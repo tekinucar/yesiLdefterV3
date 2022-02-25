@@ -1,0 +1,110 @@
+﻿USE [u7093888_Ustad01]
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[prc_MtskTeorikDersPlaniElemanaOzel] (
+   @DonemTipiId int
+  ,@GrupTipiId int 
+  ,@SubeTipiId int
+  ,@DerslikAdiTipiId int 
+  ,@PersonelId varchar(30)
+  ,@ElemanGrubu varchar(30))  
+AS BEGIN
+
+-- DonemTipiId             : Dönem
+-- GrupTipiId, SubeTipiId  : Gruplar
+-- DerslikAdiTipiId        : Derslik
+-- PersonelId              : Usta Öğretici
+
+   
+ --declare @DonemTipiId Int 
+ --declare @GrupTipiId Int 
+ --declare @SubeTipiId Int 
+ --declare @DerslikAdiTipiId Int 
+ --declare @PersonelId varchar(30)
+ --declare @ElemanGrubu varchar(30)
+ 
+ --set @DonemTipiId = 202101
+ 
+ if (@DonemTipiId <= 0)
+ begin
+   if (MONTH(getdate()) < 10)
+        set @DonemTipiId = convert(int, convert(varchar(5), YEAR(getdate())) + '0' + convert(varchar(3), MONTH(getdate())))
+   else set @DonemTipiId = convert(int, convert(varchar(5), YEAR(getdate())) + convert(varchar(3), MONTH(getdate())))
+ end
+
+ declare @EgitimBaslangicTarihi date
+ declare @EgitimBitisTarihi date
+  
+ set @EgitimBaslangicTarihi = dbo.fnc_MtskDonemDersBasBitTarihiniBul(@DonemTipiId, 1, 0, 1, 0)
+ set @EgitimBitisTarihi = dbo.fnc_MtskDonemDersBasBitTarihiniBul(@DonemTipiId, 1, 0, 0, 1)
+ 
+ declare @sql nvarchar(max)
+ declare @sqlWhere nvarchar(500)
+ declare @sqlOrderBy nvarchar(100)
+
+ set @sql = '
+ Select [MtskTeorikDers].* 
+ , FNo5.DonemTipi  as  Lkp_DonemTipi
+ , FNo6.GrupTipi   as  Lkp_GrupTipi
+ , FNo7.SubeTipi   as  Lkp_SubeTipi
+ , FNo8.DerslikTipi  as  Lkp_DerslikTipi
+ , FNo9.DerslikAdiTipi  as  Lkp_DerslikAdiTipi
+ , FNo11.DersSaatiTipi  as  Lkp_DersSaatiTipi
+ , FNo13.EgitimTipi  as  Lkp_EgitimTipi
+ , FNo5.DonemTipi + '' : '' + FNo6.GrupTipi + '' : '' + FNo7.SubeTipi as Lkp_DonemTipiGrupTipiSubeTipi
+ , [MtskPersoneli].TamAdiSoyadi as  Lkp_PersonelTamAdiSoyadi
+ , [MtskPersoneli].TcVkNo  as  Lkp_PersonelTcNo
+ 
+ from MtskTeorikDers as [MtskTeorikDers]
+   left outer join Lkp.MtskDonemTipi as FNo5 on ( MtskTeorikDers.DonemTipiId = FNo5.Id ) 
+   left outer join Lkp.MtskGrupTipi  as FNo6 on ( MtskTeorikDers.GrupTipiId = FNo6.Id ) 
+   left outer join Lkp.MtskSubeTipi  as FNo7 on ( MtskTeorikDers.SubeTipiId = FNo7.Id ) 
+   left outer join Lkp.MtskTeorikDersDerslikTipi as FNo8 on ( MtskTeorikDers.DerslikTipiId = FNo8.Id ) 
+   left outer join Lkp.MtskTeorikDersDerslikAdiTipi as FNo9 on ( MtskTeorikDers.DerslikAdiTipiId = FNo9.Id ) 
+   left outer join Lkp.MtskTeorikDersDersSaatiTipi as FNo11 on ( MtskTeorikDers.DersSaatiTipiId = FNo11.Id ) 
+   left outer join Lkp.MtskTeorikDersEgitimTipi as FNo13 on ( MtskTeorikDers.EgitimTipiId = FNo13.Id ) 
+   left outer join MtskPersoneli [MtskPersoneli] on ( [MtskTeorikDers].PersonelId = [MtskPersoneli].TcNoCalismaIzniNo  ) 
+
+ Where 0 = 0
+ '
+ set @sqlOrderBy = ' Order by DersTarihi, DersSaatiTipiId '
+
+
+ set @sqlWhere = 
+ '  and [MtskTeorikDers].DonemTipiId = ' + Convert(varchar(30), @DonemTipiId) + ' '
+
+
+ --set @ElemanGrubu = 'Gruplar'
+ --set @ElemanGrubu = 'Derslik'
+ --set @ElemanGrubu = 'Usta Eğitici'
+
+ --set @GrupTipiId = 1
+ --set @SubeTipiId = 1
+ --set @DerslikAdiTipiId = 1
+ --set @PersonelId = '205013645624899268'
+ 
+ if ((@GrupTipiId > 0) and (@SubeTipiId > 0) and  (@ElemanGrubu = 'Gruplar'))
+   set @sqlWhere = @sqlWhere +
+     '  and [MtskTeorikDers].GrupTipiId = ' + Convert(varchar(20), @GrupTipiId) 
+   + '  and [MtskTeorikDers].SubeTipiId = ' + Convert(varchar(20), @SubeTipiId) + ' '
+
+ if ((@DerslikAdiTipiId > 0) and (@ElemanGrubu = 'Derslikler'))
+   set @sqlWhere = @sqlWhere +
+   '  and [MtskTeorikDers].DerslikAdiTipiId = ' + Convert(varchar(20), @DerslikAdiTipiId) + ' '
+
+ if ((@PersonelId <> '') and (@ElemanGrubu = 'Usta Eğitici')) 
+   set @sqlWhere = @sqlWhere +
+   '  and [MtskTeorikDers].PersonelId = ''' + @PersonelId + ''''
+
+ set @sql = @sql + @sqlWhere + @sqlOrderBy
+
+ --print @sql
+ EXEC sp_executesql @sql
+  
+END -- procedure
+

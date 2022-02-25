@@ -1,0 +1,134 @@
+
+ CREATE VIEW [dbo].[VW_AJ_LINEDOC_VADE]  
+ AS
+ (
+ 
+ Select PARENT_ID
+ , SUM(MIN_ODEME_TUTARI) MIN_ODEME_TUTARI
+ , SUM(MAX_ODEME_TUTARI) MAX_ODEME_TUTARI 
+ from ( 
+  -- vadesi geçmiþ ödemeler
+  select 
+    1 PARENT_ID
+  , isnull(sum(AJLNDOC.MIN_ODEME_TUTARI),0) MIN_ODEME_TUTARI 
+  , isnull(sum(AJLNDOC.MAX_ODEME_TUTARI),0) MAX_ODEME_TUTARI 
+  from AJ_LINEDOC AJLNDOC
+  where AJLNDOC.SON_ODEME_TARIH < GETDATE() 
+
+  union all 
+
+  select 
+    1 PARENT_ID
+  , isnull(sum(VW_AJLNDOC.MIN_ODEME_TUTARI),0) MIN_ODEME_TUTARI 
+  , isnull(sum(VW_AJLNDOC.MAX_ODEME_TUTARI),0) MAX_ODEME_TUTARI 
+  from VW_AJ_LINEDOC VW_AJLNDOC
+  where VW_AJLNDOC.SON_ODEME_TARIH < GETDATE() 
+
+  union all
+  
+  -- bugün ki
+  select 
+    2 PARENT_ID
+  , isnull(sum(AJLNDOC.MIN_ODEME_TUTARI),0) MIN_ODEME_TUTARI 
+  , isnull(sum(AJLNDOC.MAX_ODEME_TUTARI),0) MAX_ODEME_TUTARI 
+  from AJ_LINEDOC AJLNDOC
+  where AJLNDOC.SON_ODEME_TARIH = GETDATE() 
+
+  union all
+
+  select 
+    2 PARENT_ID
+  , isnull(sum(VW_AJLNDOC.MIN_ODEME_TUTARI),0) MIN_ODEME_TUTARI 
+  , isnull(sum(VW_AJLNDOC.MAX_ODEME_TUTARI),0) MAX_ODEME_TUTARI 
+  from VW_AJ_LINEDOC VW_AJLNDOC
+  where VW_AJLNDOC.SON_ODEME_TARIH = GETDATE() 
+
+  union all
+
+  -- yarýn ki
+  select 
+    3 PARENT_ID
+  , isnull(sum(AJLNDOC.MIN_ODEME_TUTARI),0) MIN_ODEME_TUTARI 
+  , isnull(sum(AJLNDOC.MAX_ODEME_TUTARI),0) MAX_ODEME_TUTARI 
+  from AJ_LINEDOC AJLNDOC
+  where AJLNDOC.SON_ODEME_TARIH = GETDATE() + 1
+
+  union all
+
+  select 
+    3 PARENT_ID
+  , isnull(sum(VW_AJLNDOC.MIN_ODEME_TUTARI),0) MIN_ODEME_TUTARI 
+  , isnull(sum(VW_AJLNDOC.MAX_ODEME_TUTARI),0) MAX_ODEME_TUTARI 
+  from VW_AJ_LINEDOC VW_AJLNDOC
+  where VW_AJLNDOC.SON_ODEME_TARIH = GETDATE() + 1
+
+  union all
+
+  -- bu haftaki
+  select 
+    4 PARENT_ID
+  , isnull(sum(AJLNDOC.MIN_ODEME_TUTARI),0) MIN_ODEME_TUTARI 
+  , isnull(sum(AJLNDOC.MAX_ODEME_TUTARI),0) MAX_ODEME_TUTARI 
+  from AJ_LINEDOC AJLNDOC
+  where AJLNDOC.SON_ODEME_TARIH >= GETDATE()
+  and datepart(wk,AJLNDOC.SON_ODEME_TARIH) = datepart(wk,GETDATE())
+
+  union all
+
+  select 
+    4 PARENT_ID
+  , isnull(sum(VW_AJLNDOC.MIN_ODEME_TUTARI),0) MIN_ODEME_TUTARI 
+  , isnull(sum(VW_AJLNDOC.MAX_ODEME_TUTARI),0) MAX_ODEME_TUTARI 
+  from VW_AJ_LINEDOC VW_AJLNDOC
+  where VW_AJLNDOC.SON_ODEME_TARIH >= GETDATE()
+  and datepart(wk,VW_AJLNDOC.SON_ODEME_TARIH) = datepart(wk,GETDATE())
+
+  union all
+
+  -- gelecek haftaki
+  select 
+    5 PARENT_ID
+  , isnull(sum(AJLNDOC.MIN_ODEME_TUTARI),0) MIN_ODEME_TUTARI 
+  , isnull(sum(AJLNDOC.MAX_ODEME_TUTARI),0) MAX_ODEME_TUTARI 
+  from AJ_LINEDOC AJLNDOC
+  where datepart(wk,AJLNDOC.SON_ODEME_TARIH) = datepart(wk,GETDATE()) + 1
+
+  union all
+
+  select 
+    5 PARENT_ID
+  , isnull(sum(VW_AJLNDOC.MIN_ODEME_TUTARI),0) MIN_ODEME_TUTARI 
+  , isnull(sum(VW_AJLNDOC.MAX_ODEME_TUTARI),0) MAX_ODEME_TUTARI 
+  from VW_AJ_LINEDOC VW_AJLNDOC
+  where datepart(wk,VW_AJLNDOC.SON_ODEME_TARIH) = datepart(wk,GETDATE()) + 1
+
+  union all
+
+  -- ay sonuna kadar
+  select 
+    6 PARENT_ID
+  , isnull(sum(AJLNDOC.MIN_ODEME_TUTARI),0) MIN_ODEME_TUTARI 
+  , isnull(sum(AJLNDOC.MAX_ODEME_TUTARI),0) MAX_ODEME_TUTARI 
+  from AJ_LINEDOC AJLNDOC
+  where AJLNDOC.SON_ODEME_TARIH >= GETDATE()
+  and datepart(mm,AJLNDOC.SON_ODEME_TARIH) = datepart(mm,GETDATE())
+
+  union all
+
+  select 
+    6 PARENT_ID
+  , isnull(sum(VW_AJLNDOC.MIN_ODEME_TUTARI),0) MIN_ODEME_TUTARI 
+  , isnull(sum(VW_AJLNDOC.MAX_ODEME_TUTARI),0) MAX_ODEME_TUTARI 
+  from VW_AJ_LINEDOC VW_AJLNDOC
+  where VW_AJLNDOC.SON_ODEME_TARIH >= GETDATE()
+  and datepart(mm,VW_AJLNDOC.SON_ODEME_TARIH) = datepart(mm,GETDATE())
+
+ ) x
+
+ group by PARENT_ID
+
+ ) 
+ 
+ 
+ 
+ 

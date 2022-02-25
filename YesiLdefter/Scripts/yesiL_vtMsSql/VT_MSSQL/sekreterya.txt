@@ -1,0 +1,150 @@
+
+
+
+
+
+bana ait
+--------------------
+L1
+aradýklarým
+arayanlar
+arattýklarým
+L2
+randevularým
+gelen ziyaretci
+gidilen ziyaretler
+L3
+teknik servis isteyenler
+destek isteyenler
+L4 
+hatýrlatmalar
+
+-------------------
+Yeni konular 
+------------------
+arayan var
+telefon baðlantýsý var
+destek isteyen var
+teknik servis isteyen var
+yeni iþ var (tasarlanacak)
+gelen bilidirim (tasarlanacak- bilgi not kaðýtlarý)
+
+
+
+
+
+
+Telefon görüþmeleri
+Arayanlar
+-Randevu istiyor
+-Görüþmek istiyor
+-Teklif istiyor
+-Servis istiyor
+-Muhasebeden 
+-Tedarikci arýyor
+-Teklifleri var
+-Özel Görüþme
+
+Arananlar
+-bana telefon baðla
+-x cariyi ara, x konusunu söyle 
+-x cariyi aradým, falancayla görüþtüm, x konusunu bildirdim.
+	-arama, tamamlandý
+	-arandý fakat ulaþýlamadý
+	-arandý, ulaþýlamadý, tekrar aranacak
+	-arandý, ulaþýlamadý, SMS atýldý
+-x cariye SMS at, atýldý
+-x cariye e-mail atýldý
+
+
+iþ takibi - evernote
+----------------------
+1. iþ konusu 
+	( iþ aðacý )
+	1.1. konu/proje
+	1.2. projenin modülleri/kategorileri
+	1.3. modüllerin gruplarý
+
+2. iþi isteyen
+3. iþi kim yapacak
+4. iþ durumu 
+	4.1.yeni
+	4.2.sýra alýndý
+	4.3.baþladý, devam
+	4.4.tamamladý
+	4.5.olmadý
+5. süreler
+
+
+
+
+
+
+
+
+
+
+
+Gelen Faturalar/Ödemeler
+-
+Gelen Evraklar
+-
+Ýþ/Servis Planlama
+-
+Kargo Ýþlemleri
+-
+Toplu sms, e-mail, fax
+-
+
+
+
+
+arayanýn psikolijisi ( normal, üzgün, kýzgýn ) 
+iþlem talep hýzý ( normal, acil, çok acil, kriz )
+ 
+
+
+
+
+kredi kart / gider faturalarý
+---------------------
+hesap kesim günü
+kac gün sonra
+son ödeme günü
+hesabý takipet
+
+
+iþlem
+------------------
+Beklenen faturalar/Ödemeler
+
+gelen faturalar/ödemeler
+
+gecikmiþ f/ö
+
+
+
+
+
+
+
+
+
+
+
+
+
+Banka Ýþlem Fiþi	Bankaya para yatýrma ve çekme iþlemlerinde kullanýlýr.
+Banka Virman Fiþi	Ayný ya da farklý banka hesaplarý arasýndaki iþlemlerde kullanýlýr.
+Gelen Havale/EFT	Cari hesaplardan gelen havale ve eft bilgilerini kaydetmek için kullanýlýr.
+Gönderilen Havale/EFT	Cari hesaplara gönderilen havale ve eft bilgilerini kaydetmek için kullanýlýr.
+Banka Açýlýþ Fiþi	Banka hesaplara ait açýlýþ rakamlarýný kaydetmek için kullanýlýr.
+Banka Alýnan Hizmet Faturasý 
+Alýnan hizmet faturalarýnýn banka iþlemleri arasýndan kesilebilmesi için kullanýlan banka fiþ türüdür. Bankadan kesilen faturalar ile hizmet alým iþlemleri banka üzerinden gerçekleþtirilir.
+Banka Verilen Hizmet Faturasý	Verilen hizmet faturalarýnýn banka iþlemleri arasýndan kesilebilmesi için kullanýlan banka fiþ türüdür. Bankadan kesilen faturalar ile hizmet satýþ iþlemleri banka üzerinden gerçekleþtirilir.
+ 
+
+
+
+
+

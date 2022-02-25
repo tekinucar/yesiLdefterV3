@@ -1,0 +1,118 @@
+
+--  Bu viewde AJ_LINEDOC un benzeri oluþturuluyor
+--  Select * FROM AJ_LINEDOC WHERE ID = 1
+--  
+
+
+CREATE VIEW [dbo].[VW_AJ_LINEDOC]  
+AS
+ (
+
+  Select 
+       [AJLNDOC].[ID]
+      ,[AJLNDOC].[FIRM_ID]
+      ,[AJLNDOC].[SHOP_ID]
+      ,[AJLNDOC].[REC_DATE]
+      ,[AJLNDOC].[REC_USER_ID]
+      ,[AJLNDOC].[ARSIV_TD]
+      ,[AJLNDOC].[GELGIT_TARIH]
+      ,[AJLNDOC].[GELGIT_SAAT]
+      ,[AJLNDOC].[LINE_TD]
+      ,[AJLNDOC].[EVRAK_TD]
+      ,[AJLNDOC].[HESAP_ID]
+      ,[AJLNDOC].[BELGE_TARIHI]
+      ,[AJLNDOC].[BELGE_NO]
+      ,[AJLNDOC].[MASRAF_YERI_TD]
+      ,[AJLNDOC].[EVRAK_ILETISIM_TD]
+      ,[AJLNDOC].[ACIKLAMA]
+      ,[AJLNDOC].[TARAF_FIRMA]
+      ,[AJLNDOC].[TARAF_KISI]
+      ,[AJLNDOC].[TARAF_ILETISIM]
+      ,[AJLNDOC].[TARAF_ADRES]
+      ,[AJLNDOC].[ODEME_BAS_TARIH]
+      ,[AJLNDOC].[SON_ODEME_TARIH]
+      ,[AJLNDOC].[MIN_ODEME_TUTARI]
+      ,[AJLNDOC].[MAX_ODEME_TUTARI]
+      ,[AJLNDOC].[SONUC_TD]
+      ,[AJLNDOC].[PARENT_TD]
+      ,[AJLNDOC].[PARENT_ID]
+  , ( case [AJLNDOC].EVRAK_TD 
+      when  72 then HPFNS_GDR.HP_TAMADI 
+	  when 601 then HCR_AF.TAMADI 
+	  when 602 then HCR_IR.TAMADI 
+	  when  23 then HPFNS_KK.HP_TAMADI 
+	  when  91 then HPFNS_MUH.HP_TAMADI  
+	  else  '' end ) LKP_KAYNAK_ADI  
+  , ( case [AJLNDOC].EVRAK_TD 
+      when  72 then HPFNS_GDR.KDV_ORANI 
+	  else  CONVERT(smallInt, 0) end ) LKP_KDV_ORANI  
+
+	  
+  from AJ_LINEDOC [AJLNDOC]
+     left outer join HP_FINANS [HPFNS_GDR] on ( [AJLNDOC].HESAP_ID = [HPFNS_GDR].ID  ) 
+     left outer join HP_CARI [HCR_AF] on ( [AJLNDOC].HESAP_ID = [HCR_AF].ID  ) 
+     left outer join HP_CARI [HCR_IR] on ( [AJLNDOC].HESAP_ID = [HCR_IR].ID  ) 
+     left outer join HP_FINANS [HPFNS_KK] on ( [AJLNDOC].HESAP_ID = [HPFNS_KK].ID  ) 
+     left outer join HP_FINANS [HPFNS_MUH] on ( [AJLNDOC].HESAP_ID = [HPFNS_MUH].ID  ) 
+
+  where SONUC_TD = 0 
+
+
+  union all  
+  
+  -- periyodik belgesiz giderler
+  -- MASRAF_YERI_TD in ( 3 , 6 ) -- faliyet içi ve dýþý belgesiz
+  -- HPFNS.MASRAF_PERIYODU_TD = 3 -- aylýk
+
+  Select 
+    (HPFNS.ID * -1) ID 
+  , HPFNS.FIRM_ID
+  , HPFNS.SHOP_ID
+  , CONVERT(smalldatetime, GETDATE(), 111) REC_DATE
+  , -1  REC_USER_ID
+  , CONVERT(smallInt, 0)  ARSIV_TD
+  , CONVERT(date, GETDATE(), 103) GELGIT_TARIH
+  , CONVERT(varchar(5),CONVERT(TIME, GETDATE(), 103)) GELGIT_SAAT
+  , CONVERT(smallInt, 1)  LINE_TD
+  , CONVERT(smallInt, 72) EVRAK_TD
+  , HPFNS.ID  HESAP_ID
+  , CONVERT(date, NULL)  BELGE_TARIHI
+  , CONVERT(varchar(20), '')  BELGE_NO
+  , HPFNS.MASRAF_YERI_TD
+  , CONVERT(smallInt, 9) EVRAK_ILETISIM_TD
+  , HPFNS.HP_TAMADI  ACIKLAMA
+  , '' TARAF_FIRMA
+  , '' TARAF_KISI
+  , '' TARAF_ILETISIM
+  , '' TARAF_ADRES
+  , convert(date,
+     convert(varchar(2),ISNULL(HPFNS.ODEME_KAC_GUN_SONRA ,1)) + '/' + 
+     convert(varchar(2),datepart(MONTH, GETDATE())) + '/' + 
+     convert(varchar(4),datepart(YEAR, GETDATE()))
+  , 103) ODEME_BAS_TARIH
+  , convert(date,
+     convert(varchar(2),ISNULL(HPFNS.SON_ODEME_GUNU ,28)) + '/' + 
+     convert(varchar(2),datepart(MONTH, GETDATE())) + '/' + 
+     convert(varchar(4),datepart(YEAR, GETDATE()))
+  , 103) SON_ODEME_TARIH
+
+  -- extra tabloya baðlanana kadar
+  , CONVERT(numeric(22,5), HPFNS.B_DOVIZ_YERI_ID)	 MIN_ODEME_TUTARI
+  , CONVERT(numeric(22,5), HPFNS.B_DOVIZ_YERI_ID)    MAX_ODEME_TUTARI
+  
+  , CONVERT(smallInt, 0) SONUC_TD
+  , CONVERT(smallInt, 0) PARENT_TD
+  , 0 PARENT_ID
+  , HPFNS.HP_TAMADI  LKP_KAYNAK_ADI
+  , HPFNS.KDV_ORANI  LKP_KDV_ORANI
+
+  from HP_FINANS HPFNS 
+  where HPFNS.FNS_TIPI = 72 
+  and HPFNS.MASRAF_YERI_TD in ( 3 , 6 ) -- faliyet içi ve dýþý 
+  and HPFNS.MASRAF_PERIYODU_TD = 3 -- aylýk
+
+  
+)
+
+GO
+

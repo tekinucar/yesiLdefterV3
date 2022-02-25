@@ -1,0 +1,109 @@
+﻿USE [GREEN]
+GO
+
+
+CREATE VIEW [dbo].[VW_FINANS_ARACLARI]  
+AS
+ (
+ 
+  /* Kasa List */
+  Select 
+    k.ID         LKP_REF_ID
+  , k.FIRM_ID    LKP_FIRM_ID
+  , k.SHOP_ID    LKP_SHOP_ID  
+  , k.FNS_TIPI   LKP_FNS_TIPI  
+  , 0            LKP_BANK_ID  
+  , 0            LKP_BANKSUBE_ID
+  , ''           LKP_BANK_ADI   
+  , ''           LKP_BANK_SUBE_ADI 
+  , k.HP_KODU    LKP_HESAP_KODU
+  , k.HP_TAMADI  LKP_HESAP_ADI
+  , k.HP_TAMADI  LKP_FULL_ADI  
+  , k.PARA_ID    LKP_PARA_ID
+   
+  FROM HP_FINANS k
+  WHERE k.[FNS_TIPI] = 10
+  
+  union all 
+    
+  /* Banka List */
+  Select 
+    s.ID         LKP_REF_ID  
+  , s.FIRM_ID    LKP_FIRM_ID
+  , s.SHOP_ID    LKP_SHOP_ID  
+  , s.FNS_TIPI   LKP_FNS_TIPI
+  , s.ID         LKP_BANK_ID  
+  , s.ID         LKP_BANKSUBE_ID
+  , s.HP_TAMADI  LKP_BANK_ADI   
+  , ''           LKP_BANKSUBE_ADI 
+  , s.HP_KODU    LKP_HESAP_KODU
+  , s.HP_TAMADI  LKP_HESAP_ADI
+  , s.HP_TAMADI  LKP_FULL_ADI  
+  , -1           LKP_PARA_ID
+  
+  FROM HP_FINANS s
+  WHERE s.[FNS_TIPI] = 20
+  
+  union all 
+  
+  /* Banka Şube List */
+  Select 
+    s.ID         LKP_REF_ID  
+  , s.FIRM_ID    LKP_FIRM_ID
+  , s.SHOP_ID    LKP_SHOP_ID  
+  , s.FNS_TIPI   LKP_FNS_TIPI
+  , b.ID         LKP_BANK_ID  
+  , s.ID         LKP_BANKSUBE_ID
+  , b.HP_TAMADI  LKP_BANK_ADI   
+  , s.HP_TAMADI  LKP_BANKSUBE_ADI 
+  , s.HP_KODU    LKP_HESAP_KODU
+  , b.HP_TAMADI + ' ' + s.HP_TAMADI  LKP_HESAP_ADI
+  , b.HP_TAMADI + ' ' + s.HP_TAMADI + ' Şubesi ' LKP_FULL_ADI  
+  , -1           LKP_PARA_ID
+  
+  FROM HP_FINANS s
+     left outer join HP_FINANS b on ( s.PARENT_ID = b.ID )
+  WHERE s.[FNS_TIPI] = 21 
+  --AND s.[FIRM_ID] = 
+  
+  UNION ALL
+  
+  /* Banka / Şube / HesapNo */
+  /* Banka / Şube / POS No */
+  /* Banka / Şube / Kart No */
+  /* Banka / Şube / Kredi Adı */
+  
+  Select 
+    h.ID         LKP_REF_ID
+  , h.FIRM_ID    LKP_FIRM_ID
+  , h.SHOP_ID    LKP_SHOP_ID  
+  , h.FNS_TIPI   LKP_FNS_TIPI
+  , b.ID         LKP_BANK_ID  
+  , s.ID         LKP_BANKSUBE_ID
+  , b.HP_TAMADI  LKP_BANK_ADI   
+  , isnull(b.HP_ADI, b.HP_TAMADI) + ' ' + s.HP_TAMADI  LKP_BANKSUBE_ADI 
+  , h.HP_KODU    LKP_HESAP_KODU
+  , h.HP_TAMADI  LKP_HESAP_ADI
+  , h.HP_TAMADI +
+    (case when h.FNS_TIPI = 22 then ' /Banka Hesabı'
+          when h.FNS_TIPI = 23 then ' /Banka Kartı'
+          when h.FNS_TIPI = 24 then ''
+          else '?' end)  LKP_FULL_ADI
+  , h.PARA_ID    LKP_PARA_ID
+  
+   FROM HP_FINANS h 
+     left outer join HP_FINANS s on ( h.PARENT_ID = s.ID )
+     left outer join HP_FINANS b on ( s.PARENT_ID = b.ID )
+
+   WHERE s.[FNS_TIPI] = 21
+   --AND s.[FIRM_ID] = 
+  
+
+  
+ )
+
+
+
+GO
+
+

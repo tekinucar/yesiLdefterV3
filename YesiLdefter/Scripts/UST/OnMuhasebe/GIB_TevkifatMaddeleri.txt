@@ -1,0 +1,31 @@
+<select id="gen__1198" class="csc-combobox">
+<option value="">-----</option>
+<option value="601">601 - 3/10 Yapım işleri ile bu işlerle birlikte ifa edilen mühendislik</option>
+<option value="602">602 - Etüt, plan-proje, danışmanlık, denetim vb</option>
+<option value="603">603 - Makine, teçhizat, demirbaş ve taşitlara ait tadil, bakım, onarım</option>
+<option value="604">604 - Yemek servis hizmeti</option>
+<option value="605">605 - Organizasyon hizmeti</option>
+<option value="606">606 - İşgücü temin hizmetleri</option>
+<option value="607">607 - Özel güvenlik hizmeti</option>
+<option value="608">608 - Yapı denetim hizmetleri</option>
+<option value="609">609 - Fason olarak yaptirilan tekstil ve konfeksiyon işleri, çanta ve ayakkabı dikim işleri ve bu işlere aracılık hizmetleri</option>
+<option value="610">610 - Turistik mağazalara verilen müşteri bulma/ götürme hizmetleri</option>
+<option value="611">611 - Spor kulüplerinin yayın, reklam ve isim hakkı gelirlerine konu işlemleri</option>
+<option value="612">612 - Temizlik hizmeti</option>
+<option value="613">613 - Çevre ve bahçe bakım hizmetleri</option>
+<option value="614">614 - Servis taşımacıliğı</option>
+<option value="615">615 - Her türlü baskı ve basim hizmetleri</option>
+<option value="616">616 - 5018 sayili kanuna ekli cetvellerdeki idare,kurum ve kuruşlara yapılan diğer hizmetler</option>
+<option value="617-Ex">617 - (01.04.2020 Öncesi) Hurda metalden elde edilen külçe teslimleri</option>
+<option value="617">617 - Hurda metalden elde edilen külçe teslimleri</option>
+<option value="618-Ex">618 - (01.04.2020 Öncesi) Hurda metalden elde edilenler dışındaki bakir, çinko ve alüminyum külçe teslimleri</option>
+<option value="618">618 - Hurda metalden elde edilenler dışındaki bakir, çinko ve alüminyum külçe teslimleri</option>
+<option value="619-Ex">619 - (01.04.2020 Öncesi) Bakir, çinko ve alüminyum ürünlerinin teslimi</option>
+<option value="619">619 - Bakir, çinko ve alüminyum ürünlerinin teslimi</option>
+<option value="620-Ex">620 - (01.04.2020 Öncesi) istisnadan vazgeçenlerin hurda ve atık teslimi</option>
+<option value="620">620 - istisnadan vazgeçenlerin hurda ve atık teslimi</option>
+<option value="621">621 - Metal, plastik, lastik, kauçuk, kâğit ve cam hurda ve atıklardan elde edilen hammadde teslimi</option>
+<option value="622">622 - Pamuk, tiftik, yün ve yapaği ile ham post ve deri teslimleri</option>
+<option value="623">623 - Ağaç ve orman ürünleri teslimi</option>
+<option value="650">650 - Diğer</option>
+</select>

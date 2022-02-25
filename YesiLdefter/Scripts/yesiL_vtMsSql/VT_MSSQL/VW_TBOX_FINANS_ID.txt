@@ -1,0 +1,20 @@
+﻿
+
+CREATE VIEW [dbo].[VW_TBOX_FINANS_ID]  
+AS
+ (
+
+  /* TBOX_TD = 1 : vezne listesi TBOX_NO ise Vezne No */
+  /* TBOX_TD = 2 : veznelerin kullanıdığı finans hesapları (HP_FINANS_ID) */
+  /* TBOX_TD = 3 : personelin kullandığı Vezneler (TBOX_NO)  */
+  select A.[HP_CARI_ID], A.TBOX_NO, B.HP_FINANS_ID 
+  from [dbo].[HP_FIN_TBOX] A
+     right outer join [dbo].[HP_FIN_TBOX] B on 
+       ( A.TBOX_NO = b.TBOX_NO and b.TBOX_TD = 2 )  
+  where A.[ACTIVE_TD] = 1 
+  and   A.TBOX_TD = 3 
+  and   B.[ACTIVE_TD] = 1
+
+) -- end
+
+

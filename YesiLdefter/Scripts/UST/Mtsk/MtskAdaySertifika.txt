@@ -1,0 +1,163 @@
+﻿USE u7093888_Ustad01
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+begin transaction
+
+ create table MtskAdaySertifika
+ (
+   Id                    Int IDENTITY(1,1) not null, 
+   FirmId                Int       not null,
+   AdayId                Int       not null, /* default 0 */
+   TcNo                  Varchar(11)   null, /* trg_MtskAday */
+   
+   --10 sertifika aşaması
+   SertifikaAlmayiHakKazandi Bit           null, -- hak kazandı   : false/true
+   SertifikaTarihi           Date          null, --
+   SertifikaTeslimEdildi     Bit           null, -- teslim edildi : false/true =  
+   SertifikaTeslimTarihi     Date          null, --
+   SertifikayiTeslimAlanKisi nVarchar(50)  null, --
+   SertifikaSeri             nVarchar(10)  null,
+   SertifikaNo               nVarchar(20)  null, 
+   SertifikaDonemTipiId      Int           null,
+   SertifikaBaskiAdedi       SmallInt      null,
+   SertifikayiVerenKurum     nVarchar(100) null, 
+   DuzenlemeTarihi           Date          null,
+
+   constraint		pk_MtskAdaySertifika primary key (Id)
+ )
+  
+ grant select, insert, update, delete on MtskAdaySertifika to public
+
+ create index X_MtskAdaySertifika01 on MtskAdaySertifika (AdayId)
+ create index X_MtskAdaySertifika02 on MtskAdaySertifika (TcNo)
+ create index X_MtskAdaySertifika03 on MtskAdaySertifika (DuzenlemeTarihi)
+   
+commit transaction
+
+
+
+
+USE [u7093888_Ustad01]
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TRIGGER [dbo].[trg_MtskAdaySertifika] on [dbo].[MtskAdaySertifika] 
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    DECLARE curSertifika cursor for select Id from Inserted 
+    DECLARE @curId bigint
+
+    OPEN curSertifika
+
+    FETCH NEXT FROM curSertifika INTO @curId
+ 
+	declare @yFirmId int = 0
+
+	declare @eAdayId int = 0
+	declare @eTcNo varchar(11) = ''
+	--declare @eSertifikaAlmayiHakKazandi bit  = 0
+	--declare @eSertifikaTarihi date = null
+	declare @eSertifikaDonemTipiId int = 0
+	declare @eSertifikaNo varchar(20)
+
+	declare @yAdayId int = 0
+	declare @yTcNo varchar(11) = ''
+	declare @ySertifikaAlmayiHakKazandi bit  = 0
+	declare @ySertifikaTarihi date = null
+	declare @ySertifikaNo varchar(20)
+	declare @ySertifikaDonemTipiId int = 0
+	declare @yDuzenlemeTarihi date = null
+	
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+	    
+		select 
+    	  @eAdayId = isnull(dlt.AdayId,0)
+	    , @eTcNo = isnull(dlt.TcNo,'')
+		--, @eSertifikaAlmayiHakKazandi = isnull(dlt.SertifikaAlmayiHakKazandi,0)
+		--, @eSertifikaTarihi = dlt.SertifikaTarihi 
+		, @eSertifikaNo = dlt.SertifikaNo
+		, @eSertifikaDonemTipiId = dlt.SertifikaDonemTipiId
+
+		from deleted dlt
+    	where dlt.Id = @curId
+
+        select 
+          @yFirmId = ins.FirmId
+    	, @yAdayId = isnull(ins.AdayId,0)
+	    , @yTcNo = isnull(ins.TcNo,'')
+		, @ySertifikaAlmayiHakKazandi = isnull(ins.SertifikaAlmayiHakKazandi,0)
+		, @ySertifikaTarihi = ins.SertifikaTarihi
+		, @ySertifikaNo = ins.SertifikaNo
+		, @yDuzenlemeTarihi = ins.DuzenlemeTarihi
+		from inserted ins
+    	where ins.Id = @curId
+
+		-- Sertifikanın hangi dönemde verildiği tespit ediliyor
+		if (MONTH(@ySertifikaTarihi) < 10)
+               set @ySertifikaDonemTipiId = convert(int, convert(varchar(5), YEAR(@ySertifikaTarihi)) + '0' + convert(varchar(3), MONTH(@ySertifikaTarihi)))
+          else set @ySertifikaDonemTipiId = convert(int, convert(varchar(5), YEAR(@ySertifikaTarihi)) + convert(varchar(3), MONTH(@ySertifikaTarihi)))
+
+		if ((@yAdayId = 0) and (@yTcNo <> ''))
+		begin
+           Select top 1 @yAdayId = Id  From MtskAday
+           Where TcNo = @yTcNo
+           and   DonemTipiId <= @ySertifikaDonemTipiId
+           order by DonemTipiId desc
+		end
+		
+		if ((@eSertifikaNo <> @ySertifikaNo) and
+		    (@ySertifikaNo <> '') and
+		    (@yDuzenlemeTarihi is null)) set @yDuzenlemeTarihi = getdate()
+
+		if ((@eSertifikaNo <> @ySertifikaNo) and
+		    (@ySertifikaNo = '') and
+		    (@yDuzenlemeTarihi is not null)) set @yDuzenlemeTarihi = null
+
+		if ((@eAdayId <> @yAdayId) or
+		    (@eTcNo <> @yTcNo) or
+			(@eSertifikaDonemTipiId <> @ySertifikaDonemTipiId))
+        begin 
+		   Update MtskAdaySertifika set
+		     AdayId = @yAdayId
+           , TcNo = @yTcNo 
+		   , SertifikaDonemTipiId = @ySertifikaDonemTipiId
+		   , DuzenlemeTarihi = @yDuzenlemeTarihi
+		   Where Id = @curId
+		end
+
+		if ((@yAdayId > 0) and 
+		    (@ySertifikaAlmayiHakKazandi = 1))
+        begin
+           Update MtskAday set KayitTipiId = 4 -- Sertifikayı hak kazandı
+		   Where FirmId = @yFirmId
+           and   Id = @yAdayId
+		end
+
+        FETCH NEXT FROM curSertifika INTO @curId
+    END
+
+	--EXECUTE [dbo].[prc_MtskAdayTakip] 2 @yFirmId
+
+    CLOSE curSertifika
+    DEALLOCATE curSertifika   
+
+END
+
+
+
+
+
+
+ALTER TABLE [dbo].[MtskAdaySertifika] ENABLE TRIGGER [trg_MtskAdaySertifika]
+GO

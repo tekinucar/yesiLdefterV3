@@ -1,0 +1,62 @@
+﻿USE [MSV3DFTRBLT]
+GO
+
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+CREATE PROCEDURE [dbo].[prc_UsesTableIPCode] (@TableIPCode varchar(100))  
+AS BEGIN 
+   
+   -- TableIPCode nin kullanıldığı yerlerlerin listesini verir
+
+/* 
+   declare @TableIPCode varchar(50)
+   set @TableIPCode = 'UST/MEB/MtskAday.MebbisILKData_L01'
+*/
+   -- EKRANLARDA KULLANILAN IP LER
+   SELECT 
+     'use LAYOUT'    LKP_OBJ
+   , L.MASTER_CODE   LKP_MASTER_CODE
+   , L.LAYOUT_CODE   LKP_ITEM_CODE
+   , L.TABLEIPCODE   LKP_TABLEIPCODE
+   , L.TABLEIPCODE2  LKP_TABLEIPCODE2
+   FROM MS_LAYOUT L
+   WHERE L.LAYOUT_TYPE <> 'menu' 
+   AND ( 
+         (L.TABLEIPCODE = @TableIPCode) 
+      OR (L.TABLEIPCODE2 = @TableIPCode)
+   )
+      
+   UNION ALL
+  
+   -- MENU DEKİ PROP_NAVIGATOR İÇİNDE KULLANILAN IP LER
+   SELECT 
+     'use MENU'      LKP_OBJ  
+   , M.MASTER_CODE   LKP_MASTER_CODE
+   , M.ITEM_CODE     LKP_ITEM_CODE  
+   , @TableIPCode    LKP_TABLEIPCODE
+   , ''              LKP_TABLEIPCODE2
+   FROM MS_ITEMS M
+   WHERE M.PROP_NAVIGATOR LIKE '%' + @TableIPCode +'%'
+
+   UNION ALL
+   
+   -- FILEDS_IP TABLOSUNDA KULLANILAN DİĞER IP LER
+   SELECT 
+     'use FIELDS_IP' LKP_OBJ  
+   , M.TABLE_CODE + '.' + M.IP_CODE   LKP_MASTER_CODE
+   , CONVERT(VARCHAR(10),M.FIELD_NO)+'.'+ F.FIELD_NAME  LKP_ITEM_CODE  
+   , @TableIPCode    LKP_TABLEIPCODE
+   , ''              LKP_TABLEIPCODE2
+
+   FROM MS_FIELDS_IP M
+       LEFT OUTER JOIN MS_FIELDS F ON (M.FIELD_NO = F.FIELD_NO AND M.TABLE_CODE = F.TABLE_CODE)  
+   WHERE M.PROP_NAVIGATOR LIKE '%' + @TableIPCode +'%'
+   or    M.MASTER_TABLEIPCODE LIKE '%' + @TableIPCode +'%' 
+
+END
+GO

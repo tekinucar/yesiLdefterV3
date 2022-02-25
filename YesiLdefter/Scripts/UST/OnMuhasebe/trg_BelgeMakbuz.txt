@@ -1,0 +1,88 @@
+﻿USE [u7093888_Ustad01]
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+CREATE TRIGGER [dbo].[trg_BelgeMakbuz] on [dbo].[BelgeMakbuz] 
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    declare cursor_BMakbuz cursor for select Id from Inserted
+    declare @curId bigint
+
+    declare @eJoinId Int = 0
+	--declare @eBorcluId Int = 0
+	declare @eBHesapTipiId SmallInt = 0
+
+	OPEN cursor_BMakbuz
+
+    FETCH NEXT FROM cursor_BMakbuz INTO @curId
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+      select 
+         @eJoinId = isnull(ins.JoinId,0)  
+        ,@eBHesapTipiId = isnull(ins.BHesapTipiId,0)
+
+      from Inserted ins
+      where ins.Id = @curId
+
+	  -- BelgeMaliyet tablosunun IsPaid = True / Ödendi yap 
+	  if ((@eBHesapTipiId = 84) and (@eJoinId > 0))
+	  begin
+	    update BelgeMaliyet set IsPaid = 1
+        where Id = @eJoinId
+	  end
+
+      FETCH NEXT FROM cursor_BMakbuz INTO @curId
+    END
+
+    CLOSE cursor_BMakbuz
+    DEALLOCATE cursor_BMakbuz
+
+END
+
+
+
+CREATE TRIGGER [dbo].[trg_BelgeMakbuzDelete] on [dbo].[BelgeMakbuz] 
+FOR DELETE
+AS BEGIN
+
+    declare cursor_BMakbuz cursor for select Id from deleted
+    declare @curId bigint
+
+    declare @eJoinId Int = 0
+	declare @eBHesapTipiId SmallInt = 0
+
+	OPEN cursor_BMakbuz
+
+    FETCH NEXT FROM cursor_BMakbuz INTO @curId
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+      select 
+         @eJoinId = isnull(ins.JoinId,0)  
+        ,@eBHesapTipiId = isnull(ins.BHesapTipiId,0)
+
+      from Inserted ins
+      where ins.Id = @curId
+
+	  -- BelgeMaliyet tablosunun IsPaid = True / Ödendi yap 
+	  if ((@eBHesapTipiId = 84) and (@eJoinId > 0))
+	  begin
+	    update BelgeMaliyet set IsPaid = 0
+        where Id = @eJoinId
+	  end
+
+      FETCH NEXT FROM cursor_BMakbuz INTO @curId
+    END
+
+    CLOSE cursor_BMakbuz
+    DEALLOCATE cursor_BMakbuz
+
+END
+

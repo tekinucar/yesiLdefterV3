@@ -1,0 +1,25 @@
+﻿
+begin transaction
+
+ create table MS_DBCONN
+ (
+	REF_ID		Int IDENTITY(1,1) 	NOT NULL,
+        DB_TYPE         SmallInt                NULL,  /* 1.ms-sql, 2.mysql  */
+        CONN_TYPE       SmallInt                NULL,  /* bağlantı tipleri HENÜZ yok */
+        ORDER_NO        SmallInt                NULL,  /* param sıra no */ 
+        PARAM_CAPTION   VarChar(30)             NULL,
+        PARAM_FNAME     VarChar(30)             NULL,
+        PARAM_NOTNULL   Bit                     NULL, /* not null ise mutlaka value iste */
+        END_TYPE        VarChar(5)              NULL, /* parametre sonudadaki line end işareti listesi  ; , none  gibi */ 
+        DEFAULT_TEXT    VarChar(50)		NULL, /* default değeri var ise önce onu kullan */
+                       
+
+	Constraint PK_MS_DBCONN primary key (REF_ID)
+
+ )
+
+ create index X_MS_DBCONN01 on MS_DBCONN ( DB_TYPE )
+
+ grant select, insert, update, delete on MS_DBCONN to public
+
+commit transaction

@@ -1,0 +1,46 @@
+
+CREATE TRIGGER [dbo].[trg_SYS_FIRMS] on [dbo].[SYS_FIRMS] 
+AFTER INSERT, UPDATE
+AS BEGIN
+    
+	
+	declare @i_LOCAL_TD            SmallInt = 0        
+    declare @i_FIRM_GUID           VarChar(50) = ''
+	
+	
+    DECLARE InsertCursor_SYS_FIRMS cursor for select ID from Inserted
+    DECLARE @curId bigint
+
+    OPEN InsertCursor_SYS_FIRMS
+
+    FETCH NEXT FROM InsertCursor_SYS_FIRMS INTO @curId
+    
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+	    set @i_LOCAL_TD = 0
+        set @i_FIRM_GUID = ''
+		
+		select 
+    	   @i_LOCAL_TD  = ins.LOCAL_TD
+		 , @i_FIRM_GUID = ins.FIRM_GUID
+    	from Inserted ins
+    	where ins.ID = @curId
+        
+		-- 1. FIRM CENTER, 2. SHOP
+	    if (@i_LOCAL_TD = 1) and 
+		   ((@i_FIRM_GUID = '') or (@i_FIRM_GUID is null))
+    	begin
+    	  update SYS_FIRMS set 
+          FIRM_GUID = NEWID()
+          where ID = @curId 
+    	end 
+        
+    	FETCH NEXT FROM InsertCursor_SYS_FIRMS INTO @curId
+    END
+
+    CLOSE InsertCursor_SYS_FIRMS
+    DEALLOCATE InsertCursor_SYS_FIRMS
+
+END
+
+GO

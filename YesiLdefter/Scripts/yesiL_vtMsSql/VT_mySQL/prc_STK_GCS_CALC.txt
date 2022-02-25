@@ -1,0 +1,686 @@
+﻿/*
+USE [GREEN]
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[prc_STK_GCS_CALC]') AND type in (N'P', N'PC'))
+DROP PROCEDURE [dbo].[prc_STK_GCS_CALC]
+GO
+
+
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+CREATE PROCEDURE [dbo].[prc_STK_GCS_CALC] 
+	@Id Integer
+AS BEGIN
+*/
+    declare @Id integer = 1072068
+	
+	update [GREEN].[dbo].[STK_GCS] SET 
+        [ISLEM_SAAT] = null
+       ,[BIRIM] = null
+       ,[BIRIM_NO] = null 
+       ,[KDV] = null
+       ,[KDV_VARMI] = null
+	   ,[ISO_BIR_TUT_TL] = null
+	   ,[ISO_TOP_TUT_TL] = null
+	   ,[ISO_TOP_TUT_KDVLI] = null
+	   ,[ISKONTO_ORANI] = null
+	   ,[ISKONTO_TUTARI] = null
+       ,[BIR_TUTARI_TL] = null
+	   ,[TOP_TUTARI_TL] = null
+	   ,[KDV_MATRAHI] = null
+	   ,[KDV_TUTARI] = null
+       ,[VERGI1_TOPLAMI] = null
+       ,[BIR_TUT_KDVLI_TL] = null
+	   ,[TOP_TUT_KDVLI_TL] = null
+       ,[BIR_VRGLI_KDVLI_TL] = null
+       ,[TOP_VRGLI_KDVLI_TL] = null
+    WHERE ID = @Id
+		
+	
+	
+	
+	declare @_SHOP_ID         Int = 0 
+	declare @_GCB_ID          Int = 0 
+	declare @_ISLEM_TARIHI    Date 
+	declare @_ISLEM_SAAT      varchar(8) = '' 
+	declare @_PARA_TURU       SmallInt = 0
+    declare @_DOVIZ_KURU      numeric(22,5) = 0
+
+	declare @_GC_TURU     SmallInt = 0
+    declare @_SATIS_TIPI  SmallInt = 0
+    declare @_MODUL_ID    SmallInt = 0
+    declare @_URUN_ID     Int = 0
+           
+    -- MIKTAR    = TÜM PARASAL HESAPLAR -- MİKTAR -- İLE HESAPLANIYOR 
+	-- GC_MIKTAR = FİZİKİ  GİRİŞ ve ÇIKIŞ İŞLEMLERİ  -- GC_MIKTAR -- İLE HESAPLANIYOR 
+
+    declare @_MIKTAR      Numeric(15,5) = 0 
+    declare @_GC_MIKTAR   Numeric(15,5) = 0
+	declare @_IPT_MIKTAR  Numeric(15,5) = 0
+	declare @_BIRIM       VarChar(10) = ''
+    declare @_BIRIM_NO    SmallInt = 0
+    declare @_KDV         Numeric(4,2) = 0
+	declare @_KDV_VARMI   Bit = 1          /* 0- KDV Uygulaması Yok, 1- KDV Uygulaması Var   */
+
+	--declare @_GIRIS_GCS_ID  int = 0
+    --declare @_ALIS_TARIHI   date
+    --declare @_ALIS_FIYATI         numeric(22,5) = 0
+    --declare @_ALIS_FIYATI_KDVLI   numeric(22,5) = 0
+    --declare @_SATIS_FIYATI        numeric(22,5) = 0
+    --declare @_SATIS_FIYATI_KDVLI  numeric(22,5) = 0 
+      
+	declare @_ISO_BIR_TUT_TL    numeric(22,5) = 0 
+    declare @_ISO_TOP_TUT_TL    numeric(22,5) = 0 
+	declare @_ISO_TOP_TUT_KDVLI numeric(22,5) = 0
+    declare @_ISO_BIR_TUT_DVZ   numeric(22,5) = 0 
+    declare @_ISO_TOP_TUT_DVZ   numeric(22,5) = 0 
+
+	declare @_MAX_ISKONTO     Numeric(10,7) = 0
+	declare @_ISKONTO_SEKLI   SmallInt = 0  /* 0 = Yüzde, 1 = Tutar, ... */		
+	declare @_ISKONTO_ORANI   Numeric(10,7)	= 0 
+	declare @_ISK1_ORANI      Numeric(10,7)	= 0 
+	declare @_ISK2_ORANI      Numeric(10,7)	= 0 
+	declare @_ISK3_ORANI      Numeric(10,7)	= 0 
+	declare @_ISKONTO_TUTARI  Numeric(22,5)	= 0 
+	declare @_ISK1_TUTARI     Numeric(22,5)	= 0 
+	declare @_ISK2_TUTARI     Numeric(22,5)	= 0 
+	declare @_ISK3_TUTARI     Numeric(22,5)	= 0 
+	declare @_ISK_KADEME_ORANI   Numeric(22,5)	= 0 		
+	declare @_ISK_KADEME_TUTARI  Numeric(22,5)	= 0 
+	
+	-- İSKONTO SONRASI 
+	declare @_BIR_TUTARI_TL   numeric(22,5) = 0
+    declare @_TOP_TUTARI_TL   numeric(22,5) = 0
+    declare @_BIR_TUTARI_DVZ  numeric(22,5) = 0
+    declare @_TOP_TUTARI_DVZ  numeric(22,5) = 0
+	declare @_KDV_MATRAHI     Numeric(22,5) = 0 /* % 1,8,18 için matrah */
+    declare @_KDV_TUTARI      Numeric(22,5) = 0 /* % 1,8,18 tutarı */
+	
+    declare @_TEVKIFAT_PAY        Numeric(3) = 0    /* 1 - 9 */
+    declare @_TEVKIFAT_PAYDA      Numeric(3) = 0    /* 10 */  
+    declare @_TEVKIF_KDV_TUTARI	  Numeric(22,5)	= 0 /*  (( kdv_tutarı / 10 payda ) * X pay )  */
+    declare @_TEVKIF_DAHIL_TOPLAM Numeric(22,5)	= 0 /*  kdv_matrahı + kdv_tutarı = kdv dahil toplam  */
+	
+    declare @_VERGI1_ID       Int = 0
+	declare @_VERGI1_TUTARI   Numeric(22,5) = 0
+    declare @_VERGI1_TOPLAMI  Numeric(22,5) = 0
+	declare @_VERGI1_IN_FIYAT Numeric(2) = 0
+
+    declare @_VERGI2_ID       Int = 0
+    declare @_VERGI2_TUTARI   Numeric(22,5) = 0
+    declare @_VERGI2_TOPLAMI  Numeric(22,5) = 0
+    declare @_VERGI2_IN_FIYAT Numeric(2) = 0
+
+	declare @_VERGI3_ID       Int = 0
+    declare @_VERGI3_TUTARI   Numeric(22,5) = 0
+    declare @_VERGI3_TOPLAMI  Numeric(22,5) = 0
+    declare @_VERGI3_IN_FIYAT Numeric(2) = 0
+    
+	declare @_VERGI_TOPLAMI   Numeric(22,5) = 0
+	
+	-- BİRİM/TOPLAM + KDV < İSKONTO SONRASI HESAPLAR
+	declare @_BIR_TUT_KDVLI_TL      Numeric(22,5) = 0
+	declare @_TOP_TUT_KDVLI_TL      Numeric(22,5) = 0
+	declare @_BIR_TUT_KDVLI_DVZ     Numeric(22,5) = 0
+	declare @_TOP_TUT_KDVLI_DVZ     Numeric(22,5) = 0
+	
+	-- BİRİM/TOPLAM + KDV + VERGI < İSKONTO SONRASI HESAPLAR
+	declare @_BIR_VRGLI_KDVLI_TL    Numeric(22,5) = 0
+	declare @_TOP_VRGLI_KDVLI_TL    Numeric(22,5) = 0
+	declare @_BIR_VRGLI_KDVLI_DVZ   Numeric(22,5) = 0
+	declare @_TOP_VRGLI_KDVLI_DVZ   Numeric(22,5) = 0
+	
+	--declare @_GIRIS_YERI_ID   Int = 0
+    --declare @_CIKIS_YERI_ID   Int = 0
+    
+    -- ürün kartı 
+    declare @_urn_BIRIM_1      varchar(10) = ''
+    declare @_urn_BIRIM_2      varchar(10) = ''
+    declare @_urn_BIRIM_3      varchar(10) = ''
+    declare @_urn_BIRIM_2_CARPANI Numeric(12,4) = 0
+	declare @_urn_BIRIM_3_CARPANI Numeric(12,4) = 0
+	      
+    declare @_urn_ALIS_KDV     Numeric(4,2) = 0
+    declare @_urn_SATIS_KDV    Numeric(4,2) = 0
+	declare @_urn_ALIS_BIRIMI  SmallInt = 0
+    declare @_urn_SATIS_BIRIMI SmallInt = 0
+    declare @_urn_PARA_TURU    SmallInt = 0
+	declare @_urn_VERGI_TURU1_ID    Int = 0
+	--declare @_urn_VERGI_TURU2_ID    Int = 0
+    --declare @_urn_VERGI_TURU3_ID    Int = 0
+
+    
+	-- stk fiyatları için 
+	declare @_fyt_TODAY       Int = 0
+    declare @_fyt_GUN_ID_A    Int = 0
+    declare @_fyt_GUN_ID_B    Int = 0
+	
+	declare @_fyt_KDV_VARMI   Bit = 0
+	declare @_fyt_KDV_DH      SmallInt = 0 /* 0- Satışa KDV Hariç  1- Satışa KDV Dahil  */
+    declare @_fyt_ALIS_KDV    Numeric(4,2) = 0
+    declare @_fyt_SATIS_KDV   Numeric(4,2) = 0
+	declare @_fyt_KDV_ORANI   Numeric(4,2) = 0
+    declare @_fyt_PARA_TURU   SmallInt = 0
+
+	declare @_fyt_VERGI1_ID              int = 0
+	declare @_fyt_VERGI1_TUTARI          numeric(22,5) = 0
+	declare @_fyt_VERGI1_IN_FIYAT        numeric(2) = 0
+    declare @_fyt_SATISF_VERGILI_KDVSIZ  numeric(22,5) = 0
+	declare @_fyt_SATISF_VERGILI_KDVLI   numeric(22,5) = 0
+    
+	-- ötv 
+	declare @_otv_VERGI_ORANI        Numeric(22,8) = 0
+    declare @_otv_ASGARI_MAKTU_VT    Numeric(22,8) = 0
+    declare @_otv_MAKTU_VT           Numeric(22,8) = 0
+	declare @_otv_VR_UYGULAMA_TD     SmallInt = 0
+    declare @_otv_hes_ASG_MAKTU_TTR  Numeric(22,8) = 0 
+	declare @_otv_hes_VERGI_TTR      Numeric(22,8) = 0
+	  
+
+	
+    -- read stk_gcs line
+    SELECT 
+           -- [ID]
+           --,[FIRM_ID]
+           @_SHOP_ID = isnull([SHOP_ID],0)
+           --,[KILIT]
+           ,@_GCB_ID = [GCB_ID]
+           --,[CARI_ID]
+           
+		   ,@_ISLEM_TARIHI = isnull([ISLEM_TARIHI], convert(date, getdate(), 104))
+		   ,@_ISLEM_SAAT = isnull([ISLEM_SAAT], convert(varchar(8), getdate(),108))
+           --,[VADE_GUN]
+           --,[VADE_TARIHI]
+           ,@_PARA_TURU = [PARA_TURU]
+           ,@_DOVIZ_KURU = [DOVIZ_KURU]
+    
+	       ,@_GC_TURU = [GC_TURU]
+           ,@_SATIS_TIPI = isnull([SATIS_TIPI],0)
+           --,[SATIR_NO]
+           ,@_MODUL_ID = [MODUL_ID]
+           ,@_URUN_ID = [URUN_ID]
+           --,[URUN_ADI]
+           --,[REFERANS]
+    
+           --,[TALEP_MIKTAR]
+           ,@_MIKTAR = [MIKTAR]
+           ,@_GC_MIKTAR = [GC_MIKTAR]
+           --,@_IPT_MIKTAR = [IPT_MIKTAR]
+           ,@_BIRIM = [BIRIM]
+           ,@_BIRIM_NO = isnull([BIRIM_NO],0)
+           ,@_KDV = isnull([KDV],-1)
+           ,@_KDV_VARMI = isnull([KDV_VARMI],1) 
+           
+           --,[GIRIS_GCS_ID]
+           --,[ALIS_TARIHI]
+           --,[ALIS_FIYATI]
+           --,[ALIS_FIYATI_KDVLI]
+           --,[SATIS_FIYATI]
+           --,[SATIS_FIYATI_KDVLI]
+           --,[AS_FARK_TUTARI]
+           
+           --,[CESIT1_ID]
+           --,[CESIT2_ID]
+           --,[CESIT3_ID]
+           --,[CESIT1_TUTARI_TL]
+           --,[CESIT2_TUTARI_TL]
+           --,[CESIT3_TUTARI_TL]
+           --,[CESIT_FIYAT_FARKI]
+           
+           ,@_ISO_BIR_TUT_TL    = isnull([ISO_BIR_TUT_TL] ,0)
+           ,@_ISO_TOP_TUT_TL    = isnull([ISO_TOP_TUT_TL] ,0)
+		   ,@_ISO_TOP_TUT_KDVLI = isnull([ISO_TOP_TUT_KDVLI] ,0)
+           --,@_ISO_BIR_TUT_DVZ = isnull([ISO_BIR_TUT_DVZ],0)
+           --,@_ISO_TOP_TUT_DVZ = isnull([ISO_TOP_TUT_DVZ],0)
+    
+           ,@_MAX_ISKONTO = [MAX_ISKONTO]
+           ,@_ISKONTO_SEKLI = [ISKONTO_SEKLI]
+           ,@_ISKONTO_ORANI = isnull([ISKONTO_ORANI],0)
+           ,@_ISK1_ORANI = [ISK1_ORANI]
+           ,@_ISK2_ORANI = [ISK2_ORANI]
+           ,@_ISK3_ORANI = [ISK3_ORANI]
+           ,@_ISKONTO_TUTARI = [ISKONTO_TUTARI]
+           ,@_ISK1_TUTARI = [ISK1_TUTARI]
+           ,@_ISK2_TUTARI = [ISK2_TUTARI]
+           ,@_ISK3_TUTARI = [ISK3_TUTARI]
+           ,@_ISK_KADEME_ORANI = [ISK_KADEME_ORANI]
+           ,@_ISK_KADEME_TUTARI = [ISK_KADEME_TUTARI]
+           
+           ,@_BIR_TUTARI_TL = [BIR_TUTARI_TL]
+           ,@_TOP_TUTARI_TL = [TOP_TUTARI_TL]
+           ,@_BIR_TUTARI_DVZ = [BIR_TUTARI_DVZ]
+           ,@_TOP_TUTARI_DVZ = [TOP_TUTARI_DVZ]
+           ,@_KDV_MATRAHI = [KDV_MATRAHI]
+	       ,@_KDV_TUTARI = [KDV_TUTARI]
+           
+		   ,@_TEVKIFAT_PAY = isnull([TEVKIFAT_PAY],0)       /* 1 - 9 */
+           ,@_TEVKIFAT_PAYDA = isnull([TEVKIFAT_PAYDA],10)  /* 10 = default kabul ediliyor */  
+           ,@_TEVKIF_KDV_TUTARI = [TEVKIF_KDV_TUTARI]       /*  (( kdv_tutarı / 10 payda ) X 7 pay ) tutarı */
+           ,@_TEVKIF_DAHIL_TOPLAM = [TEVKIF_DAHIL_TOPLAM]   /* kdv_matrahı + kdv_tutarı = kdv dahil toplam  */
+		       
+           ,@_VERGI1_ID = [VERGI1_ID]
+           ,@_VERGI1_TOPLAMI = [VERGI1_TOPLAMI]
+           ,@_VERGI2_ID = [VERGI2_ID]
+           ,@_VERGI2_TOPLAMI = [VERGI2_TOPLAMI]
+           ,@_VERGI3_ID = [VERGI3_ID]
+           ,@_VERGI3_TOPLAMI = [VERGI3_TOPLAMI]
+           ,@_VERGI_TOPLAMI = [VERGI_TOPLAMI]
+           
+           ,@_BIR_TUT_KDVLI_TL = [BIR_TUT_KDVLI_TL]
+	       ,@_TOP_TUT_KDVLI_TL = [TOP_TUT_KDVLI_TL]
+	       ,@_BIR_TUT_KDVLI_DVZ = [BIR_TUT_KDVLI_DVZ]
+	       ,@_TOP_TUT_KDVLI_DVZ = [TOP_TUT_KDVLI_DVZ]
+	           
+		   ,@_BIR_VRGLI_KDVLI_TL = [BIR_VRGLI_KDVLI_TL]
+           ,@_TOP_VRGLI_KDVLI_TL = [TOP_VRGLI_KDVLI_TL]
+           ,@_BIR_VRGLI_KDVLI_DVZ = [BIR_VRGLI_KDVLI_DVZ]
+           ,@_TOP_VRGLI_KDVLI_DVZ = [TOP_VRGLI_KDVLI_DVZ]
+           
+           --,[GIRIS_YERI_ID]
+           --,[CIKIS_YERI_ID]
+           --,[SATIS_NOK_ID]
+           --,[BOLUM_ID]
+           --,[ODAMASA_ID]
+           --,[SIP_ALAN_PER_ID]
+           --,[SIP_ALIS_SAAT]
+           --,[TES_EDEN_PER_ID]
+           --,[TES_EDIL_SAAT]
+           --,[SON_DURUMU]
+           --,[RAPOR_ADEDI]
+           --,[PARENT_TD]
+           --,[PARENT_ID]
+           --,[DONEM_ID]
+
+    from [dbo].[STK_GCS]
+    where ID = @Id
+
+    -- birim no sıfır ise ürün kartından ne olduğunu bulalım
+    
+    if (@_BIRIM_NO = 0)
+    begin
+      Select
+       @_urn_BIRIM_1 = urn.[BIRIM_1] 
+      ,@_urn_BIRIM_2 = urn.[BIRIM_2] 
+      ,@_urn_BIRIM_3 = urn.[BIRIM_3] 
+	  ,@_urn_BIRIM_2_CARPANI = urn.[BIRIM_2_CARPANI]
+	  ,@_urn_BIRIM_3_CARPANI = urn.[BIRIM_3_CARPANI]
+      ,@_urn_ALIS_KDV = urn.[ALIS_KDV]
+      ,@_urn_SATIS_KDV = urn.[SATIS_KDV]
+      ,@_urn_ALIS_BIRIMI = urn.[ALIS_BIRIMI]
+      ,@_urn_SATIS_BIRIMI = urn.[SATIS_BIRIMI]
+      ,@_urn_PARA_TURU = urn.[PARA_TURU]
+	  ,@_urn_VERGI_TURU1_ID = isnull(urn.[VERGI_TURU1_ID],0)
+
+      from  [dbo].[HP_URUN] urn 
+	  where urn.ID = @_URUN_ID
+	  
+	  if (@_GC_TURU >= 6000) and (@_GC_TURU < 6050) 
+          set @_BIRIM_NO = @_urn_ALIS_BIRIMI
+
+      if (@_GC_TURU >= 6050) and (@_GC_TURU <= 6090) 
+          set @_BIRIM_NO = @_urn_SATIS_BIRIMI
+          
+      if (@_BIRIM_NO = 1) set @_BIRIM = @_urn_BIRIM_1
+      if (@_BIRIM_NO = 2) set @_BIRIM = @_urn_BIRIM_2
+      if (@_BIRIM_NO = 3) set @_BIRIM = @_urn_BIRIM_3
+          
+    end
+
+
+	-- iso birim tutar sıfır ise 
+	-- stk_fiyat tablasunu oku
+	if (@_ISO_BIR_TUT_TL = 0) 
+	begin
+      -- GUN_TD     gün uygulaması kontrolü
+      --   null, 0, Her gün geçerli 
+      --         1, Hafta içi geçerli 
+      --         2, Cumartesi geçerli 
+      --         3, Pazar geçerli 
+      --         4, C.tesi,Pazar geçerli 
+      
+	  set @_fyt_TODAY = DATEPART(weekday,@_ISLEM_TARIHI)	
+      
+      -- işlem hafta içi ise
+      if ((@_fyt_TODAY >= 2) and (@_fyt_TODAY <= 6))
+      begin
+        set @_fyt_GUN_ID_A = 0
+        set @_fyt_GUN_ID_B = 1
+      end 
+
+      -- işlem c.tesi ise
+      if (@_fyt_TODAY = 7)
+      begin
+        set @_fyt_GUN_ID_A = 2
+        set @_fyt_GUN_ID_B = 4
+      end 
+    
+      -- işlem pazar ise
+      if (@_fyt_TODAY = 1)
+      begin
+        set @_fyt_GUN_ID_A = 3
+        set @_fyt_GUN_ID_B = 4
+      end 
+
+	  -- fiyat okunuyor 
+	  SELECT top 1 
+       /*
+	   [ID]
+      ,[FIRM_ID]
+      ,[SHOP_ID]
+      ,[URUN_ID]
+      ,[BIRIM_NO]
+      ,[FIYAT_CESIT_TD]
+      ,[UYGULAMA_SEKLI_TD]
+	  */
+       @_fyt_KDV_VARMI = isnull(fyt.[KDV_VARMI],1) 
+      ,@_fyt_KDV_DH = fyt.[KDV_DH] --  0- Satışa KDV Hariç  1- Satışa KDV Dahil  
+      ,@_fyt_ALIS_KDV = fyt.[ALIS_KDV]
+      ,@_fyt_SATIS_KDV = fyt.[SATIS_KDV]
+      ,@_fyt_PARA_TURU = fyt.[PARA_TURU]
+	  /*
+	  ,[GUN_TD]
+      ,[GECERLI_BAS_TARIH]
+      ,[GECERLI_BAS_SAAT]
+      ,[GECERLI_BIT_TARIH]
+      ,[GECERLI_BIT_SAAT]
+      ,[ALIS_FIYATI]
+      ,[ALISF_KDVSIZ]
+      ,[ALISF_KDVLI]
+      ,[KAR_YUZDESI1]
+      ,[KAR_YUZDESI2]
+      ,[KAR_ISKONTOSU]
+      ,[MAX_SATIS_ISKONTOSU]
+      ,[YUVARLAMA_ORANI]
+      ,[YUVARLAMA_SEKLI]
+      ,[LISTE_ID]
+      ,[LISTE_FIYATI]
+      ,[LISTE_ISKONTOSU]
+      ,[SATIS_FIYATI]
+      ,[SATISF_KDVSIZ]
+      ,[SATISF_KDVLI]
+      ,[VERGI1_ID]
+      ,[VERGI1_TUTARI]
+	  ,[VERGI1_IN_FIYAT]
+      ,[VERGI2_ID]
+      ,[VERGI2_TUTARI]
+	  ,[VERGI2_IN_FIYAT]
+      ,[VERGI3_ID]
+      ,[VERGI3_TUTARI]
+	  ,[VERGI3_IN_FIYAT]
+      ,[VERGI_TOPLAMI]
+      ,[SATIS_VERGILI]
+      */
+      ,@_fyt_VERGI1_ID = [VERGI1_ID]
+	  ,@_fyt_VERGI1_TUTARI = [VERGI1_TUTARI]
+	  ,@_fyt_VERGI1_IN_FIYAT = isnull([VERGI1_IN_FIYAT],0) /* vergi fiyata dahil (0) mi?,  hariç (1) mi ? */
+      ,@_fyt_SATISF_VERGILI_KDVSIZ = [SATISF_VERGILI_KDVSIZ]
+      ,@_fyt_SATISF_VERGILI_KDVLI = [SATISF_VERGILI_KDVLI]
+
+	  from  [dbo].[STK_FIYAT] fyt 
+      where fyt.URUN_ID = @_URUN_ID
+      and   fyt.BIRIM_NO = @_BIRIM_NO
+      and   fyt.GECERLI_BAS_TARIH <= @_ISLEM_TARIHI
+      and   isnull(fyt.GECERLI_BAS_SAAT, '00:01') <= @_ISLEM_SAAT
+      and   isnull(fyt.GECERLI_BIT_TARIH,convert(date,getdate(), 103)) >= @_ISLEM_TARIHI
+      and   isnull(fyt.GECERLI_BIT_SAAT, '23:59') >= @_ISLEM_SAAT
+      and  (isnull(fyt.SHOP_ID,0) = 0 
+       or   isnull(fyt.SHOP_ID,0) = @_SHOP_ID )
+      and  (isnull(fyt.GUN_TD, -1) = -1 or
+            isnull(fyt.GUN_TD, -1) = @_fyt_GUN_ID_A or
+            isnull(fyt.GUN_TD, -1) = @_fyt_GUN_ID_B  )
+  
+      order by  fyt.GECERLI_BAS_TARIH desc
+               ,fyt.GECERLI_BAS_SAAT desc
+        ,isnull(fyt.GUN_TD,-1) desc 
+
+	  -- +/*
+	  set @_ISO_BIR_TUT_TL = @_fyt_SATISF_VERGILI_KDVSIZ
+	  set @_ISO_TOP_TUT_TL = @_fyt_SATISF_VERGILI_KDVSIZ * @_MIKTAR
+      set @_ISO_TOP_TUT_KDVLI = @_fyt_SATISF_VERGILI_KDVLI * @_MIKTAR
+
+	  if (@_GC_TURU >= 6000) and (@_GC_TURU < 6050) 
+	      set @_fyt_KDV_ORANI = @_fyt_ALIS_KDV
+
+	  if (@_GC_TURU >= 6050) and (@_GC_TURU <= 6090) 
+	      set @_fyt_KDV_ORANI = @_fyt_SATIS_KDV
+
+      if (@_KDV <> @_fyt_KDV_ORANI)
+	      set @_KDV = @_fyt_KDV_ORANI
+
+      -- g c s  satırı için 
+      set @_KDV_VARMI = @_fyt_KDV_VARMI
+      
+      -- fiyat satırı kdv siz ise g c s  satır hesaplanacaksa
+      if (@_fyt_KDV_VARMI = 0)
+          set @_fyt_KDV_ORANI = 0
+      
+      -- kdv uyg var ama stk_fiyat satırında kdv yoksa
+      if ((@_fyt_KDV_VARMI = 1) and
+          (@_fyt_KDV_ORANI = 0)) 
+      begin
+  	    if (@_GC_TURU >= 6000) and (@_GC_TURU < 6050) 
+	        set @_fyt_KDV_ORANI = @_urn_ALIS_KDV
+
+	    if (@_GC_TURU >= 6050) and (@_GC_TURU <= 6090) 
+	        set @_fyt_KDV_ORANI = @_urn_SATIS_KDV
+
+        set @_KDV = @_fyt_KDV_ORANI
+      end
+
+	end
+	
+	-- hesaplama sırası çok ÖNEMLİ UNUTMA
+	-- +/*
+	
+    --( [ISO_BIR_TUT_TL] / 100 ) * ( 100 - [ISKONTO_ORANI] )
+    --set @_BIR_TUTARI_TL = @_ISO_BIR_TUT_TL
+    set @_BIR_TUTARI_TL =( @_ISO_BIR_TUT_TL / 100 ) * ( 100 - @_ISKONTO_ORANI )
+    set @_TOP_TUTARI_TL = @_BIR_TUTARI_TL * @_MIKTAR
+
+   
+	-- ürünün vergisi varsa ÖTV gb...
+	-- eğer değişikliğe ihtiyaç duyulmaz ise vergi_turu1 de her zaman ötv olacak
+	--
+	if (@_urn_VERGI_TURU1_ID > 0) 
+	begin
+	  select top 1 
+         @_otv_VERGI_ORANI = isnull(SOTV.[VERGI_ORANI],0)
+        ,@_otv_ASGARI_MAKTU_VT = isnull(SOTV.[ASGARI_MAKTU_VERGI_TUTARI],0)
+        ,@_otv_MAKTU_VT = isnull(SOTV.[MAKTU_VERGI_TUTARI],0)
+		,@_otv_VR_UYGULAMA_TD = isnull(HPV.[VR_UYGULAMA_TD],-1)
+      from HP_VERGI HPV 
+        left outer join SYS_OTV SOTV on ( HPV.VR_KODU = SOTV.GTIP_TAMNO )
+      where HPV.ID = @_urn_VERGI_TURU1_ID
+      and   SOTV.TARIH <= @_ISLEM_TARIHI
+      order by SOTV.TARIH desc
+
+	  -- tek birim üzerinden vergi oranı hesaplanır
+      if (@_otv_VERGI_ORANI > 0)
+          set @_otv_hes_VERGI_TTR = (@_BIR_TUTARI_TL / 100) * @_otv_VERGI_ORANI
+
+      -- asgari maktu tutarı hesapla
+      if (@_otv_ASGARI_MAKTU_VT > 0)
+	  begin
+        -- alışlar ise  
+        if (@_GC_TURU < 6050)
+	    begin
+          if (@_urn_ALIS_BIRIMI = 1) 
+	          set @_otv_hes_ASG_MAKTU_TTR = @_otv_ASGARI_MAKTU_VT
+	      if (@_urn_ALIS_BIRIMI = 2) 
+	          set @_otv_hes_ASG_MAKTU_TTR = @_otv_ASGARI_MAKTU_VT * @_urn_BIRIM_2_CARPANI
+	      if (@_urn_ALIS_BIRIMI = 3) 
+	          set @_otv_hes_ASG_MAKTU_TTR = ( @_otv_ASGARI_MAKTU_VT * @_urn_BIRIM_2_CARPANI ) * @_urn_BIRIM_3_CARPANI 
+	    end
+		-- satışlar
+        if (@_GC_TURU > 6050)
+	    begin
+          if (@_urn_SATIS_BIRIMI = 1) 
+	          set @_otv_hes_ASG_MAKTU_TTR = @_otv_ASGARI_MAKTU_VT
+	      if (@_urn_SATIS_BIRIMI = 2) 
+	          set @_otv_hes_ASG_MAKTU_TTR = @_otv_ASGARI_MAKTU_VT * @_urn_BIRIM_2_CARPANI
+	      if (@_urn_SATIS_BIRIMI = 3) 
+	          set @_otv_hes_ASG_MAKTU_TTR = ( @_otv_ASGARI_MAKTU_VT * @_urn_BIRIM_2_CARPANI ) * @_urn_BIRIM_3_CARPANI 
+	    end
+      end
+	 
+	  -- çıkan sonuç asgariyle karşılaştırılır ve sonuca gidilir
+	  if (@_otv_hes_ASG_MAKTU_TTR < @_otv_hes_VERGI_TTR)
+	  begin 
+	    set @_VERGI1_TUTARI = ( @_otv_hes_VERGI_TTR + @_otv_MAKTU_VT )
+		set @_VERGI1_TOPLAMI = ( @_otv_hes_VERGI_TTR + @_otv_MAKTU_VT ) * @_MIKTAR
+      end
+
+      if (@_otv_hes_ASG_MAKTU_TTR > @_otv_hes_VERGI_TTR) 
+	  begin
+	    set @_VERGI1_TUTARI = ( @_otv_hes_ASG_MAKTU_TTR + @_otv_MAKTU_VT )
+		set @_VERGI1_TOPLAMI = ( @_otv_hes_ASG_MAKTU_TTR + @_otv_MAKTU_VT ) * @_MIKTAR
+      end
+
+	  -- eğer fiyat tablosunda verginin fiyat içinde olup olmadığı işaretlenmediyse 
+	  -- vergi hesap kartındaki karar geçerli
+
+	  if (@_fyt_VERGI1_IN_FIYAT = -1) and 
+	     ((@_otv_VR_UYGULAMA_TD = 0) or -- vergi fiyatın içinde 
+		  (@_otv_VR_UYGULAMA_TD = 1))   -- vergiyi toplam matraha ekle
+	       set @_fyt_VERGI1_IN_FIYAT = @_otv_VR_UYGULAMA_TD
+
+      -- tekrar konrol ediliyor
+      if (@_fyt_VERGI1_IN_FIYAT = -1)
+	      set @_fyt_VERGI1_IN_FIYAT = 0 -- default fiyatın içinde olarak kabul et
+
+	end
+	
+
+	-- kdv matrahı ve kdv hesaplaması   
+    if (@_KDV_VARMI = 1)
+	begin
+	  set @_KDV_MATRAHI = @_TOP_TUTARI_TL
+	  
+	  if (@_VERGI1_TOPLAMI > 0)
+          set @_KDV_MATRAHI = @_TOP_TUTARI_TL + (@_VERGI1_TOPLAMI * @_fyt_VERGI1_IN_FIYAT)
+      
+      set @_KDV_TUTARI = (@_KDV_MATRAHI / 100) * @_KDV
+
+	  if (@_TEVKIFAT_PAY > 0) and (@_TEVKIFAT_PAYDA > 0)
+	  begin
+	    set @_TEVKIF_KDV_TUTARI = (@_KDV_TUTARI / @_TEVKIFAT_PAYDA) * @_TEVKIFAT_PAY
+		set @_TEVKIF_DAHIL_TOPLAM = @_KDV_MATRAHI + @_KDV_TUTARI
+      end		   
+
+	  if ((@_TEVKIFAT_PAY = 0) or (@_TEVKIFAT_PAYDA = 0))
+	  begin
+	    set @_TEVKIF_KDV_TUTARI = null
+		set @_TEVKIF_DAHIL_TOPLAM = null
+      end
+
+	end else
+	begin
+      set @_KDV_MATRAHI = 0
+      set @_KDV_TUTARI = 0
+	  set @_TEVKIF_KDV_TUTARI = null
+	  set @_TEVKIF_DAHIL_TOPLAM = null
+	end
+
+    -- birim fiyat + kdv 
+    set @_BIR_TUT_KDVLI_TL = @_BIR_TUTARI_TL -- kdvsiz birim fiyatı
+                          + (@_BIR_TUTARI_TL / 100) * @_KDV  -- birim fiyatın kdvsi
+    set @_TOP_TUT_KDVLI_TL = @_BIR_TUT_KDVLI_TL * @_MIKTAR   -- kdvli birim fiyat * miktar
+    
+
+    -- birim fiyat + kdv + vergi 
+    set @_BIR_VRGLI_KDVLI_TL = @_BIR_TUTARI_TL -- kdvsiz birim fiyatı
+                            + (@_BIR_TUTARI_TL / 100) * @_KDV  -- birim fiyatın kdvsi
+    set @_TOP_VRGLI_KDVLI_TL = @_BIR_VRGLI_KDVLI_TL * @_MIKTAR -- kdvli birim fiyat * miktar
+    
+    --select @_KDV_VARMI, @_KDV_MATRAHI, @_KDV_TUTARI
+
+    UPDATE [dbo].[STK_GCS] SET
+        [ISLEM_SAAT] = @_ISLEM_SAAT
+       ,[BIRIM] = @_BIRIM
+       ,[BIRIM_NO] = @_BIRIM_NO 
+       ,[KDV] = @_KDV
+       ,[KDV_VARMI] = @_KDV_VARMI
+	   ,[ISO_BIR_TUT_TL] = @_ISO_BIR_TUT_TL
+       ,[ISO_TOP_TUT_TL] = @_ISO_TOP_TUT_TL
+	   ,[ISO_TOP_TUT_KDVLI] = @_ISO_TOP_TUT_KDVLI
+       ,[BIR_TUTARI_TL] = @_BIR_TUTARI_TL
+	   ,[TOP_TUTARI_TL] = @_TOP_TUTARI_TL
+
+       ,[VERGI1_ID] = @_urn_VERGI_TURU1_ID  
+	   ,[VERGI1_TUTARI] = @_VERGI1_TUTARI
+	   ,[VERGI1_TOPLAMI] = @_VERGI1_TOPLAMI
+	   ,[VERGI1_IN_FIYAT] = @_fyt_VERGI1_IN_FIYAT /* vergi fiyata dahil (0) mi?,  hariç (1) mi ? */
+	   ,[VERGI_TOPLAMI] = @_VERGI1_TOPLAMI + @_VERGI2_TOPLAMI + @_VERGI3_TOPLAMI
+	   
+	   ,[KDV_MATRAHI] = @_KDV_MATRAHI
+	   ,[KDV_TUTARI] = @_KDV_TUTARI
+       ,[TEVKIFAT_PAY] = @_TEVKIFAT_PAY       
+       ,[TEVKIFAT_PAYDA] = @_TEVKIFAT_PAYDA            
+       ,[TEVKIF_KDV_TUTARI] = @_TEVKIF_KDV_TUTARI       /*  (( kdv_tutarı / 10 payda ) X 7 pay ) tutarı */
+       ,[TEVKIF_DAHIL_TOPLAM] = @_TEVKIF_DAHIL_TOPLAM    /* kdv_matrahı + kdv_tutarı = kdv dahil toplam  */
+	   
+	   ,[BIR_TUT_KDVLI_TL] = @_BIR_TUT_KDVLI_TL
+	   ,[TOP_TUT_KDVLI_TL] = @_TOP_TUT_KDVLI_TL
+       ,[BIR_VRGLI_KDVLI_TL] = @_BIR_VRGLI_KDVLI_TL
+       ,[TOP_VRGLI_KDVLI_TL] = @_TOP_VRGLI_KDVLI_TL 
+
+    WHERE ID = @Id
+    
+
+	UPDATE [dbo].[STK_GCB] SET
+      
+	   ISK_ONCESI_TUTAR  = x.ISO_TOP_TUT_TL
+	  ,ISK_ORANI         = x.ISKONTO_TUTARI / (x.TOP_TUTARI_TL / 100)  
+	  ,ISK_TUTARI        = x.ISKONTO_TUTARI
+	  ,ISK_SONRASI_TUTAR = x.TOP_TUTARI_TL
+
+	  ,VERGI1_TOPLAMI    = x.VERGI1_TOPLAMI
+	  ,VERGI2_TOPLAMI    = x.VERGI2_TOPLAMI
+      ,VERGI3_TOPLAMI    = x.VERGI3_TOPLAMI
+	  ,VERGI_TOPLAMI     = x.VERGI_TOPLAMI
+
+	  ,TEVKIF_KDV_TUTARI   = x.TEVKIF_KDV_TUTARI
+	  ,TEVKIF_DAHIL_TOPLAM = x.TEVKIF_DAHIL_TOPLAM
+	  
+	  ,KDV_TOPLAMI       = x.KDV_TOPLAMI         
+	  ,GENEL_TOPLAM      = x.TOP_VRGLI_KDVLI_TL
+
+	FROM [dbo].[STK_GCB] a, 
+	(
+	  Select 
+        sum(ISO_TOP_TUT_TL) ISO_TOP_TUT_TL 
+		sum(ISKONTO_TUTARI) ISKONTO_TUTARI
+		sum(TOP_TUTARI_TL)  TOP_TUTARI_TL
+
+		sum(VERGI1_TOPLAMI) VERGI1_TOPLAMI
+		sum(VERGI2_TOPLAMI) VERGI2_TOPLAMI
+        sum(VERGI3_TOPLAMI) VERGI3_TOPLAMI
+		sum(VERGI_TOPLAMI)  VERGI_TOPLAMI 
+
+		sum(TEVKIF_KDV_TUTARI)   TEVKIF_KDV_TUTARI
+		sum(TEVKIF_DAHIL_TOPLAM) TEVKIF_DAHIL_TOPLAM
+
+		sum( case TEVKIFAT_PAY 
+		     when 0 then KDV_TUTARI
+			 else TEVKIF_KDV_TUTARI end )    KDV_TOPLAMI
+		sum(TOP_VRGLI_KDVLI_TL)  TOP_VRGLI_KDVLI_TL
+
+        from [dbo].[STK_GCS]
+        where  GCB_ID = @_GCB_ID
+	) x
+	WHERE a.ID = @_GCB_ID
+    
+
+
+--END
+
+
+GO
+
+

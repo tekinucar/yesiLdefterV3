@@ -1,0 +1,77 @@
+
+USE [GREEN]
+GO
+
+
+CREATE PROCEDURE prc_CLIENT_LIST(@firmId int, @clientType int)  
+AS BEGIN 
+ 
+  -- clientType
+  -- 1 Firma
+  -- 2 Þube
+  -- 3 Bölüm
+  -- 4 Departman
+  -- 5 Personel
+  -- 6 Bilgisayar
+  
+  if (@clientType = 1)
+  begin
+    /* Firm List */
+    Select 
+      f.ID      CLIENT_ID
+    , f.HP_NAME CLIENT_NAME 
+    , f.HP_TD   CLIENT_TYPE  
+    , 0         PARENT_ID
+    , ''        PARENT_NAME   
+    FROM HP_FIRM f 
+    WHERE f.HP_TD = 1
+    and   f.FIRM_ID = @firmId
+  end
+
+  if (@clientType = 2)
+  begin
+    /* Shop List */
+    Select 
+      s.ID      CLIENT_ID
+    , s.HP_NAME CLIENT_NAME 
+    , s.HP_TD   CLIENT_TYPE  
+    , f.ID      PARENT_ID  
+    , f.HP_NAME PARENT_NAME   
+    FROM HP_FIRM s
+      left outer join HP_FIRM f on ( s.PARENT_ID = f.ID )
+    WHERE s.HP_TD = 2
+    AND   s.FIRM_ID = @firmId
+  end
+
+  if (@clientType = 3)
+  begin
+    /* Part List */
+    Select 
+      p.ID      CLIENT_ID
+    , p.HP_NAME CLIENT_NAME 
+    , p.HP_TD   CLIENT_TYPE  
+    , s.ID      PARENT_ID
+    , s.HP_NAME PARENT_NAME   
+    FROM HP_FIRM p
+      left outer join HP_FIRM s on ( p.PARENT_ID = s.ID )
+    WHERE p.HP_TD = 3
+    AND   p.FIRM_ID = @firmId
+  end
+
+  if (@clientType = 5)
+  begin
+    /* personel  */  
+    Select 
+      c.ID      CLIENT_ID
+    , c.TAMADI  CLIENT_NAME 
+    , 5         CLIENT_TYPE  
+    , 0         PARENT_ID 
+    , c.TC_NO   PARENT_NAME   
+    FROM HP_CARI c
+    WHERE (c.CARI_TIPI = 591 or c.CARI_TIPI = 592)
+    AND   c.FIRM_ID = @firmId
+  end
+
+END
+
+

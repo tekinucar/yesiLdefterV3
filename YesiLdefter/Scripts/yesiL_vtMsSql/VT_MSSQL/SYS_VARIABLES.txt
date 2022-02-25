@@ -1,0 +1,80 @@
+
+begin transaction
+
+ create table SYS_VARIABLES
+ (
+    ID                  Int IDENTITY(1,1)     NOT NULL,
+    ACTIVE              Bit                   NULL,
+    FIRM_ID             Int                   NULL, /* HANGÝ FÝRMA ÝÇÝN ÖNDEÐERLER , BU AYRIM WEB db de GEREKLÝ */
+    
+    /* variable için master-detail baðlantý ( MS_VARIABLES <-> SYS_VARIABLES )  */
+    MODUL_CODE          VarChar(20)           NULL,
+    VARIABLE_CODE       VarChar(50)           NULL,  /* VARIABLE nýn master kodu, bu variable tanýmlarý MS_VARIABLES te tanýmlý */
+    
+    CLIENT_TYPE         SmallInt              NULL, /* 1.COMPUTER, 2.USER, 3.LOCAL   */
+    CLIENT_ID           Int                   NULL, /* LOCAL_ID or COMP_ID or USER_ID */
+    CLIENT_VALUE        VarChar(1000)         NULL,  /* müþterinin atadýðý default valuesi */
+    
+    Constraint PK_SYS_VARIABLES primary key (ID)
+
+ )
+
+ create index X_SYS_VARIABLES01 on SYS_VARIABLES (FIRM_ID, MODUL_CODE, VARIABLE_CODE)
+ create index X_SYS_VARIABLES02 on SYS_VARIABLES (FIRM_ID, MODUL_CODE, CLIENT_TYPE)
+
+ grant select, insert, update, delete on SYS_VARIABLES to public
+
+
+commit transaction
+
+
+
+
+/*  
+
+ÖNDEÐERLERDE ÝSTEMCÝ/CLIENT TÝPLERÝ
+
+1. COMP  - BÝLGÝSAYAR 
+2. USER  - PERSONEL
+3. LOCAL - PART, SHOP, FIRM 
+
+ÖNDEÐER
+
+
+
+ÖDEÐERLERDE ÖNCELÝK SIRASI 
+
+1. COMP   önce bilgisayar için tanýmlama var mý ?
+2. USER   kullanýcý/personel için tanýmlama var mý ?
+3. PART   bölüm için var mý ?
+4. SHOP   þube için var mý ?
+5. FIRM   firma için var mý ?
+
+bir iþlem için default value veya 
+tanýmlý hesap var mý diye sorgu çekildiðinde
+ 
+yukarýdaki sýraya göre bulduðu value yi getirir
+
+veya hiç tanýmlý bir öndeðer olmaya bilir 
+ 
+
+
+
+ 
+
+
+*/
+
+ 
+
+
+SELECT [MSVR].[VARIABLE_CODE]
+      ,[MSVR].[VARIABLE_CAPTION]
+      ,[SYVR].*  
+  FROM [MSV3DFTR].[dbo].[MS_VARIABLES] [MSVR]
+   left outer join [GREEN].[dbo].[SYS_VARIABLES] [SYVR] on ( [MSVR].[VARIABLE_CODE] = [SYVR].[VARIABLE_CODE] )
+  where [MSVR].ACTIVE = 1
+  
+  order by [MSVR].LINE_NO
+
+

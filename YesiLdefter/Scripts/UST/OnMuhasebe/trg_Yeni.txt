@@ -1,0 +1,39 @@
+﻿
+
+USE [u7093888_Ustad01]
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+CREATE TRIGGER [dbo].[trg_HesapCari] on [dbo].[HesapCari] 
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    DECLARE myCursor cursor for select Id from Inserted
+    DECLARE @curId bigint
+
+    OPEN myCursor
+
+    FETCH NEXT FROM myCursor INTO @curId
+        
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+    	
+      FETCH NEXT FROM myCursor INTO @curId
+    END
+
+    CLOSE myCursor
+    DEALLOCATE myCursor   
+        
+
+END
+GO
+
+ALTER TABLE [dbo].[HesapCari] ENABLE TRIGGER [trg_HesapCari]
+GO
+

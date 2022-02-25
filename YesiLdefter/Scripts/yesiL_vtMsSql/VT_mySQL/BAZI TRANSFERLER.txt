@@ -1,0 +1,198 @@
+INSERT INTO [GREEN].[dbo].[HP_CARI]
+           ([ARSIV]
+           ,[CARI_TIPI]
+           ,[HESAP_KODU]
+           ,[TAMADI]
+           ,[ADI]
+           ,[SOYADI]
+           ,[TC_NO] )
+SELECT 0
+      ,101
+      ,CONVERT(VARCHAR(10),[REF_ID])
+      ,[ADI] + ' ' + [SOYADI]
+      ,[ADI]
+      ,[SOYADI]
+      ,[TC_NO]
+      
+  FROM [IYZIV2].[dbo].[HP_CARI]
+
+     
+
+
+--  DELETE FROM [GREEN].[dbo].[HP_CARI]
+
+INSERT INTO [GREEN].[dbo].[HP_CARI]
+           ([PARENT_ID]
+           ,[FIRM_ID]
+           ,[SHOP_ID]
+           ,[REC_DATE]
+           ,[REC_USER]
+           ,[CARI_TIPI]
+           ,[ADI]
+           ,[SOYADI]
+           ,[TAMADI]
+           ,[BABA_ADI]
+           ,[ANA_ADI]
+           ,[DOGUM_TARIHI]
+           ,[DOGUM_YERI]
+           ,[TC_NO]
+           ,[CINSIYET_ID]
+           ,[MESLEK_ID]
+           ,[CARD_ID] 
+           ,[AKTIF_ID])
+           
+SELECT 0 -- PR
+      ,1 -- FR
+      ,2 -- SH
+      ,(CASE  CONVERT(VARCHAR(10), [Kayit_Tar],104) 
+        WHEN '30.12.1899' THEN NULL
+        ELSE [Kayit_Tar] END)
+      ,1 -- USER
+      ,511 -- CARI_TP
+      ,[AD]
+      ,[SOY]
+      ,[AD] + ' ' + [SOY]
+      ,[BABA_AD]
+      ,[ANA_AD]
+      /*
+	  ,[BABA_AD]
+      ,[SOY]
+      ,[BABA_AD] + ' ' + [SOY]
+      ,[AD]  
+	  */
+      ,(CASE  CONVERT(VARCHAR(10), [D_Tarihi],104) 
+        WHEN '30.12.1899' THEN NULL
+        ELSE [D_Tarihi] END)
+      ,[D_YERI]
+      ,[C_kimlik]
+      ,[Cins]
+      ,[Meslek]
+      ,[Ulas]
+      ,1
+  FROM [Surucu07].[dbo].[KURSIYER]
+           
+      
+	  
+INSERT INTO [GREEN].[dbo].[HP_ILETISIM]
+           ([FIRM_ID]
+           ,[SHOP_ID]
+           ,[TABLE_ID]
+           ,[TABLE_REF_ID]
+           ,[REC_DATE]
+           ,[REC_USER]
+           ,[ILETISIM_DURUMU]
+           ,[EV_TELEFONU]
+           ,[IS_TELEFONU]
+           ,[GSM_TELEFONU1]
+           ,[GSM_TELEFONU2]
+           ,[ESININ_GSM_TELEFONU]
+           ,[FAX]
+           ,[E_MAIL1]
+           ,[E_MAIL2]
+           ,[WEB_ADRESI]
+           ,[ACIKLAMA]
+           ,[OLDCARI_ID])
+     
+     SELECT 
+       1 -- FR
+      ,2 -- SH
+      ,1 -- table_id   
+      ,0 -- table_ref_id  
+      ,(CASE  CONVERT(VARCHAR(10), [Kayit_Tar],104) 
+        WHEN '30.12.1899' THEN NULL
+        ELSE [Kayit_Tar] END)
+      ,0 -- rec_user
+      ,0 -- iletiþim durumu 0 = geçerli
+      ,Ev_Tel
+      ,Is_Tel
+      ,cep 
+      ,NULL -- GSM2 
+      ,aciltel -- esinin_gsm
+      ,null -- fax
+      ,Email -- 
+      ,null  -- email2
+      ,null  -- web
+      ,null  -- açýklama
+      ,[Ulas] -- OLDCARI_ID
+      
+  FROM [Surucu07].[dbo].[KURSIYER]
+  
+
+update HP_ILETISIM 
+set TABLE_REF_ID = hc.ID
+
+from HP_CARI hc, HP_ILETISIM hi 
+where 0 = 0
+and hi.TABLE_ID = 1
+and hc.CARD_ID = hi.OLDCARI_ID
+and hc.ID < 148128
+
+
+	    //*********************
+
+INSERT INTO [GREEN].[dbo].[HP_ADRES]
+           ([FIRM_ID]
+           ,[SHOP_ID]
+           ,[TABLE_ID]
+           ,[TABLE_REF_ID]
+           ,[REC_DATE]
+           ,[REC_USER]
+           ,[ADRES_DURUMU]
+           ,[ADRES_TURU]
+           ,[IL]
+           ,[ILCE]
+           ,[MAHKOY]
+           ,[CADSOK]
+           ,[DISKAPI]
+           ,[ICKAPI]
+           ,[POSTA_KODU]
+           ,[TAM_ADRES]
+           ,[OLDCARI_ID]
+      )
+      SELECT 
+       1 -- FR
+      ,2 -- SH
+      ,1/2 -- table_id   
+      ,0 -- table_ref_id  
+      ,(CASE  CONVERT(VARCHAR(10), [Kayit_Tar],104) 
+        WHEN '30.12.1899' THEN NULL
+        ELSE [Kayit_Tar] END)
+      ,0 -- rec_user
+      ,0 --     ,<ADRES_DURUMU, smallint,>
+      ,null --     ,<ADRES_TURU, varchar(10),>
+      ,Ev_il
+      ,Ev_ilce
+      ,Ev_Adr1
+      ,Ev_Adr2
+      ,null -- diþ kapý
+      ,null -- iç kapý
+      ,null -- posta
+      ,Ev_Adr1 + ' ' + Ev_Adr2 + ' ' Ev_ilce
+      ,[Ulas] -- OLDCARI_ID
+       
+      FROM [Surucu07].[dbo].[KURSIYER] 
+
+
+
+
+
+
+
+update HP_ADRES
+set TABLE_REF_ID = hc.ID
+--SELECT hc.ID, hc.*
+from HP_CARI hc, HP_ADRES hi 
+where 0 = 0
+and hi.TABLE_ID = 1
+and hc.CARD_ID = hi.OLDCARI_ID
+and hc.ID < 148128
+
+
+		update HP_ADRES
+set TABLE_REF_ID = hc.ID
+-- SELECT hc.ID, hc.*
+from HP_CARI hc, HP_ADRES hi 
+where 0 = 0
+and hi.TABLE_ID = 2
+and hc.CARD_ID = hi.OLDCARI_ID
+and hc.ID >= 148128

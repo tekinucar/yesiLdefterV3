@@ -1,0 +1,63 @@
+﻿
+begin transaction
+
+ create table MtskSablonTeorikB
+ (
+   Id                      Int IDENTITY(1,1) not null, 
+   IsActive                Bit           not null, /* default : 1 = active, 0 = not active */  
+   SablonAdi               nVarChar(100) null,
+   GunTipiId               SmallInt      null,
+   ToplamIsGunuSayisi      SmallInt      null, 
+   SaatTipiId              SmallInt      null,
+   ToplamDersSaati         SmallInt      null,
+   GundeMaxSaat            SmallInt      null,
+   HaftadaMaxSaat          SmallInt      null,
+
+   constraint		pk_MtskSablonTeorikB primary key (Id)
+ )
+  
+ grant select, insert, update, delete on MtskSablonTeorikB to public
+
+
+commit transaction
+
+begin transaction
+
+-- ------------------------------------------------------- 
+-- GunTipiId
+-- ------------------------------------------------------- 
+create table Lkp.MtskSablonTeorikBGunTipi
+(
+   Id          Int Unique Not Null,
+   GunTipi     nVarchar(30)   null
+   
+   constraint  pk_MtskSablonTeorikBGunTipi primary key (Id)
+)
+
+INSERT INTO Lkp.MtskSablonTeorikBGunTipi (Id, GunTipi)
+ VALUES 
+  ( 0, N'Tanımsız'),
+  ( 1, N'5 iş günü, 2 gün izin'),
+  ( 2, N'6 iş günü, 1 gün izin')
+
+
+-- ------------------------------------------------------- 
+-- SaatTipiId
+-- ------------------------------------------------------- 
+create table Lkp.MtskSablonTeorikBSaatTipi
+(
+   Id          Int Unique Not Null,
+   SaatTipi    nVarchar(20)   null
+   
+   constraint  pk_MtskSablonTeorikBSaatTipi primary key (Id)
+)
+
+INSERT INTO Lkp.MtskSablonTeorikBSaatTipi (Id, SaatTipi)
+ VALUES 
+  ( 0, N'Tanımsız'),
+  ( 1, N'Tek saat'),
+  ( 2, N'7-8,.. çift saat'),
+  ( 3, N'8-9,.. çift saat')
+
+
+commit transaction

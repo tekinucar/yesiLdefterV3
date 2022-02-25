@@ -1,0 +1,16 @@
+﻿begin transaction
+
+ create table MtskSertifikaSeriNo
+ (
+
+   Id                     Int IDENTITY(1,1) NOT NULL, 
+   FirmId                 Int       not null,
+   SertifikaSeri          nVarchar(10)  null,
+   SertifikaNo            nVarchar(20)  null, 
+
+  constraint pk_MtskSertifikaSeriNo primary key (Id)
+ )
+
+ grant select, insert, update, delete on MtskSertifikaSeriNo to public
+
+commit transaction

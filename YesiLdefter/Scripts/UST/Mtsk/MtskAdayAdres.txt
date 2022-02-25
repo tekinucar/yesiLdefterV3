@@ -1,0 +1,131 @@
+﻿
+begin transaction
+
+ create table MtskAdayAdres
+ (
+   Id                    Int IDENTITY(1,1) not null, 
+   AdayId                Int       not null, /* default 0 */
+   FirmId                Int       not null,
+   IsActive              Bit       not null, /* default : 1 = active, 0 = not active */  
+   TcNo                  Varchar(11)   null,
+   DonemTipiId           Int           null,
+
+   SozluAdresBeyani      nVarchar(250) null,
+   AliciTcNo             Varchar(11)   null,
+   AliciAdi              nVarchar(50)  null,
+   AliciSoyadi           nVarchar(50)  null,
+
+   Il                    nVarchar(15)  null,
+   Ilce                  nVarchar(20)  null,
+   MahalleKoy            nVarchar(50)  null,
+   CaddeSokak            nVarchar(50)  null,
+   DisKapiNo             nVarchar(100) null,
+   IcKapiNo              nVarchar(20)  null,
+   AdresKodu             varchar(20)   null,
+   AcikAdresMERNIS       nVarchar(250) null,
+
+   IlKodu                varchar(3)    null,
+   IlceKodu              varchar(5)    null,
+   MahalleKoyKodu        varchar(10)   null,
+   CaddeSokakKodu        varchar(10)   null,
+   DisKapiNoKodu         varchar(10)   null,
+   IcKapiNoKodu          varchar(25)   null,
+   
+   /* MahalleKoy(50) + CaddeSokak(50) + DisKapi(30) + IcKapi(20) + Ilce(20) + Il(15) + Ulke(30) = 215 > 200  */
+   TamAdres              nVarchar(200) null,   
+   /* MahalleKoy(50) + CaddeSokak(50) + DisKapi(30) + IcKapi(20) = 150 > 120  */
+   YarimAdres            nVarchar(120) null, 
+   AdresIsUploaded       Bit           null,
+
+   constraint		pk_MtskAdayAdres primary key (Id)
+ )
+  
+ grant select, insert, update, delete on MtskAdayAdres to public
+
+  create index X_MtskAdayAdres01 on MtskAdayAdres (AdayId)
+  create index X_MtskAdayAdres02 on MtskAdayAdres (TcNo)
+  create index X_MtskAdayAdres03 on MtskAdayAdres (DonemTipiId)
+
+commit transaction
+
+
+
+USE [u7093888_Ustad01]
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TRIGGER [dbo].[trg_MtskAdayAdres] on [dbo].[MtskAdayAdres]
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    DECLARE adresCursor cursor for select Id from Inserted
+    DECLARE @curId bigint
+
+    OPEN adresCursor
+
+    FETCH NEXT FROM adresCursor INTO @curId
+
+    declare @yAdayId int 
+    declare @yFirmId int
+
+    declare @eSozluAdresBeyani nVarchar(250) = null
+    declare @ySozluAdresBeyani nVarchar(250) = null
+    declare @eAdresKodu varchar(20) = null
+    declare @yAdresKodu varchar(20) = null
+    
+    declare @durum bit
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+
+        select 
+           @eSozluAdresBeyani = isnull(dlt.SozluAdresBeyani, '')
+         , @eAdresKodu = isnull(dlt.AdresKodu, '') 
+    	from deleted dlt
+    	where dlt.Id = @curId
+			   
+        select 
+           @yAdayId = ins.AdayId
+         , @yFirmId = ins.FirmId
+         , @ySozluAdresBeyani = isnull(ins.SozluAdresBeyani, '')
+         , @yAdresKodu = isnull(ins.AdresKodu, '')
+		from inserted ins
+    	where ins.Id = @curId
+     	   	
+        if (@eSozluAdresBeyani <> @ySozluAdresBeyani) 
+        begin
+          if (@ySozluAdresBeyani <> '') set @durum = 1
+          if (@ySozluAdresBeyani = '') set @durum = 0
+
+          update dbo.MtskAday set
+            AdresAlindi = @durum
+          Where Id = @yAdayId
+          and FirmId = @yFirmId
+        end
+
+        if (@eAdresKodu <> @yAdresKodu) 
+        begin
+          if (@yAdresKodu) <> '' set @durum = 1
+          if (@yAdresKodu) = '' set @durum = 0
+
+          update dbo.MtskAdayBelgeler set
+            AdresKodlandi = @durum
+          Where AdayId = @yAdayId
+          and FirmId = @yFirmId
+        end
+
+      FETCH NEXT FROM adresCursor INTO @curId
+    END -- While
+
+    CLOSE adresCursor
+    DEALLOCATE adresCursor   
+
+END -- create trigger
+
+
+ALTER TABLE dbo.MtskAdayAdres ENABLE TRIGGER trg_MtskAdayAdres
+GO

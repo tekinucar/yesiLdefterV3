@@ -1,0 +1,108 @@
+﻿USE [u7093888_Ustad01]
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+
+CREATE TRIGGER [dbo].[trg_IBelgeStokAdres] on [dbo].[IBelgeStokAdres] 
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    DECLARE myCursor cursor for select Id from Inserted
+    DECLARE @curId bigint
+
+    OPEN myCursor
+
+    FETCH NEXT FROM myCursor INTO @curId
+
+    declare @eIl varchar(50) = null
+    declare @eIlce varchar(50) = null
+    declare @eMahalleKoy varchar(50) = null
+    declare @eCaddeSokak varchar(50) = null
+    declare @eCaddeSokakTipiId smallInt = 0
+    declare @eDisKapi varchar(30) = null
+    declare @eIcKapi varchar(20) = null
+    declare @ePostaKutusu varchar(6) = null
+    
+	declare @yTamAdres varchar(200) = null
+    declare @yYarimAdres varchar(120) = null
+		
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        set @yTamAdres = ''
+        set @yYarimAdres = ''
+                	   
+        select 
+    	   @eIl = isnull(ins.Il,'')
+    	  ,@eIlce = isnull(ins.Ilce,'')
+    	  ,@eMahalleKoy = isnull(ins.MahalleKoy,'')
+		  ,@eCaddeSokak = isnull(ins.CaddeSokak,'')
+		  ,@eCaddeSokakTipiId = isnull(ins.CaddeSokakTipiId,0)
+    	  ,@eDisKapi = isnull(ins.DisKapi,'')
+		  ,@eIcKapi = isnull(ins.IcKapi,'')
+		  ,@ePostaKutusu = isnull(ins.PostaKutusu,'')
+		from inserted ins
+    	where ins.Id = @curId
+     	
+		--set @yHesapKisaAdi = replace(@yHesapKisaAdi, 'TÜRKİYE', '');
+
+		set @eMahalleKoy = replace(upper(@eMahalleKoy), ' MAHALLESİ', '')
+		set @eMahalleKoy = replace(upper(@eMahalleKoy), ' MAHALLESI', '')
+		set @eMahalleKoy = replace(upper(@eMahalleKoy), ' MAHALLE', '')
+		set @eMahalleKoy = replace(upper(@eMahalleKoy), ' MAHAL.', '')
+		set @eMahalleKoy = replace(upper(@eMahalleKoy), ' MAHAL', '')
+		set @eMahalleKoy = replace(upper(@eMahalleKoy), ' MAH.', '')
+		set @eMahalleKoy = replace(upper(@eMahalleKoy), ' MAH', '')
+		set @eMahalleKoy = replace(upper(@eMahalleKoy), ' MH.', '')
+		set @eMahalleKoy = replace(upper(@eMahalleKoy), ' MH', '')
+		
+		set @eCaddeSokak = replace(upper(@eCaddeSokak), ' CADDESİ', '')
+		set @eCaddeSokak = replace(upper(@eCaddeSokak), ' CADDESI', '')
+		set @eCaddeSokak = replace(upper(@eCaddeSokak), ' CADDE', '')
+		set @eCaddeSokak = replace(upper(@eCaddeSokak), ' CAD.', '')
+		set @eCaddeSokak = replace(upper(@eCaddeSokak), ' CAD', '')
+		set @eCaddeSokak = replace(upper(@eCaddeSokak), ' CD.', '')
+		set @eCaddeSokak = replace(upper(@eCaddeSokak), ' CD', '')
+		
+		set @eCaddeSokak = replace(upper(@eCaddeSokak), ' SOKAĞI', '')
+		set @eCaddeSokak = replace(upper(@eCaddeSokak), ' SOKAĞİ', '')
+		set @eCaddeSokak = replace(upper(@eCaddeSokak), ' SOKAGI', '')
+		set @eCaddeSokak = replace(upper(@eCaddeSokak), ' SOKAGİ', '')
+		set @eCaddeSokak = replace(upper(@eCaddeSokak), ' SOKAK', '')
+		set @eCaddeSokak = replace(upper(@eCaddeSokak), ' SOK.', '')
+		set @eCaddeSokak = replace(upper(@eCaddeSokak), ' SOK', '')
+		set @eCaddeSokak = replace(upper(@eCaddeSokak), ' SK.', '')
+		set @eCaddeSokak = replace(upper(@eCaddeSokak), ' SK', '')
+		
+        if (@eMahalleKoy <> '') set @eMahalleKoy = @eMahalleKoy + ' Mah.' 
+		if (@eCaddeSokakTipiId = 1) set @eCaddeSokak =  @eCaddeSokak + ' Cad.'
+		if (@eCaddeSokakTipiId = 2) set @eCaddeSokak =  @eCaddeSokak + ' Sok.'
+		
+		if (@eDisKapi <> '') set @eDisKapi = 'Dış Kapı:' + @eDisKapi
+		if (@eIcKapi <> '') set @eIcKapi = 'Daire:' +@eIcKapi
+
+		set @yYarimAdres = @eMahalleKoy + ' ' + @eCaddeSokak + ' ' + @eDisKapi + ' ' + @eIcKapi 
+		if (@ePostaKutusu <> '') set  @yYarimAdres = @yYarimAdres + ' ' + @ePostaKutusu 
+		
+		set @yTamAdres = @yYarimAdres + ' ' + @eIlce + ' ' + @eIl
+
+		update IBelgeStokAdres set 
+         MahalleKoy = substring(TRIM(@eMahalleKoy),0,50)
+		,CaddeSokak = substring(TRIM(@eCaddeSokak),0,50)
+		,YarimAdres = substring(TRIM(@yYarimAdres),0,120)
+		,TamAdres = substring(TRIM(@yTamAdres),0,200)
+        where Id = @curId 
+    	
+    	FETCH NEXT FROM myCursor INTO @curId
+    END
+
+    CLOSE myCursor
+    DEALLOCATE myCursor   
+        
+
+END

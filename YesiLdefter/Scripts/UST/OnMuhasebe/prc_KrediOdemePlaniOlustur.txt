@@ -1,0 +1,218 @@
+﻿USE [u7093888_Ustad01]
+GO
+
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[prc_KrediOdemePlaniOlustur] (@firmId int, @cariTipiId smallInt, @cariId int)  
+AS BEGIN
+
+  /*
+  declare @firmId int
+  -- Kaynak : KrediOdemePlaniCariTipi tablosu
+  declare @cariTipiId smallInt
+  declare @cariId int 
+  set @firmId = 2
+  set @cariTipiId = 2110
+  set @cariId = 1203
+  */
+  
+  declare @IslemSonucu nvarchar(100) = ''
+  declare @mevcut int = 0
+    
+  Select @mevcut = count(Id)
+  From [dbo].[KrediOdemePlani]
+  Where FirmId = @firmId
+  and   CariTipiId = @cariTipiId
+  and   CariId = @cariId
+  and   (IsPaid = 1      -- ödendi
+    or BelgeMakbuzId > 0 -- tahsilat makbuzu varsa
+	or BelgeStokBId > 0) -- fatura kesilmişse
+
+  Select @mevcut as mevcut
+    
+  declare @AdayKayitTarihi    date = null
+  declare @IsUcretli          bit = 0
+  declare @SertifikaUcreti    numeric(22,8) = 0
+  declare @AnlasilanUcret     numeric(22,8) = 0
+  declare @DonemTipiId        int = 0
+  declare @IskontoOrani       numeric(12,8) = 0
+  declare @TaksitSayisiTipiId smallInt = 0
+  declare @PesinatTutari      numeric(22,8) = 0
+  declare @KalanUcret         numeric(22,8) = 0 
+  declare @OdemeTipiId        smallInt = 0
+  declare @IsPaymentDate      date = null
+  declare @OdemeBaslamaTarihi date = null 
+
+  declare @sayac int = 1
+  declare @aylikUcret numeric(22,8) = 0
+    
+  if (@mevcut > 0) 
+     set @IslemSonucu = 'DİKKAT : Tahsilat işlemi veya fatura kesildiği için işlem yapılamıyor...'
+  
+  
+  -- tahsilat veya fatura yok ise işlemi gerçekleştir
+  --
+  if (@mevcut = 0)
+  begin
+     -- Mevcut Odeme Planını sil
+	 --
+	 Delete
+     From [dbo].[KrediOdemePlani]
+     Where FirmId = @firmId
+     and   CariTipiId = @cariTipiId
+     and   CariId = @cariId
+
+	 -- Adayın Ödeme Plan Beyanı okunuyor
+	 --
+	 Select 
+        @AdayKayitTarihi = [AdayKayitTarihi]
+	   ,@IsUcretli = [IsUcretli]
+       ,@SertifikaUcreti = [SertifikaUcreti]
+       ,@AnlasilanUcret = [AnlasilanUcret]
+       ,@DonemTipiId = [DonemTipiId]
+       ,@IskontoOrani = [IskontoOrani]
+       ,@TaksitSayisiTipiId = [TaksitSayisiTipiId]
+       ,@PesinatTutari = [PesinatTutari]
+       ,@KalanUcret = [KalanUcret]
+       ,@OdemeTipiId = [OdemeTipiId]
+       --,@IsPaymentDate = [IsPaymentDate]
+       ,@OdemeBaslamaTarihi = [OdemeBaslamaTarihi]
+     From [dbo].[MtskAday]
+     Where Id = @cariId
+	
+	 Select  
+        [AdayKayitTarihi]
+	   ,[IsUcretli]
+       ,[SertifikaUcreti]
+       ,[AnlasilanUcret]
+       ,[DonemTipiId]
+       ,[IskontoOrani]
+       ,[TaksitSayisiTipiId]
+       ,[PesinatTutari]
+       ,[KalanUcret]
+       ,[OdemeTipiId]
+       --,[IsPaymentDate]
+       ,[OdemeBaslamaTarihi]
+	 From [dbo].[MtskAday] Where Id = @cariId
+	 
+	
+	 -- PeşinatTutari varsa onun kaydını oluştur
+	 --
+	 if (@PesinatTutari > 0)
+	 begin
+	    INSERT INTO [dbo].[KrediOdemePlani]
+           ([FirmId]
+           ,[DonemTipiId]
+           ,[CariTipiId]
+           ,[CariId]
+		   ,[TaksitTipiId]
+           ,[TaksitNo]
+           ,[VadeTarihi]
+           ,[VadeYil]
+           ,[VadeAy]
+           ,[VadeGun]
+           ,[TaksitTutari]
+           ,[IsPaid]
+           ,[BelgeMakbuzId]
+           ,[BelgeStokBId])
+        VALUES
+           (@firmId
+           ,@DonemTipiId
+           ,@cariTipiId
+           ,@cariId
+           ,1                       --<TaksitTipiId, smallint,>
+		   ,0                       --<TaksitNo, numeric(3,0),> 
+           ,@AdayKayitTarihi        --<VadeTarihi, date,>
+           ,YEAR(@AdayKayitTarihi)  --<VadeYil, smallint,>
+           ,MONTH(@AdayKayitTarihi) --<VadeAy, smallint,>
+           ,DAY(@AdayKayitTarihi)   --<VadeGun, smallint,>
+           ,@PesinatTutari          --<TaksitTutari, numeric(22,8),>
+           ,0  --<IsPaid, bit,>
+           ,0  --<BelgeMakbuzId, int,>
+           ,0) --<BelgeStokBId, int,>)
+        
+	 end -- @PesinatTutari
+	 
+	 --Select * From [dbo].[KrediOdemePlani] Where CariId = @cariId
+	 
+	 -- Aylık ücret hesaplanıyor
+	 -- 
+     set @aylikUcret = @KalanUcret / @TaksitSayisiTipiId
+
+          
+	 -- Yeni Ödeme Planını oluştur
+	 --
+     while (@sayac <= @TaksitSayisiTipiId)
+     begin
+        INSERT INTO [dbo].[KrediOdemePlani]
+           ([FirmId]
+           ,[DonemTipiId]
+           ,[CariTipiId]
+           ,[CariId]
+		   ,[TaksitTipiId]
+           ,[TaksitNo]
+           ,[VadeTarihi]
+           ,[VadeYil]
+           ,[VadeAy]
+           ,[VadeGun]
+           ,[TaksitTutari]
+           ,[IsPaid]
+           ,[BelgeMakbuzId]
+           ,[BelgeStokBId])
+       VALUES
+           (@firmId
+           ,@DonemTipiId
+           ,@cariTipiId
+           ,@cariId
+           ,2                          --<TaksitTipiId, smallint,>
+		   ,@sayac                     --<TaksitNo, numeric(3,0),> 
+           ,@OdemeBaslamaTarihi        --<VadeTarihi, date,>
+           ,YEAR(@OdemeBaslamaTarihi)  --<VadeYil, smallint,>
+           ,MONTH(@OdemeBaslamaTarihi) --<VadeAy, smallint,>
+           ,DAY(@OdemeBaslamaTarihi)   --<VadeGun, smallint,>
+           ,@aylikUcret                --<TaksitTutari, numeric(22,8),>
+           ,0 --<IsPaid, bit,>
+           ,0 --<BelgeMakbuzId, int,>
+           ,0) --<BelgeStokBId, int,>)
+            
+        set @OdemeBaslamaTarihi = DATEADD(MONTH, 1, @OdemeBaslamaTarihi)
+	    set @sayac = @sayac + 1 
+     end -- while
+
+  end --if
+  /*
+  Select [Id]
+      ,[FirmId]
+      ,[DonemTipiId]
+      ,[CariTipiId]
+      ,[CariId]
+      ,[TaksitNo]
+      ,[VadeTarihi]
+      ,[VadeYil]
+      ,[VadeAy]
+      ,[VadeGun]
+      ,[TaksitTutari]
+      ,[IsPaid]
+      ,[BelgeMakbuzId]
+      ,[BelgeStokBId]
+  From [dbo].[KrediOdemePlani]
+  Where FirmId = @firmId
+  and   CariTipiId = @cariTipiId
+  and   CariId = @cariId
+  */
+  
+  -- Bunu kapatma veya silem. 
+  -- Bu sonuca kodun içinde kontrol ediliyor
+  Select @IslemSonucu as IslemSonucu
+  
+
+END -- procedure
+
+
+GO
+
+

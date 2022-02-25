@@ -1,0 +1,95 @@
+﻿USE [u7093888_Ustad01]
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+ALTER PROCEDURE [dbo].[prc_MtskAdaySertifika] (@FirmId int, @AdayId int)  
+AS BEGIN
+
+    ALTER TABLE [dbo].[MtskAdaySertifika] DISABLE TRIGGER [trg_MtskAdaySertifika]
+
+	declare @TcNo varchar(11) = ''
+        declare @SinavTarihi date = null
+	declare @DurumuTipiId smallInt = 0
+	declare @SertifikaId int = 0
+	declare @SertifikaAlmayiHakKazandi bit = 0
+	declare @SertifikaTarihi date = null
+	declare @SertifikaDurumTipiId smallInt = 0
+	    
+    set @SinavTarihi = null
+    set @DurumuTipiId = 0
+    
+    -- 3,    'Sertifika Almaya Hak Kazandı'
+    Select 
+	    @TcNo = isnull(TcNo,'')
+	  , @SinavTarihi = SinavTarihi 
+      , @DurumuTipiId = isnull(DurumuTipiId,0)
+	From dbo.MtskSinavUygulama 
+    Where FirmId = @FirmId
+    and   AdayId = @AdayId
+    and   DurumuTipiId = 3 -- Sertifika
+    
+    -- ------------------------------------------------------------------
+    -- MtskAdaySertifika ve MtskAdayTakip tablosunu işaretleyelim
+    -- ------------------------------------------------------------------
+               
+    Select @SertifikaId = isnull(Id,0) 
+    From MtskAdaySertifika
+    Where FirmId = @FirmId
+    and   AdayId = @AdayId
+
+    -- 3 : Sertifika Almaya Hak Kazandı
+    if (@DurumuTipiId = 3)
+    begin
+	  set @SertifikaAlmayiHakKazandi = 1
+	  set @SertifikaTarihi = @SinavTarihi
+	  set @SertifikaDurumTipiId = 1
+	end
+	-- <> 3 : Sertifika Almaya Hak Kazandı / MADI İSE
+    if (@DurumuTipiId <> 3) 
+    begin
+	  set @SertifikaAlmayiHakKazandi = 0  
+	  set @SertifikaTarihi = null
+	  set @SertifikaDurumTipiId = 0
+	end
+
+    if (@SertifikaId = 0)
+    begin
+        Insert Into [dbo].[MtskAdaySertifika]
+                       ([FirmId]
+                       ,[AdayId]
+                       ,[TcNo]
+                       ,[SertifikaAlmayiHakKazandi]
+                       ,[SertifikaTarihi] )
+        Values
+                    ( @FirmId
+                     ,@AdayId
+                     ,@TcNo 
+                     ,@SertifikaAlmayiHakKazandi  --SertifikaAlmayiHakKazandi
+                     ,@SertifikaTarihi --SertifikaTarihi, date
+					 )
+    end
+
+    if (@SertifikaId > 0)
+    begin
+        Update [dbo].[MtskAdaySertifika] Set 
+					 [FirmId] = @FirmId
+                    ,[AdayId] = @AdayId
+                    ,[TcNo] = @TcNo
+                    ,[SertifikaAlmayiHakKazandi] = @SertifikaAlmayiHakKazandi   --SertifikaAlmayiHakKazandi, bit
+                    ,[SertifikaTarihi] = @SertifikaTarihi --SertifikaTarihi, date
+        Where Id = @SertifikaId
+    end
+        
+    Update MtskAdayTakip set
+         SertifikaDurumTipiId = @SertifikaDurumTipiId
+       , SertifikaTarihi = @SertifikaTarihi
+    Where FirmId = @FirmId
+    and   AdayId = @AdayId
+    
+	ALTER TABLE [dbo].[MtskAdaySertifika] ENABLE TRIGGER [trg_MtskAdaySertifika]
+
+END

@@ -1,0 +1,313 @@
+﻿
+
+
+begin transaction
+
+ create table MtskUygulamaliDers
+ (
+   Id                   Int IDENTITY(1,1) not null, 
+   FirmId               Int       not null,
+   IsActive             Bit       not null, /* default : 1 = active, 0 = not active */  
+
+   DonemTipiId          Int           null,
+   GrupTipiId           SmallInt      null,
+   SubeTipiId           SmallInt      null,
+   AdayNo               SmallInt      null, /* 1,2,3..8,9 */
+   AdayId               Int           null,
+   AdayTcNo             Varchar(11)   null,
+   AdayAdiSoyadi        nVarchar(100) null, /* mebbisden almak için kullanılıyor */
+   
+   EgitimYeriTipiId     SmallInt      null,
+   EgitimAraciId        Varchar(10)   null,
+   DersTarihi           Date          null,
+   DersSaatiTipiId      SmallInt      null,
+   DersDonemTipiId      Int           null,
+
+   PersonelAdiSoyadi    nVarchar(100) null, /* mebbisden almak için kullanılıyor */
+   PersonelId           Varchar(20)   null,
+   EgitimTipiId         SmallInt      null, /* 1. Normal, 2. Telafi */
+
+   BaslamaSaati         Datetime      null, /* Calender and Scheduling için gerekli */
+   BitisSaati           Datetime      null, /* Calender and Scheduling için gerekli */
+   UDersIsUploaded      Bit           null,
+   SablonUygulamaFId    Int           null, /* MtskSablonUygulamaF.Id = Hangi plan formu ile hazırlandı, hazırlanırken seçilen araç, usta öğreticiler ve adayların Id leri */ 
+   
+
+   constraint		pk_MtskUygulamaliDers primary key (Id)
+ )
+  
+ grant select, insert, update, delete on MtskUygulamaliDers to public
+
+
+commit transaction
+
+
+
+USE [u7093888_Ustad01]
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+ALTER TRIGGER [dbo].[trg_MtskUygulamaliDers] on [dbo].[MtskUygulamaliDers] 
+AFTER INSERT, UPDATE
+AS BEGIN
+
+
+    DECLARE myCursor cursor for select Id from Inserted
+    DECLARE @curId bigint
+
+    OPEN myCursor
+
+    FETCH NEXT FROM myCursor INTO @curId
+
+	declare @yFirmId int = 0
+    declare @yDonemTipiId int = 0
+    declare @yGrupTipiId smallInt = 0
+    declare @ySubeTipiId smallInt = 0
+    declare @yAdayId int = 0
+    declare @yAdayTcNo varchar(11) = null
+	declare @yAdayAdiSoyadi nVarchar(100) = null
+    declare @yDersTarihi date = null
+    declare @yDersSaatiTipiId smallInt = -1
+	declare @DersDonemTipiId int = 0
+	declare @yPersonelAdiSoyadi nVarchar(100) = null
+    declare @yPersonelId varchar(20) = null
+	declare @ySaat varchar(20) = null
+
+    declare @TcNoCalismaIzniNo varchar(20) = null
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+    	
+      Select
+      -- Id
+       @yFirmId = isnull(ins.FirmId,0)
+      --,IsActive
+      ,@yDonemTipiId = ins.DonemTipiId
+      ,@yGrupTipiId = isnull(ins.GrupTipiId,0)
+      ,@ySubeTipiId = isnull(ins.SubeTipiId,0)
+      ,@yAdayId = isnull(ins.AdayId,0)
+      ,@yAdayTcNo = isnull(ins.AdayTcNo,'')
+	  ,@yAdayAdiSoyadi = isnull(ins.AdayAdiSoyadi,'')
+      --,EgitimYeriTipiId
+      --,EgitimAraciId
+      ,@yDersTarihi = ins.DersTarihi
+      ,@yDersSaatiTipiId = ins.DersSaatiTipiId
+	  ,@yPersonelAdiSoyadi = isnull(ins.PersonelAdiSoyadi, '')
+      ,@yPersonelId = isnull(ins.PersonelId,'')
+      --,EgitimTipiId
+      --,@yBaslamaSaati = ins.BaslamaSaati
+      --,@yBitisSaati = ins.BitisSaati
+      --,UDersIsUploaded
+	  ,@ySaat = isnull(saat.DersSaatiTipi,'00:00 - 00:00')
+      From inserted ins
+	    left outer join Lkp.MtskUygulamaliDersDersSaatiTipi saat on (ins.DersSaatiTipiId = saat.Id)
+      Where ins.Id = @curId
+
+      if (@yAdayId = 0) and (@yAdayTcNo <> '')
+      begin
+        Select @yAdayId = Id 
+        From dbo.MtskAday
+        Where TcNo = @yAdayTcNo
+        and DonemTipiId = @yDonemTipiId
+	    and FirmId = @yFirmId
+		
+		update dbo.MtskUygulamaliDers set 
+        AdayId = @yAdayId
+        Where Id = @curId 
+      end
+
+      if (@yAdayId = 0) and (@yAdayTcNo = '') and (@yAdayAdiSoyadi <> '')
+      begin
+        Select @yAdayId = Id, @yAdayTcNo = TcNo
+		From dbo.MtskAday
+        Where TamAdiSoyadi = @yAdayAdiSoyadi
+        and DonemTipiId = @yDonemTipiId
+		--and GrupTipiId = @yGrupTipiId
+		--and SubeTipiId = @ySubeTipiId
+		and FirmId = @yFirmId
+	
+		update dbo.MtskUygulamaliDers set 
+          AdayId = @yAdayId
+        , AdayTcNo = @yAdayTcNo
+        Where Id = @curId 
+      end
+	  
+      if (@yAdayTcNo = '')
+      begin
+        Select @yAdayTcNo = TcNo 
+        From dbo.MtskAday
+        Where Id = @yAdayId
+        and DonemTipiId = @yDonemTipiId
+
+        update dbo.MtskUygulamaliDers set 
+        AdayTcNo = @yAdayTcNo
+        Where Id = @curId 
+      end
+
+      if ((@yGrupTipiId = 0) or
+          (@ySubeTipiId = 0))
+      begin
+        Select @yGrupTipiId = GrupTipiId
+		, @ySubeTipiId = SubeTipiId
+        From dbo.MtskAday
+        Where Id = @yAdayId
+        and DonemTipiId = @yDonemTipiId
+
+        update dbo.MtskUygulamaliDers set 
+          GrupTipiId = @yGrupTipiId
+		, SubeTipiId = @ySubeTipiId
+        Where Id = @curId 
+	  end
+
+
+	  if (@yPersonelId = '') and (@yPersonelAdiSoyadi <> '')
+	  begin
+	    -- personelId kontrolu
+        Select @TcNoCalismaIzniNo = isnull(TcNoCalismaIzniNo,'')
+        From dbo.MtskPersoneli
+        Where TamAdiSoyadi like @yPersonelAdiSoyadi+'%'
+      
+	    -- Mebbisten okuma yapınca alınan ismi alınıyor
+        -- alınan bu ismi TcNoIzinNo ya çeviriyor
+        if (@TcNoCalismaIzniNo <> '')
+        begin
+          update dbo.MtskUygulamaliDers set 
+          PersonelId = @TcNoCalismaIzniNo
+          Where Id = @curId
+        end
+	  end
+
+	  -- Sınavın hangi dönemde yapıldığı tespit ediliyor
+	  if (MONTH(@yDersTarihi) < 10)
+           set @DersDonemTipiId = convert(int, convert(varchar(5), YEAR(@yDersTarihi)) + '0' + convert(varchar(3), MONTH(@yDersTarihi)))
+      else set @DersDonemTipiId = convert(int, convert(varchar(5), YEAR(@yDersTarihi)) + convert(varchar(3), MONTH(@yDersTarihi)))
+
+
+	  -- BaslangicSaat ve BitisSaat 
+	  update dbo.MtskUygulamaliDers set 
+        BaslamaSaati = CONVERT(smalldatetime, CONVERT(varchar(10), @yDersTarihi) + ' ' + SUBSTRING(@ySaat,1,5))
+      , BitisSaati   = CONVERT(smalldatetime, CONVERT(varchar(10), @yDersTarihi) + ' ' + SUBSTRING(@ySaat,9,5))
+	  , DersDonemTipiId = @DersDonemTipiId
+      Where Id = @curId
+
+      FETCH NEXT FROM myCursor INTO @curId
+    END
+
+    CLOSE myCursor
+    DEALLOCATE myCursor   
+
+END -- create trigger
+
+
+
+ALTER TABLE dbo.MtskUygulamaliDers ENABLE TRIGGER trg_MtskUygulamaliDers
+
+
+
+
+begin transaction
+
+-- ------------------------------------------------------- 
+-- EgitimYeriTipiId
+-- ------------------------------------------------------- 
+create table Lkp.MtskUygulamaliDersEgitimYeriTipi
+(
+   Id              Int Unique Not Null,
+   EgitimYeriTipi  nVarchar(50)   null
+   
+   constraint  pk_MtskUygulamaliDersEgitimYeriTipi primary key (Id)
+)
+
+Delete from Lkp.MtskUygulamaliDersEgitimYeriTipi
+INSERT INTO Lkp.MtskUygulamaliDersEgitimYeriTipi (Id, EgitimYeriTipi)
+ VALUES 
+  (-1, N'--Seçiniz--'),
+  ( 0, N'Tanımsız'),
+  ( 1, N'Direksiyon Eğitim Alanı'),
+  ( 2, N'Akan Trafik'),
+  ( 3, N'Simülatör')
+
+
+
+-- ------------------------------------------------------- 
+-- DersSaatiTipiId
+-- ------------------------------------------------------- 
+create table Lkp.MtskUygulamaliDersDersSaatiTipi
+(
+   Id              Int Unique Not Null,
+   DersSaatiTipi   nVarchar(50)   null
+
+   constraint  pk_MtskUygulamaliDersDersSaatiTipi primary key (Id)
+)
+
+Delete from Lkp.MtskUygulamaliDersDersSaatiTipi
+INSERT INTO Lkp.MtskUygulamaliDersDersSaatiTipi (Id, DersSaatiTipi)
+ VALUES 
+  (-1, N' Seçiniz'),
+  ( 0, N'07:00 - 07:50'),
+  ( 1, N'08:00 - 08:50'),
+  ( 2, N'09:00 - 09:50'),
+  ( 3, N'10:00 - 10:50'),
+  ( 4, N'11:00 - 11:50'),
+  ( 5, N'12:00 - 12:50'),
+  ( 6, N'13:00 - 13:50'),
+  ( 7, N'14:00 - 14:50'),
+  ( 8, N'15:00 - 15:50'),
+  ( 9, N'16:00 - 16:50'),
+  (10, N'17:00 - 17:50'),
+  (11, N'18:00 - 18:50'),
+  (12, N'19:00 - 19:50'),
+  (13, N'20:00 - 20:50'),
+  (14, N'21:00 - 21:50'),
+  (15, N'22:00 - 22:50')
+
+
+
+-- ------------------------------------------------------- 
+-- EgitimTipiId
+-- ------------------------------------------------------- 
+create table Lkp.MtskUygulamaliDersEgitimTipi
+(
+   Id           Int Unique Not Null,
+   EgitimTipi   nVarchar(50)   null
+
+   constraint  pk_MtskUygulamaliDersEgitimTipi primary key (Id)
+)
+
+Delete from Lkp.MtskUygulamaliDersEgitimTipi
+INSERT INTO Lkp.MtskUygulamaliDersEgitimTipi (Id, EgitimTipi)
+ VALUES 
+  ( 0, N'Tanımsız'),
+  ( 1, N'Normal Eğitim'),
+  ( 2, N'Telafi Eğitim(Ön Sınav )'),
+  ( 3, N'2.Direksiyon Eğitimi'),
+  ( 4, N'Başarısız Aday Eğitimi')
+
+
+-- ------------------------------------------------------- 
+-- CakismaTipiId  ( bu tablo içindeki bir alan değil )
+-- EXEC	@return_value = [dbo].[prc_MtskUygulamaDersPlaniCakismaAdedi] @SablonUygulamaFId 
+-- procedureden geliyor
+-- ------------------------------------------------------- 
+create table Lkp.MtskUygulamaliDersCakismaTipi
+(
+   Id              Int Unique Not Null,
+   CakismaTipi     nVarchar(30)   null
+   
+   constraint  pk_MtskUygulamaliDersCakismaTipi primary key (Id)
+)
+
+Delete from Lkp.MtskUygulamaliDersCakismaTipi
+INSERT INTO Lkp.MtskUygulamaliDersCakismaTipi (Id, CakismaTipi)
+ VALUES 
+  ( 0, N''),
+  ( 1, N'Eğitim Aracı Çakışması'),
+  ( 2, N'Personel Çakışması')
+
+
+
+commit transaction

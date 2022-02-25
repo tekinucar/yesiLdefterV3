@@ -1,0 +1,116 @@
+﻿USE [u7093888_Ustad01]
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[prc_MtskAdayBelgeler] (@FirmId int)  
+AS BEGIN
+
+  		Update MtskAdayBelgeler set
+        IsBiyometrik = x.Sonuc
+        From MtskAdayBelgeler a, 
+        (
+            Select Id as AdayId, count(Id) as Sonuc
+            From MtskAday
+            Where BiyometrikResim is not null
+            and   FirmId = @FirmId
+            Group by Id
+        ) as x
+        Where a.AdayId = x.AdayId
+        and   a.FirmId = @FirmId
+  
+
+		Update MtskAdayBelgeler set
+        IsSavcilik = x.Sonuc
+        From MtskAdayBelgeler a, 
+        (
+            Select AdayId, count(Id) as Sonuc
+            From MtskAdayAdliSicil
+            Where SavcilikBelgesiResim is not null
+            and   FirmId = @FirmId
+            Group by AdayId
+        ) as x
+        Where a.AdayId = x.AdayId
+        and   a.FirmId = @FirmId  
+
+
+		Update MtskAdayBelgeler set
+        IsImza = x.Sonuc
+        From MtskAdayBelgeler a, 
+        (
+            Select AdayId, count(Id) as Sonuc
+            From MtskAdayImza
+            Where ImzaResim is not null
+            and   FirmId = @FirmId
+            Group by AdayId
+        ) as x
+        Where a.AdayId = x.AdayId
+        and   a.FirmId = @FirmId
+
+
+		Update MtskAdayBelgeler set
+        IsOgrenim = x.Sonuc
+        From MtskAdayBelgeler a, 
+        (
+            Select AdayId, count(Id) as Sonuc
+            From MtskAdayOgrenim
+            Where OgrenimBelgesiResim is not null
+            and   FirmId = @FirmId
+            Group by AdayId
+        ) as x
+        Where a.AdayId = x.AdayId
+        and   a.FirmId = @FirmId
+
+
+		Update MtskAdayBelgeler set
+        IsSaglik = x.Sonuc
+        From MtskAdayBelgeler a, 
+        (
+            Select AdayId, count(Id) as Sonuc
+            From MtskAdaySaglik
+            Where (
+			   SaglikRaporuResim is not null 
+			or Len(isnull(RaporReferansNo,'')) > 0
+			)
+            and FirmId = @FirmId
+            Group by AdayId
+        ) as x
+        Where a.AdayId = x.AdayId
+        and   a.FirmId = @FirmId
+
+
+		Update MtskAdayBelgeler set
+        IsSozlesme1 = x.Sonuc
+        From MtskAdayBelgeler a, 
+        (
+            Select AdayId, count(Id) as Sonuc
+            From MtskAdaySozlesme
+            Where Sozlesme1Resim is not null
+            and   FirmId = @FirmId
+            Group by AdayId
+        ) as x
+        Where a.AdayId = x.AdayId
+        and   a.FirmId = @FirmId
+        
+
+        Update MtskAdayBelgeler set
+        IsSozlesme2 = x.Sonuc
+        From MtskAdayBelgeler a, 
+        (
+            Select AdayId, count(Id) as Sonuc
+            From MtskAdaySozlesme
+            Where Sozlesme2Resim is not null
+            and   FirmId = @FirmId
+            Group by AdayId
+        ) as x
+        Where a.AdayId = x.AdayId
+        and   a.FirmId = @FirmId
+
+
+
+
+
+END -- procedure

@@ -1,0 +1,31 @@
+﻿USE [u7093888_Ustad01]
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[prc_MtskAdaySil] (@FirmId int, @AdayId int)  
+AS BEGIN
+
+   Delete From MtskAdayAdliSicil  Where FirmId = @FirmId and AdayId = @AdayId
+   Delete From MtskAdayAdres      Where FirmId = @FirmId and AdayId = @AdayId
+   Delete From MtskAdayBelgeler   Where FirmId = @FirmId and AdayId = @AdayId
+   Delete From MtskAdayImza       Where FirmId = @FirmId and AdayId = @AdayId
+   Delete From MtskAdayOgrenim    Where FirmId = @FirmId and AdayId = @AdayId
+   Delete From MtskAdaySaglik     Where FirmId = @FirmId and AdayId = @AdayId
+   Delete From MtskAdaySertifika  Where FirmId = @FirmId and AdayId = @AdayId
+   Delete From MtskAdaySozlesme   Where FirmId = @FirmId and AdayId = @AdayId
+   Delete From MtskAdayTakip      Where FirmId = @FirmId and AdayId = @AdayId
+   Delete From MtskSinavETeorik   Where FirmId = @FirmId and AdayId = @AdayId
+   Delete From MtskSinavRandevu   Where FirmId = @FirmId and AdayId = @AdayId
+   Delete From MtskSinavUygulama  Where FirmId = @FirmId and AdayId = @AdayId
+   Delete From MtskUygulamaliDers Where FirmId = @FirmId and AdayId = @AdayId
+   
+   Delete From BildirimSMS        Where FirmId = @FirmId and KaynakTipiId = 1 and KaynakRefId = @AdayId
+
+   Delete From MtskAday           Where FirmId = @FirmId and Id = @AdayId
+
+END --
+

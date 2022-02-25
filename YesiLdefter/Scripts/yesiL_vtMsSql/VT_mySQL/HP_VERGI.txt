@@ -1,0 +1,41 @@
+﻿
+
+begin transaction
+
+ create table HP_VERGI
+ (
+   ID                Int IDENTITY(1,1) NOT NULL, 
+   FIRM_ID           Int               NULL, /* Firma Bazlı Tutulacak */
+   
+   ACTIVE_TD         SmallInt          NULL, /* 0. Pasif 1. Aktif */
+   LINE_NO           Int               NULL,
+   SEKTOR_KODU       VarChar(20)       NULL,
+
+   /* Yeni Vergi Türü Geldikce Sırayla Manuel Ekle */
+   VR_TD             SmallInt          NULL, /* 1. ÖTV, 2. ÖİV (ÖzelİletişimVrg) 3. TRT, 4. Tevkifat  */    
+   VR_KODU           VarChar(30)       NULL, /* SYS_OTV.GTIP_TAMNO,  */
+   VR_TAMADI         VarChar(200)      NULL, /* Vergi Adı */
+   VR_UYGULAMA_TD    SmallInt          NULL, /* 0 = fiyatın içinde, 1 = fiyata ekle      x. Tutar Üzerinden, x. Miktar Üzerinden vb... */
+   VR_ORAN1          Numeric(10,5)     NULL,
+   VR_ORAN2          Numeric(10,5)     NULL,
+   VR_ORAN3          Numeric(10,5)     NULL,
+   VR_ORAN4          Numeric(10,5)     NULL,
+   VR_BIRIM_TUTARI1  Numeric(22,5)     NULL,
+   VR_BIRIM_TUTARI2  Numeric(22,5)     NULL,
+   VR_BIRIM_TUTARI3  Numeric(22,5)     NULL,
+   VR_BIRIM_TUTARI4  Numeric(22,5)     NULL,
+   
+   VR_MIN_TUTARI     Numeric(22,5)     NULL,
+   VR_MAX_TUTARI     Numeric(22,5)     NULL,
+   
+   VR_KDV_DH         SmallInt          NULL, /* _DH ?  1. Kdv Hariç üzerinden Hesapla, 2. Kdv Dahil üzerinden Hesapla */  
+            
+   constraint		PK_HP_VERGI primary key (ID)
+ )
+
+ create index X_HP_VERGI01 on HP_VERGI (FIRM_ID, VR_TD, LINE_NO)
+ 
+ grant select, insert, update, delete on HP_VERGI to public
+
+commit transaction
+

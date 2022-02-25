@@ -1,0 +1,32 @@
+﻿
+CREATE VIEW [dbo].[VW_TBOX_LIST]  
+AS
+ (
+
+ SELECT [HPFNS].[ID]
+      , [HPFNS].[FIRM_ID]
+      , [HPFNS].[SHOP_ID]
+	  , [HPFNS].[FNS_TIPI]
+      , [SYSL].TYPES_CAPTION LKP_FNS_ARACI
+      , ISNULL([SHP].HP_NAME,'')
+      + ISNULL([BANKA].HP_TAMADI,'') + ' ' +
+      + ISNULL([BSUBE].HP_TAMADI,'') LKP_SHOP_NAME 
+      , [HPFNS].[HP_TAMADI]  LKP_HP_TAMADI
+      , [HPFNS].PARA_ID LKP_PARA_ID
+      , [HPFNS].B_DOVIZ_YERI_ID LKP_B_DOVIZ_YERI_ID
+      , [HPFNS].A_DOVIZ_YERI_ID LKP_A_DOVIZ_YERI_ID      
+
+  FROM [dbo].[HP_FINANS] [HPFNS]
+    left outer join [dbo].[HP_FIRM] [FRM] on ([HPFNS].FIRM_ID = [FRM].ID)
+    left outer join [dbo].[HP_FIRM] [SHP] on ([HPFNS].SHOP_ID = [SHP].ID)
+    left outer join [dbo].[SYS_TYPES_L] [SYSL] on ( 
+             [HPFNS].FNS_TIPI = [SYSL].TYPES_VALUE_INT 
+         AND [SYSL].TYPES_NAME = 'FNS_ARAC_TD')
+    left outer join [dbo].[HP_FINANS] [BSUBE] on ([HPFNS].PARENT_ID = [BSUBE].ID )
+    left outer join [dbo].[HP_FINANS] [BANKA] on ([BSUBE].PARENT_ID = [BANKA].ID )
+  
+  WHERE [HPFNS].[FNS_TIPI] IN ( 10,22,23,24 )
+
+  )
+
+GO

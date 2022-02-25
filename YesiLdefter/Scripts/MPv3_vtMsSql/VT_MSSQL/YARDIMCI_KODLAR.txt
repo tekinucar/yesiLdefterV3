@@ -1,0 +1,608 @@
+﻿
+/* ***************  TABLES ve FIELDS tablosundaki xxx_CODE değişikliği ************* */
+
+
+--//( 3, 'UST', 'PMS', 'PMS', 'UST.PMS.PMS', '', 'Project Managment',  1 )  
+
+
+select * from MS_TABLES 
+where TABLE_CODE = 'SYSFIRM'
+
+/*
+update MS_TABLES set
+ MODUL_CODE = 'PMS'
+,SOFTWARE_CODE = 'UST'
+,PROJECT_CODE = 'PMS'
+,TABLE_CODE = 'Firm'
+where TABLE_CODE = 'SYSFIRM'
+*/
+
+
+select * from MS_FIELDS 
+where TABLE_CODE = 'SYSFIRM'
+
+/*
+update MS_FIELDS set
+ SOFTWARE_CODE = 'UST'
+,PROJECT_CODE = 'PMS'
+,TABLE_CODE = 'Firm'
+where TABLE_CODE = 'SYSFIRM'
+*/
+
+select * from MS_TABLES_IP
+where TABLE_CODE = 'SYSFIRM'
+
+/*
+update MS_TABLES_IP set
+ SOFTWARE_CODE = 'UST'
+,PROJECT_CODE = 'PMS'
+,TABLE_CODE = 'Firm'
+where TABLE_CODE = 'SYSFIRM'
+*/
+
+select * from MS_FIELDS_IP 
+where TABLE_CODE = 'SYSFIRM'
+
+/*
+update MS_FIELDS_IP set
+ SOFTWARE_CODE = 'UST'
+,PROJECT_CODE = 'PMS'
+,TABLE_CODE = 'Firm'
+where TABLE_CODE = 'SYSFIRM'
+*/
+
+
+/*  IP_CODE değişikliği yukarının devamı ikinci adımı */ 
+
+
+
+select * from MS_TABLES_IP
+where TABLE_CODE = 'User'
+and IP_CODE = 'SYSUSER_L01'
+/*
+update MS_TABLES_IP set
+ IP_CODE = 'UserList_L01'
+where TABLE_CODE = 'User'
+and IP_CODE = 'SYSUSER_L01'
+
+*/
+
+
+select * from MS_FIELDS_IP 
+where TABLE_CODE = 'User'
+and IP_CODE = 'SYSUSER_L01'
+/*
+update MS_FIELDS_IP set
+ IP_CODE = 'UserList_L01'
+where TABLE_CODE = 'User'
+and IP_CODE = 'SYSUSER_L01'
+
+*/
+
+
+
+
+*********** SOFTWARE_CODE set işlemi ******************
+
+select * from MS_FIELDS
+where TABLE_CODE = '3S_MSFLDIP'
+
+select * from MS_FIELDS_IP
+where TABLE_CODE = '3S_MSFLDIP'
+
+update MS_TABLES_IP Set
+SOFTWARE_CODE = 'UST'
+,PROJECT_CODE = 'T01'
+where TABLE_CODE = '3S_MSFLDIP'
+
+update MS_FIELDS_IP Set
+SOFTWARE_CODE = 'UST'
+,PROJECT_CODE = 'T01'
+where TABLE_CODE = '3S_MSFLDIP'
+
+
+
+
+
+ **** FIELD NO DEĞİŞTİRMEK ***********
+ 
+DECLARE @TABLE_CODE VARCHAR(20)
+
+DECLARE @old_FIELD_NO SMALLINT = 0
+DECLARE @new_FIELD_NO SMALLINT = 0
+
+SET @TABLE_CODE = 'FNLNVOL'
+
+SET @old_FIELD_NO = 24
+SET @new_FIELD_NO = 73
+
+update MS_FIELDS_IP set
+FIELD_NO = @new_FIELD_NO
+where TABLE_CODE = @TABLE_CODE
+and   FIELD_NO = @old_FIELD_NO  
+
+update MS_FIELDS set
+FIELD_NO = @new_FIELD_NO
+where TABLE_CODE = @TABLE_CODE
+and   FIELD_NO = @old_FIELD_NO  
+
+
+
+
+ *** ARAYA FIELD EKLEMEK İÇİN ****
+
+declare @tablo_kodu varchar(30) = 'FinansHesap'
+declare @softwareCode varchar(30) = 'UST'
+declare @projectCode varchar(30) = 'OMS'
+
+declare @field_no int = 5
+declare @adim int = 1
+
+UPDATE MS_FIELDS SET FIELD_NO = FIELD_NO + @adim
+WHERE TABLE_CODE = @tablo_kodu
+AND SOFTWARE_CODE = @softwareCode
+AND PROJECT_CODE = @projectCode
+AND FIELD_NO > @field_no
+
+UPDATE MS_FIELDS_IP SET FIELD_NO = FIELD_NO + @adim
+WHERE TABLE_CODE = @tablo_kodu
+AND SOFTWARE_CODE = @softwareCode
+AND PROJECT_CODE = @projectCode
+AND FIELD_NO > @field_no
+
+
+/* ************** TABLE_CODE değişikliği ******************* */
+
+declare @tableCode varchar(50) = 'MtskTaslakUygulamaS'
+declare @newTableCode varchar(50) = 'MtskSablonUygulamaS'
+
+
+select * from MS_FIELDS_IP
+where TABLE_CODE = @tableCode
+
+select * from MS_TABLES_IP
+where TABLE_CODE = @tableCode
+
+select * from MS_FIELDS
+where TABLE_CODE = @tableCode
+
+select * from MS_TABLES
+where TABLE_CODE = @tableCode
+
+/*
+
+update MS_FIELDS_IP 
+set TABLE_CODE = @newTableCode
+where TABLE_CODE = @tableCode
+
+update MS_TABLES_IP
+set TABLE_CODE = @newTableCode
+where TABLE_CODE = @tableCode
+
+update MS_FIELDS
+set TABLE_CODE = @newTableCode
+where TABLE_CODE = @tableCode
+
+update MS_TABLES
+set TABLE_CODE = @newTableCode
+where TABLE_CODE = @tableCode
+
+*/
+
+
+
+
+
+/* *** SADECE BİR IP PLANIN FIELDLERİNİ SİLMEK *** */
+
+DECLARE @IPCODE VARCHAR(20)
+SET @IPCODE = 'FNLNVOL_BNL01'
+
+delete from MS_FIELDS_IP
+where IP_CODE = @IPCODE
+
+
+
+/*** FIELD SİLMEK İÇİN ****/
+
+DECLARE @TABLECODE VARCHAR(20)
+SET @TABLECODE = 'AJLNTLK'
+
+declare @field_no int = -1
+
+delete from MS_FIELDS_IP
+where TABLE_CODE = @TABLECODE
+AND FIELD_NO = @field_no
+
+delete from MS_FIELDS
+where TABLE_CODE = @TABLECODE
+AND FIELD_NO = @field_no
+
+
+
+
+*** KOMPLE TABLO VE FIELDLERI SİLMEK İÇİN ****
+
+DECLARE @TABLECODE VARCHAR(20)
+SET @TABLECODE = 'HPFNS'
+
+delete from MS_FIELDS_IP
+where TABLE_CODE= @TABLECODE
+
+delete from MS_FIELDS
+where TABLE_CODE= @TABLECODE
+
+delete from MS_TABLES_IP
+where TABLE_CODE= @TABLECODE
+
+delete from MS_TABLES
+where TABLE_CODE= @TABLECODE
+
+
+
+
+*** LAYOUT TABLOSUNDAN BİR FORM TASARIMINI SİLMEK İÇİN *************
+
+DELETE FROM [dbo].[MS_LAYOUT]
+WHERE MASTER_CODE = 'FNS_HP'
+
+
+*** LAYOUT TABLOSUNDAN BİR FORMUN MASTER_CODE SİNİ DEĞİŞTİRMEK İÇİN *************
+
+UPDATE [dbo].[MS_LAYOUT] SET
+MASTER_CODE = 'CR_AV_ARA_F01'
+WHERE MASTER_CODE = 'CR_ARA_F01'
+
+
+
+
+*****  FIELD DEĞİŞİKLİĞİ ALAN DEĞİŞİKLİĞİ *********************
+
+ALTER TABLE SYS_TYPES_L ALTER COLUMN TYPES_CAPTION VARCHAR(200) NULL
+
+*****  FIELD DEĞİŞİKLİĞİ İSİM DEĞİŞİKLİĞİ *********************
+
+EXEC sp_RENAME 'TableName.OldColumnName' , 'NewColumnName', 'COLUMN'
+
+EXEC sp_RENAME 'TableName.OldColumnName' , 'NewColumnName', 'COLUMN'
+
+**********************************************
+
+*****  FIELD EKLEME **************************
+
+ALTER TABLE MS_LAYOUT ADD CMP_NAME VARCHAR(100) NULL
+
+**********************************************
+
+
+IP_CODE değişikliği 
+
+-- 1. işlem 
+
+
+-- FOREING_KEYS DELETE
+USE [MSV3DFTR]
+GO
+
+-- ANA TABLE_CODE YİDE DEĞİŞTİRMEK İÇİN
+IF  EXISTS (SELECT * FROM sys.foreign_keys WHERE object_id = OBJECT_ID(N'[dbo].[FK_MS_FIELDS_MS_TABLES]') AND parent_object_id = OBJECT_ID(N'[dbo].[MS_FIELDS]'))
+ALTER TABLE [dbo].[MS_FIELDS] DROP CONSTRAINT [FK_MS_FIELDS_MS_TABLES]
+GO
+
+-- ANA TABLE_CODE YİDE DEĞİŞTİRMEK İÇİN
+IF  EXISTS (SELECT * FROM sys.foreign_keys WHERE object_id = OBJECT_ID(N'[dbo].[FK_MS_TABLES_IP_MS_TABLES]') AND parent_object_id = OBJECT_ID(N'[dbo].[MS_TABLES_IP]'))
+ALTER TABLE [dbo].[MS_TABLES_IP] DROP CONSTRAINT [FK_MS_TABLES_IP_MS_TABLES]
+GO
+
+
+IF  EXISTS (SELECT * FROM sys.foreign_keys WHERE object_id = OBJECT_ID(N'[dbo].[FK_MS_FIELDS_IP_MS_TABLES_IP]') AND parent_object_id = OBJECT_ID(N'[dbo].[MS_FIELDS_IP]'))
+ALTER TABLE [dbo].[MS_FIELDS_IP] DROP CONSTRAINT [FK_MS_FIELDS_IP_MS_TABLES_IP]
+GO
+
+-- 2. işlem
+
+DECLARE @old_IPCODE VARCHAR(20)
+DECLARE @new_IPCODE VARCHAR(20)
+SET @old_IPCODE = 'FNLNVOL_CRKS_F02'
+SET @new_IPCODE = 'FNLNVOL_KSCR_F03'
+
+update MS_FIELDS_IP set
+IP_CODE = @new_IPCODE
+where IP_CODE = @old_IPCODE
+
+update MS_TABLES_IP set
+IP_CODE = @new_IPCODE
+where IP_CODE = @old_IPCODE
+
+update [MS_GROUPS] SET 
+[TABLE_CODE] = @new_IPCODE
+WHERE [TABLE_CODE] = @old_IPCODE
+
+
+--- ORRRRR ----------------
+
+DECLARE @old_TABLECODE VARCHAR(20)
+DECLARE @new_TABLECODE VARCHAR(20)
+
+DECLARE @old_IPCODE VARCHAR(20)
+DECLARE @new_IPCODE VARCHAR(20)
+
+SET @old_TABLECODE = 'HCR'
+SET @new_TABLECODE = 'HCRJ'
+
+SET @old_IPCODE = 'HCR_LST04'
+SET @new_IPCODE = 'HCRJ_LS01'
+
+update MS_FIELDS_IP set
+TABLE_CODE = @new_TABLECODE,
+IP_CODE = @new_IPCODE
+where TABLE_CODE = @old_TABLECODE
+AND IP_CODE = @old_IPCODE
+
+update MS_TABLES_IP set
+TABLE_CODE = @new_TABLECODE,
+IP_CODE = @new_IPCODE
+where TABLE_CODE = @old_TABLECODE
+AND IP_CODE = @old_IPCODE
+
+UPDATE [MS_GROUPS] SET 
+[TABLE_CODE] = @new_IPCODE
+WHERE [TABLE_CODE] = @old_IPCODE
+
+----- NEW ORRRRR ----
+-- ANA TABLE_CODE YİDE DEĞİŞTİRMEK İÇİN
+
+DECLARE @old_TABLECODE VARCHAR(20)
+DECLARE @new_TABLECODE VARCHAR(20)
+
+DECLARE @old_IPCODE VARCHAR(20)
+DECLARE @new_IPCODE VARCHAR(20)
+
+SET @old_TABLECODE = 'HUR'
+SET @new_TABLECODE = 'HPURN'
+
+SET @old_IPCODE = 'HUR_LST02' 
+SET @new_IPCODE = 'HPURN_L02'
+
+--SELECT DISTINCT IP_CODE FROM MS_FIELDS_IP
+--WHERE TABLE_CODE = @old_TABLECODE 
+
+
+update MS_FIELDS set
+TABLE_CODE = @new_TABLECODE
+where TABLE_CODE = @old_TABLECODE
+
+update MS_TABLES set
+TABLE_CODE = @new_TABLECODE
+where TABLE_CODE = @old_TABLECODE
+
+update MS_FIELDS_IP set
+TABLE_CODE = @new_TABLECODE,
+IP_CODE = @new_IPCODE
+where TABLE_CODE = @old_TABLECODE
+AND IP_CODE = @old_IPCODE
+
+update MS_TABLES_IP set
+TABLE_CODE = @new_TABLECODE,
+IP_CODE = @new_IPCODE
+where TABLE_CODE = @old_TABLECODE
+AND IP_CODE = @old_IPCODE
+
+UPDATE [MS_GROUPS] SET 
+[TABLE_CODE] = @new_IPCODE
+WHERE [TABLE_CODE] = @old_IPCODE
+
+
+
+
+-- 3. işlem
+
+
+-- FOREING_KEYS CREATE
+USE [MSV3DFTR]
+GO
+
+ALTER TABLE [dbo].[MS_FIELDS]  WITH CHECK ADD  CONSTRAINT [FK_MS_FIELDS_MS_TABLES] FOREIGN KEY([TABLE_CODE])
+REFERENCES [dbo].[MS_TABLES] ([TABLE_CODE])
+GO
+
+ALTER TABLE [dbo].[MS_FIELDS] CHECK CONSTRAINT [FK_MS_FIELDS_MS_TABLES]
+GO
+
+
+ALTER TABLE [dbo].[MS_TABLES_IP]  WITH CHECK ADD  CONSTRAINT [FK_MS_TABLES_IP_MS_TABLES] FOREIGN KEY([TABLE_CODE])
+REFERENCES [dbo].[MS_TABLES] ([TABLE_CODE])
+GO
+
+ALTER TABLE [dbo].[MS_TABLES_IP] CHECK CONSTRAINT [FK_MS_TABLES_IP_MS_TABLES]
+GO
+
+
+ALTER TABLE [dbo].[MS_TABLES_IP]  WITH CHECK ADD  CONSTRAINT [FK_MS_TABLES_IP_MS_TABLES] FOREIGN KEY([TABLE_CODE])
+REFERENCES [dbo].[MS_TABLES] ([TABLE_CODE])
+GO
+
+ALTER TABLE [dbo].[MS_TABLES_IP] CHECK CONSTRAINT [FK_MS_TABLES_IP_MS_TABLES]
+GO
+
+
+
+ALTER TABLE [dbo].[MS_FIELDS_IP]  WITH CHECK ADD  CONSTRAINT [FK_MS_FIELDS_IP_MS_TABLES_IP] FOREIGN KEY([IP_CODE])
+REFERENCES [dbo].[MS_TABLES_IP] ([IP_CODE])
+GO
+
+ALTER TABLE [dbo].[MS_FIELDS_IP] CHECK CONSTRAINT [FK_MS_FIELDS_IP_MS_TABLES_IP]
+GO
+
+
+
+**********************************************
+
+/*** MS_PROPERTIES Tablosundaki bir fieldin detay SQL i  ***/
+
+
+declare @fname varchar(100)
+set @fname = 'AUTO_LST' 
+
+Select FIELDNAME, ROW_CAPTION, ROW_FIELDNAME, ROW_COLUMN_TYPE
+from MS_PROPERTIES 
+where 0 = 0
+and FIELDNAME = @fname
+and ROW_TYPE > 1
+and ROW_FIELDNAME <> 'CAPTION'
+
+union all
+
+Select FIELDNAME, ROW_CAPTION, ROW_FIELDNAME, ROW_COLUMN_TYPE
+from MS_PROPERTIES 
+where 0 = 0
+and ROW_TYPE > 1
+and ROW_FIELDNAME <> 'CAPTION'
+and FIELDNAME in
+(
+Select ROW_FIELDNAME from MS_PROPERTIES 
+where 0 = 0
+and FIELDNAME = @fname
+and ( ROW_COLUMN_TYPE = 'tPropertiesEdit' 
+   or ROW_COLUMN_TYPE = 'tPropertiesPlusEdit' )
+)
+
+
+
+**********************************************
+
+Properties tablosunda
+
+bir tablonun PROP_XXX değişkenlerini  başka bir tablo için oluşturmak için
+
+
+INSERT INTO [dbo].[MS_PROPERTIES]
+           ([TABLENAME]
+           ,[FIELDNAME]
+           ,[ROW_TYPE]
+           ,[ROW_CATEGORY_NO]
+           ,[ROW_LINE_NO]
+           ,[ROW_CAPTION]
+           ,[ROW_FIELDNAME]
+           ,[ROW_FIELDTYPE]
+           ,[ROW_COLUMN_TYPE]
+           ,[LIST_TYPES_NAME])
+
+
+SELECT 'MS_VARIABLES' --[TABLENAME]
+      ,[FIELDNAME]
+      ,[ROW_TYPE]
+      ,[ROW_CATEGORY_NO]
+      ,[ROW_LINE_NO]
+      ,[ROW_CAPTION]
+      ,[ROW_FIELDNAME]
+      ,[ROW_FIELDTYPE]
+      ,[ROW_COLUMN_TYPE]
+      ,[LIST_TYPES_NAME]
+  FROM [SystemMS].[dbo].[MS_PROPERTIES]
+  where 0 = 0
+  AND TABLENAME = 'MS_FIELDS_IP'
+  and FIELDNAME = 'PROP_SEARCH'
+  
+       
+
+
+
+
+
+**********************************************
+
+SELECT DISTINCT GC_TURU FROM STK_GCB
+
+UPDATE STK_GCB SET
+GC_TURU = GC_TURU + 1000
+WHERE GC_TURU > 0
+
+
+UPDATE STK_GCS SET
+GC_TURU = GC_TURU + 1000
+WHERE GC_TURU > 0
+
+
+
+
+
+
+**********************************************
+
+
+
+ .NET Framework ortamında dosya okuma ve yazma işlemleri için stream (akım veya diğer adı ile kanal)’den faydalanırız. Kanallar byte düzeyinde bir veri girdisi oluşturan veya çıktı bilgisi elde eden mantıksal birimlerdir.
+
+Örneğin bir dosyadan byte düzeyinde bir veri almak için FileStram sınıfı kullanılır. StreamReader ve StreamWriter sınıfları ile de metin tabanlı bir dosyadan okuma ve yazma işlemleri yapabiliriz. Yine BinaryReader ve BinaryWriter sınıfları ile binary formatındaki dosyalar üzerinde işlemler yapabiliriz.
+
+Kanal sınıflarının temelini System.IO.Streamsınıfı oluşturmaktadır, bu sınıfın bazı temel metotları şunlardır :
+
+Close() : Kanalı kapatır, kaynakları serbest bırakır.
+Read() : Üç adet parametresi vardır; Buffer, offset ve count. Byte sayısı kadar kanaldan okumayaparak buffera offset değerinden itibaren aktarılır.
+ReadByte() : Kanaldan bir byte veri okur ve tam sayı geri döndürür, kanalın sonuna gelince -1 döndürür.
+Seek() : İki parametresi vardır; offset ve origin. Kanal içindeki mevcut konumu offset değeri kadar öteler.
+Flush() : Kanalın içeriğini bufferdan alıp fiziksel ortama (dosyaya vs) yazdırır.
+Write() : Üç parametresi vardır; Buffer, offset ve count. Buffer offset değerinden başlanaraj count değeri kadar kanala gönderilir.
+WriteByte() : Parametre olarak almış olduğu değeri kanala yazdırır.
+Stream sınıfının bazı özelliklerine gelirsek :
+CanWrite : Kanala yazma yapılabiliyorsa, true değerini alır.
+CanRead : Kanaldan okuma yapılabiliyorsa, true değerini alır.
+CanSeek : Kanal konumlandırmayı destekliyor ise true değerini alır.
+Position : Kanalın o anki konumunu long tipinde verir.
+Length : Kanalın uzunluğunu long tipinde verir.
+
+Stream sınıfından türeyen üç tür Byte kanal vardır :
+
+BufferedStream : Kanal üzerinde okuma – yazma işleminde buffer bellek alanını kullanarak işlem yapar. Mantığı şudur, disk üzerinden okuma veya yazma yapacağı anda bunu direkt olarak diske byte byte okuyup yazmaktansa buffer üzerinde ayrılan alana veriyi öncelikle yazar veya veriyi buraya çeker buffer alanı dolunca diske yazma işlemini gerçekleştirir ya da diskten tekrar okuma yapar. (işlem ne ise ona göre yani) Böylelikle performans yüksektir.
+
+FileStream : Dosyalar üzerinde okuma-yazma işlemleri için kullanılır.
+
+MemoryStream : Veri depolaması için direkt olarak belleği kullanmamıza yarar.
+
+Bu byte kanal sınıfları System.IO.Stream sınıfından türemiştir dolayısı ile tüm özelliklerini taşımaktadırlar.
+
+Karakter Kanalı için ise aşağıdaki sınıfları kullanabiliriz. Bu sınıflar TextWriter ve TextReader sınıflarından türemiştir.
+
+StreamReader : Byte türündeki kanaldan karakteri okur.
+StreamWriter : Byte türündeki kanala karakteri yazar.
+StringReader : String türündeki bir nesneden karakterleri okur.
+StringWriter : String türündeki bir nesneye karakteri yazar.
+
+
+TextReader sınıfının metotları :
+
+Close() : Kanalı oluşturan kaynağı kapatır.
+Read() : Kanaldan bir karakterlik okuma yapar. Okuduğu karakterin tamsayı gösterimini geri döndürür. Okunacak karakter bittiğinde -1 döner.
+ReadBlock() : Üç parametresi vardır; count, buffer ve index. Kanaldan count parametresi kadar karakteri okur, buffer parametresindeki diziye index parametresinden itibaren yazar.
+ReadLine () : Kanaldaki bir sonraki metin satırını okur. Bunu string olarak geri döndürür. Veri bitince geriye null döner.
+ReadToEnd() : Kanaldaki geri kalan tüm karakterleri okur, geriye string döner, veri bitince null döner.
+Peek() : Giriş kanalından bir karakter okur, fakat karakteri giriş kanalından çıkarmaz. Eğer okunacak veri yoksa -1 döner.
+
+TextWriter sınıfının metotları :
+
+Close() : Kanalı kapatır.
+Write() : Yeniden yüklenmiş olup aldığı parametre içeriğini çıkışa aynı satırda yazar. Sonuna satır sonlandırıcı karakterini eklemez.
+WriteLine() : Yeniden yüklenmiş olup aldığı parametre içeriğini çıkışta yeni bir satır üzerinde yazar.
+Flush() : Çıktıdaki verileri fiziksel ortama yazar.
+
+Son olarak binary veriler içinde BinaryReader ve BinaryWriter sınıfları vardır.
+
+
+varbinary ----------------------------------
+
+DECLARE @BinaryVariable2 BINARY(20)
+
+SET @BinaryVariable2 = 791
+SET @BinaryVariable2 = @BinaryVariable2 + 1
+
+SELECT CAST( @BinaryVariable2 AS varchar(max))
+SELECT CAST( @BinaryVariable2 AS int )
+
+select convert( VARBINARY(max), 'TestCase_TestCheck01_Mail_Validation')
+select convert( varchar(max)  ,  convert(VARBINARY(max), 'TestCase_TestCheck01_Mail_Validation') )
+
+---------------------------------------------------------------------------------------------------
+
+
+

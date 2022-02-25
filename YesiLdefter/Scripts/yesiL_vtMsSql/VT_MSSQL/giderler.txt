@@ -1,0 +1,71 @@
+   UstGrupTipiId     SmallInt      null, /* 102   banka        */ --: 1,2,3,4,5
+   AnaGrupTipiId     SmallInt      null, /* 1022  banka hesabı */ --: 1,2,3,4,5,6,7,8,9
+   AltGrupTipiId     Int           null, /* 10221 vadesiz      */ --: 1,2,3,5
+
+
+
+
+
+
+Gider Kavramı
+
+Kazanç elde etmek için yapılan varlık tüketimine gider denir. 
+Bir harcamanın gider sayılabilmesi için iki şart vardır; 
+
+birincisi tüketilen varlığın işletme faaliyetlerini gerçekleştirmek amacıyla yapılmış olması, 
+diğeri tüketilen varlığın belli bir dönem içinde tüketilmiş olması gerekliliğidir. 
+Giderler belli kategorilere ayrılmaktadır. 
+Bunlara göz atalım ;
+
+Direkt Giderler
+Bir mal veya hizmetin üretiminde maliyete doğrudan yüklenebilen, bunun için bir dağıtım anahtarının kullanılmasına gerek olmayan giderlere direkt (doğrudan) gider denir.
+
+Endirekt Giderler
+Bir mal veya hizmetin üretiminde maliyete doğrudan yüklenemeyen, bunun için bir dağıtım anahtarının kullanılmasına gerek olan giderlere endirekt (dolaylı) gider denir.
+
+Sabit Giderler
+Belli bir zaman dilimi içerisinde üretimin artmasından ya da azalmasından etkilenmeyip aynı kalan giderlere sabit gider denir.
+
+Değişken Giderler
+İşletmede yapılan üretimin artması ya da azalmasıyla farklılık gösteren giderlere değişken giderler denir.
+
+
+/*
+Akaryakıt
+Bilişim
+Çek-Senet
+Diğer
+Döviz Al/Sat
+Eğitim
+Eğlence/Hobi
+Elektronik
+Emeklilik Borcu
+Ev
+Dekorasyon
+Faiz
+Giyim/Aksesuar
+Komisyon
+Kart Ödemesi
+Kart Tutar Aktarım
+Kira Ödemesi
+Kişisel Hizmet
+Kredi
+Kurum Ödemesi
+Maaş
+Market
+Nakit Avans
+Para Çekme
+Para Transferi
+Para Yatırma
+Sağlık/Bakım
+Seyahat
+Sigorta
+Şans Oyunu
+Telekomünikasyon
+Turizm/Konaklama
+Ulaşım
+Vergi    >>>> daha sonra 730 lu hesaplarda detaylı olabilir     
+Yatırım
+Yeme/İçme
+
+*/

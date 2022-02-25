@@ -1,0 +1,37 @@
+
+
+/*  PROJE DATABASE ÝÇÝNE CREATE EDÝLECEK */ 
+
+CREATE VIEW [dbo].[VW_CLIENT_VALUE]  
+AS
+ (
+
+ select 
+       [3S_SYSVAR].[ID]
+      ,[3S_SYSVAR].[ACTIVE]
+      ,[3S_SYSVAR].[FIRM_ID]
+      ,[3S_SYSVAR].[MODUL_CODE]
+      ,[3S_SYSVAR].[VARIABLE_CODE]
+      ,[3S_SYSVAR].[CLIENT_TYPE]
+      ,[3S_SYSVAR].[CLIENT_ID]
+      ,[3S_SYSVAR].[CLIENT_VALUE]
+      ,[CLNT].CLIENT_TYPE    LKP_CLIENT_TYPE
+      ,[CLNT].CLIENT_ID      LKP_CLIENT_ID
+      ,[MSVR].MODUL_CODE     LKP_MODUL_CODE 
+      ,[MSVR].VARIABLE_CODE  LKP_VARIBLE_CODE
+
+ from VW_CLIENT_LIST [CLNT] 
+   left outer join [MSV3DFTR].[dbo].[MS_VARIABLES] [MSVR] on ( 0 = 0 )
+   left outer join [dbo].[SYS_VARIABLES] [3S_SYSVAR] on 
+    ( [MSVR].[VARIABLE_CODE] = [3S_SYSVAR].[VARIABLE_CODE] 
+         and [3S_SYSVAR].CLIENT_TYPE = [CLNT].CLIENT_TYPE 
+         and [3S_SYSVAR].CLIENT_ID = [CLNT].CLIENT_ID
+    )
+
+ where 0 = 0
+
+
+ )
+
+
+

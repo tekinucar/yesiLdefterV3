@@ -1,0 +1,116 @@
+﻿USE u7093888_Ustad01
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+begin transaction
+
+ create table MtskAdayAdliSicil
+ (
+   Id                    Int IDENTITY(1,1) not null, 
+   AdayId                Int       not null, /* default 0 */
+   FirmId                Int       not null,
+   IsActive              Bit       not null, /* default : 1 = active, 0 = not active */  
+   TcNo                  Varchar(11)   null,
+   DonemTipiId           Int           null,
+
+   SavcilikBelgesiVerenKurum   nVarchar(200)  null,
+   SavcilikBelgesiTarihi       Date           null,
+   SavcilikBelgesiSayisi       nVarchar(30)   null,
+   SavcilikBelgesiResim        VarBinary(max) null,
+   SavcilikBelgesiResimSmall   VarBinary(max) null,
+
+   constraint		pk_MtskAdayAdliSicil primary key (Id)
+ )
+  
+ grant select, insert, update, delete on MtskAdayAdliSicil to public
+
+  create index X_MtskAdayAdliSicil01 on MtskAdayAdliSicil (AdayId)
+  create index X_MtskAdayAdliSicil02 on MtskAdayAdliSicil (TcNo)
+  create index X_MtskAdayAdliSicil03 on MtskAdayAdliSicil (DonemTipiId)
+
+commit transaction
+
+
+
+begin transaction
+
+USE u7093888_Ustad01
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TRIGGER dbo.trg_MtskAdayAdliSicil on dbo.MtskAdayAdliSicil
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    DECLARE myCursor cursor for select Id from Inserted
+    DECLARE @curId bigint
+
+    Declare @AdayId int = 0
+    Declare @FirmId int = 0
+
+    OPEN myCursor
+
+    FETCH NEXT FROM myCursor INTO @curId
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+
+        select 
+           @AdayId = ins.AdayId
+          ,@FirmId = ins.FirmId
+		from inserted ins
+    	where ins.Id = @curId
+
+        -- MtskAdayBelgeler Insert
+        if ( Select count(*) ADET from dbo.[MtskAdayBelgeler] 
+             where 0 = 0 
+             and [AdayId] = @AdayId 
+             and [FirmId] = @FirmId
+            ) = 0 
+        begin 
+            insert into dbo.[MtskAdayBelgeler] ( 
+            AdayId, FirmId, IsActive,
+            IsBiyometrik,    IsOgrenim,    IsSaglik,    IsSavcilik,    IsImza,    IsSozlesme1,    IsSozlesme2, 
+            BiyometrikIsUploaded,    OgrenimIsUploaded,    SaglikIsUploaded,    SavcilikIsUploaded,    ImzaIsUploaded,    Sozlesme1IsUploaded,    Sozlesme2IsUploaded, 
+            IsSertifikaUcreti,    SertifikaUcretiIsPaid,    IsUcretsiz,    IsFatura ) values 
+            ( @AdayId,  @FirmId,  1,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0 ) 
+        end -- MtskAdayBelgeler
+
+		-- MtskAdayBelgeler tablosunu işaretle
+		Update MtskAdayBelgeler set
+        IsSavcilik = x.Sonuc
+        From MtskAdayBelgeler a, 
+        (
+            Select count(Id) as Sonuc
+            From MtskAdayAdliSicil
+            Where 0 = 0
+            and SavcilikBelgesiResim is not null
+            and AdayId = @AdayId
+            and FirmId = @FirmId
+        ) as x
+        Where a.AdayId = @AdayId
+        and   a.FirmId = @FirmId
+
+
+      FETCH NEXT FROM myCursor INTO @curId
+    END -- While
+
+    CLOSE myCursor
+    DEALLOCATE myCursor   
+
+END -- create trigger
+GO
+
+ALTER TABLE dbo.MtskAdayAdliSicil ENABLE TRIGGER trg_MtskAdayAdliSicil
+GO
+
+commit transaction
+

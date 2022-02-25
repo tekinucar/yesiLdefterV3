@@ -1,0 +1,38 @@
+﻿USE [u7093888_Ustad01]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+IF OBJECT_ID (N'dbo.fnc_HesapFinansKoduGet', N'FN') IS NOT NULL  
+    DROP FUNCTION fnc_HesapFinansKoduGet;  
+GO  
+CREATE FUNCTION [dbo].[fnc_HesapFinansKoduGet](
+ @FirmId int 
+,@UstGrupTipiId smallInt 
+,@AnaGrupTipiId smallInt 
+,@kacHane smallInt 
+,@curId bigint
+)  
+RETURNS varchar(50)   
+AS   
+-- Returns the stock level for the product.  
+BEGIN  
+    DECLARE @ret varchar(50);  
+    
+	select @ret = replicate('0', @kacHane - len(count(Id)) ) + convert(varchar(10), count(Id)) 
+	from [dbo].[HesapFinans]
+    Where FirmId = @FirmId
+    and UstGrupTipiId = @UstGrupTipiId
+    and AnaGrupTipiId = @AnaGrupTipiId
+	and Id <= @curId;
+
+	IF (@ret IS NULL) 
+        SET @ret = '000';  
+
+    RETURN @ret;  
+END;
+GO
+
+

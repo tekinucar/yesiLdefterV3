@@ -1,0 +1,91 @@
+﻿USE [MSV3DFTRBLT]
+GO
+
+/****** Object:  Trigger [dbo].[trg_MS_TABLES_IP]    Script Date: 23.11.2019 14:19:15 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+
+CREATE TRIGGER [dbo].[trg_MS_TABLES_IP] on [dbo].[MS_TABLES_IP] 
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    DECLARE InsertCursor_MS_TABLES_IP cursor for select REF_ID from Inserted
+    DECLARE @curId bigint
+
+    OPEN InsertCursor_MS_TABLES_IP
+
+    FETCH NEXT FROM InsertCursor_MS_TABLES_IP INTO @curId
+
+    declare @ySoftCode varchar(100) = null
+    declare @yProjectCode varchar(100) = null
+    
+	declare @yTableCode varchar(100) = null
+    declare @yIPCode varchar(100) = null
+    
+	declare @eTableCode varchar(100) = null
+    declare @eIPCode varchar(100) = null
+    
+    declare @TableIPCode varchar(100) = null
+    
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+	    set @ySoftCode = ''
+		set @yProjectCode = '' 
+        set @yTableCode = ''
+        set @yIPCode = ''
+        set @eTableCode = ''
+        set @eIPCode = ''
+        set @TableIPCode = ''
+        
+        select 
+		 @ySoftCode = ins.SOFTWARE_CODE
+		,@yProjectCode = ins.PROJECT_CODE
+    	,@yTableCode = ins.TABLE_CODE
+    	,@yIPCode = ins.IP_CODE
+		
+    	from inserted ins
+    	where ins.REF_ID = @curId
+     	
+     	select 
+    	 @eTableCode = dlt.TABLE_CODE
+    	,@eIPCode = dlt.IP_CODE
+    	from  deleted dlt
+    	where dlt.REF_ID = @curId
+     	   	
+    	if ((@yTableCode <> @eTableCode) or 
+    	    (@yIPCode <> @eIPCode) )   
+    	begin
+    	  --  UST|ONM|CARI.CARI.F01 
+		  set @TableIPCode = @ySoftCode + '/' + @yProjectCode + '/' + @yTableCode + '.' +  @yIPCode
+    	  
+    	  update MS_TABLES_IP set TABLEIPCODE = @TableIPCode
+          where REF_ID = @curId 
+    	  
+    	end        
+
+    	FETCH NEXT FROM InsertCursor_MS_TABLES_IP INTO @curId
+    END
+
+    CLOSE InsertCursor_MS_TABLES_IP
+    DEALLOCATE InsertCursor_MS_TABLES_IP   
+        
+
+END
+
+
+
+
+
+
+GO
+
+ALTER TABLE [dbo].[MS_TABLES_IP] ENABLE TRIGGER [trg_MS_TABLES_IP]
+GO
+
+

@@ -1,0 +1,61 @@
+
+/* for FORM Desing */
+
+begin transaction
+
+ create table MS_LAYOUT
+ (
+        REF_ID                  Int IDENTITY(1,1)       NOT NULL,
+        MODUL_CODE              VarChar(20)             NULL,
+        MASTER_LAYOUT_TYPE      SmallInt                NULL,
+        MASTER_CODE             VarChar(50)             NULL,
+    	LAYOUT_TYPE             VarChar(50)             NULL, 
+        LAYOUT_CODE             VarChar(50)             NULL,
+        PARENT_CODE             VarChar(100)            NULL,
+        LAYOUT_CAPTION          VarChar(4000)           NULL,
+
+        TABLEIPCODE             VarChar(100)            NULL,
+        FIELD_NAME              VarChar(30)             NULL,
+        TABLEIPCODE2            VarChar(100)            NULL,
+        FIELD_NAME2             VarChar(30)             NULL,
+
+        PROP_VIEWS              VarChar(4000)           NULL,
+        PROP_RUNTIME            VarChar(4000)           NULL,
+        PROP_NAVIGATOR          VarChar(4000)           NULL,
+        
+        CMP_DOCK                SmallInt                NULL,
+        CMP_WIDTH               SmallInt                NULL,
+        CMP_HEIGHT              SmallInt                NULL,
+        CMP_TOP                 SmallInt                NULL,
+        CMP_LEFT                SmallInt                NULL,
+        CMP_READONLY  	        Bit                     NULL,
+        CMP_ENABLED             Bit                     NULL,
+        CMP_VISIBLE             Bit                     NULL,
+        CMP_FONT_NAME           VarChar(30)             NULL,
+        CMP_FONT_SIZE           Numeric(6,3)            NULL,
+        CMP_FONT_STYLE          SmallInt                NULL,
+        CMP_FONT_COLOR          Int                     NULL,
+        CMP_BACK_COLOR          Int                     NULL,        
+        CMP_ROW_COUNT           Int                     NULL,
+        CMP_COL_COUNT           Int                     NULL,
+        CMP_LAYOUT_TYPE         SmallInt                NULL, /* 1 Horizontal  2 Vertical */
+	    CMP_FRONT_BACK          SmallInt                NULL, /* 0 = none, 1 = BringToFront(), 2 = SendToBack() */ 
+        CMP_NAME                VarChar(100)            NULL,
+        /* Gruplama */
+        GROUP_NO                SmallInt                NULL,
+        GROUP_LINE_NO           SmallInt                NULL,
+
+        SOFTWARE_CODE           Varchar(20)             NULL,
+        PROJECT_CODE            Varchar(20)             NULL,
+        LYTMAIN_CODE            Varchar(30)             NULL,
+
+	Constraint PK_MS_LAYOUT primary key (REF_ID)
+ )
+
+ create index X_MS_LAYOUT1 on MS_LAYOUT (MODUL_CODE, LAYOUT_CODE)
+
+ grant select, insert, update, delete on MS_LAYOUT to public
+
+
+commit transaction
+

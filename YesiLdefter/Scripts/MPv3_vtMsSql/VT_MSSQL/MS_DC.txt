@@ -1,0 +1,54 @@
+
+
+begin transaction
+
+ create table MS_DC
+ (
+	REF_ID		Int IDENTITY(1,1) 	NOT NULL,
+        DC_CODE         VarChar(30)             NOT NULL,     
+        DC_CAPTION      VarChar(50)             NULL,
+        DC_ABOUT        VarChar(200)            NULL,
+        DC_TYPE         SmallInt                NULL,  
+        TROW_TYPE       SmallInt                NULL, 
+        EVENT_TYPE      SmallInt                NULL,
+        QUESTION        VarChar(100)            NULL,
+        FINAL_MESSAGE   VarChar(100)            NULL,
+        CHECK_TYPE      SmallInt                NULL,   
+        DISPLAY_TYPE    SmallInt                NULL,
+	TARGET_TABLE_CODE	VarChar(20)	NULL, 
+	TARGET_IP_CODE		VarChar(20)	NULL,
+        SOURCE_TABLE_CODE	VarChar(20)	NULL, 
+	SOURCE_IP_CODE		VarChar(20)	NULL,
+        SOURCE_CHECK_FNAME      VarChar(30)     NULL,
+        SOURCE_CHECK_VALUE      VarChar(30)     NULL,
+
+	Constraint PK_MS_DC primary key (DC_CODE)
+
+ )
+
+ create index X_MS_DC_1 on MS_DC ( DC_CODE )
+
+ grant select, insert, update, delete on MS_DC to public
+
+commit transaction
+
+
+
+
+/* 
+
+DC_TYPE = Single Table, Multi Tables ( TargetIPCode )
+TROW     = ( Single row, Multi rows, Selected rows insert )
+Event type = ( button click, drag&drop )
+Question =  ( yes onaylý )
+Check control = ( 1. yok ise insert, 2. var ise cancel, 3. var ise update )
+Display = ( 1. none, 2. animasyon, 3. log list )
+
+Target TableIPCode ( Hedef, insert edilecek IP )
+Source TableIPCode ( Kaynak okunacak IP )
+Target TableIPCode ( Default value set ) 
+Target TableIPCode ( Gerektiðinde InputBox çaðýr )
+
+
+*/
+

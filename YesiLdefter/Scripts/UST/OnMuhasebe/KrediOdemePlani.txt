@@ -1,0 +1,91 @@
+﻿
+begin transaction
+
+ create table KrediOdemePlani
+ (
+   Id                Int IDENTITY(1,1) not null, 
+   FirmId            Int       not null,
+   
+   DonemTipiId       Int           null,  /* borcun oluştuğu YılAy */
+   CariTipiId        SmallInt      null,  /* 1. MtskAday tablosu, 2. yeni eklenecek borçlandırma sebepleri olacak   */
+   CariId            Int           null,  /* MtskAday.Id     */
+
+   TaksitTipiId      SmallInt      null,  /* 1. Peşinat, 2. Taksit, 3. Tek Borç  */
+   TaksitNo          Numeric(3)    null, 
+   VadeTarihi        Date          null,
+   VadeYil           SmallInt      null,
+   VadeAy            SmallInt      null,
+   VadeGun           SmallInt      null,
+   TaksitTutari      Numeric(22,8) null,
+
+   IsPaid            Bit       not null, /* default : 0 = ödenmedi,  1 = Ödendi */  
+   BelgeMakbuzId     Int           null,
+   BelgeStokBId      Int           null, /* Fatura için : BelgeStokB.Id  : BelgeStokB başlık tablosu */
+      
+   constraint		pk_KrediOdemePlani primary key (Id)
+ )
+  
+ grant select, insert, update, delete on KrediOdemePlani to public
+
+  create index X_KrediOdemePlani01 on KrediOdemePlani (CariTipiId)
+  create index X_KrediOdemePlani02 on KrediOdemePlani (CariId)
+  create index X_KrediOdemePlani03 on KrediOdemePlani (VadeTarihi)
+  create index X_KrediOdemePlani04 on KrediOdemePlani (DonemTipiId)
+  
+
+
+
+  
+commit transaction
+
+
+
+begin transaction
+
+
+-- ------------------------------------------------------- 
+-- CariTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[KrediOdemePlaniCariTipi]
+(
+   Id               Int Unique not null, 
+   CariTipi         nVarchar(50)   null,
+   
+   constraint  pk_KrediOdemePlaniCariTipi primary key (Id)
+)
+
+Delete from [Lkp].[KrediOdemePlaniCariTipi]
+INSERT INTO [Lkp].[KrediOdemePlaniCariTipi] (Id, CariTipi)
+ VALUES 
+  ( 0,    N''),
+  ( 1000,    N'ÖnMuhasebe Modülü'),
+  ( 2000,    N'Eğitim Modülü'),
+  ( 2100,    N'Mtsk Modülü'),
+  ( 2110,    N'Mtsk Sertifika Ücreti'),   -- join = MtskAday tablosu
+  ( 2111,    N'Mtsk Teorik Sınav Ücreti'),
+  ( 2112,    N'Mtsk Uygulama Sınav Ücreti'),
+  ( 2113,    N'Mtsk Özel Teorik Ders Ücreti'),
+  ( 2114,    N'Mtsk Özel Uygulama Ders Ücreti')
+  
+-- ------------------------------------------------------- 
+-- TaksitTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[KrediOdemePlaniTaksitTipi]
+(
+   Id               Int Unique not null, 
+   TaksitTipi       nVarchar(20)   null,
+   
+   constraint  pk_KrediOdemePlaniTaksitTipi primary key (Id)
+)
+
+Delete from [Lkp].[KrediOdemePlaniTaksitTipi]
+INSERT INTO [Lkp].[KrediOdemePlaniTaksitTipi] (Id, TaksitTipi)
+ VALUES 
+  ( 0,    N''),
+  ( 1,    N'Peşinat'),
+  ( 2,    N'Taksit'),
+  ( 3,    N'Tek Ödeme')
+
+     
+
+commit transaction

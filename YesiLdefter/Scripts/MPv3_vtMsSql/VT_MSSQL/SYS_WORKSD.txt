@@ -1,0 +1,28 @@
+
+
+begin transaction
+ create table SYS_WORKSD
+ (
+        ID                Int IDENTITY(1,1) NOT NULL,
+        WR_CODE           VarChar(50)           NULL,
+        PROJECT_CODE      VarChar(20)           NULL,
+        ACTIVE            Bit                   NULL, 
+        WR_STATE          SmallInt              NULL, /* 1. Bekliyor, 2. Yapýlýyor (+trh), 3. Test, 4.Test Düzl, 5. Tamamladý (+trh)  */   
+        TABLE_CODE        VarChar(50)           NULL, 
+        LAYOUT_CODE       VarChar(50)           NULL,
+        WEB_CONNECT       Bit                   NULL, /* Yapýlan iþin Webten Bilgi Okumasý veya yazmasý Var/Yok */
+        MODEL_PERS_ID     Int                   NULL, /* tabloyu tasarlayan */
+        VIEW_PERS_ID      Int                   NULL, /* ekraný hazýrlayan */
+        SOFT_PERS_ID      Int                   NULL, /* yazýlýmcý, vt üzerindeki prosedure ve func yazan */
+        TEST_PERS_ID      Int                   NULL, /* test eden */
+        CHEC_PERS_ID      Int                   NULL, /* yapýlan iþi kontrol eden, ürün sorumlusu */
+        SAMPLE_IMAGE      VarBinary(max)        NULL,
+
+   Constraint PK_SYS_WORKSD primary key (ID)
+ )
+
+ create index X_SYS_WORKSD1 on SYS_WORKSD (WR_CODE, PROJECT_CODE)
+ 
+ grant select, insert, update, delete on SYS_WORKSD to public
+
+commit transaction

@@ -1,0 +1,97 @@
+﻿Yapılması GEREKEN İşler
+
+1. FN_LINEVOL tablosuna trigger. KDV oranlı olan giderler için hesaplama
+2. FN_LINEVOL tablosuna trigger. Döviz yerlerine döviz kurları ve hesapları
+3. FN_LINEVOL tablosuna trigger. IO_TD nin value si LINE_TD ye bağlı ayarlanacak
+
+
+GİDERLER ALTINDA 
+
+1. Bir faturanın kesildiği günü takip et
+Nasıl : Elektrik her ayın 5. de kesliyor 10 gün sonra ödeme son günü takip edecek, 
+   gelen fatura tutarı, son ödeme günü
+
+2. Bir kredi kartının hesap kesim tarihini ve son ödeme gününü takip et, 
+   tüm borcunu, min tutarını ve son ödeme gününü takibe başla, ödenen kadar.
+
+
+ 
+
+
+
+****************
+
+Ön Muhasebe (Vezne) 
+---
+Finans Hesapları Seçimi Formu 
+Finans Durumu (Varlıklar, Borçlar) 
+  Borç-Alacak Takip Sistemi  
+  Vadesi gelmiş, gecikmiş işlemler,  
+  Taksitler, Krediler, Kredi Kartları,  
+  Aylık Masraflar,  
+  Faturalar (Alınan, Kesilen) 
+
+Cari Hesap Özeti 
+Makbuz (Nakit) Listesi 
+Banka Dekont Listesi 
+POS Tahsilat Listesi 
+Kredi Kartı Harcama Listesi 
+A.Çek, V.Çek Listesi 
+A.Senet, V.Senet Listesi 
+Tek kayıtlı fişler, Çok satır kayıtlı fişler 
+Alacak Taksitlendirme Sistemi 
+Borç Taksitlendirme Sistemi 
+Personel Avans, Prim, Borçlar, Maaş 
+Araç Masrafları, Araç İşlem Tarih Takipleri 
+Hızlı Gider Ödeme 
+KDV Takibi 
+Yazar Kasa Z Rapor Girişi 
+
+Finans Konuları 
+---
+Nakit kasaları (tl/döviz) 
+Müşteri Taksitleri 
+Banka hesapları 
+POS Tahsilatları 
+Kredi Kartı Harcamaları 
+Çek ve Senetler 
+Banka Kredileri 
+Giderler / Masraflar 
+Personel Avans ve Maaşları 
+
+
+
+TAHSİLAT - Nakit kasaları (tl/döviz)  
+//-----
+Perakende Satışlar
+Kesilen Faturalar
+Müşteri Hesapları (Taksitler, Alacak Kalemleri)
+Banka hesapları 
+Çek ve Senetler 
+Virman
+İade
+
+ÖDEMELER - Nakit kasaları (tl/döviz) 
+//-----
+Giderler / Masraflar 
+Alım Faturası
+Tedarikciler
+Personel Avans ve Maaşları 
+Çek ve Senetler 
+Banka Kredileri 
+Kredi Kartı Ödemesi
+Virman
+İade
+
+
+TAHSİLAT - POS Cihazları
+//---
+Perakende Satışlar
+Kesilen Faturalar
+Müşteri Hesapları (Taksitler, Alacak Kalemleri)
+
+
+
+POS Tahsilatları 
+
+Kredi Kartı Harcamaları 

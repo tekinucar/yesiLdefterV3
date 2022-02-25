@@ -1,0 +1,240 @@
+﻿USE [u7093888_Ustad01]
+GO
+
+/****** Object:  StoredProcedure [dbo].[prc_EylemPlani]    Script Date: 07.10.2020 15:51:43 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[prc_EylemPlani] (@yFirmId int, @yTarih Date, @yEylemTipiId smallInt, @yKolonNo smallInt)  
+--CREATE PROCEDURE [dbo].[prc_EylemPlani] (@yFirmId int, @yTarih Date, @yEylemTipiId smallInt, @yKolonNo smallInt)  
+AS BEGIN 
+   
+   declare @fieldEylemList nvarchar(max)
+   declare @fieldCariList nvarchar(max)
+   declare @fieldPlanList nvarchar(max)
+   declare @WhereAnd nvarchar(800)
+   declare @Tarih nvarchar(20) 
+   declare @Sql nvarchar(max)
+   
+   set @Tarih = '''' + convert(varchar(10),@yTarih)+ ''''
+
+ if ((@yKolonNo >= 10) and ((@yKolonNo <= 60))) 
+   set @fieldEylemList = '
+ Select  
+   [EylemPlani].[Id]
+ , [EylemPlani].[FirmId]
+ , [EylemPlani].[Tarih]
+ , [EylemPlani].[IsActive]
+ , [EylemPlani].[IsCancel]
+ , [EylemPlani].[EylemTipiId]
+ , [EylemPlani].[LokalId]
+ , [EylemPlani].[CariId]
+ , [EylemPlani].[BaslamaTarihSaat]
+ , [EylemPlani].[BitisTarihSaat]
+ , [EylemPlani].[VadeGun]
+ , [EylemPlani].[Aciklama]
+ , [EylemPlani].[GirisCihazKaydiId]
+ , [EylemPlani].[CikisCihazKaydiId]
+ , [EylemPlani].[Gun]
+ , [EylemPlani].[BaslamaSaati]
+ , [EylemPlani].[BitisSaati]
+ , [EylemPlani].[Sure]
+ , [EylemPlani].[GirisTarihi]
+ , [EylemPlani].[CikisTarihi]
+ , [HesapCari].[TcVkNo]            Lkp_CariHesapTcVkNo
+ , [HesapCari].[TamAdi]            Lkp_CariHesapTamAdi
+ , [EylemTipi].EylemTipi           Lkp_EylemPlaniEylemTipi
+ , [LokalHesapEylem].LokalAdi      Lkp_EylemPlaniLakolAdi
+ , convert(bit, (case when ([EylemPlani].CikisCihazKaydiId > 0) then 1 else 0 end)) as Lkp_CikisYapti
+ , convert(bit, (case when ([EylemPlani].GirisCihazKaydiId > 0) then 1 else 0 end)) as Lkp_GirisYapti
+
+ from [dbo].[EylemPlani]
+   left outer join HesapCari [HesapCari] on ( [EylemPlani].CariId = [HesapCari].Id ) 
+   left outer join Lkp.EylemPlaniEylemTipi [EylemTipi] on ( [EylemPlani].EylemTipiId = [EylemTipi].Id ) 
+   left outer join LokalHesap [LokalHesapEylem] on ( [EylemPlani].LokalId = [LokalHesapEylem].Id  )
+   
+ Where [EylemPlani].IsCancel = 0
+ and   [EylemPlani].FirmId = ' + convert(varchar(10), @yFirmId) + '
+ and   [EylemPlani].EylemTipiId = ' + convert(varchar(10), @yEylemTipiId)
+ 
+ if ((@yKolonNo = -120) or
+     (@yKolonNo = -130) or
+     (@yKolonNo = -150))
+   set @fieldCariList = '
+ Select  
+   [HesapCari].[Id]                Lkp_CariHesapId
+ , [HesapCari].[TcVkNo]            Lkp_CariHesapTcVkNo
+ , [HesapCari].[TamAdi]            Lkp_CariHesapTamAdi
+ , [CariIO].BlokId                 Lkp_CariIOBlokId
+ , [CariIO].DaireId                Lkp_CariIODaireId
+ , [CariIO].GirisTarihi            Lkp_CariIOGirisTarihi
+ , [CariIO].CikisTarihi            Lkp_CariIOCikisTarihi
+ , [CariIO].CikisTipiId            Lkp_CariIOCikisTipiId
+ , [LokalHesapBlok].LokalAdi       Lkp_CariIOBlokAdi
+ , [LokalHesapDaire].LokalAdi      Lkp_CariIODaireAdi
+ , [EylemPlani].Id
+ , [EylemPlani].Tarih
+ , [EylemPlani].EylemTipiId
+ , [EylemTipi].EylemTipi           Lkp_EylemPlaniEylemTipi
+ , [EylemPlani].LokalId
+ , [LokalHesapEylem].LokalAdi      Lkp_EylemPlaniLakolAdi
+ , convert(bit, (case when ([EylemPlani].CikisCihazKaydiId > 0) then 1 else 0 end)) as Lkp_CikisYapti
+ , convert(bit, (case when ([EylemPlani].GirisCihazKaydiId > 0) then 1 else 0 end)) as Lkp_GirisYapti
+
+ from HesapCari [HesapCari]
+   left outer join CariIO [CariIO] on ( [HesapCari].Id = [CariIO].CariId  and isnull(CariIO.IsActive,0) = 1  ) 
+   left outer join LokalHesap [LokalHesapBlok] on ( [CariIO].BlokId = [LokalHesapBlok].Id  ) 
+   left outer join LokalHesap [LokalHesapDaire] on ( [CariIO].DaireId = [LokalHesapDaire].Id  ) 
+   left outer join EylemPlani [EylemPlani] on ( [HesapCari].Id = [EylemPlani].CariId 
+     and [EylemPlani].IsActive = 1 
+	 and [EylemPlani].IsCancel = 0
+     and convert(date,[EylemPlani].Tarih) = convert(date, '+@Tarih+' ) 
+	 ) 
+   left outer join Lkp.EylemPlaniEylemTipi [EylemTipi] on ( [EylemPlani].EylemTipiId = [EylemTipi].Id ) 
+   left outer join LokalHesap [LokalHesapEylem] on ( [EylemPlani].LokalId = [LokalHesapEylem].Id  )
+ Where [HesapCari].FirmId = ' + convert(varchar(10), @yFirmId) + '
+ '
+
+
+ if (@yKolonNo = -155)
+   set @fieldPlanList = '
+ Select  
+   [EylemPlani].FirmId
+ , [EylemPlani].Tarih 
+ , [EylemPlani].EylemTipiId
+ , [EylemPlani].LokalId
+ , [EylemTipi].EylemTipi      Lkp_EylemPlaniEylemTipi
+ , [LokalHesapEylem].LokalAdi Lkp_EylemPlaniLakolAdi
+ , count([EylemPlani].Id)  as LkpKisi
+
+ from [dbo].[EylemPlani] 
+   left outer join Lkp.EylemPlaniEylemTipi [EylemTipi] on ( [EylemPlani].EylemTipiId = [EylemTipi].Id ) 
+   left outer join LokalHesap [LokalHesapEylem] on ( [EylemPlani].LokalId = [LokalHesapEylem].Id  )
+
+ where [EylemPlani].IsCancel = 0
+ and   [EylemPlani].FirmId = ' + convert(varchar(10), @yFirmId) + '
+ and   [EylemPlani].Tarih >=  DATEADD(day, -7, convert(date, '+@Tarih+'))
+ and   [EylemPlani].Tarih <  convert(date, '+@Tarih+')
+ and   [EylemPlani].EylemTipiId = ' + convert(varchar(10), @yEylemTipiId) + '
+
+ group by 
+   [EylemPlani].FirmId
+ , [EylemPlani].Tarih 
+ , [EylemPlani].EylemTipiId
+ , [EylemPlani].LokalId
+ , [EylemTipi].EylemTipi
+ , [LokalHesapEylem].LokalAdi
+
+ order by [EylemPlani].Tarih desc
+ '
+
+
+
+
+ -- preparin where And
+
+ -- Planlanan kolonu
+ if (@yKolonNo = 10)
+     set @WhereAnd = ' and convert(date,[EylemPlani].BaslamaTarihSaat) = convert(date, '+@Tarih+' ) '
+     --   122, 132 =   and convert(date,BaslamaTarihSaat) = convert(date, @yTarihSaat)
+   
+ -- Çıkmayan
+ if (@yKolonNo = 20)
+ begin
+    set @WhereAnd = '   
+	and convert(date,[EylemPlani].BaslamaTarihSaat) = convert(date, '+@Tarih+' )
+    and isnull([EylemPlani].CikisCihazKaydiId,0) = 0
+    and isnull([EylemPlani].GirisCihazKaydiId,0) = 0	'
+
+	if ((@yEylemTipiId = 122) or (@yEylemTipiId = 132))
+    set @WhereAnd = '   
+    and ( [EylemPlani].EylemTipiId = 120 or [EylemPlani].EylemTipiId = 130 ) 
+	and (
+	     convert(date,isnull([EylemPlani].CikisTarihi,convert(date,''1900.01.01''))) > convert(date, '+@Tarih+') or
+	     convert(date,isnull([EylemPlani].CikisTarihi,convert(date,''1900.01.01''))) = convert(date,''1900.01.01'')
+		) '
+ end 
+
+ -- Çıkan
+ if (@yKolonNo = 30)
+ begin
+    set @WhereAnd = '
+	and convert(date,[EylemPlani].BaslamaTarihSaat) = convert(date, '+@Tarih+' )
+    and isnull([EylemPlani].CikisCihazKaydiId,0) <> 0 '
+
+    if ((@yEylemTipiId = 122) or (@yEylemTipiId = 132))
+    set @WhereAnd = '   
+    and ( [EylemPlani].EylemTipiId = 120 or [EylemPlani].EylemTipiId = 130 ) 
+    and convert(date,isnull([EylemPlani].CikisTarihi,convert(date,''1900.01.01''))) = convert(date, '+@Tarih+') '
+ end
+
+ -- Girmeyen + Mevcut
+ -- Bugün çıkıp bugün dönmesi gerektiği halde dönmeyen
+ if ((@yKolonNo = 40) or (@yKolonNo = 60))
+ begin
+    set @WhereAnd = '   
+	and convert(date,[EylemPlani].BaslamaTarihSaat) = convert(date, '+@Tarih+' )
+    and convert(date,[EylemPlani].BitisTarihSaat) = convert(date, '+@Tarih+' )
+    and isnull([EylemPlani].CikisCihazKaydiId,0) <> 0
+    and isnull([EylemPlani].GirisCihazKaydiId,0) = 0 '
+
+	if ((@yEylemTipiId = 122) or (@yEylemTipiId = 132))
+    set @WhereAnd = '   
+	and isnull([EylemPlani].CikisCihazKaydiId,0) <> 0
+    and ( [EylemPlani].EylemTipiId = 120 or [EylemPlani].EylemTipiId = 130 )
+	and ( convert(date,isnull([EylemPlani].GirisTarihi,convert(date,''1900.01.01''))) > convert(date, '+@Tarih+') or
+	      convert(date,isnull([EylemPlani].GirisTarihi,convert(date,''1900.01.01''))) = convert(date,''1900.01.01'' ) ) '
+    --and isnull([EylemPlani].GirisCihazKaydiId,0) = 0
+
+    -- Mevcut
+	--if (@yKolonNo = 60)
+    --  set @Where = ''   
+ end
+
+ -- Giren
+ -- Bugün çıkıp, bugün geri dönen
+ if (@yKolonNo = 50)
+ begin
+    set @WhereAnd = '   
+	and [EylemPlani].IsActive = 0
+    and convert(date,[EylemPlani].BaslamaTarihSaat) = convert(date, '+@Tarih+' )
+    and convert(date,[EylemPlani].BitisTarihSaat) = convert(date, '+@Tarih+' )
+    and isnull([EylemPlani].CikisCihazKaydiId,0) <> 0
+    and isnull([EylemPlani].GirisCihazKaydiId,0) <> 0 '
+	
+    if ((@yEylemTipiId = 122) or (@yEylemTipiId = 132))
+    set @WhereAnd = '   
+    and convert(date,[EylemPlani].GirisTarihi) = convert(date, '+@Tarih+' )
+	and ( [EylemPlani].EylemTipiId = 120 or [EylemPlani].EylemTipiId = 130 ) 
+	and convert(date,isnull([EylemPlani].GirisTarihi,convert(date,''1900.01.01''))) = convert(date, '+@Tarih+' ) '	   	  
+ end
+
+
+
+
+ if ((@yKolonNo >= 10) and ((@yKolonNo <= 60))) 
+    set @Sql = @fieldEylemList + @WhereAnd 
+
+ -- cariList Where prpearing
+ 
+ if ((@yKolonNo = -120) or
+     (@yKolonNo = -130) or
+     (@yKolonNo = -150))
+ begin
+    set @WhereAnd = ' and isnull([CariIO].IsActive,0) = 1 '
+
+    set @Sql = @fieldCariList + @WhereAnd 
+ end
+ 
+ if (@yKolonNo = -155)
+    set @Sql = @fieldPlanList
+
+ Exec sp_executesql @Sql
+ 
+END
+GO
+
+

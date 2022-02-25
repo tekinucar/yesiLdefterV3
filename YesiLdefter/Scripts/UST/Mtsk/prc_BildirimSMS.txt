@@ -1,0 +1,73 @@
+﻿USE [u7093888_Ustad01]
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+CREATE PROCEDURE [dbo].[prc_BildirimSMS] ( 
+    @FirmId Int 
+   ,@KaynakTipiId SmallInt
+   ,@KaynakRefId Int
+   ,@KaynakGonderOnayi Bit
+   ,@KaynakMesajTipiId SmallInt
+  )  
+AS BEGIN
+
+   -- KaynakTipiId : Hangi tablodan istek geldiği örnek    1 = MtskAday tablosu 
+   -- KaynakRefId  : İstekde bulunan tablonun Id si        x = MtskAday.Id yani AdayId
+   -- KaynakGonderOnayi : Kaynak tablosundaki kullanıcının onayladığı veya onayını iptal ettiği işaret : MtskAday.SMSGonder
+   -- KaynakMesajTipiId : Kaynaktan gelen mesaj tipi Id  : MtskAday.MesajTipiId
+
+   declare @bildirimSMSId int = 0
+   declare @Mesaj nvarchar(160)
+
+   Select @bildirimSMSId = isnull(Id,0)
+   From [dbo].[BildirimSMS]
+   Where FirmId = @FirmId
+   and   KaynakTipiId = @KaynakTipiId
+   and   KaynakRefId = @KaynakRefId 
+   and   MesajTipiId = @KaynakMesajTipiId
+   and   IsGonderildi = 0 -- henüz göndelmemiş olan mesaj
+
+   Set @Mesaj = [dbo].[fnc_MtskSMSMesajiniHazirla] (@KaynakTipiId, @KaynakRefId, @KaynakMesajTipiId)
+
+   if (@bildirimSMSId = 0)
+   begin
+       Insert into [dbo].[BildirimSMS]
+           ([FirmId]
+           ,[IsActive]
+           ,[KaynakTipiId]
+           ,[KaynakRefId]
+           ,[MesajTipiId]
+           ,[HazirlamaTarihi]
+           ,[PlanlananTarih]
+           ,[GonderimTarihi]
+           ,[IsGonderildi]
+           ,[Mesaj])
+       Values
+           (@FirmId
+           ,@KaynakGonderOnayi -- IsActive, bit
+           ,@KaynakTipiId
+           ,@KaynakRefId
+           ,@KaynakMesajTipiId
+           ,Getdate() -- HazirlamaTarihi, smalldatetime
+           ,null      -- PlanlananTarih, smalldatetime
+           ,null      -- GonderimTarihi, smalldatetime
+           ,0         -- IsGonderildi, bit
+           ,@Mesaj    -- Mesaj, nvarchar(150)
+           )
+   end
+
+   if (@bildirimSMSId > 0)
+   begin
+       Update [dbo].[BildirimSMS] set
+         IsActive = @KaynakGonderOnayi -- IsActive, bit
+       , HazirlamaTarihi = Getdate()   -- onaylandığında veya onayı iptal edildiği tarihsaat 
+       , Mesaj = @Mesaj
+       Where Id = @bildirimSMSId
+   end
+
+END -- procedure

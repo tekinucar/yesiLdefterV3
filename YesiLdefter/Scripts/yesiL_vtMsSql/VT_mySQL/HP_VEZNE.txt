@@ -1,0 +1,66 @@
+﻿
+
+begin transaction
+
+ create table HP_VEZNE
+ (
+   ID               Int IDENTITY(1,1) NOT NULL, 
+   FIRM_ID          Int               NULL,
+   SHOP_ID          Int               NULL,
+   
+   ACTIVE_TD        SmallInt          NULL, /* 0. Pasif 1. Aktif */
+   LINE_NO          Int               NULL,
+   TBOX_TD          SmallInt          NULL, /* 1. Tahsilat Noktası/Vezne No, 2. Tahsilat/Ödeme Araçları Listesi (HP_FINANS), 3. personel listesi (HP_CARI) */    
+   HP_VEZNE_ID      Int               NULL, /* a.ID = b.HP_VEZNE_ID ? açıklama aşağıda       */   
+   HP_FINANS_ID     Int               NULL, /* HP_FINANS tablosu  */   
+   HP_CARI_ID       Int               NULL, /* HP_CARI tablosu */   
+   HP_HAKKINDA      VarChar(200)      NULL, /* Vezne Adı */
+         
+   constraint		PK_HP_VEZNE primary key (ID)
+ )
+
+ create index X_HP_VEZNE01 on HP_VEZNE (FIRM_ID, SHOP_ID, TBOX_TD, LINE_NO)
+ 
+ grant select, insert, update, delete on HP_VEZNE to public
+
+commit transaction
+
+/* yapının çalışması
+Amaç : 
+
+Birinci hamle a, b, c Veznelerini oluşturmak
+
+@VezneID = ID, TBOX_TD = 1, HP_HAKKINDA = 'a Veznesi'
+
+İkinci hamle bu veznelerde hangi finans hesapları kullanılacak onları belirlemek
+
+ID, TBOX_TD = 2, HP_VEZNE_ID = @VezneID, HP_FINANS_ID = xValue, HP_CARI_ID = 0
+
+Üçüncü hamle personel hangi vezneleri kullanabilecek 
+
+ID, TBOX_TD = 3, HP_VEZNE_ID = @VezneID, HP_FINANS_ID = 0, HP_CARI_ID = xValue
+
+
+Böylece 
+
+Firmadaki vezneler 
+ ( Select * from HP_VEZNE a Where a.FIRM_ID = x  and a.TBOX_TD = 1 ) olanlar
+
+Şubedeki vezneler
+ ( Select * from HP_VEZNE a Where a.FIRM_ID = x  and a.SHOP_ID = y  and a.TBOX_TD = 1 )
+
+Veznelerin kullandığı finans hesapları
+
+ ( Select * from HP_VEZNE a 
+   Where a.FIRM_ID = x  
+   and   a.SHOP_ID = y  
+   and   a.TBOX_TD = 2 
+   and   a.HP_VEZNE_ID = @VezneID
+   )
+
+
+
+
+
+
+/*

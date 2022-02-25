@@ -1,0 +1,73 @@
+
+
+begin transaction
+
+ create table MS_GLYPH
+ (
+    REF_ID                  Int IDENTITY(1,1)  NOT NULL,
+    MAIN_GROUP_ID           Int                NULL,
+    GROUP_ID                Int                NULL,
+    GFILE_NAME              VarChar(100)       NULL,
+    GSIZE                   VarChar(20)        NULL, /* [16], [32], [xxx,yyy]     */   
+    GLYPH_NAME              VarChar(120)       NULL, 
+    GLYPH                   VarBinary(8000)    NULL,
+
+	Constraint PK_MS_GLYPH primary key (REF_ID)
+ )
+
+ create index X_MS_GLYPH1 on MS_GLYPH (MAIN_GROUP_ID, GROUP_ID, GFILE_NAME)
+
+ grant select, insert, update, delete on MS_GLYPH to public
+
+commit transaction
+
+
+CREATE PROCEDURE [dbo].[prc_MS_GLYPH] 
+	@Id Integer
+AS BEGIN
+
+ declare @MGroupId int
+ declare @GroupId int
+ declare @GFileName VarChar(100)
+
+   Select 
+       @MGroupId = ins.[MAIN_GROUP_ID]
+      ,@GroupId = ins.[GROUP_ID]
+      ,@GFileName = ins.[GFILE_NAME]
+
+   from [MS_GLYPH] ins
+   where ins.REF_ID = @Id
+
+   update [MS_GLYPH] set 
+   GLYPH_NAME = convert(varchar(10), @MGroupId)  + '_' + convert(varchar(10), @GroupId)  + '_' + @GFileName 
+   where REF_ID = @Id  
+
+
+END
+
+
+
+
+CREATE TRIGGER trg_MS_GLYPH on MS_GLYPH
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    DECLARE InsertCursor_MS_GLYPH cursor for select REF_ID from Inserted
+    DECLARE @curId bigint
+
+    OPEN InsertCursor_MS_GLYPH
+
+    FETCH NEXT FROM InsertCursor_MS_GLYPH INTO @curId
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+    	
+    	EXEC dbo.prc_MS_GLYPH @curId
+
+    	FETCH NEXT FROM InsertCursor_MS_GLYPH INTO @curId
+    END
+
+    CLOSE InsertCursor_MS_GLYPH
+    DEALLOCATE InsertCursor_MS_GLYPH   
+
+END

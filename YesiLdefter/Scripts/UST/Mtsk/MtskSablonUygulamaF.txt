@@ -1,0 +1,36 @@
+﻿begin transaction
+
+ create table MtskSablonUygulamaF
+ (
+   Id                      Int IDENTITY(1,1) not null, 
+   FirmId                  Int       not null,
+   DonemTipiId             Int           null,
+   MevcutSertifikaTipiId   SmallInt      null,
+   IstenenSertifikaTipiId  SmallInt      null,
+   SablonUygulamaBId       Int           null,
+   BaslangicTarihi         Date          null,
+
+   SimulatorId             Int           null,
+   AracId                  Int           null, 
+   Ogretici1Id             Varchar(20)   null,
+   Ogretici2Id             Varchar(20)   null,
+   Aday1Id                 Int           null,
+   Aday2Id                 Int           null,
+   Aday3Id                 Int           null,
+   Aday4Id                 Int           null,
+   Aday5Id                 Int           null,
+   Aday6Id                 Int           null,
+   Aday7Id                 Int           null,
+   Aday8Id                 Int           null,
+
+   constraint		pk_MtskSablonUygulamaF primary key (Id)
+ )
+  
+ grant select, insert, update, delete on MtskSablonUygulamaF to public
+
+ create index X_MtskSablonUygulamaF01 on MtskSablonUygulamaF (DonemTipiId)
+ create index X_MtskSablonUygulamaF02 on MtskSablonUygulamaF (SablonUygulamaBId)
+ create index X_MtskSablonUygulamaF03 on MtskSablonUygulamaF (MevcutSertifikaTipiId, IstenenSertifikaTipiId)
+ 
+commit transaction
+

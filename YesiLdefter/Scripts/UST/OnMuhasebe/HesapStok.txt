@@ -1,0 +1,268 @@
+﻿begin transaction
+
+ create table HesapStok
+ (
+
+   Id                  Int IDENTITY(1,1) NOT NULL, /* Id  DİĞER TABLOLARDA Stok_ID OLUYOR  */
+   ParentId            Int       not null, /* default 0 */
+   FirmId              Int       not null,
+   IsActive            Bit       not null, /* default : 1 = active, 0 = not active */  
+   StokTipiId          SmallInt      null, /* 150,151,153,600(verilen Hizmetler),740 */
+   --CalismaTipiId       SmallInt      null, /* ? */
+
+   StokKodu            nVarChar(50)  null,
+   StokAdi             nVarChar(100) null,
+  
+   BirimTipiId1        nVarChar(3)   null,
+   BirimTipiId2        nVarChar(3)   null,
+   Birim2Carpani       Numeric(12,4) null,
+   AlimBirimTipiId     nVarChar(3)   null,
+   SatisBirimTipiId    nVarChar(3)   null,
+   AlimKdvOrani        Numeric(4,2)  null,
+   SatisKdvOrani       Numeric(4,2)  null,
+
+
+   AlimMesaji          nVarChar(100) null,
+   SatisMesaji         nVarChar(100) null,
+   SatisiDurumuTipiId  SmallInt      null, /* 0- Normal, 1-Satışı Yok 2- Geçiçi Süreyle Yok */
+   --
+   ParaTipiId          nVarChar(3)   null,
+   BorcDovizYeriId     SmallInt      null,
+   AlacakDovizYeriId   SmallInt      null,
+   --
+   GIPTKoduId          Int           null, /* sistem bilmiyorum */
+   IhracatKategoriKodu nVarchar(20)  null, /* sistem bilmiyorum */
+   IsTevkifat          Bit           null,
+   TevkifatKodu        nVarchar(6)   null,
+   TevkifatPayi        Numeric(3)    null, /* 2, 1 - 9, %90,  */
+   TevkifatPaydasi     Numeric(3)    null, /* 3, 10,    100   */
+   TevkifatOrani       nVarChar(4)   null, /* 2/3 , 2/10 ... 9/10 veya %90 gibi açıklamalar taşır  */
+
+   constraint  pk_HesapStok primary key (Id)
+ )
+
+ create index X_HesapStok01 on HesapStok (FirmId)
+ create index X_HesapStok02 on HesapStok (StokTipiId)
+ --create index X_HesapStok03 on HesapStok (CalismaTipiId)
+ 
+ grant select, insert, update, delete on HesapStok to public
+
+ -- ALTER TABLE HesapStok ALTER COLUMN AlimKdvOrani Numeric(4,2) null
+ -- ALTER TABLE HesapStok ALTER COLUMN SatisKdvOrani Numeric(4,2) null
+
+-- ------------------------------------------------------- 
+-- StokTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[HesapStokStokTipi]
+(
+   Id          Int Unique Not Null,
+   StokTipi    nVarchar(50)   null,
+   GrupTipiId  SmallInt       null,
+   
+   constraint  pk_HesapStokStokTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[HesapStokStokTipi] (Id, StokTipi, GrupTipiId)
+ VALUES 
+  (0,    N'Tanımsız',    0),
+  (150,  N'150 İlk Madde Malzeme',  1),
+  (151,  N'151 Yarı Mamuller', 1),
+  (153,  N'153 Ticari Mal',    1),
+  (25,   N' 25 Maddi Duran Varlık', 1),
+  (600,  N'600 Verilen Hizmetler', 1),
+  --(750,  N'750 ArGe Malzemesi', 1), -- 750. Araştırma Ve Geliştirme
+  (770,  N'770 Tüketim Malzemesi', 1) -- 770. Genel Yönetim Giderleri
+  
+
+
+ create table IStokFaturaEkVergi
+ (
+
+   Id                Int IDENTITY(1,1) NOT NULL, 
+   FirmId            Int       not null,
+   IsActive          Bit       not null, /* default : 1 = active, 0 = not active */  
+   StokId            Int           null,
+   SiraNo            SmallInt      null,
+   FaturaEkVergiKodu nVarchar(10)  null,
+   VergiOrani        Numeric(12,8) null, /* tanımlı tablodan okunacak */
+   VergiTutari       Numeric(22,8) null, /*  ""  */
+   
+   constraint		pk_IStokFaturaEkVergi primary key (Id)
+ )
+
+ create index X_IStokFaturaEkVergi01 on IStokFaturaEkVergi (FirmId,StokId)
+ 
+ grant select, insert, update, delete on IStokFaturaEkVergi to public
+
+
+
+ create table IStokFiyat
+ (
+
+   Id                  Int IDENTITY(1,1) NOT NULL, 
+   FirmId              Int       not null,
+   IsActive            Bit       not null, /* default : 1 = active, 0 = not active */
+   CesitTipiId         SmallInt      null, /* default : 1 = Müşteri fiyatı, 2 = Bayii vb,  :  */
+   UygulamaTipiId      SmallInt      null, /* default : 1 = Standart Fiyat Listesi, 2. Alış Fiyatına % Ekle, vb  */
+   
+   ListeId             Int           null, /* kampanya listesi */
+   StokId              Int           null,
+   BirimTipiId         nVarChar(3)   null,
+   
+   ParaTipiId          nVarChar(3)   null,
+   DovizYeriId         SmallInt      null,
+   
+   GecerliGunTipiId    SmallInt      null, /* 0. hergün, 1. hafta içi, 2. ctesi, 3. pazar, 4. ctesi + pazar */
+   BaslamaTarihi       Date          null,
+   BaslamaSaati        nVarchar(5)   null,
+   BaslamaTarihSaat    SmallDateTime null,
+   BitisTarihi         Date          null,
+   BitisSaati          nVarchar(5)   null,
+   BitisTarihSaat      SmallDateTime null,
+   
+   AlimFiyati          Numeric(22,5) null,
+   AlimFiyatiKdvli     Numeric(22,5) null,
+   dAlimFiyati         Numeric(22,5) null,
+   dAlimFiyatiKdvli    Numeric(22,5) null,
+
+   KarYüzdesi1         Numeric(12,8) null, /* UygulamaTipiId 1 için  */
+   KarYüzdesi2         Numeric(12,8) null,
+   KarIskontoOrani     Numeric(12,8) null, /* Kardan yapılacak max İskonto; Satış iskontosunu otomatik hesaplar  */
+
+   YuvarlamaOraniTipiId SmallInt     null,
+   YuvarlamaSekliTipiId SmallInt     null,
+
+   SatisFiyati         Numeric(22,5) null,
+   SatisFiyatiKdvli    Numeric(22,5) null,
+   dSatisFiyati        Numeric(22,5) null,
+   dSatisFiyatiKdvli   Numeric(22,5) null,
+
+   MaxSatisIskontoOrani  Numeric(12,8) null, /* Uygulanacak Olan Max Oran  */
+   MaxSatisIskontoTutari Numeric(22,8) null, /* Uygulanacak Olan Max Tutar */
+
+   constraint		pk_IStokFiyat primary key (Id)
+ )
+
+ create index X_IStokFiyat01 on IStokFiyat (FirmId,StokId)
+ 
+ grant select, insert, update, delete on IStokFiyat to public
+
+
+
+-- ------------------------------------------------------- 
+-- CesitTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[IStokFiyatCesitTipi]
+(
+   Id          Int Unique Not Null,
+   CesitTipi   nVarchar(50)   null,
+   GrupTipiId  SmallInt       null,
+   
+   constraint  pk_IStokFiyatCesitTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[IStokFiyatCesitTipi] (Id, CesitTipi, GrupTipiId)
+ VALUES 
+  (0,  N'Tanımsız',    0),
+  (1,  N'Müşteri Fiyatı',  1),
+  (2,  N'Bayii Fiyatı',  1)
+
+-- ------------------------------------------------------- 
+-- UygulamaTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[IStokFiyatUygulamaTipi]
+(
+   Id            Int Unique Not Null,
+   UygulamaTipi  nVarchar(50)   null,
+   GrupTipiId    SmallInt       null,
+   
+   constraint  pk_IStokFiyatUygulamaTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[IStokFiyatUygulamaTipi] (Id, UygulamaTipi, GrupTipiId)
+ VALUES 
+  (0,  N'Tanımsız',    0),
+  (1,  N'Standart Fiyat Listesi',  1),
+  (2,  N'Alış Fiyatına % Ekle',  1)
+
+-- ------------------------------------------------------- 
+-- GecerliGunTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[IStokFiyatGecerliGunTipi]
+(
+   Id               Int Unique Not Null,
+   GecerliGunTipi   nVarchar(50)   null,
+   GrupTipiId       SmallInt       null,
+   
+   constraint  pk_IStokFiyatGecerliGunTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[IStokFiyatGecerliGunTipi] (Id, GecerliGunTipi, GrupTipiId)
+ VALUES 
+  (0,  N'Hergün',    1),
+  (1,  N'Hafta içi',  1),
+  (2,  N'Sadece Cumartesi',  1),
+  (3,  N'Sadece Pazar',  1),
+  (4,  N'Cumartesi + Pazar',  1)
+
+
+-- ------------------------------------------------------- 
+-- YuvarlamaOraniTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[IStokFiyatYuvarlamaOraniTipi]
+(
+   Id                   Int Unique Not Null,
+   YuvarlamaOraniTipi   nVarchar(50)   null,
+   GrupTipiId           SmallInt       null,
+   
+   constraint  pk_IStokFiyatYuvarlamaOraniTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[IStokFiyatYuvarlamaOraniTipi] (Id, YuvarlamaOraniTipi, GrupTipiId)
+ VALUES 
+  (0,  N'Yuvarlama Yok',    1),
+  (1,  N'Orantılı Yuvarla (%50)',  1),
+  (2,  N'Aşağıya Yuvarla',  1),
+  (3,  N'Yukarıya Yuvarla',  1)
+
+
+-- ------------------------------------------------------- 
+-- YuvarlamaSekliTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[IStokFiyatYuvarlamaSekliTipi]
+(
+   Id                   Int Unique Not Null,
+   YuvarlamaSekliTipi   nVarchar(50)   null,
+   GrupTipiId           SmallInt       null,
+   
+   constraint  pk_IStokFiyatYuvarlamaSekliTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[IStokFiyatYuvarlamaSekliTipi] (Id, YuvarlamaSekliTipi, GrupTipiId)
+ VALUES 
+  (0,     N'0',     1),
+  (1,     N'1',     1),
+  (10,    N'10',    1),
+  (100,   N'100',   1),
+  (1000,  N'1000',  1),
+
+  (5,     N'5',     1),
+  (50,    N'50',    1),
+  (500,   N'500',   1),
+  (5000,  N'5000',  1),
+
+  (2,     N'2.5',   1),
+  (25,    N'25',    1),
+  (250,   N'250',   1),
+  (2500,  N'2500',  1),
+
+  (3110,     N'1.010',  1),
+  (3125,     N'1.025',  1),
+  (3150,     N'1.050',  1),
+  (3001,     N'1.00',   1),
+  (3010,     N'1.10',   1),
+  (3025,     N'1.25',   1),
+  (3050,     N'1.50',   1)
+
+commit  transaction
+

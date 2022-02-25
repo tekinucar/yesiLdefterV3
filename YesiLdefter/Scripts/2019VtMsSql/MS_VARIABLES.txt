@@ -1,0 +1,61 @@
+
+begin transaction
+
+ create table MS_VARIABLES
+ (
+    ID                      Int IDENTITY(1,1) NOT NULL,
+    ISACTIVE                SmallInt              NULL,
+    MODUL_CODE              VarChar(20)           NULL,
+    LINE_NO                 Int                   NULL, 
+
+    VARIABLE_CODE           VarChar(50)           NULL, 
+    VARIABLE_CAPTION        VarChar(100)          NULL,   
+    VARIABLE_ABOUT          VarChar(200)          NULL,
+
+    /* default */
+    VARIABLE_TYPE           SmallInt		      NULL,  /* field tipi */
+    CMP_COLUMN_TYPE         VarChar(30)           NULL,
+    DEFAULT_VALUE           VarChar(1000)         NULL,  /* programdan dolayý default value gerekebilir */
+   
+    SEARCH_TABLEIPCODE      VarChar(50)           NULL, /* default value için gerekli arama moturu IPCode */
+    PROP_SEARCH             VarChar(4000)         NULL,       
+    
+    /* Join Table baðlantýsý */
+    FJOIN_TYPE              SmallInt               NULL, /* 0=Yok, 1=Left, 2=Right, 3=inner */
+    FJOIN_TABLE_NAME        VarChar(50)            NULL,
+    FJOIN_TABLE_ALIAS       VarChar(30)            NULL,
+    FJOIN_KEY_FNAME         VarChar(30)            NULL,
+    FJOIN_WHERE             VarChar(200)           NULL,
+
+    Constraint PK_MS_VARIABLES primary key (ID)
+ )
+ -- mysql_add
+ 
+ create index X_MS_VARIABLES01 on MS_VARIABLES (MODUL_CODE, VARIABLE_CODE);
+ create index X_MS_VARIABLES02 on MS_VARIABLES (MODUL_CODE, LINE_NO);
+
+ grant select, insert, update, delete on MS_VARIABLES to public
+
+commit transaction
+
+
+/*
+
+VARIABLE_CODE  ÖRNEK
+-----------------------------
+DEF_HP_FIRM_ID
+DEF_HP_SHOP_ID
+DEF_HP_PART_ID
+DEF_HP_DEPARTMAN_ID
+DEF_HP_USER_ID          
+
+DEF_FNS_KASA_TL_ID
+DEF_FNS_KASA_USA_ID
+DEF_FNS_KASA_EURO_ID
+
+DEF_FNS_BANKA_HES_ID
+DEF_FNS_BANKA_POS_ID
+DEF_FNS_BANKA_KK_ID
+
+*/
+

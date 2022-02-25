@@ -1,0 +1,64 @@
+﻿
+-- ------------------------------------------------------- 
+-- BirimTipi
+-- ------------------------------------------------------- 
+create table [Lkp].[BirimTipi]
+(
+   Id          Int Unique Not null,
+   IsActive    Bit null,
+   BirimKodu   nVarchar(3) null,
+   BirimAdi    nVarchar(20) null,
+
+   constraint  pk_BirimTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[BirimTipi] (Id, IsActive, BirimKodu, BirimAdi )
+ VALUES 
+  ( 0, 1, N'',    N'Tanımsız' ),
+  ( 1, 0, N'DAY', N'Gün' ),
+  ( 2, 0, N'MON', N'Ay' ),
+  ( 3, 0, N'ANN', N'Yıl' ),
+  ( 4, 0, N'HUR', N'Saat' ),
+  ( 5, 0, N'D61', N'Dakika' ),
+  ( 6, 0, N'D62', N'Saniye' ),
+  ( 7, 1, N'C62', N'Adet' ),
+  ( 8, 1, N'PA',  N'Paket' ),
+  ( 9, 1, N'BX',  N'Kutu' ),
+  (10, 0, N'MGM', N'mg' ),
+  (11, 0, N'GRM', N'g' ),
+  (12, 1, N'KGM', N'kg' ),
+  (13, 1, N'LTR', N'lt' ),
+  (14, 1, N'TNE', N'ton' ),
+  (15, 0, N'NT',  N'Net Ton' ),
+  (16, 0, N'GT',  N'Gross Ton' ),
+  (17, 0, N'MMT', N'mm' ),
+  (18, 0, N'CMT', N'cm' ),
+  (19, 0, N'MTR', N'metre' ),
+  (20, 0, N'KTM', N'km' ),
+  (21, 0, N'MLT', N'ml' ),
+  (22, 0, N'MMQ', N'mm3' ),
+  (23, 0, N'CMK', N'cm2' ),
+  (24, 0, N'CMQ', N'cm3' ),
+  (25, 0, N'MTK', N'm2' ),
+  (26, 0, N'MTQ', N'm3' ),
+  (27, 0, N'KJO', N'kJ' ),
+  (28, 0, N'CLT', N'cl' ),
+  (29, 0, N'CT',  N'KARAT' ),
+  (30, 0, N'KWH', N'KWH' ),
+  (31, 0, N'MWH', N'MWH' ),
+  (32, 0, N'CCT', N'Ton baş.taşıma kap.' ),
+  (33, 0, N'D30', N'Brüt kalori' ),
+  (34, 0, N'D40', N'1000 lt' ),
+  (35, 0, N'LPA', N'Saf alkol lt' ),
+  (36, 0, N'B32', N'kg.m2' ),
+  (37, 0, N'NCL', N'Hücre adet' ),
+  (38, 0, N'PR',  N'Çift' ),
+  (39, 0, N'R9',  N'1000 m3' ),
+  (40, 1, N'SET', N'Set' ),
+  (41, 0, N'T3',  N'1000 adet' ),
+  (42, 0, N'Q37', N'SCM' ),
+  (43, 0, N'Q39', N'NCM' ),
+  (44, 0, N'J39', N'mmBTU' ),
+  (45, 0, N'G52', N'CM³' ),
+  (46, 0, N'DZN', N'Düzine' ),
+  (47, 0, N'dm2', N'DMK' )

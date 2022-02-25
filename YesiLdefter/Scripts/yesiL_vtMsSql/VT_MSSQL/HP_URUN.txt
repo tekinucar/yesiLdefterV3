@@ -1,0 +1,377 @@
+﻿/*
+EKLENECEK VERGİ TÜRLERİ
+---
+ÖTV - ÖZEL TÜKETİM VERGİSİ (GTIP KODU)
+ÖİT - ÖZEL İLETİŞİM VERGİSİ
+TELSİZ - TELSİZ KULLANIM ÜCRETİ
+TRT - TRT PAYI TUTARI
+
+
+*/
+
+
+begin transaction
+
+create table HP_URUN
+(
+  ID                  Int IDENTITY(1,1)   NOT NULL,
+  FIRM_ID             Int                 NULL,
+   
+  URUN_KODU           VarChar(50)         NULL,
+  URUN_ADI            VarChar(100)        NOT NULL,
+  URUN_ADI_2          VarChar(100)        NULL,
+  URUN_GRUBU          Int                 NULL,
+  URUN_TIPI           Int                 NULL,
+  
+  SATIS_BARKODU       VarChar(20)         NULL,  
+  SATIS_BARKODU2      VarChar(20)         NULL,
+  SATIS_BARKODU3      VarChar(20)         NULL,
+  SATIS_BARKODU4      VarChar(20)         NULL,
+  BARKOD_KAYNAGI      numeric(1,0)        NULL,
+
+  ALIS_KDV            Numeric(4,2)        NULL,
+  SATIS_KDV           Numeric(4,2)        NULL,
+  VERGI_TURU1_ID      int                 NULL, /* Parent table > HP_VERGI.ID */ 
+  VERGI_TURU2_ID      int                 NULL,
+  VERGI_TURU3_ID      int                 NULL,
+  
+  OZELLIK_1_ID        SmallInt            NULL,
+  OZELLIK_1           VarChar(25)         NULL,
+  OZELLIK_2_ID        SmallInt            NULL,
+  OZELLIK_2           VarChar(25)         NULL,
+  OZELLIK_3_ID        SmallInt            NULL,
+  OZELLIK_3           VarChar(25)         NULL,
+  OZELLIK_4_ID        SmallInt            NULL,
+  OZELLIK_4           VarChar(25)         NULL,
+
+  KALITE_ID           Numeric(2,0)        NULL, /* 1,2,3,4,5,6,7,8,9. sınıf */
+  ACIKLAMA            VarChar(255)        NULL,
+  BIRIM_1             VarChar(10)         NULL,
+  BIRIM_2             VarChar(10)         NULL,
+  BIRIM_3             VarChar(10)         NULL,
+  BIRIM_2_CARPANI     Numeric(12,4)       NULL,
+  BIRIM_3_CARPANI     Numeric(12,4)       NULL,
+  SATISTA_SORMA       Numeric(1,0)        NULL, /* 0 ise SOR, 1 ise SORMA */
+  KUSURAT_SAYISI_1    Numeric(1,0)        NULL, /* 0 ile 5 arası */
+  KUSURAT_SAYISI_2    Numeric(1,0)        NULL, /* 0 ile 5 arası */
+  KUSURAT_SAYISI_3    Numeric(1,0)        NULL, /* 0 ile 5 arası */
+  ALIS_BIRIMI         SmallInt            NULL,
+  SATIS_BIRIMI        SmallInt            NULL,
+  PARA_TURU           SmallInt            NULL, /* 0- TL  0 > Dolar, Mark */
+  B_DOVIZ_YERI_ID     SmallInt            NULL,
+  A_DOVIZ_YERI_ID     SmallInt            NULL,
+  SIPARIS_SEVIYESI    Numeric(12,4)       NULL, /* Min, Max hesaplandıktan sonra Günlük satış ort. sonucu yazılıyor. */
+  SIP_SEV_BIRIMI      Numeric(1,0)        NULL,
+  MIN_STOK_SEVIYESI   Numeric(12,4)       NULL,
+  MAX_STOK_SEVIYESI   Numeric(12,4)       NULL,
+  SUBE_MIN_STOK_SEV   Numeric(12,4)       NULL,
+  SUBE_MAX_STOK_SEV   Numeric(12,4)       NULL,
+  DEPO_MAX_STOK_SEKLI     Numeric(3,0)        NULL,
+  SUBE_MAX_STOK_SEKLI     Numeric(3,0)        NULL,
+  URETICI_FIRMA       VarChar(20)         NULL,
+  MARKASI             VarChar(20)         NULL,
+  MODELI              VarChar(20)         NULL,
+  ALIS_MESAJI         VarChar(100)        NULL,
+  SATIS_MESAJI        VarChar(100)        NULL,
+  URUN_IZLEME_ID      Numeric(1,0)        NULL, /* 1 = hızlı mal kabulü */
+  MIAD_IZLEME_ID      Numeric(1,0)        NULL, /* Garanti süresi veya miadı (son kullanım tarihi) izleme */
+  SATIS_DURUMU        Numeric(1,0)        NULL, /* 0- Normal, 1-Satışı Yok 2- Geçiçi Süreyle Yok */
+  CESIT_ZAMANI        numeric(1,0)        NULL, 
+  CESIT1_ID           Int                 NULL,
+  CESIT2_ID           Int                 NULL,
+  CESIT3_ID           Int                 NULL,
+  CESIT1_ADI          VarChar(15)         NULL,
+  CESIT2_ADI          VarChar(15)         NULL,
+  CESIT3_ADI          VarChar(15)         NULL,
+  CESIT1_ZORUNLU      Numeric(1,0)        NULL,
+  CESIT2_ZORUNLU      Numeric(1,0)        NULL,
+  CESIT3_ZORUNLU      Numeric(1,0)        NULL,
+  CESIT12_ID          Int                 NULL,
+  CESIT13_ID          Int                 NULL,
+  CESIT22_ID          Int                 NULL,
+  CESIT23_ID          Int                 NULL,
+  CESIT32_ID          Int                 NULL,
+  CESIT33_ID          Int                 NULL,
+  PRIM_TUTARI         Numeric(22,3)       NULL,
+  PRIM_YUZDESI        Numeric(12,4)       NULL,
+  URUN_AGACI          Numeric(1,0)        NULL, /* kredili satıştaki ürün ağacında görüksün 0=Hayır, 1=Evet*/
+  SATISI_BITECEK      Numeric(1,0)        NULL,
+  TEMIN_SURESI        Numeric(2,0)        NULL, /* temin süresi */
+  TEMIN_SURE_OPS      Numeric(2,0)        NULL, /* temin Süresi için ops. süre */
+  TEMIN_SEKLI         Numeric(1,0)        NULL, /* temin şekli  0=AL-SAT, 1.URET_SEKLI, ... */
+  TEMIN_CARI_ID       Int                 NULL,
+  TEMIN_CARI_ID2      Int                 NULL,
+  TEMIN_CARI_ID3      Int                 NULL,
+  TEMIN_CARI_ID4      Int                 NULL,
+  TEMIN_CARI_ID5      Int                 NULL,
+  GENISLIK            Numeric(6,2)        NULL,
+  YUKSEKLIK           Numeric(6,2)        NULL,
+  DERINLIK            Numeric(6,2)        NULL,
+  HACIM_M3            Numeric(6,3)        NULL,
+  KURULUM_SURESI      Numeric(6,2)        NULL,
+  TASIMA_SURESI       SmallInt            NULL,
+  GSO_ICIN            Numeric(2,0)        NULL, /* Günlük satış ortalamasını bulmak için kullanılan metod */
+  GSO_KUL_MIKTARI     Numeric(6,3)        NULL, /* GSO = Günlük Satış Ortalamsı, KULLANICI MIKTARI */
+  SEZON_FAKTORU       Numeric(5,3)        NULL,
+  MIN_CESIT_KNT       Numeric(1,0)        NULL, /* Ürün Çeşitleri için Min. Stok Seviye Takibi  0 = Yok, 1 = Var */
+  EMNIYET_STOGU       Numeric(1,0)        NULL, /* Emniyet StoğU   0 = Kullanma,  1 = Kullan */
+  DEPARTMAN_ID        int                 NULL,
+  RAF_ID              Int                 NULL,
+  FIYAT_POLITIKASI    Numeric(1,0)        NULL,
+  --STOK_DURUMU_ACIKLAMASI  VarChar(255)        NULL,  gerekirse ekle
+  SIRA_NO             int                 NULL,
+  ACILIS_TARIHI       date                NULL,
+  OLD_REF_ID          int                 NULL, 
+
+  constraint PK_HP_URUN primary key (ID)
+)
+
+ create     index X_HP_URUN0 on HP_URUN (FIRM_ID)
+ create     index X_HP_URUN1 on HP_URUN (URUN_KODU)
+ create     index X_HP_URUN2 on HP_URUN (URUN_ADI)
+ create     index X_HP_URUN3 on HP_URUN (URUN_GRUBU)
+ create     index X_HP_URUN5 on HP_URUN (SATIS_BARKODU)
+ create     index X_HP_URUN6 on HP_URUN (SATIS_BARKODU2)
+ create     index X_HP_URUN7 on HP_URUN (SATIS_BARKODU3)
+ create     index X_HP_URUN8 on HP_URUN (SATIS_BARKODU4)
+
+
+ grant select, insert, update, delete on HP_URUN to public
+
+commit transaction
+
+/*
+ALTER TABLE HP_URUN ADD VERGI_TURU1_ID int  NULL
+ALTER TABLE HP_URUN ADD VERGI_TURU2_ID int  NULL
+ALTER TABLE HP_URUN ADD VERGI_TURU3_ID int  NULL
+
+ALTER TABLE HP_URUN ALTER COLUMN ALIS_BIRIMI SmallInt NULL
+ALTER TABLE HP_URUN ALTER COLUMN SATIS_BIRIMI SmallInt NULL
+
+*/
+
+
+/*  TRANSFER İÇİN */
+
+/*
+
+INSERT INTO [GREEN].[dbo].[HP_URUN]
+           ([FIRM_ID]      <<<<  
+		   ,[URUN_KODU]
+           ,[URUN_ADI]
+           ,[URUN_ADI_2]
+           ,[URUN_GRUBU]
+           ,[URUN_TIPI]
+           ,[SATIS_BARKODU]
+           ,[SATIS_BARKODU2]
+           ,[SATIS_BARKODU3]
+           ,[SATIS_BARKODU4]
+           ,[BARKOD_KAYNAGI]
+           ,[ALIS_KDV]
+           ,[SATIS_KDV]
+		   ,[VERGI_TURU1_ID]
+		   ,[VERGI_TURU2_ID]
+           ,[VERGI_TURU3_ID]
+           ,[OZELLIK_1_ID]
+           ,[OZELLIK_1]
+           ,[OZELLIK_2_ID]
+           ,[OZELLIK_2]
+           ,[OZELLIK_3_ID]
+           ,[OZELLIK_3]
+           ,[OZELLIK_4_ID]
+           ,[OZELLIK_4]
+           ,[KALITE_ID]
+           ,[ACIKLAMA]
+           ,[BIRIM_1]
+           ,[BIRIM_2]
+           ,[BIRIM_3]
+           ,[BIRIM_2_CARPANI]
+           ,[BIRIM_3_CARPANI]
+           ,[SATISTA_SORMA]
+           ,[KUSURAT_SAYISI_1]
+           ,[KUSURAT_SAYISI_2]
+           ,[KUSURAT_SAYISI_3]
+           ,[ALIS_BIRIMI]
+           ,[SATIS_BIRIMI]
+           ,[PARA_TURU]
+           ,[B_DOVIZ_YERI_ID]
+           ,[A_DOVIZ_YERI_ID]
+           ,[SIPARIS_SEVIYESI]
+           ,[SIP_SEV_BIRIMI]
+           ,[MIN_STOK_SEVIYESI]
+           ,[MAX_STOK_SEVIYESI]
+           ,[SUBE_MIN_STOK_SEV]
+           ,[SUBE_MAX_STOK_SEV]
+           ,[DEPO_MAX_STOK_SEKLI]
+           ,[SUBE_MAX_STOK_SEKLI]
+           ,[URETICI_FIRMA]
+           ,[MARKASI]
+           ,[MODELI]
+           ,[ALIS_MESAJI]
+           ,[SATIS_MESAJI]
+           ,[URUN_IZLEME_ID]
+           ,[MIAD_IZLEME_ID]
+           ,[SATIS_DURUMU]
+           ,[CESIT_ZAMANI]
+           ,[CESIT1_ID]
+           ,[CESIT2_ID]
+           ,[CESIT3_ID]
+           ,[CESIT1_ADI]
+           ,[CESIT2_ADI]
+           ,[CESIT3_ADI]
+           ,[CESIT1_ZORUNLU]
+           ,[CESIT2_ZORUNLU]
+           ,[CESIT3_ZORUNLU]
+           ,[CESIT12_ID]
+           ,[CESIT13_ID]
+           ,[CESIT22_ID]
+           ,[CESIT23_ID]
+           ,[CESIT32_ID]
+           ,[CESIT33_ID]
+           ,[PRIM_TUTARI]
+           ,[PRIM_YUZDESI]
+           ,[URUN_AGACI]
+           ,[SATISI_BITECEK]
+           ,[TEMIN_SURESI]
+           ,[TEMIN_SURE_OPS]
+           ,[TEMIN_SEKLI]
+           ,[TEMIN_CARI_ID]
+           ,[TEMIN_CARI_ID2]
+           ,[TEMIN_CARI_ID3]
+           ,[TEMIN_CARI_ID4]
+           ,[TEMIN_CARI_ID5]
+           ,[GENISLIK]
+           ,[YUKSEKLIK]
+           ,[DERINLIK]
+           ,[HACIM_M3]
+           ,[KURULUM_SURESI]
+           ,[TASIMA_SURESI]
+           ,[GSO_ICIN]
+           ,[GSO_KUL_MIKTARI]
+           ,[SEZON_FAKTORU]
+           ,[MIN_CESIT_KNT]
+           ,[EMNIYET_STOGU]
+           ,[DEPARTMAN_ID]
+           ,[RAF_ID]
+           ,[FIYAT_POLITIKASI]
+           --,[STOK_DURUMU_ACIKLAMASI]   <<<<  İPTAL 
+           ,[SIRA_NO]
+           ,[ACILIS_TARIHI]
+           ,[OLD_REF_ID])
+
+
+    SELECT 
+	   0 /* FIRM _ID */
+	  ,[URUN_KODU]
+      ,[URUN_ADI]
+      ,[URUN_ADI_2]
+      ,[URUN_GRUBU]
+	  ,[URUN_TIPI]
+      ,[SATIS_BARKODU]
+      ,[SATIS_BARKODU2]
+      ,[SATIS_BARKODU3]
+      ,[SATIS_BARKODU4]
+      ,[BARKOD_KAYNAGI]
+      ,[ALIS_KDV]
+      ,[SATIS_KDV]
+      ,0 -- VERGI_TURU1_ID 
+	  ,0 -- VERGI_TURU2_ID 
+	  ,0 -- VERGI_TURU3_ID 
+	  ,[OZELLIK_1_ID]
+      ,[OZELLIK_1]
+      ,[OZELLIK_2_ID]
+      ,[OZELLIK_2]
+      ,[OZELLIK_3_ID]
+      ,[OZELLIK_3]
+      ,[OZELLIK_4_ID]
+      ,[OZELLIK_4]
+      ,[KALITE_ID]
+      ,[ACIKLAMA]
+      ,[BIRIM_1]
+      ,[BIRIM_2]
+      ,[BIRIM_3]
+      ,[BIRIM_2_CARPANI]
+      ,[BIRIM_3_CARPANI]
+      ,[SATISTA_SORMA]
+      ,[KUSURAT_SAYISI_1]
+      ,[KUSURAT_SAYISI_2]
+      ,[KUSURAT_SAYISI_3]
+      ,[ALIS_BIRIMI]
+      ,[SATIS_BIRIMI]
+      ,[PARA_TURU] 
+      ,[B_DOVIZ_YERI_ID]
+      ,[A_DOVIZ_YERI_ID]
+      ,[SIPARIS_SEVIYESI]
+      ,[SIP_SEV_BIRIMI]
+      ,[MIN_STOK_SEVIYESI]
+      ,[MAX_STOK_SEVIYESI]
+      ,[SUBE_MIN_STOK_SEV]
+      ,[SUBE_MAX_STOK_SEV]
+      ,[DEPO_MAX_STOK_SEKLI]
+      ,[SUBE_MAX_STOK_SEKLI]
+      ,[URETICI_FIRMA]
+      ,[MARKASI]
+      ,[WEB_SAYFASI]  -- MODELI OLDU
+      ,[ALIS_MESAJI]
+      ,[SATIS_MESAJI]
+      ,[URUN_IZLEME_ID]
+      ,[MIAD_IZLEME_ID]
+      ,[SATIS_DURUMU]
+      ,[CESIT_ZAMANI]
+      ,[CESIT1_ID]
+      ,[CESIT2_ID]
+      ,[CESIT3_ID]
+      ,[CESIT1_ADI]
+      ,[CESIT2_ADI]
+      ,[CESIT3_ADI]
+      ,[CESIT1_ZORUNLU]
+      ,[CESIT2_ZORUNLU]
+      ,[CESIT3_ZORUNLU]
+      ,[CESIT12_ID]
+      ,[CESIT13_ID]
+      ,[CESIT22_ID]
+      ,[CESIT23_ID]
+      ,[CESIT32_ID]
+      ,[CESIT33_ID]
+      ,[PRIM_TUTARI]
+      ,[PRIM_YUZDESI]
+      ,[URUN_AGACI]
+      ,[SATISI_BITECEK]
+      ,[TEMIN_SURESI]
+      ,[TEMIN_SURE_OPS]
+      ,[TEMIN_SEKLI]
+      ,[TEMIN_CARI_ID]
+      ,[TEMIN_CARI_ID2]
+      ,[TEMIN_CARI_ID3]
+      ,[TEMIN_CARI_ID4]
+      ,[TEMIN_CARI_ID5]
+      ,[GENISLIK]
+      ,[YUKSEKLIK]
+      ,[DERINLIK]
+      ,[HACIM_M3]
+      ,[KURULUM_SURESI]
+      ,[TASIMA_SURESI]
+      ,[GSO_ICIN]
+      ,[GSO_KUL_MIKTARI]
+      ,[SEZON_FAKTORU]
+      ,[MIN_CESIT_KNT]
+      ,[EMNIYET_STOGU]
+
+      ,[DEPARTMAN_ID]
+	  ,[RAF_ID]
+      ,[FIYAT_POLITIKASI]
+      -- ,[STOK_DURUMU_ACIKLAMASI]   İPTAL
+      ,[SIRA_NO]
+      ,[ACILIS_TARIHI]
+      ,URUN_ID    --- OLD ID
+
+  FROM [K2ACEVIRESTORAN].[dbo].[K2_STK_HESAP_PLANI]
+GO
+
+
+
+
+
+
+
+*/

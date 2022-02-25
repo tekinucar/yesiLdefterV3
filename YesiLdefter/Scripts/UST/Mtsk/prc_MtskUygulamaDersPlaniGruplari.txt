@@ -1,0 +1,128 @@
+﻿USE [u7093888_Ustad01]
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[prc_MtskUygulamaDersPlaniGruplari] (@DersDonemTipiId int)  
+AS BEGIN
+
+-- DonemTipiId   : Dönem
+-- EgitimAraciId : Eğitim Aracı
+-- PersonelId    : Usta Öğretici
+-- AdayId        : Aday
+
+-- declare @DonemTipiId Int 
+-- set @DonemTipiId = 202101
+/*
+ declare @EgitimBaslangicTarihi date
+ declare @EgitimBitisTarihi date
+
+ set @EgitimBaslangicTarihi = dbo.fnc_MtskDonemDersBasBitTarihiniBul(@DonemTipiId, 0, 1, 1, 0)
+ set @EgitimBitisTarihi = dbo.fnc_MtskDonemDersBasBitTarihiniBul(@DonemTipiId, 0, 1, 0, 1)
+*/ 
+   Select  
+     @DersDonemTipiId as DonemTipiId
+   , '' as EgitimAraciId 
+   , '' as PersonelId
+   , 0  AdayId 
+   , 'Dönem' as Lkp_ElemanGrubu
+   , donem.DonemTipi as Lkp_ElemanAdi
+   , '' as Lkp_SertifikaTipi
+   from Lkp.MtskDonemTipi as donem
+   Where donem.Id = @DersDonemTipiId
+
+   union all
+
+   Select 
+     @DersDonemTipiId as DonemTipiId
+   , x.EgitimAraciId 
+   , '' as PersonelId 
+   , 0  as AdayId
+   , (case x.EgitimYeriTipiId
+	  when 3 then 'Simülatör'
+	  else 'Eğitim Aracı' end) as Lkp_ElemanGrubu
+   , x.EgitimAraciId as Lkp_ElemanAdi
+   , '' as Lkp_SertifikaTipi
+   from (
+     Select distinct [uygDers].EgitimAraciId, [uygDers].EgitimYeriTipiId
+     from MtskUygulamaliDers as [uygDers]
+     Where [uygDers].DersDonemTipiId = @DersDonemTipiId
+	 --and   [uygDers].DersTarihi >= @EgitimBaslangicTarihi
+     --and   [uygDers].DersTarihi <= @EgitimBitisTarihi
+   ) as x
+   --order by  EgitimYeriTipiId, EgitimAraciId
+
+   union all
+
+   Select 
+     @DersDonemTipiId as DonemTipiId
+   , '' as EgitimAraciId 
+   , x.PersonelId
+   , 0  AdayId 
+   , 'Usta Eğitici' as Lkp_ElemanGrubu
+   , x.TamAdiSoyadi as Lkp_ElemanAdi
+   , '' as SertifikaTipi
+   from (
+     Select distinct [uygDers].PersonelId, per.TamAdiSoyadi
+     from MtskUygulamaliDers as [uygDers]
+	   left outer join MtskPersoneli as [per] on (uygDers.PersonelId = per.TcNoCalismaIzniNo)
+     Where [uygDers].DersDonemTipiId = @DersDonemTipiId
+	 --and   [uygDers].DersTarihi >= @EgitimBaslangicTarihi
+     --and   [uygDers].DersTarihi <= @EgitimBitisTarihi
+   ) x
+
+   union all
+
+   Select 
+     @DersDonemTipiId as DonemTipiId
+   , '' as EgitimAraciId 
+   , '' PersonelId
+   , x.AdayId 
+   , 'Aday' as Lkp_ElemanGrubu
+   , x.TamAdiSoyadi as Lkp_ElemanAdi
+   , x.SertifikaTipi as Lkp_SertifikaTipi
+   from (
+     Select distinct [uygDers].AdayId, aday.TamAdiSoyadi, ser.SertifikaTipi
+     from MtskUygulamaliDers as [uygDers]
+	   left outer join MtskAday as [aday] on (uygDers.AdayId = aday.Id)
+	   left outer join Lkp.MtskSertifikaTipi [ser] on (aday.IstenenSertifikaTipiId = ser.Id)
+     Where [uygDers].DersDonemTipiId = @DersDonemTipiId
+	 --and   [uygDers].DersTarihi >= @EgitimBaslangicTarihi
+     --and   [uygDers].DersTarihi <= @EgitimBitisTarihi
+   ) x
+ 
+END -- procedure
+
+
+
+
+
+/*
+
+ Select distinct [MtskUygulamaliDers].EgitimAraciId
+ from MtskUygulamaliDers [MtskUygulamaliDers]
+ Where [MtskUygulamaliDers].DersTarihi >= dbo.fnc_MtskDonemDersBasBitTarihiniBul(
+   (
+   Select distinct DonemTipiId from MtskDonemi as MtskUygulamaliDers
+   Where 0 = 0
+   /*[MtskUygulamaliDers].DEFAULT_VALUE*/
+   and [MtskUygulamaliDers].DonemTipiId = 202101   -- :D.SD.33167: --
+   )
+ , 0, 1, 1, 0)
+ 
+ and   [MtskUygulamaliDers].DersTarihi <= dbo.fnc_MtskDonemDersBasBitTarihiniBul(
+   (
+   Select distinct DonemTipiId from MtskDonemi as MtskUygulamaliDers -- master-detail de DonemTipiId ye ulaşmak için ufak bir yanıltma
+   Where 0 = 0
+   /*[MtskUygulamaliDers].DEFAULT_VALUE*/
+   and [MtskUygulamaliDers].DonemTipiId = 202101   -- :D.SD.33167: --
+   )
+ , 0, 1, 0, 1)
+
+
+
+*/
+

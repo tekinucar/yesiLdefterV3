@@ -1,0 +1,12 @@
+<select id="gen__1433" class="csc-combobox">
+
+<option value="SATIS">SATIŞ</option>
+<option value="IADE">İADE</option>
+<option value="TEVKIFAT">TEVKİFAT</option>
+<option value="ISTISNA">İSTİSNA</option>
+<option value="OZELMATRAH">ÖZEL MATRAH</option>
+<option value="IHRACKAYITLI">İHRAÇ KAYITLI</option>
+<option value="HKSSATIS">HAL TİPİ FATURA SATIŞ</option>
+<option value="HKSKOMISYONCU">HAL TİPİ FATURA KOMİSYONCU</option>
+
+</select>

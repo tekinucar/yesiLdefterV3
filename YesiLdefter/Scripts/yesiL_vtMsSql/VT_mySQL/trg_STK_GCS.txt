@@ -1,0 +1,36 @@
+﻿
+USE [GREEN]
+GO
+
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TRIGGER [dbo].[trg_STK_GCS] on [dbo].[STK_GCS] 
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    
+    DECLARE InsertCursor_STK_GCS cursor for select ID from Inserted
+    DECLARE @curId bigint
+
+    OPEN InsertCursor_STK_GCS
+
+    FETCH NEXT FROM InsertCursor_STK_GCS INTO @curId
+    
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+	    
+	    EXEC dbo.prc_STK_GCS_CALC @curId 
+				
+    	FETCH NEXT FROM InsertCursor_STK_GCS INTO @curId
+    END
+
+    CLOSE InsertCursor_STK_GCS
+    DEALLOCATE InsertCursor_STK_GCS   
+
+END
+
+GO

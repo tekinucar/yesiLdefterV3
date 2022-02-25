@@ -1,0 +1,91 @@
+
+
+/*  PROJE DATABASE ÝÇÝNE CREATE EDÝLECEK */ 
+
+CREATE VIEW [dbo].[VW_CLIENT_LIST]  
+AS
+ (
+  
+
+
+  Select 
+    ROW_NUMBER() OVER( ORDER BY [HPCLNT].CLIENT_TYPE, [HPCLNT].PARENT_NAME, [HPCLNT].CLIENT_NAME ASC) AS REF_ID 
+  , [HPCLNT].CLIENT_TYPE
+  , [HPCLNT].PARENT_ID
+  , [HPCLNT].CLIENT_ID
+  , [HPCLNT].PARENT_NAME
+  , [HPCLNT].CLIENT_NAME
+  from (   
+  
+  /* Firm List */
+  Select 
+    0         PARENT_ID
+  , ''        PARENT_NAME   
+  , f.ID      CLIENT_ID
+  , f.HP_NAME CLIENT_NAME 
+  , f.HP_TD   CLIENT_TYPE  
+  FROM HP_FIRM f 
+  WHERE f.HP_TD = 1
+  /* AND  LÝSANS_NO = ?  */
+  
+  UNION ALL 
+  
+  /* Shop List */
+  Select 
+    f.ID      PARENT_ID  
+  , f.HP_NAME PARENT_NAME   
+  , s.ID      CLIENT_ID
+  , s.HP_NAME CLIENT_NAME 
+  , s.HP_TD   CLIENT_TYPE  
+  FROM HP_FIRM s
+     left outer join HP_FIRM f on ( s.PARENT_ID = f.ID )
+  WHERE s.HP_TD = 2
+  /* AND  FIRM_ID = ?  */
+  
+  UNION ALL 
+  
+  /* Part List */
+  Select 
+    s.ID      PARENT_ID
+  , s.HP_NAME PARENT_NAME   
+  , p.ID      CLIENT_ID
+  , p.HP_NAME CLIENT_NAME 
+  , p.HP_TD   CLIENT_TYPE  
+  FROM HP_FIRM p
+     left outer join HP_FIRM s on ( p.PARENT_ID = s.ID )
+  WHERE p.HP_TD = 3
+  /* AND  FIRM_ID = ?  */
+  
+  UNION ALL 
+  
+  Select 
+    0         PARENT_ID 
+  , c.TC_NO   PARENT_NAME   
+  , c.ID      CLIENT_ID
+  , c.TAMADI  CLIENT_NAME 
+  , 5         CLIENT_TYPE  
+  FROM HP_CARI c
+  --   left outer join HP_FIRM s on ( p.PARENT_ID = s.ID )
+  WHERE (c.CARI_TIPI = 591 or c.CARI_TIPI = 592)
+  /* AND  FIRM_ID = ?  */
+  
+  ) [HPCLNT]
+  
+WHERE 0 = 0
+/*[HPCLNT].DEFAULT_VALUE*/
+/*[HPCLNT].KRITERLER*/
+  
+  
+  order by 
+    [HPCLNT].CLIENT_TYPE
+  , [HPCLNT].PARENT_NAME
+  , [HPCLNT].CLIENT_NAME
+  
+
+
+
+
+ )
+
+
+

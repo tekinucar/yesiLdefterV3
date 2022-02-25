@@ -1,0 +1,196 @@
+﻿begin transaction
+
+-- Stok Belgesi Satırlar Kaydı 
+
+ create table BelgeStokS
+ (
+
+   Id                  Int IDENTITY(1,1) NOT NULL, 
+   ParentId            Int       not null, /* Default = 0 */
+   FirmId              Int       not null,
+   BelgeStokBId        Int           null, /* BelgeStokB.Id  : BelgeStokB başlık tablosu */
+   CariId              Int           null, /* HesapCariId    : Cari Hesap kartı */
+   StokId              Int           null, /* HesapStok.Id   : Stok veya Hizmet kartı */
+   FinansId            Int           null, /* HesapFinans.Id : Varlık hesabı için */
+   
+   --10 belge tip bilgileri
+   GCTipiId            SmallInt      null, /* 0 = etkisiz, 1 = Giriş Hareketi, 2 = Çıkış Hareketi */
+   BelgeTipiId         SmallInt      null, /*   */
+   --KaynakTipiId        SmallInt      null, /* 1. kağıt, 2. elektronik belge */
+   SebepTipiId         SmallInt      null, /*   */
+   TuruTipiId          SmallInt      null, /* 1. Sipariş, 2. İrsaliye, 3. Fatura   */
+   StokTipiId          SmallInt      null, /* detay aşağıda */
+   
+   --20
+   IslemTarihi         Date          null,
+   IslemSaati          nVarChar(8)   null,
+      
+   SatirNo             SmallInt      null,
+   UrunAdi             nVarChar(50)  null,
+
+   --100
+   Miktar              Numeric(22,8) null,     
+   GCMiktar            Numeric(22,8) null,
+   BirimTipiId         nVarChar(3)   null,
+   KdvOrani            Numeric(4,2)  null,
+
+   ParaTipiId          nVarChar(3)   null, /* belgenin para birimi */
+   DovizYeriId         SmallInt      null,
+   DovizKuru           Numeric(12,8) null,
+
+   -- Numeric(22,8)
+   -- 12,345,678,901,234.56789012
+   
+   --110
+   dBirimFiyati        Numeric(22,8) null,
+   dBirimFiyatiKdvli   Numeric(22,8) null,
+   dToplamTutar        Numeric(22,8) null, 
+   dToplamTutarKdvli   Numeric(22,8) null,
+   dKdvTutari          Numeric(22,8) null,    
+
+   --120
+   BirimFiyati         Numeric(22,8) null,
+   BirimFiyatiKdvli    Numeric(22,8) null,
+   ToplamTutar         Numeric(22,8) null,
+   ToplamTutarKdvli    Numeric(22,8) null,
+   KdvTutari           Numeric(22,8) null,    
+   
+   --130   
+   IskontoOrani1       Numeric(12,8) null,
+   IskontoOrani2       Numeric(12,8) null,
+   IskontoOrani3       Numeric(12,8) null,
+   IskontoOrani4       Numeric(12,8) null,
+   IskontoOrani        Numeric(12,8) null,
+   
+   --140
+   IskontoTutari1      Numeric(22,8) null,
+   IskontoTutari2      Numeric(22,8) null,
+   IskontoTutari3      Numeric(22,8) null,
+   IskontoTutari4      Numeric(22,8) null,
+   IskontoTutari       Numeric(22,8) null,
+
+   --150
+   TevkifatKodu        nVarchar(6)   null,
+   TevkifatPayi        Numeric(3)    null, /* 2, 1 - 9, %90,  */
+   TevkifatPaydasi     Numeric(3)    null, /* 3, 10,    100   */
+   TevkifatOrani       nVarChar(4)   null, /* 2/3 , 2/10 ... 9/10 veya %90 gibi açıklamalar taşır  */
+   
+   --160	
+   dISBirimFiyati      Numeric(22,8) null,
+   dISBirimFiyatiKdvli Numeric(22,8) null,
+   dISToplamTutar      Numeric(22,8) null, 
+   dISEkVergiTutari    Numeric(22,8) null, /* = sum(IBelgeStokSEkVergi.HesaplananVergi)  */
+   dISKdvMatrahi       Numeric(22,8) null, /* ISToplamTutar + ISEkVergiTutari */
+   dISKdvTutari        Numeric(22,8) null,    
+   dISTevkifatTutari   Numeric(22,8) null, 
+   dISHesaplananKdv    Numeric(22,8) null, 
+   dISToplamTutarKdvli Numeric(22,8) null,  
+   
+   --IS : Iskonto Sonrası
+   --170
+   ISBirimFiyati       Numeric(22,8) null,
+   ISBirimFiyatiKdvli  Numeric(22,8) null, 
+   ISToplamTutar       Numeric(22,8) null, /* Birim fiyat x miktar =  Kdv Matrahıdır */
+   ISEkVergiTutari     Numeric(22,8) null, /* = sum(IBelgeStokSEkVergi.HesaplananVergi)  */
+   ISKdvMatrahi        Numeric(22,8) null, /* ISToplamTutar + ISEkVergiTutari */
+   ISKdvTutari         Numeric(22,8) null, /* ( Toplam tutarı / 100 ) x Kdv Oranı */     
+   ISTevkifatTutari    Numeric(22,8) null, /* ( Kdv tutarı / 10 )  x Tevkifat Oranı */
+   ISHesaplananKdv     Numeric(22,8) null, /* Kdv Tutarı - Tevkifat Tutarı */ 
+   ISToplamTutarKdvli  Numeric(22,8) null, /* Toplam Tutar + Hesaplanan Kdv */ 
+         
+   
+   -- 310
+   --FiyatGirisTipiId    SmallInt      null, gerek kalmadı
+   --IskontoTipiId       SmallInt      null, /* iskonto oran mı?, tutar mı?, para eksik tahsilatı mı ?  */      
+   MaxIskontoOrani     Numeric(12,8) null, /* Fiyat tablosundan geliyor */ 
+   
+   --330
+   KayitTarihi         Date          null, 
+   KayitSaati          VarChar(8)    null,
+      
+
+   constraint		pk_BelgeStokS primary key (Id)
+ )
+
+ create index X_BelgeStokS01 on BelgeStokS (FirmId,BelgeStokBId,SatirNo)
+ create index X_BelgeStokS02 on BelgeStokS (FirmId,IslemTarihi)
+
+ -- ALTER TABLE BelgeStokS ALTER COLUMN KdvOrani Numeric(4,2) null
+ -- ALTER TABLE BelgeStokS ADD ISEkVergiTutari     Numeric(22,8) null
+ -- ALTER TABLE BelgeStokS ADD ISKdvMatrahi        Numeric(22,8) null
+ 
+ /*
+ -------------------------------------------------------------------------
+ 
+ 1 : Normal kdv hesabı
+ 2 : Tevkifatlı kdv hesabı 
+ 
+ Tevkifat : 
+ Para konusunda kesintiler anlamına gelir. 
+ Vergi konusunda, vergiler üzerinde bölüşme/kesinti yapma anlamına gelir.
+
+ -------------------------------------------------------------------------
+                    :  1   :  2 
+ -------------------------------------------------------------------------
+ birim fiyatı       : 40   : 40
+ miktar             : 5    : 5
+ toplam tutar       : 200  : 200
+ kdv oranı          : 18   : 18
+ kdv tutarı         : 36   : 36
+ tevkifat payı      : 0    : 3/10
+ hesaplanan kdv     : 36   : 36 - ((36/10) * 3) > 36 - 10,8 > = 25,2
+ kdvli toplam tutar : 236  : 225.2
+ -------------------------------------------------------------------------
+ */
+
+
+-- ------------------------------------------------------- 
+-- StokTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[BelgeStokSStokTipi]
+(
+   Id          Int Unique Not Null,
+   StokTipi    nVarchar(50)   null,
+   GrupTipiId  SmallInt       null,
+   
+   constraint  pk_BelgeStokSStokTipi primary key (Id)
+)
+
+
+INSERT INTO [Lkp].[BelgeStokSStokTipi] (Id, StokTipi, GrupTipiId)
+ VALUES 
+  (0,    N'Tanımsız',    0),
+  (150,  N'150 İlk Madde Malzeme',  1),
+  (151,  N'151 Yarı Mamuller', 1),
+  (153,  N'153 Ticari Mal',    1),
+  (25,   N' 25 Maddi Duran Varlık', 1),
+  (600,  N'600 Verilen Hizmetler', 1),
+  --(750,  N'750 ArGe Malzemesi', 1), -- 750. Araştırma Ve Geliştirme
+  (770,  N'770 Tüketim Malzemesi', 1) -- 770. Genel Yönetim Giderleri
+  
+
+
+ create table IBelgeStokSEkVergi
+ (
+
+   Id                   Int IDENTITY(1,1) NOT NULL, 
+   FirmId               Int       not null,
+   BelgeStokBId         Int           null, /* BelgeStokB.Id  : BelgeStokB başlık tablosu */
+   BelgeStokSId         Int           null, /* BelgeStokS.Id  : BelgeStokS satır  tablosu */
+   StokId               Int           null, /* HesapStok.Id   : Stok veya Hizmet kartı */
+   FaturaEkVergiKodu    nVarchar(10)  null, /* IStokFaturaEkVergi üzerinde stok için tanımlı olan ek vergi kodu */
+   MatrahTutari         Numeric(22,8) null, /* vergi matrah olan meblağ */
+   MatrahTutariKdvli    Numeric(22,8) null, /* vergi matrah olan meblağ */
+   EkVergiOrani         Numeric(12,8) null, /* tanımlı tablodan okunacak */
+   EkVergiTutari        Numeric(22,8) null, /*  ""  */
+   HesaplananVergi      Numeric(22,8) null, /* hesaplanarak ortaya çıkan vergi tutarı */
+   
+
+   constraint		pk_IBelgeStokSEkVergi primary key (Id)
+ )
+
+ create index X_IBelgeStokSEkVergi01 on IBelgeStokSEkVergi (FirmId,BelgeStokBId,BelgeStokSId)
+
+
+
+commit transaction   

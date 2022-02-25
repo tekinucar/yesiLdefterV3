@@ -1,0 +1,29 @@
+﻿begin transaction
+
+ create table MtskSablonTeorikF
+ (
+   Id                      Int IDENTITY(1,1) not null, 
+   FirmId                  Int       not null,
+   DonemTipiId             Int           null,
+   GrupTipiId              SmallInt      null,
+   SubeTipiId              SmallInt      null,
+   
+   SablonTeorikBId         Int           null,
+   BaslangicTarihi         Date          null,
+
+   TrafikOgreticiId        Varchar(20)   null,
+   IlkYardimOgreticiId     Varchar(20)   null,
+   AracTeknigiOgreticiId   Varchar(20)   null,
+   TrafikAdabiOgreticiId   Varchar(20)   null,
+
+
+
+   constraint		pk_MtskSablonTeorikF primary key (Id)
+ )
+  
+ grant select, insert, update, delete on MtskSablonTeorikF to public
+
+ create index X_MtskSablonTeorikF01 on MtskSablonTeorikF (DonemTipiId, SablonTeorikBId)
+ 
+commit transaction
+

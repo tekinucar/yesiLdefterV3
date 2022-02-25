@@ -1,0 +1,29 @@
+
+begin transaction
+
+ create table FN_LINEVOL_BA
+ (
+
+   ID		             Int IDENTITY(1,1) NOT NULL,
+   PARENT_ID             Int               NULL, /* FN_LINEVOL.ID <> FN_LINEVOL_BA.PARENT_ID : tablo borc satýrý ve alacak satýrý olmak üzere iki satýrdan oluþuyor */
+
+   /* sorgu buradan yapýlacak list hesaplar */
+   HESAP_BA              VarChar(1)        NULL,    /* B veya A ifadesi için */
+   HESAP_TD              Smallint          NULL,    /* Hesap Tipi = 10 = Kasa, 22 BankaHesabý, 23=KK, 24=Pos, 50=Cari vb   */          
+   HESAP_ID              int               NULL,    /* Hesap TD ve Hesap ID =   */
+   
+   BORC_TUTARI           Numeric(22,5)     NULL,
+   ALACAK_TUTARI         Numeric(22,5)     NULL,
+   
+   constraint PK_FN_LINEVOL_BA primary key (ID)
+      
+ )
+ -- mysql_add
+ 
+ grant select, insert, update, delete on FN_LINEVOL_BA to public
+
+commit transaction
+
+
+
+

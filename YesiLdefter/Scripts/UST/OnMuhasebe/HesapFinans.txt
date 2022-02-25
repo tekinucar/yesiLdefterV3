@@ -1,0 +1,361 @@
+﻿begin transaction
+
+ create table HesapFinans
+ (
+
+   Id                Int IDENTITY(1,1) NOT NULL, 
+   ParentId          Int       not null, /* default 0 */
+   FirmId            Int       not null,
+   IsActive          Bit       not null, /* default : 1 = active, 0 = not active */  
+   
+   UstGrupTipiId     SmallInt      null, /* 10    hazır değerler */ 
+   AnaGrupTipiId     SmallInt      null, /* 102   banka          */ 
+   AltGrupTipiId     Int           null, /* 1022  banka hesabı   */ 
+   AltCesitTipiId    Int           null, /* 10221 vadesiz        */ 
+   
+   --10
+   HesapKodu         nVarchar(50)  null,
+   UstHesapKodu      nVarchar(50)  null,
+   HesapKisaAdi      nVarchar(100) null, /* nick Name, Kısa Adı */
+   HesapAdi          nVarchar(150) null, /* kullanıcının girdiği isim */
+   
+   --20
+   Numarasi          nVarchar(50)  null, /* HesapNumarasi, KartNumarasi */
+   IBANNumarasi      nVarchar(50)  null,
+   IlgiliIsim        nVarchar(50)  null, /* MusteriTemsilcisi, Kartın Üzerindeki isim */
+   Telefonu          nVarchar(50)  null,
+   MobilTelefonu     nVarchar(50)  null,
+   FaxNumarasi       nVarchar(50)  null,
+   EPosta            nVarchar(50)  null,
+   WebAdresi         nVarchar(50)  null,
+   
+   --30
+   ParaTipiId        nVarChar(3)   null,
+   BorcDovizYeriId   SmallInt      null,
+   AlacakDovizYeriId SmallInt      null,
+   
+   --40
+   HesapKesimGunu    SmallInt      null,
+   OdemeKacGunSonra  SmallInt      null,
+   SonOdemeGunu      SmallInt      null,
+   SonKullanimTarihi nVarchar(10)  null,
+   CheckId           nVarchar(10)  null, /* kartın güvenlik kodu */
+   SorumluPersonelId Int           null, /* banka kartlarında kartı kullanan personel Id  */
+
+   --70
+   IsBilancoHesap          bit  null, /* hesabın bağlı olduğu muhasebe hesap kodu ???  */ 
+   IsGelirGiderHesap       bit  null,
+   IsMaliyetAHesap         bit  null,
+   IsMaliyetBHesap         bit  null,
+   IsNazimHesap            bit  null,
+
+   BilancHesapKodu         nvarchar(50) null,
+   GelirGiderHesapKodu     nvarchar(50) null,
+   MaliyetAHesapKodu       nvarchar(50) null,
+   MaliyetBHesapKodu       nvarchar(50) null,
+   NazimHesapKodu          nvarchar(50) null,
+
+   --80
+   UruneYuklenmesiTipiId   SmallInt  null, 
+   UretimHacmiTipiId       SmallInt  null,
+   IsletmeFonksiyonuTipiId SmallInt  null,
+   PeriyodTipiId           SmallInt  null, /* dönem */
+   BelgeTipiId             SmallInt  null, /* e-devlet, fatura vb */
+   KaynakTipiId            SmallInt  null, /* 1. kağıt, 2. elektronik belge */
+   IsKkeg                  Bit       null, /* kanunen kabul edilmeyen gider */
+   IsOncekiTutar           Bit       null, /* bir maliyet belgesi işlenirken bir önceki tutarı oku */  
+   OncekiTutar             Numeric(22,5)  null,
+   KdvOrani                SmallInt  null,
+
+   constraint		pk_HesapFinans primary key (Id)
+ )
+
+ create index X_HesapFinans01 on HesapFinans (FirmId)
+ create index X_HesapFinans02 on HesapFinans (UstGrupTipiId)
+
+ 
+ grant select, insert, update, delete on HesapFinans to public
+
+
+ --ALTER TABLE HesapFinans ADD Kkeg bit NULL
+
+/*
+Giderlerin Çeşitlerine Göre Sınıflandırılması  (7/B Seçeneğinin kendisi)
+Giderlerin Ürünlere Yüklenmesine Göre Sınıflandırılması
+Giderlerin Üretim (Etkinlik) Hacmi ile İlişkisine Göre Sınıflandırılması
+Giderlerin İşletme Fonksiyonlarına Göre Sınıflandırılması
+   UruneYuklenmesiTipiId   SmallInt  null, 
+   UretimHacmiTipiId       SmallInt  null,
+   IsletmeFonksiyonuTipiId SmallInt  null,
+*/
+
+-- ------------------------------------------------------- 
+-- UruneYuklenmesiTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[HesapFinansUruneYuklenmesiTipi]
+(
+   Id                     Int Unique Not Null,
+   UruneYuklenmesiTipi    nVarchar(50),
+   GrupTipiId             SmallInt Null,
+
+   constraint  pk_HesapFinansUruneYuklenmesiTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[HesapFinansUruneYuklenmesiTipi] (Id, UruneYuklenmesiTipi, GrupTipiId)
+ VALUES 
+  (0,   N'Tanımsız', 0),
+  (1,   N'Direkt Giderler', 1),
+  (2,   N'Endirekt Giderler', 1)
+
+
+-- ------------------------------------------------------- 
+-- UretimHacmiTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[HesapFinansUretimHacmiTipi]
+(
+   Id                     Int Unique Not Null,
+   UretimHacmiTipi        nVarchar(50),
+   GrupTipiId             SmallInt Null,
+
+   constraint  pk_HesapFinansUretimHacmiTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[HesapFinansUretimHacmiTipi] (Id, UretimHacmiTipi, GrupTipiId)
+ VALUES 
+  (0,   N'Tanımsız', 0),
+  (1,   N'Sabit Giderler', 1),
+  (2,   N'Değişken Giderler', 1),
+  (3,   N'Karma Giderler', 1)
+
+-- ------------------------------------------------------- 
+-- IsletmeFonksiyonuTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[HesapFinansIsletmeFonksiyonuTipi]
+(
+   Id                     Int Unique Not Null,
+   IsletmeFonksiyonuTipi  nVarchar(50),
+   GrupTipiId             SmallInt Null,
+
+   constraint  pk_HesapFinansIsletmeFonksiyonuTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[HesapFinansIsletmeFonksiyonuTipi] (Id, IsletmeFonksiyonuTipi, GrupTipiId)
+ VALUES 
+  (0,   N'Tanımsız', 0),
+  (1,   N'Tedarik (Satın Alma)', 1),
+  (2,   N'Üretim', 1),
+  (3,   N'Araştırma, Geliştirme', 1),
+  (4,   N'Pazarlama, Satış ve Dağıtım', 1),
+  (5,   N'Genel Yönetim', 1),
+  (6,   N'Finansman', 1)
+
+-- ------------------------------------------------------- 
+-- BelgeTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[HesapFinansBelgeTipi]
+(
+   Id           Int Unique Not Null,
+   BelgeTipi    nVarchar(50),
+   GrupTipiId   SmallInt Null,
+
+   constraint  pk_HesapFinansBelgeTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[HesapFinansBelgeTipi] (Id, BelgeTipi, GrupTipiId)
+ VALUES 
+  (0,   N'Tanımsız', 0),
+  (1,   N'Fatura', 1),
+  (2,   N'ÖKC Fişi', 1),
+  (3,   N'Perakende Satış Belgesi', 1),
+  (4,   N'Gider Pusulası', 1),
+  (5,   N'Müstahsil Makbuzu', 1),
+  (6,   N'Serbest Meslek Makbuzu', 1),
+  (7,   N'Tevsiki Zaruri Olmayan', 1),
+  (8,   N'Yapay Belge', 1),
+  (21,  N'Muhasebe Dekontu', 1)
+
+-- ------------------------------------------------------- 
+-- KaynakTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[HesapFinansKaynakTipi]
+(
+   Id           Int Unique Not Null,
+   KaynakTipi   nVarchar(50),
+   GrupTipiId   SmallInt Null,
+
+   constraint  pk_HesapFinansKaynakTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[HesapFinansKaynakTipi] (Id, KaynakTipi, GrupTipiId)
+ VALUES 
+  (0,   N'Tanımsız', 0),
+  (1,   N'e-devlet', 1),
+  (2,   N'e-posta', 1),
+  (3,   N'Kağıt', 1),
+  (4,   N'Sms', 1),
+  (5,   N'Fax', 1),
+  (6,   N'Telefon', 1),
+  (7,   N'Diğer', 1)
+
+
+--   ----------------------------------------------------------------
+--   UstGrupTipiId     SmallInt      null, /* 10    hazır değerler */ 
+--   AnaGrupTipiId     SmallInt      null, /* 102   banka          */ 
+--   AltGrupTipiId     Int           null, /* 1022  banka hesabı   */ 
+--   AltCesitTipiId    Int           null, /* 10221 vadesiz        */ 
+--   ----------------------------------------------------------------
+
+-- ------------------------------------------------------- 
+-- UstGrupTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[HesapFinansUstGrupTipi]
+(
+   Id           Int Unique Not Null,
+   UstGrupTipi  nVarchar(50),
+   GrupTipiId   SmallInt Null,
+
+   constraint  pk_HesapFinansUstGrupTipi primary key (Id)
+)
+-- ------------------------------------------------------- 
+-- AnaGrupTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[HesapFinansAnaGrupTipi]
+(
+   Id          Int Unique Not Null,
+   AnaGrupTipi nVarchar(50) Null,
+   GrupTipiId  SmallInt Null,
+
+   constraint  pk_HesapFinansAnaGrupTipi primary key (Id)
+)
+-- ------------------------------------------------------- 
+-- AltGrupTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[HesapFinansAltGrupTipi]
+(
+   Id          Int Unique Not Null,
+   AltGrupTipi nVarchar(50) Null,
+   GrupTipiId  SmallInt Null,
+
+   constraint  pk_HesapFinansAltGrupTipi primary key (Id)
+)
+-- ------------------------------------------------------- 
+-- AltCesitTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[HesapFinansAltCesitTipi]
+(
+   Id           Int Unique Not Null,
+   AltCesitTipi nVarchar(50) Null,
+   GrupTipiId   SmallInt Null,
+
+   constraint  pk_HesapFinansAltCesitTipi primary key (Id)
+)
+
+
+delete from [Lkp].[HesapFinansUstGrupTipi]
+delete from [Lkp].[HesapFinansAnaGrupTipi]
+delete from [Lkp].[HesapFinansAltGrupTipi]
+delete from [Lkp].[HesapFinansAltCesitTipi]
+
+INSERT INTO [Lkp].[HesapFinansUstGrupTipi] (Id, UstGrupTipi, GrupTipiId)
+ VALUES 
+  (0,    N'Tanımsız', 0),
+  (10,   N'Hazır Değerler', 1),
+  (15,   N'Stoklar', 1),
+  (25,   N'Maddi Duran Varlıklar', 1),
+  (7,    N'Maliyet Hesapları', 1),
+  (77,   N'Genel Yönetim Giderleri', 1),
+  (81,   N'Maliyet Ön Muhasebe Grubu',  1 ),
+  (82,   N'Maliyet Ön MUhasebe Alt Grubu',  1 ),
+  (83,   N'Maliyet Ön MUhasebe Alt Çesit',  1 ),
+  (84,   N'Seçilen Maliyet Hesapları',  1 ),
+  (91,   N'Vergiler', 1),
+  (92,   N'SGK', 1),
+  (93,   N'Bağkur', 1),
+  (94,   N'Belediye', 1)
+
+  
+INSERT INTO [Lkp].[HesapFinansAnaGrupTipi] (Id, AnaGrupTipi, GrupTipiId)
+ VALUES 
+  (0,    N'Tanımsız', 0 ),
+  (100,  N'Kasa', 1),
+  (102,  N'Banka', 1),
+  (702,  N'Maliyet Hesapları (7/A Seçeneği)', 1),
+  (703,  N'Maliyet Hesapları (7/B Seçeneği)', 1),
+  (770,  N'Genel Yönetim Giderleri',  1 )
+
+  
+INSERT INTO [Lkp].[HesapFinansAltGrupTipi] (Id, AltGrupTipi, GrupTipiId)
+ VALUES 
+  (0,    N'Tanımsız',      0 ),
+  (100,  N'Nakit Kasası',  1 ), 
+  (1020, N'Banka',         1 ), 
+  (1021, N'Şube',          1 ), 
+  (1022, N'Banka Hesabı',  1 ), 
+  (1023, N'Banka Kartı',   1 ), 
+  (1024, N'POS',           1 ),
+  (1029, N'Banka Listesi', 1 ),
+  (77001, N'Telekom',  1 ) -- 770.01 gibi Telekomünikasyon
+
+
+INSERT INTO [Lkp].[HesapFinansAltCesitTipi] (Id, AltCesitTipi, GrupTipiId)
+ VALUES 
+  (0,     N'Tanımsız',      0 ),
+  (10221, N'Vadesiz',      1 ),
+  (10222, N'Vadeli',       1 ),
+  (10223, N'Ticari',       1 ),
+  (10231, N'Nakit Kartı',  2 ),
+  (10232, N'Kredi Kartı',  2 ),
+
+  (7700110, N'TürkTelekom Ev/İş Telefonu', 3),  -- 770.01.10 gibi 
+  (7700112, N'TTNET İnternet', 3),
+  (7700120, N'Turkcell Cep', 3),
+  (7700122, N'Turkcell İnternet', 3),
+  (7700130, N'Vodafone Cep', 3),
+  (7700132, N'Vodafone İnternet', 3),
+  (7700140, N'Avea Cep', 3),
+  (7700150, N'Ptt Cell', 3),
+  (7700190, N'Diğer', 3)
+
+
+commit transaction
+
+
+
+
+
+
+
+-- ------------------------------------------------------------------
+-- Default Inserts   DETAYI   Lkp.NesneMater tablosuna taşındı....
+-- ------------------------------------------------------------------
+
+begin transaction 
+
+
+-- Temel Tanımlama Kayıtları
+--                                         : UstGrupTipiId, AnaGrupTipiId, AltGrupTipiId, AltCesitTipiId   
+-- Banka Listesi                           : 10, 102,  1029, 0
+-- Varlıklar için Ust Grup Hesapları       : 25,   0,     0, 0
+-- Maliyetler için Ust ve Ana Gruplar      :  7, 702,     0, 0  ( 7/A Seçeneği )-702
+-- Maliyetler için Ust ve Ana Gruplar      :  7, 703,     0, 0  ( 7/B Seçeneği )-703
+-- Ön Muh Maliyetler için Ust Gruplar      : 81,   0,     0, 0  ( Ön muhasebe için üst maliyet grupları )
+-- Ön Muh Maliyetler için Ana Gruplar      : 82, ???,     0, 0  ( ön muhasebe için ana maliyet grup veya hesap olabilir )
+-- Vergi Kodları                           : 82, ???,     0, 0  + UstHesapKodu
+-- Telekomünikasyon Grup Hesapları         : 83, 770, 77001, 0  ( ana maliyet grubuna bağlı alt grup )
+-- Kullanmak için seçilen Maliyet Grupları : 84, ???, ?????, 0, + HesapKodu, UstHesapKodu  
+
+
+
+declare @FirmId int
+set @FirmId = 7
+
+INSERT INTO [dbo].[HesapFinans] (ParentId, FirmId, IsActive, UstGrupTipiId, AnaGrupTipiId, AltGrupTipiId, HesapKodu, HesapAdi, ParaTipiId )
+ VALUES 
+ (0, @FirmId, 1, 10, 100, 100, '100.10', 'TL Kasası', 1),
+ (0, @FirmId, 1, 10, 100, 100, '100.20', 'Dolar Kasası', 2),
+ (0, @FirmId, 1, 10, 100, 100, '100.30', 'Euro Kasası', 3)
+
+
+
+commit transaction
+

@@ -1,0 +1,25 @@
+
+begin transaction
+ create table SYS_TYPES_H
+ (
+        ID                Int IDENTITY(1,1) NOT NULL,
+        LOOKUP_TYPE       SmallInt      NULL,
+        VALUE_TYPE        SmallInt      NULL,
+        TYPES_NAME        VarChar(30)   NOT NULL,
+		TYPES_ABOUT       VarChar(100)  NULL,
+
+   Constraint PK_SYS_TYPES_H primary key (ID)
+ )
+ -- mysql_add
+ 
+ create index X_SYS_TYPES_H1 on SYS_TYPES_H (TYPES_NAME);
+ 
+ grant select, insert, update, delete on SYS_TYPES_H to public
+
+commit transaction
+
+
+/* LOOK_TYPE  = 1 : Proje Sabitleri, 2 : Kullanýcýya Ait Sabitler, 3 : Table LoopUp Baðlantýlarý  */
+
+/* VALUE_TYPE = 1 : SmallInt, 2 : Int32, 3 : String, 4 : Byte   */
+

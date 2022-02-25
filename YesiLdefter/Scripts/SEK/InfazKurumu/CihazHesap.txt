@@ -1,0 +1,207 @@
+﻿
+begin transaction
+
+ create table CihazHesap
+ (
+
+   Id                Int IDENTITY(1,1) NOT NULL, 
+   ParentId          Int       not null, /* default 0 */
+   FirmId            Int       not null,
+   IsActive          Bit       not null, /* default : 1 = active, 0 = not active */ 
+   CihazTipiId       SmallInt      null, 
+   CihazModelId      Int           null, /* cihazın hangi model olduğu bilgisi */   
+   CalismaTipiId     SmallInt      null, 
+
+   CihazAdi          nVarchar(100) null,
+   CihazIP           nVarchar(20)  null,
+   CihazPort         nVarchar(10)  null,
+   
+
+   constraint		pk_CihazHesap primary key (Id)
+ )
+
+ create index X_CihazHesap01 on CihazHesap (FirmId)
+ create index X_CihazHesap02 on CihazHesap (CihazTipiId)
+ create index X_CihazHesap03 on CihazHesap (CalismaTipiId)
+ 
+ grant select, insert, update, delete on CihazHesap to public
+
+
+-- ------------------------------------------------------- 
+-- CihazTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[CihazHesapCihazTipi]
+(
+   Id           Int Unique Not Null,
+   CihazTipi    nVarchar(50),
+
+   constraint  pk_CihazHesapCihazTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[CihazHesapCihazTipi] (Id, CihazTipi)
+ VALUES 
+  (  0, N'Tanımsız'),
+  (110, N'Parmak'),
+  (120, N'Parmak-Damar'),
+  (210, N'IP Kamera')
+
+ -- ------------------------------------------------------- 
+ -- CalismaTipiId 
+ -- ------------------------------------------------------- 
+create table [Lkp].[CihazHesapCalismaTipi]
+(
+   Id           Int Unique Not Null,
+   CalismaTipi  nVarchar(50),
+   GrupTipiId   SmallInt   null,
+   
+   constraint  pk_CihazHesapCalismaTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[CihazHesapCalismaTipi] (Id, CalismaTipi, GrupTipiId)
+ VALUES 
+  (11, N'Kayıt', 1),
+  (12, N'Giriş', 1),
+  (13, N'Çıkış', 1),
+  (14, N'Giriş-Çıkış', 1),
+  (15, N'Görüş', 1),
+  (16, N'Sayım', 1),
+  
+  (21, N'Kayıt', 2),
+  (22, N'Giriş', 2),
+  (23, N'Çıkış', 2),
+  (24, N'Giriş-Çıkış', 2),
+  (25, N'Mola', 2)
+
+
+ -- Eylem Planları için cihazlara gerekli CariId ve Bio yüklendimi onun bilgisini tutuyor 
+ -- CihazLog.EylePlaniId = EylemPlani.Id tablosuyla karşılaştırılıyor eğer null ise Set... işlemleri çalışıyor
+ -- CihazLog.Id null değil ise EylemPlan bilgisi cihazlara gönderilimiş anlamına geliyor
+ -- O zamanda Cihazlardan bilgi toplama işlemi başlıyor ( Get.. )
+ -- EylemPlani.IsActive = false ve CihazLog.IsDelete = false ise ( Del.. ) işlemleri başlıyor
+ 
+ create table CihazLog
+ (
+
+   Id                Int IDENTITY(1,1) NOT NULL, 
+   FirmId            Int       not null,
+   CihazId           Int       not null,
+   EylemPlaniId      Int       null, 
+   CariBioId         Int       null, 
+   IsDelete          Bit       null,  
+   TarihSaat         SmallDatetime not null,   
+      
+   constraint		pk_CihazLog primary key (Id)
+ )
+
+ create index X_CihazLog01 on CihazLog (FirmId)
+ create index X_CihazLog02 on CihazLog (CihazId,EylemPlaniId)
+ create index X_CihazLog03 on CihazLog (CihazId,CariBioId)
+ create index X_CihazLog04 on CihazLog (TarihSaat)
+ 
+ grant select, insert, update, delete on CihazLog to public
+
+
+
+ create table CihazKaydi
+ (
+
+   Id                Int IDENTITY(1,1) NOT NULL, 
+   FirmId            Int       not null,
+   IsActive          Bit       not null, /* default : 1 = active, 0 = not active */ 
+   CihazId           Int       not null,
+   CariId            Int       not null,
+   TarihSaat         SmallDatetime not null,   
+   EylemPlaniId      Int       null, /* default = null, EylemPlani.Id  işlenmesi sırasında dolduruluyor */
+   SayimIcmaliId     Int       null, /* default = null, SayimIcmali.Id sayım işareti  */
+   ZamanlamaTipiId   SmallInt  null, 
+
+   constraint		pk_CihazKaydi primary key (Id)
+ )
+
+ create index X_CihazKaydi01 on CihazKaydi (FirmId)
+ create index X_CihazKaydi02 on CihazKaydi (CihazId)
+ create index X_CihazKaydi03 on CihazKaydi (CariId)
+ create index X_CihazKaydi04 on CihazKaydi (EylemPlaniId)
+ create index X_CihazKaydi05 on CihazKaydi (SayimIcmaliId)
+ 
+ grant select, insert, update, delete on CihazKaydi to public
+ 
+-- ------------------------------------------------------- 
+-- ZamanlamaTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[CihazKaydiZamanlamaTipi]
+(
+   Id            Int Unique Not Null,
+   ZamanlamaTipi nVarchar(50),
+   GrupTipiId    SmallInt Null,
+ 
+   constraint  pk_CihazKaydiZamanlamaTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[CihazKaydiZamanlamaTipi] (Id, ZamanlamaTipi, GrupTipiId)
+ VALUES 
+  (0, N'Tanımsız', 0 ),
+  (1, N'Önce',     1 ),
+  (2, N'Vaktinde', 1 ),
+  (3, N'Sonra',    1 )
+
+
+
+ create table CihazEmri
+ (
+
+   Id                Int IDENTITY(1,1) NOT NULL, 
+   FirmId            Int       not null,
+   IsRun             Bit       null, /* default false, talep işlemi yapıldıysa true */ 
+   TalepTipiId       SmallInt  not null, 
+   TarihSaat         SmallDatetime null,   /* talep saait */
+   RunTarihSaat      SmallDatetime null,   /* talebin gerçekleştiği saat*/
+
+   constraint		pk_CihazEmri primary key (Id)
+ )
+
+ create index X_CihazEmri01 on CihazEmri (FirmId,TarihSaat)
+
+ grant select, insert, update, delete on CihazEmri to public
+
+
+
+ create table CihazTestUser
+ (
+   Id                Int IDENTITY(1,1) NOT NULL, 
+   FirmId            Int       not null,
+   MachineNumber     Int           null,
+   CariId            Int           null, -- = EnrollNumber
+   UserName          nVarChar(100) null,
+   BioIndex          SmallInt      null,
+   BioPrint          nVarChar(max) null,
+
+   constraint		pk_CihazTestUser primary key (Id)
+ )
+
+ create index X_CihazTestUser01 on CihazTestUser (FirmId, MachineNumber)
+
+ grant select, insert, update, delete on CihazTestUser to public
+
+
+ create table CihazTestLog
+ (
+   Id                Int IDENTITY(1,1) NOT NULL, 
+   FirmId            Int       not null,
+   MachineNumber     Int           null,
+   CariId            Int           null, -- = EnrollNumber
+   TarihSaat         SmallDatetime null,
+
+   constraint		pk_CihazTestLog primary key (Id)
+ )
+
+ create index X_CihazTestLog01 on CihazTestLog (FirmId, MachineNumber)
+
+ grant select, insert, update, delete on CihazTestLog to public
+
+
+
+
+
+commit transaction
+

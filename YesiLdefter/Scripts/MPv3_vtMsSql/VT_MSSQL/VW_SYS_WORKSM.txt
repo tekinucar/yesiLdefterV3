@@ -1,0 +1,208 @@
+
+
+
+
+
+CREATE VIEW [dbo].[VW_SYS_WORKSM]  
+AS
+ (
+
+  --- PROJEDE YAPILACAK ÝÞLER
+
+Select  
+       max(SM.[ID])          ID 
+      ,max(SM.[WR_CODE])     WR_CODE
+      ,max(SM.[PARENT_CODE]) PARENT_CODE
+      ,max(SM.[WR_NAME])     WR_NAME
+      ,max(SM.[WR_ABOUT])    WR_ABOUT
+      ,max(SM.[WR_TYPE])     WR_TYPE
+      ,max(SM.[MAIN])        LKP_MAIN
+      ,max(SM.[OKUL])        LKP_OKUL
+      ,max(SM.[MUHT])        LKP_MUHT
+      ,max(SM.[MTSK])        LKP_MTSK
+      ,max(SM.[SRC])         LKP_SCR
+      ,max(SM.[ISMAK])       LKP_ISMAK
+      ,max(SM.[ETUT])        LKP_ETUT
+      ,max(SM.[OGRT])        LKP_OGRT
+      ,max(SM.[REHA])        LKP_REHA
+      ,max(SM.[YURT])        LKP_YURT
+      
+from
+(
+
+  Select M.* 
+  , D.ACTIVE MAIN
+  , 0  OKUL
+  , 0  MUHT
+  , 0  MTSK
+  , 0  SRC
+  , 0  ISMAK
+  , 0  ETUT
+  , 0  OGRT
+  , 0  REHA
+  , 0  YURT
+  from SYS_WORKSM M
+    left outer join SYS_WORKSD D on (M.WR_CODE = D.WR_CODE and D.PROJECT_CODE = 'MAIN' ) 
+ 
+  union all
+
+  Select M.* 
+  , 0  MAIN
+  , D.ACTIVE OKUL
+  , 0  MUHT
+  , 0  MTSK
+  , 0  SRC
+  , 0  ISMAK
+  , 0  ETUT
+  , 0  OGRT
+  , 0  REHA
+  , 0  YURT
+  from SYS_WORKSM M
+    left outer join SYS_WORKSD D on (M.WR_CODE = D.WR_CODE and D.PROJECT_CODE = 'OKUL')  
+ 
+  union all
+
+  Select M.* 
+  , 0  MAIN
+  , 0  OKUL
+  , D.ACTIVE MUHT
+  , 0  MTSK
+  , 0  SRC
+  , 0  ISMAK
+  , 0  ETUT
+  , 0  OGRT
+  , 0  REHA
+  , 0  YURT
+  from SYS_WORKSM M
+    left outer join SYS_WORKSD D on (M.WR_CODE = D.WR_CODE and D.PROJECT_CODE = 'MUHT')  
+
+  union all
+
+  Select M.* 
+  , 0  MAIN
+  , 0  OKUL
+  , 0  MUHT
+  , D.ACTIVE MTSK
+  , 0  SRC
+  , 0  ISMAK
+  , 0  ETUT
+  , 0  OGRT
+  , 0  REHA
+  , 0  YURT
+  from SYS_WORKSM M
+    left outer join SYS_WORKSD D on (M.WR_CODE = D.WR_CODE and D.PROJECT_CODE = 'MTSK')  
+
+  union all
+
+  Select M.* 
+  , 0  MAIN
+  , 0  OKUL
+  , 0  MUHT
+  , 0  MTSK
+  , D.ACTIVE SRC
+  , 0  ISMAK
+  , 0  ETUT
+  , 0  OGRT
+  , 0  REHA
+  , 0  YURT
+  from SYS_WORKSM M
+    left outer join SYS_WORKSD D on (M.WR_CODE = D.WR_CODE and D.PROJECT_CODE = 'SRC')  
+
+  union all
+
+  Select M.* 
+  , 0  MAIN
+  , 0  OKUL
+  , 0  MUHT
+  , 0  MTSK
+  , 0  SRC
+  , D.ACTIVE ISMAK
+  , 0  ETUT
+  , 0  OGRT
+  , 0  REHA
+  , 0  YURT
+  from SYS_WORKSM M
+    left outer join SYS_WORKSD D on (M.WR_CODE = D.WR_CODE and D.PROJECT_CODE = 'ISMAK')  
+
+  union all
+
+  Select M.* 
+  , 0  MAIN
+  , 0  OKUL
+  , 0  MUHT
+  , 0  MTSK
+  , 0  SRC
+  , 0  ISMAK
+  , D.ACTIVE ETUT
+  , 0  OGRT
+  , 0  REHA
+  , 0  YURT
+  from SYS_WORKSM M
+    left outer join SYS_WORKSD D on (M.WR_CODE = D.WR_CODE and D.PROJECT_CODE = 'ETUT')  
+
+  union all
+
+  Select M.* 
+  , 0  MAIN
+  , 0  OKUL
+  , 0  MUHT
+  , 0  MTSK
+  , 0  SRC
+  , 0  ISMAK
+  , 0  ETUT
+  , D.ACTIVE OGRT
+  , 0  REHA
+  , 0  YURT
+  from SYS_WORKSM M
+    left outer join SYS_WORKSD D on (M.WR_CODE = D.WR_CODE and D.PROJECT_CODE = 'OGRT')  
+
+  union all
+
+  Select M.* 
+  , 0  MAIN
+  , 0  OKUL
+  , 0  MUHT
+  , 0  MTSK
+  , 0  SRC
+  , 0  ISMAK
+  , 0  ETUT
+  , 0  OGRT
+  , D.ACTIVE REHA
+  , 0  YURT
+  from SYS_WORKSM M
+    left outer join SYS_WORKSD D on (M.WR_CODE = D.WR_CODE and D.PROJECT_CODE = 'REHA')  
+
+  union all
+
+  Select M.* 
+  , 0  MAIN
+  , 0  OKUL
+  , 0  MUHT
+  , 0  MTSK
+  , 0  SRC
+  , 0  ISMAK
+  , 0  ETUT
+  , 0  OGRT
+  , 0  REHA
+  , D.ACTIVE YURT
+  from SYS_WORKSM M
+    left outer join SYS_WORKSD D on (M.WR_CODE = D.WR_CODE and D.PROJECT_CODE = 'YURT')  
+
+
+ ) SM
+ 
+ group by
+       [ID] 
+      ,[LINE_NO]
+      ,[WR_CODE]
+      ,[PARENT_CODE]
+      ,[WR_NAME]
+      ,[WR_ABOUT]
+      ,[WR_TYPE]
+     
+  
+  
+  
+  )
+  
+  

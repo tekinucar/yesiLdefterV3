@@ -1,0 +1,147 @@
+﻿begin transaction
+
+--iptal
+
+ create table FinansIslemi
+ (
+
+   Id                 Int IDENTITY(1,1) NOT NULL, 
+   ParentId           Int       not null, /* default 0 */
+   FirmId             Int       not null,
+   IsActive           Bit       not null, /* default : 1 = active, 0 = not active */  
+   IslemTipiId        SmallInt      null, 
+
+   /* fieldNo : 11... */ 
+   IslemTarihi        Date          null, 
+   IslemYil           Smallint      null, 
+   IslemAy            Smallint      null, 
+   IslemGun           Smallint      null, 
+   IslemSaat          VarChar(5)    null,
+
+   BelgeTarihi        Date          null,    /* kayda esas alınan başka bir belgenin işlem veya vade tarihi */ 
+   BelgeNo            Varchar(20)   null,    /* kayda esas alınan başka bir belgenin numarası */    
+
+   /* fieldNo : 21... */
+   BorcluTipiId       SmallInt      null,  
+   BorcluHesapId      Int           null,
+   
+   AlacakliTipiId     SmallInt      null,  
+   AlacakliHesapId    Int           null,
+   
+   CariId             Int           null,
+ 
+   /* fieldNo : 31...49 */
+   IslemTutari        Numeric(22,5) null,    /* her zaman KDV dahil tutar girilir */  
+   KdvOrani           Numeric(2)    null,
+   KdvTutari          Numeric(22,5) null,
+   KdvsizTutar        Numeric(22,5) null,
+   
+   /* bu araya diğer vergi tutalarıda ekleneccek */
+   
+   MasrafTipiId       SmallInt      null,
+   MasrafTutari       Numeric(22,5) null,    /* ödeme sırasında yapılan masraf */
+   ToplamTutar        Numeric(22,5) null,    /* AlacakTutarı + MasrafTutarı */
+
+   /* fieldNo : 51... */
+   ParaTipiId         Int           null,
+   DovizYeriId        Int           null,
+   DovizKuru          Numeric(22,5) null,
+   DovizTutari        Numeric(22,5) null,
+   
+   /* fieldNo : 61... */
+   ParentIslemTipiId  SmallInt      null, /* diğer tablolar bağlandıkca eklenecek */
+   ParentIslemId      Int           null, 
+
+   constraint		pk_FinansIslemi primary key (Id)
+ )
+
+ create index X_FinansIslemi01 on FinansIslemi (FirmId)
+ create index X_FinansIslemi02 on FinansIslemi (IslemTipiId)
+ create index X_FinansIslemi03 on FinansIslemi (BorcluTipiId)
+ create index X_FinansIslemi04 on FinansIslemi (AlacakliTipiId)
+ create index X_FinansIslemi05 on FinansIslemi (CariId)
+
+ grant select, insert, update, delete on FinansIslemi to public
+
+
+ create table FinansIslemiBA
+ (
+
+   Id                 Int IDENTITY(1,1) NOT NULL, 
+   ParentId           Int       not null, /* FinansIslemi.Id = FinansIslemiBA.ParentId  : tablo borc satırı ve alacak satırı olmak üzere iki satırdan oluşuyor */
+   FirmId             Int       not null,
+
+   HesapBA            Varchar(1)    null, /* B veya A */
+   BATipiId           SmallInt      null,
+   HesapId            Int           null,
+
+   BorcTutari         Numeric(22,5) null,
+   AlacakTutari       Numeric(22,5) null,
+   
+   constraint		pk_FinansIslemiBA primary key (Id)
+ )
+
+ create index X_FinansIslemiBA01 on FinansIslemiBA (ParentId)
+ create index X_FinansIslemiBA02 on FinansIslemiBA (FirmId)
+
+
+
+
+create table [Lkp].[FinansIslemiIslemTipi]
+(
+   Id                  Int Unique Not Null,
+   IslemTipi   nVarchar(50),
+
+   constraint  pk_FinansIslemiIslemTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[FinansIslemiIslemTipi] (Id, IslemTipi)
+ VALUES 
+  (0,   N'Tanımsız'),
+
+
+
+
+-- kodun içinde bu tablonun ismi için müdehale var
+-- [Lkp].[FinansIslemiFinansTipi] ile içeriği aynı
+-- burada Cari tanımı fazla
+--
+
+create table [Lkp].[FinansIslemiBATipi]
+(
+   Id                  Int Unique Not Null,
+   BorluAlacakliTipi   nVarchar(50),
+
+   constraint  pk_FinansIslemiBATipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[FinansIslemiBATipi] (Id, BorluAlacakliTipi)
+ VALUES 
+  (0,   N'Tanımsız'),
+  (110, N'Nakit Kasası'),
+  (210, N'Banka'),
+  (220, N'Şube'), 
+  (230, N'Banka Hesabı'), 
+  (240, N'Banka Kartı'),   
+  (250, N'POS'),
+  (310, N'Cari')
+
+create table [Lkp].[FinansIslemiParentIslemTipi]
+(
+   Id                  Int Unique Not Null,
+   ParentIslemTipi     nVarchar(50),
+
+   constraint  pk_FinansIslemiParentIslemTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[FinansIslemiParentIslemTipi] (Id, ParentIslemTipi)
+ VALUES 
+  (0,   N'Tanımsız')
+
+
+
+commit transaction
+
+
+
+

@@ -1,0 +1,240 @@
+﻿USE [u7093888_Ustad01]
+GO
+
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+create procedure [dbo].[prc_ComputeBelgeStokSEkVergi] ( 
+  @FirmId Integer,
+  @BelgeStokBId Integer,
+  @BelgeStokSId Integer,
+  @StokId Integer
+  )
+as begin
+
+  /*  
+  declare @FirmId Integer = 7
+  declare @BelgeStokBId Integer = 1
+  declare @BelgeStokSId Integer = 1
+  declare @StokId Integer = 1
+  */
+  declare @countStokEkVergi Integer = 0
+  declare @countBelgeStokSEkVergi Integer = 0
+  declare @BelgeStokSIdKontrol integer = 0
+  
+  /* 1.Adım : Stok kartında tanımlı olan ekvergi sayısını bul */
+  Select @countStokEkVergi = count(stokEkVergi.Id)
+  from [dbo].[IStokFaturaEkVergi] as stokEkVergi
+  where stokEkVergi.IsActive = 1
+  and stokEkVergi.FirmId = @FirmId
+  and stokEkVergi.StokId = @StokId
+
+  /* 2.Adım : BelgeStokSEkvergi tablosundaki ekvergi sayısını bul */
+  Select @countBelgeStokSEkVergi = count(BSSEkVergi.Id)
+  from [dbo].[IBelgeStokSEkVergi] as BSSEkVergi 
+  where BSSEkVergi.FirmId = @FirmId
+  and BSSEkVergi.BelgeStokBId = @BelgeStokBId 
+  and BSSEkVergi.BelgeStokSId = @BelgeStokSId 
+  --and BSSEkVergi.StokId = @StokId
+
+  /* 3.Adım : BelgeStokS tablosundan satır silindimi, yoksa duruyor mu ? */
+  Select @BelgeStokSIdKontrol = isnull(Id,-1)
+  from [dbo].[BelgeStokS] 
+  where Id = @BelgeStokSId 
+   
+
+  -- 4.Adım : fark varsa 
+  -- ya hiç daha BelgeStokSEkVergi tablosuna eklenmemiş, yani yeni eklenecek, ekle
+  -- yada stok kartında ekvergiyle ilgili bir değişiklik yapıldı 
+  -- onun için öncekileri sil ve yeniden BelgeStokSEkVergi tablosuna ekle
+  If ((@countBelgeStokSEkVergi <> @countStokEkVergi) and
+      (@BelgeStokSIdKontrol > 0))
+  begin
+      print @countBelgeStokSEkVergi
+      print @countStokEkVergi
+  
+      -- BelgeStokSEkVergi tablosuna ekli varsa eskileri sil
+      if (@countBelgeStokSEkVergi > 0)
+      begin
+          print 'delete [IBelgeStokSEkVergi]'
+
+          delete [dbo].[IBelgeStokSEkVergi]
+          from [dbo].[IBelgeStokSEkVergi] as BSSEkVergi 
+          where BSSEkVergi.FirmId = @FirmId
+          and BSSEkVergi.BelgeStokBId = @BelgeStokBId 
+          and BSSEkVergi.BelgeStokSId = @BelgeStokSId 
+          --and BSSEkVergi.StokId = @StokId
+      end -- if (@countBelgeStokSEkVergi > 0)
+
+      -- [IBelgeStokSEkVergi] tablosuna yeniden ekle
+	  print 'insert [IBelgeStokSEkVergi]'
+      Insert Into [dbo].[IBelgeStokSEkVergi]
+                 ([FirmId]
+                 ,[BelgeStokBId]
+                 ,[BelgeStokSId]
+                 ,[StokId]
+                 ,[FaturaEkVergiKodu]
+                 ,[MatrahTutari]
+                 ,[MatrahTutariKdvli]
+                 ,[EkVergiOrani]
+                 ,[EkVergiTutari]
+                 ,[HesaplananVergi]
+                 )
+      Select 
+          @FirmId
+         ,@BelgeStokBId
+         ,@BelgeStokSId
+         ,@StokId
+         ,stokEkVergi.FaturaEkVergiKodu
+	     ,bStokS.ISToplamTutar
+	     ,bStokS.ISToplamTutarKdvli
+	     ,stokEkVergi.VergiOrani
+	     ,stokEkVergi.VergiTutari
+		 -- Hesaplama
+		 ,(case when stokEkVergi.VergiOrani > 0 then ((bStokS.ISToplamTutar/100) * stokEkVergi.VergiOrani) else 0 end) as HesaplananVergi
+      
+	  from [dbo].[IStokFaturaEkVergi] as stokEkVergi
+          left outer join [dbo].[IBelgeStokSEkVergi] as BSSEkVergi 
+            on ( stokEkVergi.FaturaEkVergiKodu = BSSEkVergi.FaturaEkVergiKodu 
+		    and  BSSEkVergi.BelgeStokBId = @BelgeStokBId
+			and  BSSEkVergi.BelgeStokSId = @BelgeStokSId
+			and  BSSEkVergi.StokId = @StokId
+			) 
+          left outer join [dbo].[BelgeStokS] as bStokS on (
+	          bStokS.FirmId = @FirmId
+	      and bStokS.BelgeStokBId = @BelgeStokBId
+	      and bStokS.Id = @BelgeStokSId
+	      )
+      where stokEkVergi.IsActive = 1
+      and   stokEkVergi.FirmId = @FirmId
+      and   stokEkVergi.StokId = @StokId
+      and   BSSEkVergi.FaturaEkVergiKodu is null
+      order by stokEkVergi.SiraNo
+
+    end -- if (@countBelgeStokSEkVergi <> @countStokEkVergi)
+
+  -- 5.Adım : BelgeStokS tablosundan satır silinmiş ise
+  If (@BelgeStokSIdKontrol = 0)
+  begin
+      print 'delete [IBelgeStokSEkVergi]'
+      delete [dbo].[IBelgeStokSEkVergi]
+      from [dbo].[IBelgeStokSEkVergi] as BSSEkVergi 
+      where BSSEkVergi.FirmId = @FirmId
+      and BSSEkVergi.BelgeStokBId = @BelgeStokBId 
+      and BSSEkVergi.BelgeStokSId = @BelgeStokSId   
+  end
+
+  -- 6.Adım : fark yoksa
+  -- Bunlar eşitse ya matrahlar yada oranlar değişti
+  If ((@countBelgeStokSEkVergi = @countStokEkVergi) and
+      (@BelgeStokSIdKontrol > 0))
+  begin
+      print 'update'
+
+      Update [dbo].[IBelgeStokSEkVergi]
+      Set [MatrahTutari] = B.MatrahTutari
+         ,[MatrahTutariKdvli] = B.MatrahTutariKdvli
+         ,[EkVergiOrani] = B.EkVergiOrani
+         ,[EkVergiTutari] = B.EkVergiTutari
+         ,[HesaplananVergi] = B.HesaplananVergi
+      From [dbo].[IBelgeStokSEkVergi] as A,
+      (
+	    Select 
+            BSSEkVergi.FirmId
+           ,BSSEkVergi.BelgeStokBId
+           ,BSSEkVergi.BelgeStokSId
+           ,BSSEkVergi.StokId
+           ,stokEkVergi.FaturaEkVergiKodu
+           ,bStokS.ISToplamTutar as MatrahTutari
+           ,bStokS.ISToplamTutarKdvli as MatrahTutariKdvli
+           ,stokEkVergi.VergiOrani as EkVergiOrani
+           ,stokEkVergi.VergiTutari as EkVergiTutari
+		   -- Hesaplama
+		   ,(case when stokEkVergi.VergiOrani > 0 then ((bStokS.ISToplamTutar/100) * stokEkVergi.VergiOrani) else 0 end) as HesaplananVergi
+      
+       From [dbo].[IStokFaturaEkVergi] as stokEkVergi
+           left outer join [dbo].[IBelgeStokSEkVergi] as BSSEkVergi 
+               on ( stokEkVergi.FaturaEkVergiKodu = BSSEkVergi.FaturaEkVergiKodu 
+               and  BSSEkVergi.BelgeStokBId = @BelgeStokBId
+               and  BSSEkVergi.BelgeStokSId = @BelgeStokSId
+               and  BSSEkVergi.StokId = @StokId ) 
+           left outer join [dbo].[BelgeStokS] as bStokS on (
+	           bStokS.FirmId = @FirmId
+	       and bStokS.BelgeStokBId = @BelgeStokBId
+	       and bStokS.Id = @BelgeStokSId
+	       )
+       Where stokEkVergi.IsActive = 1
+       and   stokEkVergi.FirmId = @FirmId
+       and   stokEkVergi.StokId = @StokId
+    
+      ) as B
+	  Where A.FirmId = B.FirmId
+	  and   A.BelgeStokBId = B.BelgeStokBId
+	  and   A.BelgeStokSId = B.BelgeStokSId
+	  and   A.StokId = B.StokId
+
+  end -- if (@countBelgeStokSEkVergi = @countStokEkVergi) 
+
+
+  declare @HesaplananVergi numeric(22,8)
+
+  -- Hesaplan EkVergilerin sonucu topla (bir stoğun birden fazla vergisi olabilir ) 
+  -- diğer kdv hesaplarını yeniden hesapla
+  
+  Select @HesaplananVergi = isnull(Sum([HesaplananVergi]),0) 
+      From [dbo].[IBelgeStokSEkVergi]
+	  Where FirmId = @FirmId
+	  and   BelgeStokBId = @BelgeStokBId
+	  and   BelgeStokSId = @BelgeStokSId
+	  and   StokId = @StokId
+  
+  if (@HesaplananVergi >= 0) 
+  begin
+
+    declare @ISToplamTutar numeric(22,8)
+    declare @KdvOrani numeric(4,2)
+    declare @TevkifatPaydasi numeric(5)
+    declare @TevkifatPayi numeric(5)
+    declare @ISKdvMatrahi numeric(22,8)
+    declare @ISKdvTutari numeric(22,8)
+    declare @ISTevkifatTutari numeric(22,8)
+    declare @ISHesaplananKdv numeric(22,8)
+    declare @ISToplamTutarKdvli numeric(22,8)
+	
+    Select 
+      @ISToplamTutar = [ISToplamTutar]
+    , @KdvOrani = [KdvOrani]
+    , @TevkifatPaydasi = [TevkifatPaydasi]
+    , @TevkifatPayi = [TevkifatPayi]
+    From [dbo].[BelgeStokS]
+    Where Id = @BelgeStokSId
+  
+    if (@KdvOrani = 0) set @KdvOrani = 1
+
+    set @ISKdvMatrahi = @ISToplamTutar + @HesaplananVergi
+    set @ISKdvTutari = @ISKdvMatrahi * ( @KdvOrani - 1 ) 
+    
+	if (@TevkifatPaydasi > 0)
+	   set @ISTevkifatTutari = ( @ISKdvTutari / @TevkifatPaydasi ) * @TevkifatPayi
+    else set @ISTevkifatTutari = 0
+
+    set @ISHesaplananKdv = @ISKdvTutari - @ISTevkifatTutari
+    set @ISToplamTutarKdvli = @ISKdvMatrahi + @ISHesaplananKdv
+    
+    Update [dbo].[BelgeStokS]
+    Set [ISEkVergiTutari] = @HesaplananVergi
+	  , [ISKdvMatrahi] = @ISKdvMatrahi
+	  , [ISKdvTutari] = @ISKdvTutari
+	  , [ISTevkifatTutari] = @ISTevkifatTutari
+	  , [ISHesaplananKdv] = @ISHesaplananKdv
+	  , [ISToplamTutarKdvli] = @ISToplamTutarKdvli
+	From [dbo].[BelgeStokS] as A
+	Where A.Id = @BelgeStokSId
+  end -- if (@HesaplananVergi > 0) 
+
+end -- prc_
+GO
+

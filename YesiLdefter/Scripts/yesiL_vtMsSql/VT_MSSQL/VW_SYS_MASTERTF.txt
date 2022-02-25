@@ -1,0 +1,18 @@
+﻿
+
+
+CREATE VIEW [dbo].[VW_SYS_MASTERTF]  
+AS
+ (
+  select 
+     ROW_NUMBER() OVER( ORDER BY b.name, a.column_id ASC) AS REF_ID
+   , b.name TableName  
+   , a.column_id, a.name 
+   , convert(smallint, a.system_type_id) system_type_id
+   , a.max_length, a.is_identity from 
+  [GREEN].sys.columns a, 
+  [GREEN].sys.tables b 
+  where b.object_id = a.object_id 
+ )
+
+

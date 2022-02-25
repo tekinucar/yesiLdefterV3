@@ -1,0 +1,364 @@
+﻿USE u7093888_Ustad01
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+begin transaction
+
+ create table MtskSinavUygulama
+ (
+   Id                    Int IDENTITY(1,1) not null, 
+   FirmId                Int       not null,
+   IsActive              Bit       not null, /* default : 1 = active, 0 = not active */  
+   SinavDonemTipiId      Int           null, /* sınavın yapıldığı dönem */
+   AdayId                Int       not null, /* default 0 */
+   TcNo                  Varchar(11)   null,
+   TamAdiSoyadi          nVarchar(100) null,
+   AdayDonemTipiId       Int           null, /* bu mebbisde e-sınav listelerinde yok, uyg. sınav listelerinde var */ 
+
+   --10
+   SinavNo               SmallInt      null,  
+   SinavTarihi           Date          null,
+   SiraNo                SmallInt      null, /* uygulama sınavı için */  
+   PuanTipiId            SmallInt      null, /* 1. Başarısız, 100. Başarılı */
+   EgitimTipiId          SmallInt      null, /* hangi derslerin sınavı olduğunu işaret ediyor : 1 = Normal derslerin sınavı,  3 = 2.Direksiyon Eğitimi (+4) */
+   DurumuTipiId          SmallInt      null, /* mebbiste okunuyor*/
+   SinavDurumu           nVarchar(20)  null, /* aday durum sorgu sayfasında mevcut */
+   SinavSonucYorumu      nVarchar(250) null, /* aday durum sorgu sayfasında mevcut */
+   
+   UcretDurumuTipiId     SmallInt      null, /* mebbisten okunuyor : Sınav Ücreti Yatırılmamış ,  */
+   YatanToplamUcret      Numeric(22,8) null,
+   UcretSayisi           SmallInt      null,
+   RandevuId             Int           null,
+   
+   constraint		pk_MtskSinavUygulama primary key (Id)
+ )
+  
+ grant select, insert, update, delete on MtskSinavUygulama to public
+
+ create index X_MtskSinavUygulama01 on MtskSinavUygulama (AdayId)
+ create index X_MtskSinavUygulama02 on MtskSinavUygulama (TcNo)
+ 
+commit transaction
+
+
+
+
+
+USE [u7093888_Ustad01]
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+CREATE TRIGGER [dbo].[trg_MtskSinavUygulama] on [dbo].[MtskSinavUygulama] 
+AFTER INSERT, UPDATE
+AS BEGIN
+
+	DECLARE curSinavUyg cursor for select Id from Inserted 
+    DECLARE @curId bigint
+
+    OPEN curSinavUyg
+
+    FETCH NEXT FROM curSinavUyg INTO @curId
+ 
+	declare @yFirmId int = 0
+	declare @SinavDonemTipiId int = 0
+	declare @yAdayId int = 0
+	declare @yTcNo varchar(11) = ''
+	declare @yTamAdiSoyadi nvarchar(100) = ''
+	declare @AdayDonemTipiId int = 0
+	declare @ySinavNo smallInt = 0
+	declare @newSinavNo smallInt = 0
+	declare @ySinavTarihi date = null
+	declare @ePuanTipiId smallInt = 0
+	declare @yPuanTipiId smallInt = 0
+	declare @yEgitimTipiId smallInt = 0
+	declare @yDurumuTipiId smallInt = 0
+	declare @ySinavDurumu nvarchar(20) = ''
+	declare @ySinavSonucYorumu nvarchar(250) = ''
+	declare @DosyaYakti bit = 0
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+	    set @ySinavNo = 0 
+	    set @newSinavNo = 0 
+	    set @DosyaYakti = 0
+
+        select 
+          @yFirmId = ins.FirmId
+    	, @yAdayId = isnull(ins.AdayId,0)
+	    , @yTcNo = isnull(ins.TcNo,'')
+	    , @yTamAdiSoyadi = isnull(ins.TamAdiSoyadi,'') 
+		, @AdayDonemTipiId = isnull(ins.AdayDonemTipiId,0)
+        , @ySinavNo = isnull(ins.SinavNo,0)
+		, @ySinavTarihi = ins.SinavTarihi 
+		, @yPuanTipiId = isnull(ins.PuanTipiId, 0)
+	    , @yDurumuTipiId = isnull(ins.DurumuTipiId,0)
+		, @ySinavDurumu = isnull(ins.SinavDurumu,'')
+        , @ySinavSonucYorumu = isnull(ins.SinavSonucYorumu,'')
+		from inserted ins
+    	where ins.Id = @curId
+
+		-- Sınavın hangi dönemde yapıldığı tespit ediliyor
+		if (MONTH(@ySinavTarihi) < 10)
+               set @SinavDonemTipiId = convert(int, convert(varchar(5), YEAR(@ySinavTarihi)) + '0' + convert(varchar(3), MONTH(@ySinavTarihi)))
+          else set @SinavDonemTipiId = convert(int, convert(varchar(5), YEAR(@ySinavTarihi)) + convert(varchar(3), MONTH(@ySinavTarihi)))
+		
+		if (@yAdayId = 0) and (@yTcNo <> '')
+		begin
+		  Select top 1 @yAdayId = Id  From MtskAday
+          Where TcNo = @yTcNo
+          and   isnull(DonemTipiId,0) <= @SinavDonemTipiId
+          order by DonemTipiId desc
+
+		  -- demekki aday hiç kayıtlı değil 
+		  -- yani ilk defa MEBBİS in sınav sonuçları (uygulama) sayfasından okunuyor demek
+		  if (@yAdayId = 0)
+		  begin
+              INSERT INTO [dbo].[MtskAday]
+                 ([ParentId]
+                 ,[FirmId]
+                 ,[IsActive]
+                 ,[TcNo]
+                 ,[TamAdiSoyadi]
+				 ,[DonemTipiId]
+                 ,[MebbisKurumOnayi]
+                 ,[KayitTipiId]
+                 ,[KaynakKayitTipiId]
+                 )
+              VALUES
+               (  0        --ParentId, int
+                , @yFirmId --FirmId, int
+                , 1        --IsActive, bit
+                , @yTcNo   --TcNo, varchar(11)
+                , @yTamAdiSoyadi --TamAdiSoyadi, nvarchar(100)
+				, @AdayDonemTipiId --DonemTipiId, int
+                , 1        --MebbisKurumOnayi, bit
+                , 2        --KayitTipiId
+                , 3        --KaynakKayitTipiId 
+               ) 
+			  --Select @yAdayId = @@IDENTITY
+			  Select @yAdayId = aday.Id
+		      From MtskAday as aday
+		      Where aday.FirmId = @yFirmId
+		      and   aday.TcNo = @yTcNo 
+		  end -- @yAdayId = 0
+		end
+
+        -- daha önce kayıtlı ise TcNo sunu bul 			
+		if (@yAdayId > 0) and (@yTcNo = '')
+		begin
+          Select @yTcNo = aday.TcNo
+          From MtskAday as aday
+          Where aday.FirmId = @yFirmId
+          and   aday.Id = @yAdayId
+		end	
+
+	    if (isnull(charindex('Başarılı', @ySinavSonucYorumu),0) = 1)  set @yPuanTipiId = 100
+        if (isnull(charindex('Başarısız', @ySinavSonucYorumu),0) = 1) set @yPuanTipiId = 1
+		if (isnull(charindex('Girmedi', @ySinavDurumu),0) = 1) set @yPuanTipiId = -1
+
+		Select @ySinavNo = (count(Id) + 1) From MtskSinavUygulama
+		Where IsActive = 1
+		and FirmId = @yFirmId
+		and AdayId = @yAdayId
+		and SinavTarihi < @ySinavTarihi
+				
+		if (@ySinavNo <= 4) 
+		begin
+		  set @newSinavNo = @ySinavNo
+		  set @yEgitimTipiId = 1 -- Normal Eğitim sınavı
+		end
+		if (@ySinavNo > 4) 
+		begin
+		  set @newSinavNo = @ySinavNo - 4
+		  set @yEgitimTipiId = 3 -- 2. Direksiyon Eğitim sınavı ( +4 eğitimin sınavı )
+		end
+		
+		
+		-- MtskSinavUygulama.PuanTipiId
+        -- -1,  'Girmedi'
+        -- 0,   ''
+        -- 1,   'Başarısız'
+        -- 100, 'Başarılı'
+        
+		-- MtskSinavUygulama.DurumuTipiId
+        -- 0,    ''
+        -- 1,    'Uygulama Sınav Aşamasında'
+        -- 2,    '2.Direksiyon Aşamasında'
+        -- 3,    'Sertifika Almaya Hak Kazandı'
+        -- 4,    'Uygulama Sınav Hakkı Doldu'
+        -- 5,    'Sertifikası İptal Edildi'
+
+		if (@yDurumuTipiId <> 5)
+		begin
+		    -- Sınav Sonucu Başarılı ise
+		    if (@yPuanTipiId = 100)  set @yDurumuTipiId = 3  -- Sertifika Almaya Hak Kazandı
+		
+		    -- Normal eğitimlerin başarısız sınav sonuçları
+		    if (@ySinavNo < 4 and @yEgitimTipiId = 1)
+            begin
+                if ((@yPuanTipiId = 1) or -- başarısız
+		            (@yPuanTipiId = -1)) -- girmedi
+                    set @yDurumuTipiId = 1         --  Uygulama Sınav Aşamasında
+            end
+
+		    -- Normal Uygulama derslerinin son sınavı
+		    if (@ySinavNo = 4 and @yEgitimTipiId = 1)
+            begin
+                if (@yPuanTipiId = 1 or @yPuanTipiId = -1) -- başarısız veya girmediyse
+                   set @yDurumuTipiId = 4         -- Uygulama Sınav Hakkı Doldu
+            end
+
+		    -- 2. Direksiyon (+4) eğitimlerinin başarısız sınav sonuçları
+		    if (@ySinavNo > 4 and @ySinavNo < 8 and @yEgitimTipiId = 3)
+            begin
+                if ((@yPuanTipiId = 1) or  -- başarısız
+		            (@yPuanTipiId = -1)) -- girmedi 
+                     set @yDurumuTipiId = 2         -- 2.Direksiyon Aşamasında
+            end
+
+		    -- 2. Direksiyon (+4) derslerinin son sınavı
+		    if (@ySinavNo = 8 and @yEgitimTipiId = 3)
+            begin
+		        if (@yPuanTipiId = 1 or @yPuanTipiId = -1) -- başarısız veya girmediyse
+                begin     
+			        set @yDurumuTipiId = 4           -- Uygulama Sınav Hakkı Doldu
+  	                set @DosyaYakti = 1
+                end
+            end
+
+		end -- @yDurumuTipiId <> 5
+				
+		
+		Update MtskSinavUygulama set
+		  AdayId = @yAdayId
+        , TcNo = @yTcNo 
+        , SinavDonemTipiId = @SinavDonemTipiId 
+        , SinavNo = @ySinavNo
+		, PuanTipiId = @yPuanTipiId
+        , EgitimTipiId = @yEgitimTipiId 
+		, DurumuTipiId = @yDurumuTipiId
+		Where Id = @curId
+
+		EXECUTE [dbo].[prc_MtskAdaySertifika] @yFirmId, @yAdayId
+
+        FETCH NEXT FROM curSinavUyg INTO @curId
+    END
+
+    CLOSE curSinavUyg
+    DEALLOCATE curSinavUyg   
+
+	EXECUTE [dbo].[prc_MtskAdayTakip] @yFirmId
+
+
+END
+
+
+ALTER TABLE [dbo].[MtskSinavUygulama] ENABLE TRIGGER [trg_MtskSinavUygulama]
+
+
+
+
+
+
+
+
+
+begin transaction
+
+-- ------------------------------------------------------- 
+-- PuanTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[MtskSinavUygulamaPuanTipi]
+(
+   Id            Int Unique not null, 
+   PuanTipi      nVarchar(20)   null
+   
+   constraint  pk_MtskSinavUygulamaPuanTipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskSinavUygulamaPuanTipi]
+INSERT INTO [Lkp].[MtskSinavUygulamaPuanTipi] (Id, PuanTipi)
+ VALUES 
+  ( -2,   N'Durumu Girilmemiş'),
+  ( -1,   N'Girmedi'),
+  ( 0,    N''),
+  ( 1,    N'Başarısız'),
+  ( 100,  N'Başarılı')
+
+
+-- ------------------------------------------------------- 
+-- EgitimTipiId
+-- ------------------------------------------------------- 
+create table Lkp.MtskSinavUygulamaEgitimTipi
+(
+   Id           Int Unique Not Null,
+   EgitimTipi   nVarchar(50)   null
+
+   constraint  pk_MtskSinavUygulamaEgitimTipi primary key (Id)
+)
+
+INSERT INTO Lkp.MtskSinavUygulamaEgitimTipi (Id, EgitimTipi)
+ VALUES 
+  ( 0, N'Tanımsız'),
+  ( 1, N'Normal Eğitim'),
+  ( 2, N'Telafi Eğitim(Ön Sınav )'),
+  ( 3, N'2.Direksiyon Eğitimi'),
+  ( 4, N'Başarısız Aday Eğitimi')
+
+
+-- ------------------------------------------------------- 
+-- DurumuTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[MtskSinavUygulamaDurumuTipi]
+(
+   Id                 Int Unique not null, 
+   DurumuTipi  nVarchar(50)   null
+   
+   constraint  pk_MtskSinavUygulamaDurumuTipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskSinavUygulamaDurumuTipi]
+INSERT INTO [Lkp].[MtskSinavUygulamaDurumuTipi] (Id, DurumuTipi)
+ VALUES 
+  ( 0,    N''),
+  ( 1,    N'Uygulama Sınav Aşamasında'),
+  ( 2,    N'2.Direksiyon Aşamasında'),
+  ( 3,    N'Sertifika Almaya Hak Kazandı'),
+  ( 4,    N'Uygulama Sınav Hakkı Doldu'),
+  ( 5,    N'Sertifikası İptal Edildi'),
+  ( 6,    N'Durumu Girilmemiş')
+  
+
+-- ------------------------------------------------------- 
+-- UcretDurumuTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[MtskSinavUygulamaUcretDurumuTipi]
+(
+   Id               Int Unique not null, 
+   UcretDurumuTipi  nVarchar(30)   null
+   
+   constraint  pk_MtskSinavUygulamaUcretDurumuTipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskSinavUygulamaUcretDurumuTipi]
+INSERT INTO [Lkp].[MtskSinavUygulamaUcretDurumuTipi] (Id, UcretDurumuTipi)
+ VALUES 
+  ( 0,    N''),
+  ( 1,    N'Yatmışşşşş'),
+  ( 2,    N'Sınav Ücreti Yatırılmamış')
+
+
+commit transaction
+
+

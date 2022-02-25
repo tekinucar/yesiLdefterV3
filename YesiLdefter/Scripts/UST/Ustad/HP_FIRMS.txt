@@ -1,0 +1,42 @@
+
+begin transaction
+
+ create table HP_FIRMS
+ (
+   ID                     Int IDENTITY(1,1) NOT NULL, 
+   ISACTIVE               SmallInt              NULL, 
+   REC_DATE               SmallDatetime         NULL, 
+   FIRM_GUID              nVarChar(50)          NULL, /* SYS_FIRM deki GUID */
+   LOCAL_TD               SmallInt              NULL, /* Firma Tipleri, Grup Merkezi, Firma Merkezi, Þube ....  3=Part/Bölüm, 4=Departman  */ 
+   LOCAL_ID               Int                   NULL, /* LOCAL_ID = FIRM_ID */
+   PARENT_ID              Int                   NULL, /* ÜST HESAP ID */ 
+
+   FIRM_NAME              nVarChar(50)          NULL, /* SYS_FIRM deki ismi */
+   HP_CODE	              nVarChar(50)          NULL, 
+   HP_NAME                nVarChar(100)         NULL,
+   HP_LONG_NAME1          nVarChar(100)         NULL,
+   HP_LONG_NAME2          nVarChar(100)         NULL,
+   
+   USE_PACKAGE            nvarchar(20)          NULL,
+   FIRM_DB_TYPE           smallint              NULL,
+   FIRM_DB_NAME           nvarchar(100)         NULL,
+   FIRM_MAINDB_FORMAT     nvarchar(150)         NULL,
+   FIRM_PERIODDB_FORMAT   nvarchar(150)         NULL,
+   FIRM_SERVER_TYPE       smallint              NULL,
+   FIRM_SERVER_NAME       nvarchar(100)         NULL,
+   FIRM_AUTHENTICATION    smallint              NULL,
+   FIRM_LOGIN             nvarchar(50)          NULL,
+   FIRM_PASSWORD          nvarchar(50)          NULL,
+   FIRM_MAINDB_CONNTEXT   nvarchar(200)         NULL,
+   FIRM_PERIODDB_CONNTEXT nvarchar(200)         NULL,
+   OLD_ID                 Int                   NULL,   
+          	   
+   constraint		PK_HP_FIRMS primary key (ID)
+ )
+ -- mysql_add
+ 
+ create index X_HP_FIRMS1 on HP_FIRMS (HP_NAME);
+
+ grant select, insert, update, delete on HP_FIRMS to public
+
+commit transaction

@@ -1,0 +1,206 @@
+﻿
+begin transaction
+ create table MsSoftware
+ (
+    Id              Int IDENTITY(1,1) NOT NULL,
+	RecType         SmallInt          NOT NULL, 
+    SoftwareCode    NVarChar(20)      NOT NULL,     
+	ProjectCode     NVarChar(20)      NOT NULL,
+	ModulCode       NVarChar(20)      NOT NULL,
+    FullCode        NVarChar(100)     NULL, 	
+	SchemasCode     NVarChar(10)      NULL,     
+	Caption         NVarChar(100)     NOT NULL,
+	IsActive        Bit               NOT NULL,
+	
+   Constraint pk_MsSoftware primary key (Id)
+ )
+
+ create index X_MsSoftware_01 on MsSoftware (RecType)
+ create index X_MsSoftware_02 on MsSoftware (SoftwareCode,ProjectCode,ModulCode)
+ create index X_MsSoftware_03 on MsSoftware (FullCode)
+ 
+ grant select, insert, update, delete on MsSoftware to public
+
+commit transaction
+
+/*
+
+--SmallCode       NVarChar(60)      NOT NULL,
+--ParentCode      NVarChar(60)      NOT NULL,
+--FullCode        NVarChar(60)      NULL,     
+--SchemasCode     NVarChar(10)      NULL,     
+
+
+
+RecType
+
+1. software company
+2. project
+3. modul
+
+                   SMALLCODE     PARENTCODE     FULLCODE         CAPTION
+SOFTWARE_CODE      UST           NULL           UST             :Üstad Yazılım
+PROJECT_CODE       ONM           UST            UST.ONM         :Ön Muhasebe
+MODUL_CODE         FNS           ONM            UST.ONM.FNS     :Finans 
+
+
+*/
+-- --------------------------------------------------------------------------------
+ 1 Firmalar 
+-- --------------------------------------------------------------------------------
+
+
+
+
+-- 1. Software Firmalar
+INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 1, 'UST', '', '', 'UST', '', 'Üstad Yazılım',  1 )  
+INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 1, 'EDS', '', '', 'EDS', '', 'Edison Bilgisayar', 1 )  
+INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 1, 'SEK', '', '', 'SEK', '', 'Sektörel Çözümler', 1 )  
+
+
+-- --------------------------------------------------------------------------------
+ 2 Projeler
+-- --------------------------------------------------------------------------------
+
+-- Üstad Yazılım
+
+INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 2, 'UST', 'T01', '', 'UST.T01', '', 'Test (İlk Çalışmalar)',  1 )  
+INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 2, 'UST', 'T02', '', 'UST.T02', '', 'Test (İkinci Çalışmalar)',  1 )  
+INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 2, 'UST', 'PMS', '', 'UST.PMS', '', 'Project Managment Studio',  1 )  
+INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 2, 'UST', 'RSM', '', 'UST.RSM', '', 'Resmi Muhasebe',  1 )  
+INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 2, 'UST', 'OMS', '', 'UST.OMS', '', 'Ön Muhasebe, S',  1 )  
+INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 2, 'UST', 'OML', '', 'UST.OML', '', 'Ön Muhasebe, L',  1 )  
+INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 2, 'UST', 'MOB', '', 'UST.MOB', '', 'Mobilya',  1 )  
+INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 2, 'UST', 'UIK', '', 'UST.UIK', '', 'İnsan Kaynakları',  1 )  
+
+
+-- Edison
+INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 2, 'EDS', 'MTS', '', 'EDS.MTS', '', 'Mtsk',  1 )  
+INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 2, 'EDS', 'ISM', '', 'EDS.ISM', '', 'İşmak',  1 )  
+INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 2, 'EDS', 'SRC', '', 'EDS.SRC', '', 'Src',  1 )  
+INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 2, 'EDS', 'YDL', '', 'EDS.YDL', '', 'Yabancı Dil',  1 )  
+INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 2, 'EDS', 'YRT', '', 'EDS.YRT', '', 'Yurt',  1 )  
+INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 2, 'EDS', 'OKL', '', 'EDS.OKL', '', 'Okul',  1 )  
+
+
+
+-- Sektörel Çözümler
+
+INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 2, 'SEK', 'OMS', '', 'SEK.OMS', '', 'Ön Muhasebe, S',  1 )  
+INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 2, 'SEK', 'OML', '', 'SEK.OML', '', 'Ön Muhasebe, L',  1 )  
+INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 2, 'SEK', 'CEV', '', 'SEK.CEV', '', 'İnfaz Kurumu',  1 )  
+INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 2, 'SEK', 'KNT', '', 'SEK.KNT', '', 'Kantin',  1 )  
+INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 2, 'SEK', 'RES', '', 'SEK.RES', '', 'Restoran',  1 )  
+--INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 2, 'SEK', '', '', 'SEK.', '', '',  1 )  
+
+
+
+-- --------------------------------------------------------------------------------
+ 3 Moduller
+-- --------------------------------------------------------------------------------
+
+Delete from [dbo].[MsSoftware] where RecType = 3
+
+-- Üstad Yazılım - OMS - Ön Muhasebe Small
+INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 3, 'UST', 'OMS', 'AYR', 'UST.OMS.AYR', '', 'Ayarlar',  1 )  
+INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 3, 'UST', 'OMS', 'CAR', 'UST.OMS.CAR', '', 'Cari',  1 )  
+INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 3, 'UST', 'OMS', 'FNS', 'UST.OMS.FNS', '', 'Mali İşler',  1 )  
+INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 3, 'UST', 'OMS', 'STK', 'UST.OMS.STK', '', 'Stok',  1 )  
+INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 3, 'UST', 'OMS', 'STA', 'UST.OMS.STA', '', 'Satın Alma',  1 )  
+INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 3, 'UST', 'OMS', 'STS', 'UST.OMS.STS', '', 'Satış',  1 )  
+INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 3, 'UST', 'OMS', 'IDA', 'UST.OMS.IDA', '', 'İdari İşler',  1 )  
+
+-- Üstad Yazılım - Project Managment
+INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 3, 'UST', 'PMS', 'PMS', 'UST.PMS.PMS', '', 'Project Managment',  1 )  
+
+
+-- Üstad Yazılım - Resmi Muhasebe
+INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 3, 'UST', 'RSM', 'MSV', 'UST.RSM.MSV', '', 'Mali Müşavir',  1 )  
+
+
+
+-- Edison 
+INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 3, 'EDS', 'MTS', 'AYR', 'EDS.MTS.AYR', '', 'Ayarlar',  1 )  
+INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 3, 'EDS', 'MTS', 'IDR', 'EDS.MTS.IDR', '', 'İdari İşler',  1 )  
+INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 3, 'EDS', 'MTS', 'EGT', 'EDS.MTS.EGT', '', 'Eğitim',  1 )  
+INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 3, 'EDS', 'MTS', 'ONM', 'EDS.MTS.ONM', '', 'Ön Muhasebe',  1 )  
+INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 3, 'EDS', 'MTS', 'ICH', 'EDS.MTS.ICH', '', 'İç Hizmetler',  1 )  
+INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 3, 'EDS', 'MTS', 'KRM', 'EDS.MTS.KRM', '', 'Kurum Yapısı',  1 )  
+
+
+
+-- Sektörel Çözümler - ONMS - Ön Muhasebe Small
+
+INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 3, 'SEK', 'OMS', 'AYR', 'SEK.OMS.AYR', '', 'Ayarlar',  1 )  
+INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 3, 'SEK', 'OMS', 'STA', 'SEK.OMS.STA', '', 'Satın Alma',  1 )  
+INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 3, 'SEK', 'OMS', 'STS', 'SEK.OMS.STS', '', 'Satış',  1 )  
+INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 3, 'SEK', 'OMS', 'FNS', 'SEK.OMS.FNS', '', 'Finans',  1 )  
+INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 3, 'SEK', 'OMS', 'STK', 'SEK.OMS.STK', '', 'Stok',  1 )  
+
+-- Sektörel Çözümler - CEVI - İnfaz Kurumu
+INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 3, 'SEK', 'CEV', 'AYR', 'SEK.CEV.AYR', '', 'Ayarlar',  1 )  
+INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 3, 'SEK', 'CEV', 'CAR', 'SEK.CEV.CAR', '', 'Cari',  1 )  
+INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 3, 'SEK', 'CEV', 'SAY', 'SEK.CEV.SAY', '', 'Sayım',  1 )  
+
+
+/*
+
+
+INSERT INTO [dbo].[MsSoftware]
+           ([RecType]
+           ,[SoftwareCode]
+           ,[ProjectCode]
+           ,[ModulCode]
+           ,[FullCode]
+           ,[SchemasCode]
+           ,[Caption]
+           ,[IsActive])
+
+SELECT      3
+           ,'UST' --<SoftwareCode, nvarchar(20),>
+           ,'T01' --<ProjectCode, nvarchar(20),>
+           ,TYPES_VALUE_STR --<ModulCode, nvarchar(20),>
+           ,'UST.T01.' + TYPES_VALUE_STR -- <FullCode, nvarchar(100),>
+           ,'' --<SchemasCode, nvarchar(10),>
+           ,TYPES_CAPTION --<Caption, nvarchar(100),>
+           ,1
+FROM MS_TYPES
+WHERE TYPES_NAME = 'PRJ_MODUL'
+AND TYPES_VALUE_INT > 0
+
+
+--DELETE [dbo].[MsSoftware] WHERE ProjectCode = 'T02'
+
+INSERT INTO [dbo].[MsSoftware]
+           ([RecType]
+           ,[SoftwareCode]
+           ,[ProjectCode]
+           ,[ModulCode]
+           ,[FullCode]
+           ,[SchemasCode]
+           ,[Caption]
+           ,[IsActive])
+
+SELECT      3
+           ,'UST' 
+           ,'T02' 
+           ,CAST(TYPES_VALUE_INT AS VARCHAR(10))  
+           ,'UST.T02.' + CAST(TYPES_VALUE_INT AS VARCHAR(10)) 
+           ,'' 
+           ,TYPES_CAPTION 
+           ,1
+FROM MS_TYPES
+WHERE 0=0
+AND TYPES_NAME = 'MODUL_TYPE'
+AND TYPES_VALUE_INT > 0
+
+
+GO
+
+
+
+
+
+
+
+*/

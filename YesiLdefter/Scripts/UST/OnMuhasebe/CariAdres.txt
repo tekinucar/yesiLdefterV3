@@ -1,0 +1,86 @@
+
+begin transaction
+
+ create table CariAdres 
+ (
+  Id           Int  IDENTITY(1,1) not null, 
+  FirmId       Int  not null,
+  CariId       Int  not null,
+  IsActive     Bit  not null, /* default : 1 = active, 0 = not active */  
+  AdresTipiId  SmallInt not null, /* 1 = ev, 2. iþ, 3. fatura, 4. Teslimat vb... */
+
+  Ulke           nVarchar(25) null,
+  Il             nVarchar(15) null,
+  Ilce           nVarchar(20) null,      
+  MahalleKoy     nVarchar(50) null,
+  CaddeSokak     nVarchar(50) null,
+  CaddeSokakTipiId  SmallInt  null, /* 1. Cadde, 2. Sokak */
+  DisKapi        nVarchar(30) null,
+  IcKapi         nVarchar(20) null,
+  PostaKutusu    nVarchar(6)  null,
+
+  /* MahalleKoy(50) + CaddeSokak(50) + DisKapi(30) + IcKapi(20) + Ilce(20) + Il(15) + Ulke(30) = 215 > 200  */
+  TamAdres       nVarchar(200) null,   
+  
+  /* MahalleKoy(50) + CaddeSokak(50) + DisKapi(30) + IcKapi(20) = 150 > 120  */
+  YarimAdres     nVarchar(120) null, 
+  
+  UlkeTipiId     nVarchar(25) null,
+  IlTipiId       Varchar(3)  null,
+  IlceTipiId     Varchar(5)  null,
+  MahalleKoyKodu Varchar(10) null,
+  CaddeSokakKodu Varchar(10) null,
+  DisKapiKodu    Varchar(10) null,
+  IcKapiKodu     Varchar(10) null,
+  AdresOnayKodu  Varchar(20) null,
+
+  constraint pk_CariAdres primary key (Id)
+ )
+
+ create index X_CariAdres01 on CariAdres (FirmId)
+ create index X_CariAdres02 on CariAdres (CariId)
+ create index X_CariAdres03 on CariAdres (UlkeTipiId)
+ create index X_CariAdres04 on CariAdres (IlTipiId,IlceTipiId)
+
+ grant select, insert, update, delete on CariAdres to public
+
+
+-- ------------------------------------------------------- 
+-- AdresTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[CariAdresAdresTipi]
+(
+   Id          Int Unique Not Null,
+   AdresTipi   nVarchar(50)   null,
+   GrupTipiId  SmallInt       null,
+   
+   constraint  pk_CariAdresAdresTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[CariAdresAdresTipi] (Id, AdresTipi, GrupTipiId)
+ VALUES 
+  (0, N'Tanýmsýz',    0),
+  (1, N'Fatura Adresi',   1),
+  (2, N'Teslimat Adresi',   1),
+  (3, N'Ev Adresi',   1),
+  (4, N'Ýþ Adresi',   1)
+
+-- ------------------------------------------------------- 
+-- CaddeSokakTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[CariAdresCaddeSokakTipi]
+(
+   Id          Int Unique Not Null,
+   CaddeSokakTipi  nVarchar(20)   null,
+   
+   constraint  pk_CariAdresCaddeSokakTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[CariAdresCaddeSokakTipi] (Id, CaddeSokakTipi)
+ VALUES 
+  (0, N' Cadde mi? Sokak mý?'),
+  (1, N'Cadde'),
+  (2, N'Sokak')
+
+
+commit transaction

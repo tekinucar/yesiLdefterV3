@@ -1,0 +1,224 @@
+﻿
+begin transaction
+
+ create table MtskTeorikDers
+ (
+   Id                   Int IDENTITY(1,1) not null, 
+   FirmId               Int       not null,
+   IsActive             Bit       not null, /* default : 1 = active, 0 = not active */  
+
+   DonemTipiId          Int           null,
+   GrupTipiId           SmallInt      null,
+   SubeTipiId           SmallInt      null,
+   
+   DerslikTipiId        SmallInt      null, /* 1. Trafik ve Çevre Bilgisi, İlk Yardım, Araç Tekniği */
+   DerslikAdiTipiId     SmallInt      null, /* Derslik-1, -2 ... -10 */
+   DersTarihi           Date          null,
+   DersSaatiTipiId      SmallInt      null,
+   PersonelId           Varchar(20)   null,
+   EgitimTipiId         SmallInt      null, /* 1. Normal, 2. Telafi */
+
+   BaslamaSaati         Datetime      null, /* Calender and Scheduling için gerekli */
+   BitisSaati           Datetime      null, /* Calender and Scheduling için gerekli */
+   TDersIsUploaded      Bit           null,
+   SablonTeorikBId      Int           null, /* SablonTeorikBId ve DonemTipiId ile beraber bakıldığında hangi taslak formundan (MtskTaslakTeorikF) bilgi alındığı bulunur  */
+   SablonTeorikFId      Int           null,
+   
+   constraint		pk_MtskTeorikDers primary key (Id)
+ )
+  
+ grant select, insert, update, delete on MtskTeorikDers to public
+
+
+commit transaction
+
+
+USE [u7093888_Ustad01]
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+ALTER TRIGGER [dbo].[trg_MtskTeorikDers] on [dbo].[MtskTeorikDers] 
+AFTER INSERT, UPDATE
+AS BEGIN
+
+
+    DECLARE myCursor cursor for select Id from Inserted
+    DECLARE @curId bigint
+
+    OPEN myCursor
+
+    FETCH NEXT FROM myCursor INTO @curId
+
+    declare @eDonemTipiId int = 0
+    declare @eGrupTipiId smallInt = 0
+    declare @eSubeTipiId smallInt = 0
+    declare @eDersTarihi date = null
+    declare @eDersSaatiTipiId smallInt = -1
+    declare @ePersonelId varchar(20) = null
+	declare @eSaat varchar(20) = null
+    declare @TcNoCalismaIzniNo varchar(20) = null
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+    	
+      Select
+      -- Id
+      --,FirmId
+      --,IsActive
+       @eDonemTipiId = ins.DonemTipiId
+      ,@eGrupTipiId = ins.GrupTipiId
+      ,@eSubeTipiId = ins.SubeTipiId
+      --,DerslikTipiId]
+      --,DerslikAdiTipiId]
+      ,@eDersTarihi = ins.DersTarihi
+      ,@eDersSaatiTipiId = ins.DersSaatiTipiId
+      ,@ePersonelId = isnull(ins.PersonelId,'')
+      --,[EgitimTipiId]
+      --,[BaslamaSaati]
+      --,[BitisSaati]
+      --,[TDersIsUploaded]
+      ,@eSaat = isnull(saat.DersSaatiTipi,'00:00 - 00:00')
+
+      From inserted ins
+	    left outer join Lkp.MtskTeorikDersDersSaatiTipi saat on (ins.DersSaatiTipiId = saat.Id)
+      Where ins.Id = @curId
+
+      
+      -- personelId kontrolu
+      Select @TcNoCalismaIzniNo = isnull(TcNoCalismaIzniNo,'')
+      From dbo.MtskPersoneli
+      Where TamAdiSoyadi like @ePersonelId+'%'
+      
+      -- Mebbisten okuma yapınca alınan ismi alınıyor
+      -- alınan bu ismi TcNoIzinNo ya çeviriyor
+      if (@TcNoCalismaIzniNo <> '')
+      begin
+        update dbo.MtskTeorikDers set 
+        PersonelId = @TcNoCalismaIzniNo
+        Where Id = @curId
+      end
+
+	  -- BaslangicSaat ve BitisSaat 
+	  update dbo.MtskTeorikDers set 
+        BaslamaSaati = CONVERT(smalldatetime, CONVERT(varchar(10), @eDersTarihi) + ' ' + SUBSTRING(@eSaat,1,5))
+      , BitisSaati   = CONVERT(smalldatetime, CONVERT(varchar(10), @eDersTarihi) + ' ' + SUBSTRING(@eSaat,9,5))
+      Where Id = @curId
+
+      FETCH NEXT FROM myCursor INTO @curId
+    END
+
+    CLOSE myCursor
+    DEALLOCATE myCursor   
+
+END -- create trigger
+
+
+
+begin transaction
+
+-- ------------------------------------------------------- 
+-- DerslikTipiId
+-- ------------------------------------------------------- 
+create table Lkp.MtskTeorikDersDerslikTipi
+(
+   Id          Int Unique Not Null,
+   DerslikTipi nVarchar(50)   null
+   
+   constraint  pk_MtskTeorikDersDerslikTipi primary key (Id)
+)
+
+INSERT INTO Lkp.MtskTeorikDersDerslikTipi (Id, DerslikTipi)
+ VALUES 
+  (-1, N'--Seçiniz--'),
+  ( 0, N'Tanımsız'),
+  ( 1, N'Trafik ve Çevre Dersi'),
+  ( 2, N'İlkyardım Dersi'),
+  ( 3, N'Araç Tekniği Dersi'),
+  ( 5, N'Trafik Adabı Dersi')
+  
+
+
+-- ------------------------------------------------------- 
+-- DerslikAdiTipiId
+-- ------------------------------------------------------- 
+create table Lkp.MtskTeorikDersDerslikAdiTipi
+(
+   Id             Int Unique Not Null,
+   DerslikAdiTipi nVarchar(50)   null
+   
+   constraint  pk_MtskTeorikDersDerslikAdiTipi primary key (Id)
+)
+
+INSERT INTO Lkp.MtskTeorikDersDerslikAdiTipi (Id, DerslikAdiTipi)
+ VALUES 
+  ( 0, N'Tanımsız'),
+  ( 1, N'DERSLİK-1'),
+  ( 2, N'DERSLİK-2'),
+  ( 3, N'DERSLİK-3'),
+  ( 4, N'DERSLİK-4'),
+  ( 5, N'DERSLİK-5'),
+  ( 6, N'DERSLİK-6'),
+  ( 7, N'DERSLİK-7'),
+  ( 8, N'DERSLİK-8'),
+  ( 9, N'DERSLİK-9'),
+  (10, N'DERSLİK-10')
+ 
+
+-- ------------------------------------------------------- 
+-- DersSaatiTipiId
+-- ------------------------------------------------------- 
+create table Lkp.MtskTeorikDersDersSaatiTipi
+(
+   Id              Int Unique Not Null,
+   DersSaatiTipi   nVarchar(50)   null
+
+   constraint  pk_MtskTeorikDersDersSaatiTipi primary key (Id)
+)
+
+INSERT INTO Lkp.MtskTeorikDersDersSaatiTipi (Id, DersSaatiTipi)
+ VALUES 
+  (-1, N' Seçiniz'),
+  ( 0, N'07:00 - 07:50'),
+  ( 1, N'08:00 - 08:50'),
+  ( 2, N'09:00 - 09:50'),
+  ( 3, N'10:00 - 10:50'),
+  ( 4, N'11:00 - 11:50'),
+  ( 5, N'12:00 - 12:50'),
+  ( 6, N'13:00 - 13:50'),
+  ( 7, N'14:00 - 14:50'),
+  ( 8, N'15:00 - 15:50'),
+  ( 9, N'16:00 - 16:50'),
+  (10, N'17:00 - 17:50'),
+  (11, N'18:00 - 18:50'),
+  (12, N'19:00 - 19:50'),
+  (13, N'20:00 - 20:50'),
+  (14, N'21:00 - 21:50'),
+  (15, N'22:00 - 22:50')
+
+
+-- ------------------------------------------------------- 
+-- EgitimTipiId
+-- ------------------------------------------------------- 
+create table Lkp.MtskTeorikDersEgitimTipi
+(
+   Id           Int Unique Not Null,
+   EgitimTipi   nVarchar(20)   null
+
+   constraint  pk_MtskTeorikDersEgitimTipi primary key (Id)
+)
+
+INSERT INTO Lkp.MtskTeorikDersEgitimTipi (Id, EgitimTipi)
+ VALUES 
+  ( 0, N'Tanımsız'),
+  ( 1, N'Normal Eğitim'),
+  ( 2, N'Telafi Eğitim')
+
+
+commit transaction
+ 
+
+

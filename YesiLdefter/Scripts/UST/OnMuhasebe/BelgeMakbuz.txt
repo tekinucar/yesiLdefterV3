@@ -1,0 +1,256 @@
+﻿begin transaction
+
+-- Tahsilat ve Tediye Kaydı 
+
+ create table BelgeMakbuz
+ (
+
+   Id                 Int IDENTITY(1,1) NOT NULL, 
+   ParentId           Int       not null, /* default 0 */
+   FirmId             Int       not null,
+   IsActive           Bit       not null, /* default : 1 = active, 0 = not active */ 
+   IsPaid             Bit       not null, /* default : 0 = ödenmedi,  1 = Ödendi */  
+   IsCommit           Bit       not null, /* default : 0 = Muh. işlenmedi, 1 = Muh. İşlendi */  
+      
+   TipiId             SmallInt      null, /* 1. Tahsilat, 2. Tediye */
+   IslemTipiId        SmallInt      null, /* belge tipileri belli */
+   AltIslmeTipiId     SmallInt      null, /* peşinat, taksit vb gibi alt detay seçenekleri için */ 
+      
+   -- 10 Makbuz Belgesi Hakkında
+   BelgeTarihi        Date          null, 
+   BelgeYil           Smallint      null, 
+   BelgeAy            Smallint      null, 
+   BelgeGun           Smallint      null, 
+   BelgeSeri          nVarChar(5)   null,
+   BelgeNo            nVarChar(30)  null,
+
+   -- 30 Belgenin Tarafları
+   BorcluId           Int           null, 
+   BHesapTipiId       SmallInt      null,
+      
+   AlacakliId         Int           null,
+   AHesapTipiId       SmallInt      null,
+   
+   VarlikId           Int           null,
+   CariID             Int           null,
+   CariUnvan          nVarChar(200) null, /* cari hesabı yok ise */
+   
+   -- Belgenin Parasal değerleri
+   -- 50 Islem Bilgileri
+   BelgeTutari        Numeric(22,5) null,
+   KdvMatrahi         Numeric(22,5) null,    
+   KdvOrani           SmallInt      null,
+   KdvTutari          Numeric(22,5) null,
+   VergiVeFonlar      Numeric(22,5) null,    
+   --..+diğer vergiler eklenecek
+
+   -- 70
+   EkMaliyetId        Int           null,
+   MasrafTutari       Numeric(22,5) null,    /* ödeme sırasında yapılan masraf */
+   ToplamTutar        Numeric(22,5) null,    /* AlacakTutarı + MasrafTutarı */
+
+   -- 80
+   ParaTipiId         nVarChar(3)   null,
+   DovizYeriId        Int           null,
+   DovizKuru          Numeric(22,5) null,
+   DovizTutari        Numeric(22,5) null,
+      
+   -- 80 : Muhasebe bağlantıları eklenecek
+
+   -- 90 : Diğer belge bağlantıları eklenecek
+   -- İşlendi : bu belge ödendi tahsil edildi vb... 
+   KayitTarihi        Date          null, 
+   KayitSaati         VarChar(8)    null,
+   BelgeMaliyetId     Int           null, /* */
+   JoinTableId        SmallInt      null, /* ilgili table */
+   JoinId             Int           null, /* ilgili table ref Id */
+
+   constraint		pk_BelgeMakbuz primary key (Id)
+ )
+
+ create index X_BelgeMakbuz01 on BelgeMakbuz (FirmId)
+ create index X_BelgeMakbuz02 on BelgeMakbuz (TipiId)
+ create index X_BelgeMakbuz03 on BelgeMakbuz (IslemTipiId)
+ create index X_BelgeMakbuz04 on BelgeMakbuz (BHesapTipiId)
+ create index X_BelgeMakbuz05 on BelgeMakbuz (AHesapTipiId)
+ create index X_BelgeMakbuz06 on BelgeMakbuz (VarlikId)
+ create index X_BelgeMakbuz07 on BelgeMakbuz (CariId)
+
+
+ grant select, insert, update, delete on BelgeMakbuz to public
+
+
+ /*
+   TipiId             SmallInt      null, /* 1. Tahsilat, 2. Tediye */
+   IslemTipiId        SmallInt      null, /* belge tipileri belli */
+   AltIslmeTipiId     SmallInt      null, /* peşinat, taksit vb gibi alt detay seçenekleri için */ 
+
+   tt için örnek taraflar, tt : Tahsil ve Tediye işlemi : TTTipiId
+
+   IslemTipiId
+   10 fh - fh : finans hesapları arası virman/transferler
+   20 fh - ch : cari hesabı 
+   30 fh - mh : maliyet hesabı için direk ödeme yapılıyor
+
+   60 fh - mb : maliyet belgesi ( daha önce kaydedilen mb nin ödemesi yapılıyor )
+   71 fh - sb : alışlar 
+   72 fh - sb : satışlar
+   73 fh - hb : hizmet belgesi
+   80 fh - cs : cekSen  
+   */
+   
+-- ------------------------------------------------------- 
+-- TipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[BelgeMakbuzTipi]
+(
+   Id           Int Unique Not Null,
+   Tipi         nVarchar(50),
+   GrupTipiId   SmallInt Null,
+
+   constraint  pk_BelgeMakbuzTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[BelgeMakbuzTipi] (Id, Tipi, GrupTipiId)
+ VALUES 
+  (0,   N'Tanımsız', 0),
+  (1,   N'Açılış', 1),
+  (2,   N'Tahsilat', 1),
+  (3,   N'Tediye', 1),
+  (4,   N'Mahsup', 1),
+  (5,   N'Kapanış', 1)
+
+
+-- ------------------------------------------------------- 
+-- IslemTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[BelgeMakbuzIslemTipi]
+(
+   Id           Int Unique Not Null,
+   IslemTipi    nVarchar(50),
+   GrupTipiId   SmallInt Null,
+
+   constraint  pk_BelgeMakbuzIslemTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[BelgeMakbuzIslemTipi] (Id, IslemTipi, GrupTipiId)
+ VALUES 
+  (0,   N'Tanımsız', 0),
+  (10,   N'Transfer/Virman', 1),
+  (20,   N'Cari Hesap', 1),
+  (30,   N'Maliyet Hesabı', 1),
+  
+  (60,   N'Maliyet Belgesi', 1),
+  (72,   N'Alış Belgesi', 1),
+  (74,   N'Satış Belgesi', 1),
+  (76,   N'Hizmet Belgesi', 1),
+  (80,   N'Çek/Senet', 1)
+
+
+-- ------------------------------------------------------- 
+-- BHesapTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[BelgeMakbuzBHesapTipi]
+(
+   Id           Int Unique Not Null,
+   BHesapTipi   nVarchar(50),
+   GrupTipiId   SmallInt Null,
+
+   constraint  pk_BelgeMakbuzBHesapTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[BelgeMakbuzBHesapTipi] (Id, BHesapTipi, GrupTipiId)
+ VALUES 
+  (0,    N'Tanımsız', 1),
+  (15,   N'Stoklar', 1),
+  (84,   N'Maliyet Hesabı', 1),
+  (91,   N'Vergiler', 1),
+  (92,   N'SGK', 1),
+  (93,   N'Bağkur', 1),
+  (94,   N'Belediye', 1),
+  (100,  N'Kasa', 1),
+  (1022, N'Banka Hesabı',  1 ), 
+  (1023, N'Banka Kartı',   1 ), 
+  (1024, N'POS',           1 )
+  
+-- ------------------------------------------------------- 
+-- AHesapTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[BelgeMakbuzAHesapTipi]
+(
+   Id           Int Unique Not Null,
+   AHesapTipi   nVarchar(50),
+   GrupTipiId   SmallInt Null,
+
+   constraint  pk_BelgeMakbuzAHesapTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[BelgeMakbuzAHesapTipi] (Id, AHesapTipi, GrupTipiId)
+ VALUES 
+  (0,    N'Tanımsız', 1),
+  (15,   N'Stoklar', 1),
+  (84,   N'Maliyet Hesabı', 1),
+  (91,   N'Vergiler', 1),
+  (92,   N'SGK', 1),
+  (93,   N'Bağkur', 1),
+  (94,   N'Belediye', 1),
+  (100,  N'Kasa', 1),
+  (1022, N'Banka Hesabı',  1 ), 
+  (1023, N'Banka Kartı',   1 ), 
+  (1024, N'POS',           1 )
+
+
+
+
+
+
+
+commit transaction
+
+
+
+
++Fatura
+
+Faturayı tamamlayan veya fatura düzenlenmesini gerektiren belgeler
+Sevk İrsaliyesi
+Taşıma İrsaliyesi
+Yolcu Listeleri
+Günlük Müşteri Listeleri
+Adisyonlar
+Hak Ediş Belgesi
+
+Fatura yerine geçen belgeler
++Perakende Satış Belgeleri
++Gider Pusulası
++Müstahsil Makbuzu
++Serbest Meslek Makbuzu
++Yapay Belgeler
+
+
+Alınan belge türü
+----------------------------
+Fatura
+Perakende Satış Belgeleri
+Gider Pusulası
+Müstahsil Makbuzu
+Serbest Meslek Makbuzu
+Yapay Belgeler
+----------------------------
+fatura çeşitleri
+----------------------------
+akaryakıt
+market
+restoran
+elektrik
+su
+doğalgaz
+telekomikasyon
+
+sigorta
+bakım 
+tamir
+demirbaş alım
+diğer maliyet faturası
+
+

@@ -1,0 +1,29 @@
+
+begin transaction
+
+ create table CariIletisim 
+ (
+  Id           Int  IDENTITY(1,1) not null, 
+  FirmId       Int  not null,
+  CariId       Int  not null,
+  IsActive     Bit not null, /* default : 1 = active, 2 = not active */  
+
+  GsmTelefonu  nVarchar(15) null,
+  GsmYakini    nVarchar(15) null,
+  EvTelefonu   nVarchar(15) null,
+  IsTelefonu   nVarchar(15) null,
+  FaxTelefonu  nVarchar(15) null,
+  DahiliNo     nVarchar(15) null,
+  Email1       nVarchar(50) null,
+  Email2       nVarchar(50) null,
+  WebAdresi    nVarchar(100) null,
+
+  constraint pk_CariIletisim primary key (Id)
+ )
+
+ create index X_CariIletisim01 on CariIletisim (FirmId)
+ create index X_CariIletisim02 on CariIletisim (CariId)
+
+ grant select, insert, update, delete on CariIletisim to public
+
+commit transaction

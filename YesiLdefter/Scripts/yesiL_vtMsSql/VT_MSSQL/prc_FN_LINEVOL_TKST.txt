@@ -1,0 +1,529 @@
+﻿USE [GREEN]
+GO
+
+CREATE PROCEDURE [dbo].[prc_FN_LINEVOL_TKST] 
+	@Id Integer
+AS BEGIN
+   
+	-- declare @Id integer = 1
+    
+	declare @_FIRM_ID      Int = 0
+	declare @_SHOP_ID      Int = 0
+	
+	declare @_LINE_TD      Int = 0 
+    declare @_ODEME_TD     SmallInt = 0
+    declare @_TAKSIT_TD    Int = 0 
+	declare @_TAKSIT_PARENT_ID Int = 0 
+ 	declare @_TUTAR_TD     Int = 0 
+    declare @_SIRA_NO      Int = 0
+    
+    declare @_VADE_TARIHI  Date 
+	declare @_VADE_YIL     SmallInt = 0
+	declare @_VADE_AY      SmallInt = 0
+	declare @_VADE_GUN     SmallInt = 0
+	declare @_ISLEM_TARIHI Date
+    declare @_ISLEM_YIL    SmallInt = 0
+	declare @_ISLEM_AY     SmallInt = 0
+	declare @_ISLEM_GUN    SmallInt = 0
+	declare @_ISLEM_SAAT   varchar(5) = ''
+		
+    declare @_BHESAP_TD SmallInt = 0
+    declare @_BHESAP_ID Int = 0
+    declare @_AHESAP_TD SmallInt = 0
+    declare @_AHESAP_ID Int = 0
+    declare @_CARI_TD   SmallInt = 0
+    declare @_CARI_ID   Int = 0
+        
+    declare @_ISLEM_TUTARI   numeric(22,5) = 0
+    declare @_MASRAF_TUTARI  numeric(22,5) = 0
+    declare @_TOPLAM_TUTARI  numeric(22,5) = 0
+    declare @_KDV_ORANI      numeric(5,2) = 0
+    declare @_KDV_TUTARI     numeric(22,5) = 0
+    declare @_KDVSIZ_TUTAR   numeric(22,5) = 0
+    declare @_TAHSIL_TUTARI  numeric(22,5) = 0
+    declare @_TEMP1_TUTARI   numeric(22,5) = 0
+    declare @_TEMP2_TUTARI   numeric(22,5) = 0
+    declare @_TEMP_ID        Int = 0
+    declare @_PARA_ID        Int = 0
+    declare @_DOVIZ_TUTARI   numeric(22,5) = 0
+    declare @_DOVIZ_KURU     numeric(22,5) = 0
+    declare @_DOVIZ_YERI_ID  Int = 0
+    declare @_BELGE_TARIHI   Date
+    declare @_BELGE_NO       VarChar(20) = ''
+    declare @_ACIKLAMA       VarChar(200) = ''
+    
+    
+    -- read
+    Select 
+	 @_FIRM_ID = isnull(ins.[FIRM_ID],0)
+    ,@_SHOP_ID = isnull(ins.[SHOP_ID],0)
+	,@_ODEME_TD = isnull(ins.[ODEME_TD],0)
+    ,@_TAKSIT_TD = isnull(ins.[TAKSIT_TD],0)
+    ,@_TAKSIT_PARENT_ID = isnull(ins.[TAKSIT_PARENT_ID],0)
+
+    ,@_VADE_TARIHI = ins.[VADE_TARIHI]
+	,@_ISLEM_TARIHI = isnull(ins.[ISLEM_TARIHI], convert(date, getdate(), 104)) 
+    ,@_ISLEM_SAAT = isnull(ins.[ISLEM_SAAT], convert(varchar(5), getdate(),108))
+	   	
+	,@_ISLEM_TUTARI = ins.[ISLEM_TUTARI]
+   	,@_TAHSIL_TUTARI = isnull(ins.[TAHSIL_TUTARI],0) 
+   	,@_TEMP1_TUTARI = isnull(ins.[TEMP1_TUTARI],0) 
+   	,@_TEMP_ID = ISNULL(ins.[TEMP_ID],0) 
+   	
+   	,@_BHESAP_TD = ins.[BHESAP_TD]
+   	,@_BHESAP_ID = isnull(ins.[BHESAP_ID],0)
+   	,@_AHESAP_TD = ins.[AHESAP_TD]
+   	,@_AHESAP_ID = isnull(ins.[AHESAP_ID],0)
+    ,@_CARI_TD = isnull(ins.[CARI_TD],0)   	 	   	
+   	,@_CARI_ID = isnull(ins.[CARI_ID],0)   	
+   	 
+   	from [dbo].[FN_LINEVOL] ins
+   	where ins.ID = @Id
+ 
+    -- taksit tutarı ile tahsil tutarı farklı ise 
+    -- tahsil tutarı azlığına veya çokluğuna göre işlenecek   
+ 
+    -- tahsil tutarı var ve taksit satırı ise
+    --if (@_TAHSIL_TUTARI > 0) and (@_AHESAP_TD = 28)
+    if (@_AHESAP_TD = 28) or (@_BHESAP_TD = 26)
+    begin
+      declare @_tahsilat smallint = 0
+      set @_tahsilat = 0     
+     
+      -- tahsilat araçları doğru ise
+      if (@_AHESAP_TD = 28) and
+	     ((@_BHESAP_TD = 10) or (@_BHESAP_TD = 22) or (@_BHESAP_TD = 24)) 
+          set @_tahsilat = 1      
+      
+	  -- ödeme araçları doğru ise
+      if (@_BHESAP_TD = 26) and
+	     ((@_AHESAP_TD = 10) or (@_AHESAP_TD = 22) or (@_AHESAP_TD = 23)) 
+          set @_tahsilat = 1      
+
+      -- tahsil sistemi çalışsın
+      if (@_tahsilat = 1)
+      begin
+        declare @_start_ID int = 0 
+        declare @_read_ID int = 0
+        declare @_read_ISLEM_TUTARI numeric(22,5) = 0
+        declare @_tmp_TAHSIL_TUTARI numeric(22,5) = 0
+        declare @_upd_TEMP1_TUTARI numeric(22,5) = 0
+        declare @_upd_TEMP_ID int = 0
+        declare @_fark_tutari numeric(22,5) = 0
+        declare @_fazla_tutar numeric(22,5) = 0
+                 
+        set @_tmp_TAHSIL_TUTARI = @_TAHSIL_TUTARI
+         
+        -- şu an işlem yapılan satır için daha önce tahsilatı dağıt işlemi yapılmış olabilir
+        -- bu nedenle önceki işlemleri iptal edelim
+		            
+        if (@_start_ID = 0) 
+        begin
+          
+		  set @_start_ID = @Id
+
+          -- 1. işlem
+          -- daha önce oluşturulmuş fark satırı var 
+          -- ve henüz başka işlem görmemiş ise onu sil
+          delete from [dbo].[FN_LINEVOL]
+          where isnull([FIRM_ID],0) = @_FIRM_ID
+		  and   isnull([SHOP_ID],0) = @_SHOP_ID
+		  and   [TEMP_ID] = @_start_ID
+          and   isnull([TEMP1_TUTARI],0) = 0
+          and   isnull([TEMP2_TUTARI],0) = 0
+           
+          -- 2. işlem
+          -- sonra kendisini tahsilat işlemi görmemiş şekle dönder
+          update [dbo].[FN_LINEVOL] set 
+            [ISLEM_TUTARI] = 
+             ( case when (isnull(TEMP1_TUTARI,0) + isnull(TEMP2_TUTARI,0) = 0) then ISLEM_TUTARI 
+                    else  isnull(TEMP1_TUTARI,0) + isnull(TEMP2_TUTARI,0) end )
+          , [TEMP1_TUTARI] = null 
+          , [TEMP2_TUTARI] = null   
+          , [TEMP_ID] = null 
+          from [dbo].[FN_LINEVOL] 
+          where isnull([FIRM_ID],0) = @_FIRM_ID
+		  and   isnull([SHOP_ID],0) = @_SHOP_ID
+		  and   [TEMP_ID] = @_start_ID
+          and   [ID] = @_start_ID
+        
+          -- 3. işlem
+          -- sonra da kendisinden dolayı tahsilat işlemi görmüş olan diğer alt sıradaki satırları tahsilat görmemiş hale getir
+          update [dbo].[FN_LINEVOL] set 
+            [ISLEM_TUTARI] = 
+             ( case when (isnull(TEMP1_TUTARI,0) + isnull(TEMP2_TUTARI,0) = 0) then ISLEM_TUTARI 
+                    else  isnull(TEMP1_TUTARI,0) + isnull(TEMP2_TUTARI,0) end )
+          , [TEMP1_TUTARI] = null 
+          , [TEMP2_TUTARI] = null   
+          , [TEMP_ID] = null 
+		  , [LINE_TD] = 
+		     ( case when (AHESAP_TD = 28) then CONVERT(int, (CONVERT(varchar(2), CARI_TD) + CONVERT(varchar(2), AHESAP_TD)))  -- 5028 = taksit, tahsil edilmemiş taksit
+			        when (BHESAP_TD = 26) then CONVERT(int, (CONVERT(varchar(2), BHESAP_TD) + CONVERT(varchar(2), isnull(AHESAP_TD,0))))  -- ??? 260 = ödenmemiş banka kredisi
+                                          else CONVERT(int, (CONVERT(varchar(2), isnull(BHESAP_TD,99)) + CONVERT(varchar(2), isnull(AHESAP_TD,99)))) 
+					end )
+		  , [ODEME_TD] = 0
+		  , [ISLEM_TARIHI] = null
+		  , [ISLEM_YIL] = null
+		  , [ISLEM_AY] = null
+		  , [ISLEM_GUN] = null
+		  , [ISLEM_SAAT] = null
+		  , [BHESAP_TD] = (case when AHESAP_TD = 28 then null else [BHESAP_TD] end)
+   	      , [BHESAP_ID] = (case when AHESAP_TD = 28 then null else [BHESAP_ID] end)
+		  , [AHESAP_TD] = (case when BHESAP_TD = 26 then null else [AHESAP_TD] end)
+   	      , [AHESAP_ID] = (case when BHESAP_TD = 26 then null else [AHESAP_ID] end)
+
+          from [dbo].[FN_LINEVOL] 
+          where isnull([FIRM_ID],0) = @_FIRM_ID
+		  and   isnull([SHOP_ID],0) = @_SHOP_ID
+		  and   [TEMP_ID] = @_start_ID
+          and   [ID] <> @_start_ID
+           
+        end -- if (@_start_ID = 0)
+         
+        -- TAHSİLATI DAĞIT
+		-- tahsilat ücretini işlemeye başla
+        while (@_tmp_TAHSIL_TUTARI > 0)
+        begin
+        
+		  -- işlem yapılan satıra uygun olan
+          -- sıradaki ilk taksidi bul (kendiside dahil)
+          set @_read_ID = 0
+          set @_read_ISLEM_TUTARI = 0
+          
+		  Select TOP 1
+            @_read_ID = [ID] 
+          , @_read_ISLEM_TUTARI = [ISLEM_TUTARI]
+          from [dbo].[FN_LINEVOL] 
+          where isnull([FIRM_ID],0) = @_FIRM_ID
+		  and   isnull([SHOP_ID],0) = @_SHOP_ID
+		  and   [VADE_TARIHI] >= @_VADE_TARIHI 
+          and   isnull([CARI_TD],0) = @_CARI_TD
+          and   isnull([CARI_ID],0) = @_CARI_ID
+          and   isnull([TAKSIT_TD],0) = @_TAKSIT_TD
+          and   isnull([TAKSIT_PARENT_ID],0) = @_TAKSIT_PARENT_ID
+          and   isnull([TEMP1_TUTARI],0) = 0
+		  -- and [ODEME_TD] = 0  sakın açma
+          order by [VADE_TARIHI]
+           
+          if (@_read_ID > 0)
+          begin  
+            -- taksit tutarı tahsil tutarından büyükse
+		    if (@_read_ISLEM_TUTARI > @_tmp_TAHSIL_TUTARI) 
+            begin
+             
+			  set @_upd_TEMP1_TUTARI = @_tmp_TAHSIL_TUTARI
+              set @_tmp_TAHSIL_TUTARI = 0
+          
+		    -- taksit, tahsil den küçk veya eşitse
+		    end if (@_read_ISLEM_TUTARI <= @_tmp_TAHSIL_TUTARI) 
+            begin
+          
+		      set @_upd_TEMP1_TUTARI = @_read_ISLEM_TUTARI
+              set @_tmp_TAHSIL_TUTARI = @_tmp_TAHSIL_TUTARI - @_upd_TEMP1_TUTARI
+          
+		    end
+            
+            -- taksit ile tahsil arasındaki fark nedir
+		    set @_fark_tutari = @_read_ISLEM_TUTARI - @_upd_TEMP1_TUTARI          
+           
+            --select  @_start_ID, @_read_ID, @_read_ISLEM_TUTARI, @_upd_TEMP1_TUTARI,  @_tmp_TAHSIL_TUTARI
+          
+            update [dbo].[FN_LINEVOL] set 
+              [BHESAP_TD] = @_BHESAP_TD
+   	        , [BHESAP_ID] = @_BHESAP_ID
+            , [AHESAP_TD] = @_AHESAP_TD
+   	        , [AHESAP_ID] = @_AHESAP_ID
+            , [ISLEM_TUTARI] = @_upd_TEMP1_TUTARI
+            , [TEMP1_TUTARI] = @_upd_TEMP1_TUTARI 
+            , [TEMP2_TUTARI] = @_fark_tutari  
+            , [TEMP_ID] = @_start_ID 
+            , [LINE_TD] = CONVERT(int, CONVERT(varchar(2), isnull(@_BHESAP_TD,99)) + CONVERT(varchar(2), isnull(@_AHESAP_TD,99)) )
+            , [ODEME_TD] = (case when @_BHESAP_TD = 10 then 1 -- nakit tahsilat
+		                         when @_BHESAP_TD = 22 then 1 -- banka hes yatan
+		    				     when @_BHESAP_TD = 24 then 1 -- postan çekil tahsilat
+							     when @_AHESAP_TD = 10 then 2 -- nakit ödeme
+		                         when @_AHESAP_TD = 22 then 2 -- banka hes ödenen
+							     when @_AHESAP_TD = 23 then 2 -- krd.kartı ile ödenen 
+                                 else 0 end) 
+		    , [ISLEM_TARIHI] = @_ISLEM_TARIHI
+		    , [ISLEM_YIL] = YEAR(@_ISLEM_TARIHI)
+		    , [ISLEM_AY] = MONTH(@_ISLEM_TARIHI)
+		    , [ISLEM_GUN] = DAY(@_ISLEM_TARIHI)
+		    , [ISLEM_SAAT] = @_ISLEM_SAAT
+		  
+            from [dbo].[FN_LINEVOL]
+            where ID = @_read_ID
+            and   isnull([FIRM_ID],0) = @_FIRM_ID
+		    and   isnull([SHOP_ID],0) = @_SHOP_ID
+          end -- if (@_read_ID > 0)
+          
+          if (@_read_ID = 0)
+          begin
+            set @_fazla_tutar = @_tmp_TAHSIL_TUTARI
+            set @_tmp_TAHSIL_TUTARI = 0 -- while döngüsünden kurtulsun             
+          end
+          
+		  -- burası test sırasında sonsuz döngüden kurtulmak için 
+          -- set @_tmp_TAHSIL_TUTARI = @_tmp_TAHSIL_TUTARI - 25
+        end -- while
+          
+        -- taksit tutarından fazla para alındığı zaman  
+        -- iki çeşit etkisi var
+        
+        -- 1. etki
+        -- önce bununla sırayla bu tahsilat ücreti bitene kadar sırada bekleyen taksit satırlarına işlenir
+        -- tahsilat tutarı halen var ama bu tutar sıradaki taksidi kapatmaya yetmez.
+        -- bu kalan tutar sıradakine işlenir fakat tahsil edilemeyen bir fark orataya çıkar
+        -- işte bu farkı kaybetmemek için yeni taksit satırı olarak eklememiz gerekiyor
+        
+        -- 2. etki
+        -- tahsil edilecek taksitler bitti, ama henüz para bitmediyse
+        -- kalan bu fazla carinin alacağına yazılıyor
+        
+        -- onun içinde aşağıdaki insert satırı çalışıyor
+        
+        if (@_fazla_tutar > 0)
+          set @_read_ID = @_start_ID 
+          -- ???? @_read_ID oluştuğunda valuesi sıfır olduğu için @_read_ID ye value gerekiyor
+               
+        
+        -- set @_fark_tutari = 0 << çalışmasını istemediğin zaman bu satırı aktif hale getir
+           
+        if ((@_fark_tutari > 0) or (@_fazla_tutar > 0))
+        begin
+     
+          SELECT 
+		   @_FIRM_ID = [FIRM_ID] 
+          ,@_SHOP_ID = [SHOP_ID] 
+          ,@_LINE_TD = [LINE_TD]
+          ,@_ODEME_TD = [ODEME_TD]
+          ,@_TAKSIT_TD = [TAKSIT_TD]
+          ,@_TAKSIT_PARENT_ID = [TAKSIT_PARENT_ID] 
+          ,@_TUTAR_TD = [TUTAR_TD]
+          ,@_SIRA_NO = [SIRA_NO]
+          ,@_VADE_TARIHI = [VADE_TARIHI]
+          ,@_VADE_YIL = [VADE_YIL]
+		  ,@_VADE_AY = [VADE_AY]
+		  ,@_VADE_GUN = [VADE_GUN]
+		  ,@_ISLEM_TARIHI = [ISLEM_TARIHI] -- null --[ISLEM_TARIHI]
+          ,@_ISLEM_YIL = [ISLEM_YIL]
+          ,@_ISLEM_AY = [ISLEM_AY]
+          ,@_ISLEM_GUN = [ISLEM_GUN]
+          ,@_ISLEM_SAAT = [ISLEM_SAAT] -- null --[ISLEM_SAAT]
+          ,@_BHESAP_TD = [BHESAP_TD] -- (case when AHESAP_TD = 28 then 0 else [BHESAP_TD] end) 
+          ,@_BHESAP_ID = [BHESAP_ID] -- (case when AHESAP_TD = 28 then 0 else [BHESAP_ID] end)
+          ,@_AHESAP_TD = [AHESAP_TD] -- (case when BHESAP_TD = 26 then 0 else [AHESAP_TD] end)
+          ,@_AHESAP_ID = [AHESAP_ID] -- (case when BHESAP_TD = 26 then 0 else [AHESAP_ID] end)
+          ,@_CARI_TD = [CARI_TD]
+          ,@_CARI_ID = [CARI_ID]
+          ,@_ISLEM_TUTARI = [ISLEM_TUTARI] -- @_fark_tutari --[ISLEM_TUTARI]
+          ,@_MASRAF_TUTARI = [MASRAF_TUTARI]
+          ,@_TOPLAM_TUTARI = [TOPLAM_TUTARI]
+          ,@_KDV_ORANI = [KDV_ORANI]
+          ,@_KDV_TUTARI = [KDV_TUTARI]
+          ,@_KDVSIZ_TUTAR = [KDVSIZ_TUTAR]
+          ,@_PARA_ID = [PARA_ID]
+          ,@_DOVIZ_TUTARI = [DOVIZ_TUTARI]
+          ,@_DOVIZ_KURU = [DOVIZ_KURU]
+          ,@_DOVIZ_YERI_ID = [DOVIZ_YERI_ID]
+          ,@_BELGE_TARIHI = [BELGE_TARIHI]
+          ,@_BELGE_NO = [BELGE_NO]
+          ,@_ACIKLAMA = [ACIKLAMA]
+          ,@_TAHSIL_TUTARI = [TAHSIL_TUTARI] -- null --[TAHSIL_TUTARI]
+          ,@_TEMP1_TUTARI = [TEMP1_TUTARI] -- null --[TEMP1_TUTARI]
+          ,@_TEMP2_TUTARI = [TEMP2_TUTARI] -- null --[TEMP2_TUTARI]
+          ,@_TEMP_ID = [TEMP_ID] -- @_start_ID --[TEMP_ID]
+          from [dbo].[FN_LINEVOL]
+          where [ID] = @_read_ID         
+          
+          -- sadece eskik tahsilattan/ödemeden dolayı 
+          -- kalan için oluşması gereken yeni satır var ise
+          if (@_fark_tutari > 0) and (@_fazla_tutar = 0)
+          begin
+            --( case when (AHESAP_TD = 28) then CONVERT(int, (CONVERT(varchar(2), CARI_TD) + CONVERT(varchar(2), AHESAP_TD)))  
+			--       when (BHESAP_TD = 26) then CONVERT(int, (CONVERT(varchar(2), BHESAP_TD) + '0'))  -- ??? ödenmemiş banka kredisi
+            --                             else CONVERT(int, (CONVERT(varchar(2), isnull(BHESAP_TD,99)) + CONVERT(varchar(2), isnull(AHESAP_TD,  isnull(CARI_TD,99) )))) 
+            -- end )
+                        
+            -- müşteri taksidi ise  
+            if (@_AHESAP_TD = 28) Set @_LINE_TD = CONVERT(int, (CONVERT(varchar(2), @_CARI_TD) + CONVERT(varchar(2), @_AHESAP_TD)))
+            -- banka kredisi ise
+            if (@_BHESAP_TD = 26) Set @_LINE_TD = CONVERT(int, (CONVERT(varchar(2), @_BHESAP_TD) + '0')) 
+          
+            Set @_ISLEM_TARIHI = null
+            Set @_ISLEM_YIL = null
+            Set @_ISLEM_AY = null
+            Set @_ISLEM_GUN = null
+            Set @_ISLEM_SAAT = null
+            
+            -- (case when AHESAP_TD = 28 then 0 else [BHESAP_TD] end) 
+            -- (case when AHESAP_TD = 28 then 0 else [BHESAP_ID] end)
+            -- (case when BHESAP_TD = 26 then 0 else [AHESAP_TD] end)
+            -- (case when BHESAP_TD = 26 then 0 else [AHESAP_ID] end)
+            if (@_BHESAP_TD = 26) Set @_AHESAP_TD = 0
+            if (@_BHESAP_TD = 26) Set @_AHESAP_ID = 0
+            if (@_AHESAP_TD = 28) Set @_BHESAP_TD = 0
+            if (@_AHESAP_TD = 28) Set @_BHESAP_ID = 0
+                        
+            Set @_ISLEM_TUTARI = @_fark_tutari
+            Set @_TAHSIL_TUTARI = null
+            Set @_TEMP1_TUTARI = null
+            Set @_TEMP2_TUTARI = null
+            Set @_TEMP_ID = @_start_ID
+          end
+     
+          -- kredi ödemesinde fazla ödeme varsa
+          
+          /*
+          if (@_fazla_tutar > 0) and (@_BHESAP_TD = 26)
+          begin
+          
+           
+          end
+          */
+          
+          -- müşteri taksidinde fazla tahsilat varsa
+          if (@_fazla_tutar > 0) and 
+             ((@_BHESAP_TD = 26) or (@_AHESAP_TD = 28))
+          begin
+            Set @_VADE_TARIHI = @_ISLEM_TARIHI
+            Set @_VADE_YIL    = @_ISLEM_YIL
+            Set @_VADE_AY     = @_ISLEM_AY
+            Set @_VADE_GUN    = @_ISLEM_GUN
+          
+            Set @_ISLEM_TUTARI  = @_fazla_tutar
+            Set @_TAHSIL_TUTARI = null
+            Set @_TEMP1_TUTARI  = null
+            Set @_TEMP2_TUTARI  = null
+            Set @_TEMP_ID       = @_start_ID
+          end
+     
+
+          INSERT INTO [dbo].[FN_LINEVOL]
+          ([FIRM_ID]
+          ,[SHOP_ID]
+          ,[LINE_TD]
+          ,[ODEME_TD]
+          ,[TAKSIT_TD]
+          ,[TAKSIT_PARENT_ID]
+          ,[TUTAR_TD]
+          ,[SIRA_NO]
+          ,[VADE_TARIHI]
+		  ,[VADE_YIL]
+          ,[VADE_AY]
+          ,[VADE_GUN]
+          ,[ISLEM_TARIHI]
+          ,[ISLEM_YIL]
+          ,[ISLEM_AY]
+          ,[ISLEM_GUN]
+          ,[ISLEM_SAAT]
+          ,[BHESAP_TD]
+          ,[BHESAP_ID]
+          ,[AHESAP_TD]
+          ,[AHESAP_ID]
+          ,[CARI_TD]
+          ,[CARI_ID]
+          ,[ISLEM_TUTARI]
+          ,[MASRAF_TUTARI]
+          ,[TOPLAM_TUTARI]
+          ,[KDV_ORANI]
+          ,[KDV_TUTARI]
+          ,[KDVSIZ_TUTAR]
+          ,[PARA_ID]
+          ,[DOVIZ_TUTARI]
+          ,[DOVIZ_KURU]
+          ,[DOVIZ_YERI_ID]
+          ,[BELGE_TARIHI]
+          ,[BELGE_NO]
+          ,[ACIKLAMA]
+          ,[TAHSIL_TUTARI]
+          ,[TEMP1_TUTARI]
+          ,[TEMP2_TUTARI]
+          ,[TEMP_ID])
+          VALUES (
+		   @_FIRM_ID
+          ,@_SHOP_ID
+          ,@_LINE_TD
+		  ,@_ODEME_TD
+          ,@_TAKSIT_TD
+          ,@_TAKSIT_PARENT_ID
+          ,@_TUTAR_TD
+          ,@_SIRA_NO
+          ,@_VADE_TARIHI
+          ,@_VADE_YIL
+		  ,@_VADE_AY
+		  ,@_VADE_GUN
+		  ,@_ISLEM_TARIHI
+          ,@_ISLEM_YIL
+          ,@_ISLEM_AY
+          ,@_ISLEM_GUN
+          ,@_ISLEM_SAAT
+          ,@_BHESAP_TD
+          ,@_BHESAP_ID
+          ,@_AHESAP_TD
+          ,@_AHESAP_ID
+          ,@_CARI_TD
+          ,@_CARI_ID
+          ,@_ISLEM_TUTARI
+          ,@_MASRAF_TUTARI
+          ,@_TOPLAM_TUTARI
+          ,@_KDV_ORANI
+          ,@_KDV_TUTARI
+          ,@_KDVSIZ_TUTAR
+          ,@_PARA_ID
+          ,@_DOVIZ_TUTARI
+          ,@_DOVIZ_KURU
+          ,@_DOVIZ_YERI_ID
+          ,@_BELGE_TARIHI
+          ,@_BELGE_NO
+          ,@_ACIKLAMA
+          ,@_TAHSIL_TUTARI
+          ,@_TEMP1_TUTARI
+          ,@_TEMP2_TUTARI
+          ,@_TEMP_ID
+          )
+        end -- if (@_fark_tutari > 0)
+      end
+   
+    end
+ 
+ END
+ 
+ 
+ /*  -------------------------------------------  */ 
+ 
+ 
+
+ KONTROL CÜMLESİ
+
+ USE [GREEN]
+GO
+
+SELECT [ID]
+      ,[BHESAP_TD]
+      ,[BHESAP_ID] 
+      ,[ISLEM_TUTARI]
+      ,[TAHSIL_TUTARI]
+      ,[TEMP1_TUTARI]
+      ,[TEMP2_TUTARI]
+      ,[TEMP_ID]
+      
+  FROM [dbo].[FN_LINEVOL]
+  where AHESAP_TD = 28
+  
+
+select * from [dbo].[FN_LINEVOL]
+where 0 = 0
+and ISLEM_TUTARI = isnull([TEMP1_TUTARI],0)
+and ISLEM_TUTARI = isnull([TEMP1_TUTARI],0)
+
+
+select * from [dbo].[FN_LINEVOL]
+where AHESAP_TD = 28
+and isnull([TEMP1_TUTARI],0) = 0
+and isnull([TEMP2_TUTARI],0) = 0
+
+GO
+
+
+ 

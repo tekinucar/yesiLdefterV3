@@ -1,0 +1,88 @@
+﻿
+begin transaction
+
+ create table MtskDerslik
+ (
+   Id                   Int IDENTITY(1,1) not null, 
+   ParentId             Int       not null, /* default 0 */
+   FirmId               Int       not null,
+   IsActive             Bit       not null, /* default : 1 = active, 0 = not active */  
+
+   DerslikTipiId        SmallInt  not null, /* 1. Trafik ve Çevre Bilgisi, İlk Yardım, Araç Tekniği */
+   DerslikAdiTipiId     SmallInt  not null, /* Derslik-1, -2 ... -10 */
+   OdaKontenjani        SmallInt      null,
+   OdaninDurumTipiId    SmallInt      null, /* 0. belirsiz, 1. Açık, 2. Kapalı */
+   OdaAcilmaTarihi      Date          null,
+   OdaKapanmaTarihi     Date          null,
+   KurumOnayTipiId      SmallInt      null, /* BAŞLANGIÇ --Seçiniz--, 1-Onay Bekliyor, 2-Onaylandı */		
+
+   constraint		pk_MtskDerslik primary key (Id)
+ )
+  
+ grant select, insert, update, delete on MtskDerslik to public
+
+
+commit transaction
+
+-- ------------------------------------------------------- 
+-- DerslikTipiId
+-- ------------------------------------------------------- 
+create table Lkp.MtskDerslikDerslikTipi
+(
+   Id          Int Unique Not Null,
+   DerslikTipi nVarchar(30)   null,
+   
+   constraint  pk_MtskDerslikDerslikTipi primary key (Id)
+)
+
+INSERT INTO Lkp.MtskDerslikDerslikTipi (Id, DerslikTipi)
+ VALUES 
+  (0, N''),
+  (1, N'Trafik ve Çevre Bilgisi'),
+  (2, N'İlk Yardım'),
+  (3, N'Araç Tekniği')
+  --,(5, N'Trafik Adabı')
+
+
+-- ------------------------------------------------------- 
+-- DerslikAdiTipiId
+-- ------------------------------------------------------- 
+create table Lkp.MtskDerslikDerslikAdiTipi
+(
+   Id             Int Unique Not Null,
+   DerslikAdiTipi nVarchar(10)   null,
+
+   constraint  pk_MtskDerslikDerslikAdiTipi primary key (Id)
+)
+
+INSERT INTO Lkp.MtskDerslikDerslikAdiTipi (Id, DerslikAdiTipi)
+ VALUES 
+  ( 0, N''),
+  ( 1, N'Derslik-1'),
+  ( 2, N'Derslik-2'),
+  ( 3, N'Derslik-3'),
+  ( 4, N'Derslik-4'),
+  ( 5, N'Derslik-5'),
+  ( 6, N'Derslik-6'),
+  ( 7, N'Derslik-7'),
+  ( 8, N'Derslik-8'),
+  ( 9, N'Derslik-9'),
+  (10, N'Derslik-10')
+
+
+-- ------------------------------------------------------- 
+-- OdaninDurumTipiId
+-- ------------------------------------------------------- 
+create table Lkp.MtskDerslikOdaninDurumTipi
+(
+   Id              Int Unique Not Null,
+   OdaninDurumTipi nVarchar(10)   null
+   
+   constraint  pk_MtskDerslikOdaninDurumTipi primary key (Id)
+)
+
+INSERT INTO Lkp.MtskDerslikOdaninDurumTipi (Id, OdaninDurumTipi)
+ VALUES 
+  (0, N''),
+  (1, N'Açık'),
+  (2, N'Kapalı')

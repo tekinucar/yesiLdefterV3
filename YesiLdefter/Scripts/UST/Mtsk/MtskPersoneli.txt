@@ -1,0 +1,313 @@
+
+
+begin transaction
+
+ create table MtskPersoneli
+ (
+   Id                   Int IDENTITY(1,1) not null, 
+   FirmId               Int       not null,
+   IsActive             Bit       not null, /* default : 1 = active, 0 = not active */  
+
+   --11
+   CalismaIzniKayitNo       Varchar(7)    null,
+   TcVkNo                   Varchar(11)   null,
+   TamAdiSoyadi             nVarchar(70)  null, 
+   Adi                      nVarchar(30)  null,
+   Soyadi					nVarchar(30)  null,
+   DogumTarihi              Date          null,
+   CinsiyetTipiId           SmallInt      null,           
+   Eposta                   nVarchar(100) null,
+   CepTelefonu              nVarchar(15)  null,
+   
+   --31
+   OgrenimBilgisi           nVarchar(250) null,
+   MezuniyetBelgeCinsi      nVarchar(20)  null,
+   MezuniyetTarihi          Date          null,
+   MezuniyetBelgeTarihi     Date          null,
+   MezuniyetBelgeSayisi     nVarchar(20)  null,
+   
+   --41
+   Aciklama                 nVarchar(250) null,
+   GoreviTipiId             SmallInt      null,
+   StatusuTipiId            SmallInt      null,
+   Brans1TipiId             SmallInt      null,
+   Brans2TipiId             SmallInt      null,
+   Brans3TipiId             SmallInt      null,
+   Brans4TipiId             SmallInt      null,
+   
+
+   --51   
+   DersUcreti               Numeric(22,8) null,
+   DersUcretiKurus          Numeric(5)    null,
+   AylikNetUcreti           Numeric(22,8) null,
+   AylikNetUcretiKurus      Numeric(5)    null,
+   AylikBrutUcreti          Numeric(22,8) null,
+   AylikBrutUcretiKurus     Numeric(5)    null,
+   MaasKarsiligiDersSayisi  SmallInt      null,
+   DersUcretiKarsiligiDersSayisi  SmallInt      null,
+   
+   --71
+   CalismaIzniBaslamaTarihi Date          null,
+   CalismaIzniBitisTarihi   Date          null,
+   
+   OncekiGorevdenAyrilmaSebebi    nVarchar(50)  null,
+   EnSonCalistigiKurumAdi         nVarchar(250) null,
+   
+   --81
+   SuAnkiDurumu                   nVarchar(20)  null,
+   GorevdenAyrilmaAciklama        nVarchar(50)  null,
+   DersGirecegiProgramlar         nVarchar(200) null,
+   CezaBilgileri                  SmallInt      null, /* ? */
+   DisplinCezaBilgileri           SmallInt      null, /* ? */
+   GeciciTedbirKarariBilgileri    SmallInt      null, /* ? */	
+   --91
+   TcNoCalismaIzniNo              Varchar(20)    null, /* 185148231144666809   : þeklinde */ 
+   TcNo_CalismaIzniNo             Varchar(20)    null, /* 18514823114-4666809  : þeklinde */ 
+   BiyometrikResim                VarBinary(max) null,
+
+   constraint  pk_MtskPersoneli primary key (Id)
+ )
+
+ create index X_MtskPersoneli01 on MtskPersoneli (TamAdiSoyadi)
+ create index X_MtskPersoneli02 on MtskPersoneli (TcVkNo)
+  
+ grant select, insert, update, delete on MtskPersoneli to public
+
+
+
+commit transaction
+
+
+
+
+USE [u7093888_Ustad01]
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TRIGGER [dbo].[trg_MtskPersoneli] on [dbo].[MtskPersoneli]
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    DECLARE myCursor cursor for select Id from Inserted
+    DECLARE @curId bigint
+
+    OPEN myCursor
+
+    FETCH NEXT FROM myCursor INTO @curId
+
+    declare @yTamAdi varchar(100) = null
+    declare @eTamAdi varchar(100) = null
+    declare @newTamAdi varchar(100) = null
+    declare @yAdi varchar(50) = null
+    declare @ySoyAdi varchar(50) = null
+    
+	declare @eTcVkNo varchar(11) = null
+	declare @eCalismaIzniKayitNo varchar(7) = null
+	declare @yTcVkNo varchar(11) = null
+	declare @yCalismaIzniKayitNo varchar(7) = null
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        set @eTamAdi = ''
+        set @newTamAdi = ''
+		set @yTcVkNo = ''
+		set @yCalismaIzniKayitNo = ''
+
+        select 
+    	   @eTcVkNo = isnull(dlt.TcVkNo,'')
+          ,@eCalismaIzniKayitNo = isnull(dlt.CalismaIzniKayitNo, '')
+		  ,@eTamAdi = isnull(dlt.TamAdiSoyadi,'')
+    	from deleted dlt
+    	where dlt.Id = @curId
+			   
+        select 
+		   @yTcVkNo = isnull(ins.TcVkNo,'')
+          ,@yCalismaIzniKayitNo = isnull(ins.CalismaIzniKayitNo, '')
+		  ,@yTamAdi = isnull(ins.TamAdiSoyadi, '')
+    	  ,@yAdi = isnull(ins.Adi,'')
+    	  ,@ySoyAdi = isnull(ins.SoyAdi,'')
+
+		from inserted ins
+    	where ins.Id = @curId
+     	   	
+		-- TamAdiSoyadi var ise Adi ve SoyAdi tespit ediliyor 
+        if ((@yTamAdi <> '') and
+            (@yAdi = '') and
+            (@ySoyAdi = ''))
+        begin
+            declare @i1 int = 0
+            declare @i2 int = 0
+
+            set @i1 = CHARINDEX(' ', @yTamAdi, 0)
+            set @i2 = CHARINDEX(' ', @yTamAdi, @i1+1)
+
+            if (@i2 > 0) set @i1 = @i2
+
+            set @yAdi = SUBSTRING(@yTamAdi, 0, @i1)
+            set @ySoyAdi = SUBSTRING(@yTamAdi, @i1+1, 100)
+            set @eTamAdi = ''
+
+			update MtskPersoneli set 
+              Adi = TRIM(@yAdi)
+			 ,Soyadi = TRIM(@ySoyadi)
+            where Id = @curId
+        end
+        
+    	set @newTamAdi = @yAdi + ' ' +  @ySoyAdi
+    	
+        if ((@newTamAdi <> @eTamAdi) or 
+            (@eTamAdi = '') or
+            (@yTamAdi = '') or 
+			(@eTcVkNo <> @yTcVkNo) or
+			(@eCalismaIzniKayitNo <> @yCalismaIzniKayitNo)
+			)  
+    	begin
+    	    update MtskPersoneli set 
+             TamAdiSoyadi = TRIM(@newTamAdi)
+            ,TcNoCalismaIzniNo = TRIM(@yTcVkNo + @yCalismaIzniKayitNo)
+            ,TcNo_CalismaIzniNo = TRIM(@yTcVkNo + '-' + @yCalismaIzniKayitNo)
+			where Id = @curId 
+    	end
+                
+
+      FETCH NEXT FROM myCursor INTO @curId
+    END -- While
+
+    CLOSE myCursor
+    DEALLOCATE myCursor   
+
+END -- create trigger
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- ------------------------------------------------------- 
+-- CinsiyetTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[CinsiyetTipi]
+(
+   Id           Int Unique Not Null,
+   CinsiyetTipi nVarchar(20)   null,
+   
+   constraint  pk_CinsiyetTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[CinsiyetTipi] (Id, CinsiyetTipi)
+ VALUES 
+  (0, N'Tanýmsýz'),
+  (1, N'Erkek'),
+  (2, N'Kadýn')
+
+
+-- ------------------------------------------------------- 
+-- GoreviTipi
+-- ------------------------------------------------------- 
+create table [Lkp].[MtskPersoneliGoreviTipi]
+(
+   Id               Int Unique Not null,
+   GoreviTipi       nVarchar(50)   null,
+   GrupTipiId       SmallInt       null,
+
+   constraint  pk_MtskPersoneliGoreviTipi primary key (Id)
+)
+
+delete [Lkp].[MtskPersoneliGoreviTipi]
+
+INSERT INTO [Lkp].[MtskPersoneliGoreviTipi] (Id, GoreviTipi, GrupTipiId)
+ VALUES 
+  ( 0,    N'', 1 ),
+  ( 65,   N'Acil Týp Teknisyenliði', 1 ), 
+  ( 64,   N'Alan/Bölüm Þefi', 1 ), 
+  ( 34,   N'Aþçý', 1 ), 
+  ( 58,   N'Aþçý Yardýmcýsý', 1 ), 
+  ( 62,   N'Ayniyat Saymaný', 1 ), 
+  ( 66,   N'Bahçývan', 1 ), 
+  ( 59,   N'Bekçi', 1 ), 
+  ( 54,   N'Belletici', 1 ), 
+  ( 30,   N'Bölüm Baþkaný', 1 ), 
+  ( 51,   N'Dil ve Konuþma Bozukluklarý Pataloðu', 1 ), 
+  ( 50,   N'Dil ve Konuþma Bozukluklarý Terapisti', 1 ), 
+  ( 49,   N'Dil ve Konuþma Bozukluklarý Uzmaný', 1 ), 
+  ( 42,   N'Doktor', 1 ), 
+  ( 26,   N'Fen Laboratuarý Öðretmeni', 1 ), 
+  ( 29,   N'Fizyoterapist', 1 ), 
+  ( 1,    N'Genel Müdür', 1 ), 
+  ( 2,    N'Genel Müdür Yardýmcýsý', 1 ), 
+  ( 67,   N'Gýda Mühendisi', 1 ), 
+  ( 36,   N'Güvenlik Görevlisi', 1 ), 
+  ( 38,   N'Halkla Ýliþkiler', 1 ), 
+  ( 43,   N'Hemþire', 1 ), 
+  ( 32,   N'Hizmetli', 1 ), 
+  ( 40,   N'Hostes', 1 ), 
+  ( 68,   N'Ýdareci Memur', 1 ), 
+  ( 57,   N'Ýnsan Kaynaklarý Müdürü', 1 ), 
+  ( 63,   N'Ýþ Güvenliði Uzmaný', 1 ), 
+  ( 56,   N'Kaloriferci', 1 ), 
+  ( 6,    N'Koordinatör Rehber Öðretmen', 1 ), 
+  ( 3,    N'Kurum Müdürü', 1 ), 
+  ( 31,   N'Memur', 1 ), 
+  ( 35,   N'Muhasebeci', 1 ), 
+  ( 21,   N'Müdür Baþyardýmcýsý', 1 ), 
+  ( 5,    N'Müdür Yardýmcýsý', 1 ), 
+  ( 48,   N'Odyoloji ve Konuþma Bozukluklarý Uzmaný', 1 ), 
+  ( 46,   N'Odyometris', 1 ), 
+  ( 11,   N'Öðretmen', 1 ), 
+  ( 53,   N'Ölçme ve Deð. Servisi Elemaný', 1 ), 
+  ( 7,    N'Ölçme ve Deð. Servisi Yöneticisi', 1 ), 
+  ( 23,   N'Ölçme ve Deð. Uzmaný', 1 ), 
+  ( 37,   N'Pist Sorumlusu', 1 ), 
+  ( 27,   N'Psikolog', 1 ), 
+  ( 9,    N'Rehber Öðretmen', 1 ), 
+  ( 8,    N'Reh.Ölçme ve Deð. Servisi Yöneticisi', 1 ), 
+  ( 39,   N'Sekreter', 1 ), 
+  ( 41,   N'Sosyal Hizmet Uzmaný', 1 ), 
+  ( 33,   N'Þoför', 1 ), 
+  ( 55,   N'Teknik Personel', 1 ), 
+  ( 4,    N'Türk Müdür Baþyardýmcýsý', 1 ), 
+  ( 17,   N'Usta Öðretici', 1 ), 
+  ( 15,   N'Uzman Öðretici', 1 ), 
+  ( 61,   N'Yönetici Memur', 1 ), 
+  ( 10,   N'Zümre Baþkaný', 1 )
+
+
+
+-- ------------------------------------------------------- 
+-- StatusuTipi
+-- ------------------------------------------------------- 
+create table [Lkp].[MtskPersoneliStatusuTipi]
+(
+   Id               Int Unique Not null,
+   StatusuTipi      nVarchar(50)   null,
+   GrupTipiId       SmallInt       null,
+
+   constraint  pk_MtskPersoneliStatusuTipi primary key (Id)
+)
+
+delete [Lkp].[MtskPersoneliStatusuTipi] 
+
+INSERT INTO [Lkp].[MtskPersoneliStatusuTipi] (Id, StatusuTipi, GrupTipiId)
+ VALUES 
+  ( -1,   N'Tanýmsýz', 1),
+  (  0,   N'Ders Ücretli', 1 ), 
+  (  2,   N'Diðer Personel', 1 ), 
+  (  1,   N'Kadrolu', 1 ), 
+  (  3,   N'Kýsmi Süreli Çalýþtýrýlacak Personel', 1 )
+
+

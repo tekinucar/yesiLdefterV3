@@ -1,0 +1,45 @@
+
+begin transaction
+
+ create table MS_TABLES
+ (
+        REF_ID                  Int IDENTITY(1,1)     NOT NULL,
+        DBASE_TYPE              SmallInt              NULL,      /* 1.Master,  2.ManagerServer,  3.Project */ 
+        MODUL_CODE              VarChar(100)          NULL,
+        PARENT_TABLE_CODE       VarChar(20)           NULL, /* TREE VÝEW ÝÇÝN GEREKÝYOR */
+        TABLE_CODE              VarChar(20)           NOT NULL,
+        TABLE_NAME              VarChar(50)           NOT NULL,
+        KEY_FNAME		VarChar(30)           NULL,
+        TABLE_TYPE              SmallInt              NULL, /* 1. table, .... 6. select */	
+          
+        /* TABLE_TYPE = 6 (Select)  ise */
+        TB_CAPTION              VarChar(100)          NULL,
+        TB_SELECT_SQL           Text                  NULL,
+        TB_WHERE_SQL            VarChar(250)          NULL,
+        TB_ORDER_BY             VarChar(250)          NULL,
+
+        /* Master Table Baðlantýsý */
+        MASTER_TABLEIPCODE      varChar(50)           NULL,
+        MASTER_TABLE_NAME       VarChar(50)           NULL, 
+        MASTER_KEY_FNAME        VarChar(30)           NULL,	
+        FOREING_FNAME           VarChar(30)           NULL,	
+        PARENT_FNAME            VarChar(30)           NULL, /* tree viewler için gerekli */
+
+        PROP_SUBVIEW            VarChar(4000)         NULL,
+        PROP_JOINTABLE          VarChar(4000)         NULL,
+        PROP_FOREING            VarChar(4000)         NULL,
+
+        SOFTWARE_CODE           nvarchar(20)          NULL,
+        PROJECT_CODE            nvarchar(20)          NULL,
+        SCHEMAS_CODE            nvarchar(5)           NULL,
+
+	Constraint PK_MS_TABLES primary key (TABLE_CODE)
+ )
+
+ create index X_MS_TABLES1 on MS_TABLES (MODUL_CODE,TABLE_CODE)
+
+ grant select, insert, update, delete on MS_TABLES to public
+
+
+commit transaction
+

@@ -1,0 +1,873 @@
+﻿USE u7093888_Ustad01
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+begin transaction
+
+ create table MtskAday
+ (
+   Id                    Int IDENTITY(1,1) not null, 
+   ParentId              Int       not null, /* default 0 */
+   FirmId                Int       not null,
+   IsActive              Bit       not null, /* default : 1 = active, 0 = not active */  
+   AdayKayitTarihi       Date          null, 
+
+   TcNo                  Varchar(11)   null,
+   TamAdiSoyadi          nVarchar(100) null,
+   Adi                   nVarchar(50)  null,
+   SoyAdi                nVarchar(50)  null,
+   DogumTarihi           Date          null,
+   YasYil                SmallInt      null, /* otomatik hesaplanacak */
+   YasAy                 SmallInt      null, /* ehliyet sınıfına ve okuluna göre değişiyor */
+   YasGun                SmallInt      null, 
+   EksikAy               SmallInt      null,
+   EksikGun              SmallInt      null, /* otomatik hesaplanacak */
+   BabaAdi               nVarchar(50)  null,
+   CinsiyetTipiId        SmallInt      null,
+   
+   
+   CepTelefonu           Varchar(15)   null,
+   CepTelefonu2          Varchar(15)   null,
+   Eposta                Varchar(98)   null,
+   UseWhatssApp          Bit           null,
+   
+   MevcutSertifikaTipiId   SmallInt      null,
+   MevcutSurucuBelgeTarihi Date          null, 
+   MevcutSurucuBelgeNo     nVarchar(30)  null,
+   IstenenSertifikaTipiId  SmallInt      null,
+   IsOtomatik              Bit           null, /* 0 = Manuel vites, 1 = Otomatik vites */
+   
+   --51
+   IsUcretli               Bit           null, /* 0 = Ücretsiz, 1 = Ücretli */
+   IsUcretsiz              Bit           null, /* 0 = Ücretsiz, 1 = Ücretli */
+   SertifikaUcreti         Numeric(22,8) null,
+   AnlasilanUcret          Numeric(22,8) null,
+   IskontoOrani            Numeric(12,8) null,
+   PesinatTutari           Numeric(22,8) null, 
+   TaksitSayisiTipiId      SmallInt      null, /* 1.Peşin, 2 Ay, 3 Ay .... */
+   KalanUcret              Numeric(22,8) null,
+   ESinavUcreti            Numeric(22,8) null,
+   UygulamaSinavUcreti     Numeric(22,8) null,
+   SertifikaVeSinavUcreti  Numeric(22,8) null,
+   IsSinavUcretiTaksitli   Bit           null,
+   OdemeTipiId             SmallInt      null, /* 1. Kredi Kartı, 2. Nakit, 3. Banka Havalesi, 4. Senet, 5. Açık Hesap */
+   OdemeBaslamaTarihi      Date          null,
+   OdemeCepTelefonu        nVarchar(15)  null,  
+   
+   --71
+   DonemTipiId             Int           null,
+   GrupTipiId              SmallInt      null,
+   SubeTipiId              SmallInt      null,
+      
+   MebbisKurumOnayi        Bit           null, /* 0-Onaysız, 1-Onaylandı */		
+   MebbisDurumTipiId       SmallInt      null,
+   KayitTipiId             SmallInt      null,
+   KaynakKayitTipiId       SmallInt      null, /* 1. Kullanıcı Manuel, 2. Mebbis Dönem Aday Onaylama, 3. Mebbis Uygulama Sınav Listesi, 4. Mebbis Aday Durum Bilgileri  */
+
+   TeklifVerenPersonelId   Int            null,
+   TeklifTarihi            Datetime       null,
+   
+   BiyometrikResim         VarBinary(max) null,
+   BiyometrikResimSmall    VarBinary(max) null,
+     
+   MesajTipiId             SmallInt       null,
+   SMSGonder               Bit            null,
+   EpostaGonder            Bit            null,
+   WhatsAppGonder          Bit            null,
+
+   -- 111
+   KimlikGeldi             Bit            null,
+   BiyometrikGeldi         Bit            null,
+   OgrenimGeldi            Bit            null,
+   SaglikGeldi             Bit            null,
+   AdliSicilGeldi          Bit            null,
+   ImzaAlindi              Bit            null,
+   SozlesmeYapildi         Bit            null,
+   BelgelerGeldi           Bit            null,
+   AdresAlindi             Bit            null,
+   
+   constraint		pk_MtskAday primary key (Id)
+ )
+  
+ grant select, insert, update, delete on MtskAday to public
+
+  create index X_MtskAday01 on MtskAday (TamAdiSoyadi)
+  create index X_MtskAday02 on MtskAday (DonemTipiId,GrupTipiId,SubeTipiId)
+
+commit transaction
+
+
+
+USE [u7093888_Ustad01]
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+ALTER TRIGGER [dbo].[trg_MtskAday] on [dbo].[MtskAday]
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    DECLARE adayCursor cursor for select Id from Inserted
+    --DECLARE @curId bigint
+	declare @AdayId bigint
+
+    OPEN adayCursor
+
+    FETCH NEXT FROM adayCursor INTO @AdayId --@curId
+
+    declare @yFirmId int = 0
+    declare @eIsActive bit = null
+	declare @yIsActive bit = null
+	declare @yTcNo varchar(11) = null
+    declare @yTamAdi varchar(100) = null
+    declare @eTamAdi varchar(100) = null
+    declare @newTamAdi varchar(100) = null
+    declare @yAdi varchar(50) = null
+    declare @ySoyAdi varchar(50) = null
+	
+	
+	declare @eMevcutSertifikaTipiId smallInt = 0
+	declare @eIstenenSertifikaTipiId smallInt = 0
+	declare @yMevcutSertifikaTipiId smallInt = 0
+	declare @yIstenenSertifikaTipiId smallInt = 0
+	declare @yIsOtomatik bit = null
+
+	declare @yAnlasilanUcret numeric(22,8) = 0
+	declare @eIsUcretli bit = null
+    declare @yIsUcretli bit = null
+	declare @eIsUcretsiz bit = null
+	declare @yIsUcretsiz bit = null
+
+	declare @eDurumTipiId int = 0
+	declare @yDonemTipiId int = 0
+	declare @yGrupTipiId smallInt = 0
+	declare @ySubeTipiId smallInt = 0
+
+	declare @eKayitTipiId smallInt = 0
+	declare @yKayitTipiId smallInt = 0
+	declare @yMebbisKurumOnayi bit = null
+	declare @yMebbisDurumTipiId smallInt = 0
+
+
+	declare @eKimlikGeldi bit = null
+	declare @eBiyometrikGeldi bit = null
+	declare @eOgrenimGeldi bit = null
+	declare @eSaglikGeldi bit = null
+	declare @eAdliSicilGeldi bit = null
+	declare @eImzaAlindi bit = null
+	declare @eSozlesmeYapildi bit = null
+	declare @eAdresAlindi bit = null
+	declare @eBelgelerGeldi bit = null
+
+	declare @yKimlikGeldi bit = null
+	declare @yBiyometrikGeldi bit = null
+	declare @yOgrenimGeldi bit = null
+	declare @ySaglikGeldi bit = null
+	declare @yAdliSicilGeldi bit = null
+	declare @yImzaAlindi bit = null
+	declare @ySozlesmeYapildi bit = null
+	declare @yAdresAlindi bit = null
+	declare @yBelgelerGeldi bit = null
+
+	-- MtskAdayTakip
+	declare @SertifikaUcretTipiId smallInt = 0
+	declare @SertifikaAlmayiHakKazandi bit  = 0
+	declare @SertifikaTarihi date = null
+
+	declare @eSMSGonder Bit = null
+    declare @eEpostaGonder Bit = null
+    declare @eWhatsAppGonder Bit = null
+	declare @yMesajTipiId SmallInt = null
+    declare @ySMSGonder Bit = null
+    declare @yEpostaGonder Bit = null
+    declare @yWhatsAppGonder Bit = null
+	declare @BugunDonemTipiId int = 0
+
+	-- Bugün hangi dönem ?  tespit ediliyor
+	if (MONTH(getdate()) < 10)
+         set @BugunDonemTipiId = convert(int, convert(varchar(5), YEAR(getdate())) + '0' + convert(varchar(3), MONTH(getdate())))
+    else set @BugunDonemTipiId = convert(int, convert(varchar(5), YEAR(getdate())) + convert(varchar(3), MONTH(getdate())))
+	
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        set @newTamAdi = ''
+
+        select 
+		   @eIsActive = isnull(dlt.IsActive,0)
+    	  ,@eTamAdi = isnull(dlt.TamAdiSoyadi,'')
+          ,@eMevcutSertifikaTipiId = isnull(dlt.MevcutSertifikaTipiId,0)
+	      ,@eIstenenSertifikaTipiId = isnull(dlt.IstenenSertifikaTipiId,0)
+          ,@eIsUcretli = isnull(dlt.IsUcretli,0)
+          ,@eIsUcretsiz = isnull(dlt.IsUcretsiz,0)
+		  ,@eKimlikGeldi = isnull(dlt.KimlikGeldi,0)
+          ,@eBiyometrikGeldi = isnull(dlt.BiyometrikGeldi,0)
+          ,@eOgrenimGeldi = isnull(dlt.OgrenimGeldi,0)
+          ,@eSaglikGeldi = isnull(dlt.SaglikGeldi,0)
+          ,@eAdliSicilGeldi = isnull(dlt.AdliSicilGeldi,0)
+          ,@eImzaAlindi = isnull(dlt.ImzaAlindi,0)
+          ,@eSozlesmeYapildi = isnull(dlt.SozlesmeYapildi,0)
+		  ,@eAdresAlindi = isnull(dlt.AdresAlindi,0)
+		  ,@eBelgelerGeldi = isnull(dlt.BelgelerGeldi,0) 
+          ,@eSMSGonder = isnull(dlt.SMSGonder,0)
+          ,@eEpostaGonder = isnull(dlt.EpostaGonder,0)
+          ,@eWhatsAppGonder = isnull(dlt.WhatsAppGonder,0)
+	    from deleted dlt
+    	where dlt.Id = @AdayId
+			   
+        select 
+           @yFirmId = ins.FirmId
+          ,@yIsActive = isnull(ins.IsActive,0)
+          ,@yTcNo = isnull(ins.TcNo,'')
+          ,@yTamAdi = isnull(ins.TamAdiSoyadi, '')
+    	  ,@yAdi = isnull(ins.Adi,'')
+    	  ,@ySoyAdi = isnull(ins.SoyAdi,'')
+	      ,@yMevcutSertifikaTipiId = isnull(ins.MevcutSertifikaTipiId,0)
+	      ,@yIstenenSertifikaTipiId = isnull(ins.IstenenSertifikaTipiId,0)
+		  ,@yIsOtomatik = isnull (ins.IsOtomatik,0)
+		  ,@yAnlasilanUcret = isnull(ins.AnlasilanUcret,0)
+		  ,@yDonemTipiId = isnull(ins.DonemTipiId,0)
+	      ,@yGrupTipiId = isnull(ins.GrupTipiId,0)
+	      ,@ySubeTipiId = isnull(ins.SubeTipiId,0)
+		  ,@yKayitTipiId = isnull(ins.KayitTipiId,0)
+		  ,@yMebbisKurumOnayi = isnull(ins.MebbisKurumOnayi,0)
+          ,@yMebbisDurumTipiId = isnull(ins.MebbisDurumTipiId,0)
+          ,@yKimlikGeldi = isnull(ins.KimlikGeldi,0)
+          ,@yBiyometrikGeldi = isnull(ins.BiyometrikGeldi,0)
+          ,@yOgrenimGeldi = isnull(ins.OgrenimGeldi,0)
+          ,@ySaglikGeldi = isnull(ins.SaglikGeldi,0)
+          ,@yAdliSicilGeldi = isnull(ins.AdliSicilGeldi,0)
+          ,@yImzaAlindi = isnull(ins.ImzaAlindi,0)
+          ,@ySozlesmeYapildi = isnull(ins.SozlesmeYapildi,0)
+		  ,@yAdresAlindi = isnull(ins.AdresAlindi,0)
+		  ,@yBelgelerGeldi = isnull(ins.BelgelerGeldi,0)
+		  ,@yMesajTipiId = isnull(ins.MesajTipiId,0)
+          ,@ySMSGonder = isnull(ins.SMSGonder,0)
+          ,@yEpostaGonder = isnull(ins.EpostaGonder,0)
+          ,@yWhatsAppGonder = isnull(ins.WhatsAppGonder,0)
+		from inserted ins
+    	where ins.Id = @AdayId
+     	   	
+		-- TamAdiSoyadi var ise Adi ve SoyAdi tespit ediliyor 
+        if ((@yTamAdi <> '') and
+            (@yAdi = '') and
+            (@ySoyAdi = ''))
+        begin
+            declare @i1 int = 0
+            declare @i2 int = 0
+
+            set @i1 = CHARINDEX(' ', @yTamAdi, 0)
+            set @i2 = CHARINDEX(' ', @yTamAdi, @i1+1)
+
+            if (@i2 > 0) set @i1 = @i2
+
+            set @yAdi = SUBSTRING(@yTamAdi, 0, @i1)
+            set @ySoyAdi = SUBSTRING(@yTamAdi, @i1+1, 100)
+            set @eTamAdi = ''
+
+			update MtskAday set 
+              Adi = TRIM(@yAdi)
+			 ,Soyadi = TRIM(@ySoyadi)
+            where Id = @AdayId
+        end
+		
+    	set @newTamAdi = @yAdi + ' ' +  @ySoyAdi
+    	
+       
+       --2502, '2502',  'A1 SINIFI SERTİFİKA'
+       --9001, '9001',  'A1 SINIFI SERTİFİKA (Manuel)'
+       --9002, '9002',  'A1 SINIFI SERTİFİKA (Otomatik)'
+	   
+       --2503, '2503',  'A2 SINIFI SERTİFİKA'
+       --9003, '9003',  'A2 SINIFI SERTİFİKA (Manuel)'
+       --9004, '9004',  'A2 SINIFI SERTİFİKA (Otomatik)'
+
+	   --2504, '2504',  'B SINIFI SERTİFİKA'
+       --9005, '9005',  'B SINIFI SERTİFİKA (Manuel)'
+       --9006, '9006',  'B SINIFI SERTİFİKA (Otomatik)'
+
+        -- IsOtomatik
+		-- Bu durum henüz MEBBİS te oluşmadı
+		if ((@yMevcutSertifikaTipiId = 9001) or -- Manuel işareti vars
+		    (@yMevcutSertifikaTipiId = 9002))   -- Otomatik işareti varsa
+		begin
+		  set @yMevcutSertifikaTipiId = 2502
+		end
+
+		if ((@yMevcutSertifikaTipiId = 9003) or -- Manuel işareti vars
+		    (@yMevcutSertifikaTipiId = 9004))   -- Otomatik işareti varsa
+		begin
+		  set @yMevcutSertifikaTipiId = 2503
+		end
+
+		if ((@yMevcutSertifikaTipiId = 9005) or -- Manuel işareti vars
+		    (@yMevcutSertifikaTipiId = 9006))   -- Otomatik işareti varsa
+		begin
+		  set @yMevcutSertifikaTipiId = 2504
+		end
+
+		if ((@yIstenenSertifikaTipiId = 9001) or -- Manuel işareti vars
+		    (@yIstenenSertifikaTipiId = 9002))   -- Otomatik işareti varsa
+		begin
+		  if (@yIstenenSertifikaTipiId = 9001) set @yIsOtomatik = 0 -- Manuel
+		  if (@yIstenenSertifikaTipiId = 9002) set @yIsOtomatik = 1 -- Otomatik
+		  set @yIstenenSertifikaTipiId = 2502
+		end
+
+		if ((@yIstenenSertifikaTipiId = 9003) or -- Manuel işareti vars
+		    (@yIstenenSertifikaTipiId = 9004))   -- Otomatik işareti varsa
+		begin
+		  if (@yIstenenSertifikaTipiId = 9003) set @yIsOtomatik = 0 -- Manuel
+		  if (@yIstenenSertifikaTipiId = 9004) set @yIsOtomatik = 1 -- Otomatik
+		  set @yIstenenSertifikaTipiId = 2503
+		end
+
+		if ((@yIstenenSertifikaTipiId = 9005) or -- Manuel işareti vars
+		    (@yIstenenSertifikaTipiId = 9006))   -- Otomatik işareti varsa
+		begin
+		  if (@yIstenenSertifikaTipiId = 9005) set @yIsOtomatik = 0 -- Manuel
+		  if (@yIstenenSertifikaTipiId = 9006) set @yIsOtomatik = 1 -- Otomatik
+		  set @yIstenenSertifikaTipiId = 2504
+		end
+		
+		if ((@yIstenenSertifikaTipiId = 9301) or -- 100 Ceza Manuel işareti vars
+		    (@yIstenenSertifikaTipiId = 9302))   -- 100 Ceza Otomatik işareti varsa
+		begin
+		  if (@yIstenenSertifikaTipiId = 9301) set @yIsOtomatik = 0 -- Manuel
+		  if (@yIstenenSertifikaTipiId = 9302) set @yIsOtomatik = 1 -- Otomatik
+		  set @yIstenenSertifikaTipiId = 3000
+		end
+		
+		-- IsUcretli
+		if (@yAnlasilanUcret > 0) 
+		begin
+		   set @yIsUcretli = 1
+		   set @yIsUcretsiz = 0
+        end else
+        begin
+          set @yIsUcretli = 0
+		  set @yIsUcretsiz = 1
+          set @SertifikaUcretTipiId = 4 -- Ücretsiz
+		end
+/*
+  [Lkp].[MtskAdayMebbisDurumTipi]
+  ( 0,  N'Kursa Başvuru Aşamasında' ),
+  ( 1,  N'Teorik Sınav Aşamasında' ),
+  ( 2,  N'Uygulama Sınav Aşamasında' ),
+  ( 3,  N'Teorik Sınav Hakkı Doldu' ),
+  ( 4,  N'Uygulama Sınav Hakkı Doldu' ),
+  ( 5,  N'Sertifika Almaya Hak Kazandı' ),
+  ( 6,  N'Sertifikası İptal Edildi' ),
+  ( 7,  N'e-Sınav Aşamasında' ),
+  ( 8,  N'e-Sınav Test Aşamasında' ),
+  ( 9,  N'e-Sınavdan Başarısız Oldu' ),
+  ( 10,  N'e-Sınav Hakkı Doldu' ),
+  ( 11,  N'Kaydı Silindi' ),
+  ( 12,  N'Ceza Kaydı Var' ),
+  ( 13,  N'Teorik Dersten Muaf' ),
+  ( 14,  N'Adli Sicil Kaydı Uygun Olmadığından Dönem Kaydı Durdurulmuştur.' ),
+  ( 22,  N'2.Direksiyon Aşamasında' )
+
+  [Lkp].[MtskAdayTakipKayitTipi]
+  ( 0,    N''),
+  ( 1,    N'Ön Kayıt'),
+  ( 2,    N'Kayıt aşamasında'),
+  ( 3,    N'Kesin kayıt'),
+  ( 4,    N'Sertifikayı hak kazandı'),
+  ( 5,    N'Sertifikası teslim edildi'),
+  ( 6,    N'Diğerleri'),
+  ( 7,    N'Dosya Kapandı')
+*/
+        /* yeni dönem geldi ve herhangi bir geldiyse onu 
+		   Kayıt aşaması na alıyoruz
+		*/
+        if (@yKayitTipiId = 1) and
+		   (@BugunDonemTipiId = @yDonemTipiId) and
+		   ((@yKimlikGeldi = 1) or
+            (@yBiyometrikGeldi = 1) or
+            (@yOgrenimGeldi = 1) or
+            (@ySaglikGeldi = 1) or
+            (@yAdliSicilGeldi = 1) or
+            (@yImzaAlindi = 1) or
+            (@ySozlesmeYapildi = 1)) 
+        begin
+		  set @yMebbisDurumTipiId = 0
+          set @yKayitTipiId = 2
+        end
+		
+        if (@yKayitTipiId <> 1) and
+		   (@yKayitTipiId <> 6) and 
+		   (@yKayitTipiId <> 7) 
+		begin
+	      if (@yMebbisDurumTipiId = 0) set @yKayitTipiId = 2
+		
+		  if (@yMebbisDurumTipiId = 1) or
+		     (@yMebbisDurumTipiId = 2) or
+		     (@yMebbisDurumTipiId = 7) or
+		     (@yMebbisDurumTipiId = 8) or
+		     (@yMebbisDurumTipiId = 9) or
+		     (@yMebbisDurumTipiId = 12) or
+		     (@yMebbisDurumTipiId = 13) or 
+		     (@yMebbisDurumTipiId = 22) set @yKayitTipiId = 3
+
+		  if (@yMebbisDurumTipiId = 5) and (@yKayitTipiId <> 5) 
+              set @yKayitTipiId = 4
+		
+		  if (@yMebbisDurumTipiId = 3) or
+		     (@yMebbisDurumTipiId = 4) or
+		     (@yMebbisDurumTipiId = 6) or
+		     (@yMebbisDurumTipiId = 10) or
+		     (@yMebbisDurumTipiId = 11) or
+		     (@yMebbisDurumTipiId = 14) set @yKayitTipiId = 6
+	      
+	      -- Sertifikası var ise
+	      Select @SertifikaAlmayiHakKazandi = isnull(SertifikaAlmayiHakKazandi,0) 
+		       , @SertifikaTarihi = SertifikaTarihi
+		  From MtskAdaySertifika
+		  Where FirmId = @yFirmId
+		  and   AdayId = @AdayId
+
+		  if (@SertifikaAlmayiHakKazandi = 1)
+		      set @yKayitTipiId = 4
+        
+		end -- @yKayitTipiId <> 7
+
+        if (@yKayitTipiId = 0) or
+		   (@yKayitTipiId = 1) or
+		   (@yKayitTipiId = 2) or
+		   (@yKayitTipiId = 3) set @yIsActive = 1
+
+        if (@yKayitTipiId = 4) or
+		   (@yKayitTipiId = 5) or
+		   (@yKayitTipiId = 6) or
+		   (@yKayitTipiId = 7) set @yIsActive = 0
+
+
+        if ((@yKimlikGeldi = 1) and
+            (@yBiyometrikGeldi = 1) and
+            (@yOgrenimGeldi = 1) and
+            (@ySaglikGeldi = 1) and
+            (@yAdliSicilGeldi = 1) and
+            (@yImzaAlindi = 1) and
+            (@ySozlesmeYapildi = 1) and
+			(@yAdresAlindi = 1)) set @yBelgelerGeldi = 1
+        else set @yBelgelerGeldi = 0
+
+        if ((@newTamAdi <> @eTamAdi) or 
+            (@eTamAdi = '') or
+            (@yTamAdi = '') or
+            (@eMevcutSertifikaTipiId <> @yMevcutSertifikaTipiId) or
+	        (@eIstenenSertifikaTipiId <> @yIstenenSertifikaTipiId) or
+			(@eIsUcretli <> @yIsUcretli) or
+			(@eIsUcretsiz <> @yIsUcretsiz) or
+			(@eKayitTipiId <> @yKayitTipiId) or
+			(@eIsActive <> @yIsActive) or
+			(@eBelgelerGeldi <> @yBelgelerGeldi)
+			)  
+    	begin
+    	    update MtskAday set 
+              IsActive = @yIsActive 
+            , TamAdiSoyadi = TRIM(@newTamAdi)
+            , MevcutSertifikaTipiId = @yMevcutSertifikaTipiId
+	        , IstenenSertifikaTipiId = @yIstenenSertifikaTipiId
+			, IsOtomatik = @yIsOtomatik
+			, IsUcretli = @yIsUcretli
+			, IsUcretsiz = @yIsUcretsiz
+			, KayitTipiId = @yKayitTipiId
+			, BelgelerGeldi = @yBelgelerGeldi
+            where Id = @AdayId 
+    	end
+
+        -- MtskAdayBelgeler Insert
+        if ( Select count(*) ADET from dbo.MtskAdayBelgeler 
+             where FirmId = @yFirmId
+             and   AdayId = @AdayId 
+            ) = 0 
+        begin 
+		    insert into dbo.MtskAdayBelgeler (
+                FirmId , IsActive , AdayId , TcNo , DonemTipiId 
+              , KimlikGeldi , BiyometrikGeldi , OgrenimGeldi , SaglikGeldi , AdliSicilGeldi , ImzaAlindi , SozlesmeYapildi , BelgelerGeldi 
+              , BiyometrikTarandi , OgrenimTarandi , SaglikTarandi , AdliSicilTarandi , ImzaTarandi , Sozlesme1Tarandi , Sozlesme2Tarandi , BelgelerTarandi 
+              , AdayKaydiYapildi , BiyometrikYuklendi , OgrenimYuklendi , SaglikYuklendi , AdliSicilYuklendi , ImzaYuklendi , Sozlesme1Yuklendi , Sozlesme2Yuklendi , BelgelerYuklendi 
+              , IsSertifikaUcreti , SertifikaUcretiIsPaid , IsUcretsiz , IsFatura ) values
+		    ( @yFirmId,  1,  @AdayId,  @yTcNo, 0,
+			  0,  0,  0,  0,  0,  0,  0,  0,   
+		      0,  0,  0,  0,  0,  0,  0,  0,
+		      0,  0,  0,  0,  0,  0,  0,  0,  0,
+		      0,  0,  0,  0 ) 
+		end -- MtskAdayBelgeler
+        
+        -- MtskAdayAdliSicil Insert
+        if ( Select count(*) ADET from dbo.MtskAdayAdliSicil
+             where FirmId = @yFirmId
+             and   AdayId = @AdayId 
+            ) = 0 
+        begin 
+            INSERT INTO [dbo].[MtskAdayAdliSicil]
+            ([AdayId],[FirmId],[IsActive]) VALUES (@AdayId, @yFirmId, 1)
+		end
+
+		-- MtskAdayAdres Insert
+        if ( Select count(*) ADET from dbo.MtskAdayAdres
+             where FirmId = @yFirmId
+             and   AdayId = @AdayId 
+            ) = 0 
+        begin 
+  	        INSERT INTO [dbo].[MtskAdayAdres]
+            ([AdayId],[FirmId],[IsActive]) VALUES (@AdayId, @yFirmId, 1)
+		end
+
+		-- MtskAdayImza Insert
+        if ( Select count(*) ADET from dbo.MtskAdayImza
+             where FirmId = @yFirmId
+             and   AdayId = @AdayId 
+            ) = 0 
+        begin 
+            INSERT INTO [dbo].[MtskAdayImza]
+            ([AdayId],[FirmId],[IsActive]) VALUES (@AdayId, @yFirmId, 1)
+		end
+
+		-- MtskAdayOgrenim Insert
+        if ( Select count(*) ADET from dbo.MtskAdayOgrenim
+             where FirmId = @yFirmId
+             and   AdayId = @AdayId 
+            ) = 0 
+        begin 
+            INSERT INTO [dbo].[MtskAdayOgrenim]
+            ([AdayId],[FirmId],[IsActive]) VALUES (@AdayId, @yFirmId, 1)
+		end
+
+		-- MtskAdaySaglik Insert
+        if ( Select count(*) ADET from dbo.MtskAdaySaglik
+             where FirmId = @yFirmId
+             and   AdayId = @AdayId 
+            ) = 0 
+        begin 
+            INSERT INTO [dbo].[MtskAdaySaglik]
+            ([AdayId],[FirmId],[IsActive]) VALUES (@AdayId, @yFirmId, 1)
+		end
+
+		-- MtskAdaySertifika Insert
+        if ( Select count(*) ADET from dbo.MtskAdaySertifika
+             where FirmId = @yFirmId
+             and   AdayId = @AdayId 
+            ) = 0 
+        begin 
+            INSERT INTO [dbo].[MtskAdaySertifika]
+            ([AdayId],[FirmId]) VALUES (@AdayId, @yFirmId)
+		end
+
+		-- MtskAdaySozlesme Insert
+        if ( Select count(*) ADET from dbo.MtskAdaySozlesme
+             where FirmId = @yFirmId
+             and   AdayId = @AdayId 
+            ) = 0 
+        begin 
+            INSERT INTO [dbo].[MtskAdaySozlesme]
+            ([AdayId],[FirmId],[IsActive]) VALUES (@AdayId, @yFirmId, 1)
+		end
+
+
+
+
+		-- MtskAdayTakip Insert
+        if ( Select count(*) ADET from dbo.[MtskAdayTakip] 
+             where 0 = 0 
+             and [AdayId] = @AdayId 
+             and [FirmId] = @yFirmId
+            ) = 0 
+        begin 
+            insert into dbo.[MtskAdayTakip] ( 
+               [FirmId],[IsActive],[AdayId],[TcNo]
+			  ,[DonemTipiId],[GrupTipiId],[SubeTipiId]
+              ,[KayitTipiId],[MebbisKurumOnayi],[MebbisDurumTipiId]
+              ,[YasOnayiTipiId],[OzurDurumTipiId],[SertifikaUcretTipiId]
+              
+			  ,[TeorikBaslamaTarihi],[ToerikBitisTarihi],[TeorikDersToplami],[TeorikDersTipiId]
+              ,[eSinavNo],[eSinavDurumTipiId],[eSinavSonucTipiId],[eSinavSonrasiTipiId],[OnBesGunBitisTarihi],[eSinavUcretTipiId],[eSinavDetayId],[eSinavBasariTarihi]
+              
+	          ,[UygulamaBaslamaTarihi],[UygulamaBitisTarihi],[SimulatorDersToplami],[AkanTrafikDersToplami],[UygulamaliDersToplami],[UygulamaliDersTipiId]
+              ,[BasarisizBaslamaTarihi],[BasarisizBitisTarihi],[BasarisizDersToplami],[BasarisizDersTipiId]
+              ,[Arti4BaslamaTarihi],[Arti4BitisTarihi],[Arti4DersToplami],[Arti4DersTipiId]
+      
+	          ,[uSinavaKatilabilir], [uRandevuMebbisAktarildi] 
+	          ,[uSinavNo],[uSinavDurumTipiId],[uSinavSonucTipiId],[uSinavSonrasiTipiId],[uSinavUcretTipiId],[uSinavDetayId],[uSinavBasariTarihi]
+              ,[SertifikaDurumTipiId],[SertifikaTarihi],[DosyaYakti]
+			  )
+			  
+			  values
+			
+            ( @yFirmId,  1,  @AdayId,  null,   -- AdayId
+              @yDonemTipiId,  @yGrupTipiId,  @ySubeTipiId, -- DonemTipi
+              0,  0,  @yMebbisDurumTipiId,  -- KayitTipiId
+              0,  0,  0,  -- YasOnayiTipiId       
+              null, null, 0,  0,  -- [TeorikBaslamaTarihi]
+              0,  0,  0,  0,  null,  0,  0,  null, -- [eSinavNo]
+              null, null, 0,  0,  0,  0,  -- [UygulamaBaslamaTarihi]
+              null, null, 0,  0, -- [BasarisizBaslamaTarihi]
+              null, null, 0,  0, -- [Arti4BaslamaTarihi]
+              0,  0,             -- [uSinavaKatilabilir]
+			  0,  0,  0,  0,  0,  0,  null, -- [uSinavNo]
+              0,  null,   0 -- SertifikaurumTipiId
+			  ) 
+
+        end -- MtskAdayBelgeler
+
+
+
+		-- MtskAdayBelgeler tablosunu işaretle
+		Update MtskAdayBelgeler set
+          BiyometrikGeldi = x.Sonuc
+        , BiyometrikTarandi = x.Sonuc 
+        From MtskAdayBelgeler a, 
+        (
+            Select count(Id) as Sonuc
+            From MtskAday
+            Where 0 = 0
+            and BiyometrikResim is not null
+            and FirmId = @yFirmId
+            and Id = @AdayId
+        ) as x
+        Where a.AdayId = @AdayId
+        and   a.FirmId = @yFirmId
+		
+		-- MtskAdayTakip YORUMLARI 
+		
+
+        -- @SertifikaUcretTipiId kontrolü tahsilatlar ile gerçekleşecek
+
+		-- MtskAdayTakip
+		Update MtskAdayTakip set
+		  IsActive = @yIsActive
+		, DonemTipiId = @yDonemTipiId
+        , GrupTipiId = @yGrupTipiId
+		, SubeTipiId = @ySubeTipiId
+		, KayitTipiId = @yKayitTipiId
+		, MebbisKurumOnayi = @yMebbisKurumOnayi
+		, MebbisDurumTipiId = @yMebbisDurumTipiId
+		, SertifikaUcretTipiId = @SertifikaUcretTipiId
+		--, SertifikaDurumTipiId = @SertifikaAlmayiHakKazandi
+		, SertifikaTarihi = SertifikaTarihi
+		From MtskAdayTakip a
+        Where a.AdayId = @AdayId
+
+
+		-- Bildirim gönderme varsa BildirimXXXX tablolarını çalıştır
+        if ((@eSMSGonder <> @ySMSGonder) or
+		    ((@yMesajTipiId > 0) and
+		     ((@eKimlikGeldi = @yKimlikGeldi ) or
+	          (@eBiyometrikGeldi = @yBiyometrikGeldi ) or
+	          (@eOgrenimGeldi = @yOgrenimGeldi ) or
+	          (@eSaglikGeldi = @ySaglikGeldi ) or
+	          (@eAdliSicilGeldi = @yAdliSicilGeldi ) or
+	          (@eImzaAlindi = @yImzaAlindi ) or
+	          (@eSozlesmeYapildi = @ySozlesmeYapildi ) or
+	          (@eBelgelerGeldi = @yBelgelerGeldi ))))
+		begin
+            EXECUTE [dbo].[prc_BildirimSMS] @yFirmId, 1, @AdayId, @ySMSGonder, @yMesajTipiId 
+		end
+		--  @eEpostaGonder <> @yEpostaGonder
+        --  @eWhatsAppGonder <> @yWhatsAppGonder
+		
+
+
+
+      FETCH NEXT FROM adayCursor INTO @AdayId
+    END -- While
+
+    -- MtskDonemKontrolu
+    EXECUTE [dbo].[prc_MtskDonemKontrolu] @yFirmId 
+	EXECUTE [dbo].[prc_MtskAdayTakip] @yFirmId
+
+    CLOSE adayCursor
+    DEALLOCATE adayCursor   
+
+END -- create trigger
+
+
+ALTER TABLE dbo.MtskAday ENABLE TRIGGER trg_MtskAday
+GO
+
+commit transaction
+
+
+
+begin transaction
+
+
+-- MevcutSertifikaTipiId
+-- IsteneSertifikaTipiId
+-- [Lkp].[MtskSertifikaTipi]  tablosuna bak
+-- TaksitSayisiTipiId
+-- OdemeTipiId
+-- DurumTipiId
+
+-- ------------------------------------------------------- 
+-- TaksitSayisiTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[MtskAdayTaksitSayisiTipi]
+(
+   Id               Int Unique not null, 
+   TaksitSayisiTipi nVarchar(20)   null,
+   IsActive         Bit            null,
+   
+   constraint  pk_MtskAdayTaksitSayisiTipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskAdayTaksitSayisiTipi]
+INSERT INTO [Lkp].[MtskAdayTaksitSayisiTipi] (Id, TaksitSayisiTipi, IsActive)
+ VALUES 
+  (-1,    N'', 1),
+  ( 0,    N'Seçiniz', 1),
+  ( 1,    N'Peşin', 1),
+  ( 2,    N'2 Ay', 1),
+  ( 3,    N'3 Ay', 1),
+  ( 4,    N'4 Ay', 1),
+  ( 5,    N'5 Ay', 1),
+  ( 6,    N'6 Ay', 1),
+  ( 7,    N'7 Ay', 1),
+  ( 8,    N'8 Ay', 1),
+  ( 9,    N'9 Ay', 1),
+  (10,    N'10 Ay', 1),
+  (11,    N'11 Ay', 1),
+  (12,    N'12 Ay', 1)
+
+-- ------------------------------------------------------- 
+-- OdemeTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[MtskAdayOdemeTipi]
+(
+   Id               Int Unique not null, 
+   OdemeTipi        nVarchar(20)   null,
+   IsActive         Bit            null,
+   
+   constraint  pk_MtskAdayOdemeTipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskAdayOdemeTipi]
+INSERT INTO [Lkp].[MtskAdayOdemeTipi] (Id, OdemeTipi, IsActive)
+ VALUES 
+  (-1,    N'', 1),
+  ( 0,    N'Seçiniz', 1),
+  ( 1,    N'Kredi Kartı', 1),
+  ( 2,    N'Nakit', 1),
+  ( 3,    N'Banka Havalesi', 1),
+  ( 4,    N'Senet', 1),
+  ( 5,    N'Açık Hesap', 1)
+
+
+-- ------------------------------------------------------- 
+-- KayitTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[MtskAdayKayitTipi]
+(
+   Id               Int Unique not null, 
+   KayitTipi        nVarchar(30)   null,
+   ChartCaption     nVarchar(20)   null,
+   FormCaption      nVarchar(15)   null,
+
+   constraint  pk_MtskAdayKayitTipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskAdayKayitTipi]
+INSERT INTO [Lkp].[MtskAdayKayitTipi] (Id, KayitTipi, ChartCaption, FormCaption)
+ VALUES 
+  ( 0,    N'', '', ''),
+  ( 1,    N'Ön kayıt',                  'Ön kayıt',     'Yeni Aday' ),
+  ( 2,    N'Kayıt aşamasında',          'K.Aşamasında', 'Mebbis' ),
+  ( 3,    N'Kesin kayıt',               'Kesin kay.', '' ),
+  ( 4,    N'Sertifikayı hak kazandı',   '', '' ),
+  ( 5,    N'Sertifikası teslim edildi', '', '' ),
+  ( 6,    N'Diğerleri',                 '', '' ),
+  ( 7,    N'Dosya kapandı',             '', '' )
+
+
+
+
+
+-- ------------------------------------------------------- 
+-- MebbisDurumTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[MtskAdayMebbisDurumTipi]
+(
+   Id                Int Unique not null, 
+   MebbisDurumTipi   nVarchar(70)   null
+   
+   constraint  pk_MtskAdayMebbisDurumTipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskAdayMebbisDurumTipi]
+INSERT INTO [Lkp].[MtskAdayMebbisDurumTipi] (Id, MebbisDurumTipi)
+ VALUES 
+  (-1,  N'' ),
+  ( 0,  N'Kursa Başvuru Aşamasında' ),
+  ( 1,  N'Teorik Sınav Aşamasında' ),
+  ( 2,  N'Uygulama Sınav Aşamasında' ),
+  ( 3,  N'Teorik Sınav Hakkı Doldu' ),
+  ( 4,  N'Uygulama Sınav Hakkı Doldu' ),
+  ( 5,  N'Sertifika Almaya Hak Kazandı' ),
+  ( 6,  N'Sertifikası İptal Edildi' ),
+  ( 7,  N'e-Sınav Aşamasında' ),
+  ( 8,  N'e-Sınav Test Aşamasında' ),
+  ( 9,  N'e-Sınavdan Başarısız Oldu' ),
+  ( 10,  N'e-Sınav Hakkı Doldu' ),
+  ( 11,  N'Kaydı Silindi' ),
+  ( 12,  N'Ceza Kaydı Var' ),
+  ( 13,  N'Teorik Dersten Muaf' ),
+  ( 14,  N'Adli Sicil Kaydı Uygun Olmadığından Dönem Kaydı Durdurulmuştur.' ),
+  ( 22,  N'2.Direksiyon Aşamasında' )
+
+
+
+-- ------------------------------------------------------- 
+-- KaynakKayitTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[MtskAdayKaynakKayitTipi]
+(
+   Id                Int Unique not null, 
+   KaynakKayitTipi   nVarchar(50)   null
+   
+   constraint  pk_MtskAdayKaynakKayitTipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskAdayKaynakKayitTipi]
+INSERT INTO [Lkp].[MtskAdayKaynakKayitTipi] (Id, KaynakKayitTipi)
+ VALUES 
+  ( 0,  N'' ),
+  ( 1,  N'Kullanıcı Girişi' ),
+  ( 2,  N'Mebbis Dönem Aday Onaylama Listesi' ),
+  ( 3,  N'Mebbis Uygulama Sınav Listesi' ),
+  ( 4,  N'Mebbis Aday Durum Bilgileri' )
+
+
+
+-- ------------------------------------------------------- 
+-- MesajTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[MtskAdayMesajTipi]
+(
+   Id                Int Unique not null, 
+   MesajTipi         nVarchar(50)   null
+   
+   constraint  pk_MtskAdayMesajTipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskAdayMesajTipi]
+INSERT INTO [Lkp].[MtskAdayMesajTipi] (Id, MesajTipi)
+ VALUES 
+  ( 0,  N'' ),
+  ( 1,  N'Gerekli Belgeler' ),
+  ( 2,  N'Eksik Belgeler' ),
+  ( 3,  N'' )
+
+
+
+commit transaction

@@ -1,0 +1,270 @@
+﻿USE u7093888_Ustad01
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+begin transaction
+
+ create table MtskSinavETeorik
+ (
+   Id                    Int IDENTITY(1,1) not null, 
+   FirmId                Int       not null,
+   IsActive              Bit       not null, /* default : 1 = active, 0 = not active */  
+   AdayId                Int       not null, /* default 0 */
+   TcNo                  Varchar(11)   null,
+   TamAdiSoyadi          nVarchar(100) null,
+   AdayDonemTipiId       Int           null, /* bu mebbisde e-sınav listelerinde yok, uyg. sınav listelerinde var */ 
+
+   --10
+   SinavDonemTipiId        Int           null, /* sınavın yapıldığı dönem */
+   SinavNo                 SmallInt      null,  
+   SinavTarihSaat          Varchar(20)   null,
+   SinavTarihi             Date          null,
+   SinavSaati              Time          null,
+   TeorikPuani             SmallInt      null, 
+   DurumuTipiId            SmallInt      null, /* mebbiste okunuyor*/
+   MebbisESinavTarihValue  Varchar(20)   null, /* mebbis valuesi */ 
+
+   --20
+   SinavUcreti           Numeric(22,8) null,
+   KayitSirasindaAlindi  Bit           null, /* sertifika ücreti ile birlikte alındı */
+   TahsilEdildi          Bit           null, /* sonradan kursiyerden makbuzla tahsil edildi */
+   DekontId              Int           null, /* tahsil dekont ıd */
+   --30
+   /* mebbis bilgileri */
+   UcretDurumuTipiId     SmallInt      null, /* mebbisten okunuyor : Sınav Ücreti Yatırılmamış ,  */
+   YatanToplamUcret      Numeric(22,8) null,
+   UcretSayisi           SmallInt      null, 
+   TestMerkeziBilgisi    Varchar(50)   null,
+
+   constraint		pk_MtskSinavETeorik primary key (Id)
+ )
+  
+ grant select, insert, update, delete on MtskSinavETeorik to public
+
+ create index X_MtskSinavETeorik01 on MtskSinavETeorik (AdayId)
+ create index X_MtskSinavETeorik02 on MtskSinavETeorik (TcNo)
+  
+commit transaction
+
+
+
+USE [u7093888_Ustad01]
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+CREATE TRIGGER [dbo].[trg_MtskSinavETeorik] on [dbo].[MtskSinavETeorik] 
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    DECLARE myCursor cursor for select Id from Inserted
+    DECLARE @curId bigint
+
+    OPEN myCursor
+
+    FETCH NEXT FROM myCursor INTO @curId
+    
+	declare @yFirmId int = 0
+	declare @yAdayId int = 0
+	declare @yTcNo varchar(11)
+	declare @yTamAdiSoyadi nVarchar(100)
+	declare @SinavDonemTipiId int = 0
+	declare @ySinavNo int = 0
+	declare @ySinavTarihSaat varchar(20) = ''
+	declare @ySinavTarihi date = null
+	declare @ySinavSaati time = null
+	declare @yTeorikPuani int = 0
+	declare @yMebbisESinavTarihValue varchar(20) = ''
+	declare @SinavSonucTipiId smallInt = 0
+	
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+	    set @ySinavNo = 0 
+	    set @ySinavTarihi = null
+	    set @ySinavSaati = null
+				
+        select 
+         @yFirmId = ins.FirmId
+        ,@yAdayId = isnull(ins.AdayId,0)
+		,@yTcNo = isnull(ins.TcNo,'')
+		,@yTamAdiSoyadi = isnull(ins.TamAdiSoyadi,'')
+		,@ySinavNo = isnull(ins.SinavNo,0)
+		,@ySinavTarihSaat = isnull(ins.SinavTarihSaat, '0')
+		,@yTeorikPuani = isnull(ins.TeorikPuani, 0)
+		,@SinavSonucTipiId = isnull(ins.DurumuTipiId, 0)
+		,@yMebbisESinavTarihValue = isnull(ins.MebbisESinavTarihValue,'')
+		from inserted ins
+    	where ins.Id = @curId
+	
+        if (@ySinavTarihSaat <> '0')
+		begin
+		  set @ySinavTarihSaat = replace(@ySinavTarihSaat, '/E-Sınav', '') 
+		  set @ySinavTarihi = convert(date, @ySinavTarihSaat, 103)
+		  set @ySinavSaati = convert(time, @ySinavTarihSaat, 103)
+		end
+
+		-- Sınavın hangi dönemde yapıldığı tespit ediliyor
+		if (MONTH(@ySinavTarihi) < 10)
+               set @SinavDonemTipiId = convert(int, convert(varchar(5), YEAR(@ySinavTarihi)) + '0' + convert(varchar(3), MONTH(@ySinavTarihi)))
+          else set @SinavDonemTipiId = convert(int, convert(varchar(5), YEAR(@ySinavTarihi)) + convert(varchar(3), MONTH(@ySinavTarihi)))
+		
+		
+		if (@yAdayId = 0) and (@yTcNo <> '')
+		begin
+		  Select top 1 @yAdayId = Id  From MtskAday
+          Where TcNo = @yTcNo
+          and   isnull(DonemTipiId,0) <= @SinavDonemTipiId
+          order by DonemTipiId desc, Id desc
+
+		  -- demekki aday hiç kayıtlı değil 
+		  -- yani ilk defa MEBBİS in sınav sonuçları (uygulama) sayfasından okunuyor demek
+		  if (@yAdayId = 0)
+		  begin
+              
+			  INSERT INTO [dbo].[MtskAday]
+                 ([ParentId]
+                 ,[FirmId]
+                 ,[IsActive]
+                 ,[TcNo]
+                 ,[TamAdiSoyadi]
+				 ,[DonemTipiId]
+                 ,[MebbisKurumOnayi]
+                 ,[KayitTipiId]
+                 ,[KaynakKayitTipiId]
+                 )
+              VALUES
+               (  0        --ParentId, int
+                , @yFirmId --FirmId, int
+                , 1        --IsActive, bit
+                , @yTcNo   --TcNo, varchar(11)
+                , @yTamAdiSoyadi --TamAdiSoyadi, nvarchar(100)
+				, 0 -- @AdayDonemTipiId --DonemTipiId, int   << e-sınavda bu bilgi yok
+                , 1        --MebbisKurumOnayi, bit
+                , 2        --KayitTipiId
+                , 3        --KaynakKayitTipiId 
+               )
+             
+			  --Select @yAdayId = @@IDENTITY
+			  Select @yAdayId = aday.Id
+		      From MtskAday as aday
+		      Where aday.FirmId = @yFirmId
+		      and   aday.TcNo = @yTcNo 
+		  end -- @yAdayId = 0
+		end
+		
+		if (@yTeorikPuani >= 70) 
+		   set @SinavSonucTipiId = 1 -- Başarılı
+		
+		if ((@yTeorikPuani > 0) and (@yTeorikPuani < 70)) 
+		   set @SinavSonucTipiId = 2 -- Başarısız
+		
+		-- Sınav tarihinden 7 gün geçtiği halde okunmamışsa girmedi yap
+		if ((@yTeorikPuani = 0) and (@ySinavTarihi < (GETDATE() - 7))) 
+		   set @SinavSonucTipiId = 3 -- Girmedi
+		
+		Select @ySinavNo = (count(Id) + 1) From MtskSinavETeorik
+		Where IsActive = 1
+		and FirmId = @yFirmId
+		and AdayId = @yAdayId
+		and SinavTarihi < @ySinavTarihi
+
+		update MtskSinavETeorik set
+           AdayId = @yAdayId
+		 , SinavDonemTipiId = @SinavDonemTipiId
+		 , SinavNo = @ySinavNo
+		 , SinavTarihSaat = @ySinavTarihSaat
+		 , SinavTarihi = @ySinavTarihi
+         , SinavSaati = @ySinavSaati
+		 , DurumuTipiId = @SinavSonucTipiId
+		Where Id = @curId
+	
+	    -- İlk aldığımız datalarda tarihsaat yok
+		-- sonrada tekrar mebbisten sınavsonuçaları okutulursa bu seferde aynı bilgi bu sefer tarihsaatli okunduğu için
+		-- çift kayıt oluşuyor. Bu nedenle önceki saat bilgisi olmayan yani ilk datada okunan silinmesi gerekiyor
+		if (@yMebbisESinavTarihValue <> '')
+		begin
+		  Delete From MtskSinavETeorik
+		  Where SinavTarihi = @ySinavTarihi
+		  and   isnull(MebbisESinavTarihValue,'') = ''
+		  and   Id <> @curId 
+		end
+
+        FETCH NEXT FROM myCursor INTO @curId
+    END
+
+	EXECUTE [dbo].[prc_MtskAdayTakip]  @yFirmId
+
+    CLOSE myCursor
+    DEALLOCATE myCursor   
+
+END
+
+
+
+
+ALTER TABLE [dbo].[MtskSinavETeorik] ENABLE TRIGGER [trg_MtskSinavETeorik]
+GO
+
+
+
+
+
+
+begin transaction
+
+-- ------------------------------------------------------- 
+-- DurumuTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[MtskSinavETeorikDurumuTipi]
+(
+   Id               Int Unique not null, 
+   DurumuTipi       nVarchar(20)   null
+   
+   constraint  pk_MtskSinavETeorikDurumuTipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskSinavETeorikDurumuTipi]
+INSERT INTO [Lkp].[MtskSinavETeorikDurumuTipi] (Id, DurumuTipi)
+ VALUES 
+  ( 0,    N''),
+  ( 1,    N'Başarılı'),
+  ( 2,    N'Başarısız'),
+  ( 3,    N'Girmedi')
+
+-- ------------------------------------------------------- 
+-- UcretDurumuTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[MtskSinavETeorikUcretDurumuTipi]
+(
+   Id               Int Unique not null, 
+   UcretDurumuTipi  nVarchar(30)   null
+   
+   constraint  pk_MtskSinavETeorikUcretDurumuTipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskSinavETeorikUcretDurumuTipi]
+INSERT INTO [Lkp].[MtskSinavETeorikUcretDurumuTipi] (Id, UcretDurumuTipi)
+ VALUES 
+  ( 0,    N''),
+  ( 1,    N'Sınav Ücreti Yatırılmış'),
+  ( 2,    N'Sınav Ücreti Yatırılmamış')
+
+commit transaction
+
+/* ----------------------------------------------------------------- */
+
+
+
+
+
+
+

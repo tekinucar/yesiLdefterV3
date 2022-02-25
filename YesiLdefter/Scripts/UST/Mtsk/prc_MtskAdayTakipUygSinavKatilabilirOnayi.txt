@@ -1,0 +1,50 @@
+﻿USE [u7093888_Ustad01]
+GO
+
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+CREATE PROCEDURE [dbo].[prc_MtskAdayTakipUygSinavKatilabilirOnayi] (@FirmId int, 
+   @DonemTipiId int, @GrupTipiId smallInt, @SubeTipiId smallInt)  
+AS BEGIN
+   
+    -- Bu procedure -Uygulama Sınavına Katılabilir-  
+	-- ekranında  Kaydet (MEBBIS için) butonu ile çalıştırılıyor
+
+    -- 2,    'Uygulama sınavına katılabilir'            
+    -- 3,    'Uygulama sınav randevusu planlanacak'   
+	-- 2 den > 3 e geçecek
+
+    update MtskAdayTakip set
+    uSinavDurumTipiId = 3
+    from MtskAdayTakip
+    Where FirmId = @FirmId
+	and   DonemTipiId = @DonemTipiId
+	and   GrupTipiId = @GrupTipiId
+	and   SubeTipiId = @SubeTipiId
+	and   uSinavDurumTipiId = 2 -- 'Uygulama sınavına katılabilir' 
+    and   uSinavaKatilabilir = 1 -- kullanıcı onayı
+
+    -- 12,   '+4 Uygulama sınavına katılabilir'
+    -- 13,   '+4 Uygulama sınav randevusu planlanacak'
+	-- 12 den > 13 e geçecek
+
+	update MtskAdayTakip set
+    uSinavDurumTipiId = 13
+    from MtskAdayTakip
+    Where FirmId = @FirmId
+	and   DonemTipiId = @DonemTipiId
+	and   GrupTipiId = @GrupTipiId
+	and   SubeTipiId = @SubeTipiId
+	and   uSinavDurumTipiId = 12 -- 'Uygulama sınavına katılabilir' 
+    and   uSinavaKatilabilir = 1 -- kullanıcı onayı
+
+
+END -- procedure
+GO
+
+

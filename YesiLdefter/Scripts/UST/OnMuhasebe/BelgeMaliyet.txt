@@ -1,0 +1,154 @@
+﻿begin transaction
+
+-- Maliyet Belgeler hakkında detay
+
+ create table BelgeMaliyet
+ (
+
+   Id                 Int IDENTITY(1,1) NOT NULL, 
+   ParentId           Int       not null, /* default 0 */
+   FirmId             Int       not null,
+   IsActive           Bit       not null, /* default : 1 = active, 0 = not active */  
+   IsCommit           Bit       not null, /* default : 0 = işlenmedi, 1 = İşlendi */  
+      
+   BelgeTipiId        SmallInt      null, 
+   KaynakTipiId       SmallInt      null, /* 1. kağıt, 2. elektronik belge */
+   
+   -- 10 Belge Hakkında
+   BelgeTarihi        Date          null,
+   BelgeSaati         VarChar(8)    null,
+   BelgeYil           Smallint      null, 
+   BelgeAy            Smallint      null, 
+   BelgeGun           Smallint      null,
+   BelgeSeri          nVarChar(5)   null,
+   BelgeNo            nVarChar(50)  null,
+
+   VadeGun            SmallInt      null,  
+   SonOdemeTarihi     Date          null, 
+   GecerlilikTarihi   Date          null, /* sigortanın son tarihi */
+   
+   -- 30
+   CariId             Int           null,
+   CariUnvan          nVarChar(200) null, /* cari hesabı yok ise */
+   MaliyetId          Int           null, /* maliyet muhasebe hesap Id */
+   VarlikId           Int           null, /* varlıkların (bina taşıt telekom vb ) */
+
+   -- 40
+   BelgeTutari        Numeric(22,5) null,
+   MinOdemeTutari     Numeric(22,5) null,
+   KdvMatrahi         Numeric(22,5) null,    
+   KdvOrani           SmallInt      null,
+   KdvTutari          Numeric(22,5) null,    
+   VergiVeFonlar      Numeric(22,5) null,    
+   MasrafMiktari      Numeric(22,5) null,    
+   
+   --50 kdv oran ve tutarları eklenebilir (perakende fişinin işlenmesini örnek al)
+
+   -- 90
+   -- İşlendi : bu belge ödendi tahsil edildi vb... 
+   KayitTarihi        Date          null, 
+   KayitSaati         VarChar(8)    null,
+   CommitTable        Int           null, /* ilgili table */
+   CommitId           Int           null, /* ilgili table ref Id */
+
+   constraint		pk_BelgeMaliyet primary key (Id)
+ )
+
+ create index X_BelgeMaliyet01 on BelgeMaliyet (FirmId)
+ create index X_BelgeMaliyet02 on BelgeMaliyet (BelgeTipiId)
+ create index X_BelgeMaliyet03 on BelgeMaliyet (KayitTarihi)
+ create index X_BelgeMaliyet04 on BelgeMaliyet (BelgeTarihi)
+ create index X_BelgeMaliyet05 on BelgeMaliyet (SonOdemeTarihi)
+ create index X_BelgeMaliyet06 on BelgeMaliyet (GecerlilikTarihi)
+ 
+ create index X_BelgeMaliyet07 on BelgeMaliyet (CariId)
+ create index X_BelgeMaliyet08 on BelgeMaliyet (MaliyetId)
+ create index X_BelgeMaliyet09 on BelgeMaliyet (VarlikId)
+
+
+
+ grant select, insert, update, delete on BelgeMaliyet to public
+
+
+-- ------------------------------------------------------- 
+-- BelgeTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[BelgeMaliyetBelgeTipi]
+(
+   Id           Int Unique Not Null,
+   BelgeTipi    nVarchar(50),
+   GrupTipiId   SmallInt Null,
+
+   constraint  pk_BelgeMaliyetBelgeTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[BelgeMaliyetBelgeTipi] (Id, BelgeTipi, GrupTipiId)
+ VALUES 
+  (0,   N'Tanımsız', 0),
+  (1,   N'Fatura', 1),
+  (2,   N'Perakende Satış Belgesi', 1),
+  (3,   N'Gider Pusulası', 1),
+  (4,   N'Müstahsil Makbuzu', 1),
+  (5,   N'Serbest Meslek Makbuzu', 1),
+  (6,   N'Yapay Belge', 1),
+  (11,  N'Muhasebe Dekontu', 1)
+
+-- ------------------------------------------------------- 
+-- KaynakTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[BelgeMaliyetKaynakTipi]
+(
+   Id           Int Unique Not Null,
+   KaynakTipi   nVarchar(50),
+   GrupTipiId   SmallInt Null,
+
+   constraint  pk_BelgeMaliyetKaynakTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[BelgeMaliyetKaynakTipi] (Id, KaynakTipi, GrupTipiId)
+ VALUES 
+  (0,   N'Tanımsız', 0),
+  (1,   N'e-devlet', 1),
+  (2,   N'e-posta', 1),
+  (3,   N'Kağıt', 1),
+  (4,   N'Sms', 1),
+  (5,   N'Fax', 1),
+  (6,   N'Telefon', 1),
+  (7,   N'Diğer', 1)
+
+
+
+
+
+ commit transaction
+
+
+
+ +Fatura
+
+Faturayı tamamlayan veya fatura düzenlenmesini gerektiren belgeler
+Sevk İrsaliyesi
+Taşıma İrsaliyesi
+Yolcu Listeleri
+Günlük Müşteri Listeleri
+Adisyonlar
+Hak Ediş Belgesi
+
+Fatura yerine geçen belgeler
++Perakende Satış Belgeleri
++Gider Pusulası
++Müstahsil Makbuzu
++Serbest Meslek Makbuzu
++Yapay Belgeler
++Muhasebe Dekontu (vergi, sgk... ödeme emirleri)
+
+Alınan belge türü
+----------------------------
+Fatura
+Perakende Satış Belgeleri
+Gider Pusulası
+Müstahsil Makbuzu
+Serbest Meslek Makbuzu
+Yapay Belgeler
+Muhasebe Dekontu
+

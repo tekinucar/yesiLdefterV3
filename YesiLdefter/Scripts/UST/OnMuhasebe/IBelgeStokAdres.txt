@@ -1,0 +1,94 @@
+﻿
+begin transaction
+
+ create table IBelgeStokAdres 
+ (
+  Id             Int  IDENTITY(1,1) not null, 
+  FirmId         Int  not null,
+  CariId         Int  not null,
+  BelgeStokBId   Int  not null,
+  AdresTipiId    SmallInt not null, /* 1. fatura, 2. Teslimat vb... */
+
+  AliciTcNo      nVarchar(11)  null,      
+  AliciAdiSoyadi nVarchar(30)  null,      
+  AliciTelefonu  nVarchar(15)  null,      
+  Aciklama       nVarchar(200) null,      
+  
+  Ulke           nVarchar(25)  null,
+  Il             nVarchar(15)  null,
+  Ilce           nVarchar(20)  null,      
+  MahalleKoy     nVarchar(50)  null,
+  CaddeSokak     nVarchar(50)  null,
+  CaddeSokakTipiId  SmallInt   null,
+  DisKapi        nVarchar(30)  null,
+  IcKapi         nVarchar(20)  null,
+  PostaKutusu    nVarchar(6)   null,
+  /* MahalleKoy(50) + CaddeSokak(50) + DisKapi(30) + IcKapi(20) + Ilce(20) + Il(15) + Ulke(30) = 215 > 200  */
+  TamAdres       nVarchar(200) null,   
+  /* MahalleKoy(50) + CaddeSokak(50) + DisKapi(30) + IcKapi(20) = 150 > 120  */
+  YarimAdres     nVarchar(120) null, 
+  
+  /* Zamanla teslimatı ilgilendiren diğer bilgiler buraya eklenebilir */
+  
+  /* Sipariş Bilgileri */
+  --SiparisId             Int           null,
+  SiparisNo             nVarchar(20)  null,      
+
+  /* Teslimat Planlama Bilgileri eklenecek : Molbilya Teslimat gibi  */
+
+  /* Kargo Bilgileri */
+  
+  KargoTakipNo          nVarchar(20)  null,      
+  KargoSirketi          nVarchar(20)  null,      
+  KargoyaVerilisTarihi  Date          null,      
+  KargonunTeslimTarihi   Date          null,      
+  
+  constraint pk_IBelgeStokAdres primary key (Id)
+ )
+
+ create index X_IBelgeStokAdres01 on IBelgeStokAdres (FirmId)
+ create index X_IBelgeStokAdres02 on IBelgeStokAdres (CariId)
+ create index X_IBelgeStokAdres03 on IBelgeStokAdres (BelgeStokBId)
+ 
+ grant select, insert, update, delete on IBelgeStokAdres to public 
+
+
+-- ------------------------------------------------------- 
+-- AdresTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[IBelgeStokAdresAdresTipi]
+(
+   Id          Int Unique Not Null,
+   AdresTipi   nVarchar(50)   null,
+   GrupTipiId  SmallInt       null,
+   
+   constraint  pk_IBelgeStokAdresAdresTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[IBelgeStokAdresAdresTipi] (Id, AdresTipi, GrupTipiId)
+ VALUES 
+  (0, N'Tanımsız',    0),
+  (1, N'Fatura Adresi',   1),
+  (2, N'Teslimat Adresi',   1)
+
+
+-- ------------------------------------------------------- 
+-- CaddeSokakTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[IBelgeStokAdresCaddeSokakTipi]
+(
+   Id          Int Unique Not Null,
+   CaddeSokakTipi  nVarchar(20)   null,
+   
+   constraint  pk_IBelgeStokAdresCaddeSokakTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[IBelgeStokAdresCaddeSokakTipi] (Id, CaddeSokakTipi)
+ VALUES 
+  (0, N'Cadde mi? Sokak mı?'),
+  (1, N'Cadde'),
+  (2, N'Sokak')
+
+
+commit transaction
+

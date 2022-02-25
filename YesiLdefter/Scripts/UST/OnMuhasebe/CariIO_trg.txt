@@ -1,0 +1,289 @@
+﻿USE [u7093888_Ustad01]
+GO
+
+/****** Object:  Trigger [dbo].[trg_CariIO]    Script Date: 17.06.2020 11:07:21 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+--ALTER TRIGGER [dbo].[trg_CariIO] on [dbo].[CariIO] 
+CREATE TRIGGER [dbo].[trg_CariIO] on [dbo].[CariIO] 
+AFTER INSERT, UPDATE
+AS BEGIN
+
+  DECLARE InsertCursor_CariIO cursor for select Id from Inserted
+  DECLARE @curId bigint
+
+  OPEN InsertCursor_CariIO
+
+  FETCH NEXT FROM InsertCursor_CariIO INTO @curId
+
+  -- insert/yeni CariIO 
+  declare @yId Int = 0
+  declare @yFirmId int
+  declare @yIsActive bit
+  declare @yCariId int
+  declare @yGirisTarihi date
+  declare @yCikisTarihi date
+  declare @yCikisTipiId int
+  declare @yGirisEylemPlaniId Int
+  declare @yCikisEylemPlaniId Int
+  declare @yGirisCihazKaydiId Int
+  declare @yCikisCihazKaydiId Int
+
+
+  -- silinen/eski CariIO
+  declare @eId Int = 0
+  declare @eFirmId int
+  declare @eIsActive bit
+  declare @eCariId int
+  declare @eGirisTarihi date
+  declare @eCikisTarihi date
+  declare @eCikisTipiId int
+  declare @eGirisEylemPlaniId Int
+  declare @eCikisEylemPlaniId Int
+  declare @eGirisCihazKaydiId Int
+  declare @eCikisCihazKaydiId Int
+  
+  -- inserted olan CariIO nin yorumu
+  declare @yIOTarih date
+  declare @yIOEylemTipiId smallint
+  -- deleted olan CariIO nin yorumu
+  declare @eIOTarih date
+  declare @eIOEylemTipiId smallint
+
+  -- EylemPlani Id
+  declare @epId int
+  
+
+  WHILE @@FETCH_STATUS = 0
+  BEGIN
+      set @yId = 0
+	  set @yIOTarih = null
+	  set @yIOEylemTipiId = 0
+	  set @yGirisEylemPlaniId = 0
+      set @yCikisEylemPlaniId = 0
+      set @yGirisCihazKaydiId = 0
+      set @yCikisCihazKaydiId = 0
+
+	  set @eId = 0
+	  set @eIOTarih = null
+	  set @eIOEylemTipiId = 0
+	  
+	  -- inserted kaydı okuyalım
+      Select
+	      @yId = ins.[Id]
+         ,@yFirmId = ins.[FirmId]
+         ,@yIsActive = ins.[IsActive]
+         ,@yCariId = ins.[CariId]
+         ,@yGirisTarihi = isnull(ins.[GirisTarihi], convert(date,'1900.01.01'))
+         ,@yCikisTarihi = isnull(ins.[CikisTarihi], convert(date,'1900.01.01'))
+         ,@yCikisTipiId = isnull(ins.[CikisTipiId],0)
+         ,@yGirisEylemPlaniId = isnull(ins.[GirisEylemPlaniId],0)
+         ,@yCikisEylemPlaniId = isnull(ins.[CikisEylemPlaniId],0)
+         ,@yGirisCihazKaydiId = isnull(ins.[GirisCihazKaydiId],0)
+         ,@yCikisCihazKaydiId = isnull(ins.[CikisCihazKaydiId],0)
+
+      From inserted ins
+	  Where ins.Id = @curId
+	  
+	  if (@yIsActive = 1)
+	  begin 
+	      -- inserted kaydı ne yapıyor anlayalım
+	      if ((convert(date,@yGirisTarihi) > convert(date, '1900.01.01')) and 
+	          (convert(date,@yCikisTarihi) = convert(date, '1900.01.01')) and 
+	          (@yCikisTipiId < 1))
+          begin
+              set @yIOTarih = @yGirisTarihi
+              set @yIOEylemTipiId = 160 -- Yeni Giriş
+          end
+
+          if ((convert(date,@yGirisTarihi) > convert(date, '1900.01.01')) and 
+	          (convert(date,@yCikisTarihi) > convert(date, '1900.01.01')) and 
+              (@yCikisTipiId > 0))
+          begin
+	          set @yIOTarih = @yCikisTarihi
+              if (@yCikisTipiId = 1) set @yIOEylemTipiId = 170 -- Tahliye
+              if (@yCikisTipiId = 2) set @yIOEylemTipiId = 172 -- Sevk/Nakil
+	      end
+	  
+          if (((@yGirisEylemPlaniId = 0) and (@yIOEylemTipiId = 160)) or 
+	          ((@yCikisEylemPlaniId = 0) and (@yIOEylemTipiId >= 170)))
+	      begin
+		  
+		      INSERT INTO [dbo].[EylemPlani]
+              ([FirmId]
+              ,[Tarih]
+              ,[IsActive]
+              ,[IsCancel]
+              ,[EylemTipiId]
+              ,[CariId]
+              ,[BaslamaTarihSaat]
+              ,[BitisTarihSaat]
+		      )
+              VALUES
+              (@yFirmId
+              ,convert(date,@yIOTarih)
+             ,1
+		     ,0
+             ,@yIOEylemTipiId
+             ,@yCariId
+             ,@yIOTarih
+		     ,@yIOTarih
+	         ) 
+	         
+			 -- Select @epId = @@IDENTITY  
+			 -- bunu kullanınca EylemIcmali yeni gun için insertler çalıştığı zamana denk gelince EylemIcmali.Id geliyor 
+		     Select @epId = Id
+			 from [dbo].[EylemPlani]
+			 where FirmId = @yFirmId
+             and convert(date, Tarih) = convert(date,@yIOTarih)
+             and IsActive = 1
+		     and IsCancel = 0
+             and EylemTipiId = @yIOEylemTipiId
+             and CariId = @yCariId
+             and convert(date, BaslamaTarihSaat) = convert(date, @yIOTarih)
+		     and convert(date, BitisTarihSaat) = convert(date, @yIOTarih)
+		  
+	         if (@yIOEylemTipiId = 160)
+		     begin
+                 UPDATE [dbo].[CariIO]
+                 SET [GirisEylemPlaniId] = @epId
+                 WHERE [Id] = @yId
+	         end 
+
+	         if ((@yIOEylemTipiId = 170) or
+		         (@yIOEylemTipiId = 172))
+		     begin
+                 UPDATE [dbo].[CariIO]
+                 SET [CikisEylemPlaniId] = @epId
+                 WHERE [Id] = @yId
+	         end 
+	      end -- if (((@yGirisEylemPlaniId = 0) ...
+	  end -- if (@yIsActive = 1)
+
+	  /*
+	  -- deleted kaydı okuyalım
+      Select
+	      @eId = dlt.[Id]
+         ,@eFirmId = dlt.[FirmId]
+         ,@eIsActive = dlt.[IsActive]
+         ,@eCariId = dlt.[CariId]
+         ,@eGirisTarihi = isnull(dlt.[GirisTarihi], convert(date,'1900.01.01'))
+         ,@eCikisTarihi = isnull(dlt.[CikisTarihi], convert(date,'1900.01.01'))
+         ,@eCikisTipiId = isnull(dlt.[CikisTipiId],-1)
+      From deleted dlt
+	  Where dlt.Id = @curId
+	  
+	  -- deleted kaydı ne yapmış onu anlayalım
+	  if ((convert(date,@eGirisTarihi) > convert(date, '1900.01.01')) and 
+	      (convert(date,@eCikisTarihi) = convert(date, '1900.01.01')) and 
+		  (@eCikisTipiId < 1))
+	  begin
+		  set @eIOTarih = @eGirisTarihi
+		  set @eIOEylemTipiId = 160 -- Yeni Giriş
+      end
+
+      if ((convert(date,@eGirisTarihi) > convert(date, '1900.01.01')) and 
+	      (convert(date,@eCikisTarihi) > convert(date, '1900.01.01')) and 
+		  (@eCikisTipiId > 0))
+	  begin
+	      set @eIOTarih = @eCikisTarihi
+          if (@eCikisTipiId = 1) set @eIOEylemTipiId = 170 -- Tahliye
+		  if (@eCikisTipiId = 2) set @eIOEylemTipiId = 172 -- Sevk/Nakil
+	  end
+
+	  -- deleted kayda ait EylemPlani varmi kontrol et
+      -- işlem görmemiş kayıt var mı
+	  Select top 1 @epId = [Id]
+      From [dbo].[EylemPlani]
+      Where FirmId = @eFirmId
+      and convert(date,BaslamaTarihSaat) = convert(date, @eIOTarih)
+      and convert(date,BitisTarihSaat) = convert(date, @eIOTarih)
+      and CariId = @eCariId
+	  and EylemTipiId = @eIOEylemTipiId
+	  and isnull(GirisCihazKaydiId,-1) < 1
+	  and isnull(CikisCihazKaydiId,-1) < 1
+	  order by [BaslamaTarihSaat]
+
+	  if (@epId > 0)
+	  begin
+		  delete from [dbo].[EylemPlani] where Id = @epId 
+	  end
+
+	  */
+
+      -- yeni EylemPlani oluşturalım
+      -- kayıt yoksa  
+	  
+	  /*
+	  set @epId = -1
+	  
+	  -- yinede EylemPlanını kontrol edelim inserted
+      Select top 1 @epId = [Id]
+      From [dbo].[EylemPlani]
+      Where 0 = 0 --IsActive = 1
+      and FirmId = @yFirmId
+      and convert(date,BaslamaTarihSaat) = convert(date, @yIOTarih)
+      and convert(date,BitisTarihSaat) = convert(date, @yIOTarih)
+      and CariId = @yCariId
+	  and EylemTipiId = @yIOEylemTipiId
+	  order by [BaslamaTarihSaat]
+
+	  -- yeni giriş, tahliye veya sevk için EylemPlani hareketi oluşturalım
+	  if ((@epId = -1) and (@yIOEylemTipiId > 0))
+	  begin
+		  INSERT INTO [dbo].[EylemPlani]
+          ([FirmId]
+          ,[Tarih]
+          ,[IsActive]
+          ,[IsCancel]
+          ,[EylemTipiId]
+          ,[CariId]
+          ,[BaslamaTarihSaat]
+          ,[BitisTarihSaat]
+		  )
+          VALUES
+          (@yFirmId
+          ,convert(date,@yIOTarih)
+          ,1
+		  ,0
+          ,@yIOEylemTipiId
+          ,@yCariId
+          ,@yIOTarih
+		  ,@yIOTarih
+		  ) 
+
+      end--if (@epId = -1)
+	  */
+	  
+      FETCH NEXT FROM InsertCursor_CariIO INTO @curId
+  END
+	
+  -- ÇIKIŞ TİPİ BELİRTİNCE TARIH OTOMATİK GELMESİ GEREK
+
+  if (convert(date,@yIOTarih) > convert(date, '1900.01.01'))
+  begin
+    Execute [dbo].prc_EylemIcmali @yFirmId, @yIOTarih 
+    Execute [dbo].prc_SayimIcmali @yFirmId, @yIOTarih, @yIOTarih 
+  end
+
+  if ((@epId > 0) and 
+      (@yIOTarih <> @eIOTarih))
+  begin
+    Execute [dbo].prc_EylemIcmali @eFirmId, @eIOTarih 
+    Execute [dbo].prc_SayimIcmali @eFirmId, @eIOTarih, @eIOTarih 
+  end
+  
+  CLOSE InsertCursor_CariIO
+  DEALLOCATE InsertCursor_CariIO   
+  
+END
+GO
+
+ALTER TABLE [dbo].[CariIO] ENABLE TRIGGER [trg_CariIO]
+GO
+
+

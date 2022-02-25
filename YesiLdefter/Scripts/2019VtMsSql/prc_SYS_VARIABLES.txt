@@ -1,0 +1,180 @@
+
+
+CREATE PROCEDURE [dbo].[prc_SYS_VARIABLES] (
+  @firmId int, @clientType int, @clientId int, @modulCode VarChar(10)  )  
+AS BEGIN 
+ 
+  -- clientType
+  -- 1 Grup Firma
+  -- 2 Firma
+  -- 3 Þube
+  -- 4 Bölüm
+  -- 5 Departman
+  -- 6 Personel
+  -- 7 Bilgisayar 
+
+    Select 
+       SYSVAR.*
+      ,@clientType            LKP_CLIENT_TYPE     
+	  ,@clientId              LKP_CLIENT_ID
+	  ,MSVAR.MODUL_CODE       LKP_MODUL_CODE
+      ,MSVAR.VARIABLE_CODE    LKP_VARIABLE_CODE
+      ,MSVAR.VARIABLE_CAPTION LKP_VARIABLE_CAPTION
+      ,MSVAR.PROP_SEARCH      LKP_PROP_SEARCH
+      , ( CASE MSVAR.FJOIN_TABLE_NAME 
+          WHEN 'HP_FINANS' THEN HPFIN.HP_TAMADI 
+         /*
+          WHEN 'HP_FIRMS'  THEN HPFIRMS.HP_NAME 
+          WHEN 'HP_CARI'   THEN HPCARI.TAMADI 
+          WHEN 'HP_IL'     THEN HPIL.IL_ADI
+         */
+          ELSE  MSVAR.FJOIN_TABLE_NAME
+          END ) LKP_CLIENT_VALUE
+     
+     
+  from MS_VARIABLES MSVAR
+    left outer join SYS_VARIABLES SYSVAR on ( 
+         MSVAR.VARIABLE_CODE = SYSVAR.VARIABLE_CODE
+    /*[SYSVAR].DEFAULT_VALUE*/
+    /*[SYSVAR].KRITERLER*/ 
+         and   SYSVAR.FIRM_ID = @firmId
+         and   SYSVAR.CLIENT_TYPE = @clientType
+         and   SYSVAR.CLIENT_ID = @clientId
+        )
+  
+  left outer join HP_FINANS HPFIN on ( 
+       MSVAR.FJOIN_TABLE_NAME = 'HP_FINANS' 
+       and Convert(Int, isnull(SYSVAR.CLIENT_VALUE,0)) = HPFIN.ID 
+       )
+
+  where 0 = 0
+  /*[MSVAR].DEFAULT_VALUE*/
+  /*[MSVAR].KRITERLER*/ 
+  and   MSVAR.MODUL_CODE = @modulCode
+    
+
+  ORDER BY MSVAR.MODUL_CODE, MSVAR.LINE_NO
+
+END;
+
+
+
+
+/*  MySQL :  */
+
+
+
+
+DROP PROCEDURE IF EXISTS `prc_SYS_VARIABLES` $$
+CREATE PROCEDURE `prc_SYS_VARIABLES` ( 
+  in firmId int, in clientType int, in clientId int, in modulCode VarChar(10)
+  )
+BEGIN  
+
+    Select 
+       SYSVAR.ID
+      ,SYSVAR.ISACTIVE
+      ,SYSVAR.FIRM_ID
+      ,SYSVAR.MODUL_CODE
+      ,SYSVAR.VARIABLE_CODE
+      ,SYSVAR.CLIENT_TYPE
+      ,SYSVAR.CLIENT_ID
+      ,SYSVAR.CLIENT_VALUE
+      ,CLIENT_LIST.LKP_CLIENT_ID
+      ,CLIENT_LIST.LKP_CLIENT_NAME
+      ,CLIENT_LIST.LKP_CLIENT_TYPE
+      ,MSVAR.MODUL_CODE       LKP_MODUL_CODE
+      ,MSVAR.VARIABLE_CODE    LKP_VARIABLE_CODE
+      ,MSVAR.VARIABLE_CAPTION LKP_VARIABLE_CAPTION
+      ,MSVAR.PROP_SEARCH      LKP_PROP_SEARCH
+      ,( CASE MSVAR.FJOIN_TABLE_NAME 
+         WHEN 'HP_FIRM' THEN HPFIRM.HP_NAME 
+         WHEN 'HP_CARI' THEN HPCARI.TAMADI 
+         WHEN 'HP_FINANS' THEN HPFIN.HP_TAMADI 
+         WHEN 'HP_IL' THEN HPIL.IL_ADI
+         END ) LKP_CLIENT_VALUE
+       
+  from 
+    ( /* CLIENT_LIST = Client / Ýstemci  Listesi */
+
+      /* Firm List */
+      Select 
+        f.ID      LKP_CLIENT_ID   
+      , f.HP_NAME LKP_CLIENT_NAME 
+      , f.HP_TD   LKP_CLIENT_TYPE  
+      FROM HP_FIRM f 
+      WHERE f.HP_TD = 1
+      AND   f.FIRM_ID = firmId
+  
+      UNION ALL 
+  
+      /* Shop List */
+      Select 
+        s.ID      LKP_CLIENT_ID
+      , s.HP_NAME LKP_CLIENT_NAME 
+      , s.HP_TD   LKP_CLIENT_TYPE  
+      FROM HP_FIRM s
+      WHERE s.HP_TD = 2
+      AND   s.FIRM_ID = firmId 
+  
+      UNION ALL 
+  
+      /* Part List */
+      Select 
+        p.ID      LKP_CLIENT_ID
+      , p.HP_NAME LKP_CLIENT_NAME 
+      , p.HP_TD   LKP_CLIENT_TYPE  
+      FROM HP_FIRM p
+      WHERE p.HP_TD = 3
+      AND   p.FIRM_ID = firmId 
+  
+      UNION ALL 
+
+      /* Personel */
+      Select 
+        c.ID      LKP_CLIENT_ID
+      , c.TAMADI  LKP_CLIENT_NAME 
+      , 5         LKP_CLIENT_TYPE  
+      FROM HP_CARI c
+      WHERE (c.CARI_TIPI = 591 or c.CARI_TIPI = 592)
+      AND    c.FIRM_ID = firmId 
+  
+  ) 
+    /* CLIENT / ÝSTEMCÝ LÝSTESÝ */
+    CLIENT_LIST
+    /* SÝSTEM ÜZERÝNDEKÝ PROJEYE AÝT VARIABLES/ÖNDEÐER DEÐÝÞKENLERÝ LÝSTESÝ */
+    /* PROJEYE YENÝ BÝR ÖNDEÐER GEREK OLDUKCA BU TABLOYA EKLENMELÝ */
+    left outer join MS_VARIABLES  MSVAR  on ( 0 = 0 ) 
+    /* FÝRMANIN/KULLANICININ SÝSTEME TANIMLADIÐI ÖNDEÐERLER */
+    left outer join SYS_VARIABLES SYSVAR on 
+      ( MSVAR.VARIABLE_CODE      = SYSVAR.VARIABLE_CODE 
+            and SYSVAR.CLIENT_TYPE = CLIENT_LIST.LKP_CLIENT_TYPE 
+            and SYSVAR.CLIENT_ID   = CLIENT_LIST.LKP_CLIENT_ID
+      )
+    /* DÝÐER TABLOLARDAN ÇEKÝLEN HESAPLAR */
+    left outer join HP_FIRM HPFIRM on ( 
+         MSVAR.FJOIN_TABLE_NAME = 'HP_FIRM' 
+         and ifnull(SYSVAR.CLIENT_VALUE,0) = HPFIRM.ID ) 
+    left outer join HP_CARI HPCARI on ( 
+         MSVAR.FJOIN_TABLE_NAME = 'HP_CARI' 
+         and ifnull(SYSVAR.CLIENT_VALUE,0) = HPCARI.ID ) 
+    left outer join HP_FINANS HPFIN on ( 
+         MSVAR.FJOIN_TABLE_NAME = 'HP_FINANS' 
+         and ifnull(SYSVAR.CLIENT_VALUE,0) = HPFIN.ID ) 
+    left outer join HP_IL HPIL on ( 
+         MSVAR.FJOIN_TABLE_NAME = 'HP_IL' 
+         and ifnull(SYSVAR.CLIENT_VALUE,0) = HPIL.IL_KODU ) 
+
+    WHERE 0 = 0
+    AND   CLIENT_LIST.LKP_CLIENT_TYPE = clientType
+    AND   CLIENT_LIST.LKP_CLIENT_ID = clientId
+    AND   MSVAR.MODUL_CODE = modulCode
+    
+
+    ORDER BY MSVAR.MODUL_CODE, MSVAR.LINE_NO;
+
+END $$
+DELIMITER ;
+
+
+ 

@@ -1,0 +1,33 @@
+
+
+begin transaction
+
+ create table MS_REPORTS
+ (
+	REF_ID               Int IDENTITY(1,1)  NOT NULL,
+        DBASE_TYPE           SmallInt           NULL,      /* 1. Master,  2.ManagerServer,  3.Project */ 
+        TABLE_TYPE           SmallInt           NULL,      /* 1. table, .... 6. select */
+        MODUL_CODE           VarChar(20)        NULL,
+        TABLE_NAME           VarChar(50)        NULL,
+        REPORT_CODE          VarChar(20)        NULL,
+        REPORT_NAME          VarChar(100)       NULL,
+        PARENT_CODE          VarChar(20)        NULL,
+        REPORT_ABOUTH        VarChar(300)       NULL,        
+        REPORT_TYPE          SmallInt           NULL,      /* 1. Form, 2. Liste, 3. Master-Detail ... */
+        REPTOOL_TYPE         SmallInt           NULL,      /* 1. DevExpress, 2. FastReport */
+        PARAMS               SmallInt           NULL,      /* 0. none, 1. Kýsýtlý Parametre, 2. Tam Parametre */ 
+        ACTIVE               Bit                NULL,
+        GROUP_DEFAULT        Bit                NULL,
+        REPORT_TEMP          NVarChar(MAX)      NULL, 
+        UPD_DATE             SmallDatetime      NULL,
+  
+	Constraint PK_MS_REPORTS primary key (REF_ID)
+
+ )
+
+ create index X_MS_REPORTS_1 on MS_REPORTS ( MODUL_CODE, TABLE_NAME )
+
+ grant select, insert, update, delete on MS_REPORTS to public
+
+commit transaction
+

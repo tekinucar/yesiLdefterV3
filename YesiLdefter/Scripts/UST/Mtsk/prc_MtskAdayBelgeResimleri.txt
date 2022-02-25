@@ -1,0 +1,110 @@
+﻿CREATE PROCEDURE [dbo].[prc_MtskAdayBelgeResimleri] (@AdayId int, @DonemTipiId Int)  
+AS BEGIN
+   
+--declare @AdayId Int = 1454
+--declare @DonemTipiId Int = 202101
+  declare @TamAdiSoyadi nvarchar(100)
+  declare @TcNo varchar(11)
+
+  Select  @TamAdiSoyadi = TamAdiSoyadi, @TcNo = TcNo
+  From MtskAday
+  Where Id = @AdayId
+  and DonemTipiId = @DonemTipiId
+
+  Select Id, @TamAdiSoyadi as TamAdiSoyadi, @TcNo as TcNo, 
+  'Biyometrik' as LkpImageType, 'Biyometrik' as LkpBelgeAdi, 
+  'MtskAday' as LkpTableName, 'BiyometrikResim' as LkpFieldName, 'BiyometrikResimSmall' as LkpSmallFieldName, 'Id' as LkpIdFieldName, 
+  DonemTipiId, BiyometrikResim as LkpImage, BiyometrikResimSmall as LkpSmallImage,
+  394 as LkpWidth,
+  512 as LkpHeight,
+  400 as LkpDpi
+
+  From MtskAday
+  Where Id = @AdayId
+  --and DonemTipiId = @DonemTipiId
+
+  Union All
+
+  Select AdayId as Id, @TamAdiSoyadi as TamAdiSoyadi, @TcNo as TcNo, 
+  'KiloByteKontrollu' as LkpImageType, 'Öğrenim Belgesi' as LkpBelgeAdi, 
+  'MtskAdayOgrenim' as LkpTableName, 'OgrenimBelgesiResim' as LkpFieldName, 'OgrenimBelgesiResimSmall' as LkpSmallFieldName, 'AdayId' as LkpIdFieldName, 
+  DonemTipiId, OgrenimBelgesiResim as LkpImage, OgrenimBelgesiResimSmall as LkpSmallImage,
+  800 as LkpWidth,
+  600 as LkpHeight,
+  96  as LkpDpi 
+  
+  From MtskAdayOgrenim
+  Where AdayId = @AdayId
+  --and DonemTipiId = @DonemTipiId
+
+  Union All
+
+  Select AdayId as Id, @TamAdiSoyadi as TamAdiSoyadi, @TcNo as TcNo, 
+  'KiloByteKontrollu' as LkpImageType, 'Sağlık Raporu' as LkpBelgeAdi, 
+  'MtskAdaySaglik' as LkpTableName, 'SaglikRaporuResim' as LkpFieldName, 'SaglikRaporuResimSmall' as LkpSmallFieldName, 'AdayId' as LkpIdFieldName, 
+  DonemTipiId, SaglikRaporuResim as LkpImage, SaglikRaporuResimSmall as LkpSmallImage,
+  800 as LkpWidth,
+  600 as LkpHeight,
+  96  as LkpDpi  
+  
+  From MtskAdaySaglik
+  Where AdayId = @AdayId
+  --and DonemTipiId = @DonemTipiId
+
+  Union All
+
+  Select AdayId as Id, @TamAdiSoyadi as TamAdiSoyadi, @TcNo as TcNo, 
+  'KiloByteKontrollu' as LkpImageType, 'Adli Sicil Raporu' as LkpBelgeAdi, 
+  'MtskAdayAdliSicil' as LkpTableName, 'SavcilikBelgesiResim' as LkpFieldName, 'SavcilikBelgesiResimSmall' as LkpSmallFieldName, 'AdayId' as LkpIdFieldName, 
+  DonemTipiId, SavcilikBelgesiResim as LkpImage, SavcilikBelgesiResimSmall as LkpSmallImage,
+  800 as LkpWidth,
+  600 as LkpHeight,
+  96  as LkpDpi  
+  
+  From MtskAdayAdliSicil
+  Where AdayId = @AdayId
+  --and DonemTipiId = @DonemTipiId
+
+  Union All
+
+  Select AdayId as Id, @TamAdiSoyadi as TamAdiSoyadi, @TcNo as TcNo, 
+  'KiloByteKontrollu' as LkpImageType, 'İmza' as LkpBelgeAdi, 
+  'MtskAdayImza' as LkpTableName, 'ImzaResim' as LkpFieldName, 'ImzaResimSmall' as LkpSmallFieldName, 'AdayId' as LkpIdFieldName, 
+  DonemTipiId, ImzaResim as LkpImage, ImzaResimSmall as LkpSmallImage,
+  472 as LkpWidth,
+  472 as LkpHeight,
+  400 as LkpDpi  
+  
+  From MtskAdayImza
+  Where AdayId = @AdayId
+  --and DonemTipiId = @DonemTipiId
+
+  Union All
+
+  Select AdayId as Id, @TamAdiSoyadi as TamAdiSoyadi, @TcNo as TcNo, 
+  'KiloByteKontrollu' as LkpImageType, 'Sözleşme 1' as LkpBelgeAdi, 
+  'MtskAdaySozlesme' as LkpTableName, 'Sozlesme1Resim' as LkpFieldName, 'Sozlesme1ResimSmall' as LkpSmallFieldName, 'AdayId' as LkpIdFieldName, 
+  DonemTipiId, Sozlesme1Resim as LkpImage, Sozlesme1ResimSmall as LkpSmallImage,
+  653 as LkpWidth,
+  928 as LkpHeight,
+  96  as LkpDpi  
+  
+  From MtskAdaySozlesme
+  Where AdayId = @AdayId
+  --and DonemTipiId = @DonemTipiId
+
+  Union All
+
+  Select AdayId as Id, @TamAdiSoyadi as TamAdiSoyadi, @TcNo as TcNo, 
+  'KiloByteKontrollu' as LkpImageType, 'Sözleşme 2' as LkpBelgeAdi, 
+  'MtskAdaySozlesme' as LkpTableName, 'Sozlesme2Resim' as LkpFieldName,  'Sozlesme2ResimSmall' as LkpSmallFieldName, 'AdayId' as LkpIdFieldName, 
+  DonemTipiId, Sozlesme2Resim as LkpImage, Sozlesme2ResimSmall as LkpSmallImage,
+  653 as LkpWidth,
+  928 as LkpHeight,
+  96  as LkpDpi  
+  
+  From MtskAdaySozlesme
+  Where AdayId = @AdayId
+  --and DonemTipiId = @DonemTipiId
+
+END -- procedure

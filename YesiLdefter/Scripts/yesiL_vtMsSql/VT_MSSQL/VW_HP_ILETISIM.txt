@@ -1,0 +1,39 @@
+﻿CREATE VIEW [dbo].[VW_HP_ILETISIM]  
+AS
+ (
+  select 
+       hi.[ID]
+      ,hi.[FIRM_ID]
+      ,hi.[SHOP_ID]
+      ,hi.[TABLE_ID]
+      ,hi.[TABLE_REF_ID]
+      ,hi.[REC_DATE]
+      ,hi.[REC_USER]
+      ,hi.[ILETISIM_DURUMU]
+      ,hi.[EV_TELEFONU]
+      ,hi.[IS_TELEFONU]
+      ,hi.[GSM_TELEFONU1]
+      ,hi.[GSM_TELEFONU2]
+      ,hi.[ESININ_GSM_TELEFONU]
+      ,hi.[FAX]
+      ,hi.[E_MAIL1]
+      ,hi.[E_MAIL2]
+      ,hi.[WEB_ADRESI]
+      ,hi.[ACIKLAMA]
+      ,hi.[OLDCARI_ID]
+  from HP_ILETISIM hi 
+    left outer join
+      (
+        select hi.TABLE_REF_ID
+         , max(hi.REC_DATE) REC_DATE
+        from HP_CARI hc, HP_ILETISIM hi 
+        where 0 = 0
+        and hc.ID = hi.TABLE_REF_ID
+        group by hi.[TABLE_REF_ID]
+      ) x  on ( hi.TABLE_REF_ID = x.TABLE_REF_ID )      
+
+   where 0 = 0
+   and hi.REC_DATE = x.REC_DATE
+ 
+ ) 
+

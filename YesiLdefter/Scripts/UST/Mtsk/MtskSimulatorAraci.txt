@@ -1,0 +1,48 @@
+
+begin transaction
+
+ create table MtskSimulator
+ (
+   Id                   Int IDENTITY(1,1) not null, 
+   ParentId             Int       not null, /* default 0 */
+   FirmId               Int       not null,
+   IsActive             Bit       not null, /* default : 1 = active, 0 = not active */  
+
+   SicilNumarasi        nVarchar(20)  null,
+   AlimTarihi           Date          null,
+   HizmetDurumuTipiId   SmallInt      null, /* BAÞLANGIÇ --Seçiniz--, 1-Hizmette, 2-Hizmet Dýþý*/
+   KurumOnayTipiId      SmallInt      null, /* BAÞLANGIÇ --Seçiniz--, 1-Onay Bekliyor, 2-Onaylandý */		
+
+   constraint		pk_MtskSimulator primary key (Id)
+ )
+  
+ grant select, insert, update, delete on MtskSimulator to public
+
+
+commit transaction
+
+
+
+
+begin transaction
+
+-- ------------------------------------------------------- 
+-- HizmetDurumuTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[MtskSimulatorHizmetDurumuTipi]
+(
+   Id               Int Unique Not null,
+   HizmetDurumuTipi nVarchar(50)   null,
+   GrupTipiId       SmallInt       null,
+
+   constraint  pk_MtskSimulatorHizmetDurumuTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[MtskSimulatorHizmetDurumuTipi] (Id, HizmetDurumuTipi, GrupTipiId)
+ VALUES 
+  ( 0,     N'Tanýmsýz', 1),
+  ( 1,     N'Hizmette', 1),
+  ( 2,     N'Hizmet Dýþý', 1)
+
+
+commit transaction

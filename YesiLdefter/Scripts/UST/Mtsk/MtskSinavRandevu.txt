@@ -1,0 +1,278 @@
+﻿USE u7093888_Ustad01
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+begin transaction
+
+ create table MtskSinavRandevu
+ (
+   Id                    Int IDENTITY(1,1) not null, 
+   FirmId                Int       not null,
+   IsActive              Bit       not null, /* default : 1 = active, 0 = not active */  
+   DonemTipiId           Int           null,
+   Tarih                 Date          null,   
+   EgitimAraciId         Varchar(10)   null,
+   PersonelId            Varchar(20)   null,
+   AdayId                Int           null,
+   SaatTipiId            SmallInt      null,
+
+   constraint		pk_MtskSinavRandevu primary key (Id)
+ )
+  
+ grant select, insert, update, delete on MtskSinavRandevu to public
+
+ create index X_MtskSinavRandevu01 on MtskSinavRandevu (DonemTipiId, Tarih, EgitimAraciId)
+ 
+commit transaction
+
+
+
+USE [u7093888_Ustad01]
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TRIGGER [dbo].[trg_MtskSinavRandevu] on [dbo].[MtskSinavRandevu] 
+AFTER INSERT,UPDATE
+AS 
+BEGIN
+
+    DECLARE myCursor cursor for select Id from Inserted 
+    DECLARE @curId bigint
+
+    OPEN myCursor
+
+	declare @FirmId int
+
+    FETCH NEXT FROM myCursor INTO @curId
+
+    select @FirmId = isnull(ins.FirmId,0)
+	From inserted ins
+    Where ins.Id = @curId
+
+	EXECUTE [dbo].[prc_MtskAdayTakip] @FirmId
+
+    CLOSE myCursor
+    DEALLOCATE myCursor  
+
+END
+
+
+
+
+
+
+
+
+
+
+
+
+USE [u7093888_Ustad01]
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TRIGGER [dbo].[trg_MtskSinavRandevuDelete] on [dbo].[MtskSinavRandevu] 
+FOR DELETE
+AS BEGIN
+
+    declare myCursor cursor for select Id from deleted
+    declare @curId bigint
+
+    declare @FirmId Int = 0
+	declare @AdayId Int = 0
+
+	OPEN myCursor
+
+    FETCH NEXT FROM myCursor INTO @curId
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+
+      select 
+         @FirmId = isnull(dlt.FirmId,0)  
+        ,@AdayId = isnull(dlt.AdayId,0)
+      from deleted as dlt
+      where dlt.Id = @curId
+
+      Update MtskAdayTakip set
+      uSinavDurumTipiId = 2 -- Uygulama sınav randevusu planlanacak
+      Where FirmId = @FirmId
+      and AdayId = @AdayId
+      and uSinavDurumTipiId = 3 -- Uygulama sınav randevusu MEBBİSe aktarılacak
+
+      Update MtskAdayTakip set
+      uSinavDurumTipiId = 12 -- +4 Uygulama sınav randevusu planlanacak
+      Where FirmId = @FirmId
+      and AdayId = @AdayId
+      and uSinavDurumTipiId = 13 -- +4 Uygulama sınav randevusu MEBBİSe aktarılacak
+
+      FETCH NEXT FROM myCursor INTO @curId
+    END
+
+    CLOSE myCursor
+    DEALLOCATE myCursor
+
+END
+
+ALTER TABLE [dbo].[MtskSinavRandevu] ENABLE TRIGGER [trg_MtskSinavRandevuDelete]
+GO
+
+
+begin transaction
+
+-- ------------------------------------------------------- 
+-- SaatiTipiId
+-- ------------------------------------------------------- 
+create table Lkp.MtskSinavRandevuSaatTipi
+(
+   Id              Int Unique Not Null,
+   SaatTipi        Varchar(15)   null
+
+   constraint  pk_MtskSinavRandevuSaatTipi primary key (Id)
+)
+
+INSERT INTO Lkp.MtskSinavRandevuSaatTipi (Id, SaatiTipi)
+ VALUES 
+  ( 0, N''),
+  ( 2, N'08:20 - 08:55'),
+  ( 3, N'09:00 - 09:35'),
+  ( 4, N'09:40 - 10:15'),
+  ( 5, N'10:20 - 10:55'),
+  ( 6, N'11:00 - 11:35'),
+  ( 7, N'11:40 - 12:15'),
+  ( 8, N'13:15 - 13:50'),
+  ( 9, N'13:55 - 14:30'),
+  (10, N'14:35 - 15:10'),
+  (11, N'15:15 - 15:50'),
+  (12, N'15:55 - 16:30'),
+  (13, N'16:35 - 17:10')
+
+
+commit transaction
+
+
+USE [u7093888_Ustad01]
+GO
+
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+CREATE TRIGGER [dbo].[trg_MtskSinavRandevu] on [dbo].[MtskSinavRandevu] 
+AFTER INSERT,UPDATE
+AS 
+BEGIN
+
+    DECLARE myCursor cursor for select Id from Inserted 
+    DECLARE @curId bigint
+
+    OPEN myCursor
+
+	declare @FirmId int
+	declare @AdayId int
+	
+
+    FETCH NEXT FROM myCursor INTO @curId
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+
+        select 
+		  @FirmId = isnull(ins.FirmId,0)
+		, @AdayId = isnull(ins.AdayId,0)  
+		from inserted ins
+    	where ins.Id = @curId
+				
+		Update MtskAdayTakip set
+		uSinavDurumTipiId = 4 -- Uygulama sınav randevusu MEBBİSe aktarılacak
+		Where FirmId = @FirmId
+		and AdayId = @AdayId
+		and uSinavDurumTipiId = 3 -- Uygulama sınav randevusu planlanacak
+
+        Update MtskAdayTakip set
+		uSinavDurumTipiId = 14 -- +4 Uygulama sınav randevusu MEBBİSe aktarılacak
+		Where FirmId = @FirmId
+		and AdayId = @AdayId
+		and uSinavDurumTipiId = 13 -- +4 Uygulama sınav randevusu planlanacak
+
+        FETCH NEXT FROM myCursor INTO @curId
+    END
+
+    CLOSE myCursor
+    DEALLOCATE myCursor  
+
+END
+GO
+
+ALTER TABLE [dbo].[MtskSinavRandevu] ENABLE TRIGGER [trg_MtskSinavRandevu]
+GO
+
+
+USE [u7093888_Ustad01]
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TRIGGER [dbo].[trg_MtskSinavRandevuDelete] on [dbo].[MtskSinavRandevu] 
+FOR DELETE
+AS BEGIN
+
+    declare myCursor cursor for select Id from deleted
+    declare @curId bigint
+
+    declare @FirmId Int = 0
+	declare @AdayId Int = 0
+
+	OPEN myCursor
+
+    FETCH NEXT FROM myCursor INTO @curId
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+
+      select 
+         @FirmId = isnull(dlt.FirmId,0)  
+        ,@AdayId = isnull(dlt.AdayId,0)
+      from deleted as dlt
+      where dlt.Id = @curId
+
+      Update MtskAdayTakip set
+      uSinavDurumTipiId = 3 -- Uygulama sınav randevusu planlanacak
+      Where FirmId = @FirmId
+      and AdayId = @AdayId
+      and uSinavDurumTipiId = 4 -- Uygulama sınav randevusu MEBBİSe aktarılacak
+
+      Update MtskAdayTakip set
+      uSinavDurumTipiId = 13 -- +4 Uygulama sınav randevusu planlanacak
+      Where FirmId = @FirmId
+      and AdayId = @AdayId
+      and uSinavDurumTipiId = 14 -- +4 Uygulama sınav randevusu MEBBİSe aktarılacak
+
+      FETCH NEXT FROM myCursor INTO @curId
+    END
+
+    CLOSE myCursor
+    DEALLOCATE myCursor
+
+END
+

@@ -1,0 +1,532 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{DF15BF56-DA45-47BE-A21B-280B0C32C7E7}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>YesiLdefter</RootNamespace>
+    <AssemblyName>YesiLdefter</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Treetog-I-Contacts.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="DevExpress.BonusSkins.v18.2, Version=18.2.7.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.Data.v18.2, Version=18.2.7.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.Printing.v18.2.Core, Version=18.2.7.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.Sparkline.v18.2.Core, Version=18.2.7.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.Utils.v18.2, Version=18.2.7.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraBars.v18.2, Version=18.2.7.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraEditors.v18.2, Version=18.2.7.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraGrid.v18.2, Version=18.2.7.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraLayout.v18.2, Version=18.2.7.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraNavBar.v18.2, Version=18.2.7.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.Charts.v18.2.Core, Version=18.2.7.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraCharts.v18.2, Version=18.2.7.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.CodeParser.v18.2, Version=18.2.7.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraReports.v18.2, Version=18.2.7.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraTreeList.v18.2, Version=18.2.7.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraVerticalGrid.v18.2, Version=18.2.7.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraWizard.v18.2, Version=18.2.7.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="Google.Protobuf, Version=3.6.1.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604, processorArchitecture=MSIL">
+      <HintPath>..\packages\Google.Protobuf.3.6.1\lib\net45\Google.Protobuf.dll</HintPath>
+    </Reference>
+    <Reference Include="Interop.WIA, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+      <HintPath>Packages\Scanner\Interop.WIA.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.JScript" />
+    <Reference Include="MySql.Data, Version=8.0.15.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
+      <HintPath>..\packages\MySql.Data.8.0.15\lib\net452\MySql.Data.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.12.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="OpenPop, Version=2.0.6.1120, Culture=neutral, PublicKeyToken=6bdb97f144b7efc8, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Packages\OpenPop.NET.2.0.6.1120\lib\net40\OpenPop.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Configuration.Install" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.Linq" />
+    <Reference Include="System.Drawing.Design" />
+    <Reference Include="System.Management" />
+    <Reference Include="System.Transactions" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="webcam_capture">
+      <HintPath>..\..\..\..\tknGit\yesiLdefterV3\packages\WebCam Resim Alma\webcam_capture.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Forms\ms_Computer.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ms_Computer.Designer.cs">
+      <DependentUpon>ms_Computer.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ms_DBList.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ms_DBList.Designer.cs">
+      <DependentUpon>ms_DBList.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ms_Form.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ms_Form.Designer.cs">
+      <DependentUpon>ms_Form.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ms_IPList.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ms_IPList.Designer.cs">
+      <DependentUpon>ms_IPList.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ms_IPList2.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ms_IPList2.Designer.cs">
+      <DependentUpon>ms_IPList2.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ms_Layout.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ms_Layout.Designer.cs">
+      <DependentUpon>ms_Layout.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ms_Layout2.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ms_Layout2.Designer.cs">
+      <DependentUpon>ms_Layout2.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ms_Menu.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ms_Menu.Designer.cs">
+      <DependentUpon>ms_Menu.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ms_Menu2.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ms_Menu2.Designer.cs">
+      <DependentUpon>ms_Menu2.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ms_Pictures.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ms_Pictures.Designer.cs">
+      <DependentUpon>ms_Pictures.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ms_ProjeDef.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ms_ProjeDef.Designer.cs">
+      <DependentUpon>ms_ProjeDef.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ms_User.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ms_User.Designer.cs">
+      <DependentUpon>ms_User.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ms_UserFirmList.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ms_UserFirmList.Designer.cs">
+      <DependentUpon>ms_UserFirmList.cs</DependentUpon>
+    </Compile>
+    <Compile Include="main.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="main.Designer.cs">
+      <DependentUpon>main.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ms_Iskonto.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ms_Iskonto.Designer.cs">
+      <DependentUpon>ms_Iskonto.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="tForms.cs" />
+    <Compile Include="Tkn\EventsMenu.cs" />
+    <Compile Include="Tkn\tEventsButton.cs" />
+    <Compile Include="Tkn\tBase.cs" />
+    <Compile Include="Tkn\tCreateObject.cs" />
+    <Compile Include="Tkn\tDataCopy.cs" />
+    <Compile Include="Tkn\tDefaultValue.cs" />
+    <Compile Include="Tkn\tDevColumn.cs" />
+    <Compile Include="Tkn\tDevView.cs" />
+    <Compile Include="Tkn\tEMail.cs" />
+    <Compile Include="Tkn\tEvents.cs" />
+    <Compile Include="Tkn\tEventsForm.cs" />
+    <Compile Include="Tkn\tEventsGrid.cs" />
+    <Compile Include="Tkn\tFilesManager.cs" />
+    <Compile Include="Tkn\tFtp.cs" />
+    <Compile Include="Tkn\tInputPanel.cs" />
+    <Compile Include="Tkn\tLayout.cs" />
+    <Compile Include="Tkn\tManagement.cs" />
+    <Compile Include="Tkn\tMenu.cs" />
+    <Compile Include="Tkn\tRegistry.cs" />
+    <Compile Include="Tkn\tSave.cs" />
+    <Compile Include="Tkn\tSearch.cs" />
+    <Compile Include="Tkn\tSQLs.cs" />
+    <Compile Include="Tkn\tStarter.cs" />
+    <Compile Include="Tkn\tSubViews.cs" />
+    <Compile Include="Tkn\tTablesRead.cs" />
+    <Compile Include="Tkn\tToolBox.cs" />
+    <Compile Include="Tkn\tVariable.cs" />
+    <Compile Include="Tkn\tXMLRead.cs" />
+    <Compile Include="Tkn\zzz_Person.cs" />
+    <Compile Include="tMainForm.cs" />
+    <EmbeddedResource Include="Forms\ms_Computer.resx">
+      <DependentUpon>ms_Computer.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ms_DBList.resx">
+      <DependentUpon>ms_DBList.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ms_Form.resx">
+      <DependentUpon>ms_Form.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ms_IPList.resx">
+      <DependentUpon>ms_IPList.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ms_Iskonto.resx">
+      <DependentUpon>ms_Iskonto.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ms_Layout.resx">
+      <DependentUpon>ms_Layout.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ms_Menu.resx">
+      <DependentUpon>ms_Menu.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ms_Pictures.resx">
+      <DependentUpon>ms_Pictures.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ms_ProjeDef.resx">
+      <DependentUpon>ms_ProjeDef.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ms_User.resx">
+      <DependentUpon>ms_User.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="main.resx">
+      <DependentUpon>main.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\licenses.licx" />
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <None Include="packages.config" />
+    <None Include="Packages\OpenPop.NET.2.0.6.1120\OpenPop.NET.2.0.6.1120.nupkg" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Packages\OpenPop.NET.2.0.6.1120\lib\net20\OpenPop.dll" />
+    <Content Include="Packages\OpenPop.NET.2.0.6.1120\lib\net40\OpenPop.dll" />
+    <Content Include="Packages\Scanner\Interop.WIA.dll" />
+    <Content Include="Packages\Scanner\Not.txt" />
+    <Content Include="Packages\WebCam\Not.txt" />
+    <Content Include="Packages\WebCam\webcam_capture.dll" />
+    <Content Include="Scripts\2019VtMsSql\AJ_LINEDOC.txt" />
+    <Content Include="Scripts\2019VtMsSql\AJ_LINETALK.txt" />
+    <Content Include="Scripts\2019VtMsSql\FN_LINEVOL.txt" />
+    <Content Include="Scripts\2019VtMsSql\FN_LINEVOL_BA.txt" />
+    <Content Include="Scripts\2019VtMsSql\HP_ADRES.txt" />
+    <Content Include="Scripts\2019VtMsSql\HP_CARI.txt" />
+    <Content Include="Scripts\2019VtMsSql\HP_COMPS.txt" />
+    <Content Include="Scripts\2019VtMsSql\HP_FINANS.txt" />
+    <Content Include="Scripts\SEK\InfazKurumu\CihazHesap.txt" />
+    <Content Include="Scripts\SEK\InfazKurumu\TextFile1.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\FinansIslemi.txt" />
+    <Content Include="Scripts\UST\Ustad\HP_COMPS.txt" />
+    <Content Include="Scripts\UST\Ustad\HP_FIRMS.txt" />
+    <Content Include="Scripts\2019VtMsSql\HP_ILETISIM.txt" />
+    <Content Include="Scripts\2019VtMsSql\HP_URUN.txt" />
+    <Content Include="Scripts\2019VtMsSql\HP_USERS.txt" />
+    <Content Include="Scripts\2019VtMsSql\HP_VEZNE.txt" />
+    <Content Include="Scripts\2019VtMsSql\MS_VARIABLES.txt" />
+    <Content Include="Scripts\2019VtMsSql\prc_AJ_LINEDOC.txt" />
+    <Content Include="Scripts\2019VtMsSql\prc_CLIENT_LIST.txt" />
+    <Content Include="Scripts\2019VtMsSql\prc_FIRM_IN_USERS.txt" />
+    <Content Include="Scripts\2019VtMsSql\prc_STK_FIYAT_GET.txt" />
+    <Content Include="Scripts\2019VtMsSql\prc_STK_GCS_CALC.txt" />
+    <Content Include="Scripts\2019VtMsSql\prc_SYS_VARIABLES.txt" />
+    <Content Include="Scripts\2019VtMsSql\prc_SYS_VARIABLES_FULL.txt" />
+    <Content Include="Scripts\2019VtMsSql\prc_VEZNE_ITEMS.txt" />
+    <Content Include="Scripts\2019VtMsSql\STK_FIYAT.txt" />
+    <Content Include="Scripts\2019VtMsSql\STK_GCB.txt" />
+    <Content Include="Scripts\2019VtMsSql\STK_GCS.txt" />
+    <Content Include="Scripts\2019VtMsSql\SYS_TYPES_H.txt" />
+    <Content Include="Scripts\2019VtMsSql\SYS_TYPES_L.txt" />
+    <Content Include="Scripts\2019VtMsSql\SYS_TYPES_T.txt" />
+    <Content Include="Scripts\2019VtMsSql\SYS_VARIABLES.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\CariHesap.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\FinansHesap.txt" />
+    <Content Include="Scripts\UST\Ustad\HP_USERS.txt" />
+    <Content Include="Scripts\UST\Ustad\MS_VARIABLES.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\ParaTipi.txt" />
+    <Content Include="Scripts\UST\Ustad\prc_SYS_VARIABLES_FULL.txt" />
+    <Content Include="Scripts\UST\Ustad\SYS_TYPES_L.txt" />
+    <Content Include="Scripts\UST\Ustad\SYS_TYPES_T.txt" />
+    <Content Include="Scripts\UST\Ustad\SYS_VARIABLES.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\VezneHesap.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\yevmiyeDefteri.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\msSoftware.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\MS_DBCONN.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\MS_DC.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\MS_DC_LINE.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\MS_FIELDS.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\MS_FIELDS_IP.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\MS_GLYPH.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\MS_GROUPS.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\MS_ITEMS.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\MS_LAYOUT.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\MS_LAYOUT_VIEW.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\MS_PROPERTIES.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\MS_REPORTS.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\MS_TABLES.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\MS_TABLES_IP.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\MS_TABLES_TS.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\MS_TEMP_FILE.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\MS_TEMP_LINES.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\MS_TEMP_PROCESS.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\MS_TYPES.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\MS_VARIABLES.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\SEKTORLER - Kopya 2.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\SEKTORLER - Kopya.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\SYS_TYPES_H.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\SYS_TYPES_L.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\SYS_TYPES_T.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\SYS_VARIABLES.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\SYS_WORKSD.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\SYS_WORKSM.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\trg_MS_ITEMS.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\trg_MS_LAYOUT.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\trg_MS_TABLES_IP.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\VW_CLIENT_LIST.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\VW_MS_ITEMS_TABLEIPCODES.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\VW_MS_LAYOUT_TABLEIPCODES.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\VW_MS_TABLES_IP_COUNT.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\VW_MS_TABLES_IP_JOINS.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\VW_MS_TABLES_IP_OBJ.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\VW_SYS_WORKSM.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\VW_TYPES_LIST.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\ADRESLER_20160101_1.Txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\AJ_LINEDOC.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\AJ_LINELCI.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\AJ_LINETALK.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\BAZI TRANSFERLER.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\finans_kullanımı.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\FN_LINEVOL.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\giderler.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\HP_ADRES.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\HP_CARI.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\HP_CARI_KK.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\HP_FINANS.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\HP_FINANS_GIDER_TURLERI_INS.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\HP_FIN_TBOX.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\HP_FIRM.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\HP_IL.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\HP_ILCE.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\HP_ILETISIM.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\HP_URUN.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\HP_VERGI.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\HP_VEZNE.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\K2_A_HAREKETLER_1.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\K2_A_HAREKETLER_2.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\MS_VARIABLE_INSERT.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\prc_CLIENT_LIST.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\prc_FN_LINEVOL_CALC.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\prc_FN_LINEVOL_FULLHESAP.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\prc_FN_LINEVOL_TKST.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\prc_STK_FIYAT_CALC.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\prc_STK_GCS_CALC.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\sekreterya.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\SEKTORLER_GRUPLU.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\STK_FIYAT.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\STK_GCB - Kopya.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\STK_GCB.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\STK_GCS.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\SYS_OTV.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\SYS_TYPES_H.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\SYS_TYPES_L _INS.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\SYS_TYPES_L.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\SYS_TYPES_T.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\SYS_TYPES_U.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\SYS_VARIABLES.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\trg_AJ_LINEDOC.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\trg_FN_LINEVOL.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\trg_HP_FINANS.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\trg_STK_FIYAT.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\trg_STK_GCS.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\trg_SYS_FIRMS.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\trg_SYS_OTV.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\VW_AJ_LINEDOC.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\VW_AJ_LINEDOC_VADE.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\VW_BANK_LIST.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\VW_CLIENT_LIST.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\VW_CLIENT_VALUE.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\VW_FINANS_ARACLARI.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\VW_FIRM_LIST.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\VW_HP_ADRES.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\VW_HP_ILETISIM.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\VW_SYS_MASTERTF.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\VW_TBOX_FINANS_ID.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\VW_TBOX_LIST.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\VW_TYPES_LIST.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\YARDIMCI_KODLAR.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\_WorkList.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\ADRESLER_20160101_1.Txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\AJ_LINEDOC.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\AJ_LINELCI.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\AJ_LINETALK.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\BAZI TRANSFERLER.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\finans_kullanımı.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\FN_LINEVOL.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\giderler.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\HP_ADRES.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\HP_CARI.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\HP_CARI_KK.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\HP_FINANS.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\HP_FINANS_GIDER_TURLERI_INS.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\HP_FIN_TBOX.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\HP_FIRM.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\HP_IL.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\HP_ILCE.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\HP_ILETISIM.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\HP_URUN.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\HP_VERGI.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\HP_VEZNE.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\K2_A_HAREKETLER_1.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\K2_A_HAREKETLER_2.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\MS_VARIABLE_INSERT.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\prc_FN_LINEVOL_CALC.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\prc_FN_LINEVOL_FULLHESAP.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\prc_FN_LINEVOL_TKST.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\prc_STK_FIYAT_CALC.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\prc_STK_GCS_CALC.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\sekreterya.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\SEKTORLER_GRUPLU.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\STK_FIYAT.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\STK_GCB - Kopya.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\STK_GCB.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\STK_GCS.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\SYS_OTV.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\SYS_TYPES_H.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\SYS_TYPES_L _INS.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\SYS_TYPES_L.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\SYS_TYPES_T.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\SYS_TYPES_U.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\SYS_VARIABLES.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\trg_AJ_LINEDOC.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\trg_FN_LINEVOL.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\trg_HP_FINANS.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\trg_STK_FIYAT.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\trg_STK_GCS.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\trg_SYS_OTV.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\VW_AJ_LINEDOC.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\VW_AJ_LINEDOC_VADE.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\VW_BANK_LIST.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\VW_CLIENT_LIST.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\VW_CLIENT_VALUE.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\VW_FINANS_ARACLARI.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\VW_FIRM_LIST.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\VW_HP_ADRES.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\VW_HP_ILETISIM.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\VW_SYS_MASTERTF.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\VW_TBOX_FINANS_ID.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\VW_TBOX_LIST.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\VW_TYPES_LIST.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\YARDIMCI_KODLAR.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\_WorkList.txt" />
+    <Content Include="Treetog-I-Contacts.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Resources\" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.6.1">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.6.1 %28x86 ve x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 </ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

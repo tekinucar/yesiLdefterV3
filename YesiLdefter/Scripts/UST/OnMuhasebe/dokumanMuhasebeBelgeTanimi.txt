@@ -1,0 +1,100 @@
+﻿Belgenin Tanımı
+Muhasebe verilerinin güvenilirliği ticari işlemlerin belgelere dayandırılarak defterlere kaydedilmesiyle anlam kazanır. Bu nedenle muhasebe uygulamalarında kayıt araçları olarak adlandırılan ‘Belgeler’ in ve üzerinde kayıtların yapıldığı ‘Defterler’ in önemi büyüktür.
+
+Ekonomik bir olayın oluşması için alış veya satış işleminin gerçekleşmesi gerekmektedir. Alış satış ilişkisi alacak – borç olgusunu doğurur. Bu olgunun var olduğunun kanıtlanması için belge gereklidir. Alacak yaratan belge fatura, borcu gideren belge de makbuzdur. Kaydın esası belgedir. Yevmiye defterine herhangi bir işlem kaydedilirken mutlaka bir belgeye dayanması gerekir. Aksi takdirde defterlere kaydedilen işlemler dayanağı olmayan gerçek dışı birtakım yazı ve rakamlardan oluşur ki kanunen bunun kabulüne olanak yoktur. Bu nedenle Türk Ticaret Kanununa göre defter tutan bir iş sahibinin belgeler hakkında toplu bir bilgisi olması gerekir.
+
+Bir işletmede ticari işlemler nedeniyle oluşabilecek değer hareketlerinin defterlerde yer alabilmesi, bunlara ilişkin objektif belgelerin bulunmasına ve söz konusu işlemlerin bu belgelere dayandırılarak defterlere kaydedilmelerine bağlıdır. Aslında objektif belgeler işletmeler için en önemli ham veri kaynaklarıdır.
+
+Muhasebenin sosyal sorumluluğunu yerine getirebilmesini kolaylaştırmak için, işletmelerde uygun bir muhasebe bilgi sisteminin kurulması ve işlerliğinin sağlanması gerekir. Böyle bir sistemde;
+
+İşletme içinde kullanılan ve dış çevreden gelen belgelerin nitelikleri,
+Belgelerin işletme içinde oluşturdukları bilgi akımı,
+İşletmeye ilişkin belgelerin dışa iletilmesi
+konuları önemli yer tutar. Her işletme büyüklüğüne ve faaliyet türüne göre bu belgeleri, belgelerin işletme içindeki akışını ve dış çevreye iletilmesi konularını muhasebe ilkelerine göre ele alıp yönlendirmelidir. Muhasebe, bilgi üreten bir sistem olduğundan, üretilen bilgilerin güvenilir olması temel koşuldur. Bu konu ise bilgilerin belgelendirilmesi ile ilgilidir. Muhasebe bilgilerinin; bir taraftan ona gereksinim duyan birey ve gruplara yararlı olabilmesi, diğer taraftan da muhasebe kayıtlarının geçerliliğinin kanıtlanabilmesi ve mali tablo ile raporların objektif olarak hazırlanabilmesi belgelere dayandırılmalarına bağlıdır.
+
+Muhasebenin objektif belge (tarafsızlık ve belgelendirme) kavramı, muhasebe kayıtlarının gerçek durumunu yansıtan ve usulüne uygun olarak düzenlenmiş objektif belgelere dayandırılması ve muhasebe kayıtlarına esas alınacak yöntemlerin seçilmesinde tarafsız ve önyargısız davranılması gereğini ifade eder.
+
+Muhasebe uygulamalarının objektif belge sistemine dayandırılarak yürütülmesi, muhasebe teorisi ile muhasebeyi yönlendiren yasaların gereğidir. Muhasebenin temel fonksiyonlarından biri olan bilgi toplama ve kaydetme fonksiyonunun yerine getirilmesi ancak işletme içinde ve dışında oluşturulabilecek sistemleştirilmiş bir bilgi ve belge akımı ile sağlanabilir.
+
+Vergi Usul Kanunu’na göre mükelleflerin kural olarak vergi matrahının hesaplanması için gerekli tüm işlemleri gerek bu kanunun, gerekse kanunun verdiği yetkiyle Maliye Bakanlığı’nca türü ve içeriği belirtilen niteliklere haiz olarak belgelendirilmeleri gerekir.
+
+Mükellefler, üçüncü şahıslarla olan münasebet ve muamelelere ait olan kayıtları tevsik etmek ( belgelendirmek ) zorundadırlar. Kanunen tutulması gereken defterlere kaydedilen işlemlerin muhakkak bir belgeye dayanması gerekir. Bu itibarla bilanço esasına göre defter tutan bir iş sahibinin veya muhasebecinin belgeler hakkında toplu bir bilgisinin olması gerekmektedir.
+
+Vergi Usul Kanunu’na göre tutulan defterlerde yer alan ve üçüncü şahıslarla olan münasebet ve muamelelerle ilgili bulunan kayıtların belgelenmesi zorunludur. Öte yandan defter tutmak zorunda olmayan mükellefler de vergi matrahlarının tespiti ile ilgili ve gerçek usulde belli edilen giderlerini belgelemek zorundadırlar.
+
+Muhasebeye konu olan değer hareketlerinin, muhasebe kayıtlarına geçmesini sağlayacak olan belge organizasyonu, muhasebe organizasyonunun da temel elemanıdır. İşletmenin kuruluşundan başlamak üzere, ana sözleşme, kurucuların ortaklık adına yaptıkları ödemeyi gösteren makbuzlar, banka dekontları, satılan mal için kesilen faturalar, alış faturaları,senet, poliçe, çek, mahkeme ilamı, avans kağıtları, proforma fatura, konişmento, irsaliye, tesellüm fişi, ambar giriş-çıkış fişi, açılan iş emirleri vb. muhasebe kayıtlarına kaynak olan ‘belge’ leri oluşturur; belge ‘işlem’ ile ‘kayıt’ arasında köprü fonksiyonu görür.
+
+Muhasebede ve dolayısıyla muhasebe organizasyonunda vazgeçilmez bir ilke niteliğinde olan belgeleme ilkesi şu cümleler ile tanımlanmaktadır;
+
+Belgesiz muhasebe kaydı olmaz.
+Her kayıt yazılı bir orijinal belgeye dayanmalıdır.
+Her muhasebe kaydının temeli muhasebe belgesidir.
+Belgeleme İlkeleri
+
+Güvenilir bir muhasebe kaydının sağlanması bakımından bu konudaki yazında ve uygulamada bazı ilkeler gelişmiştir. İşletmede belge düzeninin kurulmasında bu ilkelerden yararlanılır.
+
+Her kayıt bir belgeye dayanmalıdır.
+Karışıklığı ve duplikasyonu önlemek için kaydın dayandığı belge kesin olarak belirlenmeli, çünkü bir işlem için birden fazla belge söz konusu olabilir, çek listesi ve banka ekstresi gibi;
+Belge üzerinde hiçbir şey okunmaz hale getirilmemeli, gerekli değişik parafe edilerek gösterilmeli,
+Belge üzerinde ilgili hesaplar belirtilerek ön kayıt sağlanmalı,
+Muhasebe kaydından sonra belge üzerine işaret konarak, belgenin kayda geçmemesi veya birden fazla geçmesi önlenmeli,
+Aynı işlemin fazla olması halinde ‘toplu bir belge’ düzenlenerek rasyonel çalışma düzeni sağlanmalı, örneğin malzeme çıkışları için bir mahsup fişi düzenlenmesi gibi,
+Belgelerle ilgili işlemlerde kolaylık ve hataların önlenebilmesi için, farklı renklerde olmalı, numaralanarak tasnifli olarak ve kolayca erişilebilecek şekilde arşivlenmeli,
+Tüm belgeler yetkili tarafından imza, hazırlayan tarafından ise paraf edilmelidir.
+Belge Çeşitleri
+
+Muhasebede saptanması gereken gerçekleşmiş, hatta planlanan işletme olaylarının yazılı olarak yer aldığı belgeler, değişik bakımlardan ayırıma tabi tutulabilir.
+
+Oluşumuna Göre Belge Çeşitleri
+
+Doğal Belgeler
+
+Ticari işlemler sonucunda kendiliğinden oluşan belgeler, doğal belgeler olarak gruplanabilir, örneğin, alış faturası, banka dekontu, gider makbuzu gibi. Bu tür belgeler, işletmenin üçüncü kişilerle olan işlemlerinden doğduğundan, dış belgeler, orijinal belgeler veya ekstern belgeler diye de adlandırılabilmektedir. Muhasebede kayıtlar mutlaka doğal belgelere dayanmalıdır.
+
+Doğal belgeler de kendi aralarında harici ve dahili belgeler olmak üzere gruplandırılabilir. Harici belgeler dışarıdan gelen belgelerdir. Giriş faturaları, banka dekontları bu tür belgelere örnek sayılabilir. Dahili belgeler ise içeriden gelen, ticari işletmelerin kendilerinin düzenledikleri belgelerdir.
+
+Doğal belgeler, işletmelerin, başka işletmeler ya da üçüncü kişiler arasındaki iş olguları için düzenledikleri muhasebe belgeleridir. Diğer bir deyişle bizim imzamızın hami olup karşı tarafa verilen ya da karşı taraftan alınan belgelerdir. Ticari yaşamda kullanılan belgelerin büyük bir bölümünü doğal belgeler oluşturur.
+
+Doğal Belge Türleri şöyledir :
+
+Fatura
+Faturayı tamamlayan veya fatura düzenlenmesini gerektiren belgeler
+Sevk İrsaliyesi
+Taşıma İrsaliyesi
+Yolcu Listeleri
+Günlük Müşteri Listeleri
+Adisyonlar
+Hak Ediş Belgesi
+Fatura yerine geçen belgeler
+Perakende Satış Belgeleri
+Gider Pusulası
+Müstahsil Makbuzu
+Serbest Meslek Makbuzu
+Yapay Belgeler
+
+Orijinal bir belgenin bulunmadığı durumlarda, muhasebe kaydına temel alınan, işletme içinde düzenlenmiş belgelerdir; örneğin, malzeme çıkış fişleri, ücret bordrosu, akort fişi gibi. Yardımcı belgeler veya iç belgeler diye de adlandırılabilen bu tür belgelerin bizzat sorumlu tarafından – mali işler müdürü – düzenlenmesi söz konusudur; örneğin, toplayıcı kayıt belgeleri, ters kayıt belgesi, envanter noksanlığı tutanağı, amortisman defteri gibi.
+
+Yardımcı belgeler veya iç belgeler diye adlandırılan bu tür belgelerin bizzat sorumlu tarafından düzenlenmesi söz konusudur. Yapay belgeler işletmenin kendisini bağlar, üçüncü kişileri bağlamaz. Ancak mahsup fişine yetkililerin imzası atılırsa doğal belge haline gelir. Ticari yaşamda kullanılan yapay belge türleri doğal belge türüne göre daha azdır. Bunun sebebi ise sadece doğal belgesi olmayan iş olguları için yapay belge düzenlenmesidir.
+
+İşlevlere Göre Belge Çeşitleri
+Genel Nitelikteki Belgeler
+
+Ticari mektuplar, genel nitelikli belgelerin başında gelmektedir. İş sahipleri bir ticari iş karşılığında karşı taraftan bazı mektuplar alacak veya yazacaktır. Haberleşme belgeleri, kira kontratı, banka ekstresi, mahkeme ilamı, vergi makbuzu, taahhütname vb . genel anlamdaki belgelerdendir.
+
+Alımlara Ait Belgeler
+
+Alış faturaları bu tür belgelerin başında gelmektedir. Mal veya hizmet satın alınması durumunda düzenlenirler. Alışlar ticari defterlere ancak alış faturalarındaki yazılı bilgilere göre işlenecektir. Bazı durumlarda satıcının fatura vermesine olanak bulunmamaktadır. Örneğin, köylüden veya müstahsilden mal alındığı zaman durum böyledir. Bu taktirde iş sahibi müstahsil makbuzu denilen diğer bir belge kullanacaktır ki, bu da alış belgeleri grubunda yer alan diğer bir belge türüdür.
+
+Satışlara Ait Belgeler
+
+Satış faturası, perakende satış fişi, yazar kasa fişi gibi mal veya hizmet satışlarına ait belgelerdir. Toptan satışlarda kullanılan belge türü fatura olmasına rağmen, perakende satış için fatura verilmez, perakende satış belgeleri düzenlenir ve bu belgelerden en önemlisi fişlerdir.
+
+Giderlere Ait Belgeler
+
+Gider kayıtlarının belgelendirilebilmesi için gider belgeleri düzenlenmektedir. Gider belgeleri içinde en önemli yeri tutan belge faturadır. Serbest meslek makbuzu, bilet, ücret bordrosu, gider makbuzu gibi. Örneğin; işverenlerin çalıştırdıkları personel ve elemanlara her ay ödedikleri ücretler için düzenledikleri belgelere ücret bordrosu adı verilmektedir.
+
+Belgelenmesi Zorunlu Olmayan Kayıtlar
+
+Üçüncü şahıslarla olan münasebetler ve muamelelerin belgelenmesi prensibinin bazı gider unsurları bakımından istisnaları bulunmaktadır. Belge teminine olanak olmayan giderler ve Vergi kanununa göre götürü olarak tespit edilen giderler için belge aranmamaktadır.
+
+Sonuç olarak güvenilir bir muhasebe sistemi için “düzgün belge akımının ve organizasyonu” nun varlığı şarttır. Çalışan bir muhasebe departmanının kalitesini “belgelere” uyma derecesi, belgelerin kalitesini ise “kanunlara” uyma derecesi belirler.

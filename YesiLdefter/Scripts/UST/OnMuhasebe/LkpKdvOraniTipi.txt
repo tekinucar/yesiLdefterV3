@@ -1,0 +1,20 @@
+﻿-- ------------------------------------------------------- 
+-- KdvOraniTipi
+-- ------------------------------------------------------- 
+create table [Lkp].[KdvOraniTipi]
+(
+   Id           Int Unique Not null,
+   IsActive     Bit null,
+   KdvOraniKodu Numeric(4,2) null,
+   KdvOrani     SmallInt null,
+   KdvOraniAdi  nVarchar(20) null,
+   
+   constraint  pk_KdvOraniTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[KdvOraniTipi] (Id, IsActive, KdvOraniKodu, KdvOrani, KdvOraniAdi )
+ VALUES 
+  (  0, 1,    0,  0, N'Kdvsiz' ),
+  (  1, 1, 1.01,  1, N'1%' ),
+  (  8, 1, 1.08,  8, N'8%' ),
+  ( 18, 1, 1.18, 18, N'18%' )

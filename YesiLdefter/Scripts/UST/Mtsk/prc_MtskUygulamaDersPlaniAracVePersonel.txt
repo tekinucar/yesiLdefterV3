@@ -1,0 +1,170 @@
+﻿USE [u7093888_Ustad01]
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[prc_MtskUygulamaDersPlaniAracVePersonel] (@EgitimAraciId varchar(20), @PersonelId varchar(20))  
+AS BEGIN
+
+ declare @bugun date = getdate()
+ set @bugun = DATEADD(ww, DATEDIFF(ww,0,@bugun), 0)
+
+
+ -- sadece Araca ait olan planlar
+ Select  
+  [MtskUygulamaliDers].[Id]
+ ,[MtskUygulamaliDers].[FirmId]
+ ,[MtskUygulamaliDers].[IsActive]
+ ,[MtskUygulamaliDers].[DonemTipiId]
+ ,[MtskUygulamaliDers].[GrupTipiId]
+ ,[MtskUygulamaliDers].[SubeTipiId]
+ ,[MtskUygulamaliDers].[AdayNo]
+ ,[MtskUygulamaliDers].[AdayId]
+ ,[MtskUygulamaliDers].[AdayTcNo]
+ ,[MtskUygulamaliDers].[EgitimYeriTipiId]
+ ,[MtskUygulamaliDers].[EgitimAraciId]
+ ,[MtskUygulamaliDers].[DersTarihi]
+ ,[MtskUygulamaliDers].[DersSaatiTipiId]
+ ,[MtskUygulamaliDers].[PersonelId]
+ ,[MtskUygulamaliDers].[EgitimTipiId]
+ ,[MtskUygulamaliDers].[BaslamaSaati]
+ ,[MtskUygulamaliDers].[BitisSaati]
+ ,[MtskUygulamaliDers].[UDersIsUploaded]
+ ,[MtskUygulamaliDers].[SablonUygulamaFId]
+ , [MtskAday].TamAdiSoyadi                   Lkp_AdayTamAdiSoyadi
+ , [MtskAday].TcNo                           Lkp_AdayTcNo
+ , [MtskPersoneli].TamAdiSoyadi                   Lkp_PersonelTamAdiSoyadi
+ , [MtskPersoneli].TcVkNo                         Lkp_PersonelTcNo 
+ , FNo4.DonemTipi  as  Lkp_DonemTipiId
+ , FNo5.GrupTipi  as  Lkp_GrupTipiId
+ , FNo6.SubeTipi  as  Lkp_SubeTipiId
+ , FNo10.EgitimYeriTipi  as  Lkp_EgitimYeriTipiId
+ , FNo13.DersSaatiTipi  as  Lkp_DersSaatiTipiId
+ , FNo15.EgitimTipi  as  Lkp_EgitimTipiId
+ , FNo4.DonemTipi + ' : ' + FNo5.GrupTipi + ' : ' + FNo6.SubeTipi as Lkp_DonemTipiGrupTipiSubeTipi
+ , FNo10.EgitimYeriTipi + ' : ' + [MtskUygulamaliDers].EgitimAraciId as Lkp_AracVeEgitimYeri
+ , 1 as Lkp_AracPersonelAdayTipiId
+
+ from MtskUygulamaliDers [MtskUygulamaliDers]
+   left outer join MtskAday [MtskAday] on ( [MtskUygulamaliDers].AdayId = [MtskAday].Id  ) 
+   left outer join MtskPersoneli [MtskPersoneli] on ( [MtskUygulamaliDers].PersonelId = [MtskPersoneli].TcNoCalismaIzniNo  ) 
+   left outer join Lkp.MtskDonemTipi as FNo4 on ( MtskUygulamaliDers.DonemTipiId = FNo4.Id ) 
+   left outer join Lkp.MtskGrupTipi as FNo5 on ( MtskUygulamaliDers.GrupTipiId = FNo5.Id ) 
+   left outer join Lkp.MtskSubeTipi as FNo6 on ( MtskUygulamaliDers.SubeTipiId = FNo6.Id ) 
+   left outer join Lkp.MtskUygulamaliDersEgitimYeriTipi as FNo10 on ( MtskUygulamaliDers.EgitimYeriTipiId = FNo10.Id ) 
+   left outer join Lkp.MtskUygulamaliDersDersSaatiTipi as FNo13 on ( MtskUygulamaliDers.DersSaatiTipiId = FNo13.Id ) 
+   left outer join Lkp.MtskUygulamaliDersEgitimTipi as FNo15 on ( MtskUygulamaliDers.EgitimTipiId = FNo15.Id ) 
+
+ where 0 = 0 
+ and [MtskUygulamaliDers].EgitimAraciId = @EgitimAraciId 
+ and [MtskUygulamaliDers].PersonelId <> @PersonelId
+ and [MtskUygulamaliDers].DersTarihi >= @bugun
+ 
+ union all
+
+ -- sadece personele ait olan planlar
+ Select  
+  [MtskUygulamaliDers].[Id]
+ ,[MtskUygulamaliDers].[FirmId]
+ ,[MtskUygulamaliDers].[IsActive]
+ ,[MtskUygulamaliDers].[DonemTipiId]
+ ,[MtskUygulamaliDers].[GrupTipiId]
+ ,[MtskUygulamaliDers].[SubeTipiId]
+ ,[MtskUygulamaliDers].[AdayNo]
+ ,[MtskUygulamaliDers].[AdayId]
+ ,[MtskUygulamaliDers].[AdayTcNo]
+ ,[MtskUygulamaliDers].[EgitimYeriTipiId]
+ ,[MtskUygulamaliDers].[EgitimAraciId]
+ ,[MtskUygulamaliDers].[DersTarihi]
+ ,[MtskUygulamaliDers].[DersSaatiTipiId]
+ ,[MtskUygulamaliDers].[PersonelId]
+ ,[MtskUygulamaliDers].[EgitimTipiId]
+ ,[MtskUygulamaliDers].[BaslamaSaati]
+ ,[MtskUygulamaliDers].[BitisSaati]
+ ,[MtskUygulamaliDers].[UDersIsUploaded]
+ ,[MtskUygulamaliDers].[SablonUygulamaFId]
+ , [MtskAday].TamAdiSoyadi                   Lkp_AdayTamAdiSoyadi
+ , [MtskAday].TcNo                           Lkp_AdayTcNo
+ , [MtskPersoneli].TamAdiSoyadi                   Lkp_PersonelTamAdiSoyadi
+ , [MtskPersoneli].TcVkNo                         Lkp_PersonelTcNo 
+ , FNo4.DonemTipi  as  Lkp_DonemTipiId
+ , FNo5.GrupTipi  as  Lkp_GrupTipiId
+ , FNo6.SubeTipi  as  Lkp_SubeTipiId
+ , FNo10.EgitimYeriTipi  as  Lkp_EgitimYeriTipiId
+ , FNo13.DersSaatiTipi  as  Lkp_DersSaatiTipiId
+ , FNo15.EgitimTipi  as  Lkp_EgitimTipiId
+ , FNo4.DonemTipi + ' : ' + FNo5.GrupTipi + ' : ' + FNo6.SubeTipi as Lkp_DonemTipiGrupTipiSubeTipi
+ , FNo10.EgitimYeriTipi + ' : ' + [MtskUygulamaliDers].EgitimAraciId as Lkp_AracVeEgitimYeri
+ , 2 as Lkp_AracPersonelAdayTipiId
+
+ from MtskUygulamaliDers [MtskUygulamaliDers]
+   left outer join MtskAday [MtskAday] on ( [MtskUygulamaliDers].AdayId = [MtskAday].Id  ) 
+   left outer join MtskPersoneli [MtskPersoneli] on ( [MtskUygulamaliDers].PersonelId = [MtskPersoneli].TcNoCalismaIzniNo  ) 
+   left outer join Lkp.MtskDonemTipi as FNo4 on ( MtskUygulamaliDers.DonemTipiId = FNo4.Id ) 
+   left outer join Lkp.MtskGrupTipi as FNo5 on ( MtskUygulamaliDers.GrupTipiId = FNo5.Id ) 
+   left outer join Lkp.MtskSubeTipi as FNo6 on ( MtskUygulamaliDers.SubeTipiId = FNo6.Id ) 
+   left outer join Lkp.MtskUygulamaliDersEgitimYeriTipi as FNo10 on ( MtskUygulamaliDers.EgitimYeriTipiId = FNo10.Id ) 
+   left outer join Lkp.MtskUygulamaliDersDersSaatiTipi as FNo13 on ( MtskUygulamaliDers.DersSaatiTipiId = FNo13.Id ) 
+   left outer join Lkp.MtskUygulamaliDersEgitimTipi as FNo15 on ( MtskUygulamaliDers.EgitimTipiId = FNo15.Id ) 
+
+ where 0 = 0 
+ and [MtskUygulamaliDers].EgitimAraciId <> @EgitimAraciId 
+ and [MtskUygulamaliDers].PersonelId = @PersonelId
+ and [MtskUygulamaliDers].DersTarihi >= @bugun
+
+ union all
+
+ -- sadece Arac ve personele ait olan ortak planlar
+ Select  
+  [MtskUygulamaliDers].[Id]
+ ,[MtskUygulamaliDers].[FirmId]
+ ,[MtskUygulamaliDers].[IsActive]
+ ,[MtskUygulamaliDers].[DonemTipiId]
+ ,[MtskUygulamaliDers].[GrupTipiId]
+ ,[MtskUygulamaliDers].[SubeTipiId]
+ ,[MtskUygulamaliDers].[AdayNo]
+ ,[MtskUygulamaliDers].[AdayId]
+ ,[MtskUygulamaliDers].[AdayTcNo]
+ ,[MtskUygulamaliDers].[EgitimYeriTipiId]
+ ,[MtskUygulamaliDers].[EgitimAraciId]
+ ,[MtskUygulamaliDers].[DersTarihi]
+ ,[MtskUygulamaliDers].[DersSaatiTipiId]
+ ,[MtskUygulamaliDers].[PersonelId]
+ ,[MtskUygulamaliDers].[EgitimTipiId]
+ ,[MtskUygulamaliDers].[BaslamaSaati]
+ ,[MtskUygulamaliDers].[BitisSaati]
+ ,[MtskUygulamaliDers].[UDersIsUploaded]
+ ,[MtskUygulamaliDers].[SablonUygulamaFId]
+ , [MtskAday].TamAdiSoyadi                   Lkp_AdayTamAdiSoyadi
+ , [MtskAday].TcNo                           Lkp_AdayTcNo
+ , [MtskPersoneli].TamAdiSoyadi                   Lkp_PersonelTamAdiSoyadi
+ , [MtskPersoneli].TcVkNo                         Lkp_PersonelTcNo 
+ , FNo4.DonemTipi  as  Lkp_DonemTipiId
+ , FNo5.GrupTipi  as  Lkp_GrupTipiId
+ , FNo6.SubeTipi  as  Lkp_SubeTipiId
+ , FNo10.EgitimYeriTipi  as  Lkp_EgitimYeriTipiId
+ , FNo13.DersSaatiTipi  as  Lkp_DersSaatiTipiId
+ , FNo15.EgitimTipi  as  Lkp_EgitimTipiId
+ , FNo4.DonemTipi + ' : ' + FNo5.GrupTipi + ' : ' + FNo6.SubeTipi as Lkp_DonemTipiGrupTipiSubeTipi
+ , FNo10.EgitimYeriTipi + ' : ' + [MtskUygulamaliDers].EgitimAraciId as Lkp_AracVeEgitimYeri
+ , 4 as Lkp_AracPersonelAdayTipiId
+
+ from MtskUygulamaliDers [MtskUygulamaliDers]
+   left outer join MtskAday [MtskAday] on ( [MtskUygulamaliDers].AdayId = [MtskAday].Id  ) 
+   left outer join MtskPersoneli [MtskPersoneli] on ( [MtskUygulamaliDers].PersonelId = [MtskPersoneli].TcNoCalismaIzniNo  ) 
+   left outer join Lkp.MtskDonemTipi as FNo4 on ( MtskUygulamaliDers.DonemTipiId = FNo4.Id ) 
+   left outer join Lkp.MtskGrupTipi as FNo5 on ( MtskUygulamaliDers.GrupTipiId = FNo5.Id ) 
+   left outer join Lkp.MtskSubeTipi as FNo6 on ( MtskUygulamaliDers.SubeTipiId = FNo6.Id ) 
+   left outer join Lkp.MtskUygulamaliDersEgitimYeriTipi as FNo10 on ( MtskUygulamaliDers.EgitimYeriTipiId = FNo10.Id ) 
+   left outer join Lkp.MtskUygulamaliDersDersSaatiTipi as FNo13 on ( MtskUygulamaliDers.DersSaatiTipiId = FNo13.Id ) 
+   left outer join Lkp.MtskUygulamaliDersEgitimTipi as FNo15 on ( MtskUygulamaliDers.EgitimTipiId = FNo15.Id ) 
+
+ where 0 = 0 
+ and [MtskUygulamaliDers].EgitimAraciId = @EgitimAraciId 
+ and [MtskUygulamaliDers].PersonelId = @PersonelId
+ and [MtskUygulamaliDers].DersTarihi >= @bugun
+
+END -- procedure

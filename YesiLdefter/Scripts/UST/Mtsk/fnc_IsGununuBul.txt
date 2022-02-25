@@ -1,0 +1,68 @@
+﻿USE [u7093888_Ustad01]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+IF OBJECT_ID (N'dbo.fnc_IsGununuBul', N'FN') IS NOT NULL  
+    DROP FUNCTION fnc_IsGununuBul;  
+GO  
+CREATE FUNCTION [dbo].[fnc_IsGununuBul](
+ @baslamaTarihi date
+,@istenenIsGunu int
+,@gunTipiId smallInt
+)  
+RETURNS date
+AS   
+BEGIN  
+  declare @ret date
+  
+  /* @gunTipiId */
+  /* 1.  5 iş günü, 2 gün izin */
+  /* 2.  6 iş günü, 1 gün izin */ 
+
+  declare @say int
+  declare @isGunu int
+
+  declare @sonuc int
+  declare @sonucTarih date
+  declare @gunNo int
+
+  --set @baslamaTarihi = getdate()
+  --set @istenenIsGunu = 7
+  set @say = 1
+  set @isGunu = 1
+  set @sonuc = 0
+  set @gunNo = -1
+
+  while (@sonuc = 0)
+  begin
+ 
+    set @sonucTarih = convert(date, DATEADD(dd, @say - 1, @baslamaTarihi), 104)
+    set @gunNo = datepart(weekday, (DATEADD(dd, @say - 1, @baslamaTarihi)))
+ 
+    -- 7 : Cumartesi ve 1 : Pazar değilse
+    if (@gunTipiId = 0) or (@gunTipiId = 1)
+	begin
+	  if (@gunNo <> 7) and (@gunNo <> 1) 
+         set @isGunu = @isGunu + 1
+    end
+
+    -- 1 : Pazar değilse
+    if (@gunTipiId = 2) and (@gunNo <> 1) 
+        set @isGunu = @isGunu + 1
+    
+
+    if (@istenenIsGunu = @isGunu - 1) 
+        set @sonuc = @isGunu
+
+    set @say = @say + 1
+  end
+
+  --Select @sonuc, @sonucTarih  
+  set @ret = @sonucTarih	
+
+  RETURN @ret;  
+END;
+GO

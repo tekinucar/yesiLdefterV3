@@ -1,0 +1,97 @@
+﻿USE [GREEN]
+GO
+
+
+CREATE TRIGGER [dbo].[trg_HP_FINANS] on [dbo].[HP_FINANS] 
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    DECLARE InsertCursor_HP_FINANS cursor for select ID from Inserted
+    DECLARE @curId bigint
+
+    OPEN InsertCursor_HP_FINANS
+
+    FETCH NEXT FROM InsertCursor_HP_FINANS INTO @curId
+
+    declare @yHpTamadi varchar(201) = null
+    declare @yFnsTipi smallInt = 0
+    declare @yHpAdi varchar(100) = null
+    declare @yHpNumara varchar(50) = null
+    declare @yYetkili varchar(100) = null
+    declare @yReferans varchar(100) = null
+    declare @yBankaAdi varchar(100) = null
+    declare @ySubeAdi  varchar(100) = null
+        
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        set @yFnsTipi = 0
+        set @yHpAdi = ''
+        set @yHpNumara = ''
+        set @yYetkili = ''
+        set @yHpTamadi = ''
+      	set @yBankaAdi = ''
+      	set @ySubeAdi = ''
+      	
+        select 
+    	 @yFnsTipi = isnull(ins.FNS_TIPI,0)  
+    	,@yHpAdi = isnull(ins.HP_ADI,'') 
+    	,@yHpNumara = isnull(ins.HP_NUMARA,'No:?') 
+    	,@yYetkili = isnull(ins.YETKILI_TAMADI,'') 
+    	,@yBankaAdi = isnull(bn.HP_ADI,'Banka?')
+        ,@ySubeAdi = isnull(sb.HP_TAMADI,'Şube?')
+           
+    	from HP_FINANS ins
+    	  left outer join HP_FINANS sb on (ins.PARENT_ID = sb.ID) 
+    	  left outer join HP_FINANS bn on (sb.PARENT_ID = bn.ID) 
+    	where ins.ID = @curId
+     	
+     	if (@yFnsTipi = 22) -- banka hesabı ise
+    	begin
+    	  set @yHpTamadi = @yBankaAdi+'.'+@ySubeAdi+'.' + @yHpNumara 
+    	  
+    	  update HP_FINANS set 
+          HP_TAMADI = substring(@yHpTamadi,1,200)
+          where ID = @curId 
+    	  
+    	end        
+   	
+    	
+    	if (@yFnsTipi = 23) -- banka kartı ise
+    	begin
+    	  set @yHpTamadi = @yHpAdi + ' ' +  @yHpNumara + ' ' + @yYetkili
+    	  
+    	  update HP_FINANS set 
+          HP_TAMADI = substring(@yHpTamadi,1,200)
+          where ID = @curId 
+    	  
+    	end        
+
+     	if (@yFnsTipi = 24) -- pos hesabı ise
+    	begin
+    	  set @yHpTamadi = @yBankaAdi + '.pos.' + @yHpAdi 
+    	  
+    	  update HP_FINANS set 
+          HP_TAMADI = substring(@yHpTamadi,1,200)
+          where ID = @curId 
+    	  
+    	end        
+   	
+
+
+    	FETCH NEXT FROM InsertCursor_HP_FINANS INTO @curId
+    END
+
+    CLOSE InsertCursor_HP_FINANS
+    DEALLOCATE InsertCursor_HP_FINANS   
+        
+
+END
+
+
+
+
+
+
+GO
+
+

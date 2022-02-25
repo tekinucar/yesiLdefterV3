@@ -1,0 +1,20 @@
+﻿-- ------------------------------------------------------- 
+-- CinsiyetTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[CinsiyetTipi]
+(
+   Id           Int Unique Not Null,
+   CinsiyetTipi nVarchar(20)   null,
+   
+   constraint  pk_CinsiyetTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[CinsiyetTipi] (Id, CinsiyetTipi)
+ VALUES 
+  (0, N'Tanımsız'),
+  (1, N'Erkek'),
+  (2, N'Kadın')
+
+
+
+

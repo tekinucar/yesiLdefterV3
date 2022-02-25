@@ -1,0 +1,628 @@
+﻿USE [u7093888_Ustad01]
+GO
+
+/****** Object:  StoredProcedure [dbo].[prc_CihazLogGet]    Script Date: 07.10.2020 15:49:47 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[prc_CihazLogGet] (@FirmId int, @Param varchar(20))  
+--CREATE PROCEDURE [dbo].[prc_CihazLogGet] (@FirmId int, @Param varchar(20))  
+AS BEGIN 
+
+
+--  DİKKAT
+--  Bu procedure yi sadece eylemler için kullan 
+--  Tüm cihazlar için veys tüm kullanıcılar için başka procedrure kullan
+
+--  160 : yeni 
+--  170,172 :çıkış
+--  120,130,150 : eylem
+--  140 : görüş
+
+--@param = 'Icmal'
+--@param = 'IcmalNewUser'
+--@param = 'IcmalOldUser'
+--@param = 'IcmalTahliye'
+
+--@param = 'SetNewUser'
+--@param = 'GetNewUserFP'
+--@param = 'SetNewSayim'
+
+--@param = 'SetOldUser'
+--@param = 'GetOldUserFP'
+--@param = 'SetOldSayim'
+
+--@param = 'SetSayim' -- içeriği new user 
+--@param = 'SetTahliye'
+--@param = 'SetGorev'
+--@param = 'SetGorus'
+
+--@param = 'GetGorev'
+--@param = 'GetGorus'
+--@param = 'GetSayim'
+
+--@param = 'DelGorev'
+--@param = 'DelGorus'
+--@param = 'DelTahliye'
+
+-- TEST
+/*
+declare @FirmId int = 9
+declare @param varchar(30)
+set @param = 'Icmal'
+*/
+
+declare @MasterSql nvarchar(max)
+declare @SayimSql nvarchar(max)
+declare @UserListSql nvarchar(max)
+declare @Sql01 nvarchar(max)
+declare @Sql02 nvarchar(max)
+declare @Sql03 nvarchar(max)
+
+declare @Sql11 nvarchar(max)
+declare @Sql12 nvarchar(max)
+declare @Sql13 nvarchar(max)
+declare @Sql14 nvarchar(max)
+declare @Sql15 nvarchar(max)
+declare @Sql16 nvarchar(max)
+declare @Sql17 nvarchar(max)
+declare @Sql18 nvarchar(max)
+declare @Sql19 nvarchar(max)
+declare @Sql20 nvarchar(max)
+
+declare @Select  nvarchar(200)
+declare @And     nvarchar(200)
+declare @And01   nvarchar(200)
+declare @And23   nvarchar(200)
+declare @And_1   nvarchar(1)
+declare @OrderBy varchar(100)
+declare @CariBioFields varchar(200)
+declare @CariBioTable varchar(200)
+declare @CariBioWhere varchar(200)
+
+declare @EylemTipi varchar(30)
+declare @CihazTipi varchar(20)
+declare @IsActive varchar(1)
+
+declare @Head varchar(15)
+declare @Caption varchar(50)
+declare @FirmIds varchar(10)
+
+  set @FirmIds = Convert(int, @FirmId)
+
+  if ((@param <> 'Icmal') and
+      (@param <> 'IcmalNewUser') and
+	  (@param <> 'IcmalOldUser') and
+	  (@param <> 'IcmalTahliye'))
+       Set @Select = ' Select ''@Head'' as Param, ''@Caption'' as Caption, a.*, [CihazLog].* from '
+  else Set @Select = ' Select ''@Head'' as Param, ''@Caption'' as Caption, count(distinct a.LkpEylemId) Adet from '
+
+  Set @OrderBy = ' order by a.CalismaTipiId, a.LkpCihazId '
+
+
+  -- cihaza göndermek/set için sorgu
+  set @And01 = ' and CihazLog.Id is null '
+  -- cihazdan data get et, cihazdan sil
+  set @And23 = 
+  ' and CihazLog.Id > 0 
+    and isnull(CihazLog.IsDelete,0) = 0 '
+  -- şart yok 
+  set @And_1 = ''
+
+  Set @CariBioFields = '
+  ,[CariBio].BioIndex
+  ,[CariBio].BioPrint '
+  Set @CariBioTable = '  left outer join [dbo].[CariBio] on ( [CariH].Id = [CariBio].CariId and [CariBio].BioTipiId = 1) '
+  Set @CariBioWhere = '  and   isnull([CariBio].BioPrint,'''') <> '''' '
+
+
+  if ((@param = 'SetOldUser') or 
+      (@param = 'GetOldUserFP') or 
+      (@param = 'SetOldSayim') or 
+	  (@param = 'IcmalOldUser'))
+  begin
+
+    Set @MasterSql = @Select + '
+(
+  Select 
+   [CH].Id as LkpCihazId
+  ,[CHCT].CalismaTipi
+  ,[CH].CihazAdi
+  ,[CH].CihazIP
+  ,[CH].CihazPort
+  ,[CH].CalismaTipiId
+  ,[CariBio].Id as LkpEylemId
+  ,[CariBio].CariId
+  ,[CariH].TamAdi
+  ,[CariBio].BioDate as Tarih
+  ,@EylemTipi as EylemTipiId
+
+  From 
+  [dbo].[CihazHesap] as [CH], 
+  [Lkp].[CihazHesapCalismaTipi] as [CHCT], 
+  [dbo].[HesapCari]  as [CariH]
+     left outer join [dbo].[CariIO]  on ( [CariH].Id = [CariIO].CariId and [CariIO].IsActive = 1 )   
+     left outer join [dbo].[CariBio] on ( [CariH].Id = [CariBio].CariId and [CariBio].BioTipiId = 1 )   
+
+  Where [CH].FirmId = @FirmId
+  and   [CH].IsActive = 1
+  and   isnull([CH].CihazIP,'''') <> ''''
+  and   [CH].CalismaTipiId in ( @CihazTipi )
+  and   [CH].CalismaTipiId = [CHCT].Id
+  and   [CariIO].FirmId = @FirmId
+  and   [CariBio].FirmId = @FirmId
+  and   convert(date,[CariIO].GirisTarihi,104) < convert(date, getdate(), 104)
+  and   convert(date,[CariBio].BioDate,104) = convert(date, getdate(), 104)
+) as a
+ left outer join [dbo].[CihazLog] on (
+   [CihazLog].FirmId = @FirmId
+   and a.LkpCihazId = [CihazLog].CihazId 
+   and a.LkpEylemId = [CihazLog].CariBioId )
+where 0 = 0 
+@And 
+/*OrderBy*/ 
+'
+
+    Set @MasterSql = replace(@MasterSql, '@FirmId', @FirmIds)
+
+  end else
+  begin
+
+    Set @MasterSql = @Select + '
+(
+  Select 
+   [CH].Id as LkpCihazId
+  ,[CHCT].CalismaTipi
+  ,[CH].CihazAdi
+  ,[CH].CihazIP
+  ,[CH].CihazPort
+  ,[CH].CalismaTipiId
+  ,[EP].Id as LkpEylemId
+  ,[EP].CariId
+  ,[CariH].TamAdi
+  ,[EP].Tarih
+  ,[EP].EylemTipiId
+  /*CariBioFields*/
+  From 
+  [dbo].[CihazHesap] as [CH], 
+  [Lkp].[CihazHesapCalismaTipi] as [CHCT], 
+  [dbo].[EylemPlani] as [EP],
+  [dbo].[HesapCari]  as [CariH]
+  /*CariBioTable*/
+  Where [CH].FirmId = @FirmId
+  and   [CH].IsActive = 1
+  and   isnull([CH].CihazIP,'''') <> ''''
+  and   [CH].CalismaTipiId in ( @CihazTipi )
+  and   [CH].CalismaTipiId = [CHCT].Id
+  and   [EP].FirmId = @FirmId
+  and   convert(date, [EP].Tarih) = Convert(date, getdate())
+  and   [EP].EylemTipiId in ( @EylemTipi )
+  and   [EP].IsActive = @IsActive 
+  and   [EP].CariId = [CariH].Id
+  /*CariBioWhere*/
+) as a
+ left outer join [dbo].[CihazLog] on (
+   [CihazLog].FirmId = @FirmId
+   and a.LkpCihazId = [CihazLog].CihazId 
+   and a.LkpEylemId = [CihazLog].EylemPlaniId )
+where 0 = 0 
+@And 
+/*OrderBy*/ 
+'
+
+    Set @MasterSql = replace(@MasterSql, '@FirmId', @FirmIds)
+
+  end 
+
+  if ((@param <> 'Icmal') and
+      (@param <> 'IcmalNewUser') and
+      (@param <> 'IcmalOldUser') and
+	  (@param <> 'IcmalTahliye'))
+  begin
+    Set @MasterSql = replace(@MasterSql, '/*OrderBy*/', @OrderBy)
+  end
+
+  if ((@param = 'GetSayim') or
+      (@param = 'Icmal'))
+  begin
+    Set @SayimSql = @Select + '
+(
+  Select 
+   [CihazHesap].Id as CihazId
+  ,0 as LkpEylemId
+  ,0 as CariId
+  ,getdate() Tarih
+  ,100 as EylemTipiId
+  From [dbo].[CihazHesap] as [CihazHesap]
+  Where [CihazHesap].IsActive = 1
+  and   [CihazHesap].FirmId = @FirmId
+  and   [CihazHesap].CalismaTipiId in ( @CihazTipi )
+  and   isnull([CihazHesap].CihazIP,'''') <> ''''
+) as a  
+ left outer join [dbo].[CihazLog] on (
+   a.CihazId = [CihazLog].CihazId and [CihazLog].Id = -1)
+where 0 = 0 '
+    Set @SayimSql = replace(@SayimSql, '@FirmId', @FirmIds)
+  end
+
+  if (@param = 'GetAllUserAndFPs') 
+  begin
+    Set @UserListSql = '
+  Select 
+   ''GetAllUserAndFPs'' as Param
+  ,''Tüm Kişiler, Parmak İzi Olanlar'' as Caption
+  ,[CariH].Id CariId
+  ,[CariH].TamAdi
+  ,[CariBio].BioIndex
+  ,[CariBio].BioPrint 
+  From 
+  [dbo].[HesapCari]  as [CariH]
+    left outer join CariIO [CariIO] on ( [CariH].Id = [CariIO].CariId  and isnull(CariIO.IsActive,0) = 1  ) 
+    left outer join [dbo].[CariBio] on ( [CariH].Id = [CariBio].CariId and [CariBio].BioTipiId = 1) 
+  Where [CariH].FirmId = @FirmId
+  and [CariBio].Id is not null
+  order by [CariH].TamAdi '
+    Set @UserListSql = replace(@UserListSql, '@FirmId', @FirmIds)
+
+  end
+
+
+if ((@param = 'SetNewUser') or
+    (@param = 'GetNewUserFP') or
+	(@param = 'SetNewSayim') or
+	(@param = 'IcmalNewUser'))
+begin
+
+  set @Head = 'SetNewUser'
+  set @Caption = 'Kayıt Chz Gönder'
+  set @EylemTipi = '160'
+  set @IsActive = '1'
+  set @CihazTipi = '11'
+  set @And = @And01
+
+  set @Sql01 = replace(@MasterSql, '@Caption', @Caption)
+  set @Sql01 = replace(@Sql01, '@Head', @Head)
+  set @Sql01 = replace(@Sql01, '@CihazTipi', @CihazTipi)
+  set @Sql01 = replace(@Sql01, '@EylemTipi', @EylemTipi)
+  set @Sql01 = replace(@Sql01, '@IsActive', @IsActive)
+  set @Sql01 = replace(@Sql01, '@And',  @And)
+
+  set @Head = 'GetNewUserFP'
+  set @Caption = 'Kayıt Chz Bio İzlerini Al'
+  set @EylemTipi = '160'
+  set @IsActive = '1'
+  set @CihazTipi = '11'
+  set @And = @And23
+
+  set @Sql02 = replace(@MasterSql, '@Caption', @Caption)
+  set @Sql02 = replace(@Sql02, '@Head', @Head)
+  set @Sql02 = replace(@Sql02, '@CihazTipi', @CihazTipi)
+  set @Sql02 = replace(@Sql02, '@EylemTipi', @EylemTipi)
+  set @Sql02 = replace(@Sql02, '@IsActive', @IsActive)
+  set @Sql02 = replace(@Sql02, '@And',  @And)
+
+  set @Head = 'SetNewUserSayim'
+  set @Caption = 'Tüm Sayım Chz Gönder'
+  set @EylemTipi = '160'
+  set @IsActive = '1'
+  set @CihazTipi = '16'
+  set @And = @And23
+
+  set @Sql03 = replace(@MasterSql, '@Caption', @Caption)
+  set @Sql03 = replace(@Sql03, '@Head', @Head)
+  set @Sql03 = replace(@Sql03, '@CihazTipi', @CihazTipi)
+  set @Sql03 = replace(@Sql03, '@EylemTipi', @EylemTipi)
+  set @Sql03 = replace(@Sql03, '@IsActive', @IsActive)
+  set @Sql03 = replace(@Sql03, '@And',  @And)
+
+end -- newUser 
+
+if ((@param = 'SetOldUser') or
+    (@param = 'GetOldUserFP') or
+	(@param = 'SetOldSayim') or
+	(@param = 'IcmalOldUser'))
+begin
+
+  set @Head = 'SetOldUser'
+  set @Caption = 'Kayıt Chz Gönder'
+  set @EylemTipi = '160'
+  set @IsActive = '1'
+  set @CihazTipi = '11'
+  set @And = @And01
+
+  set @Sql01 = replace(@MasterSql, '@Caption', @Caption)
+  set @Sql01 = replace(@Sql01, '@Head', @Head)
+  set @Sql01 = replace(@Sql01, '@CihazTipi', @CihazTipi)
+  set @Sql01 = replace(@Sql01, '@EylemTipi', @EylemTipi)
+  set @Sql01 = replace(@Sql01, '@IsActive', @IsActive)
+  set @Sql01 = replace(@Sql01, '@And',  @And)
+
+  set @Head = 'GetOldUserFP'
+  set @Caption = 'Kayıt Chz Bio İzlerini Al'
+  set @EylemTipi = '160'
+  set @IsActive = '1'
+  set @CihazTipi = '11'
+  set @And = @And23
+
+  set @Sql02 = replace(@MasterSql, '@Caption', @Caption)
+  set @Sql02 = replace(@Sql02, '@Head', @Head)
+  set @Sql02 = replace(@Sql02, '@CihazTipi', @CihazTipi)
+  set @Sql02 = replace(@Sql02, '@EylemTipi', @EylemTipi)
+  set @Sql02 = replace(@Sql02, '@IsActive', @IsActive)
+  set @Sql02 = replace(@Sql02, '@And',  @And)
+
+  set @Head = 'SetOldUserSayim'
+  set @Caption = 'Tüm Sayım Chz Gönder'
+  set @EylemTipi = '160'
+  set @IsActive = '1'
+  set @CihazTipi = '16'
+  set @And = @And23
+
+  set @Sql03 = replace(@MasterSql, '@Caption', @Caption)
+  set @Sql03 = replace(@Sql03, '@Head', @Head)
+  set @Sql03 = replace(@Sql03, '@CihazTipi', @CihazTipi)
+  set @Sql03 = replace(@Sql03, '@EylemTipi', @EylemTipi)
+  set @Sql03 = replace(@Sql03, '@IsActive', @IsActive)
+  set @Sql03 = replace(@Sql03, '@And',  @And)
+
+end -- oldUSer
+
+if (@param = 'IcmalTahliye')
+begin
+
+  set @Head = 'IcmalTahliye'
+  set @Caption = 'Tüm Giriş/Çıkış Chz Gönder'
+  set @EylemTipi = '170,172'
+  set @IsActive = '1'
+  set @CihazTipi = '12,13,14'
+  set @And = @And23
+
+  set @Sql03 = replace(@MasterSql, '@Caption', @Caption)
+  set @Sql03 = replace(@Sql03, '@Head', @Head)
+  set @Sql03 = replace(@Sql03, '@CihazTipi', @CihazTipi)
+  set @Sql03 = replace(@Sql03, '@EylemTipi', @EylemTipi)
+  set @Sql03 = replace(@Sql03, '@IsActive', @IsActive)
+  set @Sql03 = replace(@Sql03, '@And',  @And)
+
+end -- IcmalTahliye
+
+
+-- ----------------------------------------------------------------
+-- 
+-- ----------------------------------------------------------------
+
+-- Bu değişimlerin burada olması gerekiyor
+-- Sql1,2,3 için bio kontrolü olmaması gerekiyor ( kayıt cihazı için )
+-- bundan sonraki diğer sqllerde bio kontrolleri gerekiyor ( diğer cihazlar için )
+--
+Set @MasterSql = replace(@MasterSql, '/*CariBioFields*/', @CariBioFields)
+Set @MasterSql = replace(@MasterSql, '/*CariBioTable*/', @CariBioTable)
+Set @MasterSql = replace(@MasterSql, '/*CariBioWhere*/', @CariBioWhere)
+
+-- ----------------------------------------------------------------
+
+  -- yeni user var, sayım cihazları, set
+  set @Head = 'SetSayim'
+  set @Caption = 'Yeni Kişiler Sayıma'--, Sayım Chz'
+  set @EylemTipi = '160'
+  set @IsActive = '1'
+  set @CihazTipi = '16'
+  set @And = @And01
+
+  set @Sql11 = replace(@MasterSql, '@Caption', @Caption)
+  set @Sql11 = replace(@Sql11, '@Head', @Head)
+  set @Sql11 = replace(@Sql11, '@CihazTipi', @CihazTipi)
+  set @Sql11 = replace(@Sql11, '@EylemTipi', @EylemTipi)
+  set @Sql11 = replace(@Sql11, '@IsActive', @IsActive)
+  set @Sql11 = replace(@Sql11, '@And',  @And)
+
+-- tahliye var, gc cihazları, set
+set @Head = 'SetTahliye'
+set @Caption = 'Tahliye / Sevk'--, GC Chz'
+set @EylemTipi = '170,172'
+set @IsActive = '1'
+set @CihazTipi = '12,13,14'
+set @And = @And01
+
+  set @Sql12 = replace(@MasterSql, '@Caption', @Caption)
+  set @Sql12 = replace(@Sql12, '@Head', @Head)
+  set @Sql12 = replace(@Sql12, '@CihazTipi', @CihazTipi)
+  set @Sql12 = replace(@Sql12, '@EylemTipi', @EylemTipi)
+  set @Sql12 = replace(@Sql12, '@IsActive', @IsActive)
+  set @Sql12 = replace(@Sql12, '@And',  @And)
+
+
+-- eylem var, gc cihazları, set
+set @Head = 'SetGorev'
+set @Caption = 'Görev, Hastane, İzin'--, GC Chz'
+set @EylemTipi = '120,130,150'
+set @IsActive = '1'
+set @CihazTipi = '12,13,14'
+set @And = @And01
+
+  set @Sql13 = replace(@MasterSql, '@Caption', @Caption)
+  set @Sql13 = replace(@Sql13, '@Head', @Head)
+  set @Sql13 = replace(@Sql13, '@CihazTipi', @CihazTipi)
+  set @Sql13 = replace(@Sql13, '@EylemTipi', @EylemTipi)
+  set @Sql13 = replace(@Sql13, '@IsActive', @IsActive)
+  set @Sql13 = replace(@Sql13, '@And',  @And)
+   
+
+-- görüş var, görüş cihazları listesi 
+set @Head = 'SetGorus'
+set @Caption = 'Görüş'--, Görüş Chz'
+set @EylemTipi = '140'
+set @IsActive = '1'
+set @CihazTipi = '15'
+set @And = @And01
+
+set @Sql14 = replace(@MasterSql, '@Caption', @Caption)
+set @Sql14 = replace(@Sql14, '@Head', @Head)
+set @Sql14 = replace(@Sql14, '@CihazTipi', @CihazTipi)
+set @Sql14 = replace(@Sql14, '@EylemTipi', @EylemTipi)
+set @Sql14 = replace(@Sql14, '@IsActive', @IsActive)
+set @Sql14 = replace(@Sql14, '@And',  @And)
+
+
+
+-- datası okunacak eylem var, gc cihazları, get
+set @Head = 'GetGorev'
+set @Caption = 'Görev, Hastane, İzin'--; GC Chz'
+set @EylemTipi = '120,130,150'
+set @IsActive = '1'
+set @CihazTipi = '12,13,14'
+set @And = @And23
+
+set @Sql15 = replace(@MasterSql, '@Caption', @Caption)
+set @Sql15 = replace(@Sql15, '@Head', @Head)
+set @Sql15 = replace(@Sql15, '@CihazTipi', @CihazTipi)
+set @Sql15 = replace(@Sql15, '@EylemTipi', @EylemTipi)
+set @Sql15 = replace(@Sql15, '@IsActive', @IsActive)
+set @Sql15 = replace(@Sql15, '@And',  @And)
+
+
+
+-- datası okunacak görüş var, gorus cihazları, get
+set @Head = 'GetGorus'
+set @Caption = 'Görüş'--, Görüş Chz'
+set @EylemTipi = '140'
+set @IsActive = '1'
+set @CihazTipi = '15'
+set @And = @And23
+
+set @Sql16 = replace(@MasterSql, '@Caption', @Caption)
+set @Sql16 = replace(@Sql16, '@Head', @Head)
+set @Sql16 = replace(@Sql16, '@CihazTipi', @CihazTipi)
+set @Sql16 = replace(@Sql16, '@EylemTipi', @EylemTipi)
+set @Sql16 = replace(@Sql16, '@IsActive', @IsActive)
+set @Sql16 = replace(@Sql16, '@And',  @And)
+
+-- datası okunacak sayımlar, sayım cihazları, get
+set @Head = 'GetSayim'
+set @Caption = 'Sayım'--, Sayım Chz'
+set @EylemTipi = '100'
+set @IsActive = ''
+set @CihazTipi = '16'
+set @And = @And_1
+
+set @Sql17 = replace(@SayimSql, '@Caption', @Caption)
+set @Sql17 = replace(@Sql17, '@Head', @Head)
+set @Sql17 = replace(@Sql17, '@CihazTipi', @CihazTipi)
+--set @Sql17 = replace(@Sql17, '@EylemTipi', @EylemTipi)
+--set @Sql17 = replace(@Sql17, '@IsActive', @IsActive)
+--set @Sql17 = replace(@Sql17, '@And',  @And)
+
+
+-- silinecek eylem var, gc cihazları, delete
+set @Head = 'DelGorev'
+set @Caption = 'Görev, Hasta, İzin'--; GC Chz'
+set @EylemTipi = '120,130,150'
+set @IsActive = '0'
+set @CihazTipi = '12,13,14'
+set @And = @And23
+
+set @Sql18 = replace(@MasterSql, '@Caption', @Caption)
+set @Sql18 = replace(@Sql18, '@Head', @Head)
+set @Sql18 = replace(@Sql18, '@CihazTipi', @CihazTipi)
+set @Sql18 = replace(@Sql18, '@EylemTipi', @EylemTipi)
+set @Sql18 = replace(@Sql18, '@IsActive', @IsActive)
+set @Sql18 = replace(@Sql18, '@And',  @And)
+
+
+-- silinecek gorus var, gorus cihazları, delete
+set @Head = 'DelGorus'
+set @Caption = 'Görüş'--; Görüş Chz'
+set @EylemTipi = '140'
+set @IsActive = '0'
+set @CihazTipi = '15'
+set @And = @And23
+
+set @Sql19 = replace(@MasterSql, '@Caption', @Caption)
+set @Sql19 = replace(@Sql19, '@Head', @Head)
+set @Sql19 = replace(@Sql19, '@CihazTipi', @CihazTipi)
+set @Sql19 = replace(@Sql19, '@EylemTipi', @EylemTipi)
+set @Sql19 = replace(@Sql19, '@IsActive', @IsActive)
+set @Sql19 = replace(@Sql19, '@And',  @And)
+
+
+
+-- tahliye silinecek, gc ve sayım cihazları, delete
+set @Head = 'DelTahliye'
+set @Caption = 'Tahliye / Sevk'--; GC ve Sayım Chz'
+set @EylemTipi = '170,172'
+set @IsActive = '0'
+set @CihazTipi = '12,13,14,16'
+set @And = @And23
+
+set @Sql20 = replace(@MasterSql, '@Caption', @Caption)
+set @Sql20 = replace(@Sql20, '@Head', @Head)
+set @Sql20 = replace(@Sql20, '@CihazTipi', @CihazTipi)
+set @Sql20 = replace(@Sql20, '@EylemTipi', @EylemTipi)
+set @Sql20 = replace(@Sql20, '@IsActive', @IsActive)
+set @Sql20 = replace(@Sql20, '@And',  @And)
+
+
+--@param = 'Icmal'
+--@param = 'IcmalNewUser'
+--@param = 'IcmalOldUSer'
+--@param = 'IcmalTahliye'
+
+--@param = 'SetSayim'
+--@param = 'SetTahliye'
+--@param = 'SetGorev'
+--@param = 'SetGorus'
+--@param = 'GetGorev'
+--@param = 'GetGorus'
+--@param = 'GetSayim'
+--@param = 'DelGorev'
+--@param = 'DelGorus'
+--@param = 'DelTahliye'
+
+  if (@param = 'Icmal')
+  Set @MasterSql = 
+      @Sql11 + ' union all ' + @Sql12 + ' union all ' + @Sql13 + ' union all ' + @Sql14 + ' union all ' + @Sql15 + ' union all ' +
+      @Sql16 + ' union all ' + @Sql17 + ' union all ' + @Sql18 + ' union all ' + @Sql19 + ' union all ' + @Sql20
+
+  if ((@param = 'IcmalNewUser') or
+      (@param = 'IcmalOldUser'))
+      Set @MasterSql = 
+      @Sql01 + ' union all ' + @Sql02 + ' union all ' + @Sql03
+
+  if (@param = 'IcmalTahliye')
+      Set @MasterSql = @Sql03
+
+
+  if (@param = 'SetNewUser')   Set @MasterSql = @Sql01
+  if (@param = 'GetNewUserFP') Set @MasterSql = @Sql02
+  if (@param = 'SetNewSayim')  Set @MasterSql = @Sql03
+
+  if (@param = 'SetOldUser')   Set @MasterSql = @Sql01
+  if (@param = 'GetOldUserFP') Set @MasterSql = @Sql02
+  if (@param = 'SetOldSayim')  Set @MasterSql = @Sql03
+
+  if (@param = 'SetSayim') Set @MasterSql = @Sql11
+  if (@param = 'SetTahliye') Set @MasterSql = @Sql12
+  if (@param = 'SetGorev') Set @MasterSql = @Sql13
+  if (@param = 'SetGorus') Set @MasterSql = @Sql14 
+  if (@param = 'GetGorev') Set @MasterSql = @Sql15 
+  if (@param = 'GetGorus') Set @MasterSql = @Sql16 
+  if (@param = 'GetSayim') Set @MasterSql = @Sql17 
+  if (@param = 'DelGorev') Set @MasterSql = @Sql18 
+  if (@param = 'DelGorus') Set @MasterSql = @Sql19 
+  if (@param = 'DelTahliye') Set @MasterSql = @Sql20 
+  
+  if (@param = 'GetAllUserAndFPs') Set @MasterSql = @UserListSql
+
+  print @param
+  print @MasterSql
+
+  Exec sp_executesql @MasterSql
+
+
+END
+GO
+
+

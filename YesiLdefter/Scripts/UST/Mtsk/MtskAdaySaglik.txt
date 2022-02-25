@@ -1,0 +1,185 @@
+﻿USE u7093888_Ustad01
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+begin transaction
+
+ create table MtskAdaySaglik
+ (
+   Id                    Int IDENTITY(1,1) not null, 
+   AdayId                Int       not null, /* default 0 */
+   FirmId                Int       not null,
+   IsActive              Bit       not null, /* default : 1 = active, 0 = not active */  
+   TcNo                  Varchar(11)   null,
+   DonemTipiId           Int           null,
+
+   RaporReferansNo             nVarchar(50)   null,
+   SaglikRaprunuVerenKurum     nVarchar(200)  null,
+   SaglikRaporuSonuc           nVarchar(30)   null,
+   SaglikRaporuTarihi          Date           null,
+   SaglikRaporuSayisi          nVarchar(30)   null,
+   HESKodu                     nVarchar(15)   null,
+   OzurDurumuTipiId            SmallInt       null,
+   OkutmanTalebi               Bit            null,
+   TercumanTalebi              Bit            null,
+   YabanciDilTipiId            SmallInt       null,
+   SaglikRaporuResim           VarBinary(max) null,
+   SaglikRaporuResimSmall      VarBinary(max) null,
+
+   constraint		pk_MtskAdaySaglik primary key (Id)
+ )
+  
+ grant select, insert, update, delete on MtskAdaySaglik to public
+
+  create index X_MtskAdaySaglik01 on MtskAdaySaglik (AdayId)
+  create index X_MtskAdaySaglik02 on MtskAdaySaglik (TcNo)
+  create index X_MtskAdaySaglik03 on MtskAdaySaglik (DonemTipiId)
+
+commit transaction
+
+
+
+
+begin transaction
+
+USE u7093888_Ustad01
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TRIGGER dbo.trg_MtskAdaySaglik on dbo.MtskAdaySaglik
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    DECLARE myCursor cursor for select Id from Inserted
+    DECLARE @curId bigint
+
+    Declare @AdayId int = 0
+    Declare @FirmId int = 0
+
+    OPEN myCursor
+
+    FETCH NEXT FROM myCursor INTO @curId
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+
+        select 
+           @AdayId = ins.AdayId
+          ,@FirmId = ins.FirmId
+		from inserted ins
+    	where ins.Id = @curId
+
+        -- MtskAdayBelgeler Insert
+        if ( Select count(*) ADET from dbo.[MtskAdayBelgeler] 
+             where 0 = 0 
+             and [AdayId] = @AdayId 
+             and [FirmId] = @FirmId
+            ) = 0 
+        begin 
+            insert into dbo.[MtskAdayBelgeler] ( 
+            AdayId, FirmId, IsActive,
+            IsBiyometrik,    IsOgrenim,    IsSaglik,    IsSavcilik,    IsImza,    IsSozlesme1,    IsSozlesme2, 
+            BiyometrikIsUploaded,    OgrenimIsUploaded,    SaglikIsUploaded,    SavcilikIsUploaded,    ImzaIsUploaded,    Sozlesme1IsUploaded,    Sozlesme2IsUploaded, 
+            IsSertifikaUcreti,    SertifikaUcretiIsPaid,    IsUcretsiz,    IsFatura ) values 
+            ( @AdayId,  @FirmId,  1,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0 ) 
+        end -- MtskAdayBelgeler
+
+
+		-- MtskAdayBelgeler tablosunu işaretle
+		Update MtskAdayBelgeler set
+        IsSaglik = x.Sonuc
+        From MtskAdayBelgeler a, 
+        (
+            Select count(Id) as Sonuc
+            From MtskAdaySaglik
+            Where 0 = 0
+            and (
+			   SaglikRaporuResim is not null 
+			or Len(isnull(RaporReferansNo,'')) > 0
+			)
+            and AdayId = @AdayId
+            and FirmId = @FirmId
+        ) as x
+        Where a.AdayId = @AdayId
+        and   a.FirmId = @FirmId
+
+
+      FETCH NEXT FROM myCursor INTO @curId
+    END -- While
+
+    CLOSE myCursor
+    DEALLOCATE myCursor   
+
+END -- create trigger
+GO
+
+ALTER TABLE dbo.MtskAdaySaglik ENABLE TRIGGER trg_MtskAdaySaglik
+GO
+
+commit transaction
+
+
+
+begin transaction
+
+-- ------------------------------------------------------- 
+-- OzurDurumuTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[MtskAdaySaglikOzurDurumuTipi]
+(
+   Id               Int Unique Not    null,
+   OzurDurumuTipi   nVarchar(60)   null
+
+   constraint  pk_MtskAdaySaglikOzurDurumuTipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskAdaySaglikOzurDurumuTipi]
+INSERT INTO [Lkp].[MtskAdaySaglikOzurDurumuTipi] (Id, OzurDurumuTipi)
+ VALUES 
+  ( -1, N'--Seçiniz--'),
+  (  1, N'Engeli Yok'),
+  (100, N'Ortopedik Engelli (Ellerini ve/veya Kollarını Kullanamıyor)'),
+  (110, N'Ortopedik Engelli (Yürüyemiyor)'),
+  (120, N'İşitme, Dil veya Konuşma Engelli'),
+  (140, N'Görme Engelli (Bir Gözü Görmüyor)'),
+  (150, N'Görme Engelli (Büyüteç Yardımı İle Görebiliyor)'),
+  (160, N'Süreğen hastalığı var.')
+
+
+
+-- ------------------------------------------------------- 
+-- YabanciDilTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[MtskAdaySaglikYabanciDilTipi]
+(
+   Id               Int Unique Not    null,
+   YabanciDilTipi   nVarchar(60)   null
+
+   constraint  pk_MtskAdaySaglikYabanciDilTipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskAdaySaglikYabanciDilTipi]
+INSERT INTO [Lkp].[MtskAdaySaglikYabanciDilTipi] (Id, YabanciDilTipi)
+ VALUES 
+  ( -1, N'Yabancı Dil Seçiniz'),
+  (  1, N'Arapça'),
+  (  2, N'Çince'),
+  (  3, N'İngilizce'),
+  (  4, N'Almanca'),
+  (  5, N'Fransızca'),
+  (  6, N'Farsça'),
+  (  7, N'Rusça')
+
+
+
+commit transaction
+

@@ -1,0 +1,39 @@
+
+begin transaction
+
+ create table SYS_TYPES_T
+ (
+        REF_ID            Int IDENTITY(1,1) NOT NULL,
+        VALUE_TYPE        SmallInt      NULL,  
+        TYPES_NAME        VarChar(30)   NULL,
+        TABLE_NAME        VarChar(30)   NULL,
+        INT_FNAME         VarChar(30)   NULL,
+        STR_FNAME         VarChar(30)   NULL,
+        CAPTION_FNAME     VarChar(30)   NULL,
+        WHERE_SQL         VarChar(100)  NULL,
+
+   Constraint PK_SYS_TYPES_T primary key (REF_ID)
+
+ )
+
+ create index X_SYS_TYPES_T1 on SYS_TYPES_T (TABLE_NAME)
+ 
+ grant select, insert, update, delete on SYS_TYPES_T to public
+
+commit transaction
+
+
+/* VALUE_TYPE = -1 : SmallInt, -2 : Int32, -3 : String, -4 : Byte   */
+
+
+
+BEGIN TRANSACTION 
+
+ DELETE SYS_TYPES_T  
+
+ insert into SYS_TYPES_T values( 2, 'VT_FIRM', 'VT_FIRM', 'REF_ID', null, 'FIRM_NAME', null )
+ insert into SYS_TYPES_T values( 2, 'VT_SHOP', 'VT_SHOP', 'REF_ID', null, 'SHOP_NAME', null )
+ insert into SYS_TYPES_T values( 2, 'VT_PART', 'VT_PART', 'REF_ID', null, 'PART_NAME', null )
+ insert into SYS_TYPES_T values( 2, 'FINANSMANGIDERI', 'HesapFinans', 'Id', null, 'HesapAdi', 'and UstGrupTipiId = 84 and UstHesapKodu = "7030" and  FirmId = :FIRM_ID ', '' )
+
+COMMIT TRANSACTION 

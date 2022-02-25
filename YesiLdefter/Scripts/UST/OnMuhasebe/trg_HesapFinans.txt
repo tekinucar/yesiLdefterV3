@@ -1,0 +1,249 @@
+﻿USE [u7093888_Ustad01]
+GO
+/****** Object:  Trigger [dbo].[trg_HesapFinans]    Script Date: 07.09.2020 13:22:39 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+ALTER TRIGGER [dbo].[trg_HesapFinans] on [dbo].[HesapFinans] 
+--CREATE TRIGGER [dbo].[trg_HesapFinans] on [dbo].[HesapFinans] 
+AFTER INSERT, UPDATE
+AS BEGIN
+--   UstGrupTipiId       SmallInt      null, /* 102   banka        */
+--   AnaGrupTipiId       SmallInt      null, /* 1022  banka hesabı */
+--   AltGrupTipiId       Int           null, /* 10221 vadesiz      */
+
+    declare InsertCursor_HesapFinans cursor for select Id from Inserted
+    declare @curId bigint
+
+	declare @kacHane smallInt = 3 
+	declare @eId Int = 0
+    declare @eFirmId Int = 0
+    declare @eUstGrupTipiId smallInt = 0
+    declare @eAnaGrupTipiId smallInt = 0
+    declare @eAltGrupTipiId Int = 0
+    declare @eHesapKisaAdi varchar(100) = null
+    declare @eHesapAdi varchar(150) = null
+	declare @eHesapKodu varchar(50) = null
+	declare @eUstHesapKodu varchar(50) = null
+	declare @eNumarasi varchar(50) = null
+
+	declare @eParentHesapAdi1 varchar(150) = null
+	declare @eParentHesapKodu1 varchar(50) = null
+    declare @eParentHesapAdi2 varchar(150) = null
+	declare @eParentHesapAdi3 varchar(150) = null
+
+    declare @yUstGrupTipiId smallInt = 0
+	declare @yHesapKisaAdi varchar(100) = null
+	declare @yHesapKodu varchar(50) = null
+	
+
+    OPEN InsertCursor_HesapFinans
+
+    FETCH NEXT FROM InsertCursor_HesapFinans INTO @curId
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+	  set @yHesapKisaAdi = ''
+	  set @yHesapKodu = ''
+
+      select 
+	     @eFirmId = isnull(ins.FirmId,0)  
+    	,@eUstGrupTipiId = isnull(ins.UstGrupTipiId,0)  
+		,@eAnaGrupTipiId = isnull(ins.AnaGrupTipiId,0)  
+		,@eAltGrupTipiId = isnull(ins.AltGrupTipiId,0)  
+		,@eHesapKisaAdi = isnull(ins.HesapKisaAdi,'NULL')
+		,@eHesapAdi = isnull(ins.HesapAdi,'NULL')
+		,@eHesapKodu = isnull(ins.HesapKodu,'NULL')
+    	,@eUstHesapKodu = isnull(ins.UstHesapKodu,'NULL')
+    	,@eNumarasi = isnull(ins.Numarasi,'')
+		,@eParentHesapAdi1 = isnull(fh1.HesapAdi, '')
+		,@eParentHesapKodu1 = isnull(fh1.HesapKodu, '')
+		,@eParentHesapAdi2 = isnull(fh2.HesapAdi, '') 
+		,@eParentHesapAdi3 = isnull(fh3.HesapAdi, '') 
+
+      from Inserted ins
+	    left outer join HesapFinans fh1 on ( ins.ParentId = fh1.Id )
+		left outer join HesapFinans fh2 on ( fh1.ParentId = fh2.Id )
+		left outer join HesapFinans fh3 on ( fh2.ParentId = fh3.Id )
+	  where ins.Id = @curId
+	  
+	  if (@eAnaGrupTipiId = 100)  
+	  begin
+	    set @yHesapKisaAdi = @eHesapAdi
+	  end
+
+	  if (@eAnaGrupTipiId = 102)  
+	  begin
+	    set @yHesapKisaAdi = @eHesapAdi
+	    
+		--print @yHesapKisaAdi+ ' ; ' + @eParentHesapAdi1 + ' + ' + @eParentHesapAdi2 + ' ; ' + @eParentHesapAdi3
+
+		if (@eAltGrupTipiId = 1021)
+		    set @yHesapKisaAdi = @eParentHesapAdi1
+		if (@eAltGrupTipiId = 1022)
+		    set @yHesapKisaAdi = @eParentHesapAdi2
+        if (@eAltGrupTipiId = 1023)
+		    set @yHesapKisaAdi = @eParentHesapAdi3
+        if (@eAltGrupTipiId = 1024)
+		    set @yHesapKisaAdi = @eParentHesapAdi3
+
+		if ((@eAltGrupTipiId = 1020) or -- seçilen banka, 
+		    (@eAltGrupTipiId = 1021) or -- şube
+			(@eAltGrupTipiId = 1022) or -- banka hesabı
+			(@eAltGrupTipiId = 1023) or -- banka kartı
+			(@eAltGrupTipiId = 1024) or -- pos cihazı
+		    (@eAltGrupTipiId = 1029))   -- tüm banka
+		begin
+		  set @yHesapKisaAdi = replace(@yHesapKisaAdi, 'TÜRKİYE', '');
+	      set @yHesapKisaAdi = replace(@yHesapKisaAdi, 'T.A.Ş.', '');
+	      set @yHesapKisaAdi = replace(@yHesapKisaAdi, 'T.A.O.', '');
+	      set @yHesapKisaAdi = replace(@yHesapKisaAdi, 'A.Ş.', '');
+	      set @yHesapKisaAdi = replace(@yHesapKisaAdi, 'T.C.', '');
+		  set @yHesapKisaAdi = replace(@yHesapKisaAdi, ' BANKALARI', '');
+	      set @yHesapKisaAdi = replace(@yHesapKisaAdi, ' BANKASI', '');
+	      set @yHesapKisaAdi = replace(@yHesapKisaAdi, ' BANK', '');
+		  set @yHesapKisaAdi = replace(@yHesapKisaAdi, ' BBVA', '');
+        end
+
+        if (@yHesapKisaAdi <> '')
+        begin
+	      --set @yHesapKisaAdi = Ltrim(@yHesapKisaAdi)
+	      --set @yHesapKisaAdi = Rtrim(@yHesapKisaAdi)
+		  set @yHesapKisaAdi = Trim(@yHesapKisaAdi)
+        end   
+
+		-- banka şubesi
+		if (@eAltGrupTipiId = 1021)
+		    set @yHesapKisaAdi = @yHesapKisaAdi + '.' + @eHesapAdi
+        -- banka hesabi
+        if (@eAltGrupTipiId = 1022)
+		    set @yHesapKisaAdi = @yHesapKisaAdi + '.' + @eParentHesapAdi1 + '.' +  Trim(@eParentHesapKodu1) + '.' + @eNumarasi
+        -- banka kartı
+        if (@eAltGrupTipiId = 1023)
+		    set @yHesapKisaAdi = @yHesapKisaAdi + '.' + @eHesapAdi + '.' + @eNumarasi
+        -- pos cihazı
+        if (@eAltGrupTipiId = 1024)
+		    set @yHesapKisaAdi = @yHesapKisaAdi + '.pos.' + @eHesapAdi + '.' + @eNumarasi
+      end
+
+	  if ((@eUstGrupTipiId = 25) and (@eFirmId > 0))
+	  begin
+	    set @yHesapKodu = @eHesapKodu 
+
+		if (@eNumarasi = '')
+		begin
+		  set @eNumarasi = dbo.fnc_HesapFinansKoduGet(@eFirmId, @eUstGrupTipiId, @eAnaGrupTipiId, @kacHane, @curId)
+		end
+
+		set @yHesapKodu = convert(varchar(10), @eAnaGrupTipiId) + '.' + @eNumarasi
+
+
+		if ((@eHesapKodu <> @yHesapKodu) and (@yHesapKodu <> '')) 
+	    begin
+	      if ( select count(Id) as Adet from dbo.HesapFinans
+               Where FirmId = @eFirmId
+               and UstGrupTipiId = @eUstGrupTipiId
+               and AnaGrupTipiId = @eAnaGrupTipiId
+               and HesapKodu = @yHesapKodu
+             ) = 0 
+	      begin
+		    update HesapFinans set 
+                   HesapKodu = substring(@yHesapKodu,1,50)
+            where Id = @curId
+		  end --else
+		  --begin
+		    --update HesapFinans set 
+            --       HesapKodu = 'ÇAKIŞMA'
+            --where Id = @curId
+		  --end
+
+        end
+	  end
+
+	  if ((@eUstHesapKodu = '7110') or
+	      (@eUstHesapKodu = '7120') or
+          (@eUstHesapKodu = '7130') or
+          (@eUstHesapKodu = '7140'))
+      begin
+	    --print @eUstHesapKodu
+        -- vergi, sgk, bağkur, belediye ise
+	    if (@eUstHesapKodu = '7110') 
+	    begin 
+	      set @yUstGrupTipiId = 91
+	  	  set @yHesapKisaAdi = 'Vergi'
+        end
+	    if (@eUstHesapKodu = '7120') 
+	    begin 
+	      set @yUstGrupTipiId = 92
+          set @yHesapKisaAdi = 'Sgk'
+        end
+        if (@eUstHesapKodu = '7130') 
+	    begin 
+	      set @yUstGrupTipiId = 93
+          set @yHesapKisaAdi = 'Bağkur'
+        end
+        if (@eUstHesapKodu = '7140') 
+	    begin 
+	      set @yUstGrupTipiId = 94
+          set @yHesapKisaAdi = 'Belediye'
+        end  
+		
+		if (@yUstGrupTipiId > 0) and
+		   (@eHesapAdi <> @yHesapKisaAdi)
+ 	    begin
+	      update HesapFinans set 
+	           UstGrupTipiId = @yUstGrupTipiId
+             , AnaGrupTipiId = Convert(int, @eUstHesapKodu)
+          where Id = @curId
+	    end
+		
+		select @eId = isnull(ins.Id,0)  
+        from HesapFinans ins
+        where ins.FirmId = @eFirmId
+		and   ins.[UstGrupTipiId] = 84
+		and   ins.[UstHesapKodu] = @eUstHesapKodu
+
+		--print '@eId : ' + Convert(varchar(10), @eId)
+
+		if (@eId = 0)
+		begin
+  	      INSERT INTO [dbo].[HesapFinans]
+           ([ParentId]
+           ,[FirmId]
+           ,[IsActive]
+           ,[UstGrupTipiId]
+           ,[AnaGrupTipiId]
+           ,[AltGrupTipiId]
+           ,[AltCesitTipiId]
+           ,[HesapKodu]
+           ,[UstHesapKodu]
+           ,[HesapKisaAdi]
+           ,[HesapAdi])
+          VALUES 
+		   (0, @eFirmId, 1, 84, Convert(int, @eUstHesapKodu), 0, 0, null, @eUstHesapKodu, @yHesapKisaAdi, @yHesapKisaAdi)
+		end
+	  end
+	  	
+	  if (((@eHesapKisaAdi = 'NULL') or (@eHesapKisaAdi = '')) and
+	      (@eHesapAdi <> '') and 
+		  (@eFirmId > 0)) 
+		  set @yHesapKisaAdi = @eHesapAdi
+
+	  if ((@eHesapKisaAdi <> @yHesapKisaAdi) and
+	      (@yHesapKisaAdi <> '')) 
+	  begin
+	    update HesapFinans set 
+	           HesapKisaAdi = substring(@yHesapKisaAdi,1,100)
+        where Id = @curId
+      end
+
+      FETCH NEXT FROM InsertCursor_HesapFinans INTO @curId
+    END
+
+    CLOSE InsertCursor_HesapFinans
+    DEALLOCATE InsertCursor_HesapFinans
+
+END

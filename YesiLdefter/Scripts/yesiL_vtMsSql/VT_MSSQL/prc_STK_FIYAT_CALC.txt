@@ -1,0 +1,80 @@
+﻿USE [GREEN]
+GO
+
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+CREATE PROCEDURE [dbo].[prc_STK_FIYAT_CALC] 
+	@Id Integer
+AS BEGIN
+
+    --declare @Id integer = 1
+    
+    declare @_LINE_TD Int = 0 
+    declare @_ODEME_TD     SmallInt = 0
+    declare @_VADE_TARIHI  Date 
+    declare @_ISLEM_SAAT   VarChar(5)
+    declare @_ISLEM_TUTARI  numeric(22,5) = 0
+    
+
+    -- read
+    /*
+	Select 
+     @_ODEME_TD = isnull(ins.[ODEME_TD],0)
+    ,@_VADE_TARIHI = ins.[VADE_TARIHI]
+    ,@_VADE_YIL = ins.[VADE_YIL]
+    ,@_VADE_AY = ins.[VADE_AY]
+    ,@_VADE_GUN = ins.[VADE_GUN]
+    --,@_ISLEM_TARIHI = isnull(ins.[ISLEM_TARIHI], convert(date, getdate(), 104))
+    ,@_ISLEM_TARIHI = ins.[ISLEM_TARIHI]
+    ,@_ISLEM_YIL = ins.[ISLEM_YIL]
+    ,@_ISLEM_AY = ins.[ISLEM_AY]
+    ,@_ISLEM_GUN = ins.[ISLEM_GUN]
+    --,@_ISLEM_SAAT = isnull(ins.[ISLEM_SAAT], convert(varchar(5), getdate(),108))
+	,@_ISLEM_SAAT = ins.[ISLEM_SAAT]
+       	
+	,@_ISLEM_TUTARI = ins.[ISLEM_TUTARI]
+   	,@_MASRAF_TUTARI = ins.[MASRAF_TUTARI]
+   	,@_KDV_ORANI = ins.[KDV_ORANI] 
+   	,@_BHESAP_TD = ins.[BHESAP_TD]
+   	,@_BHESAP_ID = isnull(ins.[BHESAP_ID],0)
+   	,@_AHESAP_TD = ins.[AHESAP_TD]
+   	,@_AHESAP_ID = isnull(ins.[AHESAP_ID],0)
+    ,@_CARI_TD = ins.[CARI_TD]   	 	   	
+   	,@_CARI_ID = ins.[CARI_ID]   	
+   	 
+   	from [dbo].[FN_LINEVOL] ins
+   	where ins.ID = @Id
+
+    
+    -- Cari
+    if ((@_CARI_ID > 0) and (@_BHESAP_ID = 0)) 
+    begin
+      set @_BHESAP_TD  = @_CARI_TD
+   	  set @_BHESAP_ID  = @_CARI_ID
+   	  set @_LINE_TD1   = @_CARI_TD
+    end
+    */
+
+    /*
+    -- BA tablsunun borc satırı update ediliyor
+    if (@_FNLV_B > 0)
+    begin
+      UPDATE [dbo].[FN_LINEVOL_BA]
+      SET [HESAP_TD] = @_BHESAP_TD 
+         ,[HESAP_ID] = @_BHESAP_ID 
+         ,[BORC_TUTARI] = @_ISLEM_TUTARI 
+         ,[ALACAK_TUTARI] = 0
+      WHERE ID = @_FNLV_B 
+    end
+    */
+
+ END
+
+
+GO
+

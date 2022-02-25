@@ -1,0 +1,173 @@
+﻿USE [u7093888_Ustad01]
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+begin transaction
+
+ create table MtskGrupSubesi
+ (
+   Id                   Int IDENTITY(1,1) not null, 
+   ParentId             Int       not null, /* default 0 */
+   FirmId               Int       not null,
+   IsActive             Bit       not null, /* default : 1 = active, 0 = not active */  
+
+   DonemTipiId          Int           null,
+   GrupTipiId           SmallInt      null,
+   SubeTipiId           SmallInt      null,
+   GrupBaslamaTarihi    Date          null,
+   SubeAdaySayisi       SmallInt      null,
+   KurumOnayTipiId      SmallInt      null, /* 1-Onaylandı */		
+      
+   constraint		pk_MtskGrupSubesi primary key (Id)
+ )
+  
+ grant select, insert, update, delete on MtskGrupSubesi to public
+
+
+commit transaction
+
+
+begin transaction
+
+USE [u7093888_Ustad01]
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TRIGGER [dbo].[trg_MtskGrupSubesi] on [dbo].[MtskGrupSubesi] 
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    DECLARE mgSubesiCursor cursor for select Id from Inserted
+    DECLARE @curId bigint
+
+    OPEN mgSubesiCursor
+
+    FETCH NEXT FROM mgSubesiCursor INTO @curId
+   
+    declare @MtskDonemiId int 
+    declare @FirmId int
+    declare @DonemTipiId int
+    declare @GrupTipiId smallint
+    declare @SubeTipiId smallint
+    declare @GrupBaslamaTarihi date
+    declare @KurumOnayTipiId smallint
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+
+      Select
+         @FirmId = FirmId
+        ,@DonemTipiId = DonemTipiId
+        ,@GrupTipiId = GrupTipiId
+        ,@SubeTipiId = SubeTipiId
+        ,@GrupBaslamaTarihi = GrupBaslamaTarihi
+        ,@KurumOnayTipiId = KurumOnayTipiId
+
+      From inserted ins
+	  Where ins.Id = @curId
+
+      set @MtskDonemiId = 0
+
+      -- MtskDonemi tablosunda gerekli olan satır mevcut mu ?
+      Select @MtskDonemiId = isnull(Id, 0)
+      From dbo.MtskDonemi
+      Where FirmId = @FirmId
+      and DonemTipiId = @DonemTipiId
+      and GrupTipiId = @GrupTipiId
+
+	  -- Sube belli olduktan sonra SubeTipiId = 0 olanlanlar silinsin
+      if (@DonemTipiId > 0) and  
+         (@GrupTipiId > 0) and 
+         (@SubeTipiId > 0)
+      begin
+         Delete From dbo.MtskGrupSubesi
+         Where FirmId = @FirmId
+         and DonemTipiId = @DonemTipiId
+         and GrupTipiId = @GrupTipiId
+		 and SubeTipiId <= 0
+	  end
+    
+      /*
+      if (@MtskDonemiId = 0)
+      begin
+         INSERT INTO [dbo].[MtskDonemi]
+           ([ParentId]
+           ,[FirmId]
+           ,[IsActive]
+           ,[DonemTipiId]
+           ,[GrupTipiId]
+           ,[GrupBaslamaTarihi]
+           ,[GrupSubeSayisi]
+           ,[AdaySayisi]
+           ,[TeorikDersSayisi]
+           ,[UygulamaDersSayisi]
+           ,[KurumOnayTipiId]
+           ,[GrupAdaySayisi])
+         VALUES
+           (0
+           ,@FirmId
+           ,1
+           ,@DonemTipiId
+           ,@GrupTipiId
+           ,@GrupBaslamaTarihi
+           ,0 --GrupSubeSayisi
+           ,0 --AdaySayisi
+           ,0 --TeorikDersSayisi
+           ,0 --UygulamaDersSayisi
+           ,@KurumOnayTipiId
+           ,0 --GrupAdaySayisi
+           )
+      end
+      */
+
+      FETCH NEXT FROM mgSubesiCursor INTO @curId
+    END
+
+    CLOSE mgSubesiCursor
+    DEALLOCATE mgSubesiCursor   
+        
+
+END
+
+commit transaction
+
+
+begin transaction
+
+-- ------------------------------------------------------- 
+-- SubeTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[MtskSubeTipi]
+(
+   Id               Int Unique Not null,
+   SubeTipi         nVarchar(30)   null,
+
+   constraint  pk_MtskSubeTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[MtskSubeTipi] (Id, SubeTipi)
+ VALUES 
+(-1,  '--Seçiniz--' ), 
+( 0,  'Seçiniz' ),
+( 1,  'A Şubesi' ),
+( 2,  'B Şubesi' ),
+( 3,  'C Şubesi' ),
+( 4,  'D Şubesi' ),
+( 5,  'E Şubesi' ),
+( 6,  'F Şubesi' ),
+( 7,  'G Şubesi' ),
+( 8,  'H Şubesi' )
+
+
+commit transaction
+
+

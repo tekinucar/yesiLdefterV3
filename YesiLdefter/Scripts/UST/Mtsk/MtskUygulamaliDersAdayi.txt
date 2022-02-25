@@ -1,0 +1,84 @@
+﻿
+begin transaction
+
+ create table MtskUygulamaliDersAdayi
+ (
+   Id                   Int IDENTITY(1,1) not null, 
+   FirmId               Int       not null,
+   IsPlanDone           Bit       not null, /* default : 1 = yapıldı, 0 = yapılmadı */  
+   DonemTipiID          Int           null,
+   AdayId               Int           null,
+   AdayTcNo             Varchar(11)   null,
+      
+   constraint		pk_MtskUygulamaliDersAdayi primary key (Id)
+ )
+  
+ grant select, insert, update, delete on MtskUygulamaliDersAdayi to public
+
+
+commit transaction
+
+
+USE [u7093888_Ustad01]
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TRIGGER [dbo].[trg_MtskUygulamaliDersAdayi] on [dbo].[MtskUygulamaliDersAdayi] 
+AFTER INSERT, UPDATE
+AS BEGIN
+
+
+    DECLARE dersAdayiCursor cursor for select Id from Inserted
+    DECLARE @curId bigint
+
+    OPEN dersAdayiCursor
+
+    FETCH NEXT FROM dersAdayiCursor INTO @curId
+
+	declare @yFirmId int = 0
+    declare @yDonemTipiId int = 0
+    declare @yAdayId int = 0
+    declare @yAdayTcNo varchar(11) = null
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+    	
+      Select
+       @yFirmId = isnull(ins.FirmId,0)
+      ,@yDonemTipiId = ins.DonemTipiId
+      ,@yAdayId = isnull(ins.AdayId,0)
+      ,@yAdayTcNo = isnull(ins.AdayTcNo,'')
+      From inserted ins
+      Where ins.Id = @curId
+
+      if (@yAdayId = 0) and (@yAdayTcNo <> '')
+      begin
+        Select @yAdayId = Id 
+        From dbo.MtskAday
+        Where TcNo = @yAdayTcNo
+        and DonemTipiId = @yDonemTipiId
+	    and FirmId = @yFirmId
+		
+		update dbo.MtskUygulamaliDersAdayi set 
+        AdayId = @yAdayId
+        Where Id = @curId 
+      end
+
+      FETCH NEXT FROM dersAdayiCursor INTO @curId
+    END
+
+    CLOSE dersAdayiCursor
+    DEALLOCATE dersAdayiCursor   
+
+END -- create trigger
+
+ALTER TABLE dbo.MtskUygulamaliDersAdayi ENABLE TRIGGER trg_MtskUygulamaliDersAdayi
+
+
+
+
+

@@ -1,0 +1,73 @@
+
+
+
+CREATE VIEW [dbo].[VW_FIRM_LIST]  
+AS
+ (
+
+  /* Firm List */
+  /* Burada Firmamnýn bu þekilde dizany olamasýnýn sebebi 
+     Firmaný Merkezine baðlý hesaplarda oluþturula bilmesi için
+     Yani diðer Tablolarýn FIRM_ID ve SHOP_ID sini doldurmak için
+     FIRM_ID = 1,  SHOP_ID = 1  ? Firmanýn merkez yapýsýna iþaret eder
+     FIRM_ID = 1,  SHOP_ID = 2  ? Firmanýn x þubesini iþaret eder   
+  */
+  Select 
+    s.ID      REF_ID  
+  , 0         PARENT_ID  
+  , s.HP_TD   CLIENT_TYPE  
+  , s.ID      FIRM_ID  
+  , s.ID      SHOP_ID
+  , 0         PART_ID
+  , s.HP_NAME FIRM_NAME   
+  , s.HP_NAME SHOP_NAME 
+  , ''        PART_NAME 
+  , s.HP_NAME PARENT_NAME   
+  
+  FROM HP_FIRM s
+  WHERE s.HP_TD = 1
+  /* AND  LÝSANS_NO = ?  */
+  
+  UNION ALL 
+    
+  /* Shop List */
+  Select 
+    s.ID      REF_ID  
+  , f.ID      PARENT_ID  
+  , s.HP_TD   CLIENT_TYPE  
+  , f.ID      FIRM_ID  
+  , s.ID      SHOP_ID
+  , 0         PART_ID
+  , f.HP_NAME FIRM_NAME   
+  , s.HP_NAME SHOP_NAME 
+  , ''        PART_NAME 
+  , s.HP_NAME PARENT_NAME   
+  
+  FROM HP_FIRM s
+     left outer join HP_FIRM f on ( s.PARENT_ID = f.ID )
+  WHERE s.HP_TD = 2
+  
+  UNION ALL 
+  
+  /* Part List */
+  Select 
+    p.ID      REF_ID  
+  , s.ID      PARENT_ID  
+  , p.HP_TD   CLIENT_TYPE  
+  , f.ID      FIRM_ID  
+  , s.ID      SHOP_ID
+  , p.ID      PART_ID
+  , f.HP_NAME FIRM_NAME   
+  , s.HP_NAME SHOP_NAME   
+  , p.HP_NAME PART_NAME 
+  , p.HP_NAME PARENT_NAME   
+  
+  FROM HP_FIRM p
+     left outer join HP_FIRM s on ( p.PARENT_ID = s.ID )
+     left outer join HP_FIRM f on ( s.PARENT_ID = f.ID )
+  WHERE p.HP_TD = 3
+  /* AND  FIRM_ID = ?  */
+  
+  )
+  
+  

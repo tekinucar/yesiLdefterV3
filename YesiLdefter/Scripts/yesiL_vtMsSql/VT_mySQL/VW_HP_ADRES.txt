@@ -1,0 +1,43 @@
+﻿
+CREATE VIEW [dbo].[VW_HP_ADRES]  
+AS
+ (
+SELECT ha.[ID]
+      ,ha.[FIRM_ID]
+      ,ha.[SHOP_ID]
+      ,ha.[TABLE_ID]
+      ,ha.[TABLE_REF_ID]
+      ,ha.[REC_DATE]
+      ,ha.[REC_USER]
+      ,ha.[ADRES_DURUMU]
+      ,ha.[ADRES_TURU]
+      ,ha.[IL]
+      ,ha.[ILCE]
+      ,ha.[MAHKOY]
+      ,ha.[CADSOK]
+      ,ha.[DISKAPI]
+      ,ha.[ICKAPI]
+      ,ha.[POSTA_KODU]
+      ,ha.[TAM_ADRES]
+      ,ha.[ACIKLAMA]
+      ,ha.[IL_KODU]
+      ,ha.[ILCE_KODU]
+      ,ha.[MAHKOY_KODU]
+      ,ha.[CADSOK_KODU]
+      ,ha.[DISKAPI_KODU]
+      ,ha.[ICKAPI_KODU]
+  FROM [dbo].[HP_ADRES] [ha]
+  left outer join
+      (
+        select ha.TABLE_REF_ID
+         , max(ha.REC_DATE) REC_DATE
+        from HP_CARI hc, HP_ADRES ha 
+        where 0 = 0
+        and hc.ID = ha.TABLE_REF_ID
+        group by ha.[TABLE_REF_ID]
+      ) x  on ( ha.TABLE_REF_ID = x.TABLE_REF_ID )      
+
+   where 0 = 0
+   and ha.REC_DATE = x.REC_DATE
+  
+) 

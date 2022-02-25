@@ -1,0 +1,245 @@
+﻿/*
+declare @tableName nvarchar(30) = 'BelgeMakbuz'
+
+set @tableName = @tableName + '.ParaTipiId'
+
+EXEC sp_RENAME @tableName , 'ParaTipi', 'COLUMN'
+
+ALTER TABLE BelgeMakbuz ALTER COLUMN ParaTipiId nVarChar(3) NULL
+
+ALTER TABLE BelgeStokB  ALTER COLUMN ParaTipiId nVarChar(3) NULL
+ALTER TABLE BelgeStokS  ALTER COLUMN ParaTipiId nVarChar(3) NULL
+ALTER TABLE CariBanka  ALTER COLUMN ParaTipiId nVarChar(3) NULL
+ALTER TABLE HesapCari  ALTER COLUMN ParaTipiId nVarChar(3) NULL
+ALTER TABLE HesapFinans  ALTER COLUMN ParaTipiId nVarChar(3) NULL
+ALTER TABLE [Lkp].[HesapMaster]  ALTER COLUMN ParaTipiId nVarChar(3) NULL
+ALTER TABLE HesapNesne  ALTER COLUMN ParaTipiId nVarChar(3) NULL
+ALTER TABLE HesapStok  ALTER COLUMN ParaTipiId nVarChar(3) NULL
+ALTER TABLE   ALTER COLUMN ParaTipiId nVarChar(3) NULL
+ALTER TABLE   ALTER COLUMN ParaTipiId nVarChar(3) NULL
+ALTER TABLE   ALTER COLUMN ParaTipiId nVarChar(3) NULL
+*/
+
+
+/*
+-- ------------------------------------------------------- 
+-- ParaTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[ParaTipi]
+(
+   Id          Int Unique Not Null,
+   ParaTipi    nVarchar(30) Null,
+   KisaAdi     nVarchar(10) Null,
+   ParaSembolu nVarchar(5)  NUll,
+
+   constraint  pk_ParaTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[ParaTipi] (Id, ParaTipi, KisaAdi, ParaSembolu )
+ VALUES 
+  (0, N'Türk Lirası', 'TL', 'TL' ),
+  (1, N'Türk Lirası', 'TL', 'TL' ),
+  (2, N'Dolar', '', '$' ),
+  (3, N'Euro',  '', '€' )
+  */
+
+-- ------------------------------------------------------- 
+-- ParaTipi
+-- ------------------------------------------------------- 
+create table [Lkp].[ParaTipi]
+(
+   Id          Int Unique Not null,
+   IsActive    Bit null,
+   ParaKodu    nVarchar(3) null,
+   ParaAdi     nVarchar(20) null,
+   ParaSimgesi nVarchar(3) null,
+
+   constraint  pk_ParaTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[ParaTipi] (Id, IsActive, ParaKodu, ParaAdi )
+ VALUES 
+  ( 0,   1, N'',    N'Tanımsız' ),
+  ( 157, 1, N'TRY', N'Türk Lirası' ),
+  ( 49,  1, N'EUR', N'Euro' ),
+  ( 159, 1, N'USD', N'US Dolar' )
+
+/*
+157<option value="TRY">Türk Lirası</option>
+49<option value="EUR">Euro</option>
+159<option value="USD">US Dollar</option>
+*/
+
+  /*
+
+1<option value="AFN">Afghani</option>
+2<option value="DZD">Algerian Dinar</option>
+3<option value="ARS">Argentine Peso</option>
+4<option value="AWG">Aruban Guilder</option>
+5<option value="AUD">Australian Dollar</option>
+6<option value="AZM">Azerbaijanian Manat</option>
+7<option value="BSD">Bahamian Dollar</option>
+8<option value="BHD">Bahraini Dinar</option>
+9<option value="THB">Baht</option>
+10<option value="PAB">Balboa</option>
+1<option value="BBD">Barbados Dollar</option>
+2<option value="BYR">Belarussian Ruble</option>
+3<option value="BZD">Belize Dollar</option>
+4<option value="BMD">Bermudian Dollar</option>
+5<option value="VEB">Bolivar</option>
+6<option value="BOB">Boliviano</option>
+7<option value="BGN">Bulgarian Lev</option>
+8<option value="BRL">Brazilian Real</option>
+9<option value="BND">Brunei Dollar</option>
+20<option value="BIF">Burundi Franc</option>
+1<option value="CAD">Canadian Dollar</option>
+2<option value="CVE">Cape Verde Escudo</option>
+3<option value="KYD">Cayman Islands Dollar</option>
+4<option value="GHC">Cedi</option>
+5<option value="XAF">CFA Franc</option>
+6<option value="XOF">CFA Franc</option>
+7<option value="XPF">CFP Franc</option>
+8<option value="CLP">Chilean Peso</option>
+9<option value="COP">Colombian Peso</option>
+30<option value="KMF">Comoro Franc</option>
+1<option value="NIO">Cordoba Oro</option>
+2<option value="CRC">Costa Rican Colon</option>
+3<option value="CUP">Cuban Peso</option>
+4<option value="CYP">Cyprus Pound</option>
+5<option value="CZK">Czech Koruna</option>
+6<option value="DKK">Danish Krone</option>
+7<option value="GMD">Dalasi</option>
+8<option value="MKD">Denar</option>
+9<option value="AED">Dirham</option>
+40<option value="DJF">Djibouti Franc</option>
+1<option value="STD">Dobra</option>
+2<option value="DOP">Dominican Peso</option>
+3<option value="VND">Dong</option>
+4<option value="AMD">Dram</option>
+5<option value="XCD">East Carribean Dollar</option>
+6<option value="EGP">Egyptian Pound</option>
+7<option value="SVC">El Salvador Colon</option>
+8<option value="ETB">Ethopian Birr</option>
+49<option value="EUR">Euro</option>
+50<option value="FKP">Falkland Islands Pound</option>
+1<option value="FJD">Fiji Dollar</option>
+2<option value="HUF">Forint</option>
+3<option value="CDF">Franc Congolais</option>
+4<option value="GIP">Gibraltar Pound</option>
+5<option value="XAU">Gold</option>
+6<option value="HTG">Gourde</option>
+7<option value="PYG">Guarani</option>
+8<option value="GNF">Guinea Franc</option>
+9<option value="GYD">Guyana Dollar</option>
+60<option value="HKD">HKD</option>
+1<option value="UAH">Hryvnia</option>
+2<option value="ISK">Iceland Krona</option>
+3<option value="INR">Indian Rupee</option>
+4<option value="IQD">Iraqi Dinar</option>
+5<option value="IRR">Iranian Rial</option>
+6<option value="JMD">Jamaican Dollar</option>
+7<option value="JOD">Jordanian Dinar</option>
+8<option value="KES">Kenyan Shilling</option>
+9<option value="PGK">Kina</option>
+70<option value="LAK">Kip</option>
+1<option value="EEK">Kroon</option>
+2<option value="HRK">Kuna</option>
+3<option value="KWD">Kuwaiti Dinar</option>
+4<option value="MWK">Kwacha</option>
+5<option value="ZMK">Kwacha</option>
+6<option value="AOA">Kwanza</option>
+7<option value="MMK">Kyat</option>
+8<option value="GEL">Lari</option>
+9<option value="LVL">Latvian Lats</option>
+80<option value="LBP">Lebanese Pound</option>
+1<option value="ALL">Lek</option>
+2<option value="HNL">Lempira</option>
+3<option value="SLL">Leone</option>
+4<option value="ROL">Leu</option>
+5<option value="LRD">Liberian Dollar</option>
+6<option value="LYD">Libyan Dinar</option>
+7<option value="SZL">Lilangeni</option>
+8<option value="LTL">Lithuanian Litas</option>
+9<option value="LSL">Loti</option>
+90<option value="MGF">Malagasy Franc</option>
+1<option value="MYR">Malaysian Ringgit</option>
+2<option value="MTL">Maltese Lira</option>
+3<option value="TMM">Manat</option>
+4<option value="MUR">Mauritius Rupee</option>
+5<option value="MZM">Metical</option>
+6<option value="MXN">Mexican Peso</option>
+7<option value="MDL">Moldovan Leu</option>
+8<option value="MAD">Morrocan Dirham</option>
+9<option value="NGN">Naira</option>
+100<option value="ERN">Nakfa</option>
+1<option value="NAD">Namibia Dollar</option>
+2<option value="NPR">Nepalese Rupee</option>
+3<option value="ANG">Netherlands Antillian Guilder</option>
+4<option value="YUM">New Dinar</option>
+5<option value="ILS">New Israeli Sheqel</option>
+6<option value="TWD">New Taiwan Dollar</option>
+7<option value="NZD">New Zealand Dollar</option>
+8<option value="KPW">North Korean Won</option>
+9<option value="NOK">Norwegian Krone</option>
+110<option value="BTN">Ngultrum</option>
+1<option value="PEN">Nuevo Sol</option>
+2<option value="MRO">Ouguiya</option>
+3<option value="TOP">Pa&amp;apos;anga</option>
+4<option value="PKR">Pakistan Rupee</option>
+5<option value="XPD">Palladium</option>
+6<option value="MOP">Pataca</option>
+7<option value="UYU">Peso Uruguayo</option>
+8<option value="PHP">Philippine Peso</option>
+9<option value="XPT">Platinum</option>
+120<option value="GBP">Pound Sterling</option>
+1<option value="BWP">Pula</option>
+2<option value="QAR">Qatari Rial</option>
+3<option value="GTQ">Quetzal</option>
+4<option value="ZAR">Rand</option>
+5<option value="OMR">Rial Omani</option>
+6<option value="KHR">Riel</option>
+7<option value="MVR">Rufiyaa</option>
+8<option value="RON">Rumen Leyi</option>
+9<option value="IDR">Rupiah</option>
+130<option value="RUB">Russian Ruble</option>
+1<option value="RWF">Rwanda Franc</option>
+2<option value="SAR">Saudi Riyal</option>
+3<option value="XDR">SDR</option>
+4<option value="SCR">Seychelles Rupee</option>
+5<option value="XAG">Silver</option>
+6<option value="SGD">Singapore Dollar</option>
+7<option value="SKK">Slovak Koruna</option>
+8<option value="SBD">Solomon Islands Dollar</option>
+9<option value="SOS">Somali Shilling</option>
+140<option value="LKR">Sri Lanka Rupee</option>
+1<option value="KGS">Som</option>
+2<option value="TJS">Somoni</option>
+3<option value="SHP">St. Helena Pound</option>
+4<option value="SDD">Sudanese Dinar</option>
+5<option value="SRG">Suriname Guilder</option>
+6<option value="SEK">Swedish Krona</option>
+7<option value="CHF">Swiss Franc</option>
+8<option value="SYP">Syrian Pound</option>
+9<option value="BDT">Taka</option>
+150<option value="WST">Tala</option>
+1<option value="TZS">Tanzanian Shilling</option>
+2<option value="KZT">Tenge</option>
+3<option value="SIT">Tolar</option>
+4<option value="TTD">Trinidad and Tobago Dollar</option>
+5<option value="MNT">Tugrik</option>
+6<option value="TND">Tunisian Dinar</option>
+157<option value="TRY">Türk Lirası</option>
+8<option value="UGX">Uganda Shilling</option>
+159<option value="USD">US Dolar</option>
+160<option value="UZS">Uzbekistan Sum</option>
+1<option value="VUV">Vatu</option>
+2<option value="KRW">Won</option>
+3<option value="YER">Yemeni Rial</option>
+4<option value="JPY">Yen</option>
+5<option value="CNY">Yuan Renminbi</option>
+6<option value="ZWD">Zimbabwe Dollar</option>
+7<option value="PLN">Zloty</option>
+
+
+
+  */

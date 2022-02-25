@@ -1,0 +1,131 @@
+﻿USE u7093888_Ustad01
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+begin transaction
+
+ create table MtskAdaySozlesme
+ (
+   Id                    Int IDENTITY(1,1) not null, 
+   AdayId                Int       not null, /* default 0 */
+   FirmId                Int       not null,
+   IsActive              Bit       not null, /* default : 1 = active, 0 = not active */  
+   TcNo                  Varchar(11)   null,
+   DonemTipiId           Int           null,
+
+   SozlesmeTarihi        Date          null,
+   Sozlesme1Resim        VarBinary(max) null,
+   Sozlesme2Resim        VarBinary(max) null,
+   Sozlesme1ResimSmall   VarBinary(max) null,
+   Sozlesme2ResimSmall   VarBinary(max) null,
+
+   constraint		pk_MtskAdaySozlesme primary key (Id)
+ )
+  
+ grant select, insert, update, delete on MtskAdaySozlesme to public
+
+  create index X_MtskAdaySozlesme01 on MtskAdaySozlesme (AdayId)
+  create index X_MtskAdaySozlesme02 on MtskAdaySozlesme (TcNo)
+  create index X_MtskAdaySozlesme03 on MtskAdaySozlesme (DonemTipiId)
+
+commit transaction
+
+
+
+begin transaction
+
+USE u7093888_Ustad01
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TRIGGER dbo.trg_MtskAdaySozlesme on dbo.MtskAdaySozlesme
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    DECLARE myCursor cursor for select Id from Inserted
+    DECLARE @curId bigint
+
+    Declare @AdayId int = 0
+    Declare @FirmId int = 0
+
+    OPEN myCursor
+
+    FETCH NEXT FROM myCursor INTO @curId
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+
+        select 
+           @AdayId = ins.AdayId
+          ,@FirmId = ins.FirmId
+		from inserted ins
+    	where ins.Id = @curId
+
+        -- MtskAdayBelgeler Insert
+        if ( Select count(*) ADET from dbo.[MtskAdayBelgeler] 
+             where 0 = 0 
+             and [AdayId] = @AdayId 
+             and [FirmId] = @FirmId
+            ) = 0 
+        begin 
+            insert into dbo.[MtskAdayBelgeler] ( 
+            AdayId, FirmId, IsActive,
+            IsBiyometrik,    IsOgrenim,    IsSaglik,    IsSavcilik,    IsImza,    IsSozlesme1,    IsSozlesme2, 
+            BiyometrikIsUploaded,    OgrenimIsUploaded,    SaglikIsUploaded,    SavcilikIsUploaded,    ImzaIsUploaded,    Sozlesme1IsUploaded,    Sozlesme2IsUploaded, 
+            IsSertifikaUcreti,    SertifikaUcretiIsPaid,    IsUcretsiz,    IsFatura ) values 
+            ( @AdayId,  @FirmId,  1,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0 ) 
+        end -- MtskAdayBelgeler
+
+
+		-- MtskAdayBelgeler tablosunu işaretle
+		Update MtskAdayBelgeler set
+        IsSozlesme1 = x.Sonuc
+        From MtskAdayBelgeler a, 
+        (
+            Select count(Id) as Sonuc
+            From MtskAdaySozlesme
+            Where 0 = 0
+            and Sozlesme1Resim is not null
+            and AdayId = @AdayId
+            and FirmId = @FirmId
+        ) as x
+        Where a.AdayId = @AdayId
+        and   a.FirmId = @FirmId
+
+        Update MtskAdayBelgeler set
+        IsSozlesme2 = x.Sonuc
+        From MtskAdayBelgeler a, 
+        (
+            Select count(Id) as Sonuc
+            From MtskAdaySozlesme
+            Where 0 = 0
+            and Sozlesme2Resim is not null
+            and AdayId = @AdayId
+            and FirmId = @FirmId
+        ) as x
+        Where a.AdayId = @AdayId
+        and   a.FirmId = @FirmId
+
+
+      FETCH NEXT FROM myCursor INTO @curId
+    END -- While
+
+    CLOSE myCursor
+    DEALLOCATE myCursor   
+
+END -- create trigger
+GO
+
+ALTER TABLE dbo.MtskAdaySozlesme ENABLE TRIGGER trg_MtskAdaySozlesme
+GO
+
+commit transaction

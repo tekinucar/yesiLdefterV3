@@ -1,0 +1,254 @@
+
+
+begin transaction
+
+create table STK_FIYAT
+(
+    ID                      Int IDENTITY(1,1)   NOT NULL,
+    FIRM_ID                 Int                 NULL,
+    SHOP_ID                 Int                 NULL,
+
+    URUN_ID                 Int                 NOT NULL,
+    BIRIM_NO                SmallInt            NOT NULL, /* Default olarak 1. Birim  */ 
+    FIYAT_CESIT_TD          SmallInt            NOT NULL, /* 1. Müþteri Fiyatý, 2. Bayi Fiyatý gibi */
+    UYGULAMA_SEKLI_TD       SmallInt            NOT NULL, /* 1. Standart Fiyat Listesi, 2. Alýþ Fiyatýna % Ekle, vb  */
+    KDV_VARMI               Bit                 NULL,     /* 0- KDV Uygulamasý Yok, 1- KDV Uygulamasý Var   */
+	KDV_DH                  SmallInt            NULL,     /* 0- Satýþa KDV Hariç  1- Satýþa KDV Dahil  */
+    ALIS_KDV                Numeric(4,2)        NULL,
+    SATIS_KDV               Numeric(4,2)        NULL,
+    PARA_TURU               SmallInt            NULL,     /* 0- TL  0 > Dolar, Mark */
+        
+    GUN_TD                  SmallInt            NULL,     /* 0. hergün, 1. hafta içi, 2. ctesi, 3. pazar, 4. ctesi + pazar */
+    GECERLI_BAS_TARIH       Date                NOT NULL,
+    GECERLI_BAS_SAAT        VarChar(5)          NULL, 
+
+    GECERLI_BIT_TARIH       Date                NULL,
+    GECERLI_BIT_SAAT        VarChar(5)          NULL, 
+
+    ALIS_FIYATI             Numeric(22,5)       NULL,
+    ALISF_KDVSIZ            Numeric(22,5)       NULL,
+    ALISF_KDVLI             Numeric(22,5)       NULL,
+
+    KAR_YUZDESI1            Numeric(6,3)        NULL, /* UYGULAMA_SEKLI 1 için  */
+    KAR_YUZDESI2            Numeric(6,3)        NULL, /* UYGULAMA_SEKLI 1 için  */
+    KAR_ISKONTOSU           Numeric(6,3)        NULL, /* Kardan yapýlacak max Ýskonto; Satýþ iskontosunu otomatik hesaplar  */
+    MAX_SATIS_ISKONTOSU     Numeric(6,3)        NULL, /* Uygulanacak Olan Max Oran */
+
+    YUVARLAMA_ORANI         SmallInt            NULL, /* 0=1, 1=10, 2=100, 3=1000,, */
+    YUVARLAMA_SEKLI         SmallInt            NULL, /* 0=Yuvarlama Yok, 1=Orantýlý Yuv %50, 2= Aþaðý, 3=Yukarý */
+
+    LISTE_ID                Int                 NULL, 
+	LISTE_FIYATI            Numeric(22,5)       NULL,
+    LISTE_ISKONTOSU         Numeric(6,3)        NULL, /* Liste Ýskontosu Otomatik Olarak Satýþ Fiyatýndan düþer */
+
+    SATIS_FIYATI            Numeric(22,5)       NULL,
+    SATISF_KDVSIZ           Numeric(22,5)       NULL,
+    SATISF_KDVLI            Numeric(22,5)       NULL,
+
+    VERGI1_ID               Int                 NULL,
+    VERGI1_TUTARI           Numeric(22,3)       NULL, /* bir birimlik vergi tutarý */
+	VERGI1_IN_FIYAT         Numeric(2)          NULL, /* 0 = Fiyatýn ÝÇÝNDE, 1 = Fiyata Ekle  */  
+    VERGI2_ID               Int                 NULL,
+    VERGI2_TUTARI           Numeric(22,3)       NULL, /* bir birimlik vergi tutarý*/
+    VERGI2_IN_FIYAT         Numeric(2)          NULL, /* 0 = Fiyatýn ÝÇÝNDE, 1 = Fiyata Ekle  */  
+    VERGI3_ID               Int                 NULL,
+    VERGI3_TUTARI 	        Numeric(22,3)       NULL, /* bir birimlik vergi tutarý */
+    VERGI3_IN_FIYAT         Numeric(2)          NULL, /* 0 = Fiyatýn ÝÇÝNDE, 1 = Fiyata Ekle  */  
+    VERGI_TOPLAMI           Numeric(22,3)       NULL,
+
+    SATIS_VERGILI           Numeric(22,5)       NULL,
+    SATISF_VERGILI_KDVSIZ   Numeric(22,5)       NULL,
+    SATISF_VERGILI_KDVLI    Numeric(22,5)       NULL,
+
+    ACIKLAMA                VarChar(30)         NULL,
+	
+ 	constraint PK_STK_FIYAT primary key (ID)
+)
+
+ create index X_STK_FIYAT01 on STK_FIYAT (FIRM_ID, SHOP_ID, URUN_ID, FIYAT_CESIT_TD, GECERLI_BAS_TARIH, BIRIM_NO, GUN_TD)
+
+ grant select, insert, update, delete on STK_FIYAT to public
+
+commit transaction
+
+
+/*
+--ALTER TABLE HP_URUN ADD VERGI_TURU1_ID int  NULL
+
+ALTER TABLE STK_FIYAT ALTER COLUMN XXXX SmallInt NULL
+
+ALTER TABLE STK_FIYAT add KDV_VARMI  Bit    NULL
+
+*/
+
+
+/*
+
+INSERT INTO [GREEN].[dbo].[STK_FIYAT]
+           ([FIRM_ID]
+           ,[SHOP_ID]
+           ,[URUN_ID]
+           ,[BIRIM_NO]
+           ,[FIYAT_CESIT_TD]
+           ,[UYGULAMA_SEKLI_TD]
+           
+           ,[KDV_DH]
+           ,[ALIS_KDV]
+           ,[SATIS_KDV]
+           ,[PARA_TURU]
+           ,[GUN_TD]
+           
+           ,[GECERLI_BAS_TARIH]
+           ,[GECERLI_BAS_SAAT]
+           ,[GECERLI_BIT_TARIH]
+           ,[GECERLI_BIT_SAAT]
+           
+           ,[ALIS_FIYATI]
+           ,[ALISF_KDVSIZ]
+           ,[ALISF_KDVLI]
+           
+           ,[KAR_YUZDESI1]
+           ,[KAR_YUZDESI2]
+           ,[KAR_ISKONTOSU]
+           ,[MAX_SATIS_ISKONTOSU]
+           
+           ,[YUVARLAMA_ORANI]
+           ,[YUVARLAMA_SEKLI]
+           
+           ,[LISTE_ID]
+           ,[LISTE_FIYATI]
+           ,[LISTE_ISKONTOSU]
+           
+           ,[SATIS_FIYATI]
+           ,[SATISF_KDVSIZ]
+           ,[SATISF_KDVLI]
+           
+           ,[VERGI1_ID]
+           ,[VERGI1_TUTARI]
+		   ,[VERGI1_IN_FIYAT]
+           ,[VERGI2_ID]
+           ,[VERGI2_TUTARI]
+		   ,[VERGI2_IN_FIYAT]
+           ,[VERGI3_ID]
+           ,[VERGI3_TUTARI]
+		   ,[VERGI3_IN_FIYAT]
+           ,[VERGI_TOPLAMI]
+           
+           ,[SATIS_VERGILI]
+           ,[SATISF_VERGILI_KDVSIZ]
+           ,[SATISF_VERGILI_KDVLI]
+           
+           ,[ACIKLAMA])
+           
+  SELECT 
+       0
+      ,B.[YER_ID]
+      ,A.[ID]
+      ,isnull(B.[BIRIM_NO],1)
+      ,isnull(B.[FIYAT_CESIT_ID],1)
+      ,isnull(B.[UYGULAMA_SEKLI],0)
+      
+      ,B.[KDV_DAHIL]
+      ,A.ALIS_KDV 
+      ,A.SATIS_KDV 
+      ,A.PARA_TURU
+      ,B.[GUN_ID]
+      
+      ,CONVERT(DATE, isnull(B.[GECERLI_TARIH],getdate()), 103)
+      ,null
+      ,null
+      ,null
+      
+      ,B.[ALIS_FIYATI]
+      ,B.[ALISF_KDVSIZ]
+      ,B.[ALISF_KDVLI]
+      
+      ,B.[KAR_YUZDESI]
+      ,B.[KAR_YUZDESI_2]
+      ,B.[KAR_ISKONTOSU]
+      ,B.[MAX_SATIS_ISKONTOSU]
+      
+      ,B.[YUVARLAMA_ORANI]
+      ,B.[YUVARLAMA_SEKLI]
+      
+      ,null
+      ,B.[LISTE_FIYATI]
+      ,B.[LISTE_ISKONTOSU]
+            
+      ,B.[SATIS_FIYATI]
+      ,B.[SATISF_KDVSIZ]
+      ,B.[SATISF_KDVLI]
+      
+      ,null -- Vergiler
+      ,null
+      ,null
+      ,null
+      ,null
+      ,null
+      ,null
+      ,null
+	  ,null
+	  ,null
+
+      ,null
+      ,null
+      ,null
+      ,B.[ACIKLAMA]
+            
+      
+              
+        
+  FROM [GREEN].[dbo].[HP_URUN] A
+    LEFT OUTER JOIN [K2CEVIANKARA].[dbo].[K2_STK_FIYATLARI] B ON (A.OLD_REF_ID = B.URUN_ID )
+
+   
+   
+
+
+
+//****************
+
+ SELECT A.[ID]
+        ,A.[URUN_ADI]
+        ,A.[OLD_REF_ID]
+        ,B.URUN_ID
+        
+      ,B.[URUN_ID]
+      ,B.[BIRIM_NO]
+      ,B.[FIYAT_CESIT_ID]
+      ,B.[UYGULAMA_SEKLI]
+      ,B.[RECETEB_ID]
+      ,B.[GECERLI_TARIH]
+      ,B.[ALIS_FIYATI]
+      ,B.[ALISF_KDVSIZ]
+      ,B.[ALISF_KDVLI]
+      ,B.[KAR_YUZDESI]
+      ,B.[KAR_YUZDESI_2]
+      ,B.[KAR_ISKONTOSU]
+      ,B.[MAX_SATIS_ISKONTOSU]
+      ,B.[MALIYET_EKLE]
+      ,B.[MALIYET_TUTARI]
+      ,B.[YUVARLAMA_ORANI]
+      ,B.[YUVARLAMA_SEKLI]
+      ,B.[LISTE_FIYATI]
+      ,B.[LISTE_ISKONTOSU]
+      ,B.[SATIS_FIYATI]
+      ,B.[SATISF_KDVSIZ]
+      ,B.[SATISF_KDVLI]
+      ,B.[KDV_DAHIL]
+      ,B.[ACIKLAMA]
+      ,B.[PLANB_ID]
+      ,B.[YER_ID]
+      ,B.[GUN_ID]
+              
+        
+  FROM [GREEN].[dbo].[HP_URUN] A
+    LEFT OUTER JOIN [K2CEVIANKARA].[dbo].[K2_STK_FIYATLARI] B ON (A.OLD_REF_ID = B.URUN_ID )
+
+   
+
+
+
+
+
+*/

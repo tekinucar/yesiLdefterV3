@@ -1,0 +1,28 @@
+begin transaction
+
+ create table MS_TABLES_TS
+ (
+        REF_ID                  Int IDENTITY(1,1)     NOT NULL,
+        DBASE_TYPE              SmallInt              NULL,      /* 1.Master,  2.ManagerServer,  3.Project */ 
+        MODUL_CODE              VarChar(20)           NULL,
+        PARENT_TABLE_CODE       VarChar(20)           NULL, /* TREE VÝEW ÝÇÝN GEREKÝYOR */
+        TABLE_CODE              VarChar(20)           NOT NULL,
+	TABLE_NAME              VarChar(50)           NOT NULL,
+        KEY_FNAME		VarChar(30)           NULL,
+        TABLE_TYPE              SmallInt              NULL,	
+          
+        TB_CAPTION              VarChar(100)          NULL,
+        TB_SELECT_SQL           Text                  NULL,
+        TB_WHERE_SQL            VarChar(250)          NULL,
+        TB_ORDER_BY             VarChar(250)          NULL,
+        
+	Constraint PK_MS_TABLES_TS primary key (TABLE_CODE)
+ )
+
+ create index X_MS_TABLES_TS1 on MS_TABLES_TS (MODUL_CODE,TABLE_CODE)
+
+ grant select, insert, update, delete on MS_TABLES_TS to public
+
+
+commit transaction
+

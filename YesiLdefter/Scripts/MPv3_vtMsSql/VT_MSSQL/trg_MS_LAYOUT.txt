@@ -1,0 +1,104 @@
+﻿USE [MSV3DFTRBLT]
+GO
+
+/****** Object:  Trigger [dbo].[trg_MS_LAYOUT]    Script Date: 24.11.2019 13:16:25 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+
+
+CREATE TRIGGER [dbo].[trg_MS_LAYOUT] on [dbo].[MS_LAYOUT] 
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    DECLARE InsertCursor_MS_LAYOUT cursor for select REF_ID from Inserted
+    DECLARE @curId bigint
+
+    OPEN InsertCursor_MS_LAYOUT
+
+    FETCH NEXT FROM InsertCursor_MS_LAYOUT INTO @curId
+
+    declare @ySoftCode varchar(20) = null
+    declare @yProjectCode varchar(20) = null
+	declare @yModulCode varchar(20) = null
+    declare @yLytMainCode varchar(30) = null
+
+    declare @eSoftCode varchar(20) = null
+    declare @eProjectCode varchar(20) = null
+	declare @eModulCode varchar(20) = null
+    declare @eLytMainCode varchar(30) = null
+
+    declare @MasterCode varchar(100) = null
+    
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+	    set @ySoftCode = ''
+		set @yProjectCode = '' 
+        set @yModulCode = ''
+        set @yLytMainCode = ''
+        
+		set @eSoftCode = ''
+		set @eProjectCode = '' 
+        set @eModulCode = ''
+        set @eLytMainCode = ''
+        
+		set @MasterCode = ''
+        
+        select 
+          @ySoftCode = isnull(ins.SOFTWARE_CODE,'')
+		 ,@yProjectCode = isnull(ins.PROJECT_CODE,'')
+         ,@yModulCode = isnull(ins.MODUL_CODE,'')
+		 ,@yLytMainCode = isnull(ins.LYTMAIN_CODE,'')
+		from inserted ins
+        where ins.REF_ID = @curId
+     	
+     	select 
+          @eSoftCode = isnull(dlt.SOFTWARE_CODE,'')
+         ,@eProjectCode = isnull(dlt.PROJECT_CODE,'')
+         ,@eModulCode = isnull(dlt.MODUL_CODE,'')
+		 ,@eLytMainCode = isnull(dlt.LYTMAIN_CODE,'')
+        from  deleted dlt
+        where dlt.REF_ID = @curId
+
+     	/*   	
+    	if ((@ySoftCode <> @eSoftCode) or 
+    	    (@yProjectCode <> @eProjectCode) or 
+			(@yModulCode <> @eModulCode) or
+			(@yMenuCode <> @eMenuCode)
+			)   
+    	begin
+		*/
+    	  --  UST/OMS/FNS/AFORM 
+		  set @MasterCode = @ySoftCode + '/' + @yProjectCode + '/' + @yModulCode + '/' +  isnull(@yLytMainCode,'')
+    	  
+		  -- edit olan satırı düzenle 
+    	  update MS_LAYOUT set MASTER_CODE = @MasterCode
+          where REF_ID = @curId 
+    	  
+    	--end        
+
+    	FETCH NEXT FROM InsertCursor_MS_LAYOUT INTO @curId
+    END
+
+    CLOSE InsertCursor_MS_LAYOUT
+    DEALLOCATE InsertCursor_MS_LAYOUT   
+        
+
+END
+
+
+
+
+
+
+GO
+
+ALTER TABLE [dbo].[MS_LAYOUT] ENABLE TRIGGER [trg_MS_LAYOUT]
+GO
+
+

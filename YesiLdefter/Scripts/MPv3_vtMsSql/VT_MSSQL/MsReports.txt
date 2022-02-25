@@ -1,0 +1,28 @@
+﻿begin transaction
+ create table MsReports
+ (
+    Id              Int IDENTITY(1,1) not null,
+	IsActive        Bit               not null,
+    LineNumber      int               not null,
+
+	ReportName      nvarChar(100)     null,     
+    About           nvarChar(100)     null,     
+    
+    ReportTypeId    SmallInt          null, /* 1.Liste, 2. Tasarımlı form, 3. Matbu baskı form  */
+    PrivateTypeId   SmallInt          null, /* 0, 1. Genel, 2. Üst Yönetim, 3. Sadece Ortaklar */  
+
+
+	SoftWareCode    varchar(20)       null,
+    ProjectCode     varchar(20)       null,
+    ModulCode       varchar(20)       null,
+    FormCode        varchar(100)      null,
+    ReportTemp      nvarchar(max)     null,
+
+   Constraint pk_MsReports primary key (Id)
+ )
+
+ create index X_MsReports_01 on MsReports (SoftWareCode, ProjectCode, ModulCode, FormCode)
+ 
+ grant select, insert, update, delete on MsReports to public
+
+commit transaction

@@ -1,0 +1,570 @@
+﻿USE u7093888_Ustad01
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+begin transaction
+
+ create table MtskAdayTakip
+ (
+   Id                    Int IDENTITY(1,1) not null, 
+   FirmId                Int       not null,
+   AdayId                Int       not null, /* default 0 */
+   IsActive              Bit       not null, /* default : 1 = active, 0 = not active */  
+   TcNo                  Varchar(11)   null, /* trg_MtskAday */
+   DonemTipiId           Int           null, /* trg_MtskAday */ 
+   GrupTipiId            SmallInt      null, /* trg_MtskAday */
+   SubeTipiId            SmallInt      null, /* trg_MtskAday */
+
+   --10 kayıt aşaması
+   KayitTipiId            SmallInt     null, /* trg_MtskAday : 0. Teklif verildi, 1. Kayıt aşamasında, 2. Kesin Kayıt   */ 
+   MebbisKurumOnayi       Bit          null, /* trg_MtskAday : 0-Onaysız, 1-Onaylandı */	
+   MebbisDurumTipiId      SmallInt     null, /* trg_MtskAday :  detay aşağıda */
+   YasOnayiTipiId         SmallInt     null, /* 1-Yaşı Tutmuyor, 2-Yaşı Tutuyor, 3. Diğer sebeplerle onaylı */
+   OzurDurumTipiId        SmallInt     null, /* MtskAdaySaglik tan gelecek bilgi  */
+   
+   BelgelerGeldi          Bit          null,
+   BelgelerTarandi        Bit          null,
+   BelgelerYuklendi       Bit          null,
+
+   --20 ödemeleri
+   SertifikaUcretTipiId   SmallInt     null, /* trg_MtskAday */
+   
+   --100 eSınav aşaması
+   TeorikBaslamaTarihi    Date         null,
+   ToerikBitisTarihi      Date         null,
+   TeorikDersToplami      SmallInt     null,
+   TeorikDersTipiId       SmallInt     null,--104
+   
+   --110
+   eSinavNo               SmallInt     null, --111
+   eSinavDurumTipiId      SmallInt     null,
+   eSinavSonucTipiId      SmallInt     null, /* Başarılı, Başarısız, Girmedi */
+   eSinavSonrasiTipiId    SmallInt     null, 
+   OnBesGunBitisTarihi    Date         null, 
+   eSinavUcretTipiId      SmallInt     null, /* kendisi yatıracak, biz yatıracağız */
+   eSinavDetayId          Int          null, /* en son hangi sınavsa onun id si. sınav1 ise sınav1 in id si, 2 ise 2 nin id si, 3, 4 ... */
+   eSinavBasariTarihi     Date         null,
+   
+   --200 uygulama ders + Sınav aşaması
+   UygulamaBaslamaTarihi  Date         null,
+   UygulamaBitisTarihi    Date         null,
+   SimulatorDersToplami   SmallInt     null,
+   AkanTrafikDersToplami  SmallInt     null, /* prc_MtskUygulamaDersPlaniSaatleriGuncelle  içinde hesplanıyor */
+   UygulamaliDersToplami  SmallInt     null, /* prc_MtskUygulamaDersPlaniSaatleriGuncelle  içinde hesplanıyor */
+   UygulamaliDersTipiId   SmallInt     null,
+
+   --210
+   BasarisizBaslamaTarihi Date         null,
+   BasarisizBitisTarihi   Date         null,
+   BasarisizDersToplami   SmallInt     null,
+   BasarisizDersTipiId    SmallInt     null,
+   
+   --220
+   Arti4BaslamaTarihi     Date         null,
+   Arti4BitisTarihi       Date         null,
+   Arti4DersToplami       SmallInt     null, /* prc_MtskUygulamaDersPlaniSaatleriGuncelle  içinde hesplanıyor */
+   Arti4DersTipiId        SmallInt     null,
+   
+   --230
+   uSinavaKatilabilir      Bit          null,
+   uRandevuMebbisAktarildi Bit          null, 
+   uSinavNo                SmallInt     null,
+   uSinavDurumTipiId       SmallInt     null,
+   uSinavSonucTipiId       SmallInt     null, /* Başarılı, Başarısız, Girmedi */
+   uSinavSonrasiTipiId     SmallInt     null, 
+   uSinavUcretTipiId       SmallInt     null, /* kendisi yatıracak, biz yatıracağız */
+   uSinavDetayId           Int          null, /* en son hangi sınavsa onun id si. sınav1 ise sınav1 in id si, 2 ise 2 nin id si, 3, 4 ... */
+   uSinavBasariTarihi      Date         null,
+   
+   --300 sertifika aşaması
+   SertifikaDurumTipiId    SmallInt     null,
+   SertifikaTarihi         Date         null,
+   DosyaYakti              Bit          null, -- false/true
+   
+   constraint		pk_MtskAdayTakip primary key (Id)
+ )
+  
+ grant select, insert, update, delete on MtskAdayTakip to public
+
+ create index X_MtskAdayTakip01 on MtskAdayTakip (AdayId)
+ create index X_MtskAdayTakip02 on MtskAdayTakip (TcNo)
+ create index X_MtskAdayTakip03 on MtskAdayTakip (DonemTipiId,GrupTipiId,SubeTipiId)
+   
+commit transaction
+
+/* Tablonun her aday için gerekli olan satırı :  trg_MtskAday içinde insert ediliyor   */
+
+begin transaction
+
+-- ------------------------------------------------------- 
+-- KayitTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[MtskAdayTakipKayitTipi]
+(
+   Id               Int Unique not null, 
+   KayitTipi        nVarchar(30)   null,
+   ChartCaption     nVarchar(20)   null,
+   FormCaption      nVarchar(15)   null,
+
+   constraint  pk_MtskAdayTakipKayitTipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskAdayTakipKayitTipi]
+INSERT INTO [Lkp].[MtskAdayTakipKayitTipi] (Id, KayitTipi, ChartCaption, FormCaption)
+ VALUES 
+  ( 0,    N'', '', ''),
+  ( 1,    N'Ön kayıt',                  'Ön kayıt',     'Yeni Aday' ),
+  ( 2,    N'Kayıt aşamasında',          'K.Aşamasında', 'Mebbis' ),
+  ( 3,    N'Kesin kayıt',               'Kesin kay.', '' ),
+  ( 4,    N'Sertifikayı hak kazandı',   '', '' ),
+  ( 5,    N'Sertifikası teslim edildi', '', '' ),
+  ( 6,    N'Diğerleri',                 '', '' ),
+  ( 7,    N'Dosya kapandı',             '', '' )
+            
+-- ------------------------------------------------------- 
+-- MebbisDurumTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[MtskAdayTakipMebbisDurumTipi]
+(
+   Id               Int Unique not null, 
+   MebbisDurumTipi  nVarchar(70)   null
+   
+   constraint  pk_MtskAdayTakipDurumTipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskAdayTakipMebbisDurumTipi]
+INSERT INTO [Lkp].[MtskAdayTakipMebbisDurumTipi] (Id, MebbisDurumTipi)
+ VALUES 
+  (-1,  N'' ),
+  ( 0,  N'Kursa Başvuru Aşamasında' ),
+  ( 1,  N'Teorik Sınav Aşamasında' ),
+  ( 2,  N'Uygulama Sınav Aşamasında' ),
+  ( 3,  N'Teorik Sınav Hakkı Doldu' ),
+  ( 4,  N'Uygulama Sınav Hakkı Doldu' ),
+  ( 5,  N'Sertifika Almaya Hak Kazandı' ),
+  ( 6,  N'Sertifikası İptal Edildi' ),
+  ( 7,  N'e-Sınav Aşamasında' ),
+  ( 8,  N'e-Sınav Test Aşamasında' ),
+  ( 9,  N'e-Sınavdan Başarısız Oldu' ),
+  ( 10,  N'e-Sınav Hakkı Doldu' ),
+  ( 11,  N'Kaydı Silindi' ),
+  ( 12,  N'Ceza Kaydı Var' ),
+  ( 13,  N'Teorik Dersten Muaf' ),
+  ( 14,  N'Adli Sicil Kaydı Uygun Olmadığından Dönem Kaydı Durdurulmuştur.' ),
+  ( 22,  N'2.Direksiyon Aşamasında' )
+
+
+-- ------------------------------------------------------- 
+-- SertifikaUcretTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[MtskAdayTakipSertifikaUcretTipi]
+(
+   Id                 Int Unique not null, 
+   SertifikaUcretTipi nVarchar(50)   null
+   
+   constraint  pk_MtskAdayTakipSertifikaUcretTipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskAdayTakipSertifikaUcretTipi]
+INSERT INTO [Lkp].[MtskAdayTakipSertifikaUcretTipi] (Id, SertifikaUcretTipi)
+ VALUES 
+  ( 0,    N'Hiç ödemesi yok'),
+  ( 1,    N'Kısmi ödemesi var'),
+  ( 2,    N'Gecikmiş ödemesi var'),
+  ( 3,    N'Tamamı tahsil edildi'),
+  ( 4,    N'Ücretsiz')
+
+
+/* ***************************************************************************** */
+-- Teorik Ders ve e-Sınavlar
+/* ***************************************************************************** */
+
+-- ------------------------------------------------------- 
+-- TeorikDersTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[MtskAdayTakipTeorikDersTipi]
+(
+   Id               Int Unique not null, 
+   TeorikDersTipi   nVarchar(50)   null
+   
+   constraint  pk_MtskAdayTakipTeorikDersTipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskAdayTakipTeorikDersTipi]
+INSERT INTO [Lkp].[MtskAdayTakipTeorikDersTipi] (Id, TeorikDersTipi)
+ VALUES 
+  ( 0,    N''),
+  ( 1,    N'Teorik ders başlamadı'),
+  ( 2,    N'Teorik ders alıyor'),
+  ( 3,    N'Teorik dersleri tamamladı'),
+  ( 4,    N'Muaf')
+
+-- ------------------------------------------------------- 
+-- eSinavDurumTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[MtskAdayTakipeSinavDurumTipi]
+(
+   Id               Int Unique not null, 
+   eSinavDurumTipi  nVarchar(50)   null,
+   ChartCaption     nVarchar(20)   null,
+   FormCaption      nVarchar(15)   null,
+   
+   constraint  pk_MtskAdayTakipeSinavDurumTipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskAdayTakipeSinavDurumTipi]
+INSERT INTO [Lkp].[MtskAdayTakipeSinavDurumTipi] (Id, eSinavDurumTipi, ChartCaption, FormCaption)
+ VALUES 
+  ( 0,    N'', '', ''),
+  ( 1,    N'e-Sınav için hazır değil',    'Hazır değil', '' ),
+  ( 2,    N'e-Sınav başvurusu yapılacak', 'Başvuru yapılacak', 'Mebbis' ),
+  ( 3,    N'e-Sınav başvurusu yapıldı',   'Başvuru yapıldı', '' ),
+  ( 4,    N'e-Sınav sonucu okunacak',     'Sınav okunacak', 'Mebbis' ),
+  ( 5,    N'e-Sınav sonucu okundu',       'Sınav okundu', '' ),
+  ( 6,    N'Muaf',                        'Muaf', '' )
+
+
+-- ------------------------------------------------------- 
+-- eSinavSonucTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[MtskAdayTakipeSinavSonucTipi]
+(
+   Id               Int Unique not null, 
+   eSinavSonucTipi  nVarchar(50)   null,
+   ChartCaption     nVarchar(20)   null,
+   FormCaption      nVarchar(15)   null,
+   
+   constraint  pk_MtskAdayTakipeSinavSonucTipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskAdayTakipeSinavSonucTipi]
+INSERT INTO [Lkp].[MtskAdayTakipeSinavSonucTipi] (Id, eSinavSonucTipi, ChartCaption, FormCaption)
+ VALUES 
+  ( 0,    N'', '', '' ),
+  ( 1,    N'Başarılı', 'Başarılı', '' ),
+  ( 2,    N'Başarısız', 'Başarısız', '' ),
+  ( 3,    N'Girmedi', 'Girmedi', '')
+
+-- ------------------------------------------------------- 
+-- eSinavSonrasiTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[MtskAdayTakipeSinavSonrasiTipi]
+(
+   Id               Int Unique not null, 
+   eSinavSonrasiTipi  nVarchar(50)   null,
+   ChartCaption       nVarchar(20)   null,
+   FormCaption        nVarchar(15)   null,   
+
+   constraint  pk_MtskAdayTakipeSinavSonrasıTipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskAdayTakipeSinavSonrasiTipi]
+INSERT INTO [Lkp].[MtskAdayTakipeSinavSonrasiTipi] (Id, eSinavSonrasiTipi, ChartCaption, FormCaption)
+ VALUES 
+  ( 0,    N'', '', '' ),
+  ( 1,    N'15 günlük beklemede',      '15 Gün', '' ),
+  ( 2,    N'Uygulama aşamasına geçti', 'Uyg. aşama. geçti', '' ),
+  ( 3,    N'Tüm e-Sınav hakkı bitti',  'Sınav hakkı bitti', '' )
+
+
+-- ------------------------------------------------------- 
+-- eSinavUcretTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[MtskAdayTakipeSinavUcretTipi]
+(
+   Id               Int Unique not null, 
+   eSinavUcretTipi  nVarchar(50)   null
+   
+   constraint  pk_MtskAdayTakipeSinavUcretTipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskAdayTakipeSinavUcretTipi]
+INSERT INTO [Lkp].[MtskAdayTakipeSinavUcretTipi] (Id, eSinavUcretTipi)
+ VALUES 
+  ( 0,    N'Adayın kendisi yatıracak'),
+  ( 1,    N'Biz yatıracağız')
+
+/* ***************************************************************************** */
+-- Uygulamalı Ders ve Sınavlar
+/* ***************************************************************************** */
+
+-- ------------------------------------------------------- 
+-- UygulamaliDersTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[MtskAdayTakipUygulamaliDersTipi]
+(
+   Id                  Int Unique not null, 
+   UygulamaliDersTipi  nVarchar(50)   null,
+   ChartCaption        nVarchar(20)   null,
+   FormCaption         nVarchar(15)   null,   
+   
+   constraint  pk_MtskAdayTakipUygulamaliDersTipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskAdayTakipUygulamaliDersTipi]
+INSERT INTO [Lkp].[MtskAdayTakipUygulamaliDersTipi] (Id, UygulamaliDersTipi, ChartCaption, FormCaption)
+ VALUES 
+  ( 0,    N'', '', '' ),
+  ( 1,    N'Uygulamalı dersler planlanacak', 'Planlanacak', 'Planlama' ),
+  ( 2,    N'Uygulamalı dersler planlandı',   'Planlandı', 'Mebbis' ),
+  ( 3,    N'Uygulamalı dersleri alıyor',     'Ders alıyor', '' ),
+  ( 4,    N'Uygulamalı dersleri tamamladı',  'Ders tamamlandı', '' )
+
+
+-- ------------------------------------------------------- 
+-- BasarisizDersTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[MtskAdayTakipBasarisizDersTipi]
+(
+   Id                  Int Unique not null, 
+   BasarisizDersTipi   nVarchar(50)   null,
+   ChartCaption        nVarchar(20)   null,
+   FormCaption         nVarchar(15)   null,   
+   
+   constraint  pk_MtskAdayTakipBasarisizDersTipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskAdayTakipBasarisizDersTipi]
+INSERT INTO [Lkp].[MtskAdayTakipBasarisizDersTipi] (Id, BasarisizDersTipi, ChartCaption, FormCaption)
+ VALUES 
+  ( 0,    N'', '', ''),
+  ( 1,    N'2 saat başarısız aday eğitimi planlanacak', '2 saat planlanacak', 'Planlama' ),
+  ( 2,    N'2 saat başarısız aday eğitimi planlandı',   '2 saat planlandı', 'Mebbis' ),
+  ( 3,    N'2 saat başarısız aday eğitimi alıyor',      '2 saat eğitim alıyor', '' ),
+  ( 4,    N'2 saat başarısız aday eğitimi tamamlandı',  '2 saat eğitim tamam', '' ),
+  ( 5,    N'Eğitime gerek yok (Sınava girmedi)',        'Sınava girmedi', '' )
+
+
+-- ------------------------------------------------------- 
+-- Arti4DersTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[MtskAdayTakipArti4DersTipi]
+(
+   Id              Int Unique not null, 
+   Arti4DersTipi   nVarchar(50)   null,
+   ChartCaption    nVarchar(20)   null,
+   FormCaption     nVarchar(15)   null,   
+   
+   constraint  pk_MtskAdayTakipArti4DersTipi primary key (Id)
+)
+
+
+Delete from [Lkp].[MtskAdayTakipArti4DersTipi]
+INSERT INTO [Lkp].[MtskAdayTakipArti4DersTipi] (Id, Arti4DersTipi, ChartCaption, FormCaption)
+ VALUES 
+  ( 0,    N'', '', ''),
+  ( 1,    N'2.Uygulama (+4) için ders planlanacak', '+4 planlanacak', 'Planlama' ),
+  ( 2,    N'2.Uygulama (+4) için ders planlandı',   '+4 planlandı', 'Mebbis' ),
+  ( 3,    N'2.Uygulama (+4) derslerini alıyor',     '+4 alıyor', '' ),
+  ( 4,    N'2.Uygulama (+4) dersleri tamamlandı',   '+4 tamamlandı', '' )
+
+
+-- ------------------------------------------------------- 
+-- uSinavDurumTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[MtskAdayTakipuSinavDurumTipi]
+(
+   Id               Int Unique not null, 
+   uSinavDurumTipi  nVarchar(60)   null,
+   ChartCaption     nVarchar(25)   null,
+   FormCaption      nVarchar(15)   null,   
+      
+   constraint  pk_MtskAdayTakipuSinavDurumTipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskAdayTakipuSinavDurumTipi]
+INSERT INTO [Lkp].[MtskAdayTakipuSinavDurumTipi] (Id, uSinavDurumTipi, ChartCaption, FormCaption)
+ VALUES 
+  ( 0,    N'', '', '' ),
+  ( 1,    N'Uygulama sınav için hazır değil',              'Uyg.hazır değil', '' ),
+  ( 2,    N'Uygulama sınav için MEBBİS de onaylanacak',    'Mebbisde onaylanacak', 'Mebbis' ),
+  ( 3,    N'Uygulama sınav randevusu planlanacak',         'Randevu planlanacak', 'Planlama' ),
+  ( 4,    N'Uygulama sınav randevusu MEBBİSe aktarılacak', 'Randevu mebbise aktar', 'Mebbis' ),
+  ( 5,    N'Uygulama sınavına girecek',                    'Sınava girecek', '' ),
+  ( 6,    N'Uygulama sınav sonucu okunacak',               'Sonuç okunacak', 'Mebbis' ),
+  ( 7,    N'Uygulama sınav sonucu okundu',                 'Sonuç okundu', '' ),
+  
+  ( 11,   N'2.Uygulama (+4) sınav için hazır değil',              '+4 hazır değil', '' ),
+  ( 13,   N'2.Uygulama (+4) sınav randevusu planlanacak',         '+4 rand.planlanacak', 'Planlama' ),
+  ( 14,   N'2.Uygulama (+4) sınav randevusu MEBBİSe aktarılacak', '+4 Mebbise aktar', 'Mebbis' ),
+  ( 15,   N'2.Uygulama (+4) sınavına girecek',                    '+4 sınava girecek', '' ),
+  ( 16,   N'2.Uygulama (+4) sınav sonucu okunacak',               '+4 sınav okunacak', 'Mebbis' ),
+  ( 17,   N'2.Uygulama (+4) sınav sonucu okundu',                 '+4 sınav okundu', '' )
+  
+-- ------------------------------------------------------- 
+-- uSinavSonucTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[MtskAdayTakipuSinavSonucTipi]
+(
+   Id               Int Unique not null, 
+   uSinavSonucTipi  nVarchar(50)   null,
+   ChartCaption     nVarchar(20)   null,
+   FormCaption      nVarchar(15)   null,   
+   
+   constraint  pk_MtskAdayTakipuSinavSonucTipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskAdayTakipuSinavSonucTipi]
+INSERT INTO [Lkp].[MtskAdayTakipuSinavSonucTipi] (Id, uSinavSonucTipi, ChartCaption, FormCaption)
+ VALUES 
+  ( 0,    N'', '' ,'' ),
+  ( 1,    N'Başarılı',  'Başarılı' ,'' ),
+  ( 2,    N'Başarısız', 'Başarısız' ,'' ),
+  ( 3,    N'Girmedi',   'Girmedi' ,'' )
+  
+-- ------------------------------------------------------- 
+-- uSinavSonrasiTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[MtskAdayTakipuSinavSonrasiTipi]
+(
+   Id               Int Unique not null, 
+   uSinavSonrasiTipi  nVarchar(100)   null,
+   ChartCaption       nVarchar(20)   null,
+   FormCaption        nVarchar(15)   null, 
+   
+   constraint  pk_MtskAdayTakipuSinavSonrasıTipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskAdayTakipuSinavSonrasiTipi]
+INSERT INTO [Lkp].[MtskAdayTakipuSinavSonrasiTipi] (Id, uSinavSonrasiTipi, ChartCaption, FormCaption)
+ VALUES 
+  ( 0,    N'', '', '' ),
+  ( 1,    N'Sınava tekrar girecek', 'Tekrar girecek', '' ),
+  ( 2,    N'Sertifika aşamasına geçti', 'Sertifikayı kazandı', '' ),
+  ( 3,    N'Tüm uygulamalı sınav hakkı bitti, 2.Uygulama (+4) hakkını kullanacak mı ? ', 'Sınav hakkı bitti', '' ),
+  ( 4,    N'2.Uygulama (+4) sınav hakkı bitti', '2Uyg.sınav hak bitti', '' )
+
+-- ------------------------------------------------------- 
+-- SertifikaDurumTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[MtskAdayTakipSertifikaDurumTipi]
+(
+   Id                 Int Unique not null, 
+   SertifikaDurumTipi nVarchar(50)   null,
+   ChartCaption       nVarchar(20)   null,
+   FormCaption        nVarchar(15)   null,
+   
+   constraint  pk_MtskAdayTakipSertifikaDurumTipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskAdayTakipSertifikaDurumTipi]
+INSERT INTO [Lkp].[MtskAdayTakipSertifikaDurumTipi] (Id, SertifikaDurumTipi, ChartCaption, FormCaption)
+ VALUES 
+  ( 0,    N'', '', '' ),
+  ( 1,    N'Sertifikası hazırlanacak (Seri No verilecek)', 'Sert. hazırlanacak', '' ),
+  ( 2,    N'Sertifika formu yazdırılacak', 'Sert. formu yaz', '' ),
+  ( 3,    N'Sertifikası hazır', 'Sert. hazır', '' ),
+  ( 4,    N'Sertifikası teslim edildi', 'Sert. teslim edildi', '' )
+
+
+commit transaction
+
+
+/* ***************************************************************************** */
+--   MtskAdayTakip
+/* ***************************************************************************** */
+
+/*
+
+AdayId
+DonemTipiId
+
+KayitTipiId -- önkayıt, aday
+BelgeTipiId -- belgeleri eksik, belgeleri tamam
+MebbisTipiId -- belgeleri aktarılmadı, belgeleri kısmen aktarıldı, belgeleri tamamlandı
+MebbisOnayTipiId -- onay bekliyor, onaylandı
+SertifikaUcretTipiId -- 
+    hiç ödemesi yok, 
+    kısmi ödemesi var, 
+    gecikmiş ödemesi var, 
+    tamamı tahsil edildi,
+    ucretsiz 
+    
+teorikDersTipiId -- 
+    Teorik ders alma aşamasında, 
+    Teorik dersleri tamamladı
+
+eSinavNo
+eSinavDurumTipiId -- 
+    eSınav için hazır değil,
+    eSınav başvurusu yapılacak, 
+    eSınav başvurusu yapıldı, ( sınav günü ve saatine kadar olanlar )
+    eSınav sonucu okunacak,   ( sınav günü ve saatinden sonra olanlar )
+    eSınav sonucu okundu,
+    15 günlük beklemede,
+    Tüm sınav hakkı bitti
+
+eSinavSonucTipiId -- Başarılı, Başarısız
+onBesGunBitisTarihi -- 
+
+
+eSinavUcretTipiId -- kendisi yatıracak, biz yatıracağız
+
+eSinavUcreti1 -- 1. sınav ücreti
+eSinavUcreti1Yatirildi -- false/true
+eSinav1DetayId
+
+eSinavUcreti2 -- 2. sınav ücreti
+eSinavUcreti2Yatirildi -- false/true
+eSinav2DetayId
+
+eSinavUcreti3 -- 3. sınav ücreti
+eSinavUcreti3Yatirildi -- false/true
+eSinav3DetayId
+
+eSinavUcreti4 -- 4. sınav ücreti
+eSinavUcreti4Yatirildi -- false/true
+eSinav4DetayId
+
+
+
+
+uygulamaDersTipiId -- 
+    uygulamalı ders başlamadı,
+    uygulamalı ders alıyor, 
+    uygulamalı dersleri tamamladı
+
+uygSinavNo
+uygSinavDurumTipiId --
+    uygSınav için hazır değil,
+    uygSınav başvurusu yapılacak, 
+    uygSınav başvurusu yapıldı, ( sınav gününe kadar olanlar )
+    uygSınav sonucu okunacak,   ( sınav gününden sonra olanlar )
+    uygSınav sonucu okundu,
+    2 saat başarısız eğitim planlanacak
+    2 saat başarısız eğitim planlandı
+    bir sınav beklemede,
+    Tüm sınav hakkı bitti
+
+    İkinci +4 sınav hakkı alacak mı?
+    İkinci +4 sınav hakkı aldı
+    İkinci +4 sınav hakkı bitti
+
+uygSinavSonucTipiId -- Başarılı, Başarısız
+
+uygSinavUcretTipiId -- kendisi yatıracak, biz yatıracağız
+
+uygSinavUcreti1 -- 1. sınav ücreti
+uygSinavUcreti1Yatirildi -- false/true
+uygSinav1DetayId
+
+2, 3, 4
+
+arti4UygSinavUcreti1 -- 1. sınav ücreti
+arti4UygSinavUcreti1Yatirildi -- false/true
+arti4UygSinav1DetayId
+
+2, 3, 4
+
+SertifikaAlmayaHakKazandi -- false/true
+SertifikaTeslimEdidi -- 
+SertifikaTeslimTarihi --
+SertifikayiTeslimAlanKisi --
+
+dosyaYakti -- false/true
+
+*/

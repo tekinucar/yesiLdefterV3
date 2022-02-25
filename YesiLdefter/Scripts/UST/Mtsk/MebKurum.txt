@@ -1,0 +1,65 @@
+﻿
+
+begin transaction
+
+ create table MebKurum
+ (
+
+   Id                  Int IDENTITY(1,1) NOT NULL, 
+   ParentId            Int       not null, /* default 0 */
+   FirmId              Int       not null,
+   IsActive            Bit       not null, /* default : 1 = active, 0 = not active */  
+   KurumTipiId         SmallInt      null, /* 1. Mtsk, 2. ???, 3. ??? */
+
+   KurumKodu           nvarchar(15)  NULL,
+   KurumTamAdi         nvarchar(150) NULL,
+   KurumKisaAdi        nvarchar(50)  NULL,
+   
+   KurumTelefonu       nvarchar(15)  NULL,
+   KurumFaxNo          nvarchar(15)  NULL,
+   WebSayfasi          nvarchar(100) NULL,
+   EPosta              nvarchar(100) NULL,
+   Adres1              nvarchar(200) NULL,
+   Adres2              nvarchar(200) NULL,
+   AdresKodu           nvarchar(10)  NULL,
+
+   KurumIlce           nVarChar(20)  null,
+   KurumIl             nVarChar(15)  null,
+   
+   KurumAcilisTarihi   date          NULL,
+   KurumBinaKontejani  int           NULL,
+   YatiliKontejanErkek int           NULL,
+   YatiliKontejanKadin int           NULL,
+   EgitimTipiId        smallint      NULL, /* Tekli Ikili  */
+
+  constraint pk_MebKurum primary key (Id)
+ )
+
+ create index X_MebKurum01 on MebKurum (KurumKodu)
+ create index X_MebKurum02 on MebKurum (KurumTamAdi)
+
+ grant select, insert, update, delete on MebKurum to public
+
+commit transaction
+
+
+-- ------------------------------------------------------- 
+-- KurumTipiId
+-- ------------------------------------------------------- 
+create table Lkp.MebKurumKurumTipi
+(
+   Id          Int Unique Not Null,
+   KurumTipi   nVarchar(50)   null,
+   GrupTipiId  SmallInt       null,
+   
+   constraint  pk_MebKurumKurumTipi primary key (Id)
+)
+
+INSERT INTO Lkp.MebKurumKurumTipi (Id, KurumTipi, GrupTipiId)
+ VALUES 
+  (0, N'Tanımsız', 0),
+  (1, N'Mtsk',  1),
+  (2, N'İşMak', 1),
+  (3, N'SRC',   1)
+
+

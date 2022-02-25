@@ -1,0 +1,382 @@
+
+/*
+	HRK_ID		Int IDENTITY(1,1) 	NOT NULL,
+	ID		Int	 	 	NOT NULL,
+	MODUL_ADI	VarChar(50) 		NOT NULL,
+	ACIKLAMA	VarChar(100) 		NULL,
+*/
+
+begin transaction
+
+ DELETE FROM K2_A_HAREKETLER;
+
+ insert into K2_A_HAREKETLER values (  -1,  'AYLAR',            'Açýlýþ');
+ insert into K2_A_HAREKETLER values (  0,   'AYLAR',            'Devir');
+ insert into K2_A_HAREKETLER values (  1,   'AYLAR',            'Ocak');
+ insert into K2_A_HAREKETLER values (  2,   'AYLAR',            'Þubat');
+ insert into K2_A_HAREKETLER values (  3,   'AYLAR',            'Mart');
+ insert into K2_A_HAREKETLER values (  4,   'AYLAR',            'Nisan');
+ insert into K2_A_HAREKETLER values (  5,   'AYLAR',            'Mayýs');
+ insert into K2_A_HAREKETLER values (  6,   'AYLAR',            'Haziran');
+ insert into K2_A_HAREKETLER values (  7,   'AYLAR',            'Temmuz');
+ insert into K2_A_HAREKETLER values (  8,   'AYLAR',            'Aðustos');
+ insert into K2_A_HAREKETLER values (  9,   'AYLAR',            'Eylül');
+ insert into K2_A_HAREKETLER values (  10,  'AYLAR',            'Ekim');
+ insert into K2_A_HAREKETLER values (  11,  'AYLAR',            'Kasým');
+ insert into K2_A_HAREKETLER values (  12,  'AYLAR',            'Aralýk');
+ insert into K2_A_HAREKETLER values (  13,  'AYLAR',            'Kapanýþ');
+
+ insert into K2_A_HAREKETLER values (  1,   'MUHASEBE',            'Açýlýþ');
+ insert into K2_A_HAREKETLER values (  2,   'MUHASEBE',            'Tahsil');
+ insert into K2_A_HAREKETLER values (  3,   'MUHASEBE',            'Tediye');
+ insert into K2_A_HAREKETLER values (  4,   'MUHASEBE',            'Mahsup');
+ insert into K2_A_HAREKETLER values (  5,   'MUHASEBE',            'Kapanýþ');
+
+ insert into K2_A_HAREKETLER values (511, 'STOK-Vezne St.Alma',  'Ödeme Yapýlmadý');
+ insert into K2_A_HAREKETLER values (512, 'STOK-Vezne St.Alma',  'Ödeme Yapýldý');
+ insert into K2_A_HAREKETLER values (513, 'STOK-Vezne St.Alma',  'Kýsmi Ödeme Yapýldý');
+ insert into K2_A_HAREKETLER values (514, 'STOK-Vezne St.Alma',  'Ödeme Yapýlmayacak');
+ insert into K2_A_HAREKETLER values (515, 'STOK-Vezne St.Alma',  'Ödeme Nakit Yapýlacak');
+ insert into K2_A_HAREKETLER values (516, 'STOK-Vezne St.Alma',  'Ödeme Kredi Kartý ile Yapýlacak');
+ insert into K2_A_HAREKETLER values (517, 'STOK-Vezne St.Alma',  'Ödeme Çek ile Yapýlacak');
+ insert into K2_A_HAREKETLER values (518, 'STOK-Vezne St.Alma',  'Ödeme Senet ile Yapýlacak');
+
+ insert into K2_A_HAREKETLER values (521, 'STOK-Vezne Satýþ',    'Tahsilatý Yapýlmadý');
+ insert into K2_A_HAREKETLER values (522, 'STOK-Vezne Satýþ',    'Tahsilatý Yapýldý');
+ insert into K2_A_HAREKETLER values (523, 'STOK-Vezne Satýþ',    'Kýsmi Tahsilat Yapýldý');
+ insert into K2_A_HAREKETLER values (524, 'STOK-Vezne Satýþ',    'Tahsilat Yapýlmayacak');
+ insert into K2_A_HAREKETLER values (525, 'STOK-Vezne Satýþ',    'Tahsilat Nakit Yapýlacak');
+ insert into K2_A_HAREKETLER values (526, 'STOK-Vezne Satýþ',    'Tahsilat Kredi Kartý ile Yapýlacak');
+ insert into K2_A_HAREKETLER values (527, 'STOK-Vezne Satýþ',    'Tahsilat Çek ile Yapýlacak');
+ insert into K2_A_HAREKETLER values (528, 'STOK-Vezne Satýþ',    'Tahsilat Senet ile Yapýlacak');
+
+
+ insert into K2_A_HAREKETLER values (531, 'STOK-Depo Giriþ',     'Giriþ Yapýlacak');
+ insert into K2_A_HAREKETLER values (532, 'STOK-Depo Giriþ',     'Teslim Alýnmadý');
+ insert into K2_A_HAREKETLER values (533, 'STOK-Depo Giriþ',     'Tamamý Teslim Alýndý');
+ insert into K2_A_HAREKETLER values (534, 'STOK-Depo Giriþ',     'Eksik Teslim Alýndý');
+ insert into K2_A_HAREKETLER values (535, 'STOK-Depo Giriþ',     'Ürün Giriþi Yapýlmayacak');
+
+ insert into K2_A_HAREKETLER values (541, 'STOK-Depo Çýkýþ',     'Çýkýþ Yapýlacak');
+ insert into K2_A_HAREKETLER values (542, 'STOK-Depo Çýkýþ',     'Teslimat Yapýlmadý');
+ insert into K2_A_HAREKETLER values (543, 'STOK-Depo Çýkýþ',     'Tamamý Teslim Edildi');
+ insert into K2_A_HAREKETLER values (544, 'STOK-Depo Çýkýþ',     'Eksik Teslimat Yapýldý');
+ insert into K2_A_HAREKETLER values (545, 'STOK-Depo Çýkýþ',     'Ürün Çýkýþý Yapýlmayacak');
+
+ insert into K2_A_HAREKETLER values (551, 'STOK-Sipariþ',        'Onay Gerekmez');
+ insert into K2_A_HAREKETLER values (552, 'STOK-Sipariþ',        'Onay Bekliyor');
+ insert into K2_A_HAREKETLER values (553, 'STOK-Sipariþ',        'Onaylandý');
+ insert into K2_A_HAREKETLER values (554, 'STOK-Sipariþ',        'Red Edildi');
+
+ insert into K2_A_HAREKETLER values (  0, 'STOK-HESAP DURUMU',   'Açýk');
+ insert into K2_A_HAREKETLER values (  1, 'STOK-HESAP DURUMU',   'Kapalý');
+ insert into K2_A_HAREKETLER values (  2, 'STOK-HESAP DURUMU',   'Cari Hesaba Ýþli');
+ insert into K2_A_HAREKETLER values (  7, 'STOK-HESAP DURUMU',   'Parçalanmýþ Fiþ');
+ insert into K2_A_HAREKETLER values (  8, 'STOK-HESAP DURUMU',   'Cari Hesaba Ýþleme');
+ insert into K2_A_HAREKETLER values (  9, 'STOK-HESAP DURUMU',   'ÝPTAL');
+
+ insert into K2_A_HAREKETLER values ( 5011, 'STOK',    'Alým Faturasý : AFT');
+ insert into K2_A_HAREKETLER values ( 5012, 'STOK',    'Mal Giriþi : MLG');
+ insert into K2_A_HAREKETLER values ( 5013, 'STOK',    'Ýrsaliye ile Mal Giriþi : IRG');
+ insert into K2_A_HAREKETLER values ( 5045, 'STOK',    'Verilen Sipariþ : VSP');
+
+ insert into K2_A_HAREKETLER values ( 5021, 'STOK',    'Açýlýþ Fiþi : ACG');
+ insert into K2_A_HAREKETLER values ( 5022, 'STOK',    'Fason Giriþ : FSG');
+ insert into K2_A_HAREKETLER values ( 5023, 'STOK',    'Devir Giriþi : DVG');
+ insert into K2_A_HAREKETLER values ( 5024, 'STOK',    'Sayým Farký Giriþi : SFG');
+ insert into K2_A_HAREKETLER values ( 5025, 'STOK',    'Ýmalattan Giriþ : IMG');
+ insert into K2_A_HAREKETLER values ( 5027, 'STOK',    'Konsinye Giriþ : KNG');
+ insert into K2_A_HAREKETLER values ( 5029, 'STOK',    'Diðer Giriþler : DIG');
+
+ insert into K2_A_HAREKETLER values ( 5031, 'STOK',    'Ýade Faturasý-Satýþ Ýadesi : IFG');
+ insert into K2_A_HAREKETLER values ( 5032, 'STOK',    '(Mal Çýkýþý) ndan Ýade Giriþi : MCI');
+ insert into K2_A_HAREKETLER values ( 5033, 'STOK',    'Konsinye Çýkýþtan Ýade Giriþi : KCI');
+ insert into K2_A_HAREKETLER values ( 5034, 'STOK',    'Fason Çýkýþtan Ýade Giriþi : FCI');
+ insert into K2_A_HAREKETLER values ( 5035, 'STOK',    'Diðer Çýkýþtan Ýade Giriþi : DCI');
+ insert into K2_A_HAREKETLER values ( 5036, 'STOK',    'Perakende Satýþtan Ýade Giriþi : PRI');
+
+
+ insert into K2_A_HAREKETLER values ( 5051, 'STOK',    'Satýþ Faturasý : SFT');
+ insert into K2_A_HAREKETLER values ( 5052, 'STOK',    'Mal Satýþý : MLC');
+ insert into K2_A_HAREKETLER values ( 5053, 'STOK',    'Ýrsaliye ile Mal Çýkýþý : IRC');
+ insert into K2_A_HAREKETLER values ( 5055, 'STOK',    'Alýnan Sipariþ : ASP');
+ insert into K2_A_HAREKETLER values ( 5056, 'STOK',    'Perakende Satýþ : PRK');
+ insert into K2_A_HAREKETLER values ( 5057, 'STOK',    'Sözleþmeli Satýþ : TKS');
+
+ insert into K2_A_HAREKETLER values ( 5061, 'STOK',    'Kapanýþ Fiþi : KPC');
+ insert into K2_A_HAREKETLER values ( 5062, 'STOK',    'Fason Çýkýþ : FSC');
+ insert into K2_A_HAREKETLER values ( 5063, 'STOK',    'Dahili Kullaným : DHK');
+ insert into K2_A_HAREKETLER values ( 5064, 'STOK',    'Sayým Farký Çýkýþý : SFC');
+ insert into K2_A_HAREKETLER values ( 5065, 'STOK',    'Üretime Çýkýþ : URC');
+ insert into K2_A_HAREKETLER values ( 5066, 'STOK',    'Fire Çýkýþ : FRC');
+ insert into K2_A_HAREKETLER values ( 5067, 'STOK',    'Konsinye Çýkýþ : KNC');
+ insert into K2_A_HAREKETLER values ( 5069, 'STOK',    'Diðer Çýkýþlar : DIC');
+
+ insert into K2_A_HAREKETLER values ( 5071, 'STOK',    'Ýade Faturasý-Alým Ýadesi : IFC');
+ insert into K2_A_HAREKETLER values ( 5072, 'STOK',    '(Mal Giriþi) nden Ýade Çýkýþý : MGI');
+ insert into K2_A_HAREKETLER values ( 5073, 'STOK',    'Konsinye Giriþten Ýade Çýkýþý : KGI');
+ insert into K2_A_HAREKETLER values ( 5074, 'STOK',    'Fason Giriþten Ýade Çýkýþý : FGI');
+ insert into K2_A_HAREKETLER values ( 5075, 'STOK',    'Diðer Giriþten Ýade Çýkýþý : DGI');
+
+ insert into K2_A_HAREKETLER values ( 5091, 'STOK',    'Rezerv : REZ');
+ insert into K2_A_HAREKETLER values ( 5099, 'STOK',    'Depo Transferi : DPT');
+
+ insert into K2_A_HAREKETLER values ( 5101, 'STOK',    'Fiyat Güncelleme : FYG');
+ insert into K2_A_HAREKETLER values ( 5102, 'STOK',    'Teklif Formu : TKL');
+ insert into K2_A_HAREKETLER values ( 5103, 'STOK',    'Talep Formu : TLP');
+
+ insert into K2_A_HAREKETLER values ( 4232, 'KREDILISATIS', 'Satýþtan Ýade Giriþi : KSI');
+ insert into K2_A_HAREKETLER values ( 4257, 'KREDILISATIS', 'Kredili Satýþ Sözleþmesi : KKS');
+ insert into K2_A_HAREKETLER values ( 4252, 'KREDILISATIS', 'Mal Çýkýþý : MLC');
+
+ insert into K2_A_HAREKETLER values (  0, 'STOK-SON DURUMU',  '');
+ insert into K2_A_HAREKETLER values ( 11, 'STOK-SON DURUMU',  'Alýþ Faturasý Ýþlendi');
+ insert into K2_A_HAREKETLER values ( 12, 'STOK-SON DURUMU',  'Mal Giriþi Yapýldý');
+ insert into K2_A_HAREKETLER values ( 15, 'STOK-SON DURUMU',  'Sipariþ Devam Ediyor');
+
+ insert into K2_A_HAREKETLER values ( 51, 'STOK-SON DURUMU',  'Satýþ Faturasý Kesildi');
+ insert into K2_A_HAREKETLER values ( 52, 'STOK-SON DURUMU',  'Mal Çýkýþý Yapýldý');
+ insert into K2_A_HAREKETLER values ( 53, 'STOK-SON DURUMU',  'Ýrsaliye ile Mal Çýkýþý Yapýldý');
+
+ insert into K2_A_HAREKETLER values (  1, 'STOK-BIRIM',  '1. Birim');
+ insert into K2_A_HAREKETLER values (  2, 'STOK-BIRIM',  '2. Birim');
+ insert into K2_A_HAREKETLER values (  3, 'STOK-BIRIM',  '3. Birim');
+
+ insert into K2_A_HAREKETLER values (  0, 'STOK-SATIS-DURUMU',  'Normal Satýþý Yapýlabilir');
+ insert into K2_A_HAREKETLER values (  1, 'STOK-SATIS-DURUMU',  'Satýþý Yok');
+ insert into K2_A_HAREKETLER values (  2, 'STOK-SATIS-DURUMU',  'Geçici Süreyle Satýþý Durduruldu');
+ insert into K2_A_HAREKETLER values (  3, 'STOK-SATIS-DURUMU',  'Sadece MLC ile Satýþý Yapýlabilir');
+ insert into K2_A_HAREKETLER values (  4, 'STOK-SATIS-DURUMU',  'Bu Ürün Sipariþle Temin Edilmekte');
+
+ insert into K2_A_HAREKETLER values ( 0, 'BANKA-HESAP TURU',  ' ');
+ insert into K2_A_HAREKETLER values ( 1, 'BANKA-HESAP TURU',  'Vadeli Mevduat');
+ insert into K2_A_HAREKETLER values ( 2, 'BANKA-HESAP TURU',  'Vadesiz Mevduat');
+ insert into K2_A_HAREKETLER values ( 3, 'BANKA-HESAP TURU',  'Yatýrým Hesabý');
+ insert into K2_A_HAREKETLER values ( 4, 'BANKA-HESAP TURU',  'Ticari Hesap');
+
+ insert into K2_A_HAREKETLER values ( 0, 'CEK TIPI',  'Çek-Senet');
+ insert into K2_A_HAREKETLER values ( 1, 'CEK TIPI',  'Verilen Çek');
+ insert into K2_A_HAREKETLER values ( 2, 'CEK TIPI',  'Alýnan Çek');
+ insert into K2_A_HAREKETLER values ( 3, 'CEK TIPI',  'Borç Senedi');
+ insert into K2_A_HAREKETLER values ( 4, 'CEK TIPI',  'Alacak Senedi');
+
+ insert into K2_A_HAREKETLER values ( 21, 'NAKIT HAREKETI',  'Kasa Borç Dekontu');
+ insert into K2_A_HAREKETLER values ( 22, 'NAKIT HAREKETI',  'Kasa Alacak Dekontu');
+ insert into K2_A_HAREKETLER values ( 23, 'NAKIT HAREKETI',  'Kasa Devir Dekontu');
+
+ insert into K2_A_HAREKETLER values ( 31, 'NAKIT HAREKETI',  'Banka Borç Dekontu');
+ insert into K2_A_HAREKETLER values ( 32, 'NAKIT HAREKETI',  'Banka Alacak Dekontu');
+ insert into K2_A_HAREKETLER values ( 33, 'NAKIT HAREKETI',  'Banka Devir Dekontu');
+
+ insert into K2_A_HAREKETLER values ( 41, 'NAKIT HAREKETI',  'Cari Borç Dekontu');
+ insert into K2_A_HAREKETLER values ( 42, 'NAKIT HAREKETI',  'Cari Alacak Dekontu');
+ insert into K2_A_HAREKETLER values ( 43, 'NAKIT HAREKETI',  'Cari Devir Dekontu');
+
+ insert into K2_A_HAREKETLER values ( 10, 'CARI MODULLER',  'Muhasebe');
+ insert into K2_A_HAREKETLER values ( 20, 'CARI MODULLER',  'Kasa');
+ insert into K2_A_HAREKETLER values ( 30, 'CARI MODULLER',  'Banka');
+ insert into K2_A_HAREKETLER values ( 40, 'CARI MODULLER',  'Cari');
+ insert into K2_A_HAREKETLER values ( 60, 'CARI MODULLER',  'Çek-Senet');
+
+ insert into K2_A_HAREKETLER values ( 61, 'CARI MODULLER',  'Verilen Çek');
+ insert into K2_A_HAREKETLER values ( 62, 'CARI MODULLER',  'Alýnan Çek');
+ insert into K2_A_HAREKETLER values ( 63, 'CARI MODULLER',  'Borç Senedi');
+ insert into K2_A_HAREKETLER values ( 64, 'CARI MODULLER',  'Alacak Senedi');
+
+ insert into K2_A_HAREKETLER values ( 70, 'CARI MODULLER',  'Gelir-Gider');
+
+
+
+ insert into K2_A_HAREKETLER values ( 1, 'HESAP PUSULASI',  'Satýn Alma');
+ insert into K2_A_HAREKETLER values ( 2, 'HESAP PUSULASI',  'Satýþ / Pazarlama');
+
+ insert into K2_A_HAREKETLER values ( 1, 'TELEFONLAR',  'Ýþ Tlf.');
+ insert into K2_A_HAREKETLER values ( 2, 'TELEFONLAR',  'Ýþ 2 Tlf.');
+ insert into K2_A_HAREKETLER values ( 3, 'TELEFONLAR',  'Ýþ Faks No');
+ insert into K2_A_HAREKETLER values ( 4, 'TELEFONLAR',  'Ýþ Direk Tlf.');
+ insert into K2_A_HAREKETLER values ( 5, 'TELEFONLAR',  'Ýþ Dahili No');
+ insert into K2_A_HAREKETLER values ( 6, 'TELEFONLAR',  'Ev Tlf.');
+ insert into K2_A_HAREKETLER values ( 7, 'TELEFONLAR',  'Ev 2 Tlf.');
+ insert into K2_A_HAREKETLER values ( 8, 'TELEFONLAR',  'Ev Faks No');
+ insert into K2_A_HAREKETLER values ( 9, 'TELEFONLAR',  'GSM');
+ insert into K2_A_HAREKETLER values (10, 'TELEFONLAR',  'GSM 2');
+ insert into K2_A_HAREKETLER values (11, 'TELEFONLAR',  'Diðer Faks');
+ insert into K2_A_HAREKETLER values (12, 'TELEFONLAR',  'Araç Tlf.');
+
+ insert into K2_A_HAREKETLER values ( 1, 'ADRESLER',  'Fatura Adresi');
+ insert into K2_A_HAREKETLER values ( 2, 'ADRESLER',  'Ýþ Adresi');
+ insert into K2_A_HAREKETLER values ( 3, 'ADRESLER',  'Sevk Adresi');
+ insert into K2_A_HAREKETLER values ( 4, 'ADRESLER',  'Depo 1 Adresi');
+ insert into K2_A_HAREKETLER values ( 5, 'ADRESLER',  'Depo 2 Adresi');
+ insert into K2_A_HAREKETLER values ( 6, 'ADRESLER',  'Ev Adresi');
+ insert into K2_A_HAREKETLER values ( 7, 'ADRESLER',  'Tam Adresi');
+
+
+ insert into K2_A_HAREKETLER values ( 0, 'YUVARLAMA ORANI',           '1');
+ insert into K2_A_HAREKETLER values ( 1, 'YUVARLAMA ORANI',          '10');
+ insert into K2_A_HAREKETLER values ( 2, 'YUVARLAMA ORANI',         '100');
+ insert into K2_A_HAREKETLER values ( 3, 'YUVARLAMA ORANI',       '1,000');
+ insert into K2_A_HAREKETLER values ( 4, 'YUVARLAMA ORANI',      '10,000');
+ insert into K2_A_HAREKETLER values ( 5, 'YUVARLAMA ORANI',     '100,000');
+ insert into K2_A_HAREKETLER values ( 6, 'YUVARLAMA ORANI',   '1,000,000');
+ insert into K2_A_HAREKETLER values ( 7, 'YUVARLAMA ORANI',  '10,000,000');
+ insert into K2_A_HAREKETLER values (10, 'YUVARLAMA ORANI',           '5');
+ insert into K2_A_HAREKETLER values (11, 'YUVARLAMA ORANI',          '50');
+ insert into K2_A_HAREKETLER values (12, 'YUVARLAMA ORANI',         '500');
+ insert into K2_A_HAREKETLER values (13, 'YUVARLAMA ORANI',       '5,000');
+ insert into K2_A_HAREKETLER values (14, 'YUVARLAMA ORANI',      '50,000');
+ insert into K2_A_HAREKETLER values (15, 'YUVARLAMA ORANI',     '500,000');
+ insert into K2_A_HAREKETLER values (16, 'YUVARLAMA ORANI',   '5,000,000');
+ insert into K2_A_HAREKETLER values (17, 'YUVARLAMA ORANI',  '50,000,000');
+
+ insert into K2_A_HAREKETLER values (20, 'YUVARLAMA ORANI',         '2.5');
+ insert into K2_A_HAREKETLER values (21, 'YUVARLAMA ORANI',          '25');
+ insert into K2_A_HAREKETLER values (22, 'YUVARLAMA ORANI',         '250');
+ insert into K2_A_HAREKETLER values (23, 'YUVARLAMA ORANI',       '2,500');
+ insert into K2_A_HAREKETLER values (24, 'YUVARLAMA ORANI',      '25,000');
+ insert into K2_A_HAREKETLER values (25, 'YUVARLAMA ORANI',     '250,000');
+ insert into K2_A_HAREKETLER values (26, 'YUVARLAMA ORANI',   '2,500,000');
+ insert into K2_A_HAREKETLER values (27, 'YUVARLAMA ORANI',  '25,000,000');
+
+ insert into K2_A_HAREKETLER values (30, 'YUVARLAMA ORANI',        '1.00');
+ insert into K2_A_HAREKETLER values (31, 'YUVARLAMA ORANI',        '1.10');
+ insert into K2_A_HAREKETLER values (32, 'YUVARLAMA ORANI',        '1.25');
+ insert into K2_A_HAREKETLER values (33, 'YUVARLAMA ORANI',        '1.50');
+
+ insert into K2_A_HAREKETLER values (34, 'YUVARLAMA ORANI',       '1.010');
+ insert into K2_A_HAREKETLER values (35, 'YUVARLAMA ORANI',       '1.025');
+ insert into K2_A_HAREKETLER values (36, 'YUVARLAMA ORANI',       '1.050');
+
+ insert into K2_A_HAREKETLER values ( 0, 'YUVARLAMA SEKLI',  'Yuvarlama Yok');
+ insert into K2_A_HAREKETLER values ( 1, 'YUVARLAMA SEKLI',  'Orantýlý Yuvarla (%50)');
+ insert into K2_A_HAREKETLER values ( 2, 'YUVARLAMA SEKLI',  'Aþaðýya Yuvarla');
+ insert into K2_A_HAREKETLER values ( 3, 'YUVARLAMA SEKLI',  'Yukarýya Yuvarla');
+
+ insert into K2_A_HAREKETLER values (  1, 'CARI OZELLIGI',  'Müþteri');
+ insert into K2_A_HAREKETLER values (  2, 'CARI OZELLIGI',  'Bayi');
+ insert into K2_A_HAREKETLER values (  3, 'CARI OZELLIGI',  'Ürün Aldýðýmýz Firma');
+ insert into K2_A_HAREKETLER values (  4, 'CARI OZELLIGI',  'Hizmet Aldýðýmýz Firma');
+ insert into K2_A_HAREKETLER values (  5, 'CARI OZELLIGI',  'Personel');
+ insert into K2_A_HAREKETLER values (  6, 'CARI OZELLIGI',  'Þirket Ortaðý');
+ insert into K2_A_HAREKETLER values (  7, 'CARI OZELLIGI',  'Açýk Hesap');
+ insert into K2_A_HAREKETLER values (  8, 'CARI OZELLIGI',  'Çalýþma Bitti/Yok');
+ insert into K2_A_HAREKETLER values (  9, 'CARI OZELLIGI',  'Kara Listede');
+
+ insert into K2_A_HAREKETLER values (  0, 'TESLIMAT',       'Yeni Teslimat');
+ insert into K2_A_HAREKETLER values (  1, 'TESLIMAT',       'Eksik Teslimat');
+ insert into K2_A_HAREKETLER values (  2, 'TESLIMAT',       'Tamamlanan Teslimat');
+
+ insert into K2_A_HAREKETLER values (  0, 'KREDILI SATIS ONAYI', 'Onaylandý');
+ insert into K2_A_HAREKETLER values (  1, 'KREDILI SATIS ONAYI', 'Onay Bekliyor');
+ insert into K2_A_HAREKETLER values (  2, 'KREDILI SATIS ONAYI', 'Bilgi Eksikliðinden Bekliyor');
+ insert into K2_A_HAREKETLER values (  9, 'KREDILI SATIS ONAYI', 'RED Edildi');
+
+
+ insert into K2_A_HAREKETLER values (  0, 'KREDI TAHSILAT', 'Peþin (Nakit)');
+ insert into K2_A_HAREKETLER values (  1, 'KREDI TAHSILAT', 'Peþin (Kredi Kartý)');
+ insert into K2_A_HAREKETLER values (  2, 'KREDI TAHSILAT', 'Þubeye elden ödeyecek');
+ insert into K2_A_HAREKETLER values (  3, 'KREDI TAHSILAT', 'Kredi Kartý (Her ay çekilecek)');
+ insert into K2_A_HAREKETLER values (  4, 'KREDI TAHSILAT', 'Kredi Kartý (Taksitli kart)');
+ insert into K2_A_HAREKETLER values (  5, 'KREDI TAHSILAT', 'Elden tahsil edilecek');
+ insert into K2_A_HAREKETLER values (  6, 'KREDI TAHSILAT', 'Banka hesabýna yatýracak');
+ insert into K2_A_HAREKETLER values (  7, 'KREDI TAHSILAT', 'Çek ile ödeme yapacak');
+ insert into K2_A_HAREKETLER values (  8, 'KREDI TAHSILAT', 'Senet ciro edecek');
+ insert into K2_A_HAREKETLER values (  9, 'KREDI TAHSILAT', 'Posta çeki ile gönderecek');
+ insert into K2_A_HAREKETLER values ( 10, 'KREDI TAHSILAT', 'Anadolu Cetelem');
+ insert into K2_A_HAREKETLER values ( 11, 'KREDI TAHSILAT', 'Yapý Kredi Banka Kredisi');
+ insert into K2_A_HAREKETLER values ( 12, 'KREDI TAHSILAT', 'Garanti Banka Kredisi');
+ insert into K2_A_HAREKETLER values ( 13, 'KREDI TAHSILAT', 'Ýþ Bankasý Kredisi');
+ insert into K2_A_HAREKETLER values ( 14, 'KREDI TAHSILAT', 'Personelin maaþýndan kesilecek');
+ insert into K2_A_HAREKETLER values ( 15, 'KREDI TAHSILAT', 'Vakýfbank Kredisi');
+
+ insert into K2_A_HAREKETLER values (  2, 'KRD TAHSILAT CESIDI', 'Elden Tahsilat Edilecek');
+ insert into K2_A_HAREKETLER values (  3, 'KRD TAHSILAT CESIDI', 'Banka Hesabýna Yatýrýlacak');
+ insert into K2_A_HAREKETLER values (  4, 'KRD TAHSILAT CESIDI', 'Posta Çeki ile Gönderecek');
+ insert into K2_A_HAREKETLER values (  5, 'KRD TAHSILAT CESIDI', 'Teslimat Bölgeleri');
+
+
+ insert into K2_A_HAREKETLER values (  0, 'KREDILI SATIS DURUMU', 'Açýk');
+ insert into K2_A_HAREKETLER values (  1, 'KREDILI SATIS DURUMU', 'Kapalý');
+ insert into K2_A_HAREKETLER values (  2, 'KREDILI SATIS DURUMU', 'Snt Sahibi');
+ insert into K2_A_HAREKETLER values (  3, 'KREDILI SATIS DURUMU', 'Ýcralýk');
+ insert into K2_A_HAREKETLER values (  4, 'KREDILI SATIS DURUMU', 'Batak');
+ insert into K2_A_HAREKETLER values (  5, 'KREDILI SATIS DURUMU', 'Özel');
+ insert into K2_A_HAREKETLER values (  6, 'KREDILI SATIS DURUMU', 'Rezerv');
+ insert into K2_A_HAREKETLER values (  7, 'KREDILI SATIS DURUMU', 'Sipariþe Verildi');
+ insert into K2_A_HAREKETLER values (  8, 'KREDILI SATIS DURUMU', 'Sipariþi Bekliyor');
+ insert into K2_A_HAREKETLER values (  9, 'KREDILI SATIS DURUMU', 'ÝPTAL');
+
+
+ insert into K2_A_HAREKETLER values (1, 'MESAJ-ONAY',        'Onay Gerekmez');
+ insert into K2_A_HAREKETLER values (2, 'MESAJ-ONAY',        'Onay Bekliyor');
+ insert into K2_A_HAREKETLER values (3, 'MESAJ-ONAY',        'Onaylandý');
+ insert into K2_A_HAREKETLER values (4, 'MESAJ-ONAY',        'Red Edildi');
+
+ insert into K2_A_HAREKETLER values (1, 'MESAJ-ONEM',        'Normal Ýþ');
+ insert into K2_A_HAREKETLER values (2, 'MESAJ-ONEM',        'Acil Ýþ -Hemen-');
+ insert into K2_A_HAREKETLER values (3, 'MESAJ-ONEM',        'Acil Ýþ -Ýlk Sýraya Al-');
+
+ insert into K2_A_HAREKETLER values (1, 'MESAJ-POZÝSYON',    'Açýk');
+ insert into K2_A_HAREKETLER values (2, 'MESAJ-POZÝSYON',    'Tamamlanan');
+ insert into K2_A_HAREKETLER values (3, 'MESAJ-POZÝSYON',    'Beklemeye Alýnan');
+ insert into K2_A_HAREKETLER values (4, 'MESAJ-POZÝSYON',    'Ýptal Edilen');
+
+
+ insert into K2_A_HAREKETLER values (  1, 'KALITE-SINIFLARI',  '1. Sýnýf');
+ insert into K2_A_HAREKETLER values (  2, 'KALITE-SINIFLARI',  '2. Sýnýf');
+ insert into K2_A_HAREKETLER values (  3, 'KALITE-SINIFLARI',  '3. Sýnýf');
+ insert into K2_A_HAREKETLER values (  4, 'KALITE-SINIFLARI',  '4. Sýnýf');
+ insert into K2_A_HAREKETLER values (  5, 'KALITE-SINIFLARI',  '5. Sýnýf');
+ insert into K2_A_HAREKETLER values (  6, 'KALITE-SINIFLARI',  '6. Sýnýf');
+ insert into K2_A_HAREKETLER values (  7, 'KALITE-SINIFLARI',  '7. Sýnýf');
+ insert into K2_A_HAREKETLER values (  8, 'KALITE-SINIFLARI',  '8. Sýnýf');
+ insert into K2_A_HAREKETLER values (  9, 'KALITE-SINIFLARI',  '9. Sýnýf');
+
+ insert into K2_A_HAREKETLER values (1, 'HAYIR-EVET',    'Hayýr');
+ insert into K2_A_HAREKETLER values (2, 'HAYIR-EVET',    'Evet');
+
+ insert into K2_A_HAREKETLER values (0, 'DURUMU',    'Aktif');
+ insert into K2_A_HAREKETLER values (1, 'DURUMU',    'Pasif');
+
+ insert into K2_A_HAREKETLER values (0, 'YOKVAR',    'Yok');
+ insert into K2_A_HAREKETLER values (1, 'YOKVAR',    'Var');
+
+ insert into K2_A_HAREKETLER values (0, 'SATISTA_ULASMA',    'Barkodlu');
+ insert into K2_A_HAREKETLER values (1, 'SATISTA_ULASMA',    'Terazi Barkodlu');
+ insert into K2_A_HAREKETLER values (2, 'SATISTA_ULASMA',    'Sanal Klavye');
+ insert into K2_A_HAREKETLER values (3, 'SATISTA_ULASMA',    'Belirsiz');
+
+ insert into K2_A_HAREKETLER values (0, 'TEDARIK_SEKLI',    'AL-SAT');
+ insert into K2_A_HAREKETLER values (1, 'TEDARIK_SEKLI',    'ÜRET-SAT');
+ insert into K2_A_HAREKETLER values (2, 'TEDARIK_SEKLI',    'SAT-AL');
+
+ insert into K2_A_HAREKETLER values (0, 'URUN_TIPI',    'MAMÜL');
+ insert into K2_A_HAREKETLER values (1, 'URUN_TIPI',    'YARI MAMÜL');
+ insert into K2_A_HAREKETLER values (2, 'URUN_TIPI',    'HAMMADDE');
+ insert into K2_A_HAREKETLER values (3, 'URUN_TIPI',    'REÇETELÝ MAMÜL');
+
+ insert into K2_A_HAREKETLER values (33, 'DEPOTIPI',    'Depo');
+ insert into K2_A_HAREKETLER values (81, 'DEPOTIPI',    'Þube');
+ insert into K2_A_HAREKETLER values (82, 'DEPOTIPI',    'Satýþ Noktasý');
+ insert into K2_A_HAREKETLER values (83, 'DEPOTIPI',    'Bölüm');
+ insert into K2_A_HAREKETLER values (84, 'DEPOTIPI',    'Masa');
+ insert into K2_A_HAREKETLER values (85, 'DEPOTIPI',    'Depo');
+ insert into K2_A_HAREKETLER values (86, 'DEPOTIPI',    'Mutfak');
+ insert into K2_A_HAREKETLER values (87, 'DEPOTIPI',    'Hiz.Birimi');
+ insert into K2_A_HAREKETLER values (88, 'DEPOTIPI',    'Tah. Noktasý');
+
+ insert into K2_A_HAREKETLER values (1, 'ESCORTPOS',    'R');
+ insert into K2_A_HAREKETLER values (2, 'ESCORTPOS',    'X');
+ insert into K2_A_HAREKETLER values (3, 'ESCORTPOS',    'Z');
+ insert into K2_A_HAREKETLER values (4, 'ESCORTPOS',    'P');
+
+ insert into K2_A_HAREKETLER values (4, 'URUN_ISARETI',    'Stoða Dön');
+ insert into K2_A_HAREKETLER values (5, 'URUN_ISARETI',    'Fire');
+ insert into K2_A_HAREKETLER values (6, 'URUN_ISARETI',    'Ürün Ýptali');
+ insert into K2_A_HAREKETLER values (7, 'URUN_ISARETI',    'Ürün Deðiþtir');
+ insert into K2_A_HAREKETLER values (8, 'URUN_ISARETI',    'Ýkram');
+
+
+commit transaction
+
+

@@ -1,0 +1,89 @@
+﻿
+USE [u7093888_Ustad01]
+GO
+
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[prc_MtskSertifikaSeriNoUret] (@FirmId int)  
+AS BEGIN
+
+  --declare @FirmId int = 2
+  declare @SertifikaSeri varchar(20)
+  declare @SertifikaNo varchar(20)
+  declare @SerNo bigint = 0
+
+  Select 
+      @SertifikaSeri = SertifikaSeri
+    , @SertifikaNo = SertifikaNo
+  From  dbo.MtskSertifikaSeriNo
+  Where FirmId = @FirmId
+
+  if (@SertifikaNo <> '')
+      set @SerNo = Convert(bigint, @SertifikaNo)
+
+  --print @SerNo
+
+  if (@SerNo > 0)
+  begin
+      
+	  ALTER TABLE [dbo].[MtskAdaySertifika] DISABLE TRIGGER [trg_MtskAdaySertifika]
+
+      declare @Id as varchar(10)
+      declare @Title as NVARCHAR(100)
+	  
+	  declare myCursor CURSOR FOR  
+      
+	  Select sertifika.Id
+      From MtskAdaySertifika as sertifika
+          left outer join MtskAday as aday on ( sertifika.AdayId = aday.Id  ) 
+          left outer join MtskAdayTakip as takip on ( sertifika.AdayId = takip.AdayId  ) 
+      Where takip.SertifikaDurumTipiId = 1 
+      and   takip.uSinavSonrasiTipiId = 2
+      Order by aday.AdayKayitTarihi, aday.DonemTipiId, aday.Id
+  
+
+      OPEN myCursor;  
+      FETCH NEXT FROM myCursor INTO @Id--, @Title;  
+      WHILE @@FETCH_STATUS = 0  
+      BEGIN  
+          --Print '   ' + @Id + ',  ' + Convert(varchar(10), @SerNo)   --+ ',      '+  @Title 
+		  
+		  -- SertifikaNo yu 
+		  Update MtskAdaySertifika set
+		    SertifikaSeri = @SertifikaSeri
+		  , SertifikaNo = @SerNo
+		  , DuzenlemeTarihi = Convert(date, getdate(), 103)
+		  Where Id = @Id
+		  
+		  -- Seri Noyu arttır
+		  set @SerNo = @SerNo + 1
+          
+		  FETCH NEXT FROM myCursor INTO @Id--, @Title;  
+      END;  
+
+      CLOSE myCursor;  
+      DEALLOCATE myCursor;  
+
+	  ALTER TABLE [dbo].[MtskAdaySertifika] ENABLE TRIGGER [trg_MtskAdaySertifika]
+
+	  -- En Son No yu sakla
+      Update dbo.MtskSertifikaSeriNo set
+        SertifikaSeri = @SertifikaSeri
+      , SertifikaNo = convert(varchar(10), @SerNo) 
+      From  dbo.MtskSertifikaSeriNo
+      Where FirmId = @FirmId
+
+	  --print @SerNo
+
+	  EXECUTE [dbo].[prc_MtskAdayTakip] @FirmId
+
+  end -- if @SerNo > 0
+
+END -- procedure
+
+GO 
+

@@ -1,0 +1,115 @@
+﻿USE [u7093888_Ustad01]
+GO
+
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+CREATE PROCEDURE [dbo].[prc_MtskAdayTakipUygSinavMebbisRandevuAktar] (@FirmId int, 
+   @Tarih date, @EgitimAraciId varchar(10))  
+AS BEGIN
+   
+    -- Bu procedure -Uygulama Sınavı için Randevu Alma, Mebbise Aktar-  
+	-- ekranında  Kaydet (MEBBIS için) butonu ile çalıştırılıyor
+
+	update MtskAdayTakip set
+    uRandevuMebbisAktarildi = 1
+    from MtskAdayTakip
+    Where FirmId = @FirmId
+	and   AdayId in (
+	  Select AdayId From MtskSinavRandevu
+	  Where FirmId = @FirmId
+	  and   Tarih = @Tarih
+	  and   EgitimAraciId = @EgitimAraciId
+	  and   IsActive = 1
+	)
+
+    -- 4,    Uygulama sınav randevusu MEBBİSe aktarılacak
+    -- 5,    Uygulama sınavına girecek
+	-- 4 den > 5 e geçecek
+
+    update MtskAdayTakip set
+    uSinavDurumTipiId = 5
+    from MtskAdayTakip
+    Where FirmId = @FirmId
+	and   uSinavDurumTipiId = 4 -- Uygulama sınav randevusu MEBBİSe aktarılacak
+    and   AdayId in (
+	  Select AdayId From MtskSinavRandevu
+	  Where FirmId = @FirmId
+	  and   Tarih = @Tarih
+	  and   EgitimAraciId = @EgitimAraciId
+	  and   IsActive = 1
+	)
+	
+    -- 14,    +4 Uygulama sınav randevusu MEBBİSe aktarılacak  
+    -- 15,    +4 Uygulama sınavına girecek
+	-- 14 den > 15 e geçecek
+
+    update MtskAdayTakip set
+    uSinavDurumTipiId = 15
+    from MtskAdayTakip
+    Where FirmId = @FirmId
+	and   uSinavDurumTipiId = 14 --  +4 Uygulama sınav randevusu MEBBİSe aktarılacak  
+    and   AdayId in (
+	  Select AdayId From MtskSinavRandevu
+	  Where FirmId = @FirmId
+	  and   Tarih = @Tarih
+	  and   EgitimAraciId = @EgitimAraciId
+	  and   IsActive = 1
+	)
+	
+	-- [MtskSinavUygulama] tablosu için insertleri oluştur 
+	--
+	INSERT INTO [dbo].[MtskSinavUygulama]
+           ([FirmId]
+           ,[IsActive]
+           ,[DonemTipiId]
+           ,[AdayId]
+           ,[TcNo]
+           ,[SinavNo]
+           ,[SinavTarihi]
+           ,[SiraNo]
+           ,[PuanTipiId]
+           ,[EgitimTipiId]
+           ,[DurumuTipiId]
+           ,[UcretDurumuTipiId]
+           ,[YatanToplamUcret]
+           ,[UcretSayisi]
+           ,[RandevuId]) 
+     Select 
+             randevu.FirmId
+           , 1 -- IsActive
+           , 0 -- DonemTipiId
+           , randevu.AdayId
+           , null -- TcNo
+           , 0 -- SinavNo
+           , randevu.Tarih -- SinavTarihi
+           , 0 -- SiraNo
+           , 0 -- PuanTipiId
+           , 0 -- EgitimTipiId
+           , 0 -- DurumuTipiId
+           , 0 -- UcretDurumuTipiId
+           , 0 -- YatanToplamUcret
+           , 0 -- UcretSayisi
+		   , randevu.Id
+
+	  From MtskSinavRandevu as randevu
+	    Left outer join MtskSinavUygulama as sinav on ( 
+		      randevu.FirmId = sinav.FirmId
+		  and randevu.Tarih = sinav.SinavTarihi
+		  and randevu.AdayId = sinav.AdayId )
+	  
+	  Where randevu.FirmId = @FirmId
+	  and   randevu.Tarih = @Tarih
+	  and   randevu.EgitimAraciId = @EgitimAraciId
+	  and   randevu.IsActive = 1
+	  and   sinav.Id is null
+
+
+END -- procedure
+GO
+
+

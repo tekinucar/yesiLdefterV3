@@ -1,0 +1,35 @@
+﻿
+
+begin transaction
+ create table SYS_TYPES_U
+ (
+        REF_ID            Int IDENTITY(1,1) NOT NULL,
+        FIRM_ID           Int               NULL,
+		ACTIVE            Bit               NULL,
+		LINE_NO           Int               NULL, /* Kullanıcı için sıra no */
+        IMAGE_ID          SmallInt          NULL,
+        TYPES_NAME        VarChar(30)       NULL, /* types Name ihtiyaca göre eklenecek */
+        TYPES_VALUE_INT   Int               NULL,
+        TYPES_CAPTION     VarChar(100)      NULL, /* Kullanıcının gördüğü başlık */
+
+   Constraint PK_SYS_TYPES_U primary key (REF_ID)
+   
+ )
+
+ create index X_SYS_TYPES_U1 on SYS_TYPES_U (FIRM_ID, TYPES_NAME, LINE_NO, REF_ID)
+ 
+ grant select, insert, update, delete on SYS_TYPES_U to public
+
+commit transaction
+
+
+INSERT INTO [dbo].[SYS_TYPES_U]
+           ([FIRM_ID],[ACTIVE],[LINE_NO],[IMAGE_ID],[TYPES_NAME],[TYPES_VALUE_INT],[TYPES_CAPTION])  VALUES
+           (0  --<FIRM_ID, int,>
+           ,1  --<ACTIVE, bit,>
+           ,0  --<LINE_NO, int,>
+           ,-1 --<IMAGE_ID, smallint,>
+           ,'AJ_GORUSME_KONUSU' --<TYPES_NAME, varchar(30),>
+           ,0  --<TYPES_VALUE_INT, int,>
+           ,'Ajanda Görüşme Konu Maddeleri' --<TYPES_CAPTION, varchar(100),>
+           )

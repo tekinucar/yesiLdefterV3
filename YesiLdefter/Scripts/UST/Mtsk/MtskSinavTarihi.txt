@@ -1,0 +1,162 @@
+﻿USE u7093888_Ustad01
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+begin transaction
+
+ create table MtskSinavTarihi
+ (
+   
+   Id                       Int IDENTITY(1,1) not null, 
+   FirmId                   Int       not null,
+   IsActive                 Bit       not null, /* default : 1 = active, 0 = not active */  
+   --10
+   SinavTipiId              SmallInt      null,
+   SinavDonemTipiId         Int           null,
+   SinavTarihSaat           Varchar(20)   null,
+   SinavTarihi              Date          null,
+   SinavSaati               Time          null,
+   MebbisESinavTarihValue   Varchar(20)   null, /* mebbis valuesi */ 
+   MebbisRandevuTarihValue  Varchar(20)   null, /* mebbis valuesi */
+   MebbisUSinavTarihValue   Varchar(20)   null, /* mebbis valuesi */
+
+   --20
+   AracSayisi               SmallInt      null,
+   UstaOgreticiSayisi       SmallInt      null,
+   AdaySayisi               SmallInt      null,
+   BasariliAdaySayisi       SmallInt      null,
+   BasarisizAdaySayisi      SmallInt      null,
+   
+   constraint		pk_MtskSinavTarihi primary key (Id)
+ )
+  
+ grant select, insert, update, delete on MtskSinavTarihi to public
+
+ create index X_MtskSinavTarihi01 on MtskSinavTarihi (DonemTipiId desc, Tarih desc)
+ 
+commit transaction
+
+
+
+
+USE [u7093888_Ustad01]
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TRIGGER [dbo].[trg_MtskSinavTarihi] on [dbo].[MtskSinavTarihi] 
+AFTER INSERT,UPDATE
+AS 
+BEGIN
+
+    DECLARE myCursor cursor for select Id from Inserted 
+    DECLARE @curId bigint
+
+    OPEN myCursor
+
+	declare @SinavDonemTipiId int
+	declare @ySinavTarihSaat varchar(20)
+	declare @ySinavTarihi  date
+	declare @ySinavSaati time
+	declare @yMebbisESinavTarihValue varchar(20)
+    declare @yMebbisRandevuTarihValue varchar(20)
+    declare @yMebbisUSinavTarihValue varchar(20)
+
+    FETCH NEXT FROM myCursor INTO @curId
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+
+        select 
+		  @ySinavTarihSaat = isnull(ins.SinavTarihSaat,'')
+		, @ySinavTarihi = isnull(ins.SinavTarihi, CONVERT(date, getdate(),103))
+        , @yMebbisESinavTarihValue = isnull(ins.MebbisESinavTarihValue, '')
+		, @yMebbisRandevuTarihValue = isnull(ins.MebbisRandevuTarihValue, '')
+		, @yMebbisUSinavTarihValue = isnull(ins.MebbisUSinavTarihValue, '')
+		from inserted ins
+    	where ins.Id = @curId
+				
+		-- E Sınav
+        if (@ySinavTarihSaat <> '0')
+		begin
+		  set @ySinavTarihSaat = replace(@ySinavTarihSaat, '/E-Sınav', '') 
+		  set @ySinavTarihi = convert(date, @ySinavTarihSaat, 103)
+		  set @ySinavSaati = convert(time, @ySinavTarihSaat, 103)
+		end
+				
+		--	<option value="12020134-05/12/2021">05/12/2021</option>
+		if ((@yMebbisRandevuTarihValue <> '') and
+		    (@yMebbisRandevuTarihValue <> '-1'))
+        begin
+		  set @ySinavTarihi = CONVERT(date, substring(@yMebbisRandevuTarihValue, CHARINDEX('-', @yMebbisRandevuTarihValue) + 1, 10), 103)
+        end 
+		-- <option value="12020134?05/12/2021">05/12/2021</option>
+		if ((@yMebbisUSinavTarihValue <> '') and
+		    (@yMebbisUSinavTarihValue <> '-1'))
+        begin
+		  set @ySinavTarihi = CONVERT(date, substring(@yMebbisUSinavTarihValue, CHARINDEX('?', @yMebbisUSinavTarihValue) + 1, 10), 103)
+        end 
+
+        if (MONTH(@ySinavTarihi) < 10)
+             set @SinavDonemTipiId = convert(int, convert(varchar(5), YEAR(@ySinavTarihi)) + '0' + convert(varchar(3), MONTH(@ySinavTarihi)))
+        else set @SinavDonemTipiId = convert(int, convert(varchar(5), YEAR(@ySinavTarihi)) + convert(varchar(3), MONTH(@ySinavTarihi)))
+		
+        Update MtskSinavTarihi set
+          SinavTarihi = @ySinavTarihi
+        , SinavSaati = @ySinavSaati 
+        , SinavDonemTipiId = @SinavDonemTipiId 
+		Where Id = @curId
+
+
+		if (@yMebbisRandevuTarihValue = '-1') or (@yMebbisUSinavTarihValue = '-1')
+		begin
+		  Delete MtskSinavTarihi
+		  Where Id = @curId
+        end 
+
+        FETCH NEXT FROM myCursor INTO @curId
+    END
+
+    CLOSE myCursor
+    DEALLOCATE myCursor  
+
+END
+
+
+
+
+ALTER TABLE [dbo].[MtskSinavTarihi] ENABLE TRIGGER [trg_MtskSinavTarihi]
+GO
+
+
+
+
+begin transaction
+
+-- ------------------------------------------------------- 
+-- SinavTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[MtskSinavTarihiSinavTipi]
+(
+   Id               Int Unique not null, 
+   SinavTipi        nVarchar(10)   null
+   
+   constraint  pk_MtskSinavTarihiSinavTipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskSinavTarihiSinavTipi]
+INSERT INTO [Lkp].[MtskSinavTarihiSinavTipi] (Id, SinavTipi)
+ VALUES 
+  ( 0,    N''),
+  ( 1,    N'e-Sınav'),
+  ( 2,    N'Uygulama')
+
+
+commit transaction

@@ -1,0 +1,47 @@
+﻿USE [u7093888_Ustad01]
+GO
+
+/****** Object:  StoredProcedure [dbo].[prc_CariHesap]    Script Date: 07.10.2020 15:48:46 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+CREATE PROCEDURE [dbo].[prc_CariHesap] (@FirmId int, @CariId int, @CariTamAdi nvarchar(200))  
+--ALTER PROCEDURE [dbo].[prc_CariHesap] (@FirmId int, @CariId int, @CariTamAdi nvarchar(200))  
+AS BEGIN 
+
+if ( Select count(Id) Adet
+     From [dbo].[HesapCari]
+     Where [FirmId] = @FirmId
+     and   [Id] = @CariId
+     and   [TamAdi] = @CariTamAdi ) = 0 
+begin
+  SET IDENTITY_INSERT [dbo].[HesapCari] ON 
+  --print 'insert'
+  INSERT INTO [dbo].[HesapCari]
+           ([Id]
+		   ,[ParentId]
+		   ,[FirmId]
+           ,[IsActive]
+           ,[TamAdi]
+           ,[Adi]
+           ,[SoyAdi])
+     VALUES
+           (@CariId
+		   ,0
+		   ,@FirmId
+           ,1
+           ,@CariTamAdi
+           ,substring(@CariTamAdi,  0, CHARINDEX(' ', @CariTamAdi))
+           ,substring(@CariTamAdi,  CHARINDEX(' ', @CariTamAdi)+1, 200))
+
+   SET IDENTITY_INSERT [dbo].[HesapCari] OFF
+end
+
+END
+GO
+
+
