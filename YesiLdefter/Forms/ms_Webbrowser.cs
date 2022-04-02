@@ -1132,8 +1132,8 @@ private void DisplaySecondUrl()
 
             Int16 _LoadNodeCount = 0;
 
-            if (this.myPageRefreshCount > 0)
-                _LoadNodeCount = this.myLoadNodeCount;
+            //if (this.myPageRefreshCount > 0)
+            //    _LoadNodeCount = this.myLoadNodeCount;
 
             //if (this.myTriggerCount + 1 <= this.myTriggerPosition)
             if (((this.myTriggerEventsType == v.tWebEventsType.load) && (this.myLoadNodeCount + 1 <= this.myTriggerPosition)) ||
@@ -1151,7 +1151,6 @@ private void DisplaySecondUrl()
 
             return onay;
         }
-
 
         /// İşlem No : 3 : Çalıştırılmak istenen nodeyi db table üzerinde bul, ön kontrolleri yap, uygunsa webScraping e gönder
         /// 
@@ -2136,7 +2135,7 @@ private void DisplaySecondUrl()
                         }
                         else
                         {
-                            string itemValue = findNodItemsValue(wnv.nodeId, itemText);
+                            string itemValue = findNodItemsValue(wnv, itemText);
                             if (itemValue != "")
                                 dbRow[wnv.dbFieldName] = itemValue;
                         }
@@ -2436,7 +2435,7 @@ private void DisplaySecondUrl()
                         }
                         else
                         {
-                            itemValue = findNodItemsValue(wnv.nodeId, itemText);
+                            itemValue = findNodItemsValue(wnv, itemText);
                                                         
                             if (itemValue != "")
                                 dbRow[wnv.dbFieldName] = itemValue;
@@ -2539,12 +2538,12 @@ private void DisplaySecondUrl()
             return onay;
         }
 
-        private string findNodItemsValue(int nodeId, string itemText)
+        private string findNodItemsValue(webNodeValue wnv, string itemText)
         {
             if (t.IsNotNull(ds_WebNodeItemsList) == false) return "";
 
             string value = "";
-            //int nodeId_ = 0;
+            int nodeId_ = wnv.nodeId;
             string itemText_ = "";
             itemText = itemText.ToUpper().Trim();
 
@@ -2576,7 +2575,7 @@ private void DisplaySecondUrl()
             // böylece bazı WebNodeItems lar saklanmaya gerek kalmadı
             if (value == "")
             {
-                MessageBox.Show("DİKKAT : WebNodeItemsList tablosunda aranan text in valuesi tespit edilemedi ..." + v.ENTER2 + itemText);
+                MessageBox.Show("DİKKAT : WebNodeItemsList tablosunda aranan text in valuesi tespit edilemedi ..." + v.ENTER2 + wnv.AttName + " = " + itemText);
                 value = itemText;
             }
             return value;
@@ -2862,7 +2861,7 @@ private void DisplaySecondUrl()
 
         #endregion btnOneByOne - Next Record
 
-        #region Resim 
+        #region Resim download
 
         private string ImageDownload(string urlDownload)
         {

@@ -3,11 +3,11 @@ begin transaction
  create table MS_FIELDS
  (
 	REF_ID              Int IDENTITY(1,1)   NOT NULL,
-	TABLE_CODE          VarChar(20)         NOT NULL,
+	TABLE_CODE          VarChar(100)        NOT NULL,
 
 	FIELD_NO            SmallInt            NULL,
 	FIELD_NAME          VarChar(30)         NULL,
-	FIELD_TYPE 	    SmallInt            NULL, 
+	FIELD_TYPE 	        SmallInt            NULL, 
 	FIELD_LENGTH	    VarChar(6) 	        NULL, 
 
 	FAUTOINC            Bit                 NULL,
@@ -22,13 +22,13 @@ begin transaction
 	FMEMORY_FIELD	    Bit                 NULL,
 	FLOOKUP_FIELD	    Bit                 NULL,
 		 
-	FCAPTION            VarChar(50) 	NULL, 
+	FCAPTION            VarChar(50) 	    NULL, 
 	FHINT               VarChar(100)        NULL,
 	 
 	/* default */
 	DEFAULT_TYPE        SmallInt            NULL, /* Insert sýrasýnda > 0=default Yok, 1=default var */  
-	DEFAULT_NUMERIC     Numeric(26,8)	NULL,
-	DEFAULT_TEXT        VarChar(100)	NULL,
+	DEFAULT_NUMERIC     Numeric(26,8)       NULL,
+	DEFAULT_TEXT        VarChar(100)        NULL,
 	DEFAULT_INT         Int                 NULL,
 	DEFAULT_SP          Int                 NULL,
 	DEFAULT_SETUP       Int                 NULL,
@@ -44,25 +44,25 @@ begin transaction
     LIST_TYPES_NAME     VarChar(50) 	NULL, 
 
     /* veri kontrolü  */
-    VALIDATION_OPERATOR          SmallInt           NULL,
-    VALIDATION_VALUE1            VarChar(50)        NULL,
-    VALIDATION_VALUE2            VarChar(50)        NULL,
-    VALIDATION_ERRORTEXT         VarChar(100)       NULL,
-    VALIDATION_ERRORTYPE         SmallInt           NULL,
+    VALIDATION_OPERATOR     SmallInt      NULL,
+    VALIDATION_VALUE1       VarChar(50)   NULL,
+    VALIDATION_VALUE2       VarChar(50)   NULL,
+    VALIDATION_ERRORTEXT    VarChar(100)  NULL,
+    VALIDATION_ERRORTYPE    SmallInt      NULL,
 
     /* Master Table Baðlantýsý */
-    MASTER_TABLEIPCODE      varChar(50)            NULL,
-    MASTER_KEY_FNAME        VarChar(30)            NULL,
-    MASTER_CHECK_FNAME      VarChar(30)            NULL,
-    MASTER_CHECK_VALUE      VarChar(30)            NULL,
+    MASTER_TABLEIPCODE      varChar(50)   NULL,
+    MASTER_KEY_FNAME        VarChar(30)   NULL,
+    MASTER_CHECK_FNAME      VarChar(30)   NULL,
+    MASTER_CHECK_VALUE      VarChar(30)   NULL,
 
     /* Arama Motoru Baðlantýlarý */
-    SEARCH_TABLEIPCODE      VarChar(50)            NULL,
-    PROP_SEARCH             VarChar(4000)          NULL,
+    SEARCH_TABLEIPCODE      VarChar(50)   NULL,
+    PROP_SEARCH             VarChar(4000) NULL,
 
     /* Gruplama */
-	GROUP_NO		SmallInt		NULL,
-	GROUP_LINE_NO		SmallInt		NULL,
+	GROUP_NO                SmallInt   NULL,
+	GROUP_LINE_NO           SmallInt   NULL,
 
 	/* Kriter - Filtreleme */
     KRT_LINE_NO	        SmallInt     NULL,
@@ -76,21 +76,21 @@ begin transaction
 
 
     /* Join Table baðlantýsý */
-    FJOIN_TYPE              SmallInt               NULL, /* 0=Yok, 1=Left, 2=Right, 3=inner */
-    FJOIN_TABLE_NAME        VarChar(50)            NULL,
-    FJOIN_TABLE_ALIAS       VarChar(30)            NULL,
-    FJOIN_KEY_FNAME         VarChar(30)            NULL,
-    FJOIN_WHERE             VarChar(200)           NULL,
+    FJOIN_TYPE              SmallInt      NULL, /* 0=Yok, 1=Left, 2=Right, 3=inner */
+    FJOIN_TABLE_NAME        VarChar(50)   NULL,
+    FJOIN_TABLE_ALIAS       VarChar(30)   NULL,
+    FJOIN_KEY_FNAME         VarChar(30)   NULL,
+    FJOIN_WHERE             VarChar(200)  NULL,
+	FJOIN_CAPTION_FNAME     VarChar(100)  NULL,
 
     /* Hesap - Calculator, Expression Evaluator Field */
-    EXPRESSION_TYPE         SmallInt               NULL, /* 0=None, 1=Hesaplarý Çalýþtýr */ 
-    PROP_EXPRESSION         VarChar(4000)          NULL,              
+    EXPRESSION_TYPE         SmallInt      NULL, /* 0=None, 1=Hesaplarý Çalýþtýr */ 
+    PROP_EXPRESSION         VarChar(4000) NULL,              
+
+    SOFTWARE_CODE       nvarchar(20)   null,
+	PROJECT_CODE        nvarchar(20)   null,
 
 	Constraint PK_MS_FIELDS primary key (REF_ID)
-
-      , CONSTRAINT FK_MS_FIELDS_MS_TABLES FOREIGN KEY (TABLE_CODE) 
-        REFERENCES MS_TABLES (TABLE_CODE)
-
  )
 
   create index X_MS_FIELD1 on MS_FIELDS (TABLE_CODE,FIELD_NO)
@@ -102,13 +102,7 @@ commit transaction
 
 
 
-ALTER TABLE MS_FIELDS ADD EXPRESSION_TYPE         SmallInt               NULL
-ALTER TABLE MS_FIELDS ADD EXPRESSION              VarChar(200)           NULL
-ALTER TABLE MS_FIELDS ADD FLOOKUP_FIELD	    Bit                 NULL
 
-EXEC sp_RENAME 'MS_FIELDS.EXPRESSION', 'PROP_EXPRESSION', 'COLUMN'
- 
-ALTER TABLE MS_FIELDS ALTER COLUMN PROP_EXPRESSION VARCHAR(4000) NULL
 
 
 

@@ -7392,8 +7392,6 @@ namespace Tkn_Events
                                 {
                                     if (v.active_DB.projectDBType == v.dBaseType.MSSQL)
                                         str_bgn = " and Convert(Date, " + read_sub_FName + ", 103)  >=";
-                                    if (v.active_DB.projectDBType == v.dBaseType.MySQL)
-                                        str_bgn = " and Convert(" + read_sub_FName + ", Date)  >=";
                                 }
 
                                 i_bgn = Sql.IndexOf(str_bgn);
@@ -7413,8 +7411,6 @@ namespace Tkn_Events
                                 {
                                     if (v.active_DB.projectDBType == v.dBaseType.MSSQL)
                                         str_bgn = " and Convert(Date, " + read_sub_FName + ", 103)  <=";
-                                    if (v.active_DB.projectDBType == v.dBaseType.MySQL)
-                                        str_bgn = " and Convert(" + read_sub_FName + ", Date)  <=";
                                 }
 
                                 i_bgn = Sql.IndexOf(str_bgn);
@@ -7441,8 +7437,6 @@ namespace Tkn_Events
                             {
                                 if (v.active_DB.projectDBType == v.dBaseType.MSSQL)
                                     str_bgn = " and Convert(Date, " + read_sub_FName;
-                                if (v.active_DB.projectDBType == v.dBaseType.MySQL)
-                                    str_bgn = " and Convert(" + read_sub_FName + ", Date";
                             }
 
                             i_bgn = Sql.IndexOf(str_bgn);
@@ -7510,9 +7504,6 @@ namespace Tkn_Events
                             // and Convert(Date, [SYSOTV].TARIH, 103)  = Convert(Date,'01.01.1900', 103)    -- :D.SD.5839: --
                             if (v.active_DB.projectDBType == v.dBaseType.MSSQL)
                                 str_bgn = " and Convert(Date, " + read_sub_FName;
-                            if (v.active_DB.projectDBType == v.dBaseType.MySQL)
-                                str_bgn = " and Convert(" + read_sub_FName + ", Date";
-
                             i_bgn = Sql.IndexOf(str_bgn);
                         }
 
@@ -7877,7 +7868,7 @@ namespace Tkn_Events
                 {
                     //
                     //v.SQLSave = v.ENTER2 + TableIPCode + v.ENTER + Sql + v.SQLSave;
-                    v.SQLSave = v.ENTER + TableIPCode + v.SQLSave;
+                    //v.SQLSave = v.ENTER + TableIPCode + v.SQLSave;
                     //---
 
                     //

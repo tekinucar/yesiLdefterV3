@@ -1,4 +1,4 @@
-﻿	
+﻿/*	
 program hazırlama	
 	Grup Listesi
 	Grubun sertifika çeşitleri
@@ -18,11 +18,9 @@ programlar
 	usta öğretici programı
 	araç programı
 	simülatör programı
+*/
 
-
-
-
-
+/*CreateTable*/
 
 begin transaction
 
@@ -45,11 +43,19 @@ begin transaction
 
 commit transaction
 
+/*CreateTableEnd*/
+
+
+/*CreateLkpTable*/
+
 begin transaction
 
 -- ------------------------------------------------------- 
 -- SaatTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskSablonUygulamaSSaatTipi')
+drop table [Lkp].[MtskSablonUygulamaSSaatTipi]
+
 create table Lkp.MtskSablonUygulamaSSaatTipi
 (
    Id          Int Unique Not Null,
@@ -61,7 +67,7 @@ create table Lkp.MtskSablonUygulamaSSaatTipi
 
 INSERT INTO Lkp.MtskSablonUygulamaSSaatTipi (Id, SaatTipi, GrupTipiId)
  VALUES 
-  ( 0, N'Tanımsız', 0),
+  ( 0, N'', 0),
   ( 107, N'07', 1),
   ( 108, N'08', 1),
   ( 109, N'09', 1),
@@ -99,6 +105,9 @@ INSERT INTO Lkp.MtskSablonUygulamaSSaatTipi (Id, SaatTipi, GrupTipiId)
 -- ------------------------------------------------------- 
 -- AracTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskSablonUygulamaSAracTipi')
+drop table [Lkp].[MtskSablonUygulamaSAracTipi]
+
 create table Lkp.MtskSablonUygulamaSAracTipi
 (
    Id          Int Unique Not Null,
@@ -117,6 +126,9 @@ INSERT INTO Lkp.MtskSablonUygulamaSAracTipi (Id, AracTipi)
 -- ------------------------------------------------------- 
 -- OgreticiTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskSablonUygulamaSOgreticiTipi')
+drop table [Lkp].[MtskSablonUygulamaSOgreticiTipi]
+
 create table Lkp.MtskSablonUygulamaSOgreticiTipi
 (
    Id           Int Unique Not Null,
@@ -134,6 +146,9 @@ INSERT INTO Lkp.MtskSablonUygulamaSOgreticiTipi (Id, OgreticiTipi)
 -- ------------------------------------------------------- 
 -- AdayTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskSablonUygulamaSAdayTipi')
+drop table [Lkp].[MtskSablonUygulamaSAdayTipi]
+
 create table Lkp.MtskSablonUygulamaSAdayTipi
 (
    Id          Int Unique Not Null,
@@ -154,6 +169,7 @@ INSERT INTO Lkp.MtskSablonUygulamaSAdayTipi (Id, AdayTipi)
   ( 7, N'7. Aday'),
   ( 8, N'8. Aday')
 
-
 commit transaction
+
+/*CreateLkpTableEnd*/
 

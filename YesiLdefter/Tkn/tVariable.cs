@@ -3,7 +3,6 @@ using DevExpress.XtraEditors;
 using DevExpress.XtraGrid.Views.Base;
 using DevExpress.XtraGrid.Views.Grid;
 using DevExpress.XtraScheduler;
-using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -16,6 +15,143 @@ namespace Tkn_Variable
 
     public static class v
     {
+        #region Database Yapısı
+        public enum dBaseType : byte
+        {
+            None,
+            MSSQL
+        }
+
+        public enum dBaseNo : byte
+        {
+            None = 0,
+            Master = 1, 
+            Manager = 2,
+            UstadCrm = 3, 
+            Project = 4,
+            WebCrm = 5,
+            NewDatabase = 6,
+            WebManager = 7 
+        }
+
+        public class DBTypes
+        {
+            /// o an hangi db işlem yapılacaksa onu nosunu ver 
+            /// gitti fonksiyonda ona göre işlem yapılır
+            /// 
+            ///
+            public DBTypes()
+            {
+                localDB = false;
+
+                managerDBaseNo = v.dBaseNo.Manager;
+                ustadCrmDBaseNo = v.dBaseNo.UstadCrm;
+                projectDBaseNo = v.dBaseNo.Project;
+
+                projectDBType = 0;
+                projectServerName = "";
+                projectDBName = "";
+                projectUserName = "";
+                projectPsw = "";
+                projectConnectionText = "";
+            }
+            /// <summary>
+            /// runDBaseNo ile o anda hangi database üzerinde çalışacağı 
+            /// hakkında bilgi vermek/almak için kullanılıyor
+            /// Örnek : t.tTableFind() 
+            /// </summary>
+            public v.dBaseNo runDBaseNo { get; set; }
+            public bool localDB { get; set; }
+
+            //--- Manager Database
+
+            public v.dBaseNo managerDBaseNo { get; set; }
+            public v.dBaseType managerDBType { get; set; }
+            public string managerServerName { get; set; }
+            public string managerDBName { get; set; }
+            public string managerUserName { get; set; }
+            public string managerPsw { get; set; }
+            public string managerConnectionText { get; set; }
+            public SqlConnection managerMSSQLConn { get; set; }
+
+            //--- Project Database
+            public v.dBaseNo projectDBaseNo { get; set; }
+            public v.dBaseType projectDBType { get; set; }
+            public string projectServerName { get; set; }
+            public string projectDBName { get; set; }
+            public string projectUserName { get; set; }
+            public string projectPsw { get; set; }
+            public string projectConnectionText { get; set; }
+            public SqlConnection projectMSSQLConn { get; set; }
+
+            //--- UstadCrm Database
+            public v.dBaseNo ustadCrmDBaseNo { get; set; }
+            public v.dBaseType ustadCrmDBType { get; set; }
+            public string ustadCrmServerName { get; set; }
+            public string ustadCrmDBName { get; set; }
+            public string ustadCrmUserName { get; set; }
+            public string ustadCrmPsw { get; set; }
+            public string ustadCrmConnectionText { get; set; }
+            public SqlConnection ustadCrmMSSQLConn { get; set; }
+
+            //--- maste Database
+            public v.dBaseNo masterDBaseNo { get; set; }
+            public string masterServerName { get; set; }
+            public string masterDBName { get; set; }
+            public string masterUserName { get; set; }
+            public string masterPsw { get; set; }
+            public string masterConnectionText { get; set; }
+            public SqlConnection masterMSSQLConn { get; set; }
+
+        }
+
+        public static DBTypes active_DB = new DBTypes();
+
+        public static string dbLocalPws = "Password = 1;";
+        public static string dbWebPsw = "Password = *Pi784512*+;";
+
+        public class databaseAbout_
+        {
+            /// o an hangi db işlem yapılacaksa onu nosunu ver 
+            /// gitti fonksiyonda ona göre işlem yapılır
+            /// 
+            ///
+            public databaseAbout_()
+            {
+                localDB = false;
+                dBaseNo = v.dBaseNo.Project;
+                dBType = 0;
+                serverName = "";
+                databaseName = "";
+                userName = "";
+                psw = "";
+                connectionText = "";
+            }
+            /// <summary>
+            /// runDBaseNo ile o anda hangi database üzerinde çalışacağı 
+            /// hakkında bilgi vermek/almak için kullanılıyor
+            /// Örnek : t.tTableFind() 
+            /// </summary>
+            public v.dBaseNo runDBaseNo { get; set; }
+            public bool localDB { get; set; }
+
+            //--- Project Database
+            public v.dBaseNo dBaseNo { get; set; }
+            public v.dBaseType dBType { get; set; }
+            public string serverName { get; set; }
+            public string databaseName { get; set; }
+            public string userName { get; set; }
+            public string psw { get; set; }
+            public string connectionText { get; set; }
+            public SqlConnection MSSQLConn { get; set; }
+        }
+
+        public static databaseAbout_ newFirm_DB = new databaseAbout_();
+        public static databaseAbout_ webManager_DB = new databaseAbout_();
+        
+        #endregion Database Yapısı
+
+
         // picture nesnesi ile Save() functionu arasında veri taşıyıcı
         public static Form mainForm { get; set; }
 
@@ -74,6 +210,7 @@ namespace Tkn_Variable
         public static string SP_MENU { get; set; }
         public static string EXE_PATH = string.Empty;
         public static string EXE_TempPath = string.Empty;
+        public static string EXE_ScriptsPath = string.Empty;
         public static string sp_Sakla = string.Empty;
 
 
@@ -96,16 +233,9 @@ namespace Tkn_Variable
         public static string SP_Conn_Text_MainManager { get; set; }
         //public static string SP_Conn_Text_Project { get; set; }
 
-        public static string SP_Conn_Text_Proje_MySQL { get; set; }
-        public static string SP_Conn_Text_MySQL { get; set; }
 
-        public static SqlConnection SP_Conn_Master_MSSQL = new SqlConnection();
-        public static SqlConnection SP_Conn_Manager_MSSQL = new SqlConnection();
-        //public static SqlConnection SP_Conn_MainManager_MSSQL = new SqlConnection();
-        //public static SqlConnection SP_Conn_Proje_MSSQL = new SqlConnection();
-
-        //public static MySqlConnection SP_Conn_Proje_MySQL = new MySqlConnection();
-
+        
+        
 
         public static Boolean IsWaitOpen = false;
         public static Boolean SP_OpenApplication = false;
@@ -123,7 +253,6 @@ namespace Tkn_Variable
         /* Transfer işlemleri için */
         public static SqlConnection SP_Conn_MsSQL = new SqlConnection(null);
         public static SqlConnection SP_Conn_MsSQL_TR = new SqlConnection(null);
-        public static MySqlConnection SP_Conn_MySQL = new MySqlConnection(null);
         //--
 
         // *** Global DataSet *** //
@@ -248,23 +377,7 @@ namespace Tkn_Variable
         //    Function = 4, Trigger = 5, Select = 6  
         //}
 
-        public enum dBaseNo : byte
-        {
-            None = 0,
-            Master = 1,
-            Manager = 2,
-            //MainManager = 3, İPTAL
-            Project = 4,
-            FirmMainDB = 5,
-            FirmPeriodDB = 6
-        }
-
-        public enum dBaseType : byte
-        {
-            None,
-            MSSQL,
-            MySQL
-        }
+        
 
         public enum TableType
         {
@@ -676,14 +789,11 @@ namespace Tkn_Variable
         public static bool SP_FIRM_MULTI = false;
         public static string SP_FIRM_USERLIST { get; set; }
         public static string SP_FIRM_FULLLIST { get; set; }
-        public static string SP_FIRM_GUID { get; set; }
-        public static string SP_FIRM_NAME = "Tekin UÇAR";//{ get; set; }
+        
         public static string SP_FIRM_TABLENAME { get; set; }
         public static string SP_FIRM_TABLEKEYFNAME { get; set; }
         public static string SP_FIRM_TABLECAPTIONFNAME { get; set; }
         public static string SP_FIRM_REF_FNAME = "LOCAL_ID";
-        public static string SP_FIRM_USE_PACKAGE = "ONM_KOBI";
-        public static string SP_FIRM_USE_PACKAGE_OLD = "ONM_KOBI";
         public static string SP_FIRM_USE_MENU_TYPE = "toolBox";
 
 
@@ -928,18 +1038,23 @@ namespace Tkn_Variable
             searchColumn,
             firstActiveColumn //gerek kalmadı
         }
-
-        public static DBTypes active_DB = new DBTypes();
-
+                
         public static cComputer tComputer = new cComputer();
 
-        public static List<FirmAbout> tFirmUserList = new List<FirmAbout>();
-        public static List<FirmAbout> tFirmFullList = new List<FirmAbout>();
+        public static List<tUstadFirm> tFirmUserList = new List<tUstadFirm>();
+        public static List<tUstadFirm> tFirmFullList = new List<tUstadFirm>();
 
         // Bilgisayar hakkında
-        public static Comp tComp = new Comp();
+        public static Computer tComp = new Computer();
         // User-Kullanıcı hakkında
-        public static User tUser = new User();
+        public static tUstadUser tUser = new tUstadUser();
+        // user ın çalıştığı firma 
+        public static tUstadFirm tMainFirm = new tUstadFirm();
+        // user ın inceleme veya müdehale için geçici bağlandığı firma
+        public static tUstadFirm tExternalFirm = new tUstadFirm();
+        // user ın registere kaydedilen bilgileri
+        public static tUserRegister tUserRegister = new tUserRegister();
+
         // Exe hakkında
         public static exeAbout tExeAbout = new exeAbout();
         // button hakkında bilgi
@@ -1011,29 +1126,75 @@ namespace Tkn_Variable
 
 
     // computer bilgileri 
-    public class Comp
+    public class Computer
     {
         public int SP_COMP_ID = 0;
-        public int SP_COMP_ISACTIVE = 0;
+        public bool SP_COMP_ISACTIVE = false;
         public string SP_COMP_FIRM_GUID { get; set; }
         public string SP_COMP_SYSTEM_NAME { get; set; }
         public string SP_COMP_MACADDRESS { get; set; }
         public string SP_COMP_PROCESSOR_ID { get; set; }
         public int SP_COMP_FIRM_ID { get; set; }
     }
-
     // user/kullanıcı bilgileri
-    public class User
+    public class tUstadUser
     {
-        public int SP_USER_ID = 0;
-        public int SP_USER_ISACTIVE = 0;
-        public string SP_USER_FIRM_GUID { get; set; }
-        public string SP_USER_GUID { get; set; }
-        public string SP_USER_FULLNAME { get; set; }
-        public string SP_USER_FIRSTNAME { get; set; }
-        public string SP_USER_LASTNAME { get; set; }
-        public string SP_USER_EMAIL { get; set; }
-        public string SP_USER_KEY { get; set; }
+        public int UserId = 0;
+        public bool IsActive = true;
+        public string UserFirmGUID { get; set; }
+        public string UserGUID { get; set; }
+        public string FullName { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string eMail { get; set; }
+        public string Key { get; set; } /* user password ü */
+        public Int16 UserDbTypeId { get; set; } /* user ustad firmasının hangi veritabanlarını görebilir işareti */
+        public int MainFirmId { get; set; } /* user ın esas çalıştığı yani il giriş yaptığı firmanın ID si : FirmId, SP_FIRM_ID */
+        public int ExternalFirmId { get; set; } /* user ın inceleme veya müdehale etmek için giriş yaptığı firmanın ID si */
+        public string MainFirmMenuCode { get; set; } /* user ın esas çalıştığı yani il giriş yaptığı firmanın menü kodu */
+        public string ExternalFirmMenuCode { get; set; } /* user ın inceleme veya müdehale etmek için giriş yaptığı firmanın menü kodu */
+    }
+    // firm/kullanıcının bağlanıp işlem yaptığı firma bilgileri
+    public class tUstadFirm
+    {
+        public int FirmId { get; set; }
+        public string FirmLongName { get; set; }
+        public string FirmShortName { get; set; }
+        public string FirmGuid { get; set; }
+        public string MenuCode { get; set; }
+        public string MenuCodeOld { get; set; }
+
+        public string DatabaseType { get; set; }
+        public string DatabaseName { get; set; }
+        public string ServerNameIP { get; set; }
+        public string DbAuthentication { get; set; }
+        public string DbLoginName { get; set; }
+        public string DbPassword { get; set; }
+
+        public void Clear()
+        {
+            FirmId = 0;
+            FirmLongName = "";
+            FirmShortName = "";
+            FirmGuid = "";
+            MenuCode = "";
+            MenuCodeOld = "";
+        }
+    }
+
+    public class tUserRegister
+    {
+        public tUserRegister()
+        {
+            eMailList = new List<object>();
+        }
+        public int UserId { get; set; }
+        public string eMail { get; set; }
+        public bool UserRemember { get; set; }
+        public string UserLastLoginEMail { get; set; }
+        public string UserLastKey { get; set; }
+        public int UserLastFirmId { get; set; }
+        public List<object> eMailList { get; set; }
     }
 
     // exe hakkındaki bilgiler
@@ -1060,59 +1221,18 @@ namespace Tkn_Variable
     {
         public FirmUserList()
         {
-            firmAbout = new List<FirmAbout>();
+            firmAbout = new List<tUstadFirm>();
         }
-        public List<FirmAbout> firmAbout { get; set; }
+        public List<tUstadFirm> firmAbout { get; set; }
     }
 
     public class FirmFullList
     {
         public FirmFullList()
         {
-            firmFullList = new List<FirmAbout>();
+            firmFullList = new List<tUstadFirm>();
         }
-        public List<FirmAbout> firmFullList { get; set; }
-    }
-
-    public class FirmAbout
-    {
-        public int FirmId { get; set; }
-        public string FirmName { get; set; }
-        public string FirmGuid { get; set; }
-        public string usePackage { get; set; }
-
-        /*
-        [FIRM_DB_TYPE]
-      ,[FIRM_DB_NAME]
-      ,[FIRM_MAINDB_FORMAT]
-      ,[FIRM_PERIODDB_FORMAT]
-      ,[FIRM_SERVER_TYPE]
-      ,[FIRM_SERVER_NAME]
-      ,[FIRM_AUTHENTICATION]
-      ,[FIRM_LOGIN]
-      ,[FIRM_PASSWORD]
-      */
-        public string firmDBType { get; set; }
-        public string firmDBName { get; set; }
-        public string firmMainDBFormat { get; set; }
-        public string firmPeriodDBFormat { get; set; }
-        public string firmServerType { get; set; }
-        public string firmServerName { get; set; }
-        public string firmAuthentication { get; set; }
-        public string firmLogin { get; set; }
-        public string firmPassword { get; set; }
-
-        public string firmMainConnText { get; set; }
-        public string firmPeriodConnText { get; set; }
-
-        public void Clear()
-        {
-            FirmId = 0;
-            FirmName = "";
-            FirmGuid = "";
-            usePackage = "";
-
-        }
+        public List<tUstadFirm> firmFullList { get; set; }
     }
 
     public class eMail
@@ -1450,92 +1570,6 @@ namespace Tkn_Variable
         }
     }
 
-    public class DBTypes
-    {
-        /// o an hangi db işlem yapılacaksa onu nosunu ver 
-        /// gitti fonksiyonda ona göre işlem yapılır
-        /// 
-        ///
-        public DBTypes()
-        {
-            managerDBaseNo = v.dBaseNo.Manager;
-            projectDBaseNo = v.dBaseNo.Project;
-            firmMainDBaseNo = v.dBaseNo.FirmMainDB;
-            firmPeriodDBaseNo = v.dBaseNo.FirmPeriodDB;
-
-            localDB = false;
-
-            projectDBType = 0;
-            projectServerName = "";
-            projectDBName = "";
-            projectUserName = "";
-            projectPsw = "";
-            projectConnectionText = "";
-
-            firmMainDBaseNo = 0;
-            firmMainDBType = 0;
-            firmMainServerName = "";
-            firmMainDBName = "";
-            firmMainUserName = "";
-            firmMainPsw = "";
-            firmMainConnectionText = "";
-
-            firmPeriodDBaseNo = 0;
-            firmPeriodDBType = 0;
-            firmPeriodServerName = "";
-            firmPeriodDBName = "";
-            firmPeriodUserName = "";
-            firmPeriodPsw = "";
-            firmPeriodConnectionText = "";
-
-        }
-        /// <summary>
-        /// runDBaseNo ile o anda hangi database üzerinde çalışacağı 
-        /// hakkında bilgi vermek/almak için kullanılıyor
-        /// Örnek : t.tTableFind() 
-        /// </summary>
-        public v.dBaseNo runDBaseNo { get; set; }
-        public v.dBaseNo managerDBaseNo { get; set; }
-        public v.dBaseType managerDBType { get; set; }
-        public bool localDB { get; set; }
-        public string managerServerName { get; set; }
-        public string managerDBName { get; set; }
-        public string managerUserName { get; set; }
-        public string managerPsw { get; set; }
-        public string managerConnectionText { get; set; }
-        public SqlConnection managerMSSQLConn { get; set; }
-
-        public v.dBaseNo projectDBaseNo { get; set; }
-        public v.dBaseType projectDBType { get; set; }
-        public string projectServerName { get; set; }
-        public string projectDBName { get; set; }
-        public string projectUserName { get; set; }
-        public string projectPsw { get; set; }
-        public string projectConnectionText { get; set; }
-        public SqlConnection projectMSSQLConn { get; set; }
-        public MySqlConnection projectMySQLConn { get; set; }
-
-        public v.dBaseNo firmMainDBaseNo { get; set; }
-        public v.dBaseType firmMainDBType { get; set; }
-        public string firmMainServerName { get; set; }
-        public string firmMainDBName { get; set; }
-        public string firmMainUserName { get; set; }
-        public string firmMainPsw { get; set; }
-        public string firmMainConnectionText { get; set; }
-        public SqlConnection firmMainMSSQLConn { get; set; }
-        public MySqlConnection firmMainMySQLConn { get; set; }
-
-        public v.dBaseNo firmPeriodDBaseNo { get; set; }
-        public v.dBaseType firmPeriodDBType { get; set; }
-        public string firmPeriodServerName { get; set; }
-        public string firmPeriodDBName { get; set; }
-        public string firmPeriodUserName { get; set; }
-        public string firmPeriodPsw { get; set; }
-        public string firmPeriodConnectionText { get; set; }
-        public SqlConnection firmPeriodMSSQLConn { get; set; }
-        public MySqlConnection firmPeriodMySQLConn { get; set; }
-    }
-
     public class vNavigatorButton
     {
         public Control navigatorPanel { get; set; }
@@ -1583,7 +1617,6 @@ namespace Tkn_Variable
 
         public bool RunTime { get; set; }
         public SqlConnection msSqlConnection { get; set; }
-        public MySqlConnection mySqlConnection { get; set; }
         public void Clear()
         {
             DBaseNo = 0;
@@ -1603,9 +1636,6 @@ namespace Tkn_Variable
             FormCode = "";
             RunTime = false;
             msSqlConnection = null;
-            mySqlConnection = null;
-
-
         }
     }
 

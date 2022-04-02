@@ -263,7 +263,7 @@ namespace Tkn_Events
         #endregion MenuEvents
 
 
-        private bool commonMenuClick(Form tForm, string ButtonName, string tableIPCode, string myFormLoadValue)
+        public bool commonMenuClick(Form tForm, string ButtonName, string tableIPCode, string myFormLoadValue)
         {
             if (tForm == null) return false;
 
@@ -307,8 +307,6 @@ namespace Tkn_Events
             }
             return onay;
         }
-
-
 
         private bool commonMenuClick_(Form tForm, string ButtonName, string tableIPCode, string myFormLoadValue, string propNavigator, PROP_NAVIGATOR prop_, tToolBox t)
         {
@@ -503,8 +501,6 @@ namespace Tkn_Events
             return onay;
         }
 
-
-
         #region Form shortcutKeys and Buttons 
 
         public bool findKeyAdvGridGroupButtons(Form tForm, string keyCode)
@@ -671,9 +667,6 @@ namespace Tkn_Events
 
         #endregion Form shortcutKeys and Buttons 
 
-
-
-
         #region diğer menu click ler
         public void tTileItem_ItemClick(object sender, DevExpress.XtraEditors.TileItemEventArgs e)
         {
@@ -773,14 +766,14 @@ namespace Tkn_Events
                         dN.Position = pos;
 
                         // 
-                        v.SP_FIRM_ID = firmId;
-                        v.SP_FIRM_NAME = ds.Tables[0].Rows[dN.Position]["FIRM_NAME"].ToString();
+                        //v.SP_FIRM_ID = firmId;
+                        //v.SP_FirmShortName = ds.Tables[0].Rows[dN.Position]["FIRM_NAME"].ToString();
 
                         //
-                        v.Kullaniciya_Mesaj_Show = true;
-                        v.Kullaniciya_Mesaj_Var = v.SP_FIRM_NAME;
+                        //v.Kullaniciya_Mesaj_Show = true;
+                        //v.Kullaniciya_Mesaj_Var = v.SP_FirmShortName;
 
-                        Application.OpenForms[0].Text = Application.OpenForms[0].AccessibleName + "   [ " + v.SP_FIRM_NAME + " , " + v.SP_FIRM_ID.ToString() + " ]";
+                        //Application.OpenForms[0].Text = Application.OpenForms[0].AccessibleName + "   [ " + v.SP_FirmShortName + " , " + v.SP_FIRM_ID.ToString() + " ]";
                     }
                 }
             }

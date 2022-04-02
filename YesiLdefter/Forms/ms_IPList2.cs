@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Tkn_Events;
 using Tkn_InputPanel;
+using Tkn_Save;
 using Tkn_ToolBox;
 using Tkn_Variable;
 
@@ -21,8 +22,10 @@ namespace YesiLdefter
         tInputPanel ip = new tInputPanel();
         tEventsButton evb = new tEventsButton();
         vUserInputBox iBox = new vUserInputBox();
+        tSave sv = new tSave();
 
         string TableIPCode = string.Empty;
+        
         DataSet ds_MSTables = null;
         DataNavigator dN_MSTables = null;
         DataSet ds_MSFields = null;
@@ -32,20 +35,41 @@ namespace YesiLdefter
         DataNavigator dN_MSTablesIP = null;
         DataSet ds_MSFieldsIP = null;
         DataNavigator dN_MSFieldsIP = null;
+        DataSet ds_GroupsIP = null;
+        DataNavigator dN_GroupsIP = null;
+
 
         Control editpanel_TestSQL = null;
 
-        string menuName = "MENU_UST/T01/SYS/MSIP";
-        string buttonIPTest = "item_60";
-        string buttonSqlView = "item_117";
-        string buttonSqlRec = "item_118";
-        string buttonExpression = "item_405";
-        string buttonClearSQL = "item_12252";
+        string menuName = "MENU_" + "UST/PMS/PMS/InputPanel";
 
-        string buttonMsfMsfIP = "item_121";
-        string buttonMsfIPMsfIP = "item_122";
+        string buttonMsTIPMsTIP = "ButtonCopyTablesIP";         // Copy MsTablesIP > MsTablesIP 
+        string buttonMsfMsfIP = "ButtonCopyFieldsFieldsIP";     // Copy MsFields > MsFieldsIP   
+        string buttonMsfIPMsfIP = "ButtonCopyFieldsIPFieldsIP"; // Copy MsFieldsIP > MsFieldsIP 
 
-        string buttonMsTIPMsTIP = "item_436";
+        string buttonIPTest = "ButtonIPTestEt";   // IP yi Test Et
+        string buttonSqlView = "ButtonSQLView";   // SQL View
+        string buttonSqlRec = "ButtonRecordSQL";  // Record SQL
+        string buttonExpression = "ButtonExpressionView"; // Expression View
+        string buttonClearSQL = "ButtonClearSQL"; // Clear SQL
+
+        string buttonInsertPaketOlustur = "ButtonPaketOlustur";
+        string buttonPaketiGonder = "ButtonPaketiGonder";
+
+        string cumleMsTables = "";
+        string cumleMsFields = "";
+        string cumleMsTablesIP = "";
+        string cumleMsFieldsIP = "";
+        string cumleMsGroups = "";
+
+        /// Tables/Fields/Groups
+        /// UST/T01/3S_MSTBL.3S_MSTBL_05
+        /// UST/T01/3S_MSFLD.3S_MSFLD_05
+        /// UST/T01/3S_MSGRP.3S_MSGRP_04
+        /// TablesIP/FieldsIP/Groups
+        /// UST/T01/3S_MSTBLIP.3S_MSTBLIP_05
+        /// UST/T01/3S_MSFLDIP.3S_MSFLDIP_05
+        /// UST/T01/3S_MSGRP.3S_MSGRP_05
 
         public ms_IPList2()
         {
@@ -54,29 +78,37 @@ namespace YesiLdefter
 
         private void ms_IPList2_Shown(object sender, EventArgs e)
         {
+            t.Find_Button_AddClick(this, menuName, buttonMsTIPMsTIP, myNavElementClick);
+            t.Find_Button_AddClick(this, menuName, buttonMsfMsfIP, myNavElementClick);
+            t.Find_Button_AddClick(this, menuName, buttonMsfIPMsfIP, myNavElementClick);
+            
             t.Find_Button_AddClick(this, menuName, buttonIPTest, myNavElementClick);
             t.Find_Button_AddClick(this, menuName, buttonSqlView, myNavElementClick);
             t.Find_Button_AddClick(this, menuName, buttonSqlRec, myNavElementClick);
             t.Find_Button_AddClick(this, menuName, buttonExpression, myNavElementClick);
             t.Find_Button_AddClick(this, menuName, buttonClearSQL, myNavElementClick);
-            t.Find_Button_AddClick(this, menuName, buttonMsfMsfIP, myNavElementClick);
-            t.Find_Button_AddClick(this, menuName, buttonMsfIPMsfIP, myNavElementClick);
-            t.Find_Button_AddClick(this, menuName, buttonMsTIPMsTIP, myNavElementClick);
+
+            t.Find_Button_AddClick(this, menuName, buttonInsertPaketOlustur, myNavElementClick);
+            t.Find_Button_AddClick(this, menuName, buttonPaketiGonder, myNavElementClick);
 
             if (ds_MSTables == null)
             {
+                ///---
                 TableIPCode = "UST/T01/3S_MSTBL.3S_MSTBL_05";
                 t.Find_DataSet(this, ref ds_MSTables, ref dN_MSTables, TableIPCode);
 
                 TableIPCode = "UST/T01/3S_MSFLD.3S_MSFLD_05";
                 t.Find_DataSet(this, ref ds_MSFields, ref dN_MSFields, TableIPCode);
 
-
+                ///---
                 TableIPCode = "UST/T01/3S_MSTBLIP.3S_MSTBLIP_05";
                 t.Find_DataSet(this, ref ds_MSTablesIP, ref dN_MSTablesIP, TableIPCode);
 
                 TableIPCode = "UST/T01/3S_MSFLDIP.3S_MSFLDIP_05";
                 t.Find_DataSet(this, ref ds_MSFieldsIP, ref dN_MSFieldsIP, TableIPCode);
+
+                TableIPCode = "UST/T01/3S_MSGRP.3S_MSGRP_05";
+                t.Find_DataSet(this, ref ds_GroupsIP, ref dN_GroupsIP, TableIPCode);
             }
 
             //
@@ -108,6 +140,9 @@ namespace YesiLdefter
                 if (((DevExpress.XtraBars.Navigation.TileNavItem)sender).Name == buttonMsfMsfIP) CopyMsfMsfIP();
                 if (((DevExpress.XtraBars.Navigation.TileNavItem)sender).Name == buttonMsfIPMsfIP) CopyMsfIPMsfIP();
                 if (((DevExpress.XtraBars.Navigation.TileNavItem)sender).Name == buttonMsTIPMsTIP) CopyMsTIPMsTIP();
+
+                if (((DevExpress.XtraBars.Navigation.TileNavItem)sender).Name == buttonInsertPaketOlustur) InsertPaketOlustur();
+                if (((DevExpress.XtraBars.Navigation.TileNavItem)sender).Name == buttonPaketiGonder) PaketiGonder();
             }
         }
 
@@ -157,13 +192,7 @@ namespace YesiLdefter
                         // Test sonucu oluşan yeni viewe ait SQL de memoEdit te gösterilecek
                         // memoEdit aslında bir panelin içinde sıfırncı kontrol olarak duruyor
                         //
-                        if (editpanel_TestSQL != null)
-                        {
-                            if (((DevExpress.XtraEditors.PanelControl)editpanel_TestSQL).Controls.Count > 0)
-                            {
-                                ((DevExpress.XtraEditors.PanelControl)editpanel_TestSQL).Controls[0].Text = v.con_SQL;
-                            }
-                        }
+                        viewText(v.con_SQL);
                     }
                 }
             }
@@ -174,13 +203,7 @@ namespace YesiLdefter
             // Test sonucu oluşan yeni viewe ait SQL de memoEdit te gösterilecek
             // memoEdit aslında bir panelin içinde sıfırncı kontrol olarak duruyor
             //
-            if (editpanel_TestSQL != null)
-            {
-                if (((DevExpress.XtraEditors.PanelControl)editpanel_TestSQL).Controls.Count > 0)
-                {
-                    ((DevExpress.XtraEditors.PanelControl)editpanel_TestSQL).Controls[0].Text = v.SQL;
-                }
-            }
+            viewText(v.SQL);
         }
 
         private void SqlRec()
@@ -188,24 +211,12 @@ namespace YesiLdefter
             // Test sonucu oluşan yeni viewe ait SQL de memoEdit te gösterilecek
             // memoEdit aslında bir panelin içinde sıfırncı kontrol olarak duruyor
             //
-            if (editpanel_TestSQL != null)
-            {
-                if (((DevExpress.XtraEditors.PanelControl)editpanel_TestSQL).Controls.Count > 0)
-                {
-                    ((DevExpress.XtraEditors.PanelControl)editpanel_TestSQL).Controls[0].Text = v.SQLSave;
-                }
-            }
+            viewText(v.SQLSave);
         }
 
         private void ExpressionView()
         {
-            if (editpanel_TestSQL != null)
-            {
-                if (((DevExpress.XtraEditors.PanelControl)editpanel_TestSQL).Controls.Count > 0)
-                {
-                    ((DevExpress.XtraEditors.PanelControl)editpanel_TestSQL).Controls[0].Text = v.con_Expression_View;
-                }
-            }
+            viewText(v.con_Expression_View);
         }
 
         private void ClearSql()
@@ -618,6 +629,97 @@ namespace YesiLdefter
            ";
         }
 
+        private void viewText(string text)
+        {
+            if (editpanel_TestSQL != null)
+            {
+                if (((DevExpress.XtraEditors.PanelControl)editpanel_TestSQL).Controls.Count > 0)
+                {
+                    ((DevExpress.XtraEditors.PanelControl)editpanel_TestSQL).Controls[0].Text = text;
+                }
+            }
+        }
+
+        private void InsertPaketOlustur()
+        {
+            if (t.IsNotNull(ds_MSTables) == false) return;
+
+            string tableCode = ds_MSTables.Tables[0].Rows[dN_MSTables.Position]["TABLE_CODE"].ToString();
+
+            string soru = tableCode + " tablosu için INSERT paketi oluşturulacak, Onaylıyor musunuz ?";
+            DialogResult cevap = t.mySoru(soru);
+            if (DialogResult.Yes == cevap)
+            {
+                cumleMsTables = "";
+                cumleMsFields = "";
+                cumleMsTablesIP = "";
+                cumleMsFieldsIP = "";
+                cumleMsGroups = "";
+
+                cumleMsTables = preparingInsertScript("MS_TABLES", tableCode);
+                cumleMsFields = preparingInsertScript("MS_FIELDS", tableCode);
+                cumleMsTablesIP = preparingInsertScript("MS_TABLES_IP", tableCode);
+                cumleMsFieldsIP = preparingInsertScript("MS_FIELDS_IP", tableCode);
+                cumleMsGroups = preparingInsertScript("MS_GROUPS", tableCode);
+
+                viewText(
+                    cumleMsTables + v.ENTER2 +
+                    cumleMsFields + v.ENTER2 +
+                    cumleMsTablesIP + v.ENTER2 +
+                    cumleMsFieldsIP + v.ENTER2 +
+                    cumleMsGroups);
+
+                //t.FlyoutMessage("Web Manager Database Update", "Insert paketler hazırlandı...");
+
+                PaketiGonder();
+            }
+        }
+
+        private string preparingInsertScript(string tableName, string tableCode)
+        {
+            DataSet dsQuery = new DataSet();
+            string cumleDelete = " delete from {0} Where TABLE_CODE = '{1}' ";
+            string cumleSelect = " Select * from {0} Where TABLE_CODE = '{1}' ";
+            string cumle = "";
+            string tSql = "";
+            string myProp = string.Empty;
+
+            cumle = string.Format(cumleDelete, tableName, tableCode) + v.ENTER2;
+            
+            tSql = string.Format(cumleSelect, tableName, tableCode);
+            t.MyProperties_Set(ref myProp, "DBaseNo", Convert.ToString((byte)v.dBaseNo.Manager));
+            t.MyProperties_Set(ref myProp, "TableName", tableName);
+            t.MyProperties_Set(ref myProp, "SqlFirst", tSql);
+            t.MyProperties_Set(ref myProp, "SqlSecond", "null");
+            t.MyProperties_Set(ref myProp, "TableType", "1");
+            t.MyProperties_Set(ref myProp, "Cargo", "data");
+            t.MyProperties_Set(ref myProp, "KeyFName", "");
+
+            dsQuery.Namespace = myProp;
+
+            t.Data_Read_Execute(this, dsQuery, ref tSql, tableName, null);
+            if (t.IsNotNull(dsQuery))
+            {
+                cumle = cumle + sv.Insert_Script_Multi(dsQuery, tableName, v.active_DB.managerMSSQLConn);
+            }
+
+            dsQuery.Dispose();
+
+            return cumle;
+        }
+
+        private void PaketiGonder()
+        {
+            if (cumleMsTables != "") t.runScript(cumleMsTables); 
+            if (cumleMsFields != "") t.runScript(cumleMsFields);
+            if (cumleMsTablesIP != "") t.runScript(cumleMsTablesIP);
+            if (cumleMsFieldsIP != "") t.runScript(cumleMsFieldsIP);
+            if (cumleMsGroups != "") t.runScript(cumleMsGroups);
+
+            t.FlyoutMessage("Web Manager Database Update", "Insert paketler gönderildi...");
+        }
+
+        
     }
 
 }

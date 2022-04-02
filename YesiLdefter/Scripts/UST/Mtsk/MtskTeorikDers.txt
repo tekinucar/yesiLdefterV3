@@ -1,4 +1,5 @@
-﻿
+﻿/*CreateTable*/
+
 begin transaction
 
  create table MtskTeorikDers
@@ -29,22 +30,15 @@ begin transaction
   
  grant select, insert, update, delete on MtskTeorikDers to public
 
-
 commit transaction
 
+/*CreateTableEnd*/
 
-USE [u7093888_Ustad01]
-GO
+/*CreateTrigger*/
 
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-ALTER TRIGGER [dbo].[trg_MtskTeorikDers] on [dbo].[MtskTeorikDers] 
+CREATE TRIGGER [dbo].[trg_MtskTeorikDers] on [dbo].[MtskTeorikDers] 
 AFTER INSERT, UPDATE
 AS BEGIN
-
 
     DECLARE myCursor cursor for select Id from Inserted
     DECLARE @curId bigint
@@ -59,7 +53,7 @@ AS BEGIN
     declare @eDersTarihi date = null
     declare @eDersSaatiTipiId smallInt = -1
     declare @ePersonelId varchar(20) = null
-	declare @eSaat varchar(20) = null
+	  declare @eSaat varchar(20) = null
     declare @TcNoCalismaIzniNo varchar(20) = null
 
     WHILE @@FETCH_STATUS = 0
@@ -116,13 +110,18 @@ AS BEGIN
 
 END -- create trigger
 
+/*CreateTriggerEnd*/
 
+/*CreateLkpTable*/
 
 begin transaction
 
 -- ------------------------------------------------------- 
 -- DerslikTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskTeorikDersDerslikTipi')
+drop table [Lkp].[MtskTeorikDersDerslikTipi]
+
 create table Lkp.MtskTeorikDersDerslikTipi
 (
    Id          Int Unique Not Null,
@@ -139,12 +138,13 @@ INSERT INTO Lkp.MtskTeorikDersDerslikTipi (Id, DerslikTipi)
   ( 2, N'İlkyardım Dersi'),
   ( 3, N'Araç Tekniği Dersi'),
   ( 5, N'Trafik Adabı Dersi')
-  
-
 
 -- ------------------------------------------------------- 
 -- DerslikAdiTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskTeorikDersDerslikAdiTipi')
+drop table [Lkp].[MtskTeorikDersDerslikAdiTipi]
+
 create table Lkp.MtskTeorikDersDerslikAdiTipi
 (
    Id             Int Unique Not Null,
@@ -171,6 +171,9 @@ INSERT INTO Lkp.MtskTeorikDersDerslikAdiTipi (Id, DerslikAdiTipi)
 -- ------------------------------------------------------- 
 -- DersSaatiTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskTeorikDersDersSaatiTipi')
+drop table [Lkp].[MtskTeorikDersDersSaatiTipi]
+
 create table Lkp.MtskTeorikDersDersSaatiTipi
 (
    Id              Int Unique Not Null,
@@ -199,10 +202,12 @@ INSERT INTO Lkp.MtskTeorikDersDersSaatiTipi (Id, DersSaatiTipi)
   (14, N'21:00 - 21:50'),
   (15, N'22:00 - 22:50')
 
-
 -- ------------------------------------------------------- 
 -- EgitimTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskTeorikDersEgitimTipi')
+drop table [Lkp].[MtskTeorikDersEgitimTipi]
+
 create table Lkp.MtskTeorikDersEgitimTipi
 (
    Id           Int Unique Not Null,
@@ -217,8 +222,8 @@ INSERT INTO Lkp.MtskTeorikDersEgitimTipi (Id, EgitimTipi)
   ( 1, N'Normal Eğitim'),
   ( 2, N'Telafi Eğitim')
 
-
 commit transaction
  
+/*CreateLkpTableEnd*/
 
 

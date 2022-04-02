@@ -1,11 +1,4 @@
-﻿USE u7093888_Ustad01
-GO
-
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
+﻿/*CreateTable*/
 
 begin transaction
 
@@ -34,20 +27,11 @@ begin transaction
   create index X_MtskAdayOgrenim02 on MtskAdayOgrenim (TcNo)
   create index X_MtskAdayOgrenim03 on MtskAdayOgrenim (DonemTipiId)
 
-
 commit transaction
 
+/*CreateTableEnd*/
 
-begin transaction
-
-
-USE u7093888_Ustad01
-GO
-
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
+/*CreateTrigger*/
 
 CREATE TRIGGER dbo.trg_MtskAdayOgrenim on dbo.MtskAdayOgrenim
 AFTER INSERT, UPDATE
@@ -72,25 +56,9 @@ AS BEGIN
 		from inserted ins
     	where ins.Id = @curId
 
-        -- MtskAdayBelgeler Insert
-        if ( Select count(*) ADET from dbo.[MtskAdayBelgeler] 
-             where 0 = 0 
-             and [AdayId] = @AdayId 
-             and [FirmId] = @FirmId
-            ) = 0 
-        begin 
-            insert into dbo.[MtskAdayBelgeler] ( 
-            AdayId, FirmId, IsActive,
-            IsBiyometrik,    IsOgrenim,    IsSaglik,    IsSavcilik,    IsImza,    IsSozlesme1,    IsSozlesme2, 
-            BiyometrikIsUploaded,    OgrenimIsUploaded,    SaglikIsUploaded,    SavcilikIsUploaded,    ImzaIsUploaded,    Sozlesme1IsUploaded,    Sozlesme2IsUploaded, 
-            IsSertifikaUcreti,    SertifikaUcretiIsPaid,    IsUcretsiz,    IsFatura ) values 
-            ( @AdayId,  @FirmId,  1,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0 ) 
-        end -- MtskAdayBelgeler
-
-
 		-- MtskAdayBelgeler tablosunu işaretle
 		Update MtskAdayBelgeler set
-        IsOgrenim = x.Sonuc
+        OgrenimTarandi = x.Sonuc
         From MtskAdayBelgeler a, 
         (
             Select count(Id) as Sonuc
@@ -103,7 +71,6 @@ AS BEGIN
         Where a.AdayId = @AdayId
         and   a.FirmId = @FirmId
 
-
       FETCH NEXT FROM myCursor INTO @curId
     END -- While
 
@@ -111,21 +78,22 @@ AS BEGIN
     DEALLOCATE myCursor   
 
 END -- create trigger
-GO
+
+/*CreateTriggerEnd*/
 
 ALTER TABLE dbo.MtskAdayOgrenim ENABLE TRIGGER trg_MtskAdayOgrenim
-GO
 
 
-commit transaction
-
-
+/*CreateLkpTable*/
 
 begin transaction
 
 -- ------------------------------------------------------- 
 -- OgrenimBelgesiTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdayOgrenimOgrenimBelgesiTipi')
+drop table [Lkp].[MtskAdayOgrenimOgrenimBelgesiTipi]
+
 create table [Lkp].[MtskAdayOgrenimOgrenimBelgesiTipi]
 (
    Id               Int Unique Not    null,
@@ -156,3 +124,4 @@ INSERT INTO [Lkp].[MtskAdayOgrenimOgrenimBelgesiTipi] (Id, OgrenimBelgesiTipi)
 
 commit transaction
 
+/*CreateLkpTableEnd*/

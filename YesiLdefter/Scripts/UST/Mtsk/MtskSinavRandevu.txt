@@ -1,12 +1,4 @@
-﻿USE u7093888_Ustad01
-GO
-
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-
+﻿/*CreateTable*/
 
 begin transaction
 
@@ -31,15 +23,10 @@ begin transaction
  
 commit transaction
 
+/*CreateTableEnd*/
 
 
-USE [u7093888_Ustad01]
-GO
-
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
+/*CreateTrigger*/
 
 CREATE TRIGGER [dbo].[trg_MtskSinavRandevu] on [dbo].[MtskSinavRandevu] 
 AFTER INSERT,UPDATE
@@ -66,24 +53,9 @@ BEGIN
 
 END
 
+/*CreateTriggerEnd*/
 
-
-
-
-
-
-
-
-
-
-
-USE [u7093888_Ustad01]
-GO
-
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
+/*CreateTrigger*/
 
 CREATE TRIGGER [dbo].[trg_MtskSinavRandevuDelete] on [dbo].[MtskSinavRandevu] 
 FOR DELETE
@@ -128,15 +100,20 @@ AS BEGIN
 
 END
 
-ALTER TABLE [dbo].[MtskSinavRandevu] ENABLE TRIGGER [trg_MtskSinavRandevuDelete]
-GO
+/*CreateTriggerEnd*/
 
+ALTER TABLE [dbo].[MtskSinavRandevu] ENABLE TRIGGER [trg_MtskSinavRandevuDelete]
+
+/*CreateLkpTable*/
 
 begin transaction
 
 -- ------------------------------------------------------- 
--- SaatiTipiId
+-- SaatTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskSinavRandevuSaatTipi')
+drop table [Lkp].[MtskSinavRandevuSaatTipi]
+
 create table Lkp.MtskSinavRandevuSaatTipi
 (
    Id              Int Unique Not Null,
@@ -145,7 +122,7 @@ create table Lkp.MtskSinavRandevuSaatTipi
    constraint  pk_MtskSinavRandevuSaatTipi primary key (Id)
 )
 
-INSERT INTO Lkp.MtskSinavRandevuSaatTipi (Id, SaatiTipi)
+INSERT INTO Lkp.MtskSinavRandevuSaatTipi (Id, SaatTipi)
  VALUES 
   ( 0, N''),
   ( 2, N'08:20 - 08:55'),
@@ -161,118 +138,6 @@ INSERT INTO Lkp.MtskSinavRandevuSaatTipi (Id, SaatiTipi)
   (12, N'15:55 - 16:30'),
   (13, N'16:35 - 17:10')
 
-
 commit transaction
 
-
-USE [u7093888_Ustad01]
-GO
-
-SET ANSI_NULLS ON
-GO
-
-SET QUOTED_IDENTIFIER ON
-GO
-
-
-CREATE TRIGGER [dbo].[trg_MtskSinavRandevu] on [dbo].[MtskSinavRandevu] 
-AFTER INSERT,UPDATE
-AS 
-BEGIN
-
-    DECLARE myCursor cursor for select Id from Inserted 
-    DECLARE @curId bigint
-
-    OPEN myCursor
-
-	declare @FirmId int
-	declare @AdayId int
-	
-
-    FETCH NEXT FROM myCursor INTO @curId
-
-    WHILE @@FETCH_STATUS = 0
-    BEGIN
-
-        select 
-		  @FirmId = isnull(ins.FirmId,0)
-		, @AdayId = isnull(ins.AdayId,0)  
-		from inserted ins
-    	where ins.Id = @curId
-				
-		Update MtskAdayTakip set
-		uSinavDurumTipiId = 4 -- Uygulama sınav randevusu MEBBİSe aktarılacak
-		Where FirmId = @FirmId
-		and AdayId = @AdayId
-		and uSinavDurumTipiId = 3 -- Uygulama sınav randevusu planlanacak
-
-        Update MtskAdayTakip set
-		uSinavDurumTipiId = 14 -- +4 Uygulama sınav randevusu MEBBİSe aktarılacak
-		Where FirmId = @FirmId
-		and AdayId = @AdayId
-		and uSinavDurumTipiId = 13 -- +4 Uygulama sınav randevusu planlanacak
-
-        FETCH NEXT FROM myCursor INTO @curId
-    END
-
-    CLOSE myCursor
-    DEALLOCATE myCursor  
-
-END
-GO
-
-ALTER TABLE [dbo].[MtskSinavRandevu] ENABLE TRIGGER [trg_MtskSinavRandevu]
-GO
-
-
-USE [u7093888_Ustad01]
-GO
-
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-CREATE TRIGGER [dbo].[trg_MtskSinavRandevuDelete] on [dbo].[MtskSinavRandevu] 
-FOR DELETE
-AS BEGIN
-
-    declare myCursor cursor for select Id from deleted
-    declare @curId bigint
-
-    declare @FirmId Int = 0
-	declare @AdayId Int = 0
-
-	OPEN myCursor
-
-    FETCH NEXT FROM myCursor INTO @curId
-
-    WHILE @@FETCH_STATUS = 0
-    BEGIN
-
-      select 
-         @FirmId = isnull(dlt.FirmId,0)  
-        ,@AdayId = isnull(dlt.AdayId,0)
-      from deleted as dlt
-      where dlt.Id = @curId
-
-      Update MtskAdayTakip set
-      uSinavDurumTipiId = 3 -- Uygulama sınav randevusu planlanacak
-      Where FirmId = @FirmId
-      and AdayId = @AdayId
-      and uSinavDurumTipiId = 4 -- Uygulama sınav randevusu MEBBİSe aktarılacak
-
-      Update MtskAdayTakip set
-      uSinavDurumTipiId = 13 -- +4 Uygulama sınav randevusu planlanacak
-      Where FirmId = @FirmId
-      and AdayId = @AdayId
-      and uSinavDurumTipiId = 14 -- +4 Uygulama sınav randevusu MEBBİSe aktarılacak
-
-      FETCH NEXT FROM myCursor INTO @curId
-    END
-
-    CLOSE myCursor
-    DEALLOCATE myCursor
-
-END
-
+/*CreateLkpTableEnd*/

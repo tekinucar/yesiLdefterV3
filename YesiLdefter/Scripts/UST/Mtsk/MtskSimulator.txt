@@ -1,3 +1,4 @@
+/*CreateTable*/
 
 begin transaction
 
@@ -10,25 +11,29 @@ begin transaction
 
    SicilNumarasi        nVarchar(20)  null,
    AlimTarihi           Date          null,
-   HizmetDurumuTipiId   SmallInt      null, /* BAÞLANGIÇ --Seçiniz--, 1-Hizmette, 2-Hizmet Dýþý*/
-   KurumOnayTipiId      SmallInt      null, /* BAÞLANGIÇ --Seçiniz--, 1-Onay Bekliyor, 2-Onaylandý */		
+   HizmetDurumuTipiId   SmallInt      null, /* BAï¿½LANGIï¿½ --Seï¿½iniz--, 1-Hizmette, 2-Hizmet Dï¿½ï¿½ï¿½*/
+   KurumOnayTipiId      SmallInt      null, /* BAï¿½LANGIï¿½ --Seï¿½iniz--, 1-Onay Bekliyor, 2-Onaylandï¿½ */		
 
    constraint		pk_MtskSimulator primary key (Id)
  )
   
  grant select, insert, update, delete on MtskSimulator to public
 
-
 commit transaction
 
+/*CreateTableEnd*/
 
 
+/*CreateLkpTable*/
 
 begin transaction
 
 -- ------------------------------------------------------- 
 -- HizmetDurumuTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskSimulatorHizmetDurumuTipi')
+drop table [Lkp].[MtskSimulatorHizmetDurumuTipi]
+
 create table [Lkp].[MtskSimulatorHizmetDurumuTipi]
 (
    Id               Int Unique Not null,
@@ -40,9 +45,10 @@ create table [Lkp].[MtskSimulatorHizmetDurumuTipi]
 
 INSERT INTO [Lkp].[MtskSimulatorHizmetDurumuTipi] (Id, HizmetDurumuTipi, GrupTipiId)
  VALUES 
-  ( 0,     N'Tanýmsýz', 1),
+  ( 0,     N'', 1),
   ( 1,     N'Hizmette', 1),
-  ( 2,     N'Hizmet Dýþý', 1)
-
+  ( 2,     N'Hizmet DÄ±ÅŸÄ±', 1)
 
 commit transaction
+
+/*CreateLkpTableEnd*/

@@ -376,6 +376,11 @@ namespace Tkn_DevView
             // GridView in Column ları ekleniyor  
             tGrid_Columns_Create(dsFields, tGridView, dsData, TableIPCode);
 
+            // işe yaramadı kontrol edilmesi gerekiyor
+            // tablo datasını almak için bakılmıştı
+            if (tGridView.Columns.Count == 0)
+                tGridView.OptionsBehavior.AutoPopulateColumns = true;
+
             // İleride gerekebilir silme
             //GridView_Properties(tGridView, row_Table["CMP_PROPERTIES"].ToString() + "\r");
 
@@ -943,7 +948,7 @@ namespace Tkn_DevView
                 if (dsData.Tables.Count > 0)
                     tGridControl.DataSource = dsData.Tables[0];
 
-            int tabIndex = evg.GetUserRegistrySelectBands(v.tUser.SP_USER_ID, TableIPCode);
+            int tabIndex = evg.GetUserRegistrySelectBands(v.tUser.UserId, TableIPCode);
             if (tabIndex == 0) tabIndex = 1;
             evg.selectBands(tForm, TableIPCode, tabIndex);
 
@@ -3432,7 +3437,8 @@ MS_FIELDS                                          T03_MSFIELDS                 
             storage.Appointments.AutoReload = false;
             storage.Resources.AutoReload = false;
 
-            storage.Appointments.DataSource = dsData.Tables[0];
+            if (t.IsNotNull(dsData))
+                storage.Appointments.DataSource = dsData.Tables[0];
             //storage.Appointments.DataMember = "Appointments";
             //storage.Resources.DataSource = dsData;
             //storage.Resources.DataMember = "Resources";

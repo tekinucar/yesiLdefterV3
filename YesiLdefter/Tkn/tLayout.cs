@@ -2448,7 +2448,7 @@ namespace Tkn_Layout
             groupControl1.Location = new System.Drawing.Point(0, 0);
             groupControl1.Name = v.lyt_Name + t.Str_Replace(ref layoutCode, ".", "_"); //RefId.ToString();
             groupControl1.Size = new System.Drawing.Size(203, 435);
-            groupControl1.Text = v.SP_FIRM_NAME;
+            groupControl1.Text = v.tMainFirm.FirmShortName;
             groupControl1.TabIndex = pos;
 
             if (DockType == v.dock_Bottom) groupControl1.Dock = System.Windows.Forms.DockStyle.Bottom;

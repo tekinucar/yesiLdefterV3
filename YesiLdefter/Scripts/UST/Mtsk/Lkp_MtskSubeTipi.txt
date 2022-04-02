@@ -1,0 +1,30 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+-- ------------------------------------------------------- 
+-- SubeTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[MtskSubeTipi]
+(
+   Id               Int Unique Not null,
+   SubeTipi         nVarchar(30)   null,
+
+   constraint  pk_MtskSubeTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[MtskSubeTipi] (Id, SubeTipi)
+ VALUES 
+( 0,  '' ),
+( 1,  'A Şubesi' ),
+( 2,  'B Şubesi' ),
+( 3,  'C Şubesi' ),
+( 4,  'D Şubesi' ),
+( 5,  'E Şubesi' ),
+( 6,  'F Şubesi' ),
+( 7,  'G Şubesi' ),
+( 8,  'H Şubesi' )
+
+commit transaction
+
+/*CreateTableEnd*/

@@ -1,12 +1,6 @@
-﻿USE [u7093888_Ustad01]
-GO
+﻿/*CreateProcedure*/
 
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-ALTER PROCEDURE [dbo].[prc_MtskAdaySertifika] (@FirmId int, @AdayId int)  
+CREATE PROCEDURE [dbo].[prc_MtskAdaySertifika] (@FirmId int, @AdayId int)  
 AS BEGIN
 
     ALTER TABLE [dbo].[MtskAdaySertifika] DISABLE TRIGGER [trg_MtskAdaySertifika]
@@ -93,3 +87,5 @@ AS BEGIN
 	ALTER TABLE [dbo].[MtskAdaySertifika] ENABLE TRIGGER [trg_MtskAdaySertifika]
 
 END
+
+/*CreateProcedureEnd*/

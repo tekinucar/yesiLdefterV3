@@ -4,18 +4,18 @@ begin transaction
   create table MS_TABLES_IP
   (
     REF_ID           Int IDENTITY(1,1)   NOT NULL,
-    TABLE_CODE       VarChar(20)         NOT NULL,
+    TABLE_CODE       VarChar(100)        NOT NULL,
     TABLE_TYPE       SmallInt            NULL,
 
-    IP_CODE          VarChar(40)         NOT NULL,  
+    IP_CODE          VarChar(100)        NOT NULL,  
     TABLEIPCODE      VarChar(100)        NULL,  /* triger/procedure da TABLE_CODE +'.'+ IP_CODE birleþimi */ 
     IP_TYPE          SmallInt            NULL,  /* 1=Liste, 2=Bilgi Kartý, 3=  þimdililik bir iþe yaramýyor  */
-    IP_ABOUT         VarChar(200) 	 NULL,  
+    IP_ABOUT         VarChar(200)        NULL,  
     IP_CAPTION       VarChar(100)        NULL,
-    IP_SELECT_SQL    VarChar(4000)       NULL,
+    IP_SELECT_SQL    VarChar(8000)       NULL,
     IP_WHERE_SQL     VarChar(250)        NULL,
     IP_ORDER_BY      VarChar(250)        NULL,
-    EXTERNAL_IP_CODE          VarChar(40)         NULL,  
+    EXTERNAL_IP_CODE VarChar(40)         NULL,  
 
     VIEW_CMP_TYPE    SmallInt            NULL, /* Grid, LayoutView, LayoutPanel vb */
     CMP_PROPERTIES   VarChar(900)        NULL,
@@ -38,39 +38,96 @@ begin transaction
     BLOCK_WHERE_FNAME       VarChar(30)  NULL,	
     BLOCK_TYPE_CODE         varchar(15)  NULL,
 
-    PROP_SUBVIEW            VarChar(4000)          NULL,
-    PROP_JOINTABLE          VarChar(4000)          NULL,
-    PROP_VIEWS              VarChar(4000)          NULL,
-    PROP_RUNTIME            VarChar(4000)          NULL,
-    PROP_NAVIGATOR          VarChar(4000)          NULL,
-    PROP_FOREING            VarChar(4000)          NULL,
-    PROP_SEARCH             VarChar(4000)          NULL, 
+    PROP_SUBVIEW            VarChar(4000) NULL,
+    PROP_JOINTABLE          VarChar(8000) NULL,
+    PROP_VIEWS              VarChar(4000) NULL,
+    PROP_RUNTIME            VarChar(4000) NULL,
+    PROP_NAVIGATOR          VarChar(8000) NULL,
+    PROP_FOREING            VarChar(4000) NULL,
+    PROP_SEARCH             VarChar(4000) NULL, 
 
-    Constraint PK_MS_TABLES_IP primary key (IP_CODE)
+    SOFTWARE_CODE           nvarchar(20)  NULL,
+    PROJECT_CODE            nvarchar(20)  NULL,
 
-      , CONSTRAINT FK_MS_TABLES_IP_MS_TABLES FOREIGN KEY (TABLE_CODE) 
-        REFERENCES MS_TABLES (TABLE_CODE)
-
+    Constraint PK_MS_TABLES_IP primary key (REF_ID)
   )
 
- create index X_MS_TABLES_IP1 on MS_TABLES_IP (TABLE_CODE, IP_CODE)
+ create index X_MS_TABLES_IP1 on MS_TABLES_IP (TABLE_CODE, IP_CODE, SOFTWARE_CODE, PROJECT_CODE)
 
  grant select, insert, update, delete on MS_TABLES_IP to public
-
 
 commit transaction
 
 
+CREATE TRIGGER [dbo].[trg_MS_TABLES_IP] on [dbo].[MS_TABLES_IP] 
+AFTER INSERT, UPDATE
+AS BEGIN
+    DECLARE InsertCursor_MS_TABLES_IP cursor for select REF_ID from Inserted
+    DECLARE @curId bigint
 
--- alter table MS_TABLES_IP   add PROP_SEARCH             VarChar(4000)          NULL
+    OPEN InsertCursor_MS_TABLES_IP
 
--- alter table MS_TABLES_IP   add TABLEIPCODE     VarChar(100)        NULL
+    FETCH NEXT FROM InsertCursor_MS_TABLES_IP INTO @curId
 
--- alter table MS_TABLES_IP   alter COLUMN NAVIGATOR     VarChar(2000)        NULL
+    declare @ySoftCode varchar(100) = null
+    declare @yProjectCode varchar(100) = null
+    
+	declare @yTableCode varchar(100) = null
+    declare @yIPCode varchar(100) = null
+    
+	declare @eTableCode varchar(100) = null
+    declare @eIPCode varchar(100) = null
+    
+    declare @TableIPCode varchar(100) = null
+    
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+	    set @ySoftCode = ''
+		set @yProjectCode = '' 
+        set @yTableCode = ''
+        set @yIPCode = ''
+        set @eTableCode = ''
+        set @eIPCode = ''
+        set @TableIPCode = ''
+        
+        select 
+		 @ySoftCode = isnull(ins.SOFTWARE_CODE,'')
+		,@yProjectCode = isnull(ins.PROJECT_CODE,'')
+    	,@yTableCode = isnull(ins.TABLE_CODE,'')
+    	,@yIPCode = isnull(ins.IP_CODE,'')
+		
+    	from inserted ins
+    	where ins.REF_ID = @curId
+     	
+		print @ySoftCode + '/' + @yProjectCode + '/' + @yTableCode + '.' +  @yIPCode
 
+     	select 
+    	 @eTableCode = dlt.TABLE_CODE
+    	,@eIPCode = dlt.IP_CODE
+    	from  deleted dlt
+    	where dlt.REF_ID = @curId
+     	   	
+    	--if ((@yTableCode <> @eTableCode) or     	    (@yIPCode <> @eIPCode) )   
+    	--begin
+    	  --  UST|ONM|CARI.CARI.F01 
+		  print @ySoftCode + '/' + @yProjectCode + '/' + @yTableCode + '.' +  @yIPCode
 
+		  set @TableIPCode = @ySoftCode + '/' + @yProjectCode + '/' + @yTableCode + '.' +  @yIPCode
+    	  
+		  print @ySoftCode + '/' + @yProjectCode + '/' + @yTableCode + '.' +  @yIPCode
 
+    	  update MS_TABLES_IP set TABLEIPCODE = @TableIPCode
+          where REF_ID = @curId 
+    	  
+    	--end        
 
+    	FETCH NEXT FROM InsertCursor_MS_TABLES_IP INTO @curId
+    END
 
+    CLOSE InsertCursor_MS_TABLES_IP
+    DEALLOCATE InsertCursor_MS_TABLES_IP   
+END -- trigger
+
+ALTER TABLE [dbo].[MS_TABLES_IP] ENABLE TRIGGER [trg_MS_TABLES_IP]
 
 

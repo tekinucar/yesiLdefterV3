@@ -1,10 +1,4 @@
-﻿USE [u7093888_Ustad01]
-GO
-
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
+﻿/*CreateProcedure*/
 
 CREATE PROCEDURE [dbo].[prc_MtskUygulamaDersPlaniElemanaOzel] (
    @DersDonemTipiId int
@@ -14,7 +8,6 @@ CREATE PROCEDURE [dbo].[prc_MtskUygulamaDersPlaniElemanaOzel] (
   ,@ElemanGrubu varchar(30))  
 AS BEGIN
 
- 
 /* 
  declare @DersDonemTipiId Int 
  declare @AdayId Int 
@@ -52,30 +45,35 @@ AS BEGIN
  , [MtskAday].TcNo  as  Lkp_AdayTcNo
  , [MtskPersoneli].TamAdiSoyadi as  Lkp_PersonelTamAdiSoyadi
  , [MtskPersoneli].TcVkNo  as  Lkp_PersonelTcNo
- , FNo5.DonemTipi  as  Lkp_DonemTipi
- , FNo6.GrupTipi   as  Lkp_GrupTipi
- , FNo7.SubeTipi   as  Lkp_SubeTipi
+
  , FNo9.EgitimYeriTipi  as  Lkp_EgitimYeriTipi
  , FNo12.DersSaatiTipi  as  Lkp_DersSaatiTipi
  , FNo14.EgitimTipi  as  Lkp_EgitimTipi
+
+ , FNo5.DonemTipi  as  Lkp_DonemTipi
+ , FNo6.GrupTipi   as  Lkp_GrupTipi
+ , FNo7.SubeTipi   as  Lkp_SubeTipi
+
  , FNo9.EgitimYeriTipi + '' : '' + [MtskUygulamaliDers].EgitimAraciId as Lkp_AracVeEgitimYeri
  , FNo5.DonemTipi + '' : '' + FNo6.GrupTipi + '' : '' + FNo7.SubeTipi as Lkp_DonemTipiGrupTipiSubeTipi
- , [MtskPersoneli] + '' : '' + [MtskPersoneli].TamAdiSoyadi as Lkp_AracVePersonel
+ , [MtskEgitimAraci].PlakaNumarasi + '' : '' + [MtskPersoneli].TamAdiSoyadi as Lkp_AracVePersonel
  
  from MtskUygulamaliDers as [MtskUygulamaliDers]
    left outer join MtskAday [MtskAday] on ( [MtskUygulamaliDers].AdayId = [MtskAday].Id  ) 
    left outer join MtskPersoneli [MtskPersoneli] on ( [MtskUygulamaliDers].PersonelId = [MtskPersoneli].TcNoCalismaIzniNo  ) 
-   left outer join Lkp.MtskDonemTipi as FNo5 on ( MtskUygulamaliDers.DonemTipiId = FNo5.Id ) 
-   left outer join Lkp.MtskGrupTipi  as FNo6 on ( MtskUygulamaliDers.GrupTipiId = FNo6.Id ) 
-   left outer join Lkp.MtskSubeTipi  as FNo7 on ( MtskUygulamaliDers.SubeTipiId = FNo7.Id ) 
+   left outer join MtskEgitimAraci [MtskEgitimAraci] on ( [MtskUygulamaliDers].EgitimAraciId = [MtskEgitimAraci].PlakaNumarasi ) 
+ 
    left outer join Lkp.MtskUygulamaliDersEgitimYeriTipi as FNo9 on ( MtskUygulamaliDers.EgitimYeriTipiId = FNo9.Id ) 
    left outer join Lkp.MtskUygulamaliDersDersSaatiTipi as FNo12 on ( MtskUygulamaliDers.DersSaatiTipiId = FNo12.Id ) 
    left outer join Lkp.MtskUygulamaliDersEgitimTipi as FNo14 on ( MtskUygulamaliDers.EgitimTipiId = FNo14.Id ) 
 
+   left outer join Lkp.MtskDonemTipi as FNo5 on ( MtskUygulamaliDers.DonemTipiId = FNo5.Id ) 
+   left outer join Lkp.MtskGrupTipi  as FNo6 on ( MtskUygulamaliDers.GrupTipiId = FNo6.Id ) 
+   left outer join Lkp.MtskSubeTipi  as FNo7 on ( MtskUygulamaliDers.SubeTipiId = FNo7.Id ) 
+
  Where 0 = 0
  '
  set @sqlOrderBy = ' Order by DersTarihi, DersSaatiTipiId '
-
  
  set @sqlWhere = ' and [MtskUygulamaliDers].DersDonemTipiId = ' + Convert(varchar(20), @DersDonemTipiId) 
 
@@ -112,3 +110,6 @@ AS BEGIN
  EXEC sp_executesql @sql
   
 END -- procedure
+  
+
+/*CreateProcedureEnd*/

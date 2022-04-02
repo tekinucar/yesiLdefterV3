@@ -1,4 +1,6 @@
-﻿CREATE PROCEDURE [dbo].[prc_MtskAdayBelgeResimleri] (@AdayId int, @DonemTipiId Int)  
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_MtskAdayBelgeResimleri] (@AdayId int, @DonemTipiId Int)  
 AS BEGIN
    
 --declare @AdayId Int = 1454
@@ -108,3 +110,5 @@ AS BEGIN
   --and DonemTipiId = @DonemTipiId
 
 END -- procedure
+
+/*CreateProcedureEnd*/

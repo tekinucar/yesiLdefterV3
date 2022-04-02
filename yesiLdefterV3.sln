@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YesiLdefter", "YesiLdefter\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YesiLcihazlar", "YesiLcihazlar\YesiLcihazlar.csproj", "{2F50E963-47E2-4243-8BEC-6A1B980003E4}"
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "YesiLdefterSetup", "YesiLdefterSetup\YesiLdefterSetup.vdproj", "{167C700F-D1CD-4C76-90D8-18682904FC2C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -16,17 +18,15 @@ Global
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{7E97FFAA-4C27-494A-BCD9-6A4E54950E32}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7E97FFAA-4C27-494A-BCD9-6A4E54950E32}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7E97FFAA-4C27-494A-BCD9-6A4E54950E32}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7E97FFAA-4C27-494A-BCD9-6A4E54950E32}.Release|Any CPU.Build.0 = Release|Any CPU
 		{DF15BF56-DA45-47BE-A21B-280B0C32C7E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{DF15BF56-DA45-47BE-A21B-280B0C32C7E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DF15BF56-DA45-47BE-A21B-280B0C32C7E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DF15BF56-DA45-47BE-A21B-280B0C32C7E7}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2F50E963-47E2-4243-8BEC-6A1B980003E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2F50E963-47E2-4243-8BEC-6A1B980003E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2F50E963-47E2-4243-8BEC-6A1B980003E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2F50E963-47E2-4243-8BEC-6A1B980003E4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{167C700F-D1CD-4C76-90D8-18682904FC2C}.Debug|Any CPU.ActiveCfg = Release
+		{167C700F-D1CD-4C76-90D8-18682904FC2C}.Release|Any CPU.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

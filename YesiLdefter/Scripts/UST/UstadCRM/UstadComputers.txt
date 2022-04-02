@@ -1,0 +1,79 @@
+﻿USE [UstadCRM]
+GO
+
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+begin transaction
+ create table UstadComputers
+ (
+    ComputerId  Int IDENTITY(1,1) NOT NULL,
+	IsActive    Bit               NOT NULL,
+    
+    FirmId              int           null,
+    FirmGUID            varchar(50)   null, /* COMP_FIRM_GUID */
+    SystemName          varchar(50)   null,
+    NetworkMacAddress   varchar(30)   null,
+    ProcessorName       varchar(50)   null,
+    ProcessorId         varchar(50)   null,
+    DiskModel           varchar(50)   null,
+    DiskSerialNumber    varchar(50)   null,
+    OperationModeTypeId smallInt      null,
+    RecordDate          SmallDatetime null,
+
+   Constraint pk_UstadComputers primary key (ComputerId)
+ )
+
+ create index X_UstadComputers_01 on UstadComputers (FirmGUID)
+ create index X_UstadComputers_02 on UstadComputers (FirmId)
+ 
+ grant select, insert, update, delete on UstadComputers to public
+
+commit transaction
+
+
+
+
+create trigger [dbo].[trg_UstadComputers] on [dbo].[UstadComputers]
+after insert, update
+as begin
+
+    declare cursor_UstadComputers cursor for select ComputerId from Inserted
+    declare @curId bigint
+
+    OPEN cursor_UstadComputers
+
+    FETCH NEXT FROM cursor_UstadComputers INTO @curId
+
+	declare @RecordDate      SmallDatetime
+	
+    While @@FETCH_STATUS = 0
+    begin
+        select 
+          @RecordDate = ins.RecordDate
+		from inserted ins
+    	where ins.ComputerId = @curId
+
+		if (@RecordDate is null)
+		begin
+			update UstadComputers set 
+			RecordDate = GETDATE()
+            where ComputerId = @curId
+		end
+
+    	FETCH NEXT FROM cursor_UstadComputers INTO @curId
+    end -- While
+
+    CLOSE cursor_UstadComputers
+    DEALLOCATE cursor_UstadComputers
+
+end -- trigger
+
+
+alter table [dbo].[UstadComputers] ENABLE TRIGGER [trg_UstadComputers]
+GO
+

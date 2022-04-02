@@ -330,6 +330,8 @@ namespace Tkn_Menu
                 menuControl.Text = "REF_ID[" + RefId.ToString() + "],CAPTION[" + caption + "]";
                 menuControl.TabStop = false;
 
+                //menuControl.Appearance.Font = new System.Drawing.Font("Roboto", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+
                 if (mainControl is Form)
                 {
                     ((Form)mainControl).Controls.Add(menuControl);
@@ -582,8 +584,6 @@ namespace Tkn_Menu
 
             }
             #endregion
-
-
 
         }
 
@@ -1003,11 +1003,9 @@ namespace Tkn_Menu
             // 
             // ribbonPage1
             // 
-            /*
             ribbonPage1.Groups.AddRange(new DevExpress.XtraBars.Ribbon.RibbonPageGroup[] {
             ribbonPageGroup1
             });
-            */
             ribbonPage1.Name = "ribbonPage1";
             ribbonPage1.Text = "YeşiLdefter";
             // 
@@ -1496,77 +1494,6 @@ namespace Tkn_Menu
             mControl.Enter += new System.EventHandler(evm.tTileNavPane_Enter);
             mControl.Leave += new System.EventHandler(evm.tTileNavPane_Leave);
 
-
-            #region Firm Menusu 
-
-            if (fieldName.IndexOf("FIRM") > -1)
-            {
-
-                /*
-                this.tileNavPane1.DefaultCategory.Items.AddRange(new DevExpress.XtraBars.Navigation.TileNavItem[] {
-                this.tileNavItem1,
-                this.tileNavItem2});
-                this.tileNavPane1.DefaultCategory.Name = "tileNavCategory1";
-                this.tileNavPane1.DefaultCategory.OwnerCollection = null;
-                */
-                tileNavPaneFirmsAdd(mControl, fieldName, formName);
-
-                //************
-                /*
-                //TileNavCategory tItemMaliYil = new DevExpress.XtraBars.Navigation.TileNavCategory();
-                NavButton tItemMaliYil = new DevExpress.XtraBars.Navigation.NavButton();
-                tItemMaliYil.Appearance.Name = formName;
-                tItemMaliYil.Name = "item_MaliYils";
-                tItemMaliYil.Caption = "  2018  ";
-                //tItemMaliYil.Tile.Text = "Mali Yıl";
-                //tItemMaliYil.Text = "Mali Yıl";
-                tItemMaliYil.Visible = true;
-                tItemMaliYil.IsMain = true;
-
-                tItemMaliYil.Alignment = NavButtonAlignment.Left;
-
-                //mControl.Categories.Add(tItemMaliYil);
-                mControl.Buttons.Add(tItemMaliYil);
-
-                string yil = "";
-                for (int i = 0; i < 10; i++)
-                {
-                    itemName = "itemMaliYil_" + i.ToString(); // deneme
-
-                    TileNavItem tItem = new TileNavItem();
-
-                    yil = Convert.ToString(i + 2009);
-                    tItem.Appearance.Name = formName;
-                    tItem.Name = itemName;
-                    tItem.Caption = yil;
-                    tItem.Tile.Text = yil;
-                    tItem.Tag = yil;
-                    tItem.Appearance.BackColor = v.AppearanceItemCaptionColor1;
-                                       
-
-                    int i3 = mControl.Buttons.Count;
-                    for (int i2 = 0; i2 < i3; i2++)
-                    {
-                        if (mControl.Buttons[i2].Element.Name.ToString() == tItemMaliYil.Name)
-                        {
-                            //mControl.Buttons[i2].Element
-                            //((TileNavCategory)mControl.Buttons[i2].Element).Items.Add(tItem);
-                            break;
-                            //((TileNavCategory)mControl.Buttons[i2].Element).Items[0].ElementClick += null;
-                        }
-                    }
-
-
-                }
-                */
-                //**************
-
-
-            }
-
-            #endregion
-
-
             for (int i = 0; i < itemCount; i++)
             {
                 refid = ds_Items.Tables[0].Rows[i]["REF_ID"].ToString();
@@ -1760,6 +1687,8 @@ namespace Tkn_Menu
 
                             tItem.Appearance.Name = formName;
                             tItem.Name = itemName;
+                            if (t.IsNotNull(CmpName))
+                                tItem.Name = CmpName;
                             tItem.Caption = itemCaption;
                             tItem.Tile.Text = itemCaption;
                             if (t.IsNotNull(shortcut_keys))
@@ -1822,6 +1751,8 @@ namespace Tkn_Menu
 
                             tItem.Appearance.Name = formName;
                             tItem.Name = itemName;
+                            if (t.IsNotNull(CmpName))
+                                tItem.Name = CmpName;
                             tItem.Caption = itemCaption;
                             tItem.Tile.Text = itemCaption;
                             if (t.IsNotNull(shortcut_keys))
@@ -1968,7 +1899,6 @@ namespace Tkn_Menu
                 mControl.Buttons.Add(tItemEDI);
             }
             #endregion EDİ            
-
 
             #region Exit
             // Exit - Çıkış Butonu
@@ -2133,131 +2063,6 @@ namespace Tkn_Menu
 
             */
             #endregion örnek
-        }
-
-        private void tileNavPaneFirmsAdd(DevExpress.XtraBars.Navigation.TileNavPane mControl, string fieldName, string formName)
-        {
-            tToolBox t = new tToolBox();
-            tEvents ev = new tEvents();
-            tEventsMenu evm = new tEventsMenu();
-
-            // firma için kullanılacak TableIPCode 
-            // örnek value
-            // fieldName = "FIRMS||HPFRM.HPFRM_L01|ds|"  >> birden fazla firma için tasarlanmış ekranlar  ( Listeler / Raporlar )
-            // fieldName = "FIRM|||ds|"                  >> tek firma için tasarlanmış ekranlar için ( Kart, Fiş ) 
-            //
-            // ekranlar tasarlanırken çok firma için tasarlanır ( FIRMS )
-            // ama kullanıcının tek firmaya bakma yetkisi varsa veya tek firmalık bir yapı ise
-            // sadece FIRM olarak çalışır
-
-
-            string s = t.Get_And_Clear(ref fieldName, "||");
-            string firm_TableIPCode = t.Get_And_Clear(ref fieldName, "|ds|");
-            string itemName = "";
-
-            // v.SP_FIRM_MULTI = false / true
-            // false olursa kullanıcı tek firmaya kullanabilir
-            // true  olursa kullanıcı aynı anda birden fazla firma kullanabilir
-            //
-
-            // burada çok firma için tasarlanmış menu tek firmaya dönüştürülüyor
-            // 
-            if ((v.SP_FIRM_MULTI == false) &&
-                ((s == "FIRMS") || (s == "FIRMF"))) s = "FIRM";
-
-            NavButton tItemFirm = new DevExpress.XtraBars.Navigation.NavButton();
-            tItemFirm.Appearance.Name = formName;
-            tItemFirm.Caption = "Firma";
-            tItemFirm.Name = "item_FIRM";
-            if (s != "FIRM")
-                tItemFirm.IsMain = true;
-            tItemFirm.Glyph = t.Find_Glyph("40_418_Home_32x32");
-
-            NavButton tItemMaliYil = new NavButton()
-            {
-                Caption = v.BUGUN_YIL.ToString(),
-                Name = "item_MALIYIL",
-                //Glyph = MyTileNavPane.Properties.Resources.home_32x32
-            };
-            tItemMaliYil.Appearance.BackColor = Color.OliveDrab;
-            //Color.Coral;
-            //Color.LightCoral; //Color.Red;
-
-
-            /*
-            TileNavCategory tItemFirm = new TileNavCategory()
-            {
-                Caption = "FİRMA",
-                TileText = "Firma",
-                //TileImage = MyTileNavPane.Properties.Resources.newwizard_32x32,
-                //Glyph = MyTileNavPane.Properties.Resources.newwizard_16x16
-            };
-            tItemFirm.Tile.AppearanceItem.Normal.BackColor = Color.Red;
-            tItemFirm.Tile.AppearanceItem.Hovered.BackColor = Color.Green;
-            tItemFirm.OptionsDropDown.AppearanceItem.Normal.BackColor = Color.Coral;
-            tItemFirm.OptionsDropDown.AppearanceItem.Hovered.BackColor = Color.LightCoral;
-            // Set the color for the group captions in the Service category's drop-down. 
-            tItemFirm.OptionsDropDown.AppearanceGroupText.ForeColor = Color.Purple;
-            tItemFirm.Alignment = NavButtonAlignment.Left;
-            */
-            tItemFirm.AppearanceHovered.BorderColor = Color.LightGreen;
-            tItemFirm.AppearanceHovered.BackColor = Color.LightCoral;
-
-            if ((s == "FIRMS") || (s == "FIRMF"))
-            {
-                List<FirmAbout> tFirmList = new List<FirmAbout>();
-
-                if (s == "FIRMS") tFirmList = v.tFirmUserList;
-                if (s == "FIRMF") tFirmList = v.tFirmFullList;
-
-                int i = 0; // count
-
-                //foreach (FirmAbout fAbout in v.tFirmUserList)
-                //foreach (FirmAbout fAbout in v.tFirmFullList)
-                foreach (FirmAbout fAbout in tFirmList)
-                {
-                    itemName = "itemSHOP_" + fAbout.FirmId.ToString();
-
-                    TileNavItem tItem = new TileNavItem();
-
-                    tItem.Appearance.Name = formName;
-                    tItem.Appearance.BackColor = v.AppearanceItemCaptionColor1;
-                    tItem.Name = itemName;
-                    tItem.Caption = fAbout.FirmName;
-                    tItem.Tile.Text = fAbout.FirmName;
-                    tItem.Tag = fAbout.FirmId + "||" + fAbout.FirmGuid + "||" + firm_TableIPCode + "|ds|";
-
-                    tItem.ElementClick += new DevExpress.XtraBars.Navigation.NavElementClickEventHandler(evm.tNavButtonFirms_ElementClick);
-
-                    mControl.DefaultCategory.Items.Add(tItem);
-
-                    // menüdeki firmaların içinden 
-                    // kullanıcının login olurken seçmiş olduğu firmayı set ediyor
-                    //
-                    if ((s == "FIRMS") &&
-                        (fAbout.FirmId == v.SP_FIRM_ID))
-                        mControl.SelectedElement = tItem;
-
-                    // tüm firma listesi geliyorsa (grup firma ise)
-                    // ilk firma set edilecek
-                    //
-                    if ((s == "FIRMF") && (i == 0))
-                        mControl.SelectedElement = tItem;
-
-                    i++;
-                }
-
-                mControl.SelectedElementChanged += new DevExpress.XtraBars.Navigation.TileNavPaneElementEventHandler(evm.tileNavPane_SelectedElementChanged);
-            }
-
-            if (s == "FIRM")
-            {
-                tItemFirm.Caption = v.SP_FIRM_NAME;
-                tItemFirm.Appearance.BackColor = v.AppearanceItemCaptionColor2;
-            }
-
-            mControl.Buttons.Add(tItemFirm);
-            mControl.Buttons.Add(tItemMaliYil);
         }
 
         #endregion Create_TileNavPane

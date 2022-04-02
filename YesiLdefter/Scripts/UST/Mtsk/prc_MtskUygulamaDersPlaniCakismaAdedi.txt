@@ -1,0 +1,50 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_MtskUygulamaDersPlaniCakismaAdedi] (@SablonUygulamaFId int)  
+AS BEGIN
+
+/* Yeni planla çakışan varsa getirecek */ 
+
+--declare @SablonUygulamaFId int
+--set @SablonUygulamaFId = 1014
+
+  Select 
+    1 as CakismaTipiId
+  , ud.EgitimAraciId
+  , '' as PersonelId 
+  , count(x.Id) as Lkp_CakismaAdedi
+  From 
+  (
+    Select * from MtskUygulamaliDers as d
+    where d.SablonUygulamaFId = @SablonUygulamaFId
+  ) as x, [dbo].[MtskUygulamaliDers] as ud 
+  Where 0 = 0 
+  and   ud.DersSaatiTipiId = x.DersSaatiTipiId
+  and   ud.DersTarihi = x.DersTarihi
+  and   ud.EgitimAraciId = x.EgitimAraciId 
+  and   ud.SablonUygulamaFId <> @SablonUygulamaFId
+  group by ud.EgitimAraciId
+
+  union all
+  
+  Select 
+    2 as CakismaTipiId
+  , '' as EgitimAraciId
+  , ud.PersonelId
+  , count(x.Id) as Lkp_CakismaAdedi
+  From 
+  (
+    Select * from MtskUygulamaliDers as d
+    where d.SablonUygulamaFId = @SablonUygulamaFId
+  ) as x, [dbo].[MtskUygulamaliDers] as ud 
+  Where 0 = 0 
+  and   ud.DersSaatiTipiId = x.DersSaatiTipiId
+  and   ud.DersTarihi = x.DersTarihi
+  and   ud.PersonelId = x.PersonelId 
+  and   ud.SablonUygulamaFId <> @SablonUygulamaFId
+  group by ud.PersonelId
+
+
+END -- procedure
+
+/*CreateProcedureEnd*/

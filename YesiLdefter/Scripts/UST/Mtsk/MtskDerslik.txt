@@ -1,4 +1,5 @@
-﻿
+﻿/*CreateTable*/
+
 begin transaction
 
  create table MtskDerslik
@@ -21,12 +22,20 @@ begin transaction
   
  grant select, insert, update, delete on MtskDerslik to public
 
-
 commit transaction
+
+/*CreateTableEnd*/
+
+/*CreateLkpTable*/
+
+begin transaction
 
 -- ------------------------------------------------------- 
 -- DerslikTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskDerslikDerslikTipi')
+drop table [Lkp].[MtskDerslikDerslikTipi]
+
 create table Lkp.MtskDerslikDerslikTipi
 (
    Id          Int Unique Not Null,
@@ -43,10 +52,12 @@ INSERT INTO Lkp.MtskDerslikDerslikTipi (Id, DerslikTipi)
   (3, N'Araç Tekniği')
   --,(5, N'Trafik Adabı')
 
-
 -- ------------------------------------------------------- 
 -- DerslikAdiTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskDerslikDerslikAdiTipi')
+drop table [Lkp].[MtskDerslikDerslikAdiTipi]
+
 create table Lkp.MtskDerslikDerslikAdiTipi
 (
    Id             Int Unique Not Null,
@@ -73,6 +84,9 @@ INSERT INTO Lkp.MtskDerslikDerslikAdiTipi (Id, DerslikAdiTipi)
 -- ------------------------------------------------------- 
 -- OdaninDurumTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskDerslikOdaninDurumTipi')
+drop table [Lkp].[MtskDerslikOdaninDurumTipi]
+
 create table Lkp.MtskDerslikOdaninDurumTipi
 (
    Id              Int Unique Not Null,
@@ -86,3 +100,7 @@ INSERT INTO Lkp.MtskDerslikOdaninDurumTipi (Id, OdaninDurumTipi)
   (0, N''),
   (1, N'Açık'),
   (2, N'Kapalı')
+
+commit transaction
+
+/*CreateLkpTableEnd*/

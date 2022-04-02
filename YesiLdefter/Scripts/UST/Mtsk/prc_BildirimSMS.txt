@@ -1,11 +1,4 @@
-﻿USE [u7093888_Ustad01]
-GO
-
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
+﻿/*CreateProcedure*/
 
 CREATE PROCEDURE [dbo].[prc_BildirimSMS] ( 
     @FirmId Int 
@@ -71,3 +64,5 @@ AS BEGIN
    end
 
 END -- procedure
+
+/*CreateProcedureEnd*/

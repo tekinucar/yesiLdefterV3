@@ -1,0 +1,168 @@
+﻿USE [UstadCRM]
+GO
+
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+begin transaction
+ create table UstadFirms
+ (
+    FirmId          Int IDENTITY(1,1) not null,
+	ParentFirmId    Int               null,
+	IsActive        Bit               not null,
+	FirmTypeId      SmallInt          null, /* 1.Merkez, 2.Şube, 3.GrupFirma  */ 
+	FirmGUID        uniqueidentifier  null,
+
+	SectorTypeId    SmallInt          null, /* 1.ÖnMuhasebe, 2.MaliMüşavir, 3.Bordro,  21. mtsk, 22. src, 23. işmak, 24. ? */ 
+	FirmCode        nVarchar(50)      null, /* Mebbis Kodu */
+	FirmLongName    nVarchar(150)     null,
+	FirmShortName   nVarchar(50)      null,
+	FirmPhone       Varchar(15)       null,  
+	WebPage         nVarchar(50)      null,
+	EMail           nVarchar(50)      null,
+	Address1        nVarchar(200)     null,
+	Address2        nVarchar(200)     null,
+	AddressCode     varchar(20)       null,
+	DistrictTypeId  int               null, /* İlçe */
+	CityTypeId      int               null, /* İl */ 
+	FirmOpenDate    Date              null, /* Kuruluş Tarihi */
+	FounderName     nVarchar(100)     null, /* Kurucu Adı */
+	FounderPhone    nVarchar(15)      null, /* Kurucu Tel */
+	ManagerName     nVarchar(100)     null, /* Müdür Adı */
+	ManagerPhone    nVarchar(15)      null, /* Müdür Tel */
+	
+	MenuCode        nVarchar(50)      null, /* çalıştığı paketin ana menüsü */
+	ServerNameIP    nVarchar(50)      null, /* database nin olduğu ip */
+	DatabaseName    nVarchar(50)      null,
+	DbLoginName     nVarchar(30)      null, 
+	DbPass          nVarchar(30)      null,
+	DbTypeId        SmallInt          null, /* üstad firması çalışanları için databaselerin amaçları */  
+	RecordDate      SmallDatetime     null,
+
+	/* Bu tür bilgiler artınca UstadFirms tablasuna bağlı ikinci tablo oluştur */
+    MebbisCode      nVarchar(30)      null,
+    MebbisPass      nVarchar(30)      null, 
+
+   Constraint pk_UstadFirms primary key (FirmId)
+ )
+
+ create index X_UstadFirms_00 on UstadFirms (ParentFirmId)
+ create index X_UstadFirms_01 on UstadFirms (FirmGUID)
+ create index X_UstadFirms_02 on UstadFirms (FirmLongName)
+ create index X_UstadFirms_03 on UstadFirms (FirmShortName)
+ create index X_UstadFirms_04 on UstadFirms (CityTypeId,DistrictTypeId)
+ create index X_UstadFirms_05 on UstadFirms (SectorTypeId)
+
+ grant select, insert, update, delete on UstadFirms to public
+
+commit transaction
+
+
+create trigger [dbo].[trg_UstadFirms] on [dbo].[UstadFirms]
+after insert, update
+as begin
+
+    declare cursor_UstadFirms cursor for select FirmId from Inserted
+    declare @curId bigint
+
+    OPEN cursor_UstadFirms
+
+    FETCH NEXT FROM cursor_UstadFirms INTO @curId
+
+    declare @FirmGUID VarChar(50) = ''
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+		Select @FirmGUID = ins.FirmGUID
+    	From Inserted ins
+    	Where ins.FirmId = @curId
+
+	    if ((@FirmGUID = '') or 
+		    (@FirmGUID is null))
+    	begin
+    	  Update UstadFirms set 
+          FirmGUID = NEWID()
+          where FirmId = @curId 
+    	end
+
+    	FETCH NEXT FROM cursor_UstadFirms INTO @curId
+    end -- While
+
+    CLOSE cursor_UstadFirms
+    DEALLOCATE cursor_UstadFirms   
+
+end -- trigger
+
+
+alter table [dbo].[UstadFirms] ENABLE TRIGGER [trg_UstadFirms]
+GO
+
+-- ------------------------------------------------------- 
+-- SectorType
+-- ------------------------------------------------------- 
+create table [Lkp].[UstadFirmsSectorType]
+(
+   Id               Int Unique not null, 
+   SectorType       nVarchar(20)   null,
+   
+   constraint  pk_UstadFirmsSectorType primary key (Id)
+)
+
+Delete from [Lkp].[UstadFirmsSectorType]
+INSERT INTO [Lkp].[UstadFirmsSectorType] (Id, SectorType)
+ VALUES 
+  ( 0,    N''),
+  ( 1,    N'Ön Muhasebe'),
+  ( 2,    N'Mali Müşavir'),
+  ( 3,    N'Resmi Muhasebe'),
+  ( 4,    N'Bordro'),
+  ( 201,  N'Mtsk'),
+  ( 202,  N'İşmak'),
+  ( 203,  N'SRC')
+
+
+-- ------------------------------------------------------- 
+-- FirmType
+-- ------------------------------------------------------- 
+create table [Lkp].[UstadFirmsFirmType]
+(
+   Id               Int Unique not null, 
+   FirmType         nVarchar(20)   null,
+   
+   constraint  pk_UstadFirmsFirmType primary key (Id)
+)
+
+Delete from [Lkp].[UstadFirmsFirmType]
+INSERT INTO [Lkp].[UstadFirmsFirmType] (Id, FirmType)
+ VALUES 
+  ( 0,    N''),
+  ( 1,    N'Merkez'),
+  ( 2,    N'Şube'),
+  ( 3,    N'Grup Firma')
+
+
+/* üstad firması çalışanları için databaselerin amaçları */  
+-- ------------------------------------------------------- 
+-- DbTypeId
+-- ------------------------------------------------------- 
+create table [Lkp].[UstadFirmsDbType]
+(
+   Id               Int Unique not null, 
+   DbType           nVarchar(100)   null,
+   
+   constraint  pk_UstadFirmsDbType primary key (Id)
+)
+
+Delete from [Lkp].[UstadFirmsDbType]
+INSERT INTO [Lkp].[UstadFirmsDbType] (Id, DbType)
+ VALUES 
+  ( 0,    N''),
+  ( 1,    N'Yazılım database (Yazılım bölümü çalışmaları)'),
+  ( 2,    N'Abone database (Ustad yazılım müşterileri)'),
+  ( 3,    N'Ustad CRM database (Ustad CRM datası)'),
+  ( 4,    N'Muhasebe database (Ustad şirket muhasebesi)')
+	

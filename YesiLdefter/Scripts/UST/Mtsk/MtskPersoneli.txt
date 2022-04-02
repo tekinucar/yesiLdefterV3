@@ -1,4 +1,4 @@
-
+/*CreateTable*/
 
 begin transaction
 
@@ -61,9 +61,10 @@ begin transaction
    DisplinCezaBilgileri           SmallInt      null, /* ? */
    GeciciTedbirKarariBilgileri    SmallInt      null, /* ? */	
    --91
-   TcNoCalismaIzniNo              Varchar(20)    null, /* 185148231144666809   : þeklinde */ 
-   TcNo_CalismaIzniNo             Varchar(20)    null, /* 18514823114-4666809  : þeklinde */ 
+   TcNoCalismaIzniNo              Varchar(20)    null, /* 185148231144666809   : ÅŸeklinde */ 
+   TcNo_CalismaIzniNo             Varchar(20)    null, /* 18514823114-4666809  : ÅŸeklinde */ 
    BiyometrikResim                VarBinary(max) null,
+   BiyometrikResimSmall           VarBinary(max) null,
 
    constraint  pk_MtskPersoneli primary key (Id)
  )
@@ -73,20 +74,12 @@ begin transaction
   
  grant select, insert, update, delete on MtskPersoneli to public
 
-
-
 commit transaction
 
+/*CreateTableEnd*/
 
 
-
-USE [u7093888_Ustad01]
-GO
-
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
+/*CreateTrigger*/
 
 CREATE TRIGGER [dbo].[trg_MtskPersoneli] on [dbo].[MtskPersoneli]
 AFTER INSERT, UPDATE
@@ -179,28 +172,20 @@ AS BEGIN
 
     CLOSE myCursor
     DEALLOCATE myCursor   
-
 END -- create trigger
 
+/*CreateTriggerEnd*/
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
+/*CreateLkpTable*/
 
 -- ------------------------------------------------------- 
 -- CinsiyetTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'CinsiyetTipi')
+drop table [Lkp].[CinsiyetTipi]
+
 create table [Lkp].[CinsiyetTipi]
 (
    Id           Int Unique Not Null,
@@ -211,14 +196,16 @@ create table [Lkp].[CinsiyetTipi]
 
 INSERT INTO [Lkp].[CinsiyetTipi] (Id, CinsiyetTipi)
  VALUES 
-  (0, N'Tanýmsýz'),
+  (0, N''),
   (1, N'Erkek'),
-  (2, N'Kadýn')
-
+  (2, N'KadÄ±n')
 
 -- ------------------------------------------------------- 
 -- GoreviTipi
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskPersoneliGoreviTipi')
+drop table [Lkp].[MtskPersoneliGoreviTipi]
+
 create table [Lkp].[MtskPersoneliGoreviTipi]
 (
    Id               Int Unique Not null,
@@ -233,64 +220,65 @@ delete [Lkp].[MtskPersoneliGoreviTipi]
 INSERT INTO [Lkp].[MtskPersoneliGoreviTipi] (Id, GoreviTipi, GrupTipiId)
  VALUES 
   ( 0,    N'', 1 ),
-  ( 65,   N'Acil Týp Teknisyenliði', 1 ), 
-  ( 64,   N'Alan/Bölüm Þefi', 1 ), 
-  ( 34,   N'Aþçý', 1 ), 
-  ( 58,   N'Aþçý Yardýmcýsý', 1 ), 
-  ( 62,   N'Ayniyat Saymaný', 1 ), 
-  ( 66,   N'Bahçývan', 1 ), 
-  ( 59,   N'Bekçi', 1 ), 
+  ( 65,   N'Acil TÄ±p TeknisyenliÄŸi', 1 ), 
+  ( 64,   N'Alan/BÃ¶lÃ¼m Åžefi', 1 ), 
+  ( 34,   N'AÅŸcÄ±', 1 ), 
+  ( 58,   N'AÅŸcÄ± YardÄ±mcÄ±sÄ±', 1 ), 
+  ( 62,   N'Ayniyat SaymanÄ±', 1 ), 
+  ( 66,   N'BahÃ§Ä±van', 1 ), 
+  ( 59,   N'BekÃ§i', 1 ), 
   ( 54,   N'Belletici', 1 ), 
-  ( 30,   N'Bölüm Baþkaný', 1 ), 
-  ( 51,   N'Dil ve Konuþma Bozukluklarý Pataloðu', 1 ), 
-  ( 50,   N'Dil ve Konuþma Bozukluklarý Terapisti', 1 ), 
-  ( 49,   N'Dil ve Konuþma Bozukluklarý Uzmaný', 1 ), 
+  ( 30,   N'BÃ¶lÃ¼m BaÅŸkanÄ±', 1 ), 
+  ( 51,   N'Dil ve KonuÅŸma BozukluklarÄ± PataloÄŸu', 1 ), 
+  ( 50,   N'Dil ve KonuÅŸma BozukluklarÄ± Terapisti', 1 ), 
+  ( 49,   N'Dil ve KonuÅŸma BozukluklarÄ± UzmanÄ±', 1 ), 
   ( 42,   N'Doktor', 1 ), 
-  ( 26,   N'Fen Laboratuarý Öðretmeni', 1 ), 
+  ( 26,   N'Fen LaboratuarÄ± Ã–ÄŸretmeni', 1 ), 
   ( 29,   N'Fizyoterapist', 1 ), 
-  ( 1,    N'Genel Müdür', 1 ), 
-  ( 2,    N'Genel Müdür Yardýmcýsý', 1 ), 
-  ( 67,   N'Gýda Mühendisi', 1 ), 
-  ( 36,   N'Güvenlik Görevlisi', 1 ), 
-  ( 38,   N'Halkla Ýliþkiler', 1 ), 
-  ( 43,   N'Hemþire', 1 ), 
+  ( 1,    N'Genel MÃ¼dÃ¼r', 1 ), 
+  ( 2,    N'Genel MÃ¼dÃ¼r YardÄ±mcÄ±sÄ±', 1 ), 
+  ( 67,   N'GÄ±da MÃ¼hendisi', 1 ), 
+  ( 36,   N'GÃ¼venlik GÃ¶revlisi', 1 ), 
+  ( 38,   N'Halkla Ä°liÅŸkiler', 1 ), 
+  ( 43,   N'HemÅŸire', 1 ), 
   ( 32,   N'Hizmetli', 1 ), 
   ( 40,   N'Hostes', 1 ), 
-  ( 68,   N'Ýdareci Memur', 1 ), 
-  ( 57,   N'Ýnsan Kaynaklarý Müdürü', 1 ), 
-  ( 63,   N'Ýþ Güvenliði Uzmaný', 1 ), 
+  ( 68,   N'Ä°dareci Memur', 1 ), 
+  ( 57,   N'Ä°nsan KaynaklarÄ± MÃ¼dÃ¼rÃ¼', 1 ), 
+  ( 63,   N'Ä°ÅŸ GÃ¼venliÄŸi UzmanÄ±', 1 ), 
   ( 56,   N'Kaloriferci', 1 ), 
-  ( 6,    N'Koordinatör Rehber Öðretmen', 1 ), 
-  ( 3,    N'Kurum Müdürü', 1 ), 
+  ( 6,    N'KoordinatÃ¶r Rehber Ã–ÄŸretmen', 1 ), 
+  ( 3,    N'Kurum MÃ¼dÃ¼rÃ¼', 1 ), 
   ( 31,   N'Memur', 1 ), 
   ( 35,   N'Muhasebeci', 1 ), 
-  ( 21,   N'Müdür Baþyardýmcýsý', 1 ), 
-  ( 5,    N'Müdür Yardýmcýsý', 1 ), 
-  ( 48,   N'Odyoloji ve Konuþma Bozukluklarý Uzmaný', 1 ), 
+  ( 21,   N'MÃ¼dÃ¼r BaÅŸyardÄ±mcÄ±sÄ±', 1 ), 
+  ( 5,    N'MÃ¼dÃ¼r YardÄ±mcÄ±sÄ±', 1 ), 
+  ( 48,   N'Odyoloji ve KonuÅŸma BozukluklarÄ± UzmanÄ±', 1 ), 
   ( 46,   N'Odyometris', 1 ), 
-  ( 11,   N'Öðretmen', 1 ), 
-  ( 53,   N'Ölçme ve Deð. Servisi Elemaný', 1 ), 
-  ( 7,    N'Ölçme ve Deð. Servisi Yöneticisi', 1 ), 
-  ( 23,   N'Ölçme ve Deð. Uzmaný', 1 ), 
+  ( 11,   N'Ã–ÄŸretmen', 1 ), 
+  ( 53,   N'Ã–lÃ§me ve DeÄŸ. Servisi ElemanÄ±', 1 ), 
+  ( 7,    N'Ã–lÃ§me ve DeÄŸ. Servisi YÃ¶neticisi', 1 ), 
+  ( 23,   N'Ã–lÃ§me ve DeÄŸ. UzmanÄ±', 1 ), 
   ( 37,   N'Pist Sorumlusu', 1 ), 
   ( 27,   N'Psikolog', 1 ), 
-  ( 9,    N'Rehber Öðretmen', 1 ), 
-  ( 8,    N'Reh.Ölçme ve Deð. Servisi Yöneticisi', 1 ), 
+  ( 9,    N'Rehber Ã–ÄŸretmen', 1 ), 
+  ( 8,    N'Reh.Ã–lÃ§me ve DeÄŸ. Servisi YÃ¶neticisi', 1 ), 
   ( 39,   N'Sekreter', 1 ), 
-  ( 41,   N'Sosyal Hizmet Uzmaný', 1 ), 
-  ( 33,   N'Þoför', 1 ), 
+  ( 41,   N'Sosyal Hizmet UzmanÄ±', 1 ), 
+  ( 33,   N'ÅžofÃ¶r', 1 ), 
   ( 55,   N'Teknik Personel', 1 ), 
-  ( 4,    N'Türk Müdür Baþyardýmcýsý', 1 ), 
-  ( 17,   N'Usta Öðretici', 1 ), 
-  ( 15,   N'Uzman Öðretici', 1 ), 
-  ( 61,   N'Yönetici Memur', 1 ), 
-  ( 10,   N'Zümre Baþkaný', 1 )
-
-
+  ( 4,    N'TÃ¼rk MÃ¼dÃ¼r BaÅŸyardÄ±mcÄ±sÄ±', 1 ), 
+  ( 17,   N'Usta Ã–ÄŸretici', 1 ), 
+  ( 15,   N'Uzman Ã–ÄŸretici', 1 ), 
+  ( 61,   N'YÃ¶netici Memur', 1 ), 
+  ( 10,   N'ZÃ¼mre BaÅŸkanÄ±', 1 )
 
 -- ------------------------------------------------------- 
 -- StatusuTipi
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskPersoneliStatusuTipi')
+drop table [Lkp].[MtskPersoneliStatusuTipi]
+
 create table [Lkp].[MtskPersoneliStatusuTipi]
 (
    Id               Int Unique Not null,
@@ -304,10 +292,10 @@ delete [Lkp].[MtskPersoneliStatusuTipi]
 
 INSERT INTO [Lkp].[MtskPersoneliStatusuTipi] (Id, StatusuTipi, GrupTipiId)
  VALUES 
-  ( -1,   N'Tanýmsýz', 1),
-  (  0,   N'Ders Ücretli', 1 ), 
-  (  2,   N'Diðer Personel', 1 ), 
+  ( -1,   N'', 1),
+  (  0,   N'Ders Ãœcretli', 1 ), 
+  (  2,   N'DiÄŸer Personel', 1 ), 
   (  1,   N'Kadrolu', 1 ), 
-  (  3,   N'Kýsmi Süreli Çalýþtýrýlacak Personel', 1 )
+  (  3,   N'KÄ±smi SÃ¼reli Ã‡alÄ±ÅŸtÄ±rÄ±lacak Personel', 1 )
 
-
+/*CreateLkpTableEnd*/

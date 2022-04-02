@@ -1,16 +1,10 @@
-﻿USE [u7093888_Ustad01]
-GO
-
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
+﻿/*CreateProcedure*/
 
 CREATE PROCEDURE [dbo].[prc_MtskAdayBelgeler] (@FirmId int)  
 AS BEGIN
 
-  		Update MtskAdayBelgeler set
-        IsBiyometrik = x.Sonuc
+        Update MtskAdayBelgeler set
+        BiyometrikTarandi = x.Sonuc
         From MtskAdayBelgeler a, 
         (
             Select Id as AdayId, count(Id) as Sonuc
@@ -23,36 +17,8 @@ AS BEGIN
         and   a.FirmId = @FirmId
   
 
-		Update MtskAdayBelgeler set
-        IsSavcilik = x.Sonuc
-        From MtskAdayBelgeler a, 
-        (
-            Select AdayId, count(Id) as Sonuc
-            From MtskAdayAdliSicil
-            Where SavcilikBelgesiResim is not null
-            and   FirmId = @FirmId
-            Group by AdayId
-        ) as x
-        Where a.AdayId = x.AdayId
-        and   a.FirmId = @FirmId  
-
-
-		Update MtskAdayBelgeler set
-        IsImza = x.Sonuc
-        From MtskAdayBelgeler a, 
-        (
-            Select AdayId, count(Id) as Sonuc
-            From MtskAdayImza
-            Where ImzaResim is not null
-            and   FirmId = @FirmId
-            Group by AdayId
-        ) as x
-        Where a.AdayId = x.AdayId
-        and   a.FirmId = @FirmId
-
-
-		Update MtskAdayBelgeler set
-        IsOgrenim = x.Sonuc
+        Update MtskAdayBelgeler set
+        OgrenimTarandi = x.Sonuc
         From MtskAdayBelgeler a, 
         (
             Select AdayId, count(Id) as Sonuc
@@ -65,16 +31,16 @@ AS BEGIN
         and   a.FirmId = @FirmId
 
 
-		Update MtskAdayBelgeler set
-        IsSaglik = x.Sonuc
+        Update MtskAdayBelgeler set
+        SaglikTarandi = x.Sonuc
         From MtskAdayBelgeler a, 
         (
             Select AdayId, count(Id) as Sonuc
             From MtskAdaySaglik
             Where (
-			   SaglikRaporuResim is not null 
-			or Len(isnull(RaporReferansNo,'')) > 0
-			)
+		   SaglikRaporuResim is not null 
+		or Len(isnull(RaporReferansNo,'')) > 0
+		)
             and FirmId = @FirmId
             Group by AdayId
         ) as x
@@ -82,8 +48,36 @@ AS BEGIN
         and   a.FirmId = @FirmId
 
 
-		Update MtskAdayBelgeler set
-        IsSozlesme1 = x.Sonuc
+        Update MtskAdayBelgeler set
+        AdliSicilTarandi = x.Sonuc
+        From MtskAdayBelgeler a, 
+        (
+            Select AdayId, count(Id) as Sonuc
+            From MtskAdayAdliSicil
+            Where SavcilikBelgesiResim is not null
+            and   FirmId = @FirmId
+            Group by AdayId
+        ) as x
+        Where a.AdayId = x.AdayId
+        and   a.FirmId = @FirmId  
+
+
+        Update MtskAdayBelgeler set
+        ImzaTarandi = x.Sonuc
+        From MtskAdayBelgeler a, 
+        (
+            Select AdayId, count(Id) as Sonuc
+            From MtskAdayImza
+            Where ImzaResim is not null
+            and   FirmId = @FirmId
+            Group by AdayId
+        ) as x
+        Where a.AdayId = x.AdayId
+        and   a.FirmId = @FirmId
+
+
+        Update MtskAdayBelgeler set
+        Sozlesme1Tarandi = x.Sonuc
         From MtskAdayBelgeler a, 
         (
             Select AdayId, count(Id) as Sonuc
@@ -97,7 +91,7 @@ AS BEGIN
         
 
         Update MtskAdayBelgeler set
-        IsSozlesme2 = x.Sonuc
+        Sozlesme2Tarandi = x.Sonuc
         From MtskAdayBelgeler a, 
         (
             Select AdayId, count(Id) as Sonuc
@@ -109,8 +103,18 @@ AS BEGIN
         Where a.AdayId = x.AdayId
         and   a.FirmId = @FirmId
 
-
-
-
+        Update MtskAdayBelgeler set
+        BelgelerTarandi = 1
+        Where FirmId = @FirmId
+        and   BiyometrikTarandi = 1
+        and   OgrenimTarandi = 1
+        and   SaglikTarandi = 1
+        and   AdliSicilTarandi = 1
+        and   ImzaTarandi = 1
+        and   Sozlesme1Tarandi = 1
+        and   Sozlesme2Tarandi = 1
+        and   BelgelerTarandi = 0
 
 END -- procedure
+
+/*CreateProcedureEnd*/

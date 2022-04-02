@@ -12,7 +12,7 @@ begin transaction
     	LAYOUT_TYPE             VarChar(50)             NULL, 
         LAYOUT_CODE             VarChar(50)             NULL,
         PARENT_CODE             VarChar(100)            NULL,
-        LAYOUT_CAPTION          VarChar(4000)           NULL,
+        LAYOUT_CAPTION          nVarChar(250)           NULL,
 
         TABLEIPCODE             VarChar(100)            NULL,
         FIELD_NAME              VarChar(30)             NULL,

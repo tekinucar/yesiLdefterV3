@@ -3,6 +3,7 @@ using System;
 using System.Data;
 using System.Windows.Forms;
 using Tkn_DataCopy;
+using Tkn_Save;
 using Tkn_ToolBox;
 using Tkn_Variable;
 
@@ -11,12 +12,19 @@ namespace YesiLdefter
     public partial class ms_DBList : DevExpress.XtraEditors.XtraForm
     {
         tToolBox t = new tToolBox();
+        tSave sv = new tSave();
 
         DataSet dsTables = null;
-        DataNavigator tDataNavigator_Tables = null;
+        DataNavigator dNTables = null;
+        DataSet ds_DataList = null;
+        DataNavigator dN_DataList = null;
 
-        string TableIPCode = string.Empty;
+        string tableListTableIPCode = "UST/T01/3S_TBL.3S_TBL_01";
+        string dataListTableIPCode = "UST/T01/3S_DATA.List_L01";
 
+        string menuName = "MENU_" + "UST/PMS/PMS/Database";
+        string buttonInsertPaketOlustur = "ButtonPaketOlustur";
+        string cumleData = "";
         public ms_DBList()
         {
             InitializeComponent();
@@ -25,14 +33,12 @@ namespace YesiLdefter
         private void ms_DBList_Shown(object sender, EventArgs e)
         {
             // Tables List
-            TableIPCode = "UST/T01/3S_TBL.3S_TBL_01";
+            t.Find_DataSet(this, ref dsTables, ref dNTables, tableListTableIPCode);
+            t.Find_DataSet(this, ref ds_DataList, ref dN_DataList, dataListTableIPCode);
 
-            t.Find_DataSet(this, ref dsTables, ref tDataNavigator_Tables, TableIPCode);
-
-            //TableIPCode = "3S_TBL.3S_TBL_01";
             Control cntrl = null;
             string[] controls = new string[] { };
-            cntrl = t.Find_Control(this, "simpleButton_ek1", TableIPCode, controls);
+            cntrl = t.Find_Control(this, "simpleButton_ek1", tableListTableIPCode, controls);
 
             if (cntrl != null)
             {
@@ -41,7 +47,119 @@ namespace YesiLdefter
                 ((DevExpress.XtraEditors.SimpleButton)cntrl).Click += new System.EventHandler(btn_TabloyuKopyalar_Click);
             }
 
+
+            t.Find_Button_AddClick(this, menuName, buttonInsertPaketOlustur, myNavElementClick);
         }
+
+        private void myNavElementClick(object sender, DevExpress.XtraBars.Navigation.NavElementEventArgs e)
+        {
+            /*
+            if (sender.GetType().ToString() == "DevExpress.XtraBars.Navigation.NavButton")
+            {
+                if (((DevExpress.XtraBars.Navigation.NavButton)sender).Name == buttonTest) Test();
+            }
+            */
+            if (sender.GetType().ToString() == "DevExpress.XtraBars.Navigation.TileNavItem")
+            {
+                if (((DevExpress.XtraBars.Navigation.TileNavItem)sender).Name == buttonInsertPaketOlustur) InsertPaketOlustur();
+                //if (((DevExpress.XtraBars.Navigation.TileNavItem)sender).Name == buttonPaketiGonder) PaketiGonder();
+            }
+        }
+
+        private void InsertPaketOlustur()
+        {
+            if (t.IsNotNull(ds_DataList) == false) return;
+
+            string databaseName = dsTables.Tables[0].Rows[dNTables.Position]["databaseName"].ToString();
+            string schemaName = dsTables.Tables[0].Rows[dNTables.Position]["schemaName"].ToString();
+            string tableName = dsTables.Tables[0].Rows[dNTables.Position]["tableName"].ToString();
+
+            string soru = databaseName + "." + schemaName + "." + tableName + " tablosunun datası için INSERT paketi oluşturulacak, Onaylıyor musunuz ?";
+            DialogResult cevap = t.mySoru(soru);
+            if (DialogResult.Yes == cevap)
+            {
+                cumleData = "";
+                cumleData = preparingInsertScript(databaseName, schemaName, tableName);
+
+                //t.FlyoutMessage("Web Manager Database Update", "Insert paketler hazırlandı...");
+
+                PaketiGonder();
+            }
+        }
+
+        private string preparingInsertScript(string databaseName, string schemaName, string tableName)
+        {
+            DataSet dsQuery = new DataSet();
+            //string cumleDelete = " Delete   From [{0}].[{1}].[{2}] ";
+            string cumleDelete = " Delete   From [{1}].[{2}] ";
+            string cumleSelect = " Select * From [{0}].[{1}].[{2}] ";
+            string cumle = "";
+            string tSql = "";
+            string myProp = string.Empty;
+
+            cumle = string.Format(cumleDelete, databaseName, schemaName, tableName) + v.ENTER2;
+
+            tSql = string.Format(cumleSelect, databaseName, schemaName, tableName);
+
+            string dBaseNo = Convert.ToString((byte)v.dBaseNo.Manager);
+
+            t.MyProperties_Set(ref myProp, "DBaseNo", dBaseNo);
+            t.MyProperties_Set(ref myProp, "TableName", tableName);
+            t.MyProperties_Set(ref myProp, "SqlFirst", tSql);
+            t.MyProperties_Set(ref myProp, "SqlSecond", "null");
+            t.MyProperties_Set(ref myProp, "TableType", "1");
+            t.MyProperties_Set(ref myProp, "Cargo", "data");
+            t.MyProperties_Set(ref myProp, "KeyFName", "");
+
+            dsQuery.Namespace = myProp;
+
+            t.Data_Read_Execute(this, dsQuery, ref tSql, tableName, null);
+            if (t.IsNotNull(dsQuery))
+            {
+                cumle = cumle + sv.Insert_Script_Multi(dsQuery, tableName, v.active_DB.masterMSSQLConn);
+            }
+            
+            dsQuery.Dispose();
+            
+            return cumle;
+        }
+
+        private void PaketiGonder()
+        {
+            /*
+            string cevap = "";
+            string dBaseNo = "";
+
+            tToolBox t = new tToolBox();
+            vUserInputBox iBox = new vUserInputBox();
+
+            // SERVERNAME
+            if (tSql != "")
+            {
+                iBox.title = "Hazırlanacak data hangi database türüne insert edilecek ?";
+                iBox.promptText = "1. Manager, 2. Project, 3. Ustad CRM";
+                iBox.value = "2";
+                iBox.displayFormat = "";
+                iBox.fieldType = 0;
+                if (t.UserInpuBox(iBox) == DialogResult.OK)
+                {
+                    cevap = iBox.value;
+                    if (cevap == "1") dBaseNo = Convert.ToString((byte)v.dBaseNo.Manager);
+
+                }
+            }
+
+            */
+
+            if (cumleData != "")
+                t.runScript(cumleData);
+
+            t.FlyoutMessage("Web Manager Database Update", "Insert paketler gönderildi...");
+        }
+
+
+
+
 
         private void btn_TabloyuKopyalar_Click(object sender, EventArgs e)
         {
@@ -54,13 +172,13 @@ namespace YesiLdefter
 
             if (t.IsNotNull(dsTables) == false) return;
 
-            string table_name = dsTables.Tables[0].Rows[tDataNavigator_Tables.Position]["tableName"].ToString();
+            string table_name = dsTables.Tables[0].Rows[dNTables.Position]["tableName"].ToString();
 
             string s =
                 String.Format(" Select * from [{0}].[dbo].[MS_TABLES] " +
                               " where TABLE_NAME = '{1}'", v.active_DB.managerDBName, table_name);
 
-            Boolean sonuc = t.Find_Record(v.SP_Conn_Manager_MSSQL, s);
+            Boolean sonuc = t.Find_Record(v.active_DB.managerMSSQLConn, s);
 
             if (sonuc)
             {

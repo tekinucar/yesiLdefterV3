@@ -1,11 +1,4 @@
-﻿USE [u7093888_Ustad01]
-GO
-
-SET ANSI_NULLS ON
-GO
-
-SET QUOTED_IDENTIFIER ON
-GO
+﻿/*CreateProcedure*/
 
 CREATE PROCEDURE [dbo].[prc_MtskUygulamaDersPlaniGruplariBugun] 
 AS BEGIN
@@ -100,4 +93,6 @@ AS BEGIN
    ) x
  
 END -- procedure
-GO
+
+/*CreateProcedureEnd*/
+

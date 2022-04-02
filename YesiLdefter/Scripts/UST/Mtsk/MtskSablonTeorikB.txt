@@ -1,4 +1,5 @@
-﻿
+﻿/*CreateTable*/
+
 begin transaction
 
  create table MtskSablonTeorikB
@@ -18,14 +19,21 @@ begin transaction
   
  grant select, insert, update, delete on MtskSablonTeorikB to public
 
-
 commit transaction
+
+/*CreateTableEnd*/
+
+
+/*CreateLkpTable*/
 
 begin transaction
 
 -- ------------------------------------------------------- 
 -- GunTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskSablonTeorikBGunTipi')
+drop table [Lkp].[MtskSablonTeorikBGunTipi]
+
 create table Lkp.MtskSablonTeorikBGunTipi
 (
    Id          Int Unique Not Null,
@@ -44,6 +52,9 @@ INSERT INTO Lkp.MtskSablonTeorikBGunTipi (Id, GunTipi)
 -- ------------------------------------------------------- 
 -- SaatTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskSablonTeorikBSaatTipi')
+drop table [Lkp].[MtskSablonTeorikBSaatTipi]
+
 create table Lkp.MtskSablonTeorikBSaatTipi
 (
    Id          Int Unique Not Null,
@@ -59,5 +70,6 @@ INSERT INTO Lkp.MtskSablonTeorikBSaatTipi (Id, SaatTipi)
   ( 2, N'7-8,.. çift saat'),
   ( 3, N'8-9,.. çift saat')
 
-
 commit transaction
+
+/*CreateLkpTableEnd*/

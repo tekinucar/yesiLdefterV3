@@ -13,7 +13,7 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <IsWebBootstrapper>true</IsWebBootstrapper>
     <PublishUrl>ftp://ustadyazilim.com/yesiLdefterSetup/</PublishUrl>
-    <Install>true</Install>
+    <Install>false</Install>
     <InstallFrom>Web</InstallFrom>
     <UpdateEnabled>true</UpdateEnabled>
     <UpdateMode>Foreground</UpdateMode>
@@ -42,11 +42,12 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
+    <Optimize>true</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -58,7 +59,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>Treetog-I-Contacts.ico</ApplicationIcon>
+    <ApplicationIcon>yesiLdefter.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
     <SignManifests>true</SignManifests>
@@ -124,9 +125,6 @@
     <Reference Include="Microsoft.Net.Http.Headers, Version=2.2.8.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Net.Http.Headers.2.2.8\lib\netstandard2.0\Microsoft.Net.Http.Headers.dll</HintPath>
     </Reference>
-    <Reference Include="MySql.Data, Version=8.0.15.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
-      <HintPath>..\packages\MySql.Data.8.0.15\lib\net452\MySql.Data.dll</HintPath>
-    </Reference>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.12.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -170,6 +168,12 @@
     </Compile>
     <Compile Include="Forms\ms_DBList.Designer.cs">
       <DependentUpon>ms_DBList.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ms_Firms.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ms_Firms.Designer.cs">
+      <DependentUpon>ms_Firms.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\ms_Form.cs">
       <SubType>Form</SubType>
@@ -230,6 +234,12 @@
     </Compile>
     <Compile Include="Forms\ms_Pictures.Designer.cs">
       <DependentUpon>ms_Pictures.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ms_ProjectTables.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ms_ProjectTables.Designer.cs">
+      <DependentUpon>ms_ProjectTables.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\ms_ProjeDef.cs">
       <SubType>Form</SubType>
@@ -296,6 +306,7 @@
     <Compile Include="tForms.cs" />
     <Compile Include="Tkn\EventsMenu.cs" />
     <Compile Include="Tkn\tCookieReader.cs" />
+    <Compile Include="Tkn\tCreateDatabase.cs" />
     <Compile Include="Tkn\tEventsButton.cs" />
     <Compile Include="Tkn\tBase.cs" />
     <Compile Include="Tkn\tCreateObject.cs" />
@@ -324,6 +335,7 @@
     <Compile Include="Tkn\tSubViews.cs" />
     <Compile Include="Tkn\tTablesRead.cs" />
     <Compile Include="Tkn\tToolBox.cs" />
+    <Compile Include="Tkn\tUserFirms.cs" />
     <Compile Include="Tkn\tVariable.cs" />
     <Compile Include="Tkn\tXMLRead.cs" />
     <Compile Include="tMainForm.cs" />
@@ -391,7 +403,6 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <None Include="Scripts\KaynakBelgeler\vergidairelerilistesi.pdf" />
-    <None Include="YesiLdefter_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -405,10 +416,26 @@
     <Content Include="Scripts\2019VtMsSql\HP_CARI.txt" />
     <Content Include="Scripts\2019VtMsSql\HP_COMPS.txt" />
     <Content Include="Scripts\2019VtMsSql\HP_FINANS.txt" />
-    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\MsReports.txt" />
-    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\MsWebNodeItems.txt" />
-    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\MsWebNodes.txt" />
-    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\MsWebPages.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\SYS_UPDATES.txt" />
+    <Content Include="Scripts\UST\MsV3\MsProjectFunctions.txt" />
+    <Content Include="Scripts\UST\MsV3\MsProjectProcedures.txt" />
+    <Content Include="Scripts\UST\MsV3\MsProjectTables.txt" />
+    <Content Include="Scripts\UST\MsV3\Lkp_MsSectorType.txt" />
+    <Content Include="Scripts\UST\MsV3\prc_DatabaseCreateList.txt" />
+    <Content Include="Scripts\UST\Mtsk\Lkp_MtskDonemTipi.txt" />
+    <Content Include="Scripts\UST\Mtsk\Lkp_MtskGrupTipi.txt" />
+    <Content Include="Scripts\UST\Mtsk\Lkp_MtskKurumOnayTipi.txt" />
+    <Content Include="Scripts\UST\Mtsk\Lkp_MtskSubeTipi.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskSimulator.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskUygulamaDersPlaniCakismaAdedi.txt" />
+    <Content Include="Scripts\UST\UstadCRM\prc_UstadUserFirmsListGet.txt" />
+    <Content Include="Scripts\UST\UstadCRM\UstadComputers.txt" />
+    <Content Include="Scripts\UST\UstadCRM\UstadFirms.txt" />
+    <Content Include="Scripts\UST\MsV3\MsReports.txt" />
+    <Content Include="Scripts\UST\UstadCRM\UstadUsers.txt" />
+    <Content Include="Scripts\UST\MsV3\MsWebNodeItems.txt" />
+    <Content Include="Scripts\UST\MsV3\MsWebNodes.txt" />
+    <Content Include="Scripts\UST\MsV3\MsWebPages.txt" />
     <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\prc_UsesTableIPCode.txt" />
     <Content Include="Scripts\SEK\InfazKurumu\CihazHesap.txt" />
     <Content Include="Scripts\SEK\InfazKurumu\prc_CariBio.txt" />
@@ -447,7 +474,6 @@
     <Content Include="Scripts\UST\Mtsk\MtskSablonSMS.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskSertifikaSeriNo.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskSertifikaUcreti.txt" />
-    <Content Include="Scripts\UST\Mtsk\MtskSimulatorAraci.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskSinavETeorik.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskSinavRandevu.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskSinavTarihi.txt" />
@@ -575,7 +601,7 @@
     <Content Include="Scripts\UST\Ustad\SYS_TYPES_L.txt" />
     <Content Include="Scripts\UST\Ustad\SYS_TYPES_T.txt" />
     <Content Include="Scripts\UST\Ustad\SYS_VARIABLES.txt" />
-    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\msSoftware.txt" />
+    <Content Include="Scripts\UST\MsV3\MsSoftware.txt" />
     <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\MS_DBCONN.txt" />
     <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\MS_DC.txt" />
     <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\MS_DC_LINE.txt" />
@@ -744,6 +770,7 @@
     <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\YARDIMCI_KODLAR.txt" />
     <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\_WorkList.txt" />
     <Content Include="Treetog-I-Contacts.ico" />
+    <Content Include="yesiLdefter.ico" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />

@@ -8,14 +8,17 @@ using Tkn_Save;
 using Tkn_SQLs;
 using Tkn_ToolBox;
 using Tkn_Variable;
+using Tkn_UserFirms;
 
 namespace YesiLdefter
 {
     public partial class ms_User : DevExpress.XtraEditors.XtraForm
     {
-        tToolBox t = new tToolBox();
+        #region Tanımlar
 
+        tToolBox t = new tToolBox();
         tRegistry reg = new tRegistry();
+        tUserFirms userFirms = new tUserFirms();
 
         // UL = UserLogin
         DataSet ds_UL = null;
@@ -23,13 +26,12 @@ namespace YesiLdefter
         // NU = NewUser
         DataSet ds_NU = null;
         DataNavigator dN_NU = null;
-        // UK = UserKey
+        // UK = Key
         DataSet ds_UK = null;
         DataNavigator dN_UK = null;
         // FL = FirmList
-        DataSet ds_FL = null;
-        DataNavigator dN_FL = null;
-
+        DataSet dsUserFirmList = null;
+        DataNavigator dNUserFirmList = null;
 
         // sorgular için
         DataNavigator dN_Query = new DataNavigator();
@@ -40,8 +42,7 @@ namespace YesiLdefter
         Control txt_Pass = null;
         Control btn_BHatirla = null;
         Control btn_SifremiUnuttum = null;
-        Control tree_FirmList = null;
-
+        
         Control uk_user_mail = null;
         Control uk_old_user_pass = null;
         Control uk_new_user_pass = null;
@@ -55,11 +56,14 @@ namespace YesiLdefter
 
         string tSql = string.Empty;
         string TableIPCode = string.Empty;
-        string NewUser_TableIPCode = "UST/PMS/User.NewUser_F01";//"SYSUSER.SYSUSER_F01";
-        string FirmList_TableIPCode = "UST/PMS/Firm.UserFirmList_L01";//"SYSFIRM.SYSFIRM_L02";
 
+        string Login_TableIPCode = "UST/CRM/UstadUsers.Login_F01"; 
+        string NewPass_TableIPCode = "UST/CRM/UstadUsers.NewPassword_F01";
+        string NewUser_TableIPCode = "UST/CRM/UstadUsers.NewUser_F01";
+        string FirmList_TableIPCode = "UST/CRM/UstadFirms.UserFirmList_L01";
+        
         string regPath = v.registryPath;//"Software\\Üstad\\YesiLdefter";
-
+        #endregion
 
         public ms_User()
         {
@@ -67,11 +71,14 @@ namespace YesiLdefter
             /// comp - user - firm ilişkisi ?
             /// 
             /// prog açılışında 
-            /// önce comp bilgileri
-            /// sonra user bilgileri
+            /// önce  user bilgileri
+            /// sonra comp bilgileri
+
+            // burası değişti 
             /// user için tanımlı olan user_firm_guid varsa o firma/shop 
             /// yoksa 
             /// comp kartında tanımlı olan comp_firm_guid e göre firma/shop baz alınacak
+
             /// 
             /// yani kullanıcının kendisi için tanımlı firmaları var ise o listeye göre çalışır
             /// eğer kullanıcı için firm_guid yok ise Comp için tanımlı olan firma çalışır
@@ -102,13 +109,12 @@ namespace YesiLdefter
             //
             // Sisteme Giriş // User Login ---------------------------------------
             //
-            TableIPCode = "UST/PMS/User.Login_F01";// "SYSUSER.SYSUSER_D01";
-
-            t.Find_DataSet(this, ref ds_UL, ref dN_UL, TableIPCode);
+            #region
+            t.Find_DataSet(this, ref ds_UL, ref dN_UL, Login_TableIPCode);
 
             Control cntrl = null;
             string[] controls = new string[] { };
-            cntrl = t.Find_Control(this, "simpleButton_ek1", TableIPCode, controls);
+            cntrl = t.Find_Control(this, "simpleButton_ek1", Login_TableIPCode, controls);
 
             if (cntrl != null)
             {
@@ -119,16 +125,16 @@ namespace YesiLdefter
                 ((DevExpress.XtraEditors.SimpleButton)cntrl).Image = t.Find_Glyph("SIHIRBAZDEVAM16");
             }
 
-            btn_BHatirla = t.Find_Control(this, "checkButton_ek1", TableIPCode, controls);
+            btn_BHatirla = t.Find_Control(this, "checkButton_ek1", Login_TableIPCode, controls);
 
-            btn_SifremiUnuttum = t.Find_Control(this, "simpleButton_ek2", TableIPCode, controls);
+            btn_SifremiUnuttum = t.Find_Control(this, "simpleButton_ek2", Login_TableIPCode, controls);
             if (btn_SifremiUnuttum != null)
             {
                 ((DevExpress.XtraEditors.SimpleButton)btn_SifremiUnuttum).Click += new System.EventHandler(btn_SifremiUnuttumClick);
             }
 
-            cmb_EMail = t.Find_Control(this, "Column_USER_EMAIL", TableIPCode, controls);
-            txt_Pass = t.Find_Control(this, "Column_USER_KEY", TableIPCode, controls);
+            cmb_EMail = t.Find_Control(this, "Column_UserEMail", Login_TableIPCode, controls);
+            txt_Pass = t.Find_Control(this, "Column_UserKey", Login_TableIPCode, controls);
 
             if (cmb_EMail != null)
             {
@@ -143,30 +149,28 @@ namespace YesiLdefter
                 ((DevExpress.XtraEditors.TextEdit)txt_Pass).KeyDown += new KeyEventHandler(txt_Pass_KeyDown);
                 ((DevExpress.XtraEditors.TextEdit)txt_Pass).Properties.PasswordChar = '*';
             }
-
+            #endregion
             //
-            // Yeni Kullanıcı // New User ---------------------------------------------------
+            // Yeni Kullanıcı // New User ----------------------------------------
             // 
-            TableIPCode = NewUser_TableIPCode; // "SYSUSER.SYSUSER_F01";
+            #region
+            t.Find_DataSet(this, ref ds_NU, ref dN_NU, NewUser_TableIPCode);
 
-            t.Find_DataSet(this, ref ds_NU, ref dN_NU, TableIPCode);
-
-            cntrl = t.Find_Control(this, "simpleButton_ek1", TableIPCode, controls);
+            cntrl = t.Find_Control(this, "simpleButton_ek1", NewUser_TableIPCode, controls);
 
             if (cntrl != null)
             {
                 ((DevExpress.XtraEditors.SimpleButton)cntrl).Dock = DockStyle.Right;
                 ((DevExpress.XtraEditors.SimpleButton)cntrl).Click += new System.EventHandler(btn_YeniKullanici_Kaydet);
             }
-
+            #endregion
             //
-            // Şifre Değişikliği ----------------------------------------------------------
+            // Şifre Değişikliği -------------------------------------------------
             // 
-            TableIPCode = "UST/PMS/User.NewPassword_F01";// "SYSUSER.SYSUSER_F02";
+            #region
+            t.Find_DataSet(this, ref ds_UK, ref dN_UK, NewPass_TableIPCode);
 
-            t.Find_DataSet(this, ref ds_UK, ref dN_UK, TableIPCode);
-
-            cntrl = t.Find_Control(this, "simpleButton_ek1", TableIPCode, controls);
+            cntrl = t.Find_Control(this, "simpleButton_ek1", NewPass_TableIPCode, controls);
 
             if (cntrl != null)
             {
@@ -175,53 +179,50 @@ namespace YesiLdefter
                 ((DevExpress.XtraEditors.SimpleButton)cntrl).Image = t.Find_Glyph("KAYDET16");
             }
 
-
-            uk_user_mail = t.Find_Control(this, "Column_USER_EMAIL", TableIPCode, controls);
+            uk_user_mail = t.Find_Control(this, "Column_UserEMail", NewPass_TableIPCode, controls);
             if (uk_user_mail != null)
             {
                 ((DevExpress.XtraEditors.TextEdit)uk_user_mail).EnterMoveNextControl = true;
             }
 
-            uk_old_user_pass = t.Find_Control(this, "Column_USER_FIRSTNAME", TableIPCode, controls);
+            uk_old_user_pass = t.Find_Control(this, "Column_UserFirstName", NewPass_TableIPCode, controls);
             if (uk_old_user_pass != null)
             {
                 ((DevExpress.XtraEditors.TextEdit)uk_old_user_pass).EnterMoveNextControl = true;
                 //((DevExpress.XtraEditors.TextEdit)uk_old_user_pass).Properties.PasswordChar = '*';
             }
 
-            uk_new_user_pass = t.Find_Control(this, "Column_USER_LASTNAME", TableIPCode, controls);
+            uk_new_user_pass = t.Find_Control(this, "Column_UserLastName", NewPass_TableIPCode, controls);
             if (uk_new_user_pass != null)
             {
                 ((DevExpress.XtraEditors.TextEdit)uk_new_user_pass).EnterMoveNextControl = true;
                 //((DevExpress.XtraEditors.TextEdit)uk_new_user_pass).Properties.PasswordChar = '*';
             }
 
-            uk_rpt_user_pass = t.Find_Control(this, "Column_USER_KEY", TableIPCode, controls);
+            uk_rpt_user_pass = t.Find_Control(this, "Column_UserKey", NewPass_TableIPCode, controls);
             if (uk_rpt_user_pass != null)
             {
                 ((DevExpress.XtraEditors.TextEdit)uk_rpt_user_pass).EnterMoveNextControl = true;
                 //((DevExpress.XtraEditors.TextEdit)uk_rpt_user_pass).Properties.PasswordChar = '*';
             }
+            #endregion
 
             //
-            // FirmList -------------------------------------------------------------------
+            // FirmList ----------------------------------------------------------
             //
-            TableIPCode = FirmList_TableIPCode;
-
-            cntrl = t.Find_Control(this, "simpleButton_ek1", TableIPCode, controls);
-
+            #region
+            cntrl = t.Find_Control(this, "simpleButton_ek1", FirmList_TableIPCode, controls);
+            
             if (cntrl != null)
             {
                 ((DevExpress.XtraEditors.SimpleButton)cntrl).Dock = DockStyle.Right;
                 ((DevExpress.XtraEditors.SimpleButton)cntrl).Click += new System.EventHandler(btn_FirmListSec_Click);
                 ((DevExpress.XtraEditors.SimpleButton)cntrl).Image = t.Find_Glyph("SIHIRBAZDEVAM16");
             }
-
-            // şimdilik gerek kalmadı (XtraTreeList.TreeList) 
-            //tree_FirmList = t.Find_Control_View(this, TableIPCode);
+            #endregion
 
             //
-            // ----------------------------------------------------------------------------
+            // -------------------------------------------------------------------
             //
             GetUserRegistry();
 
@@ -231,9 +232,6 @@ namespace YesiLdefter
             {
                 ((DevExpress.XtraEditors.ComboBoxEdit)cmb_EMail).Focus();
             }
-
-
-            
         }
 
         void btn_SistemeGiris_Ileri(object sender, EventArgs e)
@@ -266,10 +264,13 @@ namespace YesiLdefter
                     u_user_email = ((DevExpress.XtraEditors.ComboBoxEdit)cmb_EMail).EditValue.ToString();
                     u_user_key = ((DevExpress.XtraEditors.TextEdit)txt_Pass).EditValue.ToString();
 
+                    v.tUserRegister.UserLastLoginEMail = u_user_email;
+                    v.tUserRegister.UserLastKey = u_user_key;
+                    v.tUserRegister.UserRemember = ((DevExpress.XtraEditors.CheckButton)btn_BHatirla).Checked;
+                    
                     // şimdi [ e-mail ile şifre ] databaseden kontrol ediliyor
-                    tSql = @" Select * from SYS_USERS where USER_EMAIL = '" + u_user_email + @"' and USER_KEY = '" + u_user_key + "' ";
-
-                    t.SQL_Read_Execute(v.dBaseNo.Manager, ds_Query, ref tSql, "SYS_USERS", "UserLogin");
+                    tSql = preparingUstadUsersSql(u_user_email, u_user_key, 0);
+                    t.SQL_Read_Execute(v.dBaseNo.UstadCrm, ds_Query, ref tSql, "UstadUsers", "UserLogin");
 
                     if (t.IsNotNull(ds_Query) == false)
                     {
@@ -290,7 +291,8 @@ namespace YesiLdefter
                         if (ds_Query.Tables[0].Rows.Count == 1)
                         {
                             //e-mail ve şifre girdikte sonra gelen sonucu değerlendir
-                            CheckUser(ds_Query, dN_Query);
+                            userFirms.UserSelectFirm(this, ds_Query, dN_Query, u_user_key, 
+                                ref dsUserFirmList, ref dNUserFirmList, FirmList_TableIPCode);
                         }
 
                         if (ds_Query.Tables[0].Rows.Count > 1)
@@ -304,7 +306,6 @@ namespace YesiLdefter
 
                             v.SP_UserLOGIN = false;
                         }
-
                     }
                 }
             }
@@ -312,9 +313,8 @@ namespace YesiLdefter
 
         void read_eMail(DataSet ds, string user_EMail)
         {
-            tSql = @" Select * from SYS_USERS where USER_EMAIL = '" + user_EMail + @"' ";
-
-            t.SQL_Read_Execute(v.dBaseNo.Manager, ds, ref tSql, "SYS_USERS", "FindUser");
+            tSql = preparingUstadUsersSql(user_EMail, "", 0);
+            t.SQL_Read_Execute(v.dBaseNo.UstadCrm, ds, ref tSql, "UstadUsers", "FindUser");
         }
 
         void GetUser(string user_Email, string work)
@@ -340,10 +340,10 @@ namespace YesiLdefter
 
                 if ((work == "SEND_EMAIL") & (ds_Query.Tables[0].Rows.Count == 1))
                 {
-                    int Id = t.myInt32(ds_Query.Tables[0].Rows[0]["ID"].ToString());
-                    Int16 IsActive = t.myInt16(ds_Query.Tables[0].Rows[0]["ISACTIVE"].ToString());
-                    string userFullName = ds_Query.Tables[0].Rows[0]["USER_FULLNAME"].ToString();
-                    u_db_user_key = ds_Query.Tables[0].Rows[0]["USER_KEY"].ToString();
+                    int Id = t.myInt32(ds_Query.Tables[0].Rows[0]["UserId"].ToString());
+                    Int16 IsActive = t.myInt16(ds_Query.Tables[0].Rows[0]["IsActive"].ToString());
+                    string userFullName = ds_Query.Tables[0].Rows[0]["UserFullName"].ToString();
+                    u_db_user_key = ds_Query.Tables[0].Rows[0]["UserKey"].ToString();
 
                     // 0.pasif, 1.aktif 
                     if (IsActive < 2)
@@ -358,230 +358,22 @@ namespace YesiLdefter
             }
         }
 
-        void Send_EMail(string myUserEMail, string myUserFullName, string myUserKey)
+        void Send_EMail(string myeMail, string myUserFullName, string myKey)
         {
             //
             eMail email = new eMail();
 
-            email.toMailAddress = myUserEMail;
+            email.toMailAddress = myeMail;
             email.subject = "Kullanıcı kodu ";
             email.message =
                 "<p> Üstad Bilişim veritabanında kayıtlı olan, </p>" +
                 "<p> Kullanıcı Adı Soyadı : " + myUserFullName + "<br>" +
-                " Kullanıcı Şifreniz : " + myUserKey + "</p>";
+                " Kullanıcı Şifreniz : " + myKey + "</p>";
 
             t.eMailSend3(email);
         }
 
-        void CheckUser(DataSet dsQuery, DataNavigator dNQuery)
-        {
-            if (t.IsNotNull(dsQuery))
-            {
-                if (dNQuery.Position > -2) // sürekli -1 geliyor neden 0 dan başlamıyor ???
-                {
-                    //Int16 IsActive = t.myInt16(dsQuery.Tables[0].Rows[dNQuery.Position]["ISACTIVE"].ToString());
-                    ////db_user_email = dsQuery.Tables[0].Rows[dNQuery.Position]["USER_EMAIL"].ToString();
-                    //db_user_key = dsQuery.Tables[0].Rows[dNQuery.Position]["USER_KEY"].ToString();
-
-                    int UserId = t.myInt32(dsQuery.Tables[0].Rows[0]["ID"].ToString());
-                    Int16 IsActive = t.myInt16(dsQuery.Tables[0].Rows[0]["ISACTIVE"].ToString());
-                    string userFullName = dsQuery.Tables[0].Rows[0]["USER_FULLNAME"].ToString();
-                    string userFirmGuid = dsQuery.Tables[0].Rows[0]["USER_FIRM_GUID"].ToString();
-                    u_db_user_key = dsQuery.Tables[0].Rows[0]["USER_KEY"].ToString();
-
-                    if ((IsActive == 0) && (u_user_key == u_db_user_key))
-                    {
-                        MessageBox.Show(
-                        "Kullanıcı hesabınız henüz AKTİF değil." + v.ENTER +
-                        "Hesabınız AKTİF hale getirilecektir. " + v.ENTER2 +
-                        "Lütfen en kısa zamanda şifrenizi değiştirin. ",
-                        "Bilgilendirme", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                        SetUserIsActive(UserId);
-                    }
-
-                    if (u_user_key == u_db_user_key)
-                    {
-
-                        // RegEdit defterine kayıt
-                        //
-                        SetUserRegistry(UserId);
-
-                        // Set User Values
-                        //
-                        v.tUser.SP_USER_ID = UserId;
-                        v.tUser.SP_USER_ISACTIVE = Convert.ToInt16(dsQuery.Tables[0].Rows[0]["ISACTIVE"].ToString());
-                        v.tUser.SP_USER_FIRM_GUID = dsQuery.Tables[0].Rows[0]["USER_FIRM_GUID"].ToString();
-                        v.tUser.SP_USER_GUID = dsQuery.Tables[0].Rows[0]["USER_GUID"].ToString();
-                        v.tUser.SP_USER_FULLNAME = dsQuery.Tables[0].Rows[0]["USER_FULLNAME"].ToString();
-                        v.tUser.SP_USER_FIRSTNAME = dsQuery.Tables[0].Rows[0]["USER_FIRSTNAME"].ToString();
-                        v.tUser.SP_USER_LASTNAME = dsQuery.Tables[0].Rows[0]["USER_LASTNAME"].ToString();
-                        v.tUser.SP_USER_EMAIL = dsQuery.Tables[0].Rows[0]["USER_EMAIL"].ToString();
-                        v.tUser.SP_USER_KEY = u_db_user_key;
-
-                        // Kullanıcı çalışacağı firmayı sececek
-                        //
-                        SelectFirm();
-
-                    }
-                }
-            }
-        }
-
-        void SelectFirm()
-        {
-            /// evet geldik zurnanın zırt dediği yere
-            /// 
-            /// Kontrol konuları
-            /// 1. computer_firm_guid ve 
-            /// 2. user_firm_guid  
-            /// comp_firm_guid value yok ise KESİN TEST FİRMALARI çalışacak 
-            /// eğer comp_firm_guid olmaz ise firma istedeği kadar user tanımlaya bilir.
-            /// 
-            /// User_Firm_Guid var ise kullanıcının firmaları devreye girecek
-            ///                yoksa comp_Firm_Guid firmaları devreye girecek
-            ///                
-            /// peki xxxx_firm_guid de firma tanımlıyken nasıl oluyorda birden fazla firma veya şube listeleniyor
-            /// O da şöyle oluyor : bu xxxx_firm_guid de bağlı child firma veya şubeler varsa onlarda geliyor :) 
-            /// yani bu xxxx_firm_guid in ID si kimlerin PARENT_ID sinde var ise onlarda geliyor
-            /// 
-
-            if ((!string.IsNullOrEmpty(v.tUser.SP_USER_FIRM_GUID)) &&  // user_firm_guid varsa
-                (!string.IsNullOrEmpty(v.tComp.SP_COMP_FIRM_GUID)))    // comp_firm_guid varsa
-                FirmList(v.tUser.SP_USER_FIRM_GUID);
-
-            if ((string.IsNullOrEmpty(v.tUser.SP_USER_FIRM_GUID)) &&  // user_firm_guid yoksa 
-                (!string.IsNullOrEmpty(v.tComp.SP_COMP_FIRM_GUID)))   // comp_firm_guid varsa
-                FirmList(v.tComp.SP_COMP_FIRM_GUID);
-
-            if (string.IsNullOrEmpty(v.tComp.SP_COMP_FIRM_GUID))  // comp_firm_guid yoksa kesinlikle TEST
-                FirmList("TEST");
-
-        }
-
-        void FirmList(string myGuid)
-        {
-            //set @_firmGUID = '046C4C69-EE2A-43C3-8E69-FF8A29F40844'
-
-            /// hangi guidle içeriye giriş yapılıyor, sakla
-            /// 
-            v.SP_FIRM_GUID = myGuid;
-
-            tSQLs sql = new tSQLs();
-
-            //tSql = sql.SQL_SYS_FIRM_List(myGuid, v.tFirmListType.AllFirm);
-            tSql = sql.SQL_SYS_FIRM_List(myGuid, v.tFirmListType.OnlySelect);
-
-            t.SQL_Read_Execute(v.dBaseNo.Manager, ds_Query2, ref tSql, "SYS_FIRMS", "FirmList");
-
-            if (t.IsNotNull(ds_Query2))
-            {
-                // tek firma geldiği için hangisiyle çalışacaksın diye sormak anlamsız olur
-                // gerekli bilgileri al formu kapat, main formuna devam et
-                if (ds_Query2.Tables[0].Rows.Count == 1)
-                {
-                    string ufl = "";
-                    DataRow row = ds_Query2.Tables[0].Rows[0];
-                    t.firmAboutAdd(row, ref ufl);
-                    // en sondaki virgülü sil 
-                    //
-                    t.tLast_Char_Remove(ref ufl);
-
-                    // kullınıcının çalışma yapabileceği firması
-                    t.selectFirm(0);
-
-
-                    // kullanıcının firma listesi
-                    v.SP_FIRM_USERLIST = ufl;
-                    v.SP_FIRM_MULTI = false;
-
-                    //
-                    SetUserRegistryFirm(v.tUser.SP_USER_ID, v.SP_FIRM_ID);
-
-                    // Login onayı
-                    //
-                    v.SP_UserLOGIN = true;
-
-                    // form close
-                    this.Close();
-                }
-
-                // birden fazla firma varsa hangisiyle çalışacaksın diye sormak gerekiyor
-                // bu seferde sormazsan tuhaf olur
-                if (ds_Query2.Tables[0].Rows.Count > 1)
-                {
-                    t.SelectPage(this, "BACKVIEW", "FIRMLIST", -1);
-
-                    firmListRead();
-                }
-            }
-
-            if (t.IsNotNull(ds_Query2) == false)
-            {
-                // ??? bilmem
-            }
-
-        }
-
-        void firmListRead()
-        {
-            // Form üzerinde firma Listesini gösterecek bir InputPanel mevcut
-            // bunun datasetinde şu an için bir kayıt yok
-            // burada kullanıcının kullanabileceği firma veya firmaListesi okunuyor
-            //
-            // SYSFIRM.SYSFIRM_L02 
-            // 
-            t.Find_DataSet(this, ref ds_FL, ref dN_FL, FirmList_TableIPCode);
-            // okundu
-
-            // okunan bu firma bilgileri v.tFirmUserList ' esine ekleniyor
-            // 
-            if (ds_FL != null)
-            {
-                t.Data_Read_Execute(this, ds_FL, ref tSql, "SYS_FIRMS", null);
-
-                if (tree_FirmList != null)
-                    if (tree_FirmList.GetType().ToString() == "DevExpress.XtraTreeList.TreeList")
-                        ((DevExpress.XtraTreeList.TreeList)tree_FirmList).ExpandAll();
-
-                string ufl = "";
-                int pos = 0;
-
-                foreach (DataRow row in ds_FL.Tables[0].Rows)
-                {
-                    // regedit e kayıtlı olan Id
-                    if (Convert.ToInt32(row["ID"].ToString()) == u_user_Last_FirmId)
-                    {
-                        dN_FL.Position = pos;
-                        //break;
-                    }
-
-                    t.firmAboutAdd(row, ref ufl);
-
-                    pos++;
-                }
-
-                // en sondaki virgülü sil 
-                //
-                t.tLast_Char_Remove(ref ufl);
-
-                // kullanıcının firma listesi
-                //
-                v.SP_FIRM_USERLIST = ufl;
-
-                // kullanıcı birden fazla firma kullanabilecek
-                //
-                v.SP_FIRM_MULTI = true;
-
-                // listeye set focus için
-                //
-                Control cntrl = t.Find_Control_View(this, FirmList_TableIPCode);
-
-                // set et
-                if (cntrl != null)
-                    t.tFormActiveControl(this, cntrl);
-            }
-        }
+        #region User giriş yaptı, firma seçti
 
         void btn_FirmListSec_Click(object sender, EventArgs e)
         {
@@ -589,38 +381,22 @@ namespace YesiLdefter
             /// kullanıcı için birden fazla firma seçeneği var demek ki
             /// kullanıcı bu botuna basar ve seçilen değerler alınır lets go ... main form
             ///
-
-            t.selectFirm(dN_FL.Position);
-
-            SetUserRegistryFirm(v.tUser.SP_USER_ID, v.SP_FIRM_ID);
-
-            // Login onayı
-            //
-            v.SP_UserLOGIN = true;
-
-            // form close
-            this.Close();
+            if (t.IsNotNull(dsUserFirmList))
+            {
+                DataRow row = dsUserFirmList.Tables[0].Rows[dNUserFirmList.Position];
+                userFirms.readUstadFirmAbout(this, row);
+            }
         }
+        
+        #endregion User giriş yaptı, firma seçti
 
         void SetUserIsActive(int Id)
         {
-            tSql = @" Update SYS_USERS set ISACTIVE = 1 where ID = " + Id.ToString() + @" ";
-
-            t.SQL_Read_Execute(v.dBaseNo.Manager, ds_Query2, ref tSql, "SYS_USERS", "SetUserIsActive");
+            tSql = preparingUstadUsersSql("", "", Id);
+            t.SQL_Read_Execute(v.dBaseNo.UstadCrm, ds_Query2, ref tSql, "UstadUsers", "SetUserIsActive");
         }
 
-        void SetUserRegistryFirm(int UserId, int FirmId)
-        {
-            /*
-            var regUser = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(@"" + regPath);
-
-            regUser.SetValue("userFirm" + UserId.ToString(), FirmId.ToString(), Microsoft.Win32.RegistryValueKind.String);
-            regUser.SetValue("userLastFirm", FirmId.ToString(), Microsoft.Win32.RegistryValueKind.String);
-            */
-            reg.SetUstadRegistry("userFirm" + UserId.ToString(), FirmId.ToString());
-            reg.SetUstadRegistry("userLastFirm", FirmId.ToString());
-        }
-
+        /*
         void SetUserRegistry(int UserId)
         {
             //var regUser = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(@"" + regPath);
@@ -628,8 +404,8 @@ namespace YesiLdefter
             //
             // user işlemleri
             //
-            //regUser.SetValue("userEMail" + UserId.ToString(), u_user_email, Microsoft.Win32.RegistryValueKind.String);
-            reg.SetUstadRegistry("userEMail" + UserId.ToString(), u_user_email);
+            //regUser.SetValue("eMail" + UserId.ToString(), u_user_email, Microsoft.Win32.RegistryValueKind.String);
+            reg.SetUstadRegistry("eMail" + UserId.ToString(), u_user_email);
 
             // 
             // last işlemler
@@ -653,80 +429,29 @@ namespace YesiLdefter
             }
 
         }
-
+        */
         void GetUserRegistry()
         {
-            var regUser = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(@"" + regPath);
-
-            if (regUser != null)
+            userFirms.GetUserRegistry(regPath);
+            
+            if (cmb_EMail != null)
             {
-                //cmbKullaniciAd.Text = klnadsifre.GetValue("klnad") != null ? klnadsifre.GetValue("klnad").ToString() : "";
-                //txtSifre.Text = klnadsifre.GetValue("sifre") != null ? klnadsifre.GetValue("sifre").ToString() : "";
-
+                // e-mail listesi combo için okunuyor
+                ((DevExpress.XtraEditors.ComboBoxEdit)cmb_EMail).Properties.Items.AddRange(v.tUserRegister.eMailList);
+                // en son giriş yapan e-mail combonun text ine atanıyor
                 if (cmb_EMail != null)
+                    ((DevExpress.XtraEditors.ComboBoxEdit)cmb_EMail).EditValue = v.tUserRegister.UserLastLoginEMail;
+                if (uk_user_mail != null)
+                    ((DevExpress.XtraEditors.TextEdit)uk_user_mail).EditValue = v.tUserRegister.UserLastLoginEMail;
+                if (btn_BHatirla != null)
                 {
-                    // e-mail listesi combo için okunuyor
-                    ((DevExpress.XtraEditors.ComboBoxEdit)cmb_EMail).Properties.Items.AddRange(reg.GetUstadEMailList());
-
-                    // en son giriş yapan e-mail combonun text ine atanıyor
-                    if (cmb_EMail != null)
-                        ((DevExpress.XtraEditors.ComboBoxEdit)cmb_EMail).EditValue = regUser.GetValue("userLastLogin");
-                    if (uk_user_mail != null)
-                        ((DevExpress.XtraEditors.TextEdit)uk_user_mail).EditValue = regUser.GetValue("userLastLogin");
-                    // beni hatırla butonu true/false ayarlanıyor
-                    if (regUser.GetValue("userRemember") != null)
-                        ((DevExpress.XtraEditors.CheckButton)btn_BHatirla).Checked = (regUser.GetValue("userRemember").ToString() == "true");
-                    // beni hatırla onaylıysa enson girilen key okunuyor ve şifreye atanıyor
-                    if (((DevExpress.XtraEditors.CheckButton)btn_BHatirla).Checked)
-                        ((DevExpress.XtraEditors.TextEdit)txt_Pass).EditValue = regUser.GetValue("userLastKey");
-
-                    if (regUser.GetValue("userLastFirm") != null)
-                    {
-                        try
-                        {
-                            u_user_Last_FirmId = Convert.ToInt32(regUser.GetValue("userLastFirm"));
-                        }
-                        catch (Exception)
-                        {
-                            u_user_Last_FirmId = 0;
-                        }
-                    }
-
-
-
-                    /* buradaki  reg.getRegistryValue  neden kullanılmadı ?
-                     * bu tRegistry.getRegistryValue() her çağırma işleminde regUser tekrar tekra çağırılmakta
-                     * oysa burada bir defa regUser çağırılmakta. Açılan bu kapı defalarca okunabilmekte
-                     * 
-                     * 
-                    if (cmb_EMail != null)
-                        ((DevExpress.XtraEditors.ComboBoxEdit)cmb_EMail).EditValue = reg.getRegistryValue("userLastLogin");
-
-                    if (uk_user_mail != null)
-                       ((DevExpress.XtraEditors.TextEdit)uk_user_mail).EditValue = reg.getRegistryValue("userLastLogin");
-
-                    // beni hatırla butonu true/false ayarlanıyor
-                    if (regUser.GetValue("userRemember") != null)
-                       ((DevExpress.XtraEditors.CheckButton)btn_BHatirla).Checked = (reg.getRegistryValue("userRemember").ToString() == "true");
+                    ((DevExpress.XtraEditors.CheckButton)btn_BHatirla).Checked = v.tUserRegister.UserRemember;
 
                     // beni hatırla onaylıysa enson girilen key okunuyor ve şifreye atanıyor
                     if (((DevExpress.XtraEditors.CheckButton)btn_BHatirla).Checked)
-                        ((DevExpress.XtraEditors.TextEdit)txt_Pass).EditValue = reg.getRegistryValue("userLastKey");
-                    
-                    //regUser.SetValue("userFirm" + UserId.ToString(), FirmId.ToString(), Microsoft.Win32.RegistryValueKind.String);
-                    if (regUser.GetValue("userLastFirm") != null)
-                    {
-                        try
-                        {
-                            u_user_Last_FirmId = Convert.ToInt32(reg.getRegistryValue("userLastFirm"));
-                        }
-                        catch (Exception)
-                        {
-                            u_user_Last_FirmId = 0;
-                        }
-                    }
-                    */
+                        ((DevExpress.XtraEditors.TextEdit)txt_Pass).EditValue = v.tUserRegister.UserLastKey;
                 }
+                u_user_Last_FirmId = v.tUserRegister.UserLastFirmId;
             }
         }
 
@@ -736,7 +461,7 @@ namespace YesiLdefter
             {
                 if (dN_NU.Position > -1)
                 {
-                    string user_Email = ds_NU.Tables[0].Rows[0]["USER_EMAIL"].ToString();
+                    string user_Email = ds_NU.Tables[0].Rows[0]["UserEMail"].ToString();
                     read_eMail(ds_Query, user_Email);
 
                     if (ds_Query.Tables.Count == 1)
@@ -781,24 +506,23 @@ namespace YesiLdefter
                     string user_rpt_pass = ((DevExpress.XtraEditors.TextEdit)uk_rpt_user_pass).EditValue.ToString();
 
                     // şimdi [ e-mail ile şifre ] databaseden kontrol ediliyor
-                    tSql = @" Select * from SYS_USERS where USER_EMAIL = '" + user_email + @"' and USER_KEY = '" + user_old_pass + "' ";
-
-                    t.SQL_Read_Execute(v.dBaseNo.Manager, ds_Query, ref tSql, "SYS_USERS", "UserLogin");
+                    tSql = preparingUstadUsersSql(user_email, user_old_pass, 0); 
+                    t.SQL_Read_Execute(v.dBaseNo.UstadCrm, ds_Query, ref tSql, "UstadUser", "UserLogin");
 
                     if (t.IsNotNull(ds_Query))
                     {
-                        int userId = t.myInt32(ds_Query.Tables[0].Rows[0]["ID"].ToString());
-                        Int16 IsActive = t.myInt16(ds_Query.Tables[0].Rows[0]["ISACTIVE"].ToString());
-                        string userFullName = ds_Query.Tables[0].Rows[0]["USER_FULLNAME"].ToString();
-                        string db_user_key = ds_Query.Tables[0].Rows[0]["USER_KEY"].ToString();
+                        int userId = t.myInt32(ds_Query.Tables[0].Rows[0]["UserId"].ToString());
+                        bool IsActive = Convert.ToBoolean(ds_Query.Tables[0].Rows[0]["IsActive"].ToString());
+                        string userFullName = ds_Query.Tables[0].Rows[0]["UserFullName"].ToString();
+                        string db_user_key = ds_Query.Tables[0].Rows[0]["Key"].ToString();
 
-                        if (IsActive != 1)
+                        if (IsActive == false)
                         {
                             MessageBox.Show("DİKKAT : Bu hesap AKTİF değildir.");
                             return;
                         }
 
-                        if (IsActive == 1)
+                        if (IsActive)
                         {
                             if (db_user_key == user_old_pass)
                             {
@@ -807,10 +531,7 @@ namespace YesiLdefter
                                     (user_new_pass != user_old_pass)    // yeni şifre ile eski şifre  aynı değilse
                                     )
                                 {
-                                    tSql = @" Update MS_USERS set
-                                    USER_KEY = '" + user_new_pass + @"'
-                                    where ID = " + userId.ToString();
-
+                                    tSql = preparingUstadUsersSql("", user_new_pass, userId);
                                     bool onay = t.Data_Read_Execute(this, ds_Query2, ref tSql, "NEW_USER_KEY", null);
 
                                     if (onay) MessageBox.Show("Şifreniz başarıyla güncellenmiştir...");
@@ -833,6 +554,22 @@ namespace YesiLdefter
                     }
                 }
             }
+        }
+
+        private string preparingUstadUsersSql(string eMail, string pass, int userId)
+        {
+            string Sql = "";
+
+            if ((eMail != "") && (pass == ""))
+                Sql = @" Select * from UstadUsers where UserEMail = '" + eMail + @"' ";
+            if ((eMail != "") && (pass != ""))
+                Sql = @" Select * from UstadUsers where UserEMail = '" + eMail + @"' and UserKey = '" + pass + "' ";
+            if ((userId > 0) && (pass == ""))
+                Sql = @" Update UstadUsers set IsActive = 1 where UserId = " + userId.ToString() + @" ";
+            if ((userId > 0) && (pass != ""))
+                Sql = @" Update UstadUsers set UserKey = '" + pass + @"' where UserId = " + userId.ToString() + @" ";
+
+            return Sql;
         }
 
 

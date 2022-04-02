@@ -1,10 +1,4 @@
-﻿USE [u7093888_Ustad01]
-GO
-
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
+﻿/*CreateProcedure*/
 
 CREATE PROCEDURE [dbo].[prc_MtskUygulamaDersPlaniGruplari] (@DersDonemTipiId int)  
 AS BEGIN
@@ -96,33 +90,5 @@ AS BEGIN
  
 END -- procedure
 
-
-
-
-
-/*
-
- Select distinct [MtskUygulamaliDers].EgitimAraciId
- from MtskUygulamaliDers [MtskUygulamaliDers]
- Where [MtskUygulamaliDers].DersTarihi >= dbo.fnc_MtskDonemDersBasBitTarihiniBul(
-   (
-   Select distinct DonemTipiId from MtskDonemi as MtskUygulamaliDers
-   Where 0 = 0
-   /*[MtskUygulamaliDers].DEFAULT_VALUE*/
-   and [MtskUygulamaliDers].DonemTipiId = 202101   -- :D.SD.33167: --
-   )
- , 0, 1, 1, 0)
- 
- and   [MtskUygulamaliDers].DersTarihi <= dbo.fnc_MtskDonemDersBasBitTarihiniBul(
-   (
-   Select distinct DonemTipiId from MtskDonemi as MtskUygulamaliDers -- master-detail de DonemTipiId ye ulaşmak için ufak bir yanıltma
-   Where 0 = 0
-   /*[MtskUygulamaliDers].DEFAULT_VALUE*/
-   and [MtskUygulamaliDers].DonemTipiId = 202101   -- :D.SD.33167: --
-   )
- , 0, 1, 0, 1)
-
-
-
-*/
+/*CreateProcedureEnd*/
 

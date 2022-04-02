@@ -1,4 +1,7 @@
 ﻿
+/*CreateTable*/
+
+
 begin transaction
 
  create table BildirimSMS
@@ -30,11 +33,16 @@ begin transaction
 
 commit transaction
 
+/*CreateTableEnd*/
 
+/*CreateLkpTable*/
 
 -- ------------------------------------------------------- 
 -- KaynakTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'BildirimSMSKaynakTipi')
+drop table [Lkp].[BildirimSMSKaynakTipi]
+
 create table Lkp.BildirimSMSKaynakTipi
 (
    Id           Int Unique Not Null,
@@ -56,6 +64,9 @@ INSERT INTO Lkp.BildirimSMSKaynakTipi (Id, KaynakTipi, GrupTipiId)
 -- ------------------------------------------------------- 
 -- MesajTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'BildirimSMSMesajTipi')
+drop table [Lkp].[BildirimSMSMesajTipi]
+
 create table [Lkp].[BildirimSMSMesajTipi]
 (
    Id                Int Unique not null, 
@@ -73,4 +84,5 @@ INSERT INTO [Lkp].[MtskAdayMesajTipi] (Id, MesajTipi)
   ( 3,  N'' )
 
 
+/*CreateLkpTableEnd*/
 

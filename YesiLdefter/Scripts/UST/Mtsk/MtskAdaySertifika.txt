@@ -1,10 +1,4 @@
-﻿USE u7093888_Ustad01
-GO
-
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
+﻿/*CreateTable*/
 
 begin transaction
 
@@ -39,16 +33,10 @@ begin transaction
    
 commit transaction
 
+/*CreateTableEnd*/
 
 
-
-USE [u7093888_Ustad01]
-GO
-
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
+/*CreateTrigger*/
 
 CREATE TRIGGER [dbo].[trg_MtskAdaySertifika] on [dbo].[MtskAdaySertifika] 
 AFTER INSERT, UPDATE
@@ -154,10 +142,8 @@ AS BEGIN
 
 END
 
-
-
-
+/*CreateTriggerEnd*/
 
 
 ALTER TABLE [dbo].[MtskAdaySertifika] ENABLE TRIGGER [trg_MtskAdaySertifika]
-GO
+

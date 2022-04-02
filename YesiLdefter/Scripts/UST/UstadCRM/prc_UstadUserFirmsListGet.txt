@@ -1,0 +1,129 @@
+﻿
+/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_UstadUserFirmsListeGet] (@UserId int)  
+AS BEGIN
+  --declare @UserId int = 8
+
+  declare @UserDbTypeId smallint = 0
+  declare @UserFirmGUID varchar(50)
+  declare @DbType varchar(50) = ''
+  declare @Sql varchar(max) 
+
+  Select 
+    @UserFirmGUID = FirmGUID
+  ,	@UserDbTypeId = DbTypeId From UstadUsers
+  Where UserId = @UserId
+
+  print @UserDbTypeId
+  /*[Lkp].[UstadUsersDbType] (Id, DbType)
+  ( 0,    N''),
+  ( 1,    N'Yazılım database (Yazılım bölümü çalışmaları)'),
+  ( 2,    N'Abone database (Ustad yazılım müşterileri)'),
+  ( 3,    N'Ustad CRM database (Ustad CRM datası)'),
+  ( 4,    N'Muhasebe database (Ustad şirket muhasebesi)'),
+  ( 11,   N'Ustad CRM ve Abone database (Ustad Satış ve Destek Ekibi)'),
+  ( 21,   N'Ustad Kurucu' ),
+  ( 22,   N'Ustad İdari')
+  */
+
+  /*[Lkp].[UstadFirmsDbType] (Id, DbType)
+  ( 0,    N''),
+  ( 1,    N'Yazılım database (Yazılım bölümü çalışmaları)'),
+  ( 2,    N'Abone database (Ustad yazılım müşterileri)'),
+  ( 3,    N'Ustad CRM database (Ustad CRM datası)'),
+  ( 4,    N'Muhasebe database (Ustad şirket muhasebesi)')
+  */
+  
+  set @DbType = ' = ' + CONVERT(varchar(5), @UserDbTypeId) + ' '
+
+  if (@UserDbTypeId = 0) set @UserDbTypeId = 2
+
+  if (@UserDbTypeId = 11) set @DbType = ' in ( 2, 3 ) '
+  if (@UserDbTypeId = 21) set @DbType = ' > 0 '
+  if (@UserDbTypeId = 22) set @DbType = ' in ( 1, 2, 3 ) '
+  
+  if (@UserDbTypeId <> 2) -- Abone kullanıcısı değilse
+  begin
+    set @Sql = ' Select * from UstadFirms Where DbTypeId ' + @DbType  
+    Execute(@Sql)
+  end
+    
+  if (@UserDbTypeId = 2) -- Abone kullanıcısı değilse
+  begin
+     declare @_firmGUID varchar(50) 
+     declare @_XID int
+     set @_firmGUID = @UserFirmGUID
+ 
+     Select @_XID = FirmId from UstadFirms
+     Where FirmGUID = @_firmGUID
+
+     -- Select @_XID 
+ 
+     ;WITH CTE
+     AS  (
+         Select M1.FirmId, M1.FirmId U_FirmId
+         From UstadFirms as M1
+         Where M1.ParentFirmId = @_XID
+         Union all
+         Select M1.FirmId, M1.FirmId U_FirmId
+         From UstadFirms as M1
+         Where M1.FirmId = @_XID
+	     /* 
+	     -- BUNU AÇINCA 
+	     -- GRUBUN HERHANGİ BİR ÜYESİNİ İSTEYİNCE
+	     -- GRUBUN TÜM ELEMANLARI GELİYOR 
+	     UNION ALL
+	     SELECT M1.FirmId, M1.ParentFirmId U_FirmId
+	     FROM UstadFirms as M1
+	     WHERE M1.FirmId = @_XID
+	     AND M1.ParentFirmId > 0
+         */
+	      /*
+	     UNION ALL
+         SELECT C.U_FirmId, M.ParentFirmId
+         FROM CTE C
+         JOIN UstadFirms as M ON C.U_FirmId = M.FirmId
+         */
+		 Union all
+		 Select C.U_FirmId, M.FirmId 
+         From CTE as C
+            Join UstadFirms as M ON C.U_FirmId = M.ParentFirmId
+     )
+     Select distinct 
+       f.[FirmId]
+      ,f.[ParentFirmId]
+      ,[IsActive]
+      ,[FirmTypeId]
+      ,[FirmGUID]
+      ,[SectorTypeId]
+      ,[FirmCode]
+      ,[FirmLongName]
+      ,[FirmShortName]
+      ,[FirmPhone]
+      ,[WebPage]
+      ,[EMail]
+      ,[Address1]
+      ,[Address2]
+      ,[AddressCode]
+      ,[DistrictTypeId]
+      ,[CityTypeId]
+      ,[FirmOpenDate]
+      ,[FounderName]
+      ,[FounderPhone]
+      ,[ManagerName]
+      ,[ManagerPhone]
+      ,[MenuCode]
+      ,[ServerNameIP]
+      ,[DatabaseName]
+      ,[DbLoginName]
+      ,[DbPass]
+      ,[RecordDate]
+     From CTE c
+       left outer join UstadFirms as f on ( c.U_FirmId = f.FirmId )
+  end
+
+END -- procedure
+
+/*CreateProcedureEnd*/
+

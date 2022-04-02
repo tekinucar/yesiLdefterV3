@@ -18,7 +18,7 @@ namespace YesiLdefter
         DataNavigator dN = null;
 
         string TableIPCode = string.Empty;
-        string menuName = "MENU_PRJ_DEF";
+        string menuName = "MENU_" + "PRJ_DEF";
         string buttonChild = "item_2592";
         string buttonNormal = "item_2593";
         string buttonDialog = "item_2594";

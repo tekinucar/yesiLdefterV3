@@ -1,4 +1,6 @@
 ﻿
+/*CreateTable*/
+
 begin transaction
 
  create table KrediOdemePlani
@@ -31,17 +33,14 @@ begin transaction
   create index X_KrediOdemePlani02 on KrediOdemePlani (CariId)
   create index X_KrediOdemePlani03 on KrediOdemePlani (VadeTarihi)
   create index X_KrediOdemePlani04 on KrediOdemePlani (DonemTipiId)
-  
-
-
-
-  
+ 
 commit transaction
 
+/*CreateTableEnd*/
 
+/*CreateLkpTable*/
 
 begin transaction
-
 
 -- ------------------------------------------------------- 
 -- CariTipiId
@@ -85,7 +84,8 @@ INSERT INTO [Lkp].[KrediOdemePlaniTaksitTipi] (Id, TaksitTipi)
   ( 1,    N'Peşinat'),
   ( 2,    N'Taksit'),
   ( 3,    N'Tek Ödeme')
-
-     
+    
 
 commit transaction
+
+/*CreateLkpTableEnd*/

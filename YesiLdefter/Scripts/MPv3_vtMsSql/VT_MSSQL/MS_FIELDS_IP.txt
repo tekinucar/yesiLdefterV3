@@ -3,11 +3,9 @@ begin transaction
  create table MS_FIELDS_IP
  (
 	REF_ID			Int IDENTITY(1,1) 	NOT NULL,
-    SOFTWARE_CODE   varchar(20)     NULL,
-    PROJECT_CODE    varchar(20)     NULL,
-	TABLE_CODE		VarChar(20)		NOT NULL, 
-	IP_CODE			VarChar(40)		NOT NULL,
-	FIELD_NO		SmallInt 		NOT NULL,
+    TABLE_CODE		VarChar(100)		NOT NULL, 
+	IP_CODE			VarChar(100)		NOT NULL,
+	FIELD_NO		SmallInt            NOT NULL,
 	FCAPTION        VarChar(50) 	    NULL, 
 	FHINT           VarChar(100)        NULL,
         
@@ -52,12 +50,12 @@ begin transaction
                  
 
     /* Master Table Baðlantýsý */
-    MASTER_TABLEIPCODE    VarChar(50)    NULL,
+    MASTER_TABLEIPCODE    VarChar(100)   NULL,
     MASTER_KEY_FNAME      VarChar(30)    NULL,
     MASTER_CHECK_FNAME    VarChar(30)    NULL,
     MASTER_CHECK_VALUE    VarChar(30)    NULL,
     SEARCH_TABLEIPCODE    VarChar(50)    NULL,
-    PROP_SEARCH           VarChar(4000)  NULL,       
+    PROP_NAVIGATOR        VarChar(max)   NULL,       
 
     /* Gruplama */
 	GROUP_NO       SmallInt  NULL,
@@ -102,12 +100,11 @@ begin transaction
     WebScrapingSetNodeId      SmallInt     null,
     WebScrapingSetColumnNo    SmallInt     null,
 
+    SOFTWARE_CODE   varchar(20)     NULL,
+    PROJECT_CODE    varchar(20)     NULL,
+	
 	Constraint PK_MS_FIELDS_IP primary key (REF_ID)
-
-      -- , CONSTRAINT FK_MS_FIELDS_IP_MS_TABLES_IP FOREIGN KEY (IP_CODE) 
-      --  REFERENCES MS_TABLES_IP (IP_CODE)
  )
-
 
  create index X_MS_FIELDS_IP1 on MS_FIELDS_IP (TABLE_CODE, IP_CODE, FIELD_NO)
 

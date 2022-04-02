@@ -61,6 +61,7 @@ namespace Tkn_ToolBox
         /// </summary>
         public Boolean Db_Open(SqlConnection VTbaglanti)
         {
+            bool onay = false;
 
             #region Closed ise
             if (VTbaglanti.State == ConnectionState.Closed)
@@ -72,7 +73,7 @@ namespace Tkn_ToolBox
                 try
                 {
                     VTbaglanti.Open();
-                    v.Onay = true;
+                    onay = true;
                     v.SP_ConnBool_Manager = true;
 
                     if (v.SP_OpenApplication == false)
@@ -97,140 +98,37 @@ namespace Tkn_ToolBox
                         + v.ENTER2
                         + e.Message.ToString());
 
-                    if (VTbaglanti == v.SP_Conn_Master_MSSQL) i = 1;
+                    if (VTbaglanti == v.active_DB.masterMSSQLConn) i = 1;
                     if (VTbaglanti == v.active_DB.managerMSSQLConn) i = 2;
+                    if (VTbaglanti == v.active_DB.ustadCrmMSSQLConn) i = 3;
                     if (VTbaglanti == v.active_DB.projectMSSQLConn) i = 4;
-
-                    if (VTbaglanti == v.active_DB.firmMainMSSQLConn) i = 5;
-                    if (VTbaglanti == v.active_DB.firmPeriodMSSQLConn) i = 6;
 
                     //Xml_.Database_Ondegerleri_Yenile();
 
                     try
                     {
-                        if (i == 1) VTbaglanti = new SqlConnection(v.SP_Conn_Text_Master);
-                        if (i == 3) VTbaglanti = new SqlConnection(v.SP_Conn_Text_MainManager);
-
+                        if (i == 1) VTbaglanti = new SqlConnection(v.active_DB.masterConnectionText);
                         if (i == 2) VTbaglanti = new SqlConnection(v.active_DB.managerConnectionText);
+                        if (i == 3) VTbaglanti = new SqlConnection(v.active_DB.ustadCrmConnectionText);
                         if (i == 4) VTbaglanti = new SqlConnection(v.active_DB.projectConnectionText);
-
-                        if (i == 5) VTbaglanti = new SqlConnection(v.active_DB.firmMainConnectionText);
-                        if (i == 6) VTbaglanti = new SqlConnection(v.active_DB.firmPeriodConnectionText);
 
                         // Burası OLMADI iyice araştır
                         VTbaglanti.Open();
-                        v.Onay = true;
+                        onay = true;
                         v.SP_ConnBool_Manager = true;
                     }
                     catch (Exception e2)
                     {
-                        v.Onay = false;
+                        onay = false;
                         v.SP_ConnBool_Manager = false;
 
                         MessageBox.Show(e2.Message.ToString());
 
-                        Application.Exit();
+                        // yeni firma ise program kapanmasın
+                        if (VTbaglanti != v.newFirm_DB.MSSQLConn)
+                            Application.Exit();
                     }
                 }
-            }
-            else
-            {
-                v.Onay = true;
-            }
-            #endregion Closed ise
-
-            return v.Onay;
-        }
-
-        /// <summary>
-        /// MySQL Bağlantısı
-        /// </summary>
-        /// 
-        /*
-        public bool Db_Open(MySqlConnection VTbaglanti)
-        {
-
-            #region Closed ise
-            bool onay = false;
-
-            if (VTbaglanti.State == System.Data.ConnectionState.Closed)
-            {
-                byte i = 0;
-
-                WaitFormOpen(v.mainForm, "[ MySQL ] " + v.Wait_Desc_DBBaglanti);
-
-                try
-                {
-                    VTbaglanti.Open();
-                    v.Onay = true;
-                    v.SP_ConnBool_Project = true;
-                    v.Kullaniciya_Mesaj_Var = "MySQL Database bağlantısı sağlandı...";
-
-                    if (v.SP_OpenApplication == false)
-                    {
-                        Thread.Sleep(500);
-                        SplashScreenManager.CloseForm(false);
-                    }
-                    else
-                    {
-                        WaitFormOpen(v.mainForm, v.Wait_Desc_ProgramYukDevam);
-                    }
-
-                    if ((VTbaglanti == v.SP_Conn_MySQL) &&
-                        (v.SP_Connect_Source_DBType == v.db_MySQL)) v.SP_ConnectBool_Source = true;
-
-                    if ((VTbaglanti == v.SP_Conn_MySQL) &&
-                        (v.SP_Connect_Target_DBType == v.db_MySQL)) v.SP_ConnectBool_Target = true;
-
-                }
-                catch (Exception e)
-                {
-                    v.SP_ConnBool_Project = false;
-                    v.Kullaniciya_Mesaj_Var = "DİKKAT : MySQL Database bağlantısı koptu...";
-
-                    MessageBox.Show("HATA : MySQL Database bağlantısı açılmadı ... " + v.ENTER2 +
-                        e.Message.ToString() + v.ENTER2 +
-                        "*  Bunun çeşitli sebepleri olabilir." + v.ENTER2 +
-                        "1. Database in bulunduğu bilgisayar ( SERVER ) kapalı olabilir ..." + v.ENTER +
-                        "2. MySQL Server kapalı olabilir ..." + v.ENTER +
-                        "3. Network bağlantınızda sorun olabilir ..." + v.ENTER +
-                        "4. Database bağlantı tanımlarında sorun olabilir ..." + v.ENTER2 +
-                        "   Bu nedenle size sorulan soruları kontrol edin, yine olmaz ise yardım isteyin ...");
-
-                    //if (VTbaglanti == v.SP_Conn_Master_MSQL) i = 1;
-                    //if (VTbaglanti == v.SP_Conn_Manager_MSSQL) i = 2;
-                    //if (VTbaglanti == v.SP_Conn_MainManager_MSSQL) i = 3;
-                    if (VTbaglanti == v.active_DB.projectMySQLConn) i = 4;
-
-
-                    try
-                    {
-                        //if (i == 1) VTbaglanti = new MySqlConnection(v.SP_Conn_Text_Master_MySQL);
-                        //if (i == 2) VTbaglanti = new MySqlConnection(v.SP_Conn_Text_Manager_MySQL);
-                        //if (i == 3) VTbaglanti = new MySqlConnection(v.SP_Conn_Text_MainManager_MySQL);
-                        if (i == 4) VTbaglanti = new MySqlConnection(v.active_DB.projectConnectionText);
-
-                        // Burası OLMADI iyice araştır
-                        VTbaglanti.Open();
-                        v.Onay = true;
-                        v.SP_ConnBool_Project = true;
-                        v.Kullaniciya_Mesaj_Var = "MySQL Database bağlantısı sağlandı...";
-
-                    }
-                    catch (Exception e2)
-                    {
-                        v.Onay = false;
-                        v.SP_ConnBool_Project = false;
-                        v.Kullaniciya_Mesaj_Var = "DİKKAT : MySQL Database bağlantısı gerçekleşmedi...";
-
-                        MessageBox.Show(e2.Message.ToString());
-                        //MessageBox.Show("Lütfen yardım isteyin ..." + v.ENTER2 + "Error : Database.Connection()");
-
-                        Application.Exit();
-                    }
-
-                }
-
             }
             else
             {
@@ -240,7 +138,7 @@ namespace Tkn_ToolBox
 
             return onay;
         }
-        */
+
         #endregion DB_Open
 
         #region Data_Read_Execute
@@ -257,23 +155,33 @@ namespace Tkn_ToolBox
                 Preparing_DataSet_(tForm, myProp, vt, dsData.Tables.Count);
             }
         }
+
+        public v.dBaseNo getDBaseNo(string dbaseNo)
+        {
+            v.dBaseNo dbNo = v.dBaseNo.None;
+
+            if (dbaseNo == "1") dbNo = v.dBaseNo.Master;
+            if (dbaseNo == "2") dbNo = v.dBaseNo.Manager;
+            if (dbaseNo == "3") dbNo = v.dBaseNo.UstadCrm;
+            if (dbaseNo == "4") dbNo = v.dBaseNo.Project;
+            if (dbaseNo == "5") dbNo = v.dBaseNo.WebCrm;
+
+            return dbNo;
+        }
+
         public void Preparing_DataSet_(Form tForm, string myProp, vTable vt, int tableCount)
         {
-            if (IsNotNull(myProp) == false)
+            if ((IsNotNull(myProp) == false) ||
+                (myProp.IndexOf("=DBaseNo:") == -1))
             {
                 vt.TableName = "TABLE1";
                 vt.TableCount = 255;
             }
-            if (IsNotNull(myProp))
+            if (IsNotNull(myProp) && (myProp.IndexOf("=DBaseNo:") > -1))
             {
                 byte dbaseNo_ = Set(MyProperties_Get(myProp, "=DBaseNo:"), "", (byte)0);
 
-                if (dbaseNo_ == 1) vt.DBaseNo = v.dBaseNo.Master;
-                if (dbaseNo_ == 2) vt.DBaseNo = v.dBaseNo.Manager;
-                if (dbaseNo_ == 4) vt.DBaseNo = v.dBaseNo.Project;
-                if (dbaseNo_ == 5) vt.DBaseNo = v.dBaseNo.FirmMainDB;
-                if (dbaseNo_ == 6) vt.DBaseNo = v.dBaseNo.FirmPeriodDB;
-
+                vt.DBaseNo = getDBaseNo(dbaseNo_.ToString());    
                 vt.DBaseName = Find_dBLongName(vt.DBaseNo.ToString());
                 vt.SchemasCode = Set(MyProperties_Get(myProp, "=SchemasCode:"), "dbo", "");
                 vt.TableType = Set(MyProperties_Get(myProp, "=TableType:"), "", (byte)0);
@@ -315,44 +223,37 @@ namespace Tkn_ToolBox
             if (vt.DBaseNo == v.dBaseNo.Master)
             {
                 vt.DBaseType = v.dBaseType.MSSQL;
-                vt.msSqlConnection = v.SP_Conn_Master_MSSQL;
+                vt.msSqlConnection = v.active_DB.masterMSSQLConn;
             }
             if (vt.DBaseNo == v.dBaseNo.Manager)
             {
                 vt.DBaseType = v.dBaseType.MSSQL;
                 vt.msSqlConnection = v.active_DB.managerMSSQLConn;
             }
-            if ((vt.DBaseNo == v.dBaseNo.Project) && (v.active_DB.projectDBType == v.dBaseType.MSSQL))
+            if (vt.DBaseNo == v.dBaseNo.UstadCrm)
+            {
+                vt.DBaseType = v.dBaseType.MSSQL;
+                vt.msSqlConnection =   v.active_DB.ustadCrmMSSQLConn;
+            }
+            if (vt.DBaseNo == v.dBaseNo.Project)
             {
                 vt.DBaseType = v.dBaseType.MSSQL;
                 vt.msSqlConnection = v.active_DB.projectMSSQLConn;
             }
-            if ((vt.DBaseNo == v.dBaseNo.Project) && (v.active_DB.projectDBType == v.dBaseType.MySQL))
+            if (vt.DBaseNo == v.dBaseNo.WebCrm)
             {
-                vt.DBaseType = v.dBaseType.MySQL;
-                vt.msSqlConnection = null;
-            }
-            // firma databaseleri 
-            if ((vt.DBaseNo == v.dBaseNo.FirmMainDB) && (v.active_DB.firmMainDBType == v.dBaseType.MSSQL))
-            {
-                //WaitFormOpen(v.mainForm, "Firma MainDB MSSQL Connection...");
-                Db_Open(v.active_DB.firmMainMSSQLConn);
-                v.IsWaitOpen = false;
-                //WaitFormClose();
-
                 vt.DBaseType = v.dBaseType.MSSQL;
-                vt.msSqlConnection = v.active_DB.firmMainMSSQLConn;
+                vt.msSqlConnection = v.active_DB.projectMSSQLConn;
             }
-            if ((vt.DBaseNo == v.dBaseNo.FirmPeriodDB) && (v.active_DB.firmPeriodDBType == v.dBaseType.MSSQL))
+            if (vt.DBaseNo == v.dBaseNo.NewDatabase)
             {
-                //WaitFormOpen(v.mainForm, "Firma Period MSSQL Connection...");
-                Db_Open(v.active_DB.firmPeriodMSSQLConn);
-                v.IsWaitOpen = false;
-                //WaitFormClose();
-
                 vt.DBaseType = v.dBaseType.MSSQL;
-                vt.msSqlConnection = v.active_DB.firmPeriodMSSQLConn;
-                //vt.mySqlConnection = null;
+                vt.msSqlConnection = v.newFirm_DB.MSSQLConn;
+            }
+            if (vt.DBaseNo == v.dBaseNo.WebManager)
+            {
+                vt.DBaseType = v.dBaseType.MSSQL;
+                vt.msSqlConnection = v.webManager_DB.MSSQLConn;
             }
 
             if (tForm != null)
@@ -408,56 +309,13 @@ namespace Tkn_ToolBox
 
                 if (sqlB != string.Empty)
                 {
-                    //= TableIPCode:3S_MSTBL.3S_MSTBL_02;
-
-                    //if (vt.TableIPCode.IndexOf("3S_") == -1)
-                    //    msSqlAdapter = new SqlDataAdapter(sqlB, v.SP_Conn_Manager_MSSQL);
-                    //else
-                    //    msSqlAdapter = new SqlDataAdapter(sqlB, v.SP_Conn_MainManager_MSSQL);
-
                     msSqlAdapter = new SqlDataAdapter(sqlB, v.active_DB.managerMSSQLConn);
-
                     //_FIELDS2
                     msSqlAdapter.Fill(dsData, vt.TableName + fields + "2");
-
                 }
 
                 msSqlAdapter.Dispose();
             }
-
-            /*
-            if (vt.DBaseType == v.dBaseType.MySQL)
-            {
-                MySqlDataAdapter mySqlAdapter = null;
-
-                if (sqlA != string.Empty)
-                {
-                    mySqlAdapter = new MySqlDataAdapter(sqlA, vt.mySqlConnection);
-                    mySqlAdapter.Fill(dsData, vt.TableName + fields);
-                }
-
-                /// database ler şimdilik her halükarda MSSQL üzerinde olduğu için
-                /// MSSQL den okunayor mecburen
-                /// MSV3DFTR veya SystemMS 
-                if (sqlB != string.Empty)
-                {
-                    //= TableIPCode:3S_MSTBL.3S_MSTBL_02;
-                    SqlDataAdapter msSqlAdapter = null;
-
-                    //if (vt.TableIPCode.IndexOf("3S_") == -1)
-                    //    msSqlAdapter = new SqlDataAdapter(sqlB, v.SP_Conn_Manager_MSSQL);
-                    //else msSqlAdapter = new SqlDataAdapter(sqlB, v.SP_Conn_MainManager_MSSQL);
-
-
-
-                    msSqlAdapter = new SqlDataAdapter(sqlB, v.active_DB.managerMSSQLConn);
-
-                    msSqlAdapter.Fill(dsData, vt.TableName + fields + "2");
-
-                    msSqlAdapter.Dispose();
-                }
-                mySqlAdapter.Dispose();
-            }*/
         }
 
         private void Preparing_TableFields_SQL(vTable vt,
@@ -474,12 +332,6 @@ namespace Tkn_ToolBox
                left outer join sys.tables b on (a.object_id = b.object_id ) 
              where b.name = '" + vt.TableName + @"' 
              order by a.column_id ";
-
-            if (vt.DBaseType == v.dBaseType.MySQL)
-                sqlA =
-            @" Select COLUMN_NAME, ORDINAL_POSITION, DATA_TYPE, COLUMN_TYPE, EXTRA 
-               From INFORMATION_SCHEMA.COLUMNS
-               Where table_name = '" + vt.TableName + "' ";
 
             /// FFOREING Bit                 NULL,
             /// FTRIGGER Bit                 NULL,
@@ -522,6 +374,12 @@ namespace Tkn_ToolBox
                 MessageBox.Show("Preparing_Fields_SQL : Table_Name.IndexOf(_KIST) / (_FULL) : konusu vardı.");
         }
 
+        public bool Sql_ExecuteNon(string SqlText, vTable vt)
+        {
+            SqlCommand cmd = new SqlCommand(SqlText);
+
+            return Sql_ExecuteNon(cmd, vt);
+        }
 
         public Boolean Sql_ExecuteNon(SqlCommand SqlComm, vTable vt)
         {
@@ -552,7 +410,7 @@ namespace Tkn_ToolBox
                 {
                     string Adet = "";
 
-                    SqlComm.ExecuteNonQuery().ToString();
+                    Adet = SqlComm.ExecuteNonQuery().ToString();
 
                     if ((Adet != "-1") && (Adet != "0"))
                         v.Kullaniciya_Mesaj_Var = Adet + " adet kayıt üzerinde işlem gerçekleşti ...";
@@ -575,6 +433,9 @@ namespace Tkn_ToolBox
 
             if (Cursor.Current == Cursors.Default)
                 Cursor.Current = Cursors.WaitCursor;
+
+            if (vt.msSqlConnection == null)
+                Preparing_DataSet_(null, null, vt, 0);
 
             SqlConnection msSqlConn = vt.msSqlConnection;
             
@@ -605,7 +466,7 @@ namespace Tkn_ToolBox
                 {
                     string Adet = "";
 
-                    SqlComm.ExecuteNonQuery().ToString();
+                    Adet = SqlComm.ExecuteNonQuery().ToString();
 
                     if ((Adet != "-1") && (Adet != "0"))
                         v.Kullaniciya_Mesaj_Var = Adet + " adet kayıt üzerinde işlem gerçekleşti ...";
@@ -629,15 +490,11 @@ namespace Tkn_ToolBox
             Boolean onay = false;
 
             SqlConnection msSqlConn = vt.msSqlConnection;
-            //MySqlConnection mySqlConn = vt.mySqlConnection;
 
             if (vt.DBaseType == v.dBaseType.MSSQL)
                 Db_Open(msSqlConn);
-            //if (vt.DBaseType == v.dBaseType.MySQL)
-            //    Db_Open(mySqlConn);
 
             SqlDataAdapter msSqlAdapter = null;
-            //MySqlDataAdapter mySqlAdapter = null;
 
             #region 1. adımda DATA dolduruluyor
             try
@@ -712,44 +569,20 @@ namespace Tkn_ToolBox
                 /// bu geçici çözümdür
                 ///
 
-                //if (vt.DBaseType == v.dBaseType.MySQL)
-                //{
-                //    if (mySqlConn.State == System.Data.ConnectionState.Closed)
-                //    {
-                //        v.SP_ConnBool_Project = false;
-                //        v.Kullaniciya_Mesaj_Var = "DİKKAT : MySQL Database bağlantısı koptu...";
-                //    }
-                //}
+                onay = false;
+                Cursor.Current = Cursors.Default;
 
-                if ((vt.DBaseType == v.dBaseType.MySQL) &&
-                    (e.Message == "Fatal error encountered during command execution."))
-                {
-                    //Db_Open(mySqlConn);
-                    //mySqlAdapter.Fill(dsData, vt.TableName);
+                v.SQL = v.ENTER2 +
+                    "   HATALI SQL :  [ " + e.Message.ToString() + v.ENTER2 +
+                    vt.TableName + " / " + vt.TableIPCode + " / " + vt.functionName +
+                    " ] { " + v.ENTER2 + SQL + v.ENTER2 + " } " + v.SQL;
 
-                    //v.SQL =
-                    //    v.ENTER2 + "[ 2. Data_Read_Execute : " +
-                    //    vt.TableName + " / " + vt.TableIPCode + " / " + vt.functionName +
-                    //    " ] { " + v.ENTER2 + SQL + v.ENTER2 + " } " + v.SQL;
-                }
-                else
-                {
-                    onay = false;
-                    Cursor.Current = Cursors.Default;
-
-                    v.SQL = v.ENTER2 +
-                        "   HATALI SQL :  [ " + e.Message.ToString() + v.ENTER2 +
-                        vt.TableName + " / " + vt.TableIPCode + " / " + vt.functionName +
-                        " ] { " + v.ENTER2 + SQL + v.ENTER2 + " } " + v.SQL;
-
-                    MessageBox.Show("HATALI SQL : " + v.ENTER2 + e.Message.ToString() +
-                        v.ENTER2 + vt.TableName + v.ENTER2 + SQL, "Data_Read_Execute");
-                }
+                MessageBox.Show("HATALI SQL : " + v.ENTER2 + e.Message.ToString() +
+                    v.ENTER2 + vt.TableName + v.ENTER2 + SQL, "Data_Read_Execute");
             }
             #endregion 1.adım
 
             if (msSqlAdapter != null) msSqlAdapter.Dispose();
-            //if (mySqlAdapter != null) mySqlAdapter.Dispose();
 
             return onay;
         }
@@ -845,16 +678,7 @@ namespace Tkn_ToolBox
             vTable vt = new vTable();
 
             vt.functionName = function_name;
-
             vt.DBaseNo = dBNo;
-            //if (v.dBaseNo.Master == dBNo)
-            //    vt.DBaseNo = (byte)1;
-            //if (v.dBaseNo.Manager == dBNo)
-            //    vt.DBaseNo = (byte)2;
-            //if (v.dBaseNo.MainManager == dBNo)
-            //    vt.DBaseNo = (byte)3;
-            //if (v.dBaseNo.Project == dBNo)
-            //    vt.DBaseNo = (byte)4;
 
             Preparing_DataSet(tForm, dsData, vt);
 
@@ -865,7 +689,8 @@ namespace Tkn_ToolBox
                     (tableName != ""))
                     vt.TableName = tableName;
 
-                SQL = SQLPreparing(SQL, vt);
+                if (vt.DBaseNo != v.dBaseNo.WebManager)
+                    SQL = SQLPreparing(SQL, vt);
 
                 if ((tableName != "GROUPS") &&
                     (SQL.IndexOf("[Lkp]") == -1))
@@ -882,200 +707,18 @@ namespace Tkn_ToolBox
                     dsData.DataSetName = vt.TableIPCode;
             }
 
-
             if (Cursor.Current == Cursors.WaitCursor)
                 Cursor.Current = Cursors.Default;
 
             return onay;
-
-
-
             /*
             SqlConnection conn = new SqlConnection(sqlConnectionString); 
             Server server = new Server(new ServerConnection(conn)); 
             server.ConnectionContext.ExecuteNonQuery(script);
             */
-            /*
-            conn = new SqlConnection("Server=(local);DataBase=master;Integrated Security=SSPI"); 
-            conn.Open(); 
-            SqlCommand cmd = new SqlCommand("dbo.test", conn);
-            cmd.CommandType = CommandType.Text;
-            rdr = cmd.ExecuteReader(); 
-            */
-
-
         }
         #endregion SQL_Read_Execute
-
-        #region SQL_ExecuteNon
-
-        public Boolean SQL_ExecuteNon(DataSet dsData, ref string SQL, string Kim)
-        {
-            // SQL çalıştırır ve geriye hiç sonuç vermez
-
-            Boolean sonuc = false;
-            /*
-                        #region Eksik bilgiler varsa tamamlanacak
-
-                        SqlConnection SqlConn = null;
-                        string FieldsListSQL = string.Empty;
-                        string function_name = "SQL ExecuteNon"; 
-                        string TableName = string.Empty;
-                        int TableCount = 0;
-                        byte dbName = 0;
-
-                        // Gerekli olan verileri topla
-                        Preparing_DB_Variables(dsData, ref dbName, ref TableName, ref FieldsListSQL, ref TableCount);
-
-                        #endregion Eksik bilgiler varsa tamamlanacak
-
-                        #region SqlConn == Empty
-                        if (SqlConn.ConnectionString == string.Empty)
-                        {
-                            MessageBox.Show("DİKKAT : Bağlantı cümlesi yok..." + v.ENTER2 +
-                                            SQL, function_name);
-                            return sonuc;
-                        }
-                        #endregion
-
-                        #region SQL != Empty
-
-                        if (SQL != "")
-                        {
-                            Db_Open(SqlConn);
-
-                            SQL = SQLPreparing(SQL);
-
-                            v.SQL = v.ENTER2 + SQL + v.SQL;
-
-                            SqlCommand SqlKomut = new SqlCommand(SQL, SqlConn);
-
-                            try
-                            {
-                                SqlKomut.ExecuteNonQuery();
-                                sonuc = true;
-                            }
-                            catch (Exception e)
-                            {
-                                sonuc = false;
-
-                                if (v.SP_ConnectBool)
-                                {
-                                    MessageBox.Show("HATALI İŞLEM : " + v.ENTER2 + e.Message, function_name + " [ " + Kim + " ]");
-                                }
-                                else 
-                                {
-                                    if (Db_Open(SqlConn))
-                                    {
-                                        SqlKomut.ExecuteNonQuery();
-                                    }
-                                    else
-                                    {
-                                        MessageBox.Show("DİKKAT : Bağlantı kurulamadı...", function_name);
-                                    }
-                                }
-                            }
-
-                            if (sonuc == true)
-                            {
-                                try
-                                {
-                                    string Adet = SqlKomut.ExecuteNonQuery().ToString();
-                                    if (Adet != "-1")
-                                        v.Kullaniciya_Mesaj_Var = Adet + " adet kayıt üzerinde işlem gerçekleşti ...";
-                                }
-                                catch
-                                {
-                                    // 
-                                }
-                            }
-
-                            SqlKomut.Dispose();
-
-                        } // if (SQL != "")
-                        #endregion
-            */
-            return sonuc;
-        }
-
-        public Boolean SQL_ExecuteNon(SqlConnection SqlConn, DataSet dsData, ref string SQL, string Kim)
-        {
-            // SQL çalıştırır ve geriye hiç sonuç vermez
-
-            //#region Tanımlar
-            Boolean sonuc = false;
-            /*          string function_name = "SQL ExecuteNon";
-
-                      if (SqlConn.ConnectionString == string.Empty)
-                      {
-                          MessageBox.Show("DİKKAT : Bağlantı cümlesi yok..." + v.ENTER2 +
-                                          SQL, function_name);
-                          return sonuc;
-                      }
-                      #endregion Tanımlar
-
-                      #region SQL != Empty
-
-                      if (SQL != "")
-                      {
-                          Db_Open(SqlConn);
-
-                          SQL = SQLPreparing(SQL);
-
-                          v.SQL = v.ENTER2 + SQL + v.SQL;
-
-                          SqlCommand SqlKomut = new SqlCommand(SQL, SqlConn);
-
-                          try
-                          {
-                              SqlKomut.ExecuteNonQuery();
-                              sonuc = true;
-                          }
-                          catch (Exception e)
-                          {
-                              sonuc = false;
-
-                              if (v.SP_ConnectBool)
-                              {
-                                  MessageBox.Show("HATALI İŞLEM : " + v.ENTER2 + e.Message, function_name + " [ " + Kim + " ]");
-                              }
-                              else
-                              {
-                                  if (Db_Open(SqlConn))
-                                  {
-                                      SqlKomut.ExecuteNonQuery();
-                                  }
-                                  else
-                                  {
-                                      MessageBox.Show("DİKKAT : Bağlantı kurulamadı...", function_name);
-                                  }
-                              }
-                          }
-
-                          if (sonuc == true)
-                          {
-                              try
-                              {
-                                  string Adet = SqlKomut.ExecuteNonQuery().ToString();
-                                  if ((Adet != "-1") && (Adet != "0"))
-                                      v.Kullaniciya_Mesaj_Var = Adet + " adet kayıt üzerinde işlem gerçekleşti ...";
-                              }
-                              catch
-                              {
-                                  // 
-                              }
-                          }
-
-                          SqlKomut.Dispose();
-
-                      } // if (SQL != "")
-                      #endregion
-          */
-            return sonuc;
-        }
-
-        #endregion SQL_ExecuteNon
-
+                
         #region TableRemove
         public Boolean TableRemove(DataSet ds)
         {
@@ -1553,231 +1196,91 @@ namespace Tkn_ToolBox
         }
 
         #endregion TriggerOnOff
-        
+
+        #region runScript
+        public bool runScript(string cumle)
+        {
+            bool onay = false;
+
+            DataSet ds = new DataSet();
+            SQL_Read_Execute(v.dBaseNo.WebManager, ds, ref cumle, "TABLES1", null);
+            ds.Dispose();
+
+            return onay;
+        }
+        #endregion
+
         #endregion Database İşlemleri
 
         #region Firm İşlemleri
 
-        public void firmAboutAdd(DataRow row, ref string ufl)
+        public void firmAboutAdd(DataRow row, ref tUstadFirm tFirm)
         {
-            int fId = 0;
-            string fName = "";
-            string fGuid = "";
-            string fusePackage = "";
-
-            string firmDBType = "";
-            string firmDBName = "";
-            string firmMainDBFormat = "";
-            string firmPeriodDBFormat = "";
-            string firmServerType = "";
-            string firmServerName = "";
-            string firmAuthentication = "";
-            string firmLogin = "";
-            string firmPassword = "";
-
-            string fmainDbConnText = "";
-            string fperiodDbConnText = "";
-
-            // user in tüm FIRMA ıd leri toplanıyor 
-            ufl = ufl + row["ID"].ToString() + ", ";
+            int firmId = 0;
+            string firmLongName = "";
+            string firmShortName = "";
+            string firmGuid = "";
+            string menuCode = "";
+            string databaseType = "";
+            string databaseName = "";
+            string dbServerNameIP = "";
+            //string dbAuthentication = "";
+            string dbLoginName = "";
+            string dbPassword = "";
             //
-            fId = myInt32(row["ID"].ToString());
-            fName = row["FIRM_NAME"].ToString();
-            fGuid = row["FIRM_GUID"].ToString();
-            fusePackage = row["USE_PACKAGE"].ToString();
-
-            firmDBType = row["FIRM_DB_TYPE"].ToString();
-            firmDBName = row["FIRM_DB_NAME"].ToString();
-            firmMainDBFormat = row["FIRM_MAINDB_FORMAT"].ToString();
-            firmPeriodDBFormat = row["FIRM_PERIODDB_FORMAT"].ToString();
-            firmServerType = row["FIRM_SERVER_TYPE"].ToString();
-            firmServerName = row["FIRM_SERVER_NAME"].ToString();
-            firmAuthentication = row["FIRM_AUTHENTICATION"].ToString();
-            firmLogin = row["FIRM_LOGIN"].ToString();
-            firmPassword = row["FIRM_PASSWORD"].ToString();
-
-            fmainDbConnText = row["FIRM_MAINDB_CONNTEXT"].ToString();
-            fperiodDbConnText = row["FIRM_PERIODDB_CONNTEXT"].ToString();
-
+            firmId = myInt32(row["FirmId"].ToString());
+            firmLongName = row["FirmLongName"].ToString();
+            firmShortName = row["FirmShortName"].ToString();
+            firmGuid = row["FirmGUID"].ToString();
+            menuCode = row["MenuCode"].ToString();
+            databaseType = "1";// MSSQL 
+            databaseName = row["DatabaseName"].ToString();
+            dbServerNameIP = row["ServerNameIP"].ToString();
+            dbLoginName = row["DbLoginName"].ToString();
+            dbPassword = row["DbPass"].ToString();
             //
-            FirmAbout tFirmAbout = new FirmAbout();
-            tFirmAbout.FirmId = fId;
-            tFirmAbout.FirmName = fName;
-            tFirmAbout.FirmGuid = fGuid;
-            tFirmAbout.usePackage = fusePackage;
-
-            tFirmAbout.firmDBType = firmDBType;
-            tFirmAbout.firmDBName = firmDBName;
-            tFirmAbout.firmMainDBFormat = firmMainDBFormat;
-            tFirmAbout.firmPeriodDBFormat = firmPeriodDBFormat;
-            tFirmAbout.firmServerType = firmServerType;
-            tFirmAbout.firmServerName = firmServerName;
-            tFirmAbout.firmAuthentication = firmAuthentication;
-            tFirmAbout.firmLogin = firmLogin;
-            tFirmAbout.firmPassword = firmPassword;
-            tFirmAbout.firmMainConnText = fmainDbConnText;
-            tFirmAbout.firmPeriodConnText = fperiodDbConnText;
-
-            v.tFirmUserList.Add(tFirmAbout);
+            tFirm.FirmId = firmId;
+            tFirm.FirmLongName = firmLongName;
+            tFirm.FirmShortName = firmShortName;
+            tFirm.FirmGuid = firmGuid;
+            tFirm.MenuCode = menuCode;
+            tFirm.DatabaseType = databaseType;
+            tFirm.DatabaseName = databaseName;
+            tFirm.ServerNameIP = dbServerNameIP;
+            //tFirm.DbAuthentication = dbAuthentication;
+            tFirm.DbLoginName = dbLoginName;
+            tFirm.DbPassword = dbPassword;
         }
 
-        public void selectFirm(int firmPos)
+        public void setSelectFirm(tUstadFirm tFirm)
         {
-            //foreach (FirmAbout fAbout in v.tFirmUserList)
-            //foreach (FirmAbout fAbout in v.tFirmFullList)
-            int pos = 0;
-            foreach (FirmAbout fAbout in v.tFirmUserList)
-            {
-                if (pos == firmPos)
-                {
-                    v.SP_FIRM_ID = Convert.ToInt32(fAbout.FirmId);
-                    v.SP_FIRM_NAME = fAbout.FirmName;
-                    v.SP_FIRM_USE_PACKAGE = fAbout.usePackage;
+            v.tUser.MainFirmId = tFirm.FirmId;
+            
+            v.SP_FIRM_ID = tFirm.FirmId;
+            
+            v.active_DB.projectDBName = tFirm.DatabaseName;
+            
+            if (v.active_DB.localDB == false)
+                v.active_DB.projectServerName = tFirm.ServerNameIP; // "195.xx";
 
-                    if (IsNotNull(v.SP_FIRM_USE_PACKAGE) == false)
-                        v.SP_FIRM_USE_PACKAGE = "UST/T01/ONM/KOBI";
+            v.active_DB.projectUserName = tFirm.DbLoginName; // "sa";
 
-                    /// firm tablosunda tanımlı ise
-                    /// 
-                    if (((fAbout.firmMainDBFormat == "") && (fAbout.firmServerName != "")) || 
-                        ((fAbout.firmPeriodDBFormat == "") && (fAbout.firmServerName != "")))
-                    {
-                        v.active_DB.projectDBName = fAbout.firmDBName;
-                        if (v.active_DB.localDB == false)
-                            v.active_DB.projectServerName = fAbout.firmServerName; // "195.xx";
-                        v.active_DB.projectUserName = fAbout.firmLogin; //"sa";
+            if (tFirm.DbPassword != "")
+                v.active_DB.projectPsw = "Password = " + tFirm.DbPassword + ";"; // Password = 1;
+            else v.active_DB.projectPsw = "";
 
-                        if (fAbout.firmPassword != "")
-                             v.active_DB.projectPsw = "Password = " + fAbout.firmPassword + ";"; // Password = 1;
-                        else v.active_DB.projectPsw = "";
+            v.active_DB.projectDBType = v.dBaseType.MSSQL;
 
-                        v.active_DB.projectDBType = v.dBaseType.MSSQL;
+            v.active_DB.projectConnectionText =
+                string.Format(" Data Source = {0}; Initial Catalog = {1}; User ID = {2}; {3} MultipleActiveResultSets = True ",
+                v.active_DB.projectServerName,
+                v.active_DB.projectDBName,
+                v.active_DB.projectUserName,
+                v.active_DB.projectPsw);
 
-                        v.active_DB.projectConnectionText =
-                            string.Format(" Data Source = {0}; Initial Catalog = {1}; User ID = {2}; {3} MultipleActiveResultSets = True ",
-                            v.active_DB.projectServerName,
-                            v.active_DB.projectDBName,
-                            v.active_DB.projectUserName,
-                            v.active_DB.projectPsw);
-
-                        v.active_DB.projectMSSQLConn = new SqlConnection(v.active_DB.projectConnectionText);
-                        v.active_DB.projectMSSQLConn.StateChange += new StateChangeEventHandler(DBConnectStateProject);
-                    }
-
-                    /// firm tablosunda YIL formatlı db bilgisi mevcut ise
-                    /// 
-                    if (fAbout.firmMainDBFormat != "")
-                    {
-                        //v.active_DB.firmMainDBName = "043_DUYSA_İNŞ_LTD_ŞTİ_GENEL";
-                        //v.active_DB.firmMainDBName = "test_GENEL";
-                        v.active_DB.firmMainDBName = fAbout.firmMainDBFormat.Replace("DBNAME", fAbout.firmDBName);
-                        v.active_DB.firmMainDBName = v.active_DB.firmMainDBName.Replace("YYYY", v.BUGUN_YIL.ToString());
-                        
-                        v.active_DB.firmMainServerName = fAbout.firmServerName; // "PCTEKIN\\SQLEXPRESS";
-                        v.active_DB.firmMainUserName = fAbout.firmLogin; //"sa";
-
-                        if (fAbout.firmPassword != "")
-                             v.active_DB.firmMainPsw = "Password = " + fAbout.firmPassword + ";"; // Password = zrvsql;
-                        else v.active_DB.firmMainPsw = "";
-
-                        v.active_DB.firmMainDBType = v.dBaseType.MSSQL;
-
-                        v.active_DB.firmMainConnectionText =
-                            string.Format(" Data Source = {0}; Initial Catalog = {1}; User ID = {2}; {3} MultipleActiveResultSets = True ",
-                            v.active_DB.firmMainServerName,
-                            v.active_DB.firmMainDBName,
-                            v.active_DB.firmMainUserName,
-                            v.active_DB.firmMainPsw);
-
-                        v.active_DB.firmMainMSSQLConn = new SqlConnection(v.active_DB.firmMainConnectionText);
-                        v.active_DB.firmMainMSSQLConn.StateChange += new StateChangeEventHandler(DBConnectStateFirmMain);
-                    }
-
-                    /// firm tablosunda YIL formatlı db bilgisi mevcut ise
-                    /// 
-                    if (fAbout.firmPeriodDBFormat != "")
-                    {
-                        //v.active_DB.firmPeriodDBName = "043_DUYSA_İNŞ_LTD_ŞTİ_2018";
-                        //v.active_DB.firmPeriodDBName = "test_2018";
-                        v.active_DB.firmPeriodDBName = fAbout.firmPeriodDBFormat.Replace("DBNAME", fAbout.firmDBName);
-                        v.active_DB.firmPeriodDBName = v.active_DB.firmPeriodDBName.Replace("YYYY", v.BUGUN_YIL.ToString());
-
-                        v.active_DB.firmPeriodServerName = fAbout.firmServerName; // "PCTEKIN\\SQLEXPRESS";
-                        v.active_DB.firmPeriodUserName = fAbout.firmLogin; //"sa";
-
-                        if (fAbout.firmPassword != "")
-                             v.active_DB.firmPeriodPsw = "Password = " + fAbout.firmPassword + ";"; // Password = 1;
-                        else v.active_DB.firmPeriodPsw = "";
-
-                        v.active_DB.firmPeriodDBType = v.dBaseType.MSSQL;
-
-                        v.active_DB.firmPeriodConnectionText =
-                            string.Format(" Data Source = {0}; Initial Catalog = {1}; User ID = {2}; {3} MultipleActiveResultSets = True ",
-                            v.active_DB.firmPeriodServerName,
-                            v.active_DB.firmPeriodDBName,
-                            v.active_DB.firmPeriodUserName,
-                            v.active_DB.firmPeriodPsw);
-
-                        v.active_DB.firmPeriodMSSQLConn = new SqlConnection(v.active_DB.firmPeriodConnectionText);
-                        v.active_DB.firmPeriodMSSQLConn.StateChange += new StateChangeEventHandler(DBConnectStateFirmPeriod);
-                    }
-
-                    /// firm tablosunda hiç bilgi verilmemiş ise
-                    /// 
-                    if ((fAbout.firmMainDBFormat == "") && 
-                        (fAbout.firmServerName == "") &&
-                        (fAbout.firmPeriodDBFormat == "") && 
-                        (fAbout.firmServerName == ""))
-                    {
-                        v.active_DB.projectServerName = "94.73.170.20";
-                        v.active_DB.projectDBName = "u7093888_MSV3GREENMS";
-                        v.active_DB.projectUserName = "u7093888_user4601";
-                        v.active_DB.projectPsw = "Password = CanBerk98;";
-                        v.active_DB.projectDBType = v.dBaseType.MSSQL;
-                        v.active_DB.projectConnectionText =
-                            string.Format(" Data Source = {0}; Initial Catalog = {1}; User ID = {2}; {3} MultipleActiveResultSets = True ",
-                            v.active_DB.projectServerName,
-                            v.active_DB.projectDBName,
-                            v.active_DB.projectUserName,
-                            v.active_DB.projectPsw);
-
-                        v.active_DB.projectMSSQLConn = new SqlConnection(v.active_DB.projectConnectionText);
-                        v.active_DB.projectMSSQLConn.StateChange += new StateChangeEventHandler(DBConnectStateProject);
-                    }
-
-
-
-                    break;
-                }
-                pos++;
-            }
+            v.active_DB.projectMSSQLConn = new SqlConnection(v.active_DB.projectConnectionText);
+            v.active_DB.projectMSSQLConn.StateChange += new StateChangeEventHandler(DBConnectStateProject);
         }
-
-        #region Aktif Firma Read
-        public void Aktif_Firma_Read()
-        {
-            if ((v.SP_FIRM_ID > 0) && (IsNotNull(v.SP_FIRM_NAME) == false))
-            {
-                string function_name = "Aktif Kurs";
-                string Sql =
-                    " Select * from [" + v.active_DB.projectDBName + "].dbo.[" + v.SP_FIRM_TABLENAME + "]" +
-                    " where " + v.SP_FIRM_TABLEKEYFNAME + " = " + v.SP_FIRM_ID.ToString();
-
-                //Data_Read_Execute(tForm, v.ds_Firm, ref Sql, v.SP_FIRM_TABLENAME, null);
-
-                if (IsNotNull(v.ds_Firm))
-                {
-                    v.SP_FIRM_NAME = v.ds_Firm.Tables[v.SP_FIRM_TABLENAME].Rows[0][v.SP_FIRM_TABLECAPTIONFNAME].ToString();
-                }
-                else
-                {
-                    v.SP_FIRM_NAME = "DİKKAT : TANIMSIZ KURS";
-                    MessageBox.Show(v.SP_FIRM_NAME, function_name);
-                }
-
-            }
-        }
-        #endregion Aktif Firma Read
 
         #endregion Firm İşlemleri
 
@@ -1852,7 +1355,12 @@ namespace Tkn_ToolBox
 
             // SQL içindeki " işaretleri ' ile değiştirilir
             //Sql = Sql.ToUpper();
-            Sql = Str_AntiCheck(Sql);
+            //MessageBox.Show(Sql.ToUpper().IndexOf("INSERT").ToString() + ";" + Sql.ToUpper().IndexOf("UPDATE").ToString());
+            //MessageBox.Show(Sql.ToUpper());
+            if ((Sql.ToUpper().IndexOf("INSERT") == -1) &&
+                (Sql.ToUpper().IndexOf("İNSERT") == -1) &&
+                (Sql.ToUpper().IndexOf("UPDATE") == -1))
+                 Sql = Str_AntiCheck(Sql);
 
             // Yukarıda toUpper yüzüunden join > JOİN şekline dönüşüyor
             //Str_Replace(ref Sql, "JOİN", "JOIN");
@@ -1863,53 +1371,18 @@ namespace Tkn_ToolBox
             //{
             //    v.Kullaniciya_Mesaj_Var = vt.TableIPCode;
             //}
-
-            if (vt.DBaseType == v.dBaseType.MySQL)
-            {
-                //Sql = Sql.ToLower();
-                Str_Replace(ref Sql, "begin transaction", "");
-                Str_Replace(ref Sql, "commit transaction", "");
-
-                // ID  Int IDENTITY(1,1) NOT NULL,
-                //`ID` INTEGER NOT NULL AUTO_INCREMENT,
-
-                Str_Replace(ref Sql, "Int IDENTITY(1,1) NOT NULL", "int not null auto_increment");
-
-                // ENGINE = InnoDB
-                // AUTO_INCREMENT = 1
-                // CHARACTER SET latin5 COLLATE latin5_turkish_ci
-                // ROW_FORMAT = DYNAMIC;
-
-                Str_Replace(ref Sql, "-- mysql_add",
-                    @" engine = innoDB  
-  auto_increment = 1  
-  character set latin5 collate latin5_turkish_ci 
-  row_format = dynamic; ");
-
-                //\r\n grant
-                Str_Replace(ref Sql, "grant", "-- grant");
-
-                //uniqueidentifier
-                Str_Replace(ref Sql, "uniqueidentifier", "varchar(50)");
-
-                Str_Replace(ref Sql, "smalldatetime", "datetime");
-                Str_Replace(ref Sql, "SmallDatetime", "datetime");
-                Str_Replace(ref Sql, "SmallDateTime", "datetime");
-                Str_Replace(ref Sql, "SMALLDATETIME", "datetime");
-
-            }
-
+                        
             Str_Replace(ref Sql, ":VT_FIRM_ID", v.SP_FIRM_ID.ToString());
             Str_Replace(ref Sql, ":FIRM_ID", v.SP_FIRM_ID.ToString());
-            Str_Replace(ref Sql, ":FIRM_USERLIST", v.SP_FIRM_USERLIST);
-            Str_Replace(ref Sql, ":FIRM_USER_LIST", v.SP_FIRM_USERLIST);
-            Str_Replace(ref Sql, ":FIRM_FULLLIST", v.SP_FIRM_FULLLIST);
-            Str_Replace(ref Sql, ":FIRM_FULL_LIST", v.SP_FIRM_FULLLIST);
+            //Str_Replace(ref Sql, ":FIRM_USERLIST", v.SP_FIRM_USERLIST);
+            //Str_Replace(ref Sql, ":FIRM_USER_LIST", v.SP_FIRM_USERLIST);
+            //Str_Replace(ref Sql, ":FIRM_FULLLIST", v.SP_FIRM_FULLLIST);
+            //Str_Replace(ref Sql, ":FIRM_FULL_LIST", v.SP_FIRM_FULLLIST);
 
             Str_Replace(ref Sql, ":VT_COMP_ID", v.tComp.SP_COMP_ID.ToString());
             Str_Replace(ref Sql, ":VT_PERIOD_ID", v.vt_PERIOD_ID.ToString());
-            Str_Replace(ref Sql, ":VT_USER_ID", v.tUser.SP_USER_ID.ToString());
-            Str_Replace(ref Sql, ":USER_ID", v.tUser.SP_USER_ID.ToString());
+            Str_Replace(ref Sql, ":VT_USER_ID", v.tUser.UserId.ToString());
+            Str_Replace(ref Sql, ":USER_ID", v.tUser.UserId.ToString());
 
             Str_Replace(ref Sql, ":BUGUN_YILAY", v.BUGUN_YILAY.ToString());
             Str_Replace(ref Sql, ":BUGUN_GUN", v.BUGUN_GUN.ToString());
@@ -1920,6 +1393,8 @@ namespace Tkn_ToolBox
             Str_Replace(ref Sql, ":GELECEL_YILAY", v.GELECEK_YILAY.ToString());
 
             Str_Replace(ref Sql, ":FORM_CODE", "'" + vt.FormCode + "'");
+            Str_Replace(ref Sql, ":MANAGER_DBNAME", v.active_DB.managerDBName);
+            Str_Replace(ref Sql, ":NEWFIRM_DBNAME", v.newFirm_DB.databaseName);
 
 
             //Str_Replace(ref Sql, "{gun}", v.BUGUN_GUN.ToString());
@@ -2001,19 +1476,6 @@ namespace Tkn_ToolBox
             if (Sql.IndexOf("<MSV3>") > -1)
             {
                 Str_Replace(ref Sql, "<MSV3>", "[" + v.active_DB.managerDBName.ToString() + "]");
-            }
-
-            //if (v.vt_USER_SHOP_LIST != "")
-            //    Str_Replace(ref Sql, ":VT_USER_SHOP_LIST", v.vt_USER_SHOP_LIST);
-            //if (v.vt_USER_SHOP_LIST == "")
-            //    Str_Replace(ref Sql, ":VT_USER_SHOP_LIST", "-1");
-
-            //    SQL = SQL.Replace("[", "");
-            //    SQL = SQL.Replace("]", "");
-            if (vt.DBaseType == v.dBaseType.MySQL)
-            {
-                Str_Replace(ref Sql, "[", "");
-                Str_Replace(ref Sql, "]", "");
             }
 
             return Sql;
@@ -2665,11 +2127,7 @@ namespace Tkn_ToolBox
             {
                 MessageBox.Show("DİKKAT : JSon paketi kontrol et, sorun mevcut...");
                 throw;
-                return null;
             }
-            
-
-            
         }
 
         #endregion JSON işlemleri
@@ -3197,18 +2655,6 @@ namespace Tkn_ToolBox
             Str_Replace(ref Veri, '½', (char)39);
 
             return Veri;
-            /*
-            string s = "";
-            for (int i = 0; i < Veri.Length; ++i)
-            {
-                if (Veri[i] != '"')
-                { s += Veri[i].ToString(); }
-                else
-                { s += "'"; };
-            }
-
-            return s;
-            */
         }
 
         #endregion Str_Check
@@ -3343,7 +2789,6 @@ namespace Tkn_ToolBox
             return onay;
         }
         #endregion IsDirectory
-
 
         #region UseDirectory
         public void UseDirectory(string pathName)
@@ -4034,9 +3479,6 @@ namespace Tkn_ToolBox
                         if ((v.active_DB.projectDBType == v.dBaseType.MSSQL) && (SetType == "and"))
                             MyStr = "Convert(Date, " + Field_Name + ", 103) " + Operand + Tarih_Formati(Convert.ToDateTime(fvalue)) + " ";
 
-                        if ((v.active_DB.projectDBType == v.dBaseType.MySQL) && (SetType == "and"))
-                            MyStr = "Convert(" + Field_Name + ", Date) " + Operand + Tarih_Formati(Convert.ToDateTime(fvalue)) + " ";
-
                         if (SetType == "as") MyStr = Tarih_Formati(Convert.ToDateTime(fvalue)) + " as " + Field_Name;
                         if (SetType == "@") MyStr = "@" + Field_Name + Operand + Tarih_Formati(Convert.ToDateTime(fvalue)) + " ";
                     }
@@ -4046,9 +3488,6 @@ namespace Tkn_ToolBox
 
                         if ((v.active_DB.projectDBType == v.dBaseType.MSSQL) && (SetType == "and"))
                             MyStr = "Convert(Date, " + Field_Name + ", 103) " + Operand + "Convert(Date,'01.01.1900', 103) ";
-
-                        if ((v.active_DB.projectDBType == v.dBaseType.MySQL) && (SetType == "and"))
-                            MyStr = "Convert(" + Field_Name + ", Date) " + Operand + "Convert('01.01.1900', Date) ";
 
                         if (SetType == "as") MyStr = "'01.01.1900'" + " as " + Field_Name;
                         if (SetType == "@") MyStr = "@" + Field_Name + Operand + "'01.01.1900'" + " ";
@@ -4181,9 +3620,6 @@ namespace Tkn_ToolBox
                 {
                     if (v.active_DB.projectDBType == v.dBaseType.MSSQL)
                         sonuc = " Convert(date, Convert(varchar(10)," + fname + ", 103), 104) ";  //  Tarih_Formati(Convert.ToDateTime(fvalue)) + " ";
-                                                                                                  //and convert(date, VP.BAS_TARIH, 104)
-                    if (v.active_DB.projectDBType == v.dBaseType.MySQL)
-                        sonuc = " Convert(" + fname + ", Date) ";
                 }
             }
 
@@ -5707,13 +5143,11 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
             /// 2. işlem
             /// 
-            SYS_Variables_Read();
-
-            /// 3. işlem 
-            /// SYS_COMPS ile HP_COMPS
-            /// SYS_USERS ile HP_USERS
-            /// SYS_FIRMS ile HP_FIRM arasındaki fark gideriliyor
-            HP_FIRM_Preparing();
+            //SYS_Variables_Read();
+            
+            /// 2022.02.26 HP_FIRM neden kullanlanılıyor hatırlamıyorum
+            /// 
+            ///HP_FIRM_Preparing();
 
             /// 4. İşlem 
             /// exe update varmı
@@ -5784,7 +5218,8 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
         public void SYS_Variables_Read()
         {
             /// SYS_VARIABLES list
-            /// 
+            ///
+            /*
             if (v.active_DB.managerDBName != "SystemMS")
             {
                 tSQLs sql = new tSQLs();
@@ -5794,6 +5229,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 if (IsNotNull(Sql))
                     SQL_Read_Execute(v.dBaseNo.Project, v.ds_Variables, ref Sql, "SYS_VARIABLES_LIST", "");
             }
+            */
         }
 
         public void HP_UPDATE_Preparing()
@@ -5847,94 +5283,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             }
         }
 
-
-        public void HP_FIRM_Preparing()
-        {
-            DataSet ds_Query = new DataSet();
-            tSQLs sql = new tSQLs();
-
-            string execSql = string.Empty;
-            string tSql = sql.SQL_SYS_FIRM_List(v.SP_FIRM_GUID, v.tFirmListType.AllFirm);
-
-            SQL_Read_Execute(v.dBaseNo.Manager, ds_Query, ref tSql, "SYS_FIRMS", "FirmList");
-
-            /*
-              Select 
-              distinct f.[ID]
-                      ,f.[PARENT_ID]
-                      ,f.[REF_ID]
-                      ,f.[PARENT_REF_ID]
-                      ,f.[ISACTIVE]
-                      ,f.LOCAL_TD
-                      ,f.[FIRM_GUID]
-                      ,f.[FIRM_CODE]
-                      ,f.[FIRM_NAME]
-                      ,f.[FIRM_LONG_NAME1]
-                      ,f.[FIRM_LONG_NAME2]
-
-                  from CTE c
-                     left outer join SYS_FIRMS f on(c.U_ID = f.ID)
-            */
-
-            tSql = "";
-            string s = "";
-            string ffl = "";
-            int fId = 0;
-            string fName = "";
-            string fGuid = "";
-            v.SP_FIRM_FULLLIST = "";
-
-            foreach (DataRow row in ds_Query.Tables[0].Rows)
-            {
-                s = Sql_HP_FIRM_Insert(
-                   myInt16(row["ISACTIVE"].ToString())
-                 , row["FIRM_GUID"].ToString()
-                 , row["LOCAL_TD"].ToString()
-                 , row["ID"].ToString()          // LOCAL_ID 
-                 , row["PARENT_ID"].ToString()
-                 , row["FIRM_NAME"].ToString());
-
-                // firma kontrol cümlesi
-                //
-                execSql = execSql + s + v.ENTER;
-
-                // Tüm grup FIRMA ıd leri toplanıyor 
-                ffl = ffl + row["ID"].ToString() + ", ";
-
-                //
-                fId = myInt32(row["ID"].ToString());
-                fName = row["FIRM_NAME"].ToString();
-                fGuid = row["FIRM_GUID"].ToString();
-
-                // hafızada kalsın diye bilgiler toplanıyor
-                FirmAbout tFirmAbout = new FirmAbout();
-                tFirmAbout.FirmId = fId;
-                tFirmAbout.FirmName = fName;
-                tFirmAbout.FirmGuid = fGuid;
-                v.tFirmFullList.Add(tFirmAbout);
-            }
-
-            // comp / bilgisayar kontrol cumlesi
-            //
-            execSql = execSql + v.ENTER + Sql_HP_COMPS();
-
-            // users kontrol cümlesi
-            //
-            execSql = execSql + v.ENTER + Sql_HP_USERS();
-
-
-            if (IsNotNull(execSql))
-            {
-                // en sondaki virgülü sil
-                tLast_Char_Remove(ref ffl);
-                v.SP_FIRM_FULLLIST = ffl;
-
-                //execSql = " begin transaction \r\n " + execSql + " commit transaction "; 
-
-                SQL_Read_Execute(v.dBaseNo.Project, ds_Query, ref execSql, "HP_FIRM", "HP_FIRMS_INS_UPD");
-            }
-        }
-
+                
         private string Sql_HP_COMPS()
         {
             string s = "";
@@ -5980,9 +5329,6 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 )
             end    ";
 
-            if (v.active_DB.projectDBType == v.dBaseType.MySQL)
-                s = "";
-
             return s;
         }
 
@@ -5996,23 +5342,23 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 s = @"
             if ( select count(*) ADET from HP_USERS
                  where ID > 0 
-                 and  USER_EMAIL = '" + v.tUser.SP_USER_EMAIL + @"'
-                 and ( ISACTIVE <> " + v.tUser.SP_USER_ISACTIVE.ToString() + @"
-                   or  USER_FIRM_GUID <> '" + v.tUser.SP_USER_FIRM_GUID + @"'
-                   or  USER_FIRSTNAME <> '" + v.tUser.SP_USER_FIRSTNAME + @"' 
-                   or  USER_LASTNAME <> '" + v.tUser.SP_USER_LASTNAME + @"'
+                 and  USER_EMAIL = '" + v.tUser.eMail + @"'
+                 and ( ISACTIVE <> " + v.tUser.IsActive.ToString() + @"
+                   or  USER_FIRM_GUID <> '" + v.tUser.UserFirmGUID + @"'
+                   or  USER_FIRSTNAME <> '" + v.tUser.FirstName + @"' 
+                   or  USER_LASTNAME <> '" + v.tUser.LastName + @"'
             )) = 1
             begin
               UPDATE HP_USERS
-              SET ISACTIVE = " + v.tUser.SP_USER_ISACTIVE.ToString() + @"
-                 ,USER_FIRM_GUID = '" + v.tUser.SP_USER_FIRM_GUID + @"'
-                 ,USER_FIRSTNAME = '" + v.tUser.SP_USER_FIRSTNAME + @"'
-                 ,USER_LASTNAME = '" + v.tUser.SP_USER_LASTNAME + @"' 
-              WHERE USER_EMAIL = '" + v.tUser.SP_USER_EMAIL + @"'
+              SET ISACTIVE = " + v.tUser.IsActive.ToString() + @"
+                 ,USER_FIRM_GUID = '" + v.tUser.UserFirmGUID + @"'
+                 ,USER_FIRSTNAME = '" + v.tUser.FirstName + @"'
+                 ,USER_LASTNAME = '" + v.tUser.LastName + @"' 
+              WHERE USER_EMAIL = '" + v.tUser.eMail + @"'
             end
 
             if ( select count(*) ADET from HP_USERS
-                 where USER_EMAIL = '" + v.tUser.SP_USER_EMAIL + @"'
+                 where USER_EMAIL = '" + v.tUser.eMail + @"'
             ) = 0
             begin
               INSERT INTO HP_USERS
@@ -6026,20 +5372,17 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 ,USER_EMAIL
                 ,REC_DATE)
               VALUES
-                (" + v.tUser.SP_USER_ID.ToString() + @"
-                ,'" + v.tUser.SP_USER_FIRM_GUID + @"'
+                (" + v.tUser.UserId.ToString() + @"
+                ,'" + v.tUser.UserFirmGUID + @"'
                 ,1
-                ,'" + v.tUser.SP_USER_GUID + @"'
-                ,'" + v.tUser.SP_USER_FULLNAME + @"'
-                ,'" + v.tUser.SP_USER_FIRSTNAME + @"'
-                ,'" + v.tUser.SP_USER_LASTNAME + @"'
-                ,'" + v.tUser.SP_USER_EMAIL + @"'
+                ,'" + v.tUser.UserGUID + @"'
+                ,'" + v.tUser.FullName + @"'
+                ,'" + v.tUser.FirstName + @"'
+                ,'" + v.tUser.LastName + @"'
+                ,'" + v.tUser.eMail + @"'
                 ,getdate()
                 )
             end     ";
-
-            if (v.active_DB.projectDBType == v.dBaseType.MySQL)
-                s = "";
 
             return s;
         }
@@ -6095,31 +5438,6 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                   WHERE FIRM_GUID = '" + myGuid + @"'
                 end  ";
 
-            if (v.active_DB.projectDBType == v.dBaseType.MySQL)
-                s = @"
-                  insert into HP_FIRMS ( 
-                       ISACTIVE, 
-                       REC_DATE, 
-                       FIRM_GUID, 
-                       LOCAL_TD, 
-                       LOCAL_ID, 
-                       PARENT_ID, 
-                       FIRM_NAME,
-                       HP_NAME
-                       ) 
-                   select 1 , curdate() 
-                      , '" + myGuid + @"'
-                      ,  " + localTd + @"
-                      ,  " + firmId + @"
-                      ,  " + parentId + @"
-                      , '" + firmName + @"'
-                      , '" + firmName + @"' 
-                   from HP_FIRMS   
-                   where not exists 
-                   ( Select count(*) ADET from [HP_FIRMS] where 0 = 0 
-                     and [FIRM_GUID] = '" + myGuid + @"' )  
-                   limit 1;
-            ";
 
             ///*       -- update
 
@@ -6432,534 +5750,6 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
         }
 
         #endregion Computer MOS
-
-        #region TableFind
-
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="tableName"></param>
-        public void tTableFind(string tableName)
-        {
-            String Sql = "";
-
-            // Gerekli olan verileri topla
-            DataSet ds = new DataSet();
-            vTable vt = new vTable();
-
-            if (v.active_DB.runDBaseNo == v.dBaseNo.Manager)
-            {
-                vt.DBaseNo = v.active_DB.managerDBaseNo;
-                vt.DBaseType = v.active_DB.managerDBType;
-                vt.DBaseName = v.active_DB.managerDBName;
-            }
-
-            if (v.active_DB.runDBaseNo == v.dBaseNo.Project)
-            {
-                vt.DBaseNo = v.active_DB.projectDBaseNo;
-                vt.DBaseType = v.active_DB.projectDBType;
-                vt.DBaseName = v.active_DB.projectDBName;
-            }
-
-            if (vt.DBaseType == v.dBaseType.MSSQL)
-            {
-                Sql = string.Format(" select * from {0}.sys.tables where name = '{1}' ", vt.DBaseName, tableName);
-
-                vt.msSqlConnection = v.active_DB.projectMSSQLConn;
-            }
-
-            if (vt.DBaseType == v.dBaseType.MySQL)
-            {
-                Sql = string.Format(" SHOW FULL TABLES FROM {0} where Tables_in_{1} = '{2}'", vt.DBaseName, vt.DBaseName, tableName);
-
-                vt.mySqlConnection = v.active_DB.projectMySQLConn;
-            }
-
-            SQL_Read_Execute(vt.DBaseNo, ds, ref Sql, "", "Table Find");
-
-            if (IsNotNull(ds) == false)
-            {
-                MessageBox.Show(tableName + " tablosu yok, oluşturulacak...");
-
-                tTableCreate(tableName, vt);
-            }
-            //else MessageBox.Show(tableName + " tablosu mevcut");
-
-            ds.Dispose();
-        }
-
-        private void tTableCreate(string tableName, vTable vt)
-        {
-            string fname = string.Empty;
-            Boolean filenotfound = false;
-
-            try
-            {
-                fname = v.EXE_PATH + "\\VT_MSSQL\\" + tableName + ".txt";
-                if (File.Exists(@"" + fname))
-                {
-                    //FileStream fileStream = new FileStream(@"" + fname, FileMode.Open, FileAccess.Read);
-
-                    DataSet ds = new DataSet();
-                    string Sql = null;
-                    System.IO.TextReader readFile = new StreamReader(@"" + fname);
-                    Sql = readFile.ReadToEnd();
-
-                    if (Sql_ExecuteNon(ds, ref Sql, vt))
-                    {
-                        MessageBox.Show("Başarıyla tablo açıldı : " + tableName);
-                    }
-
-                    readFile.Close();
-                    readFile = null;
-                    filenotfound = false;
-                    ds.Dispose();
-                }
-                else filenotfound = true;
-
-                if (filenotfound == true)
-                {
-                    MessageBox.Show("File not found : " + fname);
-                }
-            }
-            catch
-            { }
-
-        }
-
-        public void tTableUpdate(string DatabaseName, string FileName, SqlConnection SqlConn)
-        {
-            string fname = v.EXE_PATH + "\\VT_MSSQL\\" + FileName + ".txt";
-
-            try
-            {
-                if (File.Exists(@"" + fname))
-                {
-                    //FileStream fileStream = new FileStream(@"" + fname, FileMode.Open, FileAccess.Read);
-
-                    DataSet ds = new DataSet();
-                    string Sql = null;
-                    System.IO.TextReader readFile = new StreamReader(@"" + fname);
-                    Sql = readFile.ReadToEnd();
-                    if (Sql.Length > 20)
-                    {
-                        //if (db.SQL_ExecuteNon(VTConnect, ref s, "TableUpdate"))
-                        if (SQL_ExecuteNon(SqlConn, ds, ref Sql, "tTableUpdate"))
-                        {
-                            //MessageBox.Show("Update başarıyla gerçekleşti : " + FileName);
-                        }
-                    }
-                    readFile.Close();
-                    readFile = null;
-                    ds.Dispose();
-                }
-                else
-                {
-                    MessageBox.Show("File not found : " + fname);
-                }
-            }
-            catch
-            { }
-        }
-
-        public void tTable_FieldAdd(string DatabaseName, string TableName, string FieldName, string FieldType, SqlConnection SqlConn)
-        {
-            string Sql =
-            @" IF not EXISTS (     
-                 select  
-                 a.column_id, a.name, 
-                 convert(smallInt, a.system_type_id) system_type_id, 
-                 convert(smallInt, a.user_type_id) user_type_id, 
-                 a.max_length, a.precision, a.scale, a.is_nullable, a.is_identity 
-                 from 
-                 [" + DatabaseName + @"].sys.columns a,  
-                 [" + DatabaseName + @"].sys.tables b 
-                 where b.object_id = a.object_id 
-                 and   b.name = '" + TableName + @"'
-                 and   a.name = '" + FieldName + @"' 
-                 )
-                 begin
-                   ALTER TABLE " + TableName + @" ADD " + FieldName + @" " + FieldType + @" NULL 
-                 end
-                 ";
-
-            DataSet ds = new DataSet();
-
-            SQL_ExecuteNon(SqlConn, ds, ref Sql, "tTable_FieldAdd");
-
-            ds.Dispose();
-
-        }
-
-        public void tTable_FieldNameChange(string DatabaseName, string Table_Name,
-                    string OldFieldName, string NewFieldName, SqlConnection SqlConn)
-        {
-            string Sql =
-            @"
-            IF EXISTS (
-              select a.column_id, a.name, 
-                     convert(smallInt, a.system_type_id) system_type_id, 
-                     convert(smallInt, a.user_type_id) user_type_id, 
-                     a.max_length, a.precision, a.scale, a.is_nullable, a.is_identity 
-                     from 
-                     [" + DatabaseName + @"].sys.columns a,  
-                     [" + DatabaseName + @"].sys.tables b 
-                     where b.object_id = a.object_id 
-                     and   b.name = '" + Table_Name + @"' 
-                     and   a.name = '" + OldFieldName + @"'
-            )  
-            begin
-              USE " + DatabaseName + @"
-              EXEC sp_rename '" + Table_Name + @"." + OldFieldName + @"', '" + NewFieldName + @"', 'COLUMN';
-            end
-             ";
-
-            DataSet ds = new DataSet();
-
-            SQL_ExecuteNon(SqlConn, ds, ref Sql, "tTable_FieldNameChange");
-
-            ds.Dispose();
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="procedureName"></param>
-        public void tStoredProceduresFind(string procedureName)
-        {
-            String Sql = "";
-
-            // Gerekli olan verileri topla
-            DataSet ds = new DataSet();
-            vTable vt = new vTable();
-
-            if (v.active_DB.runDBaseNo == v.dBaseNo.Manager)
-            {
-                vt.DBaseNo = v.active_DB.managerDBaseNo;
-                vt.DBaseType = v.active_DB.managerDBType;
-                vt.DBaseName = v.active_DB.managerDBName;
-            }
-
-            if (v.active_DB.runDBaseNo == v.dBaseNo.Project)
-            {
-                vt.DBaseNo = v.active_DB.projectDBaseNo;
-                vt.DBaseType = v.active_DB.projectDBType;
-                vt.DBaseName = v.active_DB.projectDBName;
-            }
-
-            if (vt.DBaseType == v.dBaseType.MSSQL)
-            {
-                Sql = string.Format(" select * from {0}.sys.procedures where name = '{1}' ", vt.DBaseName, procedureName);
-
-                vt.msSqlConnection = v.active_DB.projectMSSQLConn;
-            }
-
-            if (vt.DBaseType == v.dBaseType.MySQL)
-            {
-                Sql = string.Format(" SHOW PROCEDURE STATUS Where Name = '{0}' ", procedureName);
-
-                vt.mySqlConnection = v.active_DB.projectMySQLConn;
-            }
-
-            SQL_Read_Execute(vt.DBaseNo, ds, ref Sql, "", "Procedure Find");
-
-            if (IsNotNull(ds) == false)
-            {
-                MessageBox.Show(procedureName + " Stored Procedure yok, oluşturulacak...");
-
-                tStoredProcedureCreate(procedureName, vt);
-            }
-            //else MessageBox.Show(tableName + " tablosu mevcut");
-
-            ds.Dispose();
-
-        }
-
-        private void tStoredProcedureCreate(string procedureName, vTable vt)
-        {
-            string fname = string.Empty;
-            Boolean filenotfound = false;
-
-            try
-            {
-                fname = v.EXE_PATH + "\\VT_MSSQL\\" + procedureName + ".txt";
-                if (File.Exists(@"" + fname))
-                {
-                    //FileStream fileStream = new FileStream(@"" + fname, FileMode.Open, FileAccess.Read);
-
-                    DataSet ds = new DataSet();
-                    string Sql = null;
-                    System.IO.TextReader readFile = new StreamReader(@"" + fname);
-                    Sql = readFile.ReadToEnd();
-
-                    int bgn = 0;
-                    int end = 0;
-
-                    if (vt.DBaseType == v.dBaseType.MSSQL)
-                    {
-                        bgn = Sql.IndexOf("CREATE PROCEDURE");
-                        end = Sql.IndexOf("END;");
-                        Sql = Sql.Substring(bgn, (end - bgn) + 3);
-                    }
-
-                    if (vt.DBaseType == v.dBaseType.MySQL)
-                    {
-                        bgn = Sql.IndexOf("DELIMITER $$");
-                        end = Sql.IndexOf("END $$;");
-                        Sql = Sql.Substring(bgn, (end - bgn) + 7);
-                    }
-
-
-
-                    if (Sql_ExecuteNon(ds, ref Sql, vt))
-                    {
-                        MessageBox.Show("Başarıyla Stored Procedure açıldı : " + procedureName);
-                    }
-
-                    readFile.Close();
-                    readFile = null;
-                    filenotfound = false;
-                    ds.Dispose();
-                }
-                else filenotfound = true;
-
-                if (filenotfound == true)
-                {
-                    MessageBox.Show("File not found : " + fname);
-                }
-            }
-            catch
-            { }
-
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="triggerName"></param>
-        public void tTriggerFind(string triggerName)
-        {
-            String Sql = "";
-
-            // Gerekli olan verileri topla
-            DataSet ds = new DataSet();
-            vTable vt = new vTable();
-
-            if (v.active_DB.runDBaseNo == v.dBaseNo.Manager)
-            {
-                vt.DBaseNo = v.active_DB.managerDBaseNo;
-                vt.DBaseType = v.active_DB.managerDBType;
-                vt.DBaseName = v.active_DB.managerDBName;
-            }
-
-            if (v.active_DB.runDBaseNo == v.dBaseNo.Project)
-            {
-                vt.DBaseNo = v.active_DB.projectDBaseNo;
-                vt.DBaseType = v.active_DB.projectDBType;
-                vt.DBaseName = v.active_DB.projectDBName;
-            }
-
-            if (vt.DBaseType == v.dBaseType.MSSQL)
-            {
-                Sql = string.Format(" select * from {0}.sys.triggers where name = '{1}' ", vt.DBaseName, triggerName);
-
-                vt.msSqlConnection = v.active_DB.projectMSSQLConn;
-            }
-
-            if (vt.DBaseType == v.dBaseType.MySQL)
-            {
-                Sql = string.Format(" SHOW TRIGGERS like = '%{0}%' ", triggerName);
-
-                vt.mySqlConnection = v.active_DB.projectMySQLConn;
-            }
-
-            SQL_Read_Execute(vt.DBaseNo, ds, ref Sql, "", "Trigger Find");
-
-            if (IsNotNull(ds) == false)
-            {
-                MessageBox.Show(triggerName + " Trigger yok, oluşturulacak...");
-
-                tTriggerCreate(triggerName, vt);
-            }
-            //else MessageBox.Show(tableName + " tablosu mevcut");
-
-            ds.Dispose();
-
-        }
-
-        private void tTriggerCreate(string triggerName, vTable vt)
-        {
-            string fname = string.Empty;
-            Boolean filenotfound = false;
-
-            try
-            {
-                fname = v.EXE_PATH + "\\VT_MSSQL\\" + triggerName + ".txt";
-                if (File.Exists(@"" + fname))
-                {
-                    //FileStream fileStream = new FileStream(@"" + fname, FileMode.Open, FileAccess.Read);
-
-                    DataSet ds = new DataSet();
-                    string Sql = null;
-                    System.IO.TextReader readFile = new StreamReader(@"" + fname);
-                    Sql = readFile.ReadToEnd();
-
-                    int bgn = 0;
-                    int end = 0;
-
-                    if (vt.DBaseType == v.dBaseType.MSSQL)
-                    {
-                        bgn = Sql.IndexOf("CREATE TRIGGER");
-                        end = Sql.IndexOf("END;");
-                        Sql = Sql.Substring(bgn, (end - bgn) + 3);
-                    }
-
-                    if (vt.DBaseType == v.dBaseType.MySQL)
-                    {
-                        bgn = Sql.IndexOf("DELIMITER $$");
-                        end = Sql.IndexOf("END $$;");
-                        Sql = Sql.Substring(bgn, (end - bgn) + 7);
-                    }
-
-
-
-                    if (Sql_ExecuteNon(ds, ref Sql, vt))
-                    {
-                        MessageBox.Show("Başarıyla Trigger açıldı : " + triggerName);
-                    }
-
-                    readFile.Close();
-                    readFile = null;
-                    filenotfound = false;
-                    ds.Dispose();
-                }
-                else filenotfound = true;
-
-                if (filenotfound == true)
-                {
-                    MessageBox.Show("File not found : " + fname);
-                }
-            }
-            catch
-            { }
-
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="tableName"></param>
-        public void tPreparingData(string tableName)
-        {
-            String Sql = "";
-
-            // Gerekli olan verileri topla
-            DataSet ds = new DataSet();
-            vTable vt = new vTable();
-
-            tableName = tableName.Replace("data_", "");
-
-            if (v.active_DB.runDBaseNo == v.dBaseNo.Project)
-            {
-                vt.DBaseNo = v.active_DB.projectDBaseNo;
-                vt.DBaseType = v.active_DB.projectDBType;
-                vt.DBaseName = v.active_DB.projectDBName;
-            }
-
-            if (vt.DBaseType == v.dBaseType.MSSQL)
-            {
-                Sql = string.Format(" select count(*) ADET from {0}.dbo.{1} ", vt.DBaseName, tableName);
-
-                if (tableName == "SYS_TYPES_L")
-                    Sql = @" select count(ID) ADET from  SYS_TYPES_L where TYPES_NAME not like 'ICRA_%' and TYPES_NAME not like 'AVK_%' ";
-
-                if (tableName == "SYS_TYPES_L_AVK")
-                    Sql = @" select count(ID) ADET from  SYS_TYPES_L where TYPES_NAME like 'ICRA_%' or TYPES_NAME like 'AVK_%' ";
-
-                vt.msSqlConnection = v.active_DB.projectMSSQLConn;
-            }
-
-
-            SQL_Read_Execute(vt.DBaseNo, ds, ref Sql, "", "Preparing Data");
-
-            if (IsNotNull(ds))
-            {
-                if (ds.Tables[0].Rows[0][0].ToString() == "0")
-                {
-                    MessageBox.Show(tableName + " tablosunda DATA yok, eklenecek...");
-
-                    tDataInsert(tableName, vt);
-                }
-            }
-            //else MessageBox.Show("olmadı");
-
-            ds.Dispose();
-        }
-
-        private void tDataInsert(string tableName, vTable vt)
-        {
-            string fname = string.Empty;
-            Boolean filenotfound = false;
-
-            try
-            {
-                fname = v.EXE_PATH + "\\VT_MSSQL\\" + "data_" + tableName + ".txt";
-                if (File.Exists(@"" + fname))
-                {
-                    //FileStream fileStream = new FileStream(@"" + fname, FileMode.Open, FileAccess.Read);
-
-                    DataSet ds = new DataSet();
-                    string Sql = null;
-                    //StreamReader reader = new StreamReader(fileStream, Encoding.GetEncoding("iso-8859-9"), false);
-                    // türkçe sorunu çözüldü
-                    System.IO.TextReader readFile = new StreamReader(@"" + fname, Encoding.GetEncoding("iso-8859-9"), false);
-                    //System.IO.TextReader readFile = new StreamReader(@"" + fname);
-
-                    Sql = readFile.ReadToEnd();
-
-                    int bgn = 0;
-                    int end = 0;
-
-                    if (vt.DBaseType == v.dBaseType.MSSQL)
-                    {
-                        bgn = Sql.IndexOf("-- INSERT_BEGIN;");
-                        end = Sql.IndexOf("-- INSERT_END;");
-                        Sql = Sql.Substring(bgn, (end - bgn) + 3);
-                    }
-
-                    if (vt.DBaseType == v.dBaseType.MySQL)
-                    {
-                        bgn = Sql.IndexOf("DELIMITER $$");
-                        end = Sql.IndexOf("END $$;");
-                        Sql = Sql.Substring(bgn, (end - bgn) + 7);
-                    }
-
-
-
-                    if (Sql_ExecuteNon(ds, ref Sql, vt))
-                    {
-                        MessageBox.Show("Data başarıyla eklendi : " + tableName);
-                    }
-
-                    readFile.Close();
-                    readFile = null;
-                    filenotfound = false;
-                    ds.Dispose();
-                }
-                else filenotfound = true;
-
-                if (filenotfound == true)
-                {
-                    MessageBox.Show("File not found : " + fname);
-                }
-            }
-            catch
-            { }
-
-        }
-        
-        #endregion
 
         #region  Create_PropertiesEdit_Model_JSON
         public string Create_PropertiesEdit_Model_JSON(string TableName, string Main_FieldName)
@@ -8458,25 +7248,12 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             if ((DatabaseName.ToUpper() == v.active_DB.projectDBName.ToUpper()) || (DatabaseName == "3") ||
                 (DatabaseName == ""))
                 dbNo = (byte)v.dBaseNo.Project;
-
-            //  firm main adı
-            if ((DatabaseName.ToUpper() == v.active_DB.firmMainDBName.ToUpper()) || (DatabaseName == "5"))
-                dbNo = (byte)v.dBaseNo.FirmMainDB;
-
-            //  firm period adı
-            if ((DatabaseName.ToUpper() == v.active_DB.firmPeriodDBName.ToUpper()) || (DatabaseName == "6"))
-                dbNo = (byte)v.dBaseNo.FirmMainDB;
-
-
+            
             /*
             insert into MS_TYPES values ( 1, 0, 'DB_TYPE',  0, '', 'none');
             insert into MS_TYPES values ( 1, 0, 'DB_TYPE',  1, '', 'master');
             insert into MS_TYPES values ( 1, 0, 'DB_TYPE',  2, '', 'ManagerServer');
             insert into MS_TYPES values ( 1, 0, 'DB_TYPE',  3, '', 'Proje');
-            insert into MS_TYPES values ( 1, 0, 'DB_TYPE',  4, '', 'MainManagerServer');
-            insert into MS_TYPES values ( 1, 0, 'DB_TYPE',  5, '', 'Firm Main DB');
-            insert into MS_TYPES values ( 1, 0, 'DB_TYPE',  6, '', 'Firm Period DB');
-
             */
 
             if (dbNo != 0)
@@ -8505,35 +7282,23 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 s = v.db_MASTER_DBNAME;
 
             //  "MANAGERSERVER"
-            if ((DatabaseName.ToUpper() == v.active_DB.managerDBName.ToUpper()) ||
+            if ((v.active_DB.managerDBName.ToUpper().IndexOf(DatabaseName.ToUpper()) > -1) ||
                 (DatabaseName == v.dBaseNo.Manager.ToString()) ||
                 (DatabaseName == "2"))
                 s = v.active_DB.managerDBName;
 
-            //  "MAINMANAGERSERVER"
-            if ((DatabaseName.ToUpper() == v.db_MAINMANAGER_DBNAME.ToUpper()) ||
+            //  "UstadCRM"
+            if ((v.active_DB.ustadCrmDBName.ToUpper().IndexOf(DatabaseName.ToUpper()) > -1)  ||
                 (DatabaseName == "3"))
-                s = v.db_MAINMANAGER_DBNAME;
+                s = v.active_DB.ustadCrmDBName;
 
             //  proje adı
-            if ((DatabaseName.ToUpper() == v.active_DB.projectDBName.ToUpper()) ||
+            if ((v.active_DB.projectDBName.ToUpper().IndexOf(DatabaseName.ToUpper()) > -1) ||
                 (DatabaseName == v.dBaseNo.Project.ToString()) ||
                 (DatabaseName == "4") ||
                 (DatabaseName == ""))
                 s = v.active_DB.projectDBName;
-
-            //  firm Main DBaseName
-            if ((DatabaseName.ToUpper() == v.active_DB.firmMainDBName.ToUpper()) ||
-                (DatabaseName == v.dBaseNo.FirmMainDB.ToString()) ||
-                (DatabaseName == "5"))
-                s = v.active_DB.firmMainDBName;
-
-            //  firm Period DBaseName
-            if ((DatabaseName.ToUpper() == v.active_DB.firmPeriodDBName.ToUpper()) ||
-                (DatabaseName == v.dBaseNo.FirmPeriodDB.ToString()) ||
-                (DatabaseName == "6"))
-                s = v.active_DB.firmPeriodDBName;
-
+                        
             if (IsNotNull(s))
             {
                 return s;
@@ -9018,89 +7783,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
         {
 
             return true;
-            /*
-            bool onay = false;
-
-            int i1 = dsData.Tables.Count;
-            int i2 = 0;
-            int i3 = 0;
-            string fields = "_FIELDS";
-            string myProp = dsData.Namespace.ToString();
-            string TableIPCode = Set(MyProperties_Get(myProp, "=TableIPCode:"), "", "");
-            string Table_Name = Set(MyProperties_Get(myProp, "=TableName:"), "", "TABLE1");
-            
-            if (Table_Name.IndexOf("SNL_") > -1)
-                return onay;
-
-            if (i1 == 1)
-            {
-                string FieldsListSQL = Set(MyProperties_Get(myProp, "=FieldsListSQL:"), "", "");
-                string sqlA = string.Empty;
-                string sqlB = string.Empty;
-
-                if (FieldsListSQL.IndexOf("|ds|") > 0)
-                    String_Parcala(FieldsListSQL, ref sqlA, ref sqlB, "|ds|");
-                
-                if (SqlConn == null)
-                {
-                    byte DBaseNo = Set(MyProperties_Get(myProp, "=DBaseNo:"), "", (byte)3);
-                    MessageBox.Show("eksik : Find_TableFields");
-                    SqlConn = null; //Find_DBConn(DBaseNo.ToString());
-                }
-
-                if ((FieldsListSQL != "") &&
-                    (FieldsListSQL != "null") &&
-                    (FieldsListSQL != "report") &&
-                    (FieldsListSQL != "param"))
-                {
-                    SqlDataAdapter adapter = null;
-
-                    if (sqlA != string.Empty)
-                    {
-                        adapter = new SqlDataAdapter(sqlA, SqlConn);
-                        adapter.Fill(dsData, Table_Name + fields);
-                    }
-
-                    if (sqlB != string.Empty)
-                    {
-                        //= TableIPCode:3S_MSTBL.3S_MSTBL_02;
-
-                        //if (TableIPCode.IndexOf("3S_") == -1)
-                            adapter = new SqlDataAdapter(sqlB, v.SP_Conn_Manager_MSSQL);
-                        //else adapter = new SqlDataAdapter(sqlB, v.SP_Conn_MainManager_MSSQL);
-
-                        adapter.Fill(dsData, Table_Name + fields + "2");
-                    }
-
-                    if ((sqlA == string.Empty) &&
-                        (sqlB == string.Empty))
-                    {
-                        adapter = new SqlDataAdapter(FieldsListSQL, SqlConn);
-                        adapter.Fill(dsData, Table_Name + fields);
-                    }
-
-                    adapter.Dispose();
-                }
-
-            }
-            
-            if (i1 > 1)
-            {
-                string tname = dsData.Tables[1].TableName;
-                // field tablosu mevcut mu
-                i2 = tname.IndexOf(fields);
-                // field listesi mevcut mu
-                i3 = dsData.Tables[1].Rows.Count;
-                
-                if (i3 == 0)
-                    MessageBox.Show("DİKKAT : " + Table_Name + " isimli tablonun field listesi bulunamadı ... " + v.ENTER2 +
-                                    "( dsData["+ Table_Name + "_FIELDS].Rows.Count = 0 )", "");
-
-                if ((i2 > 0) && (i3 > 0)) onay = true;
-            }
-
-            return onay;
-            */
+            // buradaki kodlar zaten kapılmıştı sildim.
         }
 
         public int Find_Field_Type_Id(DataSet dsData, string fieldName, ref string displayFormat)
@@ -9779,7 +8462,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                             i5 = ((DevExpress.XtraBars.Navigation.TileNavCategory)tnPane.Buttons[i2].Element).Items.Count;
 
                             for (int i4 = 0; i4 < i5; i4++)
-                            {
+                            {                                
                                 iname = ((DevExpress.XtraBars.Navigation.TileNavCategory)tnPane.Buttons[i2].Element).Items[i4].Name.ToString();
                                 if (iname == buttonName)
                                 {
@@ -9977,6 +8660,38 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             return tableIPCode;
         }
 
+        public int Find_TabControlPageIndex(Control c)
+        {
+            int pageNo = 0;
+
+            if (c != null)
+            {
+                #region XtraTab.XtraTabControl
+                if (c.GetType().ToString() == "DevExpress.XtraTab.XtraTabControl")
+                {
+                    pageNo = ((DevExpress.XtraTab.XtraTabControl)c).SelectedTabPageIndex;
+                }
+                #endregion
+
+                #region Navigation.NavigationPane
+                if (c.GetType().ToString() == "DevExpress.XtraBars.Navigation.NavigationPane")
+                {
+                    pageNo = ((DevExpress.XtraBars.Navigation.NavigationPane)c).SelectedPageIndex;
+                }
+                #endregion
+
+                #region Navigation.TabPane
+                if (c.GetType().ToString() == "DevExpress.XtraBars.Navigation.TabPane")
+                {
+                    pageNo = ((DevExpress.XtraBars.Navigation.TabPane)c).SelectedPageIndex;
+                }
+                #endregion
+            }
+
+            return pageNo;
+        }
+
+
         #endregion Diğerleri <<
 
         #endregion Find Functions
@@ -10005,8 +8720,6 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
                 if (v.active_DB.projectDBType == v.dBaseType.MSSQL)
                     s = " Convert(Date, '" + t + "', 103) ";
-                if (v.active_DB.projectDBType == v.dBaseType.MySQL)
-                    s = " Convert('" + t + "', Date) ";
             }
             else s = "null";
             return s;
@@ -10037,12 +8750,6 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                     // CONVERT(SMALLDATETIME, '05.29.2015 00:00:00', 101)
                     s = " CONVERT(SMALLDATETIME, " + s + ", 101) ";
                 }
-                if (v.active_DB.projectDBType == v.dBaseType.MySQL)
-                {
-                    s = "'" + Tarih.ToString("yyyy.MM.dd", CultureInfo.InvariantCulture) + " " + saat + "'";
-                    s = " convert(" + s + ", datetime) ";
-                }
-
             }
             else s = "null";
 
@@ -10851,13 +9558,6 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 dsData.Tables[0].Rows[0]["REPORT_TEMP"] = temp;
 
                 MessageBox.Show("Burasıda MySQL den dolayı düzenleme istiyor  : Save_REPORT_TEMP() ");
-
-                /*
-                // kaydet
-                v.Kullaniciya_Mesaj_Var =
-                        sv.MyRecord(dsData, TableName, 0,
-                                    (byte)v.Save.KAYDET, v.SP_Conn_Manager_MSSQL);
-                */
             }
 
             dsData.Dispose();
@@ -11799,8 +10499,8 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             object skinUserFirm = null;
 
             //object skin = reg.getRegistryValue("userSkin");
-            //object skinUser = reg.getRegistryValue("userSkin_" + v.tUser.SP_USER_ID.ToString());
-            skinUserFirm = reg.getRegistryValue("userSkin_" + v.tUser.SP_USER_ID.ToString() + "_" + v.SP_FIRM_ID.ToString());
+            //object skinUser = reg.getRegistryValue("userSkin_" + v.tUser.UserId.ToString());
+            skinUserFirm = reg.getRegistryValue("userSkin_" + v.tUser.UserId.ToString() + "_" + v.SP_FIRM_ID.ToString());
             /*
             if (skin != null)
                 UserLookAndFeel.Default.SetSkinStyle(skin.ToString());
@@ -12675,6 +11375,40 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
         #region Order
 
+        public string tReadTextFile(string fileName)
+        {
+            //fname = v.EXE_ScriptsPath + "\\" + tableName + ".txt";
+
+            string text = "";
+            Boolean filenotfound = false;
+
+            try
+            {
+                if (File.Exists(@"" + fileName))
+                {
+                    //FileStream fileStream = new FileStream(@"" + fname, FileMode.Open, FileAccess.Read);
+                    
+                    System.IO.TextReader readFile = new StreamReader(@"" + fileName);
+                    text = readFile.ReadToEnd();
+                    readFile.Close();
+                    readFile = null;
+                    filenotfound = false;
+                }
+                else filenotfound = true;
+
+                if (filenotfound == true)
+                {
+                    MessageBox.Show("File not found : " + fileName);
+                }
+            }
+            catch
+            {
+                text = "";
+            }
+
+            return text;
+        }
+
         private void newExeUpdate(DataSet ds)
         {
             if (IsNotNull(ds) == false) return;
@@ -13193,6 +11927,8 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 OzelType = fieldName.IndexOf("Ulke");
             if (OzelType == -1)
                 OzelType = fieldName.IndexOf("Cinsiyet");
+            if (OzelType == -1)
+                OzelType = fieldName.IndexOf("Sector");
 
             if (tableName.ToUpper().IndexOf("MTSK") > -1)
             {
@@ -13226,6 +11962,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 /// ILTipi     >> IL    e  dönsün
                 /// ILCETipi   >> ILCE  ye dönsün
                 fieldName = fieldName.Replace("Tipi", "");
+                fieldName = fieldName.Replace("Type", "");
 
                 // BirimTipiId1, BirimTipiId2
                 // AlimBirimTipiId, SatisBirimTipiId
@@ -13250,13 +11987,26 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                     tableName = "CinsiyetTipi";
                 }
 
+                if (fieldName.ToUpper().IndexOf("SECTOR") > -1)
+                {
+                    // (MsProjectTablesSectorTypeId ve
+                    //  MsProjectProceduresSectorTypeId ve
+                    //  MsProjectFunctionsSectorTypeId ) = MsSectorType
+                    //  veya 
+                    //  UstadFirmsSectorTypeId gibi
+                    idFieldName = "Id";
+                    fieldName = "SectorType";
+                    if (orjinalTableName.ToUpper().IndexOf("MSPROJECT") > -1)
+                        tableName = "MsSectorType";
+                    else tableName = orjinalTableName + fieldName;
+                }
 
                 if (orjinalTableName.ToUpper().IndexOf("MTSK") > -1)
                 {
                     if (fieldName.IndexOf("KurumOnay") > -1)
                     {
                         idFieldName = "Id";
-                        fieldName = "KurumOnayTipi";
+                        fieldName = "OnayTipi";
                         tableName = "MtskKurumOnayTipi";
                     }
                     if (orjinalFieldName.IndexOf("DonemTipi") > -1)
@@ -13301,29 +12051,57 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
         public void ftpDowloadIniFile()
         {
             bool onay = false;
-            //
-
-            //MessageBox.Show(Application.StartupPath + " ; " + Application.ExecutablePath);
-
+            
             onay = ftpDownload("YesiLdefterConnection.Ini");
 
-            var YesiLdefterIni = new tIniFile("YesiLdefter.Ini");
-            string DefaultServerAddress = YesiLdefterIni.Read("DefaultServerAddress");
-            string DefaultServerName = YesiLdefterIni.Read("DefaultServerName");
+            /// [YesiLDefter]
+            /// DefaultAddressIp=Local
+            /// ManagerAddressIp = DESKTOPTKN\SQLEXPRESS
+            /// ManagerDbName = MSV3DFTRBLT
+            /// UstadCrmDbName = UstadCRM
 
-            if (DefaultServerAddress.ToUpper() != "LOCAL")
+            string DefaultServerAddress = "";
+            string ManagerAddressIp = "";
+            string ManagerDbName = "";
+            string UstadCrmAddressIp = "";
+            string UstadCrmDbName = "";
+
+            v.active_DB.localDB = false;
+            var ConnectionIni = new tIniFile("YesiLdefterConnection.Ini");
+            if (ConnectionIni != null)
             {
-                v.active_DB.localDB = false;
-                var ConnectIni = new tIniFile("YesiLdefterConnection.Ini");
-                DefaultServerName = ConnectIni.Read("DefaultAddressIp");
+                ManagerAddressIp = ConnectionIni.Read("ManagerAddressIp");
+                ManagerDbName = ConnectionIni.Read("ManagerDbName");
+                UstadCrmAddressIp = ConnectionIni.Read("ManagerAddressIp");
+                UstadCrmDbName = ConnectionIni.Read("UstadCrmDbName");
+
+                v.active_DB.managerServerName = ManagerAddressIp;
+                v.active_DB.managerDBName = ManagerDbName;
+                v.active_DB.ustadCrmServerName = UstadCrmAddressIp;
+                v.active_DB.ustadCrmDBName = UstadCrmDbName;
+
+                v.webManager_DB.serverName = ManagerAddressIp;
+                v.webManager_DB.databaseName = ManagerDbName;
             }
-            else
+
+            var YesiLdefterIni = new tIniFile("YesiLdefter.Ini");
+            DefaultServerAddress = YesiLdefterIni.Read("DefaultAddressIp");
+            if (DefaultServerAddress.ToUpper() == "LOCAL")
             {
                 v.active_DB.localDB = true;
-                v.active_DB.projectServerName = DefaultServerName;
+                ManagerAddressIp = YesiLdefterIni.Read("ManagerAddressIp");
+                ManagerDbName = YesiLdefterIni.Read("ManagerDbName");
+                UstadCrmAddressIp = YesiLdefterIni.Read("ManagerAddressIp");
+                UstadCrmDbName = YesiLdefterIni.Read("UstadCrmDbName");
+
+                v.active_DB.managerServerName = ManagerAddressIp;
+                v.active_DB.managerDBName = ManagerDbName;
+                v.active_DB.ustadCrmServerName = UstadCrmAddressIp;
+                v.active_DB.ustadCrmDBName = UstadCrmDbName;
+                v.active_DB.projectServerName = ManagerAddressIp;
             }
 
-            v.active_DB.managerServerName = DefaultServerName;
+
         }
 
         public bool ftpDownload(string fileName)
@@ -13332,9 +12110,6 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
             //
             //Alan Adı ustadyazilim.com
-            //Server Ip 94.73.151.195
-            //FTP Kullanıcı adı = u8094836@edisonhost.com
-            //FTP Şifresi = CanBerk98
 
             tFtp ftpClient = null;
 
@@ -13351,6 +12126,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
             try
             {
+                MessageBox.Show(v.tExeAbout.activePath + "\\" + fileName);
                 /* Download a File */
                 //ftpClient.download("/public/YesiLdefter_201806201.rar", @"E:\Temp\YesiLdefter_201806201.rar");
                 //ftpClient.download(v.tExeAbout.ftpPacketName, @"" + v.tExeAbout.activePath + "\\" + v.tExeAbout.ftpPacketName);

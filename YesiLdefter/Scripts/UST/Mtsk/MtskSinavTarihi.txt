@@ -1,10 +1,4 @@
-﻿USE u7093888_Ustad01
-GO
-
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
+﻿/*CreateTable*/
 
 begin transaction
 
@@ -36,20 +30,13 @@ begin transaction
   
  grant select, insert, update, delete on MtskSinavTarihi to public
 
- create index X_MtskSinavTarihi01 on MtskSinavTarihi (DonemTipiId desc, Tarih desc)
+ create index X_MtskSinavTarihi01 on MtskSinavTarihi (SinavDonemTipiId desc, SinavTarihi desc)
  
 commit transaction
 
+/*CreateTableEnd*/
 
-
-
-USE [u7093888_Ustad01]
-GO
-
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
+/*CreateTrigger*/
 
 CREATE TRIGGER [dbo].[trg_MtskSinavTarihi] on [dbo].[MtskSinavTarihi] 
 AFTER INSERT,UPDATE
@@ -61,7 +48,7 @@ BEGIN
 
     OPEN myCursor
 
-	declare @SinavDonemTipiId int
+    declare @SinavDonemTipiId int
 	declare @ySinavTarihSaat varchar(20)
 	declare @ySinavTarihi  date
 	declare @ySinavSaati time
@@ -74,17 +61,17 @@ BEGIN
     WHILE @@FETCH_STATUS = 0
     BEGIN
 
-        select 
+    select 
 		  @ySinavTarihSaat = isnull(ins.SinavTarihSaat,'')
 		, @ySinavTarihi = isnull(ins.SinavTarihi, CONVERT(date, getdate(),103))
-        , @yMebbisESinavTarihValue = isnull(ins.MebbisESinavTarihValue, '')
+    , @yMebbisESinavTarihValue = isnull(ins.MebbisESinavTarihValue, '')
 		, @yMebbisRandevuTarihValue = isnull(ins.MebbisRandevuTarihValue, '')
 		, @yMebbisUSinavTarihValue = isnull(ins.MebbisUSinavTarihValue, '')
 		from inserted ins
-    	where ins.Id = @curId
+   	where ins.Id = @curId
 				
 		-- E Sınav
-        if (@ySinavTarihSaat <> '0')
+    if (@ySinavTarihSaat <> '0')
 		begin
 		  set @ySinavTarihSaat = replace(@ySinavTarihSaat, '/E-Sınav', '') 
 		  set @ySinavTarihi = convert(date, @ySinavTarihSaat, 103)
@@ -101,19 +88,18 @@ BEGIN
 		if ((@yMebbisUSinavTarihValue <> '') and
 		    (@yMebbisUSinavTarihValue <> '-1'))
         begin
-		  set @ySinavTarihi = CONVERT(date, substring(@yMebbisUSinavTarihValue, CHARINDEX('?', @yMebbisUSinavTarihValue) + 1, 10), 103)
+		       set @ySinavTarihi = CONVERT(date, substring(@yMebbisUSinavTarihValue, CHARINDEX('?', @yMebbisUSinavTarihValue) + 1, 10), 103)
         end 
 
         if (MONTH(@ySinavTarihi) < 10)
              set @SinavDonemTipiId = convert(int, convert(varchar(5), YEAR(@ySinavTarihi)) + '0' + convert(varchar(3), MONTH(@ySinavTarihi)))
         else set @SinavDonemTipiId = convert(int, convert(varchar(5), YEAR(@ySinavTarihi)) + convert(varchar(3), MONTH(@ySinavTarihi)))
 		
-        Update MtskSinavTarihi set
+    Update MtskSinavTarihi set
           SinavTarihi = @ySinavTarihi
         , SinavSaati = @ySinavSaati 
         , SinavDonemTipiId = @SinavDonemTipiId 
 		Where Id = @curId
-
 
 		if (@yMebbisRandevuTarihValue = '-1') or (@yMebbisUSinavTarihValue = '-1')
 		begin
@@ -129,20 +115,20 @@ BEGIN
 
 END
 
-
-
+/*CreateTriggerEnd*/
 
 ALTER TABLE [dbo].[MtskSinavTarihi] ENABLE TRIGGER [trg_MtskSinavTarihi]
-GO
 
-
-
+/*CreateLkpTable*/
 
 begin transaction
 
 -- ------------------------------------------------------- 
 -- SinavTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskSinavTarihiSinavTipi')
+drop table [Lkp].[MtskSinavTarihiSinavTipi]
+
 create table [Lkp].[MtskSinavTarihiSinavTipi]
 (
    Id               Int Unique not null, 
@@ -160,3 +146,5 @@ INSERT INTO [Lkp].[MtskSinavTarihiSinavTipi] (Id, SinavTipi)
 
 
 commit transaction
+
+/*CreateLkpTableEnd*/

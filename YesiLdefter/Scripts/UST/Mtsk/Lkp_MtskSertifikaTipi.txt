@@ -1,8 +1,6 @@
-﻿
-
+﻿/*CreateTable*/
 
 begin transaction
-
 
 -- ------------------------------------------------------- 
 -- SertifikaTipiId
@@ -19,7 +17,6 @@ create table [Lkp].[MtskSertifikaTipi]
    
    constraint  pk_MtskSertifikaTipi primary key (Id)
 )
-
 
 set IDENTITY_INSERT [Lkp].[MtskSertifikaTipi] ON
 
@@ -59,9 +56,8 @@ INSERT INTO [Lkp].[MtskSertifikaTipi] (Id, SertifikaTipi, IsActive, TeorikDersSa
   ( 9301, N'100 Ceza Puanı (Manuel)',          0,  0,  2,  10,  12 ),
   ( 9302, N'100 Ceza Puanı (Otomatik)',        0,  0,  2,  10,  12 )
 
-
-
 set IDENTITY_INSERT [Lkp].[MtskSertifikaTipi] OFF
 
 commit transaction
 
+/*CreateTableEnd*/

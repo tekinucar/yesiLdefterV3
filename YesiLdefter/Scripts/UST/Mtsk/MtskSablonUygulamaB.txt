@@ -1,4 +1,5 @@
-﻿
+﻿/*CreateTable*/
+
 begin transaction
 
  create table MtskSablonUygulamaB
@@ -23,14 +24,20 @@ begin transaction
   
  grant select, insert, update, delete on MtskSablonUygulamaB to public
 
-
 commit transaction
+
+/*CreateTableEnd*/
+
+/*CreateLkpTable*/
 
 begin transaction
 
 -- ------------------------------------------------------- 
 -- GunTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskSablonUygulamaBGunTipi')
+drop table [Lkp].[MtskSablonUygulamaBGunTipi]
+
 create table Lkp.MtskSablonUygulamaBGunTipi
 (
    Id          Int Unique Not Null,
@@ -49,6 +56,9 @@ INSERT INTO Lkp.MtskSablonUygulamaBGunTipi (Id, GunTipi)
 -- ------------------------------------------------------- 
 -- SaatTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskSablonUygulamaBSaatTipi')
+drop table [Lkp].[MtskSablonUygulamaBSaatTipi]
+
 create table Lkp.MtskSablonUygulamaBSaatTipi
 (
    Id          Int Unique Not Null,
@@ -64,11 +74,12 @@ INSERT INTO Lkp.MtskSablonUygulamaBSaatTipi (Id, SaatTipi)
   ( 2, N'7-8,.. çift saat'),
   ( 3, N'8-9,.. çift saat')
 
-
-
 -- ------------------------------------------------------- 
 -- AracTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskSablonUygulamaBAracTipi')
+drop table [Lkp].[MtskSablonUygulamaBAracTipi]
+
 create table Lkp.MtskSablonUygulamaBAracTipi
 (
    Id          Int Unique Not Null,
@@ -87,6 +98,9 @@ INSERT INTO Lkp.MtskSablonUygulamaBAracTipi (Id, AracTipi)
 -- ------------------------------------------------------- 
 -- OgreticiTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskSablonUygulamaBOgreticiTipi')
+drop table [Lkp].[MtskSablonUygulamaBOgreticiTipi]
+
 create table Lkp.MtskSablonUygulamaBOgreticiTipi
 (
    Id           Int Unique Not Null,
@@ -105,6 +119,9 @@ INSERT INTO Lkp.MtskSablonUygulamaBOgreticiTipi (Id, OgreticiTipi)
 -- ------------------------------------------------------- 
 -- AdayTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskSablonUygulamaBAdayTipi')
+drop table [Lkp].[MtskSablonUygulamaBAdayTipi]
+
 create table Lkp.MtskSablonUygulamaBAdayTipi
 (
    Id          Int Unique Not Null,
@@ -122,7 +139,6 @@ INSERT INTO Lkp.MtskSablonUygulamaBAdayTipi (Id, AdayTipi)
   ( 7, N'7 Aday'),
   ( 8, N'8 Aday')
 
-
-
-
 commit transaction
+
+/*CreateLkpTableEnd*/

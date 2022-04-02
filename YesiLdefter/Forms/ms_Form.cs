@@ -12,7 +12,6 @@ namespace YesiLdefter
             //this.Shown += new System.EventHandler(ev.myForm_Shown);
 
             this.KeyPreview = true;
-
         }
     }
 }

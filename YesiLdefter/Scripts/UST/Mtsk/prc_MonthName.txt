@@ -1,4 +1,6 @@
-﻿CREATE PROCEDURE [dbo].[prc_MonthName] (@Id int, @MonthName nvarchar(15) output)  
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_MonthName] (@Id int, @MonthName nvarchar(15) output)  
 AS BEGIN
    
    if (@Id = 1)  set @MonthName = 'Ocak'
@@ -15,3 +17,5 @@ AS BEGIN
    if (@Id = 12) set @MonthName = 'Aralık'
 
 END -- procedure
+
+/*CreateProcedureEnd*/

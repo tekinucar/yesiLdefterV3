@@ -1,4 +1,4 @@
-
+/*CreateTable*/
 
 begin transaction
 
@@ -9,7 +9,7 @@ begin transaction
    FirmId                 Int       not null,
    IsActive               Bit       not null, /* default : 1 = active, 0 = not active */  
    
-   PlakaIlKoduTipiId      SmallInt      null, /* BAÞLANGIÇ --- SONRA 01-81 ARASI SEÇÝM */
+   PlakaIlKoduTipiId      SmallInt      null, /* BASLANGIC --- SONRA 01-81 ARASI SECIM */
    PlakaNumarasi          nVarchar(10)  null,
    SertifikaTipiId        SmallInt      null, 
 
@@ -21,8 +21,8 @@ begin transaction
    HizmetBaslamaTarihi     Date          null,
    HizmettenCikisTarihi    Date          null,
 
-   SahiplikTipiId          SmallInt      null, /* BAÞLANGIÇ --Seçiniz--, 1-Kuruma Ait, 2-Kiralýk*/
-   HizmetDurumuTipiId      SmallInt      null, /* BAÞLANGIÇ --Seçiniz--, 1-Hizmette, 2-Hizmet Dýþý*/
+   SahiplikTipiId          SmallInt      null, /* BAï¿½LANGIï¿½ --Seï¿½iniz--, 1-Kuruma Ait, 2-Kiralï¿½k*/
+   HizmetDurumuTipiId      SmallInt      null, /* BAï¿½LANGIï¿½ --Seï¿½iniz--, 1-Hizmette, 2-Hizmet Dï¿½ï¿½ï¿½*/
 
    MuayeneGecerlilikTarihi Date          null,
 
@@ -31,12 +31,12 @@ begin transaction
    
    AracSaseNumarasi        nVarchar(20)  null,
    AracMotorNumarasi       nVarchar(20)  null,
-   SanzimanTipiId          SmallInt      null, /* BAÞLANGIÇ --Seçiniz--, 1-Manuel, 2-Otomatik*/
+   SanzimanTipiId          SmallInt      null, /* BAï¿½LANGIï¿½ --Seï¿½iniz--, 1-Manuel, 2-Otomatik*/
 
    TrafikSigortaBasTarihi  Date          null,
    TrafikSigortaBelgeNo    nVarchar(20)  null,
    
-   KurumOnayTipiId         SmallInt      null, /* BAÞLANGIÇ --Seçiniz--, 1-Onay Bekliyor, 2-Onaylandý */		
+   KurumOnayTipiId         SmallInt      null, /* BAï¿½LANGIï¿½ --Seï¿½iniz--, 1-Onay Bekliyor, 2-Onaylandï¿½ */		
 
    constraint		pk_MtskEgitimAraci primary key (Id)
  )
@@ -47,11 +47,18 @@ begin transaction
 
  commit transaction
 
+/*CreateTableEnd*/
+
+/*CreateLkpTable*/
+
  begin transaction
 
 -- ------------------------------------------------------- 
 -- PlakaIlKoduTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskEgitimAraciPlakaIlKoduTipi')
+drop table [Lkp].[MtskEgitimAraciPlakaIlKoduTipi]
+
 create table [Lkp].[MtskEgitimAraciPlakaIlKoduTipi]
 (
    Id               Int Unique Not null,
@@ -63,7 +70,7 @@ create table [Lkp].[MtskEgitimAraciPlakaIlKoduTipi]
 
 INSERT INTO [Lkp].[MtskEgitimAraciPlakaIlKoduTipi] (Id, PlakaIlKoduTipi, GrupTipiId)
  VALUES 
-  ( 0,  N'Tanýmsýz', 1),
+  ( 0,  N'', 1),
   ( 1,  N'01', 1),
   ( 2,  N'02', 1),
   ( 3,  N'03', 1),
@@ -146,15 +153,12 @@ INSERT INTO [Lkp].[MtskEgitimAraciPlakaIlKoduTipi] (Id, PlakaIlKoduTipi, GrupTip
   (80,  N'80', 1),
   (81,  N'81', 1)
 
-
-
-
-
-
-
 -- ------------------------------------------------------- 
 -- ModelYiliTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskEgitimAraciModelYiliTipi')
+drop table [Lkp].[MtskEgitimAraciModelYiliTipi]
+
 create table [Lkp].[MtskEgitimAraciModelYiliTipi]
 (
    Id               Int Unique Not null,
@@ -166,7 +170,7 @@ create table [Lkp].[MtskEgitimAraciModelYiliTipi]
 
 INSERT INTO [Lkp].[MtskEgitimAraciModelYiliTipi] (Id, ModelYiliTipi, GrupTipiId)
  VALUES 
-  ( 0,     N'Tanýmsýz', 1),
+  ( 0,     N'', 1),
   ( 2030,  N'2030', 1),
   ( 2029,  N'2029', 1),
   ( 2028,  N'2028', 1),
@@ -199,11 +203,12 @@ INSERT INTO [Lkp].[MtskEgitimAraciModelYiliTipi] (Id, ModelYiliTipi, GrupTipiId)
   ( 2001,  N'2001', 1),
   ( 2000,  N'2000', 1)
 
-
-
 -- ------------------------------------------------------- 
 -- SahiplikTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskEgitimAraciSahiplikTipi')
+drop table [Lkp].[MtskEgitimAraciSahiplikTipi]
+
 create table [Lkp].[MtskEgitimAraciSahiplikTipi]
 (
    Id               Int Unique Not null,
@@ -215,15 +220,16 @@ create table [Lkp].[MtskEgitimAraciSahiplikTipi]
 
 INSERT INTO [Lkp].[MtskEgitimAraciSahiplikTipi] (Id, SahiplikTipi, GrupTipiId)
  VALUES 
-  ( 0,     N'Tanýmsýz', 1),
+  ( 0,     N'', 1),
   ( 1,     N'Kuruma Ait', 1),
-  ( 2,     N'Kiralýk', 1)
-
-
+  ( 2,     N'KiralÄ±k', 1)
 
 -- ------------------------------------------------------- 
 -- HizmetDurumuTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskEgitimAraciHizmetDurumuTipi')
+drop table [Lkp].[MtskEgitimAraciHizmetDurumuTipi]
+
 create table [Lkp].[MtskEgitimAraciHizmetDurumuTipi]
 (
    Id               Int Unique Not null,
@@ -235,15 +241,17 @@ create table [Lkp].[MtskEgitimAraciHizmetDurumuTipi]
 
 INSERT INTO [Lkp].[MtskEgitimAraciHizmetDurumuTipi] (Id, HizmetDurumuTipi, GrupTipiId)
  VALUES 
-  ( 0,     N'Tanýmsýz', 1),
+  ( 0,     N'', 1),
   ( 1,     N'Hizmette', 1),
-  ( 2,     N'Hizmet Dýþý', 1),
-  ( 3,     N'Trafik Sigortasý Süresi Doldu', 1)
-
+  ( 2,     N'Hizmet DÄ±ÅŸÄ±', 1),
+  ( 3,     N'Trafik SigortasÄ± SÃ¼resi Doldu', 1)
 
 -- ------------------------------------------------------- 
 -- SanzimanTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskEgitimAraciSanzimanTipi')
+drop table [Lkp].[MtskEgitimAraciSanzimanTipi]
+
 create table [Lkp].[MtskEgitimAraciSanzimanTipi]
 (
    Id               Int Unique Not null,
@@ -255,32 +263,10 @@ create table [Lkp].[MtskEgitimAraciSanzimanTipi]
 
 INSERT INTO [Lkp].[MtskEgitimAraciSanzimanTipi] (Id, SanzimanTipi, GrupTipiId)
  VALUES 
-  ( 0,     N'Tanýmsýz', 1),
+  ( 0,     N'', 1),
   ( 1,     N'Manuel', 1),
   ( 2,     N'Otomatik', 1)
 
-
-
-
-
-
--- ------------------------------------------------------- 
--- KurumOnayTipiId
--- ------------------------------------------------------- 
-create table [Lkp].[MtskKurumOnayTipi]
-(
-   Id               Int Unique Not null,
-   KurumOnayTipi    nVarchar(50)   null,
-   GrupTipiId       SmallInt       null,
-
-   constraint  pk_MtskKurumOnayTipi primary key (Id)
-)
-
-INSERT INTO [Lkp].[MtskKurumOnayTipi] (Id, KurumOnayTipi, GrupTipiId)
- VALUES 
-  (-1,     N'Tanýmsýz', 1),
-  ( 0,     N'Onay Bekliyor', 1),
-  ( 1,     N'Onaylý', 1)
-
-
 commit transaction
+
+/*CreateLkpTableEnd*/

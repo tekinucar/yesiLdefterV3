@@ -1,4 +1,5 @@
-﻿
+﻿/*CreateTable*/
+
 begin transaction
 
  create table MtskUygulamaliDersAdayi
@@ -15,22 +16,15 @@ begin transaction
   
  grant select, insert, update, delete on MtskUygulamaliDersAdayi to public
 
-
 commit transaction
 
+/*CreateTableEnd*/
 
-USE [u7093888_Ustad01]
-GO
-
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
+/*CreateTrigger*/
 
 CREATE TRIGGER [dbo].[trg_MtskUygulamaliDersAdayi] on [dbo].[MtskUygulamaliDersAdayi] 
 AFTER INSERT, UPDATE
 AS BEGIN
-
 
     DECLARE dersAdayiCursor cursor for select Id from Inserted
     DECLARE @curId bigint
@@ -39,7 +33,7 @@ AS BEGIN
 
     FETCH NEXT FROM dersAdayiCursor INTO @curId
 
-	declare @yFirmId int = 0
+	  declare @yFirmId int = 0
     declare @yDonemTipiId int = 0
     declare @yAdayId int = 0
     declare @yAdayTcNo varchar(11) = null
@@ -61,9 +55,9 @@ AS BEGIN
         From dbo.MtskAday
         Where TcNo = @yAdayTcNo
         and DonemTipiId = @yDonemTipiId
-	    and FirmId = @yFirmId
+	      and FirmId = @yFirmId
 		
-		update dbo.MtskUygulamaliDersAdayi set 
+		    update dbo.MtskUygulamaliDersAdayi set 
         AdayId = @yAdayId
         Where Id = @curId 
       end
@@ -76,7 +70,10 @@ AS BEGIN
 
 END -- create trigger
 
+/*CreateTriggerEnd*/
+
 ALTER TABLE dbo.MtskUygulamaliDersAdayi ENABLE TRIGGER trg_MtskUygulamaliDersAdayi
+
 
 
 

@@ -1,4 +1,6 @@
-﻿begin transaction
+﻿/*CreateTable*/
+
+begin transaction
 
  create table MtskSablonUygulamaF
  (
@@ -33,4 +35,6 @@
  create index X_MtskSablonUygulamaF03 on MtskSablonUygulamaF (MevcutSertifikaTipiId, IstenenSertifikaTipiId)
  
 commit transaction
+
+/*CreateTableEnd*/
 

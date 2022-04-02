@@ -3200,7 +3200,7 @@ namespace Tkn_Events
                     {
                         tView.Bands[i].Visible = (i == tabIndex);
                         if ((i == tabIndex))
-                            SetUserRegistrySelectBands(v.tUser.SP_USER_ID, TableIPCode, tabIndex);
+                            SetUserRegistrySelectBands(v.tUser.UserId, TableIPCode, tabIndex);
                     }
                 }
                 tView.EndInit();
@@ -3312,7 +3312,7 @@ namespace Tkn_Events
                     {
                         tView.Bands[i].Visible = (i == tabIndex);
                         if ((i == tabIndex))
-                            SetUserRegistrySelectBands(v.tUser.SP_USER_ID, TableIPCode, tabIndex);
+                            SetUserRegistrySelectBands(v.tUser.UserId, TableIPCode, tabIndex);
                     }
                 }
                 */

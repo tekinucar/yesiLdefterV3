@@ -1,5 +1,4 @@
-﻿
-
+﻿/*CreateTable*/
 
 begin transaction
 
@@ -31,30 +30,22 @@ begin transaction
    BitisSaati           Datetime      null, /* Calender and Scheduling için gerekli */
    UDersIsUploaded      Bit           null,
    SablonUygulamaFId    Int           null, /* MtskSablonUygulamaF.Id = Hangi plan formu ile hazırlandı, hazırlanırken seçilen araç, usta öğreticiler ve adayların Id leri */ 
-   
 
    constraint		pk_MtskUygulamaliDers primary key (Id)
  )
   
  grant select, insert, update, delete on MtskUygulamaliDers to public
 
-
 commit transaction
 
+/*CreateTableEnd*/
 
 
-USE [u7093888_Ustad01]
-GO
+/*CreateTrigger*/
 
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-ALTER TRIGGER [dbo].[trg_MtskUygulamaliDers] on [dbo].[MtskUygulamaliDers] 
+CREATE TRIGGER [dbo].[trg_MtskUygulamaliDers] on [dbo].[MtskUygulamaliDers] 
 AFTER INSERT, UPDATE
 AS BEGIN
-
 
     DECLARE myCursor cursor for select Id from Inserted
     DECLARE @curId bigint
@@ -63,19 +54,19 @@ AS BEGIN
 
     FETCH NEXT FROM myCursor INTO @curId
 
-	declare @yFirmId int = 0
+	  declare @yFirmId int = 0
     declare @yDonemTipiId int = 0
     declare @yGrupTipiId smallInt = 0
     declare @ySubeTipiId smallInt = 0
     declare @yAdayId int = 0
     declare @yAdayTcNo varchar(11) = null
-	declare @yAdayAdiSoyadi nVarchar(100) = null
+	  declare @yAdayAdiSoyadi nVarchar(100) = null
     declare @yDersTarihi date = null
     declare @yDersSaatiTipiId smallInt = -1
-	declare @DersDonemTipiId int = 0
-	declare @yPersonelAdiSoyadi nVarchar(100) = null
+	  declare @DersDonemTipiId int = 0
+	  declare @yPersonelAdiSoyadi nVarchar(100) = null
     declare @yPersonelId varchar(20) = null
-	declare @ySaat varchar(20) = null
+	  declare @ySaat varchar(20) = null
 
     declare @TcNoCalismaIzniNo varchar(20) = null
 
@@ -91,18 +82,18 @@ AS BEGIN
       ,@ySubeTipiId = isnull(ins.SubeTipiId,0)
       ,@yAdayId = isnull(ins.AdayId,0)
       ,@yAdayTcNo = isnull(ins.AdayTcNo,'')
-	  ,@yAdayAdiSoyadi = isnull(ins.AdayAdiSoyadi,'')
+	    ,@yAdayAdiSoyadi = isnull(ins.AdayAdiSoyadi,'')
       --,EgitimYeriTipiId
       --,EgitimAraciId
       ,@yDersTarihi = ins.DersTarihi
       ,@yDersSaatiTipiId = ins.DersSaatiTipiId
-	  ,@yPersonelAdiSoyadi = isnull(ins.PersonelAdiSoyadi, '')
+	    ,@yPersonelAdiSoyadi = isnull(ins.PersonelAdiSoyadi, '')
       ,@yPersonelId = isnull(ins.PersonelId,'')
       --,EgitimTipiId
       --,@yBaslamaSaati = ins.BaslamaSaati
       --,@yBitisSaati = ins.BitisSaati
       --,UDersIsUploaded
-	  ,@ySaat = isnull(saat.DersSaatiTipi,'00:00 - 00:00')
+	    ,@ySaat = isnull(saat.DersSaatiTipi,'00:00 - 00:00')
       From inserted ins
 	    left outer join Lkp.MtskUygulamaliDersDersSaatiTipi saat on (ins.DersSaatiTipiId = saat.Id)
       Where ins.Id = @curId
@@ -113,9 +104,9 @@ AS BEGIN
         From dbo.MtskAday
         Where TcNo = @yAdayTcNo
         and DonemTipiId = @yDonemTipiId
-	    and FirmId = @yFirmId
+	      and FirmId = @yFirmId
 		
-		update dbo.MtskUygulamaliDers set 
+		    update dbo.MtskUygulamaliDers set 
         AdayId = @yAdayId
         Where Id = @curId 
       end
@@ -123,14 +114,14 @@ AS BEGIN
       if (@yAdayId = 0) and (@yAdayTcNo = '') and (@yAdayAdiSoyadi <> '')
       begin
         Select @yAdayId = Id, @yAdayTcNo = TcNo
-		From dbo.MtskAday
+		    From dbo.MtskAday
         Where TamAdiSoyadi = @yAdayAdiSoyadi
         and DonemTipiId = @yDonemTipiId
-		--and GrupTipiId = @yGrupTipiId
-		--and SubeTipiId = @ySubeTipiId
-		and FirmId = @yFirmId
+		    --and GrupTipiId = @yGrupTipiId
+		    --and SubeTipiId = @ySubeTipiId
+		    and FirmId = @yFirmId
 	
-		update dbo.MtskUygulamaliDers set 
+		    update dbo.MtskUygulamaliDers set 
           AdayId = @yAdayId
         , AdayTcNo = @yAdayTcNo
         Where Id = @curId 
@@ -152,17 +143,16 @@ AS BEGIN
           (@ySubeTipiId = 0))
       begin
         Select @yGrupTipiId = GrupTipiId
-		, @ySubeTipiId = SubeTipiId
+		    , @ySubeTipiId = SubeTipiId
         From dbo.MtskAday
         Where Id = @yAdayId
         and DonemTipiId = @yDonemTipiId
 
         update dbo.MtskUygulamaliDers set 
           GrupTipiId = @yGrupTipiId
-		, SubeTipiId = @ySubeTipiId
+		    , SubeTipiId = @ySubeTipiId
         Where Id = @curId 
 	  end
-
 
 	  if (@yPersonelId = '') and (@yPersonelAdiSoyadi <> '')
 	  begin
@@ -202,18 +192,21 @@ AS BEGIN
 
 END -- create trigger
 
-
+/*CreateTriggerEnd*/
 
 ALTER TABLE dbo.MtskUygulamaliDers ENABLE TRIGGER trg_MtskUygulamaliDers
 
 
-
+/*CreateLkpTable*/
 
 begin transaction
 
 -- ------------------------------------------------------- 
 -- EgitimYeriTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskUygulamaliDersEgitimYeriTipi')
+drop table [Lkp].[MtskUygulamaliDersEgitimYeriTipi]
+
 create table Lkp.MtskUygulamaliDersEgitimYeriTipi
 (
    Id              Int Unique Not Null,
@@ -231,11 +224,12 @@ INSERT INTO Lkp.MtskUygulamaliDersEgitimYeriTipi (Id, EgitimYeriTipi)
   ( 2, N'Akan Trafik'),
   ( 3, N'Simülatör')
 
-
-
 -- ------------------------------------------------------- 
 -- DersSaatiTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskUygulamaliDersDersSaatiTipi')
+drop table [Lkp].[MtskUygulamaliDersDersSaatiTipi]
+
 create table Lkp.MtskUygulamaliDersDersSaatiTipi
 (
    Id              Int Unique Not Null,
@@ -247,7 +241,7 @@ create table Lkp.MtskUygulamaliDersDersSaatiTipi
 Delete from Lkp.MtskUygulamaliDersDersSaatiTipi
 INSERT INTO Lkp.MtskUygulamaliDersDersSaatiTipi (Id, DersSaatiTipi)
  VALUES 
-  (-1, N' Seçiniz'),
+  (-1, N''),
   ( 0, N'07:00 - 07:50'),
   ( 1, N'08:00 - 08:50'),
   ( 2, N'09:00 - 09:50'),
@@ -265,11 +259,12 @@ INSERT INTO Lkp.MtskUygulamaliDersDersSaatiTipi (Id, DersSaatiTipi)
   (14, N'21:00 - 21:50'),
   (15, N'22:00 - 22:50')
 
-
-
 -- ------------------------------------------------------- 
 -- EgitimTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskUygulamaliDersEgitimTipi')
+drop table [Lkp].[MtskUygulamaliDersEgitimTipi]
+
 create table Lkp.MtskUygulamaliDersEgitimTipi
 (
    Id           Int Unique Not Null,
@@ -281,7 +276,7 @@ create table Lkp.MtskUygulamaliDersEgitimTipi
 Delete from Lkp.MtskUygulamaliDersEgitimTipi
 INSERT INTO Lkp.MtskUygulamaliDersEgitimTipi (Id, EgitimTipi)
  VALUES 
-  ( 0, N'Tanımsız'),
+  ( 0, N''),
   ( 1, N'Normal Eğitim'),
   ( 2, N'Telafi Eğitim(Ön Sınav )'),
   ( 3, N'2.Direksiyon Eğitimi'),
@@ -293,6 +288,9 @@ INSERT INTO Lkp.MtskUygulamaliDersEgitimTipi (Id, EgitimTipi)
 -- EXEC	@return_value = [dbo].[prc_MtskUygulamaDersPlaniCakismaAdedi] @SablonUygulamaFId 
 -- procedureden geliyor
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskUygulamaliDersCakismaTipi')
+drop table [Lkp].[MtskUygulamaliDersCakismaTipi]
+
 create table Lkp.MtskUygulamaliDersCakismaTipi
 (
    Id              Int Unique Not Null,
@@ -308,6 +306,6 @@ INSERT INTO Lkp.MtskUygulamaliDersCakismaTipi (Id, CakismaTipi)
   ( 1, N'Eğitim Aracı Çakışması'),
   ( 2, N'Personel Çakışması')
 
-
-
 commit transaction
+
+/*CreateLkpTableEnd*/

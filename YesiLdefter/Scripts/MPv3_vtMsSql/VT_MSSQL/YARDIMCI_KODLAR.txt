@@ -1,55 +1,72 @@
 ﻿
+
+ /* tablolara ait kaç adet trigger mevcut  */
+ Select tbl.name, count(trg.object_id) adet From u7093888_Ustad01.sys.triggers as trg 
+   left outer join u7093888_Ustad01.sys.tables as tbl on ( trg.parent_id = tbl.object_id ) 
+ group by tbl.name
+
+
+
 /* ***************  TABLES ve FIELDS tablosundaki xxx_CODE değişikliği ************* */
 
 
 --//( 3, 'UST', 'PMS', 'PMS', 'UST.PMS.PMS', '', 'Project Managment',  1 )  
 
+USE [MSV3DFTRBLT]
+GO
+
+declare @oldTableCode varchar(50) = 'MsSectorTables'
+declare @newTableCode varchar(50) = 'MsProjectTables'
 
 select * from MS_TABLES 
-where TABLE_CODE = 'SYSFIRM'
+where TABLE_CODE = @oldTableCode
 
 /*
 update MS_TABLES set
- MODUL_CODE = 'PMS'
-,SOFTWARE_CODE = 'UST'
-,PROJECT_CODE = 'PMS'
-,TABLE_CODE = 'Firm'
-where TABLE_CODE = 'SYSFIRM'
+-- MODUL_CODE = 'PMS'
+--,SOFTWARE_CODE = 'UST'
+--,PROJECT_CODE = 'PMS'
+   TABLE_CODE = @newTableCode
+where TABLE_CODE = @oldTableCode
 */
 
 
 select * from MS_FIELDS 
-where TABLE_CODE = 'SYSFIRM'
+where TABLE_CODE = @oldTableCode
 
 /*
 update MS_FIELDS set
- SOFTWARE_CODE = 'UST'
-,PROJECT_CODE = 'PMS'
-,TABLE_CODE = 'Firm'
-where TABLE_CODE = 'SYSFIRM'
+-- SOFTWARE_CODE = 'UST'
+--,PROJECT_CODE = 'PMS'
+   TABLE_CODE = @newTableCode
+where TABLE_CODE = @oldTableCode
 */
 
 select * from MS_TABLES_IP
-where TABLE_CODE = 'SYSFIRM'
+where TABLE_CODE = @oldTableCode
 
 /*
 update MS_TABLES_IP set
- SOFTWARE_CODE = 'UST'
-,PROJECT_CODE = 'PMS'
-,TABLE_CODE = 'Firm'
-where TABLE_CODE = 'SYSFIRM'
+-- SOFTWARE_CODE = 'UST'
+--,PROJECT_CODE = 'PMS'
+   TABLE_CODE = @newTableCode
+where TABLE_CODE = @oldTableCode
 */
 
 select * from MS_FIELDS_IP 
-where TABLE_CODE = 'SYSFIRM'
+where TABLE_CODE = @oldTableCode
 
 /*
 update MS_FIELDS_IP set
- SOFTWARE_CODE = 'UST'
-,PROJECT_CODE = 'PMS'
-,TABLE_CODE = 'Firm'
-where TABLE_CODE = 'SYSFIRM'
+-- SOFTWARE_CODE = 'UST'
+--,PROJECT_CODE = 'PMS'
+   TABLE_CODE = @newTableCode
+where TABLE_CODE = @oldTableCode
 */
+
+
+
+GO
 
 
 /*  IP_CODE değişikliği yukarının devamı ikinci adımı */ 
@@ -84,21 +101,47 @@ and IP_CODE = 'SYSUSER_L01'
 
 *********** SOFTWARE_CODE set işlemi ******************
 
-select * from MS_FIELDS
-where TABLE_CODE = '3S_MSFLDIP'
 
-select * from MS_FIELDS_IP
-where TABLE_CODE = '3S_MSFLDIP'
+declare @tableCode varchar(30) = 'UstadFirms'
+
+select * from MS_TABLES
+where TABLE_CODE = @tableCode
+
+select * from MS_TABLES_IP
+where TABLE_CODE = @tableCode
+
+/*
+update MS_TABLES Set
+ SOFTWARE_CODE = 'UST'
+,PROJECT_CODE = 'CRM'
+,MODUL_CODE = 'ABO'
+where TABLE_CODE = @tableCode
 
 update MS_TABLES_IP Set
-SOFTWARE_CODE = 'UST'
-,PROJECT_CODE = 'T01'
-where TABLE_CODE = '3S_MSFLDIP'
+ SOFTWARE_CODE = 'UST'
+,PROJECT_CODE = 'CRM'
+where TABLE_CODE = @tableCode
+*/
+
+
+select * from MS_FIELDS
+where TABLE_CODE = @tableCode
+
+select * from MS_FIELDS_IP
+where TABLE_CODE = @tableCode
+
+/*
+update MS_FIELDS Set
+ SOFTWARE_CODE = 'UST'
+,PROJECT_CODE = 'CRM'
+where TABLE_CODE = @tableCode
+
 
 update MS_FIELDS_IP Set
-SOFTWARE_CODE = 'UST'
-,PROJECT_CODE = 'T01'
-where TABLE_CODE = '3S_MSFLDIP'
+ SOFTWARE_CODE = 'UST'
+,PROJECT_CODE = 'CRM'
+where TABLE_CODE = @tableCode
+*/
 
 
 

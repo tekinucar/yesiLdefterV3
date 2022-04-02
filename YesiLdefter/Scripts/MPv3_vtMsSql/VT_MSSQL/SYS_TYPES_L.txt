@@ -6,13 +6,14 @@ begin transaction
         ID                      Int IDENTITY(1,1) NOT NULL,
         SYS_TYPES_H_ID          Int               NULL,
         ISACTIVE                SmallInt          NULL,
+        /* VALUE_TYPE = 1 : SmallInt, 2 : Int32, 3 : String, 4 : Byte   */
         VALUE_TYPE              SmallInt          NULL,  
         IMAGE_ID                SmallInt          NULL,
         TYPES_NAME              VarChar(30)       NULL,
         TYPES_VALUE_INT         Int               NULL,
         TYPES_VALUE_STR         VarChar(30)       NULL,          
         TYPES_CAPTION           VarChar(100)      NULL,
-
+        
    Constraint PK_SYS_TYPES_L primary key (ID)
    
  )
@@ -21,14 +22,10 @@ begin transaction
  
  grant select, insert, update, delete on SYS_TYPES_L to public
 
+
 commit transaction
 
 
-/* VALUE_TYPE = 1 : SmallInt, 2 : Int32, 3 : String, 4 : Byte   */
 
 
-
---- alter table SYS_TYPES_L add    PROP_SUBVIEW            VarChar(4000)     NULL
-
-ALTER TABLE [dbo].[SYS_TYPES_L] DROP COLUMN [PROP_SUBVIEW]
 

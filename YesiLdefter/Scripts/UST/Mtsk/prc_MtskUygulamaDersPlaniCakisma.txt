@@ -1,10 +1,4 @@
-﻿USE [u7093888_Ustad01]
-GO
-
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
+﻿/*CreateProcedure*/
 
 CREATE PROCEDURE [dbo].[prc_MtskUygulamaDersPlaniCakisma] (@SablonUygulamaFId int)  
 AS BEGIN
@@ -83,3 +77,5 @@ AS BEGIN
   order by ud.DersTarihi, ud.DersSaatiTipiId
 
 END -- procedure
+
+/*CreateProcedureEnd*/

@@ -1,12 +1,6 @@
-﻿USE [u7093888_Ustad01]
-GO
-/****** Object:  StoredProcedure [dbo].[prc_MtskTeorikDersPlaniCakisma]    Script Date: 10.02.2022 00:17:15 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
+﻿/*CreateProcedure*/
 
-ALTER PROCEDURE [dbo].[prc_MtskTeorikDersPlaniCakisma] (@DonemTipiId int, @SablonTeorikBId int)  
+CREATE PROCEDURE [dbo].[prc_MtskTeorikDersPlaniCakisma] (@DonemTipiId int, @SablonTeorikBId int)  
 AS BEGIN
 
 /* Yeni planla çakışan varsa getirecek */ 
@@ -103,3 +97,6 @@ AS BEGIN
   order by td.DersTarihi, td.DersSaatiTipiId
 
 END -- procedure
+
+/*CreateProcedureEnd*/
+

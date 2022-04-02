@@ -1,0 +1,27 @@
+﻿-- ------------------------------------------------------- 
+-- SectorType
+-- ------------------------------------------------------- 
+create table [Lkp].[MsSectorType]
+(
+   Id               Int Unique not null, 
+   SectorType       nVarchar(20)   null,
+   
+   constraint  pk_MsSectorType primary key (Id)
+)
+
+Delete from [Lkp].[MsSectorType]
+INSERT INTO [Lkp].[MsSectorType] (Id, SectorType)
+ VALUES 
+  (  0,    N''),
+  (  1,    N'UstadManagerV3'),
+  (  2,    N'UstadManagerV4'),
+  ( 11,    N'UstadCrmV1'),
+  ( 21,    N'UstadEdiV1'),
+  ( 101,   N'Ön Muhasebe'),
+  ( 111,   N'Mali Müşavir'),
+  ( 112,   N'Resmi Muhasebe'),
+  ( 113,   N'Bordro'),
+  ( 201,   N'Mtsk'),
+  ( 202,   N'İşmak'),
+  ( 203,   N'SRC')
+

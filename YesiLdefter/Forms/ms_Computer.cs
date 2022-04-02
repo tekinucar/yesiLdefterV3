@@ -4,7 +4,6 @@ using System.Data;
 using System.Windows.Forms;
 
 using Tkn_Events;
-//using Tkn_EventsForm;
 using Tkn_ToolBox;
 using Tkn_Variable;
 
@@ -34,45 +33,6 @@ namespace YesiLdefter
 
         }
 
-        void PreparingCompterValues()
-        {
-            TableIPCode = "UST/T01/SYSCOMP.SYSCOMP_F01";
-                      //  "UST/T01/SYSCOMP.SYSCOMP_F01"
-            t.Find_DataSet(this, ref ds, ref dN, TableIPCode);
-
-            if (t.IsNotNull(ds))
-            {
-                if (ds.Tables[0].Rows[dN.Position]["NETWORK_MACADDRESS"].ToString() == "")
-                {
-                    ds.Tables[0].Rows[dN.Position]["ISACTIVE"] = 1;
-                    ds.Tables[0].Rows[dN.Position]["SYSTEM_NAME"] = v.tComputer.SystemName.ToString();
-                    ds.Tables[0].Rows[dN.Position]["NETWORK_MACADDRESS"] = v.tComputer.Network_MACAddress.ToString();
-                    ds.Tables[0].Rows[dN.Position]["PROCESSOR_NAME"] = v.tComputer.Processor_Name.ToString();
-                    ds.Tables[0].Rows[dN.Position]["PROCESSOR_ID"] = v.tComputer.Processor_Id.ToString();
-
-                    ds.Tables[0].Rows[dN.Position]["DISK_MODEL"] = v.tComputer.DiskDrive_Model.ToString();
-                    ds.Tables[0].Rows[dN.Position]["DISK_SERIALNUMBER"] = v.tComputer.DiskDrive_SerialNumber.ToString();
-
-                }
-
-                /*
-    SYSTEM_NAME                VarChar(50)       NULL,
-	NETWORK_MACADDRESS         VarChar(30)       NULL UNIQUE,  
-	PROCESSOR_NAME             VarChar(50)       NULL,
-	PROCESSOR_ID               VarChar(50)       NULL,
-	
-	DISK_MODEL                 VarChar(50)       NULL,
-	DISK_SERIALNUMBER          VarChar(50)       NULL,
-
-                */
-            }
-
-
-            //string[] controls = new string[] { };
-            //txt_FirmGuid = t.Find_Control(this, "Column_FIRM_GUID", TableIPCode, controls);
-
-        }
-
         private void ms_Computer_Shown(object sender, EventArgs e)
         {
             //this.Activated += new System.EventHandler(this.ms_Computer_Activated);
@@ -82,18 +42,44 @@ namespace YesiLdefter
             //this.Validated += new System.EventHandler(this.ms_Computer_Validated);
 
             //this.Text = this.Text + "s";
-            PreparingCompterValues();
-
-
+            PreparingComputerValues();
 
             // burada daha firmanın lisans adet kontrolu yapılacak
             // eğer sınır tamamlandıysa mevcut aktif computerlerin listesi gelecek 
             // bu isteden istediği bilgisayarın IsActivesini kapatıp yerine yeni computeri aktif edebilecek
             // tabiki bu kaydet butonuna basılınca gerçekleşecek
-
-
         }
 
+        void PreparingComputerValues()
+        {
+            TableIPCode = "UST/CRM/UstadComputers.Kart_F01";
+                      //  "UST/T01/SYSCOMP.SYSCOMP_F01"
+            t.Find_DataSet(this, ref ds, ref dN, TableIPCode);
+
+            if (t.IsNotNull(ds))
+            {
+                if (ds.Tables[0].Rows[dN.Position]["NetworkMacAddress"].ToString() == "")
+                {
+                    ds.Tables[0].Rows[dN.Position]["IsActive"] = 1;
+                    ds.Tables[0].Rows[dN.Position]["FirmId"] = v.tMainFirm.FirmId;
+                    ds.Tables[0].Rows[dN.Position]["FirmGUID"] = v.tUser.UserFirmGUID;
+                    ds.Tables[0].Rows[dN.Position]["SystemName"] = v.tComputer.SystemName.ToString();
+                    ds.Tables[0].Rows[dN.Position]["NetworkMacAddress"] = v.tComputer.Network_MACAddress.ToString();
+                    ds.Tables[0].Rows[dN.Position]["ProcessorName"] = v.tComputer.Processor_Name.ToString();
+                    ds.Tables[0].Rows[dN.Position]["ProcessorId"] = v.tComputer.Processor_Id.ToString();
+                    ds.Tables[0].Rows[dN.Position]["DiskModel"] = v.tComputer.DiskDrive_Model.ToString();
+                    ds.Tables[0].Rows[dN.Position]["DiskSerialNumber"] = v.tComputer.DiskDrive_SerialNumber.ToString();
+
+                    // kaydı aç
+                    ds.Tables[0].CaseSensitive = false;
+                    dN.Tag = dN.Position;
+                    NavigatorButton btnEnd = dN.Buttons.EndEdit;
+                    dN.Buttons.DoClick(btnEnd);
+                }
+            }
+        }
+
+        
 
         private void ms_Computer_Activated(object sender, EventArgs e)
         {
@@ -128,11 +114,11 @@ namespace YesiLdefter
         {
             /// kullanıcın yeni girdiği firm_guidi al
             ///
-            v.tComp.SP_COMP_FIRM_GUID = ds.Tables[0].Rows[0]["COMP_FIRM_GUID"].ToString();
+            v.tComp.SP_COMP_FIRM_GUID = ds.Tables[0].Rows[0]["FirmGUID"].ToString();
 
             /// compter yeni kayıt sırasında aktif kabul edilecek
             /// 
-            v.tComp.SP_COMP_ISACTIVE = 1;
+            v.tComp.SP_COMP_ISACTIVE = true;
 
             //MessageBox.Show("ms_Computer_FormClosing : "  + v.SP_COMP_FIRM_GUID);
         }

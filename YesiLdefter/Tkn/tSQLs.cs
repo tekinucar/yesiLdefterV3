@@ -418,11 +418,7 @@ namespace Tkn_SQLs
             /// buraya sırayla FIRM_ID, SHOP_ID, PART_ID, DEPT_ID, PERSONEL_ID, COMP_ID
             /// gelmesi gerekiyor
             string s = "";
-
-            if (dbtype == v.dBaseType.MySQL)
-                s = @" CALL prc_SYS_VARIABLES_FULL (" + v.SP_FIRM_ID + "); ";
-
-
+                        
             if (dbtype == v.dBaseType.MSSQL)
                 s = @" EXEC prc_SYS_VARIABLES_FULL " + v.SP_FIRM_ID;
 
@@ -551,6 +547,125 @@ Select [3S_SYSVAR].*
   
             */
             #endregion
+        }
+
+        public string preparingUstadFirmListSql(string myGuid, v.tFirmListType flt)
+        {
+            string tSql = "";
+            string selectFields = @"
+Select distinct 
+       f.[FirmId]
+      ,f.[ParentFirmId]
+      ,[IsActive]
+      ,[FirmTypeId]
+      ,[FirmGUID]
+      ,[SectorTypeId]
+      ,[FirmCode]
+      ,[FirmLongName]
+      ,[FirmShortName]
+      ,[FirmPhone]
+      ,[WebPage]
+      ,[EMail]
+      ,[Address1]
+      ,[Address2]
+      ,[AddressCode]
+      ,[DistrictTypeId]
+      ,[CityTypeId]
+      ,[FirmOpenDate]
+      ,[FounderName]
+      ,[FounderPhone]
+      ,[ManagerName]
+      ,[ManagerPhone]
+      ,[MenuCode]
+      ,[ServerNameIP]
+      ,[DatabaseName]
+      ,[DbLoginName]
+      ,[DbPass]
+      ,[RecordDate]
+            "; //FROM[dbo].[UstadFirms]
+
+            #region Only Select Firm List
+
+            /// kendisi ve kendisine bağlı alt firma, şubeleride getirir
+            if (flt == v.tFirmListType.OnlySelect)
+                tSql = @" 
+             declare @_firmGUID varchar(50) 
+             declare @_XID int
+             set @_firmGUID = '" + myGuid + @"'
+ 
+             Select @_XID = FirmId from UstadFirms
+             where FirmGUID = @_firmGUID
+
+             -- Select @_XID 
+ 
+             ;WITH CTE
+             AS
+             (
+                Select M1.FirmId, M1.FirmId U_FirmId
+        	    From UstadFirms as M1
+        	    Where M1.ParentFirmId = @_XID
+		
+                Union all
+	
+                Select M1.FirmId, M1.FirmId U_FirmId
+        	    From UstadFirms as M1
+        	    Where M1.FirmId = @_XID
+	
+        	    /* 
+	            -- BUNU AÇINCA 
+	            -- GRUBUN HERHANGİ BİR ÜYESİNİ İSTEYİNCE
+	            -- GRUBUN TÜM ELEMANLARI GELİYOR 
+	
+	            UNION ALL
+	
+                SELECT M1.FirmId, M1.ParentFirmId U_FirmId
+	            FROM UstadFirms as M1
+	            WHERE M1.FirmId = @_XID
+	            AND M1.ParentFirmId > 0
+        	    */
+	
+        	    /*
+	            UNION ALL
+		
+	            SELECT C.U_FirmId, M.ParentFirmId
+                FROM CTE C
+                    JOIN UstadFirms as M ON C.U_FirmId = M.FirmId
+                */
+
+	            Union all
+		
+        	    Select C.U_FirmId, M.FirmId 
+                From CTE as C
+                    Join UstadFirms as M ON C.U_FirmId = M.ParentFirmId
+		        
+             )
+             " + selectFields + @"
+              from CTE c
+                 left outer join UstadFirms as f on ( c.U_FirmId = f.FirmId ) ";
+
+            #endregion
+
+
+            #region All Firm List
+
+            if (flt == v.tFirmListType.AllFirm)
+                tSql = @"" + selectFields + @" from UstadFirms as f ";
+
+            #endregion
+
+
+            #region guid = TEST
+
+            // burayı daha mantıklı hale getir
+            if (myGuid == "TEST")
+                tSql = selectFields + @"
+                From UstadFirms as f Where f.FirmId = ";
+                //where f.OPERATION_MODE_TD = 1 ";
+
+            #endregion
+
+
+            return tSql;
         }
 
         public string SQL_SYS_FIRM_List(string myGuid, v.tFirmListType flt)
@@ -872,7 +987,8 @@ Select [3S_SYSVAR].*
 
             string s =
               " Select a.* " + v.ENTER
-            + " , c.TABLE_NAME               LKP_TABLE_NAME " + v.ENTER
+            + " , c.TABLE_NAME as LKP_TABLE_NAME " + v.ENTER
+            + " , c.DBASE_TYPE as LKP_DBASE_TYPE " + v.ENTER
             + msfields_list
             + " from MS_FIELDS_IP a " + v.ENTER
             + "   left outer join MS_FIELDS b on ( a.TABLE_CODE = b.TABLE_CODE and a.FIELD_NO = b.FIELD_NO ) " + v.ENTER
@@ -1436,12 +1552,6 @@ INSERT INTO [dbo].[SYS_UPDATES]
 
                     NewSQL = Where_Lines;
 
-                }
-
-                if (v.active_DB.projectDBType == v.dBaseType.MySQL)
-                {
-                    NewSQL =
-                        " CALL " + Master_TableName + " (" + v.ENTER + Where_Lines + v.ENTER + ")";
                 }
             }
             #endregion Stored Procedure
@@ -2940,26 +3050,7 @@ INSERT INTO [dbo].[SYS_UPDATES]
                                         }
                                     }
                                 }
-
-                                //if ((dBaseNo == 4) && (v.dBTypes.ProjectDBType == v.dBaseType.MySQL))
-                                if (v.active_DB.projectDBType == v.dBaseType.MySQL)
-                                {
-                                    if (MasterValue1 == "")
-                                    {
-                                        Where_Lines =
-                                            Where_Lines +
-                                            "/*prm.@" + fname + "*/ " + t.Set_FieldName_Value_(field_type, "", "first", "@", "null") +
-                                            "   -- :D.SD." + RefId.ToString() + ": --" + v.ENTER;
-                                    }
-
-                                    if (MasterValue1 != "")
-                                    {
-                                        Where_Lines =
-                                            Where_Lines +
-                                            "/*prm.@" + fname + "*/ " + t.Set_FieldName_Value_(field_type, "", MasterValue1, "@", "null") +
-                                            "   -- :D.SD." + RefId.ToString() + ": --" + v.ENTER;
-                                    }
-                                }
+                                                                
                             }
                             #endregion // sp
 
@@ -3174,6 +3265,8 @@ INSERT INTO [dbo].[SYS_UPDATES]
 
             if (lookUpFieldName.IndexOf("TipiId") > -1)
                 lookUpFieldName = lookUpFieldName.Replace("TipiId", "Tipi");
+            if (lookUpFieldName.IndexOf("TypeId") > -1)
+                lookUpFieldName = lookUpFieldName.Replace("TypeId", "Type");
 
             joinFields += " , " + joinTableAlias + "." + fieldName + "  as  " + lookUpFieldName + v.ENTER;
 

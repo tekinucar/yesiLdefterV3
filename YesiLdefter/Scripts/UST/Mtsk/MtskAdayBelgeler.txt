@@ -1,4 +1,4 @@
-﻿
+﻿/*CreateTable*/
 
 begin transaction
 
@@ -10,22 +10,6 @@ begin transaction
    AdayId                Int       not null, /* default 0 */
    TcNo                  Varchar(11)   null,
    DonemTipiId           Int           null,
-
-   --arrived   document : geldi belge
-   --scanned   document : taranmış belge
-   --uploaded  document : yüklenen belge
-   
-   /* Bu grup alanlar MtskAday tablosuna taşındı */
-   KimlikGeldi           Bit   null, 
-   BiyometrikGeldi       Bit   null,
-   OgrenimGeldi          Bit   null,
-   SaglikGeldi           Bit   null,
-   AdliSicilGeldi        Bit   null,
-   ImzaAlindi            Bit   null,
-   SozlesmeYapildi       Bit   null,
-   AdresAlindi           Bit   null,
-   BelgelerGeldi         Bit   null, 
-   /* --- taşınma sonu */
 
    BiyometrikTarandi     Bit   null,
    OgrenimTarandi        Bit   null,
@@ -64,16 +48,10 @@ begin transaction
 
 commit transaction
 
+/*CreateTableEnd*/
 
 
-
-USE [u7093888_Ustad01]
-GO
-
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
+/*CreateTrigger*/
 
 CREATE TRIGGER [dbo].[trg_MtskAdayBelgeler] on [dbo].[MtskAdayBelgeler]
 AFTER INSERT, UPDATE
@@ -170,3 +148,4 @@ AS BEGIN
 
 END -- create trigger
 
+/*CreateTriggerEnd*/

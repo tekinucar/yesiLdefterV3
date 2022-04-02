@@ -1,17 +1,9 @@
-﻿USE [u7093888_Ustad01]
-GO
+﻿/*CreateProcedure*/
 
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-ALTER PROCEDURE [dbo].[prc_MtskAdayTakip] (@FirmId int)  
+CREATE PROCEDURE [dbo].[prc_MtskAdayTakip] (@FirmId int)  
 AS BEGIN
    
    declare @bugun smalldatetime = getdate() 
-
-
    -- -------------------------------------------------------------------
    -- BelgelerGeldi, BelgelerTarandi, BelgelerYuklendi
    -- -------------------------------------------------------------------
@@ -188,10 +180,10 @@ AS BEGIN
 	     , eSinav.FirmId
 	     , eSinav.SinavNo
          , eSinav.DurumuTipiId
-		 , convert(date, eSinav.SinavTarihSaat, 103) as SinavTarihi
+		 , convert(date, eSinav.SinavTarihi, 103) as SinavTarihi
 	     , case
-             when (eSinav.DurumuTipiId = 0 and convert(date, @bugun,103) <  convert(date, eSinav.SinavTarihSaat, 103)) then 3 -- e-Sınav başvurusu yapıldı
-             when (eSinav.DurumuTipiId = 0 and convert(date, @bugun,103) >= convert(date, eSinav.SinavTarihSaat, 103)) then 4 -- e-Sınav sonucu okunacak
+             when (eSinav.DurumuTipiId = 0 and convert(date, @bugun,103) <  convert(date, eSinav.SinavTarihi, 103)) then 3 -- e-Sınav başvurusu yapıldı
+             when (eSinav.DurumuTipiId = 0 and convert(date, @bugun,103) >= convert(date, eSinav.SinavTarihi, 103)) then 4 -- e-Sınav sonucu okunacak
 	         when (eSinav.DurumuTipiId > 0) then 5 -- e-Sınav sonucu okundu
            end as eSinavDurumTipiId
          , case
@@ -200,7 +192,7 @@ AS BEGIN
              when (eSinav.DurumuTipiId > 1) and (eSinav.SinavNo >= 4 ) then 3 -- Tüm e-Sınav hakkı bitti
            end as eSinavSonrasiTipiId
          , case 
-	         when (eSinav.DurumuTipiId > 1) and (eSinav.SinavNo < 4 ) then DATEADD(day, 15, convert(date, eSinav.SinavTarihSaat, 103))
+	         when (eSinav.DurumuTipiId > 1) and (eSinav.SinavNo < 4 ) then DATEADD(day, 15, convert(date, eSinav.SinavTarihi, 103))
 			 else null
 	       end as OnBesGunBitisTarihi
          , case
@@ -211,12 +203,10 @@ AS BEGIN
          from MtskSinavETeorik as eSinav,
 	     (  -- Adayların son sınavlarını buluyor
 	           Select AdayId
-			   , max(convert(smallDatetime,SinavTarihSaat,103)) as SinavTarihSaat
-			   --, max(convert(date,SinavTarihSaat,103)) as SinavTarih
+			   , max(convert(smallDatetime,SinavTarihi,103)) as SinavTarihi
                from MtskSinavETeorik
 		       Where FirmId = @FirmId
 			   and IsActive = 1
-		       --and SinavTarihi <= @bugun
                /*
 			   and AdayId in ( -- devam eden adaylar
                   Select a.Id from MtskAday a, MtskAdayTakip t
@@ -233,7 +223,7 @@ AS BEGIN
 		     group by AdayId
          ) as aday
 	     Where eSinav.AdayId = aday.AdayId
-	     and   convert(smallDatetime,eSinav.SinavTarihSaat,103) = aday.SinavTarihSaat
+	     and   convert(smallDatetime,eSinav.SinavTarihi,103) = aday.SinavTarihi
     ) as x
     Where a.FirmId = x.FirmId
 	and   a.AdayId = x.AdayId 
@@ -968,3 +958,4 @@ AS BEGIN
 
 END -- procedure
 
+/*CreateProcedureEnd*/

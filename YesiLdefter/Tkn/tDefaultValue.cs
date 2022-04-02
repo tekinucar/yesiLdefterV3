@@ -881,7 +881,7 @@ namespace Tkn_DefaultValue
             /// 
 
             if (def == "2003") s = v.tComp.SP_COMP_ID.ToString();
-            if (def == "2005") s = v.tUser.SP_USER_ID.ToString();
+            if (def == "2005") s = v.tUser.UserId.ToString();
             if (def == "2001") s = v.SP_FIRM_ID.ToString();
 
             //if (def == "2002") s = v.vt_SHOP_ID.ToString(); İPTAL
@@ -919,20 +919,20 @@ namespace Tkn_DefaultValue
             }
             if ((def == "DEF_HP_FIRM_GUID") || (def == "2002"))
             {
-                return v.SP_FIRM_GUID;
+                return v.tMainFirm.FirmGuid;
             }
 
             if ((def == "DEF_HP_USER_ID") || (def == "2005"))
             {
-                return v.tUser.SP_USER_ID.ToString();
+                return v.tUser.UserId.ToString();
             }
             if ((def == "DEF_HP_USER_GUID") || (def == "2006"))
             {
-                return v.tUser.SP_USER_GUID;
+                return v.tUser.UserGUID;
             }
             if ((def == "DEF_HP_USER_FIRM_GUID") || (def == "2007"))
             {
-                return v.tUser.SP_USER_FIRM_GUID;
+                return v.tUser.UserFirmGUID;
             }
             
             if (t.IsNotNull(v.ds_Variables) == false)

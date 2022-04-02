@@ -4,35 +4,37 @@ begin transaction
 
  create table MS_GROUPS
  (
-	REF_ID               Int IDENTITY(1,1)  NOT NULL,
-        MAIN_TABLE_NAME      VarChar(50)        NULL,
-        TABLE_CODE           VarChar(20)        NULL,
-        GROUP_TYPES          SmallInt           NULL, /* 1 = GROUPCONTROL, 2 = TABPAGE CONTROL */ 
-	FCAPTION             VarChar(50)        NULL, 
-        FGROUPNO             SmallInt           NULL,
-        FVISIBLE             Bit                NULL, 
-        FIXED                VarChar(10)        NULL,
-        CMP_WIDTH            SmallInt           NULL,
+    REF_ID               Int IDENTITY(1,1)  NOT NULL,
+    MAIN_TABLE_NAME      VarChar(50)        NULL,
+    TABLE_CODE           VarChar(100)       NULL,
+    GROUP_TYPES          SmallInt           NULL, /* 1 = GROUPCONTROL, 2 = TABPAGE CONTROL */ 
+    FCAPTION             VarChar(50)        NULL, 
+    FGROUPNO             SmallInt           NULL,
+    FVISIBLE             Bit                NULL, 
+    FIXED                VarChar(10)        NULL,
+    CMP_WIDTH            SmallInt           NULL,
 
-        /* Move   */
-        MOVE_ITEM_TYPE       SmallInt           NULL, /* 1 Column, 2 Group, 3 TabPage */
-        MOVE_ITEM_NAME       VarChar(30)        NULL,
-        MOVE_TYPE            SmallInt           NULL, /* 1 Inside  2 Outside */
-        MOVE_LOCATION        SmallInt           NULL, /* 1 After   2 Before  */
-        MOVE_LAYOUT_TYPE     SmallInt           NULL, /* 1 Horizontal  2 Vertical */
+    /* Move   */
+    MOVE_ITEM_TYPE       SmallInt           NULL, /* 1 Column, 2 Group, 3 TabPage */
+    MOVE_ITEM_NAME       VarChar(30)        NULL,
+    MOVE_TYPE            SmallInt           NULL, /* 1 Inside  2 Outside */
+    MOVE_LOCATION        SmallInt           NULL, /* 1 After   2 Before  */
+    MOVE_LAYOUT_TYPE     SmallInt           NULL, /* 1 Horizontal  2 Vertical */
 
-        PROP_VIEWS           VarChar(4000)      NULL,
+    PROP_VIEWS           VarChar(4000)      NULL,
+	SOFTWARE_CODE        nvarchar(20)       NULL,
+	PROJECT_CODE         nvarchar(20)       NULL,
+	IP_CODE              varchar(100)       NULL,
 
 	Constraint PK_MS_GROUPS primary key (REF_ID)
-
  )
 
- create index X_MS_GROUPS_1 on MS_GROUPS ( TABLE_CODE )
+ create index X_MS_GROUPS_1 on MS_GROUPS ( TABLE_CODE, IP_CODE )
 
  grant select, insert, update, delete on MS_GROUPS to public
 
 commit transaction
 
 
--- alter table MS_GROUPS add   PROP_VIEWS           VarChar(4000)      NULL
+
 

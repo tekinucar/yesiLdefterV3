@@ -1,10 +1,5 @@
-﻿USE [u7093888_Ustad01]
-GO
-
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
+﻿
+/*CreateFunction*/
 
 CREATE FUNCTION [dbo].[fnc_MtskDonemDersBasBitTarihiniBul](
  @DonemTipi Int
@@ -73,3 +68,5 @@ BEGIN
 
   RETURN @ret;  
 END;
+
+/*CreateFunctionEnd*/

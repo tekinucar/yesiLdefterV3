@@ -1,10 +1,4 @@
-﻿USE u7093888_Ustad01
-GO
-
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
+﻿/*CreateTable*/
 
 begin transaction
 
@@ -50,27 +44,20 @@ begin transaction
   
 commit transaction
 
+/*CreateTableEnd*/
 
-
-USE [u7093888_Ustad01]
-GO
-
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
+/*CreateTrigger*/
 
 CREATE TRIGGER [dbo].[trg_MtskSinavETeorik] on [dbo].[MtskSinavETeorik] 
 AFTER INSERT, UPDATE
 AS BEGIN
 
-    DECLARE myCursor cursor for select Id from Inserted
+    DECLARE eSinavCursor cursor for select Id from Inserted
     DECLARE @curId bigint
 
-    OPEN myCursor
+    OPEN eSinavCursor
 
-    FETCH NEXT FROM myCursor INTO @curId
+    FETCH NEXT FROM eSinavCursor INTO @curId
     
 	declare @yFirmId int = 0
 	declare @yAdayId int = 0
@@ -79,6 +66,7 @@ AS BEGIN
 	declare @SinavDonemTipiId int = 0
 	declare @ySinavNo int = 0
 	declare @ySinavTarihSaat varchar(20) = ''
+	declare @xSinavTarihSaat varchar(20) = ''
 	declare @ySinavTarihi date = null
 	declare @ySinavSaati time = null
 	declare @yTeorikPuani int = 0
@@ -107,9 +95,9 @@ AS BEGIN
 	
         if (@ySinavTarihSaat <> '0')
 		begin
-		  set @ySinavTarihSaat = replace(@ySinavTarihSaat, '/E-Sınav', '') 
-		  set @ySinavTarihi = convert(date, @ySinavTarihSaat, 103)
-		  set @ySinavSaati = convert(time, @ySinavTarihSaat, 103)
+		  set @xSinavTarihSaat = replace(@ySinavTarihSaat, '/E-Sınav', '') 
+		  set @ySinavTarihi = convert(date, @xSinavTarihSaat, 103)
+		  set @ySinavSaati = convert(time, @xSinavTarihSaat, 103)
 		end
 
 		-- Sınavın hangi dönemde yapıldığı tespit ediliyor
@@ -181,7 +169,7 @@ AS BEGIN
            AdayId = @yAdayId
 		 , SinavDonemTipiId = @SinavDonemTipiId
 		 , SinavNo = @ySinavNo
-		 , SinavTarihSaat = @ySinavTarihSaat
+		 --, SinavTarihSaat = @ySinavTarihSaat
 		 , SinavTarihi = @ySinavTarihi
          , SinavSaati = @ySinavSaati
 		 , DurumuTipiId = @SinavSonucTipiId
@@ -198,32 +186,31 @@ AS BEGIN
 		  and   Id <> @curId 
 		end
 
-        FETCH NEXT FROM myCursor INTO @curId
+        FETCH NEXT FROM eSinavCursor INTO @curId
     END
 
 	EXECUTE [dbo].[prc_MtskAdayTakip]  @yFirmId
 
-    CLOSE myCursor
-    DEALLOCATE myCursor   
+    CLOSE eSinavCursor
+    DEALLOCATE eSinavCursor   
 
-END
+END -- trigger
 
-
-
+/*CreateTriggerEnd*/
 
 ALTER TABLE [dbo].[MtskSinavETeorik] ENABLE TRIGGER [trg_MtskSinavETeorik]
-GO
 
 
-
-
-
+/*CreateLkpTable*/
 
 begin transaction
 
 -- ------------------------------------------------------- 
 -- DurumuTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskSinavETeorikDurumuTipi')
+drop table [Lkp].[MtskSinavETeorikDurumuTipi]
+
 create table [Lkp].[MtskSinavETeorikDurumuTipi]
 (
    Id               Int Unique not null, 
@@ -243,6 +230,9 @@ INSERT INTO [Lkp].[MtskSinavETeorikDurumuTipi] (Id, DurumuTipi)
 -- ------------------------------------------------------- 
 -- UcretDurumuTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskSinavETeorikUcretDurumuTipi')
+drop table [Lkp].[MtskSinavETeorikUcretDurumuTipi]
+
 create table [Lkp].[MtskSinavETeorikUcretDurumuTipi]
 (
    Id               Int Unique not null, 
@@ -260,11 +250,4 @@ INSERT INTO [Lkp].[MtskSinavETeorikUcretDurumuTipi] (Id, UcretDurumuTipi)
 
 commit transaction
 
-/* ----------------------------------------------------------------- */
-
-
-
-
-
-
-
+/*CreateLkpTableEnd*/

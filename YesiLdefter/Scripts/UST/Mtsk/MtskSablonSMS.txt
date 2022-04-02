@@ -1,4 +1,5 @@
-﻿
+﻿/*CreateTable*/
+
 begin transaction
 
  create table MtskSablonSMS
@@ -19,6 +20,7 @@ begin transaction
 
 commit transaction
 
+begin transaction
 
 INSERT INTO [dbo].[MtskSablonSMS]
            ([IsActive]
@@ -29,4 +31,7 @@ INSERT INTO [dbo].[MtskSablonSMS]
            ,2
            ,'Sn aday, eksik belgeleri tamamlamanızı rica ederiz.')
            --,'Sayın <MtskAday.TamAdiSoyadi> dönem kaydınızı gerçekleştirebilmek için en kısa zamanda eksik olan belgeleri tamamlamanızı önemle rica ederiz.')
-GO
+
+commit transaction
+
+/*CreateTableEnd*/

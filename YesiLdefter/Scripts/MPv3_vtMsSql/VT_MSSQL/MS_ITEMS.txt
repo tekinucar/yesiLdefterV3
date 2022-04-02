@@ -6,7 +6,7 @@ begin transaction
  create table MS_ITEMS
  (
     REF_ID                  Int IDENTITY(1,1)  NOT NULL,
-    MODUL_CODE              VarChar(20)     NULL,
+    MODUL_CODE              VarChar(100)    NULL,
     MASTER_ITEM_TYPE        SmallInt        NULL,
     MASTER_CODE             VarChar(50)     NULL,
     ITEM_TYPE               SmallInt        NULL,
@@ -36,8 +36,14 @@ begin transaction
     CMP_FONT_STYLE          SmallInt        NULL,
     CMP_FONT_COLOR          Int             NULL,
     CMP_BACK_COLOR          Int             NULL, 
+	CMP_NAME                varchar(50)     NULL,
+
     GYLPH_16                VarChar(100)    NULL,
     GYLPH_32                VarChar(100)    NULL,         
+
+	SOFTWARE_CODE           nvarchar(20)    NULL,
+	PROJECT_CODE            nvarchar(20)    NULL,
+	MENU_CODE               nvarchar(20)    NULL,
 
 	Constraint PK_MS_ITEMS primary key (REF_ID)
  )
@@ -49,16 +55,10 @@ begin transaction
 commit transaction
 
 
--- alter table MS_ITEMS   add SHORTCUT_KEYS     VarChar(20)        NULL
-
-
 /*
 MASTER ITEM TYPES
 -----------------------
 1. FORM
 2. USER_CONTROL
 3. MENU
-
-
-
 */

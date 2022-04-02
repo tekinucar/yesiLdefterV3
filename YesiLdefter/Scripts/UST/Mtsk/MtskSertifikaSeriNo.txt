@@ -1,4 +1,6 @@
-﻿begin transaction
+﻿/*CreateTable*/
+
+begin transaction
 
  create table MtskSertifikaSeriNo
  (
@@ -14,3 +16,5 @@
  grant select, insert, update, delete on MtskSertifikaSeriNo to public
 
 commit transaction
+
+/*CreateTableEnd*/

@@ -1,11 +1,4 @@
-﻿USE [u7093888_Ustad01]
-GO
-
-SET ANSI_NULLS ON
-GO
-
-SET QUOTED_IDENTIFIER ON
-GO
+﻿/*CreateProcedure*/
 
 CREATE PROCEDURE [dbo].[prc_MtskTeorikDersPlaniGruplari] (@DonemTipiId int)  
 AS BEGIN
@@ -90,7 +83,6 @@ AS BEGIN
      Where [teoDers].DonemTipiId = @DonemTipiId
    ) x
 
-
-
 END -- procedure
-GO
+
+/*CreateProcedureEnd*/

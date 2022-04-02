@@ -1,12 +1,4 @@
-﻿USE u7093888_Ustad01
-GO
-
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-
+﻿/*CreateTable*/
 
 begin transaction
 
@@ -46,18 +38,10 @@ begin transaction
  
 commit transaction
 
+/*CreateTableEnd*/
 
 
-
-
-USE [u7093888_Ustad01]
-GO
-
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
+/*CreateTrigger*/
 
 CREATE TRIGGER [dbo].[trg_MtskSinavUygulama] on [dbo].[MtskSinavUygulama] 
 AFTER INSERT, UPDATE
@@ -263,22 +247,20 @@ AS BEGIN
 
 END
 
+/*CreateTriggerEnd*/
 
 ALTER TABLE [dbo].[MtskSinavUygulama] ENABLE TRIGGER [trg_MtskSinavUygulama]
 
-
-
-
-
-
-
-
+/*CreateLkpTable*/
 
 begin transaction
 
 -- ------------------------------------------------------- 
 -- PuanTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskSinavUygulamaPuanTipi')
+drop table [Lkp].[MtskSinavUygulamaPuanTipi]
+
 create table [Lkp].[MtskSinavUygulamaPuanTipi]
 (
    Id            Int Unique not null, 
@@ -296,10 +278,12 @@ INSERT INTO [Lkp].[MtskSinavUygulamaPuanTipi] (Id, PuanTipi)
   ( 1,    N'Başarısız'),
   ( 100,  N'Başarılı')
 
-
 -- ------------------------------------------------------- 
 -- EgitimTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskSinavUygulamaEgitimTipi')
+drop table [Lkp].[MtskSinavUygulamaEgitimTipi]
+
 create table Lkp.MtskSinavUygulamaEgitimTipi
 (
    Id           Int Unique Not Null,
@@ -320,6 +304,9 @@ INSERT INTO Lkp.MtskSinavUygulamaEgitimTipi (Id, EgitimTipi)
 -- ------------------------------------------------------- 
 -- DurumuTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskSinavUygulamaDurumuTipi')
+drop table [Lkp].[MtskSinavUygulamaDurumuTipi]
+
 create table [Lkp].[MtskSinavUygulamaDurumuTipi]
 (
    Id                 Int Unique not null, 
@@ -343,6 +330,9 @@ INSERT INTO [Lkp].[MtskSinavUygulamaDurumuTipi] (Id, DurumuTipi)
 -- ------------------------------------------------------- 
 -- UcretDurumuTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskSinavUygulamaUcretDurumuTipi')
+drop table [Lkp].[MtskSinavUygulamaUcretDurumuTipi]
+
 create table [Lkp].[MtskSinavUygulamaUcretDurumuTipi]
 (
    Id               Int Unique not null, 
@@ -361,4 +351,4 @@ INSERT INTO [Lkp].[MtskSinavUygulamaUcretDurumuTipi] (Id, UcretDurumuTipi)
 
 commit transaction
 
-
+/*CreateLkpTableEnd*/

@@ -1,13 +1,6 @@
-﻿USE [u7093888_Ustad01]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
+﻿/*CreateFunction*/
 
-IF OBJECT_ID (N'dbo.fnc_IsGununuBul', N'FN') IS NOT NULL  
-    DROP FUNCTION fnc_IsGununuBul;  
-GO  
+
 CREATE FUNCTION [dbo].[fnc_IsGununuBul](
  @baslamaTarihi date
 ,@istenenIsGunu int
@@ -65,4 +58,6 @@ BEGIN
 
   RETURN @ret;  
 END;
-GO
+
+/*CreateFunctionEnd*/
+

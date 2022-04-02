@@ -23,7 +23,7 @@ namespace Tkn_Registry
             {
                 foreach (var item in regUser.GetValueNames())
                 {
-                    if (item.IndexOf("userEMail") > -1)
+                    if (item.IndexOf("eMail") > -1)
                     {
                         //((DevExpress.XtraEditors.ComboBoxEdit)cmb_EMail).Properties.Items.Add(regUser.GetValue(item.ToString()));
                         itemList.Add(regUser.GetValue(item.ToString()));

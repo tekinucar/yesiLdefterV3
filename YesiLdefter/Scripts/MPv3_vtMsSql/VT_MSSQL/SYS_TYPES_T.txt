@@ -4,6 +4,7 @@ begin transaction
  create table SYS_TYPES_T
  (
         REF_ID            Int IDENTITY(1,1) NOT NULL,
+        /* VALUE_TYPE = -1 : SmallInt, -2 : Int32, -3 : String, -4 : Byte   */
         VALUE_TYPE        SmallInt          NULL,  
         TYPES_NAME        VarChar(30)       NULL,
         TABLE_NAME        VarChar(30)       NULL,
@@ -25,7 +26,7 @@ begin transaction
 commit transaction
 
 
-/* VALUE_TYPE = -1 : SmallInt, -2 : Int32, -3 : String, -4 : Byte   */
+
 
 
 -- ALTER TABLE SYS_TYPES_T ADD ORDER_BY          VarChar(250)      NULL

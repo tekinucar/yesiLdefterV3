@@ -130,6 +130,8 @@ namespace Tkn_DevColumn
                                      DevExpress.XtraEditors.SearchLookUpEdit tEdit_LookUpEdit)
         {
             tToolBox t = new tToolBox();
+
+            string dbaseType = Row["LKP_DBASE_TYPE"].ToString();
             string tFieldName = Row["LKP_FIELD_NAME"].ToString();
             string jTableName = t.Set(Row["FJOIN_TABLE_NAME"].ToString(), Row["LKP_FJOIN_TABLE_NAME"].ToString(), "");
             string jKeyFName = t.Set(Row["FJOIN_KEY_FNAME"].ToString(), Row["LKP_FJOIN_KEY_FNAME"].ToString(), "");
@@ -144,7 +146,7 @@ namespace Tkn_DevColumn
                 return;
             }
 
-            LookUpTableRead_(jTableName);
+            LookUpTableRead_(dbaseType, jTableName);
             
             if (ItemBox_LookUpEdit != null)
             {
@@ -333,6 +335,7 @@ namespace Tkn_DevColumn
             tToolBox t = new tToolBox();
 
             string idFieldName = "Id";
+            string dbaseType = Row["LKP_DBASE_TYPE"].ToString();
             string tableName = Row["LKP_TABLE_NAME"].ToString();
             string fieldName = Row["LKP_FIELD_NAME"].ToString();
             string groupListTypes = Row["LIST_TYPES_NAME"].ToString();
@@ -345,13 +348,13 @@ namespace Tkn_DevColumn
 
             t.LookUpFieldNameChecked(ref tableName, ref fieldName, ref idFieldName);             
 
-            LookUpTableRead_(tableName);
+            LookUpTableRead_(dbaseType, tableName);
             LookUpTableFill_(tableName, idFieldName, fieldName, groupListTypes, type,
                              ItemBox_ICB, tEdit_ICB, 
                              ItemBox_CB, tEdit_CB, 
                              ItemBox_RG, tEdit_RG);
         }
-        private void LookUpTableRead_(string tableName)
+        private void LookUpTableRead_(string dbaseType, string tableName)
         {
             /// bir dataset üzerine tüm Lkp tablolar bir defaya mahsus yükleniyor
             /// ve bu yükleme sadece o Lkp tablosuna ihtiyaç olduğunda dolduruluyor
@@ -379,8 +382,8 @@ namespace Tkn_DevColumn
                 if (tableName == "MtskDonemTipi")
                     Sql = " Select * from [Lkp].[" + tableName + "] order by Id desc ";
 
-
-                t.SQL_Read_Execute(v.dBaseNo.Project, v.ds_LookUpTableList, ref Sql, tableName, "");
+                v.dBaseNo dBaseNo = t.getDBaseNo(dbaseType);
+                t.SQL_Read_Execute(dBaseNo, v.ds_LookUpTableList, ref Sql, tableName, "");
             }
         }
         private void LookUpTableFill_(string tableName, string idFieldName, string captionFieldName, string groupListTypes, Int16 type,
@@ -3264,8 +3267,8 @@ namespace Tkn_DevColumn
                 tXtraEditors_Properties(row_Fields, tEdit, tcolumn_type, tview_type);
 
                 // IP_LIST ekranındaki memo lar için eklenedi
-                if (row_Fields == null)
-                    ((DevExpress.XtraEditors.MemoEdit)tEdit).Properties.Appearance.Font = new Font(FontFamily.GenericMonospace, 9);
+                //if (row_Fields == null)
+                    ((DevExpress.XtraEditors.MemoEdit)tEdit).Properties.Appearance.Font = new Font(FontFamily.GenericMonospace, (float)9.25);
 
             }
             #endregion

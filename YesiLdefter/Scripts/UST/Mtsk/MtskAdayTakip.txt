@@ -1,10 +1,4 @@
-﻿USE u7093888_Ustad01
-GO
-
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
+﻿/*CreateTable*/
 
 begin transaction
 
@@ -96,13 +90,21 @@ begin transaction
    
 commit transaction
 
+/*CreateTableEnd*/
+
+
 /* Tablonun her aday için gerekli olan satırı :  trg_MtskAday içinde insert ediliyor   */
+
+/*CreateLkpTable*/
 
 begin transaction
 
 -- ------------------------------------------------------- 
 -- KayitTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdayTakipKayitTipi')
+drop table [Lkp].[MtskAdayTakipKayitTipi]
+
 create table [Lkp].[MtskAdayTakipKayitTipi]
 (
    Id               Int Unique not null, 
@@ -128,6 +130,9 @@ INSERT INTO [Lkp].[MtskAdayTakipKayitTipi] (Id, KayitTipi, ChartCaption, FormCap
 -- ------------------------------------------------------- 
 -- MebbisDurumTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdayTakipMebbisDurumTipi')
+drop table [Lkp].[MtskAdayTakipMebbisDurumTipi]
+
 create table [Lkp].[MtskAdayTakipMebbisDurumTipi]
 (
    Id               Int Unique not null, 
@@ -161,6 +166,9 @@ INSERT INTO [Lkp].[MtskAdayTakipMebbisDurumTipi] (Id, MebbisDurumTipi)
 -- ------------------------------------------------------- 
 -- SertifikaUcretTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdayTakipSertifikaUcretTipi')
+drop table [Lkp].[MtskAdayTakipSertifikaUcretTipi]
+
 create table [Lkp].[MtskAdayTakipSertifikaUcretTipi]
 (
    Id                 Int Unique not null, 
@@ -186,6 +194,9 @@ INSERT INTO [Lkp].[MtskAdayTakipSertifikaUcretTipi] (Id, SertifikaUcretTipi)
 -- ------------------------------------------------------- 
 -- TeorikDersTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdayTakipTeorikDersTipi')
+drop table [Lkp].[MtskAdayTakipTeorikDersTipi]
+
 create table [Lkp].[MtskAdayTakipTeorikDersTipi]
 (
    Id               Int Unique not null, 
@@ -206,6 +217,9 @@ INSERT INTO [Lkp].[MtskAdayTakipTeorikDersTipi] (Id, TeorikDersTipi)
 -- ------------------------------------------------------- 
 -- eSinavDurumTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdayTakipeSinavDurumTipi')
+drop table [Lkp].[MtskAdayTakipeSinavDurumTipi]
+
 create table [Lkp].[MtskAdayTakipeSinavDurumTipi]
 (
    Id               Int Unique not null, 
@@ -223,7 +237,7 @@ INSERT INTO [Lkp].[MtskAdayTakipeSinavDurumTipi] (Id, eSinavDurumTipi, ChartCapt
   ( 1,    N'e-Sınav için hazır değil',    'Hazır değil', '' ),
   ( 2,    N'e-Sınav başvurusu yapılacak', 'Başvuru yapılacak', 'Mebbis' ),
   ( 3,    N'e-Sınav başvurusu yapıldı',   'Başvuru yapıldı', '' ),
-  ( 4,    N'e-Sınav sonucu okunacak',     'Sınav okunacak', 'Mebbis' ),
+  ( 4,    N'e-Sınav sonucu okunacak',     'Sınav okunacak', 'Mebbis.' ),
   ( 5,    N'e-Sınav sonucu okundu',       'Sınav okundu', '' ),
   ( 6,    N'Muaf',                        'Muaf', '' )
 
@@ -231,6 +245,9 @@ INSERT INTO [Lkp].[MtskAdayTakipeSinavDurumTipi] (Id, eSinavDurumTipi, ChartCapt
 -- ------------------------------------------------------- 
 -- eSinavSonucTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdayTakipeSinavSonucTipi')
+drop table [Lkp].[MtskAdayTakipeSinavSonucTipi]
+
 create table [Lkp].[MtskAdayTakipeSinavSonucTipi]
 (
    Id               Int Unique not null, 
@@ -252,6 +269,9 @@ INSERT INTO [Lkp].[MtskAdayTakipeSinavSonucTipi] (Id, eSinavSonucTipi, ChartCapt
 -- ------------------------------------------------------- 
 -- eSinavSonrasiTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdayTakipeSinavSonrasiTipi')
+drop table [Lkp].[MtskAdayTakipeSinavSonrasiTipi]
+
 create table [Lkp].[MtskAdayTakipeSinavSonrasiTipi]
 (
    Id               Int Unique not null, 
@@ -274,6 +294,9 @@ INSERT INTO [Lkp].[MtskAdayTakipeSinavSonrasiTipi] (Id, eSinavSonrasiTipi, Chart
 -- ------------------------------------------------------- 
 -- eSinavUcretTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdayTakipeSinavUcretTipi')
+drop table [Lkp].[MtskAdayTakipeSinavUcretTipi]
+
 create table [Lkp].[MtskAdayTakipeSinavUcretTipi]
 (
    Id               Int Unique not null, 
@@ -295,6 +318,9 @@ INSERT INTO [Lkp].[MtskAdayTakipeSinavUcretTipi] (Id, eSinavUcretTipi)
 -- ------------------------------------------------------- 
 -- UygulamaliDersTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdayTakipUygulamaliDersTipi')
+drop table [Lkp].[MtskAdayTakipUygulamaliDersTipi]
+
 create table [Lkp].[MtskAdayTakipUygulamaliDersTipi]
 (
    Id                  Int Unique not null, 
@@ -318,6 +344,9 @@ INSERT INTO [Lkp].[MtskAdayTakipUygulamaliDersTipi] (Id, UygulamaliDersTipi, Cha
 -- ------------------------------------------------------- 
 -- BasarisizDersTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdayTakipBasarisizDersTipi')
+drop table [Lkp].[MtskAdayTakipBasarisizDersTipi]
+
 create table [Lkp].[MtskAdayTakipBasarisizDersTipi]
 (
    Id                  Int Unique not null, 
@@ -332,8 +361,8 @@ Delete from [Lkp].[MtskAdayTakipBasarisizDersTipi]
 INSERT INTO [Lkp].[MtskAdayTakipBasarisizDersTipi] (Id, BasarisizDersTipi, ChartCaption, FormCaption)
  VALUES 
   ( 0,    N'', '', ''),
-  ( 1,    N'2 saat başarısız aday eğitimi planlanacak', '2 saat planlanacak', 'Planlama' ),
-  ( 2,    N'2 saat başarısız aday eğitimi planlandı',   '2 saat planlandı', 'Mebbis' ),
+  ( 1,    N'2 saat başarısız aday eğitimi planlanacak', '2 saat planlanacak', 'Planlama.' ),
+  ( 2,    N'2 saat başarısız aday eğitimi planlandı',   '2 saat planlandı', 'Mebbis.' ),
   ( 3,    N'2 saat başarısız aday eğitimi alıyor',      '2 saat eğitim alıyor', '' ),
   ( 4,    N'2 saat başarısız aday eğitimi tamamlandı',  '2 saat eğitim tamam', '' ),
   ( 5,    N'Eğitime gerek yok (Sınava girmedi)',        'Sınava girmedi', '' )
@@ -342,6 +371,9 @@ INSERT INTO [Lkp].[MtskAdayTakipBasarisizDersTipi] (Id, BasarisizDersTipi, Chart
 -- ------------------------------------------------------- 
 -- Arti4DersTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdayTakipArti4DersTipi')
+drop table [Lkp].[MtskAdayTakipArti4DersTipi]
+
 create table [Lkp].[MtskAdayTakipArti4DersTipi]
 (
    Id              Int Unique not null, 
@@ -351,7 +383,6 @@ create table [Lkp].[MtskAdayTakipArti4DersTipi]
    
    constraint  pk_MtskAdayTakipArti4DersTipi primary key (Id)
 )
-
 
 Delete from [Lkp].[MtskAdayTakipArti4DersTipi]
 INSERT INTO [Lkp].[MtskAdayTakipArti4DersTipi] (Id, Arti4DersTipi, ChartCaption, FormCaption)
@@ -366,6 +397,9 @@ INSERT INTO [Lkp].[MtskAdayTakipArti4DersTipi] (Id, Arti4DersTipi, ChartCaption,
 -- ------------------------------------------------------- 
 -- uSinavDurumTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdayTakipuSinavDurumTipi')
+drop table [Lkp].[MtskAdayTakipuSinavDurumTipi]
+
 create table [Lkp].[MtskAdayTakipuSinavDurumTipi]
 (
    Id               Int Unique not null, 
@@ -383,21 +417,24 @@ INSERT INTO [Lkp].[MtskAdayTakipuSinavDurumTipi] (Id, uSinavDurumTipi, ChartCapt
   ( 1,    N'Uygulama sınav için hazır değil',              'Uyg.hazır değil', '' ),
   ( 2,    N'Uygulama sınav için MEBBİS de onaylanacak',    'Mebbisde onaylanacak', 'Mebbis' ),
   ( 3,    N'Uygulama sınav randevusu planlanacak',         'Randevu planlanacak', 'Planlama' ),
-  ( 4,    N'Uygulama sınav randevusu MEBBİSe aktarılacak', 'Randevu mebbise aktar', 'Mebbis' ),
+  ( 4,    N'Uygulama sınav randevusu MEBBİSe aktarılacak', 'Randevu mebbise aktar', 'Mebbis.' ),
   ( 5,    N'Uygulama sınavına girecek',                    'Sınava girecek', '' ),
-  ( 6,    N'Uygulama sınav sonucu okunacak',               'Sonuç okunacak', 'Mebbis' ),
+  ( 6,    N'Uygulama sınav sonucu okunacak',               'Sonuç okunacak', 'Mebbis..' ),
   ( 7,    N'Uygulama sınav sonucu okundu',                 'Sonuç okundu', '' ),
   
   ( 11,   N'2.Uygulama (+4) sınav için hazır değil',              '+4 hazır değil', '' ),
-  ( 13,   N'2.Uygulama (+4) sınav randevusu planlanacak',         '+4 rand.planlanacak', 'Planlama' ),
-  ( 14,   N'2.Uygulama (+4) sınav randevusu MEBBİSe aktarılacak', '+4 Mebbise aktar', 'Mebbis' ),
+  ( 13,   N'2.Uygulama (+4) sınav randevusu planlanacak',         '+4 rand.planlanacak', 'Planlama.' ),
+  ( 14,   N'2.Uygulama (+4) sınav randevusu MEBBİSe aktarılacak', '+4 Mebbise aktar', 'Mebbis...' ),
   ( 15,   N'2.Uygulama (+4) sınavına girecek',                    '+4 sınava girecek', '' ),
-  ( 16,   N'2.Uygulama (+4) sınav sonucu okunacak',               '+4 sınav okunacak', 'Mebbis' ),
+  ( 16,   N'2.Uygulama (+4) sınav sonucu okunacak',               '+4 sınav okunacak', 'Mebbis....' ),
   ( 17,   N'2.Uygulama (+4) sınav sonucu okundu',                 '+4 sınav okundu', '' )
   
 -- ------------------------------------------------------- 
 -- uSinavSonucTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdayTakipuSinavSonucTipi')
+drop table [Lkp].[MtskAdayTakipuSinavSonucTipi]
+
 create table [Lkp].[MtskAdayTakipuSinavSonucTipi]
 (
    Id               Int Unique not null, 
@@ -419,6 +456,9 @@ INSERT INTO [Lkp].[MtskAdayTakipuSinavSonucTipi] (Id, uSinavSonucTipi, ChartCapt
 -- ------------------------------------------------------- 
 -- uSinavSonrasiTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdayTakipuSinavSonrasiTipi')
+drop table [Lkp].[MtskAdayTakipuSinavSonrasiTipi]
+
 create table [Lkp].[MtskAdayTakipuSinavSonrasiTipi]
 (
    Id               Int Unique not null, 
@@ -438,9 +478,34 @@ INSERT INTO [Lkp].[MtskAdayTakipuSinavSonrasiTipi] (Id, uSinavSonrasiTipi, Chart
   ( 3,    N'Tüm uygulamalı sınav hakkı bitti, 2.Uygulama (+4) hakkını kullanacak mı ? ', 'Sınav hakkı bitti', '' ),
   ( 4,    N'2.Uygulama (+4) sınav hakkı bitti', '2Uyg.sınav hak bitti', '' )
 
+
+-- ------------------------------------------------------- 
+-- uSinavUcretTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdayTakipuSinavUcretTipi')
+drop table [Lkp].[MtskAdayTakipuSinavUcretTipi]
+
+create table [Lkp].[MtskAdayTakipuSinavUcretTipi]
+(
+   Id               Int Unique not null, 
+   uSinavUcretTipi  nVarchar(50)   null
+   
+   constraint  pk_MtskAdayTakipuSinavUcretTipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskAdayTakipuSinavUcretTipi]
+INSERT INTO [Lkp].[MtskAdayTakipuSinavUcretTipi] (Id, uSinavUcretTipi)
+ VALUES 
+  ( 0,    N'Adayın kendisi yatıracak'),
+  ( 1,    N'Biz yatıracağız')
+
+
 -- ------------------------------------------------------- 
 -- SertifikaDurumTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdayTakipSertifikaDurumTipi')
+drop table [Lkp].[MtskAdayTakipSertifikaDurumTipi]
+
 create table [Lkp].[MtskAdayTakipSertifikaDurumTipi]
 (
    Id                 Int Unique not null, 
@@ -463,108 +528,4 @@ INSERT INTO [Lkp].[MtskAdayTakipSertifikaDurumTipi] (Id, SertifikaDurumTipi, Cha
 
 commit transaction
 
-
-/* ***************************************************************************** */
---   MtskAdayTakip
-/* ***************************************************************************** */
-
-/*
-
-AdayId
-DonemTipiId
-
-KayitTipiId -- önkayıt, aday
-BelgeTipiId -- belgeleri eksik, belgeleri tamam
-MebbisTipiId -- belgeleri aktarılmadı, belgeleri kısmen aktarıldı, belgeleri tamamlandı
-MebbisOnayTipiId -- onay bekliyor, onaylandı
-SertifikaUcretTipiId -- 
-    hiç ödemesi yok, 
-    kısmi ödemesi var, 
-    gecikmiş ödemesi var, 
-    tamamı tahsil edildi,
-    ucretsiz 
-    
-teorikDersTipiId -- 
-    Teorik ders alma aşamasında, 
-    Teorik dersleri tamamladı
-
-eSinavNo
-eSinavDurumTipiId -- 
-    eSınav için hazır değil,
-    eSınav başvurusu yapılacak, 
-    eSınav başvurusu yapıldı, ( sınav günü ve saatine kadar olanlar )
-    eSınav sonucu okunacak,   ( sınav günü ve saatinden sonra olanlar )
-    eSınav sonucu okundu,
-    15 günlük beklemede,
-    Tüm sınav hakkı bitti
-
-eSinavSonucTipiId -- Başarılı, Başarısız
-onBesGunBitisTarihi -- 
-
-
-eSinavUcretTipiId -- kendisi yatıracak, biz yatıracağız
-
-eSinavUcreti1 -- 1. sınav ücreti
-eSinavUcreti1Yatirildi -- false/true
-eSinav1DetayId
-
-eSinavUcreti2 -- 2. sınav ücreti
-eSinavUcreti2Yatirildi -- false/true
-eSinav2DetayId
-
-eSinavUcreti3 -- 3. sınav ücreti
-eSinavUcreti3Yatirildi -- false/true
-eSinav3DetayId
-
-eSinavUcreti4 -- 4. sınav ücreti
-eSinavUcreti4Yatirildi -- false/true
-eSinav4DetayId
-
-
-
-
-uygulamaDersTipiId -- 
-    uygulamalı ders başlamadı,
-    uygulamalı ders alıyor, 
-    uygulamalı dersleri tamamladı
-
-uygSinavNo
-uygSinavDurumTipiId --
-    uygSınav için hazır değil,
-    uygSınav başvurusu yapılacak, 
-    uygSınav başvurusu yapıldı, ( sınav gününe kadar olanlar )
-    uygSınav sonucu okunacak,   ( sınav gününden sonra olanlar )
-    uygSınav sonucu okundu,
-    2 saat başarısız eğitim planlanacak
-    2 saat başarısız eğitim planlandı
-    bir sınav beklemede,
-    Tüm sınav hakkı bitti
-
-    İkinci +4 sınav hakkı alacak mı?
-    İkinci +4 sınav hakkı aldı
-    İkinci +4 sınav hakkı bitti
-
-uygSinavSonucTipiId -- Başarılı, Başarısız
-
-uygSinavUcretTipiId -- kendisi yatıracak, biz yatıracağız
-
-uygSinavUcreti1 -- 1. sınav ücreti
-uygSinavUcreti1Yatirildi -- false/true
-uygSinav1DetayId
-
-2, 3, 4
-
-arti4UygSinavUcreti1 -- 1. sınav ücreti
-arti4UygSinavUcreti1Yatirildi -- false/true
-arti4UygSinav1DetayId
-
-2, 3, 4
-
-SertifikaAlmayaHakKazandi -- false/true
-SertifikaTeslimEdidi -- 
-SertifikaTeslimTarihi --
-SertifikayiTeslimAlanKisi --
-
-dosyaYakti -- false/true
-
-*/
+/*CreateLkpTableEnd*/

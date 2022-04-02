@@ -1,4 +1,6 @@
-﻿begin transaction
+﻿/*CreateTable*/
+
+begin transaction
 
  create table MtskSertifikaUcreti
  (
@@ -20,3 +22,5 @@
  grant select, insert, update, delete on MtskSertifikaUcreti to public
 
 commit transaction
+
+/*CreateTableEnd*/

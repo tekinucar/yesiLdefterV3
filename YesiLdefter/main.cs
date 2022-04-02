@@ -69,9 +69,11 @@ namespace YesiLdefter
 
         public main()
         {
+
             // ... 
             // 
             System.Globalization.CultureInfo tr = new System.Globalization.CultureInfo("tr-TR");
+
             System.Threading.Thread.CurrentThread.CurrentCulture = tr;
 
             #region appOpenSetDefaaultSkin
@@ -140,7 +142,7 @@ namespace YesiLdefter
 
             #endregion
 
-            if (v.SP_FIRM_USE_PACKAGE == "SEK/CEV/AYR/MAINTOP")
+            if (v.tMainFirm.MenuCode == "SEK/CEV/AYR/MAINTOP")
             {
                 System.Windows.Forms.Timer timerCihazLogGetIcmal = new System.Windows.Forms.Timer(this.components);
                 cl.CihazLog(this, timerCihazLogGetIcmal);
@@ -179,15 +181,7 @@ namespace YesiLdefter
                     t.WaitFormOpen(v.mainForm, "ProjectDB MSSQL Connection...");
                     t.Db_Open(v.active_DB.projectMSSQLConn);
                 }
-                if (v.active_DB.projectDBType == v.dBaseType.MySQL)
-                {
-                    //t.WaitFormOpen(v.mainForm, "ProjectDB MySQL Connection...");
-                    //t.Db_Open(v.active_DB.projectMySQLConn);
-                }
-                /*
-                barMSConn.Caption = v.active_DB.managerDBName;
-                barPrjConn.Caption = v.active_DB.projectDBName;
-                */
+                
                 t.WaitFormOpen(v.mainForm, "SysTypes Load ...");
                 t.SYS_Types_Read();
 
@@ -208,7 +202,7 @@ namespace YesiLdefter
             this.Text = "Üstad'ın yeşiL defteri   Ver : " +
                 v.tExeAbout.activeVersionNo.Substring(2, 6) + "." +
                 v.tExeAbout.activeVersionNo.Substring(9, 4) +
-                "    [ " + v.SP_FIRM_ID.ToString() + " : " + v.SP_FIRM_NAME + " ] ";
+                "    [ " + v.tMainFirm.FirmId.ToString() + " : " + v.tMainFirm.FirmShortName + " ] ";
         }
 
         void chechkedPaths()
@@ -218,6 +212,8 @@ namespace YesiLdefter
 
             //if (!exists)
             System.IO.Directory.CreateDirectory(v.EXE_TempPath);
+            System.IO.Directory.CreateDirectory(v.EXE_ScriptsPath);
+
         }
 
         #endregion
@@ -226,38 +222,37 @@ namespace YesiLdefter
 
         void preparingMenus()
         {
-            short menuType = mn.getCreateMenuType(v.SP_FIRM_USE_PACKAGE);
+            short menuType = mn.getCreateMenuType(v.tMainFirm.MenuCode);
 
-            //if (menuType )
-            
-            
-            
             // kullanıcının seçtiği firmanın kullandığı menü
             //
-            v.SP_FIRM_USE_PACKAGE_OLD = v.SP_FIRM_USE_PACKAGE;
+            v.tMainFirm.MenuCodeOld = v.tMainFirm.MenuCode;
             //
             if (menuType == 102)
             {
-                mn.Create_Menu(ribbon, v.SP_FIRM_USE_PACKAGE, "");
+                mn.Create_Menu(ribbon, v.tMainFirm.MenuCode, "");
                 mn.alterRibbon(ribbon, "");
 
                 ribbon.Minimized = false;
             }
             if (menuType == 109)
             {
-                mn.Create_Menu(toolboxControl1, v.SP_FIRM_USE_PACKAGE, "");
+                mn.Create_Menu(toolboxControl1, v.tMainFirm.MenuCode, "");
                 mn.alterRibbon(ribbon, "yesiL");
 
             }
-            
-            if (v.tUser.SP_USER_EMAIL == "tekinucar70@hotmail.com")
+
+            // Kullanıcıların Ortak Menüsü
+            //
+            mn.Create_Menu(ribbon, "UST/PMS/PMS/PublicUser", "");
+
+            if ((v.tUser.UserDbTypeId == 1) || // yazılım
+                (v.tUser.UserDbTypeId == 21))  // kurucu
             {
-                mn.Create_Menu(ribbon, "UST/T01/SYS/USERSPEED", "");
-
+                
                 t.WaitFormOpen(v.mainForm, "Menu Create ...");
-                mn.Create_Menu(ribbon, "UST/PMS/PMS/MAINMN", "");
+                mn.Create_Menu(ribbon, "UST/PMS/PMS/MsV3Menu", "");
             }
-
 
             setMenuItems();
         }
@@ -408,19 +403,21 @@ namespace YesiLdefter
         //btnFirmList
         private void btnFirmList_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
         {
-            // 
+            // ms_UserFirmList formundaki 
+            // btn_FirmListSec sonrası
+            //
             t.AllFormsClose();
             //
             setMainFormCaption();
 
             // kullanıcının seçtiği firmanın kullandığı menü
             //
-            if (v.SP_FIRM_USE_PACKAGE_OLD != v.SP_FIRM_USE_PACKAGE)
+            if (v.tMainFirm.MenuCodeOld != v.tMainFirm.MenuCode)
             {
                 // değişien firmanın menüsü 
-                v.SP_FIRM_USE_PACKAGE_OLD = v.SP_FIRM_USE_PACKAGE;
+                v.tMainFirm.MenuCodeOld = v.tMainFirm.MenuCode;
 
-                mn.Create_Menu(toolboxControl1, v.SP_FIRM_USE_PACKAGE, "");
+                mn.Create_Menu(toolboxControl1, v.tMainFirm.MenuCode, "");
             }
 
             t.getUserLookAndFeelSkins();
@@ -755,9 +752,9 @@ namespace YesiLdefter
             // tüm kullanıcılar için geçerli
             //reg.SetUstadRegistry("userSkin", e.Item.Value.ToString());
             // kullanıcı bazlı
-            //reg.SetUstadRegistry("userSkin_" + v.tUser.SP_USER_ID.ToString(), e.Item.Value.ToString());
+            //reg.SetUstadRegistry("userSkin_" + v.tUser.UserId.ToString(), e.Item.Value.ToString());
             // kullanıcı kullandığı her firma için ayrı ayrı
-            reg.SetUstadRegistry("userSkin_" + v.tUser.SP_USER_ID.ToString() + "_" + v.SP_FIRM_ID.ToString(),
+            reg.SetUstadRegistry("userSkin_" + v.tUser.UserId.ToString() + "_" + v.SP_FIRM_ID.ToString(),
                                  item.ToString());
             /*
             MessageBox.Show(

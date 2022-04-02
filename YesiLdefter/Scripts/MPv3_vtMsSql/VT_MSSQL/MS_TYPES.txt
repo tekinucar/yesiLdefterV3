@@ -218,11 +218,14 @@ begin transaction
  insert into MS_TYPES values ( 3, 0, 'SUBVIEW_EVENT',  1, 'PositionChanged', 'PositionChanged');
  insert into MS_TYPES values ( 3, 0, 'SUBVIEW_EVENT',  2, 'ButtonClick',     'ButtonClick');
 
+
  insert into MS_TYPES values ( 1, 0, 'DB_TYPE',  0, '', 'none');
  insert into MS_TYPES values ( 1, 0, 'DB_TYPE',  1, '', 'master');
  insert into MS_TYPES values ( 1, 0, 'DB_TYPE',  2, '', 'ManagerServer');
- insert into MS_TYPES values ( 1, 0, 'DB_TYPE',  3, '', 'Proje');
- --insert into MS_TYPES values ( 1, 0, 'DB_TYPE',  4, '', 'MainManagerServer'); iptal edildi
+ insert into MS_TYPES values ( 1, 0, 'DB_TYPE',  3, '', 'UstadCRM');
+ insert into MS_TYPES values ( 1, 0, 'DB_TYPE',  4, '', 'Project'); 
+
+
 
  insert into MS_TYPES values ( 1, 0, 'DEFAULT_TYPE',  0, '', '');
  insert into MS_TYPES values ( 1, 0, 'DEFAULT_TYPE',  1, '', 'Var (Integer)');

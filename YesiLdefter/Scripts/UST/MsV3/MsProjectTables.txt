@@ -1,0 +1,22 @@
+﻿
+begin transaction
+
+ create table MsProjectTables
+ (
+    Id              Int IDENTITY(1,1) NOT null,
+    IsActive        Bit               NOT null,
+	SectorTypeId    SmallInt          NOT null,
+    SchemaName      NVarChar(10)      null,     
+	TableName       nVarChar(50)      NOT null,     
+	ParentTable     NVarChar(50)      null, /* LookUp table lerin hangi tabloya bağlı olduğu */ 
+	HasATrigger     Bit               null,
+	SqlScript       varchar(MAX)      null,
+
+   Constraint pk_MsProjectTables primary key (Id)
+ )
+
+ create index X_MsProjectTables_01 on MsProjectTables (SectorTypeId, TableName)
+
+ grant select, insert, update, delete on MsProjectTables to public
+
+commit transaction

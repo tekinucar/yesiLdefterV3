@@ -1,13 +1,6 @@
-﻿USE [u7093888_Ustad01]
-GO
+﻿/*CreateProcedure*/
 
-SET ANSI_NULLS ON
-GO
-
-SET QUOTED_IDENTIFIER ON
-GO
-
-ALTER PROCEDURE [dbo].[prc_KrediOdemePlaniOlustur] (@firmId int, @cariTipiId smallInt, @cariId int)  
+CREATE PROCEDURE [dbo].[prc_KrediOdemePlaniOlustur] (@firmId int, @cariTipiId smallInt, @cariId int)  
 AS BEGIN
   /* 
   declare @firmId int
@@ -183,6 +176,6 @@ AS BEGIN
 
 END -- procedure
 
-GO
+/*CreateProcedureEnd*/
 
 

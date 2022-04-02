@@ -1,5 +1,4 @@
 ﻿using DevExpress.XtraEditors;
-using MySql.Data.MySqlClient;
 using System;
 using System.Data;
 using System.Data.SqlClient;
@@ -222,6 +221,7 @@ namespace Tkn_Save
             vt.DBaseNo = v.dBaseNo.Manager;
             vt.DBaseType = v.dBaseType.MSSQL;
             vt.DBaseName = v.active_DB.managerDBName;
+            vt.Cargo = "data";
 
             string master = MyRecord(ds_Target, vt, target_pos, (byte)v.Save.SQL_OLUSTUR_IDENTITY_YOK);
 
@@ -238,6 +238,7 @@ namespace Tkn_Save
             vt.DBaseNo = v.dBaseNo.Manager;
             vt.DBaseType = v.dBaseType.MSSQL;
             vt.DBaseName = v.active_DB.managerDBName;
+            vt.Cargo = "data";
 
             int j = ds_Target.Tables[0].Rows.Count;
 
@@ -468,13 +469,7 @@ namespace Tkn_Save
                 end = v.SP_MSSQL_END;           // = " commit transaction " + ENTER;
                 line_end = v.SP_MSSQL_LINE_END; // = ENTER;
             }
-            if (vt.DBaseType == v.dBaseType.MySQL)
-            {
-                begin = v.SP_MySQL_BEGIN;       // = " start transaction; " + ENTER;
-                end = v.SP_MySQL_END;           // = " commit; " + ENTER;
-                line_end = v.SP_MySQL_LINE_END; // = ";" + ENTER;
-            }
-
+            
             // Gelen kaydın Insert ve Edit mi olmasına karar veriliyor
             // Tabloların 1. fieldi her zaman IDENTITY ID  kabul ediliyor
             // Eğer farklı bir durum söz konusu ise başka bir metodla başınızın çaresine bakın   Tkn
@@ -705,16 +700,23 @@ namespace Tkn_Save
             {
                 line_end = v.SP_MSSQL_LINE_END; // = ENTER;
             }
-            if (vt.DBaseType == v.dBaseType.MySQL)
-            {
-                line_end = v.SP_MySQL_LINE_END; // = ";" + ENTER;
-            }
 
             //if (State == "dsInsert")
             //    MyStr = " insert into [" + Table_Name + "] (";
 
+
+
+            if (t.IsNotNull(SchemasCode) == false) 
+                SchemasCode = "[dbo].";
+
+            if (SchemasCode.IndexOf("[") == -1)
+                SchemasCode = "[" + SchemasCode + "].";
+
+            if (SchemasCode.IndexOf(".") == -1)
+                SchemasCode = SchemasCode + "."; 
+
             //if (State == "dsEdit")
-            MyEdit = "  update "+ SchemasCode + ".[" + Table_Name + "] set ";
+            MyEdit = "  update "+ SchemasCode + "[" + Table_Name + "] set ";
 
             tableFieldsName = Table_Name + "_FIELDS";
 
@@ -744,18 +746,12 @@ namespace Tkn_Save
                     // varchar(max), nvarchar(max) olunca -1 geliyor
                     if (fmax_length == -1) fmax_length = 128000;
 
+                    if (ftype == 36) // GUID / uniqueidentifier
+                        fmax_length = 128000;
                     if (ftype == 231) // nVarchar ise
                         fmax_length = fmax_length / 2;
-                }
 
-                if (vt.DBaseType == v.dBaseType.MySQL)
-                {
-                    //COLUMN_NAME, ORDINAL_POSITION, DATA_TYPE, COLUMN_TYPE 
-                    fname = ds.Tables[tableFieldsName].Rows[i]["COLUMN_NAME"].ToString();
-                    ftype = mySQL_FieldType(ds.Tables[tableFieldsName].Rows[i]["DATA_TYPE"].ToString());
-                    fidentity = (Boolean)((ds.Tables[tableFieldsName].Rows[i]["EXTRA"].ToString() == "auto_increment"));
                 }
-
 
                 // burada olmaz bir daha açma
                 //ValidationInsert = t.Set(ds.Tables[tableFieldsName + "2"].Rows[i]["VALIDATION_INSERT"].ToString(), "", "False");
@@ -1076,7 +1072,7 @@ namespace Tkn_Save
                             fieldNewValue = " [" + fname + "] = " + "null, ";
                     }
 
-                    //* image 34, varbinary (max) 165 
+                    //* img, image 34, varbinary (max) 165 
                     if ((ftype == 34) || (ftype == 165))
                     {
                         // 1. Resim
@@ -1267,10 +1263,10 @@ namespace Tkn_Save
 
                     // sorunu bulamadım
                     MyInsert =
-                        " if ( Select count(*) ADET from "+ SchemasCode + ".[" + Table_Name + "] where 0 = 0 " + v.ENTER
+                        " if ( Select count(*) ADET from "+ SchemasCode + "[" + Table_Name + "] where 0 = 0 " + v.ENTER
                       + MyIfW + " ) = 0 " + v.ENTER
                       + " begin " + v.ENTER
-                      + " insert into "+ SchemasCode + ".[" + Table_Name + "] ( " + v.ENTER
+                      + " insert into "+ SchemasCode + "[" + Table_Name + "] ( " + v.ENTER
                       + MyField + " ) values " + v.ENTER
                       + " ( " + MyValue + " ) " + line_end
                       + " --IdentityID " + v.ENTER
@@ -1285,7 +1281,7 @@ namespace Tkn_Save
                 else
                 {
                     MyInsert = 
-                        " insert into "+ SchemasCode + ".[" + Table_Name + "] ( " + v.ENTER +
+                        " insert into "+ SchemasCode + "[" + Table_Name + "] ( " + v.ENTER +
                           MyField + " ) values " + v.ENTER +
                         " ( " + MyValue + " ) " + line_end +
                         " --IdentityID " + line_end;
@@ -1374,12 +1370,12 @@ namespace Tkn_Save
 
             if (SQL != "")
             {
-
+                /*
                 if (vt.DBaseType == v.dBaseType.MySQL)
                 {
                     SQL = t.SQLPreparing(SQL, vt);
                 }
-
+                */
                 v.SQLSave = v.ENTER + SQL + v.SQLSave;
 
                 SqlConnection SqlConn = vt.msSqlConnection;
@@ -1393,12 +1389,7 @@ namespace Tkn_Save
                     t.Db_Open(SqlConn);
                     SqlKomut = new SqlCommand(SQL, SqlConn);
                 }
-                if (vt.DBaseType == v.dBaseType.MySQL)
-                {
-                    //t.Db_Open(MySqlConn);
-                    //MySqlKomut = new MySqlCommand(SQL, MySqlConn);
-                }
-
+                
                 // 1. Resim
                 if (t.IsNotNull(v.con_Images_FieldName) && (v.con_Images != null))
                 {
@@ -1427,11 +1418,6 @@ namespace Tkn_Save
                         if (vt.DBaseType == v.dBaseType.MSSQL)
                             rec_id = SqlKomut.ExecuteScalar().ToString();
 
-                        if (vt.DBaseType == v.dBaseType.MySQL)
-                        {
-                            //t.Db_Open(MySqlConn);
-                            //rec_id = MySqlKomut.ExecuteScalar().ToString();
-                        }
                         /// ValidationInsert devreye girince kayıt gerçekleşmeden dönebiliyor
                     }
                     catch (Exception e)
@@ -1441,14 +1427,7 @@ namespace Tkn_Save
                         /// işlem bu sefer gerçekleşiyor
                         /// bu geçici çözümdür
                         /// 
-                        if ((vt.DBaseType == v.dBaseType.MySQL) &&
-                            (e.Message == "Fatal error encountered during command execution."))
-                        {
-                            //t.Db_Open(MySqlConn);
-                            //rec_id = MySqlKomut.ExecuteScalar().ToString();
-                        }
-                        else
-                            MessageBox.Show("HATA : Insert : " + v.ENTER + e.Message + v.ENTER2 + SQL);
+                        MessageBox.Show("HATA : Insert : " + v.ENTER + e.Message + v.ENTER2 + SQL);
                         //throw;
                     }
 

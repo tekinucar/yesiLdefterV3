@@ -1,4 +1,4 @@
-﻿
+﻿/*CreateTable*/
 
 begin transaction
 
@@ -42,10 +42,18 @@ begin transaction
 
 commit transaction
 
+/*CreateTableEnd*/
+
+
+/*CreateLkpTable*/
 
 -- ------------------------------------------------------- 
 -- KurumTipiId
 -- ------------------------------------------------------- 
+
+IF EXISTS (Select * From sys.objects WHERE name = 'MebKurumKurumTipi')
+drop table [Lkp].[MebKurumKurumTipi]
+
 create table Lkp.MebKurumKurumTipi
 (
    Id          Int Unique Not Null,
@@ -62,4 +70,4 @@ INSERT INTO Lkp.MebKurumKurumTipi (Id, KurumTipi, GrupTipiId)
   (2, N'İşMak', 1),
   (3, N'SRC',   1)
 
-
+/*CreateLkpTableEnd*/

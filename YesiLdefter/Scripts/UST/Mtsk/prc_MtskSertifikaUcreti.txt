@@ -1,11 +1,4 @@
-﻿USE [u7093888_Ustad01]
-GO
-
-SET ANSI_NULLS ON
-GO
-
-SET QUOTED_IDENTIFIER ON
-GO
+﻿/*CreateProcedure*/
 
 CREATE PROCEDURE [dbo].[prc_MtskSertifikaUcreti] (@FirmId int, @Yil int, 
     @MevcutSertifikaTipiId smallint, @IstenenSertifikaTipiId smallint)  
@@ -40,4 +33,5 @@ AS BEGIN
    	 
 
 END -- procedure
-GO
+
+/*CreateProcedureEnd*/

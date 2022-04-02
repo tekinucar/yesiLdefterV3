@@ -1,17 +1,10 @@
-﻿USE [u7093888_Ustad01]
-GO
-
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
+﻿/*CreateProcedure*/
 
 CREATE PROCEDURE [dbo].[prc_MtskUygulamaDersPlaniAracVePersonel] (@EgitimAraciId varchar(20), @PersonelId varchar(20))  
 AS BEGIN
 
  declare @bugun date = getdate()
  set @bugun = DATEADD(ww, DATEDIFF(ww,0,@bugun), 0)
-
 
  -- sadece Araca ait olan planlar
  Select  
@@ -168,3 +161,5 @@ AS BEGIN
  and [MtskUygulamaliDers].DersTarihi >= @bugun
 
 END -- procedure
+
+/*CreateProcedureEnd*/
