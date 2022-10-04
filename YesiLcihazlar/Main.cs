@@ -23,7 +23,9 @@ namespace YesiLcihazlar
 
         public Main()
         {
+
             InitializeComponent();
+            
             myInitialize();
 
             #region UserLOGIN

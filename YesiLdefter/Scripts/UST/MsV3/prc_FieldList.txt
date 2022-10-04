@@ -1,0 +1,51 @@
+﻿
+CREATE PROCEDURE [dbo].[prc_FieldList] ( 
+    @workDBName varchar(100) 
+   ,@tableName varchar(100) 
+  )  
+AS BEGIN
+
+ /* 
+ declare @workDBName varchar(100) 
+ declare @tableName varchar(100) 
+ set @workDBName = 'u7093888_Ustad01'
+ set @tableName = 'BelgeMaliyetKaynakTipi'
+ */
+ 
+ declare @cumle varchar(2000) 
+ 
+ set @cumle = '
+   Select 
+     a.column_id
+   , a.name as fieldName
+   , convert(smallint, a.system_type_id) as system_type_id
+   , (case a.system_type_id when 231 then  a.max_length / 2 else a.max_length end) as max_length
+   , a.is_identity 
+  From 
+  [{workDb}].sys.columns a, 
+  [{workDb}].sys.tables b 
+  Where b.object_id = a.object_id 
+  and      b.name = ''{tableName}''  
+  '
+  set @cumle = REPLACE(@cumle, '{workDb}', @workDBName) 
+  set @cumle = REPLACE(@cumle, '{tableName}', @tableName) 
+
+ if ((@workDBName = '') or
+     (@workDBName = 'null') or
+     (@tableName = '') or
+     (@tableName = 'null')) 
+ begin
+   set @cumle = '
+   Select 
+     0 as column_id
+   , ''name'' as fieldName
+   , 0 as system_type_id
+   , 0 as max_length
+   , 0 is_identity '
+ end 
+
+  --print @cumle
+
+  execute(@cumle) 
+
+END -- procedure

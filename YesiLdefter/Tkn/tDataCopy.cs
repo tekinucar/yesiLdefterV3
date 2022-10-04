@@ -49,6 +49,13 @@ namespace Tkn_DataCopy
             string source_ip_code = t.Set(ds_DC.Tables[0].Rows[0]["SOURCE_IP_CODE"].ToString(), "", "");
             string source_checkfname = t.Set(ds_DC.Tables[0].Rows[0]["SOURCE_CHECK_FNAME"].ToString(), "", "");
             string source_checkvalue = t.Set(ds_DC.Tables[0].Rows[0]["SOURCE_CHECK_VALUE"].ToString(), "", "");
+            string source_operandType = t.Set(ds_DC.Tables[0].Rows[0]["SOURCE_OPERAND_TYPE"].ToString(), "", "");
+            string target_checkfname = t.Set(ds_DC.Tables[0].Rows[0]["TARGET_CHECK_FNAME"].ToString(), "", "");
+            string target_checkvalue = t.Set(ds_DC.Tables[0].Rows[0]["TARGET_CHECK_VALUE"].ToString(), "", "");
+            string target_operandType = t.Set(ds_DC.Tables[0].Rows[0]["TARGET_OPERAND_TYPE"].ToString(), "", "");
+            bool sourceOnay = true;
+            bool targetOnay = true;
+            string read_value = "";
 
             /// * 'TROW_TYPE'  row_type
             /// * 0, 'none'
@@ -120,8 +127,7 @@ namespace Tkn_DataCopy
                     }
                 }
             }
-
-
+            
             #endregion eksik bilgi kontrolü
 
             #region işlem yapılacak Kaynak ve Hedef DataSetleri
@@ -164,6 +170,28 @@ namespace Tkn_DataCopy
                 //ds_Source = t.Find_DataSet(tForm, "", Source_TableIPCode, "");
                 t.Find_DataSet(tForm, ref ds_Source, ref dN_Source, Source_TableIPCode);
             }
+
+            if ((t.IsNotNull(source_checkfname)) &
+                (t.IsNotNull(source_checkvalue)) &
+                (t.IsNotNull(source_operandType)) &
+                (dN_Source.Position > -1))
+            {
+                read_value = ds_Source.Tables[0].Rows[dN_Source.Position][source_checkfname].ToString();
+                if (read_value == "") read_value = "0";
+                sourceOnay = t.myOperandControl(read_value, source_checkvalue, source_operandType);
+                if (sourceOnay == false) return sourceOnay;
+            }
+            if ((t.IsNotNull(target_checkfname)) &
+                (t.IsNotNull(target_checkvalue)) &
+                (t.IsNotNull(target_operandType)) &
+                (dN_Target.Position > -1))
+            {
+                read_value = ds_Target.Tables[0].Rows[dN_Target.Position][target_checkfname].ToString();
+                if (read_value == "") read_value = "0";
+                targetOnay = t.myOperandControl(read_value, target_checkvalue, target_operandType);
+                if (targetOnay == false) return targetOnay;
+            }
+
             #endregion işlem yapılacak Kaynak ve Hedef DataSetleri
 
             #region Soru var ise
@@ -939,9 +967,11 @@ namespace Tkn_DataCopy
                 {
                     pos = ds_Target.Tables[0].Rows.Count - 1;
 
+                    v.con_LkpOnayChange = true; // tDefaultValue_And_Validation çalışmasın diye
                     v.con_Cancel = true;
                     dN_Target.Position = pos;
                     dN_Target.Tag = pos;
+                    v.con_LkpOnayChange = false;
                 }
 
                 if (work_type == 3)

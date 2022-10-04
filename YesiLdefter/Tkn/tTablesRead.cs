@@ -30,23 +30,6 @@ namespace Tkn_TablesRead
                 t.SQL_Read_Execute(v.dBaseNo.Manager, v.dsMS_Tables_IP, ref tSql, "MS_TABLES_IP", function_name);
             if (ds != null)
                 t.SQL_Read_Execute(v.dBaseNo.Manager, ds, ref tSql, "MS_TABLES_IP", function_name);
-
-            //int i1 = TableIPCode.IndexOf("3S_");
-            //if ( i1 == -1) // Tablo ismi 3S_ ile başlamıyorsa
-            //{
-            //    if (ds == null)
-            //        t.SQL_Read_Execute(v.dBName.Manager, v.dsMS_Tables_IP, ref tSql, "MS_TABLES_IP", function_name);
-            //    if (ds != null)
-            //        t.SQL_Read_Execute(v.dBName.Manager, ds, ref tSql, "MS_TABLES_IP", function_name);
-            //}
-            //else // Tablo ismi 3S_ ile başlıyorsa
-            //{
-            //    if (ds == null)
-            //        t.SQL_Read_Execute(v.dBName.MainManager, v.dsMS_Tables_IP, ref tSql, "MS_TABLES_IP", function_name);
-            //    if (ds != null)
-            //        t.SQL_Read_Execute(v.dBName.MainManager, ds, ref tSql, "MS_TABLES_IP", function_name);
-            //}
-
         }
 
         public void MS_Fields_IP_Read(DataSet ds, string TableIPCode)

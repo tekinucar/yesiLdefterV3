@@ -1,0 +1,52 @@
+﻿/*CreateFunction*/
+
+
+CREATE FUNCTION [dbo].[fnc_GetFieldTypeFirstValue](
+  @fieldTypeId int
+)  
+RETURNS varchar(100)
+AS   
+BEGIN
+    -- if ((ftype == 175) | (ftype == 167) | (ftype == 99)  | (ftype == 35) | (ftype == 239) | (ftype == 231) | (ftype == 36)) = null
+    -- if ((ftype == 56)  | (ftype == 48)  | (ftype == 127) | (ftype == 52) | ftype == 60)   | (ftype == 62)  | (ftype == 59) | (ftype == 108))
+    -- if ((ftype == 58) || (ftype == 40) || (ftype == 61))
+
+    declare @value varchar(100)
+	set @value = ''
+
+    if (@fieldTypeId = 56)  set @value = '-99' --'int'
+    if (@fieldTypeId = 52)  set @value = '-99' --'smallint'
+    if (@fieldTypeId = 127) set @value = '-99' --'bigint'
+    if (@fieldTypeId = 104) set @value = '0' --'bit'
+    if (@fieldTypeId = 108) set @value = '-99' -- 'numeric(' + @value + ')'
+    if (@fieldTypeId = 62)  set @value = '-99' --'float'
+    if (@fieldTypeId = 59)  set @value = '-99' --'real'
+    if (@fieldTypeId = 60)  set @value = '-99' --'money'
+    if (@fieldTypeId = 48)  set @value = '-99' --'tinyint'
+
+    if (@fieldTypeId = 231) set @value = '''null''' --'varchar(' + @value + ')'
+    if (@fieldTypeId = 167) set @value = '''null''' --'varchar(' + @value + ')'
+    if (@fieldTypeId = 175) set @value = '''null''' --'char(' + @value + ')'
+    if (@fieldTypeId = 35)  set @value = '''null''' --'text'
+    -- 36 = uniqueidentifier
+    if (@fieldTypeId = 36)  set @value = '''null''' --'varchar(' + @value + ')' 
+    if (@fieldTypeId = 99)  set @value = '''null''' --'ntext'
+
+	--if (@fieldTypeId = 58)  set @value = 'Convert(Date, '''+convert(varchar(10), convert(date, getdate(), 103))+''', 103) '   --'smalldatetim'
+    --if (@fieldTypeId = 40)  set @value = 'Convert(Date, '''+convert(varchar(10), convert(date, getdate(), 103))+''', 103) '   
+	--if (@fieldTypeId = 61)  set @value = 'Convert(Date, '''+convert(varchar(10), convert(date, getdate(), 103))+''', 103) '   --'date'
+    if (@fieldTypeId = 58)  set @value = 'Convert(Date, '':BUGUN'', 103) '   --'smalldatetim'
+    if (@fieldTypeId = 40)  set @value = 'Convert(Date, '':BUGUN'', 103) '   
+	if (@fieldTypeId = 61)  set @value = 'Convert(Date, '':BUGUN'', 103) '   --'date'
+
+    if (@fieldTypeId = 41)  set @value = 'null' --'time'
+
+    if (@fieldTypeId = 34)  set @value = 'null' --'image'
+    if (@fieldTypeId = 173) set @value = 'null' --'binary'
+    if (@fieldTypeId = 165) set @value = 'null' --'varbinary'
+
+    return @value
+
+END --
+
+/*CreateFunctionEnd*/

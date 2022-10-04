@@ -14,19 +14,20 @@ begin transaction
     UserId          Int IDENTITY(1,1) NOT NULL,
 	IsActive        Bit               NOT NULL,
 
-	UserFullName    nVarchar(100) null,
-	UserFirstName   nVarchar(50)  null,
-	UserLastName    nVarchar(50)  null,
-	UserTcNo        varchar(11)   null,
-	UserMobileNo    varchar(11)   null,
-	UserEMail       varchar(50)   null,
-	FirmGUID        varchar(50)   null,
-    About           nVarchar(250) null,
-	UserKey         nVarchar(50)  null,
-	JobTypeId       SmallInt      null,
-	DbTypeId        SmallInt      null,
-    RecordDate      SmallDatetime null,
-    
+    UserGUID        varchar(50)   null, 11
+	UserFullName    nVarchar(100) null, 2
+	UserFirstName   nVarchar(50)  null,3
+	UserLastName    nVarchar(50)  null,4
+	UserTcNo        varchar(11)   null,5
+	UserMobileNo    varchar(11)   null,6
+	UserEMail       varchar(50)   null,7
+	FirmGUID        varchar(50)   null,8
+    About           nVarchar(250) null,9
+	UserKey         nVarchar(50)  null,21
+	JobTypeId       SmallInt      null,2
+	DbTypeId        SmallInt      null,3
+    RecordDate      SmallDatetime null,31
+        
     MebbisCode      nVarchar(30)  null,
     MebbisPass      nVarchar(30)  null, 
     
@@ -45,9 +46,9 @@ commit transaction
 
 
 
-create trigger [dbo].[trg_UstadUsers] on [dbo].[UstadUsers]
-after insert, update
-as begin
+CREATE TRIGGER [dbo].[trg_UstadUsers] ON [dbo].[UstadUsers]
+AFTER INSERT, UPDATE
+AS BEGIN
 
     declare cursor_UstadUsers cursor for select UserId from Inserted
     declare @curId bigint
@@ -56,16 +57,17 @@ as begin
 
     FETCH NEXT FROM cursor_UstadUsers INTO @curId
 
+	declare @UserGUID        varchar(50)
 	declare @UserFullName    nVarchar(100)
 	declare @UserFirstName   nVarchar(50)
 	declare @UserLastName    nVarchar(50)
 	/*
 	declare @UserTcNo        varchar(11)
 	declare @UserMobileNo    varchar(11)
-	declare @eMail       varchar(50)
+	declare @UserEMail       varchar(50)
 	declare @FirmGUID        varchar(50)
     declare @About           nVarchar(250)
-	declare @Key         nVarchar(50)
+	declare @UserKey         nVarchar(50)
 	declare @JobTypeId       SmallInt
 	*/
 	declare @RecordDate      SmallDatetime
@@ -73,7 +75,8 @@ as begin
     While @@FETCH_STATUS = 0
     begin
         select 
-	      @UserFullName = isnull(ins.UserFullName,'')
+	      @UserGUID = isnull(ins.UserGUID,'')
+		, @UserFullName = isnull(ins.UserFullName,'')
 	    , @UserFirstName = isnull(ins.UserFirstName,'')
 	    , @UserLastName = isnull(ins.UserLastName,'')
         --UserTcNo
@@ -117,6 +120,14 @@ as begin
               UserFullName = RTRIM(LTRIM(@UserFirstName)) + ' ' + RTRIM(LTRIM(@UserLastName))
             where UserId = @curId
         end
+        
+        if ((@UserGUID = '') or 
+		    (@UserGUID is null))
+    	begin
+    	  update UstadUsers set 
+          UserGUID = NEWID()
+          where UserId = @curId
+    	end 
 
 		if (@RecordDate is null)
 		begin
@@ -131,11 +142,9 @@ as begin
     CLOSE cursor_UstadUsers
     DEALLOCATE cursor_UstadUsers   
 
-end -- trigger
-
+END -- trigger
 
 alter table [dbo].[UstadUsers] ENABLE TRIGGER [trg_UstadUsers]
-GO
 
 
 /* üstad kullanıcıları için database hakları */  

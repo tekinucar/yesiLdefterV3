@@ -1,0 +1,55 @@
+﻿CREATE PROCEDURE [dbo].[prc_MsDataCopyLineList] ( 
+    @dataCopyCode varchar(100) )  
+AS BEGIN
+
+  --declare @dataCopyCode varchar(100)
+  --set @dataCopyCode = ''
+  declare @cumle varchar(4000)   
+
+  set @cumle = 
+  ' select  
+        a.[REF_ID]
+      , a.[DC_CODE]
+      , a.[LINE_NO]
+      , a.[DC_SOURCE_TYPE]
+      , a.[TARGET_TABLEIPCODE]
+      , a.[TARGET_FIELDNAME]
+      , a.[SOURCE_TABLEIPCODE]
+      , a.[SOURCE_FIELDNAME]
+      , a.[INPUTBOX_MESSAGE]
+      , a.[INPUTBOX_TYPE]
+      , a.[INPUTBOX_DEFAULT1]
+      , a.[INPUTBOX_DEFAULT2]
+      , a.[CHECK_FIELD]
+      , c.FIELD_NO   LKP_FIELD_NO
+      , c.FIELD_NAME LKP_FIELD_NAME
+      , c.FCAPTION   LKP_FCAPTION
+
+ from MS_FIELDS_IP d 
+
+   left outer join MS_FIELDS c  on ( 
+       c.TABLE_CODE = d.TABLE_CODE 
+   and c.FIELD_NO = d.FIELD_NO 
+   and c.SOFTWARE_CODE = d.SOFTWARE_CODE 
+   and c.PROJECT_CODE = d.PROJECT_CODE
+   )
+  
+   left outer join MS_DC b on (  
+            b.TARGET_IP_CODE = d.IP_CODE 
+        and b.TARGET_TABLE_CODE = (d.SOFTWARE_CODE +''/''+ d.PROJECT_CODE +''/''+ d.TABLE_CODE)
+   ) 
+   left outer join MS_DC_LINE a on ( a.DC_CODE = b.DC_CODE and a.TARGET_FIELDNAME = c.FIELD_NAME )
+
+ where 0 = 0
+ and b.DC_CODE = ''{_dc_code_}''  
+  
+ order by c.FIELD_NO
+ '
+  
+ -- D.SD.SET --
+  
+ set @cumle = REPLACE(@cumle, '{_dc_code_}', @dataCopyCode) 
+  
+ execute(@cumle)
+
+END -- procedure

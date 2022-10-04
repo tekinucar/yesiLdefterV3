@@ -40,7 +40,7 @@ namespace Tkn_CreateObject
             int RefID = t.Set(row_Table["REF_ID"].ToString(), "", 0);
             string TableName = t.Set(row_Table["LKP_TABLE_NAME"].ToString(), "", "");
             string navigator = t.Set(row_Table["NAVIGATOR"].ToString(), "", "");
-            byte DBaseName = t.Set(row_Table["LKP_DBASE_NAME"].ToString(), "", (byte)3);
+            byte DBaseNo = t.Set(row_Table["LKP_DBASE_TYPE"].ToString(), "", (byte)3);
 
             string Key_FName = t.Set(row_Table["LKP_KEY_FNAME"].ToString(), "", "");
             string Master_Key_FName = t.Set(row_Table["MASTER_KEY_FNAME"].ToString(), row_Table["LKP_MASTER_KEY_FNAME"].ToString(), "");
@@ -175,7 +175,7 @@ namespace Tkn_CreateObject
             // Tablonun Adını tutuyor, db.MyRecord() için gerekli
             tDataNavigator.AccessibleDefaultActionDescription = TableName;
             // Database in Türünü tutuyor, db.MyRecord() için gerekli
-            tDataNavigator.AccessibleDescription = DBaseName.ToString();
+            tDataNavigator.AccessibleDescription = DBaseNo.ToString();
 
             #endregion DataNavigator
 
@@ -397,7 +397,7 @@ namespace Tkn_CreateObject
             //Int16 width35 = 35; // w2
             Int16 width70 = 70; // width
             Int16 width90 = 90; // w3
-            Int16 width120 = 120; // w4
+            //Int16 width120 = 120; // w4
 
             string xTableIPCode = TableIPCode;
 
@@ -3436,10 +3436,11 @@ namespace Tkn_CreateObject
                 tToggleSwitch.Location = new System.Drawing.Point(250, 1);
                 tToggleSwitch.Size = new System.Drawing.Size(125, 24);//(200, 24);
                 tToggleSwitch.Properties.AccessibleDefaultActionDescription = TableIPCode;
-                tToggleSwitch.Properties.OffText = "Liste"; //"Liste üzerinde Arama";
-                tToggleSwitch.Properties.OnText = "Şartlı";  //"Data içinde Arama";
+                tToggleSwitch.Properties.OffText = "Listeden Arama"; //"Liste üzerinde Arama";
+                tToggleSwitch.Properties.OnText = "Şartlı Arama";  //"Data içinde Arama";
                 tToggleSwitch.TabIndex = 3;
-
+                tToggleSwitch.BorderStyle = DevExpress.XtraEditors.Controls.BorderStyles.NoBorder;
+                
                 //tToggleSwitch.IsOn = (v.search_CARI_ARAMA_TD == v.search_inData);
                 /// findType = 100 ise standart find
                 /// findType = 200 ise list && data  yı işaret ediyor 

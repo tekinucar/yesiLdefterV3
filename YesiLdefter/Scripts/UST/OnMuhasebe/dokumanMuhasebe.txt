@@ -11,13 +11,13 @@
 -- ---------------------------------------------------------------------------
 --   Hesap Tabloları 
 
-2001 : crh : Cari Hesabı     : HesapCari.Id   as CariId    : ( müşteri, tedarikci, personel )
-2002 : fnh : Finans Hesabı   : HesapFinans.Id as FinansId  : ( kasa ve banka araçları )
-2003 : mlh : Maliyet Hesabı  : HesapFinans.Id as MaliyetId : ( maliyet muhasebe hesapları )
-2004 : vrh : Varlık Hesabı   : HesapFinans.Id as VarlikId  : ( varlıklar, telekom hesaplar, )
-2005 : sth : Stok Hesabı     : HesapStok.Id   as StokId    : ( tüm stoklar )
-2006 : hzh : Hizmet Hesabı   : ??? as HizmetId  : ( verilen hizmetler hesabı ) 
-2007 : vzh : Vezne Hesabı    : HesapVezne.Id  as VezneId   : ( vezne hesapları )
+2001 : crh : Cari Hesabı     : OnmHesapCari.Id   as CariId    : ( müşteri, tedarikci, personel )
+2002 : fnh : Finans Hesabı   : OnmHesapFinans.Id as FinansId  : ( kasa ve banka araçları )
+2003 : mlh : Maliyet Hesabı  : OnmHesapFinans.Id as MaliyetId : ( maliyet muhasebe hesapları )
+2004 : vrh : Varlık Hesabı   : OnmHesapFinans.Id as VarlikId  : ( varlıklar, telekom hesaplar, )
+2005 : sth : Stok Hesabı     : OnmHesapStok.Id   as StokId    : ( tüm stoklar )
+2006 : hzh : Hizmet Hesabı   : ???               as HizmetId  : ( verilen hizmetler hesabı ) 
+2007 : vzh : Vezne Hesabı    : OnmHesapVezne.Id  as VezneId   : ( vezne hesapları )
 -- ------------------------------------------------------------------------------------------
 
 
@@ -98,6 +98,10 @@ bml: BelgeMaliyet nin yapısı
      ne kadar  ( maliyet tutarları )
      hakkında bilgileri tutar
 
+sb : stok belgesi
+
+mb : maliyet belgesi
+
 
 tt : BelgeMakbuz un yapısı ( tahsil/tediye ) 
    : İşlem kaydı 2 (iki) taraf arasında gerçekleşir
@@ -151,16 +155,16 @@ tt için örnek taraflar, tt : Tahsil ve Tediye işlemi
 hp için örnek işlem ( AçıkBelge )
     
   KaynakBelgeId
+
   sb : stokBelgesi
   mb : maliyetBelgesi
+
   +zaman, tutar, cari detayları ...
 
 
 -- ---------------------------------------------------------------------------
 
 mb : MaliyetBelgesi nin yapisi
-
-   
 
 Maliyet Belge yapısı
 
@@ -649,7 +653,7 @@ AltCesit : 3,5
 118. Diğer Menkul Kıymetler
 119. Menkul Kıymetler Değer Düşüklüğü Karşılığı(-)
 12. Ticari Alacaklar
-120. Alıcılar
+120. Alıcılar  ( Bu hesaptaki alacakların vadesi 1 yıla kadardır. )
 121. Alacak Senetleri
 122. Alacak Senetleri Reeskontu(-)
 124. Kazanılmamış Finansal Kiralama Faiz Gelirleri(-)
@@ -694,7 +698,7 @@ AltCesit : 3,5
 2. DURAN VARLIKLAR
 
 22. Ticari Alacaklar
-220. Alıcılar
+220. Alıcılar  ( Bu hesaptaki alacakların vadesi 1 yıldan daha fazladır. )
 221. Alacak Senetleri
 222. Alacak Senetleri Reeskontu(-)
 224. Kazanılmamış Finansal Kiralama Faiz Gelirleri(-)
@@ -771,7 +775,7 @@ AltCesit : 3,5
 308. Menkul Kıymetler İhraç Farkı(-)
 309. Diğer Mali Borçlar
 32. Ticari Borçlar
-320. Satıcılar
+320. Satıcılar  ( Bu hesaptaki borçların vadesi 1 yıla kadardır. )
 321. Borç Senetleri
 322. Borç Senetleri Reeskontu(-)
 326. Alınan Depozito Ve Teminatlar
@@ -820,7 +824,7 @@ AltCesit : 3,5
 408. Menkul Kıymetler İhraç Farkı(-)
 409. Diğer Mali Borçlar
 42. Ticari Borçlar
-420. Satıcılar
+420. Satıcılar ( Bu hesaptaki borçların vadesi 1 yıldan daha fazladır. )
 421. Borç Senetleri
 422. Borç Senetleri Reeskontu(-)
 426. Alınan Depozito Ve Teminatlar

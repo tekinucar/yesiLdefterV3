@@ -263,10 +263,9 @@ INSERT INTO [dbo].[MsWebNodeItems]
 	VALUES
 		   ( 680, 'MTSKARAC', 1 , 1, 'Hizmette' ),    -- Aracın durumu
 		   ( 680, 'MTSKARAC', 1 , 2, 'Hizmet Dışı' ),
+		   ( 680, 'MTSKARAC', 1 , 3, 'Trafik Sigortası Süresi Doldu' ),
 		   ( 680, 'MTSKARAC', 1 , 1, 'Manuel' ),      -- Şanzıman
 		   ( 680, 'MTSKARAC', 1 , 2, 'Otomatik' )
-
-
 
 -- -----------------------------------------------------------------------------
 --   MTSKSIMULATOR
@@ -652,23 +651,42 @@ INSERT INTO [dbo].MsWebNodeItems (NodeId, PageCode, IsActive, ItemValue, ItemTex
 ( 321, 'MTSKDONEMTEORIK', 1, '10',  'Derslik 10' )
 
 
-
-delete [dbo].MsWebNodeItems where NodeId = 1324 and PageCode = 'MTSKDONEMUYGULAMA'
-
-INSERT INTO [dbo].MsWebNodeItems (NodeId, PageCode, IsActive, ItemValue, ItemText)
- VALUES 
-( 1324, 'MTSKDONEMUYGULAMA', 1, '-1',  '--Seçiniz--' ),
-( 1324, 'MTSKDONEMUYGULAMA', 1,  '1',  'Direksiyon Eğitim Alanı' ),
-( 1324, 'MTSKDONEMUYGULAMA', 1,  '2',  'Akan Trafik' ),
-( 1324, 'MTSKDONEMUYGULAMA', 1,  '3',  'Simülatör' ),
-( 1324, 'MTSKDONEMUYGULAMA', 1,  '3',  'Simulatör' )
-
-
-delete [dbo].MsWebNodeItems where NodeId = 0 and PageCode = 'MTSKILKDATAUYGDERSLER'
+delete [dbo].MsWebNodeItems where PageCode = 'MTSKDONEMUYGULAMA'
 
 INSERT INTO [dbo].MsWebNodeItems (NodeId, PageCode, IsActive, ItemValue, ItemText)
  VALUES 
-( 0, 'MTSKILKDATAUYGDERSLER', 1, '-1',  '--Seçiniz--' ),
+( 0, 'MTSKDONEMUYGULAMA', 1,  '1',  'Direksiyon Eğitim Alanı' ),
+( 0, 'MTSKDONEMUYGULAMA', 1,  '2',  'Akan Trafik' ),
+( 0, 'MTSKDONEMUYGULAMA', 1,  '3',  'Simülatör' ),
+( 0, 'MTSKDONEMUYGULAMA', 1,  '3',  'Simulatör' ),
+
+( 0, 'MTSKDONEMUYGULAMA', 1,  '0', '07:00 - 07:50'),
+( 0, 'MTSKDONEMUYGULAMA', 1,  '1', '08:00 - 08:50'),
+( 0, 'MTSKDONEMUYGULAMA', 1,  '2', '09:00 - 09:50'),
+( 0, 'MTSKDONEMUYGULAMA', 1,  '3', '10:00 - 10:50'),
+( 0, 'MTSKDONEMUYGULAMA', 1,  '4', '11:00 - 11:50'),
+( 0, 'MTSKDONEMUYGULAMA', 1,  '5', '12:00 - 12:50'),
+( 0, 'MTSKDONEMUYGULAMA', 1,  '6', '13:00 - 13:50'),
+( 0, 'MTSKDONEMUYGULAMA', 1,  '7', '14:00 - 14:50'),
+( 0, 'MTSKDONEMUYGULAMA', 1,  '8', '15:00 - 15:50'),
+( 0, 'MTSKDONEMUYGULAMA', 1,  '9', '16:00 - 16:50'),
+( 0, 'MTSKDONEMUYGULAMA', 1, '10', '17:00 - 17:50'),
+( 0, 'MTSKDONEMUYGULAMA', 1, '11', '18:00 - 18:50'),
+( 0, 'MTSKDONEMUYGULAMA', 1, '12', '19:00 - 19:50'),
+( 0, 'MTSKDONEMUYGULAMA', 1, '13', '20:00 - 20:50'),
+( 0, 'MTSKDONEMUYGULAMA', 1, '14', '21:00 - 21:50'),
+( 0, 'MTSKDONEMUYGULAMA', 1, '15', '22:00 - 22:50'),
+
+( 0, 'MTSKDONEMUYGULAMA', 1, '1', 'Normal Eğitim'),
+( 0, 'MTSKDONEMUYGULAMA', 1, '2', 'Telafi Eğitim(Ön Sınav )'),
+( 0, 'MTSKDONEMUYGULAMA', 1, '3', '2.Direksiyon Eğitimi'),
+( 0, 'MTSKDONEMUYGULAMA', 1, '4', 'Başarısız Aday Eğitimi')
+
+
+delete [dbo].MsWebNodeItems where PageCode = 'MTSKILKDATAUYGDERSLER'
+
+INSERT INTO [dbo].MsWebNodeItems (NodeId, PageCode, IsActive, ItemValue, ItemText)
+ VALUES 
 ( 0, 'MTSKILKDATAUYGDERSLER', 1,  '1',  'Direksiyon Eğitim Alanı' ),
 ( 0, 'MTSKILKDATAUYGDERSLER', 1,  '2',  'Akan Trafik' ),
 ( 0, 'MTSKILKDATAUYGDERSLER', 1,  '3',  'Simülatör' ),
@@ -744,6 +762,16 @@ INSERT INTO [dbo].MsWebNodeItems (NodeId, PageCode, IsActive, ItemValue, ItemTex
 
 
 
+delete [dbo].MsWebNodeItems where NodeId = 609 and PageCode = 'MTSKESINAVBASVURU'
+
+INSERT INTO [dbo].MsWebNodeItems (NodeId, PageCode, IsActive, ItemValue, ItemText)
+ VALUES 
+( 609, 'MTSKESINAVBASVURU', 0, '0',  '' ),
+( 609, 'MTSKESINAVBASVURU', 1, '1',  'Sınav Ücreti Yatırılmış' ),
+( 609, 'MTSKESINAVBASVURU', 2, '2',  'Sınav Ücreti Yatırılmamış' )
+
+
+
 
 delete [dbo].MsWebNodeItems where NodeId = 272 and PageCode = 'MTSKILKDATADURUMU'
 
@@ -751,6 +779,7 @@ INSERT INTO [dbo].MsWebNodeItems (NodeId, PageCode, IsActive, ItemValue, ItemTex
  VALUES 
 ( 272, 'MTSKILKDATADURUMU', 0, '0',  '' ),
 ( 272, 'MTSKILKDATADURUMU', 2514, '2514',  'A SINIFI SERTİFİKA' ),
+( 272, 'MTSKILKDATADURUMU', 9000, '9000',  'A SINIFI SERTİFİKA (Manuel)' ),
 
 ( 272, 'MTSKILKDATADURUMU', 2502, '2502',  'A1 SINIFI SERTİFİKA' ),
 ( 272, 'MTSKILKDATADURUMU', 9001, '9001',  'A1 SINIFI SERTİFİKA (Manuel)' ),
@@ -763,27 +792,42 @@ INSERT INTO [dbo].MsWebNodeItems (NodeId, PageCode, IsActive, ItemValue, ItemTex
 ( 272, 'MTSKILKDATADURUMU', 2504, '2504',  'B SINIFI SERTİFİKA' ),
 ( 272, 'MTSKILKDATADURUMU', 9005, '9005',  'B SINIFI SERTİFİKA (Manuel)' ),
 ( 272, 'MTSKILKDATADURUMU', 9006, '9006',  'B SINIFI SERTİFİKA (Otomatik)' ),
+( 272, 'MTSKILKDATADURUMU', 9006, '9006',  'B SINIFI SERTİFİKA(Otomatik)' ),
 
 ( 272, 'MTSKILKDATADURUMU', 2518, '2518',  'BE SINIFI SERTİFİKA' ),
 ( 272, 'MTSKILKDATADURUMU', 2515, '2515',  'B1 SINIFI SERTİFİKA' ),
+
 ( 272, 'MTSKILKDATADURUMU', 2505, '2505',  'C SINIFI SERTİFİKA' ),
+( 272, 'MTSKILKDATADURUMU', 9007, '9007',  'C SINIFI SERTİFİKA (Manuel)' ),
+( 272, 'MTSKILKDATADURUMU', 9008, '9008',  'C SINIFI SERTİFİKA (Otomatik)' ),
+
+
 ( 272, 'MTSKILKDATADURUMU', 2520, '2520',  'CE SINIFI SERTİFİKA' ),
 ( 272, 'MTSKILKDATADURUMU', 2516, '2516',  'C1 SINIFI SERTİFİKA' ),
 ( 272, 'MTSKILKDATADURUMU', 2519, '2519',  'C1E SINIFI SERTİFİKA' ),
+
 ( 272, 'MTSKILKDATADURUMU', 2506, '2506',  'D SINIFI SERTİFİKA' ),
+( 272, 'MTSKILKDATADURUMU', 9009, '9009',  'D SINIFI SERTİFİKA (Manuel)' ),
+( 272, 'MTSKILKDATADURUMU', 9010, '9010',  'D SINIFI SERTİFİKA (Otomatik)' ),
+
 ( 272, 'MTSKILKDATADURUMU', 2522, '2522',  'DE SINIFI SERTİFİKA' ),
 ( 272, 'MTSKILKDATADURUMU', 2517, '2517',  'D1 SINIFI SERTİFİKA' ),
 ( 272, 'MTSKILKDATADURUMU', 2521, '2521',  'D1E SINIFI SERTİFİKA' ),
+
 ( 272, 'MTSKILKDATADURUMU', 2507, '2507',  'E SINIFI SERTİFİKA' ),
+( 272, 'MTSKILKDATADURUMU', 9011, '9011',  'E SINIFI SERTİFİKA (Manuel)' ),
+( 272, 'MTSKILKDATADURUMU', 9012, '9012',  'E SINIFI SERTİFİKA (Otomatik)' ),
+
 ( 272, 'MTSKILKDATADURUMU', 2508, '2508',  'F SINIFI SERTİFİKA' ),
 ( 272, 'MTSKILKDATADURUMU', 2509, '2509',  'G SINIFI SERTİFİKA' ),
 ( 272, 'MTSKILKDATADURUMU', 2510, '2510',  'H SINIFI SERTİFİKA (Otomabil)' ),
 ( 272, 'MTSKILKDATADURUMU', 2511, '2511',  'H SINIFI SERTİFİKA (Motosiklet)' ),
 ( 272, 'MTSKILKDATADURUMU', 2513, '2513',  'M SINIFI SERTİFİKA' ),
 ( 272, 'MTSKILKDATADURUMU', 2512, '2512',  'RÖMORK SINIFI SERTİFİKA' ),
-( 272, 'MTSKILKDATADURUMU', 9999, '9999',  '100 Ceza Puanı' ),
-( 272, 'MTSKILKDATADURUMU', 9301, '9301',  '100 Ceza Puanı (Manuel)' ),
-( 272, 'MTSKILKDATADURUMU', 9302, '9302',  '100 Ceza Puanı (Otomatik)' )
+
+( 272, 'MTSKILKDATADURUMU', 9100, '9100',  '100 Ceza Puanı' ),
+( 272, 'MTSKILKDATADURUMU', 9101, '9101',  '100 Ceza Puanı (Manuel)' ),
+( 272, 'MTSKILKDATADURUMU', 9102, '9102',  '100 Ceza Puanı (Otomatik)' )
 
 delete [dbo].MsWebNodeItems where NodeId = 554 and PageCode = 'MTSKILKDATAADAYTCAL2'
 
@@ -791,6 +835,7 @@ INSERT INTO [dbo].MsWebNodeItems (NodeId, PageCode, IsActive, ItemValue, ItemTex
  VALUES 
 ( 554, 'MTSKILKDATAADAYTCAL2', 0, '0',  '' ),
 ( 554, 'MTSKILKDATAADAYTCAL2', 2514, '2514',  'A SINIFI SERTİFİKA' ),
+( 554, 'MTSKILKDATAADAYTCAL2', 9000, '9000',  'A SINIFI SERTİFİKA (Manuel)' ),
 
 ( 554, 'MTSKILKDATAADAYTCAL2', 2502, '2502',  'A1 SINIFI SERTİFİKA' ),
 ( 554, 'MTSKILKDATAADAYTCAL2', 9001, '9001',  'A1 SINIFI SERTİFİKA (Manuel)' ),
@@ -803,34 +848,41 @@ INSERT INTO [dbo].MsWebNodeItems (NodeId, PageCode, IsActive, ItemValue, ItemTex
 ( 554, 'MTSKILKDATAADAYTCAL2', 2504, '2504',  'B SINIFI SERTİFİKA' ),
 ( 554, 'MTSKILKDATAADAYTCAL2', 9005, '9005',  'B SINIFI SERTİFİKA (Manuel)' ),
 ( 554, 'MTSKILKDATAADAYTCAL2', 9006, '9006',  'B SINIFI SERTİFİKA (Otomatik)' ),
+( 554, 'MTSKILKDATAADAYTCAL2', 9006, '9006',  'B SINIFI SERTİFİKA(Otomatik)' ),
+
 
 ( 554, 'MTSKILKDATAADAYTCAL2', 2518, '2518',  'BE SINIFI SERTİFİKA' ),
 ( 554, 'MTSKILKDATAADAYTCAL2', 2515, '2515',  'B1 SINIFI SERTİFİKA' ),
+
 ( 554, 'MTSKILKDATAADAYTCAL2', 2505, '2505',  'C SINIFI SERTİFİKA' ),
+( 554, 'MTSKILKDATAADAYTCAL2', 9007, '9007',  'C SINIFI SERTİFİKA (Manuel)' ),
+( 554, 'MTSKILKDATAADAYTCAL2', 9008, '9008',  'C SINIFI SERTİFİKA (Otomatik)' ),
+
 ( 554, 'MTSKILKDATAADAYTCAL2', 2520, '2520',  'CE SINIFI SERTİFİKA' ),
 ( 554, 'MTSKILKDATAADAYTCAL2', 2516, '2516',  'C1 SINIFI SERTİFİKA' ),
 ( 554, 'MTSKILKDATAADAYTCAL2', 2519, '2519',  'C1E SINIFI SERTİFİKA' ),
+
 ( 554, 'MTSKILKDATAADAYTCAL2', 2506, '2506',  'D SINIFI SERTİFİKA' ),
+( 554, 'MTSKILKDATAADAYTCAL2', 9009, '9009',  'D SINIFI SERTİFİKA (Manuel)' ),
+( 554, 'MTSKILKDATAADAYTCAL2', 9010, '9010',  'D SINIFI SERTİFİKA (Otomatik)' ),
+
 ( 554, 'MTSKILKDATAADAYTCAL2', 2522, '2522',  'DE SINIFI SERTİFİKA' ),
 ( 554, 'MTSKILKDATAADAYTCAL2', 2517, '2517',  'D1 SINIFI SERTİFİKA' ),
 ( 554, 'MTSKILKDATAADAYTCAL2', 2521, '2521',  'D1E SINIFI SERTİFİKA' ),
+
 ( 554, 'MTSKILKDATAADAYTCAL2', 2507, '2507',  'E SINIFI SERTİFİKA' ),
+( 554, 'MTSKILKDATAADAYTCAL2', 9011, '9011',  'E SINIFI SERTİFİKA (Manuel)' ),
+( 554, 'MTSKILKDATAADAYTCAL2', 9012, '9012',  'E SINIFI SERTİFİKA (Otomatik)' ),
+
 ( 554, 'MTSKILKDATAADAYTCAL2', 2508, '2508',  'F SINIFI SERTİFİKA' ),
 ( 554, 'MTSKILKDATAADAYTCAL2', 2509, '2509',  'G SINIFI SERTİFİKA' ),
 ( 554, 'MTSKILKDATAADAYTCAL2', 2510, '2510',  'H SINIFI SERTİFİKA (Otomabil)' ),
 ( 554, 'MTSKILKDATAADAYTCAL2', 2511, '2511',  'H SINIFI SERTİFİKA (Motosiklet)' ),
 ( 554, 'MTSKILKDATAADAYTCAL2', 2513, '2513',  'M SINIFI SERTİFİKA' ),
 ( 554, 'MTSKILKDATAADAYTCAL2', 2512, '2512',  'RÖMORK SINIFI SERTİFİKA' ),
-( 554, 'MTSKILKDATAADAYTCAL2', 9999, '9999',  '100 Ceza Puanı' ),
-( 554, 'MTSKILKDATAADAYTCAL2', 9301, '9301',  '100 Ceza Puanı (Manuel)' ),
-( 554, 'MTSKILKDATAADAYTCAL2', 9302, '9302',  '100 Ceza Puanı (Otomatik)' )
+
+( 554, 'MTSKILKDATAADAYTCAL2', 9100, '9100',  '100 Ceza Puanı' ),
+( 554, 'MTSKILKDATAADAYTCAL2', 9101, '9101',  '100 Ceza Puanı (Manuel)' ),
+( 554, 'MTSKILKDATAADAYTCAL2', 9102, '9102',  '100 Ceza Puanı (Otomatik)' )
 
 
-
-delete [dbo].MsWebNodeItems where NodeId = 609 and PageCode = 'MTSKESINAVBASVURU'
-
-INSERT INTO [dbo].MsWebNodeItems (NodeId, PageCode, IsActive, ItemValue, ItemText)
- VALUES 
-( 609, 'MTSKESINAVBASVURU', 0, '0',  '' ),
-( 609, 'MTSKESINAVBASVURU', 1, '1',  'Sınav Ücreti Yatırılmış' ),
-( 609, 'MTSKESINAVBASVURU', 2, '2',  'Sınav Ücreti Yatırılmamış' )

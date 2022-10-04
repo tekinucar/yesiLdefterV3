@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YesiLcihazlar", "YesiLcihaz
 EndProject
 Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "YesiLdefterSetup", "YesiLdefterSetup\YesiLdefterSetup.vdproj", "{167C700F-D1CD-4C76-90D8-18682904FC2C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ustad.API", "Ustad.API\Ustad.API.csproj", "{6BEFC597-D7FE-4D76-B752-3408A3A19FA2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{2F50E963-47E2-4243-8BEC-6A1B980003E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{167C700F-D1CD-4C76-90D8-18682904FC2C}.Debug|Any CPU.ActiveCfg = Release
 		{167C700F-D1CD-4C76-90D8-18682904FC2C}.Release|Any CPU.ActiveCfg = Release
+		{6BEFC597-D7FE-4D76-B752-3408A3A19FA2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6BEFC597-D7FE-4D76-B752-3408A3A19FA2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6BEFC597-D7FE-4D76-B752-3408A3A19FA2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6BEFC597-D7FE-4D76-B752-3408A3A19FA2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -3502,7 +3502,7 @@ MS_FIELDS                                          T03_MSFIELDS                 
             // Hide the time marker in the second time ruler.
             //scheduler.DayView.TimeRulers[1].TimeMarkerVisibility = TimeMarkerVisibility.Never;
 
-            scheduler.DayView.TimeRulers[0].ShowCurrentTime = CurrentTimeVisibility.Always;
+            //scheduler.DayView.TimeRulers[0].ShowCurrentTime = CurrentTimeVisibility.Always;
             scheduler.DayView.TimeRulers[0].Visible = true;
 
             scheduler.ActiveViewType = SchedulerViewType.Day;
@@ -3529,7 +3529,7 @@ MS_FIELDS                                          T03_MSFIELDS                 
                 TableIPCode = SoftwareCode + "/" + ProjectCode + "/" + TableIPCode;
 
             string Prop_View = t.Set(row_Table["PROP_VIEWS"].ToString(), "", "");
-            PROP_VIEWS_IP JSON_PropView = null;
+            //PROP_VIEWS_IP JSON_PropView = null;
 
             string headerCapiton = "";
 

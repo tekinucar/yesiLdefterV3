@@ -1,0 +1,22 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table MsExeUpdates
+ (
+    Id           Int IDENTITY(1,1)  NOT NULL,
+    IsActive     bit           NULL,
+    RecordDate   Datetime      NULL,
+    ExeName      varchar(50)   NULL,
+    VersionNo    varchar(20)   NULL,
+    PacketName   varchar(50)   NULL,
+    About        varchar(100)  NULL,
+
+	Constraint pk_MsExeUpdates primary key (Id)
+ )
+
+ grant select, insert, update, delete on MsExeUpdates to public
+
+commit transaction
+
+/*CreateTableEnd*/

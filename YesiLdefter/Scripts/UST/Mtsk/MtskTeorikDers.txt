@@ -24,7 +24,8 @@ begin transaction
    TDersIsUploaded      Bit           null,
    SablonTeorikBId      Int           null, /* SablonTeorikBId ve DonemTipiId ile beraber bakıldığında hangi taslak formundan (MtskTaslakTeorikF) bilgi alındığı bulunur  */
    SablonTeorikFId      Int           null,
-   
+   SablonTeorikSId      Int           null,
+
    constraint		pk_MtskTeorikDers primary key (Id)
  )
   
@@ -53,7 +54,7 @@ AS BEGIN
     declare @eDersTarihi date = null
     declare @eDersSaatiTipiId smallInt = -1
     declare @ePersonelId varchar(20) = null
-	  declare @eSaat varchar(20) = null
+    declare @eSaat varchar(20) = null
     declare @TcNoCalismaIzniNo varchar(20) = null
 
     WHILE @@FETCH_STATUS = 0

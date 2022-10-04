@@ -1,0 +1,181 @@
+﻿
+
+
+/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_MsFollow] (@firmId int, @tableName Varchar(50), @typeId smallInt)  
+AS BEGIN
+
+
+   declare @itemTypeId smallInt = 0
+   -- dbo.MsFollow.ItemId 
+   -- 201, 'Vadesi geçmiş sertifika ücretleri' 
+   -- 202, 'Bu ayki sertifika ücretleri' 
+   -- 203, 'Gelecek aylardaki sertifika ücretleri' 
+   -- 211, 'Teorik sınav ücretleri' 
+   -- 212, 'Uygulama sınav ücretleri' 
+   -- 213, 'Özel teorik ders ücretleri' 
+   -- 214, 'Özel uygulama ders ücretleri' 
+
+   if (@tableName = 'OnmOdemePlani')
+   begin
+       -- 2100, 'Mtsk Modülü'
+       -- 2110, 'Mtsk Sertifika Ücreti'
+       -- 2111, 'Mtsk Teorik Sınav Ücreti'
+       -- 2112, 'Mtsk Uygulama Sınav Ücreti'
+       -- 2113, 'Mtsk Özel Teorik Ders Ücreti'
+       -- 2114, 'Mtsk Özel Uygulama Ders Ücreti'
+       -- 
+
+	   -- 2110, 'Mtsk Sertifika Ücreti'
+       if (@typeId = 2110) 
+       begin
+       -- dbo.MsFollow.ItemId 
+       -- 201, 'Vadesi geçmiş sertifika ücretleri' 
+       -- 202, 'Bu ayki sertifika ücretleri' 
+       -- 203, 'Gelecek aylardaki sertifika ücretleri' 
+       -- 211, 'Teorik sınav ücretleri' 
+       -- 212, 'Uygulama sınav ücretleri' 
+       -- 213, 'Özel teorik ders ücretleri' 
+	   -- 214, 'Özel uygulama ders ücretleri' 
+  
+           -- 201
+		   update MsFollow set
+		   ItemValue = (
+		      Select sum(TaksitTutari) from OnmOdemePlani
+			  Where FirmId = @firmId
+			  and   IsActive = 1
+			  and   IsPaid = 0
+			  and   UcretTipiId = @typeId
+			  and   CONVERT(date, VadeTarihi, 103) < CONVERT(date, GETDATE(), 103)
+		   )
+           Where ItemId = 201
+           and   FirmId = @firmId
+
+	       -- 202
+		   update MsFollow set
+		   ItemValue = (
+		      Select sum(TaksitTutari) from OnmOdemePlani
+			  Where FirmId = @firmId
+			  and   IsActive = 1
+			  and   IsPaid = 0
+			  and   UcretTipiId = @typeId
+			  and   YEAR(VadeTarihi) = year(GETDATE())
+			  and   MONTH(VadeTarihi) = MONTH(GETDATE())
+		   )
+           Where ItemId = 202
+           and   FirmId = @firmId
+
+	       -- 203
+		   update MsFollow set
+		   ItemValue = (
+		      Select sum(TaksitTutari) from OnmOdemePlani
+			  Where FirmId = @firmId
+			  and   IsActive = 1
+			  and   IsPaid = 0
+			  and   UcretTipiId = @typeId
+			  and   convert(date, VadeTarihi, 103) >= DATEADD(dd,- (DAY(DATEADD(mm,1,GETDATE()))-1), DATEADD(mm,1, convert(date, GETDATE(), 103)))
+		   )
+           Where ItemId = 203
+           and   FirmId = @firmId
+
+       end -- if (@typeId = 2110)
+   
+       -- 2111, 'Mtsk Teorik Sınav Ücreti'
+	   if (@typeId = 2111)
+       begin
+           -- dbo.MsFollow.ItemId 
+           -- 211, 'Teorik sınav ücretleri' 
+		   update MsFollow set
+		   ItemValue = (
+		      Select sum(TaksitTutari) from OnmOdemePlani
+			  Where FirmId = @firmId
+			  and   IsActive = 1
+			  and   IsPaid = 0
+			  and   UcretTipiId = @typeId
+			  and   CONVERT(date, VadeTarihi, 103) <= CONVERT(date, GETDATE(), 103)
+		   )
+           Where ItemId = 211
+           and   FirmId = @firmId
+
+       end -- if (@typeId = 2111)
+
+	   -- 2112, 'Mtsk Uygulama Sınav Ücreti'
+	   if (@typeId = 2112)
+       begin
+           -- dbo.MsFollow.ItemId 
+           -- 212, 'Uygulama sınav ücretleri' 
+		   update MsFollow set
+		   ItemValue = (
+		      Select sum(TaksitTutari) from OnmOdemePlani
+			  Where FirmId = @firmId
+			  and   IsActive = 1
+			  and   IsPaid = 0
+			  and   UcretTipiId = @typeId
+			  and   CONVERT(date, VadeTarihi, 103) <= CONVERT(date, GETDATE(), 103)
+		   )
+           Where ItemId = 212
+           and   FirmId = @firmId
+
+       end -- if (@typeId = 2110)
+
+       -- 2113, 'Mtsk Özel Teorik Ders Ücreti'
+	   if (@typeId = 2113)
+       begin
+           -- dbo.MsFollow.ItemId 
+           -- 213, 'Özel teorik ders ücretleri'
+		   update MsFollow set
+		   ItemValue = (
+		      Select sum(TaksitTutari) from OnmOdemePlani
+			  Where FirmId = @firmId
+			  and   IsActive = 1
+			  and   IsPaid = 0
+			  and   UcretTipiId = @typeId
+			  and   CONVERT(date, VadeTarihi, 103) <= CONVERT(date, GETDATE(), 103)
+		   )
+           Where ItemId = 213
+           and   FirmId = @firmId
+
+       end -- if (@typeId = 2113)
+
+       -- 2114, 'Mtsk Özel Uygulama Ders Ücreti'
+	   if (@typeId = 2114)
+       begin
+           -- dbo.MsFollow.ItemId 
+           -- 214, 'Özel uygulama ders ücretleri'
+		   update MsFollow set
+		   ItemValue = (
+		      Select sum(TaksitTutari) from OnmOdemePlani
+			  Where FirmId = @firmId
+			  and   IsActive = 1
+			  and   IsPaid = 0
+			  and   UcretTipiId = @typeId
+			  and   CONVERT(date, VadeTarihi, 103) <= CONVERT(date, GETDATE(), 103)
+		   )
+           Where ItemId = 214
+           and   FirmId = @firmId
+
+       end -- if (@typeId = 2114)
+   
+   end -- OnmOdemePlani
+
+
+END -- procedure
+
+/*CreateProcedureEnd*/
+
+
+/*
+
+
+Select 
+  YEAR(GETDATE())
+, MONTH(GETDATE())
+, CONVERT(VARCHAR(10),DATEADD(dd,-(DAY(DATEADD(mm,1,GETDATE()))-1),DATEADD(mm,1,GETDATE())),112)
+, DATEADD(dd,- (DAY(DATEADD(mm,1,GETDATE()))-1), DATEADD(mm,1, convert(date, GETDATE(), 103)))
+
+, DAY(DATEADD(mm,1,GETDATE()))-1
+, DATEADD(mm,1,GETDATE())
+
+
+*/

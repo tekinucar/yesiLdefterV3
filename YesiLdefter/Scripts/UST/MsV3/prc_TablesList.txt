@@ -1,0 +1,46 @@
+﻿
+CREATE PROCEDURE [dbo].[prc_TablesList] ( 
+    @managerDbName varchar(100) 
+   ,@workDbName varchar(100) 
+  )  
+AS BEGIN
+ /*
+ declare @managerDbName varchar(100) 
+ declare @workDbName varchar(100) 
+ set @managerDbName = 'MSV3DFTRBLT'
+ set @workDbName = 'u7093888_Ustad01'
+ */
+
+ declare @cumle varchar(2000) 
+ 
+ set @cumle = '
+   select 
+     ''{workDb}'' as databaseName
+   , sch.name as schemaName
+   , a.name as tableName
+   , mt.TABLE_CODE + ''.'' + mt.TABLE_NAME Msv3Name  
+   from {workDb}.sys.tables as a 
+      left outer join [{managerDb}].[dbo].[MS_TABLES] mt on ( a.name = mt.TABLE_NAME )
+      left outer join [{workDb}].sys.schemas as sch on ( a.schema_id = sch.schema_id ) 
+
+   order by a.name 
+'
+  set @cumle = REPLACE(@cumle, '{workDb}', @workDbName) 
+  set @cumle = REPLACE(@cumle, '{managerDb}', @managerDbName) 
+
+  if ((@managerDbName = '') or
+      (@managerDbName = 'null') or
+      (@workDBName = '') or
+      (@workDBName = 'null'))
+  begin
+    set @cumle = '
+    select 
+      ''workDb'' as databaseName
+    , ''sch.name'' as schemaName
+    , ''tableName'' as tableName
+    , ''Msv3Name'' Msv3Name  '
+  end
+  
+  execute(@cumle) 
+
+END -- procedure

@@ -1,0 +1,26 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table OnmIVezneKullanici
+ (
+
+   Id                Int IDENTITY(1,1) NOT NULL, 
+   ParentId          Int       not null, /* default 0 */
+   FirmId            Int       not null,
+   IsActive          Bit       not null, /* default : 1 = active, 0 = not active */  
+   KullaniciId       Int           null,
+   TcVkNo            Varchar(11)   null,
+   VezneId           Int           null,
+   SiraNo            SmallInt      null,
+
+   constraint		pk_OnmIVezneKullanici primary key (Id)
+ )
+
+ create index X_OnmIVezneKullanici01 on OnmIVezneKullanici (FirmId,KullaniciId)
+ 
+ grant select, insert, update, delete on OnmIVezneKullanici to public
+ 
+commit transaction
+
+/*CreateTableEnd*/

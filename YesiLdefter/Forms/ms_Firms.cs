@@ -17,10 +17,9 @@ namespace YesiLdefter
     {
         tToolBox t = new tToolBox();
 
-        DataSet dsFirm = null;
-        DataNavigator dNFirm = null;
-
-        string tableIPCode = "";
+        //DataSet dsFirm = null;
+        //DataNavigator dNFirm = null;
+        //string tableIPCode = "";
 
         public ms_Firms()
         {

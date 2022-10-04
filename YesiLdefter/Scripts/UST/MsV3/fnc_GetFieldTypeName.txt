@@ -1,0 +1,47 @@
+﻿/*CreateFunction*/
+
+
+CREATE FUNCTION [dbo].[fnc_GetFieldTypeName](
+  @fieldTypeId int
+)  
+RETURNS varchar(max)
+AS   
+BEGIN
+
+    declare @typeName varchar(20)
+	declare @value varchar(3) = '800'
+
+	set @typeName = ''
+
+    if (@fieldTypeId = 56)  set @typeName = 'int'
+    if (@fieldTypeId = 52)  set @typeName = 'smallint'
+    if (@fieldTypeId = 127) set @typeName = 'bigint'
+    if (@fieldTypeId = 104) set @typeName = 'bit'
+    if (@fieldTypeId = 108) set @typeName = 'numeric(' + @value + ')'
+    if (@fieldTypeId = 62)  set @typeName = 'float'
+    if (@fieldTypeId = 59)  set @typeName = 'real'
+    if (@fieldTypeId = 60)  set @typeName = 'money'
+    if (@fieldTypeId = 48)  set @typeName = 'tinyint'
+
+    if (@fieldTypeId = 231) set @typeName = 'varchar(' + @value + ')'
+    if (@fieldTypeId = 167) set @typeName = 'varchar(' + @value + ')'
+    if (@fieldTypeId = 175) set @typeName = 'char(' + @value + ')'
+    if (@fieldTypeId = 35) set @typeName = 'text'
+    -- 36 = uniqueidentifier
+    if (@fieldTypeId = 36) set @typeName = 'varchar(' + @value + ')' 
+    if (@fieldTypeId = 99) set @typeName = 'ntext'
+
+    if (@fieldTypeId = 58) set @typeName = 'smalldatetime'
+    if ((@fieldTypeId = 40) or (@fieldTypeId = 61)) set @typeName = 'date'
+
+    if (@fieldTypeId = 41) set @typeName = 'time'
+
+    if (@fieldTypeId = 34) set @typeName = 'image'
+    if (@fieldTypeId = 173) set @typeName = 'binary'
+    if (@fieldTypeId = 165) set @typeName = 'varbinary'
+
+    return @typeName
+
+END --
+
+/*CreateFunctionEnd*/

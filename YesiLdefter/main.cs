@@ -125,7 +125,9 @@ namespace YesiLdefter
 
             using (tStarter s = new tStarter())
             {
+
                 s.InitStart();
+
             }
 
             #endregion
@@ -192,6 +194,8 @@ namespace YesiLdefter
 
                 versionChecked();
 
+                //t.dbUpdatesChecked();
+
                 setMainFormCaption();
             }
         }
@@ -211,10 +215,68 @@ namespace YesiLdefter
             //bool exists = System.IO.Directory.Exists(Server.MapPath(subPath));
 
             //if (!exists)
+            
+            getDriver();
+
+            v.EXE_TempPath = v.EXE_DRIVE + "UstadYazilim\\Temp";
+            v.EXE_ScriptsPath = v.EXE_DRIVE + "UstadYazilim\\Scripts";
+
+
+            //MakeFolderWritable(v.EXE_PATH);
+
             System.IO.Directory.CreateDirectory(v.EXE_TempPath);
             System.IO.Directory.CreateDirectory(v.EXE_ScriptsPath);
-
         }
+
+        private void MakeFolderWritable(string Folder)
+        {
+            if (IsFolderReadOnly(Folder))
+            {
+                System.IO.DirectoryInfo oDir = new System.IO.DirectoryInfo(Folder);
+                oDir.Attributes = oDir.Attributes & ~System.IO.FileAttributes.ReadOnly;
+                MessageBox.Show("path : Read Only");
+            }
+        }
+        private bool IsFolderReadOnly(string Folder)
+        {
+            System.IO.DirectoryInfo oDir = new System.IO.DirectoryInfo(Folder);
+            return ((oDir.Attributes & System.IO.FileAttributes.ReadOnly) > 0);
+        }
+
+        private void getDriver()
+        {
+            DriveInfo[] allDrives = DriveInfo.GetDrives();
+
+            foreach (DriveInfo d in allDrives)
+            {
+                if (v.EXE_PATH.IndexOf(d.Name) > -1)
+                {
+                    v.EXE_DRIVE = d.Name.ToString();
+                    break;
+                }
+                /*
+                Console.WriteLine("Drive {0}", d.Name);
+                Console.WriteLine("  Drive type: {0}", d.DriveType);
+                if (d.IsReady == true)
+                {
+                    Console.WriteLine("  Volume label: {0}", d.VolumeLabel);
+                    Console.WriteLine("  File system: {0}", d.DriveFormat);
+                    Console.WriteLine(
+                        "  Available space to current user:{0, 15} bytes",
+                        d.AvailableFreeSpace);
+
+                    Console.WriteLine(
+                        "  Total available space:          {0, 15} bytes",
+                        d.TotalFreeSpace);
+
+                    Console.WriteLine(
+                        "  Total size of drive:            {0, 15} bytes ",
+                        d.TotalSize);
+                }
+                */
+            }
+        }
+
 
         #endregion
 
@@ -319,7 +381,6 @@ namespace YesiLdefter
                         {
                             if (((DevExpress.XtraBars.BarLargeButtonItemLink)item).Item.Name.ToString() == "btnExeCompress")
                             {
-                                //MessageBox.Show("oley");
                                 ((DevExpress.XtraBars.BarLargeButtonItemLink)item).Item.ItemClick 
                                       += new DevExpress.XtraBars.ItemClickEventHandler(this.btnExeCompress_ItemClick);
                             }
@@ -549,18 +610,20 @@ namespace YesiLdefter
                 tSQLs sqls = new tSQLs();
                 DataSet ds = new DataSet();
                 string sql = sqls.SQL_SYS_UPDATES_INSERT();
-                if (t.SQL_Read_Execute(v.dBaseNo.Manager, ds, ref sql, "", "SYS_UPDATES"))
+                if (t.SQL_Read_Execute(v.dBaseNo.WebManager, ds, ref sql, "", "SYS_UPDATES"))
                     MessageBox.Show("Exe Ftp'ye yüklendi ...");
+
+                sql = sqls.Sql_MsExeUpdates_Insert();
+                if (t.SQL_Read_Execute(v.dBaseNo.WebManager, ds, ref sql, "", "MsExeUpdates"))
+                    MessageBox.Show("Exe Ftp'ye yüklendi ...");
+
             }
         }
 
         #endregion ftpUpload
 
         #region ftpDownload 
-
         
-
-
         private void barButtonGuncelleme_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
         {
             bool onay = false;
@@ -702,15 +765,19 @@ namespace YesiLdefter
         #region versionChecked
         private void versionChecked()
         {
-            string activeVer = v.tExeAbout.activeVersionNo.Replace("_","");
-            string ftpVer = v.tExeAbout.ftpVersionNo.Replace("_","");
-
-            if (t.myLong(activeVer) < t.myLong(ftpVer))
+            if (t.IsNotNull(v.tExeAbout.ftpVersionNo))
             {
-                 barButtonGuncelleme.Visibility = DevExpress.XtraBars.BarItemVisibility.Always;
+                string activeVer = v.tExeAbout.activeVersionNo.Replace("_", "");
+                string ftpVer = v.tExeAbout.ftpVersionNo.Replace("_", "");
+
+                if (t.myLong(activeVer) < t.myLong(ftpVer))
+                {
+                    barButtonGuncelleme.Visibility = DevExpress.XtraBars.BarItemVisibility.Always;
+                }
             }
         }
         #endregion
+
 
         #region skinChanged
 

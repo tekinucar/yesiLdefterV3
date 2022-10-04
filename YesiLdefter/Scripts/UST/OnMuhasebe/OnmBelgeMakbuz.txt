@@ -1,0 +1,689 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+-- Tahsilat ve Tediye Kaydı 
+
+ create table OnmBelgeMakbuz
+ (
+
+   Id                 Int IDENTITY(1,1) NOT NULL, 
+   ParentId           Int       not null, /* default 0 */
+   FirmId             Int       not null,
+   IsActive           Bit       not null, /* default : 1 = active, 0 = not active */ 
+   IsCommit           Bit       not null, /* default : 0 = Muh. işlenmedi, 1 = Muh. İşlendi */  
+      
+   TipiId             SmallInt      null, /* 1. Tahsilat, 2. Tediye */
+   IslemTipiId        Varchar(10)   null, /* peşinat, taksit vb gibi alt detay seçenekleri için */ 
+      
+   -- 10 Makbuz Belgesi Hakkında
+   BelgeTarihi        Date          null, 
+   BelgeYil           Smallint      null, 
+   BelgeAy            Smallint      null, 
+   BelgeGun           Smallint      null, 
+   BelgeSeri          nVarChar(5)   null,
+   BelgeNo            nVarChar(50)  null,
+
+   -- 30 Belgenin Tarafları
+   BorcluId           Int           null, 
+   BHesapTipiId       SmallInt      null,
+      
+   AlacakliId         Int           null,
+   AHesapTipiId       SmallInt      null,
+   
+   VarlikId           Int           null,
+   AboneId            Int           null,  
+   CariId             Int           null,
+   CariUnvan          nVarChar(200) null, /* cari hesabı yok ise */
+   
+   -- Belgenin Parasal değerleri
+   -- 50 Islem Bilgileri
+   BelgeTutari        Numeric(22,8) null,
+   BorcTutari         Numeric(22,8) null,
+   AlacakTutari       Numeric(22,8) null,
+   KdvMatrahi         Numeric(22,8) null,    
+   KdvOrani           SmallInt      null,
+   KdvTutari          Numeric(22,8) null,
+   VergiVeFonlar      Numeric(22,8) null,    
+   --..+diğer vergiler eklenecek
+
+   -- 70
+   EkMaliyetId        Int           null,
+   MasrafTutari       Numeric(22,8) null,    /* ödeme sırasında yapılan masraf */
+   ToplamTutar        Numeric(22,8) null,    /* AlacakTutarı + MasrafTutarı */
+
+   -- 80
+   ParaTipiId         nVarChar(3)   null,
+   DovizYeriId        Int           null,
+   DovizKuru          Numeric(22,8) null,
+   DovizTutari        Numeric(22,8) null,
+      
+   -- 80 : Muhasebe bağlantıları eklenecek
+
+   -- 90 : Diğer belge bağlantıları eklenecek
+   -- İşlendi : bu belge ödendi tahsil edildi vb... 
+   Aciklama           nVarchar(200) null,
+   KayitTarihi        Date          null, 
+   KayitSaati         VarChar(8)    null,
+   JoinTableTypeId    SmallInt      null, /* ilgili table 1: OnmBelgeMaliyet,  */
+   JoinId             Int           null, /* ilgili table ref Id */
+
+   constraint		pk_OnmBelgeMakbuz primary key (Id)
+ )
+
+ create index X_OnmBelgeMakbuz01 on OnmBelgeMakbuz (FirmId)
+ create index X_OnmBelgeMakbuz02 on OnmBelgeMakbuz (TipiId)
+ create index X_OnmBelgeMakbuz03 on OnmBelgeMakbuz (IslemTipiId)
+ create index X_OnmBelgeMakbuz04 on OnmBelgeMakbuz (BHesapTipiId)
+ create index X_OnmBelgeMakbuz05 on OnmBelgeMakbuz (AHesapTipiId)
+ create index X_OnmBelgeMakbuz06 on OnmBelgeMakbuz (VarlikId)
+ create index X_OnmBelgeMakbuz07 on OnmBelgeMakbuz (CariId)
+
+
+ grant select, insert, update, delete on OnmBelgeMakbuz to public
+
+ commit transaction
+
+ /*CreateTableEnd*/
+
+CREATE TRIGGER [dbo].[trg_OnmBelgeMakbuz] on [dbo].[OnmBelgeMakbuz] 
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    declare cursor_BMakbuz cursor for select Id from Inserted
+    declare @curId bigint
+
+	declare @FirmId int
+	declare @IsActive bit
+	declare @TipiId smallInt
+	declare @IslemTipiId varchar(10)
+	declare @_IslemTipiId varchar(10)
+	declare @BHesapTipiId smallInt
+	declare @AHesapTipiId smallInt
+	declare @BelgeTutari numeric(22,8)
+	declare @_BelgeTutari numeric(22,8)
+	declare @CariId int
+	declare @JoinTableTypeId smallInt
+	declare @JoinId int
+
+    declare @onay bit
+	declare @OnmOdemePlaniId int
+	declare @OnmOdemePlaniTaksitTutari numeric(22,8)
+	declare @makbuzCount int
+
+	OPEN cursor_BMakbuz
+
+    FETCH NEXT FROM cursor_BMakbuz INTO @curId
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+      select 
+	      @FirmId = ins.FirmId
+	    , @IsActive = ins.IsActive
+	    , @TipiId = ins.TipiId
+	    , @IslemTipiId = ins.IslemTipiId
+		, @BHesapTipiId = isnull(ins.BHesapTipiId,0)
+		, @AHesapTipiId = isnull(ins.AHesapTipiId,0)
+	    , @BelgeTutari = round(ins.BelgeTutari,2)
+		, @CariId = ins.CariId
+		, @JoinTableTypeId = ins.JoinTableTypeId
+		, @JoinId = ins.JoinId
+      from Inserted ins
+      where ins.Id = @curId
+	  
+	  set @_IslemTipiId = CONVERT(varchar(5), @BHesapTipiId) + '.' + CONVERT(varchar(5), @AHesapTipiId)
+
+	  set @_BelgeTutari = @BelgeTutari
+
+	  if (@TipiId = 3) and -- Tediye    
+	     (@JoinTableTypeId = 1) and -- OnmBelgeMaliyet tablosu
+		 (@IsActive = 1)
+      begin
+          Update dbo.OnmBelgeMaliyet set
+			IsPaid = 1  -- ödendi işareti
+          , PaidId = @curId -- OnmBelgeMakbuz.Id
+          Where Id = @JoinId
+	  end
+	  	  
+	  if (@TipiId = 2) and -- Tahsilat
+	     (@AHesapTipiId >= 2100) -- Mtskİşlemleri
+      begin
+	      set @makbuzCount = 0
+          -- OnmBelgeMakbuz.Id = @curId daha önce OnmOdemePlani tablosuna işlenmiş mi ?
+		  Select @makbuzCount = count(Id)
+          from dbo.OnmOdemePlani
+          where CariId = @CariId
+          and UcretTipiId = @AHesapTipiId
+		  and ( BelgeMakbuzId = @curId or PatchBelgeMakbuzId = @curId )
+		  		  
+		  if (@_BelgeTutari > 1) and -- 0 değil 1 liradan büyük ise
+		     (@makbuzCount = 0)     -- OnmBelgeMakbuz.Id henüz işlenmemiş  
+		  begin
+              set @onay = 1
+		      set @OnmOdemePlaniId = 0
+              set @OnmOdemePlaniTaksitTutari = 0
+
+	          Select top 1
+                @OnmOdemePlaniId = Id
+              , @OnmOdemePlaniTaksitTutari = round(TaksitTutari,2)
+		      from dbo.OnmOdemePlani
+		      where CariId = @CariId
+		      and UcretTipiId = @AHesapTipiId
+		      and IsPaid = 0
+		      order by VadeTarihi, TaksitNo, Id
+
+              if (@_BelgeTutari >= @OnmOdemePlaniTaksitTutari)
+              begin
+                  Update dbo.OnmOdemePlani set
+				    IsPaid = 1
+				  , BelgeMakbuzId = @curId 
+                  Where Id = @OnmOdemePlaniId
+
+                  set @_BelgeTutari = @_BelgeTutari - @OnmOdemePlaniTaksitTutari
+                  set @onay = 0 
+              end
+
+              if (@_BelgeTutari < @OnmOdemePlaniTaksitTutari) and
+                 (@onay = 1)
+              begin
+			      Update dbo.OnmOdemePlani set
+				    YedekTaksitTutari = TaksitTutari
+                  , TaksitTutari = @_BelgeTutari
+                  , IsPaid = 1
+				  , BelgeMakbuzId = @curId 
+                  Where Id = @OnmOdemePlaniId
+
+                  Insert into dbo.OnmOdemePlani
+                  ( FirmId, DonemTipiId, UcretTipiId, CariId, TaksitTipiId
+                   ,TaksitNo, VadeTarihi, VadeYil, VadeAy, VadeGun
+                   ,TaksitTutari, IsPaid
+                   ,YedekTaksitTutari, BelgeMakbuzId, PatchBelgeMakbuzId, BelgeStokBId )
+                  Select 
+				    FirmId, DonemTipiId, UcretTipiId, CariId, TaksitTipiId
+                   ,TaksitNo, VadeTarihi, VadeYil, VadeAy, VadeGun
+                   ,@OnmOdemePlaniTaksitTutari - @_BelgeTutari  --TaksitTutari
+				   ,0      --IsPaid
+                   ,null   --YedekTaksitTutari
+                   ,null   --BelgeMakbuzId
+                   ,@curId --PatchBelgeMakbuzId
+				   ,null   --BelgeStokBId
+                  from dbo.OnmOdemePlani
+				  where Id = @OnmOdemePlaniId
+
+				  set @_BelgeTutari = 0
+				  set @onay = 0
+              end
+
+          end -- @_BelgeTutari > 0
+      end -- if (@TipiId = 2)
+      
+	  if (@TipiId = 2) or (@TipiId = 1) -- Tahsilat, Açılış    
+      begin
+          Update dbo.OnmBelgeMakbuz set
+			BorcTutari = @BelgeTutari
+          , AlacakTutari = 0
+		  , IslemTipiId = @_IslemTipiId
+          Where Id = @curId 
+	  end
+
+	  if (@TipiId = 3) or (@TipiId = 5) -- Tediye, Kapanış    
+      begin
+          Update dbo.OnmBelgeMakbuz set
+			BorcTutari = 0
+          , AlacakTutari = @BelgeTutari
+		  , IslemTipiId = @_IslemTipiId
+          Where Id = @curId 
+	  end
+	  
+	  FETCH NEXT FROM cursor_BMakbuz INTO @curId
+    END
+
+    CLOSE cursor_BMakbuz
+    DEALLOCATE cursor_BMakbuz
+
+	EXECUTE [dbo].[prc_OnmToplamBekleyenOdemeler] @FirmId
+    EXECUTE [dbo].[prc_OnmToplamBekleyenGelirler] @FirmId
+
+END
+
+ /*CreateTrigger*/
+
+
+ /*CreateTriggerEnd*/
+
+
+ /*CreateTrigger*/
+
+CREATE TRIGGER [dbo].[trg_OnmBelgeMakbuzDelete] on [dbo].[OnmBelgeMakbuz]
+FOR DELETE
+AS BEGIN
+
+    declare cursor_BMakbuzDlt cursor for select Id from deleted
+    declare @curId bigint
+
+	declare @FirmId int
+    declare @TipiId smallInt
+	declare @AltIslemTipiId smallInt
+	declare @BelgeTutari numeric(22,8)
+	declare @CariId int
+	declare @JoinTableTypeId smallInt
+	declare @JoinId int
+
+	OPEN cursor_BMakbuzDlt
+
+    FETCH NEXT FROM cursor_BMakbuzDlt INTO @curId
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+      select 
+	      @FirmId = dlt.FirmId
+	    , @TipiId = dlt.TipiId
+	    , @AltIslemTipiId = dlt.AltIslemTipiId
+	    , @BelgeTutari = round(dlt.BelgeTutari,2)
+		, @CariId = dlt.CariId
+		, @JoinTableTypeId = dlt.JoinTableTypeId
+		, @JoinId = dlt.JoinId
+      from deleted dlt
+      where dlt.Id = @curId
+	  
+	  if (@TipiId = 3) and -- Tediye    
+	     (@JoinTableTypeId = 1) -- OnmBelgeMaliyet tablosu
+      begin
+          Update dbo.OnmBelgeMaliyet set
+			IsPaid = 0  -- ödenmedi işareti
+          , PaidId = 0  -- OnmBelgeMakbuz.Id
+          Where Id = @JoinId
+	  end
+
+	  if (@TipiId = 2) and -- Tahsilat
+	     (@AltIslemTipiId >= 2100) -- Mtskİşlemleri
+      begin
+	      -- iki türlü taksit satırı mevcut
+		  -- 1. esas TaksitTutari : kullanıcının oluşturduğu
+		  -- 2. eksik tahsilatlardan dolayı sonradan türetilmiş ve PatchBelgeMakbuzId ile kaynağı belirtilmiş eksik TaksitTutari
+		  -- yani 
+		  -- BelgeMakbuzId      : taksidi kapatan tahsilat makbuzun Id si 
+	      -- PatchBelgeMakbuzId : taksidin tamamı kapatılmadıysa kalan tutarın yeni taksit oluşmasına sebep olan tahsilat makbuz Id (bu sadece borçlandırıyor)
+
+		  -- EsasTaksitTutari  : EsTT
+		  -- EksikTaksitTutari : EkTT
+
+		  -- işlem1 : EsTT tamamı tahsil edildi
+		  -- işlem2 : EsTT eksik tahsil edildi, EkTT üretildi
+		  -- işlem3 : EkTT tamamı tahsil edildi
+		  -- işlem4 : EkTT tahsil edilmedi 
+		  -- işlem5 : EkTT tamamı tahsil edildi 
+		  -- işlem6 : EkTT eksik tahsil edildi, yeni EkTT2 üretildi
+		  -- işlem7 : EkTT2 üretildikten sonra EkTT gibi tekrarlamakta
+
+		  -- esas taksidin tahsilatını iptal et
+		  -- işlem1
+		  Update dbo.OnmOdemePlani set
+		    IsPaid = 0
+          , BelgeMakbuzId = 0
+		  Where BelgeMakbuzId = @curId
+		  and   isnull(YedekTaksitTutari,0) = 0
+		  and   isnull(PatchBelgeMakbuzId,0) = 0
+		  and   IsPaid = 1
+	      
+	      -- esas taksit tutarı eksik tahsil edilmiş 
+		  -- işlem2
+		  Update dbo.OnmOdemePlani set
+		    TaksitTutari = YedekTaksitTutari
+          , YedekTaksitTutari = null
+		  , IsPaid = 0
+          , BelgeMakbuzId = 0
+		  Where BelgeMakbuzId = @curId
+		  and   isnull(YedekTaksitTutari,0) > 0
+		  and   isnull(PatchBelgeMakbuzId,0) = 0
+		  and   IsPaid = 1
+
+          -- eksik taksit üretilmiş ve oda başka bir tahsilat makbuzu ile tahsil edilmiş ise
+		  -- işlem3
+		  Update dbo.OnmOdemePlani set
+            PatchBelgeMakbuzId = null
+          Where PatchBelgeMakbuzId = @curId
+          and   BelgeMakbuzId > 0
+		  and   IsPaid = 1
+		  
+		  -- eksik taksit üretilmiş ve tahsil edilmemiş ise
+		  -- işlem4 ve işlem6 için
+          Delete from dbo.OnmOdemePlani 
+          Where PatchBelgeMakbuzId = @curId
+		  and   IsPaid = 0
+
+		  -- eksik taksidin tamamını tahsilmiş ise
+		  -- işlem5
+		  Update dbo.OnmOdemePlani set
+		    IsPaid = 0
+          , BelgeMakbuzId = 0
+		  Where BelgeMakbuzId = @curId
+		  and   isnull(YedekTaksitTutari,0) = 0
+		  and   isnull(PatchBelgeMakbuzId,0) > 0
+		  and   IsPaid = 1
+
+		  -- kendisi eksik taksit zaten, ve yine eksik tahsil edilmiş ise
+		  -- işlem6
+		  Update dbo.OnmOdemePlani set
+		    TaksitTutari = YedekTaksitTutari
+          , YedekTaksitTutari = null
+		  , IsPaid = 0
+          , BelgeMakbuzId = 0
+		  Where BelgeMakbuzId = @curId
+		  and   isnull(YedekTaksitTutari,0) > 0
+		  and   isnull(PatchBelgeMakbuzId,0) > 0
+		  and   IsPaid = 1
+		  		   
+      end -- if (@TipiId = 2)
+
+      FETCH NEXT FROM cursor_BMakbuzDlt INTO @curId
+    END
+
+    CLOSE cursor_BMakbuzDlt
+    DEALLOCATE cursor_BMakbuzDlt
+
+	EXECUTE [dbo].[prc_OnmToplamBekleyenOdemeler] @FirmId
+    EXECUTE [dbo].[prc_OnmToplamBekleyenGelirler] @FirmId
+
+END
+
+ /*CreateTriggerEnd*/
+
+
+
+ /*
+   TipiId             SmallInt      null, /* 1. Tahsilat, 2. Tediye */
+   IslemTipiId        SmallInt      null, /* belge tipileri belli */
+   AltIslmeTipiId     SmallInt      null, /* peşinat, taksit vb gibi alt detay seçenekleri için */ 
+
+   tt için örnek taraflar, tt : Tahsil ve Tediye işlemi : TTTipiId
+
+   IslemTipiId
+   10 fh - fh : finans hesapları arası virman/transferler
+   20 fh - ch : cari hesabı 
+   30 fh - mh : maliyet hesabı için direk ödeme yapılıyor
+
+   60 fh - mb : maliyet belgesi ( daha önce kaydedilen mb nin ödemesi yapılıyor )
+   71 fh - sb : alışlar 
+   72 fh - sb : satışlar
+   73 fh - hb : hizmet belgesi
+   80 fh - cs : cekSen  
+   */
+
+/*CreateLkpTable*/
+
+begin transaction
+
+-- ------------------------------------------------------- 
+-- TipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[OnmBelgeMakbuzTipi]
+(
+   Id           Int Unique Not Null,
+   Tipi         nVarchar(50),
+   GrupTipiId   SmallInt Null,
+
+   constraint  pk_OnmBelgeMakbuzTipi primary key (Id)
+)
+
+delete from [Lkp].[OnmBelgeMakbuzTipi]
+INSERT INTO [Lkp].[OnmBelgeMakbuzTipi] (Id, Tipi, GrupTipiId)
+ VALUES 
+  (0,   N'Tanımsız', 0),
+  (1,   N'Açılış', 1),
+  (2,   N'Tahsilat', 1),
+  (3,   N'Tediye', 1),
+  (4,   N'Mahsup', 1),
+  (5,   N'Kapanış', 1)
+
+
+-- ------------------------------------------------------- 
+-- IslemTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[OnmBelgeMakbuzIslemTipi]
+(
+   Id             Int IDENTITY(1,1) Not Null,
+   BorcHesapId    Int null,
+   AlacakHesapId  Int null,
+   IslemKodu      Varchar(10),
+   IslemAdi       nVarchar(100),
+
+   constraint  pk_OnmBelgeMakbuzIslemTipi primary key (Id)
+)
+
+/*
+
+SELECT [BorcHesapId]
+      ,[AlacakHesapId]
+      ,[IslemKodu]
+      ,[IslemAdi]
+  FROM [Lkp].[OnmBelgeMakbuzIslemTipi]
+  Where BorcHesapId in ( 100, 1022, 1023, 1024 ) 
+  order by BorcHesapId, AlacakHesapId
+
+
+  
+SELECT [BorcHesapId]
+      ,[AlacakHesapId]
+      ,[IslemKodu]
+      ,[IslemAdi]
+  FROM [Lkp].[OnmBelgeMakbuzIslemTipi]
+  Where AlacakHesapId in ( 100, 1022, 1023, 1024 )  
+  and Id not in ( 
+      Select Id From [Lkp].[OnmBelgeMakbuzIslemTipi]
+      Where BorcHesapId in ( 100, 1022, 1023, 1024 ) 
+      )
+  order by AlacakHesapId, BorcHesapId
+
+*/
+
+
+/*
+-- ------------------------------------------------------- 
+-- AltIslemTipiId  ( Zamamla yeni tanımlamalar eklenecek )
+-- ------------------------------------------------------- 
+create table [Lkp].[OnmBelgeMakbuzAltIslemTipi]
+(
+   Id           Int Unique Not Null,
+   AltIslemTipi nVarchar(50),
+   GrupTipiId   SmallInt Null,
+
+   constraint  pk_OnmBelgeMakbuzAltIslemTipi primary key (Id)
+)
+
+delete from [Lkp].[OnmBelgeMakbuzAltIslemTipi]
+INSERT INTO [Lkp].[OnmBelgeMakbuzAltIslemTipi] (Id, AltIslemTipi, GrupTipiId)
+ VALUES 
+  (    0,    N'Tanımsız', 0),
+  ( 1001,    N'Virman', 1),
+  ( 1002,    N'Cariden tahsilat', 1),
+  ( 1003,    N'Cariye ödeme', 1),
+  ( 1021,    N'Kredi Kartı ödemesi', 1),
+  (  770,    N'Gider ödemesi', 1),
+  ( 2110,    N'Mtsk sertifika ücreti', 1),  
+  ( 2111,    N'Mtsk teorik sınav ücreti', 1),
+  ( 2112,    N'Mtsk uygulama sınav ücreti', 1),
+  ( 2113,    N'Mtsk özel teorik ders ücreti', 1),
+  ( 2114,    N'Mtsk özel uygulama ders ücreti', 1)
+  */
+
+
+
+
+-- ------------------------------------------------------- 
+-- BHesapTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[OnmBelgeMakbuzBHesapTipi]
+(
+   Id           Int Unique Not Null,
+   BHesapTipi   nVarchar(50),
+   GrupTipiId   SmallInt Null,
+
+   constraint  pk_OnmBelgeMakbuzBHesapTipi primary key (Id)
+)
+
+delete from [Lkp].[OnmBelgeMakbuzBHesapTipi]
+INSERT INTO [Lkp].[OnmBelgeMakbuzBHesapTipi] (Id, BHesapTipi, GrupTipiId)
+ VALUES 
+  ( 0,    N'Tanımsız', 1),
+
+  ( 100,  N'Kasa', 1),
+  ( 1022, N'Banka hesabı', 1), 
+  ( 1023, N'Banka/Kredi kartı', 1), 
+  ( 1024, N'POS', 1),
+
+  ( 120,  N'Alıcılar', 1),
+  ( 131,  N'Ortaklar', 1),
+  ( 135,  N'Personel', 1),
+  ( 196,  N'Personel avansları', 1),
+  ( 320,  N'Satıcılar', 1),
+
+  ( 300,  N'Banka kredileri', 1),
+
+  ( 153,  N'Stok alımı', 1),
+  ( 600,  N'Yurtiçi satışlar', 1),
+  ( 601,  N'Yurtdışı satışlar', 1), 
+  ( 602,  N'Verilen hizmetler', 1),
+
+  ( 770,  N'Genel yönetim giderleri', 1),
+  ( 791,  N'İşçi ücret ve giderleri', 1),
+  ( 793,  N'Dışarıdan sağlanan fayda ve hizmetler', 1),
+  ( 795,  N'Vergi, resim ve harçlar', 1),
+  ( 797,  N'Finansman giderleri', 1),
+
+  --( 901,   N'SGK giderleri', 1),
+  --( 902,   N'SGK işci payı giderleri', 1),
+  --( 903,   N'SGK işveren payı giderleri', 1),
+  --( 911,   N'Bağkur giderleri', 1),
+  --( 921,   N'Belediye harçları', 1),
+
+  ( 2110,  N'Mtsk sertifika ücreti', 1),  
+  ( 2111,  N'Mtsk teorik sınav ücreti', 1),
+  ( 2112,  N'Mtsk uygulama sınav ücreti', 1),
+  ( 2113,  N'Mtsk özel teorik ders ücreti', 1),
+  ( 2114,  N'Mtsk özel uygulama ders ücreti', 1)
+
+
+  
+-- ------------------------------------------------------- 
+-- AHesapTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[OnmBelgeMakbuzAHesapTipi]
+(
+   Id           Int Unique Not Null,
+   AHesapTipi   nVarchar(50),
+   GrupTipiId   SmallInt Null,
+
+   constraint  pk_OnmBelgeMakbuzAHesapTipi primary key (Id)
+)
+
+delete from [Lkp].[OnmBelgeMakbuzAHesapTipi]
+INSERT INTO [Lkp].[OnmBelgeMakbuzAHesapTipi] (Id, AHesapTipi, GrupTipiId)
+ VALUES 
+  ( 0,    N'Tanımsız', 1),
+
+  ( 100,  N'Kasa', 1),
+  ( 1022, N'Banka hesabı', 1), 
+  ( 1023, N'Banka/Kredi kartı', 1), 
+  ( 1024, N'POS', 1),
+
+  ( 120,  N'Alıcılar', 1),
+  ( 131,  N'Ortaklar', 1),
+  ( 135,  N'Personel', 1),
+  ( 196,  N'Personel avansları', 1),
+  ( 320,  N'Satıcılar', 1),
+
+  ( 300,  N'Banka kredileri', 1),
+
+  ( 153,  N'Stok alımı', 1),
+  ( 600,  N'Yurtiçi satışlar', 1),
+  ( 601,  N'Yurtdışı satışlar', 1), 
+  ( 602,  N'Verilen hizmetler', 1),
+
+  ( 770,  N'Genel yönetim giderleri', 1),
+  ( 791,  N'İşçi ücret ve giderleri', 1),
+  ( 793,  N'Dışarıdan sağlanan fayda ve hizmetler', 1),
+  ( 795,  N'Vergi, resim ve harçlar', 1),
+  ( 797,  N'Finansman giderleri', 1),
+
+  --( 901,   N'SGK giderleri', 1),
+  --( 902,   N'SGK işci payı giderleri', 1),
+  --( 903,   N'SGK işveren payı giderleri', 1),
+  --( 911,   N'Bağkur giderleri', 1),
+  --( 921,   N'Belediye harçları', 1),
+
+  ( 2110,  N'Mtsk sertifika ücreti', 1),  
+  ( 2111,  N'Mtsk teorik sınav ücreti', 1),
+  ( 2112,  N'Mtsk uygulama sınav ücreti', 1),
+  ( 2113,  N'Mtsk özel teorik ders ücreti', 1),
+  ( 2114,  N'Mtsk özel uygulama ders ücreti', 1)
+
+-- ------------------------------------------------------- 
+-- JoinTableTypeId
+-- ------------------------------------------------------- 
+create table [Lkp].[OnmBelgeMakbuzJoinTableType]
+(
+   Id               Int Unique Not Null,
+   JoinTableType    nVarchar(50),
+
+   constraint  pk_OnmBelgeMakbuzJoinTableType primary key (Id)
+)
+
+delete from [Lkp].[OnmBelgeMakbuzJoinTableType]
+INSERT INTO [Lkp].[OnmBelgeMakbuzJoinTableType] (Id, JoinTableType)
+ VALUES 
+  ( 0,     N'Tanımsız'),
+  ( 1,     N'OnmBelgeMaliyet'),
+  ( 2100,  N'Mtsk Modülü')
+
+
+
+commit transaction
+
+/*CreateLkpTableEnd*/
+
+/*
++Fatura
+
+Faturayı tamamlayan veya fatura düzenlenmesini gerektiren belgeler
+Sevk İrsaliyesi
+Taşıma İrsaliyesi
+Yolcu Listeleri
+Günlük Müşteri Listeleri
+Adisyonlar
+Hak Ediş Belgesi
+
+Fatura yerine geçen belgeler
++Perakende Satış Belgeleri
++Gider Pusulası
++Müstahsil Makbuzu
++Serbest Meslek Makbuzu
++Yapay Belgeler
+
+
+Alınan belge türü
+----------------------------
+Fatura
+Perakende Satış Belgeleri
+Gider Pusulası
+Müstahsil Makbuzu
+Serbest Meslek Makbuzu
+Yapay Belgeler
+----------------------------
+fatura çeşitleri
+----------------------------
+akaryakıt
+market
+restoran
+elektrik
+su
+doğalgaz
+telekomikasyon
+
+sigorta
+bakım 
+tamir
+demirbaş alım
+diğer maliyet faturası
+
+*/

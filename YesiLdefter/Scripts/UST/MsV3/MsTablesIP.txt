@@ -1,0 +1,228 @@
+/*CreateTable*/
+
+begin transaction
+
+ create table MsTablesIP
+ (
+    Id                      Int IDENTITY(1,1)     not null,
+        
+    SoftwareCode            varchar(20)           null,
+    ProjectCode             varchar(20)           null,
+    TableTypeId             SmallInt              null,
+    TableCode               VarChar(50)           not null,
+    IPCode                  VarChar(50)           not null,
+    TableIPCode             VarChar(100)          null,
+    IPCaption               nVarchar(100)         null,
+
+    IPSelectSql             varchar(8000)         null,
+    IPWhereSql              varchar(250)          null,  
+    IPOrderBySql            varchar(250)          null,  
+    ExternalIPCode          varchar(100)          null,
+
+    ViewCmpTypeId           smallInt              null,
+    Navigator               varchar(2000)         null,
+    DataReadTypeId          smallInt              null,
+    DataFindTypeId          smallInt              null,
+    FindFieldName           varchar(300)          null,
+    AutoInsert              bit                   null,
+    
+    ProcedureName           varchar(100)          null,
+    TreeKeyFieldName        varchar(50)           null,
+    TreeParentFieldName     varchar(50)           null,
+
+    PropSubView             varchar(4000)         null,
+    PropJoinTable           varchar(8000)         null,
+    PropViews               varchar(4000)         null,
+    PropNavigator           varchar(8000)         null,
+
+
+	Constraint PK_MsTablesIP primary key (Id)
+ )
+
+ create index X_MsTablesIP1 on MsTablesIP (SoftWareCode,ProjectCode,TableCode,IPCode)
+
+ grant select, insert, update, delete on MsTablesIP to public
+
+
+commit transaction
+
+/*CreateTableEnd*/
+
+
+/*CreateTrigger*/
+
+
+CREATE TRIGGER [dbo].[trg_MsTablesIP] on [dbo].[MsTablesIP] 
+AFTER INSERT, UPDATE
+AS BEGIN
+    DECLARE Cursor_MsTablesIP cursor for select Id from Inserted
+    DECLARE @curId bigint
+
+    OPEN Cursor_MsTablesIP
+
+    FETCH NEXT FROM Cursor_MsTablesIP INTO @curId
+
+    declare @ySoftCode varchar(100) = null
+    declare @yProjectCode varchar(100) = null
+    
+	declare @yTableCode varchar(100) = null
+    declare @yIPCode varchar(100) = null
+    
+	declare @eTableCode varchar(100) = null
+    declare @eIPCode varchar(100) = null
+    
+    declare @TableIPCode varchar(100) = null
+    
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+	    set @ySoftCode = ''
+		set @yProjectCode = '' 
+        set @yTableCode = ''
+        set @yIPCode = ''
+        set @TableIPCode = ''
+        
+        select 
+		  @ySoftCode = isnull(ins.SoftwareCode,'')
+		, @yProjectCode = isnull(ins.ProjectCode,'')
+    	, @yTableCode = isnull(ins.TableCode,'')
+    	, @yIPCode = isnull(ins.IPCode,'')
+		
+    	from inserted ins
+    	where ins.Id = @curId
+     	
+        set @TableIPCode = @ySoftCode + '/' + @yProjectCode + '/' + @yTableCode + '.' +  @yIPCode
+    	  
+        Update MsTableIP set TableIPCode = @TableIPCode
+        Where Id = @curId 
+
+    	FETCH NEXT FROM Cursor_MsTablesIP INTO @curId
+    END
+
+    CLOSE Cursor_MsTablesIP
+    DEALLOCATE Cursor_MsTablesIP   
+END -- trigger
+
+ALTER TABLE [dbo].[MsTableIP] ENABLE TRIGGER [trg_MsTableIP]
+
+
+/*CreateTriggerEnd*/
+
+
+
+
+
+/*CreateLkpTable*/
+
+begin transaction
+
+
+
+
+-- ------------------------------------------------------- 
+-- TableTypeId
+-- ------------------------------------------------------- 
+
+IF EXISTS (Select * From sys.objects WHERE name = 'MsTablesIPTableType')
+drop table [Lkp].[MsTablesIPTableType]
+
+create table [Lkp].[MsTablesIPTableType]
+(
+   Id          Int Unique not null, 
+   TableType   nVarchar(50)   null
+   
+   constraint  pk_MsTablesIPTableType primary key (Id)
+)
+
+Delete from [Lkp].[MsTablesIPTableType]
+INSERT INTO [Lkp].[MsTablesIPTableType] (Id, TableType)
+ VALUES 
+  ( 0,     N''),
+  ( 1,     N'Table'),
+  ( 2,     N'View'),
+  ( 3,     N'Stored Procedure'),
+  ( 4,     N'Function'),
+  ( 5,     N'Trigger'),
+  ( 6,     N'Select')
+
+
+-- ------------------------------------------------------- 
+--    ViewCmpTypeId  
+--    DataReadTypeId 
+--    DataFindTypeId 
+-- ------------------------------------------------------- 
+
+IF EXISTS (Select * From sys.objects WHERE name = 'MsTablesIPViewCmpType')
+drop table [Lkp].[MsTablesIPViewCmpType]
+
+create table [Lkp].[MsTablesIPViewCmpType]
+(
+   Id           Int Unique not null, 
+   ViewCmpType  Varchar(50)    null
+   
+   constraint  pk_MsTablesIPViewCmpType primary key (Id)
+)
+
+Delete from [Lkp].[MsTablesIPViewCmpType]
+INSERT INTO [Lkp].[MsTablesIPViewCmpType] (Id, ViewCmpType)
+ VALUES 
+  ( 0,     N'none'),
+  ( 1010,  N'GridView'),
+  ( 1020,  N'BandedGridView'),
+  ( 1030,  N'AdvBandedGridView'),
+  ( 1040,  N'GridLayoutView'),
+  ( 1050,  N'WinExplorerView'),
+  ( 1060,  N'TileView'),
+  ( 1070,  N'CardView'),
+  ( 2010,  N'VGridSingle'),
+  ( 2012,  N'VGridMulti'),
+  ( 2020,  N'TreeView'),
+  ( 2030,  N'PivotGrid'),
+  ( 3010,  N'DataLayoutView'),
+  ( 3020,  N'CalenderAndScheduler'),
+  ( 3030,  N'Charts'),
+  ( 4010,  N'WizardControl')
+
+IF EXISTS (Select * From sys.objects WHERE name = 'MsTablesIPDataReadType')
+drop table [Lkp].[MsTablesIPDataReadType]
+
+create table [Lkp].[MsTablesIPDataReadType]
+(
+   Id            Int Unique not null, 
+   DataReadType  Varchar(50)    null
+   
+   constraint  pk_MsTablesIPDataReadType primary key (Id)
+)
+
+Delete from [Lkp].[MsTablesIPDataReadType]
+INSERT INTO [Lkp].[MsTablesIPDataReadType] (Id, DataReadType)
+ VALUES 
+  ( 0, N'none'),
+  ( 1, N'Not Read Data'),
+  ( 2, N'Read RefID'),
+  ( 3, N'Detail Table'),
+  ( 4, N'SubDetail Table'),
+  ( 5, N'Data Collection'),  /* veri toplama */
+  ( 6, N'Read SubView'),
+  ( 7, N'Dont Save')
+
+IF EXISTS (Select * From sys.objects WHERE name = 'MsTablesIPDataFindType')
+drop table [Lkp].[MsTablesIPDataFindType]
+
+create table [Lkp].[MsTablesIPDataFindType]
+(
+   Id            Int Unique not null, 
+   DataFindType  Varchar(20)    null
+   
+   constraint  pk_MsTablesIPDataFindType primary key (Id)
+)
+
+Delete from [Lkp].[MsTablesIPDataFindType]
+INSERT INTO [Lkp].[MsTablesIPDataFindType] (Id, DataFindType)
+ VALUES 
+  ( 0, N'none'),
+  ( 1, N'Standart'),
+  ( 2, N'List & Data')
+
+commit transaction
+  
+/*CreateLkpTableEnd*/

@@ -1,8 +1,9 @@
-﻿-- ------------------------------------------------------- 
+﻿/*CreatTable*/ 
+-- ------------------------------------------------------- 
 -- FaturaEkVergiTipi
 -- ------------------------------------------------------- 
 
-create table [Lkp].[FaturaEkVergiTipi]
+create table [Lkp].[OnmFaturaEkVergiTipi]
 (
    Id           Int IDENTITY(1,1) NOT NULL, 
    IsActive     Bit null,
@@ -11,12 +12,17 @@ create table [Lkp].[FaturaEkVergiTipi]
    VergiOrani        Numeric(12,8) null,
    VergiTutari       Numeric(22,8) null,
 
-   constraint  pk_FaturaEkVergiTipi primary key (Id)
+   constraint  pk_OnmFaturaEkVergiTipi primary key (Id)
 )
 
-SET IDENTITY_INSERT [Lkp].[FaturaEkVergiTipi] ON
+/*CreatTableEnd*/
 
-INSERT INTO [Lkp].[FaturaEkVergiTipi] (Id, IsActive, FaturaEkVergiKodu, FaturaEkVergiAdi, VergiOrani )
+
+/*CreatData*/
+
+SET IDENTITY_INSERT [Lkp].[OnmFaturaEkVergiTipi] ON
+
+INSERT INTO [Lkp].[OnmFaturaEkVergiTipi] (Id, IsActive, FaturaEkVergiKodu, FaturaEkVergiAdi, VergiOrani )
  VALUES 
   ( 0, 1, N'', N'Tanımsız', 0 ),
   ( 1, 0, N'V0021', N'BANKA MUAMELELERİ VER.', 0 ),
@@ -48,4 +54,6 @@ INSERT INTO [Lkp].[FaturaEkVergiTipi] (Id, IsActive, FaturaEkVergiKodu, FaturaEk
   (27, 0, N'V4171', N'ÖTV TEVKİFAT', 0 ),
   (28, 0, N'V9944', N'BEL.ÖD.HAL RÜSUM', 0 )
 
-  SET IDENTITY_INSERT [Lkp].[FaturaEkVergiTipi] OFF
+  SET IDENTITY_INSERT [Lkp].[OnmFaturaEkVergiTipi] OFF
+
+  /*CreatDataEnd*/

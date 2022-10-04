@@ -1,0 +1,770 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table OnmHesapFinans
+ (
+
+   Id                Int IDENTITY(1,1) NOT NULL, 
+   ParentId          Int       not null, /* default 0 */
+   FirmId            Int       not null,
+   IsActive          Bit       not null, /* default : 1 = active, 0 = not active */  
+   
+   UstGrupTipiId     SmallInt      null, /* 10    hazır değerler */ 
+   AnaGrupTipiId     SmallInt      null, /* 102   banka          */ 
+   AltGrupTipiId     Int           null, /* 1022  banka hesabı   */ 
+   AltCesitTipiId    Int           null, /* 10221 vadesiz        */ 
+   HesapTipiId       SmallInt      null, /* 11. Maliyet grubu, 12. Varlık hesabı, 13. Abone hesabı */   
+   
+   --10
+   HesapKodu         nVarchar(50)  null,
+   UstHesapKodu      nVarchar(50)  null,
+   HesapKisaAdi      nVarchar(100) null, /* nick Name, Kısa Adı */
+   HesapAdi          nVarchar(150) null, /* kullanıcının girdiği isim */
+   
+   --20
+   Numarasi          nVarchar(50)  null, /* HesapNumarasi, KartNumarasi */
+   IBANNumarasi      nVarchar(50)  null,
+   IlgiliIsim        nVarchar(50)  null, /* MusteriTemsilcisi, Kartın Üzerindeki isim */
+   Telefonu          nVarchar(50)  null,
+   MobilTelefonu     nVarchar(50)  null,
+   FaxNumarasi       nVarchar(50)  null,
+   EPosta            nVarchar(50)  null,
+   WebAdresi         nVarchar(50)  null,
+   
+   --30
+   ParaTipiId        nVarChar(3)   null,
+   BorcDovizYeriId   SmallInt      null,
+   AlacakDovizYeriId SmallInt      null,
+   
+   --40
+   HesapKesimGunu    SmallInt      null,
+   OdemeKacGunSonra  SmallInt      null,
+   SonOdemeGunu      SmallInt      null,
+   SonKullanimTarihi nVarchar(10)  null,
+   CheckId           nVarchar(10)  null, /* kartın güvenlik kodu */
+   SorumluPersonelId Int           null, /* banka kartlarında kartı kullanan personel Id  */
+
+   --70
+   IsBilancoHesap          bit  null, /* hesabın bağlı olduğu muhasebe hesap kodu ???  */ 
+   IsGelirGiderHesap       bit  null,
+   IsMaliyetAHesap         bit  null,
+   IsMaliyetBHesap         bit  null,
+   IsNazimHesap            bit  null,
+
+   BilancHesapKodu         nvarchar(50) null,
+   GelirGiderHesapKodu     nvarchar(50) null,
+   MaliyetAHesapKodu       nvarchar(50) null,
+   MaliyetBHesapKodu       nvarchar(50) null,
+   NazimHesapKodu          nvarchar(50) null,
+
+   --80
+   BAHesapTipiId           SmallInt  null, /* OnmBelgeMakbuz tablsundaki BHesapTipiId veya AHesapTipiId nin bağlantısı */
+   UruneYuklenmesiTipiId   SmallInt  null, 
+   UretimHacmiTipiId       SmallInt  null,
+   IsletmeFonksiyonuTipiId SmallInt  null,
+   PeriyodTipiId           SmallInt  null, /* dönem */
+   BelgeTipiId             SmallInt  null, /* e-devlet, fatura vb */
+   KaynakTipiId            SmallInt  null, /* 1. kağıt, 2. elektronik belge */
+   IsKkeg                  Bit       null, /* kanunen kabul edilmeyen gider */
+   IsOncekiTutar           Bit       null, /* bir maliyet belgesi işlenirken bir önceki tutarı oku */  
+   OncekiTutar             Numeric(22,5)  null,
+   KdvOrani                SmallInt  null,
+   OtoOdemeBankaHesapId    Int       null,
+
+   constraint		pk_OnmHesapFinans primary key (Id)
+ )
+
+ create index X_OnmHesapFinans01 on OnmHesapFinans (FirmId)
+ create index X_OnmHesapFinans02 on OnmHesapFinans (UstGrupTipiId)
+
+ 
+ grant select, insert, update, delete on OnmHesapFinans to public
+
+ commit transaction
+
+ /*CreateTableEnd*/
+  
+
+/*
+Giderlerin Çeşitlerine Göre Sınıflandırılması  (7/B Seçeneğinin kendisi)
+Giderlerin Ürünlere Yüklenmesine Göre Sınıflandırılması
+Giderlerin Üretim (Etkinlik) Hacmi ile İlişkisine Göre Sınıflandırılması
+Giderlerin İşletme Fonksiyonlarına Göre Sınıflandırılması
+   UruneYuklenmesiTipiId   SmallInt  null, 
+   UretimHacmiTipiId       SmallInt  null,
+   IsletmeFonksiyonuTipiId SmallInt  null,
+*/
+
+/*CreateLkpTable*/
+
+-- ------------------------------------------------------- 
+-- BAHesapTipiId   /* OnmBelgeMakbuz tablsundaki BHesapTipiId veya AHesapTipiId nin bağlantısı */
+-- ------------------------------------------------------- 
+create table [Lkp].[OnmHesapFinansBAHesapTipi]
+(
+   Id             Int Unique Not Null,
+   BAHesapTipi    nVarchar(50),
+   GrupTipiId     SmallInt Null,
+
+   constraint  pk_OnmHesapFinansBAHesapTipi primary key (Id)
+)
+
+delete from [Lkp].[OnmHesapFinansBAHesapTipi]
+INSERT INTO [Lkp].[OnmHesapFinansBAHesapTipi] (Id, BAHesapTipi, GrupTipiId)
+ VALUES 
+  ( 0,    N'Tanımsız', 1),
+  ( 100,  N'Kasa', 1),
+  ( 1022, N'Banka hesabı', 1), 
+  ( 1023, N'Banka/Kredi kartı', 1), 
+  ( 1024, N'POS', 1),
+
+  ( 770,  N'Genel yönetim giderleri', 1),
+  ( 791,  N'İşçi ücret ve giderleri', 1),
+  ( 793,  N'Dışarıdan sağlanan fayda ve hizmetler', 1),
+  ( 795,  N'Vergi, resim ve harçlar', 1),
+  ( 797,  N'Finansman giderleri', 1),
+
+  ( 901,   N'SGK giderleri', 1),
+  ( 902,   N'SGK işci payı giderleri', 1),
+  ( 903,   N'SGK işveren payı giderleri', 1),
+  ( 911,   N'Bağkur giderleri', 1),
+  ( 921,   N'Belediye harçları', 1)
+
+
+-- ------------------------------------------------------- 
+-- UruneYuklenmesiTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[OnmHesapFinansUruneYuklenmesiTipi]
+(
+   Id                     Int Unique Not Null,
+   UruneYuklenmesiTipi    nVarchar(50),
+   GrupTipiId             SmallInt Null,
+
+   constraint  pk_OnmHesapFinansUruneYuklenmesiTipi primary key (Id)
+)
+
+delete from [Lkp].[OnmHesapFinansUruneYuklenmesiTipi]
+INSERT INTO [Lkp].[OnmHesapFinansUruneYuklenmesiTipi] (Id, UruneYuklenmesiTipi, GrupTipiId)
+ VALUES 
+  (0,   N'Tanımsız', 0),
+  (1,   N'Direkt Giderler', 1),
+  (2,   N'Endirekt Giderler', 1)
+
+
+-- ------------------------------------------------------- 
+-- UretimHacmiTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[OnmHesapFinansUretimHacmiTipi]
+(
+   Id                     Int Unique Not Null,
+   UretimHacmiTipi        nVarchar(50),
+   GrupTipiId             SmallInt Null,
+
+   constraint  pk_OnmHesapFinansUretimHacmiTipi primary key (Id)
+)
+
+delete from [Lkp].[OnmHesapFinansUretimHacmiTipi]
+INSERT INTO [Lkp].[OnmHesapFinansUretimHacmiTipi] (Id, UretimHacmiTipi, GrupTipiId)
+ VALUES 
+  (0,   N'Tanımsız', 0),
+  (1,   N'Sabit Giderler', 1),
+  (2,   N'Değişken Giderler', 1),
+  (3,   N'Karma Giderler', 1)
+
+-- ------------------------------------------------------- 
+-- IsletmeFonksiyonuTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[OnmHesapFinansIsletmeFonksiyonuTipi]
+(
+   Id                     Int Unique Not Null,
+   IsletmeFonksiyonuTipi  nVarchar(50),
+   GrupTipiId             SmallInt Null,
+
+   constraint  pk_OnmHesapFinansIsletmeFonksiyonuTipi primary key (Id)
+)
+
+delete from [Lkp].[OnmHesapFinansIsletmeFonksiyonuTipi]
+INSERT INTO [Lkp].[OnmHesapFinansIsletmeFonksiyonuTipi] (Id, IsletmeFonksiyonuTipi, GrupTipiId)
+ VALUES 
+  (0,   N'Tanımsız', 0),
+  (1,   N'Tedarik (Satın Alma)', 1),
+  (2,   N'Üretim', 1),
+  (3,   N'Araştırma, Geliştirme', 1),
+  (4,   N'Pazarlama, Satış ve Dağıtım', 1),
+  (5,   N'Genel Yönetim', 1),
+  (6,   N'Finansman', 1)
+
+-- ------------------------------------------------------- 
+-- PeriyodTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[OnmHesapFinansPeriyodTipi]
+(
+   Id           Int Unique Not Null,
+   PeriyodTipi  nVarchar(20),
+   GrupTipiId   SmallInt Null,
+
+   constraint  pk_OnmHesapFinansPeriyodTipi primary key (Id)
+)
+
+delete from [Lkp].[OnmHesapFinansPeriyodTipi]
+INSERT INTO [Lkp].[OnmHesapFinansPeriyodTipi] (Id, PeriyodTipi, GrupTipiId)
+ VALUES 
+  (0,   N'Tanımsız', 0),
+  (11,   N'Günlük', 1),
+  (21,   N'Haftalık', 1),
+  (22,   N'2 Haftalık', 1),
+  (31,   N'Aylık', 1),
+  (32,   N'2 Aylık', 1),
+  (33,   N'3 Aylık', 1),
+  (34,   N'4 Aylık', 1),
+  (35,   N'6 Aylık', 1),
+  (41,   N'Yıllık', 1),
+  (42,   N'2 Yıllık', 1)
+
+
+-- ------------------------------------------------------- 
+-- BelgeTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[OnmHesapFinansBelgeTipi]
+(
+   Id           Int Unique Not Null,
+   BelgeTipi    nVarchar(50),
+   GrupTipiId   SmallInt Null,
+
+   constraint  pk_OnmHesapFinansBelgeTipi primary key (Id)
+)
+
+delete from [Lkp].[OnmHesapFinansBelgeTipi]
+INSERT INTO [Lkp].[OnmHesapFinansBelgeTipi] (Id, BelgeTipi, GrupTipiId)
+ VALUES 
+  (0,   N'Tanımsız', 0),
+  (1,   N'Fatura', 1),
+  (2,   N'ÖKC Fişi', 1),
+  (3,   N'Perakende Satış Belgesi', 1),
+  (4,   N'Gider Pusulası', 1),
+  (5,   N'Müstahsil Makbuzu', 1),
+  (6,   N'Serbest Meslek Makbuzu', 1),
+  (7,   N'Tevsiki Zaruri Olmayan', 1),
+  (8,   N'Yapay Belge', 1),
+  (21,  N'Muhasebe Dekontu', 1),
+  (22,  N'Hesap Extresi', 1)
+
+-- ------------------------------------------------------- 
+-- KaynakTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[OnmHesapFinansKaynakTipi]
+(
+   Id           Int Unique Not Null,
+   KaynakTipi   nVarchar(50),
+   GrupTipiId   SmallInt Null,
+
+   constraint  pk_OnmHesapFinansKaynakTipi primary key (Id)
+)
+
+delete from [Lkp].[OnmHesapFinansKaynakTipi]
+INSERT INTO [Lkp].[OnmHesapFinansKaynakTipi] (Id, KaynakTipi, GrupTipiId)
+ VALUES 
+  (0,   N'Tanımsız', 0),
+  (1,   N'e-devlet', 1), 
+  (2,   N'e-fatura', 1),
+  (3,   N'e-belge', 1),
+  (4,   N'Kağıt', 1),
+  (5,   N'Sms', 1),
+  (6,   N'Fax', 1),
+  (7,   N'Telefon', 1),
+  (8,   N'Diğer', 1)
+
+
+--   ----------------------------------------------------------------
+--   UstGrupTipiId     SmallInt      null, /* 10    hazır değerler */ 
+--   AnaGrupTipiId     SmallInt      null, /* 102   banka          */ 
+--   AltGrupTipiId     Int           null, /* 1022  banka hesabı   */ 
+--   AltCesitTipiId    Int           null, /* 10221 vadesiz        */ 
+--   ----------------------------------------------------------------
+
+-- ------------------------------------------------------- 
+-- UstGrupTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[OnmHesapFinansUstGrupTipi]
+(
+   Id           Int Unique Not Null,
+   UstGrupTipi  nVarchar(50),
+   GrupTipiId   SmallInt Null,
+
+   constraint  pk_OnmHesapFinansUstGrupTipi primary key (Id)
+)
+-- ------------------------------------------------------- 
+-- AnaGrupTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[OnmHesapFinansAnaGrupTipi]
+(
+   Id          Int Unique Not Null,
+   AnaGrupTipi nVarchar(50) Null,
+   GrupTipiId  SmallInt Null,
+
+   constraint  pk_OnmHesapFinansAnaGrupTipi primary key (Id)
+)
+-- ------------------------------------------------------- 
+-- AltGrupTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[OnmHesapFinansAltGrupTipi]
+(
+   Id          Int Unique Not Null,
+   AltGrupTipi nVarchar(50) Null,
+   GrupTipiId  SmallInt Null,
+
+   constraint  pk_OnmHesapFinansAltGrupTipi primary key (Id)
+)
+-- ------------------------------------------------------- 
+-- AltCesitTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[OnmHesapFinansAltCesitTipi]
+(
+   Id           Int Unique Not Null,
+   AltCesitTipi nVarchar(50) Null,
+   GrupTipiId   SmallInt Null,
+
+   constraint  pk_OnmHesapFinansAltCesitTipi primary key (Id)
+)
+
+-- ------------------------------------------------------- 
+-- HesapTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[OnmHesapFinansHesapTipi]
+(
+   Id           Int Unique Not Null,
+   HesapTipi    nVarchar(20) Null,
+
+   constraint  pk_OnmHesapFinansHesapTipi primary key (Id)
+)
+
+delete from [Lkp].[OnmHesapFinansUstGrupTipi]
+INSERT INTO [Lkp].[OnmHesapFinansUstGrupTipi] (Id, UstGrupTipi, GrupTipiId)
+ VALUES 
+  (0,    N'Tanımsız', 0),
+  (10,   N'Hazır Değerler', 1),
+  (15,   N'Stoklar', 1),
+  (25,   N'Maddi Duran Varlıklar', 1),
+  (7,    N'Maliyet Hesapları', 1),
+  (77,   N'Genel Yönetim Giderleri', 1),
+  (81,   N'Master için ana maliyet grubu',  1 ),
+  (82,   N'Master için maliyet hesapları',  1 ),
+  (83,   N'Varlık grupları',  1 ),
+  (84,   N'Abone grupları',  1 ),
+  (85,   N'Seçilen maliyet hesapları',  1 ),
+  (91,   N'Vergiler', 1),
+  (92,   N'SGK', 1),
+  (93,   N'Bağkur', 1),
+  (94,   N'Belediye', 1)
+
+delete from [Lkp].[OnmHesapFinansAnaGrupTipi]
+INSERT INTO [Lkp].[OnmHesapFinansAnaGrupTipi] (Id, AnaGrupTipi, GrupTipiId)
+ VALUES 
+  (0,    N'Tanımsız', 0 ),
+  (100,  N'Kasa', 1),
+  (102,  N'Banka', 1),
+  (702,  N'Maliyet Hesapları (7/A Seçeneği)', 1),
+  (703,  N'Maliyet Hesapları (7/B Seçeneği)', 1),
+  (770,  N'Genel Yönetim Giderleri',  1 )
+
+delete from [Lkp].[OnmHesapFinansAltGrupTipi]
+INSERT INTO [Lkp].[OnmHesapFinansAltGrupTipi] (Id, AltGrupTipi, GrupTipiId)
+ VALUES 
+  (0,    N'Tanımsız',      0 ),
+  (100,  N'Nakit Kasası',  1 ), 
+  (1020, N'Banka',         1 ), 
+  (1021, N'Şube',          1 ), 
+  (1022, N'Banka Hesabı',  1 ), 
+  (1023, N'Banka Kartı',   1 ), 
+  (1024, N'POS',           1 ),
+  (1029, N'Banka Listesi', 1 ),
+  ( 860, N'Doğalgaz Sayacı (Bina)', 3 ),
+  ( 861, N'Doğalgaz Sayacı (Tesis, Makine ve Cihaz)', 3 ),
+  ( 862, N'Elektrik Sayacı (Bina)', 3 ),
+  ( 863, N'Elektrik Sayacı (Taşıt)', 3 ),
+  ( 864, N'Elektrik Sayacı (Tesis, Makine ve Cihaz)', 3 ),
+  ( 865, N'Su Sayacı (Bina)', 3 ),
+  ( 866, N'Su Sayacı (Tesis, Makine ve Cihaz)', 3 ),
+  ( 890, N'Diğer', 3)
+
+delete from [Lkp].[OnmHesapFinansAltCesitTipi]
+INSERT INTO [Lkp].[OnmHesapFinansAltCesitTipi] (Id, AltCesitTipi, GrupTipiId)
+ VALUES 
+  (0,     N'Tanımsız',      0 ),
+  (10221, N'Vadesiz',      1 ),
+  (10222, N'Vadeli',       1 ),
+  (10223, N'Ticari',       1 ),
+  (10231, N'Nakit Kartı',  2 ),
+  (10232, N'Kredi Kartı',  2 ),
+
+  ( 810, N'TürkTelekom Ev/İş Telefonu', 3),
+  ( 812, N'TürkTelekom Cep', 3),
+  ( 814, N'TTNET İnternet', 3),
+  ( 820, N'Turkcell Cep', 3),
+  ( 822, N'Turkcell İnternet', 3),
+  ( 830, N'Vodafone Cep', 3),
+  ( 832, N'Vodafone İnternet', 3),
+  ( 840, N'Ptt Cell', 3),
+  ( 842, N'Türksat', 3)
+
+
+delete from [Lkp].[OnmHesapFinansHesapTipi]
+INSERT INTO [Lkp].[OnmHesapFinansHesapTipi] (Id, HesapTipi)
+ VALUES 
+  ( 0,  N'Tanımsız'),
+  (11,  N'Maliyet grubu'),
+  (12,  N'Varlık hesabı'),
+  (13,  N'Abone hesabı')
+
+
+commit transaction
+
+/*CreateLkpTableEnd*/
+
+
+/*CreateTrigger*/
+
+CREATE TRIGGER [dbo].[trg_OnmHesapFinans] on [dbo].[OnmHesapFinans] 
+AFTER INSERT, UPDATE
+AS BEGIN
+--   UstGrupTipiId       SmallInt      null, /* 102   banka        */
+--   AnaGrupTipiId       SmallInt      null, /* 1022  banka hesabı */
+--   AltGrupTipiId       Int           null, /* 10221 vadesiz      */
+
+    declare cursorOnmHesapFinans cursor for select Id from Inserted
+    declare @curId bigint
+
+	declare @kacHane smallInt = 3 
+	declare @eId Int = 0
+    declare @eFirmId Int = 0
+    declare @eUstGrupTipiId smallInt = 0
+    declare @eAnaGrupTipiId smallInt = 0
+    declare @eAltGrupTipiId Int = 0
+	declare @eAltCesitTipiId Int = 0
+	declare @eHesapTipiId smallInt = 0
+    declare @eHesapKisaAdi varchar(100) = null
+    declare @eHesapAdi varchar(150) = null
+	declare @eHesapKodu varchar(50) = null
+	declare @eUstHesapKodu varchar(50) = null
+	declare @eNumarasi varchar(50) = null
+
+	declare @eParentHesapAdi1 varchar(150) = null
+	declare @eParentHesapKodu1 varchar(50) = null
+    declare @eParentHesapAdi2 varchar(150) = null
+	declare @eParentHesapAdi3 varchar(150) = null
+
+    declare @yUstGrupTipiId smallInt = 0
+	declare @yHesapKisaAdi varchar(100) = null
+	declare @yHesapKodu varchar(50) = null
+	declare @yHesapTipiId smallInt = 0
+
+    OPEN cursorOnmHesapFinans
+
+    FETCH NEXT FROM cursorOnmHesapFinans INTO @curId
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+	  set @yHesapKisaAdi = ''
+	  set @yHesapKodu = ''
+	  set @yHesapTipiId = 0
+
+      select 
+	     @eFirmId = isnull(ins.FirmId,0)  
+    	,@eUstGrupTipiId = isnull(ins.UstGrupTipiId,0)  
+		,@eAnaGrupTipiId = isnull(ins.AnaGrupTipiId,0)  
+		,@eAltGrupTipiId = isnull(ins.AltGrupTipiId,0)  
+		,@eAltCesitTipiId = isnull(ins.AltCesitTipiId,0)  
+		,@eHesapTipiId = isnull(ins.HesapTipiId,0)  
+		,@eHesapKisaAdi = isnull(ins.HesapKisaAdi,'NULL')
+		,@eHesapAdi = isnull(ins.HesapAdi,'NULL')
+		,@eHesapKodu = isnull(ins.HesapKodu,'NULL')
+    	,@eUstHesapKodu = isnull(ins.UstHesapKodu,'NULL')
+    	,@eNumarasi = isnull(ins.Numarasi,'')
+		,@eParentHesapAdi1 = isnull(fh1.HesapAdi, '')
+		,@eParentHesapKodu1 = isnull(fh1.HesapKodu, '')
+		,@eParentHesapAdi2 = isnull(fh2.HesapAdi, '') 
+		,@eParentHesapAdi3 = isnull(fh3.HesapAdi, '') 
+
+      from Inserted ins
+	    left outer join OnmHesapFinans fh1 on ( ins.ParentId = fh1.Id )
+		left outer join OnmHesapFinans fh2 on ( fh1.ParentId = fh2.Id )
+		left outer join OnmHesapFinans fh3 on ( fh2.ParentId = fh3.Id )
+	  where ins.Id = @curId
+	  
+	  /*
+	  print '@eUstGrupTipiId = ' + convert(varchar, @eUstGrupTipiId) 
+	  print '@eAnaGrupTipiId = ' + convert(varchar, @eAnaGrupTipiId) 
+	  print '@eAltGrupTipiId = ' + convert(varchar, @eAltGrupTipiId) 
+      print '@eAltCesitTipiId = ' + convert(varchar, @eAltCesitTipiId) 
+	  print '@eHesapKisaAdi = ' + @eHesapKisaAdi 
+	  print '@eHesapAdi = ' + @eHesapAdi 
+	  print '@eHesapKodu = ' + @eHesapKodu 
+	  print '@eUstHesapKodu = ' + @eUstHesapKodu 
+	  print '@eNumarasi = ' + @eNumarasi 
+	  print '@eParentHesapAdi1 = ' + @eParentHesapAdi1
+      print '@eParentHesapKodu1 = ' + @eParentHesapKodu1
+      print '@eParentHesapAdi2 = ' + @eParentHesapAdi2
+      print '@eParentHesapAdi3 = ' + @eParentHesapAdi3
+	  */
+
+	  if (@eAnaGrupTipiId = 100)  
+	  begin
+	    set @yHesapKisaAdi = @eHesapAdi
+	  end
+
+	  if (@eUstGrupTipiId = 10) and (@eAnaGrupTipiId = 102)  
+	  begin
+	    set @yHesapKisaAdi = @eHesapAdi
+	    
+		--print @yHesapKisaAdi+ ' ; ' + @eParentHesapAdi1 + ' + ' + @eParentHesapAdi2 + ' ; ' + @eParentHesapAdi3
+
+		if (@eAltGrupTipiId = 1021)
+		    set @yHesapKisaAdi = @eParentHesapAdi1
+		if (@eAltGrupTipiId = 1022)
+		    set @yHesapKisaAdi = @eParentHesapAdi2
+        if (@eAltGrupTipiId = 1023)
+		    set @yHesapKisaAdi = @eParentHesapAdi3
+        if (@eAltGrupTipiId = 1024)
+		    set @yHesapKisaAdi = @eParentHesapAdi3
+
+		if ((@eAltGrupTipiId = 1020) or -- seçilen banka, 
+		    (@eAltGrupTipiId = 1021) or -- şube
+			(@eAltGrupTipiId = 1022) or -- banka hesabı
+			(@eAltGrupTipiId = 1023) or -- banka kartı
+			(@eAltGrupTipiId = 1024) or -- pos cihazı
+		    (@eAltGrupTipiId = 1029))   -- tüm banka
+		begin
+		  set @yHesapKisaAdi = replace(@yHesapKisaAdi, 'TÜRKİYE', '');
+	      set @yHesapKisaAdi = replace(@yHesapKisaAdi, 'T.A.Ş.', '');
+	      set @yHesapKisaAdi = replace(@yHesapKisaAdi, 'T.A.O.', '');
+	      set @yHesapKisaAdi = replace(@yHesapKisaAdi, 'A.Ş.', '');
+	      set @yHesapKisaAdi = replace(@yHesapKisaAdi, 'T.C.', '');
+		  set @yHesapKisaAdi = replace(@yHesapKisaAdi, ' BANKALARI', '');
+	      set @yHesapKisaAdi = replace(@yHesapKisaAdi, ' BANKASI', '');
+	      set @yHesapKisaAdi = replace(@yHesapKisaAdi, ' BANK', '');
+		  set @yHesapKisaAdi = replace(@yHesapKisaAdi, ' BBVA', '');
+        end
+
+		if (@eHesapTipiId = 0) and -- Maliyet Grubu değilse
+		   ((@eAltGrupTipiId = 1022) or -- banka hesabı
+			(@eAltGrupTipiId = 1023) or -- banka kartı
+			(@eAltGrupTipiId = 1024))   -- pos cihazı
+		begin
+		  set @yHesapTipiId = 12 -- Varlık Tipi
+        end
+
+        if (@yHesapKisaAdi <> '')
+        begin
+	      --set @yHesapKisaAdi = Ltrim(@yHesapKisaAdi)
+	      --set @yHesapKisaAdi = Rtrim(@yHesapKisaAdi)
+		  set @yHesapKisaAdi = RTRIM(LTRIM(@yHesapKisaAdi))
+        end   
+
+		-- banka şubesi
+		if (@eAltGrupTipiId = 1021)
+		    set @yHesapKisaAdi = @yHesapKisaAdi + '.' + @eHesapAdi
+        -- banka hesabi
+        if (@eAltGrupTipiId = 1022)
+		    set @yHesapKisaAdi = @yHesapKisaAdi + '.' + @eParentHesapAdi1 + '.' +  RTRIM(LTRIM(@eParentHesapKodu1)) + '.' + @eNumarasi
+        -- banka kartı
+        if (@eAltGrupTipiId = 1023)
+		    set @yHesapKisaAdi = @yHesapKisaAdi + '.' + @eHesapAdi + '.' + @eNumarasi
+		-- pos cihazı
+        if (@eAltGrupTipiId = 1024) and (@eHesapAdi <> 'pos')
+		    set @yHesapKisaAdi = @yHesapKisaAdi + '.pos.' + @eHesapAdi + '.' + @eNumarasi
+        if (@eAltGrupTipiId = 1024) and (@eHesapAdi = 'pos')
+		    set @yHesapKisaAdi = @yHesapKisaAdi + '.pos.' + @eNumarasi
+      
+	  
+	    if (@yHesapKisaAdi <> @eHesapKisaAdi)
+        begin
+            update OnmHesapFinans set 
+	             HesapKisaAdi = substring(@yHesapKisaAdi,1,100)
+            where Id = @curId
+		    set @eHesapAdi = '' -- aşağıdaki çalısmasın ( update OnmHesapFinans set HesapKisaAdi = ...) 
+	    end 
+	  
+	  end
+
+	  -- Varlık 25 > 83
+	  if ((@eUstGrupTipiId = 83) and (@eFirmId > 0))
+	  begin
+	    set @yHesapKodu = @eHesapKodu 
+
+		if (@eNumarasi = '')
+		begin
+		  set @eNumarasi = dbo.fnc_OnmHesapFinansKoduGet(@eFirmId, @eUstGrupTipiId, @eAnaGrupTipiId, @kacHane, @curId)
+		end
+
+		set @yHesapKodu = convert(varchar(10), @eAnaGrupTipiId) + '.' + @eNumarasi
+		
+		if ((@eHesapKodu <> @yHesapKodu) and (@yHesapKodu <> '')) 
+	    begin
+	      if ( select count(Id) as Adet from dbo.OnmHesapFinans
+               Where FirmId = @eFirmId
+               and UstGrupTipiId = @eUstGrupTipiId
+               and AnaGrupTipiId = @eAnaGrupTipiId
+               and HesapKodu = @yHesapKodu
+             ) = 0 
+	      begin
+		    update OnmHesapFinans set 
+                   HesapKodu = substring(@yHesapKodu,1,50)
+            where Id = @curId
+		  end --else
+		  --begin
+		    --update HesapFinans set 
+            --       HesapKodu = 'ÇAKIŞMA'
+            --where Id = @curId
+		  --end
+        end
+	  end
+
+	  if ((@eUstHesapKodu = '81.21') or
+	      (@eUstHesapKodu = '81.22') or
+          (@eUstHesapKodu = '81.23') or
+          (@eUstHesapKodu = '81.24'))
+      begin
+        --81, 0, 0, '81.21', '', 'Vergiler, harçlar'
+        --81, 0, 0, '81.22', '', 'SGK'
+        --81, 0, 0, '81.23', '', 'Bağkur' 
+        --81, 0, 0, '81.24', '', 'Belediye'
+		
+		--print @eUstHesapKodu
+        -- vergi, sgk, bağkur, belediye ise
+	    if (@eUstHesapKodu = '81.21') 
+	    begin 
+	      set @yUstGrupTipiId = 91
+	  	  set @yHesapKisaAdi = 'Vergiler, harçlar'
+        end
+	    if (@eUstHesapKodu = '81.22') 
+	    begin 
+	      set @yUstGrupTipiId = 92
+          set @yHesapKisaAdi = 'Sgk'
+        end
+        if (@eUstHesapKodu = '81.23') 
+	    begin 
+	      set @yUstGrupTipiId = 93
+          set @yHesapKisaAdi = 'Bağkur'
+        end
+        if (@eUstHesapKodu = '81.24') 
+	    begin 
+	      set @yUstGrupTipiId = 94
+          set @yHesapKisaAdi = 'Belediye'
+        end  
+		
+		if (@yUstGrupTipiId > 0) and
+		   (@eHesapAdi <> @yHesapKisaAdi)
+ 	    begin
+	      update OnmHesapFinans set 
+	           UstGrupTipiId = @yUstGrupTipiId
+             , AnaGrupTipiId = Convert(int, @eUstHesapKodu)
+          where Id = @curId
+	    end
+		
+		select @eId = isnull(ins.Id,0)  
+        from OnmHesapFinans ins
+        where ins.FirmId = @eFirmId
+		and   ins.[UstGrupTipiId] = 84
+		and   ins.[UstHesapKodu] = @eUstHesapKodu
+
+		--print '@eId : ' + Convert(varchar(10), @eId)
+
+		if (@eId = 0)
+		begin
+  	      INSERT INTO [dbo].[OnmHesapFinans]
+           ([ParentId]
+           ,[FirmId]
+           ,[IsActive]
+           ,[UstGrupTipiId]
+           ,[AnaGrupTipiId]
+           ,[AltGrupTipiId]
+           ,[AltCesitTipiId]
+           ,[HesapKodu]
+           ,[UstHesapKodu]
+           ,[HesapKisaAdi]
+           ,[HesapAdi])
+          VALUES 
+		   (0, @eFirmId, 1, 84, Convert(int, @eUstHesapKodu), 0, 0, null, @eUstHesapKodu, @yHesapKisaAdi, @yHesapKisaAdi)
+		end
+	  end
+	  
+	  -- Abone kaydı ise
+	  if (@eUstGrupTipiId = 84)
+	  begin
+	      Select @eHesapAdi = HesapAdi From Lkp.OnmHesapMaster
+          Where AltGrupTipiId = @eAltGrupTipiId
+
+		  set @yHesapKisaAdi = @eHesapAdi + '.' + @eNumarasi
+
+		  update OnmHesapFinans set 
+	           HesapKisaAdi = substring(@yHesapKisaAdi,1,100)
+             , HesapAdi = substring(@yHesapKisaAdi,1,150)
+          where Id = @curId
+
+		  -- aşağıdaki updateye girmesin
+		  set @eHesapAdi = ''
+	  end
+
+	  if ((@eHesapKisaAdi = '') or (@eHesapKisaAdi = 'NULL')) and
+	     (@eHesapAdi <> '')
+      begin
+          update OnmHesapFinans set 
+	           HesapKisaAdi = substring(@eHesapAdi,1,100)
+          where Id = @curId
+	  end
+	  
+      if (@yHesapTipiId > 0)
+	  begin
+          update OnmHesapFinans set 
+	           HesapTipiId = @yHesapTipiId
+          where Id = @curId
+      end
+	  
+      FETCH NEXT FROM cursorOnmHesapFinans INTO @curId
+    END
+
+    CLOSE cursorOnmHesapFinans
+    DEALLOCATE cursorOnmHesapFinans
+
+END
+
+ALTER TABLE dbo.OnmHesapFinans ENABLE TRIGGER trg_OnmHesapFinans
+
+/*CreateTriggerEnd*/
+
+
+
+
+
+
+-- ------------------------------------------------------------------
+-- Default Inserts   DETAYI   Lkp.NesneMater tablosuna taşındı....
+-- ------------------------------------------------------------------
+
+begin transaction 
+
+-- Temel Tanımlama Kayıtları
+--                                         : UstGrupTipiId, AnaGrupTipiId, AltGrupTipiId, AltCesitTipiId   
+-- Banka Listesi                           : 10, 102,  1029, 0
+-- Varlıklar için Ust Grup Hesapları       : 25,   0,     0, 0
+-- Maliyetler için Ust ve Ana Gruplar      :  7, 702,     0, 0  ( 7/A Seçeneği )-702
+-- Maliyetler için Ust ve Ana Gruplar      :  7, 703,     0, 0  ( 7/B Seçeneği )-703
+-- Ön Muh Maliyetler için Ust Gruplar      : 81,   0,     0, 0  ( Ön muhasebe için üst maliyet grupları )
+-- Ön Muh Maliyetler için Ana Gruplar      : 82, ???,     0, 0  ( ön muhasebe için ana maliyet grup veya hesap olabilir )
+-- Vergi Kodları                           : 82, ???,     0, 0  + UstHesapKodu
+-- Telekomünikasyon Grup Hesapları         : 83, 770, 77001, 0  ( ana maliyet grubuna bağlı alt grup )
+-- Kullanmak için seçilen Maliyet Grupları : 84, ???, ?????, 0, + HesapKodu, UstHesapKodu  
+
+declare @FirmId int
+set @FirmId = :FIRM_ID
+
+INSERT INTO [dbo].[OnmHesapFinans] (ParentId, FirmId, IsActive, UstGrupTipiId, AnaGrupTipiId, AltGrupTipiId, HesapKodu, HesapAdi, ParaTipiId )
+ VALUES 
+ (0, @FirmId, 1, 10, 100, 100, '100.10', 'TL Kasası', 'TRY'),
+ (0, @FirmId, 1, 10, 100, 100, '100.20', 'Dolar Kasası', 'USD'),
+ (0, @FirmId, 1, 10, 100, 100, '100.30', 'Euro Kasası', 'EUR')
+
+commit transaction
+
+

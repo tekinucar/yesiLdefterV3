@@ -92,10 +92,10 @@ AS BEGIN
 		set @yTamAdres = @yYarimAdres + ' ' + @eIlce + ' ' + @eIl
 
 		update IBelgeStokAdres set 
-         MahalleKoy = substring(TRIM(@eMahalleKoy),0,50)
-		,CaddeSokak = substring(TRIM(@eCaddeSokak),0,50)
-		,YarimAdres = substring(TRIM(@yYarimAdres),0,120)
-		,TamAdres = substring(TRIM(@yTamAdres),0,200)
+         MahalleKoy = substring(RTRIM(LTRIM(@eMahalleKoy)),0,50)
+		,CaddeSokak = substring(RTRIM(LTRIM(@eCaddeSokak)),0,50)
+		,YarimAdres = substring(RTRIM(LTRIM(@yYarimAdres)),0,120)
+		,TamAdres = substring(RTRIM(LTRIM(@yTamAdres)),0,200)
         where Id = @curId 
     	
     	FETCH NEXT FROM myCursor INTO @curId

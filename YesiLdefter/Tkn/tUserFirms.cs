@@ -72,12 +72,16 @@ namespace Tkn_UserFirms
                         //
                         v.tUser.UserId = UserId;
                         v.tUser.IsActive = Convert.ToBoolean(dsQuery.Tables[0].Rows[0]["IsActive"].ToString());
+                        v.tUser.UserGUID = dsQuery.Tables[0].Rows[0]["UserGUID"].ToString();
                         v.tUser.UserFirmGUID = dsQuery.Tables[0].Rows[0]["FirmGUID"].ToString();
-                        //v.tUser.UserGUID = dsQuery.Tables[0].Rows[0]["USER_GUID"].ToString();
                         v.tUser.FullName = dsQuery.Tables[0].Rows[0]["UserFullName"].ToString();
                         v.tUser.FirstName = dsQuery.Tables[0].Rows[0]["UserFirstName"].ToString();
                         v.tUser.LastName = dsQuery.Tables[0].Rows[0]["UserLastName"].ToString();
+                        v.tUser.UserTcNo = dsQuery.Tables[0].Rows[0]["UserTcNo"].ToString();
                         v.tUser.eMail = dsQuery.Tables[0].Rows[0]["UserEMail"].ToString();
+                        v.tUser.MebbisCode = dsQuery.Tables[0].Rows[0]["MebbisCode"].ToString();
+                        v.tUser.MebbisPass = dsQuery.Tables[0].Rows[0]["MebbisPass"].ToString();
+
                         v.tUser.Key = u_db_user_key;
                         v.tUser.UserDbTypeId = userDbTypeId;
 

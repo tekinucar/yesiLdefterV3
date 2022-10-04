@@ -119,6 +119,7 @@ INSERT INTO [Lkp].[FinansIslemiBATipi] (Id, BorluAlacakliTipi)
  VALUES 
   (0,   N'Tanımsız'),
   (110, N'Nakit Kasası'),
+  (120, N'Alıcılar'),
   (210, N'Banka'),
   (220, N'Şube'), 
   (230, N'Banka Hesabı'), 

@@ -254,6 +254,7 @@ namespace Tkn_CreateDatabase
 
             return onay;
         }
+        
         /*
         public void tTableUpdate(string DatabaseName, string FileName, SqlConnection SqlConn)
         {
@@ -291,38 +292,8 @@ namespace Tkn_CreateDatabase
             catch
             { }
         }
-
-        public void tTable_FieldAdd(string DatabaseName, string TableName, string FieldName, string FieldType, SqlConnection SqlConn)
-        {
-            string Sql =
-            @" IF not EXISTS (     
-                 select  
-                 a.column_id, a.name, 
-                 convert(smallInt, a.system_type_id) system_type_id, 
-                 convert(smallInt, a.user_type_id) user_type_id, 
-                 a.max_length, a.precision, a.scale, a.is_nullable, a.is_identity 
-                 from 
-                 [" + DatabaseName + @"].sys.columns a,  
-                 [" + DatabaseName + @"].sys.tables b 
-                 where b.object_id = a.object_id 
-                 and   b.name = '" + TableName + @"'
-                 and   a.name = '" + FieldName + @"' 
-                 )
-                 begin
-                   ALTER TABLE " + TableName + @" ADD " + FieldName + @" " + FieldType + @" NULL 
-                 end
-                 ";
-
-            DataSet ds = new DataSet();
-
-            MessageBox.Show("SQL_ExecuteNon() ayarlanacak");
-            /*
-            SQL_ExecuteNon(SqlConn, ds, ref Sql, "tTable_FieldAdd");
-            * /
-            ds.Dispose();
-
-        }
-
+        */
+        /*
         public void tTable_FieldNameChange(string DatabaseName, string Table_Name,
                     string OldFieldName, string NewFieldName, SqlConnection SqlConn)
         {
@@ -458,7 +429,7 @@ namespace Tkn_CreateDatabase
             { }
 
         }
-
+        
         #endregion
 
 

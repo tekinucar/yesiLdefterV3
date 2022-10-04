@@ -29,6 +29,7 @@ AS BEGIN
            ,[BitisSaati]
            ,[TDersIsUploaded]
 		   ,[SablonTeorikBId]
+           ,[SablonTeorikSId]
 		   ,[SablonTeorikFId]
 		   )
 
@@ -48,6 +49,7 @@ AS BEGIN
      ,x.[BitisSaati]
      ,x.[TDersIsUploaded]
 	 ,x.[SablonTeorikBId] 
+     ,x.[SablonTeorikSId] 
 	 ,x.[SablonTeorikFId]
   from (
   Select 
@@ -93,10 +95,11 @@ AS BEGIN
      Else '' End) as PersonelId
 	
   , s.EgitimTipiId
-  , null BaslamaSaati
-  , null BitisSaati
-  , 0 TDersIsUploaded
+  , null as BaslamaSaati
+  , null as BitisSaati
+  , 0 as TDersIsUploaded
   , s.SablonTeorikBId
+  , null as SablonTeorikSId 
   , f.Id as SablonTeorikFId
   from MtskSablonTeorikS as s 
      left outer join MtskSablonTeorikB as b on ( s.SablonTeorikBId = b.Id )

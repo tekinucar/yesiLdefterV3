@@ -198,8 +198,6 @@ namespace Tkn_Events
             return keyFind;
         }
 
-
-
         public void myForm_KeyDown(object sender, KeyEventArgs e) //*** FORM
         {
             //return;
@@ -639,8 +637,6 @@ namespace Tkn_Events
         {
             //MessageBox.Show("myForm_Validating");
             //Application.OpenForms[0].Text = Application.OpenForms[0].Text + ";Valing";
-
-
         }
 
         public void myForm_Validated(object sender, EventArgs e)
@@ -660,12 +656,6 @@ namespace Tkn_Events
         {
             //MessageBox.Show("myForm_FormClosing : " + ((Form)sender).Text);
         }
-
-        private void search_readTableIPCode()
-        { 
-        // silebilirsin
-        }
-
 
         public string myFormGetActiveControlTableIPCode(Form tForm, ref string controlType)
         {
@@ -712,7 +702,6 @@ namespace Tkn_Events
                 {
                     TableIPCode = t.Find_FirstTableIPCode(tForm);
                 }
-
             }
 
             return TableIPCode;

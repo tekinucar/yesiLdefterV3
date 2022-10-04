@@ -73,11 +73,24 @@ as begin
 
     FETCH NEXT FROM cursor_UstadFirms INTO @curId
 
-    declare @FirmGUID VarChar(50) = ''
+    declare @SectorTypeId smallInt = 0
+	declare @FirmGUID VarChar(50) = ''
+	
+	declare @DatabaseName nvarchar(50) = ''
+	declare @RecordDate smalldatetime 
+	declare @dbNameKunye varchar(10) = ''
+
+	declare @Id varchar(8) = ''
+	declare @Length smallInt = 8
+	declare @PaddingChar char(1) = '0'
 
     WHILE @@FETCH_STATUS = 0
     BEGIN
-		Select @FirmGUID = ins.FirmGUID
+		Select 
+		  @SectorTypeId = isnull(ins.SectorTypeId, 0) 
+		, @FirmGUID = ins.FirmGUID
+		, @DatabaseName = isnull(ins.DatabaseName,'')
+		, @RecordDate = ins.RecordDate
     	From Inserted ins
     	Where ins.FirmId = @curId
 
@@ -85,16 +98,43 @@ as begin
 		    (@FirmGUID is null))
     	begin
     	  Update UstadFirms set 
-          FirmGUID = NEWID()
+            FirmGUID = NEWID()
           where FirmId = @curId 
     	end
+
+		if (@DatabaseName = '')
+		begin
+          if (@SectorTypeId = 1) set @dbNameKunye = 'OnMuh'
+          if (@SectorTypeId = 2) set @dbNameKunye = 'MaliM'
+          if (@SectorTypeId = 3) set @dbNameKunye = 'ResMuh'
+          if (@SectorTypeId = 4) set @dbNameKunye = 'Bordro'
+		  if (@SectorTypeId = 201) set @dbNameKunye = 'Mtsk'
+		  if (@SectorTypeId = 202) set @dbNameKunye = 'Ismak'
+		  if (@SectorTypeId = 203) set @dbNameKunye = 'Src'
+
+		  set @Id = CONVERT(varchar(8), @curId)
+          
+		  set @DatabaseName = @dbNameKunye + RIGHT(Replicate(@PaddingChar, @Length) + @Id, @Length)
+
+		  Update UstadFirms set 
+            DatabaseName = @DatabaseName
+          where FirmId = @curId 
+
+		end
+		
+		if (@RecordDate is null)
+		begin
+    	  Update UstadFirms set 
+            RecordDate = GETDATE()
+          where FirmId = @curId 
+		end
 
     	FETCH NEXT FROM cursor_UstadFirms INTO @curId
     end -- While
 
     CLOSE cursor_UstadFirms
-    DEALLOCATE cursor_UstadFirms   
-
+    DEALLOCATE cursor_UstadFirms  
+	
 end -- trigger
 
 

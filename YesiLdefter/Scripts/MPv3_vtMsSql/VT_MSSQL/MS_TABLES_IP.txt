@@ -3,27 +3,27 @@ begin transaction
 
   create table MS_TABLES_IP
   (
-    REF_ID           Int IDENTITY(1,1)   NOT NULL,
-    TABLE_CODE       VarChar(100)        NOT NULL,
-    TABLE_TYPE       SmallInt            NULL,
+    --REF_ID           Int IDENTITY(1,1)   NOT NULL,
+    --TABLE_CODE       VarChar(100)        NOT NULL,
+    --TABLE_TYPE       SmallInt            NULL,
 
-    IP_CODE          VarChar(100)        NOT NULL,  
-    TABLEIPCODE      VarChar(100)        NULL,  /* triger/procedure da TABLE_CODE +'.'+ IP_CODE birleþimi */ 
-    IP_TYPE          SmallInt            NULL,  /* 1=Liste, 2=Bilgi Kartý, 3=  þimdililik bir iþe yaramýyor  */
-    IP_ABOUT         VarChar(200)        NULL,  
-    IP_CAPTION       VarChar(100)        NULL,
-    IP_SELECT_SQL    VarChar(8000)       NULL,
-    IP_WHERE_SQL     VarChar(250)        NULL,
-    IP_ORDER_BY      VarChar(250)        NULL,
-    EXTERNAL_IP_CODE VarChar(40)         NULL,  
+    --IP_CODE          VarChar(100)        NOT NULL,  
+    --TABLEIPCODE      VarChar(100)        NULL,  /* triger/procedure da TABLE_CODE +'.'+ IP_CODE birleþimi */ 
+    --IP_TYPE          SmallInt            NULL,  /* 1=Liste, 2=Bilgi Kartý, 3=  þimdililik bir iþe yaramýyor  */
+    --IP_ABOUT         VarChar(200)        NULL,  
+    --IP_CAPTION       VarChar(100)        NULL,
+    --IP_SELECT_SQL    VarChar(8000)       NULL,
+    --IP_WHERE_SQL     VarChar(250)        NULL,
+    --IP_ORDER_BY      VarChar(250)        NULL,
+    --EXTERNAL_IP_CODE VarChar(50)         NULL,  
 
-    VIEW_CMP_TYPE    SmallInt            NULL, /* Grid, LayoutView, LayoutPanel vb */
-    CMP_PROPERTIES   VarChar(900)        NULL,
-    NAVIGATOR        VarChar(2000)       NULL,
-    DATA_READ        SmallInt            NULL, /* 0= Tablonun tamamýný okusun, 1=Kýsýtlama var   */
-    FIND_FNAME       VarChar(300)        NULL, /* birden fazla fielde gerek duyulursa {0} , {1} formatýný kullan */
-    DATA_FIND        SmallInt            NULL, /* 0= Find yok, 1. standart, 2. List&Data   */
-    AUTO_INSERT      Bit                 NULL,
+    --VIEW_CMP_TYPE    SmallInt            NULL, /* Grid, LayoutView, LayoutPanel vb */
+    --CMP_PROPERTIES   VarChar(900)        NULL,
+    --NAVIGATOR        VarChar(2000)       NULL,
+    --DATA_READ        SmallInt            NULL, /* 0= Tablonun tamamýný okusun, 1=Kýsýtlama var   */
+    --FIND_FNAME       VarChar(300)        NULL, /* birden fazla fielde gerek duyulursa {0} , {1} formatýný kullan */
+    --DATA_FIND        SmallInt            NULL, /* 0= Find yok, 1. standart, 2. List&Data   */
+    --AUTO_INSERT      Bit                 NULL,
     
 
     /* Master Table Baðlantýsý */
@@ -46,8 +46,8 @@ begin transaction
     PROP_FOREING            VarChar(4000) NULL,
     PROP_SEARCH             VarChar(4000) NULL, 
 
-    SOFTWARE_CODE           nvarchar(20)  NULL,
-    PROJECT_CODE            nvarchar(20)  NULL,
+    --SOFTWARE_CODE           nvarchar(20)  NULL,
+    --PROJECT_CODE            nvarchar(20)  NULL,
 
     Constraint PK_MS_TABLES_IP primary key (REF_ID)
   )
@@ -119,6 +119,8 @@ AS BEGIN
     	  update MS_TABLES_IP set TABLEIPCODE = @TableIPCode
           where REF_ID = @curId 
     	  
+          EXEC [dbo].[prc_GetTableIPCodeSql] @curId, @TableIPCode
+
     	--end        
 
     	FETCH NEXT FROM InsertCursor_MS_TABLES_IP INTO @curId

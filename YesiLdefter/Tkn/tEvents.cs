@@ -90,9 +90,8 @@ namespace Tkn_Events
 
                         // yenisi bir türlü tree de başarılı olmadı sebebini bulamadım
 
-                        /// Yeni Süreç ----
-                        /// 
-
+                        // Yeni Süreç ----
+                        // 
                         //vSubWork vSW = new vSubWork();
                         //vSW._01_tForm = tForm;
                         //vSW._02_TableIPCode = "";
@@ -429,6 +428,7 @@ namespace Tkn_Events
             if (value == 124) return v.tButtonType.btInputBox;
             if (value == 125) return v.tButtonType.btOpenSubView;
             if (value == 126) return v.tButtonType.btExtraIslem;
+            if (value == 127) return v.tButtonType.btFindListData;
 
             return v.tButtonType.btNone;
         }
@@ -555,7 +555,14 @@ namespace Tkn_Events
             {
                 foreach (RibbonPage item in ((DevExpress.XtraBars.Ribbon.RibbonControl)menu).Pages)
                 {
-                    item.Visible = (item.Name.IndexOf(menuValue) > -1);
+                    // isminde -1 yok ise ( -1 : silinmesin menu Item.LineNo = -1 işaretlenmiştir)
+                    if (item.Name.IndexOf("-1") == -1)
+                    {
+                        item.Visible = (item.Name.IndexOf(menuValue) > -1);
+
+                        if (item.Visible)
+                            ((DevExpress.XtraBars.Ribbon.RibbonControl)menu).SelectPage(item); 
+                    }
                 }
             }
         }
@@ -1255,6 +1262,8 @@ namespace Tkn_Events
             string fname = "";
             string newValue = "";
             byte tOperand_type = 0;
+            string SubDetail_List = "";
+            string subDetail_List_ = "";
 
             // değişiklik nesne üzerinde oluyor fakat yeni value nin dataset ulaşması gerek
 
@@ -1264,7 +1273,6 @@ namespace Tkn_Events
                 fname = ((DevExpress.XtraEditors.CheckEdit)sender).Name.Substring(7).ToString();
                 newValue = ((DevExpress.XtraEditors.CheckEdit)sender).EditValue.ToString();
                 tOperand_type = t.myByte(((DevExpress.XtraEditors.CheckEdit)sender).Tag.ToString());
-
             } 
             else if (sender.ToString() == "DevExpress.XtraEditors.ImageComboBoxEdit")
             {
@@ -1275,8 +1283,9 @@ namespace Tkn_Events
             else if (sender.ToString() == "DevExpress.XtraEditors.DateEdit")
             {
                 fname = ((DevExpress.XtraEditors.DateEdit)sender).Name.Substring(7).ToString();
-                newValue = ((DevExpress.XtraEditors.DateEdit)sender).EditValue.ToString();
-                tOperand_type = t.myByte(((DevExpress.XtraEditors.DateEdit)sender).Tag.ToString());
+                if (((DevExpress.XtraEditors.DateEdit)sender).EditValue != null)
+                    newValue = ((DevExpress.XtraEditors.DateEdit)sender).EditValue.ToString();
+                subDetail_List_ = ((DevExpress.XtraEditors.DateEdit)sender).Tag.ToString();
             }
             else
             {
@@ -1312,12 +1321,14 @@ namespace Tkn_Events
                 (fname.IndexOf("_BIT") > -1))
             {
                 string myProp = string.Empty;
-                string SubDetail_List = string.Empty;
                 string Prop_SubView = string.Empty;
 
                 myProp = ds.Namespace.ToString();
                 SubDetail_List = t.MyProperties_Get(myProp, "About_Detail_SubDetail:");
                 Prop_SubView = t.MyProperties_Get(myProp, "Prop_SubView:");
+
+                if (t.IsNotNull(SubDetail_List) == false)
+                    SubDetail_List = subDetail_List_;
 
                 #region SubDetail_List
                 if (t.IsNotNull(SubDetail_List))
@@ -1329,13 +1340,15 @@ namespace Tkn_Events
 
                     string Sql_OldF = SqlF;
                     string Sql_OldS = SqlS;
-                                        
+                    bool sourceTableIPCodeREAD = false;
+
                     if ((Sql_OldF != "") && (Sql_OldS == ""))
                     {
                         SubDetail_Preparing(tForm, ref SqlF,
                                             ds, dN, //mst_TableIPCode, 
                                             ds, SubDetail_List, SubDetail_TableIPCode,
-                                            DataReadType, FieldName, Value);
+                                            DataReadType, FieldName, Value, 
+                                            ref sourceTableIPCodeREAD);
                     }
 
                     if (Sql_OldS != "")
@@ -1343,7 +1356,8 @@ namespace Tkn_Events
                         SubDetail_Preparing(tForm, ref SqlS,
                                             ds, dN, //mst_TableIPCode,
                                             ds, SubDetail_List, SubDetail_TableIPCode,
-                                            DataReadType, FieldName, Value);
+                                            DataReadType, FieldName, Value,
+                                            ref sourceTableIPCodeREAD);
                     }
                     
                     SubDetail_Run(tForm, ds, myProp, SqlF, Sql_OldF, SqlS, Sql_OldS, SubDetail_TableIPCode, DataReadType);
@@ -3786,7 +3800,7 @@ namespace Tkn_Events
             t.Alias_Control(ref alias);
 
             string aSQL = t.MyProperties_Get(myProp, "=SqlFirst:");
-            aSQL = t.MySQL_Clear(aSQL);
+            aSQL = t.kisitlamalarClear(aSQL);
 
             int fKRITERLER = aSQL.IndexOf("/*" + alias + "KRITERLER*/") + 14 + alias.Length;
 
@@ -3830,7 +3844,7 @@ namespace Tkn_Events
             int t2 = 0;
             int ffieldtype = 0;
             //int fKRITERLER = 0;
-            aSQL = t.MySQL_Clear(aSQL);
+            aSQL = t.kisitlamalarClear(aSQL);
 
             string softCode = "";
             string projectCode = "";
@@ -3980,7 +3994,7 @@ namespace Tkn_Events
                     t.tKriter_Ekle(ref aSQL, alias, Where_Add);
             }
 
-            aSQL = t.MySQL_Clear(aSQL);
+            aSQL = t.kisitlamalarClear(aSQL);
 
             t.Data_Read_Execute(tForm, dsData, ref aSQL, "", cntrl);
 
@@ -4477,7 +4491,9 @@ namespace Tkn_Events
                 (selectItemValue == "")) return;
 
             string Read_TableIPCode = menuControl.AccessibleName;
-            string DetailFName = menuControl.AccessibleDescription;
+            string fNames = menuControl.AccessibleDescription; // VezneId||FinansId||
+            string GroupFName = t.Get_And_Clear(ref fNames, "||");
+            string DetailFName = t.Get_And_Clear(ref fNames, "||");
 
             //MessageBox.Show(
             //     ((DevExpress.XtraBars.Navigation.AccordionControlElement)sender).Text + " : " + selectItemValue + " : " + Read_TableIPCode+ " : " + DetailFName);
@@ -4491,20 +4507,51 @@ namespace Tkn_Events
                 DevExpress.XtraBars.Navigation.AccordionControlElement owner =
                     ((DevExpress.XtraBars.Navigation.AccordionControlElement)sender).OwnerElement;
 
-                AccordionDinamik_SubPage_Preparing(menuControl, owner, selectItemValue, Caption, selectItemHint); // selectItemHint = MenuValue
+                AccordionDimanik_SelectedDataSet(menuControl, Read_TableIPCode, DetailFName, selectItemValue);
+                AccordionDinamik_SubPage_Preparing(menuControl, owner, Read_TableIPCode, DetailFName, selectItemValue, Caption, selectItemHint); // selectItemHint = MenuValue
             }
 
             // Main group altındaki diğer group lar
             if (ButtonName.IndexOf("item_MainItem_") > -1)
             {
-                AccordionDinamik_SubGroup_Preparing(menuControl, Read_TableIPCode, DetailFName, selectItemValue);
+                AccordionDinamik_SubGroup_Preparing(menuControl, Read_TableIPCode, GroupFName, selectItemValue);
             }
 
+        }
+
+        private void AccordionDimanik_SelectedDataSet(DevExpress.XtraBars.Navigation.AccordionControl menuControl,
+            string Read_TableIPCode,
+            string DetailFName,
+            string selectItemValue
+            )
+        {
+            // bunun amacı sadece :
+            // kullanıcını menuden seçtiği menuitem ın sonucunda 
+            // finans/detay isimlerinin olduğu dataset doğru dNavigator.Position set etmek
+
+            if (t.IsNotNull(Read_TableIPCode) &&
+                t.IsNotNull(DetailFName))
+            {
+                #region
+                Form tForm = menuControl.FindForm();
+                DataSet dsRead = null;
+                DataNavigator tdN_Read = null;
+
+                t.Find_DataSet(tForm, ref dsRead, ref tdN_Read, Read_TableIPCode);
+
+                int i = -1;
+                if (t.IsNotNull(dsRead))
+                    i = t.Find_GotoRecord(dsRead, DetailFName, selectItemValue);
+                tdN_Read.Position = i;
+                #endregion
+            }
         }
 
         private void AccordionDinamik_SubPage_Preparing(
             DevExpress.XtraBars.Navigation.AccordionControl menuControl,
             DevExpress.XtraBars.Navigation.AccordionControlElement owner,
+            string Read_TableIPCode,
+            string selectFName,
             string selectItemValue,
             string Caption,
             string MenuValue
@@ -4528,7 +4575,7 @@ namespace Tkn_Events
 
         private void AccordionDinamik_SubGroup_Preparing(
               DevExpress.XtraBars.Navigation.AccordionControl menuControl,
-              string Read_TableIPCode, string DetailFName, string selectItemValue)
+              string Read_TableIPCode, string GroupFName, string selectItemValue)
         {
             // menu hazır olan ile yeni seçilmiş olan MainItem aynı olabilir
             // yani menu zaten hazır tekrar aynı item clicke basılmış olabilir
@@ -4543,9 +4590,8 @@ namespace Tkn_Events
             menuControl.Tag = selectItemValue;
 
 
-
             if (t.IsNotNull(Read_TableIPCode) &&
-                t.IsNotNull(DetailFName)
+                t.IsNotNull(GroupFName)
                 )
             {
                 #region
@@ -4646,7 +4692,7 @@ namespace Tkn_Events
                             for (int i = 0; i < i2; i++)
                             {
                                 if ((dsRead.Tables[0].Rows[i][chc_FName].ToString() == chc_Value) &&
-                                    (dsRead.Tables[0].Rows[i][DetailFName].ToString() == selectItemValue))
+                                    (dsRead.Tables[0].Rows[i][GroupFName].ToString() == selectItemValue))
                                 {
 
                                     itemCaption = dsRead.Tables[0].Rows[i][read_CaptionFName].ToString();
@@ -4669,7 +4715,7 @@ namespace Tkn_Events
                                     barButtonItem.Appearance.Normal.Options.UseForeColor = true;
 
                                     barButtonItem.Style = DevExpress.XtraBars.Navigation.ElementStyle.Item;
-                                    barButtonItem.Click += new System.EventHandler(ev.tAccordionDinamikElement_Click);
+                                    barButtonItem.Click += new System.EventHandler(tAccordionDinamikElement_Click);
 
                                     pGroup.Elements.Add(barButtonItem);
                                     elementCount++;
@@ -6242,12 +6288,12 @@ namespace Tkn_Events
 
         #region subViewExec  // oldName = tSubView_Preparing
 
-        public void subViewExec(Form tForm,
+        public bool subViewExec(Form tForm,
             string ViewType, string FormCode, string TableIPCode, string tabPageCode,
             string ReadValue, string ReadCaption, string menuValue)
         {
             tToolBox t = new tToolBox();
-
+            bool onay = false;
             #region TabPage ise
             if ((ViewType == "TabPage") ||
                 (ViewType == "TabPage2") ||
@@ -6306,7 +6352,10 @@ namespace Tkn_Events
                         // bir Tab page içine  birden fazla TableIPCode dizayn et
                         if (t.IsNotNull(FormCode))
                             subViewLayoutExec_(tForm, FormCode, cntrl);
+
+                        onay = true;
                     }
+                    else onay = true;
                 }
 
             }
@@ -6322,6 +6371,7 @@ namespace Tkn_Events
             if (t.IsNotNull(menuValue))
                 setMenuPage(tForm, menuValue);
 
+            return onay;
         }
 
         private void subViewExec_(Form tForm, string ViewType, string TableIPCode,
@@ -6448,12 +6498,19 @@ namespace Tkn_Events
             List<SUBVIEW_LIST> subViewList = prop_.SUBVIEW_LIST;
             string subViewType = prop_.SUBVIEW_TYPE.ToString();
 
+            bool onay = false;
             string TableIPCode = "";
             string showMenuPageName = "";
-
+            string elseShowTableIPCode = "";
+            string elseShowMenuPageName = "";
             foreach (var item in subViewList)
             {
-                if ((item.SUBVIEW_VALUE == readValue))
+                if ((item.SUBVIEW_VALUE == "ELSE"))
+                {
+                    elseShowTableIPCode = item.SUBVIEW_TABLEIPCODE.ToString();
+                    elseShowMenuPageName = item.SHOWMENU_PAGENAME.ToString();
+                }
+                if (item.SUBVIEW_VALUE.IndexOf(readValue) > -1)
                 {
                     TableIPCode = item.SUBVIEW_TABLEIPCODE.ToString();
                     // PageName var ise bir menunün (Ribbon un) page ismidir ve bu page show edilececek
@@ -6462,11 +6519,17 @@ namespace Tkn_Events
 
                     if (t.IsNotNull(TableIPCode))
                     {
-                        subViewExec(tForm, subViewType, "", TableIPCode, "", "", "", showMenuPageName);
+                        onay = subViewExec(tForm, subViewType, "", TableIPCode, "", "", "", showMenuPageName);
                         break;
                     }
                 }
             }
+
+            if (onay == false)
+            {
+                onay = subViewExec(tForm, subViewType, "", elseShowTableIPCode, "", "", "", elseShowMenuPageName);
+            }
+
         }
 
         private PROP_SUBVIEW propSubViewReadValue(DataSet dsData, DevExpress.XtraEditors.DataNavigator tDataNavigator, ref string readValue)
@@ -6689,6 +6752,7 @@ namespace Tkn_Events
             #region Tanımlar
 
             bool onay = true;
+            bool onay2 = true;
             bool tBreak = false;
             bool old_PositionChange = false;
             string TableIPCode = string.Empty;
@@ -6697,8 +6761,8 @@ namespace Tkn_Events
             string DataFind = string.Empty;
             string DetailSubDetail = string.Empty;
             string DataCopyCode = string.Empty;
+            string SqlFirst = string.Empty;
             string activeTableIPCode = string.Empty;
-            //string buttonName = string.Empty;
             byte btnType = 0;
             string tabPageName = string.Empty;
 
@@ -6707,7 +6771,7 @@ namespace Tkn_Events
             /// Eğer bir TableIPCode gelmişse
             /// ya kendisi için işlem yapılacak, 
             /// ya da kendisine bağlı (Master-Detail ile) childs ları
-            string Main_TableIPCode = vSW._02_TableIPCode;
+            string targetTableIPCode = vSW._02_TableIPCode;
 
             if (vSW._05_tabPageControl != null)
                tabPageName = vSW._05_tabPageControl.Name.ToString();
@@ -6768,16 +6832,14 @@ namespace Tkn_Events
 
                     TableIPCode = dN.AccessibleName.ToString();
 
-                    if ((vSW._04_WorkWhom == v.tWorkWhom.Childs) &&
-                        (Main_TableIPCode != TableIPCode) &&
-                        (Main_TableIPCode != "")
-                        ) onay = false;
+                    if (targetTableIPCode != "")
+                    {
+                        if ((vSW._04_WorkWhom == v.tWorkWhom.Childs) &&
+                            (targetTableIPCode != TableIPCode)) onay = false;
 
-                    if ((vSW._04_WorkWhom == v.tWorkWhom.Only) &&
-                        (Main_TableIPCode != TableIPCode) &&
-                        (Main_TableIPCode != "")
-                        ) onay = false;
-
+                        if ((vSW._04_WorkWhom == v.tWorkWhom.Only) &&
+                            (targetTableIPCode != TableIPCode)) onay = false;
+                    }
 
                     if (dN.DataSource == null)
                         onay = false;
@@ -6792,6 +6854,7 @@ namespace Tkn_Events
                         DataFind = t.MyProperties_Get(myProp, "DataFind:");
                         DetailSubDetail = t.MyProperties_Get(myProp, "DetailSubDetail:");
                         DataCopyCode = t.MyProperties_Get(myProp, "DataCopyCode:");
+                        SqlFirst = t.MyProperties_Get(myProp, "SqlFirst:");
 
                         #region tWorkTD.Save - tDataSave 
                         if (vSW._03_WorkTD == v.tWorkTD.Save)
@@ -7034,13 +7097,23 @@ namespace Tkn_Events
                         #endregion NewData
 
                         #region Refresh_Data
-                        if (vSW._03_WorkTD == v.tWorkTD.Refresh_Data)
+                        if ((vSW._03_WorkTD == v.tWorkTD.Refresh_Data) ||
+                            (vSW._03_WorkTD == v.tWorkTD.Refresf_DataYilAy))
                         {
-                            t.TableRefresh(tForm, dsData, TableIPCode);
-                            // 15.5.2018
-                            t.ViewControl_Enabled(tForm, dsData, TableIPCode);
-                            // bu IPCode bağlı ExternalIPCode olabilir...
-                            t.ViewControl_Enabled_ExtarnalIP(tForm, dsData);
+                            onay2 = true;
+
+                            // :@@YILAY işareti yoksa boşuna çalışmasın
+                            if ((vSW._03_WorkTD == v.tWorkTD.Refresf_DataYilAy) &&
+                                SqlFirst.IndexOf(":@@YILAY") == -1) onay2 = false;
+
+                            if (onay2)
+                            {
+                                t.TableRefresh(tForm, dsData, TableIPCode);
+                                // 15.5.2018
+                                t.ViewControl_Enabled(tForm, dsData, TableIPCode);
+                                // bu IPCode bağlı ExternalIPCode olabilir...
+                                t.ViewControl_Enabled_ExtarnalIP(tForm, dsData);
+                            }
                         }
                         #endregion 
 
@@ -7130,13 +7203,10 @@ namespace Tkn_Events
             bool onay = false;
 
             tEventsButton evb = new tEventsButton();
-
-            //string function_name = "tSubDetail_Read";
-
+                        
             #region Tanımlar
 
             // yeniden okunacak SubDetail dataseti bul
-            //DataSet dsSubDetail_Data = t.Find_DataSet(tForm, "", SubDetail_TableIPCode, function_name);
             DataSet dsSubDetail_Data = null;
             DataNavigator dN_SubDetail = null;
             t.Find_DataSet(tForm, ref dsSubDetail_Data, ref dN_SubDetail, SubDetail_TableIPCode);
@@ -7162,31 +7232,59 @@ namespace Tkn_Events
             string SqlS = t.MyProperties_Get(myProp, "SqlSecond:");
             string Sql_OldF = SqlF;
             string Sql_OldS = SqlS;
+            bool sourceTableIPCodeREAD = false;
 
             #endregion Tanımlar
 
             if ((Sql_OldF != "") && (Sql_OldS == ""))
             {
-                SubDetail_Preparing(tForm, ref SqlF,
+                onay = SubDetail_Preparing(tForm, ref SqlF,
                                     ds_Master, dN_Master, //mst_TableIPCode,
                                     dsSubDetail_Data, SubDetail_List, SubDetail_TableIPCode,
-                                    DataReadType, "", "");
-
-                onay = SubDetail_Run(tForm, dsSubDetail_Data, myProp,
-                          SqlF, Sql_OldF, SqlS, Sql_OldS,
-                          SubDetail_TableIPCode, DataReadType);
+                                    DataReadType, "", "", ref sourceTableIPCodeREAD);
+                if (onay)
+                {
+                    onay = SubDetail_Run(tForm, dsSubDetail_Data, myProp,
+                              SqlF, Sql_OldF, SqlS, Sql_OldS,
+                              SubDetail_TableIPCode, DataReadType);
+                }
             }
 
             if (Sql_OldS != "")
             {
-                SubDetail_Preparing(tForm, ref SqlS,
+                onay = SubDetail_Preparing(tForm, ref SqlS,
                                     ds_Master, dN_Master, //mst_TableIPCode,
                                     dsSubDetail_Data, SubDetail_List, SubDetail_TableIPCode,
-                                    DataReadType, "", "");
+                                    DataReadType, "", "", ref sourceTableIPCodeREAD);
+                if (onay)
+                {
+                    onay = SubDetail_Run(tForm, dsSubDetail_Data, myProp,
+                              SqlF, Sql_OldF, SqlS, Sql_OldS,
+                              SubDetail_TableIPCode, DataReadType);
+                }
+            }
+            
+            if (sourceTableIPCodeREAD)
+            {
+                // Sadece yeni kayıt ise defaulValue çalışsın
+                if (t.IsNotNull(dsSubDetail_Data))
+                {
+                    string value = dsSubDetail_Data.Tables[0].Rows[dN_SubDetail.Position][0].ToString();
+                    if (value == "")
+                    {
+                        DataRow newRow = dsSubDetail_Data.Tables[0].Rows[dN_SubDetail.Position];
 
-                onay = SubDetail_Run(tForm, dsSubDetail_Data, myProp,
-                          SqlF, Sql_OldF, SqlS, Sql_OldS,
-                          SubDetail_TableIPCode, DataReadType);
+                        using (tDefaultValue df = new tDefaultValue())
+                        {
+                            df.tDefaultValue_And_Validation
+                                (tForm,
+                                 dsSubDetail_Data,
+                                 newRow,
+                                 SubDetail_TableIPCode,
+                                 "tData_NewRecord");
+                        }
+                    }
+                }
             }
 
             if (AutoInsert == "True")
@@ -7208,16 +7306,23 @@ namespace Tkn_Events
         }
 
         
-        public void SubDetail_Preparing(Form tForm, ref string Sql,
-                   DataSet ds_Master, DataNavigator dN_Master,
+        public bool SubDetail_Preparing(
+                   Form tForm, 
+                   ref string Sql,
+                   DataSet ds_Master, 
+                   DataNavigator dN_Master,
                    DataSet dsSubDetail_Data,
-                   string SubDetail_List, string SubDetail_TableIPCode,
+                   string SubDetail_List, 
+                   string SubDetail_TableIPCode,
                    int DataReadType, 
-                   string Speed_FName, string Speed_Value)
+                   string Speed_FName, 
+                   string Speed_Value,
+                   ref bool sourceTableIPCodeREAD)
         {
-            
+
 
             #region Tanımlar
+            bool IsChange = false;
             string satir = string.Empty;
             string new_And = string.Empty;
             string read_mst_TableIPCode = string.Empty;
@@ -7257,7 +7362,7 @@ namespace Tkn_Events
 
             if (t.IsNotNull(ds_Master))
             {
-                if (dN_Master.Position == -1) return;
+                if (dN_Master.Position == -1) return IsChange;
                 mst_Row = ds_Master.Tables[0].Rows[dN_Master.Position] as DataRow;
             }
 
@@ -7332,11 +7437,13 @@ namespace Tkn_Events
                 if (OperandType == "=") Operand = " = ";
                 if (OperandType == "0") Operand = " = ";
                 if (OperandType == "2") Operand = " = "; // Odd  (Single) 
+                if (OperandType == "3") Operand = " = "; // 
                 if (OperandType == "11") Operand = " >= ";
                 if (OperandType == "12") Operand = " > ";
                 if (OperandType == "13") Operand = " <= ";
                 if (OperandType == "14") Operand = " < ";
                 if (OperandType == "15") Operand = " <> ";
+
                 #endregion set
 
                 // eğer sql de -99 var ise sql boşu boşuna çalışmasın 
@@ -7353,7 +7460,14 @@ namespace Tkn_Events
                 }
                 //---
 
-                if (read_mst_TableIPCode == clean_TableIPCode)
+                // evet sourceTableIPCodeREAD bilgisi mevcut
+                if ((read_mst_TableIPCode == clean_TableIPCode) &&
+                    (default_type == 21))
+                    sourceTableIPCodeREAD = true;
+
+                if (((read_mst_TableIPCode == clean_TableIPCode) ||
+                     (read_mst_TableIPCode == mst_TableIPCode)) &&
+                    (default_type != 21)) // 21 = Source TableIPCode READ
                 {
                     // buldu = 9 ile başlar, eğer 9 değişirse bir işlem olmuştur demek
                     buldu = 9;  // bu metod olmadı
@@ -7384,6 +7498,8 @@ namespace Tkn_Events
                             /// and Convert(Date, [AJLNTLK].REC_DATE, 103) <= Convert(Date, '25.12.2016', 103)--:D.SD.2809:--<=
 
                             /// >= işlemleri
+                            ///  and Convert(Date, [BMakbuz].BelgeTarihi, 103)  >= Convert(Date, '27.07.2022', 103)     -- :D.SD.43301: -->=
+                            ///  and Convert(Date, [BMakbuz].BelgeTarihi, 103)  <= Convert(Date, '27.07.2022', 103)     -- :D.SD.43301: --<=
                             if (Speed_FName.IndexOf("_BAS") > -1)
                             {
                                 str_bgn = " and " + read_sub_FName + "  >=";
@@ -7765,7 +7881,7 @@ namespace Tkn_Events
                         {
                             //Sql = Sql.Remove(i_bgn, (i_end - i_bgn));
                             //Sql = Sql.Insert(i_bgn, new_And);
-
+                            IsChange = true;
                             f_bgn = 0;
                             f_end = 0;
                             //int i1 = Sql.IndexOf(FullHeader1, f1);
@@ -7827,6 +7943,8 @@ namespace Tkn_Events
 
                 }
             }
+
+            return IsChange;
             #endregion SubDetail_List Read
         }
 
@@ -7903,8 +8021,8 @@ namespace Tkn_Events
 
                         if (t.IsNotNull(SubDetail_List))
                         {
-                            DataNavigator dN = null;
-                            dN = t.Find_DataNavigator(tForm, TableIPCode);
+                            //DataNavigator dN = null;
+                            //dN = t.Find_DataNavigator(tForm, TableIPCode);
 
                             // sonra database okunuyor
                             //tSubDetail_Refresh(dsSubDetail_Data, dN); eski hali
@@ -7969,7 +8087,6 @@ namespace Tkn_Events
         }
 
         #endregion Detail_SubDetail_Read
-
 
 
         private void Source_ParentControl_Tag_Value(Form tForm, string TableIPCode)

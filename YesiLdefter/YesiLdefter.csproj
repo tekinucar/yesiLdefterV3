@@ -11,10 +11,10 @@
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <IsWebBootstrapper>true</IsWebBootstrapper>
-    <PublishUrl>ftp://ustadyazilim.com/yesiLdefterSetup/</PublishUrl>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <PublishUrl>C:\yesiLdefterPaket\</PublishUrl>
     <Install>false</Install>
-    <InstallFrom>Web</InstallFrom>
+    <InstallFrom>Disk</InstallFrom>
     <UpdateEnabled>true</UpdateEnabled>
     <UpdateMode>Foreground</UpdateMode>
     <UpdateInterval>7</UpdateInterval>
@@ -22,16 +22,14 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>true</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <InstallUrl>http://www.ustadyazilim.com/</InstallUrl>
     <UpdateUrl>http://www.ustadyazilim.com/</UpdateUrl>
     <SupportUrl>http://www.ustadyazilim.com</SupportUrl>
     <ProductName>yesiLdefter</ProductName>
     <PublisherName>Üstad Yazılım</PublisherName>
     <SuiteName>yesiLdefter</SuiteName>
     <MinimumRequiredVersion>1.22.0.0</MinimumRequiredVersion>
-    <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>5</ApplicationRevision>
+    <ApplicationRevision>7</ApplicationRevision>
     <ApplicationVersion>1.22.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -42,7 +40,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
-    <Optimize>true</Optimize>
+    <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
@@ -156,6 +154,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Class1.cs" />
     <Compile Include="Codes\CihazLogs.cs" />
     <Compile Include="Forms\ms_Computer.cs">
       <SubType>Form</SubType>
@@ -417,17 +416,48 @@
     <Content Include="Scripts\2019VtMsSql\HP_COMPS.txt" />
     <Content Include="Scripts\2019VtMsSql\HP_FINANS.txt" />
     <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\SYS_UPDATES.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\YatayKolon SQL.txt" />
+    <Content Include="Scripts\UST\MsV3\fnc_GetFieldTypeFirstValue.txt" />
+    <Content Include="Scripts\UST\MsV3\fnc_GetFieldTypeName.txt" />
+    <Content Include="Scripts\UST\MsV3\fnc_GetJoinTableText.txt" />
+    <Content Include="Scripts\UST\MsV3\prc_GetTableIPCodeSql.txt" />
+    <Content Include="Scripts\UST\MsV3\fnc_GetWhereMasterDetailText.txt" />
+    <Content Include="Scripts\UST\MsV3\MsDbUpdates.txt" />
+    <Content Include="Scripts\UST\MsV3\MsExeUpdates.txt" />
+    <Content Include="Scripts\UST\MsV3\MsTablesIP.txt" />
+    <Content Include="Scripts\UST\MsV3\MsTables.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\MsFollow.txt" />
     <Content Include="Scripts\UST\MsV3\MsProjectFunctions.txt" />
     <Content Include="Scripts\UST\MsV3\MsProjectProcedures.txt" />
     <Content Include="Scripts\UST\MsV3\MsProjectTables.txt" />
     <Content Include="Scripts\UST\MsV3\Lkp_MsSectorType.txt" />
     <Content Include="Scripts\UST\MsV3\prc_DatabaseCreateList.txt" />
+    <Content Include="Scripts\UST\MsV3\prc_FieldList.txt" />
+    <Content Include="Scripts\UST\MsV3\prc_MsDataCopyLineList.txt" />
+    <Content Include="Scripts\UST\MsV3\prc_MsProjectFunctionsList.txt" />
+    <Content Include="Scripts\UST\MsV3\prc_MsProjectProceduresList.txt" />
+    <Content Include="Scripts\UST\MsV3\prc_MsProjectTablesList.txt" />
+    <Content Include="Scripts\UST\MsV3\prc_TablesList.txt" />
+    <Content Include="Scripts\UST\Mtsk\DbUpdates.txt" />
     <Content Include="Scripts\UST\Mtsk\Lkp_MtskDonemTipi.txt" />
     <Content Include="Scripts\UST\Mtsk\Lkp_MtskGrupTipi.txt" />
     <Content Include="Scripts\UST\Mtsk\Lkp_MtskKurumOnayTipi.txt" />
     <Content Include="Scripts\UST\Mtsk\Lkp_MtskSubeTipi.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskSimulator.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskTeorikDersPlaniCakismaManuel.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskTeorikDersPlaniOlusturManuel.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskUygulamaDersPlaniCakismaAdedi.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\OnmIVezneFinans.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\OnmIVezneKullanici.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\OnmToplamBakiye.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\OnmToplamBekleyen.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\OnmToplamGerceklesen.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\OnmToplamKdv.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\OnmToplamSonuc.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\prc_MsFollow.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\prc_OnmToplamBekleyenGelirler.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\prc_OnmToplamBekleyenOdemeler.txt" />
+    <Content Include="Scripts\UST\UstadCRM\prc_FirmUsers.txt" />
     <Content Include="Scripts\UST\UstadCRM\prc_UstadUserFirmsListGet.txt" />
     <Content Include="Scripts\UST\UstadCRM\UstadComputers.txt" />
     <Content Include="Scripts\UST\UstadCRM\UstadFirms.txt" />
@@ -436,7 +466,7 @@
     <Content Include="Scripts\UST\MsV3\MsWebNodeItems.txt" />
     <Content Include="Scripts\UST\MsV3\MsWebNodes.txt" />
     <Content Include="Scripts\UST\MsV3\MsWebPages.txt" />
-    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\prc_UsesTableIPCode.txt" />
+    <Content Include="Scripts\UST\MsV3\prc_UsesTableIPCode.txt" />
     <Content Include="Scripts\SEK\InfazKurumu\CihazHesap.txt" />
     <Content Include="Scripts\SEK\InfazKurumu\prc_CariBio.txt" />
     <Content Include="Scripts\SEK\InfazKurumu\prc_CariHesap.txt" />
@@ -494,7 +524,7 @@
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakip.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakipUygSinavKatilabilirOnayi.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakipUygSinavMebbisRandevuAktar.txt" />
-    <Content Include="Scripts\UST\Mtsk\prc_KrediOdemePlaniOlustur.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\prc_OnmOdemePlaniOlustur.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MonthName.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayBelgeResimleri.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskDonemKontrolu.txt" />
@@ -513,15 +543,15 @@
     <Content Include="Scripts\UST\Mtsk\prc_MtskUygulamaDersPlaniSaatleriGuncelle.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskUygulamaDersPlaniAracVePersonel.txt" />
     <Content Include="Scripts\UST\Mtsk\trg_ORNEK.txt" />
-    <Content Include="Scripts\UST\OnMuhasebe\BelgeMakbuz.txt" />
-    <Content Include="Scripts\UST\OnMuhasebe\BelgeMaliyet.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\OnmBelgeMakbuz.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\OnmBelgeMaliyet.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\BelgeStokB.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\BelgeStokS.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\CariAdres.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\CariBanka.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\CariHesap_trg.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\CariIletisim.txt" />
-    <Content Include="Scripts\UST\OnMuhasebe\CariIO_trg.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\CariIO.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\dataVergiKodlari.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\dokumanFatura.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\dokumanMuhasebe.txt" />
@@ -529,7 +559,7 @@
     <Content Include="Scripts\UST\OnMuhasebe\dokumanStoklar.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\dokumanYevmiyeDefteri.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\FinansIslemi.txt" />
-    <Content Include="Scripts\UST\OnMuhasebe\fnc_HesapFinansKoduGet.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\fnc_OnmHesapFinansKoduGet.txt" />
     <Content Include="Scripts\UST\Mtsk\fnc_IsGununuBul.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\GIB_BirimSeti.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\GIB_FaturaCesitleri.txt" />
@@ -538,31 +568,30 @@
     <Content Include="Scripts\UST\OnMuhasebe\GIB_Sehirler.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\GIB_TevkifatMaddeleri.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\GIB_Ulke.txt" />
-    <Content Include="Scripts\UST\OnMuhasebe\HesapCari.txt" />
-    <Content Include="Scripts\UST\OnMuhasebe\HesapFinans.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\OnmHesapCari.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\OnmHesapFinans.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\HesapFinans_MSTABLES_Insert.txt" />
-    <Content Include="Scripts\UST\OnMuhasebe\HesapMaster.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\OnmHesapMaster.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\HesapNesne.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\HesapNesne_MSTABLES_Insert.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\HesapStok.txt" />
-    <Content Include="Scripts\UST\OnMuhasebe\HesapVezne.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\OnmHesapVezne.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\IBelgeStokAdres.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\JoinTables.txt" />
-    <Content Include="Scripts\UST\OnMuhasebe\KrediOdemePlani.txt" />
-    <Content Include="Scripts\UST\OnMuhasebe\LkpBirimTipi.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\OnmOdemePlani.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\LkpOnmStokBirimTipi.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\LkpCinsiyetTipi.txt" />
-    <Content Include="Scripts\UST\OnMuhasebe\LkpFaturaEkVergiTipi.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\LkpOnmFaturaEkVergiTipi.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\LkpILCETipi.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\LkpILTipi.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\LkpKdvOraniTipi.txt" />
-    <Content Include="Scripts\UST\OnMuhasebe\LkpParaTipi.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\LkpOnmParaTipi.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\LkpTevkifatTipi.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\LkpUlkeTipi.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\LkpVergiDairesiTipi.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\prc_ComputeBelgeStokB.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\prc_ComputeBelgeStokSEkVergi.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\prc_GetStokFiyati.txt" />
-    <Content Include="Scripts\UST\OnMuhasebe\prc_KrediOdemePlaniOlustur.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\trg_BelgeMakbuz.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\trg_BelgeStokS.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\trg_BelgeStokSDelete.txt" />
@@ -1308,16 +1337,6 @@
       <IncludeHash>True</IncludeHash>
       <FileType>File</FileType>
     </PublishFile>
-    <PublishFile Include="Scripts\MPv3_vtMsSql\VT_MSSQL\prc_UsesTableIPCode.txt">
-      <Visible>False</Visible>
-      <Group>
-      </Group>
-      <TargetPath>
-      </TargetPath>
-      <PublishState>Exclude</PublishState>
-      <IncludeHash>True</IncludeHash>
-      <FileType>File</FileType>
-    </PublishFile>
     <PublishFile Include="Scripts\MPv3_vtMsSql\VT_MSSQL\SEKTORLER - Kopya 2.txt">
       <Visible>False</Visible>
       <Group>
@@ -1629,6 +1648,16 @@
       <FileType>File</FileType>
     </PublishFile>
     <PublishFile Include="Scripts\SEK\InfazKurumu\tablolar.txt">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Exclude</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="Scripts\UST\MsV3\prc_UsesTableIPCode.txt">
       <Visible>False</Visible>
       <Group>
       </Group>
@@ -2039,16 +2068,6 @@
       <FileType>File</FileType>
     </PublishFile>
     <PublishFile Include="Scripts\UST\Mtsk\prc_BildirimSMS.txt">
-      <Visible>False</Visible>
-      <Group>
-      </Group>
-      <TargetPath>
-      </TargetPath>
-      <PublishState>Exclude</PublishState>
-      <IncludeHash>True</IncludeHash>
-      <FileType>File</FileType>
-    </PublishFile>
-    <PublishFile Include="Scripts\UST\Mtsk\prc_KrediOdemePlaniOlustur.txt">
       <Visible>False</Visible>
       <Group>
       </Group>
@@ -2548,16 +2567,6 @@
       <IncludeHash>True</IncludeHash>
       <FileType>File</FileType>
     </PublishFile>
-    <PublishFile Include="Scripts\UST\OnMuhasebe\HesapFinans.txt">
-      <Visible>False</Visible>
-      <Group>
-      </Group>
-      <TargetPath>
-      </TargetPath>
-      <PublishState>Exclude</PublishState>
-      <IncludeHash>True</IncludeHash>
-      <FileType>File</FileType>
-    </PublishFile>
     <PublishFile Include="Scripts\UST\OnMuhasebe\HesapFinans_MSTABLES_Insert.txt">
       <Visible>False</Visible>
       <Group>
@@ -2629,16 +2638,6 @@
       <FileType>File</FileType>
     </PublishFile>
     <PublishFile Include="Scripts\UST\OnMuhasebe\JoinTables.txt">
-      <Visible>False</Visible>
-      <Group>
-      </Group>
-      <TargetPath>
-      </TargetPath>
-      <PublishState>Exclude</PublishState>
-      <IncludeHash>True</IncludeHash>
-      <FileType>File</FileType>
-    </PublishFile>
-    <PublishFile Include="Scripts\UST\OnMuhasebe\KrediOdemePlani.txt">
       <Visible>False</Visible>
       <Group>
       </Group>
@@ -2748,6 +2747,26 @@
       <IncludeHash>True</IncludeHash>
       <FileType>File</FileType>
     </PublishFile>
+    <PublishFile Include="Scripts\UST\OnMuhasebe\OnmHesapFinans.txt">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Exclude</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="Scripts\UST\OnMuhasebe\OnmOdemePlani.txt">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Exclude</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
     <PublishFile Include="Scripts\UST\OnMuhasebe\prc_ComputeBelgeStokB.txt">
       <Visible>False</Visible>
       <Group>
@@ -2778,7 +2797,7 @@
       <IncludeHash>True</IncludeHash>
       <FileType>File</FileType>
     </PublishFile>
-    <PublishFile Include="Scripts\UST\OnMuhasebe\prc_KrediOdemePlaniOlustur.txt">
+    <PublishFile Include="Scripts\UST\OnMuhasebe\prc_OnmOdemePlaniOlustur.txt">
       <Visible>False</Visible>
       <Group>
       </Group>

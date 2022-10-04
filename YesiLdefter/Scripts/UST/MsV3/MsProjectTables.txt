@@ -20,3 +20,6 @@ begin transaction
  grant select, insert, update, delete on MsProjectTables to public
 
 commit transaction
+
+
+// SectorTypeId >> Lkp_MsSectorType.txt

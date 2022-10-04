@@ -45,16 +45,24 @@ INSERT INTO [Lkp].[MtskSertifikaTipi] (Id, SertifikaTipi, IsActive, TeorikDersSa
   ( 2511, N'H Sınıfı (Motosiklet)',   1,  0,  2,  10,  12 ),
   ( 2513, N'M Sınıfı Sertifika',      1,  0,  2,  10,  12 ),
   ( 2512, N'RÖMORK Sınıfı Sertifika', 1,  0,  2,  10,  12 ),
-  ( 9999, N'100 Ceza Puanı',          1,  0,  2,  10,  12 ),
-
+  
+  ( 9000, N'A Sınıfı Sertifika (Manuel)',      0,  0,  2,  10,  12 ), 
   ( 9001, N'A1 Sınıfı Sertifika (Manuel)',     0,  0,  2,  10,  12 ), 
   ( 9002, N'A1 Sınıfı Sertifika (Otomatik)',   0,  0,  2,  10,  12 ),
   ( 9003, N'A2 Sınıfı Sertifika (Manuel)',     0,  0,  2,  10,  12 ),
   ( 9004, N'A2 Sınıfı Sertifika (Otomatik)',   0,  0,  2,  10,  12 ),
   ( 9005, N'B Sınıfı Sertifika (Manuel)',      0,  0,  2,  10,  12 ),
   ( 9006, N'B Sınıfı Sertifika (Otomatik)',    0,  0,  2,  10,  12 ),
-  ( 9301, N'100 Ceza Puanı (Manuel)',          0,  0,  2,  10,  12 ),
-  ( 9302, N'100 Ceza Puanı (Otomatik)',        0,  0,  2,  10,  12 )
+  ( 9007, N'C Sınıfı Sertifika (Manuel)',      0,  0,  2,  10,  12 ),
+  ( 9008, N'C Sınıfı Sertifika (Otomatik)',    0,  0,  2,  10,  12 ),
+  ( 9009, N'D Sınıfı Sertifika (Manuel)',      0,  0,  2,  10,  12 ),
+  ( 9010, N'D Sınıfı Sertifika (Otomatik)',    0,  0,  2,  10,  12 ),
+  ( 9011, N'E Sınıfı Sertifika (Manuel)',      0,  0,  2,  10,  12 ),
+  ( 9012, N'E Sınıfı Sertifika (Otomatik)',    0,  0,  2,  10,  12 ),
+
+  ( 9100, N'100 Ceza Puanı',                   1,  0,  2,  10,  12 ), -- 9999
+  ( 9101, N'100 Ceza Puanı (Manuel)',          0,  0,  2,  10,  12 ), -- 9301
+  ( 9102, N'100 Ceza Puanı (Otomatik)',        0,  0,  2,  10,  12 )  -- 9302
 
 set IDENTITY_INSERT [Lkp].[MtskSertifikaTipi] OFF
 

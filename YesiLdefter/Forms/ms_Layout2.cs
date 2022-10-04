@@ -138,7 +138,7 @@ namespace YesiLdefter
             if (DialogResult.Yes == cevap)
             {
                 cumleMsLayout = "";
-                cumleMsLayout = preparingInsertScript("MS_LAYOUT", masterCode);
+                cumleMsLayout = preparingInsertScript(masterCode);
 
                 //t.FlyoutMessage("Web Manager Database Update", "Insert paketler hazırlandı...");
 
@@ -146,35 +146,17 @@ namespace YesiLdefter
             }
         }
 
-        private string preparingInsertScript(string tableName, string tableCode)
+        private string preparingInsertScript(string tableCode)
         {
-            DataSet dsQuery = new DataSet();
-            string cumleDelete = " delete from {0} Where MASTER_CODE = '{1}' ";
-            string cumleSelect = " Select * from {0} Where MASTER_CODE = '{1}' ";
-            string cumle = "";
-            string tSql = "";
-            string myProp = string.Empty;
+            vScripts scripts = new vScripts();
 
-            cumle = string.Format(cumleDelete, tableName, tableCode) + v.ENTER2;
+            scripts.SourceDBaseName = t.Find_dBLongName(Convert.ToString((byte)v.dBaseNo.Manager));  
+            scripts.SchemaName = "dbo"; 
+            scripts.SourceTableName = "MS_LAYOUT";
+            scripts.Where = string.Format(" MASTER_CODE = '{0}' ", tableCode);
+            scripts.IdentityInsertOnOff = false;
 
-            tSql = string.Format(cumleSelect, tableName, tableCode);
-            t.MyProperties_Set(ref myProp, "DBaseNo", Convert.ToString((byte)v.dBaseNo.Manager));
-            t.MyProperties_Set(ref myProp, "TableName", tableName);
-            t.MyProperties_Set(ref myProp, "SqlFirst", tSql);
-            t.MyProperties_Set(ref myProp, "SqlSecond", "null");
-            t.MyProperties_Set(ref myProp, "TableType", "1");
-            t.MyProperties_Set(ref myProp, "Cargo", "data");
-            t.MyProperties_Set(ref myProp, "KeyFName", "");
-
-            dsQuery.Namespace = myProp;
-
-            t.Data_Read_Execute(this, dsQuery, ref tSql, tableName, null);
-            if (t.IsNotNull(dsQuery))
-            {
-                cumle = cumle + sv.Insert_Script_Multi(dsQuery, tableName, v.active_DB.managerMSSQLConn);
-            }
-
-            dsQuery.Dispose();
+            string cumle = t.preparingInsertScript(scripts);
 
             return cumle;
         }
@@ -182,7 +164,7 @@ namespace YesiLdefter
         private void PaketiGonder()
         {
             if (cumleMsLayout != "") 
-                t.runScript(cumleMsLayout);
+                t.runScript(v.dBaseNo.WebManager, cumleMsLayout);
             
             t.FlyoutMessage("Web Manager Database Update", "Insert paketler gönderildi...");
         }

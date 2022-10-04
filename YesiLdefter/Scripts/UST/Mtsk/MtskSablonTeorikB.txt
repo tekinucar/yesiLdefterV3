@@ -45,8 +45,9 @@ create table Lkp.MtskSablonTeorikBGunTipi
 INSERT INTO Lkp.MtskSablonTeorikBGunTipi (Id, GunTipi)
  VALUES 
   ( 0, N'Tanımsız'),
-  ( 1, N'5 iş günü, 2 gün izin'),
-  ( 2, N'6 iş günü, 1 gün izin')
+  ( 1, N'Manuel, 1 gün'),
+  ( 2, N'6 iş günü, 1 gün izin'),
+  ( 3, N'5 iş günü, 2 gün izin')
 
 
 -- ------------------------------------------------------- 

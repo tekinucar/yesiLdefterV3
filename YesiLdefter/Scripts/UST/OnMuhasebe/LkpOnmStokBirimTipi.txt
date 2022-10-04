@@ -2,17 +2,17 @@
 -- ------------------------------------------------------- 
 -- BirimTipi
 -- ------------------------------------------------------- 
-create table [Lkp].[BirimTipi]
+create table [Lkp].[OnmStokBirimTipi]
 (
    Id          Int Unique Not null,
    IsActive    Bit null,
    BirimKodu   nVarchar(3) null,
    BirimAdi    nVarchar(20) null,
 
-   constraint  pk_BirimTipi primary key (Id)
+   constraint  pk_OnmStokBirimTipi primary key (Id)
 )
 
-INSERT INTO [Lkp].[BirimTipi] (Id, IsActive, BirimKodu, BirimAdi )
+INSERT INTO [Lkp].[OnmStokBirimTipi] (Id, IsActive, BirimKodu, BirimAdi )
  VALUES 
   ( 0, 1, N'',    N'Tanımsız' ),
   ( 1, 0, N'DAY', N'Gün' ),

@@ -182,7 +182,7 @@ namespace Tkn_InputPanel
             #region Tanımlar
 
             DataSet ds_Data = new DataSet();
-            DataRow row_Table = ds_Table.Tables[0].Rows[0] as DataRow;
+            DataRow row_Table = ds_Table.Tables[0].Rows[0];
 
             bool tabStop = true;
             string navigator_buttons = t.Set(row_Table["NAVIGATOR"].ToString(), "", "");
@@ -844,7 +844,7 @@ namespace Tkn_InputPanel
 
             //string TableName = t.Set(row_Table["LKP_TABLE_NAME"].ToString(), "", "");
             //string navigator = t.Set(row_Table["NAVIGATOR"].ToString(), "", "");
-            byte DBaseName = t.Set(row_Table["LKP_DBASE_NAME"].ToString(), "", (byte)3);
+            byte DBaseNo = t.Set(row_Table["LKP_DBASE_TYPE"].ToString(), "", (byte)3);
 
             string sSQL = string.Empty;
             string softCode = "";
@@ -929,7 +929,7 @@ namespace Tkn_InputPanel
             // Tablonun Adını tutuyor, db.MyRecord() için gerekli
             tDataNavigator_CatList.AccessibleDefaultActionDescription = TableName;
             // Database in Türünü tutuyor, db.MyRecord() için gerekli
-            tDataNavigator_CatList.AccessibleDescription = DBaseName.ToString();
+            tDataNavigator_CatList.AccessibleDescription = DBaseNo.ToString();
 
             tDataNavigator_CatList.PositionChanged += new System.EventHandler(ev.ctg_DataNavigator_CatList_PositionChanged);
             tDataNavigator_CatList.Dock = DockStyle.Bottom;
@@ -1008,7 +1008,7 @@ namespace Tkn_InputPanel
             // Tablonun Adını tutuyor, db.MyRecord() için gerekli
             tDataNavigator_CatDetail.AccessibleDefaultActionDescription = TableName;
             // Database in Türünü tutuyor, db.MyRecord() için gerekli
-            tDataNavigator_CatDetail.AccessibleDescription = DBaseName.ToString();
+            tDataNavigator_CatDetail.AccessibleDescription = DBaseNo.ToString();
 
 
             tDataNavigator_CatDetail.PositionChanged += new System.EventHandler(ev.ctg_DataNavigator_CatDetail_PositionChanged);

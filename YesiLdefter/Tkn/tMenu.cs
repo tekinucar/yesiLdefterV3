@@ -1822,6 +1822,122 @@ namespace Tkn_Menu
                 }
                 #endregion / TileNavItem
 
+                #region // Mali Dönem - YilAy
+                if ((t.IsNotNull(itemName) == false) &&
+                    (itemType == 211))
+                {
+                    
+                    NavButton tItemBack = new DevExpress.XtraBars.Navigation.NavButton();
+                    NavButton tItemNext = new DevExpress.XtraBars.Navigation.NavButton();
+
+                    //mControl.Name
+
+                    itemName = "item_";
+                    Preparing_ButtonName(21, ref itemName);
+                    tItemBack.Name = itemName;
+                    tItemBack.Caption = "<";
+                    tItemBack.Appearance.Name = formName;
+                    tItemBack.Tag = mControl.Name;
+
+                    itemName = "item_";
+                    Preparing_ButtonName(22, ref itemName);
+                    tItemNext.Name = itemName;
+                    tItemNext.Caption = ">";
+                    tItemNext.Appearance.Name = formName;
+                    tItemNext.Tag = mControl.Name;
+
+                    tItemBack.ElementClick += new DevExpress.XtraBars.Navigation.NavElementClickEventHandler(evm.tNavButton_ElementClick);
+                    tItemNext.ElementClick += new DevExpress.XtraBars.Navigation.NavElementClickEventHandler(evm.tNavButton_ElementClick);
+
+                    //itemName = "item_" + refid;
+                    //if (clickEvents > 0)
+                    //    Preparing_ButtonName(clickEvents, ref itemName);
+
+                    NavButton tItem = new DevExpress.XtraBars.Navigation.NavButton();
+
+                    tItem.Appearance.Name = formName;
+                    //tItem.Name = itemName;
+                    tItem.Name = "item_YILAY";
+                    tItem.Caption = evm.getYilAyCaption(v.BUGUN_YILAY);
+                    v.USER_YILAY = v.BUGUN_YILAY;
+
+                    // itemCaption = Belge Türü Seçin
+                    if (t.IsNotNull(shortcut_keys))
+                    {
+
+                        if ((shortcut_keys == "SHORTCUT_BUTTON") |
+                            (shortcut_keys == "SHORTCUT"))
+                        {
+                            itemName = "item_SHORTCUT_" + refid;
+
+                            // event bağlansın
+                            if (clickEvents == 0)
+                                clickEvents = 99;
+                            else
+                                Preparing_ButtonName(clickEvents, ref itemName);
+
+                            tItem.Name = itemName;
+                        }
+                        else
+                            tItem.Caption = itemCaption + "   : " + shortcut_keys;
+
+                        //tItem.Caption = itemCaption + "   <i>" + shortcut_keys + "</i>";
+                        //tItem.  AllowHtmlText = DefaultBoolean.True;
+                    }
+
+                    tItem.Enabled = tenabled;
+                    tItem.Visible = tvisible;
+                    if (t.IsNotNull(Prop_Navigator))
+                        tItem.Tag = Prop_Navigator;
+                    //tItem.
+                    //tItem.Appearance.BackColor = v.colorNew;
+                    //tItem.AppearanceHovered.BackColor = v.colorFocus;
+                    //tItem.AppearanceHovered.ForeColor = v.AppearanceFocusedTextColor;
+                    //tItem.AppearanceSelected.BackColor = v.colorSave;
+                    //tItem.Appearance.Options.UseBackColor = true;
+                    //tItem.AppearanceHovered.Options.UseBackColor = true;
+                    //tItem.AppearanceHovered.Options.UseForeColor = true;
+                    //tItem.AppearanceSelected.Options.UseBackColor = true;
+
+
+                    if ((DockType == v.dock_None) | (DockType == v.dock_Left))
+                        tItem.Alignment = NavButtonAlignment.Left;
+                    if (DockType == v.dock_Right)
+                        tItem.Alignment = NavButtonAlignment.Right;
+
+                    if (clickEvents > 0)
+                        tItem.ElementClick += new DevExpress.XtraBars.Navigation.NavElementClickEventHandler(evm.tNavButton_ElementClick);
+
+                    #region Image set
+                    if (!DBNull.Value.Equals(ds_Items.Tables[0].Rows[i]["LKP_GLYPH16"]))
+                    {
+                        byte[] img16 = (byte[])ds_Items.Tables[0].Rows[i]["LKP_GLYPH16"];
+                        if (img16 != null)
+                        {
+                            MemoryStream ms = new MemoryStream(img16);
+                            tItem.Glyph = Image.FromStream(ms);
+                            ms.Dispose();
+                        }
+                    }
+
+                    if (!DBNull.Value.Equals(ds_Items.Tables[0].Rows[i]["LKP_GLYPH32"]))
+                    {
+                        byte[] img32 = (byte[])ds_Items.Tables[0].Rows[i]["LKP_GLYPH32"];
+                        if (img32 != null)
+                        {
+                            MemoryStream ms = new MemoryStream(img32);
+                            tItem.Glyph = Image.FromStream(ms);
+                            ms.Dispose();
+                        }
+                    }
+                    #endregion Image set
+
+                    mControl.Buttons.Add(tItemBack);
+                    mControl.Buttons.Add(tItem);
+                    mControl.Buttons.Add(tItemNext);
+                }
+                #endregion Mali Dönem
+
 
             }
 
@@ -2894,7 +3010,6 @@ namespace Tkn_Menu
 
                         if (t.IsNotNull(ustHesapItemName)) ustItemName = ustHesapItemName;
                         else ustItemName = "item_" + ustHesapRefId;
-
                     }
 
                 }
@@ -2905,6 +3020,11 @@ namespace Tkn_Menu
             {
                 mControl.ExpandElementMode = DevExpress.XtraBars.Navigation.ExpandElementMode.Multiple;
                 mControl.ExpandAll();
+
+                if (mControl.Elements != null)
+                    if (mControl.Elements[0].Elements != null)
+                        if (mControl.Elements[0].Elements.Count > 0)
+                           ev.tAccordionDinamikElement_Click(mControl.Elements[0].Elements[0], EventArgs.Empty);
             }
 
         }
@@ -3009,6 +3129,9 @@ namespace Tkn_Menu
             if (clickEvents == 10) buttonName = buttonName + "_" + "SMS_SETUP";
             if (clickEvents == 13) buttonName = buttonName + "_" + "FOPEN_SUBVIEW";
 
+            if (clickEvents == 21) buttonName = buttonName + "_" + "YILAY_BACK";
+            if (clickEvents == 22) buttonName = buttonName + "_" + "YILAY_NEXT";
+
             //if (clickEvents == 1) buttonName = buttonName + "_" + "FEXIT";
 
             /*
@@ -3025,7 +3148,6 @@ namespace Tkn_Menu
             insert into MS_TYPES values ( 1, 0, 'CLICK_EVENTS', 11, '', 'TBOX_MAIN');
             insert into MS_TYPES values ( 1, 0, 'CLICK_EVENTS', 12, '', 'TBOX_GROUP');
             insert into MS_TYPES values ( 1, 0, 'CLICK_EVENTS', 13, '', 'FOPEN_SUBVIEW');
-
             */
         }
 
@@ -3427,6 +3549,7 @@ TABLEIPCODE_LIST=};
             tEvents ev = new tEvents();
 
             string Read_TableIPCode = string.Empty;
+            string GroupFName = string.Empty;
             string DetailFName = string.Empty;
 
             #region // AccordionDinamik ilk satırı ise
@@ -3437,7 +3560,8 @@ TABLEIPCODE_LIST=};
 
                 // Ana Grup altındaki hesapların, alt detaylarına ulaşmak için işe yarayan field
                 // ŞubeId ile Şubeye bağlı hesapların bağlantısı master-detail fname 
-                DetailFName = prop_.CHC_FNAME;
+                GroupFName = prop_.CHC_FNAME;
+                DetailFName = prop_.CHC_FNAME_SEC;
 
                 if (t.IsNotNull(Read_TableIPCode) == false)
                 {
@@ -3445,9 +3569,15 @@ TABLEIPCODE_LIST=};
                     return;
                 }
 
+                if (t.IsNotNull(GroupFName) == false)
+                {
+                    MessageBox.Show("DİKKAT : Alt Detay hesaplara ulaşmak için gerekli olan Group FieldName CHC_FNAME (VezneId) bilgileri eksiklik mevcut ...");
+                    return;
+                }
+
                 if (t.IsNotNull(DetailFName) == false)
                 {
-                    MessageBox.Show("DİKKAT : Alt Detay hesaplara ulaşmak için gerekli olan Detail FieldName CHC_FNAME bilgileri eksiklik mevcut ...");
+                    MessageBox.Show("DİKKAT : Alt Detay hesaplara ulaşmak için gerekli olan Detail FieldName CHC_FNAME_SEC (FinansId) bilgileri eksiklik mevcut ...");
                     return;
                 }
 
@@ -3464,16 +3594,14 @@ TABLEIPCODE_LIST=};
 
                     //dsRead = ip.Create_DataSet(tForm, Read_TableIPCode);
 
-
                     //DataSet dsRead = null;
                     DevExpress.XtraEditors.DataNavigator tdN_Read = null;
 
                     t.Find_DataSet(tForm, ref dsRead, ref tdN_Read, Read_TableIPCode);
 
-
                     menuControl.AccessibleName = Read_TableIPCode;
                     // Master-Detail FName
-                    menuControl.AccessibleDescription = DetailFName;
+                    menuControl.AccessibleDescription = GroupFName + "||"+ DetailFName + "||";
                 }
                 return;
             }
@@ -3503,7 +3631,7 @@ TABLEIPCODE_LIST=};
                 (t.IsNotNull(chc_Value) == false)
                 )
             {
-                MessageBox.Show("DİKKAT : Liste hazırlamak için gerekli Navigator içindeki RTABLEIPCODE, RKEYFNAME bilgilerinde eksiklik mevcut ...");
+                MessageBox.Show("DİKKAT : Liste hazırlamak için gerekli Navigator içindeki RTABLEIPCODE, RKEYFNAME, CHC_FNAME, CHC_VALUE bilgilerinde eksiklik mevcut ...");
                 return;
             }
 

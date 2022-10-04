@@ -1,6 +1,22 @@
-﻿
-/*CreateTable*/
+﻿/* -----------------------------------------------*/
 
+/*CreateTable*/
+/*CreateTableEnd*/
+
+/*CreateTrigger*/
+/*CreateTriggerEnd*/
+
+/*CreateLkpTable*/
+/*CreateLkpTableEnd*/
+
+/*CreateData*/
+/*CreateDataEnd*/
+
+/* -----------------------------------------------*/
+
+
+
+/*CreateTable*/
 
 begin transaction
 

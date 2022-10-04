@@ -202,9 +202,19 @@ INSERT INTO [Lkp].[HesapNesneAltCesitTipi] (Id, AltCesitTipi, GrupTipiId)
   (7700140, N'Avea Cep', 3),
   (7700150, N'Ptt Cell', 3),
   (7700190, N'Diğer', 3)
-
-
-
+/*
+(0, @FirmId, 1, 83, 770, 77001, 7700110, '7700110', '706050',    'TürkTelekom Ev/İş Telefonu' ),
+(0, @FirmId, 1, 83, 770, 77001, 7700112, '7700112', '706050',    'TTNET İnternet' ),
+(0, @FirmId, 1, 83, 770, 77001, 7700120, '7700120', '706050',    'Turkcell Cep' ),
+(0, @FirmId, 1, 83, 770, 77001, 7700122, '7700122', '706050',    'Turkcell İnternet' ),
+(0, @FirmId, 1, 83, 770, 77001, 7700130, '7700130', '706050',    'Vodafone Cep' ),
+(0, @FirmId, 1, 83, 770, 77001, 7700132, '7700132', '706050',    'Vodafone İnternet' ),
+(0, @FirmId, 1, 83, 770, 77001, 7700140, '7700140', '706050',    'Ptt Cell' ),
+(0, @FirmId, 1, 83, 770, 77001, 7700150, '7700150', '706050',    'Elektrik Faturası' ),
+(0, @FirmId, 1, 83, 770, 77001, 7700152, '7700152', '706050',    'Su Futarası' ),
+(0, @FirmId, 1, 83, 770, 77001, 7700154, '7700154', '706050',    'Doğalgaz' ),
+(0, @FirmId, 1, 83, 770, 77001, 7700190, '7700190', '706050',    'Diğer' )
+*/
 
 -- Bu inserstlere çözüm
 

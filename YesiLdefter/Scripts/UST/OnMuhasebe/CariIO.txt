@@ -1,14 +1,96 @@
-﻿USE [u7093888_Ustad01]
-GO
+﻿ 
+ create table CariIO
+ (
 
-/****** Object:  Trigger [dbo].[trg_CariIO]    Script Date: 17.06.2020 11:07:21 ******/
-SET ANSI_NULLS ON
-GO
+   Id                Int IDENTITY(1,1) NOT NULL, 
+   FirmId            Int       not null,
+   IsActive          Bit       not null, /* default : 1 = active, 0 = not active */  
+   IsCancel          Bit           null,
 
-SET QUOTED_IDENTIFIER ON
-GO
+   CariId            Int           null, 
+   DosyaNo           nVarchar(30)  null,
 
---ALTER TRIGGER [dbo].[trg_CariIO] on [dbo].[CariIO] 
+   BlokId            Int           null,
+   KatId             Int           null,
+   DaireId           Int           null,
+
+   DepartmanId       Int           null,
+   BolumId           Int           null, 
+   GorevId           Int           null,
+
+   GirisTarihi       Date          null,
+   CikisTarihi       Date          null,
+   CikisTipiId       SmallInt      null,
+
+   GirisEylemPlaniId Int           null,
+   CikisEylemPlaniId Int           null,
+   GirisCihazKaydiId Int           null, 
+   CikisCihazKaydiId Int           null,
+   
+   --Aciklama          nVarchar(200) null, gerekince aç
+   
+   constraint		pk_CariIO primary key (Id)
+ )
+
+ create index X_CariIO01 on CariIO (FirmId,CariId)
+ create index X_CariIO03 on CariIO (FirmId,BlokId)
+ create index X_CariIO04 on CariIO (FirmId,KatId)
+ create index X_CariIO05 on CariIO (FirmId,DaireId)
+ create index X_CariIO06 on CariIO (FirmId,DepartmanId)
+ create index X_CariIO07 on CariIO (FirmId,BolumId)
+ create index X_CariIO08 on CariIO (FirmId,GorevId)
+ 
+ grant select, insert, update, delete on CariIO to public
+
+-- ------------------------------------------------------- 
+-- CikisTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[CariIOCikisTipi]
+(
+   Id          Int Unique Not Null,
+   CikisTipi   nVarchar(50)   null,
+   GrupTipiId  SmallInt       null,
+   
+   constraint  pk_CariIOCikisTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[CariIOCikisTipi] (Id, CikisTipi, GrupTipiId)
+ VALUES 
+  (0, N'Tanımsız',    0),
+  (1, N'Tahliye',     1),
+  (2, N'Sevk/Nakil',  1)
+
+
+
+ create table CariBio
+ (
+   Id                Int IDENTITY(1,1) NOT NULL, 
+   FirmId            Int       not null,
+   IsActive          Bit       not null, /* default : 1 = active, 0 = not active */  
+   CariId            Int           null, 
+   BioTipiId         SmallInt      null, /* 1 : fingerPrint  */
+   BioIndex          SmallInt      null, /* sıra no */
+   BioPrint          nVarChar(max) null, /* bio datası */
+   BioDate           Date          null,
+   
+   constraint		pk_CariBio primary key (Id)
+ )
+
+ create index X_CariBio01 on CariBio (FirmId,CariId)
+ create index X_CariBio02 on CariBio (FirmId,BioDate)
+ 
+ grant select, insert, update, delete on CariBio to public
+
+
+
+
+-- CariHesapKimlik
+-- CariHesapAdres
+-- CariHesapIletisim
+
+
+
+
 CREATE TRIGGER [dbo].[trg_CariIO] on [dbo].[CariIO] 
 AFTER INSERT, UPDATE
 AS BEGIN

@@ -1,52 +1,8 @@
-﻿/*
-declare @tableName nvarchar(30) = 'BelgeMakbuz'
-
-set @tableName = @tableName + '.ParaTipiId'
-
-EXEC sp_RENAME @tableName , 'ParaTipi', 'COLUMN'
-
-ALTER TABLE BelgeMakbuz ALTER COLUMN ParaTipiId nVarChar(3) NULL
-
-ALTER TABLE BelgeStokB  ALTER COLUMN ParaTipiId nVarChar(3) NULL
-ALTER TABLE BelgeStokS  ALTER COLUMN ParaTipiId nVarChar(3) NULL
-ALTER TABLE CariBanka  ALTER COLUMN ParaTipiId nVarChar(3) NULL
-ALTER TABLE HesapCari  ALTER COLUMN ParaTipiId nVarChar(3) NULL
-ALTER TABLE HesapFinans  ALTER COLUMN ParaTipiId nVarChar(3) NULL
-ALTER TABLE [Lkp].[HesapMaster]  ALTER COLUMN ParaTipiId nVarChar(3) NULL
-ALTER TABLE HesapNesne  ALTER COLUMN ParaTipiId nVarChar(3) NULL
-ALTER TABLE HesapStok  ALTER COLUMN ParaTipiId nVarChar(3) NULL
-ALTER TABLE   ALTER COLUMN ParaTipiId nVarChar(3) NULL
-ALTER TABLE   ALTER COLUMN ParaTipiId nVarChar(3) NULL
-ALTER TABLE   ALTER COLUMN ParaTipiId nVarChar(3) NULL
-*/
-
-
-/*
--- ------------------------------------------------------- 
--- ParaTipiId
--- ------------------------------------------------------- 
-create table [Lkp].[ParaTipi]
-(
-   Id          Int Unique Not Null,
-   ParaTipi    nVarchar(30) Null,
-   KisaAdi     nVarchar(10) Null,
-   ParaSembolu nVarchar(5)  NUll,
-
-   constraint  pk_ParaTipi primary key (Id)
-)
-
-INSERT INTO [Lkp].[ParaTipi] (Id, ParaTipi, KisaAdi, ParaSembolu )
- VALUES 
-  (0, N'Türk Lirası', 'TL', 'TL' ),
-  (1, N'Türk Lirası', 'TL', 'TL' ),
-  (2, N'Dolar', '', '$' ),
-  (3, N'Euro',  '', '€' )
-  */
-
+﻿/*CreateTable*/
 -- ------------------------------------------------------- 
 -- ParaTipi
 -- ------------------------------------------------------- 
-create table [Lkp].[ParaTipi]
+create table [Lkp].[OnmParaTipi]
 (
    Id          Int Unique Not null,
    IsActive    Bit null,
@@ -54,15 +10,22 @@ create table [Lkp].[ParaTipi]
    ParaAdi     nVarchar(20) null,
    ParaSimgesi nVarchar(3) null,
 
-   constraint  pk_ParaTipi primary key (Id)
+   constraint  pk_OnmParaTipi primary key (Id)
 )
 
-INSERT INTO [Lkp].[ParaTipi] (Id, IsActive, ParaKodu, ParaAdi )
+/*CreateTableEnd*/
+
+
+/*CreateData*/
+
+INSERT INTO [Lkp].[OnmParaTipi] (Id, IsActive, ParaKodu, ParaAdi )
  VALUES 
   ( 0,   1, N'',    N'Tanımsız' ),
   ( 157, 1, N'TRY', N'Türk Lirası' ),
   ( 49,  1, N'EUR', N'Euro' ),
   ( 159, 1, N'USD', N'US Dolar' )
+
+/*CreateDataEnd*/
 
 /*
 157<option value="TRY">Türk Lirası</option>

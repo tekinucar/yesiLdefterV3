@@ -54,6 +54,392 @@ namespace Tkn_ToolBox
 
         #region *Database İşlemleri
 
+        #region dbUpdatesChecked
+        public void dbUpdatesChecked()
+        {
+            
+            string IdList = getMusteriDbUpdateIdList();
+
+            tSQLs sqls = new tSQLs();
+            DataSet ds = new DataSet();
+            
+            string sql = sqls.Sql_MsDbUpdates(IdList);
+            if (SQL_Read_Execute(v.dBaseNo.Manager, ds, ref sql, "", "MsDbUpdates"))
+            {
+                if (IsNotNull(ds))
+                {
+                    readMsDbUpdatesList(ds);
+                }
+            }
+            
+        }
+
+        private string getMusteriDbUpdateIdList()
+        {
+            tSQLs sqls = new tSQLs();
+            DataSet ds = new DataSet();
+            string sql = "";
+            sql = sqls.Sql_DbUpdatesIdList();
+            SQL_Read_Execute(v.dBaseNo.Project, ds, ref sql, "", "DbUpdates");
+
+            string IdList = "0";
+            int count = ds.Tables[0].Rows.Count;
+            for (int i = 0; i < count; i++)
+            {
+                IdList = IdList + ", " + ds.Tables[0].Rows[i]["MsDbUpdateId"].ToString();
+            }
+
+            return IdList;            
+        }
+
+        private void readMsDbUpdatesList(DataSet ds)
+        {
+            int count = ds.Tables[0].Rows.Count;
+            Int16 typeId = 0;
+
+            foreach (DataRow row in ds.Tables[0].Rows)
+            {
+                typeId = Convert.ToInt16(row["UpdateTypeId"].ToString());
+
+                readMsDbUpdate(row);
+
+                if (typeId == 11) runDbUpdateData();
+                //if (typeId == 12)
+                //if (typeId == 21)
+                if (typeId == 22) runDbUpdateFieldAdd();
+                //if (typeId == 23)
+                //if (typeId == 24)
+                //if (typeId == 31) 
+                //if (typeId == 32) 
+                //if (typeId == 41) 
+                //if (typeId == 42) 
+                //if (typeId == 51) 
+                //if (typeId == 52) 
+
+
+            }
+
+            /*
+  [Lkp].[MsDbUpdatesUpdateType] (Id, UpdateType)
+  ( 11,    N'Data  update - ManagerDb den table datasını al'),
+  ( 12,    N'Rapor update - ManagerDb den rapor datasını al'),
+  ( 21,    N'Table add'),
+  ( 22,    N'Field add'),
+  ( 23,    N'Field update'),
+  ( 24,    N'Field rename'),
+  ( 31,    N'Trigger add'),
+  ( 32,    N'Trigger update'),
+  ( 41,    N'Procedure add'),
+  ( 42,    N'Procedure update'),
+  ( 51,    N'Function add'),
+  ( 52,    N'Function update')
+            */
+        }
+
+        private void readMsDbUpdate(DataRow msDbUpdatesRow)
+        {
+            v.tMsDbUpdate.Clear();
+            
+            v.tMsDbUpdate.id = (int)msDbUpdatesRow["Id"];
+            v.tMsDbUpdate.sectorTypeId = (Int16)msDbUpdatesRow["SectorTypeId"];
+            v.tMsDbUpdate.updateTypeId = (Int16)msDbUpdatesRow["UpdateTypeId"];
+            
+            v.tMsDbUpdate.dBaseNoTypeId = (Int16)msDbUpdatesRow["DBaseNoTypeId"];
+            v.tMsDbUpdate.schemaName = msDbUpdatesRow["SchemaName"].ToString();
+            v.tMsDbUpdate.tableName = msDbUpdatesRow["TableName"].ToString();
+            v.tMsDbUpdate.fieldName = msDbUpdatesRow["FieldName"].ToString();
+            v.tMsDbUpdate.fieldTypeId = myInt16(msDbUpdatesRow["FieldTypeId"].ToString());
+            v.tMsDbUpdate.fieldLength = Set(msDbUpdatesRow["FieldLength"].ToString(), "", "");
+            v.tMsDbUpdate.fieldNotNull = myBool(msDbUpdatesRow["FieldNotNull"].ToString());
+        }
+
+        // 11,    Data  update - ManagerDb den table datasını al
+        private void runDbUpdateData()
+        {
+            // Data Update :
+            // WebManager de olan bir tablonun tüm kayıtlarını oku ve 
+            // müşterinin database ne insert et
+            // Örnek : MtskSablonTeorik, MtskSablonUygulama vb..
+
+            vScripts scripts = new vScripts();
+            scripts.SourceDBaseName = Find_dBLongName(Convert.ToString((byte)v.dBaseNo.WebManager));
+            scripts.SchemaName = v.tMsDbUpdate.schemaName;
+            scripts.SourceTableName = v.tMsDbUpdate.tableName;
+            scripts.IdentityInsertOnOff = true;
+
+            // insert cumlesi hazırlansın
+            string cumle = preparingInsertScript(scripts);
+            // hangi Database yazılacak 
+            v.dBaseNo dBaseNo = getDBaseNo(v.tMsDbUpdate.dBaseNoTypeId.ToString());
+            // hazırlanan cumleyi müşteri database üzerinde çalıştıralım
+            bool onay = runScript(dBaseNo, cumle);
+
+            // Müşteri database nin üzerinde yapılan işlemleri DBUpdates tablosuna kaydedilecek
+            if (onay)
+            {
+                insertDbUpdates();
+            }
+        }
+
+        // 12,    Rapor update - ManagerDb den rapor datasını al
+        private void runDbUpdateReport()
+        {
+
+        }
+        // 21,    Table add
+        private void runDbUpdateTableAdd()
+        {
+            string schemaName = v.tMsDbUpdate.schemaName;
+            string tableName = v.tMsDbUpdate.tableName;
+            
+            string notExistsSql = preparingTableIFNotExists(schemaName, tableName);
+
+        }
+
+        private string preparingTableIFNotExists(string schemaName, string tableName)
+        {
+            return 
+              " IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[" + schemaName + "].[" + tableName + "]') AND type in (N'U')) "
+            + " begin "
+            + " print 'create table sql' "
+            + " end ";
+        }
+        // 22,    Field add
+        private void runDbUpdateFieldAdd()
+        {
+            // hangi Database yazılacak 
+            v.dBaseNo dBaseNo = getDBaseNo(v.tMsDbUpdate.dBaseNoTypeId.ToString());
+            string databaseName = Find_dBLongName(Convert.ToString((byte)dBaseNo));
+            string tNull = "null";
+            if (v.tMsDbUpdate.fieldNotNull)
+                tNull = " not null";
+
+            // fieldAdd cumlesini hazırlansın
+            string cumle = preparingTableFieldAdd(
+                databaseName,
+                v.tMsDbUpdate.schemaName,
+                v.tMsDbUpdate.tableName,
+                v.tMsDbUpdate.fieldName,
+                getFieldTypeName(v.tMsDbUpdate.fieldTypeId),
+                v.tMsDbUpdate.fieldLength,
+                tNull
+                ); 
+            
+            // hazırlanan cumleyi müşteri database üzerinde çalıştıralım
+            bool onay = runScript(dBaseNo, cumle);
+
+            // Müşteri database nin üzerinde yapılan işlemleri DBUpdates tablosuna kaydedilecek
+            if (onay)
+            {
+                insertDbUpdates();
+            }
+
+        }
+        // 23,    Field update
+        private void runDbUpdateFieldUpdate()
+        {
+            //ALTER TABLE MS_TABLES_IP ALTER COLUMN EXTERNAL_IP_CODE VARCHAR(50) NULL
+        }
+        // 24,    Field rename
+        private void runDbUpdateFieldRename()
+        {
+
+        }
+        // 31,    Trigger add
+        private void runDbUpdateTriggerAdd()
+        {
+
+        }
+        // 32,    Trigger update
+        private void runDbUpdateTriggerUpdate()
+        {
+
+        }
+        // 41,    Procedure add
+        private void runDbUpdateProcedureAdd()
+        {
+
+        }
+        // 42,    Procedure update
+        private void runDbUpdateProcedureUpdate()
+        {
+
+        }
+        // 51,    Function add
+        private void runDbUpdateFunctionAdd()
+        {
+
+        }
+        // 52,    Function update
+        private void runDbUpdateFunctionUpdate()
+        {
+
+        }
+
+        private void insertDbUpdates()
+        {
+            DataSet ds = new DataSet();
+            string sql = "";
+            sql = Sql_DbUpdatesInsert();
+            try
+            {
+                SQL_Read_Execute(v.dBaseNo.Project, ds, ref sql, "", "DbUpdates");
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        private string Sql_DbUpdatesInsert()
+        {
+            // Müşteri database üzerinde çalıştırılan update lerin kaydı
+            string cumle = @"
+            INSERT INTO [dbo].[DbUpdates]
+           ([MsDbUpdateId]
+           ,[UpdateDate]
+           ,[SectorTypeId]
+           ,[UpdateTypeId]
+           ,[DBaseNoTypeId]
+           ,[SchemaName]
+           ,[TableName]
+           ,[FieldName]
+           ,[FieldTypeId]
+           ,[FieldLength]
+           ,[FieldNotNull]
+           ,[About]
+           ,[SqlScript])
+            VALUES
+           (   " + v.tMsDbUpdate.id.ToString() +          
+            ", getdate() " +
+            ", " + v.tMsDbUpdate.sectorTypeId.ToString() +
+            ", " + v.tMsDbUpdate.updateTypeId.ToString() +
+            ", " + v.tMsDbUpdate.dBaseNoTypeId.ToString() +
+            ",'" + v.tMsDbUpdate.schemaName + "'" +
+            ",'" + v.tMsDbUpdate.tableName + "'" +
+            ",'" + v.tMsDbUpdate.fieldName + "'" +
+            ", " + v.tMsDbUpdate.fieldTypeId.ToString() +
+            ",'" + v.tMsDbUpdate.fieldLength + "'" +
+            ", " + myBoolMsSql(v.tMsDbUpdate.fieldNotNull.ToString()) + 
+            ",'" + v.tMsDbUpdate.about + "'" +     
+            ",'" + v.tMsDbUpdate.sqlScript + "'" + 
+            "); ";
+            return cumle;
+        }
+
+        public string preparingInsertScript(vScripts scripts)
+        {
+            DataSet dsQuery = new DataSet();
+            string cumleDelete = " Delete   From [{0}].[{1}] ";
+            string cumleSelect = " Select * From [{0}].[{1}] ";
+
+            string databaseName = scripts.SourceDBaseName;
+            string schemaName = scripts.SchemaName;
+            string tableName = scripts.SourceTableName;
+            string where = scripts.Where;
+            bool identityInsertOnOff = scripts.IdentityInsertOnOff;
+
+            string cumle = "";
+            string tSql = "";
+            string myProp = "";
+
+            if (schemaName == "") schemaName = "dbo";
+
+            if (where != "")
+            {
+                cumleDelete = " Delete   From [{0}].[{1}] Where {2} ";
+                cumle = string.Format(cumleDelete, schemaName, tableName, where) + v.ENTER2;
+
+                cumleSelect = " Select * From [{0}].[{1}] Where {2} ";
+                tSql = string.Format(cumleSelect, schemaName, tableName, where);
+            }
+            else
+            {
+                cumle = string.Format(cumleDelete, schemaName, tableName) + v.ENTER2;
+                tSql = string.Format(cumleSelect, schemaName, tableName);
+            }
+
+            myProp = preparingMyProp(databaseName, schemaName, tableName, tSql);
+
+            dsQuery.Namespace = myProp;
+
+            Data_Read_Execute(null, dsQuery, ref tSql, tableName, null);
+
+            if (IsNotNull(dsQuery))
+            {
+                vTable vt = new vTable();
+                preparing_vTable(null, myProp, vt, dsQuery.Tables.Count);
+                vt.IdentityInsertOnOff = identityInsertOnOff;
+
+                tSave sv = new tSave();
+                cumle = cumle + sv.Insert_Script_Multi(dsQuery, vt); 
+            }
+
+            dsQuery.Dispose();
+
+            return cumle;
+        }
+
+        private string preparingTableFieldAdd(
+            string databaseName,
+            string schemaName,
+            string tableName, 
+            string fieldName, 
+            string fieldTypeName, 
+            string fieldLength, 
+            string fieldNull)
+        {
+            if (schemaName == "") schemaName = "dbo";
+            if (fieldNull == "") fieldNull = " null ";
+            if (fieldLength != "") 
+                if (fieldLength.IndexOf("(") == -1)
+                    fieldLength = "(" + fieldLength + ")";
+
+            string Sql =
+            @" IF not EXISTS (     
+                 select  
+                 a.column_id, a.name, 
+                 convert(smallInt, a.system_type_id) system_type_id, 
+                 convert(smallInt, a.user_type_id) user_type_id, 
+                 a.max_length, a.precision, a.scale, a.is_nullable, a.is_identity 
+                 from 
+                 [" + databaseName + @"].sys.columns a,  
+                 [" + databaseName + @"].sys.tables b 
+                 where b.object_id = a.object_id 
+                 and   b.name = '" + tableName + @"'
+                 and   a.name = '" + fieldName + @"' 
+                 )
+                 begin
+                   ALTER TABLE " + schemaName + "." + tableName + @" ADD " + fieldName + @" " + fieldTypeName + fieldLength + @" " + fieldNull + @" 
+                 end
+                 ";
+
+            return Sql;
+        }
+
+
+        public string preparingMyProp(string databaseName, string schemas, string tableName, string sql)
+        {
+            
+            v.dBaseNo dBaseNo = getDBaseNo(databaseName);
+            
+            string myProp = "";
+            MyProperties_Set(ref myProp, "DBaseNo", Convert.ToString((byte)dBaseNo));
+            MyProperties_Set(ref myProp, "DBaseName", databaseName);
+            MyProperties_Set(ref myProp, "SchemasCode", schemas);
+            MyProperties_Set(ref myProp, "TableName", tableName);
+            MyProperties_Set(ref myProp, "SqlFirst", sql);
+            MyProperties_Set(ref myProp, "SqlSecond", "null");
+            MyProperties_Set(ref myProp, "TableType", "1");
+            MyProperties_Set(ref myProp, "Cargo", "data");
+            MyProperties_Set(ref myProp, "KeyFName", "");
+
+            return myProp;
+        }
+
+        #endregion dbUpdatesChecked
+
+
         #region Db_Open
 
         /// <summary>
@@ -151,25 +537,42 @@ namespace Tkn_ToolBox
 
                 if (IsNotNull(dsData.Namespace))
                     myProp = dsData.Namespace.ToString();
-                                
-                Preparing_DataSet_(tForm, myProp, vt, dsData.Tables.Count);
+
+                preparing_vTable(tForm, myProp, vt, dsData.Tables.Count);
             }
         }
 
-        public v.dBaseNo getDBaseNo(string dbaseNo)
+        public v.dBaseNo getDBaseNo(string dBaseNo_Or_dBaseName)
         {
             v.dBaseNo dbNo = v.dBaseNo.None;
 
-            if (dbaseNo == "1") dbNo = v.dBaseNo.Master;
-            if (dbaseNo == "2") dbNo = v.dBaseNo.Manager;
-            if (dbaseNo == "3") dbNo = v.dBaseNo.UstadCrm;
-            if (dbaseNo == "4") dbNo = v.dBaseNo.Project;
-            if (dbaseNo == "5") dbNo = v.dBaseNo.WebCrm;
+            string dbaseNo = dBaseNo_Or_dBaseName;
+
+            // "master"
+            if ((dBaseNo_Or_dBaseName.ToUpper() == "MASTER") || (dBaseNo_Or_dBaseName == "1"))
+                dbNo = v.dBaseNo.Master;
+
+            //  "MANAGERSERVER"
+            if ((dBaseNo_Or_dBaseName.ToUpper() == v.active_DB.managerDBName.ToUpper()) || (dBaseNo_Or_dBaseName == "2"))
+                dbNo = v.dBaseNo.Manager;
+
+            //  "UstadCRM"
+            if ((dBaseNo_Or_dBaseName.ToUpper() == v.active_DB.ustadCrmDBName.ToUpper()) || (dBaseNo_Or_dBaseName == "3"))
+                dbNo = v.dBaseNo.UstadCrm;
+
+            //  projenin adı
+            if ((dBaseNo_Or_dBaseName.ToUpper() == v.active_DB.projectDBName.ToUpper()) || (dBaseNo_Or_dBaseName == "4") ||
+                (dBaseNo_Or_dBaseName == ""))
+                dbNo = v.dBaseNo.Project;
+
+            //  "WebManager"
+            if ((dBaseNo_Or_dBaseName.ToUpper() == v.webManager_DB.databaseName.ToUpper()) || (dBaseNo_Or_dBaseName == "7"))
+                dbNo = v.dBaseNo.WebManager;
 
             return dbNo;
         }
 
-        public void Preparing_DataSet_(Form tForm, string myProp, vTable vt, int tableCount)
+        public void preparing_vTable(Form tForm, string myProp, vTable vt, int tableCount)
         {
             if ((IsNotNull(myProp) == false) ||
                 (myProp.IndexOf("=DBaseNo:") == -1))
@@ -182,7 +585,7 @@ namespace Tkn_ToolBox
                 byte dbaseNo_ = Set(MyProperties_Get(myProp, "=DBaseNo:"), "", (byte)0);
 
                 vt.DBaseNo = getDBaseNo(dbaseNo_.ToString());    
-                vt.DBaseName = Find_dBLongName(vt.DBaseNo.ToString());
+                vt.DBaseName = Find_dBLongName(dbaseNo_.ToString());
                 vt.SchemasCode = Set(MyProperties_Get(myProp, "=SchemasCode:"), "dbo", "");
                 vt.TableType = Set(MyProperties_Get(myProp, "=TableType:"), "", (byte)0);
                 vt.TableName = Set(MyProperties_Get(myProp, "=TableName:"), "TABLE1", "TABLE1");
@@ -367,6 +770,7 @@ namespace Tkn_ToolBox
              where c.TABLE_NAME  = '" + vt.TableName + @"' 
              and   c.SOFTWARE_CODE = '" + vt.SoftwareCode + @"'
              and   c.PROJECT_CODE  = '" + vt.ProjectCode + @"'
+             and   c.TABLE_CODE = '" + vt.TableCode + @"'
              order by d.FIELD_NO ";
 
             if ((vt.TableName.IndexOf("_KIST") > -1) ||
@@ -435,7 +839,7 @@ namespace Tkn_ToolBox
                 Cursor.Current = Cursors.WaitCursor;
 
             if (vt.msSqlConnection == null)
-                Preparing_DataSet_(null, null, vt, 0);
+                preparing_vTable(null, null, vt, 0);
 
             SqlConnection msSqlConn = vt.msSqlConnection;
             
@@ -665,8 +1069,7 @@ namespace Tkn_ToolBox
             return SQL_Read_Execute(null, dBNo, dsData, ref SQL, tableName, function_name);
         }
 
-        public Boolean SQL_Read_Execute(Form tForm, v.dBaseNo dBNo, DataSet dsData,
-               ref string SQL, string tableName, string function_name)
+        public Boolean SQL_Read_Execute(Form tForm, v.dBaseNo dBNo, DataSet dsData, ref string SQL, string tableName, string function_name)
         {
             Boolean onay = false;
             string TableIPCode = string.Empty;
@@ -732,7 +1135,8 @@ namespace Tkn_ToolBox
                 for (int i = ds.Tables.Count - 1; i >= 0; i--)
                 {
                     //ds.Tables[i].Clear();
-                    ds.Tables.RemoveAt(i);
+                    //ds.Tables.RemoveAt(i);
+                    ds.Tables[i].Rows.Clear();
                 }
             }
             catch (Exception e)
@@ -1132,7 +1536,7 @@ namespace Tkn_ToolBox
                 {
                     string TableIPCode = Set(ds.DataSetName.ToString(), "", "");
 
-                    Control cntrl = new Control();
+                    Control cntrl = null;// new Control();
                     cntrl = Find_Control_View(tForm, TableIPCode);
 
                     Data_Read_Execute(tForm, ds, ref Sql, "", cntrl);
@@ -1178,7 +1582,7 @@ namespace Tkn_ToolBox
                 MyProperties_Set(ref myProp, "SqlSecond", "null");
 
                 vTable vt = new vTable();
-                Preparing_DataSet_(null, myProp, vt, 0);
+                preparing_vTable(null, myProp, vt, 0);
                 Sql_ExecuteNon(cmd, vt);
                 onay = true;
                 cmd.Dispose();
@@ -1198,13 +1602,24 @@ namespace Tkn_ToolBox
         #endregion TriggerOnOff
 
         #region runScript
-        public bool runScript(string cumle)
+        public bool runScript(v.dBaseNo targetDBaseNo, string cumle)
         {
             bool onay = false;
 
+            v.con_CreateScriptPacket = true;
+
             DataSet ds = new DataSet();
-            SQL_Read_Execute(v.dBaseNo.WebManager, ds, ref cumle, "TABLES1", null);
+            try
+            {
+                onay = SQL_Read_Execute(targetDBaseNo, ds, ref cumle, "TABLE1", null);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            
             ds.Dispose();
+            v.con_CreateScriptPacket = false;
 
             return onay;
         }
@@ -1217,6 +1632,7 @@ namespace Tkn_ToolBox
         public void firmAboutAdd(DataRow row, ref tUstadFirm tFirm)
         {
             int firmId = 0;
+            Int16 sectorTypeId = 0;
             string firmLongName = "";
             string firmShortName = "";
             string firmGuid = "";
@@ -1227,29 +1643,37 @@ namespace Tkn_ToolBox
             //string dbAuthentication = "";
             string dbLoginName = "";
             string dbPassword = "";
+            string mebbisCode = "";
+            string mebbisPassword = "";
             //
             firmId = myInt32(row["FirmId"].ToString());
             firmLongName = row["FirmLongName"].ToString();
             firmShortName = row["FirmShortName"].ToString();
             firmGuid = row["FirmGUID"].ToString();
             menuCode = row["MenuCode"].ToString();
+            sectorTypeId = myInt16(row["SectorTypeId"].ToString());
             databaseType = "1";// MSSQL 
             databaseName = row["DatabaseName"].ToString();
             dbServerNameIP = row["ServerNameIP"].ToString();
             dbLoginName = row["DbLoginName"].ToString();
             dbPassword = row["DbPass"].ToString();
+            mebbisCode = row["MebbisCode"].ToString();
+            mebbisPassword = row["MebbisPass"].ToString();
             //
             tFirm.FirmId = firmId;
             tFirm.FirmLongName = firmLongName;
             tFirm.FirmShortName = firmShortName;
             tFirm.FirmGuid = firmGuid;
             tFirm.MenuCode = menuCode;
+            tFirm.SectorTypeId = sectorTypeId;
             tFirm.DatabaseType = databaseType;
             tFirm.DatabaseName = databaseName;
             tFirm.ServerNameIP = dbServerNameIP;
             //tFirm.DbAuthentication = dbAuthentication;
             tFirm.DbLoginName = dbLoginName;
             tFirm.DbPassword = dbPassword;
+            tFirm.MebbisCode = mebbisCode;
+            tFirm.MebbisPass = mebbisPassword;
         }
 
         public void setSelectFirm(tUstadFirm tFirm)
@@ -1260,7 +1684,7 @@ namespace Tkn_ToolBox
             
             v.active_DB.projectDBName = tFirm.DatabaseName;
             
-            if (v.active_DB.localDB == false)
+            //if (v.active_DB.localDB == false)
                 v.active_DB.projectServerName = tFirm.ServerNameIP; // "195.xx";
 
             v.active_DB.projectUserName = tFirm.DbLoginName; // "sa";
@@ -1357,10 +1781,14 @@ namespace Tkn_ToolBox
             //Sql = Sql.ToUpper();
             //MessageBox.Show(Sql.ToUpper().IndexOf("INSERT").ToString() + ";" + Sql.ToUpper().IndexOf("UPDATE").ToString());
             //MessageBox.Show(Sql.ToUpper());
-            if ((Sql.ToUpper().IndexOf("INSERT") == -1) &&
-                (Sql.ToUpper().IndexOf("İNSERT") == -1) &&
-                (Sql.ToUpper().IndexOf("UPDATE") == -1))
-                 Sql = Str_AntiCheck(Sql);
+            
+            //if ((Sql.ToUpper().IndexOf("INSERT") == -1) &&
+            //    (Sql.ToUpper().IndexOf("İNSERT") == -1) &&
+            //    (Sql.ToUpper().IndexOf("UPDATE") == -1))
+            if (v.con_CreateScriptPacket == false)
+                Sql = Str_AntiCheck(Sql);
+
+            Sql = Str_CheckYilAy(Sql);
 
             // Yukarıda toUpper yüzüunden join > JOİN şekline dönüşüyor
             //Str_Replace(ref Sql, "JOİN", "JOIN");
@@ -1371,7 +1799,7 @@ namespace Tkn_ToolBox
             //{
             //    v.Kullaniciya_Mesaj_Var = vt.TableIPCode;
             //}
-                        
+
             Str_Replace(ref Sql, ":VT_FIRM_ID", v.SP_FIRM_ID.ToString());
             Str_Replace(ref Sql, ":FIRM_ID", v.SP_FIRM_ID.ToString());
             //Str_Replace(ref Sql, ":FIRM_USERLIST", v.SP_FIRM_USERLIST);
@@ -1383,11 +1811,14 @@ namespace Tkn_ToolBox
             Str_Replace(ref Sql, ":VT_PERIOD_ID", v.vt_PERIOD_ID.ToString());
             Str_Replace(ref Sql, ":VT_USER_ID", v.tUser.UserId.ToString());
             Str_Replace(ref Sql, ":USER_ID", v.tUser.UserId.ToString());
+            Str_Replace(ref Sql, ":USER_TCNO", "'" + v.tUser.UserTcNo + "'");
+            Str_Replace(ref Sql, ":USER_DBTYPE_ID", v.tUser.UserDbTypeId.ToString());
 
             Str_Replace(ref Sql, ":BUGUN_YILAY", v.BUGUN_YILAY.ToString());
             Str_Replace(ref Sql, ":BUGUN_GUN", v.BUGUN_GUN.ToString());
             Str_Replace(ref Sql, ":BUGUN_AY", v.BUGUN_AY.ToString());
             Str_Replace(ref Sql, ":BUGUN_YIL", v.BUGUN_YIL.ToString());
+            Str_Replace(ref Sql, ":BUGUN", v.BUGUN_TARIH.ToString());
 
             Str_Replace(ref Sql, ":GECEN_YILAY", v.GECEN_YILAY.ToString());
             Str_Replace(ref Sql, ":GELECEL_YILAY", v.GELECEK_YILAY.ToString());
@@ -1478,6 +1909,11 @@ namespace Tkn_ToolBox
                 Str_Replace(ref Sql, "<MSV3>", "[" + v.active_DB.managerDBName.ToString() + "]");
             }
 
+            if (Sql.IndexOf("<CRM>") > -1)
+            {
+                Str_Replace(ref Sql, "<CRM>", "[" + v.active_DB.ustadCrmDBName.ToString() + "]");
+            }
+
             return Sql;
         }
 
@@ -1529,7 +1965,8 @@ namespace Tkn_ToolBox
                 while ((i2 > f2) && (f2 > -1))
                 {
                     Sql = Sql.Insert((i2 + FullHeader2.Length) - 2, v.ENTER + WhereAnd);
-                    f2 = Sql.IndexOf(FullHeader2, i2 + FullHeader2.Length);
+                    // bulduğunun haricinde başka bir tane daha var mı kontrol et
+                    f2 = Sql.IndexOf(FullHeader2, i2 + FullHeader2.Length); 
                     if (f2 > 0)
                     {
                         i2 = f2;
@@ -1840,6 +2277,9 @@ namespace Tkn_ToolBox
             string FORMTYPE = MyProperties_Get(Prop_Navigator, "FORMTYPE:");
             string FORMSTATE = MyProperties_Get(Prop_Navigator, "FORMSTATE:");
 
+
+            //MessageBox.Show(FORMCODE + " : için OpenForm_OLD çalışıyor, S.O.S. ");
+
             string TableIPCode_RowBlock = Find_Properies_Get_FieldBlock(Prop_Navigator, "TABLEIPCODE_LIST");
 
             TableIPCode_RowBlock = TableIPCodeList_Get_Values_OLD(tForm, TableIPCode_RowBlock);
@@ -2102,14 +2542,18 @@ namespace Tkn_ToolBox
             int i = 0;
 
             s = "Type:SearchEngine;";
-            i = prop_.IndexOf(s);
-            if (i > -1)
+            while (prop_.IndexOf(s) > -1)
+            {
+                i = prop_.IndexOf(s);
                 prop_ = prop_.Remove(i, s.Length);
+            }
 
             s = "Type:Buttons;";
-            i = prop_.IndexOf(s);
-            if (i > -1)
+            while (prop_.IndexOf(s) > -1)
+            {
+                i = prop_.IndexOf(s);
                 prop_ = prop_.Remove(i, s.Length);
+            }
 
             /// 34 = " değiştir  39 = '
             prop_ = prop_.Replace((char)34, (char)39);
@@ -2392,6 +2836,77 @@ namespace Tkn_ToolBox
 
         #endregion myByte
 
+        #region myBool
+
+        public bool myBool(string Veri)
+        {
+            bool j = false;
+
+            string s = "";
+            for (int i = 0; i < Veri.Length; ++i)
+            {
+                if (char.IsDigit(Veri[i]) == true)
+                {
+                    s += Veri[i].ToString();
+                }
+                else
+                {
+                    if (Veri[i] == '-')
+                        s += Veri[i].ToString();
+                }
+            }
+
+            if (s == "") s = "0";
+
+            try
+            {
+                j = Convert.ToBoolean(s);
+            }
+            catch (Exception)
+            {
+                j = false;  //throw;
+            }
+
+            return j;
+        }
+
+        public string myBoolMsSql(string Veri)
+        {
+            string j = "0";
+
+            string s = "";
+            for (int i = 0; i < Veri.Length; ++i)
+            {
+                if (char.IsDigit(Veri[i]) == true)
+                {
+                    s += Veri[i].ToString();
+                }
+                else
+                {
+                    if (Veri[i] == '-')
+                        s += Veri[i].ToString();
+                }
+            }
+
+            if (s == "") s = "False";
+
+            try
+            {
+                if (Veri.ToUpper() == "TRUE") j = "1";
+                if (Veri.ToUpper() == "FALSE") j = "0";
+            }
+            catch (Exception)
+            {
+                j = "0";  //throw;
+            }
+
+            return j;
+        }
+
+
+        #endregion myBool
+
+
         #region myTamliBolen
         public int myTamliBolen(int Bolunen, int Bolen)
         {
@@ -2559,9 +3074,9 @@ namespace Tkn_ToolBox
 
         #region myOperandControl
 
-        public Boolean myOperandControl(string Value1, string Value2, string OperandType)
+        public bool myOperandControl(string Value1, string Value2, string OperandType)
         {
-            Boolean onay = false;
+            bool onay = false;
 
             /* 'KRT_ODD_NOTLIKE_STR'
             1, '>=', '>=');
@@ -2627,7 +3142,6 @@ namespace Tkn_ToolBox
             return Veri;
         }
 
-
         /*  (char)34 = "    (char)39 = '   */
         public string Str_Check(string Veri)
         {
@@ -2653,6 +3167,41 @@ namespace Tkn_ToolBox
             // string içindeki " işaareti ' işaretile değiştiriliyor
             Str_Replace(ref Veri, (char)34, (char)39);
             Str_Replace(ref Veri, '½', (char)39);
+
+            return Veri;
+        }
+
+        private string Str_CheckYilAy(string Veri)
+        {
+            //-- :@@YILAY
+            int i1 = Veri.IndexOf("-- :@@YILAY");
+            if (i1 == -1)
+                Veri.IndexOf("--  :@@YILAY");
+            if (i1 == -1)
+                i1 = Veri.IndexOf("--:@@YILAY");
+
+            int i2 = Veri.IndexOf(":BUGUN_YILAY");
+
+            // eğer :@@YILAY ifadesi var, :BUGUN_YILAY yoksa
+            // :BUGUN_YILAY value değerini yenileyebilmek için tekrar düzenleme gerekiyor
+            //
+            // declare @DonemTipiId int = 202205 -- :@@YILAY   şeklindeki satır
+            // declare @DonemTipiId int = :BUGUN_YILAY  -- :@@YILAY şekline dönüyor
+            if ((i1 > -1) && (i2 == -1))
+            {
+                for (int i = i1; i > -1; i--)
+                {
+                    if (Veri[i] == '=' || Veri[i] == '>' || Veri[i] == '<')
+                    {
+                        i2 = i;
+                        break;
+                    }
+                }
+
+                Veri = Veri.Remove(i2 + 1, i1 - i2 - 1);
+
+                Veri = Veri.Insert(i2 + 1, " :BUGUN_YILAY ");
+            }
 
             return Veri;
         }
@@ -3509,7 +4058,7 @@ namespace Tkn_ToolBox
         #endregion Alias Control
 
         #region MySQL_Clear
-        public string MySQL_Clear(string tSQL)
+        public string kisitlamalarClear(string tSQL)
         {
             if (tSQL.IndexOf("/*KISITLAMALAR|1|*/") > -1)
             {
@@ -3527,11 +4076,20 @@ namespace Tkn_ToolBox
         {
             bool onay = false;
 
-            //* rakam  56, 48, 127, 52, 60, 62, 59, 108
+            //* rakam  56, 48, 127, 52, 60, 62, 59
             if ((ftype == 56) | (ftype == 48) | (ftype == 127) | (ftype == 52) |
-                (ftype == 60) | (ftype == 62) | (ftype == 59) | (ftype == 108))
+                (ftype == 60) | (ftype == 62) | (ftype == 59))
             {
                 int value = myInt32(read_value);
+
+                if (value == 0) return false;
+                if (value > 0) return true;
+            }
+
+            //* numeric  108
+            if ((ftype == 108))
+            {
+                double value = myDouble(read_value);
 
                 if (value == 0) return false;
                 if (value > 0) return true;
@@ -3568,10 +4126,37 @@ namespace Tkn_ToolBox
 
         #region Get_FieldTypeName
 
+        private string getFieldTypeName(int fType)
+        {
+            string s = "";
+            if (fType == 56) s = "Int";
+            if (fType == 52) s = "SmallInt";
+            if (fType == 127) s = "Bigint";
+            if (fType == 104) s = "Bit";
+            if (fType == 108) s = "Numeric";
+            if (fType == 62) s = "Float";
+            if (fType == 59) s = "Real";
+            if (fType == 60) s = "Money";
+            if (fType == 48) s = "Tinyint";
+            if (fType == 58) s = "Smalldatetime";
+            if (fType == 61) s = "Datetime";
+            if (fType == 40) s = "Date";
+            if (fType == 41) s = "Time";
+            if (fType == 167) s = "Varchar";
+            if (fType == 231) s = "nVarchar";
+            if (fType == 175) s = "Char";
+            if (fType == 35) s = "Text";
+            if (fType == 99) s = "Ntext";
+            if (fType == 34) s = "Image";
+            if (fType == 173) s = "Binary";
+            if (fType == 165) s = "Varbinary";
+            return s;
+        }
+
         public string Get_FieldTypeName(int ftype, string value)
         {
             string s = string.Empty;
-
+                        
             if ((value == "") ||
                 (value == "0")) value = "100";
 
@@ -4936,8 +5521,28 @@ namespace Tkn_ToolBox
         #region MSSQL_Server_Tarihi
         public void MSSQL_Server_Tarihi()
         {
+            /*
+            if (v.SAAT_KISA != "")
+            {
+                int t1saat = Convert.ToInt32(v.SAAT_KISA.Substring(0,2));
+                int t2saat = Convert.ToInt32(DateTime.Now.ToShortTimeString().Substring(0,2));
+
+                int t1dakika = Convert.ToInt32(v.SAAT_KISA.Substring(3, 2));
+                int t2dakika = Convert.ToInt32(DateTime.Now.ToShortTimeString().Substring(3, 2));
+                int fark = t2dakika - t1dakika;
+                if (fark < 11) return; // 11 dakikadan küçükse bir daha sorgulama
+            }
+            */
+
             string ySql =
-              @"  select top 1 upd.*
+              @"  select top 1 
+               upd.[Id]
+             , upd.[IsActive]
+             , upd.[RecordDate]
+             , upd.[ExeName]
+             , upd.[VersionNo]
+             , upd.[PacketName]
+             , upd.[About]
              , GETDATE() DB_TARIH 
              , CONVERT(varchar(10), GETDATE(), 104) TARIH 
              , CONVERT(varchar(10), GETDATE(), 102) YILAYGUN 
@@ -4947,7 +5552,7 @@ namespace Tkn_ToolBox
              , MONTH(GETDATE()) AY 
              , DAY(GETDATE()) GUN 
              , DATEPART(weekday, GETDATE()) HAFTA_GUN
-            from SYS_UPDATES upd order by upd.REC_DATE desc 
+            from MsExeUpdates upd order by upd.RecordDate desc 
             --3S_
             " + v.ENTER;
 
@@ -5005,17 +5610,15 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 if (v.BUGUN_AY < 10)
                     v.GELECEK_YILAY = Convert.ToInt32(v.BUGUN_YIL.ToString() + '0' + v.BUGUN_AY.ToString());
                 else v.GELECEK_YILAY = Convert.ToInt32(v.BUGUN_YIL.ToString() + v.BUGUN_AY.ToString());
-                
+
                 // Bugün Yil_Ay
                 v.BUGUN_GUN = v.BUGUN_TARIH.Day;
                 v.BUGUN_AY = v.BUGUN_TARIH.Month;
                 v.BUGUN_YIL = v.BUGUN_TARIH.Year;
 
                 if (v.BUGUN_AY < 10)
-                     v.BUGUN_YILAY = Convert.ToInt32(v.BUGUN_YIL.ToString() + '0' + v.BUGUN_AY.ToString());
+                    v.BUGUN_YILAY = Convert.ToInt32(v.BUGUN_YIL.ToString() + '0' + v.BUGUN_AY.ToString());
                 else v.BUGUN_YILAY = Convert.ToInt32(v.BUGUN_YIL.ToString() + v.BUGUN_AY.ToString());
-
-
 
                 v.TARIH_SAAT = ds.Tables[0].Rows[0]["DB_TARIH"].ToString();
                 v.SAAT_KISA = ds.Tables[0].Rows[0]["UZUN_SAAT"].ToString().Substring(0, 5);
@@ -5051,18 +5654,30 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
                 Tarihin_Ayin_IlkGunu_SonGunu(v.BUGUN_TARIH, ref v.BU_AY_BASI_TARIH, ref v.BU_AY_SONU_TARIH);
 
-                v.tExeAbout.ftpVersionNo = ds.Tables[0].Rows[0]["VERSION_NO"].ToString();
-                v.tExeAbout.ftpExeName = ds.Tables[0].Rows[0]["EXE_NAME"].ToString();
-                v.tExeAbout.ftpPacketName = ds.Tables[0].Rows[0]["PACKET_NAME"].ToString();
-
-
+                v.tExeAbout.ftpVersionNo = ds.Tables[0].Rows[0]["VersionNo"].ToString();
+                v.tExeAbout.ftpExeName = ds.Tables[0].Rows[0]["ExeName"].ToString();
+                v.tExeAbout.ftpPacketName = ds.Tables[0].Rows[0]["PacketName"].ToString();
             }
-
             //MessageBox.Show(v.BUGUN_TARIH.ToString());
 
             ds.Dispose();
         }
         #endregion MSSQL_Server_Tarihi
+
+        #region YilAy - Mali Dönem Read
+        public void YilAyRead()
+        {
+            if (v.tMainFirm.SectorTypeId == 201) // Mtsk
+            {
+                string tableName = "MtskDonemTipi";
+                string Sql = " Select * from [Lkp].[" + tableName + "] order by Id desc ";
+
+                v.dBaseNo dBaseNo = v.dBaseNo.Project;
+                SQL_Read_Execute(dBaseNo, v.ds_YilAyList, ref Sql, tableName, "");
+            }
+        }
+
+        #endregion YilAy - Mali Dönem Read
 
         #region tGotoRecord
         public Boolean tGotoRecord(Form tForm, DataSet dsData, string TableIPCode, string FieldName, string Value, int position)// string TalepEden)
@@ -5231,59 +5846,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             }
             */
         }
-
-        public void HP_UPDATE_Preparing()
-        {
-            DataSet ds_Query = new DataSet();
-            tSQLs sql = new tSQLs();
-
-            string execSql = string.Empty;
-            string tSql = sql.SQL_SYS_UPDATES();
-
-            SQL_Read_Execute(v.dBaseNo.Manager, ds_Query, ref tSql, "SYS_UPDATES", "UpdateList");
-
-            /*
-            SELECT 
-               [ID]
-              ,[ISACTIVE]
-              ,[REC_DATE]
-              ,[EXE_NAME]
-              ,[UPDATE_TD]
-              ,[UPDATE_NO]
-              ,[VERSION_NO]
-              ,[PACKET_NAME]
-              ,[ABOUT]
-            FROM [MSV3DFTRBLT].[dbo].[SYS_UPDATES]
-            */
-
-            tSql = "";
-            string s = "";
-
-            foreach (DataRow row in ds_Query.Tables[0].Rows)
-            {
-                s = Sql_HP_UPDATES_Insert(
-                    row["REC_DATE"].ToString()
-                  , row["EXE_NAME"].ToString()
-                  , myInt16(row["UPDATE_TD"].ToString())
-                  , myInt32(row["UPDATE_NO"].ToString())
-                  , row["VERSION_NO"].ToString()
-                  , row["PACKET_NAME"].ToString()
-                  , row["ABOUT"].ToString());
-
-                // update kontrol cümlesi
-                //
-                execSql = execSql + s + v.ENTER;
-            }
-
-            if (IsNotNull(execSql))
-            {
-                SQL_Read_Execute(v.dBaseNo.Project, v.ds_ExeUpdates, ref execSql, "HP_UPDATES", "HP_UPDATES_INS");
-
-                newExeUpdate(v.ds_ExeUpdates);
-            }
-        }
-
-                
+        
         private string Sql_HP_COMPS()
         {
             string s = "";
@@ -5921,11 +6484,12 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             #endregion
 
             #region PROP_NAVIGATOR and 2
-            if (Main_FieldName == "PROP_NAVIGATOR")
-            {
-                PROP_NAVIGATOR obj = new PROP_NAVIGATOR();
-                value = JsonConvert.SerializeObject(obj, Newtonsoft.Json.Formatting.Indented);
-            }
+            // neden iki tane hatırlmadım ? 
+            //if (Main_FieldName == "PROP_NAVIGATOR")
+            //{
+            //    PROP_NAVIGATOR obj = new PROP_NAVIGATOR();
+            //    value = JsonConvert.SerializeObject(obj, Newtonsoft.Json.Formatting.Indented);
+            //}
             if (Main_FieldName == "PROP_NAVIGATOR")
             {
                 PROP_NAVIGATOR obj = new PROP_NAVIGATOR();
@@ -6290,9 +6854,6 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             //((DevExpress.XtraEditors.CheckEdit)sender).Parent
             return tForm;
         }
-
-
-
 
         #endregion Form
 
@@ -7231,49 +7792,23 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
         #endregion DataNavigator_Position
 
-        #region DBaseNo
-        public byte Find_DBaseNo(string DatabaseName)
-        {
-            byte dbNo = 0;
-
-            // "master"
-            if ((DatabaseName.ToUpper() == "MASTER") || (DatabaseName == "1"))
-                dbNo = (byte)v.dBaseNo.Master;
-
-            //  "MANAGERSERVER"
-            if ((DatabaseName.ToUpper() == v.active_DB.managerDBName.ToUpper()) || (DatabaseName == "2"))
-                dbNo = (byte)v.dBaseNo.Manager;
-
-            //  projenin adı
-            if ((DatabaseName.ToUpper() == v.active_DB.projectDBName.ToUpper()) || (DatabaseName == "3") ||
-                (DatabaseName == ""))
-                dbNo = (byte)v.dBaseNo.Project;
-            
-            /*
-            insert into MS_TYPES values ( 1, 0, 'DB_TYPE',  0, '', 'none');
-            insert into MS_TYPES values ( 1, 0, 'DB_TYPE',  1, '', 'master');
-            insert into MS_TYPES values ( 1, 0, 'DB_TYPE',  2, '', 'ManagerServer');
-            insert into MS_TYPES values ( 1, 0, 'DB_TYPE',  3, '', 'Proje');
-            */
-
-            if (dbNo != 0)
-            {
-                return dbNo;
-            }
-            else
-            {
-                if (DatabaseName != "null")
-                    MessageBox.Show("DİKKAT : [ " + DatabaseName + " ] için Database Connection tespit edilemedi ...");
-
-                return 0;
-            }
-        }
-        #endregion DBaseNo
-
         #region Find_dBLongName
         public string Find_dBLongName(string DatabaseName)
         {
             string s = string.Empty;
+            /*
+        public enum dBaseNo : byte
+        {
+            None = 0,
+            Master = 1, 
+            Manager = 2,
+            UstadCrm = 3, 
+            Project = 4,
+            WebCrm = 5,
+            NewDatabase = 6,
+            WebManager = 7 
+        }
+            */
 
             // "master"
             if ((DatabaseName.ToUpper() == "MASTER") ||
@@ -7282,23 +7817,27 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 s = v.db_MASTER_DBNAME;
 
             //  "MANAGERSERVER"
-            if ((v.active_DB.managerDBName.ToUpper().IndexOf(DatabaseName.ToUpper()) > -1) ||
+            if ((v.active_DB.managerDBName.ToUpper() == DatabaseName.ToUpper()) ||
                 (DatabaseName == v.dBaseNo.Manager.ToString()) ||
                 (DatabaseName == "2"))
                 s = v.active_DB.managerDBName;
 
             //  "UstadCRM"
-            if ((v.active_DB.ustadCrmDBName.ToUpper().IndexOf(DatabaseName.ToUpper()) > -1)  ||
+            if ((v.active_DB.ustadCrmDBName.ToUpper() == DatabaseName.ToUpper())  ||
                 (DatabaseName == "3"))
                 s = v.active_DB.ustadCrmDBName;
 
             //  proje adı
-            if ((v.active_DB.projectDBName.ToUpper().IndexOf(DatabaseName.ToUpper()) > -1) ||
+            if ((v.active_DB.projectDBName.ToUpper() == DatabaseName.ToUpper()) ||
                 (DatabaseName == v.dBaseNo.Project.ToString()) ||
                 (DatabaseName == "4") ||
                 (DatabaseName == ""))
                 s = v.active_DB.projectDBName;
-                        
+
+            if ((v.webManager_DB.databaseName.ToUpper() == DatabaseName.ToUpper()) ||
+                (DatabaseName == "7"))
+                s = v.webManager_DB.databaseName;
+
             if (IsNotNull(s))
             {
                 return s;
@@ -9153,7 +9692,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             {
                 try
                 {
-                    SqlF = MySQL_Clear(SqlF);
+                    SqlF = kisitlamalarClear(SqlF);
                     Data_Read_Execute(tForm, dsData, ref SqlF, tTableName, null);
                     dsData.Tables[tTableName].Namespace = tTableCaption;
 
@@ -11904,15 +12443,16 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
         public void LookUpFieldNameChecked(
             ref string tableName,
             ref string fieldName,
-            ref string idFieldName
+            ref string idFieldName,
+            Int16 fieldType
             )
         {
             string orjinalTableName = tableName;
             string orjinalFieldName = fieldName;
-
+            
             int OzelType = -1;
 
-            OzelType = fieldName.IndexOf("ParaTipi");
+            //OzelType = fieldName.IndexOf("ParaTipi");
             if (OzelType == -1)
                 OzelType = fieldName.IndexOf("BirimTipi");
             if (OzelType == -1)
@@ -11946,6 +12486,8 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                     OzelType = fieldName.IndexOf("Brans");
             }
 
+
+
             /// BelgeTipiId >> BelgeTipi ne dönüşüyor 
             /// ParaTipiId  >> ParaTipi
             /// ILTipiId    >> ILTipi
@@ -11953,6 +12495,22 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             ///
             fieldName = fieldName.Replace("Id", "");
             tableName = tableName + fieldName;
+
+            if ((fieldType == 167) || // varchar
+                (fieldType == 231))   // nvarchar
+            {
+                fieldName = fieldName.Replace("Tipi", "");
+                fieldName = fieldName.Replace("Type", "");
+
+                // IslemKodu oluştu
+                idFieldName = fieldName + "Kodu";
+                // IslemAdi oluştu
+                fieldName = fieldName + "Adi";
+
+                if (fieldName.IndexOf("Para") > -1)
+                    tableName = "OnmParaTipi";
+                
+            }
 
             if (OzelType > -1)
             {
@@ -11980,11 +12538,26 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 // BirimAdi oluştu
                 fieldName = fieldName + "Adi";
 
+                
                 if (fieldName.IndexOf("Cinsiyet") > -1)
                 {
                     idFieldName = "Id";
                     fieldName = "CinsiyetTipi";
                     tableName = "CinsiyetTipi";
+                }
+
+                
+
+                if (fieldName.IndexOf("Birim") > -1)
+                {
+                    tableName = "OnmStokBirimTipi";
+                }
+
+                if (fieldName.IndexOf("KdvOrani") > -1)
+                {
+                    idFieldName = "Id";
+                    fieldName = "KdvOraniAdi";
+                    tableName = "OnmKdvOraniTipi";
                 }
 
                 if (fieldName.ToUpper().IndexOf("SECTOR") > -1)
@@ -11996,10 +12569,12 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                     //  UstadFirmsSectorTypeId gibi
                     idFieldName = "Id";
                     fieldName = "SectorType";
-                    if (orjinalTableName.ToUpper().IndexOf("MSPROJECT") > -1)
+                    if ((orjinalTableName.ToUpper().IndexOf("MSPROJECT") > -1) ||
+                        (orjinalTableName.ToUpper() == "MSSECTORTYPE"))
                         tableName = "MsSectorType";
                     else tableName = orjinalTableName + fieldName;
                 }
+
 
                 if (orjinalTableName.ToUpper().IndexOf("MTSK") > -1)
                 {
@@ -12098,7 +12673,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 v.active_DB.managerDBName = ManagerDbName;
                 v.active_DB.ustadCrmServerName = UstadCrmAddressIp;
                 v.active_DB.ustadCrmDBName = UstadCrmDbName;
-                v.active_DB.projectServerName = ManagerAddressIp;
+                //v.active_DB.projectServerName = ManagerAddressIp;
             }
 
 
@@ -12126,7 +12701,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
             try
             {
-                MessageBox.Show(v.tExeAbout.activePath + "\\" + fileName);
+                //MessageBox.Show(v.tExeAbout.activePath + "\\" + fileName);
                 /* Download a File */
                 //ftpClient.download("/public/YesiLdefter_201806201.rar", @"E:\Temp\YesiLdefter_201806201.rar");
                 //ftpClient.download(v.tExeAbout.ftpPacketName, @"" + v.tExeAbout.activePath + "\\" + v.tExeAbout.ftpPacketName);
@@ -12184,8 +12759,6 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
             return onay;
         }
-
-
 
         #endregion ftp
 

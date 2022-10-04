@@ -33,7 +33,7 @@ AS BEGIN
 
     FETCH NEXT FROM dersAdayiCursor INTO @curId
 
-	  declare @yFirmId int = 0
+    declare @yFirmId int = 0
     declare @yDonemTipiId int = 0
     declare @yAdayId int = 0
     declare @yAdayTcNo varchar(11) = null
@@ -54,10 +54,10 @@ AS BEGIN
         Select @yAdayId = Id 
         From dbo.MtskAday
         Where TcNo = @yAdayTcNo
-        and DonemTipiId = @yDonemTipiId
-	      and FirmId = @yFirmId
+        --and DonemTipiId = @yDonemTipiId
+        --and FirmId = @yFirmId
 		
-		    update dbo.MtskUygulamaliDersAdayi set 
+        update dbo.MtskUygulamaliDersAdayi set 
         AdayId = @yAdayId
         Where Id = @curId 
       end

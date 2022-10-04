@@ -10,7 +10,9 @@ begin transaction
    IsActive              Bit       not null, /* default : 1 = active, 0 = not active */  
    AdayKayitTarihi       Date          null, 
 
+   AdayNo                Int           null,
    TcNo                  Varchar(11)   null,
+   KimlikSeriNo          Varchar(10)   null,
    TamAdiSoyadi          nVarchar(100) null,
    Adi                   nVarchar(50)  null,
    SoyAdi                nVarchar(50)  null,
@@ -22,7 +24,6 @@ begin transaction
    EksikGun              SmallInt      null, /* otomatik hesaplanacak */
    BabaAdi               nVarchar(50)  null,
    CinsiyetTipiId        SmallInt      null,
-   
    
    CepTelefonu           Varchar(15)   null,
    CepTelefonu2          Varchar(15)   null,
@@ -95,7 +96,6 @@ begin transaction
 commit transaction
 
 /*CreateTableEnd*/
-
 
 /*CreateTrigger*/
 
@@ -260,34 +260,77 @@ AS BEGIN
             set @eTamAdi = ''
 
             Update MtskAday set 
-             Adi = TRIM(@yAdi)
-            ,Soyadi = TRIM(@ySoyadi)
+             Adi = RTRIM(LTRIM(@yAdi))
+            ,Soyadi = RTRIM(LTRIM(@ySoyadi))
             Where Id = @AdayId
         end
 		
     	set @newTamAdi = @yAdi + ' ' +  @ySoyAdi
        
-        --2502, '2502',  'A1 SINIFI SERTİFİKA'
-        --9001, '9001',  'A1 SINIFI SERTİFİKA (Manuel)'
-        --9002, '9002',  'A1 SINIFI SERTİFİKA (Otomatik)'
-        --2503, '2503',  'A2 SINIFI SERTİFİKA'
-        --9003, '9003',  'A2 SINIFI SERTİFİKA (Manuel)'
-        --9004, '9004',  'A2 SINIFI SERTİFİKA (Otomatik)'
-        --2504, '2504',  'B SINIFI SERTİFİKA'
-        --9005, '9005',  'B SINIFI SERTİFİKA (Manuel)'
-        --9006, '9006',  'B SINIFI SERTİFİKA (Otomatik)'
+        --2502, 'A1 SINIFI SERTİFİKA'
+        --9001, 'A1 SINIFI SERTİFİKA (Manuel)'
+        --9002, 'A1 SINIFI SERTİFİKA (Otomatik)'
+
+        --2503, 'A2 SINIFI SERTİFİKA'
+        --9003, 'A2 SINIFI SERTİFİKA (Manuel)'
+        --9004, 'A2 SINIFI SERTİFİKA (Otomatik)'
+        
+        --2504, 'B SINIFI SERTİFİKA'
+        --9005, 'B SINIFI SERTİFİKA (Manuel)'
+        --9006, 'B SINIFI SERTİFİKA (Otomatik)'
+        
+        --2505, 'C SINIFI SERTİFİKA'
+        --9007, 'C Sınıfı Sertifika (Manuel)'
+        --9008, 'C Sınıfı Sertifika (Otomatik)'
+        
+        --2506, 'D SINIFI SERTİFİKA'
+        --9009, 'D Sınıfı Sertifika (Manuel)'
+        --9010, 'D Sınıfı Sertifika (Otomatik)'
+        
+        --2507, 'E SINIFI SERTİFİKA'
+        --9011, 'E Sınıfı Sertifika (Manuel)'
+        --9012, 'E Sınıfı Sertifika (Otomatik)'
+
         -- IsOtomatik
         -- Bu durum henüz MEBBİS te oluşmadı
+
+		if (@yMevcutSertifikaTipiId < 0)
+            set @yMevcutSertifikaTipiId = 0
+
+		if (@yMevcutSertifikaTipiId = 9000) -- A Manuel işareti vars
+            set @yMevcutSertifikaTipiId = 2514
+
         if ((@yMevcutSertifikaTipiId = 9001) or -- Manuel işareti vars
             (@yMevcutSertifikaTipiId = 9002))   -- Otomatik işareti varsa
              set @yMevcutSertifikaTipiId = 2502
+
         if ((@yMevcutSertifikaTipiId = 9003) or -- Manuel işareti vars
             (@yMevcutSertifikaTipiId = 9004))   -- Otomatik işareti varsa
              set @yMevcutSertifikaTipiId = 2503
+
         if ((@yMevcutSertifikaTipiId = 9005) or -- Manuel işareti vars
             (@yMevcutSertifikaTipiId = 9006))   -- Otomatik işareti varsa
              set @yMevcutSertifikaTipiId = 2504
- 
+
+        if ((@yMevcutSertifikaTipiId = 9007) or -- Manuel işareti vars
+            (@yMevcutSertifikaTipiId = 9008))   -- Otomatik işareti varsa
+             set @yMevcutSertifikaTipiId = 2505
+
+        if ((@yMevcutSertifikaTipiId = 9009) or -- Manuel işareti vars
+            (@yMevcutSertifikaTipiId = 9010))   -- Otomatik işareti varsa
+             set @yMevcutSertifikaTipiId = 2506
+
+        if ((@yMevcutSertifikaTipiId = 9011) or -- Manuel işareti vars
+            (@yMevcutSertifikaTipiId = 9012))   -- Otomatik işareti varsa
+             set @yMevcutSertifikaTipiId = 2507
+
+
+		if (@yIstenenSertifikaTipiId = 9000) -- Manuel işareti vars
+        begin
+            if (@yIstenenSertifikaTipiId = 9000) set @yIsOtomatik = 0 -- Manuel
+            set @yIstenenSertifikaTipiId = 2514
+        end
+
         if ((@yIstenenSertifikaTipiId = 9001) or -- Manuel işareti vars
             (@yIstenenSertifikaTipiId = 9002))   -- Otomatik işareti varsa
         begin
@@ -295,6 +338,7 @@ AS BEGIN
             if (@yIstenenSertifikaTipiId = 9002) set @yIsOtomatik = 1 -- Otomatik
             set @yIstenenSertifikaTipiId = 2502
         end
+
         if ((@yIstenenSertifikaTipiId = 9003) or -- Manuel işareti vars
             (@yIstenenSertifikaTipiId = 9004))   -- Otomatik işareti varsa
         begin
@@ -302,6 +346,7 @@ AS BEGIN
             if (@yIstenenSertifikaTipiId = 9004) set @yIsOtomatik = 1 -- Otomatik
             set @yIstenenSertifikaTipiId = 2503
         end
+
         if ((@yIstenenSertifikaTipiId = 9005) or -- Manuel işareti vars
             (@yIstenenSertifikaTipiId = 9006))   -- Otomatik işareti varsa
         begin
@@ -309,12 +354,37 @@ AS BEGIN
             if (@yIstenenSertifikaTipiId = 9006) set @yIsOtomatik = 1 -- Otomatik
             set @yIstenenSertifikaTipiId = 2504
         end
-        if ((@yIstenenSertifikaTipiId = 9301) or -- 100 Ceza Manuel işareti vars
-            (@yIstenenSertifikaTipiId = 9302))   -- 100 Ceza Otomatik işareti varsa
+
+        if ((@yIstenenSertifikaTipiId = 9007) or -- Manuel işareti vars
+            (@yIstenenSertifikaTipiId = 9008))   -- Otomatik işareti varsa
         begin
-            if (@yIstenenSertifikaTipiId = 9301) set @yIsOtomatik = 0 -- Manuel
-            if (@yIstenenSertifikaTipiId = 9302) set @yIsOtomatik = 1 -- Otomatik
-            set @yIstenenSertifikaTipiId = 3000
+            if (@yIstenenSertifikaTipiId = 9007) set @yIsOtomatik = 0 -- Manuel
+            if (@yIstenenSertifikaTipiId = 9008) set @yIsOtomatik = 1 -- Otomatik
+            set @yIstenenSertifikaTipiId = 2505
+        end
+
+        if ((@yIstenenSertifikaTipiId = 9009) or -- Manuel işareti vars
+            (@yIstenenSertifikaTipiId = 9010))   -- Otomatik işareti varsa
+        begin
+            if (@yIstenenSertifikaTipiId = 9009) set @yIsOtomatik = 0 -- Manuel
+            if (@yIstenenSertifikaTipiId = 9010) set @yIsOtomatik = 1 -- Otomatik
+            set @yIstenenSertifikaTipiId = 2506
+        end
+
+        if ((@yIstenenSertifikaTipiId = 9011) or -- Manuel işareti vars
+            (@yIstenenSertifikaTipiId = 9012))   -- Otomatik işareti varsa
+        begin
+            if (@yIstenenSertifikaTipiId = 9011) set @yIsOtomatik = 0 -- Manuel
+            if (@yIstenenSertifikaTipiId = 9012) set @yIsOtomatik = 1 -- Otomatik
+            set @yIstenenSertifikaTipiId = 2507
+        end
+
+        if ((@yIstenenSertifikaTipiId = 9101) or -- 100 Ceza Manuel işareti vars
+            (@yIstenenSertifikaTipiId = 9102))   -- 100 Ceza Otomatik işareti varsa
+        begin
+            if (@yIstenenSertifikaTipiId = 9101) set @yIsOtomatik = 0 -- Manuel
+            if (@yIstenenSertifikaTipiId = 9102) set @yIsOtomatik = 1 -- Otomatik
+            set @yIstenenSertifikaTipiId = 9100
         end
 		
         -- IsUcretli
@@ -416,7 +486,7 @@ AS BEGIN
     	begin
     	    update MtskAday set 
               IsActive = @yIsActive 
-            , TamAdiSoyadi = TRIM(@newTamAdi)
+            , TamAdiSoyadi = RTRIM(LTRIM(@newTamAdi))
             , MevcutSertifikaTipiId = @yMevcutSertifikaTipiId
             , IstenenSertifikaTipiId = @yIstenenSertifikaTipiId
             , IsOtomatik = @yIsOtomatik
@@ -623,7 +693,6 @@ END -- create trigger
 
 /*CreateTriggerEnd*/
 
-
 /*CreateLkpTable*/
 
 begin transaction
@@ -656,8 +725,7 @@ create table [Lkp].[MtskAdayTaksitSayisiTipi]
 Delete from [Lkp].[MtskAdayTaksitSayisiTipi]
 INSERT INTO [Lkp].[MtskAdayTaksitSayisiTipi] (Id, TaksitSayisiTipi, IsActive)
  VALUES 
-  (-1,    N'', 1),
-  ( 0,    N'Seçiniz', 1),
+  ( 0,    N'', 1),
   ( 1,    N'Peşin', 1),
   ( 2,    N'2 Ay', 1),
   ( 3,    N'3 Ay', 1),

@@ -208,6 +208,7 @@ namespace YesiLdefter
         
 
         bool IsPreparing = false;
+        string _dBaseNo = "";
         string TableIPCode = string.Empty;
         string TabControlName = string.Empty;
         Control tabControl = null;
@@ -257,6 +258,9 @@ namespace YesiLdefter
 
             if (ds_SablonB != null)
             {
+                string myProp = ds_SablonB.Namespace;
+                _dBaseNo = t.MyProperties_Get(myProp, "DBaseNo:");
+
                 _planTipi = planTipi.teorik;
 
                 if (ds_SablonB.DataSetName == TableIPCode)
@@ -272,6 +276,9 @@ namespace YesiLdefter
 
             if (ds_SablonB != null)
             {
+                string myProp = ds_SablonB.Namespace;
+                _dBaseNo = t.MyProperties_Get(myProp, "DBaseNo:");
+
                 _planTipi = planTipi.teorik;
 
                 if (ds_SablonB.DataSetName == TableIPCode)
@@ -288,6 +295,9 @@ namespace YesiLdefter
 
             if (ds_SablonB != null)
             {
+                string myProp = ds_SablonB.Namespace;
+                _dBaseNo = t.MyProperties_Get(myProp, "DBaseNo:");
+
                 _planTipi = planTipi.uygulama;
 
                 if (ds_SablonB.DataSetName == TableIPCode)
@@ -303,6 +313,9 @@ namespace YesiLdefter
 
             if (ds_SablonB != null)
             {
+                string myProp = ds_SablonB.Namespace;
+                _dBaseNo = t.MyProperties_Get(myProp, "DBaseNo:");
+
                 _planTipi = planTipi.uygulama;
 
                 if (ds_SablonB.DataSetName == TableIPCode)
@@ -336,8 +349,7 @@ namespace YesiLdefter
             }
 
 
-
-
+            /*
             // Planı Oluştur
             TableIPCode = "UST/MEB/MtskSablonTeorikF.Planlar_L01";
             //t.Find_DataSet(this, ref ds_MtskUygulamaliDersPlan_L01, ref dN_MtskUygulamaliDersPlan_L01, TableIPCode);
@@ -347,10 +359,10 @@ namespace YesiLdefter
 
             if (cntrl != null)
             {
-                ((DevExpress.XtraEditors.SimpleButton)cntrl).Click += new System.EventHandler(btn_planlamaFormuTeorikPlaniOlustur);
-                ((DevExpress.XtraEditors.SimpleButton)cntrl).Image = t.Find_Glyph("KAYDET16");
+                //((DevExpress.XtraEditors.SimpleButton)cntrl).Click += new System.EventHandler(btn_planlamaFormuTeorikPlaniOlustur);
+                //((DevExpress.XtraEditors.SimpleButton)cntrl).Image = t.Find_Glyph("KAYDET16");
             }
-
+            */
 
             TableIPCode = "UST/MEB/MtskSablonTeorikS.Planlama_F01";
             this.ds_Fields = new DataSet();
@@ -1526,7 +1538,7 @@ namespace YesiLdefter
 
 
             string myProp = string.Empty;
-            t.MyProperties_Set(ref myProp, "DBaseNo", "4");
+            t.MyProperties_Set(ref myProp, "DBaseNo", _dBaseNo);
             t.MyProperties_Set(ref myProp, "TableName", tableName);
             t.MyProperties_Set(ref myProp, "SqlFirst", tSql);
             t.MyProperties_Set(ref myProp, "SqlSecond", "null");
@@ -1563,7 +1575,7 @@ namespace YesiLdefter
                 tSql = @" Select * From MtskSablonUygulamaS Where SablonUygulamaBId = " + RefId.ToString();
 
             myProp = string.Empty;
-            t.MyProperties_Set(ref myProp, "DBaseNo", "4");
+            t.MyProperties_Set(ref myProp, "DBaseNo", _dBaseNo);
             t.MyProperties_Set(ref myProp, "TableName", tableName);
             t.MyProperties_Set(ref myProp, "SqlFirst", tSql);
             t.MyProperties_Set(ref myProp, "SqlSecond", "null");

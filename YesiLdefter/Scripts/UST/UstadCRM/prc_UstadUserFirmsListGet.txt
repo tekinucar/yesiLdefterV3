@@ -49,7 +49,7 @@ AS BEGIN
     Execute(@Sql)
   end
     
-  if (@UserDbTypeId = 2) -- Abone kullanıcısı değilse
+  if (@UserDbTypeId = 2) -- Abone kullanıcısı ise
   begin
      declare @_firmGUID varchar(50) 
      declare @_XID int

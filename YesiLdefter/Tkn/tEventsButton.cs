@@ -4,6 +4,7 @@ using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Views.BandedGrid;
 using DevExpress.XtraGrid.Views.Grid;
 using DevExpress.XtraReports.UI;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -41,6 +42,9 @@ namespace Tkn_Events
             bool onay = false;
             bool birOncekiOnay = false;
             bool isFormOpen = true;
+            bool elseOncesiCalisti = false;
+            bool elseItem = false;
+            bool transactionRun = false;
             Form tForm = buttonHint.tForm;
 
             string tableIPCode = buttonHint.tableIPCode;
@@ -147,14 +151,35 @@ namespace Tkn_Events
                 ///
                 if (buttonHint.propList_ == null)
                     buttonHint.propList_ = propList_;
-
+                                
                 foreach (PROP_NAVIGATOR item in propList_)
                 {
                     isFormOpen = CheckValue(tForm, item, tableIPCode);
 
+                    // else satırı mı kontrol et
+                    elseItem = (item.CHC_VALUE.ToString().IndexOf("ELSE") > -1);
+
+                    // bu satır daha önce çalıştı mı ?
+                    transactionRun = item.TransactionRun;
+
+                    if ((elseItem) &&          // else satırına geldik
+                        (elseOncesiCalisti) && // elseden öncede çalıştı
+                        (isFormOpen))          // else satırının çalışması için onay da aldı
+                        isFormOpen = false;    // fakat else den önce çalıştığı için else satırının onayı iptal, çalışmasın
+
+                    // test sırasında işlem yakalamak için kullanılıyor
+                    /*
+                    if ((elseItem) &&          // else satırına geldik
+                        (elseOncesiCalisti == false) && // elseden öncede çalıştı
+                        (isFormOpen))          // else satırının çalışması için onayda aldı
+                        isFormOpen = true;    // fakat else den önce çalıştığı için else satırının onayı iptal, çalışmasın
+                    */
+
                     // form açılması için onaylandı ise
-                    if (isFormOpen)
+                    // bu işlem daha önce çalışmadıysa çalışsın
+                    if ((isFormOpen) && (transactionRun == false))
                     {
+                        elseOncesiCalisti = true;
                         // propNavigator üzerindeki tanım
                         if (item.BUTTONTYPE.ToString() != "null")
                         {
@@ -548,6 +573,13 @@ namespace Tkn_Events
                 return onay;
             }
 
+            //Datası yüklenmemiş grid içindeki şartlı arama işlemi
+            if (buttonType == v.tButtonType.btFindListData)
+            {
+                onay = findListDataIslemi(tForm, tableIPCode, prop_, v.tButtonHint.columnEditValue);
+                return onay;
+            }
+
             if (buttonType == v.tButtonType.btFormulleriHesapla)
             {
                 formulleriHesapla(tForm, tableIPCode, prop_);
@@ -556,7 +588,7 @@ namespace Tkn_Events
 
             if (buttonType == v.tButtonType.btDataTransferi)
             {
-                dataTransferi(tForm, tableIPCode, prop_);
+                onay = dataTransferi(tForm, tableIPCode, prop_);
                 return onay;
             }
 
@@ -719,6 +751,9 @@ namespace Tkn_Events
             {
                 // listeye eklede genelde 'RDC', 'Run DataCopy'  çalışıyor
                 onay = extraIslemVar(tForm, tableIPCode, v.tButtonType.btListeyeEkle, v.tBeforeAfter.Before, propList_);
+
+                if (onay)
+                    extraIslemVar(tForm, tableIPCode, v.tButtonType.btListeyeEkle, v.tBeforeAfter.After, propList_);
             }
             else MessageBox.Show("Listeye Ekleme işi için gerekli olan bilgiler eksik...");
 
@@ -1141,6 +1176,7 @@ namespace Tkn_Events
             string targetKEYFNAME = string.Empty;
             string readTABLEIPCODE = string.Empty;
             string readKEYFNAME = string.Empty;
+            string manuelSetValue = string.Empty;
             bool old_PositionChange = false;
 
             DataSet dsTarget = null;
@@ -1150,10 +1186,16 @@ namespace Tkn_Events
 
             workType = item.WORKTYPE.ToString();
 
-            targetTABLEIPCODE = t.Set(item.TABLEIPCODE.ToString(), "", "");
-            targetKEYFNAME = t.Set(item.KEYFNAME.ToString(), "", "");
-            readTABLEIPCODE = t.Set(item.RTABLEIPCODE.ToString(), "", "");
-            readKEYFNAME = t.Set(item.RKEYFNAME.ToString(), "", "");
+            if (t.IsNotNull(item.TABLEIPCODE))
+                targetTABLEIPCODE = t.Set(item.TABLEIPCODE.ToString(), "", "");
+            if (t.IsNotNull(item.KEYFNAME))
+                targetKEYFNAME = t.Set(item.KEYFNAME.ToString(), "", "");
+            if (t.IsNotNull(item.RTABLEIPCODE))
+                readTABLEIPCODE = t.Set(item.RTABLEIPCODE.ToString(), "", "");
+            if (t.IsNotNull(item.RKEYFNAME))
+                readKEYFNAME = t.Set(item.RKEYFNAME.ToString(), "", "");
+            if (t.IsNotNull(item.MSETVALUE))
+                manuelSetValue = t.Set(item.MSETVALUE.ToString(), "", "");
 
             dsTarget = null;
             dNTarget = null;
@@ -1194,8 +1236,24 @@ namespace Tkn_Events
                 dsTarget.Tables[0].Rows[dNTarget.Position][targetKEYFNAME] =
                                     dsRead.Tables[0].Rows[dNRead.Position][readKEYFNAME];
             }
-            else
-                MessageBox.Show(workType.ToString() + " için bilgilerde eksiklik mevcut...");
+            if (t.IsNotNull(dsTarget) &&
+                t.IsNotNull(targetKEYFNAME) &&
+                t.IsNotNull(dsRead) == false &&
+                t.IsNotNull(manuelSetValue)
+                )
+            {
+                dsTarget.Tables[0].Rows[dNTarget.Position][targetKEYFNAME] = manuelSetValue;
+            }
+            if (t.IsNotNull(dsTarget) == false &&
+                t.IsNotNull(dsRead) &&
+                t.IsNotNull(manuelSetValue)
+                )
+            {
+                dsRead.Tables[0].Rows[dNRead.Position][readKEYFNAME] = manuelSetValue;
+            }
+
+            //else
+            //    MessageBox.Show(workType.ToString() + " için bilgilerde eksiklik mevcut...");
 
 
 
@@ -1809,6 +1867,20 @@ namespace Tkn_Events
             return v.searchOnay;
         }
 
+        private bool findListDataIslemi(Form tForm, string tableIPCode, PROP_NAVIGATOR prop_, string columnValue)
+        {
+            /// Datası yüklenmemiş grid içindeki şartlı arama işlemi
+            /// 
+            tSearch se = new tSearch();
+
+            v.searchOnay = false;
+
+            v.searchOnay = se.findListDataEngines(tForm, tableIPCode, columnValue, prop_);
+
+            return v.searchOnay;
+        }
+
+
         private bool formulleriHesapla(Form tForm, string TableIPCode, PROP_NAVIGATOR prop_) // Run_Expression
         {
             tToolBox t = new tToolBox();
@@ -1828,7 +1900,7 @@ namespace Tkn_Events
             return true;
         }
 
-        public void dataTransferi(Form tForm, string TableIPCode, PROP_NAVIGATOR prop_) // Run_TableIPCode
+        public bool dataTransferi(Form tForm, string TableIPCode, PROP_NAVIGATOR prop_) // Run_TableIPCode
         {
             /// Run_TableIPCode ile burada okunan data ile SETDATA işlemi yapılmaktadır
             /// yani istenen datayı oku, ekrandaki başka bir dataset e ata.
@@ -1836,9 +1908,11 @@ namespace Tkn_Events
             /// 
 
             tToolBox t = new tToolBox();
-            
+
             // burda yeni okunacak data bulunmakta
-            // 
+            //
+            bool onay = false;
+            bool islemOnayi = false;
             string readTableIPCode = "";
             string targetTableIPCode = "";
 
@@ -1869,10 +1943,11 @@ namespace Tkn_Events
                               dsRead, dNRead,
                               dsTarget, dNTarget);
 
-                    extraIslemVar_(tForm, prop_, v.tBeforeAfter.After);
+                    onay = extraIslemVar_(tForm, prop_, v.tBeforeAfter.After, ref islemOnayi);
                 }
-
             }
+
+            return islemOnayi;
         }
 
         private bool runStoredProcedure(Form tForm, TABLEIPCODE_LIST item, PROP_NAVIGATOR prop_)
@@ -2288,13 +2363,15 @@ namespace Tkn_Events
                     if (t.IsNotNull(chc_Operand))
                     {
                         form_open1 = t.myOperandControl(read_value, chc_Value, chc_Operand);
-
-
-
                     }
                 }
             }
             #endregion Check işlemleri1
+
+            #region ELSE kontrolü
+            if ((chc_Value.IndexOf("ELSE") > -1))
+                form_open1 = true;
+            #endregion 
 
             #region Check işlemleri / Second veya Target için şart varsa
             if (t.IsNotNull(chc_IPCode_SEC) &&
@@ -2336,7 +2413,9 @@ namespace Tkn_Events
                                    v.tBeforeAfter beforeAfter, List<PROP_NAVIGATOR> propList_)
         {
             bool onay = true;// false;
+            bool islemOnayi = false;
             bool isFormOpen = true;
+            bool transactionRun = false;
 
             if (propList_ != null)
             {
@@ -2344,23 +2423,22 @@ namespace Tkn_Events
                 //
                 foreach (PROP_NAVIGATOR item in propList_)
                 {
-
-                    // yanlışlık var 
-                    // kaydet butonunda ek1 veya ek2 çalışıyor
-                    //if (item.BUTTONTYPE.ToString() == Convert.ToString((byte)buttonType) ||
-                    //    (item.BUTTONTYPE.ToString() == Convert.ToString((byte)v.tButtonType.btEk1) ||
-                    //     item.BUTTONTYPE.ToString() == Convert.ToString((byte)v.tButtonType.btEk2))
-                    //    )
-                    
                     if (item.BUTTONTYPE.ToString() == Convert.ToString((byte)buttonType))
                     {
                         isFormOpen = CheckValue(tForm, item, tableIPCode);
+                        
+                        // daha önce çalıştımı ? çalışmadı mı bilgisi tutuluyor
+                        transactionRun = item.TransactionRun;
 
                         // form açılması için onaylandı ise
-                        if (isFormOpen)
+                        // eğer daha önce çalışmamış ise çalışsın
+                        if ((isFormOpen) && (transactionRun == false))
                         {
                             // buttonType uygun olduğu için işlemi gerçekleştir 
-                            onay = extraIslemVar_(tForm, item, beforeAfter);
+                            onay = extraIslemVar_(tForm, item, beforeAfter, ref islemOnayi);
+
+                            // işem çalıştı onayı
+                            //item.TransactionRun = islemOnayi;
 
                             if (onay == false)
                                 break;
@@ -2388,22 +2466,22 @@ namespace Tkn_Events
         private bool extraIslemCalistir(Form tForm, string tableIPCode, PROP_NAVIGATOR prop_)
         {
             bool onay = false;
-
+            bool islemOnayi = false;
             if (prop_ != null)
             {
                 //onay = extraIslemVar(tForm, tableIPCode, v.tButtonType.btExtraIslem, v.tBeforeAfter.Before, propList_);
                 ////if (onay)
                 //onay = extraIslemVar(tForm, tableIPCode, v.tButtonType.btExtraIslem, v.tBeforeAfter.After, propList_);
 
-                onay = extraIslemVar_(tForm, prop_, v.tBeforeAfter.Before);
+                onay = extraIslemVar_(tForm, prop_, v.tBeforeAfter.Before, ref islemOnayi);
 
                 if (onay)
-                    onay = extraIslemVar_(tForm, prop_, v.tBeforeAfter.After);
+                    onay = extraIslemVar_(tForm, prop_, v.tBeforeAfter.After, ref islemOnayi);
             }
-            return onay;
+            return islemOnayi;
         }
         
-        private bool extraIslemVar_(Form tForm, PROP_NAVIGATOR prop_, v.tBeforeAfter tBeforeAfter)
+        private bool extraIslemVar_(Form tForm, PROP_NAVIGATOR prop_, v.tBeforeAfter tBeforeAfter, ref bool islemOnayi)
         {
             tToolBox t = new tToolBox();
 
@@ -2476,6 +2554,7 @@ namespace Tkn_Events
                                 v.con_Cancel = true;
 
                                 onay = t.TableRefresh(tForm, ds);//, TABLEIPCODE);
+                                islemOnayi = onay;
                             }
                         }
                     }
@@ -2491,6 +2570,7 @@ namespace Tkn_Events
                             if (ds != null)
                             {
                                 onay = ev.tSubDetail_Refresh(ds, dN);
+                                islemOnayi = onay;
                             }
                         }
                     }
@@ -2498,10 +2578,14 @@ namespace Tkn_Events
                     if (workType == "READ")
                     {
                         onay = readData_(tForm, item);
+                        islemOnayi = onay;
                     }
 
                     if (workType == "NEW")
-                    { }
+                    {
+                        onay = newDataExecute(tForm, TABLEIPCODE, null, v.tButtonType.btNone);
+                        islemOnayi = onay;
+                    }
 
                     if (workType == "GOTO")
                     { }
@@ -2511,6 +2595,8 @@ namespace Tkn_Events
                         // burayı açtığında  openSubView de tekrara düşebilirsin
 
                         onay = openSubView(tForm, TABLEIPCODE, prop_, buttonType);
+                        onay = true;
+                        islemOnayi = onay;
                     }
 
                     if (workType == "SVIEWVALUE")
@@ -2532,6 +2618,7 @@ namespace Tkn_Events
                             {
                                 //t.ButtonEnabledAll(tForm, TABLEIPCODE, true);
                             }
+                            islemOnayi = onay;
                         }
 
                         v.con_PositionChange = false;
@@ -2543,7 +2630,8 @@ namespace Tkn_Events
                         if (t.IsNotNull(item.RTABLEIPCODE) == false) item.RTABLEIPCODE = prop_.READ_TABLEIPCODE;
                         if (t.IsNotNull(item.TABLEIPCODE) == false) item.TABLEIPCODE = prop_.TARGET_TABLEIPCODE;
 
-                        readAndSetData_(tForm, item);
+                        onay = readAndSetData_(tForm, item);
+                        islemOnayi = onay;
                     }
 
                     if (workType == "SETFOCUS")
@@ -2557,6 +2645,7 @@ namespace Tkn_Events
                             v.con_SetFocus_TableIPCode = TABLEIPCODE;
                             v.con_SetFocus_FieldName = KEYFNAME;
                             onay = true;
+                            islemOnayi = true;
                         }
                     }
 
@@ -2572,6 +2661,11 @@ namespace Tkn_Events
                             dc.tDC_Run(tForm, DataCopyCode);
                             v.con_DragDropEdit = false;
                             onay = true;
+                            islemOnayi = true;
+                        }
+                        else
+                        {
+                            MessageBox.Show("DİKKAT : [DataCopy Code] tanımsız...");
                         }
                     }
 
@@ -2579,11 +2673,13 @@ namespace Tkn_Events
                     if (workType == "RPRC")
                     {
                         onay = runStoredProcedure(tForm, item, prop_);
+                        islemOnayi = onay;
                     }
 
                     if (workType == "OPENFORM")
                     {
                         t.OpenForm_JSON(tForm, prop_);
+                        islemOnayi = true;
                     }
 
                     if (workType == "CLOSEFORM")
@@ -2611,11 +2707,13 @@ namespace Tkn_Events
                             else onay = false;
                         }
                         else onay = false;
+                        islemOnayi = onay;
                     }
 
                     if (workType == "MESSAGESHOW")
                     {
-                        messageBoxShow_(tForm, item);
+                        onay = messageBoxShow_(tForm, item);
+                        islemOnayi = onay;
                     }
                     
                     if (workType == "QUESTION")
@@ -2627,6 +2725,7 @@ namespace Tkn_Events
                         {
                             break;
                         }
+                        islemOnayi = onay;
                     }
 
                     // birden çok işlem yapıpılırken eğer birinden olumsuz dönüş olursa işlem kesiliyor
@@ -2666,6 +2765,7 @@ namespace Tkn_Events
             string selectItemValue = "";
             string MenuValue = "";
             string caption = "";
+            string itemCaption = "";
 
             string TableIPCode = tableIPCode;
             string TableAlias = string.Empty;
@@ -2698,9 +2798,13 @@ namespace Tkn_Events
 
                     if (workType == "SVIEW")
                     {
+                        itemCaption = item.CAPTION.ToString();
                         TableIPCode = item.TABLEIPCODE.ToString();
                         TableAlias = item.TABLEALIAS.ToString();
                         KeyFName = item.KEYFNAME.ToString();
+
+                        if (t.IsNotNull(itemCaption))
+                            caption = itemCaption;
 
                         // tLayout_xx_xx ile direk bir page nin namesi ile sayfanın setfocus olması sağlanabilir
                         if (t.IsNotNull(TableIPCode))
@@ -2879,17 +2983,17 @@ namespace Tkn_Events
 
                                         v.con_FormLoadValue = myFormLoadValue;
 
-                                        ev.subViewExec(tForm, controlName, "", TableIPCode, "", selectItemValue, caption, MenuValue);
+                                        onay = ev.subViewExec(tForm, controlName, "", TableIPCode, "", selectItemValue, caption, MenuValue);
                                     }
                                     // formCode var ise
                                     if (t.IsNotNull(formCode))
                                     {
-                                        ev.subViewExec(tForm, controlName, formCode, "", "", "", caption, MenuValue);
+                                        onay = ev.subViewExec(tForm, controlName, formCode, "", "", "", caption, MenuValue);
                                     }
                                     // tabPageCode var ise
                                     if (t.IsNotNull(tabPageCode))
                                     {
-                                        ev.subViewExec(tForm, controlName, "", "", tabPageCode, "", caption, MenuValue);
+                                        onay = ev.subViewExec(tForm, controlName, "", "", tabPageCode, "", caption, MenuValue);
                                     }
                                 }
                             }
@@ -2970,7 +3074,7 @@ namespace Tkn_Events
            if (t.findAttendantKey(e))
            {
                 string propNavigator = "";
-                string buttonName = "";
+                //string buttonName = "";
 
                 vButtonHint tButtonHint = new vButtonHint();
                 v.tButtonHint.Clear();
@@ -2987,12 +3091,24 @@ namespace Tkn_Events
                     v.tButtonHint.columnEditValue = ((DevExpress.XtraEditors.TextEdit)sender).EditValue.ToString();
 
 
-                v.tButtonHint.buttonType = ev.getClickType(v.tButtonHint.tForm, v.tButtonHint.tableIPCode, e, ref propNavigator, ref buttonName);
+                //v.tButtonHint.buttonType = ev.getClickType(v.tButtonHint.tForm, v.tButtonHint.tableIPCode, e, ref propNavigator, ref buttonName);
+                //if (propNavigator != "")
+                //    v.tButtonHint.propNavigator = propNavigator;
+                //if (buttonName != "")
+                //    v.tButtonHint.buttonName = buttonName;
 
-                if (propNavigator != "")
-                    v.tButtonHint.propNavigator = propNavigator;
-                if (buttonName != "")
-                    v.tButtonHint.buttonName = buttonName;
+                if ((e.KeyCode == Keys.Enter) || (e.KeyCode == Keys.Return))
+                    v.tButtonHint.buttonType = v.tButtonType.btFindListData;
+                
+                propNavigator = t.Create_PropertiesEdit_Model_JSON("MS_TABLES_IP", "PROP_NAVIGATOR");
+
+                PROP_NAVIGATOR prop_ = t.readProp<PROP_NAVIGATOR>(propNavigator);
+
+                prop_.BUTTONTYPE = Convert.ToString((byte)v.tButtonHint.buttonType);
+
+                prop_.READ_TABLEIPCODE = v.tButtonHint.tableIPCode;
+
+                v.tButtonHint.propNavigator = JsonConvert.SerializeObject(prop_);
 
                 tEventsButton evb = new tEventsButton();
                 evb.btnClick(v.tButtonHint);
@@ -3210,7 +3326,7 @@ namespace Tkn_Events
 
                 if (dsData != null)
                 {
-                    dsData.Tables[0].Clear();
+                    dsData.Tables[0].Rows.Clear();// Clear();
                     v.searchCount = 0;
                 }
             }

@@ -208,6 +208,7 @@ namespace Tkn_Variable
         //public static string db_PASSWORD { get; set; }
 
         public static string SP_MENU { get; set; }
+        public static string EXE_DRIVE = string.Empty;
         public static string EXE_PATH = string.Empty;
         public static string EXE_TempPath = string.Empty;
         public static string EXE_ScriptsPath = string.Empty;
@@ -265,7 +266,7 @@ namespace Tkn_Variable
         public static DataSet ds_Computer = new DataSet();
         public static DataSet ds_ExeUpdates = new DataSet();
         public static DataSet ds_LookUpTableList = new DataSet();
-
+        public static DataSet ds_YilAyList = new DataSet();
 
 
 
@@ -340,7 +341,14 @@ namespace Tkn_Variable
         public static byte SQL_OLUSTUR_IDENTITY_YOK = 3;
         public static byte N_SATIR_SQL_OLUSTUR = 4;
 
-        public enum Save : byte { KAYDET, N_SATIR_KAYDET, SQL_OLUSTUR, SQL_OLUSTUR_IDENTITY_YOK, N_SATIR_SQL_OLUSTUR }
+        public enum Save 
+        { 
+            KAYDET, 
+            N_SATIR_KAYDET, 
+            SQL_OLUSTUR, 
+            SQL_OLUSTUR_IDENTITY_YOK, 
+            N_SATIR_SQL_OLUSTUR 
+        }
 
         public static string SP_MSSQL_BEGIN = " begin transaction " + ENTER;
         public static string SP_MSSQL_END = " commit transaction " + ENTER;
@@ -420,8 +428,8 @@ namespace Tkn_Variable
             NewData,
             Refresh_SubDetail,
             Refresh_Data,
+            Refresf_DataYilAy,
             Save,
-
         }
 
         public enum tWorkWhom
@@ -638,6 +646,7 @@ namespace Tkn_Variable
         public static Boolean con_FormAfterCreateView = false;
         public static Boolean con_FormOpen = false;
         public static Boolean con_DefaultValuePreparing = false;
+        public static Boolean con_CreateScriptPacket = false;
 
         public static DataRow con_DataRow = null;
 
@@ -738,6 +747,7 @@ namespace Tkn_Variable
         // *** Date & Time Variables *** //
         public static DateTime DONEM_BASI_TARIH = DateTime.Now.AddDays(-1 * DateTime.Now.Day);
         public static DateTime DONEM_BITIS_TARIH;
+
         public static DateTime BUGUN_TARIH;// = DateTime.Now;
         public static DateTime BU_HAFTA_BASI_TARIH;
         public static DateTime BU_HAFTA_SONU_TARIH;
@@ -755,6 +765,7 @@ namespace Tkn_Variable
         public static int BUGUN_YILAY = 0;
         public static int GECEN_YILAY = 0;
         public static int GELECEK_YILAY = 0;
+        public static int USER_YILAY = 0;
 
 
         public static string Declare_bugun = string.Empty;
@@ -779,6 +790,7 @@ namespace Tkn_Variable
         public static string sp_deactiveSkinName = "Blueprint";//"High Contrast White";
         //public static SkinSvgPalette sp_DeactiveSkinPalette = SkinSvgPalette.Bezier.HighContrastWhite;
         public static SkinStyle sp_DeactiveSkin = SkinStyle.Blueprint;
+        public static SkinStyle sp_LocalDeactiveSkin = SkinStyle.GlassOceans;
 
         // firma bilgileri
         // 
@@ -1010,7 +1022,8 @@ namespace Tkn_Variable
             btDataTransferi = 123,
             btInputBox = 124,
             btOpenSubView = 125,
-            btExtraIslem = 126
+            btExtraIslem = 126,
+            btFindListData = 127
         }
 
         #endregion
@@ -1062,6 +1075,8 @@ namespace Tkn_Variable
         // resim editorunu açarken gerekli olan bilgiler
         public static vResimEditor tResimEditor = new vResimEditor();
 
+        public static vMsDbUpdate tMsDbUpdate = new vMsDbUpdate();
+
         public enum tWebEventsType
         {
             none = 0,
@@ -1073,6 +1088,7 @@ namespace Tkn_Variable
             button3 = 143,
             button4 = 144,
             button5 = 145,
+            tableField = 146,
             pageRefresh = 200
         }
 
@@ -1123,7 +1139,42 @@ namespace Tkn_Variable
     }
 
 
+    public class vMsDbUpdate
+    {
+        public vMsDbUpdate()
+        {
+            Clear();
+        }
 
+        public int id { get; set; }
+        public Int16 sectorTypeId { get; set; }
+        public Int16 updateTypeId { get; set; }
+        public Int16 dBaseNoTypeId { get; set; }
+        public string schemaName { get; set; }
+        public string tableName { get; set; }
+        public string fieldName { get; set; }
+        public Int16 fieldTypeId { get; set; }
+        public string fieldLength { get; set; }
+        public bool fieldNotNull { get; set; }
+        public string about { get; set; }
+        public string sqlScript { get; set; }
+
+        public void Clear()
+        {
+            id = 0;
+            sectorTypeId = 0;
+            updateTypeId = 0;
+            dBaseNoTypeId = 0;
+            schemaName = "";
+            tableName = "";
+            fieldName = "";
+            fieldTypeId = 0;
+            fieldLength = "";
+            fieldNotNull = false;
+            about = "";
+            sqlScript = "";
+        }
+    }
 
     // computer bilgileri 
     public class Computer
@@ -1139,10 +1190,10 @@ namespace Tkn_Variable
     // user/kullanıcı bilgileri
     public class tUstadUser
     {
-        public int UserId = 0;
         public bool IsActive = true;
-        public string UserFirmGUID { get; set; }
+        public int UserId { get; set; }
         public string UserGUID { get; set; }
+        public string UserFirmGUID { get; set; }
         public string FullName { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
@@ -1153,6 +1204,10 @@ namespace Tkn_Variable
         public int ExternalFirmId { get; set; } /* user ın inceleme veya müdehale etmek için giriş yaptığı firmanın ID si */
         public string MainFirmMenuCode { get; set; } /* user ın esas çalıştığı yani il giriş yaptığı firmanın menü kodu */
         public string ExternalFirmMenuCode { get; set; } /* user ın inceleme veya müdehale etmek için giriş yaptığı firmanın menü kodu */
+        public string MebbisCode { get; set; }
+        public string MebbisPass { get; set; }
+        public string UserTcNo { get; set; }
+
     }
     // firm/kullanıcının bağlanıp işlem yaptığı firma bilgileri
     public class tUstadFirm
@@ -1164,13 +1219,15 @@ namespace Tkn_Variable
         public string MenuCode { get; set; }
         public string MenuCodeOld { get; set; }
 
+        public Int16 SectorTypeId { get; set; }
         public string DatabaseType { get; set; }
         public string DatabaseName { get; set; }
         public string ServerNameIP { get; set; }
         public string DbAuthentication { get; set; }
         public string DbLoginName { get; set; }
         public string DbPassword { get; set; }
-
+        public string MebbisCode { get; set; }
+        public string MebbisPass { get; set; }
         public void Clear()
         {
             FirmId = 0;
@@ -1179,6 +1236,9 @@ namespace Tkn_Variable
             FirmGuid = "";
             MenuCode = "";
             MenuCodeOld = "";
+            SectorTypeId = 0;
+            MebbisCode = "";
+            MebbisPass = "";
         }
     }
 
@@ -1395,6 +1455,7 @@ namespace Tkn_Variable
 
         public List<HtmlElement> elements { get; set; }
 
+
         public int nodeId { get; set; }
         public string pageCode { get; set; }
         public string TagName { get; set; }
@@ -1598,7 +1659,6 @@ namespace Tkn_Variable
         }
 
         public v.dBaseNo DBaseNo { get; set; }
-        
         public v.dBaseType DBaseType { get; set; }
         public string DBaseName { get; set; }
         public string TableName { get; set; }
@@ -1614,8 +1674,8 @@ namespace Tkn_Variable
         public string ProjectCode { get; set; }
         public string SchemasCode { get; set; }
         public string FormCode { get; set; }
-
         public bool RunTime { get; set; }
+        public bool IdentityInsertOnOff { get; set; } //IDENTITY_INSERT 
         public SqlConnection msSqlConnection { get; set; }
         public void Clear()
         {
@@ -1635,7 +1695,33 @@ namespace Tkn_Variable
             SchemasCode = "";
             FormCode = "";
             RunTime = false;
+            IdentityInsertOnOff = false;
             msSqlConnection = null;
+        }
+    }
+
+    public class vScripts
+    {
+        public vScripts()
+        {
+            Clear();
+        }
+        public v.dBaseNo DBaseNo { get; set; }
+        public v.dBaseType DBaseType { get; set; }
+        public string SourceDBaseName { get; set; }
+        public string SchemaName { get; set; }
+        public string SourceTableName { get; set; }
+        public string Where { get; set; }
+        public bool IdentityInsertOnOff { get; set; } //IDENTITY_INSERT 
+        public void Clear()
+        {
+            DBaseNo = 0;
+            DBaseType = v.dBaseType.None;
+            SourceDBaseName = "";
+            SchemaName = "";
+            SourceTableName = "";
+            Where = "";
+            IdentityInsertOnOff = false;
         }
     }
 
@@ -1648,7 +1734,6 @@ namespace Tkn_Variable
         private int groupPanelCount_ = 0;
         private int dLTabPageCount_ = 0;  // DataLayout
         private int dWTabPageCount_ = 0;  // dataWizard 
-
         public int TablesCount
         {
             get { return TablesCount_; }
@@ -2114,6 +2199,7 @@ namespace Tkn_Variable
         public string CHC_FNAME_SEC { get; set; }
         public string CHC_VALUE_SEC { get; set; }
         public string CHC_OPERAND_SEC { get; set; }
+        public bool TransactionRun { get; set; }
     }
 
     public class TABLEIPCODE_LIST

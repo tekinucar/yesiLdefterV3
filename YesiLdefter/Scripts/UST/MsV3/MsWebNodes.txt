@@ -21,11 +21,11 @@
 	XPath           VarChar(400)     null, 
     
     InnerHtml       varChar(8000)    null, 	
-	InnerText       varChar(200)     null, 	
+	InnerText       varChar(8000)    null, 	
 	OuterHtml       varChar(8000)    null, 	
 	OuterText       varChar(200)     null, 	
 	
-	ValueType       smallInt         null, /* 1.get&set, 2.get, 3.set,  4.? */
+	InjectType      smallInt         null, /* 1.get&set, 2.get, 3.set,  4.? */
 	InvokeMember    smallInt         null,
 	DontSave        Bit              null,
 	GetSave         Bit              null, /* get işleminin bitiminde otomatik database kayıt etmesi için */

@@ -262,7 +262,7 @@ namespace Tkn_Events
 
         #endregion MenuEvents
 
-
+        #region commonMenu
         public bool commonMenuClick(Form tForm, string ButtonName, string tableIPCode, string myFormLoadValue)
         {
             if (tForm == null) return false;
@@ -486,6 +486,27 @@ namespace Tkn_Events
             }
             #endregion FSMS_SEND
 
+            #region YILAYBACK - NEXT
+            if (ButtonName.IndexOf("YILAY_BACK") > 0)
+            {
+                int value = v.USER_YILAY;
+                string caption = getYilAyCaption(value);
+                v.USER_YILAY = getBackYilAy(value, 1, ref caption);
+                setYilAyCaption(tForm, v.USER_YILAY, caption, myFormLoadValue, t);
+                yilAyFormRefresh(tForm);
+                //MessageBox.Show(v.USER_YILAY.ToString() + " ; " + caption);
+            }
+            if (ButtonName.IndexOf("YILAY_NEXT") > 0)
+            {
+                int value = v.USER_YILAY;
+                string caption = getYilAyCaption(value);
+                v.USER_YILAY = getBackYilAy(value, 2, ref caption);
+                setYilAyCaption(tForm, v.USER_YILAY, caption, myFormLoadValue, t);
+                yilAyFormRefresh(tForm);
+                //MessageBox.Show(v.USER_YILAY.ToString() + " ; " + caption);
+            }
+            #endregion YILAYBACK - NEXT
+
             if ((onay) &&
                 (buttonType != v.tButtonType.btNone))
             {
@@ -500,6 +521,227 @@ namespace Tkn_Events
 
             return onay;
         }
+
+        #region sub commonMenuClick functions
+
+        private string getSourceParentControlTagValue(Form tForm) //con_Source_ParentControl_Tag_Value
+        {
+            tToolBox t = new tToolBox();
+            string value = "";
+            if (tForm.AccessibleName == null) return value;
+
+            // form üzerinde hem işaret hemde value değerleri var ise direk onu alalım
+            if (tForm.AccessibleName.IndexOf("con_Source_ParentControl_Tag_Value||") > -1)
+            {
+                value = tForm.AccessibleName.ToString();
+                // işareti silelim kalan value değerlerini gönderelim
+                value = value.Replace("con_Source_ParentControl_Tag_Value||", "");
+                v.con_Source_ParentControl_Tag_Value = value;
+                return value;
+            }
+
+            if (tForm.AccessibleName.IndexOf("con_Source_ParentControl_Tag_Value") > -1)
+            {
+                string TabControlName = "tabControl_SUBVIEW";
+                Control cntrl = null;
+                cntrl = t.Find_Control(tForm, TabControlName);
+
+                /// TabControl or 
+                /// TabPane or
+                /// NavigationPane or
+
+                if (cntrl != null)
+                {
+                    #region XtraTab.XtraTabControl
+                    if (cntrl.GetType().ToString() == "DevExpress.XtraTab.XtraTabControl")
+                    {
+                        DevExpress.XtraTab.XtraTabPage tTabPage =
+                            ((DevExpress.XtraTab.XtraTabControl)cntrl).SelectedTabPage;
+                        if (tTabPage.Tag != null)
+                        {
+                            value = tTabPage.Tag.ToString();
+                            return value;
+                        }
+                    }
+                    #endregion
+
+                    #region Navigation.NavigationPane
+                    if (cntrl.GetType().ToString() == "DevExpress.XtraBars.Navigation.NavigationPane")
+                    {
+                        var tTabPage = ((DevExpress.XtraBars.Navigation.NavigationPane)cntrl).SelectedPage; //.SelectedPage;
+
+                        if (tTabPage == null)
+                            return "";
+
+                        if (((DevExpress.XtraBars.Navigation.NavigationPage)tTabPage).Tag != null)
+                        {
+                            value = ((DevExpress.XtraBars.Navigation.NavigationPage)tTabPage).Tag.ToString();
+                            return value;
+                        }
+                    }
+                    #endregion
+
+                    #region Navigation.TabPane
+                    if (cntrl.GetType().ToString() == "DevExpress.XtraBars.Navigation.TabPane")
+                    {
+                        DevExpress.XtraBars.Navigation.TabNavigationPage tTabPage =
+                            ((DevExpress.XtraBars.Navigation.TabPane)cntrl).SelectedPage;
+                        if (tTabPage.Tag != null)
+                            value = tTabPage.Tag.ToString();
+                        return value;
+                    }
+                    #endregion
+                }
+            }
+
+            return value;
+        }
+        private string getPropNavigator(Form tForm, string tableIPCode)
+        {
+            tToolBox t = new tToolBox();
+            string value = "";
+            if (tForm == null) return value;
+            if (t.IsNotNull(tableIPCode) == false) return value;
+
+            Control cntrl = null;
+            cntrl = t.Find_Control_View(tForm, tableIPCode);
+            if (cntrl == null) return value;
+
+            if (cntrl.GetType().ToString() == "DevExpress.XtraGrid.GridControl")
+            {
+                if (((GridControl)cntrl).AccessibleDescription != null)
+                {
+                    value = ((GridControl)cntrl).AccessibleDescription.ToString();
+                    return value;
+                }
+            }
+
+            if (cntrl.GetType().ToString() == "DevExpress.XtraTreeList.TreeList")
+            {
+                if (((DevExpress.XtraTreeList.TreeList)cntrl).AccessibleDescription != null)
+                {
+                    value = ((DevExpress.XtraTreeList.TreeList)cntrl).AccessibleDescription.ToString();
+                    return value;
+                }
+            }
+            return value;
+        }
+        private int getBackYilAy(int yilAy, byte backNext, ref string yilAyCapiton)
+        {
+            int rowNo = 0;
+            int yeniYilAy = yilAy;
+            int count = v.ds_YilAyList.Tables[0].Rows.Count;
+
+            for (int i = 0; i < count; i++)
+            {
+                if (yilAy.ToString() == v.ds_YilAyList.Tables[0].Rows[i][0].ToString())
+                {
+                    rowNo = i;
+                    break;
+                }
+            }
+
+            // back ise
+            if (backNext == 1)
+            {
+                if (count > rowNo + 1)
+                {
+                    yeniYilAy = Convert.ToInt32(v.ds_YilAyList.Tables[0].Rows[rowNo + 1][0].ToString());
+                    yilAyCapiton = v.ds_YilAyList.Tables[0].Rows[rowNo + 1][1].ToString();
+                }
+            }
+            // next ise
+            if (backNext == 2)
+            {
+                if (rowNo > 0)
+                {
+                    yeniYilAy = Convert.ToInt32(v.ds_YilAyList.Tables[0].Rows[rowNo - 1][0].ToString());
+                    yilAyCapiton = v.ds_YilAyList.Tables[0].Rows[rowNo - 1][1].ToString();
+                }
+            }
+
+            return yeniYilAy;
+        }
+        private void setYilAyCaption(Form tForm, int yilAy, string caption, string menuControlName, tToolBox t)
+        {
+            //tItem.Caption = t.getYilAyCaption(yilAy);
+
+            Control c = null;
+            string[] controls = new string[] { };
+
+            c = t.Find_Control(tForm, menuControlName, "", controls);
+
+            if (c != null)
+            {
+                if (c.GetType().ToString() == "DevExpress.XtraBars.Navigation.TileNavPane")
+                {
+                    DevExpress.XtraBars.Navigation.TileNavPane tnPane = null;
+                    tnPane = c as DevExpress.XtraBars.Navigation.TileNavPane;
+                    string bname = string.Empty;
+                    //string iname = string.Empty;
+
+                    int i3 = tnPane.Buttons.Count;
+                    //int i5 = 0;
+                    for (int i2 = 0; i2 < i3; i2++)
+                    {
+                        bname = tnPane.Buttons[i2].Element.Name.ToString();
+                        if (bname == "item_YILAY") //buttonName)
+                        {
+                            tnPane.Buttons[i2].Element.Caption = caption;
+                            //tnPane.Buttons[i2].Element.ElementClick += null;
+                            //tnPane.Buttons[i2].Element.ElementClick += myClick;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        private void yilAyFormRefresh(Form tForm)
+        {
+            int emanet = v.BUGUN_YILAY;
+
+            v.BUGUN_YILAY = v.USER_YILAY;
+
+            vSubWork vSW = new vSubWork();
+            vSW._01_tForm = tForm;
+            vSW._02_TableIPCode = "";
+            vSW._03_WorkTD = v.tWorkTD.Refresf_DataYilAy;
+            vSW._04_WorkWhom = v.tWorkWhom.All;
+
+            ev.tSubWork_(vSW);
+
+
+            v.BUGUN_YILAY = emanet;
+        }
+
+
+        public string getYilAyCaption(int yilAy)
+        {
+            tToolBox t = new tToolBox();
+            if (t.IsNotNull(v.ds_YilAyList) == false) return "";
+
+            string caption = "";
+            string yilAy_ = yilAy.ToString();
+
+            int count = v.ds_YilAyList.Tables[0].Rows.Count;
+
+            for (int i = 0; i < count; i++)
+            {
+                if (yilAy_ == v.ds_YilAyList.Tables[0].Rows[i]["Id"].ToString())
+                {
+                    caption = v.ds_YilAyList.Tables[0].Rows[i]["DonemTipi"].ToString();
+                    break;
+                }
+            }
+
+
+            return caption;
+        }
+
+        #endregion sub commonMenuClick functions
+
+        #endregion commonMenu
 
         #region Form shortcutKeys and Buttons 
 
@@ -863,6 +1105,8 @@ namespace Tkn_Events
                     // aslında navButton görünürde olduğu için gerekte yok
                     //shortcutButtonSet(mControl, ((DevExpress.XtraBars.Navigation.TileNavItem)sender).Caption, ButtonName, myFormLoadValue);
 
+                    //((DevExpress.XtraBars.Navigation.NavButton)sender).
+
                     commonMenuClick(tForm, ButtonName, TableIPCode, myFormLoadValue);
                 }
             }
@@ -910,113 +1154,6 @@ namespace Tkn_Events
 
         #endregion
 
-        #region 201910 new commonMenuClick
-
-        private string getSourceParentControlTagValue(Form tForm) //con_Source_ParentControl_Tag_Value
-        {
-            tToolBox t = new tToolBox();
-            string value = "";
-            if (tForm.AccessibleName == null) return value;
-
-            // form üzerinde hem işaret hemde value değerleri var ise direk onu alalım
-            if (tForm.AccessibleName.IndexOf("con_Source_ParentControl_Tag_Value||") > -1)
-            {
-                value = tForm.AccessibleName.ToString();
-                // işareti silelim kalan value değerlerini gönderelim
-                value = value.Replace("con_Source_ParentControl_Tag_Value||", "");
-                v.con_Source_ParentControl_Tag_Value = value;
-                return value;
-            }
-
-            if (tForm.AccessibleName.IndexOf("con_Source_ParentControl_Tag_Value") > -1)
-            {
-                string TabControlName = "tabControl_SUBVIEW";
-                Control cntrl = null;
-                cntrl = t.Find_Control(tForm, TabControlName);
-
-                /// TabControl or 
-                /// TabPane or
-                /// NavigationPane or
-
-                if (cntrl != null)
-                {
-                    #region XtraTab.XtraTabControl
-                    if (cntrl.GetType().ToString() == "DevExpress.XtraTab.XtraTabControl")
-                    {
-                        DevExpress.XtraTab.XtraTabPage tTabPage =
-                            ((DevExpress.XtraTab.XtraTabControl)cntrl).SelectedTabPage;
-                        if (tTabPage.Tag != null)
-                        {
-                            value = tTabPage.Tag.ToString();
-                            return value;
-                        }
-                    }
-                    #endregion
-
-                    #region Navigation.NavigationPane
-                    if (cntrl.GetType().ToString() == "DevExpress.XtraBars.Navigation.NavigationPane")
-                    { 
-                        var tTabPage = ((DevExpress.XtraBars.Navigation.NavigationPane)cntrl).SelectedPage; //.SelectedPage;
-
-                        if (tTabPage == null)
-                            return "";
-
-                        if (((DevExpress.XtraBars.Navigation.NavigationPage)tTabPage).Tag != null)
-                        {
-                            value = ((DevExpress.XtraBars.Navigation.NavigationPage)tTabPage).Tag.ToString();
-                            return value;
-                        }
-                    }
-                    #endregion
-
-                    #region Navigation.TabPane
-                    if (cntrl.GetType().ToString() == "DevExpress.XtraBars.Navigation.TabPane")
-                    {
-                        DevExpress.XtraBars.Navigation.TabNavigationPage tTabPage =
-                            ((DevExpress.XtraBars.Navigation.TabPane)cntrl).SelectedPage;
-                        if (tTabPage.Tag != null)
-                            value = tTabPage.Tag.ToString();
-                        return value;
-                    }
-                    #endregion
-                }
-            }
-
-            return value;
-        }
-
-        private string getPropNavigator(Form tForm, string tableIPCode)
-        {
-            tToolBox t = new tToolBox();
-            string value = "";
-            if (tForm == null) return value;
-            if (t.IsNotNull(tableIPCode) == false) return value;
-            
-            Control cntrl = null;
-            cntrl = t.Find_Control_View(tForm, tableIPCode);
-            if (cntrl == null) return value;
-
-            if (cntrl.GetType().ToString() == "DevExpress.XtraGrid.GridControl")
-            {
-                if (((GridControl)cntrl).AccessibleDescription != null)
-                {
-                    value = ((GridControl)cntrl).AccessibleDescription.ToString();
-                    return value;
-                }
-            }
-
-            if (cntrl.GetType().ToString() == "DevExpress.XtraTreeList.TreeList")
-            {
-                if (((DevExpress.XtraTreeList.TreeList)cntrl).AccessibleDescription != null)
-                {
-                    value = ((DevExpress.XtraTreeList.TreeList)cntrl).AccessibleDescription.ToString();
-                    return value;
-                }
-            }
-            return value;
-        }
-
-        #endregion 201910 new common click
-
+        
     }
 }

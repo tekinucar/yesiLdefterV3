@@ -44,6 +44,8 @@ begin transaction
  insert into MS_TYPES values ( 1, 0, 'WEBNODE_EVENTS_TYPE', 143, '', 'Button3');
  insert into MS_TYPES values ( 1, 0, 'WEBNODE_EVENTS_TYPE', 144, '', 'Button4');
  insert into MS_TYPES values ( 1, 0, 'WEBNODE_EVENTS_TYPE', 145, '', 'Button5');
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_EVENTS_TYPE', 146, '', 'tableField');
+
  
  DELETE MS_TYPES WHERE TYPES_NAME = 'WEBNODE_ATT_ROLE'
  
@@ -224,7 +226,9 @@ begin transaction
  insert into MS_TYPES values ( 1, 0, 'DB_TYPE',  2, '', 'ManagerServer');
  insert into MS_TYPES values ( 1, 0, 'DB_TYPE',  3, '', 'UstadCRM');
  insert into MS_TYPES values ( 1, 0, 'DB_TYPE',  4, '', 'Project'); 
-
+ --insert into MS_TYPES values ( 1, 0, 'DB_TYPE',  5, '', 'none');
+ --insert into MS_TYPES values ( 1, 0, 'DB_TYPE',  6, '', 'NewDatabase');
+ insert into MS_TYPES values ( 1, 0, 'DB_TYPE',  7, '', 'WebManager');
 
 
  insert into MS_TYPES values ( 1, 0, 'DEFAULT_TYPE',  0, '', '');
@@ -548,6 +552,7 @@ begin transaction
  insert into MS_TYPES values ( 1, 0, 'MENU_ITEM',  204, '', 'SubMenu');
  insert into MS_TYPES values ( 1, 0, 'MENU_ITEM',  205, '', 'Button');
  insert into MS_TYPES values ( 1, 0, 'MENU_ITEM',  206, '', 'NavBarItem');
+ insert into MS_TYPES values ( 1, 0, 'MENU_ITEM',  211, '', 'Mali Dönem');
 
 
  insert into MS_TYPES values ( 1, 0, 'DOCK_TYPE',  0, '', 'None');

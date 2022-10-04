@@ -12,7 +12,7 @@ namespace YesiLdefter
     public partial class ms_DBList : DevExpress.XtraEditors.XtraForm
     {
         tToolBox t = new tToolBox();
-        tSave sv = new tSave();
+        
 
         DataSet dsTables = null;
         DataNavigator dNTables = null;
@@ -78,50 +78,17 @@ namespace YesiLdefter
             DialogResult cevap = t.mySoru(soru);
             if (DialogResult.Yes == cevap)
             {
-                cumleData = "";
-                cumleData = preparingInsertScript(databaseName, schemaName, tableName);
+                vScripts scripts = new vScripts();
+                scripts.SourceDBaseName = databaseName;
+                scripts.SchemaName = schemaName;
+                scripts.SourceTableName = tableName;
+                scripts.IdentityInsertOnOff = true;
 
-                //t.FlyoutMessage("Web Manager Database Update", "Insert paketler hazırlandı...");
+                cumleData = "";
+                cumleData = t.preparingInsertScript(scripts);
 
                 PaketiGonder();
             }
-        }
-
-        private string preparingInsertScript(string databaseName, string schemaName, string tableName)
-        {
-            DataSet dsQuery = new DataSet();
-            //string cumleDelete = " Delete   From [{0}].[{1}].[{2}] ";
-            string cumleDelete = " Delete   From [{1}].[{2}] ";
-            string cumleSelect = " Select * From [{0}].[{1}].[{2}] ";
-            string cumle = "";
-            string tSql = "";
-            string myProp = string.Empty;
-
-            cumle = string.Format(cumleDelete, databaseName, schemaName, tableName) + v.ENTER2;
-
-            tSql = string.Format(cumleSelect, databaseName, schemaName, tableName);
-
-            string dBaseNo = Convert.ToString((byte)v.dBaseNo.Manager);
-
-            t.MyProperties_Set(ref myProp, "DBaseNo", dBaseNo);
-            t.MyProperties_Set(ref myProp, "TableName", tableName);
-            t.MyProperties_Set(ref myProp, "SqlFirst", tSql);
-            t.MyProperties_Set(ref myProp, "SqlSecond", "null");
-            t.MyProperties_Set(ref myProp, "TableType", "1");
-            t.MyProperties_Set(ref myProp, "Cargo", "data");
-            t.MyProperties_Set(ref myProp, "KeyFName", "");
-
-            dsQuery.Namespace = myProp;
-
-            t.Data_Read_Execute(this, dsQuery, ref tSql, tableName, null);
-            if (t.IsNotNull(dsQuery))
-            {
-                cumle = cumle + sv.Insert_Script_Multi(dsQuery, tableName, v.active_DB.masterMSSQLConn);
-            }
-            
-            dsQuery.Dispose();
-            
-            return cumle;
         }
 
         private void PaketiGonder()
@@ -152,7 +119,7 @@ namespace YesiLdefter
             */
 
             if (cumleData != "")
-                t.runScript(cumleData);
+                t.runScript(v.dBaseNo.WebManager, cumleData);
 
             t.FlyoutMessage("Web Manager Database Update", "Insert paketler gönderildi...");
         }

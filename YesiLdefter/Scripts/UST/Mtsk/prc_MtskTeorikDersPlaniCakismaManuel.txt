@@ -1,0 +1,48 @@
+﻿  
+CREATE PROCEDURE [dbo].[prc_MtskTeorikDersPlaniCakismaManuel] (@SablonTeorikFId int)  
+AS BEGIN
+
+  --Declare @SablonTeorikFId int = 2
+
+  Select td.* From ( 
+     Select [Id]
+      ,[FirmId]
+      ,[IsActive]
+      ,[DonemTipiId]
+      ,[GrupTipiId]
+      ,[SubeTipiId]
+      ,[DerslikTipiId]
+      ,[DerslikAdiTipiId]
+      ,[DersTarihi]
+      ,[DersSaatiTipiId]
+      ,[PersonelId]
+      ,[EgitimTipiId]
+      ,[BaslamaSaati]
+      ,[BitisSaati]
+      ,[TDersIsUploaded]
+      ,[SablonTeorikBId]
+      ,[SablonTeorikFId]
+      ,[SablonTeorikSId]
+     From [dbo].[MtskTeorikDers]
+     Where SablonTeorikFId = @SablonTeorikFId
+     and   SablonTeorikSId > 0
+
+   ) as x, [dbo].[MtskTeorikDers] as td 
+  Where 0 = 0 
+  and td.DersSaatiTipiId = x.DersSaatiTipiId
+  and td.DersTarihi = x.DersTarihi
+  
+  and ( td.DerslikAdiTipiId = x.DerslikAdiTipiId 
+  or  td.PersonelId = x.PersonelId )
+  
+  and (td.DonemTipiId <> x.DonemTipiId
+  or   td.GrupTipiId <> x.GrupTipiId
+  or   td.SubeTipiId <> x.SubeTipiId
+  or   td.DerslikTipiId <> x.DerslikTipiId
+  or   td.DerslikAdiTipiId <> x.DerslikAdiTipiId -- personelin başka sınıfta dersi varsa
+  or   td.PersonelId <> x.PersonelId -- derslikte başka hoca varsa
+  )
+
+  order by td.DersTarihi, td.DersSaatiTipiId
+
+END -- procedure

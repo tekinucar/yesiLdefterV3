@@ -1342,7 +1342,7 @@
         private DevExpress.XtraBars.BarButtonItem btn_TarayicidanAl;
         private DevExpress.XtraBars.BarButtonItem btn_DosyadanAl;
         private DevExpress.XtraBars.BarButtonItem btn_DosyayaKaydet;
-        private DevExpress.XtraBars.BarButtonItem btn_DatabaseKaydet;
+        //private DevExpress.XtraBars.BarButtonItem btn_DatabaseKaydet;
         private DevExpress.XtraBars.BarButtonItem btn_FarkliKaydet;
         private DevExpress.XtraBars.BarButtonItem btn_ResimSil;
         private DevExpress.XtraBars.Ribbon.RibbonPageGroup ribbonPageGroup3;

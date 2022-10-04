@@ -1,0 +1,144 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table MsDbUpdates
+ (
+    Id              Int IDENTITY(1,1) not null,
+    IsActive        Bit               not null,
+	UpdateDate      Datetime          not null,             
+	
+	SectorTypeId    SmallInt          not null,
+	UpdateTypeId    SmallInt          not null,
+	DBaseNoTypeId   smallInt          null,       
+	SchemaName      VarChar(5)        null, 
+    TableName       VarChar(100)      null,
+    FieldName       VarChar(50)       null,
+	FieldTypeId     smallInt          null,
+	FieldLength     VarChar(6)        null, 
+	FieldNotNull    bit               null,
+
+	About           nVarChar(100)     null,     
+	SqlScript       varchar(MAX)      null,
+
+   Constraint pk_MsDbUpdates primary key (Id)
+ )
+
+ create index X_MsDbUpdates_01 on MsDbUpdates (UpdateDate)
+
+ grant select, insert, update, delete on MsDbUpdates to public
+
+commit transaction
+
+/*CreateTableEnd*/
+
+
+/*CreateLkpTable*/
+
+begin transaction
+
+-- ------------------------------------------------------- 
+-- DBaseNoTypeId
+-- ------------------------------------------------------- 
+
+IF EXISTS (Select * From sys.objects WHERE name = 'MsDbUpdatesDBaseNoType')
+drop table [Lkp].[MsDbUpdatesDBaseNoType]
+
+create table [Lkp].[MsDbUpdatesDBaseNoType]
+(
+   Id               Int Unique not null, 
+   DBaseNoType      Varchar(20)    null
+   
+   constraint  pk_MsDbUpdatesDBaseNoType primary key (Id)
+)
+
+Delete from [Lkp].[MsDbUpdatesDBaseNoType]
+INSERT INTO [Lkp].[MsDbUpdatesDBaseNoType] (Id, DBaseNoType)
+ VALUES 
+  ( 0,     N'none'),
+  ( 1,     N'master'),
+  ( 2,     N'ManagerServer'),
+  ( 3,     N'UstadCRM'),
+  ( 4,     N'Project'),
+  ( 7,     N'WebManager')
+
+
+-- ------------------------------------------------------- 
+-- UpdateTypeId
+-- ------------------------------------------------------- 
+
+IF EXISTS (Select * From sys.objects WHERE name = 'MsDbUpdatesUpdateType')
+drop table [Lkp].[MsDbUpdatesUpdateType]
+
+create table [Lkp].[MsDbUpdatesUpdateType]
+(
+   Id               Int Unique not null, 
+   UpdateType       nVarchar(50)   null
+   
+   constraint  pk_MsDbUpdatesUpdateType primary key (Id)
+)
+
+Delete from [Lkp].[MsDbUpdatesUpdateType]
+INSERT INTO [Lkp].[MsDbUpdatesUpdateType] (Id, UpdateType)
+ VALUES 
+  ( 0,     N''),
+  ( 11,    N'Data  update - ManagerDb den table datasını al'),
+  ( 12,    N'Rapor update - ManagerDb den rapor datasını al'),
+  
+  ( 21,    N'Table add'),
+  ( 22,    N'Field add'),
+  ( 23,    N'Field update'),
+  ( 24,    N'Field rename'),
+
+  ( 31,    N'Trigger add'),
+  ( 32,    N'Trigger update'),
+  ( 41,    N'Procedure add'),
+  ( 42,    N'Procedure update'),
+  ( 51,    N'Function add'),
+  ( 52,    N'Function update')
+
+
+
+create table [Lkp].[MsDbUpdatesFieldType]
+(
+   Id               Int Unique not null, 
+   FieldType       nVarchar(20)   null
+   
+   constraint  pk_MsDbUpdatesFieldType primary key (Id)
+)
+
+Delete from [Lkp].[MsDbUpdatesFieldType]
+INSERT INTO [Lkp].[MsDbUpdatesFieldType] (Id, FieldType)
+ VALUES 
+  (  0,   N''),
+  (  56, 'Int'),
+  (  52, 'SmallInt'),
+  ( 127, 'Bigint'),
+  ( 104, 'Bit'),
+  ( 108, 'Numeric'),
+  (  62, 'Float'),
+  (  59, 'Real'),
+  (  60, 'Money'),
+  (  48, 'Tinyint'),
+  (  58, 'Smalldatetime'),
+  (  61, 'Datetime'),
+  (  40, 'Date'),
+  (  41, 'Time'),
+  ( 167, 'Varchar'),
+  ( 231, 'nVarchar'),
+  ( 175, 'Char'),
+  (  35, 'Text'),
+  (  99, 'Ntext'),
+  (  34, 'Image'),
+  ( 173, 'Binary'),
+  ( 165, 'Varbinary')
+
+
+commit transaction
+
+
+
+
+  
+/*CreateLkpTableEnd*/
+

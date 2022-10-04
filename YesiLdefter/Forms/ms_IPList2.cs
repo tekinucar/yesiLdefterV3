@@ -290,8 +290,6 @@ namespace YesiLdefter
             string SoftwareCode = ds_MSTablesIP.Tables[0].Rows[dN_MSTablesIP.Position]["SOFTWARE_CODE"].ToString();
             string ProjectCode = ds_MSTablesIP.Tables[0].Rows[dN_MSTablesIP.Position]["PROJECT_CODE"].ToString();
 
-
-
             iBox.Clear();
             iBox.title = "Kopyalanacak MS_FIELDS_IP Kodu";
             iBox.promptText = "Kopyalanacak MS_FIELDS_IP IPCode  :";
@@ -646,6 +644,10 @@ namespace YesiLdefter
 
             string tableCode = ds_MSTables.Tables[0].Rows[dN_MSTables.Position]["TABLE_CODE"].ToString();
 
+            string myProp = ds_MSTables.Namespace;
+            string databaseName = t.MyProperties_Get(myProp, "DBaseName:");
+            string schemaName = t.MyProperties_Get(myProp, "SchemasCode:");
+
             string soru = tableCode + " tablosu için INSERT paketi oluşturulacak, Onaylıyor musunuz ?";
             DialogResult cevap = t.mySoru(soru);
             if (DialogResult.Yes == cevap)
@@ -656,11 +658,11 @@ namespace YesiLdefter
                 cumleMsFieldsIP = "";
                 cumleMsGroups = "";
 
-                cumleMsTables = preparingInsertScript("MS_TABLES", tableCode);
-                cumleMsFields = preparingInsertScript("MS_FIELDS", tableCode);
-                cumleMsTablesIP = preparingInsertScript("MS_TABLES_IP", tableCode);
-                cumleMsFieldsIP = preparingInsertScript("MS_FIELDS_IP", tableCode);
-                cumleMsGroups = preparingInsertScript("MS_GROUPS", tableCode);
+                cumleMsTables = preparingInsertScript(databaseName, schemaName, "MS_TABLES", tableCode);
+                cumleMsFields = preparingInsertScript(databaseName, schemaName, "MS_FIELDS", tableCode);
+                cumleMsTablesIP = preparingInsertScript(databaseName, schemaName, "MS_TABLES_IP", tableCode);
+                cumleMsFieldsIP = preparingInsertScript(databaseName, schemaName, "MS_FIELDS_IP", tableCode);
+                cumleMsGroups = preparingInsertScript(databaseName, schemaName, "MS_GROUPS", tableCode);
 
                 viewText(
                     cumleMsTables + v.ENTER2 +
@@ -675,50 +677,32 @@ namespace YesiLdefter
             }
         }
 
-        private string preparingInsertScript(string tableName, string tableCode)
+        
+        private string preparingInsertScript(string databaseName, string schemaName, string tableName, string tableCode)
         {
-            DataSet dsQuery = new DataSet();
-            string cumleDelete = " delete from {0} Where TABLE_CODE = '{1}' ";
-            string cumleSelect = " Select * from {0} Where TABLE_CODE = '{1}' ";
-            string cumle = "";
-            string tSql = "";
-            string myProp = string.Empty;
+            vScripts scripts = new vScripts();
 
-            cumle = string.Format(cumleDelete, tableName, tableCode) + v.ENTER2;
-            
-            tSql = string.Format(cumleSelect, tableName, tableCode);
-            t.MyProperties_Set(ref myProp, "DBaseNo", Convert.ToString((byte)v.dBaseNo.Manager));
-            t.MyProperties_Set(ref myProp, "TableName", tableName);
-            t.MyProperties_Set(ref myProp, "SqlFirst", tSql);
-            t.MyProperties_Set(ref myProp, "SqlSecond", "null");
-            t.MyProperties_Set(ref myProp, "TableType", "1");
-            t.MyProperties_Set(ref myProp, "Cargo", "data");
-            t.MyProperties_Set(ref myProp, "KeyFName", "");
+            scripts.SourceDBaseName = databaseName;
+            scripts.SchemaName = schemaName;
+            scripts.SourceTableName = tableName;
+            scripts.Where = string.Format(" TABLE_CODE = '{0}' ", tableCode);
+            scripts.IdentityInsertOnOff = false;
 
-            dsQuery.Namespace = myProp;
-
-            t.Data_Read_Execute(this, dsQuery, ref tSql, tableName, null);
-            if (t.IsNotNull(dsQuery))
-            {
-                cumle = cumle + sv.Insert_Script_Multi(dsQuery, tableName, v.active_DB.managerMSSQLConn);
-            }
-
-            dsQuery.Dispose();
+            string cumle = t.preparingInsertScript(scripts);
 
             return cumle;
         }
-
+        
         private void PaketiGonder()
         {
-            if (cumleMsTables != "") t.runScript(cumleMsTables); 
-            if (cumleMsFields != "") t.runScript(cumleMsFields);
-            if (cumleMsTablesIP != "") t.runScript(cumleMsTablesIP);
-            if (cumleMsFieldsIP != "") t.runScript(cumleMsFieldsIP);
-            if (cumleMsGroups != "") t.runScript(cumleMsGroups);
+            if (cumleMsTables != "") t.runScript(v.dBaseNo.WebManager, cumleMsTables); 
+            if (cumleMsFields != "") t.runScript(v.dBaseNo.WebManager, cumleMsFields);
+            if (cumleMsTablesIP != "") t.runScript(v.dBaseNo.WebManager, cumleMsTablesIP);
+            if (cumleMsFieldsIP != "") t.runScript(v.dBaseNo.WebManager, cumleMsFieldsIP);
+            if (cumleMsGroups != "") t.runScript(v.dBaseNo.WebManager, cumleMsGroups);
 
             t.FlyoutMessage("Web Manager Database Update", "Insert paketler gönderildi...");
         }
-
         
     }
 

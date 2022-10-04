@@ -16,7 +16,7 @@
     ErrorPageUrl    nvarChar(200)     null,
 
 	ModulCode       varChar(100)      null,
-    SoftWareCode    varchar(20)       null,
+    SoftwareCode    varchar(20)       null,
     ProjectCode     varchar(20)       null,
     SchemasCode     varchar(5)        null,
 

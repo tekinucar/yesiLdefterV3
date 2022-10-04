@@ -1,4 +1,6 @@
-﻿using System;
+﻿using DevExpress.LookAndFeel;
+using DevExpress.XtraEditors;
+using System;
 using System.Data;
 using System.Data.SqlClient;
 using System.IO;
@@ -89,6 +91,7 @@ namespace Tkn_Starter
             //SYS_Glyph_Read();
 
             t.WaitFormOpen(v.mainForm, "Preparing User Form ...");
+            setLoginSkins();
             InitLoginUser();
 
             t.WaitFormOpen(v.mainForm, "Computer Info ...");
@@ -99,7 +102,20 @@ namespace Tkn_Starter
 
             t.MSSQL_Server_Tarihi();
 
+            t.YilAyRead();
+
             v.SP_UserIN = true;
+        }
+
+        void setLoginSkins()
+        {
+            #region appOpenSetDefaaultSkin
+            WindowsFormsSettings.EnableFormSkins();
+            if (v.active_DB.localDB)
+               UserLookAndFeel.Default.SetSkinStyle(SkinStyle.Whiteprint);
+            else
+               UserLookAndFeel.Default.SetSkinStyle(SkinSvgPalette.Office2019White.Yale);
+            #endregion
         }
 
         #region Variable Set

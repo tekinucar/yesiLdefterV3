@@ -1,0 +1,24 @@
+﻿ /*CreateTable*/
+
+begin transaction
+
+create table OnmIVezneFinans
+ (
+
+   Id                Int IDENTITY(1,1) NOT NULL, 
+   ParentId          Int       not null, /* default 0 */
+   FirmId            Int       not null,
+   IsActive          Bit       not null, /* default : 1 = active, 0 = not active */  
+   FinansId          Int           null,
+   VezneId           Int           null,
+
+   constraint		pk_OnmIVezneFinans primary key (Id)
+ )
+
+ create index X_OnmIVezneFinans01 on OnmIVezneFinans (FirmId)
+ 
+ grant select, insert, update, delete on OnmIVezneFinans to public
+ 
+commit transaction
+
+/*CreateTableEnd*/

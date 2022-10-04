@@ -1,16 +1,11 @@
 ﻿using DevExpress.XtraEditors;
-using DevExpress.XtraGrid;
-using DevExpress.XtraGrid.Views.Grid;
 using HtmlAgilityPack;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Tkn_ToolBox;
@@ -18,14 +13,8 @@ using Tkn_Variable;
 using Tkn_InputPanel;
 using Tkn_Events;
 using System.Threading;
-using System.Web;
-using System.Timers;
 using System.Net;
 using System.IO;
-using System.Collections.Specialized;
-using Tkn_WebScraping;
-using Microsoft.Net.Http.Headers;
-using System.Text.RegularExpressions;
 using Tkn_CookieReader;
 
 namespace YesiLdefter
@@ -36,7 +25,7 @@ namespace YesiLdefter
         tToolBox t = new tToolBox();
         tInputPanel ip = new tInputPanel();
         tEventsButton evb = new tEventsButton();
-                
+
         int nodeId = 0;
         int parentId = 0;
         //int columnId = 0;
@@ -50,7 +39,7 @@ namespace YesiLdefter
         // veri transferlerinin (web <=> dbase) yapıldığı datasetler
         DataSet ds_ScrapingDbConnectionList = null;
         DataSet ds_WebNodeItemsList = null;
-        
+
         // silinecek
         /*
         DataSet ds_PageNodes = null;
@@ -76,7 +65,7 @@ namespace YesiLdefter
         DataNavigator dN_ScrapingPages = null;
         DataSet ds_Nodes = null;
         DataNavigator dN_Nodes = null;
-               
+
         WebBrowser webAnalysis = null;
         WebBrowser webTest = null;
         WebBrowser webMain = null;
@@ -88,19 +77,23 @@ namespace YesiLdefter
         //System.IO.Stream htmlDocumentStream = null;
         //string htmlDocumentText = null;
         string htmlDocumentBody = null;
+        HtmlElementCollection htmlTablePages = null;
+        int selectedTablePageNo = 0;
+        string tablePageName = "";
+        string tablePageUrl = "";
 
         System.Windows.Forms.TableLayoutPanel tableLayoutPanel1 = null;
         System.Windows.Forms.TableLayoutPanel tableLayoutPanel2 = null;
         Control btn_AnalysisView = null;
         Control btn_AnalysisGetNodeItems = null;
-        
+
         Control btn_PageView = null;
         Control btn_PageViewAnalysis = null;
-        
+
         Control btn_LineGet = null;   // 1 satırı get  ediyor  analysis tarafında kullanılmakta
         Control btn_LinePost = null;  // 1 satırı post ediyor  analysis tarafında kullanılmakta
         Control btn_AlwaysSet = null; // AlwaysSet : TcNo sorgula gibi
-        
+
         Control btn_FullGet1 = null;  // birinci get butonu
         Control btn_FullGet2 = null;  // ikinci  get butonu
         Control btn_FullPost1 = null; // birinci post butonu
@@ -130,13 +123,13 @@ namespace YesiLdefter
         string loginPageUrl = "";
         string aktifUrl = "";
         string sessionIdAndToken = "";
-        
+
 
         //birbirini tetikleyen işler
 
         bool myWebTableRowToDatabase = false;
         bool myTriggerItemButton = false;
-        
+
         Int16 myLoadNodeCount = 0;
         Int16 myDisplayNoneCount = 0;
         Int16 myPageRefreshCount = 0;
@@ -144,9 +137,10 @@ namespace YesiLdefter
         Int16 myButton2Count = 0;
         Int16 myButton3Count = 0;
         Int16 myButton4Count = 0;
-        Int16 myButton5Count = 0; 
+        Int16 myButton5Count = 0;
+        Int16 myTabelFieldCount = 0;
         Int16 myNoneCount = 0;
-        Int16 myTriggerCount = 0; // tüm nodeler
+        Int16 myNodeCount = 0; // tüm nodeler
 
         Int16 talepPageLeft = 0;
         Int16 talepPageTop = 0;
@@ -161,7 +155,7 @@ namespace YesiLdefter
         bool myTriggerPageRefresh = false;
         bool myTriggerPageRefreshTick = false;
         int myTriggerPosition = 0;
-        
+
         string myTriggerList = "";
         webNodeValue myTriggerWnv = null;
         //v.tWebEventsType myTriggerButtonEventsType = v.tWebEventsType.none;
@@ -213,7 +207,7 @@ namespace YesiLdefter
             readScrapingTables();
 
             v.SQL = "";
-            timerTrigger.Interval = 1000;
+            timerTrigger.Interval = 2000;
         }
 
         // simpleButton_ek1 :  line get  / pageView
@@ -245,7 +239,7 @@ namespace YesiLdefter
 
             btn_AnalysisView = t.Find_Control(this, "checkButton_ek1", TableIPCode, controls);
 
-            
+
             TableIPCode = "UST/PMS/MsWebNodeItems.Analysis_L01";
 
             btn_AnalysisGetNodeItems = t.Find_Control(this, "simpleButton_ek1", TableIPCode, controls);
@@ -256,7 +250,7 @@ namespace YesiLdefter
             }
 
             #endregion tabPage1 
-            
+
             #region tabPage 2
             /// tabPage 2
             ///
@@ -370,7 +364,7 @@ namespace YesiLdefter
             MsWebPagesButtonsPreparing();
 
             MsWebNodesButtonsPreparing();
-            
+
             webMain = (WebBrowser)t.Find_Control(this, "WebMain");
             if (webMain != null)
             {
@@ -381,7 +375,7 @@ namespace YesiLdefter
             {
                 MessageBox.Show("DİKKAT : Form tasarım sırasında WebBrowser için CmpName = WebMain tanımı bulunamadı...");
             }
-            
+
             menuName = "MENU_" + "UST/PMS/PMS/WEBSCRAPING";
             t.Find_Button_AddClick(this, menuName, buttonScrapingGoBack, myNavElementClick);
             t.Find_Button_AddClick(this, menuName, buttonScrapingGoForward, myNavElementClick);
@@ -610,13 +604,18 @@ namespace YesiLdefter
                             //var response = await wClient.DownloadData(urlDownload);
                             wClient.DownloadFile(urlDownload, "C:\\SqlData\\" + urlDownload.Substring(urlDownload.LastIndexOf('/')));
             */
- 
-            string htmlContent = "";
+
+            //string htmlContent = "";
             string url = @"";
             url = @"https://mebbis.meb.gov.tr/default.aspx";
 
             ///"txtKullaniciAd", "99969564"
             ///"txtSifre", "Ata.5514126")
+
+            ///"txtKullaniciAd", "HATİCEKAYA20"
+            ///"txtSifre", "246810")
+
+
 
             var baseAddress = new Uri(url);
             var cookieContainer = new CookieContainer();
@@ -632,12 +631,12 @@ namespace YesiLdefter
                 var result = client.PostAsync("", content).Result;
                 result.EnsureSuccessStatusCode();
                 var value = result.Headers.ToString();
-                                
+
                 string sessionId = t.myGetValue(value, "ASP.NET_SessionId=", ";");
                 string token = t.myGetValue(value, "__RequestVerificationToken=", ";");
-                
+
             }
-                        
+
             return "";
         }
 
@@ -663,7 +662,7 @@ namespace YesiLdefter
             if (htmlBody != null)
                 listNode_(htmlBody.ChildNodes);
 
-            
+
         }
 
         private void loadBody(string htmlDocumentBody, ref HtmlAgilityPack.HtmlNode htmlBody)
@@ -746,7 +745,6 @@ namespace YesiLdefter
                 nodeValuesPreparing(row, ref wnv);
 
                 WebScrapingAsync(webAnalysis, wnv);
-
             }
         }
 
@@ -774,9 +772,9 @@ namespace YesiLdefter
                 url = ds_ScrapingPages.Tables[0].Rows[dN_ScrapingPages.Position]["BeforePageUrl"].ToString();
                 this.talepOncesiUrl = url;
 
-                this.talepPageLeft = t.myInt16(ds_ScrapingPages.Tables[0].Rows[dN_ScrapingPages.Position]["PageLeft"].ToString()); 
+                this.talepPageLeft = t.myInt16(ds_ScrapingPages.Tables[0].Rows[dN_ScrapingPages.Position]["PageLeft"].ToString());
                 this.talepPageTop = t.myInt16(ds_ScrapingPages.Tables[0].Rows[dN_ScrapingPages.Position]["PageTop"].ToString());
-                
+
                 if (this.aktifUrl != this.talepEdilenUrl)
                 {
                     if (t.IsNotNull(this.talepOncesiUrl))
@@ -796,7 +794,7 @@ namespace YesiLdefter
             if (!string.IsNullOrEmpty(url))
             {
                 wb.Navigate(url);
-                
+
                 return true;
             }
             else
@@ -883,14 +881,6 @@ private void DisplaySecondUrl()
                 eventsTypeCount(ds_Nodes);
 
             myPageViewClickAsync(webMain);
-
-            // *
-            //webBrowser1.Navigate(new System.Uri(@"file://C:\content.html"));
-            //string aa = @"file://" + Application.StartupPath + "\\stk01001xxxx.html";
-            //aa = @"file://C:\UstadProjects\yesiLdefter\yesiLdefterV3\YesiLdefter\bin\Debug\stk01001.html";
-            //Uri fl = new System.Uri(@"C:\UstadProjects\yesiLdefter\yesiLdefterV3\YesiLdefter\bin\Debug\skt01001.html");
-            //webMain.Navigate(fl);
-            //* /
         }
 
         private void myAlwaysSetClick(object sender, EventArgs e)
@@ -898,9 +888,9 @@ private void DisplaySecondUrl()
             v.SQL = "";
 
             Cursor.Current = Cursors.WaitCursor;
-            startTriggersBefore();
+            startNodesBefore();
 
-            startTriggers(ds_Nodes, v.tWebRequestType.alwaysSet, v.tWebEventsType.buttonAlwaysSet);
+            startNodesRun(ds_Nodes, v.tWebRequestType.alwaysSet, v.tWebEventsType.buttonAlwaysSet);
         }
 
         private void myFullGet1_Click(object sender, EventArgs e)
@@ -908,8 +898,8 @@ private void DisplaySecondUrl()
             v.SQL = "";
 
             Cursor.Current = Cursors.WaitCursor;
-            startTriggersBefore();
-            startTriggers(ds_Nodes, v.tWebRequestType.get, v.tWebEventsType.button1);
+            startNodesBefore();
+            startNodesRun(ds_Nodes, v.tWebRequestType.get, v.tWebEventsType.button1);
         }
 
         private void myFullGet2_Click(object sender, EventArgs e)
@@ -917,17 +907,23 @@ private void DisplaySecondUrl()
             v.SQL = "";
 
             Cursor.Current = Cursors.WaitCursor;
-            startTriggersBefore();
-            startTriggers(ds_Nodes, v.tWebRequestType.get, v.tWebEventsType.button2);
+            startNodesBefore();
+            startNodesRun(ds_Nodes, v.tWebRequestType.get, v.tWebEventsType.button2);
         }
 
         private void myFullPost1_Click(object sender, EventArgs e)
         {
+            /* 
+            HtmlElement htmlTable = webMain.Document.GetElementById(this.tablePageName);
+            // bu kopya daha sonra selectTablePage için kulllanılıyor
+            this.htmlTablePages = htmlTable.GetElementsByTagName("table");
+            selectTablePage(webMain);
+            */
             v.SQL = "";
 
             Cursor.Current = Cursors.WaitCursor;
-            startTriggersBefore();
-            startTriggers(ds_Nodes, v.tWebRequestType.post, v.tWebEventsType.button3);
+            startNodesBefore();
+            startNodesRun(ds_Nodes, v.tWebRequestType.post, v.tWebEventsType.button3);
         }
 
         private void myFullPost2_Click(object sender, EventArgs e)
@@ -935,23 +931,23 @@ private void DisplaySecondUrl()
             v.SQL = "";
 
             Cursor.Current = Cursors.WaitCursor;
-            startTriggersBefore();
-            startTriggers(ds_Nodes, v.tWebRequestType.post, v.tWebEventsType.button4);
+            startNodesBefore();
+            startNodesRun(ds_Nodes, v.tWebRequestType.post, v.tWebEventsType.button4);
         }
-               
+
         private void myFullSave_Click(object sender, EventArgs e)
         {
             v.SQL = "";
 
             Cursor.Current = Cursors.WaitCursor;
-            startTriggersBefore();
-            startTriggers(ds_Nodes, v.tWebRequestType.post, v.tWebEventsType.button5);
+            startNodesBefore();
+            startNodesRun(ds_Nodes, v.tWebRequestType.post, v.tWebEventsType.button5);
         }
 
         private void myBtnWebScrapingClick(object sender, EventArgs e)
         {
             v.SQL = "";
-            
+
             if (((DevExpress.XtraEditors.SimpleButton)sender).TabIndex == 141)
                 this.myTriggerEventsType = v.tWebEventsType.button1;
             if (((DevExpress.XtraEditors.SimpleButton)sender).TabIndex == 142)
@@ -961,20 +957,20 @@ private void DisplaySecondUrl()
             if (((DevExpress.XtraEditors.SimpleButton)sender).TabIndex == 144)
                 this.myTriggerEventsType = v.tWebEventsType.button4;
 
-            startTriggersBefore();
+            startNodesBefore();
             //startTriggersBeforeForButton();
-            startTriggers(ds_Nodes, v.tWebRequestType.none, this.myTriggerEventsType);
+            startNodesRun(ds_Nodes, v.tWebRequestType.none, this.myTriggerEventsType);
         }
 
         #endregion user buttons
 
-        #region startTriggers, runTrigger
+        #region startNodesRun
 
-        /// Trigger çalıştırılmadan önceki hazırlık işlemleri
+        /// Nodes çalıştırılmadan önceki hazırlık işlemleri
         /// 
-        private void startTriggersBefore()
+        private void startNodesBefore()
         {
-            timerTrigger.Interval = 1000;
+            timerTrigger.Interval = 2000;
             this.myTriggerInvoke = false; // sorun çıkarırsa startTriggersBeforeForButton() kullan ve butonlara ekle
             this.myDocumentCompleted = false;
             //this.myTriggerOneByOne = false;
@@ -983,25 +979,22 @@ private void DisplaySecondUrl()
             this.myTriggerPageRefresh = false;
             this.myTriggerPageRefreshTick = false;
             this.myTriggerEventsType = v.tWebEventsType.none;
+
+            this.htmlTablePages = null;
+            this.selectedTablePageNo = 0;
             
             v.con_Images = null;
-            v.con_Images_FieldName = null;
+            v.con_Images_FieldName = "";
             v.con_Images2 = null;
-            v.con_Images_FieldName2 = null;
+            v.con_Images_FieldName2 = "";
         }
 
-        private void startTriggersBeforeForButton()
-        {
-            this.myTriggerInvoke = false;
-            this.myDocumentCompleted = false;
-        }
-
-        /// İşlem No : 1 : eventsType sayısını tespit et, bulunan sayı trigger sayısıdır
+        /// İşlem No : 1 : eventsType sayısını tespit et, bulunan sayı node sayısıdır
         /// 
-        private void startTriggers(DataSet ds, v.tWebRequestType webRequestType, v.tWebEventsType eventsType)
+        private void startNodesRun(DataSet ds, v.tWebRequestType webRequestType, v.tWebEventsType eventsType)
         {
             myNokta = ". ";
-            v.SQL = v.SQL + v.ENTER2 + myNokta + "startTriggers";
+            v.SQL = v.SQL + v.ENTER2 + myNokta + "startNodesRun";
 
             //--- hazırlık 
             timerTrigger.Enabled = false;
@@ -1009,8 +1002,10 @@ private void DisplaySecondUrl()
             this.myTriggerPosition = 1;
             this.myTriggerWebRequestType = webRequestType;
             this.myTriggerEventsType = eventsType;
-            
-            if (this.myTriggerCount > 0)
+            //emanet
+            this.myTriggerTableRowNo = 0;
+
+            if (this.myNodeCount > 0)
             {
                 t.WaitFormOpen(v.mainForm, "");
 
@@ -1018,11 +1013,11 @@ private void DisplaySecondUrl()
                 runTriggerNodesAsync(ds); //startTriggers
 
                 myNokta = ". ";
-                v.SQL = v.SQL + v.ENTER2 + myNokta + "startTriggers : END";
+                v.SQL = v.SQL + v.ENTER2 + myNokta + "startNodesRun : END";
 
                 if (countControl())
                 {
-                    v.SQL = v.SQL + v.ENTER + myNokta + "runTriggerNodes : END 2 ";
+                    v.SQL = v.SQL + v.ENTER + myNokta + "startNodesRun : END 2 ";
                     // table ve itembutton beraber olunca sorun çıkardı : eğitim aracı  <<<<< myTableTriggering  diye yenisini ekle
                     this.myTriggering = false;
 
@@ -1041,7 +1036,7 @@ private void DisplaySecondUrl()
             if (countControl())
             {
                 v.SQL = v.SQL + v.ENTER + myNokta + " runTriggerNodes : END ";
-                
+
                 // tetiklenecek başka node kalmadı
                 this.myTriggering = false;
 
@@ -1049,7 +1044,7 @@ private void DisplaySecondUrl()
                     (this.myDocumentCompleted)) //&& (this.myTriggerInvoke == false))
                 {
                     /* btnListele invoke = click yüzünden kapattım. Tekrar gerekirse bir işaret koy */
-                    
+
                     v.SQL = v.SQL + v.ENTER + myNokta + " runTriggerNodesAsync() : this.myDisplayNoneCount > 0 : timerTrigger.Enabled =  true ";
                     timerTrigger.Interval = 500;
                     timerTrigger.Enabled = true;
@@ -1061,22 +1056,27 @@ private void DisplaySecondUrl()
 
                 return;
             }
-            
+
+            bool isActive = false;
             bool onay = false;
             int pos = 0;
             int nodeId = 0;
             string nodeNo = "";
             v.tWebEventsType dbEventsType = v.tWebEventsType.none;
-            
+
             // çalıştırılmak istenen nodeyi bul ve çalıştır
             foreach (DataRow eventRow in ds.Tables[0].Rows)
             {
+                isActive = (bool)eventRow["IsActive"];
                 nodeId = t.myInt32(eventRow["NodeId"].ToString());
                 dbEventsType = (v.tWebEventsType)t.myInt16(eventRow["EventsType"].ToString());
 
                 onay = false;
                 if (this.myTriggerEventsType == dbEventsType)
                     onay = true;
+
+                if (isActive == false)
+                    onay = false;
 
                 if (onay)
                 {
@@ -1091,31 +1091,31 @@ private void DisplaySecondUrl()
                         v.SQL = v.SQL + v.ENTER2 + myNokta + "runTriggerNodes : nodeId = " + nodeId.ToString();
 
                         await runScrapingAsync(ds, this.myTriggerWebRequestType, this.myTriggerEventsType, nodeId, 0);
-                                                
+
                         this.myTriggerPosition++;
 
                         this.myTriggerList = this.myTriggerList + nodeNo;
 
                         myNokta = ".. ";
                         v.SQL = v.SQL + v.ENTER + myNokta + "this.myTriggerList : " + this.myTriggerList;
-                                                
+
                         Thread.Sleep(100);
 
                         if ((this.myTriggerPageRefresh) ||
                             (this.myTriggerInvoke))
                         {
-                            if (this.myTriggerPageRefresh) 
+                            if (this.myTriggerPageRefresh)
                                 v.SQL = v.SQL + v.ENTER + myNokta + "pageRefresh : break";
-                            if (this.myTriggerInvoke) 
+                            if (this.myTriggerInvoke)
                                 v.SQL = v.SQL + v.ENTER + myNokta + "invoke : break";
                             break;
                         }
                     }
                 }
             }
-            
+
             if (countControl())
-            { 
+            {
                 v.SQL = v.SQL + v.ENTER + myNokta + "runTriggerNodes : END 2 ";
                 // table ve itembutton beraber olunca sorun çıkardı : eğitim aracı  <<<<< myTableTriggering  diye yenisini ekle
                 this.myTriggering = false;
@@ -1135,7 +1135,7 @@ private void DisplaySecondUrl()
             //if (this.myPageRefreshCount > 0)
             //    _LoadNodeCount = this.myLoadNodeCount;
 
-            //if (this.myTriggerCount + 1 <= this.myTriggerPosition)
+            //if (this.myNodeCount + 1 <= this.myTriggerPosition)
             if (((this.myTriggerEventsType == v.tWebEventsType.load) && (this.myLoadNodeCount + 1 <= this.myTriggerPosition)) ||
                 ((this.myTriggerEventsType == v.tWebEventsType.displayNone) && (this.myDisplayNoneCount + 1 <= this.myTriggerPosition)) ||
                 ((this.myTriggerEventsType == v.tWebEventsType.none) && (_LoadNodeCount + this.myNoneCount + 1 <= this.myTriggerPosition)) ||
@@ -1143,7 +1143,8 @@ private void DisplaySecondUrl()
                 ((this.myTriggerEventsType == v.tWebEventsType.button2) && (_LoadNodeCount + this.myButton2Count + 1 <= this.myTriggerPosition)) ||
                 ((this.myTriggerEventsType == v.tWebEventsType.button3) && (_LoadNodeCount + this.myButton3Count + 1 <= this.myTriggerPosition)) ||
                 ((this.myTriggerEventsType == v.tWebEventsType.button4) && (_LoadNodeCount + this.myButton4Count + 1 <= this.myTriggerPosition)) ||
-                ((this.myTriggerEventsType == v.tWebEventsType.button5) && (_LoadNodeCount + this.myButton5Count + 1 <= this.myTriggerPosition))
+                ((this.myTriggerEventsType == v.tWebEventsType.button5) && (_LoadNodeCount + this.myButton5Count + 1 <= this.myTriggerPosition)) ||
+                ((this.myTriggerEventsType == v.tWebEventsType.tableField) && (_LoadNodeCount + this.myTabelFieldCount + 1 <= this.myTriggerPosition))
                 )
             {
                 onay = true;
@@ -1163,7 +1164,7 @@ private void DisplaySecondUrl()
             {
                 bool isActive = false;
                 int nodeId = 0;
-                
+
                 v.tWebEventsType eventsType = v.tWebEventsType.none;
                 v.tWebInjectType injectType = v.tWebInjectType.none; /* none, set&get, set, get,  */
 
@@ -1207,8 +1208,8 @@ private void DisplaySecondUrl()
                         if ((workEventsType != v.tWebEventsType.load) &&
                             (workEventsType != v.tWebEventsType.displayNone))
                         {
-                            if (workRequestType == v.tWebRequestType.post && 
-                                (injectType == v.tWebInjectType.Get || 
+                            if (workRequestType == v.tWebRequestType.post &&
+                                (injectType == v.tWebInjectType.Get ||
                                  injectType == v.tWebInjectType.none ||
                                 (injectType == v.tWebInjectType.AlwaysSet && btn_AlwaysSet != null)
                                  ))
@@ -1219,7 +1220,7 @@ private void DisplaySecondUrl()
                             }
 
                             // workRequest istekleri get ise Get ve Get&Set çalışsın
-                            if (workRequestType == v.tWebRequestType.get && 
+                            if (workRequestType == v.tWebRequestType.get &&
                                 (injectType == v.tWebInjectType.Set ||
                                  injectType == v.tWebInjectType.none ||
                                 (injectType == v.tWebInjectType.AlwaysSet && btn_AlwaysSet != null)
@@ -1233,7 +1234,7 @@ private void DisplaySecondUrl()
                             // workRequest istekleri get ise Get ve Get&Set çalışsın
                             if ((workRequestType == v.tWebRequestType.alwaysSet) &&
                                 (injectType != v.tWebInjectType.AlwaysSet))
-    
+
                             {
                                 v.SQL = v.SQL + v.ENTER + myNokta + "runScraping : AlwaysSet çalıcak. ( Get, Set veya none )  node olduğu için çalışmaması gerekiyor. NodeId : " + nodeId.ToString();
                                 isActive = false;
@@ -1266,7 +1267,7 @@ private void DisplaySecondUrl()
                                 if (this.myTriggerInvoke) v.SQL = v.SQL + v.ENTER + myNokta + "invoke : break";
                                 break;
                             }
-                            
+
                             // documentComplatedeki çalışmadıysa yani oraya gitmediyse
                             // çünkü get işlemlerinde documentComplate tetiklenmiyor
                             //
@@ -1300,14 +1301,14 @@ private void DisplaySecondUrl()
 
             if (pageRefresh_ == "True")
             {
-                pageRefresh(row);
+                pageRefresh(webMain, row);
                 return;
             }
-            
+
             // database tanımlı olan node bilgilerini al
             //
             nodeValuesPreparing(row, ref wnv);
-            
+
             v.SQL = v.SQL + v.ENTER + myNokta + "WebScrapingBefore : TagName = " + wnv.TagName + " : " + wnv.AttId;
 
             // database deki veriyi web e aktar için 
@@ -1343,7 +1344,7 @@ private void DisplaySecondUrl()
 
             //  web deki veriyi database aktar
             //  webden alınan veriyi (readValue yi)  db ye aktar
-            
+
             if ((wnv.InjectType == v.tWebInjectType.Get ||
                 (wnv.InjectType == v.tWebInjectType.GetAndSet && wnv.workRequestType == v.tWebRequestType.get)) &&
                 (this.myTriggerInvoke == false)) // invoke gerçekleşmişse hiç başlama : get sırasında set edip bilgi çağrılıyor demekki
@@ -1362,7 +1363,7 @@ private void DisplaySecondUrl()
 
                         this.myTriggeringItemButton = false;
                         this.myTriggerTableCount = wnv.tTable.tRows.Count;
-                        this.myTriggerTableRowNo = 0;
+                        //this.myTriggerTableRowNo = 0;
                         transferFromWebTableToDatabase(this.myTriggerTableWnv);
                     }
                 }
@@ -1383,7 +1384,7 @@ private void DisplaySecondUrl()
             }
         }
 
-        private async Task pageRefresh(DataRow row)
+        private async Task pageRefresh(WebBrowser wb, DataRow row)
         {
             if (this.myTriggerPageRefresh == false)
             {
@@ -1393,13 +1394,13 @@ private void DisplaySecondUrl()
                 v.SQL = v.SQL + v.ENTER + myNokta + " Page Refresh : start";
 
                 await myPageViewClickAsync(webMain);
-
+                
                 v.SQL = v.SQL + v.ENTER + myNokta + " Page Refresh : END";
 
                 t.ReadyComplate(2000);
             }
         }
-                
+
         private async Task WebScrapingAsync(WebBrowser wb, webNodeValue wnv)
         {
             //, v.tWebRequestType request
@@ -1424,7 +1425,7 @@ private void DisplaySecondUrl()
             string XPath = wnv.XPath;
             string InnerText = wnv.InnerText;
             string OuterText = wnv.OuterText;
-            
+
             v.tWebInjectType injectType = wnv.InjectType;
             v.tWebInvokeMember invokeMember = wnv.InvokeMember;
             v.tWebRequestType workRequestType = wnv.workRequestType;
@@ -1442,7 +1443,7 @@ private void DisplaySecondUrl()
 
             if (wnv.AttId != "") idName = wnv.AttId;
             if ((wnv.AttId == "") && (wnv.AttName != "")) idName = wnv.AttName;
-                        
+
             if (wnv.EventsType == v.tWebEventsType.displayNone)
             {
                 displayNone(TagName, idName, XPath, InnerText);
@@ -1452,10 +1453,12 @@ private void DisplaySecondUrl()
             // şimdilik sadece itemButton var
             // aktif olan sayfadaki tüm uygun elementleri topla
             // burada sadece itemButton olan elementler toplanıyor 
-            
+
             //if (eventsType == v.tWebEventsType.itemButton)
             if (AttRole == "ItemButton")
             {
+                // table listesindeki satırın detayını açmak için kullanılıyor
+                // 
                 string src = "";
                 HtmlElementCollection elements = wb.Document.GetElementsByTagName(TagName);
                 foreach (HtmlElement item in elements)
@@ -1540,7 +1543,7 @@ private void DisplaySecondUrl()
                     selectItemsRead(wb, ref wnv, idName);
 
                 if ((workRequestType == v.tWebRequestType.get) &&
-                    (AttRole == "ItemTable"))    //(eventsType == v.tWebEventsType.itemTable))
+                    (AttRole == "ItemTable"))
                     selectItemsRead(wb, ref wnv, idName);
 
                 // select in böyle bir özelliği yok ben manuel ekliyorum
@@ -1552,7 +1555,7 @@ private void DisplaySecondUrl()
                     if ((injectType == v.tWebInjectType.Set) ||
                         (injectType == v.tWebInjectType.GetAndSet && workRequestType == v.tWebRequestType.post) ||
                         (injectType == v.tWebInjectType.AlwaysSet))
-                         writeValue = selectItemsGetValue(wb, ref wnv, idName, writeValue);
+                        writeValue = selectItemsGetValue(wb, ref wnv, idName, writeValue);
                 }
             }
 
@@ -1604,7 +1607,7 @@ private void DisplaySecondUrl()
             }
 
 
-            if ((injectType == v.tWebInjectType.Set || 
+            if ((injectType == v.tWebInjectType.Set ||
                 (injectType == v.tWebInjectType.GetAndSet && workRequestType == v.tWebRequestType.post) ||
                 // workRequestType = sadece alwaysSet isteği ve alwaysSet butonu var ise ( TC Sorgula gibi )
                 (injectType == v.tWebInjectType.AlwaysSet && workRequestType == v.tWebRequestType.alwaysSet && btn_AlwaysSet != null) ||
@@ -1729,7 +1732,7 @@ private void DisplaySecondUrl()
 
                             // select in value si değilde text kısmı okunacak ise 
                             // writeValeu veya AttRole bizim tarafımızdan manuel işaretleniyor
-                            if ((TagName == "select") && 
+                            if ((TagName == "select") &&
                                 ((wnv.writeValue == "InnerText") ||
                                  (AttRole == "GetCaption") || (AttRole == "text") || (AttRole == "InnerText")
                                  ))
@@ -1823,7 +1826,7 @@ private void DisplaySecondUrl()
                     if (invokeMember == v.tWebInvokeMember.click) invoke = "click";
                     if (invokeMember == v.tWebInvokeMember.submit) invoke = "submit";
                     if ((invokeMember == v.tWebInvokeMember.onchange) &&
-                        (writeValue != "")) 
+                        (writeValue != ""))
                         invoke = "onchange";
                     if ((invokeMember == v.tWebInvokeMember.onchangeDontDocComplate) &&
                         (writeValue != ""))
@@ -1833,10 +1836,10 @@ private void DisplaySecondUrl()
                     //if (invokeMember == v.tWebInvokeMember.onchangeDontDocComplate)
                     if (invokeMember != v.tWebInvokeMember.onchange)
                     {
-                       // this.myDocumentCompleted = true;
-                          
-                       // burayı açacağın zaman aday dönem kayıt sırasında ucretli seçilince çalışmıyor 
-                       // aslıdan timer2 de invokemember break yapamıyor
+                        // this.myDocumentCompleted = true;
+
+                        // burayı açacağın zaman aday dönem kayıt sırasında ucretli seçilince çalışmıyor 
+                        // aslıdan timer2 de invokemember break yapamıyor
 
                     }
 
@@ -1852,12 +1855,12 @@ private void DisplaySecondUrl()
                             element = wb.Document.GetElementById(idName);
                             if (element != null)
                                 wb.Document.GetElementById(idName).InvokeMember(invoke);
-                            
+
                             Thread.Sleep(1000);
                             Application.DoEvents();
 
                             t.WebReadyComplate(wb);
-                            
+
                             //if ((this.myDisplayNoneCount > 0) &&
                             //    (this.myTriggering == false) && (invoke == "click"))
                             //{
@@ -1895,21 +1898,52 @@ private void DisplaySecondUrl()
         }
         private async Task timerTriggerAsync()
         {
+            if ((this.myTriggeringItemButton) &&
+                (this.myTriggeringTable) &&
+                (this.myTriggerWmvTableRows != null) &&
+                (this.myTriggerPageRefreshTick))
+            {
+                // burası pageRefresh olunca devreye giriyor
+                // yani alınacak bilgilerin listesi -x- sayfasında detay bilgisi -y- sayfasında ise 
+                // örnek : personel listesi ve detayı sayfası
+                //
+                v.SQL = v.SQL + v.ENTER2 + myNokta + " timerTrigger_Tick 1.2 start : ( TriggeringTable )";
 
-            if ((this.myTriggeringTable) &&
+                if (this.myTriggerTableCount >= this.myTriggerTableRowNo)
+                {
+                    this.myTriggerPageRefreshTick = false;
+
+                    // bir sonraki satır için tekrar yeniden 
+                    transferFromWebTableToDatabase(this.myTriggerTableWnv);
+                }
+
+                v.SQL = v.SQL + v.ENTER + myNokta + " timerTrigger_Tick 1.2 end : ( TriggeringTable )";
+                return;
+            }
+
+            if ((this.myTriggeringItemButton) &&
+                (this.myTriggeringTable) &&
                 (this.myTriggerWmvTableRows != null) &&
                 (this.myTriggerPageRefreshTick == false))
             {
-                v.SQL = v.SQL + v.ENTER2 + myNokta + " timerTrigger_Tick 1 start : ( TriggeringTable )";
+                // burasıda; sayfada detay bilgileri var ve her column bilgisini tek tek okumayı gerçekleştiriyor
+                // burası 2 şekilde çalışıyor
+                // birincisi : liste bilgisi ve detay bilgisi aynı sayfada ise detayları okuyor : örnek : eğitim araçları sayfası 
+                // ikincisi  : liste -x- syafasında detay -y- sayfasında ise detayları okuyor   : örnek : personel listesi ve detayı sayfası
+                //
+                v.SQL = v.SQL + v.ENTER2 + myNokta + " timerTrigger_Tick 1.1 start : ( TriggeringTable )";
+
+                this.myTriggerPageRefresh = false;
 
                 transferFromWebTableRowToDatabase();
 
-                v.SQL = v.SQL + v.ENTER + myNokta + " timerTrigger_Tick 1 end : ( TriggeringTable )";
+                v.SQL = v.SQL + v.ENTER + myNokta + " timerTrigger_Tick 1.1 end : ( TriggeringTable )";
+                return;
             }
 
             if ((this.myTriggering) &&
                 (this.myTriggeringTable == false) &&
-                (this.myTriggerPageRefreshTick == false))  
+                (this.myTriggerPageRefreshTick == false))
             {
                 v.SQL = v.SQL + v.ENTER2 + myNokta + " timerTrigger_Tick 2 start : ( Triggering )";
 
@@ -1938,7 +1972,7 @@ private void DisplaySecondUrl()
                         v.SQL = v.SQL + v.ENTER + myNokta + " invoke : break : timerTrigger_Tick 2 ";
                         break;
                     }
-                    
+
                 }
 
                 if (countControl())
@@ -1964,7 +1998,7 @@ private void DisplaySecondUrl()
                 (this.myTriggeringTable) &&
                 (this.myTriggerPageRefreshTick == false))
             {
-                
+
                 if (this.myTriggerTableWnv.tTable == null)
                 {
                     v.SQL = v.SQL + v.ENTER2 + myNokta + " timerTrigger_Tick 3 start : ( TriggerTableWnv )";
@@ -1973,7 +2007,7 @@ private void DisplaySecondUrl()
 
                     v.SQL = v.SQL + v.ENTER + myNokta + " timerTrigger_Tick 3 end : ( TriggerTableWnv ) ";
                 }
-                
+
             }
 
             if ((this.myTriggering) &&
@@ -2056,13 +2090,13 @@ private void DisplaySecondUrl()
                     v.tWebRequestType webRequestType_ = this.myTriggerWebRequestType;
                     v.tWebEventsType eventsType_ = this.myTriggerEventsType;
 
-                    startTriggersBefore();
-                    
+                    startNodesBefore();
+
                     // hatırla
                     this.myTriggerWebRequestType = webRequestType_;
                     this.myTriggerEventsType = eventsType_;
-                    
-                    startTriggers(ds_Nodes, this.myTriggerWebRequestType, this.myTriggerEventsType);
+
+                    startNodesRun(ds_Nodes, this.myTriggerWebRequestType, this.myTriggerEventsType);
 
                     v.SQL = v.SQL + v.ENTER + myNokta + " timerTrigger_Tick 5 end : ( TriggerOneByOne )";
                 }
@@ -2074,7 +2108,7 @@ private void DisplaySecondUrl()
             {
                 v.SQL = v.SQL + v.ENTER2 + myNokta + " timerTrigger_Tick 6 start : ( DisplayNone )";
                 await runDisplayNoneAsync();
-                timerTrigger.Interval = 1000;
+                timerTrigger.Interval = 2000;
                 v.SQL = v.SQL + v.ENTER + myNokta + " timerTrigger_Tick 6 end : ( DisplayNone )";
             }
 
@@ -2135,7 +2169,7 @@ private void DisplaySecondUrl()
                         }
                         else
                         {
-                            string itemValue = findNodItemsValue(wnv, itemText);
+                            string itemValue = findNodeItemsValue(wnv, itemText);
                             if (itemValue != "")
                                 dbRow[wnv.dbFieldName] = itemValue;
                         }
@@ -2146,9 +2180,9 @@ private void DisplaySecondUrl()
                 else
                 {
                     v.SQL = v.SQL + wnv.dbFieldName;
-                    
-                    if (v.con_Images_FieldName == null)
-                         v.con_Images_FieldName = wnv.dbFieldName;
+
+                    if (t.IsNotNull(v.con_Images_FieldName) == false)
+                        v.con_Images_FieldName = wnv.dbFieldName;
                     else v.con_Images_FieldName2 = wnv.dbFieldName;
 
                     //v.EXE_TempPath+"\\AResimGoster.aspx"
@@ -2157,7 +2191,7 @@ private void DisplaySecondUrl()
                     //byte[] theBytes = Encoding.UTF8.GetBytes(wnv.readValue);
 
                     if (v.con_Images == null)
-                         v.con_Images = t.imageBinaryArrayConverter(fileName);//theBytes;
+                        v.con_Images = t.imageBinaryArrayConverter(fileName);//theBytes;
                     else v.con_Images2 = t.imageBinaryArrayConverter(fileName);
 
                     if (t.IsNotNull(v.con_Images_FieldName))
@@ -2170,19 +2204,19 @@ private void DisplaySecondUrl()
                     {
                         if (v.con_Images_FieldName2.IndexOf("Small") > -1)
                             v.con_Images2 = ResmiKucult(v.con_Images2);
-                    }                 
+                    }
                     //if (t.IsNotNull(wnv.readValue))
                     //    dbRow[wnv.dbFieldName] = theBytes; // Encoding.UTF8.GetBytes(wnv.readValue);
                 }
             }
-        
+
             // get işlemi bitti ve artık database yazma işlemi gerekiyor
             if (wnv.GetSave)
             {
                 if (t.IsNotNull(ds_DbaseTable))
                     dbButtonClick(ds_DbaseTable.DataSetName, v.tButtonType.btKaydet);
             }
-            
+
         }
 
         private byte[] ResmiKucult(byte[] byteArrayIn)
@@ -2190,7 +2224,7 @@ private void DisplaySecondUrl()
             // gelen byte image çevir
             MemoryStream ms = new MemoryStream(byteArrayIn);
             Image oldImage = Image.FromStream(ms);
-                        
+
             // image yi bitmap a çevir
             Bitmap workingImage = new Bitmap(oldImage, oldImage.Width, oldImage.Height);
 
@@ -2199,7 +2233,7 @@ private void DisplaySecondUrl()
             int newHeight = (int)(workingImage.Height * 0.2);
 
             Bitmap _img = myImageCompress_(workingImage, newWidth, newHeight);
-                                 
+
             /// tekrar byte dönüştür ve gönder
             ms = null;
             ms = new MemoryStream();
@@ -2248,7 +2282,7 @@ private void DisplaySecondUrl()
                     string value = dbRow[wnv.dbFieldName].ToString();
                     if (value != "")
                         wnv.writeValue = Convert.ToDateTime(value).ToString("dd.MM.yyyy"); //.Substring(0,10);
-                    
+
                 }
                 else if (ftype == 108)
                 {
@@ -2256,7 +2290,7 @@ private void DisplaySecondUrl()
                     if (value != "")
                     {
                         //value = value.Substring(0, value.IndexOf(",") + 3);
-                        wnv.writeValue = string.Format("{0:0.00}", Convert.ToDecimal(value)) ;// Convert.ToString(Convert.ToDouble(value).ToString("D"));
+                        wnv.writeValue = string.Format("{0:0.00}", Convert.ToDecimal(value));// Convert.ToString(Convert.ToDouble(value).ToString("D"));
                     }
                 }
                 else
@@ -2271,41 +2305,60 @@ private void DisplaySecondUrl()
         {
             v.SQL = v.SQL + v.ENTER + myNokta + " transferFromWebTableToDatabase";
 
-            // itemButton olup olmaması fark ediyor
-            int count = 0;
-            //if (this.myTriggerItemButton)
-            //    count = this.myTriggerTableCount;
-            //else 
-                count = this.myTriggerTableCount;
+            Application.DoEvents();
 
-            if (count <= this.myTriggerTableRowNo)
+            if (this.myTriggerTableCount <= this.myTriggerTableRowNo)
             {
                 // bitti
                 // tetiklenecek başka row kalmadı
+                this.myTriggering = false;
                 this.myTriggeringTable = false;
                 return;
             }
 
-            if (wnv.tTable == null) return;
+            if ((this.myTriggerPageRefresh) &&
+                (this.myTriggerPageRefreshTick))
+                return;
+
+            if (wnv.tTable == null)
+                return;
 
             tTable tb = wnv.tTable;
 
+            this.myTriggerWmvTableRows = null;
             this.myTriggerWmvTableRows = tb.tRows[this.myTriggerTableRowNo];
-                        
-            /// okunan tabloda itemButton varmı ?
-            /// varsa uygula
-            this.myTriggerItemButton = findItemButton(this.myTriggerWmvTableRows, this.myTriggerTableRowNo);//, ref wnv);
-                        
+
+            // Tablo üzerinde bulunduğu satırdaki bilgilerin detayını göstermek için buton var mı ?
+            // varsa uygula
+            this.myTriggerItemButton = findTableItemButton(this.myTriggerWmvTableRows, this.myTriggerTableRowNo);//, ref wnv);
+
             // itemButton false ise buradan çağrılıyor 
-            if (this.myTriggerItemButton == false)
+            if ((this.myTriggerItemButton == false) && (this.myTriggerTableRowNo == 0))
             {
-                // itemButton olmadığı için table nin bütün row larını bir defada kaydet
+                // itemButton olmadığı için table nin bütün row larını bir defada buradan kayıt işlemini gerçekleştir
+                //
+                int value = 0;
                 foreach (tRow row in tb.tRows)
                 {
-                    saveRowAsync(this.myTriggerTableWnv, row);
+                    // geçici çözüm burayı sil
+                    value = t.myInt32(row.tColumns[0].value.ToString());
+
+                    //if (value >= 3180)
+                    //{
+                        saveRowAsync(this.myTriggerTableWnv, row);
+                    //}
+
                 }
                 this.myTriggeringTable = false;
             }
+
+            if (this.myTriggerItemButton)
+            {
+                // tetikleme işi timerTriggerAsync() içinde 1.1
+                //
+                // transferFromWebTableRowToDatabase();
+            }
+
         }
         private async Task transferFromWebTableRowToDatabase()
         {
@@ -2314,13 +2367,19 @@ private void DisplaySecondUrl()
             this.myWebTableRowToDatabase = true;
 
             await saveRowAsync(this.myTriggerTableWnv, this.myTriggerWmvTableRows);
-            
+
             this.myWebTableRowToDatabase = false;
-            
+
             this.myTriggerTableRowNo++;
 
-            // bir sonraki satır için tekrar yeniden 
-            transferFromWebTableToDatabase(this.myTriggerTableWnv);
+            if (this.myTriggerTableCount >= this.myTriggerTableRowNo)
+            {
+                if (this.myTriggerPageRefresh == false)
+                {
+                    // bir sonraki satır için tekrar yeniden 
+                    transferFromWebTableToDatabase(this.myTriggerTableWnv);
+                }
+            }
         }
         private void transferFromWebSelectToDatabase(webNodeValue wnv)
         {
@@ -2339,7 +2398,7 @@ private void DisplaySecondUrl()
             ds_DbaseTable = null;
             dN_DbaseTable = null;
             //DataRow dbRow = null;
-            
+
             int rowNo = 0;
             //Int16 colNo = 0;
             bool onay = false;
@@ -2347,7 +2406,7 @@ private void DisplaySecondUrl()
             //bool itemButton = false;
             //string itemText = "";
             //string itemValue = "";
-            
+
 
             /// sırayla row ları ele al
             ///
@@ -2383,7 +2442,7 @@ private void DisplaySecondUrl()
             string itemText = "";
             string itemValue = "";
             Int16 colNo = 0;
-            bool firstRow = true;
+            bool firstColumn = true;
 
             #region wnv.table verilerini db ye aktaralım
 
@@ -2412,11 +2471,11 @@ private void DisplaySecondUrl()
                 /// yeni data satırı oluştur
                 /// tabloy aktarmaya başladığında ilk yeni row oluştursun
                 /// bir defa çalışıyor
-                if ((firstRow) && (dbRow != null))
+                if ((firstColumn) && (dbRow != null))
                 {
                     dbButtonClick(ds_DbaseTable.DataSetName, v.tButtonType.btYeniHesapSatir);
                     dbRow = ds_DbaseTable.Tables[0].Rows[dN_DbaseTable.Position];
-                    firstRow = false;
+                    firstColumn = false;
                 }
 
                 /// dbRow geldiyse ilgili tablo ve column bulunmuş demektir
@@ -2435,8 +2494,8 @@ private void DisplaySecondUrl()
                         }
                         else
                         {
-                            itemValue = findNodItemsValue(wnv, itemText);
-                                                        
+                            itemValue = findNodeItemsValue(wnv, itemText);
+
                             if (itemValue != "")
                                 dbRow[wnv.dbFieldName] = itemValue;
                         }
@@ -2452,8 +2511,11 @@ private void DisplaySecondUrl()
             /// 
             //if (wnv.TagName == "table")
             if (this.myWebTableRowToDatabase)
-                runScrapingAsync(ds_Nodes, this.myTriggerWebRequestType, v.tWebEventsType.none, 0, wnv.nodeId);
-                //runScrapingAsync(ds_ScrapingNodes, this.myTriggerWebRequestType, v.tWebEventsType.none, 0, wnv.nodeId);
+            {
+                v.SQL = v.SQL + v.ENTER + myNokta + " saveRow : start other nodes read ";
+                //runScrapingAsync(ds_Nodes, this.myTriggerWebRequestType, this.myTriggerEventsType, 0, wnv.nodeId);
+                runScrapingAsync(ds_Nodes, this.myTriggerWebRequestType, v.tWebEventsType.tableField, 0, wnv.nodeId);
+            }
 
             if ((wnv.TagName == "table") ||
                 (wnv.TagName == "select"))
@@ -2464,7 +2526,9 @@ private void DisplaySecondUrl()
                 /// bir row un okunması tamalandı, o zaman bunu kaydedelim, ve yeni satır açalım
                 /// 
                 if (t.IsNotNull(ds_DbaseTable) && (wnv.DontSave == false))
+                {
                     dbButtonClick(ds_DbaseTable.DataSetName, v.tButtonType.btKaydetYeni);
+                }
             }
         }
 
@@ -2492,9 +2556,11 @@ private void DisplaySecondUrl()
             }
         }
 
-        private bool findItemButton(tRow rows, int rowNo)//, ref webNodeValue wnv)
+        private bool findTableItemButton(tRow dataRow, int dataRowNo)//, ref webNodeValue wnv)
         {
-            v.SQL = v.SQL + v.ENTER + myNokta + " findItemButton RowNo : " + rowNo.ToString();
+            // Tablo üzerinde bulunduğu satırdaki bilgilerin detayını göstermek için buton var mı ?
+            // 
+            v.SQL = v.SQL + v.ENTER + myNokta + " find tableItemButton RowNo : " + dataRowNo.ToString();
 
             bool onay = false;
             bool isActive = false;
@@ -2503,11 +2569,11 @@ private void DisplaySecondUrl()
             string AttRole = "";
 
             //foreach (DataRow row in ds_ScrapingNodes.Tables[0].Rows)
-            foreach (DataRow row in ds_Nodes.Tables[0].Rows)
+            foreach (DataRow nodeRow in ds_Nodes.Tables[0].Rows)
             {
-                isActive = (bool)row["IsActive"];
+                isActive = (bool)nodeRow["IsActive"];
                 //eventsType = t.myInt16(row["EventsType"].ToString());
-                AttRole = row["AttRole"].ToString();
+                AttRole = nodeRow["AttRole"].ToString();
 
                 //if (eventsType == (Int16)v.tWebEventsType.itemButton)
                 if (AttRole == "ItemButton")
@@ -2517,28 +2583,46 @@ private void DisplaySecondUrl()
                     // 
 
                     // ds_ScrapingNodes üzerindeki value 
-                    value = row["AttSrc"].ToString();
+                    value = nodeRow["AttSrc"].ToString();
 
-                    foreach (tColumn column in rows.tColumns)
+                    int i2 = dataRow.tColumns.Count;
+                    for (int i = 0; i < i2; i++)
+                    {
+                        if (value == dataRow.tColumns[i].value)
+                        {
+                            // burada ds_ScrapingNodes içindeki itemButton ait olan detay bilgisi gerekiyor
+                            //
+                            this.myTriggerTableRow = nodeRow;
+
+                            tableItemButtonClickAsync(dataRowNo);
+                            onay = true;
+                            break;
+                        }
+                    }
+                    /*
+                    foreach (tColumn column in dataRow.tColumns)
                     {
                         if (value == column.value)
                         {
                             // burada ds_ScrapingNodes içindeki itemButton ait olan detay bilgisi gerekiyor
                             //
-                            this.myTriggerTableRow = row;
-
-                            itemButtonClickAsync(rowNo);
+                            this.myTriggerTableRow = nodeRow;
+                            
+                            tableItemButtonClickAsync(dataRowNo);
                             onay = true;
                             break;
                         }
                     }
+                    */
+                    // columns taradı ve bulamadı
+                    break;
                 }
             }
 
             return onay;
         }
 
-        private string findNodItemsValue(webNodeValue wnv, string itemText)
+        private string findNodeItemsValue(webNodeValue wnv, string itemText)
         {
             if (t.IsNotNull(ds_WebNodeItemsList) == false) return "";
 
@@ -2593,7 +2677,7 @@ private void DisplaySecondUrl()
             int _dbNodeId = 0;
             Int16 _dbColNo = 0;
             Control cntrl = null;
-            
+
             if (wnv.tTable != null)
                 _colNo = wnv.tTableColNo;
 
@@ -2602,7 +2686,7 @@ private void DisplaySecondUrl()
             // okunacak veya yazılacak tablo
             //if (ds_DbaseTable == null)
             //    ds_DbaseTable = new DataSet();
-                 
+
             //if (colNo == 6)
             //    Thread.Sleep(100);
 
@@ -2631,7 +2715,7 @@ private void DisplaySecondUrl()
                 {
                     // yazılacak veya okunacak Table
                     _TableIPCode = row["TableIPCode"].ToString();
-                    
+
                     // böyle TableIPCode bulduk fakat form üzerinde böyle bir control var mı
                     // çünkü WebScrapingPageCode tanımı birden fazla InputPanel de kullanılabiliyor
                     cntrl = t.Find_Control_View(this, _TableIPCode);
@@ -2655,21 +2739,21 @@ private void DisplaySecondUrl()
                             /// Sıralı işlem hangi TableIPCode üzerinde gerçekleşecek onu bulalım
                             ///
                             if (this.myTriggerOneByOne == false)// &&
-                                //(this.ds_DbaseSiraliTable == null))
+                                                                //(this.ds_DbaseSiraliTable == null))
                             {
                                 findOneByOneButton(_TableIPCode);
                             }
-                            
+
                             return findDbRow;
                         }
                     }
                 }
 
             }
-            
+
             if (findDbRow == null)
             {
-               // v.SQL = v.SQL + v.ENTER + "DİKKAT : findRightRow, uygun row bulunamadı. PageCode : " + pageCode + ", nodeId : " + nodeId.ToString();
+                // v.SQL = v.SQL + v.ENTER + "DİKKAT : findRightRow, uygun row bulunamadı. PageCode : " + pageCode + ", nodeId : " + nodeId.ToString();
             }
 
             // işlem buraya kadar geldiyse null dönüyor
@@ -2739,19 +2823,19 @@ private void DisplaySecondUrl()
 
             if (findDbRow == null)
             {
-               // v.SQL = v.SQL + v.ENTER + "DİKKAT : findRightRowForSelect, uygun row bulunamadı. PageCode : " + pageCode + ", nodeId : " + nodeId.ToString();
+                // v.SQL = v.SQL + v.ENTER + "DİKKAT : findRightRowForSelect, uygun row bulunamadı. PageCode : " + pageCode + ", nodeId : " + nodeId.ToString();
             }
 
             return findDbRow;
         }
-                
+
         //KRT_OPERAND_TYPE == 10
         private void findRightDbTables(webNodeValue wnv)
         {
             // database tablsoundaki web deki bir tabloya veri atacağımız zaman iki si arasında bir eşleştirme yapmak gerekiyor
             // örnek : table deki bir TCNo yu alıp webdeki tabloda önce onu bulmamız gerekiyor
             // şimdi db table deki veri önce tespit alanları edelim
-            
+
             string _TableIPCode = "";
             string _pageCode = wnv.pageCode;
             string _dbPageCode = "";
@@ -2778,7 +2862,7 @@ private void DisplaySecondUrl()
                     }
                 }
             }
-            
+
             // anahtar field dışındaki atama yapılacak diğer fieldleri tespit ediyor
             foreach (DataRow row in ds_ScrapingDbConnectionList.Tables[0].Rows)
             {
@@ -2793,19 +2877,19 @@ private void DisplaySecondUrl()
                         (_krtOperandType != "10"))
                     {
                         // database tablodan okunacak fieldler tespit ediliyor
-                        
+
                         tRow _tRow = new tRow();
 
                         // html table üzerindeki column no
                         tColumn _tColumnNo = new tColumn();
                         _tColumnNo.value = row["WebScrapingSetColumnNo"].ToString();
                         _tRow.tColumns.Add(_tColumnNo);
-                        
+
                         // database table üzerindeki okunacak fieldName
                         tColumn _tColumn = new tColumn();
-                        _tColumn.value = row["FIELD_NAME"].ToString(); 
+                        _tColumn.value = row["FIELD_NAME"].ToString();
                         _tRow.tColumns.Add(_tColumn);
-                        
+
                         // o fieldin value değerini html table ye taşıma için kullanılacak şimdilik sadece boş olan column
                         tColumn _tColumnValue = new tColumn();
                         _tColumnValue.value = "";
@@ -2843,12 +2927,12 @@ private void DisplaySecondUrl()
 
                         onay = false;
 
-                        t.AlertMessage("","Sıralı işler tamamlandı ...");
+                        t.AlertMessage("", "Sıralı işler tamamlandı ...");
                     }
 
                     NavigatorButton btnNext = this.dN_DbaseSiraliTable.Buttons.Next;
                     this.dN_DbaseSiraliTable.Buttons.DoClick(btnNext);
-                                        
+
                     //v.SQL = v.SQL + v.ENTER + myNokta + " btnOneByOneNextRecord() : timerTrigger.Enabled =  true ";
 
                     //timerTrigger.Interval = 1000;// 1500;
@@ -2870,7 +2954,7 @@ private void DisplaySecondUrl()
 
             if (this.sessionIdAndToken == "")
                 this.sessionIdAndToken = tCookieReader.GetCookie($"https://mebbis.meb.gov.tr/default.aspx");
-            
+
             // value nin içeriği böyle bir şey
             //ASP.NET_SessionId=zi3lg1kml2pnn35ax1ervzzn; __RequestVerificationToken=xXxQr11ekzeKXPuXkcTB91oW8vUbGAhP0Rcqdx-S-SSQBho0b6kvkCAmN0PUX6rj4fEABihHlFv6-Ab6wRwxdKUHs1W1NbEBC-x0SuYa9bM1
 
@@ -2878,10 +2962,10 @@ private void DisplaySecondUrl()
             //this.token = getFindValue(value, "__RequestVerificationToken=", ";");
 
             WebClient wClient = new WebClient();
-            
+
             wClient.Headers.Add($"Accept", $"*/*");
             //wClient.Headers.Add($"Referer", $"https://mebbis.meb.gov.tr/SKT/skt02001.aspx");
-            wClient.Headers.Add($"Referer", $""+this.aktifUrl+"");
+            wClient.Headers.Add($"Referer", $"" + this.aktifUrl + "");
             wClient.Headers.Add($"Accept-Language", $"tr-TR");
             wClient.Headers.Add($"Accept-Encoding", $"gzip, deflate");
             wClient.Headers.Add($"User-Agent", $"Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.2; WOW64; Trident/7.0; .NET4.0C; .NET4.0E; .NET CLR 2.0.50727; .NET CLR 3.0.30729; .NET CLR 3.5.30729; InfoPath.3)");
@@ -2899,11 +2983,11 @@ private void DisplaySecondUrl()
                 string newUrl = url.Remove(url.IndexOf("?ImageID="));
                 result = v.EXE_TempPath + "\\" + newUrl.Substring(url.LastIndexOf('/') + 1);
             }
-            else 
+            else
                 result = v.EXE_TempPath + "\\" + url.Substring(url.LastIndexOf('/') + 1);
-            
+
             wClient.DownloadFile(url, result);
-            
+
             //Stream data = wClient.OpenRead(new Uri(url));
             //StreamReader reader = new StreamReader(data);
             //string content = reader.ReadToEnd();
@@ -3026,52 +3110,45 @@ private void DisplaySecondUrl()
                 //this.sessionId = t.myGetValue(value, "ASP.NET_SessionId=", ";");
                 //this.token = t.myGetValue(value, "__RequestVerificationToken=", ";");
             }
-
         }
 
         #endregion Resim
 
         #region ItemButton ( ItemTable içinde çalışıyor )
-        private async Task itemButtonClickAsync(int RowNo)
+        private async Task tableItemButtonClickAsync(int RowNo)
         {
-            v.SQL = v.SQL + v.ENTER + myNokta + " itemButtonClick RowNo : " + RowNo.ToString();
+            v.SQL = v.SQL + v.ENTER + myNokta + " preparing tableItemButtonClick : RowNo : " + RowNo.ToString();
 
-            if (myTriggering)
+            webNodeValue wnv_ = new webNodeValue();
+
+            // scraping için gerekli verileri hazırla
+            //
+            wnv_.workRequestType = this.myTriggerWebRequestType;
+            //wnv_.workEventsType = v.tWebEventsType.itemButton;
+            wnv_.AttRole = "ItemButton";
+
+            nodeValuesPreparing(this.myTriggerTableRow, ref wnv_);
+
+            // clik yapılacak olan nodeyi bulup getirmek için scraping işlemini gerçekleştir
+            //
+            await WebScrapingAsync(webMain, wnv_);
+
+            if (wnv_ != null)
             {
-                // burada sadece ItemButton itemlerın listesini toparlamak için hazırlanıyor
+                // sadece istenen RowNo yu için itemButton click le
                 //
-                webNodeValue wnv_ = new webNodeValue();
+                if (RowNo >= 0)
+                    applyTableItemButtonClick_(wnv_, RowNo);
 
-                // scraping için gerekli verileri hazırla
-                //
-                wnv_.workRequestType = this.myTriggerWebRequestType;
-                //wnv_.workEventsType = v.tWebEventsType.itemButton;
-                wnv_.AttRole = "ItemButton";
-
-                nodeValuesPreparing(this.myTriggerTableRow, ref wnv_);
-
-                // scraping işlemini gerçekleştir
-                //
-                await WebScrapingAsync(webMain, wnv_);
-                //WebScrapingAsync(webMain, wnv_);
-
-                if (wnv_ != null)
-                {
-                    // sadece istenen RowNo yu için itemButton click le
-                    //
-                    if (RowNo >= 0)
-                        oneItemButtonClick(wnv_, RowNo);
-
-                    // burada tetiklenme başlayınca sırayla kendi kendini tetikliyor
-                    // henüz gerek olmadı
-                    if (RowNo == -1)
-                        runAllItemButton_();
-                }
+                // burada tetiklenme başlayınca sırayla kendi kendini tetikliyor
+                // henüz gerek olmadı
+                if (RowNo == -1)
+                    runAllItemButton_();
             }
         }
-        private void oneItemButtonClick(webNodeValue wnv_, int RowNo)
+        private void applyTableItemButtonClick_(webNodeValue wnv_, int RowNo)
         {
-            v.SQL = v.SQL + v.ENTER + myNokta + " oneItemButtonClick RowNo : " + RowNo.ToString();
+            v.SQL = v.SQL + v.ENTER + myNokta + " apply tableItemButtonClick RowNo : " + RowNo.ToString();
             //if (this.myTriggerWnv.elements != null)
             if (wnv_.elements != null)
             {
@@ -3083,7 +3160,14 @@ private void DisplaySecondUrl()
                     {
                         this.myTriggeringItemButton = true;
                         item.InvokeMember("click");
-                        Thread.Sleep(500);
+
+                        Application.DoEvents();
+                        if (this.timerTrigger.Enabled == false)
+                        {
+                            this.timerTrigger.Enabled = true;
+                            v.SQL = v.SQL + v.ENTER + myNokta + " applyTableItemButtonClick_ : for start : timerTrigger.Enabled = true";
+                        }
+
                     }
                 }
             }
@@ -3198,7 +3282,6 @@ private void DisplaySecondUrl()
                     element = webMain.Document.GetElementById(idName);
                     if (element != null)
                         element.SetAttribute("hidden", "display : none");
-
                 }
             }
             else
@@ -3225,14 +3308,26 @@ private void DisplaySecondUrl()
                 }
                 */
             }
-            
-        }
 
+        }
+                
         private void getHtmlTable(WebBrowser wb, ref webNodeValue wnv, string idName)
         {
             wnv.tTable = null;// Mevcudu yok et, yeni hazırlanacak
             HtmlElement htmlTable = wb.Document.GetElementById(idName);
             if (htmlTable == null) return;
+
+            // okunacak table içinde pages tables var mı kontrol etmek gerekiyor
+            // 
+            //this.htmlTablePages = null;
+            //this.selectedTablePageNo = 0;
+                        
+            if (areThereTablePages(htmlTable))
+            {
+                this.tablePageName = idName;
+                this.tablePageUrl = wb.Url.ToString();
+            }
+                        
             HtmlElementCollection htmlRows = htmlTable.GetElementsByTagName("tr");
             int rowCount = htmlRows.Count;
             int colCount = 0;
@@ -3250,71 +3345,241 @@ private void DisplaySecondUrl()
             //for (int i = 0; i < rowCount; i++)
             for (int i = 1; i < rowCount; i++)
             {
-                tRow _tRow = new tRow();
-
                 HtmlElement hRow = htmlRows[i];
-                HtmlElementCollection htmlCols = hRow.GetElementsByTagName("td");
-                colCount = htmlCols.Count;
 
-                for (int i2 = 0; i2 < colCount; i2++)
+                if (hRow.Name != "pages")
                 {
-                    HtmlElement hCol = htmlCols[i2];
+                    tRow _tRow = new tRow();
 
-                    //<input name="dgListele$ctl04$ab" id="dgListele_ctl04_chkOnayBekliyor" type="radio" checked="checked" value="chkOnayBekliyor">
-                    //<input name="dgListele$ctl04$ab" id="dgListele_ctl04_chkOnayDurum" type="radio" value="chkOnayDurum">
+                    HtmlElementCollection htmlCols = hRow.GetElementsByTagName("td");
+                    colCount = htmlCols.Count;
 
-                    //HtmlElementCollection kDetay = kolon.Children;
-                    dtyHtml = hCol.InnerHtml;
-
-                    if (dtyHtml.IndexOf("type=\"radio\"") > -1)
+                    for (int i2 = 0; i2 < colCount; i2++)
                     {
-                        //dtyValue = hCol.Children[0].GetAttribute("value");
-                        dtyValue = hCol.Children[0].GetAttribute("");
-                        dtyIdName = hCol.Children[0].GetAttribute("id");
-                        dtyType = hCol.Children[0].GetAttribute("type");
+                        HtmlElement hCol = htmlCols[i2];
 
-                        if (dtyType == "radio")
+                        // <input name="dgListele$ctl04$ab" id="dgListele_ctl04_chkOnayBekliyor" type="radio" checked="checked" value="chkOnayBekliyor">
+                        // <input name="dgListele$ctl04$ab" id="dgListele_ctl04_chkOnayDurum" type="radio" value="chkOnayDurum">
+
+                        //HtmlElementCollection kDetay = kolon.Children;
+                        dtyHtml = hCol.InnerHtml;
+
+                        //dtyAhref = hCol.Children[0].GetAttribute("href");  << çalışıyor 
+                        //dtySrc = hCol.Children[0].GetAttribute("src");     << çalışmıyor
+
+                        if (dtyHtml.IndexOf("type=\"radio\"") > -1)
                         {
-                            wb.Document.GetElementById(dtyIdName).InvokeMember("click");
+                            //dtyValue = hCol.Children[0].GetAttribute("value");
+                            dtyValue = hCol.Children[0].GetAttribute("");
+                            dtyIdName = hCol.Children[0].GetAttribute("id");
+                            dtyType = hCol.Children[0].GetAttribute("type");
+                            if (dtyType == "radio")
+                            {
+                                wb.Document.GetElementById(dtyIdName).InvokeMember("click");
+                            }
                         }
-                    }
 
-                    if (hCol.InnerText != null)
-                    {
-                        value = hCol.InnerText.Trim();
-                    }
-                    else
-                    {
-                        /*
-                        <img onmouseover="this.src="/images/toolimages/open_kucuk_a.gif";this.style.cursor="hand";" 
-                        onmouseout="this.src="/images/toolimages/open_kucuk.gif";this.style.cursor="default";" 
-                        onclick="fnIslemSec("99969564|01/08/2017|NMZVAN93C15010059");" 
-                        src="/images/toolimages/open_kucuk.gif">
-                        */
-                        pos = -1;
-                        pos = hCol.OuterHtml.IndexOf("onclick");
-                        if (pos > -1)
+                        if (hCol.InnerText != null)
                         {
-                            //value = hCol.GetAttribute("src");
-                            //System.Windows.Forms.HtmlDocument doc = preparingHtmlDocument(hCol.OuterHtml);
-                            //value = doc.GetElementsByTagName("img")[0].GetAttribute("src");
-
-                            //   /images/toolimages/open_kucuk.gif
-
-                            html = hCol.OuterHtml.Remove(0, hCol.OuterHtml.IndexOf(" src=") + 6);
-                            value = html.Remove(html.IndexOf(">") - 1);
+                            value = hCol.InnerText.Trim();
                         }
-                        else value = "";
+                        else
+                        {
+                            // <img onmouseover="this.src="/images/toolimages/open_kucuk_a.gif";this.style.cursor="hand";" 
+                            // onmouseout="this.src="/images/toolimages/open_kucuk.gif";this.style.cursor="default";" 
+                            // onclick="fnIslemSec("99969564|01/08/2017|NMZVAN93C15010059");" 
+                            // src="/images/toolimages/open_kucuk.gif">
+
+                            pos = -1;
+                            pos = hCol.OuterHtml.IndexOf("onclick");
+
+                            // <td align="center" style="width: 30px;">
+                            // <a href="javascript:__doPostBack('dgIstekOnaylanan','Select$0')">
+                            // <img title="Aç" onmouseover="this.src='/images/toolimages/open_kucuk_a.gif';this.style.cursor='pointer';" onmouseout="this.src='/images/toolimages/open_kucuk.gif';this.style.cursor='default';" src="/images/toolimages/open_kucuk.gif">
+                            // </a></td>                        
+
+                            if (pos == -1) // 
+                                pos = hCol.OuterHtml.IndexOf("__doPostBack(");
+
+                            if (pos > -1)
+                            {
+                                //value = hCol.GetAttribute("src");
+                                //System.Windows.Forms.HtmlDocument doc = preparingHtmlDocument(hCol.OuterHtml);
+                                //value = doc.GetElementsByTagName("img")[0].GetAttribute("src");
+
+                                //   /images/toolimages/open_kucuk.gif
+
+                                html = hCol.OuterHtml.Remove(0, hCol.OuterHtml.IndexOf(" src=") + 6);
+                                value = html.Remove(html.IndexOf(">") - 1);
+                            }
+                            else value = "";
+                        }
+                        tColumn _tColumn = new tColumn();
+                        _tColumn.value = value;
+                        _tRow.tColumns.Add(_tColumn);
                     }
-                    tColumn _tColumn = new tColumn();
-                    _tColumn.value = value;
-                    _tRow.tColumns.Add(_tColumn);
+
+                    if (_tRow.tColumns.Count > 0)
+                    {
+                        if (_tRow.tColumns[0].value != "pages")
+                           _tTable.tRows.Add(_tRow);
+                    }
+
                 }
 
-                _tTable.tRows.Add(_tRow);
+                if (hRow.Name == "pages")
+                {
+                    //işlem yapma
+                }
             }
 
             wnv.tTable = _tTable;
+        }
+
+        // table içinde sayfalar var mı ?
+        private bool areThereTablePages(HtmlElement htmlTable)
+        {
+            // Pages için table varmı kontrol et, varsa -pages- şeklinde işaretler 
+            // böylece table dan data okurken page bilgisini bulunduran satırları atlasın
+            //
+            // <tbody><tr>
+            // <td><span>1</span></td>
+            // <td><a href="javascript:__doPostBack('dgIstekOnaylanan','Page$2')"> 2 </a></td>
+            // <td><a href="javascript:__doPostBack('dgIstekOnaylanan','Page$3')"> 3 </a></td>
+            // </tr>
+            // </tbody>
+
+            bool onay = false;
+            // bu kopya ise esas tabloya müdehale için kullanılıyor
+            HtmlElementCollection htmlTablePages_ = htmlTable.GetElementsByTagName("table");
+            
+            int tableCount = htmlTablePages_.Count;
+            int rowCount = 0;
+            int colCount = 0;
+
+            for (int i = 0; i < tableCount; i++)
+            {
+                if ((htmlTablePages_[i].InnerHtml.IndexOf("javascript:__doPostBack(") > -1) &&
+                    (htmlTablePages_[i].InnerHtml.IndexOf("Page$") > -1))
+                {
+                    HtmlElement hTable = htmlTablePages_[i];
+                    HtmlElementCollection htmlRows = hTable.GetElementsByTagName("tr");
+                    rowCount = htmlRows.Count;
+                    
+                    for (int i2 = 0; i2 < rowCount; i2++)
+                    {
+                        HtmlElement hRow = htmlRows[i2];
+                        HtmlElementCollection htmlCols = hRow.GetElementsByTagName("td");
+                        colCount = htmlCols.Count;
+
+                        for (int i3 = 0; i3 < colCount; i3++)
+                        {
+
+                            // sayfa 1 için durum
+                            // hcol.InnerHtml = <span>1</span>
+                            // hcol.InnerHtml = <a href="javascript:__doPostBack('dgIstekOnaylanan','Page$2')">2</a>
+                            // hcol.InnerHtml = <a href="javascript:__doPostBack('dgIstekOnaylanan','Page$3')">3</a>
+                            //
+                            // sayfa 2 için durum
+                            // hcol.InnerHtml = <a href="javascript:__doPostBack('dgIstekOnaylanan','Page$1')">1</a>
+                            // hcol.InnerHtml = <span>2</span>
+                            // hcol.InnerHtml = <a href="javascript:__doPostBack('dgIstekOnaylanan','Page$3')">3</a>
+                            //
+                            // sayfa 3 için durum
+                            // hcol.InnerHtml = <a href="javascript:__doPostBack('dgIstekOnaylanan','Page$1')">1</a>
+                            // hcol.InnerHtml = <a href="javascript:__doPostBack('dgIstekOnaylanan','Page$2')">2</a>
+                            // hcol.InnerHtml = <span>3</span>
+
+                            HtmlElement hCol = htmlCols[i3];
+
+                            if (hCol.InnerHtml.IndexOf("<span>") > -1)
+                                this.selectedTablePageNo = i3 + 1;
+                        }
+
+                        if (hRow.TagName == "TR")
+                        {
+                            hRow.InnerText = "pages";
+                            hRow.Name = "pages";
+                        }
+                    }
+                }
+            }
+
+            if (tableCount > 0) 
+                onay = true;
+
+            return onay;
+        }
+
+        private void selectTablePage(WebBrowser wb)
+        {
+            
+            if (this.htmlTablePages == null) return;
+
+            v.SQL = v.SQL + v.ENTER + myNokta + " selectTablePage : " + this.selectedTablePageNo.ToString();
+
+            int tableCount = this.htmlTablePages.Count;
+            int rowCount = 0;
+            int colCount = 0;
+
+            // htmlTablePages birden fazla olabiliyor, tablonun başında ve tablonun en altında page ler için tablePages oluyor
+            // click lemek için bir tanesine ulaşmamız yeterli olduğu için tableCount yerine 1 kullanıldı.
+
+            //for (int i = 0; i < tableCount; i++)
+            for (int i = 0; i < 1; i++)
+            {
+                if ((this.htmlTablePages[i].InnerHtml.IndexOf("javascript:__doPostBack(") > -1) &&
+                    (this.htmlTablePages[i].InnerHtml.IndexOf("Page$") > -1))
+                {
+                    HtmlElement hTable = this.htmlTablePages[i];
+                    HtmlElementCollection htmlRows = hTable.GetElementsByTagName("tr");
+                    rowCount = htmlRows.Count;
+
+                    for (int i2 = 0; i2 < rowCount; i2++)
+                    {
+                        HtmlElement hRow = htmlRows[i2];
+                        HtmlElementCollection htmlCols = hRow.GetElementsByTagName("td");
+                        colCount = htmlCols.Count;
+
+                        for (int i3 = 0; i3 < colCount; i3++)
+                        {
+                            // sayfa 1 için durum
+                            // hcol.InnerHtml = <span>1</span>
+                            // hcol.InnerHtml = <a href="javascript:__doPostBack('dgIstekOnaylanan','Page$2')">2</a>
+                            // hcol.InnerHtml = <a href="javascript:__doPostBack('dgIstekOnaylanan','Page$3')">3</a>
+                            //
+                            // sayfa 2 için durum
+                            // hcol.InnerHtml = <a href="javascript:__doPostBack('dgIstekOnaylanan','Page$1')">1</a>
+                            // hcol.InnerHtml = <span>2</span>
+                            // hcol.InnerHtml = <a href="javascript:__doPostBack('dgIstekOnaylanan','Page$3')">3</a>
+                            //
+                            // sayfa 3 için durum
+                            // hcol.InnerHtml = <a href="javascript:__doPostBack('dgIstekOnaylanan','Page$1')">1</a>
+                            // hcol.InnerHtml = <a href="javascript:__doPostBack('dgIstekOnaylanan','Page$2')">2</a>
+                            // hcol.InnerHtml = <span>3</span>
+
+                            HtmlElement hCol = htmlCols[i3];
+
+                            if (i3 + 1 == this.selectedTablePageNo)
+                            {
+                                string dtyIdName = "Page$" + this.selectedTablePageNo.ToString();
+
+                                // bu metod çalışmadı
+                                // string doPostBack = hCol.Children[0].GetAttribute("href");
+                                // object y = wb.Document.InvokeScript(this.tablePageName, new string[] { doPostBack });
+                                // object y = wb.Document.InvokeScript(this.tablePageName, new string[] { dtyIdName });
+
+                                // bu metodda çalışmadı
+                                // hCol.InvokeMember("click");
+
+                                // bu metod çalışıyor
+                                hCol.Children[0].SetAttribute("id", dtyIdName);
+                                wb.Document.GetElementById(dtyIdName).InvokeMember("click");
+                            }
+                        }
+                    }
+                }
+            }
 
         }
 
@@ -3483,7 +3748,6 @@ private void DisplaySecondUrl()
                             }
                         }
 
-
                         if (dtyHtml.IndexOf("type=\"radio\"") == -1)
                         {
                             hCol.SetAttribute("value", _dbValue);
@@ -3521,6 +3785,20 @@ private void DisplaySecondUrl()
 
             if (wnv.writeValue == "BUGUN_YILAY")
                 wnv.writeValue = v.BUGUN_YILAY.ToString();
+
+            if (wnv.writeValue == "MEBBIS_KODU")
+            {
+                if (v.tUser.MebbisCode != "")
+                    wnv.writeValue = v.tUser.MebbisCode;
+                else wnv.writeValue = v.tMainFirm.MebbisCode;
+            }
+
+            if (wnv.writeValue == "MEBBIS_SIFRE")
+            {
+                if (v.tUser.MebbisPass != "")
+                    wnv.writeValue = v.tUser.MebbisPass;
+                else wnv.writeValue = v.tMainFirm.MebbisPass;
+            }
         }
         
         private void selectItemsRead(WebBrowser wb, ref webNodeValue wnv, string idName)
@@ -3585,7 +3863,6 @@ private void DisplaySecondUrl()
             return value;
         }
 
-
         private void dN_AnalysisNodes_PositionChanged(object sender, EventArgs e)
         {
             if (btn_AnalysisView != null)
@@ -3611,7 +3888,12 @@ private void DisplaySecondUrl()
 
         private void dbButtonClick(string tableIPCode, v.tButtonType buttonType)
         {
-            v.SQL = v.SQL + v.ENTER + myNokta + " dbButtonClick";
+            string type_ = "";
+            if (buttonType == v.tButtonType.btKaydet) type_ = "Kaydet";
+            if (buttonType == v.tButtonType.btYeniHesapSatir) type_ = "YeniHesapSatir";
+            if (buttonType == v.tButtonType.btKaydetYeni) type_ = "KaydetYeni";
+
+            v.SQL = v.SQL + v.ENTER + myNokta + " dbButtonClick ( " + type_ + " ) ";
 
             v.tButtonHint.Clear();
             v.tButtonHint.tForm = this;
@@ -3673,10 +3955,15 @@ private void DisplaySecondUrl()
 
             openPageControlAsync(((WebBrowser)sender));
 
-            if (this.myTriggering)
+            if (((this.myTriggering) ||
+                 (this.myTriggeringTable)
+                 ) &&
+                (this.selectedTablePageNo == 0))
             {
-                if ((this.myTriggeringTable) ||
-                    (this.myTriggerItemButton) ||
+                if (
+                    //(this.myTriggerItemButton) ||
+                    //(this.myTriggeringItemButton) ||
+                    (this.myTriggeringTable) ||
                     (this.myTriggerInvoke) ||
                     (this.myTriggerPageRefresh) ||
                     (this.myTriggerOneByOne)
@@ -3685,7 +3972,6 @@ private void DisplaySecondUrl()
                     Application.DoEvents();
                     if (this.timerTrigger.Enabled == false)
                     {
-
                         this.timerTrigger.Enabled = true;
                         v.SQL = v.SQL + v.ENTER + myNokta + " webMain_DocumentCompleted : for start : timerTrigger.Enabled = true";
                     }
@@ -3708,6 +3994,29 @@ private void DisplaySecondUrl()
                 v.IsWaitOpen = true;
             }
 
+
+            if (this.myTriggerPageRefresh)
+            {
+                // table pages varsa onu clickle 
+                if ((this.selectedTablePageNo > 0) &&
+                    (this.tablePageUrl == this.aktifUrl))
+                {
+                    //MessageBox.Show("selectedpage");
+
+                    // bu kopya daha sonra selectTablePage için kulllanılıyor
+                    HtmlElement htmlTable = ((WebBrowser)sender).Document.GetElementById(this.tablePageName);
+                    this.htmlTablePages = htmlTable.GetElementsByTagName("table");
+
+                    selectTablePage((WebBrowser)sender);
+
+                    Application.DoEvents();
+                    if (this.timerTrigger.Enabled == false)
+                    {
+                        this.timerTrigger.Enabled = true;
+                        v.SQL = v.SQL + v.ENTER + myNokta + " webMain_DocumentCompleted, selectTablePage : for start : timerTrigger.Enabled = true";
+                    }
+                }
+            }
         }
 
         public bool WebReadyComplate(WebBrowser wb)
@@ -3815,7 +4124,7 @@ private void DisplaySecondUrl()
             this.loadBeforeWebRequestType = this.myTriggerWebRequestType;
             this.loadBeforeEventsType = this.myTriggerEventsType;
 
-            startTriggers(ds_Nodes, v.tWebRequestType.none, v.tWebEventsType.load);
+            startNodesRun(ds_Nodes, v.tWebRequestType.none, v.tWebEventsType.load);
 
             
             Thread.Sleep(100);
@@ -3827,11 +4136,11 @@ private void DisplaySecondUrl()
 
             v.SQL = v.SQL + v.ENTER + myNokta + " runDisplayNone : ";
 
-            startTriggersBefore();
+            startNodesBefore();
 
             this.myTriggering = true;
             //this.myTriggerEventsType = v.tWebEventsType.displayNone;
-            startTriggers(ds_Nodes, v.tWebRequestType.none, v.tWebEventsType.displayNone);
+            startNodesRun(ds_Nodes, v.tWebRequestType.none, v.tWebEventsType.displayNone);
             
             Thread.Sleep(100);
         }
@@ -3839,7 +4148,6 @@ private void DisplaySecondUrl()
         #endregion webBrowser events
 
         #region read db tables
-
         private bool readLoginPageControl(string Url)
         {
             if (Url == "") return false;
@@ -3992,11 +4300,10 @@ private void DisplaySecondUrl()
 
             ds.Namespace = pageCode;
         }
-
         private void eventsTypeCount(DataSet ds)
         {
             v.tWebEventsType dbEventsType = v.tWebEventsType.none;
-            this.myTriggerCount = 0; // tüm nodelerin sayısı
+            this.myNodeCount = 0; // tüm nodelerin sayısı
             this.myLoadNodeCount = 0;
             this.myDisplayNoneCount = 0;
             this.myPageRefreshCount = 0;
@@ -4005,6 +4312,7 @@ private void DisplaySecondUrl()
             this.myButton3Count = 0;
             this.myButton4Count = 0;
             this.myButton5Count = 0;
+            this.myTabelFieldCount = 0;
             this.myNoneCount = 0;
             string value = "";
             string isActive = "";
@@ -4016,7 +4324,7 @@ private void DisplaySecondUrl()
 
                 if (isActive == "True")
                 {
-                    this.myTriggerCount++;
+                    this.myNodeCount++;
                     if (dbEventsType == v.tWebEventsType.load) this.myLoadNodeCount++;
                     if (dbEventsType == v.tWebEventsType.displayNone) this.myDisplayNoneCount++;
                     if (dbEventsType == v.tWebEventsType.button1) this.myButton1Count++;
@@ -4024,6 +4332,7 @@ private void DisplaySecondUrl()
                     if (dbEventsType == v.tWebEventsType.button3) this.myButton3Count++;
                     if (dbEventsType == v.tWebEventsType.button4) this.myButton4Count++;
                     if (dbEventsType == v.tWebEventsType.button5) this.myButton5Count++;
+                    if (dbEventsType == v.tWebEventsType.tableField) this.myTabelFieldCount++;
                     if (dbEventsType == v.tWebEventsType.none) this.myNoneCount++;
 
                     //if (dbEventsType == v.tWebEventsType.pageRefresh)
@@ -4033,7 +4342,6 @@ private void DisplaySecondUrl()
             }
 
         }
-
         private void readNodeItems(string pageCode)
         {
             // her web page için ayrı ayrı okunacak bu liste

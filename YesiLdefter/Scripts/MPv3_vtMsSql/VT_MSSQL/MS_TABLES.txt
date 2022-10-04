@@ -7,7 +7,7 @@ begin transaction
         DBASE_TYPE              SmallInt              NULL,      /* 1.Master,  2.ManagerServer,  3.Project */ 
         MODUL_CODE              VarChar(100)          NULL,
         PARENT_TABLE_CODE       VarChar(20)           NULL, /* TREE VÝEW ÝÇÝN GEREKÝYOR */
-        TABLE_CODE              VarChar(20)           NOT NULL,
+        TABLE_CODE              VarChar(50)           NOT NULL,
         TABLE_NAME              VarChar(50)           NOT NULL,
         KEY_FNAME		        VarChar(30)           NULL,
         TABLE_TYPE              SmallInt              NULL, /* 1. table, .... 6. select */	
@@ -33,7 +33,7 @@ begin transaction
         PROJECT_CODE            nvarchar(20)          NULL,
         SCHEMAS_CODE            nvarchar(5)           NULL,
 
-	Constraint PK_MS_TABLES primary key (TABLE_CODE)
+	Constraint PK_MS_TABLES primary key (REF_ID)
  )
 
  create index X_MS_TABLES1 on MS_TABLES (MODUL_CODE,TABLE_CODE)

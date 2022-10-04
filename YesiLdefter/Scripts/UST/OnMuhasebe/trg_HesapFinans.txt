@@ -112,7 +112,7 @@ AS BEGIN
         begin
 	      --set @yHesapKisaAdi = Ltrim(@yHesapKisaAdi)
 	      --set @yHesapKisaAdi = Rtrim(@yHesapKisaAdi)
-		  set @yHesapKisaAdi = Trim(@yHesapKisaAdi)
+		  set @yHesapKisaAdi = RTRIM(LTRIM(@yHesapKisaAdi))
         end   
 
 		-- banka şubesi
@@ -120,7 +120,7 @@ AS BEGIN
 		    set @yHesapKisaAdi = @yHesapKisaAdi + '.' + @eHesapAdi
         -- banka hesabi
         if (@eAltGrupTipiId = 1022)
-		    set @yHesapKisaAdi = @yHesapKisaAdi + '.' + @eParentHesapAdi1 + '.' +  Trim(@eParentHesapKodu1) + '.' + @eNumarasi
+		    set @yHesapKisaAdi = @yHesapKisaAdi + '.' + @eParentHesapAdi1 + '.' +  RTRIM(LTRIM(@eParentHesapKodu1)) + '.' + @eNumarasi
         -- banka kartı
         if (@eAltGrupTipiId = 1023)
 		    set @yHesapKisaAdi = @yHesapKisaAdi + '.' + @eHesapAdi + '.' + @eNumarasi

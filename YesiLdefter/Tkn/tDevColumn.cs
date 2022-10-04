@@ -45,7 +45,7 @@ namespace Tkn_DevColumn
             if (t.IsNotNull(List_Name) && (List_Name.IndexOf(" = ") == -1)) // IsActive = True  gibi koşullar varsa çalışmasın
                 tRepositoryItem_Fill(ItemBox, null, null, null, null, null, List_Name, default_value, tview_type);
             //if (tLookUpField)
-            if ((tLookUpField) && ((t.IsNotNull(List_Name) == false) || (List_Name.IndexOf(" = ") > -1)))
+            if ((tLookUpField) && ((t.IsNotNull(List_Name) == false) || (List_Name.IndexOf(" = ") > -1) || (List_Name.IndexOf("Lkp.") > -1)))
                 LookUpTableFill(Row, ItemBox, null, null, null, null, null);
         }
 
@@ -60,7 +60,7 @@ namespace Tkn_DevColumn
             if (t.IsNotNull(List_Name) && (List_Name.IndexOf(" = ") == -1)) // IsActive = True  gibi koşullar varsa çalışmasın
                 tRepositoryItem_Fill(null, ItemBox, null, null, null, null, List_Name, default_value, tview_type);
             //if (tLookUpField)
-            if ((tLookUpField) && ((t.IsNotNull(List_Name) == false) || (List_Name.IndexOf(" = ") > -1)))
+            if ((tLookUpField) && ((t.IsNotNull(List_Name) == false) || (List_Name.IndexOf(" = ") > -1) || (List_Name.IndexOf("Lkp.") > -1)))
                 LookUpTableFill(Row, null, ItemBox, null, null, null, null);
         }
 
@@ -338,6 +338,7 @@ namespace Tkn_DevColumn
             string dbaseType = Row["LKP_DBASE_TYPE"].ToString();
             string tableName = Row["LKP_TABLE_NAME"].ToString();
             string fieldName = Row["LKP_FIELD_NAME"].ToString();
+            string groupTables = Row["LKP_LIST_TYPES_NAME"].ToString();
             string groupListTypes = Row["LIST_TYPES_NAME"].ToString();
             Int16 type = Convert.ToInt16(Row["LKP_FIELD_TYPE"].ToString());
 
@@ -346,7 +347,22 @@ namespace Tkn_DevColumn
             if (t.IsNotNull(Row["KRT_ALIAS"].ToString()))
                 tableName = Row["KRT_ALIAS"].ToString();
 
-            t.LookUpFieldNameChecked(ref tableName, ref fieldName, ref idFieldName);             
+            if (t.IsNotNull(groupTables))
+            {
+                // tablonun kendisi için Lkp.{tableName}Type tablosu hazırlanmamış 
+                // onun yerine başka bir tablonun Lkp.xxxxType tablusu kullanılacak
+
+                //Lkp.MsSectorType||Id||SectorType
+
+                if (groupTables.IndexOf("Lkp.") > -1)
+                    groupTables = groupTables.Replace("Lkp.", "");
+
+                tableName = t.Get_And_Clear(ref groupTables, "||");
+                idFieldName = t.Get_And_Clear(ref groupTables, "||");
+                fieldName = t.Get_And_Clear(ref groupTables, "||");
+            }
+
+            t.LookUpFieldNameChecked(ref tableName, ref fieldName, ref idFieldName, type);             
 
             LookUpTableRead_(dbaseType, tableName);
             LookUpTableFill_(tableName, idFieldName, fieldName, groupListTypes, type,
@@ -372,9 +388,10 @@ namespace Tkn_DevColumn
 
                 string Sql = " Select * from [Lkp].[" + tableName + "]  ";
 
-                if ((tableName == "ParaTipi") ||
-                    (tableName == "BirimTipi"))
-                    Sql = " Select * from [Lkp].[" + tableName + "] where IsActive = 1 ";
+                if (tableName == "ParaTipi")
+                    Sql = " Select * from [Lkp].[OnmParaTipi] where IsActive = 1 ";
+                if (tableName == "BirimTipi")
+                    Sql = " Select * from [Lkp].[OnmStokBirimTipi] where IsActive = 1 ";
 
                 if (tableName == "ILTipi")
                     Sql = " Select * from [Lkp].[" + tableName + "] order by IlAdi ";
@@ -2556,6 +2573,7 @@ namespace Tkn_DevColumn
             string s = string.Empty;
             string TableIPCode = string.Empty;
             string default_value = string.Empty;
+            string tTableCode = string.Empty;
             string tTableName = string.Empty;
             string tFieldName = string.Empty;
             string tExpression = string.Empty;
@@ -2565,11 +2583,17 @@ namespace Tkn_DevColumn
             Int16 tcmp_format_type = 0;
             Int16 tcmp_format_type2 = 0;
             Int16 tExpressionType = 0;
+            int RefId = 0;
             int field_no = 0;
+            byte default_type = 0;
+            Int16 field_type = 0;
 
             #region row_Fields != null
             if (row_Fields != null)
             {
+                RefId = t.myInt32(row_Fields["REF_ID"].ToString());
+                field_type = t.myInt16(row_Fields["LKP_FIELD_TYPE"].ToString());
+                tTableCode = row_Fields["LKP_TABLE_CODE"].ToString();
                 tTableName = row_Fields["LKP_TABLE_NAME"].ToString();
                 tFieldName = row_Fields["LKP_FIELD_NAME"].ToString();
                 tExpression = row_Fields["LKP_PROP_EXPRESSION"].ToString();
@@ -2603,7 +2627,7 @@ namespace Tkn_DevColumn
 
                 if (tview_type == 2) // Tumu varsa 
                 {
-                    byte default_type = t.Set(row_Fields["DEFAULT_TYPE"].ToString(), row_Fields["LKP_DEFAULT_TYPE"].ToString(), (byte)0);
+                    default_type = t.Set(row_Fields["DEFAULT_TYPE"].ToString(), row_Fields["LKP_DEFAULT_TYPE"].ToString(), (byte)0);
 
                     // Tespit edilen Default Type Göre -------------------
                     #region default_type > Var ( 1, 2, 3, 4 )
@@ -2999,7 +3023,21 @@ namespace Tkn_DevColumn
 
                     tEdit.EditValueChanged += new System.EventHandler(ev.tXtraEdit_EditValueChanged);
                     tEdit.EditValueChanging += new DevExpress.XtraEditors.Controls.ChangingEventHandler(ev.tXtraEdit_EditValueChanging);
-                    tEdit.Tag = tOperand_type;
+                    //tEdit.Tag = tOperand_type;
+
+                    string SubDetail_List =
+                        "=Detail_SubDetail:" +
+                        TableIPCode + "||" +
+                        "[" + tTableCode + "]." + tFieldName + "||" +
+                        "[" + tTableCode + "]." + tFieldName + "||" +
+                        field_type.ToString() + "||" +
+                        default_type.ToString() + "||" + //  51, 52, 53
+                        tOperand_type.ToString() + "||" +
+                        "" + "||" + //mst_CheckFName
+                        "" + "||" + // mst_CheckValue
+                        RefId.ToString() + "|ds|" + v.ENTER;
+
+                    tEdit.Tag = SubDetail_List;
                 }
             }
             #endregion

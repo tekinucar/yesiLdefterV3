@@ -67,6 +67,7 @@ namespace YesiLdefter
         string buttonTablesList = "TABLES_LIST";
         string buttonSingleTableCreate = "SINGLE_TABLE_CREATE";
         string buttonTablesCreate = "TABLES_CREATE";
+        string buttonTriggersCreate = "TRIGGERS_CREATE";
 
         string buttonProceduresList = "PROCEDURES_LIST";
         string buttonSingleProcedureCreate = "SINGLE_PROCEDURE_CREATE";
@@ -141,6 +142,9 @@ namespace YesiLdefter
                 if (((DevExpress.XtraBars.Navigation.TileNavItem)sender).Name == buttonTablesCreate) tablesCreate();
                 if (((DevExpress.XtraBars.Navigation.TileNavItem)sender).Name == buttonFieldList) fieldList();
                 if (((DevExpress.XtraBars.Navigation.TileNavItem)sender).Name == buttonDataView) dataView();
+                if (((DevExpress.XtraBars.Navigation.TileNavItem)sender).Name == buttonTriggersCreate) triggersCreate();
+                
+
                 // procedures
                 if (((DevExpress.XtraBars.Navigation.TileNavItem)sender).Name == buttonProceduresList) tablesList((DevExpress.XtraBars.Navigation.TileNavItem)sender);
                 if (((DevExpress.XtraBars.Navigation.TileNavItem)sender).Name == buttonSingleProcedureCreate) singleProcedureCreate();
@@ -230,79 +234,73 @@ namespace YesiLdefter
 
         private void allTableFileReadDbWrite()
         {
-            string fileName = "";
-            string vSchemaName = "";
-            string vTableName = "";
-            string vParentTable = "";
-            string vHasATrigger = "";
-
-            v.active_DB.runDBaseNo = v.dBaseNo.UstadCrm;
-
-            if (t.IsNotNull(dsTables))
-            {
-                foreach (DataRow Row in dsTables.Tables[0].Rows)
-                {
-                    vSchemaName  = Row[fSchemaName].ToString();
-                    vTableName   = Row[fTableName].ToString();
-                    vParentTable = Row[fParentTable].ToString();
-                    vHasATrigger = Row[fHasATrigger].ToString();
-
-                    fileName = vTableName;
-                    if (vSchemaName != "dbo")
-                        fileName =  vSchemaName + "_" + vTableName;
-
-                    // parentTable olan tablolar başka bir tablonun Lkp tablolarıdır
-                    // onlar kendisinin bağlı olduğu tablo içerisinde create ediliyorlar
-                    // parentTable ismi olmayan Lkp_xxx tablolar ise bağımsız tablolardır
-                    //
-                    if (vParentTable == "")
-                    {
-                        tFileReadAndWrite(dsTables, dNTables, fSqlScript, fileName);
-                    }
-                }
-            }
+            allFileReadDbWrite(dsTables, dNTables, "Table",
+                fSchemaName, fTableName, fSqlScript, fParentTable);
         }
 
         private void allProcedureFileReadDbWrite()
         {
-            string fileName = "";
-            string vSchemaName = "";
-            string vProcedureName = "";
-            
-            v.active_DB.runDBaseNo = v.dBaseNo.UstadCrm;
-
-            if (t.IsNotNull(dsProcedures))
-            {
-                foreach (DataRow Row in dsProcedures.Tables[0].Rows)
-                {
-                    vSchemaName = Row[fSchemaName].ToString();
-                    vProcedureName = Row[fProcedureName].ToString();
-                    
-                    fileName = vProcedureName;
-                    if (vSchemaName != "dbo")
-                        fileName = vSchemaName + "_" + vProcedureName;
-
-                    tFileReadAndWrite(dsProcedures, dNProcedures, fSqlScript, fileName);
-                }
-            }
+            allFileReadDbWrite(dsProcedures, dNProcedures, "Procedure",
+                fSchemaName, fProcedureName, fSqlScript, "");
         }
 
         private void allFunctionFileReadDbWrite()
         {
-            string vFunctionName = "";
+            allFileReadDbWrite(dsFunctions, dNFunctions, "Function",
+                fSchemaName, fFunctionName, fSqlScript, "");
+        }
+
+        private void allFileReadDbWrite(DataSet ds, DataNavigator dN, 
+            string fileTypeName, 
+            string fieldSchemaName, 
+            string fieldEntityName, 
+            string fieldSqlScript,
+            string fieldParentName)
+        {
+            string fileName = "";
+            string vSchemaName = "";
+            string vEntityName = "";
+            string vParentTable = "";
 
             v.active_DB.runDBaseNo = v.dBaseNo.UstadCrm;
 
-            if (t.IsNotNull(dsFunctions))
+            if (t.IsNotNull(ds))
             {
-                foreach (DataRow Row in dsFunctions.Tables[0].Rows)
+                string soru = " Tüm  " + fileTypeName + "  ?.txt dosyalarından okunarak database yazılacak. Onaylıyor musunuz ?";
+                DialogResult cevap = t.mySoru(soru);
+                if (DialogResult.Yes == cevap)
                 {
-                    vFunctionName = Row[fFunctionName].ToString();
+                    int length = ds.Tables[0].Rows.Count;
+                    for (int i = 0; i < length; i++)
+                    {
+                        dN.Position = i;
 
-                    tFileReadAndWrite(dsFunctions, dNFunctions, fSqlScript, vFunctionName);
+                        vSchemaName = ds.Tables[0].Rows[i][fieldSchemaName].ToString();
+                        vEntityName = ds.Tables[0].Rows[i][fieldEntityName].ToString();
+                        vParentTable = "";
+
+                        if (fieldParentName != "")
+                            vParentTable = ds.Tables[0].Rows[i][fieldParentName].ToString();
+
+                        /// parentTable ?
+                        /// parentTable olan tablolar başka bir tablonun Lkp tablolarıdır
+                        /// onlar kendisinin bağlı olduğu tablo içerisinde create ediliyorlar
+                        /// parentTable ismi olmayan Lkp_xxx tablolar ise bağımsız tablolardır
+                        ///
+                        if (vParentTable == "")
+                        {
+                            fileName = vEntityName;
+                            if (vSchemaName != "dbo")
+                                fileName = vSchemaName + "_" + vEntityName;
+
+                            tFileReadAndWrite(ds, dN, fieldSqlScript, fileName);
+                        }
+                    }
+                    t.FlyoutMessage(fileTypeName + " dosyalarını okuma ve database yazma", "İşlemler tamamlandı...");
                 }
             }
         }
+
 
         private bool tFileReadAndWrite(DataSet dsData, DataNavigator dNData, string fieldName, string fileName)
         {
@@ -621,6 +619,81 @@ namespace YesiLdefter
         {
 
         }
+        private void triggersCreate()
+        {
+            if (t.IsNotNull(dsTables))
+            {
+                bool onay = true;
+                vTable vt = new vTable();
+                v.active_DB.runDBaseNo = v.dBaseNo.NewDatabase;
+
+                string soru = " Tüm trigger listesi yeniden oluşturulacak. Onaylıyor musunuz ?";
+                DialogResult cevap = t.mySoru(soru);
+                if (DialogResult.Yes == cevap)
+                {
+                    // çalışmıyor sebebini anlamadım.
+                    //t.WaitFormOpen(this, "Tables create...");
+                    //v.SP_OpenApplication = true;
+                    //---
+
+                    int length = dsTables.Tables[0].Rows.Count;
+                    for (int i = 0; i < length; i++)
+                    {
+                        dNTables.Position = i;
+                        onay = preparingCreateTrigger(dNTables.Position);
+                    }
+
+                    //--- çalışmıyor
+                    //v.IsWaitOpen = false;
+                    //t.WaitFormClose();
+                    //----
+                    t.FlyoutMessage("Trigger oluşturma", "İşlemler tamamlandı...");
+                }
+            }
+        }
+
+        private bool preparingCreateTrigger(int pos)
+        {
+            bool onay = false;
+            string fileName = "";
+            string vSchemaName = "";
+            string vTableName = "";
+            string vParentTable = "";
+            //string vHasATrigger = "";
+            string vSqlScript = "";
+            vTable vt = new vTable();
+
+            vSchemaName = dsTables.Tables[0].Rows[pos][fSchemaName].ToString();
+            vTableName = dsTables.Tables[0].Rows[pos][fTableName].ToString();
+            vParentTable = dsTables.Tables[0].Rows[pos][fParentTable].ToString();
+            //vHasATrigger = dsTables.Tables[0].Rows[pos][fHasATrigger].ToString();
+            vSqlScript = dsTables.Tables[0].Rows[pos][fSqlScript].ToString();
+
+            vt.DBaseNo = v.dBaseNo.NewDatabase;
+            vt.SchemasCode = vSchemaName;
+            vt.TableName = vTableName;
+
+            fileName = vTableName;
+            if (vSchemaName != "dbo")
+                fileName = vSchemaName + "_" + vTableName;
+
+            Application.DoEvents();
+
+            // parentTable olan tablolar başka bir tablonun Lkp tablolarıdır
+            // onlar kendisinin bağlı olduğu tablo içerisinde create ediliyorlar
+            // parentTable ismi olmayan Lkp_xxx tablolar ise bağımsız tablolardır
+            //
+            if ((vParentTable == "") && (t.IsNotNull(vSqlScript)))
+            {
+                v.active_DB.runDBaseNo = v.dBaseNo.NewDatabase;
+
+                onay = db.tTriggerCreate(vSqlScript, vt);
+            }
+
+            Thread.Sleep(100);
+
+            return onay;
+        }
 
         #endregion Tables işlemleri
 
@@ -803,6 +876,9 @@ namespace YesiLdefter
         {
             if (t.IsNotNull(dsFirm))
             {
+                // preparing Tables, Proceduru, Function write database
+                t.Find_Button_AddClick(this, menuName2, buttonSingFileReadDbWrite, myNavElementClick);
+                t.Find_Button_AddClick(this, menuName2, buttonAllFileReadDbWrite, myNavElementClick);
                 // database
                 t.Find_Button_AddClick(this, menuName2, buttonDbConnection, myNavElementClick);
                 t.Find_Button_AddClick(this, menuName2, buttonDbCreate, myNavElementClick);
@@ -812,6 +888,7 @@ namespace YesiLdefter
                 t.Find_Button_AddClick(this, menuName2, buttonTablesCreate, myNavElementClick);
                 t.Find_Button_AddClick(this, menuName2, buttonFieldList, myNavElementClick);
                 t.Find_Button_AddClick(this, menuName2, buttonDataView, myNavElementClick);
+                t.Find_Button_AddClick(this, menuName2, buttonTriggersCreate, myNavElementClick);
                 // procedures
                 t.Find_Button_AddClick(this, menuName2, buttonProceduresList, myNavElementClick);
                 t.Find_Button_AddClick(this, menuName2, buttonSingleProcedureCreate, myNavElementClick);

@@ -114,7 +114,7 @@ namespace Tkn_Events
         }
 
         private bool getSearchValues(Form tForm,
-            string TableIPCode,
+            string searchTableIPCode,
             string myProp,
             string searchValue,
             string targetTableIPCode,
@@ -129,22 +129,20 @@ namespace Tkn_Events
             /// TargetTableIPCode = bulunan kaydın set edileceği ekrandaki aktif form 
             
             bool onay = false;
-            bool isIntField = false;
-            int isIntValue = 0;
-
+            
             tToolBox t = new tToolBox();
             tInputPanel ip = new tInputPanel();
 
-            DataSet ds = ip.Create_DataSet(tForm, TableIPCode);
+            DataSet dsSearchTableIP = ip.Create_DataSet(tForm, searchTableIPCode);
 
-            string myProp_ = ds.Namespace.ToString();
+            string myProp_ = dsSearchTableIP.Namespace.ToString();
             string tSql = t.Set(t.MyProperties_Get(myProp_, "SqlSecond:"),
                                 t.MyProperties_Get(myProp_, "SqlFirst:"), "");
                         
             tTablesRead tr = new tTablesRead();
             DataSet dsMSTableIp = new DataSet();
 
-            tr.MS_Tables_IP_Read(dsMSTableIp, TableIPCode);
+            tr.MS_Tables_IP_Read(dsMSTableIp, searchTableIPCode);
 
             if (t.IsNotNull(dsMSTableIp) == false)
                 return false;
@@ -159,79 +157,15 @@ namespace Tkn_Events
                                     
             if (t.IsNotNull(FindFName) == false)
             {
-                MessageBox.Show("DİKKAT : ( " + TableIPCode + " ) için -Find FName- tanımı eksik ...");
+                MessageBox.Show("DİKKAT : ( " + searchTableIPCode + " ) için -Find FName- tanımı eksik ...");
                 return onay;
             }
 
-            string fName = "";
-            string findValues = "";
-            if ((FindFName.ToString().IndexOf("||") > -1) && // birden fazla field var
-                (FindFName.ToString().IndexOf("==") == -1))  // Int field için eşleştirme yok
-            {
-                FindFName = FindFName + "||";
-                while (FindFName.IndexOf("||") > -1)
-                {
-                    fName = t.Get_And_Clear(ref FindFName, "||");
-                    if (fName != "")
-                    {
-                        if (findValues == "")
-                             findValues = findValues + "and (" + fName + " like '%" + searchValue + "%'";
-                        else findValues = findValues + " or  " + fName + " like '%" + searchValue + "%'";
-                    }
-                }
-            }
-
-            // bir field üzerinde sadece eşitse çalışacak ( Id ler için gerekli oldu Aday.Id gibi ) 
-            if ((FindFName.ToString().IndexOf("||") > -1) && // birden fazla field var
-                (FindFName.ToString().IndexOf("==") > -1))   // Int field için eşleştirme var    
-            {
-                // Id||TamAdiSoyadi||==
-                FindFName = FindFName.Replace("==", "");
-                                
-                while (FindFName.IndexOf("||") > -1)
-                {
-                    fName = t.Get_And_Clear(ref FindFName, "||");
-                    
-                    if (fName != "")
-                    {
-                        // karşılaştırmayı aranan value ile yapmamız gerekiyor 
-                        // int bir value mi arıyor, yoksa string bir value mi arıyor
-                        
-                        isIntField = t.IsIntFieldType(ds, fName);
-                        isIntValue = t.myInt32(searchValue);
-                        
-                        // Int field değil ise (TamAdiSoyadi gibi birşey ise
-                        
-                        if ((isIntValue == 0) && (isIntField == false))
-                        {
-                            if (findValues == "")
-                                 findValues = findValues + "and (" + fName + " like '%" + searchValue + "%'";
-                            else findValues = findValues + " or  " + fName + " like '%" + searchValue + "%'";
-                        }
-                        
-                        if ((isIntValue > 0) && (isIntField))
-                        {
-                            findValues = " and " + TableLabel + "." + fName + " = " + searchValue + " ";
-                        }
-                    }
-                }
-
-            }
-
-            // yani tek field yazılmışsa
-            if ((FindFName.ToString().IndexOf("||") == -1) && // birden fazla field yok
-                (FindFName.ToString().IndexOf("==") == -1) && // Int field için eşleştirme yok
-                (findValues == ""))
-            {
-                findValues = " and " + TableLabel + "." + FindFName + " like '%" + searchValue + "%'";
-            }
-                       
-
-            if (findValues.IndexOf("and (") > -1) findValues = findValues + ")";
+            string whereSQL = preparinSearchSql(dsSearchTableIP, TableLabel, FindFName, searchValue);
 
             //string tSql = "Select * from " + schemasCode + "." + TableName + " where 0 = 0 " + findValues;
 
-            tSql = t.SQLWhereAdd(tSql, TableLabel, findValues, "DEFAULT");
+            tSql = t.SQLWhereAdd(tSql, TableLabel, whereSQL, "DEFAULT");
 
             DataSet ds_Query = new DataSet();
             t.SQL_Read_Execute(v.dBaseNo.Project, ds_Query, ref tSql, TableName, "searchVaule");
@@ -283,6 +217,146 @@ namespace Tkn_Events
             }
 
             ds_Query.Dispose();
+            return onay;
+        }
+
+        private string preparinSearchSql(DataSet dsSearchTableIP, string tableLabel, string findFName, string searchValue)
+        {
+            tToolBox t = new tToolBox();
+           
+            bool isIntField = false;
+            int isIntValue = 0;
+            string fName = "";
+            string whereSQL = "";
+
+            if ((findFName.ToString().IndexOf("||") > -1) && // birden fazla field var
+                (findFName.ToString().IndexOf("==") == -1))  // Int field için eşleştirme yok
+            {
+                findFName = findFName + "||";
+                while (findFName.IndexOf("||") > -1)
+                {
+                    fName = t.Get_And_Clear(ref findFName, "||");
+
+                    //checkLabel(ref tableLabel, ref fName);
+
+                    if (fName != "")
+                    {
+                        if (whereSQL == "")
+                            whereSQL = whereSQL + "and (" + fName + " like '%" + searchValue + "%'";
+                        else whereSQL = whereSQL + " or  " + fName + " like '%" + searchValue + "%'";
+                    }
+                }
+            }
+
+            // bir field üzerinde sadece eşitse çalışacak ( Id ler için gerekli oldu Aday.Id gibi ) 
+            if ((findFName.ToString().IndexOf("||") > -1) && // birden fazla field var
+                (findFName.ToString().IndexOf("==") > -1))   // Int field için eşleştirme var    
+            {
+                // Id||TamAdiSoyadi||==
+                findFName = findFName.Replace("==", "");
+
+                while (findFName.IndexOf("||") > -1)
+                {
+                    fName = t.Get_And_Clear(ref findFName, "||");
+
+                    //checkLabel(ref tableLabel, ref fName);
+
+                    if (fName != "")
+                    {
+                        // karşılaştırmayı aranan value ile yapmamız gerekiyor 
+                        // int bir value mi arıyor, yoksa string bir value mi arıyor
+
+                        isIntField = t.IsIntFieldType(dsSearchTableIP, fName);
+                        isIntValue = t.myInt32(searchValue);
+
+                        // Int field değil ise (TamAdiSoyadi gibi birşey ise
+
+                        if ((isIntValue == 0) && (isIntField == false))
+                        {
+                            if (whereSQL == "")
+                                whereSQL = whereSQL + "and (" + fName + " like '%" + searchValue + "%'";
+                            else whereSQL = whereSQL + " or  " + fName + " like '%" + searchValue + "%'";
+                        }
+
+                        if ((isIntValue > 0) && (isIntField))
+                        {
+                            //whereSQL = " and " + tableLabel + "." + fName + " = " + searchValue + " ";
+                            if (tableLabel != "")
+                                 whereSQL = " and " + tableLabel + "." + fName + " = " + searchValue + " ";
+                            else whereSQL = " and " + findFName + " = " + searchValue + " ";
+                        }
+                    }
+                }
+            }
+
+            // yani tek field yazılmışsa
+            if ((findFName.ToString().IndexOf("||") == -1) && // birden fazla field yok
+                (findFName.ToString().IndexOf("==") == -1) && // Int field için eşleştirme yok
+                (whereSQL == ""))
+            {
+                if (checkLabel(ref tableLabel, ref findFName))
+                {
+                    if (tableLabel != "")
+                        whereSQL = " and " + tableLabel + "." + findFName + " like '%" + searchValue + "%'";
+                    else whereSQL = " and " + findFName + " like '%" + searchValue + "%'";
+                }
+            }
+
+            if (whereSQL.IndexOf("and (") > -1) whereSQL = whereSQL + ")";
+
+            return whereSQL;
+        }
+
+        private bool checkLabel(ref string tableLabel, ref string fieldName)
+        {
+            // tableLabel = MtskAday
+            // fieldName  = MtskAday.TamAdiSoyadi
+            // veya
+            // tableLabel = [MtskAday]
+            // fieldName  = [MtskAday].TamAdiSoyadi
+            //
+
+            bool onay = true;
+
+            if (fieldName == "")
+            {
+                MessageBox.Show("Arama yapılacak olan -Find FieldName- belli değil...");
+                onay = false;
+                return onay;
+            }
+
+
+            if (fieldName.IndexOf(tableLabel + ".") > -1)
+            {
+                fieldName = fieldName.Replace(tableLabel + ".", "");
+                return onay;
+            }
+
+            // tableLabel = [MtskAday]
+            // fieldName  = MtskAday.TamAdiSoyadi
+            //
+            tableLabel = tableLabel.Replace("[", "");
+            tableLabel = tableLabel.Replace("]", "");
+
+            if (fieldName.IndexOf(tableLabel + ".") > -1)
+            {
+                fieldName = fieldName.Replace(tableLabel + ".", "");
+                return onay;
+            }
+
+            // tableLabel = MtskAday
+            // fieldName  = MtskAdayBelgeler.Id
+
+            if (fieldName.IndexOf(".") > -1)
+            {
+                if ((fieldName.IndexOf(tableLabel + ".") == -1) &&
+                    (fieldName.IndexOf("[" + tableLabel + "].") == -1))
+                {
+                    tableLabel = "";
+                    return onay;
+                }
+            }
+
             return onay;
         }
 
@@ -916,7 +990,63 @@ namespace Tkn_Events
 
         #endregion Search Engine / Arama Motoru
 
+        #region findListDataEngines
+        public bool findListDataEngines(Form tForm, string targetTableIPCode, string searchValue, PROP_NAVIGATOR prop_)
+        {
+            if (prop_ == null) return false;
+
+            tToolBox t = new tToolBox();
+            bool onay = false;
+
+            string SearchTableIPCode = "";
+
+            if (t.IsNotNull(prop_.READ_TABLEIPCODE))
+                SearchTableIPCode = prop_.READ_TABLEIPCODE.ToString();
+
+            if (t.IsNotNull(SearchTableIPCode) == false)
+                if (t.IsNotNull(prop_.TARGET_TABLEIPCODE))
+                    SearchTableIPCode = prop_.TARGET_TABLEIPCODE.ToString();
 
 
+            if (t.IsNotNull(SearchTableIPCode))
+            {
+                DataSet dsSearch = null;
+                DataNavigator dNSearch = null;
+                t.Find_DataSet(tForm, ref dsSearch, ref dNSearch, SearchTableIPCode);
+
+                if (dsSearch != null)
+                {
+                    string myProp_ = dsSearch.Namespace.ToString();
+                    string DBaseNo = t.MyProperties_Get(myProp_, "DBaseNo:");
+                    v.dBaseNo dBaseNo = t.getDBaseNo(DBaseNo);
+                    string TableName = t.MyProperties_Get(myProp_, "TableName:");
+                    string TableLabel = t.MyProperties_Get(myProp_, "TableLabel:");
+                    string FindFName = t.MyProperties_Get(myProp_, "FindFName:");
+                    string tSql = t.Set(t.MyProperties_Get(myProp_, "SqlSecond:"),
+                                        t.MyProperties_Get(myProp_, "SqlFirst:"), "");
+                    
+                    string whereSQL = preparinSearchSql(dsSearch, TableLabel, FindFName, searchValue);
+
+                    //string tSql = "Select * from " + schemasCode + "." + TableName + " where 0 = 0 " + findValues;
+
+                    whereSQL =
+                      " /*KISITLAMALAR|1|*/ " + v.ENTER 
+                    + whereSQL + v.ENTER 
+                    + " /*KISITLAMALAR|2|*/ " + v.ENTER;
+
+                    tSql = t.kisitlamalarClear(tSql);
+
+                    tSql = t.SQLWhereAdd(tSql, TableLabel, whereSQL, "DEFAULT");
+
+                    t.SQL_Read_Execute(tForm, dBaseNo, dsSearch, ref tSql, TableName, "searchVaule");
+
+                    if (t.IsNotNull(dsSearch)) onay = true;
+                }
+            }
+
+            return onay;
+        }
+
+        #endregion findListDataEngines
     }
 }

@@ -844,6 +844,18 @@ Select distinct
             return tSql;
         }
 
+        public string Sql_MsExeUpdates()
+        {
+            string tSql = "";
+
+            tSql = @"
+            Select TOP 1 * from MsExeUpdates
+            where IsActive = 1 
+            order by RecordDate desc ";
+
+            return tSql;
+        }
+        
         #endregion System SQLs
 
         #region ManagerServer Tables SQLs Preparing
@@ -853,7 +865,7 @@ Select distinct
             string s =
                 @" Select a.*  
                , b.SCHEMAS_CODE        LKP_SCHEMAS_CODE   
-               , b.DBASE_TYPE          LKP_DBASE_NAME 
+               , b.DBASE_TYPE          LKP_DBASE_TYPE 
                , b.MODUL_CODE          LKP_MODUL_CODE 
                , b.PARENT_TABLE_CODE   LKP_PARENT_TABLE_CODE 
                , b.TABLE_CODE          LKP_TABLE_CODE 
@@ -1203,9 +1215,8 @@ Select distinct
         public string SQL_SYS_UPDATES_INSERT()
         {
             //[MSV3DFTRBLT]
-            return @"
-USE " + v.active_DB.managerDBName + @"  
-
+            return //@" USE " + v.active_DB.managerDBName + @"  
+@"
 INSERT INTO [dbo].[SYS_UPDATES]
            ([ISACTIVE]
            ,[REC_DATE]
@@ -1241,6 +1252,43 @@ INSERT INTO [dbo].[SYS_UPDATES]
             */
         }
 
+
+
+        public string Sql_MsExeUpdates_Insert()
+        {
+            return @"
+           INSERT INTO [dbo].[MsExeUpdates]
+             ([IsActive]
+             ,[RecordDate]
+             ,[ExeName]
+             ,[VersionNo]
+             ,[PacketName]
+             ,[About])
+           VALUES
+             (1         
+             ,getdate() 
+             , " + "'" + v.tExeAbout.newFileName + "'" + @"
+             , " + "'" + v.tExeAbout.newVersionNo + "'" + @"
+             , " + "'" + v.tExeAbout.newPacketName + "'" + @"
+             , null 
+		     ) ";
+        }
+
+        public string Sql_MsDbUpdates(string IdList)
+        {
+            // webManager database
+            return 
+              " Select * from dbo.MsDbUpdates Where Id not in ( " + IdList + " )";
+            //" Select * from " + v.webManager_DB.databaseName + ".dbo.MsDbUpdates "
+
+        }
+
+        public string Sql_DbUpdatesIdList()
+        {
+            // müşteri database
+            return " Select MsDbUpdateId from DbUpdates ";
+        }
+
         #endregion ManagerServer Tables SQLs Preparing
 
         #region Preparing dsData
@@ -1260,7 +1308,7 @@ INSERT INTO [dbo].[SYS_UPDATES]
             string RefID_SubView = string.Empty;
             string REF_CALL = string.Empty;
 
-            byte dBaseNo = t.Set(row["LKP_DBASE_NAME"].ToString(), "", (byte)3);
+            byte dBaseNo = t.Set(row["LKP_DBASE_TYPE"].ToString(), "", (byte)3);
             string DBaseName = t.Find_dBLongName(dBaseNo.ToString());
             string IP_Caption = t.Set(row["IP_CAPTION"].ToString(), "", "");
             string TableName = t.Set(row["LKP_TABLE_NAME"].ToString(), "", "null");
@@ -1329,6 +1377,7 @@ INSERT INTO [dbo].[SYS_UPDATES]
 
             string ForeingID = string.Empty;
             string Kisitlama = string.Empty;
+            string masterFields = string.Empty;
             string join_Fields = string.Empty;
             string join_Tables = string.Empty;
             string About_Detail_SubDetail = string.Empty;
@@ -1390,7 +1439,7 @@ INSERT INTO [dbo].[SYS_UPDATES]
             #region Not Read Data // Kısıtlama
 
             if ( //(Table_Type == 1) &&       // v.TableType.Table
-                 (Data_Read_Type == 1) &&   // v.DataReadType.NotReadData
+                 ((Data_Read_Type == 1) || (Data_Find == "2")) &&   // v.DataReadType.NotReadData veya List&Data ise 
                  (t.IsNotNull(KeyFName)))  // KefFName biliniyorsa
             {
                 // tüm datanında okunmaması için geçiçi bir kısıtlama eklenmekte   
@@ -1494,6 +1543,8 @@ INSERT INTO [dbo].[SYS_UPDATES]
             Preparing_Join_Fields_Tables(tForm, row, dsFields,
                           dBaseNo,
                           TableIPCode,
+                          TableCode,
+                      ref masterFields,
                       ref join_Tables,
                       ref join_Fields,
                       ref Lkp_Memory_Fields,
@@ -1514,8 +1565,11 @@ INSERT INTO [dbo].[SYS_UPDATES]
             #region Table için SQL hazırlanıyor
             if (Table_Type == 1)  // v.TableType.Table
             {
+                //if (masterFields == "")
+                    masterFields = TableLabel + ".* " + v.ENTER;
+
                 NewSQL =
-                     " Select " + TableLabel + ".* " + v.ENTER +
+                     " Select " + masterFields + //TableLabel + ".* " + v.ENTER +
                        join_Fields + v.ENTER +
                        Lkp_Memory_Fields +
                      " from " + SchemasDot + TableName + " " + TableLabel + v.ENTER +
@@ -1734,6 +1788,7 @@ INSERT INTO [dbo].[SYS_UPDATES]
 
             //t.Data_Read_Execute(tForm, dsData, ref NewSQL, TableName, null);
 
+            //if (Data_Find != "2")
             t.Data_Read_Execute(tForm, dsData, ref NewSQL, TableIPCode, null);
 
             if ((TargetValue == "NewRecord") ||
@@ -1849,6 +1904,12 @@ INSERT INTO [dbo].[SYS_UPDATES]
                         NewSQL = t.SQLWhereAdd(NewSQL, TABLEALIAS, KEYFNAME, "DEFAULT");
                     }
 
+                    // buna gerek yok : RefID den dolayı aşağıda zaten set ediliyor
+                    //if (WORKTYPE == "READ")
+                    //{
+                    //    NewSQL = t.SQLWhereAdd(NewSQL, TABLEALIAS, RefID, "DEFAULT");
+                    //}
+
                     if (t.IsNotNull(RefID))
                     {
                         NewSQL = t.SQLWhereAdd(NewSQL, TABLEALIAS, RefID, "DEFAULT");
@@ -1883,45 +1944,6 @@ INSERT INTO [dbo].[SYS_UPDATES]
                      string form_prp,
                      int Data_Read_Type)
         {
-            #region örnek
-            /*
-            PROP_NAVIGATOR={
-            1=ROW_PROP_NAVIGATOR:1;
-            1=CAPTION:KART AÇ;             <<< Hangi butona basıldığına dair bilgi  
-            1=BUTTONTYPE:51;
-             * 
-            1=TABLEIPCODE_LIST:TABLEIPCODE_LIST={   <<<<< field bloğu        <<< okunacak TABLEIPCODE ler
-            1=ROW_TABLEIPCODE_LIST:1;               <<<<< row bloğu
-            1=CAPTION:Kart aç;
-            1=TABLEIPCODE:TSTDTL.TSTDTL_03;
-            1=TABLEALIAS:[TSTDTL];
-            1=KEYFNAME:MSTR_REF_ID;
-            1=RTABLEIPCODE:TSTMSTR.TSTMSTR_01;
-            1=RKEYFNAME:REF_ID;
-            1=MSETVALUE:null;
-            1=WORKTYPE:READ;
-            1=ROWE_TABLEIPCODE_LIST:1;
-            2=ROW_TABLEIPCODE_LIST:2;
-            2=CAPTION:Cari Hesabı Oku;
-            2=TABLEIPCODE:HP_CARI.HP_CARI_02;
-            2=TABLEALIAS:[HPCARI];
-            2=KEYFNAME:REF_ID;
-            2=RTABLEIPCODE:TSTMSTR.TSTMSTR_01;
-            2=RKEYFNAME:CARI_ID;
-            2=MSETVALUE:null;
-            2=WORKTYPE:READ;
-            2=ROWE_TABLEIPCODE_LIST:2;
-            TABLEIPCODE_LIST=};                 <<<<< 
-             * 
-            1=FORMNAME:TestFormu1;              <<< açılacak form bilgileri
-            1=FORMCODE:null;
-            1=FORMTYPE:DIALOG;
-            1=FORMSTATE:NORMAL;
-            1=ROWE_PROP_NAVIGATOR:1;
-            PROP_NAVIGATOR=}
-            */
-            #endregion örnek
-
             // kendinden önceki formdan gelen bilgiler
 
             // önceki formun Navigator Butonlarından gelen ve 
@@ -1940,44 +1962,6 @@ INSERT INTO [dbo].[SYS_UPDATES]
             string RefID = string.Empty;
             string s = form_prp;
 
-            #region 
-            /*
-            1=ROW_TABLEIPCODE_LIST:1;
-            1=CAPTION:Fiş Aç - Cari Oku;
-            1=TABLEIPCODE:PERSNL_03.PERSNL_03_02;
-            1=TABLEALIAS:[HPCARI];
-            1=KEYFNAME:REF_ID;
-            1=RTABLEIPCODE:PERMAZRT.PERMAZRT_01;
-            1=RKEYFNAME:CARI_ID;
-            1=MSETVALUE:null;
-            1=WORKTYPE:READ;
-            1=ROWE_TABLEIPCODE_LIST:1;
-
-            2=ROW_TABLEIPCODE_LIST:2;
-            2=CAPTION:Fiş Aç - SubView Oku;
-            2=TABLEIPCODE:T13_TYPESL.T13_TYPESL_IZIN_TIPI;
-            2=TABLEALIAS:[T13_TYPESL];
-            2=KEYFNAME:TYPES_VALUE_INT;
-            2=RTABLEIPCODE:PERMAZRT.PERMAZRT_01;
-            2=RKEYFNAME:IZIN_TIPI;
-            2=MSETVALUE:null;
-            2=WORKTYPE:SVIEW;
-            2=ROWE_TABLEIPCODE_LIST:2;
-
-            3=ROW_TABLEIPCODE_LIST:3;
-            3=CAPTION:Fiş Aç - Mazeret Fişi;
-            3=TABLEIPCODE:PERMAZRT.PERMAZRT_03;
-            3=TABLEALIAS:[PERMAZRT];
-            3=KEYFNAME:REF_ID;
-            3=RTABLEIPCODE:PERMAZRT.PERMAZRT_01;
-            3=RKEYFNAME:REF_ID;
-            3=MSETVALUE:null;
-            3=WORKTYPE:READ;
-            3=ROWE_TABLEIPCODE_LIST:3;
-
-            */
-            #endregion
-
             if (s.IndexOf("TABLEIPCODE_LIST") > -1)
             {
                 string TABLEIPCODE = string.Empty;
@@ -1995,19 +1979,6 @@ INSERT INTO [dbo].[SYS_UPDATES]
 
                     TABLEIPCODE = t.MyProperties_Get(row_block, "TABLEIPCODE:");
 
-                    /*
-                    =ROW_TABLEIPCODE_LIST:3;
-                    3=CAPTION:Fiş Aç - Mazeret Fişi;
-                    3=TABLEIPCODE:null;
-                    3=TABLEALIAS:[PERMAZRT];
-                    3=KEYFNAME:REF_ID;
-                    3=RTABLEIPCODE:PERMAZRT.PERMAZRT_01;
-                    3=RKEYFNAME:REF_ID;
-                    3=MSETVALUE:3;
-                    3=WORKTYPE:SVIEWVALUE;
-                    3=ROWE_TABLEIPCODE_LIST:
-                    */
-
                     if ((row_block.IndexOf("SVIEWVALUE") > -1) &&
                         (TABLEIPCODE == "") &&
                         (Data_Read_Type == 6))
@@ -2018,18 +1989,6 @@ INSERT INTO [dbo].[SYS_UPDATES]
                     if (row_block.IndexOf("CREATEVIEW") > -1)
                     {
                         v.con_FormAfterCreateView = true;
-                        /*
-                        1=ROW_TABLEIPCODE_LIST:1;
-                        1=CAPTION:Icra Dosyasını Aç;
-                        1=TABLEIPCODE:AVI_DOS.AVI_DOS_03;
-                        1=TABLEALIAS:[AVI_DOS];
-                        1=KEYFNAME:ID;
-                        1=RTABLEIPCODE:AVI_DOS.AVI_DOS_02;
-                        1=RKEYFNAME:ID;
-                        1=MSETVALUE:splitContainer2.Panel1;
-                        1=WORKTYPE:CREATEVIEW;
-                        1=ROWE_TABLEIPCODE_LIST:1;
-                        */
                     }
 
                     if (Main_TableIPCode == TABLEIPCODE)
@@ -2387,6 +2346,8 @@ INSERT INTO [dbo].[SYS_UPDATES]
                           DataSet dsFields,
                           byte dBaseNo,
                           string Create_TableIPCode,
+                          string tableCode, 
+                          ref string masterFields,
                           ref string joinTables,
                           ref string joinFields,
                           ref string Lkp_Memory_Fields,
@@ -2440,7 +2401,7 @@ INSERT INTO [dbo].[SYS_UPDATES]
             string TableIPCode = "";
 
             if ((softCode != "") && (projectCode != ""))
-                    TableIPCode = softCode + "/" + projectCode + "/" + TableCode + "." + IPCode;
+                 TableIPCode = softCode + "/" + projectCode + "/" + TableCode + "." + IPCode;
             else TableIPCode = TableCode + "." + IPCode;
 
             string tLabel = "[" + t.Set(row["LKP_TABLE_CODE"].ToString(), "", "") + "]";
@@ -2492,6 +2453,7 @@ INSERT INTO [dbo].[SYS_UPDATES]
             string declareEnds = "";
             string setEnds = "";
             string paramEnds = "";
+
             if (Table_Type == 3) // Stored Procedure ise
             {
                 dsFields.Tables[0].DefaultView.Sort = "KRT_LINE_NO";
@@ -2561,6 +2523,9 @@ INSERT INTO [dbo].[SYS_UPDATES]
                 tLookUpField    = t.Set(Row["LKP_FLOOKUP_FIELD"].ToString(), "", false);
                 
                 tvisible = t.Set(Row["CMP_VISIBLE"].ToString(), Row["LKP_FVISIBLE"].ToString(), true);
+
+                if (fieldname.ToUpper().IndexOf("LKP") == -1)
+                    masterFields = masterFields + " , [" + tableCode + "]." + fieldname + v.ENTER;
 
                 if (tvisible)
                 {
@@ -2633,8 +2598,6 @@ INSERT INTO [dbo].[SYS_UPDATES]
                             if (toperand_type == 2)
                                 MasterValue1 = default_value;
                         }
-
-
                     }
                     #endregion Var
                 }
@@ -2684,7 +2647,8 @@ INSERT INTO [dbo].[SYS_UPDATES]
                 /// 52,  'Kriter READ (Even.Bit)' 
                 /// 53,  'Kriter READ (Odd)'
 
-                if ((default_type == 31) ||
+                if ((default_type == 21) ||
+                    (default_type == 31) ||
                     (default_type == 32) ||
                     (default_type == 51) ||
                     (default_type == 52) ||
@@ -2731,13 +2695,12 @@ INSERT INTO [dbo].[SYS_UPDATES]
 
                     #region About_Detail_SubDetail
 
-                    /// 51,  'Kriter READ (Even.Bas)' 
-                    /// 52,  'Kriter READ (Even.Bit)' 
-                    /// 53,  'Kriter READ (Odd)'
-
-                    if ((default_type != 51) &&
-                        (default_type != 52) &&
-                        (default_type != 53))
+                    /// 21,  'Source TableIPCode READ'
+                    /// 31,  'Master=Detail'
+                    /// 32,  'Master=Detail Multi'
+                    if ((default_type == 21) ||
+                        (default_type == 31) ||
+                        (default_type == 32))
                     {
                         About_Detail_SubDetail = About_Detail_SubDetail +
                             "=Detail_SubDetail:" +
@@ -2745,13 +2708,16 @@ INSERT INTO [dbo].[SYS_UPDATES]
                             mst_FName + "||" +
                             tkrt_table_alias + "." + fname + "||" +
                             field_type.ToString() + "||" +
-                            default_type.ToString() + "||" +
+                            default_type.ToString() + "||" + // 21, 31, 32
                             toperand_type.ToString() + "||" +
                             mst_CheckFName + "||" +
                             mst_CheckValue + "||" +
                             RefId.ToString() + "|ds|" + v.ENTER;
                     }
 
+                    /// 51,  'Kriter READ (Even.Bas)' 
+                    /// 52,  'Kriter READ (Even.Bit)' 
+                    /// 53,  'Kriter READ (Odd)'
                     if ((default_type == 51) ||
                         (default_type == 52) ||
                         (default_type == 53))
@@ -2763,13 +2729,12 @@ INSERT INTO [dbo].[SYS_UPDATES]
                             //tkrt_table_alias + "." + fname + "||" +
                             fname + "||" +
                             field_type.ToString() + "||" +
-                            default_type.ToString() + "||" +
+                            default_type.ToString() + "||" + //  51, 52, 53
                             toperand_type.ToString() + "||" +
                             mst_CheckFName + "||" +
                             mst_CheckValue + "||" +
                             RefId.ToString() + "|ds|" + v.ENTER;
                     }
-
 
                     #endregion About_Detail_SubDetail
 
@@ -3212,6 +3177,11 @@ INSERT INTO [dbo].[SYS_UPDATES]
                 Report_FieldsName = "   " + Report_FieldsName;
             }
 
+            if (masterFields.Length > 3)
+            {
+                masterFields = masterFields.Remove(1, 1);
+            }
+
             #region About_Detail_SubDetail
 
             if (t.IsNotNull(About_Detail_SubDetail))
@@ -3230,6 +3200,11 @@ INSERT INTO [dbo].[SYS_UPDATES]
         {
             tToolBox t = new tToolBox();
 
+            // kendi tablosuna ait olmayan başka bir type tablosu kullanıyorsa çalışmasın
+            // Lkp.MsSectorType||Id||SectorType
+            string groupTables = Row["LKP_LIST_TYPES_NAME"].ToString();
+            if (t.IsNotNull(groupTables)) return;
+
             string idFieldName = "Id";
             string tableCode = Row["TABLE_CODE"].ToString();
             string tableName = Row["LKP_TABLE_NAME"].ToString();
@@ -3238,6 +3213,7 @@ INSERT INTO [dbo].[SYS_UPDATES]
             
             string lookUpFieldName = Row["LKP_FIELD_NAME"].ToString();
             string joinTableAlias = "FNo" + Row["LKP_FIELD_NO"].ToString();
+            Int16 fieldType = Convert.ToInt16(Row["LKP_FIELD_TYPE"].ToString());
 
             bool isSubJoin = (fieldName.IndexOf("Lkp") == 0);
 
@@ -3252,7 +3228,7 @@ INSERT INTO [dbo].[SYS_UPDATES]
             //if (fieldName.IndexOf("Lkp_") > -1)
             fieldName = fieldName.Replace("Lkp_", "");
 
-            t.LookUpFieldNameChecked(ref tableName, ref fieldName, ref idFieldName);
+            t.LookUpFieldNameChecked(ref tableName, ref fieldName, ref idFieldName, fieldType);
 
             //int adet = t.tFindWordCount(joinTables, "as " + joinTableAlias);
             //if (adet > 0)
@@ -3267,6 +3243,8 @@ INSERT INTO [dbo].[SYS_UPDATES]
                 lookUpFieldName = lookUpFieldName.Replace("TipiId", "Tipi");
             if (lookUpFieldName.IndexOf("TypeId") > -1)
                 lookUpFieldName = lookUpFieldName.Replace("TypeId", "Type");
+            // 
+            if (fieldName == "Type") fieldName = fieldName + "Name";
 
             joinFields += " , " + joinTableAlias + "." + fieldName + "  as  " + lookUpFieldName + v.ENTER;
 
@@ -3286,7 +3264,8 @@ INSERT INTO [dbo].[SYS_UPDATES]
             string joinTableAlias = "";
             string aliasFieldName = "";
             string newLkpFieldName = "";
-
+            string groupTables = "";
+            Int16 fieldType = 0;
 
             foreach (DataRow Row in dsFields.Tables[0].Rows)
             {
@@ -3294,13 +3273,18 @@ INSERT INTO [dbo].[SYS_UPDATES]
 
                 tvisible = t.Set(Row["CMP_VISIBLE"].ToString(), Row["LKP_FVISIBLE"].ToString(), true);
 
-                if ((tvisible) && (tLookUpField))
+                // kendi tablosuna ait olmayan başka bir type tablosu kullanıyorsa çalışmasın
+                // Lkp.MsSectorType||Id||SectorType
+                groupTables = Row["LKP_LIST_TYPES_NAME"].ToString();
+
+                if ((tvisible) && (tLookUpField) && (t.IsNotNull(groupTables) == false))
                 {
                     idFieldName = "Id";
                     tableName = Row["LKP_TABLE_NAME"].ToString();
 
                     fieldName = Row["LKP_FIELD_NAME"].ToString();
                     joinTableAlias = "FNo" + Row["LKP_FIELD_NO"].ToString();
+                    fieldType = Convert.ToInt16(Row["LKP_FIELD_TYPE"].ToString());
 
                     //int adet = t.tFindWordCount(joinTables, "as " + joinTableAlias);
                     //if (adet > 0)
@@ -3315,7 +3299,7 @@ INSERT INTO [dbo].[SYS_UPDATES]
                     //     (joinFields.IndexOf(joinTableAlias) == -1))
                     {
                         
-                        t.LookUpFieldNameChecked(ref tableName, ref fieldName, ref idFieldName);
+                        t.LookUpFieldNameChecked(ref tableName, ref fieldName, ref idFieldName, fieldType);
 
                         if (aliasFieldName == "")
                             aliasFieldName = " , " + joinTableAlias + "." + fieldName;
@@ -3352,6 +3336,10 @@ INSERT INTO [dbo].[SYS_UPDATES]
             string j_table_alias = string.Empty;
             string join = string.Empty;
             string masterTabAlias = MasterTableAlias;
+            //yeni ek : 2020.03.08
+            // master table içinde field eklebiyor artık ( case > bit fieldler üretmek için )
+            t.Str_Remove(ref masterTabAlias, "[");
+            t.Str_Remove(ref masterTabAlias, "]");
 
             foreach (var item in prop_.J_TABLE)
             {
@@ -3375,18 +3363,12 @@ INSERT INTO [dbo].[SYS_UPDATES]
 
                         // J_STN_FIELDS
                         if (j_format == "STANDART")
-                            Preparing_Select_Standart_Fields_JSON(prop_.J_STN_FIELDS, ref joinFields, j_table_alias, "");
+                            Preparing_Select_Standart_Fields_JSON(prop_.J_STN_FIELDS, ref joinFields, j_table_alias, masterTabAlias);
                     }
                 }
-
             }
 
-            //yeni ek : 2020.03.08
-            // master table içinde field eklebiyor artık ( case > bit fieldler üretmek için )
-            t.Str_Remove(ref masterTabAlias, "[");
-            t.Str_Remove(ref masterTabAlias, "]");
-
-            Preparing_Select_Standart_Fields_JSON(prop_.J_STN_FIELDS, ref joinFields, "", masterTabAlias);
+            //Preparing_Select_Standart_Fields_JSON(prop_.J_STN_FIELDS, ref joinFields, "", masterTabAlias);
 
             //J_CASE_FIELDS    (j_format == "CASE")
             Preparing_Select_Case_Fields_JSON(prop_.J_CASE_FIELDS, ref joinFields, j_table_alias, MasterTableAlias);
@@ -3539,7 +3521,7 @@ INSERT INTO [dbo].[SYS_UPDATES]
                     j_fname = item.J_FNAME.ToString();
                     fnl_fname = item.FNL_FNAME.ToString();
 
-                    joinFields = joinFields + " , " + j_fname.PadRight(5) + " as " + fnl_fname + v.ENTER;
+                    joinFields = joinFields + " , " + m_table_alias + "." + j_fname.PadRight(5) + " as " + fnl_fname + v.ENTER;
                 }
             }
             #endregion J_STN_FIELDS

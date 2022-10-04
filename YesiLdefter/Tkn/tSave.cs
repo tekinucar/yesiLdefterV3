@@ -223,38 +223,52 @@ namespace Tkn_Save
             vt.DBaseName = v.active_DB.managerDBName;
             vt.Cargo = "data";
 
-            string master = MyRecord(ds_Target, vt, target_pos, (byte)v.Save.SQL_OLUSTUR_IDENTITY_YOK);
+            string master = MyRecord(ds_Target, vt, target_pos, v.Save.SQL_OLUSTUR_IDENTITY_YOK);
 
             return master;
         }
 
-        public string Insert_Script_Multi(DataSet ds_Target, string Target_TableName, SqlConnection VTbaglanti)
+        public string Insert_Script_Multi(DataSet dsTarget, vTable vt) 
         {
             string master = string.Empty;
-
+            /*
+             * // string dBaseName, string Target_TableName, SqlConnection VTbaglanti)
             vTable vt = new vTable();
             vt.TableName = Target_TableName;
             vt.msSqlConnection = VTbaglanti;
             vt.DBaseNo = v.dBaseNo.Manager;
             vt.DBaseType = v.dBaseType.MSSQL;
-            vt.DBaseName = v.active_DB.managerDBName;
+            vt.DBaseName = dBaseName; //v.active_DB.managerDBName;
             vt.Cargo = "data";
+            */
+            int count = dsTarget.Tables[0].Rows.Count;
+            string tableName = "";
 
-            int j = ds_Target.Tables[0].Rows.Count;
-
-            for (int i = 0; i < j; i++)
+            if (vt.IdentityInsertOnOff)
             {
-                if (ds_Target.Tables[0].Rows[i][0].ToString() != "")
-                {
-                    ds_Target.Tables[0].Rows[i][0] = -999;
+                if (vt.SchemasCode != "") 
+                    tableName = vt.SchemasCode + ".";
+                
+                tableName = tableName + vt.TableName;
 
-                    ///master = master +
-                    ///         MyRecord(ds_Target, Target_TableName, i,
-                    ///                 (byte)v.Save.SQL_OLUSTUR_IDENTITY_YOK, VTbaglanti);
+                master = " SET IDENTITY_INSERT " + tableName + " ON " + v.ENTER;
+            }
+
+            for (int i = 0; i < count; i++)
+            {
+                if (dsTarget.Tables[0].Rows[i][0].ToString() != "")
+                {
+                    if (vt.IdentityInsertOnOff == false)
+                        dsTarget.Tables[0].Rows[i][0] = -999;
 
                     master = master +
-                             MyRecord(ds_Target, vt, i, (byte)v.Save.SQL_OLUSTUR_IDENTITY_YOK);
+                             MyRecord(dsTarget, vt, i, v.Save.SQL_OLUSTUR_IDENTITY_YOK);
                 }
+            }
+
+            if (vt.IdentityInsertOnOff)
+            {
+                master = master + v.ENTER + " SET IDENTITY_INSERT " + tableName + " OFF ";
             }
 
             return master;
@@ -441,7 +455,7 @@ namespace Tkn_Save
         public string MyRecord(DataSet ds,
                                vTable vt,
                                int Position,
-                               byte Sonuc)
+                               v.Save save) //byte Sonuc)
         {
             // ilk atamalar ----------------------------------------------------------------------------------------
             #region ilk atamalar
@@ -456,6 +470,7 @@ namespace Tkn_Save
 
             string Table_Name = vt.TableName;
             string Key_Id_FieldName = vt.KeyId_FName;
+            bool identityInsertOnOff = vt.IdentityInsertOnOff;
 
             int j = 0;
 
@@ -484,7 +499,9 @@ namespace Tkn_Save
                 return ""; // dataset üzerinde veri yoksa burada hata olarak yakalanır
             }
 
-            if ((id_value == "") || (id_value == "-999"))
+            if ((id_value == "") || 
+                (id_value == "-999") || 
+                (identityInsertOnOff))
             {
                 State = "dsInsert";
                 //if ((Sonuc == 0) | (Sonuc == 2))
@@ -498,13 +515,19 @@ namespace Tkn_Save
             // insert veya update cümlesi oluşturma işlemi başlıyor ------------------------------------------------
             #region Cümleleri Oluştur
 
-            if ((Sonuc == 0) | (Sonuc == 2) | (Sonuc == 3))
+            //if ((Sonuc == 0) | (Sonuc == 2) | (Sonuc == 3))
+            if ((save == v.Save.KAYDET) |
+                (save == v.Save.SQL_OLUSTUR) |
+                (save == v.Save.SQL_OLUSTUR_IDENTITY_YOK))
             {
                 sqlCommand = Kayit_Cumlesi_Olustur(ds, vt, State, Position, ref TriggerSQL);
-                if (sqlCommand == "DONTSAVE") return string.Empty;
+                if (sqlCommand == "DONTSAVE") 
+                    return string.Empty;
             }
 
-            if ((Sonuc == 1) | (Sonuc == 4))
+            //if ((Sonuc == 1) | (Sonuc == 4))
+            if ((save == v.Save.N_SATIR_KAYDET) |
+                (save == v.Save.N_SATIR_SQL_OLUSTUR))
             {
                 // Tek tablo, Çok kayıtlı ve
                 j = ds.Tables[0].Rows.Count;
@@ -517,7 +540,8 @@ namespace Tkn_Save
 
                     // insert veya update cümlesi oluşmakta
                     Cumle_Detay = Kayit_Cumlesi_Olustur(ds, vt, State, i, ref TriggerSQL);
-                    if (Cumle_Detay == "DONTSAVE") return string.Empty;
+                    if (Cumle_Detay == "DONTSAVE") 
+                        return string.Empty;
 
                     sqlCommand = sqlCommand + Cumle_Detay + v.ENTER;
                 }
@@ -525,23 +549,29 @@ namespace Tkn_Save
             #endregion
             //------------------------------------------------------------------------------------------------------ 
 
-
             if ((id_value == "") || (id_value == "-999"))
             {
                 // eğer tabloya bağlı trigger ve ona bağlı başka tablolar varsa id şaşırıyor
                 //if ((Sonuc == 0) | (Sonuc == 2))
                 //    Identity_ID = " select @@IDENTITY as ID ";
 
-                if ((Sonuc == 0) | (Sonuc == 2))
-                    Identity_ID = " select MAX(" + Key_Id_FieldName + ") as ID from " + Table_Name;
-
+                //if ((Sonuc == 0) | (Sonuc == 2))
+                if ((save == v.Save.KAYDET) |
+                    (save == v.Save.SQL_OLUSTUR))
+                {
+                    if (vt.SchemasCode != "")
+                         Identity_ID = " select MAX(" + Key_Id_FieldName + ") as ID from " + vt.SchemasCode + "." + Table_Name;
+                    else Identity_ID = " select MAX(" + Key_Id_FieldName + ") as ID from " + Table_Name;
+                }
             }
-
-
 
             // Oluşan Cümlelere Karar Verme işlemi------------------------------------------------------------------
             #region Oluşan Cümlelere Karar Verme işlemi
-            if ((Sonuc == 2) | (Sonuc == 3) | (Sonuc == 4))
+            //if ((Sonuc == 2) | (Sonuc == 3) | (Sonuc == 4))
+            if ((save == v.Save.SQL_OLUSTUR) |
+                (save == v.Save.SQL_OLUSTUR_IDENTITY_YOK) |
+                (save == v.Save.N_SATIR_SQL_OLUSTUR)
+                )
             {
                 if (Identity_ID != "")
                 {
@@ -569,7 +599,9 @@ namespace Tkn_Save
 
                 }
             }
-            else
+            
+            if ((save == v.Save.KAYDET) |
+                (save == v.Save.N_SATIR_KAYDET))
             {
                 // Eğer function buraya kadar geldiyse ( Sonuc in [0,1] ) sql Cümleyi çalıştır
                 // ve cümleyi göndermeye gerek kalmadı onu yerine
@@ -619,8 +651,6 @@ namespace Tkn_Save
                 }
 
                 v.con_Refresh = Record_SQL_RUN(ds, vt, State, Position, ref Sonuc_Cumle, TriggerSQL);
-
-
             }
             #endregion
             //------------------------------------------------------------------------------------------------------ 
@@ -633,7 +663,8 @@ namespace Tkn_Save
         #region Kayit_Cumlesi_Olustur
 
 
-        public string Kayit_Cumlesi_Olustur(DataSet ds,
+        public string Kayit_Cumlesi_Olustur(
+            DataSet ds,
             vTable vt,
             string State,
             int Position,
@@ -649,7 +680,7 @@ namespace Tkn_Save
             string SchemasCode = vt.SchemasCode;
             string Table_Name = vt.TableName;
             string Key_Id_FieldName = vt.KeyId_FName;
-
+            bool identityInsertOnOff = vt.IdentityInsertOnOff;
             //string MyStr = "";
             string sonuc = "";
             string MyInsert = "";
@@ -676,7 +707,7 @@ namespace Tkn_Save
             int ftype = 0;
             int fmax_length = 0;
             int c = 0;
-            bool fidentity = false;
+            bool fIdentity = false;
             bool IsChanges = false;
 
             //List<string> fTriggerFieldList = new List<string>();
@@ -703,8 +734,6 @@ namespace Tkn_Save
 
             //if (State == "dsInsert")
             //    MyStr = " insert into [" + Table_Name + "] (";
-
-
 
             if (t.IsNotNull(SchemasCode) == false) 
                 SchemasCode = "[dbo].";
@@ -740,7 +769,7 @@ namespace Tkn_Save
                 {
                     fname = ds.Tables[tableFieldsName].Rows[i]["name"].ToString();
                     ftype = Convert.ToInt32(ds.Tables[tableFieldsName].Rows[i]["user_type_id"].ToString());
-                    fidentity = (Boolean)(ds.Tables[tableFieldsName].Rows[i]["is_identity"]);
+                    fIdentity = (Boolean)(ds.Tables[tableFieldsName].Rows[i]["is_identity"]);
                     fmax_length = Convert.ToInt32(ds.Tables[tableFieldsName].Rows[i]["max_length"].ToString());
 
                     // varchar(max), nvarchar(max) olunca -1 geliyor
@@ -771,7 +800,8 @@ namespace Tkn_Save
                     Lkp_fname = "LKP_";
                 
                 // Anahtar ID fieldname dönüyor
-                if (fidentity == true) Key_Id_FieldName = fname;
+                if (fIdentity == true) 
+                    Key_Id_FieldName = fname;
 
                 // dsData yapısı TableType == Table değilise
                 if ((TableType != 1) &&  // Table
@@ -813,8 +843,12 @@ namespace Tkn_Save
 
                 //------------------------ INSERT ------------------------------------------------
                 #region INSERT
-                if ((State == "dsInsert") & (fidentity == false) &
-                    (Lkp_fname != "LKP_") & (Lkp_fname != "rowg")
+                if ((State == "dsInsert") & 
+                    ( (fIdentity == false) |                // Identity olmayan fied  veya
+                      ((fIdentity) & (identityInsertOnOff)) // Identity ve OnOff true ise yani RefId field da isteniyorsa 
+                    ) &
+                    (Lkp_fname != "LKP_") & 
+                    (Lkp_fname != "rowg")
                     )
                 {
 
@@ -980,7 +1014,7 @@ namespace Tkn_Save
                 {
                     // Tablonun ID fieldi
                     //if ((j == 0) & (fidentity == true))
-                    if (fidentity == true)
+                    if (fIdentity == true)
                     {
                         MyStr2 = " where [" + fname + "] = " + fvalue + " " + line_end;
                         MyStr3 = " select " + fname + " from [" + Table_Name + "] where 0 = 0 ";
@@ -995,14 +1029,16 @@ namespace Tkn_Save
                     }
                 }
 
-                if ((Lkp_fname != "LKP_") & (Lkp_fname != "rowg") & (fVisible == "True"))
+                if (//(State == "dsEdit") & 
+                    (Lkp_fname != "LKP_") & (Lkp_fname != "rowg") & 
+                    (fVisible == "True"))
                 {
 
                     // column için yeni update değeri
                     fieldNewValue = "";
 
                     //* rakam türleri  56, 48, 127, 52, 60, 62, 59, 106, 108
-                    if ((fidentity == false) &
+                    if ((fIdentity == false) &
                        ((ftype == 56) | (ftype == 48) | (ftype == 127) | (ftype == 52) |
                         (ftype == 60) | (ftype == 62) | (ftype == 59) | (ftype == 106) | (ftype == 108)))
                     {
@@ -1138,7 +1174,7 @@ namespace Tkn_Save
                     (Lkp_fname != "rowg"))
                 {
                     //* rakam türleri  56, 48, 127, 52, 60, 62, 59, 106, 108
-                    if ((fidentity == false) &
+                    if ((fIdentity == false) &
                        ((ftype == 56) | (ftype == 48) | (ftype == 127) | (ftype == 52) |
                         (ftype == 60) | (ftype == 62) | (ftype == 59) | (ftype == 106) | (ftype == 108)))
                     {
@@ -1273,7 +1309,9 @@ namespace Tkn_Save
                       //+ " --Trigger " + v.ENTER
                       + " end else " + v.ENTER
                       + " begin " + v.ENTER
-                      + MyEdit + v.ENTER + " where 0 = 0 " + v.ENTER + MyIfW
+                      + MyEdit + v.ENTER 
+                      + " where 0 = 0 " + v.ENTER 
+                      + MyIfW
                       // MyStr3 = " select " + fname + " from [" + Table_Name + "] where 0 = 0 ";
                       + MyStr3 + MyIfW  
                     + " end "; 
@@ -1396,7 +1434,7 @@ namespace Tkn_Save
                     SqlKomut.Parameters.Add(new SqlParameter("@" + v.con_Images_FieldName, v.con_Images));
 
                     // işi burada bitti bir sonraki kayıt için boşaltalım....
-                    v.con_Images_FieldName = string.Empty;
+                    v.con_Images_FieldName = "";
                     v.con_Images = null;
                 }
                 // 2. Resim
@@ -1405,7 +1443,7 @@ namespace Tkn_Save
                     SqlKomut.Parameters.Add(new SqlParameter("@" + v.con_Images_FieldName2, v.con_Images2));
 
                     // işi burada bitti bir sonraki kayıt için boşaltalım....
-                    v.con_Images_FieldName2 = string.Empty;
+                    v.con_Images_FieldName2 = "";
                     v.con_Images2 = null;
                 }
 

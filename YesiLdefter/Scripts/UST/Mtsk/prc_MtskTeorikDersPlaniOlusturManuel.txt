@@ -1,0 +1,92 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_MtskTeorikDersPlaniOlusturManuel] (@SablonTeorikFId int)  
+AS BEGIN
+  --declare @SablonTeorikFId int = 1
+
+  declare @FirmId int
+  declare @DonemTipiId int
+  declare @GrupTipiId smallint
+  declare @SubeTipiId smallint
+  declare @BaslangicTarihi date
+  declare @SablonTeorikSId int
+  declare @DerslikTipiId smallint
+  declare @DerslikAdiTipiId smallint
+  declare @DersSaatiTipiId smallint
+  declare @SaatSayisi smallint
+  declare @PersonelId varchar(20)
+  declare @EgitimTipiId smallint
+  declare @Count smallint
+
+  Select  
+	   @FirmId = [FirmId]
+      ,@DonemTipiId = [DonemTipiId]
+      ,@GrupTipiId = [GrupTipiId]
+      ,@SubeTipiId = [SubeTipiId]
+      ,@BaslangicTarihi = [BaslangicTarihi]
+      ,@SablonTeorikSId = [SablonTeorikSId]
+      ,@DerslikTipiId = [DerslikTipiId]
+      ,@DerslikAdiTipiId = [DerslikAdiTipiId]
+      ,@DersSaatiTipiId = [DersSaatiTipiId]
+      ,@SaatSayisi = [SaatSayisi]
+      ,@PersonelId = [PersonelId]
+      ,@EgitimTipiId = [EgitimTipiId]
+  From MtskSablonTeorikF
+  Where Id = @SablonTeorikFId
+
+  if (@DerslikAdiTipiId = 0)
+  begin
+    Select @DerslikAdiTipiId = DerslikAdiTipiId from MtskDerslik Where DerslikTipiId = @DerslikTipiId
+    if (@DerslikTipiId = 5)
+	    Select @DerslikAdiTipiId = DerslikAdiTipiId from MtskDerslik Where DerslikTipiId = 1
+  end
+
+  set @Count = 1
+  WHILE ( @Count <= @SaatSayisi )
+  BEGIN
+      --PRINT 'The counter value is = ' + CONVERT(VARCHAR,@Count) + '; ' + CONVERT(varchar,@DersSaatiTipiId)
+      Insert Into [dbo].[MtskTeorikDers]
+           ([FirmId]
+           ,[IsActive]
+           ,[DonemTipiId]
+           ,[GrupTipiId]
+           ,[SubeTipiId]
+           ,[DerslikTipiId]
+           ,[DerslikAdiTipiId]
+           ,[DersTarihi]
+           ,[DersSaatiTipiId]
+           ,[PersonelId]
+           ,[EgitimTipiId]
+           ,[BaslamaSaati]
+           ,[BitisSaati]
+           ,[TDersIsUploaded]
+		   ,[SablonTeorikBId]
+		   ,[SablonTeorikSId]
+		   ,[SablonTeorikFId]
+		   )
+    Values (@FirmId
+           ,1
+           ,@DonemTipiId
+           ,@GrupTipiId
+           ,@SubeTipiId
+           ,@DerslikTipiId
+           ,@DerslikAdiTipiId
+           ,@BaslangicTarihi
+           ,@DersSaatiTipiId
+           ,@PersonelId
+           ,@EgitimTipiId
+           ,null -- BaslamaSaati
+           ,null -- BitisSaati
+           ,0    -- TDersIsUploaded
+           ,null -- SablonTeorikBId
+		   ,@SablonTeorikSId
+           ,@SablonTeorikFId)
+	
+	set @Count = @Count + 1
+	set @DersSaatiTipiId = @DersSaatiTipiId + 1
+	if (@DersSaatiTipiId > 15) set @Count = 100
+  END
+
+END -- procedure
+
+/*CreateProcedureEnd*/

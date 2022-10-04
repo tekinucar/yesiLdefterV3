@@ -6,19 +6,29 @@ begin transaction
  (
    Id                      Int IDENTITY(1,1) not null, 
    FirmId                  Int       not null,
+
    DonemTipiId             Int           null,
    GrupTipiId              SmallInt      null,
    SubeTipiId              SmallInt      null,
-   
+
+   /* şablon için */  
    SablonTeorikBId         Int           null,
    BaslangicTarihi         Date          null,
-
    TrafikOgreticiId        Varchar(20)   null,
    IlkYardimOgreticiId     Varchar(20)   null,
    AracTeknigiOgreticiId   Varchar(20)   null,
    TrafikAdabiOgreticiId   Varchar(20)   null,
+   /* şablon için */
 
-
+   /* manuel kısım */
+   SablonTeorikSId         Int           null,
+   DerslikTipiId           SmallInt      null, -- default  /* 1. Trafik ve Çevre Bilgisi, İlk Yardım, Araç Tekniği */
+   DerslikAdiTipiId        SmallInt      null, -- default  /* Derslik-1, -2 ... -10 */
+   DersSaatiTipiId         SmallInt      null, -- user     /* 07:00 - 07:50 ... */
+   SaatSayisi              SmallInt      null, -- user 
+   PersonelId              Varchar(20)   null, -- user
+   EgitimTipiId            SmallInt      null, -- default  /* 1. Normal, 2. Telafi */
+   /* maneul kısım */
 
    constraint		pk_MtskSablonTeorikF primary key (Id)
  )
@@ -30,3 +40,165 @@ begin transaction
 commit transaction
 
 /*CreateTableEnd*/
+
+
+
+/*CreateLkpTable*/
+
+begin transaction
+
+-- ------------------------------------------------------- 
+-- DerslikTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskSablonTeorikFDerslikTipi')
+drop table [Lkp].[MtskSablonTeorikFDerslikTipi]
+
+create table Lkp.MtskSablonTeorikFDerslikTipi
+(
+   Id          Int Unique Not Null,
+   DerslikTipi nVarchar(50)   null
+   
+   constraint  pk_MtskSablonTeorikFDerslikTipi primary key (Id)
+)
+
+INSERT INTO Lkp.MtskSablonTeorikFDerslikTipi (Id, DerslikTipi)
+ VALUES 
+  ( 0, N'Tanımsız'),
+  ( 1, N'Trafik ve Çevre Dersi'),
+  ( 2, N'İlkyardım Dersi'),
+  ( 3, N'Araç Tekniği Dersi'),
+  ( 5, N'Trafik Adabı Dersi')
+
+
+-- ------------------------------------------------------- 
+-- DerslikAdiTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskSablonTeorikFDerslikAdiTipi')
+drop table [Lkp].[MtskSablonTeorikFDerslikAdiTipi]
+
+create table Lkp.MtskSablonTeorikFDerslikAdiTipi
+(
+   Id             Int Unique Not Null,
+   DerslikAdiTipi nVarchar(50)   null
+   
+   constraint  pk_MtskSablonTeorikFDerslikAdiTipi primary key (Id)
+)
+
+INSERT INTO Lkp.MtskSablonTeorikFDerslikAdiTipi (Id, DerslikAdiTipi)
+ VALUES 
+  ( 0, N''),
+  ( 1, N'DERSLİK-1'),
+  ( 2, N'DERSLİK-2'),
+  ( 3, N'DERSLİK-3'),
+  ( 4, N'DERSLİK-4'),
+  ( 5, N'DERSLİK-5'),
+  ( 6, N'DERSLİK-6'),
+  ( 7, N'DERSLİK-7'),
+  ( 8, N'DERSLİK-8'),
+  ( 9, N'DERSLİK-9'),
+  (10, N'DERSLİK-10')
+ 
+
+-- ------------------------------------------------------- 
+-- DersSaatiTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskSablonTeorikFDersSaatiTipi')
+drop table [Lkp].[MtskSablonTeorikFDersSaatiTipi]
+
+create table Lkp.MtskSablonTeorikFDersSaatiTipi
+(
+   Id              Int Unique Not Null,
+   DersSaatiTipi   nVarchar(50)   null
+
+   constraint  pk_MtskSablonTeorikFDersSaatiTipi primary key (Id)
+)
+
+INSERT INTO Lkp.MtskSablonTeorikFDersSaatiTipi (Id, DersSaatiTipi)
+ VALUES 
+  (-1, N''),
+  ( 0, N'07:00 - 07:50'),
+  ( 1, N'08:00 - 08:50'),
+  ( 2, N'09:00 - 09:50'),
+  ( 3, N'10:00 - 10:50'),
+  ( 4, N'11:00 - 11:50'),
+  ( 5, N'12:00 - 12:50'),
+  ( 6, N'13:00 - 13:50'),
+  ( 7, N'14:00 - 14:50'),
+  ( 8, N'15:00 - 15:50'),
+  ( 9, N'16:00 - 16:50'),
+  (10, N'17:00 - 17:50'),
+  (11, N'18:00 - 18:50'),
+  (12, N'19:00 - 19:50'),
+  (13, N'20:00 - 20:50'),
+  (14, N'21:00 - 21:50'),
+  (15, N'22:00 - 22:50')
+
+
+-- ------------------------------------------------------- 
+-- EgitimTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskSablonTeorikFEgitimTipi')
+drop table [Lkp].[MtskSablonTeorikFEgitimTipi]
+
+create table Lkp.MtskSablonTeorikFEgitimTipi
+(
+   Id           Int Unique Not Null,
+   EgitimTipi   nVarchar(20)   null
+
+   constraint  pk_MtskSablonTeorikFEgitimTipi primary key (Id)
+)
+
+INSERT INTO Lkp.MtskSablonTeorikFEgitimTipi (Id, EgitimTipi)
+ VALUES 
+  ( 0, N''),
+  ( 1, N'Normal Eğitim'),
+  ( 2, N'Telafi Eğitim')
+
+commit transaction
+
+/*CreateLkpTableEnd*/
+
+/*
+
+   DonemTipiId             Int           null, -- sourec read 
+   GrupTipiId              SmallInt      null, -- sourec read 
+   SubeTipiId              SmallInt      null, -- sourec read 
+
+   BaslangicTarihi         Date          null, -- user 
+   DerslikTipiId           SmallInt      null, -- default  /* 1. Trafik ve Çevre Bilgisi, İlk Yardım, Araç Tekniği */
+   DerslikAdiTipiId        SmallInt      null, -- default  /* Derslik-1, -2 ... -10 */
+   DersSaatiTipiId         SmallInt      null, -- user     /* 07:00 - 07:50 ... */
+   SaatSayisi              SmallInt   <<       -- user 
+   PersonelId              Varchar(20)   null, -- user
+   EgitimTipiId            SmallInt      null, -- default  /* 1. Normal, 2. Telafi */
+
+
+create table MtskTeorikDers
+ (
+   Id                   Int IDENTITY(1,1) not null, 
+   FirmId               Int       not null,
+   IsActive             Bit       not null, /* default : 1 = active, 0 = not active */  
+
+   DonemTipiId          Int           null, --sourec read 
+   GrupTipiId           SmallInt      null, --sourec read
+   SubeTipiId           SmallInt      null, --sourec read
+   
+   DerslikTipiId        SmallInt      null, -- default        /* 1. Trafik ve Çevre Bilgisi, İlk Yardım, Araç Tekniği */
+   DerslikAdiTipiId     SmallInt      null, --          /* Derslik-1, -2 ... -10 */
+   DersTarihi           Date          null, -- user
+   DersSaatiTipiId      SmallInt      null, -- user
+   PersonelId           Varchar(20)   null, -- user
+   EgitimTipiId         SmallInt      null, -- defalut  /* 1. Normal, 2. Telafi */
+
+   BaslamaSaati         Datetime      null, /* Calender and Scheduling için gerekli */
+   BitisSaati           Datetime      null, /* Calender and Scheduling için gerekli */
+   TDersIsUploaded      Bit           null,
+   SablonTeorikBId      Int           null, /* SablonTeorikBId ve DonemTipiId ile beraber bakıldığında hangi taslak formundan (MtskTaslakTeorikF) bilgi alındığı bulunur  */
+   SablonTeorikFId      Int           null,
+   
+   constraint		pk_MtskTeorikDers primary key (Id)
+ )
+ 
+
+
+*/

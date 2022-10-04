@@ -1,0 +1,46 @@
+﻿
+CREATE PROCEDURE [dbo].[prc_MsProjectFunctionsList] ( 
+    @managerDbName varchar(100) 
+   ,@workDbName varchar(100) 
+  )  
+AS BEGIN
+
+ /* 
+ declare @managerDbName varchar(100) 
+ declare @workDbName varchar(100) 
+ set @managerDbName = 'MSV3DFTRBLT'
+ set @workDbName = 'u7093888_Ustad01'
+ */
+ 
+ declare @cumle varchar(2000) 
+
+ set @cumle = 
+  ' Select func.*
+  , obj.name as Lkp_FunctionName
+  , modul.definition
+  , obj.type_desc 
+  , ''{workDb}'' as Lkp_DatabaseName
+  From [{workDb}].sys.sql_modules as modul 
+     inner join [{workDb}].sys.objects as obj on ( modul.object_id=obj.object_id )
+     left outer join [{managerDb}].dbo.MsProjectFunctions func on ( obj.name = func.FunctionName )
+  Where obj.type_desc like ''%function%''
+  Order by obj.name '
+
+  set @cumle = REPLACE(@cumle, '{workDb}', @workDbName) 
+  set @cumle = REPLACE(@cumle, '{managerDb}', @managerDbName) 
+
+  if ((@managerDbName = '') or
+      (@managerDbName = 'null') or
+      (@workDBName = '') or
+      (@workDBName = 'null'))
+  begin
+    set @cumle = '
+    select 
+      ''sch.name'' as Lkp_SchemaName
+    , ''functionName'' as Lkp_FunctionName 
+	, ''databaseName'' as Lkp_DatabaseName '
+  end
+  
+  execute(@cumle)  
+
+END -- procedure

@@ -1,21 +1,12 @@
-﻿USE [u7093888_Ustad01]
-GO
-
-SET ANSI_NULLS ON
-GO
-
-SET QUOTED_IDENTIFIER ON
-GO
-
-
-CREATE TRIGGER [Lkp].[trg_HesapMaster] on [Lkp].[HesapMaster] 
+﻿
+CREATE TRIGGER [Lkp].[trg_OnmHesapMaster] on [Lkp].[OnmHesapMaster] 
 AFTER INSERT, UPDATE
 AS BEGIN
---   UstGrupTipiId       SmallInt      null, /* 102   banka        */
---   AnaGrupTipiId       SmallInt      null, /* 1022  banka hesabı */
---   AltGrupTipiId       Int           null, /* 10221 vadesiz      */
+    --   UstGrupTipiId       SmallInt      null, /* 102   banka        */
+    --   AnaGrupTipiId       SmallInt      null, /* 1022  banka hesabı */
+    --   AltGrupTipiId       Int           null, /* 10221 vadesiz      */
 
-    declare cursor_HesapMaster cursor for select Id from Inserted
+    declare cursor_OnmHesapMaster cursor for select Id from Inserted
     declare @curId bigint
 
 	declare @kacHane smallInt = 3 
@@ -40,9 +31,9 @@ AS BEGIN
 	declare @yHesapKodu varchar(50) = null
 	
 
-    OPEN cursor_HesapMaster
+    OPEN cursor_OnmHesapMaster
 
-    FETCH NEXT FROM cursor_HesapMaster INTO @curId
+    FETCH NEXT FROM cursor_OnmHesapMaster INTO @curId
 
     WHILE @@FETCH_STATUS = 0
     BEGIN
@@ -65,9 +56,9 @@ AS BEGIN
 		,@eParentHesapAdi3 = isnull(fh3.HesapAdi, '') 
 
       from Inserted ins
-	    left outer join Lkp.HesapMaster fh1 on ( ins.ParentId = fh1.Id )
-		left outer join Lkp.HesapMaster fh2 on ( fh1.ParentId = fh2.Id )
-		left outer join Lkp.HesapMaster fh3 on ( fh2.ParentId = fh3.Id )
+	    left outer join Lkp.OnmHesapMaster fh1 on ( ins.ParentId = fh1.Id )
+		left outer join Lkp.OnmHesapMaster fh2 on ( fh1.ParentId = fh2.Id )
+		left outer join Lkp.OnmHesapMaster fh3 on ( fh2.ParentId = fh3.Id )
 	  where ins.Id = @curId
 	  
 	  if (@eAnaGrupTipiId = 102)  
@@ -105,7 +96,7 @@ AS BEGIN
         begin
 	      --set @yHesapKisaAdi = Ltrim(@yHesapKisaAdi)
 	      --set @yHesapKisaAdi = Rtrim(@yHesapKisaAdi)
-		  set @yHesapKisaAdi = Trim(@yHesapKisaAdi)
+		  set @yHesapKisaAdi = RTRIM(LTRIM(@yHesapKisaAdi))
         end   
 
 		-- banka şubesi
@@ -113,7 +104,7 @@ AS BEGIN
 		    set @yHesapKisaAdi = @yHesapKisaAdi + '.' + @eHesapAdi
         -- banka hesabi
         if (@eAltGrupTipiId = 1022)
-		    set @yHesapKisaAdi = @yHesapKisaAdi + '.' + @eParentHesapAdi1 + '.' +  Trim(@eParentHesapKodu1) + '.' + @eNumarasi
+		    set @yHesapKisaAdi = @yHesapKisaAdi + '.' + @eParentHesapAdi1 + '.' +  RTRIM(LTRIM(@eParentHesapKodu1)) + '.' + @eNumarasi
         -- banka kartı
         if (@eAltGrupTipiId = 1023)
 		    set @yHesapKisaAdi = @yHesapKisaAdi + '.' + @eHesapAdi + '.' + @eNumarasi
@@ -125,20 +116,20 @@ AS BEGIN
 	  if ((@eHesapKisaAdi <> @yHesapKisaAdi) and
 	      (@yHesapKisaAdi <> '')) 
 	  begin
-	    update Lkp.HesapMaster set 
+	    update Lkp.OnmHesapMaster set 
 	           HesapKisaAdi = substring(@yHesapKisaAdi,1,100)
         where Id = @curId
       end
 
-      FETCH NEXT FROM cursor_HesapMaster INTO @curId
+      FETCH NEXT FROM cursor_OnmHesapMaster INTO @curId
     END
 
-    CLOSE cursor_HesapMaster
-    DEALLOCATE cursor_HesapMaster
+    CLOSE cursor_OnmHesapMaster
+    DEALLOCATE cursor_OnmHesapMaster
 END
 GO
 
-ALTER TABLE [Lkp].[HesapMaster] ENABLE TRIGGER [trg_HesapMaster]
+ALTER TABLE [Lkp].[OnmHesapMaster] ENABLE TRIGGER [trg_OnmHesapMaster]
 GO
 
 

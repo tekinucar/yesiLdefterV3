@@ -24,22 +24,18 @@ namespace Tkn_DefaultValue
         {
 
             #region Tanımlar
-            
-            
+                       
             bool onay = true;
-            string fname = string.Empty;
-
             string s = string.Empty;
+            string fname = string.Empty;
             string validation_err = string.Empty;
             string default_fill_err = string.Empty;
-            
             string checked_sonucu = string.Empty;
 
             #endregion
 
             tToolBox t = new tToolBox();
             string function_name = "tDefaultValue_And_Validation";
-            //t.Takipci(function_name, "", '{');
 
             // Bu fonkisyona kimler geliyor ...
 
@@ -68,12 +64,6 @@ namespace Tkn_DefaultValue
                  , ref default_fill_err
                  , ref validation_err
                  , Kim);
-
-            // test için
-            //if (Target_TableIPCode == "SGCB.SGCB_CF01")
-            //{
-            //    onay = onay;
-            //}
 
             v.con_DefaultValuePreparing = false;
 
@@ -146,13 +136,14 @@ namespace Tkn_DefaultValue
                     if (dfl_type != 0)
                     {
                         getErr = string.Empty;
-                        //onay = tDefault_Value_Fill(tForm,
-                                 tDefault_Value_Fill(tForm,
-                                               FieldRow,
-                                               dsData_Target,
-                                               focus_data_row,
-                                               ref getErr,
-                                               Kim);
+                        
+                        tDefault_Value_Fill(tForm,
+                                            FieldRow,
+                                            dsData_Target,
+                                            focus_data_row,
+                                            ref getErr,
+                                            Kim);
+                        
                         if (getErr != null)
                             default_fill_err = default_fill_err + getErr;
                     }
@@ -177,9 +168,7 @@ namespace Tkn_DefaultValue
                     }
 
                     if ((Kim == "tData_Save") ||
-                        (Kim == "tPro_VALIDATION") ||
-                        (Kim == "tdataNavigator_PositionChanged"))// ||
-                                                                  //(Kim == "tData_NewRecord"))
+                        (Kim == "tdataNavigator_PositionChanged"))
                     {
                         getErr = "";
                         getErr = tValidation_Check(FieldRow, focus_data_row);
@@ -220,8 +209,7 @@ namespace Tkn_DefaultValue
         {
 
             tToolBox t = new tToolBox();
-            //string function_name = "tDefault Value Fill";
-
+            
             #region Tanımlar
             bool onay = true;
             byte default_type = 0;
@@ -233,11 +221,9 @@ namespace Tkn_DefaultValue
             string err = string.Empty;
             string fautoinc = string.Empty;
             string newValue = string.Empty;
-            
             string myProp = string.Empty;
             string TableIPCode = string.Empty;
             string MultiPageID = string.Empty;
-
             #endregion
 
             // Kim = "btn_Navigotor_HVG_Click"
@@ -417,12 +403,8 @@ namespace Tkn_DefaultValue
 
                         }
                     }
-                    //else
-                    //{
-                    //    MessageBox.Show(TableIPCode + " : içinde [ " + master_TableIPCode + " | " + master_FieldName + " ] master_TableIPCode / master_FieldName   bulunamadı.");
-                    //}
-
                 }
+
                 if ((dsData_Source == null) || (t.IsNotNull(master_FieldName) == false))
                 {
                     onay = false;

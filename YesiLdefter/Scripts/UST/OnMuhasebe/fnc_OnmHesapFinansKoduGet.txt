@@ -1,14 +1,9 @@
-﻿USE [u7093888_Ustad01]
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
+﻿/*CreateFunction*/
 
-IF OBJECT_ID (N'dbo.fnc_HesapFinansKoduGet', N'FN') IS NOT NULL  
-    DROP FUNCTION fnc_HesapFinansKoduGet;  
+IF OBJECT_ID (N'dbo.fnc_OnmHesapFinansKoduGet', N'FN') IS NOT NULL  
+    DROP FUNCTION fnc_OnmHesapFinansKoduGet;  
 GO  
-CREATE FUNCTION [dbo].[fnc_HesapFinansKoduGet](
+CREATE FUNCTION [dbo].[fnc_OnmHesapFinansKoduGet](
  @FirmId int 
 ,@UstGrupTipiId smallInt 
 ,@AnaGrupTipiId smallInt 
@@ -22,7 +17,7 @@ BEGIN
     DECLARE @ret varchar(50);  
     
 	select @ret = replicate('0', @kacHane - len(count(Id)) ) + convert(varchar(10), count(Id)) 
-	from [dbo].[HesapFinans]
+	from [dbo].[OnmHesapFinans]
     Where FirmId = @FirmId
     and UstGrupTipiId = @UstGrupTipiId
     and AnaGrupTipiId = @AnaGrupTipiId
@@ -32,7 +27,8 @@ BEGIN
         SET @ret = '000';  
 
     RETURN @ret;  
-END;
-GO
+END
+
+/*CreateFunctionEnd*/
 
 

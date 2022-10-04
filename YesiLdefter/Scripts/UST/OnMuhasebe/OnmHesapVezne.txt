@@ -1,0 +1,37 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table OnmHesapVezne
+ (
+
+   Id                Int IDENTITY(1,1) NOT NULL, 
+   ParentId          Int       not null, /* default 0 */
+   FirmId            Int       not null,
+   IsActive          Bit       not null, /* default : 1 = active, 0 = not active */  
+   VezneKodu         nVarchar(50)  null,
+   VezneAdi          nVarchar(100) null, /* kullanıcının girdiği isim */
+
+   constraint		pk_OnmHesapVezne primary key (Id)
+ )
+
+ create index X_OnmHesapVezne01 on OnmHesapVezne (FirmId)
+ 
+ grant select, insert, update, delete on OnmHesapVezne to public
+
+commit transaction
+
+/*CreateTableEnd*/
+
+/*CreateData*/
+
+declare @FirmId int
+set @FirmId = :FIRM_ID
+
+INSERT INTO [dbo].[OnmHesapVezne] ([ParentId],[FirmId],[IsActive],[VezneKodu],[VezneAdi]) 
+  VALUES 
+  (0, @FirmId, 1, '', 'A Veznesi'),
+  (0, @FirmId, 1, '', 'B Veznesi')
+
+/*CreateData*/
+

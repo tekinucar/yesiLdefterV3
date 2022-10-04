@@ -85,19 +85,23 @@ CREATE TRIGGER [dbo].[trg_MtskPersoneli] on [dbo].[MtskPersoneli]
 AFTER INSERT, UPDATE
 AS BEGIN
 
-    DECLARE myCursor cursor for select Id from Inserted
+    DECLARE cursorMtskPersoneli cursor for select Id from Inserted
     DECLARE @curId bigint
 
-    OPEN myCursor
+    OPEN cursorMtskPersoneli
 
-    FETCH NEXT FROM myCursor INTO @curId
+    FETCH NEXT FROM cursorMtskPersoneli INTO @curId
 
-    declare @yTamAdi varchar(100) = null
+    declare @yFirmId Int = 0
+	declare @yTamAdi varchar(100) = null
     declare @eTamAdi varchar(100) = null
     declare @newTamAdi varchar(100) = null
     declare @yAdi varchar(50) = null
     declare @ySoyAdi varchar(50) = null
-    
+    declare @yEposta nvarchar(100) = null
+	declare @yCepTelefonu nvarchar(15) = null
+	declare @CariId int = 0
+
 	declare @eTcVkNo varchar(11) = null
 	declare @eCalismaIzniKayitNo varchar(7) = null
 	declare @yTcVkNo varchar(11) = null
@@ -118,7 +122,8 @@ AS BEGIN
     	where dlt.Id = @curId
 			   
         select 
-		   @yTcVkNo = isnull(ins.TcVkNo,'')
+		   @yFirmId = ins.FirmId
+		  ,@yTcVkNo = isnull(ins.TcVkNo,'')
           ,@yCalismaIzniKayitNo = isnull(ins.CalismaIzniKayitNo, '')
 		  ,@yTamAdi = isnull(ins.TamAdiSoyadi, '')
     	  ,@yAdi = isnull(ins.Adi,'')
@@ -145,8 +150,8 @@ AS BEGIN
             set @eTamAdi = ''
 
 			update MtskPersoneli set 
-              Adi = TRIM(@yAdi)
-			 ,Soyadi = TRIM(@ySoyadi)
+              Adi = RTRIM(LTRIM(@yAdi))
+			 ,Soyadi = RTRIM(LTRIM(@ySoyadi))
             where Id = @curId
         end
         
@@ -160,18 +165,64 @@ AS BEGIN
 			)  
     	begin
     	    update MtskPersoneli set 
-             TamAdiSoyadi = TRIM(@newTamAdi)
-            ,TcNoCalismaIzniNo = TRIM(@yTcVkNo + @yCalismaIzniKayitNo)
-            ,TcNo_CalismaIzniNo = TRIM(@yTcVkNo + '-' + @yCalismaIzniKayitNo)
+             TamAdiSoyadi = RTRIM(LTRIM(@newTamAdi))
+            ,TcNoCalismaIzniNo = RTRIM(LTRIM(@yTcVkNo + @yCalismaIzniKayitNo))
+            ,TcNo_CalismaIzniNo = RTRIM(LTRIM(@yTcVkNo + '-' + @yCalismaIzniKayitNo))
 			where Id = @curId 
     	end
                 
+	    if (LEN(@yTcVkNo) = 11)
+	    begin
+		    set @CariId = 0
 
-      FETCH NEXT FROM myCursor INTO @curId
+	        Select @CariId = ISNULL(Id,0) From dbo.OnmHesapCari
+	        Where TcVkNo = @yTcVkNo
+	        and   CalismaTipiId = 19 -- personel ise
+
+            if (@CariId = 0)
+	        begin
+			    print @yTcVkNo
+                INSERT INTO [dbo].[OnmHesapCari]
+                ([ParentId],[FirmId],[IsActive]
+                ,[CariTipiId],[CalismaTipiId]
+                ,[TcVkNo]
+                ,[TamAdi]
+                ,[Adi]
+                ,[GobekAdi]
+                ,[SoyAdi]
+                ,[CepTelefonu],[Eposta]
+                ,[ParaTipiId]
+                ) VALUES (   
+				 0, @yFirmId, 1
+                ,1 ,19
+                ,@yTcVkNo
+                ,RTRIM(LTRIM(@newTamAdi))
+                ,@yAdi
+                ,null
+                ,@ySoyAdi
+	            ,@yCepTelefonu, @yEposta
+                ,'TRY' )
+	        end else
+	        begin
+			    print @yTcVkNo + ' : ' + convert(varchar(10), @CariId)
+                UPDATE [dbo].[OnmHesapCari]
+                SET [FirmId] = @yFirmId
+                ,[TcVkNo] = @yTcVkNo
+                ,[TamAdi] = RTRIM(LTRIM(@newTamAdi))
+                ,[Adi] = @yAdi
+                ,[SoyAdi] = @ySoyAdi
+                ,[CepTelefonu] = @yCepTelefonu
+                ,[Eposta] = @yEposta
+                WHERE Id = @CariId
+	        end
+ 	    end -- if (LEN(@yTcVkNo) = 11)
+
+      FETCH NEXT FROM cursorMtskPersoneli INTO @curId
     END -- While
 
-    CLOSE myCursor
-    DEALLOCATE myCursor   
+    CLOSE cursorMtskPersoneli
+    DEALLOCATE cursorMtskPersoneli   
+
 END -- create trigger
 
 /*CreateTriggerEnd*/

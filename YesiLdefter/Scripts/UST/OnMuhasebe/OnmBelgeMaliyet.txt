@@ -1,0 +1,293 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+-- Maliyet Belgeler hakkında detay
+
+ create table OnmBelgeMaliyet
+ (
+
+   Id                 Int IDENTITY(1,1) NOT NULL, 
+   ParentId           Int       not null, /* default 0 */
+   FirmId             Int       not null,
+   IsActive           Bit       not null, /* default : 1 = active, 0 = not active */  
+   IsPaid             Bit       not null, /* default : 0 = ödenmedi, 1 = ödendi */  
+   IsCommit           Bit       not null, /* default : 0 = işlenmedi, 1 = İşlendi */  
+   BelgeTipiId        SmallInt      null, 
+   KaynakTipiId       SmallInt      null, /* 1. kağıt, 2. elektronik belge */
+   
+   -- 10 Belge Hakkında
+   BelgeTarihi        Date          null,
+   BelgeSaati         VarChar(8)    null,
+   BelgeYil           Smallint      null, 
+   BelgeAy            Smallint      null, 
+   BelgeGun           Smallint      null,
+   BelgeSeri          nVarChar(5)   null,
+   BelgeNo            nVarChar(50)  null,
+
+   VadeGun            SmallInt      null,  
+   SonOdemeTarihi     Date          null, 
+   GecerlilikTarihi   Date          null, /* sigortanın son tarihi */
+   
+   -- 30
+   CariId             Int           null,
+   CariUnvan          nVarChar(200) null, /* cari hesabı yok ise */
+   MaliyetId          Int           null, /* maliyet muhasebe hesap Id */
+   VarlikId           Int           null, /* varlıkların (bina taşıt telekom vb ) */
+   AboneId            Int           null, /* aylık abonelik faturaların işareti */
+
+   -- 40
+   BelgeTutari        Numeric(22,5) null,
+   MinOdemeTutari     Numeric(22,5) null,
+   KdvMatrahi         Numeric(22,5) null,    
+   KdvOrani           SmallInt      null,
+   KdvTutari          Numeric(22,5) null,    
+   VergiVeFonlar      Numeric(22,5) null,    
+   MasrafMiktari      Numeric(22,5) null,    
+   
+   --50 kdv oran ve tutarları eklenebilir (perakende fişinin işlenmesini örnek al)
+
+   -- 90
+   -- İşlendi : bu belge ödendi tahsil edildi vb... 
+   Aciklama           nVarchar(200) null, 
+   KayitTarihi        Date          null, 
+   KayitSaati         VarChar(8)    null,
+   PaidId             Int           null,   
+   CommitTable        Int           null, /* ilgili table */
+   CommitId           Int           null, /* ilgili table ref Id */
+
+   constraint		pk_OnmBelgeMaliyet primary key (Id)
+ )
+
+ create index X_OnmBelgeMaliyet01 on OnmBelgeMaliyet (FirmId)
+ create index X_OnmBelgeMaliyet02 on OnmBelgeMaliyet (BelgeTipiId)
+ create index X_OnmBelgeMaliyet03 on OnmBelgeMaliyet (KayitTarihi)
+ create index X_OnmBelgeMaliyet04 on OnmBelgeMaliyet (BelgeTarihi)
+ create index X_OnmBelgeMaliyet05 on OnmBelgeMaliyet (SonOdemeTarihi)
+ create index X_OnmBelgeMaliyet06 on OnmBelgeMaliyet (GecerlilikTarihi)
+ 
+ create index X_OnmBelgeMaliyet07 on OnmBelgeMaliyet (CariId)
+ create index X_OnmBelgeMaliyet08 on OnmBelgeMaliyet (MaliyetId)
+ create index X_OnmBelgeMaliyet09 on OnmBelgeMaliyet (VarlikId)
+ create index X_OnmBelgeMaliyet10 on OnmBelgeMaliyet (AboneId)
+
+ grant select, insert, update, delete on OnmBelgeMaliyet to public
+
+ commit transaction
+
+ /*CreateTableEnd*/
+
+
+ /*CreateTrigger*/
+
+CREATE TRIGGER [dbo].[trg_OnmBelgeMaliyet] on [dbo].[OnmBelgeMaliyet] 
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    declare cursor_BMaliyet cursor for select Id from Inserted
+    declare @curId bigint
+    
+	declare @FirmId int
+	declare @BelgeTarihi date
+	declare @SonOdemeTarihi date
+	declare @BelgeTutari numeric(22,8)
+	declare @KdvMatrahi  numeric(22,8)
+	declare @KdvOrani smallInt
+	declare @KdvTutari numeric(22,8)
+	declare @ykdvTutari numeric(22,8)
+
+	declare @eKayitTarihi date 
+    
+	OPEN cursor_BMaliyet
+
+    FETCH NEXT FROM cursor_BMaliyet INTO @curId
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+      select 
+	      @FirmId = ins.FirmId
+		 ,@BelgeTarihi = ins.BelgeTarihi
+	     ,@SonOdemeTarihi = ins.SonOdemeTarihi
+	     ,@BelgeTutari = ins.BelgeTutari
+	     ,@KdvMatrahi = ins.KdvMatrahi
+	     ,@KdvOrani = ins.KdvOrani
+	     ,@KdvTutari = ins.KdvTutari
+         ,@eKayitTarihi = ins.KayitTarihi  
+      from Inserted ins
+      where ins.Id = @curId
+	  
+	  if (@SonOdemeTarihi is null) or
+	     (@SonOdemeTarihi < @BelgeTarihi)
+	  begin
+	    update OnmBelgeMaliyet set 
+		  SonOdemeTarihi = @BelgeTarihi
+		where Id = @curId
+	  end
+
+	  -- sadece belge tutarı var ise 
+	  -- belgeTutarı kdvDahil verilmiştir, ona göre kdv hesaplanır
+	  if ((@BelgeTutari > 0) and (@KdvMatrahi = 0))
+	      set @ykdvTutari = ( @BelgeTutari / (100 + @KdvOrani) ) * @KdvOrani  
+      
+	  -- KdvMatrahı belirtilmiş ise Kdvsiz tutardır, ona göre hesaplanı
+	  if (@KdvMatrahi > 0)
+	      set @ykdvTutari = (@KdvMatrahi / 100) * @KdvOrani   
+
+	  if (@KdvOrani = 0)
+	      set  @ykdvTutari = 0
+	  
+	  if (@KdvTutari != @ykdvTutari) 
+	  begin
+	    update OnmBelgeMaliyet set 
+		  KdvTutari = @ykdvTutari
+        where Id = @curId
+	  end
+	  
+	  if (@eKayitTarihi is null)
+	  begin
+	    update OnmBelgeMaliyet set 
+		  KayitTarihi = GETDATE()
+		, KayitSaati = CONVERT(Time, getdate())
+        where Id = @curId
+	  end
+	  	   
+      FETCH NEXT FROM cursor_BMaliyet INTO @curId
+    END
+
+    CLOSE cursor_BMaliyet
+    DEALLOCATE cursor_BMaliyet
+
+	EXECUTE [dbo].[prc_OnmToplamBekleyenOdemeler] @FirmId
+	   
+END
+
+ /*CreateTriggerEnd*/
+
+
+ /*CreateTrigger*/
+
+CREATE TRIGGER [dbo].[trg_OnmBelgeMaliyetDelete] on [dbo].[OnmBelgeMaliyet]
+FOR DELETE
+AS BEGIN
+
+    declare cursor_belgeMaliyetDlt cursor for select Id from deleted
+    declare @curId bigint
+	declare @FirmId int
+	
+	OPEN cursor_belgeMaliyetDlt
+
+    FETCH NEXT FROM cursor_belgeMaliyetDlt INTO @curId
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        Select 
+            @FirmId = dlt.FirmId
+        From deleted dlt
+        Where dlt.Id = @curId
+
+
+      FETCH NEXT FROM cursor_belgeMaliyetDlt INTO @curId
+    END
+
+    CLOSE cursor_belgeMaliyetDlt
+    DEALLOCATE cursor_belgeMaliyetDlt
+
+	EXECUTE [dbo].[prc_OnmToplamBekleyenOdemeler] @FirmId 
+
+END
+
+ /*CreateTriggerEnd*/
+
+
+ /*CreateLkpTable*/
+
+ begin transaction
+
+-- ------------------------------------------------------- 
+-- BelgeTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[OnmBelgeMaliyetBelgeTipi]
+(
+   Id           Int Unique Not Null,
+   BelgeTipi    nVarchar(50),
+   GrupTipiId   SmallInt Null,
+
+   constraint  pk_OnmBelgeMaliyetBelgeTipi primary key (Id)
+)
+
+delete from [Lkp].[OnmBelgeMaliyetBelgeTipi]
+INSERT INTO [Lkp].[OnmBelgeMaliyetBelgeTipi] (Id, BelgeTipi, GrupTipiId)
+ VALUES 
+  (0,   N'Tanımsız', 0),
+  (1,   N'Fatura', 1),
+  (2,   N'ÖKC Fişi', 1),
+  (3,   N'Perakende Satış Belgesi', 1),
+  (4,   N'Gider Pusulası', 1),
+  (5,   N'Müstahsil Makbuzu', 1),
+  (6,   N'Serbest Meslek Makbuzu', 1),
+  (7,   N'Tevsiki Zaruri Olmayan', 1),
+  (8,   N'Yapay Belge', 1),
+  (21,  N'Muhasebe Dekontu', 1),
+  (22,  N'Hesap Extresi', 1)
+
+
+-- ------------------------------------------------------- 
+-- KaynakTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[OnmBelgeMaliyetKaynakTipi]
+(
+   Id           Int Unique Not Null,
+   KaynakTipi   nVarchar(50),
+   GrupTipiId   SmallInt Null,
+
+   constraint  pk_OnmBelgeMaliyetKaynakTipi primary key (Id)
+)
+
+delete from [Lkp].[OnmBelgeMaliyetKaynakTipi]
+INSERT INTO [Lkp].[OnmBelgeMaliyetKaynakTipi] (Id, KaynakTipi, GrupTipiId)
+ VALUES 
+  (0,   N'Tanımsız', 0),
+  (1,   N'e-devlet', 1), 
+  (2,   N'e-fatura', 1),
+  (3,   N'e-belge', 1),
+  (4,   N'Kağıt', 1),
+  (5,   N'Sms', 1),
+  (6,   N'Fax', 1),
+  (7,   N'Telefon', 1),
+  (8,   N'Diğer', 1)
+
+
+ commit transaction
+
+ /*CreateLkpTableEnd*/
+
+ /*
+ +Fatura
+
+Faturayı tamamlayan veya fatura düzenlenmesini gerektiren belgeler
+Sevk İrsaliyesi
+Taşıma İrsaliyesi
+Yolcu Listeleri
+Günlük Müşteri Listeleri
+Adisyonlar
+Hak Ediş Belgesi
+
+Fatura yerine geçen belgeler
++Perakende Satış Belgeleri
++Gider Pusulası
++Müstahsil Makbuzu
++Serbest Meslek Makbuzu
++Yapay Belgeler
++Muhasebe Dekontu (vergi, sgk... ödeme emirleri)
+
+Alınan belge türü
+----------------------------
+Fatura
+Perakende Satış Belgeleri
+Gider Pusulası
+Müstahsil Makbuzu
+Serbest Meslek Makbuzu
+Yapay Belgeler
+Muhasebe Dekontu
+
+*/

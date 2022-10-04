@@ -1,15 +1,15 @@
 ﻿/*CreateProcedure*/
 
-CREATE PROCEDURE [dbo].[prc_KrediOdemePlaniOlustur] (@firmId int, @cariTipiId smallInt, @cariId int)  
+CREATE PROCEDURE [dbo].[prc_OnmOdemePlaniOlustur] (@firmId int, @ucretTipiId smallInt, @cariId int)  
 AS BEGIN
   /* 
   declare @firmId int
-  -- Kaynak : KrediOdemePlaniCariTipi tablosu
-  declare @cariTipiId smallInt
+  -- Kaynak : OnmOdemePlaniCariTipi tablosu
+  declare @ucretTipiId smallInt
   declare @cariId int 
   
   set @firmId = 2
-  set @cariTipiId = 2110
+  set @ucretTipiId = 2110
   set @cariId = 1566
   */
   
@@ -17,9 +17,9 @@ AS BEGIN
   declare @mevcut int = 0
     
   Select @mevcut = count(Id)
-  From [dbo].[KrediOdemePlani]
+  From [dbo].[OnmOdemePlani]
   Where FirmId = @firmId
-  and   CariTipiId = @cariTipiId
+  and   UcretTipiId = @ucretTipiId
   and   CariId = @cariId
   and   (IsPaid = 1      -- ödendi
     or BelgeMakbuzId > 0 -- tahsilat makbuzu varsa
@@ -47,7 +47,8 @@ AS BEGIN
 
   declare @OdemeTipiId         smallInt = 0
   declare @IsPaymentDate       date = null
-  declare @OdemeBaslamaTarihi  date = null 
+  declare @OdemeBaslamaTarihi1  date = null 
+  declare @OdemeBaslamaTarihi2  date = null 
 
   declare @sayac int = 1
   declare @aylikUcret numeric(22,8) = 0
@@ -59,10 +60,11 @@ AS BEGIN
      -- Mevcut Odeme Planını sil
 	 --
 	 Delete
-     From [dbo].[KrediOdemePlani]
+     From [dbo].[OnmOdemePlani]
      Where FirmId = @firmId
-     and   CariTipiId = @cariTipiId
+     and   UcretTipiId = @ucretTipiId
      and   CariId = @cariId
+	 and   IsPaid = 0
 
 	 -- Adayın Ödeme Plan Beyanı okunuyor
 	 --
@@ -81,18 +83,20 @@ AS BEGIN
        ,@SertifikaVeSinavUcreti = [SertifikaVeSinavUcreti]
        ,@IsSinavUcretiTaksitli = [IsSinavUcretiTaksitli]
        ,@OdemeTipiId = [OdemeTipiId]
-       ,@OdemeBaslamaTarihi = [OdemeBaslamaTarihi]
+       ,@OdemeBaslamaTarihi1 = isnull([OdemeBaslamaTarihi],getdate())
      From [dbo].[MtskAday]
      Where Id = @cariId
-	 	 
+	 	
+	 set @OdemeBaslamaTarihi2 = @OdemeBaslamaTarihi1
+	 
 	 -- PeşinatTutari varsa onun kaydını oluştur
 	 --
 	 if (@PesinatTutari > 0)
 	 begin
-	    INSERT INTO [dbo].[KrediOdemePlani]
+	    INSERT INTO [dbo].[OnmOdemePlani]
            ([FirmId]
            ,[DonemTipiId]
-           ,[CariTipiId]
+           ,[UcretTipiId]
            ,[CariId]
 		   ,[TaksitTipiId]
            ,[TaksitNo]
@@ -107,7 +111,7 @@ AS BEGIN
         VALUES
            (@firmId
            ,@DonemTipiId
-           ,@cariTipiId
+           ,@ucretTipiId
            ,@cariId
            ,1                       --<TaksitTipiId, smallint,>
 		   ,0                       --<TaksitNo, numeric(3,0),> 
@@ -122,6 +126,8 @@ AS BEGIN
         
 	 end -- @PesinatTutari
 
+	 if (@TaksitSayisiTipiId <= 0) set @TaksitSayisiTipiId = 1
+
 	 -- Aylık ücret hesaplanıyor
 	 -- 
      set @aylikUcret = @KalanUcret / @TaksitSayisiTipiId
@@ -133,10 +139,10 @@ AS BEGIN
 	 --
      while (@sayac <= @TaksitSayisiTipiId)
      begin
-        INSERT INTO [dbo].[KrediOdemePlani]
+        INSERT INTO [dbo].[OnmOdemePlani]
            ([FirmId]
            ,[DonemTipiId]
-           ,[CariTipiId]
+           ,[UcretTipiId]
            ,[CariId]
 		   ,[TaksitTipiId]
            ,[TaksitNo]
@@ -151,23 +157,105 @@ AS BEGIN
        VALUES
            (@firmId
            ,@DonemTipiId
-           ,@cariTipiId
+           ,@ucretTipiId
            ,@cariId
            ,2                          --<TaksitTipiId, smallint,>
 		   ,@sayac                     --<TaksitNo, numeric(3,0),> 
-           ,@OdemeBaslamaTarihi        --<VadeTarihi, date,>
-           ,YEAR(@OdemeBaslamaTarihi)  --<VadeYil, smallint,>
-           ,MONTH(@OdemeBaslamaTarihi) --<VadeAy, smallint,>
-           ,DAY(@OdemeBaslamaTarihi)   --<VadeGun, smallint,>
+           ,@OdemeBaslamaTarihi1        --<VadeTarihi, date,>
+           ,YEAR(@OdemeBaslamaTarihi1)  --<VadeYil, smallint,>
+           ,MONTH(@OdemeBaslamaTarihi1) --<VadeAy, smallint,>
+           ,DAY(@OdemeBaslamaTarihi1)   --<VadeGun, smallint,>
            ,@aylikUcret                --<TaksitTutari, numeric(22,8),>
            ,0 --<IsPaid, bit,>
            ,0 --<BelgeMakbuzId, int,>
            ,0) --<BelgeStokBId, int,>)
             
-        set @OdemeBaslamaTarihi = DATEADD(MONTH, 1, @OdemeBaslamaTarihi)
+        set @OdemeBaslamaTarihi1 = DATEADD(MONTH, 1, @OdemeBaslamaTarihi1)
 	    set @sayac = @sayac + 1 
      end -- while
   
+     if (@IsSinavUcretiTaksitli = 0) and
+	    (@ESinavUcreti > 0)
+     begin
+	    Delete From [dbo].[OnmOdemePlani]
+        Where FirmId = @firmId
+        and   UcretTipiId = 2111
+        and   CariId = @cariId
+	    and   IsPaid = 0
+				
+		INSERT INTO [dbo].[OnmOdemePlani]
+           ([FirmId]
+           ,[DonemTipiId]
+           ,[UcretTipiId]
+           ,[CariId]
+		   ,[TaksitTipiId]
+           ,[TaksitNo]
+           ,[VadeTarihi]
+           ,[VadeYil]
+           ,[VadeAy]
+           ,[VadeGun]
+           ,[TaksitTutari]
+           ,[IsPaid]
+           ,[BelgeMakbuzId]
+           ,[BelgeStokBId])
+        VALUES
+           (@firmId
+           ,@DonemTipiId
+           ,2111 --@ucretTipiId      -- Mtsk Teorik Sınav Ücreti 
+           ,@cariId
+           ,3                       --<TaksitTipiId, smallint,>
+		   ,1                       --<TaksitNo, numeric(3,0),> 
+           ,@OdemeBaslamaTarihi2        --<VadeTarihi, date,>
+           ,YEAR(@OdemeBaslamaTarihi2)  --<VadeYil, smallint,>
+           ,MONTH(@OdemeBaslamaTarihi2) --<VadeAy, smallint,>
+           ,DAY(@OdemeBaslamaTarihi2)   --<VadeGun, smallint,>
+           ,@ESinavUcreti               --<TaksitTutari, numeric(22,8),>
+           ,0  --<IsPaid, bit,>
+           ,0  --<BelgeMakbuzId, int,>
+           ,0) --<BelgeStokBId, int,>)
+     end
+     
+     if (@IsSinavUcretiTaksitli = 0) and
+	    (@UygulamaSinavUcreti > 0)
+     begin
+	    Delete From [dbo].[OnmOdemePlani]
+        Where FirmId = @firmId
+        and   UcretTipiId = 2112
+        and   CariId = @cariId
+	    and   IsPaid = 0
+
+	    INSERT INTO [dbo].[OnmOdemePlani]
+           ([FirmId]
+           ,[DonemTipiId]
+           ,[UcretTipiId]
+           ,[CariId]
+		   ,[TaksitTipiId]
+           ,[TaksitNo]
+           ,[VadeTarihi]
+           ,[VadeYil]
+           ,[VadeAy]
+           ,[VadeGun]
+           ,[TaksitTutari]
+           ,[IsPaid]
+           ,[BelgeMakbuzId]
+           ,[BelgeStokBId])
+        VALUES
+           (@firmId
+           ,@DonemTipiId
+           ,2112 --@ucretTipiId      -- 'Mtsk Uygulama Sınav Ücreti 
+           ,@cariId
+           ,3                       --<TaksitTipiId, smallint,>
+		   ,1                       --<TaksitNo, numeric(3,0),> 
+           ,@OdemeBaslamaTarihi2        --<VadeTarihi, date,>
+           ,YEAR(@OdemeBaslamaTarihi2)  --<VadeYil, smallint,>
+           ,MONTH(@OdemeBaslamaTarihi2) --<VadeAy, smallint,>
+           ,DAY(@OdemeBaslamaTarihi2)   --<VadeGun, smallint,>
+           ,@UygulamaSinavUcreti        --<TaksitTutari, numeric(22,8),>
+           ,0  --<IsPaid, bit,>
+           ,0  --<BelgeMakbuzId, int,>
+           ,0) --<BelgeStokBId, int,>)
+     end
+
   end --if
 
   -- Bunu kapatma veya silem. 
@@ -177,5 +265,3 @@ AS BEGIN
 END -- procedure
 
 /*CreateProcedureEnd*/
-
-
