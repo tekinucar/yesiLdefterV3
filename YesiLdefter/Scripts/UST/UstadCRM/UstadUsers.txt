@@ -90,7 +90,7 @@ AS BEGIN
 		from inserted ins
     	where ins.UserId = @curId
 
-		-- TamAdiSoyadi var ise Adi ve SoyAdi tespit ediliyor 
+		-- TamAdiSoyadi var ise Adi ve Soyadi tespit ediliyor 
         if ((@UserFullName <> '') and
             (@UserFirstName = '') and
             (@UserLastName = ''))

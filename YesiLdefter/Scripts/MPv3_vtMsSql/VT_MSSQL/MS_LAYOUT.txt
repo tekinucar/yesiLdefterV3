@@ -21,7 +21,8 @@ begin transaction
 
         PROP_VIEWS              VarChar(4000)           NULL,
         PROP_RUNTIME            VarChar(4000)           NULL,
-        PROP_NAVIGATOR          VarChar(4000)           NULL,
+        PROP_HTMLATTRIBUTE      VarChar(max)            NULL,
+        PROP_HTMLCONTENT        VarChar(max)            NULL,
         
         CMP_DOCK                SmallInt                NULL,
         CMP_WIDTH               SmallInt                NULL,
@@ -48,6 +49,7 @@ begin transaction
         SOFTWARE_CODE           Varchar(20)             NULL,
         PROJECT_CODE            Varchar(20)             NULL,
         LYTMAIN_CODE            Varchar(30)             NULL,
+        IMAGE_SOURCE            Varchar(200)            NULL,
 
 	Constraint PK_MS_LAYOUT primary key (REF_ID)
  )
@@ -59,3 +61,16 @@ begin transaction
 
 commit transaction
 
+/*
+
+EXEC sp_RENAME 'MS_LAYOUT.PROP_NAVIGATOR' , 'PROP_HTML', 'COLUMN'
+
+ALTER TABLE MS_LAYOUT ALTER COLUMN PROP_HTML VARCHAR(MAX) NULL
+
+ALTER TABLE MS_LAYOUT ADD IMAGE_SOURCE  Varchar(200) NULL
+
+
+ALTER TABLE MS_LAYOUT ADD PROP_HTMLCONTENT  Varchar(max) NULL
+EXEC sp_RENAME 'MS_LAYOUT.PROP_HTML' , 'PROP_HTMLATTRIBUTE', 'COLUMN'
+
+*/

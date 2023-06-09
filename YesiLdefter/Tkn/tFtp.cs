@@ -69,8 +69,9 @@ namespace Tkn_Ftp
 
 
         /* Download File */
-        public void download(string remoteFile, string localFile)
+        public bool download(string remoteFile, string localFile)
         {
+            bool onay = false;
             try
             {
                 /* Create an FTP Request */
@@ -100,9 +101,11 @@ namespace Tkn_Ftp
                         localFileStream.Write(byteBuffer, 0, bytesRead);
                         bytesRead = ftpStream.Read(byteBuffer, 0, bufferSize);
                     }
+                    onay = true;
                 }
                 catch (Exception ex)
                 {
+                    onay = false;
                     MessageBox.Show(ex.ToString());
                 }
                 /* Resource Cleanup */
@@ -113,9 +116,10 @@ namespace Tkn_Ftp
             }
             catch (Exception ex)
             {
+                onay = false;
                 MessageBox.Show(ex.ToString());
             }
-            return;
+            return onay;
         }
 
         /* Upload File */

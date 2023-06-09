@@ -15,7 +15,7 @@ begin transaction
    KimlikSeriNo          Varchar(10)   null,
    TamAdiSoyadi          nVarchar(100) null,
    Adi                   nVarchar(50)  null,
-   SoyAdi                nVarchar(50)  null,
+   Soyadi                nVarchar(50)  null,
    DogumTarihi           Date          null,
    YasYil                SmallInt      null, /* otomatik hesaplanacak */
    YasAy                 SmallInt      null, /* ehliyet sınıfına ve okuluna göre değişiyor */
@@ -119,7 +119,7 @@ AS BEGIN
     declare @eTamAdi varchar(100) = null
     declare @newTamAdi varchar(100) = null
     declare @yAdi varchar(50) = null
-    declare @ySoyAdi varchar(50) = null
+    declare @ySoyadi varchar(50) = null
 	
     declare @eMevcutSertifikaTipiId smallInt = 0
     declare @eIstenenSertifikaTipiId smallInt = 0
@@ -215,7 +215,7 @@ AS BEGIN
           ,@yTcNo = isnull(ins.TcNo,'')
           ,@yTamAdi = isnull(ins.TamAdiSoyadi, '')
     	  ,@yAdi = isnull(ins.Adi,'')
-    	  ,@ySoyAdi = isnull(ins.SoyAdi,'')
+    	  ,@ySoyadi = isnull(ins.Soyadi,'')
           ,@yMevcutSertifikaTipiId = isnull(ins.MevcutSertifikaTipiId,0)
           ,@yIstenenSertifikaTipiId = isnull(ins.IstenenSertifikaTipiId,0)
           ,@yIsOtomatik = isnull (ins.IsOtomatik,0)
@@ -242,10 +242,10 @@ AS BEGIN
         From inserted ins
         Where ins.Id = @AdayId
      	   	
-        -- TamAdiSoyadi var ise Adi ve SoyAdi tespit ediliyor 
+        -- TamAdiSoyadi var ise Adi ve Soyadi tespit ediliyor 
         if ((@yTamAdi <> '') and
             (@yAdi = '') and
-            (@ySoyAdi = ''))
+            (@ySoyadi = ''))
         begin
             declare @i1 int = 0
             declare @i2 int = 0
@@ -256,7 +256,7 @@ AS BEGIN
             if (@i2 > 0) set @i1 = @i2
 
             set @yAdi = SUBSTRING(@yTamAdi, 0, @i1)
-            set @ySoyAdi = SUBSTRING(@yTamAdi, @i1+1, 100)
+            set @ySoyadi = SUBSTRING(@yTamAdi, @i1+1, 100)
             set @eTamAdi = ''
 
             Update MtskAday set 
@@ -265,7 +265,7 @@ AS BEGIN
             Where Id = @AdayId
         end
 		
-    	set @newTamAdi = @yAdi + ' ' +  @ySoyAdi
+    	set @newTamAdi = @yAdi + ' ' +  @ySoyadi
        
         --2502, 'A1 SINIFI SERTİFİKA'
         --9001, 'A1 SINIFI SERTİFİKA (Manuel)'

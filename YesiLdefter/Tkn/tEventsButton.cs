@@ -1301,7 +1301,8 @@ namespace Tkn_Events
             {
                 message = dsRead.Tables[0].Rows[dNRead.Position][readKEYFNAME].ToString();
                 onay = true;
-                MessageBox.Show(message);
+                //MessageBox.Show(message);
+                t.FlyoutMessage("Bilgilendirme : ", message);
             }
             else
             {
@@ -1309,9 +1310,46 @@ namespace Tkn_Events
                 if (t.IsNotNull(message))
                 {
                     onay = true;
-                    MessageBox.Show(message);
+                    //MessageBox.Show(message);
+                    t.FlyoutMessage("Bilgilendirme : ", message);
                 }
             }
+            return onay;
+        }
+
+        private bool questionShow_(Form tForm, TABLEIPCODE_LIST item, ref bool islemOnayi)
+        {
+            tToolBox t = new tToolBox();
+            bool onay = false;
+            string Question = t.Set(item.CAPTION.ToString(), "", "");
+
+            if (t.IsNotNull(Question) == false)
+            Question = t.Set(item.MSETVALUE.ToString(), "", "");
+
+            if (t.IsNotNull(Question))
+            {
+                DialogResult answer = MessageBox.Show(Question, "Onay İşlemi", MessageBoxButtons.YesNo);
+
+                switch (answer)
+                {
+                    case DialogResult.Yes:
+                        {
+                            onay = true;
+                            break; // break ifadesini sakın silme
+                        }
+                    case DialogResult.No:
+                        {
+                            break; // break ifadesini sakın silme
+                        }
+                    case DialogResult.Cancel:
+                        {
+                            break; // break ifadesini sakın silme
+                        }
+                }
+            }
+            // soru islemi gerçekleşti, soruldu. cevap ise onay üzerinde
+            islemOnayi = true;
+
             return onay;
         }
 
@@ -2490,6 +2528,7 @@ namespace Tkn_Events
             string workType = string.Empty;
             string BEFOREAFTER = string.Empty;
             string beforeAfter = string.Empty;
+            
             v.tButtonType buttonType = ev.getClickType(Convert.ToInt32(prop_.BUTTONTYPE.ToString()));
             bool onay = true;
 
@@ -2718,20 +2757,17 @@ namespace Tkn_Events
                     
                     if (workType == "QUESTION")
                     {
-                        // henüz yazılmadı
-                        onay = true;
-
+                        onay = questionShow_(tForm, item, ref islemOnayi);
                         if (onay == false)
                         {
                             break;
                         }
-                        islemOnayi = onay;
                     }
 
                     // birden çok işlem yapıpılırken eğer birinden olumsuz dönüş olursa işlem kesiliyor
                     if (onay == false)
                     {
-                        t.AlertMessage("UYARI : ", "İşleminiz iptal edilidi...");
+                        //t.AlertMessage("UYARI : ", "İşleminiz iptal edilidi...");
                         return onay;
                     }
                 

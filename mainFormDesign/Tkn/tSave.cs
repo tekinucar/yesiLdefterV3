@@ -528,7 +528,7 @@ namespace Tkn_Save
                 //    Identity_ID = " select @@IDENTITY as ID ";
 
                 if ((Sonuc == 0) | (Sonuc == 2))
-                    Identity_ID = " select MAX(" + Key_Id_FieldName + ") as ID from " + Table_Name;
+                    Identity_ID = " select MAX(" + Key_Id_FieldName + ") as ID, 'dsInsert' as dsState from " + Table_Name;
 
             }
 

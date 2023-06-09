@@ -3,14 +3,14 @@ begin transaction
  create table MsSoftware
  (
     Id              Int IDENTITY(1,1) NOT NULL,
-	RecType         SmallInt          NOT NULL, 
+    RecType         SmallInt          NOT NULL, 
     SoftwareCode    NVarChar(20)      NOT NULL,     
-	ProjectCode     NVarChar(20)      NOT NULL,
-	ModulCode       NVarChar(20)      NOT NULL,
+    ProjectCode     NVarChar(20)      NOT NULL,
+    ModulCode       NVarChar(20)      NOT NULL,
     FullCode        NVarChar(100)     NULL, 	
-	SchemasCode     NVarChar(10)      NULL,     
-	Caption         NVarChar(100)     NOT NULL,
-	IsActive        Bit               NOT NULL,
+    SchemasCode     NVarChar(10)      NULL,     
+    Caption         NVarChar(100)     NOT NULL,
+    IsActive        Bit               NOT NULL,
 	
    Constraint pk_MsSoftware primary key (Id)
  )
@@ -68,7 +68,7 @@ INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCod
 INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 2, 'UST', 'OMS', '', 'UST.OMS', '', 'Ön Muhasebe, S',  1 )  
 INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 2, 'UST', 'OML', '', 'UST.OML', '', 'Ön Muhasebe, L',  1 )  
 INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 2, 'UST', 'CRM', '', 'UST.CRM', '', 'Üstad CRM',  1 )  
-INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 2, 'UST', 'UIK', '', 'UST.UIK', '', 'İnsan Kaynakları',  1 )  
+INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 2, 'UST', 'MVD', '', 'UST.MVD', '', 'Mavi Defter',  1 )  
 INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 2, 'UST', 'MEB', '', 'UST.MEB', '', 'MEB',  1 )  
 
 
@@ -97,8 +97,11 @@ INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCod
 INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 3, 'UST', 'OMS', 'IDA', 'UST.OMS.IDA', '', 'İdari İşler',  1 )  
 
 -- Üstad Yazılım - Project Managment
+INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 3, 'UST', 'PMS', 'COM', 'UST.PMS.COM', '', 'Üstad Commercial',  1 )  
+INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 3, 'UST', 'PMS', 'EDU', 'UST.PMS.EDU', '', 'Üstad Education',  1 )  
 INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 3, 'UST', 'PMS', 'PMS', 'UST.PMS.PMS', '', 'Project Managment',  1 )  
 INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 3, 'UST', 'CRM', 'ABO', 'UST.CRM.ABO', '', 'Üstad Aboneleri',  1 )  
+INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 3, 'UST', 'MVD', 'GNL', 'UST.MVD.GNL', '', 'Mavi Genel ',  1 )  
 
 -- Üstad Yazılım - Resmi Muhasebe
 INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 3, 'UST', 'RSM', 'MSV', 'UST.RSM.MSV', '', 'Mali Müşavir',  1 )  

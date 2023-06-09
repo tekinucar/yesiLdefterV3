@@ -162,6 +162,9 @@ namespace Tkn_Variable
         public static Control formLastActiveControl { get; set; }
 
 
+        public static string con_Save_dsState { get; set; }
+        public static int con_EditSaveCount { get; set; }
+
         public static byte[] con_Images = null;
         public static string con_Images_FieldName { get; set; }
 
@@ -181,7 +184,7 @@ namespace Tkn_Variable
 
         public static string con_Source_FormName { get; set; }
         public static string con_Source_FormCode { get; set; }
-
+        //public static 
         public static string con_Source_FormCodeAndName { get; set; }
 
         //public static string con_Images_Name { get; set; }

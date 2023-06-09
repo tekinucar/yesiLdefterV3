@@ -1,4 +1,5 @@
-﻿using DevExpress.XtraEditors.Repository;
+﻿
+using DevExpress.XtraEditors.Repository;
 using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Grid;
 using DevExpress.XtraVerticalGrid;
@@ -1047,9 +1048,7 @@ namespace Tkn_InputPanel
         public DataSet Create_DataSet(Form tForm, string TableIPCode)
         {
             tToolBox t = new tToolBox();
-            //string function_name = "Create_DataSet";
-            //t.Takipci(function_name, "", '{');
-
+            
             #region TableIP and FieldsIP Read
 
             string softCode = "";
@@ -1078,9 +1077,7 @@ namespace Tkn_InputPanel
             sql.Preparing_dsData(tForm, row_Table, ds_Fields, ref ds_Data, "", vTA);
 
             #endregion TableIP and FieldsIP Read
-
-            //t.Takipci(function_name, "", '}');
-
+                        
             return ds_Data;
         }
 

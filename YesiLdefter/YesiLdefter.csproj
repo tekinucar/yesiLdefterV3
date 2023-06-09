@@ -60,7 +60,7 @@
     <ApplicationIcon>yesiLdefter.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
-    <SignManifests>true</SignManifests>
+    <SignManifests>false</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
     <ManifestCertificateThumbprint>49398E87D9989223456F29A1A85124CC38F229C6</ManifestCertificateThumbprint>
@@ -154,7 +154,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
     <Compile Include="Codes\CihazLogs.cs" />
     <Compile Include="Forms\ms_Computer.cs">
       <SubType>Form</SubType>
@@ -417,9 +416,24 @@
     <Content Include="Scripts\2019VtMsSql\HP_FINANS.txt" />
     <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\SYS_UPDATES.txt" />
     <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\YatayKolon SQL.txt" />
+    <Content Include="Scripts\UST\MsV3\EduMtskDenemeSinavi.txt" />
+    <Content Include="Scripts\UST\MsV3\EduMtskDersler.txt" />
+    <Content Include="Scripts\UST\MsV3\EduMtskKonular.txt" />
+    <Content Include="Scripts\UST\MsV3\EduMtskSoruKitabi.txt" />
+    <Content Include="Scripts\UST\MsV3\EduMtskSoruKitabiDetayi.txt" />
+    <Content Include="Scripts\UST\MsV3\EduMtskSorular.txt" />
+    <Content Include="Scripts\UST\MsV3\fnc_GetModelFieldType.txt" />
+    <Content Include="Scripts\UST\MsV3\prc_GetTableModel.txt" />
+    <Content Include="Scripts\UST\MsV3\tempEduUsersList.txt" />
+    <Content Include="Scripts\UST\UstadCRM\AspNetUserChanges.txt" />
+    <Content Include="Scripts\UST\MsV3\EduMtskDenemeSinavSonuc.txt" />
+    <Content Include="Scripts\UST\MsV3\EduMtskYonetmelik.txt" />
     <Content Include="Scripts\UST\MsV3\fnc_GetFieldTypeFirstValue.txt" />
     <Content Include="Scripts\UST\MsV3\fnc_GetFieldTypeName.txt" />
     <Content Include="Scripts\UST\MsV3\fnc_GetJoinTableText.txt" />
+    <Content Include="Scripts\UST\MsV3\MsCommercial.txt" />
+    <Content Include="Scripts\UST\MsV3\prc_EduMtskSoruResimleri.txt" />
+    <Content Include="Scripts\UST\MsV3\prc_EduMtskYonetmelikDetailList.txt" />
     <Content Include="Scripts\UST\MsV3\prc_GetTableIPCodeSql.txt" />
     <Content Include="Scripts\UST\MsV3\fnc_GetWhereMasterDetailText.txt" />
     <Content Include="Scripts\UST\MsV3\MsDbUpdates.txt" />
@@ -457,8 +471,16 @@
     <Content Include="Scripts\UST\OnMuhasebe\prc_MsFollow.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\prc_OnmToplamBekleyenGelirler.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\prc_OnmToplamBekleyenOdemeler.txt" />
+    <Content Include="Scripts\UST\UstadCRM\AspNetRoleClaims.txt" />
+    <Content Include="Scripts\UST\UstadCRM\AspNetRoles.txt" />
+    <Content Include="Scripts\UST\UstadCRM\AspNetUserClaims.txt" />
+    <Content Include="Scripts\UST\UstadCRM\AspNetUserLogins.txt" />
+    <Content Include="Scripts\UST\UstadCRM\AspNetUserRoles.txt" />
+    <Content Include="Scripts\UST\UstadCRM\AspNetUsers.txt" />
+    <Content Include="Scripts\UST\UstadCRM\AspNetUserTokens.txt" />
     <Content Include="Scripts\UST\UstadCRM\prc_FirmUsers.txt" />
     <Content Include="Scripts\UST\UstadCRM\prc_UstadUserFirmsListGet.txt" />
+    <Content Include="Scripts\UST\UstadCRM\EduMtskUserSertifikasi.txt" />
     <Content Include="Scripts\UST\UstadCRM\UstadComputers.txt" />
     <Content Include="Scripts\UST\UstadCRM\UstadFirms.txt" />
     <Content Include="Scripts\UST\MsV3\MsReports.txt" />

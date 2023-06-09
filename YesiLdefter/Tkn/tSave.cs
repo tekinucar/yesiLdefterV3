@@ -16,7 +16,6 @@ namespace Tkn_Save
 
         tToolBox t = new tToolBox();
 
-
         public bool tDataSave(Form tForm, string TableIPCode)
         {
 
@@ -560,8 +559,8 @@ namespace Tkn_Save
                     (save == v.Save.SQL_OLUSTUR))
                 {
                     if (vt.SchemasCode != "")
-                         Identity_ID = " select MAX(" + Key_Id_FieldName + ") as ID from " + vt.SchemasCode + "." + Table_Name;
-                    else Identity_ID = " select MAX(" + Key_Id_FieldName + ") as ID from " + Table_Name;
+                         Identity_ID = " select MAX(" + Key_Id_FieldName + ") as "+ Key_Id_FieldName + ", 'dsInsert' as dsState from " + vt.SchemasCode + "." + Table_Name;
+                    else Identity_ID = " select MAX(" + Key_Id_FieldName + ") as "+ Key_Id_FieldName + ", 'dsInsert' as dsState from " + Table_Name;
                 }
             }
 
@@ -1017,7 +1016,7 @@ namespace Tkn_Save
                     if (fIdentity == true)
                     {
                         MyStr2 = " where [" + fname + "] = " + fvalue + " " + line_end;
-                        MyStr3 = " select " + fname + " from [" + Table_Name + "] where 0 = 0 ";
+                        MyStr3 = " select " + fname + ", 'dsEdit' as dsState from [" + Table_Name + "] where 0 = 0 ";
                         // Tarihce için gerekiyor
                         // KeyID_Value := Value; 
 
@@ -1389,9 +1388,6 @@ namespace Tkn_Save
         #endregion Kayit_Cumlesi_Olustur
 
         #region Record_SQL_RUN
-        //public Boolean Record_SQL_RUN(SqlConnection SqlConn, DataSet ds, string State,
-        //                              string Table_Name, string Key_Id_FieldName, int Position,
-        //                              ref string SQL, string TriggerSQL)
         public Boolean Record_SQL_RUN(DataSet ds,
             vTable vt,
             string State,
@@ -1399,7 +1395,6 @@ namespace Tkn_Save
             ref string SQL,
             string TriggerSQL)
         {
-
             Boolean sonuc = false;
             string Table_Name = vt.TableName;
             string Key_Id_FieldName = vt.KeyId_FName;
@@ -1408,24 +1403,18 @@ namespace Tkn_Save
 
             if (SQL != "")
             {
-                /*
-                if (vt.DBaseType == v.dBaseType.MySQL)
-                {
-                    SQL = t.SQLPreparing(SQL, vt);
-                }
-                */
                 v.SQLSave = v.ENTER + SQL + v.SQLSave;
 
                 SqlConnection SqlConn = vt.msSqlConnection;
-                //MySqlConnection MySqlConn = vt.mySqlConnection;
-
                 SqlCommand SqlKomut = null;
-                //MySqlCommand MySqlKomut = null;
+                SqlDataReader myReader;
+                DataTable table = new DataTable();
 
                 if (vt.DBaseType == v.dBaseType.MSSQL)
                 {
                     t.Db_Open(SqlConn);
                     SqlKomut = new SqlCommand(SQL, SqlConn);
+                    
                 }
                 
                 // 1. Resim
@@ -1450,11 +1439,29 @@ namespace Tkn_Save
                 if (State == "dsInsert")
                 {
                     string rec_id = "0";
+                    //string old_rec_id = "0";
 
                     try
                     {
-                        if (vt.DBaseType == v.dBaseType.MSSQL)
-                            rec_id = SqlKomut.ExecuteScalar().ToString();
+                        myReader = SqlKomut.ExecuteReader();
+                        table.Load(myReader);
+                        myReader.Close();
+                        rec_id = table.Rows[0][Key_Id_FieldName].ToString();
+
+                        // şuanda gerçekleşen state Insert gibi görünsede aslında kontrollü sql ile o kaydın update olduğu tespit ediliyor
+                        // kayıt için gönderilen datanın sürekli olarak dsEdit olduğu tespit edilirse kullanıcıdan işlemi durdurmak için onay istenebilir.
+                        //
+                        v.con_Save_dsState = "dsInsert";
+                        if (table.Columns.Count == 2)
+                        {
+                            string checkFName = table.Columns[1].ToString();
+                            if (checkFName == "dsState")
+                                v.con_Save_dsState = table.Rows[0][checkFName].ToString();
+
+                            if (v.con_Save_dsState == "dsEdit")
+                                v.con_EditSaveCount += 1;
+                        }
+
 
                         /// ValidationInsert devreye girince kayıt gerçekleşmeden dönebiliyor
                     }
@@ -1473,7 +1480,7 @@ namespace Tkn_Save
                     {
                         if (TriggerSQL != "")
                             TriggerSQL = TriggerSQL + rec_id;
-
+                                                
                         // key Id filedin insertten gelen id si datasete yükleniyor
                         ds.Tables[Table_Name].Rows[Position][Key_Id_FieldName] = rec_id;
 
@@ -1526,15 +1533,10 @@ namespace Tkn_Save
                 {
                     try
                     {
-                        //string rec_id = SqlKomut.ExecuteScalar().ToString();
-
                         string adet = "";
 
                         if (vt.DBaseType == v.dBaseType.MSSQL)
                             adet = SqlKomut.ExecuteNonQuery().ToString();
-
-                        //if (vt.DBaseType == v.dBaseType.MySQL)
-                        //    adet = MySqlKomut.ExecuteNonQuery().ToString();
 
                         // Edit cümlesi burada çalıştırıldığı için talep edene sadece işlemin gerçekleştiğine dair mesaj gitmekte
                         SQL = " " + adet + v.DBRec_Update;

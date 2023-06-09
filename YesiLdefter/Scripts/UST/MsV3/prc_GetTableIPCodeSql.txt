@@ -75,7 +75,7 @@ AS BEGIN
              and a.PROJECT_CODE = @ProjectCode 
              and a.TABLE_CODE = @TableCode
              and a.IP_CODE = @IPCode
-             and a.CMP_VISIBLE = 1
+             and ( a.CMP_VISIBLE = 1 or a.DEFAULT_TYPE > 0 or a.DEFAULT_TYPE2 > 0 )
              and SUBSTRING(b.FIELD_NAME, 1,3) <> 'LKP'
             ) x
 

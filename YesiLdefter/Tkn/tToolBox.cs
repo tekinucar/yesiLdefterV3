@@ -475,6 +475,7 @@ namespace Tkn_ToolBox
                 catch (Exception e)
                 {
                     MessageBox.Show("HATA : MSSQL Database bağlantısı açılmadı ... " + v.ENTER2 +
+                        "Connection : " + VTbaglanti.ConnectionString + v.ENTER2 +
                         "*  Bunun çeşitli sebepleri olabilir." + v.ENTER2 +
                         "1. Database in bulunduğu bilgisayar ( SERVER ) kapalı olabilir ..." + v.ENTER +
                         "2. MSSQL Server kapalı olabilir ..." + v.ENTER +
@@ -910,8 +911,6 @@ namespace Tkn_ToolBox
                 /// sql execute oluyor
                 if (vt.DBaseType == v.dBaseType.MSSQL)
                     msSqlAdapter = new SqlDataAdapter(SQL, msSqlConn);
-                //if (vt.DBaseType == v.dBaseType.MySQL)
-                //    mySqlAdapter = new MySqlDataAdapter(SQL, mySqlConn);
 
                 if (vt.Cargo == "data")
                 {
@@ -939,27 +938,11 @@ namespace Tkn_ToolBox
                     else msSqlAdapter.Fill(dsData, vt.TableName);
 
                 }
-                //if (vt.DBaseType == v.dBaseType.MySQL)
-                //    mySqlAdapter.Fill(dsData, vt.TableName);
 
                 if ((vt.Cargo == "data") &&
                     (SQL.IndexOf("Select @@VERSION") == -1))
                 {
                     tSqlSecond_Set(ref dsData, SQL);
-                }
-
-                /// bunu daha sonra parametreye bağla 
-                /// 
-                if ((vt.TableName.IndexOf("GROUPS") == -1) &&
-                    (vt.TableName.IndexOf("MS_FIELDS_IP") == -1) &&
-                    (vt.TableName.IndexOf("MS_TABLES_IP") == -1))
-                {
-                    /*
-                    v.SQL =
-                        v.ENTER2 + "[ Data_Read_Execute : " +
-                        vt.TableName + " / " + vt.TableIPCode + " / " + vt.functionName +
-                        " ] { " + v.ENTER2 + SQL + v.ENTER2 + " } " + v.SQL;
-                    */
                 }
 
                 onay = true;
@@ -8202,9 +8185,6 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
         public string Find_myFormBox_Value(Form tForm, string ButtonName)
         {
-            string function_name = "Find_tMyFormBox_Value(" + ButtonName + ")"; ;
-            Takipci(function_name, "", '{');
-
             string[] controls = new string[] { };
             Control c = Find_Control(tForm, "tMyFormBox", "", controls);
             string s = string.Empty;
@@ -8230,8 +8210,6 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                     }
                 }
             }
-
-            Takipci(function_name, "", '}');
 
             return s;
         }
@@ -12475,6 +12453,8 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 if (OzelType == -1)
                     OzelType = fieldName.IndexOf("KurumOnayTipi");
                 if (OzelType == -1)
+                    OzelType = fieldName.IndexOf("SertikaGrupTipi");
+                if (OzelType == -1)
                     OzelType = fieldName.IndexOf("GrupTipi");
                 if (OzelType == -1)
                     OzelType = fieldName.IndexOf("DonemTipi");
@@ -12596,6 +12576,12 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                         fieldName = "GrupTipi";
                         tableName = "MtskGrupTipi";
                     }
+                    if (orjinalFieldName.IndexOf("SertifikaGrupTipi") > -1)
+                    {
+                        idFieldName = "Id";
+                        fieldName = "SertifikaGrupTipi";
+                        tableName = "EduMtskDerslerSertifikaGrupTipi";
+                    }
                     if (orjinalFieldName.IndexOf("SubeTipi") > -1)
                     {
                         idFieldName = "Id";
@@ -12688,36 +12674,19 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
             tFtp ftpClient = null;
 
-            try
-            {
-                /* Create Object Instance */
-                ftpClient = new tFtp(@"ftp://ustadyazilim.com", "updateFiles@ustadyazilim.com", "cyhn+7470");
-            }
-            catch (Exception e1)
-            {
-                MessageBox.Show("Hata : Ftp bağlantı problemi ..." + v.ENTER2 + e1.Message);
-                //throw;
-            }
+            /* Create Object Instance */
+            ftpClient = new tFtp(@"ftp://ustadyazilim.com", "updateFiles@ustadyazilim.com", "cyhn+7470");
 
-            try
-            {
-                //MessageBox.Show(v.tExeAbout.activePath + "\\" + fileName);
-                /* Download a File */
-                //ftpClient.download("/public/YesiLdefter_201806201.rar", @"E:\Temp\YesiLdefter_201806201.rar");
-                //ftpClient.download(v.tExeAbout.ftpPacketName, @"" + v.tExeAbout.activePath + "\\" + v.tExeAbout.ftpPacketName);
-                ftpClient.download(fileName, @"" + v.tExeAbout.activePath + "\\" + fileName);
-                onay = true;
-            }
-            catch (Exception e2)
-            {
-                MessageBox.Show("Hata : Ftp download (indirme) problemi ..." + v.ENTER2 + e2.Message);
-                //throw;
-            }
-
+            //MessageBox.Show(v.tExeAbout.activePath + "\\" + fileName);
+            /* Download a File */
+            //ftpClient.download("/public/YesiLdefter_201806201.rar", @"E:\Temp\YesiLdefter_201806201.rar");
+            //ftpClient.download(v.tExeAbout.ftpPacketName, @"" + v.tExeAbout.activePath + "\\" + v.tExeAbout.ftpPacketName);
+            onay = ftpClient.download(fileName, @"" + v.tExeAbout.activePath + "\\" + fileName);
+            
             /* Release Resources */
             ftpClient = null;
 
-            v.Kullaniciya_Mesaj_Var = "Download gerçekleşti ...";
+            if (onay) v.Kullaniciya_Mesaj_Var = "Download gerçekleşti ...";
 
             return onay;
         }

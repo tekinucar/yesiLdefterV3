@@ -118,6 +118,9 @@ namespace YesiLdefter
 
             */
 
+            v.SQLSave = "";
+            v.SQLSave = cumleData;
+
             if (cumleData != "")
                 t.runScript(v.dBaseNo.WebManager, cumleData);
 

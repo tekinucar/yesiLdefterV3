@@ -3533,8 +3533,9 @@ MS_FIELDS                                          T03_MSFIELDS                 
 
             string headerCapiton = "";
 
-            headerCapiton = dsData.Tables[0].Rows[0]["Lkp_GrupKonusu"].ToString();
-
+            if (t.IsNotNull(dsData))
+                headerCapiton = dsData.Tables[0].Rows[0]["Lkp_GrupKonusu"].ToString();
+            else return;
             //Series series = new Series(headerCapiton, ViewType.Pie);
 
 

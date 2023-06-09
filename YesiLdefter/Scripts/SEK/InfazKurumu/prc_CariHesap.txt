@@ -28,7 +28,7 @@ begin
            ,[IsActive]
            ,[TamAdi]
            ,[Adi]
-           ,[SoyAdi])
+           ,[Soyadi])
      VALUES
            (@CariId
 		   ,0

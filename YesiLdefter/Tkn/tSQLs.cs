@@ -153,41 +153,6 @@ namespace Tkn_SQLs
 
         public string SQL_Table_FieldsList(string DatabaseName, string Table_Name, string IPCode)
         {
-            #region bulut ve mysql öncesi yapı
-            /*
-            string s =
-            @" select  
-               a.column_id, a.name 
-             , convert(smallInt, a.system_type_id) system_type_id 
-             , convert(smallInt, a.user_type_id)   user_type_id 
-             , a.max_length, a.precision, a.scale, a.is_nullable, a.is_identity  
-             , isnull(d.FFOREING, 0) FFOREING
-             , isnull(d.FTRIGGER, 0) FTRIGGER
-             , isnull(e.VALIDATION_INSERT, 0) VALIDATION_INSERT
-             , d.PROP_EXPRESSION 
-             , e.XML_FIELD_NAME
-             , e.CMP_DISPLAY_FORMAT
-             , e.CMP_EDIT_FORMAT
-
-             from [" + DatabaseName + @"].sys.columns a 
-              left outer join [" + DatabaseName + @"].sys.tables b on (a.object_id = b.object_id )
-              left outer join [" + v.active_DB.managerDBName + @"].dbo.MS_TABLES c on (b.name = c.TABLE_NAME)
-              left outer join [" + v.active_DB.managerDBName + @"].dbo.MS_FIELDS d on (
-                 a.name = d.FIELD_NAME 
-                 and c.TABLE_CODE = d.TABLE_CODE
-                 and a.system_type_id = d.FIELD_TYPE
-                 )
-              left outer join [" + v.active_DB.managerDBName + @"].dbo.MS_FIELDS_IP e on (
-                 c.TABLE_CODE = d.TABLE_CODE 
-                 and d.FIELD_NO = e.FIELD_NO
-                 and e.IP_CODE = '" + IPCode + @"' 
-                 )  
-             where 0 = 0 
-             and   b.name = '" + Table_Name + @"' 
-             order by a.column_id ";
-            */
-            #endregion
-
             string s1 =
             @" select  
                a.column_id, a.name 
@@ -1107,7 +1072,7 @@ Select distinct
                 myAnd = " and a.MASTER_ITEM_TYPE = " + MasterItemType.ToString() + " ";
 
                 return
-                    " select a.* from MS_LAYOUT a "
+                " select a.* from MS_LAYOUT a "
               + " where a.MASTER_CODE = '" + MasterCode + "' "
               //+ myAnd
               + " order by a.MASTER_CODE, isnull(a.GROUP_LINE_NO,0), isnull(a.LAYOUT_CODE,0) ";

@@ -1,0 +1,75 @@
+﻿
+begin transaction
+
+ create table EduMtskDersler
+ (
+    Id                   Int IDENTITY(1,1) not null,
+    IsActive             Bit               not null,
+	SertifikaGrupTipiId  SmallInt          not null,
+	Sertifikalar         varchar(250)      null,       /*  [2514],[2502],[2503], şeklinde kaydedilecek */
+	DersTipiId           SmallInt          null,       /* 1. Trafik ve Çevre Bilgisi, İlk Yardım, Araç Tekniği */
+	SinavSoruSayisi      SmallInt          null,
+	DersSoruPuani        SmallInt          null,
+    ToplamSoruSayisi     SmallInt          null,
+
+   Constraint pk_EduMtskDersler primary key (Id)
+ )
+
+ create index X_EduMtskDersler_01 on EduMtskDersler (SertifikaGrupTipiId)
+
+ grant select, insert, update, delete on EduMtskDersler to public
+
+commit transaction
+
+
+/*CreateLkpTable*/
+
+begin transaction
+
+-- ------------------------------------------------------- 
+-- SertifikaGrupTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'EduMtskDerslerSertifikaGrupTipi')
+drop table [Lkp].[EduMtskDerslerSertifikaGrupTipi]
+
+create table Lkp.EduMtskDerslerSertifikaGrupTipi
+(
+   Id          Int Unique Not Null,
+   SertifikaGrupTipi  nVarchar(50)   null
+   
+   constraint  pk_EduMtskDerslerSertifikaGrupTipi primary key (Id)
+)
+
+INSERT INTO Lkp.EduMtskDerslerSertifikaGrupTipi (Id, SertifikaGrupTipi)
+ VALUES 
+  ( 0, N'Tanımsız'),
+  ( 1, N'A,A1,A2,M'),
+  ( 2, N'B,C,D,E'),
+  ( 3, N'F,G')
+
+
+-- ------------------------------------------------------- 
+-- DersTipiTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'EduMtskDerslerDersTipi')
+drop table [Lkp].[EduMtskDerslerDersTipi]
+
+create table Lkp.EduMtskDerslerDersTipi
+(
+   Id          Int Unique Not Null,
+   DersTipi    nVarchar(50)   null
+   
+   constraint  pk_EduMtskDerslerDersTipi primary key (Id)
+)
+
+INSERT INTO Lkp.EduMtskDerslerDersTipi (Id, DersTipi)
+ VALUES 
+  ( 0, N'Tanımsız'),
+  ( 1, N'Trafik ve Çevre Dersi'),
+  ( 2, N'İlkyardım Dersi'),
+  ( 3, N'Araç Tekniği Dersi'),
+  ( 5, N'Trafik Adabı Dersi')
+
+commit transaction
+
+/*CreateLkpTableEnd*/

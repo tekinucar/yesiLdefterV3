@@ -97,7 +97,7 @@ AS BEGIN
     declare @eTamAdi varchar(100) = null
     declare @newTamAdi varchar(100) = null
     declare @yAdi varchar(50) = null
-    declare @ySoyAdi varchar(50) = null
+    declare @ySoyadi varchar(50) = null
     declare @yEposta nvarchar(100) = null
 	declare @yCepTelefonu nvarchar(15) = null
 	declare @CariId int = 0
@@ -127,15 +127,15 @@ AS BEGIN
           ,@yCalismaIzniKayitNo = isnull(ins.CalismaIzniKayitNo, '')
 		  ,@yTamAdi = isnull(ins.TamAdiSoyadi, '')
     	  ,@yAdi = isnull(ins.Adi,'')
-    	  ,@ySoyAdi = isnull(ins.SoyAdi,'')
+    	  ,@ySoyadi = isnull(ins.SoyAdi,'')
 
 		from inserted ins
     	where ins.Id = @curId
      	   	
-		-- TamAdiSoyadi var ise Adi ve SoyAdi tespit ediliyor 
+		-- TamAdiSoyadi var ise Adi ve Soyadi tespit ediliyor 
         if ((@yTamAdi <> '') and
             (@yAdi = '') and
-            (@ySoyAdi = ''))
+            (@ySoyadi = ''))
         begin
             declare @i1 int = 0
             declare @i2 int = 0
@@ -146,7 +146,7 @@ AS BEGIN
             if (@i2 > 0) set @i1 = @i2
 
             set @yAdi = SUBSTRING(@yTamAdi, 0, @i1)
-            set @ySoyAdi = SUBSTRING(@yTamAdi, @i1+1, 100)
+            set @ySoyadi = SUBSTRING(@yTamAdi, @i1+1, 100)
             set @eTamAdi = ''
 
 			update MtskPersoneli set 
@@ -155,7 +155,7 @@ AS BEGIN
             where Id = @curId
         end
         
-    	set @newTamAdi = @yAdi + ' ' +  @ySoyAdi
+    	set @newTamAdi = @yAdi + ' ' +  @ySoyadi
     	
         if ((@newTamAdi <> @eTamAdi) or 
             (@eTamAdi = '') or
@@ -170,7 +170,7 @@ AS BEGIN
             ,TcNo_CalismaIzniNo = RTRIM(LTRIM(@yTcVkNo + '-' + @yCalismaIzniKayitNo))
 			where Id = @curId 
     	end
-                
+         
 	    if (LEN(@yTcVkNo) = 11)
 	    begin
 		    set @CariId = 0
@@ -181,15 +181,14 @@ AS BEGIN
 
             if (@CariId = 0)
 	        begin
-			    print @yTcVkNo
+			    --print @yTcVkNo
                 INSERT INTO [dbo].[OnmHesapCari]
                 ([ParentId],[FirmId],[IsActive]
                 ,[CariTipiId],[CalismaTipiId]
                 ,[TcVkNo]
-                ,[TamAdi]
+                ,[TamAdiSoyadi]
                 ,[Adi]
-                ,[GobekAdi]
-                ,[SoyAdi]
+                ,[Soyadi]
                 ,[CepTelefonu],[Eposta]
                 ,[ParaTipiId]
                 ) VALUES (   
@@ -198,19 +197,18 @@ AS BEGIN
                 ,@yTcVkNo
                 ,RTRIM(LTRIM(@newTamAdi))
                 ,@yAdi
-                ,null
-                ,@ySoyAdi
+                ,@ySoyadi
 	            ,@yCepTelefonu, @yEposta
                 ,'TRY' )
 	        end else
 	        begin
-			    print @yTcVkNo + ' : ' + convert(varchar(10), @CariId)
+			    --print @yTcVkNo + ' : ' + convert(varchar(10), @CariId)
                 UPDATE [dbo].[OnmHesapCari]
                 SET [FirmId] = @yFirmId
                 ,[TcVkNo] = @yTcVkNo
-                ,[TamAdi] = RTRIM(LTRIM(@newTamAdi))
+                ,[TamAdiSoyadi] = RTRIM(LTRIM(@newTamAdi))
                 ,[Adi] = @yAdi
-                ,[SoyAdi] = @ySoyAdi
+                ,[Soyadi] = @ySoyadi
                 ,[CepTelefonu] = @yCepTelefonu
                 ,[Eposta] = @yEposta
                 WHERE Id = @CariId
@@ -222,7 +220,6 @@ AS BEGIN
 
     CLOSE cursorMtskPersoneli
     DEALLOCATE cursorMtskPersoneli   
-
 END -- create trigger
 
 /*CreateTriggerEnd*/

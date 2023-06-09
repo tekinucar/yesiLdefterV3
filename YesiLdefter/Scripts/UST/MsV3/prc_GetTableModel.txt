@@ -1,0 +1,60 @@
+﻿
+/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_GetTableModel]( @RefId int )  
+AS BEGIN  
+
+  --declare @RefId int
+
+  declare @enter varchar(10) = CHAR(13) + CHAR(10) --' \r\n '
+  declare @Columns varchar(8000) 
+  declare @SoftwareCode varchar(20)
+  declare @ProjectCode varchar(20)
+  declare @ShemasCode varchar(5)
+  declare @TableName varchar(50)
+  declare @TableCode varchar(100)
+  declare @PropModel varchar(8000) 
+
+  Select
+    @SoftwareCode = a.SOFTWARE_CODE
+  , @ProjectCode = a.PROJECT_CODE
+  , @ShemasCode = isnull(a.SCHEMAS_CODE,'dbo')
+  , @TableCode = a.TABLE_CODE
+  , @TableName = a.TABLE_NAME
+  From MS_TABLES as a
+  Where 0 = 0
+  and a.REF_ID = @RefId
+  
+  -- -------------------------------------------------------
+  -- Tablonun fieldlerini hazırla
+  -- -------------------------------------------------------
+  Select @Columns = COALESCE( @Columns +  
+    '     public ' + dbo.fnc_GetModelFieldType(FIELD_TYPE) + ' ' + FIELD_NAME + ' { get; set; }' + @enter, 
+    '     public ' + dbo.fnc_GetModelFieldType(FIELD_TYPE) + ' ' + FIELD_NAME + ' { get; set; }' + @enter ) 
+  From (
+    Select a.FIELD_NAME, a.FIELD_TYPE
+    From MS_FIELDS as a
+    Where 0 = 0
+    and a.SOFTWARE_CODE = @SoftwareCode 
+    and a.PROJECT_CODE = @ProjectCode 
+    and a.TABLE_CODE = @TableCode
+  ) x
+    
+  -- ------------------------------------------------------
+  -- Hazırlanan bilgileri toparlama işlemleri
+  -- ------------------------------------------------------
+  --if (@Columns is null) set @Columns = '' 
+
+  set @PropModel = 
+    '  public static class ' + @TableName + @enter
+  + '  { ' + @enter
+  + @Columns
+  + '  } ';
+  
+  print @PropModel
+
+  --Select @PropModel
+
+END --
+
+/*CreateProcedureEnd*/

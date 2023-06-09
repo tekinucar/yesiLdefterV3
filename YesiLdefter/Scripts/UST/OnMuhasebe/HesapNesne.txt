@@ -48,7 +48,7 @@ begin transaction
    TcVkNo            nVarchar(11)  null,
    Numarasi          nVarchar(50)  null,
    Adi               nVarchar(50)  null,
-   SoyAdi            nVarchar(50)  null,
+   Soyadi            nVarchar(50)  null,
    Unvani1           nVarchar(98)  null,
    Unvani2           nVarchar(98)  null,
 

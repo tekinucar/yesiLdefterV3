@@ -1,0 +1,57 @@
+﻿
+begin transaction
+
+ create table EduMtskYonetmelik
+ (
+    Id                   Int IDENTITY(1,1) not null,
+    ParentId             Int               null,
+	KonuTipiId           SmallInt          null,
+    IsActive             Bit               null,
+    SiraNo               SmallInt          null,
+    Konu                 nVarChar(250)     null,
+    ContentHTML          nVarChar(max)     null,
+
+   Constraint pk_EduMtskYonetmelik primary key (Id)
+ )
+
+ create index X_EduMtskYonetmelik_01 on EduMtskYonetmelik (KonuTipiId)
+
+ grant select, insert, update, delete on EduMtskYonetmelik to public
+
+commit transaction
+
+
+
+/*CreateLkpTable*/
+
+begin transaction
+
+-- ------------------------------------------------------- 
+-- KonuTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'EduMtskYonetmelikKonuTipi')
+drop table [Lkp].[EduMtskYonetmelikKonuTipi]
+
+create table Lkp.EduMtskYonetmelikKonuTipi
+(
+   Id         Int Unique Not Null,
+   KonuTipi   nVarchar(20)   null
+   
+   constraint  pk_EduMtskYonetmelikKonuTipi primary key (Id)
+)
+
+INSERT INTO Lkp.EduMtskYonetmelikKonuTipi (Id, KonuTipi)
+ VALUES 
+  ( 0, N'Tanımsız'),
+  ( 1, N'Aday'),
+  ( 2, N'Dersler'),
+  ( 3, N'Sınavlar'),
+  ( 4, N'Mtsk Kurum İşlemleri'),
+  ( 5, N'Tanımlar')
+
+commit transaction
+
+/*CreateLkpTableEnd*/
+
+
+

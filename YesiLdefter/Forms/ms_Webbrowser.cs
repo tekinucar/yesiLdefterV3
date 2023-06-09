@@ -28,6 +28,8 @@ namespace YesiLdefter
 
         int nodeId = 0;
         int parentId = 0;
+        int kayitBaslangisId = 0;
+        
         //int columnId = 0;
         //ArrayList oldParent = new ArrayList();
         //List<int> oldParent = new List<int>();
@@ -479,7 +481,7 @@ namespace YesiLdefter
 
             if (t.IsNotNull(TableIPCode) == false)
             {
-                MessageBox.Show("DİKKAT : MsWebNodes tablosu bulunamadı...");
+                MessageBox.Show("DİKKAT : MsWebNodes tablosu bulunamadı...(Form bilgisi olmayabilir... ( MS_LAYOUT )) ");
                 return;
             }
             t.Find_DataSet(this, ref ds_Nodes, ref dN_Nodes, TableIPCode);
@@ -1357,6 +1359,24 @@ private void DisplaySecondUrl()
                     /// okunan tabloyu db ye yaz
                     if (wnv.tTable != null)
                     {
+                        //https://mebbis.meb.gov.tr/SKT/skt02006.aspx
+                        if (webMain.Url.ToString() == "https://mebbis.meb.gov.tr/SKT/skt02006.aspx")
+                        {
+                            vUserInputBox iBox = new vUserInputBox();
+                            iBox.Clear();
+                            iBox.title = "Kaydın başlamasını istediğiniz sıra no";
+                            iBox.promptText = "Sıra No  :";
+                            iBox.value = "0";
+                            iBox.displayFormat = "";
+                            iBox.fieldType = 0;
+
+                            // ınput box ile sorulan ise kimden kopyalanacak (old) bilgisi
+                            if (t.UserInpuBox(iBox) == DialogResult.OK)
+                            {
+                                this.kayitBaslangisId = int.Parse(iBox.value);
+                            }
+                        }
+                        v.con_EditSaveCount = 0;
                         this.myTriggeringTable = true;
                         this.myTriggerTableWnv = null;
                         this.myTriggerTableWnv = wnv.Copy();
@@ -2343,11 +2363,20 @@ private void DisplaySecondUrl()
                     // geçici çözüm burayı sil
                     value = t.myInt32(row.tColumns[0].value.ToString());
 
-                    //if (value >= 3180)
-                    //{
-                        saveRowAsync(this.myTriggerTableWnv, row);
-                    //}
+                    // kayitBaslangisId : bazı table data listesi çok büyük olabiliyor (sertifika alanların listesi gibi)
+                    // kayitBaslangisId ile hangi kayıttan başlayabileceğine karar verebiliriz
+                    // çünkü bazen liste daha bitmemişken herhangi bir sebeple işlem durmuş olabiliyor
+                    // önceki kayıt edilmiş olanlar tekrar kayıt işlemiyle uğraşmasın diye istenen yerden kaydın başlanması 
+                    // sağlanabiliyor
 
+                    if (value >= kayitBaslangisId)
+                    {
+                        saveRowAsync(this.myTriggerTableWnv, row);
+
+                        if (editKayitKontrolu()) break;
+                    }
+
+                    
                 }
                 this.myTriggeringTable = false;
             }
@@ -2360,6 +2389,24 @@ private void DisplaySecondUrl()
             }
 
         }
+
+        private bool editKayitKontrolu()
+        {
+            bool onay = false;
+
+            if ((v.con_EditSaveCount == 10) || (v.con_EditSaveCount == 25) || (v.con_EditSaveCount > 50))
+            {
+                string soru = "Sürekli olarak eski kayıtlar denk gelmeye başladı. İşlemi durdurmak ister misiniz ?";
+                DialogResult cevap = t.mySoru(soru);
+                if (DialogResult.Yes == cevap)
+                {
+                    v.con_EditSaveCount = 0;
+                    onay = true;
+                }
+            }
+            return onay;
+        }
+
         private async Task transferFromWebTableRowToDatabase()
         {
             v.SQL = v.SQL + v.ENTER + myNokta + " transferFromWebTableRowToDatabase";
@@ -2367,6 +2414,8 @@ private void DisplaySecondUrl()
             this.myWebTableRowToDatabase = true;
 
             await saveRowAsync(this.myTriggerTableWnv, this.myTriggerWmvTableRows);
+
+            //if (editKayitKontrolu()) return;
 
             this.myWebTableRowToDatabase = false;
 
@@ -2428,6 +2477,8 @@ private void DisplaySecondUrl()
                 if (onay)
                 {
                     saveRowAsync(wnv, rows);
+
+                    if (editKayitKontrolu()) break;
                 }
                 rowNo++;
             }
@@ -3901,6 +3952,7 @@ private void DisplaySecondUrl()
             v.tButtonHint.buttonType = buttonType;
             tEventsButton evb = new tEventsButton();
             evb.btnClick(v.tButtonHint);
+            
             Application.DoEvents();
         }
 

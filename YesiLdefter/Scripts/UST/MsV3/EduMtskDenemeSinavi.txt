@@ -1,0 +1,119 @@
+﻿-- ---------------------------------------------------------------
+-- 
+-- ---------------------------------------------------------------
+
+begin transaction
+
+ create table EduMtskDenemeSinavi
+ (
+    Id                   Int IDENTITY(1,1) not null,
+    KitapNo              SmallInt          not null,
+	DersTipiId           SmallInt          null,  
+    EduMtskKonularId     Int               null,
+    EduMtskSorularId     Int               null,
+    UserGUID             nvarchar(40)      null,
+    DogruCevapTipiId     SmallInt          null,
+    UserCevapTipiId      SmallInt          null,
+    IsCorrectAnswer      Bit               null,
+
+   Constraint pk_EduMtskDenemeSinavi primary key (Id)
+ )
+
+ create index X_EduMtskDenemeSinavi_01 on EduMtskDenemeSinavi (UserGUID, KitapNo, EduMtskSorularId)
+
+ grant select, insert, update, delete on EduMtskDenemeSinavi to public
+
+commit transaction
+
+
+
+
+create trigger [dbo].[trg_EduMtskDenemeSinavi] on [dbo].[EduMtskDenemeSinavi]
+after insert, update
+as begin
+
+    declare cursor_EduMtskDenemeSinavi cursor for select Id from Inserted
+    declare @curId bigint
+
+    OPEN cursor_EduMtskDenemeSinavi
+
+    FETCH NEXT FROM cursor_EduMtskDenemeSinavi INTO @curId
+
+    declare @KitapNo  SmallInt
+    declare @UserGUID nVarchar(40)
+    declare @DogruCevap SmallInt
+    declare @UserCevap SmallInt
+	declare @IsCorrect bit
+	declare @SinavSonucId int
+	declare @DogruCevapSayisi Smallint
+	declare @YanlisCevapSayisi Smallint
+
+	
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+		Select 
+           @KitapNo = ins.KitapNo
+          ,@UserGUID = ins.UserGUID
+		  ,@DogruCevap = ins.DogruCevapTipiId
+          ,@UserCevap = ins.UserCevapTipiId
+    	From EduMtskDenemeSinavi ins
+    	Where ins.Id = @curId
+
+        if (@DogruCevap = @UserCevap) set @IsCorrect = 1
+		else set @IsCorrect = 0
+
+        Update EduMtskDenemeSinavi set 
+        IsCorrectAnswer = @IsCorrect
+        where Id = @curId 
+
+    	FETCH NEXT FROM cursor_EduMtskDenemeSinavi INTO @curId
+    end -- While
+
+    -- -------------------------------------------------------
+    -- Sınav Sonucu
+    -- -------------------------------------------------------
+    set @SinavSonucId = 0
+    Select @SinavSonucId = Id from EduMtskDenemeSinavSonuc
+    Where KitapNo = @KitapNo
+    and UserGUID = @UserGUID
+
+    Select @DogruCevapSayisi = COUNT(Id)  from EduMtskDenemeSinavi
+    Where KitapNo = @KitapNo
+    and UserGUID = @UserGUID
+    and IsCorrectAnswer = 1
+
+    Select @YanlisCevapSayisi = COUNT(Id)  from EduMtskDenemeSinavi
+    Where KitapNo = @KitapNo
+    and UserGUID = @UserGUID
+    and IsCorrectAnswer = 0
+		
+    if (@SinavSonucId = 0) 
+    begin
+        INSERT INTO [dbo].[EduMtskDenemeSinavSonuc]
+           ([KitapNo]
+           ,[UserGUID]
+           ,[DogruCevapSayisi]
+           ,[YanlisCevapSayisi]
+           ,[SinavPuani]
+           ,[IsSuccessful])
+        VALUES
+           (@KitapNo
+           ,@UserGUID
+           ,@DogruCevapSayisi
+           ,@YanlisCevapSayisi
+           ,0
+           ,1)
+    end else
+    begin
+        UPDATE [dbo].[EduMtskDenemeSinavSonuc]
+        SET [DogruCevapSayisi] = @DogruCevapSayisi
+           ,[YanlisCevapSayisi] = @YanlisCevapSayisi
+           ,[SinavPuani] = 0
+           ,[IsSuccessful] = 1
+        WHERE Id = @SinavSonucId
+    end
+
+    CLOSE cursor_EduMtskDenemeSinavi
+    DEALLOCATE cursor_EduMtskDenemeSinavi  
+	
+end -- trigger

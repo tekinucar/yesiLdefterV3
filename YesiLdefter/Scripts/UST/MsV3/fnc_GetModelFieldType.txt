@@ -1,0 +1,50 @@
+﻿
+/*CreateFunction*/
+
+
+CREATE FUNCTION [dbo].[fnc_GetModelFieldType](
+  @fieldTypeId int
+)  
+RETURNS varchar(100)
+AS   
+BEGIN
+    -- if ((ftype == 175) | (ftype == 167) | (ftype == 99)  | (ftype == 35) | (ftype == 239) | (ftype == 231) | (ftype == 36)) = null
+    -- if ((ftype == 56)  | (ftype == 48)  | (ftype == 127) | (ftype == 52) | ftype == 60)   | (ftype == 62)  | (ftype == 59) | (ftype == 108))
+    -- if ((ftype == 58) || (ftype == 40) || (ftype == 61))
+
+    declare @value varchar(100)
+	set @value = ''
+
+    if (@fieldTypeId = 56)  set @value = 'int'
+    if (@fieldTypeId = 52)  set @value = 'Int16'--'smallint'
+    if (@fieldTypeId = 127) set @value = 'bigint'
+    if (@fieldTypeId = 104) set @value = 'bool'--'bit'
+    if (@fieldTypeId = 108) set @value = 'decimal' --float/double/decimal 'numeric(1000)'
+    if (@fieldTypeId = 62)  set @value = 'float'
+    if (@fieldTypeId = 59)  set @value = 'real'
+    if (@fieldTypeId = 60)  set @value = 'decimal'--'money'
+    if (@fieldTypeId = 48)  set @value = 'short'--'tinyint'
+
+    if (@fieldTypeId = 231) set @value = 'string' --'nvarchar(1000)'
+    if (@fieldTypeId = 167) set @value = 'string' --'varchar(1000)'
+    if (@fieldTypeId = 175) set @value = 'string' --'char(1000)'
+    if (@fieldTypeId = 35)  set @value = 'string' --'text'
+    -- 36 = uniqueidentifier
+    if (@fieldTypeId = 36)  set @value = 'string' --'uniqueidentifier' 
+    if (@fieldTypeId = 99)  set @value = 'string' --'ntext'
+    
+    if (@fieldTypeId = 58)  set @value = 'smalldatetime'
+    if (@fieldTypeId = 40)  set @value = 'datetime'--'date'   
+	if (@fieldTypeId = 61)  set @value = 'datetime'--'date'
+
+    if (@fieldTypeId = 41)  set @value = 'string' --'time'
+
+    if (@fieldTypeId = 34)  set @value = 'string' --'image'
+    if (@fieldTypeId = 173) set @value = 'string' --'binary'
+    if (@fieldTypeId = 165) set @value = 'string' --'varbinary'
+
+    return @value
+
+END --
+
+/*CreateFunctionEnd*/

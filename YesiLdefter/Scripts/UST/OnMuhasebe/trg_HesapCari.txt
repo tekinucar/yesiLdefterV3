@@ -32,7 +32,7 @@ AS BEGIN
     WHILE @@FETCH_STATUS = 0
     BEGIN
         set @yAdi = ''
-        set @ySoyAdi = ''
+        set @ySoyadi = ''
         set @yTamAdi = ''
         set @yGobekAdi = ''
 	  	set @yCariKisaAdi = ''
@@ -47,7 +47,7 @@ AS BEGIN
 			   
         select 
     	   @yAdi = isnull(ins.Adi,'')
-    	  ,@ySoyAdi = isnull(ins.SoyAdi,'')
+    	  ,@ySoyadi = isnull(ins.Soyadi,'')
     	  ,@yGobekAdi = isnull(ins.GobekAdi,'')
 		  ,@yCariKisaAdi = isnull(ins.CariKisaAdi,'')
     	  ,@yUnvani1 = isnull(ins.Unvani1,'')
@@ -55,12 +55,12 @@ AS BEGIN
 		from inserted ins
     	where ins.Id = @curId
      	   	
-    	set @yTamAdi = @yAdi + ' ' +  @ySoyAdi
+    	set @yTamAdi = @yAdi + ' ' +  @ySoyadi
     	  
         if @yGobekAdi <> '' 
-		   set @ytamadi = @yAdi + ' ' + @yGobekAdi + ' ' +  @ySoyAdi
+		   set @ytamadi = @yAdi + ' ' + @yGobekAdi + ' ' +  @ySoyadi
 
-        if ((@yAdi = '') and (@ySoyAdi = '') and
+        if ((@yAdi = '') and (@ySoyadi = '') and
 		    (@yUnvani1 <> ''))
 		begin
 			set @yTamAdi = @yUnvani1 + ' ' + @yUnvani2

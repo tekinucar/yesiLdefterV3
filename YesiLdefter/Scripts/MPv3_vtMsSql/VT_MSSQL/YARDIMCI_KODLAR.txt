@@ -6,6 +6,11 @@ ALTER DATABASE DatabaseName SET COMPATIBILITY_LEVEL = 130
 ALTER DATABASE MSV3DFTRBLT SET COMPATIBILITY_LEVEL = 130
 
 
+/* Identitiy field ON-OFF */
+
+SET IDENTITY_INSERT [dbo].[EduMtskYonetmelik] ON 
+SET IDENTITY_INSERT [dbo].[EduMtskYonetmelik] OFF
+
 
 
  /* tablolara ait kaç adet trigger mevcut  */
@@ -580,6 +585,23 @@ WHERE GC_TURU > 0
 
 
 **********************************************
+
+DECLARE @sqlVariable nvarchar(15)
+SET @sqlVariable = '1234567890'
+
+SELECT
+  @sqlVariable,
+  REPLICATE('0', 15),
+  '000000000000000' + @sqlVariable,
+  RIGHT('000000000000000' + @sqlVariable, 13)
+
+SELECT STUFF(@sqlVariable, 1, 0, REPLICATE('0', 15 - LEN(@sqlVariable)))
+SELECT RIGHT(REPLICATE('0', 15) + LTRIM(RTRIM(@sqlVariable)), 15)
+
+
+
+**********************************************
+
 
 
 

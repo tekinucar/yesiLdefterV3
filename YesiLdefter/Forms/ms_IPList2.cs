@@ -52,6 +52,7 @@ namespace YesiLdefter
         string buttonSqlRec = "ButtonRecordSQL";  // Record SQL
         string buttonExpression = "ButtonExpressionView"; // Expression View
         string buttonClearSQL = "ButtonClearSQL"; // Clear SQL
+        string buttonModelClass = "ButtonModelClass"; // Create ModelClass
 
         string buttonInsertPaketOlustur = "ButtonPaketOlustur";
         string buttonPaketiGonder = "ButtonPaketiGonder";
@@ -87,6 +88,7 @@ namespace YesiLdefter
             t.Find_Button_AddClick(this, menuName, buttonSqlRec, myNavElementClick);
             t.Find_Button_AddClick(this, menuName, buttonExpression, myNavElementClick);
             t.Find_Button_AddClick(this, menuName, buttonClearSQL, myNavElementClick);
+            t.Find_Button_AddClick(this, menuName, buttonModelClass, myNavElementClick);
 
             t.Find_Button_AddClick(this, menuName, buttonInsertPaketOlustur, myNavElementClick);
             t.Find_Button_AddClick(this, menuName, buttonPaketiGonder, myNavElementClick);
@@ -134,6 +136,7 @@ namespace YesiLdefter
                 if (((DevExpress.XtraBars.Navigation.NavButton)sender).Name == buttonSqlRec) SqlRec();
                 if (((DevExpress.XtraBars.Navigation.NavButton)sender).Name == buttonExpression) ExpressionView();
                 if (((DevExpress.XtraBars.Navigation.NavButton)sender).Name == buttonClearSQL) ClearSql();
+                if (((DevExpress.XtraBars.Navigation.NavButton)sender).Name == buttonModelClass) CreateModelClass();
             }
             if (sender.GetType().ToString() == "DevExpress.XtraBars.Navigation.TileNavItem")
             {
@@ -222,6 +225,27 @@ namespace YesiLdefter
         private void ClearSql()
         {
             v.SQL = "";
+        }
+
+        private void CreateModelClass()
+        {
+            if (t.IsNotNull(ds_MSFields) == false) return;
+            if (t.IsNotNull(ds_MSTables) == false) return;
+
+            string content = "";
+            int refId = t.myInt32(ds_MSTables.Tables[0].Rows[dN_MSTables.Position]["REF_ID"].ToString());
+
+            string Sql = CreateModelClassSql(refId);
+
+            v.SQL = Sql + v.SQL;
+
+            DataSet dsModel = new DataSet();
+            t.SQL_Read_Execute(v.dBaseNo.Manager, dsModel, ref Sql, "TableModel", null);
+            if (t.IsNotNull(dsModel))
+                content = dsModel.Tables[0].Rows[0][0].ToString();
+            dsModel.Dispose();
+
+            viewText(content);
         }
 
         private void CopyMsfMsfIP()
@@ -315,6 +339,11 @@ namespace YesiLdefter
             }
 
 
+        }
+
+        private string CreateModelClassSql(int RefId)
+        {
+            return @" EXEC [dbo].[prc_GetTableModel] @RefId = " + RefId.ToString();
         }
 
         private string MSFieldsIP_Insert_Sql(string TableCode, string OldIPCode, string NewIPCode,

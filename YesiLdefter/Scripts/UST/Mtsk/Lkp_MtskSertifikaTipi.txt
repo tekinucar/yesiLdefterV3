@@ -27,6 +27,7 @@ INSERT INTO [Lkp].[MtskSertifikaTipi] (Id, SertifikaTipi, IsActive, TeorikDersSa
   ( 2514, N'A Sınıfı Sertifika',      1,  0,  2,  10,  12 ),
   ( 2502, N'A1 Sınıfı Sertifika',     1,  0,  2,  10,  12 ),
   ( 2503, N'A2 Sınıfı Sertifika',     1,  0,  2,  10,  12 ),
+  
   ( 2504, N'B Sınıfı Sertifika',      1,  0,  2,  10,  12 ),
   ( 2518, N'BE Sınıfı Sertifika',     1,  0,  2,  10,  12 ),
   ( 2515, N'B1 Sınıfı Sertifika',     1,  0,  2,  10,  12 ),
@@ -39,6 +40,7 @@ INSERT INTO [Lkp].[MtskSertifikaTipi] (Id, SertifikaTipi, IsActive, TeorikDersSa
   ( 2517, N'D1 Sınıfı Sertifika',     1,  0,  2,  10,  12 ),
   ( 2521, N'D1E Sınıfı Sertifika',    1,  0,  2,  10,  12 ),
   ( 2507, N'E Sınıfı Sertifika',      1,  0,  2,  10,  12 ),
+
   ( 2508, N'F Sınıfı Sertifika',      1,  0,  2,  10,  12 ),
   ( 2509, N'G Sınıfı Sertifika',      1,  0,  2,  10,  12 ),
   ( 2510, N'H Sınıfı (Otomobil)',     1,  0,  2,  10,  12 ),

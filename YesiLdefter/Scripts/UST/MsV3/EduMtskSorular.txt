@@ -1,0 +1,175 @@
+﻿begin transaction
+
+ create table EduMtskSorular
+ (
+    Id                   Int IDENTITY(1,1) not null,
+    IsActive             Bit               not null,
+
+	SertifikaGrupTipiId  SmallInt          null,
+	DersTipiId           SmallInt          null,       /* 1. Trafik ve Çevre Bilgisi, İlk Yardım, Araç Tekniği */
+    EduMtskKonularId     Int               null,
+    
+    Soru                 nVarChar(1000)    null,
+    CevapA               nVarChar(500)     null,
+    CevapB               nVarChar(500)     null,
+    CevapC               nVarChar(500)     null,
+    CevapD               nVarChar(500)     null,
+    DogruCevapTipiId     SmallInt          null,  
+    DogruCevapAciklamasi nVarChar(1000)    null,
+
+    SoruResim            VarBinary(max)    null,
+    CevapAResim          VarBinary(max)    null,
+    CevapBResim          VarBinary(max)    null,
+    CevapCResim          VarBinary(max)    null,
+    CevapDResim          VarBinary(max)    null,
+
+    KayitTarihi          SmallDatetime     null,
+    DuzenlemeTarihi      SmallDatetime     null,
+    IsOurQuestion        Bit               null,
+
+   Constraint pk_EduMtskSorular primary key (Id)
+ )
+
+ create index X_EduMtskSorular_01 on EduMtskSorular (SertifikaGrupTipiId, DersTipiId, EduMtskKonularId)
+
+ grant select, insert, update, delete on EduMtskSorular to public
+
+commit transaction
+
+
+create trigger [dbo].[trg_EduMtskSorular] on [dbo].[EduMtskSorular]
+after insert, update
+as begin
+
+    declare cursor_EduMtskSorular cursor for select Id from Inserted
+    declare @curId bigint
+
+    OPEN cursor_EduMtskSorular
+
+    FETCH NEXT FROM cursor_EduMtskSorular INTO @curId
+
+	declare @RecordDate smalldatetime 
+	
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+		Select 
+		  @RecordDate = ins.KayitTarihi
+    	From Inserted ins
+    	Where ins.Id = @curId
+
+		if (@RecordDate is null)
+		begin
+    	  Update EduMtskSorular set 
+            KayitTarihi = GETDATE()
+          where Id = @curId 
+		end
+
+        Update EduMtskSorular set 
+         DuzenlemeTarihi = GETDATE()
+        where Id = @curId 
+
+
+    	FETCH NEXT FROM cursor_EduMtskSorular INTO @curId
+    end -- While
+
+
+    Update EduMtskKonular Set
+    ToplamSoruSayisi = x.Adet
+    From EduMtskKonular as a, 
+    (
+       Select EduMtskKonularId, COUNT(Id) as Adet
+       From EduMtskSorular
+       Group by EduMtskKonularId
+    ) as x
+    Where a.Id = x.EduMtskKonularId
+
+    Update EduMtskDersler Set
+    ToplamSoruSayisi = x.Adet
+    From EduMtskDersler as a, 
+    (
+      Select SertifikaGrupTipiId, DersTipiId, COUNT(Id) as Adet
+      From EduMtskSorular
+      Group by SertifikaGrupTipiId, DersTipiId
+    ) as x
+
+    Where a.SertifikaGrupTipiId = x.SertifikaGrupTipiId
+    and   a.DersTipiId = x.DersTipiId
+
+
+    CLOSE cursor_EduMtskSorular
+    DEALLOCATE cursor_EduMtskSorular  
+	
+end -- trigger
+
+
+/*CreateLkpTable*/
+
+begin transaction
+
+
+-- ------------------------------------------------------- 
+-- DersTipiTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'EduMtskSorularDersTipi')
+drop table [Lkp].[EduMtskDerslerDersTipi]
+
+create table Lkp.EduMtskSorularDersTipi
+(
+   Id          Int Unique Not Null,
+   DersTipi    nVarchar(50)   null
+   
+   constraint  pk_EduMtskSorularDersTipi primary key (Id)
+)
+
+INSERT INTO Lkp.EduMtskSorularDersTipi (Id, DersTipi)
+ VALUES 
+  ( 0, N'Tanımsız'),
+  ( 1, N'Trafik ve Çevre Dersi'),
+  ( 2, N'İlkyardım Dersi'),
+  ( 3, N'Araç Tekniği Dersi'),
+  ( 5, N'Trafik Adabı Dersi')
+
+
+-- ------------------------------------------------------- 
+-- DogruCevapTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'EduMtskSorularDogruCevapTipi')
+drop table [Lkp].[EduMtskSorularDogruCevapTipi]
+
+create table Lkp.EduMtskSorularDogruCevapTipi
+(
+   Id          Int Unique Not Null,
+   DogruCevapTipi  nVarchar(10)   null
+   
+   constraint  pk_EduMtskSorularDogruCevapTipi primary key (Id)
+)
+
+INSERT INTO Lkp.EduMtskSorularDogruCevapTipi (Id, DogruCevapTipi)
+ VALUES 
+  ( 0, N'Tanımsız'),
+  ( 1, N'A'),
+  ( 2, N'B'),
+  ( 3, N'C'),
+  ( 4, N'D')
+
+commit transaction
+
+/*CreateLkpTableEnd*/
+
+
+
+INSERT INTO [dbo].[EduMtskDersler] ([IsActive],[SertifikaGrupTipiId],[Sertifikalar],[DersTipiId],[DersSoruSayisi],[DersSoruPuani])  VALUES (1, 1, '[2514],[2502],[2503]' ,1 ,0 ,0)
+INSERT INTO [dbo].[EduMtskDersler] ([IsActive],[SertifikaGrupTipiId],[Sertifikalar],[DersTipiId],[DersSoruSayisi],[DersSoruPuani])  VALUES (1, 1, '[2514],[2502],[2503]' ,5 ,0 ,0)
+INSERT INTO [dbo].[EduMtskDersler] ([IsActive],[SertifikaGrupTipiId],[Sertifikalar],[DersTipiId],[DersSoruSayisi],[DersSoruPuani])  VALUES (1, 1, '[2514],[2502],[2503]' ,3 ,0 ,0)
+INSERT INTO [dbo].[EduMtskDersler] ([IsActive],[SertifikaGrupTipiId],[Sertifikalar],[DersTipiId],[DersSoruSayisi],[DersSoruPuani])  VALUES (1, 1, '[2514],[2502],[2503]' ,2 ,0 ,0)
+
+INSERT INTO [dbo].[EduMtskDersler] ([IsActive],[SertifikaGrupTipiId],[Sertifikalar],[DersTipiId],[DersSoruSayisi],[DersSoruPuani])  VALUES (1, 2, '[2504],[2518],[2515],[2505],[2520],[2516],[2519],[2506],[2522],[2517],[2521],[2507]' ,1 ,0 ,0)
+INSERT INTO [dbo].[EduMtskDersler] ([IsActive],[SertifikaGrupTipiId],[Sertifikalar],[DersTipiId],[DersSoruSayisi],[DersSoruPuani])  VALUES (1, 2, '[2504],[2518],[2515],[2505],[2520],[2516],[2519],[2506],[2522],[2517],[2521],[2507]' ,5 ,0 ,0)
+INSERT INTO [dbo].[EduMtskDersler] ([IsActive],[SertifikaGrupTipiId],[Sertifikalar],[DersTipiId],[DersSoruSayisi],[DersSoruPuani])  VALUES (1, 2, '[2504],[2518],[2515],[2505],[2520],[2516],[2519],[2506],[2522],[2517],[2521],[2507]' ,3 ,0 ,0)
+INSERT INTO [dbo].[EduMtskDersler] ([IsActive],[SertifikaGrupTipiId],[Sertifikalar],[DersTipiId],[DersSoruSayisi],[DersSoruPuani])  VALUES (1, 2, '[2504],[2518],[2515],[2505],[2520],[2516],[2519],[2506],[2522],[2517],[2521],[2507]' ,2 ,0 ,0)
+
+INSERT INTO [dbo].[EduMtskDersler] ([IsActive],[SertifikaGrupTipiId],[Sertifikalar],[DersTipiId],[DersSoruSayisi],[DersSoruPuani])  VALUES (1, 3, '[2508],[2509]' ,1 ,0 ,0)
+INSERT INTO [dbo].[EduMtskDersler] ([IsActive],[SertifikaGrupTipiId],[Sertifikalar],[DersTipiId],[DersSoruSayisi],[DersSoruPuani])  VALUES (1, 3, '[2508],[2509]' ,5 ,0 ,0)
+INSERT INTO [dbo].[EduMtskDersler] ([IsActive],[SertifikaGrupTipiId],[Sertifikalar],[DersTipiId],[DersSoruSayisi],[DersSoruPuani])  VALUES (1, 3, '[2508],[2509]' ,3 ,0 ,0)
+INSERT INTO [dbo].[EduMtskDersler] ([IsActive],[SertifikaGrupTipiId],[Sertifikalar],[DersTipiId],[DersSoruSayisi],[DersSoruPuani])  VALUES (1, 3, '[2508],[2509]' ,2 ,0 ,0)
+
