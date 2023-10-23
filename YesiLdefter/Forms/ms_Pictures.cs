@@ -915,7 +915,8 @@ namespace YesiLdefter
                 workingImage.Save(Images_Path, ImageFormat.Jpeg);
                 pictureEdit1.Image = workingImage;
 
-                v.con_Images = t.imageBinaryArrayConverter(Images_Path);
+                long imageLength = 0;
+                v.con_Images = t.imageBinaryArrayConverter(Images_Path, ref imageLength);
                 v.con_Images_FieldName = fieldName;
 
 
@@ -930,7 +931,7 @@ namespace YesiLdefter
                     Images_Path = t.Find_Path("images") + fileGuid + "_Small.jpg";
                     _img.Save(Images_Path, ImageFormat.Jpeg);
 
-                    v.con_Images2 = t.imageBinaryArrayConverter(Images_Path);
+                    v.con_Images2 = t.imageBinaryArrayConverter(Images_Path, ref imageLength);
                     v.con_Images_FieldName2 = smallFieldName;
 
                     dsDataTarget.Tables[0].Rows[dNTarget.Position]["LkpSmallImage"] = v.con_Images2;
@@ -1132,7 +1133,7 @@ namespace YesiLdefter
             this.viewInfo = null;
 
         }
-
+        // Sıkıştır
         private void btn_Sikistir_ItemClick(object sender, ItemClickEventArgs e)
         {
             //

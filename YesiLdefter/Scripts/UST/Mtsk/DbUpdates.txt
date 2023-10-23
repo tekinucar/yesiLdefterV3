@@ -6,20 +6,19 @@ begin transaction
  (
     Id              Int IDENTITY(1,1) not null,
     MsDbUpdateId    Int               not null,
-	UpdateDate      Datetime          not null,
-	UpdateTypeId    SmallInt          not null,
+    UpdateDate      Datetime          not null,
+    UpdateTypeId    SmallInt          not null,
 
-	SectorTypeId    SmallInt          not null,
-	DBaseNoTypeId   smallInt          null, 
-	SchemaName      VarChar(5)        null, 
+    SectorTypeId    SmallInt          not null,
+    DBaseNoTypeId   smallInt          null, 
+    SchemaName      VarChar(5)        null, 
     TableName       VarChar(100)      null,
     FieldName       VarChar(50)       null,
-	FieldTypeId     smallInt          null,
-	FieldLength     VarChar(6)        null, 
-	FieldNotNull    bit               null,
-
-	About           nVarChar(100)     null,
-	SqlScript       varchar(MAX)      null,
+    FieldTypeId     smallInt          null,
+    FieldLength     VarChar(6)        null, 
+    FieldNotNull    bit               null,
+    About           nVarChar(100)     null,
+    SqlScript       varchar(MAX)      null,
 
    Constraint pk_DbUpdates primary key (Id)
  )

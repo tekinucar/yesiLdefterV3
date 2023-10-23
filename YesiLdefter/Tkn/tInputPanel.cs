@@ -385,7 +385,7 @@ namespace Tkn_InputPanel
                     //((DevExpress.XtraGrid.GridControl)cntrl).MainView.EndInit();
                 }
 
-                if (ViewType == v.obj_vw_DataLayoutView)
+                if ((ViewType == v.obj_vw_DataLayoutView) || (ViewType == v.obj_vw_HtmlEditorsView))
                 {
                     if (tPanelControl.ToString() != "DevExpress.XtraBars.Navigation.NavigationPane")
                     {

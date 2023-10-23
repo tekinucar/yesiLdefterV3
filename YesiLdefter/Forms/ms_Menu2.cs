@@ -119,7 +119,7 @@ namespace YesiLdefter
         private void PaketiGonder()
         {
             if (cumleMsItems != "")
-                t.runScript(v.dBaseNo.WebManager, cumleMsItems);
+                t.runScript(v.dBaseNo.publishManager, cumleMsItems);
 
             t.FlyoutMessage("Web Manager Database Update", "Insert paketler gönderildi...");
         }

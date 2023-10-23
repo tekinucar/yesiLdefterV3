@@ -86,6 +86,9 @@ begin transaction
 
  /*CreateTableEnd*/
 
+
+ /*CreateTrigger*/
+
 CREATE TRIGGER [dbo].[trg_OnmBelgeMakbuz] on [dbo].[OnmBelgeMakbuz] 
 AFTER INSERT, UPDATE
 AS BEGIN
@@ -242,11 +245,9 @@ AS BEGIN
     DEALLOCATE cursor_BMakbuz
 
 	EXECUTE [dbo].[prc_OnmToplamBekleyenOdemeler] @FirmId
-    EXECUTE [dbo].[prc_OnmToplamBekleyenGelirler] @FirmId
+	EXECUTE [dbo].[prc_OnmToplamBekleyenGelirler] @FirmId
 
 END
-
- /*CreateTrigger*/
 
 
  /*CreateTriggerEnd*/
@@ -262,9 +263,14 @@ AS BEGIN
     declare @curId bigint
 
 	declare @FirmId int
-    declare @TipiId smallInt
-	declare @AltIslemTipiId smallInt
+	declare @IsActive bit
+	declare @TipiId smallInt
+	declare @IslemTipiId varchar(10)
+	declare @_IslemTipiId varchar(10)
+	declare @BHesapTipiId smallInt
+	declare @AHesapTipiId smallInt
 	declare @BelgeTutari numeric(22,8)
+	declare @_BelgeTutari numeric(22,8)
 	declare @CariId int
 	declare @JoinTableTypeId smallInt
 	declare @JoinId int
@@ -277,8 +283,11 @@ AS BEGIN
     BEGIN
       select 
 	      @FirmId = dlt.FirmId
+	    , @IsActive = dlt.IsActive
 	    , @TipiId = dlt.TipiId
-	    , @AltIslemTipiId = dlt.AltIslemTipiId
+	    , @IslemTipiId = dlt.IslemTipiId
+		, @BHesapTipiId = isnull(dlt.BHesapTipiId,0)
+		, @AHesapTipiId = isnull(dlt.AHesapTipiId,0)
 	    , @BelgeTutari = round(dlt.BelgeTutari,2)
 		, @CariId = dlt.CariId
 		, @JoinTableTypeId = dlt.JoinTableTypeId
@@ -296,7 +305,7 @@ AS BEGIN
 	  end
 
 	  if (@TipiId = 2) and -- Tahsilat
-	     (@AltIslemTipiId >= 2100) -- Mtskİşlemleri
+	     (@AHesapTipiId >= 2100) -- Mtskİşlemleri
       begin
 	      -- iki türlü taksit satırı mevcut
 		  -- 1. esas TaksitTutari : kullanıcının oluşturduğu
@@ -383,7 +392,7 @@ AS BEGIN
     DEALLOCATE cursor_BMakbuzDlt
 
 	EXECUTE [dbo].[prc_OnmToplamBekleyenOdemeler] @FirmId
-    EXECUTE [dbo].[prc_OnmToplamBekleyenGelirler] @FirmId
+	EXECUTE [dbo].[prc_OnmToplamBekleyenGelirler] @FirmId
 
 END
 
@@ -394,7 +403,7 @@ END
  /*
    TipiId             SmallInt      null, /* 1. Tahsilat, 2. Tediye */
    IslemTipiId        SmallInt      null, /* belge tipileri belli */
-   AltIslmeTipiId     SmallInt      null, /* peşinat, taksit vb gibi alt detay seçenekleri için */ 
+   İPTAL EDİLDİ : AltIslmeTipiId     SmallInt      null, /* peşinat, taksit vb gibi alt detay seçenekleri için */ 
 
    tt için örnek taraflar, tt : Tahsil ve Tediye işlemi : TTTipiId
 
@@ -408,7 +417,7 @@ END
    72 fh - sb : satışlar
    73 fh - hb : hizmet belgesi
    80 fh - cs : cekSen  
-   */
+*/
 
 /*CreateLkpTable*/
 
@@ -476,39 +485,6 @@ SELECT [BorcHesapId]
   order by AlacakHesapId, BorcHesapId
 
 */
-
-
-/*
--- ------------------------------------------------------- 
--- AltIslemTipiId  ( Zamamla yeni tanımlamalar eklenecek )
--- ------------------------------------------------------- 
-create table [Lkp].[OnmBelgeMakbuzAltIslemTipi]
-(
-   Id           Int Unique Not Null,
-   AltIslemTipi nVarchar(50),
-   GrupTipiId   SmallInt Null,
-
-   constraint  pk_OnmBelgeMakbuzAltIslemTipi primary key (Id)
-)
-
-delete from [Lkp].[OnmBelgeMakbuzAltIslemTipi]
-INSERT INTO [Lkp].[OnmBelgeMakbuzAltIslemTipi] (Id, AltIslemTipi, GrupTipiId)
- VALUES 
-  (    0,    N'Tanımsız', 0),
-  ( 1001,    N'Virman', 1),
-  ( 1002,    N'Cariden tahsilat', 1),
-  ( 1003,    N'Cariye ödeme', 1),
-  ( 1021,    N'Kredi Kartı ödemesi', 1),
-  (  770,    N'Gider ödemesi', 1),
-  ( 2110,    N'Mtsk sertifika ücreti', 1),  
-  ( 2111,    N'Mtsk teorik sınav ücreti', 1),
-  ( 2112,    N'Mtsk uygulama sınav ücreti', 1),
-  ( 2113,    N'Mtsk özel teorik ders ücreti', 1),
-  ( 2114,    N'Mtsk özel uygulama ders ücreti', 1)
-  */
-
-
-
 
 -- ------------------------------------------------------- 
 -- BHesapTipiId

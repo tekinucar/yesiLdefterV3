@@ -6052,7 +6052,7 @@ namespace Tkn_Events
         // 3. Yine Button Click ExtraIslemler için çalışmaktadır : PROP_NAVIGATOR.TABLEIPCODE_LIST.WORKTYPE üzerinde 
 
         #region CreateOrSelect TabPage 
-        public void CreateOrSelect_Page(Form tForm, string TabControlName, string tabPageCode, string TableIPCode, string readValue, string headCaption)
+        public void CreateOrSelect_Page(Form tForm, string TabControlName, string tabPageCode, string TableIPCode, string readValue, string headCaption, bool show)
         {
             // tabControl_SUBVIEW -- CreateOrSelect_Page
 
@@ -6089,7 +6089,7 @@ namespace Tkn_Events
 
             #region SelectedPage var ise bulduğu sayfayı select et geri dön
 
-            if (c != null)
+            if ((c != null) && (show))
             {
                 #region XtraTabPage
                 if (c.GetType().ToString() == "DevExpress.XtraTab.XtraTabPage")
@@ -6136,6 +6136,9 @@ namespace Tkn_Events
                 return;
             }
 
+            if ((c != null) && (show == false)) 
+                return; 
+
             #endregion
 
             // ------------------------------------------------------------------------------
@@ -6144,7 +6147,7 @@ namespace Tkn_Events
             // 1. Form üzerindeki TabPage aranır ve ilk bulunan getirilir
             // 2. TabPage nin MasterKey i belirtilmiş ise direk o TabPage aranır
 
-            string Item_MasterKey = string.Empty;
+                string Item_MasterKey = string.Empty;
             string Caption = string.Empty;
 
             if (t.IsNotNull(TableIPCode_NotDot))
@@ -6207,7 +6210,7 @@ namespace Tkn_Events
                     ((DevExpress.XtraTab.XtraTabControl)c).AccessibleName = TableIPCode;
                     ((DevExpress.XtraTab.XtraTabControl)c).AccessibleDescription = TableIPCode_NotDot + "|" + readValue;
                     ((DevExpress.XtraTab.XtraTabControl)c).TabPages.Add(tTabPage);
-                    ((DevExpress.XtraTab.XtraTabControl)c).SelectedTabPage = tTabPage;
+                    if (show) ((DevExpress.XtraTab.XtraTabControl)c).SelectedTabPage = tTabPage;
                 }
                 #endregion
 
@@ -6239,7 +6242,7 @@ namespace Tkn_Events
                     ((DevExpress.XtraBars.Navigation.NavigationPane)c).AccessibleDescription = TableIPCode_NotDot + "|" + readValue;
                     ((DevExpress.XtraBars.Navigation.NavigationPane)c).Controls.Add(tTabPage);
                     ((DevExpress.XtraBars.Navigation.NavigationPane)c).Pages.Add((DevExpress.XtraBars.Navigation.NavigationPage)tTabPage);
-                    ((DevExpress.XtraBars.Navigation.NavigationPane)c).SelectedPage = tTabPage;
+                    if (show) ((DevExpress.XtraBars.Navigation.NavigationPane)c).SelectedPage = tTabPage;
 
                     ((System.ComponentModel.ISupportInitialize)(((DevExpress.XtraBars.Navigation.NavigationPane)c))).EndInit();
 
@@ -6273,7 +6276,7 @@ namespace Tkn_Events
                     ((DevExpress.XtraBars.Navigation.TabPane)c).AccessibleDescription = TableIPCode_NotDot + "|" + readValue;
                     ((DevExpress.XtraBars.Navigation.TabPane)c).Controls.Add(tTabPage);
                     ((DevExpress.XtraBars.Navigation.TabPane)c).Pages.Add((DevExpress.XtraBars.Navigation.TabNavigationPage)tTabPage);
-                    ((DevExpress.XtraBars.Navigation.TabPane)c).SelectedPage = tTabPage;
+                    if (show) ((DevExpress.XtraBars.Navigation.TabPane)c).SelectedPage = tTabPage;
 
                     ((System.ComponentModel.ISupportInitialize)(((DevExpress.XtraBars.Navigation.TabPane)c))).EndInit();
 
@@ -6294,6 +6297,9 @@ namespace Tkn_Events
         {
             tToolBox t = new tToolBox();
             bool onay = false;
+            bool show = true;
+            if (menuValue == "DONTSHOW") show = false;
+
             #region TabPage ise
             if ((ViewType == "TabPage") ||
                 (ViewType == "TabPage2") ||
@@ -6317,13 +6323,13 @@ namespace Tkn_Events
 
                 if (t.IsNotNull(TableIPCode))
                 {
-                    CreateOrSelect_Page(tForm, TabControlName, "", TableIPCode, ReadValue, ReadCaption);
+                    CreateOrSelect_Page(tForm, TabControlName, "", TableIPCode, ReadValue, ReadCaption, show);
                     cntrl = t.Find_Control(tForm, "tTabPage_" + t.AntiStr_Dot(TableIPCode + ReadValue), "", controls);
                 }
 
                 if (t.IsNotNull(FormCode))
                 {
-                    CreateOrSelect_Page(tForm, TabControlName, "", FormCode, ReadValue, ReadCaption);
+                    CreateOrSelect_Page(tForm, TabControlName, "", FormCode, ReadValue, ReadCaption, show);
                     //tTabPage_UST/OMS/FNS/MASRAFKAYDET|
                     if (FormCode.IndexOf("tTabPage_") == -1)
                          cntrl = t.Find_Control(tForm, "tTabPage_" + t.AntiStr_Dot(FormCode), "", controls);
@@ -6332,7 +6338,7 @@ namespace Tkn_Events
 
                 if (t.IsNotNull(tabPageCode))
                 {
-                    CreateOrSelect_Page(tForm, TabControlName, tabPageCode, "", ReadValue, ReadCaption);
+                    CreateOrSelect_Page(tForm, TabControlName, tabPageCode, "", ReadValue, ReadCaption, show);
                     cntrl = t.Find_Control(tForm, tabPageCode, "", controls);
                 }
 
@@ -6368,7 +6374,7 @@ namespace Tkn_Events
             }
             #endregion dockPanel ise
 
-            if (t.IsNotNull(menuValue))
+            if (t.IsNotNull(menuValue) && (menuValue != "DONTSHOW"))
                 setMenuPage(tForm, menuValue);
 
             return onay;
@@ -6400,7 +6406,7 @@ namespace Tkn_Events
                 }
                 // tabPage ile RibbonPage bağlantısını sağlamak için gerekiyor
                 // tabPege değiştiğinde RibbonPagede ona göre değişsin 
-                if (t.IsNotNull(menuValue))
+                if (t.IsNotNull(menuValue) && (menuValue != "DONTSHOW"))
                     cntrl.AccessibleDefaultActionDescription = menuValue;
 
                 //tTabPage_FNLNVOL_FNLNVOL_BNL0123

@@ -78,6 +78,7 @@ INSERT INTO [Lkp].[MsCommercialPageType] (Id, PageType)
   ( 107,     N'Commercial-ÖnMuhasebe'),
 
   ( 201,    N'Education-İletişim'),
+  ( 210,    N'Education-Ana Sayfa'),
   ( 211,    N'Education-Ehliyet Hakkında'),
   ( 212,    N'Education-Sürücü Kursları'),
   ( 213,    N'Education-Ehliyet Dersleri'),

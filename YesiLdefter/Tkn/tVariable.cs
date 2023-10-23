@@ -31,7 +31,8 @@ namespace Tkn_Variable
             Project = 4,
             WebCrm = 5,
             NewDatabase = 6,
-            WebManager = 7 
+            publishManager = 7,
+            aktarilacakDatabase = 8
         }
 
         public class DBTypes
@@ -42,7 +43,7 @@ namespace Tkn_Variable
             ///
             public DBTypes()
             {
-                localDB = false;
+                mainManagerDbUses = false;
 
                 managerDBaseNo = v.dBaseNo.Manager;
                 ustadCrmDBaseNo = v.dBaseNo.UstadCrm;
@@ -61,7 +62,7 @@ namespace Tkn_Variable
             /// Örnek : t.tTableFind() 
             /// </summary>
             public v.dBaseNo runDBaseNo { get; set; }
-            public bool localDB { get; set; }
+            public bool mainManagerDbUses { get; set; }
 
             //--- Manager Database
 
@@ -94,7 +95,7 @@ namespace Tkn_Variable
             public string ustadCrmConnectionText { get; set; }
             public SqlConnection ustadCrmMSSQLConn { get; set; }
 
-            //--- maste Database
+            //--- master Database
             public v.dBaseNo masterDBaseNo { get; set; }
             public string masterServerName { get; set; }
             public string masterDBName { get; set; }
@@ -107,8 +108,8 @@ namespace Tkn_Variable
 
         public static DBTypes active_DB = new DBTypes();
 
-        public static string dbLocalPws = "Password = 1;";
-        public static string dbWebPsw = "Password = *Pi784512*+;";
+        public static string mainManagerPass = "Password = ustad84352Yazilim;";
+        public static string publishManagerPass = "Password = ustad84352Yazilim;";
 
         public class databaseAbout_
         {
@@ -118,7 +119,7 @@ namespace Tkn_Variable
             ///
             public databaseAbout_()
             {
-                localDB = false;
+                mainManagerDbUses = false;
                 dBaseNo = v.dBaseNo.Project;
                 dBType = 0;
                 serverName = "";
@@ -133,7 +134,7 @@ namespace Tkn_Variable
             /// Örnek : t.tTableFind() 
             /// </summary>
             public v.dBaseNo runDBaseNo { get; set; }
-            public bool localDB { get; set; }
+            public bool mainManagerDbUses { get; set; }
 
             //--- Project Database
             public v.dBaseNo dBaseNo { get; set; }
@@ -147,9 +148,17 @@ namespace Tkn_Variable
         }
 
         public static databaseAbout_ newFirm_DB = new databaseAbout_();
-        public static databaseAbout_ webManager_DB = new databaseAbout_();
-        
+        public static databaseAbout_ source_DB = new databaseAbout_();
+        public static databaseAbout_ publishManager_DB = new databaseAbout_();
+
         #endregion Database Yapısı
+
+        #region Ftp
+        public static string ftpHostIp = @"ftp://ustadyazilim.com";
+        public static string ftpUserName = "webadmin_ftp";
+        public static string ftpUserPass = "Ustad+784512";
+        #endregion Ftp
+
 
 
         // picture nesnesi ile Save() functionu arasında veri taşıyıcı
@@ -170,6 +179,10 @@ namespace Tkn_Variable
 
         public static byte[] con_Images2 = null;
         public static string con_Images_FieldName2 { get; set; }
+        public static byte[] con_Images3 = null;
+        public static string con_Images_FieldName3 { get; set; }
+        public static byte[] con_Images4 = null;
+        public static string con_Images_FieldName4 { get; set; }
 
         public static Image con_Image_Original = null;
         public static string con_Images_Path { get; set; }
@@ -559,6 +572,10 @@ namespace Tkn_Variable
         public static Int16 obj_vw_CalenderAndScheduler = 3020; //{ get; set; }
         public static Int16 obj_vw_ChartsView = 3030; //{ get; set; }
         public static Int16 obj_vw_WizardControl = 4010; //{ get; set; }
+
+        public static Int16 obj_vw_HtmlEditorsView = 5010;
+        public static Int16 obj_vw_HtmlEditorsMultiView = 5020;
+
 
         public static Int16 obj_vw_InputBoxControl { get; set; }
         public static byte obj_vw_KriterView { get; set; }

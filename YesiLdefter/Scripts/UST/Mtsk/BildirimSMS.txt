@@ -1,21 +1,4 @@
-﻿/* -----------------------------------------------*/
-
-/*CreateTable*/
-/*CreateTableEnd*/
-
-/*CreateTrigger*/
-/*CreateTriggerEnd*/
-
-/*CreateLkpTable*/
-/*CreateLkpTableEnd*/
-
-/*CreateData*/
-/*CreateDataEnd*/
-
-/* -----------------------------------------------*/
-
-
-
+﻿
 /*CreateTable*/
 
 begin transaction
@@ -36,7 +19,6 @@ begin transaction
    CepTelefonu         nVarchar(15)    null,
    Mesaj               nVarchar(160)   null,
    --sonuclar eklenecek 
-
 
   constraint pk_BildirimSMS primary key (Id)
  )
@@ -91,13 +73,12 @@ create table [Lkp].[BildirimSMSMesajTipi]
    constraint  pk_BildirimSMSMesajTipi primary key (Id)
 )
 
-Delete from [Lkp].[MtskAdayMesajTipi]
-INSERT INTO [Lkp].[MtskAdayMesajTipi] (Id, MesajTipi)
+Delete from [Lkp].[BildirimSMSMesajTipi]
+INSERT INTO [Lkp].[BildirimSMSMesajTipi] (Id, MesajTipi)
  VALUES 
   ( 0,  N'' ),
   ( 1,  N'Aday için Gerekli Belgeler' ),
-  ( 2,  N'Aday için Eksik Belgeler' ),
-  ( 3,  N'' )
+  ( 2,  N'Aday için Eksik Belgeler' )
 
 
 /*CreateLkpTableEnd*/

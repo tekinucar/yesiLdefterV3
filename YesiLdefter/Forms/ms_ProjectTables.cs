@@ -15,14 +15,17 @@ using Tkn_CreateDatabase;
 using Tkn_Events;
 using Tkn_ToolBox;
 using Tkn_Variable;
+using Tkn_Save;
 
 namespace YesiLdefter
 {
     public partial class ms_ProjectTables : Form
     {
+        #region Tanımlar
         tToolBox t = new tToolBox();
         tDatabase db = new tDatabase();
         tEventsMenu evm = new tEventsMenu();
+        tSave sv = new tSave();
 
         DataSet dsFirm = null;
         DataNavigator dNFirm = null;
@@ -33,7 +36,14 @@ namespace YesiLdefter
         DataSet dsFunctions = null;
         DataNavigator dNFunctions = null;
 
+        DataSet dsDataTransfer = null;
+        DataNavigator dNDataTransfer = null;
+
         Control tabControl = null;
+        
+        List<string> fieldsNameList = new List<string>();
+        List<string> imagefieldsNameList = new List<string>();
+        bool imageFieldAvailable = false;
 
         string fSchemaName = "SchemaName";
         string fTableName = "TableName";
@@ -47,12 +57,17 @@ namespace YesiLdefter
         string fDatabaseName = "DatabaseName";
         string fDbLoginName = "DbLoginName";
         string fDbPass = "DbPass";
-        
+
+        string sourceServerNameIP = "SourceServerNameIP";
+        string sourcefDatabaseName = "SourceDatabaseName";
+        string sourceDbLoginName = "SourceDbLoginName";
+        string sourceDbPass = "SourceDbPass";
 
         string tableIPCode = "";
         string tablesTableIPCode = "";
         string proceduresTableIPCode = "";
         string functionsTableIPCode = "";
+        string dataTransferTableIPCode = "";
         
         string menuName1 = "MENU_" + "UST/PMS/PMS/ProjectTables";
         string buttonSingFileReadDbWrite = "SINGLE_FILE_READ_DB_WRITE";
@@ -77,6 +92,11 @@ namespace YesiLdefter
         string buttonSingleFunctionCreate = "SINGLE_FUNCTION_CREATE";
         string buttonFunctionsCreate = "FUNCTIONS_CREATE";
 
+        string buttonSourceDBConnect = "SOURCE_DB_CONNECTION";
+        string buttonSourceTablesList = "SOURCE_TABLES";
+        string buttonSingleTableTransfer = "SINGLE_TABLE_TRANSFER";
+        string buttonTablesTransfer = "TABLES_TRANSFER";
+        #endregion
         public ms_ProjectTables()
         {
             InitializeComponent();
@@ -89,7 +109,6 @@ namespace YesiLdefter
 
             this.KeyPreview = true;
         }
-
         private void ms_ProjectTables_Shown(object sender, EventArgs e)
         {
             // Table scriplerini MsProjectTables tablosuna kaydetmek
@@ -144,7 +163,6 @@ namespace YesiLdefter
                 if (((DevExpress.XtraBars.Navigation.TileNavItem)sender).Name == buttonDataView) dataView();
                 if (((DevExpress.XtraBars.Navigation.TileNavItem)sender).Name == buttonTriggersCreate) triggersCreate();
                 
-
                 // procedures
                 if (((DevExpress.XtraBars.Navigation.TileNavItem)sender).Name == buttonProceduresList) tablesList((DevExpress.XtraBars.Navigation.TileNavItem)sender);
                 if (((DevExpress.XtraBars.Navigation.TileNavItem)sender).Name == buttonSingleProcedureCreate) singleProcedureCreate();
@@ -153,10 +171,16 @@ namespace YesiLdefter
                 if (((DevExpress.XtraBars.Navigation.TileNavItem)sender).Name == buttonFunctionsList) tablesList((DevExpress.XtraBars.Navigation.TileNavItem)sender);
                 if (((DevExpress.XtraBars.Navigation.TileNavItem)sender).Name == buttonSingleFunctionCreate) singleFunctionCreate();
                 if (((DevExpress.XtraBars.Navigation.TileNavItem)sender).Name == buttonFunctionsCreate) functionsCreate();
+
+                // veri aktarım
+                if (((DevExpress.XtraBars.Navigation.TileNavItem)sender).Name == buttonSourceDBConnect) sourceDBConnect();
+                if (((DevExpress.XtraBars.Navigation.TileNavItem)sender).Name == buttonSourceTablesList) sourceTablesList((DevExpress.XtraBars.Navigation.TileNavItem)sender);
+                if (((DevExpress.XtraBars.Navigation.TileNavItem)sender).Name == buttonSingleTableTransfer) singleTableTransfer();
+                if (((DevExpress.XtraBars.Navigation.TileNavItem)sender).Name == buttonTablesTransfer) tablesTransfer();
             }
         }
 
-        #region Table scriplerini MsProjectTables tablosuna kaydetmek
+        #region Table + Trigger + Lpp.Tables, Procedure ve Function scriplerini MsProjectTables tablosuna kaydetmek
         private void singleFileReadDbWrite()
         {
             int pageIndex = t.Find_TabControlPageIndex(this.tabControl);
@@ -301,7 +325,6 @@ namespace YesiLdefter
             }
         }
 
-
         private bool tFileReadAndWrite(DataSet dsData, DataNavigator dNData, string fieldName, string fileName)
         {
             bool onay = false;
@@ -397,7 +420,7 @@ namespace YesiLdefter
         private void tablesList(object sender)
         {
             bool onay = dbConnction(false, false);
-
+            
             if (onay)
             {
                 string buttonName = "";
@@ -494,6 +517,13 @@ namespace YesiLdefter
                 if (dsFunctions == null)
                 {
                     t.Find_DataSet(this, ref dsFunctions, ref dNFunctions, this.functionsTableIPCode);
+                }
+            }
+            if (this.dataTransferTableIPCode != "")
+            {
+                if (dsDataTransfer == null)
+                {
+                    t.Find_DataSet(this, ref dsDataTransfer, ref dNDataTransfer, this.dataTransferTableIPCode);
                 }
             }
         }
@@ -852,6 +882,645 @@ namespace YesiLdefter
 
         #endregion Functions İşlemleri
 
+        #region Veri Aktarma İşlemleri
+
+        private void sourceDBConnect()
+        {
+            sourceDbConnction_(true);
+        }
+        private void sourceTablesList(object sender)
+        {
+            bool onay = sourceDbConnction_(false);
+
+            if (onay)
+            {
+                string buttonName = "";
+
+                // gerçekte istekde bulunan butonun ismi
+                if (((DevExpress.XtraBars.Navigation.TileNavItem)sender).Name != null)
+                    buttonName = ((DevExpress.XtraBars.Navigation.TileNavItem)sender).Name.ToString();
+
+                string islemButtonName = "item_FOPEN_SUBVIEW";
+                string myFormLoadValue = "";
+                string tableIPCode_ = "";
+
+                if (((DevExpress.XtraBars.Navigation.TileNavItem)sender).Appearance.Name != null)
+                {
+                    if (((DevExpress.XtraBars.Navigation.TileNavItem)sender).Tag != null)
+                        myFormLoadValue = ((DevExpress.XtraBars.Navigation.TileNavItem)sender).Tag.ToString();
+
+                    // bu işlev çalışsın diye bu isim verilerek istek gönderiliyor
+                    evm.commonMenuClick(this, islemButtonName, "", myFormLoadValue);
+
+                    // tables listesini bulmak için hangi IPCode olduğunu bul
+                    tableIPCode_ = findListTableIPCode(myFormLoadValue);
+
+                    if (buttonName == buttonSourceTablesList)
+                        this.dataTransferTableIPCode = tableIPCode_;
+
+                    // bulunan tableIPCode_ ile dsDataTransfer ve dNDataTransfer i bul
+                    preparingObjectList();
+                }
+            }
+            else MessageBox.Show("DİKKAT : Database ile bağlantı kurulamadı...");
+
+        }
+        private void singleTableTransfer()
+        {
+            if (t.IsNotNull(dsDataTransfer))
+            {
+                bool onay = true;
+
+                //v.active_DB.runDBaseNo = v.dBaseNo.aktarilacakDatabase;
+
+                string about = dsDataTransfer.Tables[0].Rows[dNDataTransfer.Position]["About"].ToString();
+
+                string soru = "[ " + about + " ] açıklamalı tablosundan Data Transferi yapılacak, onaylıyor musunuz ?";
+                DialogResult cevap = t.mySoru(soru);
+                if (DialogResult.Yes == cevap)
+                {
+                    onay = preparingTableDataTransfer(dNDataTransfer.Position);
+
+                    if (onay)
+                        t.FlyoutMessage("[ " + about + " ]", "Data transferi gerçekleştirildi...");
+                }
+            }
+
+        }
+        private void tablesTransfer()
+        {
+
+        }
+
+        private bool preparingTableDataTransfer(int pos)
+        {
+            bool onay = false;
+            string sourceTableName = "";
+            string sourceDataReadSql = "";
+            string targetTableName = "";
+            string targetFirmId = "";
+            string targetFieldList = "";
+            string targetInsertHeaderSql = "";
+            string editWhereSql = ""; // "and Id = :IdValue ";
+            bool isIdentityInsert = false; // IDENTITY_INSERT ON/OFF
+            bool isEditScript = false; // transfer sırasında Select kontrolüne edit scriptini ekle
+
+            targetFirmId = dsFirm.Tables[0].Rows[dNFirm.Position]["FirmId"].ToString();
+            sourceTableName = dsDataTransfer.Tables[0].Rows[pos]["SourceTableName"].ToString();
+            targetTableName = dsDataTransfer.Tables[0].Rows[pos]["TargetTableName"].ToString();
+            sourceDataReadSql = dsDataTransfer.Tables[0].Rows[pos]["SourceDataReadSql"].ToString();
+            editWhereSql = dsDataTransfer.Tables[0].Rows[pos]["EditWhereSql"].ToString();
+            isIdentityInsert = (dsDataTransfer.Tables[0].Rows[pos]["IsIdentityInsert"].ToString() == "True");
+            isEditScript = (dsDataTransfer.Tables[0].Rows[pos]["IsEditScript"].ToString() == "True");
+
+            string alias = string.Empty;
+            string tableName = string.Empty;
+            t.String_Parcala(sourceTableName, ref alias, ref tableName, ".");
+            if (alias == "") alias = "dbo";
+
+            vTable vt = new vTable();
+            vt.DBaseNo = v.dBaseNo.aktarilacakDatabase;
+            vt.DBaseType = v.dBaseType.MSSQL;
+            vt.DBaseName = v.source_DB.databaseName;
+            vt.msSqlConnection = v.source_DB.MSSQLConn;
+            vt.SchemasCode = alias;
+            vt.TableName = tableName;
+            vt.TableIPCode = "";
+
+            DataSet dsSource = new DataSet();
+            sourceDataReadSql = t.Str_Replace(ref sourceDataReadSql, "\":FIRM_ID\"", targetFirmId);
+            sourceDataReadSql = t.SQLPreparing(sourceDataReadSql, vt);
+
+            t.Sql_Execute(dsSource, ref sourceDataReadSql, vt);
+            
+            if (t.IsNotNull(dsSource))
+            {
+                alias = "";
+                tableName = "";
+                t.String_Parcala(targetTableName, ref alias, ref tableName, ".");
+                if (alias == "") alias = "dbo";
+                targetFieldList = preparingTargetFieldList(dsSource);
+                targetInsertHeaderSql = preparingInsertScript(alias, tableName, targetFieldList);
+                
+                onay = preparingDataTransfer(dsSource, alias, tableName, targetInsertHeaderSql, editWhereSql, isIdentityInsert, isEditScript);
+            }
+               
+            Thread.Sleep(100);
+
+            return onay;
+        }
+
+        private string preparingTargetFieldList(DataSet dsSource)
+        {
+            fieldsNameList.Clear();
+            imagefieldsNameList.Clear();
+            string fName = "";
+            string fieldsName = "";
+            int colCount = dsSource.Tables[0].Columns.Count;
+            for (int i = 0; i < colCount; i++)
+            {
+                fName = dsSource.Tables[0].Columns[i].ColumnName;
+                fieldsNameList.Add(fName);
+                if (fName.IndexOf("Resim") == -1)
+                {
+                    /// tüm field listesi
+                    fieldsName += ",[" + fName + "]";
+                }
+                else
+                {
+                    /// image Field mevcut
+                    imagefieldsNameList.Add(fName);
+                    imageFieldAvailable = true;
+                }
+            }
+            fieldsName = fieldsName.Remove(0, 1);
+            return fieldsName;
+        }
+
+        private string preparingInsertScript(string alias, string tableName, string targetFieldList)
+        {
+            string insertSql = " INSERT INTO [" + alias + "].[" + tableName + "] (" + targetFieldList + ") values ";
+            return insertSql;
+        }
+
+        private bool preparingDataTransfer(DataSet dsSource, 
+            string alias, string tableName, 
+            string targetInsertHeaderSql, string editWhereSql, 
+            bool isIdentityInsert, bool isEditScript)
+        {
+            bool onay = false;
+
+            int rowCount = dsSource.Tables[0].Rows.Count;
+            int recCount = 1;
+            int totCount = 0;
+
+            string sql = "";
+            string insertValue = "";
+            string targetInsertSql = "";
+            string targetEditSql = "";
+            string targetSelectSql = "";
+
+            //test için
+            //rowCount = 10;
+            v.SP_OpenApplication = false;
+            t.WaitFormOpen(v.mainForm, "Veri aktarım işlemi başlıyor...");
+
+            for (int i = 0; i < rowCount; i++)
+            {
+                insertValue = preparingInsertValues(dsSource, i);
+                targetInsertSql = targetInsertHeaderSql + " ( " + insertValue + " ) ";
+                if (isEditScript)
+                     targetEditSql = preparingEditValues(dsSource, i, alias, tableName, editWhereSql);
+                targetSelectSql = preparingSelectControl(dsSource, i, alias, tableName, editWhereSql, isEditScript);
+                sql += preparingTransferSql(targetSelectSql, targetInsertSql, targetEditSql, isEditScript);
+                
+                if (recCount == 50)
+                {
+                    if (isIdentityInsert)
+                        sql = preparingIsIdentityInsert(alias, tableName, sql);
+
+                    onay = executeNonSql(sql);
+
+                    if (onay)
+                    {
+                        sql = "";
+                        totCount += recCount;
+                        recCount = 1;
+                        v.SP_OpenApplication = false;
+                        t.WaitFormOpen(v.mainForm, totCount.ToString() + "/" + rowCount.ToString() + " veri aktarım işlemi devam ediyor...");
+                    }
+                }
+
+                recCount += 1;
+            }
+                       
+            if ((recCount > 0) && (sql != ""))
+            {
+                if (isIdentityInsert)
+                    sql = preparingIsIdentityInsert(alias, tableName, sql);
+
+                onay = executeNonSql(sql);
+
+                v.SP_OpenApplication = false;
+                t.WaitFormOpen(v.mainForm, rowCount.ToString() + "/" + rowCount.ToString() + " veri aktarım işlemi devam ediyor...");
+            }
+
+            v.IsWaitOpen = false;
+            t.WaitFormClose();
+
+            /// Resim / image fields mevcut
+            if (imageFieldAvailable)
+            {
+                v.SP_OpenApplication = false;
+                t.WaitFormOpen(v.mainForm, "Resim aktarım işlemi başlıyor...");
+                onay = executeImage(dsSource, alias, tableName, editWhereSql);
+                v.IsWaitOpen = false;
+                t.WaitFormClose();
+            }
+
+            return onay;
+        }
+
+        private string preparingInsertValues(DataSet dsSource, int rowNo)
+        {
+            string type = "";
+            string value = "";
+            string values = "";
+            string fName = "";
+
+            int colCount = dsSource.Tables[0].Columns.Count;
+            for (int i = 0; i < colCount; i++)
+            {
+                /// Resim fieldları null geldiği zaman onu yakalayamıyorum 
+                //  type = dsSource.Tables[0].Rows[rowNo][i].GetType().ToString();
+                //  value = dsSource.Tables[0].Rows[rowNo][i].ToString();
+                                
+                fName = fieldsNameList[i];
+
+                if (fName.IndexOf("Resim") == -1)
+                {
+                    type = dsSource.Tables[0].Rows[rowNo][fName].GetType().ToString();
+                    value = dsSource.Tables[0].Rows[rowNo][fName].ToString();
+
+                    // adres verisinde görülebiliyor
+                    if (value.IndexOf("<option value=\"") > -1)
+                        value = value.Replace("<option value=\"", "");
+                    if (value.IndexOf("\">") > -1)
+                        value = value.Replace("\">", "");
+
+                    if (type == "System.Int32") values += " , " + value;
+                    if (type == "System.Int64") values += " , " + value;
+                    if (type == "System.DateTime") values += " , convert(Datetime, '" + value + "',103)";
+                    if (type == "System.String") values += " , '" + value + "' ";
+                    if (type == "System.DBNull") values += " , null";
+                    if (type == "System.Double")
+                    {
+                        value = value.Replace(",", ".");
+                        values += " , " + value;
+                    }
+                    if (type == "System.Byte[]")
+                    {
+                        /// resim fieldları burada olmadğı için devreye girmiyor artık
+
+                        //string base64Encoded = Convert.ToBase64String((byte[])dsSource.Tables[0].Rows[rowNo][i]);
+                        //values += ", cast('" + base64Encoded + "' as varbinary(max))";
+
+                        //values += ", CAST( '" + Convert.ToBase64String((byte[])dsSource.Tables[0].Rows[rowNo][i]) + "' as varbinary(max) ) ";
+
+                        //values += ", CONVERT(varchar(8000), convert(varbinary(8000), '" + Convert.ToBase64String((byte[])dsSource.Tables[0].Rows[rowNo][i]) + "')) ";
+                        //values += ", convert(varbinary(8000), '" + Convert.ToBase64String((byte[])dsSource.Tables[0].Rows[rowNo][i]) + "') ";
+                    }
+                }
+
+                //System.Int32
+                //System.DateTime
+                //System.String
+                //System.DBNull
+                //System.Double
+                //System.Byte[]
+
+            }
+            values = values.Remove(0, 2);
+            return values;
+        }
+
+        private string preparingEditValues(DataSet dsSource, int rowNo, string alias, string tableName, string editWhereSql)
+        {
+            string type = "";
+            string value = "";
+            string values = "";
+            string fieldName = "";
+            string editSql = "";
+            string editWhere = editWhereSql;
+            int x = 0;
+            int colCount = dsSource.Tables[0].Columns.Count;
+            for (int i = 0; i < colCount; i++)
+            {
+                type = dsSource.Tables[0].Rows[rowNo][i].GetType().ToString();
+                value = dsSource.Tables[0].Rows[rowNo][i].ToString();
+                fieldName = dsSource.Tables[0].Columns[i].ColumnName;
+                //fieldName = fieldsNameList[i]; ikiside olur
+
+                // adres verisinde görülebiliyor
+                if (value.IndexOf("<option value=\"") > -1)
+                    value = value.Replace("<option value=\"", "");
+                if (value.IndexOf("\">") > -1)
+                    value = value.Replace("\">", "");
+
+                // Where koşulunda var mı?
+                x = editWhere.IndexOf(":" + fieldName + "Value");
+                
+                if (x > 0)
+                {
+                    if (type == "System.Int32") editWhere = editWhere.Replace(":" + fieldName + "Value", value);
+                    if (type == "System.String") editWhere = editWhere.Replace(":" + fieldName + "Value", "'" + value + "'");
+                }
+                else
+                {
+                    if (fieldName.IndexOf("Resim") == -1)
+                    {
+                        fieldName = "[" + fieldName + "]";
+                        if (type == "System.Int32") values += " , " + fieldName + " = " + value;
+                        if (type == "System.Int64") values += " , " + fieldName + " = " + value;
+                        if (type == "System.DateTime") values += " , " + fieldName + " = " + " convert(Datetime, '" + value + "',103)";
+                        if (type == "System.String") values += " , " + fieldName + " = " + "'" + value + "' ";
+                        if (type == "System.DBNull") values += " , " + fieldName + " = " + " null ";
+                        if (type == "System.Double")
+                        {
+                            value = value.Replace(",", ".");
+                            values += " , " + fieldName + " = " + value;
+                        }
+                        //if (type == "System.Byte[]") values += " , " + fieldName + " = " + value;
+                    }
+                }
+            }
+            values = values.Remove(0, 2);
+            editSql = " update " + alias + "." + tableName + " set " + v.ENTER
+                + values + v.ENTER
+                + " Where 0 = 0 " + editWhere;
+            return editSql;
+        }
+
+        private void preparingImageEditSql(DataSet dsSource, int rowNo, string alias, string tableName, string editWhereSql, ref string selectSql, ref string updateSql)
+        {
+            string type = "";
+            string value = "";
+            string imgFieldsNameSelect = "";
+            string imgFieldsNameUpdate = "";
+            string fieldName = "";
+            string editWhere = editWhereSql;
+            int x = 0;
+            int count = dsSource.Tables[0].Columns.Count;
+            
+            for (int i = 0; i < count; i++)
+            {
+                type = dsSource.Tables[0].Rows[rowNo][i].GetType().ToString();
+                value = dsSource.Tables[0].Rows[rowNo][i].ToString();
+                fieldName = dsSource.Tables[0].Columns[i].ColumnName;
+                // Where koşulunda var mı?
+                x = editWhere.IndexOf(":" + fieldName + "Value");
+
+                if (x > 0)
+                {
+                    if (type == "System.Int32") editWhere = editWhere.Replace(":" + fieldName + "Value", value);
+                    if (type == "System.String") editWhere = editWhere.Replace(":" + fieldName + "Value", "'" + value + "'");
+                }
+            }
+
+            count = imagefieldsNameList.Count;
+            for (int i = 0; i < count; i++)
+            {
+                imgFieldsNameSelect += " , " + imagefieldsNameList[i];
+                imgFieldsNameUpdate += " , " + imagefieldsNameList[i] + " = @" + imagefieldsNameList[i];
+            }
+
+            imgFieldsNameSelect = imgFieldsNameSelect.Remove(0, 2);
+            imgFieldsNameUpdate = imgFieldsNameUpdate.Remove(0, 2);
+
+            selectSql = 
+              " select " + imgFieldsNameSelect + " from " + alias + "." + tableName + " "
+            + " Where 0 = 0 " + editWhere;
+
+            updateSql =
+              " Update " + alias + "." + tableName + " set "
+            + imgFieldsNameUpdate
+            + " Where 0 = 0 " + editWhere;
+        }
+
+        private string preparingSelectControl(DataSet dsSource, int rowNo, string alias, string tableName, string editWhereSql, bool isEditScript)
+        {
+            string type = "";
+            string value = "";
+            string fieldName = "";
+            string selectSql = "";
+            string editWhere = editWhereSql;
+
+            int x = 0;
+            int colCount = dsSource.Tables[0].Columns.Count;
+            for (int i = 0; i < colCount; i++)
+            {
+
+                type = dsSource.Tables[0].Rows[rowNo][i].GetType().ToString();
+                value = dsSource.Tables[0].Rows[rowNo][i].ToString();
+                fieldName = dsSource.Tables[0].Columns[i].ColumnName;
+                // Where koşulunda var mı?
+                x = editWhere.IndexOf(":" + fieldName + "Value");
+
+                if (x > 0)
+                {
+                    if (type == "System.Int32") editWhere = editWhere.Replace(":" + fieldName + "Value", value);
+                    if (type == "System.String") editWhere = editWhere.Replace(":" + fieldName + "Value", "'" + value + "'");
+                }
+            }
+
+            selectSql =
+                " if ( Select count(*) ADET from [" + alias + "].[" + tableName + "] where 0 = 0 " + editWhere + " ) = 0 " + v.ENTER
+              + " begin " + v.ENTER
+              + " --:insertCumlesi " + v.ENTER
+              + " end " + v.ENTER;
+
+            if (isEditScript)
+              selectSql += 
+                " else begin " + v.ENTER
+              + " --:editCumlesi " + v.ENTER
+              + " end ";
+
+            return selectSql;
+        }
+
+        private string preparingTransferSql(string selectSql, string insertSql, string editSql, bool isEditScrit)
+        {
+            string sql = selectSql.Replace("--:insertCumlesi", insertSql);
+            if (isEditScrit)
+                sql = sql.Replace("--:editCumlesi", editSql); 
+            return sql;
+        }
+
+        private string preparingIsIdentityInsert(string alias, string tableName, string sql)
+        {
+            sql = " SET IDENTITY_INSERT [" + alias + "].[" + tableName + "] ON " + v.ENTER
+                + sql + v.ENTER
+                + " SET IDENTITY_INSERT [" + alias + "].[" + tableName + "] OFF " + v.ENTER;
+            return sql;
+        }
+
+        private bool executeNonSql(string targetSql)
+        {
+            /// Hedef database ile bağlantı kuruluyor
+            bool onay = dbConnction(false, false);
+
+            if (onay)
+            {
+                vTable vt = new vTable();
+                preparingTargetVTable(vt, "", "");
+
+                DataSet dsTarget = new DataSet();
+
+                onay = t.Sql_ExecuteNon(dsTarget, ref targetSql, vt);
+            }
+
+            return onay;
+        }
+
+        private bool executeSql(DataSet ds, string sql, vTable vt)
+        {
+            /// Hedef database ile bağlantı kuruluyor
+            bool onay = dbConnction(false, false);
+
+            if (onay)
+            {
+                onay = t.Sql_Execute(ds, ref sql, vt);
+            }
+
+            return onay;
+        }
+
+
+        private void preparingTargetVTable(vTable vt, string alias, string tableName)
+        {
+            vt.DBaseNo = v.newFirm_DB.dBaseNo;
+            vt.DBaseType = v.newFirm_DB.dBType;
+            vt.DBaseName = v.newFirm_DB.databaseName;
+            vt.msSqlConnection = v.newFirm_DB.MSSQLConn;
+            vt.SchemasCode = alias;
+            vt.TableName = tableName;
+            vt.TableIPCode = "";
+        }
+
+        private bool executeImage(DataSet dsSource, string alias, string tableName, string editWhereSql)
+        {
+            bool onay = true;
+
+            int rowCount = dsSource.Tables[0].Rows.Count;
+            int imgFieldCount = imagefieldsNameList.Count;
+
+            string selectSql = "";
+            string updateSql = "";
+            string imgFieldName = "";
+            byte[] imgSourceValue;
+            byte[] imgTargetValue;
+
+            // test için
+            //rowCount = 10;
+
+            //if (Cursor.Current == Cursors.Default)
+            //    Cursor.Current = Cursors.WaitCursor;
+
+            vTable vt = new vTable();
+            preparingTargetVTable(vt, alias, tableName);
+
+            DataSet dsTarget = new DataSet();
+            DataNavigator dNTarget = new DataNavigator();
+            dNTarget.DataSource = dsTarget;
+
+            for (int i = 0; i < rowCount; i++)
+            {
+                ///  Örnek sql
+                ///  select BiyometrikResim , BiyometrikResimSmall from dbo.MtskAday  Where 0 = 0 and Id = ???  
+                ///  update dbo.MtskAday set BiyometrikResim = @BiyometrikResim, BiyometrikResimSmall = @BiyometrikResimSmall Where 0 = 0 and Id = ???  
+                preparingImageEditSql(dsSource, i, alias, tableName, editWhereSql, ref selectSql, ref updateSql);
+
+                try
+                {
+                    executeSql(dsTarget, selectSql, vt);
+
+                    
+                    if (t.IsNotNull(dsTarget))
+                    {
+                        v.con_Images = null;
+                        v.con_Images2 = null;
+                        v.con_Images3 = null;
+                        v.con_Images4 = null;
+
+                        for (int i2 = 0; i2 < imgFieldCount; i2++)
+                        {
+                            imgFieldName = imagefieldsNameList[i2];
+                            imgSourceValue = null;
+                            imgTargetValue = null;
+
+                            if (dsSource.Tables[0].Rows[i][imgFieldName].ToString() != "")
+                                imgSourceValue = (byte[])dsSource.Tables[0].Rows[i][imgFieldName];
+
+                            if (dsTarget.Tables[0].Rows[i][imgFieldName].ToString() != "")
+                                imgTargetValue = (byte[])dsTarget.Tables[0].Rows[i][imgFieldName];
+
+                            // Kaynak img var, hedef img yok ise image taşı
+                            if ((imgSourceValue != null) && (imgTargetValue == null))
+                            {
+                                if (imgFieldName.IndexOf("Small") > -1)
+                                {
+                                    imgSourceValue = preparingSmallImage(imgSourceValue);
+                                }
+
+                                if (i2 == 0)
+                                {
+                                    v.con_Images = imgSourceValue;
+                                    v.con_Images_FieldName = imgFieldName;
+                                }
+                                if (i2 == 1)
+                                {
+                                    v.con_Images2 = imgSourceValue;
+                                    v.con_Images_FieldName2 = imgFieldName;
+                                }
+                                if (i2 == 2)
+                                {
+                                    v.con_Images3 = imgSourceValue;
+                                    v.con_Images_FieldName3 = imgFieldName;
+                                }
+                                if (i2 == 3)
+                                {
+                                    v.con_Images4 = imgSourceValue;
+                                    v.con_Images_FieldName4 = imgFieldName;
+                                }
+                            }
+                        }
+
+                        if ((v.con_Images != null) || 
+                            (v.con_Images2 != null) || 
+                            (v.con_Images3 != null) || 
+                            (v.con_Images4 != null))
+                        onay = sv.Record_SQL_RUN(dsTarget, vt, "dsEdit", dNTarget.Position, ref updateSql, "");
+                        
+                        v.SP_OpenApplication = false;
+                        t.WaitFormOpen(v.mainForm, i.ToString() + "/" + rowCount.ToString() + " resim aktarım işlemi devam ediyor...");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    //if (Cursor.Current == Cursors.WaitCursor)
+                    //    Cursor.Current = Cursors.Default;
+                    onay = false;
+                    MessageBox.Show(ex.Message.ToString());
+                    //throw;
+                }
+            }
+
+            //if (Cursor.Current == Cursors.WaitCursor)
+            //    Cursor.Current = Cursors.Default;
+
+            return onay;
+        }
+
+        private byte[] preparingSmallImage(byte[] tImage)
+        {
+            long oldLength = tImage.Length;
+            MemoryStream mStream = new MemoryStream(tImage);
+            Bitmap workingImage = new Bitmap(mStream);
+
+            // % 80 oranında küçült
+            int newWidth = (int)(workingImage.Width * 0.2);
+            int newHeight = (int)(workingImage.Height * 0.2);
+
+            Bitmap _img = t.imageCompress(workingImage, newWidth, newHeight);
+
+            ImageConverter converter = new ImageConverter();
+            byte[] newImage = (byte[])converter.ConvertTo(_img, typeof(byte[]));
+            long newLength = newImage.Length;
+            return newImage;
+        }
+
+        #endregion Veri Aktarma İşlemleri
+
         #region sub functions
 
         private void preparingTablesProceduresFunctionsScripts()
@@ -897,6 +1566,11 @@ namespace YesiLdefter
                 t.Find_Button_AddClick(this, menuName2, buttonFunctionsList, myNavElementClick);
                 t.Find_Button_AddClick(this, menuName2, buttonSingleFunctionCreate, myNavElementClick);
                 t.Find_Button_AddClick(this, menuName2, buttonFunctionsCreate, myNavElementClick);
+                // veri aktarımı
+                t.Find_Button_AddClick(this, menuName2, buttonSourceDBConnect, myNavElementClick);
+                t.Find_Button_AddClick(this, menuName2, buttonSourceTablesList, myNavElementClick);
+                t.Find_Button_AddClick(this, menuName2, buttonSingleTableTransfer, myNavElementClick);
+                t.Find_Button_AddClick(this, menuName2, buttonTablesTransfer, myNavElementClick);
             }
         }
         private bool dbConnction(bool test, bool masterConnect)
@@ -954,9 +1628,55 @@ namespace YesiLdefter
 
             return onay;
         }
+        private bool sourceDbConnction_(bool test)
+        {
+            bool onay = false;
+            
+            if (t.IsNotNull(dsFirm))
+            {
+                string vDbPass = "";
+
+                if (v.source_DB.MSSQLConn != null)
+                    v.source_DB.MSSQLConn.Close();
+
+                v.source_DB.dBaseNo = v.dBaseNo.NewDatabase;
+                v.source_DB.dBType = v.dBaseType.MSSQL;
+                v.source_DB.serverName = dsFirm.Tables[0].Rows[dNFirm.Position][sourceServerNameIP].ToString();
+                v.source_DB.databaseName = dsFirm.Tables[0].Rows[dNFirm.Position][sourcefDatabaseName].ToString();
+                v.source_DB.userName = dsFirm.Tables[0].Rows[dNFirm.Position][sourceDbLoginName].ToString();
+                vDbPass = dsFirm.Tables[0].Rows[dNFirm.Position][sourceDbPass].ToString();
+
+                if (vDbPass != "")
+                    v.source_DB.psw = "Password = " + vDbPass + ";";
+                else v.source_DB.psw = "";
+
+                v.source_DB.connectionText =
+                    string.Format(" Data Source = {0}; Initial Catalog = {1}; User ID = {2}; {3} MultipleActiveResultSets = True ",
+                    v.source_DB.serverName,
+                    v.source_DB.databaseName,
+                    v.source_DB.userName,
+                    v.source_DB.psw);
+
+                v.source_DB.MSSQLConn = new SqlConnection(v.source_DB.connectionText);
+                
+                t.WaitFormOpen(v.mainForm, "Kaynak database bağlantısı test ediliyor...");
+                v.SP_OpenApplication = true;
+
+                onay = t.Db_Open(v.source_DB.MSSQLConn);
+
+                v.IsWaitOpen = false;
+                t.WaitFormClose();
+
+                if ((onay) && (test))
+                    MessageBox.Show(":) " + v.source_DB.databaseName + " kaynak database bağlantı başarıyla sağlanmıştır ...");
+            }
+
+            return onay;
+        }
+
 
         #endregion sub database Create functions
 
-        
+
     }
 }

@@ -47,6 +47,15 @@ begin transaction
     MebbisCode      nVarchar(30)      null,
     MebbisPass      nVarchar(30)      null, 
 
+	/* firmanın aktarılacak database bilgisi */
+	SourceFirmTypeId      SmallInt          null, /* hangi firmadan aktarılıyor */
+	SourceDataTypeId      SmallInt          null, /* 1. Mebbisden alınacak, 2. MSSQL Database */
+	SourceServerNameIP    nVarchar(50)      null, /* database nin olduğu ip */
+	SourceDatabaseName    nVarchar(50)      null,
+	SourceDbLoginName     nVarchar(30)      null, 
+	SourceDbPass          nVarchar(30)      null,
+	
+
    Constraint pk_UstadFirms primary key (FirmId)
  )
 
@@ -206,3 +215,51 @@ INSERT INTO [Lkp].[UstadFirmsDbType] (Id, DbType)
   ( 3,    N'Ustad CRM database (Ustad CRM datası)'),
   ( 4,    N'Muhasebe database (Ustad şirket muhasebesi)')
 	
+
+
+/* kaynak firma : müşteri daha önce hangi programı kullanıyordu */
+-- ------------------------------------------------------- 
+-- SourceFirmTypeId
+-- ------------------------------------------------------- 
+create table [Lkp].[UstadFirmsSourceFirmType]
+(
+   Id               Int Unique not null, 
+   SourceFirmType   nVarchar(50)   null,
+   
+   constraint  pk_UstadFirmsSourceFirmType primary key (Id)
+)
+
+Delete from [Lkp].[UstadFirmsSourceFirmType]
+INSERT INTO [Lkp].[UstadFirmsSourceFirmType] (Id, SourceFirmType)
+ VALUES 
+  ( 0,    N'Firma belli değil'),
+  ( 11,   N'Yeni Mtsk'),
+  ( 12,   N'Tabim'),
+  ( 13,   N'Akınsoft'),
+  ( 14,   N'GoldenNet'),
+  ( 15,   N'WennTec'),
+  ( 16,   N'Ths'),
+  ( 17,   N'Çizgisoft')
+
+
+/* firmanın aktarılacak datası nereden alındı */
+-- ------------------------------------------------------- 
+-- SourceDataTypeId
+-- ------------------------------------------------------- 
+create table [Lkp].[UstadFirmsSourceDataType]
+(
+   Id               Int Unique not null, 
+   SourceDataType   nVarchar(50)   null,
+   
+   constraint  pk_UstadFirmsSourceDataType primary key (Id)
+)
+
+Delete from [Lkp].[UstadFirmsSourceDataType]
+INSERT INTO [Lkp].[UstadFirmsSourceDataType] (Id, SourceDataType)
+ VALUES 
+  ( 0,   N'Veri kaynağı belli değil'),
+  ( 1,   N'Mebbis'),
+  ( 2,   N'MSSQL Database')
+
+
+

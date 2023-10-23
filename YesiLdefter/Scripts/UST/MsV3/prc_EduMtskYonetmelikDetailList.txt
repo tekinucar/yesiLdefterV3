@@ -16,7 +16,8 @@ set @padding = 20
 		 , CONVERT(varchar(25), emy.Id) AS sort
 		 , @kat as kat
          From dbo.EduMtskYonetmelik as emy
-         Where emy.Id = @_XID
+         Where emy.IsActive = 1
+		 and emy.Id = @_XID
 
 		 Union all
 
@@ -35,6 +36,10 @@ set @padding = 20
       ,emy.ParentId
 	  ,emy.Konu
       ,emy.ContentHTML
+      ,emy.ImageName1, emy.ImageAbout1, emy.ImageWidth1, emy.ImageHeight1
+      ,emy.ImageName2, emy.ImageAbout2, emy.ImageWidth2, emy.ImageHeight2
+      ,emy.ImageName3, emy.ImageAbout3, emy.ImageWidth3, emy.ImageHeight3
+      ,emy.ImageName4, emy.ImageAbout4, emy.ImageWidth1, emy.ImageHeight4
 	  ,cte.sort
 	  ,cte.kat * @padding as padding
 	  
@@ -42,6 +47,7 @@ set @padding = 20
     left outer join dbo.EduMtskYonetmelik as emy on ( cte.Cte_Id = emy.Id )
 	
    where cte.Cte_Id is not null
+   and emy.IsActive = 1
    order by cte.sort
  
 

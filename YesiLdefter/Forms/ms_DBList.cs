@@ -118,11 +118,12 @@ namespace YesiLdefter
 
             */
 
+
             v.SQLSave = "";
             v.SQLSave = cumleData;
 
             if (cumleData != "")
-                t.runScript(v.dBaseNo.WebManager, cumleData);
+                t.runScript(v.dBaseNo.publishManager, cumleData);
 
             t.FlyoutMessage("Web Manager Database Update", "Insert paketler gönderildi...");
         }

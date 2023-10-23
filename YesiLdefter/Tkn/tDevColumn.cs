@@ -3285,7 +3285,7 @@ namespace Tkn_DevColumn
             #endregion
 
             #region MemoEdit
-            if (tcolumn_type == "MemoEdit")
+            if ((tcolumn_type == "MemoEdit") || (tcolumn_type == "HtmlEditor")) // web 
             {
                 MemoEdit tEdit = new DevExpress.XtraEditors.MemoEdit();
                 tEdit.Name = "Column_" + tFieldName;
@@ -6173,8 +6173,9 @@ namespace Tkn_DevColumn
                 ((DevExpress.XtraEditors.PictureEdit)pictureEdit1).Image = newImage;
 
                 // yeni resmi kaydetmek için binary çevir ve ınsert veya update sırasında kaydet
+                long imageLength = 0;
                 v.con_Images = null;
-                v.con_Images = t.imageBinaryArrayConverter(ImagesPath);
+                v.con_Images = t.imageBinaryArrayConverter(ImagesPath, ref imageLength);
                 v.con_Images_FieldName = FieldName;
 
                 // Bu MasterPath/Image_Original yedek için tutuluyor, 
@@ -6195,14 +6196,14 @@ namespace Tkn_DevColumn
 
                 if (label_PictureSize != null)
                 {
-                    ResimKb = (float)v.con_Images_Length / 1024;
+                    ResimKb = (float)imageLength / 1024;
 
                     ((DevExpress.XtraEditors.LabelControl)label_PictureSize).Text =
                         String.Format(
                         "Resim Boyutu : {0:N} kb. ( {1} byte )" + v.ENTER +
                         "Olması gereken boyutu : Min ( {2} kb ), Max ( {3} kb )"
                         , ResimKb.ToString()
-                        , v.con_Images_Length.ToString()
+                        , imageLength.ToString()
                         , MinKb.ToString()
                         , MaxKb.ToString());
                 }
@@ -6331,26 +6332,6 @@ namespace Tkn_DevColumn
             }
         }
 
-
-        
-        //public byte[] myBinaryArrayConverter(string ImagesPath)
-        //{
-        //    byte[] byteResim = null;
-        //    FileInfo fInfo = new FileInfo(ImagesPath);
-        //    long sayac = fInfo.Length;
-        //    FileStream fStream = new FileStream(ImagesPath, FileMode.Open, FileAccess.Read);
-        //    BinaryReader bReader = new BinaryReader(fStream);
-
-        //    byteResim = bReader.ReadBytes((int)sayac);
-        //    v.con_Images_Length = byteResim.Length;
-
-        //    fStream.Close();
-        //    fStream.Dispose();
-        //    bReader.Close();
-        //    bReader.Dispose();
-
-        //    return byteResim;
-        //}
 
         /// <summary>
         /// Verilen resmin kapasitesinin belirtilen parametrede düşürülmesini sağlar.

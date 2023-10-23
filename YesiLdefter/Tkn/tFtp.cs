@@ -84,34 +84,49 @@ namespace Tkn_Ftp
                 ftpRequest.KeepAlive = true;
                 /* Specify the Type of FTP Request */
                 ftpRequest.Method = WebRequestMethods.Ftp.DownloadFile;
-                /* Establish Return Communication with the FTP Server */
-                ftpResponse = (FtpWebResponse)ftpRequest.GetResponse();
-                /* Get the FTP Server's Response Stream */
-                ftpStream = ftpResponse.GetResponseStream();
-                /* Open a File Stream to Write the Downloaded File */
-                FileStream localFileStream = new FileStream(localFile, FileMode.Create);
-                /* Buffer for the Downloaded Data */
-                byte[] byteBuffer = new byte[bufferSize];
-                int bytesRead = ftpStream.Read(byteBuffer, 0, bufferSize);
-                /* Download the File by Writing the Buffered Data Until the Transfer is Complete */
+
                 try
                 {
-                    while (bytesRead > 0)
-                    {
-                        localFileStream.Write(byteBuffer, 0, bytesRead);
-                        bytesRead = ftpStream.Read(byteBuffer, 0, bufferSize);
-                    }
-                    onay = true;
+                    /* Establish Return Communication with the FTP Server */
+                    ftpResponse = (FtpWebResponse)ftpRequest.GetResponse();
                 }
                 catch (Exception ex)
                 {
                     onay = false;
                     MessageBox.Show(ex.ToString());
+                    //throw;
                 }
-                /* Resource Cleanup */
-                localFileStream.Close();
-                ftpStream.Close();
-                ftpResponse.Close();
+                
+                if (ftpResponse != null)
+                {
+                    /* Get the FTP Server's Response Stream */
+                    ftpStream = ftpResponse.GetResponseStream();
+                    /* Open a File Stream to Write the Downloaded File */
+                    FileStream localFileStream = new FileStream(localFile, FileMode.Create);
+                    /* Buffer for the Downloaded Data */
+                    byte[] byteBuffer = new byte[bufferSize];
+                    int bytesRead = ftpStream.Read(byteBuffer, 0, bufferSize);
+                    /* Download the File by Writing the Buffered Data Until the Transfer is Complete */
+                    try
+                    {
+                        while (bytesRead > 0)
+                        {
+                            localFileStream.Write(byteBuffer, 0, bytesRead);
+                            bytesRead = ftpStream.Read(byteBuffer, 0, bufferSize);
+                        }
+                        onay = true;
+                    }
+                    catch (Exception ex)
+                    {
+                        onay = false;
+                        MessageBox.Show(ex.ToString());
+                    }
+                    /* Resource Cleanup */
+                    localFileStream.Close();
+                    ftpStream.Close();
+                    ftpResponse.Close();
+                }
+                                
                 ftpRequest = null;
             }
             catch (Exception ex)

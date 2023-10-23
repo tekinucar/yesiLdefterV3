@@ -60,7 +60,7 @@ INSERT INTO [Lkp].[MsDbUpdatesDBaseNoType] (Id, DBaseNoType)
   ( 2,     N'ManagerServer'),
   ( 3,     N'UstadCRM'),
   ( 4,     N'Project'),
-  ( 7,     N'WebManager')
+  ( 7,     N'PublishManager')
 
 
 -- ------------------------------------------------------- 

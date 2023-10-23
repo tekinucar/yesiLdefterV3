@@ -610,11 +610,11 @@ namespace YesiLdefter
                 tSQLs sqls = new tSQLs();
                 DataSet ds = new DataSet();
                 string sql = sqls.SQL_SYS_UPDATES_INSERT();
-                if (t.SQL_Read_Execute(v.dBaseNo.WebManager, ds, ref sql, "", "SYS_UPDATES"))
+                if (t.SQL_Read_Execute(v.dBaseNo.publishManager, ds, ref sql, "", "SYS_UPDATES"))
                     MessageBox.Show("Exe Ftp'ye yüklendi ...");
 
                 sql = sqls.Sql_MsExeUpdates_Insert();
-                if (t.SQL_Read_Execute(v.dBaseNo.WebManager, ds, ref sql, "", "MsExeUpdates"))
+                if (t.SQL_Read_Execute(v.dBaseNo.publishManager, ds, ref sql, "", "MsExeUpdates"))
                     MessageBox.Show("Exe Ftp'ye yüklendi ...");
 
             }

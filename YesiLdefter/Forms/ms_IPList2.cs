@@ -724,11 +724,11 @@ namespace YesiLdefter
         
         private void PaketiGonder()
         {
-            if (cumleMsTables != "") t.runScript(v.dBaseNo.WebManager, cumleMsTables); 
-            if (cumleMsFields != "") t.runScript(v.dBaseNo.WebManager, cumleMsFields);
-            if (cumleMsTablesIP != "") t.runScript(v.dBaseNo.WebManager, cumleMsTablesIP);
-            if (cumleMsFieldsIP != "") t.runScript(v.dBaseNo.WebManager, cumleMsFieldsIP);
-            if (cumleMsGroups != "") t.runScript(v.dBaseNo.WebManager, cumleMsGroups);
+            if (cumleMsTables != "") t.runScript(v.dBaseNo.publishManager, cumleMsTables); 
+            if (cumleMsFields != "") t.runScript(v.dBaseNo.publishManager, cumleMsFields);
+            if (cumleMsTablesIP != "") t.runScript(v.dBaseNo.publishManager, cumleMsTablesIP);
+            if (cumleMsFieldsIP != "") t.runScript(v.dBaseNo.publishManager, cumleMsFieldsIP);
+            if (cumleMsGroups != "") t.runScript(v.dBaseNo.publishManager, cumleMsGroups);
 
             t.FlyoutMessage("Web Manager Database Update", "Insert paketler gönderildi...");
         }

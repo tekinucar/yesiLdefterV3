@@ -1435,6 +1435,24 @@ namespace Tkn_Save
                     v.con_Images_FieldName2 = "";
                     v.con_Images2 = null;
                 }
+                // 3. Resim
+                if (t.IsNotNull(v.con_Images_FieldName3) && (v.con_Images3 != null))
+                {
+                    SqlKomut.Parameters.Add(new SqlParameter("@" + v.con_Images_FieldName3, v.con_Images3));
+
+                    // işi burada bitti bir sonraki kayıt için boşaltalım....
+                    v.con_Images_FieldName3 = "";
+                    v.con_Images3 = null;
+                }
+                // 4. Resim
+                if (t.IsNotNull(v.con_Images_FieldName4) && (v.con_Images4 != null))
+                {
+                    SqlKomut.Parameters.Add(new SqlParameter("@" + v.con_Images_FieldName4, v.con_Images4));
+
+                    // işi burada bitti bir sonraki kayıt için boşaltalım....
+                    v.con_Images_FieldName4 = "";
+                    v.con_Images4 = null;
+                }
 
                 if (State == "dsInsert")
                 {

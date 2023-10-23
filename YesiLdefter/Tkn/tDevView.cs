@@ -70,7 +70,8 @@ namespace Tkn_DevView
                 (ViewType == v.obj_vw_DataLayoutView) ||
                 (ViewType == v.obj_vw_CalenderAndScheduler) ||
                 (ViewType == v.obj_vw_ChartsView) ||
-                (ViewType == v.obj_vw_WizardControl)
+                (ViewType == v.obj_vw_WizardControl) ||
+                (ViewType == v.obj_vw_HtmlEditorsView)
                )
             {
                 // esas buradan dönüş yapılıyor
@@ -203,9 +204,9 @@ namespace Tkn_DevView
 
             #endregion TreeListView
 
-            #region DataLayoutControl
+            #region DataLayoutControl or HtmlEditorsView
 
-            if (ViewType == v.obj_vw_DataLayoutView)
+            if ((ViewType == v.obj_vw_DataLayoutView) || (ViewType == v.obj_vw_HtmlEditorsView))
             {
                 DevExpress.XtraDataLayout.DataLayoutControl tDataLayoutControl =
                                        new DevExpress.XtraDataLayout.DataLayoutControl();

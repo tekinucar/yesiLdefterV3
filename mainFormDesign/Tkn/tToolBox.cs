@@ -10760,16 +10760,16 @@ namespace Tkn_ToolBox
             /// ftp : //ustadyazilim.com
             ///u8094836@edisonhost.com
 
-            tFtp ftpClient = new tFtp(@"ftp://ustadyazilim.com", "u8094836@edisonhost.com", "CanBerk98");
+            //tFtp ftpClient = new tFtp(@"ftp://ustadyazilim.com", v.ftpUserName, v.ftpUserPass);
             //using ftpClient do
 
             //string[] simpleDirectoryListing = ftpClient.directoryListDetailed("/public");
 
             /* Download a File */
-            ftpClient.download("public/YesiLdefter_201806201.rar", @"C:\download\YesiLdefter_201806201.rar");
+            //ftpClient.download("public/YesiLdefter_201806201.rar", @"C:\download\YesiLdefter_201806201.rar");
 
 
-            ftpClient = null;
+            //ftpClient = null;
         }
 
         public void AlertMessage(string caption, string text)
@@ -11160,8 +11160,30 @@ namespace Tkn_ToolBox
         }
 
         #endregion Order
+
+        public byte[] imageBinaryArrayConverter(string ImagesPath, ref long imageLength)
+        {
+            byte[] byteResim = null;
+            FileInfo fInfo = new FileInfo(ImagesPath);
+            long sayac = fInfo.Length;
+            FileStream fStream = new FileStream(ImagesPath, FileMode.Open, FileAccess.Read);
+            BinaryReader bReader = new BinaryReader(fStream);
+
+            byteResim = bReader.ReadBytes((int)sayac);
+            //v.con_Images_Length = byteResim.Length;
+            imageLength = byteResim.Length;
+
+            fStream.Close();
+            fStream.Dispose();
+            bReader.Close();
+            bReader.Dispose();
+
+            return byteResim;
+        }
+
     }
 
+    
 
     #region 
     /*

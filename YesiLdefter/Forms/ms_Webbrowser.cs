@@ -2202,17 +2202,17 @@ private void DisplaySecondUrl()
                     v.SQL = v.SQL + wnv.dbFieldName;
 
                     if (t.IsNotNull(v.con_Images_FieldName) == false)
-                        v.con_Images_FieldName = wnv.dbFieldName;
+                         v.con_Images_FieldName  = wnv.dbFieldName;
                     else v.con_Images_FieldName2 = wnv.dbFieldName;
 
                     //v.EXE_TempPath+"\\AResimGoster.aspx"
                     string fileName = wnv.readValue;
 
                     //byte[] theBytes = Encoding.UTF8.GetBytes(wnv.readValue);
-
+                    long imageLength = 0;
                     if (v.con_Images == null)
-                        v.con_Images = t.imageBinaryArrayConverter(fileName);//theBytes;
-                    else v.con_Images2 = t.imageBinaryArrayConverter(fileName);
+                         v.con_Images  = t.imageBinaryArrayConverter(fileName, ref imageLength);
+                    else v.con_Images2 = t.imageBinaryArrayConverter(fileName, ref imageLength);
 
                     if (t.IsNotNull(v.con_Images_FieldName))
                     {
@@ -2227,6 +2227,10 @@ private void DisplaySecondUrl()
                     }
                     //if (t.IsNotNull(wnv.readValue))
                     //    dbRow[wnv.dbFieldName] = theBytes; // Encoding.UTF8.GetBytes(wnv.readValue);
+                    if ((v.con_Images != null) && (v.con_Images2 == null)) 
+                        dbRow[wnv.dbFieldName] = v.con_Images;
+                    if ((v.con_Images != null) && (v.con_Images2 != null))
+                        dbRow[wnv.dbFieldName] = v.con_Images2;
                 }
             }
 
@@ -2673,22 +2677,23 @@ private void DisplaySecondUrl()
             return onay;
         }
 
-        private string findNodeItemsValue(webNodeValue wnv, string itemText)
+        private string findNodeItemsValue(webNodeValue wnv, string findText)
         {
             if (t.IsNotNull(ds_WebNodeItemsList) == false) return "";
 
             string value = "";
             int nodeId_ = wnv.nodeId;
+            string pageCode_ = "";
             string itemText_ = "";
-            itemText = itemText.ToUpper().Trim();
-
-            //foreach (DataRow row in ds_WebNodeItemsList.Tables[0].Rows)
+            string itemValue_ = "";
+            findText = findText.Trim();
+            
             int length = ds_WebNodeItemsList.Tables[0].Rows.Count;
             for (int i = 0; i < length; i++)
             {
-                //nodeId_ = t.myInt32(row["NodeId"].ToString());
-                //itemText_ = row["ItemText"].ToString().ToUpper().Trim();
-                itemText_ = ds_WebNodeItemsList.Tables[0].Rows[i]["ItemText"].ToString().ToUpper().Trim();
+                pageCode_ = ds_WebNodeItemsList.Tables[0].Rows[i]["PageCode"].ToString().Trim();
+                itemValue_ = ds_WebNodeItemsList.Tables[0].Rows[i]["ItemValue"].ToString().Trim();
+                itemText_ = ds_WebNodeItemsList.Tables[0].Rows[i]["ItemText"].ToString().Trim();
 
                 /// nodeId kontrolü olmadı  
                 /// get ve set node ler farklı oluyor
@@ -2696,13 +2701,13 @@ private void DisplaySecondUrl()
                 /// set ederken select nodeyi kullanıyoruz
                 /// haliyle nodeId tutmuyor
                 /// 
-                //if ((nodeId == nodeId_) &&
-
-                if (itemText == itemText_)
+                if (wnv.pageCode == pageCode_)
                 {
-                    //value = row["ItemValue"].ToString();
-                    value = ds_WebNodeItemsList.Tables[0].Rows[i]["ItemValue"].ToString();
-                    return value;
+                    if ((findText == itemText_) || (findText == itemValue_))
+                    {
+                        value = ds_WebNodeItemsList.Tables[0].Rows[i]["ItemValue"].ToString();
+                        return value;
+                    }
                 }
             }
 
@@ -2710,8 +2715,8 @@ private void DisplaySecondUrl()
             // böylece bazı WebNodeItems lar saklanmaya gerek kalmadı
             if (value == "")
             {
-                MessageBox.Show("DİKKAT : WebNodeItemsList tablosunda aranan text in valuesi tespit edilemedi ..." + v.ENTER2 + wnv.AttName + " = " + itemText);
-                value = itemText;
+                MessageBox.Show("DİKKAT : WebNodeItemsList tablosunda aranan text in valuesi tespit edilemedi ..." + v.ENTER2 + wnv.AttName + " = " + findText);
+                value = findText;
             }
             return value;
         }
@@ -2785,7 +2790,14 @@ private void DisplaySecondUrl()
 
                         if (t.IsNotNull(ds_DbaseTable))
                         {
-                            findDbRow = ds_DbaseTable.Tables[0].Rows[dN_DbaseTable.Position];
+                            if (dN_DbaseTable.Position == -1)
+                            {
+                                dN_DbaseTable.Position = 0;
+                                dN_DbaseTable.Tag = 0;
+                                findDbRow = ds_DbaseTable.Tables[0].Rows[0];
+                            }
+                            else
+                                findDbRow = ds_DbaseTable.Tables[0].Rows[dN_DbaseTable.Position];
 
                             /// Sıralı işlem hangi TableIPCode üzerinde gerçekleşecek onu bulalım
                             ///
@@ -3148,6 +3160,7 @@ private void DisplaySecondUrl()
             using (var handler = new HttpClientHandler() { CookieContainer = cookieContainer })
             using (var client = new HttpClient(handler) { BaseAddress = baseAddress })
             {
+                //UNUTMA MEBBİS KODU değişecek
                 var content = new FormUrlEncodedContent(new[]
                 {
                     new KeyValuePair<string, string>("txtKullaniciAd", "99969564"),

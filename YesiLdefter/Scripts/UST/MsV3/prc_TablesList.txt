@@ -20,7 +20,7 @@ AS BEGIN
    , a.name as tableName
    , mt.TABLE_CODE + ''.'' + mt.TABLE_NAME Msv3Name  
    from {workDb}.sys.tables as a 
-      left outer join [{managerDb}].[dbo].[MS_TABLES] mt on ( a.name = mt.TABLE_NAME )
+      left outer join [{managerDb}].[dbo].[MS_TABLES] mt on ( a.name COLLATE TURKISH_CI_AS = mt.TABLE_NAME COLLATE TURKISH_CI_AS )
       left outer join [{workDb}].sys.schemas as sch on ( a.schema_id = sch.schema_id ) 
 
    order by a.name 

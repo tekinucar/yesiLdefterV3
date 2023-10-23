@@ -45,7 +45,7 @@ namespace Tkn_CreateDatabase
                 {
                     DataSet ds = new DataSet();
 
-                    string Sql = " create database " + vt.DBaseName + " ";
+                    string Sql = " create database " + vt.DBaseName + " COLLATE Turkish_CI_AS ";
 
                     onay = t.Sql_ExecuteNon(ds, ref Sql, vt);
 
@@ -100,7 +100,7 @@ namespace Tkn_CreateDatabase
             bool onay = true;
             String Sql = "";
             DataSet ds = new DataSet();
-
+            /*
             if (v.active_DB.runDBaseNo == v.dBaseNo.Manager)
             {
                 vt.DBaseNo = v.active_DB.managerDBaseNo;
@@ -132,6 +132,8 @@ namespace Tkn_CreateDatabase
                 vt.DBaseName = v.newFirm_DB.databaseName;
                 vt.msSqlConnection = v.newFirm_DB.MSSQLConn;
             }
+            */
+            preparingVTable(vt);
 
             if (vt.DBaseType == v.dBaseType.MSSQL)
             {
@@ -159,18 +161,9 @@ namespace Tkn_CreateDatabase
                 if (t.IsNotNull(SqlText))
                 {
                     DataSet ds = new DataSet();
-                    string Sql = "";
-                    int i_bgn = SqlText.IndexOf("/*CreateTable*/") + 15;
-                    int i_end = SqlText.IndexOf("/*CreateTableEnd*/") - 1;
-                    Sql = SqlText.Substring(i_bgn, i_end - i_bgn);
-                    Sql = Sql.Replace("--USE ", "USE ");
-                    Sql = Sql.Replace(":DBNAME", vt.DBaseName);
-                    Sql = Sql.Replace("GO\r\n", "\r\n");
+                    string Sql = preparingSqlScript(SqlText, "Table", vt);
 
-                    if (t.Sql_ExecuteNon(ds, ref Sql, vt))
-                    {
-                        onay = true;
-                    }
+                    onay = t.Sql_ExecuteNon(ds, ref Sql, vt);
 
                     ds.Dispose();
                 }
@@ -193,18 +186,9 @@ namespace Tkn_CreateDatabase
                 if (t.IsNotNull(SqlText))
                 {
                     DataSet ds = new DataSet();
-                    string Sql = "";
-                    int i_bgn = SqlText.IndexOf("/*CreateLkpTable*/") + 18;
-                    int i_end = SqlText.IndexOf("/*CreateLkpTableEnd*/") - 1;
-                    Sql = SqlText.Substring(i_bgn, i_end - i_bgn);
-                    Sql = Sql.Replace("--USE ", "USE ");
-                    Sql = Sql.Replace(":DBNAME", vt.DBaseName);
-                    Sql = Sql.Replace("GO\r\n", "\r\n");
+                    string Sql = preparingSqlScript(SqlText, "LkpTable", vt);
 
-                    if (t.Sql_ExecuteNon(ds, ref Sql, vt))
-                    {
-                        onay = true;
-                    }
+                    onay = t.Sql_ExecuteNon(ds, ref Sql, vt); 
 
                     ds.Dispose();
                 }
@@ -231,20 +215,9 @@ namespace Tkn_CreateDatabase
                     DataSet ds = new DataSet();
 
                     string text = t.tReadTextFile(fileName);
-                    string Sql = "";
+                    string Sql = preparingSqlScript(text, "Table", vt);
 
-                    int i_bgn = text.IndexOf("/*CreateTable*/") + 15;
-                    int i_end = text.IndexOf("/*CreateTableEnd*/") - 1;
-                    Sql = text.Substring(i_bgn, i_end - i_bgn);
-                    Sql = Sql.Replace("--USE ", "USE ");
-                    Sql = Sql.Replace(":DBNAME", vt.DBaseName);
-                    Sql = Sql.Replace("GO\r\n", "\r\n");
-
-                    if (t.Sql_ExecuteNon(ds, ref Sql, vt))
-                    {
-                        onay = true;
-                        //MessageBox.Show("Başarıyla tablo açıldı : " + tableName);
-                    }
+                    onay = t.Sql_ExecuteNon(ds, ref Sql, vt);
 
                     ds.Dispose();
                 }
@@ -361,7 +334,6 @@ namespace Tkn_CreateDatabase
                 vt.msSqlConnection = v.active_DB.projectMSSQLConn;
             }
 
-
             t.SQL_Read_Execute(vt.DBaseNo, ds, ref Sql, "", "Preparing Data");
 
             if (t.IsNotNull(ds))
@@ -442,7 +414,7 @@ namespace Tkn_CreateDatabase
             bool onay = false;
             String Sql = "";
             DataSet ds = new DataSet();
-
+            /*
             if (v.active_DB.runDBaseNo == v.dBaseNo.Manager)
             {
                 vt.DBaseNo = v.active_DB.managerDBaseNo;
@@ -474,6 +446,8 @@ namespace Tkn_CreateDatabase
                 vt.DBaseName = v.newFirm_DB.databaseName;
                 vt.msSqlConnection = v.newFirm_DB.MSSQLConn;
             }
+            */
+            preparingVTable(vt);
 
             if (vt.DBaseType == v.dBaseType.MSSQL)
             {
@@ -494,7 +468,7 @@ namespace Tkn_CreateDatabase
         {
             bool onay = false;
             String Sql = "";
-
+            /*
             if (v.active_DB.runDBaseNo == v.dBaseNo.Manager)
             {
                 vt.DBaseNo = v.active_DB.managerDBaseNo;
@@ -529,6 +503,8 @@ namespace Tkn_CreateDatabase
 
             if (vt.SchemasCode == "")
                 vt.SchemasCode = "dbo";
+            */
+            preparingVTable(vt);
 
             if (vt.DBaseType == v.dBaseType.MSSQL)
             {
@@ -557,18 +533,9 @@ namespace Tkn_CreateDatabase
                 if (t.IsNotNull(SqlText))
                 {
                     DataSet ds = new DataSet();
-                    string Sql = "";
-                    int i_bgn = SqlText.IndexOf("/*CreateProcedure*/") + 19;
-                    int i_end = SqlText.IndexOf("/*CreateProcedureEnd*/") - 1;
-                    Sql = SqlText.Substring(i_bgn, i_end - i_bgn);
-                    Sql = Sql.Replace("--USE ", "USE ");
-                    Sql = Sql.Replace(":DBNAME", vt.DBaseName);
-                    Sql = Sql.Replace("GO\r\n", "\r\n");
+                    string Sql = preparingSqlScript(SqlText, "Procedure", vt);
 
-                    if (t.Sql_ExecuteNon(ds, ref Sql, vt))
-                    {
-                        onay = true;
-                    }
+                    onay = t.Sql_ExecuteNon(ds, ref Sql, vt);
 
                     ds.Dispose();
                 }
@@ -591,7 +558,7 @@ namespace Tkn_CreateDatabase
             bool onay = false;
             String Sql = "";
             DataSet ds = new DataSet();
-
+            /*
             if (v.active_DB.runDBaseNo == v.dBaseNo.Manager)
             {
                 vt.DBaseNo = v.active_DB.managerDBaseNo;
@@ -620,6 +587,8 @@ namespace Tkn_CreateDatabase
                 vt.DBaseName = v.newFirm_DB.databaseName;
                 vt.msSqlConnection = v.newFirm_DB.MSSQLConn;
             }
+            */
+            preparingVTable(vt);
 
             if (vt.DBaseType == v.dBaseType.MSSQL)
             {
@@ -649,21 +618,12 @@ namespace Tkn_CreateDatabase
                 {
                     DataSet ds = new DataSet();
                     string Sql = "";
-                    int i_bgn = 0;
-                    int i_end = 0;
 
                     while (SqlText.IndexOf("/*CreateTrigger*/") > -1)
                     {
                         Sql = t.Get_And_Clear(ref SqlText, "/*CreateTriggerEnd*/") + "/*CreateTriggerEnd*/";
 
-                        i_bgn = Sql.IndexOf("/*CreateTrigger*/") + 17;
-                        i_end = Sql.IndexOf("/*CreateTriggerEnd*/") - 1;
-                        Sql = Sql.Substring(i_bgn, i_end - i_bgn);
-
-                        // Create Trigger öncesi tanımlar siliniyor
-                        i_bgn = Sql.ToUpper().IndexOf("CREATE ");
-                        Sql = Sql.Substring(i_bgn, Sql.Length - i_bgn);
-                        Sql = Sql.Replace("GO\r\n", "\r\n");
+                        Sql = preparingSqlScript(Sql, "Trigger", vt);
 
                         // aynı trigger varsa sil
                         onay = triggerDrop(Sql, vt);
@@ -671,10 +631,7 @@ namespace Tkn_CreateDatabase
                         // triggeri create et
                         if (onay)
                         {
-                            if (t.Sql_ExecuteNon(ds, ref Sql, vt))
-                            {
-                                onay = true;
-                            }
+                            onay = t.Sql_ExecuteNon(ds, ref Sql, vt);
                         }
                     }
                     ds.Dispose();
@@ -694,7 +651,7 @@ namespace Tkn_CreateDatabase
 
             bool onay = false;
             String Sql = "";
-
+            /*
             if (v.active_DB.runDBaseNo == v.dBaseNo.Manager)
             {
                 vt.DBaseNo = v.active_DB.managerDBaseNo;
@@ -723,6 +680,8 @@ namespace Tkn_CreateDatabase
                 vt.DBaseName = v.newFirm_DB.databaseName;
                 vt.msSqlConnection = v.newFirm_DB.MSSQLConn;
             }
+            */
+            preparingVTable(vt);
 
             if (vt.DBaseType == v.dBaseType.MSSQL)
             {
@@ -765,7 +724,7 @@ namespace Tkn_CreateDatabase
             bool onay = false;
             String Sql = "";
             DataSet ds = new DataSet();
-
+            /*
             if (v.active_DB.runDBaseNo == v.dBaseNo.Manager)
             {
                 vt.DBaseNo = v.active_DB.managerDBaseNo;
@@ -797,6 +756,8 @@ namespace Tkn_CreateDatabase
                 vt.DBaseName = v.newFirm_DB.databaseName;
                 vt.msSqlConnection = v.newFirm_DB.MSSQLConn;
             }
+            */
+            preparingVTable(vt);
 
             if (vt.DBaseType == v.dBaseType.MSSQL)
             {
@@ -817,7 +778,74 @@ namespace Tkn_CreateDatabase
         {
             bool onay = false;
             String Sql = "";
+                        
+            preparingVTable(vt);
 
+            if (vt.DBaseType == v.dBaseType.MSSQL)
+            {
+                Sql = string.Format(" IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID('[{0}].[{1}]') AND type in ('FN')) " + v.ENTER
+                + " DROP FUNCTION [{0}].[{1}] ", vt.SchemasCode, vt.TableName);
+            }
+
+            try
+            {
+                onay = t.Sql_ExecuteNon(Sql, vt);
+            }
+            catch (Exception)
+            {
+                onay = false;
+            }
+
+            return onay;
+        }
+        public bool tFunctionCreate(string SqlText, vTable vt)
+        {
+            bool onay = false;
+
+            try
+            {
+                if (t.IsNotNull(SqlText))
+                {
+                    DataSet ds = new DataSet();
+                    string Sql = preparingSqlScript(SqlText, "Function", vt);
+
+                    onay = t.Sql_ExecuteNon(ds, ref Sql, vt);
+
+                    ds.Dispose();
+                }
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Message.ToString());
+                //throw;
+            }
+
+            return onay;
+        }
+
+
+        private string preparingSqlScript(string SqlText, string ObjType, vTable vt)
+        {
+            string Sql = "";
+            string create = "/*Create???*/";
+            string createEnd = "/*Create???End*/";
+
+            create = create.Replace("???", ObjType);
+            createEnd = createEnd.Replace("???", ObjType);
+            int length = create.Length;
+
+            int i_bgn = SqlText.IndexOf(create) + length; // ("/*CreateTable*/") + 15; 
+            int i_end = SqlText.IndexOf(createEnd) - 1;   // ("/*CreateTableEnd*/") - 1;
+            Sql = SqlText.Substring(i_bgn, i_end - i_bgn);
+            Sql = Sql.Replace("--USE ", "USE ");
+            Sql = Sql.Replace(":DBNAME", vt.DBaseName);
+            Sql = Sql.Replace("GO\r\n", "\r\n");
+
+            return Sql;
+        }
+
+        private void preparingVTable(vTable vt)
+        {
             if (v.active_DB.runDBaseNo == v.dBaseNo.Manager)
             {
                 vt.DBaseNo = v.active_DB.managerDBaseNo;
@@ -852,59 +880,7 @@ namespace Tkn_CreateDatabase
 
             if (vt.SchemasCode == "")
                 vt.SchemasCode = "dbo";
-
-            if (vt.DBaseType == v.dBaseType.MSSQL)
-            {
-                Sql = string.Format(" IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID('[{0}].[{1}]') AND type in ('FN')) " + v.ENTER
-                + " DROP FUNCTION [{0}].[{1}] ", vt.SchemasCode, vt.TableName);
-            }
-
-            try
-            {
-                onay = t.Sql_ExecuteNon(Sql, vt);
-            }
-            catch (Exception)
-            {
-                onay = false;
-            }
-
-            return onay;
         }
-        public bool tFunctionCreate(string SqlText, vTable vt)
-        {
-            bool onay = false;
-
-            try
-            {
-                if (t.IsNotNull(SqlText))
-                {
-                    DataSet ds = new DataSet();
-                    string Sql = "";
-                    int i_bgn = SqlText.IndexOf("/*CreateFunction*/") + 18;
-                    int i_end = SqlText.IndexOf("/*CreateFunctionEnd*/") - 1;
-                    Sql = SqlText.Substring(i_bgn, i_end - i_bgn);
-                    Sql = Sql.Replace("--USE ", "USE ");
-                    Sql = Sql.Replace(":DBNAME", vt.DBaseName);
-                    Sql = Sql.Replace("GO\r\n", "\r\n");
-
-                    if (t.Sql_ExecuteNon(ds, ref Sql, vt))
-                    {
-                        onay = true;
-                    }
-
-                    ds.Dispose();
-                }
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.Message.ToString());
-                //throw;
-            }
-
-            return onay;
-        }
-
-
     }
 
 

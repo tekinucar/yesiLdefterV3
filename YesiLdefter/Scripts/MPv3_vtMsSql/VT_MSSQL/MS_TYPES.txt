@@ -223,7 +223,7 @@ begin transaction
  insert into MS_TYPES values ( 3, 0, 'SUBVIEW_EVENT',  1, 'PositionChanged', 'PositionChanged');
  insert into MS_TYPES values ( 3, 0, 'SUBVIEW_EVENT',  2, 'ButtonClick',     'ButtonClick');
 
-
+ --DELETE MS_TYPES WHERE TYPES_NAME = 'DB_TYPE'
  insert into MS_TYPES values ( 1, 0, 'DB_TYPE',  0, '', 'none');
  insert into MS_TYPES values ( 1, 0, 'DB_TYPE',  1, '', 'master');
  insert into MS_TYPES values ( 1, 0, 'DB_TYPE',  2, '', 'ManagerServer');
@@ -231,7 +231,8 @@ begin transaction
  insert into MS_TYPES values ( 1, 0, 'DB_TYPE',  4, '', 'Project'); 
  --insert into MS_TYPES values ( 1, 0, 'DB_TYPE',  5, '', 'none');
  --insert into MS_TYPES values ( 1, 0, 'DB_TYPE',  6, '', 'NewDatabase');
- insert into MS_TYPES values ( 1, 0, 'DB_TYPE',  7, '', 'WebManager');
+ insert into MS_TYPES values ( 1, 0, 'DB_TYPE',  7, '', 'PublishManager');
+ insert into MS_TYPES values ( 1, 0, 'DB_TYPE',  8, '', 'SourceDB(Aktarýlacak)');
 
 
  insert into MS_TYPES values ( 1, 0, 'DEFAULT_TYPE',  0, '', '');
@@ -756,6 +757,8 @@ begin transaction
  insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   51, '51', '51 Sil (Satýr)');
  insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   52, '52', '52 Sil (Kart)');
  insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   55, '55', '55 Sil (Liste)');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   63, '63', '63 Sonraki');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   65, '65', '65 Önceki');
  insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   91, '91', '91 Ek Button 1');
  insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   92, '92', '92 Ek Button 2');
  insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   93, '93', '93 Ek Button 3');
@@ -993,6 +996,14 @@ begin transaction
  insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'part-subTitle',              'part-subTitle');
  insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'part-content',               'part-content');
  insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'part-button',                'part-button');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'part-image',                 'part-image');
+
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'part-title-doc',             'part-title-doc');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'part-subTitle-doc',          'part-subTitle-doc');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'part-content-doc',           'part-content-doc');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'part-button-doc',            'part-button-doc');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'part-image-doc',             'part-image-doc');
+
 
  insert into MS_TYPES values ( 3, 0, 'NAVBAR_VIEW', 0, 'Default', 'Default');
  insert into MS_TYPES values ( 3, 0, 'NAVBAR_VIEW', 0, 'BaseView', 'BaseView');

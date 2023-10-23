@@ -157,7 +157,9 @@ where TABLE_CODE = @tableCode
 */
 
 
+ ***** TABLO KOPYALAMAK **************
 
+Select * into EduMtskYonetmelik2 from EduMtskYonetmelik
 
 
  **** FIELD NO DEĞİŞTİRMEK ***********

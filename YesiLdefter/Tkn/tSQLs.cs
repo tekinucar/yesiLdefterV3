@@ -1241,10 +1241,10 @@ INSERT INTO [dbo].[SYS_UPDATES]
 
         public string Sql_MsDbUpdates(string IdList)
         {
-            // webManager database
+            // publishManager database
             return 
               " Select * from dbo.MsDbUpdates Where Id not in ( " + IdList + " )";
-            //" Select * from " + v.webManager_DB.databaseName + ".dbo.MsDbUpdates "
+            //" Select * from " + v.publishManager_DB.databaseName + ".dbo.MsDbUpdates "
 
         }
 

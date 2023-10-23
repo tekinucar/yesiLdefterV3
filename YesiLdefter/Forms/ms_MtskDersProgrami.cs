@@ -1162,7 +1162,7 @@ namespace YesiLdefter
                     "DevExpress.XtraBars.Ribbon.BackstageViewClientControl"
                 };
 
-            ev.CreateOrSelect_Page(this, TabControlName, "", TableIPCode, ReadValue, SablonAdi);
+            ev.CreateOrSelect_Page(this, TabControlName, "", TableIPCode, ReadValue, SablonAdi, true);
             cntrl = t.Find_Control(this, "tTabPage_" + t.AntiStr_Dot(TableIPCode + ReadValue), "", controls);
 
             // TabPage bulunduysa üzerinde istenen IP (InputPanel) oluşturuluyor

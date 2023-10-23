@@ -98,6 +98,8 @@ Giderlerin İşletme Fonksiyonlarına Göre Sınıflandırılması
 
 /*CreateLkpTable*/
 
+begin transaction
+
 -- ------------------------------------------------------- 
 -- BAHesapTipiId   /* OnmBelgeMakbuz tablsundaki BHesapTipiId veya AHesapTipiId nin bağlantısı */
 -- ------------------------------------------------------- 

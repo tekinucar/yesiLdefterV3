@@ -35,6 +35,7 @@ begin transaction
    MevcutSurucuBelgeNo     nVarchar(30)  null,
    IstenenSertifikaTipiId  SmallInt      null,
    IsOtomatik              Bit           null, /* 0 = Manuel vites, 1 = Otomatik vites */
+   IsEngelli               Bit           null, /* 0 = yok, 1 = var */
    
    --51
    IsUcretli               Bit           null, /* 0 = Ücretsiz, 1 = Ücretli */
@@ -852,7 +853,9 @@ INSERT INTO [Lkp].[MtskAdayKaynakKayitTipi] (Id, KaynakKayitTipi)
   ( 1,  N'Kullanıcı Girişi' ),
   ( 2,  N'Mebbis Dönem Aday Onaylama Listesi' ),
   ( 3,  N'Mebbis Uygulama Sınav Listesi' ),
-  ( 4,  N'Mebbis Aday Durum Bilgileri' )
+  ( 4,  N'Mebbis Aday Durum Bilgileri' ),
+  ( 5,  N'Veri Aktarımı' )
+
 
 -- ------------------------------------------------------- 
 -- MesajTipiId
@@ -873,8 +876,7 @@ INSERT INTO [Lkp].[MtskAdayMesajTipi] (Id, MesajTipi)
  VALUES 
   ( 0,  N'' ),
   ( 1,  N'Gerekli Belgeler' ),
-  ( 2,  N'Eksik Belgeler' ),
-  ( 3,  N'' )
+  ( 2,  N'Eksik Belgeler' )
 
 
 commit transaction

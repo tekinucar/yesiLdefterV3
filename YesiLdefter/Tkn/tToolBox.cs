@@ -157,12 +157,12 @@ namespace Tkn_ToolBox
         private void runDbUpdateData()
         {
             // Data Update :
-            // WebManager de olan bir tablonun tüm kayıtlarını oku ve 
+            // publishManager de olan bir tablonun tüm kayıtlarını oku ve 
             // müşterinin database ne insert et
             // Örnek : MtskSablonTeorik, MtskSablonUygulama vb..
 
             vScripts scripts = new vScripts();
-            scripts.SourceDBaseName = Find_dBLongName(Convert.ToString((byte)v.dBaseNo.WebManager));
+            scripts.SourceDBaseName = Find_dBLongName(Convert.ToString((byte)v.dBaseNo.publishManager));
             scripts.SchemaName = v.tMsDbUpdate.schemaName;
             scripts.SourceTableName = v.tMsDbUpdate.tableName;
             scripts.IdentityInsertOnOff = true;
@@ -566,9 +566,13 @@ namespace Tkn_ToolBox
                 (dBaseNo_Or_dBaseName == ""))
                 dbNo = v.dBaseNo.Project;
 
-            //  "WebManager"
-            if ((dBaseNo_Or_dBaseName.ToUpper() == v.webManager_DB.databaseName.ToUpper()) || (dBaseNo_Or_dBaseName == "7"))
-                dbNo = v.dBaseNo.WebManager;
+            //  "publishManager"
+            if ((dBaseNo_Or_dBaseName.ToUpper() == v.publishManager_DB.databaseName.ToUpper()) || (dBaseNo_Or_dBaseName == "7"))
+                dbNo = v.dBaseNo.publishManager;
+
+            //  aktarılacak datanın
+            if (dBaseNo_Or_dBaseName == "8")
+                dbNo = v.dBaseNo.aktarilacakDatabase;
 
             return dbNo;
         }
@@ -654,12 +658,16 @@ namespace Tkn_ToolBox
                 vt.DBaseType = v.dBaseType.MSSQL;
                 vt.msSqlConnection = v.newFirm_DB.MSSQLConn;
             }
-            if (vt.DBaseNo == v.dBaseNo.WebManager)
+            if (vt.DBaseNo == v.dBaseNo.publishManager)
             {
                 vt.DBaseType = v.dBaseType.MSSQL;
-                vt.msSqlConnection = v.webManager_DB.MSSQLConn;
+                vt.msSqlConnection = v.publishManager_DB.MSSQLConn;
             }
-
+            if (vt.DBaseNo == v.dBaseNo.aktarilacakDatabase)
+            {
+                vt.DBaseType = v.dBaseType.MSSQL;
+                vt.msSqlConnection = v.source_DB.MSSQLConn;
+            }
             if (tForm != null)
             {
                 // normal formların kendi FormCode leri
@@ -890,7 +898,7 @@ namespace Tkn_ToolBox
             return sonuc;
         }
 
-        private Boolean Sql_Execute(DataSet dsData, ref string SQL, vTable vt)
+        public Boolean Sql_Execute(DataSet dsData, ref string SQL, vTable vt)
         {
             Boolean onay = false;
 
@@ -1057,7 +1065,7 @@ namespace Tkn_ToolBox
             Boolean onay = false;
             string TableIPCode = string.Empty;
 
-            if (Cursor.Current == Cursors.Default)
+            if (Cursor.Current == Cursors.Default) 
                 Cursor.Current = Cursors.WaitCursor;
 
             // Gerekli olan verileri topla
@@ -1075,7 +1083,7 @@ namespace Tkn_ToolBox
                     (tableName != ""))
                     vt.TableName = tableName;
 
-                if (vt.DBaseNo != v.dBaseNo.WebManager)
+                if (vt.DBaseNo != v.dBaseNo.publishManager)
                     SQL = SQLPreparing(SQL, vt);
 
                 if ((tableName != "GROUPS") &&
@@ -1667,7 +1675,7 @@ namespace Tkn_ToolBox
             
             v.active_DB.projectDBName = tFirm.DatabaseName;
             
-            //if (v.active_DB.localDB == false)
+            //if (v.active_DB.mainManagerDbUses == false)
                 v.active_DB.projectServerName = tFirm.ServerNameIP; // "195.xx";
 
             v.active_DB.projectUserName = tFirm.DbLoginName; // "sa";
@@ -1784,6 +1792,7 @@ namespace Tkn_ToolBox
             //}
 
             Str_Replace(ref Sql, ":VT_FIRM_ID", v.SP_FIRM_ID.ToString());
+            Str_Replace(ref Sql, "\':FIRM_ID\'", v.SP_FIRM_ID.ToString());
             Str_Replace(ref Sql, ":FIRM_ID", v.SP_FIRM_ID.ToString());
             //Str_Replace(ref Sql, ":FIRM_USERLIST", v.SP_FIRM_USERLIST);
             //Str_Replace(ref Sql, ":FIRM_USER_LIST", v.SP_FIRM_USERLIST);
@@ -7394,6 +7403,9 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             if (cntrl.ToString().IndexOf("DataLayoutControl") > -1) // "DevExpress.XtraDataLayout.DataLayoutControl")
                 i = v.obj_vw_DataLayoutView;
 
+            if (cntrl.ToString().IndexOf("HtmlEditorsView") > -1) // web üzerinde
+                i = v.obj_vw_HtmlEditorsView;
+
             if (cntrl.ToString().IndexOf("VGridControl") > -1) // "DevExpress.XtraVerticalGrid.VGridControl")
             {
                 if (((DevExpress.XtraVerticalGrid.VGridControl)cntrl).LayoutStyle == LayoutViewStyle.SingleRecordView)
@@ -7789,7 +7801,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             Project = 4,
             WebCrm = 5,
             NewDatabase = 6,
-            WebManager = 7 
+            publishManager = 7 
         }
             */
 
@@ -7817,9 +7829,13 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 (DatabaseName == ""))
                 s = v.active_DB.projectDBName;
 
-            if ((v.webManager_DB.databaseName.ToUpper() == DatabaseName.ToUpper()) ||
+            if ((v.publishManager_DB.databaseName.ToUpper() == DatabaseName.ToUpper()) ||
                 (DatabaseName == "7"))
-                s = v.webManager_DB.databaseName;
+                s = v.publishManager_DB.databaseName;
+
+            if ((v.active_DB.projectDBName.ToUpper() == DatabaseName.ToUpper()) ||
+                (DatabaseName == "8"))
+                s = v.source_DB.databaseName;
 
             if (IsNotNull(s))
             {
@@ -10949,6 +10965,9 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
         public void WaitFormOpen(Form tForm, string Mesaj)
         {
+            if (Cursor.Current != Cursors.Default)
+                Cursor.Current = Cursors.Default;
+
             if (v.IsWaitOpen) return;
 
             if (Mesaj == "") Mesaj = "İşleminiz yapılıyor ...";
@@ -10985,7 +11004,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
         {
             if (v.IsWaitOpen) return;
 
-            Thread.Sleep(100);
+            Thread.Sleep(1000);
             SplashScreenManager.CloseForm(false);
         }
 
@@ -11952,13 +11971,13 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             /// ftp : //ustadyazilim.com
             ///u8094836@edisonhost.com
 
-            tFtp ftpClient = new tFtp(@"ftp://ustadyazilim.com", "u8094836@edisonhost.com", "CanBerk98");
+            tFtp ftpClient = new tFtp(v.ftpHostIp, v.ftpUserName, v.ftpUserPass);
             //using ftpClient do
 
             //string[] simpleDirectoryListing = ftpClient.directoryListDetailed("/public");
 
             /* Download a File */
-            ftpClient.download("public/YesiLdefter_201806201.rar", @"C:\download\YesiLdefter_201806201.rar");
+            //ftpClient.download("public/YesiLdefter_201806201.rar", @"C:\download\YesiLdefter_201806201.rar");
 
 
             ftpClient = null;
@@ -12381,7 +12400,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
         /// </summary>
         /// <param name="CevrilecekResimYolu">Hangi resim dosyası üzerinde işlem yapılacak ise yolu.</param>
         /// <returns>byte[] e çevrilmiş şekilde resmi verir.</returns>
-        public byte[] imageBinaryArrayConverter(string ImagesPath)
+        public byte[] imageBinaryArrayConverter(string ImagesPath, ref long imageLength)
         {
             byte[] byteResim = null;
             FileInfo fInfo = new FileInfo(ImagesPath);
@@ -12390,7 +12409,8 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             BinaryReader bReader = new BinaryReader(fStream);
 
             byteResim = bReader.ReadBytes((int)sayac);
-            v.con_Images_Length = byteResim.Length;
+            //v.con_Images_Length = byteResim.Length;
+            imageLength = byteResim.Length;
 
             fStream.Close();
             fStream.Dispose();
@@ -12400,7 +12420,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             return byteResim;
         }
 
-        public byte[] imageBinaryArrayConverterMem(byte[] tResim)
+        public byte[] imageBinaryArrayConverterMem(byte[] tResim, ref long imageLength)
         {
             byte[] byteResim = null;
             long sayac = tResim.Length;
@@ -12408,7 +12428,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             BinaryReader bReader = new BinaryReader(mStream);
 
             byteResim = bReader.ReadBytes((int)sayac);
-            v.con_Images_Length = byteResim.Length;
+            imageLength = byteResim.Length;
 
             mStream.Close();
             mStream.Dispose();
@@ -12417,6 +12437,24 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
             return byteResim;
         }
+
+        public Bitmap imageCompress(Bitmap workingImage, int newWidth, int newHeight)
+        {
+            Bitmap _img = new Bitmap(newWidth, newHeight, workingImage.PixelFormat);
+            _img.SetResolution(workingImage.HorizontalResolution, workingImage.VerticalResolution);
+
+            /// for new small image
+            Graphics g = Graphics.FromImage(_img);
+            /// create graphics
+            g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+            g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
+            g.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
+
+            g.DrawImage(workingImage, 0, 0, newWidth, newHeight);
+
+            return _img;
+        }
+
 
         public void LookUpFieldNameChecked(
             ref string tableName,
@@ -12615,53 +12653,35 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             
             onay = ftpDownload("YesiLdefterConnection.Ini");
 
-            /// [YesiLDefter]
-            /// DefaultAddressIp=Local
-            /// ManagerAddressIp = DESKTOPTKN\SQLEXPRESS
-            /// ManagerDbName = MSV3DFTRBLT
-            /// UstadCrmDbName = UstadCRM
+            string MainManagerDbUses = "";
 
-            string DefaultServerAddress = "";
-            string ManagerAddressIp = "";
-            string ManagerDbName = "";
-            string UstadCrmAddressIp = "";
-            string UstadCrmDbName = "";
-
-            v.active_DB.localDB = false;
+            v.active_DB.mainManagerDbUses = false;
+            
+            // Normal kullanıcılar için
             var ConnectionIni = new tIniFile("YesiLdefterConnection.Ini");
             if (ConnectionIni != null)
             {
-                ManagerAddressIp = ConnectionIni.Read("ManagerAddressIp");
-                ManagerDbName = ConnectionIni.Read("ManagerDbName");
-                UstadCrmAddressIp = ConnectionIni.Read("ManagerAddressIp");
-                UstadCrmDbName = ConnectionIni.Read("UstadCrmDbName");
-
-                v.active_DB.managerServerName = ManagerAddressIp;
-                v.active_DB.managerDBName = ManagerDbName;
-                v.active_DB.ustadCrmServerName = UstadCrmAddressIp;
-                v.active_DB.ustadCrmDBName = UstadCrmDbName;
-
-                v.webManager_DB.serverName = ManagerAddressIp;
-                v.webManager_DB.databaseName = ManagerDbName;
+                v.active_DB.managerServerName = ConnectionIni.Read("PublishManagerServerIp"); 
+                v.active_DB.managerDBName = ConnectionIni.Read("PublishManagerDbName");
+                v.active_DB.ustadCrmServerName = ConnectionIni.Read("UstadCrmServerIp");
+                v.active_DB.ustadCrmDBName = ConnectionIni.Read("UstadCrmDbName");
             }
 
+            // Ustad çalışanları için 
             var YesiLdefterIni = new tIniFile("YesiLdefter.Ini");
-            DefaultServerAddress = YesiLdefterIni.Read("DefaultAddressIp");
-            if (DefaultServerAddress.ToUpper() == "LOCAL")
+            MainManagerDbUses = YesiLdefterIni.Read("MainManagerDbUses");
+            if (MainManagerDbUses.ToUpper() == "TRUE")
             {
-                v.active_DB.localDB = true;
-                ManagerAddressIp = YesiLdefterIni.Read("ManagerAddressIp");
-                ManagerDbName = YesiLdefterIni.Read("ManagerDbName");
-                UstadCrmAddressIp = YesiLdefterIni.Read("ManagerAddressIp");
-                UstadCrmDbName = YesiLdefterIni.Read("UstadCrmDbName");
+                v.active_DB.mainManagerDbUses = true;
 
-                v.active_DB.managerServerName = ManagerAddressIp;
-                v.active_DB.managerDBName = ManagerDbName;
-                v.active_DB.ustadCrmServerName = UstadCrmAddressIp;
-                v.active_DB.ustadCrmDBName = UstadCrmDbName;
-                //v.active_DB.projectServerName = ManagerAddressIp;
+                v.active_DB.managerServerName = YesiLdefterIni.Read("MainManagerServerIp");
+                v.active_DB.managerDBName = YesiLdefterIni.Read("MainManagerDbName");
+                v.active_DB.ustadCrmServerName = ConnectionIni.Read("UstadCrmServerIp");
+                v.active_DB.ustadCrmDBName = ConnectionIni.Read("UstadCrmDbName");
+
+                v.publishManager_DB.serverName = ConnectionIni.Read("PublishManagerServerIp");
+                v.publishManager_DB.databaseName = ConnectionIni.Read("PublishManagerDbName");
             }
-
 
         }
 
@@ -12675,7 +12695,8 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             tFtp ftpClient = null;
 
             /* Create Object Instance */
-            ftpClient = new tFtp(@"ftp://ustadyazilim.com", "updateFiles@ustadyazilim.com", "cyhn+7470");
+            //ftpClient = new tFtp(v.ftpHostIp, "webadmin_ftp@ustadyazilim.com", v.ftpUserPass);
+            ftpClient = new tFtp(v.ftpHostIp, v.ftpUserName, v.ftpUserPass);
 
             //MessageBox.Show(v.tExeAbout.activePath + "\\" + fileName);
             /* Download a File */
@@ -12701,7 +12722,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             {
                 /* Create Object Instance */
                 //ftpClient = new tFtp(@"ftp://94.73.151.195/", "u8094836@edisonhost.com", "CanBerk98");
-                ftpClient = new tFtp(@"ftp://ustadyazilim.com", "updateFiles@ustadyazilim.com", "cyhn+7470");
+                ftpClient = new tFtp(v.ftpHostIp, v.ftpUserName, v.ftpUserPass);
             }
             catch (Exception e1)
             {

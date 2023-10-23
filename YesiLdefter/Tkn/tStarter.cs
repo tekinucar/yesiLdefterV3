@@ -77,7 +77,6 @@ namespace Tkn_Starter
             //
             t.ftpDowloadIniFile();
 
-
             t.WaitFormOpen(v.mainForm, "GetMacAdress ...");
             Get_MacAddress();
 
@@ -111,10 +110,10 @@ namespace Tkn_Starter
         {
             #region appOpenSetDefaaultSkin
             WindowsFormsSettings.EnableFormSkins();
-            if (v.active_DB.localDB)
-               UserLookAndFeel.Default.SetSkinStyle(SkinStyle.Whiteprint);
+            if (v.active_DB.mainManagerDbUses)
+                UserLookAndFeel.Default.SetSkinStyle(SkinStyle.Whiteprint);
             else
-               UserLookAndFeel.Default.SetSkinStyle(SkinSvgPalette.Office2019White.Yale);
+                UserLookAndFeel.Default.SetSkinStyle(SkinSvgPalette.Office2019White.Default);//  Yale);
             #endregion
         }
 
@@ -147,17 +146,15 @@ namespace Tkn_Starter
             
             
             ///
-            /// Manager DB Connections
+            /// main Manager DB Connections
             /// 
             #region
             
-            //v.active_DB.managerServerName = "DESKTOPTKN\\SQLEXPRESS";
-            //v.active_DB.managerDBName = "MSV3DFTRBLT";
             v.active_DB.managerUserName = "sa";
-            if (v.active_DB.localDB)
-                v.active_DB.managerPsw = v.dbLocalPws;
-            if (v.active_DB.localDB == false)
-                v.active_DB.managerPsw = v.dbWebPsw;
+            
+            if (v.active_DB.mainManagerDbUses)
+                 v.active_DB.managerPsw = v.mainManagerPass;
+            else v.active_DB.managerPsw = v.publishManagerPass;
 
             v.active_DB.managerConnectionText =
                 string.Format(" Data Source = {0}; Initial Catalog = {1}; User ID = {2}; {3} MultipleActiveResultSets = True ",
@@ -171,21 +168,21 @@ namespace Tkn_Starter
             #endregion
 
             ///
-            /// Web Manager DB Connections
+            /// publish Manager DB Connections
             /// 
             #region
-            v.webManager_DB.dBaseNo = v.dBaseNo.WebManager;
-            v.webManager_DB.userName = "sa";
-            v.webManager_DB.psw = v.dbWebPsw;
-            v.webManager_DB.connectionText =
+            v.publishManager_DB.dBaseNo = v.dBaseNo.publishManager;
+            v.publishManager_DB.userName = "sa";
+            v.publishManager_DB.psw = v.publishManagerPass;
+            v.publishManager_DB.connectionText =
                 string.Format(" Data Source = {0}; Initial Catalog = {1}; User ID = {2}; {3} MultipleActiveResultSets = True ",
-                v.webManager_DB.serverName,
-                v.webManager_DB.databaseName,
-                v.webManager_DB.userName,
-                v.webManager_DB.psw);
+                v.publishManager_DB.serverName,
+                v.publishManager_DB.databaseName,
+                v.publishManager_DB.userName,
+                v.publishManager_DB.psw);
 
-            v.webManager_DB.MSSQLConn = new SqlConnection(v.webManager_DB.connectionText);
-            v.webManager_DB.MSSQLConn.StateChange += new StateChangeEventHandler(DBConnectStateManager);
+            v.publishManager_DB.MSSQLConn = new SqlConnection(v.publishManager_DB.connectionText);
+            v.publishManager_DB.MSSQLConn.StateChange += new StateChangeEventHandler(DBConnectStateManager);
             #endregion
 
             ///
@@ -195,10 +192,10 @@ namespace Tkn_Starter
 
             //v.active_DB.ustadCrmDBName = "UstadCRM";
             v.active_DB.ustadCrmUserName = "sa";
-            if (v.active_DB.localDB)
-                v.active_DB.ustadCrmPsw = v.dbLocalPws;
-            if (v.active_DB.localDB == false)
-                v.active_DB.ustadCrmPsw = v.dbWebPsw;
+            
+            if (v.active_DB.mainManagerDbUses)
+                 v.active_DB.ustadCrmPsw = v.mainManagerPass;
+            else v.active_DB.ustadCrmPsw = v.publishManagerPass;
 
             v.active_DB.ustadCrmConnectionText =
                 string.Format(" Data Source = {0}; Initial Catalog = {1}; User ID = {2}; {3} MultipleActiveResultSets = True ",
@@ -219,10 +216,10 @@ namespace Tkn_Starter
 
             v.active_DB.masterDBName = "master";
             v.active_DB.masterUserName = "sa";
-            if (v.active_DB.localDB)
-                v.active_DB.masterPsw = v.dbLocalPws;
-            if (v.active_DB.localDB == false)
-                v.active_DB.masterPsw = v.dbWebPsw;
+
+            if (v.active_DB.mainManagerDbUses)
+                 v.active_DB.masterPsw = v.mainManagerPass;
+            else v.active_DB.masterPsw = v.publishManagerPass;
 
             v.active_DB.masterConnectionText =
                 string.Format(" Data Source = {0}; Initial Catalog = {1}; User ID = {2}; {3} MultipleActiveResultSets = True ",

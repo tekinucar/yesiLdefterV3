@@ -7,7 +7,7 @@ begin transaction
  (
    Id                Int IDENTITY(1,1) not null, 
    FirmId            Int       not null,
-   
+   IsActive          Bit       not null, /* default : 1 = active, 0 = not active */ 
    DonemTipiId       Int           null,  /* borcun oluştuğu YılAy */
    UcretTipiId       SmallInt      null,  /* 1. MtskAday tablosu, 2. yeni eklenecek borçlandırma sebepleri olacak   */
    CariId            Int           null,  /* MtskAday.Id     */
@@ -20,12 +20,15 @@ begin transaction
    VadeGun           SmallInt      null,
    TaksitTutari      Numeric(22,8) null, 
    IsPaid            Bit       not null, /* default : 0 = ödenmedi,  1 = Ödendi */  
+   TahsilTarihi      Date          null,
 
    YedekTaksitTutari   Numeric(22,8) null, /* taksit tutarı eksik tahsil edildiği zaman ( YedekTaksitTutari = TaksitTutari, TaksitTutari = EksikTahsilTutarı ) şeklinde işleniyor */
    BelgeMakbuzId       Int         null,
    PatchBelgeMakbuzId  Int         null, /* eksik tahsil edildiğinde yeni oluşturulan satıra hangi BelgeMakbuzId den dolayı oluşturulduğunun işareti */
    BelgeStokBId        Int         null, /* Fatura için : BelgeStokB.Id  : BelgeStokB başlık tablosu */
-   
+   SourceTypeId        SmallInt    null, /* 0. manuel giriş, 1. Tabim Transfer */      
+   SourceId            Int         null, /* Tabim CariAlt.Ulas */
+
    constraint		pk_OnmOdemePlani primary key (Id)
  )
   
@@ -34,7 +37,8 @@ begin transaction
   create index X_OnmOdemePlani01 on OnmOdemePlani (UcretTipiId)
   create index X_OnmOdemePlani02 on OnmOdemePlani (CariId)
   create index X_OnmOdemePlani03 on OnmOdemePlani (VadeTarihi)
-  create index X_OnmOdemePlani04 on OnmOdemePlani (DonemTipiId)
+  create index X_OnmOdemePlani04 on OnmOdemePlani (TahsilTarihi)
+  create index X_OnmOdemePlani05 on OnmOdemePlani (DonemTipiId)
  
 commit transaction
 
