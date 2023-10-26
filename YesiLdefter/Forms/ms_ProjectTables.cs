@@ -40,7 +40,8 @@ namespace YesiLdefter
         DataNavigator dNDataTransfer = null;
 
         Control tabControl = null;
-        
+        Control editpanel_Sonuc = null;
+
         List<string> fieldsNameList = new List<string>();
         List<string> imagefieldsNameList = new List<string>();
         bool imageFieldAvailable = false;
@@ -134,6 +135,19 @@ namespace YesiLdefter
                 if (t.IsNotNull(dsFirm))
                 {
                     preparingDBCreate();
+                }
+            }
+
+            //
+            // aranan nesne memoEdit ()
+            // memoEdit aslında bir panelin içinde sıfırncı kontrol olarak duruyor
+            //
+            editpanel_Sonuc = t.Find_Control(this, v.lyt_Name + "30_30");
+            if (editpanel_Sonuc != null)
+            {
+                if (((DevExpress.XtraEditors.PanelControl)editpanel_Sonuc).Controls.Count > 0)
+                {
+                    ((DevExpress.XtraEditors.PanelControl)editpanel_Sonuc).Controls[0].Font = new System.Drawing.Font("Courier New", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
                 }
             }
         }
@@ -991,6 +1005,10 @@ namespace YesiLdefter
             sourceDataReadSql = t.Str_Replace(ref sourceDataReadSql, "\":FIRM_ID\"", targetFirmId);
             sourceDataReadSql = t.SQLPreparing(sourceDataReadSql, vt);
 
+            v.SP_OpenApplication = false;
+            t.WaitFormOpen(v.mainForm, "Kaynak veriler okunuyor...");
+            viewText("Kaynak veriler okunuyor...");
+
             t.Sql_Execute(dsSource, ref sourceDataReadSql, vt);
             
             if (t.IsNotNull(dsSource))
@@ -1064,6 +1082,7 @@ namespace YesiLdefter
             //rowCount = 10;
             v.SP_OpenApplication = false;
             t.WaitFormOpen(v.mainForm, "Veri aktarım işlemi başlıyor...");
+            viewText("Veri aktarım işlemi başlıyor...");
 
             for (int i = 0; i < rowCount; i++)
             {
@@ -1076,18 +1095,22 @@ namespace YesiLdefter
                 
                 if (recCount == 50)
                 {
+                    Application.DoEvents();
+
                     if (isIdentityInsert)
                         sql = preparingIsIdentityInsert(alias, tableName, sql);
 
-                    onay = executeNonSql(sql);
-
+                    onay = true;// executeNonSql(sql);
+                    
                     if (onay)
                     {
+                        viewText(totCount.ToString() + " / " + rowCount.ToString() + " veri aktarım işlemi devam ediyor...");
                         sql = "";
                         totCount += recCount;
-                        recCount = 1;
+                        recCount = 0;
                         v.SP_OpenApplication = false;
                         t.WaitFormOpen(v.mainForm, totCount.ToString() + "/" + rowCount.ToString() + " veri aktarım işlemi devam ediyor...");
+                        Application.DoEvents();
                     }
                 }
 
@@ -1103,6 +1126,7 @@ namespace YesiLdefter
 
                 v.SP_OpenApplication = false;
                 t.WaitFormOpen(v.mainForm, rowCount.ToString() + "/" + rowCount.ToString() + " veri aktarım işlemi devam ediyor...");
+                viewText(rowCount.ToString() + " / " + rowCount.ToString() + " veri aktarım işlemi devam ediyor...");
             }
 
             v.IsWaitOpen = false;
@@ -1113,7 +1137,8 @@ namespace YesiLdefter
             {
                 v.SP_OpenApplication = false;
                 t.WaitFormOpen(v.mainForm, "Resim aktarım işlemi başlıyor...");
-                onay = executeImage(dsSource, alias, tableName, editWhereSql);
+                viewText("Resim aktarım işlemi başlıyor...");
+                //onay = executeImage(dsSource, alias, tableName, editWhereSql);
                 v.IsWaitOpen = false;
                 t.WaitFormClose();
             }
@@ -1147,6 +1172,8 @@ namespace YesiLdefter
                         value = value.Replace("<option value=\"", "");
                     if (value.IndexOf("\">") > -1)
                         value = value.Replace("\">", "");
+                    if (value == "\"")
+                        value = "";
 
                     if (type == "System.Int32") values += " , " + value;
                     if (type == "System.Int64") values += " , " + value;
@@ -1206,6 +1233,8 @@ namespace YesiLdefter
                     value = value.Replace("<option value=\"", "");
                 if (value.IndexOf("\">") > -1)
                     value = value.Replace("\">", "");
+                if (value == "\"")
+                    value = "";
 
                 // Where koşulunda var mı?
                 x = editWhere.IndexOf(":" + fieldName + "Value");
@@ -1674,6 +1703,20 @@ namespace YesiLdefter
             return onay;
         }
 
+        private void viewText(string text)
+        {
+            if (editpanel_Sonuc != null)
+            {
+                if (((DevExpress.XtraEditors.PanelControl)editpanel_Sonuc).Controls.Count > 0)
+                {
+                    string old = ((DevExpress.XtraEditors.PanelControl)editpanel_Sonuc).Controls[0].Text;
+
+                    ((DevExpress.XtraEditors.PanelControl)editpanel_Sonuc).Controls[0].Text = text + v.ENTER + old;
+
+                    Application.DoEvents();
+                }
+            }
+        }
 
         #endregion sub database Create functions
 

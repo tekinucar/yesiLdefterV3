@@ -163,11 +163,17 @@ Delete from [Lkp].[UstadUsersDbType]
 INSERT INTO [Lkp].[UstadUsersDbType] (Id, DbType)
  VALUES 
   ( 0,    N''),
-  ( 1,    N'Yazılım database (Yazılım bölümü çalışmaları)'),
-  ( 2,    N'Abone database (Ustad yazılım müşterileri)'),
-  ( 3,    N'Ustad CRM database (Ustad CRM datası)'),
-  ( 4,    N'Muhasebe database (Ustad şirket muhasebesi)'),
-  ( 11,   N'Ustad CRM ve Abone database (Ustad Satış ve Destek Ekibi)'),
-  ( 21,   N'Ustad Kurucu' ),
-  ( 22,   N'Ustad İdari')
+  ( 11,   N'Ustad Admin'),
+  ( 12,   N'Ustad İdari'),
+  ( 13,   N'Ustad Muhasebe'),
+  ( 21,   N'Ustad Yazılım Personeli'),
+  ( 22,   N'Ustad Test Personeli'),
+  ( 23,   N'Ustad Satış Personeli - Ustad CRM ve Abone database'),
+  ( 24,   N'Ustad Destek Personeli - Ustad CRM ve Abone database'),
+  ( 51,   N'Son kullanıcı - rol1'),
+  ( 52,   N'Son kullanıcı - rol2'),
+  ( 53,   N'Son kullanıcı - rol3'),
+  ( 54,   N'Son kullanıcı - rol4'),
+  ( 55,   N'Son kullanıcı - rol5'),
+
 

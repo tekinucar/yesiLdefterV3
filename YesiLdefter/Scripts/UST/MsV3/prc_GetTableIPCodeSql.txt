@@ -3,7 +3,7 @@ GO
 
 /*CreateProcedure*/
 
-ALTER PROCEDURE [dbo].[prc_GetTableIPCodeSql]( @RefId int, @TableIPCode varchar(100) )  
+CREATE PROCEDURE [dbo].[prc_GetTableIPCodeSql]( @RefId int, @TableIPCode varchar(100) )  
 AS BEGIN  
   --declare @TableIPCode varchar(100)
   --set @TableIPCode = 'UST/MEB/MtskSertifikaUcreti.prcSertifikaUcreti_F02'
@@ -76,15 +76,15 @@ AS BEGIN
              and a.TABLE_CODE = @TableCode
              and a.IP_CODE = @IPCode
              and ( a.CMP_VISIBLE = 1 or a.DEFAULT_TYPE > 0 or a.DEFAULT_TYPE2 > 0 )
-             and SUBSTRING(b.FIELD_NAME, 1,3) <> 'LKP'
+			 and SUBSTRING(b.FIELD_NAME, 1,3) <> 'LKP'
             ) x
 
        -- -------------------------------------------------------
 	   -- Tablonun LookUp işaretli fieldleri
        -- -------------------------------------------------------
 	   Select @LkpColumns = COALESCE( @LkpColumns + ' ,' + 
-           ' [FNo' + FIELD_NO + '].[' + FIELD_NAME + '] as Lkp_' + FIELD_NAME + @enter, 
-         ' , [FNo' + FIELD_NO + '].[' + FIELD_NAME + '] as Lkp_' + FIELD_NAME + @enter ) 
+           ' [FNo' + FIELD_NO + '].[' + FIELD_NAME + '] as Lkp_' + LKP_FIELD_NAME + @enter, 
+         ' , [FNo' + FIELD_NO + '].[' + FIELD_NAME + '] as Lkp_' + LKP_FIELD_NAME + @enter ) 
        From (
              Select a.TABLE_CODE 
 			 , convert(varchar, a.FIELD_NO) as FIELD_NO
@@ -92,8 +92,15 @@ AS BEGIN
                case b.FIELD_NAME  
                   when 'KdvOrani' then 'KdvOrani'  
                   when 'ParaTipiId' then 'ParaAdi'  
+				  when 'MevcutSertifikaTipiId' then 'SertifikaTipi'
+				  when 'IstenenSertifikaTipiId' then 'SertifikaTipi'
                   when 'T' then ''  
                   when 'S' then ''  
+                  else replace(FIELD_NAME, 'Id', '') end 
+			 , LKP_FIELD_NAME =  
+               case b.FIELD_NAME  
+                  when 'KdvOrani' then 'KdvOrani'  
+                  when 'ParaTipiId' then 'ParaAdi'  
                   else replace(FIELD_NAME, 'Id', '') end 
 
              From MS_FIELDS_IP as a, MS_FIELDS as b
@@ -122,14 +129,19 @@ AS BEGIN
 			 , FIELD_NAME =
                case b.FIELD_NAME  
                   when 'KdvOrani' then ''  
-                  when 'ParaTipiId' then ''  
+                  when 'ParaTipiId' then '' 
+				  when 'CinsiyetTipiId' then ''
+				  when 'MevcutSertifikaTipiId' then ''
+				  when 'IstenenSertifikaTipiId' then ''
+				  when 'DonemTipiId' then ''
+				  when 'GrupTipiId' then ''
+				  when 'SubeTipiId' then ''
                   when 'T' then ''  
                   when 'S' then ''  
                   else replace(b.FIELD_NAME, 'Id', '') end
 			 , FIELD_NAME_ID = 
                case b.FIELD_NAME  
                   when 'KdvOrani' then 'KdvOrani'  
-                  when 'ParaTipiId' then 'ParaTipiId'  
                   when 'T' then ''  
                   when 'S' then ''  
                   else b.FIELD_NAME end			 
@@ -137,14 +149,19 @@ AS BEGIN
                case b.FIELD_NAME  
                   when 'KdvOrani' then 'KdvOrani'  
                   when 'ParaTipiId' then 'ParaKodu'  
-                  when 'T' then ''  
+				  when 'T' then ''  
                   when 'S' then ''  
                   else 'Id' end 
              , _TableName =  
                case b.FIELD_NAME  
                   when 'KdvOrani' then 'OnmKdvOraniTipi'  
-                  when 'ParaTipiId' then 'OnmParaTipi'
-                  when 'CinsiyetTipiId' then 'OnmCinsiyetTipi'
+                  when 'ParaTipiId' then 'OnmParaTipi'  
+				  when 'CinsiyetTipiId' then 'CinsiyetTipi'
+				  when 'MevcutSertifikaTipiId' then 'MtskSertifikaTipi'
+				  when 'IstenenSertifikaTipiId' then 'MtskSertifikaTipi'
+				  when 'DonemTipiId' then 'MtskDonemTipi'
+				  when 'GrupTipiId' then 'MtskGrupTipi'
+				  when 'SubeTipiId' then 'MtskSubeTipi'
                   when 'T' then ''  
                   when 'S' then ''  
                   else c.TABLE_NAME  
