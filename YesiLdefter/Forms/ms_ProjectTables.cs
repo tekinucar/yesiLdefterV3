@@ -45,6 +45,7 @@ namespace YesiLdefter
         List<string> fieldsNameList = new List<string>();
         List<string> imagefieldsNameList = new List<string>();
         bool imageFieldAvailable = false;
+        bool DbUpdatesIsActive = false;
 
         string fSchemaName = "SchemaName";
         string fTableName = "TableName";
@@ -649,6 +650,11 @@ namespace YesiLdefter
                 // tablo oluşturuldu şimdi Lkp.xxxx tabloları oluşturalım
                 onay = false;
                 onay = db.tLkpTableCreate(vSqlScript, vt);
+
+
+                // tablo oluşturuldu şimdi dataları insert edelim
+                onay = false;
+                onay = db.tDataCreate(vSqlScript, vt);
             }
 
             Thread.Sleep(100);
@@ -969,6 +975,11 @@ namespace YesiLdefter
         private bool preparingTableDataTransfer(int pos)
         {
             bool onay = false;
+            string sAlias = string.Empty;
+            string sTableName = string.Empty;
+            string tAlias = string.Empty;
+            string tTableName = string.Empty;
+
             string sourceTableName = "";
             string sourceDataReadSql = "";
             string targetTableName = "";
@@ -976,30 +987,64 @@ namespace YesiLdefter
             string targetFieldList = "";
             string targetInsertHeaderSql = "";
             string editWhereSql = ""; // "and Id = :IdValue ";
+            string lastIdControlSql = "";
+            string whereLastId = "";
+
             bool isIdentityInsert = false; // IDENTITY_INSERT ON/OFF
             bool isEditScript = false; // transfer sırasında Select kontrolüne edit scriptini ekle
 
+            // firmanın yeni Id si : Mtsk000000??? şeklinde database adı oluşacak 
             targetFirmId = dsFirm.Tables[0].Rows[dNFirm.Position]["FirmId"].ToString();
             sourceTableName = dsDataTransfer.Tables[0].Rows[pos]["SourceTableName"].ToString();
             targetTableName = dsDataTransfer.Tables[0].Rows[pos]["TargetTableName"].ToString();
+            /// Source tablosunda aktarılacak dataları okuyan sql
             sourceDataReadSql = dsDataTransfer.Tables[0].Rows[pos]["SourceDataReadSql"].ToString();
+            /// Target table için hazırlanan insert ve update scriptinde kullanılıyor
             editWhereSql = dsDataTransfer.Tables[0].Rows[pos]["EditWhereSql"].ToString();
+            /// Sourcede Id si neyse yeni target tabloda da aynı Id kullanılsın  : KURSIYER.Ulas = MtskAday.Id
             isIdentityInsert = (dsDataTransfer.Tables[0].Rows[pos]["IsIdentityInsert"].ToString() == "True");
+            /// Target table için hazırlanan insert ve update scriptinde kullanılan where koşulu
             isEditScript = (dsDataTransfer.Tables[0].Rows[pos]["IsEditScript"].ToString() == "True");
+            /// Data aktarımı sırasında kırılmalar olduğunda yeniden aktarım başladğında kaldığı yerden devam etmesini sağlıyor
+            lastIdControlSql = dsDataTransfer.Tables[0].Rows[pos]["LastIdControlSql"].ToString();
 
-            string alias = string.Empty;
-            string tableName = string.Empty;
-            t.String_Parcala(sourceTableName, ref alias, ref tableName, ".");
-            if (alias == "") alias = "dbo";
+            sAlias = "";
+            sTableName = "";
+            t.String_Parcala(sourceTableName, ref sAlias, ref sTableName, ".");
+            if (sAlias == "") sAlias = "dbo";
+
+            tAlias = "";
+            tTableName = "";
+            t.String_Parcala(targetTableName, ref tAlias, ref tTableName, ".");
+            if (tAlias == "") tAlias = "dbo";
+
+            /// işlem yapılırken kırılmış olabilir
+            /// işleme kaldığı yerden devam etmesi için gerekli where koşulu uygulanıyor
+            /// 
+            if (lastIdControlSql != "")
+            {
+                whereLastId = preparingGetLastId(tAlias, tTableName, lastIdControlSql);
+
+                if (whereLastId != "")
+                    sourceDataReadSql = sourceDataReadSql.Replace("--:WhereAnd", whereLastId);
+            }
+
+            /// Data transferi başlamadan önce 
+            /// dbo.DbUpdates tablosuna işaret koyacağız 
+            /// Böylece data transferi sırasında bazı trigger ler üzerindeki procedure lerin çalışmasını engelleyerek
+            /// hızlı transferi sağlamış oluyoruz
+            /// örnek : trg_MtskAday içindeki 
+            /// --EXECUTE [dbo].[prc_MtskDonemKontrolu] @yFirmId 
+            /// --EXECUTE[dbo].[prc_MtskAdayTakip] @yFirmId
+            /// 
+
+            if (this.DbUpdatesIsActive == false)
+            {
+                this.DbUpdatesIsActive = preparingSetDbUpdatesIsActive();
+            }
 
             vTable vt = new vTable();
-            vt.DBaseNo = v.dBaseNo.aktarilacakDatabase;
-            vt.DBaseType = v.dBaseType.MSSQL;
-            vt.DBaseName = v.source_DB.databaseName;
-            vt.msSqlConnection = v.source_DB.MSSQLConn;
-            vt.SchemasCode = alias;
-            vt.TableName = tableName;
-            vt.TableIPCode = "";
+            preparingSourceVTable(vt, sAlias, sTableName);
 
             DataSet dsSource = new DataSet();
             sourceDataReadSql = t.Str_Replace(ref sourceDataReadSql, "\":FIRM_ID\"", targetFirmId);
@@ -1013,14 +1058,10 @@ namespace YesiLdefter
             
             if (t.IsNotNull(dsSource))
             {
-                alias = "";
-                tableName = "";
-                t.String_Parcala(targetTableName, ref alias, ref tableName, ".");
-                if (alias == "") alias = "dbo";
                 targetFieldList = preparingTargetFieldList(dsSource);
-                targetInsertHeaderSql = preparingInsertScript(alias, tableName, targetFieldList);
+                targetInsertHeaderSql = preparingInsertScript(tAlias, tTableName, targetFieldList);
                 
-                onay = preparingDataTransfer(dsSource, alias, tableName, targetInsertHeaderSql, editWhereSql, isIdentityInsert, isEditScript);
+                onay = preparingDataTransfer(dsSource, tAlias, tTableName, targetInsertHeaderSql, editWhereSql, isIdentityInsert, isEditScript);
             }
                
             Thread.Sleep(100);
@@ -1070,7 +1111,8 @@ namespace YesiLdefter
 
             int rowCount = dsSource.Tables[0].Rows.Count;
             int recCount = 1;
-            int totCount = 0;
+            int counted = 0;
+            bool IsCrmDb = false;
 
             string sql = "";
             string insertValue = "";
@@ -1078,6 +1120,8 @@ namespace YesiLdefter
             string targetEditSql = "";
             string targetSelectSql = "";
 
+            IsCrmDb = (tableName.IndexOf("UstadFirms") > -1);
+                        
             //test için
             //rowCount = 10;
             v.SP_OpenApplication = false;
@@ -1100,16 +1144,18 @@ namespace YesiLdefter
                     if (isIdentityInsert)
                         sql = preparingIsIdentityInsert(alias, tableName, sql);
 
-                    onay = true;// executeNonSql(sql);
+                    if (IsCrmDb == false)
+                        onay = executeNonTargetSql(sql);
                     
                     if (onay)
                     {
-                        viewText(totCount.ToString() + " / " + rowCount.ToString() + " veri aktarım işlemi devam ediyor...");
                         sql = "";
-                        totCount += recCount;
+                        counted += recCount;
                         recCount = 0;
+
+                        viewText(counted.ToString() + " / " + rowCount.ToString() + " veri aktarım işlemi devam ediyor...");
                         v.SP_OpenApplication = false;
-                        t.WaitFormOpen(v.mainForm, totCount.ToString() + "/" + rowCount.ToString() + " veri aktarım işlemi devam ediyor...");
+                        t.WaitFormOpen(v.mainForm, counted.ToString() + "/" + rowCount.ToString() + " veri aktarım işlemi devam ediyor...");
                         Application.DoEvents();
                     }
                 }
@@ -1122,7 +1168,9 @@ namespace YesiLdefter
                 if (isIdentityInsert)
                     sql = preparingIsIdentityInsert(alias, tableName, sql);
 
-                onay = executeNonSql(sql);
+                if (IsCrmDb == false)
+                    onay = executeNonTargetSql(sql);
+                else executeNonCrmSql(sql, tableName);
 
                 v.SP_OpenApplication = false;
                 t.WaitFormOpen(v.mainForm, rowCount.ToString() + "/" + rowCount.ToString() + " veri aktarım işlemi devam ediyor...");
@@ -1373,7 +1421,64 @@ namespace YesiLdefter
             return sql;
         }
 
-        private bool executeNonSql(string targetSql)
+        private string preparingGetLastId(string alias, string tableName, string lastIdControlSql)
+        {
+            string editWhere = "";
+
+            t.Str_Replace(ref lastIdControlSql, "\"", "'");
+            
+            // yeni database in connection sağlansın
+            dbConnction(false, false);
+
+            vTable vt = new vTable();
+            preparingTargetVTable(vt, alias, tableName);
+
+            DataSet dsLastIdControl = new DataSet();
+
+            try
+            {
+                executeTargetSql(dsLastIdControl, lastIdControlSql, vt);
+
+                /// 0. kolonda where koşulu
+                /// 1. kolonda sourceTable fieldName
+                /// 2. kolonda target tableden okunan max Id value 
+                /// 
+                /// Select
+                /// ' Where :IdFieldName > :IdFieldValue '
+                /// , 'ULAS' as IdFieldName
+                /// , max(Id) as LastId
+                /// from dbo.MtskAday
+
+                string fieldName = dsLastIdControl.Tables[0].Rows[0][1].ToString();
+                string type = dsLastIdControl.Tables[0].Rows[0][2].GetType().ToString();
+                string value = dsLastIdControl.Tables[0].Rows[0][2].ToString();
+
+                if ((value != "") || (value != null) || value != "0")
+                {
+                    // 0. kolonda where
+                    editWhere = dsLastIdControl.Tables[0].Rows[0][0].ToString();
+
+                    if (editWhere != "")
+                    {
+                        t.Str_Replace(ref editWhere, "\"", "'");
+
+                        if (type == "System.Int32") editWhere = editWhere.Replace(":IdFieldValue", value);
+                        if (type == "System.String") editWhere = editWhere.Replace(":IdFieldValue", "'" + value + "'");
+                        
+                        editWhere = editWhere.Replace(":IdFieldName", fieldName);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message.ToString());
+                //throw;
+            }
+
+            return editWhere;
+        }
+
+        private bool executeNonTargetSql(string targetSql)
         {
             /// Hedef database ile bağlantı kuruluyor
             bool onay = dbConnction(false, false);
@@ -1391,7 +1496,23 @@ namespace YesiLdefter
             return onay;
         }
 
-        private bool executeSql(DataSet ds, string sql, vTable vt)
+        private bool executeNonCrmSql(string targetSql, string tableName)
+        {
+            v.active_DB.runDBaseNo = v.dBaseNo.UstadCrm;
+
+            /*
+            vTable vt = new vTable();
+            vt.DBaseNo = v.dBaseNo.UstadCrm;
+            vt.DBaseType = v.dBaseType.MSSQL;
+            
+            db.preparingVTable(vt);
+            */
+            
+            DataSet ds = new DataSet();
+            return t.SQL_Read_Execute(v.dBaseNo.UstadCrm, ds, ref targetSql, tableName, tableName);
+        }
+
+        private bool executeTargetSql(DataSet ds, string sql, vTable vt)
         {
             /// Hedef database ile bağlantı kuruluyor
             bool onay = dbConnction(false, false);
@@ -1404,6 +1525,16 @@ namespace YesiLdefter
             return onay;
         }
 
+        private void preparingSourceVTable(vTable vt, string alias, string tableName)
+        {
+            vt.DBaseNo = v.dBaseNo.aktarilacakDatabase;
+            vt.DBaseType = v.dBaseType.MSSQL;
+            vt.DBaseName = v.source_DB.databaseName;
+            vt.msSqlConnection = v.source_DB.MSSQLConn;
+            vt.SchemasCode = alias;
+            vt.TableName = tableName;
+            vt.TableIPCode = "";
+        }
 
         private void preparingTargetVTable(vTable vt, string alias, string tableName)
         {
@@ -1451,9 +1582,8 @@ namespace YesiLdefter
 
                 try
                 {
-                    executeSql(dsTarget, selectSql, vt);
-
-                    
+                    executeTargetSql(dsTarget, selectSql, vt);
+                                        
                     if (t.IsNotNull(dsTarget))
                     {
                         v.con_Images = null;
@@ -1547,6 +1677,16 @@ namespace YesiLdefter
             long newLength = newImage.Length;
             return newImage;
         }
+
+        private bool preparingSetDbUpdatesIsActive()
+        {
+            bool onay = false;
+            string sql = t.DBUpdatesDataTransferOnSql();
+            onay = executeNonTargetSql(sql);
+            return onay;
+
+        }
+
 
         #endregion Veri Aktarma İşlemleri
 
@@ -1702,7 +1842,6 @@ namespace YesiLdefter
 
             return onay;
         }
-
         private void viewText(string text)
         {
             if (editpanel_Sonuc != null)

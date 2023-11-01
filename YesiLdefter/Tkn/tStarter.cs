@@ -103,6 +103,8 @@ namespace Tkn_Starter
 
             t.YilAyRead();
 
+            t.DBUpdatesDataTransferOff();
+
             v.SP_UserIN = true;
         }
 

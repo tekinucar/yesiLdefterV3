@@ -5,6 +5,7 @@ begin transaction
  create table dbo.DbUpdates
  (
     Id              Int IDENTITY(1,1) not null,
+    IsActive        Bit               not null,
     MsDbUpdateId    Int               not null,
     UpdateDate      Datetime          not null,
     UpdateTypeId    SmallInt          not null,
@@ -30,3 +31,41 @@ begin transaction
 commit transaction
 
 /*CreateTableEnd*/
+
+
+/*CreateData*/
+
+INSERT INTO [dbo].[DbUpdates]
+           ([IsActive]
+           ,[MsDbUpdateId]
+           ,[UpdateDate]
+           ,[UpdateTypeId]
+           ,[SectorTypeId]
+           ,[DBaseNoTypeId]
+           ,[SchemaName]
+           ,[TableName]
+           ,[FieldName]
+           ,[FieldTypeId]
+           ,[FieldLength]
+           ,[FieldNotNull]
+           ,[About]
+           ,[SqlScript])
+     VALUES
+           ( 0    -- IsActive, bit  1 : veri transferi yapılıyor, 0 = yapılmıyor 
+           , 6    -- MsDbUpdateId, NewDatabase
+           , null -- UpdateDate, datetime
+           , 13   -- UpdateTypeId, Data transfer işlemi
+           , null -- SectorTypeId, smallint 
+           , 6    -- DBaseNoTypeId, NewDatabase
+           , null -- SchemaName, varchar(5)
+           , null -- TableName, varchar(100)
+           , null -- FieldName, varchar(50)
+           , null -- FieldTypeId, smallint
+           , null -- FieldLength, varchar(6)
+           , null -- FieldNotNull, bit
+           , 'Veri transferinin yapılması ' -- About, nvarchar(100)
+           , null -- SqlScript, varchar(max)
+		   )
+
+/*CreateDataEnd*/
+

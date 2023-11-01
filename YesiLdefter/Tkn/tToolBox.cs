@@ -5671,6 +5671,38 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
         #endregion YilAy - Mali Dönem Read
 
+        #region DBUpdates Veri Aktarımı IsActive Set OFF
+
+        public void DBUpdatesDataTransferOff()
+        {
+            //if (v.tMainFirm.SectorTypeId == 201) // Mtsk
+            // Ustad Crm değilse 
+            if (v.tMainFirm.SectorTypeId != 5) /// Ustad Crm
+            {
+                // IsActive 1 ise IsActive 0 olacak
+                string Sql = " Update [dbo].[DbUpdates] set IsActive = 0 Where MsDbUpdateId = 6 and UpdateTypeId = 13 and DBaseNoTypeId = 6 and IsActive = 1 ";
+
+                vTable vt = new vTable();
+                vt.DBaseNo = v.dBaseNo.Project;
+                vt.DBaseType = v.dBaseType.MSSQL;
+                vt.DBaseName = v.active_DB.projectDBName;
+                vt.msSqlConnection = v.active_DB.projectMSSQLConn;
+
+                DataSet ds = new DataSet();
+
+                Sql_ExecuteNon(ds, ref Sql, vt);
+
+                ds.Dispose();
+            }
+        }
+
+        public string DBUpdatesDataTransferOnSql()
+        {
+            return " Update [dbo].[DbUpdates] set IsActive = 1 Where MsDbUpdateId = 6 and UpdateTypeId = 13 and DBaseNoTypeId = 6 ";
+        }
+
+        #endregion DBUpdates Veri Aktarımı IsActive Set OFF
+
         #region tGotoRecord
         public Boolean tGotoRecord(Form tForm, DataSet dsData, string TableIPCode, string FieldName, string Value, int position)// string TalepEden)
         {

@@ -199,6 +199,30 @@ namespace Tkn_CreateDatabase
             return onay;
         }
 
+        public bool tDataCreate(string SqlText, vTable vt)
+        {
+            bool onay = false;
+
+            try
+            {
+                if (t.IsNotNull(SqlText))
+                {
+                    DataSet ds = new DataSet();
+                    string Sql = preparingSqlScript(SqlText, "Data", vt);
+
+                    onay = t.Sql_ExecuteNon(ds, ref Sql, vt);
+
+                    ds.Dispose();
+                }
+            }
+            catch
+            { }
+
+            return onay;
+        }
+
+
+
         public bool tTableCreateReadTextFile(string tableName, vTable vt)
         {
             // 
@@ -840,11 +864,12 @@ namespace Tkn_CreateDatabase
             Sql = Sql.Replace("--USE ", "USE ");
             Sql = Sql.Replace(":DBNAME", vt.DBaseName);
             Sql = Sql.Replace("GO\r\n", "\r\n");
+            Sql = Sql.Replace("\"", "'");
 
             return Sql;
         }
 
-        private void preparingVTable(vTable vt)
+        public void preparingVTable(vTable vt)
         {
             if (v.active_DB.runDBaseNo == v.dBaseNo.Manager)
             {

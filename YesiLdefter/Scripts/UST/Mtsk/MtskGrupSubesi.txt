@@ -61,6 +61,7 @@ AS BEGIN
 	  Where ins.Id = @curId
 
       set @MtskDonemiId = 0
+      set @LkpMtskDonemiId = 0
 
       -- MtskDonemi tablosunda gerekli olan satır mevcut mu ?
       Select @MtskDonemiId = isnull(Id, 0)
@@ -69,7 +70,7 @@ AS BEGIN
       and DonemTipiId = @DonemTipiId
       and GrupTipiId = @GrupTipiId
 
-	  -- Sube belli olduktan sonra SubeTipiId = 0 olanlanlar silinsin
+      -- Sube belli olduktan sonra SubeTipiId = 0 olanlanlar silinsin
       if (@DonemTipiId > 0) and  
          (@GrupTipiId > 0) and 
          (@SubeTipiId > 0)
@@ -78,10 +79,9 @@ AS BEGIN
          Where FirmId = @FirmId
          and DonemTipiId = @DonemTipiId
          and GrupTipiId = @GrupTipiId
-		 and SubeTipiId <= 0
-	  end
-    
-      /*
+         and SubeTipiId <= 0
+      end
+      
       if (@MtskDonemiId = 0)
       begin
          INSERT INTO [dbo].[MtskDonemi]
@@ -112,8 +112,7 @@ AS BEGIN
            ,0 --GrupAdaySayisi
            )
       end
-      */
-
+      
       FETCH NEXT FROM mgSubesiCursor INTO @curId
     END
 

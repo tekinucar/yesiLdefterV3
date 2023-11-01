@@ -117,6 +117,7 @@ as begin
           if (@SectorTypeId = 2) set @dbNameKunye = 'MaliM'
           if (@SectorTypeId = 3) set @dbNameKunye = 'ResMuh'
           if (@SectorTypeId = 4) set @dbNameKunye = 'Bordro'
+          if (@SectorTypeId = 5) set @dbNameKunye = 'Crm'
 		  if (@SectorTypeId = 201) set @dbNameKunye = 'Mtsk'
 		  if (@SectorTypeId = 202) set @dbNameKunye = 'Ismak'
 		  if (@SectorTypeId = 203) set @dbNameKunye = 'Src'
@@ -169,6 +170,7 @@ INSERT INTO [Lkp].[UstadFirmsSectorType] (Id, SectorType)
   ( 2,    N'Mali Müşavir'),
   ( 3,    N'Resmi Muhasebe'),
   ( 4,    N'Bordro'),
+  ( 5,    N'Ustad Crm'),
   ( 201,  N'Mtsk'),
   ( 202,  N'İşmak'),
   ( 203,  N'SRC')

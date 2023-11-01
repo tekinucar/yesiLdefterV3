@@ -177,11 +177,19 @@ AS BEGIN
     declare @yEpostaGonder Bit = null
     declare @yWhatsAppGonder Bit = null
     declare @BugunDonemTipiId int = 0
-
+	declare @DbUpdatesIsActive Bit = 0
+	
     -- Bugün hangi dönem ?  tespit ediliyor
     if (MONTH(getdate()) < 10)
          set @BugunDonemTipiId = convert(int, convert(varchar(5), YEAR(getdate())) + '0' + convert(varchar(3), MONTH(getdate())))
     else set @BugunDonemTipiId = convert(int, convert(varchar(5), YEAR(getdate())) + convert(varchar(3), MONTH(getdate())))
+
+	-- Veri Transferi başladımı
+    Select @DbUpdatesIsActive = u.IsActive
+    from [dbo].[DbUpdates] as u
+    Where u.MsDbUpdateId = 6
+    and   u.UpdateTypeId = 13
+    and   u.DBaseNoTypeId = 6
 
 
     WHILE @@FETCH_STATUS = 0
@@ -664,6 +672,7 @@ AS BEGIN
 
 
         -- Bildirim gönderme varsa BildirimXXXX tablolarını çalıştır
+		/*
         if ((@eSMSGonder <> @ySMSGonder) or
             ((@yMesajTipiId > 0) and
              ((@eKimlikGeldi = @yKimlikGeldi ) or
@@ -677,20 +686,26 @@ AS BEGIN
         begin
             EXECUTE [dbo].[prc_BildirimSMS] @yFirmId, 1, @AdayId, @ySMSGonder, @yMesajTipiId 
         end
+		*/
         --  @eEpostaGonder <> @yEpostaGonder
         --  @eWhatsAppGonder <> @yWhatsAppGonder
 
       FETCH NEXT FROM adayCursor INTO @AdayId
     END -- While
 
-    -- MtskDonemKontrolu
-    EXECUTE [dbo].[prc_MtskDonemKontrolu] @yFirmId 
-    EXECUTE [dbo].[prc_MtskAdayTakip] @yFirmId
+	-- Veri transferi yapılmıyorsa 
+	if (@DbUpdatesIsActive = 0)
+	begin
+       -- MtskDonemKontrolu
+       EXECUTE [dbo].[prc_MtskDonemKontrolu] @yFirmId 
+       EXECUTE [dbo].[prc_MtskAdayTakip] @yFirmId
+    end
 
     CLOSE adayCursor
     DEALLOCATE adayCursor   
 
 END -- create trigger
+
 
 /*CreateTriggerEnd*/
 

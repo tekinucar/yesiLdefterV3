@@ -13,9 +13,50 @@ create table [Lkp].[MtskDonemTipi]
    constraint  pk_MtskDonemTipi primary key (Id)
 )
 
+Delete from  [Lkp].[MtskDonemTipi]
 INSERT INTO [Lkp].[MtskDonemTipi] (Id, DonemTipi)
  VALUES 
 (0,       '' ),
+
+(202512,  '2025 - Aralık' ),
+(202511,  '2025 - Kasım' ),
+(202510,  '2025 - Ekim' ),
+(202509,  '2025 - Eylül' ),
+(202508,  '2025 - Ağustos' ),
+(202507,  '2025 - Temmuz' ),
+(202506,  '2025 - Haziran' ),
+(202505,  '2025 - Mayıs' ),
+(202504,  '2025 - Nisan' ),
+(202503,  '2025 - Mart' ),
+(202502,  '2025 - Şubat' ),
+(202501,  '2025 - Ocak' ),
+
+(202412,  '2024 - Aralık' ),
+(202411,  '2024 - Kasım' ),
+(202410,  '2024 - Ekim' ),
+(202409,  '2024 - Eylül' ),
+(202408,  '2024 - Ağustos' ),
+(202407,  '2024 - Temmuz' ),
+(202406,  '2024 - Haziran' ),
+(202405,  '2024 - Mayıs' ),
+(202404,  '2024 - Nisan' ),
+(202403,  '2024 - Mart' ),
+(202402,  '2024 - Şubat' ),
+(202401,  '2024 - Ocak' ),
+
+
+(202312,  '2023 - Aralık' ),
+(202311,  '2023 - Kasım' ),
+(202310,  '2023 - Ekim' ),
+(202309,  '2023 - Eylül' ),
+(202308,  '2023 - Ağustos' ),
+(202307,  '2023 - Temmuz' ),
+(202306,  '2023 - Haziran' ),
+(202305,  '2023 - Mayıs' ),
+(202304,  '2023 - Nisan' ),
+(202303,  '2023 - Mart' ),
+(202302,  '2023 - Şubat' ),
+(202301,  '2023 - Ocak' ),
 
 (202212,  '2022 - Aralık' ),
 (202211,  '2022 - Kasım' ),
@@ -149,3 +190,5 @@ INSERT INTO [Lkp].[MtskDonemTipi] (Id, DonemTipi)
 commit transaction
 
 /*CreateTableEnd*/
+
+

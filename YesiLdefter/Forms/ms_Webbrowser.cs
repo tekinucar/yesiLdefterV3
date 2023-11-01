@@ -2709,13 +2709,24 @@ private void DisplaySecondUrl()
                         return value;
                     }
                 }
+                else
+                {
+                    if ((findText == itemText_) || (findText == itemValue_))
+                    {
+                        if ((pageCode_ == "DONEMLER") || (pageCode_ == "GRUPLAR") || (pageCode_ == "SUBELER"))
+                        {
+                            value = ds_WebNodeItemsList.Tables[0].Rows[i]["ItemValue"].ToString();
+                            return value;
+                        }
+                    }
+                }
             }
 
             // bir eşleşmezse bulmaz ise gelen value dönsün
             // böylece bazı WebNodeItems lar saklanmaya gerek kalmadı
             if (value == "")
             {
-                MessageBox.Show("DİKKAT : WebNodeItemsList tablosunda aranan text in valuesi tespit edilemedi ..." + v.ENTER2 + wnv.AttName + " = " + findText);
+                MessageBox.Show("DİKKAT : MsWebNodeItems tablosunda aranan text in valuesi tespit edilemedi ..." + v.ENTER2 + wnv.AttName + " = " + findText);
                 value = findText;
             }
             return value;
@@ -4427,7 +4438,7 @@ private void DisplaySecondUrl()
              Where  [PageCode] in (" + pages + @") 
              order by NodeId, ItemValue ";
             
-            t.SQL_Read_Execute(v.dBaseNo.Manager, ds_WebNodeItemsList, ref tSql, "WebNodeItemsList", "WebNodeItemsList");
+            t.SQL_Read_Execute(v.dBaseNo.Manager, ds_WebNodeItemsList, ref tSql, "MsWebNodeItems", "MsWebNodeItems");
         }
 
         #endregion read db tables

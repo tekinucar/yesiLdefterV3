@@ -1,4 +1,5 @@
-﻿
+﻿/*CreateTable*/
+
 -- ------------------------------------------------------- 
 -- BirimTipi
 -- ------------------------------------------------------- 
@@ -11,6 +12,12 @@ create table [Lkp].[OnmStokBirimTipi]
 
    constraint  pk_OnmStokBirimTipi primary key (Id)
 )
+
+/*CreateTableEnd*/
+
+
+
+/*CreateData*/
 
 INSERT INTO [Lkp].[OnmStokBirimTipi] (Id, IsActive, BirimKodu, BirimAdi )
  VALUES 
@@ -62,3 +69,5 @@ INSERT INTO [Lkp].[OnmStokBirimTipi] (Id, IsActive, BirimKodu, BirimAdi )
   (45, 0, N'G52', N'CM³' ),
   (46, 0, N'DZN', N'Düzine' ),
   (47, 0, N'dm2', N'DMK' )
+
+/*CreateDataEnd*/

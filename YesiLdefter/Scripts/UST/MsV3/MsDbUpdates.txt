@@ -60,7 +60,9 @@ INSERT INTO [Lkp].[MsDbUpdatesDBaseNoType] (Id, DBaseNoType)
   ( 2,     N'ManagerServer'),
   ( 3,     N'UstadCRM'),
   ( 4,     N'Project'),
+  ( 6,     N'NewDatabase'),
   ( 7,     N'PublishManager')
+
 
 
 -- ------------------------------------------------------- 
@@ -84,7 +86,8 @@ INSERT INTO [Lkp].[MsDbUpdatesUpdateType] (Id, UpdateType)
   ( 0,     N''),
   ( 11,    N'Data  update - ManagerDb den table datasını al'),
   ( 12,    N'Rapor update - ManagerDb den rapor datasını al'),
-  
+  ( 13,    N'Data transfer işlemi'),
+
   ( 21,    N'Table add'),
   ( 22,    N'Field add'),
   ( 23,    N'Field update'),
@@ -135,9 +138,6 @@ INSERT INTO [Lkp].[MsDbUpdatesFieldType] (Id, FieldType)
 
 
 commit transaction
-
-
-
 
   
 /*CreateLkpTableEnd*/
