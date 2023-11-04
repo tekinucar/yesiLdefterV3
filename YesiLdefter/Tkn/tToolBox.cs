@@ -5649,6 +5649,9 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 v.tExeAbout.ftpVersionNo = ds.Tables[0].Rows[0]["VersionNo"].ToString();
                 v.tExeAbout.ftpExeName = ds.Tables[0].Rows[0]["ExeName"].ToString();
                 v.tExeAbout.ftpPacketName = ds.Tables[0].Rows[0]["PacketName"].ToString();
+
+                //if (v.tExeAbout.ftpVersionNo == "")
+                //    v.tExeAbout.ftpVersionNo = "20990101_1111";
             }
             //MessageBox.Show(v.BUGUN_TARIH.ToString());
 

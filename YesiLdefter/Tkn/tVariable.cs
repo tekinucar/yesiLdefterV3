@@ -154,6 +154,7 @@ namespace Tkn_Variable
         #endregion Database Yapısı
 
         #region Ftp
+        ///home/webadmin/web/ustadyazilim.com/desktopapp
         public static string ftpHostIp = @"ftp://ustadyazilim.com";
         public static string ftpUserName = "webadmin_ftp";
         public static string ftpUserPass = "Ustad+784512";
