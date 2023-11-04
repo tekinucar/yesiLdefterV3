@@ -57,6 +57,8 @@ begin transaction
   
  grant select, insert, update, delete on [Lkp].[OnmHesapMaster] to public
 
+ commit transaction
+
  /*CreateTableEnd*/
 
  /*
@@ -71,6 +73,8 @@ begin transaction
 
 
 /*CreateLkpTable*/
+
+begin transaction
 
 -- ------------------------------------------------------- 
 -- BAHesapTipiId   /* OnmBelgeMakbuz tablsundaki BHesapTipiId veya AHesapTipiId nin bağlantısı */
@@ -760,7 +764,7 @@ INSERT INTO [Lkp].[OnmHesapMaster] (ParentId, FirmId, IsActive, UstGrupTipiId, A
 (0, @FirmId, 1, 83, 253, 0, '253', '',   'Tesis, Makine Ve Cihazlar' ),
 (0, @FirmId, 1, 83, 254, 0, '254', '',   'Taşıtlar' ),
 (0, @FirmId, 1, 83, 255, 0, '255', '',   'Demirbaşlar' ),
-(0, @FirmId, 1, 83, 256, 0, '256', '',   'Diğer Maddi Duran Varlıklar' )
+(0, @FirmId, 1, 83, 256, 0, '256', '',   'Diğer Maddi Duran Varlıklar' ),
 (0, @FirmId, 1, 83, 259, 0, '259', '',   'Abonelikler' )
 
 
