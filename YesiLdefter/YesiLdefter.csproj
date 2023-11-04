@@ -8,10 +8,11 @@
     <OutputType>WinExe</OutputType>
     <RootNamespace>YesiLdefter</RootNamespace>
     <AssemblyName>YesiLdefter</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <IsWebBootstrapper>false</IsWebBootstrapper>
+    <TargetFrameworkProfile />
     <PublishUrl>C:\yesiLdefterPaket\</PublishUrl>
     <Install>false</Install>
     <InstallFrom>Disk</InstallFrom>

@@ -53,9 +53,9 @@ INSERT INTO [dbo].[DbUpdates]
      VALUES
            ( 0    -- IsActive, bit  1 : veri transferi yapılıyor, 0 = yapılmıyor 
            , 6    -- MsDbUpdateId, NewDatabase
-           , null -- UpdateDate, datetime
+           , convert(date, '01.01.2023',103) -- UpdateDate, datetime
            , 13   -- UpdateTypeId, Data transfer işlemi
-           , null -- SectorTypeId, smallint 
+           , 0    -- SectorTypeId, smallint 
            , 6    -- DBaseNoTypeId, NewDatabase
            , null -- SchemaName, varchar(5)
            , null -- TableName, varchar(100)
@@ -68,4 +68,3 @@ INSERT INTO [dbo].[DbUpdates]
 		   )
 
 /*CreateDataEnd*/
-
