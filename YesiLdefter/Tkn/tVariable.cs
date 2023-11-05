@@ -127,6 +127,7 @@ namespace Tkn_Variable
                 userName = "";
                 psw = "";
                 connectionText = "";
+                firmId = 0;
             }
             /// <summary>
             /// runDBaseNo ile o anda hangi database üzerinde çalışacağı 
@@ -145,6 +146,7 @@ namespace Tkn_Variable
             public string psw { get; set; }
             public string connectionText { get; set; }
             public SqlConnection MSSQLConn { get; set; }
+            public int firmId { get; set; }
         }
 
         public static databaseAbout_ newFirm_DB = new databaseAbout_();
@@ -1697,6 +1699,7 @@ namespace Tkn_Variable
         public string FormCode { get; set; }
         public bool RunTime { get; set; }
         public bool IdentityInsertOnOff { get; set; } //IDENTITY_INSERT 
+        public int FirmId { get; set; }
         public SqlConnection msSqlConnection { get; set; }
         public void Clear()
         {
@@ -1717,6 +1720,7 @@ namespace Tkn_Variable
             FormCode = "";
             RunTime = false;
             IdentityInsertOnOff = false;
+            FirmId = 0;
             msSqlConnection = null;
         }
     }

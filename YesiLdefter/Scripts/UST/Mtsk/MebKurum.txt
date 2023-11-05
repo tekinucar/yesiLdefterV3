@@ -71,3 +71,132 @@ INSERT INTO Lkp.MebKurumKurumTipi (Id, KurumTipi, GrupTipiId)
   (3, N'SRC',   1)
 
 /*CreateLkpTableEnd*/
+
+
+/*CreateTrigger*/
+
+CREATE TRIGGER [dbo].[trg_MebKurum] on [dbo].[MebKurum]
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    DECLARE cursorMebKurum cursor for select Id from Inserted
+    DECLARE @curId bigint
+
+    OPEN cursorMebKurum
+
+    FETCH NEXT FROM cursorMebKurum INTO @curId
+    
+    declare @yFirmId Int = 0
+	declare @yAdres1 nvarchar(200) = null
+    declare @OnmHesapFinansId Int = 0
+    declare @HesapAdi nvarchar(150) = null
+	
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        set @yAdres1 = ''
+        set @HesapAdi = ''
+
+        -- OnmHesapFinans
+        select 
+          @OnmHesapFinansId = isnull(Id, 0)
+        , @HesapAdi = isnull(HesapAdi,'')
+        From [dbo].[OnmHesapFinans]
+        Where 0 = 0
+        and   UstGrupTipiId = 83
+        and   AnaGrupTipiId = 252
+        and   HesapTipiId = 12
+        and   UstHesapKodu = '252'
+        and   JoinTableTypeId = 2101
+    	and   JoinId = @curId
+
+        -- MebKurum			   
+        select 
+          @yFirmId = ins.FirmId
+        , @yAdres1 = isnull(ins.Adres1,'')
+        from inserted ins
+    	where ins.Id = @curId
+
+        -- Maliyetlerin takibi için Finans hesabı yok ise
+        if (@OnmHesapFinansId = 0) 
+        begin
+          INSERT INTO [dbo].[OnmHesapFinans]
+           ([ParentId]
+           ,[FirmId]
+           ,[IsActive]
+           ,[UstGrupTipiId]
+           ,[AnaGrupTipiId]
+           ,[AltGrupTipiId]
+           ,[AltCesitTipiId]
+           ,[HesapTipiId]
+           ,[HesapKodu]
+           ,[UstHesapKodu]
+           ,[HesapKisaAdi]
+           ,[HesapAdi]
+
+           ,[IsBilancoHesap]
+           ,[IsGelirGiderHesap]
+           ,[IsMaliyetAHesap]
+           ,[IsMaliyetBHesap]
+           ,[IsNazimHesap]
+
+           ,[BAHesapTipiId]
+           ,[UruneYuklenmesiTipiId]
+           ,[UretimHacmiTipiId]
+           ,[IsletmeFonksiyonuTipiId]
+           ,[PeriyodTipiId]
+           ,[BelgeTipiId]
+           ,[KaynakTipiId]
+           ,[IsKkeg]
+           ,[JoinTableTypeId]
+           ,[JoinId])
+          VALUES
+           (0        --ParentId
+           ,@yFirmId --FirmId
+           ,1        --IsActive
+           ,83       --UstGrupTipiId
+           ,252      --AnaGrupTipiId
+           ,0        --AltGrupTipiId
+           ,0        --AltCesitTipiId
+           ,12       --HesapTipiId
+           ,''       --HesapKodu
+           ,252      --UstHesapKodu
+           ,substring(@yAdres1,1,100) --HesapKisaAdi, nvarchar(100)
+           ,substring(@yAdres1,1,150) --HesapAdi, nvarchar(150)
+
+           ,0 -- IsBilancoHesap
+           ,0 -- IsGelirGiderHesap
+           ,0 -- IsMaliyetAHesap
+           ,0 -- IsMaliyetBHesap
+           ,0 -- IsNazimHesap
+
+           ,0 -- BAHesapTipiId, smallint,>
+           ,0 -- UruneYuklenmesiTipiId, smallint,>
+           ,0 -- UretimHacmiTipiId, smallint,>
+           ,0 -- IsletmeFonksiyonuTipiId, smallint,>
+           ,0 -- PeriyodTipiId, smallint,>
+           ,0 -- BelgeTipiId, smallint,>
+           ,0 -- KaynakTipiId, smallint,>
+           ,0 -- IsKkeg, bit,>
+           ,2101 --JoinTableTypeId
+           ,@curId --JoinId 
+           )
+        end -- if (@eHesapAdi = '')
+         
+        if ((@OnmHesapFinansId > 0) and 
+            (substring(@yAdres1,1,150) <> @HesapAdi))
+        begin            
+          Update [dbo].[OnmHesapFinans] set
+            [HesapKisaAdi] = substring(@yAdres1,1,100)
+           ,[HesapAdi] = substring(@yAdres1,1,150)
+          Where Id = @OnmHesapFinansId
+        end
+
+      FETCH NEXT FROM cursorMebKurum INTO @curId
+    END -- While
+
+    CLOSE cursorMebKurum
+    DEALLOCATE cursorMebKurum
+END -- create trigger
+
+/*CreateTriggerEnd*/
+

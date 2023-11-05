@@ -55,6 +55,7 @@ namespace YesiLdefter
         string fHasATrigger = "HasATrigger";
         string fSqlScript = "SqlScript";
 
+        string fFirmId = "FirmId";
         string fServerNameIP = "ServerNameIP";
         string fDatabaseName = "DatabaseName";
         string fDbLoginName = "DbLoginName";
@@ -636,7 +637,7 @@ namespace YesiLdefter
 
                 // tablo var mı diye kontrol et
                 onay = db.tTableFind(fileName, vt);
-
+                
                 // tablo yok ise
                 if (onay == false)
                 {
@@ -701,7 +702,6 @@ namespace YesiLdefter
                 }
             }
         }
-
         private bool preparingCreateTrigger(int pos)
         {
             bool onay = false;
@@ -1759,6 +1759,7 @@ namespace YesiLdefter
                 v.newFirm_DB.serverName = dsFirm.Tables[0].Rows[dNFirm.Position][fServerNameIP].ToString();
                 v.newFirm_DB.databaseName = dsFirm.Tables[0].Rows[dNFirm.Position][fDatabaseName].ToString();
                 v.newFirm_DB.userName = dsFirm.Tables[0].Rows[dNFirm.Position][fDbLoginName].ToString();
+                v.newFirm_DB.firmId = t.myInt32(dsFirm.Tables[0].Rows[dNFirm.Position][fFirmId].ToString());
                 vDbPass = dsFirm.Tables[0].Rows[dNFirm.Position][fDbPass].ToString();
 
                 // test veya database create için -master- database ile açılması gerekiyor

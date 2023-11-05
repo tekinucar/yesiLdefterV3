@@ -501,9 +501,9 @@ and AltGrupTipiId = 100
 
 INSERT INTO [Lkp].[OnmHesapMaster] (ParentId, FirmId, IsActive, UstGrupTipiId, AnaGrupTipiId, AltGrupTipiId, HesapKodu, HesapAdi, ParaTipiId )
  VALUES 
- (0, @FirmId, 1, 10, 100, 100, '100.10', 'TL Kasası', 1),
- (0, @FirmId, 1, 10, 100, 100, '100.20', 'Dolar Kasası', 2),
- (0, @FirmId, 1, 10, 100, 100, '100.30', 'Euro Kasası', 3)
+ (0, @FirmId, 1, 10, 100, 100, '100.10', 'TL Kasası', 'TRY'),
+ (0, @FirmId, 1, 10, 100, 100, '100.20', 'Dolar Kasası', 'USD'),
+ (0, @FirmId, 1, 10, 100, 100, '100.30', 'Euro Kasası', 'EUR')
 
 
 

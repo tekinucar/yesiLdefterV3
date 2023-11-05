@@ -865,6 +865,8 @@ namespace Tkn_CreateDatabase
             Sql = Sql.Replace(":DBNAME", vt.DBaseName);
             Sql = Sql.Replace("GO\r\n", "\r\n");
             Sql = Sql.Replace("\"", "'");
+            Sql = Sql.Replace("\':FIRM_ID\'", vt.FirmId.ToString());
+            Sql = Sql.Replace(":FIRM_ID", vt.FirmId.ToString());
 
             return Sql;
         }
@@ -901,6 +903,7 @@ namespace Tkn_CreateDatabase
                 vt.DBaseType = v.newFirm_DB.dBType;
                 vt.DBaseName = v.newFirm_DB.databaseName;
                 vt.msSqlConnection = v.newFirm_DB.MSSQLConn;
+                vt.FirmId = v.newFirm_DB.firmId;
             }
 
             if (vt.SchemasCode == "")

@@ -862,8 +862,12 @@ namespace Tkn_ToolBox
 
                 if (vt.DBaseType == v.dBaseType.MSSQL)
                 {
+                    string Adet = "";
                     SqlComm = new SqlCommand(SQL, msSqlConn);
-                    SqlComm.ExecuteNonQuery();
+                    //SqlComm.ExecuteNonQuery();
+                    Adet = SqlComm.ExecuteNonQuery().ToString();
+                    if ((Adet != "-1") && (Adet != "0"))
+                        v.Kullaniciya_Mesaj_Var = Adet + " adet kayıt üzerinde işlem gerçekleşti ...";
                 }
                 sonuc = true;
             }
@@ -873,6 +877,7 @@ namespace Tkn_ToolBox
                 MessageBox.Show("HATALI İŞLEM : " + v.ENTER2 + e.Message, "Sql_ExecuteNon [ " + vt.TableName + " ]");
             }
 
+            /*
             if (sonuc == true)
             {
                 try
@@ -889,6 +894,7 @@ namespace Tkn_ToolBox
                     // 
                 }
             }
+            */
 
             SqlComm.Dispose();
 

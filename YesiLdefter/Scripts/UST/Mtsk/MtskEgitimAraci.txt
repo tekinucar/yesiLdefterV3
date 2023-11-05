@@ -201,7 +201,18 @@ INSERT INTO [Lkp].[MtskEgitimAraciModelYiliTipi] (Id, ModelYiliTipi, GrupTipiId)
   ( 2003,  N'2003', 1),
   ( 2002,  N'2002', 1),
   ( 2001,  N'2001', 1),
-  ( 2000,  N'2000', 1)
+  ( 2000,  N'2000', 1),
+  ( 1999,  N"1999", 1),
+  ( 1998,  N"1998", 1),
+  ( 1997,  N"1997", 1),
+  ( 1996,  N"1996", 1),
+  ( 1995,  N"1995", 1),
+  ( 1994,  N"1994", 1),
+  ( 1993,  N"1993", 1),
+  ( 1992,  N"1992", 1),
+  ( 1991,  N"1991", 1),
+  ( 1990,  N"1990", 1)
+
 
 -- ------------------------------------------------------- 
 -- SahiplikTipiId
@@ -270,3 +281,138 @@ INSERT INTO [Lkp].[MtskEgitimAraciSanzimanTipi] (Id, SanzimanTipi, GrupTipiId)
 commit transaction
 
 /*CreateLkpTableEnd*/
+
+
+
+/*CreateTrigger*/
+
+CREATE TRIGGER [dbo].[trg_MtskEgitimAraci] on [dbo].[MtskEgitimAraci]
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    DECLARE cursorMtskEgitimAraci cursor for select Id from Inserted
+    DECLARE @curId bigint
+
+    OPEN cursorMtskEgitimAraci
+
+    FETCH NEXT FROM cursorMtskEgitimAraci INTO @curId
+    
+    declare @yFirmId Int = 0
+	declare @yPlakaNumarasi nvarchar(20) = null
+    declare @yAracinMarkasi nvarchar(50) = null
+	declare @yHizmetDurumuTipiId SmallInt = 0
+    declare @OnmHesapFinansId Int = 0
+    declare @HesapAdi nvarchar(150) = null
+	
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        set @yPlakaNumarasi = ''
+        set @yAracinMarkasi = ''
+        set @HesapAdi = ''
+
+        -- OnmHesapFinans
+        select 
+          @OnmHesapFinansId = isnull(Id, 0)
+        , @HesapAdi = isnull(HesapAdi,'')
+        From [dbo].[OnmHesapFinans]
+        Where 0 = 0
+        and   UstGrupTipiId = 83
+        and   AnaGrupTipiId = 254
+        and   HesapTipiId = 12
+        and   UstHesapKodu = '254'
+        and   JoinTableTypeId = 2102
+    	and   JoinId = @curId
+
+        -- MtskEgitimAraci			   
+        select 
+          @yFirmId = ins.FirmId
+        , @yPlakaNumarasi = isnull(ins.PlakaNumarasi,'')
+        , @yAracinMarkasi = isnull(ins.AracinMarkasi,'')
+		, @yHizmetDurumuTipiId  = ins.HizmetDurumuTipiId 
+        from inserted ins
+    	where ins.Id = @curId
+
+        -- Maliyetlerin takibi için Finans hesabı yok ise
+		-- @yHizmetDurumuTipiId = 2 Hizmet dışı değilse
+        if (@OnmHesapFinansId = 0) and (@yHizmetDurumuTipiId <> 2)
+        begin
+          INSERT INTO [dbo].[OnmHesapFinans]
+           ([ParentId]
+           ,[FirmId]
+           ,[IsActive]
+           ,[UstGrupTipiId]
+           ,[AnaGrupTipiId]
+           ,[AltGrupTipiId]
+           ,[AltCesitTipiId]
+           ,[HesapTipiId]
+           ,[HesapKodu]
+           ,[UstHesapKodu]
+           ,[HesapKisaAdi]
+           ,[HesapAdi]
+
+           ,[IsBilancoHesap]
+           ,[IsGelirGiderHesap]
+           ,[IsMaliyetAHesap]
+           ,[IsMaliyetBHesap]
+           ,[IsNazimHesap]
+
+           ,[BAHesapTipiId]
+           ,[UruneYuklenmesiTipiId]
+           ,[UretimHacmiTipiId]
+           ,[IsletmeFonksiyonuTipiId]
+           ,[PeriyodTipiId]
+           ,[BelgeTipiId]
+           ,[KaynakTipiId]
+           ,[IsKkeg]
+           ,[JoinTableTypeId]
+           ,[JoinId])
+          VALUES
+           (0        --ParentId
+           ,@yFirmId --FirmId
+           ,1        --IsActive
+           ,83       --UstGrupTipiId
+           ,254      --AnaGrupTipiId
+           ,0        --AltGrupTipiId
+           ,0        --AltCesitTipiId
+           ,12       --HesapTipiId
+           ,''       --HesapKodu
+           ,254      --UstHesapKodu
+           ,substring(@yPlakaNumarasi + '-' + @yAracinMarkasi,1,100) --HesapKisaAdi, nvarchar(100)
+           ,substring(@yPlakaNumarasi + '-' + @yAracinMarkasi,1,150) --HesapAdi, nvarchar(150)
+
+           ,0 -- IsBilancoHesap
+           ,0 -- IsGelirGiderHesap
+           ,0 -- IsMaliyetAHesap
+           ,0 -- IsMaliyetBHesap
+           ,0 -- IsNazimHesap
+
+           ,0 -- BAHesapTipiId, smallint,>
+           ,0 -- UruneYuklenmesiTipiId, smallint,>
+           ,0 -- UretimHacmiTipiId, smallint,>
+           ,0 -- IsletmeFonksiyonuTipiId, smallint,>
+           ,0 -- PeriyodTipiId, smallint,>
+           ,0 -- BelgeTipiId, smallint,>
+           ,0 -- KaynakTipiId, smallint,>
+           ,0 -- IsKkeg, bit,>
+           ,2102 --JoinTableTypeId
+           ,@curId --JoinId 
+           )
+        end -- if (@eHesapAdi = '')
+         
+        if ((@OnmHesapFinansId > 0) and 
+            (substring(@yPlakaNumarasi + '-' + @yAracinMarkasi,1,150) <> @HesapAdi))
+        begin            
+          Update [dbo].[OnmHesapFinans] set
+            [HesapKisaAdi] = substring(@yPlakaNumarasi + '-' + @yAracinMarkasi,1,100)
+           ,[HesapAdi] = substring(@yPlakaNumarasi + '-' + @yAracinMarkasi,1,150)
+          Where Id = @OnmHesapFinansId
+        end
+
+      FETCH NEXT FROM cursorMtskEgitimAraci INTO @curId
+    END -- While
+
+    CLOSE cursorMtskEgitimAraci
+    DEALLOCATE cursorMtskEgitimAraci
+END -- create trigger
+
+/*CreateTriggerEnd*/
