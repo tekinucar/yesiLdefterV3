@@ -681,3 +681,24 @@ select convert( varchar(max)  ,  convert(VARBINARY(max), 'TestCase_TestCheck01_M
 
 
 
+declare @count int 
+declare @say int = 1
+
+SELECT @count = count(Id) FROM dbo.OnmBelgeMakbuz Where BelgeSeri = 'TbmGd'
+
+WHILE ( @say <= @count ) 
+BEGIN  
+   print @say
+
+
+/*
+   UPDATE Production.Product  
+      SET ListPrice = ListPrice * 2  
+   SELECT MAX(ListPrice) FROM Production.Product  
+   IF (SELECT MAX(ListPrice) FROM Production.Product) > $500  
+      BREAK  
+   ELSE  
+      CONTINUE  
+*/
+  set @say = @say + 1
+END 

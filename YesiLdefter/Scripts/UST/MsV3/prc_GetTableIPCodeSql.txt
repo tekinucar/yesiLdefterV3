@@ -9,7 +9,7 @@ AS BEGIN
   --set @TableIPCode = 'UST/MEB/MtskSertifikaUcreti.prcSertifikaUcreti_F02'
   --'UST/T01/3S_MSFLDIP.3S_MSFLDIP_01'
   --'UST/MEB/MtskSertifikaUcreti.prcSertifikaUcreti_F02'
-  --'UST/OMS/BMakbuz.BankaHesapIslemleri_L01'
+  --'UST/OMS/BDekont.BankaHesapIslemleri_L01'
   --'UST/OMS/BMaliyet.Dogalgaz_F01'
   --'UST/OMS/HMaliyet.Maliyet_L05'
 

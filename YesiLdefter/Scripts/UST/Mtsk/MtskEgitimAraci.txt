@@ -377,8 +377,8 @@ AS BEGIN
            ,12       --HesapTipiId
            ,''       --HesapKodu
            ,254      --UstHesapKodu
-           ,substring(@yPlakaNumarasi + '-' + @yAracinMarkasi,1,100) --HesapKisaAdi, nvarchar(100)
-           ,substring(@yPlakaNumarasi + '-' + @yAracinMarkasi,1,150) --HesapAdi, nvarchar(150)
+           ,substring(@yPlakaNumarasi + ' - ' + @yAracinMarkasi,1,100) --HesapKisaAdi, nvarchar(100)
+           ,substring(@yPlakaNumarasi + ' - ' + @yAracinMarkasi,1,150) --HesapAdi, nvarchar(150)
 
            ,0 -- IsBilancoHesap
            ,0 -- IsGelirGiderHesap
@@ -400,11 +400,11 @@ AS BEGIN
         end -- if (@eHesapAdi = '')
          
         if ((@OnmHesapFinansId > 0) and 
-            (substring(@yPlakaNumarasi + '-' + @yAracinMarkasi,1,150) <> @HesapAdi))
+            (substring(@yPlakaNumarasi + ' - ' + @yAracinMarkasi,1,150) <> @HesapAdi))
         begin            
           Update [dbo].[OnmHesapFinans] set
-            [HesapKisaAdi] = substring(@yPlakaNumarasi + '-' + @yAracinMarkasi,1,100)
-           ,[HesapAdi] = substring(@yPlakaNumarasi + '-' + @yAracinMarkasi,1,150)
+            [HesapKisaAdi] = substring(@yPlakaNumarasi + ' - ' + @yAracinMarkasi,1,100)
+           ,[HesapAdi] = substring(@yPlakaNumarasi + ' - ' + @yAracinMarkasi,1,150)
           Where Id = @OnmHesapFinansId
         end
 

@@ -59,7 +59,7 @@ begin transaction
    NazimHesapKodu          nvarchar(50) null,
 
    --80, 81, ..., 90, 91
-   BAHesapTipiId           SmallInt  null, /* OnmBelgeMakbuz tablsundaki BHesapTipiId veya AHesapTipiId nin bağlantısı */
+   BAHesapTipiId           SmallInt  null, /* OnmBelgeDekont tablsundaki BHesapTipiId veya AHesapTipiId nin bağlantısı */
    UruneYuklenmesiTipiId   SmallInt  null, 
    UretimHacmiTipiId       SmallInt  null,
    IsletmeFonksiyonuTipiId SmallInt  null,
@@ -105,7 +105,7 @@ Giderlerin İşletme Fonksiyonlarına Göre Sınıflandırılması
 begin transaction
 
 -- ------------------------------------------------------- 
--- BAHesapTipiId   /* OnmBelgeMakbuz tablsundaki BHesapTipiId veya AHesapTipiId nin bağlantısı */
+-- BAHesapTipiId   /* OnmBelgeDekont tablsundaki BHesapTipiId veya AHesapTipiId nin bağlantısı */
 -- ------------------------------------------------------- 
 
 IF EXISTS (Select * From sys.objects WHERE name = 'OnmHesapFinansBAHesapTipi')

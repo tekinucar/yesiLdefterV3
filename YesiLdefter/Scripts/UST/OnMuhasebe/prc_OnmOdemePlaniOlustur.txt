@@ -258,7 +258,7 @@ AS BEGIN
 
   end --if
 
-  -- Bunu kapatma veya silem. 
+  -- Bunu kapatma veya silme. 
   -- Bu sonuca kodun içinde kontrol ediliyor
   Select @IslemSonucu as IslemSonucu
 

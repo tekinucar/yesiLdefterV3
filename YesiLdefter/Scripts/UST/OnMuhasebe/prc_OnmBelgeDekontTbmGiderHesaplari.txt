@@ -1,0 +1,92 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_OnmBelgeDekontTbmGiderHesaplari] 
+AS BEGIN
+
+declare @KasaId int = 0
+Select top 1 @KasaId = Id from dbo.OnmHesapFinans 
+Where UstGrupTipiId = 10 
+and   AnaGrupTipiId = 100
+and   AltGrupTipiId = 100
+and   ParaTipiId = 'TRY'
+and   IsActive = 1
+
+Update [dbo].[OnmBelgeDekont] set 
+
+   BHesapTipiId = ( case isnull([BDekont].BHesapTipiId,-1) when -1 then x.BAHesapTipiId else [BDekont].BHesapTipiId end )
+ , BorcluId     = ( case ISNULL([BDekont].BorcluId,-1)     when -1 then x.MaliyetId     when -2 then @KasaId else [BDekont].BorcluId end )
+ , AHesapTipiId = ( case isnull([BDekont].AHesapTipiId,-1) when -1 then x.BAHesapTipiId else [BDekont].AHesapTipiId end ) 
+ , AlacakliId   = ( case ISNULL([BDekont].AlacakliId,-1)   when -1 then x.MaliyetId     when -2 then @KasaId else [BDekont].AlacakliId end ) 
+ 
+from [dbo].[OnmBelgeDekont] as [BDekont],
+(
+ Select 
+   [BDekont].Id as MakbuzId
+ , tbm.VarlikId
+ , tbm.AboneId
+ , hm.BAHesapTipiId
+ , hf.Id as MaliyetId
+ , hf.HesapAdi
+
+ From [dbo].[OnmBelgeDekont] as [BDekont]
+	left outer join TempTabimHesaplar as tbm on ( [BDekont].BelgeNo = tbm.HESAP_KODU )
+	left outer join Lkp.OnmHesapMaster as hm on ( tbm.MaliyetHesapKodu = hm.HesapKodu )
+	left outer join OnmHesapFinans as hf on ( tbm.MaliyetHesapKodu = hf.HesapKodu )
+
+ Where 0 = 0 
+ and [BDekont].BelgeSeri = 'TbmGd'
+ ) as x
+
+Where [BDekont].Id = x.MakbuzId
+
+
+/*
+
+declare @KasaId int = 0
+Select top 1 @KasaId = Id from dbo.OnmHesapFinans 
+Where UstGrupTipiId = 10 
+and   AnaGrupTipiId = 100
+and   AltGrupTipiId = 100
+and   ParaTipiId = 'TRY'
+and   IsActive = 1
+
+-- print @KasaId
+
+Select 
+   [BDekont].[IslemTipiId]
+ , [BDekont].[BHesapTipiId]
+ , [BDekont].[AHesapTipiId]
+ , [BDekont].[VarlikId]
+ , [BDekont].[AboneId]
+ , ( case isnull([BDekont].BHesapTipiId,-1) when -1 then x.BAHesapTipiId else [BDekont].BHesapTipiId end ) as BH
+ , ( case ISNULL([BDekont].BorcluId,-1)     when -1 then x.MaliyetId     when -2 then @KasaId else [BDekont].BorcluId end ) as BID  
+ , ( case isnull([BDekont].AHesapTipiId,-1) when -1 then x.BAHesapTipiId else [BDekont].AHesapTipiId end ) as AH
+ , ( case ISNULL([BDekont].AlacakliId,-1)   when -1 then x.MaliyetId     when -2 then @KasaId else [BDekont].AlacakliId end ) as AID  
+ 
+ , x.*
+from [dbo].[OnmBelgeDekont] as [BDekont],
+(
+ Select 
+   [BDekont].Id as MakbuzId
+ , tbm.VarlikId
+ , tbm.AboneId
+ , hm.BAHesapTipiId
+ , hf.Id as MaliyetId
+ , hf.HesapAdi
+
+ From [dbo].[OnmBelgeDekont] as [BDekont]
+	left outer join TempTabimHesaplar as tbm on ( [BDekont].BelgeNo = tbm.HESAP_KODU )
+	left outer join Lkp.OnmHesapMaster as hm on ( tbm.MaliyetHesapKodu = hm.HesapKodu )
+	left outer join OnmHesapFinans as hf on ( tbm.MaliyetHesapKodu = hf.HesapKodu )
+
+ Where 0 = 0 
+ and [BDekont].BelgeSeri = 'TbmGd'
+ ) as x
+
+Where [BDekont].Id = x.MakbuzId
+
+*/
+
+END -- procedure
+
+/*CreateProcedureEnd*/

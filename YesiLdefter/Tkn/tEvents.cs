@@ -7504,8 +7504,8 @@ namespace Tkn_Events
                             /// and Convert(Date, [AJLNTLK].REC_DATE, 103) <= Convert(Date, '25.12.2016', 103)--:D.SD.2809:--<=
 
                             /// >= işlemleri
-                            ///  and Convert(Date, [BMakbuz].BelgeTarihi, 103)  >= Convert(Date, '27.07.2022', 103)     -- :D.SD.43301: -->=
-                            ///  and Convert(Date, [BMakbuz].BelgeTarihi, 103)  <= Convert(Date, '27.07.2022', 103)     -- :D.SD.43301: --<=
+                            ///  and Convert(Date, [BDekont].BelgeTarihi, 103)  >= Convert(Date, '27.07.2022', 103)     -- :D.SD.43301: -->=
+                            ///  and Convert(Date, [BDekont].BelgeTarihi, 103)  <= Convert(Date, '27.07.2022', 103)     -- :D.SD.43301: --<=
                             if (Speed_FName.IndexOf("_BAS") > -1)
                             {
                                 str_bgn = " and " + read_sub_FName + "  >=";

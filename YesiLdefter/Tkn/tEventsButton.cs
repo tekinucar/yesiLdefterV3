@@ -2040,14 +2040,14 @@ namespace Tkn_Events
 
                         if (item.MSETVALUE != "")
                         {
-                            mesaj = t.Set(item.MSETVALUE.ToString(), "İşlem başarıyla çalıştı ...", "");
+                            mesaj = t.Set("İşlem başarıyla çalıştı ...", "", "");
 
                             t.FlyoutMessage("Bilgilendirme", mesaj + v.ENTER);
                         }
                     }
                     else
                     {
-                        mesaj = t.Set(item.MSETVALUE.ToString(), "İşlem başarıyla çalıştı ...", "");
+                        mesaj = t.Set("İşlem başarıyla çalıştı ...", "", "");
 
                         t.AlertMessage("Stored Procedure" + v.ENTER2, mesaj);
                     }

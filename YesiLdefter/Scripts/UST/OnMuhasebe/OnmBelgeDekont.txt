@@ -4,7 +4,7 @@ begin transaction
 
 -- Tahsilat ve Tediye Kaydı 
 
- create table OnmBelgeMakbuz
+ create table OnmBelgeDekont
  (
 
    Id                 Int IDENTITY(1,1) NOT NULL, 
@@ -16,7 +16,7 @@ begin transaction
    TipiId             SmallInt      null, /* 1. Tahsilat, 2. Tediye */
    IslemTipiId        Varchar(10)   null, /* peşinat, taksit vb gibi alt detay seçenekleri için */ 
       
-   -- 10 Makbuz Belgesi Hakkında
+   -- 10 Dekont Belgesi Hakkında
    BelgeTarihi        Date          null, 
    BelgeYil           Smallint      null, 
    BelgeAy            Smallint      null, 
@@ -68,19 +68,19 @@ begin transaction
    JoinTableTypeId    SmallInt      null, /* ilgili table 1: OnmBelgeMaliyet,  */
    JoinId             Int           null, /* ilgili table ref Id */
 
-   constraint		pk_OnmBelgeMakbuz primary key (Id)
+   constraint		pk_OnmBelgeDekont primary key (Id)
  )
 
- create index X_OnmBelgeMakbuz01 on OnmBelgeMakbuz (FirmId)
- create index X_OnmBelgeMakbuz02 on OnmBelgeMakbuz (TipiId)
- create index X_OnmBelgeMakbuz03 on OnmBelgeMakbuz (IslemTipiId)
- create index X_OnmBelgeMakbuz04 on OnmBelgeMakbuz (BHesapTipiId)
- create index X_OnmBelgeMakbuz05 on OnmBelgeMakbuz (AHesapTipiId)
- create index X_OnmBelgeMakbuz06 on OnmBelgeMakbuz (VarlikId)
- create index X_OnmBelgeMakbuz07 on OnmBelgeMakbuz (CariId)
+ create index X_OnmBelgeDekont01 on OnmBelgeDekont (FirmId)
+ create index X_OnmBelgeDekont02 on OnmBelgeDekont (TipiId)
+ create index X_OnmBelgeDekont03 on OnmBelgeDekont (IslemTipiId)
+ create index X_OnmBelgeDekont04 on OnmBelgeDekont (BHesapTipiId)
+ create index X_OnmBelgeDekont05 on OnmBelgeDekont (AHesapTipiId)
+ create index X_OnmBelgeDekont06 on OnmBelgeDekont (VarlikId)
+ create index X_OnmBelgeDekont07 on OnmBelgeDekont (CariId)
 
 
- grant select, insert, update, delete on OnmBelgeMakbuz to public
+ grant select, insert, update, delete on OnmBelgeDekont to public
 
  commit transaction
 
@@ -89,11 +89,11 @@ begin transaction
 
  /*CreateTrigger*/
 
-CREATE TRIGGER [dbo].[trg_OnmBelgeMakbuz] on [dbo].[OnmBelgeMakbuz] 
+CREATE TRIGGER [dbo].[trg_OnmBelgeDekont] on [dbo].[OnmBelgeDekont] 
 AFTER INSERT, UPDATE
 AS BEGIN
 
-    declare cursor_BMakbuz cursor for select Id from Inserted
+    declare cursor_BDekont cursor for select Id from Inserted
     declare @curId bigint
 
 	declare @FirmId int
@@ -114,9 +114,9 @@ AS BEGIN
 	declare @OnmOdemePlaniTaksitTutari numeric(22,8)
 	declare @makbuzCount int
 
-	OPEN cursor_BMakbuz
+	OPEN cursor_BDekont
 
-    FETCH NEXT FROM cursor_BMakbuz INTO @curId
+    FETCH NEXT FROM cursor_BDekont INTO @curId
 
     WHILE @@FETCH_STATUS = 0
     BEGIN
@@ -144,7 +144,7 @@ AS BEGIN
       begin
           Update dbo.OnmBelgeMaliyet set
 			IsPaid = 1  -- ödendi işareti
-          , PaidId = @curId -- OnmBelgeMakbuz.Id
+          , PaidId = @curId -- OnmBelgeDekont.Id
           Where Id = @JoinId
 	  end
 	  	  
@@ -152,7 +152,7 @@ AS BEGIN
 	     (@AHesapTipiId >= 2100) -- Mtskİşlemleri
       begin
 	      set @makbuzCount = 0
-          -- OnmBelgeMakbuz.Id = @curId daha önce OnmOdemePlani tablosuna işlenmiş mi ?
+          -- OnmBelgeDekont.Id = @curId daha önce OnmOdemePlani tablosuna işlenmiş mi ?
 		  Select @makbuzCount = count(Id)
           from dbo.OnmOdemePlani
           where CariId = @CariId
@@ -160,7 +160,7 @@ AS BEGIN
 		  and ( BelgeMakbuzId = @curId or PatchBelgeMakbuzId = @curId )
 		  		  
 		  if (@_BelgeTutari > 1) and -- 0 değil 1 liradan büyük ise
-		     (@makbuzCount = 0)     -- OnmBelgeMakbuz.Id henüz işlenmemiş  
+		     (@makbuzCount = 0)     -- OnmBelgeDekont.Id henüz işlenmemiş  
 		  begin
               set @onay = 1
 		      set @OnmOdemePlaniId = 0
@@ -222,7 +222,7 @@ AS BEGIN
       
 	  if (@TipiId = 2) or (@TipiId = 1) -- Tahsilat, Açılış    
       begin
-          Update dbo.OnmBelgeMakbuz set
+          Update dbo.OnmBelgeDekont set
 			BorcTutari = @BelgeTutari
           , AlacakTutari = 0
 		  , IslemTipiId = @_IslemTipiId
@@ -231,18 +231,18 @@ AS BEGIN
 
 	  if (@TipiId = 3) or (@TipiId = 5) -- Tediye, Kapanış    
       begin
-          Update dbo.OnmBelgeMakbuz set
+          Update dbo.OnmBelgeDekont set
 			BorcTutari = 0
           , AlacakTutari = @BelgeTutari
 		  , IslemTipiId = @_IslemTipiId
           Where Id = @curId 
 	  end
 	  
-	  FETCH NEXT FROM cursor_BMakbuz INTO @curId
+	  FETCH NEXT FROM cursor_BDekont INTO @curId
     END
 
-    CLOSE cursor_BMakbuz
-    DEALLOCATE cursor_BMakbuz
+    CLOSE cursor_BDekont
+    DEALLOCATE cursor_BDekont
 
 	EXECUTE [dbo].[prc_OnmToplamBekleyenOdemeler] @FirmId
 	EXECUTE [dbo].[prc_OnmToplamBekleyenGelirler] @FirmId
@@ -255,11 +255,11 @@ END
 
  /*CreateTrigger*/
 
-CREATE TRIGGER [dbo].[trg_OnmBelgeMakbuzDelete] on [dbo].[OnmBelgeMakbuz]
+CREATE TRIGGER [dbo].[trg_OnmBelgeDekontDelete] on [dbo].[OnmBelgeDekont]
 FOR DELETE
 AS BEGIN
 
-    declare cursor_BMakbuzDlt cursor for select Id from deleted
+    declare cursor_BDekontDlt cursor for select Id from deleted
     declare @curId bigint
 
 	declare @FirmId int
@@ -275,9 +275,9 @@ AS BEGIN
 	declare @JoinTableTypeId smallInt
 	declare @JoinId int
 
-	OPEN cursor_BMakbuzDlt
+	OPEN cursor_BDekontDlt
 
-    FETCH NEXT FROM cursor_BMakbuzDlt INTO @curId
+    FETCH NEXT FROM cursor_BDekontDlt INTO @curId
 
     WHILE @@FETCH_STATUS = 0
     BEGIN
@@ -300,7 +300,7 @@ AS BEGIN
       begin
           Update dbo.OnmBelgeMaliyet set
 			IsPaid = 0  -- ödenmedi işareti
-          , PaidId = 0  -- OnmBelgeMakbuz.Id
+          , PaidId = 0  -- OnmBelgeDekont.Id
           Where Id = @JoinId
 	  end
 
@@ -385,11 +385,11 @@ AS BEGIN
 		  		   
       end -- if (@TipiId = 2)
 
-      FETCH NEXT FROM cursor_BMakbuzDlt INTO @curId
+      FETCH NEXT FROM cursor_BDekontDlt INTO @curId
     END
 
-    CLOSE cursor_BMakbuzDlt
-    DEALLOCATE cursor_BMakbuzDlt
+    CLOSE cursor_BDekontDlt
+    DEALLOCATE cursor_BDekontDlt
 
 	EXECUTE [dbo].[prc_OnmToplamBekleyenOdemeler] @FirmId
 	EXECUTE [dbo].[prc_OnmToplamBekleyenGelirler] @FirmId
@@ -426,17 +426,17 @@ begin transaction
 -- ------------------------------------------------------- 
 -- TipiId
 -- ------------------------------------------------------- 
-create table [Lkp].[OnmBelgeMakbuzTipi]
+create table [Lkp].[OnmBelgeDekontTipi]
 (
    Id           Int Unique Not Null,
    Tipi         nVarchar(50),
    GrupTipiId   SmallInt Null,
 
-   constraint  pk_OnmBelgeMakbuzTipi primary key (Id)
+   constraint  pk_OnmBelgeDekontTipi primary key (Id)
 )
 
-delete from [Lkp].[OnmBelgeMakbuzTipi]
-INSERT INTO [Lkp].[OnmBelgeMakbuzTipi] (Id, Tipi, GrupTipiId)
+delete from [Lkp].[OnmBelgeDekontTipi]
+INSERT INTO [Lkp].[OnmBelgeDekontTipi] (Id, Tipi, GrupTipiId)
  VALUES 
   (0,   N'Tanımsız', 0),
   (1,   N'Açılış', 1),
@@ -449,57 +449,118 @@ INSERT INTO [Lkp].[OnmBelgeMakbuzTipi] (Id, Tipi, GrupTipiId)
 -- ------------------------------------------------------- 
 -- IslemTipiId
 -- ------------------------------------------------------- 
-create table [Lkp].[OnmBelgeMakbuzIslemTipi]
+
+create table [Lkp].[OnmBelgeDekontIslemTipi]
 (
    Id             Int IDENTITY(1,1) Not Null,
+   IslemKodu      Varchar(10) Unique Not Null,
+   IslemAdi       nVarchar(100),
    BorcHesapId    Int null,
    AlacakHesapId  Int null,
-   IslemKodu      Varchar(10),
-   IslemAdi       nVarchar(100),
 
-   constraint  pk_OnmBelgeMakbuzIslemTipi primary key (Id)
+   constraint  pk_OnmBelgeDekontIslemTipi primary key (Id)
 )
 
-/*
-
-SELECT [BorcHesapId]
-      ,[AlacakHesapId]
-      ,[IslemKodu]
-      ,[IslemAdi]
-  FROM [Lkp].[OnmBelgeMakbuzIslemTipi]
-  Where BorcHesapId in ( 100, 1022, 1023, 1024 ) 
-  order by BorcHesapId, AlacakHesapId
 
 
-  
-SELECT [BorcHesapId]
-      ,[AlacakHesapId]
-      ,[IslemKodu]
-      ,[IslemAdi]
-  FROM [Lkp].[OnmBelgeMakbuzIslemTipi]
-  Where AlacakHesapId in ( 100, 1022, 1023, 1024 )  
-  and Id not in ( 
-      Select Id From [Lkp].[OnmBelgeMakbuzIslemTipi]
-      Where BorcHesapId in ( 100, 1022, 1023, 1024 ) 
-      )
-  order by AlacakHesapId, BorcHesapId
+delete from [Lkp].[OnmBelgeDekontIslemTipi]
+INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, AlacakHesapId)
+ VALUES 
 
-*/
+ ( '100.100',  'Kasalar arası virman' , 100,  100  ), 
+ ( '100.120',  'Cariden nakit tahsilat' , 100,  120  ), 
+ ( '100.131',  'Ortaklardan alınan nakit' , 100,  131  ), 
+ ( '100.135',  'Personelden alınan nakit' , 100,  135  ), 
+ ( '100.196',  'Personele ödenen nakit avans' , 100,  196  ), 
+ ( '100.320',  'Cariden nakit tahsilat' , 100,  320  ), 
+ ( '100.600',  'Satışlardan nakit tahsilat' , 100,  600  ), 
+ ( '100.602',  'Verilen hizmetlerden nakit tahsilat' , 100,  602  ), 
+ ( '100.1022',  'Banka hesabından çekilen nakit' , 100,  1022  ), 
+ ( '100.1023',  'Kredi kartından çekilen nakit avans' , 100,  1023  ), 
+ ( '100.2110',  'Mtsk sertifika ücreti, nakit tahsilat ' , 100,  2110  ), 
+ ( '100.2111',  'Mtsk teorik sınav ücreti, nakit tahsilat' , 100,  2111  ), 
+ ( '100.2112',  'Mtsk uygulama sınav ücreti, nakit tahsilat' , 100,  2112  ), 
+ ( '100.2113',  'Mtsk özel teorik ders ücreti, nakit tahsilat' , 100,  2113  ), 
+ ( '100.2114',  'Mtsk özel uygulama ders ücreti, nakit tahsilat' , 100,  2114  ), 
+ ( '1022.100',  'Kasadan banka hesabına yatırılan' , 1022,  100  ), 
+ ( '1022.120',  'Cariden gelen havale/Eft' , 1022,  120  ), 
+ ( '1022.131',  'Ortaklardan gelen havale/Eft' , 1022,  131  ), 
+ ( '1022.135',  'Personelden gelen havale/Eft' , 1022,  135  ), 
+ ( '1022.300',  'Banka kredisi girişi' , 1022,  300  ), 
+ ( '1022.320',  'Cariden gelen havale/Eft' , 1022,  320  ), 
+ ( '1022.602',  'Verilen hizmet için banka hesabına yatırılan' , 1022,  602  ), 
+ ( '1022.1022',  'Banka hesapları arası havale' , 1022,  1022  ), 
+ ( '1022.1023',  'Kredi kartından çekilen nakit avans' , 1022,  1023  ), 
+ ( '1022.1024',  'POS hesabından banka hesabına geçen' , 1022,  1024  ), 
+ ( '1022.2110',  'Mtsk sertifika ücreti, banka hesabına yatan' , 1022,  2110  ), 
+ ( '1022.2111',  'Mtsk teorik sınav ücreti, banka hesabına yatan' , 1022,  2111  ), 
+ ( '1022.2112',  'Mtsk uygulama sınav ücreti, banka hesabına yatan' , 1022,  2112  ), 
+ ( '1022.2113',  'Mtsk özel teorik ders ücreti, banka hesabına yatan' , 1022,  2113  ), 
+ ( '1022.2114',  'Mtsk özel uygulama ders ücreti, banka hesabına ya' , 1022,  2114  ), 
+ ( '1023.100',  'Kredi kartı borcunu kasadan ödeme' , 1023,  100  ), 
+ ( '1023.1022',  'Kredi kartı borcunu banka hesabından ödeme' , 1023,  1022  ), 
+ ( '1024.120',  'Cariden banka/kredi kartı ile tahsilat' , 1024,  120  ), 
+ ( '1024.131',  'Ortağın banka/kredi kartından çekilen ' , 1024,  131  ), 
+ ( '1024.135',  'Personelin banka/kredi kartından çekilen' , 1024,  135  ), 
+ ( '1024.320',  'Cariden banka/kredi kartı ile tahsilat' , 1024,  320  ), 
+ ( '1024.600',  'Kesilen fatura için banka/kredi kartı tahsilat' , 1024,  600  ), 
+ ( '1024.601',  'Yurtdışı satışlar için çekilen banka/kredi kartı tahsilat' , 1024,  601  ), 
+ ( '1024.602',  'Verilen hizmetler için çekilen banka/kredi kartı tahsilat' , 1024,  602  ), 
+ ( '1024.2110',  'Mtsk sertifika ücreti, POS ile tahsilat' , 1024,  2110  ), 
+ ( '1024.2111',  'Mtsk teorik sınav ücreti, POS ile tahsilat' , 1024,  2111  ), 
+ ( '1024.2112',  'Mtsk uygulama sınav ücreti, POS ile tahsilat' , 1024,  2112  ), 
+ ( '1024.2113',  'Mtsk özel teorik ders ücreti, POS ile tahsilat' , 1024,  2113  ), 
+ ( '1024.2114',  'Mtsk özel uygulama ders ücreti, POS ile tahsilat' , 1024,  2114  ), 
+ ( '120.100',  'Cari hesaba ödenen nakit' , 120,  100  ), 
+ ( '131.100',  'Ortaklara verilen nakit ' , 131,  100  ), 
+ ( '135.100',  'Personele verilen nakit' , 135,  100  ), 
+ ( '153.100',  'Stok alımı için ödenen nakit' , 153,  100  ), 
+ ( '196.100',  'Personel avansı olarak verilen nakit' , 196,  100  ), 
+ ( '300.100',  'Banka kredisi için nakit ödeme' , 300,  100  ), 
+ ( '320.100',  'Cari hesaba ödenen nakit' , 320,  100  ), 
+ ( '770.100',  'Genel yönetim giderleri için nakit ödeme' , 770,  100  ), 
+ ( '2110.100',  'Mtsk sertifika ücreti, nakit iadesi' , 2110,  100  ), 
+ ( '2113.100',  'Mtsk özel teorik ders ücreti, nakit iadesi' , 2113,  100  ), 
+ ( '2114.100',  'Mtsk özel uygulama ders ücreti, nakit iadesi' , 2114,  100  ), 
+ ( '120.1022',  'Cari hesabına gönderilen havale/Eft' , 120,  1022  ), 
+ ( '131.1022',  'Ortaklara banka hesabından havale/Eft' , 131,  1022  ), 
+ ( '135.1022',  'Personel banka hesabından havale/Eft' , 135,  1022  ), 
+ ( '153.1022',  'Stok alımı için banka hesabında havale/Eft' , 153,  1022  ), 
+ ( '196.1022',  'Personel avansları için banka hesabından havale/Eft' , 196,  1022  ), 
+ ( '300.1022',  'Banka kredisi için banka hesabından ödeme' , 300,  1022  ), 
+ ( '320.1022',  'Cari hesabına havale/Eft' , 320,  1022  ), 
+ ( '770.1022',  'Genel yönetim giderleri için banka hesabından havale/Eft' , 770,  1022  ), 
+ ( '2110.1022',  'Mtsk sertifika ücreti, banka hesabından iade' , 2110,  1022  ), 
+ ( '2111.1022',  'Mtsk teorik sınav ücreti, banka hesabından iade' , 2111,  1022  ), 
+ ( '2112.1022',  'Mtsk uygulama sınav ücreti, banka hesabından iade' , 2112,  1022  ), 
+ ( '2113.1022',  'Mtsk özel teorik ders ücreti, banka hesabından iade' , 2113,  1022  ), 
+ ( '2114.1022',  'Mtsk özel uygulama ders ücreti, banka hesabından iade' , 2114,  1022  ), 
+ ( '2111.100',  'Mtsk teorik sınav ücreti, nakit iadesi' , 2111,  100  ), 
+ ( '2112.100',  'Mtsk uygulama sınav ücreti, nakit iadesi' , 2112,  100  ), 
+ ( '120.1023',  'Cari hesaba kredi kartı ile ödeme' , 120,  1023  ), 
+ ( '131.1023',  'Ortakların kredi kartı ile yaptığı harcama' , 131,  1023  ), 
+ ( '135.1023',  'Personelin kredi kartı ile yaptığı harcama' , 135,  1023  ), 
+ ( '153.1023',  'Stok alımı için kredi kartıyla ödeme' , 153,  1023  ), 
+ ( '320.1023',  'Cari hesaba kredi kartı ile ödeme' , 320,  1023  ), 
+ ( '770.1023',  'Genel yönetim giderleri için kredi kartıyla ödeme' , 770,  1023  ), 
+ ( '793.1023',  'Dışarıdan sağlanan hizmetler için kredi kartıyla ödeme' , 793,  1023  ), 
+ ( '793.100',  'Dışarıdan sağlanan hizmetler için nakit ödeme' , 793,  100  ), 
+ ( '793.1022',  'Dışarıdan sağlanan hizmetler için banka hesabından havale/Eft' , 793,  1022  ) 
 
 -- ------------------------------------------------------- 
 -- BHesapTipiId
 -- ------------------------------------------------------- 
-create table [Lkp].[OnmBelgeMakbuzBHesapTipi]
+create table [Lkp].[OnmBelgeDekontBHesapTipi]
 (
    Id           Int Unique Not Null,
    BHesapTipi   nVarchar(50),
    GrupTipiId   SmallInt Null,
 
-   constraint  pk_OnmBelgeMakbuzBHesapTipi primary key (Id)
+   constraint  pk_OnmBelgeDekontBHesapTipi primary key (Id)
 )
 
-delete from [Lkp].[OnmBelgeMakbuzBHesapTipi]
-INSERT INTO [Lkp].[OnmBelgeMakbuzBHesapTipi] (Id, BHesapTipi, GrupTipiId)
+delete from [Lkp].[OnmBelgeDekontBHesapTipi]
+INSERT INTO [Lkp].[OnmBelgeDekontBHesapTipi] (Id, BHesapTipi, GrupTipiId)
  VALUES 
   ( 0,    N'Tanımsız', 1),
 
@@ -544,17 +605,17 @@ INSERT INTO [Lkp].[OnmBelgeMakbuzBHesapTipi] (Id, BHesapTipi, GrupTipiId)
 -- ------------------------------------------------------- 
 -- AHesapTipiId
 -- ------------------------------------------------------- 
-create table [Lkp].[OnmBelgeMakbuzAHesapTipi]
+create table [Lkp].[OnmBelgeDekontAHesapTipi]
 (
    Id           Int Unique Not Null,
    AHesapTipi   nVarchar(50),
    GrupTipiId   SmallInt Null,
 
-   constraint  pk_OnmBelgeMakbuzAHesapTipi primary key (Id)
+   constraint  pk_OnmBelgeDekontAHesapTipi primary key (Id)
 )
 
-delete from [Lkp].[OnmBelgeMakbuzAHesapTipi]
-INSERT INTO [Lkp].[OnmBelgeMakbuzAHesapTipi] (Id, AHesapTipi, GrupTipiId)
+delete from [Lkp].[OnmBelgeDekontAHesapTipi]
+INSERT INTO [Lkp].[OnmBelgeDekontAHesapTipi] (Id, AHesapTipi, GrupTipiId)
  VALUES 
   ( 0,    N'Tanımsız', 1),
 
@@ -597,16 +658,16 @@ INSERT INTO [Lkp].[OnmBelgeMakbuzAHesapTipi] (Id, AHesapTipi, GrupTipiId)
 -- ------------------------------------------------------- 
 -- JoinTableTypeId
 -- ------------------------------------------------------- 
-create table [Lkp].[OnmBelgeMakbuzJoinTableType]
+create table [Lkp].[OnmBelgeDekontJoinTableType]
 (
    Id               Int Unique Not Null,
    JoinTableType    nVarchar(50),
 
-   constraint  pk_OnmBelgeMakbuzJoinTableType primary key (Id)
+   constraint  pk_OnmBelgeDekontJoinTableType primary key (Id)
 )
 
-delete from [Lkp].[OnmBelgeMakbuzJoinTableType]
-INSERT INTO [Lkp].[OnmBelgeMakbuzJoinTableType] (Id, JoinTableType)
+delete from [Lkp].[OnmBelgeDekontJoinTableType]
+INSERT INTO [Lkp].[OnmBelgeDekontJoinTableType] (Id, JoinTableType)
  VALUES 
   ( 0,     N'Tanımsız'),
   ( 1,     N'OnmBelgeMaliyet'),

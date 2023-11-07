@@ -1,0 +1,27 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table TempTabimHesaplar
+ (
+
+   ULAS                Int IDENTITY(1,1) not null,  
+   HESAP_KODU          varchar(10)  null,
+   ACIKLAMA            varchar(80)  null,
+
+   MaliyetHesapKodu    nvarchar(50) null,
+   VarlikId            Int          null,
+   AboneId             Int          null,
+   
+  constraint pk_TempTabimHesaplar primary key (ULAS)
+ )
+
+ create index X_TempTabimHesaplar01 on TempTabimHesaplar (HESAP_KODU)
+
+ grant select, insert, update, delete on TempTabimHesaplar to public
+
+commit transaction
+
+/*CreateTableEnd*/
+
+

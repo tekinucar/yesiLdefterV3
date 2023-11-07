@@ -242,7 +242,7 @@ BEGIN
 
       --print @case
       -- -------------------------------------------------------------------------------------
-	  -- , ( case [BMakbuz].JoinTableTypeId <#JoinTableTypeId#>  else '?' end ) as Lkp_CariAdi		
+	  -- , ( case [BDekont].JoinTableTypeId <#JoinTableTypeId#>  else '?' end ) as Lkp_CariAdi		
       -- -------------------------------------------------------------------------------------
 	  
 	  Select
@@ -269,7 +269,7 @@ BEGIN
 	  -- ------------------------------------------------
 	  -- @case ve @when alanları birleştirilerek
 	  --
-	  --  , ( case [BMakbuz].JoinTableTypeId  
+	  --  , ( case [BDekont].JoinTableTypeId  
 	  --      When 0 Then HCari.TamAdiSoyadi  
 	  --      When 1 Then HCari.TamAdiSoyadi  
 	  --      When 2100 Then Aday.TamAdiSoyadi   

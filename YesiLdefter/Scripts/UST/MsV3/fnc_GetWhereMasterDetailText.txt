@@ -7,7 +7,7 @@ AS
 BEGIN
 
   --declare @TableIPCode varchar(100)
-  --set @TableIPCode = 'UST/OMS/BMakbuz.BankaHesapIslemleri_L01'
+  --set @TableIPCode = 'UST/OMS/BDekont.BankaHesapIslemleri_L01'
 
   declare @enter varchar(10) = CHAR(13) + CHAR(10) --' \r\n '
   declare @MasterDetail1 varchar(MAX)
@@ -78,8 +78,8 @@ BEGIN
             ) x
 
        -- -------------------------------------------------------
-       -- and Convert(Date, [BMakbuz].BelgeTarihi, 103)  >=  Convert(Date, '1.10.2022 ', 103)     -- :D.SD.43424: -->=
-       -- and Convert(Date, [BMakbuz].BelgeTarihi, 103)  <=  Convert(Date, '1.10.2022 ', 103)     -- :D.SD.43424: --<=
+       -- and Convert(Date, [BDekont].BelgeTarihi, 103)  >=  Convert(Date, '1.10.2022 ', 103)     -- :D.SD.43424: -->=
+       -- and Convert(Date, [BDekont].BelgeTarihi, 103)  <=  Convert(Date, '1.10.2022 ', 103)     -- :D.SD.43424: --<=
 	   -- -------------------------------------------------------
        set @MasterDetail2 = ''
 	   Select @MasterDetail2 = COALESCE( @MasterDetail2 + 

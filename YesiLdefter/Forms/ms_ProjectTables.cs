@@ -41,6 +41,7 @@ namespace YesiLdefter
 
         Control tabControl = null;
         Control editpanel_Sonuc = null;
+        Control editpanel_Sql = null;
 
         List<string> fieldsNameList = new List<string>();
         List<string> imagefieldsNameList = new List<string>();
@@ -152,6 +153,17 @@ namespace YesiLdefter
                     ((DevExpress.XtraEditors.PanelControl)editpanel_Sonuc).Controls[0].Font = new System.Drawing.Font("Courier New", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
                 }
             }
+
+            editpanel_Sql = t.Find_Control(this, v.lyt_Name + "30_20_10_10");
+            if (editpanel_Sql != null)
+            {
+                if (((DevExpress.XtraEditors.PanelControl)editpanel_Sql).Controls.Count > 0)
+                {
+                    ((DevExpress.XtraEditors.PanelControl)editpanel_Sql).Controls[0].Font = new System.Drawing.Font("Courier New", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+                }
+            }
+
+
         }
         private void myNavElementClick(object sender, DevExpress.XtraBars.Navigation.NavElementEventArgs e)
         {
@@ -1146,7 +1158,7 @@ namespace YesiLdefter
 
                     if (IsCrmDb == false)
                         onay = executeNonTargetSql(sql);
-                    
+
                     if (onay)
                     {
                         sql = "";
@@ -1157,6 +1169,14 @@ namespace YesiLdefter
                         v.SP_OpenApplication = false;
                         t.WaitFormOpen(v.mainForm, counted.ToString() + "/" + rowCount.ToString() + " veri aktarım işlemi devam ediyor...");
                         Application.DoEvents();
+                    }
+                    else
+                    {
+                        viewText("DİKKAT : Veri aktarım işlemi durduruldu ...");
+                        imageFieldAvailable = false;
+                        recCount = 0;
+                        Application.DoEvents();
+                        break;
                     }
                 }
 
@@ -1220,8 +1240,14 @@ namespace YesiLdefter
                         value = value.Replace("<option value=\"", "");
                     if (value.IndexOf("\">") > -1)
                         value = value.Replace("\">", "");
-                    if (value == "\"")
-                        value = "";
+
+                    if (value.IndexOf("\"") > -1)
+                        value = value.Replace("\"", "");
+
+                    if (value.IndexOf("'") > -1)
+                        value = value.Replace("'", " ");
+
+                    //if (value == "\"") value = "";
 
                     if (type == "System.Int32") values += " , " + value;
                     if (type == "System.Int64") values += " , " + value;
@@ -1281,8 +1307,14 @@ namespace YesiLdefter
                     value = value.Replace("<option value=\"", "");
                 if (value.IndexOf("\">") > -1)
                     value = value.Replace("\">", "");
-                if (value == "\"")
-                    value = "";
+
+                if (value.IndexOf("\"") > -1)
+                    value = value.Replace("\"", "");
+
+                if (value.IndexOf("'") > -1)
+                    value = value.Replace("'", " ");
+
+                //if (value == "\"") value = "";
 
                 // Where koşulunda var mı?
                 x = editWhere.IndexOf(":" + fieldName + "Value");
@@ -1449,23 +1481,26 @@ namespace YesiLdefter
                 /// , max(Id) as LastId
                 /// from dbo.MtskAday
 
-                string fieldName = dsLastIdControl.Tables[0].Rows[0][1].ToString();
-                string type = dsLastIdControl.Tables[0].Rows[0][2].GetType().ToString();
-                string value = dsLastIdControl.Tables[0].Rows[0][2].ToString();
-
-                if ((value != "") || (value != null) || value != "0")
+                if (t.IsNotNull(dsLastIdControl))
                 {
-                    // 0. kolonda where
-                    editWhere = dsLastIdControl.Tables[0].Rows[0][0].ToString();
+                    string fieldName = dsLastIdControl.Tables[0].Rows[0][1].ToString();
+                    string type = dsLastIdControl.Tables[0].Rows[0][2].GetType().ToString();
+                    string value = dsLastIdControl.Tables[0].Rows[0][2].ToString();
 
-                    if (editWhere != "")
+                    if ((value != "") || (value != null) || value != "0")
                     {
-                        t.Str_Replace(ref editWhere, "\"", "'");
+                        // 0. kolonda where
+                        editWhere = dsLastIdControl.Tables[0].Rows[0][0].ToString();
 
-                        if (type == "System.Int32") editWhere = editWhere.Replace(":IdFieldValue", value);
-                        if (type == "System.String") editWhere = editWhere.Replace(":IdFieldValue", "'" + value + "'");
-                        
-                        editWhere = editWhere.Replace(":IdFieldName", fieldName);
+                        if (editWhere != "")
+                        {
+                            t.Str_Replace(ref editWhere, "\"", "'");
+
+                            if (type == "System.Int32") editWhere = editWhere.Replace(":IdFieldValue", value);
+                            if (type == "System.String") editWhere = editWhere.Replace(":IdFieldValue", "'" + value + "'");
+
+                            editWhere = editWhere.Replace(":IdFieldName", fieldName);
+                        }
                     }
                 }
             }
@@ -1491,6 +1526,8 @@ namespace YesiLdefter
                 DataSet dsTarget = new DataSet();
 
                 onay = t.Sql_ExecuteNon(dsTarget, ref targetSql, vt);
+
+                if (onay == false) viewSqlText(targetSql);
             }
 
             return onay;
@@ -1500,16 +1537,11 @@ namespace YesiLdefter
         {
             v.active_DB.runDBaseNo = v.dBaseNo.UstadCrm;
 
-            /*
-            vTable vt = new vTable();
-            vt.DBaseNo = v.dBaseNo.UstadCrm;
-            vt.DBaseType = v.dBaseType.MSSQL;
-            
-            db.preparingVTable(vt);
-            */
-            
             DataSet ds = new DataSet();
-            return t.SQL_Read_Execute(v.dBaseNo.UstadCrm, ds, ref targetSql, tableName, tableName);
+            bool onay = t.SQL_Read_Execute(v.dBaseNo.UstadCrm, ds, ref targetSql, tableName, tableName);
+            if (onay == false) viewSqlText(targetSql);
+
+            return onay;
         }
 
         private bool executeTargetSql(DataSet ds, string sql, vTable vt)
@@ -1520,6 +1552,8 @@ namespace YesiLdefter
             if (onay)
             {
                 onay = t.Sql_Execute(ds, ref sql, vt);
+
+                if (onay == false) viewSqlText(sql);
             }
 
             return onay;
@@ -1691,7 +1725,6 @@ namespace YesiLdefter
         #endregion Veri Aktarma İşlemleri
 
         #region sub functions
-
         private void preparingTablesProceduresFunctionsScripts()
         {
             proceduresTableIPCode = "UST/PMS/MsProjectProcedures.List_L01";
@@ -1857,7 +1890,20 @@ namespace YesiLdefter
                 }
             }
         }
+        private void viewSqlText(string text)
+        {
+            if (editpanel_Sql != null)
+            {
+                if (((DevExpress.XtraEditors.PanelControl)editpanel_Sql).Controls.Count > 0)
+                {
+                    string old = ((DevExpress.XtraEditors.PanelControl)editpanel_Sql).Controls[0].Text;
 
+                    ((DevExpress.XtraEditors.PanelControl)editpanel_Sql).Controls[0].Text = text + v.ENTER + "/*  * * * * * * * * *  */" + v.ENTER + old;
+
+                    Application.DoEvents();
+                }
+            }
+        }
         #endregion sub database Create functions
 
 
