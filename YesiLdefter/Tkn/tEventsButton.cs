@@ -466,12 +466,17 @@ namespace Tkn_Events
                 (buttonType == v.tButtonType.btHesapAc) ||
                 (buttonType == v.tButtonType.btBelgeAc))
             {
-                if ((prop_ != null) && (propListCount_ <= 1))
-                    t.OpenForm_JSON(tForm, prop_);
+                if ((buttonHint.senderType == "GridView") ||
+                    (buttonHint.senderType == "TreeList") ||
+                    (buttonHint.senderType == "SchedulerControl") ||
+                    (buttonHint.senderType == "Menu"))
+                {
+                    if ((prop_ != null) && (propListCount_ <= 1))
+                        t.OpenForm_JSON(tForm, prop_);
 
-                if (propListCount_ > 1)
-                    onay = openControlForm_(tForm, tableIPCode, propList_, buttonType);
-
+                    if (propListCount_ > 1)
+                        onay = openControlForm_(tForm, tableIPCode, propList_, buttonType);
+                }
                 return onay;
             }
 

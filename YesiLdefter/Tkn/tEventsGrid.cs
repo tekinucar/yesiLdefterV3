@@ -111,7 +111,9 @@ namespace Tkn_Events
             v.tButtonHint.columnOldValue = tGridHint.columnOldValue;
             v.tButtonHint.columnEditValue = tGridHint.columnEditValue;
             v.tButtonHint.parentObject = tGridHint.parentObject;
-            
+            v.tButtonHint.sender = tGridHint.view;
+            v.tButtonHint.senderType = tGridHint.viewType;
+
             buttonType = v.tButtonHint.buttonType = ev.getClickType(tGridHint.tForm, tGridHint.tableIPCode, e, ref propNavigator, ref buttonName);
 
             if (propNavigator != "" && e.KeyCode != Keys.None)

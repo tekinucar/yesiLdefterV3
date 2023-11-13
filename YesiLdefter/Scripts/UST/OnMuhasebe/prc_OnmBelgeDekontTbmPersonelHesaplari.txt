@@ -1,0 +1,21 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_OnmBelgeDekontTbmPersonelHesaplari] 
+AS BEGIN
+
+  update dbo.TempTabimHesaplar set
+    PersonelId = x.Id
+  , MaliyetHesapKodu = '81.17.10'
+  from dbo.TempTabimHesaplar as a,
+  (
+    Select CariHesapKodu, Id  from [dbo].[OnmHesapCari] 
+    where 0 = 0 
+    and   CalismaTipiId = 19
+    and   ISNULL(CariHesapKodu,'') <> ''
+  ) as x
+  Where a.HESAP_KODU = x.CariHesapKodu
+
+END -- procedure
+
+/*CreateProcedureEnd*/
+

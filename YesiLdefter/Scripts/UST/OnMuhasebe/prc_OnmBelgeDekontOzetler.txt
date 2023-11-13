@@ -1,0 +1,218 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_OnmBelgeDekontOzetler]  (@firmId int, @baslangicTarihi datetime, @BitisTarihi datetime)  
+AS BEGIN
+
+  --declare @firmId int = 14
+  --declare @baslangicTarihi datetime
+  --declare @bitisTarihi datetime
+  
+  set @baslangicTarihi = CONVERT(datetime, '01.01.2021',103)
+  set @bitisTarihi = CONVERT(datetime, getdate(), 103)
+
+  Select
+       'Dekontun tipi' as Lkp_OzetGrubu 
+      ,dk.TipiId 
+      ,'' as IslemTipiId
+	  /*
+      ,dk.BHesapTipiId
+      ,dk.AlacakliId
+      ,dk.AHesapTipiId
+      ,dk.VarlikId
+	  ,dk.AboneId
+      ,dk.CariId
+	  */
+	  ,tp.Tipi as Aciklama
+	  	  
+      --,sum(BelgeTutari) as BelgeTutari
+      ,sum((case dk.TipiId when 2 then dk.BelgeTutari else 0 end)) as BorcTutari
+      ,sum((case dk.TipiId when 3 then dk.BelgeTutari else 0 end)) as AlacakTutari
+      ,sum(dk.KdvMatrahi) as KdvMatrahi
+      --,[KdvOrani]
+      ,sum(dk.KdvTutari) as KdvTutari
+      ,sum(dk.VergiVeFonlar) as VergiVeFonlar
+      --,[EkMaliyetId]
+      ,sum(dk.MasrafTutari) as MasrafTutari
+      ,sum(dk.ToplamTutar) as ToplamTutar
+      --,[ParaTipiId]
+      --,[DovizYeriId]
+      --,[DovizKuru]
+      --,[DovizTutari]
+
+  FROM [dbo].[OnmBelgeDekont] as dk
+      left outer join Lkp.OnmBelgeDekontTipi as tp on (dk.TipiId = tp.Id)
+  Where dk.FirmId = @firmId
+  and   dk.IsActive = 1
+  and   dk.BelgeTarihi >= @baslangicTarihi
+  and   dk.BelgeTarihi <= @bitisTarihi
+
+  group by dk.TipiId, tp.Tipi
+
+  union all
+
+  Select
+       'Dekontun düzenlenme nedeni' as Lkp_OzetGrubu 
+      ,0 as TipiId 
+      ,dk.IslemTipiId
+     /* ,dk.BHesapTipiId
+      ,dk.AlacakliId
+      ,dk.AHesapTipiId
+      ,dk.VarlikId
+	  ,dk.AboneId
+      ,dk.CariId
+	  */
+	  ,tp.IslemAdi as Aciklama
+	  
+      --,sum(BelgeTutari) as BelgeTutari
+      ,sum((case dk.TipiId when 2 then dk.BelgeTutari else 0 end)) as BorcTutari
+      ,sum((case dk.TipiId when 3 then dk.BelgeTutari else 0 end)) as AlacakTutari
+      ,sum(dk.KdvMatrahi) as KdvMatrahi
+      --,[KdvOrani]
+      ,sum(dk.KdvTutari) as KdvTutari
+      ,sum(dk.VergiVeFonlar) as VergiVeFonlar
+      --,[EkMaliyetId]
+      ,sum(dk.MasrafTutari) as MasrafTutari
+      ,sum(dk.ToplamTutar) as ToplamTutar
+      --,[ParaTipiId]
+      --,[DovizYeriId]
+      --,[DovizKuru]
+      --,[DovizTutari]
+	  
+  FROM [dbo].[OnmBelgeDekont] as dk
+      left outer join Lkp.OnmBelgeDekontIslemTipi as tp on (isnull(dk.IslemTipiId,'') = tp.IslemKodu)
+  Where dk.FirmId = @firmId
+  and   dk.IsActive = 1
+  and   dk.BelgeTarihi >= @baslangicTarihi
+  and   dk.BelgeTarihi <= @bitisTarihi
+
+  group by dk.IslemTipiId, tp.IslemAdi
+
+  union all
+
+  Select
+       fhg.Lkp_OzetGrubu 
+      ,fhg.TipiId 
+      ,fhg.IslemTipiId
+	  /*
+      ,dk.BHesapTipiId
+      ,dk.AlacakliId
+      ,dk.AHesapTipiId
+      ,dk.VarlikId
+	  ,dk.AboneId
+      ,dk.CariId
+	  */
+	  ,fhg.Aciklama
+	  
+      --,sum(BelgeTutari) as BelgeTutari
+      ,sum(fhg.BorcTutari) as BorcTutari
+      ,SUM(fhg.AlacakTutari) as AlacakTutari
+      ,sum(fhg.KdvMatrahi) as KdvMatrahi
+      --,[KdvOrani]
+      ,sum(fhg.KdvTutari) as KdvTutari
+      ,sum(fhg.VergiVeFonlar) as VergiVeFonlar
+      --,[EkMaliyetId]
+      ,sum(fhg.MasrafTutari) as MasrafTutari
+      ,sum(fhg.ToplamTutar) as ToplamTutar
+      --,[ParaTipiId]
+      --,[DovizYeriId]
+      --,[DovizKuru]
+      --,[DovizTutari]
+	  
+  From (
+  Select
+       'Kullanılan finans hesapları' as Lkp_OzetGrubu 
+      ,dk.BHesapTipiId as TipiId 
+      ,'' IslemTipiId
+	  /*
+      ,dk.BHesapTipiId
+      ,dk.AlacakliId
+      ,dk.AHesapTipiId
+      ,dk.VarlikId
+	  ,dk.AboneId
+      ,dk.CariId
+	  */
+	  ,bht.BHesapTipi + ' - ' + fns.HesapKisaAdi as Aciklama
+	  
+      --,sum(BelgeTutari) as BelgeTutari
+      ,sum(dk.BelgeTutari) as BorcTutari
+      ,0 as AlacakTutari
+      ,sum(dk.KdvMatrahi) as KdvMatrahi
+      --,[KdvOrani]
+      ,sum(dk.KdvTutari) as KdvTutari
+      ,sum(dk.VergiVeFonlar) as VergiVeFonlar
+      --,[EkMaliyetId]
+      ,sum(dk.MasrafTutari) as MasrafTutari
+      ,sum(dk.ToplamTutar) as ToplamTutar
+      --,[ParaTipiId]
+      --,[DovizYeriId]
+      --,[DovizKuru]
+      --,[DovizTutari]
+	  
+  FROM [dbo].[OnmBelgeDekont] as dk
+      left outer join Lkp.OnmBelgeDekontBHesapTipi as bht on (isnull(dk.BHesapTipiId,0) = bht.Id)
+	  left outer join dbo.OnmHesapFinans as fns on (isnull(dk.BorcluId,0) = fns.Id) 
+  Where dk.FirmId = @firmId
+  and   dk.IsActive = 1
+  and   dk.BHesapTipiId in (100,1022,1023,1024) 
+  and   dk.BelgeTarihi >= @baslangicTarihi
+  and   dk.BelgeTarihi <= @bitisTarihi
+
+  group by dk.BHesapTipiId, bht.BHesapTipi, fns.HesapKisaAdi
+
+  union all
+
+  Select
+       'Kullanılan finans hesapları' as Lkp_OzetGrubu 
+      ,dk.AHesapTipiId as TipiId 
+      ,'' IslemTipiId
+	  /*
+      ,dk.BHesapTipiId
+      ,dk.AlacakliId
+      ,dk.AHesapTipiId
+      ,dk.VarlikId
+	  ,dk.AboneId
+      ,dk.CariId
+	  */
+	  ,aht.AHesapTipi + ' - ' + fns.HesapKisaAdi as Aciklama
+	  
+      --,sum(BelgeTutari) as BelgeTutari
+      ,0 as BorcTutari
+      ,sum(dk.BelgeTutari) as AlacakTutari
+      ,sum(dk.KdvMatrahi) as KdvMatrahi
+      --,[KdvOrani]
+      ,sum(dk.KdvTutari) as KdvTutari
+      ,sum(dk.VergiVeFonlar) as VergiVeFonlar
+      --,[EkMaliyetId]
+      ,sum(dk.MasrafTutari) as MasrafTutari
+      ,sum(dk.ToplamTutar) as ToplamTutar
+      --,[ParaTipiId]
+      --,[DovizYeriId]
+      --,[DovizKuru]
+      --,[DovizTutari]
+	  
+  FROM [dbo].[OnmBelgeDekont] as dk
+      left outer join Lkp.OnmBelgeDekontAHesapTipi as aht on (isnull(dk.AHesapTipiId,0) = aht.Id)
+	  left outer join dbo.OnmHesapFinans as fns on (isnull(dk.AlacakliId,0) = fns.Id) 
+  Where dk.FirmId = @firmId
+  and   dk.IsActive = 1
+  and   dk.AHesapTipiId in (100,1022,1023,1024) 
+  and   dk.BelgeTarihi >= @baslangicTarihi
+  and   dk.BelgeTarihi <= @bitisTarihi
+
+  group by dk.AHesapTipiId, aht.AHesapTipi, fns.HesapKisaAdi
+
+  ) as fhg -- finansHesapGrubu
+
+  group by 
+       fhg.Lkp_OzetGrubu 
+      ,fhg.TipiId 
+      ,fhg.IslemTipiId
+	  ,fhg.Aciklama
+
+
+
+
+
+END -- procedure
+
+/*CreateProcedureEnd*/

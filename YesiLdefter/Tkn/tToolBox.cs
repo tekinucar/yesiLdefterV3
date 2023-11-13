@@ -7344,6 +7344,17 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             if (i == 6) if ((c.Name == Name) && (controls == true)) sonuc = true;
             if (i == 7) if ((c.Name == Name) && (c.AccessibleName == AccessibleName) && (controls == true)) sonuc = true;
 
+            // c.AccessibleName = UST/OMS/BDekont.NakitIslemler_L01|1
+            // AccessibleName   = UST/OMS/BDekont.NakitIslemler_L01
+            // durumunu yakalamak için 
+            // UST/OMS/BDekont.NakitIslemler_L01|1 : bu durum AcordionDinamik içinde oluşuyor
+            
+            if ((controls == true) && (sonuc == false) && IsNotNull(c.AccessibleName))
+            {
+                if (c.AccessibleName.IndexOf("|") > -1)
+                    if (c.AccessibleName.IndexOf(AccessibleName) > -1) sonuc = true;
+            }
+
             // Controlun FieldName bakarak control tespiti, 
             // FieldName de controlun Name ne veriliyor   
             // tEdit.Name = "Column_" + tfieldname;    şeklinde
@@ -7579,7 +7590,8 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                                                "DevExpress.XtraVerticalGrid.VGridControl",
                                                "DevExpress.XtraDataLayout.DataLayoutControl",
                                                "DevExpress.XtraTreeList.TreeList",
-                                               "DevExpress.XtraEditors.DataNavigator" };
+                                               "DevExpress.XtraEditors.DataNavigator",
+                                               "DevExpress.XtraBars.Navigation.NavigationPane" };
                                                //"DevExpress.XtraTab.XtraTabPage",
                                                //"DevExpress.XtraTab.XtraTabControl"
                                                //"DevExpress.XtraWizard.WizardControl" 
@@ -7591,6 +7603,11 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             if (cntrl != null)
             {
                 object tDataTable = new object();
+
+                // Page içindeki view yapan controlu al
+                // o controlde aşağıdakilerden birisidir
+                if (cntrl.GetType().ToString() == "DevExpress.XtraBars.Navigation.NavigationPane")
+                    cntrl = ((DevExpress.XtraBars.Navigation.NavigationPane)cntrl).Controls[0].Controls[0];
 
                 if (cntrl.GetType().ToString() == "DevExpress.XtraGrid.GridControl")
                     tDataTable = ((DevExpress.XtraGrid.GridControl)cntrl).DataSource;
@@ -7606,6 +7623,8 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
                 if (cntrl.GetType().ToString() == "DevExpress.XtraEditors.DataNavigator")
                     tDataTable = ((DevExpress.XtraEditors.DataNavigator)cntrl).DataSource;
+
+                
 
                 if (cntrl.GetType().ToString() == "DevExpress.XtraWizard.WizardControl")
                 {

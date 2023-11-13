@@ -515,6 +515,7 @@ namespace Tkn_Events
                 v.tButtonHint.tableIPCode = tableIPCode;
                 v.tButtonHint.propNavigator = propNavigator;
                 v.tButtonHint.buttonType = buttonType;
+                v.tButtonHint.senderType = "Menu";
                 tEventsButton evb = new tEventsButton();
                 onay = evb.btnClick(v.tButtonHint);
             }

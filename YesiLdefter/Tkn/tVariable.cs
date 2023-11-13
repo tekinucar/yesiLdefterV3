@@ -1889,6 +1889,7 @@ namespace Tkn_Variable
 
         public Form tForm { get; set; }
         public object sender { get; set; }
+        public string senderType { get; set; }
         public string tableIPCode { get; set; }
         public string buttonName { get; set; }
         public string caption { get; set; }
@@ -1908,6 +1909,7 @@ namespace Tkn_Variable
         {
             tForm = null;
             sender = null;
+            senderType = "";
             tableIPCode = "";
             buttonName = "";
             caption = "";

@@ -17,7 +17,7 @@ begin transaction
    Constraint pk_EduMtskSoruKitabiDetayi primary key (Id)
  )
 
- create index X_EduMtskSoruKitabiDetayi_01 on EduMtskSoruKitabiDetayi (KitapNo, DersTipiId)
+ create index X_EduMtskSoruKitabiDetayi_01 on EduMtskSoruKitabiDetayi (KitapNo)
 
  grant select, insert, update, delete on EduMtskSoruKitabiDetayi to public
 
@@ -172,4 +172,78 @@ AS BEGIN
 
 
 END -- procedure
+
+
+
+CREATE trigger [dbo].[trg_EduMtskSoruKitabiDetayi] on [dbo].[EduMtskSoruKitabiDetayi]
+after insert, update
+as begin
+
+    declare cursor_EduMtskSoruKitabiDetayi cursor for select Id from Inserted
+    declare @curId bigint
+
+    OPEN cursor_EduMtskSoruKitabiDetayi
+
+    FETCH NEXT FROM cursor_EduMtskSoruKitabiDetayi INTO @curId
+	
+	declare @yKitapNo smallint = 0
+	declare @yDersTipiId smallint = 0
+	declare @yEduMtskKonularId int = 0
+	declare @yEduMtskSorularId int = 0
+
+	declare @DersTipiId_ smallint = 0
+	declare @EduMtskKonularId_ int = 0
+	
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+	    set @yKitapNo = 0
+	    set @yDersTipiId = 0
+	    set @yEduMtskKonularId = 0
+	    set @yEduMtskSorularId = 0
+	    set @DersTipiId_ = 0
+	    set @EduMtskKonularId_ = 0
+
+		Select 
+             @yKitapNo = ins.KitapNo
+            ,@yDersTipiId = ins.DersTipiId
+	        ,@yEduMtskKonularId = ins.EduMtskKonularId
+	        ,@yEduMtskSorularId = ins.EduMtskSorularId
+    	From Inserted ins
+    	Where ins.Id = @curId
+
+		Select 
+             @DersTipiId_ = sr.DersTipiId
+	        ,@EduMtskKonularId_ = sr.EduMtskKonularId
+    	From EduMtskSorular as sr
+    	Where sr.Id = @yEduMtskSorularId
+		
+		if ((@yDersTipiId <> @DersTipiId_) or
+		    (@yEduMtskSorularId <> @EduMtskKonularId_))
+        begin
+            Update EduMtskSoruKitabiDetayi set
+			  DersTipiId = @DersTipiId_
+			 ,EduMtskKonularId = @EduMtskKonularId_
+			where Id = @curId
+
+            Update EduMtskSoruKitabi set
+              SoruSayisi = x.Adet 
+            From EduMtskSoruKitabi as a,
+            (
+               Select KitapNo, count(Id) Adet from EduMtskSoruKitabiDetayi 
+               Where KitapNo = @yKitapNo
+               Group by KitapNo
+            ) as x
+            Where a.KitapNo = x.KitapNo
+
+        end
+
+    	FETCH NEXT FROM cursor_EduMtskSoruKitabiDetayi INTO @curId
+    end -- While
+
+
+    CLOSE cursor_EduMtskSoruKitabiDetayi
+    DEALLOCATE cursor_EduMtskSoruKitabiDetayi  
+	
+end -- trigger
 

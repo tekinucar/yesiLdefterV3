@@ -1,0 +1,29 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table TempTabimBankalar
+ (
+
+   ULAS                Int IDENTITY(1,1) not null,  
+   BANKANO             varchar(10)  null,
+   BANKAADI            varchar(20)  null,
+
+   KasaId              Int          null,
+   BankaHesapId        Int          null,
+   KrediKartiId        Int          null,
+   PosId               Int          null,
+   
+  constraint pk_TempTabimBankalar primary key (ULAS)
+ )
+
+ create index X_TempTabimBankalar01 on TempTabimBankalar (BANKANO)
+
+ grant select, insert, update, delete on TempTabimBankalar to public
+
+commit transaction
+
+/*CreateTableEnd*/
+
+
+

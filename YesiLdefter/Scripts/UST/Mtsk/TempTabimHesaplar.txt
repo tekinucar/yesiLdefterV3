@@ -12,6 +12,11 @@ begin transaction
    MaliyetHesapKodu    nvarchar(50) null,
    VarlikId            Int          null,
    AboneId             Int          null,
+   KasaId              Int          null,
+   BankaHesapId        Int          null,
+   KrediKartiId        Int          null,
+   PosId               Int          null,
+   PersonelId          Int          null,
    
   constraint pk_TempTabimHesaplar primary key (ULAS)
  )

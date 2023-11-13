@@ -65,8 +65,8 @@ begin transaction
    Aciklama           nVarchar(200) null,
    KayitTarihi        Date          null, 
    KayitSaati         VarChar(8)    null,
-   JoinTableTypeId    SmallInt      null, /* ilgili table 1: OnmBelgeMaliyet,  */
-   JoinId             Int           null, /* ilgili table ref Id */
+   SourceTypeId    SmallInt      null, /* ilgili table 1: OnmBelgeMaliyet,  */
+   SourceId             Int           null, /* ilgili table ref Id */
 
    constraint		pk_OnmBelgeDekont primary key (Id)
  )
@@ -96,25 +96,26 @@ AS BEGIN
     declare cursor_BDekont cursor for select Id from Inserted
     declare @curId bigint
 
-	declare @FirmId int
-	declare @IsActive bit
-	declare @TipiId smallInt
-	declare @IslemTipiId varchar(10)
-	declare @_IslemTipiId varchar(10)
-	declare @BHesapTipiId smallInt
-	declare @AHesapTipiId smallInt
-	declare @BelgeTutari numeric(22,8)
-	declare @_BelgeTutari numeric(22,8)
-	declare @CariId int
-	declare @JoinTableTypeId smallInt
-	declare @JoinId int
+    declare @FirmId int
+    declare @IsActive bit
+    declare @TipiId smallInt
+    declare @IslemTipiId varchar(10)
+    declare @_IslemTipiId varchar(10)
+    declare @BelgeTarihi date
+    declare @BHesapTipiId smallInt
+    declare @AHesapTipiId smallInt
+    declare @BelgeTutari numeric(22,8)
+    declare @_BelgeTutari numeric(22,8)
+    declare @CariId int
+    declare @SourceTypeId smallInt
+    declare @SourceId int
 
     declare @onay bit
-	declare @OnmOdemePlaniId int
-	declare @OnmOdemePlaniTaksitTutari numeric(22,8)
-	declare @makbuzCount int
+    declare @OnmOdemePlaniId int
+    declare @OnmOdemePlaniTaksitTutari numeric(22,8)
+    declare @makbuzCount int
 
-	OPEN cursor_BDekont
+    OPEN cursor_BDekont
 
     FETCH NEXT FROM cursor_BDekont INTO @curId
 
@@ -125,12 +126,13 @@ AS BEGIN
 	    , @IsActive = ins.IsActive
 	    , @TipiId = ins.TipiId
 	    , @IslemTipiId = ins.IslemTipiId
+        , @BelgeTarihi = ins.BelgeTarihi
 		, @BHesapTipiId = isnull(ins.BHesapTipiId,0)
 		, @AHesapTipiId = isnull(ins.AHesapTipiId,0)
 	    , @BelgeTutari = round(ins.BelgeTutari,2)
 		, @CariId = ins.CariId
-		, @JoinTableTypeId = ins.JoinTableTypeId
-		, @JoinId = ins.JoinId
+		, @SourceTypeId = ins.SourceTypeId
+		, @SourceId = ins.SourceId
       from Inserted ins
       where ins.Id = @curId
 	  
@@ -139,13 +141,13 @@ AS BEGIN
 	  set @_BelgeTutari = @BelgeTutari
 
 	  if (@TipiId = 3) and -- Tediye    
-	     (@JoinTableTypeId = 1) and -- OnmBelgeMaliyet tablosu
+	     (@SourceTypeId = 1) and -- OnmBelgeMaliyet tablosu
 		 (@IsActive = 1)
       begin
           Update dbo.OnmBelgeMaliyet set
 			IsPaid = 1  -- ödendi işareti
           , PaidId = @curId -- OnmBelgeDekont.Id
-          Where Id = @JoinId
+          Where Id = @SourceId
 	  end
 	  	  
 	  if (@TipiId = 2) and -- Tahsilat
@@ -157,7 +159,7 @@ AS BEGIN
           from dbo.OnmOdemePlani
           where CariId = @CariId
           and UcretTipiId = @AHesapTipiId
-		  and ( BelgeMakbuzId = @curId or PatchBelgeMakbuzId = @curId )
+		  and ( BelgeDekontId = @curId or PatchBelgeDekontId = @curId )
 		  		  
 		  if (@_BelgeTutari > 1) and -- 0 değil 1 liradan büyük ise
 		     (@makbuzCount = 0)     -- OnmBelgeDekont.Id henüz işlenmemiş  
@@ -179,7 +181,8 @@ AS BEGIN
               begin
                   Update dbo.OnmOdemePlani set
 				    IsPaid = 1
-				  , BelgeMakbuzId = @curId 
+                  , TahsilTarihi = @BelgeTarihi
+				  , BelgeDekontId = @curId 
                   Where Id = @OnmOdemePlaniId
 
                   set @_BelgeTutari = @_BelgeTutari - @OnmOdemePlaniTaksitTutari
@@ -193,22 +196,23 @@ AS BEGIN
 				    YedekTaksitTutari = TaksitTutari
                   , TaksitTutari = @_BelgeTutari
                   , IsPaid = 1
-				  , BelgeMakbuzId = @curId 
+                  
+				  , BelgeDekontId = @curId 
                   Where Id = @OnmOdemePlaniId
 
                   Insert into dbo.OnmOdemePlani
                   ( FirmId, DonemTipiId, UcretTipiId, CariId, TaksitTipiId
                    ,TaksitNo, VadeTarihi, VadeYil, VadeAy, VadeGun
                    ,TaksitTutari, IsPaid
-                   ,YedekTaksitTutari, BelgeMakbuzId, PatchBelgeMakbuzId, BelgeStokBId )
+                   ,YedekTaksitTutari, BelgeDekontId, PatchBelgeDekontId, BelgeStokBId )
                   Select 
 				    FirmId, DonemTipiId, UcretTipiId, CariId, TaksitTipiId
                    ,TaksitNo, VadeTarihi, VadeYil, VadeAy, VadeGun
                    ,@OnmOdemePlaniTaksitTutari - @_BelgeTutari  --TaksitTutari
 				   ,0      --IsPaid
                    ,null   --YedekTaksitTutari
-                   ,null   --BelgeMakbuzId
-                   ,@curId --PatchBelgeMakbuzId
+                   ,null   --BelgeDekontId
+                   ,@curId --PatchBelgeDekontId
 				   ,null   --BelgeStokBId
                   from dbo.OnmOdemePlani
 				  where Id = @OnmOdemePlaniId
@@ -272,8 +276,8 @@ AS BEGIN
 	declare @BelgeTutari numeric(22,8)
 	declare @_BelgeTutari numeric(22,8)
 	declare @CariId int
-	declare @JoinTableTypeId smallInt
-	declare @JoinId int
+	declare @SourceTypeId smallInt
+	declare @SourceId int
 
 	OPEN cursor_BDekontDlt
 
@@ -290,18 +294,18 @@ AS BEGIN
 		, @AHesapTipiId = isnull(dlt.AHesapTipiId,0)
 	    , @BelgeTutari = round(dlt.BelgeTutari,2)
 		, @CariId = dlt.CariId
-		, @JoinTableTypeId = dlt.JoinTableTypeId
-		, @JoinId = dlt.JoinId
+		, @SourceTypeId = dlt.SourceTypeId
+		, @SourceId = dlt.SourceId
       from deleted dlt
       where dlt.Id = @curId
 	  
 	  if (@TipiId = 3) and -- Tediye    
-	     (@JoinTableTypeId = 1) -- OnmBelgeMaliyet tablosu
+	     (@SourceTypeId = 1) -- OnmBelgeMaliyet tablosu
       begin
           Update dbo.OnmBelgeMaliyet set
 			IsPaid = 0  -- ödenmedi işareti
           , PaidId = 0  -- OnmBelgeDekont.Id
-          Where Id = @JoinId
+          Where Id = @SourceId
 	  end
 
 	  if (@TipiId = 2) and -- Tahsilat
@@ -309,10 +313,10 @@ AS BEGIN
       begin
 	      -- iki türlü taksit satırı mevcut
 		  -- 1. esas TaksitTutari : kullanıcının oluşturduğu
-		  -- 2. eksik tahsilatlardan dolayı sonradan türetilmiş ve PatchBelgeMakbuzId ile kaynağı belirtilmiş eksik TaksitTutari
+		  -- 2. eksik tahsilatlardan dolayı sonradan türetilmiş ve PatchBelgeDekontId ile kaynağı belirtilmiş eksik TaksitTutari
 		  -- yani 
-		  -- BelgeMakbuzId      : taksidi kapatan tahsilat makbuzun Id si 
-	      -- PatchBelgeMakbuzId : taksidin tamamı kapatılmadıysa kalan tutarın yeni taksit oluşmasına sebep olan tahsilat makbuz Id (bu sadece borçlandırıyor)
+		  -- BelgeDekontId      : taksidi kapatan tahsilat dekontun Id si 
+	      -- PatchBelgeDekontId : taksidin tamamı kapatılmadıysa kalan tutarın yeni taksit oluşmasına sebep olan tahsilat dekont Id (bu sadece borçlandırıyor)
 
 		  -- EsasTaksitTutari  : EsTT
 		  -- EksikTaksitTutari : EkTT
@@ -329,10 +333,10 @@ AS BEGIN
 		  -- işlem1
 		  Update dbo.OnmOdemePlani set
 		    IsPaid = 0
-          , BelgeMakbuzId = 0
-		  Where BelgeMakbuzId = @curId
+          , BelgeDekontId = 0
+		  Where BelgeDekontId = @curId
 		  and   isnull(YedekTaksitTutari,0) = 0
-		  and   isnull(PatchBelgeMakbuzId,0) = 0
+		  and   isnull(PatchBelgeDekontId,0) = 0
 		  and   IsPaid = 1
 	      
 	      -- esas taksit tutarı eksik tahsil edilmiş 
@@ -341,34 +345,34 @@ AS BEGIN
 		    TaksitTutari = YedekTaksitTutari
           , YedekTaksitTutari = null
 		  , IsPaid = 0
-          , BelgeMakbuzId = 0
-		  Where BelgeMakbuzId = @curId
+          , BelgeDekontId = 0
+		  Where BelgeDekontId = @curId
 		  and   isnull(YedekTaksitTutari,0) > 0
-		  and   isnull(PatchBelgeMakbuzId,0) = 0
+		  and   isnull(PatchBelgeDekontId,0) = 0
 		  and   IsPaid = 1
 
           -- eksik taksit üretilmiş ve oda başka bir tahsilat makbuzu ile tahsil edilmiş ise
 		  -- işlem3
 		  Update dbo.OnmOdemePlani set
-            PatchBelgeMakbuzId = null
-          Where PatchBelgeMakbuzId = @curId
-          and   BelgeMakbuzId > 0
+            PatchBelgeDekontId = null
+          Where PatchBelgeDekontId = @curId
+          and   BelgeDekontId > 0
 		  and   IsPaid = 1
 		  
 		  -- eksik taksit üretilmiş ve tahsil edilmemiş ise
 		  -- işlem4 ve işlem6 için
           Delete from dbo.OnmOdemePlani 
-          Where PatchBelgeMakbuzId = @curId
+          Where PatchBelgeDekontId = @curId
 		  and   IsPaid = 0
 
 		  -- eksik taksidin tamamını tahsilmiş ise
 		  -- işlem5
 		  Update dbo.OnmOdemePlani set
 		    IsPaid = 0
-          , BelgeMakbuzId = 0
-		  Where BelgeMakbuzId = @curId
+          , BelgeDekontId = 0
+		  Where BelgeDekontId = @curId
 		  and   isnull(YedekTaksitTutari,0) = 0
-		  and   isnull(PatchBelgeMakbuzId,0) > 0
+		  and   isnull(PatchBelgeDekontId,0) > 0
 		  and   IsPaid = 1
 
 		  -- kendisi eksik taksit zaten, ve yine eksik tahsil edilmiş ise
@@ -377,10 +381,10 @@ AS BEGIN
 		    TaksitTutari = YedekTaksitTutari
           , YedekTaksitTutari = null
 		  , IsPaid = 0
-          , BelgeMakbuzId = 0
-		  Where BelgeMakbuzId = @curId
+          , BelgeDekontId = 0
+		  Where BelgeDekontId = @curId
 		  and   isnull(YedekTaksitTutari,0) > 0
-		  and   isnull(PatchBelgeMakbuzId,0) > 0
+		  and   isnull(PatchBelgeDekontId,0) > 0
 		  and   IsPaid = 1
 		  		   
       end -- if (@TipiId = 2)
@@ -543,6 +547,7 @@ INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, A
  ( '153.1023',  'Stok alımı için kredi kartıyla ödeme' , 153,  1023  ), 
  ( '320.1023',  'Cari hesaba kredi kartı ile ödeme' , 320,  1023  ), 
  ( '770.1023',  'Genel yönetim giderleri için kredi kartıyla ödeme' , 770,  1023  ), 
+ ( '791.100',  'İşçi ücret ve giderleri için nakit ödeme' , 791,  100  ), 
  ( '793.1023',  'Dışarıdan sağlanan hizmetler için kredi kartıyla ödeme' , 793,  1023  ), 
  ( '793.100',  'Dışarıdan sağlanan hizmetler için nakit ödeme' , 793,  100  ), 
  ( '793.1022',  'Dışarıdan sağlanan hizmetler için banka hesabından havale/Eft' , 793,  1022  ) 
@@ -656,22 +661,28 @@ INSERT INTO [Lkp].[OnmBelgeDekontAHesapTipi] (Id, AHesapTipi, GrupTipiId)
   ( 2114,  N'Mtsk özel uygulama ders ücreti', 1)
 
 -- ------------------------------------------------------- 
--- JoinTableTypeId
+-- SourceTypeId
 -- ------------------------------------------------------- 
-create table [Lkp].[OnmBelgeDekontJoinTableType]
+create table [Lkp].[OnmBelgeDekontSourceType]
 (
    Id               Int Unique Not Null,
-   JoinTableType    nVarchar(50),
+   SourceType    nVarchar(50),
 
-   constraint  pk_OnmBelgeDekontJoinTableType primary key (Id)
+   constraint  pk_OnmBelgeDekontSourceType primary key (Id)
 )
 
-delete from [Lkp].[OnmBelgeDekontJoinTableType]
-INSERT INTO [Lkp].[OnmBelgeDekontJoinTableType] (Id, JoinTableType)
+delete from [Lkp].[OnmBelgeDekontSourceType]
+INSERT INTO [Lkp].[OnmBelgeDekontSourceType] (Id, SourceType)
  VALUES 
   ( 0,     N'Tanımsız'),
   ( 1,     N'OnmBelgeMaliyet'),
-  ( 2100,  N'Mtsk Modülü')
+  ( 2,     N'OnmOdemePlani'),
+  ( 2100,  N'Mtsk Modülü'),
+  ( 2103,  N'Mtsk Veri Transferi - Giderler'),
+  ( 2104,  N'Mtsk Veri Transferi - CariAlt'),
+  ( 2105,  N'Mtsk Veri Transferi - Kurharc')
+
+
 
 
 

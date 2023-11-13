@@ -23,8 +23,8 @@ begin transaction
    TahsilTarihi      Date          null,
 
    YedekTaksitTutari   Numeric(22,8) null, /* taksit tutarı eksik tahsil edildiği zaman ( YedekTaksitTutari = TaksitTutari, TaksitTutari = EksikTahsilTutarı ) şeklinde işleniyor */
-   BelgeMakbuzId       Int         null,
-   PatchBelgeMakbuzId  Int         null, /* eksik tahsil edildiğinde yeni oluşturulan satıra hangi BelgeMakbuzId den dolayı oluşturulduğunun işareti */
+   BelgeDekontId       Int         null, /* OnmBelgeDekont.Id */
+   PatchBelgeDekontId  Int         null, /* eksik tahsil edildiğinde yeni oluşturulan satıra hangi BelgeDekontId den dolayı oluşturulduğunun işareti */
    BelgeStokBId        Int         null, /* Fatura için : BelgeStokB.Id  : BelgeStokB başlık tablosu */
    SourceTypeId        SmallInt    null, /* 0. manuel giriş, 1. Tabim Transfer */      
    SourceId            Int         null, /* Tabim CariAlt.Ulas */
@@ -91,6 +91,26 @@ INSERT INTO [Lkp].[OnmOdemePlaniTaksitTipi] (Id, TaksitTipi)
   ( 2,    N'Taksit'),
   ( 3,    N'Tek Ödeme')
     
+
+-- ------------------------------------------------------- 
+-- SourceTypeId
+-- ------------------------------------------------------- 
+create table [Lkp].[OnmOdemePlaniSourceType]
+(
+   Id               Int Unique not null, 
+   SourceType       nVarchar(50)   null,
+   
+   constraint  pk_OnmOdemePlaniSourceType primary key (Id)
+)
+
+Delete from [Lkp].[OnmOdemePlaniSourceType]
+INSERT INTO [Lkp].[OnmOdemePlaniSourceType] (Id, SourceType)
+ VALUES 
+  ( 0,     N''),
+  ( 2100,  N'Mtsk Modülü - Kullanıcı girişi'),
+  ( 2103,  N'Mtsk Veri Transferi - Giderler'),
+  ( 2104,  N'Mtsk Veri Transferi - CariAlt'),
+  ( 2105,  N'Mtsk Veri Transferi - Kurharc')
 
 commit transaction
 

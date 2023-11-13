@@ -1249,6 +1249,7 @@ namespace YesiLdefter
 
                     //if (value == "\"") value = "";
 
+                    if (type == "System.Int16") values += " , " + value;
                     if (type == "System.Int32") values += " , " + value;
                     if (type == "System.Int64") values += " , " + value;
                     if (type == "System.DateTime") values += " , convert(Datetime, '" + value + "',103)";
@@ -1321,7 +1322,9 @@ namespace YesiLdefter
                 
                 if (x > 0)
                 {
+                    if (type == "System.Int16") editWhere = editWhere.Replace(":" + fieldName + "Value", value);
                     if (type == "System.Int32") editWhere = editWhere.Replace(":" + fieldName + "Value", value);
+                    if (type == "System.Int64") editWhere = editWhere.Replace(":" + fieldName + "Value", value);
                     if (type == "System.String") editWhere = editWhere.Replace(":" + fieldName + "Value", "'" + value + "'");
                 }
                 else
@@ -1329,6 +1332,7 @@ namespace YesiLdefter
                     if (fieldName.IndexOf("Resim") == -1)
                     {
                         fieldName = "[" + fieldName + "]";
+                        if (type == "System.Int16") values += " , " + fieldName + " = " + value;
                         if (type == "System.Int32") values += " , " + fieldName + " = " + value;
                         if (type == "System.Int64") values += " , " + fieldName + " = " + value;
                         if (type == "System.DateTime") values += " , " + fieldName + " = " + " convert(Datetime, '" + value + "',103)";
@@ -1417,7 +1421,9 @@ namespace YesiLdefter
 
                 if (x > 0)
                 {
+                    if (type == "System.Int16") editWhere = editWhere.Replace(":" + fieldName + "Value", value);
                     if (type == "System.Int32") editWhere = editWhere.Replace(":" + fieldName + "Value", value);
+                    if (type == "System.Int64") editWhere = editWhere.Replace(":" + fieldName + "Value", value);
                     if (type == "System.String") editWhere = editWhere.Replace(":" + fieldName + "Value", "'" + value + "'");
                 }
             }

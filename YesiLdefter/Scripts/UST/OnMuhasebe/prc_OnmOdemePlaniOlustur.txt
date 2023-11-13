@@ -22,7 +22,7 @@ AS BEGIN
   and   UcretTipiId = @ucretTipiId
   and   CariId = @cariId
   and   (IsPaid = 1      -- ödendi
-    or BelgeMakbuzId > 0 -- tahsilat makbuzu varsa
+    or BelgeDekontId > 0 -- tahsilat dekontu var ise
 	or BelgeStokBId > 0) -- fatura kesilmişse
 
   if (@mevcut > 0) 
@@ -106,7 +106,7 @@ AS BEGIN
            ,[VadeGun]
            ,[TaksitTutari]
            ,[IsPaid]
-           ,[BelgeMakbuzId]
+           ,[BelgeDekontId]
            ,[BelgeStokBId])
         VALUES
            (@firmId
@@ -121,7 +121,7 @@ AS BEGIN
            ,DAY(@AdayKayitTarihi)   --<VadeGun, smallint,>
            ,@PesinatTutari          --<TaksitTutari, numeric(22,8),>
            ,0  --<IsPaid, bit,>
-           ,0  --<BelgeMakbuzId, int,>
+           ,0  --<BelgeDekontId, int,>
            ,0) --<BelgeStokBId, int,>)
         
 	 end -- @PesinatTutari
@@ -152,7 +152,7 @@ AS BEGIN
            ,[VadeGun]
            ,[TaksitTutari]
            ,[IsPaid]
-           ,[BelgeMakbuzId]
+           ,[BelgeDekontId]
            ,[BelgeStokBId])
        VALUES
            (@firmId
@@ -167,7 +167,7 @@ AS BEGIN
            ,DAY(@OdemeBaslamaTarihi1)   --<VadeGun, smallint,>
            ,@aylikUcret                --<TaksitTutari, numeric(22,8),>
            ,0 --<IsPaid, bit,>
-           ,0 --<BelgeMakbuzId, int,>
+           ,0 --<BelgeDekontId, int,>
            ,0) --<BelgeStokBId, int,>)
             
         set @OdemeBaslamaTarihi1 = DATEADD(MONTH, 1, @OdemeBaslamaTarihi1)
@@ -196,7 +196,7 @@ AS BEGIN
            ,[VadeGun]
            ,[TaksitTutari]
            ,[IsPaid]
-           ,[BelgeMakbuzId]
+           ,[BelgeDekontId]
            ,[BelgeStokBId])
         VALUES
            (@firmId
@@ -211,7 +211,7 @@ AS BEGIN
            ,DAY(@OdemeBaslamaTarihi2)   --<VadeGun, smallint,>
            ,@ESinavUcreti               --<TaksitTutari, numeric(22,8),>
            ,0  --<IsPaid, bit,>
-           ,0  --<BelgeMakbuzId, int,>
+           ,0  --<BelgeDekontId, int,>
            ,0) --<BelgeStokBId, int,>)
      end
      
@@ -237,7 +237,7 @@ AS BEGIN
            ,[VadeGun]
            ,[TaksitTutari]
            ,[IsPaid]
-           ,[BelgeMakbuzId]
+           ,[BelgeDekontId]
            ,[BelgeStokBId])
         VALUES
            (@firmId
@@ -252,7 +252,7 @@ AS BEGIN
            ,DAY(@OdemeBaslamaTarihi2)   --<VadeGun, smallint,>
            ,@UygulamaSinavUcreti        --<TaksitTutari, numeric(22,8),>
            ,0  --<IsPaid, bit,>
-           ,0  --<BelgeMakbuzId, int,>
+           ,0  --<BelgeDekontId, int,>
            ,0) --<BelgeStokBId, int,>)
      end
 
