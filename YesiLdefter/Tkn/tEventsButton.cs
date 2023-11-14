@@ -469,6 +469,7 @@ namespace Tkn_Events
                 if ((buttonHint.senderType == "GridView") ||
                     (buttonHint.senderType == "TreeList") ||
                     (buttonHint.senderType == "SchedulerControl") ||
+                    (buttonHint.senderType == "Button") ||
                     (buttonHint.senderType == "Menu"))
                 {
                     if ((prop_ != null) && (propListCount_ <= 1))

@@ -1652,6 +1652,7 @@ namespace Tkn_Events
             v.tButtonHint.propNavigator = Prop_Navigator;
             v.tButtonHint.buttonType = getClickType(Button_Click_Type);
             v.tButtonHint.sender = sender;
+            v.tButtonHint.senderType = "Button";
             tEventsButton evb = new tEventsButton();
             evb.btnClick(v.tButtonHint);
             v.tButtonHint.Clear();
