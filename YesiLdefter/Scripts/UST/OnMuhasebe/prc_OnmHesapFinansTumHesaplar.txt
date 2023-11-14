@@ -1,0 +1,145 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_OnmHesapFinansTumHesaplar]   
+AS BEGIN
+  --(@firmId int) 
+  --declare @firmId int = 14
+  
+ -- Bankalar
+ Select 
+   [HBanka].[Id]
+ , [HBanka].[ParentId]
+ , [HBanka].[FirmId]
+ , [HBanka].[IsActive]
+ , [HBanka].[UstGrupTipiId]
+ , [HBanka].[AnaGrupTipiId]
+ , [HBanka].[AltGrupTipiId]
+ , [HBanka].[AltCesitTipiId]
+ , [HBanka].[HesapKodu]
+ , [HBanka].[HesapKisaAdi]
+ , [HBanka].[HesapAdi]
+ , [HBanka].[Numarasi]
+ , [HBanka].[IBANNumarasi]
+ , '' as Lkp_AltCesitTipi
+ , '' as Lkp_ParaAdi
+
+ From [dbo].[OnmHesapFinans] as [HBanka]
+ Where 0 = 0 
+ and HBanka.UstGrupTipiId = 10
+ and HBanka.AltGrupTipiId = 1020
+ 
+ union all 
+
+ -- Şubeler
+ Select 
+   [HBanka].[Id]
+ , [HBanka].[ParentId]
+ , [HBanka].[FirmId]
+ , [HBanka].[IsActive]
+ , [HBanka].[UstGrupTipiId]
+ , [HBanka].[AnaGrupTipiId]
+ , [HBanka].[AltGrupTipiId]
+ , [HBanka].[AltCesitTipiId]
+ , [HBanka].[HesapKodu]
+ , [HBanka].[HesapKisaAdi]
+ , [HBanka].[HesapAdi]
+ , [HBanka].[Numarasi]
+ , [HBanka].[IBANNumarasi]
+ , '' as Lkp_AltCesitTipi
+ , '' as Lkp_ParaAdi
+
+ From [dbo].[OnmHesapFinans] as [HBanka]
+ Where 0 = 0 
+ and HBanka.UstGrupTipiId = 10
+ and HBanka.AltGrupTipiId = 1021
+
+ union all 
+
+ -- Hesaplar    
+ Select 
+   [HBanka].[Id]
+ , [HBanka].[ParentId]
+ , [HBanka].[FirmId]
+ , [HBanka].[IsActive]
+ , [HBanka].[UstGrupTipiId]
+ , [HBanka].[AnaGrupTipiId]
+ , [HBanka].[AltGrupTipiId]
+ , [HBanka].[AltCesitTipiId]
+ , [HBanka].[HesapKodu]
+ , [HBanka].[HesapKisaAdi]
+ , [HBanka].[HesapAdi]
+ , [HBanka].[Numarasi]
+ , [HBanka].[IBANNumarasi]
+ -- LookUp fields
+ , [FNo8].[AltCesitTipi] as Lkp_AltCesitTipi
+ , [FNo31].[ParaAdi] as Lkp_ParaAdi
+ From [dbo].[OnmHesapFinans] as [HBanka]
+    left outer join Lkp.OnmHesapFinansAltCesitTipi as FNo8 on ( HBanka.AltCesitTipiId = FNo8.Id )
+    left outer join Lkp.OnmParaTipi as FNo31 on ( HBanka.ParaTipiId = FNo31.ParaKodu )
+ Where 0 = 0 
+ and HBanka.UstGrupTipiId = 10
+ and HBanka.AltGrupTipiId = 1022
+ 
+ union all 
+
+ -- Kredi kartları
+ Select 
+   [HBanka].[Id]
+ , [HBanka].[ParentId]
+ , [HBanka].[FirmId]
+ , [HBanka].[IsActive]
+ , [HBanka].[UstGrupTipiId]
+ , [HBanka].[AnaGrupTipiId]
+ , [HBanka].[AltGrupTipiId]
+ , [HBanka].[AltCesitTipiId]
+ , [HBanka].[HesapKodu]
+ , [HBanka].[HesapKisaAdi]
+ , [HBanka].[HesapAdi]
+ , [HBanka].[Numarasi]
+ , [HBanka].[IBANNumarasi]
+ -- LookUp fields
+ , [FNo8].[AltCesitTipi] as Lkp_AltCesitTipi
+ , [FNo31].[ParaAdi] as Lkp_ParaAdi
+
+ From [dbo].[OnmHesapFinans] as [HBanka]
+    left outer join Lkp.OnmHesapFinansAltCesitTipi as FNo8 on ( HBanka.AltCesitTipiId = FNo8.Id )
+    left outer join Lkp.OnmParaTipi as FNo31 on ( HBanka.ParaTipiId = FNo31.ParaKodu )
+ Where 0 = 0 
+ and HBanka.UstGrupTipiId = 10
+ and HBanka.AltGrupTipiId = 1023
+
+ union all 
+
+ -- Pos Cihazlar
+ Select 
+   [HBanka].[Id]
+ , [HBanka].[ParentId]
+ , [HBanka].[FirmId]
+ , [HBanka].[IsActive]
+ , [HBanka].[UstGrupTipiId]
+ , [HBanka].[AnaGrupTipiId]
+ , [HBanka].[AltGrupTipiId]
+ , [HBanka].[AltCesitTipiId]
+ , [HBanka].[HesapKodu]
+ , [HBanka].[HesapKisaAdi]
+ , [HBanka].[HesapAdi]
+ , [HBanka].[Numarasi]
+ , [HBanka].[IBANNumarasi]
+ -- LookUp fields
+ , [FNo8].[AltCesitTipi] as Lkp_AltCesitTipi
+ , [FNo31].[ParaAdi] as Lkp_ParaAdi
+
+ From [dbo].[OnmHesapFinans] as [HBanka]
+    left outer join Lkp.OnmHesapFinansAltCesitTipi as FNo8 on ( HBanka.AltCesitTipiId = FNo8.Id )
+    left outer join Lkp.OnmParaTipi as FNo31 on ( HBanka.ParaTipiId = FNo31.ParaKodu )
+
+ Where 0 = 0 
+ and HBanka.UstGrupTipiId = 10
+ and HBanka.AltGrupTipiId = 1024
+
+
+
+
+END -- procedure
+
+/*CreateProcedureEnd*/

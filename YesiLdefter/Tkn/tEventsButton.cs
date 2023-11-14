@@ -477,6 +477,8 @@ namespace Tkn_Events
 
                     if (propListCount_ > 1)
                         onay = openControlForm_(tForm, tableIPCode, propList_, buttonType);
+
+                    extraIslemVar(tForm, tableIPCode, v.tButtonType.btKartAc, v.tBeforeAfter.After, propList_);
                 }
                 return onay;
             }
