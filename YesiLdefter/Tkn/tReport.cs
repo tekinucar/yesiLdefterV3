@@ -213,7 +213,7 @@ namespace Tkn_Report
                 }
                 finally
                 {
-                    t.FlyoutMessage("Raporun tasarım kaydı", "İşlem tamamlandı.");
+                    t.FlyoutMessage(tFormReports, "Raporun tasarım kaydı", "İşlem tamamlandı.");
                 }
 
                 // Add a row to a table.

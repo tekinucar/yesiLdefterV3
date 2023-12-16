@@ -71,6 +71,7 @@ begin transaction
    OncekiTutar             Numeric(22,5)  null,
    KdvOrani                SmallInt  null,
    OtoOdemeBankaHesapId    Int       null,
+   IsKiralik               Bit       null,
 
    --98,99
    JoinTableTypeId    SmallInt       null, /* ilgili table 1: OnmBelgeMaliyet,  */

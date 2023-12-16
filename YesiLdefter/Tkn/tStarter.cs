@@ -75,7 +75,7 @@ namespace Tkn_Starter
             // YesiLdefter.Ini
             // YesiLdefterConnection.Ini
             //
-            t.ftpDowloadIniFile();
+            t.ftpDownloadIniFile();
 
             t.WaitFormOpen(v.mainForm, "GetMacAdress ...");
             Get_MacAddress();
@@ -91,7 +91,10 @@ namespace Tkn_Starter
 
             t.WaitFormOpen(v.mainForm, "Preparing User Form ...");
             setLoginSkins();
-            InitLoginUser();
+
+            if (v.active_DB.localDbUses == false)
+                InitLoginUser(); // Ustad YesiLdester user girişi
+            else InitTabimLoginUser();
 
             t.WaitFormOpen(v.mainForm, "Computer Info ...");
             InitLoginComputer();
@@ -102,8 +105,6 @@ namespace Tkn_Starter
             t.MSSQL_Server_Tarihi();
 
             t.YilAyRead();
-
-            t.DBUpdatesDataTransferOff();
 
             v.SP_UserIN = true;
         }
@@ -359,6 +360,14 @@ namespace Tkn_Starter
             //v.SP_UserLOGIN = false;
         }
         #endregion InitLoginUser
+
+        void InitTabimLoginUser()
+        {
+            string FormName = "ms_TabimMtsk";
+            string FormCode = "UST/MEB/TB1/TbmWelcome";
+            OpenFormPreparing(FormName, FormCode, v.formType.Dialog);
+        }
+
 
         #region orders
 

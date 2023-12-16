@@ -700,7 +700,7 @@ namespace YesiLdefter
                     cumleMsFieldsIP + v.ENTER2 +
                     cumleMsGroups);
 
-                //t.FlyoutMessage("Web Manager Database Update", "Insert paketler hazırlandı...");
+                //t.FlyoutMessage(this, "Web Manager Database Update", "Insert paketler hazırlandı...");
 
                 PaketiGonder();
             }
@@ -730,7 +730,7 @@ namespace YesiLdefter
             if (cumleMsFieldsIP != "") t.runScript(v.dBaseNo.publishManager, cumleMsFieldsIP);
             if (cumleMsGroups != "") t.runScript(v.dBaseNo.publishManager, cumleMsGroups);
 
-            t.FlyoutMessage("Web Manager Database Update", "Insert paketler gönderildi...");
+            t.FlyoutMessage(this, "Web Manager Database Update", "Insert paketler gönderildi...");
         }
         
     }

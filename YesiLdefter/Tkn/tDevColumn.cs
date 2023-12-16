@@ -5719,7 +5719,7 @@ namespace Tkn_DevColumn
                 {
                     if (t.Find_EditState(tForm, v.tResimEditor.imagesSourceTableIPCode) == false)
                     {
-                        t.FlyoutMessage("Uyarı", "Resim Editörü kayıt işlemi gerçekleşmeden çalışmaz...");
+                        t.FlyoutMessage(tForm, "Uyarı", "Resim Editörü kayıt işlemi gerçekleşmeden çalışmaz...");
                         return;
                     }
                 }

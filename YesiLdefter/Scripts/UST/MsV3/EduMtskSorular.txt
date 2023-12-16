@@ -7,7 +7,7 @@
 
 	SertifikaGrupTipiId  SmallInt          null,
 	DersTipiId           SmallInt          null,       /* 1. Trafik ve Çevre Bilgisi, İlk Yardım, Araç Tekniği */
-    EduMtskKonularId     Int               null,
+    KonuId               Int               null,
     
     Soru                 nVarChar(1000)    null,
     CevapA               nVarChar(500)     null,
@@ -77,11 +77,11 @@ as begin
     ToplamSoruSayisi = x.Adet
     From EduMtskKonular as a, 
     (
-       Select EduMtskKonularId, COUNT(Id) as Adet
+       Select KonuId, COUNT(Id) as Adet
        From EduMtskSorular
-       Group by EduMtskKonularId
+       Group by KonuId
     ) as x
-    Where a.Id = x.EduMtskKonularId
+    Where a.Id = x.KonuId
 
     Update EduMtskDersler Set
     ToplamSoruSayisi = x.Adet

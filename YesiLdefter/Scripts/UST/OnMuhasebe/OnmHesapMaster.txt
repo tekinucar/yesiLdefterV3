@@ -48,7 +48,8 @@ begin transaction
    OncekiTutar             Numeric(22,5)  null,
    ParaTipiId              nVarChar(3)    null,
    KdvOrani                SmallInt  null,
-   
+   IsKiralik               Bit       null,
+
     constraint		pk_OnmHesapMaster primary key (Id)
  )
 
@@ -672,79 +673,79 @@ DELETE [Lkp].[OnmHesapMaster]
 Where FirmId = 0
 and UstGrupTipiId = 82
 
-INSERT INTO [Lkp].[OnmHesapMaster] (ParentId, FirmId, IsActive, UstGrupTipiId, AnaGrupTipiId, AltGrupTipiId, BAHesapTipiId, HesapKodu, UstHesapKodu, KdvOrani, HesapAdi )
+INSERT INTO [Lkp].[OnmHesapMaster] (ParentId, FirmId, IsActive, UstGrupTipiId, AnaGrupTipiId, AltGrupTipiId, BAHesapTipiId, HesapKodu, UstHesapKodu, KdvOrani, IsKiralik, HesapAdi )
  VALUES 
-(0, @FirmId, 1, 82, 252,    0,  793, '81.11.10', '81.11',  20,  'Bina bakım hizmetleri' ),
-(0, @FirmId, 1, 82, 252,    0,  793, '81.11.12', '81.11',  20,  'Bina tamir hizmetleri' ),
-(0, @FirmId, 1, 82, 252,    0,  793, '81.11.14', '81.11',  20,  'Dekorasyon' ),
-(0, @FirmId, 1, 82, 253,    0,  793, '81.11.20', '81.11',  20,  'Tesis, Makine Ve Cihaz bakım hizmetleri' ),
-(0, @FirmId, 1, 82, 253,    0,  793, '81.11.22', '81.11',  20,  'Tesis, Makine Ve Cihaz tamir hizmetleri' ),
-(0, @FirmId, 1, 82, 254,    0,  793, '81.11.30', '81.11',  20,  'Taşıt bakım hizmetleri' ),
-(0, @FirmId, 1, 82, 254,    0,  793, '81.11.32', '81.11',  20,  'Taşıt tamir hizmetleri' ),
-(0, @FirmId, 1, 82, 255,    0,  793, '81.11.40', '81.11',  20,  'Demirbaş bakım hizmetleri' ),
-(0, @FirmId, 1, 82, 255,    0,  793, '81.11.42', '81.11',  20,  'Demirbaş tamir hizmetleri' ),
+(0, @FirmId, 1, 82, 252,    0,  793, '81.11.10', '81.11',  20,  0, 'Bina bakım hizmetleri' ),
+(0, @FirmId, 1, 82, 252,    0,  793, '81.11.12', '81.11',  20,  0, 'Bina tamir hizmetleri' ),
+(0, @FirmId, 1, 82, 252,    0,  793, '81.11.14', '81.11',  20,  0, 'Dekorasyon' ),
+(0, @FirmId, 1, 82, 253,    0,  793, '81.11.20', '81.11',  20,  0, 'Tesis, Makine Ve Cihaz bakım hizmetleri' ),
+(0, @FirmId, 1, 82, 253,    0,  793, '81.11.22', '81.11',  20,  0, 'Tesis, Makine Ve Cihaz tamir hizmetleri' ),
+(0, @FirmId, 1, 82, 254,    0,  793, '81.11.30', '81.11',  20,  0, 'Taşıt bakım hizmetleri' ),
+(0, @FirmId, 1, 82, 254,    0,  793, '81.11.32', '81.11',  20,  0, 'Taşıt tamir hizmetleri' ),
+(0, @FirmId, 1, 82, 255,    0,  793, '81.11.40', '81.11',  20,  0, 'Demirbaş bakım hizmetleri' ),
+(0, @FirmId, 1, 82, 255,    0,  793, '81.11.42', '81.11',  20,  0, 'Demirbaş tamir hizmetleri' ),
 
-(0, @FirmId, 1, 82,   0,    0,  793, '81.12.10', '81.12',  20,  'Bilişim' ),
-(0, @FirmId, 1, 82,   0,    0,  793, '81.12.20', '81.12',  20,  'Baskı ve Matbu' ),
-(0, @FirmId, 1, 82,   0,    0,  793, '81.12.30', '81.12',  20,  'Eğitim' ),
-(0, @FirmId, 1, 82,   0,    0,  770, '81.12.40', '81.12',  20,  'Giyim/Aksesuar' ),
-(0, @FirmId, 1, 82,   0,    0,  770, '81.12.50', '81.12',  20,  'Kırtasiye' ),
-(0, @FirmId, 1, 82,   0,    0,  770, '81.12.60', '81.12',  20,  'Konaklama' ),
-(0, @FirmId, 1, 82,   0,    0,  770, '81.12.70', '81.12',  20,  'Sağlık ve Bakım' ),
-(0, @FirmId, 1, 82,   0,    0,  770, '81.12.80', '81.12',  20,  'Seyahat ( Şehirler arası )' ),
-(0, @FirmId, 1, 82, 254,    0,  770, '81.12.82', '81.12',  20,  'Otoyol ve Köprü Geçiş Ücreti' ),
-(0, @FirmId, 1, 82,   0,    0,  770, '81.12.90', '81.12',  20,  'Kanunen kabul edilmeyen gider' ),
-(0, @FirmId, 1, 82,   0,    0,  770, '81.12.92', '81.12',  20,  'Genel gider' ),
-(0, @FirmId, 1, 82,   0,    0,  770, '81.12.94', '81.12',  20,  'Veri transferi' ),
+(0, @FirmId, 1, 82,   0,    0,  793, '81.12.10', '81.12',  20,  0, 'Bilişim' ),
+(0, @FirmId, 1, 82,   0,    0,  793, '81.12.20', '81.12',  20,  0, 'Baskı ve Matbu' ),
+(0, @FirmId, 1, 82,   0,    0,  793, '81.12.30', '81.12',  20,  0, 'Eğitim' ),
+(0, @FirmId, 1, 82,   0,    0,  770, '81.12.40', '81.12',  20,  0, 'Giyim/Aksesuar' ),
+(0, @FirmId, 1, 82,   0,    0,  770, '81.12.50', '81.12',  20,  0, 'Kırtasiye' ),
+(0, @FirmId, 1, 82,   0,    0,  770, '81.12.60', '81.12',  20,  0, 'Konaklama' ),
+(0, @FirmId, 1, 82,   0,    0,  770, '81.12.70', '81.12',  20,  0, 'Sağlık ve Bakım' ),
+(0, @FirmId, 1, 82,   0,    0,  770, '81.12.80', '81.12',  20,  0, 'Seyahat ( Şehirler arası )' ),
+(0, @FirmId, 1, 82, 254,    0,  770, '81.12.82', '81.12',  20,  0, 'Otoyol ve Köprü Geçiş Ücreti' ),
+(0, @FirmId, 1, 82,   0,    0,  770, '81.12.90', '81.12',  20,  0, 'Kanunen kabul edilmeyen gider' ), -- sonrada eklendi
+(0, @FirmId, 1, 82,   0,    0,  770, '81.12.92', '81.12',  20,  0, 'Genel gider' ), -- sonrada eklendi
+(0, @FirmId, 1, 82,   0,    0,  770, '81.12.94', '81.12',  20,  0, 'Veri transferi' ), -- sonrada eklendi
 
 
-(0, @FirmId, 1, 82,   0,    0,  797, '81.13.10', '81.13',  0,  'Banka hesap ve kart ücretleri' ),
-(0, @FirmId, 1, 82,   0,    0,  797, '81.13.12', '81.13',  0,  'Çek/Senet masrafları' ),
-(0, @FirmId, 1, 82,   0,    0,  797, '81.13.14', '81.13',  0,  'Faiz' ),
-(0, @FirmId, 1, 82,   0,    0,  797, '81.13.16', '81.13',  0,  'İşlem ücretleri' ),
-(0, @FirmId, 1, 82,   0,    0,  797, '81.13.18', '81.13',  0,  'Kredi masrafları' ),
-(0, @FirmId, 1, 82,   0,    0,  797, '81.13.20', '81.13',  0,  'Komisyon ücretleri' ),
-(0, @FirmId, 1, 82,   0,    0,  797, '81.13.22', '81.13',  0,  'Para çekme' ),
-(0, @FirmId, 1, 82,   0,    0,  797, '81.13.24', '81.13',  0,  'Para transferi' ),
-(0, @FirmId, 1, 82,   0,    0,  797, '81.13.26', '81.13',  0,  'Para yatırma' ),
-(0, @FirmId, 1, 82,   0,    0,  797, '81.13.28', '81.13',  0,  'Pos komisyonu' ),
-(0, @FirmId, 1, 82, 102, 1023, 1023, '81.13.30', '81.13',  0,  'Kredi Kartı Hesap Ekstresi' ),
-(0, @FirmId, 1, 82, 102, 1022,  797, '81.13.32', '81.13',  0,  'KMH-Faiz Tahsilatı' ),
+(0, @FirmId, 1, 82,   0,    0,  797, '81.13.10', '81.13',   0,  0, 'Banka hesap ve kart ücretleri' ),
+(0, @FirmId, 1, 82,   0,    0,  797, '81.13.12', '81.13',   0,  0, 'Çek/Senet masrafları' ),
+(0, @FirmId, 1, 82,   0,    0,  797, '81.13.14', '81.13',   0,  0, 'Faiz' ),
+(0, @FirmId, 1, 82,   0,    0,  797, '81.13.16', '81.13',   0,  0, 'İşlem ücretleri' ),
+(0, @FirmId, 1, 82,   0,    0,  797, '81.13.18', '81.13',   0,  0, 'Kredi masrafları' ),
+(0, @FirmId, 1, 82,   0,    0,  797, '81.13.20', '81.13',   0,  0, 'Komisyon ücretleri' ),
+(0, @FirmId, 1, 82,   0,    0,  797, '81.13.22', '81.13',   0,  0, 'Para çekme' ),
+(0, @FirmId, 1, 82,   0,    0,  797, '81.13.24', '81.13',   0,  0, 'Para transferi' ),
+(0, @FirmId, 1, 82,   0,    0,  797, '81.13.26', '81.13',   0,  0, 'Para yatırma' ),
+(0, @FirmId, 1, 82,   0,    0,  797, '81.13.28', '81.13',   0,  0, 'Pos komisyonu' ),
+(0, @FirmId, 1, 82, 102, 1023, 1023, '81.13.30', '81.13',   0,  0, 'Kredi Kartı Hesap Ekstresi' ),
+(0, @FirmId, 1, 82, 102, 1022,  797, '81.13.32', '81.13',   0,  0, 'KMH-Faiz Tahsilatı' ),
 
-(0, @FirmId, 1, 82, 250,    0,  770, '81.14.10', '81.14',  0,  'Kira (Arazi ve Arsa)' ),
-(0, @FirmId, 1, 82, 251,    0,  770, '81.14.20', '81.14',  0,  'Kira (Yer Altı ve Yer Üstü Düzenler)' ),
-(0, @FirmId, 1, 82, 252,    0,  770, '81.14.30', '81.14',  0,  'Kira (Bina, Depo)' ),
-(0, @FirmId, 1, 82, 253,    0,  770, '81.14.40', '81.14',  0,  'Kira (Tesis, Makine ve Cihaz)' ),
-(0, @FirmId, 1, 82, 254,    0,  770, '81.14.50', '81.14',  0,  'Kira (Taşıt)' ),
+(0, @FirmId, 1, 82, 250,    0,  770, '81.14.10', '81.14',   0,  1, 'Kira (Arazi ve Arsa)' ),
+(0, @FirmId, 1, 82, 251,    0,  770, '81.14.20', '81.14',   0,  1, 'Kira (Yer Altı ve Yer Üstü Düzenler)' ),
+(0, @FirmId, 1, 82, 252,    0,  770, '81.14.30', '81.14',   0,  1, 'Kira (Bina, Depo)' ),
+(0, @FirmId, 1, 82, 253,    0,  770, '81.14.40', '81.14',   0,  1, 'Kira (Tesis, Makine ve Cihaz)' ),
+(0, @FirmId, 1, 82, 254,    0,  770, '81.14.50', '81.14',   0,  1, 'Kira (Taşıt)' ),
 
-(0, @FirmId, 1, 82, 250,    0,  770, '81.15.10', '81.15',  20,  'Sigorta (Arazi ve Arsa)' ),
-(0, @FirmId, 1, 82, 251,    0,  770, '81.15.20', '81.15',  20,  'Sigorta (Yer Altı ve Yer Üstü Düzenler)' ),
-(0, @FirmId, 1, 82, 252,    0,  770, '81.15.30', '81.15',  20,  'Sigorta (Bina, Depo)' ),
-(0, @FirmId, 1, 82, 253,    0,  770, '81.15.40', '81.15',  20,  'Sigorta (Tesis, Makine ve Cihaz)' ),
-(0, @FirmId, 1, 82, 254,    0,  770, '81.15.50', '81.15',  20,  'Sigorta (Taşıt - Zorunlu Trafik)' ),
-(0, @FirmId, 1, 82, 254,    0,  770, '81.15.60', '81.15',  20,  'Sigorta (Taşıt - Kasko)' ),
+(0, @FirmId, 1, 82, 250,    0,  770, '81.15.10', '81.15',  20,  0, 'Sigorta (Arazi ve Arsa)' ),
+(0, @FirmId, 1, 82, 251,    0,  770, '81.15.20', '81.15',  20,  0, 'Sigorta (Yer Altı ve Yer Üstü Düzenler)' ),
+(0, @FirmId, 1, 82, 252,    0,  770, '81.15.30', '81.15',  20,  0, 'Sigorta (Bina, Depo)' ),
+(0, @FirmId, 1, 82, 253,    0,  770, '81.15.40', '81.15',  20,  0, 'Sigorta (Tesis, Makine ve Cihaz)' ),
+(0, @FirmId, 1, 82, 254,    0,  770, '81.15.50', '81.15',  20,  0, 'Sigorta (Taşıt - Zorunlu Trafik)' ),
+(0, @FirmId, 1, 82, 254,    0,  770, '81.15.60', '81.15',  20,  0, 'Sigorta (Taşıt - Kasko)' ),
 
-(0, @FirmId, 1, 82, 252,    0,  770, '81.16.10', '81.16',  20,  'Akaryakıt (Bina)' ),
-(0, @FirmId, 1, 82, 254,    0,  770, '81.16.12', '81.16',  20,  'Akaryakıt (Taşıt)' ),
-(0, @FirmId, 1, 82, 253,    0,  770, '81.16.14', '81.16',  20,  'Akaryakıt (Tesis, Makine ve Cihaz)' ),
-(0, @FirmId, 1, 82, 252,  860,  770, '81.16.20', '81.16',  20,  'Doğalgaz Sayacı (Bina)' ),
-(0, @FirmId, 1, 82, 253,  861,  770, '81.16.22', '81.16',  20,  'Doğalgaz Sayacı (Tesis, Makine ve Cihaz)' ),
-(0, @FirmId, 1, 82, 252,  862,  770, '81.16.30', '81.16',  20,  'Elektrik Sayacı (Bina)' ),
-(0, @FirmId, 1, 82, 254,  863,  770, '81.16.32', '81.16',  20,  'Elektrik Sayacı (Taşıt)' ),
-(0, @FirmId, 1, 82, 253,  864,  770, '81.16.34', '81.16',  20,  'Elektrik Sayacı (Tesis, Makine ve Cihaz)' ),
-(0, @FirmId, 1, 82, 252,  865,  770, '81.16.40', '81.16',  20,  'Su Sayacı (Bina)' ),
-(0, @FirmId, 1, 82, 253,  866,  770, '81.16.42', '81.16',  20,  'Su Sayacı (Tesis, Makine ve Cihaz)' ),
-(0, @FirmId, 1, 82, 259,    0,  770, '81.16.50', '81.16',  20,  'Telekom' ), --Telekomünikasyon  
+(0, @FirmId, 1, 82, 252,    0,  770, '81.16.10', '81.16',  20,  0, 'Akaryakıt (Bina)' ),
+(0, @FirmId, 1, 82, 254,    0,  770, '81.16.12', '81.16',  20,  0, 'Akaryakıt (Taşıt)' ),
+(0, @FirmId, 1, 82, 253,    0,  770, '81.16.14', '81.16',  20,  0, 'Akaryakıt (Tesis, Makine ve Cihaz)' ),
+(0, @FirmId, 1, 82, 252,  860,  770, '81.16.20', '81.16',  20,  0, 'Doğalgaz Sayacı (Bina)' ),
+(0, @FirmId, 1, 82, 253,  861,  770, '81.16.22', '81.16',  20,  0, 'Doğalgaz Sayacı (Tesis, Makine ve Cihaz)' ),
+(0, @FirmId, 1, 82, 252,  862,  770, '81.16.30', '81.16',  20,  0, 'Elektrik Sayacı (Bina)' ),
+(0, @FirmId, 1, 82, 254,  863,  770, '81.16.32', '81.16',  20,  0, 'Elektrik Sayacı (Taşıt)' ),
+(0, @FirmId, 1, 82, 253,  864,  770, '81.16.34', '81.16',  20,  0, 'Elektrik Sayacı (Tesis, Makine ve Cihaz)' ),
+(0, @FirmId, 1, 82, 252,  865,  770, '81.16.40', '81.16',  20,  0, 'Su Sayacı (Bina)' ),
+(0, @FirmId, 1, 82, 253,  866,  770, '81.16.42', '81.16',  20,  0, 'Su Sayacı (Tesis, Makine ve Cihaz)' ),
+(0, @FirmId, 1, 82, 259,    0,  770, '81.16.50', '81.16',  20,  0, 'Telekom' ), --Telekomünikasyon  
 
-(0, @FirmId, 1, 82,   0,    0,  791, '81.17.10', '81.17',   0,  'İşçi Ücretleri' ),
-(0, @FirmId, 1, 82,   0,    0,  791, '81.17.20', '81.17',   0,  'Memur Ücretleri' ),
-(0, @FirmId, 1, 82,   0,    0,  791, '81.17.30', '81.17',   0,  'Primler' ),
-(0, @FirmId, 1, 82,   0,    0,  791, '81.17.40', '81.17',   0,  'Ortaklar' ),
+(0, @FirmId, 1, 82,   0,    0,  791, '81.17.10', '81.17',   0,  0, 'İşçi Ücretleri' ),
+(0, @FirmId, 1, 82,   0,    0,  791, '81.17.20', '81.17',   0,  0, 'Memur Ücretleri' ),
+(0, @FirmId, 1, 82,   0,    0,  791, '81.17.30', '81.17',   0,  0, 'Primler' ),
+(0, @FirmId, 1, 82,   0,    0,  791, '81.17.40', '81.17',   0,  0, 'Ortaklar' ),
 
-(0, @FirmId, 1, 82,   0,    0,  770, '81.18.10', '81.18',  20,  'Market' ),
-(0, @FirmId, 1, 82,   0,    0,  770, '81.18.20', '81.18',  20,  'Restoran' ),
-(0, @FirmId, 1, 82,   0,    0,  770, '81.18.30', '81.18',  20,  'Yemek Kartı' ),
-(0, @FirmId, 1, 82,   0,    0,  770, '81.18.40', '81.18',  20,  'İkram' )
+(0, @FirmId, 1, 82,   0,    0,  770, '81.18.10', '81.18',  20,  0, 'Market' ),
+(0, @FirmId, 1, 82,   0,    0,  770, '81.18.20', '81.18',  20,  0, 'Restoran' ),
+(0, @FirmId, 1, 82,   0,    0,  770, '81.18.30', '81.18',  20,  0, 'Yemek Kartı' ),
+(0, @FirmId, 1, 82,   0,    0,  770, '81.18.40', '81.18',  20,  0, 'İkram' )
 
 
 -- ------------------------------------------------------------------

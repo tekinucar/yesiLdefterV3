@@ -38,13 +38,24 @@ begin transaction
  insert into MS_TYPES values ( 1, 0, 'WEBNODE_EVENTS_TYPE', 1,   '', 'Load');
  insert into MS_TYPES values ( 1, 0, 'WEBNODE_EVENTS_TYPE', 2,   '', 'DisplayNone');
  insert into MS_TYPES values ( 1, 0, 'WEBNODE_EVENTS_TYPE', 3,   '', 'PageRefresh');
- insert into MS_TYPES values ( 1, 0, 'WEBNODE_EVENTS_TYPE', 140, '', 'buttonAlwaysSet');
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_EVENTS_TYPE', 142, '', 'buttonAlwaysSet');
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_EVENTS_TYPE', 143, '', 'Button3:Get1');
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_EVENTS_TYPE', 144, '', 'Button4:Get2');
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_EVENTS_TYPE', 145, '', 'Button5:Set1');
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_EVENTS_TYPE', 146, '', 'Button6:Set2');
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_EVENTS_TYPE', 147, '', 'Button7:Save');
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_EVENTS_TYPE', 148, '', 'tableField');
+ /*
+ 
  insert into MS_TYPES values ( 1, 0, 'WEBNODE_EVENTS_TYPE', 141, '', 'Button1');
  insert into MS_TYPES values ( 1, 0, 'WEBNODE_EVENTS_TYPE', 142, '', 'Button2');
  insert into MS_TYPES values ( 1, 0, 'WEBNODE_EVENTS_TYPE', 143, '', 'Button3');
  insert into MS_TYPES values ( 1, 0, 'WEBNODE_EVENTS_TYPE', 144, '', 'Button4');
  insert into MS_TYPES values ( 1, 0, 'WEBNODE_EVENTS_TYPE', 145, '', 'Button5');
  insert into MS_TYPES values ( 1, 0, 'WEBNODE_EVENTS_TYPE', 146, '', 'tableField');
+ */
+
+
 
  
  DELETE MS_TYPES WHERE TYPES_NAME = 'WEBNODE_ATT_ROLE'
@@ -229,7 +240,7 @@ begin transaction
  insert into MS_TYPES values ( 1, 0, 'DB_TYPE',  2, '', 'ManagerServer');
  insert into MS_TYPES values ( 1, 0, 'DB_TYPE',  3, '', 'UstadCRM');
  insert into MS_TYPES values ( 1, 0, 'DB_TYPE',  4, '', 'Project'); 
- --insert into MS_TYPES values ( 1, 0, 'DB_TYPE',  5, '', 'none');
+ insert into MS_TYPES values ( 1, 0, 'DB_TYPE',  5, '', 'Local');
  --insert into MS_TYPES values ( 1, 0, 'DB_TYPE',  6, '', 'NewDatabase');
  insert into MS_TYPES values ( 1, 0, 'DB_TYPE',  7, '', 'PublishManager');
  insert into MS_TYPES values ( 1, 0, 'DB_TYPE',  8, '', 'SourceDB(Aktarýlacak)');

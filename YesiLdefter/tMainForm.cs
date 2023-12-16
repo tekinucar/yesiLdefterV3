@@ -333,7 +333,7 @@ namespace YesiLdefter
             // 
             // toolboxControl1
             // 
-            toolboxControl1.Caption = "Üstad Yazılım";
+            toolboxControl1.Caption = "Ana Menü";
             toolboxControl1.Dock = System.Windows.Forms.DockStyle.Right;
             toolboxControl1.Location = new System.Drawing.Point(752, 116);
             toolboxControl1.MaximumSize = new System.Drawing.Size(175, 0);
@@ -346,7 +346,7 @@ namespace YesiLdefter
             toolboxControl1.OptionsView.ShowToolboxCaption = true;
             toolboxControl1.Size = new System.Drawing.Size(175, 275);
             toolboxControl1.TabIndex = 0;
-            toolboxControl1.Text = "Üstad Yazılım";
+            //toolboxControl1.Text = "Üstad Yazılım";
 
 
             #region

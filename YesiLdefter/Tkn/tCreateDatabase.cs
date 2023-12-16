@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Tkn_SQLs;
 using Tkn_ToolBox;
 using Tkn_Variable;
 
@@ -14,6 +15,7 @@ namespace Tkn_CreateDatabase
     public class tDatabase : tBase
     {
         tToolBox t = new tToolBox();
+        tSQLs sqls = new tSQLs();
 
         #region DatabaseFind
         public bool tDatabaseFind(vTable vt)
@@ -91,53 +93,69 @@ namespace Tkn_CreateDatabase
 
         #region TableFind
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="tableName"></param>
-        public bool tTableFind(string tableName, vTable vt)
+        public bool preparingCreateTable(vTable vt)
+        {
+            bool onay = true;
+
+            //string fileName = "";
+            string sqlScript = "";
+
+            sqlScript = vt.SqlScript;
+            //fileName = vt.TableName;
+            
+            // bunun sebebinin unuttum hatırlamıyorum
+            //if (vt.SchemasCode != "dbo")
+            //    fileName = vt.SchemasCode + "_" + vt.TableName;
+            //----
+
+            // parentTable olan tablolar başka bir tablonun Lkp tablolarıdır
+            // onlar kendisinin bağlı olduğu tablo içerisinde create ediliyorlar
+            // parentTable ismi olmayan Lkp_xxx tablolar ise bağımsız tablolardır
+            //
+            if ((vt.ParentTable == "") && (t.IsNotNull(sqlScript)))
+            {
+                v.active_DB.runDBaseNo = vt.DBaseNo; //v.dBaseNo.NewDatabase;
+
+                // tablo var mı diye kontrol et
+                //onay = tTableFind(fileName, vt);
+                onay = tTableFind(vt);
+
+                // tablo yok ise
+                if (onay == false)
+                {
+                    onay = tTableCreate(sqlScript, vt);
+                }
+
+                // tablo oluşturuldu şimdi trigger leri oluşturalım
+                onay = false;
+                onay = tTriggerCreate(sqlScript, vt);
+
+                // tablo oluşturuldu şimdi Lkp.xxxx tabloları oluşturalım
+                onay = false;
+                onay = tLkpTableCreate(sqlScript, vt);
+
+                // tablo oluşturuldu şimdi dataları insert edelim
+                onay = false;
+                onay = tDataCreate(sqlScript, vt);
+            }
+
+            return onay;
+        }
+
+        //public bool tTableFind(string tableName, vTable vt)
+        public bool tTableFind(vTable vt)
         {
             bool onay = true;
             String Sql = "";
             DataSet ds = new DataSet();
-            /*
-            if (v.active_DB.runDBaseNo == v.dBaseNo.Manager)
-            {
-                vt.DBaseNo = v.active_DB.managerDBaseNo;
-                vt.DBaseType = v.active_DB.managerDBType;
-                vt.DBaseName = v.active_DB.managerDBName;
-                vt.msSqlConnection = v.active_DB.managerMSSQLConn;
-            }
 
-            if (v.active_DB.runDBaseNo == v.dBaseNo.UstadCrm)
-            {
-                vt.DBaseNo = v.active_DB.ustadCrmDBaseNo;
-                vt.DBaseType = v.active_DB.ustadCrmDBType;
-                vt.DBaseName = v.active_DB.ustadCrmDBName;
-                vt.msSqlConnection = v.active_DB.ustadCrmMSSQLConn;
-            }
+            v.active_DB.runDBaseNo = vt.DBaseNo;
 
-            if (v.active_DB.runDBaseNo == v.dBaseNo.Project)
-            {
-                vt.DBaseNo = v.active_DB.projectDBaseNo;
-                vt.DBaseType = v.active_DB.projectDBType;
-                vt.DBaseName = v.active_DB.projectDBName;
-                vt.msSqlConnection = v.active_DB.projectMSSQLConn;
-            }
-
-            if (v.active_DB.runDBaseNo == v.dBaseNo.NewDatabase)
-            {
-                vt.DBaseNo = v.newFirm_DB.dBaseNo;
-                vt.DBaseType = v.newFirm_DB.dBType;
-                vt.DBaseName = v.newFirm_DB.databaseName;
-                vt.msSqlConnection = v.newFirm_DB.MSSQLConn;
-            }
-            */
             preparingVTable(vt);
 
             if (vt.DBaseType == v.dBaseType.MSSQL)
             {
-                Sql = string.Format(" select * from {0}.sys.tables where name = '{1}' ", vt.DBaseName, tableName);
+                Sql = string.Format(" select * from {0}.sys.tables where name = '{1}' ", vt.DBaseName, vt.TableName);
             }
 
             t.SQL_Read_Execute(vt.DBaseNo, ds, ref Sql, "", "Table Find");
@@ -221,8 +239,6 @@ namespace Tkn_CreateDatabase
             return onay;
         }
 
-
-
         public bool tTableCreateReadTextFile(string tableName, vTable vt)
         {
             // 
@@ -252,82 +268,6 @@ namespace Tkn_CreateDatabase
             return onay;
         }
         
-        /*
-        public void tTableUpdate(string DatabaseName, string FileName, SqlConnection SqlConn)
-        {
-            string fname = v.EXE_PATH + "\\VT_MSSQL\\" + FileName + ".txt";
-
-            try
-            {
-                if (File.Exists(@"" + fname))
-                {
-                    //FileStream fileStream = new FileStream(@"" + fname, FileMode.Open, FileAccess.Read);
-
-                    DataSet ds = new DataSet();
-                    string Sql = null;
-                    System.IO.TextReader readFile = new StreamReader(@"" + fname);
-                    Sql = readFile.ReadToEnd();
-                    if (Sql.Length > 20)
-                    {
-                        MessageBox.Show("SQL_ExecuteNon() ayarlanacak");
-                        /*
-                        if (SQL_ExecuteNon(SqlConn, ds, ref Sql, "tTableUpdate"))
-                        {
-                            //MessageBox.Show("Update başarıyla gerçekleşti : " + FileName);
-                        }
-                        * /
-                    }
-                    readFile.Close();
-                    readFile = null;
-                    ds.Dispose();
-                }
-                else
-                {
-                    MessageBox.Show("File not found : " + fname);
-                }
-            }
-            catch
-            { }
-        }
-        */
-        /*
-        public void tTable_FieldNameChange(string DatabaseName, string Table_Name,
-                    string OldFieldName, string NewFieldName, SqlConnection SqlConn)
-        {
-            string Sql =
-            @"
-            IF EXISTS (
-              select a.column_id, a.name, 
-                     convert(smallInt, a.system_type_id) system_type_id, 
-                     convert(smallInt, a.user_type_id) user_type_id, 
-                     a.max_length, a.precision, a.scale, a.is_nullable, a.is_identity 
-                     from 
-                     [" + DatabaseName + @"].sys.columns a,  
-                     [" + DatabaseName + @"].sys.tables b 
-                     where b.object_id = a.object_id 
-                     and   b.name = '" + Table_Name + @"' 
-                     and   a.name = '" + OldFieldName + @"'
-            )  
-            begin
-              USE " + DatabaseName + @"
-              EXEC sp_rename '" + Table_Name + @"." + OldFieldName + @"', '" + NewFieldName + @"', 'COLUMN';
-            end
-             ";
-
-            DataSet ds = new DataSet();
-
-            MessageBox.Show("SQL_ExecuteNon() ayarlanacak");
-            /*
-            SQL_ExecuteNon(SqlConn, ds, ref Sql, "tTable_FieldNameChange");
-            * /
-            ds.Dispose();
-        }
-        */
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="tableName"></param>
         public void tPreparingData(string tableName)
         {
             String Sql = "";
@@ -425,14 +365,10 @@ namespace Tkn_CreateDatabase
             { }
 
         }
-        
+
         #endregion
 
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="procedureName"></param>
+        #region StoredProcedure
         public bool tStoredProcedureFind(string procedureName, vTable vt)
         {
             bool onay = false;
@@ -573,10 +509,9 @@ namespace Tkn_CreateDatabase
             return onay;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="triggerName"></param>
+        #endregion StoredProcedure
+
+        #region Trigger
         public bool tTriggerFind(string triggerName, vTable vt)
         {
             bool onay = false;
@@ -739,10 +674,9 @@ namespace Tkn_CreateDatabase
             return name;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="functionName"></param>
+        #endregion Trigger
+
+        #region Function
         public bool tFunctionFind(string functionName, vTable vt)
         {
             bool onay = false;
@@ -847,6 +781,38 @@ namespace Tkn_CreateDatabase
             return onay;
         }
 
+        #endregion Function
+
+        #region FieldFind
+
+        public bool tFieldFind(vTable vt, string fieldName)
+        {
+            bool onay = true;
+            String Sql = "";
+            DataSet ds = new DataSet();
+
+            v.active_DB.runDBaseNo = vt.DBaseNo;
+
+            preparingVTable(vt);
+
+            if (vt.DBaseType == v.dBaseType.MSSQL)
+            {
+                Sql = sqls.SQL_FieldFind(vt.DBaseName, vt.TableName, fieldName);
+            }
+
+            t.SQL_Read_Execute(vt.DBaseNo, ds, ref Sql, "", "Field Find");
+
+            if (t.IsNotNull(ds) == false)
+            {
+                onay = false;
+            }
+
+            ds.Dispose();
+
+            return onay;
+        }
+
+        #endregion
 
         private string preparingSqlScript(string SqlText, string ObjType, vTable vt)
         {
@@ -895,6 +861,14 @@ namespace Tkn_CreateDatabase
                 vt.DBaseType = v.active_DB.projectDBType;
                 vt.DBaseName = v.active_DB.projectDBName;
                 vt.msSqlConnection = v.active_DB.projectMSSQLConn;
+            }
+
+            if (v.active_DB.runDBaseNo == v.dBaseNo.Local)
+            {
+                vt.DBaseNo = v.active_DB.localDBaseNo;
+                vt.DBaseType = v.active_DB.localDBType;
+                vt.DBaseName = v.active_DB.localDBName;
+                vt.msSqlConnection = v.active_DB.localMSSQLConn;
             }
 
             if (v.active_DB.runDBaseNo == v.dBaseNo.NewDatabase)

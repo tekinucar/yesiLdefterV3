@@ -61,6 +61,7 @@ begin transaction
       
    MebbisKurumOnayi        Bit           null, /* 0-Onaysız, 1-Onaylandı */		
    MebbisDurumTipiId       SmallInt      null,
+   MebbisDurumOkundu       Bit           null,
    KayitTipiId             SmallInt      null,
    KaynakKayitTipiId       SmallInt      null, /* 1. Kullanıcı Manuel, 2. Mebbis Dönem Aday Onaylama, 3. Mebbis Uygulama Sınav Listesi, 4. Mebbis Aday Durum Bilgileri  */
 
@@ -83,8 +84,8 @@ begin transaction
    AdliSicilGeldi          Bit            null,
    ImzaAlindi              Bit            null,
    SozlesmeYapildi         Bit            null,
-   BelgelerGeldi           Bit            null,
    AdresAlindi             Bit            null,
+   BelgelerGeldi           Bit            null,
    
    constraint		pk_MtskAday primary key (Id)
  )
@@ -187,7 +188,7 @@ AS BEGIN
 	-- Veri Transferi başladımı
     Select @DbUpdatesIsActive = u.IsActive
     from [dbo].[DbUpdates] as u
-    Where u.MsDbUpdateId = 6
+    Where u.MsDbUpdateId = -1
     and   u.UpdateTypeId = 13
     and   u.DBaseNoTypeId = 6
 

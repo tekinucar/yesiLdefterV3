@@ -12,16 +12,14 @@ create table [Lkp].[MsSectorType]
 Delete from [Lkp].[MsSectorType]
 INSERT INTO [Lkp].[MsSectorType] (Id, SectorType)
  VALUES 
-  (  0,    N''),
-  (  1,    N'UstadManagerV3'),
-  (  2,    N'UstadManagerV4'),
-  ( 11,    N'UstadCrmV1'),
-  ( 21,    N'UstadEdiV1'),
-  ( 101,   N'Ön Muhasebe'),
-  ( 111,   N'Mali Müşavir'),
-  ( 112,   N'Resmi Muhasebe'),
-  ( 113,   N'Bordro'),
-  ( 201,   N'Mtsk'),
-  ( 202,   N'İşmak'),
-  ( 203,   N'SRC')
+  ( 0,    N''),
+  ( 1,    N'Ön Muhasebe'),
+  ( 2,    N'Mali Müşavir'),
+  ( 3,    N'Resmi Muhasebe'),
+  ( 4,    N'Bordro'),
+  ( 5,    N'Ustad Crm'),
+  ( 201,  N'Mtsk'),
+  ( 202,  N'İşmak'),
+  ( 203,  N'SRC'),
+  ( 211,  N'TabimMtsk')
 

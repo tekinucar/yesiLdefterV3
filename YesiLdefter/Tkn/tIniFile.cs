@@ -24,7 +24,7 @@ namespace Tkn_IniFile
         {
             Path = new FileInfo(IniPath ?? EXE + ".ini").FullName;
         }
-
+        
         public string Read(string Key, string Section = null)
         {
             var RetVal = new StringBuilder(255);

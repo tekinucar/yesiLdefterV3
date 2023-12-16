@@ -227,6 +227,24 @@ namespace Tkn_SQLs
              order by a.column_id ";
         }
 
+        public string SQL_FieldFind(string databaseName, string tableName, string fieldName)
+        {
+            return
+                @"
+                 select  
+                 a.column_id, a.name, 
+                 convert(smallInt, a.system_type_id) system_type_id, 
+                 convert(smallInt, a.user_type_id) user_type_id, 
+                 a.max_length, a.precision, a.scale, a.is_nullable, a.is_identity 
+                 from 
+                 [" + databaseName + @"].sys.columns a,  
+                 [" + databaseName + @"].sys.tables b 
+                 where b.object_id = a.object_id 
+                 and   b.name = '" + tableName + @"'
+                 and   a.name = '" + fieldName + @"' 
+        ";
+        }
+
         public string SQL_Types_List(string Type_Name)
         {
             string s = string.Empty;
@@ -514,6 +532,10 @@ Select [3S_SYSVAR].*
             #endregion
         }
 
+        public string Sql_UstadFirmsWithFirmGUID(string firmGUID)
+        {
+            return @" Select * from UstadFirms Where FirmGUID = '" + firmGUID + @"' ";
+        }
         public string preparingUstadFirmListSql(string myGuid, v.tFirmListType flt)
         {
             string tSql = "";
@@ -820,7 +842,72 @@ Select distinct
 
             return tSql;
         }
-        
+
+        public string preparingUstadUsersSql(string eMail, string pass, int userId)
+        {
+            string Sql = "";
+
+            if ((eMail != "") && (pass == ""))
+                Sql = @" Select * from UstadUsers where UserEMail = '" + eMail + @"' ";
+            if ((eMail != "") && (pass != ""))
+                Sql = @" Select * from UstadUsers where UserEMail = '" + eMail + @"' and UserKey = '" + pass + "' ";
+            if ((userId > 0) && (pass == ""))
+                Sql = @" Update UstadUsers set IsActive = 1 where UserId = " + userId.ToString() + @" ";
+            if ((userId > 0) && (pass != ""))
+                Sql = @" Update UstadUsers set UserKey = '" + pass + @"' where UserId = " + userId.ToString() + @" ";
+
+            return Sql;
+        }
+
+        public string preparingTabimUsersSql(string userName, string pass, int userId)
+        {
+            string Sql = "";
+
+            if ((userName != "") && (pass == ""))
+                Sql = @" Select * from users where Username_ = '" + userName + @"' ";
+            if ((userName != "") && (pass != ""))
+                Sql = @" Select * from users where Username_ = '" + userName + @"' and Password_ = '" + pass + "' ";
+            if ((userId > 0) && (pass == ""))
+                Sql = @" Update users set IsActive = 1 where Ulas = " + userId.ToString() + @" ";
+            if ((userId > 0) && (pass != ""))
+                Sql = @" Update users set Password_ = '" + pass + @"' where Ulas = " + userId.ToString() + @" ";
+
+            return Sql;
+        }
+
+
+        public string SQL_TabimValues(string tableName, string where)
+        {
+            return @" Select * from dbo." + tableName + " where 0 = 0 " + where;
+        }
+
+        public string updateTabimFirmGUIDSql(string FirmGUID)
+        {
+            return @" 
+  if ( Select count(*) ADET from [dbo].[paramalt] where ULASPARAMTOP = 1 and KOD = 119 ) = 0
+  begin
+    INSERT INTO [dbo].[paramalt]
+           ([ULASPARAMTOP]
+           ,[KOD]
+           ,[BASLIK]
+           ,[DEGER])
+    VALUES
+           ( 1, 119, 'FirmGUID', '" + FirmGUID + @"' )
+  end else
+  begin
+    UPDATE [dbo].[paramalt]
+    SET [DEGER] = '" + FirmGUID + @"'
+    WHERE ULASPARAMTOP = 1
+	and   KOD = 119
+  end
+
+  UPDATE [dbo].[users] SET [FirmGUID] = '" + FirmGUID + @"'
+
+  Select 1 as onay
+            ";
+        }
+
+
         #endregion System SQLs
 
         #region ManagerServer Tables SQLs Preparing
@@ -1242,11 +1329,35 @@ INSERT INTO [dbo].[SYS_UPDATES]
         public string Sql_MsDbUpdates(string IdList)
         {
             // publishManager database
-            return 
-              " Select * from dbo.MsDbUpdates Where Id not in ( " + IdList + " )";
+            return
+                " Select * from dbo.MsDbUpdates Where Id not in ( " + IdList + " ) "
+              + " and SectorTypeId in ( 0, " + v.SP_Firm_SectorTypeId.ToString() + " ) ";
             //" Select * from " + v.publishManager_DB.databaseName + ".dbo.MsDbUpdates "
-
         }
+
+        public string Sql_MsProjectTables(string tableName, Int16 sectorTypeId)
+        {
+            return @"
+ Select 
+   [MsProjectTables].[Id]
+ , [MsProjectTables].[IsActive]
+ , [MsProjectTables].[SectorTypeId]
+ , [MsProjectTables].[SchemaName]
+ , [MsProjectTables].[TableName]
+ , [MsProjectTables].[SqlScript]
+ From [dbo].[MsProjectTables] as [MsProjectTables]
+ Where 0 = 0 
+ and [MsProjectTables].SectorTypeId = " + sectorTypeId.ToString() + @"
+ and [MsProjectTables].TableName = '" + tableName + "' " + @" ";
+        }
+
+
+        public string Sql_prcUstadUserFirmsList()
+        {
+            return @" EXECUTE [dbo].[prc_UstadUserFirmsListeGet] ";
+        }
+
+
 
         public string Sql_DbUpdatesIdList()
         {
@@ -1537,7 +1648,7 @@ INSERT INTO [dbo].[SYS_UPDATES]
                      " Select " + masterFields + //TableLabel + ".* " + v.ENTER +
                        join_Fields + v.ENTER +
                        Lkp_Memory_Fields +
-                     " from " + SchemasDot + TableName + " " + TableLabel + v.ENTER +
+                     " from " + SchemasDot + TableName + " as " + TableLabel + " with (nolock) " + v.ENTER +
                        join_Tables + v.ENTER +
                      " where 0 = 0 " + v.ENTER +
                      " /*" + TableLabel + ".DEFAULT_VALUE*/" + v.ENTER +
@@ -3199,7 +3310,7 @@ INSERT INTO [dbo].[SYS_UPDATES]
             //if (adet > 0)
             //    joinTableAlias = joinTableAlias + "_" + Convert.ToString(adet + 1);
 
-            joinTables += "   left outer join Lkp." + tableName + " as " + joinTableAlias  + " on ( " + tableCode + "." + lookUpFieldName + " = " + joinTableAlias + "." + idFieldName + " ) " + v.ENTER;
+            joinTables += "   left outer join Lkp." + tableName + " as " + joinTableAlias  + " with (nolock) on ( " + tableCode + "." + lookUpFieldName + " = " + joinTableAlias + "." + idFieldName + " ) " + v.ENTER;
 
             if (lookUpFieldName.IndexOf("Lkp_") == -1)
                 lookUpFieldName = "Lkp_" + lookUpFieldName;
@@ -3211,7 +3322,7 @@ INSERT INTO [dbo].[SYS_UPDATES]
             // 
             if (fieldName == "Type") fieldName = fieldName + "Name";
 
-            joinFields += " , " + joinTableAlias + "." + fieldName + "  as  " + lookUpFieldName + v.ENTER;
+            joinFields += " , " + joinTableAlias + "." + fieldName + " as " + lookUpFieldName + v.ENTER;
 
         }
 
@@ -3323,7 +3434,7 @@ INSERT INTO [dbo].[SYS_UPDATES]
 
                         // J_TABLE + J_WHERE
                         joinTables = joinTables +
-                            join + j_table_name + " [" + j_table_alias + "] on ( " +
+                            join + j_table_name + " as [" + j_table_alias + "] with (nolock) on ( " +
                               Preparing_JoinWhere_JSON(prop_.J_WHERE, j_table_alias, MasterTableAlias) + " ) " + v.ENTER;
 
                         // J_STN_FIELDS

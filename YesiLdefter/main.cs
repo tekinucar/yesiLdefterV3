@@ -125,9 +125,7 @@ namespace YesiLdefter
 
             using (tStarter s = new tStarter())
             {
-
                 s.InitStart();
-
             }
 
             #endregion
@@ -140,6 +138,9 @@ namespace YesiLdefter
                 Login();
                 // application set skins
                 t.getUserLookAndFeelSkins();
+
+                if (v.active_DB.localDbUses == false)
+                    t.DBUpdatesDataTransferOff();
             }
 
             #endregion
@@ -181,7 +182,7 @@ namespace YesiLdefter
                 if (v.active_DB.projectDBType == v.dBaseType.MSSQL)
                 {
                     t.WaitFormOpen(v.mainForm, "ProjectDB MSSQL Connection...");
-                    t.Db_Open(v.active_DB.projectMSSQLConn);
+                    //t.Db_Open(v.active_DB.projectMSSQLConn);
                 }
                 
                 t.WaitFormOpen(v.mainForm, "SysTypes Load ...");
@@ -194,7 +195,12 @@ namespace YesiLdefter
 
                 versionChecked();
 
-                //t.dbUpdatesChecked();
+                /// Ustad Crm ve TabimMtsk değil ise
+                /// TabimMtsk ya ait güncellemeler ms_TabimMtsk.cs içinde çalışıyor
+                /// 
+                if ((v.SP_Firm_SectorTypeId != 5) && // Crm
+                    (v.SP_Firm_SectorTypeId != 211)) 
+                    t.dbUpdatesChecked();
 
                 setMainFormCaption();
             }
@@ -306,7 +312,8 @@ namespace YesiLdefter
 
             // Kullanıcıların Ortak Menüsü
             //
-            mn.Create_Menu(ribbon, "UST/PMS/PMS/PublicUser", "");
+            if (v.SP_TabimDbConnection == false)
+                mn.Create_Menu(ribbon, "UST/PMS/PMS/PublicUser", "");
 
             if ((v.tUser.UserDbTypeId == 1) || // yazılım
                 (v.tUser.UserDbTypeId == 21))  // kurucu

@@ -17,6 +17,7 @@ namespace YesiLdefter
         #region Tanımlar
 
         tToolBox t = new tToolBox();
+        tSQLs Sqls = new tSQLs();
         tRegistry reg = new tRegistry();
         tUserFirms userFirms = new tUserFirms();
 
@@ -110,6 +111,8 @@ namespace YesiLdefter
             // Sisteme Giriş // User Login ---------------------------------------
             //
             #region
+            Application.DoEvents();
+
             t.Find_DataSet(this, ref ds_UL, ref dN_UL, Login_TableIPCode);
 
             Control cntrl = null;
@@ -236,7 +239,7 @@ namespace YesiLdefter
 
         void btn_SistemeGiris_Ileri(object sender, EventArgs e)
         {
-            CheckInput();
+            checkedInput();
         }
 
         void cmb_EMail_EditValueChanged(object sender, EventArgs e)
@@ -248,11 +251,11 @@ namespace YesiLdefter
         {
             if (e.KeyCode == Keys.Return)
             {
-                CheckInput();
+                checkedInput();
             }
         }
 
-        void CheckInput()
+        void checkedInput()
         {
             if (t.IsNotNull(ds_UL) && (dN_UL != null))
             {
@@ -269,13 +272,13 @@ namespace YesiLdefter
                     v.tUserRegister.UserRemember = ((DevExpress.XtraEditors.CheckButton)btn_BHatirla).Checked;
                     
                     // şimdi [ e-mail ile şifre ] databaseden kontrol ediliyor
-                    tSql = preparingUstadUsersSql(u_user_email, u_user_key, 0);
+                    tSql = Sqls.preparingUstadUsersSql(u_user_email, u_user_key, 0);
                     t.SQL_Read_Execute(v.dBaseNo.UstadCrm, ds_Query, ref tSql, "UstadUsers", "UserLogin");
 
                     if (t.IsNotNull(ds_Query) == false)
                     {
                         //böyle bir email varmı diye kontrol et
-                        GetUser(u_user_email, "FIND");
+                        checkedUser(u_user_email, "FIND");
                     }
                     else
                     {
@@ -285,7 +288,7 @@ namespace YesiLdefter
                         if (ds_Query.Tables[0].Rows.Count == 0)
                         {
                             //böyle bir email varmı diye kontrol et
-                            GetUser(u_user_email, "FIND");
+                            checkedUser(u_user_email, "FIND");
                         }
 
                         if (ds_Query.Tables[0].Rows.Count == 1)
@@ -313,11 +316,11 @@ namespace YesiLdefter
 
         void read_eMail(DataSet ds, string user_EMail)
         {
-            tSql = preparingUstadUsersSql(user_EMail, "", 0);
+            tSql = Sqls.preparingUstadUsersSql(user_EMail, "", 0);
             t.SQL_Read_Execute(v.dBaseNo.UstadCrm, ds, ref tSql, "UstadUsers", "FindUser");
         }
 
-        void GetUser(string user_Email, string work)
+        void checkedUser(string user_Email, string work)
         {
             read_eMail(ds_Query, user_Email);
 
@@ -379,7 +382,7 @@ namespace YesiLdefter
         {
             /// Buraya geldiysen 
             /// kullanıcı için birden fazla firma seçeneği var demek ki
-            /// kullanıcı bu botuna basar ve seçilen değerler alınır lets go ... main form
+            /// kullanıcı bu butona basar ve seçilen değerler alınır lets go ... main form
             ///
             if (t.IsNotNull(dsUserFirmList))
             {
@@ -392,7 +395,7 @@ namespace YesiLdefter
 
         void SetUserIsActive(int Id)
         {
-            tSql = preparingUstadUsersSql("", "", Id);
+            tSql = Sqls.preparingUstadUsersSql("", "", Id);
             t.SQL_Read_Execute(v.dBaseNo.UstadCrm, ds_Query2, ref tSql, "UstadUsers", "SetUserIsActive");
         }
 
@@ -491,7 +494,7 @@ namespace YesiLdefter
         {
             u_user_email = ((DevExpress.XtraEditors.ComboBoxEdit)cmb_EMail).EditValue.ToString();
 
-            GetUser(u_user_email, "SEND_EMAIL");
+            checkedUser(u_user_email, "SEND_EMAIL");
         }
 
         void btn_Yeni_SifreClick(object sender, EventArgs e)
@@ -506,7 +509,7 @@ namespace YesiLdefter
                     string user_rpt_pass = ((DevExpress.XtraEditors.TextEdit)uk_rpt_user_pass).EditValue.ToString();
 
                     // şimdi [ e-mail ile şifre ] databaseden kontrol ediliyor
-                    tSql = preparingUstadUsersSql(user_email, user_old_pass, 0); 
+                    tSql = Sqls.preparingUstadUsersSql(user_email, user_old_pass, 0); 
                     t.SQL_Read_Execute(v.dBaseNo.UstadCrm, ds_Query, ref tSql, "UstadUser", "UserLogin");
 
                     if (t.IsNotNull(ds_Query))
@@ -531,7 +534,7 @@ namespace YesiLdefter
                                     (user_new_pass != user_old_pass)    // yeni şifre ile eski şifre  aynı değilse
                                     )
                                 {
-                                    tSql = preparingUstadUsersSql("", user_new_pass, userId);
+                                    tSql = Sqls.preparingUstadUsersSql("", user_new_pass, userId);
                                     bool onay = t.Data_Read_Execute(this, ds_Query2, ref tSql, "NEW_USER_KEY", null);
 
                                     if (onay) MessageBox.Show("Şifreniz başarıyla güncellenmiştir...");
@@ -550,27 +553,13 @@ namespace YesiLdefter
                     if (t.IsNotNull(ds_Query) == false)
                     {
                         //böyle bir email varmı diye kontrol et
-                        GetUser(user_email, "FIND");
+                        checkedUser(user_email, "FIND");
                     }
                 }
             }
         }
 
-        private string preparingUstadUsersSql(string eMail, string pass, int userId)
-        {
-            string Sql = "";
-
-            if ((eMail != "") && (pass == ""))
-                Sql = @" Select * from UstadUsers where UserEMail = '" + eMail + @"' ";
-            if ((eMail != "") && (pass != ""))
-                Sql = @" Select * from UstadUsers where UserEMail = '" + eMail + @"' and UserKey = '" + pass + "' ";
-            if ((userId > 0) && (pass == ""))
-                Sql = @" Update UstadUsers set IsActive = 1 where UserId = " + userId.ToString() + @" ";
-            if ((userId > 0) && (pass != ""))
-                Sql = @" Update UstadUsers set UserKey = '" + pass + @"' where UserId = " + userId.ToString() + @" ";
-
-            return Sql;
-        }
+        
 
 
     }

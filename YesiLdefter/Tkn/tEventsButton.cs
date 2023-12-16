@@ -1310,7 +1310,7 @@ namespace Tkn_Events
                 message = dsRead.Tables[0].Rows[dNRead.Position][readKEYFNAME].ToString();
                 onay = true;
                 //MessageBox.Show(message);
-                t.FlyoutMessage("Bilgilendirme : ", message);
+                t.FlyoutMessage(tForm, "Bilgilendirme : ", message);
             }
             else
             {
@@ -1319,7 +1319,7 @@ namespace Tkn_Events
                 {
                     onay = true;
                     //MessageBox.Show(message);
-                    t.FlyoutMessage("Bilgilendirme : ", message);
+                    t.FlyoutMessage(tForm, "Bilgilendirme : ", message);
                 }
             }
             return onay;
@@ -2050,7 +2050,7 @@ namespace Tkn_Events
                         {
                             mesaj = t.Set("İşlem başarıyla çalıştı ...", "", "");
 
-                            t.FlyoutMessage("Bilgilendirme", mesaj + v.ENTER);
+                            t.FlyoutMessage(tForm, "Bilgilendirme", mesaj + v.ENTER);
                         }
                     }
                     else
@@ -2287,7 +2287,7 @@ namespace Tkn_Events
                     if (workType == "MESSAGESHOW")
                     {
                         if (t.IsNotNull(item.MSETVALUE))
-                            t.FlyoutMessage("Bilgilendirme", item.MSETVALUE);
+                            t.FlyoutMessage(null, "Bilgilendirme", item.MSETVALUE);
                             //MessageBox.Show(item.MSETVALUE);
                     }
                 }

@@ -35,6 +35,12 @@ commit transaction
 
 /*CreateData*/
 
+if ( Select count(*) ADET from [dbo].[DbUpdates] 
+     where [MsDbUpdateId] = -1
+     and   [UpdateTypeId] = 13 
+     and   [DBaseNoTypeId] = 6
+) = 0 
+begin
 INSERT INTO [dbo].[DbUpdates]
            ([IsActive]
            ,[MsDbUpdateId]
@@ -52,7 +58,7 @@ INSERT INTO [dbo].[DbUpdates]
            ,[SqlScript])
      VALUES
            ( 0    -- IsActive, bit  1 : veri transferi yapılıyor, 0 = yapılmıyor 
-           , 6    -- MsDbUpdateId, NewDatabase
+           ,-1    -- MsDbUpdateId, NewDatabase
            , convert(date, '01.01.2023',103) -- UpdateDate, datetime
            , 13   -- UpdateTypeId, Data transfer işlemi
            , 0    -- SectorTypeId, smallint 
@@ -66,5 +72,5 @@ INSERT INTO [dbo].[DbUpdates]
            , 'Veri transferinin yapılması ' -- About, nvarchar(100)
            , null -- SqlScript, varchar(max)
 		   )
-
+end
 /*CreateDataEnd*/

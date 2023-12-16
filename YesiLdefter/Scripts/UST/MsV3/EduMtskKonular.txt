@@ -20,3 +20,26 @@ begin transaction
  grant select, insert, update, delete on EduMtskKonular to public
 
 commit transaction
+
+
+-- ------------------------------------------------------- 
+-- DersTipiTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'EduMtskKonularDersTipi')
+drop table [Lkp].[EduMtskKonularDersTipi]
+
+create table Lkp.EduMtskKonularDersTipi
+(
+   Id          Int Unique Not Null,
+   DersTipi    nVarchar(50)   null
+   
+   constraint  pk_EduMtskKonularDersTipi primary key (Id)
+)
+
+INSERT INTO Lkp.EduMtskKonularDersTipi (Id, DersTipi)
+ VALUES 
+  ( 0, N'Tanımsız'),
+  ( 1, N'Trafik ve Çevre Dersi'),
+  ( 2, N'İlkyardım Dersi'),
+  ( 3, N'Araç Tekniği Dersi'),
+  ( 5, N'Trafik Adabı Dersi')

@@ -1,15 +1,15 @@
 ﻿/*CreateProcedure*/
 
-CREATE PROCEDURE [dbo].[prc_EduMtskSoruKitabiDetayiOlustur] (@KitapNo int)  
+CREATE PROCEDURE [dbo].[prc_EduMtskSoruKitabiSayfasiOlustur] (@KitapNo int)  
 AS BEGIN
 
   --declare @KitapNo int = 203
 
-  delete from EduMtskSoruKitabiDetayi 
+  delete from EduMtskSoruKitabiSayfasi 
   where KitapNo = @KitapNo
  
   -- 1	Trafik ve Çevre Dersi
-  INSERT INTO [dbo].[EduMtskSoruKitabiDetayi]
+  INSERT INTO [dbo].[EduMtskSoruKitabiSayfasi]
            ([IsActive]
            ,[KitapNo]
            ,[DersTipiId]
@@ -30,7 +30,7 @@ AS BEGIN
 
 
   -- 2	İlkyardım Dersi
-  INSERT INTO [dbo].[EduMtskSoruKitabiDetayi]
+  INSERT INTO [dbo].[EduMtskSoruKitabiSayfasi]
            ([IsActive]
            ,[KitapNo]
            ,[DersTipiId]
@@ -50,7 +50,7 @@ AS BEGIN
   ORDER BY NEWID()
 
   -- 3	Araç Tekniği Dersi
-  INSERT INTO [dbo].[EduMtskSoruKitabiDetayi]
+  INSERT INTO [dbo].[EduMtskSoruKitabiSayfasi]
            ([IsActive]
            ,[KitapNo]
            ,[DersTipiId]
@@ -70,7 +70,7 @@ AS BEGIN
   ORDER BY NEWID()
 
   -- 5	Trafik Adabı Dersi
-  INSERT INTO [dbo].[EduMtskSoruKitabiDetayi]
+  INSERT INTO [dbo].[EduMtskSoruKitabiSayfasi]
            ([IsActive]
            ,[KitapNo]
            ,[DersTipiId]
@@ -94,7 +94,7 @@ AS BEGIN
     SoruSayisi = x.Adet 
   From EduMtskSoruKitabi as a,
   (
-     Select KitapNo, count(Id) Adet from EduMtskSoruKitabiDetayi 
+     Select KitapNo, count(Id) Adet from EduMtskSoruKitabiSayfasi 
      Where KitapNo = @kitapNo
      Group by KitapNo
   ) as x

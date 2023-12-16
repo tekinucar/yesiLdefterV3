@@ -64,6 +64,30 @@ INSERT INTO [Lkp].[MsDbUpdatesDBaseNoType] (Id, DBaseNoType)
   ( 7,     N'PublishManager')
 
 
+-- ------------------------------------------------------- 
+-- SectorType
+-- ------------------------------------------------------- 
+create table [Lkp].[MsDbUpdatesSectorType]
+(
+   Id               Int Unique not null, 
+   SectorType       nVarchar(20)   null,
+   
+   constraint  pk_MsDbUpdatesSectorType primary key (Id)
+)
+
+Delete from [Lkp].[MsDbUpdatesSectorType]
+INSERT INTO [Lkp].[MsDbUpdatesSectorType] (Id, SectorType)
+ VALUES 
+  ( 0,    N''),
+  ( 1,    N'Ön Muhasebe'),
+  ( 2,    N'Mali Müşavir'),
+  ( 3,    N'Resmi Muhasebe'),
+  ( 4,    N'Bordro'),
+  ( 5,    N'Ustad Crm'),
+  ( 201,  N'Mtsk'),
+  ( 202,  N'İşmak'),
+  ( 203,  N'SRC'),
+  ( 211,  N'TabimMtsk')
 
 -- ------------------------------------------------------- 
 -- UpdateTypeId

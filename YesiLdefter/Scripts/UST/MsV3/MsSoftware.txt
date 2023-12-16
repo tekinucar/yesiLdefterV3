@@ -113,6 +113,8 @@ INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCod
 INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 3, 'UST', 'MEB', 'YDL', 'UST.MEB.YDL', '', 'Yabancı Dil',  1 )  
 INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 3, 'UST', 'MEB', 'YRT', 'UST.MEB.YRT', '', 'Yurt',  1 )  
 INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 3, 'UST', 'MEB', 'OKL', 'UST.MEB.OKL', '', 'Okul',  1 )  
+INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 3, 'UST', 'MEB', 'TB1', 'UST.MEB.TB1', '', 'Tabim Mtsk',  1 )  
+
 
 -- Üstad Yazılım - T01
 INSERT INTO [dbo].[MsSoftware] ([RecType],[SoftwareCode],[ProjectCode],[ModulCode],[FullCode],[SchemasCode],[Caption],[IsActive]) VALUES ( 3, 'UST', 'T01', 'AJN', 'UST.T01.AJN', '', '',  1 )  

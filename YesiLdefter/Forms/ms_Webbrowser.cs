@@ -16,6 +16,8 @@ using System.Threading;
 using System.Net;
 using System.IO;
 using Tkn_CookieReader;
+using YesiLdefter.Selenium;
+using YesiLdefter.Entities;
 
 namespace YesiLdefter
 {
@@ -25,6 +27,8 @@ namespace YesiLdefter
         tToolBox t = new tToolBox();
         tInputPanel ip = new tInputPanel();
         tEventsButton evb = new tEventsButton();
+
+        MsWebPagesService msPagesService = new MsWebPagesService();
 
         int nodeId = 0;
         int parentId = 0;
@@ -63,10 +67,10 @@ namespace YesiLdefter
         DataNavigator dN_AnalysisNodeItems = null;
 
         /// Scraping
-        DataSet ds_ScrapingPages = null;
-        DataNavigator dN_ScrapingPages = null;
-        DataSet ds_Nodes = null;
-        DataNavigator dN_Nodes = null;
+        DataSet ds_MsWebPages = null;
+        DataNavigator dN_MsWebPages = null;
+        DataSet ds_MsWebNodes = null;
+        DataNavigator dN_MsWebNodes = null;
 
         WebBrowser webAnalysis = null;
         WebBrowser webTest = null;
@@ -135,11 +139,11 @@ namespace YesiLdefter
         Int16 myLoadNodeCount = 0;
         Int16 myDisplayNoneCount = 0;
         Int16 myPageRefreshCount = 0;
-        Int16 myButton1Count = 0;
-        Int16 myButton2Count = 0;
         Int16 myButton3Count = 0;
         Int16 myButton4Count = 0;
         Int16 myButton5Count = 0;
+        Int16 myButton6Count = 0;
+        Int16 myButton7Count = 0;
         Int16 myTabelFieldCount = 0;
         Int16 myNoneCount = 0;
         Int16 myNodeCount = 0; // tüm nodeler
@@ -181,6 +185,10 @@ namespace YesiLdefter
         v.tWebRequestType loadBeforeWebRequestType = v.tWebRequestType.none;
         v.tWebEventsType loadBeforeEventsType = v.tWebEventsType.none;
 
+        List<MsWebPage> msWebPage = null;
+        List<MsWebNode> msWebNodes = null;
+
+        webForm f = new webForm();
 
         #endregion Tanımlar
 
@@ -212,20 +220,26 @@ namespace YesiLdefter
             timerTrigger.Interval = 2000;
         }
 
-        // simpleButton_ek1 :  line get  / pageView
-        // simpleButton_ek2 :  line post / AlwaysSet Tc sorgula gibi
-        // simpleButton_ek3 :  full get1  : v.tWebEventsType.button1
-        // simpleButton_ek4 :  full get2  : v.tWebEventsType.button2
-        // simpleButton_ek5 :  full post1 : v.tWebEventsType.button3
-        // simpleButton_ek6 :  full post2 : v.tWebEventsType.button4
-        // simpleButton_ek7 :  full save  : v.tWebEventsType.button5
+        /// simpleButton_ek1 :  line get  / pageView
+        /// simpleButton_ek2 :  line post / AlwaysSet Tc sorgula gibi
+        /// simpleButton_ek3 :  full get1  : v.tWebEventsType.button3
+        /// simpleButton_ek4 :  full get2  : v.tWebEventsType.button4
+        /// simpleButton_ek5 :  full post1 : v.tWebEventsType.button5
+        /// simpleButton_ek6 :  full post2 : v.tWebEventsType.button6
+        /// simpleButton_ek7 :  full save  : v.tWebEventsType.button7
+        /// aynı anda Ek3 ve Ek4 var ise button3 ve button4 devreye girecek ikisi aynı anda yoksa v.tWebEventsType.none çalışacak
+        /// aynı anda Ek5 ve Ek6 var ise button5 ve button6 devreye girecek ikisi aynı anda yoksa v.tWebEventsType.none çalışacak
 
-        // aynı anda Ek3 ve Ek4 var ise button1 ve button2 devreye girecek ikisi aynı anda yoksa v.tWebEventsType.none çalışacak
-        // aynı anda Ek5 ve Ek6 var ise button3 ve button4 devreye girecek ikisi aynı anda yoksa v.tWebEventsType.none çalışacak
-
+        #region Analysis Form
         private void formAnalysisPreparing()
         {
-            Control cntrl = null;
+            preparingTabPage1Buttons();
+            preparingTabPage2Buttons();
+            preparingOrderControls();
+        }
+        private void preparingTabPage1Buttons()
+        {
+            //Control cntrl = null;
             string[] controls = new string[] { };
 
             #region tabPage1
@@ -253,67 +267,82 @@ namespace YesiLdefter
 
             #endregion tabPage1 
 
+        }
+        private void preparingTabPage2Buttons()
+        {
+            //Control cntrl = null;
+            string[] controls = new string[] { };
+
             #region tabPage 2
             /// tabPage 2
             ///
+
+            #region UST/PMS/MsWebPages.Analysis_L01
+            
             TableIPCode = "UST/PMS/MsWebPages.Analysis_L01";
-            t.Find_DataSet(this, ref ds_ScrapingPages, ref dN_ScrapingPages, TableIPCode);
+            
+            t.Find_DataSet(this, ref ds_MsWebPages, ref dN_MsWebPages, TableIPCode);
+
+            if (t.IsNotNull(ds_MsWebPages))
+            {
+                dN_MsWebPages.PositionChanged += new System.EventHandler(dNScrapingPages_PositionChanged);
+                preparingMsWebNodesFields();
+            }
 
             btn_PageView = t.Find_Control(this, "simpleButton_ek1", TableIPCode, controls);
-
             if (btn_PageView != null)
             {
                 ((DevExpress.XtraEditors.SimpleButton)btn_PageView).Click += new System.EventHandler(myPageViewClick);
             }
 
             btn_PageViewAnalysis = t.Find_Control(this, "simpleButton_ek2", TableIPCode, controls);
-
             if (btn_PageViewAnalysis != null)
             {
                 ((DevExpress.XtraEditors.SimpleButton)btn_PageViewAnalysis).Click += new System.EventHandler(myPageViewAnalysisClick);
             }
 
-            TableIPCode = "UST/PMS/MsWebNodeItems.Analysis_L01";
-            t.Find_DataSet(this, ref ds_AnalysisNodeItems, ref dN_AnalysisNodeItems, TableIPCode);
-
+            #endregion UST/PMS/MsWebPages.Analysis_L01
+                        
+            #region UST/PMS/MsWebNodes.Analysis_L02
+            ///
             TableIPCode = "UST/PMS/MsWebNodes.Analysis_L02";
-            t.Find_DataSet(this, ref ds_Nodes, ref dN_Nodes, TableIPCode);
+            t.Find_DataSet(this, ref ds_MsWebNodes, ref dN_MsWebNodes, TableIPCode);
 
-            btn_LineGet = t.Find_Control(this, "simpleButton_ek1", TableIPCode, controls);
+            /// Get işlemleri
+            btn_LineGet = t.Find_Control(this, "simpleButton_ek3", TableIPCode, controls);
             if (btn_LineGet != null)
             {
                 ((DevExpress.XtraEditors.SimpleButton)btn_LineGet).Click += new System.EventHandler(myLineGetTestClick);
             }
-
-            btn_LinePost = t.Find_Control(this, "simpleButton_ek2", TableIPCode, controls);
-            if (btn_LinePost != null)
-            {
-                ((DevExpress.XtraEditors.SimpleButton)btn_LinePost).Click += new System.EventHandler(myLinePostTestClick);
-            }
-
-            // simpleButton_ek3 :  full get1  : v.tWebEventsType.button1
-            // simpleButton_ek5 :  full post1 : v.tWebEventsType.button3
-
-            btn_FullGet1 = t.Find_Control(this, "simpleButton_ek3", TableIPCode, controls);
+            btn_FullGet1 = t.Find_Control(this, "simpleButton_ek4", TableIPCode, controls);
             if (btn_FullGet1 != null)
             {
                 ((DevExpress.XtraEditors.SimpleButton)btn_FullGet1).Click += new System.EventHandler(myFullGet1_Click);
             }
-
-            btn_FullPost1 = t.Find_Control(this, "simpleButton_ek5", TableIPCode, controls);
+            /// Post işlemleri
+            btn_LinePost = t.Find_Control(this, "simpleButton_ek5", TableIPCode, controls);
+            if (btn_LinePost != null)
+            {
+                ((DevExpress.XtraEditors.SimpleButton)btn_LinePost).Click += new System.EventHandler(myLinePostTestClick);
+            }
+            btn_FullPost1 = t.Find_Control(this, "simpleButton_ek6", TableIPCode, controls);
             if (btn_FullPost1 != null)
             {
                 ((DevExpress.XtraEditors.SimpleButton)btn_FullPost1).Click += new System.EventHandler(myFullPost1_Click);
             }
+            ///
+            #endregion UST/PMS/MsWebNodes.Analysis_L02
 
-            //simpleButton_WebScraping1
-            btn_WebScraping1 = t.Find_Control(this, "simpleButton_WebScraping1", TableIPCode, controls);
-            if (btn_WebScraping1 != null)
-            {
-                ((DevExpress.XtraEditors.SimpleButton)btn_WebScraping1).Click += new System.EventHandler(myBtnWebScrapingClick);
-            }
+            TableIPCode = "UST/PMS/MsWebNodeItems.Analysis_L01";
+            t.Find_DataSet(this, ref ds_AnalysisNodeItems, ref dN_AnalysisNodeItems, TableIPCode);
 
             #endregion tabPage 2
+
+        }
+        private void preparingOrderControls()
+        {
+            Control cntrl = null;
+            string[] controls = new string[] { };
 
             #region order control
             /// order control
@@ -325,14 +354,17 @@ namespace YesiLdefter
 
             webAnalysis = new WebBrowser();
             webTest = new WebBrowser();
-            webMain = new WebBrowser();
+            if (webMain == null)
+            {
+                webMain = new WebBrowser();
+                webMain.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(this.webMain_DocumentCompleted);
+            }
 
             tableLayoutPanel1.Controls.Add(webAnalysis, 0, 0);
             tableLayoutPanel1.SetRowSpan(webAnalysis, 2);
 
             //tabPageHtmlView
             cntrl = t.Find_Control(this, "tabPageHtmlView");
-            //tableLayoutPanel1.Controls.Add(webTest, 1, 1);
             if (cntrl != null)
                 cntrl.Controls.Add(webTest);
 
@@ -348,7 +380,6 @@ namespace YesiLdefter
             webMain.ScriptErrorsSuppressed = true;
 
             webAnalysis.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(this.webAnalysis_DocumentCompleted);
-            webMain.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(this.webMain_DocumentCompleted);
 
             menuName = "MENU_" + "UST/PMS/PMS/WEBANALYSIS";
             t.Find_Button_AddClick(this, menuName, buttonGIB, myNavElementClick);
@@ -361,10 +392,13 @@ namespace YesiLdefter
 
             #endregion order control
         }
+
+        #endregion Analysis Form
+
+        #region Scraping Form
         private void formScrapingPreparing()
         {
             MsWebPagesButtonsPreparing();
-
             MsWebNodesButtonsPreparing();
 
             webMain = (WebBrowser)t.Find_Control(this, "WebMain");
@@ -382,7 +416,6 @@ namespace YesiLdefter
             t.Find_Button_AddClick(this, menuName, buttonScrapingGoBack, myNavElementClick);
             t.Find_Button_AddClick(this, menuName, buttonScrapingGoForward, myNavElementClick);
         }
-
         private void MsWebPagesButtonsPreparing()
         {
             /// MsWebPages tablosu
@@ -395,20 +428,20 @@ namespace YesiLdefter
             //Control cntrl = null;
             string[] controls = new string[] { };
 
-            t.Find_DataSet(this, ref ds_ScrapingPages, ref dN_ScrapingPages, TableIPCode);
+            t.Find_DataSet(this, ref ds_MsWebPages, ref dN_MsWebPages, TableIPCode);
 
-            if (t.IsNotNull(ds_ScrapingPages))
+            if (t.IsNotNull(ds_MsWebPages))
             {
+                dN_MsWebPages.PositionChanged += new System.EventHandler(dNScrapingPages_PositionChanged);
+                preparingMsWebNodesFields();
 
-                dN_ScrapingPages.PositionChanged += new System.EventHandler(dNScrapingPages_PositionChanged);
-
-                // simpleButton_ek1 :  line get  / pageView
-                // simpleButton_ek2 :  line post / AlwaysSet Tc sorgula gibi
-                // simpleButton_ek3 :  full get1  : v.tWebEventsType.button1
-                // simpleButton_ek4 :  full get2  : v.tWebEventsType.button2
-                // simpleButton_ek5 :  full post1 : v.tWebEventsType.button3
-                // simpleButton_ek6 :  full post2 : v.tWebEventsType.button4
-                // simpleButton_ek7 :  full save  : v.tWebEventsType.button5
+                /// simpleButton_ek1 :  line get   / pageView
+                /// simpleButton_ek2 :  line set   / AlwaysSet Tc sorgula gibi
+                /// simpleButton_ek3 :  full get1  : v.tWebEventsType.button3
+                /// simpleButton_ek4 :  full get2  : v.tWebEventsType.button4
+                /// simpleButton_ek5 :  full set1  : v.tWebEventsType.button5
+                /// simpleButton_ek6 :  full set2  : v.tWebEventsType.button6
+                /// simpleButton_ek7 :  full save  : v.tWebEventsType.button7
 
                 btn_PageView = t.Find_Control(this, "simpleButton_ek1", TableIPCode, controls);
                 // Page View
@@ -417,6 +450,8 @@ namespace YesiLdefter
                     ((DevExpress.XtraEditors.SimpleButton)btn_PageView).Click += new System.EventHandler(myPageViewClick);
                 }
 
+                // Bu hiç kullanılmadı 
+                //
                 // Bilgileri Sorgula / AlwaysSet  (TcNo sorgula gibi)
                 btn_AlwaysSet = t.Find_Control(this, "simpleButton_ek2", TableIPCode, controls);
                 if (btn_AlwaysSet != null)
@@ -424,26 +459,26 @@ namespace YesiLdefter
                     ((DevExpress.XtraEditors.SimpleButton)btn_AlwaysSet).Click += new System.EventHandler(myAlwaysSetClick);
                 }
 
-                // Bilgileri Al 1
+                // Bilgileri Al button3 : get
                 btn_FullGet1 = t.Find_Control(this, "simpleButton_ek3", TableIPCode, controls);
                 if (btn_FullGet1 != null)
                 {
                     ((DevExpress.XtraEditors.SimpleButton)btn_FullGet1).Click += new System.EventHandler(myFullGet1_Click);
                 }
-                // Bilgileri Al 2
+                // Bilgileri Al button4 : get
                 btn_FullGet2 = t.Find_Control(this, "simpleButton_ek4", TableIPCode, controls);
                 if (btn_FullGet2 != null)
                 {
                     ((DevExpress.XtraEditors.SimpleButton)btn_FullGet2).Click += new System.EventHandler(myFullGet2_Click);
                 }
 
-                // Bilgileri Gönder 1
+                // Bilgileri Gönder button5 : set
                 btn_FullPost1 = t.Find_Control(this, "simpleButton_ek5", TableIPCode, controls);
                 if (btn_FullPost1 != null)
                 {
                     ((DevExpress.XtraEditors.SimpleButton)btn_FullPost1).Click += new System.EventHandler(myFullPost1_Click);
                 }
-                // Bilgileri Gönder 2
+                // Bilgileri Gönder button6 : set
                 btn_FullPost2 = t.Find_Control(this, "simpleButton_ek6", TableIPCode, controls);
                 if (btn_FullPost2 != null)
                 {
@@ -456,20 +491,6 @@ namespace YesiLdefter
                 {
                     ((DevExpress.XtraEditors.SimpleButton)btn_FullSave).Click += new System.EventHandler(myFullSave_Click);
                 }
-
-                //simpleButton_WebScraping1
-                btn_WebScraping1 = t.Find_Control(this, "simpleButton_WebScraping1", TableIPCode, controls);
-                if (btn_WebScraping1 != null)
-                {
-                    ((DevExpress.XtraEditors.SimpleButton)btn_WebScraping1).Click += new System.EventHandler(myBtnWebScrapingClick);
-                }
-
-                btn_Test = t.Find_Control(this, "simpleButton_ek2", TableIPCode, controls);
-                if (btn_Test != null)
-                {
-                    ((DevExpress.XtraEditors.SimpleButton)btn_Test).Click += new System.EventHandler(myTestClick);
-                }
-
             }
 
         }
@@ -484,7 +505,7 @@ namespace YesiLdefter
                 MessageBox.Show("DİKKAT : MsWebNodes tablosu bulunamadı...(Form bilgisi olmayabilir... ( MS_LAYOUT )) ");
                 return;
             }
-            t.Find_DataSet(this, ref ds_Nodes, ref dN_Nodes, TableIPCode);
+            t.Find_DataSet(this, ref ds_MsWebNodes, ref dN_MsWebNodes, TableIPCode);
 
             // Hiç kullanma ihtiyacı olmadı 
             //
@@ -520,25 +541,34 @@ namespace YesiLdefter
             }
             */
         }
+
+        #endregion Scraping Form
+
         private void dNScrapingPages_PositionChanged(object sender, EventArgs e)
         {
-            if (t.IsNotNull(ds_Nodes))
-                eventsTypeCount(ds_Nodes);
+            eventsTypeCount(ds_MsWebNodes);
+
+            preparingMsWebNodesFields();
 
             this.btn_OneByOne = null;
             this.myTriggerOneByOne = false;
             this.ds_DbaseSiraliTable = null;
             this.dN_DbaseSiraliTable = null;
         }
+
+        private void preparingMsWebNodesFields()
+        {
+            msWebPage = t.RunQueryModelsSingle<MsWebPage>(ds_MsWebPages, dN_MsWebPages.Position);
+            msWebNodes = t.RunQueryModels<MsWebNode>(ds_MsWebNodes);
+        }
+
         #endregion Form preparing
 
         #region Analysis buttonları
-
         private void myNavElementClick(object sender, DevExpress.XtraBars.Navigation.NavElementEventArgs e)
         {
             if (((DevExpress.XtraBars.Navigation.NavButton)sender).Name == buttonGIB) GIBPage();
             if (((DevExpress.XtraBars.Navigation.NavButton)sender).Name == buttonMEB) MEBPage();
-            if (((DevExpress.XtraBars.Navigation.NavButton)sender).Name == buttonCONNECT) Connect();
             if (((DevExpress.XtraBars.Navigation.NavButton)sender).Name == buttonANALYSIS) Analysis();
 
             if (((DevExpress.XtraBars.Navigation.NavButton)sender).Name == buttonAnalysisGoBack) GoBackAnalysis();
@@ -547,21 +577,14 @@ namespace YesiLdefter
             if (((DevExpress.XtraBars.Navigation.NavButton)sender).Name == buttonScrapingGoBack) GoBackMain();
             if (((DevExpress.XtraBars.Navigation.NavButton)sender).Name == buttonScrapingGoForward) GoForwardMain();
         }
-
         private void GIBPage()
         {
             webAnalysis.Navigate("https://test.efatura.gov.tr/efatura/login.jsp");
         }
-
         private void MEBPage()
         {
             //webAnalysis.Navigate("https://mebbis.meb.gov.tr/default.aspx");
             webAnalysis.Navigate("https://mebbis.meb.gov.tr/KurumListesi.aspx");
-        }
-
-        private void Connect()
-        {
-
         }
         private void GoBackAnalysis()
         {
@@ -587,7 +610,6 @@ namespace YesiLdefter
         {
             Test();
         }
-
         private async Task<string> Test()
         {
             /*
@@ -663,10 +685,7 @@ namespace YesiLdefter
             parentId = 0;
             if (htmlBody != null)
                 listNode_(htmlBody.ChildNodes);
-
-
         }
-
         private void loadBody(string htmlDocumentBody, ref HtmlAgilityPack.HtmlNode htmlBody)
         {
             /// htmlDocumentBody ile okunan sayfanın html yapısı string olarak geliyor
@@ -682,7 +701,6 @@ namespace YesiLdefter
             //
             //HtmlAgilityPack.HtmlNode htmlBody = htmlDoc.DocumentNode.SelectSingleNode("//body");
         }
-
         private void listNode_(HtmlNodeCollection listNode)
         {
             foreach (HtmlNode nNode in listNode)
@@ -699,7 +717,6 @@ namespace YesiLdefter
                 }
             }
         }
-
         private void listAdd(int NodeId, int parentId, HtmlNode nNode)
         {
             if (nNode.Name == "br") return;
@@ -732,7 +749,7 @@ namespace YesiLdefter
 
         #endregion Analysis
 
-        #region user buttons
+        #region analysis buttons
 
         private void myAnalysisGetNodeItemsClick(object sender, EventArgs e)
         {
@@ -744,9 +761,9 @@ namespace YesiLdefter
 
                 DataRow row = ds_AnalysisNodes.Tables[0].Rows[dN_AnalysisNodes.Position];
 
-                nodeValuesPreparing(row, ref wnv);
+                msPagesService.nodeValuesPreparing(row, ref wnv, this.aktifPageCode);
 
-                WebScrapingAsync(webAnalysis, wnv);
+                WebScrapingAsync(webAnalysis, wnv); // myAnalysisGetNodeItemsClick
             }
         }
 
@@ -755,102 +772,24 @@ namespace YesiLdefter
             //myPageViewClickAsync(sender, e, webAnalysis);
             myPageViewClickAsync(webAnalysis);
         }
-
-        // PageView Async
-        private async Task myPageViewClickAsync(WebBrowser wb)
-        {
-            if (ds_ScrapingPages != null)
-            {
-                bool onay = false;
-                string url = "";
-
-                v.SQL = v.SQL + v.ENTER + myNokta + " PageView : ";
-
-                this.aktifPageCode = ds_ScrapingPages.Tables[0].Rows[dN_ScrapingPages.Position]["PageCode"].ToString();
-
-                url = ds_ScrapingPages.Tables[0].Rows[dN_ScrapingPages.Position]["PageUrl"].ToString();
-                this.talepEdilenUrl = url;
-                this.talepEdilenUrl2 = url;
-                url = ds_ScrapingPages.Tables[0].Rows[dN_ScrapingPages.Position]["BeforePageUrl"].ToString();
-                this.talepOncesiUrl = url;
-
-                this.talepPageLeft = t.myInt16(ds_ScrapingPages.Tables[0].Rows[dN_ScrapingPages.Position]["PageLeft"].ToString());
-                this.talepPageTop = t.myInt16(ds_ScrapingPages.Tables[0].Rows[dN_ScrapingPages.Position]["PageTop"].ToString());
-
-                if (this.aktifUrl != this.talepEdilenUrl)
-                {
-                    if (t.IsNotNull(this.talepOncesiUrl))
-                        onay = await loadPage(wb, this.talepOncesiUrl);
-                    else
-                        onay = await loadPage(wb, this.talepEdilenUrl);
-                }
-                else
-                {
-                    onay = await loadPage(wb, this.talepEdilenUrl);
-                }
-            }
-        }
-
-        private async Task<bool> loadPage(WebBrowser wb, string url)
-        {
-            if (!string.IsNullOrEmpty(url))
-            {
-                wb.Navigate(url);
-
-                return true;
-            }
-            else
-            {
-                MessageBox.Show("DİKKAT : Lütfen  - page url - yi girin...");
-                return false;
-            }
-
-            /*
-if (webBrowser1.Document != null)
-    {
-        HtmlWindow docWindow = webBrowser1.Document.Window;
-        HtmlWindow newWindow = docWindow.OpenNew(new Uri("http://www.adatum.com/popup.htm"), "left=" + docWindow.Position.X + ",top=" + docWindow.Position.Y + ",width=" + webBrowser1.Width + ",height=" + webBrowser1.Height);
-    }         
-              
-private void DisplayFirstUrl()
-{
-    if (webBrowser1.Document != null)
-    {
-        //If this is called first, the window will only have a status bar.
-        webBrowser1.Document.Window.Open(new Uri("http://www.microsoft.com/"), "displayWindow", "status=yes,width=200,height=400", false);
-    }
-}
-
-private void DisplaySecondUrl()
-{
-    if (webBrowser1.Document != null)
-    {
-        // If this is called first, the window will only have an Address bar.
-        webBrowser1.Document.Window.Open(new Uri("http://msdn.microsoft.com/"), "displayWindow", "width=400,height=200,location=yes", false);
-    }
-}
-
-
-            */
-        }
-
+        
         private void myLineGetTestClick(object sender, EventArgs e)
         {
-            if (ds_Nodes != null)
+            if (ds_MsWebNodes != null)
             {
                 webNodeValue wnv = new webNodeValue();
                 wnv.workRequestType = v.tWebRequestType.get;
 
-                DataRow row = ds_Nodes.Tables[0].Rows[dN_Nodes.Position];
+                DataRow row = ds_MsWebNodes.Tables[0].Rows[dN_MsWebNodes.Position];
 
-                nodeValuesPreparing(row, ref wnv);
+                msPagesService.nodeValuesPreparing(row, ref wnv, this.aktifPageCode);
 
                 // node nin items okunacak (getNodeItems)
                 // sonrada MsWebNodeItems tablosuna yazılacak  
                 if (wnv.TagName == "select")
                     wnv.workRequestType = v.tWebRequestType.getNodeItems;
 
-                WebScrapingAsync(webMain, wnv);
+                WebScrapingAsync(webMain, wnv); // myLineGetTestClick
 
                 if (wnv.TagName == "select")
                 {
@@ -863,24 +802,29 @@ private void DisplaySecondUrl()
 
         private void myLinePostTestClick(object sender, EventArgs e)
         {
-            if (ds_Nodes != null)
+            if (ds_MsWebNodes != null)
             {
                 webNodeValue wnv = new webNodeValue();
                 wnv.workRequestType = v.tWebRequestType.post;
 
-                DataRow row = ds_Nodes.Tables[0].Rows[dN_Nodes.Position];
+                DataRow row = ds_MsWebNodes.Tables[0].Rows[dN_MsWebNodes.Position];
 
-                nodeValuesPreparing(row, ref wnv);
+                msPagesService.nodeValuesPreparing(row, ref wnv, aktifPageCode);
 
-                WebScrapingAsync(webMain, wnv);
+                WebScrapingAsync(webMain, wnv); // myLinePostTestClick
             }
         }
 
+        #endregion analysis buttons
+
+        /// 
+        /// Userın kullanığı butonlar
+        /// 
+        #region user buttons
         private void myPageViewClick(object sender, EventArgs e)
         {
             // page ait nodelerin tespiti
-            if (t.IsNotNull(ds_Nodes))
-                eventsTypeCount(ds_Nodes);
+            eventsTypeCount(ds_MsWebNodes);
 
             myPageViewClickAsync(webMain);
         }
@@ -891,8 +835,7 @@ private void DisplaySecondUrl()
 
             Cursor.Current = Cursors.WaitCursor;
             startNodesBefore();
-
-            startNodesRun(ds_Nodes, v.tWebRequestType.alwaysSet, v.tWebEventsType.buttonAlwaysSet);
+            startNodesRun(ds_MsWebNodes, v.tWebRequestType.alwaysSet, v.tWebEventsType.buttonAlwaysSet);
         }
 
         private void myFullGet1_Click(object sender, EventArgs e)
@@ -901,7 +844,7 @@ private void DisplaySecondUrl()
 
             Cursor.Current = Cursors.WaitCursor;
             startNodesBefore();
-            startNodesRun(ds_Nodes, v.tWebRequestType.get, v.tWebEventsType.button1);
+            startNodesRun(ds_MsWebNodes, v.tWebRequestType.get, v.tWebEventsType.button3);
         }
 
         private void myFullGet2_Click(object sender, EventArgs e)
@@ -910,7 +853,7 @@ private void DisplaySecondUrl()
 
             Cursor.Current = Cursors.WaitCursor;
             startNodesBefore();
-            startNodesRun(ds_Nodes, v.tWebRequestType.get, v.tWebEventsType.button2);
+            startNodesRun(ds_MsWebNodes, v.tWebRequestType.get, v.tWebEventsType.button4);
         }
 
         private void myFullPost1_Click(object sender, EventArgs e)
@@ -925,7 +868,7 @@ private void DisplaySecondUrl()
 
             Cursor.Current = Cursors.WaitCursor;
             startNodesBefore();
-            startNodesRun(ds_Nodes, v.tWebRequestType.post, v.tWebEventsType.button3);
+            startNodesRun(ds_MsWebNodes, v.tWebRequestType.post, v.tWebEventsType.button5);
         }
 
         private void myFullPost2_Click(object sender, EventArgs e)
@@ -934,7 +877,7 @@ private void DisplaySecondUrl()
 
             Cursor.Current = Cursors.WaitCursor;
             startNodesBefore();
-            startNodesRun(ds_Nodes, v.tWebRequestType.post, v.tWebEventsType.button4);
+            startNodesRun(ds_MsWebNodes, v.tWebRequestType.post, v.tWebEventsType.button6);
         }
 
         private void myFullSave_Click(object sender, EventArgs e)
@@ -943,28 +886,11 @@ private void DisplaySecondUrl()
 
             Cursor.Current = Cursors.WaitCursor;
             startNodesBefore();
-            startNodesRun(ds_Nodes, v.tWebRequestType.post, v.tWebEventsType.button5);
+            startNodesRun(ds_MsWebNodes, v.tWebRequestType.post, v.tWebEventsType.button7);
         }
-
-        private void myBtnWebScrapingClick(object sender, EventArgs e)
-        {
-            v.SQL = "";
-
-            if (((DevExpress.XtraEditors.SimpleButton)sender).TabIndex == 141)
-                this.myTriggerEventsType = v.tWebEventsType.button1;
-            if (((DevExpress.XtraEditors.SimpleButton)sender).TabIndex == 142)
-                this.myTriggerEventsType = v.tWebEventsType.button2;
-            if (((DevExpress.XtraEditors.SimpleButton)sender).TabIndex == 143)
-                this.myTriggerEventsType = v.tWebEventsType.button3;
-            if (((DevExpress.XtraEditors.SimpleButton)sender).TabIndex == 144)
-                this.myTriggerEventsType = v.tWebEventsType.button4;
-
-            startNodesBefore();
-            //startTriggersBeforeForButton();
-            startNodesRun(ds_Nodes, v.tWebRequestType.none, this.myTriggerEventsType);
-        }
-
+        
         #endregion user buttons
+                
 
         #region startNodesRun
 
@@ -1011,13 +937,14 @@ private void DisplaySecondUrl()
             {
                 t.WaitFormOpen(v.mainForm, "");
 
+                // 2. adıma gider
                 this.myTriggering = true;
                 runTriggerNodesAsync(ds); //startTriggers
 
                 myNokta = ". ";
                 v.SQL = v.SQL + v.ENTER2 + myNokta + "startNodesRun : END";
 
-                if (countControl())
+                if (countControl() == false)
                 {
                     v.SQL = v.SQL + v.ENTER + myNokta + "startNodesRun : END 2 ";
                     // table ve itembutton beraber olunca sorun çıkardı : eğitim aracı  <<<<< myTableTriggering  diye yenisini ekle
@@ -1035,7 +962,7 @@ private void DisplaySecondUrl()
         {
             myNokta = ".. ";
 
-            if (countControl())
+            if (countControl() == false)
             {
                 v.SQL = v.SQL + v.ENTER + myNokta + " runTriggerNodes : END ";
 
@@ -1074,6 +1001,8 @@ private void DisplaySecondUrl()
                 dbEventsType = (v.tWebEventsType)t.myInt16(eventRow["EventsType"].ToString());
 
                 onay = false;
+                onay = countControl();
+
                 if (this.myTriggerEventsType == dbEventsType)
                     onay = true;
 
@@ -1091,7 +1020,7 @@ private void DisplaySecondUrl()
                     if (pos == -1)
                     {
                         v.SQL = v.SQL + v.ENTER2 + myNokta + "runTriggerNodes : nodeId = " + nodeId.ToString();
-
+                        // 3. adıma gider
                         await runScrapingAsync(ds, this.myTriggerWebRequestType, this.myTriggerEventsType, nodeId, 0);
 
                         this.myTriggerPosition++;
@@ -1116,7 +1045,7 @@ private void DisplaySecondUrl()
                 }
             }
 
-            if (countControl())
+            if (countControl() == false)
             {
                 v.SQL = v.SQL + v.ENTER + myNokta + "runTriggerNodes : END 2 ";
                 // table ve itembutton beraber olunca sorun çıkardı : eğitim aracı  <<<<< myTableTriggering  diye yenisini ekle
@@ -1130,7 +1059,7 @@ private void DisplaySecondUrl()
 
         private bool countControl()
         {
-            bool onay = false;
+            bool onay = true;
 
             Int16 _LoadNodeCount = 0;
 
@@ -1141,15 +1070,16 @@ private void DisplaySecondUrl()
             if (((this.myTriggerEventsType == v.tWebEventsType.load) && (this.myLoadNodeCount + 1 <= this.myTriggerPosition)) ||
                 ((this.myTriggerEventsType == v.tWebEventsType.displayNone) && (this.myDisplayNoneCount + 1 <= this.myTriggerPosition)) ||
                 ((this.myTriggerEventsType == v.tWebEventsType.none) && (_LoadNodeCount + this.myNoneCount + 1 <= this.myTriggerPosition)) ||
-                ((this.myTriggerEventsType == v.tWebEventsType.button1) && (_LoadNodeCount + this.myButton1Count + 1 <= this.myTriggerPosition)) ||
-                ((this.myTriggerEventsType == v.tWebEventsType.button2) && (_LoadNodeCount + this.myButton2Count + 1 <= this.myTriggerPosition)) ||
-                ((this.myTriggerEventsType == v.tWebEventsType.button3) && (_LoadNodeCount + this.myButton3Count + 1 <= this.myTriggerPosition)) ||
-                ((this.myTriggerEventsType == v.tWebEventsType.button4) && (_LoadNodeCount + this.myButton4Count + 1 <= this.myTriggerPosition)) ||
-                ((this.myTriggerEventsType == v.tWebEventsType.button5) && (_LoadNodeCount + this.myButton5Count + 1 <= this.myTriggerPosition)) ||
-                ((this.myTriggerEventsType == v.tWebEventsType.tableField) && (_LoadNodeCount + this.myTabelFieldCount + 1 <= this.myTriggerPosition))
+                ((this.myTriggerEventsType == v.tWebEventsType.button3) && (this.myButton3Count > 0) && (_LoadNodeCount + this.myButton3Count + 1 <= this.myTriggerPosition)) ||
+                ((this.myTriggerEventsType == v.tWebEventsType.button4) && (this.myButton4Count > 0) && (_LoadNodeCount + this.myButton4Count + 1 <= this.myTriggerPosition)) ||
+                ((this.myTriggerEventsType == v.tWebEventsType.button5) && (this.myButton5Count > 0) && (_LoadNodeCount + this.myButton5Count + 1 <= this.myTriggerPosition)) ||
+                ((this.myTriggerEventsType == v.tWebEventsType.button6) && (this.myButton6Count > 0) && (_LoadNodeCount + this.myButton6Count + 1 <= this.myTriggerPosition)) ||
+                ((this.myTriggerEventsType == v.tWebEventsType.button7) && (this.myButton7Count > 0) && (_LoadNodeCount + this.myButton7Count + 1 <= this.myTriggerPosition)) ||
+                ((this.myTriggerEventsType == v.tWebEventsType.tableField) && (_LoadNodeCount + this.myTabelFieldCount + 1 <= this.myTriggerPosition)) ||
+                (this.myNodeCount < this.myTriggerPosition)
                 )
             {
-                onay = true;
+                onay = false;
             }
 
             return onay;
@@ -1252,6 +1182,7 @@ private void DisplaySecondUrl()
                         wnv.workRequestType = workRequestType;
                         wnv.workEventsType = workEventsType;
 
+                        // 4. adıma gider
                         await WebScrapingBefore(row, wnv);
 
                         myNokta = "... ";
@@ -1292,8 +1223,9 @@ private void DisplaySecondUrl()
 
         #region WebScraping
 
-        /// İşlem No : 4 : PageRefresh ve webScraping işleminden önce set olacak datayı ise db den oku ve hazır et, 
-        /// (databaseden webe gönderilecek data) get olan data ise hangi tabloya atılacak ise onu bul ve yaz ( webden al, database yaz)
+        /// İşlem No : 4 : PageRefresh ve webScraping işleminden önce 
+        ///  set olacak datayı db den oku ve hazır et, (databaseden webe gönderilecek data)
+        ///  get olacak datayı ise hangi tabloya atılacak ise onu bul ve yaz ( webden al, database yaz)
 
         private async Task WebScrapingBefore(DataRow row, webNodeValue wnv)
         {
@@ -1309,7 +1241,7 @@ private void DisplaySecondUrl()
 
             // database tanımlı olan node bilgilerini al
             //
-            nodeValuesPreparing(row, ref wnv);
+            msPagesService.nodeValuesPreparing(row, ref wnv, this.aktifPageCode);
 
             v.SQL = v.SQL + v.ENTER + myNokta + "WebScrapingBefore : TagName = " + wnv.TagName + " : " + wnv.AttId;
 
@@ -1341,8 +1273,8 @@ private void DisplaySecondUrl()
             }
 
             // scraping işlemini gerçekleştir
-            //
-            await WebScrapingAsync(webMain, wnv);
+            // 5. adıma/son işleme gider
+            await WebScrapingAsync(webMain, wnv); // WebScrapingBefore
 
             //  web deki veriyi database aktar
             //  webden alınan veriyi (readValue yi)  db ye aktar
@@ -1792,7 +1724,10 @@ private void DisplaySecondUrl()
                             //string urlDownload = @"https://mebbis.meb.gov.tr/SKT/AResimGoster.aspx";
                             string urlDownload = element.GetAttribute("src");
 
-                            readValue = ImageDownload(urlDownload);
+                            if (this.sessionIdAndToken == "")
+                                this.sessionIdAndToken = tCookieReader.GetCookie($"https://mebbis.meb.gov.tr/default.aspx");
+
+                            readValue = msPagesService.ImageDownload(urlDownload, this.sessionIdAndToken, this.aktifUrl);
 
                             //v.SQL = v.SQL + v.ENTER + " get img : " + readValue;
                         }
@@ -1973,7 +1908,7 @@ private void DisplaySecondUrl()
                 while (this.myTriggering)
                 {
                     //await runTriggerNodesAsync(ds_TriggerNodes); //timerTriggerAsync() timerTrigger_Tick 2
-                    await runTriggerNodesAsync(ds_Nodes); //timerTriggerAsync() timerTrigger_Tick 2
+                    await runTriggerNodesAsync(ds_MsWebNodes); //timerTriggerAsync() timerTrigger_Tick 2
 
                     // invoke çalıştığına göre DocumentComplate ninde çalışması gerekiyor 
                     // onun için buradan çıkmak gerekiyor
@@ -1995,7 +1930,7 @@ private void DisplaySecondUrl()
 
                 }
 
-                if (countControl())
+                if (countControl() == false)
                 {
                     this.myTriggering = false;
                     this.myDocumentCompleted = true;
@@ -2023,7 +1958,7 @@ private void DisplaySecondUrl()
                 {
                     v.SQL = v.SQL + v.ENTER2 + myNokta + " timerTrigger_Tick 3 start : ( TriggerTableWnv )";
 
-                    await WebScrapingAsync(webMain, this.myTriggerTableWnv);
+                    await WebScrapingAsync(webMain, this.myTriggerTableWnv); // timerTriggerAsync
 
                     v.SQL = v.SQL + v.ENTER + myNokta + " timerTrigger_Tick 3 end : ( TriggerTableWnv ) ";
                 }
@@ -2046,7 +1981,7 @@ private void DisplaySecondUrl()
                 while (this.myTriggering)
                 {
                     //await runTriggerNodesAsync(ds_TriggerNodes); // timerTriggerAsync() timerTrigger_Tick 4
-                    await runTriggerNodesAsync(ds_Nodes); // timerTriggerAsync() timerTrigger_Tick 4
+                    await runTriggerNodesAsync(ds_MsWebNodes); // timerTriggerAsync() timerTrigger_Tick 4
 
                     // invoke çalıştığına göre DocumentComplate ninde çalışması gerekiyor 
                     // onun için buradan çıkmak gerekiyor
@@ -2074,7 +2009,7 @@ private void DisplaySecondUrl()
                     this.myTriggerEventsType = this.loadBeforeEventsType;
                 }
 
-                if (countControl())
+                if (countControl() == false)
                 {
                     this.myTriggering = false;
                     this.myDocumentCompleted = true;
@@ -2116,7 +2051,7 @@ private void DisplaySecondUrl()
                     this.myTriggerWebRequestType = webRequestType_;
                     this.myTriggerEventsType = eventsType_;
 
-                    startNodesRun(ds_Nodes, this.myTriggerWebRequestType, this.myTriggerEventsType);
+                    startNodesRun(ds_MsWebNodes, this.myTriggerWebRequestType, this.myTriggerEventsType);
 
                     v.SQL = v.SQL + v.ENTER + myNokta + " timerTrigger_Tick 5 end : ( TriggerOneByOne )";
                 }
@@ -2568,8 +2503,8 @@ private void DisplaySecondUrl()
             if (this.myWebTableRowToDatabase)
             {
                 v.SQL = v.SQL + v.ENTER + myNokta + " saveRow : start other nodes read ";
-                //runScrapingAsync(ds_Nodes, this.myTriggerWebRequestType, this.myTriggerEventsType, 0, wnv.nodeId);
-                runScrapingAsync(ds_Nodes, this.myTriggerWebRequestType, v.tWebEventsType.tableField, 0, wnv.nodeId);
+                //runScrapingAsync(ds_MsWebNodes, this.myTriggerWebRequestType, this.myTriggerEventsType, 0, wnv.nodeId);
+                runScrapingAsync(ds_MsWebNodes, this.myTriggerWebRequestType, v.tWebEventsType.tableField, 0, wnv.nodeId);
             }
 
             if ((wnv.TagName == "table") ||
@@ -2624,7 +2559,7 @@ private void DisplaySecondUrl()
             string AttRole = "";
 
             //foreach (DataRow row in ds_ScrapingNodes.Tables[0].Rows)
-            foreach (DataRow nodeRow in ds_Nodes.Tables[0].Rows)
+            foreach (DataRow nodeRow in ds_MsWebNodes.Tables[0].Rows)
             {
                 isActive = (bool)nodeRow["IsActive"];
                 //eventsType = t.myInt16(row["EventsType"].ToString());
@@ -3021,54 +2956,7 @@ private void DisplaySecondUrl()
 
         #region Resim download
 
-        private string ImageDownload(string urlDownload)
-        {
-            string url = urlDownload;
-            string result = "";
-
-            if (this.sessionIdAndToken == "")
-                this.sessionIdAndToken = tCookieReader.GetCookie($"https://mebbis.meb.gov.tr/default.aspx");
-
-            // value nin içeriği böyle bir şey
-            //ASP.NET_SessionId=zi3lg1kml2pnn35ax1ervzzn; __RequestVerificationToken=xXxQr11ekzeKXPuXkcTB91oW8vUbGAhP0Rcqdx-S-SSQBho0b6kvkCAmN0PUX6rj4fEABihHlFv6-Ab6wRwxdKUHs1W1NbEBC-x0SuYa9bM1
-
-            //this.sessionId = getFindValue(value, "ASP.NET_SessionId=", ";");
-            //this.token = getFindValue(value, "__RequestVerificationToken=", ";");
-
-            WebClient wClient = new WebClient();
-
-            wClient.Headers.Add($"Accept", $"*/*");
-            //wClient.Headers.Add($"Referer", $"https://mebbis.meb.gov.tr/SKT/skt02001.aspx");
-            wClient.Headers.Add($"Referer", $"" + this.aktifUrl + "");
-            wClient.Headers.Add($"Accept-Language", $"tr-TR");
-            wClient.Headers.Add($"Accept-Encoding", $"gzip, deflate");
-            wClient.Headers.Add($"User-Agent", $"Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.2; WOW64; Trident/7.0; .NET4.0C; .NET4.0E; .NET CLR 2.0.50727; .NET CLR 3.0.30729; .NET CLR 3.5.30729; InfoPath.3)");
-            wClient.Headers.Add($"Host", $"mebbis.meb.gov.tr");
-            //wClient.Headers.Add($"Connection", $"Keep-Alive");
-            //wClient.Headers.Add($"Cookie", $"ASP.NET_SessionId=vo5wqgkyy4rfcudwgc1agade; __RequestVerificationToken=QFRLdG8NbJR4gkjqyARZ4feWs29RtbTZnuPDkBbdn0yHRqkAKH6Mlo9aawS5FvriU34oVh7ZMpSg7oQp-6_p3xyiSHtyJdjg4dLG4ImcEs01");
-            //wClient.Headers.Add($"Cookie", $""+this.sessionId + "; " + this.token+"");
-            wClient.Headers.Add($"Cookie", $"" + this.sessionIdAndToken);
-            //var response = await wClient.DownloadData(urlDownload);
-
-            //https://mebbis.meb.gov.tr/SKT/AResimGosterSozlesme.aspx?ImageID=221936811702021011
-
-            if (url.IndexOf("?ImageID=") > -1)
-            {
-                string newUrl = url.Remove(url.IndexOf("?ImageID="));
-                result = v.EXE_TempPath + "\\" + newUrl.Substring(url.LastIndexOf('/') + 1);
-            }
-            else
-                result = v.EXE_TempPath + "\\" + url.Substring(url.LastIndexOf('/') + 1);
-
-            wClient.DownloadFile(url, result);
-
-            //Stream data = wClient.OpenRead(new Uri(url));
-            //StreamReader reader = new StreamReader(data);
-            //string content = reader.ReadToEnd();
-
-            return result;
-        }
-
+        
         public void DownloadFile(string UrlString)
         {
             string DescFilePath = "C:\\SqlData";
@@ -3202,11 +3090,11 @@ private void DisplaySecondUrl()
             //wnv_.workEventsType = v.tWebEventsType.itemButton;
             wnv_.AttRole = "ItemButton";
 
-            nodeValuesPreparing(this.myTriggerTableRow, ref wnv_);
+            msPagesService.nodeValuesPreparing(this.myTriggerTableRow, ref wnv_, this.aktifPageCode);
 
             // clik yapılacak olan nodeyi bulup getirmek için scraping işlemini gerçekleştir
             //
-            await WebScrapingAsync(webMain, wnv_);
+            await WebScrapingAsync(webMain, wnv_); // tableItemButtonClickAsync
 
             if (wnv_ != null)
             {
@@ -3314,6 +3202,53 @@ private void DisplaySecondUrl()
         #endregion ItemButton
 
         #region subFunctions
+        private async Task<bool> loadPage(WebBrowser wb, string url)
+        {
+            //
+            if (!string.IsNullOrEmpty(url))
+            {
+                wb.Navigate(url);
+                return true;
+            }
+            else
+            {
+                MessageBox.Show("DİKKAT : Lütfen  - page url - yi girin...");
+                return false;
+            }
+        }
+        private async Task myPageViewClickAsync(WebBrowser wb)
+        {
+            if (ds_MsWebPages != null)
+            {
+                bool onay = false;
+                string url = "";
+
+                v.SQL = v.SQL + v.ENTER + myNokta + " PageView : ";
+
+                this.aktifPageCode = ds_MsWebPages.Tables[0].Rows[dN_MsWebPages.Position]["PageCode"].ToString();
+
+                url = ds_MsWebPages.Tables[0].Rows[dN_MsWebPages.Position]["PageUrl"].ToString();
+                this.talepEdilenUrl = url;
+                this.talepEdilenUrl2 = url;
+                url = ds_MsWebPages.Tables[0].Rows[dN_MsWebPages.Position]["BeforePageUrl"].ToString();
+                this.talepOncesiUrl = url;
+
+                this.talepPageLeft = t.myInt16(ds_MsWebPages.Tables[0].Rows[dN_MsWebPages.Position]["PageLeft"].ToString());
+                this.talepPageTop = t.myInt16(ds_MsWebPages.Tables[0].Rows[dN_MsWebPages.Position]["PageTop"].ToString());
+
+                if (this.aktifUrl != this.talepEdilenUrl)
+                {
+                    if (t.IsNotNull(this.talepOncesiUrl))
+                        onay = await loadPage(wb, this.talepOncesiUrl);
+                    else
+                        onay = await loadPage(wb, this.talepEdilenUrl);
+                }
+                else
+                {
+                    onay = await loadPage(wb, this.talepEdilenUrl);
+                }
+            }
+        }
 
         private void displayNone(string tagName, string idName, string XPath, string InnerText)
         {
@@ -3833,48 +3768,6 @@ private void DisplaySecondUrl()
                 }
             }
         }
-
-
-        // node hakkındaki bilgilerin wnv üzerine aktarılması
-        private void nodeValuesPreparing(DataRow row, ref webNodeValue wnv)
-        {
-            wnv.pageCode = this.aktifPageCode;
-            wnv.nodeId = Convert.ToInt32(row["NodeId"].ToString());
-            wnv.TagName = row["TagName"].ToString();
-            wnv.AttId = row["AttId"].ToString();
-            wnv.AttName = row["AttName"].ToString();
-            wnv.AttClass = row["AttClass"].ToString();
-            wnv.AttType = row["AttType"].ToString();
-            wnv.AttRole = row["AttRole"].ToString();
-            wnv.AttHRef = row["AttHRef"].ToString();
-            wnv.AttSrc = row["AttSrc"].ToString();
-            wnv.XPath = row["XPath"].ToString();
-            wnv.InnerText = row["InnerText"].ToString();
-            wnv.OuterText = row["OuterText"].ToString();
-            wnv.InjectType = (v.tWebInjectType)Convert.ToInt16(row["InjectType"].ToString());
-            wnv.InvokeMember = (v.tWebInvokeMember)Convert.ToInt16(row["InvokeMember"].ToString());
-            wnv.DontSave = Convert.ToBoolean(row["DontSave"].ToString());
-            wnv.GetSave = Convert.ToBoolean(row["GetSave"].ToString());
-            wnv.writeValue = row["TestValue"].ToString();
-            wnv.EventsType = (v.tWebEventsType)t.myInt16(row["EventsType"].ToString());
-
-            if (wnv.writeValue == "BUGUN_YILAY")
-                wnv.writeValue = v.BUGUN_YILAY.ToString();
-
-            if (wnv.writeValue == "MEBBIS_KODU")
-            {
-                if (v.tUser.MebbisCode != "")
-                    wnv.writeValue = v.tUser.MebbisCode;
-                else wnv.writeValue = v.tMainFirm.MebbisCode;
-            }
-
-            if (wnv.writeValue == "MEBBIS_SIFRE")
-            {
-                if (v.tUser.MebbisPass != "")
-                    wnv.writeValue = v.tUser.MebbisPass;
-                else wnv.writeValue = v.tMainFirm.MebbisPass;
-            }
-        }
         
         private void selectItemsRead(WebBrowser wb, ref webNodeValue wnv, string idName)
         {
@@ -4028,7 +3921,7 @@ private void DisplaySecondUrl()
                       + "top: " + this.talepPageTop.ToString()+ "px; "
                       + "position: absolute;";
             }
-
+                        
             openPageControlAsync(((WebBrowser)sender));
 
             if (((this.myTriggering) ||
@@ -4070,7 +3963,6 @@ private void DisplaySecondUrl()
                 v.IsWaitOpen = true;
             }
 
-
             if (this.myTriggerPageRefresh)
             {
                 // table pages varsa onu clickle 
@@ -4107,29 +3999,28 @@ private void DisplaySecondUrl()
             if (t.IsNotNull(this.talepEdilenUrl) == false) 
                 return;
 
+            bool onay = false;
+
             if (this.talepEdilenUrl != this.aktifUrl)
             {
-              
                 /// aktif url Login page mi kontrol et
-                /// 
-                if (readLoginPageControl(this.aktifUrl))
-                {
-                    if (this.errorPageUrl == this.aktifUrl)
-                    {
-                        loadPage(wb, this.loginPageUrl);
-                    }
-                    else if (this.aktifUrl.IndexOf("oturumsonu") > -1)
-                    {
-                        return;
-                    }
-                    else
-                    {
-                        /// login işlemlerini gerçekleştir
-                        /// 
-                        await runScrapingAsync(this.ds_LoginPageNodes, v.tWebRequestType.post, v.tWebEventsType.none, 0, 0);
+                ///
 
-                        t.WebReadyComplate(wb);
-                    }
+                /// bu atamalar geçici f class bu forma uygulayınca bunu atamaları sil
+                f.aktifUrl = this.aktifUrl;
+                f.loginPageUrl = this.loginPageUrl;
+                f.errorPageUrl = this.errorPageUrl;
+
+                onay = msPagesService.readLoginPageControl(ref ds_LoginPageNodes, f);// this.aktifUrl, ref this.loginPageUrl, ref this.errorPageUrl);
+
+                this.aktifUrl = f.aktifUrl;
+                this.loginPageUrl = f.loginPageUrl;
+                this.errorPageUrl= f.errorPageUrl;
+
+                if (onay)
+                {
+                    await runLoginPage(wb);
+                    return;
                 }
                 else 
                 {
@@ -4167,8 +4058,6 @@ private void DisplaySecondUrl()
                         loadPage(wb, this.talepEdilenUrl);
                     }
                 }
-            
-            
             }
 
             if (this.talepEdilenUrl == this.aktifUrl)
@@ -4189,6 +4078,26 @@ private void DisplaySecondUrl()
             }
         }
 
+        private async Task runLoginPage(WebBrowser wb)
+        {
+            if (this.errorPageUrl == this.aktifUrl)
+            {
+                loadPage(wb, this.loginPageUrl);
+            }
+            else if (this.aktifUrl.IndexOf("oturumsonu") > -1)
+            {
+                return;
+            }
+            else
+            {
+                /// login işlemlerini gerçekleştir
+                /// 
+                await runScrapingAsync(this.ds_LoginPageNodes, v.tWebRequestType.post, v.tWebEventsType.none, 0, 0);
+
+                t.WebReadyComplate(wb);
+            }
+        }
+
         private async Task runLoadAsync()
         {
             /// istenen sayfaya açıldı, açılışta çalışması istenen komutlar varsa çalışsın artık
@@ -4200,7 +4109,7 @@ private void DisplaySecondUrl()
             this.loadBeforeWebRequestType = this.myTriggerWebRequestType;
             this.loadBeforeEventsType = this.myTriggerEventsType;
 
-            startNodesRun(ds_Nodes, v.tWebRequestType.none, v.tWebEventsType.load);
+            startNodesRun(ds_MsWebNodes, v.tWebRequestType.none, v.tWebEventsType.load);
 
             
             Thread.Sleep(100);
@@ -4216,7 +4125,7 @@ private void DisplaySecondUrl()
 
             this.myTriggering = true;
             //this.myTriggerEventsType = v.tWebEventsType.displayNone;
-            startNodesRun(ds_Nodes, v.tWebRequestType.none, v.tWebEventsType.displayNone);
+            startNodesRun(ds_MsWebNodes, v.tWebRequestType.none, v.tWebEventsType.displayNone);
             
             Thread.Sleep(100);
         }
@@ -4224,66 +4133,9 @@ private void DisplaySecondUrl()
         #endregion webBrowser events
 
         #region read db tables
-        private bool readLoginPageControl(string Url)
-        {
-            if (Url == "") return false;
-
-            if (t.IsNotNull(ds_LoginPageNodes))
-            {
-                /// Daha önce aynı login url yüklenmişse bir daha okumaya gerek yok
-                ///
-                if (ds_LoginPageNodes.Namespace == Url)
-                    return true;
-            }
-            else
-            {
-                /// ilk defa geldiğinde
-                if (ds_LoginPageNodes == null)
-                    ds_LoginPageNodes = new DataSet();
-            }
-
-            bool onay = false;
-
-            string tSql = @" 
-              Select a.*, b.PageUrl, b.ErrorPageUrl 
-              from MsWebNodes a, MsWebPages b
-              Where a.IsActive = 1
-              and b.LoginPage = 1
-              and a.PageCode = b.PageCode
-              and ( b.PageUrl = '" + Url + "' or b.ErrorPageUrl = '" + Url + "' )  order by a.NodeId ";
-                        
-            t.SQL_Read_Execute(v.dBaseNo.Manager, ds_LoginPageNodes, ref tSql, "LoginPageNodes", "LoginPage");
-
-            if (t.IsNotNull(ds_LoginPageNodes))
-            {
-                this.loginPageUrl = ds_LoginPageNodes.Tables[0].Rows[0]["PageUrl"].ToString();
-                this.errorPageUrl = ds_LoginPageNodes.Tables[0].Rows[0]["ErrorPageUrl"].ToString();
-                
-                // eğer error page açılmışsa 
-                if (this.errorPageUrl == Url)
-                    Url = this.loginPageUrl;
-                
-                /// evet LoginPage 
-                ds_LoginPageNodes.Namespace = Url;
-                
-                onay = true;
-            }
-            else
-            {
-                /*
-                MessageBox.Show("DİKKAT : Bir sorunumuz var ..." + v.ENTER +
-                    "Talep edilen Url : " + talepEdilenUrl + v.ENTER +
-                    "Aktif Url : " + aktifUrl);
-                */
-                /// bu sayfada bulunan select nodelere ait olan 
-                /// bizim db de kayıtlı olan value ve textleri oku (MsWebNodeItems)
-
-            }
-            return onay;
-        }
         private void readScrapingTables()
         {
-            if (t.IsNotNull(ds_ScrapingPages) == false) return;
+            if (t.IsNotNull(ds_MsWebPages) == false) return;
 
             if (ds_ScrapingDbConnectionList == null)
                 ds_ScrapingDbConnectionList = new DataSet();
@@ -4291,7 +4143,7 @@ private void DisplaySecondUrl()
             // MsWebNodeItems tablosuna items ları atabilmek için en başa bu pageCode ekleniyor
             string pageCodes = "'SELECTNODEITEMS',";
 
-            foreach (DataRow row in ds_ScrapingPages.Tables[0].Rows)
+            foreach (DataRow row in ds_MsWebPages.Tables[0].Rows)
             {
                 pageCodes = pageCodes + "'" + row["PageCode"] + "',";
             }
@@ -4339,7 +4191,7 @@ private void DisplaySecondUrl()
              'WEBNODE_EVENTS_TYPE',  1, 'Load'
              'WEBNODE_EVENTS_TYPE',  2, 'DisplayNone'
              'WEBNODE_EVENTS_TYPE',  3, 'PageRefresh'
-             'WEBNODE_EVENTS_TYPE', 141, 'Button1',2,3,4,5 
+             'WEBNODE_EVENTS_TYPE', 141, 'Button3',2,3,4,5 
             
              'WEBNODE_ATT_ROLE', 11, 'ItemTable'
              'WEBNODE_ATT_ROLE', 12, 'ItemButton'
@@ -4378,24 +4230,29 @@ private void DisplaySecondUrl()
         }
         private void eventsTypeCount(DataSet ds)
         {
+            /// page ait nodelerin tespiti
+            /// 
             v.tWebEventsType dbEventsType = v.tWebEventsType.none;
             this.myNodeCount = 0; // tüm nodelerin sayısı
             this.myLoadNodeCount = 0;
             this.myDisplayNoneCount = 0;
             this.myPageRefreshCount = 0;
-            this.myButton1Count = 0;
-            this.myButton2Count = 0;
             this.myButton3Count = 0;
             this.myButton4Count = 0;
             this.myButton5Count = 0;
+            this.myButton6Count = 0;
+            this.myButton7Count = 0;
             this.myTabelFieldCount = 0;
             this.myNoneCount = 0;
-            string value = "";
+
+            if (t.IsNotNull(ds) == false) return;
+
+            string pageRefresh = "";
             string isActive = "";
             foreach (DataRow row in ds.Tables[0].Rows)
             {
                 dbEventsType = (v.tWebEventsType)t.myInt16(row["EventsType"].ToString());
-                value = row["PageRefresh"].ToString();
+                pageRefresh = row["PageRefresh"].ToString();
                 isActive = row["IsActive"].ToString();
 
                 if (isActive == "True")
@@ -4403,17 +4260,14 @@ private void DisplaySecondUrl()
                     this.myNodeCount++;
                     if (dbEventsType == v.tWebEventsType.load) this.myLoadNodeCount++;
                     if (dbEventsType == v.tWebEventsType.displayNone) this.myDisplayNoneCount++;
-                    if (dbEventsType == v.tWebEventsType.button1) this.myButton1Count++;
-                    if (dbEventsType == v.tWebEventsType.button2) this.myButton2Count++;
                     if (dbEventsType == v.tWebEventsType.button3) this.myButton3Count++;
                     if (dbEventsType == v.tWebEventsType.button4) this.myButton4Count++;
                     if (dbEventsType == v.tWebEventsType.button5) this.myButton5Count++;
+                    if (dbEventsType == v.tWebEventsType.button6) this.myButton6Count++;
+                    if (dbEventsType == v.tWebEventsType.button7) this.myButton7Count++;
                     if (dbEventsType == v.tWebEventsType.tableField) this.myTabelFieldCount++;
                     if (dbEventsType == v.tWebEventsType.none) this.myNoneCount++;
-
-                    //if (dbEventsType == v.tWebEventsType.pageRefresh)
-                    if (value == "True")
-                        this.myPageRefreshCount++;
+                    if (pageRefresh == "True") this.myPageRefreshCount++;
                 }
             }
 

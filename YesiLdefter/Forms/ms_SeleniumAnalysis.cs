@@ -1,0 +1,1696 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using DevExpress.XtraEditors;
+using Tkn_Events;
+using Tkn_Save;
+using Tkn_ToolBox;
+using Tkn_Variable;
+
+using YesiLdefter.Selenium.Helpers;
+using YesiLdefter.Selenium;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
+using Tkn_CookieReader;
+using System.Threading;
+using YesiLdefter.Entities;
+
+namespace YesiLdefter
+{
+    public partial class ms_SeleniumAnalysis : Form
+    {
+        tToolBox t = new tToolBox();
+
+        IWebDriver webDriver;
+        MsWebPagesService msPagesService = new MsWebPagesService();
+
+        /// Scraping
+        DataSet ds_MsWebPages = null;
+        DataNavigator dN_MsWebPages = null;
+        DataSet ds_MsWebNodes = null;
+        DataNavigator dN_MsWebNodes = null;
+        // sadece login için kullanılan dataset
+        DataSet ds_LoginPageNodes = null;
+
+        // User butonları
+        Control btn_PageView = null;
+        //Control btn_PageViewAnalysis = null;
+        Control btn_AlwaysSet = null;
+        Control btn_FullGet1 = null;  // birinci get butonu
+        Control btn_FullGet2 = null;  // ikinci  get butonu
+        Control btn_FullPost1 = null; // birinci post butonu
+        Control btn_FullPost2 = null; // ikinci  post butonu
+        Control btn_FullSave = null;  // save    post butonu
+        // Test butonları
+        Control btn_LineGet = null;   // test get
+        Control btn_LinePost = null;  // test set
+        Control btn_FullGetTest1 = null;   // test get butonu
+        Control btn_FullGetTest2 = null;   // test get butonu
+        Control btn_FullPostTest1 = null;  // test set butonu
+        Control btn_FullPostTest2 = null;  // test set butonu
+
+        string TableIPCode = string.Empty;
+
+
+
+        IWebDriver webMain = null;
+
+        List<MsWebPage> msWebPage_ = null;
+        List<MsWebNode> msWebNodes_ = null;
+        webWorkPageNodes workPageNodes_ = new webWorkPageNodes();
+
+        webForm f = new webForm();
+
+        public ms_SeleniumAnalysis()
+        {
+            InitializeComponent();
+
+            tEventsForm evf = new tEventsForm();
+
+            this.Load += new System.EventHandler(evf.myForm_Load);
+            this.Shown += new System.EventHandler(evf.myForm_Shown);
+            this.Shown += new System.EventHandler(this.ms_SeleniumAnalysis_Shown);
+
+            this.KeyPreview = true;
+        }
+        #region Form preparing
+        private void ms_SeleniumAnalysis_Shown(object sender, EventArgs e)
+        {
+            MsWebPagesButtonsPreparing();
+            MsWebNodesButtonsPreparing();
+        }
+        private void preparingWebMain()
+        {
+            /*
+            var chromeDriverService = ChromeDriverService.CreateDefaultService();
+            chromeDriverService.HideCommandPromptWindow = true;
+            webMain = new ChromeDriver(chromeDriverService, new ChromeOptions());
+            //webMain.Manage().Window.Maximize();
+            webMain.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(SeleniumHelper.ImplicitlyWait);
+            webMain.Manage().Timeouts().PageLoad = TimeSpan.FromSeconds(SeleniumHelper.PageLoadTimeout);
+            */
+
+            SeleniumHelper.ResetDriver();
+            webMain = SeleniumHelper.WebDriver;
+        }
+        private void MsWebPagesButtonsPreparing()
+        {
+            /// MsWebPages tablosu
+            /// 
+
+            TableIPCode = t.Find_TableIPCode(this, "MsWebPages");
+
+            if (t.IsNotNull(TableIPCode) == false) return;
+
+            //Control cntrl = null;
+            string[] controls = new string[] { };
+
+            t.Find_DataSet(this, ref ds_MsWebPages, ref dN_MsWebPages, TableIPCode);
+
+            if (t.IsNotNull(ds_MsWebPages))
+            {
+
+                dN_MsWebPages.PositionChanged += new System.EventHandler(dNScrapingPages_PositionChanged);
+                preparingMsWebNodesFields();
+
+                /// simpleButton_ek1 :  line get  / pageView
+                /// simpleButton_ek2 :  line post / AlwaysSet Tc sorgula gibi
+                /// simpleButton_ek3 :  full get1  : v.tWebEventsType.button1
+                /// simpleButton_ek4 :  full get2  : v.tWebEventsType.button2
+                /// simpleButton_ek5 :  full post1 : v.tWebEventsType.button3
+                /// simpleButton_ek6 :  full post2 : v.tWebEventsType.button4
+                /// simpleButton_ek7 :  full save  : v.tWebEventsType.button5
+
+                btn_PageView = t.Find_Control(this, "simpleButton_ek1", TableIPCode, controls);
+                // Page View
+                if (btn_PageView != null)
+                {
+                    ((DevExpress.XtraEditors.SimpleButton)btn_PageView).Click += new System.EventHandler(myPageViewClick);
+                }
+                #region
+                //
+                // Bilgileri Sorgula / AlwaysSet  (TcNo sorgula gibi) // Bu henüz hiç kullanılmadı 
+                btn_AlwaysSet = t.Find_Control(this, "simpleButton_ek2", TableIPCode, controls);
+                if (btn_AlwaysSet != null)
+                {
+                    ((DevExpress.XtraEditors.SimpleButton)btn_AlwaysSet).Click += new System.EventHandler(myAlwaysSetClick);
+                }
+                // Bilgileri Al 1
+                btn_FullGet1 = t.Find_Control(this, "simpleButton_ek3", TableIPCode, controls);
+                if (btn_FullGet1 != null)
+                {
+                    ((DevExpress.XtraEditors.SimpleButton)btn_FullGet1).Click += new System.EventHandler(myFullGet1Click);
+                }
+                // Bilgileri Al 2
+                btn_FullGet2 = t.Find_Control(this, "simpleButton_ek4", TableIPCode, controls);
+                if (btn_FullGet2 != null)
+                {
+                    ((DevExpress.XtraEditors.SimpleButton)btn_FullGet2).Click += new System.EventHandler(myFullGet2Click);
+                }
+                // Bilgileri Gönder 1
+                btn_FullPost1 = t.Find_Control(this, "simpleButton_ek5", TableIPCode, controls);
+                if (btn_FullPost1 != null)
+                {
+                    ((DevExpress.XtraEditors.SimpleButton)btn_FullPost1).Click += new System.EventHandler(myFullPost1Click);
+                }
+                // Bilgileri Gönder 2
+                btn_FullPost2 = t.Find_Control(this, "simpleButton_ek6", TableIPCode, controls);
+                if (btn_FullPost2 != null)
+                {
+                    ((DevExpress.XtraEditors.SimpleButton)btn_FullPost2).Click += new System.EventHandler(myFullPost2Click);
+                }
+                // Bilgileri Kaydet
+                btn_FullSave = t.Find_Control(this, "simpleButton_ek7", TableIPCode, controls);
+                if (btn_FullSave != null)
+                {
+                    ((DevExpress.XtraEditors.SimpleButton)btn_FullSave).Click += new System.EventHandler(myFullSaveClick);
+                }
+                
+                #endregion
+            }
+
+        }
+        private void MsWebNodesButtonsPreparing()
+        {
+            /// MsWebNodes tablosu
+            /// 
+            TableIPCode = t.Find_TableIPCode(this, "MsWebNodes");
+
+            if (t.IsNotNull(TableIPCode) == false)
+            {
+                MessageBox.Show("DİKKAT : MsWebNodes tablosu bulunamadı...(Form bilgisi olmayabilir... ( MS_LAYOUT )) ");
+                return;
+            }
+            t.Find_DataSet(this, ref ds_MsWebNodes, ref dN_MsWebNodes, TableIPCode);
+
+            // Hiç kullanma ihtiyacı olmadı 
+            //
+            
+            //Control cntrl = null;
+            string[] controls = new string[] { };
+
+            btn_LineGet = t.Find_Control(this, "simpleButton_ek1", TableIPCode, controls);
+            if (btn_LineGet != null)
+            {
+                ((DevExpress.XtraEditors.SimpleButton)btn_LineGet).Click += new System.EventHandler(myLineGetTestClick);
+            }
+            btn_LinePost = t.Find_Control(this, "simpleButton_ek2", TableIPCode, controls);
+            if (btn_LinePost != null)
+            {
+                ((DevExpress.XtraEditors.SimpleButton)btn_LinePost).Click += new System.EventHandler(myLinePostTestClick);
+            }
+
+            btn_FullGetTest1 = t.Find_Control(this, "simpleButton_ek3", TableIPCode, controls);
+            if (btn_FullGetTest1 != null)
+            {
+                ((DevExpress.XtraEditors.SimpleButton)btn_FullGetTest1).Click += new System.EventHandler(myFullGet1Click);
+            }
+            btn_FullGetTest2 = t.Find_Control(this, "simpleButton_ek4", TableIPCode, controls);
+            if (btn_FullGetTest2 != null)
+            {
+                ((DevExpress.XtraEditors.SimpleButton)btn_FullGetTest2).Click += new System.EventHandler(myFullGet2Click);
+            }
+
+            btn_FullPostTest1 = t.Find_Control(this, "simpleButton_ek5", TableIPCode, controls);
+            if (btn_FullPostTest1 != null)
+            {
+                ((DevExpress.XtraEditors.SimpleButton)btn_FullPostTest1).Click += new System.EventHandler(myFullPost1Click);
+            }
+            btn_FullPostTest2 = t.Find_Control(this, "simpleButton_ek6", TableIPCode, controls);
+            if (btn_FullPostTest2 != null)
+            {
+                ((DevExpress.XtraEditors.SimpleButton)btn_FullPostTest2).Click += new System.EventHandler(myFullPost2Click);
+            }
+            
+        }
+
+        #region Test buttons click
+        private void myLineGetTestClick(object sender, EventArgs e)
+        {
+            if (ds_MsWebNodes != null)
+            {
+                webNodeValue wnv = new webNodeValue();
+                wnv.workRequestType = v.tWebRequestType.get;
+
+                DataRow row = ds_MsWebNodes.Tables[0].Rows[dN_MsWebNodes.Position];
+
+                msPagesService.nodeValuesPreparing(row, ref wnv, f.aktifPageCode);
+                                
+                // node nin items okunacak (getNodeItems)
+                // sonrada MsWebNodeItems tablosuna yazılacak  
+                if (wnv.TagName == "select")
+                    wnv.workRequestType = v.tWebRequestType.getNodeItems;
+
+                WebScrapingAsync(webMain, wnv);
+
+                if (wnv.TagName == "select")
+                {
+                    /// select node ye ait (value, text) listesinide MsWebNodeItems tablosuna yaz
+                    //transferFromWebSelectToDatabase(wnv);
+                    //MessageBox.Show("İşlem tamamlandı...");
+                }
+            }
+        }
+        private void myLinePostTestClick(object sender, EventArgs e)
+        {
+            if (ds_MsWebNodes != null)
+            {
+                webNodeValue wnv = new webNodeValue();
+                wnv.workRequestType = v.tWebRequestType.post;
+
+                DataRow row = ds_MsWebNodes.Tables[0].Rows[dN_MsWebNodes.Position];
+
+                msPagesService.nodeValuesPreparing(row, ref wnv, f.aktifPageCode);
+
+
+                // node nin items okunacak (getNodeItems)
+                // sonrada MsWebNodeItems tablosuna yazılacak  
+                //if (wnv.TagName == "select")
+                //    wnv.workRequestType = v.tWebRequestType.getNodeItems;
+
+                WebScrapingAsync(webMain, wnv);
+
+                //if (wnv.TagName == "select")
+                //{
+                /// select node ye ait (value, text) listesinide MsWebNodeItems tablosuna yaz
+                //transferFromWebSelectToDatabase(wnv);
+                //MessageBox.Show("İşlem tamamlandı...");
+                //}
+            }
+        }
+
+        private void myFullGetTest1Click(object sender, EventArgs e)
+        {
+
+        }
+        private void myFullGetTest2Click(object sender, EventArgs e)
+        {
+
+        }
+        private void myFullPostTest1Click(object sender, EventArgs e)
+        {
+
+        }
+        private void myFullPostTest2Click(object sender, EventArgs e)
+        {
+
+        }
+        #endregion Test buttons click
+
+        private void dNScrapingPages_PositionChanged(object sender, EventArgs e)
+        {
+            preparingMsWebNodesFields();
+        }
+        private void preparingMsWebNodesFields()
+        {
+            this.msWebPage_ = t.RunQueryModelsSingle<MsWebPage>(ds_MsWebPages, dN_MsWebPages.Position);
+            this.msWebNodes_ = t.RunQueryModels<MsWebNode>(ds_MsWebNodes);
+            this.workPageNodes_.aktifPageCode = this.msWebPage_[0].PageCode;
+            
+        }
+
+        #endregion Form preparing
+        /// 
+        /// Userın kullanığı butonlar
+        /// 
+        #region user buttons
+        private void myPageViewClick(object sender, EventArgs e)
+        {
+            // page ait nodelerin tespiti
+            //if (t.IsNotNull(ds_MsWebNodes))
+            //    eventsTypeCount(ds_MsWebNodes);
+
+            if (webMain == null)
+                preparingWebMain();
+
+            myPageViewClickAsync(webMain, this.msWebPage_);
+        }
+
+        private void myAlwaysSetClick(object sender, EventArgs e)
+        {
+            Cursor.Current = Cursors.WaitCursor;
+            //startNodesBefore();
+            //startNodesRun(ds_MsWebNodes, v.tWebRequestType.alwaysSet, v.tWebEventsType.buttonAlwaysSet);
+        }
+
+        private void myFullGet1Click(object sender, EventArgs e)
+        {
+            Cursor.Current = Cursors.WaitCursor;
+            //startNodesBefore();
+            //startNodesRun(ds_MsWebNodes, v.tWebRequestType.get, v.tWebEventsType.button3);
+            startNodes(this.msWebNodes_, this.workPageNodes_, v.tWebRequestType.get, v.tWebEventsType.button3);
+        }
+
+        private void myFullGet2Click(object sender, EventArgs e)
+        {
+            Cursor.Current = Cursors.WaitCursor;
+            //startNodesBefore();
+            //startNodesRun(ds_MsWebNodes, v.tWebRequestType.get, v.tWebEventsType.button4);
+            startNodes(this.msWebNodes_, this.workPageNodes_, v.tWebRequestType.get, v.tWebEventsType.button4);
+        }
+
+        private void myFullPost1Click(object sender, EventArgs e)
+        {
+            /* 
+            HtmlElement htmlTable = webMain.Document.GetElementById(this.tablePageName);
+            // bu kopya daha sonra selectTablePage için kulllanılıyor
+            this.htmlTablePages = htmlTable.GetElementsByTagName("table");
+            selectTablePage(webMain);
+            */
+            Cursor.Current = Cursors.WaitCursor;
+            //startNodesBefore();
+            //startNodesRun(ds_MsWebNodes, v.tWebRequestType.post, v.tWebEventsType.button5);
+            startNodes(this.msWebNodes_, this.workPageNodes_, v.tWebRequestType.post, v.tWebEventsType.button5);
+        }
+
+        private void myFullPost2Click(object sender, EventArgs e)
+        {
+            Cursor.Current = Cursors.WaitCursor;
+            //startNodesBefore();
+            //startNodesRun(ds_MsWebNodes, v.tWebRequestType.post, v.tWebEventsType.button6);
+            startNodes(this.msWebNodes_, this.workPageNodes_, v.tWebRequestType.post, v.tWebEventsType.button6);
+        }
+
+        private void myFullSaveClick(object sender, EventArgs e)
+        {
+            Cursor.Current = Cursors.WaitCursor;
+            //startNodesBefore();
+            //startNodesRun(ds_MsWebNodes, v.tWebRequestType.post, v.tWebEventsType.button7);
+        }
+
+        #endregion user buttons
+
+
+        
+        private async Task startNodes(List<MsWebNode> msWebNodes, webWorkPageNodes workPageNodes,  v.tWebRequestType workRequestType, v.tWebEventsType workEventsType)
+        {
+            bool onay = false;
+
+            foreach (MsWebNode item in msWebNodes)
+            {
+                //MessageBox.Show(item.TagName + " ; " + item.AttId + " ; " + item.AttName + " ; ");
+
+                // 2. adımda 
+                // IsActive = 1, nodeIdList += item.Id
+                // 
+                onay = listControl(item, workPageNodes);
+
+                // 3. adımda
+                // v.tWebRequestType workRequestType,
+                // v.tWebEventsType  workEventsType,
+                // eventsType = (v.tWebEventsType)t.myInt16(row["EventsType"].ToString());
+                // injectType = (v.tWebInjectType)t.myInt16(row["InjectType"].ToString());
+                // kontrolleri
+                onay = requestContol(item, workRequestType, workEventsType);
+
+                // 4. adım 
+                //
+                // WebScrapingAsync öncesi (set için) yapılacak işler
+
+                // 5. adım scraping
+                // WebScrapingAsync
+                //
+                if (onay)
+                {
+                    webNodeValue wnv = new webNodeValue();
+                    wnv.workRequestType = workRequestType;
+                    wnv.pageCode = workPageNodes.aktifPageCode;
+                    msPagesService.nodeValuesPreparing(item, ref wnv);
+                    await WebScrapingAsync(webMain, wnv);
+                }
+                
+                // 4. adım
+                // WebScrapingAsync sonrası (get için ) yapılacak işler
+
+            }
+        }
+        
+        private bool listControl(MsWebNode item, webWorkPageNodes workPageNodes)
+        {
+            // 1. aktif mi
+            // 2. daha önce çalışmış mı çalışmamış mı ?
+            bool onay = true;
+            
+            onay = item.IsActive;
+
+            if (onay)
+            {
+                // nodeId ile bu satır çalıştı mı diye kontrol için sadece
+                string nodeNo = "|" + item.NodeId.ToString() + "|";
+                int pos = workPageNodes.nodeIdList.IndexOf(nodeNo);
+                // -1 ise daha önce çalışmamış 
+                if (pos == -1)
+                    workPageNodes.nodeIdList += nodeNo;
+                else onay = false;
+            }
+
+            return onay;
+        }
+        
+        private bool requestContol(MsWebNode item, v.tWebRequestType workRequestType, v.tWebEventsType workEventsType)
+        {
+            /// istek çeşitleri
+            /// startNodes(v.tWebRequestType.get,  v.tWebEventsType.button3);
+            /// startNodes(v.tWebRequestType.get,  v.tWebEventsType.button4);
+            /// startNodes(v.tWebRequestType.post, v.tWebEventsType.button5);
+            /// startNodes(v.tWebRequestType.post, v.tWebEventsType.button6);
+
+            /// tWebInjectType
+            /// none,
+            /// AlwaysSet,
+            /// Get,
+            /// Set,
+            /// GetAndSet
+
+            /// tWebRequestType
+            /// none,
+            /// get,
+            /// post,
+            /// put,
+            /// delete,
+            /// getNodeItems,
+            /// postNodeItems,
+            /// alwaysSet
+
+            /// tWebEventsType
+            /// none = 0,
+            /// load = 1,
+            /// displayNone = 2,
+            /// buttonAlwaysSet = 140,
+            /// button3 = 143, 
+            /// button4 = 144, 
+            /// button5 = 145, 
+            /// button6 = 146, 
+            /// button7 = 147, 
+            /// tableField = 148, 
+            /// pageRefresh = 200
+
+            bool onay = false;
+
+            v.tWebInjectType injectType_ = (v.tWebInjectType)item.InjectType;
+            v.tWebEventsType eventsType_ = (v.tWebEventsType)item.EventsType;
+                        
+            // istek load ise ve
+            // event = node load ise
+            if (workEventsType == v.tWebEventsType.load)
+                if (eventsType_ ==  v.tWebEventsType.load) onay = true;
+
+            // istek button3 ise
+            // item.event = button3 veya none ise : true
+            if (workEventsType == v.tWebEventsType.button3)
+                if (eventsType_ == v.tWebEventsType.button3 || eventsType_ == v.tWebEventsType.none) onay = true;
+            if (workEventsType == v.tWebEventsType.button4)
+                if (eventsType_ == v.tWebEventsType.button4 || eventsType_ == v.tWebEventsType.none) onay = true;
+            if (workEventsType == v.tWebEventsType.button5)
+                if (eventsType_ == v.tWebEventsType.button5 || eventsType_ == v.tWebEventsType.none) onay = true;
+            if (workEventsType == v.tWebEventsType.button6)
+                if (eventsType_ == v.tWebEventsType.button6 || eventsType_ == v.tWebEventsType.none) onay = true;
+            
+            if (workEventsType == v.tWebEventsType.button7)
+                if (eventsType_ == v.tWebEventsType.button7) onay = true;
+
+            if (workEventsType == v.tWebEventsType.tableField)
+                if (eventsType_ == v.tWebEventsType.tableField) onay = true;
+
+            if (onay)
+            {
+                // istek get ise
+                // item.inject = none veya set veya alwaysset ise 
+                if (workRequestType == v.tWebRequestType.get)
+                    if (injectType_ == v.tWebInjectType.none ||
+                        injectType_ == v.tWebInjectType.Set || 
+                        injectType_ == v.tWebInjectType.AlwaysSet) onay = false;
+                // istek post
+                // item.inject = none veya get ise 
+                if (workRequestType == v.tWebRequestType.post)
+                    if (injectType_ == v.tWebInjectType.none ||
+                        injectType_ == v.tWebInjectType.Get) onay = false;
+            }
+
+            if (eventsType_ == v.tWebEventsType.displayNone) onay = true;
+            
+            // false olabilir
+            if (item.IsActive == false) onay = false;
+
+            return onay;
+        }
+
+
+
+        #region
+
+        private async Task WebScrapingAsync(IWebDriver wb, webNodeValue wnv)
+        {
+            //, v.tWebRequestType request
+            //myNokta = "..... ";
+            //this.myTriggerInvoke = false;
+            //this.myDocumentCompleted = false;
+
+            if (wb.PageSource == null) return;
+
+            //HtmlNode nNode = null;
+            string TagName = wnv.TagName.ToLower();
+
+            //v.SQL = v.SQL + v.ENTER + myNokta + "WebScraping : " + TagName;
+
+            //string AttId = "";
+            //string AttName = "";
+            //string AttClass = "";
+            string AttType = wnv.AttType;
+            string AttRole = wnv.AttRole;
+            string AttHRef = wnv.AttHRef;
+            string AttSrc = wnv.AttSrc;
+            string XPath = wnv.XPath;
+            string InnerText = wnv.InnerText;
+            string OuterText = wnv.OuterText;
+
+            v.tWebInjectType injectType = wnv.InjectType;
+            v.tWebInvokeMember invokeMember = wnv.InvokeMember;
+            v.tWebRequestType workRequestType = wnv.workRequestType;
+            v.tWebEventsType eventsType = wnv.EventsType;
+            v.tWebEventsType workEventsType = wnv.workEventsType;
+
+            string writeValue = "";
+            if (!string.IsNullOrEmpty(wnv.writeValue))
+                writeValue = wnv.writeValue;
+
+            string idName = "";
+            string readValue = "";
+            
+            if (wnv.AttId != "") idName = wnv.AttId;
+            if ((wnv.AttId == "") && (wnv.AttName != "")) idName = wnv.AttName;
+
+            ///
+            /// displayNone işlemi
+            /// 
+            if (wnv.EventsType == v.tWebEventsType.displayNone)
+            {
+                displayNone(wb, TagName, idName, XPath, InnerText);
+                return;
+            }
+            
+            if (AttRole == "ItemButton")
+            {
+                //if (eventsType == v.tWebEventsType.itemButton)
+                // table listesindeki satırın detayını açmak için kullanılıyor
+                // 
+                preparingItemButtonsList(wb, wnv, TagName, AttSrc);
+            }
+            
+            if (TagName == "a")
+            {
+                // button TagName olmayan fakat click eventi olan taga button rolü yükleniyor 
+                if (!string.IsNullOrEmpty(AttHRef) && AttRole != "button")
+                    AttRole = "Button";
+            }
+
+            if (TagName == "input")
+            {
+                if ((AttType == "submit") ||
+                    (AttType == "file"))
+                    invokeMember = v.tWebInvokeMember.click;
+            }
+
+            if (TagName == "button")
+            {
+                if (invokeMember == v.tWebInvokeMember.none)
+                    invokeMember = v.tWebInvokeMember.click;
+            }
+            
+            if (TagName == "script")
+            {
+                if (AttType == "text/javascript")
+                {
+                    
+                }
+            }
+            
+            if (TagName == "select")
+            {
+                if (workRequestType == v.tWebRequestType.getNodeItems)
+                    selectItemsRead(wb, ref wnv, idName);
+
+                if ((workRequestType == v.tWebRequestType.get) &&
+                    (AttRole == "ItemTable"))
+                    selectItemsRead(wb, ref wnv, idName);
+
+                // select in böyle bir özelliği yok ben manuel ekliyorum
+                if (AttRole == "SetCaption")
+                {
+                    // elimizde select e ait text mevcut. bize bu textin valuesi gerekiyor. onuda nodenin kendi listesine bakarak buluyoruz
+                    // text'i söyle sana value'sini vereyim
+
+                    if ((injectType == v.tWebInjectType.Set) ||
+                        (injectType == v.tWebInjectType.GetAndSet && workRequestType == v.tWebRequestType.post) ||
+                        (injectType == v.tWebInjectType.AlwaysSet))
+                        writeValue = selectItemsGetValue(wb, ref wnv, idName, writeValue);
+                }
+            }
+                        
+            if (AttRole == "Button")
+            {
+                // tablolar üzerindeki liste satırları üzerindeki butonlar
+                buttonsClick(wb, TagName, idName, InnerText);
+                return;
+            }
+
+            if (TagName == "table")
+            {
+                if (injectType == v.tWebInjectType.Get ||
+                   (injectType == v.tWebInjectType.GetAndSet && workRequestType == v.tWebRequestType.get))
+                {
+                    //t.WebReadyComplate(wb);
+                    getHtmlTable(wb, ref wnv, idName);
+                    //t.WebReadyComplate(wb);
+
+                    //if (wnv.tTable == null) v.SQL = v.SQL + v.ENTER + myNokta + "WebScraping : table null";
+                    //else
+                    //{
+                    //    v.SQL = v.SQL + v.ENTER + myNokta + "WebScraping : table Count = " + wnv.tTable.tRows.Count;
+                    //}
+                }
+
+
+                if ((injectType == v.tWebInjectType.Set ||
+                    (injectType == v.tWebInjectType.GetAndSet && workRequestType == v.tWebRequestType.post)) &&
+                    (TagName == "table"))
+                {
+                    //t.WebReadyComplate(wb);
+                    postHtmlTable(wb, ref wnv, idName);
+                    //t.WebReadyComplate(wb);
+
+                    //if (wnv.tTable == null) v.SQL = v.SQL + v.ENTER + myNokta + "WebScraping : table null";
+                    //else
+                    //{
+                    //    v.SQL = v.SQL + v.ENTER + myNokta + "WebScraping : table Count = " + wnv.tTable.tRows.Count;
+                    //}
+                }
+            }
+
+            ///
+            /// Set işlemleri 
+            /// 
+            if ((injectType == v.tWebInjectType.Set ||
+                (injectType == v.tWebInjectType.GetAndSet && workRequestType == v.tWebRequestType.post) ||
+                // workRequestType = sadece alwaysSet isteği ve alwaysSet butonu var ise ( TC Sorgula gibi )
+                (injectType == v.tWebInjectType.AlwaysSet && workRequestType == v.tWebRequestType.alwaysSet && btn_AlwaysSet != null) ||
+                // workRequestType = Get veya Set isteği ve alwaysSet butonu yok ise 
+                (injectType == v.tWebInjectType.AlwaysSet && workRequestType != v.tWebRequestType.alwaysSet && btn_AlwaysSet == null) ||
+                // load sırasında 
+                (injectType == v.tWebInjectType.AlwaysSet && workEventsType == v.tWebEventsType.load)
+               ) &&
+                (TagName == "input" || TagName == "select") &&
+                (writeValue != "") &&
+                (idName != ""))
+            {
+                invokeMember = await setElementValues(wb, AttType, idName, writeValue, invokeMember);
+            }
+
+            ///
+            /// Get işlemleri 
+            /// 
+            if ((injectType == v.tWebInjectType.Get ||
+                (injectType == v.tWebInjectType.GetAndSet && workRequestType == v.tWebRequestType.get)) &&
+                (TagName == "input" || TagName == "span" || TagName == "select" || TagName == "img") &&
+                (idName != ""))
+            {
+                await getElementValues(wb, wnv, TagName, AttType, AttRole, idName);
+            }
+
+            #region
+              
+            //
+            // Atanan valueden sonra nesnenin tetiklenmesi gerekirse
+            //
+            if (invokeMember > v.tWebInvokeMember.none)
+            {
+                if (injectType == v.tWebInjectType.Set ||
+                    injectType == v.tWebInjectType.AlwaysSet ||
+                   (injectType == v.tWebInjectType.GetAndSet && workRequestType == v.tWebRequestType.post))
+                {
+                    //this.myDocumentCompleted = false;
+                    //this.myTriggerInvoke = true;
+                    //timerTrigger.Enabled = false;
+                    await invokeMemberExec(wb, invokeMember, writeValue, idName);
+                }
+            }
+            
+            #endregion
+            wnv.readValue = readValue;
+        }
+
+        #endregion
+
+        #region subFunctions
+        private async Task myPageViewClickAsync(IWebDriver wb, List<MsWebPage> msWebPage)
+        {
+            if (msWebPage[0].Id > 0) 
+            {
+                bool onay = false;
+
+                //v.SQL = v.SQL + v.ENTER + myNokta + " PageView : ";
+
+                f.aktifPageCode = msWebPage[0].PageCode;    
+                f.talepEdilenUrl = msWebPage[0].PageUrl;
+                f.talepEdilenUrl2 = msWebPage[0].PageUrl;
+                f.talepOncesiUrl = msWebPage[0].BeforePageUrl; 
+                f.talepPageLeft = msWebPage[0].PageLeft;       
+                f.talepPageTop = msWebPage[0].PageTop;         
+
+                if (f.aktifUrl != f.talepEdilenUrl)
+                {
+                    if (t.IsNotNull(f.talepOncesiUrl))
+                        onay = await loadPage(wb, f.talepOncesiUrl);
+                    else
+                        onay = await loadPage(wb, f.talepEdilenUrl);
+                }
+                else
+                {
+                    onay = await loadPage(wb, f.talepEdilenUrl);
+                }
+            }
+        }
+        private async Task<bool> loadPage(IWebDriver wb, string url)
+        {
+            if (!string.IsNullOrEmpty(url))
+            {
+                //wb.Url = url;
+                wb.Navigate().GoToUrl(url);
+
+                f.aktifUrl = wb.Url;
+
+                openPageControlAsync(wb);
+                return true;
+            }
+            else
+            {
+                MessageBox.Show("DİKKAT : Lütfen  - page url - yi girin...");
+                return false;
+            }
+        }
+        private async Task openPageControlAsync(IWebDriver wb)
+        {
+            if (t.IsNotNull(f.talepEdilenUrl) == false)
+                return;
+
+            bool onay = false;
+
+            if (f.talepEdilenUrl != f.aktifUrl)
+            {
+                /// aktif url Login page mi kontrol et
+                ///
+
+                onay = msPagesService.readLoginPageControl(ref ds_LoginPageNodes, f);// f.aktifUrl, ref this.loginPageUrl, ref this.errorPageUrl);
+
+                if (onay)
+                {
+                    await runLoginPage(wb);
+                    return;
+                }
+                else
+                {
+                    if (f.aktifUrl.IndexOf("oturumsonu") > -1)
+                    {
+                        return;
+                    }
+                    /// aktif url Login page değil ise nedir ?
+                    /// 
+                    /// talep öncesi başka bir url çağrısı var ise
+                    ///
+                    if (t.IsNotNull(f.talepOncesiUrl))
+                    {
+                        /// aktif url ne talep edilen ne de talep öncesi url değil ise 
+                        /// talepOncesiUrl yi çağır
+                        ///
+                        if ((f.talepOncesiUrl != f.aktifUrl) &&
+                            (f.talepEdilenUrl != f.aktifUrl))
+                            loadPage(wb, f.talepOncesiUrl);
+
+                        /// talep öncesi geldiyse sıra esas talep edilen url ye sıra geldi
+                        ///
+                        if (f.talepOncesiUrl == f.aktifUrl)
+                        {
+                            loadPage(wb, f.talepEdilenUrl);
+                            /* silme doğru sayfa burdan devam ediyor
+                                                        if (t.IsNotNull(this.aktifPageCode))
+                                                            readNodeItems(this.aktifPageCode);  */
+                        }
+                    }
+                    else
+                    {
+                        /// talepOncesiUrl yok ise şimdi talepEdilenUrl yi çağıralım 
+                        ///
+                        loadPage(wb, f.talepEdilenUrl);
+                    }
+                }
+            }
+
+            if (f.talepEdilenUrl == f.aktifUrl)
+            {
+                /*
+                this.htmlDocumentBody = wb.Document.Body.InnerHtml;
+
+                //
+                if (this.myLoadNodeCount > 0)
+                {
+                    await runLoadAsync();
+                    this.talepEdilenUrl = "";
+                }
+
+                if (this.myLoadNodeCount == 0)
+                {
+                    this.talepEdilenUrl = "";
+                }
+                */
+            }
+
+        }
+        private async Task runLoginPage(IWebDriver wb)
+        {
+            if (f.errorPageUrl == f.aktifUrl)
+            {
+                loadPage(wb, f.loginPageUrl);
+            }
+            else if (f.aktifUrl.IndexOf("oturumsonu") > -1)
+            {
+                return;
+            }
+        }
+
+        private void displayNone(IWebDriver wb, string tagName, string idName, string XPath, string InnerText)
+        {
+            if (t.IsNotNull(idName))
+            {
+                IWebElement element = wb.FindElement(By.Id(idName));
+                if (element != null)
+                {
+                    IJavaScriptExecutor js = (IJavaScriptExecutor)wb;
+                    js.ExecuteScript("arguments[0].style.display = 'none';", element);
+                }
+                #region
+                /*
+                if (tagName == "table")
+                {
+                    IWebElement element = wb.FindElement(By.Id(idName));
+                    if (element != null)
+                    {
+                        IJavaScriptExecutor js = (IJavaScriptExecutor)wb;
+                        js.ExecuteScript("arguments[0].style.display = 'none';", element);
+                    }
+                }
+                else
+                {
+                    IWebElement element = wb.FindElement(By.Id(idName));
+                    if (element != null)
+                    {
+                        IJavaScriptExecutor js = (IJavaScriptExecutor)wb;
+                        js.ExecuteScript("arguments[0].style.display = 'none';", element);
+                    }
+                }
+                */
+                #endregion
+            }
+            else
+            {
+                //
+            }
+
+        }
+        private void preparingItemButtonsList(IWebDriver wb, webNodeValue wnv, string tagName, string attSrc)
+        {
+            // şimdilik sadece itemButton var
+            // aktif olan sayfadaki tüm uygun elementleri topla
+            // burada sadece itemButton olan elementler toplanıyor 
+
+            // table listesindeki satırın detayını açmak için kullanılıyor
+            // 
+            string src = "";
+            IList<IWebElement> elements = wb.FindElements(By.TagName(tagName));
+            foreach (IWebElement item in elements)
+            {
+                //Console.WriteLine(element.Text);
+                src = item.GetAttribute("src");
+                if (src.IndexOf(attSrc) > -1)
+                {
+                    // uygun olan element leri topla
+                    wnv.elementsSelenium.Add(item);
+                }
+            }
+        }
+        private void selectItemsRead(IWebDriver wb, ref webNodeValue wnv, string idName)
+        {
+            IList<IWebElement> elements = wb.FindElements(By.Id(idName));
+            
+            if (elements == null) return;
+
+            string value = "";
+            string text = "";
+
+            tTable table = new tTable();
+
+            foreach (IWebElement item in elements)
+            {
+                tRow row = new tRow();
+                value = item.GetAttribute("value");
+                text = item.Text;
+
+                tColumn column1 = new tColumn();
+                column1.value = value;
+                tColumn column2 = new tColumn();
+                column2.value = text;
+
+                row.tColumns.Add(column1);
+                row.tColumns.Add(column2);
+
+                table.tRows.Add(row);
+            }
+
+            wnv.tTable = table;
+        }
+        private string selectItemsGetValue(IWebDriver wb, ref webNodeValue wnv, string idName, string findText)
+        {
+            IList<IWebElement> elements = wb.FindElements(By.Id(idName));
+            
+            if (elements == null) return "";
+
+            string value = "";
+            string text = "";
+
+            foreach (IWebElement item in elements)
+            {
+                value = item.GetAttribute("value");
+                text = item.Text;
+
+                // tarih formatı ise 
+                // mebbiste tarih ayırımı gg/aa/yyyy şeklinde
+                // bizim database de ise  gg.aa.yyyy şeklindedir
+                if (text != null)
+                {
+                    if ((text.Substring(2, 1) == "/") &&
+                        (text.Substring(5, 1) == "/"))
+                        text = text.Replace("/", ".");
+
+                    if (findText == text)
+                        break;
+                }
+            }
+
+            return value;
+        }
+        private void buttonsClick(IWebDriver wb, string tagName, string idName, string innerText)
+        {
+            if (t.IsNotNull(idName) == false)
+            {
+                IList<IWebElement> elements = wb.FindElements(By.TagName(tagName));
+                foreach (IWebElement item in elements)
+                {
+                    if (item.Text == innerText)
+                    {
+                        item.Click();
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                IWebElement element = wb.FindElement(By.Id(idName));
+                if (element != null)
+                    element.Click();
+            }
+        }
+        private async Task<v.tWebInvokeMember> setElementValues(IWebDriver wb, string attType, string idName, string writeValue, v.tWebInvokeMember invokeMember)
+        {
+            //
+            // Value atama işlemi 
+            //
+            #region
+            IWebElement element = null;
+            try
+            {
+                if ((attType != "file") && (attType != "checkbox"))
+                {
+                    element = wb.FindElement(By.Id(idName));   
+                    if (element != null)
+                    {
+                        element.SendKeys(writeValue);
+                        //v.SQL = v.SQL + v.ENTER + myNokta + " set value : " + writeValue;
+                    }
+
+                    if (writeValue.ToLower().IndexOf("selectedindex=") > -1)
+                    {
+                        writeValue = writeValue.Replace("selectedindex=", "");
+                        //element.SetAttribute("selectedindex", writeValue);
+
+                        IList<IWebElement> optionElements = element.FindElements(By.TagName("option"));
+                        optionElements.FirstOrDefault(x => x.Text == writeValue)?.Click();
+
+                        //v.SQL = v.SQL + v.ENTER + myNokta + " set selectedindex : " + writeValue;
+                    }
+
+                    //t.WebReadyComplate(wb);
+                }
+                if ((attType == "checkbox") || (attType == "radio"))
+                {
+                    if (writeValue == "True")
+                    {
+                        element = wb.FindElement(By.Id(idName));
+
+                        if (element != null)
+                        {
+                            if (attType == "checkbox")
+                            {
+                                //element.SetAttribute("checked", writeValue);
+                                IJavaScriptExecutor js = (IJavaScriptExecutor)wb;
+                                js.ExecuteScript("arguments[0].checked = '"+writeValue+"';", element);
+
+                            }
+                            if (attType == "radio")
+                            {
+                                //element.SetAttribute("value", "1");
+                                IJavaScriptExecutor js = (IJavaScriptExecutor)wb;
+                                js.ExecuteScript("arguments[0].value = '1';", element);
+                            }
+                            //v.SQL = v.SQL + v.ENTER + myNokta + " set checked : " + writeValue;
+                        }
+                    }
+
+                    //if ((writeValue == "False") && (invokeMember > v.tWebInvokeMember.none))
+                    if ((writeValue != "True") && (invokeMember > v.tWebInvokeMember.none))
+                        invokeMember = v.tWebInvokeMember.none;
+                }
+                if (attType == "file")
+                {
+                    await Task.Delay(500);
+                    SendKeys.Send(writeValue);// + "{ENTER}");
+
+                    //v.SQL = v.SQL + v.ENTER + myNokta + " set file (SendKeys.Send) : " + writeValue;
+                }
+            }
+            catch (Exception exc1)
+            {
+                string inner = (exc1.InnerException != null ? exc1.InnerException.ToString() : exc1.Message.ToString());
+
+                //t.WebReadyComplate(wb);
+                MessageBox.Show("DİKKAT [error 1001] : [ " + idName + " (" + writeValue + ") ] veri ataması sırasında sorun oluştu ..." +
+                    v.ENTER2 + inner);
+            }
+            return invokeMember;
+            #endregion
+        }
+        private async Task<string> getElementValues(IWebDriver wb, webNodeValue wnv, string tagName, string attType, string attRole, string idName)
+        {
+            //
+            // Value alma/okuma işlemi 
+            //
+            #region
+            IWebElement element = null;
+            string readValue = "";
+            try
+            {
+                if (tagName == "input" || tagName == "select")
+                {
+                    element = null;
+                    element = wb.FindElement(By.Id(idName)); 
+                    if (element != null)
+                    {
+                        //tagName == "input"
+                        readValue = element.Text;
+
+                        // select in value si değilde text kısmı okunacak ise 
+                        // writeValeu veya AttRole bizim tarafımızdan manuel işaretleniyor
+
+                        if ((tagName == "select") &&
+                            ((wnv.writeValue == "InnerText") ||
+                             (attRole == "GetCaption") || (attRole == "text") || (attRole == "InnerText")
+                             ))
+                        {
+                            readValue = element.Text;
+                            //v.SQL = v.SQL + v.ENTER + myNokta + " get select : " + readValue;
+                        }
+                        // önceki hali
+                        //readValue = element.GetAttribute("value");
+                        //if ((tagName == "select") &&
+                        //    ((wnv.writeValue == "InnerText") ||
+                        //     (attRole == "GetCaption") || (attRole == "text") || (attRole == "InnerText")
+                        //     ))
+                        //{
+                        //    foreach (HtmlElement item in element.Children)
+                        //    {
+                        //        if (readValue == item.GetAttribute("value"))
+                        //        {
+                        //            readValue = item.InnerText;
+                        //            v.SQL = v.SQL + v.ENTER + myNokta + " get select : " + readValue;
+                        //            break;
+                        //        }
+                        //    }
+                        //}
+                    }
+
+                }
+                if (tagName == "span")
+                {
+                    element = null;
+                    element = wb.FindElement(By.Id(idName));
+                    if (element != null)
+                    {
+                        readValue = element.Text;
+                        //v.SQL = v.SQL + v.ENTER + myNokta + " get span : " + readValue;
+                    }
+                }
+                if (tagName == "img")
+                {
+                    element = null;
+                    element = wb.FindElement(By.Id(idName));
+
+                    if (element != null)
+                    {
+                        //örnek :
+                        //string urlDownload = @"https://mebbis.meb.gov.tr/SKT/AResimGoster.aspx";
+                        string urlDownload = element.GetAttribute("src");
+
+                        if (f.sessionIdAndToken == "")
+                            f.sessionIdAndToken = tCookieReader.GetCookie($"https://mebbis.meb.gov.tr/default.aspx");
+
+                        readValue = msPagesService.ImageDownload(urlDownload, f.sessionIdAndToken, f.aktifUrl);
+
+                        //v.SQL = v.SQL + v.ENTER + " get img : " + readValue;
+                    }
+                }
+                if (attType == "checkbox")
+                {
+                    element = null;
+                    element = wb.FindElement(By.Id(idName));
+                    if (element != null)
+                    {
+                        readValue = element.GetAttribute("checked");
+                        //v.SQL = v.SQL + v.ENTER + myNokta + " get checkbox : " + readValue;
+                    }
+                }
+
+                //t.WebReadyComplate(wb);
+            }
+            catch (Exception exc1)
+            {
+                string inner = (exc1.InnerException != null ? exc1.InnerException.ToString() : exc1.Message.ToString());
+
+                //t.WebReadyComplate(wb);
+                MessageBox.Show("DİKKAT [error 1002] : [ " + idName + " ] veri okuması sırasında sorun oluştu ..." +
+                    v.ENTER2 + inner);
+            }
+            return readValue;
+            #endregion
+        }
+        private async Task invokeMemberExec(IWebDriver wb, v.tWebInvokeMember invokeMember, string writeValue, string idName)
+        {
+            string invoke = "";
+
+            // this.myTriggerInvoke 
+            // invoke çalışınca her zaman webbrowserDocumentCompleted  tetiklenmiyor
+            // bu event çalıştımı çalışmadı mı diye 
+            // this.myDocumentCompleted kullanılıyor
+            //
+
+            if (invokeMember == v.tWebInvokeMember.click) invoke = "click";
+            if (invokeMember == v.tWebInvokeMember.submit) invoke = "submit";
+            if ((invokeMember == v.tWebInvokeMember.onchange) &&
+                (writeValue != ""))
+                invoke = "onchange";
+            if ((invokeMember == v.tWebInvokeMember.onchangeDontDocComplate) &&
+                (writeValue != ""))
+                invoke = "onchange";
+
+            // bazı nodeler onchange olduğu halde webBrowserDocumentComplate gerçekleşmiyor, yinede olmuş gibi davran
+            //if (invokeMember == v.tWebInvokeMember.onchangeDontDocComplate)
+            if (invokeMember != v.tWebInvokeMember.onchange)
+            {
+                // this.myDocumentCompleted = true;
+
+                // burayı açacağın zaman aday dönem kayıt sırasında ucretli seçilince çalışmıyor 
+                // aslıdan timer2 de invokemember break yapamıyor
+            }
+
+            //v.SQL = v.SQL + myNokta + " : invoke = " + invoke;
+
+            try
+            {
+                if ((idName != "") && (invoke != ""))
+                {
+                    //t.WebReadyComplate(wb);
+
+                    IWebElement element = null;
+                    element = wb.FindElement(By.Id(idName));
+                    if (element != null)
+                    {
+                        //wb.Document.GetElementById(idName).InvokeMember(invoke);
+                        if (invoke == "click")
+                            element.Click();
+                        if (invoke == "submit")
+                            element.Submit();
+                        if (invoke == "onchange")
+                        {
+                            IList<IWebElement> optionElements = element.FindElements(By.TagName("option"));
+                            optionElements.FirstOrDefault(x => x.Text == writeValue)?.Click();
+                        }
+                    }
+                    Thread.Sleep(1000);
+                    Application.DoEvents();
+
+                    //t.WebReadyComplate(wb);
+                }
+            }
+            catch (Exception exc2)
+            {
+                string inner = (exc2.InnerException != null ? exc2.InnerException.ToString() : exc2.Message.ToString());
+
+                //t.WebReadyComplate(wb);
+
+                MessageBox.Show("DİKKAT [error 1002] : [ " + idName + " (" + writeValue + "), (" + invoke + ") ] verinin çalıştırılması sırasında sorun oluştu ..." +
+                    v.ENTER2 + inner);
+            }
+        }
+
+        #endregion subFunctions
+
+        #region getHtmlTable
+        private void getHtmlTable(IWebDriver wb, ref webNodeValue wnv, string idName)
+        {
+            // Mevcudu yok et, yeni hazırlanacak
+            wnv.tTable = null;
+
+            IWebElement htmlTable = wb.FindElement(By.Id(idName));
+            //HtmlElement htmlTable = wb.Document.GetElementById(idName);
+
+            if (htmlTable == null) return;
+
+            // okunacak table içinde pages tables var mı kontrol etmek gerekiyor
+            // 
+            //this.htmlTablePages = null;
+            //this.selectedTablePageNo = 0;
+
+            //////// burası seleniuma göre düzenlenmesi gerekiyor
+
+            //if (areThereTablePages(htmlTable))
+            //{
+            //    this.tablePageName = idName;
+            //    this.tablePageUrl = wb.Url.ToString();
+            //}
+
+            //HtmlElementCollection htmlRows = htmlTable.GetElementsByTagName("tr");
+            //int rowCount = htmlRows.Count;
+            //int colCount = 0;
+            //int pos = 0;
+            //string value = "";
+            //string html = "";
+
+            //string dtyHtml = "";
+            //string dtyValue = "";
+            //string dtyIdName = "";
+            //string dtyType = "";
+
+            //tTable _tTable = new tTable();
+
+            ////for (int i = 0; i < rowCount; i++)
+            //for (int i = 1; i < rowCount; i++)
+            //{
+            //    HtmlElement hRow = htmlRows[i];
+
+            //    if (hRow.Name != "pages")
+            //    {
+            //        tRow _tRow = new tRow();
+
+            //        HtmlElementCollection htmlCols = hRow.GetElementsByTagName("td");
+            //        colCount = htmlCols.Count;
+
+            //        for (int i2 = 0; i2 < colCount; i2++)
+            //        {
+            //            HtmlElement hCol = htmlCols[i2];
+
+            //            // <input name="dgListele$ctl04$ab" id="dgListele_ctl04_chkOnayBekliyor" type="radio" checked="checked" value="chkOnayBekliyor">
+            //            // <input name="dgListele$ctl04$ab" id="dgListele_ctl04_chkOnayDurum" type="radio" value="chkOnayDurum">
+
+            //            //HtmlElementCollection kDetay = kolon.Children;
+            //            dtyHtml = hCol.InnerHtml;
+
+            //            //dtyAhref = hCol.Children[0].GetAttribute("href");  << çalışıyor 
+            //            //dtySrc = hCol.Children[0].GetAttribute("src");     << çalışmıyor
+
+            //            if (dtyHtml.IndexOf("type=\"radio\"") > -1)
+            //            {
+            //                //dtyValue = hCol.Children[0].GetAttribute("value");
+            //                dtyValue = hCol.Children[0].GetAttribute("");
+            //                dtyIdName = hCol.Children[0].GetAttribute("id");
+            //                dtyType = hCol.Children[0].GetAttribute("type");
+            //                if (dtyType == "radio")
+            //                {
+            //                    wb.Document.GetElementById(dtyIdName).InvokeMember("click");
+            //                }
+            //            }
+
+            //            if (hCol.InnerText != null)
+            //            {
+            //                value = hCol.InnerText.Trim();
+            //            }
+            //            else
+            //            {
+            //                // <img onmouseover="this.src="/images/toolimages/open_kucuk_a.gif";this.style.cursor="hand";" 
+            //                // onmouseout="this.src="/images/toolimages/open_kucuk.gif";this.style.cursor="default";" 
+            //                // onclick="fnIslemSec("99969564|01/08/2017|NMZVAN93C15010059");" 
+            //                // src="/images/toolimages/open_kucuk.gif">
+
+            //                pos = -1;
+            //                pos = hCol.OuterHtml.IndexOf("onclick");
+
+            //                // <td align="center" style="width: 30px;">
+            //                // <a href="javascript:__doPostBack('dgIstekOnaylanan','Select$0')">
+            //                // <img title="Aç" onmouseover="this.src='/images/toolimages/open_kucuk_a.gif';this.style.cursor='pointer';" onmouseout="this.src='/images/toolimages/open_kucuk.gif';this.style.cursor='default';" src="/images/toolimages/open_kucuk.gif">
+            //                // </a></td>                        
+
+            //                if (pos == -1) // 
+            //                    pos = hCol.OuterHtml.IndexOf("__doPostBack(");
+
+            //                if (pos > -1)
+            //                {
+            //                    //value = hCol.GetAttribute("src");
+            //                    //System.Windows.Forms.HtmlDocument doc = preparingHtmlDocument(hCol.OuterHtml);
+            //                    //value = doc.GetElementsByTagName("img")[0].GetAttribute("src");
+
+            //                    //   /images/toolimages/open_kucuk.gif
+
+            //                    html = hCol.OuterHtml.Remove(0, hCol.OuterHtml.IndexOf(" src=") + 6);
+            //                    value = html.Remove(html.IndexOf(">") - 1);
+            //                }
+            //                else value = "";
+            //            }
+            //            tColumn _tColumn = new tColumn();
+            //            _tColumn.value = value;
+            //            _tRow.tColumns.Add(_tColumn);
+            //        }
+
+            //        if (_tRow.tColumns.Count > 0)
+            //        {
+            //            if (_tRow.tColumns[0].value != "pages")
+            //                _tTable.tRows.Add(_tRow);
+            //        }
+
+            //    }
+
+            //    if (hRow.Name == "pages")
+            //    {
+            //        //işlem yapma
+            //    }
+            //}
+
+            //wnv.tTable = _tTable;
+        }
+        // table içinde sayfalar var mı ?
+        private bool areThereTablePages(HtmlElement htmlTable)
+        {
+
+            
+            // Pages için table varmı kontrol et, varsa -pages- şeklinde işaretler 
+            // böylece table dan data okurken page bilgisini bulunduran satırları atlasın
+            //
+            // <tbody><tr>
+            // <td><span>1</span></td>
+            // <td><a href="javascript:__doPostBack('dgIstekOnaylanan','Page$2')"> 2 </a></td>
+            // <td><a href="javascript:__doPostBack('dgIstekOnaylanan','Page$3')"> 3 </a></td>
+            // </tr>
+            // </tbody>
+
+            bool onay = false;
+            // bu kopya ise esas tabloya müdehale için kullanılıyor
+            //HtmlElementCollection htmlTablePages_ = htmlTable.GetElementsByTagName("table");
+
+            //int tableCount = htmlTablePages_.Count;
+            //int rowCount = 0;
+            //int colCount = 0;
+
+            //for (int i = 0; i < tableCount; i++)
+            //{
+            //    if ((htmlTablePages_[i].InnerHtml.IndexOf("javascript:__doPostBack(") > -1) &&
+            //        (htmlTablePages_[i].InnerHtml.IndexOf("Page$") > -1))
+            //    {
+            //        HtmlElement hTable = htmlTablePages_[i];
+            //        HtmlElementCollection htmlRows = hTable.GetElementsByTagName("tr");
+            //        rowCount = htmlRows.Count;
+
+            //        for (int i2 = 0; i2 < rowCount; i2++)
+            //        {
+            //            HtmlElement hRow = htmlRows[i2];
+            //            HtmlElementCollection htmlCols = hRow.GetElementsByTagName("td");
+            //            colCount = htmlCols.Count;
+
+            //            for (int i3 = 0; i3 < colCount; i3++)
+            //            {
+
+            //                // sayfa 1 için durum
+            //                // hcol.InnerHtml = <span>1</span>
+            //                // hcol.InnerHtml = <a href="javascript:__doPostBack('dgIstekOnaylanan','Page$2')">2</a>
+            //                // hcol.InnerHtml = <a href="javascript:__doPostBack('dgIstekOnaylanan','Page$3')">3</a>
+            //                //
+            //                // sayfa 2 için durum
+            //                // hcol.InnerHtml = <a href="javascript:__doPostBack('dgIstekOnaylanan','Page$1')">1</a>
+            //                // hcol.InnerHtml = <span>2</span>
+            //                // hcol.InnerHtml = <a href="javascript:__doPostBack('dgIstekOnaylanan','Page$3')">3</a>
+            //                //
+            //                // sayfa 3 için durum
+            //                // hcol.InnerHtml = <a href="javascript:__doPostBack('dgIstekOnaylanan','Page$1')">1</a>
+            //                // hcol.InnerHtml = <a href="javascript:__doPostBack('dgIstekOnaylanan','Page$2')">2</a>
+            //                // hcol.InnerHtml = <span>3</span>
+
+            //                HtmlElement hCol = htmlCols[i3];
+
+            //                if (hCol.InnerHtml.IndexOf("<span>") > -1)
+            //                    this.selectedTablePageNo = i3 + 1;
+            //            }
+
+            //            if (hRow.TagName == "TR")
+            //            {
+            //                hRow.InnerText = "pages";
+            //                hRow.Name = "pages";
+            //            }
+            //        }
+            //    }
+            //}
+
+            //if (tableCount > 0)
+            //    onay = true;
+
+            /// burası seleniuma göre yeniden düznlenecek
+            onay = true;
+            /// this.selectedTablePageNo = 1;
+
+            return onay;
+        }
+
+        #endregion getHtmlTable
+
+        #region postHtmlTable
+        // database üzerindeki tabloyu bul ve gönderilecek colums/kolonları oku 
+        // ve okunan bu bu colums/kolonları htmlTable anahtar value ile post için gönder
+        private void postHtmlTable(IWebDriver wb, ref webNodeValue wnv, string idName)
+        {
+            string _TableIPCode = wnv.TableIPCode;
+            string _dbKeyFieldName = wnv.dbFieldName;
+            tTable _tTable = wnv.tTable;
+
+            string _dbFieldName = "";
+            string _dbValue = "";
+
+            if (t.IsNotNull(_TableIPCode))
+            {
+                DataSet ds = null;
+                DataNavigator dN = null;
+                string[] controls = new string[] { };
+                t.Find_DataSet(this, ref ds, ref dN, _TableIPCode);
+
+                // transfer edilecek database table bulundu
+                if (t.IsNotNull(ds))
+                {
+                    // database tablosunun row/satırını oku, colums/kolonları tTable üzeri ata 
+                    // htmlTable ye post için gönder, sonra sıradaki database tablosunun bir sonraki satırına geç
+                    foreach (DataRow row in ds.Tables[0].Rows)
+                    {
+                        // örnek : TcNo okunuyor
+                        wnv.keyValue = row[_dbKeyFieldName].ToString();
+
+                        // TcNo haricindeki diğer colums/kolonlar okunuyor 
+                        foreach (tRow item in _tTable.tRows)
+                        {
+                            _dbFieldName = item.tColumns[1].value;
+                            _dbValue = row[_dbFieldName].ToString();
+                            item.tColumns[2].value = _dbValue;
+                        }
+
+                        // hazırlanan bilgiyi html tabloya post et
+                        postHtmlTable_(wb, ref wnv, idName);
+
+                    }
+                }
+            }
+        }
+
+        ///  html tablodaki doğru satırı/row u bul ve bulduğun satırın columns value leri doldur
+        private void postHtmlTable_(IWebDriver wb, ref webNodeValue wnv, string idName)
+        {
+            Int16 _keyColumnNo = wnv.tTableColNo;
+            string _keyValue = wnv.keyValue;
+            tTable _tTable = wnv.tTable;
+
+            IWebElement htmlTable = wb.FindElement(By.Id(idName));
+            //HtmlElement htmlTable = wb.Document.GetElementById(idName);
+
+            if (htmlTable == null) return;
+
+            //HtmlElementCollection htmlRows = htmlTable.GetElementsByTagName("tr");
+            IList<IWebElement> htmlRows = wb.FindElements(By.TagName("tr"));
+            int rowCount = htmlRows.Count;
+            int colCount = 0;
+
+            string dtyValue = "";
+
+            bool onay = false;
+            for (int i = 1; i < rowCount; i++)
+            {
+                //HtmlElement hRow = htmlRows[i];
+                //HtmlElementCollection htmlCols = hRow.GetElementsByTagName("td");
+
+                IWebElement hRow = htmlRows[i];
+                IList<IWebElement> htmlCols = hRow.FindElements(By.TagName("td"));
+
+                colCount = htmlCols.Count;
+
+                onay = false;
+                for (int i2 = 0; i2 < colCount; i2++)
+                {
+                    // eşleştirme yapacağımız kolon ise
+                    if (_keyColumnNo == i2)
+                    {
+                        //HtmlElement hCol = htmlCols[i2];
+                        IWebElement hCol = htmlCols[i2];
+
+                        dtyValue = hCol.Text.Trim();
+
+                        // anahtar değer dogru satırda ise ( TcNo == "xxx")
+                        if (_keyValue == dtyValue)
+                        {
+                            postColumsValue_(wb, htmlCols, _tTable);
+                            onay = true;
+                            break;
+                        }
+                    }
+                }
+                if (onay) break;
+            }
+        }
+        /// onaylanmış html satırı ise db Table den okunan value html columns value ye atanır
+        private void postColumsValue_(IWebDriver wb, IList<IWebElement> htmlCols, tTable _tTable)
+        {
+            Int16 _colNo = 0;
+            string _dbValue = "";
+
+            string dtyHtml = "";
+            //string dtyValue = "";
+            string dtyIdName = "";
+            string dtyType = "";
+
+            int colCount = htmlCols.Count;
+
+            foreach (tRow _tRow in _tTable.tRows)
+            {
+                // database den gelen veriler
+                _colNo = t.myInt16(_tRow.tColumns[0].value.ToString());
+                _dbValue = _tRow.tColumns[2].value;
+
+                // html üzerindeki tablonun colonları
+                for (int i2 = 0; i2 < colCount; i2++)
+                {
+                    if (_colNo == i2)
+                    {
+                        //HtmlElement hCol = htmlCols[i2];
+                        IWebElement hCol = htmlCols[i2];
+
+                        //<input name="dgListele$ctl04$ab" id="dgListele_ctl04_chkOnayBekliyor" type="radio" checked="checked" value="chkOnayBekliyor">
+                        //<input name="dgListele$ctl04$ab" id="dgListele_ctl04_chkOnayDurum" type="radio" value="chkOnayDurum">
+
+                        dtyHtml = hCol.Text;// InnerHtml;
+
+                        if (dtyHtml.IndexOf("type=\"radio\"") > -1)
+                        {
+                            //dtyValue = hCol.Children[0].GetAttribute("value");
+                            dtyIdName = hCol.GetAttribute("id");//  Children[0].GetAttribute("id");
+                            dtyType = hCol.GetAttribute("type");  //Children[0].GetAttribute("type");
+
+                            if ((dtyType == "radio") && (_dbValue == "True"))
+                            {
+                                //wb.Document.GetElementById(dtyIdName).InvokeMember("click");
+                                wb.FindElement(By.Id(dtyIdName)).Click();
+                                break;
+                            }
+                        }
+
+                        if (dtyHtml.ToLower().IndexOf("selectedindex=") > -1)
+                        {
+                            //hCol.SetAttribute("selectedindex", _dbValue);
+
+                            // denemedim çalışmı çalışmaz mı bilmiyorum
+                            IJavaScriptExecutor js = (IJavaScriptExecutor)wb;
+                            js.ExecuteScript("arguments[0].selectedindex = '"+ _dbValue + "';", hCol);
+
+                            //v.SQL = v.SQL + v.ENTER + myNokta + " set selectedindex : " + _dbValue;
+                            break;
+                        }
+
+                        if (dtyHtml.IndexOf("select name=") > -1)
+                        {
+                            /* table içinde combo 
+                             * 
+                            <select name="dgListele$ctl04$cmbAracPlaka" class="frminput" id="dgListele_ctl04_cmbAracPlaka" style="color: black;">
+                               <option value="-1"></option>
+                               <option value="20ABJ177">20ABJ177</option>
+                               <option value="20ABJ334">20ABJ334</option>
+                               <option value="20BT473">20BT473</option>
+                            </select>
+                            */
+
+                            // yemiyor
+                            //hCol.SetAttribute("option value", _dbValue);
+
+
+                            //dtyIdName = hCol.Children[0].GetAttribute("id");
+                            dtyIdName = hCol.GetAttribute("id");
+                            if (dtyIdName != "")
+                            {
+                                //Seleniuma göre düzenle
+                                ////wb.Document.GetElementById(dtyIdName).SetAttribute("value", _dbValue);
+
+                                //v.SQL = v.SQL + v.ENTER + myNokta + " set value : " + _dbValue;
+                                break;
+                            }
+                        }
+
+                        if (dtyHtml.IndexOf("type=\"radio\"") == -1)
+                        {
+                            //Seleniuma göre düzenle
+                            //hCol.SetAttribute("value", _dbValue);
+                            //v.SQL = v.SQL + v.ENTER + myNokta + " set value : " + _dbValue;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        #endregion postHtmlTable
+
+
+        
+
+    }
+}

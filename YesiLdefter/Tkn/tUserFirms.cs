@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Tkn_SQLs;
 using Tkn_Registry;
 using Tkn_ToolBox;
 using Tkn_Variable;
@@ -16,12 +17,12 @@ namespace Tkn_UserFirms
     {
         tToolBox t = new tToolBox();
         tRegistry reg = new tRegistry();
+        tSQLs Sqls = new tSQLs();
 
         //DataSet dsUserFirmList = null;
         //DataNavigator dNUserFirmList = null;
         string FirmList_TableIPCode = "";
-        string tSql = " EXECUTE [dbo].[prc_UstadUserFirmsListeGet] ";
-
+       
         // User giriş yaptı, firma seçecek
         #region User Select Firms
 
@@ -99,6 +100,77 @@ namespace Tkn_UserFirms
             }
         }
 
+
+        public void UserTabimFirm(Form tForm, DataSet ds, string userKey)
+            //ref DataSet dsUserFirmList, ref DataNavigator dNUserFirmList, string firmList_TableIPCode)
+        {
+            if (t.IsNotNull(ds))
+            {
+                // Set User Values
+                //
+                int userId = t.myInt32(ds.Tables[0].Rows[0]["Ulas"].ToString());
+                // Surucu07.users tablosunun önceki bilgileri
+                v.tUser.UserId = userId;
+                v.tUser.IsActive = Convert.ToBoolean(ds.Tables[0].Rows[0]["AKTIF"].ToString());
+                v.tUser.Username_ = ds.Tables[0].Rows[0]["Username_"].ToString();
+                // Bunlar yesildefter tarafdından eklenen bilgiler
+                v.tUser.UserGUID = ds.Tables[0].Rows[0]["UserGUID"].ToString();
+                v.tUser.UserFirmGUID = ds.Tables[0].Rows[0]["FirmGUID"].ToString();
+                v.tUser.FullName = ds.Tables[0].Rows[0]["UserFullName"].ToString();
+                v.tUser.FirstName = ds.Tables[0].Rows[0]["UserFirstName"].ToString();
+                v.tUser.LastName = ds.Tables[0].Rows[0]["UserLastName"].ToString();
+                v.tUser.UserTcNo = ds.Tables[0].Rows[0]["UserTcNo"].ToString();
+                v.tUser.eMail = ds.Tables[0].Rows[0]["UserEMail"].ToString();
+                v.tUser.UserDbTypeId = t.myInt16(ds.Tables[0].Rows[0]["DbTypeId"].ToString());
+                v.tUser.MebbisCode = ds.Tables[0].Rows[0]["MebbisCode"].ToString();
+                v.tUser.MebbisPass = ds.Tables[0].Rows[0]["MebbisPass"].ToString();
+                
+                SetUserRegistry(userId);
+
+                //v.tUser.Key = u_db_user_key;
+                //v.tUser.UserDbTypeId = userDbTypeId;
+            }
+        }
+
+
+        public bool getFirmAboutWithUserFirmGUID(string firmGUID)
+        {
+            bool onay = false;
+            DataSet ds_Query = new DataSet();
+            string Sql = Sqls.Sql_UstadFirmsWithFirmGUID(v.tUser.UserFirmGUID);
+
+            t.SQL_Read_Execute(v.dBaseNo.UstadCrm, ds_Query, ref Sql, "UserFirmGUID", "FirmAbout");
+
+            if (t.IsNotNull(ds_Query))
+            {
+                /// tek firma geldiği için hangisiyle çalışacaksın diye sormak anlamsız olur
+                /// gerekli bilgileri al formu kapat, main formuna devam et
+                ///
+                if (ds_Query.Tables[0].Rows.Count == 1)
+                {
+                    ///
+                    /// kullanıcının bağlanabileceği firmaya ait bilgileri al
+                    /// 
+                    DataRow row = ds_Query.Tables[0].Rows[0];
+                    t.getFirmAbout(row, ref v.tMainFirm);
+                    onay = true;
+                }
+
+                // birden fazla firma varsa hangisiyle çalışacaksın diye sormak gerekiyor
+                // bu seferde sormazsan tuhaf olur
+                //
+                if (ds_Query.Tables[0].Rows.Count > 1)
+                {
+                    MessageBox.Show("DİKKAT : Kullanıcının FirmGUID bilgiyle birden fazla firma bilgisi geliyor...");
+                }
+            }
+
+            ds_Query.Dispose();
+
+            return onay;
+        }
+
+
         void SelectFirm(Form tForm, ref DataSet dsUserFirmList, ref DataNavigator dNUserFirmList)
         {
             /// evet geldik zurnanın zırt dediği yere
@@ -118,7 +190,7 @@ namespace Tkn_UserFirms
             /// 
 
             DataSet ds_Query = new DataSet();
-            string Sql = tSql + v.tUser.UserId.ToString();
+            string Sql = Sqls.Sql_prcUstadUserFirmsList() + v.tUser.UserId.ToString();
 
             t.SQL_Read_Execute(v.dBaseNo.UstadCrm, ds_Query, ref Sql, "UserFirmList", "FirmList");
 
@@ -164,7 +236,7 @@ namespace Tkn_UserFirms
             // 
             if (dsUserFirmList != null)
             {
-                string Sql = tSql + v.tUser.UserId.ToString();
+                string Sql = Sqls.Sql_prcUstadUserFirmsList() + v.tUser.UserId.ToString(); 
                 string myProp = string.Empty;
                 t.MyProperties_Set(ref myProp, "DBaseNo", "3");
                 t.MyProperties_Set(ref myProp, "TableName", "UstadFirms");
@@ -210,7 +282,9 @@ namespace Tkn_UserFirms
 
         public void readUstadFirmAbout(Form tForm, DataRow row)
         {
-            t.firmAboutAdd(row, ref v.tMainFirm);
+            /// UstadCrm den gelen Firmaya ait bilgileri v.tMainFirm üzerine oku
+            /// 
+            t.getFirmAbout(row, ref v.tMainFirm);
             ///
             /// kullınıcının çalışma yapabileceği firması
             ///

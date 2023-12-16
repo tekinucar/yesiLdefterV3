@@ -348,7 +348,7 @@ namespace YesiLdefter
                             tFileReadAndWrite(ds, dN, fieldSqlScript, fileName);
                         }
                     }
-                    t.FlyoutMessage(fileTypeName + " dosyalarını okuma ve database yazma", "İşlemler tamamlandı...");
+                    t.FlyoutMessage(null, fileTypeName + " dosyalarını okuma ve database yazma", "İşlemler tamamlandı...");
                 }
             }
         }
@@ -408,7 +408,7 @@ namespace YesiLdefter
 
                 if (onay)
                 {
-                    t.FlyoutMessage("Database : " + vt.DBaseName, "Bu isimde bir database mevcut ....");
+                    t.FlyoutMessage(this, "Database : " + vt.DBaseName, "Bu isimde bir database mevcut ....");
                 }
 
                 if (onay == false)
@@ -435,7 +435,7 @@ namespace YesiLdefter
                         if (onay)
                         {
                             //MessageBox.Show("Database ve Schema (Lkp) başarıyla açılmıştır ...");
-                            t.FlyoutMessage(":) Tebrikler...", "Database ve Schema (Lkp) başarıyla açılmıştır ...");
+                            t.FlyoutMessage(this, ":) Tebrikler...", "Database ve Schema (Lkp) başarıyla açılmıştır ...");
                         }
                     }
                 }
@@ -573,10 +573,10 @@ namespace YesiLdefter
                 DialogResult cevap = t.mySoru(soru);
                 if (DialogResult.Yes == cevap)
                 {
-                    onay = preparingCreateTable(dNTables.Position);
+                    onay = preparingCreateTable(dsTables, dNTables.Position, v.dBaseNo.NewDatabase);
 
                     if (onay)
-                        t.FlyoutMessage(tName, "Table oluşturuldu...");
+                        t.FlyoutMessage(this, tName, "Table oluşturuldu...");
                 }
             }
         }
@@ -601,76 +601,31 @@ namespace YesiLdefter
                     for (int i = 0; i < length; i++)
                     {
                         dNTables.Position = i;
-                        onay = preparingCreateTable(dNTables.Position);
+                        onay = preparingCreateTable(dsTables, dNTables.Position, v.dBaseNo.NewDatabase);
                     }
 
                     //--- çalışmıyor
                     //v.IsWaitOpen = false;
                     //t.WaitFormClose();
                     //----
-                    t.FlyoutMessage("Table oluşturma","İşlemler tamamlandı...");
+                    t.FlyoutMessage(this, "Table oluşturma","İşlemler tamamlandı...");
                 }
             }
         }
-        private bool preparingCreateTable(int pos)
+        private bool preparingCreateTable(DataSet ds, int pos, v.dBaseNo dBaseNo)  
         {
             bool onay = false;
-            string fileName = "";
-            string vSchemaName = "";
-            string vTableName = "";
-            string vParentTable = "";
-            //string vHasATrigger = "";
-            string vSqlScript = "";
+
             vTable vt = new vTable();
+            vt.DBaseNo = dBaseNo;
+            vt.SchemasCode = ds.Tables[0].Rows[pos][fSchemaName].ToString();
+            vt.TableName = ds.Tables[0].Rows[pos][fTableName].ToString();
+            vt.ParentTable = ds.Tables[0].Rows[pos][fParentTable].ToString();
+            vt.SqlScript = ds.Tables[0].Rows[pos][fSqlScript].ToString();
 
-            vSchemaName = dsTables.Tables[0].Rows[pos][fSchemaName].ToString();
-            vTableName = dsTables.Tables[0].Rows[pos][fTableName].ToString();
-            vParentTable = dsTables.Tables[0].Rows[pos][fParentTable].ToString();
-            //vHasATrigger = dsTables.Tables[0].Rows[pos][fHasATrigger].ToString();
-            vSqlScript = dsTables.Tables[0].Rows[pos][fSqlScript].ToString();
-
-            vt.DBaseNo = v.dBaseNo.NewDatabase;
-            vt.SchemasCode = vSchemaName;
-            vt.TableName = vTableName;
-
-            fileName = vTableName;
-            if (vSchemaName != "dbo")
-                fileName = vSchemaName + "_" + vTableName;
-
+            onay = db.preparingCreateTable(vt);
+            
             Application.DoEvents();
-
-            // parentTable olan tablolar başka bir tablonun Lkp tablolarıdır
-            // onlar kendisinin bağlı olduğu tablo içerisinde create ediliyorlar
-            // parentTable ismi olmayan Lkp_xxx tablolar ise bağımsız tablolardır
-            //
-            if ((vParentTable == "") && (t.IsNotNull(vSqlScript)))
-            {
-                v.active_DB.runDBaseNo = v.dBaseNo.NewDatabase;
-
-                // tablo var mı diye kontrol et
-                onay = db.tTableFind(fileName, vt);
-                
-                // tablo yok ise
-                if (onay == false)
-                {
-                    onay = db.tTableCreate(vSqlScript, vt);
-                }
-
-                // tablo oluşturuldu şimdi trigger leri oluşturalım
-                onay = false;
-                onay = db.tTriggerCreate(vSqlScript, vt);
-
-                // tablo oluşturuldu şimdi Lkp.xxxx tabloları oluşturalım
-                onay = false;
-                onay = db.tLkpTableCreate(vSqlScript, vt);
-
-
-                // tablo oluşturuldu şimdi dataları insert edelim
-                onay = false;
-                onay = db.tDataCreate(vSqlScript, vt);
-            }
-
-            Thread.Sleep(100);
 
             return onay;
         }
@@ -710,7 +665,7 @@ namespace YesiLdefter
                     //v.IsWaitOpen = false;
                     //t.WaitFormClose();
                     //----
-                    t.FlyoutMessage("Trigger oluşturma", "İşlemler tamamlandı...");
+                    t.FlyoutMessage(this, "Trigger oluşturma", "İşlemler tamamlandı...");
                 }
             }
         }
@@ -777,7 +732,7 @@ namespace YesiLdefter
                     onay = preparingCreateProcedure(dNProcedures.Position);
 
                     if (onay)
-                        t.FlyoutMessage(tName, "Procedure oluşturuldu...");
+                        t.FlyoutMessage(this, tName, "Procedure oluşturuldu...");
                 }
             }
         }
@@ -800,7 +755,7 @@ namespace YesiLdefter
                         onay = preparingCreateProcedure(dNProcedures.Position);
                         //if (onay == false) break;
                     }
-                    t.FlyoutMessage("Procedure oluşturma", "İşlemler tamamlandı...");
+                    t.FlyoutMessage(this, "Procedure oluşturma", "İşlemler tamamlandı...");
                 }
             }
         }
@@ -855,7 +810,7 @@ namespace YesiLdefter
                     onay = preparingCreateFunction(dNFunctions.Position);
 
                     if (onay)
-                        t.FlyoutMessage(tName, "Function oluşturuldu...");
+                        t.FlyoutMessage(this, tName, "Function oluşturuldu...");
 
                 }
             }
@@ -879,7 +834,7 @@ namespace YesiLdefter
                         onay = preparingCreateFunction(dNFunctions.Position);
                         //if (onay == false) break;
                     }
-                    t.FlyoutMessage("Function oluşturma", "İşlemler tamamlandı...");
+                    t.FlyoutMessage(this, "Function oluşturma", "İşlemler tamamlandı...");
                 }
             }
         }
@@ -963,7 +918,7 @@ namespace YesiLdefter
             {
                 bool onay = true;
 
-                //v.active_DB.runDBaseNo = v.dBaseNo.aktarilacakDatabase;
+                //v.active_DB.runDBaseNo = v.dBaseNo.aktrilacakDb;
 
                 string about = dsDataTransfer.Tables[0].Rows[dNDataTransfer.Position]["About"].ToString();
 
@@ -974,7 +929,7 @@ namespace YesiLdefter
                     onay = preparingTableDataTransfer(dNDataTransfer.Position);
 
                     if (onay)
-                        t.FlyoutMessage("[ " + about + " ]", "Data transferi gerçekleştirildi...");
+                        t.FlyoutMessage(this, "[ " + about + " ]", "Data transferi gerçekleştirildi...");
                 }
             }
 
@@ -1567,7 +1522,7 @@ namespace YesiLdefter
 
         private void preparingSourceVTable(vTable vt, string alias, string tableName)
         {
-            vt.DBaseNo = v.dBaseNo.aktarilacakDatabase;
+            vt.DBaseNo = v.dBaseNo.aktrilacakDb;
             vt.DBaseType = v.dBaseType.MSSQL;
             vt.DBaseName = v.source_DB.databaseName;
             vt.msSqlConnection = v.source_DB.MSSQLConn;
@@ -1848,7 +1803,7 @@ namespace YesiLdefter
                 if (v.source_DB.MSSQLConn != null)
                     v.source_DB.MSSQLConn.Close();
 
-                v.source_DB.dBaseNo = v.dBaseNo.NewDatabase;
+                v.source_DB.dBaseNo = v.dBaseNo.aktrilacakDb;  //NewDatabase;
                 v.source_DB.dBType = v.dBaseType.MSSQL;
                 v.source_DB.serverName = dsFirm.Tables[0].Rows[dNFirm.Position][sourceServerNameIP].ToString();
                 v.source_DB.databaseName = dsFirm.Tables[0].Rows[dNFirm.Position][sourcefDatabaseName].ToString();

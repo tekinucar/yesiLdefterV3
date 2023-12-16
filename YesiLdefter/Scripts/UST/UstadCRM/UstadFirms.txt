@@ -173,7 +173,8 @@ INSERT INTO [Lkp].[UstadFirmsSectorType] (Id, SectorType)
   ( 5,    N'Ustad Crm'),
   ( 201,  N'Mtsk'),
   ( 202,  N'İşmak'),
-  ( 203,  N'SRC')
+  ( 203,  N'SRC'),
+  ( 211,  N'TabimMtsk')
 
 
 -- ------------------------------------------------------- 

@@ -70,11 +70,14 @@ namespace YesiLdefter
                     ds.Tables[0].Rows[dN.Position]["DiskModel"] = v.tComputer.DiskDrive_Model.ToString();
                     ds.Tables[0].Rows[dN.Position]["DiskSerialNumber"] = v.tComputer.DiskDrive_SerialNumber.ToString();
 
+                    Application.DoEvents();
                     // kaydı aç
                     ds.Tables[0].CaseSensitive = false;
                     dN.Tag = dN.Position;
                     NavigatorButton btnEnd = dN.Buttons.EndEdit;
                     dN.Buttons.DoClick(btnEnd);
+
+                    this.Close();
                 }
             }
         }

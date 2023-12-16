@@ -9,6 +9,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Drawing;
 using System.Windows.Forms;
+//using OpenQA.Selenium;
 
 namespace Tkn_Variable
 {
@@ -29,10 +30,10 @@ namespace Tkn_Variable
             Manager = 2,
             UstadCrm = 3, 
             Project = 4,
-            WebCrm = 5,
+            Local = 5,
             NewDatabase = 6,
             publishManager = 7,
-            aktarilacakDatabase = 8
+            aktrilacakDb = 8,
         }
 
         public class DBTypes
@@ -47,25 +48,35 @@ namespace Tkn_Variable
 
                 managerDBaseNo = v.dBaseNo.Manager;
                 ustadCrmDBaseNo = v.dBaseNo.UstadCrm;
-                projectDBaseNo = v.dBaseNo.Project;
 
-                projectDBType = 0;
+                projectDBaseNo = v.dBaseNo.Project;
+                projectDBType = v.dBaseType.MSSQL;
                 projectServerName = "";
                 projectDBName = "";
                 projectUserName = "";
                 projectPsw = "";
                 projectConnectionText = "";
-            }
-            /// <summary>
-            /// runDBaseNo ile o anda hangi database üzerinde çalışacağı 
-            /// hakkında bilgi vermek/almak için kullanılıyor
-            /// Örnek : t.tTableFind() 
-            /// </summary>
-            public v.dBaseNo runDBaseNo { get; set; }
+
+                localDBaseNo = v.dBaseNo.Local;
+                localDBType = v.dBaseType.MSSQL;
+                localServerName = "";
+                localDBName = "";
+                localUserName = "";
+                localPsw = "";
+                localConnectionText = "";
+        }
+        /// <summary>
+        /// runDBaseNo ile o anda hangi database üzerinde çalışacağı 
+        /// hakkında bilgi vermek/almak için kullanılıyor
+        /// Örnek : t.tTableFind() 
+        /// </summary>
+        public v.dBaseNo runDBaseNo { get; set; }
             public bool mainManagerDbUses { get; set; }
+            //Tabim.Surucu07 için
+            public bool localDbUses { get; set; }
+
 
             //--- Manager Database
-
             public v.dBaseNo managerDBaseNo { get; set; }
             public v.dBaseType managerDBType { get; set; }
             public string managerServerName { get; set; }
@@ -94,6 +105,16 @@ namespace Tkn_Variable
             public string ustadCrmPsw { get; set; }
             public string ustadCrmConnectionText { get; set; }
             public SqlConnection ustadCrmMSSQLConn { get; set; }
+
+            //--- Local Database
+            public v.dBaseNo localDBaseNo { get; set; }
+            public v.dBaseType localDBType { get; set; }
+            public string localServerName { get; set; }
+            public string localDBName { get; set; }
+            public string localUserName { get; set; }
+            public string localPsw { get; set; }
+            public string localConnectionText { get; set; }
+            public SqlConnection localMSSQLConn { get; set; }
 
             //--- master Database
             public v.dBaseNo masterDBaseNo { get; set; }
@@ -165,6 +186,7 @@ namespace Tkn_Variable
 
 
         // picture nesnesi ile Save() functionu arasında veri taşıyıcı
+        //public static WebBrowser webMain = null;
         public static Form mainForm { get; set; }
 
         public static DevExpress.XtraScheduler.TimeRuler timeRuler = new TimeRuler();
@@ -234,6 +256,7 @@ namespace Tkn_Variable
         public static string sp_Sakla = string.Empty;
 
 
+        public static Boolean SP_TabimDbConnection = false;
         public static Boolean SP_UserIN = false;
         public static Boolean SP_UserLOGIN = true;
 
@@ -818,6 +841,7 @@ namespace Tkn_Variable
         // firma bilgileri
         // 
         public static int SP_FIRM_ID = 0;
+        public static Int16 SP_Firm_SectorTypeId = 0;
         // false olursa kullanıcı tek firmaya kullanabilir
         // true  olursa kullanıcı aynı anda birden fazla firma kullanabilir
         //
@@ -856,6 +880,7 @@ namespace Tkn_Variable
         #endregion
 
         #region Keys
+        
         public static Keys Key_Exit = Keys.Escape;
         public static Keys Key_YeniSatir = Keys.Insert;
 
@@ -881,7 +906,7 @@ namespace Tkn_Variable
         public static Keys Key_Next = Keys.Next;
         public static Keys Key_Prior = Keys.Prior;
         public static Keys Key_ExtraIslem = Keys.F16;
-
+        
         #endregion
 
         #region Navigator
@@ -1090,6 +1115,8 @@ namespace Tkn_Variable
         public static tUstadFirm tExternalFirm = new tUstadFirm();
         // user ın registere kaydedilen bilgileri
         public static tUserRegister tUserRegister = new tUserRegister();
+        // TabimMtsk kurs hakkindaki bilggiler
+        public static tTabimFirm tTabimFirm = new tTabimFirm();
 
         // Exe hakkında
         public static exeAbout tExeAbout = new exeAbout();
@@ -1106,12 +1133,12 @@ namespace Tkn_Variable
             load = 1, 
             displayNone = 2,
             buttonAlwaysSet = 140,
-            button1 = 141,
-            button2 = 142,
-            button3 = 143,
-            button4 = 144,
-            button5 = 145,
-            tableField = 146,
+            button3 = 143, //b1 : 141,
+            button4 = 144, //b2 : 142,
+            button5 = 145, //b3 : 143,
+            button6 = 146, //b4 : 144,
+            button7 = 147, //b5 : 145,
+            tableField = 148, //146,
             pageRefresh = 200
         }
 
@@ -1161,6 +1188,56 @@ namespace Tkn_Variable
 
     }
 
+    public class webWorkPageNodes
+    {
+        public webWorkPageNodes()
+        {
+            Clear();
+        }
+
+        public string aktifPageCode { get; set; } // o anda hangi pageCode için çalışıyor
+        public string nodeIdList { get; set; } // myTriggerList nin işini yapıyor
+
+        public void Clear()
+        {
+            aktifPageCode = "";
+            nodeIdList = "";
+        }
+
+    }
+    public class webForm
+    {
+        public webForm()
+        {
+            Clear();
+        }
+        public string aktifPageCode { get; set; }
+        public string talepEdilenUrl { get; set; }
+        public string talepEdilenUrl2 { get; set; }
+        public string talepOncesiUrl { get; set; }
+        public string errorPageUrl { get; set; }
+        public string loginPageUrl { get; set; }
+        public string aktifUrl { get; set; }
+        public string sessionIdAndToken { get; set; }
+
+        public Int16 talepPageLeft { get; set; }
+        public Int16 talepPageTop { get; set; }
+
+        public void Clear()
+        {
+            aktifPageCode = "";
+            talepEdilenUrl = "";
+            talepEdilenUrl2 = "";
+            talepOncesiUrl = "";
+            errorPageUrl = "";
+            loginPageUrl = "";
+            aktifUrl = "";
+            sessionIdAndToken = "";
+
+            talepPageLeft = 0;
+            talepPageTop = 0;
+        }
+    }
 
     public class vMsDbUpdate
     {
@@ -1230,6 +1307,7 @@ namespace Tkn_Variable
         public string MebbisCode { get; set; }
         public string MebbisPass { get; set; }
         public string UserTcNo { get; set; }
+        public string Username_ { get; set; } /* Tabim users dan gelen bilgi */
 
     }
     // firm/kullanıcının bağlanıp işlem yaptığı firma bilgileri
@@ -1249,6 +1327,7 @@ namespace Tkn_Variable
         public string DbAuthentication { get; set; }
         public string DbLoginName { get; set; }
         public string DbPassword { get; set; }
+        public Int16 DbTypeId { get; set; }
         public string MebbisCode { get; set; }
         public string MebbisPass { get; set; }
         public void Clear()
@@ -1260,8 +1339,41 @@ namespace Tkn_Variable
             MenuCode = "";
             MenuCodeOld = "";
             SectorTypeId = 0;
+            DbTypeId = 0;
             MebbisCode = "";
             MebbisPass = "";
+        }
+    }
+    // Surucu07
+    public class tTabimFirm
+    {
+        public tTabimFirm()
+        {
+            Clear();
+        }
+        public string KursunAdi { get; set; }
+        public string Adres1 { get; set; }
+        public string Adres2 { get; set; }
+        public string Telefon { get; set; }
+        public string KursMuduru { get; set; }
+        public string KurucuAdi { get; set; }
+        public string KursunKodu { get; set; }
+        public string MebbisKullaniciAdi { get; set; }
+        public string MebbisSifresi { get; set; }
+        public string FirmGUID { get; set; }
+
+        public void Clear()
+        {
+            KursunAdi = "";
+            Adres1 = "";
+            Adres2 = "";
+            Telefon = "";
+            KursMuduru = "";
+            KurucuAdi = "";
+            KursunKodu = "";
+            MebbisKullaniciAdi = "";
+            MebbisSifresi = "";
+            FirmGUID = "";
         }
     }
 
@@ -1270,6 +1382,7 @@ namespace Tkn_Variable
         public tUserRegister()
         {
             eMailList = new List<object>();
+            userNameList = new List<object>();
         }
         public int UserId { get; set; }
         public string eMail { get; set; }
@@ -1278,6 +1391,7 @@ namespace Tkn_Variable
         public string UserLastKey { get; set; }
         public int UserLastFirmId { get; set; }
         public List<object> eMailList { get; set; }
+        public List<object> userNameList { get; set; }
     }
 
     // exe hakkındaki bilgiler
@@ -1469,6 +1583,7 @@ namespace Tkn_Variable
         public webNodeValue()
         {
             elements = new List<HtmlElement>();
+            elementsSelenium = new List<OpenQA.Selenium.IWebElement>();
         }
 
         public webNodeValue Copy()
@@ -1478,6 +1593,7 @@ namespace Tkn_Variable
 
         public List<HtmlElement> elements { get; set; }
 
+        public List<OpenQA.Selenium.IWebElement> elementsSelenium { get; set; }
 
         public int nodeId { get; set; }
         public string pageCode { get; set; }
@@ -1697,6 +1813,9 @@ namespace Tkn_Variable
         public string ProjectCode { get; set; }
         public string SchemasCode { get; set; }
         public string FormCode { get; set; }
+        public string ParentTable { get; set; }
+        public string SqlScript { get; set; }
+
         public bool RunTime { get; set; }
         public bool IdentityInsertOnOff { get; set; } //IDENTITY_INSERT 
         public int FirmId { get; set; }
@@ -1718,6 +1837,7 @@ namespace Tkn_Variable
             ProjectCode = "";
             SchemasCode = "";
             FormCode = "";
+            ParentTable = "";
             RunTime = false;
             IdentityInsertOnOff = false;
             FirmId = 0;

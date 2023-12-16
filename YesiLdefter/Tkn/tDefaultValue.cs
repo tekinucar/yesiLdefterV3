@@ -78,7 +78,7 @@ namespace Tkn_DefaultValue
                 if (validation_err != "ROW_DELETE")
                 {
                     //MessageBox.Show(validation_err, "Veri Doğrulama - Validation");
-                    t.FlyoutMessage("Veri Doğrulama - Validation", validation_err);
+                    t.FlyoutMessage(tForm, "Veri Doğrulama - Validation", validation_err);
                 }
                 else
                 {
@@ -91,7 +91,7 @@ namespace Tkn_DefaultValue
             if (default_fill_err != string.Empty)
             {
                 if (default_fill_err.IndexOf("MasterTabloKayıtHatası") == -1)
-                    t.FlyoutMessage("Veri Doldurma - Default Value Fill", default_fill_err);
+                    t.FlyoutMessage(tForm, "Veri Doldurma - Default Value Fill", default_fill_err);
                 //MessageBox.Show(default_fill_err, "Veri Doldurma - Default Value Fill");
 
                 onay = false;

@@ -9,9 +9,7 @@ begin transaction
     Id                   Int IDENTITY(1,1) not null,
     IsActive             Bit               null,
     KitapNo              SmallInt          not null,
-	DersTipiId           SmallInt          null,  
-    EduMtskKonularId     Int               null,
-    EduMtskSorularId     Int               null,
+    SoruId               Int               null,
     SiraNo               SmallInt          null,  
     
    Constraint pk_EduMtskSoruKitabiDetayi primary key (Id)
@@ -24,6 +22,157 @@ begin transaction
 commit transaction
 
 
+CREATE trigger [dbo].[trg_EduMtskSoruKitabiDetayi] on [dbo].[EduMtskSoruKitabiDetayi]
+after insert, update
+as begin
+
+    declare cursor_EduMtskSoruKitabiDetayi cursor for select Id from Inserted
+    declare @curId bigint
+
+    OPEN cursor_EduMtskSoruKitabiDetayi
+
+    FETCH NEXT FROM cursor_EduMtskSoruKitabiDetayi INTO @curId
+	
+	declare @yKitapNo smallint = 0
+	declare @yDersTipiId smallint = 0
+	declare @DersTipiId_ smallint = 0
+	declare @ySoruId int = 0
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+		Select @yKitapNo = ins.KitapNo
+    	From Inserted ins
+    	Where ins.Id = @curId
+
+    	FETCH NEXT FROM cursor_EduMtskSoruKitabiDetayi INTO @curId
+    end -- While
+
+    Update EduMtskSoruKitabi set
+        SoruSayisi = x.Adet 
+    From EduMtskSoruKitabi as a,
+    (
+       Select KitapNo, count(Id) Adet from EduMtskSoruKitabiDetayi 
+       Where KitapNo = @yKitapNo
+       Group by KitapNo
+    ) as x
+     Where a.KitapNo = x.KitapNo
+
+    CLOSE cursor_EduMtskSoruKitabiDetayi
+    DEALLOCATE cursor_EduMtskSoruKitabiDetayi  
+	
+end -- trigger
+
+
+
+
+/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_EduMtskSoruKitabiDetayiOlustur] (@KitapNo int)  
+AS BEGIN
+
+  --declare @KitapNo int = 203
+
+  delete from EduMtskSoruKitabiDetayi 
+  where KitapNo = @KitapNo
+ 
+  -- 1	Trafik ve Çevre Dersi
+  INSERT INTO [dbo].[EduMtskSoruKitabiDetayi]
+           ([IsActive]
+           ,[KitapNo]
+           ,[SoruId]
+           ,[SiraNo])
+  Select TOP 23
+       [IsActive]
+      ,@KitapNo as KitapNo
+	  ,Id as [SoruId] 
+      ,0 as SiraNo
+  From [dbo].[EduMtskSorular]
+  where DersTipiId = 1
+  and   IsActive = 1
+  ORDER BY NEWID()
+
+
+  -- 2	İlkyardım Dersi
+  INSERT INTO [dbo].[EduMtskSoruKitabiDetayi]
+           ([IsActive]
+           ,[KitapNo]
+           ,[SoruId]
+           ,[SiraNo])
+  Select TOP 12
+       [IsActive]
+      ,@KitapNo as KitapNo
+	  ,Id as [SoruId] 
+      ,0 as SiraNo
+  From [dbo].[EduMtskSorular]
+  where DersTipiId = 2
+  and   IsActive = 1
+  ORDER BY NEWID()
+
+  -- 3	Araç Tekniği Dersi
+  INSERT INTO [dbo].[EduMtskSoruKitabiDetayi]
+           ([IsActive]
+           ,[KitapNo]
+           ,[SoruId]
+           ,[SiraNo])
+  Select TOP 9
+       [IsActive]
+      ,@KitapNo as KitapNo
+	  ,Id as [SoruId] 
+      ,0 as SiraNo
+  From [dbo].[EduMtskSorular]
+  where DersTipiId = 3
+  and   IsActive = 1
+  ORDER BY NEWID()
+
+  -- 5	Trafik Adabı Dersi
+  INSERT INTO [dbo].[EduMtskSoruKitabiDetayi]
+           ([IsActive]
+           ,[KitapNo]
+           ,[SoruId]
+           ,[SiraNo])
+  Select TOP 6
+       [IsActive]
+      ,@KitapNo as KitapNo
+	  ,Id as [SoruId] 
+      ,0 as SiraNo
+  From [dbo].[EduMtskSorular]
+  where DersTipiId = 5
+  and   IsActive = 1
+  ORDER BY NEWID()
+
+
+  Update EduMtskSoruKitabi set
+    SoruSayisi = x.Adet 
+  From EduMtskSoruKitabi as a,
+  (
+     Select KitapNo, count(Id) Adet from EduMtskSoruKitabiDetayi 
+     Where KitapNo = @kitapNo
+     Group by KitapNo
+  ) as x
+  Where a.KitapNo = x.KitapNo
+
+
+END -- procedure
+
+/*CreateProcedureEnd*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* **** iptal ***** */
 
 CREATE PROCEDURE [dbo].[prc_EduMtskSoruKitabiDetayiOlustur1] ( @kitapNo int )  
 AS BEGIN
@@ -173,77 +322,5 @@ AS BEGIN
 
 END -- procedure
 
-
-
-CREATE trigger [dbo].[trg_EduMtskSoruKitabiDetayi] on [dbo].[EduMtskSoruKitabiDetayi]
-after insert, update
-as begin
-
-    declare cursor_EduMtskSoruKitabiDetayi cursor for select Id from Inserted
-    declare @curId bigint
-
-    OPEN cursor_EduMtskSoruKitabiDetayi
-
-    FETCH NEXT FROM cursor_EduMtskSoruKitabiDetayi INTO @curId
-	
-	declare @yKitapNo smallint = 0
-	declare @yDersTipiId smallint = 0
-	declare @yEduMtskKonularId int = 0
-	declare @yEduMtskSorularId int = 0
-
-	declare @DersTipiId_ smallint = 0
-	declare @EduMtskKonularId_ int = 0
-	
-
-    WHILE @@FETCH_STATUS = 0
-    BEGIN
-	    set @yKitapNo = 0
-	    set @yDersTipiId = 0
-	    set @yEduMtskKonularId = 0
-	    set @yEduMtskSorularId = 0
-	    set @DersTipiId_ = 0
-	    set @EduMtskKonularId_ = 0
-
-		Select 
-             @yKitapNo = ins.KitapNo
-            ,@yDersTipiId = ins.DersTipiId
-	        ,@yEduMtskKonularId = ins.EduMtskKonularId
-	        ,@yEduMtskSorularId = ins.EduMtskSorularId
-    	From Inserted ins
-    	Where ins.Id = @curId
-
-		Select 
-             @DersTipiId_ = sr.DersTipiId
-	        ,@EduMtskKonularId_ = sr.EduMtskKonularId
-    	From EduMtskSorular as sr
-    	Where sr.Id = @yEduMtskSorularId
-		
-		if ((@yDersTipiId <> @DersTipiId_) or
-		    (@yEduMtskSorularId <> @EduMtskKonularId_))
-        begin
-            Update EduMtskSoruKitabiDetayi set
-			  DersTipiId = @DersTipiId_
-			 ,EduMtskKonularId = @EduMtskKonularId_
-			where Id = @curId
-
-            Update EduMtskSoruKitabi set
-              SoruSayisi = x.Adet 
-            From EduMtskSoruKitabi as a,
-            (
-               Select KitapNo, count(Id) Adet from EduMtskSoruKitabiDetayi 
-               Where KitapNo = @yKitapNo
-               Group by KitapNo
-            ) as x
-            Where a.KitapNo = x.KitapNo
-
-        end
-
-    	FETCH NEXT FROM cursor_EduMtskSoruKitabiDetayi INTO @curId
-    end -- While
-
-
-    CLOSE cursor_EduMtskSoruKitabiDetayi
-    DEALLOCATE cursor_EduMtskSoruKitabiDetayi  
-	
-end -- trigger
+/* ****** ptalin sonu ************* */
 

@@ -140,7 +140,7 @@ namespace YesiLdefter
                 cumleMsLayout = "";
                 cumleMsLayout = preparingInsertScript(masterCode);
 
-                //t.FlyoutMessage("Web Manager Database Update", "Insert paketler hazırlandı...");
+                //t.FlyoutMessage(this, "Web Manager Database Update", "Insert paketler hazırlandı...");
 
                 PaketiGonder();
             }
@@ -166,7 +166,7 @@ namespace YesiLdefter
             if (cumleMsLayout != "") 
                 t.runScript(v.dBaseNo.publishManager, cumleMsLayout);
             
-            t.FlyoutMessage("Web Manager Database Update", "Insert paketler gönderildi...");
+            t.FlyoutMessage(this, "Web Manager Database Update", "Insert paketler gönderildi...");
         }
 
 
