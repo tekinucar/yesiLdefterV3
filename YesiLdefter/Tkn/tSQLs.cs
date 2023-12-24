@@ -1304,8 +1304,6 @@ INSERT INTO [dbo].[SYS_UPDATES]
             */
         }
 
-
-
         public string Sql_MsExeUpdates_Insert()
         {
             return @"
@@ -1351,18 +1349,95 @@ INSERT INTO [dbo].[SYS_UPDATES]
  and [MsProjectTables].TableName = '" + tableName + "' " + @" ";
         }
 
-
         public string Sql_prcUstadUserFirmsList()
         {
             return @" EXECUTE [dbo].[prc_UstadUserFirmsListeGet] ";
         }
 
-
-
         public string Sql_DbUpdatesIdList()
         {
             // müşteri database
             return " Select MsDbUpdateId from DbUpdates ";
+        }
+
+        public string Sql_WebScrapingFieldsList(string pageCodes)
+        {
+            return @"
+        Select 
+          fieldsIP.WebScrapingPageCode
+        , fieldsIP.WebScrapingGetNodeId
+        , fieldsIP.WebScrapingGetColumnNo
+        , fieldsIP.WebScrapingSetNodeId
+        , fieldsIP.WebScrapingSetColumnNo
+        , fieldsIP.KRT_OPERAND_TYPE as KrtOperandType
+        , fieldsIP.SOFTWARE_CODE + '/' + 
+          fieldsIP.PROJECT_CODE + '/' +
+          fieldsIP.TABLE_CODE + '.' + fieldsIP.IP_CODE as TableIPCode 
+        , fields.FIELD_NAME as FieldName
+        , fields.FLOOKUP_FIELD as FLookUpField
+        , fields.FIELD_TYPE as FieldType
+
+        From MS_FIELDS_IP as fieldsIP
+          left outer join MS_FIELDS as fields on ( 
+            fieldsIP.SOFTWARE_CODE = fields.SOFTWARE_CODE and
+            fieldsIP.PROJECT_CODE = fields.PROJECT_CODE and
+            fieldsIP.TABLE_CODE = fields.TABLE_CODE and
+            fieldsIP.IP_CODE = fieldsIP.IP_CODE and
+            fieldsIP.FIELD_NO = fields.FIELD_NO )
+        Where 0 = 0 --fieldsIP.DEFAULT_TYPE = 25 or fieldsIP.DEFAULT_TYPE2 = 25)
+        and fieldsIP.WebScrapingPageCode <> ''
+        and fieldsIP.WebScrapingPageCode in (" + pageCodes + @")
+        order by fieldsIP.WebScrapingPageCode, 
+                 fieldsIP.WebScrapingGetNodeId,
+                 fieldsIP.WebScrapingGetColumnNo 
+            ";
+        }
+        public string Sql_WebScrapingFieldsListOld(string pageCodes)
+        {
+            return @"
+        Select 
+          fieldsIP.WebScrapingPageCode
+        , fieldsIP.WebScrapingGetNodeId
+        , fieldsIP.WebScrapingGetColumnNo
+        , fieldsIP.WebScrapingSetNodeId
+        , fieldsIP.WebScrapingSetColumnNo
+        , fieldsIP.KRT_OPERAND_TYPE
+        , fieldsIP.SOFTWARE_CODE + '/' + 
+          fieldsIP.PROJECT_CODE + '/' +
+          fieldsIP.TABLE_CODE + '.' + fieldsIP.IP_CODE as TableIPCode 
+        , fields.FIELD_NAME
+        , fields.FLOOKUP_FIELD
+        , fields.FIELD_TYPE
+
+        From MS_FIELDS_IP as fieldsIP
+          left outer join MS_FIELDS as fields on ( 
+            fieldsIP.SOFTWARE_CODE = fields.SOFTWARE_CODE and
+            fieldsIP.PROJECT_CODE = fields.PROJECT_CODE and
+            fieldsIP.TABLE_CODE = fields.TABLE_CODE and
+            fieldsIP.IP_CODE = fieldsIP.IP_CODE and
+            fieldsIP.FIELD_NO = fields.FIELD_NO )
+        Where 0 = 0 --fieldsIP.DEFAULT_TYPE = 25 or fieldsIP.DEFAULT_TYPE2 = 25)
+        and fieldsIP.WebScrapingPageCode <> ''
+        and fieldsIP.WebScrapingPageCode in (" + pageCodes + @")
+        order by fieldsIP.WebScrapingPageCode, 
+                 fieldsIP.WebScrapingGetNodeId,
+                 fieldsIP.WebScrapingGetColumnNo 
+            ";
+        }
+
+        public string Sql_WebNodeItemsList(string pageCodes)
+        {
+            return @"
+            Select 
+              [Id]
+             ,[NodeId]
+             ,[PageCode]
+             ,[IsActive]
+             ,[ItemValue]
+             ,[ItemText]
+             From   [MsWebNodeItems]
+             Where  [PageCode] in (" + pageCodes + @") 
+             order by NodeId, ItemValue ";
         }
 
         #endregion ManagerServer Tables SQLs Preparing

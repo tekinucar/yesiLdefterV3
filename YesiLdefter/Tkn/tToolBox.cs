@@ -1148,7 +1148,12 @@ namespace Tkn_ToolBox
                 if ((tableName != "GROUPS") &&
                     (SQL.IndexOf("[Lkp]") == -1))
                 {
-                    TableRemove(dsData);
+                    // TableRemove daha önce çalışmıyormuş
+                    // şimdi çalışmaya başladı
+                    // bu seferde silmemesi gerekenleride siliyor
+                    // ne zaman silecek doğru tespit et
+                    // 2023.12.24
+                    //TableRemove(dsData);
                 }
 
                 // 1. adım

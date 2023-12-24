@@ -13,6 +13,8 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <TargetFrameworkProfile />
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
     <PublishUrl>C:\yesiLdefterPaket\</PublishUrl>
     <Install>false</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -36,8 +38,6 @@
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -169,6 +169,7 @@
     <Compile Include="Codes\CihazLogs.cs" />
     <Compile Include="Entities\MsWebNode.cs" />
     <Compile Include="Entities\MsWebPage.cs" />
+    <Compile Include="Entities\MsWebScrapingDbFields.cs" />
     <Compile Include="Forms\ms_Computer.cs">
       <SubType>Form</SubType>
     </Compile>

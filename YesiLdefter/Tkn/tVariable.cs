@@ -1197,11 +1197,21 @@ namespace Tkn_Variable
 
         public string aktifPageCode { get; set; } // o anda hangi pageCode için çalışıyor
         public string nodeIdList { get; set; } // myTriggerList nin işini yapıyor
-
+        public string tableIPCode { get; set; }
+        public bool siraliIslem { get; set; }
+        public bool siraliIslemAktif { get; set; }
+        public DataSet aktif_ds = null;
+        public DataNavigator aktif_dN = null;
+        
         public void Clear()
         {
             aktifPageCode = "";
             nodeIdList = "";
+            tableIPCode = "";
+            siraliIslem = false;
+            siraliIslemAktif = false;
+            aktif_ds = null;
+            aktif_dN = null;
         }
 
     }
@@ -1613,7 +1623,7 @@ namespace Tkn_Variable
         public v.tWebEventsType EventsType { get; set; }
         public v.tWebInjectType InjectType { get; set; } 
         public v.tWebInvokeMember InvokeMember { get; set; }
-
+        public bool IsInvoke { get; set; }
         public v.tWebEventsType workEventsType { get; set; } // kod çalırken işe göre atanıyor
         public v.tWebRequestType workRequestType { get; set; } // kod çalırken işe göre atanıyor
 
@@ -1630,6 +1640,9 @@ namespace Tkn_Variable
         public Int16 dbFieldType { get; set; }
         public bool DontSave { get; set; }
         public bool GetSave { get; set; }
+
+        public DataSet ds { get; set; }
+        public DataNavigator dN { get; set; }
         public void Clear()
         {
             nodeId = 0;
@@ -1648,7 +1661,8 @@ namespace Tkn_Variable
             EventsType = v.tWebEventsType.none;
             InjectType = v.tWebInjectType.none;
             InvokeMember = v.tWebInvokeMember.none;
-            
+            IsInvoke = false;
+
             workRequestType = v.tWebRequestType.none;
             workEventsType = v.tWebEventsType.none;
 
@@ -1663,6 +1677,33 @@ namespace Tkn_Variable
             dbFieldType = 0;
             DontSave = false;
             GetSave = false;
+
+            ds = null; // o anda işlem yapılan dataset 
+            dN = null; //   ve datanavigator
+        }
+    }
+
+    public class webNodeItemsList
+    {
+        public webNodeItemsList()
+        {
+            Clear();
+        }
+
+        public int Id { get; set; }
+        public int NodeId { get; set; }
+        public string PageCode { get; set; }
+        public bool IsActive { get; set; }
+        public string ItemValue { get; set; }
+        public string ItemText { get; set; }
+        public void Clear()
+        {
+            Id = 0;
+            NodeId = 0;
+            PageCode = "";
+            IsActive = false;
+            ItemValue = "";
+            ItemText = "";
         }
     }
 
@@ -2047,7 +2088,6 @@ namespace Tkn_Variable
             parentObject = "";
         }
     }
-
 
     public class vResimEditor
     {

@@ -62,7 +62,11 @@ namespace YesiLdefter
         IWebDriver webMain = null;
 
         List<MsWebPage> msWebPage_ = null;
+        List<MsWebPage> msWebPages_ = null;
         List<MsWebNode> msWebNodes_ = null;
+        List<MsWebScrapingDbFields> msWebScrapingDbFields_ = null;
+        List<webNodeItemsList> aktifPageNodeItemsList_ = null;
+
         webWorkPageNodes workPageNodes_ = new webWorkPageNodes();
 
         webForm f = new webForm();
@@ -84,6 +88,11 @@ namespace YesiLdefter
         {
             MsWebPagesButtonsPreparing();
             MsWebNodesButtonsPreparing();
+
+            // scraping ilişkisi olan TableIPCode ve ilgili fieldler
+            // 
+            this.msWebScrapingDbFields_ = msPagesService.readScrapingTablesAndFields(this.msWebPages_);
+            msPagesService.checkedSiraliIslemVarmi(this, this.workPageNodes_, this.msWebScrapingDbFields_);
         }
         private void preparingWebMain()
         {
@@ -117,6 +126,7 @@ namespace YesiLdefter
             {
 
                 dN_MsWebPages.PositionChanged += new System.EventHandler(dNScrapingPages_PositionChanged);
+                preparingMsWebPages();
                 preparingMsWebNodesFields();
 
                 /// simpleButton_ek1 :  line get  / pageView
@@ -307,13 +317,20 @@ namespace YesiLdefter
         {
             preparingMsWebNodesFields();
         }
+        private void preparingMsWebPages()
+        {
+            this.msWebPages_ = t.RunQueryModels<MsWebPage>(ds_MsWebPages);
+        }
         private void preparingMsWebNodesFields()
         {
             this.msWebPage_ = t.RunQueryModelsSingle<MsWebPage>(ds_MsWebPages, dN_MsWebPages.Position);
             this.msWebNodes_ = t.RunQueryModels<MsWebNode>(ds_MsWebNodes);
             this.workPageNodes_.aktifPageCode = this.msWebPage_[0].PageCode;
-            
+            msPagesService.checkedSiraliIslemVarmi(this, this.workPageNodes_, this.msWebScrapingDbFields_);
         }
+
+        
+        
 
         #endregion Form preparing
         /// 
@@ -409,28 +426,152 @@ namespace YesiLdefter
                 // kontrolleri
                 onay = requestContol(item, workRequestType, workEventsType);
 
-                // 4. adım 
-                //
-                // WebScrapingAsync öncesi (set için) yapılacak işler
+                // PageRefresh satırımı kontrol ediliyor
+                // pageRefresh ise sub functionda çalışsın ve false dönsün
+                // true dönerse pageRefresh değil işleme devam et
+                onay = await pageRefresh(webMain, item);
 
-                // 5. adım scraping
-                // WebScrapingAsync
-                //
+
                 if (onay)
                 {
                     webNodeValue wnv = new webNodeValue();
                     wnv.workRequestType = workRequestType;
                     wnv.pageCode = workPageNodes.aktifPageCode;
                     msPagesService.nodeValuesPreparing(item, ref wnv);
-                    await WebScrapingAsync(webMain, wnv);
-                }
-                
-                // 4. adım
-                // WebScrapingAsync sonrası (get için ) yapılacak işler
 
+                    // 4. adım 
+                    //
+                    // WebScrapingAsync öncesi (set için) yapılacak işler
+                    await WebScrapingBefore(wnv);
+
+
+                    // 5. adım scraping
+                    // WebScrapingAsync
+                    //
+                    await WebScrapingAsync(webMain, wnv);
+
+
+                    // 4. adım
+                    //
+                    // WebScrapingAsync sonrası (get için ) yapılacak işler
+                    await WebScrapingAfter(wnv);
+                }
             }
         }
-        
+
+        private async Task<bool> pageRefresh(IWebDriver wb, MsWebNode item)
+        {
+            bool onay = true;
+            //if (this.myTriggerPageRefresh == false)
+            //{
+            //    this.myTriggerPageRefresh = true;
+            //    this.myTriggerPageRefreshTick = true;
+            //    v.SQL = v.SQL + v.ENTER + myNokta + " Page Refresh : start";
+            if (item.PageRefresh == true)
+            {
+                await myPageViewClickAsync(wb, this.msWebPage_);
+                // onay satırı (item) burda çalıştı, dönüşte tekrar çalışmasın diye false olarak geri dönüyor
+                onay = false;
+            }
+            //    v.SQL = v.SQL + v.ENTER + myNokta + " Page Refresh : END";
+            //    t.ReadyComplate(2000);
+            //}
+            return onay; 
+        }
+
+        private async Task WebScrapingBefore(webNodeValue wnv)
+        {
+            // database deki veriyi web e aktar için 
+            // db deki veriyi wnv.writeValue üzerine aktar
+            
+            if (wnv.InjectType == v.tWebInjectType.Set ||
+                wnv.InjectType == v.tWebInjectType.AlwaysSet ||
+               (wnv.InjectType == v.tWebInjectType.GetAndSet && wnv.workRequestType == v.tWebRequestType.post))
+            {
+                if (wnv.TagName != "table")
+                    msPagesService.transferFromDatabaseToWeb(this, wnv, msWebScrapingDbFields_);
+
+                if (wnv.TagName == "table")
+                {
+                    /// webe transfer edilecek tablonun field bilgilerini databaseden al
+                    if (wnv.tTable == null)
+                    {
+                //        this.myTriggeringTable = false;
+                //        this.myTriggerTableWnv = null;
+                //        this.myTriggeringItemButton = false;
+                //        this.myTriggerTableCount = 0;
+                //        this.myTriggerTableRowNo = 0;
+
+                       msPagesService.findRightDbTables(wnv, msWebScrapingDbFields_);
+                    }
+                }
+            }
+            
+        }
+        private async Task WebScrapingAfter(webNodeValue wnv)
+        {
+            //  web deki veriyi database aktar
+            //  webden alınan veriyi (readValue yi)  db ye aktar
+
+            if ((wnv.InjectType == v.tWebInjectType.Get ||
+                (wnv.InjectType == v.tWebInjectType.GetAndSet && wnv.workRequestType == v.tWebRequestType.get)) &&
+                (wnv.IsInvoke == false)) //(this.myTriggerInvoke == false)) // invoke gerçekleşmişse hiç başlama : get sırasında set edip bilgi çağrılıyor demekki
+            {
+                if (wnv.TagName != "table")
+                    msPagesService.transferFromWebToDatabase(this, wnv, msWebScrapingDbFields_, aktifPageNodeItemsList_);
+
+                if (wnv.TagName == "table")
+                {
+                    /// okunan tabloyu db ye yaz
+                    if (wnv.tTable != null)
+                    {
+                        ////https://mebbis.meb.gov.tr/SKT/skt02006.aspx
+                        //if (webMain.Url.ToString() == "https://mebbis.meb.gov.tr/SKT/skt02006.aspx")
+                        //{
+                        //    vUserInputBox iBox = new vUserInputBox();
+                        //    iBox.Clear();
+                        //    iBox.title = "Kaydın başlamasını istediğiniz sıra no";
+                        //    iBox.promptText = "Sıra No  :";
+                        //    iBox.value = "1";
+                        //    iBox.displayFormat = "";
+                        //    iBox.fieldType = 0;
+
+                        //    // ınput box ile sorulan ise kimden kopyalanacak (old) bilgisi
+                        //    if (t.UserInpuBox(iBox) == DialogResult.OK)
+                        //    {
+                        //        this.kayitBaslangisId = int.Parse(iBox.value);
+                        //    }
+                        //}
+                        //v.con_EditSaveCount = 0;
+                        //this.myTriggeringTable = true;
+                        //this.myTriggerTableWnv = null;
+                        //this.myTriggerTableWnv = wnv.Copy();
+
+                        //this.myTriggeringItemButton = false;
+                        //this.myTriggerTableCount = wnv.tTable.tRows.Count;
+                        //this.myTriggerTableRowNo = 0;
+
+                        webNodeValue myTriggerTableWnv = wnv.Copy();
+
+                        msPagesService.transferFromWebTableToDatabase(this, myTriggerTableWnv, msWebNodes_, msWebScrapingDbFields_, aktifPageNodeItemsList_);
+                    }
+                }
+
+                if (wnv.TagName == "select")
+                {
+                    /// okunan tabloyu db ye yaz
+                    if (wnv.tTable != null)
+                    {
+                        if (wnv.tTable.tRows.Count > 0)
+                        {
+                            /// select node ye ait (value, text) listesinide ilgili tabloya yaz
+                            msPagesService.transferFromWebSelectToDatabase(this, wnv, msWebScrapingDbFields_, aktifPageNodeItemsList_);
+                            //MessageBox.Show("İşlem tamamlandı...");
+                        }
+                    }
+                }
+            }
+        }
         private bool listControl(MsWebNode item, webWorkPageNodes workPageNodes)
         {
             // 1. aktif mi
@@ -735,9 +876,9 @@ namespace YesiLdefter
                    (injectType == v.tWebInjectType.GetAndSet && workRequestType == v.tWebRequestType.post))
                 {
                     //this.myDocumentCompleted = false;
-                    //this.myTriggerInvoke = true;
+                    //this.myTriggerInvoke = true;           <<<< gerek kalmadı
                     //timerTrigger.Enabled = false;
-                    await invokeMemberExec(wb, invokeMember, writeValue, idName);
+                    await invokeMemberExec(wb, wnv, invokeMember, writeValue, idName);
                 }
             }
             
@@ -837,9 +978,10 @@ namespace YesiLdefter
                         if (f.talepOncesiUrl == f.aktifUrl)
                         {
                             loadPage(wb, f.talepEdilenUrl);
-                            /* silme doğru sayfa burdan devam ediyor
-                                                        if (t.IsNotNull(this.aktifPageCode))
-                                                            readNodeItems(this.aktifPageCode);  */
+                            
+                            // nodenin içindeki itemValue ve itemText listesi (combo içerikleri)
+                            if (t.IsNotNull(f.aktifPageCode))
+                                aktifPageNodeItemsList_ = msPagesService.readNodeItems(f.aktifPageCode);
                         }
                     }
                     else
@@ -882,7 +1024,6 @@ namespace YesiLdefter
                 return;
             }
         }
-
         private void displayNone(IWebDriver wb, string tagName, string idName, string XPath, string InnerText)
         {
             if (t.IsNotNull(idName))
@@ -1206,7 +1347,7 @@ namespace YesiLdefter
             return readValue;
             #endregion
         }
-        private async Task invokeMemberExec(IWebDriver wb, v.tWebInvokeMember invokeMember, string writeValue, string idName)
+        private async Task invokeMemberExec(IWebDriver wb, webNodeValue wnv, v.tWebInvokeMember invokeMember, string writeValue, string idName)
         {
             string invoke = "";
 
@@ -1257,6 +1398,8 @@ namespace YesiLdefter
                             IList<IWebElement> optionElements = element.FindElements(By.TagName("option"));
                             optionElements.FirstOrDefault(x => x.Text == writeValue)?.Click();
                         }
+                        
+                        wnv.IsInvoke = true; // invoke çalıştı
                     }
                     Thread.Sleep(1000);
                     Application.DoEvents();
@@ -1284,130 +1427,122 @@ namespace YesiLdefter
             wnv.tTable = null;
 
             IWebElement htmlTable = wb.FindElement(By.Id(idName));
-            //HtmlElement htmlTable = wb.Document.GetElementById(idName);
-
+            
             if (htmlTable == null) return;
 
-            // okunacak table içinde pages tables var mı kontrol etmek gerekiyor
-            // 
-            //this.htmlTablePages = null;
-            //this.selectedTablePageNo = 0;
+            IList<IWebElement> htmlRows = htmlTable.FindElements(By.TagName("tr"));
+            
+            int rowCount = htmlRows.Count;
+            int colCount = 0;
+            int pos = 0;
+            string name = "";
+            string value = "";
+            string dtyHtml = "";
 
-            //////// burası seleniuma göre düzenlenmesi gerekiyor
+            tTable _tTable = new tTable();
+            
+            for (int i = 1; i < rowCount; i++)
+            {
+                IWebElement hRow = htmlRows[i];
 
-            //if (areThereTablePages(htmlTable))
-            //{
-            //    this.tablePageName = idName;
-            //    this.tablePageUrl = wb.Url.ToString();
-            //}
+                name = hRow.GetAttribute("name");
 
-            //HtmlElementCollection htmlRows = htmlTable.GetElementsByTagName("tr");
-            //int rowCount = htmlRows.Count;
-            //int colCount = 0;
-            //int pos = 0;
-            //string value = "";
-            //string html = "";
+                if (name != "pages")
+                {
+                    tRow _tRow = new tRow();
 
-            //string dtyHtml = "";
-            //string dtyValue = "";
-            //string dtyIdName = "";
-            //string dtyType = "";
+                    IList<IWebElement> htmlCols = hRow.FindElements(By.TagName("td"));
+                    colCount = htmlCols.Count;
 
-            //tTable _tTable = new tTable();
+                    for (int i2 = 0; i2 < colCount; i2++)
+                    {
+                        value = "";
 
-            ////for (int i = 0; i < rowCount; i++)
-            //for (int i = 1; i < rowCount; i++)
-            //{
-            //    HtmlElement hRow = htmlRows[i];
+                        IWebElement hCol = htmlCols[i2];
 
-            //    if (hRow.Name != "pages")
-            //    {
-            //        tRow _tRow = new tRow();
+                        // <input name="dgListele$ctl04$ab" id="dgListele_ctl04_chkOnayBekliyor" type="radio" checked="checked" value="chkOnayBekliyor">
+                        // <input name="dgListele$ctl04$ab" id="dgListele_ctl04_chkOnayDurum" type="radio" value="chkOnayDurum">
+                        dtyHtml = hCol.GetAttribute("innerHTML");
 
-            //        HtmlElementCollection htmlCols = hRow.GetElementsByTagName("td");
-            //        colCount = htmlCols.Count;
+                        if (dtyHtml.IndexOf("type=\"radio\"") > -1)
+                        {
+                            //hCol.Click();  get sırasında neden click yapmışım ?
+                        }
 
-            //        for (int i2 = 0; i2 < colCount; i2++)
-            //        {
-            //            HtmlElement hCol = htmlCols[i2];
+                        if (hCol.Text != null)
+                        {
+                            value = hCol.Text.Trim();
+                        }
+                        else
+                        {
+                            // <img onmouseover="this.src="/images/toolimages/open_kucuk_a.gif";this.style.cursor="hand";" 
+                            // onmouseout="this.src="/images/toolimages/open_kucuk.gif";this.style.cursor="default";" 
+                            // onclick="fnIslemSec("99969564|01/08/2017|NMZVAN93C15010059");" 
+                            // src="/images/toolimages/open_kucuk.gif">
 
-            //            // <input name="dgListele$ctl04$ab" id="dgListele_ctl04_chkOnayBekliyor" type="radio" checked="checked" value="chkOnayBekliyor">
-            //            // <input name="dgListele$ctl04$ab" id="dgListele_ctl04_chkOnayDurum" type="radio" value="chkOnayDurum">
+                            pos = -1;
+                            dtyHtml = hCol.GetAttribute("outerHTML");
+                            pos = dtyHtml.IndexOf("onclick");
 
-            //            //HtmlElementCollection kDetay = kolon.Children;
-            //            dtyHtml = hCol.InnerHtml;
+                            // <td align="center" style="width: 30px;">
+                            // <a href="javascript:__doPostBack('dgIstekOnaylanan','Select$0')">
+                            // <img title="Aç" onmouseover="this.src='/images/toolimages/open_kucuk_a.gif';this.style.cursor='pointer';" onmouseout="this.src='/images/toolimages/open_kucuk.gif';this.style.cursor='default';" src="/images/toolimages/open_kucuk.gif">
+                            // </a></td>                        
 
-            //            //dtyAhref = hCol.Children[0].GetAttribute("href");  << çalışıyor 
-            //            //dtySrc = hCol.Children[0].GetAttribute("src");     << çalışmıyor
+                            if (pos == -1) // 
+                                pos = dtyHtml.IndexOf("__doPostBack(");
 
-            //            if (dtyHtml.IndexOf("type=\"radio\"") > -1)
-            //            {
-            //                //dtyValue = hCol.Children[0].GetAttribute("value");
-            //                dtyValue = hCol.Children[0].GetAttribute("");
-            //                dtyIdName = hCol.Children[0].GetAttribute("id");
-            //                dtyType = hCol.Children[0].GetAttribute("type");
-            //                if (dtyType == "radio")
-            //                {
-            //                    wb.Document.GetElementById(dtyIdName).InvokeMember("click");
-            //                }
-            //            }
+                            if (pos > -1)
+                            {
+                                //   /images/toolimages/open_kucuk.gif
 
-            //            if (hCol.InnerText != null)
-            //            {
-            //                value = hCol.InnerText.Trim();
-            //            }
-            //            else
-            //            {
-            //                // <img onmouseover="this.src="/images/toolimages/open_kucuk_a.gif";this.style.cursor="hand";" 
-            //                // onmouseout="this.src="/images/toolimages/open_kucuk.gif";this.style.cursor="default";" 
-            //                // onclick="fnIslemSec("99969564|01/08/2017|NMZVAN93C15010059");" 
-            //                // src="/images/toolimages/open_kucuk.gif">
+                                //html = hCol.OuterHtml.Remove(0, hCol.OuterHtml.IndexOf(" src=") + 6);
+                                //value = html.Remove(html.IndexOf(">") - 1);
+                                value = dtyHtml.Remove(0, dtyHtml.IndexOf(" src=") + 6);
+                                value = value.Remove(dtyHtml.IndexOf(">") - 1);
+                            }
+                            else value = "";
+                        }
 
-            //                pos = -1;
-            //                pos = hCol.OuterHtml.IndexOf("onclick");
+                        // Add column
+                        tColumn _tColumn = new tColumn();
+                        _tColumn.value = value;
+                        _tRow.tColumns.Add(_tColumn);
+                    }
 
-            //                // <td align="center" style="width: 30px;">
-            //                // <a href="javascript:__doPostBack('dgIstekOnaylanan','Select$0')">
-            //                // <img title="Aç" onmouseover="this.src='/images/toolimages/open_kucuk_a.gif';this.style.cursor='pointer';" onmouseout="this.src='/images/toolimages/open_kucuk.gif';this.style.cursor='default';" src="/images/toolimages/open_kucuk.gif">
-            //                // </a></td>                        
+                    // Add row
+                    if (_tRow.tColumns.Count > 0)
+                    {
+                        if (_tRow.tColumns[0].value != "pages")
+                            _tTable.tRows.Add(_tRow);
+                    }
+                }
 
-            //                if (pos == -1) // 
-            //                    pos = hCol.OuterHtml.IndexOf("__doPostBack(");
+            }
+            // Add table
+            wnv.tTable = _tTable;
 
-            //                if (pos > -1)
-            //                {
-            //                    //value = hCol.GetAttribute("src");
-            //                    //System.Windows.Forms.HtmlDocument doc = preparingHtmlDocument(hCol.OuterHtml);
-            //                    //value = doc.GetElementsByTagName("img")[0].GetAttribute("src");
+/*
+            // Grab the table
+            WebElement table = driver.findElement(By.id("searchResultsGrid"));
 
-            //                    //   /images/toolimages/open_kucuk.gif
+            // Now get all the TR elements from the table
+            List<WebElement> allRows = table.findElements(By.tagName("tr"));
 
-            //                    html = hCol.OuterHtml.Remove(0, hCol.OuterHtml.IndexOf(" src=") + 6);
-            //                    value = html.Remove(html.IndexOf(">") - 1);
-            //                }
-            //                else value = "";
-            //            }
-            //            tColumn _tColumn = new tColumn();
-            //            _tColumn.value = value;
-            //            _tRow.tColumns.Add(_tColumn);
-            //        }
+            // And iterate over them, getting the cells
+            for (WebElement row : allRows)
+            {
+                List<WebElement> cells = row.findElements(By.tagName("td"));
+                for (WebElement cell : cells)
+                {
+                    // Do something with the cell
+                }
+            }
+*/
 
-            //        if (_tRow.tColumns.Count > 0)
-            //        {
-            //            if (_tRow.tColumns[0].value != "pages")
-            //                _tTable.tRows.Add(_tRow);
-            //        }
 
-            //    }
-
-            //    if (hRow.Name == "pages")
-            //    {
-            //        //işlem yapma
-            //    }
-            //}
-
-            //wnv.tTable = _tTable;
         }
+
         // table içinde sayfalar var mı ?
         private bool areThereTablePages(HtmlElement htmlTable)
         {
@@ -1619,7 +1754,7 @@ namespace YesiLdefter
                         //<input name="dgListele$ctl04$ab" id="dgListele_ctl04_chkOnayBekliyor" type="radio" checked="checked" value="chkOnayBekliyor">
                         //<input name="dgListele$ctl04$ab" id="dgListele_ctl04_chkOnayDurum" type="radio" value="chkOnayDurum">
 
-                        dtyHtml = hCol.Text;// InnerHtml;
+                        dtyHtml = hCol.GetAttribute("innerHTML");
 
                         if (dtyHtml.IndexOf("type=\"radio\"") > -1)
                         {

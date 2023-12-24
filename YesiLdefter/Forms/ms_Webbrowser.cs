@@ -186,7 +186,9 @@ namespace YesiLdefter
         v.tWebEventsType loadBeforeEventsType = v.tWebEventsType.none;
 
         List<MsWebPage> msWebPage = null;
+        List<MsWebPage> msWebPages = null;
         List<MsWebNode> msWebNodes = null;
+        List<MsWebScrapingDbFields> msWebScrapingFields = null;
 
         webForm f = new webForm();
 
@@ -214,7 +216,12 @@ namespace YesiLdefter
 
             // scraping ilişkisi olan TableIPCode ve ilgili fieldler
             // 
-            readScrapingTables();
+            this.msWebScrapingFields = msPagesService.readScrapingTablesAndFields(this.msWebPages);
+            
+            // gerekli düzeltmeleri yapınca bunu sil gerek kalmayacak
+            //
+            ds_ScrapingDbConnectionList = msPagesService.readScrapingTablesAndFieldsOld(this.msWebPages);
+
 
             v.SQL = "";
             timerTrigger.Interval = 2000;
@@ -286,6 +293,7 @@ namespace YesiLdefter
             if (t.IsNotNull(ds_MsWebPages))
             {
                 dN_MsWebPages.PositionChanged += new System.EventHandler(dNScrapingPages_PositionChanged);
+                preparingMsWebPages();
                 preparingMsWebNodesFields();
             }
 
@@ -433,6 +441,7 @@ namespace YesiLdefter
             if (t.IsNotNull(ds_MsWebPages))
             {
                 dN_MsWebPages.PositionChanged += new System.EventHandler(dNScrapingPages_PositionChanged);
+                preparingMsWebPages();
                 preparingMsWebNodesFields();
 
                 /// simpleButton_ek1 :  line get   / pageView
@@ -556,12 +565,15 @@ namespace YesiLdefter
             this.dN_DbaseSiraliTable = null;
         }
 
+        private void preparingMsWebPages()
+        {
+            msWebPages = t.RunQueryModels<MsWebPage>(ds_MsWebPages);
+        }
         private void preparingMsWebNodesFields()
         {
             msWebPage = t.RunQueryModelsSingle<MsWebPage>(ds_MsWebPages, dN_MsWebPages.Position);
             msWebNodes = t.RunQueryModels<MsWebNode>(ds_MsWebNodes);
         }
-
         #endregion Form preparing
 
         #region Analysis buttonları
@@ -1224,8 +1236,8 @@ namespace YesiLdefter
         #region WebScraping
 
         /// İşlem No : 4 : PageRefresh ve webScraping işleminden önce 
-        ///  set olacak datayı db den oku ve hazır et, (databaseden webe gönderilecek data)
-        ///  get olacak datayı ise hangi tabloya atılacak ise onu bul ve yaz ( webden al, database yaz)
+        ///  set olacak data ise db den oku ve hazır et, (databaseden webe gönderilecek data)
+        ///  get olacak data ise hangi tabloya atılacak ise onu bul ve yaz ( webden al, database yaz)
 
         private async Task WebScrapingBefore(DataRow row, webNodeValue wnv)
         {
@@ -2152,13 +2164,13 @@ namespace YesiLdefter
                     if (t.IsNotNull(v.con_Images_FieldName))
                     {
                         if (v.con_Images_FieldName.IndexOf("Small") > -1)
-                            v.con_Images = ResmiKucult(v.con_Images);
+                            v.con_Images = msPagesService.ResmiKucult(v.con_Images);
                     }
 
                     if (t.IsNotNull(v.con_Images_FieldName2))
                     {
                         if (v.con_Images_FieldName2.IndexOf("Small") > -1)
-                            v.con_Images2 = ResmiKucult(v.con_Images2);
+                            v.con_Images2 = msPagesService.ResmiKucult(v.con_Images2);
                     }
                     //if (t.IsNotNull(wnv.readValue))
                     //    dbRow[wnv.dbFieldName] = theBytes; // Encoding.UTF8.GetBytes(wnv.readValue);
@@ -2173,49 +2185,13 @@ namespace YesiLdefter
             if (wnv.GetSave)
             {
                 if (t.IsNotNull(ds_DbaseTable))
-                    dbButtonClick(ds_DbaseTable.DataSetName, v.tButtonType.btKaydet);
+                   msPagesService.dbButtonClick(this, ds_DbaseTable.DataSetName, v.tButtonType.btKaydet);
             }
 
         }
 
-        private byte[] ResmiKucult(byte[] byteArrayIn)
-        {
-            // gelen byte image çevir
-            MemoryStream ms = new MemoryStream(byteArrayIn);
-            Image oldImage = Image.FromStream(ms);
-
-            // image yi bitmap a çevir
-            Bitmap workingImage = new Bitmap(oldImage, oldImage.Width, oldImage.Height);
-
-            // % 80 oranında küçült
-            int newWidth = (int)(workingImage.Width * 0.2);
-            int newHeight = (int)(workingImage.Height * 0.2);
-
-            Bitmap _img = myImageCompress_(workingImage, newWidth, newHeight);
-
-            /// tekrar byte dönüştür ve gönder
-            ms = null;
-            ms = new MemoryStream();
-            _img.Save(ms, System.Drawing.Imaging.ImageFormat.Jpeg);
-            return ms.ToArray();
-        }
-        private Bitmap myImageCompress_(Bitmap workingImage, int newWidth, int newHeight)
-        {
-            Bitmap _img = new Bitmap(newWidth, newHeight, workingImage.PixelFormat);
-            _img.SetResolution(workingImage.HorizontalResolution, workingImage.VerticalResolution);
-
-            /// for new small image
-            Graphics g = Graphics.FromImage(_img);
-            /// create graphics
-            g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-            g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
-            g.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
-
-            g.DrawImage(workingImage, 0, 0, newWidth, newHeight);
-
-            return _img;
-        }
-
+        
+        
         private void transferFromDatabaseToWeb(webNodeValue wnv)
         {
             v.SQL = v.SQL + v.ENTER + myNokta + " transferFromDatabaseToWeb : Set : ";
@@ -2260,6 +2236,7 @@ namespace YesiLdefter
                 v.SQL = v.SQL + wnv.dbFieldName + " ; " + wnv.writeValue;
             }
         }
+        
         private void transferFromWebTableToDatabase(webNodeValue wnv)
         {
             v.SQL = v.SQL + v.ENTER + myNokta + " transferFromWebTableToDatabase";
@@ -2312,7 +2289,7 @@ namespace YesiLdefter
                     {
                         saveRowAsync(this.myTriggerTableWnv, row);
 
-                        if (editKayitKontrolu()) break;
+                        if (msPagesService.editKayitKontrolu()) break;
                     }
 
                     
@@ -2329,22 +2306,6 @@ namespace YesiLdefter
 
         }
 
-        private bool editKayitKontrolu()
-        {
-            bool onay = false;
-
-            if ((v.con_EditSaveCount == 10) || (v.con_EditSaveCount == 25) || (v.con_EditSaveCount > 50))
-            {
-                string soru = "Sürekli olarak eski kayıtlar denk gelmeye başladı. İşlemi durdurmak ister misiniz ?";
-                DialogResult cevap = t.mySoru(soru);
-                if (DialogResult.Yes == cevap)
-                {
-                    v.con_EditSaveCount = 0;
-                    onay = true;
-                }
-            }
-            return onay;
-        }
 
         private async Task transferFromWebTableRowToDatabase()
         {
@@ -2417,7 +2378,7 @@ namespace YesiLdefter
                 {
                     saveRowAsync(wnv, rows);
 
-                    if (editKayitKontrolu()) break;
+                    if (msPagesService.editKayitKontrolu()) break;
                 }
                 rowNo++;
             }
@@ -2463,7 +2424,7 @@ namespace YesiLdefter
                 /// bir defa çalışıyor
                 if ((firstColumn) && (dbRow != null))
                 {
-                    dbButtonClick(ds_DbaseTable.DataSetName, v.tButtonType.btYeniHesapSatir);
+                    msPagesService.dbButtonClick(this, ds_DbaseTable.DataSetName, v.tButtonType.btYeniHesapSatir);
                     dbRow = ds_DbaseTable.Tables[0].Rows[dN_DbaseTable.Position];
                     firstColumn = false;
                 }
@@ -2517,7 +2478,7 @@ namespace YesiLdefter
                 /// 
                 if (t.IsNotNull(ds_DbaseTable) && (wnv.DontSave == false))
                 {
-                    dbButtonClick(ds_DbaseTable.DataSetName, v.tButtonType.btKaydetYeni);
+                    msPagesService.dbButtonClick(this, ds_DbaseTable.DataSetName, v.tButtonType.btKaydetYeni);
                 }
             }
         }
@@ -2849,8 +2810,7 @@ namespace YesiLdefter
             string _pageCode = wnv.pageCode;
             string _dbPageCode = "";
             string _krtOperandType = "";
-            string _fieldName = "";
-
+            
             tTable _tTable = new tTable();
 
             // sadece eşleştirme yapılacak anahtar fieldi tespit ediyor
@@ -3854,24 +3814,7 @@ namespace YesiLdefter
             }
         }
 
-        private void dbButtonClick(string tableIPCode, v.tButtonType buttonType)
-        {
-            string type_ = "";
-            if (buttonType == v.tButtonType.btKaydet) type_ = "Kaydet";
-            if (buttonType == v.tButtonType.btYeniHesapSatir) type_ = "YeniHesapSatir";
-            if (buttonType == v.tButtonType.btKaydetYeni) type_ = "KaydetYeni";
-
-            v.SQL = v.SQL + v.ENTER + myNokta + " dbButtonClick ( " + type_ + " ) ";
-
-            v.tButtonHint.Clear();
-            v.tButtonHint.tForm = this;
-            v.tButtonHint.tableIPCode = tableIPCode;
-            v.tButtonHint.buttonType = buttonType;
-            tEventsButton evb = new tEventsButton();
-            evb.btnClick(v.tButtonHint);
-            
-            Application.DoEvents();
-        }
+        
 
         #endregion subFunctions
 
@@ -4048,7 +3991,10 @@ namespace YesiLdefter
                             loadPage(wb, this.talepEdilenUrl);
 
                             if (t.IsNotNull(this.aktifPageCode))
-                                readNodeItems(this.aktifPageCode);
+                            {
+                                ds_WebNodeItemsList = null;
+                                ds_WebNodeItemsList = msPagesService.readNodeItemsOld(this.aktifPageCode);
+                            }
                         }
                     }
                     else
@@ -4133,56 +4079,7 @@ namespace YesiLdefter
         #endregion webBrowser events
 
         #region read db tables
-        private void readScrapingTables()
-        {
-            if (t.IsNotNull(ds_MsWebPages) == false) return;
-
-            if (ds_ScrapingDbConnectionList == null)
-                ds_ScrapingDbConnectionList = new DataSet();
-
-            // MsWebNodeItems tablosuna items ları atabilmek için en başa bu pageCode ekleniyor
-            string pageCodes = "'SELECTNODEITEMS',";
-
-            foreach (DataRow row in ds_MsWebPages.Tables[0].Rows)
-            {
-                pageCodes = pageCodes + "'" + row["PageCode"] + "',";
-            }
-            // son virgülü sil
-            pageCodes = pageCodes.Remove(pageCodes.Length - 1, 1);
-
-            string tSql = @"
-        Select 
-          fieldsIP.WebScrapingPageCode
-        , fieldsIP.WebScrapingGetNodeId
-        , fieldsIP.WebScrapingGetColumnNo
-        , fieldsIP.WebScrapingSetNodeId
-        , fieldsIP.WebScrapingSetColumnNo
-        , fieldsIP.KRT_OPERAND_TYPE
-        , fieldsIP.SOFTWARE_CODE + '/' + 
-          fieldsIP.PROJECT_CODE + '/' +
-          fieldsIP.TABLE_CODE + '.' + fieldsIP.IP_CODE as TableIPCode 
-        , fields.FIELD_NAME
-        , fields.FLOOKUP_FIELD
-        , fields.FIELD_TYPE 
-
-        From MS_FIELDS_IP as fieldsIP
-          left outer join MS_FIELDS as fields on ( 
-            fieldsIP.SOFTWARE_CODE = fields.SOFTWARE_CODE and
-            fieldsIP.PROJECT_CODE = fields.PROJECT_CODE and
-            fieldsIP.TABLE_CODE = fields.TABLE_CODE and
-            fieldsIP.IP_CODE = fieldsIP.IP_CODE and
-            fieldsIP.FIELD_NO = fields.FIELD_NO )
-        Where 0 = 0 --fieldsIP.DEFAULT_TYPE = 25 or fieldsIP.DEFAULT_TYPE2 = 25)
-        and fieldsIP.WebScrapingPageCode <> ''
-        and fieldsIP.WebScrapingPageCode in (" + pageCodes + @")
-        order by fieldsIP.WebScrapingPageCode, 
-                 fieldsIP.WebScrapingGetNodeId,
-                 fieldsIP.WebScrapingGetColumnNo ";
-
-            /// webNode ler ile db field leri arasındaki ilişkilerin listesi bu tabloda
-            /// 
-            t.SQL_Read_Execute(v.dBaseNo.Manager, ds_ScrapingDbConnectionList, ref tSql, "ScrapingTables", "ScrapingTables");
-        }
+        
         private void readTriggerNodes(ref DataSet ds, string pageCode, v.tWebEventsType eventsType)
         {
             /* burayada gerek kalmadı
@@ -4272,29 +4169,7 @@ namespace YesiLdefter
             }
 
         }
-        private void readNodeItems(string pageCode)
-        {
-            // her web page için ayrı ayrı okunacak bu liste
-            ds_WebNodeItemsList = null;
-            ds_WebNodeItemsList = new DataSet();
-
-            string pages = "'" + pageCode + "'," + "'DONEMLER','GRUPLAR','SUBELER'"; 
-
-            string tSql = @"
-            Select 
-              [Id]
-             ,[NodeId]
-             ,[PageCode]
-             ,[IsActive]
-             ,[ItemValue]
-             ,[ItemText]
-             From   [MsWebNodeItems]
-             Where  [PageCode] in (" + pages + @") 
-             order by NodeId, ItemValue ";
-            
-            t.SQL_Read_Execute(v.dBaseNo.Manager, ds_WebNodeItemsList, ref tSql, "MsWebNodeItems", "MsWebNodeItems");
-        }
-
+        
         #endregion read db tables
 
         //-------------------------------------------------------------------------------------
