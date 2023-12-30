@@ -527,6 +527,8 @@
     <Content Include="Scripts\UST\UstadCRM\AspNetUserRoles.txt" />
     <Content Include="Scripts\UST\UstadCRM\AspNetUsers.txt" />
     <Content Include="Scripts\UST\UstadCRM\AspNetUserTokens.txt" />
+    <Content Include="Scripts\UST\UstadCRM\EduUsers.txt" />
+    <Content Include="Scripts\UST\UstadCRM\EduUserTokens.txt" />
     <Content Include="Scripts\UST\UstadCRM\MtskVeriAktarimi.txt" />
     <Content Include="Scripts\UST\UstadCRM\prc_FirmUsers.txt" />
     <Content Include="Scripts\UST\UstadCRM\prc_UstadUserFirmsListGet.txt" />
