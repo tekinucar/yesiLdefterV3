@@ -1079,17 +1079,23 @@ namespace YesiLdefter
             //    _LoadNodeCount = this.myLoadNodeCount;
 
             //if (this.myNodeCount + 1 <= this.myTriggerPosition)
-            if (((this.myTriggerEventsType == v.tWebEventsType.load) && (this.myLoadNodeCount + 1 <= this.myTriggerPosition)) ||
-                ((this.myTriggerEventsType == v.tWebEventsType.displayNone) && (this.myDisplayNoneCount + 1 <= this.myTriggerPosition)) ||
-                ((this.myTriggerEventsType == v.tWebEventsType.none) && (_LoadNodeCount + this.myNoneCount + 1 <= this.myTriggerPosition)) ||
-                ((this.myTriggerEventsType == v.tWebEventsType.button3) && (this.myButton3Count > 0) && (_LoadNodeCount + this.myButton3Count + 1 <= this.myTriggerPosition)) ||
-                ((this.myTriggerEventsType == v.tWebEventsType.button4) && (this.myButton4Count > 0) && (_LoadNodeCount + this.myButton4Count + 1 <= this.myTriggerPosition)) ||
-                ((this.myTriggerEventsType == v.tWebEventsType.button5) && (this.myButton5Count > 0) && (_LoadNodeCount + this.myButton5Count + 1 <= this.myTriggerPosition)) ||
-                ((this.myTriggerEventsType == v.tWebEventsType.button6) && (this.myButton6Count > 0) && (_LoadNodeCount + this.myButton6Count + 1 <= this.myTriggerPosition)) ||
-                ((this.myTriggerEventsType == v.tWebEventsType.button7) && (this.myButton7Count > 0) && (_LoadNodeCount + this.myButton7Count + 1 <= this.myTriggerPosition)) ||
-                ((this.myTriggerEventsType == v.tWebEventsType.tableField) && (_LoadNodeCount + this.myTabelFieldCount + 1 <= this.myTriggerPosition)) ||
-                (this.myNodeCount < this.myTriggerPosition)
-                )
+            
+            //if (//((this.myTriggerEventsType == v.tWebEventsType.load) && (this.myLoadNodeCount + 1 <= this.myTriggerPosition)) ||
+            //    ((this.myTriggerEventsType == v.tWebEventsType.displayNone) && (this.myDisplayNoneCount + 1 <= this.myTriggerPosition)) ||
+            //    ((this.myTriggerEventsType == v.tWebEventsType.none) && (_LoadNodeCount + this.myNoneCount + 1 <= this.myTriggerPosition)) ||
+            //    ((this.myTriggerEventsType == v.tWebEventsType.button3) && (this.myButton3Count > 0) && (_LoadNodeCount + this.myButton3Count + 1 <= this.myTriggerPosition)) ||
+            //    ((this.myTriggerEventsType == v.tWebEventsType.button4) && (this.myButton4Count > 0) && (_LoadNodeCount + this.myButton4Count + 1 <= this.myTriggerPosition)) ||
+            //    ((this.myTriggerEventsType == v.tWebEventsType.button5) && (this.myButton5Count > 0) && (_LoadNodeCount + this.myButton5Count + 1 <= this.myTriggerPosition)) ||
+            //    ((this.myTriggerEventsType == v.tWebEventsType.button6) && (this.myButton6Count > 0) && (_LoadNodeCount + this.myButton6Count + 1 <= this.myTriggerPosition)) ||
+            //    ((this.myTriggerEventsType == v.tWebEventsType.button7) && (this.myButton7Count > 0) && (_LoadNodeCount + this.myButton7Count + 1 <= this.myTriggerPosition)) ||
+            //    ((this.myTriggerEventsType == v.tWebEventsType.tableField) && (_LoadNodeCount + this.myTabelFieldCount + 1 <= this.myTriggerPosition)) ||
+            //    (this.myNodeCount < this.myTriggerPosition)
+            //    )
+            //{
+            //    onay = false;
+            //}
+
+            if (this.myNodeCount < this.myTriggerPosition)
             {
                 onay = false;
             }

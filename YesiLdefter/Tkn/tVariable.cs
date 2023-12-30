@@ -1127,6 +1127,8 @@ namespace Tkn_Variable
 
         public static vMsDbUpdate tMsDbUpdate = new vMsDbUpdate();
 
+        public static OpenQA.Selenium.IWebDriver webMain_ = null;
+
         public enum tWebEventsType
         {
             none = 0,
@@ -1195,6 +1197,7 @@ namespace Tkn_Variable
             Clear();
         }
 
+        public string aktifPageUrl { get; set; } // o anda hangi page Url için çalışıyor
         public string aktifPageCode { get; set; } // o anda hangi pageCode için çalışıyor
         public string nodeIdList { get; set; } // myTriggerList nin işini yapıyor
         public string tableIPCode { get; set; }
@@ -1229,7 +1232,7 @@ namespace Tkn_Variable
         public string loginPageUrl { get; set; }
         public string aktifUrl { get; set; }
         public string sessionIdAndToken { get; set; }
-
+        public bool loadWorking { get; set; }
         public Int16 talepPageLeft { get; set; }
         public Int16 talepPageTop { get; set; }
 
@@ -1243,7 +1246,7 @@ namespace Tkn_Variable
             loginPageUrl = "";
             aktifUrl = "";
             sessionIdAndToken = "";
-
+            loadWorking = false;
             talepPageLeft = 0;
             talepPageTop = 0;
         }

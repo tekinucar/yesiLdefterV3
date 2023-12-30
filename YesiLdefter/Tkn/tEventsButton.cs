@@ -3151,7 +3151,7 @@ namespace Tkn_Events
                 prop_.BUTTONTYPE = Convert.ToString((byte)v.tButtonHint.buttonType);
 
                 prop_.READ_TABLEIPCODE = v.tButtonHint.tableIPCode;
-
+                
                 v.tButtonHint.propNavigator = JsonConvert.SerializeObject(prop_);
 
                 tEventsButton evb = new tEventsButton();

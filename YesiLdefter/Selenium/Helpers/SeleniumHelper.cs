@@ -37,8 +37,8 @@ namespace YesiLdefter.Selenium.Helpers
             {
                 if (_driver != null)
                 {
-                    WebDriver.Close();
-                    WebDriver.Quit();
+                    //WebDriver.Close();
+                    //WebDriver.Quit();
                     _driver = null;
                 }
             }

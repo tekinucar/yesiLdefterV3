@@ -1129,7 +1129,7 @@ namespace Tkn_ToolBox
 
             // Gerekli olan verileri topla
             vTable vt = new vTable();
-
+            vt.Clear();
             vt.functionName = function_name;
             vt.DBaseNo = dBNo;
 
@@ -1396,6 +1396,10 @@ namespace Tkn_ToolBox
                         password);
 
                 v.active_DB.localMSSQLConn = new SqlConnection(v.active_DB.localConnectionText);
+
+                v.active_DB.projectConnectionText = v.active_DB.localConnectionText;
+                v.active_DB.projectMSSQLConn = new SqlConnection(v.active_DB.projectConnectionText);
+
 
             }
             catch (Exception)
@@ -12939,6 +12943,14 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 v.active_DB.localDBName = YesiLdefterTabimIni.Read("SourceDatabaseName");
                 v.active_DB.localUserName = YesiLdefterTabimIni.Read("SourceDbLoginName");
                 v.active_DB.localPsw = YesiLdefterTabimIni.Read("SourceDbPass");
+
+                v.active_DB.projectDBType = v.dBaseType.MSSQL;
+                v.active_DB.projectServerName = YesiLdefterTabimIni.Read("SourceServerNameIP");
+                v.active_DB.projectDBName = YesiLdefterTabimIni.Read("SourceDatabaseName");
+                v.active_DB.projectUserName = YesiLdefterTabimIni.Read("SourceDbLoginName");
+                v.active_DB.projectPsw = YesiLdefterTabimIni.Read("SourceDbPass");
+
+
 
                 // ini file içinde manuel false yapılmış olabilir
                 // yapılırsa sonuç ne olur bilmiyorum
