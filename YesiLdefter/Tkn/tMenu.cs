@@ -38,7 +38,8 @@ namespace Tkn_Menu
 
             DataSet ds_Items = new DataSet();
 
-            tr.MS_LayoutOrItems_Read(ds_Items, MenuCode, 3);
+            //tr.MS_LayoutOrItems_Read(ds_Items, MenuCode, 3);
+            tr.MS_Menu_Read(ds_Items, MenuCode);
 
             if (t.IsNotNull(ds_Items) == false) return;
 
@@ -86,7 +87,8 @@ namespace Tkn_Menu
             
             DataSet ds_Items = new DataSet();
 
-            tr.MS_LayoutOrItems_Read(ds_Items, MenuCode, 3);
+            //tr.MS_LayoutOrItems_Read(ds_Items, MenuCode, 3);
+            tr.MS_Menu_Read(ds_Items, MenuCode);
 
             if (t.IsNotNull(ds_Items) == false) return;
 
@@ -3082,7 +3084,8 @@ namespace Tkn_Menu
 
             DataSet ds_Items = new DataSet();
 
-            tr.MS_LayoutOrItems_Read(ds_Items, MenuCode, 3);
+            //tr.MS_LayoutOrItems_Read(ds_Items, MenuCode, 3);
+            tr.MS_Menu_Read(ds_Items, MenuCode);
 
             if (t.IsNotNull(ds_Items) == false) return ItemType;
 

@@ -140,6 +140,8 @@ namespace Tkn_DataCopy
             //ds_Target = t.Find_DataSet(tForm, "", Target_TableIPCode, "");
             t.Find_DataSet(tForm, ref ds_Target, ref dN_Target, Target_TableIPCode);
 
+            if (ds_Target == null) return false;
+
             /// dc_run çalışması hakkında 
             /// work_type in (1,2,3,4)
             /// Normal DataCopy
@@ -353,33 +355,66 @@ namespace Tkn_DataCopy
         private bool tDC_Read(DataSet ds_DC, DataSet ds_DCLine, string DC_Code)
         {
             tToolBox t = new tToolBox();
-            tSQLs sql = new tSQLs();
-            string function_name = "tDC_Read";
+            //tSQLs sql = new tSQLs();
+            //string function_name = "tDC_Read";
 
             Boolean onay = true;
-            string sql_DC = sql.SQL_MS_DC(DC_Code);
-            string sql_DCLine = sql.SQL_MS_DC_LINE(DC_Code);
 
-            t.SQL_Read_Execute(v.dBaseNo.Manager, ds_DC, ref sql_DC, "TABLE_DC", function_name);
+            //string sql_DC = sql.SQL_MS_DC(DC_Code);
+            //string sql_DCLine = sql.SQL_MS_DC_LINE(DC_Code);
 
-            if (t.IsNotNull(ds_DC))
+            //t.SQL_Read_Execute(v.dBaseNo.Manager, ds_DC, ref sql_DC, "TABLE_DC", function_name);
+
+            //if (t.IsNotNull(ds_DC))
+            //{
+            //    t.SQL_Read_Execute(v.dBaseNo.Manager, ds_DCLine, ref sql_DCLine, "TABLE_DCLINE", function_name);
+
+            //    if (t.IsNotNull(ds_DCLine) == false)
+            //    {
+            //        //onay = false;
+            //        //MessageBox.Show("DİKKAT : " + DC_Code + v.ENTER2 +
+            //        //                "kodlu DataCopyLine bilgileri okunamadı ... ", function_name);
+            //    }
+            //}
+            //else
+            //{
+            //    onay = false;
+            //    MessageBox.Show("DİKKAT : " + DC_Code + v.ENTER2 +
+            //                    "kodlu DataCopy bilgileri okunamadı ... ", function_name);
+            //}
+
+
+            // DataCopy
+            t.preparing_DataCopyList(DC_Code);
+
+            DataTable dt = v.ds_DataCopy.Tables[DC_Code];
+            if (dt == null) onay = false;
+            if (onay)
             {
-                t.SQL_Read_Execute(v.dBaseNo.Manager, ds_DCLine, ref sql_DCLine, "TABLE_DCLINE", function_name);
+                ds_DC.Tables.Add(dt.Copy());
+                dt.Dispose();
+            }
 
-                if (t.IsNotNull(ds_DCLine) == false)
+            if (onay)
+            {
+                // DataCopyLines
+                t.preparing_DataCopyLinesList(DC_Code);
+
+                DataTable dtL = v.ds_DataCopyLines.Tables[DC_Code];
+                if (dtL == null) onay = false;
+                if (onay)
                 {
-                    //onay = false;
-                    //MessageBox.Show("DİKKAT : " + DC_Code + v.ENTER2 +
-                    //                "kodlu DataCopyLine bilgileri okunamadı ... ", function_name);
+                    ds_DCLine.Tables.Add(dtL.Copy());
+                    dtL.Dispose();
                 }
             }
-            else
-            {
-                onay = false;
-                MessageBox.Show("DİKKAT : " + DC_Code + v.ENTER2 +
-                                "kodlu DataCopy bilgileri okunamadı ... ", function_name);
-            }
 
+            if (onay == false)
+            {
+                MessageBox.Show("DİKKAT : " + DC_Code + v.ENTER2 +
+                                "kodlu DataCopy bilgileri okunamadı ... ", "tDC_Read");
+            }
+            
             return onay;
         }
 
@@ -726,16 +761,27 @@ namespace Tkn_DataCopy
             {
                 #region read DCLine
                 Read_Value = "";
-                dc_source_type = t.Set(ds_DCLine.Tables[0].Rows[i]["DC_SOURCE_TYPE"].ToString(), "", (Int16)0);
-                target_tableipcode = t.Set(ds_DCLine.Tables[0].Rows[i]["TARGET_TABLEIPCODE"].ToString(), Target_TableIPCode, "");
-                target_fieldname = t.Set(ds_DCLine.Tables[0].Rows[i]["TARGET_FIELDNAME"].ToString(), "", "");
-                source_tableipcode = t.Set(ds_DCLine.Tables[0].Rows[i]["SOURCE_TABLEIPCODE"].ToString(), Source_TableIPCode, "");
-                source_fieldname = t.Set(ds_DCLine.Tables[0].Rows[i]["SOURCE_FIELDNAME"].ToString(), "", "");
-                inputbox_message = t.Set(ds_DCLine.Tables[0].Rows[i]["INPUTBOX_MESSAGE"].ToString(), "", "");
-                inputbox_type = t.Set(ds_DCLine.Tables[0].Rows[i]["INPUTBOX_TYPE"].ToString(), "", (Int16)0);
-                inputbox_default1 = t.Set(ds_DCLine.Tables[0].Rows[i]["INPUTBOX_DEFAULT1"].ToString(), "", "");
-                inputbox_default2 = t.Set(ds_DCLine.Tables[0].Rows[i]["INPUTBOX_DEFAULT2"].ToString(), "", "");
-                chechk_field = t.Set(ds_DCLine.Tables[0].Rows[i]["CHECK_FIELD"].ToString(), "", "False");
+                try
+                {
+                    dc_source_type = t.Set(ds_DCLine.Tables[0].Rows[i]["DC_SOURCE_TYPE"].ToString(), "", (Int16)0);
+                    target_tableipcode = t.Set(ds_DCLine.Tables[0].Rows[i]["TARGET_TABLEIPCODE"].ToString(), Target_TableIPCode, "");
+                    target_fieldname = t.Set(ds_DCLine.Tables[0].Rows[i]["TARGET_FIELDNAME"].ToString(), "", "");
+                    source_tableipcode = t.Set(ds_DCLine.Tables[0].Rows[i]["SOURCE_TABLEIPCODE"].ToString(), Source_TableIPCode, "");
+                    source_fieldname = t.Set(ds_DCLine.Tables[0].Rows[i]["SOURCE_FIELDNAME"].ToString(), "", "");
+                    inputbox_message = t.Set(ds_DCLine.Tables[0].Rows[i]["INPUTBOX_MESSAGE"].ToString(), "", "");
+                    inputbox_type = t.Set(ds_DCLine.Tables[0].Rows[i]["INPUTBOX_TYPE"].ToString(), "", (Int16)0);
+                    inputbox_default1 = t.Set(ds_DCLine.Tables[0].Rows[i]["INPUTBOX_DEFAULT1"].ToString(), "", "");
+                    inputbox_default2 = t.Set(ds_DCLine.Tables[0].Rows[i]["INPUTBOX_DEFAULT2"].ToString(), "", "");
+                    chechk_field = t.Set(ds_DCLine.Tables[0].Rows[i]["CHECK_FIELD"].ToString(), "", "False");
+                }
+                catch (Exception e)
+                {
+                    onay = false;
+                    MessageBox.Show("DİKKAT : " + e.Message);
+                    //throw;
+                    break;
+                }
+                
                 #endregion read DCLine
 
                 /// * 'DC_SOURCE_TYPE',  

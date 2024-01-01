@@ -87,7 +87,7 @@ namespace Tkn_SQLs
 
             t.TableIPCode_Get(TableIPCode, ref softCode, ref projectCode, ref TableCode, ref IPCode);
 
-            string MsFieldList = MS_FIELDS_LIST("b");
+            string MsFieldList = t.MS_FIELDS_LIST("b");
 
             // and   isnull(b.FPICTURE, '') = ''
 
@@ -960,125 +960,7 @@ Select distinct
 
             return s;
         }
-
-        private string MS_FIELDS_LIST(string Alias)
-        {
-
-            string s = v.ENTER
-           + " , " + Alias + ".TABLE_CODE               LKP_TABLE_CODE " + v.ENTER
-           + " , " + Alias + ".FIELD_NO                 LKP_FIELD_NO " + v.ENTER
-           + " , " + Alias + ".FIELD_NAME               LKP_FIELD_NAME " + v.ENTER
-           + " , " + Alias + ".FIELD_TYPE               LKP_FIELD_TYPE " + v.ENTER
-           + " , " + Alias + ".FIELD_LENGTH             LKP_FIELD_LENGTH " + v.ENTER
-           + " , " + Alias + ".FAUTOINC                 LKP_FAUTOINC " + v.ENTER
-           + " , " + Alias + ".FNOTNULL                 LKP_FNOTNULL " + v.ENTER
-           + " , " + Alias + ".FREADONLY                LKP_FREADONLY " + v.ENTER
-           + " , " + Alias + ".FENABLED                 LKP_FENABLED " + v.ENTER
-           + " , " + Alias + ".FVISIBLE                 LKP_FVISIBLE " + v.ENTER
-           + " , " + Alias + ".FINDEX                   LKP_FINDEX " + v.ENTER
-           + " , " + Alias + ".FPICTURE                 LKP_FPICTURE " + v.ENTER
-           + " , " + Alias + ".FFOREING                 LKP_FFOREING " + v.ENTER
-           + " , " + Alias + ".FMEMORY_FIELD            LKP_FMEMORY_FIELD " + v.ENTER
-           + " , " + Alias + ".FLOOKUP_FIELD            LKP_FLOOKUP_FIELD " + v.ENTER
-
-           + " , " + Alias + ".FCAPTION                 LKP_FCAPTION " + v.ENTER
-           + " , " + Alias + ".FHINT                    LKP_FHINT " + v.ENTER
-
-           + " , " + Alias + ".DEFAULT_TYPE             LKP_DEFAULT_TYPE " + v.ENTER
-           //+ " , " + Alias + ".DEFAULT_TYPE2            LKP_DEFAULT_TYPE2 " + v.ENTER
-           + " , " + Alias + ".DEFAULT_NUMERIC          LKP_DEFAULT_NUMERIC " + v.ENTER
-           + " , " + Alias + ".DEFAULT_TEXT             LKP_DEFAULT_TEXT " + v.ENTER
-           + " , " + Alias + ".DEFAULT_INT              LKP_DEFAULT_INT " + v.ENTER
-           + " , " + Alias + ".DEFAULT_SP               LKP_DEFAULT_SP " + v.ENTER
-           + " , " + Alias + ".DEFAULT_SETUP            LKP_DEFAULT_SETUP " + v.ENTER
-
-           + " , " + Alias + ".CMP_COLUMN_TYPE          LKP_CMP_COLUMN_TYPE " + v.ENTER
-           + " , " + Alias + ".CMP_WIDTH                LKP_CMP_WIDTH " + v.ENTER
-           + " , " + Alias + ".CMP_SORT_TYPE            LKP_CMP_SORT_TYPE " + v.ENTER
-           + " , " + Alias + ".CMP_SUMMARY_TYPE         LKP_CMP_SUMMARY_TYPE " + v.ENTER
-           + " , " + Alias + ".CMP_FORMAT_TYPE          LKP_CMP_FORMAT_TYPE " + v.ENTER
-           + " , " + Alias + ".CMP_DISPLAY_FORMAT       LKP_CMP_DISPLAY_FORMAT " + v.ENTER
-           + " , " + Alias + ".CMP_EDIT_FORMAT          LKP_CMP_EDIT_FORMAT " + v.ENTER
-           + " , " + Alias + ".LIST_TYPES_NAME          LKP_LIST_TYPES_NAME " + v.ENTER
-           + " , " + Alias + ".VALIDATION_OPERATOR      LKP_VALIDATION_OPERATOR " + v.ENTER
-           + " , " + Alias + ".VALIDATION_VALUE1        LKP_VALIDATION_VALUE1 " + v.ENTER
-           + " , " + Alias + ".VALIDATION_VALUE2        LKP_VALIDATION_VALUE2 " + v.ENTER
-           + " , " + Alias + ".VALIDATION_ERRORTEXT     LKP_VALIDATION_ERRORTEXT " + v.ENTER
-           + " , " + Alias + ".VALIDATION_ERRORTYPE     LKP_VALIDATION_ERRORTYPE " + v.ENTER
-
-           + " , " + Alias + ".KRT_LINE_NO              LKP_KRT_LINE_NO " + v.ENTER
-           + " , " + Alias + ".KRT_CAPTION              LKP_KRT_CAPTION " + v.ENTER // Kriter FieldName olara kullnaılıyor
-           + " , " + Alias + ".KRT_OPERAND_TYPE         LKP_KRT_OPERAND_TYPE " + v.ENTER
-           + " , " + Alias + ".KRT_LIKE                 LKP_KRT_LIKE " + v.ENTER
-           + " , " + Alias + ".KRT_DEFAULT1             LKP_KRT_DEFAULT1 " + v.ENTER
-           + " , " + Alias + ".KRT_DEFAULT2             LKP_KRT_DEFAULT2 " + v.ENTER
-           + " , " + Alias + ".KRT_ALIAS                LKP_KRT_ALIAS " + v.ENTER
-           + " , " + Alias + ".KRT_TABLE_ALIAS          LKP_KRT_TABLE_ALIAS " + v.ENTER
-
-           + " , " + Alias + ".MASTER_TABLEIPCODE       LKP_MASTER_TABLEIPCODE " + v.ENTER
-           + " , " + Alias + ".SEARCH_TABLEIPCODE       LKP_MASTER_TABLE_NAME " + v.ENTER
-           + " , " + Alias + ".MASTER_KEY_FNAME         LKP_MASTER_KEY_FNAME " + v.ENTER
-           + " , " + Alias + ".MASTER_CHECK_FNAME       LKP_MASTER_CHECK_FNAME " + v.ENTER
-           + " , " + Alias + ".MASTER_CHECK_VALUE       LKP_MASTER_CHECK_VALUE " + v.ENTER
-
-           + " , " + Alias + ".GROUP_NO                 LKP_GROUP_NO " + v.ENTER
-           + " , " + Alias + ".GROUP_LINE_NO            LKP_GROUP_LINE_NO " + v.ENTER
-
-           + " , " + Alias + ".EXPRESSION_TYPE          LKP_EXPRESSION_TYPE " + v.ENTER
-           + " , " + Alias + ".PROP_EXPRESSION          LKP_PROP_EXPRESSION " + v.ENTER // LKP_EXPRESSION
-
-           + " , " + Alias + ".FJOIN_TABLE_NAME         LKP_FJOIN_TABLE_NAME " + v.ENTER
-           + " , " + Alias + ".FJOIN_TABLE_ALIAS        LKP_FJOIN_TABLE_ALIAS " + v.ENTER
-           + " , " + Alias + ".FJOIN_KEY_FNAME          LKP_FJOIN_KEY_FNAME " + v.ENTER
-           + " , " + Alias + ".FJOIN_CAPTION_FNAME      LKP_FJOIN_CAPTION_FNAME " + v.ENTER
-           ;
-
-
-            return s;
-        }
-
-        public string SQL_MS_FIELDS_IP_LIST(string Table_IP_Code)
-        {
-            string softCode = "";
-            string projectCode = "";
-            string Table_Code = string.Empty;
-            string IP_Code = string.Empty;
-
-            tToolBox t = new tToolBox();
-            t.TableIPCode_Get(Table_IP_Code, ref softCode, ref projectCode, ref Table_Code, ref IP_Code);
-
-            string msfields_list = MS_FIELDS_LIST("b");
-
-            string s =
-              " Select a.* " + v.ENTER
-            + " , c.TABLE_NAME as LKP_TABLE_NAME " + v.ENTER
-            + " , c.DBASE_TYPE as LKP_DBASE_TYPE " + v.ENTER
-            + msfields_list
-            + " from MS_FIELDS_IP a " + v.ENTER
-            + "   left outer join MS_FIELDS b on ( a.TABLE_CODE = b.TABLE_CODE and a.FIELD_NO = b.FIELD_NO ) " + v.ENTER
-            + "   left outer join MS_TABLES c on ( a.TABLE_CODE = c.TABLE_CODE ) " + v.ENTER
-            + " where a.TABLE_CODE = '" + Table_Code + "' " + v.ENTER
-            + " and   a.IP_CODE = '" + IP_Code + "' " + v.ENTER;
-            
-            if ((softCode != "") && (softCode != "null"))
-                s = s + " and   a.SOFTWARE_CODE = '" + softCode + "' " + v.ENTER
-                      + " and   a.SOFTWARE_CODE = b.SOFTWARE_CODE " + v.ENTER
-                      + " and   a.SOFTWARE_CODE = c.SOFTWARE_CODE " + v.ENTER;
-
-            if ((projectCode != "") && (projectCode != "null"))
-                s = s + " and   a.PROJECT_CODE = '" + projectCode + "' " + v.ENTER
-                      + " and   a.PROJECT_CODE = b.PROJECT_CODE " + v.ENTER
-                      + " and   a.PROJECT_CODE = c.PROJECT_CODE " + v.ENTER;
-                                 
-            s = s    
-            + " order by "
-            + " isnull(a.GROUP_NO,0), isnull(a.GROUP_LINE_NO,0), "
-            + " isnull(b.GROUP_NO,0), isnull(b.GROUP_LINE_NO,0), "
-            + " isnull(a.FIELD_NO,0) ";
-
-            return s;
-        }
-
+        
         public string SQL_MS_PROPERTIES_LIST(string TableName, string FieldName)
         {
             return
@@ -2769,8 +2651,8 @@ INSERT INTO [dbo].[SYS_UPDATES]
 
                 // bu satırların yerini değiştirme
                 ga = -1;
-                
-                mst_FName = t.Set(Row["MASTER_KEY_FNAME"].ToString(), Row["LKP_MASTER_KEY_FNAME"].ToString(), "");
+
+                mst_FName = t.Set(Row["MASTER_KEY_FNAME"].ToString(), "", "");//Row["LKP_MASTER_KEY_FNAME"].ToString(), "");
                 /*
                 if (mst_FName != "")
                 {
@@ -2825,10 +2707,10 @@ INSERT INTO [dbo].[SYS_UPDATES]
                     // farklı aliası var ise esas table aliasına ulaşılıyor
                     tkrt_table_alias = t.Set(Row["KRT_TABLE_ALIAS"].ToString(), tLabel, "");
 
-                    mst_TableIPCode = t.Set(Row["MASTER_TABLEIPCODE"].ToString(), Row["LKP_MASTER_TABLEIPCODE"].ToString(), "");
+                    mst_TableIPCode = t.Set(Row["MASTER_TABLEIPCODE"].ToString(), "", ""); //Row["LKP_MASTER_TABLEIPCODE"].ToString(), "");
                     //src_TableIPCode = t.Set(Row["SEARCH_TABLEIPCODE"].ToString(), Row["LKP_SEARCH_TABLEIPCODE"].ToString(), "");
-                    mst_CheckFName = t.Set(Row["MASTER_CHECK_FNAME"].ToString(), Row["LKP_MASTER_CHECK_FNAME"].ToString(), "");
-                    mst_CheckValue = t.Set(Row["MASTER_CHECK_VALUE"].ToString(), Row["LKP_MASTER_CHECK_VALUE"].ToString(), "");
+                    mst_CheckFName = t.Set(Row["MASTER_CHECK_FNAME"].ToString(), "", ""); //Row["LKP_MASTER_CHECK_FNAME"].ToString(), "");
+                    mst_CheckValue = t.Set(Row["MASTER_CHECK_VALUE"].ToString(), "", ""); //Row["LKP_MASTER_CHECK_VALUE"].ToString(), "");
 
                     /// 3. SpeedKriter Double 
                     /// 4. SpeedKriter Single 

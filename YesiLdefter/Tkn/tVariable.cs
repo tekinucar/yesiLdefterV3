@@ -299,7 +299,6 @@ namespace Tkn_Variable
         //--
 
         // *** Global DataSet *** //
-        public static DataSet dsMS_Tables_IP = new DataSet();
         public static DataSet ds_TypesList = new DataSet();
         public static DataSet ds_MsTypesList = new DataSet();
         public static DataSet ds_Firm = new DataSet();
@@ -310,7 +309,23 @@ namespace Tkn_Variable
         public static DataSet ds_LookUpTableList = new DataSet();
         public static DataSet ds_YilAyList = new DataSet();
 
+        public static List<string> tableList = new List<string>();
+        public static List<string> tableIPCodeTableList = new List<string>();
+        public static List<string> tableIPCodeFieldsList = new List<string>();
+        public static List<string> tableIPCodeGroupsList = new List<string>();
+        public static List<string> msLayoutItemsList = new List<string>();
+        public static List<string> msMenuItemsList = new List<string>();
+        public static List<string> dataCopyList = new List<string>();
+        public static List<string> dataCopyLinesList = new List<string>();
 
+        public static DataSet ds_MsTableFields = new DataSet();
+        public static DataSet ds_TableIPCodeTable = new DataSet();
+        public static DataSet ds_TableIPCodeFields = new DataSet();
+        public static DataSet ds_TableIPCodeGroups = new DataSet();
+        public static DataSet ds_MsLayoutItems = new DataSet();
+        public static DataSet ds_MsMenuItems = new DataSet();
+        public static DataSet ds_DataCopy = new DataSet();
+        public static DataSet ds_DataCopyLines = new DataSet();
 
         /// Hangi SMS bilgisi isteniyorsa seçilir.
         //public static SP_SMS : string
@@ -2057,6 +2072,7 @@ namespace Tkn_Variable
         public string tableIPCode { get; set; }
         public string buttonName { get; set; }
         public string caption { get; set; }
+        public string checkedValue { get; set; }
         public string columnOldValue { get; set; }
         public string columnEditValue { get; set; }
         public string columnFieldName { get; set; }
@@ -2077,6 +2093,7 @@ namespace Tkn_Variable
             tableIPCode = "";
             buttonName = "";
             caption = "";
+            checkedValue = "";
             columnOldValue = "";
             columnEditValue = "";
             columnFieldName = "";

@@ -40,11 +40,11 @@ namespace Tkn_Events
             tToolBox t = new tToolBox();
 
             bool onay = false;
+            bool transactionRun = false;
             bool birOncekiOnay = false;
             bool isFormOpen = true;
             bool elseOncesiCalisti = false;
             bool elseItem = false;
-            bool transactionRun = false;
             Form tForm = buttonHint.tForm;
 
             string tableIPCode = buttonHint.tableIPCode;
@@ -130,7 +130,7 @@ namespace Tkn_Events
                     if (mainButtonType == propButtonType)
                     {
                         onay = true;
-
+                        
                         onay = singleButtonEvent(buttonHint);
 
                         if (onay == false)
@@ -199,6 +199,8 @@ namespace Tkn_Events
                             buttonHint.buttonType = mainButtonType;
 
                             onay = singleButtonEvent(buttonHint);
+
+                            transactionRun = onay;
 
                             buttonHint.tForm = tForm;
 
@@ -470,7 +472,8 @@ namespace Tkn_Events
                     (buttonHint.senderType == "TreeList") ||
                     (buttonHint.senderType == "SchedulerControl") ||
                     (buttonHint.senderType == "Button") ||
-                    (buttonHint.senderType == "Menu"))
+                    (buttonHint.senderType == "Menu") ||
+                    (buttonHint.senderType == "DevExpress.XtraEditors.ButtonEdit"))
                 {
                     if ((prop_ != null) && (propListCount_ <= 1))
                         t.OpenForm_JSON(tForm, prop_);
@@ -899,7 +902,7 @@ namespace Tkn_Events
                 // fields tablosu varsa
                 if (dsData.Tables.Count > 1)
                 {
-                    string keyFName = t.Find_Table_Ref_FieldName(dsData.Tables[1]);
+                    string keyFName = t.Find_Table_Ref_FieldName(dsData.Tables[1]); bu ds değişti v.ds_MsTableFields oldu
                     // field tipini öğrenelim
                     string displayFormat = string.Empty;
                     int ftype = t.Find_Field_Type_Id(dsData, keyFName, ref displayFormat);
@@ -2416,7 +2419,11 @@ namespace Tkn_Events
 
             #region ELSE kontrolü
             if ((chc_Value.IndexOf("ELSE") > -1))
+            {
+                // önceki kontrollere henüz yakalanmamış
+                // ve else koşuluna sıra gelmişse
                 form_open1 = true;
+            }
             #endregion 
 
             #region Check işlemleri / Second veya Target için şart varsa
@@ -2459,9 +2466,11 @@ namespace Tkn_Events
                                    v.tBeforeAfter beforeAfter, List<PROP_NAVIGATOR> propList_)
         {
             bool onay = true;// false;
+            bool transactionRun = false;
             bool islemOnayi = false;
             bool isFormOpen = true;
-            bool transactionRun = false;
+            bool elseItem = false;
+            bool elseOncesiCalisti = false;
 
             if (propList_ != null)
             {
@@ -2473,9 +2482,21 @@ namespace Tkn_Events
                     {
                         isFormOpen = CheckValue(tForm, item, tableIPCode);
                         
-                        // daha önce çalıştımı ? çalışmadı mı bilgisi tutuluyor
+                        
+                        // else satırı mı kontrol et
+                        elseItem = (item.CHC_VALUE.ToString().IndexOf("ELSE") > -1);
+
+                        // bu satır daha önce çalıştı mı ?
                         transactionRun = item.TransactionRun;
 
+                        if (elseItem) // else satırına geldik
+                        {
+                            elseOncesiCalisti = elseOncesiniKontrolEt(propList_, buttonType);
+                            if ((elseOncesiCalisti) && // elseden öncede çalıştı
+                                (isFormOpen))          // else satırının çalışması için onay da aldı
+                                isFormOpen = false;    // fakat else den önce çalıştığı için else satırının onayı iptal, çalışmasın
+                        }
+                        
                         // form açılması için onaylandı ise
                         // eğer daha önce çalışmamış ise çalışsın
                         if ((isFormOpen) && (transactionRun == false))
@@ -2484,11 +2505,30 @@ namespace Tkn_Events
                             onay = extraIslemVar_(tForm, item, beforeAfter, ref islemOnayi);
 
                             // işem çalıştı onayı
-                            //item.TransactionRun = islemOnayi;
+                            item.TransactionRun = islemOnayi;
 
                             if (onay == false)
                                 break;
                         }
+                    }
+                }
+            }
+
+            return onay;
+        }
+
+        private bool elseOncesiniKontrolEt(List<PROP_NAVIGATOR> propList_, v.tButtonType buttonType)
+        {
+            bool onay = false;
+
+            foreach (PROP_NAVIGATOR item in propList_)
+            {
+                if (item.BUTTONTYPE.ToString() == Convert.ToString((byte)buttonType))
+                {
+                    if (item.TransactionRun)
+                    {
+                        onay = true;
+                        break;
                     }
                 }
             }
@@ -2578,13 +2618,14 @@ namespace Tkn_Events
                 if (item.BEFOREAFTER != null)
                 {
                     BEFOREAFTER = item.BEFOREAFTER.ToString();
+                    if (BEFOREAFTER == "null") BEFOREAFTER = "BEFORE";
                 }
 
                 TABLEIPCODE = t.Set(item.TABLEIPCODE.ToString(), item.RTABLEIPCODE.ToString(), "");
 
                 #region
 
-                if ((BEFOREAFTER == beforeAfter) || t.IsNotNull(BEFOREAFTER) == false)
+                if (BEFOREAFTER == beforeAfter)
                 {
                     if (workType == "REFRESH")
                     {

@@ -244,7 +244,7 @@ namespace YesiLdefter
         }
 
         #region Test buttons click
-        private void myLineGetTestClick(object sender, EventArgs e)
+        private async void myLineGetTestClick(object sender, EventArgs e)
         {
             if (ds_MsWebNodes != null)
             {
@@ -260,7 +260,7 @@ namespace YesiLdefter
                 if (wnv.TagName == "select")
                     wnv.workRequestType = v.tWebRequestType.getNodeItems;
 
-                WebScrapingAsync(v.webMain_, wnv);
+                await WebScrapingAsync(v.webMain_, wnv);
 
                 if (wnv.TagName == "select")
                 {
@@ -270,7 +270,8 @@ namespace YesiLdefter
                 }
             }
         }
-        private void myLinePostTestClick(object sender, EventArgs e)
+
+        private async void myLinePostTestClick(object sender, EventArgs e)
         {
             if (ds_MsWebNodes != null)
             {
@@ -287,7 +288,7 @@ namespace YesiLdefter
                 //if (wnv.TagName == "select")
                 //    wnv.workRequestType = v.tWebRequestType.getNodeItems;
 
-                WebScrapingAsync(v.webMain_, wnv);
+                await WebScrapingAsync(v.webMain_, wnv);
 
                 //if (wnv.TagName == "select")
                 //{
@@ -322,14 +323,11 @@ namespace YesiLdefter
             preparingMsWebNodesFields();
             preparingAktifPageLoad();
         }
-        private void preparingAktifPageLoad()
+        private async void preparingAktifPageLoad()
         {
-            //if (this.webMain_ == null)
-            //    preparingWebMain();
             if (v.webMain_ != null)
             {
-                f.loadWorking = false;
-                myPageViewClickAsync(v.webMain_, this.msWebPage_);
+                await myPageViewClickAsync(v.webMain_, this.msWebPage_);
             }
         }
         private void preparingMsWebPages()
@@ -338,6 +336,7 @@ namespace YesiLdefter
         }
         private void preparingMsWebNodesFields()
         {
+            this.f.Clear();
             this.msWebPage_ = t.RunQueryModelsSingle<MsWebPage>(ds_MsWebPages, dN_MsWebPages.Position);
             this.msWebNodes_ = t.RunQueryModels<MsWebNode>(ds_MsWebNodes);
             this.workPageNodes_.Clear();
@@ -347,7 +346,6 @@ namespace YesiLdefter
         }
         private void preparingMsWebLoginPage()
         {
-            // this.msWebLoginPage_ = t.RunQueryModelsSingle<MsWebPage>(ds_MsWebPages, dN_MsWebPages.Position);
             if (this.msWebLoginNodes_ == null)
                 this.msWebLoginNodes_ = t.RunQueryModels<MsWebNode>(ds_LoginPageNodes);
         }
@@ -357,18 +355,14 @@ namespace YesiLdefter
         /// Userın kullanığı butonlar
         /// 
         #region user buttons
-        private void myPageViewClick(object sender, EventArgs e)
+        private async void myPageViewClick(object sender, EventArgs e)
         {
-            // page ait nodelerin tespiti
-            //if (t.IsNotNull(ds_MsWebNodes))
-            //    eventsTypeCount(ds_MsWebNodes);
-
-            f.loadWorking = false;
+            f.Clear();
 
             if (v.webMain_ == null)
                 preparingWebMain();
 
-            myPageViewClickAsync(v.webMain_, this.msWebPage_);
+            await myPageViewClickAsync(v.webMain_, this.msWebPage_);
         }
 
         private void myAlwaysSetClick(object sender, EventArgs e)
@@ -378,42 +372,28 @@ namespace YesiLdefter
             //startNodesRun(ds_MsWebNodes, v.tWebRequestType.alwaysSet, v.tWebEventsType.buttonAlwaysSet);
         }
 
-        private void myFullGet1Click(object sender, EventArgs e)
+        private async void myFullGet1Click(object sender, EventArgs e)
         {
             Cursor.Current = Cursors.WaitCursor;
-            //startNodesBefore();
-            //startNodesRun(ds_MsWebNodes, v.tWebRequestType.get, v.tWebEventsType.button3);
-            startNodes(this.msWebNodes_, this.workPageNodes_, v.tWebRequestType.get, v.tWebEventsType.button3);
+            await startNodes(this.msWebNodes_, this.workPageNodes_, v.tWebRequestType.get, v.tWebEventsType.button3);
         }
 
-        private void myFullGet2Click(object sender, EventArgs e)
+        private async void myFullGet2Click(object sender, EventArgs e)
         {
             Cursor.Current = Cursors.WaitCursor;
-            //startNodesBefore();
-            //startNodesRun(ds_MsWebNodes, v.tWebRequestType.get, v.tWebEventsType.button4);
-            startNodes(this.msWebNodes_, this.workPageNodes_, v.tWebRequestType.get, v.tWebEventsType.button4);
+            await startNodes (this.msWebNodes_, this.workPageNodes_, v.tWebRequestType.get, v.tWebEventsType.button4);
         }
 
-        private void myFullPost1Click(object sender, EventArgs e)
+        private async void myFullPost1Click(object sender, EventArgs e)
         {
-            /* 
-            HtmlElement htmlTable = webMain.Document.GetElementById(this.tablePageName);
-            // bu kopya daha sonra selectTablePage için kulllanılıyor
-            this.htmlTablePages = htmlTable.GetElementsByTagName("table");
-            selectTablePage(webMain);
-            */
             Cursor.Current = Cursors.WaitCursor;
-            //startNodesBefore();
-            //startNodesRun(ds_MsWebNodes, v.tWebRequestType.post, v.tWebEventsType.button5);
-            startNodes(this.msWebNodes_, this.workPageNodes_, v.tWebRequestType.post, v.tWebEventsType.button5);
+            await startNodes(this.msWebNodes_, this.workPageNodes_, v.tWebRequestType.post, v.tWebEventsType.button5);
         }
 
-        private void myFullPost2Click(object sender, EventArgs e)
+        private async void myFullPost2Click(object sender, EventArgs e)
         {
             Cursor.Current = Cursors.WaitCursor;
-            //startNodesBefore();
-            //startNodesRun(ds_MsWebNodes, v.tWebRequestType.post, v.tWebEventsType.button6);
-            startNodes(this.msWebNodes_, this.workPageNodes_, v.tWebRequestType.post, v.tWebEventsType.button6);
+            await startNodes (this.msWebNodes_, this.workPageNodes_, v.tWebRequestType.post, v.tWebEventsType.button6);
         }
 
         private void myFullSaveClick(object sender, EventArgs e)
@@ -453,7 +433,6 @@ namespace YesiLdefter
                 // pageRefresh ise sub functionda çalışsın ve false dönsün
                 // true dönerse pageRefresh değil işleme devam et
                 onayPage = await pageRefresh(v.webMain_, item);
-
 
                 if ((onayList) && (onayRequest) && (onayPage))
                 {
@@ -856,9 +835,9 @@ namespace YesiLdefter
             if ((injectType == v.tWebInjectType.Set ||
                 (injectType == v.tWebInjectType.GetAndSet && workRequestType == v.tWebRequestType.post) ||
                 // workRequestType = sadece alwaysSet isteği ve alwaysSet butonu var ise ( TC Sorgula gibi )
-                (injectType == v.tWebInjectType.AlwaysSet && workRequestType == v.tWebRequestType.alwaysSet && btn_AlwaysSet != null) ||
+                //(injectType == v.tWebInjectType.AlwaysSet && workRequestType == v.tWebRequestType.alwaysSet && btn_AlwaysSet != null) ||
                 // workRequestType = Get veya Set isteği ve alwaysSet butonu yok ise 
-                (injectType == v.tWebInjectType.AlwaysSet && workRequestType != v.tWebRequestType.alwaysSet && btn_AlwaysSet == null) ||
+                //(injectType == v.tWebInjectType.AlwaysSet && workRequestType != v.tWebRequestType.alwaysSet && btn_AlwaysSet == null) ||
                 // load sırasında 
                 (injectType == v.tWebInjectType.AlwaysSet && workEventsType == v.tWebEventsType.load)
                ) &&

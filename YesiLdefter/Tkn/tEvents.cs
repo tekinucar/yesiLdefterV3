@@ -898,6 +898,7 @@ namespace Tkn_Events
             string funcName = "";
             string TableIPCode = string.Empty;
             string myProp = ((DevExpress.XtraEditors.ButtonEdit)sender).Properties.AccessibleDescription;
+            
             string editValue = "";
 
             if (t.IsNotNull(myProp))
@@ -917,6 +918,10 @@ namespace Tkn_Events
                 {
                     TableIPCode = ((DevExpress.XtraEditors.ButtonEdit)sender).Properties.AccessibleName;
                     tForm = ((DevExpress.XtraEditors.ButtonEdit)sender).FindForm();
+                    // şimdilik gerek kalmadı
+                    //string masterCheckFName = ((DevExpress.XtraEditors.ButtonEdit)sender).Properties.AccessibleDefaultActionDescription;
+                    //if (t.IsNotNull(masterCheckFName))
+                    //    editValue = t.Find_TableIPCode_Value(tForm, TableIPCode, masterCheckFName);
                 }
 
                 if (sender.GetType().ToString() == "DevExpress.XtraEditors.SimpleButton")
@@ -1057,6 +1062,8 @@ namespace Tkn_Events
                     v.tButtonHint.propNavigator = myProp;
                     v.tButtonHint.buttonType = buttonType;
                     v.tButtonHint.columnEditValue = editValue;
+                    v.tButtonHint.senderType = sender.GetType().ToString();
+                    v.tButtonHint.checkedValue = editValue;
                     tEventsButton evb = new tEventsButton();
                     evb.btnClick(v.tButtonHint);
                 }

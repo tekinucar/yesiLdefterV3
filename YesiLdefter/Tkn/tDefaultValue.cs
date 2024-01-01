@@ -332,8 +332,8 @@ namespace Tkn_DefaultValue
             if ((default_type == 21) || // DEFAULT_TYPE', 21, '', 'Source TableIPCode READ'
                 (default_type == 31))   // DEFAULT_TYPE', 31, '', 'Master=Detail'
             {
-                string master_TableIPCode = t.Set(Field_Row["MASTER_TABLEIPCODE"].ToString(), Field_Row["LKP_MASTER_TABLEIPCODE"].ToString(), "");
-                string master_FieldName = t.Set(Field_Row["MASTER_KEY_FNAME"].ToString(), Field_Row["LKP_MASTER_KEY_FNAME"].ToString(), "");
+                string master_TableIPCode = t.Set(Field_Row["MASTER_TABLEIPCODE"].ToString(), "", "");// Field_Row["LKP_MASTER_TABLEIPCODE"].ToString(), "");
+                string master_FieldName = t.Set(Field_Row["MASTER_KEY_FNAME"].ToString(), "", "");// Field_Row["LKP_MASTER_KEY_FNAME"].ToString(), "");
                 DataSet dsData_Source = null;
                 DataNavigator dN = null;
                 int position = -1;

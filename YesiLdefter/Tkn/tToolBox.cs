@@ -488,7 +488,6 @@ namespace Tkn_ToolBox
 
         #endregion dbUpdatesChecked
 
-
         #region Db_Open
 
         /// <summary>
@@ -734,111 +733,19 @@ namespace Tkn_ToolBox
                     vt.FormCode = tForm.AccessibleDescription;
             }
         }
-        private void Preparing_TableFields(DataSet dsData, vTable vt)
+        
+        private bool IsDataTable(DataSet dsData)
         {
-            //if (vt.TableName.IndexOf("SNL_") > -1) return;
-            //if (vt.TableName.IndexOf("MS_TABLES") > -1)
-            //    MessageBox.Show("");
-
-            //if (dsData.Tables.Count > 1) return;
-            if (dsData.Tables.Count != 1) return;
+            // Data tablosumu kontrol et
+            if (dsData.Tables.Count != 1) return false;
 
             if ((dsData.Tables[0].Rows.Count == 1) &&
                 (dsData.Tables[0].Columns.Count == 1) &&
-                (dsData.Tables[0].Columns[0].Caption == "@@VERSION")) return;
-
-            // zaten bu koşul yoksa buraya gelmiyor
-            // if (vt.Cargo != "data") return;
-
-            // gelen DataSet üzerine yüklenen Table ve StoredProcedures değilse geri dönsün  
-            if ((vt.TableType != 1) && // table
-                (vt.TableType != 3) && // storedprocedure
-                (vt.TableType != 6)    // select
-                ) return;
-
-            string fields = "_FIELDS";
-            string sqlA = string.Empty;
-            string sqlB = string.Empty;
-
-            Preparing_TableFields_SQL(vt, ref sqlA, ref sqlB);
-
-            if (vt.DBaseType == v.dBaseType.MSSQL)
-            {
-                SqlDataAdapter msSqlAdapter = null;
-
-                if (sqlA != string.Empty)
-                {
-                    msSqlAdapter = new SqlDataAdapter(sqlA, vt.msSqlConnection);
-                    msSqlAdapter.Fill(dsData, vt.TableName + fields);
-                }
-
-                if (sqlB != string.Empty)
-                {
-                    msSqlAdapter = new SqlDataAdapter(sqlB, v.active_DB.managerMSSQLConn);
-                    //_FIELDS2
-                    msSqlAdapter.Fill(dsData, vt.TableName + fields + "2");
-                }
-
-                msSqlAdapter.Dispose();
-            }
+                (dsData.Tables[0].Columns[0].Caption == "@@VERSION")) return false;
+            return true;
         }
+        
 
-        private void Preparing_TableFields_SQL(vTable vt,
-               ref string sqlA, ref string sqlB)
-        {
-            if (vt.DBaseType == v.dBaseType.MSSQL)
-                sqlA =
-            @" Select  
-               a.column_id, a.name 
-             , convert(smallInt, a.system_type_id) system_type_id 
-             , convert(smallInt, a.user_type_id)   user_type_id 
-             , a.max_length, a.precision, a.scale, a.is_nullable, a.is_identity  
-             from sys.columns a 
-               left outer join sys.tables b on (a.object_id = b.object_id ) 
-             where b.name = '" + vt.TableName + @"' 
-             order by a.column_id ";
-
-            /// FFOREING Bit                 NULL,
-            /// FTRIGGER Bit                 NULL,
-            /// PROP_EXPRESSION VarChar(4000)          NULL,              
-            /// VALIDATION_INSERT Bit                NULL,
-            /// XML_FIELD_NAME VarChar(30)            NULL,
-            /// CMP_DISPLAY_FORMAT VarChar(50) 		NULL,
-
-            sqlB =
-            @" select  
-               d.FIELD_NO
-             , d.FIELD_NAME
-             , d.FFOREING 
-             , d.FTRIGGER 
-             , d.PROP_EXPRESSION 
-             , e.VALIDATION_INSERT
-             , e.XML_FIELD_NAME
-             , e.CMP_DISPLAY_FORMAT
-             , e.CMP_EDIT_FORMAT
-             , e.CMP_VISIBLE
-             , e.DEFAULT_TYPE
-             from dbo.MS_TABLES as c 
-               left outer join dbo.MS_FIELDS as d on ( c.TABLE_CODE = d.TABLE_CODE 
-                    and c.SOFTWARE_CODE = d.SOFTWARE_CODE
-                    and c.PROJECT_CODE = d.PROJECT_CODE
-                 )
-               left outer join dbo.MS_FIELDS_IP as e on (
-                     d.TABLE_CODE = e.TABLE_CODE 
-                 and d.SOFTWARE_CODE = e.SOFTWARE_CODE
-                 and d.PROJECT_CODE = e.PROJECT_CODE
-                 and d.FIELD_NO  = e.FIELD_NO
-                 and e.IP_CODE   = '" + vt.IPCode + @"' )  
-             where c.TABLE_NAME  = '" + vt.TableName + @"' 
-             and   c.SOFTWARE_CODE = '" + vt.SoftwareCode + @"'
-             and   c.PROJECT_CODE  = '" + vt.ProjectCode + @"'
-             and   c.TABLE_CODE = '" + vt.TableCode + @"'
-             order by d.FIELD_NO ";
-
-            if ((vt.TableName.IndexOf("_KIST") > -1) ||
-                (vt.TableName.IndexOf("_FULL") > -1))
-                MessageBox.Show("Preparing_Fields_SQL : Table_Name.IndexOf(_KIST) / (_FULL) : konusu vardı.");
-        }
 
         public bool Sql_ExecuteNon(string SqlText, vTable vt)
         {
@@ -1094,7 +1001,18 @@ namespace Tkn_ToolBox
             if ((vt.TableCount == 0) &&
                 (vt.Cargo == "data"))
             {
-                Preparing_TableFields(dsData, vt);
+                if (IsDataTable(dsData))
+                {
+                    if ((vt.TableType != 1) || // table
+                        (vt.TableType != 3) || // storedprocedure
+                        (vt.TableType != 6)    // select
+                       )
+                    {
+                        preparing_MsTableFields(vt);
+                        preparing_TableIPCodeTableList(vt.TableIPCode);
+                        preparing_TableIPCodeFieldsList(vt.TableIPCode);
+                    }
+                }
             }
             #endregion 2. adım
 
@@ -1111,6 +1029,546 @@ namespace Tkn_ToolBox
         }
 
         #endregion Data_Read_Execute
+
+        #region Read : msTables, msTableIPCodeTables, msTableIPCodeFields, msTableIPGroups
+        private void preparing_MsTableFields(vTable vt)
+        {
+            //string fields = "_FIELDS";
+            string sqlA = string.Empty;
+
+            var matchingTable = v.tableList.Where(stringToCheck => stringToCheck.Contains(vt.TableName));
+            if (matchingTable.Any())
+            {
+                // bu table için fieldlist1 daha önce yüklenmiş demektir
+                // bir daha okumaya gerek yok
+            }
+            else
+            {
+                v.tableList.Add(vt.TableName);
+
+                sqlA = msTableFieldsList_SQL(vt.TableName);
+
+                SqlDataAdapter msSqlAdapter = null;
+                if (sqlA != string.Empty)
+                {
+                    msSqlAdapter = new SqlDataAdapter(sqlA, vt.msSqlConnection);
+                    //msSqlAdapter.Fill(dsData, vt.TableName + fields);
+                    msSqlAdapter.Fill(v.ds_MsTableFields, vt.TableName);
+                }
+                msSqlAdapter.Dispose();
+            }
+
+        }
+        public void preparing_TableIPCodeTableList(string tableIPCode)
+        {
+            var matchingTableIPCode = v.tableIPCodeTableList.Where(stringToCheck => stringToCheck.Contains(tableIPCode));
+            if (matchingTableIPCode.Any())
+            {
+                // bu tableIPCode için table bilgileri daha önce yüklenmiş demektir
+                // bir daha okumaya gerek yok
+                return;
+            }
+            else
+            {
+                v.tableIPCodeTableList.Add(tableIPCode);
+
+                string sqlB = msTableIPCodeTableList_SQL(tableIPCode);
+
+                SqlDataAdapter msSqlAdapter2 = null;
+                if (sqlB != string.Empty)
+                {
+                    msSqlAdapter2 = new SqlDataAdapter(sqlB, v.active_DB.managerMSSQLConn);
+                    //_FIELDS2
+                    //msSqlAdapter.Fill(dsData, vt.TableName + fields + "2");
+                    msSqlAdapter2.Fill(v.ds_TableIPCodeTable, tableIPCode);// vt.TableName + fields + "2");
+                }
+                msSqlAdapter2.Dispose();
+            }
+        }
+        public void preparing_TableIPCodeFieldsList(string tableIPCode)
+        {
+            var matchingTableIPCode = v.tableIPCodeFieldsList.Where(stringToCheck => stringToCheck.Contains(tableIPCode));
+            if (matchingTableIPCode.Any())
+            {
+                // bu tableIPCode için field list daha önce yüklenmiş demektir
+                // bir daha okumaya gerek yok
+                return;
+            }
+            else
+            {
+                v.tableIPCodeFieldsList.Add(tableIPCode);
+
+                string sqlC = msTableIPCodeFieldsList_SQL(tableIPCode);
+
+                SqlDataAdapter msSqlAdapter3 = null;
+                if (sqlC != string.Empty)
+                {
+                    msSqlAdapter3 = new SqlDataAdapter(sqlC, v.active_DB.managerMSSQLConn);
+                    //_FIELDS2
+                    //msSqlAdapter.Fill(dsData, vt.TableName + fields + "2");
+                    msSqlAdapter3.Fill(v.ds_TableIPCodeFields, tableIPCode);// vt.TableName + fields + "2");
+                }
+                msSqlAdapter3.Dispose();
+            }
+        }
+        public void preparing_TableIPCodeGroupsList(string tableIPCode)
+        {
+            var matchingTableIPCode = v.tableIPCodeGroupsList.Where(stringToCheck => stringToCheck.Contains(tableIPCode));
+            if (matchingTableIPCode.Any())
+            {
+                // bu tableIPCode için groups list daha önce yüklenmiş demektir
+                // bir daha okumaya gerek yok
+                return;
+            }
+            else
+            {
+                v.tableIPCodeGroupsList.Add(tableIPCode);
+
+                string sqlC = msTableIPCodeGroupsList_SQL(tableIPCode);
+
+                SqlDataAdapter msSqlAdapter4 = null;
+                if (sqlC != string.Empty)
+                {
+                    msSqlAdapter4 = new SqlDataAdapter(sqlC, v.active_DB.managerMSSQLConn);
+                    msSqlAdapter4.Fill(v.ds_TableIPCodeGroups, tableIPCode + "_GROUPS");
+                }
+                msSqlAdapter4.Dispose();
+            }
+        }
+        public void preparing_LayoutItemsList(string masterCode)
+        {
+            var matchingMasterCode = v.msLayoutItemsList.Where(stringToCheck => stringToCheck.Contains(masterCode));
+            if (matchingMasterCode.Any())
+            {
+                // bu Layout için items list daha önce yüklenmiş demektir
+                // bir daha okumaya gerek yok
+                return;
+            }
+            else
+            {
+                v.msLayoutItemsList.Add(masterCode);
+
+                string sqlL = msLayoutItemsList_SQL(masterCode);
+
+                SqlDataAdapter msSqlAdapter5 = null;
+                if (sqlL != string.Empty)
+                {
+                    msSqlAdapter5 = new SqlDataAdapter(sqlL, v.active_DB.managerMSSQLConn);
+                    msSqlAdapter5.Fill(v.ds_MsLayoutItems, masterCode);
+                }
+                msSqlAdapter5.Dispose();
+            }
+        }
+        public void preparing_MenuItemsList(string masterCode)
+        {
+            var matchingMasterCode = v.msMenuItemsList.Where(stringToCheck => stringToCheck.Contains(masterCode));
+            if (matchingMasterCode.Any())
+            {
+                // bu Menu için items list daha önce yüklenmiş demektir
+                // bir daha okumaya gerek yok
+                return;
+            }
+            else
+            {
+                v.msMenuItemsList.Add(masterCode);
+
+                string sqlM = msMenuItemsList_SQL(masterCode);
+
+                SqlDataAdapter msSqlAdapter6 = null;
+                if (sqlM != string.Empty)
+                {
+                    msSqlAdapter6 = new SqlDataAdapter(sqlM, v.active_DB.managerMSSQLConn);
+                    msSqlAdapter6.Fill(v.ds_MsMenuItems, masterCode);
+                }
+                msSqlAdapter6.Dispose();
+            }
+        }
+        public void preparing_DataCopyList(string DC_Code)
+        {
+            var matchingDCCode = v.dataCopyList.Where(stringToCheck => stringToCheck.Contains(DC_Code));
+            if (matchingDCCode.Any())
+            {
+                // bu DataCopy için tanımlar daha önce yüklenmiş demektir
+                // bir daha okumaya gerek yok
+                return;
+            }
+            else
+            {
+                v.dataCopyList.Add(DC_Code);
+
+                string sqlDC = dataCopyList_SQL(DC_Code);
+
+                SqlDataAdapter msSqlAdapter7 = null;
+                if (sqlDC != string.Empty)
+                {
+                    msSqlAdapter7 = new SqlDataAdapter(sqlDC, v.active_DB.managerMSSQLConn);
+                    msSqlAdapter7.Fill(v.ds_DataCopy, DC_Code);
+                }
+                msSqlAdapter7.Dispose();
+            }
+        }
+        public void preparing_DataCopyLinesList(string DC_Code)
+        {
+            var matchingDCCode = v.dataCopyLinesList.Where(stringToCheck => stringToCheck.Contains(DC_Code));
+            if (matchingDCCode.Any())
+            {
+                // bu DataCopyLines için list daha önce yüklenmiş demektir
+                // bir daha okumaya gerek yok
+                return;
+            }
+            else
+            {
+                v.dataCopyLinesList.Add(DC_Code);
+
+                string sqlDCL = dataCopyLinesList_SQL(DC_Code);
+
+                SqlDataAdapter msSqlAdapter8 = null;
+                if (sqlDCL != string.Empty)
+                {
+                    msSqlAdapter8 = new SqlDataAdapter(sqlDCL, v.active_DB.managerMSSQLConn);
+                    msSqlAdapter8.Fill(v.ds_DataCopyLines, DC_Code);
+                }
+                msSqlAdapter8.Dispose();
+            }
+        }
+
+
+        //--- SQLs
+        private string msTableFieldsList_SQL(string tableName)
+        {
+            return @" 
+             Select  
+               a.column_id, a.name 
+             , convert(smallInt, a.system_type_id) as system_type_id 
+             , convert(smallInt, a.user_type_id)   as user_type_id 
+             , a.max_length, a.precision, a.scale, a.is_nullable, a.is_identity  
+             from sys.columns a With (nolock) 
+               left outer join sys.tables b With (nolock) on (a.object_id = b.object_id ) 
+             where b.name = '" + tableName + @"' 
+             order by a.column_id ";
+
+        }
+        public string msTableIPCodeTableList_SQL(string tableIPCode)
+        {
+            string softCode = "";
+            string projectCode = "";
+            string TableCode = string.Empty;
+            string IPCode = string.Empty;
+
+            TableIPCode_Get(tableIPCode, ref softCode, ref projectCode, ref TableCode, ref IPCode);
+
+            string tSql =
+              @" Select a.*  
+               , b.SCHEMAS_CODE        LKP_SCHEMAS_CODE   
+               , b.DBASE_TYPE          LKP_DBASE_TYPE 
+               , b.MODUL_CODE          LKP_MODUL_CODE 
+               , b.PARENT_TABLE_CODE   LKP_PARENT_TABLE_CODE 
+               , b.TABLE_CODE          LKP_TABLE_CODE 
+               , b.TABLE_NAME          LKP_TABLE_NAME 
+               , b.KEY_FNAME           LKP_KEY_FNAME  
+               , b.TABLE_TYPE          LKP_TABLE_TYPE 
+
+               , b.MASTER_TABLEIPCODE  LKP_MASTER_TABLEIPCODE 
+               , b.MASTER_TABLE_NAME   LKP_MASTER_TABLE_NAME 
+               , b.MASTER_KEY_FNAME    LKP_MASTER_KEY_FNAME 
+              
+               , b.FOREING_FNAME       LKP_FOREING_FNAME 
+               , b.PARENT_FNAME        LKP_PARENT_FNAME 
+               , b.TB_CAPTION          LKP_TB_CAPTION 
+               , b.TB_SELECT_SQL       LKP_TB_SELECT_SQL 
+               , b.TB_WHERE_SQL        LKP_TB_WHERE_SQL 
+               , b.TB_ORDER_BY         LKP_TB_ORDER_BY 
+               , b.PROP_SUBVIEW        LKP_PROP_SUBVIEW 
+               , b.PROP_JOINTABLE      LKP_PROP_JOINTABLE 
+                             
+               from MS_TABLES_IP a With (nolock)
+                 left outer join MS_TABLES b With (nolock) on ( 
+                        a.TABLE_CODE = b.TABLE_CODE 
+                    and a.SOFTWARE_CODE = b.SOFTWARE_CODE
+                    and a.PROJECT_CODE = b.PROJECT_CODE
+                    ) 
+               where 0 = 0 ";
+
+            if ((TableCode != "") && (TableCode != "null"))
+                tSql += " and a.TABLE_CODE = '" + TableCode + "' ";
+
+            if ((IPCode != "") && (IPCode != "null"))
+                tSql += " and a.IP_CODE = '" + IPCode + "' ";
+
+            if ((softCode != "") && (softCode != "null"))
+                tSql += " and a.SOFTWARE_CODE = '" + softCode + "' ";
+
+            if ((projectCode != "") && (projectCode != "null"))
+                tSql += " and a.PROJECT_CODE = '" + projectCode + "' ";
+
+            return tSql;
+        }
+        public string msTableIPCodeFieldsList_SQL(string tableIPCode)
+        {
+            //public string SQL_MS_FIELDS_IP_LIST(string Table_IP_Code)
+            string softCode = "";
+            string projectCode = "";
+            string tableCode = string.Empty;
+            string IPCode = string.Empty;
+
+            TableIPCode_Get(tableIPCode, ref softCode, ref projectCode, ref tableCode, ref IPCode);
+
+            string msfields_list = MS_FIELDS_LIST("b");
+
+            string tSql =
+              " Select a.* " + v.ENTER
+            + " , c.TABLE_NAME as LKP_TABLE_NAME " + v.ENTER
+            + " , c.DBASE_TYPE as LKP_DBASE_TYPE " + v.ENTER
+
+            + msfields_list
+            + " from MS_FIELDS_IP a With (nolock) " + v.ENTER
+            + "   left outer join MS_FIELDS b With (nolock) on ( a.TABLE_CODE = b.TABLE_CODE and a.FIELD_NO = b.FIELD_NO ) " + v.ENTER
+            + "   left outer join MS_TABLES c With (nolock) on ( a.TABLE_CODE = c.TABLE_CODE ) " + v.ENTER
+            + " where a.TABLE_CODE = '" + tableCode + "' " + v.ENTER
+            + " and   a.IP_CODE = '" + IPCode + "' " + v.ENTER;
+
+            if ((softCode != "") && (softCode != "null"))
+                tSql += " and   a.SOFTWARE_CODE = '" + softCode + "' " + v.ENTER
+                      + " and   a.SOFTWARE_CODE = b.SOFTWARE_CODE " + v.ENTER
+                      + " and   a.SOFTWARE_CODE = c.SOFTWARE_CODE " + v.ENTER;
+
+            if ((projectCode != "") && (projectCode != "null"))
+                tSql += " and   a.PROJECT_CODE = '" + projectCode + "' " + v.ENTER
+                      + " and   a.PROJECT_CODE = b.PROJECT_CODE " + v.ENTER
+                      + " and   a.PROJECT_CODE = c.PROJECT_CODE " + v.ENTER;
+
+            tSql +=
+              " order by "
+            + " isnull(a.GROUP_NO,0), isnull(a.GROUP_LINE_NO,0), "
+            + " isnull(b.GROUP_NO,0), isnull(b.GROUP_LINE_NO,0), "
+            + " isnull(a.FIELD_NO,0) ";
+
+            return tSql;
+            #region
+            /*
+                        sqlB =
+                        @" select  
+                           d.FIELD_NO
+                         , d.FIELD_NAME
+                         , d.FFOREING 
+                         , d.FTRIGGER 
+                         , d.PROP_EXPRESSION 
+                         , e.VALIDATION_INSERT
+                         , e.XML_FIELD_NAME
+                         , e.CMP_DISPLAY_FORMAT
+                         , e.CMP_EDIT_FORMAT
+                         , e.CMP_VISIBLE
+                         , e.DEFAULT_TYPE
+                         from dbo.MS_TABLES as c 
+                           left outer join dbo.MS_FIELDS as d on ( 
+                               c.TABLE_CODE = d.TABLE_CODE 
+                           and c.SOFTWARE_CODE = d.SOFTWARE_CODE
+                           and c.PROJECT_CODE = d.PROJECT_CODE
+                           )
+                           left outer join dbo.MS_FIELDS_IP as e on (
+                               d.TABLE_CODE = e.TABLE_CODE 
+                           and d.SOFTWARE_CODE = e.SOFTWARE_CODE
+                           and d.PROJECT_CODE = e.PROJECT_CODE
+                           and d.FIELD_NO = e.FIELD_NO
+                           and e.IP_CODE = '" + vt.IPCode + @"' )  
+                         where c.TABLE_NAME = '" + vt.TableName + @"' 
+                         and   c.SOFTWARE_CODE = '" + vt.SoftwareCode + @"'
+                         and   c.PROJECT_CODE = '" + vt.ProjectCode + @"'
+                         and   c.TABLE_CODE = '" + vt.TableCode + @"'
+                         order by d.FIELD_NO ";
+
+                        if ((vt.TableName.IndexOf("_KIST") > -1) ||
+                            (vt.TableName.IndexOf("_FULL") > -1))
+                            MessageBox.Show("Preparing_Fields_SQL : Table_Name.IndexOf(_KIST) / (_FULL) : konusu vardı.");
+            */
+            #endregion
+
+        }
+        public string MS_FIELDS_LIST(string Alias)
+        {
+
+            string s = v.ENTER
+           + " , " + Alias + ".TABLE_CODE               LKP_TABLE_CODE " + v.ENTER
+           + " , " + Alias + ".FIELD_NO                 LKP_FIELD_NO " + v.ENTER
+           + " , " + Alias + ".FIELD_NAME               LKP_FIELD_NAME " + v.ENTER
+           + " , " + Alias + ".FIELD_TYPE               LKP_FIELD_TYPE " + v.ENTER
+           + " , " + Alias + ".FIELD_LENGTH             LKP_FIELD_LENGTH " + v.ENTER
+           + " , " + Alias + ".FAUTOINC                 LKP_FAUTOINC " + v.ENTER
+           + " , " + Alias + ".FNOTNULL                 LKP_FNOTNULL " + v.ENTER
+           + " , " + Alias + ".FREADONLY                LKP_FREADONLY " + v.ENTER
+           + " , " + Alias + ".FENABLED                 LKP_FENABLED " + v.ENTER
+           + " , " + Alias + ".FVISIBLE                 LKP_FVISIBLE " + v.ENTER
+           + " , " + Alias + ".FINDEX                   LKP_FINDEX " + v.ENTER
+           + " , " + Alias + ".FPICTURE                 LKP_FPICTURE " + v.ENTER
+           + " , " + Alias + ".FTRIGGER                 LKP_FTRIGGER " + v.ENTER
+           + " , " + Alias + ".FFOREING                 LKP_FFOREING " + v.ENTER
+           + " , " + Alias + ".FMEMORY_FIELD            LKP_FMEMORY_FIELD " + v.ENTER
+           + " , " + Alias + ".FLOOKUP_FIELD            LKP_FLOOKUP_FIELD " + v.ENTER
+
+           + " , " + Alias + ".FCAPTION                 LKP_FCAPTION " + v.ENTER
+           //+ " , " + Alias + ".FHINT                    LKP_FHINT " + v.ENTER
+
+           + " , " + Alias + ".DEFAULT_TYPE             LKP_DEFAULT_TYPE " + v.ENTER
+           //+ " , " + Alias + ".DEFAULT_TYPE2            LKP_DEFAULT_TYPE2 " + v.ENTER
+           + " , " + Alias + ".DEFAULT_NUMERIC          LKP_DEFAULT_NUMERIC " + v.ENTER
+           + " , " + Alias + ".DEFAULT_TEXT             LKP_DEFAULT_TEXT " + v.ENTER
+           + " , " + Alias + ".DEFAULT_INT              LKP_DEFAULT_INT " + v.ENTER
+           + " , " + Alias + ".DEFAULT_SP               LKP_DEFAULT_SP " + v.ENTER
+           + " , " + Alias + ".DEFAULT_SETUP            LKP_DEFAULT_SETUP " + v.ENTER
+
+           + " , " + Alias + ".CMP_COLUMN_TYPE          LKP_CMP_COLUMN_TYPE " + v.ENTER
+           + " , " + Alias + ".CMP_WIDTH                LKP_CMP_WIDTH " + v.ENTER
+           + " , " + Alias + ".CMP_SORT_TYPE            LKP_CMP_SORT_TYPE " + v.ENTER
+           + " , " + Alias + ".CMP_SUMMARY_TYPE         LKP_CMP_SUMMARY_TYPE " + v.ENTER
+           + " , " + Alias + ".CMP_FORMAT_TYPE          LKP_CMP_FORMAT_TYPE " + v.ENTER
+           + " , " + Alias + ".CMP_DISPLAY_FORMAT       LKP_CMP_DISPLAY_FORMAT " + v.ENTER
+           + " , " + Alias + ".CMP_EDIT_FORMAT          LKP_CMP_EDIT_FORMAT " + v.ENTER
+           + " , " + Alias + ".LIST_TYPES_NAME          LKP_LIST_TYPES_NAME " + v.ENTER
+           + " , " + Alias + ".VALIDATION_OPERATOR      LKP_VALIDATION_OPERATOR " + v.ENTER
+           + " , " + Alias + ".VALIDATION_VALUE1        LKP_VALIDATION_VALUE1 " + v.ENTER
+           + " , " + Alias + ".VALIDATION_VALUE2        LKP_VALIDATION_VALUE2 " + v.ENTER
+           + " , " + Alias + ".VALIDATION_ERRORTEXT     LKP_VALIDATION_ERRORTEXT " + v.ENTER
+           + " , " + Alias + ".VALIDATION_ERRORTYPE     LKP_VALIDATION_ERRORTYPE " + v.ENTER
+
+           //+ " , " + Alias + ".KRT_LINE_NO              LKP_KRT_LINE_NO " + v.ENTER
+           //+ " , " + Alias + ".KRT_CAPTION              LKP_KRT_CAPTION " + v.ENTER // Kriter FieldName olara kullnaılıyor
+           //+ " , " + Alias + ".KRT_OPERAND_TYPE         LKP_KRT_OPERAND_TYPE " + v.ENTER
+           //+ " , " + Alias + ".KRT_LIKE                 LKP_KRT_LIKE " + v.ENTER
+           //+ " , " + Alias + ".KRT_DEFAULT1             LKP_KRT_DEFAULT1 " + v.ENTER
+           //+ " , " + Alias + ".KRT_DEFAULT2             LKP_KRT_DEFAULT2 " + v.ENTER
+           //+ " , " + Alias + ".KRT_ALIAS                LKP_KRT_ALIAS " + v.ENTER
+           //+ " , " + Alias + ".KRT_TABLE_ALIAS          LKP_KRT_TABLE_ALIAS " + v.ENTER
+
+           //+ " , " + Alias + ".MASTER_TABLEIPCODE       LKP_MASTER_TABLEIPCODE " + v.ENTER
+           //+ " , " + Alias + ".SEARCH_TABLEIPCODE       LKP_MASTER_TABLE_NAME " + v.ENTER
+           //+ " , " + Alias + ".MASTER_KEY_FNAME         LKP_MASTER_KEY_FNAME " + v.ENTER
+           //+ " , " + Alias + ".MASTER_CHECK_FNAME       LKP_MASTER_CHECK_FNAME " + v.ENTER
+           //+ " , " + Alias + ".MASTER_CHECK_VALUE       LKP_MASTER_CHECK_VALUE " + v.ENTER
+
+           + " , " + Alias + ".GROUP_NO                 LKP_GROUP_NO " + v.ENTER
+           + " , " + Alias + ".GROUP_LINE_NO            LKP_GROUP_LINE_NO " + v.ENTER
+
+           + " , " + Alias + ".EXPRESSION_TYPE          LKP_EXPRESSION_TYPE " + v.ENTER
+           + " , " + Alias + ".PROP_EXPRESSION          LKP_PROP_EXPRESSION " + v.ENTER // LKP_EXPRESSION
+
+           //+ " , " + Alias + ".FJOIN_TABLE_NAME         LKP_FJOIN_TABLE_NAME " + v.ENTER
+           //+ " , " + Alias + ".FJOIN_TABLE_ALIAS        LKP_FJOIN_TABLE_ALIAS " + v.ENTER
+           //+ " , " + Alias + ".FJOIN_KEY_FNAME          LKP_FJOIN_KEY_FNAME " + v.ENTER
+           //+ " , " + Alias + ".FJOIN_CAPTION_FNAME      LKP_FJOIN_CAPTION_FNAME " + v.ENTER
+           ;
+
+            return s;
+        }
+        public string msTableIPCodeGroupsList_SQL(string tableIPCode)
+        {
+            //public string SQL_MS_GROUPS(string Table_IP_Code)
+            string softCode = "";
+            string projectCode = "";
+            string tableCode = string.Empty;
+            string IPCode = string.Empty;
+
+            TableIPCode_Get(tableIPCode, ref softCode, ref projectCode, ref tableCode, ref IPCode);
+
+            string tSql =
+               @" Select x.* from ( 
+               select
+                 a.MAIN_TABLE_NAME
+               , a.TABLE_CODE
+               , a.GROUP_TYPES
+               , a.FCAPTION
+               , a.FGROUPNO
+               , a.FVISIBLE
+               , a.FIXED
+               , a.CMP_WIDTH
+               , a.MOVE_ITEM_TYPE
+               , a.MOVE_ITEM_NAME
+               , a.MOVE_TYPE
+               , a.MOVE_LOCATION
+               , a.MOVE_LAYOUT_TYPE
+               , a.PROP_VIEWS
+               , 1 TABLE_NO
+
+               from MS_GROUPS a With (nolock)
+               where a.MAIN_TABLE_NAME = 'MS_FIELDS_IP'
+               and a.TABLE_CODE = '" + tableCode + @"'
+               and a.IP_CODE = '" + IPCode + @"'
+               and a.SOFTWARE_CODE = '" + softCode + @"'
+               and a.PROJECT_CODE = '" + projectCode + @"'
+
+               union all
+
+               select
+                 a.MAIN_TABLE_NAME
+               , a.TABLE_CODE
+               , a.GROUP_TYPES
+               , a.FCAPTION
+               , a.FGROUPNO
+               , a.FVISIBLE
+               , a.FIXED
+               , a.CMP_WIDTH
+               , a.MOVE_ITEM_TYPE
+               , a.MOVE_ITEM_NAME
+               , a.MOVE_TYPE
+               , a.MOVE_LOCATION
+               , a.MOVE_LAYOUT_TYPE
+               , a.PROP_VIEWS
+               , 2 TABLE_NO
+
+               from MS_GROUPS a With (nolock)
+               where a.MAIN_TABLE_NAME = 'MS_FIELDS'
+               and a.TABLE_CODE = '" + tableCode + @"'
+               and a.SOFTWARE_CODE = '" + softCode + @"'
+               and a.PROJECT_CODE = '" + projectCode + @"'
+               ) x
+
+              order by x.TABLE_NO, x.FGROUPNO ";
+
+            return tSql;
+        }
+        public string msLayoutItemsList_SQL(string masterCode)
+        {
+            // public string SQL_MS_LAYOUT_LIST(string MasterCode, byte MasterItemType)
+
+            //if (MasterItemType > 0)
+            //    myAnd = " and a.MASTER_ITEM_TYPE = " + MasterItemType.ToString() + " ";
+
+            string tSql =
+            @" select a.* from MS_LAYOUT a With (nolock)
+               where a.MASTER_CODE = '" + masterCode + @"' 
+               order by a.MASTER_CODE, isnull(a.GROUP_LINE_NO,0), isnull(a.LAYOUT_CODE,0) ";
+            return tSql;
+        }
+        public string msMenuItemsList_SQL(string masterCode)
+        {
+            // public string SQL_MS_ITEMS_LIST(string MasterCode, byte MasterItemType)
+            // and a.MASTER_ITEM_TYPE = " + MasterItemType.ToString() +  
+
+            string tSql =
+            @"  select a.* 
+                , g16.GLYPH LKP_GLYPH16 
+                , g32.GLYPH LKP_GLYPH32 
+                from MS_ITEMS a With (nolock)
+                  left outer join MS_GLYPH g16 With (nolock) on (a.GYLPH_16 = g16.GLYPH_NAME) 
+                  left outer join MS_GLYPH g32 With (nolock) on (a.GYLPH_32 = g32.GLYPH_NAME) 
+               where a.MASTER_CODE = '" + masterCode + @"' 
+               and a.MASTER_ITEM_TYPE = 3
+               order by a.MASTER_CODE, a.ITEM_CODE ";
+
+            return tSql;
+        }
+        public string dataCopyList_SQL(string DC_Code)
+        {
+            return
+             @" Select a.* from [dbo].[MS_DC] as a With (nolock) Where  a.DC_CODE = '" + DC_Code + @"' ";
+        }
+        public string dataCopyLinesList_SQL(string DC_Code)
+        {
+            return
+              @" Select a.* from [dbo].[MS_DC_LINE] as a With (nolock) Where  a.DC_CODE = '" + DC_Code + @"' Order by a.LINE_NO ";
+        }
+        
+        //--- SQLs end
+        #endregion Read : msTables, msTableIPCodeTables, msTableIPCodeFields, msTableIPGroups
 
         #region SQL_Read_Execute
         public Boolean SQL_Read_Execute(v.dBaseNo dBNo, DataSet dsData,
@@ -1717,7 +2175,7 @@ namespace Tkn_ToolBox
         }
         #endregion
 
-        
+        #region RunQueryModels
         public async Task<List<T>> RunQueryModelsAsync<T>(DataSet ds)
         {
             //DataTable dataTable = await RunQueryTableAsync(queryAbout);
@@ -1780,6 +2238,8 @@ namespace Tkn_ToolBox
 
             return packet;
         }
+
+        #endregion RunQueryModels
 
         #endregion Database İşlemleri
 
@@ -7742,7 +8202,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
             cntrl = Find_Control(tForm, CmpName, TableIPCode, controls);
 
-            Takipci(function_name, "", '}');
+            //Takipci(function_name, "", '}');
 
             if (cntrl != null)
             {
@@ -8522,14 +8982,17 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
             return fname;
         }
-
-        public bool Find_TableFields(DataSet dsData, SqlConnection SqlConn)
+        
+        public bool Find_TableFields(DataSet dsData)
         {
-
+            string myProp = dsData.Namespace;
+            string tableName = MyProperties_Get(myProp, "TableName:");// + "_FIELDS";
+            DataTable dt = v.ds_MsTableFields.Tables[tableName];
+            if (dt == null) return false;
+            if (dt.Rows.Count == 0) return false;
+            dt.Dispose();
             return true;
-            // buradaki kodlar zaten kapılmıştı sildim.
         }
-
         public int Find_Field_Type_Id(DataSet dsData, string fieldName, ref string displayFormat)
         {
             int ftype = 0;
@@ -8539,52 +9002,57 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             {
                 if (dsData.Namespace != null)
                 {
-                    int TableCount = dsData.Tables.Count;
+                    
+                    int i2 = 0;
+                    string function_name = "";
+                    string myProp = dsData.Namespace.ToString();
+                    string tableName = Set(MyProperties_Get(myProp, "=TableName:"), "", "TABLE1");
+                    string TableIPCode = MyProperties_Get(myProp, "TableIPCode:");
+                    //string TableFields = Table_Name + "_FIELDS";
 
-                    if (TableCount > 1)
+                    if (Find_TableFields(dsData))
                     {
-                        int i2 = 0;
-                        string function_name = "";
-                        string myProp = dsData.Namespace.ToString();
-                        string Table_Name = Set(MyProperties_Get(myProp, "=TableName:"), "", "TABLE1");
-                        string TableFields = Table_Name + "_FIELDS";
-
                         try
                         {
-                            i2 = dsData.Tables[TableFields].Rows.Count;
-
+                            i2 = v.ds_MsTableFields.Tables[tableName].Rows.Count;
                             if (i2 == 0)
-                                MessageBox.Show("DİKKAT : " + Table_Name + " isimli tablonun field listesi bulunamadı ... " + v.ENTER2 +
-                                                "( Tables[xxxx_FIELDS].Rows.Count = 0 )", function_name);
+                            {
+                                MessageBox.Show("DİKKAT : " + tableName + " isimli tablonun field listesi bulunamadı ... " + v.ENTER2 +
+                                                "( TableFields[xxxx_FIELDS].Rows.Count = 0 )", function_name);
+                                return ftype;
+                            }
                         }
                         catch
                         {
-                            MessageBox.Show("DİKKAT : " + Table_Name + " isimli tablonun field listesi bulunamadı ... " + v.ENTER2 +
-                                            "( Tables[xxxx_FIELDS].Rows.Count = 0 )", function_name);
+                            MessageBox.Show("DİKKAT : " + tableName + " isimli tablonun field listesi bulunamadı ... " + v.ENTER2 +
+                                            "( TableFields[xxxx_FIELDS].Rows.Count = 0 )", function_name);
                             i2 = 0;
+                            return ftype;
                         }
 
                         string ValidationInsert = "";
                         string fForeing = "";
                         string fTrigger = "";
-                        //string displayFormat = "";
                         string fVisible = "";
-
                         string fname = "";
+                        //string displayFormat = "";
+
                         for (int i = 0; i < i2; i++)
                         {
-                            fname = dsData.Tables[TableFields].Rows[i]["name"].ToString();
+                            //fname = dsData.Tables[TableFields].Rows[i]["name"].ToString();
+                            fname = v.ds_MsTableFields.Tables[tableName].Rows[i]["name"].ToString();
                             if (fname == fieldName)
                             {
-                                ftype = myInt32(dsData.Tables[TableFields].Rows[i]["user_type_id"].ToString());
+                                //ftype = myInt32(dsData.Tables[TableFields].Rows[i]["user_type_id"].ToString());
+                                ftype = myInt32(v.ds_MsTableFields.Tables[tableName].Rows[i]["user_type_id"].ToString());
 
-                                OtherValues_Get(dsData, TableFields + "2", fname,
+                                //OtherValues_Get(dsData, TableFields + "2", fname,
+                                //    ref ValidationInsert, ref fForeing, ref fTrigger, ref displayFormat, ref fVisible);
+                                OtherValues_Get(v.ds_TableIPCodeFields, TableIPCode, fname,
                                     ref ValidationInsert, ref fForeing, ref fTrigger, ref displayFormat, ref fVisible);
-
                                 break;
                             }
                         }
-
                     }
                 }
             }
@@ -8602,16 +9070,35 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
             for (int i = 0; i < j; i++)
             {
-                if (ds.Tables[tableName].Rows[i]["FIELD_NAME"].ToString() == fName)
+                //if (ds.Tables[tableName].Rows[i]["FIELD_NAME"].ToString() == fName)
+                if (ds.Tables[tableName].Rows[i]["LKP_FIELD_NAME"].ToString() == fName)
                 {
                     ValidationInsert = Set(ds.Tables[tableName].Rows[i]["VALIDATION_INSERT"].ToString(), "", "False");
-                    fForeing = Set(ds.Tables[tableName].Rows[i]["FFOREING"].ToString(), "", "False");
-                    fTrigger = Set(ds.Tables[tableName].Rows[i]["FTRIGGER"].ToString(), "", "False");
+                    //fForeing = Set(ds.Tables[tableName].Rows[i]["FFOREING"].ToString(), "", "False");
+                    //fTrigger = Set(ds.Tables[tableName].Rows[i]["FTRIGGER"].ToString(), "", "False");
+                    fForeing = Set(ds.Tables[tableName].Rows[i]["LKP_FFOREING"].ToString(), "", "False");
+                    fTrigger = Set(ds.Tables[tableName].Rows[i]["LKP_FTRIGGER"].ToString(), "", "False");
                     displayFormat = Set(ds.Tables[tableName].Rows[i]["CMP_DISPLAY_FORMAT"].ToString(), "", "");
                     fVisible = Set(ds.Tables[tableName].Rows[i]["CMP_VISIBLE"].ToString(), "", "");
                     break;
                 }
             }
+            /*
+            dbo.MS_FIELDS as d
+               d.FIELD_NO
+             , d.FIELD_NAME
+             , d.FFOREING 
+             , d.FTRIGGER 
+             , d.PROP_EXPRESSION 
+            
+            dbo.MS_FIELDS_IP as e 
+             , e.VALIDATION_INSERT
+             , e.XML_FIELD_NAME
+             , e.CMP_DISPLAY_FORMAT
+             , e.CMP_EDIT_FORMAT
+             , e.CMP_VISIBLE
+             , e.DEFAULT_TYPE
+            */
         }
 
         public VGridControl Find_VGridControl(Form tForm, string VGridName, string TableIPCode)
@@ -11350,138 +11837,141 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             if ((send_FieldName != "") && (send_Value == "")) 
                 send_Value = "0";
 
-            if (Find_TableFields(dsData, null))
+            List<PROP_EXPRESSION> prop_ = null;
+
+            MessageBox.Show("DİKKAT : Preparing_Expression için  v.ds_MsTableFields düzenlemesi yapman gerekiyor");
+            //v.ds_MsTableFields
+            //v.ds_TableIPCodeFields
+            return;
+
+            string tname1 = dsData.Tables[1].TableName;
+            string tname2 = dsData.Tables[2].TableName;
+
+            int i4 = dsData.Tables[tname1].Rows.Count;
+
+            string send_prop_Expression = prop_Expression_Get(dsData, tname2, send_FieldName);
+
+            string prop_Expression = string.Empty;
+            string exp_formul_fname = string.Empty;
+
+
+            // DataLayoutControl ise
+            #region yapılan değişikliği view üzerine işle
+
+            Control cntrl = null;
+            cntrl = Find_Control_View(tForm, TableIPCode);
+
+            Control cntrlExt = null;
+            string External_TableIPCode = Find_External_TableIPCode(dsData);
+            if (IsNotNull(External_TableIPCode))
             {
-                List<PROP_EXPRESSION> prop_ = null;
-
-                string tname1 = dsData.Tables[1].TableName;
-                string tname2 = dsData.Tables[2].TableName;
-
-                int i4 = dsData.Tables[tname1].Rows.Count;
-
-                string send_prop_Expression = prop_Expression_Get(dsData, tname2, send_FieldName);
-
-                string prop_Expression = string.Empty;
-                string exp_formul_fname = string.Empty;
-
-
-                // DataLayoutControl ise
-                #region yapılan değişikliği view üzerine işle
-
-                Control cntrl = null;
-                cntrl = Find_Control_View(tForm, TableIPCode);
-
-                Control cntrlExt = null;
-                string External_TableIPCode = Find_External_TableIPCode(dsData);
-                if (IsNotNull(External_TableIPCode))
-                {
-                    cntrlExt = Find_Control_View(tForm, External_TableIPCode);
-                }
-
-                #endregion
-
-                string s2 = (char)34 + "EXP_TYPE" + (char)34 + ":";
-                /// "EXP_TYPE":
-
-                /// formül iki şekilde olabilir
-                /// birincisi  [
-
-                vExpression vExp = new vExpression();
-
-                vExp.tForm = tForm;
-                vExp.cntrl = cntrl;
-                vExp.cntrlExt = cntrlExt;
-                vExp.dsData = dsData;
-                vExp.pos = pos;
-                vExp.send_FieldName = send_FieldName;
-                vExp.send_Value = send_Value;
-
-                //List<PROP_EXPRESSION> packet = new List<PROP_EXPRESSION>();
-
-                int p = send_prop_Expression.IndexOf("[");
-                if ((p == -1) || (p > 10))
-                    send_prop_Expression = "[" + send_prop_Expression + "]";
-
-                //List<PROP_EXPRESSION> prop_ = t.readPropList<PROP_EXPRESSION>(send_prop_Expression);
-
-
-                #region // tablonu fieldleri
-
-                for (int i = 0; i < i4; i++)
-                {
-                    /// EXP_TYPE 
-                    /// COMP = Compute
-                    /// SETDATA = Set Data
-                    vExp.exp_type = "";
-                    /// "formül gelecek";
-                    vExp.exp_value = "";
-                    /// formülün sahibi olan field
-                    exp_formul_fname = dsData.Tables[tname1].Rows[i]["name"].ToString();
-
-                    /// formül okunuyor 
-                    /// eski hali böyleydi (xxx_fields )
-                    ///prop_Expression = dsData.Tables[tname2].Rows[i]["PROP_EXPRESSION"].ToString();
-                    /// yeni hali böyle ( xxx_fields ve xxx_fields2 )
-                    prop_Expression = prop_Expression_Get(dsData, tname2, exp_formul_fname);
-
-                    //if (exp_formul_fname == "ISKONTO_TUTARI")
-                    //{
-                    //    //    // maksat durdurmak
-                    //    v.Kullaniciya_Mesaj_Var = send_FieldName;
-                    //}
-
-                    if (IsNotNull(prop_Expression))
-                    {
-                        vExp.exp_formul_fname = exp_formul_fname;
-                        vExp.extra_fname = "";
-
-                        // sonuc değişkenini boşaltalım
-                        //value = "";
-
-                        v.con_Expression_View =
-                            v.con_Expression_View + "  " + exp_formul_fname + " : field " + v.ENTER;
-
-                        // json format varsa
-                        if (prop_Expression.IndexOf(s2) > -1)
-                        {
-                            //if (vExp.exp_formul_fname.ToString() == "TEVKIFAT_PAY")
-                            //if (vExp.exp_formul_fname.ToString() == "ISKONTO_ORANI")
-                            //{
-                            //    // maksat durdurmak
-                            //    v.Kullaniciya_Mesaj_Var = vExp.exp_formul_fname.ToString();
-                            //}
-
-                            // prop_Expression : eğer birden fazla ( JSON ) yorum ve hesap varsa 
-                            // sırayla işlem yapması için Exp_Preparinge git ve orada her json satırı için teker teker hesapla
-
-                            //List<PROP_EXPRESSION> 
-                            prop_ = readPropList<PROP_EXPRESSION>(prop_Expression);
-
-                            vExp.pa = "<";
-                            vExp.pk = ">";
-                            vExp.exp_value = "";
-                            Exp_Preparing(vExp, prop_);
-                        }
-                        else
-                        {
-                            // prop_Expression içinde sadece tek bir formul var ise direk buradan git çalış
-
-                            // json değilde düz yazılmış formul ise
-                            vExp.pa = "[";
-                            vExp.pk = "]";
-                            vExp.exp_value = prop_Expression;
-                            vExp.focus_field = "FALSE"; // tek formul olduğu için
-                            Exp_Set(vExp);
-                        }
-
-                        v.con_Expression_View =
-                            v.con_Expression_View + v.ENTER + "-------------- " + v.ENTER;
-
-                    } //if (t.IsNotNull(prop_Expression))
-                } // for 
-
-                #endregion
+                cntrlExt = Find_Control_View(tForm, External_TableIPCode);
             }
+
+            #endregion
+
+            string s2 = (char)34 + "EXP_TYPE" + (char)34 + ":";
+            /// "EXP_TYPE":
+
+            /// formül iki şekilde olabilir
+            /// birincisi  [
+
+            vExpression vExp = new vExpression();
+
+            vExp.tForm = tForm;
+            vExp.cntrl = cntrl;
+            vExp.cntrlExt = cntrlExt;
+            vExp.dsData = dsData;
+            vExp.pos = pos;
+            vExp.send_FieldName = send_FieldName;
+            vExp.send_Value = send_Value;
+
+            //List<PROP_EXPRESSION> packet = new List<PROP_EXPRESSION>();
+
+            int p = send_prop_Expression.IndexOf("[");
+            if ((p == -1) || (p > 10))
+                send_prop_Expression = "[" + send_prop_Expression + "]";
+
+            //List<PROP_EXPRESSION> prop_ = t.readPropList<PROP_EXPRESSION>(send_prop_Expression);
+
+
+            #region // tablonu fieldleri
+
+            for (int i = 0; i < i4; i++)
+            {
+                /// EXP_TYPE 
+                /// COMP = Compute
+                /// SETDATA = Set Data
+                vExp.exp_type = "";
+                /// "formül gelecek";
+                vExp.exp_value = "";
+                /// formülün sahibi olan field
+                exp_formul_fname = dsData.Tables[tname1].Rows[i]["name"].ToString();
+
+                /// formül okunuyor 
+                /// eski hali böyleydi (xxx_fields )
+                ///prop_Expression = dsData.Tables[tname2].Rows[i]["PROP_EXPRESSION"].ToString();
+                /// yeni hali böyle ( xxx_fields ve xxx_fields2 )
+                prop_Expression = prop_Expression_Get(dsData, tname2, exp_formul_fname);
+
+                //if (exp_formul_fname == "ISKONTO_TUTARI")
+                //{
+                //    //    // maksat durdurmak
+                //    v.Kullaniciya_Mesaj_Var = send_FieldName;
+                //}
+
+                if (IsNotNull(prop_Expression))
+                {
+                    vExp.exp_formul_fname = exp_formul_fname;
+                    vExp.extra_fname = "";
+
+                    // sonuc değişkenini boşaltalım
+                    //value = "";
+
+                    v.con_Expression_View =
+                        v.con_Expression_View + "  " + exp_formul_fname + " : field " + v.ENTER;
+
+                    // json format varsa
+                    if (prop_Expression.IndexOf(s2) > -1)
+                    {
+                        //if (vExp.exp_formul_fname.ToString() == "TEVKIFAT_PAY")
+                        //if (vExp.exp_formul_fname.ToString() == "ISKONTO_ORANI")
+                        //{
+                        //    // maksat durdurmak
+                        //    v.Kullaniciya_Mesaj_Var = vExp.exp_formul_fname.ToString();
+                        //}
+
+                        // prop_Expression : eğer birden fazla ( JSON ) yorum ve hesap varsa 
+                        // sırayla işlem yapması için Exp_Preparinge git ve orada her json satırı için teker teker hesapla
+
+                        //List<PROP_EXPRESSION> 
+                        prop_ = readPropList<PROP_EXPRESSION>(prop_Expression);
+
+                        vExp.pa = "<";
+                        vExp.pk = ">";
+                        vExp.exp_value = "";
+                        Exp_Preparing(vExp, prop_);
+                    }
+                    else
+                    {
+                        // prop_Expression içinde sadece tek bir formul var ise direk buradan git çalış
+
+                        // json değilde düz yazılmış formul ise
+                        vExp.pa = "[";
+                        vExp.pk = "]";
+                        vExp.exp_value = prop_Expression;
+                        vExp.focus_field = "FALSE"; // tek formul olduğu için
+                        Exp_Set(vExp);
+                    }
+
+                    v.con_Expression_View =
+                        v.con_Expression_View + v.ENTER + "-------------- " + v.ENTER;
+
+                } //if (t.IsNotNull(prop_Expression))
+            } // for 
+
+            #endregion
+            
         }
 
         private string Exp_Preparing(vExpression vExp, List<PROP_EXPRESSION> prop_)

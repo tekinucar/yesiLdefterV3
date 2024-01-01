@@ -1093,7 +1093,11 @@ namespace Tkn_DevColumn
             string teditformat = t.Set(Row["CMP_EDIT_FORMAT"].ToString(), Row["LKP_CMP_EDIT_FORMAT"].ToString(), "");
             string tProp_Navigator = t.Set(Row["PROP_NAVIGATOR"].ToString(), "", "");
             string prop_ = tProp_Navigator.Replace((char)34, (char)39);
-            
+            string masterCheckFName = t.Set(Row["MASTER_CHECK_FNAME"].ToString(), "", "");
+            // masterCheckFName
+            // bu fieldle bulunduğu satırdaki bir kolonu okuyor
+            // bu sayede DataCopy için ayırt edici value oluyor
+            // aynı value ....
 
 
             #region tPropertiesEdit
@@ -1159,6 +1163,7 @@ namespace Tkn_DevColumn
                 RepositoryItemButtonEdit tEdit = new RepositoryItemButtonEdit();
                 tEdit.Name = "Column_" + tFieldName;
                 tEdit.AccessibleName = TableIPCode;
+                tEdit.AccessibleDefaultActionDescription = masterCheckFName;
                 tEdit.Enter += new EventHandler(ev.buttonEdit_Enter);
                 //tEdit.KeyDown += new KeyEventHandler(ev.buttonEdit_KeyDown);
                 tEdit.KeyDown += new System.Windows.Forms.KeyEventHandler(evg.myRepositoryItemEdit_KeyDown);

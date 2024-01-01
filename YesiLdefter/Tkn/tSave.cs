@@ -38,14 +38,6 @@ namespace Tkn_Save
 
             if (dsData != null)
             {
-                // field bilgisi yoksa işleme girmesin 
-                // zaten bu data select datasıdır
-                if (dsData.Tables.Count > 1)
-                {
-                    if (dsData.Tables[1].Rows.Count == 0)
-                        return true; // kendisinden sonraki dataset işleme devam etsin
-                }
-
                 //if (dsData.HasChanges() == false) return;
 
                 // NewRocord işareti kayıtla bereber boşaltılıyor
@@ -59,60 +51,56 @@ namespace Tkn_Save
 
                 if (pos > -1)
                 {
-                    string myProp = dsData.Namespace;
                     
-                    if (t.Find_TableFields(dsData, null))  // tablonun FieldListesi var ise   
+                    // DataLayout nesnesi olunca bulundğu texttedeki değişiklikleri algılamıyordu
+                    // bu nedenle cursor ün buluduğu nesneden exit yapması sağlandı.
+
+                    // burası işe yaramıyor
+                    // commonGridClick() buraya bak
+                    //
+                    tDataNavigator.TabStop = true;
+                    tDataNavigator.Focus();
+                    tDataNavigator.TabStop = false;
+                    // 
+
+                    //dsData.Tables[0].AcceptChanges();
+                    string myProp = dsData.Namespace;
+                    // Kayıttan ÖNCE yapması gerekenler var sie
+                    if (myProp.IndexOf("Prop_Runtime:True") > 0)
                     {
-                        // DataLayout nesnesi olunca bulundğu texttedeki değişiklikleri algılamıyordu
-                        // bu nedenle cursor ün buluduğu nesneden exit yapması sağlandı.
+                        tEvents ev = new tEvents();
+                        ev.Prop_RunTimeClick(tForm, dsData, TableIPCode, v.tButtonType.btAutoInsert); //v.nv_102_AUTO_INS);
+                    }
 
-                        // burası işe yaramıyor
-                        // commonGridClick() buraya bak
-                        //
-                        tDataNavigator.TabStop = true;
-                        tDataNavigator.Focus();
-                        tDataNavigator.TabStop = false;
-                        // 
+                    tDefaultValue df = new tDefaultValue();
+                    if (df.tDefaultValue_And_Validation
+                                        (tForm,
+                                         dsData,
+                                         dsData.Tables[0].Rows[tDataNavigator.Position],
+                                         TableIPCode,
+                                         function_name) == true) // Table Save 
+                    {
+                        /// Save İşlemi
+                        /// 
+                        tDataSave(tForm, dsData, tDataNavigator, pos);
+                        onay = true;
 
-                        //dsData.Tables[0].AcceptChanges();
-
-                        // Kayıttan ÖNCE yapması gerekenler var sie
-                        if (myProp.IndexOf("Prop_Runtime:True") > 0)
+                        /// SubDetail bağlantısı varsa refresh et
+                        if ((v.con_PositionChange == false) &&
+                            (tDataNavigator.IsAccessible == true))
                         {
                             tEvents ev = new tEvents();
-                            ev.Prop_RunTimeClick(tForm, dsData, TableIPCode, v.tButtonType.btAutoInsert); //v.nv_102_AUTO_INS);
+                            //ev.Data_Refresh(dsData, tDataNavigator);
+                            //ev.tDataNavigatorList(tForm, "Detail_SubDetail_Refresh");
+                            vSubWork vSW = new vSubWork();
+                            vSW._01_tForm = tForm;
+                            vSW._02_TableIPCode = TableIPCode;
+                            vSW._03_WorkTD = v.tWorkTD.NewAndRef;
+                            vSW._04_WorkWhom = v.tWorkWhom.Childs;
+                            ev.tSubWork_(vSW);
                         }
-
-                        tDefaultValue df = new tDefaultValue();
-                        if (df.tDefaultValue_And_Validation
-                                            (tForm,
-                                             dsData,
-                                             dsData.Tables[0].Rows[tDataNavigator.Position],
-                                             TableIPCode,
-                                             function_name) == true) // Table Save 
-                        {
-                            /// Save İşlemi
-                            /// 
-                            tDataSave(tForm, dsData, tDataNavigator, pos);
-                            onay = true;
-
-                            /// SubDetail bağlantısı varsa refresh et
-                            if ((v.con_PositionChange == false) &&
-                                (tDataNavigator.IsAccessible == true))
-                            {
-                                tEvents ev = new tEvents();
-                                //ev.Data_Refresh(dsData, tDataNavigator);
-                                //ev.tDataNavigatorList(tForm, "Detail_SubDetail_Refresh");
-                                vSubWork vSW = new vSubWork();
-                                vSW._01_tForm = tForm;
-                                vSW._02_TableIPCode = TableIPCode;
-                                vSW._03_WorkTD = v.tWorkTD.NewAndRef;
-                                vSW._04_WorkWhom = v.tWorkWhom.Childs;
-                                ev.tSubWork_(vSW);
-                            }
-                        }
-                        else onay = false; // default value den onay gelmedi
                     }
+                    else onay = false; // default value den onay gelmedi
                 }
             }
 
@@ -130,18 +118,14 @@ namespace Tkn_Save
                 return;
             }
 
-            
+            tToolBox t = new tToolBox();
+
             if ((dsData != null) && (pos > -1))
             {
                 // field bilgisi yoksa işleme girmesin 
                 // zaten bu data select datasıdır
-                if (dsData.Tables.Count > 1)
-                {
-                    if (dsData.Tables[1].Rows.Count == 0)
-                        return;
-                }
+                if (t.Find_TableFields(dsData) == false) return;
 
-                tToolBox t = new tToolBox();
                 vTable vt = new vTable();
 
                 //v.Kullaniciya_Mesaj_Var = "Kayıt işlemi gerçekleşiyor...";
@@ -677,7 +661,7 @@ namespace Tkn_Save
             tToolBox t = new tToolBox();
 
             string SchemasCode = vt.SchemasCode;
-            string Table_Name = vt.TableName;
+            string tableName = vt.TableName;
             string Key_Id_FieldName = vt.KeyId_FName;
             bool identityInsertOnOff = vt.IdentityInsertOnOff;
             //string MyStr = "";
@@ -694,7 +678,6 @@ namespace Tkn_Save
             string Lkp_fname = "";
             string fvalue = "";
             string bos = "   ";
-            string tableFieldsName = string.Empty;
             string ValidationInsert = string.Empty;
             string fForeing = string.Empty;
             string fTrigger = string.Empty;
@@ -715,6 +698,7 @@ namespace Tkn_Save
 
             string myProp = ds.Namespace.ToString();
             string SqlF = t.Set(t.MyProperties_Get(myProp, "=SqlFirst:"), "", "");
+            string TableIPCode = t.MyProperties_Get(myProp, "TableIPCode:");
             byte TableType = t.Set(t.MyProperties_Get(myProp, "=TableType:"), "", (byte)1);
             int DataReadType = t.myInt32(t.MyProperties_Get(myProp, "DataReadType:"));
 
@@ -731,9 +715,6 @@ namespace Tkn_Save
                 line_end = v.SP_MSSQL_LINE_END; // = ENTER;
             }
 
-            //if (State == "dsInsert")
-            //    MyStr = " insert into [" + Table_Name + "] (";
-
             if (t.IsNotNull(SchemasCode) == false) 
                 SchemasCode = "[dbo].";
 
@@ -743,17 +724,17 @@ namespace Tkn_Save
             if (SchemasCode.IndexOf(".") == -1)
                 SchemasCode = SchemasCode + "."; 
 
-            //if (State == "dsEdit")
-            MyEdit = "  update "+ SchemasCode + "[" + Table_Name + "] set ";
+            MyEdit = "  update "+ SchemasCode + "[" + tableName + "] set ";
 
-            tableFieldsName = Table_Name + "_FIELDS";
+            //tableFields = tableName + "_FIELDS";
 
             if (State == "dsInsert")
                 IsChanges = true;
 
             try
             {
-                c = ds.Tables[tableFieldsName].Rows.Count;
+                //c = ds.Tables[tableFields].Rows.Count;
+                c = v.ds_MsTableFields.Tables[tableName].Rows.Count;
             }
             catch
             {
@@ -766,10 +747,14 @@ namespace Tkn_Save
             {
                 if (vt.DBaseType == v.dBaseType.MSSQL)
                 {
-                    fname = ds.Tables[tableFieldsName].Rows[i]["name"].ToString();
-                    ftype = Convert.ToInt32(ds.Tables[tableFieldsName].Rows[i]["user_type_id"].ToString());
-                    fIdentity = (Boolean)(ds.Tables[tableFieldsName].Rows[i]["is_identity"]);
-                    fmax_length = Convert.ToInt32(ds.Tables[tableFieldsName].Rows[i]["max_length"].ToString());
+                    //fname = ds.Tables[tableFields].Rows[i]["name"].ToString();
+                    //ftype = Convert.ToInt32(ds.Tables[tableFields].Rows[i]["user_type_id"].ToString());
+                    //fIdentity = (Boolean)(ds.Tables[tableFields].Rows[i]["is_identity"]);
+                    //fmax_length = Convert.ToInt32(ds.Tables[tableFields].Rows[i]["max_length"].ToString());
+                    fname = v.ds_MsTableFields.Tables[tableName].Rows[i]["name"].ToString();
+                    ftype = Convert.ToInt32(v.ds_MsTableFields.Tables[tableName].Rows[i]["user_type_id"].ToString());
+                    fIdentity = (Boolean)(v.ds_MsTableFields.Tables[tableName].Rows[i]["is_identity"]);
+                    fmax_length = Convert.ToInt32(v.ds_MsTableFields.Tables[tableName].Rows[i]["max_length"].ToString());
 
                     // varchar(max), nvarchar(max) olunca -1 geliyor
                     if (fmax_length == -1) fmax_length = 128000;
@@ -781,13 +766,8 @@ namespace Tkn_Save
 
                 }
 
-                // burada olmaz bir daha açma
-                //ValidationInsert = t.Set(ds.Tables[tableFieldsName + "2"].Rows[i]["VALIDATION_INSERT"].ToString(), "", "False");
-                //fForeing = t.Set(ds.Tables[tableFieldsName + "2"].Rows[i]["FFOREING"].ToString(), "", "False");
-                //fTrigger = t.Set(ds.Tables[tableFieldsName + "2"].Rows[i]["FTRIGGER"].ToString(), "", "False");
-                //fVisible = ds.Tables[tableFieldsName + "2"].Rows[i]["CMP_VISIBLE"].ToString();
-                t.OtherValues_Get(ds, tableFieldsName + "2", fname, ref ValidationInsert, ref fForeing, ref fTrigger, ref displayFormat, ref fVisible);
-                
+                //t.OtherValues_Get(ds, tableFields + "2", fname, ref ValidationInsert, ref fForeing, ref fTrigger, ref displayFormat, ref fVisible);
+                t.OtherValues_Get(v.ds_TableIPCodeFields, TableIPCode, fname, ref ValidationInsert, ref fForeing, ref fTrigger, ref displayFormat, ref fVisible);
 
                 // field ismi LKP_ veya  rowguid  ise
                 //Lkp_fname = "";
@@ -1012,19 +992,12 @@ namespace Tkn_Save
                 if ((Lkp_fname != "LKP_") & (Lkp_fname != "rowg"))
                 {
                     // Tablonun ID fieldi
-                    //if ((j == 0) & (fidentity == true))
                     if (fIdentity == true)
                     {
                         MyStr2 = " where [" + fname + "] = " + fvalue + " " + line_end;
-                        MyStr3 = " select " + fname + ", 'dsEdit' as dsState from [" + Table_Name + "] where 0 = 0 ";
+                        MyStr3 = " select " + fname + ", 'dsEdit' as dsState from [" + tableName + "] where 0 = 0 ";
                         // Tarihce için gerekiyor
                         // KeyID_Value := Value; 
-
-                        /*
-                        // Tablonun ilk fieldi her zaman AutoInc olmak zorunda olduğu kabul ediliyor
-                        // ORACLE de ilk fieldin type AutoInc değil ve
-                        if (t = 0) then ftype := 'TAutoIncField';
-                        */
                     }
                 }
 
@@ -1061,50 +1034,40 @@ namespace Tkn_Save
 
                         // alınan değeri stringe ekle
                         if ((fvalue != "") && (fvalue != "null"))
-                            //MyEdit = MyEdit + " [" + fname + "] = " + "'" + t.Str_Check(fvalue) + "', ";
                             fieldNewValue = " [" + fname + "] = " + "'" + t.Str_Check(fvalue) + "', ";
-                        else //MyEdit = MyEdit + " [" + fname + "] = " + "null, ";// Eğer veri yok ise null bas
-                            fieldNewValue = " [" + fname + "] = " + "null, ";
+                        else fieldNewValue = " [" + fname + "] = " + "null, ";// Eğer veri yok ise null bas
                     }
 
                     //* bit türü 104
                     if (ftype == 104)
                     {
                         if ((fvalue == "") || (fvalue == "False"))
-                            //MyEdit = MyEdit + " [" + fname + "] = " + "0, ";
                             fieldNewValue = " [" + fname + "] = " + "0, ";
-                        else //MyEdit = MyEdit + " [" + fname + "] = " + "1, ";
-                            fieldNewValue = " [" + fname + "] = " + "1, ";
+                        else fieldNewValue = " [" + fname + "] = " + "1, ";
                     }
 
                     //* datetime türü 40
                     if ((ftype == 40) || (ftype == 61))
                     {
                         if ((fvalue != "") && (fvalue.IndexOf("01.01.0001") == -1) && fvalue != "null")
-                            //MyEdit = MyEdit + " [" + fname + "] = " + t.Tarih_Formati(Convert.ToDateTime(fvalue)) + ", ";
                             fieldNewValue = " [" + fname + "] = " + t.Tarih_Formati(Convert.ToDateTime(fvalue)) + ", ";
-                        else //MyEdit = MyEdit + " [" + fname + "] = " + "null, ";
-                            fieldNewValue = " [" + fname + "] = " + "null, ";
+                        else fieldNewValue = " [" + fname + "] = " + "null, ";
                     }
 
                     //* time türü 41
                     if (ftype == 41)
                     {
                         if (fvalue != "")
-                            //MyEdit = MyEdit + " [" + fname + "] = '" + t.Str_Check(fvalue) + "', ";
                             fieldNewValue = " [" + fname + "] = '" + t.Str_Check(fvalue) + "', ";
-                        else //MyEdit = MyEdit + " [" + fname + "] = " + "null, ";
-                            fieldNewValue = " [" + fname + "] = " + "null, ";
+                        else fieldNewValue = " [" + fname + "] = " + "null, ";
                     }
 
                     //* datetime türü  58
                     if (ftype == 58)
                     {
                         if ((fvalue != "") && (fvalue.IndexOf("01.01.0001") == -1) && fvalue != "null")
-                            //MyEdit = MyEdit + " [" + fname + "] = " + t.TarihSaat_Formati(Convert.ToDateTime(fvalue)) + ", ";
                             fieldNewValue = " [" + fname + "] = " + t.TarihSaat_Formati(Convert.ToDateTime(fvalue)) + ", ";
-                        else //MyEdit = MyEdit + " [" + fname + "] = " + "null, ";
-                            fieldNewValue = " [" + fname + "] = " + "null, ";
+                        else fieldNewValue = " [" + fname + "] = " + "null, ";
                     }
 
                     //* img, image 34, varbinary (max) 165 
@@ -1113,7 +1076,6 @@ namespace Tkn_Save
                         // 1. Resim
                         if ((v.con_Images_FieldName == fname) && (v.con_Images != null))
                         {
-                            //MyEdit = MyEdit + " [" + fname + "] = " + " @" + fname + " , ";
                             fieldNewValue = " [" + fname + "] = " + " @" + fname + " , ";
                             // üzerindeki eskim varsa tekrar onu gösteriyor
                             // bu nedenle bu atama yapılıyor
@@ -1121,7 +1083,6 @@ namespace Tkn_Save
                         }
                         if ((v.con_Images_FieldName == fname) && (v.con_Images == null))
                         {
-                            //MyEdit = MyEdit + " [" + fname + "] = null , ";
                             fieldNewValue = " [" + fname + "] = null , ";
                             // üzerindeki eskim varsa tekrar onu gösteriyor
                             // bu nedenle bu atama yapılıyor
@@ -1130,7 +1091,6 @@ namespace Tkn_Save
                         // 2. Resim
                         if ((v.con_Images_FieldName2 == fname) && (v.con_Images2 != null))
                         {
-                            //MyEdit = MyEdit + " [" + fname + "] = " + " @" + fname + " , ";
                             fieldNewValue = " [" + fname + "] = " + " @" + fname + " , ";
                             // üzerindeki eskim varsa tekrar onu gösteriyor
                             // bu nedenle bu atama yapılıyor
@@ -1138,7 +1098,6 @@ namespace Tkn_Save
                         }
                         if ((v.con_Images_FieldName2 == fname) && (v.con_Images2 == null))
                         {
-                            //MyEdit = MyEdit + " [" + fname + "] = null , ";
                             fieldNewValue = " [" + fname + "] = null , ";
                             // üzerindeki eskim varsa tekrar onu gösteriyor
                             // bu nedenle bu atama yapılıyor
@@ -1298,10 +1257,10 @@ namespace Tkn_Save
 
                     // sorunu bulamadım
                     MyInsert =
-                        " if ( Select count(*) ADET from "+ SchemasCode + "[" + Table_Name + "] where 0 = 0 " + v.ENTER
+                        " if ( Select count(*) ADET from "+ SchemasCode + "[" + tableName + "] where 0 = 0 " + v.ENTER
                       + MyIfW + " ) = 0 " + v.ENTER
                       + " begin " + v.ENTER
-                      + " insert into "+ SchemasCode + "[" + Table_Name + "] ( " + v.ENTER
+                      + " insert into "+ SchemasCode + "[" + tableName + "] ( " + v.ENTER
                       + MyField + " ) values " + v.ENTER
                       + " ( " + MyValue + " ) " + line_end
                       + " --IdentityID " + v.ENTER
@@ -1311,14 +1270,14 @@ namespace Tkn_Save
                       + MyEdit + v.ENTER 
                       + " where 0 = 0 " + v.ENTER 
                       + MyIfW
-                      // MyStr3 = " select " + fname + " from [" + Table_Name + "] where 0 = 0 ";
+                      // MyStr3 = " select " + fname + " from [" + tableName + "] where 0 = 0 ";
                       + MyStr3 + MyIfW  
                     + " end "; 
                 }
                 else
                 {
                     MyInsert = 
-                        " insert into "+ SchemasCode + "[" + Table_Name + "] ( " + v.ENTER +
+                        " insert into "+ SchemasCode + "[" + tableName + "] ( " + v.ENTER +
                           MyField + " ) values " + v.ENTER +
                         " ( " + MyValue + " ) " + line_end +
                         " --IdentityID " + line_end;
@@ -1351,14 +1310,14 @@ namespace Tkn_Save
 
                 if (State == "dsInsert")
                 {
-                    // "  , " + fTriggerFields + " from [" + Table_Name + "] "
+                    // "  , " + fTriggerFields + " from [" + tableName + "] "
 
                     TriggerSQL =
-                        "  Select " + fTriggerFields + " from [" + Table_Name + "] "
+                        "  Select " + fTriggerFields + " from [" + tableName + "] "
                       + "  where " + Key_Id_FieldName + " =  @@IDENTITY " + v.ENTER; // where id = xxx  
 
                     TriggerSQL =
-                        "  Select " + fTriggerFields + " from [" + Table_Name + "] "
+                        "  Select " + fTriggerFields + " from [" + tableName + "] "
                       + "  where " + Key_Id_FieldName + " = "; // where id = rec_id   
                 }
 
@@ -1368,7 +1327,7 @@ namespace Tkn_Save
                     //   Select GRUP_TAMADI from [GRUP] where ID = xxxx 
 
                     TriggerSQL =
-                        "  Select " + fTriggerFields + " from [" + Table_Name + "] "
+                        "  Select " + fTriggerFields + " from [" + tableName + "] "
                       + "  " + MyStr2 + v.ENTER; // where id = xxx
                 }
 
