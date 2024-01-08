@@ -766,8 +766,10 @@ namespace Tkn_Save
 
                 }
 
-                //t.OtherValues_Get(ds, tableFields + "2", fname, ref ValidationInsert, ref fForeing, ref fTrigger, ref displayFormat, ref fVisible);
-                t.OtherValues_Get(v.ds_TableIPCodeFields, TableIPCode, fname, ref ValidationInsert, ref fForeing, ref fTrigger, ref displayFormat, ref fVisible);
+                if (v.active_DB.mainManagerDbUses) // tableFields + "2"
+                    t.OtherValues_Get(ds, TableIPCode, fname, ref ValidationInsert, ref fForeing, ref fTrigger, ref displayFormat, ref fVisible);
+                else
+                    t.OtherValues_Get(v.ds_TableIPCodeFields, TableIPCode, fname, ref ValidationInsert, ref fForeing, ref fTrigger, ref displayFormat, ref fVisible);
 
                 // field ismi LKP_ veya  rowguid  ise
                 //Lkp_fname = "";

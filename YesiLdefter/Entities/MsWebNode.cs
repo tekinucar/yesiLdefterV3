@@ -39,6 +39,8 @@ namespace YesiLdefter.Entities
 		public bool DisplayNone { get; set; }
 		public bool PageRefresh { get; set; }
 		public string TestValue { get; set; }
+		public string KrtOperandType { get; set; }
+		public string CheckValue { get; set; }
 
-}
+	}
 }

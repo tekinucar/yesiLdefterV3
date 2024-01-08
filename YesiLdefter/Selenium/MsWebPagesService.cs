@@ -33,12 +33,12 @@ namespace YesiLdefter.Selenium
             {
                 /// Daha önce aynı login url yüklenmişse bir daha okumaya gerek yok
                 ///
-                if (ds_LoginPageNodes.Namespace == f.aktifUrl)
-                    return true;
+                //if (ds_LoginPageNodes.Namespace == f.aktifUrl)
+                return true;
             }
 
             bool onay = false;
-            readLoginPageNodes(ref ds_LoginPageNodes, f.aktifUrl);
+            readLoginPageNodes(ref ds_LoginPageNodes);
 
             if (t.IsNotNull(ds_LoginPageNodes))
             {
@@ -57,7 +57,7 @@ namespace YesiLdefter.Selenium
             return onay;
         }
 
-        private bool readLoginPageNodes(ref DataSet ds, string Url)
+        private bool readLoginPageNodes(ref DataSet ds)
         {
             bool onay = false;
 
@@ -71,7 +71,10 @@ namespace YesiLdefter.Selenium
               Where a.IsActive = 1
               and b.LoginPage = 1
               and a.PageCode = b.PageCode
-              and ( b.PageUrl = '" + Url + "' or b.ErrorPageUrl = '" + Url + "' )  order by a.NodeId ";
+              and b.PageCode = '" + v.tWebLoginPageCode + @"' 
+              order by a.NodeId ";
+
+            //and(b.PageUrl = '" + Url + "' or b.ErrorPageUrl = '" + Url + "')  "
 
             onay = t.SQL_Read_Execute(v.dBaseNo.Manager, ds, ref tSql, "LoginPageNodes", "LoginPage");
 
@@ -219,6 +222,8 @@ namespace YesiLdefter.Selenium
             wnv.GetSave = item.GetSave;// Convert.ToBoolean(row["GetSave"].ToString());
             wnv.writeValue = item.TestValue;// row["TestValue"].ToString();
             wnv.EventsType = (v.tWebEventsType)item.EventsType;   //t.myInt16(row["EventsType"].ToString());
+            wnv.KrtOperandType = item.KrtOperandType;
+            wnv.CheckValue = item.CheckValue;
 
             if (wnv.writeValue == "BUGUN_YILAY")
                 wnv.writeValue = v.BUGUN_YILAY.ToString();

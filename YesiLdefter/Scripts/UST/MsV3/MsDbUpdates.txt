@@ -111,6 +111,7 @@ INSERT INTO [Lkp].[MsDbUpdatesUpdateType] (Id, UpdateType)
   ( 11,    N'Data  update - ManagerDb den table datasını al'),
   ( 12,    N'Rapor update - ManagerDb den rapor datasını al'),
   ( 13,    N'Data transfer işlemi'),
+  ( 14,    N'SQL script çalıştır'),
 
   ( 21,    N'Table add'),
   ( 22,    N'Field add'),

@@ -20,6 +20,7 @@ using OpenQA.Selenium.Chrome;
 using Tkn_CookieReader;
 using System.Threading;
 using YesiLdefter.Entities;
+using OpenQA.Selenium.Support.UI;
 
 namespace YesiLdefter
 {
@@ -411,6 +412,13 @@ namespace YesiLdefter
             bool onayList = false;
             bool onayRequest = false;
             bool onayPage = false;
+            bool onayValue = false;
+            /// daha çalışanları temizle yani
+            /// load çalıştı diyelim
+            /// kullanıcı veri gönder/veri al talebinde bulununca 
+            /// loada ait çalışma listesini temizle 
+            ///
+            workPageNodes.nodeIdList = "";
 
             foreach (MsWebNode item in msWebNodes)
             {
@@ -447,10 +455,13 @@ namespace YesiLdefter
                     await WebScrapingBefore(wnv);
 
 
+                    onayValue = valueChecked(wnv);
+
                     // 5. adım scraping
                     // WebScrapingAsync
                     //
-                    await WebScrapingAsync(v.webMain_, wnv);
+                    if (onayValue)
+                        await WebScrapingAsync(v.webMain_, wnv);
 
 
                     // 4. adım
@@ -468,7 +479,8 @@ namespace YesiLdefter
             //    this.myTriggerPageRefresh = true;
             //    this.myTriggerPageRefreshTick = true;
             //    v.SQL = v.SQL + v.ENTER + myNokta + " Page Refresh : start";
-            if (item.PageRefresh == true)
+            if ((item.PageRefresh == true) &&
+                (item.IsActive))
             {
                 await myPageViewClickAsync(wb, this.msWebPage_);
                 // onay satırı (item) burda çalıştı, dönüşte tekrar çalışmasın diye false olarak geri dönüyor
@@ -677,6 +689,18 @@ namespace YesiLdefter
             
             // false olabilir
             if (item.IsActive == false) onay = false;
+
+            return onay;
+        }
+
+        private bool valueChecked(webNodeValue wnv)
+        {
+            bool onay = true;
+
+            if (wnv.KrtOperandType == null) return onay;
+            if (wnv.KrtOperandType == "") return onay;
+
+            onay = t.myOperandControl(wnv.writeValue , wnv.CheckValue, wnv.KrtOperandType);
 
             return onay;
         }
@@ -902,17 +926,17 @@ namespace YesiLdefter
                 if (f.aktifUrl != f.talepEdilenUrl)
                 {
                     if (t.IsNotNull(f.talepOncesiUrl))
-                        onay = await loadPage(wb, f.talepOncesiUrl);
+                        onay = await loadPageUrl(wb, f.talepOncesiUrl);
                     else
-                        onay = await loadPage(wb, f.talepEdilenUrl);
+                        onay = await loadPageUrl(wb, f.talepEdilenUrl);
                 }
                 else
                 {
-                    onay = await loadPage(wb, f.talepEdilenUrl);
+                    onay = await loadPageUrl(wb, f.talepEdilenUrl);
                 }
             }
         }
-        private async Task<bool> loadPage(IWebDriver wb, string url)
+        private async Task<bool> loadPageUrl(IWebDriver wb, string url)
         {
             if (!string.IsNullOrEmpty(url))
             {
@@ -951,76 +975,53 @@ namespace YesiLdefter
 
             bool onay = false;
 
+            if (t.IsNotNull(ds_LoginPageNodes) == false)
+            {
+                onay = msPagesService.readLoginPageControl(ref ds_LoginPageNodes, f);
+                if (onay)
+                    preparingMsWebLoginPage();
+            }
+
             if (f.talepEdilenUrl != f.aktifUrl)
             {
-                /// aktif url Login page mi kontrol et
-                ///
-
-                onay = msPagesService.readLoginPageControl(ref ds_LoginPageNodes, f);// f.aktifUrl, ref this.loginPageUrl, ref this.errorPageUrl);
-
-                if (onay)
+                if (f.aktifUrl.IndexOf("oturumsonu") > -1)
                 {
-                    preparingMsWebLoginPage();
-
-                    await runLoginPage(wb);
                     return;
+                }
+                /// aktif url Login page değil ise nedir ?
+                /// 
+                /// talep öncesi başka bir url çağrısı var ise
+                ///
+                if (t.IsNotNull(f.talepOncesiUrl))
+                {
+                    /// aktif url ne talep edilen ne de talep öncesi url değil ise 
+                    /// talepOncesiUrl yi çağır
+                    ///
+                    if ((f.talepOncesiUrl != f.aktifUrl) &&
+                        (f.talepEdilenUrl != f.aktifUrl))
+                        loadPageUrl(wb, f.talepOncesiUrl);
+
+                    /// talep öncesi geldiyse sıra esas talep edilen url ye sıra geldi
+                    ///
+                    if (f.talepOncesiUrl == f.aktifUrl)
+                    {
+                        loadPageUrl(wb, f.talepEdilenUrl);
+                            
+                        // nodenin içindeki itemValue ve itemText listesi (combo içerikleri)
+                        if (t.IsNotNull(f.aktifPageCode))
+                            aktifPageNodeItemsList_ = msPagesService.readNodeItems(f.aktifPageCode);
+                    }
                 }
                 else
                 {
-                    if (f.aktifUrl.IndexOf("oturumsonu") > -1)
-                    {
-                        return;
-                    }
-                    /// aktif url Login page değil ise nedir ?
-                    /// 
-                    /// talep öncesi başka bir url çağrısı var ise
+                    /// talepOncesiUrl yok ise şimdi talepEdilenUrl yi çağıralım 
                     ///
-                    if (t.IsNotNull(f.talepOncesiUrl))
-                    {
-                        /// aktif url ne talep edilen ne de talep öncesi url değil ise 
-                        /// talepOncesiUrl yi çağır
-                        ///
-                        if ((f.talepOncesiUrl != f.aktifUrl) &&
-                            (f.talepEdilenUrl != f.aktifUrl))
-                            loadPage(wb, f.talepOncesiUrl);
-
-                        /// talep öncesi geldiyse sıra esas talep edilen url ye sıra geldi
-                        ///
-                        if (f.talepOncesiUrl == f.aktifUrl)
-                        {
-                            loadPage(wb, f.talepEdilenUrl);
-                            
-                            // nodenin içindeki itemValue ve itemText listesi (combo içerikleri)
-                            if (t.IsNotNull(f.aktifPageCode))
-                                aktifPageNodeItemsList_ = msPagesService.readNodeItems(f.aktifPageCode);
-                        }
-                    }
-                    else
-                    {
-                        /// talepOncesiUrl yok ise şimdi talepEdilenUrl yi çağıralım 
-                        ///
-                        loadPage(wb, f.talepEdilenUrl);
-                    }
+                    loadPageUrl(wb, f.talepEdilenUrl);
                 }
             }
 
             if (f.talepEdilenUrl == f.aktifUrl)
             {
-
-                //this.htmlDocumentBody = wb.Document.Body.InnerHtml;
-
-                ////
-                //if (this.myLoadNodeCount > 0)
-                //{
-                //    await runLoadAsync();
-                //    this.talepEdilenUrl = "";
-                //}
-
-                //if (this.myLoadNodeCount == 0)
-                //{
-                //    this.talepEdilenUrl = "";
-                //}
-
                 if (f.loadWorking == false)
                 {
                     f.loadWorking = true;
@@ -1033,7 +1034,7 @@ namespace YesiLdefter
         {
             if (f.errorPageUrl == f.aktifUrl)
             {
-                loadPage(wb, f.loginPageUrl);
+                loadPageUrl(wb, f.loginPageUrl);
             }
             else if (f.aktifUrl.IndexOf("oturumsonu") > -1)
             {
@@ -1198,19 +1199,45 @@ namespace YesiLdefter
             IWebElement element = null;
             try
             {
-                if ((attType != "file") && (attType != "checkbox"))
+                if ((attType != "file") && (attType != "checkbox") && (attType != "radio"))
                 {
                     element = wb.FindElement(By.Id(idName));   
                     if (element != null)
                     {
                         if (tagName == "select")
                         {
-                            IList<IWebElement> comboOptionElements = element.FindElements(By.TagName("option"));
-                            comboOptionElements.FirstOrDefault(x => x.Text == writeValue)?.Click();
+                            //IList<IWebElement> comboOptionElements = element.FindElements(By.TagName("option"));
+                            //comboOptionElements.FirstOrDefault(x => x.Text == writeValue)?.Click();
+                            
+                            SelectElement oSelect = new SelectElement(element);
+                            List<string> values = oSelect.Options.Select(option => option.GetAttribute("value")).ToList();
+                            string value = values.Find(s => s.Contains(writeValue)); 
+
+                            if (value != null)
+                            {
+                                oSelect.SelectByValue(writeValue);
+                                //oSelect.SelectByIndex(index);
+                                //oSelect.SelectByText(text);
+                            }
+
+                            
+                            /*
+                            SelectElement oSelect = new SelectElement(driver.FindElement(By.Id(Element_ID)));
+                            oSelect.SelectByIndex(index);
+                            oSelect.SelectByText(text);
+                            oSelect.SelectByValue(value);
+                            */
                         }
                         else
                         {
-                            element.SendKeys(writeValue);
+                            if (attType != "radio")
+                            {
+                                element.Click();
+                                element.Clear();
+                                element.SendKeys(writeValue);
+                            }
+                            if (attType == "radio") 
+                                element.SendKeys(writeValue);
                         }
 
                         /*
@@ -1256,15 +1283,19 @@ namespace YesiLdefter
                             if (attType == "checkbox")
                             {
                                 //element.SetAttribute("checked", writeValue);
-                                IJavaScriptExecutor js = (IJavaScriptExecutor)wb;
-                                js.ExecuteScript("arguments[0].checked = '"+writeValue+"';", element);
-
+                                //IJavaScriptExecutor js = (IJavaScriptExecutor)wb;
+                                //js.ExecuteScript("arguments[0].checked = '"+writeValue+"';", element);
+                                // görevini burada yaptı, dönüşte tekrar clicklemesin
+                                element.Click();
+                                invokeMember = v.tWebInvokeMember.none;
                             }
                             if (attType == "radio")
                             {
                                 //element.SetAttribute("value", "1");
-                                IJavaScriptExecutor js = (IJavaScriptExecutor)wb;
-                                js.ExecuteScript("arguments[0].value = '1';", element);
+                                //IJavaScriptExecutor js = (IJavaScriptExecutor)wb;
+                                //js.ExecuteScript("arguments[0].value = '1';", element);
+                                element.Click();
+                                invokeMember = v.tWebInvokeMember.none;
                             }
                             //v.SQL = v.SQL + v.ENTER + myNokta + " set checked : " + writeValue;
                         }
@@ -1873,8 +1904,26 @@ namespace YesiLdefter
 
         #endregion postHtmlTable
 
+        /*
+        if (read_value != "")
+                {
+                    if ((chc_Value.IndexOf(read_value) > -1) &&
+                        (t.IsNotNull(chc_Operand) == false))
+                    {
+                        // eğer buraya kadar geldiyse 
+                        // öndeki chc_xxxx kontrollerinden geçti,  
+                        // yani onayı hak etti demektir
+                        form_open1 = true;
+                    }
 
-        
+                    if (t.IsNotNull(chc_Operand))
+                    {
+                        form_open1 = t.myOperandControl(read_value, chc_Value, chc_Operand);
+                    }
+                }
+
+        */
+
 
     }
 }

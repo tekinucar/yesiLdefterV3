@@ -1,9 +1,4 @@
-﻿/*
-
-
-using MySql.Data.MySqlClient;
-*/
-using DevExpress.XtraBars.Alerter;
+﻿using DevExpress.XtraBars.Alerter;
 using DevExpress.XtraSplashScreen;
 using DevExpress.XtraEditors;
 using DevExpress.XtraLayout;
@@ -118,6 +113,7 @@ namespace Tkn_ToolBox
 
                 if (typeId == 11) runDbUpdateData();
                 //if (typeId == 12)
+                if (typeId == 14) runSqlScript();
                 if (typeId == 21) runDbUpdateTableAdd_();
                 if (typeId == 22) runDbUpdateFieldAdd();
                 //if (typeId == 23)
@@ -135,6 +131,7 @@ namespace Tkn_ToolBox
   ( 11,    N'Data  update - ManagerDb den table datasını al'),
   ( 12,    N'Rapor update - ManagerDb den rapor datasını al'),
   ( 13,    N'Data transfer işlemi'),
+  ( 14,    N'SQL script çalıştır'),
 
   ( 21,    N'Table add'),
   ( 22,    N'Field add'),
@@ -165,6 +162,7 @@ namespace Tkn_ToolBox
             v.tMsDbUpdate.fieldTypeId = myInt16(msDbUpdatesRow["FieldTypeId"].ToString());
             v.tMsDbUpdate.fieldLength = Set(msDbUpdatesRow["FieldLength"].ToString(), "", "");
             v.tMsDbUpdate.fieldNotNull = myBool(msDbUpdatesRow["FieldNotNull"].ToString());
+            v.tMsDbUpdate.sqlScript = msDbUpdatesRow["SqlScript"].ToString();
         }
 
         // 11,    Data  update - ManagerDb den table datasını al
@@ -200,6 +198,22 @@ namespace Tkn_ToolBox
         {
 
         }
+        private void runSqlScript()
+        {
+            // hangi Database yazılacak 
+            v.dBaseNo dBaseNo = getDBaseNo(v.tMsDbUpdate.dBaseNoTypeId.ToString());
+            string cumle = v.tMsDbUpdate.sqlScript;
+            
+            // hazırlanan cumleyi müşteri database üzerinde çalıştıralım
+            bool onay = runScript(dBaseNo, cumle);
+
+            // Müşteri database nin üzerinde yapılan işlemleri DBUpdates tablosuna kaydedilecek
+            if (onay)
+            {
+                insertDbUpdates();
+            }
+        }
+
         // 21,    Table add
         private void runDbUpdateTableAdd_()
         {
@@ -330,6 +344,15 @@ namespace Tkn_ToolBox
 
         private void insertDbUpdates()
         {
+
+            // 14,    N'SQL script çalıştır'
+            // Bu script çalıştı bitti
+            // Şimdi sıra DbUpdates tablosuna insert sırası geldi
+            // v.con_CreateScriptPacket = true; devreye girsin diye 
+            // bu değişiklik yapılıyor
+            if (v.tMsDbUpdate.updateTypeId == 14)
+                v.con_CreateScriptPacket = true;
+
             DataSet ds = new DataSet();
             string sql = "";
             sql = Sql_DbUpdatesInsert();
@@ -1011,6 +1034,14 @@ namespace Tkn_ToolBox
                         preparing_MsTableFields(vt);
                         preparing_TableIPCodeTableList(vt.TableIPCode);
                         preparing_TableIPCodeFieldsList(vt.TableIPCode);
+
+                        if (v.active_DB.mainManagerDbUses)
+                        {
+                            DataTable dt = v.ds_TableIPCodeFields.Tables[vt.TableIPCode];
+                            if (dt != null) 
+                                dsData.Tables.Add(dt.Copy());
+                            dt.Dispose();
+                        }
                     }
                 }
             }
@@ -1061,177 +1092,253 @@ namespace Tkn_ToolBox
         }
         public void preparing_TableIPCodeTableList(string tableIPCode)
         {
-            var matchingTableIPCode = v.tableIPCodeTableList.Where(stringToCheck => stringToCheck.Contains(tableIPCode));
-            if (matchingTableIPCode.Any())
+            if (v.active_DB.mainManagerDbUses)
             {
-                // bu tableIPCode için table bilgileri daha önce yüklenmiş demektir
-                // bir daha okumaya gerek yok
-                return;
+                TableRemove(v.ds_TableIPCodeTable);
+                readTableIPCodeTableList_(tableIPCode);
             }
             else
             {
-                v.tableIPCodeTableList.Add(tableIPCode);
-
-                string sqlB = msTableIPCodeTableList_SQL(tableIPCode);
-
-                SqlDataAdapter msSqlAdapter2 = null;
-                if (sqlB != string.Empty)
+                var matchingTableIPCode = v.tableIPCodeTableList.Where(stringToCheck => stringToCheck.Contains(tableIPCode));
+                if (matchingTableIPCode.Any())
                 {
-                    msSqlAdapter2 = new SqlDataAdapter(sqlB, v.active_DB.managerMSSQLConn);
-                    //_FIELDS2
-                    //msSqlAdapter.Fill(dsData, vt.TableName + fields + "2");
-                    msSqlAdapter2.Fill(v.ds_TableIPCodeTable, tableIPCode);// vt.TableName + fields + "2");
+                    // bu tableIPCode için table bilgileri daha önce yüklenmiş demektir
+                    // bir daha okumaya gerek yok
+                    return;
                 }
-                msSqlAdapter2.Dispose();
+                else
+                {
+                    v.tableIPCodeTableList.Add(tableIPCode);
+                    readTableIPCodeTableList_(tableIPCode);
+                }
             }
+        }
+        private void readTableIPCodeTableList_(string tableIPCode)
+        {
+            string sqlB = msTableIPCodeTableList_SQL(tableIPCode);
+
+            SqlDataAdapter msSqlAdapter2 = null;
+            if (sqlB != string.Empty)
+            {
+                msSqlAdapter2 = new SqlDataAdapter(sqlB, v.active_DB.managerMSSQLConn);
+                //_FIELDS2
+                //msSqlAdapter.Fill(dsData, vt.TableName + fields + "2");
+                msSqlAdapter2.Fill(v.ds_TableIPCodeTable, tableIPCode);// vt.TableName + fields + "2");
+            }
+            msSqlAdapter2.Dispose();
         }
         public void preparing_TableIPCodeFieldsList(string tableIPCode)
         {
-            var matchingTableIPCode = v.tableIPCodeFieldsList.Where(stringToCheck => stringToCheck.Contains(tableIPCode));
-            if (matchingTableIPCode.Any())
+            if (v.active_DB.mainManagerDbUses)
             {
-                // bu tableIPCode için field list daha önce yüklenmiş demektir
-                // bir daha okumaya gerek yok
-                return;
+                TableRemove(v.ds_TableIPCodeFields);
+                readTableIPCodeFieldsList_(tableIPCode);
             }
             else
             {
-                v.tableIPCodeFieldsList.Add(tableIPCode);
-
-                string sqlC = msTableIPCodeFieldsList_SQL(tableIPCode);
-
-                SqlDataAdapter msSqlAdapter3 = null;
-                if (sqlC != string.Empty)
+                var matchingTableIPCode = v.tableIPCodeFieldsList.Where(stringToCheck => stringToCheck.Contains(tableIPCode));
+                if (matchingTableIPCode.Any())
                 {
-                    msSqlAdapter3 = new SqlDataAdapter(sqlC, v.active_DB.managerMSSQLConn);
-                    //_FIELDS2
-                    //msSqlAdapter.Fill(dsData, vt.TableName + fields + "2");
-                    msSqlAdapter3.Fill(v.ds_TableIPCodeFields, tableIPCode);// vt.TableName + fields + "2");
+                    // bu tableIPCode için field list daha önce yüklenmiş demektir
+                    // bir daha okumaya gerek yok
+                    return;
                 }
-                msSqlAdapter3.Dispose();
+                else
+                {
+                    v.tableIPCodeFieldsList.Add(tableIPCode);
+                    readTableIPCodeFieldsList_(tableIPCode);
+                }
             }
+        }
+        private void readTableIPCodeFieldsList_(string tableIPCode)
+        {
+            string sqlC = msTableIPCodeFieldsList_SQL(tableIPCode);
+
+            SqlDataAdapter msSqlAdapter3 = null;
+            if (sqlC != string.Empty)
+            {
+                msSqlAdapter3 = new SqlDataAdapter(sqlC, v.active_DB.managerMSSQLConn);
+                //_FIELDS2
+                //msSqlAdapter.Fill(dsData, vt.TableName + fields + "2");
+                msSqlAdapter3.Fill(v.ds_TableIPCodeFields, tableIPCode);// vt.TableName + fields + "2");
+            }
+            msSqlAdapter3.Dispose();
         }
         public void preparing_TableIPCodeGroupsList(string tableIPCode)
         {
-            var matchingTableIPCode = v.tableIPCodeGroupsList.Where(stringToCheck => stringToCheck.Contains(tableIPCode));
-            if (matchingTableIPCode.Any())
+            if (v.active_DB.mainManagerDbUses)
             {
-                // bu tableIPCode için groups list daha önce yüklenmiş demektir
-                // bir daha okumaya gerek yok
-                return;
+                TableRemove(v.ds_TableIPCodeGroups);
+                readTableIPCodeGroupsList_(tableIPCode);
             }
             else
             {
-                v.tableIPCodeGroupsList.Add(tableIPCode);
-
-                string sqlC = msTableIPCodeGroupsList_SQL(tableIPCode);
-
-                SqlDataAdapter msSqlAdapter4 = null;
-                if (sqlC != string.Empty)
+                var matchingTableIPCode = v.tableIPCodeGroupsList.Where(stringToCheck => stringToCheck.Contains(tableIPCode));
+                if (matchingTableIPCode.Any())
                 {
-                    msSqlAdapter4 = new SqlDataAdapter(sqlC, v.active_DB.managerMSSQLConn);
-                    msSqlAdapter4.Fill(v.ds_TableIPCodeGroups, tableIPCode + "_GROUPS");
+                    // bu tableIPCode için groups list daha önce yüklenmiş demektir
+                    // bir daha okumaya gerek yok
+                    return;
                 }
-                msSqlAdapter4.Dispose();
+                else
+                {
+                    v.tableIPCodeGroupsList.Add(tableIPCode);
+                    readTableIPCodeGroupsList_(tableIPCode);
+                }
             }
+        }
+        private void readTableIPCodeGroupsList_(string tableIPCode)
+        {
+            string sqlC = msTableIPCodeGroupsList_SQL(tableIPCode);
+
+            SqlDataAdapter msSqlAdapter4 = null;
+            if (sqlC != string.Empty)
+            {
+                msSqlAdapter4 = new SqlDataAdapter(sqlC, v.active_DB.managerMSSQLConn);
+                msSqlAdapter4.Fill(v.ds_TableIPCodeGroups, tableIPCode + "_GROUPS");
+            }
+            msSqlAdapter4.Dispose();
         }
         public void preparing_LayoutItemsList(string masterCode)
         {
-            var matchingMasterCode = v.msLayoutItemsList.Where(stringToCheck => stringToCheck.Contains(masterCode));
-            if (matchingMasterCode.Any())
+            if (v.active_DB.mainManagerDbUses)
             {
-                // bu Layout için items list daha önce yüklenmiş demektir
-                // bir daha okumaya gerek yok
-                return;
+                TableRemove(v.ds_MsLayoutItems);
+                readLayoutItemsList_(masterCode);
             }
             else
             {
-                v.msLayoutItemsList.Add(masterCode);
-
-                string sqlL = msLayoutItemsList_SQL(masterCode);
-
-                SqlDataAdapter msSqlAdapter5 = null;
-                if (sqlL != string.Empty)
+                var matchingMasterCode = v.msLayoutItemsList.Where(stringToCheck => stringToCheck.Contains(masterCode));
+                if (matchingMasterCode.Any())
                 {
-                    msSqlAdapter5 = new SqlDataAdapter(sqlL, v.active_DB.managerMSSQLConn);
-                    msSqlAdapter5.Fill(v.ds_MsLayoutItems, masterCode);
+                    // bu Layout için items list daha önce yüklenmiş demektir
+                    // bir daha okumaya gerek yok
+                    return;
                 }
-                msSqlAdapter5.Dispose();
+                else
+                {
+                    v.msLayoutItemsList.Add(masterCode);
+                    readLayoutItemsList_(masterCode);
+                }
             }
+        }
+        private void readLayoutItemsList_(string masterCode)
+        {
+            string sqlL = msLayoutItemsList_SQL(masterCode);
+
+            SqlDataAdapter msSqlAdapter5 = null;
+            if (sqlL != string.Empty)
+            {
+                msSqlAdapter5 = new SqlDataAdapter(sqlL, v.active_DB.managerMSSQLConn);
+                msSqlAdapter5.Fill(v.ds_MsLayoutItems, masterCode);
+            }
+            msSqlAdapter5.Dispose();
         }
         public void preparing_MenuItemsList(string masterCode)
         {
-            var matchingMasterCode = v.msMenuItemsList.Where(stringToCheck => stringToCheck.Contains(masterCode));
-            if (matchingMasterCode.Any())
+            if (v.active_DB.mainManagerDbUses)
             {
-                // bu Menu için items list daha önce yüklenmiş demektir
-                // bir daha okumaya gerek yok
-                return;
+                TableRemove(v.ds_MsMenuItems);
+                readMenuItemsList_(masterCode);
             }
             else
             {
-                v.msMenuItemsList.Add(masterCode);
-
-                string sqlM = msMenuItemsList_SQL(masterCode);
-
-                SqlDataAdapter msSqlAdapter6 = null;
-                if (sqlM != string.Empty)
+                var matchingMasterCode = v.msMenuItemsList.Where(stringToCheck => stringToCheck.Contains(masterCode));
+                if (matchingMasterCode.Any())
                 {
-                    msSqlAdapter6 = new SqlDataAdapter(sqlM, v.active_DB.managerMSSQLConn);
-                    msSqlAdapter6.Fill(v.ds_MsMenuItems, masterCode);
+                    // bu Menu için items list daha önce yüklenmiş demektir
+                    // bir daha okumaya gerek yok
+                    return;
                 }
-                msSqlAdapter6.Dispose();
+                else
+                {
+                    v.msMenuItemsList.Add(masterCode);
+                    readMenuItemsList_(masterCode);
+                }
             }
+        }
+        private void readMenuItemsList_(string masterCode)
+        {
+            string sqlM = msMenuItemsList_SQL(masterCode);
+
+            SqlDataAdapter msSqlAdapter6 = null;
+            if (sqlM != string.Empty)
+            {
+                msSqlAdapter6 = new SqlDataAdapter(sqlM, v.active_DB.managerMSSQLConn);
+                msSqlAdapter6.Fill(v.ds_MsMenuItems, masterCode);
+            }
+            msSqlAdapter6.Dispose();
         }
         public void preparing_DataCopyList(string DC_Code)
         {
-            var matchingDCCode = v.dataCopyList.Where(stringToCheck => stringToCheck.Contains(DC_Code));
-            if (matchingDCCode.Any())
+            if (v.active_DB.mainManagerDbUses)
             {
-                // bu DataCopy için tanımlar daha önce yüklenmiş demektir
-                // bir daha okumaya gerek yok
-                return;
+                TableRemove(v.ds_DataCopy);
+                readDataCopyList_(DC_Code);
             }
             else
             {
-                v.dataCopyList.Add(DC_Code);
-
-                string sqlDC = dataCopyList_SQL(DC_Code);
-
-                SqlDataAdapter msSqlAdapter7 = null;
-                if (sqlDC != string.Empty)
+                var matchingDCCode = v.dataCopyList.Where(stringToCheck => stringToCheck.Contains(DC_Code));
+                if (matchingDCCode.Any())
                 {
-                    msSqlAdapter7 = new SqlDataAdapter(sqlDC, v.active_DB.managerMSSQLConn);
-                    msSqlAdapter7.Fill(v.ds_DataCopy, DC_Code);
+                    // bu DataCopy için tanımlar daha önce yüklenmiş demektir
+                    // bir daha okumaya gerek yok
+                    return;
                 }
-                msSqlAdapter7.Dispose();
+                else
+                {
+                    v.dataCopyList.Add(DC_Code);
+                    readDataCopyList_(DC_Code);
+                }
             }
+        }
+        private void readDataCopyList_(string DC_Code)
+        {
+            string sqlDC = dataCopyList_SQL(DC_Code);
+
+            SqlDataAdapter msSqlAdapter7 = null;
+            if (sqlDC != string.Empty)
+            {
+                msSqlAdapter7 = new SqlDataAdapter(sqlDC, v.active_DB.managerMSSQLConn);
+                msSqlAdapter7.Fill(v.ds_DataCopy, DC_Code);
+            }
+            msSqlAdapter7.Dispose();
         }
         public void preparing_DataCopyLinesList(string DC_Code)
         {
-            var matchingDCCode = v.dataCopyLinesList.Where(stringToCheck => stringToCheck.Contains(DC_Code));
-            if (matchingDCCode.Any())
+            if (v.active_DB.mainManagerDbUses)
             {
-                // bu DataCopyLines için list daha önce yüklenmiş demektir
-                // bir daha okumaya gerek yok
-                return;
+                TableRemove(v.ds_DataCopyLines);
+                readDataCopyLinesList_(DC_Code);
             }
             else
             {
-                v.dataCopyLinesList.Add(DC_Code);
-
-                string sqlDCL = dataCopyLinesList_SQL(DC_Code);
-
-                SqlDataAdapter msSqlAdapter8 = null;
-                if (sqlDCL != string.Empty)
+                var matchingDCCode = v.dataCopyLinesList.Where(stringToCheck => stringToCheck.Contains(DC_Code));
+                if (matchingDCCode.Any())
                 {
-                    msSqlAdapter8 = new SqlDataAdapter(sqlDCL, v.active_DB.managerMSSQLConn);
-                    msSqlAdapter8.Fill(v.ds_DataCopyLines, DC_Code);
+                    // bu DataCopyLines için list daha önce yüklenmiş demektir
+                    // bir daha okumaya gerek yok
+                    return;
                 }
-                msSqlAdapter8.Dispose();
+                else
+                {
+                    v.dataCopyLinesList.Add(DC_Code);
+                    readDataCopyLinesList_(DC_Code);
+                }
             }
         }
+        private void readDataCopyLinesList_(string DC_Code)
+        {
+            string sqlDCL = dataCopyLinesList_SQL(DC_Code);
 
+            SqlDataAdapter msSqlAdapter8 = null;
+            if (sqlDCL != string.Empty)
+            {
+                msSqlAdapter8 = new SqlDataAdapter(sqlDCL, v.active_DB.managerMSSQLConn);
+                msSqlAdapter8.Fill(v.ds_DataCopyLines, DC_Code);
+            }
+            msSqlAdapter8.Dispose();
+        }
 
         //--- SQLs
         private string msTableFieldsList_SQL(string tableName)
@@ -2156,7 +2263,8 @@ namespace Tkn_ToolBox
         {
             bool onay = false;
 
-            v.con_CreateScriptPacket = true;
+            if (v.tMsDbUpdate.updateTypeId != 14) // 14,    N'SQL script çalıştır'
+                v.con_CreateScriptPacket = true;
 
             DataSet ds = new DataSet();
             try

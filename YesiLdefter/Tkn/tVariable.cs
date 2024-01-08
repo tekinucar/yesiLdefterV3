@@ -1143,7 +1143,8 @@ namespace Tkn_Variable
         public static vMsDbUpdate tMsDbUpdate = new vMsDbUpdate();
 
         public static OpenQA.Selenium.IWebDriver webMain_ = null;
-
+        public static string tWebLoginPageCode = "MEBBISLOGIN"; // bunu öndeğerlere bağlaman gerekiyor
+        public static string tWebLoginPageUrl = "https://mebbis.meb.gov.tr/default.aspx?lg1"; // bunu öndeğerlere bağlaman gerekiyor
         public enum tWebEventsType
         {
             none = 0,
@@ -1659,6 +1660,9 @@ namespace Tkn_Variable
         public bool DontSave { get; set; }
         public bool GetSave { get; set; }
 
+        public string KrtOperandType { get; set; }
+        public string CheckValue { get; set; }
+
         public DataSet ds { get; set; }
         public DataNavigator dN { get; set; }
         public void Clear()
@@ -1695,6 +1699,8 @@ namespace Tkn_Variable
             dbFieldType = 0;
             DontSave = false;
             GetSave = false;
+            KrtOperandType = "";
+            CheckValue = "";
 
             ds = null; // o anda işlem yapılan dataset 
             dN = null; //   ve datanavigator
