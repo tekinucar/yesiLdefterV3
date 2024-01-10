@@ -777,6 +777,7 @@ namespace Tkn_Variable
 
         //Color.LightSeaGreen; //Color.GreenYellow;  //Color.PaleGreen;
 
+        public static Color colorAutoSave = System.Drawing.Color.Orange;
         public static Color colorFocus = System.Drawing.Color.LightGreen; //AppearanceFocusedColor;// 
         public static Color colorSave = System.Drawing.Color.LimeGreen; //AppearanceFocusedColor;//
         public static Color colorNew = System.Drawing.Color.Turquoise; //AppearanceFocusedColor;
@@ -1175,7 +1176,8 @@ namespace Tkn_Variable
             click,
             onchange,
             onchangeDontDocComplate,
-            submit
+            submit,
+            autoSubmit
         };
 
         public enum tWebInjectType
@@ -1249,6 +1251,8 @@ namespace Tkn_Variable
         public string aktifUrl { get; set; }
         public string sessionIdAndToken { get; set; }
         public bool loadWorking { get; set; }
+        public bool anErrorOccurred { get; set; }
+        public bool autoSubmit { get; set; }
         public Int16 talepPageLeft { get; set; }
         public Int16 talepPageTop { get; set; }
 
@@ -1263,6 +1267,8 @@ namespace Tkn_Variable
             aktifUrl = "";
             sessionIdAndToken = "";
             loadWorking = false;
+            anErrorOccurred = false;
+            autoSubmit = false;
             talepPageLeft = 0;
             talepPageTop = 0;
         }

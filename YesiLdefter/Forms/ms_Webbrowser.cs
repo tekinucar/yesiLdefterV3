@@ -3017,9 +3017,6 @@ namespace YesiLdefter
             string url = @"";
             url = @"https://mebbis.meb.gov.tr/default.aspx";
 
-            ///"txtKullaniciAd", "99969564"
-            ///"txtSifre", "Ata.5514126")
-
             var baseAddress = new Uri(url);
             var cookieContainer = new CookieContainer();
             using (var handler = new HttpClientHandler() { CookieContainer = cookieContainer })
