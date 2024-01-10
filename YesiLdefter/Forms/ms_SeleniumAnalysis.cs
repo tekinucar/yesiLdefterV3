@@ -553,13 +553,14 @@ namespace YesiLdefter
         {
             // database deki veriyi web e aktar için 
             // db deki veriyi wnv.writeValue üzerine aktar
-            
+            bool onay = false;
             if (wnv.InjectType == v.tWebInjectType.Set ||
                 wnv.InjectType == v.tWebInjectType.AlwaysSet ||
                (wnv.InjectType == v.tWebInjectType.GetAndSet && wnv.workRequestType == v.tWebRequestType.post))
             {
+
                 if (wnv.TagName != "table")
-                    msPagesService.transferFromDatabaseToWeb(this, wnv, msWebScrapingDbFields_);
+                    onay = msPagesService.transferFromDatabaseToWeb(this, wnv, msWebScrapingDbFields_);
 
                 if (wnv.TagName == "table")
                 {
@@ -574,9 +575,18 @@ namespace YesiLdefter
 
                        msPagesService.findRightDbTables(wnv, msWebScrapingDbFields_);
                     }
+                    onay = true;
                 }
             }
-            
+
+            //if ((onay == false) &&
+            //    (wnv.writeValue == "") &&
+            //    (wnv.workRequestType == v.tWebRequestType.post)
+            //    )
+            //     f.anErrorOccurred = true;
+            if (wnv.writeValue != null)
+                if (wnv.writeValue.IndexOf("Error") > -1)
+                    f.anErrorOccurred = true;
         }
         private async Task WebScrapingAfter(webNodeValue wnv)
         {
@@ -840,8 +850,7 @@ namespace YesiLdefter
 
             if (TagName == "input")
             {
-                if ((AttType == "submit") ||
-                    (AttType == "file"))
+                if (AttType == "submit") // || (AttType == "file"))
                     invokeMember = v.tWebInvokeMember.click;
             }
 
@@ -1415,11 +1424,15 @@ namespace YesiLdefter
                 }
                 if (attType == "file")
                 {
+                    //if (attRole == "ImageData")
+
                     element = wb.FindElement(By.Id(idName));
                     if (element != null)
                     {
-                        await Task.Delay(500);
-                        SendKeys.Send(writeValue);// + "{ENTER}");
+                        //Bu komut klavyeye basar gibi davranıyor
+                        //SendKeys.Send(writeValue);// + "{ENTER}");
+                        //Bu işlemde direkt nesneye atama yapıyor  
+                        element.SendKeys(writeValue);
                     }
                     //v.SQL = v.SQL + v.ENTER + myNokta + " set file (SendKeys.Send) : " + writeValue;
                 }

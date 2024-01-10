@@ -299,7 +299,7 @@ namespace YesiLdefter.Selenium
             return ds;
         }
 
-        public void transferFromDatabaseToWeb(Form tForm, webNodeValue wnv, List<MsWebScrapingDbFields> msWebScrapingDbFields)
+        public bool transferFromDatabaseToWeb(Form tForm, webNodeValue wnv, List<MsWebScrapingDbFields> msWebScrapingDbFields)
         {
             //v.SQL = v.SQL + v.ENTER + myNokta + " transferFromDatabaseToWeb : Set : ";
 
@@ -307,44 +307,72 @@ namespace YesiLdefter.Selenium
             ///
 
             //if (t.IsNotNull(ds_ScrapingDbConnectionList) == false) return;
+            bool onay = false;
+
             if (msWebScrapingDbFields.Count == 0) 
-                return;
+                return onay;
 
             wnv.dbFieldName = "";
             wnv.dbLookUpField = false;
 
-            DataRow dbRow = findRightRow(tForm, wnv, v.tSelect.Set, msWebScrapingDbFields);
-
-            // db den okuyarak web göndereceği veri db den aldığı an
-            if (dbRow != null)
+            try
             {
-                //if (wnv.dbLookUpField == false)
-                Int16 ftype = wnv.dbFieldType;
+                DataRow dbRow = findRightRow(tForm, wnv, v.tSelect.Set, msWebScrapingDbFields);
 
-                // date veya smalldate
-                if ((ftype == 40) || (ftype == 58) || (ftype == 61))
+                // db den okuyarak web göndereceği veri db den aldığı an
+                if (dbRow != null)
                 {
-                    string value = dbRow[wnv.dbFieldName].ToString();
-                    if (value != "")
-                        wnv.writeValue = Convert.ToDateTime(value).ToString("dd.MM.yyyy"); //.Substring(0,10);
+                    Int16 ftype = wnv.dbFieldType;
 
-                }
-                else if (ftype == 108)
-                {
-                    string value = dbRow[wnv.dbFieldName].ToString();
-                    if (value != "")
+                    if (wnv.dbFieldName.IndexOf("Resim") == -1)
                     {
-                        //value = value.Substring(0, value.IndexOf(",") + 3);
-                        wnv.writeValue = string.Format("{0:0.00}", Convert.ToDecimal(value));// Convert.ToString(Convert.ToDouble(value).ToString("D"));
+                        // date veya smalldate
+                        if ((ftype == 40) || (ftype == 58) || (ftype == 61))
+                        {
+                            string value = dbRow[wnv.dbFieldName].ToString();
+                            if (value != "")
+                                wnv.writeValue = Convert.ToDateTime(value).ToString("dd.MM.yyyy"); //.Substring(0,10);
+
+                        }
+                        else if (ftype == 108)
+                        {
+                            string value = dbRow[wnv.dbFieldName].ToString();
+                            if (value != "")
+                            {
+                                //value = value.Substring(0, value.IndexOf(",") + 3);
+                                wnv.writeValue = string.Format("{0:0.00}", Convert.ToDecimal(value));// Convert.ToString(Convert.ToDouble(value).ToString("D"));
+                            }
+                        }
+                        else
+                        {
+                            wnv.writeValue = dbRow[wnv.dbFieldName].ToString();
+                        }
+                        onay = true;
+                    }
+                    else
+                    {
+                        string imgName = wnv.writeValue; //
+                        if (imgName == "") imgName = wnv.dbFieldName;
+
+                        string Images_Path = t.Find_Path("images") + imgName + ".jpg";
+                        long imageLength = 0;
+                        byte[] byteResim = t.imageBinaryArrayConverterMem((byte[])dbRow[wnv.dbFieldName], ref imageLength);
+
+                        onay = t.imageBinaryArrayConverterFile(byteResim, Images_Path);
+
+                        if (onay)
+                            wnv.writeValue = Images_Path;
+                        else
+                            wnv.writeValue = "Error Images";
                     }
                 }
-                else
-                {
-                    wnv.writeValue = dbRow[wnv.dbFieldName].ToString();
-                }
-
-                //v.SQL = v.SQL + wnv.dbFieldName + " ; " + wnv.writeValue;
             }
+            catch (Exception)
+            {
+                onay = false;
+                throw;
+            }
+            return onay;
         }
         public void findRightDbTables(webNodeValue wnv, List<MsWebScrapingDbFields> msWebScrapingFields)
         {

@@ -13250,6 +13250,41 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             return byteResim;
         }
 
+        public bool imageBinaryArrayConverterFile(byte[] tResim, string ImagesPath)
+        {
+            bool onay = false;
+            try
+            {
+                byte[] byteResim = null;
+                long sayac = tResim.Length;
+                MemoryStream mStream = new MemoryStream(tResim);
+                BinaryReader bReader = new BinaryReader(mStream);
+
+                byteResim = bReader.ReadBytes((int)sayac);
+                //imageLength = byteResim.Length;
+
+                File.Delete(ImagesPath);
+                //FileStream fStream = new FileStream(ImagesPath, FileMode.CreateNew, FileAccess.Write);
+                File.WriteAllBytes(ImagesPath, byteResim);
+
+                mStream.Close();
+                mStream.Dispose();
+                bReader.Close();
+                bReader.Dispose();
+                onay = true;
+            }
+            catch (Exception exc1)
+            {
+                string inner = (exc1.InnerException != null ? exc1.InnerException.ToString() : exc1.Message.ToString());
+
+                MessageBox.Show("DİKKAT [error image] : [ " + ImagesPath + " ] dosyasına veri ataması sırasında sorun oluştu ..." +
+                    v.ENTER2 + inner);
+                //throw;
+            }
+
+            return onay;
+        }
+
         public Bitmap imageCompress(Bitmap workingImage, int newWidth, int newHeight)
         {
             Bitmap _img = new Bitmap(newWidth, newHeight, workingImage.PixelFormat);

@@ -66,7 +66,7 @@ begin transaction
  insert into MS_TYPES values ( 1, 0, 'WEBNODE_ATT_ROLE', 13, '', 'SetCaption');
  insert into MS_TYPES values ( 1, 0, 'WEBNODE_ATT_ROLE', 14, '', 'GetCaption');
  insert into MS_TYPES values ( 1, 0, 'WEBNODE_ATT_ROLE', 15, '', 'Button');
- 
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_ATT_ROLE', 16, '', 'ImageData');
 
 
  DELETE MS_TYPES WHERE TYPES_NAME = 'WEBNODE_VALUE_TYPE'
