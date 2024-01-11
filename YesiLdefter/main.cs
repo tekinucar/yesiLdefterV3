@@ -315,13 +315,13 @@ namespace YesiLdefter
             if (v.SP_TabimDbConnection == false)
                 mn.Create_Menu(ribbon, "UST/PMS/PMS/PublicUser", "");
 
-            if ((v.tUser.UserDbTypeId == 1) || // yazılım
-                (v.tUser.UserDbTypeId == 21))  // kurucu
-            {
+            //if ((v.tUser.UserDbTypeId == 1) || // yazılım
+            //    (v.tUser.UserDbTypeId == 21))  // kurucu
+            //{
                 
                 t.WaitFormOpen(v.mainForm, "Menu Create ...");
                 mn.Create_Menu(ribbon, "UST/PMS/PMS/MsV3Menu", "");
-            }
+            //}
 
             setMenuItems();
         }

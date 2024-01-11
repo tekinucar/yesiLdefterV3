@@ -9154,10 +9154,11 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                                 //ftype = myInt32(dsData.Tables[TableFields].Rows[i]["user_type_id"].ToString());
                                 ftype = myInt32(v.ds_MsTableFields.Tables[tableName].Rows[i]["user_type_id"].ToString());
 
-                                //OtherValues_Get(dsData, TableFields + "2", fname,
-                                //    ref ValidationInsert, ref fForeing, ref fTrigger, ref displayFormat, ref fVisible);
-                                OtherValues_Get(v.ds_TableIPCodeFields, TableIPCode, fname,
+                                if (v.active_DB.mainManagerDbUses) // tableFields + "2"
+                                    OtherValues_Get(dsData, TableIPCode, fname,
                                     ref ValidationInsert, ref fForeing, ref fTrigger, ref displayFormat, ref fVisible);
+                                else OtherValues_Get(v.ds_TableIPCodeFields, TableIPCode, fname,
+                                     ref ValidationInsert, ref fForeing, ref fTrigger, ref displayFormat, ref fVisible);
                                 break;
                             }
                         }
