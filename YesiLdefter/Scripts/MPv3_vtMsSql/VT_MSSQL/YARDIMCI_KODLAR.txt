@@ -11,6 +11,11 @@ ALTER DATABASE MSV3DFTRBLT SET COMPATIBILITY_LEVEL = 130
 SET IDENTITY_INSERT [dbo].[EduMtskYonetmelik] ON 
 SET IDENTITY_INSERT [dbo].[EduMtskYonetmelik] OFF
 
+ ***** TABLO KOPYALAMAK **************
+
+Select * into EduMtskYonetmelik2 from EduMtskYonetmelik
+
+
 
 
  /* tablolara ait kaç adet trigger mevcut  */
@@ -157,9 +162,6 @@ where TABLE_CODE = @tableCode
 */
 
 
- ***** TABLO KOPYALAMAK **************
-
-Select * into EduMtskYonetmelik2 from EduMtskYonetmelik
 
 
  **** FIELD NO DEĞİŞTİRMEK ***********

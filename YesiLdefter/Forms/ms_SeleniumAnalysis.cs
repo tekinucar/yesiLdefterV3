@@ -1429,9 +1429,10 @@ namespace YesiLdefter
                     element = wb.FindElement(By.Id(idName));
                     if (element != null)
                     {
-                        //Bu komut klavyeye basar gibi davranıyor
+                        //Bu komut klavyeye basar gibi davranıyor, gönder.exe gibi çalışıyor
                         //SendKeys.Send(writeValue);// + "{ENTER}");
-                        //Bu işlemde direkt nesneye atama yapıyor  
+                        
+                        //Bu işlemde direkt nesneye fileName atama yapıyor  
                         element.SendKeys(writeValue);
                     }
                     //v.SQL = v.SQL + v.ENTER + myNokta + " set file (SendKeys.Send) : " + writeValue;
