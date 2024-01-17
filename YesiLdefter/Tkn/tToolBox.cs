@@ -54,7 +54,6 @@ namespace Tkn_ToolBox
         #region dbUpdatesChecked
         public void dbUpdatesChecked()
         {
-            
             string IdList = getMusteriDbUpdateIdList();
 
             tSQLs sqls = new tSQLs();
@@ -87,15 +86,23 @@ namespace Tkn_ToolBox
 
             if (onay)
             {
-                int count = ds.Tables[0].Rows.Count;
-                for (int i = 0; i < count; i++)
+                if (IsNotNull(ds))
                 {
-                    IdList = IdList + ", " + ds.Tables[0].Rows[i]["MsDbUpdateId"].ToString();
+                    int count = ds.Tables[0].Rows.Count;
+                    //for (int i = 0; i < count; i++)
+                    //{
+                    //    IdList = IdList + ", " + ds.Tables[0].Rows[i]["MsDbUpdateId"].ToString();
+                    //}
+                    // sadece maxID geliyor artık
+                    if (count > 0)
+                        IdList = ds.Tables[0].Rows[0]["MsDbUpdateId"].ToString();
+                    else IdList = " 0 ";
                 }
+                else IdList = " 0 ";
             }
             else
             {
-                //
+                IdList = " 0 ";
             }
             return IdList;            
         }
@@ -116,7 +123,7 @@ namespace Tkn_ToolBox
                 if (typeId == 14) runSqlScript();
                 if (typeId == 21) runDbUpdateTableAdd_();
                 if (typeId == 22) runDbUpdateFieldAdd();
-                //if (typeId == 23)
+                if (typeId == 23) runDbUpdateFieldUpdate();
                 //if (typeId == 24)
                 //if (typeId == 31) 
                 //if (typeId == 32) 
@@ -305,6 +312,35 @@ namespace Tkn_ToolBox
         private void runDbUpdateFieldUpdate()
         {
             //ALTER TABLE MS_TABLES_IP ALTER COLUMN EXTERNAL_IP_CODE VARCHAR(50) NULL
+
+            // hangi Database yazılacak 
+            v.dBaseNo dBaseNo = getDBaseNo(v.tMsDbUpdate.dBaseNoTypeId.ToString());
+            string databaseName = Find_dBLongName(Convert.ToString((byte)dBaseNo));
+            string tNull = "null";
+            if (v.tMsDbUpdate.fieldNotNull)
+                tNull = " not null";
+
+            // fieldAdd cumlesini hazırlansın
+            string cumle = preparingTableFieldUpdate(
+                databaseName,
+                v.tMsDbUpdate.schemaName,
+                v.tMsDbUpdate.tableName,
+                v.tMsDbUpdate.fieldName,
+                getFieldTypeName(v.tMsDbUpdate.fieldTypeId),
+                v.tMsDbUpdate.fieldTypeId,
+                v.tMsDbUpdate.fieldLength,
+                tNull
+                );
+
+            // hazırlanan cumleyi müşteri database üzerinde çalıştıralım
+            bool onay = runScript(dBaseNo, cumle);
+
+            // Müşteri database nin üzerinde yapılan işlemleri DBUpdates tablosuna kaydedilecek
+            if (onay)
+            {
+                insertDbUpdates();
+            }
+
         }
         // 24,    Field rename
         private void runDbUpdateFieldRename()
@@ -488,6 +524,38 @@ namespace Tkn_ToolBox
 
             return Sql;
         }
+
+        private string preparingTableFieldUpdate(
+            string databaseName,
+            string schemaName,
+            string tableName,
+            string fieldName,
+            string fieldTypeName,
+            Int16 fieldTypeId,
+            string fieldLength,
+            string fieldNull)
+        {
+            tSQLs sqls = new tSQLs();
+
+            if (schemaName == "") schemaName = "dbo";
+            if (fieldNull == "") fieldNull = " null ";
+            if (fieldLength != "")
+                if (fieldLength.IndexOf("(") == -1)
+                    fieldLength = "(" + fieldLength + ")";
+
+            string findSql = sqls.SQL_FieldNameAndTypeFind(databaseName, tableName, fieldName, fieldTypeId);
+
+            string Sql = // IF not EXISTS
+            @" IF EXISTS ( " + findSql + @" )
+               begin
+                   ALTER TABLE " + schemaName + "." + tableName + @" ALTER COLUMN " + fieldName + @" " + fieldTypeName + fieldLength + @" " + fieldNull + @" 
+               end
+            ";
+
+            return Sql;
+        }
+
+
 
 
         public string preparingMyProp(string databaseName, string schemas, string tableName, string sql)
@@ -5163,14 +5231,14 @@ namespace Tkn_ToolBox
         #endregion Kriter_Ekle
 
         #region tLast_Char_Remove / En Sondaki ', ' sil
-        public void tLast_Char_Remove(ref string Veri)
+        public string tLast_Char_Remove(string Veri)
         {
             // En Sondaki ', ' siliniyor
             Veri = Veri.Trim();
             if (Veri.Length < 2)
-                return;
+                return Veri;
             Veri = Veri.Substring(0, Veri.Length - 1);
-            //Veri = Veri.Remove(Veri.Length - 1, 1);
+            return Veri;
         }
         #endregion
 
@@ -9168,6 +9236,29 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             return ftype;
         }
 
+        public void OtherValues_Get(DataSet ds, saveVariables f)
+        {
+            string tableName_ = "";
+            if (v.active_DB.mainManagerDbUses) // tableFields + "2"
+                tableName_ = ds.DataSetName; // TapleIPCode
+            else tableName_ = f.tableName;   // normal tableName
+
+            int j = ds.Tables[tableName_].Rows.Count;
+            
+            for (int i = 0; i < j; i++)
+            {
+                if (ds.Tables[tableName_].Rows[i]["LKP_FIELD_NAME"].ToString() == f.fname)
+                {
+                    f.ValidationInsert = Set(ds.Tables[tableName_].Rows[i]["VALIDATION_INSERT"].ToString(), "", "False");
+                    f.fForeing = Set(ds.Tables[tableName_].Rows[i]["LKP_FFOREING"].ToString(), "", "False");
+                    f.fTrigger = Set(ds.Tables[tableName_].Rows[i]["LKP_FTRIGGER"].ToString(), "", "False");
+                    f.displayFormat = Set(ds.Tables[tableName_].Rows[i]["CMP_DISPLAY_FORMAT"].ToString(), "", "");
+                    f.fVisible = Set(ds.Tables[tableName_].Rows[i]["CMP_VISIBLE"].ToString(), "", "");
+                    break;
+                }
+            }
+        }
+
         public void OtherValues_Get(DataSet ds, string tableName, string fName,
             ref string ValidationInsert,
             ref string fForeing,
@@ -10031,6 +10122,22 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             return pageNo;
         }
 
+        public bool Find_FieldName(DataSet ds, string findFieldName)
+        {
+            bool onay = false;
+            string fName = "";
+            int colCount = ds.Tables[0].Columns.Count;
+            for (int i = 0; i < colCount; i++)
+            {
+                fName = ds.Tables[0].Columns[i].ColumnName;
+                if (fName == findFieldName)
+                {
+                    onay = true;
+                    break;
+                }
+            }
+            return onay;
+        }
 
         #endregion Diğerleri <<
 

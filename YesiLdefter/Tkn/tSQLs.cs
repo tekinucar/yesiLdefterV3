@@ -241,8 +241,24 @@ namespace Tkn_SQLs
                  [" + databaseName + @"].sys.tables b 
                  where b.object_id = a.object_id 
                  and   b.name = '" + tableName + @"'
+                 and   a.name = '" + fieldName + @"' ";
+        }
+        public string SQL_FieldNameAndTypeFind(string databaseName, string tableName, string fieldName, Int16 fieldTypeId)
+        {
+            return
+                @"
+                 select  
+                 a.column_id, a.name, 
+                 convert(smallInt, a.system_type_id) system_type_id, 
+                 convert(smallInt, a.user_type_id) user_type_id, 
+                 a.max_length, a.precision, a.scale, a.is_nullable, a.is_identity 
+                 from 
+                 [" + databaseName + @"].sys.columns a,  
+                 [" + databaseName + @"].sys.tables b 
+                 where b.object_id = a.object_id 
+                 and   b.name = '" + tableName + @"'
                  and   a.name = '" + fieldName + @"' 
-        ";
+                 and   a.system_type_id <> " + fieldTypeId.ToString()  + @"  ";
         }
 
         public string SQL_Types_List(string Type_Name)
@@ -1209,8 +1225,10 @@ INSERT INTO [dbo].[SYS_UPDATES]
         public string Sql_MsDbUpdates(string IdList)
         {
             // publishManager database
+            //" Select * from dbo.MsDbUpdates Where Id not in ( " + IdList + " ) "
             return
-                " Select * from dbo.MsDbUpdates Where Id not in ( " + IdList + " ) "
+                " Select * from dbo.MsDbUpdates Where Id > " + IdList + "  "
+              + " and IsActive = 1 " 
               + " and SectorTypeId in ( 0, " + v.SP_Firm_SectorTypeId.ToString() + " ) ";
             //" Select * from " + v.publishManager_DB.databaseName + ".dbo.MsDbUpdates "
         }
@@ -1239,7 +1257,8 @@ INSERT INTO [dbo].[SYS_UPDATES]
         public string Sql_DbUpdatesIdList()
         {
             // müşteri database
-            return " Select MsDbUpdateId from DbUpdates ";
+            return " Select max(MsDbUpdateId) as MsDbUpdateId from DbUpdates ";
+            //return " Select MsDbUpdateId from DbUpdates ";
         }
 
         public string Sql_WebScrapingFieldsList(string pageCodes)

@@ -453,7 +453,6 @@ namespace YesiLdefter
         private void myAutoSubmit(object sender, EventArgs e)
         {
             //Cursor.Current = Cursors.WaitCursor;
-            //startNodesBefore();
             //startNodesRun(ds_MsWebNodes, v.tWebRequestType.post, v.tWebEventsType.button7);
         }
         #endregion user buttons
@@ -519,7 +518,6 @@ namespace YesiLdefter
                     if (onayValue)
                     {
                         await WebScrapingAsync(v.webMain_, wnv);
-
 
                         // 4. adım
                         //
@@ -875,7 +873,10 @@ namespace YesiLdefter
 
                 if ((workRequestType == v.tWebRequestType.get) &&
                     (AttRole == "ItemTable"))
+                {
                     selectItemsRead(wb, ref wnv, idName);
+                    TagName = ""; // aşağıdaki get işlemine girmesin, teğet geçsin
+                }
 
                 // select in böyle bir özelliği yok ben manuel ekliyorum
                 if (AttRole == "SetCaption")
@@ -913,7 +914,6 @@ namespace YesiLdefter
                     //    v.SQL = v.SQL + v.ENTER + myNokta + "WebScraping : table Count = " + wnv.tTable.tRows.Count;
                     //}
                 }
-
 
                 if ((injectType == v.tWebInjectType.Set ||
                     (injectType == v.tWebInjectType.GetAndSet && workRequestType == v.tWebRequestType.post)) &&
@@ -1186,16 +1186,26 @@ namespace YesiLdefter
         }
         private void selectItemsRead(IWebDriver wb, ref webNodeValue wnv, string idName)
         {
-            IList<IWebElement> elements = wb.FindElements(By.Id(idName));
-            
-            if (elements == null) return;
+            //SelectElement selectElement = new SelectElement(driver.FindElement(By.Id("comboElementId")));
+            //List<IWebElement> options = selectElement.Options.ToList();
+            //List<string> optionValues = new List<string>();
+            //List<string> optionTexts = new List<string>();
+            //foreach (IWebElement option in options)
+            //{
+            //    optionValues.Add(option.GetAttribute("value"));
+            //    optionTexts.Add(option.Text);
+            //}
 
-            string value = "";
-            string text = "";
+            t.WaitFormOpen(v.mainForm, "Kaynak veriler okunuyor...");
+            
+            SelectElement selectElement = new SelectElement(wb.FindElement(By.Id(idName)));
+            if (selectElement == null) return;
+            List<IWebElement> options = selectElement.Options.ToList();
 
             tTable table = new tTable();
-
-            foreach (IWebElement item in elements)
+            string value = "";
+            string text = "";
+            foreach (IWebElement item in options)
             {
                 tRow row = new tRow();
                 value = item.GetAttribute("value");
@@ -1211,8 +1221,10 @@ namespace YesiLdefter
 
                 table.tRows.Add(row);
             }
-
             wnv.tTable = table;
+
+            v.IsWaitOpen = false;
+            t.WaitFormClose();
         }
         private string selectItemsGetValue(IWebDriver wb, ref webNodeValue wnv, string idName, string findText)
         {
@@ -1472,13 +1484,21 @@ namespace YesiLdefter
                         // select in value si değilde text kısmı okunacak ise 
                         // writeValeu veya AttRole bizim tarafımızdan manuel işaretleniyor
 
-                        if ((tagName == "select") &&
-                            ((wnv.writeValue == "InnerText") ||
-                             (attRole == "GetCaption") || (attRole == "text") || (attRole == "InnerText")
-                             ))
+                        if ((tagName == "select") && (attRole != "ItemTable"))
                         {
-                            readValue = element.Text;
-                            //v.SQL = v.SQL + v.ENTER + myNokta + " get select : " + readValue;
+                            if ((wnv.writeValue == "InnerText") ||
+                                (attRole == "GetCaption") || 
+                                (attRole == "text") || 
+                                (attRole == "InnerText"))
+                            { 
+                                SelectElement selectElement = new SelectElement(wb.FindElement(By.Id(idName)));
+                                readValue = selectElement.SelectedOption.Text;
+                            }
+                            else
+                            {
+                                SelectElement selectElement = new SelectElement(wb.FindElement(By.Id(idName)));
+                                readValue = selectElement.SelectedOption.GetAttribute("value");
+                            }
                         }
                         // önceki hali
                         //readValue = element.GetAttribute("value");

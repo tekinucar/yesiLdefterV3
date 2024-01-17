@@ -316,7 +316,7 @@ WHERE MASTER_CODE = 'CR_ARA_F01'
 
 
 
-*****  FIELD DEĞİŞİKLİĞİ ALAN DEĞİŞİKLİĞİ *********************
+*****  FIELD DEĞİŞİKLİĞİ ALAN/TYPE DEĞİŞİKLİĞİ *********************
 
 ALTER TABLE SYS_TYPES_L ALTER COLUMN TYPES_CAPTION VARCHAR(200) NULL
 

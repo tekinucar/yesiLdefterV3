@@ -1018,13 +1018,14 @@ namespace YesiLdefter.Selenium
         }
 
 
-        private async Task saveRowAsync(Form tForm, webNodeValue wnv, tRow tableRows, List<MsWebScrapingDbFields> msWebScrapingDbFields, List<webNodeItemsList> aktifPageNodeItemsList)
+        private async Task<bool> saveRowAsync(Form tForm, webNodeValue wnv, tRow tableRows, List<MsWebScrapingDbFields> msWebScrapingDbFields, List<webNodeItemsList> aktifPageNodeItemsList)
         {
             //v.SQL = v.SQL + v.ENTER + myNokta + " saveRow";
 
             /// table in bir row unu alıp tüm column larını tarayarak db ye kaydet işlemini gerçekleşitiriyor
             ///
             DataRow dbRow = null;
+            bool onay = true;
             string itemText = "";
             string itemValue = "";
             Int16 colNo = 0;
@@ -1075,8 +1076,17 @@ namespace YesiLdefter.Selenium
                     {
                         if (wnv.dbLookUpField == false)
                         {
-                            if (itemText != "")
-                                dbRow[wnv.dbFieldName] = itemText;
+                            try
+                            {
+                                if (itemText != "")
+                                    dbRow[wnv.dbFieldName] = itemText;
+                            }
+                            catch (Exception exc1)
+                            {
+                                onay = false;
+                                MessageBox.Show("Error, db Field set : " + wnv.dbFieldName + " = " + itemText + v.ENTER2 + exc1.Message);
+                                //throw;
+                            }
                         }
                         else
                         {
@@ -1106,8 +1116,6 @@ namespace YesiLdefter.Selenium
             //    runScrapingAsync(ds_MsWebNodes, this.myTriggerWebRequestType, v.tWebEventsType.tableField, 0, wnv.nodeId);
             //}
 
-
-
             if ((wnv.TagName == "table") ||
                 (wnv.TagName == "select"))
             {
@@ -1121,6 +1129,8 @@ namespace YesiLdefter.Selenium
                     dbButtonClick(tForm, wnv.ds.DataSetName, v.tButtonType.btKaydetYeni);
                 }
             }
+
+            return onay;
         }
 
 

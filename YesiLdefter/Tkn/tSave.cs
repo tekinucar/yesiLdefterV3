@@ -653,579 +653,55 @@ namespace Tkn_Save
             int Position,
             ref string TriggerSQL)
         {
-
             #region İlk atamalar
 
             if (vt.Cargo != "data") return "";
 
             tToolBox t = new tToolBox();
-
-            string SchemasCode = vt.SchemasCode;
-            string tableName = vt.TableName;
-            string Key_Id_FieldName = vt.KeyId_FName;
-            bool identityInsertOnOff = vt.IdentityInsertOnOff;
-            //string MyStr = "";
-            string sonuc = "";
-            string MyInsert = "";
-            string MyEdit = "";
-            string MyStr2 = "";
-            string MyStr3 = "";
-            string MyField = "";
-            string MyValue = "";
-            string MyIfW = string.Empty;
-            string fname = "";
-            string onceki_fname = "";
-            string Lkp_fname = "";
-            string fvalue = "";
-            string bos = "   ";
-            string ValidationInsert = string.Empty;
-            string fForeing = string.Empty;
-            string fTrigger = string.Empty;
-            string fTriggerFields = string.Empty;
-            string displayFormat = string.Empty;
-            string fVisible = string.Empty;
-            string fieldNewValue = "";
-
-            int ftype = 0;
-            int fmax_length = 0;
-            int c = 0;
-            bool fIdentity = false;
-            bool IsChanges = false;
-
-            //List<string> fTriggerFieldList = new List<string>();
-
             TriggerSQL = string.Empty;
 
-            string myProp = ds.Namespace.ToString();
-            string SqlF = t.Set(t.MyProperties_Get(myProp, "=SqlFirst:"), "", "");
-            string TableIPCode = t.MyProperties_Get(myProp, "TableIPCode:");
-            byte TableType = t.Set(t.MyProperties_Get(myProp, "=TableType:"), "", (byte)1);
-            int DataReadType = t.myInt32(t.MyProperties_Get(myProp, "DataReadType:"));
+            saveVariables f = new saveVariables();
+            f.State = State;
+            f.position = Position;
 
+            setVariables(f, ds, vt);
             // Dont Save
-            if (DataReadType == 7)
+            if (f.DataReadType == 7)
             {
                 return "DONTSAVE";
             }
 
-            string line_end = "";
-
-            if (vt.DBaseType == v.dBaseType.MSSQL)
-            {
-                line_end = v.SP_MSSQL_LINE_END; // = ENTER;
-            }
-
-            if (t.IsNotNull(SchemasCode) == false) 
-                SchemasCode = "[dbo].";
-
-            if (SchemasCode.IndexOf("[") == -1)
-                SchemasCode = "[" + SchemasCode + "].";
-
-            if (SchemasCode.IndexOf(".") == -1)
-                SchemasCode = SchemasCode + "."; 
-
-            MyEdit = "  update "+ SchemasCode + "[" + tableName + "] set ";
-
-            //tableFields = tableName + "_FIELDS";
-
-            if (State == "dsInsert")
-                IsChanges = true;
-
-            try
-            {
-                //c = ds.Tables[tableFields].Rows.Count;
-                c = v.ds_MsTableFields.Tables[tableName].Rows.Count;
-            }
-            catch
-            {
-                c = 0;
-            }
             #endregion İlk atamalar
 
             #region Field Liste Döngüsü
-            for (int i = 0; i < c; i++)
+            for (int i = 0; i < f.count; i++)
             {
-                if (vt.DBaseType == v.dBaseType.MSSQL)
-                {
-                    //fname = ds.Tables[tableFields].Rows[i]["name"].ToString();
-                    //ftype = Convert.ToInt32(ds.Tables[tableFields].Rows[i]["user_type_id"].ToString());
-                    //fIdentity = (Boolean)(ds.Tables[tableFields].Rows[i]["is_identity"]);
-                    //fmax_length = Convert.ToInt32(ds.Tables[tableFields].Rows[i]["max_length"].ToString());
-                    fname = v.ds_MsTableFields.Tables[tableName].Rows[i]["name"].ToString();
-                    ftype = Convert.ToInt32(v.ds_MsTableFields.Tables[tableName].Rows[i]["user_type_id"].ToString());
-                    fIdentity = (Boolean)(v.ds_MsTableFields.Tables[tableName].Rows[i]["is_identity"]);
-                    fmax_length = Convert.ToInt32(v.ds_MsTableFields.Tables[tableName].Rows[i]["max_length"].ToString());
-
-                    // varchar(max), nvarchar(max) olunca -1 geliyor
-                    if (fmax_length == -1) fmax_length = 128000;
-
-                    if (ftype == 36) // GUID / uniqueidentifier
-                        fmax_length = 128000;
-                    if (ftype == 231) // nVarchar ise
-                        fmax_length = fmax_length / 2;
-
-                }
-
-                if (v.active_DB.mainManagerDbUses) // tableFields + "2"
-                    t.OtherValues_Get(ds, TableIPCode, fname, ref ValidationInsert, ref fForeing, ref fTrigger, ref displayFormat, ref fVisible);
-                else
-                    t.OtherValues_Get(v.ds_TableIPCodeFields, TableIPCode, fname, ref ValidationInsert, ref fForeing, ref fTrigger, ref displayFormat, ref fVisible);
-
-                // field ismi LKP_ veya  rowguid  ise
-                //Lkp_fname = "";
-                //if (fname.Length > 4)
-                //    Lkp_fname = fname.Substring(0, 4);
-                Lkp_fname = fname;
-                if ((fname.IndexOf("LKP_") > -1) ||
-                    (fname.IndexOf("rowguid") > -1))
-                    Lkp_fname = "LKP_";
+                //------------------------ PREPARING ---------------------------------------------
+                preparingFieldVariables(f, ds, i);
+                //------------------------ PREPARING ---------------------------------------------
                 
-                // Anahtar ID fieldname dönüyor
-                if (fIdentity == true) 
-                    Key_Id_FieldName = fname;
-
-                // dsData yapısı TableType == Table değilise
-                if ((TableType != 1) &&  // Table
-                    (TableType != 3))    // StoredProcedure
+                if (f.isFieldFind)
                 {
-                    // TableFields listesindeki fieldname  
-                    // select edilen cümle içinde var mı / yok mu
-                    // yok ise işlem yapılmasın
+                    //------------------------ INSERT ------------------------------------------------
+                    //preparingInsertScript(f, ds);
+                    //-------------------------------------------------------------------------------- 
 
-                    //if (SqlF.IndexOf(fname) == -1)
-                    //{
-                    //    Lkp_fname = "LKP_";
-                    //}
+                    //------------------------ EDIT --------------------------------------------------
+                    //preparingEditScript(f, ds);
+                    //--------------------------------------------------------------------------------
+
+                    //------------------------ Select Control ----------------------------------------
+                    //preparingSelectControlScript(f);
+                    //--------------------------------------------------------------------------------
+
+                    //--- Yeni Script Fields ---------------------------------------------------------
+                    preparingFieldsScript(f, ds);
+                    //--------------------------------------------------------------------------------
+
+                    //------------------------ Triggers Fields --------------------------------------
+                    preparinfTriggerFieldsList(f);
+                    //-------------------------------------------------------------------------------
                 }
-
-                // bazen kriter sorgulamalardan dolayı çift olabiliyor ( >=, =< ) 
-                // FIELD_IP listesinden çift field olabiliyor
-
-                if ((onceki_fname == fname) && (onceki_fname != ""))
-                {
-                    Lkp_fname = "LKP_";
-                }
-
-                // onceki_fname nin ataması, bir sonraki field aynı mı diye karşılaştırılacak 
-                onceki_fname = fname;
-
-                // dataset üzerinden veriyi al
-                fvalue = "";
-                // ilk  Lkp_fname == "LKP_"  atamasını TableType != 1 ile alıyor 
-                if (Lkp_fname != "LKP_")
-                    fvalue = ds.Tables[0].Rows[Position][fname].ToString();
-
-                // Foreing field ve value değeri yok ise cümle içine girmesin
-                if ((fForeing == "True") && (fvalue == ""))
-                    Lkp_fname = "LKP_";
-                if ((fForeing == "True") && (fvalue == "0"))
-                    fvalue = "null";
-
-
-                //------------------------ INSERT ------------------------------------------------
-                #region INSERT
-                if ((State == "dsInsert") & 
-                    ( (fIdentity == false) |                // Identity olmayan fied  veya
-                      ((fIdentity) & (identityInsertOnOff)) // Identity ve OnOff true ise yani RefId field da isteniyorsa 
-                    ) &
-                    (Lkp_fname != "LKP_") & 
-                    (Lkp_fname != "rowg")
-                    )
-                {
-
-                    //* rakam  56, 48, 127, 52, 60, 62, 59, 106, 108
-                    if ((ftype == 56) | (ftype == 48) | (ftype == 127) | (ftype == 52) |
-                        (ftype == 60) | (ftype == 62) | (ftype == 59) | (ftype == 106) | (ftype == 108))
-                    {
-
-                        // Eğer veri (Rakam) yok ise Sıfır bas
-                        if (fvalue == "") fvalue = "0";
-
-                        // rakam türü , ile ayrılmış ise , yerine . işareti değiştiriliyor 
-                        if (fvalue.IndexOf(",") > -1)
-                            fvalue = fvalue.Replace(",", ".");
-
-                        // alınan değeri stringe ekle
-                        MyField = MyField + bos + fname + ", ";
-                        MyValue = MyValue + fvalue + ", ";
-                    }
-
-                    //* text = (char)175, (varchar)167, (ntext)99, (text)35, (nchar)239, (nvarchar)231, (uniqueidentifier)36 //39 
-                    if ((ftype == 175) | (ftype == 167) | (ftype == 99) | (ftype == 35) | (ftype == 239) | (ftype == 231) | (ftype == 36))
-                    {
-                        MyField = MyField + bos + fname + ", ";
-
-                        // Eğer veri yok ise null bas
-                        if ((fvalue == "") || (fvalue == "null"))
-                        {
-                            MyValue = MyValue + "null, ";
-                        }
-                        else
-                        {
-                            if (fvalue.Length > fmax_length)
-                                fvalue = fvalue.Substring(0, fmax_length-1);
-
-                            // alınan değeri stringe ekle
-                            MyValue = MyValue + "'" + t.Str_Check(fvalue) + "', ";
-                        }
-                    }
-
-                    //* bit türü 104
-                    if (ftype == 104)
-                    {
-                        MyField = MyField + bos + fname + ", ";
-
-                        if ((fvalue == "False") || (fvalue == ""))
-                        {
-                            MyValue = MyValue + "0, ";
-                        }
-                        else if (fvalue == "True")
-                        {
-                            MyValue = MyValue + "1, ";
-                        }
-                        else
-                        {
-                            MyValue = MyValue + "null, ";
-                        }
-                    }
-
-                    //* date 40
-                    if ((ftype == 40) || (ftype == 61))
-                    {
-                        MyField = MyField + bos + fname + ", ";
-
-                        if ((fvalue != "") && (fvalue.IndexOf("01.01.0001") == -1) && fvalue != "null")
-                        {
-                            MyValue = MyValue + t.Tarih_Formati(Convert.ToDateTime(fvalue)) + ", ";
-                        }
-                        else
-                        {
-                            MyValue = MyValue + "null, ";
-                        }
-                    }
-
-                    //* time türü 41
-                    if (ftype == 41)
-                    {
-                        MyField = MyField + bos + fname + ", ";
-
-                        if (fvalue != "")
-                        {
-                            MyValue = MyValue + "'" + t.Str_Check(fvalue) + "', ";
-                        }
-                        else
-                        {
-                            MyValue = MyValue + "null, ";
-                        }
-                    }
-
-                    // smalldatetime 58
-                    if (ftype == 58)
-                    {
-                        MyField = MyField + bos + fname + ", ";
-
-                        if ((fvalue != "") && (fvalue.IndexOf("01.01.0001") == -1) && fvalue != "null")
-                        {
-                            MyValue = MyValue + t.TarihSaat_Formati(Convert.ToDateTime(fvalue)) + ", ";
-                        }
-                        else
-                        {
-                            MyValue = MyValue + "null, ";
-                        }
-                    }
-
-                    //* image 34, varbinary (max) 165 
-                    if ((ftype == 34) || (ftype == 165))
-                    {
-                        // bir tabloda 1 den fazla resim olabiliyor (şimdilik 2 resim kontrolü var)
-                        //
-                        // 1. resim var ise
-                        if ((v.con_Images_FieldName == fname) && (v.con_Images != null))
-                        {
-                            MyField = MyField + bos + fname + ", ";
-                            MyValue = MyValue + " @" + fname + ", ";
-                            // üzerindeki eskim varsa tekrar onu gösteriyor
-                            // bu nedenle bu atama yapılıyor
-                            ds.Tables[0].Rows[Position][fname] = v.con_Images;
-                        }
-                        // 2. resim var ise
-                        if ((v.con_Images_FieldName2 == fname) && (v.con_Images2 != null))
-                        {
-                            MyField = MyField + bos + fname + ", ";
-                            MyValue = MyValue + " @" + fname + ", ";
-                            // üzerindeki eskim varsa tekrar onu gösteriyor
-                            // bu nedenle bu atama yapılıyor
-                            ds.Tables[0].Rows[Position][fname] = v.con_Images2;
-                        }
-
-                        // 1. resim null ise
-                        if ((v.con_Images_FieldName == fname) && (v.con_Images == null))
-                        {
-                            MyField = MyField + bos + fname + ", ";
-                            MyValue = MyValue + " null , ";
-                            // üzerindeki eskim varsa tekrar onu gösteriyor
-                            // bu nedenle bu atama yapılıyor
-                            ds.Tables[0].Rows[Position][fname] = null;
-                        }
-                        // 2. resim null ise
-                        if ((v.con_Images_FieldName2 == fname) && (v.con_Images2 == null))
-                        {
-                            MyField = MyField + bos + fname + ", ";
-                            MyValue = MyValue + " null , ";
-                            // üzerindeki eskim varsa tekrar onu gösteriyor
-                            // bu nedenle bu atama yapılıyor
-                            ds.Tables[0].Rows[Position][fname] = null;
-                        }
-                    }
-
-                    MyField = MyField + v.ENTER;
-                    MyValue = MyValue + "  ";
-                }
-                #endregion INSERT
-                //-------------------------------------------------------------------------------- 
-
-                //------------------------ EDIT --------------------------------------------------
-                #region EDIT
-                //if ( (State == "dsEdit") &  
-                //     (Lkp_fname != "LKP_") & (Lkp_fname != "rowg"))
-
-                // ValidationInsert == "True" için sürekli edit cümleside hazırlansın 
-
-                if ((Lkp_fname != "LKP_") & (Lkp_fname != "rowg"))
-                {
-                    // Tablonun ID fieldi
-                    if (fIdentity == true)
-                    {
-                        MyStr2 = " where [" + fname + "] = " + fvalue + " " + line_end;
-                        MyStr3 = " select " + fname + ", 'dsEdit' as dsState from [" + tableName + "] where 0 = 0 ";
-                        // Tarihce için gerekiyor
-                        // KeyID_Value := Value; 
-                    }
-                }
-
-                if (//(State == "dsEdit") & 
-                    (Lkp_fname != "LKP_") & (Lkp_fname != "rowg") & 
-                    (fVisible == "True"))
-                {
-
-                    // column için yeni update değeri
-                    fieldNewValue = "";
-
-                    //* rakam türleri  56, 48, 127, 52, 60, 62, 59, 106, 108
-                    if ((fIdentity == false) &
-                       ((ftype == 56) | (ftype == 48) | (ftype == 127) | (ftype == 52) |
-                        (ftype == 60) | (ftype == 62) | (ftype == 59) | (ftype == 106) | (ftype == 108)))
-                    {
-                        // Eğer veri (Rakam) yok ise Sıfır bas
-                        if (fvalue == "") fvalue = "0";
-
-                        // rakam türü , ile ayrılmış ise , yerine . işareti değiştiriliyor 
-                        if (fvalue.IndexOf(",") > -1)
-                            fvalue = fvalue.Replace(",", ".");
-
-                        // alınan değeri stringe ekle
-                        //MyEdit = MyEdit + " [" + fname + "] = " + fvalue + ", ";
-                        fieldNewValue = " [" + fname + "] = " + fvalue + ", ";
-                    }
-
-                    //* text = (char)175, (varchar)167, (ntext)99, (text)35, (nchar)239, (nvarchar)231, (uniqueidentifier)36 //39
-                    if ((ftype == 175) | (ftype == 167) | (ftype == 99) | (ftype == 35) | (ftype == 239) | (ftype == 231) | (ftype == 36))
-                    {
-                        if (fvalue.Length > fmax_length)
-                            fvalue = fvalue.Substring(0, fmax_length - 1);
-
-                        // alınan değeri stringe ekle
-                        if ((fvalue != "") && (fvalue != "null"))
-                            fieldNewValue = " [" + fname + "] = " + "'" + t.Str_Check(fvalue) + "', ";
-                        else fieldNewValue = " [" + fname + "] = " + "null, ";// Eğer veri yok ise null bas
-                    }
-
-                    //* bit türü 104
-                    if (ftype == 104)
-                    {
-                        if ((fvalue == "") || (fvalue == "False"))
-                            fieldNewValue = " [" + fname + "] = " + "0, ";
-                        else fieldNewValue = " [" + fname + "] = " + "1, ";
-                    }
-
-                    //* datetime türü 40
-                    if ((ftype == 40) || (ftype == 61))
-                    {
-                        if ((fvalue != "") && (fvalue.IndexOf("01.01.0001") == -1) && fvalue != "null")
-                            fieldNewValue = " [" + fname + "] = " + t.Tarih_Formati(Convert.ToDateTime(fvalue)) + ", ";
-                        else fieldNewValue = " [" + fname + "] = " + "null, ";
-                    }
-
-                    //* time türü 41
-                    if (ftype == 41)
-                    {
-                        if (fvalue != "")
-                            fieldNewValue = " [" + fname + "] = '" + t.Str_Check(fvalue) + "', ";
-                        else fieldNewValue = " [" + fname + "] = " + "null, ";
-                    }
-
-                    //* datetime türü  58
-                    if (ftype == 58)
-                    {
-                        if ((fvalue != "") && (fvalue.IndexOf("01.01.0001") == -1) && fvalue != "null")
-                            fieldNewValue = " [" + fname + "] = " + t.TarihSaat_Formati(Convert.ToDateTime(fvalue)) + ", ";
-                        else fieldNewValue = " [" + fname + "] = " + "null, ";
-                    }
-
-                    //* img, image 34, varbinary (max) 165 
-                    if ((ftype == 34) || (ftype == 165))
-                    {
-                        // 1. Resim
-                        if ((v.con_Images_FieldName == fname) && (v.con_Images != null))
-                        {
-                            fieldNewValue = " [" + fname + "] = " + " @" + fname + " , ";
-                            // üzerindeki eskim varsa tekrar onu gösteriyor
-                            // bu nedenle bu atama yapılıyor
-                            ds.Tables[0].Rows[Position][fname] = v.con_Images;
-                        }
-                        if ((v.con_Images_FieldName == fname) && (v.con_Images == null))
-                        {
-                            fieldNewValue = " [" + fname + "] = null , ";
-                            // üzerindeki eskim varsa tekrar onu gösteriyor
-                            // bu nedenle bu atama yapılıyor
-                            ds.Tables[0].Rows[Position][fname] = null;
-                        }
-                        // 2. Resim
-                        if ((v.con_Images_FieldName2 == fname) && (v.con_Images2 != null))
-                        {
-                            fieldNewValue = " [" + fname + "] = " + " @" + fname + " , ";
-                            // üzerindeki eskim varsa tekrar onu gösteriyor
-                            // bu nedenle bu atama yapılıyor
-                            ds.Tables[0].Rows[Position][fname] = v.con_Images2;
-                        }
-                        if ((v.con_Images_FieldName2 == fname) && (v.con_Images2 == null))
-                        {
-                            fieldNewValue = " [" + fname + "] = null , ";
-                            // üzerindeki eskim varsa tekrar onu gösteriyor
-                            // bu nedenle bu atama yapılıyor
-                            ds.Tables[0].Rows[Position][fname] = null;
-                        }
-                    }
-
-                    //MyEdit = MyEdit + v.ENTER;
-
-                    // sadece belli field ismi seçilmişse o fieldler update olacak
-                    // diğer fieldler update olmayacak
-                    if (v.onlyTheseFields != "")
-                    {
-                        // onlyTheseFields listesinde bu field yok ise update bilgisini boşalt
-                        if (v.onlyTheseFields.IndexOf(fname) == -1)
-                            fieldNewValue = "";
-                    }
-
-                    if (fieldNewValue != "")
-                    {
-                        MyEdit = MyEdit + fieldNewValue + v.ENTER;
-                        IsChanges = true;
-                    }
-                }
-                #endregion EDIT
-                //---------------------------------------------------------------------------------
-
-                //------------------------ Select Control ----------------------------------------
-                #region Select Control
-                if ((ValidationInsert == "True") &&
-                    (Lkp_fname != "LKP_") &&
-                    (Lkp_fname != "rowg"))
-                {
-                    //* rakam türleri  56, 48, 127, 52, 60, 62, 59, 106, 108
-                    if ((fIdentity == false) &
-                       ((ftype == 56) | (ftype == 48) | (ftype == 127) | (ftype == 52) |
-                        (ftype == 60) | (ftype == 62) | (ftype == 59) | (ftype == 106) | (ftype == 108)))
-                    {
-                        // Eğer veri (Rakam) yok ise Sıfır bas
-                        if (fvalue == "") fvalue = "0";
-
-                        // rakam türü , ile ayrılmış ise , yerine . işareti değiştiriliyor 
-                        if (fvalue.IndexOf(",") > -1)
-                            fvalue = fvalue.Replace(",", ".");
-
-                        // alınan değeri stringe ekle
-                        MyIfW = MyIfW + " and [" + fname + "] = " + fvalue + " ";
-                    }
-
-                    //* text = (char)175, (varchar)167, (ntext)99, (text)35, (nchar)239, (nvarchar)231, (uniqueidentifier)36 //39
-                    if ((ftype == 175) | (ftype == 167) | (ftype == 99) | (ftype == 35) | (ftype == 239) | (ftype == 231) | (ftype == 36))
-                    {
-                        // alınan değeri stringe ekle
-                        if ((fvalue != "") && (fvalue != "null"))
-                            MyIfW = MyIfW + " and [" + fname + "] = " + "'" + t.Str_Check(fvalue) + "' ";
-                        else MyIfW = MyIfW + " and [" + fname + "] = " + "null ";// Eğer veri yok ise null bas
-                    }
-
-                    //* bit türü 104
-                    if (ftype == 104)
-                    {
-                        if ((fvalue == "") || (fvalue == "False"))
-                            MyIfW = MyIfW + " and [" + fname + "] = 0 ";
-                        else MyIfW = MyIfW + " and [" + fname + "] = 1 ";
-                    }
-
-                    //* datetime türü 40
-                    if ((ftype == 40) || (ftype == 61))
-                    {
-                        if (fvalue != "")
-                            MyIfW = MyIfW + " and [" + fname + "] = " + t.Tarih_Formati(Convert.ToDateTime(fvalue)) + " ";
-                        else MyIfW = MyIfW + " and [" + fname + "] = null ";
-                    }
-
-                    //* time türü 41
-                    if (ftype == 41)
-                    {
-                        if (fvalue != "")
-                            MyIfW = MyIfW + " and [" + fname + "] = '" + t.Str_Check(fvalue) + "' ";
-                        else MyIfW = MyIfW + " and [" + fname + "] = " + "null ";
-                    }
-
-                    //* datetime türü  58
-                    if (ftype == 58)
-                    {
-                        if (fvalue != "")
-                            MyIfW = MyIfW + " and [" + fname + "] = " + t.TarihSaat_Formati(Convert.ToDateTime(fvalue)) + " ";
-                        else MyIfW = MyIfW + " and [" + fname + "] = " + "null ";
-                    }
-
-                    //* image 34
-                    if (ftype == 34)
-                    {
-                        //if (fvalue != "")
-                        //    //MyStr = MyStr + " [" + fname + "] = " + fvalue + ", ";
-                        //    MyStr = MyStr + " [" + fname + "] = " + "CONVERT(varchar(8000), convert(binary(8000)," + Convert.ToString((byte[])ds.Tables[0].Rows[Position][fname]) + ")), ";//:Convert.ToString((byte[])ds.Tables[0].Rows[Position][fname]);
-
-                        //  //"  (select * FROM OPENROWSET(BULK '" + Convert.ToByte( ds.Tables[0].Rows[Position][fname]) + "', SINGLE_BLOB) AS img) ";
-                        //else MyStr = MyStr + " [" + fname + "] = " + "null, ";
-                    }
-
-                    MyIfW = MyIfW + v.ENTER;
-
-
-                }
-                #endregion Select Control
-                //---------------------------------------------------------------------------------
-
-                //------------------------ Triggers Fields --------------------------------------
-                #region Triggers Fields Control
-                if ((fTrigger == "True") &&
-                    (Lkp_fname != "LKP_") &&
-                    (Lkp_fname != "rowg"))
-                {
-                    // trigger ile atama yapılan fieldlerin listesi hazırlanıyor 
-
-                    // DİKKAT : Sadece trigger ile atama yapılan fieldler listeleniyor
-
-                    // select için isimler hazırlanıyor 
-                    fTriggerFields = fTriggerFields + bos + fname + ", ";
-                    // field list 
-                    //fTriggerFieldList.Add(fname);
-                }
-                #endregion Triggers Fileds Control
-                //---------------------------------------------------------------------------------
-
             }
             #endregion Field Liste Döngüsü
 
@@ -1236,12 +712,18 @@ namespace Tkn_Save
             if (State == "dsInsert")
             {
                 // En Sondaki ', ' siliniyor
-                t.tLast_Char_Remove(ref MyField);
-                t.tLast_Char_Remove(ref MyValue);
+                //f.MyField = t.tLast_Char_Remove(f.MyField);
+                //f.MyValue = t.tLast_Char_Remove(f.MyValue);
 
-                if (MyIfW != "")
+                f._insFields = t.tLast_Char_Remove(f._insFields);
+                f._insValues = t.tLast_Char_Remove(f._insValues);
+
+                //if (f.MyIfW != "")
+                if (f._selectControls != "")
                 {
-                    t.tLast_Char_Remove(ref MyEdit);
+                    //f.MyEdit = t.tLast_Char_Remove(f.MyEdit);
+                    f._editFields = t.tLast_Char_Remove(f._editFields);
+
                     /*         
                     if ( Select count(*) ADET from xxxxx
                     where ID = yyy ) = 0 
@@ -1258,53 +740,65 @@ namespace Tkn_Save
                     */
 
                     // sorunu bulamadım
-                    MyInsert =
-                        " if ( Select count(*) ADET from "+ SchemasCode + "[" + tableName + "] where 0 = 0 " + v.ENTER
-                      + MyIfW + " ) = 0 " + v.ENTER
+                    f.MyInsert =
+                        " if ( Select count(*) ADET from "+ f.SchemasCode + "[" + f.tableName + "] where 0 = 0 " + v.ENTER
+                      //+ f.MyIfW + " ) = 0 " + v.ENTER
+                      + f._selectControls + " ) = 0 " + v.ENTER
                       + " begin " + v.ENTER
-                      + " insert into "+ SchemasCode + "[" + tableName + "] ( " + v.ENTER
-                      + MyField + " ) values " + v.ENTER
-                      + " ( " + MyValue + " ) " + line_end
+                      + " Insert into "+ f.SchemasCode + "[" + f.tableName + "] ( " + v.ENTER
+                      //+ f.MyField + " ) values " + v.ENTER
+                      //+ " ( " + f.MyValue + " ) " + f.line_end
+                      + f._insFields + " ) values " + v.ENTER
+                      + " ( " + f._insValues + " ) " + v.ENTER
                       + " --IdentityID " + v.ENTER
                       //+ " --Trigger " + v.ENTER
                       + " end else " + v.ENTER
                       + " begin " + v.ENTER
-                      + MyEdit + v.ENTER 
+                      //+ f.MyEdit + v.ENTER
+                      + f._editFields + v.ENTER
                       + " where 0 = 0 " + v.ENTER 
-                      + MyIfW
+                      //+ f.MyIfW
+                      + f._selectControls
                       // MyStr3 = " select " + fname + " from [" + tableName + "] where 0 = 0 ";
-                      + MyStr3 + MyIfW  
+                      + f.MyStr3 
+                      //+ f.MyIfW  
+                      + f._selectControls // ????
                     + " end "; 
                 }
                 else
                 {
-                    MyInsert = 
-                        " insert into "+ SchemasCode + "[" + tableName + "] ( " + v.ENTER +
-                          MyField + " ) values " + v.ENTER +
-                        " ( " + MyValue + " ) " + line_end +
-                        " --IdentityID " + line_end;
+                    f.MyInsert = 
+                        " Insert into "+ f.SchemasCode + "[" + f.tableName + "] ( " + v.ENTER +
+                        //f.MyField + " ) values " + v.ENTER +
+                        f._insFields + " ) values " + v.ENTER +
+                        //" ( " + f.MyValue + " ) " + f.line_end +
+                        " ( " + f._insValues + " ) " + f.line_end +
+                        " --IdentityID " + f.line_end;
                 }
-                sonuc = MyInsert;
+                f.sonuc = f.MyInsert;
             }
 
             if (State == "dsEdit")
             {
                 // En Sondaki ', ' siliniyor
-                t.tLast_Char_Remove(ref MyEdit);
+                //f.MyEdit = t.tLast_Char_Remove(f.MyEdit);
+                //f.MyEdit = f.MyEdit + v.ENTER2 + "  " + f.MyStr2 + v.ENTER2;
+                //f.sonuc = f.MyEdit;
 
-                MyEdit = MyEdit + v.ENTER2 + "  " + MyStr2 + v.ENTER2;
-                sonuc = MyEdit;
+                f._editFields = t.tLast_Char_Remove(f._editFields);
+                f._editFields += v.ENTER2 + "  " + f._editWhere + v.ENTER2;
+                f.sonuc = f._editFields;
             }
 
             // eğer bir değişiklik yoksa 
-            if (IsChanges == false) sonuc = "DONTSAVE";
+            if (f.IsChanges == false) f.sonuc = "DONTSAVE";
 
-            if (fTriggerFields.Length > 0)
+            if (f.fTriggerFields.Length > 0)
             {
                 string s = string.Empty;
 
                 // En Sondaki ', ' siliniyor
-                fTriggerFields = fTriggerFields.Substring(0, fTriggerFields.Length - 2);
+                f.fTriggerFields = f.fTriggerFields.Substring(0, f.fTriggerFields.Length - 2);
 
                 //   Aşağıdaki sorgu oluşturmak için
                 //   Select  @@IDENTITY as ID
@@ -1315,12 +809,12 @@ namespace Tkn_Save
                     // "  , " + fTriggerFields + " from [" + tableName + "] "
 
                     TriggerSQL =
-                        "  Select " + fTriggerFields + " from [" + tableName + "] "
-                      + "  where " + Key_Id_FieldName + " =  @@IDENTITY " + v.ENTER; // where id = xxx  
+                        "  Select " + f.fTriggerFields + " from [" + f.tableName + "] "
+                      + "  where " + f.Key_Id_FieldName + " =  @@IDENTITY " + v.ENTER; // where id = xxx  
 
                     TriggerSQL =
-                        "  Select " + fTriggerFields + " from [" + tableName + "] "
-                      + "  where " + Key_Id_FieldName + " = "; // where id = rec_id   
+                        "  Select " + f.fTriggerFields + " from [" + f.tableName + "] "
+                      + "  where " + f.Key_Id_FieldName + " = "; // where id = rec_id   
                 }
 
                 if (State == "dsEdit")
@@ -1329,8 +823,8 @@ namespace Tkn_Save
                     //   Select GRUP_TAMADI from [GRUP] where ID = xxxx 
 
                     TriggerSQL =
-                        "  Select " + fTriggerFields + " from [" + tableName + "] "
-                      + "  " + MyStr2 + v.ENTER; // where id = xxx
+                        "  Select " + f.fTriggerFields + " from [" + f.tableName + "] "
+                      + "  " + f.MyStr2 + v.ENTER; // where id = xxx
                 }
 
                 //if (MyStr.IndexOf("--Trigger") > 0)
@@ -1341,11 +835,773 @@ namespace Tkn_Save
 
             //-----------------------------------------------------------------------------------
 
-            return sonuc; // MyStr;
+            return f.sonuc; // MyStr;
 
         } // Kayit_Cumlesi_Olustur
 
 
+        private void setVariables(saveVariables f, DataSet ds, vTable vt)
+        {
+            f.SchemasCode = vt.SchemasCode;
+            f.tableName = vt.TableName;
+            f.Key_Id_FieldName = vt.KeyId_FName;
+            f.identityInsertOnOff = vt.IdentityInsertOnOff;
+            f.myProp = ds.Namespace.ToString();
+            f.SqlF = t.Set(t.MyProperties_Get(f.myProp, "=SqlFirst:"), "", "");
+            f.TableIPCode = t.MyProperties_Get(f.myProp, "TableIPCode:");
+            f.TableType = t.Set(t.MyProperties_Get(f.myProp, "=TableType:"), "", (byte)1);
+            f.DataReadType = t.myInt32(t.MyProperties_Get(f.myProp, "DataReadType:"));
+
+            if (vt.DBaseType == v.dBaseType.MSSQL)
+            {
+                f.line_end = v.SP_MSSQL_LINE_END; // = ENTER;
+            }
+
+            if (t.IsNotNull(f.SchemasCode) == false)
+                f.SchemasCode = "[dbo].";
+
+            if (f.SchemasCode.IndexOf("[") == -1)
+                f.SchemasCode = "[" + f.SchemasCode + "].";
+
+            if (f.SchemasCode.IndexOf(".") == -1)
+                f.SchemasCode = f.SchemasCode + ".";
+
+            //f.MyEdit = "  update " + f.SchemasCode + "[" + f.tableName + "] set ";
+            f._editFields = "  Update " + f.SchemasCode + "[" + f.tableName + "] set " + v.ENTER;
+
+            //tableFields = tableName + "_FIELDS";
+
+            if (f.State == "dsInsert")
+                f.IsChanges = true;
+
+            try
+            {
+                //c = ds.Tables[tableFields].Rows.Count;
+                f.count = v.ds_MsTableFields.Tables[f.tableName].Rows.Count;
+            }
+            catch
+            {
+                f.count = 0;
+            }
+        }
+        private void preparingFieldVariables(saveVariables f, DataSet ds, int i)
+        {
+            f.fname = v.ds_MsTableFields.Tables[f.tableName].Rows[i]["name"].ToString();
+
+            f.isFieldFind = t.Find_FieldName(ds, f.fname);
+
+            /// bu field mevcut TableIPCode.DataSet üzerinde kullanılmamış anlamına geliyor
+            /// onun için bu fieldi atla
+            ///
+            if (f.isFieldFind == false) return;
+
+            f.ftype = Convert.ToInt32(v.ds_MsTableFields.Tables[f.tableName].Rows[i]["user_type_id"].ToString());
+            f.fIdentity = (Boolean)(v.ds_MsTableFields.Tables[f.tableName].Rows[i]["is_identity"]);
+            f.fmax_length = Convert.ToInt32(v.ds_MsTableFields.Tables[f.tableName].Rows[i]["max_length"].ToString());
+
+            // varchar(max), nvarchar(max) olunca -1 geliyor
+            if (f.fmax_length == -1) f.fmax_length = 128000;
+
+            if (f.ftype == 36) // GUID / uniqueidentifier
+                f.fmax_length = 128000;
+            if (f.ftype == 231) // nVarchar ise
+                f.fmax_length = f.fmax_length / 2;
+
+            if (v.active_DB.mainManagerDbUses) // tableFields + "2"
+                t.OtherValues_Get(ds, f);
+            else
+                t.OtherValues_Get(v.ds_TableIPCodeFields, f);
+
+            f.Lkp_fname = f.fname;
+            if ((f.fname.IndexOf("LKP_") > -1) ||
+                (f.fname.IndexOf("rowguid") > -1))
+                f.Lkp_fname = "LKP_";
+
+            // Anahtar ID fieldname dönüyor
+            if (f.fIdentity == true)
+                f.Key_Id_FieldName = f.fname;
+
+            // dsData yapısı TableType == Table değilise
+            if ((f.TableType != 1) &&  // Table
+                (f.TableType != 3))    // StoredProcedure
+            {
+                // TableFields listesindeki fieldname  
+                // select edilen cümle içinde var mı / yok mu
+                // yok ise işlem yapılmasın
+
+                //if (SqlF.IndexOf(fname) == -1)
+                //{
+                //    Lkp_fname = "LKP_";
+                //}
+            }
+
+            // bazen kriter sorgulamalardan dolayı çift olabiliyor ( >=, =< ) 
+            // FIELD_IP listesinden çift field olabiliyor
+
+            if ((f.onceki_fname == f.fname) && (f.onceki_fname != ""))
+            {
+                f.Lkp_fname = "LKP_";
+            }
+
+            // onceki_fname nin ataması, bir sonraki field aynı mı diye karşılaştırılacak 
+            f.onceki_fname = f.fname;
+
+            // dataset üzerinden veriyi al
+            f.fvalue = "";
+            // ilk  Lkp_fname == "LKP_"  atamasını TableType != 1 ile alıyor 
+            if (f.Lkp_fname != "LKP_")
+                f.fvalue = ds.Tables[0].Rows[f.position][f.fname].ToString();
+
+            // Foreing field ve value değeri yok ise cümle içine girmesin
+            if ((f.fForeing == "True") && (f.fvalue == ""))
+                f.Lkp_fname = "LKP_";
+            if ((f.fForeing == "True") && (f.fvalue == "0"))
+                f.fvalue = "null";
+        }
+        private void preparingFieldsScript(saveVariables f, DataSet ds)
+        {
+
+            // insFields
+            // insValues
+            // editFields
+            // editWhere
+            // selectControl
+
+            if ((f.Lkp_fname != "LKP_") & (f.Lkp_fname != "rowg"))
+            {
+                //* rakam  56, 48, 127, 52, 60, 62, 59, 106, 108
+                if ((f.ftype == 56) | (f.ftype == 48) | (f.ftype == 127) | (f.ftype == 52) |
+                    (f.ftype == 60) | (f.ftype == 62) | (f.ftype == 59) | (f.ftype == 106) | (f.ftype == 108))
+                {
+                    // Eğer veri (Rakam) yok ise Sıfır bas
+                    if (f.fvalue == "") f.fvalue = "0";
+
+                    // rakam türü , ile ayrılmış ise , yerine . işareti değiştiriliyor 
+                    if (f.fvalue.IndexOf(",") > -1)
+                        f.fvalue = f.fvalue.Replace(",", ".");
+
+                    f._setInsField = f.bos + f.fname + ", ";
+                    f._setInsValue = f.fvalue + ", ";
+                    f._setEditField = " [" + f.fname + "] = " + f.fvalue + ", ";
+                    f._setSelectControl = " and [" + f.fname + "] = " + f.fvalue + " ";
+                }
+
+                //* text = (char)175, (varchar)167, (ntext)99, (text)35, (nchar)239, (nvarchar)231, (uniqueidentifier)36 //39 
+                if ((f.ftype == 175) | (f.ftype == 167) | (f.ftype == 99) | (f.ftype == 35) | (f.ftype == 239) | (f.ftype == 231) | (f.ftype == 36))
+                {
+                    f._setInsField = f.bos + f.fname + ", ";
+
+                    // Eğer veri yok ise null bas
+                    if ((f.fvalue == "") || (f.fvalue == "null")) 
+                    {
+                        f._setInsValue = "null, ";
+                        f._setEditField = " [" + f.fname + "] = " + "null, ";
+                        f._setSelectControl = " and [" + f.fname + "] = " + "null ";
+                    }
+                    else
+                    {
+                        if (f.fvalue.Length > f.fmax_length)
+                            f.fvalue = f.fvalue.Substring(0, f.fmax_length - 1);
+
+                        f._setInsValue = "'" + t.Str_Check(f.fvalue) + "', ";
+                        f._setEditField = " [" + f.fname + "] = " + "'" + t.Str_Check(f.fvalue) + "', ";
+                        f._setSelectControl = " and [" + f.fname + "] = " + "'" + t.Str_Check(f.fvalue) + "' ";
+                    }
+                }
+
+                //* bit türü 104
+                if (f.ftype == 104)
+                {
+                    f._setInsField = f.bos + f.fname + ", ";
+
+                    if ((f.fvalue == "False") || (f.fvalue == ""))
+                    {
+                        f._setInsValue = "0, ";
+                        f._setEditField = " [" + f.fname + "] = " + "0, ";
+                        f._setSelectControl = " and [" + f.fname + "] = 0 ";
+                    }
+                    else if (f.fvalue == "True")
+                    {
+                        f._setInsValue = "1, ";
+                        f._setEditField = " [" + f.fname + "] = " + "1, ";
+                        f._setSelectControl = " and [" + f.fname + "] = 1 ";
+                    }
+                    else
+                    {
+                        f._setInsValue = "null, ";
+                        f._setEditField = " [" + f.fname + "] = " + "0, ";
+                        f._setSelectControl = "";
+                    }
+                }
+
+                //* date 40
+                if ((f.ftype == 40) || (f.ftype == 61))
+                {
+                    f._setInsField = f.bos + f.fname + ", ";
+
+                    if ((f.fvalue != "") && (f.fvalue.IndexOf("01.01.0001") == -1) && f.fvalue != "null")
+                    {
+                        f._setInsValue = t.Tarih_Formati(Convert.ToDateTime(f.fvalue)) + ", ";
+                        f._setEditField = " [" + f.fname + "] = " + t.Tarih_Formati(Convert.ToDateTime(f.fvalue)) + ", ";
+                        f._setSelectControl = " and [" + f.fname + "] = " + t.Tarih_Formati(Convert.ToDateTime(f.fvalue)) + " ";
+                    }
+                    else
+                    {
+                        f._setInsValue = "null, ";
+                        f._setEditField = " [" + f.fname + "] = " + "null, ";
+                        f._setSelectControl = " and [" + f.fname + "] = null ";
+                    }
+                }
+
+                //* time türü 41
+                if (f.ftype == 41)
+                {
+                    f._setInsField = f.bos + f.fname + ", ";
+
+                    if (f.fvalue != "")
+                    {
+                        f._setInsValue = "'" + t.Str_Check(f.fvalue) + "', ";
+                        f._setEditField = " [" + f.fname + "] = '" + t.Str_Check(f.fvalue) + "', ";
+                        f._setSelectControl = " and [" + f.fname + "] = '" + t.Str_Check(f.fvalue) + "' ";
+                    }
+                    else
+                    {
+                        f._setInsValue = "null, ";
+                        f._setEditField = " [" + f.fname + "] = " + "null, ";
+                        f._setSelectControl = " and [" + f.fname + "] = " + "null ";
+                    }
+                }
+
+                // smalldatetime 58
+                if (f.ftype == 58)
+                {
+                    f._setInsField = f.bos + f.fname + ", ";
+
+                    if ((f.fvalue != "") && (f.fvalue.IndexOf("01.01.0001") == -1) && f.fvalue != "null")
+                    {
+                        f._setInsValue = t.TarihSaat_Formati(Convert.ToDateTime(f.fvalue)) + ", ";
+                        f._setEditField = " [" + f.fname + "] = " + t.TarihSaat_Formati(Convert.ToDateTime(f.fvalue)) + ", ";
+                        f._setSelectControl = " and [" + f.fname + "] = " + t.TarihSaat_Formati(Convert.ToDateTime(f.fvalue)) + " ";
+                    }
+                    else
+                    {
+                        f._setInsValue = "null, ";
+                        f._setEditField = " [" + f.fname + "] = " + "null, ";
+                        f._setSelectControl = " and [" + f.fname + "] = " + "null ";
+                    }
+                }
+
+                //* image 34, varbinary (max) 165 
+                if ((f.ftype == 34) || (f.ftype == 165))
+                {
+                    f._setInsField = f.bos + f.fname + ", ";
+
+                    // bir tabloda 1 den fazla resim olabiliyor (şimdilik 2 resim kontrolü var)
+                    //
+                    // 1. resim var ise
+                    if ((v.con_Images_FieldName == f.fname) && (v.con_Images != null))
+                    {
+                        //f.MyField = f.MyField + f.bos + f.fname + ", ";
+                        //f.MyValue = f.MyValue + " @" + f.fname + ", ";
+
+                        // üzerindeki eskim varsa tekrar onu gösteriyor
+                        // bu nedenle bu atama yapılıyor
+                        f._setInsValue = " @" + f.fname + ", ";
+                        f._setEditField = " [" + f.fname + "] = " + " @" + f.fname + " , ";
+                        ds.Tables[0].Rows[f.position][f.fname] = v.con_Images;
+                    }
+                    // 2. resim var ise
+                    if ((v.con_Images_FieldName2 == f.fname) && (v.con_Images2 != null))
+                    {
+                        //f.MyField = f.MyField + f.bos + f.fname + ", ";
+                        //f.MyValue = f.MyValue + " @" + f.fname + ", ";
+
+                        // üzerindeki eskim varsa tekrar onu gösteriyor
+                        // bu nedenle bu atama yapılıyor
+                        f._setInsValue = " @" + f.fname + ", ";
+                        f._setEditField = " [" + f.fname + "] = " + " @" + f.fname + " , ";
+                        ds.Tables[0].Rows[f.position][f.fname] = v.con_Images2;
+                    }
+
+                    // 1. resim null ise
+                    if ((v.con_Images_FieldName == f.fname) && (v.con_Images == null))
+                    {
+                        //f.MyField = f.MyField + f.bos + f.fname + ", ";
+                        //f.MyValue = f.MyValue + " null , ";
+
+                        // üzerindeki eski resim varsa tekrar onu gösteriyor
+                        // bu nedenle bu atama yapılıyor
+                        f._setInsValue = " null, ";
+                        f._setEditField = " [" + f.fname + "] = null , ";
+                        ds.Tables[0].Rows[f.position][f.fname] = null;
+                    }
+                    // 2. resim null ise
+                    if ((v.con_Images_FieldName2 == f.fname) && (v.con_Images2 == null))
+                    {
+                        //f.MyField = f.MyField + f.bos + f.fname + ", ";
+                        //f.MyValue = f.MyValue + " null , ";
+
+                        // üzerindeki eski resim varsa tekrar onu gösteriyor
+                        // bu nedenle bu atama yapılıyor
+                        f._setInsValue = " null, ";
+                        f._setEditField = " [" + f.fname + "] = null , ";
+                        ds.Tables[0].Rows[f.position][f.fname] = null;
+                    }
+                }
+
+                // Tablonun ID fieldi
+                if (f.fIdentity == true)
+                {
+                    // Identity ve OnOff true ise yani RefId field da isteniyorsa dokunma
+                    // false ise 
+                    if (f.identityInsertOnOff == false)
+                    {
+                        f._setInsField = "";
+                        f._setInsValue = "";
+                    }
+
+                    f._setEditField = "";
+                    //f.MyStr2 = " where [" + f.fname + "] = " + f.fvalue + " " + f.line_end;
+                    f._editWhere = " Where [" + f.fname + "] = " + f.fvalue + " " + f.line_end;
+                    f.MyStr3 = " select " + f.fname + ", 'dsEdit' as dsState from [" + f.tableName + "] where 0 = 0 ";
+                    // Tarihce için gerekiyor
+                    // KeyID_Value := Value; 
+                }
+
+                // sadece belli field ismi seçilmişse o fieldler update olacak
+                // diğer fieldler update olmayacak
+                if (v.onlyTheseFields != "")
+                {
+                    // onlyTheseFields listesinde bu field yok ise update bilgisini boşalt
+                    if (v.onlyTheseFields.IndexOf(f.fname) == -1)
+                        f._setEditField = "";
+                }
+
+                if (f._setEditField != "")
+                {
+                    f._editFields += f._setEditField + v.ENTER;
+                    f.IsChanges = true;
+                }
+
+                if (f.ValidationInsert == "True")
+                    f._selectControls += f._setSelectControl + v.ENTER;
+
+                if (f._setInsField != "")
+                {
+                    f._insFields += f._setInsField + v.ENTER;
+                    f._insValues += f._setInsValue;
+                }
+
+                f._setInsValue = "";
+                f._setEditField = "";
+                f._setSelectControl = "";
+            } // if LKP_
+        }
+        private void preparingInsertScript(saveVariables f, DataSet ds)
+        {
+            #region INSERT
+            if ((f.State == "dsInsert") &
+                ((f.fIdentity == false) |                // Identity olmayan fied  veya
+                  ((f.fIdentity) & (f.identityInsertOnOff)) // Identity ve OnOff true ise yani RefId field da isteniyorsa 
+                ) &
+                (f.Lkp_fname != "LKP_") &
+                (f.Lkp_fname != "rowg")
+                )
+            {
+
+                //* rakam  56, 48, 127, 52, 60, 62, 59, 106, 108
+                if ((f.ftype == 56) | (f.ftype == 48) | (f.ftype == 127) | (f.ftype == 52) |
+                    (f.ftype == 60) | (f.ftype == 62) | (f.ftype == 59) | (f.ftype == 106) | (f.ftype == 108))
+                {
+
+                    // Eğer veri (Rakam) yok ise Sıfır bas
+                    if (f.fvalue == "") f.fvalue = "0";
+
+                    // rakam türü , ile ayrılmış ise , yerine . işareti değiştiriliyor 
+                    if (f.fvalue.IndexOf(",") > -1)
+                        f.fvalue = f.fvalue.Replace(",", ".");
+
+                    // alınan değeri stringe ekle
+                    f.MyField += f.bos + f.fname + ", ";
+                    f.MyValue += f.fvalue + ", ";
+                }
+
+                //* text = (char)175, (varchar)167, (ntext)99, (text)35, (nchar)239, (nvarchar)231, (uniqueidentifier)36 //39 
+                if ((f.ftype == 175) | (f.ftype == 167) | (f.ftype == 99) | (f.ftype == 35) | (f.ftype == 239) | (f.ftype == 231) | (f.ftype == 36))
+                {
+                    f.MyField = f.MyField + f.bos + f.fname + ", ";
+
+                    // Eğer veri yok ise null bas
+                    if ((f.fvalue == "") || (f.fvalue == "null"))
+                    {
+                        f.MyValue = f.MyValue + "null, ";
+                    }
+                    else
+                    {
+                        if (f.fvalue.Length > f.fmax_length)
+                            f.fvalue = f.fvalue.Substring(0, f.fmax_length - 1);
+
+                        // alınan değeri stringe ekle
+                        f.MyValue = f.MyValue + "'" + t.Str_Check(f.fvalue) + "', ";
+                    }
+                }
+
+                //* bit türü 104
+                if (f.ftype == 104)
+                {
+                    f.MyField = f.MyField + f.bos + f.fname + ", ";
+
+                    if ((f.fvalue == "False") || (f.fvalue == ""))
+                    {
+                        f.MyValue = f.MyValue + "0, ";
+                    }
+                    else if (f.fvalue == "True")
+                    {
+                        f.MyValue = f.MyValue + "1, ";
+                    }
+                    else
+                    {
+                        f.MyValue = f.MyValue + "null, ";
+                    }
+                }
+
+                //* date 40
+                if ((f.ftype == 40) || (f.ftype == 61))
+                {
+                    f.MyField = f.MyField + f.bos + f.fname + ", ";
+
+                    if ((f.fvalue != "") && (f.fvalue.IndexOf("01.01.0001") == -1) && f.fvalue != "null")
+                    {
+                        f.MyValue = f.MyValue + t.Tarih_Formati(Convert.ToDateTime(f.fvalue)) + ", ";
+                    }
+                    else
+                    {
+                        f.MyValue = f.MyValue + "null, ";
+                    }
+                }
+
+                //* time türü 41
+                if (f.ftype == 41)
+                {
+                    f.MyField = f.MyField + f.bos + f.fname + ", ";
+
+                    if (f.fvalue != "")
+                    {
+                        f.MyValue = f.MyValue + "'" + t.Str_Check(f.fvalue) + "', ";
+                    }
+                    else
+                    {
+                        f.MyValue = f.MyValue + "null, ";
+                    }
+                }
+
+                // smalldatetime 58
+                if (f.ftype == 58)
+                {
+                    f.MyField = f.MyField + f.bos + f.fname + ", ";
+
+                    if ((f.fvalue != "") && (f.fvalue.IndexOf("01.01.0001") == -1) && f.fvalue != "null")
+                    {
+                        f.MyValue = f.MyValue + t.TarihSaat_Formati(Convert.ToDateTime(f.fvalue)) + ", ";
+                    }
+                    else
+                    {
+                        f.MyValue = f.MyValue + "null, ";
+                    }
+                }
+
+                //* image 34, varbinary (max) 165 
+                if ((f.ftype == 34) || (f.ftype == 165))
+                {
+                    // bir tabloda 1 den fazla resim olabiliyor (şimdilik 2 resim kontrolü var)
+                    //
+                    // 1. resim var ise
+                    if ((v.con_Images_FieldName == f.fname) && (v.con_Images != null))
+                    {
+                        f.MyField = f.MyField + f.bos + f.fname + ", ";
+                        f.MyValue = f.MyValue + " @" + f.fname + ", ";
+                        // üzerindeki eskim varsa tekrar onu gösteriyor
+                        // bu nedenle bu atama yapılıyor
+                        ds.Tables[0].Rows[f.position][f.fname] = v.con_Images;
+                    }
+                    // 2. resim var ise
+                    if ((v.con_Images_FieldName2 == f.fname) && (v.con_Images2 != null))
+                    {
+                        f.MyField = f.MyField + f.bos + f.fname + ", ";
+                        f.MyValue = f.MyValue + " @" + f.fname + ", ";
+                        // üzerindeki eskim varsa tekrar onu gösteriyor
+                        // bu nedenle bu atama yapılıyor
+                        ds.Tables[0].Rows[f.position][f.fname] = v.con_Images2;
+                    }
+
+                    // 1. resim null ise
+                    if ((v.con_Images_FieldName == f.fname) && (v.con_Images == null))
+                    {
+                        f.MyField = f.MyField + f.bos + f.fname + ", ";
+                        f.MyValue = f.MyValue + " null , ";
+                        // üzerindeki eskim varsa tekrar onu gösteriyor
+                        // bu nedenle bu atama yapılıyor
+                        ds.Tables[0].Rows[f.position][f.fname] = null;
+                    }
+                    // 2. resim null ise
+                    if ((v.con_Images_FieldName2 == f.fname) && (v.con_Images2 == null))
+                    {
+                        f.MyField = f.MyField + f.bos + f.fname + ", ";
+                        f.MyValue = f.MyValue + " null , ";
+                        // üzerindeki eskim varsa tekrar onu gösteriyor
+                        // bu nedenle bu atama yapılıyor
+                        ds.Tables[0].Rows[f.position][f.fname] = null;
+                    }
+                }
+
+                f.MyField = f.MyField + v.ENTER;
+                f.MyValue = f.MyValue + "  ";
+            }
+            #endregion INSERT
+
+        }
+        private void preparingEditScript(saveVariables f, DataSet ds)
+        {
+            #region EDIT
+
+            // ValidationInsert == "True" için sürekli edit cümleside hazırlansın 
+
+            if ((f.Lkp_fname != "LKP_") & (f.Lkp_fname != "rowg"))
+            {
+                // Tablonun ID fieldi
+                if (f.fIdentity == true)
+                {
+                    f.MyStr2 = " where [" + f.fname + "] = " + f.fvalue + " " + f.line_end;
+                    f.MyStr3 = " select " + f.fname + ", 'dsEdit' as dsState from [" + f.tableName + "] where 0 = 0 ";
+                    // Tarihce için gerekiyor
+                    // KeyID_Value := Value; 
+                }
+            }
+
+            if (//(State == "dsEdit") & 
+                (f.Lkp_fname != "LKP_") & (f.Lkp_fname != "rowg") &
+                (f.fVisible == "True"))
+            {
+
+                // column için yeni update değeri
+                f.fieldNewValue = "";
+
+                //* rakam türleri  56, 48, 127, 52, 60, 62, 59, 106, 108
+                if ((f.fIdentity == false) &
+                   ((f.ftype == 56) | (f.ftype == 48) | (f.ftype == 127) | (f.ftype == 52) |
+                    (f.ftype == 60) | (f.ftype == 62) | (f.ftype == 59) | (f.ftype == 106) | (f.ftype == 108)))
+                {
+                    // Eğer veri (Rakam) yok ise Sıfır bas
+                    if (f.fvalue == "") f.fvalue = "0";
+
+                    // rakam türü , ile ayrılmış ise , yerine . işareti değiştiriliyor 
+                    if (f.fvalue.IndexOf(",") > -1)
+                        f.fvalue = f.fvalue.Replace(",", ".");
+
+                    // alınan değeri stringe ekle
+                    //MyEdit = MyEdit + " [" + fname + "] = " + fvalue + ", ";
+                    f.fieldNewValue = " [" + f.fname + "] = " + f.fvalue + ", ";
+                }
+
+                //* text = (char)175, (varchar)167, (ntext)99, (text)35, (nchar)239, (nvarchar)231, (uniqueidentifier)36 //39
+                if ((f.ftype == 175) | (f.ftype == 167) | (f.ftype == 99) | (f.ftype == 35) | (f.ftype == 239) | (f.ftype == 231) | (f.ftype == 36))
+                {
+                    if (f.fvalue.Length > f.fmax_length)
+                        f.fvalue = f.fvalue.Substring(0, f.fmax_length - 1);
+
+                    // alınan değeri stringe ekle
+                    if ((f.fvalue != "") && (f.fvalue != "null"))
+                        f.fieldNewValue = " [" + f.fname + "] = " + "'" + t.Str_Check(f.fvalue) + "', ";
+                    else f.fieldNewValue = " [" + f.fname + "] = " + "null, ";// Eğer veri yok ise null bas
+                }
+
+                //* bit türü 104
+                if (f.ftype == 104)
+                {
+                    if ((f.fvalue == "") || (f.fvalue == "False"))
+                        f.fieldNewValue = " [" + f.fname + "] = " + "0, ";
+                    else f.fieldNewValue = " [" + f.fname + "] = " + "1, ";
+                }
+
+                //* datetime türü 40
+                if ((f.ftype == 40) || (f.ftype == 61))
+                {
+                    if ((f.fvalue != "") && (f.fvalue.IndexOf("01.01.0001") == -1) && f.fvalue != "null")
+                        f.fieldNewValue = " [" + f.fname + "] = " + t.Tarih_Formati(Convert.ToDateTime(f.fvalue)) + ", ";
+                    else f.fieldNewValue = " [" + f.fname + "] = " + "null, ";
+                }
+
+                //* time türü 41
+                if (f.ftype == 41)
+                {
+                    if (f.fvalue != "")
+                        f.fieldNewValue = " [" + f.fname + "] = '" + t.Str_Check(f.fvalue) + "', ";
+                    else f.fieldNewValue = " [" + f.fname + "] = " + "null, ";
+                }
+
+                //* datetime türü  58
+                if (f.ftype == 58)
+                {
+                    if ((f.fvalue != "") && (f.fvalue.IndexOf("01.01.0001") == -1) && f.fvalue != "null")
+                        f.fieldNewValue = " [" + f.fname + "] = " + t.TarihSaat_Formati(Convert.ToDateTime(f.fvalue)) + ", ";
+                    else f.fieldNewValue = " [" + f.fname + "] = " + "null, ";
+                }
+
+                //* img, image 34, varbinary (max) 165 
+                if ((f.ftype == 34) || (f.ftype == 165))
+                {
+                    // 1. Resim
+                    if ((v.con_Images_FieldName == f.fname) && (v.con_Images != null))
+                    {
+                        f.fieldNewValue = " [" + f.fname + "] = " + " @" + f.fname + " , ";
+                        // üzerindeki eskim varsa tekrar onu gösteriyor
+                        // bu nedenle bu atama yapılıyor
+                        ds.Tables[0].Rows[f.position][f.fname] = v.con_Images;
+                    }
+                    if ((v.con_Images_FieldName == f.fname) && (v.con_Images == null))
+                    {
+                        f.fieldNewValue = " [" + f.fname + "] = null , ";
+                        // üzerindeki eskim varsa tekrar onu gösteriyor
+                        // bu nedenle bu atama yapılıyor
+                        ds.Tables[0].Rows[f.position][f.fname] = null;
+                    }
+                    // 2. Resim
+                    if ((v.con_Images_FieldName2 == f.fname) && (v.con_Images2 != null))
+                    {
+                        f.fieldNewValue = " [" + f.fname + "] = " + " @" + f.fname + " , ";
+                        // üzerindeki eskim varsa tekrar onu gösteriyor
+                        // bu nedenle bu atama yapılıyor
+                        ds.Tables[0].Rows[f.position][f.fname] = v.con_Images2;
+                    }
+                    if ((v.con_Images_FieldName2 == f.fname) && (v.con_Images2 == null))
+                    {
+                        f.fieldNewValue = " [" + f.fname + "] = null , ";
+                        // üzerindeki eskim varsa tekrar onu gösteriyor
+                        // bu nedenle bu atama yapılıyor
+                        ds.Tables[0].Rows[f.position][f.fname] = null;
+                    }
+                }
+
+                //MyEdit = MyEdit + v.ENTER;
+
+                // sadece belli field ismi seçilmişse o fieldler update olacak
+                // diğer fieldler update olmayacak
+                if (v.onlyTheseFields != "")
+                {
+                    // onlyTheseFields listesinde bu field yok ise update bilgisini boşalt
+                    if (v.onlyTheseFields.IndexOf(f.fname) == -1)
+                        f.fieldNewValue = "";
+                }
+
+                if (f.fieldNewValue != "")
+                {
+                    f.MyEdit += f.fieldNewValue + v.ENTER;
+                    f.IsChanges = true;
+                }
+            }
+            #endregion EDIT
+
+        }
+        private void preparingSelectControlScript(saveVariables f)
+        {
+            #region Select Control
+            if ((f.ValidationInsert == "True") &&
+                (f.Lkp_fname != "LKP_") &&
+                (f.Lkp_fname != "rowg"))
+            {
+                //* rakam türleri  56, 48, 127, 52, 60, 62, 59, 106, 108
+                if ((f.fIdentity == false) &
+                   ((f.ftype == 56) | (f.ftype == 48) | (f.ftype == 127) | (f.ftype == 52) |
+                    (f.ftype == 60) | (f.ftype == 62) | (f.ftype == 59) | (f.ftype == 106) | (f.ftype == 108)))
+                {
+                    // Eğer veri (Rakam) yok ise Sıfır bas
+                    if (f.fvalue == "") f.fvalue = "0";
+
+                    // rakam türü , ile ayrılmış ise , yerine . işareti değiştiriliyor 
+                    if (f.fvalue.IndexOf(",") > -1)
+                        f.fvalue = f.fvalue.Replace(",", ".");
+
+                    // alınan değeri stringe ekle
+                    f.MyIfW = f.MyIfW + " and [" + f.fname + "] = " + f.fvalue + " ";
+                }
+
+                //* text = (char)175, (varchar)167, (ntext)99, (text)35, (nchar)239, (nvarchar)231, (uniqueidentifier)36 //39
+                if ((f.ftype == 175) | (f.ftype == 167) | (f.ftype == 99) | (f.ftype == 35) | (f.ftype == 239) | (f.ftype == 231) | (f.ftype == 36))
+                {
+                    // alınan değeri stringe ekle
+                    if ((f.fvalue != "") && (f.fvalue != "null"))
+                        f.MyIfW = f.MyIfW + " and [" + f.fname + "] = " + "'" + t.Str_Check(f.fvalue) + "' ";
+                    else f.MyIfW = f.MyIfW + " and [" + f.fname + "] = " + "null ";// Eğer veri yok ise null bas
+                }
+
+                //* bit türü 104
+                if (f.ftype == 104)
+                {
+                    if ((f.fvalue == "") || (f.fvalue == "False"))
+                        f.MyIfW = f.MyIfW + " and [" + f.fname + "] = 0 ";
+                    else f.MyIfW = f.MyIfW + " and [" + f.fname + "] = 1 ";
+                }
+
+                //* datetime türü 40
+                if ((f.ftype == 40) || (f.ftype == 61))
+                {
+                    if (f.fvalue != "")
+                        f.MyIfW = f.MyIfW + " and [" + f.fname + "] = " + t.Tarih_Formati(Convert.ToDateTime(f.fvalue)) + " ";
+                    else f.MyIfW = f.MyIfW + " and [" + f.fname + "] = null ";
+                }
+
+                //* time türü 41
+                if (f.ftype == 41)
+                {
+                    if (f.fvalue != "")
+                        f.MyIfW = f.MyIfW + " and [" + f.fname + "] = '" + t.Str_Check(f.fvalue) + "' ";
+                    else f.MyIfW = f.MyIfW + " and [" + f.fname + "] = " + "null ";
+                }
+
+                //* datetime türü  58
+                if (f.ftype == 58)
+                {
+                    if (f.fvalue != "")
+                        f.MyIfW = f.MyIfW + " and [" + f.fname + "] = " + t.TarihSaat_Formati(Convert.ToDateTime(f.fvalue)) + " ";
+                    else f.MyIfW = f.MyIfW + " and [" + f.fname + "] = " + "null ";
+                }
+
+                //* image 34
+                if (f.ftype == 34)
+                {
+                    //if (fvalue != "")
+                    //    //MyStr = MyStr + " [" + fname + "] = " + fvalue + ", ";
+                    //    MyStr = MyStr + " [" + fname + "] = " + "CONVERT(varchar(8000), convert(binary(8000)," + Convert.ToString((byte[])ds.Tables[0].Rows[Position][fname]) + ")), ";//:Convert.ToString((byte[])ds.Tables[0].Rows[Position][fname]);
+
+                    //  //"  (select * FROM OPENROWSET(BULK '" + Convert.ToByte( ds.Tables[0].Rows[Position][fname]) + "', SINGLE_BLOB) AS img) ";
+                    //else MyStr = MyStr + " [" + fname + "] = " + "null, ";
+                }
+
+                f.MyIfW = f.MyIfW + v.ENTER;
+
+
+            }
+            #endregion Select Control
+
+        }
+        private void preparinfTriggerFieldsList(saveVariables f)
+        {
+            #region Triggers Fields Control
+            if ((f.fTrigger == "True") &&
+                (f.Lkp_fname != "LKP_") &&
+                (f.Lkp_fname != "rowg"))
+            {
+                // trigger ile atama yapılan fieldlerin listesi hazırlanıyor 
+
+                // DİKKAT : Sadece trigger ile atama yapılan fieldler listeleniyor
+
+                // select için isimler hazırlanıyor 
+                f.fTriggerFields = f.fTriggerFields + f.bos + f.fname + ", ";
+                // field list 
+                //fTriggerFieldList.Add(fname);
+            }
+            #endregion Triggers Fileds Control
+        }
         #endregion Kayit_Cumlesi_Olustur
 
         #region Record_SQL_RUN
@@ -1375,45 +1631,9 @@ namespace Tkn_Save
                 {
                     t.Db_Open(SqlConn);
                     SqlKomut = new SqlCommand(SQL, SqlConn);
-                    
                 }
-                
-                // 1. Resim
-                if (t.IsNotNull(v.con_Images_FieldName) && (v.con_Images != null))
-                {
-                    SqlKomut.Parameters.Add(new SqlParameter("@" + v.con_Images_FieldName, v.con_Images));
 
-                    // işi burada bitti bir sonraki kayıt için boşaltalım....
-                    v.con_Images_FieldName = "";
-                    v.con_Images = null;
-                }
-                // 2. Resim
-                if (t.IsNotNull(v.con_Images_FieldName2) && (v.con_Images2 != null))
-                {
-                    SqlKomut.Parameters.Add(new SqlParameter("@" + v.con_Images_FieldName2, v.con_Images2));
-
-                    // işi burada bitti bir sonraki kayıt için boşaltalım....
-                    v.con_Images_FieldName2 = "";
-                    v.con_Images2 = null;
-                }
-                // 3. Resim
-                if (t.IsNotNull(v.con_Images_FieldName3) && (v.con_Images3 != null))
-                {
-                    SqlKomut.Parameters.Add(new SqlParameter("@" + v.con_Images_FieldName3, v.con_Images3));
-
-                    // işi burada bitti bir sonraki kayıt için boşaltalım....
-                    v.con_Images_FieldName3 = "";
-                    v.con_Images3 = null;
-                }
-                // 4. Resim
-                if (t.IsNotNull(v.con_Images_FieldName4) && (v.con_Images4 != null))
-                {
-                    SqlKomut.Parameters.Add(new SqlParameter("@" + v.con_Images_FieldName4, v.con_Images4));
-
-                    // işi burada bitti bir sonraki kayıt için boşaltalım....
-                    v.con_Images_FieldName4 = "";
-                    v.con_Images4 = null;
-                }
+                preparingSetImages(SqlKomut);
 
                 if (State == "dsInsert")
                 {
@@ -1571,6 +1791,48 @@ namespace Tkn_Save
 
             return sonuc;
         }
+
+        private void preparingSetImages(SqlCommand SqlKomut)
+        {
+            // 1. Resim
+            if (t.IsNotNull(v.con_Images_FieldName) && (v.con_Images != null))
+            {
+                SqlKomut.Parameters.Add(new SqlParameter("@" + v.con_Images_FieldName, v.con_Images));
+
+                // işi burada bitti bir sonraki kayıt için boşaltalım....
+                v.con_Images_FieldName = "";
+                v.con_Images = null;
+            }
+            // 2. Resim
+            if (t.IsNotNull(v.con_Images_FieldName2) && (v.con_Images2 != null))
+            {
+                SqlKomut.Parameters.Add(new SqlParameter("@" + v.con_Images_FieldName2, v.con_Images2));
+
+                // işi burada bitti bir sonraki kayıt için boşaltalım....
+                v.con_Images_FieldName2 = "";
+                v.con_Images2 = null;
+            }
+            // 3. Resim
+            if (t.IsNotNull(v.con_Images_FieldName3) && (v.con_Images3 != null))
+            {
+                SqlKomut.Parameters.Add(new SqlParameter("@" + v.con_Images_FieldName3, v.con_Images3));
+
+                // işi burada bitti bir sonraki kayıt için boşaltalım....
+                v.con_Images_FieldName3 = "";
+                v.con_Images3 = null;
+            }
+            // 4. Resim
+            if (t.IsNotNull(v.con_Images_FieldName4) && (v.con_Images4 != null))
+            {
+                SqlKomut.Parameters.Add(new SqlParameter("@" + v.con_Images_FieldName4, v.con_Images4));
+
+                // işi burada bitti bir sonraki kayıt için boşaltalım....
+                v.con_Images_FieldName4 = "";
+                v.con_Images4 = null;
+            }
+
+        }
+
         #endregion
 
         private int mySQL_FieldType(string fieldType)

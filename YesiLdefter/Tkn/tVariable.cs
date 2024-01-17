@@ -1274,6 +1274,121 @@ namespace Tkn_Variable
         }
     }
 
+    public class saveVariables
+    {
+        public saveVariables()
+        {
+            Clear();
+        }
+        public bool isFieldFind { get; set; }
+        public bool identityInsertOnOff { get; set; }
+        public bool fIdentity { get; set; }
+        public bool IsChanges { get; set; }
+
+        public string State { get; set; }
+        public string SchemasCode { get; set; } //vt.SchemasCode;
+        public string tableName { get; set; } //vt.TableName;
+        public string Key_Id_FieldName { get; set; } //= vt.KeyId_FName;
+        public string sonuc { get; set; }
+        public string MyInsert { get; set; }
+        public string MyEdit { get; set; }
+        public string MyStr2 { get; set; }
+        public string MyStr3 { get; set; }
+        public string MyField { get; set; }
+        public string MyValue { get; set; }
+        public string MyIfW { get; set; }
+        public string fname { get; set; }
+        public string onceki_fname { get; set; }
+        public string Lkp_fname { get; set; }
+        public string fvalue { get; set; }
+        public string bos { get; set; }
+        public string ValidationInsert { get; set; }
+        public string fForeing { get; set; }
+        public string fTrigger { get; set; }
+        public string fTriggerFields { get; set; }
+        public string displayFormat { get; set; }
+        public string fVisible { get; set; }
+        public string fieldNewValue { get; set; }
+        public string myProp { get; set; }
+        public string SqlF { get; set; }
+        public string TableIPCode { get; set; }
+        public string line_end { get; set; }
+
+        // new variables
+
+        public string _setInsField { get; set; }
+        public string _setInsValue { get; set; }
+        public string _setEditField { get; set; }
+        public string _setSelectControl { get; set; }
+        public string _insFields { get; set; }
+        public string _insValues { get; set; }
+        public string _editFields { get; set; }
+        public string _editWhere { get; set; }
+        public string _selectControls { get; set; }
+
+
+        public byte TableType { get; set; }
+        public int DataReadType { get; set; }
+        public int ftype { get; set; }
+        public int fmax_length { get; set; }
+        public int count { get; set; }
+        public int position { get; set; }
+        public void Clear()
+        {
+            isFieldFind = false;
+            identityInsertOnOff = false;
+            fIdentity = false;
+            IsChanges = false;
+
+            State = "";
+            SchemasCode = "";// vt.SchemasCode;
+            tableName = "";// vt.TableName;
+            Key_Id_FieldName = "";// = vt.KeyId_FName;
+            sonuc = "";
+            MyInsert = "";
+            MyEdit = "";
+            MyStr2 = "";
+            MyStr3 = "";
+            MyField = "";
+            MyValue = "";
+            MyIfW = string.Empty;
+            fname = "";
+            onceki_fname = "";
+            Lkp_fname = "";
+            fvalue = "";
+            bos = "   ";
+            ValidationInsert = string.Empty;
+            fForeing = string.Empty;
+            fTrigger = string.Empty;
+            fTriggerFields = string.Empty;
+            displayFormat = string.Empty;
+            fVisible = string.Empty;
+            fieldNewValue = "";
+            myProp = "";
+            SqlF = "";
+            TableIPCode = "";
+            line_end = "";
+
+            _setInsField = "";
+            _setInsValue = "";
+            _setEditField = "";
+            _setSelectControl = "";
+
+            _insFields = "";
+            _insValues = "";
+            _editFields = "";
+            _editWhere = "";
+            _selectControls = "";
+
+            TableType = 0;
+            DataReadType = 0;
+            ftype = 0;
+            fmax_length = 0;
+            count = 0;
+            position = 0;
+        }
+    }
+
     public class vMsDbUpdate
     {
         public vMsDbUpdate()
