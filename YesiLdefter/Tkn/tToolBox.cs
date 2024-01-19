@@ -837,7 +837,6 @@ namespace Tkn_ToolBox
         }
         
 
-
         public bool Sql_ExecuteNon(string SqlText, vTable vt)
         {
             SqlCommand cmd = new SqlCommand(SqlText);
@@ -1064,6 +1063,10 @@ namespace Tkn_ToolBox
                 // 1. adım
                 onay = Sql_Execute(dsData, ref SQL, vt);
 
+                // buraya yeni kondu
+                // table refreshde çalışmadığı tespit edildi
+                // 
+                tSqlSecond_Set(ref dsData, SQL);
             }
 
             #region NotExecute
@@ -1072,7 +1075,9 @@ namespace Tkn_ToolBox
             {
                 SQL = SQLPreparing(SQL, vt);
 
-                tSqlSecond_Set(ref dsData, SQL);
+                // yukaı taşınıca kapatıldı
+                //
+                //tSqlSecond_Set(ref dsData, SQL);
                 
                 if ((vt.TableName.IndexOf("SNL_") > -1) ||
                     (vt.TableName.IndexOf("3S_") > -1))//  || (vt.TableType == 3) // stored procedure 
@@ -2278,6 +2283,27 @@ namespace Tkn_ToolBox
 
             v.con_Refresh = false;
             return sonuc;
+        }
+
+        public bool TableRefresh(Form tForm, string tableIPCode)
+        {
+            bool onay = false;
+            if (IsNotNull(tableIPCode))
+            {
+                DataSet ds = Find_DataSet(tForm, "", tableIPCode, "");
+
+                if (ds != null)
+                {
+                    /// sadece kendisi refresh olsun 
+                    /// kendisine bağlı olanlar refresh olmasın
+                    /// dataNavigator_PositionChanged( 
+                    ///
+                    v.con_Cancel = true;
+
+                    onay = TableRefresh(tForm, ds);
+                }
+            }
+            return onay;
         }
 
         #endregion TableRefresh

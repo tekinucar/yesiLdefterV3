@@ -823,8 +823,9 @@ namespace Tkn_Save
                     //   Select GRUP_TAMADI from [GRUP] where ID = xxxx 
 
                     TriggerSQL =
-                        "  Select " + f.fTriggerFields + " from [" + f.tableName + "] "
-                      + "  " + f.MyStr2 + v.ENTER; // where id = xxx
+                    "  Select " + f.fTriggerFields + " from [" + f.tableName + "] "
+                    + f._editWhere + v.ENTER;
+                    //  + "  " + f.MyStr2 + v.ENTER; // where id = xxx
                 }
 
                 //if (MyStr.IndexOf("--Trigger") > 0)

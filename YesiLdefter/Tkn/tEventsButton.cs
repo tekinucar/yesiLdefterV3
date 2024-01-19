@@ -945,7 +945,9 @@ namespace Tkn_Events
             tAfter_RUN(tForm, dsData, "tNewData");
 
             //
-            sqlChangeText(dsData);
+            // sqlChangeText(dsData);  newData dan sonra Listele çalışınca sorun oluşuyor
+            //
+
             // Control Enabled
             t.ViewControl_Enabled(tForm, dsData, tableIPCode);
             // bu IPCode bağlı ExternalIPCode olabilir...

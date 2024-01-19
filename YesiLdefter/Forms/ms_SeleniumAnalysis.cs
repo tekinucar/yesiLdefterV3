@@ -107,7 +107,33 @@ namespace YesiLdefter
             // 
             this.msWebScrapingDbFields_ = msPagesService.readScrapingTablesAndFields(this.msWebPages_);
             msPagesService.checkedSiraliIslemVarmi(this, this.workPageNodes_, this.msWebScrapingDbFields_);
+
+            // DataSet ve DataNavigatorleri işaretle
+            preparingDataSets();
         }
+
+        private void preparingDataSets()
+        {
+            #region DataNavigator Listesi Hazırlanıyor
+
+            List<string> list = new List<string>();
+            t.Find_DataNavigator_List(this, ref list);
+
+            Control cntrl = new Control();
+            string[] controls = new string[] { "DevExpress.XtraEditors.DataNavigator" };
+
+            foreach (string value in list)
+            {
+                cntrl = t.Find_Control(this, value, "", controls);
+                if (cntrl != null)
+                {
+                    ((DevExpress.XtraEditors.DataNavigator)cntrl).PositionChanged += new System.EventHandler(dataNavigator_PositionChanged);
+                } // if cntrl != null
+            }//foreach
+
+            #endregion DataNavigator Listesi
+        }
+
         private void preparingWebMain()
         {
             /*
@@ -291,7 +317,6 @@ namespace YesiLdefter
                 //if (((DevExpress.XtraBars.Navigation.TileNavItem)sender).Name == buttonInsertPaketOlustur) InsertPaketOlustur();
             }
         }
-        
 
         #region Test buttons click
         private async void myLineGetTestClick(object sender, EventArgs e)
@@ -371,6 +396,28 @@ namespace YesiLdefter
         {
             preparingMsWebNodesFields();
             preparingAktifPageLoad();
+        }
+        private async void dataNavigator_PositionChanged(object sender, EventArgs e)
+        {
+            ///
+            if (f.tableIPCodesInLoad != "")
+            {
+                object tDataTable = ((DevExpress.XtraEditors.DataNavigator)sender).DataSource;
+                DataSet dsData = ((DataTable)tDataTable).DataSet;
+                string tableIPCode_ = "";
+                if (dsData.DataSetName != null)
+                    tableIPCode_ = dsData.DataSetName.ToString();
+
+                if (f.tableIPCodesInLoad.IndexOf(tableIPCode_) > -1)
+                {
+                    t.WaitFormOpen(this, "Sayfa değiştiriliyor ...");
+                    f.loadWorking = false;
+                    await startNodes(this.msWebNodes_, this.workPageNodes_, v.tWebRequestType.post, v.tWebEventsType.load);
+                    f.loadWorking = true;
+                    v.IsWaitOpen = false;
+                    t.WaitFormClose();
+                }
+            }
         }
         private async void preparingAktifPageLoad()
         {
@@ -471,7 +518,8 @@ namespace YesiLdefter
             ///
             workPageNodes.nodeIdList = "";
             /// kullanıcı tekrar istekte bulundu onun için hatayı kapat
-            f.anErrorOccurred = false; 
+            f.anErrorOccurred = false;
+            //f.tableIPCodesInLoad = ""; Açma 
 
             foreach (MsWebNode item in msWebNodes)
             {
@@ -575,6 +623,24 @@ namespace YesiLdefter
                     }
                     onay = true;
                 }
+
+                /// Load işlemleri sırasında ve set işlemi için bir dataSet ten bilgi alındı ise
+                /// kullanıcı bu dataSet üzerinde position değiştirdiğinde 
+                /// bulunduğu web sayfası tekrar yenilenmesi gerekiyor
+                /// Örnek : kullanıcı SınavTarih listesinde pos değiştirince Mebbis sinav listesi sayfasıda ona göre değişmesi gerekiyor
+                /// 
+                if ((wnv.workEventsType == v.tWebEventsType.load) && (onay))
+                {
+                    if (wnv.ds != null)
+                        if (wnv.ds.DataSetName != null)
+                        {
+                            string code = wnv.ds.DataSetName.ToString();
+                            if (f.tableIPCodesInLoad.IndexOf(code) == -1)
+                            {
+                                f.tableIPCodesInLoad += "||" + code + "||";
+                            }
+                        }
+                }
             }
 
             //if ((onay == false) &&
@@ -631,7 +697,11 @@ namespace YesiLdefter
 
                         webNodeValue myTriggerTableWnv = wnv.Copy();
 
-                        msPagesService.transferFromWebTableToDatabase(this, myTriggerTableWnv, msWebNodes_, msWebScrapingDbFields_, aktifPageNodeItemsList_);
+                        await msPagesService.transferFromWebTableToDatabase(this, myTriggerTableWnv, msWebNodes_, msWebScrapingDbFields_, aktifPageNodeItemsList_);
+
+                        t.TableRefresh(this, myTriggerTableWnv.TableIPCode);
+                        //t.TableRefresh(this, wnv.TableIPCode);
+
                     }
                 }
 
@@ -779,6 +849,9 @@ namespace YesiLdefter
             return onay;
         }
 
+        /// WebScrapingAsync - Kazıma işlemi
+        /// 
+        /// 
         private async Task WebScrapingAsync(IWebDriver wb, webNodeValue wnv)
         {
             //, v.tWebRequestType request
@@ -904,30 +977,14 @@ namespace YesiLdefter
                 if (injectType == v.tWebInjectType.Get ||
                    (injectType == v.tWebInjectType.GetAndSet && workRequestType == v.tWebRequestType.get))
                 {
-                    //t.WebReadyComplate(wb);
                     getHtmlTable(wb, ref wnv, idName);
-                    //t.WebReadyComplate(wb);
-
-                    //if (wnv.tTable == null) v.SQL = v.SQL + v.ENTER + myNokta + "WebScraping : table null";
-                    //else
-                    //{
-                    //    v.SQL = v.SQL + v.ENTER + myNokta + "WebScraping : table Count = " + wnv.tTable.tRows.Count;
-                    //}
                 }
 
                 if ((injectType == v.tWebInjectType.Set ||
                     (injectType == v.tWebInjectType.GetAndSet && workRequestType == v.tWebRequestType.post)) &&
                     (TagName == "table"))
                 {
-                    //t.WebReadyComplate(wb);
                     postHtmlTable(wb, ref wnv, idName);
-                    //t.WebReadyComplate(wb);
-
-                    //if (wnv.tTable == null) v.SQL = v.SQL + v.ENTER + myNokta + "WebScraping : table null";
-                    //else
-                    //{
-                    //    v.SQL = v.SQL + v.ENTER + myNokta + "WebScraping : table Count = " + wnv.tTable.tRows.Count;
-                    //}
                 }
             }
 
@@ -1099,8 +1156,11 @@ namespace YesiLdefter
             {
                 if (f.loadWorking == false)
                 {
+                    t.WaitFormOpen(this, "Sayfa yükleniyor ...");
+                    await startNodes(this.msWebNodes_, this.workPageNodes_, v.tWebRequestType.post, v.tWebEventsType.load);
                     f.loadWorking = true;
-                    startNodes(this.msWebNodes_, this.workPageNodes_, v.tWebRequestType.post, v.tWebEventsType.load);
+                    v.IsWaitOpen = false;
+                    t.WaitFormClose();
                 }
             }
 

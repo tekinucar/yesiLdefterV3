@@ -541,12 +541,12 @@ namespace YesiLdefter.Selenium
             }
 
         }
-        public void transferFromWebTableToDatabase(Form tForm, webNodeValue wnv, List<MsWebNode> msWebNodes, List<MsWebScrapingDbFields> msWebScrapingDbFields, List<webNodeItemsList> aktifPageNodeItemsList)
+        public async Task transferFromWebTableToDatabase(Form tForm, webNodeValue wnv, List<MsWebNode> msWebNodes, List<MsWebScrapingDbFields> msWebScrapingDbFields, List<webNodeItemsList> aktifPageNodeItemsList)
         {
             //v.SQL = v.SQL + v.ENTER + myNokta + " transferFromWebTableToDatabase";
-
+            
             Application.DoEvents();
-
+            
             //if (this.myTriggerTableCount <= this.myTriggerTableRowNo)
             //{
             //    // bitti
@@ -562,6 +562,8 @@ namespace YesiLdefter.Selenium
 
             if (wnv.tTable == null)
                 return;
+
+            t.WaitFormOpen(tForm, "Alınan bilgiler veritabanına yazılıyor ...");
 
             tTable tb = wnv.tTable;
 
@@ -580,7 +582,6 @@ namespace YesiLdefter.Selenium
 
             //this.myTriggerItemButton = findTableItemButton(msWebNodes, this.myTriggerWmvTableRows, this.myTriggerTableRowNo);
             bool myTriggerItemButton = findTableItemButton(msWebNodes, myTriggerWmvTableRows, myTriggerTableRowNo);
-
 
             /// itemButton yoksa 
             /// itemButton false ise burada kayıt işlemi yapılıyor
@@ -614,12 +615,12 @@ namespace YesiLdefter.Selenium
 
                         if (editKayitKontrolu()) break;
                     }
-
-
                 }
                 //this.myTriggeringTable = false;
             }
 
+            v.IsWaitOpen = false;
+            t.WaitFormClose();
 
             /// itemButton varsa kayıt işlem aşağıdaki adreste yapılıyor
             ///
@@ -726,6 +727,7 @@ namespace YesiLdefter.Selenium
                     if (cntrl != null)
                     {
                         // yazılacak veya okunacak fieldName
+                        wnv.TableIPCode = _TableIPCode; // iş bitimde DataSet Refresh için gerekli
                         wnv.dbFieldName = item.FieldName;       //row["FIELD_NAME"].ToString();
                         wnv.dbLookUpField = item.FLookUpField;  //Convert.ToBoolean(row["FLOOKUP_FIELD"].ToString());
                         wnv.dbFieldType = item.FieldType;       //t.myInt16(row["FIELD_TYPE"].ToString());
