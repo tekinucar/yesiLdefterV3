@@ -539,11 +539,11 @@ namespace Tkn_ToolBox
 
             if (schemaName == "") schemaName = "dbo";
             if (fieldNull == "") fieldNull = " null ";
-            if (fieldLength != "")
-                if (fieldLength.IndexOf("(") == -1)
-                    fieldLength = "(" + fieldLength + ")";
+                        
+            string findSql = sqls.SQL_FieldNameAndTypeFind(databaseName, tableName, fieldName, fieldTypeId, fieldLength);
 
-            string findSql = sqls.SQL_FieldNameAndTypeFind(databaseName, tableName, fieldName, fieldTypeId);
+            if (fieldLength.IndexOf("(") == -1)
+                fieldLength = "(" + fieldLength + ")";
 
             string Sql = // IF not EXISTS
             @" IF EXISTS ( " + findSql + @" )

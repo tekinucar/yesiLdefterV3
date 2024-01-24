@@ -243,9 +243,9 @@ namespace Tkn_SQLs
                  and   b.name = '" + tableName + @"'
                  and   a.name = '" + fieldName + @"' ";
         }
-        public string SQL_FieldNameAndTypeFind(string databaseName, string tableName, string fieldName, Int16 fieldTypeId)
+        public string SQL_FieldNameAndTypeFind(string databaseName, string tableName, string fieldName, Int16 fieldTypeId, string fieldLength)
         {
-            return
+            string Sql =
                 @"
                  select  
                  a.column_id, a.name, 
@@ -257,8 +257,12 @@ namespace Tkn_SQLs
                  [" + databaseName + @"].sys.tables b 
                  where b.object_id = a.object_id 
                  and   b.name = '" + tableName + @"'
-                 and   a.name = '" + fieldName + @"' 
-                 and   a.system_type_id <> " + fieldTypeId.ToString()  + @"  ";
+                 and   a.name = '" + fieldName + @"'  ";
+            if (fieldLength == "")
+                 Sql += "  and    a.system_type_id <> " + fieldTypeId.ToString() + "  ";
+            else Sql += "  and  ( a.system_type_id <> " + fieldTypeId.ToString() + " or  a.max_length <> " + fieldLength + " ) "; 
+
+            return Sql;
         }
 
         public string SQL_Types_List(string Type_Name)

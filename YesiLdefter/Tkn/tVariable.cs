@@ -1249,6 +1249,7 @@ namespace Tkn_Variable
         public string errorPageUrl { get; set; }
         public string loginPageUrl { get; set; }
         public string tableIPCodesInLoad { get; set; }
+        public string tableIPCodeIsSave { get; set; }
         public string aktifUrl { get; set; }
         public string sessionIdAndToken { get; set; }
         public bool loadWorking { get; set; }
@@ -1266,6 +1267,7 @@ namespace Tkn_Variable
             errorPageUrl = "";
             loginPageUrl = "";
             tableIPCodesInLoad = "";
+            tableIPCodeIsSave = "";
             aktifUrl = "";
             sessionIdAndToken = "";
             loadWorking = false;

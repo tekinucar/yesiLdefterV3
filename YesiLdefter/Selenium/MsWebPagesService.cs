@@ -447,7 +447,7 @@ namespace YesiLdefter.Selenium
             wnv.tTable = _tTable;
 
         }
-        public void transferFromWebToDatabase(Form tForm, webNodeValue wnv, List<MsWebScrapingDbFields> msWebScrapingDbFields, List<webNodeItemsList> aktifPageNodeItemsList)
+        public void transferFromWebToDatabase(Form tForm, webNodeValue wnv, List<MsWebScrapingDbFields> msWebScrapingDbFields, List<webNodeItemsList> aktifPageNodeItemsList, webForm f)
         {
             //v.SQL = v.SQL + v.ENTER + myNokta + " transferFromWebToDatabase : Get : " + wnv.dbFieldName;
 
@@ -460,6 +460,10 @@ namespace YesiLdefter.Selenium
             wnv.dbLookUpField = false;
                         
             DataRow dbRow = findRightRow(tForm, wnv, v.tSelect.Get, msWebScrapingDbFields);
+
+            /// tableIPCode tespit edildi ... save işlemi başlayacak olan DataSet belli oldu
+            ///
+            f.tableIPCodeIsSave = wnv.TableIPCode;
 
             // webden okunan veriyi db ye aktardığı an
             if (dbRow != null)
@@ -633,7 +637,7 @@ namespace YesiLdefter.Selenium
             //}
 
         }
-        public void transferFromWebSelectToDatabase(Form tForm, webNodeValue wnv, List<MsWebScrapingDbFields> msWebScrapingDbFields, List<webNodeItemsList> aktifPageNodeItemsList)
+        public void transferFromWebSelectToDatabase(Form tForm, webNodeValue wnv, List<MsWebScrapingDbFields> msWebScrapingDbFields, List<webNodeItemsList> aktifPageNodeItemsList, webForm f)
         {
             //v.SQL = v.SQL + v.ENTER + myNokta + " transferFromWebSelectToDatabase";
 
@@ -649,6 +653,12 @@ namespace YesiLdefter.Selenium
 
             int rowNo = 0;
             bool onay = false;
+
+
+            /// tableIPCode tespit edildi ... save işlemi başlayacak olan DataSet belli oldu
+            ///
+            f.tableIPCodeIsSave = wnv.TableIPCode;
+
 
             /// sırayla row ları ele al
             ///

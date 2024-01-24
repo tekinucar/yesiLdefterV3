@@ -7899,7 +7899,7 @@ namespace Tkn_Events
                             f_bgn = 0;
                             f_end = 0;
                             //int i1 = Sql.IndexOf(FullHeader1, f1);
-                            while ((i_end > f_end) && (f_end > -1))
+                            while ((i_end > f_end) && (f_end > -1) && (i_end > i_bgn))
                             {
                                 Sql = Sql.Remove(i_bgn, (i_end - i_bgn));
 

@@ -408,7 +408,8 @@ namespace YesiLdefter
                 if (dsData.DataSetName != null)
                     tableIPCode_ = dsData.DataSetName.ToString();
 
-                if (f.tableIPCodesInLoad.IndexOf(tableIPCode_) > -1)
+                if ((f.tableIPCodesInLoad.IndexOf(tableIPCode_) > -1) && 
+                    (f.tableIPCodesInLoad.IndexOf(f.tableIPCodeIsSave) == -1 )) // save olan Dataset ise atla
                 {
                     t.WaitFormOpen(this, "Sayfa değiştiriliyor ...");
                     f.loadWorking = false;
@@ -661,8 +662,9 @@ namespace YesiLdefter
                 (wnv.InjectType == v.tWebInjectType.GetAndSet && wnv.workRequestType == v.tWebRequestType.get)) &&
                 (wnv.IsInvoke == false)) //(this.myTriggerInvoke == false)) // invoke gerçekleşmişse hiç başlama : get sırasında set edip bilgi çağrılıyor demekki
             {
+                
                 if (wnv.TagName != "table")
-                    msPagesService.transferFromWebToDatabase(this, wnv, msWebScrapingDbFields_, aktifPageNodeItemsList_);
+                    msPagesService.transferFromWebToDatabase(this, wnv, msWebScrapingDbFields_, aktifPageNodeItemsList_, f);
 
                 if (wnv.TagName == "table")
                 {
@@ -696,7 +698,7 @@ namespace YesiLdefter
                         //this.myTriggerTableRowNo = 0;
 
                         webNodeValue myTriggerTableWnv = wnv.Copy();
-
+                                                
                         await msPagesService.transferFromWebTableToDatabase(this, myTriggerTableWnv, msWebNodes_, msWebScrapingDbFields_, aktifPageNodeItemsList_);
 
                         t.TableRefresh(this, myTriggerTableWnv.TableIPCode);
@@ -713,7 +715,7 @@ namespace YesiLdefter
                         if (wnv.tTable.tRows.Count > 0)
                         {
                             /// select node ye ait (value, text) listesinide ilgili tabloya yaz
-                            msPagesService.transferFromWebSelectToDatabase(this, wnv, msWebScrapingDbFields_, aktifPageNodeItemsList_);
+                            msPagesService.transferFromWebSelectToDatabase(this, wnv, msWebScrapingDbFields_, aktifPageNodeItemsList_, f);
                             //MessageBox.Show("İşlem tamamlandı...");
                         }
                     }
