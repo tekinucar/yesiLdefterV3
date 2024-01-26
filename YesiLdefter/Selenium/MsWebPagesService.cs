@@ -777,9 +777,26 @@ namespace YesiLdefter.Selenium
 
                             return findDbRow;
                         }
+                        else
+                        {
+                            /// Table var fakat row yok ise
+                            /// 
+                            if (ds != null)
+                            {
+                                if (ds.Tables != null)
+                                {
+                                    if (ds.Tables[0].Rows.Count == 0)
+                                    {
+                                        findDbRow = ds.Tables[0].NewRow();
+                                        wnv.ds = ds;
+                                    }
+                                    return findDbRow;
+                                }
+                            }
+                        }
+
                     }
                 }
-
             }
 
             if (findDbRow == null)

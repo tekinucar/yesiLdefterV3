@@ -1252,6 +1252,7 @@ namespace Tkn_Variable
         public string tableIPCodeIsSave { get; set; }
         public string aktifUrl { get; set; }
         public string sessionIdAndToken { get; set; }
+        public bool pageRefreshWorking { get; set; }
         public bool loadWorking { get; set; }
         public bool anErrorOccurred { get; set; }
         public bool autoSubmit { get; set; }
@@ -1270,6 +1271,7 @@ namespace Tkn_Variable
             tableIPCodeIsSave = "";
             aktifUrl = "";
             sessionIdAndToken = "";
+            pageRefreshWorking = false;
             loadWorking = false;
             anErrorOccurred = false;
             autoSubmit = false;

@@ -407,12 +407,13 @@ namespace YesiLdefter
                 string tableIPCode_ = "";
                 if (dsData.DataSetName != null)
                     tableIPCode_ = dsData.DataSetName.ToString();
-
+                
                 if ((f.tableIPCodesInLoad.IndexOf(tableIPCode_) > -1) && 
-                    (f.tableIPCodesInLoad.IndexOf(f.tableIPCodeIsSave) == -1 )) // save olan Dataset ise atla
+                    (f.tableIPCodesInLoad.IndexOf(f.tableIPCodeIsSave) <= 0 )) // save olan Dataset ise atla
                 {
                     t.WaitFormOpen(this, "Sayfa değiştiriliyor ...");
                     f.loadWorking = false;
+                    f.pageRefreshWorking = true;
                     await startNodes(this.msWebNodes_, this.workPageNodes_, v.tWebRequestType.post, v.tWebEventsType.load);
                     f.loadWorking = true;
                     v.IsWaitOpen = false;
@@ -510,7 +511,7 @@ namespace YesiLdefter
         {
             bool onayList = false;
             bool onayRequest = false;
-            bool onayPage = false;
+            bool onayPageRefresh = false;
             bool onayValue = false;
             /// daha çalışanları temizle yani
             /// load çalıştı diyelim
@@ -518,8 +519,11 @@ namespace YesiLdefter
             /// loada ait çalışma listesini temizle 
             ///
             workPageNodes.nodeIdList = "";
-            /// kullanıcı tekrar istekte bulundu onun için hatayı kapat
+            /// kullanıcı tekrar istekte bulundu onun için hatayı kapat ve 
+            /// save işlemini sıfırla
+            /// 
             f.anErrorOccurred = false;
+            f.tableIPCodeIsSave = "";
             //f.tableIPCodesInLoad = ""; Açma 
 
             foreach (MsWebNode item in msWebNodes)
@@ -544,9 +548,9 @@ namespace YesiLdefter
                 // PageRefresh satırımı kontrol ediliyor
                 // pageRefresh ise sub functionda çalışsın ve false dönsün
                 // true dönerse pageRefresh değil işleme devam et
-                onayPage = await pageRefresh(v.webMain_, item);
+                onayPageRefresh = await pageRefresh(v.webMain_, item);
 
-                if ((onayList) && (onayRequest) && (onayPage))
+                if ((onayList) && (onayRequest) && (onayPageRefresh))
                 {
                     webNodeValue wnv = new webNodeValue();
                     wnv.workRequestType = workRequestType;
@@ -579,21 +583,20 @@ namespace YesiLdefter
         private async Task<bool> pageRefresh(IWebDriver wb, MsWebNode item)
         {
             bool onay = true;
-            //if (this.myTriggerPageRefresh == false)
-            //{
-            //    this.myTriggerPageRefresh = true;
-            //    this.myTriggerPageRefreshTick = true;
-            //    v.SQL = v.SQL + v.ENTER + myNokta + " Page Refresh : start";
             if ((item.PageRefresh == true) &&
                 (item.IsActive))
             {
-                await myPageViewClickAsync(wb, this.msWebPage_);
-                // onay satırı (item) burda çalıştı, dönüşte tekrar çalışmasın diye false olarak geri dönüyor
-                onay = false;
+                /// PageRefresh isteği şimdilik sadece DataNavigator position değişikliğinde aktif ediliyor
+                /// 
+                if (f.pageRefreshWorking)
+                {
+                    f.pageRefreshWorking = false;
+                    await myPageViewClickAsync(wb, this.msWebPage_);
+                    /// pageRefresh satırı (item) buarda çalıştı, dönüşte tekrar çalışmasın diye false olarak geri dönüyor
+                    /// 
+                    onay = false;
+                }
             }
-            //    v.SQL = v.SQL + v.ENTER + myNokta + " Page Refresh : END";
-            //    t.ReadyComplate(2000);
-            //}
             return onay; 
         }
         private async Task WebScrapingBefore(webNodeValue wnv)
@@ -630,7 +633,7 @@ namespace YesiLdefter
                 /// bulunduğu web sayfası tekrar yenilenmesi gerekiyor
                 /// Örnek : kullanıcı SınavTarih listesinde pos değiştirince Mebbis sinav listesi sayfasıda ona göre değişmesi gerekiyor
                 /// 
-                if ((wnv.workEventsType == v.tWebEventsType.load) && (onay))
+                if ((wnv.workEventsType == v.tWebEventsType.load) && (onay)) 
                 {
                     if (wnv.ds != null)
                         if (wnv.ds.DataSetName != null)
@@ -865,6 +868,7 @@ namespace YesiLdefter
 
             if (wb.PageSource == null) return;
 
+            if (wnv.TagName == null) return;
             //HtmlNode nNode = null;
             string TagName = wnv.TagName.ToLower();
 
