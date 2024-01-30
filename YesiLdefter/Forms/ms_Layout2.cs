@@ -153,6 +153,7 @@ namespace YesiLdefter
             scripts.SourceDBaseName = t.Find_dBLongName(Convert.ToString((byte)v.dBaseNo.Manager));  
             scripts.SchemaName = "dbo"; 
             scripts.SourceTableName = "MS_LAYOUT";
+            scripts.TableIPCode = "";
             scripts.Where = string.Format(" MASTER_CODE = '{0}' ", tableCode);
             scripts.IdentityInsertOnOff = false;
 

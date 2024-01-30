@@ -270,7 +270,9 @@ namespace YesiLdefter
                     v.tUserRegister.UserLastLoginEMail = u_user_email;
                     v.tUserRegister.UserLastKey = u_user_key;
                     v.tUserRegister.UserRemember = ((DevExpress.XtraEditors.CheckButton)btn_BHatirla).Checked;
-                    
+                                        
+                    t.TableRemove(ds_Query);
+
                     // şimdi [ e-mail ile şifre ] databaseden kontrol ediliyor
                     tSql = Sqls.preparingUstadUsersSql(u_user_email, u_user_key, 0);
                     t.SQL_Read_Execute(v.dBaseNo.UstadCrm, ds_Query, ref tSql, "UstadUsers", "UserLogin");

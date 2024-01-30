@@ -146,8 +146,7 @@ namespace Tkn_Starter
             v.active_DB.managerDBType = v.dBaseType.MSSQL;
             v.active_DB.ustadCrmDBType = v.dBaseType.MSSQL;
             v.active_DB.projectDBType = v.dBaseType.MSSQL;
-            
-            
+                        
             ///
             /// main Manager DB Connections
             /// 

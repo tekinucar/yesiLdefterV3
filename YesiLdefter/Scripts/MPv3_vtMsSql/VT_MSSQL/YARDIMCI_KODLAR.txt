@@ -16,8 +16,6 @@ SET IDENTITY_INSERT [dbo].[EduMtskYonetmelik] OFF
 Select * into EduMtskYonetmelik2 from EduMtskYonetmelik
 
 
-
-
  /* tablolara ait kaç adet trigger mevcut  */
  Select tbl.name, count(trg.object_id) adet From u7093888_Ustad01.sys.triggers as trg 
    left outer join u7093888_Ustad01.sys.tables as tbl on ( trg.parent_id = tbl.object_id ) 

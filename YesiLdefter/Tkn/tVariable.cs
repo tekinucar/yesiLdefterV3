@@ -259,6 +259,7 @@ namespace Tkn_Variable
         public static Boolean SP_TabimDbConnection = false;
         public static Boolean SP_UserIN = false;
         public static Boolean SP_UserLOGIN = true;
+        public static Boolean SP_CheckedNewApplication = false;
 
         public static Boolean SP_ConnectBool = false;
         public static Boolean SP_ConnBool_Manager = false;
@@ -1097,19 +1098,16 @@ namespace Tkn_Variable
             Before,
             After
         }
-
         public enum tFocus
         {
             True,
             False
         }
-
         public enum tRowCount
         {
             SingleRow,
             MultiRows
         }
-
         public enum tFindColumnType
         {
             searchColumn,
@@ -1117,7 +1115,6 @@ namespace Tkn_Variable
         }
                 
         public static cComputer tComputer = new cComputer();
-
         public static List<tUstadFirm> tFirmUserList = new List<tUstadFirm>();
         public static List<tUstadFirm> tFirmFullList = new List<tUstadFirm>();
 
@@ -1256,6 +1253,7 @@ namespace Tkn_Variable
         public bool loadWorking { get; set; }
         public bool anErrorOccurred { get; set; }
         public bool autoSubmit { get; set; }
+
         public Int16 talepPageLeft { get; set; }
         public Int16 talepPageTop { get; set; }
 
@@ -2047,6 +2045,7 @@ namespace Tkn_Variable
         public v.dBaseType DBaseType { get; set; }
         public string SourceDBaseName { get; set; }
         public string SchemaName { get; set; }
+        public string TableIPCode { get; set; }
         public string SourceTableName { get; set; }
         public string Where { get; set; }
         public bool IdentityInsertOnOff { get; set; } //IDENTITY_INSERT 
@@ -2056,6 +2055,7 @@ namespace Tkn_Variable
             DBaseType = v.dBaseType.None;
             SourceDBaseName = "";
             SchemaName = "";
+            TableIPCode = "";
             SourceTableName = "";
             Where = "";
             IdentityInsertOnOff = false;

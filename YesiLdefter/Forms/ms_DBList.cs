@@ -81,6 +81,7 @@ namespace YesiLdefter
                 vScripts scripts = new vScripts();
                 scripts.SourceDBaseName = databaseName;
                 scripts.SchemaName = schemaName;
+                scripts.TableIPCode = "";
                 scripts.SourceTableName = tableName;
                 scripts.IdentityInsertOnOff = true;
 

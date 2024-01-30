@@ -451,6 +451,7 @@ namespace Tkn_ToolBox
 
             string databaseName = scripts.SourceDBaseName;
             string schemaName = scripts.SchemaName;
+            string tableIPCode = scripts.TableIPCode;
             string tableName = scripts.SourceTableName;
             string where = scripts.Where;
             bool identityInsertOnOff = scripts.IdentityInsertOnOff;
@@ -475,7 +476,7 @@ namespace Tkn_ToolBox
                 tSql = string.Format(cumleSelect, schemaName, tableName);
             }
 
-            myProp = preparingMyProp(databaseName, schemaName, tableName, tSql);
+            myProp = preparingMyProp(databaseName, schemaName, tableName, tableIPCode, tSql);
 
             dsQuery.Namespace = myProp;
 
@@ -558,7 +559,7 @@ namespace Tkn_ToolBox
 
 
 
-        public string preparingMyProp(string databaseName, string schemas, string tableName, string sql)
+        public string preparingMyProp(string databaseName, string schemas, string tableName, string tableIPCode, string sql)
         {
             
             v.dBaseNo dBaseNo = getDBaseNo(databaseName);
@@ -568,6 +569,7 @@ namespace Tkn_ToolBox
             MyProperties_Set(ref myProp, "DBaseName", databaseName);
             MyProperties_Set(ref myProp, "SchemasCode", schemas);
             MyProperties_Set(ref myProp, "TableName", tableName);
+            MyProperties_Set(ref myProp, "TableIPCode", tableIPCode);
             MyProperties_Set(ref myProp, "SqlFirst", sql);
             MyProperties_Set(ref myProp, "SqlSecond", "null");
             MyProperties_Set(ref myProp, "TableType", "1");
@@ -613,8 +615,14 @@ namespace Tkn_ToolBox
                 }
                 catch (Exception e)
                 {
+                    string conn = VTbaglanti.ConnectionString;
+                    //  Data Source = 111.222.333.444; Initial Catalog = xxxxxxx; User ID = sa; Password = *****; MultipleActiveResultSets = True 
+                    int i1 = conn.IndexOf("Password");
+                    int i2 = conn.IndexOf("MultipleActiveResultSets");
+                    conn = conn.Remove(i1 + 10, i2 - i1 - 10); // password ü sil
+
                     MessageBox.Show("HATA : MSSQL Database bağlantısı açılmadı ... " + v.ENTER2 +
-                        "Connection : " + VTbaglanti.ConnectionString + v.ENTER2 +
+                        "Connection : " + conn + v.ENTER2 +
                         "*  Bunun çeşitli sebepleri olabilir." + v.ENTER2 +
                         "1. Database in bulunduğu bilgisayar ( SERVER ) kapalı olabilir ..." + v.ENTER +
                         "2. MSSQL Server kapalı olabilir ..." + v.ENTER +
@@ -1107,13 +1115,15 @@ namespace Tkn_ToolBox
                         preparing_MsTableFields(vt);
                         preparing_TableIPCodeTableList(vt.TableIPCode);
                         preparing_TableIPCodeFieldsList(vt.TableIPCode);
-
-                        if (v.active_DB.mainManagerDbUses)
+                        if (IsNotNull(vt.TableIPCode))
                         {
-                            DataTable dt = v.ds_TableIPCodeFields.Tables[vt.TableIPCode];
-                            if (dt != null) 
-                                dsData.Tables.Add(dt.Copy());
-                            dt.Dispose();
+                            if (v.active_DB.mainManagerDbUses)
+                            {
+                                DataTable dt = v.ds_TableIPCodeFields.Tables[vt.TableIPCode];
+                                if (dt != null)
+                                    dsData.Tables.Add(dt.Copy());
+                                dt.Dispose();
+                            }
                         }
                     }
                 }
@@ -1165,6 +1175,8 @@ namespace Tkn_ToolBox
         }
         public void preparing_TableIPCodeTableList(string tableIPCode)
         {
+            if (IsNotNull(tableIPCode) == false) return;
+
             if (v.active_DB.mainManagerDbUses)
             {
                 TableRemove(v.ds_TableIPCodeTable);
@@ -1188,6 +1200,8 @@ namespace Tkn_ToolBox
         }
         private void readTableIPCodeTableList_(string tableIPCode)
         {
+            if (IsNotNull(tableIPCode) == false) return;
+
             string sqlB = msTableIPCodeTableList_SQL(tableIPCode);
 
             SqlDataAdapter msSqlAdapter2 = null;
@@ -1202,6 +1216,8 @@ namespace Tkn_ToolBox
         }
         public void preparing_TableIPCodeFieldsList(string tableIPCode)
         {
+            if (IsNotNull(tableIPCode) == false) return;
+
             if (v.active_DB.mainManagerDbUses)
             {
                 TableRemove(v.ds_TableIPCodeFields);
@@ -1225,6 +1241,8 @@ namespace Tkn_ToolBox
         }
         private void readTableIPCodeFieldsList_(string tableIPCode)
         {
+            if (IsNotNull(tableIPCode) == false) return;
+
             string sqlC = msTableIPCodeFieldsList_SQL(tableIPCode);
 
             SqlDataAdapter msSqlAdapter3 = null;
@@ -1239,6 +1257,8 @@ namespace Tkn_ToolBox
         }
         public void preparing_TableIPCodeGroupsList(string tableIPCode)
         {
+            if (IsNotNull(tableIPCode) == false) return;
+
             if (v.active_DB.mainManagerDbUses)
             {
                 TableRemove(v.ds_TableIPCodeGroups);
@@ -1262,6 +1282,8 @@ namespace Tkn_ToolBox
         }
         private void readTableIPCodeGroupsList_(string tableIPCode)
         {
+            if (IsNotNull(tableIPCode) == false) return;
+
             string sqlC = msTableIPCodeGroupsList_SQL(tableIPCode);
 
             SqlDataAdapter msSqlAdapter4 = null;
@@ -1274,6 +1296,8 @@ namespace Tkn_ToolBox
         }
         public void preparing_LayoutItemsList(string masterCode)
         {
+            if (IsNotNull(masterCode) == false) return;
+
             if (v.active_DB.mainManagerDbUses)
             {
                 TableRemove(v.ds_MsLayoutItems);
@@ -1297,6 +1321,8 @@ namespace Tkn_ToolBox
         }
         private void readLayoutItemsList_(string masterCode)
         {
+            if (IsNotNull(masterCode) == false) return;
+
             string sqlL = msLayoutItemsList_SQL(masterCode);
 
             SqlDataAdapter msSqlAdapter5 = null;
@@ -1309,6 +1335,8 @@ namespace Tkn_ToolBox
         }
         public void preparing_MenuItemsList(string masterCode)
         {
+            if (IsNotNull(masterCode) == false) return;
+
             if (v.active_DB.mainManagerDbUses)
             {
                 TableRemove(v.ds_MsMenuItems);
@@ -1332,6 +1360,8 @@ namespace Tkn_ToolBox
         }
         private void readMenuItemsList_(string masterCode)
         {
+            if (IsNotNull(masterCode) == false) return;
+
             string sqlM = msMenuItemsList_SQL(masterCode);
 
             SqlDataAdapter msSqlAdapter6 = null;
@@ -1344,6 +1374,8 @@ namespace Tkn_ToolBox
         }
         public void preparing_DataCopyList(string DC_Code)
         {
+            if (IsNotNull(DC_Code) == false) return;
+
             if (v.active_DB.mainManagerDbUses)
             {
                 TableRemove(v.ds_DataCopy);
@@ -1367,6 +1399,8 @@ namespace Tkn_ToolBox
         }
         private void readDataCopyList_(string DC_Code)
         {
+            if (IsNotNull(DC_Code) == false) return;
+
             string sqlDC = dataCopyList_SQL(DC_Code);
 
             SqlDataAdapter msSqlAdapter7 = null;
@@ -1379,6 +1413,8 @@ namespace Tkn_ToolBox
         }
         public void preparing_DataCopyLinesList(string DC_Code)
         {
+            if (IsNotNull(DC_Code) == false) return;
+
             if (v.active_DB.mainManagerDbUses)
             {
                 TableRemove(v.ds_DataCopyLines);
@@ -1402,6 +1438,8 @@ namespace Tkn_ToolBox
         }
         private void readDataCopyLinesList_(string DC_Code)
         {
+            if (IsNotNull(DC_Code) == false) return;
+
             string sqlDCL = dataCopyLinesList_SQL(DC_Code);
 
             SqlDataAdapter msSqlAdapter8 = null;
@@ -6384,7 +6422,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
             */
 
-            if (SQL_Read_Execute(v.dBaseNo.Manager, ds, ref ySql, "", "MSSQL Server Tarihi"))
+            if (SQL_Read_Execute(v.dBaseNo.publishManager, ds, ref ySql, "", "MSSQL Server Tarihi"))
             {
                 v.BUGUN_TARIH = Convert.ToDateTime(ds.Tables[0].Rows[0]["TARIH"].ToString());
                 v.DONEM_BASI_TARIH = v.BUGUN_TARIH.AddDays(-367);
@@ -9264,6 +9302,10 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
         public void OtherValues_Get(DataSet ds, saveVariables f)
         {
+            if (ds == null) return;
+            if (ds.Tables == null) return;
+            if (ds.Tables.Count <= 1) return;
+
             string tableName_ = "";
             if (v.active_DB.mainManagerDbUses) // tableFields + "2"
                 tableName_ = ds.DataSetName; // TapleIPCode
@@ -11923,7 +11965,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 SplashScreenManager.Default.SetWaitFormCaption(" " + Mesaj);
                 if (v.SP_TabimDbConnection)
                 SplashScreenManager.Default.SetWaitFormDescription(v.ENTER + "  "+"Tabim.MTSK");
-                else SplashScreenManager.Default.SetWaitFormDescription(v.ENTER + "  " + "Üstad.MTSK");
+                else SplashScreenManager.Default.SetWaitFormDescription(v.ENTER + "  " + "...");
 
                 //SplashScreenManager.ShowForm(tForm, typeof(DevExpress.XtraWaitForm.ManualLayoutDemoWaitForm), true, true, false);
                 //SplashScreenManager.ShowForm(tForm, typeof(DevExpress.XtraWaitForm.DemoWaitForm), true, true, false);
@@ -13664,8 +13706,10 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 v.active_DB.managerDBName = ConnectionIni.Read("PublishManagerDbName");
                 v.active_DB.ustadCrmServerName = ConnectionIni.Read("UstadCrmServerIp");
                 v.active_DB.ustadCrmDBName = ConnectionIni.Read("UstadCrmDbName");
+                v.publishManager_DB.serverName = ConnectionIni.Read("PublishManagerServerIp");
+                v.publishManager_DB.databaseName = ConnectionIni.Read("PublishManagerDbName");
             }
-            
+
             // Ustad çalışanları için 
             var YesiLdefterIni = new tIniFile("YesiLdefter.Ini");
             MainManagerDbUses = YesiLdefterIni.Read("MainManagerDbUses");
@@ -13677,12 +13721,10 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 v.active_DB.managerDBName = YesiLdefterIni.Read("MainManagerDbName");
                 v.active_DB.ustadCrmServerName = ConnectionIni.Read("UstadCrmServerIp");
                 v.active_DB.ustadCrmDBName = ConnectionIni.Read("UstadCrmDbName");
-
                 v.publishManager_DB.serverName = ConnectionIni.Read("PublishManagerServerIp");
                 v.publishManager_DB.databaseName = ConnectionIni.Read("PublishManagerDbName");
             }
             
-
             // Tabim Surucu07 için 
             var YesiLdefterTabimIni = new tIniFile("YesiLdefterTabim.Ini");
             SourceDbUses = YesiLdefterTabimIni.Read("SourceDbUses");

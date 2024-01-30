@@ -7,7 +7,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Threading;
+
 using DevExpress.XtraEditors;
+
+using Tkn_CookieReader;
 using Tkn_Events;
 using Tkn_Save;
 using Tkn_ToolBox;
@@ -15,12 +19,13 @@ using Tkn_Variable;
 
 using YesiLdefter.Selenium.Helpers;
 using YesiLdefter.Selenium;
+using YesiLdefter.Entities;
+
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
-using Tkn_CookieReader;
-using System.Threading;
-using YesiLdefter.Entities;
 using OpenQA.Selenium.Support.UI;
+using Tesseract;
+using System.Net;
 
 namespace YesiLdefter
 {
@@ -978,6 +983,17 @@ namespace YesiLdefter
                 return;
             }
 
+            /// SecurityImage
+            if (AttRole == "SecurityI")
+            {
+                bool secOnay = await getSecurityImageValue(wb, wnv, idName);
+            }
+
+            if (AttRole == "InputBox")
+            {
+                writeValue = await getInputBoxValue(wb, wnv);
+            }
+
             if (TagName == "table")
             {
                 if (injectType == v.tWebInjectType.Get ||
@@ -1712,6 +1728,160 @@ namespace YesiLdefter
                 MessageBox.Show("DİKKAT [error 1002] : [ " + idName + " (" + writeValue + "), (" + invoke + ") ] verinin çalıştırılması sırasında sorun oluştu ..." +
                     v.ENTER2 + inner);
             }
+        }
+
+        private async Task<bool> getSecurityImageValue(IWebDriver wb, webNodeValue wnv, string idName)
+        {
+            bool onay = false;
+            return onay;
+            string value = "";
+            // Locate the image element
+            IWebElement image = wb.FindElement(By.Id(idName));
+            // Get the src attribute of the image
+            string src = image.GetAttribute("src");
+
+            /*
+            // gelen byte image çevir
+            MemoryStream ms = new MemoryStream(byteArrayIn);
+            Image oldImage = Image.FromStream(ms);
+
+            // image yi bitmap a çevir
+            Bitmap workingImage = new Bitmap(oldImage, oldImage.Width, oldImage.Height);
+            */
+
+
+
+
+
+            // Download the image from the src URL
+            using (WebClient webClient = new WebClient())
+            {
+                /*
+                // Create a CookieContainer object
+                CookieContainer cookieContainer = new CookieContainer();
+
+                // Add some cookies to the CookieContainer
+                cookieContainer.Add(new System.Net.Cookie("name", "value", "/", "example.com"));
+
+                // Set the CookieContainer for the WebClient
+                webClient.CookieContainer = cookieContainer;
+
+                // Get the image source URL
+                //string src = "https://example.com/getphoto.action?memberInfo.memberNumber=123";
+
+                // Download the image data from the src URL
+                byte[] data = webClient.DownloadData(src);
+
+                // Save the image data to a file
+                System.IO.File.WriteAllBytes("image.jpg", data);
+                */
+
+                /*
+                                try
+                                {
+                                    byte[] data = webClient.DownloadData(src);
+                                    // Save the image as a Bitmap object
+                                    using (System.IO.MemoryStream memoryStream = new System.IO.MemoryStream(data))
+                                {
+                                    Bitmap bitmap = new Bitmap(memoryStream);
+
+                                    // Create a Tesseract engine with the tessdata folder and the language
+                                    using (TesseractEngine engine = new TesseractEngine(@"./tessdata", "eng", EngineMode.Default))
+                                    {
+                                        // Process the Bitmap object and get the Page object
+                                        using (Page page = engine.Process(bitmap))
+                                        {
+                                            // Get the text from the Page object
+                                            value = page.GetText();
+                                            wnv.writeValue = value;
+                                            if (value != "") onay = true;
+                                        }
+                                    }
+                                }
+                                }
+                                catch (Exception e)
+                                {
+                                    MessageBox.Show(e.Message);
+                                    //throw;
+                                }
+                 */
+            }
+
+            return onay;
+
+            #region 
+            /*
+            // Create a Chrome driver
+            IWebDriver driver = new ChromeDriver();
+
+            // Navigate to the web page with the image
+            driver.Navigate().GoToUrl("https://example.com");
+
+            // Locate the image element
+            IWebElement image = driver.FindElement(By.Id("security-code"));
+
+            // Get the src attribute of the image
+            string src = image.GetAttribute("src");
+
+            // Download the image from the src URL
+            using (WebClient webClient = new WebClient())
+            {
+                byte[] data = webClient.DownloadData(src);
+
+                // Save the image as a Bitmap object
+                using (System.IO.MemoryStream memoryStream = new System.IO.MemoryStream(data))
+                {
+                    Bitmap bitmap = new Bitmap(memoryStream);
+
+                    // Create a Tesseract engine with the tessdata folder and the language
+                    using (TesseractEngine engine = new TesseractEngine(@"./tessdata", "eng", EngineMode.Default))
+                    {
+                        // Process the Bitmap object and get the Page object
+                        using (Page page = engine.Process(bitmap))
+                        {
+                            // Get the text from the Page object
+                            string text = page.GetText();
+
+                            // Compare the text with the expected security code
+                            if (text == "1234")
+                            {
+                                // Security code matched
+                                Console.WriteLine("Security code matched");
+                            }
+                            else
+                            {
+                                // Security code did not match
+                                Console.WriteLine("Security code did not match");
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Close the driver
+            driver.Quit();
+
+            */
+            #endregion
+        }
+
+        private async Task<string> getInputBoxValue(IWebDriver wb, webNodeValue wnv)
+        {
+            vUserInputBox iBox = new vUserInputBox();
+            iBox.Clear();
+            iBox.title = wnv.OuterText;
+            iBox.promptText = wnv.InnerText;
+            iBox.value = "0";
+            iBox.displayFormat = "";
+            iBox.fieldType = 0;
+
+            // ınput box ile sorulan ise kimden kopyalanacak (old) bilgisi
+            if (t.UserInpuBox(iBox) == DialogResult.OK)
+            {
+                wnv.writeValue = iBox.value;
+            }
+
+            return wnv.writeValue;
         }
 
         #endregion subFunctions

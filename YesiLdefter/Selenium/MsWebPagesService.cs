@@ -709,92 +709,95 @@ namespace YesiLdefter.Selenium
             //foreach (DataRow row in ds_ScrapingDbConnectionList.Tables[0].Rows)
             foreach (MsWebScrapingDbFields item in msWebScrapingDbFields)
             {
-                if (select == v.tSelect.Get)
-                {
-                    _dbNodeId = item.WebScrapingGetNodeId;   //t.myInt32(row["WebScrapingGetNodeId"].ToString());
-                    _dbColNo = item.WebScrapingGetColumnNo;  //t.myInt16(row["WebScrapingGetColumnNo"].ToString());
-                }
-                if (select == v.tSelect.Set)
-                {
-                    _dbNodeId = item.WebScrapingSetNodeId; //t.myInt32(row["WebScrapingSetNodeId"].ToString());
-                    _dbColNo = item.WebScrapingSetColumnNo;//t.myInt16(row["WebScrapingSetColumnNo"].ToString());
-                }
-
                 _dbPageCode = item.WebScrapingPageCode;  //row["WebScrapingPageCode"].ToString();
 
-                if ((_dbPageCode == _pageCode) &&
-                    (_dbNodeId == _nodeId) &&
-                    (_dbColNo == _colNo))
+                if (_pageCode == _dbPageCode)
                 {
-                    // yazılacak veya okunacak Table
-                    _TableIPCode = item.TableIPCode;  //row["TableIPCode"].ToString();
-
-                    // böyle TableIPCode bulduk fakat form üzerinde böyle bir control var mı
-                    // çünkü WebScrapingPageCode tanımı birden fazla InputPanel de kullanılabiliyor
-                    cntrl = t.Find_Control_View(tForm, _TableIPCode);
-
-                    // varsa devam
-                    if (cntrl != null)
+                    if (select == v.tSelect.Get)
                     {
-                        // yazılacak veya okunacak fieldName
-                        wnv.TableIPCode = _TableIPCode; // iş bitimde DataSet Refresh için gerekli
-                        wnv.dbFieldName = item.FieldName;       //row["FIELD_NAME"].ToString();
-                        wnv.dbLookUpField = item.FLookUpField;  //Convert.ToBoolean(row["FLOOKUP_FIELD"].ToString());
-                        wnv.dbFieldType = item.FieldType;       //t.myInt16(row["FIELD_TYPE"].ToString());
+                        _dbNodeId = item.WebScrapingGetNodeId;   //t.myInt32(row["WebScrapingGetNodeId"].ToString());
+                        _dbColNo = item.WebScrapingGetColumnNo;  //t.myInt16(row["WebScrapingGetColumnNo"].ToString());
+                    }
+                    if (select == v.tSelect.Set)
+                    {
+                        _dbNodeId = item.WebScrapingSetNodeId; //t.myInt32(row["WebScrapingSetNodeId"].ToString());
+                        _dbColNo = item.WebScrapingSetColumnNo;//t.myInt16(row["WebScrapingSetColumnNo"].ToString());
+                    }
 
-                        DataSet ds = null;
-                        DataNavigator dN = null;
-                        t.Find_DataSet(tForm, ref ds, ref dN, _TableIPCode);
+                    if ((_dbPageCode == _pageCode) &&
+                        (_dbNodeId == _nodeId) &&
+                        (_dbColNo == _colNo))
+                    {
+                        // yazılacak veya okunacak Table
+                        _TableIPCode = item.TableIPCode;  //row["TableIPCode"].ToString();
 
-                        if (t.IsNotNull(ds))
+                        // böyle TableIPCode bulduk fakat form üzerinde böyle bir control var mı
+                        // çünkü WebScrapingPageCode tanımı birden fazla InputPanel de kullanılabiliyor
+                        cntrl = t.Find_Control_View(tForm, _TableIPCode);
+
+                        // varsa devam
+                        if (cntrl != null)
                         {
-                            if (dN.Position == -1)
+                            // yazılacak veya okunacak fieldName
+                            wnv.TableIPCode = _TableIPCode; // iş bitimde DataSet Refresh için gerekli
+                            wnv.dbFieldName = item.FieldName;       //row["FIELD_NAME"].ToString();
+                            wnv.dbLookUpField = item.FLookUpField;  //Convert.ToBoolean(row["FLOOKUP_FIELD"].ToString());
+                            wnv.dbFieldType = item.FieldType;       //t.myInt16(row["FIELD_TYPE"].ToString());
+
+                            DataSet ds = null;
+                            DataNavigator dN = null;
+                            t.Find_DataSet(tForm, ref ds, ref dN, _TableIPCode);
+
+                            if (t.IsNotNull(ds))
                             {
-                                dN.Position = 0;
-                                dN.Tag = 0;
-                                findDbRow = ds.Tables[0].Rows[0];
+                                if (dN.Position == -1)
+                                {
+                                    dN.Position = 0;
+                                    dN.Tag = 0;
+                                    findDbRow = ds.Tables[0].Rows[0];
+                                }
+                                else
+                                    findDbRow = ds.Tables[0].Rows[dN.Position];
+
+                                // işlem yapılan DataSet ve DataNavigator
+                                wnv.ds = ds;
+                                wnv.dN = dN;
+
+                                /********** bu işleme gerek kalmadı 
+                                 * çünkü sıralı işlem var mı yok önceden tespit edilmeye başlandı
+                                 * 
+
+                                /// Sıralı işlem hangi TableIPCode üzerinde gerçekleşecek onu bulalım
+                                ///
+                                if (this.myTriggerOneByOne == false)// &&
+                                                                    //(this.ds_DbaseSiraliTable == null))
+                                {
+                                    findOneByOneButton(_TableIPCode);
+                                }
+
+                                ********/
+
+                                return findDbRow;
                             }
                             else
-                                findDbRow = ds.Tables[0].Rows[dN.Position];
-
-                            // işlem yapılan DataSet ve DataNavigator
-                            wnv.ds = ds;
-                            wnv.dN = dN;
-
-                            /********** bu işleme gerek kalmadı 
-                             * çünkü sıralı işlem var mı yok önceden tespit edilmeye başlandı
-                             * 
-
-                            /// Sıralı işlem hangi TableIPCode üzerinde gerçekleşecek onu bulalım
-                            ///
-                            if (this.myTriggerOneByOne == false)// &&
-                                                                //(this.ds_DbaseSiraliTable == null))
                             {
-                                findOneByOneButton(_TableIPCode);
-                            }
-
-                            ********/
-
-                            return findDbRow;
-                        }
-                        else
-                        {
-                            /// Table var fakat row yok ise
-                            /// 
-                            if (ds != null)
-                            {
-                                if (ds.Tables != null)
+                                /// Table var fakat row yok ise
+                                /// 
+                                if (ds != null)
                                 {
-                                    if (ds.Tables[0].Rows.Count == 0)
+                                    if (ds.Tables != null)
                                     {
-                                        findDbRow = ds.Tables[0].NewRow();
-                                        wnv.ds = ds;
+                                        if (ds.Tables[0].Rows.Count == 0)
+                                        {
+                                            findDbRow = ds.Tables[0].NewRow();
+                                            wnv.ds = ds;
+                                        }
+                                        return findDbRow;
                                     }
-                                    return findDbRow;
                                 }
                             }
-                        }
 
+                        }
                     }
                 }
             }

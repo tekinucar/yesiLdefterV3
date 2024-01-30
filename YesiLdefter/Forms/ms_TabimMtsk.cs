@@ -434,6 +434,7 @@ namespace YesiLdefter
 
                     //string sonuc = preparingEncodePassword(u_user_key);
                     //MessageBox.Show(u_user_key + " : " + sonuc);
+                    t.TableRemove(ds_Query);
 
                     // şimdi [ userName ve anahtar ] databaseden kontrol ediliyor
                     tSql = Sqls.preparingTabimUsersSql(u_user_name, u_user_key, 0);

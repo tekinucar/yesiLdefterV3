@@ -3,6 +3,7 @@ using System.Windows.Forms;
 
 using Tkn_ToolBox;
 using Tkn_Variable;
+using Tkn_ExeUpdate;
 
 namespace Tkn_Events
 {
@@ -460,7 +461,24 @@ namespace Tkn_Events
         {
             //MessageBox.Show("myForm_Shown");
             //Application.OpenForms[0].Text = Application.OpenForms[0].Text + ";Show";
+            
+            if (v.SP_CheckedNewApplication == false)
+            {
+                tExeUpdate exe = new tExeUpdate();
+                string formName = ((Form)sender).Name;
+                if (formName == "main")
+                {
+                    /// Exe sadece açılışta bir defa kontrol edilsin
+                    ///
+                    v.SP_CheckedNewApplication = true;
 
+                    /// Exe Güncellendiyse
+                    bool onay = exe.versionChecked((Form)sender);
+                    if (onay) 
+                        Application.Exit();
+                }
+            }
+                        
             if ((v.SP_UserLOGIN == false) &&
                 (v.SP_UserIN))
                 Application.Exit();
@@ -473,6 +491,10 @@ namespace Tkn_Events
 
                 v.con_FormAfterCreateView = false;
             }
+
+
+
+
 
             //if (v.con_AutoNewRecords)
             //{
@@ -725,6 +747,9 @@ namespace Tkn_Events
         }
 
         #endregion Form Events Functions
+
+
+
 
     }
 

@@ -883,9 +883,6 @@ namespace Tkn_Events
             // ev.formRibbonMenu_ItemClick >> event te devam ediyor
         }
 
-
-       
-
         
 
         // gerçek eventsler ***********************************************************
@@ -7526,9 +7523,9 @@ namespace Tkn_Events
 
                                 i_bgn = Sql.IndexOf(str_bgn);
 
-                                str_end = "   -- :D.SD." + read_RefId + ": -->=";
-                                i_end = Sql.IndexOf(str_end);
-
+                                str_end = "   -- :D.SD.";// + read_RefId + ": -->=";
+                                i_end = Sql.IndexOf(str_end, i_bgn);
+                                
                                 new_And = " and " + t.Set_FieldName_Value_(System.Convert.ToInt16(read_field_type), read_sub_FName, Speed_Value, "and", ">=");
                             }
 
@@ -7545,8 +7542,8 @@ namespace Tkn_Events
 
                                 i_bgn = Sql.IndexOf(str_bgn);
 
-                                str_end = "   -- :D.SD." + read_RefId + ": --<=";
-                                i_end = Sql.IndexOf(str_end);
+                                str_end = "   -- :D.SD.";// + read_RefId + ": --<=";
+                                i_end = Sql.IndexOf(str_end, i_bgn);
 
                                 new_And = " and " + t.Set_FieldName_Value_(System.Convert.ToInt16(read_field_type), read_sub_FName, Speed_Value, "and", "<=");
                             }
@@ -7571,8 +7568,8 @@ namespace Tkn_Events
 
                             i_bgn = Sql.IndexOf(str_bgn);
 
-                            str_end = "   -- :D.SD." + read_RefId + ": --";
-                            i_end = Sql.IndexOf(str_end);
+                            str_end = "   -- :D.SD.";// + read_RefId + ": --";
+                            i_end = Sql.IndexOf(str_end, i_bgn);
 
                             new_And = " and " + t.Set_FieldName_Value_(System.Convert.ToInt16(read_field_type), read_sub_FName, Speed_Value, "and", OperandType);
                         }
@@ -7637,8 +7634,11 @@ namespace Tkn_Events
                             i_bgn = Sql.IndexOf(str_bgn);
                         }
 
-                        str_end = "   -- :D.SD." + read_RefId + ": --";
-                        i_end = Sql.IndexOf(str_end);
+                        if (i_bgn > -1)
+                        {
+                            str_end = "   -- :D.SD.";// + read_RefId + ": --";
+                            i_end = Sql.IndexOf(str_end, i_bgn);
+                        }
 
                         if (mst_Row != null)
                         {
@@ -7722,8 +7722,8 @@ namespace Tkn_Events
                             buldu = 2;
                         }
 
-                        str_end = "   -- :D.SD." + read_RefId + ": --";
-                        i_end = Sql.IndexOf(str_end);
+                        str_end = "   -- :D.SD.";// + read_RefId + ": --";
+                        i_end = Sql.IndexOf(str_end, i_bgn);
 
                         if ((i_end == -1) && (i_bgn > -1))
                         {
@@ -7803,8 +7803,8 @@ namespace Tkn_Events
                         //    i_bgn = Sql.IndexOf(str_bgn);
                         //}
 
-                        str_end = "   -- :D.SD." + read_RefId + ": --";
-                        i_end = Sql.IndexOf(str_end);
+                        str_end = "   -- :D.SD.";// + read_RefId + ": --";
+                        i_end = Sql.IndexOf(str_end, i_bgn);
 
                         read_mst_value = t.Find_Kriter_Value(tForm, read_mst_TableIPCode, read_mst_FName, default_type);
                         if (read_mst_value == "") read_mst_value = "0";
