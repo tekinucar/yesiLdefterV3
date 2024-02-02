@@ -112,9 +112,6 @@ namespace YesiLdefter.Selenium
             return ds;
         }
 
-
-
-
         public string ImageDownload(string urlDownload, string sessionIdAndToken, string aktifUrl)
         {
             string url = urlDownload;
@@ -687,7 +684,6 @@ namespace YesiLdefter.Selenium
             }
         }
 
-
         private DataRow findRightRow(Form tForm, webNodeValue wnv, v.tSelect select, List<MsWebScrapingDbFields> msWebScrapingDbFields)
         {
             //v.SQL = v.SQL + v.ENTER + "findRightRow";
@@ -1238,6 +1234,38 @@ namespace YesiLdefter.Selenium
             return onay;
         }
 
+        public void getMebbisCode()
+        {
+            string tSql = "";
+            DataSet ds = new DataSet();
+
+            if (v.SP_TabimDbConnection)
+            {
+                tSql = sql.preparingTabimUsersSql(""
+                    , "", v.tUser.UserId);
+                t.SQL_Read_Execute(v.dBaseNo.Local, ds, ref tSql, "TabimUsers", "FindUser");
+            }
+            else
+            {
+                tSql = sql.preparingUstadUsersSql("", "", v.tUser.UserId);
+                t.SQL_Read_Execute(v.dBaseNo.Project, ds, ref tSql, "Users", "FindUser");
+            }
+
+            if (t.IsNotNull(ds))
+            {
+                if (v.SP_TabimDbConnection)
+                {
+                    v.tUser.MebbisCode = ds.Tables[0].Rows[0]["MebbisCode"].ToString();
+                    v.tUser.MebbisPass = ds.Tables[0].Rows[0]["MebbisPass"].ToString();
+                }
+                else
+                {
+                    v.tUser.MebbisCode = ds.Tables[0].Rows[0]["MebbisCode"].ToString();
+                    v.tUser.MebbisPass = ds.Tables[0].Rows[0]["MebbisPass"].ToString();
+                }
+            }
+
+        }
 
     }
 }

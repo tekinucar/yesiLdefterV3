@@ -125,13 +125,20 @@ namespace YesiLdefter
 
             using (tStarter s = new tStarter())
             {
-                s.InitStart();
+               s.InitStart();
             }
+            
+            /// Main form size
+            /// 
+            this.Top = 0;
+            this.Left = 0;
+            this.Width = v.Primary_Screen_Width;
+            this.Height = v.Primary_Screen_Height;
 
             #endregion
 
             #region UserLOGIN
-
+            
             if (v.SP_UserLOGIN)
             {
                 // login işlemleri
@@ -142,7 +149,7 @@ namespace YesiLdefter
                 if (v.active_DB.localDbUses == false)
                     t.DBUpdatesDataTransferOff();
             }
-
+            
             #endregion
 
             if (v.tMainFirm.MenuCode == "SEK/CEV/AYR/MAINTOP")
@@ -419,7 +426,7 @@ namespace YesiLdefter
             //((DevExpress.XtraToolbox.ToolboxControl)toolboxControl1).SelectedGroup = 0;
             
             // bunu kullanıcının seçmesini sağla
-            //((DevExpress.XtraToolbox.ToolboxControl)toolboxControl1).SelectedGroupIndex = 0;
+            ((DevExpress.XtraToolbox.ToolboxControl)toolboxControl1).SelectedGroupIndex = 0;
         }
 
         #endregion

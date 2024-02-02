@@ -80,6 +80,7 @@ namespace Tkn_UserFirms
                         v.tUser.LastName = dsQuery.Tables[0].Rows[0]["UserLastName"].ToString();
                         v.tUser.UserTcNo = dsQuery.Tables[0].Rows[0]["UserTcNo"].ToString();
                         v.tUser.eMail = dsQuery.Tables[0].Rows[0]["UserEMail"].ToString();
+                        v.tUser.MobileNo = dsQuery.Tables[0].Rows[0]["UserMobileNo"].ToString();
                         v.tUser.MebbisCode = dsQuery.Tables[0].Rows[0]["MebbisCode"].ToString();
                         v.tUser.MebbisPass = dsQuery.Tables[0].Rows[0]["MebbisPass"].ToString();
 
@@ -121,6 +122,7 @@ namespace Tkn_UserFirms
                 v.tUser.LastName = ds.Tables[0].Rows[0]["UserLastName"].ToString();
                 v.tUser.UserTcNo = ds.Tables[0].Rows[0]["UserTcNo"].ToString();
                 v.tUser.eMail = ds.Tables[0].Rows[0]["UserEMail"].ToString();
+                v.tUser.MobileNo = ds.Tables[0].Rows[0]["UserMobileNo"].ToString();
                 v.tUser.UserDbTypeId = t.myInt16(ds.Tables[0].Rows[0]["DbTypeId"].ToString());
                 v.tUser.MebbisCode = ds.Tables[0].Rows[0]["MebbisCode"].ToString();
                 v.tUser.MebbisPass = ds.Tables[0].Rows[0]["MebbisPass"].ToString();

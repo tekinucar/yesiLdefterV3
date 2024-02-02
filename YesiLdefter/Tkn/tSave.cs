@@ -967,7 +967,7 @@ namespace Tkn_Save
             // editFields
             // editWhere
             // selectControl
-
+            
             if ((f.Lkp_fname != "LKP_") & (f.Lkp_fname != "rowg"))
             {
                 //* rakam  56, 48, 127, 52, 60, 62, 59, 106, 108
@@ -983,7 +983,8 @@ namespace Tkn_Save
 
                     f._setInsField = f.bos + f.fname + ", ";
                     f._setInsValue = f.fvalue + ", ";
-                    f._setEditField = " [" + f.fname + "] = " + f.fvalue + ", ";
+                    if (f.fVisible == "True")
+                        f._setEditField = " [" + f.fname + "] = " + f.fvalue + ", ";
                     f._setSelectControl = " and [" + f.fname + "] = " + f.fvalue + " ";
                 }
 
@@ -996,7 +997,8 @@ namespace Tkn_Save
                     if ((f.fvalue == "") || (f.fvalue == "null")) 
                     {
                         f._setInsValue = "null, ";
-                        f._setEditField = " [" + f.fname + "] = " + "null, ";
+                        if (f.fVisible == "True")
+                            f._setEditField = " [" + f.fname + "] = " + "null, ";
                         f._setSelectControl = " and [" + f.fname + "] = " + "null ";
                     }
                     else
@@ -1005,7 +1007,8 @@ namespace Tkn_Save
                             f.fvalue = f.fvalue.Substring(0, f.fmax_length - 1);
 
                         f._setInsValue = "'" + t.Str_Check(f.fvalue) + "', ";
-                        f._setEditField = " [" + f.fname + "] = " + "'" + t.Str_Check(f.fvalue) + "', ";
+                        if (f.fVisible == "True")
+                            f._setEditField = " [" + f.fname + "] = " + "'" + t.Str_Check(f.fvalue) + "', ";
                         f._setSelectControl = " and [" + f.fname + "] = " + "'" + t.Str_Check(f.fvalue) + "' ";
                     }
                 }
@@ -1018,19 +1021,22 @@ namespace Tkn_Save
                     if ((f.fvalue == "False") || (f.fvalue == ""))
                     {
                         f._setInsValue = "0, ";
-                        f._setEditField = " [" + f.fname + "] = " + "0, ";
+                        if (f.fVisible == "True")
+                            f._setEditField = " [" + f.fname + "] = " + "0, ";
                         f._setSelectControl = " and [" + f.fname + "] = 0 ";
                     }
                     else if (f.fvalue == "True")
                     {
                         f._setInsValue = "1, ";
-                        f._setEditField = " [" + f.fname + "] = " + "1, ";
+                        if (f.fVisible == "True")
+                            f._setEditField = " [" + f.fname + "] = " + "1, ";
                         f._setSelectControl = " and [" + f.fname + "] = 1 ";
                     }
                     else
                     {
                         f._setInsValue = "null, ";
-                        f._setEditField = " [" + f.fname + "] = " + "0, ";
+                        if (f.fVisible == "True")
+                            f._setEditField = " [" + f.fname + "] = " + "0, ";
                         f._setSelectControl = "";
                     }
                 }
@@ -1043,13 +1049,15 @@ namespace Tkn_Save
                     if ((f.fvalue != "") && (f.fvalue.IndexOf("01.01.0001") == -1) && f.fvalue != "null")
                     {
                         f._setInsValue = t.Tarih_Formati(Convert.ToDateTime(f.fvalue)) + ", ";
-                        f._setEditField = " [" + f.fname + "] = " + t.Tarih_Formati(Convert.ToDateTime(f.fvalue)) + ", ";
+                        if (f.fVisible == "True")
+                            f._setEditField = " [" + f.fname + "] = " + t.Tarih_Formati(Convert.ToDateTime(f.fvalue)) + ", ";
                         f._setSelectControl = " and [" + f.fname + "] = " + t.Tarih_Formati(Convert.ToDateTime(f.fvalue)) + " ";
                     }
                     else
                     {
                         f._setInsValue = "null, ";
-                        f._setEditField = " [" + f.fname + "] = " + "null, ";
+                        if (f.fVisible == "True")
+                            f._setEditField = " [" + f.fname + "] = " + "null, ";
                         f._setSelectControl = " and [" + f.fname + "] = null ";
                     }
                 }
@@ -1062,13 +1070,15 @@ namespace Tkn_Save
                     if (f.fvalue != "")
                     {
                         f._setInsValue = "'" + t.Str_Check(f.fvalue) + "', ";
-                        f._setEditField = " [" + f.fname + "] = '" + t.Str_Check(f.fvalue) + "', ";
+                        if (f.fVisible == "True")
+                            f._setEditField = " [" + f.fname + "] = '" + t.Str_Check(f.fvalue) + "', ";
                         f._setSelectControl = " and [" + f.fname + "] = '" + t.Str_Check(f.fvalue) + "' ";
                     }
                     else
                     {
                         f._setInsValue = "null, ";
-                        f._setEditField = " [" + f.fname + "] = " + "null, ";
+                        if (f.fVisible == "True")
+                            f._setEditField = " [" + f.fname + "] = " + "null, ";
                         f._setSelectControl = " and [" + f.fname + "] = " + "null ";
                     }
                 }
@@ -1081,13 +1091,15 @@ namespace Tkn_Save
                     if ((f.fvalue != "") && (f.fvalue.IndexOf("01.01.0001") == -1) && f.fvalue != "null")
                     {
                         f._setInsValue = t.TarihSaat_Formati(Convert.ToDateTime(f.fvalue)) + ", ";
-                        f._setEditField = " [" + f.fname + "] = " + t.TarihSaat_Formati(Convert.ToDateTime(f.fvalue)) + ", ";
+                        if (f.fVisible == "True")
+                            f._setEditField = " [" + f.fname + "] = " + t.TarihSaat_Formati(Convert.ToDateTime(f.fvalue)) + ", ";
                         f._setSelectControl = " and [" + f.fname + "] = " + t.TarihSaat_Formati(Convert.ToDateTime(f.fvalue)) + " ";
                     }
                     else
                     {
                         f._setInsValue = "null, ";
-                        f._setEditField = " [" + f.fname + "] = " + "null, ";
+                        if (f.fVisible == "True")
+                            f._setEditField = " [" + f.fname + "] = " + "null, ";
                         f._setSelectControl = " and [" + f.fname + "] = " + "null ";
                     }
                 }
@@ -1108,7 +1120,8 @@ namespace Tkn_Save
                         // üzerindeki eskim varsa tekrar onu gösteriyor
                         // bu nedenle bu atama yapılıyor
                         f._setInsValue = " @" + f.fname + ", ";
-                        f._setEditField = " [" + f.fname + "] = " + " @" + f.fname + " , ";
+                        if (f.fVisible == "True")
+                            f._setEditField = " [" + f.fname + "] = " + " @" + f.fname + " , ";
                         ds.Tables[0].Rows[f.position][f.fname] = v.con_Images;
                     }
                     // 2. resim var ise
@@ -1120,7 +1133,8 @@ namespace Tkn_Save
                         // üzerindeki eskim varsa tekrar onu gösteriyor
                         // bu nedenle bu atama yapılıyor
                         f._setInsValue = " @" + f.fname + ", ";
-                        f._setEditField = " [" + f.fname + "] = " + " @" + f.fname + " , ";
+                        if (f.fVisible == "True")
+                            f._setEditField = " [" + f.fname + "] = " + " @" + f.fname + " , ";
                         ds.Tables[0].Rows[f.position][f.fname] = v.con_Images2;
                     }
 
@@ -1133,7 +1147,8 @@ namespace Tkn_Save
                         // üzerindeki eski resim varsa tekrar onu gösteriyor
                         // bu nedenle bu atama yapılıyor
                         f._setInsValue = " null, ";
-                        f._setEditField = " [" + f.fname + "] = null , ";
+                        if (f.fVisible == "True")
+                            f._setEditField = " [" + f.fname + "] = null , ";
                         ds.Tables[0].Rows[f.position][f.fname] = null;
                     }
                     // 2. resim null ise
@@ -1145,7 +1160,8 @@ namespace Tkn_Save
                         // üzerindeki eski resim varsa tekrar onu gösteriyor
                         // bu nedenle bu atama yapılıyor
                         f._setInsValue = " null, ";
-                        f._setEditField = " [" + f.fname + "] = null , ";
+                        if (f.fVisible == "True")
+                            f._setEditField = " [" + f.fname + "] = null , ";
                         ds.Tables[0].Rows[f.position][f.fname] = null;
                     }
                 }

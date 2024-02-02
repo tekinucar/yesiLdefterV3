@@ -31,6 +31,7 @@ namespace YesiLdefter
 {
     public partial class ms_SeleniumAnalysis : Form
     {
+        #region Tanımlar
         tToolBox t = new tToolBox();
 
         //IWebDriver webDriver;
@@ -70,8 +71,6 @@ namespace YesiLdefter
 
         string TableIPCode = string.Empty;
 
-
-
         //IWebDriver webMain_ = null;
 
         List<MsWebPage> msWebPage_ = null;
@@ -84,8 +83,9 @@ namespace YesiLdefter
         List<webNodeItemsList> aktifPageNodeItemsList_ = null;
 
         webWorkPageNodes workPageNodes_ = new webWorkPageNodes();
-
         webForm f = new webForm();
+
+        #endregion
 
         public ms_SeleniumAnalysis()
         {
@@ -113,7 +113,14 @@ namespace YesiLdefter
             this.msWebScrapingDbFields_ = msPagesService.readScrapingTablesAndFields(this.msWebPages_);
             msPagesService.checkedSiraliIslemVarmi(this, this.workPageNodes_, this.msWebScrapingDbFields_);
 
-            // DataSet ve DataNavigatorleri işaretle
+            /// Kullanıcının mebbisCode ve şifresini yeniden oku
+            /// değiştirmiş olabilir
+            /// 
+            msPagesService.getMebbisCode();
+            //MessageBox.Show("Mebbis : " + v.tUser.MebbisCode + " : " + v.tUser.MebbisPass);
+
+            /// DataSet ve DataNavigatorleri işaretle
+            /// 
             preparingDataSets();
         }
 
@@ -152,6 +159,78 @@ namespace YesiLdefter
 
             SeleniumHelper.ResetDriver();
             v.webMain_ = SeleniumHelper.WebDriver;
+
+            preparingWebDriverChangeSiz(v.webMain_);
+        }
+
+        private void preparingWebDriverChangeSiz(IWebDriver wb)
+        {
+            /// Main Form size change
+            /// 
+            Form mainF = Application.OpenForms[0];
+
+            Screen screen = Screen.FromControl(mainF); // formun bulunduğu ekranı al
+            //string text = screen.DeviceName; // ekranın adını etikete yaz
+            bool primary = screen.Primary; // Birinci ekran mı kontrol et 
+
+            /// Birinci ekranda ise
+            /// 
+            if (primary)
+            {
+                mainF.WindowState = FormWindowState.Normal;
+                mainF.Left = 0;
+                mainF.Top = 0;
+                mainF.Size = new Size(v.Primary_Screen_Width / 2, v.Primary_Screen_Height);
+
+                wb.Manage().Window.Size = new Size(v.Primary_Screen_Width / 2, v.Primary_Screen_Height);
+                wb.Manage().Window.Position = new Point(v.Primary_Screen_Width / 2, 0);
+            }
+            else
+            {
+                /// - 140 browser nedense tam Y koordinatına gelmiyor, -140 ile yaklaştırıyorum
+                wb.Manage().Window.Position = new Point(screen.Bounds.X / 2, screen.Bounds.Y - 140);
+                wb.Manage().Window.Size = new Size(screen.Bounds.Width / 2, screen.Bounds.Height - 50);
+
+                /// Başka bir ekranda ise
+                /// 
+                mainF.WindowState = FormWindowState.Normal;
+                mainF.Left = screen.Bounds.X;
+                mainF.Top = screen.Bounds.Y;
+                mainF.Size = new Size(screen.Bounds.Width / 2, screen.Bounds.Height - 50);
+            }
+
+
+            //Screen[] screens = Screen.AllScreens; // tüm ekranları al
+            //if (screens.Length > 1) // birden fazla ekran varsa
+            //{
+            //    Screen secondScreen = screens[1]; // ikinci ekranı al
+            //    this.Location = secondScreen.WorkingArea.Location; // formun konumunu ikinci ekranın çalışma alanının konumuna ayarla
+            //}
+
+
+            /// Main Form size change
+            /// 
+            //Application.OpenForms[0].WindowState = FormWindowState.Normal;
+            //Application.OpenForms[0].Left = 0;
+            //Application.OpenForms[0].Top = 0;
+            //Application.OpenForms[0].Size = new Size(v.Primary_Screen_Width / 2, v.Primary_Screen_Height);
+
+            /// Form boyutunu değiştirmek için,
+            /// Bu özellik, formun genişliğini ve yüksekliğini belirten bir System.Drawing.Size nesnesi alır
+            /// driver.Manage().Window.Size = new System.Drawing.Size(800, 600);
+            /// 
+            //wb.Manage().Window.Size = new Size(v.Primary_Screen_Width / 2, v.Primary_Screen_Height);
+
+            /// Form konumunu değiştirmek için, 
+            /// Bu özellik, formun ekranın sol üst köşesine göre x ve y koordinatlarını belirten bir System.Drawing.Point nesnesi alır
+            /// driver.Manage().Window.Position = new System.Drawing.Point(0, 0);
+            /// 
+            //wb.Manage().Window.Position = new Point(v.Primary_Screen_Width / 2, 0);
+
+            /// Formu tam ekran yapmak için, 
+            /// Bu metot, formu mevcut ekran çözünürlüğüne göre en büyük boyuta getirir
+            /// driver.Manage().Window.Maximize();
+            /// 
         }
         private void MsWebPagesButtonsPreparing()
         {
@@ -984,16 +1063,28 @@ namespace YesiLdefter
             }
 
             /// SecurityImage
+            /// 
             if (AttRole == "SecurityI")
             {
                 bool secOnay = await getSecurityImageValue(wb, wnv, idName);
             }
-
+            /// Güvenlik kodunu sor veya başka bir değerde sorabilir
+            /// 
             if (AttRole == "InputBox")
             {
                 writeValue = await getInputBoxValue(wb, wnv);
             }
-
+            /// SecurityAgain : Güvenlik Kodu Tekrarı
+            /// 
+            if (AttRole == "SecurityA")
+            {
+                /// Bu işleme gelmeden önce SecurityImage veya InputBox aracılığı ile
+                /// güvenlik kodu okunmuş olmalı
+                /// 
+                wnv.writeValue = f.securityCode;
+                writeValue = f.securityCode;
+            }
+            
             if (TagName == "table")
             {
                 if (injectType == v.tWebInjectType.Get ||
@@ -1881,6 +1972,10 @@ namespace YesiLdefter
                 wnv.writeValue = iBox.value;
             }
 
+            if ((wnv.OuterText.IndexOf("Güvenlik") > -1) ||
+                (wnv.InnerText.IndexOf("Güvenlik") > -1))
+                f.securityCode = wnv.writeValue;
+             
             return wnv.writeValue;
         }
 

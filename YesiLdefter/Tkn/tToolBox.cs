@@ -42,6 +42,7 @@ using Tkn_Variable;
 using Tkn_IniFile;
 using DevExpress.XtraBars.Docking2010.Views.WindowsUI;
 using DevExpress.XtraBars.Docking2010.Customization;
+using System.Data.Sql;
 
 namespace Tkn_ToolBox
 {
@@ -125,7 +126,7 @@ namespace Tkn_ToolBox
                 if (typeId == 22) runDbUpdateFieldAdd();
                 if (typeId == 23) runDbUpdateFieldUpdate();
                 //if (typeId == 24)
-                //if (typeId == 31) 
+                if (typeId == 31) runDbUpdateTriggerAdd();
                 //if (typeId == 32) 
                 //if (typeId == 41) 
                 //if (typeId == 42) 
@@ -205,12 +206,15 @@ namespace Tkn_ToolBox
         {
 
         }
+        // 14,    SQL script çalıştır
         private void runSqlScript()
         {
             // hangi Database yazılacak 
             v.dBaseNo dBaseNo = getDBaseNo(v.tMsDbUpdate.dBaseNoTypeId.ToString());
             string cumle = v.tMsDbUpdate.sqlScript;
-            
+
+            cumle = Str_AntiCheck(cumle);
+
             // hazırlanan cumleyi müşteri database üzerinde çalıştıralım
             bool onay = runScript(dBaseNo, cumle);
 
@@ -350,7 +354,46 @@ namespace Tkn_ToolBox
         // 31,    Trigger add
         private void runDbUpdateTriggerAdd()
         {
+            v.dBaseNo dBaseNo = getDBaseNo(v.tMsDbUpdate.dBaseNoTypeId.ToString());
+            string cumle1 = v.tMsDbUpdate.sqlScript;
+            string cumle2 = v.tMsDbUpdate.sqlScript;
 
+            if (cumle1.IndexOf("drop") == -1)
+            {
+                /// trigger mevcut ise önce sil
+                /// 
+                if (cumle1.IndexOf("sys.triggers") == -1)
+                {
+                    cumle1 = @"
+                    if ( select count(object_id) as ADET from sys.triggers where name = '" + v.tMsDbUpdate.tableName + @"') = 1 
+                    begin
+                        DROP TRIGGER [" + v.tMsDbUpdate.schemaName + @"].[" + v.tMsDbUpdate.tableName + @"] 
+                    end ";
+
+                    runScript(dBaseNo, cumle1);
+                }
+            }
+
+            /*
+            if (cumle2.IndexOf("sys.triggers") == -1)
+            {
+                cumle2 = @"
+                if ( select count(object_id) as ADET from sys.triggers where name = '"+ v.tMsDbUpdate.tableName + @"') = 0 
+                begin
+                  "+ cumle2 +@"
+
+                end ";
+            }
+            */
+            cumle2 = Str_AntiCheck(cumle2);
+            // hazırlanan cumleyi müşteri database üzerinde çalıştıralım
+            bool onay = runScript(dBaseNo, cumle2);
+
+            // Müşteri database nin üzerinde yapılan işlemleri DBUpdates tablosuna kaydedilecek
+            if (onay)
+            {
+                insertDbUpdates();
+            }
         }
         // 32,    Trigger update
         private void runDbUpdateTriggerUpdate()
@@ -380,14 +423,9 @@ namespace Tkn_ToolBox
 
         private void insertDbUpdates()
         {
-
-            // 14,    N'SQL script çalıştır'
-            // Bu script çalıştı bitti
-            // Şimdi sıra DbUpdates tablosuna insert sırası geldi
-            // v.con_CreateScriptPacket = true; devreye girsin diye 
-            // bu değişiklik yapılıyor
-            if (v.tMsDbUpdate.updateTypeId == 14)
-                v.con_CreateScriptPacket = true;
+            /// Sql execute sırasında script kontrolünden geçmeyecek
+            ///
+            v.con_CreateScriptPacket = true;
 
             DataSet ds = new DataSet();
             string sql = "";
@@ -400,6 +438,7 @@ namespace Tkn_ToolBox
             {
                 throw;
             }
+            v.con_CreateScriptPacket = false;
         }
 
         private string Sql_DbUpdatesInsert()
@@ -543,8 +582,8 @@ namespace Tkn_ToolBox
                         
             string findSql = sqls.SQL_FieldNameAndTypeFind(databaseName, tableName, fieldName, fieldTypeId, fieldLength);
 
-            if (fieldLength.IndexOf("(") == -1)
-                fieldLength = "(" + fieldLength + ")";
+            if ((fieldLength.IndexOf("(") == -1) && (fieldLength != ""))
+                 fieldLength = " (" + fieldLength + ") ";
 
             string Sql = // IF not EXISTS
             @" IF EXISTS ( " + findSql + @" )
@@ -2395,8 +2434,9 @@ namespace Tkn_ToolBox
         {
             bool onay = false;
 
-            if (v.tMsDbUpdate.updateTypeId != 14) // 14,    N'SQL script çalıştır'
-                v.con_CreateScriptPacket = true;
+            /// Sql execute sırasında script kontrolünden geçmeyecek
+            ///
+            v.con_CreateScriptPacket = true;
 
             DataSet ds = new DataSet();
             try
@@ -7489,6 +7529,45 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
         #region *Find Functions
 
+        public string Find_ListAvailableMSSQLServers()
+        {
+            //v.IsWaitOpen = false;
+            //WaitFormClose();
+            Application.DoEvents();
+
+            //AlertMessage("MSSQL Server", "Network üzerindeki MSSQL Server tespit ediliyor...");
+            //WaitFormOpen(null, "Network üzerindeki MSSQL Server tespit ediliyor...");
+            //Application.DoEvents();
+
+            MessageBox.Show("Network üzerindeki MSSQL Server tespit edilecek, lütfen biraz bekleyin ...", "MSSQL Server");
+
+            // Örnekleyici al
+            SqlDataSourceEnumerator instance = SqlDataSourceEnumerator.Instance;
+            // Tabloyu al
+            DataTable table = instance.GetDataSources();
+            // Tabloyu istediğiniz şekilde kullanın
+            string serverName = "";
+            string instanceName = "";
+            foreach (DataRow row in table.Rows)
+            {
+                serverName = row["ServerName"].ToString();
+                instanceName = row["InstanceName"].ToString();
+                break;
+                //Console.WriteLine("{0}\\{1}", row["ServerName"], row["InstanceName"]);
+            }
+
+            //v.IsWaitOpen = false;
+            //WaitFormClose();
+            //Application.DoEvents();
+
+            // test için kapatmayı unutma
+            serverName = "LAPTOP-ACER1";
+            instanceName = "SQLEXPRESS";
+
+            MessageBox.Show(serverName + "\\" + instanceName, "Tespit edilen MSSQL Server");
+            return serverName + "\\"+ instanceName;
+        }
+
         #region Form
 
         public Form Find_Form(string FormCode)
@@ -9302,6 +9381,8 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
         public void OtherValues_Get(DataSet ds, saveVariables f)
         {
+            f.fVisible = "False";
+
             if (ds == null) return;
             if (ds.Tables == null) return;
             if (ds.Tables.Count <= 1) return;
@@ -9313,6 +9394,8 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
             int j = ds.Tables[tableName_].Rows.Count;
             
+            
+
             for (int i = 0; i < j; i++)
             {
                 if (ds.Tables[tableName_].Rows[i]["LKP_FIELD_NAME"].ToString() == f.fname)

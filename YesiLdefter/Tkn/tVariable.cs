@@ -260,6 +260,7 @@ namespace Tkn_Variable
         public static Boolean SP_UserIN = false;
         public static Boolean SP_UserLOGIN = true;
         public static Boolean SP_CheckedNewApplication = false;
+        public static Boolean SP_ApplicationExit = false;
 
         public static Boolean SP_ConnectBool = false;
         public static Boolean SP_ConnBool_Manager = false;
@@ -669,6 +670,8 @@ namespace Tkn_Variable
 
         public static int Screen_Width { get; set; }
         public static int Screen_Height { get; set; }
+        public static int Primary_Screen_Width { get; set; }
+        public static int Primary_Screen_Height { get; set; }
         public static int NavBar_Width { get; set; }
         public static int Ribbon_Height { get; set; }
         public static int Padding4 = 4;
@@ -1249,6 +1252,7 @@ namespace Tkn_Variable
         public string tableIPCodeIsSave { get; set; }
         public string aktifUrl { get; set; }
         public string sessionIdAndToken { get; set; }
+        public string securityCode { get; set; }
         public bool pageRefreshWorking { get; set; }
         public bool loadWorking { get; set; }
         public bool anErrorOccurred { get; set; }
@@ -1269,6 +1273,7 @@ namespace Tkn_Variable
             tableIPCodeIsSave = "";
             aktifUrl = "";
             sessionIdAndToken = "";
+            securityCode = "";
             pageRefreshWorking = false;
             loadWorking = false;
             anErrorOccurred = false;
@@ -1452,6 +1457,7 @@ namespace Tkn_Variable
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string eMail { get; set; }
+        public string MobileNo { get; set; }
         public string Key { get; set; } /* user password ü */
         public Int16 UserDbTypeId { get; set; } /* user ustad firmasının hangi veritabanlarını görebilir işareti */
         public int MainFirmId { get; set; } /* user ın esas çalıştığı yani il giriş yaptığı firmanın ID si : FirmId, SP_FIRM_ID */

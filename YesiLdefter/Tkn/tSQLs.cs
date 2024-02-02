@@ -871,8 +871,12 @@ Select distinct
                 Sql = @" Select * from UstadUsers where UserEMail = '" + eMail + @"' ";
             if ((eMail != "") && (pass != ""))
                 Sql = @" Select * from UstadUsers where UserEMail = '" + eMail + @"' and UserKey = '" + pass + "' ";
-            if ((userId > 0) && (pass == ""))
-                Sql = @" Update UstadUsers set IsActive = 1 where UserId = " + userId.ToString() + @" ";
+
+            //if ((userId > 0) && (pass == ""))
+            //    Sql = @" Update UstadUsers set IsActive = 1 where UserId = " + userId.ToString() + @" ";
+            if ((userId > 0) && (eMail == "") && (pass == ""))
+                Sql = @" Select * from UstadUsers where UserId = " + userId.ToString() + @" ";
+
             if ((userId > 0) && (pass != ""))
                 Sql = @" Update UstadUsers set UserKey = '" + pass + @"' where UserId = " + userId.ToString() + @" ";
 
@@ -887,8 +891,8 @@ Select distinct
                 Sql = @" Select * from users where Username_ = '" + userName + @"' ";
             if ((userName != "") && (pass != ""))
                 Sql = @" Select * from users where Username_ = '" + userName + @"' and Password_ = '" + pass + "' ";
-            if ((userId > 0) && (pass == ""))
-                Sql = @" Update users set IsActive = 1 where Ulas = " + userId.ToString() + @" ";
+            if ((userId > 0) && (userName == "") && (pass == ""))
+                Sql = @" Select * from users where Ulas = " + userId.ToString() + @" ";
             if ((userId > 0) && (pass != ""))
                 Sql = @" Update users set Password_ = '" + pass + @"' where Ulas = " + userId.ToString() + @" ";
 

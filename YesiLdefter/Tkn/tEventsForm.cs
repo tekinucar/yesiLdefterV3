@@ -483,6 +483,8 @@ namespace Tkn_Events
                 (v.SP_UserIN))
                 Application.Exit();
 
+            if (v.SP_ApplicationExit) Application.Exit();
+
             v.formLastActiveControl = null;
 
             if (v.con_FormAfterCreateView)
@@ -491,10 +493,6 @@ namespace Tkn_Events
 
                 v.con_FormAfterCreateView = false;
             }
-
-
-
-
 
             //if (v.con_AutoNewRecords)
             //{

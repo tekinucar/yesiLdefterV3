@@ -309,6 +309,8 @@ namespace Tkn_Starter
         {
             v.Screen_Width = Screen.PrimaryScreen.Bounds.Width - (20 + v.NavBar_Width);
             v.Screen_Height = Screen.PrimaryScreen.Bounds.Height - (90 + v.Ribbon_Height);
+            v.Primary_Screen_Width = Screen.PrimaryScreen.Bounds.Width;
+            v.Primary_Screen_Height = Screen.PrimaryScreen.Bounds.Height - 50;
         }
 
         #endregion Variable Set
@@ -324,18 +326,6 @@ namespace Tkn_Starter
             string FormName = "ms_Computer";
             string FormCode = "UST/CRM/ABO/Computer";
             OpenFormPreparing(FormName, FormCode, v.formType.Dialog);
-
-            /*
-            string FormName = "ms_Computer";
-            string FormCode = "UST/T01/MSV/SYS_COMP_F01";// "SYS_COMP_F01";
-            string Prop_Navigator = @"
-            0=FORMNAME:" + FormName + @";
-            0=FORMCODE:" + FormCode + @";
-            0=FORMTYPE:DIALOG;
-            0=FORMSTATE:NORMAL;
-            ";
-            OpenForm(null, Prop_Navigator);
-            */
         }
         #endregion InitRegisterComputer
 

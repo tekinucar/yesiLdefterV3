@@ -150,7 +150,7 @@ namespace YesiLdefter
             {
                 //((DevExpress.XtraEditors.TextEdit)txt_Pass).EnterMoveNextControl = true;
                 ((DevExpress.XtraEditors.TextEdit)txt_Pass).KeyDown += new KeyEventHandler(txt_Pass_KeyDown);
-                ((DevExpress.XtraEditors.TextEdit)txt_Pass).Properties.PasswordChar = '*';
+                //((DevExpress.XtraEditors.TextEdit)txt_Pass).Properties.PasswordChar = '*';
             }
             #endregion
             //

@@ -1047,13 +1047,19 @@ namespace Tkn_DevColumn
 
                 if (tcmp_format_type == 3)
                 {
-                    tEdit.Properties.DisplayFormat.FormatType = DevExpress.Utils.FormatType.Custom;
-                    tEdit.Properties.EditFormat.FormatType = DevExpress.Utils.FormatType.Custom;
-
-                    tEdit.Properties.DisplayFormat.FormatString = tdisplayformat;
-                    tEdit.Properties.EditFormat.FormatString = teditformat;
-
-                    tEdit.Properties.Mask.MaskType = DevExpress.XtraEditors.Mask.MaskType.Simple;
+                    // Password tanımı ise
+                    if (tdisplayformat == "*")
+                    {
+                        tEdit.Properties.PasswordChar = '*';
+                    }
+                    else
+                    {
+                        tEdit.Properties.DisplayFormat.FormatType = DevExpress.Utils.FormatType.Custom;
+                        tEdit.Properties.EditFormat.FormatType = DevExpress.Utils.FormatType.Custom;
+                        tEdit.Properties.DisplayFormat.FormatString = tdisplayformat;
+                        tEdit.Properties.EditFormat.FormatString = teditformat;
+                        tEdit.Properties.Mask.MaskType = DevExpress.XtraEditors.Mask.MaskType.Simple;
+                    }
                 }
                                 
                 /*

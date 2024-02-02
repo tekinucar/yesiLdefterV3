@@ -82,14 +82,39 @@ namespace YesiLdefter
             this.Shown += new System.EventHandler(this.ms_TabimMtsk_Shown);
 
             this.KeyPreview = true;
+
+            if (v.active_DB.localServerName.ToLower() == "null")
+            {
+                /// 1. işlem
+                /// 
+                readTabSurucuIni();
+            }
         }
 
         private void ms_TabimMtsk_Shown(object sender, EventArgs e)
         {
+            if (v.SP_ApplicationExit)
+            {
+                ((Form)sender).Close();
+                return;
+            }
+
             Application.DoEvents();
-            bool onay = false;
+            
             v.SP_UserLOGIN = false;
 
+            /// ViewControls ayarlar
+            /// 
+            preparingViewControls();
+            
+            /// Local Database hazırla
+            /// 2. işlem
+            /// 
+            preparingLocalDatabase();
+        }
+
+        private void preparingViewControls()
+        {
             backstageViewControl_ = t.Find_Control(this, v.lyt_Name + "20");
             if (backstageViewControl_ != null)
             {
@@ -107,11 +132,10 @@ namespace YesiLdefter
             {
                 ((System.Windows.Forms.TableLayoutPanel)kullaniciBilgileri_).Visible = false;
             }
-
-            if (v.active_DB.localServerName.ToLower() == "null")
-            {
-                readTabSurucuIni();
-            }
+        }
+        private void preparingLocalDatabase()
+        {
+            bool onay = false;
             
             if (v.active_DB.localMSSQLConn != null)
             {
@@ -120,43 +144,74 @@ namespace YesiLdefter
 
             if (onay)
             {
-                /// Surucu07 için  tablo kontrolleri
-                InitTables();
-
-                /// TabimMtsk
-                v.SP_Firm_SectorTypeId = 211;
+                /// Surucu07 içinde DbUpdates tablo kontrolleri
+                /// yoksa oluştur
+                /// 
+                InitDbUpdatesTable();
 
                 /// Surucu07 için database update var mı?
+                /// MsDbUpdates de güncelleme var mı kontrolet
+                /// varsa Surucu07 yi update et
+                /// 
                 t.dbUpdatesChecked();
 
-                // user tablosu hazır mı ?
+                /// user tablosu hazır mı ?
+                /// 
                 onayUserInput = checkedSurucu07UserTable();
 
                 if (onayUserInput)
                 {
+                    /// DataSet ler tespit et
+                    InitDataSets();
+                    /// Butonları tespit et
                     InitButtons();
 
-                    GetUserRegistry();
+                    /// Kullanıcı Adı combo sunun içi dolduruluyor
+                    /// 
+                    getUserRegistry();
 
+                    /// Kullanıcı Adı combo su setFocus oluyor
+                    /// 
                     if (cmb_Username_ != null)
                     {
                         ((DevExpress.XtraEditors.ComboBoxEdit)cmb_Username_).Focus();
                     }
                 }
             }
-
         }
 
-        private void InitButtons()
+        private void InitDbUpdatesTable()
         {
-            Control cntrl = null;
-            string[] controls = new string[] { };
+            bool onay = false;
+            /// Surucu07 database üzerinde yapılacak değişiklikleri takip için 
+            /// dbo.DbUpdates ekleneyiyor
 
+            /// 
+            /// UstadMtsk
+            /// Bunu 201 yapmamızın sebebi dbo.DbUpdates tablosunu scriptini almak için 
+            /// iş bitimde 211 olacak
+            v.SP_Firm_SectorTypeId = 201;
+
+            /// DbUpdates table kontrolü
+            /// yok ise dbo.DbUpdates ekleneyiyor
+            onay = preparingCreateTable("dbo", "DbUpdates");
+
+            /// TabimMtsk olsun
+            /// 
+            v.SP_Firm_SectorTypeId = 211;
+        }
+        private void InitDataSets()
+        {
             t.Find_DataSet(this, ref ds_DbConnValues, ref dN_DbConnValues, DbConnect_TableIPCode);
             t.Find_DataSet(this, ref ds_UL, ref dN_UL, Login_TableIPCode);
             t.Find_DataSet(this, ref ds_UserAbout, ref dN_UserAbout, UserAbout_TableIPCode);
             t.Find_DataSet(this, ref ds_UstadFirms, ref dN_UstadFirms, UstadFirms_TableIPCode);
-
+        }
+        private void InitButtons()
+        {
+            Control cntrl = null;
+            string[] controls = new string[] { };
+                        
             #region DbConnection buttons
 
             cntrl = t.Find_Control(this, "simpleButton_ek1", DbConnect_TableIPCode, controls);
@@ -195,19 +250,19 @@ namespace YesiLdefter
             cmb_Username_ = t.Find_Control(this, "Column_Username_", Login_TableIPCode, controls);
             txt_Password_ = t.Find_Control(this, "Column_Password_", Login_TableIPCode, controls);
             btn_Card_F01_Save = t.Find_Control(this, "simpleButton_kaydet", UserAbout_TableIPCode, controls);
-            
+
+            if (txt_Password_ != null)
+            {
+                //((DevExpress.XtraEditors.TextEdit)txt_Pass).EnterMoveNextControl = true;
+                //((DevExpress.XtraEditors.TextEdit)txt_Password_).Properties.PasswordChar = '*';
+                ((DevExpress.XtraEditors.TextEdit)txt_Password_).KeyDown += new KeyEventHandler(txt_Password_KeyDown);
+            }
+
             if (cmb_Username_ != null)
             {
                 ((DevExpress.XtraEditors.ComboBoxEdit)cmb_Username_).EnterMoveNextControl = true;
                 ((DevExpress.XtraEditors.ComboBoxEdit)cmb_Username_).EditValueChanged
                     += new System.EventHandler(cmb_Username_EditValueChanged);
-            }
-
-            if (txt_Password_ != null)
-            {
-                //((DevExpress.XtraEditors.TextEdit)txt_Pass).EnterMoveNextControl = true;
-                ((DevExpress.XtraEditors.TextEdit)txt_Password_).KeyDown += new KeyEventHandler(txt_Password_KeyDown);
-                ((DevExpress.XtraEditors.TextEdit)txt_Password_).Properties.PasswordChar = '*';
             }
 
             if (btn_Card_F01_Save != null)
@@ -218,26 +273,8 @@ namespace YesiLdefter
             //btn_Card_F01_Save
 
             #endregion User Login buttons
-
         }
-
-        private void InitTables()
-        {
-            bool onay = false;
-            /// Surucu07 database üzerinde yapılacak değişiklikleri takip için 
-            /// dbo.DbUpdates ekleneyiyor
-
-            /// 
-            /// UstadMtsk
-            /// Bunu 201 yapmamızın sebebi dbo.DbUpdates tablosunu scriptini almak için 
-            /// iş bitimde 211 olacak
-            v.SP_Firm_SectorTypeId = 201;
-
-            /// DbUpdates table kontrolü
-            /// yok ise dbo.DbUpdates ekleneyiyor
-            onay = preparingCreateTable("dbo", "DbUpdates");
-        }
-
+        
         private bool preparingCreateTable(string schemasCode, string tableName)
         {
             bool onay = false;
@@ -260,7 +297,6 @@ namespace YesiLdefter
 
             return onay;
         }
-
         private bool checkedSurucu07UserTable()
         {
             bool onay = false;
@@ -279,7 +315,6 @@ namespace YesiLdefter
 
             return onay;
         }
-
         private void readTabSurucuIni()
         {
             var tabSurucuIni = new tIniFile("c:\\Windows\\TABSURUCU.INI");
@@ -289,16 +324,34 @@ namespace YesiLdefter
                 v.active_DB.localUserName = tabSurucuIni.Read("edUsername_Text", "TfrmLoginDB");
                 v.active_DB.localPsw = tabSurucuIni.Read("edPassword_Text", "TfrmLoginDB");
 
+                if (v.active_DB.localUserName == "") v.active_DB.localUserName = "TABIM";
+                if (v.active_DB.localPsw == "") v.active_DB.localPsw = "312";
+                if (t.IsNotNull(v.active_DB.localDBName) == false) v.active_DB.localDBName = "Surucu07";
+                if (v.active_DB.localServerName == "") v.active_DB.localServerName = t.Find_ListAvailableMSSQLServers();
+
+                t.preparingLocalDbConnectionText();
+
                 setDbConnectionValues();
+                
+                /// Database bağlantısını test et
+                /// 
+                bool onay = dbConnectionTest();
+                
+                /// onay false ise program kapansın
+                /// 
+                v.SP_ApplicationExit = !onay;
             }
         }
         private void setDbConnectionValues()
         {
-            ds_DbConnValues.Tables[0].Rows[0]["ServerName"] = v.active_DB.localServerName;
-            ds_DbConnValues.Tables[0].Rows[0]["DatabaseName"] = v.active_DB.localDBName;
-            ds_DbConnValues.Tables[0].Rows[0]["UserName"] = v.active_DB.localUserName;
-            ds_DbConnValues.Tables[0].Rows[0]["Pass"] = v.active_DB.localPsw;
-            Application.DoEvents();
+            if (ds_DbConnValues != null)
+            {
+                ds_DbConnValues.Tables[0].Rows[0]["ServerName"] = v.active_DB.localServerName;
+                ds_DbConnValues.Tables[0].Rows[0]["DatabaseName"] = v.active_DB.localDBName;
+                ds_DbConnValues.Tables[0].Rows[0]["UserName"] = v.active_DB.localUserName;
+                ds_DbConnValues.Tables[0].Rows[0]["Pass"] = v.active_DB.localPsw;
+                Application.DoEvents();
+            }
         }
         private bool writeTabSurucuIni()
         {
@@ -325,33 +378,93 @@ namespace YesiLdefter
 
             return onay;
         }
-        
-        private void btn_DbConnectionTest(object sender, EventArgs e)
+        private bool dbConnectionTest()
         {
             bool onay = dbConnect(true);
-
+            //onay = false; // test
             if (onay)
             {
                 writeTabSurucuIni();
                 MessageBox.Show(":) " + v.active_DB.localDBName + " database bağlantısı başarıyla sağlanmıştır ...");
             }
+            else
+            {
+                MessageBox.Show(":( " + v.active_DB.localDBName + " için database bağlantısı malesef gerçekleşmedi ..." + v.ENTER2 + "Lütfen Tabim Destek masasından yardım isteyiniz...");
+            }
+            return onay;
+        }
+        private void getUserRegistry()
+        {
+            userFirms.GetUserRegistry(regPath);
+
+            if (cmb_Username_ != null)
+            {
+                v.tUserRegister.userNameList.AddRange(getUserNameList());
+
+                // cmb_Username_ listesi combo için okunuyor
+                ((DevExpress.XtraEditors.ComboBoxEdit)cmb_Username_).Properties.Items.AddRange(v.tUserRegister.userNameList);
+
+                // en son giriş yapan username combonun text ine atanıyor
+                if (cmb_Username_ != null)
+                    ((DevExpress.XtraEditors.ComboBoxEdit)cmb_Username_).EditValue = v.tUserRegister.UserLastLoginEMail;
+                //u_user_Last_FirmId = v.tUserRegister.UserLastFirmId;
+            }
+        }
+        private List<object> getUserNameList()
+        {
+            DataSet ds = t.getTabimValues("users", "and AKTIF = 1");
+
+            List<object> itemList = new List<object>();
+
+            if (ds != null)
+            {
+                foreach (DataRow item in ds.Tables[0].Rows)
+                {
+                    itemList.Add(item["Username_"].ToString());
+                }
+            }
+
+            return itemList;
+        }
+        private bool dbConnect(bool Test)
+        {
+            bool onay = false;
+
+            t.preparingLocalDbConnectionText();
+
+            if (firstConnect == false)
+            {
+                v.active_DB.localMSSQLConn.StateChange += new StateChangeEventHandler(t.DBConnectStateProject);
+                firstConnect = true;
+            }
+
+            //t.WaitFormOpen(v.mainForm, "Kaynak database bağlantısı test ediliyor...");
+            //v.SP_OpenApplication = true;
+
+            onay = t.Db_Open(v.active_DB.localMSSQLConn);
+
+            //v.IsWaitOpen = false;
+            //t.WaitFormClose();
+
+            return onay;
+        }
+
+        #region buttons click
+        private void btn_DbConnectionTest(object sender, EventArgs e)
+        {
+            dbConnectionTest();
         }
         private void btn_GetDbConnectionValues(object sender, EventArgs e)
         {
             setDbConnectionValues();
         }
-
         void btn_SistemeGiris_Ileri(object sender, EventArgs e)
         {
             checkedInput();
         }
         void cmb_Username_EditValueChanged(object sender, EventArgs e)
         {
-            /// UNUTMA tekrar aç
-            
-            //((DevExpress.XtraEditors.TextEdit)txt_Password_).EditValue = "";
-
-
+            ((DevExpress.XtraEditors.TextEdit)txt_Password_).EditValue = "";
         }
         void txt_Password_KeyDown(object sender, KeyEventArgs e)
         {
@@ -378,41 +491,10 @@ namespace YesiLdefter
             //}
         }
 
-        void GetUserRegistry()
-        {
-            userFirms.GetUserRegistry(regPath);
-
-            if (cmb_Username_ != null)
-            {
-                v.tUserRegister.userNameList.AddRange(GetUserNameList());
-
-                // cmb_Username_ listesi combo için okunuyor
-                ((DevExpress.XtraEditors.ComboBoxEdit)cmb_Username_).Properties.Items.AddRange(v.tUserRegister.userNameList);
-                
-                // en son giriş yapan username combonun text ine atanıyor
-                if (cmb_Username_ != null)
-                    ((DevExpress.XtraEditors.ComboBoxEdit)cmb_Username_).EditValue = v.tUserRegister.UserLastLoginEMail;
-                //u_user_Last_FirmId = v.tUserRegister.UserLastFirmId;
-            }
-        }
-
-        public List<object> GetUserNameList()
-        {
-            DataSet ds = t.getTabimValues("users", "and AKTIF = 1");
-
-            List<object> itemList = new List<object>();
-
-            if (ds != null)
-            {
-                foreach (DataRow item in ds.Tables[0].Rows)
-                {
-                    itemList.Add(item["Username_"].ToString());
-                }
-            }
-
-            return itemList;
-        }
-
+        /// kullanıcıyı konrol et
+        /// firmGUID kontrol et 
+        /// kullanıcının Mebbis kodunu kontrol et
+        /// 
         void checkedInput()
         {
             bool onayFirmGuid = false;
@@ -473,23 +555,21 @@ namespace YesiLdefter
                         // Başarılı giriş
                         if (ds_Query.Tables[0].Rows.Count == 1)
                         {
-                            //username ve pass girdikte sonra gelen sonucu değerlendir
-                            //user hakkındaki bilgileri  v.tUser  üzerine yükle
+                            /// username ve pass girdikte sonra gelen sonucu değerlendir
+                            /// user hakkındaki bilgileri  v.tUser  üzerine yükle
                             userFirms.UserTabimFirm(this, ds_Query, u_user_key);
                             //ref dsUserFirmList, ref dNUserFirmList, FirmList_TableIPCode);
 
-                            // FirmGUID belli değilse
+                            /// FirmGUID belli değilse
                             onayFirmGuid = checkedFirm();
-                            // user Mebbis kodu varmı
+                            /// user Mebbis kodu varmı
                             onayMebbisCode = checkedUserMebbisCode();
 
-                            ///
                             /// Login onayı
                             ///
                             if ((onayFirmGuid) && (onayMebbisCode)) 
                             {
                                 v.SP_UserLOGIN = true;
-                                ///
                                 /// form close
                                 ///
                                 this.Close();
@@ -499,6 +579,7 @@ namespace YesiLdefter
                 }
             }
         }
+        #endregion buttons click
 
         #region checkedUser
         void checkedUser(string userName, string work)
@@ -510,7 +591,8 @@ namespace YesiLdefter
 
             if (ds_Query.Tables.Count == 1)
             {
-                // userName : kullanıcı yok ise
+                /// userName : kullanıcı yok ise
+                /// 
                 if (ds_Query.Tables[0].Rows.Count == 0)
                 {
                     //string soru = u_user_name + "  böyle bir hesap bulunamadı. \r\n\r\n Yeni bir kullanıcı oluşturmak ister misiniz  ?";
@@ -522,7 +604,8 @@ namespace YesiLdefter
                     MessageBox.Show(userName + "  böyle bir hesap bulunamadı.");
                 }
 
-                // userName : kullanıcı ismi 1 adet var ise
+                /// userName : kullanıcı ismi 1 adet var ise
+                /// 
                 if ((work == "FIND") & (ds_Query.Tables[0].Rows.Count == 1))
                 {
                     MessageBox.Show(" Şifrenizde bir sorun olabilir.\r\n\r\n Yeniden deneyebilir veya yeni bir şifre alabilirsiniz.");
@@ -574,8 +657,7 @@ namespace YesiLdefter
  
             return onay;
         }
-
-        void read_FirmAbout()
+        private void read_FirmAbout()
         {
             // şimdi Mtsk Firma bilgileri databaseden okunuyor
             // Surucu07.paramalt tablosundan gereken bilgileri oku
@@ -607,13 +689,12 @@ namespace YesiLdefter
             }
             ds.Dispose();
         }
-
         private bool InitFirmGUID()
         {
             // FirmGUID yok ise
             bool onay = false;
 
-            if (v.tTabimFirm.FirmGUID == "")
+            if (v.tTabimFirm.FirmGUID != "")
             {
                 if (firmaBilgileri_ != null)
                 {
@@ -661,7 +742,6 @@ namespace YesiLdefter
 
             return onay;
         }
-
         void setFirmGUID()
         {
             // yeni FirmGUID Surucu07 database ekleniyor
@@ -678,7 +758,6 @@ namespace YesiLdefter
                 }
             }
         }
-
         #endregion FirmGUID
 
         #region checkedUserMebbisCode
@@ -708,27 +787,28 @@ namespace YesiLdefter
 
             return onay;
         }
-
         private bool preparingUserMebbisCode(DataSet ds)
         {
             bool onay = false;
 
+            if (v.tUser.UserGUID == "")
+                v.tUser.UserGUID = Guid.NewGuid().ToString();
+
             ds.Tables[0].Rows[0]["Ulas"] = v.tUser.UserId;
             ds.Tables[0].Rows[0]["Username_"] = v.tUser.Username_;
-
             ds.Tables[0].Rows[0]["UserGUID"] = v.tUser.UserGUID;
             ds.Tables[0].Rows[0]["FirmGUID"] = v.tUser.UserFirmGUID;
-            ds.Tables[0].Rows[0]["UserFullName"] = v.tUser.FullName;
+            //ds.Tables[0].Rows[0]["UserFullName"] = v.tUser.FullName;
             ds.Tables[0].Rows[0]["UserFirstName"] = v.tUser.FirstName;
             ds.Tables[0].Rows[0]["UserLastName"] = v.tUser.LastName;
             ds.Tables[0].Rows[0]["UserTcNo"] = v.tUser.UserTcNo;
             ds.Tables[0].Rows[0]["UserEMail"] = v.tUser.eMail;
+            ds.Tables[0].Rows[0]["UserMobileNo"] = v.tUser.MobileNo;
             ds.Tables[0].Rows[0]["MebbisCode"] = v.tUser.MebbisCode;
             ds.Tables[0].Rows[0]["MebbisPass"] = v.tUser.MebbisPass;
 
             return onay;
         }
-
         #endregion checkedUserMebbisCode
 
         #region Password
@@ -775,7 +855,6 @@ namespace YesiLdefter
 
             return newCase;
         }
-
         private string preparingEncodePassword(string inputCase)
         {
             string newCase = "";
@@ -819,32 +898,9 @@ namespace YesiLdefter
 
             return newCase;
         }
-
         #endregion Password
 
-        private bool dbConnect(bool Test)
-        {
-            bool onay = false;
-
-            t.preparingLocalDbConnectionText();
-
-            if (firstConnect == false)
-            {
-                v.active_DB.localMSSQLConn.StateChange += new StateChangeEventHandler(t.DBConnectStateProject);
-                firstConnect = true;
-            }
-
-            //t.WaitFormOpen(v.mainForm, "Kaynak database bağlantısı test ediliyor...");
-            //v.SP_OpenApplication = true;
-
-            onay = t.Db_Open(v.active_DB.localMSSQLConn);
-
-            //v.IsWaitOpen = false;
-            //t.WaitFormClose();
-
-            return onay;
-        }
-
+        
 
     }
 }

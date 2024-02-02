@@ -68,7 +68,8 @@ begin transaction
  insert into MS_TYPES values ( 1, 0, 'WEBNODE_ATT_ROLE', 15, '', 'Button');
  insert into MS_TYPES values ( 1, 0, 'WEBNODE_ATT_ROLE', 16, '', 'ImageData');
  insert into MS_TYPES values ( 1, 0, 'WEBNODE_ATT_ROLE', 17, '', 'SecurityImage');
- insert into MS_TYPES values ( 1, 0, 'WEBNODE_ATT_ROLE', 18, '', 'InputBox');
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_ATT_ROLE', 18, '', 'SecurityAgain');
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_ATT_ROLE', 19, '', 'InputBox');
 
 
  DELETE MS_TYPES WHERE TYPES_NAME = 'WEBNODE_VALUE_TYPE'
@@ -1005,6 +1006,7 @@ begin transaction
  insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  '.',                          '.');
  insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  ',',                          ',');
  insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  '%',                          '%');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  '*',                          '*');
  insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'Web Display --------------', 'Web Dislplay -------------');
  insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'part-title',                 'part-title');
  insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'part-subTitle',              'part-subTitle');
