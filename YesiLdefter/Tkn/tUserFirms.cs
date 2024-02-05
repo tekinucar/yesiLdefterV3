@@ -105,33 +105,8 @@ namespace Tkn_UserFirms
         public void UserTabimFirm(Form tForm, DataSet ds, string userKey)
             //ref DataSet dsUserFirmList, ref DataNavigator dNUserFirmList, string firmList_TableIPCode)
         {
-            if (t.IsNotNull(ds))
-            {
-                // Set User Values
-                //
-                int userId = t.myInt32(ds.Tables[0].Rows[0]["Ulas"].ToString());
-                // Surucu07.users tablosunun önceki bilgileri
-                v.tUser.UserId = userId;
-                v.tUser.IsActive = Convert.ToBoolean(ds.Tables[0].Rows[0]["AKTIF"].ToString());
-                v.tUser.Username_ = ds.Tables[0].Rows[0]["Username_"].ToString();
-                // Bunlar yesildefter tarafdından eklenen bilgiler
-                v.tUser.UserGUID = ds.Tables[0].Rows[0]["UserGUID"].ToString();
-                v.tUser.UserFirmGUID = ds.Tables[0].Rows[0]["FirmGUID"].ToString();
-                v.tUser.FullName = ds.Tables[0].Rows[0]["UserFullName"].ToString();
-                v.tUser.FirstName = ds.Tables[0].Rows[0]["UserFirstName"].ToString();
-                v.tUser.LastName = ds.Tables[0].Rows[0]["UserLastName"].ToString();
-                v.tUser.UserTcNo = ds.Tables[0].Rows[0]["UserTcNo"].ToString();
-                v.tUser.eMail = ds.Tables[0].Rows[0]["UserEMail"].ToString();
-                v.tUser.MobileNo = ds.Tables[0].Rows[0]["UserMobileNo"].ToString();
-                v.tUser.UserDbTypeId = t.myInt16(ds.Tables[0].Rows[0]["DbTypeId"].ToString());
-                v.tUser.MebbisCode = ds.Tables[0].Rows[0]["MebbisCode"].ToString();
-                v.tUser.MebbisPass = ds.Tables[0].Rows[0]["MebbisPass"].ToString();
-                
-                SetUserRegistry(userId);
-
-                //v.tUser.Key = u_db_user_key;
-                //v.tUser.UserDbTypeId = userDbTypeId;
-            }
+            t.getTabimUserAbout(ds);
+            SetUserRegistry(v.tUser.UserId);
         }
 
 

@@ -67,36 +67,33 @@ namespace YesiLdefter
 
         }
 
-        public main()
+        public main(string[] args)
         {
 
-            // ... 
-            // 
-            System.Globalization.CultureInfo tr = new System.Globalization.CultureInfo("tr-TR");
+            preparinDefaultValues();
 
-            System.Threading.Thread.CurrentThread.CurrentCulture = tr;
+            #region Read Parameters
+            if (args.Length > 0)
+            {
+                foreach (string arg in args)
+                {
+                    if (arg != "")
+                    {
+                        //MessageBox.Show("param:" + arg);
+                        if (arg.IndexOf("UserId=") > -1)
+                        {
+                            v.tUser.UserId = t.myInt32(arg.Replace("UserId=", ""));
+                        }
+                    }
+                }
+            }                
+            //v.tUser.UserId = 12; Test
+            
+            #endregion 
 
-            #region appOpenSetDefaaultSkin
-            WindowsFormsSettings.EnableFormSkins();
-            //UserLookAndFeel.Default.SetSkinStyle("VS2010");
-            //UserLookAndFeel.Default.SetSkinStyle(SkinSvgPalette.Office2019Colorful.Forest);
-            //UserLookAndFeel.Default.SetSkinStyle(SkinStyle.Whiteprint);
-            //UserLookAndFeel.Default.SetSkinStyle(SkinSvgPalette.Bezier.Grasshopper);
-            UserLookAndFeel.Default.StyleChanged += Default_StyleChanged;
-            #endregion
 
             #region preparing mainForm
 
-            v.mainForm = this;
-            v.Wait_Caption = v.Wait_Caption.PadRight(100);
-            //v.Wait_Desc_ProgramYukleniyor = v.Wait_Desc_ProgramYukleniyor.PadRight(100);
-            //v.Wait_Desc_ProgramYukDevam = v.Wait_Desc_ProgramYukDevam.PadRight(100);
-            //v.Wait_Desc_DBBaglanti = v.Wait_Desc_DBBaglanti.PadRight(100);
-
-            //SplashScreenManager.ShowForm(this, typeof(DevExpress.XtraWaitForm.AutoLayoutDemoWaitForm), true, true, false);
-
-            t.WaitFormOpen(v.mainForm, "yesiLdefter hazırlanıyor ...");
-            v.SP_OpenApplication = true;
 
             // formun kendisi
             InitializeComponent();
@@ -106,16 +103,8 @@ namespace YesiLdefter
             using (tMainForm f = new tMainForm())
             {
                 f.preparingMainForm(this);
-
                 //f.preparingDockPanel(this, "SEK/CEV/prcCihazLogGetIcmal.Icmal_L01");
             }
-
-            this.Load += new System.EventHandler(evf.myForm_Load);
-            this.Shown += new System.EventHandler(evf.myForm_Shown);
-            this.KeyDown += new System.Windows.Forms.KeyEventHandler(mainForm_KeyDown);
-            //this.Activated += new System.EventHandler(mainForm_Activated);
-            //this.Deactivate += new System.EventHandler(mainForm_Deactivate);
-            this.KeyPreview = true;
 
             #endregion mainForm
 
@@ -158,19 +147,52 @@ namespace YesiLdefter
                 cl.CihazLog(this, timerCihazLogGetIcmal);
             }
 
-
             #region -- açılışın sonu
 
-            chechkedPaths();
-
             v.SP_OpenApplication = false;
-
             v.IsWaitOpen = false;
             t.WaitFormClose();
 
             //SplashScreenManager.CloseForm(false);
             v.SQL = "";
             #endregion
+        }
+
+        private void preparinDefaultValues()
+        {
+            // ... 
+            // 
+            System.Globalization.CultureInfo tr = new System.Globalization.CultureInfo("tr-TR");
+            System.Threading.Thread.CurrentThread.CurrentCulture = tr;
+
+            #region appOpenSetDefaaultSkin
+            WindowsFormsSettings.EnableFormSkins();
+            //UserLookAndFeel.Default.SetSkinStyle("VS2010");
+            //UserLookAndFeel.Default.SetSkinStyle(SkinSvgPalette.Office2019Colorful.Forest);
+            //UserLookAndFeel.Default.SetSkinStyle(SkinStyle.Whiteprint);
+            //UserLookAndFeel.Default.SetSkinStyle(SkinSvgPalette.Bezier.Grasshopper);
+            UserLookAndFeel.Default.StyleChanged += Default_StyleChanged;
+            #endregion
+
+            v.mainForm = this;
+            v.Wait_Caption = v.Wait_Caption.PadRight(100);
+            //v.Wait_Desc_ProgramYukleniyor = v.Wait_Desc_ProgramYukleniyor.PadRight(100);
+            //v.Wait_Desc_ProgramYukDevam = v.Wait_Desc_ProgramYukDevam.PadRight(100);
+            //v.Wait_Desc_DBBaglanti = v.Wait_Desc_DBBaglanti.PadRight(100);
+            //SplashScreenManager.ShowForm(this, typeof(DevExpress.XtraWaitForm.AutoLayoutDemoWaitForm), true, true, false);
+
+            chechkedPaths();
+
+            this.Load += new System.EventHandler(evf.myForm_Load);
+            this.Shown += new System.EventHandler(evf.myForm_Shown);
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(mainForm_KeyDown);
+            //this.Activated += new System.EventHandler(mainForm_Activated);
+            //this.Deactivate += new System.EventHandler(mainForm_Deactivate);
+            this.KeyPreview = true;
+
+            t.WaitFormOpen(v.mainForm, "yesiLdefter hazırlanıyor ...");
+            v.SP_OpenApplication = true;
+
         }
 
         #region Login
@@ -323,13 +345,12 @@ namespace YesiLdefter
             if (v.SP_TabimDbConnection == false)
                 mn.Create_Menu(ribbon, "UST/PMS/PMS/PublicUser", "");
 
-            //if ((v.tUser.UserDbTypeId == 1) || // yazılım
-            //    (v.tUser.UserDbTypeId == 21))  // kurucu
-            //{
-                
+            if ((v.tUser.UserDbTypeId == 1) || // yazılım
+                (v.tUser.UserDbTypeId == 21))  // kurucu
+            {
                 t.WaitFormOpen(v.mainForm, "Menu Create ...");
                 mn.Create_Menu(ribbon, "UST/PMS/PMS/MsV3Menu", "");
-            //}
+            }
 
             setMenuItems();
         }
@@ -655,13 +676,13 @@ namespace YesiLdefter
                 if (UserLookAndFeel.Default.ActiveSkinName.ToString().IndexOf(v.sp_deactiveSkinName) > -1) return;
                 if (UserLookAndFeel.Default.ActiveSvgPaletteName.ToString().IndexOf(v.sp_deactiveSkinName) > -1) return;
             }
-            else
-                v.sp_activeSkinName = "";
+            //else  v.sp_activeSkinName = "";
 
             // eğer yeni load oluyarsa buradaki işlemler çalışmasın
             if (skinUserFirm != null) return;
-
-            setUserLookAndFeelSkins();
+            
+            if (v.sp_activeSkinName != "STARTER")
+                setUserLookAndFeelSkins();
         }
 
         private void setUserLookAndFeelSkins()
@@ -686,7 +707,7 @@ namespace YesiLdefter
             // kullanıcı bazlı
             //reg.SetUstadRegistry("userSkin_" + v.tUser.UserId.ToString(), e.Item.Value.ToString());
             // kullanıcı kullandığı her firma için ayrı ayrı
-            reg.SetUstadRegistry("userSkin_" + v.tUser.UserId.ToString() + "_" + v.SP_FIRM_ID.ToString(),
+            reg.SetUstadRegistry("userSkin_" + v.tUser.UserId.ToString() + "_" + v.tMainFirm.FirmId.ToString(),  //v.SP_FIRM_ID.ToString(),
                                  item.ToString());
             /*
             MessageBox.Show(
@@ -786,26 +807,11 @@ namespace YesiLdefter
         public void mainForm_Activated(object sender, EventArgs e)
         {
             //v.Kullaniciya_Mesaj_Var = "Form Activated";
-            //this.Text = this.Text + ",a";
-            /*
-            v.sp_activeSkinName = "Form_Activated";
-            tToolBox t = new tToolBox();
-            t.getUserLookAndFeelSkins();
-            */
         }
 
         public void mainForm_Deactivate(object sender, EventArgs e)
         {
             //MessageBox.Show("myForm_Deactivate : " + ((Form)sender).Text);
-            //v.Kullaniciya_Mesaj_Var = "Form Deactivate";
-            //this.Text = this.Text + ",d";
-            /*
-            if ((v.sp_OpenFormState != "DIALOG") &
-                (v.sp_OpenFormState != "NORMAL") &
-                (v.sp_OpenFormState != "CHILD"))
-                UserLookAndFeel.Default.SetSkinStyle(v.sp_DeactiveSkin);
-            */
-            //UserLookAndFeel.Default.SetSkinStyle(v.sp_DeactiveSkinPalette);
         }
                 
 

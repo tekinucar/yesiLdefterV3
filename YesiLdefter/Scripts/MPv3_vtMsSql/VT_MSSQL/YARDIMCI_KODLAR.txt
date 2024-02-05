@@ -1,4 +1,10 @@
 ﻿
+/*   varchar(max) olan bir kolonun tüm detayını görmek için    */
+
+SELECT CAST(SqlScript AS XML) FROM [UstadManagerV3].[dbo].[MsProjectTables] where TableName = 'DbUpdates'
+SELECT SqlScript AS [XML_F52E2B61-18A1-11d1-B105-00805F49916B] FROM [UstadManagerV3].[dbo].[MsProjectTables] where TableName = 'DbUpdates'
+SELECT SqlScript AS [processing-instruction(x)] FROM [UstadManagerV3].[dbo].[MsProjectTables] where TableName = 'DbUpdates' FOR XML PATH('')
+
 
 /*  dikkat MSSQL JSON komutları çalışmadğı zaman aşağıdaki komutu çalıştırmanız gerekiyor */
 

@@ -9,13 +9,15 @@ namespace YesiLdefter
         /// Uygulamanın ana girdi noktası.
         /// </summary>
         [STAThread]
-        static void Main()
+        static void Main(string[] args)
         {
             DevExpress.UserSkins.BonusSkins.Register();
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new main());
+            Application.Run(new main(args));
         }
+
+
     }
 }

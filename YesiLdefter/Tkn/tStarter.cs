@@ -8,6 +8,7 @@ using System.Linq;
 using System.Net.NetworkInformation;
 using System.Windows.Forms;
 using Tkn_ToolBox;
+using Tkn_UserFirms;
 using Tkn_Variable;
 
 namespace Tkn_Starter
@@ -89,12 +90,39 @@ namespace Tkn_Starter
             //t.WaitFormOpen(v.mainForm, "Read : SysGlyph ...");
             //SYS_Glyph_Read();
 
-            t.WaitFormOpen(v.mainForm, "Preparing User Form ...");
-            setLoginSkins();
-
             if (v.active_DB.localDbUses == false)
                 InitLoginUser(); // Ustad YesiLdester user girişi
-            else InitTabimLoginUser();
+            else
+            {
+                /// exe ilk çalıştığında [] args ile userId / ExternalUserId ile çalıştırılabilir
+                /// 
+                if (v.tUser.UserId != 0)
+                {
+                    /// Kullanıcı hakkındaki bilgileri oku
+                    /// 
+                    t.getUserInfo();
+                }
+
+                if ((t.IsNotNull(v.tUser.UserFirmGUID) == false) ||
+                    (t.IsNotNull(v.tUser.MebbisCode) == false))
+                {
+                    /// eğer exe yeni bir database/müşteri üzerinde ilk defa açıldığında ExternalUserId ile çalışmasın
+                    /// vaya kullanıcının MebbisCode yok ise
+                    /// veya exe manuel olarak direkt olarak çalıştırılmış olabilir
+                    ///     
+                    InitTabimLoginUser();
+                }
+                else
+                {
+                    /// ExternalUserId ile açılış
+                    /// 
+                    tUserFirms userFirms = new tUserFirms();
+                    userFirms.getFirmAboutWithUserFirmGUID(v.tUser.UserFirmGUID);
+                }
+            }
+
+            t.WaitFormOpen(v.mainForm, "Preparing User Form ...");
+            setLoginSkins();
 
             t.WaitFormOpen(v.mainForm, "Computer Info ...");
             InitLoginComputer();
@@ -112,11 +140,13 @@ namespace Tkn_Starter
         void setLoginSkins()
         {
             #region appOpenSetDefaaultSkin
+            v.sp_activeSkinName = "STARTER";
             WindowsFormsSettings.EnableFormSkins();
             if (v.active_DB.mainManagerDbUses)
                 UserLookAndFeel.Default.SetSkinStyle(SkinStyle.Whiteprint);
             else
                 UserLookAndFeel.Default.SetSkinStyle(SkinSvgPalette.Office2019White.Default);//  Yale);
+            v.sp_activeSkinName = "";
             #endregion
         }
 

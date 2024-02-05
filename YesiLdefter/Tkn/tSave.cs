@@ -910,8 +910,7 @@ namespace Tkn_Save
 
             if (v.active_DB.mainManagerDbUses) // tableFields + "2"
                 t.OtherValues_Get(ds, f);
-            else
-                t.OtherValues_Get(v.ds_TableIPCodeFields, f);
+            else t.OtherValues_Get(v.ds_TableIPCodeFields, f);
 
             f.Lkp_fname = f.fname;
             if ((f.fname.IndexOf("LKP_") > -1) ||

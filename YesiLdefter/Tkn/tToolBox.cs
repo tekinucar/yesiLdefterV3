@@ -55,12 +55,18 @@ namespace Tkn_ToolBox
         #region dbUpdatesChecked
         public void dbUpdatesChecked()
         {
-            string IdList = getMusteriDbUpdateIdList();
+            /// Burdaki Id Project Database den [dbo].[DbUpdates] tablosundan okunuyor
+            /// yani Müşteri database den
+            /// 
+            string lastMsDbUpdatesId = getMusteriDbUpdateIdList();
 
             tSQLs sqls = new tSQLs();
             DataSet ds = new DataSet();
-            
-            string sql = sqls.Sql_MsDbUpdates(IdList);
+
+            /// Update olup olmadığı sorgusu ise MainManagerV3 / UstadManagerV3 
+            /// [dbo].[MsDbUpdates] üzerinden sorgulanıyor
+            /// 
+            string sql = sqls.Sql_MsDbUpdates(lastMsDbUpdatesId);
             if (SQL_Read_Execute(v.dBaseNo.Manager, ds, ref sql, "", "MsDbUpdates"))
             {
                 if (IsNotNull(ds))
@@ -68,7 +74,6 @@ namespace Tkn_ToolBox
                     readMsDbUpdatesList(ds);
                 }
             }
-            
         }
 
         private string getMusteriDbUpdateIdList()
@@ -9390,7 +9395,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             string tableName_ = "";
             if (v.active_DB.mainManagerDbUses) // tableFields + "2"
                 tableName_ = ds.DataSetName; // TapleIPCode
-            else tableName_ = f.tableName;   // normal tableName
+            else tableName_ = f.TableIPCode; //  f.tableName;   // normal tableName
 
             int j = ds.Tables[tableName_].Rows.Count;
             
@@ -12103,7 +12108,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
             //object skin = reg.getRegistryValue("userSkin");
             //object skinUser = reg.getRegistryValue("userSkin_" + v.tUser.UserId.ToString());
-            skinUserFirm = reg.getRegistryValue("userSkin_" + v.tUser.UserId.ToString() + "_" + v.SP_FIRM_ID.ToString());
+            skinUserFirm = reg.getRegistryValue("userSkin_" + v.tUser.UserId.ToString() + "_" + v.tMainFirm.FirmId.ToString());  //v.SP_FIRM_ID.ToString());
             /*
             if (skin != null)
                 UserLookAndFeel.Default.SetSkinStyle(skin.ToString());
@@ -12132,6 +12137,67 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
         }
 
         #endregion
+
+        #region getUserInfo
+
+        public void getUserInfo()
+        {
+            string tSql = "";
+            tSQLs sql = new tSQLs();
+            DataSet ds = new DataSet();
+            
+            if (v.SP_TabimDbConnection)
+            {
+                tSql = sql.preparingTabimUsersSql(""
+                    , "", v.tUser.UserId);
+                SQL_Read_Execute(v.dBaseNo.Local, ds, ref tSql, "TabimUsers", "FindUser");
+            }
+            else
+            {
+                //tSql = sql.preparingUstadUsersSql("", "", v.tUser.UserId);
+                //SQL_Read_Execute(v.dBaseNo.Project, ds, ref tSql, "Users", "FindUser");
+            }
+
+            if (IsNotNull(ds))
+            {
+                if (v.SP_TabimDbConnection)
+                {
+                    getTabimUserAbout(ds);
+                }
+                else
+                {
+                    //
+                }
+            }
+
+        }
+
+        public void getTabimUserAbout(DataSet ds)
+        {
+            if (IsNotNull(ds))
+            {
+                // Surucu07.users tablosunun önceki bilgileri
+                v.tUser.UserId = myInt32(ds.Tables[0].Rows[0]["Ulas"].ToString());
+                v.tUser.IsActive = Convert.ToBoolean(ds.Tables[0].Rows[0]["AKTIF"].ToString());
+                v.tUser.Username_ = ds.Tables[0].Rows[0]["Username_"].ToString();
+                // Bunlar yesildefter tarafdından eklenen bilgiler
+                v.tUser.UserGUID = ds.Tables[0].Rows[0]["UserGUID"].ToString();
+                v.tUser.UserFirmGUID = ds.Tables[0].Rows[0]["FirmGUID"].ToString();
+                v.tUser.FullName = ds.Tables[0].Rows[0]["UserFullName"].ToString();
+                v.tUser.FirstName = ds.Tables[0].Rows[0]["UserFirstName"].ToString();
+                v.tUser.LastName = ds.Tables[0].Rows[0]["UserLastName"].ToString();
+                v.tUser.UserTcNo = ds.Tables[0].Rows[0]["UserTcNo"].ToString();
+                v.tUser.eMail = ds.Tables[0].Rows[0]["UserEMail"].ToString();
+                v.tUser.MobileNo = ds.Tables[0].Rows[0]["UserMobileNo"].ToString();
+                v.tUser.UserDbTypeId = myInt16(ds.Tables[0].Rows[0]["DbTypeId"].ToString());
+                v.tUser.MebbisCode = ds.Tables[0].Rows[0]["MebbisCode"].ToString();
+                v.tUser.MebbisPass = ds.Tables[0].Rows[0]["MebbisPass"].ToString();
+                //v.tUser.Key = u_db_user_key;
+                //v.tUser.UserDbTypeId = userDbTypeId;
+            }
+        }
+
+        #endregion getUserInfo
 
         #region Expression - Column üzerindeki formüller hesaplanıyor
 
