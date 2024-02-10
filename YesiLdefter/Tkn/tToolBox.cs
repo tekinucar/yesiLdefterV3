@@ -81,7 +81,7 @@ namespace Tkn_ToolBox
             tSQLs sqls = new tSQLs();
             DataSet ds = new DataSet();
             string sql = "";
-            string IdList = "0";
+            string IdList = " 0 ";
             sql = sqls.Sql_DbUpdatesIdList();
 
             v.dBaseNo dBaseNo = v.dBaseNo.Project;
@@ -110,6 +110,10 @@ namespace Tkn_ToolBox
             {
                 IdList = " 0 ";
             }
+            
+            if (IdList == "")
+                IdList = " 0 ";
+
             return IdList;            
         }
 
@@ -2117,6 +2121,10 @@ namespace Tkn_ToolBox
 
                 v.active_DB.localMSSQLConn = new SqlConnection(v.active_DB.localConnectionText);
 
+                v.active_DB.projectServerName = v.active_DB.localServerName;
+                v.active_DB.projectDBName = v.active_DB.localDBName;
+                v.active_DB.projectUserName = v.active_DB.localUserName;
+                v.active_DB.projectPsw = password;
                 v.active_DB.projectConnectionText = v.active_DB.localConnectionText;
                 v.active_DB.projectMSSQLConn = new SqlConnection(v.active_DB.projectConnectionText);
 
@@ -13908,19 +13916,30 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 v.active_DB.projectUserName = YesiLdefterTabimIni.Read("SourceDbLoginName");
                 v.active_DB.projectPsw = YesiLdefterTabimIni.Read("SourceDbPass");
 
-
-
                 // ini file içinde manuel false yapılmış olabilir
                 // yapılırsa sonuç ne olur bilmiyorum
                 v.active_DB.localDbUses = true;
                 v.SP_TabimDbConnection = Convert.ToBoolean(YesiLdefterTabimIni.Read("SourceConnection"));
 
                 if (v.SP_TabimDbConnection)
-                    preparingLocalDbConnectionText();
+                {
+                    if ((v.active_DB.localServerName.ToUpper() == "NULL") ||
+                        (v.active_DB.localDBName.ToUpper() == "NULL") ||
+                        (v.active_DB.localUserName.ToUpper() == "NULL") ||
+                        (v.active_DB.localPsw.ToUpper() == "NULL"))
+                    {
+                        v.tUser.UserId = 0;
+                    }
+                    else
+                    {
+                        preparingLocalDbConnectionText();
+                    }
+                }
             }
 
         }
-           
+       
+
         
         public bool ftpDownload(string fileName)
         {

@@ -87,6 +87,8 @@ namespace YesiLdefter
         int selectedTablePageNo = 0;
         string tablePageName = "";
         string tablePageUrl = "";
+        string cumleMsWebPages = "";
+        string cumleMsWebNodes = "";
 
         System.Windows.Forms.TableLayoutPanel tableLayoutPanel1 = null;
         System.Windows.Forms.TableLayoutPanel tableLayoutPanel2 = null;
@@ -115,6 +117,7 @@ namespace YesiLdefter
         string buttonMEB = "buttonMEB";
         string buttonCONNECT = "buttonCONNECT";
         string buttonANALYSIS = "buttonANALYSIS";
+        string buttonWEBUPDATE = "buttonWEBUPDATE";
 
         string buttonAnalysisGoBack = "buttonAnalysisGoBack";
         string buttonAnalysisGoForward = "buttonAnalysisGoForward";
@@ -394,6 +397,7 @@ namespace YesiLdefter
             t.Find_Button_AddClick(this, menuName, buttonMEB, myNavElementClick);
             t.Find_Button_AddClick(this, menuName, buttonCONNECT, myNavElementClick);
             t.Find_Button_AddClick(this, menuName, buttonANALYSIS, myNavElementClick);
+            t.Find_Button_AddClick(this, menuName, buttonWEBUPDATE, myNavElementClick);
 
             t.Find_Button_AddClick(this, menuName, buttonAnalysisGoBack, myNavElementClick);
             t.Find_Button_AddClick(this, menuName, buttonAnalysisGoForward, myNavElementClick);
@@ -582,6 +586,7 @@ namespace YesiLdefter
             if (((DevExpress.XtraBars.Navigation.NavButton)sender).Name == buttonGIB) GIBPage();
             if (((DevExpress.XtraBars.Navigation.NavButton)sender).Name == buttonMEB) MEBPage();
             if (((DevExpress.XtraBars.Navigation.NavButton)sender).Name == buttonANALYSIS) Analysis();
+            if (((DevExpress.XtraBars.Navigation.NavButton)sender).Name == buttonWEBUPDATE) WebUpdate();
 
             if (((DevExpress.XtraBars.Navigation.NavButton)sender).Name == buttonAnalysisGoBack) GoBackAnalysis();
             if (((DevExpress.XtraBars.Navigation.NavButton)sender).Name == buttonAnalysisGoForward) GoForwardAnalysis();
@@ -760,6 +765,68 @@ namespace YesiLdefter
         }
 
         #endregion Analysis
+
+        #region WebUpdate
+
+        private void WebUpdate()
+        {
+            /// Scraping
+            //DataSet ds_MsWebPages = null;
+            //DataNavigator dN_MsWebPages = null;
+            //DataSet ds_MsWebNodes = null;
+            //DataNavigator dN_MsWebNodes = null;
+
+
+            if (t.IsNotNull(ds_MsWebPages) == false) return;
+            if (t.IsNotNull(ds_MsWebNodes) == false) return;
+
+            string pageCode = ds_MsWebPages.Tables[0].Rows[dN_MsWebPages.Position]["PageCode"].ToString();
+
+            string soru = pageCode + " web sayfası için INSERT paketi oluşturulacak, Onaylıyor musunuz ?";
+            DialogResult cevap = t.mySoru(soru);
+            if (DialogResult.Yes == cevap)
+            {
+                cumleMsWebPages = "";
+                cumleMsWebNodes = "";
+
+                cumleMsWebPages = preparingInsertScript("MsWebPages", pageCode);
+                cumleMsWebNodes = preparingInsertScript("MsWebNodes", pageCode);
+
+                //t.FlyoutMessage(this, "Web Manager Database Update", "Insert paketler hazırlandı...");
+
+                PaketiGonder();
+            }
+        }
+
+        private string preparingInsertScript(string tableName, string tableCode)
+        {
+            vScripts scripts = new vScripts();
+
+            scripts.SourceDBaseName = t.Find_dBLongName(Convert.ToString((byte)v.dBaseNo.Manager));
+            scripts.SchemaName = "dbo";
+            scripts.SourceTableName = tableName;
+            scripts.TableIPCode = "";
+            scripts.Where = string.Format(" PageCode = '{0}' ", tableCode);
+            scripts.IdentityInsertOnOff = false;
+
+            string cumle = t.preparingInsertScript(scripts);
+
+            return cumle;
+        }
+
+        private void PaketiGonder()
+        {
+            if (cumleMsWebPages != "")
+                t.runScript(v.dBaseNo.publishManager, cumleMsWebPages);
+            if (cumleMsWebNodes != "")
+                t.runScript(v.dBaseNo.publishManager, cumleMsWebNodes);
+
+            t.FlyoutMessage(this, "Web Manager Database Update", "Insert paketler gönderildi...");
+        }
+
+
+        #endregion
+
 
         #region analysis buttons
 

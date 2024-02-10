@@ -398,8 +398,12 @@ namespace YesiLdefter
                 ((DevExpress.XtraEditors.ComboBoxEdit)cmb_Username_).Properties.Items.AddRange(v.tUserRegister.userNameList);
 
                 /// en son giriş yapan username combonun text ine atanıyor
-                if (cmb_Username_ != null)
+                /// username_ in boş olması uygulama direkt olarak çalıştırıldı demek
+                /// username_ in dolu olması ise diğer exe tarafından çalıştırıldı demektir
+                /// 
+                if ((cmb_Username_ != null) && (t.IsNotNull(v.tUser.Username_) == false))
                     ((DevExpress.XtraEditors.ComboBoxEdit)cmb_Username_).EditValue = v.tUserRegister.UserLastLoginEMail;
+                else ((DevExpress.XtraEditors.ComboBoxEdit)cmb_Username_).EditValue = v.tUser.Username_; 
             }
         }
         private List<object> getUserNameList()
@@ -446,7 +450,7 @@ namespace YesiLdefter
         }
         void btn_SistemeGiris_Ileri(object sender, EventArgs e)
         {
-            checkedInput();
+            checkedUserInput();
         }
         void cmb_Username_EditValueChanged(object sender, EventArgs e)
         {
@@ -456,7 +460,7 @@ namespace YesiLdefter
         {
             if (e.KeyCode == Keys.Return)
             {
-                checkedInput();
+                checkedUserInput();
             }
         }
         void btn_Card_F01_SaveClick(object sender, EventArgs e)
@@ -478,7 +482,7 @@ namespace YesiLdefter
         /// firmGUID kontrol et 
         /// kullanıcının Mebbis kodunu kontrol et
         /// 
-        void checkedInput()
+        void checkedUserInput()
         {
             bool onayFirmGuid = false;
             bool onayMebbisCode = false;
@@ -683,7 +687,7 @@ namespace YesiLdefter
             // FirmGUID yok ise
             bool onay = false;
 
-            if (v.tTabimFirm.FirmGUID != "")
+            if (t.IsNotNull(v.tTabimFirm.FirmGUID))
             {
                 if (firmaBilgileri_ != null)
                 {
@@ -889,4 +893,5 @@ namespace YesiLdefter
         
 
     }
+
 }

@@ -106,10 +106,16 @@ namespace Tkn_Starter
                 if ((t.IsNotNull(v.tUser.UserFirmGUID) == false) ||
                     (t.IsNotNull(v.tUser.MebbisCode) == false))
                 {
-                    /// eğer exe yeni bir database/müşteri üzerinde ilk defa açıldığında ExternalUserId ile çalışmasın
-                    /// vaya kullanıcının MebbisCode yok ise
-                    /// veya exe manuel olarak direkt olarak çalıştırılmış olabilir
-                    ///     
+                    /// Exe yeni bir local database üzerinde ilk defa açıldığında 
+                    /// vaya kullanıcının MebbisCode si yok ise
+                    /// veya exe manuel olarak direkt olarak çalıştırılmış ise
+                    /// Sırayla yapılanlar    
+                    /// ms_TabimMtsk formunu aç
+                    /// MsSql connection için gereken bilgileri toparla
+                    /// Toparlanan bilgileri YesiLdefterTabim.ini file yaz
+                    /// Local db de DbUpdates tablosunu oluştur ve update leri uygula
+                    /// User listesini getir ve kullanıcı girişini sağla
+                    /// 
                     InitTabimLoginUser();
                 }
                 else
@@ -165,7 +171,7 @@ namespace Tkn_Starter
             v.tComputer.Network_MACAddress = macAddr;
         }
 
-        void InitPreparingConnection() // SqlConnection text set
+        void InitPreparingConnection() 
         {
             ///
             /// ------------------------------------------------
@@ -359,38 +365,24 @@ namespace Tkn_Starter
         }
         #endregion InitRegisterComputer
 
-        #region InitLoginUser
+        #region InitLoginUser, InitTabimLoginUser
         void InitLoginUser()
         {
             string FormName = "ms_User";
             string FormCode = "UST/CRM/ABO/UstadUserLogin";
             OpenFormPreparing(FormName, FormCode, v.formType.Dialog);
-
-            /*
-            string Prop_Navigator = @"
-            0=FORMNAME:" + FormName + @";
-            0=FORMCODE:" + FormCode + @";
-            0=FORMTYPE:DIALOG;
-            0=FORMSTATE:NORMAL;
-            ";
-            OpenForm(null, Prop_Navigator);
-            */
-            //v.SP_UserLOGIN = true;
-            //v.SP_UserLOGIN = false;
         }
-        #endregion InitLoginUser
-
         void InitTabimLoginUser()
         {
             string FormName = "ms_TabimMtsk";
             string FormCode = "UST/MEB/TB1/TbmWelcome";
             OpenFormPreparing(FormName, FormCode, v.formType.Dialog);
         }
-
+        #endregion InitLoginUser
 
         #region orders
 
-        
+
         #endregion orders
     }
 }

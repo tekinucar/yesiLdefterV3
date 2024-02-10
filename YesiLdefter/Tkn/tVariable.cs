@@ -1521,7 +1521,6 @@ namespace Tkn_Variable
         public string MebbisKullaniciAdi { get; set; }
         public string MebbisSifresi { get; set; }
         public string FirmGUID { get; set; }
-
         public void Clear()
         {
             KursunAdi = "";

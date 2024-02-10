@@ -56,7 +56,6 @@ namespace YesiLdefter
         Control btn_FullSave = null;  // save    post butonu
         Control btn_AutoSubmit = null;// auto    kaydet butonu 
 
-
         // Test butonları
         Control btn_LineGet = null;   // test get
         Control btn_LinePost = null;  // test set
@@ -188,7 +187,7 @@ namespace YesiLdefter
             else
             {
                 /// - 140 browser nedense tam Y koordinatına gelmiyor, -140 ile yaklaştırıyorum
-                wb.Manage().Window.Position = new Point(screen.Bounds.X / 2, screen.Bounds.Y - 140);
+                wb.Manage().Window.Position = new Point(screen.Bounds.X / 2, screen.Bounds.Y);
                 wb.Manage().Window.Size = new Size(screen.Bounds.Width / 2, screen.Bounds.Height - 50);
 
                 /// Başka bir ekranda ise
