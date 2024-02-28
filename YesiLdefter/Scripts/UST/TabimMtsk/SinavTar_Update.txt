@@ -1,0 +1,121 @@
+﻿declare @onayYedek bit = 0
+declare @onayTable2 bit = 0
+declare @onayTableSil bit = 0
+declare @onayYeni bit = 0 
+
+  
+BEGIN TRY  
+    print "sinavtar tablosu yedekleniyor"
+    Select * into [sinavtarYedek] from [sinavtar]
+	set @onayYedek = 1
+END TRY  
+BEGIN CATCH  
+    print "yedek daha önce alınmış"   
+	set @onayYedek = 1
+END CATCH
+
+if ( select  count(b.object_id) as ADET from 
+     sys.tables b 
+     where b.name = "sinavtar2"
+    ) = 0
+begin
+  print "sinavtar2 oluşturuluyor"
+  Select * into [sinavtar2] from [sinavtar]
+  set @onayTable2 = 1
+end
+else begin
+  print "sinavtar2 daha önce oluşturulmuş"
+  set @onayTable2 = 1
+end
+
+
+if (( select  count(a.column_id) as ADET from 
+      sys.columns a,  sys.tables b 
+      where b.object_id = a.object_id 
+      and   b.name = "sinavtar"
+      and   a.name = "Id" ) = 0 and (@onayTable2 = 1))
+begin
+  print "eski sinavtar ı sil"
+  drop table [sinavtar]
+  set @onayTableSil = 1
+end 
+else begin
+  print "sinavtar daha önce silinmiş"
+  if (@onayTable2 = 1) -- tablo2 varsa onayla
+      set @onayTableSil = 1
+end
+
+if ( select  count(b.object_id) as ADET from 
+     sys.tables b 
+     where b.name = "sinavtar"
+   ) = 0 
+begin
+  print "yeni sınavtar ı oluştur"
+  
+  CREATE TABLE [dbo].[sinavtar]
+  (
+    [Id] [Int] IDENTITY(1,1) not null,
+	[Tarih] [smalldatetime] NOT NULL,
+	[TEOT] [bit] NULL,
+	[DIRT] [bit] NULL,
+	[WEBAKTAR] [bit] NULL,
+	[TEO_2013] [bit] NULL,
+	[DIR_2013] [bit] NULL,
+	[ESINAV] [bit] NULL,
+	[MebbisESinavTarihValue] [varchar](20) NULL,
+	[MebbisRandevuTarihValue] [varchar](20) NULL,
+	[MebbisUSinavTarihValue] [varchar](20) NULL,
+
+	Constraint pk_sinavtar primary key (Id)
+  )
+  create index X_sinavtar_01 on sinavtar (Tarih)
+  grant select, insert, update, delete on sinavtar to public
+
+end
+
+if (( select  count(a.column_id) as ADET from 
+      sys.columns a,  sys.tables b 
+      where b.object_id = a.object_id 
+      and   b.name = "sinavtar"
+      and   a.name = "Id" ) = 1 and -- yeni tablo var
+   ( select count(*) as RecCount from sinavtar ) = 0 ) -- ve yeni tabloda kayıt sıfır ise
+begin
+  print "yeni sinavtar a data kopyalanıyor"
+  
+  INSERT INTO [dbo].[sinavtar]
+           ([Tarih]
+           ,[TEOT]
+           ,[DIRT]
+           ,[WEBAKTAR]
+           ,[TEO_2013]
+           ,[DIR_2013]
+           ,[ESINAV]
+           ,[MebbisESinavTarihValue]
+           ,[MebbisRandevuTarihValue]
+           ,[MebbisUSinavTarihValue]
+		   )
+  SELECT [Tarih]
+      ,[TEOT]
+      ,[DIRT]
+      ,[WEBAKTAR]
+      ,[TEO_2013]
+      ,[DIR_2013]
+      ,[ESINAV]
+	  ,"", "", ""
+  FROM [dbo].[sinavtar2]
+  Where convert(datetime, Tarih, 103) > convert(datetime, "01.01.1990", 103)
+
+end
+
+if (( select  count(a.column_id) as ADET from 
+      sys.columns a,  sys.tables b 
+      where b.object_id = a.object_id 
+      and   b.name = "sinavtar"
+      and   a.name = "Id" ) = 1 and -- yeni tablo var
+   ( select count(*) as RecCount from sinavtar ) > 0 ) -- ve yeni tabloda kayıt var ise
+begin
+  print "yeni sinavtar tablosuna data kopyalanmış"
+end
+
+
+

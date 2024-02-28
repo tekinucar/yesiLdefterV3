@@ -348,19 +348,36 @@ namespace YesiLdefter.Selenium
                     }
                     else
                     {
-                        string imgName = wnv.writeValue; //
+                        bool valueOnay = false;
+                        string imgName = wnv.writeValue;
                         if (imgName == "") imgName = wnv.dbFieldName;
 
-                        string Images_Path = t.Find_Path("images") + imgName + ".jpg";
-                        long imageLength = 0;
-                        byte[] byteResim = t.imageBinaryArrayConverterMem((byte[])dbRow[wnv.dbFieldName], ref imageLength);
+                        try
+                        {
+                            var value = (byte[])dbRow[wnv.dbFieldName];
+                            valueOnay = true;
+                        }
+                        catch (Exception)
+                        {
+                            valueOnay = false;
+                        }
 
-                        onay = t.imageBinaryArrayConverterFile(byteResim, Images_Path);
-
-                        if (onay)
-                            wnv.writeValue = Images_Path;
+                        if (valueOnay)
+                        {
+                            string Images_Path = t.Find_Path("images") + imgName + ".jpg";
+                            long imageLength = 0;
+                            byte[] byteResim = t.imageBinaryArrayConverterMem((byte[])dbRow[wnv.dbFieldName], ref imageLength);
+                            onay = t.imageBinaryArrayConverterFile(byteResim, Images_Path);
+                            if (onay)
+                                wnv.writeValue = Images_Path;
+                            else
+                                wnv.writeValue = "Error Images";
+                        }
                         else
-                            wnv.writeValue = "Error Images";
+                        {
+                            onay = false;
+                            MessageBox.Show($"DİKKAT : {imgName} için resim kaydı bulunamadı...", imgName);
+                        }
                     }
                 }
             }
@@ -1045,7 +1062,6 @@ namespace YesiLdefter.Selenium
             return onay;
         }
 
-
         private async Task<bool> saveRowAsync(Form tForm, webNodeValue wnv, tRow tableRows, List<MsWebScrapingDbFields> msWebScrapingDbFields, List<webNodeItemsList> aktifPageNodeItemsList)
         {
             //v.SQL = v.SQL + v.ENTER + myNokta + " saveRow";
@@ -1241,14 +1257,13 @@ namespace YesiLdefter.Selenium
 
             if (v.SP_TabimDbConnection)
             {
-                tSql = sql.preparingTabimUsersSql(""
-                    , "", v.tUser.UserId);
+                tSql = sql.preparingTabimUsersSql("", "", v.tUser.UserId); // UserId ile giriş
                 t.SQL_Read_Execute(v.dBaseNo.Local, ds, ref tSql, "TabimUsers", "FindUser");
             }
             else
             {
                 tSql = sql.preparingUstadUsersSql("", "", v.tUser.UserId);
-                t.SQL_Read_Execute(v.dBaseNo.Project, ds, ref tSql, "Users", "FindUser");
+                t.SQL_Read_Execute(v.dBaseNo.UstadCrm, ds, ref tSql, "Users", "FindUser");
             }
 
             if (t.IsNotNull(ds))

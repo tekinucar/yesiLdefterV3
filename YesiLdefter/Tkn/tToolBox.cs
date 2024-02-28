@@ -7574,8 +7574,8 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             //Application.DoEvents();
 
             // test için kapatmayı unutma
-            serverName = "LAPTOP-ACER1";
-            instanceName = "SQLEXPRESS";
+            //serverName = "LAPTOP-ACER1";
+            //instanceName = "SQLEXPRESS";
 
             MessageBox.Show(serverName + "\\" + instanceName, "Tespit edilen MSSQL Server");
             return serverName + "\\"+ instanceName;
@@ -10071,8 +10071,57 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
                 }
             }
-
         }
+
+        public void Find_NavButton_Control(Form tForm, string menuName, string buttonName, ref DevExpress.XtraBars.Navigation.NavElement control_)
+        {
+            string[] controls = new string[] { };
+            Control c = Find_Control(tForm, menuName, "", controls);
+
+            if (c != null)
+            {
+                if (c.GetType().ToString() == "DevExpress.XtraBars.Navigation.TileNavPane")
+                {
+                    DevExpress.XtraBars.Navigation.TileNavPane tnPane = null;
+                    tnPane = c as DevExpress.XtraBars.Navigation.TileNavPane;
+                    string bname = string.Empty;
+                    string iname = string.Empty;
+
+                    int i3 = tnPane.Buttons.Count;
+                    int i5 = 0;
+                    for (int i2 = 0; i2 < i3; i2++)
+                    {
+                        bname = tnPane.Buttons[i2].Element.Name.ToString();
+                        if (bname == buttonName)
+                        {
+                            control_ = tnPane.Buttons[i2].Element;
+                            break;
+                        }
+
+                        /// category / sub menu altındakiler
+                        ///
+                        i5 = 0;
+                        if (tnPane.Buttons[i2].Element.GetType().ToString() == "DevExpress.XtraBars.Navigation.TileNavCategory")
+                        {
+                            i5 = ((DevExpress.XtraBars.Navigation.TileNavCategory)tnPane.Buttons[i2].Element).Items.Count;
+
+                            for (int i4 = 0; i4 < i5; i4++)
+                            {
+                                iname = ((DevExpress.XtraBars.Navigation.TileNavCategory)tnPane.Buttons[i2].Element).Items[i4].Name.ToString();
+                                if (iname == buttonName)
+                                {
+                                    control_ = ((DevExpress.XtraBars.Navigation.TileNavCategory)tnPane.Buttons[i2].Element).Items[i4];
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                }
+            }
+        }
+
+
 
         public void Find_Button_AddClick_(Form tForm, string menuName, string buttonName,
                                           System.EventHandler myClick)
@@ -12156,8 +12205,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             
             if (v.SP_TabimDbConnection)
             {
-                tSql = sql.preparingTabimUsersSql(""
-                    , "", v.tUser.UserId);
+                tSql = sql.preparingTabimUsersSql("", "", v.tUser.UserId); // UserId ile giriş
                 SQL_Read_Execute(v.dBaseNo.Local, ds, ref tSql, "TabimUsers", "FindUser");
             }
             else

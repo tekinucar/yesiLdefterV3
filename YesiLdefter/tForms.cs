@@ -38,7 +38,6 @@ namespace Tkn_Forms
             if (FormName == "ms_Menu2") tForm = new YesiLdefter.ms_Menu2();
 
             if (FormName == "ms_Selenium") tForm = new YesiLdefter.ms_Selenium();
-            if (FormName == "ms_SeleniumAnalysis") tForm = new YesiLdefter.ms_SeleniumAnalysis();
             if (FormName == "ms_Webbrowser") tForm = new YesiLdefter.ms_Webbrowser();
             if (FormName == "ms_MtskDersProgrami") tForm = new YesiLdefter.ms_MtskDersProgrami();
             if (FormName == "ms_MtskSinavRandevu") tForm = new YesiLdefter.ms_MtskSinavRandevu();

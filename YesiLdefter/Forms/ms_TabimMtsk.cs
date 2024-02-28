@@ -388,23 +388,32 @@ namespace YesiLdefter
         }
         private void getUserRegistry()
         {
-            userFirms.GetUserRegistry(regPath);
-
-            if (cmb_Username_ != null)
+            try
             {
-                v.tUserRegister.userNameList.AddRange(getUserNameList());
+                userFirms.GetUserRegistry(regPath);
 
-                /// cmb_Username_ listesi combo için okunuyor
-                ((DevExpress.XtraEditors.ComboBoxEdit)cmb_Username_).Properties.Items.AddRange(v.tUserRegister.userNameList);
+                if (cmb_Username_ != null)
+                {
+                    v.tUserRegister.userNameList.AddRange(getUserNameList());
 
-                /// en son giriş yapan username combonun text ine atanıyor
-                /// username_ in boş olması uygulama direkt olarak çalıştırıldı demek
-                /// username_ in dolu olması ise diğer exe tarafından çalıştırıldı demektir
-                /// 
-                if ((cmb_Username_ != null) && (t.IsNotNull(v.tUser.Username_) == false))
-                    ((DevExpress.XtraEditors.ComboBoxEdit)cmb_Username_).EditValue = v.tUserRegister.UserLastLoginEMail;
-                else ((DevExpress.XtraEditors.ComboBoxEdit)cmb_Username_).EditValue = v.tUser.Username_; 
+                    /// cmb_Username_ listesi combo için okunuyor
+                    ((DevExpress.XtraEditors.ComboBoxEdit)cmb_Username_).Properties.Items.AddRange(v.tUserRegister.userNameList);
+
+                    /// en son giriş yapan username combonun text ine atanıyor
+                    /// username_ in boş olması uygulama direkt olarak çalıştırıldı demek
+                    /// username_ in dolu olması ise diğer exe tarafından çalıştırıldı demektir
+                    /// 
+                    if ((cmb_Username_ != null) && (t.IsNotNull(v.tUser.Username_) == false))
+                        ((DevExpress.XtraEditors.ComboBoxEdit)cmb_Username_).EditValue = v.tUserRegister.UserLastLoginEMail;
+                    else ((DevExpress.XtraEditors.ComboBoxEdit)cmb_Username_).EditValue = v.tUser.Username_;
+                }
             }
+            catch (Exception)
+            {
+                MessageBox.Show("Bilgisayarınızda Windows.Register hatası oluşmaktadır. Kullanıcı giriş ismini ve şifresini manuel giriniz...");
+                //throw;
+            }
+            
         }
         private List<object> getUserNameList()
         {
@@ -506,7 +515,7 @@ namespace YesiLdefter
 
                     /// şimdi [ userName ve anahtar ] databaseden kontrol ediliyor
                     /// 
-                    tSql = Sqls.preparingTabimUsersSql(u_user_name, u_user_key, 0);
+                    tSql = Sqls.preparingTabimUsersSql(u_user_name, u_user_key, 0); // checkedUser
                     t.SQL_Read_Execute(v.dBaseNo.Local, ds_Query, ref tSql, "TabimUsers", "TabimLogin");
 
                     /// userName ve anahtar sonucu döndü ve kontrol zamanı
@@ -564,6 +573,17 @@ namespace YesiLdefter
                                 ///
                                 this.Close();
                             }
+                            else
+                            {
+                                v.SP_UserLOGIN = false;
+                                /// form close
+                                ///
+                                //MessageBox.Show("DİKKAT : Kullanıcı giriş hatası ... 1005 ");
+                                //this.Close();
+
+                                // Kullanıcı bilgileri alınıyor ona göre kontrol et
+
+                            }
                         }
                     }
                 }
@@ -577,7 +597,7 @@ namespace YesiLdefter
             /// buraya kontrol için geliniyor
             /// userName : böyle bir kullanıcı adı var mı ?
             /// 
-            read_UserName(ds_Query, userName);
+            read_UserNameControl(ds_Query, userName);
 
             if (ds_Query.Tables.Count == 1)
             {
@@ -620,9 +640,9 @@ namespace YesiLdefter
                 }
             }
         }
-        void read_UserName(DataSet ds, string userName)
+        void read_UserNameControl(DataSet ds, string userName)
         {
-            tSql = Sqls.preparingTabimUsersSql(userName, "", 0);
+            tSql = Sqls.preparingTabimUsersSql(userName, "", -1); // read UserNameControl
             t.SQL_Read_Execute(v.dBaseNo.Local, ds, ref tSql, "TabimUsers", "FindUser");
         }
         #endregion checkedUser
@@ -815,6 +835,7 @@ namespace YesiLdefter
                     case 0:
                         {
                             ch = inputCase[i-1];
+                            if (ch == 304) ch = (char)221; // İ
                             xx = 7 + ch;
                             newCase += (char)xx;
                             break; // break ifadesini sakın silme

@@ -87,7 +87,7 @@ namespace YesiLdefter
                     }
                 }
             }                
-            v.tUser.UserId = 12; //Test
+            //v.tUser.UserId = 12; //Test
             
             #endregion 
 

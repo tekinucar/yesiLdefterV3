@@ -887,13 +887,13 @@ Select distinct
         {
             string Sql = "";
 
-            if ((userName != "") && (pass == ""))
+            if ((userName != "") && (userId == -1)) // UserName Control
                 Sql = @" Select * from users where Username_ = '" + userName + @"' ";
-            if ((userName != "") && (pass != ""))
+            if ((userName != "") && (userId == 0))  // UserName ve password ile giriş
                 Sql = @" Select * from users where Username_ = '" + userName + @"' and Password_ = '" + pass + "' ";
-            if ((userId > 0) && (userName == "") && (pass == ""))
+            if ((userId > 0) && (userName == "") && (pass == "")) // IserId ile giriş
                 Sql = @" Select * from users where Ulas = " + userId.ToString() + @" ";
-            if ((userId > 0) && (pass != ""))
+            if ((userId > 0) && (pass != "")) // Password Update
                 Sql = @" Update users set Password_ = '" + pass + @"' where Ulas = " + userId.ToString() + @" ";
 
             return Sql;

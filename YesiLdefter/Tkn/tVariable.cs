@@ -1143,7 +1143,7 @@ namespace Tkn_Variable
 
         public static vMsDbUpdate tMsDbUpdate = new vMsDbUpdate();
 
-        public static OpenQA.Selenium.IWebDriver webMain_ = null;
+        public static OpenQA.Selenium.IWebDriver webDriver_ = null;
         public static string tWebLoginPageCode = "MEBBISLOGIN"; // bunu öndeğerlere bağlaman gerekiyor
         public static string tWebLoginPageUrl = "https://mebbis.meb.gov.tr/default.aspx?lg1"; // bunu öndeğerlere bağlaman gerekiyor
         public enum tWebEventsType
@@ -1277,7 +1277,7 @@ namespace Tkn_Variable
             pageRefreshWorking = false;
             loadWorking = false;
             anErrorOccurred = false;
-            autoSubmit = false;
+            //autoSubmit = false;
             talepPageLeft = 0;
             talepPageTop = 0;
         }

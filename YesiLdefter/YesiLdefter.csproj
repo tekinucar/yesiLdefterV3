@@ -281,12 +281,6 @@
     <Compile Include="Forms\ms_Selenium.Designer.cs">
       <DependentUpon>ms_Selenium.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\ms_SeleniumAnalysis.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\ms_SeleniumAnalysis.Designer.cs">
-      <DependentUpon>ms_SeleniumAnalysis.cs</DependentUpon>
-    </Compile>
     <Compile Include="Forms\ms_TabimMtsk.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -478,6 +472,7 @@
     <Content Include="Scripts\UST\OnMuhasebe\prc_OnmBelgeDekontTbmGelirHesaplari.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\prc_OnmBelgeDekontTbmGiderHesaplari.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\prc_OnmBelgeDekontTbmPersonelHesaplari.txt" />
+    <Content Include="Scripts\UST\TabimMtsk\SinavTar_Update.txt" />
     <Content Include="Scripts\UST\TabimMtsk\trg_sinavnot.txt" />
     <Content Include="Scripts\UST\UstadCRM\AspNetUserChanges.txt" />
     <Content Include="Scripts\UST\MsV3\EduMtskDenemeSinavSonuc.txt" />

@@ -1,4 +1,9 @@
 ﻿
+/* ldf dosyası bozulan database kurtarmak için */
+
+EXEC sp_attach_single_file_db @dbname = 'Surucu07', @physname = N'C:\SqlData\MenderesMtsk\Surucu07.mdf';
+
+
 /*   varchar(max) olan bir kolonun tüm detayını görmek için    */
 
 SELECT CAST(SqlScript AS XML) FROM [UstadManagerV3].[dbo].[MsProjectTables] where TableName = 'DbUpdates'
