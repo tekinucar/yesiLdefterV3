@@ -172,7 +172,9 @@ AS BEGIN
                VALUES (@UlasKursiyer ,convert(datetime, convert(varchar(10), @yTarih1, 103), 103), 0, 'YD', 0, 0)
            end
        end
-		  
+
+       Execute [dbo].[prc_KursiyerSinavDurumu] @yUlasKursiyer
+       
        FETCH NEXT FROM sinavnotCursor INTO @curId
    END
 

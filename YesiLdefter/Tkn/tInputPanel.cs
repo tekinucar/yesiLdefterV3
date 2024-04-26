@@ -72,7 +72,7 @@ namespace Tkn_InputPanel
              *     |__ ViewObject    ( GridView   )
              */
 
-            v.Kullaniciya_Mesaj_Var = "IP hazırlanıyor : " + TableIPCode;
+            //v.Kullaniciya_Mesaj_Var = "IP hazırlanıyor : " + TableIPCode;
 
             #region TableIP and FieldsIP Read
 
@@ -198,7 +198,7 @@ namespace Tkn_InputPanel
             // TableIPCode hazırlanıyor (  External TableIPCode yok ise kendisine ait dsData hazırlansın )
             if (t.IsNotNull(External_TableIPCode) == false)
             {
-                v.Kullaniciya_Mesaj_Var = "Data Read : " + TableIPCode;
+                //v.Kullaniciya_Mesaj_Var = "Data Read : " + TableIPCode;
 
                 tSQLs sql = new tSQLs();
                 sql.Preparing_dsData(tForm, row_Table, ds_Fields, ref ds_Data, MultiPageID, vTA);

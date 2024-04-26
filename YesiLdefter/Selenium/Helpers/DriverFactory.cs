@@ -8,6 +8,8 @@ using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Firefox;
 using OpenQA.Selenium.IE;
+using WebDriverManager.DriverConfigs.Impl;
+using WebDriverManager.Helpers;
 
 namespace YesiLdefter.Selenium.Helpers
 {
@@ -48,10 +50,22 @@ namespace YesiLdefter.Selenium.Helpers
                     driver.Manage().Window.Maximize();
                     break;
                 case DriverToUse.Chrome:
-                    // komut satırı penceresinin açılmasını engelliyor
-                    var chromeDriverService = ChromeDriverService.CreateDefaultService();
-                    chromeDriverService.HideCommandPromptWindow = true; 
+                    /// ChromeDriver'ı otomatik olarak ayarla
+                    //new WebDriverManager.DriverManager().SetUpDriver(new ChromeConfig());
+                    new WebDriverManager.DriverManager().SetUpDriver(new ChromeConfig(), VersionResolveStrategy.MatchingBrowser);
+
+                    /// Get the downloaded ChromeDriver version
+                    /// burda klasör içindeki mevcut chromedriver.exe nin versiyonunu çekiyor
+                    /// bu versiyon no ya görede chrome pathine bakılıyor
+                    var driverVersion = new ChromeConfig().GetMatchingBrowserVersion();
+                    var driverPath = $"./Chrome/{driverVersion}/X64/";
+
+                    /// komut satırı penceresinin açılmasını engelliyor
+                    var chromeDriverService = ChromeDriverService.CreateDefaultService(driverPath);
+                    chromeDriverService.HideCommandPromptWindow = true;
+
                     driver = new ChromeDriver(chromeDriverService, new ChromeOptions());
+
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

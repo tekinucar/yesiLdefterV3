@@ -35,17 +35,21 @@ namespace Tkn_ExeUpdate
             }
             return onay;
         }
-        private bool RunExeUpdate()
+        public bool RunExeUpdate()
         {
             bool onay = false;
             //
-            onay = t.ftpDownload(v.tExeAbout.ftpPacketName);
+            onay = t.ftpDownload(v.tExeAbout.activePath, v.tExeAbout.ftpPacketName);
             //
             if (onay)
-                onay = ExtractFile();
-            //
+                onay = ExtractFile(v.tExeAbout.activePath, v.tExeAbout.ftpPacketName);
+
+            // activeFileName   = v.tExeAbout.activeExeName
+            // extension        = 
+            // oldVersionNo     = v.tExeAbout.activeVersionNo
+            // packetName       = v.tExeAbout.ftpPacketName
             if (onay)
-                onay = fileNameChange();
+                onay = fileNameChange(v.tExeAbout.activePath, v.tExeAbout.activeExeName, "exe", v.tExeAbout.activeVersionNo, v.tExeAbout.ftpPacketName);
 
             if (onay)
             {
@@ -85,17 +89,17 @@ namespace Tkn_ExeUpdate
 
         #region Extract
 
-        public bool ExtractFile()
+        public bool ExtractFile(string path, string packetName)
         {
 
             bool onay = false;
 
-            DirectoryInfo di = new DirectoryInfo(v.tExeAbout.activePath);
+            DirectoryInfo di = new DirectoryInfo(path); //v.tExeAbout.activePath);
 
             foreach (FileInfo fi in di.GetFiles())
             {
                 //for specific file 
-                if (fi.ToString() == v.tExeAbout.ftpPacketName)
+                if (fi.ToString() ==  packetName)//v.tExeAbout.ftpPacketName)
                 {
                     onay = Extract(fi);
                     break;
@@ -131,29 +135,58 @@ namespace Tkn_ExeUpdate
             return onay;
         }
 
-        public bool fileNameChange()
+        public bool fileNameChange(string path, string activeFileName, string extension, string oldVersionNo, string packetName)
         {
             bool onay = false;
+
+            // activeFileName   = v.tExeAbout.activeExeName
+            // extension        = 
+            // oldVersionNo     = v.tExeAbout.activeVersionNo
+            // packetName       = v.tExeAbout.ftpPacketName
+
 
             try
             {
                 // mevcut exe yi yedekleyelim
 
                 // YesiLdefter.exe  >>>  YesiLdefter_20190328_2205.exe  ismine çevrilecek
-                string newFileName = v.tExeAbout.activeExeName.Remove(v.tExeAbout.activeExeName.IndexOf(".exe"), 4) + "_" +
-                                     v.tExeAbout.activeVersionNo + ".exe";
+                // string newFileName = v.tExeAbout.activeExeName.Remove(v.tExeAbout.activeExeName.IndexOf(".exe"), 4) + "_" + v.tExeAbout.activeVersionNo + ".exe";
+                string newFileName = activeFileName.Remove(activeFileName.IndexOf("." + extension), extension.Length + 1) + "_" + oldVersionNo + "." + extension;
+
                 // newFileName varsa sil
-                File.Delete(newFileName);
+                File.Delete(path + "\\" + newFileName);
+
+                // Mevcutta var ise ismini değiştir
                 // YesiLdefter.exe  >>>  YesiLdefter_20190328_2205.exe
-                File.Move(v.tExeAbout.activeExeName, newFileName);
+                //File.Move(v.tExeAbout.activeExeName, newFileName);
+
+                if (File.Exists(path + "\\" + activeFileName))
+                    File.Move(path + "\\" + activeFileName, path + "\\" + newFileName);
+
 
                 // ftp den inen exe nin adını değiştirelim
 
                 // YesiLdefter_20190331_1843.gz   >>> YesiLdefter_20190331_1843.exe
-                newFileName = v.tExeAbout.ftpPacketName.Remove(v.tExeAbout.ftpPacketName.IndexOf(".gz"), 3) + ".exe";
+                //newFileName = v.tExeAbout.ftpPacketName.Remove(v.tExeAbout.ftpPacketName.IndexOf(".gz"), 3) + ".exe";
+                newFileName = packetName.Remove(packetName.IndexOf(".gz"), 3) + "." + extension;
 
-                // YesiLdefter_20190331_1843.exe  >>> YesiLdefter.exe
-                File.Move(newFileName, v.tExeAbout.activeExeName);
+                try
+                {
+                    // YesiLdefter_20190331_1843.exe  >>> YesiLdefter.exe
+                    //File.Move(newFileName, v.tExeAbout.activeExeName);
+                    File.Move(path + "\\" + newFileName, path + "\\" + activeFileName);
+                }
+                catch (Exception)
+                {
+                    // exe harici dosyalarıda (dll gibi)   ICSharpCode.SharpZipLib_1_4_2_13.exe şeklinde açıyor bu nedenle patlıyor
+                    // bir daha .exe şeklinde dene
+                    newFileName = packetName.Remove(packetName.IndexOf(".gz"), 3) + ".exe";
+
+                    // ICSharpCode.SharpZipLib__1_4_2_13.exe >>> ICSharpCode.SharpZipLib.dll
+                    File.Move(path + "\\" + newFileName, path + "\\" + activeFileName);
+                    //throw;
+                }
+                
 
                 onay = true;
             }

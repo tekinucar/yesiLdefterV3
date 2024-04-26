@@ -24,6 +24,9 @@ begin transaction
     DiskSerialNumber    varchar(50)   null,
     OperationModeTypeId smallInt      null,
     RecordDate          SmallDatetime null,
+    LastDate            SmallDatetime null,
+    OperatingSystem     varchar(50)   null,
+    ExeVersion          varchar(20)   null,
 
    Constraint pk_UstadComputers primary key (ComputerId)
  )

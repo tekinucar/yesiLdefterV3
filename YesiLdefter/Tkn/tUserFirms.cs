@@ -138,15 +138,17 @@ namespace Tkn_UserFirms
                 //
                 if (ds_Query.Tables[0].Rows.Count > 1)
                 {
-                    MessageBox.Show("DİKKAT : Kullanıcının FirmGUID bilgiyle birden fazla firma bilgisi geliyor...");
+                    MessageBox.Show("DİKKAT : Kullanıcının FirmGUID bilgisiyle birden fazla firma bilgisi geliyor...");
                 }
             }
 
             ds_Query.Dispose();
 
+            if (onay == false)
+                MessageBox.Show("DİKKAT : Kullanıcının FirmGUID bilgisiyle eşleşen firma bulunamıyor...");
+
             return onay;
         }
-
 
         void SelectFirm(Form tForm, ref DataSet dsUserFirmList, ref DataNavigator dNUserFirmList)
         {
@@ -295,10 +297,38 @@ namespace Tkn_UserFirms
 
             if (regUser != null)
             {
-                v.tUserRegister.eMailList.AddRange(reg.GetUstadEMailList());
-                v.tUserRegister.UserLastLoginEMail = regUser.GetValue("userLastLogin").ToString();
-                v.tUserRegister.UserRemember = (regUser.GetValue("userRemember").ToString() == "true");
-                v.tUserRegister.UserLastKey = regUser.GetValue("userLastKey").ToString();
+                try
+                {
+                    v.tUserRegister.eMailList.AddRange(reg.GetUstadEMailList());
+                }
+                catch (Exception)
+                {
+                    //throw;
+                }
+                try
+                {
+                    v.tUserRegister.UserLastLoginEMail = regUser.GetValue("userLastLogin")?.ToString();
+                }
+                catch (Exception)
+                {
+                    v.tUserRegister.UserLastLoginEMail = "";
+                }
+                try
+                {
+                    v.tUserRegister.UserRemember = (regUser.GetValue("userRemember")?.ToString() == "true");
+                }
+                catch (Exception)
+                {
+                    v.tUserRegister.UserRemember = false;
+                }
+                try
+                {
+                    v.tUserRegister.UserLastKey = regUser.GetValue("userLastKey")?.ToString();
+                }
+                catch (Exception)
+                {
+                    v.tUserRegister.UserLastKey = "";
+                }                  
                 if (regUser.GetValue("userLastFirm") != null)
                 {
                     try
@@ -313,7 +343,7 @@ namespace Tkn_UserFirms
             }
         }
 
-        void SetUserRegistry(int UserId)
+        public void SetUserRegistry(int UserId)
         {
             //var regUser = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(@"" + regPath);
 
@@ -339,6 +369,17 @@ namespace Tkn_UserFirms
             }
         }
 
-
+        public void checkedRegistry(string regPath)
+        {
+            try
+            {
+                var regUser = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(@"" + regPath);
+            }
+            catch (Exception)
+            {
+                reg.SetUstadRegistry("create time", DateTime.Now.ToString());
+                //throw;
+            }
+        }
     }
 }

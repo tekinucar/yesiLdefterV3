@@ -241,24 +241,21 @@ namespace Tkn_Events
         {
             //Console.WriteLine("Table_NewRow Event: RowState={0}",
             //    e.Row.RowState.ToString());
-            v.Kullaniciya_Mesaj_Var = String.Format("Table_NewRow Event: RowState={0}",
-                e.Row.RowState.ToString());
+            //v.Kullaniciya_Mesaj_Var = String.Format("Table_NewRow Event: RowState={0}",  e.Row.RowState.ToString());
         }
 
         public void tTable_Cleared(object sender, DataTableClearEventArgs e)
         {
             //Console.WriteLine("Table_Cleared Event: TableName={0}; Rows={1}",
             //    e.TableName, e.Table.Rows.Count.ToString());
-            v.Kullaniciya_Mesaj_Var = String.Format("Table_Cleared Event: TableName={0}; Rows={1}",
-                e.TableName, e.Table.Rows.Count.ToString());
+            //v.Kullaniciya_Mesaj_Var = String.Format("Table_Cleared Event: TableName={0}; Rows={1}",  e.TableName, e.Table.Rows.Count.ToString());
         }
 
         public void tTable_Clearing(object sender, DataTableClearEventArgs e)
         {
             //Console.WriteLine("Table_Clearing Event: TableName={0}; Rows={1}",
             //    e.TableName, e.Table.Rows.Count.ToString());
-            v.Kullaniciya_Mesaj_Var = String.Format("Table_Clearing Event: TableName={0}; Rows={1}",
-                e.TableName, e.Table.Rows.Count.ToString());
+            //v.Kullaniciya_Mesaj_Var = String.Format("Table_Clearing Event: TableName={0}; Rows={1}", e.TableName, e.Table.Rows.Count.ToString());
         }
 
         public bool tGetDataChanges(Form tForm)
@@ -7505,12 +7502,12 @@ namespace Tkn_Events
                         if (OperandType == "3")
                         {
                             /// read_field_type = 58
-                            /// and Convert(Date, [AJLNTLK].REC_DATE, 103) >= Convert(Date, '25.12.2016', 103)--:D.SD.2809:-->=
-                            /// and Convert(Date, [AJLNTLK].REC_DATE, 103) <= Convert(Date, '25.12.2016', 103)--:D.SD.2809:--<=
+                            /// and Convert(Datetime, [AJLNTLK].REC_DATE, 103) >= Convert(Datetime, '25.12.2016', 103)--:D.SD.2809:-->=
+                            /// and Convert(Datetime, [AJLNTLK].REC_DATE, 103) <= Convert(Datetime, '25.12.2016', 103)--:D.SD.2809:--<=
 
                             /// >= işlemleri
-                            ///  and Convert(Date, [BDekont].BelgeTarihi, 103)  >= Convert(Date, '27.07.2022', 103)     -- :D.SD.43301: -->=
-                            ///  and Convert(Date, [BDekont].BelgeTarihi, 103)  <= Convert(Date, '27.07.2022', 103)     -- :D.SD.43301: --<=
+                            ///  and Convert(Datetime, [BDekont].BelgeTarihi, 103)  >= Convert(Datetime, '27.07.2022', 103)     -- :D.SD.43301: -->=
+                            ///  and Convert(Datetime, [BDekont].BelgeTarihi, 103)  <= Convert(Datetime, '27.07.2022', 103)     -- :D.SD.43301: --<=
                             if (Speed_FName.IndexOf("_BAS") > -1)
                             {
                                 str_bgn = " and " + read_sub_FName + "  >=";
@@ -7518,7 +7515,7 @@ namespace Tkn_Events
                                     (read_field_type == "58"))
                                 {
                                     if (v.active_DB.projectDBType == v.dBaseType.MSSQL)
-                                        str_bgn = " and Convert(Date, " + read_sub_FName + ", 103)  >=";
+                                        str_bgn = " and Convert(Datetime, " + read_sub_FName + ", 103)  >=";
                                 }
 
                                 i_bgn = Sql.IndexOf(str_bgn);
@@ -7537,7 +7534,7 @@ namespace Tkn_Events
                                     (read_field_type == "58"))
                                 {
                                     if (v.active_DB.projectDBType == v.dBaseType.MSSQL)
-                                        str_bgn = " and Convert(Date, " + read_sub_FName + ", 103)  <=";
+                                        str_bgn = " and Convert(Datetime, " + read_sub_FName + ", 103)  <=";
                                 }
 
                                 i_bgn = Sql.IndexOf(str_bgn);
@@ -7556,14 +7553,14 @@ namespace Tkn_Events
                         if (OperandType == "4")
                         {
                             /// read_field_type = 58
-                            /// and Convert(Date, [AJLNTLK].REC_DATE, 103)  =  Convert(Date, '25.12.2016', 103)     -- :D.SD.2809: --
+                            /// and Convert(Datetime, [AJLNTLK].REC_DATE, 103)  =  Convert(Datetime, '25.12.2016', 103)     -- :D.SD.2809: --
 
                             str_bgn = " and " + read_sub_FName;
                             if ((read_field_type == "40") ||
                                 (read_field_type == "58"))
                             {
                                 if (v.active_DB.projectDBType == v.dBaseType.MSSQL)
-                                    str_bgn = " and Convert(Date, " + read_sub_FName;
+                                    str_bgn = " and Convert(Datetime, " + read_sub_FName;
                             }
 
                             i_bgn = Sql.IndexOf(str_bgn);
@@ -7608,6 +7605,10 @@ namespace Tkn_Events
                     }
                     #endregion
 
+                    // smalldatetime = 58
+                    // date = 40, 61
+                    // time = 41
+
                     #region and [a].GCB = x   değişimi
                     if ((ga1 == -1) && (ga2 == -1) && (default_type == 31))
                     {
@@ -7628,9 +7629,14 @@ namespace Tkn_Events
 
                         if (i_bgn == -1)
                         {
-                            // and Convert(Date, [SYSOTV].TARIH, 103)  = Convert(Date,'01.01.1900', 103)    -- :D.SD.5839: --
-                            if (v.active_DB.projectDBType == v.dBaseType.MSSQL)
-                                str_bgn = " and Convert(Date, " + read_sub_FName;
+                            // and Convert(Datetime, [SYSOTV].TARIH, 103)  = Convert(Datetime,'01.01.1900', 103)    -- :D.SD.5839: --
+                            str_bgn = " and Convert(Datetime, " + read_sub_FName;
+                            i_bgn = Sql.IndexOf(str_bgn);
+                        }
+                        if (i_bgn == -1)
+                        {
+                            // and Convert(Datetime, [SYSOTV].TARIH, 103)  = Convert(Datetime,'01.01.1900', 103)    -- :D.SD.5839: --
+                            str_bgn = " and Convert(SmallDatetime, " + read_sub_FName;
                             i_bgn = Sql.IndexOf(str_bgn);
                         }
 

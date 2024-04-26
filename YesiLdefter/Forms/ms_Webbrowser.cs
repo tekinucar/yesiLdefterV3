@@ -1369,7 +1369,7 @@ namespace YesiLdefter
                 (this.myTriggerInvoke == false)) // invoke gerçekleşmişse hiç başlama : get sırasında set edip bilgi çağrılıyor demekki
             {
                 if (wnv.TagName != "table")
-                    transferFromWebToDatabase(wnv);
+                    msPagesService.transferFromWebToDatabase(wnv);
 
                 if (wnv.TagName == "table")
                 {
@@ -2161,108 +2161,7 @@ namespace YesiLdefter
 
         #region transferFrom... , saveRow
 
-        private void transferFromWebToDatabase(webNodeValue wnv)
-        {
-            v.SQL = v.SQL + v.ENTER + myNokta + " transferFromWebToDatabase : Get : " + wnv.dbFieldName;
-
-            /// web deki veriyi database aktar
-            ///
-            if (t.IsNotNull(ds_ScrapingDbConnectionList) == false) return;
-
-            wnv.dbFieldName = "";
-            wnv.dbLookUpField = false;
-
-            //durdurmak için 
-            /*
-            if (wnv.nodeId == 1293)
-                wnv.dbFieldName = "";
-            if (wnv.nodeId == 1294)
-                wnv.dbFieldName = "";
-            */
-
-            DataRow dbRow = findRightRow(wnv, v.tSelect.Get);
-
-            // webden okunan veriyi db ye aktardığı an
-            if (dbRow != null)
-            {
-                //t.tCheckedValue(dbRow, wnv.dbFieldName, wnv.readValue);
-
-                if (wnv.dbFieldName.IndexOf("Resim") == -1)
-                {
-                    v.SQL = v.SQL + wnv.readValue;
-                    //if (t.IsNotNull(wnv.readValue))
-                    //    dbRow[wnv.dbFieldName] = wnv.readValue;
-
-                    if (t.IsNotNull(wnv.readValue))
-                    {
-                        string itemText = wnv.readValue;
-
-                        if (wnv.dbLookUpField == false)
-                        {
-                            if (wnv.dbFieldType == 108)
-                            {
-                                itemText = wnv.readValue.Replace(" TL", "");
-                                itemText = wnv.readValue.Replace("TL", "");
-                            }
-                            if (itemText != "")
-                                dbRow[wnv.dbFieldName] = itemText;
-                        }
-                        else
-                        {
-                            string itemValue = findNodeItemsValue(wnv, itemText);
-                            if (itemValue != "")
-                                dbRow[wnv.dbFieldName] = itemValue;
-                        }
-
-                        dbRow.AcceptChanges();
-                    }
-                }
-                else
-                {
-                    v.SQL = v.SQL + wnv.dbFieldName;
-
-                    if (t.IsNotNull(v.con_Images_FieldName) == false)
-                         v.con_Images_FieldName  = wnv.dbFieldName;
-                    else v.con_Images_FieldName2 = wnv.dbFieldName;
-
-                    //v.EXE_TempPath+"\\AResimGoster.aspx"
-                    string fileName = wnv.readValue;
-
-                    //byte[] theBytes = Encoding.UTF8.GetBytes(wnv.readValue);
-                    long imageLength = 0;
-                    if (v.con_Images == null)
-                         v.con_Images  = t.imageBinaryArrayConverter(fileName, ref imageLength);
-                    else v.con_Images2 = t.imageBinaryArrayConverter(fileName, ref imageLength);
-
-                    if (t.IsNotNull(v.con_Images_FieldName))
-                    {
-                        if (v.con_Images_FieldName.IndexOf("Small") > -1)
-                            v.con_Images = msPagesService.ResmiKucult(v.con_Images);
-                    }
-
-                    if (t.IsNotNull(v.con_Images_FieldName2))
-                    {
-                        if (v.con_Images_FieldName2.IndexOf("Small") > -1)
-                            v.con_Images2 = msPagesService.ResmiKucult(v.con_Images2);
-                    }
-                    //if (t.IsNotNull(wnv.readValue))
-                    //    dbRow[wnv.dbFieldName] = theBytes; // Encoding.UTF8.GetBytes(wnv.readValue);
-                    if ((v.con_Images != null) && (v.con_Images2 == null)) 
-                        dbRow[wnv.dbFieldName] = v.con_Images;
-                    if ((v.con_Images != null) && (v.con_Images2 != null))
-                        dbRow[wnv.dbFieldName] = v.con_Images2;
-                }
-            }
-
-            // get işlemi bitti ve artık database yazma işlemi gerekiyor
-            if (wnv.GetSave)
-            {
-                if (t.IsNotNull(ds_DbaseTable))
-                   msPagesService.dbButtonClick(this, ds_DbaseTable.DataSetName, v.tButtonType.btKaydet);
-            }
-
-        }
-
+        
         
         
         private void transferFromDatabaseToWeb(webNodeValue wnv)

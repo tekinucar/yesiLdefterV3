@@ -853,13 +853,12 @@ Select distinct
 
         public string Sql_MsExeUpdates()
         {
-            string tSql = "";
-
-            tSql = @"
+            /// Son aktif exeyi bul
+            /// 
+            string tSql = @"
             Select TOP 1 * from MsExeUpdates
             where IsActive = 1 
             order by RecordDate desc ";
-
             return tSql;
         }
 
@@ -890,7 +889,7 @@ Select distinct
             if ((userName != "") && (userId == -1)) // UserName Control
                 Sql = @" Select * from users where Username_ = '" + userName + @"' ";
             if ((userName != "") && (userId == 0))  // UserName ve password ile giriş
-                Sql = @" Select * from users where Username_ = '" + userName + @"' and Password_ = '" + pass + "' ";
+                Sql = @" Select * from users where Username_ = '" + userName + @"' and isnull(Password_, '') = '" + pass + "' ";
             if ((userId > 0) && (userName == "") && (pass == "")) // IserId ile giriş
                 Sql = @" Select * from users where Ulas = " + userId.ToString() + @" ";
             if ((userId > 0) && (pass != "")) // Password Update
@@ -1234,11 +1233,22 @@ INSERT INTO [dbo].[SYS_UPDATES]
         {
             // publishManager database
             //" Select * from dbo.MsDbUpdates Where Id not in ( " + IdList + " ) "
+            string sectorTypeId = v.SP_Firm_SectorTypeId.ToString();
+            // TabimSrc, TabimIsmak ise TabimMtsk dahil olarak hepsi aynı güncelleme olsun 
+            // örnek : ( 0, 212, 211 ) veya ( 0, 213, 211 )
+            if (v.SP_Firm_SectorTypeId == 212) sectorTypeId += ", 211";
+            if (v.SP_Firm_SectorTypeId == 213) sectorTypeId += ", 211";
+
             return
                 " Select * from dbo.MsDbUpdates Where Id > " + IdList + "  "
               + " and IsActive = 1 " 
-              + " and SectorTypeId in ( 0, " + v.SP_Firm_SectorTypeId.ToString() + " ) ";
+              + " and SectorTypeId in ( 0, " + sectorTypeId + " ) ";
             //" Select * from " + v.publishManager_DB.databaseName + ".dbo.MsDbUpdates "
+        }
+        public string Sql_MsFileUpdates(string IdList)
+        {
+            // read publishManager database
+            return " Select * from dbo.MsFileUpdates Where Id > " + IdList + "  and IsActive = 1 order by RecordDate ";
         }
 
         public string Sql_MsProjectTables(string tableName, Int16 sectorTypeId)
@@ -1266,7 +1276,15 @@ INSERT INTO [dbo].[SYS_UPDATES]
         {
             // müşteri database
             return " Select max(MsDbUpdateId) as MsDbUpdateId from DbUpdates ";
-            //return " Select MsDbUpdateId from DbUpdates ";
+        }
+        public string Sql_FileUpdatesIdList()
+        {
+            // müşteri database
+            string networkKey = v.tComputer.Network_MACAddress;
+            string pcName = v.tComputer.PcName;
+
+            return " Select max(MsFileUpdateId) as MsFileUpdateId from FileUpdates " +
+                " where ( isnull(NetworkMacAddress,'') = '" + networkKey + "' and isnull(PcName,'') = '" + pcName + "' ) ";
         }
 
         public string Sql_WebScrapingFieldsList(string pageCodes)

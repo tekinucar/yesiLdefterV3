@@ -124,11 +124,13 @@ namespace Tkn_Save
             {
                 // field bilgisi yoksa işleme girmesin 
                 // zaten bu data select datasıdır
-                if (t.Find_TableFields(dsData) == false) return;
+                if (t.Find_TableFields(tForm, dsData) == false) return;
 
                 vTable vt = new vTable();
 
-                //v.Kullaniciya_Mesaj_Var = "Kayıt işlemi gerçekleşiyor...";
+                v.Kullaniciya_Mesaj_Var = "Kayıt işlemi gerçekleşiyor...";
+                v.timer_Kullaniciya_Mesaj_Varmi.Enabled = true;
+
                 //t.WaitFormOpen(tForm, v.Kullaniciya_Mesaj_Var);
                 //v.SP_OpenApplication = true;
 
@@ -140,7 +142,10 @@ namespace Tkn_Save
 
                     //t.ButtonEnabledAll(tForm, vt.TableIPCode, true);
 
-                    v.Kullaniciya_Mesaj_Show = true;
+                    //v.Kullaniciya_Mesaj_Show = true;
+                    
+                    /// Insert veya Update Script oluşturuluyor ve uygulanıyor
+                    /// 
                     v.Kullaniciya_Mesaj_Var = MyRecord(dsData, vt, pos, (byte)v.Save.KAYDET);
                 }
 

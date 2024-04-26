@@ -24,8 +24,10 @@ using YesiLdefter.Entities;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
+
 using Tesseract;
 using System.Net;
+
 
 namespace YesiLdefter
 {
@@ -57,6 +59,7 @@ namespace YesiLdefter
         Control btn_FullPost2 = null; // ikinci  post butonu
         Control btn_FullSave = null;  // save    post butonu
         Control btn_AutoSubmit = null;// auto    kaydet butonu 
+        Control btn_SiraliIslem = null;
 
         // Test butonları
         Control btn_LineGet = null;   // test get
@@ -67,6 +70,7 @@ namespace YesiLdefter
         Control btn_FullPostTest2 = null;  // test set butonu
 
         string menuName = "MENU_" + "UST/PMS/PMS/SeleniumMebbis";
+        string buttonMebbisGiris = "ButtonMebbisGiris";
         string buttonAutoSave = "ButtonOtomatikMebbisKaydet";
         string buttonManuelSave = "ButtonManuelMebbisKaydet";
         DevExpress.XtraBars.Navigation.NavElement buttonManuelSaveControl = null;
@@ -115,17 +119,18 @@ namespace YesiLdefter
 
 
             // TileNavMenu buttons
+            t.Find_Button_AddClick(this, menuName, buttonMebbisGiris, myNavElementClick);
             t.Find_Button_AddClick(this, menuName, buttonManuelSave, myNavElementClick);
             t.Find_Button_AddClick(this, menuName, buttonAutoSave, myNavElementClick);
             t.Find_NavButton_Control(this, menuName, buttonManuelSave, ref buttonManuelSaveControl);
             t.Find_NavButton_Control(this, menuName, buttonAutoSave, ref buttonAutoSaveControl);
-            if (buttonManuelSaveControl != null)
-                myNavElementClick(buttonManuelSaveControl, null);
+            if (buttonAutoSaveControl != null)
+                myNavElementClick(buttonAutoSaveControl, null);
 
             // scraping ilişkisi olan TableIPCode ve ilgili fieldler
             // 
             this.msWebScrapingDbFields_ = msPagesService.readScrapingTablesAndFields(this.msWebPages_);
-            msPagesService.checkedSiraliIslemVarmi(this, this.workPageNodes_, this.msWebScrapingDbFields_);
+            //msPagesService.checkedSiraliIslemVarmi(this, this.workPageNodes_, this.msWebScrapingDbFields_);
 
             /// Kullanıcının mebbisCode ve şifresini yeniden oku
             /// değiştirmiş olabilir
@@ -159,7 +164,6 @@ namespace YesiLdefter
 
             #endregion DataNavigator Listesi
         }
-
         private void preparingWebMain()
         {
             /*
@@ -174,10 +178,9 @@ namespace YesiLdefter
             SeleniumHelper.ResetDriver();
             v.webDriver_ = SeleniumHelper.WebDriver;
 
-            preparingWebDriverChangeSiz(v.webDriver_);
+            preparingWebDriverChangeSize(v.webDriver_);
         }
-
-        private void preparingWebDriverChangeSiz(IWebDriver wb)
+        private void preparingWebDriverChangeSize(IWebDriver wb)
         {
             /// Main Form size change
             /// 
@@ -401,15 +404,16 @@ namespace YesiLdefter
                         tTileView.ItemClick += new DevExpress.XtraGrid.Views.Tile.TileViewItemClickEventHandler(myTileView_ItemClick);
                     }
                 }
-
-                
-
             }
         }
-        private void myNavElementClick(object sender, DevExpress.XtraBars.Navigation.NavElementEventArgs e)
+        private async void myNavElementClick(object sender, DevExpress.XtraBars.Navigation.NavElementEventArgs e)
         {
             if (sender.GetType().ToString() == "DevExpress.XtraBars.Navigation.NavButton")
             {
+                if (((DevExpress.XtraBars.Navigation.NavButton)sender).Name == buttonMebbisGiris)
+                {
+                    await loginPageViev();
+                }
                 if (((DevExpress.XtraBars.Navigation.NavButton)sender).Name == buttonManuelSave)
                 {
                     f.autoSubmit = false;
@@ -439,19 +443,33 @@ namespace YesiLdefter
         }
         public async void myTileView_ItemClick(object sender, DevExpress.XtraGrid.Views.Tile.TileViewItemClickEventArgs e)
         {
-            if (v.webDriver_ != null) return;
+            
             if (t.IsNotNull(ds_MsWebPages) == false) return;
             if (dN_MsWebPages.Position == -1) return;
+
+            string soru = "Mebbis Giriş sayfasını açmak ister misiniz ?";
+            //if (v.webDriver_ != null) soru = "Yeniden Mebbis Giriş sayfasını"
 
             string loginPage = ds_MsWebPages.Tables[0].Rows[dN_MsWebPages.Position]["LoginPage"].ToString();
 
             if (loginPage == "True")
             {
-                string soru = "Giriş sayfasını açmak ister misiniz ?";
                 DialogResult cevap = t.mySoru(soru);
                 if (DialogResult.Yes == cevap)
                 {
                     await loginPageViev();
+
+                    //try
+                    //{
+                    //    await loginPageViev();
+                    //}
+                    //catch (Exception ex)
+                    //{
+                    //    //İstek gönderilirken bir hata oluştu
+                    //    MessageBox.Show("İstek gönderilirken bir hata oluştu" + v.ENTER + ex.Message.ToString());
+                    //    //throw;
+                    //}
+
                 }
             }
         }
@@ -534,6 +552,27 @@ namespace YesiLdefter
         {
             preparingMsWebNodesFields();
             preparingAktifPageLoad();
+
+            if (f.autoSubmit)
+            {
+                if ((this.workPageNodes_.aktifPageCode != "MTSKADAYRESIM") &&
+                    (this.workPageNodes_.aktifPageCode != "MTSKADAYSOZLESME") &&
+                    (this.workPageNodes_.aktifPageCode != "MTSKADAYIMZA"))
+                    btn_FullPost1.Visible = true;
+                else btn_FullPost1.Visible = false;
+
+                if ((this.workPageNodes_.aktifPageCode == "MTSKADAYRESIM") ||
+                    (this.workPageNodes_.aktifPageCode == "MTSKADAYSOZLESME") ||
+                    (this.workPageNodes_.aktifPageCode == "MTSKADAYIMZA"))
+                    btn_FullPost2.Visible = true;
+                else btn_FullPost2.Visible = false;
+            }
+            else
+            {
+                if (btn_FullPost1 != null) btn_FullPost1.Visible = true;
+                if (btn_FullPost2 != null) btn_FullPost2.Visible = true;
+                if (btn_FullSave != null) btn_FullSave.Visible = true;
+            }
         }
         private async void dataNavigator_PositionChanged(object sender, EventArgs e)
         {
@@ -578,7 +617,9 @@ namespace YesiLdefter
             this.workPageNodes_.Clear();
             this.workPageNodes_.aktifPageCode = this.msWebPage_[0].PageCode;
             this.workPageNodes_.aktifPageUrl = this.msWebPage_[0].PageUrl;
+            
             msPagesService.checkedSiraliIslemVarmi(this, this.workPageNodes_, this.msWebScrapingDbFields_);
+            //this.btn_SiraliIslem = this.workPageNodes_.siraliIslem_Btn;
         }
         private void preparingMsWebLoginPage()
         {
@@ -663,6 +704,7 @@ namespace YesiLdefter
             bool onayRequest = false;
             bool onayPageRefresh = false;
             bool onayValue = false;
+            bool onaySiraliIslem = false;
             /// daha çalışanları temizle yani
             /// load çalıştı diyelim
             /// kullanıcı veri gönder/veri al talebinde bulununca 
@@ -680,16 +722,16 @@ namespace YesiLdefter
             {
                 if (f.anErrorOccurred) break;
 
-                if ((item.EventsType == (short)v.tWebEventsType.button5) && (workEventsType == v.tWebEventsType.button5))
-                {
-                   // test
-                   string aa = "aaa555";
-                }
-                if ((item.EventsType == (short)v.tWebEventsType.button6) && (workEventsType == v.tWebEventsType.button6))
-                {
-                    // test
-                    string aa = "aaa6666";
-                }
+                //if ((item.EventsType == (short)v.tWebEventsType.button5) && (workEventsType == v.tWebEventsType.button5))
+                //{
+                //   // test
+                //   //string aa = "aaa555";
+                //}
+                //if ((item.EventsType == (short)v.tWebEventsType.button6) && (workEventsType == v.tWebEventsType.button6))
+                //{
+                //    // test
+                //    //string aa = "aaa6666";
+                //}
 
                 //MessageBox.Show(item.TagName + " ; " + item.AttId + " ; " + item.AttName + " ; ");
 
@@ -744,6 +786,48 @@ namespace YesiLdefter
                     }
                 }
             }
+
+            /// Sıralı islem butonu çalışıcak
+            if ((workEventsType == v.tWebEventsType.button5) ||
+                (workEventsType == v.tWebEventsType.button6))
+            {
+                if ((workRequestType == v.tWebRequestType.post) &&
+                    (workPageNodes.siraliIslemVar) &&
+                    (f.anErrorOccurred == false))
+                {
+                    /// kullanıcı onayı sıralı işlemi iptal edebilir
+                    workPageNodes.siraliIslemAktif = ((DevExpress.XtraEditors.CheckButton)workPageNodes.siraliIslem_Btn).Checked;
+
+                    if (workPageNodes.siraliIslemAktif)
+                    {
+                        onaySiraliIslem = nextDataSetRow(workPageNodes);
+                        if (onaySiraliIslem)
+                            await startNodes(msWebNodes, workPageNodes, workRequestType, workEventsType);
+                    }
+                }
+            }
+        }
+        private bool nextDataSetRow(webWorkPageNodes workPageNodes)
+        {
+            bool onay = false;
+            DataSet ds = workPageNodes.siraliIslem_ds;
+            DataNavigator dN = workPageNodes.siraliIslem_dN;
+            if (ds != null)
+            {
+                if (dN.Tag == null) dN.Tag = -1;
+                //if ((int)dN.Tag == dN.Position) return false;
+                if (ds.Tables[0].Rows.Count == (int)dN.Tag + 1)
+                {
+                    t.FlyoutMessage(this, "Bilgilendirme", "Sıralı atma işlemi tamamlandı...");
+                    return false;
+                }
+                NavigatorButton btnNext = dN.Buttons.Next;
+                dN.Buttons.DoClick(btnNext);
+                dN.Tag = dN.Position;
+                Application.DoEvents();
+                onay = true;
+            }
+            return onay;
         }
         private async Task<bool> pageRefresh(IWebDriver wb, MsWebNode item)
         {
@@ -821,13 +905,17 @@ namespace YesiLdefter
                 if (onay == false)
                 {
                     // item item ile çalışma eventi aynı olmalı : örn : button5 == button5
-                    if (wnv.EventsType == wnv.workEventsType)
+                    if ((wnv.EventsType == wnv.workEventsType) ||
+                        (wnv.EventsType == v.tWebEventsType.none))
                     {
                         /// kayıt butonu ise onayla
                         if (wnv.EventsType == v.tWebEventsType.button7) onay = true;
                         if (wnv.AttRole == "Button") onay = true;
+                        if (wnv.AttType == "submit") onay = true;
                         if (wnv.InvokeMember == v.tWebInvokeMember.autoSubmit) onay = true;
-                        if (t.IsNotNull(wnv.writeValue)) onay = true; // 
+                        if (t.IsNotNull(wnv.writeValue)) onay = true; //
+                        if (wnv.TagName == "div") onay = true;  // testresult yüzünden eklendi
+                        if (wnv.TagName == "span") onay = true; // kayıt sonucunu yazan element
                     }
                 }
             }
@@ -842,7 +930,7 @@ namespace YesiLdefter
         {
             //  web deki veriyi database aktar
             //  webden alınan veriyi (readValue yi)  db ye aktar
-
+            
             if ((wnv.InjectType == v.tWebInjectType.Get ||
                 (wnv.InjectType == v.tWebInjectType.GetAndSet && wnv.workRequestType == v.tWebRequestType.get)) &&
                 (wnv.IsInvoke == false)) //(this.myTriggerInvoke == false)) // invoke gerçekleşmişse hiç başlama : get sırasında set edip bilgi çağrılıyor demekki
@@ -907,6 +995,7 @@ namespace YesiLdefter
                 }
             }
         }
+        
         private bool listControl(MsWebNode item, webWorkPageNodes workPageNodes)
         {
             // 1. aktif mi
@@ -1136,7 +1225,19 @@ namespace YesiLdefter
                         writeValue = selectItemsGetValue(wb, ref wnv, idName, writeValue);
                 }
             }
-                        
+             
+            if (TagName == "div")
+            {
+                await divOperations(wb, wnv);
+                return;
+            }
+
+            if (TagName == "span")
+            {
+                await spanOperations(wb, wnv);
+                return;
+            }
+
             if (AttRole == "Button")
             {
                 // tablolar üzerindeki liste satırları üzerindeki butonlar
@@ -1157,6 +1258,7 @@ namespace YesiLdefter
             if (AttRole == "InputBox")
             {
                 writeValue = await getInputBoxValue(wb, wnv);
+                wnv.writeValue = writeValue;
             }
             /// SecurityAgain : Güvenlik Kodu Tekrarı
             /// 
@@ -1282,7 +1384,15 @@ namespace YesiLdefter
                     wb = null;
                     preparingWebMain();
                     wb = v.webDriver_;
-                    wb.Navigate().GoToUrl(url);
+                    try
+                    {
+                        wb.Navigate().GoToUrl(url);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Error Navigate ( " + url + " )" + v.ENTER2 + ex.Message);
+                        //throw;
+                    }
                     //throw;
                 }
                 
@@ -1392,11 +1502,36 @@ namespace YesiLdefter
         {
             if (t.IsNotNull(idName))
             {
+                /*
                 IWebElement element = wb.FindElement(By.Id(idName));
                 if (element != null)
                 {
                     IJavaScriptExecutor js = (IJavaScriptExecutor)wb;
                     js.ExecuteScript("arguments[0].style.display = 'none';", element);
+                }
+                */
+                IList<IWebElement> elements = wb.FindElements(By.TagName(tagName));
+                foreach (IWebElement element in elements)
+                {
+                    string elementId = element.GetAttribute("id");
+                    if (elementId == idName)
+                    {
+                        string innerText = element.Text;
+                        if (InnerText != "")
+                        {
+                            if (innerText.IndexOf(InnerText) > -1)
+                            {
+                                IJavaScriptExecutor js = (IJavaScriptExecutor)wb;
+                                js.ExecuteScript("arguments[0].style.display = 'none';", element);
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            IJavaScriptExecutor js = (IJavaScriptExecutor)wb;
+                            js.ExecuteScript("arguments[0].style.display = 'none';", element);
+                        }
+                    }
                 }
                 #region
                 /*
@@ -1607,6 +1742,87 @@ namespace YesiLdefter
                     v.ENTER2 + inner);
             }
         }
+        private async Task divOperations(IWebDriver wb, webNodeValue wnv)
+        {
+            if (wnv.TagName == "div")
+            {
+                string idName = "";
+                if (wnv.AttId != "") idName = wnv.AttId;
+                if ((wnv.AttId == "") && (wnv.AttName != "")) idName = wnv.AttName;
+
+                IWebElement element = wb.FindElement(By.Id(idName));
+
+                if (element != null)
+                {
+                    string className = wnv.AttClass;
+                    if (t.IsNotNull(className) == false) className = "error"; 
+                    
+                    IList<IWebElement> errorElements = element.FindElements(By.ClassName(className));
+
+                    if (errorElements != null)
+                    {
+                        if (errorElements.Count > 0)
+                        {
+                            f.anErrorOccurred = true;
+                            t.FlyoutMessage(this, "Hata", wnv.OuterText);
+                        }
+                    }
+                }
+            }
+        }
+        private async Task spanOperations(IWebDriver wb, webNodeValue wnv)
+        {
+            if (wnv.TagName == "span")
+            {
+                string idName = "";
+                if (wnv.AttId != "") idName = wnv.AttId;
+                if ((wnv.AttId == "") && (wnv.AttName != "")) idName = wnv.AttName;
+
+                try
+                {
+                    // elementi  1 saniye ara
+                    wb.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(1);
+
+                    IWebElement element = wb.FindElement(By.Id(idName));
+
+                    if (element != null)
+                    {
+                        string innerText = wnv.InnerText;
+                        string elementText = element.Text;
+
+                        /// İşlem sonuçları sonunda kullanıcıya browser üzerinde verilen mesajlar
+                        /// Örnek : Kayıt İşleminiz Başarı İle Gerçekleşti. veya diğer hata mesajları
+                        /// 
+                        if (innerText != elementText)
+                            t.FlyoutMessage(this, "Uyarı :", elementText);
+                        else
+                        {
+                            if (wnv.AttRole == "Success")
+                            {
+                                if (t.IsNotNull(wnv.ds))
+                                {
+                                    if (wnv.dbFieldType == 104) // bit
+                                        wnv.ds.Tables[0].Rows[wnv.dN.Position][wnv.dbFieldName] = 1;
+
+                                    if (wnv.GetSave)
+                                    {
+                                        msPagesService.dbButtonClick(this, wnv.ds.DataSetName, v.tButtonType.btKaydet);
+                                    }
+                                }
+                                t.FlyoutMessage(this, "Bilgilendirme", elementText);
+                            }
+                        }
+                    }
+                }
+                catch (Exception)
+                {
+                    //
+                }
+                
+                wb.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(30);
+
+            }
+        }
         private async Task<v.tWebInvokeMember> setElementValues(IWebDriver wb, string tagName, string attType, string idName, string writeValue, v.tWebInvokeMember invokeMember)
         {
             //
@@ -1636,8 +1852,6 @@ namespace YesiLdefter
                                 //oSelect.SelectByIndex(index);
                                 //oSelect.SelectByText(text);
                             }
-
-                            
                             /*
                             SelectElement oSelect = new SelectElement(driver.FindElement(By.Id(Element_ID)));
                             oSelect.SelectByIndex(index);
@@ -1736,8 +1950,11 @@ namespace YesiLdefter
                         //Bu komut klavyeye basar gibi davranıyor, gönder.exe gibi çalışıyor
                         //SendKeys.Send(writeValue);// + "{ENTER}");
                         
-                        //Bu işlemde direkt nesneye fileName atama yapıyor  
+                        // Bu işlemde direkt nesneye fileName atama yapıyor  
+                        // Resim yükleniyor .....
+                        //
                         element.SendKeys(writeValue);
+                        Thread.Sleep(2000);
                     }
                     //v.SQL = v.SQL + v.ENTER + myNokta + " set file (SendKeys.Send) : " + writeValue;
                 }
@@ -1943,7 +2160,6 @@ namespace YesiLdefter
                     v.ENTER2 + inner);
             }
         }
-
         private async Task<bool> getSecurityImageValue(IWebDriver wb, webNodeValue wnv, string idName)
         {
             bool onay = false;
@@ -1962,10 +2178,6 @@ namespace YesiLdefter
             // image yi bitmap a çevir
             Bitmap workingImage = new Bitmap(oldImage, oldImage.Width, oldImage.Height);
             */
-
-
-
-
 
             // Download the image from the src URL
             using (WebClient webClient = new WebClient())
@@ -2078,14 +2290,13 @@ namespace YesiLdefter
             */
             #endregion
         }
-
         private async Task<string> getInputBoxValue(IWebDriver wb, webNodeValue wnv)
         {
             vUserInputBox iBox = new vUserInputBox();
             iBox.Clear();
             iBox.title = wnv.OuterText;
             iBox.promptText = wnv.InnerText;
-            iBox.value = "0";
+            iBox.value = wnv.writeValue;
             iBox.displayFormat = "";
             iBox.fieldType = 0;
 
@@ -2103,6 +2314,7 @@ namespace YesiLdefter
         }
 
         #endregion subFunctions
+
 
         #region getHtmlTable
         private void getHtmlTable(IWebDriver wb, ref webNodeValue wnv, string idName)

@@ -400,41 +400,7 @@ namespace YesiLdefter
             tSql = Sqls.preparingUstadUsersSql("", "", Id);
             t.SQL_Read_Execute(v.dBaseNo.UstadCrm, ds_Query2, ref tSql, "UstadUsers", "SetUserIsActive");
         }
-
-        /*
-        void SetUserRegistry(int UserId)
-        {
-            //var regUser = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(@"" + regPath);
-
-            //
-            // user işlemleri
-            //
-            //regUser.SetValue("eMail" + UserId.ToString(), u_user_email, Microsoft.Win32.RegistryValueKind.String);
-            reg.SetUstadRegistry("eMail" + UserId.ToString(), u_user_email);
-
-            // 
-            // last işlemler
-            //
-            //regUser.SetValue("userLastLogin", u_user_email, Microsoft.Win32.RegistryValueKind.String);
-            reg.SetUstadRegistry("userLastLogin", u_user_email);
-
-            if (((DevExpress.XtraEditors.CheckButton)btn_BHatirla).Checked)
-            {
-                //regUser.SetValue("userRemember", "true", Microsoft.Win32.RegistryValueKind.String);
-                //regUser.SetValue("userLastKey", u_user_key, Microsoft.Win32.RegistryValueKind.String);
-                reg.SetUstadRegistry("userRemember", "true");
-                reg.SetUstadRegistry("userLastKey", u_user_key);
-            }
-            else
-            {
-                //regUser.SetValue("userRemember", "false", Microsoft.Win32.RegistryValueKind.String);
-                //regUser.SetValue("userLastKey", "", Microsoft.Win32.RegistryValueKind.String);
-                reg.SetUstadRegistry("userRemember", "false");
-                reg.SetUstadRegistry("userLastKey", "");
-            }
-
-        }
-        */
+                
         void GetUserRegistry()
         {
             userFirms.GetUserRegistry(regPath);

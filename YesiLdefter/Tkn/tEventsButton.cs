@@ -1126,6 +1126,9 @@ namespace Tkn_Events
             /// şimdi basılan butonun kaydını
             if (onay)
             {
+                v.Kullaniciya_Mesaj_Var = "Kayıt işlemi başladı ...";
+                v.timer_Kullaniciya_Mesaj_Varmi.Enabled = true;
+
                 tSave sv = new tSave();
                 onay = sv.tDataSave(tForm, tableIPCode);
                 if (onay)

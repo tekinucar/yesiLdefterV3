@@ -135,6 +135,9 @@ namespace YesiLdefter
             if (v.active_DB.localMSSQLConn != null)
             {
                 onay = dbConnect(false);
+
+                if ((onay) && (v.SP_TabimIniWrite))
+                    writeTabSurucuIni();
             }
 
             if (onay)
@@ -153,13 +156,25 @@ namespace YesiLdefter
                 /// user tablosu hazır mı ?
                 /// 
                 onayUserInput = checkedSurucu07UserTable();
-
+                                
                 if (onayUserInput)
                 {
                     /// DataSet ler tespit et
                     InitDataSets();
                     /// Butonları tespit et
                     InitButtons();
+                    /// User tablosuna yeni eklenen fieldler olamdığı için 
+                    /// ds tekrar okunarak yeni fieldlerin gelmesi sağlanıyor
+                    if (ds_UserAbout != null)
+                    {
+                        /// field list tablosunu sil 
+                        /// yeni fieldleri okusun
+                        
+                        t.TableFieldsListRefresh(this, ds_UserAbout);
+
+                        t.TableRefresh(this, ds_UserAbout);
+                    }
+                    
 
                     /// Kullanıcı Adı combo sunun içi dolduruluyor
                     /// 
@@ -320,7 +335,9 @@ namespace YesiLdefter
                 if (v.active_DB.localUserName == "") v.active_DB.localUserName = "TABIM";
                 if (v.active_DB.localPsw == "") v.active_DB.localPsw = "312";
                 if (t.IsNotNull(v.active_DB.localDBName) == false) v.active_DB.localDBName = "Surucu07";
-                if (v.active_DB.localServerName == "") v.active_DB.localServerName = t.Find_ListAvailableMSSQLServers();
+
+                if (v.active_DB.localServerName == "")
+                    v.active_DB.localServerName = t.Find_ListAvailableMSSQLServers();
 
                 t.preparingLocalDbConnectionText();
 
@@ -410,7 +427,7 @@ namespace YesiLdefter
             }
             catch (Exception)
             {
-                MessageBox.Show("Bilgisayarınızda Windows.Register hatası oluşmaktadır. Kullanıcı giriş ismini ve şifresini manuel giriniz...");
+                MessageBox.Show("Tabim kullanıcı giriş isminizi ve şifresinizi giriniz... Örnek : ADMIN, ******* ");
                 //throw;
             }
             
@@ -474,10 +491,20 @@ namespace YesiLdefter
         }
         void btn_Card_F01_SaveClick(object sender, EventArgs e)
         {
+            //sil 
+            //t.TableFieldsListRefresh(ds_UserAbout);
+
+            v.tUser.FirstName = ds_UserAbout.Tables[0].Rows[0]["UserFirstName"].ToString();
+            v.tUser.LastName = ds_UserAbout.Tables[0].Rows[0]["UserLastName"].ToString();
+            v.tUser.MobileNo = ds_UserAbout.Tables[0].Rows[0]["UserMobileNo"].ToString();
             v.tUser.MebbisCode = ds_UserAbout.Tables[0].Rows[0]["MebbisCode"].ToString();
             v.tUser.MebbisPass = ds_UserAbout.Tables[0].Rows[0]["MebbisPass"].ToString();
 
-            if (t.IsNotNull(v.tUser.MebbisCode) && t.IsNotNull(v.tUser.MebbisPass))
+            if (t.IsNotNull(v.tUser.FirstName) &&
+                t.IsNotNull(v.tUser.LastName) &&
+                t.IsNotNull(v.tUser.MobileNo) &&
+                t.IsNotNull(v.tUser.MebbisCode) && 
+                t.IsNotNull(v.tUser.MebbisPass))
             {
                 v.SP_UserLOGIN = true;
                 ///
@@ -654,7 +681,7 @@ namespace YesiLdefter
 
             if (v.tUser.UserFirmGUID == "")
             {
-                /// Surucu07 üzerinden gerekli bilgileri oku
+                /// Surucu07 üzerindeki paramalt tablosundaki gerekli bilgileri oku
                 /// 
                 read_FirmAbout();
                 /// UstadCrm e kaydet ve FirmGUID üret
@@ -707,7 +734,22 @@ namespace YesiLdefter
             // FirmGUID yok ise
             bool onay = false;
 
-            if (t.IsNotNull(v.tTabimFirm.FirmGUID))
+            /// Kullanıcının firmGUID yok ise
+            /// paramalt tablosundan gelen firmGUID var ise
+            /// onu users tablosundaki tüm kullanıcalara update et
+            /// 
+            if ((v.tUser.UserFirmGUID == "") &&
+                t.IsNotNull(v.tTabimFirm.FirmGUID))
+            {
+                /// mevcut FirmGUID bilgisini 
+                /// Surucu07.paramalt tablosuna ve users tablosundaki tüm kullanıcılara ekle
+                ///
+                setUsersFirmGUID();
+
+                onay = true;
+            }    
+
+            if (t.IsNotNull(v.tTabimFirm.FirmGUID) == false)
             {
                 if (firmaBilgileri_ != null)
                 {
@@ -753,8 +795,7 @@ namespace YesiLdefter
                     setUsersFirmGUID();
                 }
             }
-            else onay = true;
-
+            
             return onay;
         }
         void setUsersFirmGUID()
@@ -835,36 +876,43 @@ namespace YesiLdefter
                     case 0:
                         {
                             ch = inputCase[i-1];
-                            if (ch == 304) ch = (char)221; // İ
-                            xx = 7 + ch;
+                            xx = 7 + checkedChar(ch);
                             newCase += (char)xx;
                             break; // break ifadesini sakın silme
                         }
                     case 1:
                         {
                             ch = inputCase[i-1];
-                            xx = 145 - ch;
+                            xx = 145 - checkedChar(ch);
                             newCase += (char)xx;
                             break; 
                         }
                     case 2:
                         {
                             ch = inputCase[i-1];
-                            xx = 155 - ch;
+                            xx = 155 - checkedChar(ch);
                             newCase += (char)xx;
                             break; 
                         }
                     case 3:
                         {
                             ch = inputCase[i-1];
-                            xx = (134 - ch) + 7;
+                            xx = (134 - checkedChar(ch)) + 7;
                             newCase += (char)xx;
                             break; 
                         }
                 }
             }
-
             return newCase;
+        }
+        private char checkedChar(char ch)
+        {
+            //if (ch == 286) ch = (char)208; // Ğ
+            //if (ch == 350) ch = (char)222; // Ş
+            if (ch == 304) ch = (char)221; // İ
+            //if (ch == 287) ch = (char)240; // ğ
+            //if (ch == 351) ch = (char)254; // ş
+            return ch;
         }
         private string preparingEncodePassword(string inputCase)
         {

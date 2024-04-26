@@ -64,13 +64,13 @@ namespace Tkn_Variable
                 localUserName = "";
                 localPsw = "";
                 localConnectionText = "";
-        }
-        /// <summary>
-        /// runDBaseNo ile o anda hangi database üzerinde çalışacağı 
-        /// hakkında bilgi vermek/almak için kullanılıyor
-        /// Örnek : t.tTableFind() 
-        /// </summary>
-        public v.dBaseNo runDBaseNo { get; set; }
+            }
+            /// <summary>
+            /// runDBaseNo ile o anda hangi database üzerinde çalışacağı 
+            /// hakkında bilgi vermek/almak için kullanılıyor
+            /// Örnek : t.tTableFind() 
+            /// </summary>
+            public v.dBaseNo runDBaseNo { get; set; }
             public bool mainManagerDbUses { get; set; }
             //Tabim.Surucu07 için
             public bool localDbUses { get; set; }
@@ -188,7 +188,6 @@ namespace Tkn_Variable
         // picture nesnesi ile Save() functionu arasında veri taşıyıcı
         //public static WebBrowser webMain = null;
         public static Form mainForm { get; set; }
-
         public static DevExpress.XtraScheduler.TimeRuler timeRuler = new TimeRuler();
 
         public static string spFormName = "ustad";
@@ -255,8 +254,12 @@ namespace Tkn_Variable
         public static string EXE_ScriptsPath = string.Empty;
         public static string sp_Sakla = string.Empty;
 
+        public static string SP_TabimParamsKurumTipi = "MTSK";
+        public static string SP_TabimParamsServerName = string.Empty;
 
         public static Boolean SP_TabimDbConnection = false;
+        public static Boolean SP_TabimIniWrite = false;
+
         public static Boolean SP_UserIN = false;
         public static Boolean SP_UserLOGIN = true;
         public static Boolean SP_CheckedNewApplication = false;
@@ -582,6 +585,12 @@ namespace Tkn_Variable
             Disable
         }
 
+        public enum fileType : byte
+        {
+            ActiveExe,
+            OrderFile
+        }
+
         #endregion Enum
 
         // *** Object Variables *** //
@@ -643,6 +652,7 @@ namespace Tkn_Variable
         public static string SQL { get; set; }
         public static string SQLSave { get; set; }
         public static string SQLState { get; set; }
+        public static System.Windows.Forms.Timer timer_Kullaniciya_Mesaj_Varmi = null;
         public static string Kullaniciya_Mesaj_Var { get; set; }
         public static Boolean Kullaniciya_Mesaj_Show = false;
         public static Boolean Onay { get; set; }
@@ -1141,6 +1151,7 @@ namespace Tkn_Variable
         // resim editorunu açarken gerekli olan bilgiler
         public static vResimEditor tResimEditor = new vResimEditor();
 
+        public static vMsFileUpdate tMsFileUpdate = new vMsFileUpdate();
         public static vMsDbUpdate tMsDbUpdate = new vMsDbUpdate();
 
         public static OpenQA.Selenium.IWebDriver webDriver_ = null;
@@ -1219,18 +1230,25 @@ namespace Tkn_Variable
         public string aktifPageCode { get; set; } // o anda hangi pageCode için çalışıyor
         public string nodeIdList { get; set; } // myTriggerList nin işini yapıyor
         public string tableIPCode { get; set; }
-        public bool siraliIslem { get; set; }
+        public bool siraliIslemVar { get; set; }
         public bool siraliIslemAktif { get; set; }
+        public string siraliIslemTableIPCode { get; set; }
+        public DataSet siraliIslem_ds = null;
+        public DataNavigator siraliIslem_dN = null;
         public DataSet aktif_ds = null;
         public DataNavigator aktif_dN = null;
-        
+        public Control siraliIslem_Btn = null;
         public void Clear()
         {
             aktifPageCode = "";
             nodeIdList = "";
             tableIPCode = "";
-            siraliIslem = false;
+            siraliIslemVar = false;
             siraliIslemAktif = false;
+            siraliIslemTableIPCode = "";
+            siraliIslem_Btn = null;
+            siraliIslem_ds = null;
+            siraliIslem_dN = null;
             aktif_ds = null;
             aktif_dN = null;
         }
@@ -1398,6 +1416,32 @@ namespace Tkn_Variable
         }
     }
 
+    public class vMsFileUpdate
+    {
+        public vMsFileUpdate()
+        {
+            Clear();
+        }
+        public int id { get; set; }
+        public string fileName { get; set; }
+        public string extension { get; set; }
+        public string versionNo { get; set; }
+        public string packetName { get; set; }
+        public string pathName { get; set; }
+        public string about { get; set; }
+
+        public void Clear()
+        {
+            id = 0;
+            fileName = "";
+            extension = "";
+            versionNo = "";
+            packetName = "";
+            pathName = "";
+            about = "";
+        }
+    }
+
     public class vMsDbUpdate
     {
         public vMsDbUpdate()
@@ -1449,6 +1493,11 @@ namespace Tkn_Variable
     // user/kullanıcı bilgileri
     public class tUstadUser
     {
+        public tUstadUser()
+        {
+            Clear();
+        }
+
         public bool IsActive = true;
         public int UserId { get; set; }
         public string UserGUID { get; set; }
@@ -1468,6 +1517,29 @@ namespace Tkn_Variable
         public string MebbisPass { get; set; }
         public string UserTcNo { get; set; }
         public string Username_ { get; set; } /* Tabim users dan gelen bilgi */
+
+        public void Clear()
+        {
+            IsActive = true;
+            UserId = 0;
+            UserGUID = "";
+            UserFirmGUID = "";
+            FullName = "";
+            FirstName = "";
+            LastName = "";
+            eMail = "";
+            MobileNo = "";
+            Key = "";
+            UserDbTypeId = 0;
+            MainFirmId = 0;
+            ExternalFirmId = 0;
+            MainFirmMenuCode = "";
+            ExternalFirmMenuCode = "";
+            MebbisCode = "";
+            MebbisPass = "";
+            UserTcNo = "";
+            Username_ = "";
+        }
 
     }
     // firm/kullanıcının bağlanıp işlem yaptığı firma bilgileri
@@ -1561,16 +1633,26 @@ namespace Tkn_Variable
         public string activeExeName { get; set; }
         public string activePath { get; set; }
 
-        // ftp deki exe
+        // diğer dosyalar
+        public string orderFileVersionNo { get; set; }
+        public string orderFileName { get; set; }
+        public string orderFileExtension { get; set; }
+        public string orderFilePath { get; set; }
+
+
+        // ftp deki exe, file
         public string ftpVersionNo { get; set; }
-        public string ftpExeName { get; set; }
+        public string ftpFileName { get; set; }
+        public string ftpFileExtension { get; set; }
         public string ftpPacketName { get; set; }
+        public string ftpPathName { get; set; }
 
         // yeni hazırlanan exe
         public string newVersionNo { get; set; }
         public string newFileName { get; set; }
         public string newPacketName { get; set; }
-        public string newPathFileName { get; set; }
+        
+        public v.fileType FileType { get; set; }
     }
 
     public class FirmUserList
@@ -1633,54 +1715,19 @@ namespace Tkn_Variable
 
     public class cComputer
     {
-        private string SystemName_ = "";
-        private string Network_MACAddress_ = "";
+        public int UstadCrmComputerId { get; set; }
+        public string PcName { get; set; }
+        public string Network_MACAddress { get; set; }
+        public string CPUType { get; set; }
+        public string CPUSpeed { get; set; }
+        public string OperatingSystem { get; set; }
 
-        private string Processor_Name_ = "";
-        private string Processor_Id_ = "";
+        public string Processor_Name { get; set; }
+        public string Processor_Id { get; set; }
 
-        private string DiskDrive_Name_ = "";
-        private string DiskDrive_Model_ = "";
-        private string DiskDrive_SerialNumber_ = "";
-
-        public string SystemName
-        {
-            get { return SystemName_; }
-            set { SystemName_ = value; }
-        }
-        public string Network_MACAddress
-        {
-            get { return Network_MACAddress_; }
-            set { Network_MACAddress_ = value; }
-        }
-
-        public string Processor_Name
-        {
-            get { return Processor_Name_; }
-            set { Processor_Name_ = value; }
-        }
-        public string Processor_Id
-        {
-            get { return Processor_Id_; }
-            set { Processor_Id_ = value; }
-        }
-
-
-        public string DiskDrive_Name
-        {
-            get { return DiskDrive_Name_; }
-            set { DiskDrive_Name_ = value; }
-        }
-        public string DiskDrive_Model
-        {
-            get { return DiskDrive_Model_; }
-            set { DiskDrive_Model_ = value; }
-        }
-        public string DiskDrive_SerialNumber
-        {
-            get { return DiskDrive_SerialNumber_; }
-            set { DiskDrive_SerialNumber_ = value; }
-        }
+        public string DiskDrive_Name { get; set; }
+        public string DiskDrive_Model { get; set; }
+        public string DiskDrive_SerialNumber { get; set; }
 
 
         ///Win32_Processor

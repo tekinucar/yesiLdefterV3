@@ -43,12 +43,175 @@ using Tkn_IniFile;
 using DevExpress.XtraBars.Docking2010.Views.WindowsUI;
 using DevExpress.XtraBars.Docking2010.Customization;
 using System.Data.Sql;
+using System.IO.Compression;
+using Tkn_ExeUpdate;
 
 namespace Tkn_ToolBox
 {
 
     public class tToolBox: tBase
     {
+
+        #region fileUpdates
+        public void fileUpdatesChecked()
+        {
+            string lastMsFileUpdatesId = getMusteriFileUpdateIdList();
+
+            tSQLs sqls = new tSQLs();
+            DataSet ds = new DataSet();
+
+            /// FileUpdate olup olmadığı sorgusu ise MainManagerV3 / UstadManagerV3 
+            /// [dbo].[MsFileUpdates] üzerinden sorgulanıyor
+            /// 
+            string sql = sqls.Sql_MsFileUpdates(lastMsFileUpdatesId);
+            if (SQL_Read_Execute(v.dBaseNo.publishManager, ds, ref sql, "", "MsFileUpdates"))
+            {
+                //MessageBox.Show("fileUpdatesChecked - 2 " + sql);
+                if (IsNotNull(ds))
+                {
+                    //MessageBox.Show("fileUpdatesChecked - 3 ");
+                    runMsFileUpdates(ds);
+                }
+            }
+        }
+        private string getMusteriFileUpdateIdList()
+        {
+            tSQLs sqls = new tSQLs();
+            DataSet ds = new DataSet();
+            string sql = "";
+            string IdList = " 0 ";
+            sql = sqls.Sql_FileUpdatesIdList();
+
+            v.dBaseNo dBaseNo = v.dBaseNo.Project;
+            if (v.active_DB.localDbUses)
+                dBaseNo = v.dBaseNo.Local;
+
+            bool onay = SQL_Read_Execute(dBaseNo, ds, ref sql, "", "FileUpdates");
+
+            if (onay)
+            {
+                if (IsNotNull(ds))
+                {
+                    int count = ds.Tables[0].Rows.Count;
+                    // sadece maxID geliyor artık
+                    if (count > 0)
+                        IdList = ds.Tables[0].Rows[0]["MsFileUpdateId"].ToString();
+                    else IdList = " 0 ";
+                }
+                else IdList = " 0 ";
+            }
+            else
+            {
+                IdList = " 0 ";
+            }
+
+            if (IdList == "")
+                IdList = " 0 ";
+
+            return IdList;
+        }
+        private void runMsFileUpdates(DataSet ds)
+        {
+            tExeUpdate exe = new tExeUpdate();
+
+            bool onay = false;
+
+            foreach (DataRow row in ds.Tables[0].Rows)
+            {
+                readMsFileUpdate(row);
+                
+                if (IsNotNull(v.tMsFileUpdate.pathName) == false)
+                    v.tMsFileUpdate.pathName = v.tExeAbout.activePath;
+
+                onay = ftpDownload(v.tMsFileUpdate.pathName, v.tMsFileUpdate.packetName);
+                if (onay)
+                    onay = exe.ExtractFile(v.tMsFileUpdate.pathName, v.tMsFileUpdate.packetName);
+
+                // activeFileName   = v.tExeAbout.activeExeName
+                // extension        = 
+                // oldVersionNo     = v.tExeAbout.activeVersionNo
+                // packetName       = v.tExeAbout.ftpPacketName
+                if (onay)
+                    onay = exe.fileNameChange(v.tMsFileUpdate.pathName, v.tMsFileUpdate.fileName, v.tMsFileUpdate.extension, v.tMsFileUpdate.versionNo, v.tMsFileUpdate.packetName);
+
+                // FileUpdates tablosuna işle
+                if (onay)
+                    insertFileUpdates();
+            }
+        }
+        private void readMsFileUpdate(DataRow msFileUpdatesRow)
+        {
+            v.tMsFileUpdate.Clear();
+
+            v.tMsFileUpdate.id = (int)msFileUpdatesRow["Id"];
+            v.tMsFileUpdate.fileName = msFileUpdatesRow["FileName"].ToString();
+            v.tMsFileUpdate.extension = msFileUpdatesRow["Extension"].ToString();
+            v.tMsFileUpdate.versionNo = msFileUpdatesRow["VersionNo"].ToString();
+            v.tMsFileUpdate.packetName = msFileUpdatesRow["PacketName"].ToString();
+            v.tMsFileUpdate.pathName = msFileUpdatesRow["PathName"].ToString();
+            v.tMsFileUpdate.about = msFileUpdatesRow["About"].ToString();
+        }
+        private void insertFileUpdates()
+        {
+            /// Sql execute sırasında script kontrolünden geçmeyecek
+            ///
+            v.con_CreateScriptPacket = true;
+
+            DataSet ds = new DataSet();
+            string sql = "";
+            sql = Sql_FileUpdatesInsert();
+            try
+            {
+                SQL_Read_Execute(v.dBaseNo.Project, ds, ref sql, "", "FileUpdates");
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            v.con_CreateScriptPacket = false;
+        }
+
+        private string Sql_FileUpdatesInsert()
+        {
+            // müşteri database
+            string networkKey = v.tComputer.Network_MACAddress;
+            string pcName = v.tComputer.PcName;
+
+            // Müşteri database üzerinde çalıştırılan update lerin kaydı
+            string cumle =
+            @" if ( Select count(*) ADET from [dbo].[FileUpdates] where 0 = 0 
+                    and [MsFileUpdateId] = " + v.tMsFileUpdate.id.ToString() + @" ) = 0 
+        begin
+            INSERT INTO [dbo].[FileUpdates]
+           ([IsActive]
+           ,[MsFileUpdateId]
+           ,[UpdateDate]
+           ,[FileName]
+           ,[Extension]
+           ,[VersionNo]
+           ,[PacketName]
+           ,[PathName]
+           ,[About]
+           ,[PcName]
+           ,[NetworkMacAddress])
+            VALUES
+           ( 1," + v.tMsFileUpdate.id.ToString() +
+            ", getdate() " +
+            ",'" + v.tMsFileUpdate.fileName + "'" +
+            ",'" + v.tMsFileUpdate.extension + "'" +
+            ",'" + v.tMsFileUpdate.versionNo + "'" +
+            ",'" + v.tMsFileUpdate.packetName + "'" +
+            ",'" + v.tMsFileUpdate.pathName + "'" +
+            ",'" + v.tMsFileUpdate.about + "'" +
+            ",'" + pcName + "'" +
+            ",'" + networkKey + "'" +
+           @"); 
+        end ";
+            return cumle;
+        }
+
+
+        #endregion fileUpdates
 
         #region *Database İşlemleri
 
@@ -63,19 +226,22 @@ namespace Tkn_ToolBox
             tSQLs sqls = new tSQLs();
             DataSet ds = new DataSet();
 
+            //MessageBox.Show("dbUpdatesChecked - 1 ");
+
             /// Update olup olmadığı sorgusu ise MainManagerV3 / UstadManagerV3 
             /// [dbo].[MsDbUpdates] üzerinden sorgulanıyor
             /// 
             string sql = sqls.Sql_MsDbUpdates(lastMsDbUpdatesId);
-            if (SQL_Read_Execute(v.dBaseNo.Manager, ds, ref sql, "", "MsDbUpdates"))
+            if (SQL_Read_Execute(v.dBaseNo.publishManager, ds, ref sql, "", "MsDbUpdates"))
             {
+                //MessageBox.Show("dbUpdatesChecked - 2 " + sql);
                 if (IsNotNull(ds))
                 {
-                    readMsDbUpdatesList(ds);
+                    //MessageBox.Show("dbUpdatesChecked - 3 ");
+                    runMsDbUpdates(ds);
                 }
             }
         }
-
         private string getMusteriDbUpdateIdList()
         {
             tSQLs sqls = new tSQLs();
@@ -116,11 +282,11 @@ namespace Tkn_ToolBox
 
             return IdList;            
         }
-
-        private void readMsDbUpdatesList(DataSet ds)
+        private void runMsDbUpdates(DataSet ds)
         {
-            int count = ds.Tables[0].Rows.Count;
             Int16 typeId = 0;
+
+            //MessageBox.Show("readMsDbUpdatesList - 1 ");
 
             foreach (DataRow row in ds.Tables[0].Rows)
             {
@@ -137,7 +303,7 @@ namespace Tkn_ToolBox
                 //if (typeId == 24)
                 if (typeId == 31) runDbUpdateTriggerAdd();
                 //if (typeId == 32) 
-                //if (typeId == 41) 
+                if (typeId == 41) runDbUpdateProcedureAdd();
                 //if (typeId == 42) 
                 //if (typeId == 51) 
                 //if (typeId == 52) 
@@ -163,15 +329,14 @@ namespace Tkn_ToolBox
   ( 52,    N'Function update')
             */
         }
-
         private void readMsDbUpdate(DataRow msDbUpdatesRow)
         {
             v.tMsDbUpdate.Clear();
-            
+
             v.tMsDbUpdate.id = (int)msDbUpdatesRow["Id"];
             v.tMsDbUpdate.sectorTypeId = (Int16)msDbUpdatesRow["SectorTypeId"];
             v.tMsDbUpdate.updateTypeId = (Int16)msDbUpdatesRow["UpdateTypeId"];
-            
+
             v.tMsDbUpdate.dBaseNoTypeId = (Int16)msDbUpdatesRow["DBaseNoTypeId"];
             v.tMsDbUpdate.schemaName = msDbUpdatesRow["SchemaName"].ToString();
             v.tMsDbUpdate.tableName = msDbUpdatesRow["TableName"].ToString();
@@ -261,7 +426,7 @@ namespace Tkn_ToolBox
 
             DataSet ds = new DataSet();
 
-            if (SQL_Read_Execute(v.dBaseNo.Manager, ds, ref tSql, "", "tableScripts"))
+            if (SQL_Read_Execute(v.dBaseNo.publishManager, ds, ref tSql, "", "tableScripts"))
             {
                 if (IsNotNull(ds))
                 {
@@ -276,6 +441,29 @@ namespace Tkn_ToolBox
                     {
                         if (v.tMsDbUpdate.id > 0)
                             insertDbUpdates();
+                    }
+                }
+                else
+                {
+                    if (IsNotNull(v.tMsDbUpdate.sqlScript))
+                    {
+                        // MsDbUpdates üzerindeki Sql Scripti al
+                        v.dBaseNo dBaseNo = getDBaseNo(v.tMsDbUpdate.dBaseNoTypeId.ToString());
+                        string databaseName = Find_dBLongName(Convert.ToString((byte)dBaseNo));
+                        vt.SchemasCode = v.tMsDbUpdate.schemaName;
+                        vt.DBaseNo = dBaseNo;
+                        vt.DBaseName = databaseName;
+                        vt.TableName = v.tMsDbUpdate.tableName;
+                        vt.SqlScript = v.tMsDbUpdate.sqlScript;
+
+                        onay = db.preparingCreateTable(vt);
+
+                        // Müşteri database nin üzerinde yapılan işlemleri DBUpdates tablosuna kaydedilecek
+                        if (onay)
+                        {
+                            if (v.tMsDbUpdate.id > 0)
+                                insertDbUpdates();
+                        }
                     }
                 }
             }
@@ -367,6 +555,9 @@ namespace Tkn_ToolBox
             string cumle1 = v.tMsDbUpdate.sqlScript;
             string cumle2 = v.tMsDbUpdate.sqlScript;
 
+            /// cumle1 ve cumle2 aynı sqllerdir
+            /// drop kontrolü yapılıyor, yok ise önce drop sqli hazırla ve uygula
+            /// 
             if (cumle1.IndexOf("drop") == -1)
             {
                 /// trigger mevcut ise önce sil
@@ -382,18 +573,7 @@ namespace Tkn_ToolBox
                     runScript(dBaseNo, cumle1);
                 }
             }
-
-            /*
-            if (cumle2.IndexOf("sys.triggers") == -1)
-            {
-                cumle2 = @"
-                if ( select count(object_id) as ADET from sys.triggers where name = '"+ v.tMsDbUpdate.tableName + @"') = 0 
-                begin
-                  "+ cumle2 +@"
-
-                end ";
-            }
-            */
+            // create cumlesi            
             cumle2 = Str_AntiCheck(cumle2);
             // hazırlanan cumleyi müşteri database üzerinde çalıştıralım
             bool onay = runScript(dBaseNo, cumle2);
@@ -407,17 +587,48 @@ namespace Tkn_ToolBox
         // 32,    Trigger update
         private void runDbUpdateTriggerUpdate()
         {
-
+            //
         }
         // 41,    Procedure add
         private void runDbUpdateProcedureAdd()
         {
+            v.dBaseNo dBaseNo = getDBaseNo(v.tMsDbUpdate.dBaseNoTypeId.ToString());
+            string cumle1 = v.tMsDbUpdate.sqlScript;
+            string cumle2 = v.tMsDbUpdate.sqlScript;
 
+            /// cumle1 ve cumle2 aynı sqllerdir
+            /// drop kontrolü yapılıyor, yok ise önce drop sqli hazırla ve uygula
+            /// 
+            if (cumle1.IndexOf("drop") == -1)
+            {
+                /// procedure mevcut ise önce sil
+                /// 
+                if (cumle1.IndexOf("sys.procedures") == -1)
+                {
+                    cumle1 = @"
+                    if ( select count(object_id) as ADET from sys.procedures where name = '" + v.tMsDbUpdate.tableName + @"') = 1 
+                    begin
+                        DROP PROCEDURE [" + v.tMsDbUpdate.schemaName + @"].[" + v.tMsDbUpdate.tableName + @"] 
+                    end ";
+
+                    runScript(dBaseNo, cumle1);
+                }
+            }
+            // create cumlesi            
+            cumle2 = Str_AntiCheck(cumle2);
+            // hazırlanan cumleyi müşteri database üzerinde çalıştıralım
+            bool onay = runScript(dBaseNo, cumle2);
+
+            // Müşteri database nin üzerinde yapılan işlemleri DBUpdates tablosuna kaydedilecek
+            if (onay)
+            {
+                insertDbUpdates();
+            }
         }
         // 42,    Procedure update
         private void runDbUpdateProcedureUpdate()
         {
-
+            //
         }
         // 51,    Function add
         private void runDbUpdateFunctionAdd()
@@ -603,9 +814,6 @@ namespace Tkn_ToolBox
 
             return Sql;
         }
-
-
-
 
         public string preparingMyProp(string databaseName, string schemas, string tableName, string tableIPCode, string sql)
         {
@@ -1148,9 +1356,29 @@ namespace Tkn_ToolBox
             #endregion NotExecute
 
             #region 2. adımda Tablonun Fields bilgileri geliyor
+            preparingTableAndFields(tForm, dsData);
+            #endregion 2. adım
+
+            if (Cursor.Current == Cursors.WaitCursor)
+                Cursor.Current = Cursors.Default;
+
+            if (cntrl != null)
+            {
+                if (cntrl.GetType().ToString().IndexOf("DevExpress.XtraGrid.GridControl") > -1)
+                    GridGroupRefresh(cntrl);
+            }
+
+            return onay;
+        }
+
+        public void preparingTableAndFields(Form tForm, DataSet dsData)
+        {
+            vTable vt = new vTable();
+            Preparing_DataSet(tForm, dsData, vt);
+
             /// tablo ilk defa okunuyorsa ve
             /// data tablosuyla tablonun fields listesi hazırlanıyor 
-            if ((vt.TableCount == 0) &&
+            if ((vt.TableCount == 1) &&
                 (vt.Cargo == "data"))
             {
                 if (IsDataTable(dsData))
@@ -1176,19 +1404,8 @@ namespace Tkn_ToolBox
                     }
                 }
             }
-            #endregion 2. adım
-
-            if (Cursor.Current == Cursors.WaitCursor)
-                Cursor.Current = Cursors.Default;
-
-            if (cntrl != null)
-            {
-                if (cntrl.GetType().ToString().IndexOf("DevExpress.XtraGrid.GridControl") > -1)
-                    GridGroupRefresh(cntrl);
-            }
-
-            return onay;
         }
+
 
         #endregion Data_Read_Execute
 
@@ -1203,6 +1420,7 @@ namespace Tkn_ToolBox
             {
                 // bu table için fieldlist1 daha önce yüklenmiş demektir
                 // bir daha okumaya gerek yok
+                return;
             }
             else
             {
@@ -1929,6 +2147,50 @@ namespace Tkn_ToolBox
         }
         #endregion TableRemove
 
+        public void TableRemoveOnDataSet(DataSet ds, string name)
+        {
+            if (ds != null)
+            {
+                ds.Tables[name].Rows.Clear();
+                ds.Tables.Remove(ds.Tables[name]);
+            }
+        }
+
+        #region TableFieldsListRefresh
+        public void TableFieldsListRefresh(Form tForm, DataSet dsData)
+        {
+            if (dsData == null) return;
+
+            vTable vt = new vTable();
+            Preparing_DataSet(tForm, dsData, vt);
+
+            var matchingTable = v.tableList.Where(stringToCheck => stringToCheck.Contains(vt.TableName));
+            if (matchingTable.Any())
+            {
+                v.tableList.Remove(vt.TableName);
+                TableRemoveOnDataSet(v.ds_MsTableFields,vt.TableName);
+            }
+            /* burayı silme gerek olunca kullanırsın
+             * 
+            var matchingTableIPCode = v.tableIPCodeTableList.Where(stringToCheck => stringToCheck.Contains(vt.TableIPCode));
+            if (matchingTableIPCode.Any())
+            {
+                v.tableIPCodeTableList.Remove(vt.TableIPCode);
+                TableRemoveOnDataSet(v.ds_TableIPCodeTable, vt.TableIPCode);
+            }
+            var matchingTableIPCode2 = v.tableIPCodeFieldsList.Where(stringToCheck => stringToCheck.Contains(vt.TableIPCode));
+            if (matchingTableIPCode2.Any())
+            {
+                v.tableIPCodeFieldsList.Remove(vt.TableIPCode);
+                TableRemoveOnDataSet(v.ds_TableIPCodeFields, vt.TableIPCode);
+            }
+            */
+            preparingTableAndFields(tForm, dsData);
+        }
+
+        #endregion TableFieldsListRefresh
+
+
         #region TableRowDelete
         public Boolean TableRowDelete(DataSet ds, int TableNo)
         {
@@ -2164,7 +2426,15 @@ namespace Tkn_ToolBox
             v.SP_ConnBool_Project = (e.CurrentState == ConnectionState.Open);
 
             if (v.SP_ConnBool_Project == false)
-                v.Kullaniciya_Mesaj_Var = "DİKKAT : MxSQL Database bağlantısı koptu...";
+                v.Kullaniciya_Mesaj_Var = "DİKKAT : MsSQL Database bağlantısı koptu...";
+
+            if (v.SP_ConnBool_Project != v.SP_ConnBool_Project_Old)
+            {
+                v.Kullaniciya_Mesaj_Var = "Project bağlantı değişikliği ... " + v.SP_ConnBool_Project.ToString();
+                v.timer_Kullaniciya_Mesaj_Varmi.Enabled = true;
+            }
+
+            v.SP_ConnBool_Project_Old = v.SP_ConnBool_Project;
         }
 
         public void DBConnectStateManager(object sender, StateChangeEventArgs e)
@@ -2188,6 +2458,12 @@ namespace Tkn_ToolBox
                           "Server Name :  " + v.active_DB.managerServerName + "  " + v.ENTER +
                           "Database Name :  " + v.active_DB.managerDBName + "  ", "Önemli Uyarı");
                     }
+                }
+
+                if (v.SP_ConnBool_Manager != v.SP_ConnBool_Manager_Old)
+                {
+                    v.Kullaniciya_Mesaj_Var = "ManagerServer bağlantı değişikliği ... " + v.SP_ConnBool_Manager.ToString();
+                    v.timer_Kullaniciya_Mesaj_Varmi.Enabled = true;
                 }
 
                 v.SP_ConnBool_Manager_Old = v.SP_ConnBool_Manager;
@@ -2702,7 +2978,7 @@ namespace Tkn_ToolBox
             //Str_Replace(ref Sql, ":FIRM_FULLLIST", v.SP_FIRM_FULLLIST);
             //Str_Replace(ref Sql, ":FIRM_FULL_LIST", v.SP_FIRM_FULLLIST);
 
-            Str_Replace(ref Sql, ":VT_COMP_ID", v.tComp.SP_COMP_ID.ToString());
+            Str_Replace(ref Sql, ":VT_COMP_ID", v.tComputer.UstadCrmComputerId.ToString()); //v.tComp.SP_COMP_ID.ToString());
             Str_Replace(ref Sql, ":VT_PERIOD_ID", v.vt_PERIOD_ID.ToString());
             Str_Replace(ref Sql, ":VT_USER_ID", v.tUser.UserId.ToString());
             Str_Replace(ref Sql, ":USER_ID", v.tUser.UserId.ToString());
@@ -4901,8 +5177,10 @@ namespace Tkn_ToolBox
                 }
             }
 
-            //* date 58
-            if ((ftype == 58) || (ftype == 40) || (ftype == 61))
+            //* smalldatetime = 58
+            //* date = 40, 61
+            //* time = 41
+            if (ftype == 58)
             {
                 if ((fvalue == "") || (fvalue == "-1") || (fvalue == "0"))
                     fvalue = DateTime.Now.Date.ToShortDateString();
@@ -4918,20 +5196,52 @@ namespace Tkn_ToolBox
                 {
                     if ((fvalue != "first") && (fvalue != "-1"))
                     {
-                        //if (SetType == "and") MyStr = "Convert(Date, Convert(varchar(10)," + Field_Name + ", 103), 103) " + Operand + Tarih_Formati(Convert.ToDateTime(fvalue)) + " ";
+                        if (SetType == "and")
+                            MyStr = "Convert(SmallDatetime, " + Field_Name + ", 101) " + Operand + TarihSaat_Formati(Convert.ToDateTime(fvalue)) + " ";
+
+                        if (SetType == "as") MyStr = TarihSaat_Formati(Convert.ToDateTime(fvalue)) + " as " + Field_Name;
+                        if (SetType == "@") MyStr = "@" + Field_Name + Operand + Tarih_Formati(Convert.ToDateTime(fvalue)) + " ";
+                    }
+                    if ((fvalue == "first") || (fvalue == "-99"))
+                    {
+                        //if (SetType == "and") MyStr = "Convert(Datetime, Convert(varchar(10)," + Field_Name + ", 103), 103) " + Operand + "Convert(Datetime,'01.01.1900', 103) ";
 
                         if ((v.active_DB.projectDBType == v.dBaseType.MSSQL) && (SetType == "and"))
-                            MyStr = "Convert(Date, " + Field_Name + ", 103) " + Operand + Tarih_Formati(Convert.ToDateTime(fvalue)) + " ";
+                            MyStr = "Convert(Datetime, " + Field_Name + ", 103) " + Operand + "Convert(Datetime,'01.01.1900', 103) ";
+
+                        if (SetType == "as") MyStr = "'01.01.1900'" + " as " + Field_Name;
+                        if (SetType == "@") MyStr = "@" + Field_Name + Operand + "'01.01.1900'" + " ";
+                    }
+                }
+            }
+            //* date = 40, 61
+            //* time = 41
+            if ((ftype == 40) || (ftype == 61))
+            {
+                if ((fvalue == "") || (fvalue == "-1") || (fvalue == "0"))
+                    fvalue = DateTime.Now.Date.ToShortDateString();
+
+                if ((fvalue == null) ||
+                    (fvalue == "null") ||
+                    (fvalue == "NewRecord") ||
+                    (fvalue == "0"))
+                {
+                    MyStr = string.Empty;
+                }
+                else
+                {
+                    if ((fvalue != "first") && (fvalue != "-1"))
+                    {
+                        if ((v.active_DB.projectDBType == v.dBaseType.MSSQL) && (SetType == "and"))
+                            MyStr = "Convert(Datetime, " + Field_Name + ", 103) " + Operand + Tarih_Formati(Convert.ToDateTime(fvalue)) + " ";
 
                         if (SetType == "as") MyStr = Tarih_Formati(Convert.ToDateTime(fvalue)) + " as " + Field_Name;
                         if (SetType == "@") MyStr = "@" + Field_Name + Operand + Tarih_Formati(Convert.ToDateTime(fvalue)) + " ";
                     }
                     if ((fvalue == "first") || (fvalue == "-99"))
                     {
-                        //if (SetType == "and") MyStr = "Convert(Date, Convert(varchar(10)," + Field_Name + ", 103), 103) " + Operand + "Convert(Date,'01.01.1900', 103) ";
-
                         if ((v.active_DB.projectDBType == v.dBaseType.MSSQL) && (SetType == "and"))
-                            MyStr = "Convert(Date, " + Field_Name + ", 103) " + Operand + "Convert(Date,'01.01.1900', 103) ";
+                            MyStr = "Convert(Datetime, " + Field_Name + ", 103) " + Operand + "Convert(Datetime,'01.01.1900', 103) ";
 
                         if (SetType == "as") MyStr = "'01.01.1900'" + " as " + Field_Name;
                         if (SetType == "@") MyStr = "@" + Field_Name + Operand + "'01.01.1900'" + " ";
@@ -5099,7 +5409,7 @@ namespace Tkn_ToolBox
                 if (fname != "")
                 {
                     if (v.active_DB.projectDBType == v.dBaseType.MSSQL)
-                        sonuc = " Convert(date, Convert(varchar(10)," + fname + ", 103), 104) ";  //  Tarih_Formati(Convert.ToDateTime(fvalue)) + " ";
+                        sonuc = " Convert(Datetime, Convert(varchar(10)," + fname + ", 103), 104) ";  //  Tarih_Formati(Convert.ToDateTime(fvalue)) + " ";
                 }
             }
 
@@ -5232,7 +5542,7 @@ namespace Tkn_ToolBox
                 string myprop = dsData.Namespace.ToString();
                 myprop = myprop.Replace(oldValue, newValue);
                 dsData.Namespace = myprop;
-                v.Kullaniciya_Mesaj_Var = "DataState : Update";
+                //v.Kullaniciya_Mesaj_Var = "DataState : Update";
             }
         }
         #endregion
@@ -6430,15 +6740,8 @@ namespace Tkn_ToolBox
             */
 
             string ySql =
-              @"  select top 1 
-               upd.[Id]
-             , upd.[IsActive]
-             , upd.[RecordDate]
-             , upd.[ExeName]
-             , upd.[VersionNo]
-             , upd.[PacketName]
-             , upd.[About]
-             , GETDATE() DB_TARIH 
+              @"  select 
+               GETDATE() DB_TARIH 
              , CONVERT(varchar(10), GETDATE(), 104) TARIH 
              , CONVERT(varchar(10), GETDATE(), 102) YILAYGUN 
              , CONVERT(varchar(10), GETDATE(), 8) UZUN_SAAT 
@@ -6447,10 +6750,8 @@ namespace Tkn_ToolBox
              , MONTH(GETDATE()) AY 
              , DAY(GETDATE()) GUN 
              , DATEPART(weekday, GETDATE()) HAFTA_GUN
-            from MsExeUpdates upd order by upd.RecordDate desc 
             --3S_
             " + v.ENTER;
-
             DataSet ds = new DataSet();
             /*
  
@@ -6472,7 +6773,6 @@ UNION ALL
 SELECT 'Yılın İlk Günü',                DATEADD(yy, DATEDIFF(yy,0,getdate()), 0)
 UNION ALL
 SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(yy,DATEDIFF(yy,0,getdate())+1,0)))
-
             */
 
             if (SQL_Read_Execute(v.dBaseNo.publishManager, ds, ref ySql, "", "MSSQL Server Tarihi"))
@@ -6494,7 +6794,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 v.BUGUN_YIL = v.GECEN_AY_BUGUN.Year;
 
                 if (v.BUGUN_AY < 10)
-                    v.GECEN_YILAY = Convert.ToInt32(v.BUGUN_YIL.ToString() + '0' + v.BUGUN_AY.ToString());
+                     v.GECEN_YILAY = Convert.ToInt32(v.BUGUN_YIL.ToString() + '0' + v.BUGUN_AY.ToString());
                 else v.GECEN_YILAY = Convert.ToInt32(v.BUGUN_YIL.ToString() + v.BUGUN_AY.ToString());
 
                 // Gelecek Yil_Ay
@@ -6503,7 +6803,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 v.BUGUN_YIL = v.GELECEK_AY_BUGUN.Year;
 
                 if (v.BUGUN_AY < 10)
-                    v.GELECEK_YILAY = Convert.ToInt32(v.BUGUN_YIL.ToString() + '0' + v.BUGUN_AY.ToString());
+                     v.GELECEK_YILAY = Convert.ToInt32(v.BUGUN_YIL.ToString() + '0' + v.BUGUN_AY.ToString());
                 else v.GELECEK_YILAY = Convert.ToInt32(v.BUGUN_YIL.ToString() + v.BUGUN_AY.ToString());
 
                 // Bugün Yil_Ay
@@ -6512,7 +6812,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 v.BUGUN_YIL = v.BUGUN_TARIH.Year;
 
                 if (v.BUGUN_AY < 10)
-                    v.BUGUN_YILAY = Convert.ToInt32(v.BUGUN_YIL.ToString() + '0' + v.BUGUN_AY.ToString());
+                     v.BUGUN_YILAY = Convert.ToInt32(v.BUGUN_YIL.ToString() + '0' + v.BUGUN_AY.ToString());
                 else v.BUGUN_YILAY = Convert.ToInt32(v.BUGUN_YIL.ToString() + v.BUGUN_AY.ToString());
 
                 v.TARIH_SAAT = ds.Tables[0].Rows[0]["DB_TARIH"].ToString();
@@ -6548,19 +6848,49 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 v.BU_HAFTA_SONU_TARIH = v.BUGUN_TARIH.Date.AddDays(g);
 
                 Tarihin_Ayin_IlkGunu_SonGunu(v.BUGUN_TARIH, ref v.BU_AY_BASI_TARIH, ref v.BU_AY_SONU_TARIH);
-
-                v.tExeAbout.ftpVersionNo = ds.Tables[0].Rows[0]["VersionNo"].ToString();
-                v.tExeAbout.ftpExeName = ds.Tables[0].Rows[0]["ExeName"].ToString();
-                v.tExeAbout.ftpPacketName = ds.Tables[0].Rows[0]["PacketName"].ToString();
-
-                //if (v.tExeAbout.ftpVersionNo == "")
-                //    v.tExeAbout.ftpVersionNo = "20990101_1111";
             }
-            //MessageBox.Show(v.BUGUN_TARIH.ToString());
 
             ds.Dispose();
         }
         #endregion MSSQL_Server_Tarihi
+
+        #region MsExeUpdates Read
+        
+        public void read_MsExeUpdates()
+        {
+            string ySql =
+              @"  select top 1 
+               upd.[Id]
+             , upd.[IsActive]
+             , upd.[RecordDate]
+             , upd.[ExeName]
+             , upd.[VersionNo]
+             , upd.[PacketName]
+             , upd.[About]
+            from MsExeUpdates upd 
+            where upd.IsActive = 1
+            order by upd.RecordDate desc ";
+
+            DataSet ds = new DataSet();
+
+            if (SQL_Read_Execute(v.dBaseNo.publishManager, ds, ref ySql, "", "MsExeUpdates"))
+            {
+                v.tExeAbout.ftpVersionNo = ds.Tables[0].Rows[0]["VersionNo"].ToString();
+                v.tExeAbout.ftpFileName = ds.Tables[0].Rows[0]["ExeName"].ToString();
+                v.tExeAbout.ftpPacketName = ds.Tables[0].Rows[0]["PacketName"].ToString();
+            }
+
+            ds.Dispose();
+        }
+
+        #endregion MsExeUpdates
+
+        #region MsFileUpdates Read
+        public void read_MsFileUpdates()
+        {
+            fileUpdatesChecked();
+        }
+        #endregion MsFileUpdates
 
         #region YilAy - Mali Dönem Read
         public void YilAyRead()
@@ -6573,6 +6903,21 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 v.dBaseNo dBaseNo = v.dBaseNo.Project;
                 SQL_Read_Execute(dBaseNo, v.ds_YilAyList, ref Sql, tableName, "");
             }
+        }
+
+        public void TestRead()
+        {
+            DataSet ds = new DataSet();
+
+            string tableName = "UstadFirms";
+            string Sql = " Select * from [dbo].[UstadFirms] with (nolock) where FirmGUID = '60e9532c-bff2-4772-a593-ba5c7ec7e895' ";
+            Sql = " Select * from [dbo].[UstadFirms] with (nolock) where FirmLongName like '%HEDEF%' ";
+
+            v.dBaseNo dBaseNo = v.dBaseNo.UstadCrm;
+            SQL_Read_Execute(dBaseNo, ds, ref Sql, tableName, "");
+
+            string a = "durdur";
+            
         }
 
         #endregion YilAy - Mali Dönem Read
@@ -7207,7 +7552,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
         }
 
-        public void ComputerAbout()
+        public void Get_ComputerAbout()
         {
 
             ///Win32_Processor
@@ -7221,25 +7566,81 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             ///string   SerialNumber;
             ///string   SystemName;
 
-            ManagementObjectSearcher MOS = new ManagementObjectSearcher("root\\CIMV2", "Select * From Win32_Processor ");
-            foreach (ManagementObject obj in MOS.Get())
+            /// Win32_ComputerSystem
+            /// Win32_Processor
+            /// Win32_DiskDrive
+            /// Win32_PhysicalMemory 
+            /// Win32_OperatingSystem
+            /// 
+
+            //try    pc Name için gerek yok
+            //{
+            //    ManagementObjectSearcher computerSystemSearcher = new ManagementObjectSearcher("SELECT * FROM Win32_ComputerSystem");
+            //    foreach (ManagementObject computerSystem in computerSystemSearcher.Get())
+            //    {
+            //        //Console.WriteLine($"PC Name: {computerSystem["Name"]}");
+            //        //Console.WriteLine($"Service Tag: {computerSystem["OEMStringArray"][1]}");
+            //        string pcName = computerSystem["Name"].ToString();
+            //        //var serviceTag = computerSystem["OEMStringArray"][1];
+            //    }
+            //}
+            //catch (Exception ex)
+            //{
+            //    //throw;
+            //}
+
+            try
             {
-                v.tComputer.SystemName = Convert.ToString(obj["SystemName"]);
-                v.tComputer.Processor_Name = Convert.ToString(obj["Name"]);
-                v.tComputer.Processor_Id = Convert.ToString(obj["ProcessorId"]);
+                //ManagementObjectSearcher MOS = new ManagementObjectSearcher("root\\CIMV2", "Select * From Win32_Processor ");
+                ManagementObjectSearcher processorSearcher = new ManagementObjectSearcher("SELECT * FROM Win32_Processor");
+                foreach (ManagementObject processor in processorSearcher.Get())
+                {
+                    v.tComputer.PcName = Convert.ToString(processor["SystemName"]);
+                    v.tComputer.Processor_Name = Convert.ToString(processor["Name"]);
+                    v.tComputer.Processor_Id = Convert.ToString(processor["ProcessorId"]);
+                    v.tComputer.CPUType = processor["Name"].ToString();
+                    v.tComputer.CPUSpeed = processor["MaxClockSpeed"].ToString() + " MHz";
+                }
             }
-
-            MOS = new ManagementObjectSearcher("root\\CIMV2", "Select * From Win32_DiskDrive ");
-            foreach (ManagementObject obj in MOS.Get())
+            catch (Exception ex)
             {
-                v.tComputer.DiskDrive_Name = Convert.ToString(obj["Name"]);
-                v.tComputer.DiskDrive_Model = Convert.ToString(obj["Model"]);
-                v.tComputer.DiskDrive_SerialNumber = Convert.ToString(obj["SerialNumber"]);
+                MessageBox.Show("ManagementObjectSearcher (Win32_Processor) :" + ex.Message);
+                //throw;
             }
+            try
+            {
+                ManagementObjectSearcher operSearcher = new ManagementObjectSearcher("SELECT * FROM Win32_OperatingSystem");
+                foreach (ManagementObject oper in operSearcher.Get())
+                {
+                    string oprSystem = oper["Name"].ToString();
+                    v.tComputer.OperatingSystem = oprSystem.Substring(0, oprSystem.IndexOf("|"));
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("ManagementObjectSearcher (Win32_OperatingSystem) :" + ex.Message);
+                //throw;
+            }
+            try
+            {
+                //ManagementObjectSearcher MOS = new ManagementObjectSearcher("root\\CIMV2", "Select * From Win32_DiskDrive ");
+                ManagementObjectSearcher MOS = new ManagementObjectSearcher("Select * From Win32_DiskDrive ");
 
-            MOS.Dispose();
+                foreach (ManagementObject obj in MOS.Get())
+                {
+                    v.tComputer.DiskDrive_Name = Convert.ToString(obj["Name"]);
+                    v.tComputer.DiskDrive_Model = Convert.ToString(obj["Model"]);
+                    v.tComputer.DiskDrive_SerialNumber = Convert.ToString(obj["SerialNumber"]);
+                    break; // birinci diski oku çık
+                }
 
-            //MessageBox.Show(v.tComputer.Processor_Id);
+                MOS.Dispose();
+            }
+            catch (Exception e2)
+            {
+                MessageBox.Show("ManagementObjectSearcher (Win32_DiskDrive) :" + e2.Message);
+                //throw;
+            }
         }
 
         #endregion Computer MOS
@@ -7883,7 +8284,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             /*
             if (AccessibleName == "CR.CR_OMARA_L01")
             {
-                v.Kullaniciya_Mesaj_Var = AccessibleName;
+            //    v.Kullaniciya_Mesaj_Var = AccessibleName;
             }
             */
             #region Control1
@@ -9315,12 +9716,27 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             return fname;
         }
         
-        public bool Find_TableFields(DataSet dsData)
+        public bool Find_TableFields(Form tForm, DataSet dsData)
         {
             string myProp = dsData.Namespace;
             string tableName = MyProperties_Get(myProp, "TableName:");// + "_FIELDS";
+
             DataTable dt = v.ds_MsTableFields.Tables[tableName];
-            if (dt == null) return false;
+            if ((dt == null) && (tForm != null))
+            {
+                // table fields list yok ise şansını dene
+                //
+                vTable vt = new vTable();
+                Preparing_DataSet(tForm, dsData, vt);
+                               
+                preparing_MsTableFields(vt);
+                
+                // yine kontrol fields gelmiş mi
+                dt = v.ds_MsTableFields.Tables[tableName];
+                // halen yok ise elveda
+                if (dt == null) return false;
+            }
+
             if (dt.Rows.Count == 0) return false;
             dt.Dispose();
             return true;
@@ -9342,7 +9758,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                     string TableIPCode = MyProperties_Get(myProp, "TableIPCode:");
                     //string TableFields = Table_Name + "_FIELDS";
 
-                    if (Find_TableFields(dsData))
+                    if (Find_TableFields(null, dsData))
                     {
                         try
                         {
@@ -9406,8 +9822,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             else tableName_ = f.TableIPCode; //  f.tableName;   // normal tableName
 
             int j = ds.Tables[tableName_].Rows.Count;
-            
-            
+                       
 
             for (int i = 0; i < j; i++)
             {
@@ -10367,19 +10782,9 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             if (Tarih.Year > 0)
             {
                 t = Tarih.Date.ToString().Substring(0, 10);
-                /*
-                s = "'" +
-                    t[3].ToString() + t[4].ToString() + "." +
-                    t[0].ToString() + t[1].ToString() + "." +
-                    t[6].ToString() + t[7].ToString() +
-                    t[8].ToString() + t[9].ToString() + "'";
-                s = " Convert(Date, Convert(varchar(10)," + s + ", 101), 101) ";
-                */
-
-                //s = " Convert(Date, Convert(varchar(10),'" + t + "', 101), 101) ";
-
+                                
                 if (v.active_DB.projectDBType == v.dBaseType.MSSQL)
-                    s = " Convert(Date, '" + t + "', 103) ";
+                    s = " Convert(Datetime, '" + t + "', 103) ";
             }
             else s = "null";
             return s;
@@ -10394,21 +10799,16 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             if (Tarih.Year > 0)
             {
                 t = Tarih.ToString();
-
                 saat = Tarih.ToLongTimeString();
-                /*
-                s = "'" +
-                    t[3].ToString() + t[4].ToString() + "." +
-                    t[0].ToString() + t[1].ToString() + "." +
-                    t[6].ToString() + t[7].ToString() +
-                    t[8].ToString() + t[9].ToString() + " " + saat + "'";
-                */
-
+                
                 if (v.active_DB.projectDBType == v.dBaseType.MSSQL)
                 {
-                    s = "'" + Tarih.ToString("MM.dd.yyyy", CultureInfo.InvariantCulture) + " " + saat + "'";
+                    //s = "'" + Tarih.ToString("MM.dd.yyyy", CultureInfo.InvariantCulture) + " " + saat + "'";
                     // CONVERT(SMALLDATETIME, '05.29.2015 00:00:00', 101)
-                    s = " CONVERT(SMALLDATETIME, " + s + ", 101) ";
+                    //s = " Convert(SmallDatetime, " + s + ", 101) ";
+
+                    s = Tarih.Date.ToString("yyyy.MM.dd", CultureInfo.InvariantCulture).Substring(0, 10) + ' ' + Tarih.TimeOfDay.ToString().Substring(0, 8);
+                    s = " Convert(SmallDatetime, '" + s + "', 101) ";
                 }
             }
             else s = "null";
@@ -13896,7 +14296,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
         {
             bool onay = false;
             
-            onay = ftpDownload("YesiLdefterConnection.Ini");
+            onay = ftpDownload(v.tExeAbout.activePath, "YesiLdefterConnection.Ini");
 
             string MainManagerDbUses = "";
             string SourceDbUses = "";
@@ -13916,12 +14316,16 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             }
 
             // Ustad çalışanları için 
-            var YesiLdefterIni = new tIniFile("YesiLdefter.Ini");
+            if (File.Exists("YesiLdefter.Ini"))
+            {
+                File.Delete("YesiLdefter.Ini");
+            }
+            
+            var YesiLdefterIni = new tIniFile("YesiLdefter2.Ini");
             MainManagerDbUses = YesiLdefterIni.Read("MainManagerDbUses");
             if (MainManagerDbUses.ToUpper() == "TRUE")
             {
                 v.active_DB.mainManagerDbUses = true;
-
                 v.active_DB.managerServerName = YesiLdefterIni.Read("MainManagerServerIp");
                 v.active_DB.managerDBName = YesiLdefterIni.Read("MainManagerDbName");
                 v.active_DB.ustadCrmServerName = ConnectionIni.Read("UstadCrmServerIp");
@@ -13964,6 +14368,14 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 v.active_DB.projectUserName = YesiLdefterTabimIni.Read("SourceDbLoginName");
                 v.active_DB.projectPsw = YesiLdefterTabimIni.Read("SourceDbPass");
 
+                // Exe açılış Params ile farklı bir ServerName geldiyse
+                if ((v.SP_TabimParamsServerName != "") &&
+                    (v.SP_TabimParamsServerName != v.active_DB.localServerName))
+                {
+                    v.active_DB.localServerName = v.SP_TabimParamsServerName;
+                    v.active_DB.projectServerName = v.SP_TabimParamsServerName;
+                }
+
                 // ini file içinde manuel false yapılmış olabilir
                 // yapılırsa sonuç ne olur bilmiyorum
                 v.active_DB.localDbUses = true;
@@ -13977,6 +14389,16 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                         (v.active_DB.localPsw.ToUpper() == "NULL"))
                     {
                         v.tUser.UserId = 0;
+                        // ilk çalıştımada boş geliyor ise
+                        if (IsNotNull(v.active_DB.localDBName) == false)  v.active_DB.localDBName = "Surucu07";
+                        if (IsNotNull(v.active_DB.localUserName) == false) v.active_DB.localUserName = "TABIM";
+                        if (IsNotNull(v.active_DB.localPsw) == false) v.active_DB.localPsw = "312";
+
+                        if (IsNotNull(v.active_DB.localServerName))
+                        {
+                            preparingLocalDbConnectionText();
+                            v.SP_TabimIniWrite = true;
+                        }
                     }
                     else
                     {
@@ -13986,10 +14408,8 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             }
 
         }
-       
-
         
-        public bool ftpDownload(string fileName)
+        public bool ftpDownload(string path, string fileName)
         {
             bool onay = false;
 
@@ -14006,17 +14426,20 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             /* Download a File */
             //ftpClient.download("/public/YesiLdefter_201806201.rar", @"E:\Temp\YesiLdefter_201806201.rar");
             //ftpClient.download(v.tExeAbout.ftpPacketName, @"" + v.tExeAbout.activePath + "\\" + v.tExeAbout.ftpPacketName);
-            onay = ftpClient.download(fileName, @"" + v.tExeAbout.activePath + "\\" + fileName);
+            onay = ftpClient.download(fileName, @"" + path + "\\" + fileName);
             
             /* Release Resources */
             ftpClient = null;
 
-            if (onay) v.Kullaniciya_Mesaj_Var = "Download gerçekleşti ...";
-
+            if (onay)
+            {
+                v.Kullaniciya_Mesaj_Var = "Download gerçekleşti ...";
+                v.timer_Kullaniciya_Mesaj_Varmi.Start();
+            }
             return onay;
         }
 
-        public bool ftpUpload()
+        public bool ftpUpload(exeAbout exeFileAbout)
         {
             bool onay = false;
 
@@ -14037,8 +14460,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             try
             {
                 /* Upload a File */
-                //ftpClient.upload("/public/YesiLdefter_201806201.rar", @"E:\TekinOzel\yesiLdefter\yesiLdefterV3\YesiLdefter\bin\Debug\YesiLdefter_20190329_1553.gz");
-                ftpClient.upload(v.tExeAbout.newPacketName, v.tExeAbout.newPathFileName);
+                ftpClient.upload(exeFileAbout.newPacketName, exeFileAbout.activePath + "\\" + exeFileAbout.newPacketName);
 
                 onay = true;
             }
@@ -14051,11 +14473,150 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             /* Release Resources */
             ftpClient = null;
 
+            if (onay)
+            {
+                MessageBox.Show(":)  [  " + exeFileAbout.newPacketName + "  ]  paket ftp ye yüklendi ...");
+            }
+
             return onay;
         }
 
         #endregion ftp
 
+        #region CompressFile
+        public bool CompressFile(exeAbout exeFileAbout, v.fileType fileType)
+        {
+            if (exeFileAbout is null)
+            {
+                //throw new ArgumentNullException(nameof(exeAbout_));
+                return false;
+            }
+
+            bool onay = false;
+            DirectoryInfo di = new DirectoryInfo(exeFileAbout.activePath);
+
+            v.tExeAbout.FileType = fileType;
+
+            string fileName = "";
+            
+            if (fileType == v.fileType.ActiveExe) fileName = exeFileAbout.activeExeName;
+            if (fileType == v.fileType.OrderFile) fileName = exeFileAbout.orderFileName;
+
+            foreach (FileInfo fi in di.GetFiles())
+            {
+                //for specific file 
+                if (fi.ToString() == fileName)
+                {
+                    onay = CompressFile_(fi, exeFileAbout);
+                    break;
+                }
+            }
+
+            if (onay)
+            {
+                MessageBox.Show(":)  [  " + exeFileAbout.newPacketName + "  ]  paketlendi ...");
+            }
+
+            return onay;
+        }
+        private bool CompressFile_(FileInfo fi, exeAbout exeFileAbout)
+        {
+            bool onay = false;
+
+            // Get the stream of the source file.
+            using (FileStream inFile = fi.OpenRead())
+            {
+                // Prevent compressing hidden and 
+                // already compressed files.
+                if ((File.GetAttributes(fi.FullName)
+                    & FileAttributes.Hidden)
+                    != FileAttributes.Hidden & fi.Extension != ".gz")
+                {
+                    //string myFileName = fi.FullName + ".gz";
+                    string myFileName = fi.FullName.Remove(fi.FullName.IndexOf(fi.Extension), fi.Extension.Length) + ".gz";
+
+                    //exe kendisini compress yapacaksa
+                    if (exeFileAbout.FileType == v.fileType.ActiveExe)
+                        myFileName = preparingExeFileName(fi, exeFileAbout);
+
+                    if (exeFileAbout.FileType == v.fileType.OrderFile)
+                        myFileName = preparingOrderFileName(fi, exeFileAbout);
+
+                    // çalışan kod
+                    // Create the compressed file.
+                    using (FileStream outFile = File.Create(myFileName))
+                    {
+                        using (GZipStream Compress = new GZipStream(outFile, CompressionMode.Compress))
+                        {
+                            // Copy the source file into 
+                            // the compression stream.
+                            inFile.CopyTo(Compress);
+
+                            onay = true;
+
+                            //Console.WriteLine("Compressed {0} from {1} to {2} bytes.",
+                            //    fi.Name, fi.Length.ToString(), outFile.Length.ToString());
+                        }
+                    }
+
+                }
+            }
+
+            return onay;
+        }
+        private string preparingExeFileName(FileInfo fi, exeAbout exeFileAbout)
+        {
+            string myFileName = "";
+
+            if (fi.FullName.IndexOf(exeFileAbout.activeExeName) > -1)
+            {
+                /// activeVersionNo : 20190329_1545
+                /// activeFileName  : YesiLdefter.exe >> YesiLdefter_20190329_1545.gz  şeklinde olacak
+                /// activePath      : E:\TekinOzel\yesiLdefter\yesiLdefterV3\YesiLdefter\bin\Debug\YesiLdefter_20190329_1553.gz
+                /// dikkat : kafan karışmasın şuan çalıştığın exeyi ftpye atmak istiyorsun
+                /// bu nedenle active olandan faydalanıyor onu new diye ftp göndeririyoruz
+
+                exeFileAbout.newVersionNo = exeFileAbout.activeVersionNo;
+                exeFileAbout.newFileName = exeFileAbout.activeExeName;
+                exeFileAbout.newPacketName =
+                    exeFileAbout.activeExeName.Remove(exeFileAbout.activeExeName.IndexOf(fi.Extension), fi.Extension.Length) + "_"
+                  + exeFileAbout.activeVersionNo + ".gz";
+
+                // bu da aynı sonucu veriyor 
+                //fi.FullName.Remove(fi.FullName.IndexOf(fi.Extension), fi.Extension.Length) + "_" + v.tExeAbout.activeVersionNo + ".gz";
+
+                myFileName = exeFileAbout.activePath + "\\" + exeFileAbout.newPacketName;
+            }
+
+            return myFileName;
+        }
+        private string preparingOrderFileName(FileInfo fi, exeAbout exeFileAbout)
+        {
+            string myFileName = "";
+
+            if (fi.FullName.IndexOf(exeFileAbout.orderFileName) > -1)
+            {
+                /// orderVersionNo : 20190329_1545
+                /// orderFileName  : YesiLdefter.exe >> YesiLdefter_20190329_1545.gz  şeklinde olacak
+                /// activePath      : E:\TekinOzel\yesiLdefter\yesiLdefterV3\YesiLdefter\bin\Debug\YesiLdefter_20190329_1553.gz
+                /// dikkat : kafan karışmasın şuan exenin çalıştığın path içindeki dosyayı  ftpye atmak istiyorsun
+                /// bu nedenle mevcut olan dosyadan faydalanıyor onu new diye ftp göndeririyoruz
+
+                exeFileAbout.newVersionNo = exeFileAbout.orderFileVersionNo;
+                exeFileAbout.newFileName = exeFileAbout.orderFileName;
+                exeFileAbout.newPacketName =
+                    exeFileAbout.orderFileName.Remove(exeFileAbout.orderFileName.IndexOf(fi.Extension), fi.Extension.Length) + "_"
+                  + exeFileAbout.orderFileVersionNo.Replace('.', '_') + ".gz";
+
+                // bu da aynı sonucu veriyor 
+                //fi.FullName.Remove(fi.FullName.IndexOf(fi.Extension), fi.Extension.Length) + "_" + v.tExeAbout.activeVersionNo + ".gz";
+
+                myFileName = exeFileAbout.activePath + "\\" + exeFileAbout.newPacketName;
+            }
+
+            return myFileName;
+        }
+        #endregion CompressFile
     }
 
 

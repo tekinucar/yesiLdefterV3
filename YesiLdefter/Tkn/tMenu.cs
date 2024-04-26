@@ -51,7 +51,7 @@ namespace Tkn_Menu
             dontEDI = (Prop_View.IndexOf("DONTEDI\": \"TRUE") > -1);
 
             //if (ItemType == 101) Create_BarManager((DevExpress.XtraBars.BarManager)menuControl, ds_Items);
-            if (ItemType == 102) Create_Ribbon((DevExpress.XtraBars.Ribbon.RibbonControl)menuControl, ds_Items);
+            if (ItemType == 102) Create_Ribbon((DevExpress.XtraBars.Ribbon.RibbonControl)menuControl, ds_Items, MenuCode);
             if (ItemType == 103) Create_NavBar((DevExpress.XtraNavBar.NavBarControl)menuControl, ds_Items);
             if (ItemType == 104) Create_TileBar((DevExpress.XtraBars.Navigation.TileBar)menuControl, ds_Items);
             if (ItemType == 105) Create_TileControl((DevExpress.XtraEditors.TileControl)menuControl, ds_Items);
@@ -138,7 +138,7 @@ namespace Tkn_Menu
                 menuControl.Size = new System.Drawing.Size(783, 141);
                 menuControl.ToolbarLocation = DevExpress.XtraBars.Ribbon.RibbonQuickAccessToolbarLocation.Hidden;
 
-                Create_Ribbon(menuControl, ds_Items);
+                Create_Ribbon(menuControl, ds_Items, MenuCode);
 
                 if (mainControl is Form)
                 {
@@ -194,7 +194,6 @@ namespace Tkn_Menu
                 if (t.IsNotNull(ExtraValue))
                     t.RibbonPagesSet(menuControl, ExtraValue);
 
-                
             }
             #endregion
 
@@ -597,7 +596,7 @@ namespace Tkn_Menu
         #endregion Create_BarManager
 
         #region Create_Ribbon
-        public void Create_Ribbon(DevExpress.XtraBars.Ribbon.RibbonControl mControl, DataSet ds_Items)
+        public void Create_Ribbon(DevExpress.XtraBars.Ribbon.RibbonControl mControl, DataSet ds_Items, string MenuCode)
         {
             tToolBox t = new tToolBox();
             tEvents ev = new tEvents();
@@ -614,6 +613,7 @@ namespace Tkn_Menu
             string itemName = string.Empty;
             string itemCaption = string.Empty;
             string Prop_Navigator = string.Empty;
+            string cmpName = string.Empty;
 
             Int16 clickEvents = 0;
 
@@ -640,6 +640,7 @@ namespace Tkn_Menu
                 tvisible = t.Set(ds_Items.Tables[0].Rows[i]["CMP_VISIBLE"].ToString(), "", true);
                 clickEvents = t.myInt16(ds_Items.Tables[0].Rows[i]["CLICK_EVENTS"].ToString());
                 Prop_Navigator = t.Set(ds_Items.Tables[0].Rows[i]["PROP_NAVIGATOR"].ToString(), "", "");
+                cmpName = t.Set(ds_Items.Tables[0].Rows[i]["CMP_NAME"].ToString(), "", "");
 
                 UstHesapRow = null;
                 ustHesapRefId = string.Empty;
@@ -831,10 +832,14 @@ namespace Tkn_Menu
                     barButtonItem.Tag = Prop_Navigator;
                     barButtonItem.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(evm.formRibbonMenu_ItemClick);
 
+                    //UST/PMS/PMS/MsV3Menu
+                    if (MenuCode == "UST/PMS/PMS/MsV3Menu" && cmpName != "")
+                        anaMenuIcinOzelDurum(barButtonItem, cmpName);
+
                     // image çalışıyor SİLME 
                     // button Image set
 
-                    #region Image set
+                        #region Image set
                     if (!DBNull.Value.Equals(ds_Items.Tables[0].Rows[i]["LKP_GLYPH16"]))
                     {
                         byte[] img16 = (byte[])ds_Items.Tables[0].Rows[i]["LKP_GLYPH16"];
@@ -962,6 +967,14 @@ namespace Tkn_Menu
             //ribbonControl1.SelectedPage = 
         }
         
+        private void anaMenuIcinOzelDurum(DevExpress.XtraBars.BarLargeButtonItem barButtonItem, string cmpName)
+        {
+            string serverName = "";
+            if (cmpName == "ButtonMainServerName") serverName = v.active_DB.managerDBName;
+            if (cmpName == "ButtonPublisServerName") serverName = v.publishManager_DB.databaseName;
+            barButtonItem.Caption += v.ENTER + serverName;
+        }
+
         public void alterRibbon(DevExpress.XtraBars.Ribbon.RibbonControl mControl, string proje)
         {
             tEvents ev = new tEvents();

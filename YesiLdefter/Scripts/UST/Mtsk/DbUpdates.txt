@@ -18,6 +18,7 @@ begin transaction
     FieldTypeId     smallInt          null,
     FieldLength     VarChar(6)        null, 
     FieldNotNull    bit               null,
+
     About           nVarChar(100)     null,
     SqlScript       varchar(MAX)      null,
 
@@ -59,7 +60,7 @@ INSERT INTO [dbo].[DbUpdates]
      VALUES
            ( 0    -- IsActive, bit  1 : veri transferi yapılıyor, 0 = yapılmıyor 
            ,-1    -- MsDbUpdateId, NewDatabase
-           , convert(date, '01.01.2023',103) -- UpdateDate, datetime
+           , convert(datetime, '01.01.2023',103) -- UpdateDate, datetime
            , 13   -- UpdateTypeId, Data transfer işlemi
            , 0    -- SectorTypeId, smallint 
            , 6    -- DBaseNoTypeId, NewDatabase

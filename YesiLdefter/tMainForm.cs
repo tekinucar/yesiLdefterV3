@@ -57,6 +57,8 @@ namespace YesiLdefter
             DevExpress.XtraEditors.Repository.RepositoryItemToggleSwitch _repositoryItemToggleSwitch1 = new DevExpress.XtraEditors.Repository.RepositoryItemToggleSwitch();
             DevExpress.XtraBars.BarEditItem barMSConn = new DevExpress.XtraBars.BarEditItem();
             DevExpress.XtraEditors.Repository.RepositoryItemToggleSwitch _repositoryItemToggleSwitch2 = new DevExpress.XtraEditors.Repository.RepositoryItemToggleSwitch();
+
+            
             /*
             //-- backstageView
             DevExpress.XtraBars.Ribbon.BackstageViewControl backstageViewControl1 = new DevExpress.XtraBars.Ribbon.BackstageViewControl();
@@ -216,6 +218,13 @@ namespace YesiLdefter
             barMesajlar.Alignment = DevExpress.XtraBars.BarItemLinkAlignment.Left;
             barMesajlar.ItemAppearance.Hovered.BackColor = v.AppearanceFocusedColor;
             barMesajlar.ItemAppearance.Hovered.Options.UseBackColor = true;
+
+            barMesajlar.ItemAppearance.Normal.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(100)));
+            barMesajlar.ItemAppearance.Normal.ForeColor = System.Drawing.Color.Red;
+            barMesajlar.ItemAppearance.Normal.Options.UseForeColor = true;
+            barMesajlar.ItemAppearance.Normal.BackColor = System.Drawing.Color.White;
+            barMesajlar.ItemAppearance.Normal.Options.UseBackColor = true;
+
             barMesajlar.Caption = "Mesajlar";
             barMesajlar.Id = 2;
             barMesajlar.Name = "barMesajlar";
@@ -232,13 +241,6 @@ namespace YesiLdefter
             barButtonGuncelleme.ItemAppearance.Normal.Options.UseForeColor = true;
             barButtonGuncelleme.Name = "barButtonGuncelleme";
             barButtonGuncelleme.Visibility = DevExpress.XtraBars.BarItemVisibility.Never;
-            // 
-            // barMesajlar
-            //
-            barMesajlar.ItemAppearance.Normal.ForeColor = v.AppearanceItemCaptionColor1;
-            barMesajlar.ItemAppearance.Normal.Options.UseForeColor = true;
-            barMesajlar.ItemAppearance.Normal.BackColor = System.Drawing.Color.White;
-            barMesajlar.ItemAppearance.Normal.Options.UseBackColor = true;
             // 
             // mainProgressBar
             // 

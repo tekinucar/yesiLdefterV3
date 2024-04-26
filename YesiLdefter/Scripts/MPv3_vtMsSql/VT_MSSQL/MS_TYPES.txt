@@ -70,6 +70,8 @@ begin transaction
  insert into MS_TYPES values ( 1, 0, 'WEBNODE_ATT_ROLE', 17, '', 'SecurityImage');
  insert into MS_TYPES values ( 1, 0, 'WEBNODE_ATT_ROLE', 18, '', 'SecurityAgain');
  insert into MS_TYPES values ( 1, 0, 'WEBNODE_ATT_ROLE', 19, '', 'InputBox');
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_ATT_ROLE', 20, '', 'Success');
+
 
 
  DELETE MS_TYPES WHERE TYPES_NAME = 'WEBNODE_VALUE_TYPE'
@@ -1050,6 +1052,33 @@ begin transaction
  //----sil
 
 
+
+
+ --DELETE MS_TYPES WHERE TYPES_NAME = 'TbmMtskSertifika'
+ insert into MS_TYPES values ( 2, 0, 'TbmMtskSertifika',    0, '', N'' );
+ insert into MS_TYPES values ( 2, 0, 'TbmMtskSertifika', 2514, '', N'A');
+ insert into MS_TYPES values ( 2, 0, 'TbmMtskSertifika', 2502, '', N'A1');
+ insert into MS_TYPES values ( 2, 0, 'TbmMtskSertifika', 2503, '', N'A2');
+  
+ insert into MS_TYPES values ( 2, 0, 'TbmMtskSertifika', 2504, '', N'B');
+ insert into MS_TYPES values ( 2, 0, 'TbmMtskSertifika', 2518, '', N'BE');
+ insert into MS_TYPES values ( 2, 0, 'TbmMtskSertifika', 2515, '', N'B1');
+ insert into MS_TYPES values ( 2, 0, 'TbmMtskSertifika', 2505, '', N'C');
+ insert into MS_TYPES values ( 2, 0, 'TbmMtskSertifika', 2520, '', N'CE');
+ insert into MS_TYPES values ( 2, 0, 'TbmMtskSertifika', 2516, '', N'C1');
+ insert into MS_TYPES values ( 2, 0, 'TbmMtskSertifika', 2519, '', N'C1E');
+ insert into MS_TYPES values ( 2, 0, 'TbmMtskSertifika', 2506, '', N'D');
+ insert into MS_TYPES values ( 2, 0, 'TbmMtskSertifika', 2522, '', N'DE');
+ insert into MS_TYPES values ( 2, 0, 'TbmMtskSertifika', 2517, '', N'D1');
+ insert into MS_TYPES values ( 2, 0, 'TbmMtskSertifika', 2521, '', N'D1E');
+ insert into MS_TYPES values ( 2, 0, 'TbmMtskSertifika', 2507, '', N'E');
+
+ insert into MS_TYPES values ( 2, 0, 'TbmMtskSertifika', 2508, '', N'F');
+ insert into MS_TYPES values ( 2, 0, 'TbmMtskSertifika', 2509, '', N'G');
+ insert into MS_TYPES values ( 2, 0, 'TbmMtskSertifika', 2510, '', N'H (Otomobil)');
+ insert into MS_TYPES values ( 2, 0, 'TbmMtskSertifika', 2511, '', N'H (Motosiklet)');
+ insert into MS_TYPES values ( 2, 0, 'TbmMtskSertifika', 2513, '', N'M');
+ insert into MS_TYPES values ( 2, 0, 'TbmMtskSertifika', 2512, '', N'RÖMORK');
 
 
 commit transaction

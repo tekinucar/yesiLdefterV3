@@ -1,6 +1,7 @@
 ﻿using DevExpress.LookAndFeel;
 using DevExpress.XtraEditors;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Diagnostics;
@@ -44,8 +45,8 @@ namespace YesiLdefter
         DevExpress.XtraBars.BarEditItem mainProgressBar = null;
         DevExpress.XtraBars.BarEditItem barEditItemCari = null;
 
-        DevExpress.XtraBars.BarEditItem barPrjConn = null;
-        DevExpress.XtraBars.BarEditItem barMSConn = null;
+        DevExpress.XtraBars.BarEditItem barPrjConn_ = null;
+        DevExpress.XtraBars.BarEditItem barMSConn_ = null;
 
         /// <summary>
         /// 
@@ -73,6 +74,7 @@ namespace YesiLdefter
             preparinDefaultValues();
 
             #region Read Parameters
+            bool params_ = false;
             if (args.Length > 0)
             {
                 foreach (string arg in args)
@@ -83,17 +85,34 @@ namespace YesiLdefter
                         if (arg.IndexOf("UserId=") > -1)
                         {
                             v.tUser.UserId = t.myInt32(arg.Replace("UserId=", ""));
+                            params_ = true;
+                        }
+                        if (arg.IndexOf("KurumTipi=") > -1)
+                        {
+                            v.SP_TabimParamsKurumTipi = arg.Replace("KurumTipi=", "");
+
+                        }
+                        if (arg.IndexOf("ServerName=") > -1)
+                        {
+                            v.SP_TabimParamsServerName = arg.Replace("ServerName=", "");
+
                         }
                     }
                 }
-            }                
-            //v.tUser.UserId = 12; //Test
-            
-            #endregion 
+            }
 
+            /// params giriş TESTi için 
+            // KÖREN FirmGUID : 0fe40e88-bccf-4f58-9531-7e39c47a1385
+            
+            //params_ = true;
+            //v.tUser.UserId = 12; 
+            //v.SP_TabimParamsKurumTipi = "MTSK";
+            //v.SP_TabimParamsServerName = "LAPTOP-ACER1\\SQLEXPRESS";
+            //MessageBox.Show(params_.ToString() + " : " + v.tUser.UserId.ToString() + " : " + v.SP_TabimParamsKurumTipi + " : " + v.SP_TabimParamsServerName);
+
+            #endregion
 
             #region preparing mainForm
-
 
             // formun kendisi
             InitializeComponent();
@@ -104,6 +123,7 @@ namespace YesiLdefter
             {
                 f.preparingMainForm(this);
                 //f.preparingDockPanel(this, "SEK/CEV/prcCihazLogGetIcmal.Icmal_L01");
+                v.timer_Kullaniciya_Mesaj_Varmi = timer_Kullaniciya_Mesaj_Varmi;
             }
 
             #endregion mainForm
@@ -138,7 +158,22 @@ namespace YesiLdefter
                 if (v.active_DB.localDbUses == false)
                     t.DBUpdatesDataTransferOff();
             }
-            
+
+            if ((params_) && (v.tUser.UserId > 0))
+            {
+                /// Surucu07 için database update var mı?
+                /// MsDbUpdates de güncelleme var mı kontrolet
+                /// varsa Surucu07 yi update et
+                /// 
+                if (v.SP_TabimParamsKurumTipi == "MTSK") v.SP_Firm_SectorTypeId = 211; // TabimMtsk
+                if (v.SP_TabimParamsKurumTipi == "ISMAK") v.SP_Firm_SectorTypeId = 212;
+                if (v.SP_TabimParamsKurumTipi == "SRC") v.SP_Firm_SectorTypeId = 213;
+
+                //MessageBox.Show("2 : " + params_.ToString() + " ; " + v.tUser.UserId.ToString());
+
+                t.dbUpdatesChecked();
+            }
+
             #endregion
 
             if (v.tMainFirm.MenuCode == "SEK/CEV/AYR/MAINTOP")
@@ -202,9 +237,7 @@ namespace YesiLdefter
             if (v.SP_UserLOGIN)
             {
                 setMenuItems();
-
-                //timer_Kullaniciya_Mesaj_Varmi.Enabled = true;
-
+                
                 t.WaitFormOpen(v.mainForm, "ManagerDB Connection...");
                 t.Db_Open(v.active_DB.managerMSSQLConn);
 
@@ -233,13 +266,15 @@ namespace YesiLdefter
                     t.dbUpdatesChecked();
 
                 setMainFormCaption();
+
+                //timer_Kullaniciya_Mesaj_Varmi.Enabled = true;
             }
         }
 
         void setMainFormCaption()
         {
             // ---
-            this.Text = "yeşiL defteri   Ver : " +
+            this.Text = "YeşiL defter   Ver : " +
                 v.tExeAbout.activeVersionNo.Substring(2, 6) + "." +
                 v.tExeAbout.activeVersionNo.Substring(9, 4) +
                 "    [ " + v.tMainFirm.FirmId.ToString() + " : " + v.tMainFirm.FirmShortName + " ] ";
@@ -313,7 +348,6 @@ namespace YesiLdefter
             }
         }
 
-
         #endregion
 
         #region preparingMenus
@@ -338,6 +372,9 @@ namespace YesiLdefter
                 mn.Create_Menu(toolboxControl1, v.tMainFirm.MenuCode, "");
                 mn.alterRibbon(ribbon, "yesiL");
 
+                // MSV3 MENU gereklin olunca aç yoksa kapat
+                //
+                // mn.Create_Menu(ribbon, "UST/PMS/PMS/MsV3Menu", "");
             }
 
             // Kullanıcıların Ortak Menüsü
@@ -354,7 +391,7 @@ namespace YesiLdefter
 
             setMenuItems();
         }
-
+        
         void setMenuItems()
         {
             toolboxControl1 = t.Find_Control(this, "toolboxControl1");
@@ -393,9 +430,9 @@ namespace YesiLdefter
                         barEditItemCari = (DevExpress.XtraBars.BarEditItem)item;
 
                     if (((DevExpress.XtraBars.BarEditItem)item).Name == "barPrjConn")
-                        barPrjConn = (DevExpress.XtraBars.BarEditItem)item;
+                        barPrjConn_ = (DevExpress.XtraBars.BarEditItem)item;
                     if (((DevExpress.XtraBars.BarEditItem)item).Name == "barMSConn")
-                        barMSConn = (DevExpress.XtraBars.BarEditItem)item;
+                        barMSConn_ = (DevExpress.XtraBars.BarEditItem)item;
                 }
             }
             
@@ -442,12 +479,20 @@ namespace YesiLdefter
                     
                 }
             }
-            //MessageBox.Show(ss);
-
+            
             //((DevExpress.XtraToolbox.ToolboxControl)toolboxControl1).SelectedGroup = 0;
             
             // bunu kullanıcının seçmesini sağla
             ((DevExpress.XtraToolbox.ToolboxControl)toolboxControl1).SelectedGroupIndex = 0;
+
+            if (this.barMSConn_ != null)
+            {
+                if (v.active_DB.managerDBName != v.publishManager_DB.databaseName)
+                     this.barMSConn_.Hint = v.active_DB.managerDBName + " ; " + v.publishManager_DB.databaseName;
+                else this.barMSConn_.Hint = v.publishManager_DB.databaseName;
+            }
+            if (this.barPrjConn_ != null)
+                this.barPrjConn_.Hint = v.active_DB.projectDBName;
         }
 
         #endregion
@@ -541,115 +586,27 @@ namespace YesiLdefter
         #region Compress
         private void btnExeCompress_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
         {
-            CompressFile();
+            t.CompressFile(v.tExeAbout, v.fileType.ActiveExe);
         }
-
-        public bool CompressFile()
-        {
-            bool onay = false;
-            DirectoryInfo di = new DirectoryInfo(v.tExeAbout.activePath);
-
-            foreach (FileInfo fi in di.GetFiles())
-            {
-                //for specific file 
-                if (fi.ToString() == v.tExeAbout.activeExeName)
-                {
-                    onay = Compress(fi);
-                    break;
-                }
-            }
-
-            if (onay)
-            {
-                v.Kullaniciya_Mesaj_Var = "Exe paketlendi ...";
-                MessageBox.Show("Exe Paketlendi ...");
-            }
-
-            return onay;
-        }
-
-        public bool Compress(FileInfo fi)
-        {
-            bool onay = false;
-
-            // Get the stream of the source file.
-            using (FileStream inFile = fi.OpenRead())
-            {
-                // Prevent compressing hidden and 
-                // already compressed files.
-                if ((File.GetAttributes(fi.FullName)
-                    & FileAttributes.Hidden)
-                    != FileAttributes.Hidden & fi.Extension != ".gz")
-                {
-                    //string myFileName = fi.FullName + ".gz";
-                    string myFileName = fi.FullName.Remove(fi.FullName.IndexOf(fi.Extension), fi.Extension.Length) + ".gz";
-
-                    //exe kendisini compress yapacaksa
-                    if (fi.FullName.IndexOf(v.tExeAbout.activeExeName) > -1)
-                    {
-                        /// activeVersionNo : 20190329_1545
-                        /// activeFileName  : YesiLdefter.exe >> YesiLdefter_20190329_1545.gz  şeklinde olacak
-                        /// activePath      : E:\TekinOzel\yesiLdefter\yesiLdefterV3\YesiLdefter\bin\Debug\YesiLdefter_20190329_1553.gz
-                        /// dikkat : kafan karışmasın şuan çalıştığın exeyi ftpye atmak istiyorsun
-                        /// bu nedenle active olandan faydalanıyor onu new diye ftp göndeririyoruz
-
-                        v.tExeAbout.newVersionNo = v.tExeAbout.activeVersionNo;
-                        v.tExeAbout.newFileName = v.tExeAbout.activeExeName;
-
-                        v.tExeAbout.newPacketName =
-                            //v.tExeAbout.activeExeName.Remove(v.tExeAbout.activeExeName.IndexOf(fi.Extension), fi.Extension.Length) + "_" +
-                            v.tExeAbout.activeExeName.Remove(v.tExeAbout.activeExeName.IndexOf(".exe"), 4) + "_" +
-                            v.tExeAbout.activeVersionNo + ".gz";
-
-                        v.tExeAbout.newPathFileName =
-                            v.tExeAbout.activePath + "\\" + v.tExeAbout.newPacketName;
-                        // bu da aynı sonucu veriyor 
-                        //fi.FullName.Remove(fi.FullName.IndexOf(fi.Extension), fi.Extension.Length) + "_" + v.tExeAbout.activeVersionNo + ".gz";
-
-                        myFileName = v.tExeAbout.newPathFileName;
-                    }
-
-                    // Create the compressed file.
-                    using (FileStream outFile = File.Create(myFileName))
-                    {
-                        using (GZipStream Compress = new GZipStream(outFile, CompressionMode.Compress))
-                        {
-                            // Copy the source file into 
-                            // the compression stream.
-                            inFile.CopyTo(Compress);
-
-                            onay = true;
-
-                            //Console.WriteLine("Compressed {0} from {1} to {2} bytes.",
-                            //    fi.Name, fi.Length.ToString(), outFile.Length.ToString());
-                        }
-                    }
-                }
-            }
-
-            return onay;
-        }
-
+                
         #endregion
 
         #region ftpUpload
 
         private void btnExeUpload_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
         {
-            bool onay = t.ftpUpload();
+            // geçici ipat
+
+            bool onay = t.ftpUpload(v.tExeAbout);
 
             if (onay)
             {
                 tSQLs sqls = new tSQLs();
                 DataSet ds = new DataSet();
-                string sql = sqls.SQL_SYS_UPDATES_INSERT();
-                if (t.SQL_Read_Execute(v.dBaseNo.publishManager, ds, ref sql, "", "SYS_UPDATES"))
-                    MessageBox.Show("Exe Ftp'ye yüklendi ...");
-
-                sql = sqls.Sql_MsExeUpdates_Insert();
-                if (t.SQL_Read_Execute(v.dBaseNo.publishManager, ds, ref sql, "", "MsExeUpdates"))
-                    MessageBox.Show("Exe Ftp'ye yüklendi ...");
-
+                //string sql = sqls.SQL_SYS_UPDATES_INSERT();
+                //t.SQL_Read_Execute(v.dBaseNo.publishManager, ds, ref sql, "", "SYS_UPDATES");
+                string sql = sqls.Sql_MsExeUpdates_Insert();
+                t.SQL_Read_Execute(v.dBaseNo.publishManager, ds, ref sql, "", "MsExeUpdates");
             }
         }
 
@@ -740,8 +697,11 @@ namespace YesiLdefter
 
         private void timer_Kullaniciya_Mesaj_Varmi_Tick(object sender, EventArgs e)
         {
-            barMSConn.EditValue = v.SP_ConnBool_Manager;
-            barPrjConn.EditValue = v.SP_ConnBool_Project;
+            if (barMesajlar == null) return;
+
+            this.barMSConn_.EditValue = v.SP_ConnBool_Manager;
+            
+            this.barPrjConn_.EditValue = v.SP_ConnBool_Project;
 
             if (!string.IsNullOrEmpty(v.Kullaniciya_Mesaj_Var))
             {
@@ -813,7 +773,6 @@ namespace YesiLdefter
         {
             //MessageBox.Show("myForm_Deactivate : " + ((Form)sender).Text);
         }
-                
 
         //*****
 

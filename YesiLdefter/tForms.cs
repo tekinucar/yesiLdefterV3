@@ -32,6 +32,7 @@ namespace Tkn_Forms
             }
             if (FormName == "ms_ReportDesign") tForm = new YesiLdefter.ms_ReportDesign();
             if (FormName == "ms_ProjectTables") tForm = new YesiLdefter.ms_ProjectTables();
+            if (FormName == "ms_FileUpdates") tForm = new YesiLdefter.ms_FileUpdates();
 
             if (FormName == "ms_IPList2") tForm = new YesiLdefter.ms_IPList2();
             if (FormName == "ms_Layout2") tForm = new YesiLdefter.ms_Layout2();

@@ -96,6 +96,7 @@ namespace Tkn_CreateDatabase
         public bool preparingCreateTable(vTable vt)
         {
             bool onay = true;
+            bool tableOnay = false;
 
             //string fileName = "";
             string sqlScript = "";
@@ -123,7 +124,7 @@ namespace Tkn_CreateDatabase
                 // tablo yok ise
                 if (onay == false)
                 {
-                    onay = tTableCreate(sqlScript, vt);
+                    tableOnay = tTableCreate(sqlScript, vt);
                 }
 
                 // tablo oluşturuldu şimdi trigger leri oluşturalım
@@ -139,7 +140,7 @@ namespace Tkn_CreateDatabase
                 onay = tDataCreate(sqlScript, vt);
             }
 
-            return onay;
+            return tableOnay;
         }
 
         //public bool tTableFind(string tableName, vTable vt)

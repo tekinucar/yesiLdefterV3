@@ -296,6 +296,104 @@ namespace YesiLdefter.Selenium
             return ds;
         }
 
+        public void transferFromWebToDatabase(webNodeValue wnv)
+        {
+           // hataları düzelt
+            
+            /*
+
+            /// web deki veriyi database aktar
+            ///
+            if (t.IsNotNull(ds_ScrapingDbConnectionList) == false) return;
+
+            wnv.dbFieldName = "";
+            wnv.dbLookUpField = false;
+
+            DataRow dbRow = findRightRow(wnv, v.tSelect.Get);
+
+            // webden okunan veriyi db ye aktardığı an
+            if (dbRow != null)
+            {
+                //t.tCheckedValue(dbRow, wnv.dbFieldName, wnv.readValue);
+
+                if (wnv.dbFieldName.IndexOf("Resim") == -1)
+                {
+                    v.SQL = v.SQL + wnv.readValue;
+                    //if (t.IsNotNull(wnv.readValue))
+                    //    dbRow[wnv.dbFieldName] = wnv.readValue;
+
+                    if (t.IsNotNull(wnv.readValue))
+                    {
+                        string itemText = wnv.readValue;
+
+                        if (wnv.dbLookUpField == false)
+                        {
+                            if (wnv.dbFieldType == 108)
+                            {
+                                itemText = wnv.readValue.Replace(" TL", "");
+                                itemText = wnv.readValue.Replace("TL", "");
+                            }
+                            if (itemText != "")
+                                dbRow[wnv.dbFieldName] = itemText;
+                        }
+                        else
+                        {
+                            string itemValue = findNodeItemsValue(wnv, itemText);
+                            if (itemValue != "")
+                                dbRow[wnv.dbFieldName] = itemValue;
+                        }
+
+                        dbRow.AcceptChanges();
+                    }
+                }
+                else
+                {
+                    v.SQL = v.SQL + wnv.dbFieldName;
+
+                    if (t.IsNotNull(v.con_Images_FieldName) == false)
+                        v.con_Images_FieldName = wnv.dbFieldName;
+                    else v.con_Images_FieldName2 = wnv.dbFieldName;
+
+                    //v.EXE_TempPath+"\\AResimGoster.aspx"
+                    string fileName = wnv.readValue;
+
+                    //byte[] theBytes = Encoding.UTF8.GetBytes(wnv.readValue);
+                    long imageLength = 0;
+                    if (v.con_Images == null)
+                        v.con_Images = t.imageBinaryArrayConverter(fileName, ref imageLength);
+                    else v.con_Images2 = t.imageBinaryArrayConverter(fileName, ref imageLength);
+
+                    if (t.IsNotNull(v.con_Images_FieldName))
+                    {
+                        if (v.con_Images_FieldName.IndexOf("Small") > -1)
+                            v.con_Images = ResmiKucult(v.con_Images);
+                    }
+
+                    if (t.IsNotNull(v.con_Images_FieldName2))
+                    {
+                        if (v.con_Images_FieldName2.IndexOf("Small") > -1)
+                            v.con_Images2 = ResmiKucult(v.con_Images2);
+                    }
+                    //if (t.IsNotNull(wnv.readValue))
+                    //    dbRow[wnv.dbFieldName] = theBytes; // Encoding.UTF8.GetBytes(wnv.readValue);
+                    if ((v.con_Images != null) && (v.con_Images2 == null))
+                        dbRow[wnv.dbFieldName] = v.con_Images;
+                    if ((v.con_Images != null) && (v.con_Images2 != null))
+                        dbRow[wnv.dbFieldName] = v.con_Images2;
+                }
+            }
+
+            // get işlemi bitti ve artık database yazma işlemi gerekiyor
+            if (wnv.GetSave)
+            {
+                if (t.IsNotNull(ds_DbaseTable))
+                    msPagesService.dbButtonClick(this, ds_DbaseTable.DataSetName, v.tButtonType.btKaydet);
+            }
+
+
+            */
+        }
+
         public bool transferFromDatabaseToWeb(Form tForm, webNodeValue wnv, List<MsWebScrapingDbFields> msWebScrapingDbFields)
         {
             //v.SQL = v.SQL + v.ENTER + myNokta + " transferFromDatabaseToWeb : Set : ";
@@ -669,10 +767,13 @@ namespace YesiLdefter.Selenium
             bool onay = false;
 
 
+            string kacAdet = KullaniciyaSor(wnv.InnerText, wnv.OuterText, wnv.writeValue);
+            int userCount = t.myInt32(kacAdet);
+            //int.Parse(iBox.value);
+
             /// tableIPCode tespit edildi ... save işlemi başlayacak olan DataSet belli oldu
             ///
             f.tableIPCodeIsSave = wnv.TableIPCode;
-
 
             /// sırayla row ları ele al
             ///
@@ -698,7 +799,31 @@ namespace YesiLdefter.Selenium
                     if (editKayitKontrolu()) break;
                 }
                 rowNo++;
+
+                if (rowNo >= userCount)
+                {
+                    MessageBox.Show(userCount.ToString() + " adet kayıt alındı...");
+                    break;
+                }
             }
+        }
+
+        private string KullaniciyaSor(string title, string label, string defaultValue)
+        {
+            vUserInputBox iBox = new vUserInputBox();
+            iBox.Clear();
+            iBox.title = title;         // "Kaydın başlamasını istediğiniz sıra no";
+            iBox.promptText = label;    // "Sıra No  :";
+            iBox.value = defaultValue;  // "0";
+            iBox.displayFormat = "";
+            iBox.fieldType = 0;
+
+            string cevap = "";
+            if (t.UserInpuBox(iBox) == DialogResult.OK)
+            {
+                cevap = iBox.value;
+            }
+            return cevap;
         }
 
         private DataRow findRightRow(Form tForm, webNodeValue wnv, v.tSelect select, List<MsWebScrapingDbFields> msWebScrapingDbFields)
@@ -915,39 +1040,78 @@ namespace YesiLdefter.Selenium
             if (msWebScrapingFields == null) return;
             if (msWebScrapingFields.Count == 0) return;
 
-            string tableIPCode = findTableIPCode(workPageNodes.aktifPageCode, msWebScrapingFields);
-            if (tableIPCode == "") return;
+            string tableIPCode = "";
+            string notFoundTableIPCodeList = "";
+            bool taramaOnayi = true;
+            bool siraliIslemButonOnayi = false;
 
-            workPageNodes.tableIPCode = tableIPCode;
-
-            string[] controls = new string[] { };
-            Control btn_OneByOne = null;
-            btn_OneByOne = t.Find_Control(tForm, "checkButton_ek1", workPageNodes.tableIPCode, controls);
-
-            if (btn_OneByOne != null)
+            while (taramaOnayi)
             {
-                workPageNodes.siraliIslem = true;
-                workPageNodes.siraliIslemAktif = ((DevExpress.XtraEditors.CheckButton)btn_OneByOne).Checked;
-            }
-            if (t.IsNotNull(tableIPCode))
-            {
-                DataSet ds = null;
-                DataNavigator dN = null;
-                t.Find_DataSet(tForm, ref ds, ref dN, tableIPCode);
-                workPageNodes.aktif_ds = ds;
-                workPageNodes.aktif_dN = dN;
+                tableIPCode = findTableIPCode(workPageNodes.aktifPageCode, msWebScrapingFields, notFoundTableIPCodeList);
+
+                if (tableIPCode == "")
+                {
+                    taramaOnayi = false;
+                }
+
+                siraliIslemButonOnayi = findSiraliIslemButonu(tForm, workPageNodes, tableIPCode);
+
+                if (siraliIslemButonOnayi)
+                {
+                    taramaOnayi = false;
+                }
+                else
+                {
+                    notFoundTableIPCodeList += "||" + tableIPCode;
+                }
             }
 
         }
-        private string findTableIPCode(string aktifPageCode, List<MsWebScrapingDbFields> msWebScrapingFields)
+        private bool findSiraliIslemButonu(Form tForm, webWorkPageNodes workPageNodes, string tableIPCode)
+        {
+            bool onay = false;
+
+            string[] controls = new string[] { };
+            Control btn_SiraliIslem = null;
+            btn_SiraliIslem = t.Find_Control(tForm, "checkButton_ek1", tableIPCode, controls);
+
+            if (btn_SiraliIslem != null)
+            {
+                workPageNodes.siraliIslemVar = true;
+                workPageNodes.siraliIslemTableIPCode = tableIPCode;
+                workPageNodes.siraliIslem_Btn = btn_SiraliIslem;
+
+                /// ilk bulduğunda default olarak işaretli olsun
+                /// 
+                ((DevExpress.XtraEditors.CheckButton)btn_SiraliIslem).Checked = true;
+                
+                workPageNodes.siraliIslemAktif = ((DevExpress.XtraEditors.CheckButton)btn_SiraliIslem).Checked;
+
+                DataSet ds = null;
+                DataNavigator dN = null;
+                t.Find_DataSet(tForm, ref ds, ref dN, tableIPCode);
+                if (ds != null)
+                {
+                    workPageNodes.siraliIslem_ds = ds;
+                    workPageNodes.siraliIslem_dN = dN;
+                    onay = true;
+                }
+            }
+            
+            return onay;
+        }
+        private string findTableIPCode(string aktifPageCode, List<MsWebScrapingDbFields> msWebScrapingFields, string notFoundTableIPCodeList)
         {
             string tableIPCode = "";
             foreach (MsWebScrapingDbFields item in msWebScrapingFields)
             {
                 if (item.WebScrapingPageCode == aktifPageCode)
                 {
-                    tableIPCode = item.TableIPCode;
-                    break;
+                    if (notFoundTableIPCodeList.IndexOf(item.TableIPCode) == -1)
+                    {
+                        tableIPCode = item.TableIPCode;
+                        break;
+                    }
                 }
             }
             return tableIPCode;

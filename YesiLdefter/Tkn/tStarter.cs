@@ -3,6 +3,7 @@ using DevExpress.XtraEditors;
 using System;
 using System.Data;
 using System.Data.SqlClient;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.NetworkInformation;
@@ -40,11 +41,9 @@ namespace Tkn_Starter
             v.EXE_ScriptsPath = v.EXE_PATH + "\\Scripts";
             v.tExeAbout.activeExeName = Application.ProductName + ".exe";
             v.tExeAbout.activePath = Application.StartupPath;
-                       
-
+            
             // output : { 25.03.2019 22:59:22 }
             DateTime dt = File.GetLastWriteTime(System.IO.Path.Combine(v.tExeAbout.activePath, v.tExeAbout.activeExeName));
-
             string yil = dt.Year.ToString();
             string ay = dt.Month.ToString();
             string gun = dt.Day.ToString();
@@ -59,6 +58,9 @@ namespace Tkn_Starter
             // output = { 20190325_2259 }
             v.tExeAbout.activeVersionNo = yil + ay + gun + "_" + saat + dakk;
 
+            //var versionInfo = FileVersionInfo.GetVersionInfo(v.tExeAbout.activePath +"\\"+ v.tExeAbout.activeExeName);
+            //string version = versionInfo.FileVersion;
+            
             System.Globalization.CultureInfo tr = new System.Globalization.CultureInfo("tr-TR");
             System.Threading.Thread.CurrentThread.CurrentCulture = tr;
 
@@ -78,8 +80,15 @@ namespace Tkn_Starter
             //
             t.ftpDownloadIniFile();
 
+            //Version clrVersion = Environment.Version;
+            //string appVersion = Application.ProductVersion;
+
+            /// Computer hakkındaki verileri topla
+            /// 
             t.WaitFormOpen(v.mainForm, "GetMacAdress ...");
             Get_MacAddress();
+            Get_ComputerAbout();
+            
 
             t.WaitFormOpen(v.mainForm, "Preparing Connection Strings ...");
             InitPreparingConnection();
@@ -136,9 +145,16 @@ namespace Tkn_Starter
             t.WaitFormOpen(v.mainForm, "Screen Size Get ...");
             Screen_Sizes_Get();
 
+            // önce yeni dosya varsa onla download olması gerekiyor
+            t.read_MsFileUpdates();
+            // dosyalardan son yeni exenin download olması gerekiyor
+            t.read_MsExeUpdates();
+
             t.MSSQL_Server_Tarihi();
 
             t.YilAyRead();
+
+            //t.TestRead();
 
             v.SP_UserIN = true;
         }
@@ -162,13 +178,21 @@ namespace Tkn_Starter
         {
             /// Read computer network ethernet mac address
             /// 
-            String macAddr = NetworkInterface
+            try
+            {
+                String macAddr = NetworkInterface
                 .GetAllNetworkInterfaces()
                 .Where(nic => nic.NetworkInterfaceType == NetworkInterfaceType.Ethernet)
                 .Select(nic => nic.GetPhysicalAddress().ToString())
                 .FirstOrDefault();
 
-            v.tComputer.Network_MACAddress = macAddr;
+                v.tComputer.Network_MACAddress = macAddr;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Get MacAddress " + v.ENTER2 + ex.Message);
+                //throw;
+            }
         }
 
         void InitPreparingConnection() 
@@ -290,21 +314,85 @@ namespace Tkn_Starter
             /// eğer firm_guid yok ise sadece test firmalarını görebilir
             /// Firm_Guid aldığında da bu computer bilgileri sayesinde 
             /// firma için kayıt olan computer sayısı / lisans tespit edilmiş olacak
+                        
+            string networkKey = v.tComputer.Network_MACAddress;
+            string pcName = v.tComputer.PcName;
 
-            string compKey = v.tComputer.Network_MACAddress;
+            /* test için
+            networkKey = null;
+            pcName = "VIRA-2PC";
 
-            // eğer bir şekilde eğer macaddresi gelmez ise
-            //
-            //if (IsNotNull(compKey) == false)
-            //{
-            //    ComputerAbout();
-            //    compKey = v.tComputer.Processor_Id;
-            //}
+            v.tMainFirm.FirmId = 116;
+            v.tUser.UserFirmGUID = "aab68ddf-1c4c-49e6-a860-80bbd558d945";
 
-            string tSql = @" Select * from UstadComputers where NetworkMacAddress = '" + compKey + "' ";
+            v.tComputer.PcName = pcName;
+            v.tComputer.Network_MACAddress = null;
+            v.tComputer.Processor_Name = null;
+            v.tComputer.Processor_Id = null;
+            v.tComputer.DiskDrive_Model = null;
+            v.tComputer.DiskDrive_SerialNumber = null;
+            if (IsNotNull(networkKey) == false) networkKey = "";
+            if (IsNotNull(pcName) == false) pcName = "";
+            */
+
+            /// FirmGUID
+            /// NetworkMacAddress
+            /// SystemName
+            string tSql = "";
+
+            tSql = @" Select * from UstadComputers where ( isnull(NetworkMacAddress,'') = '" + networkKey + "' and isnull(SystemName,'') = '" + pcName + "' ) ";
 
             SQL_Read_Execute(v.dBaseNo.UstadCrm, v.ds_Computer, ref tSql, "UstadComputers", "InitLoginComputer");
 
+            if (IsNotNull(v.ds_Computer))
+            {
+                // Birden fazla computer kaydı var ise 
+                if (v.ds_Computer.Tables[0].Rows.Count > 1)
+                {
+                    string delete_sql = " Delete from UstadComputers where ( isnull(NetworkMacAddress,'') = '" + networkKey + "' and isnull(SystemName,'') = '" + pcName + "' ) ";
+
+                    DataSet ds_ = new DataSet();
+                    SQL_Read_Execute(v.dBaseNo.UstadCrm, ds_, ref delete_sql, "UstadComputers", "Delete");
+
+                    // computer bilgisini yeniden kaydet
+                    InitRegisterComputer();
+
+                    // yeni kaydedilen computer bilgisini oku
+                    tSql = @" Select * from UstadComputers where ( isnull(NetworkMacAddress,'') = '" + networkKey + "' and isnull(SystemName,'') = '" + pcName + "' ) ";
+                    SQL_Read_Execute(v.dBaseNo.UstadCrm, v.ds_Computer, ref tSql, "UstadComputers", "InitLoginComputer");
+
+                }
+
+                /// yeniden okunduğu için tekrar kontrol
+                if (IsNotNull(v.ds_Computer))
+                    v.tComputer.UstadCrmComputerId = Convert.ToInt32(v.ds_Computer.Tables[0].Rows[0]["ComputerId"].ToString());
+
+                /// Bazı Computer bilgileri güncelleniyor
+                /// FirmId
+                /// FirmGUID 
+                /// LastDate
+                /// OperatingSystem
+                /// ExeVersion
+                if (v.ds_Computer.Tables[0].Rows.Count == 1)
+                {
+                    tSql = " Update UstadComputers set "
+                    + "   FirmId = "+ v.tMainFirm.FirmId.ToString() 
+                    + " , FirmGUID = '"+ v.tUser.UserFirmGUID + "' "
+                    + " , LastDate = " + TarihSaat_Formati(Convert.ToDateTime(DateTime.Now)) // v.TARIH_SAAT
+                    + " , OperatingSystem = '" + v.tComputer.OperatingSystem + "' "
+                    + " , ExeVersion = '" + v.tExeAbout.activeVersionNo.Substring(0, 8) + "' "
+                    + " where ComputerId = " + v.tComputer.UstadCrmComputerId.ToString();
+                    DataSet ds_ = new DataSet();
+                    SQL_Read_Execute(v.dBaseNo.UstadCrm, ds_, ref tSql, "UstadComputers", "Update");
+                }
+            }
+            else
+            {
+                // Hiç kaydı yok ise
+                InitRegisterComputer();
+            }
+
+            /*
             if (IsNotNull(v.ds_Computer))
             {
                 /// computer için planlanmış firma guid bilgisi
@@ -326,19 +414,20 @@ namespace Tkn_Starter
                 {
                     MessageBox.Show("Bilgisayarınız PASİF durumda. \r\n\r\n Destek ekibini arayarak bilgisayarınız AKTİF ettirebilirsiniz ...", "DİKKAT : ", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
-                /*
+                / *
                 // diğer modlarda ise
                 if (v.tComp.SP_COMP_ISACTIVE)
                 {
                     MessageBox.Show("Bilgisayarınız  ( IsAcvite : " + v.tComp.SP_COMP_ISACTIVE.ToString() + " ) durumda.", "DİKKAT : ", MessageBoxButtons.OK, MessageBoxIcon.Hand);
                 }
-                */
+                * /
             }
             else
             {
                 /// computer register için form
                 InitRegisterComputer();
             }
+            */
         }
 
         void Screen_Sizes_Get()
@@ -356,7 +445,7 @@ namespace Tkn_Starter
         {
             /// Computer hakkındaki verileri topla
             /// 
-            ComputerAbout();
+            //Get_ComputerAbout();
             /// Computeri, merkezdeki db ye (MSV3..) kaydedecek formu aç
             ///
             string FormName = "ms_Computer";

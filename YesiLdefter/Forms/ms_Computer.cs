@@ -63,12 +63,13 @@ namespace YesiLdefter
                     ds.Tables[0].Rows[dN.Position]["IsActive"] = 1;
                     ds.Tables[0].Rows[dN.Position]["FirmId"] = v.tMainFirm.FirmId;
                     ds.Tables[0].Rows[dN.Position]["FirmGUID"] = v.tUser.UserFirmGUID;
-                    ds.Tables[0].Rows[dN.Position]["SystemName"] = v.tComputer.SystemName.ToString();
-                    ds.Tables[0].Rows[dN.Position]["NetworkMacAddress"] = v.tComputer.Network_MACAddress.ToString();
-                    ds.Tables[0].Rows[dN.Position]["ProcessorName"] = v.tComputer.Processor_Name.ToString();
-                    ds.Tables[0].Rows[dN.Position]["ProcessorId"] = v.tComputer.Processor_Id.ToString();
-                    ds.Tables[0].Rows[dN.Position]["DiskModel"] = v.tComputer.DiskDrive_Model.ToString();
-                    ds.Tables[0].Rows[dN.Position]["DiskSerialNumber"] = v.tComputer.DiskDrive_SerialNumber.ToString();
+                    ds.Tables[0].Rows[dN.Position]["SystemName"] = v.tComputer.PcName?.ToString();
+                    ds.Tables[0].Rows[dN.Position]["NetworkMacAddress"] = v.tComputer.Network_MACAddress?.ToString();
+                    ds.Tables[0].Rows[dN.Position]["ProcessorName"] = v.tComputer.Processor_Name?.ToString();
+                    ds.Tables[0].Rows[dN.Position]["ProcessorId"] = v.tComputer.Processor_Id?.ToString();
+                    ds.Tables[0].Rows[dN.Position]["DiskModel"] = v.tComputer.DiskDrive_Model?.ToString();
+                    ds.Tables[0].Rows[dN.Position]["DiskSerialNumber"] = v.tComputer.DiskDrive_SerialNumber?.ToString();
+                    ds.Tables[0].Rows[dN.Position]["OperatingSystem"] = v.tComputer.OperatingSystem?.ToString();
 
                     Application.DoEvents();
                     // kaydı aç
