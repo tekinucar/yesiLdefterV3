@@ -1809,7 +1809,8 @@ namespace YesiLdefter
                                         msPagesService.dbButtonClick(this, wnv.ds.DataSetName, v.tButtonType.btKaydet);
                                     }
                                 }
-                                t.FlyoutMessage(this, "Bilgilendirme", elementText);
+                                //t.FlyoutMessage(this, "Bilgilendirme", elementText);
+                                t.AlertMessage("Bilgilendirme", elementText);
                             }
                         }
                     }
