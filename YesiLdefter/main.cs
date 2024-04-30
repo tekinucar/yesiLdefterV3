@@ -144,6 +144,7 @@ namespace YesiLdefter
             this.Width = v.Primary_Screen_Width;
             this.Height = v.Primary_Screen_Height;
 
+
             #endregion
 
             #region UserLOGIN

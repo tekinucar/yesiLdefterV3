@@ -204,11 +204,12 @@ namespace YesiLdefter
 
             /// DbUpdates table kontrolü
             /// yok ise dbo.DbUpdates ekleneyiyor
-            onay = preparingCreateTable("dbo", "DbUpdates");
+            onay = t.preparingCreateTable(v.dBaseNo.Local, "dbo", "DbUpdates", 201);
 
             /// TabimMtsk olsun
             /// 
             v.SP_Firm_SectorTypeId = 211;
+            onay = t.preparingCreateTable(v.dBaseNo.Local, "dbo", "FileUpdates", 211);
         }
         private void InitDataSets()
         {
@@ -282,29 +283,7 @@ namespace YesiLdefter
                         
             #endregion User Login buttons
         }
-        
-        private bool preparingCreateTable(string schemasCode, string tableName)
-        {
-            bool onay = false;
-
-            vTable vt = new vTable();
-            vt.DBaseNo = v.dBaseNo.Local;
-            vt.SchemasCode = schemasCode;
-            vt.TableName = tableName;
-            vt.ParentTable = ""; 
-            vt.SqlScript = ""; 
-            
-            onay = db.tTableFind(vt);
-
-            if (onay == false)
-            {
-                onay = t.runDbUpdateTableAdd(vt);
-            }
-
-            Application.DoEvents();
-
-            return onay;
-        }
+                
         private bool checkedSurucu07UserTable()
         {
             bool onay = false;
@@ -716,7 +695,7 @@ namespace YesiLdefter
                     if (item["KOD"].ToString() == "104") v.tTabimFirm.Telefon = item["DEGER"].ToString();
                     if (item["KOD"].ToString() == "105") v.tTabimFirm.KursMuduru = item["DEGER"].ToString();
                     if (item["KOD"].ToString() == "106") v.tTabimFirm.KurucuAdi = item["DEGER"].ToString();
-                    if (item["KOD"].ToString() == "108") v.tTabimFirm.KursunKodu = item["DEGER"].ToString();
+                    if (item["KOD"].ToString() == "113") v.tTabimFirm.KursunKodu = item["DEGER"].ToString();
                     if (item["KOD"].ToString() == "321") v.tTabimFirm.MebbisKullaniciAdi = item["DEGER"].ToString();
                     if (item["KOD"].ToString() == "322") v.tTabimFirm.MebbisSifresi = item["DEGER"].ToString();
                     if (item["KOD"].ToString() == "119") v.tTabimFirm.FirmGUID = item["DEGER"].ToString();

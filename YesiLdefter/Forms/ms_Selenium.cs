@@ -131,13 +131,7 @@ namespace YesiLdefter
             // 
             this.msWebScrapingDbFields_ = msPagesService.readScrapingTablesAndFields(this.msWebPages_);
             //msPagesService.checkedSiraliIslemVarmi(this, this.workPageNodes_, this.msWebScrapingDbFields_);
-
-            /// Kullanıcının mebbisCode ve şifresini yeniden oku
-            /// değiştirmiş olabilir
-            /// 
-            msPagesService.getMebbisCode();
-            //MessageBox.Show("Mebbis : " + v.tUser.MebbisCode + " : " + v.tUser.MebbisPass);
-
+            
             /// DataSet ve DataNavigatorleri işaretle
             /// 
             preparingDataSets();
@@ -647,6 +641,12 @@ namespace YesiLdefter
         }
         private async Task loginPageViev()
         {
+            /// Kullanıcının mebbisCode ve şifresini yeniden oku
+            /// değiştirmiş olabilir
+            /// 
+            msPagesService.getMebbisCode();
+            //MessageBox.Show("Mebbis : " + v.tUser.MebbisCode + " : " + v.tUser.MebbisPass);
+
             f.Clear();
 
             if (v.webDriver_ == null)

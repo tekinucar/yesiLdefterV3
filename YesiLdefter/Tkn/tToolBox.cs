@@ -64,7 +64,9 @@ namespace Tkn_ToolBox
             /// [dbo].[MsFileUpdates] üzerinden sorgulanıyor
             /// 
             string sql = sqls.Sql_MsFileUpdates(lastMsFileUpdatesId);
-            if (SQL_Read_Execute(v.dBaseNo.publishManager, ds, ref sql, "", "MsFileUpdates"))
+            
+            //if (SQL_Read_Execute(v.dBaseNo.Manager, ds, ref sql, "", "MsFileUpdates")) // test için kullan
+            if (SQL_Read_Execute(v.dBaseNo.publishManager, ds, ref sql, "", "MsFileUpdates")) // publish için kullan
             {
                 //MessageBox.Show("fileUpdatesChecked - 2 " + sql);
                 if (IsNotNull(ds))
@@ -125,8 +127,11 @@ namespace Tkn_ToolBox
 
                 onay = ftpDownload(v.tMsFileUpdate.pathName, v.tMsFileUpdate.packetName);
                 if (onay)
-                    onay = exe.ExtractFile(v.tMsFileUpdate.pathName, v.tMsFileUpdate.packetName);
+                {
+                    AlertMessage("File download", v.tMsFileUpdate.fileName);
 
+                    onay = exe.ExtractFile(v.tMsFileUpdate.pathName, v.tMsFileUpdate.packetName);
+                }
                 // activeFileName   = v.tExeAbout.activeExeName
                 // extension        = 
                 // oldVersionNo     = v.tExeAbout.activeVersionNo
@@ -162,10 +167,12 @@ namespace Tkn_ToolBox
             sql = Sql_FileUpdatesInsert();
             try
             {
+                //MessageBox.Show(sql);
                 SQL_Read_Execute(v.dBaseNo.Project, ds, ref sql, "", "FileUpdates");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                MessageBox.Show("Error : FileUpdates : " + ex.Message);
                 throw;
             }
             v.con_CreateScriptPacket = false;
@@ -180,6 +187,7 @@ namespace Tkn_ToolBox
             // Müşteri database üzerinde çalıştırılan update lerin kaydı
             string cumle =
             @" if ( Select count(*) ADET from [dbo].[FileUpdates] where 0 = 0 
+                    and [PcName] = '" + pcName + @"' 
                     and [MsFileUpdateId] = " + v.tMsFileUpdate.id.ToString() + @" ) = 0 
         begin
             INSERT INTO [dbo].[FileUpdates]
@@ -409,11 +417,11 @@ namespace Tkn_ToolBox
             vt.ParentTable = "";
             vt.SqlScript = "";
 
-            runDbUpdateTableAdd(vt);
+            runDbUpdateTableAdd(vt, 0);
             //string notExistsSql = preparingTableIFNotExists(schemaName, tableName);
         }
 
-        public bool runDbUpdateTableAdd(vTable vt)
+        public bool runDbUpdateTableAdd(vTable vt, Int16 sectorTypeId)
         {
             tDatabase db = new tDatabase();
             tSQLs sql = new tSQLs();
@@ -421,8 +429,11 @@ namespace Tkn_ToolBox
             bool onay = false;
 
             /// tablonun scriptini temin edelim
-            
-            string tSql = sql.Sql_MsProjectTables(vt.TableName, v.SP_Firm_SectorTypeId);
+
+            if (sectorTypeId == 0)
+                sectorTypeId = v.SP_Firm_SectorTypeId;
+
+            string tSql = sql.Sql_MsProjectTables(vt.TableName, sectorTypeId);
 
             DataSet ds = new DataSet();
 
@@ -833,6 +844,30 @@ namespace Tkn_ToolBox
             MyProperties_Set(ref myProp, "KeyFName", "");
 
             return myProp;
+        }
+
+        public bool preparingCreateTable(v.dBaseNo dBaseNo, string schemasCode, string tableName, Int16 sectorTypeId)
+        {
+            bool onay = false;
+            tDatabase db = new tDatabase();
+
+            vTable vt = new vTable();
+            vt.DBaseNo = dBaseNo; 
+            vt.SchemasCode = schemasCode;
+            vt.TableName = tableName;
+            vt.ParentTable = "";
+            vt.SqlScript = "";
+
+            onay = db.tTableFind(vt);
+
+            if (onay == false)
+            {
+                onay = runDbUpdateTableAdd(vt, sectorTypeId);
+            }
+
+            Application.DoEvents();
+
+            return onay;
         }
 
         #endregion dbUpdatesChecked
@@ -6888,7 +6923,17 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
         #region MsFileUpdates Read
         public void read_MsFileUpdates()
         {
-            fileUpdatesChecked();
+            //v.active_DB.projectDBaseNo
+            //v.dBaseNo.Local,
+
+            v.dBaseNo dBaseNo = v.active_DB.projectDBaseNo;
+            if ((v.SP_Firm_SectorTypeId == 211) ||
+                (v.SP_Firm_SectorTypeId == 212) ||
+                (v.SP_Firm_SectorTypeId == 213)) dBaseNo = v.dBaseNo.Local;
+ 
+            bool onay = preparingCreateTable(dBaseNo, "dbo", "FileUpdates", 211);
+            if (onay) 
+                fileUpdatesChecked();
         }
         #endregion MsFileUpdates
 
