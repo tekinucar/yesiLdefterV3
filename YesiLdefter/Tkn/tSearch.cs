@@ -629,7 +629,7 @@ namespace Tkn_Events
             // InputPanel Create
             //
             if (t.IsNotNull(SearchTableIPCode))
-                ip.Create_InputPanel(tSearchForm, tabNavigationPage1, SearchTableIPCode, 1);
+                ip.Create_InputPanel(tSearchForm, tabNavigationPage1, SearchTableIPCode, 1, true);
 
 
             tabPane1.Controls.Add(tabNavigationPage1);

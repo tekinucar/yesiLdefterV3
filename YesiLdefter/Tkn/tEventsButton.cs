@@ -739,6 +739,10 @@ namespace Tkn_Events
             tToolBox t = new tToolBox();
             bool onay = false;
 
+            /// ms_Selenium da dataNavigator_PositionChanged de kontrol için kullanılmaktadır
+            /// 
+            v.con_Listele_TableIPCode = tableIPCode;
+
             DataSet ds = t.Find_DataSet(tForm, "", tableIPCode, "btnClick/listele");
             if (ds != null)
             {
@@ -747,6 +751,8 @@ namespace Tkn_Events
                 t.ViewControl_Enabled(tForm, ds, tableIPCode);
                 // bu IPCode bağlı ExternalIPCode olabilir...
                 t.ViewControl_Enabled_ExtarnalIP(tForm, ds);
+                //
+                v.con_Listele_TableIPCode = "";
                 return onay;
             }
 
@@ -3106,8 +3112,10 @@ namespace Tkn_Events
 
         public void textEdit_Find_EditValueChanged(object sender, EventArgs e)
         {
-            tToolBox t = new tToolBox();
+            string findText = ((DevExpress.XtraEditors.TextEdit)sender).Text;
+            if (findText == v.con_Search_NullText) findText = "";//return;
 
+            tToolBox t = new tToolBox();
             Control cntrl = null;
             Form tForm = ((DevExpress.XtraEditors.TextEdit)sender).FindForm();
             string TableIPCode = ((DevExpress.XtraEditors.TextEdit)sender).Properties.AccessibleDefaultActionDescription;
@@ -3121,7 +3129,7 @@ namespace Tkn_Events
                     {
                         GridView view = ((DevExpress.XtraGrid.GridControl)cntrl).MainView as GridView;
                         view.BeginDataUpdate();
-                        view.FindFilterText = "\"" + ((DevExpress.XtraEditors.TextEdit)sender).Text + "\"";
+                        view.FindFilterText = "\"" + findText + "\"";
                         //view.ApplyFindFilter("\"" + ((DevExpress.XtraEditors.TextEdit)sender).Text + "\"");
                         view.EndDataUpdate();
                     }
@@ -3130,14 +3138,13 @@ namespace Tkn_Events
                     {
                         AdvBandedGridView view = ((DevExpress.XtraGrid.GridControl)cntrl).MainView as AdvBandedGridView;
                         view.BeginDataUpdate();
-                        view.FindFilterText = "\"" + ((DevExpress.XtraEditors.TextEdit)sender).Text + "\"";
+                        view.FindFilterText = "\"" + findText + "\"";
                         view.EndDataUpdate();
                     }
                 }
                 if (cntrl.GetType().ToString() == "DevExpress.XtraTreeList.TreeList")
                 {
-                    ((DevExpress.XtraTreeList.TreeList)cntrl).FindFilterText =
-                        "\"" + ((DevExpress.XtraEditors.TextEdit)sender).Text + "\"";
+                    ((DevExpress.XtraTreeList.TreeList)cntrl).FindFilterText = "\"" + findText + "\"";
                 }
 
                 //if (!string.IsNullOrEmpty(gridView1.FindFilterText) && !gridView1.FindFilterText.Contains('"'))
@@ -3149,12 +3156,12 @@ namespace Tkn_Events
             /// findDelay = 200 ise list && data  yı işaret ediyor 
             int findType = t.myInt32(((DevExpress.XtraEditors.TextEdit)sender).Tag.ToString());
 
-            int valueCount = ((DevExpress.XtraEditors.TextEdit)sender).Text.Length;
+            int valueCount = findText.Length;
 
-            if ((findType == 200) &&
-                (v.searchCount > 0) &&
-                (v.searchCount > valueCount))
-                InData_Close(tForm, TableIPCode);
+            //if ((findType == 200) &&
+            //    (v.searchCount > 0) &&
+            //    (v.searchCount > valueCount))
+            //    InData_Close(tForm, TableIPCode);
         }
 
         public void textEdit_Find_KeyDown(object sender, KeyEventArgs e)//***New Ok
@@ -3164,7 +3171,27 @@ namespace Tkn_Events
            if (t.findAttendantKey(e))
            {
                 string propNavigator = "";
-                //string buttonName = "";
+                
+                if (e.KeyCode == Keys.Enter)
+                {
+                    tEventsGrid evg = new tEventsGrid();
+                    vGridHint tGridHint = new vGridHint();
+
+                    Control cntrl = null;
+                    Form tForm = ((DevExpress.XtraEditors.TextEdit)sender).FindForm();
+                    string TableIPCode = ((DevExpress.XtraEditors.TextEdit)sender).Properties.AccessibleDefaultActionDescription;
+                    cntrl = t.Find_Control_View(tForm, TableIPCode);
+
+                    if (cntrl != null)
+                    {
+                        evg.getGridHint_(cntrl, ref tGridHint);
+
+                        /// kullanıcı arama yaptı ve uygun data bulunmadıysa
+                        /// işlem yapmasın
+                        if (tGridHint.focusedRow == null) return;
+                    }
+                }
+
 
                 vButtonHint tButtonHint = new vButtonHint();
                 v.tButtonHint.Clear();
@@ -3180,28 +3207,26 @@ namespace Tkn_Events
                 if (((DevExpress.XtraEditors.TextEdit)sender).EditValue != null)
                     v.tButtonHint.columnEditValue = ((DevExpress.XtraEditors.TextEdit)sender).EditValue.ToString();
 
-
-                //v.tButtonHint.buttonType = ev.getClickType(v.tButtonHint.tForm, v.tButtonHint.tableIPCode, e, ref propNavigator, ref buttonName);
-                //if (propNavigator != "")
-                //    v.tButtonHint.propNavigator = propNavigator;
-                //if (buttonName != "")
-                //    v.tButtonHint.buttonName = buttonName;
-
                 if ((e.KeyCode == Keys.Enter) || (e.KeyCode == Keys.Return))
-                    v.tButtonHint.buttonType = v.tButtonType.btFindListData;
-                
-                propNavigator = t.Create_PropertiesEdit_Model_JSON("MS_TABLES_IP", "PROP_NAVIGATOR");
+                    v.tButtonHint.buttonType = v.tButtonType.btListeyeEkle;
+                        //v.tButtonType.btFindListData;
 
-                PROP_NAVIGATOR prop_ = t.readProp<PROP_NAVIGATOR>(propNavigator);
+                //propNavigator = t.Create_PropertiesEdit_Model_JSON("MS_TABLES_IP", "PROP_NAVIGATOR");
 
-                prop_.BUTTONTYPE = Convert.ToString((byte)v.tButtonHint.buttonType);
+                propNavigator = t.getPropNavigator(v.tButtonHint.tForm, v.tButtonHint.tableIPCode);
+                v.tButtonHint.propNavigator = propNavigator;
+                v.tButtonHint.senderType = sender.GetType().ToString();
 
-                prop_.READ_TABLEIPCODE = v.tButtonHint.tableIPCode;
-                
-                v.tButtonHint.propNavigator = JsonConvert.SerializeObject(prop_);
+                //v.tButtonHint.Clear();
+                //v.tButtonHint.tForm = tForm;
+                //v.tButtonHint.tableIPCode = TableIPCode;
+                //v.tButtonHint.propNavigator = myProp;
+                //v.tButtonHint.buttonType = buttonType;
+                //v.tButtonHint.columnEditValue = editValue;
+                //v.tButtonHint.senderType = sender.GetType().ToString();
+                //v.tButtonHint.checkedValue = editValue;
+                btnClick(v.tButtonHint);
 
-                tEventsButton evb = new tEventsButton();
-                evb.btnClick(v.tButtonHint);
                 return;
             }
 
@@ -3338,11 +3363,14 @@ namespace Tkn_Events
         public void textEdit_Find_Enter(object sender, EventArgs e)
         {
             int findType = 0;
+            string findText = "";
 
             if (sender.GetType().ToString() == "DevExpress.XtraEditors.ButtonEdit")
             {
                 findType = (int)((DevExpress.XtraEditors.ButtonEdit)sender).Tag;
-                v.searchCount = ((DevExpress.XtraEditors.ButtonEdit)sender).Text.Length;
+                findText = ((DevExpress.XtraEditors.ButtonEdit)sender).Text;
+                if (findText != v.con_Search_NullText)
+                    v.searchCount = findText.Length;
 
                 // create sırasında geçici yüklenmiş değer
                 if (findType == -100)
@@ -3356,7 +3384,9 @@ namespace Tkn_Events
             if (sender.GetType().ToString() == "DevExpress.XtraEditors.TextEdit")
             {
                 findType = (int)((DevExpress.XtraEditors.TextEdit)sender).Tag;
-                v.searchCount = ((DevExpress.XtraEditors.TextEdit)sender).Text.Length;
+                findText = ((DevExpress.XtraEditors.TextEdit)sender).Text;
+                if (findText != v.con_Search_NullText)
+                    v.searchCount = findText.Length;
                 ((DevExpress.XtraEditors.TextEdit)sender).Properties.Appearance.BackColor = v.AppearanceFocusedColor;
 
                 /*

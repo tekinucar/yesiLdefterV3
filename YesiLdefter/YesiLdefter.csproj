@@ -222,6 +222,12 @@
     <Compile Include="Forms\ms_DBList.Designer.cs">
       <DependentUpon>ms_DBList.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\ms_DestekServiceTool.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ms_DestekServiceTool.Designer.cs">
+      <DependentUpon>ms_DestekServiceTool.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\ms_FileUpdates.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -522,6 +528,7 @@
     <Content Include="Scripts\UST\TabimMtsk\SinavTar_Update.txt" />
     <Content Include="Scripts\UST\TabimMtsk\trg_DERSPRG_PLAN.txt" />
     <Content Include="Scripts\UST\TabimMtsk\trg_sinavnot.txt" />
+    <Content Include="Scripts\UST\TabimMtsk\trg_users.txt" />
     <Content Include="Scripts\UST\UstadCRM\AspNetUserChanges.txt" />
     <Content Include="Scripts\UST\MsV3\EduMtskDenemeSinavSonuc.txt" />
     <Content Include="Scripts\UST\MsV3\EduMtskYonetmelik.txt" />
@@ -575,6 +582,7 @@
     <Content Include="Scripts\UST\UstadCRM\AspNetUserRoles.txt" />
     <Content Include="Scripts\UST\UstadCRM\AspNetUsers.txt" />
     <Content Include="Scripts\UST\UstadCRM\AspNetUserTokens.txt" />
+    <Content Include="Scripts\UST\UstadCRM\Edi_Dosyalari.txt" />
     <Content Include="Scripts\UST\UstadCRM\EduUsers.txt" />
     <Content Include="Scripts\UST\UstadCRM\EduUserTokens.txt" />
     <Content Include="Scripts\UST\UstadCRM\MtskVeriAktarimi.txt" />

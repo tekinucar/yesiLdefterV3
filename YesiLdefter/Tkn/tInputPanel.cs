@@ -27,7 +27,8 @@ namespace Tkn_InputPanel
              Form tForm,
              string tPanelControlName,
              string TableIPCode,
-             byte IP_View_Type)
+             byte IP_View_Type,
+             bool isCloseWaitForm)
         {
             tToolBox t = new tToolBox();
 
@@ -37,7 +38,7 @@ namespace Tkn_InputPanel
 
             if (cntrl != null)
             {
-                Create_InputPanel(tForm, cntrl, TableIPCode, "", IP_View_Type);
+                Create_InputPanel(tForm, cntrl, TableIPCode, "", IP_View_Type, isCloseWaitForm);
             }
         }
 
@@ -45,9 +46,10 @@ namespace Tkn_InputPanel
             Form tForm,
             Control tPanelControl,
             string TableIPCode,
-            byte IP_View_Type)
+            byte IP_View_Type,
+            bool isCloseWaitForm)
         {
-            Create_InputPanel(tForm, tPanelControl, TableIPCode, "", IP_View_Type);
+            Create_InputPanel(tForm, tPanelControl, TableIPCode, "", IP_View_Type, isCloseWaitForm);
         }
 
         public void Create_InputPanel(
@@ -55,7 +57,8 @@ namespace Tkn_InputPanel
             Control tPanelControl,
             string TableIPCode,
             string MultiPageID,
-            byte IP_View_Type)
+            byte IP_View_Type,
+            bool isCloseWaitForm)
         {
             if (tPanelControl.Controls.Count >= 2) return;
 
@@ -120,7 +123,8 @@ namespace Tkn_InputPanel
             if (tPanelControl.GetType().ToString() == "DevExpress.XtraEditors.XtraUserControl")
                 tPanelControl.Parent.Text = caption;
 
-            
+            t.WaitFormOpen(v.mainForm, caption);
+
             #endregion Tanımlar
 
             /// * IP_VIEW_TYPE
@@ -159,6 +163,12 @@ namespace Tkn_InputPanel
             #endregion HGS View
 
             tPanelControl.Padding = new System.Windows.Forms.Padding(v.Padding4);
+
+            if (isCloseWaitForm)
+            {
+                v.IsWaitOpen = false;
+                t.WaitFormClose();
+            }
 
             t.Takipci(function_name, "", '}');
         }

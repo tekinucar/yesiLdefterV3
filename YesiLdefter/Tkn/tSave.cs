@@ -795,6 +795,12 @@ namespace Tkn_Save
                 f.sonuc = f._editFields;
             }
 
+            if (t.IsNotNull(f.Key_Id_FieldName) == false)
+            {
+                MessageBox.Show("DİKKAT : [ " + f.tableName + " ]  tablosunun  primary key fieldin Identity özelliği testpit edilemedi ..." + v.ENTER2 + "Tablonun primary key fieldinin Identity özelliğinin True olmasını sağlayın ...");
+                f.sonuc = "DONTSAVE";
+            }
+
             // eğer bir değişiklik yoksa 
             if (f.IsChanges == false) f.sonuc = "DONTSAVE";
 
@@ -850,7 +856,7 @@ namespace Tkn_Save
         {
             f.SchemasCode = vt.SchemasCode;
             f.tableName = vt.TableName;
-            f.Key_Id_FieldName = vt.KeyId_FName;
+            //f.Key_Id_FieldName = vt.KeyId_FName;
             f.identityInsertOnOff = vt.IdentityInsertOnOff;
             f.myProp = ds.Namespace.ToString();
             f.SqlF = t.Set(t.MyProperties_Get(f.myProp, "=SqlFirst:"), "", "");

@@ -131,7 +131,7 @@ namespace Tkn_Variable
 
         public static string mainManagerPass = "Password = ustad84352Yazilim;";
         public static string publishManagerPass = "Password = ustad84352Yazilim;";
-
+        public static string destekServiceToolCode = "875421";
         public class databaseAbout_
         {
             /// o an hangi db işlem yapılacaksa onu nosunu ver 
@@ -194,7 +194,7 @@ namespace Tkn_Variable
         public static string registryPath = "Software\\Üstad\\YesiLdefter";
         public static Control formLastActiveControl { get; set; }
 
-
+        public static string con_Search_NullText { get; set; }
         public static string con_Save_dsState { get; set; }
         public static int con_EditSaveCount { get; set; }
 
@@ -218,6 +218,7 @@ namespace Tkn_Variable
         public static bool con_SetFocus;
         public static string con_SetFocus_TableIPCode { get; set; }
         public static string con_SetFocus_FieldName { get; set; }
+        public static string con_Listele_TableIPCode { get; set; }
 
         public static string con_Source_FormName { get; set; }
         public static string con_Source_FormCode { get; set; }
@@ -668,7 +669,7 @@ namespace Tkn_Variable
         public static string Wait_Caption = " Lütfen bekleyin...";
         public static string Wait_Desc_ProgramYukleniyor = "Program yükleniyor...";
         public static string Wait_Desc_ProgramYukDevam = "Program yüklenmeye devam ediyor...";
-        public static string Wait_Desc_DBBaglanti = " Bağlantı kuruluyor...";
+        public static string Wait_Desc_DBBaglanti = " veri tabanına bağlantı kuruluyor...";
         public static string DBRec_Insert = " Yeni kayıt işlemi gerçekleşti... ";
         public static string DBRec_Update = " adet kayıt düzeltme işlemi gerçekleşti... ";
         public static string DBRec_ListAdd = " Başarıyla listeye eklenmiştir...";
@@ -2222,7 +2223,7 @@ namespace Tkn_Variable
         public string viewType { get; set; }
         public string parentObject { get; set; }
         public v.tButtonType buttonType { get; set; }
-
+        public object focusedRow { get; set; }
         public void Clear()
         {
             tForm = null;
@@ -2240,6 +2241,7 @@ namespace Tkn_Variable
             viewType = "";
             parentObject = "";
             buttonType = 0;
+            focusedRow = null;
         }
 
     }

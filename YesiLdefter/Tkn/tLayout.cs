@@ -189,6 +189,8 @@ namespace Tkn_Layout
 
             Cursor.Current = Cursors.Default;
 
+            v.IsWaitOpen = false;
+            t.WaitFormClose();
         }
 
         private void lForm_Preparing(Form tForm, DataRow row)
@@ -3883,7 +3885,7 @@ namespace Tkn_Layout
             if (TableIPCode != string.Empty)
             {
                 tInputPanel ip = new tInputPanel();
-                ip.Create_InputPanel(tForm, cntrl, TableIPCode, v.IPdataType_DataView);
+                ip.Create_InputPanel(tForm, cntrl, TableIPCode, v.IPdataType_DataView, true);
             }
         }
 
@@ -3903,7 +3905,7 @@ namespace Tkn_Layout
             if (TableIPCode != string.Empty)
             {
                 tInputPanel ip = new tInputPanel();
-                ip.Create_InputPanel(tForm, cntrl, TableIPCode, IPDataType);
+                ip.Create_InputPanel(tForm, cntrl, TableIPCode, IPDataType, false);
             }
         }
 

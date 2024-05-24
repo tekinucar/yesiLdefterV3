@@ -169,7 +169,7 @@ namespace YesiLdefter
             groupControl.Dock = DockStyle.Fill;
 
             if (t.IsNotNull(TableIPCode))
-                ip.Create_InputPanel(tTestForm, groupControl, TableIPCode, 1);
+                ip.Create_InputPanel(tTestForm, groupControl, TableIPCode, 1, true);
 
             tTestForm.Controls.Add(groupControl);
 

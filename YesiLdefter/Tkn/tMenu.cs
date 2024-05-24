@@ -3224,7 +3224,7 @@ namespace Tkn_Menu
                 if (tForm != null)
                 {
                     tInputPanel ip = new tInputPanel();
-                    ip.Create_InputPanel(tForm, tPanelControl, Read_TableIPCode, 1);
+                    ip.Create_InputPanel(tForm, tPanelControl, Read_TableIPCode, 1, true);
 
                     dsRead = ip.Create_DataSet(tForm, Read_TableIPCode);
 
@@ -3421,7 +3421,7 @@ namespace Tkn_Menu
                 if (tForm != null)
                 {
                     tInputPanel ip = new tInputPanel();
-                    ip.Create_InputPanel(tForm, tPanelControl, Read_TableIPCode, 1);
+                    ip.Create_InputPanel(tForm, tPanelControl, Read_TableIPCode, 1, true);
 
                     dsRead = ip.Create_DataSet(tForm, Read_TableIPCode);
 
@@ -3606,7 +3606,7 @@ TABLEIPCODE_LIST=};
                     // demek ki gereksiz değilmiş bir daha kapatma 21.04.2018
                     // çünkü daha sonra Read_TableIPCode ile Find_DataSet çalıştığında bulamıyor
                     //
-                    ip.Create_InputPanel(tForm, tPanelControl, Read_TableIPCode, 1);
+                    ip.Create_InputPanel(tForm, tPanelControl, Read_TableIPCode, 1, true);
 
                     //dsRead = ip.Create_DataSet(tForm, Read_TableIPCode);
 

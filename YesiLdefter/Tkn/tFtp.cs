@@ -1,7 +1,9 @@
 ﻿using System;
+using System.ComponentModel;
 using System.IO;
 using System.Net;
 using System.Windows.Forms;
+using Tkn_Variable;
 
 namespace Tkn_Ftp
 {
@@ -18,7 +20,7 @@ namespace Tkn_Ftp
         /* Construct Object */
         public tFtp(string hostIP, string userName, string password)
         {
-            host = hostIP;
+            host = "" + hostIP;
             user = userName;
             pass = password;
         }
@@ -90,13 +92,18 @@ namespace Tkn_Ftp
                     /* Establish Return Communication with the FTP Server */
                     ftpResponse = (FtpWebResponse)ftpRequest.GetResponse();
                 }
-                catch (Exception ex)
+                catch (Exception e)
                 {
                     onay = false;
-                    MessageBox.Show(ex.ToString());
+                    //Uzak ad çözülemedi: 'ustadyazilim.com'
+                    //Uzak sunucu hata döndürdü: (530) Oturum açılmadı.
+                    if (e.Message.IndexOf("Uzak ad çözülemedi") > -1)
+                         MessageBox.Show("İnternet bağlantı hatası : " + v.ENTER2 + e.ToString());
+                    if (e.Message.IndexOf("530") > -1)
+                        MessageBox.Show("Ftp bağlantı hatası : " + v.ENTER2 + e.ToString());
                     //throw;
                 }
-                
+
                 if (ftpResponse != null)
                 {
                     /* Get the FTP Server's Response Stream */
@@ -119,7 +126,7 @@ namespace Tkn_Ftp
                     catch (Exception ex)
                     {
                         onay = false;
-                        MessageBox.Show(ex.ToString());
+                        MessageBox.Show("Ftp response hatası : " + v.ENTER2 + ex.ToString());
                     }
                     /* Resource Cleanup */
                     localFileStream.Close();
@@ -132,7 +139,7 @@ namespace Tkn_Ftp
             catch (Exception ex)
             {
                 onay = false;
-                MessageBox.Show(ex.ToString());
+                MessageBox.Show("Ftp için URI bağlantı hatası : " + v.ENTER2 + ex.ToString());
             }
             return onay;
         }

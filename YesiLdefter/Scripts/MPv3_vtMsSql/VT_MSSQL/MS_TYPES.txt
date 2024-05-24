@@ -669,6 +669,8 @@ begin transaction
  insert into MS_TYPES values ( 3, 0, 'DEFAULT_SETUP2', 2005, 'DEF_HP_USER_ID',            'User Id');
  insert into MS_TYPES values ( 3, 0, 'DEFAULT_SETUP2', 2006, 'DEF_HP_USER_GUID',          'User Guid');
  insert into MS_TYPES values ( 3, 0, 'DEFAULT_SETUP2', 2007, 'DEF_HP_USER_FIRM_GUID',     'User Firm Guid');
+ insert into MS_TYPES values ( 3, 0, 'DEFAULT_SETUP2', 2008, 'DEF_SECTOR_TYPE_ID',        'SectorTypeId');
+
  insert into MS_TYPES values ( 3, 0, 'DEFAULT_SETUP2', 2101, 'DEF_FNS_KASA_TL_ID',        'DEF_FNS_KASA_TL_ID');
  insert into MS_TYPES values ( 3, 0, 'DEFAULT_SETUP2', 2102, 'DEF_FNS_KASA_USA_ID',       'DEF_FNS_KASA_USA_ID');
  insert into MS_TYPES values ( 3, 0, 'DEFAULT_SETUP2', 2103, 'DEF_FNS_KASA_EURO_ID',      'DEF_FNS_KASA_EURO_ID');

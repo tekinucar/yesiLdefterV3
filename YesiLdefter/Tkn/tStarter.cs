@@ -18,6 +18,8 @@ namespace Tkn_Starter
     {
         public void InitStart()
         {
+            Application.DoEvents();
+
             tToolBox t = new tToolBox();
 
             /*
@@ -78,6 +80,7 @@ namespace Tkn_Starter
             // YesiLdefter.Ini
             // YesiLdefterConnection.Ini
             //
+            t.WaitFormOpen(v.mainForm, "Ini dosyalar okunuyor...");
             t.ftpDownloadIniFile();
 
             //Version clrVersion = Environment.Version;
@@ -85,20 +88,21 @@ namespace Tkn_Starter
 
             /// Computer hakkındaki verileri topla
             /// 
-            t.WaitFormOpen(v.mainForm, "GetMacAdress ...");
+            t.WaitFormOpen(v.mainForm, "Bilgisayara hakkındaki bilgiler okunuyor...");
             Get_MacAddress();
             Get_ComputerAbout();
             
 
-            t.WaitFormOpen(v.mainForm, "Preparing Connection Strings ...");
+            t.WaitFormOpen(v.mainForm, "Database bağlantı bilgileri hazırlanıyor...");
             InitPreparingConnection();
 
-            t.WaitFormOpen(v.mainForm, "ManagerDB Connection...");
+            t.WaitFormOpen(v.mainForm, "ManagerDB bağlantısı gerçekleşiyor...");
             Db_Open(v.active_DB.managerMSSQLConn);
 
             //t.WaitFormOpen(v.mainForm, "Read : SysGlyph ...");
             //SYS_Glyph_Read();
 
+            t.WaitFormOpen(v.mainForm, "Kullunacı girişi...");
             if (v.active_DB.localDbUses == false)
                 InitLoginUser(); // Ustad YesiLdester user girişi
             else
@@ -136,22 +140,25 @@ namespace Tkn_Starter
                 }
             }
 
-            t.WaitFormOpen(v.mainForm, "Preparing User Form ...");
+            t.WaitFormOpen(v.mainForm, "Kullanıcı teması hazırlanıyor...");
             setLoginSkins();
 
-            t.WaitFormOpen(v.mainForm, "Computer Info ...");
+            t.WaitFormOpen(v.mainForm, "Bilgisayar hakkındaki bilgi sorgulaması...");
             InitLoginComputer();
 
-            t.WaitFormOpen(v.mainForm, "Screen Size Get ...");
+            t.WaitFormOpen(v.mainForm, "Ekran çözünürlüğünün tespiti...");
             Screen_Sizes_Get();
 
             // önce yeni dosya varsa onla download olması gerekiyor
+            t.WaitFormOpen(v.mainForm, "DbUpdates işlemleri yapılıyor...");
             t.read_MsFileUpdates();
+            
             // dosyalardan son yeni exenin download olması gerekiyor
+            t.WaitFormOpen(v.mainForm, "Exe güncelleme kontrolü yapılıyor...");
             t.read_MsExeUpdates();
 
+            t.WaitFormOpen(v.mainForm, "Sistem tarihleri okunuyor, hazırlanıyor...");
             t.MSSQL_Server_Tarihi();
-
             t.YilAyRead();
 
             //t.TestRead();

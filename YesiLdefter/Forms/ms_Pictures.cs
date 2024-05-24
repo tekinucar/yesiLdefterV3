@@ -190,7 +190,7 @@ namespace YesiLdefter
                 this.imagesSourceFieldName = this.imagesSourceFieldName.Replace("Small", "");
 
                 tInputPanel ip = new tInputPanel();
-                ip.Create_InputPanel(this, splitContainerControl1.Panel1, this.imagesMasterTableIPCode, 1);
+                ip.Create_InputPanel(this, splitContainerControl1.Panel1, this.imagesMasterTableIPCode, 1, true);
 
                 t.Find_DataSet(this, ref dsDataTarget, ref dNTarget, this.imagesMasterTableIPCode);
                 

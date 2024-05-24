@@ -42,6 +42,7 @@ namespace YesiLdefter
         Control editpanel_TestSQL = null;
 
         string menuName = "MENU_" + "UST/PMS/PMS/InputPanel";
+        string editPanelName = "editpanel_ViewSQL";
 
         string buttonMsTIPMsTIP = "ButtonCopyTablesIP";         // Copy MsTablesIP > MsTablesIP 
         string buttonMsfMsfIP = "ButtonCopyFieldsFieldsIP";     // Copy MsFields > MsFieldsIP   
@@ -53,7 +54,6 @@ namespace YesiLdefter
         string buttonExpression = "ButtonExpressionView"; // Expression View
         string buttonClearSQL = "ButtonClearSQL"; // Clear SQL
         string buttonModelClass = "ButtonModelClass"; // Create ModelClass
-
         string buttonInsertPaketOlustur = "ButtonPaketOlustur";
         string buttonPaketiGonder = "ButtonPaketiGonder";
 
@@ -117,7 +117,7 @@ namespace YesiLdefter
             // aranan nesne memoEdit ()
             // memoEdit aslında bir panelin içinde sıfırncı kontrol olarak duruyor
             //
-            editpanel_TestSQL = t.Find_Control(this, v.lyt_Name + "40_40_01");
+            editpanel_TestSQL = t.Find_Control(this, editPanelName);//v.lyt_Name + "40_40_01");
             if (editpanel_TestSQL != null)
             {
                 if (((DevExpress.XtraEditors.PanelControl)editpanel_TestSQL).Controls.Count > 0)
@@ -181,7 +181,7 @@ namespace YesiLdefter
 
                         // Test işlemi gerçekleştiriliyor
                         //
-                        ip.Create_InputPanel(this, page, TableIPCode, 1);
+                        ip.Create_InputPanel(this, page, TableIPCode, 1, true);
 
                         // Test sonucu dataset olmadığı zaman yeni create edilen VievControl nesnesi Enabled = false dönüyor
                         // onun Enabled = true yapılıyor 

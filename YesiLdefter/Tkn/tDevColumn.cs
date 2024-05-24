@@ -1198,7 +1198,7 @@ namespace Tkn_DevColumn
                     (tcolumn_type == "tSearchEditOnly"))
                 {
                     tProp_Navigator = "Type:" + v.SearchEngine + ";" + tProp_Navigator;
-                    tEdit.NullText = "Arama listesi için  " + v.Key_SearchEngine + "  basın ...";
+                    tEdit.NullText = v.con_Search_NullText;
                 }
 
                 if ((tcolumn_type == "ButtonEdit") ||
@@ -2000,9 +2000,9 @@ namespace Tkn_DevColumn
                 {
 
                     //tProp_Navigator = "Type:" + v.SearchEngine + ";" + tProp_Navigator;
-                    //tEdit.NullText = "Arama listesi için  " + v.Key_SearchEngine + "  basın ...";
+                    //tEdit.NullText = v.con_Search_NullText;
                     //tEdit.AccessibleDescription = tProp_Navigator;
-                    
+
                     //if (tcolumn_type == "tSearchEditOnly")
                     //    tEdit.Buttons[0].Kind = DevExpress.XtraEditors.Controls.ButtonPredefines.Search;
 
@@ -2019,7 +2019,7 @@ namespace Tkn_DevColumn
                         (tcolumn_type == "tSearchEditOnly"))
                     {
                         tProp_Navigator = "Type:" + v.SearchEngine + ";" + tProp_Navigator;
-                        tEdit.NullText = "Arama listesi için  " + v.Key_SearchEngine + "  basın ...";
+                        tEdit.NullText = v.con_Search_NullText;
                     }
 
                     if (tcolumn_type == "tButtonEdit2Button")
@@ -2747,7 +2747,7 @@ namespace Tkn_DevColumn
                     (tcolumn_type == "tSearchEditOnly"))
                 {
                     tProp_Navigator = "Type:" + v.SearchEngine + ";" + tProp_Navigator;
-                    tEdit.Properties.NullText = "Arama listesi için  " + v.Key_SearchEngine + "  basın ...";
+                    tEdit.Properties.NullText = v.con_Search_NullText;
                     tEdit.Properties.AccessibleDescription = tProp_Navigator;
                     
                     if (tcolumn_type == "tSearchEditOnly")
@@ -3442,6 +3442,20 @@ namespace Tkn_DevColumn
             #region PopupContainerEdit
             if (tcolumn_type == "PopupContainerEdit")
             {
+                PopupContainerControl popupControl = new DevExpress.XtraEditors.PopupContainerControl();
+
+                GroupBox groupBox = new GroupBox();
+                groupBox.Dock = DockStyle.Fill;
+                popupControl.Controls.Add(groupBox);
+
+                PopupContainerEdit tEdit = new PopupContainerEdit();
+                tEdit.Properties.PopupControl = popupControl;
+                tEdit.EnterMoveNextControl = true;
+
+                if (Column.ToString() == s)
+                    ((LayoutControlItem)Column).Control = popupControl;
+                else ((Control)Column).Controls.Add(popupControl);
+
             }
             #endregion
 
@@ -4440,7 +4454,7 @@ namespace Tkn_DevColumn
                     (tcolumn_type == "tSearchEditOnly"))
                 {
                     tProp_Navigator = "Type:" + v.SearchEngine + ";" + tProp_Navigator;
-                    tEdit.NullText = "Arama listesi için  " + v.Key_SearchEngine + "  basın ...";
+                    tEdit.NullText = v.con_Search_NullText;
                     tEdit.AccessibleDescription = tProp_Navigator;
 
                     if (tcolumn_type == "tSearchEditOnly")

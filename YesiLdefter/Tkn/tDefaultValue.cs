@@ -916,7 +916,12 @@ namespace Tkn_DefaultValue
             {
                 return v.tUser.UserFirmGUID;
             }
-            
+            if ((def == "DEF_SECTOR_TYPE_ID") || (def == "2008"))
+            {
+                return v.SP_Firm_SectorTypeId.ToString();
+            }
+
+
             if (t.IsNotNull(v.ds_Variables) == false)
                 return "0"; //"0"; null;
 

@@ -133,7 +133,7 @@ namespace YesiLdefter
 
                         // Test işlemi gerçekleştiriliyor
                         //
-                        ip.Create_InputPanel(this, page, TableIPCode, 1);
+                        ip.Create_InputPanel(this, page, TableIPCode, 1, true);
 
                         // Test sonucu dataset olmadığı zaman yeni create edilen VievControl nesnesi Enabled = false dönüyor
                         // onun Enabled = true yapılıyor 

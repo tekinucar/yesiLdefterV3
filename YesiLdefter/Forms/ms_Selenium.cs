@@ -570,7 +570,7 @@ namespace YesiLdefter
         }
         private async void dataNavigator_PositionChanged(object sender, EventArgs e)
         {
-            ///
+            /// 
             if (f.tableIPCodesInLoad != "")
             {
                 object tDataTable = ((DevExpress.XtraEditors.DataNavigator)sender).DataSource;
@@ -580,9 +580,11 @@ namespace YesiLdefter
                     tableIPCode_ = dsData.DataSetName.ToString();
                 
                 if ((f.tableIPCodesInLoad.IndexOf(tableIPCode_) > -1) && 
-                    (f.tableIPCodesInLoad.IndexOf(f.tableIPCodeIsSave) <= 0 )) // save olan Dataset ise atla
+                    (f.tableIPCodesInLoad.IndexOf(f.tableIPCodeIsSave) <= 0 ) && // save olan Dataset ise atla
+                    (v.con_Listele_TableIPCode != tableIPCode_)
+                    ) 
                 {
-                    t.WaitFormOpen(this, "Sayfa değiştiriliyor ...");
+                    t.WaitFormOpen(this, "Web sayfası değiştiriliyor ...");
                     f.loadWorking = false;
                     f.pageRefreshWorking = true;
                     await startNodes(this.msWebNodes_, this.workPageNodes_, v.tWebRequestType.post, v.tWebEventsType.load);
@@ -718,6 +720,11 @@ namespace YesiLdefter
             f.tableIPCodeIsSave = "";
             //f.tableIPCodesInLoad = ""; Açma 
 
+            /// tableIPCodesInLoad view lerin enabled = false yap
+            await preparingViewControls(false);
+
+            //if (f.tableIPCodesInLoad != "")
+
             foreach (MsWebNode item in msWebNodes)
             {
                 if (f.anErrorOccurred) break;
@@ -806,6 +813,14 @@ namespace YesiLdefter
                     }
                 }
             }
+
+            /// tableIPCodesInLoad view lerin enabled = true yap
+            await preparingViewControls(true);
+
+            /// iş bitiminde de sıfılamak gerekiyor.
+            /// Örnek : Tarih al  dan sonra yeni tarihlere göre sayfalar değişmiyor
+            /// 
+            f.tableIPCodeIsSave = "";
         }
         private bool nextDataSetRow(webWorkPageNodes workPageNodes)
         {
@@ -2314,6 +2329,21 @@ namespace YesiLdefter
             return wnv.writeValue;
         }
 
+        private async Task preparingViewControls(bool value)
+        {
+            if (t.IsNotNull(f.tableIPCodesInLoad) == false) return;
+
+            /// tableIPCodesInLoad üzerindeki tableIPCode viewleri tespit et ve Enabled durumunu değiştir
+            /// 
+            string tableIPCode = "";
+            string list = f.tableIPCodesInLoad;
+            while (list.IndexOf("||") > -1)
+            {
+                tableIPCode = t.Get_And_Clear(ref list, "||");
+                if (t.IsNotNull(tableIPCode))
+                    t.ViewControl_Enabled(this, tableIPCode, value);
+            }
+        }
         #endregion subFunctions
 
 

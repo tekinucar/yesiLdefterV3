@@ -224,13 +224,13 @@ namespace Tkn_ToolBox
         #region *Database İşlemleri
 
         #region dbUpdatesChecked
-        public void dbUpdatesChecked()
+        public bool dbUpdatesChecked()
         {
             /// Burdaki Id Project Database den [dbo].[DbUpdates] tablosundan okunuyor
             /// yani Müşteri database den
             /// 
             string lastMsDbUpdatesId = getMusteriDbUpdateIdList();
-
+            bool onay = false;
             tSQLs sqls = new tSQLs();
             DataSet ds = new DataSet();
 
@@ -247,8 +247,10 @@ namespace Tkn_ToolBox
                 {
                     //MessageBox.Show("dbUpdatesChecked - 3 ");
                     runMsDbUpdates(ds);
+                    onay = true;
                 }
             }
+            return onay;
         }
         private string getMusteriDbUpdateIdList()
         {
@@ -886,7 +888,7 @@ namespace Tkn_ToolBox
             {
                 byte i = 0;
 
-                WaitFormOpen(v.mainForm, "[ MSSQL ] " + v.Wait_Desc_DBBaglanti);
+                WaitFormOpen(v.mainForm, "MsSQL " + v.Wait_Desc_DBBaglanti);
 
                 try
                 {
@@ -2536,11 +2538,17 @@ namespace Tkn_ToolBox
             }
 
         }
-
+        public void ViewControl_Enabled(Form tForm, string TableIPCode, bool value)
+        {
+            Control cntrl = null;
+            cntrl = Find_Control_View(tForm, TableIPCode);
+            if (cntrl != null)
+                cntrl.Enabled = value;
+        }
         public void ViewControl_Enabled(Form tForm, DataSet dsData, string TableIPCode) //Control cntrl)
         {
             // Control Enabled
-            Control cntrl = new Control();
+            Control cntrl = null;// new Control();
             cntrl = Find_Control_View(tForm, TableIPCode);
             if (cntrl != null)
             {
@@ -3022,6 +3030,7 @@ namespace Tkn_ToolBox
             Str_Replace(ref Sql, ":USER_GUID", v.tUser.UserGUID);
             Str_Replace(ref Sql, ":USERGUID", v.tUser.UserGUID);
             Str_Replace(ref Sql, ":UserGUID", v.tUser.UserGUID);
+            Str_Replace(ref Sql, ":SectorTypeId", v.SP_Firm_SectorTypeId.ToString());
 
 
             Str_Replace(ref Sql, ":BUGUN_YILAY", v.BUGUN_YILAY.ToString());
@@ -10812,6 +10821,41 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             return onay;
         }
 
+        public string getPropNavigator(Form tForm, string tableIPCode)
+        {
+            tToolBox t = new tToolBox();
+            string value = "";
+            if (tForm == null) return value;
+            if (t.IsNotNull(tableIPCode) == false) return value;
+
+            Control cntrl = null;
+            cntrl = t.Find_Control_View(tForm, tableIPCode);
+            if (cntrl == null) return value;
+
+            if (cntrl.GetType().ToString() == "DevExpress.XtraGrid.GridControl")
+            {
+                if (((GridControl)cntrl).AccessibleDescription != null)
+                {
+                    value = ((GridControl)cntrl).AccessibleDescription.ToString();
+                    //return value;
+                }
+            }
+
+            if (cntrl.GetType().ToString() == "DevExpress.XtraTreeList.TreeList")
+            {
+                if (((DevExpress.XtraTreeList.TreeList)cntrl).AccessibleDescription != null)
+                {
+                    value = ((DevExpress.XtraTreeList.TreeList)cntrl).AccessibleDescription.ToString();
+                    //return value;
+                }
+            }
+            
+            Str_Remove(ref value, "|ds|");
+            value = value.Trim();
+            return value;
+        }
+
+
         #endregion Diğerleri <<
 
         #endregion Find Functions
@@ -11111,6 +11155,24 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
             textBox.SetBounds(12, 80, 372, 20);
             textBox.Font = new Font("Tahoma", 22);
+
+            if ((vUIBox.displayFormat != "") ||
+                (vUIBox.displayFormat != null))
+            {
+                // Password tanımı ise
+                if (vUIBox.displayFormat == "*")
+                {
+                    textBox.Properties.PasswordChar = '*';
+                }
+                else
+                {
+                    textBox.Properties.Mask.EditMask = vUIBox.displayFormat;
+                    textBox.Properties.Mask.SaveLiteral = true;
+                    textBox.Properties.Mask.ShowPlaceHolders = true;
+                    textBox.Properties.Mask.UseMaskAsDisplayFormat = true;
+                }
+            }
+
             // set value             
             textBox.Text = vUIBox.value;   
 
@@ -11151,17 +11213,6 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 textBox.Text = vUIBox.value;
                 if (vUIBox.value == "") textBox.Text = "0";
             }
-
-            if ((vUIBox.displayFormat != "") ||
-                (vUIBox.displayFormat != null))
-            {
-                textBox.Properties.Mask.EditMask = vUIBox.displayFormat;
-                textBox.Properties.Mask.SaveLiteral = true;
-                textBox.Properties.Mask.ShowPlaceHolders = true;
-                textBox.Properties.Mask.UseMaskAsDisplayFormat = true;
-            }
-
-            
 
             //buttonOk.SetBounds(228, 72, 75, 23);
             //buttonCancel.SetBounds(309, 72, 75, 23);
@@ -12540,9 +12591,16 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             if (Cursor.Current != Cursors.Default)
                 Cursor.Current = Cursors.Default;
 
-            if (v.IsWaitOpen) return;
-
             if (Mesaj == "") Mesaj = "İşleminiz yapılıyor ...";
+
+            if (v.IsWaitOpen)
+            {
+                //SplashScreenManager.Default.SetWaitFormCaption(" " + Mesaj);
+                SplashScreenManager.Default?.SetWaitFormDescription(v.ENTER + "  " + Mesaj);
+                return;
+            }
+
+            
             //Mesaj = "  " + Mesaj.PadRight(100);
 
             if (v.SP_OpenApplication == false)
@@ -14260,10 +14318,13 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                     //  UstadFirmsSectorTypeId gibi
                     idFieldName = "Id";
                     fieldName = "SectorType";
+                    tableName = "MsSectorType";
+                    /*
                     if ((orjinalTableName.ToUpper().IndexOf("MSPROJECT") > -1) ||
                         (orjinalTableName.ToUpper() == "MSSECTORTYPE"))
                         tableName = "MsSectorType";
                     else tableName = orjinalTableName + fieldName;
+                    */
                 }
 
 
@@ -14471,7 +14532,16 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             /* Download a File */
             //ftpClient.download("/public/YesiLdefter_201806201.rar", @"E:\Temp\YesiLdefter_201806201.rar");
             //ftpClient.download(v.tExeAbout.ftpPacketName, @"" + v.tExeAbout.activePath + "\\" + v.tExeAbout.ftpPacketName);
-            onay = ftpClient.download(fileName, @"" + path + "\\" + fileName);
+            try
+            {
+                onay = ftpClient.download(fileName, @"" + path + "\\" + fileName);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Ftp download" + v.ENTER2 + ex.Message);
+                //throw;
+            }
+            
             
             /* Release Resources */
             ftpClient = null;

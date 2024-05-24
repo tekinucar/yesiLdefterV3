@@ -18,13 +18,18 @@ AS BEGIN
   print @UserDbTypeId
   /*[Lkp].[UstadUsersDbType] (Id, DbType)
   ( 0,    N''),
-  ( 1,    N'Yazılım database (Yazılım bölümü çalışmaları)'),
-  ( 2,    N'Abone database (Ustad yazılım müşterileri)'),
-  ( 3,    N'Ustad CRM database (Ustad CRM datası)'),
-  ( 4,    N'Muhasebe database (Ustad şirket muhasebesi)'),
-  ( 11,   N'Ustad CRM ve Abone database (Ustad Satış ve Destek Ekibi)'),
-  ( 21,   N'Ustad Kurucu' ),
-  ( 22,   N'Ustad İdari')
+  ( 11,   N'Ustad Admin'),
+  ( 12,   N'Ustad İdari'),
+  ( 13,   N'Ustad Muhasebe'),
+  ( 21,   N'Ustad Yazılım Personeli'),
+  ( 22,   N'Ustad Test Personeli'),
+  ( 23,   N'Ustad Satış Personeli - Ustad CRM ve Abone database'),
+  ( 24,   N'Ustad Destek Personeli - Ustad CRM ve Abone database'),
+  ( 51,   N'Son kullanıcı - rol1'),
+  ( 52,   N'Son kullanıcı - rol2'),
+  ( 53,   N'Son kullanıcı - rol3'),
+  ( 54,   N'Son kullanıcı - rol4'),
+  ( 55,   N'Son kullanıcı - rol5'),
   */
 
   /*[Lkp].[UstadFirmsDbType] (Id, DbType)
@@ -42,14 +47,17 @@ AS BEGIN
   if (@UserDbTypeId = 11) set @DbType = ' in ( 2, 3 ) '
   if (@UserDbTypeId = 21) set @DbType = ' > 0 '
   if (@UserDbTypeId = 22) set @DbType = ' in ( 1, 2, 3 ) '
-  
-  if (@UserDbTypeId <> 2) -- Abone kullanıcısı değilse
+  if (@UserDbTypeId = 23) or (@UserDbTypeId = 24) set @DbType = ' = 2 '
+
+  -- Abone değil ve firmGUID de yok ise
+  if ((@UserDbTypeId <> 2) and (@UserFirmGUID = ''))-- Abone kullanıcısı değilse
   begin
     set @Sql = ' Select * from UstadFirms Where DbTypeId ' + @DbType  
     Execute(@Sql)
   end
     
-  if (@UserDbTypeId = 2) -- Abone kullanıcısı ise
+  if ((@UserDbTypeId = 2) or -- Abone kullanıcısı ise
+      (@UserDbTypeId <> 2 ) and (@UserFirmGUID <> '')) -- Abone değil ve FirmGUID tanımlı ise 
   begin
      declare @_firmGUID varchar(50) 
      declare @_XID int
@@ -118,7 +126,10 @@ AS BEGIN
       ,[DatabaseName]
       ,[DbLoginName]
       ,[DbPass]
+	  ,[DbTypeId]
       ,[RecordDate]
+	  ,[MebbisCode]
+	  ,[MebbisPass]
      From CTE c
        left outer join UstadFirms as f on ( c.U_FirmId = f.FirmId )
   end
@@ -126,4 +137,7 @@ AS BEGIN
 END -- procedure
 
 /*CreateProcedureEnd*/
+
+
+
 

@@ -4909,7 +4909,7 @@ namespace Tkn_Events
                     tInputPanel ip = new tInputPanel();
 
                     ((DevExpress.XtraEditors.GroupControl)cntrl).Visible = true;
-                    ip.Create_InputPanel(tForm, ((DevExpress.XtraEditors.GroupControl)cntrl), AddIP_TableIPCode, 1);
+                    ip.Create_InputPanel(tForm, ((DevExpress.XtraEditors.GroupControl)cntrl), AddIP_TableIPCode, 1, true);
 
                     v.con_AddIP_TableCode = AddIP_TableCode;
                     v.con_AddIP_FieldName = AddIP_FieldName;
@@ -6392,7 +6392,7 @@ namespace Tkn_Events
                 (ViewType == "TabPage2") ||
                 (ViewType == "TabPage3"))
             {
-                ip.Create_InputPanel(tForm, cntrl, TableIPCode, ReadValue, 1);
+                ip.Create_InputPanel(tForm, cntrl, TableIPCode, ReadValue, 1, true);
 
                 if (t.IsNotNull(ReadCaption))
                     cntrl.Text = "   " + ReadCaption + "   ";
@@ -6464,7 +6464,7 @@ namespace Tkn_Events
                 if (((DevExpress.XtraBars.Docking.DockPanel)cntrl).Controls.Count == 1)
                 {
                     tInputPanel ip = new tInputPanel();
-                    ip.Create_InputPanel(tForm, ((DevExpress.XtraBars.Docking.DockPanel)cntrl), TableIPCode, 1);
+                    ip.Create_InputPanel(tForm, ((DevExpress.XtraBars.Docking.DockPanel)cntrl), TableIPCode, 1, true);
                 }
             }
         }
@@ -6631,7 +6631,7 @@ namespace Tkn_Events
                             if (cntrl != null)
                             {
                                 tInputPanel ip = new tInputPanel();
-                                ip.Create_InputPanel(tForm, cntrl, TABLEIPCODE, 1);
+                                ip.Create_InputPanel(tForm, cntrl, TABLEIPCODE, 1, true);
                             } // if (cntrl != 
                             else
                             {

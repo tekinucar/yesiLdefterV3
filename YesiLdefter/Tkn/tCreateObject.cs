@@ -1889,7 +1889,7 @@ namespace Tkn_CreateObject
             // InputPanel Create
             //
             tInputPanel ip = new tInputPanel();
-            ip.Create_InputPanel(tForm, groupControl1, TableIPCode, v.IPdataType_DataView);
+            ip.Create_InputPanel(tForm, groupControl1, TableIPCode, v.IPdataType_DataView, true);
 
             Create_PropertiesNav_Buttons(tForm, TableIPCode);
 

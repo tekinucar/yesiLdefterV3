@@ -41,7 +41,7 @@ namespace YesiLdefter
 
         DevExpress.XtraBars.BarStaticItem barMesajlar = null;
         DevExpress.XtraBars.BarButtonItem barButtonGuncelleme = null;
-
+        DevExpress.XtraBars.BarButtonItem barButtonServiceTool = null;
         DevExpress.XtraBars.BarEditItem mainProgressBar = null;
         DevExpress.XtraBars.BarEditItem barEditItemCari = null;
 
@@ -67,7 +67,6 @@ namespace YesiLdefter
         {
 
         }
-
         public main(string[] args)
         {
 
@@ -130,8 +129,7 @@ namespace YesiLdefter
 
             #region Starter
 
-            t.WaitFormOpen(v.mainForm, "Starter ...");
-
+            t.WaitFormOpen(v.mainForm, "Program hazırlanmaya başlıyor ...");
             using (tStarter s = new tStarter())
             {
                s.InitStart();
@@ -159,7 +157,7 @@ namespace YesiLdefter
                 if (v.active_DB.localDbUses == false)
                     t.DBUpdatesDataTransferOff();
             }
-
+            
             if ((params_) && (v.tUser.UserId > 0))
             {
                 /// Surucu07 için database update var mı?
@@ -193,7 +191,6 @@ namespace YesiLdefter
             v.SQL = "";
             #endregion
         }
-
         private void preparinDefaultValues()
         {
             // ... 
@@ -218,13 +215,15 @@ namespace YesiLdefter
             //SplashScreenManager.ShowForm(this, typeof(DevExpress.XtraWaitForm.AutoLayoutDemoWaitForm), true, true, false);
 
             chechkedPaths();
-
+            
             this.Load += new System.EventHandler(evf.myForm_Load);
             this.Shown += new System.EventHandler(evf.myForm_Shown);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(mainForm_KeyDown);
             //this.Activated += new System.EventHandler(mainForm_Activated);
             //this.Deactivate += new System.EventHandler(mainForm_Deactivate);
             this.KeyPreview = true;
+
+            v.con_Search_NullText = "Arama listesi için  " + v.Key_SearchEngine + "  basın ...";
 
             t.WaitFormOpen(v.mainForm, "yesiLdefter hazırlanıyor ...");
             v.SP_OpenApplication = true;
@@ -239,16 +238,16 @@ namespace YesiLdefter
             {
                 setMenuItems();
                 
-                t.WaitFormOpen(v.mainForm, "ManagerDB Connection...");
+                t.WaitFormOpen(v.mainForm, "ManagerDB bağlantısı gerçekleşiyor...");
                 t.Db_Open(v.active_DB.managerMSSQLConn);
 
                 if (v.active_DB.projectDBType == v.dBaseType.MSSQL)
                 {
-                    t.WaitFormOpen(v.mainForm, "ProjectDB MSSQL Connection...");
+                    t.WaitFormOpen(v.mainForm, "ProjectDB bağlantısı gerçekleşiyor...");
                     //t.Db_Open(v.active_DB.projectMSSQLConn);
                 }
                 
-                t.WaitFormOpen(v.mainForm, "SysTypes Load ...");
+                t.WaitFormOpen(v.mainForm, "SysTypes tanımları okunuyor...");
                 t.SYS_Types_Read();
 
                 //t.WaitFormOpen(v.mainForm, "Read : SysGlyph ...");
@@ -386,20 +385,20 @@ namespace YesiLdefter
             if ((v.tUser.UserDbTypeId == 1) || // yazılım
                 (v.tUser.UserDbTypeId == 21))  // kurucu
             {
-                t.WaitFormOpen(v.mainForm, "Menu Create ...");
+                t.WaitFormOpen(v.mainForm, "MsV3Menu menüsü hazırlanıyor...");
                 mn.Create_Menu(ribbon, "UST/PMS/PMS/MsV3Menu", "");
             }
 
             setMenuItems();
         }
-        
+
         void setMenuItems()
         {
             toolboxControl1 = t.Find_Control(this, "toolboxControl1");
             ribbonControl1 = t.Find_Control(this, "ribbonControl1");
 
             ribbon = ((DevExpress.XtraBars.Ribbon.RibbonControl)ribbonControl1);
-            
+
             foreach (var item in ribbon.Items)
             {
                 if (item.GetType().ToString() == "DevExpress.XtraBars.BarStaticItem")
@@ -411,15 +410,27 @@ namespace YesiLdefter
                         barMesajlar.Caption = "";
                     }
                 }
-                
+
                 if (item.GetType().ToString() == "DevExpress.XtraBars.BarButtonItem")
                 {
                     if ((((DevExpress.XtraBars.BarButtonItem)item).Name.ToString() == "barButtonGuncelleme") &&
                         (barButtonGuncelleme == null))
                     {
                         barButtonGuncelleme = (DevExpress.XtraBars.BarButtonItem)item;
-                        barButtonGuncelleme.ItemClick += 
+                        barButtonGuncelleme.ItemClick +=
                             new DevExpress.XtraBars.ItemClickEventHandler(this.barButtonGuncelleme_ItemClick);
+                    }
+                }
+
+                //barButtonServiceTool
+                if (item.GetType().ToString() == "DevExpress.XtraBars.BarButtonItem")
+                {
+                    if ((((DevExpress.XtraBars.BarButtonItem)item).Name.ToString() == "barButtonServiceTool") &&
+                        (barButtonServiceTool == null))
+                    {
+                        barButtonServiceTool = (DevExpress.XtraBars.BarButtonItem)item;
+                        barButtonServiceTool.ItemClick +=
+                            new DevExpress.XtraBars.ItemClickEventHandler(this.barButtonServiceTool_ItemClick);
                     }
                 }
 
@@ -436,7 +447,7 @@ namespace YesiLdefter
                         barMSConn_ = (DevExpress.XtraBars.BarEditItem)item;
                 }
             }
-            
+
             //string ss = "";
 
             int i3 = ribbon.Pages.Count;
@@ -444,7 +455,7 @@ namespace YesiLdefter
             for (int i2 = 0; i2 < i3; i2++)
             {
                 i5 = ribbon.Pages[i2].Groups.Count;
-                
+
                 for (int i4 = 0; i4 < i5; i4++)
                 {
                     foreach (var item in ribbon.Pages[i2].Groups[i4].ItemLinks)
@@ -455,7 +466,7 @@ namespace YesiLdefter
                         {
                             if (((DevExpress.XtraBars.BarLargeButtonItemLink)item).Item.Name.ToString() == "btnExeCompress")
                             {
-                                ((DevExpress.XtraBars.BarLargeButtonItemLink)item).Item.ItemClick 
+                                ((DevExpress.XtraBars.BarLargeButtonItemLink)item).Item.ItemClick
                                       += new DevExpress.XtraBars.ItemClickEventHandler(this.btnExeCompress_ItemClick);
                             }
                             if (((DevExpress.XtraBars.BarLargeButtonItemLink)item).Item.Name.ToString() == "btnExeFtpUpload")
@@ -464,7 +475,7 @@ namespace YesiLdefter
                                       += new DevExpress.XtraBars.ItemClickEventHandler(this.btnExeUpload_ItemClick);
                             }
                             //btnFirmList
-                            if (((DevExpress.XtraBars.BarLargeButtonItemLink)item).Item.Name.ToString() == "btnFirmList_FOPEN_IP") 
+                            if (((DevExpress.XtraBars.BarLargeButtonItemLink)item).Item.Name.ToString() == "btnFirmList_FOPEN_IP")
                             {
                                 ((DevExpress.XtraBars.BarLargeButtonItemLink)item).Item.ItemClick
                                       += new DevExpress.XtraBars.ItemClickEventHandler(this.btnFirmList_ItemClick);
@@ -477,23 +488,30 @@ namespace YesiLdefter
                             }
                         }
                     }
-                    
+
                 }
             }
-            
-            //((DevExpress.XtraToolbox.ToolboxControl)toolboxControl1).SelectedGroup = 0;
-            
-            // bunu kullanıcının seçmesini sağla
-            ((DevExpress.XtraToolbox.ToolboxControl)toolboxControl1).SelectedGroupIndex = 0;
+
+            selectedGroups((DevExpress.XtraToolbox.ToolboxControl)toolboxControl1);
 
             if (this.barMSConn_ != null)
             {
                 if (v.active_DB.managerDBName != v.publishManager_DB.databaseName)
-                     this.barMSConn_.Hint = v.active_DB.managerDBName + " ; " + v.publishManager_DB.databaseName;
+                    this.barMSConn_.Hint = v.active_DB.managerDBName + " ; " + v.publishManager_DB.databaseName;
                 else this.barMSConn_.Hint = v.publishManager_DB.databaseName;
             }
             if (this.barPrjConn_ != null)
                 this.barPrjConn_.Hint = v.active_DB.projectDBName;
+                       
+        }
+               
+
+        private void selectedGroups(DevExpress.XtraToolbox.ToolboxControl toolboxControl1)
+        {
+            /// Sağdaki Toolbox ın sıfırıncı group kullanıcı için seç  
+            /// 
+            if (toolboxControl1.Groups.Count == 1)
+                toolboxControl1.SelectedGroupIndex = 0;
         }
 
         #endregion
@@ -559,6 +577,8 @@ namespace YesiLdefter
                 v.tMainFirm.MenuCodeOld = v.tMainFirm.MenuCode;
 
                 mn.Create_Menu(toolboxControl1, v.tMainFirm.MenuCode, "");
+
+                selectedGroups((DevExpress.XtraToolbox.ToolboxControl)toolboxControl1);
             }
 
             t.getUserLookAndFeelSkins();
@@ -578,6 +598,7 @@ namespace YesiLdefter
                 " ActiveStyle : " + UserLookAndFeel.Default.ActiveStyle.ToString() + " // " + v.ENTER +
                 " ActiveSvgPaletteName : " + UserLookAndFeel.Default.ActiveSvgPaletteName.ToString()
                 );
+
 
 
         }
@@ -619,10 +640,34 @@ namespace YesiLdefter
         {
             //RunExeUpdate();
         }
+        //barButtonServiceTool
+        private void barButtonServiceTool_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
+        {
+            vUserInputBox iBox = new vUserInputBox();
 
+            iBox.Clear();
+            iBox.title = "Service tools";
+            iBox.promptText = "Service tool code  :";
+            iBox.value = "";
+            iBox.displayFormat = "*";
+            iBox.fieldType = 0;
+
+            // ınput box ile sorulan ise kimden kopyalanacak (old) bilgisi
+            if (t.UserInpuBox(iBox) == DialogResult.OK)
+            {
+                string userCode = iBox.value;
+
+                if (userCode == v.destekServiceToolCode)
+                {
+                    string FormName = "ms_DestekServiceTool";
+                    string FormCode = "UST/PMS/PMS/DestekServiceTool";
+                    t.OpenFormPreparing(FormName, FormCode, v.formType.Child);
+                }
+            }
+
+        }
         #endregion
 
-        
         #region skinChanged
 
         private void Default_StyleChanged(object sender, EventArgs e)
@@ -735,6 +780,7 @@ namespace YesiLdefter
 
         #endregion
 
+        #region Events
         public void mainForm_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Handled) return;
@@ -775,8 +821,8 @@ namespace YesiLdefter
             //MessageBox.Show("myForm_Deactivate : " + ((Form)sender).Text);
         }
 
-        //*****
-
+        #endregion Events
+        
         /*
         internal class CustomApplicationSettings : ApplicationSettingsBase
         {

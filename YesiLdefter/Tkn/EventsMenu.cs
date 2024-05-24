@@ -274,7 +274,7 @@ namespace Tkn_Events
             PROP_NAVIGATOR prop_ = null;
             List<PROP_NAVIGATOR> propList_ = null;
 
-            propNavigator = getPropNavigator(tForm, tableIPCode);
+            propNavigator = t.getPropNavigator(tForm, tableIPCode);
             propNavigator = propNavigator.Replace((char)34, (char)39);
 
             if ((t.IsNotNull(tableIPCode) == false) ||
@@ -595,36 +595,6 @@ namespace Tkn_Events
                 }
             }
 
-            return value;
-        }
-        private string getPropNavigator(Form tForm, string tableIPCode)
-        {
-            tToolBox t = new tToolBox();
-            string value = "";
-            if (tForm == null) return value;
-            if (t.IsNotNull(tableIPCode) == false) return value;
-
-            Control cntrl = null;
-            cntrl = t.Find_Control_View(tForm, tableIPCode);
-            if (cntrl == null) return value;
-
-            if (cntrl.GetType().ToString() == "DevExpress.XtraGrid.GridControl")
-            {
-                if (((GridControl)cntrl).AccessibleDescription != null)
-                {
-                    value = ((GridControl)cntrl).AccessibleDescription.ToString();
-                    return value;
-                }
-            }
-
-            if (cntrl.GetType().ToString() == "DevExpress.XtraTreeList.TreeList")
-            {
-                if (((DevExpress.XtraTreeList.TreeList)cntrl).AccessibleDescription != null)
-                {
-                    value = ((DevExpress.XtraTreeList.TreeList)cntrl).AccessibleDescription.ToString();
-                    return value;
-                }
-            }
             return value;
         }
         private int getBackYilAy(int yilAy, byte backNext, ref string yilAyCapiton)

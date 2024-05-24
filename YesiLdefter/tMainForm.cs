@@ -51,6 +51,7 @@ namespace YesiLdefter
             DevExpress.XtraBars.BarButtonItem barButtonGuncelleme = new DevExpress.XtraBars.BarButtonItem();
             DevExpress.XtraBars.BarEditItem mainProgressBar = new DevExpress.XtraBars.BarEditItem();
             DevExpress.XtraEditors.Repository.RepositoryItemProgressBar _mainProgressBar = new DevExpress.XtraEditors.Repository.RepositoryItemProgressBar();
+            DevExpress.XtraBars.BarButtonItem barButtonServiceTool = new DevExpress.XtraBars.BarButtonItem();
             DevExpress.XtraBars.BarEditItem barEditItemCari = new DevExpress.XtraBars.BarEditItem();
             DevExpress.XtraEditors.Repository.RepositoryItemSearchControl _mainCariSearch = new DevExpress.XtraEditors.Repository.RepositoryItemSearchControl();
             DevExpress.XtraBars.BarEditItem barPrjConn = new DevExpress.XtraBars.BarEditItem();
@@ -110,6 +111,7 @@ namespace YesiLdefter
                    barMesajlar,
                    barButtonGuncelleme,
                    mainProgressBar,
+                   barButtonServiceTool,
                    //skinDropDownButtonItem1,
                    //skinRibbonGalleryBarItem1,
                    //skinPaletteRibbonGalleryBarItem1
@@ -198,6 +200,7 @@ namespace YesiLdefter
             ribbonStatusBar1.ItemLinks.Add(barButtonGuncelleme);
             ribbonStatusBar1.ItemLinks.Add(mainProgressBar);
             ribbonStatusBar1.ItemLinks.Add(barEditItemCari);
+            ribbonStatusBar1.ItemLinks.Add(barButtonServiceTool);
             ribbonStatusBar1.ItemLinks.Add(barPrjConn);
             ribbonStatusBar1.ItemLinks.Add(barMSConn);
             ribbonStatusBar1.Location = new System.Drawing.Point(0, 391);
@@ -249,11 +252,22 @@ namespace YesiLdefter
             mainProgressBar.EditWidth = 150;
             mainProgressBar.Id = 4;
             mainProgressBar.Name = "mainProgressBar";
-
             // 
             // _mainProgressBar
             // 
             _mainProgressBar.Name = "_mainProgressBar";
+            // 
+            // barButtonServiceTool
+            // 
+            barButtonServiceTool.Alignment = DevExpress.XtraBars.BarItemLinkAlignment.Right;
+            barButtonServiceTool.Caption = " Service ";
+            barButtonServiceTool.Id = 5;
+            //barButtonServiceTool.ItemAppearance.Normal.BackColor = System.Drawing.Color.Red;
+            barButtonServiceTool.ItemAppearance.Normal.ForeColor = System.Drawing.Color.DarkGray;
+            //barButtonServiceTool.ItemAppearance.Normal.Options.UseBackColor = true;
+            barButtonServiceTool.ItemAppearance.Normal.Options.UseForeColor = true;
+            barButtonServiceTool.Name = "barButtonServiceTool";
+            barButtonServiceTool.Visibility = DevExpress.XtraBars.BarItemVisibility.Always;
             // 
             // barEditItemCari
             // 
@@ -607,7 +621,7 @@ namespace YesiLdefter
                     if (TableIPCode != string.Empty)
                     {
                         tInputPanel ip = new tInputPanel();
-                        ip.Create_InputPanel(tForm, tDockPanel, TableIPCode, IPDataType);
+                        ip.Create_InputPanel(tForm, tDockPanel, TableIPCode, IPDataType, true);
                     }
                 }
 

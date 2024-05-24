@@ -293,11 +293,21 @@ namespace Tkn_Events
             string oldValue = "";
             string editValue = "";
 
+            if (sender.GetType().ToString() == "DevExpress.XtraGrid.GridControl" )
+            {
+                var newSender = ((DevExpress.XtraGrid.GridControl)sender).FocusedView;
+                sender = null;
+                sender = newSender;
+            }
+               
+
             if (sender.GetType().ToString() == "DevExpress.XtraGrid.Views.Grid.GridView")
             {
                 //if ((((DevExpress.XtraGrid.Views.Grid.GridView)sender).GridControl).AccessibleDescription != null)
                 //    tGridHint.grid_Prop_Navigator = (((DevExpress.XtraGrid.Views.Grid.GridView)sender).GridControl).AccessibleDescription;
 
+                tGridHint.focusedRow = ((DevExpress.XtraGrid.Views.Grid.GridView)sender).GetFocusedRow();
+                
                 if (((DevExpress.XtraGrid.Views.Grid.GridView)sender).FocusedColumn != null)
                 {
                     if (((DevExpress.XtraGrid.Views.Grid.GridView)sender).FocusedColumn.ColumnEdit != null)
@@ -321,6 +331,8 @@ namespace Tkn_Events
 
             if (sender.GetType().ToString() == "DevExpress.XtraGrid.Views.BandedGrid.AdvBandedGridView")
             {
+                tGridHint.focusedRow = ((DevExpress.XtraGrid.Views.BandedGrid.AdvBandedGridView)sender).GetFocusedRow();
+
                 if (((DevExpress.XtraGrid.Views.BandedGrid.AdvBandedGridView)sender).FocusedColumn != null)
                 {
                     if (((DevExpress.XtraGrid.Views.BandedGrid.AdvBandedGridView)sender).FocusedColumn.ColumnEdit != null)
