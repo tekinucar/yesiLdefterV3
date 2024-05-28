@@ -6521,15 +6521,24 @@ namespace Tkn_Events
                 if (item.SUBVIEW_VALUE.IndexOf(readValue) > -1)
                 {
                     TableIPCode = item.SUBVIEW_TABLEIPCODE.ToString();
-                    // PageName var ise bir menunün (Ribbon un) page ismidir ve bu page show edilececek
-                    // Show Menu Page Name
-                    showMenuPageName = item.SHOWMENU_PAGENAME.ToString();
 
                     if (t.IsNotNull(TableIPCode))
                     {
+                        // PageName var ise bir menunün (Ribbon un) page ismidir ve bu page show edilececek
+                        // Show Menu Page Name
+                        showMenuPageName = item.SHOWMENU_PAGENAME.ToString();
+
                         onay = subViewExec(tForm, subViewType, "", TableIPCode, "", "", "", showMenuPageName);
                         break;
                     }
+                    
+                    if (t.IsNotNull(item.SUBVIEW_VALUE))
+                    {
+                        string subViewValue = item.SUBVIEW_VALUE;
+                        onay = subViewExec(tForm, subViewType, "", "", "", "", "", subViewValue);
+                        break;
+                    }
+
                 }
             }
 
