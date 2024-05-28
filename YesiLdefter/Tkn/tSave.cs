@@ -69,7 +69,7 @@ namespace Tkn_Save
                     if (myProp.IndexOf("Prop_Runtime:True") > 0)
                     {
                         tEvents ev = new tEvents();
-                        ev.Prop_RunTimeClick(tForm, dsData, TableIPCode, v.tButtonType.btAutoInsert); //v.nv_102_AUTO_INS);
+                        ev.Prop_RunTimeClick(tForm, dsData, TableIPCode, v.tButtonType.btAutoInsert, v.tBeforeAfter.Before); // before nedeni için fonksina bak
                     }
 
                     tDefaultValue df = new tDefaultValue();
@@ -163,7 +163,10 @@ namespace Tkn_Save
                 if (vt.RunTime)
                 {
                     tEvents ev = new tEvents();
-                    ev.Prop_RunTimeClick(tForm, null, vt.TableIPCode, v.tButtonType.btKaydet);// v.nv_22_Kaydet);
+                    /// kayıttan sonra olması gereken diğer kayıt veya silmeler
+                    ev.Prop_RunTimeClick(tForm, null, vt.TableIPCode, v.tButtonType.btKaydet, v.tBeforeAfter.Before); // before nedeni için fonksina bak
+                    /// kayıttan sonra olması gereken refreshler
+                    ev.Prop_RunTimeClick(tForm, null, vt.TableIPCode, v.tButtonType.btListele, v.tBeforeAfter.After); 
                 }
                                 
                 //t.WaitFormClose();

@@ -240,7 +240,11 @@ namespace Tkn_ToolBox
             /// [dbo].[MsDbUpdates] üzerinden sorgulanıyor
             /// 
             string sql = sqls.Sql_MsDbUpdates(lastMsDbUpdatesId);
-            if (SQL_Read_Execute(v.dBaseNo.publishManager, ds, ref sql, "", "MsDbUpdates"))
+
+            /// Kodlama ve Test aşamasında kullan
+            //if (SQL_Read_Execute(v.dBaseNo.Manager, ds, ref sql, "", "MsDbUpdates")) 
+            /// publish sırasında kullan
+            if (SQL_Read_Execute(v.dBaseNo.publishManager, ds, ref sql, "", "MsDbUpdates")) 
             {
                 //MessageBox.Show("dbUpdatesChecked - 2 " + sql);
                 if (IsNotNull(ds))
@@ -295,6 +299,7 @@ namespace Tkn_ToolBox
         private void runMsDbUpdates(DataSet ds)
         {
             Int16 typeId = 0;
+            bool onay = true;
 
             //MessageBox.Show("readMsDbUpdatesList - 1 ");
 
@@ -304,19 +309,23 @@ namespace Tkn_ToolBox
 
                 readMsDbUpdate(row);
 
-                if (typeId == 11) runDbUpdateData();
+                if (typeId == 11) onay = runDbUpdateData();
                 //if (typeId == 12)
-                if (typeId == 14) runSqlScript();
-                if (typeId == 21) runDbUpdateTableAdd_();
-                if (typeId == 22) runDbUpdateFieldAdd();
-                if (typeId == 23) runDbUpdateFieldUpdate();
+                if (typeId == 14) onay = runSqlScript();
+                if (typeId == 21) onay = runDbUpdateTableAdd_();
+                if (typeId == 22) onay = runDbUpdateFieldAdd();
+                if (typeId == 23) onay = runDbUpdateFieldUpdate();
                 //if (typeId == 24)
-                if (typeId == 31) runDbUpdateTriggerAdd();
+                if (typeId == 31) onay = runDbUpdateTriggerAdd();
                 //if (typeId == 32) 
-                if (typeId == 41) runDbUpdateProcedureAdd();
+                if (typeId == 41) onay = runDbUpdateProcedureAdd();
                 //if (typeId == 42) 
                 //if (typeId == 51) 
                 //if (typeId == 52) 
+
+                /// hata oluşmuş ise işlemi bırak
+                ///
+                if (onay == false) break;
             }
 
             /*
@@ -358,7 +367,7 @@ namespace Tkn_ToolBox
         }
 
         // 11,    Data  update - ManagerDb den table datasını al
-        private void runDbUpdateData()
+        private bool runDbUpdateData()
         {
             // Data Update :
             // publishManager de olan bir tablonun tüm kayıtlarını oku ve 
@@ -383,6 +392,7 @@ namespace Tkn_ToolBox
             {
                 insertDbUpdates();
             }
+            return onay;
         }
 
         // 12,    Rapor update - ManagerDb den rapor datasını al
@@ -391,7 +401,7 @@ namespace Tkn_ToolBox
 
         }
         // 14,    SQL script çalıştır
-        private void runSqlScript()
+        private bool runSqlScript()
         {
             // hangi Database yazılacak 
             v.dBaseNo dBaseNo = getDBaseNo(v.tMsDbUpdate.dBaseNoTypeId.ToString());
@@ -407,10 +417,12 @@ namespace Tkn_ToolBox
             {
                 insertDbUpdates();
             }
+
+            return onay;
         }
 
         // 21,    Table add
-        private void runDbUpdateTableAdd_()
+        private bool runDbUpdateTableAdd_()
         {
             vTable vt = new vTable();
             vt.DBaseNo = v.active_DB.projectDBaseNo;
@@ -419,8 +431,9 @@ namespace Tkn_ToolBox
             vt.ParentTable = "";
             vt.SqlScript = "";
 
-            runDbUpdateTableAdd(vt, 0);
+            bool onay = runDbUpdateTableAdd(vt, 0);
             //string notExistsSql = preparingTableIFNotExists(schemaName, tableName);
+            return onay;
         }
 
         public bool runDbUpdateTableAdd(vTable vt, Int16 sectorTypeId)
@@ -492,7 +505,7 @@ namespace Tkn_ToolBox
             + " end ";
         }
         // 22,    Field add
-        private void runDbUpdateFieldAdd()
+        private bool runDbUpdateFieldAdd()
         {
             // hangi Database yazılacak 
             v.dBaseNo dBaseNo = getDBaseNo(v.tMsDbUpdate.dBaseNoTypeId.ToString());
@@ -520,10 +533,10 @@ namespace Tkn_ToolBox
             {
                 insertDbUpdates();
             }
-
+            return onay;
         }
         // 23,    Field update
-        private void runDbUpdateFieldUpdate()
+        private bool runDbUpdateFieldUpdate()
         {
             //ALTER TABLE MS_TABLES_IP ALTER COLUMN EXTERNAL_IP_CODE VARCHAR(50) NULL
 
@@ -554,7 +567,7 @@ namespace Tkn_ToolBox
             {
                 insertDbUpdates();
             }
-
+            return onay;
         }
         // 24,    Field rename
         private void runDbUpdateFieldRename()
@@ -562,7 +575,7 @@ namespace Tkn_ToolBox
 
         }
         // 31,    Trigger add
-        private void runDbUpdateTriggerAdd()
+        private bool runDbUpdateTriggerAdd()
         {
             v.dBaseNo dBaseNo = getDBaseNo(v.tMsDbUpdate.dBaseNoTypeId.ToString());
             string cumle1 = v.tMsDbUpdate.sqlScript;
@@ -596,6 +609,7 @@ namespace Tkn_ToolBox
             {
                 insertDbUpdates();
             }
+            return onay;
         }
         // 32,    Trigger update
         private void runDbUpdateTriggerUpdate()
@@ -603,7 +617,7 @@ namespace Tkn_ToolBox
             //
         }
         // 41,    Procedure add
-        private void runDbUpdateProcedureAdd()
+        private bool runDbUpdateProcedureAdd()
         {
             v.dBaseNo dBaseNo = getDBaseNo(v.tMsDbUpdate.dBaseNoTypeId.ToString());
             string cumle1 = v.tMsDbUpdate.sqlScript;
@@ -637,6 +651,7 @@ namespace Tkn_ToolBox
             {
                 insertDbUpdates();
             }
+            return onay;
         }
         // 42,    Procedure update
         private void runDbUpdateProcedureUpdate()
@@ -1274,8 +1289,8 @@ namespace Tkn_ToolBox
                      v.SQL = v.ENTER2 + SQL + v.SQL;
 
                 /// sql execute oluyor
-                if (vt.DBaseType == v.dBaseType.MSSQL)
-                    msSqlAdapter = new SqlDataAdapter(SQL, msSqlConn);
+                //if (vt.DBaseType == v.dBaseType.MSSQL)
+                msSqlAdapter = new SqlDataAdapter(SQL, msSqlConn);
 
                 if (vt.Cargo == "data")
                 {
@@ -2645,9 +2660,9 @@ namespace Tkn_ToolBox
             return sonuc;
         }
 
-        public Boolean TableRefresh(Form tForm, DataSet ds)
+        public bool TableRefresh(Form tForm, DataSet ds)
         {
-            Boolean sonuc = true;
+            bool sonuc = true;
 
             // Table_Type = 1.Table olmalı
             if (ds == null) return false;
@@ -2666,6 +2681,7 @@ namespace Tkn_ToolBox
                 string TableIPCode = Set(ds.DataSetName.ToString(), "", "");
                 DataNavigator dN = Find_DataNavigator(tForm, TableIPCode);
                 ev.tSubDetail_Refresh(ds, dN);
+                return true;
             }
 
             if (IsNotNull(Sql))
@@ -2673,14 +2689,14 @@ namespace Tkn_ToolBox
                 #region
                 try
                 {
+                    /*
                     string TableIPCode = Set(ds.DataSetName.ToString(), "", "");
 
                     Control cntrl = null;// new Control();
                     cntrl = Find_Control_View(tForm, TableIPCode);
-
-                    Data_Read_Execute(tForm, ds, ref Sql, "", cntrl);
-
-                    sonuc = true;
+                    */
+                    Control cntrl = null;
+                    sonuc = Data_Read_Execute(tForm, ds, ref Sql, "", cntrl);
                 }
                 catch (Exception)
                 {

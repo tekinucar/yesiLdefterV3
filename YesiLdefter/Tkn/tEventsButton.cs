@@ -1521,7 +1521,7 @@ namespace Tkn_Events
                                         if (vt.RunTime)
                                         {
                                             //tEvents ev = new tEvents();
-                                            ev.Prop_RunTimeClick(tForm, null, tableIPCode, v.tButtonType.btSilSatir); //v.nv_26_Sil_Satir);
+                                            ev.Prop_RunTimeClick(tForm, null, tableIPCode, v.tButtonType.btSilSatir, v.tBeforeAfter.Before); // before nedeni için fonksina bak
                                         }
                                         v.Kullaniciya_Mesaj_Var = "Kayıt SİLME işlemi başarıyla sonuçlandı.!";
 

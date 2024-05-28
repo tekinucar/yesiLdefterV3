@@ -3278,10 +3278,8 @@ namespace Tkn_Events
 
         #region Prop_RunTime
 
-        public void Prop_RunTimeClick(Form tForm, DataSet dsData, string TableIPCode, v.tButtonType buttonType) //byte Button_Type)
+        public void Prop_RunTimeClick(Form tForm, DataSet dsData, string TableIPCode, v.tButtonType buttonType, v.tBeforeAfter beforeAfter)
         {
-
-
             Control cntrl = null;
             cntrl = t.Find_Control_View(tForm, TableIPCode);
 
@@ -3294,144 +3292,37 @@ namespace Tkn_Events
                     //string s1 = "=ROW_PROP_RUNTIME:";
                     string s2 = (char)34 + "AUTO_LST" + (char)34 + ": [";
                     /// "AUTO_LST": [
-                    /*
-                    if (Prop_RunTime.IndexOf(s1) > -1)
-                    {
-                        if (buttonType == v.tButtonType.btAutoInsert)//(Button_Type == v.nv_102_AUTO_INS)
-                            Prop_RunTime_Work_AUTO_INS(tForm, dsData, Prop_RunTime);
-                        else Prop_RunTime_Work(tForm, Prop_RunTime, buttonType);// Button_Type);
-                    }
-                    */
                     if (Prop_RunTime.IndexOf(s2) > -1)
                     {
-                        if (buttonType ==  v.tButtonType.btAutoInsert)//v.nv_102_AUTO_INS)
-                            Prop_RunTime_Work_AUTO_INS_JSON(tForm, dsData, Prop_RunTime);
-                        else Prop_RunTime_Work_JSON(tForm, Prop_RunTime, buttonType);
+                        // bunlar AUTO_REFRESH_IP den önceki işler
+                        if (beforeAfter == v.tBeforeAfter.Before)
+                        {
+                            if (buttonType == v.tButtonType.btAutoInsert)
+                                Prop_RunTime_Work_AUTO_INSERT(tForm, dsData, Prop_RunTime);
+                            
+                            if ((buttonType == v.tButtonType.btKaydet) ||
+                                (buttonType == v.tButtonType.btSilSatir))
+                                Prop_RunTime_Work_AUTO_LIST(tForm, Prop_RunTime, buttonType);
+                        }
+
+                        // AUTO_REFRESH_IP bu özellik yeni eklendi
+                        // mevcut dataset ten sonra refresh olması istenen başka bir TableIPCode için
+                        if (beforeAfter == v.tBeforeAfter.After)
+                        {
+                            if (buttonType == v.tButtonType.btListele)
+                                Prop_RunTime_Work_AUTO_REFRESH(tForm, Prop_RunTime);
+                        }
                     }
                 }
             }
         }
 
-        /* sil
-        public void Prop_RunTime_Work(Form tForm, string Prop_RunTime, byte Button_Type)
+        public void Prop_RunTime_Work_AUTO_LIST(Form tForm, string Prop_RunTime, v.tButtonType buttonType)//byte Button_Type)
         {
-
-            #region AUTO_LST
-
-
-
-            if (t.IsData(ref Prop_RunTime, "AUTO_LST"))
-            {
-
-                /* MS_PROPERTIES
-                FIELDNAME                 ROW_CAPTION             ROW_FIELDNAME          ROW_COLUMN_TYPE
-                ------------------------ ----------------------- --------------------- -----------------------
-                AUTO_LST                  Button Type             BUTTONTYPE             ImageComboBoxEdit
-                AUTO_LST                  TableIPCode List        TABLEIPCODE_LIST2      tPropertiesPlusEdit
-                TABLEIPCODE_LIST2         Target TableIPCode      TABLEIPCODE            NULL
-                * /
-
-                // AUTO_LST ve TABLEIPCODE_LIST2 birer block
-                // BUTTONTYPE ve TABLEIPCODE ise birer field
-
-                // block ve row tanımları
-                string fblock1 = string.Empty;
-                string fname1 = "AUTO_LST";
-                string lockE1 = "=ROWE_" + fname1;
-                string rblock1 = string.Empty;
-
-                string fblock2 = string.Empty;
-                string fname2 = "TABLEIPCODE_LIST2";
-                string lockE2 = "=ROWE_" + fname2;
-                string rblock2 = string.Empty;
-
-                // içteki field tanımları
-                string BUTTONTYPE = string.Empty;
-                string TABLEIPCODE = string.Empty;
-
-                // önce tüm bloğu al  (AUTO_LST)
-                //fblock1 = t.Find_Properies_Get_FieldBlock(Prop_RunTime, fname1);
-                fblock1 = Prop_RunTime;
-
-                while (fblock1.IndexOf(lockE1) > -1)
-                {
-                    // tüm bloğu row larını ayır  (AUTO_LST yi rowlara ayır)
-                    rblock1 = t.Find_Properies_Get_RowBlock(ref fblock1, fname1);
-
-                    BUTTONTYPE = t.MyProperties_Get(rblock1, "BUTTONTYPE:");
-
-                    // v.nv_24_Kaydet 
-                    // v.nv_26_Sil_Satir
-                    if (BUTTONTYPE == Button_Type.ToString())
-                    {
-                        fblock2 = t.Find_Properies_Get_FieldBlock(rblock1, "TABLEIPCODE_LIST2");
-
-                        // TABLEIPCODE_LIST2 bloğa başla
-                        while (fblock2.IndexOf(lockE2) > -1)
-                        {
-                            // ikinci bloğun row larını ayır (TABLEIPCODE_LIST2)
-                            rblock2 = t.Find_Properies_Get_RowBlock(ref fblock2, fname2);
-
-                            TABLEIPCODE = t.MyProperties_Get(rblock2, "TABLEIPCODE:");
-
-                            if (t.IsNotNull(TABLEIPCODE))
-                            {
-                                DataSet ds = t.Find_DataSet(tForm, "", TABLEIPCODE, "");
-                                if (ds != null)
-                                {
-                                    t.TableRefresh(tForm, ds, TABLEIPCODE);
-                                }
-                                //MessageBox.Show(TABLEIPCODE);
-                            }
-
-                        }
-
-                    } // if (buttontype)
-                }
-
-
-                #region örnek
-                /*                
-                PROP_RUNTIME={
-                0=ROW_PROP_RUNTIME:0;
-                0=DRAGDROP:null;
-                0=PRL_KRT:null;
-                0=AUTO_KRT:null;
-                0=AUTO_LST:AUTO_LST={
-                1=ROW_AUTO_LST:1;
-                1=CAPTION:Kaydet Butonu;
-                1=BUTTONTYPE:24;
-                1=TABLEIPCODE_LIST2:TABLEIPCODE_LIST2={
-                1=ROW_TABLEIPCODE_LIST2:1;
-                1=CAPTION:Teorik Sınav Notları;
-                1=TABLEIPCODE:SNVLIST.SNVLIST_06;
-                1=ROWE_TABLEIPCODE_LIST2:1;
-                TABLEIPCODE_LIST2=};
-                1=ROWE_AUTO_LST:1;
-                AUTO_LST=};
-                0=ROWE_PROP_RUNTIME:0;
-                PROP_RUNTIME=}
-                * /
-                #endregion örnek
-            }
-
-            #endregion AUTO_LST
-
-        }
-        */
-
-        public void Prop_RunTime_Work_JSON(Form tForm, string Prop_RunTime, v.tButtonType buttonType)//byte Button_Type)
-        {
-
-
             string RunTime = string.Empty;
             string Navigator = string.Empty;
             t.String_Parcala(Prop_RunTime, ref RunTime, ref Navigator, "|ds|");
-            /*
-            PROP_RUNTIME packet = new PROP_RUNTIME();
-            RunTime = RunTime.Replace((char)34, (char)39);
-            //var prop_ = JsonConvert.DeserializeAnonymousType(RunTime, packet);
-            */
+
             PROP_RUNTIME prop_ = t.readProp<PROP_RUNTIME>(RunTime);
 
             string TABLEIPCODE = string.Empty;
@@ -3465,68 +3356,49 @@ namespace Tkn_Events
             #endregion AUTO_LST
 
         }
-        /* sil
-        public void Prop_RunTime_Work_AUTO_INS(Form tForm, DataSet dsData, string Prop_RunTime)
+        
+        private void Prop_RunTime_Work_AUTO_REFRESH(Form tForm, string Prop_RunTime)
         {
-            tEventsButton evb = new tEventsButton();
+            /// Kendisi kayıt olduktan sonra başka TableIPCode nin refresh olması sağlanıyor
+            ///
+            string RunTime = string.Empty;
+            string Navigator = string.Empty;
+            t.String_Parcala(Prop_RunTime, ref RunTime, ref Navigator, "|ds|");
 
-            // Kendisinden önce kayıt oluşturması gerek bir IP var ise o çalışacak
-            // ??= Yani fiş satırının ilk kaydı oluşacaksa kendinden önce fiş başlığının 
-            //     kaydı oluşması gerekir. okey
+            PROP_RUNTIME prop_ = t.readProp<PROP_RUNTIME>(RunTime);
 
-            string Header_TableIPCode = string.Empty;
+            string tableIPCode = string.Empty;
 
-            Header_TableIPCode = t.MyProperties_Get(Prop_RunTime, "AUTO_INS_MST_IP:");
-
-            if (t.IsNotNull(Header_TableIPCode))
+            if (prop_ != null)
+                tableIPCode = prop_.AUTO_REFRESH_IP;
+            
+            if (t.IsNotNull(tableIPCode))
             {
-                if (dsData != null)
+                DataSet ds = null;
+                DataNavigator dN = null;
+                t.Find_DataSet(tForm, ref ds, ref dN, tableIPCode);
+                if (ds != null)
                 {
-                    if (dsData.Tables[0].Rows.Count == 1)
-                    {
-                        string myProp = dsData.Namespace;
-                        string KeyFName = t.MyProperties_Get(myProp, "KeyFName:");
-
-                        if (dsData.Tables[0].Rows[0][KeyFName].ToString() == "")
-                        {
-
-                            DataSet dsDataHeader = t.Find_DataSet(tForm, "", Header_TableIPCode, "");
-
-                            if (dsDataHeader != null)
-                            {
-                                if (dsDataHeader.Tables[0].Rows.Count == 0)
-                                {
-                                    evb.newData(tForm, Header_TableIPCode);
-                                }
-
-                                tSave sv = new tSave();
-                                sv.tDataSave(tForm, Header_TableIPCode);
-                                t.ButtonEnabledAll(tForm, Header_TableIPCode, true);
-                            }
-                        }
-                    }
+                    v.con_PositionChange = true;
+                    int pos = dN.Position;
+                    t.TableRefresh(tForm, ds);
+                    dN.Position = pos;
+                    v.con_PositionChange = false;
                 }
             }
         }
-        */
-        public void Prop_RunTime_Work_AUTO_INS_JSON(Form tForm, DataSet dsData, string Prop_RunTime)
+        private void Prop_RunTime_Work_AUTO_INSERT(Form tForm, DataSet dsData, string Prop_RunTime)
         {
-
-
-            // Kendisinden önce kayıt oluşturması gerek bir IP var ise o çalışacak
-            // ??= Yani fiş satırının ilk kaydı oluşacaksa kendinden önce fiş başlığının 
-            //     kaydı oluşması gerekir. okey
+            /// Kendisinden önce kayıt oluşturması gereken bir TableIPCode var ise o çalışacak
+            /// ??= Yani fiş satırının ilk kaydı oluşacaksa kendinden önce fiş başlığının 
+            ///     kaydı oluşması gerekir. okey
 
             tEventsButton evb = new tEventsButton();
 
             string RunTime = string.Empty;
             string Navigator = string.Empty;
             t.String_Parcala(Prop_RunTime, ref RunTime, ref Navigator, "|ds|");
-            /*
-            PROP_RUNTIME packet = new PROP_RUNTIME();
-            RunTime = RunTime.Replace((char)34, (char)39);
-            //var prop_ = JsonConvert.DeserializeAnonymousType(RunTime, packet);
-            */
+            
             PROP_RUNTIME prop_ = t.readProp<PROP_RUNTIME>(RunTime);
 
             string Header_TableIPCode = string.Empty;
@@ -6524,18 +6396,20 @@ namespace Tkn_Events
 
                     if (t.IsNotNull(TableIPCode))
                     {
-                        // PageName var ise bir menunün (Ribbon un) page ismidir ve bu page show edilececek
-                        // Show Menu Page Name
+                        /// PageName var ise bir menunün (Ribbon un) page ismidir ve bu page show edilececek
+                        /// Show Menu Page Name
                         showMenuPageName = item.SHOWMENU_PAGENAME.ToString();
 
                         onay = subViewExec(tForm, subViewType, "", TableIPCode, "", "", "", showMenuPageName);
                         break;
                     }
                     
+                    /// tabPage in CmpName yazdığını kod ile tetiklenmesini sağlayan table.Rows.Column.value eşleşiyorsa çalışacak
+                    ///
                     if (t.IsNotNull(item.SUBVIEW_VALUE))
                     {
                         string subViewValue = item.SUBVIEW_VALUE;
-                        onay = subViewExec(tForm, subViewType, "", "", "", "", "", subViewValue);
+                        onay = subViewExec(tForm, subViewType, "", "", subViewValue, "", "", "");
                         break;
                     }
 

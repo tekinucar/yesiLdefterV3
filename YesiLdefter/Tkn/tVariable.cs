@@ -2530,6 +2530,8 @@ namespace Tkn_Variable
         public List<PRL_KRT> PRL_KRT { get; set; }
         public string AUTO_INS_MST_IP { get; set; }
         public List<AUTO_LST> AUTO_LST { get; set; }
+        public string AUTO_REFRESH_IP { get; set; }
+
     }
 
     public class DRAGDROP
