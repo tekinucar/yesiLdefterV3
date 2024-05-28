@@ -3677,7 +3677,8 @@ namespace Tkn_Events
 
                 if (viewCntrl.GetType().ToString() == "DevExpress.XtraGrid.GridControl")
                 {
-                    GridView view = ((DevExpress.XtraGrid.GridControl)viewCntrl).MainView as GridView;
+                    object view = ((DevExpress.XtraGrid.GridControl)viewCntrl).MainView as object;
+                    //DevExpress.XtraGrid.Views.Card.CardView
 
                     vGridHint tGridHint = new vGridHint();
                     evg.getGridHint_(view, ref tGridHint);

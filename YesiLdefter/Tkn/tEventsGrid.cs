@@ -271,12 +271,16 @@ namespace Tkn_Events
             }
 
             GridView view = null;
+            //object view = null;
 
             if (tGridHint.view.GetType().ToString() == "DevExpress.XtraGrid.Views.Grid.GridView")
                 view = ((DevExpress.XtraGrid.Views.Grid.GridView)tGridHint.view);
 
             if (tGridHint.view.GetType().ToString() == "DevExpress.XtraGrid.Views.BandedGrid.AdvBandedGridView")
                 view = ((DevExpress.XtraGrid.Views.BandedGrid.AdvBandedGridView)tGridHint.view);
+
+            //if (tGridHint.parentObject.GetType().ToString() == "DevExpress.XtraGrid.Views.Card.CardView")
+            //    view = tGridHint.parentObject;
 
             return view;
         }
@@ -299,7 +303,6 @@ namespace Tkn_Events
                 sender = null;
                 sender = newSender;
             }
-               
 
             if (sender.GetType().ToString() == "DevExpress.XtraGrid.Views.Grid.GridView")
             {
@@ -352,6 +355,34 @@ namespace Tkn_Events
 
                 tGridHint.columnOldValue = oldValue.Trim();
                 tGridHint.columnEditValue = editValue.Trim();
+            }
+
+            if (sender.GetType().ToString() == "DevExpress.XtraGrid.Views.Card.CardView")
+            {
+                if (((DevExpress.XtraGrid.Views.Card.CardView)sender) != null)
+                {
+                    tGridHint.focusedRow = ((DevExpress.XtraGrid.Views.Card.CardView)sender).GetFocusedRow();
+
+                    if (((DevExpress.XtraGrid.Views.Card.CardView)sender).FocusedColumn != null)
+                    {
+                        if (((DevExpress.XtraGrid.Views.Card.CardView)sender).FocusedColumn.ColumnEdit != null)
+                            if (((DevExpress.XtraGrid.Views.Card.CardView)sender).FocusedColumn.ColumnEdit.AccessibleDescription != null)
+                                tGridHint.columnPropNavigator = ((DevExpress.XtraGrid.Views.Card.CardView)sender).FocusedColumn.ColumnEdit.AccessibleDescription;
+                    }
+
+                    //if (tGridHint.columnValue != null)
+                    //    if ((tGridHint.columnValue != "") &&
+                    if (((DevExpress.XtraGrid.Views.Card.CardView)sender).FocusedValue != null)
+                        oldValue = ((DevExpress.XtraGrid.Views.Card.CardView)sender).GetFocusedValue().ToString();
+
+                    if (((DevExpress.XtraGrid.Views.Card.CardView)sender).EditingValue != null)
+                        editValue = ((DevExpress.XtraGrid.Views.Card.CardView)sender).EditingValue.ToString();
+
+                    tGridHint.parentObject = sender.GetType().ToString();
+
+                    tGridHint.columnOldValue = oldValue.Trim();
+                    tGridHint.columnEditValue = editValue.Trim();
+                }
             }
 
             if (sender.GetType().ToString() == "DevExpress.XtraEditors.ButtonEdit")
@@ -1015,11 +1046,20 @@ namespace Tkn_Events
             }
 
             GridView view = null;
+            CardView cardView = null;
 
             if (parentObj != null)
-                view = ((DevExpress.XtraGrid.GridControl)parentObj).MainView as GridView;
+            {
+                if (parentObj.GetType().ToString() != "DevExpress.XtraGrid.Views.Card.CardView")
+                    view = ((DevExpress.XtraGrid.GridControl)parentObj).MainView as GridView;
+                else cardView = ((DevExpress.XtraGrid.GridControl)parentObj).MainView as CardView;
+            }
             else
-                view = sender as GridView;
+            {
+                if (sender.GetType().ToString() != "DevExpress.XtraGrid.Views.Card.CardView")
+                    view = sender as GridView;
+                else cardView = sender as CardView;
+            }
 
             /*
             view.Focus();
@@ -1030,20 +1070,42 @@ namespace Tkn_Events
             if (view.FocusedColumn.ReadOnly)
                 view.FocusedColumn = GetNextFocusableColumn(tGridHint);
             */
-            DevExpress.XtraGrid.Columns.GridColumn res = null;
-            int count = ((DevExpress.XtraGrid.Views.Grid.GridView)view).VisibleColumns.Count;
-            for (int i = 0; i < count - 1; i++)
-            {
-                res = (DevExpress.XtraGrid.Columns.GridColumn)view.VisibleColumns[i];
 
-                if (res.ReadOnly == false)
+            if (sender.GetType().ToString() == "DevExpress.XtraGrid.Views.Grid.GridView")
+            {
+                DevExpress.XtraGrid.Columns.GridColumn res = null;
+                int count = ((DevExpress.XtraGrid.Views.Grid.GridView)view).VisibleColumns.Count;
+                for (int i = 0; i < count - 1; i++)
                 {
-                    tGridHint.currentColumn = res;
-                    view.FocusedColumn = res;
-                    gridShowEditor(tGridHint);
-                    return; // res;
+                    res = (DevExpress.XtraGrid.Columns.GridColumn)view.VisibleColumns[i];
+
+                    if (res.ReadOnly == false)
+                    {
+                        tGridHint.currentColumn = res;
+                        view.FocusedColumn = res;
+                        gridShowEditor(tGridHint);
+                        return; // res;
+                    }
                 }
             }
+            if (sender.GetType().ToString() == "DevExpress.XtraGrid.Views.Card.CardView")
+            {
+                DevExpress.XtraGrid.Columns.GridColumn res = null;
+                int count = ((DevExpress.XtraGrid.Views.Card.CardView)cardView).VisibleColumns.Count;
+                for (int i = 0; i < count - 1; i++)
+                {
+                    res = (DevExpress.XtraGrid.Columns.GridColumn)cardView.VisibleColumns[i];
+
+                    if (res.ReadOnly == false)
+                    {
+                        tGridHint.currentColumn = res;
+                        cardView.FocusedColumn = res;
+                        gridShowEditor(tGridHint);
+                        return; // res;
+                    }
+                }
+            }
+
             return;
         }
 
@@ -1062,13 +1124,19 @@ namespace Tkn_Events
             //view.ShowEditor();
             //
             GridView view = getGridView(tGridHint);
-                        
+
+            if (view == null) return;
+
             try
             {
                 if (tGridHint.dataSet != null)
                 {
                     if (tGridHint.dataSet.Tables[0].Rows.Count > 0)
-                        view.GridControl.BeginInvoke(new Action(delegate { view.ShowEditor(); }));
+                    {
+                        if (view.GetType().ToString() == "DevExpress.XtraGrid.Views.Grid.GridView")
+                         ((GridView)view).GridControl.BeginInvoke(new Action(delegate { ((GridView)view).ShowEditor(); }));
+
+                    }
                 }
             }
             catch (Exception)

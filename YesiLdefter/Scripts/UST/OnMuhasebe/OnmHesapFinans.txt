@@ -441,7 +441,7 @@ INSERT INTO [Lkp].[OnmHesapFinansAltCesitTipi] (Id, AltCesitTipi, GrupTipiId)
   (0,     N"Tanımsız",      0 ),
   (10221, N"Vadesiz",      1 ),
   (10222, N"Vadeli",       1 ),
-  (10223, N"Ticari",       1 ),
+  --(10223, N"Ticari",       1 ),
   (10231, N"Nakit Kartı",  2 ),
   (10232, N"Kredi Kartı",  2 ),
 
