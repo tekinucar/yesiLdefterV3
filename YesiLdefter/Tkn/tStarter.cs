@@ -284,11 +284,8 @@ namespace Tkn_Starter
             #region
 
             v.active_DB.masterDBName = "master";
-            v.active_DB.masterUserName = "sa";
-
-            if (v.active_DB.mainManagerDbUses)
-                 v.active_DB.masterPsw = v.mainManagerPass;
-            else v.active_DB.masterPsw = v.publishManagerPass;
+            if (IsNotNull(v.active_DB.masterUserName) == false)
+                v.active_DB.masterUserName = "sa";
 
             v.active_DB.masterConnectionText =
                 string.Format(" Data Source = {0}; Initial Catalog = {1}; User ID = {2}; {3} MultipleActiveResultSets = True ",

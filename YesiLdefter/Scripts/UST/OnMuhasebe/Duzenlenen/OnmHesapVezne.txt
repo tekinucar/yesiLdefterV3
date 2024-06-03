@@ -31,10 +31,10 @@ set @FirmId = :FIRM_ID
 INSERT INTO [dbo].[OnmHesapVezne] ([ParentId],[FirmId],[IsActive],[VezneKodu],[VezneAdi]) 
   VALUES 
   (0, @FirmId, 1, '', 'Vezne 1'),
-  (0, @FirmId, 1, '', 'Vezne 2'),
-  (0, @FirmId, 1, '', 'Vezne 3'),
-  (0, @FirmId, 1, '', 'Vezne 4'),
-  (0, @FirmId, 1, '', 'Vezne 5')
+  (0, @FirmId, 0, '', 'Vezne 2'),
+  (0, @FirmId, 0, '', 'Vezne 3'),
+  (0, @FirmId, 0, '', 'Vezne 4'),
+  (0, @FirmId, 0, '', 'Vezne 5')
 
 
 /*CreateDataEnd*/

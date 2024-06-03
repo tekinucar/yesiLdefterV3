@@ -313,6 +313,7 @@ namespace YesiLdefter
 
             string SoftwareCode = ds_MSTablesIP.Tables[0].Rows[dN_MSTablesIP.Position]["SOFTWARE_CODE"].ToString();
             string ProjectCode = ds_MSTablesIP.Tables[0].Rows[dN_MSTablesIP.Position]["PROJECT_CODE"].ToString();
+            string ModulCode = ds_MSTablesIP.Tables[0].Rows[dN_MSTablesIP.Position]["MODUL_CODE"].ToString();
 
             iBox.Clear();
             iBox.title = "Kopyalanacak MS_FIELDS_IP Kodu";
@@ -328,7 +329,7 @@ namespace YesiLdefter
 
                 if (t.IsNotNull(newIPCode))
                 {
-                    string Sql = MSFieldsIP_Insert_Sql(TableCode, OldIPCode, newIPCode, SoftwareCode, ProjectCode);
+                    string Sql = MSFieldsIP_Insert_Sql(TableCode, OldIPCode, newIPCode, SoftwareCode, ProjectCode, ModulCode);
 
                     DataSet dsCopy = new DataSet();
                     t.SQL_Read_Execute(v.dBaseNo.Manager, dsCopy, ref Sql, "MS_FIELDS_IP", null);
@@ -347,7 +348,7 @@ namespace YesiLdefter
         }
 
         private string MSFieldsIP_Insert_Sql(string TableCode, string OldIPCode, string NewIPCode,
-              string SoftwareCode, string ProjectCode)
+              string SoftwareCode, string ProjectCode, string ModulCode)
         {
 
             return @"
@@ -419,6 +420,7 @@ namespace YesiLdefter
            ,[XML_FIELD_NAME]
            ,[SOFTWARE_CODE]
 	       ,[PROJECT_CODE]
+           ,[MODUL_CODE] 
            ,[FJOIN_CAPTION_FNAME]
            ,[WebScrapingPageCode]
            ,[WebScrapingGetNodeId]
@@ -495,6 +497,7 @@ namespace YesiLdefter
       ,[XML_FIELD_NAME]
       ,[SOFTWARE_CODE]
 	  ,[PROJECT_CODE]
+      ,[MODUL_CODE]
       ,[FJOIN_CAPTION_FNAME]
       ,[WebScrapingPageCode]
       ,[WebScrapingGetNodeId]
@@ -507,6 +510,7 @@ namespace YesiLdefter
       and   [TABLE_CODE] = '" + TableCode + @"'
       and   [SOFTWARE_CODE] = '" + SoftwareCode + @"'
 	  and   [PROJECT_CODE] = '" + ProjectCode + @"'
+      and   [MODUL_CODE] = '" + ModulCode + @"'
       order by [FIELD_NO]  
 
       Select count(*) ADET  
@@ -515,6 +519,7 @@ namespace YesiLdefter
       and   [TABLE_CODE] = '" + TableCode + @"'
       and   [SOFTWARE_CODE] = '" + SoftwareCode + @"'
 	  and   [PROJECT_CODE] = '" + ProjectCode + @"'
+      and   [MODUL_CODE] = '" + ModulCode + @"'
       ";
 
         }
@@ -537,6 +542,7 @@ namespace YesiLdefter
             string NewIPCode = ds_MSTablesIP.Tables[0].Rows[dN_MSTablesIP.Position]["TABLE_CODE"].ToString() + "_";
             string SoftwareCode = ds_MSTablesIP.Tables[0].Rows[dN_MSTablesIP.Position]["SOFTWARE_CODE"].ToString();
             string ProjectCode = ds_MSTablesIP.Tables[0].Rows[dN_MSTablesIP.Position]["PROJECT_CODE"].ToString();
+            string ModulCode = ds_MSTablesIP.Tables[0].Rows[dN_MSTablesIP.Position]["MODUL_CODE"].ToString();
 
             iBox.Clear();
             iBox.title = "Kopyalanacak : " + TableCode + "." + OldIPCode;
@@ -553,7 +559,7 @@ namespace YesiLdefter
                 {
                     //MessageBox.Show(OldIPCode +"//"+ NewIPCode);
 
-                    string Sql = MSTablesIP_Insert_Sql(TableCode, OldIPCode, NewIPCode, SoftwareCode, ProjectCode);
+                    string Sql = MSTablesIP_Insert_Sql(TableCode, OldIPCode, NewIPCode, SoftwareCode, ProjectCode, ModulCode);
 
                     DataSet dsCopy = new DataSet();
                     t.SQL_Read_Execute(v.dBaseNo.Manager, dsCopy, ref Sql, "MS_TABLES_IP", null);
@@ -565,7 +571,7 @@ namespace YesiLdefter
         }
 
         private string MSTablesIP_Insert_Sql(string TableCode, string OldIPCode, string NewIPCode,
-             string SoftwareCode, string ProjectCode)
+             string SoftwareCode, string ProjectCode, string ModulCode)
         {
             return @"
            INSERT INTO [dbo].[MS_TABLES_IP]
@@ -604,6 +610,7 @@ namespace YesiLdefter
            ,[PROP_SEARCH]
            ,[SOFTWARE_CODE]
            ,[PROJECT_CODE] 
+           ,[MODUL_CODE]
          )
            SELECT [TABLE_CODE]
            ,[TABLE_TYPE]
@@ -640,12 +647,14 @@ namespace YesiLdefter
            ,[PROP_SEARCH]
            ,[SOFTWARE_CODE]
            ,[PROJECT_CODE]
+           ,[MODUL_CODE]
 
            FROM [dbo].[MS_TABLES_IP]
            Where [TABLE_CODE] = '" + TableCode + @"'
            and   [IP_CODE] = '" + OldIPCode + @"'
            and   [SOFTWARE_CODE] = '" + SoftwareCode + @"'
 	       and   [PROJECT_CODE] = '" + ProjectCode + @"'
+	       and   [MODUL_CODE] = '" + ModulCode + @"'
                
            Select count(*) ADET  
            FROM [dbo].[MS_TABLES_IP]
@@ -653,6 +662,7 @@ namespace YesiLdefter
            and   [TABLE_CODE] = '" + TableCode + @"'
            and   [SOFTWARE_CODE] = '" + SoftwareCode + @"'
 	       and   [PROJECT_CODE] = '" + ProjectCode + @"'
+           and   [MODUL_CODE] = '" + ModulCode + @"'
            ";
         }
 

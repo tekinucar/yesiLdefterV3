@@ -734,4 +734,23 @@ tamir
 demirbaş alım
 diğer maliyet faturası
 
+
+
+Finans hesaplar
+  ( 100,  N'Kasa', 1),
+  ( 1022, N'Banka hesabı', 1), 
+  ( 1023, N'Banka/Kredi kartı', 1), 
+  ( 1024, N'POS', 1),
+
+
+
+
+Masraf hesapları
+  ( 770,  N'Genel yönetim giderleri', 1),
+
+
+
+
+
+
 */

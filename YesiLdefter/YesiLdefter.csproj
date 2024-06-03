@@ -519,7 +519,9 @@
     <Content Include="Scripts\UST\Mtsk\FileUpdates.txt" />
     <Content Include="Scripts\UST\Mtsk\TempTabimBankalar.txt" />
     <Content Include="Scripts\UST\Mtsk\TempTabimHesaplar.txt" />
-    <Content Include="Scripts\UST\OnMuhasebe\prc_OnmHesapFinansBankaTumHesaplar.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\DbUpdates.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\FileUpdates.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmHesapFinansBankaTumHesaplar.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\prc_OnmBelgeDekontOzetler.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\prc_OnmBelgeDekontTbmGelirHesaplari.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\prc_OnmBelgeDekontTbmGiderHesaplari.txt" />
@@ -565,8 +567,8 @@
     <Content Include="Scripts\UST\Mtsk\prc_MtskTeorikDersPlaniCakismaManuel.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskTeorikDersPlaniOlusturManuel.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskUygulamaDersPlaniCakismaAdedi.txt" />
-    <Content Include="Scripts\UST\OnMuhasebe\OnmIVezneFinans.txt" />
-    <Content Include="Scripts\UST\OnMuhasebe\OnmIVezneKullanici.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmVezneFinans.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmVezneKullanici.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\OnmToplamBakiye.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\OnmToplamBekleyen.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\OnmToplamGerceklesen.txt" />
@@ -699,13 +701,13 @@
     <Content Include="Scripts\UST\OnMuhasebe\GIB_TevkifatMaddeleri.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\GIB_Ulke.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\OnmHesapCari.txt" />
-    <Content Include="Scripts\UST\OnMuhasebe\OnmHesapFinans.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmHesapFinans.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\HesapFinans_MSTABLES_Insert.txt" />
-    <Content Include="Scripts\UST\OnMuhasebe\OnmHesapMaster.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\LkpOnmHesapMaster.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\HesapNesne.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\HesapNesne_MSTABLES_Insert.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\HesapStok.txt" />
-    <Content Include="Scripts\UST\OnMuhasebe\OnmHesapVezne.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmHesapVezne.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\IBelgeStokAdres.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\JoinTables.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\OnmOdemePlani.txt" />
@@ -714,8 +716,8 @@
     <Content Include="Scripts\UST\OnMuhasebe\LkpOnmFaturaEkVergiTipi.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\LkpILCETipi.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\LkpILTipi.txt" />
-    <Content Include="Scripts\UST\OnMuhasebe\LkpKdvOraniTipi.txt" />
-    <Content Include="Scripts\UST\OnMuhasebe\LkpOnmParaTipi.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\LkpKdvOraniTipi.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\LkpOnmParaTipi.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\LkpTevkifatTipi.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\LkpUlkeTipi.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\LkpVergiDairesiTipi.txt" />
@@ -2596,6 +2598,16 @@
       <IncludeHash>True</IncludeHash>
       <FileType>File</FileType>
     </PublishFile>
+    <PublishFile Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmHesapFinans.txt">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Exclude</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
     <PublishFile Include="Scripts\UST\OnMuhasebe\FinansIslemi.txt">
       <Visible>False</Visible>
       <Group>
@@ -2867,16 +2879,6 @@
       <FileType>File</FileType>
     </PublishFile>
     <PublishFile Include="Scripts\UST\OnMuhasebe\LkpVergiDairesiTipi.txt">
-      <Visible>False</Visible>
-      <Group>
-      </Group>
-      <TargetPath>
-      </TargetPath>
-      <PublishState>Exclude</PublishState>
-      <IncludeHash>True</IncludeHash>
-      <FileType>File</FileType>
-    </PublishFile>
-    <PublishFile Include="Scripts\UST\OnMuhasebe\OnmHesapFinans.txt">
       <Visible>False</Visible>
       <Group>
       </Group>

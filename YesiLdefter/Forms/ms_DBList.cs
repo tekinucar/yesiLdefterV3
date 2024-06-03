@@ -149,36 +149,45 @@ namespace YesiLdefter
             string s =
                 String.Format(" Select * from [{0}].[dbo].[MS_TABLES] " +
                               " where TABLE_NAME = '{1}'", v.active_DB.managerDBName, table_name);
+            
+            DataSet ds = new DataSet();
 
-            Boolean sonuc = t.Find_Record(v.active_DB.managerMSSQLConn, s);
+            bool sonuc = t.Find_Record(v.dBaseNo.Manager, ref ds, s);
 
             if (sonuc)
             {
-                MessageBox.Show("Aynı isimde kayıtlı tablo mevcut ... " + table_name);
-                return;
+                //MessageBox.Show("Aynı isimde kayıtlı tablo mevcut ... " + table_name);
+
+                string soru = "DİKKAT : " + table_name + " tablosu mevcut. " + v.ENTER2
+                    + " SorftwareCode = " + ds.Tables[0].Rows[0]["SOFTWARE_CODE"].ToString() + v.ENTER
+                    + " ProjectCode = " + ds.Tables[0].Rows[0]["PROJECT_CODE"].ToString() + v.ENTER
+                    + " ModulCode = " + ds.Tables[0].Rows[0]["MODUL_CODE"].ToString() + v.ENTER
+                    + " TableCode = " + ds.Tables[0].Rows[0]["TABLE_CODE"].ToString() + v.ENTER2
+                    + " Yinede işleme devam istiyor musunuz ?" + v.ENTER
+                    + " Devam ettiğinizde farklı bir TableCode kullanın.";
+                DialogResult cevap = t.mySoru(soru);
+                if (DialogResult.Yes != cevap) return;
             }
-            else
+            
+
+            //xtraTabPage_MS.Show();
+
+            tDataCopy dc = new tDataCopy();
+
+            // Tabloyu kopyala, onay true dönerse filedleride kopyala
+            string DataCopyCode = "DC_MSTABLE01";
+            if (dc.tDC_Run(this, DataCopyCode))
             {
-
-                //xtraTabPage_MS.Show();
-
-                tDataCopy dc = new tDataCopy();
-
-                // Tabloyu kopyala, onay true dönerse filedleride kopyala
-                string DataCopyCode = "DC_MSTABLE01";
-                if (dc.tDC_Run(this, DataCopyCode))
-                {
-                    DataCopyCode = "DC_MSFIELD01";
-                    dc.tDC_Run(this, DataCopyCode);
-                }
-                /*
-                if (dc.tDC_Run(this, v.SP_Conn_MainManager_MSSQL, "DC_MSTABLE01"))
-                {
-                    // fieldleri kopyala
-                    dc.tDC_Run(this, v.SP_Conn_MainManager_MSSQL, "DC_MSFIELD01");
-                }
-                */
+                DataCopyCode = "DC_MSFIELD01";
+                dc.tDC_Run(this, DataCopyCode);
             }
+            /*
+            if (dc.tDC_Run(this, v.SP_Conn_MainManager_MSSQL, "DC_MSTABLE01"))
+            {
+                // fieldleri kopyala
+                dc.tDC_Run(this, v.SP_Conn_MainManager_MSSQL, "DC_MSFIELD01");
+            }
+            */
 
 
         }

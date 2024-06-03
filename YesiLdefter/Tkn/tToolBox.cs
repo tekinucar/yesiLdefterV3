@@ -1275,9 +1275,8 @@ namespace Tkn_ToolBox
             Boolean onay = false;
 
             SqlConnection msSqlConn = vt.msSqlConnection;
-
-            if (vt.DBaseType == v.dBaseType.MSSQL)
-                Db_Open(msSqlConn);
+                        
+            Db_Open(msSqlConn);
 
             SqlDataAdapter msSqlAdapter = null;
 
@@ -7674,7 +7673,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             }
             catch (Exception ex)
             {
-                MessageBox.Show("ManagementObjectSearcher (Win32_Processor) :" + ex.Message);
+                //MessageBox.Show("ManagementObjectSearcher (Win32_Processor) :" + ex.Message);
                 //throw;
             }
             try
@@ -7688,7 +7687,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             }
             catch (Exception ex)
             {
-                MessageBox.Show("ManagementObjectSearcher (Win32_OperatingSystem) :" + ex.Message);
+                //MessageBox.Show("ManagementObjectSearcher (Win32_OperatingSystem) :" + ex.Message);
                 //throw;
             }
             try
@@ -7708,7 +7707,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             }
             catch (Exception e2)
             {
-                MessageBox.Show("ManagementObjectSearcher (Win32_DiskDrive) :" + e2.Message);
+                //MessageBox.Show("ManagementObjectSearcher (Win32_DiskDrive) :" + e2.Message);
                 //throw;
             }
         }
@@ -9326,23 +9325,20 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
         #endregion Find_dBLongName
 
         #region Find_Record
-        public Boolean Find_Record(SqlConnection SqlConn, string SQL)
+        
+        public Boolean Find_Record(v.dBaseNo dBaseNo, ref DataSet ds, string SQL)
         {
             // SqlConnection SqlConn buna gerek kalmadı silebilirsiniz
 
             Boolean sonuc = false;
 
-            DataSet ds = new DataSet();
-
             if (IsNotNull(SQL))
             {
-                SQL_Read_Execute(v.dBaseNo.None, ds, ref SQL, "TABLE1", "");
+                SQL_Read_Execute(dBaseNo, ds, ref SQL, "TABLE1", "");
 
                 sonuc = IsNotNull(ds);
             }
-
-            ds.Dispose();
-
+            
             // false dönerse aranın kayıt yok
             // true  dönerse aranan kayıt mevcut
             return sonuc;
@@ -14454,8 +14450,15 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 v.active_DB.ustadCrmDBName = ConnectionIni.Read("UstadCrmDbName");
                 v.publishManager_DB.serverName = ConnectionIni.Read("PublishManagerServerIp");
                 v.publishManager_DB.databaseName = ConnectionIni.Read("PublishManagerDbName");
+
+                v.active_DB.masterServerName = YesiLdefterIni.Read("MasterServerIp");
+                v.active_DB.masterDBName = "master";
+                v.active_DB.masterUserName = YesiLdefterIni.Read("MasterLoginName");
+                v.active_DB.masterPsw = YesiLdefterIni.Read("MasterDbPass");
+                if (IsNotNull(v.active_DB.masterPsw))
+                    v.active_DB.masterPsw = " Password = " + v.active_DB.masterPsw + "; ";
             }
-            
+
             // Tabim Surucu07 için 
             var YesiLdefterTabimIni = new tIniFile("YesiLdefterTabim.Ini");
             SourceDbUses = YesiLdefterTabimIni.Read("SourceDbUses");

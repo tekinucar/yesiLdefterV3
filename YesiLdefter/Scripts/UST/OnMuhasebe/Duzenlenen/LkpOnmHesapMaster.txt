@@ -1,4 +1,8 @@
-﻿/*CreateTable*/
+﻿/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+/*CreateTable*/
 
 begin transaction
 
@@ -62,15 +66,9 @@ begin transaction
 
  /*CreateTableEnd*/
 
- /*
- Giderlerin Çeşitlerine Göre Sınıflandırılması  (7/B Seçeneğinin kendisi)
- Giderlerin Ürünlere Yüklenmesine Göre Sınıflandırılması
- Giderlerin Üretim (Etkinlik) Hacmi ile İlişkisine Göre Sınıflandırılması
- Giderlerin İşletme Fonksiyonlarına Göre Sınıflandırılması
-   UruneYuklenmesiTipiId   SmallInt  null, 
-   UretimHacmiTipiId       SmallInt  null,
-   IsletmeFonksiyonuTipiId SmallInt  null,
- */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 
 /*CreateLkpTable*/
@@ -257,6 +255,11 @@ commit transaction
 /*CreateLkpTableEnd*/
 
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+
 /*CreateTrigger*/
 
 
@@ -392,6 +395,11 @@ END
 ALTER TABLE [Lkp].[OnmHesapMaster] ENABLE TRIGGER [trg_OnmHesapMaster]
 
 /*CreateTriggerEnd*/
+
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 
 /*CreateData*/
@@ -813,6 +821,23 @@ commit transaction
 /*CreateDataEnd*/
 
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+
+
+ /*
+ Giderlerin Çeşitlerine Göre Sınıflandırılması  (7/B Seçeneğinin kendisi)
+ Giderlerin Ürünlere Yüklenmesine Göre Sınıflandırılması
+ Giderlerin Üretim (Etkinlik) Hacmi ile İlişkisine Göre Sınıflandırılması
+ Giderlerin İşletme Fonksiyonlarına Göre Sınıflandırılması
+   UruneYuklenmesiTipiId   SmallInt  null, 
+   UretimHacmiTipiId       SmallInt  null,
+   IsletmeFonksiyonuTipiId SmallInt  null,
+ */
+
+
 /* * * * * * * * * * * * * *
 
 7/A hesapları fonksiyon esasına göre sınıflandırılmış
@@ -856,6 +881,17 @@ Gider hesaplarında hareket oluştuğunda gider hesabı borç çalışır, karş
 Dönem sonunda hesaplar kapatılarak 798 yansıtma hesabına aktarılacak,
 
 798 hesabıda ilgi gelir - gider tablolarına yansıtılacak ve kapatılacak
+
+
+
+drop table [Lkp].[OnmHesapMasterBAHesapTipi]
+drop table [Lkp].[OnmHesapMasterUruneYuklenmesiTipi]
+drop table [Lkp].[OnmHesapMasterUretimHacmiTipi]
+drop table [Lkp].[OnmHesapMasterIsletmeFonksiyonuTipi]
+drop table [Lkp].[OnmHesapMasterPeriyodTipi]
+drop table [Lkp].[OnmHesapMasterBelgeTipi]
+drop table [Lkp].[OnmHesapMasterKaynakTipi]
+
 
 */
 

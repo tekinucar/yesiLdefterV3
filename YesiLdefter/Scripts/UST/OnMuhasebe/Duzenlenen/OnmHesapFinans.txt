@@ -1,4 +1,8 @@
-﻿/*CreateTable*/
+﻿/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+/*CreateTable*/
 
 begin transaction
 
@@ -89,17 +93,11 @@ begin transaction
  commit transaction
 
  /*CreateTableEnd*/
-  
 
-/*
-Giderlerin Çeşitlerine Göre Sınıflandırılması  (7/B Seçeneğinin kendisi)
-Giderlerin Ürünlere Yüklenmesine Göre Sınıflandırılması
-Giderlerin Üretim (Etkinlik) Hacmi ile İlişkisine Göre Sınıflandırılması
-Giderlerin İşletme Fonksiyonlarına Göre Sınıflandırılması
-   UruneYuklenmesiTipiId   SmallInt  null, 
-   UretimHacmiTipiId       SmallInt  null,
-   IsletmeFonksiyonuTipiId SmallInt  null,
-*/
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+  
 
 /*CreateLkpTable*/
 
@@ -465,9 +463,6 @@ INSERT INTO [Lkp].[OnmHesapFinansHesapTipi] (Id, HesapTipi)
   (13,  N"Abone hesabı")
 
 
-
-
-
 -- ------------------------------------------------------- 
 -- JoinTableTypeId
 -- ------------------------------------------------------- 
@@ -485,21 +480,18 @@ create table [Lkp].[OnmHesapFinansJoinTableType]
 delete from [Lkp].[OnmHesapFinansJoinTableType]
 INSERT INTO [Lkp].[OnmHesapFinansJoinTableType] (Id, JoinTableType)
  VALUES 
-  (0,   N"Tanımsız"),
+  (0,      N"Tanımsız"),
   (2100,   N"Mtsk Modülü"),
   (2101,   N"MebKurum"),
   (2102,   N"MtskEgitimAraci")
-
-
-
-
-
-
 
 commit transaction
 
 /*CreateLkpTableEnd*/
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*CreateTrigger*/
 
@@ -832,9 +824,11 @@ END
 
 ALTER TABLE dbo.OnmHesapFinans ENABLE TRIGGER trg_OnmHesapFinans
 
-
 /*CreateTriggerEnd*/
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 -- ------------------------------------------------------------------
 -- Default Inserts   DETAYI   Lkp.NesneMater tablosuna taşındı....
@@ -845,7 +839,10 @@ ALTER TABLE dbo.OnmHesapFinans ENABLE TRIGGER trg_OnmHesapFinans
 begin transaction 
 
 -- Temel Tanımlama Kayıtları
---                                         : UstGrupTipiId, AnaGrupTipiId, AltGrupTipiId, AltCesitTipiId   
+--                                         : UstGrupTipiId, 
+--                                               AnaGrupTipiId, 
+--                                                     AltGrupTipiId, 
+--                                                           AltCesitTipiId   
 -- Banka Listesi                           : 10, 102,  1029, 0
 -- Varlıklar için Ust Grup Hesapları       : 25,   0,     0, 0
 -- Maliyetler için Ust ve Ana Gruplar      :  7, 702,     0, 0  ( 7/A Seçeneği )-702
@@ -878,3 +875,21 @@ INSERT INTO [dbo].[OnmHesapFinans] (ParentId, FirmId, IsActive, UstGrupTipiId, A
 commit transaction
 
 /*CreateDataEnd*/
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+
+/*
+Giderlerin Çeşitlerine Göre Sınıflandırılması  (7/B Seçeneğinin kendisi)
+Giderlerin Ürünlere Yüklenmesine Göre Sınıflandırılması
+Giderlerin Üretim (Etkinlik) Hacmi ile İlişkisine Göre Sınıflandırılması
+Giderlerin İşletme Fonksiyonlarına Göre Sınıflandırılması
+   UruneYuklenmesiTipiId   SmallInt  null, 
+   UretimHacmiTipiId       SmallInt  null,
+   IsletmeFonksiyonuTipiId SmallInt  null,
+*/
+
+
+

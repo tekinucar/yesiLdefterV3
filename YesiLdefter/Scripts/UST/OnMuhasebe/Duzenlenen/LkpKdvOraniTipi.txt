@@ -2,6 +2,8 @@
 -- ------------------------------------------------------- 
 -- KdvOraniTipi
 -- ------------------------------------------------------- 
+begin transaction
+
 create table [Lkp].[OnmKdvOraniTipi]
 (
    Id           Int Unique Not null,
@@ -13,6 +15,8 @@ create table [Lkp].[OnmKdvOraniTipi]
    constraint  pk_OnmKdvOraniTipi primary key (Id)
 )
 
+ commit transaction
+
 /*CreateTableEnd*/
 
 
@@ -22,7 +26,9 @@ INSERT INTO [Lkp].[OnmKdvOraniTipi] (Id, IsActive, KdvOraniKodu, KdvOrani, KdvOr
  VALUES 
   (  0, 1,    0,  0, N'Kdvsiz' ),
   (  1, 1, 1.01,  1, N'1%' ),
-  (  8, 1, 1.08,  8, N'8%' ),
-  ( 18, 1, 1.18, 18, N'18%' )
+  (  8, 0, 1.08,  8, N'8%' ),
+  ( 10, 1, 1.10, 10, N'10%' ),
+  ( 18, 0, 1.18, 18, N'18%' ),
+  ( 20, 1, 1.20, 20, N'20%' )
 
 /*CreateDataEnd*/

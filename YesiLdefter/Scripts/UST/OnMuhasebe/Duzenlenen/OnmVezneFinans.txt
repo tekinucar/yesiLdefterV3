@@ -2,7 +2,7 @@
 
 begin transaction
 
-create table OnmIVezneFinans
+create table OnmVezneFinans
  (
 
    Id                Int IDENTITY(1,1) NOT NULL, 
@@ -12,12 +12,12 @@ create table OnmIVezneFinans
    FinansId          Int           null,
    VezneId           Int           null,
 
-   constraint		pk_OnmIVezneFinans primary key (Id)
+   constraint		pk_OnmVezneFinans primary key (Id)
  )
 
- create index X_OnmIVezneFinans01 on OnmIVezneFinans (FirmId)
+ create index X_OnmVezneFinans01 on OnmVezneFinans (FirmId)
  
- grant select, insert, update, delete on OnmIVezneFinans to public
+ grant select, insert, update, delete on OnmVezneFinans to public
  
 commit transaction
 
