@@ -700,7 +700,7 @@
     <Content Include="Scripts\UST\OnMuhasebe\GIB_Sehirler.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\GIB_TevkifatMaddeleri.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\GIB_Ulke.txt" />
-    <Content Include="Scripts\UST\OnMuhasebe\OnmHesapCari.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmHesapCari.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmHesapFinans.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\HesapFinans_MSTABLES_Insert.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\LkpOnmHesapMaster.txt" />

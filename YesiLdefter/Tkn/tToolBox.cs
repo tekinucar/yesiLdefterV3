@@ -14487,11 +14487,13 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 v.active_DB.localUserName = YesiLdefterTabimIni.Read("SourceDbLoginName");
                 v.active_DB.localPsw = YesiLdefterTabimIni.Read("SourceDbPass");
 
-                v.active_DB.projectDBType = v.dBaseType.MSSQL;
-                v.active_DB.projectServerName = YesiLdefterTabimIni.Read("SourceServerNameIP");
-                v.active_DB.projectDBName = YesiLdefterTabimIni.Read("SourceDatabaseName");
-                v.active_DB.projectUserName = YesiLdefterTabimIni.Read("SourceDbLoginName");
-                v.active_DB.projectPsw = YesiLdefterTabimIni.Read("SourceDbPass");
+                if (v.SP_TabimParamsKurumTipi == "SRC")
+                {
+                    v.active_DB.localServerName = YesiLdefterTabimIni.Read("SRCServerNameIP");
+                    v.active_DB.localDBName = YesiLdefterTabimIni.Read("SRCDatabaseName");
+                    v.active_DB.localUserName = YesiLdefterTabimIni.Read("SRCDbLoginName");
+                    v.active_DB.localPsw = YesiLdefterTabimIni.Read("SRCDbPass");
+                }
 
                 // Exe açılış Params ile farklı bir ServerName geldiyse
                 if ((v.SP_TabimParamsServerName != "") &&
@@ -14508,14 +14510,19 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
                 if (v.SP_TabimDbConnection)
                 {
-                    if ((v.active_DB.localServerName.ToUpper() == "NULL") ||
-                        (v.active_DB.localDBName.ToUpper() == "NULL") ||
-                        (v.active_DB.localUserName.ToUpper() == "NULL") ||
-                        (v.active_DB.localPsw.ToUpper() == "NULL"))
+                    if ((IsNotNull(v.active_DB.localServerName.ToUpper()) == false) ||
+                        (IsNotNull(v.active_DB.localDBName.ToUpper()) == false) ||
+                        (IsNotNull(v.active_DB.localUserName.ToUpper()) == false) ||
+                        (IsNotNull(v.active_DB.localPsw.ToUpper()) == false))
                     {
                         v.tUser.UserId = 0;
                         // ilk çalıştımada boş geliyor ise
-                        if (IsNotNull(v.active_DB.localDBName) == false)  v.active_DB.localDBName = "Surucu07";
+                        if (IsNotNull(v.active_DB.localDBName) == false)
+                        {
+                            v.active_DB.localDBName = "Surucu07";
+                            if (v.SP_TabimParamsKurumTipi == "SRC")
+                                v.active_DB.localDBName = "SRC07";
+                        }
                         if (IsNotNull(v.active_DB.localUserName) == false) v.active_DB.localUserName = "TABIM";
                         if (IsNotNull(v.active_DB.localPsw) == false) v.active_DB.localPsw = "312";
 

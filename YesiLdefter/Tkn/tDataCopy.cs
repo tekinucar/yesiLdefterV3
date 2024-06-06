@@ -355,34 +355,8 @@ namespace Tkn_DataCopy
         private bool tDC_Read(DataSet ds_DC, DataSet ds_DCLine, string DC_Code)
         {
             tToolBox t = new tToolBox();
-            //tSQLs sql = new tSQLs();
-            //string function_name = "tDC_Read";
 
-            Boolean onay = true;
-
-            //string sql_DC = sql.SQL_MS_DC(DC_Code);
-            //string sql_DCLine = sql.SQL_MS_DC_LINE(DC_Code);
-
-            //t.SQL_Read_Execute(v.dBaseNo.Manager, ds_DC, ref sql_DC, "TABLE_DC", function_name);
-
-            //if (t.IsNotNull(ds_DC))
-            //{
-            //    t.SQL_Read_Execute(v.dBaseNo.Manager, ds_DCLine, ref sql_DCLine, "TABLE_DCLINE", function_name);
-
-            //    if (t.IsNotNull(ds_DCLine) == false)
-            //    {
-            //        //onay = false;
-            //        //MessageBox.Show("DİKKAT : " + DC_Code + v.ENTER2 +
-            //        //                "kodlu DataCopyLine bilgileri okunamadı ... ", function_name);
-            //    }
-            //}
-            //else
-            //{
-            //    onay = false;
-            //    MessageBox.Show("DİKKAT : " + DC_Code + v.ENTER2 +
-            //                    "kodlu DataCopy bilgileri okunamadı ... ", function_name);
-            //}
-
+            bool onay = true;
 
             // DataCopy
             t.preparing_DataCopyList(DC_Code);
@@ -404,7 +378,10 @@ namespace Tkn_DataCopy
                 if (dtL == null) onay = false;
                 if (onay)
                 {
-                    ds_DCLine.Tables.Add(dtL.Copy());
+                    if (dtL.Rows.Count > 0)
+                        ds_DCLine.Tables.Add(dtL.Copy());
+                    else onay = false; // satırları yok ise
+
                     dtL.Dispose();
                 }
             }

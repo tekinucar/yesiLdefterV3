@@ -2916,6 +2916,7 @@ namespace Tkn_Layout
             string fieldName = string.Empty;
 
             int width = 0;
+            int DockType = 0;
 
             string ustItemType = string.Empty;
             string ustHesapRefId = string.Empty;
@@ -2929,6 +2930,7 @@ namespace Tkn_Layout
             TableIPCode = t.Set(row["TABLEIPCODE"].ToString(), "", "");
             fieldName = t.Set(row["FIELD_NAME"].ToString(), "", "");
             CmpName = t.Set(row["CMP_NAME"].ToString(), "", "");
+            DockType = t.Set(row["CMP_DOCK"].ToString(), v.dock_Fill.ToString(), (int)0);
 
             //Prop_View = t.Set(row["PROP_VIEWS"].ToString(), "", "");
             //TableIPCode = t.Set(t.MyProperties_Get(Prop_View, "HP_TABLEIPCODE:"), "", "");
@@ -2962,7 +2964,13 @@ namespace Tkn_Layout
                 // 
                 panelControl1.Controls.Add(textEdit1);
                 panelControl1.Controls.Add(labelControl1);
-                panelControl1.Dock = System.Windows.Forms.DockStyle.Top;
+
+                if (DockType == v.dock_Bottom) panelControl1.Dock = System.Windows.Forms.DockStyle.Bottom;
+                if (DockType == v.dock_Fill) panelControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+                if (DockType == v.dock_Left) panelControl1.Dock = System.Windows.Forms.DockStyle.Left;
+                if (DockType == v.dock_Right) panelControl1.Dock = System.Windows.Forms.DockStyle.Right;
+                if (DockType == v.dock_Top) panelControl1.Dock = System.Windows.Forms.DockStyle.Top;
+                
                 panelControl1.Location = new System.Drawing.Point(0, 0);
                 panelControl1.Name = v.lyt_Name + t.Str_Replace(ref layout_code, ".", "_");  //RefId.ToString();
                 if (t.IsNotNull(CmpName))
@@ -2975,6 +2983,7 @@ namespace Tkn_Layout
                 // labelControl1
                 // 
                 labelControl1.Appearance.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+                labelControl1.Appearance.Options.UseFont = true;
                 labelControl1.AutoSizeMode = DevExpress.XtraEditors.LabelAutoSizeMode.None;
                 labelControl1.Dock = System.Windows.Forms.DockStyle.Left;
                 labelControl1.Location = new System.Drawing.Point(6, 6);
@@ -2994,14 +3003,15 @@ namespace Tkn_Layout
                 textEdit1.Location = new System.Drawing.Point(156, 6);
                 textEdit1.Name = "textEdit_" + RefId.ToString();
                 //textEdit1.Properties.Appearance.BackColor = System.Drawing.Color.FloralWhite;
+                //textEdit1.Properties.Appearance.Options.UseBackColor = true;
                 textEdit1.Properties.Appearance.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-                textEdit1.Properties.Appearance.Options.UseBackColor = true;
                 textEdit1.Properties.Appearance.Options.UseFont = true;
                 textEdit1.Properties.BorderStyle = DevExpress.XtraEditors.Controls.BorderStyles.HotFlat;
                 textEdit1.Size = new System.Drawing.Size(712, 28);
+
                 textEdit1.TabStop = false;
                 textEdit1.TabIndex = 0;
-
+                
                 if ((TableIPCode != "") && (fieldName != ""))
                 {
                     try
@@ -3022,6 +3032,8 @@ namespace Tkn_Layout
                     textEdit1.Visible = false;
                     labelControl1.Dock = DockStyle.Fill;
                 }
+
+                
 
                 if (caption == "") labelControl1.Visible = false;
 

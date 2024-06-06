@@ -351,11 +351,26 @@ namespace YesiLdefter
                 var YesiLdefterTabimIni = new tIniFile("YesiLdefterTabim.Ini");
                 if (YesiLdefterTabimIni != null)
                 {
-                    YesiLdefterTabimIni.Write("SourceServerNameIP", v.active_DB.localServerName, "YesiLDefter");
-                    YesiLdefterTabimIni.Write("SourceDatabaseName", v.active_DB.localDBName, "YesiLDefter");
-                    YesiLdefterTabimIni.Write("SourceDbLoginName", v.active_DB.localUserName, "YesiLDefter");
-                    YesiLdefterTabimIni.Write("SourceDbPass", v.active_DB.localPsw, "YesiLDefter");
-                    YesiLdefterTabimIni.Write("SourceConnection", "true", "YesiLDefter");
+                    if (v.SP_TabimParamsKurumTipi == "MTSK")
+                    {
+                        YesiLdefterTabimIni.Write("SourceServerNameIP", v.active_DB.localServerName, "YesiLDefter");
+                        YesiLdefterTabimIni.Write("SourceDatabaseName", v.active_DB.localDBName, "YesiLDefter");
+                        YesiLdefterTabimIni.Write("SourceDbLoginName", v.active_DB.localUserName, "YesiLDefter");
+                        YesiLdefterTabimIni.Write("SourceDbPass", v.active_DB.localPsw, "YesiLDefter");
+                        YesiLdefterTabimIni.Write("SourceConnection", "true", "YesiLDefter");
+                    }
+                    if (v.SP_TabimParamsKurumTipi == "SRC")
+                    {
+                        YesiLdefterTabimIni.Write("SRCServerNameIP", v.active_DB.localServerName, "YesiLDefter");
+                        YesiLdefterTabimIni.Write("SRCDatabaseName", v.active_DB.localDBName, "YesiLDefter");
+                        YesiLdefterTabimIni.Write("SRCDbLoginName", v.active_DB.localUserName, "YesiLDefter");
+                        YesiLdefterTabimIni.Write("SRCDbPass", v.active_DB.localPsw, "YesiLDefter");
+                        YesiLdefterTabimIni.Write("SourceConnection", "true", "YesiLDefter");
+                    }
+                    if (v.SP_TabimParamsKurumTipi == "ISMAK")
+                    {
+                        MessageBox.Show("ISMAK writeTabSurucuIni bak");
+                    }
                 }
             }
             catch (Exception)
@@ -752,6 +767,12 @@ namespace YesiLdefter
                     ds_UstadFirms.Tables[0].Rows[0]["SourceDatabaseName"] = v.active_DB.localDBName;
                     ds_UstadFirms.Tables[0].Rows[0]["SourceDbLoginName"] = v.active_DB.localUserName;
                     ds_UstadFirms.Tables[0].Rows[0]["SourceDbPass"] = v.active_DB.localPsw;
+
+                    if (v.SP_TabimParamsKurumTipi == "SRC")
+                    {
+                        ds_UstadFirms.Tables[0].Rows[0]["SectorTypeId"] = 213; // v.SP_Firm_SectorTypeId;
+                        ds_UstadFirms.Tables[0].Rows[0]["MenuCode"] = "UST/MEB/TB2/MAIN";
+                    }
 
                     ds_UstadFirms.Tables[0].AcceptChanges();
 

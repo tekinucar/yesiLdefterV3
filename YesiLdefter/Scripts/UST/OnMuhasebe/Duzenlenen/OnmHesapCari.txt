@@ -80,10 +80,10 @@ Delete from [Lkp].[OnmHesapCariCariTipi]
 INSERT INTO [Lkp].[OnmHesapCariCariTipi] (Id, CariTipi, GrupTipiId)
  VALUES 
   (0, N'Tanımsız',    0),
-  (1, N'Gerçek Kişi',    1),
-  (2, N'Özel Firma',  1),
-  (3, N'Kamu Kurumu', 1),
-  (4, N'CariPersoneli', 1)
+  (1, N'Gerçek kişi',    1),
+  (2, N'Tüzel kişi (Özel firma, dernek vb)',  1),
+  (3, N'Kamu kurumları', 1)
+  --,(4, N'CariPersoneli', 1)
   
 -- ------------------------------------------------------- 
 -- CalismaTipiId 
@@ -135,3 +135,87 @@ commit transaction
 /*CreateLkpTableEnd*/
 
   
+/*CreateTrigger*/
+
+CREATE TRIGGER [dbo].[trg_OnmHesapCari] on [dbo].[OnmHesapCari] 
+AFTER INSERT, UPDATE
+AS BEGIN
+    DECLARE cursorOnmHCari cursor for select Id from Inserted
+    DECLARE @curId bigint
+
+    OPEN cursorOnmHCari
+
+    FETCH NEXT FROM cursorOnmHCari INTO @curId
+
+    declare @yAdi nvarchar(50) = null
+    declare @ySoyadi nvarchar(50) = null
+    
+	declare @yCariKisaAdi nvarchar(50) = null
+    declare @yUnvani1 nvarchar(100) = null
+    declare @yUnvani2 nvarchar(100) = null
+    
+	declare @yTamAdiSoyadi nvarchar(200) = null
+    declare @eTamAdiSoyadi nvarchar(200) = null
+    
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        set @yAdi = ''
+        set @ySoyadi = ''
+        set @yTamAdiSoyadi = ''
+        set @yCariKisaAdi = ''
+		set @yUnvani1 = ''
+        set @yUnvani2 = ''
+    	set @eTamAdiSoyadi = ''
+        
+        select 
+    	   @eTamAdiSoyadi = isnull(dlt.TamAdiSoyadi,'')
+    	from deleted dlt
+    	where dlt.Id = @curId
+
+        select 
+    	   @yAdi = isnull(ins.Adi,'')
+    	  ,@ySoyadi = isnull(ins.Soyadi,'')
+		  ,@yCariKisaAdi = isnull(ins.CariKisaAdi,'')
+    	  ,@yUnvani1 = isnull(ins.Unvani1,'')
+		  ,@yUnvani2 = isnull(ins.Unvani2,'')
+		from inserted ins
+    	where ins.Id = @curId
+     	   	
+    	set @yTamAdiSoyadi = @yAdi + ' ' +  @ySoyadi
+
+        if ((@yAdi = '') and (@ySoyadi = '') and (@yUnvani1 <> ''))
+		begin
+			set @yTamAdiSoyadi = @yUnvani1 + ' ' + @yUnvani2
+
+			if (@yCariKisaAdi = '')
+			begin
+			  declare @i1 int = 0
+			  set @i1 = CHARINDEX(' ', @yUnvani1, 0)
+			  set @yCariKisaAdi = SUBSTRING(@yUnvani1, 0, @i1)
+            end
+		end
+
+    	if (@yCariKisaAdi = '')
+		begin
+    	    update OnmHesapCari set 
+            TamAdiSoyadi = LTRIM(RTRIM(@yTamAdiSoyadi))
+            where Id = @curId 
+    	end
+		else begin
+		    update OnmHesapCari set 
+             TamAdiSoyadi = LTRIM(RTRIM(@yTamAdiSoyadi))
+            ,CariKisaAdi = LTRIM(RTRIM(@yCariKisaAdi))
+			where Id = @curId 
+		end
+    	
+    	FETCH NEXT FROM cursorOnmHCari INTO @curId
+    END
+
+    CLOSE cursorOnmHCari
+    DEALLOCATE cursorOnmHCari   
+END
+
+ALTER TABLE [dbo].[OnmHesapCari] ENABLE TRIGGER [trg_OnmHesapCari]
+
+
+/*CreateTriggerEnd*/
