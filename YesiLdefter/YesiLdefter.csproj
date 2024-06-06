@@ -594,6 +594,7 @@
     <Content Include="Scripts\UST\UstadCRM\UstadComputers.txt" />
     <Content Include="Scripts\UST\UstadCRM\UstadFirms.txt" />
     <Content Include="Scripts\UST\MsV3\MsReports.txt" />
+    <Content Include="Scripts\UST\UstadCRM\UstadFirmsUsers.txt" />
     <Content Include="Scripts\UST\UstadCRM\UstadUsers.txt" />
     <Content Include="Scripts\UST\MsV3\MsWebNodeItems.txt" />
     <Content Include="Scripts\UST\MsV3\MsWebNodes.txt" />

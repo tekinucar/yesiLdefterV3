@@ -50,6 +50,7 @@ CREATE TRIGGER [dbo].[trg_UstadUsers] ON [dbo].[UstadUsers]
 AFTER INSERT, UPDATE
 AS BEGIN
 
+
     declare cursor_UstadUsers cursor for select UserId from Inserted
     declare @curId bigint
 
@@ -57,15 +58,15 @@ AS BEGIN
 
     FETCH NEXT FROM cursor_UstadUsers INTO @curId
 
-	declare @UserGUID        varchar(50)
+	declare @UserGUID        varchar(255)
 	declare @UserFullName    nVarchar(100)
 	declare @UserFirstName   nVarchar(50)
 	declare @UserLastName    nVarchar(50)
+	declare @FirmGUID        varchar(255)
 	/*
 	declare @UserTcNo        varchar(11)
 	declare @UserMobileNo    varchar(11)
 	declare @UserEMail       varchar(50)
-	declare @FirmGUID        varchar(50)
     declare @About           nVarchar(250)
 	declare @UserKey         nVarchar(50)
 	declare @JobTypeId       SmallInt
@@ -79,6 +80,7 @@ AS BEGIN
 		, @UserFullName = isnull(ins.UserFullName,'')
 	    , @UserFirstName = isnull(ins.UserFirstName,'')
 	    , @UserLastName = isnull(ins.UserLastName,'')
+		, @FirmGUID = isnull(ins.FirmGUID, '')
         --UserTcNo
         --UserMobileNo
         --UserEMail
@@ -90,7 +92,7 @@ AS BEGIN
 		from inserted ins
     	where ins.UserId = @curId
 
-		-- TamAdiSoyadi var ise Adi ve Soyadi tespit ediliyor 
+		-- TamAdiSoyadi var ise Adi ve SoyAdi tespit ediliyor 
         if ((@UserFullName <> '') and
             (@UserFirstName = '') and
             (@UserLastName = ''))
@@ -124,8 +126,9 @@ AS BEGIN
         if ((@UserGUID = '') or 
 		    (@UserGUID is null))
     	begin
+		  set @UserGUID = NEWID()
     	  update UstadUsers set 
-          UserGUID = NEWID()
+          UserGUID = @UserGUID
           where UserId = @curId
     	end 
 
@@ -134,6 +137,34 @@ AS BEGIN
 			update UstadUsers set 
 			RecordDate = GETDATE()
             where UserId = @curId
+		end
+
+		/* FirmGUID */
+		if (@FirmGUID <> '')
+		begin
+		  -- Firms ve Users bağlantısı varmı kontrol edelim
+		  -- ufu : UstadFirmsUsers
+		  declare @ufuFirmGUID varchar(255)
+		  set @ufuFirmGUID = ''
+		  
+		  Select @ufuFirmGUID = @FirmGUID from dbo.UstadFirmsUsers
+		  Where FirmGUID = @FirmGUID
+		  and   UserId = @curId
+		  
+		  -- firma ve user arasında bağlantı yok, bağlantı kaydı oluşturalım
+		  if (@ufuFirmGUID = '')
+		  begin
+              INSERT INTO [dbo].[UstadFirmsUsers]
+                ([IsActive],[FirmId],[FirmGUID],[UserId],[UserGUID])
+              VALUES
+                (1
+                ,0                   --FirmId
+                ,'' + @FirmGUID + '' --FirmGUID
+                ,@curId              --UserId
+                ,'' + @UserGUID + '' --UserGUID		    
+				) 
+		  end
+		  
 		end
 
     	FETCH NEXT FROM cursor_UstadUsers INTO @curId
