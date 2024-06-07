@@ -4492,8 +4492,6 @@ namespace Tkn_CreateObject
 
             panelControl1.Controls.Add(cntrl);
 
-
-
             tForm.Tag = "DIALOG";
 
             if (rowCount == v.tRowCount.SingleRow)

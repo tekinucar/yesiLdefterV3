@@ -1395,19 +1395,20 @@ namespace Tkn_Events
                 vTable vt = new vTable();
                 t.Preparing_DataSet(tForm, dsData, vt);
 
+                
                 string myProp = dsData.Namespace.ToString();
                 string tTableName = t.MyProperties_Get(myProp, "TableName:");
-                string SqlF = t.MyProperties_Get(myProp, "SqlFirst:");
-
-                string selectSql = SqlF;
-
-                string deleteSql = SqlF.Remove(0, SqlF.IndexOf("where"));
-                if (deleteSql.IndexOf("order by") > -1)
-                    deleteSql = deleteSql.Remove(deleteSql.IndexOf("order by"));
+                //string SqlF = t.MyProperties_Get(myProp, "SqlFirst:");
+                string SqlS = t.MyProperties_Get(myProp, "SqlSecond:");
+                string selectSql = SqlS;
+                /*
+                string deleteSql = SqlS.Remove(0, SqlS.ToUpper().IndexOf("WHERE"));
+                if (deleteSql.ToUpper().IndexOf("ORDER BY") > -1)
+                    deleteSql = deleteSql.Remove(deleteSql.ToUpper().IndexOf("ORDER BY"));
                 deleteSql = "delete " + vt.TableName + " " + v.ENTER + deleteSql;
-
+                
                 v.SQL = deleteSql + v.ENTER2 + v.SQL;
-
+                */
                 //--view
 
                 DataSet ds_MultiRows = new DataSet();
@@ -1418,8 +1419,11 @@ namespace Tkn_Events
                     tCreateObject co = new tCreateObject();
                     if (co.Create_Delete_Form(ds_MultiRows, tableIPCode, v.tRowCount.MultiRows) == DialogResult.Yes)
                     {
+                        string deleteSql = getDeleteSql(ds_MultiRows, vt);
+
                         try
                         {
+                            onay = true;
                             if (propList_ != null)
                                 onay = extraIslemVar(tForm, tableIPCode, v.tButtonType.btSilListe, v.tBeforeAfter.Before, propList_); //26
 
@@ -1459,6 +1463,23 @@ namespace Tkn_Events
             return onay;
         }
 
+        private string getDeleteSql(DataSet ds, vTable vt)
+        {
+            string tSql = "";
+            string keyFName = vt.KeyId_FName;
+            string IdList = "";
+
+            foreach (DataRow item in ds.Tables[0].Rows)
+            {
+                IdList += ", " + item[keyFName].ToString();
+            }
+
+            IdList = IdList.Remove(0, 1);
+
+            tSql = "delete from " + vt.TableName + " where " + vt.KeyId_FName + " in ( " + IdList + " ) ";
+
+            return tSql;
+        }
         private void satirSil(Form tForm, string tableIPCode, List<PROP_NAVIGATOR> propList_)
         {
             tToolBox t = new tToolBox();

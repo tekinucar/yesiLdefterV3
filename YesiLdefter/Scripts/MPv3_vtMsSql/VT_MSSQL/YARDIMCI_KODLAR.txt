@@ -1,4 +1,12 @@
 ﻿
+/* db user oluşturmak */
+--exec sys.sp_addlogin TABIM, 312, Surucu07, Türkçe
+--exec sys.sp_grantdbaccess TABIM, TABIM
+--exec sys.sp_addrolemember 'db_owner', TABIM
+--exec sys.sp_addsrvrolemember TABIM, 'sysadmin'
+
+
+
 /* ldf dosyası bozulan database kurtarmak için */
 
 EXEC sp_attach_single_file_db @dbname = 'Surucu07', @physname = N'C:\SqlData\MenderesMtsk\Surucu07.mdf';

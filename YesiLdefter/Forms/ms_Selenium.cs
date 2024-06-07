@@ -817,7 +817,7 @@ namespace YesiLdefter
             /// tableIPCodesInLoad view lerin enabled = true yap
             await preparingViewControls(true);
 
-            /// iş bitiminde de sıfılamak gerekiyor.
+            /// iş bitiminde de sıfırlamak gerekiyor.
             /// Örnek : Tarih al  dan sonra yeni tarihlere göre sayfalar değişmiyor
             /// 
             f.tableIPCodeIsSave = "";
@@ -2328,7 +2328,6 @@ namespace YesiLdefter
              
             return wnv.writeValue;
         }
-
         private async Task preparingViewControls(bool value)
         {
             if (t.IsNotNull(f.tableIPCodesInLoad) == false) return;
