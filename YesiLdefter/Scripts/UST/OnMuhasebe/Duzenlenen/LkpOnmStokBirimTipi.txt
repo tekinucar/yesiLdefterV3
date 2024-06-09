@@ -3,6 +3,9 @@
 -- ------------------------------------------------------- 
 -- BirimTipi
 -- ------------------------------------------------------- 
+
+begin transaction
+
 create table [Lkp].[OnmStokBirimTipi]
 (
    Id          Int Unique Not null,
@@ -12,6 +15,10 @@ create table [Lkp].[OnmStokBirimTipi]
 
    constraint  pk_OnmStokBirimTipi primary key (Id)
 )
+
+ grant select, insert, update, delete on [Lkp].[OnmStokBirimTipi] to public
+
+commit transaction
 
 /*CreateTableEnd*/
 

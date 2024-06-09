@@ -103,10 +103,10 @@ namespace YesiLdefter
             /// params giriş TESTi için 
             // KÖREN FirmGUID : 0fe40e88-bccf-4f58-9531-7e39c47a1385
 
-            //params_ = true;
-            //v.tUser.UserId = 61;// 12; 
-            //v.SP_TabimParamsKurumTipi = "SRC";// "MTSK";
-            //v.SP_TabimParamsServerName = "LAPTOP-ACER1\\SQLEXPRESS";
+            params_ = true;
+            v.tUser.UserId = 61;// 12; 
+            v.SP_TabimParamsKurumTipi = "SRC";// "MTSK";
+            v.SP_TabimParamsServerName = "LAPTOP-ACER1\\SQLEXPRESS";
             //MessageBox.Show(params_.ToString() + " : " + v.tUser.UserId.ToString() + " : " + v.SP_TabimParamsKurumTipi + " : " + v.SP_TabimParamsServerName);
 
             #endregion

@@ -2,6 +2,7 @@
 -- ------------------------------------------------------- 
 -- FaturaEkVergiTipi
 -- ------------------------------------------------------- 
+begin transaction
 
 create table [Lkp].[OnmFaturaEkVergiTipi]
 (
@@ -14,6 +15,10 @@ create table [Lkp].[OnmFaturaEkVergiTipi]
 
    constraint  pk_OnmFaturaEkVergiTipi primary key (Id)
 )
+
+ grant select, insert, update, delete on [Lkp].[OnmFaturaEkVergiTipi] to public
+
+commit transaction
 
 /*CreatTableEnd*/
 

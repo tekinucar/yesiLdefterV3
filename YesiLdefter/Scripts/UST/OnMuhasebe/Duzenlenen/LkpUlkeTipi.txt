@@ -1,6 +1,9 @@
-﻿-- ------------------------------------------------------- 
+﻿/*CreateTable*/
+-- ------------------------------------------------------- 
 -- UlkeTipi
 -- ------------------------------------------------------- 
+begin transaction
+
 create table [Lkp].[UlkeTipi]
 (
    Id           Int Unique Not null,
@@ -10,6 +13,15 @@ create table [Lkp].[UlkeTipi]
    
    constraint  pk_UlkeTipi primary key (Id)
 )
+
+ grant select, insert, update, delete on [Lkp].[UlkeTipi] to public
+
+commit transaction
+
+/*CreateTableEnd*/
+
+
+/*CreateData*/
 
 INSERT INTO [Lkp].[UlkeTipi] (Id, UlkeKodu, UlkeAdi, UlkeAdi2 )
  VALUES 
@@ -276,4 +288,4 @@ INSERT INTO [Lkp].[UlkeTipi] (Id, UlkeKodu, UlkeAdi, UlkeAdi2 )
   ( 1259, 'Zimbabve', 'Zimbabve', 'Zimbabve' )
 
 
-
+  /*CreateDataEnd*/
