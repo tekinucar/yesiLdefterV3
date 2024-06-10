@@ -929,6 +929,7 @@ namespace YesiLdefter.Selenium
                                         {
                                             findDbRow = ds.Tables[0].NewRow();
                                             wnv.ds = ds;
+                                            wnv.dN = dN;
                                         }
                                         return findDbRow;
                                     }

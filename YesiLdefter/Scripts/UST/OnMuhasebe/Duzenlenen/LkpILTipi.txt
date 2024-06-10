@@ -1,6 +1,10 @@
-﻿-- ------------------------------------------------------- 
+﻿/*CreateTable*/
+-- ------------------------------------------------------- 
 -- ILTipi
 -- ------------------------------------------------------- 
+
+begin transaction
+
 create table [Lkp].[ILTipi]
 (
    Id           Int Unique Not null,
@@ -9,6 +13,15 @@ create table [Lkp].[ILTipi]
    
    constraint  pk_ILTipi primary key (Id)
 )
+
+ grant select, insert, update, delete on [Lkp].[ILTipi] to public
+
+commit transaction
+
+/*CreateTableEnd*/
+
+
+/*CreateData*/
 
 INSERT INTO [Lkp].[ILTipi] (Id, IlKodu, IlAdi )
  VALUES 
@@ -96,3 +109,4 @@ INSERT INTO [Lkp].[ILTipi] (Id, IlKodu, IlAdi )
   ( 67, '67', N'ZONGULDAK' )
 
 
+    /*CreateDataEnd*/

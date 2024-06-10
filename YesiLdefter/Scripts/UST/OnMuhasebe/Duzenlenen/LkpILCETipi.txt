@@ -1,5 +1,9 @@
 ﻿-- : Harmandalı Gazi Mustafa Kemal Atatürk Mahallesi : 48 karekter
 
+/*CreateTable*/
+
+begin transaction
+
 -- ------------------------------------------------------- 
 -- IlceTipi
 -- ------------------------------------------------------- 
@@ -12,6 +16,15 @@ create table [Lkp].[IlceTipi]
    
    constraint  pk_IlceTipi primary key (Id)
 )
+
+ grant select, insert, update, delete on [Lkp].[IlceTipi] to public
+
+commit transaction
+
+/*CreateTableEnd*/
+
+
+/*CreateData*/
 
 
 INSERT INTO [Lkp].[IlceTipi] (Id, IlKodu, IlceAdi, IlceKodu )
@@ -1075,5 +1088,5 @@ INSERT INTO [Lkp].[IlceTipi] (Id, IlKodu, IlceAdi, IlceKodu )
   (  16708, '67', 'KOZLU', '2101' )
 
 
-
+    /*CreateDataEnd*/
 

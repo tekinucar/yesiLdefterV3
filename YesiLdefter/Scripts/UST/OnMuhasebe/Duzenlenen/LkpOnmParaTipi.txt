@@ -2,6 +2,9 @@
 -- ------------------------------------------------------- 
 -- ParaTipi
 -- ------------------------------------------------------- 
+
+begin transaction
+
 create table [Lkp].[OnmParaTipi]
 (
    Id          Int Unique Not null,
@@ -12,6 +15,10 @@ create table [Lkp].[OnmParaTipi]
 
    constraint  pk_OnmParaTipi primary key (Id)
 )
+
+ grant select, insert, update, delete on [Lkp].[OnmParaTipi] to public
+
+commit transaction
 
 /*CreateTableEnd*/
 

@@ -3,6 +3,8 @@
 -- TevkifatTipi
 -- ------------------------------------------------------- 
 
+begin transaction
+
 create table [Lkp].[OnmTevkifatTipi]
 (
    Id                  Int IDENTITY(1,1) NOT NULL, 
@@ -15,6 +17,10 @@ create table [Lkp].[OnmTevkifatTipi]
    
    constraint  pk_OnmTevkifatTipi primary key (Id)
 )
+
+ grant select, insert, update, delete on [Lkp].[OnmTevkifatTipi] to public
+
+commit transaction
 
 /*CreateTableEnd*/
 
@@ -55,7 +61,7 @@ INSERT INTO [Lkp].[OnmTevkifatTipi] (Id, IsActive, TevkifatKodu, TevkifatAdi, Te
   (27, 1, N'623', N'623 - Ağaç ve orman ürünleri teslimi', 3, 10 ),
   (28, 1, N'650', N'650 - Diğer', 3, 10 )
 
-SET IDENTITY_INSERT [Lkp].[TevkifatTipi] OFF
+SET IDENTITY_INSERT [Lkp].[OnmTevkifatTipi] OFF
 
 /*CreateDataEnd*/
 

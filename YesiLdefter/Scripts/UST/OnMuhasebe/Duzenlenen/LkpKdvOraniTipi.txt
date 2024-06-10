@@ -15,6 +15,8 @@ create table [Lkp].[OnmKdvOraniTipi]
    constraint  pk_OnmKdvOraniTipi primary key (Id)
 )
 
+ grant select, insert, update, delete on [Lkp].[OnmKdvOraniTipi] to public
+
  commit transaction
 
 /*CreateTableEnd*/

@@ -780,7 +780,7 @@ namespace YesiLdefter
                         onayValue = valueChecked(wnv);
 
                     // 5. adım scraping
-                    // WebScrapingAsync
+                    // WebScrapingAsync işlemi yapılsın
                     //
                     if (onayValue)
                     {
