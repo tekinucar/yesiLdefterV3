@@ -36,10 +36,10 @@ namespace YesiLdefter
             t.Find_DataSet(this, ref dsTables, ref dNTables, tableListTableIPCode);
             t.Find_DataSet(this, ref ds_DataList, ref dN_DataList, dataListTableIPCode);
 
-            Control cntrl = null;
-            string[] controls = new string[] { };
-            cntrl = t.Find_Control(this, "simpleButton_ek1", tableListTableIPCode, controls);
-
+            //Control cntrl = null;
+            //string[] controls = new string[] { };
+            //cntrl = t.Find_Control(this, "simpleButton_ek1", tableListTableIPCode, controls);
+            Control cntrl = t.Find_SimpleButton(this, "simpleButton_ek1", tableListTableIPCode);
             if (cntrl != null)
             {
                 ((DevExpress.XtraEditors.SimpleButton)cntrl).Width = 105;

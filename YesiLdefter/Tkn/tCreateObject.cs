@@ -3416,6 +3416,8 @@ namespace Tkn_CreateObject
                 textEdit_Find.Enter += new System.EventHandler(evb.textEdit_Find_Enter);
                 textEdit_Find.Leave += new System.EventHandler(evb.textEdit_Find_Leave);
                 textEdit_Find.KeyDown += new System.Windows.Forms.KeyEventHandler(evb.textEdit_Find_KeyDown);
+                textEdit_Find.KeyUp += new System.Windows.Forms.KeyEventHandler(evb.textEdit_Find_KeyUp);
+
                 textEdit_Find.EditValueChanged += new System.EventHandler(evb.textEdit_Find_EditValueChanged);
 
                 // kullanılacak find type takibi için
@@ -3555,10 +3557,8 @@ namespace Tkn_CreateObject
                         /// Create_MyFindPanel_ için navigator butonlarını tekrar burada false yap
                         /// 
                         /// genel aramalar
-                        textEdit_Find.Text = v.con_SearchValue;
                         v.con_SearchTableIPCode = TableIPCode;
-                        //textEdit_Find.DeselectAll();
-                        //textEdit_Find.SelectionStart = textEdit_Find.SelectionLength;
+                        textEdit_Find.DeselectAll();
                     }
 
                 }

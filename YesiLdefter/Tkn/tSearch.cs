@@ -459,7 +459,6 @@ namespace Tkn_Events
 
             v.con_SearchValue = searchValue;
 
-
             /// sadece SearchTableIPCode var ise 
             if (t.IsNotNull(SearchTableIPCode) && (t.IsNotNull(SearchFormCode) == false))
                 onay = searchEngineByTableIPCode(tForm, prop_, targetTableIPCode); // SearchTableIPCode);
@@ -639,13 +638,7 @@ namespace Tkn_Events
             tabPane1.ResumeLayout(false);
 
             tSearchForm.Controls.Add(tabPane1);
-
-            /*
-            if (t.IsNotNull(v.con_SearchValue))
-            {
-                t.textEdit_Find_SetValue(tSearchForm, SearchTableIPCode, v.con_SearchValue);
-            }
-            */
+                        
             #endregion Create tSearchForm 
 
             return tSearchForm;
@@ -758,7 +751,7 @@ namespace Tkn_Events
             return onay;
         }
 
-        /// Search için burada SETDATA işlemleri yapılıyor
+        /// Search işleminden sonra burada SETDATA işlemleri yapılıyor
         /// 
         public bool setSearchEngineValues(Form tForm, string TargetTableIPCode,
             List<GET_FIELD_LIST> GetFieldList,
@@ -769,6 +762,10 @@ namespace Tkn_Events
             /// Seçilen DataRow 
             ///
             bool onay = false;
+
+            Application.DoEvents();
+            t.WaitFormOpen(v.mainForm, "");
+            t.WaitFormOpen(v.mainForm, "Atama işlemleri yapılıyor...");
 
             if (v.con_DataRow != null)
             {
@@ -896,6 +893,9 @@ namespace Tkn_Events
                 #endregion SetValues işlemleri
 
             }
+
+            v.IsWaitOpen = false;
+            t.WaitFormClose();
 
             return onay;
         }

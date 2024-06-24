@@ -194,7 +194,6 @@ namespace Tkn_Variable
         public static string registryPath = "Software\\Üstad\\YesiLdefter";
         public static Control formLastActiveControl { get; set; }
 
-        public static string con_Search_NullText { get; set; }
         public static string con_Save_dsState { get; set; }
         public static int con_EditSaveCount { get; set; }
 
@@ -759,8 +758,6 @@ namespace Tkn_Variable
         public static string con_DragDropOpenFormInTableIPCode = string.Empty; // ve = THIRD 
 
         public static string con_TableIPCode = string.Empty;
-        public static string con_SearchValue = string.Empty;
-        public static string con_SearchTableIPCode = string.Empty;
         public static string con_FormLoadValue = string.Empty;
         public static string con_GridMouseValue = string.Empty;
         public static Boolean con_DragDropEdit = false;
@@ -779,7 +776,6 @@ namespace Tkn_Variable
         public static string Properties = "Properties";
         public static string PropertiesPlus = "PropertiesPlus";
         public static string PropertiesNav = "PropertiesNav";
-        public static string SearchEngine = "SearchEngine";
         public static string ButtonEdit = "Buttons";
 
 
@@ -864,6 +860,7 @@ namespace Tkn_Variable
 
         public static string sp_OpenFormState = "";
         public static string sp_activeSkinName = "";
+        public static string sp_SelectSkinName = "";
         public static string sp_deactiveSkinName = "Blueprint";//"High Contrast White";
         //public static SkinSvgPalette sp_DeactiveSkinPalette = SkinSvgPalette.Bezier.HighContrastWhite;
         public static SkinStyle sp_DeactiveSkin = SkinStyle.Blueprint;
@@ -898,15 +895,21 @@ namespace Tkn_Variable
         //public static string vt_USER_NAME = "";   // 2007
         public static string vt_USER_SHOP_LIST = "";
 
+        
         public static bool searchOnay = false;
         public static bool searchSet = false;
         public static bool searchEnter = true;
         public static int searchCount = 0;
+        public static int searchStartCount = 1; /* 1 ile 5 arası kullanıcı ayarlasın */
+        public static string SearchEngine = "SearchEngine";
         public static string search_onList = "onList";
         public static string search_inData = "inData";
         public static string search_CARI_ARAMA_TD = search_inData; //search_onList;//
         public static string search_STOK_ARAMA_TD = "";
-        //public static string search_VALUE = "";
+        public static string con_Search_NullText { get; set; }
+        public static string con_SearchValue = string.Empty;
+        public static string con_SearchValueCopy = string.Empty;
+        public static string con_SearchTableIPCode = string.Empty;
         public static string search_readTableIPCode = "";
         #endregion
 

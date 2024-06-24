@@ -12,8 +12,9 @@ begin transaction
    FirmId             Int       not null,
    IsActive           Bit       not null, /* default : 1 = active, 0 = not active */  
    IsPaid             Bit       not null, /* default : 0 = ödenmedi, 1 = ödendi */  
-   IsCommit           Bit       not null, /* default : 0 = işlenmedi, 1 = İşlendi */  
-   BelgeTipiId        SmallInt      null, 
+   IsCommit           Bit       not null, /* default : 0 = muh. işlenmedi, 1 = muh. İşlendi */  
+  
+   BelgeTipiId        SmallInt      null, /* fatura, öck, parek.fişi, ...*/
    KaynakTipiId       SmallInt      null, /* 1. kağıt, 2. elektronik belge */
    
    -- 10 Belge Hakkında
@@ -22,9 +23,11 @@ begin transaction
    BelgeYil           Smallint      null, 
    BelgeAy            Smallint      null, 
    BelgeGun           Smallint      null,
-   BelgeSeri          nVarChar(5)   null,
+   BelgeSeri          nVarChar(10)  null,
    BelgeNo            nVarChar(50)  null,
+   BelgeDonemTipiId   Int           null,
 
+   -- 20 vadeler
    VadeGun            SmallInt      null,  
    SonOdemeTarihi     Date          null, 
    GecerlilikTarihi   Date          null, /* sigortanın son tarihi */
@@ -35,24 +38,61 @@ begin transaction
    MaliyetId          Int           null, /* maliyet muhasebe hesap Id */
    VarlikId           Int           null, /* varlıkların (bina taşıt telekom vb ) */
    AboneId            Int           null, /* aylık abonelik faturaların işareti */
+   ProjeId            Int           null, /* proje için takip */
+   MaliyetKdvOrani    SmallInt      null, /* maliyet hesabında tanımlı olan kdv oranı */
 
    -- 40
-   BelgeTutari        Numeric(22,5) null,
+   KdvOrani1          SmallInt      null,
+   KdvMatrahi1        Numeric(22,5) null,
+   KdvTutari1         Numeric(22,5) null,
+   KdvliToplam1       Numeric(22,5) null,
+   -- 50
+   KdvOrani2          SmallInt      null,
+   KdvMatrahi2        Numeric(22,5) null,
+   KdvTutari2         Numeric(22,5) null,
+   KdvliToplam2       Numeric(22,5) null,
+   -- 60
+   KdvOrani3          SmallInt      null,
+   KdvMatrahi3        Numeric(22,5) null,
+   KdvTutari3         Numeric(22,5) null,
+   KdvliToplam3       Numeric(22,5) null,
+   -- 70 Kdvsiz matrah
+   KdvOrani0          SmallInt      null,
+   KdvMatrahi0        Numeric(22,5) null,
+   KdvTutari0         Numeric(22,5) null,
+   KdvliToplam0       Numeric(22,5) null,
+   -- 80
+   KdvMatrahToplami   Numeric(22,5) null,
+   KdvTutariToplami   Numeric(22,5) null,
+   KdvliToplam        Numeric(22,5) null,
+
+   -- 100
+   BelgeTutari        Numeric(22,5) null, /* belgenin kdvli toplam tutarı */
+   IndirimTutari      Numeric(22,5) null,
+   GenelToplam        Numeric(22,5) null,
    MinOdemeTutari     Numeric(22,5) null,
-   KdvMatrahi         Numeric(22,5) null,    
-   KdvOrani           SmallInt      null,
-   KdvTutari          Numeric(22,5) null,    
+
    VergiVeFonlar      Numeric(22,5) null,    
    MasrafMiktari      Numeric(22,5) null,    
    
-   --50 kdv oran ve tutarları eklenebilir (perakende fişinin işlenmesini örnek al)
+   -- 110 Döviz bilgileri 
+   ParaTipiId1        nVarChar(3)   null,
+   DovizYeriId1       SmallInt      null,
+   DovizKuru1         Numeric(12,8) null,
+   DovizTutari1       Numeric(22,8) null,
+   -- 120 Döviz bilgileri 
+   ParaTipiId2        nVarChar(3)   null,
+   DovizYeriId2       SmallInt      null,
+   DovizKuru2         Numeric(12,8) null,
+   DovizTutari2       Numeric(22,8) null,
 
-   -- 90
+   -- 130
    -- İşlendi : bu belge ödendi tahsil edildi vb... 
    Aciklama           nVarchar(200) null, 
-   KayitTarihi        Date          null, 
-   KayitSaati         VarChar(8)    null,
-   PaidId             Int           null,   
+
+   -- 140
+   KayitTarihi        DateTime      null, 
+   BelgeDekontId      Int           null, /* OnmBelgeDekont.Id = Ödeme yapan belge ıd */  
    CommitTable        Int           null, /* ilgili table */
    CommitId           Int           null, /* ilgili table ref Id */
 
@@ -87,16 +127,25 @@ AS BEGIN
     declare cursor_BMaliyet cursor for select Id from Inserted
     declare @curId bigint
     
-	declare @FirmId int
-	declare @BelgeTarihi date
-	declare @SonOdemeTarihi date
-	declare @BelgeTutari numeric(22,8)
-	declare @KdvMatrahi  numeric(22,8)
-	declare @KdvOrani smallInt
-	declare @KdvTutari numeric(22,8)
-	declare @ykdvTutari numeric(22,8)
+    declare @FirmId int
+    declare @BelgeTarihi date
+    declare @SonOdemeTarihi date
+    declare @Yil varchar(4)
+	declare @Ay varchar(2)
+	--declare @BelgeTutari numeric(22,8)
 
-	declare @eKayitTarihi date 
+    declare @yKdvOrani1    smallInt
+	declare @yKdvOrani2    smallInt
+    declare @yKdvOrani3    smallInt
+
+    declare @yKdvMatrahi1  numeric(22,8)
+    declare @yKdvMatrahi2  numeric(22,8)
+    declare @yKdvMatrahi3  numeric(22,8)
+    declare @yKdvMatrahi0  numeric(22,8)
+    declare @yMaliyetKdvOrani  smallInt
+
+	declare @yKayitTarihi date 
+    declare @KdvOranSayisi smallInt
     
 	OPEN cursor_BMaliyet
 
@@ -108,11 +157,19 @@ AS BEGIN
 	      @FirmId = ins.FirmId
 		 ,@BelgeTarihi = ins.BelgeTarihi
 	     ,@SonOdemeTarihi = ins.SonOdemeTarihi
-	     ,@BelgeTutari = ins.BelgeTutari
-	     ,@KdvMatrahi = ins.KdvMatrahi
-	     ,@KdvOrani = ins.KdvOrani
-	     ,@KdvTutari = ins.KdvTutari
-         ,@eKayitTarihi = ins.KayitTarihi  
+	     --,@BelgeTutari = ins.BelgeTutari
+	     ,@yMaliyetKdvOrani = ins.MaliyetKdvOrani
+
+	     ,@yKdvOrani1 = ins.KdvOrani1
+	     ,@yKdvOrani2 = ins.KdvOrani2
+	     ,@yKdvOrani3 = ins.KdvOrani3
+
+	     ,@yKdvMatrahi1 = isnull(ins.KdvMatrahi1,0)
+	     ,@yKdvMatrahi2 = isnull(ins.KdvMatrahi2,0)
+	     ,@yKdvMatrahi3 = isnull(ins.KdvMatrahi3,0)
+	     ,@yKdvMatrahi0 = isnull(ins.KdvMatrahi0,0)
+
+         ,@yKayitTarihi = ins.KayitTarihi  
       from Inserted ins
       where ins.Id = @curId
 	  
@@ -124,40 +181,48 @@ AS BEGIN
 		where Id = @curId
 	  end
 
-	  -- sadece belge tutarı var ise 
-	  -- belgeTutarı kdvDahil verilmiştir, ona göre kdv hesaplanır
-	  if ((@BelgeTutari > 0) and (@KdvMatrahi = 0))
-	      set @ykdvTutari = ( @BelgeTutari / (100 + @KdvOrani) ) * @KdvOrani  
-      
-	  -- KdvMatrahı belirtilmiş ise Kdvsiz tutardır, ona göre hesaplanı
-	  if (@KdvMatrahi > 0)
-	      set @ykdvTutari = (@KdvMatrahi / 100) * @KdvOrani   
+	  if (@yKdvOrani1 = 0) update OnmBelgeMaliyet set KdvliToplam1 = 0 where Id = @curId
+	  if (@yKdvOrani2 = 0) update OnmBelgeMaliyet set KdvliToplam2 = 0 where Id = @curId
+	  if (@yKdvOrani3 = 0) update OnmBelgeMaliyet set KdvliToplam3 = 0 where Id = @curId
 
-	  if (@KdvOrani = 0)
-	      set  @ykdvTutari = 0
-	  
-	  if (@KdvTutari != @ykdvTutari) 
-	  begin
+	  -- birden fazla kdv oranı varmı kontrol ediliyor 
+      set @KdvOranSayisi = 0
+      
+      if (@yKdvMatrahi1 > 0) set @KdvOranSayisi = @KdvOranSayisi + 1
+      if (@yKdvMatrahi2 > 0) set @KdvOranSayisi = @KdvOranSayisi + 1
+      if (@yKdvMatrahi3 > 0) set @KdvOranSayisi = @KdvOranSayisi + 1
+      if (@yKdvMatrahi0 > 0) set @KdvOranSayisi = @KdvOranSayisi + 1
+
+      -- birdern fazla kdv oranı var ise 
+      -- Karma Kdv mevcut işaretini koy
+      if (@KdvOranSayisi > 1)
+      begin
 	    update OnmBelgeMaliyet set 
-		  KdvTutari = @ykdvTutari
-        where Id = @curId
-	  end
-	  
-	  if (@eKayitTarihi is null)
+		  MaliyetKdvOrani = -1 
+		where Id = @curId
+      end
+
+	  if (@yKayitTarihi is null)
 	  begin
 	    update OnmBelgeMaliyet set 
 		  KayitTarihi = GETDATE()
-		, KayitSaati = CONVERT(Time, getdate())
         where Id = @curId
 	  end
-	  	   
+	  	
+      set @Yil = convert(varchar(4), YEAR(@BelgeTarihi))
+      set @Ay = convert(varchar(2), MONTH(@BelgeTarihi)) 		
+	  if (len(@Ay) = 1) set @Ay = '0' + @Ay
+
+	  update OnmBelgeMaliyet set BelgeDonemTipiId = convert(int, (@Yil + @Ay))
+	  where Id = @curId
+	  
       FETCH NEXT FROM cursor_BMaliyet INTO @curId
     END
 
     CLOSE cursor_BMaliyet
     DEALLOCATE cursor_BMaliyet
 
-	EXECUTE [dbo].[prc_OnmToplamBekleyenOdemeler] @FirmId
+	--EXECUTE [dbo].[prc_OnmToplamBekleyenOdemeler] @FirmId
 	   
 END
 
@@ -261,6 +326,8 @@ INSERT INTO [Lkp].[OnmBelgeMaliyetKaynakTipi] (Id, KaynakTipi, GrupTipiId)
 
  /*CreateLkpTableEnd*/
 
+
+
  /*
  +Fatura
 
@@ -289,5 +356,50 @@ Müstahsil Makbuzu
 Serbest Meslek Makbuzu
 Yapay Belgeler
 Muhasebe Dekontu
+
+
+
+
+
+    declare @yKdvOrani1    smallInt
+    //declare @yKdvMatrahi1  numeric(22,8)
+    //declare @yKdvTutari1   numeric(22,8)
+    //declare @yKdvliToplam1 numeric(22,8)
+
+	declare @yKdvOrani2    smallInt
+    //declare @yKdvMatrahi2  numeric(22,8)
+    //declare @yKdvTutari2   numeric(22,8)
+    //declare @yKdvliToplam2 numeric(22,8)
+
+    declare @yKdvOrani3    smallInt
+    //declare @yKdvMatrahi3  numeric(22,8)
+    //declare @yKdvTutari3   numeric(22,8)
+    //declare @yKdvliToplam3 numeric(22,8)
+
+    declare @yKdvOrani0    smallInt
+    //declare @yKdvMatrahi0  numeric(22,8)
+    //declare @yKdvTutari0   numeric(22,8)
+    //declare @yKdvliToplam0 numeric(22,8)
+
+	     ,@yKdvOrani1 = ins.KdvOrani1
+	     //,@yKdvMatrahi1 = isnull(ins.KdvMatrahi1,0)
+         //,@yKdvTutari1 = isnull(ins.KdvTutari1,0)
+         //,@yKdvliToplam1 = isnull(ins.KdvliToplam1,0)
+
+	     ,@yKdvOrani2 = ins.KdvOrani2
+	     //,@yKdvMatrahi2 = isnull(ins.KdvMatrahi2,0)
+         //,@yKdvTutari2 = isnull(ins.KdvTutari2,0)
+         //,@yKdvliToplam2 = isnull(ins.KdvliToplam2,0)
+
+	     ,@yKdvOrani3 = ins.KdvOrani3
+	     //,@yKdvMatrahi3 = isnull(ins.KdvMatrahi3,0)
+         //,@yKdvTutari3 = isnull(ins.KdvTutari3,0)
+         //,@yKdvliToplam3 = isnull(ins.KdvliToplam3,0)
+
+	     ,@yKdvOrani0 = ins.KdvOrani0
+	     //,@yKdvMatrahi0 = isnull(ins.KdvMatrahi0,0)
+         //,@yKdvTutari0 = isnull(ins.KdvTutari0,0)
+         //,@yKdvliToplam0 = isnull(ins.KdvliToplam0,0)
+
 
 */

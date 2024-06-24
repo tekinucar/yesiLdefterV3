@@ -766,15 +766,26 @@ begin transaction
  insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   21, '21', '21 Kaydet Yeni');
  insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   22, '22', '22 Kaydet');
  insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   31, '31', '31 Yeni Kart (Form)');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   32, '32', '32 Yeni Hesap (Form)');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   33, '33', '33 Yeni Belge (Form)');
  insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   34, '34', '34 Yeni Alt Hesap (Form)');
+
  insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   36, '36', '36 Yeni Kart (Satýr)');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   37, '37', '37 Yeni Hesap (Satýr)');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   38, '38', '38 Yeni Belge (Satýr)');
  insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   39, '39', '39 Yeni Alt Hesap (Satýr)');
+
  insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   41, '41', '41 Göster');
  insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   42, '42', '42 Kartý Aç');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   43, '43', '43 Hesabý Aç');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   44, '44', '44 Belgeyi Aç');
+
  insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   45, '45', '45 Resim Editörü');
  insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   46, '46', '46 Rapor Dizayný');
  insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   51, '51', '51 Sil (Satýr)');
  insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   52, '52', '52 Sil (Kart)');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   53, '53', '53 Sil (Hesap)');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   54, '54', '54 Sil (Belge)');
  insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   55, '55', '55 Sil (Liste)');
  insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   63, '63', '63 Sonraki');
  insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   65, '65', '65 Önceki');
@@ -837,6 +848,7 @@ begin transaction
  insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'SETFOCUS',   'Set Focus');
  insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'RDC',        'Run DataCopy');
  insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'RPRC',       'Run StoredProcedure');
+ insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'RFORMUL',    'Run Formul');
  insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'OPENFORM',   'Open Form');
  insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'NEWOPENFORM','New Open Form');
  insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'CLOSEFORM',  'Close Form');
@@ -1082,6 +1094,37 @@ begin transaction
  insert into MS_TYPES values ( 2, 0, 'TbmMtskSertifika', 2513, '', N'M');
  insert into MS_TYPES values ( 2, 0, 'TbmMtskSertifika', 2512, '', N'RÖMORK');
 
+  --DELETE MS_TYPES WHERE TYPES_NAME = 'TbmSrcSertifika'
+ insert into MS_TYPES values ( 2, 0, 'TbmSrcSertifika',    0, '', N'' );
+ insert into MS_TYPES values ( 2, 0, 'TbmSrcSertifika', 14380, '', N'SRC1');
+ insert into MS_TYPES values ( 2, 0, 'TbmSrcSertifika', 14381, '', N'SRC2');
+ insert into MS_TYPES values ( 2, 0, 'TbmSrcSertifika', 14382, '', N'SRC3');
+ insert into MS_TYPES values ( 2, 0, 'TbmSrcSertifika', 14383, '', N'SRC4');
+
+ insert into MS_TYPES values ( 2, 0, 'TbmSrcSertifika', 13610, '', N'ODY1');
+ insert into MS_TYPES values ( 2, 0, 'TbmSrcSertifika', 13611, '', N'ODY2');
+ insert into MS_TYPES values ( 2, 0, 'TbmSrcSertifika', 13612, '', N'ODY3');
+ insert into MS_TYPES values ( 2, 0, 'TbmSrcSertifika', 13613, '', N'ODY4');
+
+ insert into MS_TYPES values ( 2, 0, 'TbmSrcSertifika', 13606, '', N'ÜDY1');
+ insert into MS_TYPES values ( 2, 0, 'TbmSrcSertifika', 13607, '', N'ÜDY2');
+ insert into MS_TYPES values ( 2, 0, 'TbmSrcSertifika', 13607, '', N'ÜDY3');
+ insert into MS_TYPES values ( 2, 0, 'TbmSrcSertifika', 13608, '', N'ÜDY4');
+
+/*
+SRC1 : 111 - 14380
+SRC2 : 112 - 14381
+SRC3 : 113 - 14382
+SRC4 : 114 - 14383
+ODY1 : 121 - 13610
+ODY2 : 122 - 13611
+ODY3 : 123 - 13612
+ODY4 : 124 - 13613
+ÜDY1 : 131 - 13606
+ÜDY2 : 132 - 13607
+ÜDY3 : 133 - 13608
+ÜDY4 : 134 - 13609
+*/
 
 commit transaction
 

@@ -2714,6 +2714,18 @@ namespace Tkn_ToolBox
             bool onay = false;
             if (IsNotNull(tableIPCode))
             {
+                DataSet ds = null;
+                DataNavigator dN = null;
+                Find_DataSet(tForm, ref ds, ref dN, tableIPCode);
+                if (ds != null)
+                {
+                    v.con_PositionChange = true;
+                    int pos = dN.Position;
+                    TableRefresh(tForm, ds);
+                    dN.Position = pos;
+                    v.con_PositionChange = false;
+                }
+                /*
                 DataSet ds = Find_DataSet(tForm, "", tableIPCode, "");
 
                 if (ds != null)
@@ -2726,6 +2738,7 @@ namespace Tkn_ToolBox
 
                     onay = TableRefresh(tForm, ds);
                 }
+                */
             }
             return onay;
         }
@@ -3304,7 +3317,7 @@ namespace Tkn_ToolBox
 
                     /// refresh özelliğini taşı
                     /// açılan newForm da kayıt gerçekleşirse on 
-                    tNewForm.HelpButton = tForm.HelpButton;
+                    //tNewForm.HelpButton = tForm.HelpButton;
 
                     #region
                     if (IsNotNull(FORMTYPE))
@@ -5158,6 +5171,9 @@ namespace Tkn_ToolBox
                     (fvalue == "null") ||
                     (fvalue == "NewRecord")) fvalue = "-1";
 
+                if (Field_Name == "FirmId" && fvalue == "first") fvalue = ":FIRM_ID";
+                if (Field_Name == "UserId" && fvalue == "first") fvalue = ":USER_ID";
+
                 if (fvalue == "first") fvalue = "-99";
 
                 // rakam türü , ile ayrılmış ise , yerine . işareti değiştiriliyor 
@@ -5292,7 +5308,7 @@ namespace Tkn_ToolBox
                     if ((fvalue != "first") && (fvalue != "-1"))
                     {
                         if ((v.active_DB.projectDBType == v.dBaseType.MSSQL) && (SetType == "and"))
-                            MyStr = "Convert(Datetime, " + Field_Name + ", 103) " + Operand + Tarih_Formati(Convert.ToDateTime(fvalue)) + " ";
+                            MyStr = "Convert(Date, " + Field_Name + ", 103) " + Operand + Tarih_Formati(Convert.ToDateTime(fvalue)) + " ";
 
                         if (SetType == "as") MyStr = Tarih_Formati(Convert.ToDateTime(fvalue)) + " as " + Field_Name;
                         if (SetType == "@") MyStr = "@" + Field_Name + Operand + Tarih_Formati(Convert.ToDateTime(fvalue)) + " ";
@@ -5300,7 +5316,7 @@ namespace Tkn_ToolBox
                     if ((fvalue == "first") || (fvalue == "-99"))
                     {
                         if ((v.active_DB.projectDBType == v.dBaseType.MSSQL) && (SetType == "and"))
-                            MyStr = "Convert(Datetime, " + Field_Name + ", 103) " + Operand + "Convert(Datetime,'01.01.1900', 103) ";
+                            MyStr = "Convert(Date, " + Field_Name + ", 103) " + Operand + "Convert(Date,'01.01.1900', 103) ";
 
                         if (SetType == "as") MyStr = "'01.01.1900'" + " as " + Field_Name;
                         if (SetType == "@") MyStr = "@" + Field_Name + Operand + "'01.01.1900'" + " ";
@@ -9657,6 +9673,74 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             */
         }
 
+        public Control Find_SimpleButton(Form tForm, string buttonName, string tableIPCode)
+        {
+            /*
+            "dragDownButton_ek1"
+            "checkButton_ek1"
+            "simpleButton_ek7"
+            "simpleButton_ek6"
+            "simpleButton_ek5"
+            "simpleButton_ek4"
+            "simpleButton_ek3"
+            "simpleButton_ek2"
+            "simpleButton_ek1"
+
+            "simpleButton_Coll"
+            "simpleButton_Exp"
+            "simpleButton_onay_iptal"
+            "simpleButton_onayla"
+            "simpleButton_yazici"
+
+            "simpleButton_en_basa"
+            "simpleButton_onceki_syf"
+            "simpleButton_onceki"
+            "simpleButton_sonraki"
+            "simpleButton_sonraki_syf"
+            "simpleButton_en_sona"
+
+            "simpleButton_sil_liste"
+            "simpleButton_sil_belge"
+            "simpleButton_sil_hesap"
+            "simpleButton_sil_kart"
+            "simpleButton_sil_satir"
+
+            "simpleButton_kaydet_yeni"
+            "simpleButton_kaydet"
+            "simpleButton_kaydet_devam"
+            "simpleButton_kaydet_cik"
+
+            "simpleButton_yeni_kart"
+            "simpleButton_yeni_hesap"
+            "simpleButton_yeni_belge"
+            "simpleButton_yeni_alt_hesap"
+            "simpleButton_yeni_kart_satir"
+            "simpleButton_yeni_hesap_satir"
+            "simpleButton_yeni_belge_satir"
+            "simpleButton_yeni_alt_hesap_satir"
+
+            "simpleButton_goster"
+            "simpleButton_kart_ac"
+            "simpleButton_hesap_ac"
+            "simpleButton_belge_ac"
+            "simpleButton_resim_edit"
+            "simpleButton_report_design"
+
+            "simpleButton_sec"
+            "simpleButton_listeye_ekle"
+            "simpleButton_liste_hazirla"
+            "simpleButton_listele"
+            "simpleButton_sihirbaz_geri"
+            "simpleButton_sihirbaz_devam"
+            "simpleButton_cikis"
+
+            */
+            Control cntrl = null;
+            string[] controls = new string[] { };
+            cntrl = Find_Control(tForm, buttonName, tableIPCode, controls);
+            return cntrl;
+        }
+
         public void myFormBox_Set(Form tForm, string AddValue)
         {
             string[] controls = new string[] { };
@@ -10649,40 +10733,16 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
         public void textEdit_Find_SetValue(Form tForm, string SearchTableIPCode, string value)
         {
+            return; // iptal 
+            /// .Text = v.con_SearchValue yi  textEdit_Find_ içine set ediyor
             Control cntrl = Find_Control(tForm, "textEdit_Find_" + AntiStr_Dot(SearchTableIPCode));
             if (cntrl != null)
             {
-                ((DevExpress.XtraEditors.TextEdit)cntrl).Text = value + "+";
-                System.Windows.Forms.SendKeys.Send("{END}");
-                System.Windows.Forms.SendKeys.Send("{BACKSPACE}");
-
-                // bunların hiçbiri çalışmıyor ne hikmetse 
-                // 
-                //((DevExpress.XtraEditors.TextEdit)cntrl).Select(2, 1);
-                //((DevExpress.XtraEditors.TextEdit)cntrl).SelectedText = "e";
-                //((DevExpress.XtraEditors.TextEdit)cntrl).SelectionStart = 2;
-                //((DevExpress.XtraEditors.TextEdit)cntrl).SelectionLength = 1;
-                //((DevExpress.XtraEditors.TextEdit)cntrl).Select(((DevExpress.XtraEditors.TextEdit)cntrl).Text.Length, 0);
-                //((DevExpress.XtraEditors.TextEdit)cntrl).ScrollToCaret();
-                //((DevExpress.XtraEditors.TextEdit)cntrl).Select(v.search_VALUE.Length - 1,1);
-                //((DevExpress.XtraEditors.TextEdit)cntrl).ScrollToCaret();
-                //((DevExpress.XtraEditors.TextEdit)cntrl).Text = ((DevExpress.XtraEditors.TextEdit)cntrl).Text.Remove(v.search_VALUE.Length, 1);
-
-                /*
-                var edit = ((DevExpress.XtraEditors.TextEdit)cntrl);
-                edit.BeginInvoke(new MethodInvoker(() =>
-                {
-                    edit.SelectionStart = 2;
-                    edit.SelectionLength = 1;// edit.Text.Length;
-                }));
-                */
-                /*
-                ((DevExpress.XtraEditors.TextEdit)cntrl).BeginInvoke(new MethodInvoker(() =>
-                {
-                    ((DevExpress.XtraEditors.TextEdit)cntrl).SelectionStart = 2;
-                    ((DevExpress.XtraEditors.TextEdit)cntrl).SelectionLength = 1; // edit.Text.Length;
-                }));
-                */
+                //((DevExpress.XtraEditors.TextEdit)cntrl).Text = value + "+";
+                //System.Windows.Forms.SendKeys.Send("{END}");
+                //System.Windows.Forms.SendKeys.Send("{BACKSPACE}");
+                ((DevExpress.XtraEditors.TextEdit)cntrl).Text = value + ((DevExpress.XtraEditors.TextEdit)cntrl).Text;
+                ((DevExpress.XtraEditors.TextEdit)cntrl).DeselectAll();
             }
         }
 
@@ -10885,7 +10945,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 t = Tarih.Date.ToString().Substring(0, 10);
                                 
                 if (v.active_DB.projectDBType == v.dBaseType.MSSQL)
-                    s = " Convert(Datetime, '" + t + "', 103) ";
+                    s = " Convert(Date, '" + t + "', 103) ";
             }
             else s = "null";
             return s;
@@ -10909,7 +10969,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                     //s = " Convert(SmallDatetime, " + s + ", 101) ";
 
                     s = Tarih.Date.ToString("yyyy.MM.dd", CultureInfo.InvariantCulture).Substring(0, 10) + ' ' + Tarih.TimeOfDay.ToString().Substring(0, 8);
-                    s = " Convert(SmallDatetime, '" + s + "', 101) ";
+                    s = " Convert(Datetime, '" + s + "', 101) ";
                 }
             }
             else s = "null";
@@ -12624,7 +12684,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
                 SplashScreenManager.Default.SetWaitFormCaption(" " + Mesaj);
                 if (v.SP_TabimDbConnection)
-                SplashScreenManager.Default.SetWaitFormDescription(v.ENTER + "  "+"Tabim.MTSK");
+                     SplashScreenManager.Default.SetWaitFormDescription(v.ENTER + "  " + "Tabim.MTSK");
                 else SplashScreenManager.Default.SetWaitFormDescription(v.ENTER + "  " + "...");
 
                 //SplashScreenManager.ShowForm(tForm, typeof(DevExpress.XtraWaitForm.ManualLayoutDemoWaitForm), true, true, false);
@@ -12647,8 +12707,6 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
         public void WaitFormClose()
         {
             if (v.IsWaitOpen) return;
-
-            Thread.Sleep(1000);
             SplashScreenManager.CloseForm(false);
         }
 
@@ -12830,33 +12888,18 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             // (v.con_Expression == false) = şu anda aşağıda işlem yapılan fielde hesaplalnlar set ediliyorsa 
 
             if ((pos == -1) || (v.con_Expression == false)) return;
-
-            // gelen prop_ içinde birden fazla yorum veya formul olabilir
-            //if (send_FieldName == "ISKONTO_ORANI")
-            //{
-            //    // maksat durdurmak
-            //    v.Kullaniciya_Mesaj_Var = send_FieldName;
-            // }
-
+            
             if ((send_FieldName != "") && (send_Value == "")) 
                 send_Value = "0";
 
             List<PROP_EXPRESSION> prop_ = null;
 
-            MessageBox.Show("DİKKAT : Preparing_Expression için  v.ds_MsTableFields düzenlemesi yapman gerekiyor");
-            //v.ds_MsTableFields
-            //v.ds_TableIPCodeFields
-            return;
+            string myProp = dsData.Namespace.ToString();
+            string tableName = MyProperties_Get(myProp, "TableName:");
+            
+            int i4 = v.ds_MsTableFields.Tables[tableName].Rows.Count;
 
-            string tname1 = dsData.Tables[1].TableName;
-            string tname2 = dsData.Tables[2].TableName;
-
-            int i4 = dsData.Tables[tname1].Rows.Count;
-
-            string send_prop_Expression = prop_Expression_Get(dsData, tname2, send_FieldName);
-
-            string prop_Expression = string.Empty;
-            string exp_formul_fname = string.Empty;
+            string send_prop_Expression = prop_Expression_Get(dsData, TableIPCode, send_FieldName); // new
 
 
             // DataLayoutControl ise
@@ -12901,54 +12944,41 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
             #region // tablonu fieldleri
 
+            string prop_Expression = string.Empty;
+            string exp_formul_fname = string.Empty;
+
+            /// Sırayla tüm fieldleri kontrol edelim 
+            /// fielde ait bir formul var çalıştırılacak
             for (int i = 0; i < i4; i++)
             {
                 /// EXP_TYPE 
                 /// COMP = Compute
                 /// SETDATA = Set Data
                 vExp.exp_type = "";
+                
                 /// "formül gelecek";
                 vExp.exp_value = "";
+                
                 /// formülün sahibi olan field
-                exp_formul_fname = dsData.Tables[tname1].Rows[i]["name"].ToString();
+                exp_formul_fname = v.ds_MsTableFields.Tables[tableName].Rows[i]["name"].ToString();
 
                 /// formül okunuyor 
-                /// eski hali böyleydi (xxx_fields )
-                ///prop_Expression = dsData.Tables[tname2].Rows[i]["PROP_EXPRESSION"].ToString();
-                /// yeni hali böyle ( xxx_fields ve xxx_fields2 )
-                prop_Expression = prop_Expression_Get(dsData, tname2, exp_formul_fname);
+                prop_Expression = prop_Expression_Get(dsData, TableIPCode, exp_formul_fname);
 
-                //if (exp_formul_fname == "ISKONTO_TUTARI")
-                //{
-                //    //    // maksat durdurmak
-                //    v.Kullaniciya_Mesaj_Var = send_FieldName;
-                //}
-
+                /// formül varsa
                 if (IsNotNull(prop_Expression))
                 {
                     vExp.exp_formul_fname = exp_formul_fname;
                     vExp.extra_fname = "";
 
-                    // sonuc değişkenini boşaltalım
-                    //value = "";
-
-                    v.con_Expression_View =
-                        v.con_Expression_View + "  " + exp_formul_fname + " : field " + v.ENTER;
+                    //v.con_Expression_View = v.con_Expression_View + "  " + exp_formul_fname + " : field " + v.ENTER;
 
                     // json format varsa
                     if (prop_Expression.IndexOf(s2) > -1)
                     {
-                        //if (vExp.exp_formul_fname.ToString() == "TEVKIFAT_PAY")
-                        //if (vExp.exp_formul_fname.ToString() == "ISKONTO_ORANI")
-                        //{
-                        //    // maksat durdurmak
-                        //    v.Kullaniciya_Mesaj_Var = vExp.exp_formul_fname.ToString();
-                        //}
-
                         // prop_Expression : eğer birden fazla ( JSON ) yorum ve hesap varsa 
                         // sırayla işlem yapması için Exp_Preparinge git ve orada her json satırı için teker teker hesapla
 
-                        //List<PROP_EXPRESSION> 
                         prop_ = readPropList<PROP_EXPRESSION>(prop_Expression);
 
                         vExp.pa = "<";
@@ -13394,19 +13424,19 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             //private readonly VsaEngine _engine = VsaEngine.CreateEngine();
         }
 
-        private string prop_Expression_Get(DataSet ds, string tableName, string fName)
+        private string prop_Expression_Get(DataSet ds, string tableIPCode, string fName)
         {
             string s = "";
-            int j = ds.Tables[tableName].Rows.Count;
-
+            int j = ds.Tables[tableIPCode].Rows.Count;
             for (int i = 0; i < j; i++)
             {
-                if (ds.Tables[tableName].Rows[i]["FIELD_NAME"].ToString() == fName)
+                if (ds.Tables[tableIPCode].Rows[i]["LKP_FIELD_NAME"].ToString() == fName)
                 {
-                    s = ds.Tables[tableName].Rows[i]["PROP_EXPRESSION"].ToString();
+                    s = ds.Tables[tableIPCode].Rows[i]["LKP_PROP_EXPRESSION"].ToString();
                     break;
                 }
             }
+            
             return s;
         }
 
@@ -14211,7 +14241,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             
             int OzelType = -1;
 
-            //OzelType = fieldName.IndexOf("ParaTipi");
+            OzelType = fieldName.IndexOf("ParaTipi");
             if (OzelType == -1)
                 OzelType = fieldName.IndexOf("BirimTipi");
             if (OzelType == -1)
@@ -14307,8 +14337,6 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                     tableName = "CinsiyetTipi";
                 }
 
-                
-
                 if (fieldName.IndexOf("Birim") > -1)
                 {
                     tableName = "OnmStokBirimTipi";
@@ -14320,6 +14348,14 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                     fieldName = "KdvOraniAdi";
                     tableName = "OnmKdvOraniTipi";
                 }
+
+                if (fieldName.IndexOf("Para") > -1)
+                {
+                    idFieldName = "ParaKodu";
+                    fieldName = "ParaAdi";
+                    tableName = "OnmParaTipi";
+                }
+
 
                 if (fieldName.ToUpper().IndexOf("SECTOR") > -1)
                 {
@@ -14338,7 +14374,6 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                     else tableName = orjinalTableName + fieldName;
                     */
                 }
-
 
                 if (orjinalTableName.ToUpper().IndexOf("MTSK") > -1)
                 {

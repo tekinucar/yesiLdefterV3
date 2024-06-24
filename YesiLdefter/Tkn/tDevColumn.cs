@@ -388,7 +388,7 @@ namespace Tkn_DevColumn
 
                 string Sql = " Select * from [Lkp].[" + tableName + "]  ";
 
-                if (tableName == "ParaTipi")
+                if (tableName.IndexOf("ParaTipi") > -1)
                     Sql = " Select * from [Lkp].[OnmParaTipi] where IsActive = 1 ";
                 if (tableName == "BirimTipi")
                     Sql = " Select * from [Lkp].[OnmStokBirimTipi] where IsActive = 1 ";
@@ -468,13 +468,25 @@ namespace Tkn_DevColumn
 
                 if (onay)
                 {
-                    value = v.ds_LookUpTableList.Tables[tableName].Rows[i][idFieldName].ToString();
-                    caption = v.ds_LookUpTableList.Tables[tableName].Rows[i][captionFieldName].ToString();
-                    RepositoryItem_Add_(
-                        ItemBox_ICB, tEdit_ICB,
-                        ItemBox_CB, tEdit_CB,
-                        ItemBox_RG, tEdit_RG,
-                        null, null, caption, value, type);
+                    try
+                    {
+                        value = v.ds_LookUpTableList.Tables[tableName].Rows[i][idFieldName].ToString();
+                        caption = v.ds_LookUpTableList.Tables[tableName].Rows[i][captionFieldName].ToString();
+
+                        RepositoryItem_Add_(
+                            ItemBox_ICB, tEdit_ICB,
+                            ItemBox_CB, tEdit_CB,
+                            ItemBox_RG, tEdit_RG,
+                            null, null, caption, value, type);
+
+                    }
+                    catch (Exception)
+                    {
+                        MessageBox.Show("DİKKAT : Hatalı isim. " + captionFieldName + " veya " + idFieldName);
+                        //throw;
+                        break;
+                    }
+                    
                 }
             } // for
             
@@ -1618,6 +1630,9 @@ namespace Tkn_DevColumn
                 tEdit.Name = "Column_" + tFieldName;
                 tEdit.KeyDown += new System.Windows.Forms.KeyEventHandler(evg.myRepositoryItemEdit_KeyDown);
 
+                tEdit.MinValue = t.Set(Row["CMP_HEIGHT"].ToString(), "0", 0);
+                tEdit.MaxValue = t.Set(Row["CMP_LEFT"].ToString(), "0", 0);
+
                 if (tExpressionType > 0)
                     Column.Tag = "EXPRESSION";
                 Column.ColumnEdit = tEdit;
@@ -2749,7 +2764,8 @@ namespace Tkn_DevColumn
                     tProp_Navigator = "Type:" + v.SearchEngine + ";" + tProp_Navigator;
                     tEdit.Properties.NullText = v.con_Search_NullText;
                     tEdit.Properties.AccessibleDescription = tProp_Navigator;
-                    
+                    //tEdit.Properties.ReadOnly = true;
+
                     if (tcolumn_type == "tSearchEditOnly")
                         tEdit.Properties.Buttons[0].Kind = DevExpress.XtraEditors.Controls.ButtonPredefines.Search;
 

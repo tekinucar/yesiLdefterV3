@@ -543,7 +543,7 @@ namespace Tkn_Events
 
             if (((Form)sender).Name.ToString().IndexOf("tSearchForm") > -1)
             {
-                mySearchValuePreparing(((Form)sender));
+                //mySearchValuePreparing(((Form)sender));
             }
 
             /// Yeni Süreç ----
@@ -561,13 +561,10 @@ namespace Tkn_Events
 
             if (t.IsNotNull(v.con_SearchValue) && t.IsNotNull(v.con_SearchTableIPCode))
             {
+                /// v.con_SearchValue yi  textEdit_Find_ içine set ediyor
+
                 t.textEdit_Find_SetValue(((Form)sender), v.con_SearchTableIPCode, v.con_SearchValue);
             }
-
-            #region Category
-            // Eğer ekranda Kategori - Category var ise oku
-            //Category_Form_Shown(((Form)sender));
-            #endregion Category
 
         }
 
@@ -616,7 +613,7 @@ namespace Tkn_Events
                     v.con_GotoRecord_Value,
                     v.con_GotoRecord_Position);
 
-                tForm.HelpButton = false;
+                //tForm.HelpButton = false;
             }
 
 
@@ -662,9 +659,6 @@ namespace Tkn_Events
         public void myForm_Validated(object sender, EventArgs e)
         {
             //MessageBox.Show("myForm_Validated");
-            //Application.OpenForms[0].Text = Application.OpenForms[0].Text + ";Valted";
-            //((Form)sender).Text = ((Form)sender).ActiveControl.ToString();
-
         }
 
         public void myForm_Closed(object sender, FormClosedEventArgs e)

@@ -1,4 +1,5 @@
-﻿
+﻿/*CreateTable*/
+
 begin transaction
 
  create table [Lkp].[VergiDairesiTipi]
@@ -20,6 +21,10 @@ begin transaction
 
  commit transaction
 
+ /*CreateTableEnd*/
+
+
+ /*CreateData*/
 
  begin transaction
 
@@ -1073,3 +1078,6 @@ begin transaction
 
 
   commit transaction
+
+  /*CreateDataEnd*/
+

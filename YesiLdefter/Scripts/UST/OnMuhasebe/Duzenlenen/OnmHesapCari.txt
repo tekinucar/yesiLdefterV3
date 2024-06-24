@@ -103,10 +103,6 @@ INSERT INTO [Lkp].[OnmHesapCariCalismaTipi] (Id, CalismaTipi, GrupTipiId, IsMast
   (12, N'Tedarikci', 1, 1),
   (13, N'Bayi',      1, 1),
   (19, N'Personel',  1, 1),
-  (11, N'Müşteri',   2, 0),
-  (12, N'Tedarikci', 2, 0),
-  (13, N'Bayi',      2, 0),
-  
   (21, N'Personel',  121, 1),
   (22, N'Hükümlü',   121, 1)
 

@@ -23,61 +23,71 @@ begin transaction
    BelgeGun           Smallint      null, 
    BelgeSeri          nVarChar(5)   null,
    BelgeNo            nVarChar(50)  null,
+   BelgeDonemTipiId   Int           null,
 
-   -- 30 Belgenin Tarafları
-   BorcluId           Int           null, 
+   -- 20 Belgenin Tarafları
    BHesapTipiId       SmallInt      null,
+   BorcluId           Int           null, 
       
-   AlacakliId         Int           null,
    AHesapTipiId       SmallInt      null,
+   AlacakliId         Int           null,
    
+   MaliyetId          Int           null,
    VarlikId           Int           null,
-   AboneId            Int           null,  
+   AboneId            Int           null,
+   ProjeId            Int           null,
    CariId             Int           null,
    CariUnvan          nVarChar(200) null, /* cari hesabı yok ise */
    
+   /* bu belgede kdv bilgisi olmayacak */
+   
    -- Belgenin Parasal değerleri
-   -- 50 Islem Bilgileri
-   BelgeTutari        Numeric(22,8) null,
-   BorcTutari         Numeric(22,8) null,
-   AlacakTutari       Numeric(22,8) null,
-   KdvMatrahi         Numeric(22,8) null,    
-   KdvOrani           SmallInt      null,
-   KdvTutari          Numeric(22,8) null,
-   VergiVeFonlar      Numeric(22,8) null,    
-   --..+diğer vergiler eklenecek
+   -- 100 Islem Bilgileri
+   BelgeTutari        Numeric(22,5) null,
+   --BorcTutari         Numeric(22,5) null,
+   --AlacakTutari       Numeric(22,5) null,
 
-   -- 70
-   EkMaliyetId        Int           null,
-   MasrafTutari       Numeric(22,8) null,    /* ödeme sırasında yapılan masraf */
-   ToplamTutar        Numeric(22,8) null,    /* AlacakTutarı + MasrafTutarı */
+   -- 110 ödeme masrafları
+   MasrafAHesapTipiId SmallInt      null,
+   MasrafAlacakliId   Int           null,
+   EkMasrafId         Int           null,
+   MasrafTutari       Numeric(22,5) null,    /* ödeme sırasında yapılan masraf */
+   ToplamTutar        Numeric(22,5) null,    /* AlacakTutarı + MasrafTutarı */
 
-   -- 80
-   ParaTipiId         nVarChar(3)   null,
-   DovizYeriId        Int           null,
-   DovizKuru          Numeric(22,8) null,
-   DovizTutari        Numeric(22,8) null,
-      
-   -- 80 : Muhasebe bağlantıları eklenecek
+   -- 130 Döviz bilgileri (BelgeTutarı) 
+   ParaTipiId1        nVarChar(3)   null,
+   DovizYeriId1       SmallInt      null,
+   DovizKuru1         Numeric(12,8) null,
+   DovizTutari1       Numeric(22,8) null,
+   -- 140 Döviz bilgileri 
+   ParaTipiId2        nVarChar(3)   null,
+   DovizYeriId2       SmallInt      null,
+   DovizKuru2         Numeric(12,8) null,
+   DovizTutari2       Numeric(22,8) null,
 
-   -- 90 : Diğer belge bağlantıları eklenecek
-   -- İşlendi : bu belge ödendi tahsil edildi vb... 
+   -- 150
    Aciklama           nVarchar(200) null,
-   KayitTarihi        Date          null, 
-   KayitSaati         VarChar(8)    null,
-   SourceTypeId    SmallInt      null, /* ilgili table 1: OnmBelgeMaliyet,  */
-   SourceId             Int           null, /* ilgili table ref Id */
+   
+   -- 180 : Muhasebe bağlantıları eklenecek
+   -- 190 
+   KayitTarihi        Datetime      null, 
+   SourceTypeId       SmallInt      null, /* ilgili table 1: OnmBelgeMaliyet,  */
+   SourceId           Int           null, /* ilgili table ref Id */
 
    constraint		pk_OnmBelgeDekont primary key (Id)
  )
 
+ create index X_OnmBelgeDekont00 on OnmBelgeDekont (BelgeTarihi)
  create index X_OnmBelgeDekont01 on OnmBelgeDekont (FirmId)
  create index X_OnmBelgeDekont02 on OnmBelgeDekont (TipiId)
  create index X_OnmBelgeDekont03 on OnmBelgeDekont (IslemTipiId)
  create index X_OnmBelgeDekont04 on OnmBelgeDekont (BHesapTipiId)
  create index X_OnmBelgeDekont05 on OnmBelgeDekont (AHesapTipiId)
- create index X_OnmBelgeDekont06 on OnmBelgeDekont (VarlikId)
- create index X_OnmBelgeDekont07 on OnmBelgeDekont (CariId)
+ create index X_OnmBelgeDekont06 on OnmBelgeDekont (MaliyetId)
+ create index X_OnmBelgeDekont07 on OnmBelgeDekont (VarlikId)
+ create index X_OnmBelgeDekont08 on OnmBelgeDekont (AboneId)
+ create index X_OnmBelgeDekont09 on OnmBelgeDekont (ProjeId)
+ create index X_OnmBelgeDekont10 on OnmBelgeDekont (CariId)
 
 
  grant select, insert, update, delete on OnmBelgeDekont to public
@@ -109,6 +119,8 @@ AS BEGIN
     declare @CariId int
     declare @SourceTypeId smallInt
     declare @SourceId int
+    declare @Yil varchar(4)
+	declare @Ay varchar(2)
 
     declare @onay bit
     declare @OnmOdemePlaniId int
@@ -140,6 +152,7 @@ AS BEGIN
 
 	  set @_BelgeTutari = @BelgeTutari
 
+      -- OnmBelgeMaliyet tablosunu işaretle
 	  if (@TipiId = 3) and -- Tediye    
 	     (@SourceTypeId = 1) and -- OnmBelgeMaliyet tablosu
 		 (@IsActive = 1)
@@ -149,7 +162,7 @@ AS BEGIN
           , PaidId = @curId -- OnmBelgeDekont.Id
           Where Id = @SourceId
 	  end
-	  	  
+	  /*	  
 	  if (@TipiId = 2) and -- Tahsilat
 	     (@AHesapTipiId >= 2100) -- Mtskİşlemleri
       begin
@@ -223,33 +236,26 @@ AS BEGIN
 
           end -- @_BelgeTutari > 0
       end -- if (@TipiId = 2)
-      
-	  if (@TipiId = 2) or (@TipiId = 1) -- Tahsilat, Açılış    
-      begin
-          Update dbo.OnmBelgeDekont set
-			BorcTutari = @BelgeTutari
-          , AlacakTutari = 0
-		  , IslemTipiId = @_IslemTipiId
-          Where Id = @curId 
-	  end
-
-	  if (@TipiId = 3) or (@TipiId = 5) -- Tediye, Kapanış    
-      begin
-          Update dbo.OnmBelgeDekont set
-			BorcTutari = 0
-          , AlacakTutari = @BelgeTutari
-		  , IslemTipiId = @_IslemTipiId
-          Where Id = @curId 
-	  end
+      */
 	  
+
+      set @Yil = convert(varchar(4), YEAR(@BelgeTarihi))
+      set @Ay = convert(varchar(2), MONTH(@BelgeTarihi)) 		
+	  if (len(@Ay) = 1) set @Ay = '0' + @Ay
+
+      Update dbo.OnmBelgeDekont set 
+        IslemTipiId = @_IslemTipiId
+      , BelgeDonemTipiId = convert(int, (@Yil + @Ay))
+      Where Id = @curId 
+
 	  FETCH NEXT FROM cursor_BDekont INTO @curId
     END
 
     CLOSE cursor_BDekont
     DEALLOCATE cursor_BDekont
 
-	EXECUTE [dbo].[prc_OnmToplamBekleyenOdemeler] @FirmId
-	EXECUTE [dbo].[prc_OnmToplamBekleyenGelirler] @FirmId
+	--EXECUTE [dbo].[prc_OnmToplamBekleyenOdemeler] @FirmId
+	--EXECUTE [dbo].[prc_OnmToplamBekleyenGelirler] @FirmId
 
 END
 
@@ -307,7 +313,7 @@ AS BEGIN
           , PaidId = 0  -- OnmBelgeDekont.Id
           Where Id = @SourceId
 	  end
-
+/*
 	  if (@TipiId = 2) and -- Tahsilat
 	     (@AHesapTipiId >= 2100) -- Mtskİşlemleri
       begin
@@ -388,15 +394,15 @@ AS BEGIN
 		  and   IsPaid = 1
 		  		   
       end -- if (@TipiId = 2)
-
+*/
       FETCH NEXT FROM cursor_BDekontDlt INTO @curId
     END
 
     CLOSE cursor_BDekontDlt
     DEALLOCATE cursor_BDekontDlt
 
-	EXECUTE [dbo].[prc_OnmToplamBekleyenOdemeler] @FirmId
-	EXECUTE [dbo].[prc_OnmToplamBekleyenGelirler] @FirmId
+	--EXECUTE [dbo].[prc_OnmToplamBekleyenOdemeler] @FirmId
+	--EXECUTE [dbo].[prc_OnmToplamBekleyenGelirler] @FirmId
 
 END
 
@@ -750,7 +756,65 @@ Masraf hesapları
 
 
 
+  join Tables ek olacak
+   
+   
+   "J_TABLE": [
+  ,
+    {
+      "CAPTION": "Aday",
+      "J_FORMAT": "STANDART",
+      "J_TYPE": "LEFT",
+      "J_TABLE_NAME": "MtskAday",
+      "J_TABLE_ALIAS": "Aday"
+    }
 
+  "J_WHERE": [
+,
+    {
+      "CAPTION": "Aday",
+      "M_TABLE_ALIAS": "null",
+      "MT_FNAME": "CariId",
+      "J_TABLE_ALIAS": "Aday",
+      "J_FNAME": "Id",
+      "FVALUE": "null",
+      "WHERE_ADD": "and BDekont.SourceTypeId >= 2100"
+    }
+
+  "J_STN_FIELDS": [
+  ,
+    {
+      "CAPTION": "MtskAday",
+      "CASE_FOR_FNAME": "SourceTypeId",
+      "WHERE_VALUE": "2100",
+      "THEN_ALIAS": "Aday",
+      "THEN_FNAME": "TamAdiSoyadi",
+      "FINAL_FNAME": "Lkp_CariAdi"
+    },
+    {
+      "CAPTION": "MtskAday",
+      "CASE_FOR_FNAME": "SourceTypeId",
+      "WHERE_VALUE": "2103",
+      "THEN_ALIAS": "Aday",
+      "THEN_FNAME": "TamAdiSoyadi",
+      "FINAL_FNAME": "Lkp_CariAdi"
+    },
+    {
+      "CAPTION": "MtskAday",
+      "CASE_FOR_FNAME": "SourceTypeId",
+      "WHERE_VALUE": "2104",
+      "THEN_ALIAS": "Aday",
+      "THEN_FNAME": "TamAdiSoyadi",
+      "FINAL_FNAME": "Lkp_CariAdi"
+    },
+    {
+      "CAPTION": "MtskAday",
+      "CASE_FOR_FNAME": "SourceTypeId",
+      "WHERE_VALUE": "2105",
+      "THEN_ALIAS": "Aday",
+      "THEN_FNAME": "TamAdiSoyadi",
+      "FINAL_FNAME": "Lkp_CariAdi"
+    }
 
 
 */

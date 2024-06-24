@@ -10,7 +10,7 @@ create table [Lkp].[OnmKdvOraniTipi]
    IsActive     Bit null,
    KdvOraniKodu Numeric(4,2) null,
    KdvOrani     SmallInt null,
-   KdvOraniAdi  nVarchar(20) null,
+   KdvOraniAdi  nVarchar(30) null,
    
    constraint  pk_OnmKdvOraniTipi primary key (Id)
 )
@@ -23,14 +23,15 @@ create table [Lkp].[OnmKdvOraniTipi]
 
 
 /*CreateData*/
-
+-- delete from Lkp.OnmKdvOraniTipi
 INSERT INTO [Lkp].[OnmKdvOraniTipi] (Id, IsActive, KdvOraniKodu, KdvOrani, KdvOraniAdi )
  VALUES 
+  ( -1, 1,    0, -1, N'Farklı Kdv oranları mevcut' ),
   (  0, 1,    0,  0, N'Kdvsiz' ),
-  (  1, 1, 1.01,  1, N'1%' ),
-  (  8, 0, 1.08,  8, N'8%' ),
-  ( 10, 1, 1.10, 10, N'10%' ),
-  ( 18, 0, 1.18, 18, N'18%' ),
-  ( 20, 1, 1.20, 20, N'20%' )
+  (  1, 1, 1.01,  1, N'%1' ),
+  (  8, 0, 1.08,  8, N'%8' ),
+  ( 10, 1, 1.10, 10, N'%10' ),
+  ( 18, 0, 1.18, 18, N'%18' ),
+  ( 20, 1, 1.20, 20, N'%20' )
 
 /*CreateDataEnd*/

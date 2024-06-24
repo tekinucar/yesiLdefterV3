@@ -1,0 +1,72 @@
+﻿
+CREATE PROCEDURE [dbo].[prc_OnmHesapFinansMaliyetGrubuKontrolu](
+ @FirmId int 
+,@UstGrupTipiId smallInt 
+,@AnaGrupTipiId smallInt 
+,@AltGrupTipiId int 
+,@HesapKodu varchar(100)
+)  
+AS BEGIN  
+    Declare @UstGrupTipiId_Where smallInt
+	set @UstGrupTipiId_Where = 82
+
+    Declare @id int;  
+    set @id = 0
+
+    select @id = Id
+    from [dbo].[OnmHesapFinans] as hf
+    Where hf.FirmId = @FirmId
+    and   hf.UstGrupTipiId = @UstGrupTipiId
+    and   hf.AnaGrupTipiId = @AnaGrupTipiId
+    and   hf.HesapKodu = @HesapKodu
+
+    if (@id = 0)
+    begin
+      INSERT INTO [dbo].[OnmHesapFinans]
+           ([ParentId]
+           ,[FirmId]
+           ,[IsActive]
+           ,[UstGrupTipiId]
+           ,[AnaGrupTipiId]
+           ,[AltGrupTipiId]
+           ,[AltCesitTipiId]
+           ,[HesapTipiId]
+           ,[HesapKodu]
+           ,[UstHesapKodu]
+           ,[HesapKisaAdi]
+           ,[HesapAdi]
+           ,[BAHesapTipiId]
+           ,[PeriyodTipiId]
+           ,[BelgeTipiId]
+           ,[KaynakTipiId]
+           ,[KdvOrani]
+           ,[IsKiralik]
+           )
+      Select 
+            0 --ParentId
+           ,@FirmId --FirmId
+           ,1 --IsActive
+           ,@UstGrupTipiId --UstGrupTipiId
+           ,AnaGrupTipiId
+           ,AltGrupTipiId
+           ,AltCesitTipiId
+           ,11 -- HesapTipiId  ??????
+           ,HesapKodu
+           ,UstHesapKodu
+           ,HesapAdi --HesapKisaAdi
+           ,HesapAdi
+           ,BAHesapTipiId
+           ,PeriyodTipiId
+           ,BelgeTipiId
+           ,KaynakTipiId
+           ,KdvOrani
+           ,IsKiralik
+      from Lkp.OnmHesapMaster
+      where 0 = 0
+      and UstGrupTipiId = @UstGrupTipiId_Where
+      and AnaGrupTipiId = @AnaGrupTipiId
+      and HesapKodu = @HesapKodu
+
+    end
+
+END

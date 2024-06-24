@@ -103,10 +103,10 @@ namespace YesiLdefter
             /// params giriş TESTi için 
             // KÖREN FirmGUID : 0fe40e88-bccf-4f58-9531-7e39c47a1385
 
-            params_ = true;
-            v.tUser.UserId = 61;// 12; 
-            v.SP_TabimParamsKurumTipi = "SRC";// "MTSK";
-            v.SP_TabimParamsServerName = "LAPTOP-ACER1\\SQLEXPRESS";
+            //params_ = true;
+            //v.tUser.UserId = 61;// 12; 
+            //v.SP_TabimParamsKurumTipi = "SRC";// "MTSK";
+            //v.SP_TabimParamsServerName = "LAPTOP-ACER1\\SQLEXPRESS";
             //MessageBox.Show(params_.ToString() + " : " + v.tUser.UserId.ToString() + " : " + v.SP_TabimParamsKurumTipi + " : " + v.SP_TabimParamsServerName);
 
             #endregion
@@ -149,10 +149,11 @@ namespace YesiLdefter
             
             if (v.SP_UserLOGIN)
             {
-                // login işlemleri
-                Login();
                 // application set skins
                 t.getUserLookAndFeelSkins();
+
+                // login işlemleri
+                Login();
 
                 if (v.active_DB.localDbUses == false)
                     t.DBUpdatesDataTransferOff();
@@ -676,6 +677,7 @@ namespace YesiLdefter
 
             if (v.sp_activeSkinName != "READ")
             {
+                v.sp_SelectSkinName = UserLookAndFeel.Default.ActiveSkinName.ToString();
                 if (UserLookAndFeel.Default.ActiveSkinName.ToString().IndexOf(v.sp_deactiveSkinName) > -1) return;
                 if (UserLookAndFeel.Default.ActiveSvgPaletteName.ToString().IndexOf(v.sp_deactiveSkinName) > -1) return;
             }
@@ -691,6 +693,7 @@ namespace YesiLdefter
         private void setUserLookAndFeelSkins()
         {
             var item = UserLookAndFeel.Default.ActiveSkinName.ToString();
+            v.sp_SelectSkinName = item.ToString();
 
             if (UserLookAndFeel.Default.ActiveSvgPaletteName.ToString() != "")
             {

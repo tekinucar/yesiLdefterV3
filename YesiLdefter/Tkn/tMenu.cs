@@ -303,21 +303,27 @@ namespace Tkn_Menu
                 t.myControl_Size_And_Location(menuControl, width, height, 0, 0);
 
                 // forma şimdi ekleyelelim
-                ((Form)mainControl).Controls.Add(menuControl);
-                ((Form)mainControl).Padding = new System.Windows.Forms.Padding(8);
+                //((Form)mainControl).Controls.Add(menuControl);
+                //((Form)mainControl).Padding = new System.Windows.Forms.Padding(8);
 
-                Create_TileControl(menuControl, ds_Items);
+                if (DockType == v.dock_Bottom) menuControl.Dock = DockStyle.Bottom;
+                if (DockType == v.dock_Fill) menuControl.Dock = DockStyle.Fill;
+                if (DockType == v.dock_Left) menuControl.Dock = DockStyle.Left;
+                if (DockType == v.dock_None) menuControl.Dock = DockStyle.None;
+                if (DockType == v.dock_Right) menuControl.Dock = DockStyle.Right;
+                if (DockType == v.dock_Top) menuControl.Dock = DockStyle.Top;
 
                 if (mainControl is Form)
                 {
-                    if (DockType == v.dock_Bottom) menuControl.Dock = DockStyle.Bottom;
-                    if (DockType == v.dock_Fill) menuControl.Dock = DockStyle.Fill;
-                    if (DockType == v.dock_Left) menuControl.Dock = DockStyle.Left;
-                    if (DockType == v.dock_None) menuControl.Dock = DockStyle.None;
-                    if (DockType == v.dock_Right) menuControl.Dock = DockStyle.Right;
-                    if (DockType == v.dock_Top) menuControl.Dock = DockStyle.Top;
+                    ((Form)mainControl).Controls.Add(menuControl);
+                }
+                else
+                {
+                    mainControl.Controls.Add(menuControl);
                 }
 
+                Create_TileControl(menuControl, ds_Items);
+                
             }
             #endregion TileControl
 
@@ -1419,6 +1425,11 @@ namespace Tkn_Menu
                     tItem.Id = i;
                     tItem.ItemSize = DevExpress.XtraEditors.TileItemSize.Default;
                     tItem.ItemClick += new DevExpress.XtraEditors.TileItemClickEventHandler(evm.tTileItem_ItemClick);
+
+                    tItem.Appearance.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+                    //tItem.Appearance.ForeColor = System.Drawing.Color.Crimson;
+                    tItem.Appearance.Options.UseFont = true;
+                    //tItem.Appearance.Options.UseForeColor = true;
 
                     if (t.IsNotNull(shortcut_keys))
                     {
@@ -2753,10 +2764,16 @@ namespace Tkn_Menu
                         barButtonItem.Appearance.Hovered.Options.UseBackColor = true;
                         */
 
-                        barButtonItem.Appearance.Normal.ForeColor = SystemColors.HotTrack; //SystemColors.ActiveBorder; 
+                        if ((v.sp_SelectSkinName.ToLower().IndexOf("dark") > -1) ||
+                            (v.sp_SelectSkinName.ToLower().IndexOf("black") > -1))
+                            barButtonItem.Appearance.Normal.ForeColor = Color.Green;
+                        else barButtonItem.Appearance.Normal.ForeColor = Color.Tomato;
+
+                        //barButtonItem.Appearance.Normal.ForeColor = Color.Tomato;
+                        //barButtonItem.Appearance.Normal.ForeColor = SystemColors.HotTrack; //SystemColors.ActiveBorder; 
                         barButtonItem.Appearance.Normal.Options.UseForeColor = true;
 
-                        barButtonItem.Appearance.Normal.Font = new System.Drawing.Font(barButtonItem.Appearance.Normal.Font.FontFamily, barButtonItem.Appearance.Normal.Font.Size, FontStyle.Italic);
+                        barButtonItem.Appearance.Normal.Font = new System.Drawing.Font(barButtonItem.Appearance.Normal.Font.FontFamily, barButtonItem.Appearance.Normal.Font.Size, FontStyle.Regular);
                         barButtonItem.Appearance.Normal.Options.UseFont = true;
 
                         

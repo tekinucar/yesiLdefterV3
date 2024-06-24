@@ -489,8 +489,6 @@ namespace Tkn_Events
             return getClickType(value);
         }
 
-
-
         public void viewControlFocusedValue(Form tForm, string TableIPCode)
         {
             #region 
@@ -564,12 +562,7 @@ namespace Tkn_Events
             }
         }
 
-
-
-
-
-
-        
+                
 
         #region tExtraCancel_Data // 153 ( Yeni / Vazgeç ) işlemi  <<< işe yarayabilir
         public void tExtraCancel_Data(Form tForm, string Prop_Navigator_Block)
@@ -887,12 +880,19 @@ namespace Tkn_Events
         #region buttonEdit Events
         public void buttonEdit_ButtonClick(object sender, DevExpress.XtraEditors.Controls.ButtonPressedEventArgs e)
         {
+            DevExpress.XtraEditors.Controls.ButtonPredefines button = e.Button.Kind;
+
+            buttonEdit_ButtonClick_(sender, button);
+        }
+        
+        private void buttonEdit_ButtonClick_(object sender, DevExpress.XtraEditors.Controls.ButtonPredefines button)
+        {
             // 
             //bool onay = true;
             string funcName = "";
             string TableIPCode = string.Empty;
             string myProp = ((DevExpress.XtraEditors.ButtonEdit)sender).Properties.AccessibleDescription;
-            
+
             string editValue = "";
 
             if (t.IsNotNull(myProp))
@@ -926,7 +926,6 @@ namespace Tkn_Events
 
                 #endregion
 
-
                 //Type: SearchEngine;[
                 //   {
                 //     "CAPTION": "Search",
@@ -956,19 +955,23 @@ namespace Tkn_Events
                         //    buttonType = v.tButtonType.btListeyeEkle;
                         buttonType = getClickType(myProp);
 
-                        if ((e.Button.Kind == DevExpress.XtraEditors.Controls.ButtonPredefines.Search) &&
+                        //if ((e.Button.Kind == DevExpress.XtraEditors.Controls.ButtonPredefines.Search) &&
+                        if ((button == DevExpress.XtraEditors.Controls.ButtonPredefines.Search) &&
                             (funcName == v.SearchEngine))
                             buttonType = v.tButtonType.btArama;
 
-                        if ((e.Button.Kind == DevExpress.XtraEditors.Controls.ButtonPredefines.Search) &&
+                        //if ((e.Button.Kind == DevExpress.XtraEditors.Controls.ButtonPredefines.Search) &&
+                        if ((button == DevExpress.XtraEditors.Controls.ButtonPredefines.Search) &&
                             (funcName == v.ButtonEdit))
                             buttonType = v.tButtonType.btGoster;
 
-                        if ((e.Button.Kind == DevExpress.XtraEditors.Controls.ButtonPredefines.Ellipsis) &&
+                        //if ((e.Button.Kind == DevExpress.XtraEditors.Controls.ButtonPredefines.Ellipsis) &&
+                        if ((button == DevExpress.XtraEditors.Controls.ButtonPredefines.Ellipsis) &&
                             (funcName == v.ButtonEdit))
                             buttonType = v.tButtonType.btKartAc;
 
-                        if ((e.Button.Kind == DevExpress.XtraEditors.Controls.ButtonPredefines.Plus) &&
+                        //if ((e.Button.Kind == DevExpress.XtraEditors.Controls.ButtonPredefines.Plus) &&
+                        if ((button == DevExpress.XtraEditors.Controls.ButtonPredefines.Plus) &&
                             (funcName == v.ButtonEdit))
                             buttonType = v.tButtonType.btYeniKart;
 
@@ -1009,25 +1012,11 @@ namespace Tkn_Events
 
                     string NewValue = thisValue;
 
-                    string s1 = "=ROW_";// PROP_NAVIGATOR:";
-                    //string s2 = (char)34 + "TABLEIPCODE_LIST" + (char)34 + ": [";
+                    if (funcName == v.Properties)
+                        NewValue = co.Create_PropertiesEdit_JSON(TableName, FieldName, Width, thisValue);
 
-                    if (thisValue.IndexOf(s1) > -1)
-                    {
-                        if (funcName == v.Properties)
-                            NewValue = co.Create_PropertiesEdit(TableName, FieldName, Width, thisValue);
-
-                        if (funcName == v.PropertiesPlus)
-                            NewValue = co.Create_PropertiesPlusEdit(TableName, FieldName, Width, thisValue);
-                    }
-                    else //if (thisValue.IndexOf(s2) > -1)
-                    {
-                        if (funcName == v.Properties)
-                            NewValue = co.Create_PropertiesEdit_JSON(TableName, FieldName, Width, thisValue);
-
-                        if (funcName == v.PropertiesPlus)
-                            NewValue = co.Create_PropertiesPlusEdit_JSON(TableName, FieldName, Width, thisValue);
-                    }
+                    if (funcName == v.PropertiesPlus)
+                        NewValue = co.Create_PropertiesPlusEdit_JSON(TableName, FieldName, Width, thisValue);
 
                     ((DevExpress.XtraEditors.ButtonEdit)sender).EditValue = NewValue;
                 }
@@ -1063,9 +1052,9 @@ namespace Tkn_Events
                 }
 
             }
-
         }
-        
+
+
         public void ImageComboBoxEdit_ButtonClick(object sender, DevExpress.XtraEditors.Controls.ButtonPressedEventArgs e)
         {
             #region Button[1] click ise
@@ -1103,7 +1092,36 @@ namespace Tkn_Events
 
         public void buttonEdit_EditValueChanged(object sender, EventArgs e)
         {
-            string oldValue = ((DevExpress.XtraEditors.ButtonEdit)sender).EditValue.ToString();
+            string value = ((DevExpress.XtraEditors.ButtonEdit)sender).EditValue.ToString();
+
+            /// Auto Search Start
+            /// arama yaparken herhangi bir butona veya extra bir tşa basmadan otomatik Search ekranlarının açılması
+            if ((value.Length >= v.searchStartCount) && (v.searchOnay == false))
+            {
+                string myProp = ((DevExpress.XtraEditors.ButtonEdit)sender).Properties.AccessibleDescription;
+
+                string func_name = t.MyProperties_Get(myProp, "Type:");
+
+                if (func_name == v.SearchEngine)
+                {
+                    v.con_Value_New = "";
+                    
+                    if (((DevExpress.XtraEditors.ButtonEdit)sender).EditValue != null)
+                        v.con_Value_New = ((DevExpress.XtraEditors.ButtonEdit)sender).EditValue.ToString();
+                    
+                    v.con_SearchValue = v.con_Value_New;
+
+                    DevExpress.XtraEditors.Controls.ButtonPredefines button = DevExpress.XtraEditors.Controls.ButtonPredefines.Search;
+
+                    buttonEdit_ButtonClick_(sender, button);
+
+                    if (v.searchOnay)
+                    {
+                        v.searchOnay = false;
+                        System.Windows.Forms.SendKeys.Send("{ENTER}");
+                    }
+                }
+            }
         }
 
         public void buttonEdit_Leave(object sender, EventArgs e)
@@ -1455,8 +1473,6 @@ namespace Tkn_Events
              v.onlyTheseFields = "";
              */
         }
-
-        
 
         public void tXtraEdit_Expression_EditValueChanged(object sender, EventArgs e)
         {
@@ -7394,12 +7410,10 @@ namespace Tkn_Events
                             if (Speed_FName.IndexOf("_BAS") > -1)
                             {
                                 str_bgn = " and " + read_sub_FName + "  >=";
-                                if ((read_field_type == "40") ||
-                                    (read_field_type == "58"))
-                                {
-                                    if (v.active_DB.projectDBType == v.dBaseType.MSSQL)
-                                        str_bgn = " and Convert(Datetime, " + read_sub_FName + ", 103)  >=";
-                                }
+                                if (read_field_type == "40") 
+                                    str_bgn = " and Convert(Date, " + read_sub_FName + ", 103)  >=";
+                                if (read_field_type == "58")
+                                    str_bgn = " and Convert(Datetime, " + read_sub_FName + ", 103)  >=";
 
                                 i_bgn = Sql.IndexOf(str_bgn);
 
@@ -7413,12 +7427,10 @@ namespace Tkn_Events
                             if (Speed_FName.IndexOf("_BIT") > -1)
                             {
                                 str_bgn = " and " + read_sub_FName + "  <=";
-                                if ((read_field_type == "40") ||
-                                    (read_field_type == "58"))
-                                {
-                                    if (v.active_DB.projectDBType == v.dBaseType.MSSQL)
-                                        str_bgn = " and Convert(Datetime, " + read_sub_FName + ", 103)  <=";
-                                }
+                                if (read_field_type == "40") 
+                                   str_bgn = " and Convert(Date, " + read_sub_FName + ", 103)  <=";
+                                if (read_field_type == "58")
+                                    str_bgn = " and Convert(Datetime, " + read_sub_FName + ", 103)  <=";
 
                                 i_bgn = Sql.IndexOf(str_bgn);
 
@@ -7439,12 +7451,10 @@ namespace Tkn_Events
                             /// and Convert(Datetime, [AJLNTLK].REC_DATE, 103)  =  Convert(Datetime, '25.12.2016', 103)     -- :D.SD.2809: --
 
                             str_bgn = " and " + read_sub_FName;
-                            if ((read_field_type == "40") ||
-                                (read_field_type == "58"))
-                            {
-                                if (v.active_DB.projectDBType == v.dBaseType.MSSQL)
-                                    str_bgn = " and Convert(Datetime, " + read_sub_FName;
-                            }
+                            if (read_field_type == "40")
+                                str_bgn = " and Convert(Date, " + read_sub_FName;
+                            if (read_field_type == "58")
+                                str_bgn = " and Convert(Datetime, " + read_sub_FName;
 
                             i_bgn = Sql.IndexOf(str_bgn);
 
@@ -7510,6 +7520,12 @@ namespace Tkn_Events
                             i_bgn = Sql.IndexOf(str_bgn);
                         }
 
+                        if (i_bgn == -1)
+                        {
+                            // and Convert(Date, [SYSOTV].TARIH, 103)  = Convert(Datetime,'01.01.1900', 103)    -- :D.SD.5839: --
+                            str_bgn = " and Convert(Date, " + read_sub_FName;
+                            i_bgn = Sql.IndexOf(str_bgn);
+                        }
                         if (i_bgn == -1)
                         {
                             // and Convert(Datetime, [SYSOTV].TARIH, 103)  = Convert(Datetime,'01.01.1900', 103)    -- :D.SD.5839: --

@@ -91,8 +91,9 @@ namespace Tkn_Layout
                 if (visible == "True")
                 {
                     // subView varsa menü oluşturma yoksa oluştur
-                    if ((LayoutType == v.lyt_menu) && (subView == null))
-                        lMenu_Preparing(tForm, ds_Layout, row, pos);
+                    if (LayoutType == v.lyt_menu) //&& (subView == null))
+                        lMenu_Preparing(tForm, subView, ds_Layout, row, pos);
+
                     if ((LayoutType == v.lyt_dockPanel) && (dockPanel == false))
                     {
                         lDockPanel_Preparing(tForm, ds_Layout, row);
@@ -100,7 +101,8 @@ namespace Tkn_Layout
                     }
                     if (LayoutType == v.lyt_tableLayoutPanel) ltableLayoutPanel_Preparing(tForm, subView, ds_Layout, row, pos);
                     if (LayoutType == v.lyt_splitContainer) lSplitContainer_Preparing(tForm, subView, ds_Layout, row, pos);
-                    if (LayoutType == v.lyt_groupControl) lGroupControl_Preparing(tForm, subView, ds_Layout, row, pos);
+                    if (LayoutType == v.lyt_groupControl) 
+                        lGroupControl_Preparing(tForm, subView, ds_Layout, row, pos);
                     if (LayoutType == v.lyt_panelControl) lPanelControl_Preparing(tForm, subView, ds_Layout, row, pos);
 
                     if (LayoutType == v.lyt_tabPane) lTabPane_Preparing(tForm, subView, ds_Layout, row, pos);
@@ -127,7 +129,6 @@ namespace Tkn_Layout
                     if (LayoutType == v.lyt_documentManager) lDocumentManager_Preparing(tForm, subView, ds_Layout, row, pos);
 
                     if (LayoutType == v.lyt_dataWizard) lDataWizard_Preparing(tForm, ds_Layout, row, pos);
-
                 }
             }
 
@@ -212,7 +213,7 @@ namespace Tkn_Layout
             tForm.Text = caption;
         }
 
-        private void lMenu_Preparing(Form tForm, DataSet ds_Layout, DataRow row, int pos)
+        private void lMenu_Preparing(Form tForm, Control subView, DataSet ds_Layout, DataRow row, int pos)
         {
             tMenu mn = new tMenu();
 
@@ -239,18 +240,18 @@ namespace Tkn_Layout
 
             if (TABLEIPCODE != "")
             {
+                tToolBox t = new tToolBox();
                 DataRow UstHesapRow = UstHesap_Get(ds_Layout, pos);
+
+                string Prop_View = string.Empty;
+                Prop_View = t.Set(row["PROP_VIEWS"].ToString(), "", "");
 
                 if (UstHesapRow != null)
                 {
-                    tToolBox t = new tToolBox();
                     string ustItemType = string.Empty;
                     string ustHesapRefId = string.Empty;
                     string ustHesapItemName = string.Empty;
                     string ustItemName = string.Empty;
-                    string Prop_View = string.Empty;
-
-                    Prop_View = t.Set(row["PROP_VIEWS"].ToString(), "", "");
 
                     ustItemType = UstHesapRow["LAYOUT_TYPE"].ToString();
                     ustHesapRefId = UstHesapRow["LAYOUT_CODE"].ToString();
@@ -259,8 +260,6 @@ namespace Tkn_Layout
 
                     if (t.IsNotNull(UstHesapRow["CMP_NAME"].ToString()))
                         ustItemName = UstHesapRow["CMP_NAME"].ToString();
-
-                    //lParentControlAdd(tForm, panelControl1, ustItemName, ustItemType, row);
 
                     string[] controls = new string[] { };
                     Control c = t.Find_Control(tForm, ustItemName, "", controls);
@@ -272,10 +271,17 @@ namespace Tkn_Layout
                         v.con_Menu_Prop_Value = string.Empty;
                     }
                 }
+                else if (subView != null)
+                {
+                    v.con_Menu_Prop_Value = Prop_View;
+                    mn.Create_Menu_IN_Control(subView, TABLEIPCODE, fieldName);
+                    v.con_Menu_Prop_Value = string.Empty;
+                }
                 else
                 {
                     mn.Create_Menu_IN_Control(tForm, TABLEIPCODE, fieldName);
                 }
+
             }
             #endregion
 
@@ -2752,7 +2758,6 @@ namespace Tkn_Layout
         }
 
         #endregion Data Wizard
-
 
         #region Order Panels
 

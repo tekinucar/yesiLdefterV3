@@ -2847,6 +2847,11 @@ INSERT INTO [dbo].[SYS_UPDATES]
                     {
                         #region SpeedKriter 
 
+                        /// Where işlemleri sırasında tarihSaat yerine sadece tarih şeklinde sorgulansın                          
+                        //* smalldatetime = 58
+                        //* date = 40, 61
+                        if (field_type == 58) field_type = 40;
+
                         // Odd Single
                         // Stored Procedure hazırlanırken
                         // eğer kritername yoksa bu parametre atlaması için
@@ -3312,7 +3317,7 @@ INSERT INTO [dbo].[SYS_UPDATES]
             //if (adet > 0)
             //    joinTableAlias = joinTableAlias + "_" + Convert.ToString(adet + 1);
 
-            joinTables += "   left outer join Lkp." + tableName + " as " + joinTableAlias  + " with (nolock) on ( " + tableCode + "." + lookUpFieldName + " = " + joinTableAlias + "." + idFieldName + " ) " + v.ENTER;
+            joinTables += "   left outer join Lkp." + tableName + " as " + joinTableAlias  + " with (nolock) on ( " + tableCode + "." + lookUpFieldName.Replace("Lkp_", "") + " = " + joinTableAlias + "." + idFieldName + " ) " + v.ENTER;
 
             if (lookUpFieldName.IndexOf("Lkp_") == -1)
                 lookUpFieldName = "Lkp_" + lookUpFieldName;

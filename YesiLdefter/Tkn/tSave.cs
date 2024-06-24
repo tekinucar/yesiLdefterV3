@@ -41,8 +41,7 @@ namespace Tkn_Save
                 //if (dsData.HasChanges() == false) return;
 
                 // NewRocord işareti kayıtla bereber boşaltılıyor
-                //if (dsData.Tables[0].Namespace == "NewRecord")
-                //    dsData.Tables[0].Namespace = "";
+                // "NewRecord"
                 if (dsData.Tables[0].CaseSensitive == true)
                     dsData.Tables[0].CaseSensitive = false;
 

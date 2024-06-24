@@ -53,6 +53,19 @@ namespace Tkn_Events
             #endregion KeyCode
         }
 
+        public void myRepositoryItemEdit_KeyUp(object sender, KeyEventArgs e) //*** New Ok
+        {
+            #region KeyCode
+            if (t.findAttendantKey(e))
+            {
+                /// preparing tGridHint
+                vGridHint tGridHint = new vGridHint();
+                getGridHint_(sender, ref tGridHint);
+                commonGridClick(sender, e, tGridHint);
+            }
+            #endregion KeyCode
+        }
+
         public void myRepositoryItemEdit_EditValueChanged(object sender, EventArgs e)
         {
             #region Giriş kontrolleri
@@ -447,12 +460,9 @@ namespace Tkn_Events
             //bool kontrol = false;
             string oldValue = "";
             string editValue = "";
-
             string senderType = sender.GetType().ToString();
-
             DataSet dsData = null;
             DataNavigator dN = null;
-            
 
             if (senderType == "DevExpress.XtraGrid.GridControl")
             {
@@ -662,8 +672,43 @@ namespace Tkn_Events
                         if (((DevExpress.XtraEditors.TimeSpanEdit)sender).OldEditValue != null)
                             oldValue = ((DevExpress.XtraEditors.TimeSpanEdit)sender).OldEditValue.ToString();
 
-                        if (((DevExpress.XtraEditors.TextEdit)sender).EditValue != null)
+                        if (((DevExpress.XtraEditors.TimeSpanEdit)sender).EditValue != null)
                             editValue = ((DevExpress.XtraEditors.TimeSpanEdit)sender).EditValue.ToString();
+
+                        //return;
+                    }
+                }
+            }
+
+            if (senderType == "DevExpress.XtraEditors.SpinEdit")
+            {
+                tGridHint.viewType = "SpinEdit";
+
+                if (((DevExpress.XtraEditors.SpinEdit)sender).Parent != null)
+                {
+                    senderType = ((DevExpress.XtraEditors.SpinEdit)sender).Parent.GetType().ToString();
+
+                    Control parentControl = ((DevExpress.XtraEditors.SpinEdit)sender).Parent;
+
+                    // yer değişikliği
+                    if (parentControl.GetType().ToString() == "DevExpress.XtraGrid.GridControl")
+                    {
+                        sender = ((DevExpress.XtraGrid.GridControl)parentControl).MainView;
+                        senderType = sender.GetType().ToString();
+                    }
+                    else
+                    {
+                        tGridHint.tForm = ((DevExpress.XtraEditors.SpinEdit)sender).FindForm();
+                        tGridHint.tableIPCode = ((DevExpress.XtraEditors.SpinEdit)sender).AccessibleName;
+                        tGridHint.view = sender;
+                        tGridHint.columnFieldName = ((DevExpress.XtraEditors.SpinEdit)sender).Name.ToString();
+                        tGridHint.parentObject = ((DevExpress.XtraEditors.SpinEdit)sender).Parent.GetType().ToString();
+
+                        if (((DevExpress.XtraEditors.SpinEdit)sender).OldEditValue != null)
+                            oldValue = ((DevExpress.XtraEditors.SpinEdit)sender).OldEditValue.ToString();
+
+                        if (((DevExpress.XtraEditors.SpinEdit)sender).EditValue != null)
+                            editValue = ((DevExpress.XtraEditors.SpinEdit)sender).EditValue.ToString();
 
                         //return;
                     }

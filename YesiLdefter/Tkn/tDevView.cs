@@ -255,6 +255,7 @@ namespace Tkn_DevView
                 layoutControlGroup1.TextVisible = false;
                 layoutControlGroup1.Size = new System.Drawing.Size(200, 200);
                 layoutControlGroup1.DoubleClick += new System.EventHandler(ev.layoutControlGroup_DoubleClick);
+                //layoutControlGroup1.Padding = new DevExpress.XtraLayout.Utils.Padding(0);
 
                 tDataLayoutControl.Root = layoutControlGroup1;
 
@@ -2178,6 +2179,9 @@ MS_FIELDS                                          T03_MSFIELDS                 
             {
                 //tDLayout.BeginUpdate();
 
+                // layoutControlGroup1 için padding sıfırlanıyor
+                tDLayout.Root.Padding = new DevExpress.XtraLayout.Utils.Padding(0);
+
                 // Açılacak Group veya TabPage döngüsü
                 foreach (DataRow Row in dsFields.Tables[1].Rows)
                 {
@@ -2224,6 +2228,8 @@ MS_FIELDS                                          T03_MSFIELDS                 
                         LCGroup = new LayoutControlGroup();
                         LCGroup.Name = "LCGroup_" + groupNo.ToString();
                         LCGroup.Text = caption;
+                        LCGroup.Padding = new DevExpress.XtraLayout.Utils.Padding(8);
+                        
 
                         //LCGroup.ExpandButtonVisible = true;
                         //LCGroup.AllowBorderColorBlending = true;
@@ -2247,7 +2253,8 @@ MS_FIELDS                                          T03_MSFIELDS                 
                             //LCTabbed_ = new TabbedControlGroup();
                             LCTabbed_.Name = "LCTabbed_" + groupNo.ToString();
                             LCTabbed_.Text = caption;
-                            //LCTabbed_.
+                            LCTabbed_.Padding = new DevExpress.XtraLayout.Utils.Padding(8);
+
                             //tDLayout.Root.AddTabbedGroup(LCTabbed_);
                         }
 
@@ -2947,7 +2954,7 @@ MS_FIELDS                                          T03_MSFIELDS                 
                     if (tDLayout != null)
                     {
                         bl_item2 = tDLayout.Root.Items.FindByName(move_item_name);
-
+                        
                         if ((bl_item2 == null) && (group_no > 0) && (move_item_type > 0))
                         {
                             // Group kontrolu
@@ -2972,16 +2979,27 @@ MS_FIELDS                                          T03_MSFIELDS                 
                         if (move_item_type == 4)
                         {
                             es_item1 = new DevExpress.XtraLayout.EmptySpaceItem();
-                            tDLayout.Root.AddItem(es_item1);
+                            
+                            if (group_no > 0)
+                            {
+                                bl_groupitem = Find_TabbedControlGroup(tDLayout, group_no);
 
-                            dragController = new LayoutItemDragController(
-                                es_item1,  //layoutControlItem1, 
-                                bl_item1,  //layoutControlItem2,
-                                param1, param2, param3);
+                                if (bl_groupitem != null)
+                                    ((DevExpress.XtraLayout.LayoutControlGroup)bl_groupitem).AddItem(es_item1);
+                            }
+                            else tDLayout.Root.AddItem(es_item1);
+
+                            if ((es_item1 != null) && (bl_item1 != null))
+                            {
+                                dragController = new LayoutItemDragController(
+                                    es_item1,  //layoutControlItem1, 
+                                    bl_item1,  //layoutControlItem2,
+                                    param1, param2, param3);
                                 //MoveType.Inside, InsertLocation.Before, LayoutType.Horizontal);
 
-                            // move işlemini gerçekleştir
-                            bl_item1.Move(dragController);
+                                // move işlemini gerçekleştir
+                                bl_item1.Move(dragController);
+                            }
                         }
 
                     }
@@ -4346,6 +4364,9 @@ MS_FIELDS                                          T03_MSFIELDS                 
                 column.MinWidth = 10;
                 column.Width = t.Set(Row["CMP_WIDTH"].ToString(), Row["LKP_CMP_WIDTH"].ToString(), 100);
                 column.OptionsColumn.AllowEdit = t.Set(Row["CMP_ENABLED"].ToString(), Row["LKP_FENABLED"].ToString(), true);
+
+                if (tfield_name == "LKP_LISTEYE_EKLE")
+                    column.MinWidth = t.Set(Row["CMP_WIDTH"].ToString(), Row["LKP_CMP_WIDTH"].ToString(), 100);
 
                 if (column.Width < 1)
                     column.Width = t.Set(Row["LKP_CMP_WIDTH"].ToString(), "100", (Int16)100);
