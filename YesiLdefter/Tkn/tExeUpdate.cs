@@ -39,7 +39,10 @@ namespace Tkn_ExeUpdate
         {
             bool onay = false;
             //
-            onay = t.ftpDownload(v.tExeAbout.activePath, v.tExeAbout.ftpPacketName);
+            if (v.SP_tUserType == v.tUserType.EndUser)
+                onay = t.ftpDownload(v.tExeAbout.activePath, v.tExeAbout.ftpPacketName); // EndUser için exe indiriyor
+            if (v.SP_tUserType == v.tUserType.TesterUser)
+                onay = t.ftpTesterDownload(v.tExeAbout.activePath, v.tExeAbout.ftpPacketName);
             //
             if (onay)
                 onay = ExtractFile(v.tExeAbout.activePath, v.tExeAbout.ftpPacketName);

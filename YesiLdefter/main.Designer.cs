@@ -53,7 +53,8 @@
             this.Name = "main";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "yesiLdefter";
-            this.Load += new System.EventHandler(this.main_Load);
+            this.Load += new System.EventHandler(this.mainForm_Load);
+            this.Shown += new System.EventHandler(this.mainForm_Shown);
             this.ResumeLayout(false);
 
         }

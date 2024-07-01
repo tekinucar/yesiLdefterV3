@@ -159,7 +159,7 @@ AS BEGIN
       begin
           Update dbo.OnmBelgeMaliyet set
 			IsPaid = 1  -- ödendi işareti
-          , PaidId = @curId -- OnmBelgeDekont.Id
+          , BelgeDekontId = @curId -- OnmBelgeDekont.Id
           Where Id = @SourceId
 	  end
 	  /*	  
@@ -310,7 +310,7 @@ AS BEGIN
       begin
           Update dbo.OnmBelgeMaliyet set
 			IsPaid = 0  -- ödenmedi işareti
-          , PaidId = 0  -- OnmBelgeDekont.Id
+          , BelgeDekontId = 0  -- OnmBelgeDekont.Id
           Where Id = @SourceId
 	  end
 /*

@@ -22,6 +22,7 @@ namespace YesiLdefter
         string buttonDbUpdates = "ButtonDbUpdates";
         string buttonSqlView = "ButtonSQLView";   // SQL View
         string buttonRecSQLView = "ButtonRecSQLView";
+        string buttonDowloadIni2 = "ButtonDownloadIni2";
         string editPanelName = "editpanel_ViewSQL";
         Control editpanel_ViewSQL = null;
 
@@ -44,7 +45,7 @@ namespace YesiLdefter
             t.Find_Button_AddClick(this, menuName, buttonDbUpdates, myNavElementClick);
             t.Find_Button_AddClick(this, menuName, buttonSqlView, myNavElementClick);
             t.Find_Button_AddClick(this, menuName, buttonRecSQLView, myNavElementClick);
-
+            t.Find_Button_AddClick(this, menuName, buttonDowloadIni2, myNavElementClick);
             //
             // aranan nesne memoEdit ()
             // memoEdit aslında bir panelin içinde sıfırncı kontrol olarak duruyor
@@ -66,7 +67,7 @@ namespace YesiLdefter
                 if (((DevExpress.XtraBars.Navigation.NavButton)sender).Name == buttonDbUpdates) DbUpdatesRefresh();
                 if (((DevExpress.XtraBars.Navigation.NavButton)sender).Name == buttonSqlView) SqlView();
                 if (((DevExpress.XtraBars.Navigation.NavButton)sender).Name == buttonRecSQLView) SqlRecView();
-                //if (((DevExpress.XtraBars.Navigation.NavButton)sender).Name == buttonExpression) ExpressionView();
+                if (((DevExpress.XtraBars.Navigation.NavButton)sender).Name == buttonDowloadIni2) DowloadIni2();
             }
             if (sender.GetType().ToString() == "DevExpress.XtraBars.Navigation.TileNavItem")
             {
@@ -109,6 +110,42 @@ namespace YesiLdefter
         private void SqlRecView()
         {
             viewText(v.SQLSave);
+        }
+
+        private void DowloadIni2()
+        {
+            
+            vUserInputBox iBox = new vUserInputBox();
+
+            iBox.Clear();
+            iBox.title = "Tester service tools";
+            iBox.promptText = "Tester service tool code  :";
+            iBox.value = "";
+            iBox.displayFormat = "*";
+            iBox.fieldType = 0;
+
+            // ınput box ile sorulan ise kimden kopyalanacak (old) bilgisi
+            if (t.UserInpuBox(iBox) == DialogResult.OK)
+            {
+                string userCode = iBox.value;
+
+                if (userCode == v.destekTesterServiceToolCode)
+                {
+                    bool onay = false;
+
+                    onay = t.ftpDownload(v.tExeAbout.activePath, "YesiLdefter2.ini");
+
+                    if (onay)
+                    {
+                        MessageBox.Show("YesiLdefter2.Ini file aktif olması için programı kapatıp yeniden çalıştırın.");
+                    }
+                    else
+                    {
+                        MessageBox.Show("DİKKAT : İşlem başarısız... YesiLdefter2.Ini indirilemedi.");
+                    }
+                }
+            }
+            
         }
 
         private void viewText(string text)

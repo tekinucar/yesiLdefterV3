@@ -125,7 +125,7 @@ namespace Tkn_ToolBox
                 if (IsNotNull(v.tMsFileUpdate.pathName) == false)
                     v.tMsFileUpdate.pathName = v.tExeAbout.activePath;
 
-                onay = ftpDownload(v.tMsFileUpdate.pathName, v.tMsFileUpdate.packetName);
+                onay = ftpDownload(v.tMsFileUpdate.pathName, v.tMsFileUpdate.packetName); // MsFileUpdates te indirilmesi istenen dosyalar 
                 if (onay)
                 {
                     AlertMessage("File download", v.tMsFileUpdate.fileName);
@@ -6931,7 +6931,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
         #region MsExeUpdates Read
         
-        public void read_MsExeUpdates()
+        public void read_MsExeUpdates(v.tUserType userType)
         {
             string ySql =
               @"  select top 1 
@@ -6948,11 +6948,23 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
             DataSet ds = new DataSet();
 
-            if (SQL_Read_Execute(v.dBaseNo.publishManager, ds, ref ySql, "", "MsExeUpdates"))
+            if (userType == v.tUserType.EndUser)
             {
-                v.tExeAbout.ftpVersionNo = ds.Tables[0].Rows[0]["VersionNo"].ToString();
-                v.tExeAbout.ftpFileName = ds.Tables[0].Rows[0]["ExeName"].ToString();
-                v.tExeAbout.ftpPacketName = ds.Tables[0].Rows[0]["PacketName"].ToString();
+                if (SQL_Read_Execute(v.dBaseNo.publishManager, ds, ref ySql, "", "MsExeUpdates"))
+                {
+                    v.tExeAbout.ftpVersionNo = ds.Tables[0].Rows[0]["VersionNo"].ToString();
+                    v.tExeAbout.ftpFileName = ds.Tables[0].Rows[0]["ExeName"].ToString();
+                    v.tExeAbout.ftpPacketName = ds.Tables[0].Rows[0]["PacketName"].ToString();
+                }
+            }
+            if (userType == v.tUserType.TesterUser)
+            {
+                if (SQL_Read_Execute(v.dBaseNo.Manager, ds, ref ySql, "", "MsExeUpdates"))
+                {
+                    v.tExeAbout.ftpVersionNo = ds.Tables[0].Rows[0]["VersionNo"].ToString();
+                    v.tExeAbout.ftpFileName = ds.Tables[0].Rows[0]["ExeName"].ToString();
+                    v.tExeAbout.ftpPacketName = ds.Tables[0].Rows[0]["PacketName"].ToString();
+                }
             }
 
             ds.Dispose();
@@ -14450,7 +14462,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             bool onay = false;
             
             onay = ftpDownload(v.tExeAbout.activePath, "YesiLdefterConnection.Ini");
-
+            
             string MainManagerDbUses = "";
             string SourceDbUses = "";
 
@@ -14492,6 +14504,10 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 v.active_DB.masterPsw = YesiLdefterIni.Read("MasterDbPass");
                 if (IsNotNull(v.active_DB.masterPsw))
                     v.active_DB.masterPsw = " Password = " + v.active_DB.masterPsw + "; ";
+
+                /// Eğer kullanıcı YesiLdefter2.Ini yi kullanıyorsa tester kullanıcıdır
+                /// 
+                v.SP_tUserType = v.tUserType.TesterUser;
             }
 
             // Tabim Surucu07 için 
@@ -14580,19 +14596,43 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
         {
             bool onay = false;
 
-            //
-            //Alan Adı ustadyazilim.com
+            tFtp ftpClient = null;
+
+            /* Create Object Instance */
+            ftpClient = new tFtp(v.ftpHostIp, v.ftpUserName, v.ftpUserPass);
+
+            try
+            {
+                /// download sırasında hata oluşuyorsa dasya ismindeki büyük/küçük harfe dikkat et
+                /// YesiLdefter2.Ini  hatalı
+                /// YesiLdefter2.ini  çalışıyor 
+                /// 
+                onay = ftpClient.download(fileName, @"" + path + "\\" + fileName);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Ftp download" + v.ENTER2 + ex.Message);
+                //throw;
+            }
+            /* Release Resources */
+            ftpClient = null;
+
+            if (onay)
+            {
+                v.Kullaniciya_Mesaj_Var = "Download gerçekleşti ...";
+                v.timer_Kullaniciya_Mesaj_Varmi.Start();
+            }
+            return onay;
+        }
+        public bool ftpTesterDownload(string path, string fileName)
+        {
+            bool onay = false;
 
             tFtp ftpClient = null;
 
             /* Create Object Instance */
-            //ftpClient = new tFtp(v.ftpHostIp, "webadmin_ftp@ustadyazilim.com", v.ftpUserPass);
-            ftpClient = new tFtp(v.ftpHostIp, v.ftpUserName, v.ftpUserPass);
+            ftpClient = new tFtp(v.ftpHostIp, v.ftpTesterUserName, v.ftpUserPass);
 
-            //MessageBox.Show(v.tExeAbout.activePath + "\\" + fileName);
-            /* Download a File */
-            //ftpClient.download("/public/YesiLdefter_201806201.rar", @"E:\Temp\YesiLdefter_201806201.rar");
-            //ftpClient.download(v.tExeAbout.ftpPacketName, @"" + v.tExeAbout.activePath + "\\" + v.tExeAbout.ftpPacketName);
             try
             {
                 onay = ftpClient.download(fileName, @"" + path + "\\" + fileName);
@@ -14602,8 +14642,6 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 MessageBox.Show("Ftp download" + v.ENTER2 + ex.Message);
                 //throw;
             }
-            
-            
             /* Release Resources */
             ftpClient = null;
 
@@ -14624,7 +14662,6 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             try
             {
                 /* Create Object Instance */
-                //ftpClient = new tFtp(@"ftp://94.73.151.195/", "u8094836@edisonhost.com", "CanBerk98");
                 ftpClient = new tFtp(v.ftpHostIp, v.ftpUserName, v.ftpUserPass);
             }
             catch (Exception e1)
@@ -14637,7 +14674,6 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             {
                 /* Upload a File */
                 ftpClient.upload(exeFileAbout.newPacketName, exeFileAbout.activePath + "\\" + exeFileAbout.newPacketName);
-
                 onay = true;
             }
             catch (Exception e2)
@@ -14652,6 +14688,45 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             if (onay)
             {
                 MessageBox.Show(":)  [  " + exeFileAbout.newPacketName + "  ]  paket ftp ye yüklendi ...");
+            }
+
+            return onay;
+        }
+
+        public bool ftpTesterUpload(exeAbout exeFileAbout)
+        {
+            bool onay = false;
+
+            tFtp ftpClient = null;
+
+            try
+            {
+                /* Create Object Instance */
+                ftpClient = new tFtp(v.ftpHostIp, v.ftpTesterUserName, v.ftpUserPass);
+            }
+            catch (Exception e1)
+            {
+                MessageBox.Show("Hata : Ftp bağlantı problemi ..." + v.ENTER2 + e1.Message);
+            }
+
+            try
+            {
+                /* Upload a File */
+                ftpClient.upload(exeFileAbout.newPacketName, exeFileAbout.activePath + "\\" + exeFileAbout.newPacketName);
+                onay = true;
+            }
+            catch (Exception e2)
+            {
+                MessageBox.Show("Hata : Ftp upload (yükleme) problemi ..." + v.ENTER2 + e2.Message);
+                //throw;
+            }
+
+            /* Release Resources */
+            ftpClient = null;
+
+            if (onay)
+            {
+                MessageBox.Show(":)  [  " + exeFileAbout.newPacketName + "  ]  paket 'home/webadmin/web/ustadyazilim.com/desktoptester'  yüklendi ...");
             }
 
             return onay;

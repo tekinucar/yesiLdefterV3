@@ -682,7 +682,7 @@ DELETE [Lkp].[OnmHesapMaster]
 Where FirmId = 0
 and UstGrupTipiId = 82
 
-<<<<<<< HEAD
+--<<<<<<< HEAD
 -- , PeriyodTipiId, BelgeTipiId, KaynakTipiId
 
 

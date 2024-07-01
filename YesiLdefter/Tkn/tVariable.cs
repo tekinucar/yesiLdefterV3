@@ -132,6 +132,8 @@ namespace Tkn_Variable
         public static string mainManagerPass = "Password = ustad84352Yazilim;";
         public static string publishManagerPass = "Password = ustad84352Yazilim;";
         public static string destekServiceToolCode = "875421";
+        public static string destekTesterServiceToolCode = "784512";
+
         public class databaseAbout_
         {
             /// o an hangi db işlem yapılacaksa onu nosunu ver 
@@ -178,12 +180,12 @@ namespace Tkn_Variable
 
         #region Ftp
         ///home/webadmin/web/ustadyazilim.com/desktopapp
+        ///home/webadmin/web/ustadyazilim.com/desktoptester
         public static string ftpHostIp = @"ftp://ustadyazilim.com";
         public static string ftpUserName = "webadmin_ftp";
+        public static string ftpTesterUserName = "webadmin_tester";
         public static string ftpUserPass = "Ustad+784512";
         #endregion Ftp
-
-
 
         // picture nesnesi ile Save() functionu arasında veri taşıyıcı
         //public static WebBrowser webMain = null;
@@ -425,6 +427,22 @@ namespace Tkn_Variable
         #endregion Save 
 
         #region Enum
+
+        public enum msSectorType : Int16
+        {
+            None = 0,
+            OnMuhasebe = 1,
+            MaliMusavir = 2,
+            ResmiMuhasebe = 3,
+            Bordro = 4,
+            UstadCrm = 5,
+            UstadMtsk = 201,
+            UstadIsmak = 202,
+            UstadSrc = 203,
+            TabimMtsk = 211,
+            TabimSrc = 212,
+            TabimIsmak = 213
+        }
 
         public enum formType
         {
@@ -883,7 +901,7 @@ namespace Tkn_Variable
         public static string SP_FIRM_REF_FNAME = "LOCAL_ID";
         public static string SP_FIRM_USE_MENU_TYPE = "toolBox";
 
-
+        public static tUserType SP_tUserType = tUserType.EndUser;
 
         //public static int vt_FIRM_ID = 1;    // 2001   geçiçi değiştirildi, aslı 0
         //public static int vt_SHOP_ID = 2;    // 2002   geçiçi değiştirildi, aslı 0
@@ -1110,6 +1128,11 @@ namespace Tkn_Variable
 
         #endregion
 
+        public enum tUserType
+        {
+            EndUser,
+            TesterUser
+        }
         public enum tBeforeAfter
         {
             Before,

@@ -88,7 +88,7 @@ namespace Tkn_Starter
 
             /// Computer hakkındaki verileri topla
             /// 
-            t.WaitFormOpen(v.mainForm, "Bilgisayara hakkındaki bilgiler okunuyor...");
+            t.WaitFormOpen(v.mainForm, "Bilgisayar hakkındaki bilgiler okunuyor...");
             Get_MacAddress();
             Get_ComputerAbout();
             
@@ -140,6 +140,12 @@ namespace Tkn_Starter
                 }
             }
 
+            /// Mesaj formu nedense kayboluyor
+            /// onun açılması için burada bunlar false yapılıyor
+            v.IsWaitOpen = false;
+            v.SP_OpenApplication = false;
+            t.WaitFormOpen(v.mainForm, "");
+
             t.WaitFormOpen(v.mainForm, "Kullanıcı teması hazırlanıyor...");
             setLoginSkins();
 
@@ -155,7 +161,7 @@ namespace Tkn_Starter
             
             // dosyalardan son yeni exenin download olması gerekiyor
             t.WaitFormOpen(v.mainForm, "Exe güncelleme kontrolü yapılıyor...");
-            t.read_MsExeUpdates();
+            t.read_MsExeUpdates(v.SP_tUserType);
 
             t.WaitFormOpen(v.mainForm, "Sistem tarihleri okunuyor, hazırlanıyor...");
             t.MSSQL_Server_Tarihi();

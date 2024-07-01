@@ -99,8 +99,7 @@ namespace Tkn_Ftp
                     //Uzak sunucu hata döndürdü: (530) Oturum açılmadı.
                     if (e.Message.IndexOf("Uzak ad çözülemedi") > -1)
                          MessageBox.Show("İnternet bağlantı hatası : " + v.ENTER2 + e.ToString());
-                    if (e.Message.IndexOf("530") > -1)
-                        MessageBox.Show("Ftp bağlantı hatası : " + v.ENTER2 + e.ToString());
+                    else MessageBox.Show("Ftp bağlantı hatası : " + v.ENTER2 + e.ToString());
                     //throw;
                 }
 

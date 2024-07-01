@@ -63,9 +63,14 @@ namespace YesiLdefter
 
         #endregion
 
-        private void main_Load(object sender, EventArgs e)
-        {
 
+        private void mainForm_Load(object sender, EventArgs e)
+        {
+            //
+        }
+        private void mainForm_Shown(object sender, EventArgs e)
+        {
+            YolHaritasi();
         }
         public main(string[] args)
         {
@@ -134,14 +139,17 @@ namespace YesiLdefter
             {
                s.InitStart();
             }
-            
+
+            v.SP_OpenApplication = false;
+            v.IsWaitOpen = false;
+            t.WaitFormOpen(v.mainForm, "");
+
             /// Main form size
             /// 
             this.Top = 0;
             this.Left = 0;
             this.Width = v.Primary_Screen_Width;
             this.Height = v.Primary_Screen_Height;
-
 
             #endregion
 
@@ -256,21 +264,39 @@ namespace YesiLdefter
 
                 preparingMenus();
 
-                // Exe Güncellendiyse
-                // v.SP_NewApplication = versionChecked();
                 
                 /// Ustad Crm ve TabimMtsk değil ise DbUpdates çalışacak
                 /// TabimMtsk ya ait güncellemeler ise ms_TabimMtsk.cs içinde çalışıyor
                 /// 
-                if ((v.SP_Firm_SectorTypeId != 5) && // Crm
-                    (v.SP_Firm_SectorTypeId != 211)) 
+                if ((v.SP_Firm_SectorTypeId != (Int16)v.msSectorType.UstadCrm) && // Crm
+                    (v.SP_Firm_SectorTypeId != (Int16)v.msSectorType.TabimMtsk)) 
                     t.dbUpdatesChecked();
 
                 setMainFormCaption();
 
-                //timer_Kullaniciya_Mesaj_Varmi.Enabled = true;
+                
             }
         }
+
+        void YolHaritasi()
+        {
+            /// Ön Muhasebe için başlangıç işlemleri
+            if (v.SP_Firm_SectorTypeId == (Int16)v.msSectorType.OnMuhasebe) autoOpenForm("UST/OMS/AYR/YHBaslangic");
+                
+        }
+
+        void autoOpenForm(string FormCode)
+        {
+            string Prop_Navigator = @"
+            0=FORMNAME:null;
+            0=FORMCODE:" + FormCode + @";
+            0=FORMTYPE:CHILD;
+            0=FORMSTATE:NORMAL;
+            ";
+
+            t.OpenForm(new ms_Form(), Prop_Navigator);
+        }
+
 
         void setMainFormCaption()
         {
@@ -475,6 +501,12 @@ namespace YesiLdefter
                                 ((DevExpress.XtraBars.BarLargeButtonItemLink)item).Item.ItemClick
                                       += new DevExpress.XtraBars.ItemClickEventHandler(this.btnExeUpload_ItemClick);
                             }
+                            if (((DevExpress.XtraBars.BarLargeButtonItemLink)item).Item.Name.ToString() == "btnExeFtpUploadTest")
+                            {
+                                ((DevExpress.XtraBars.BarLargeButtonItemLink)item).Item.ItemClick
+                                      += new DevExpress.XtraBars.ItemClickEventHandler(this.btnExeUploadTest_ItemClick);
+                            }
+
                             //btnFirmList
                             if (((DevExpress.XtraBars.BarLargeButtonItemLink)item).Item.Name.ToString() == "btnFirmList_FOPEN_IP")
                             {
@@ -618,25 +650,45 @@ namespace YesiLdefter
 
         private void btnExeUpload_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
         {
-            // geçici ipat
-
+            if (t.IsNotNull(v.tExeAbout.newPacketName) == false)
+            {
+                MessageBox.Show("DİKKAT : Önce -Exeyi Paketle- işlemini çalıştırın");
+                return;
+            }
+            /// Son kullanıcı için // vt : UstadManagerV3.dbo.MsExeUpdates tablosuna yazılıyor 
+            ///
             bool onay = t.ftpUpload(v.tExeAbout);
-
             if (onay)
             {
                 tSQLs sqls = new tSQLs();
                 DataSet ds = new DataSet();
-                //string sql = sqls.SQL_SYS_UPDATES_INSERT();
-                //t.SQL_Read_Execute(v.dBaseNo.publishManager, ds, ref sql, "", "SYS_UPDATES");
                 string sql = sqls.Sql_MsExeUpdates_Insert();
                 t.SQL_Read_Execute(v.dBaseNo.publishManager, ds, ref sql, "", "MsExeUpdates");
             }
         }
 
+        private void btnExeUploadTest_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
+        {
+            if (t.IsNotNull(v.tExeAbout.newPacketName) == false)
+            {
+                MessageBox.Show("DİKKAT : Önce -Exeyi Paketle- işlemini çalıştırın");
+                return;
+            }
+            /// Test exesi // vt : MainManagerV3.dbo.MsExeUpdates tablosuna yazılıyor
+            ///
+            bool onay = t.ftpTesterUpload(v.tExeAbout);
+            if (onay)
+            {
+                tSQLs sqls = new tSQLs();
+                DataSet ds = new DataSet();
+                string sql = sqls.Sql_MsExeUpdates_Insert();
+                t.SQL_Read_Execute(v.dBaseNo.Manager, ds, ref sql, "", "MsExeUpdates");
+            }
+        }
         #endregion ftpUpload
 
         #region ftpDownload 
-        
+
         private void barButtonGuncelleme_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
         {
             //RunExeUpdate();
@@ -662,6 +714,10 @@ namespace YesiLdefter
                 {
                     string FormName = "ms_DestekServiceTool";
                     string FormCode = "UST/PMS/PMS/DestekServiceTool";
+
+                    if (v.SP_TabimDbConnection)
+                        FormCode = "UST/PMS/PMS/DestekServiceTabim";
+
                     t.OpenFormPreparing(FormName, FormCode, v.formType.Child);
                 }
             }
