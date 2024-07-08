@@ -7010,8 +7010,11 @@ namespace Tkn_Events
                             onay2 = true;
 
                             // :@@YILAY işareti yoksa boşuna çalışmasın
-                            if ((vSW._03_WorkTD == v.tWorkTD.Refresf_DataYilAy) &&
-                                SqlFirst.IndexOf(":@@YILAY") == -1) onay2 = false;
+                            if (vSW._03_WorkTD == v.tWorkTD.Refresf_DataYilAy)
+                            {
+                                if (SqlFirst.IndexOf(":@@YILAY") == -1 &&
+                                    SqlFirst.IndexOf(":DONEM_YILAY") == -1)   onay2 = false;
+                            }
 
                             if (onay2)
                             {

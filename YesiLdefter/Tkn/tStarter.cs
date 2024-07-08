@@ -165,7 +165,7 @@ namespace Tkn_Starter
 
             t.WaitFormOpen(v.mainForm, "Sistem tarihleri okunuyor, hazırlanıyor...");
             t.MSSQL_Server_Tarihi();
-            t.YilAyRead();
+            t.DonemTipiYilAyRead();
 
             //t.TestRead();
 

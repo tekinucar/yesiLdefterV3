@@ -70,7 +70,9 @@ namespace YesiLdefter
         }
         private void mainForm_Shown(object sender, EventArgs e)
         {
-            YolHaritasi();
+            v.Kullaniciya_Mesaj_Var = "YolHaritasi";
+            timer_Mesaj_Suresini_Bitir.Interval = 500;
+            v.timer_Kullaniciya_Mesaj_Var_.Start();
         }
         public main(string[] args)
         {
@@ -127,7 +129,7 @@ namespace YesiLdefter
             {
                 f.preparingMainForm(this);
                 //f.preparingDockPanel(this, "SEK/CEV/prcCihazLogGetIcmal.Icmal_L01");
-                v.timer_Kullaniciya_Mesaj_Varmi = timer_Kullaniciya_Mesaj_Varmi;
+                v.timer_Kullaniciya_Mesaj_Var_ = timer_Kullaniciya_Mesaj_Var;
             }
 
             #endregion mainForm
@@ -281,7 +283,8 @@ namespace YesiLdefter
         void YolHaritasi()
         {
             /// Ön Muhasebe için başlangıç işlemleri
-            if (v.SP_Firm_SectorTypeId == (Int16)v.msSectorType.OnMuhasebe) autoOpenForm("UST/OMS/AYR/YHBaslangic");
+            if (v.SP_Firm_SectorTypeId == (Int16)v.msSectorType.OnMuhasebe) autoOpenForm("UST/OMS/FNS/MALIISLEM");
+                //autoOpenForm("UST/OMS/AYR/YHBaslangic");
                 
         }
 
@@ -788,52 +791,38 @@ namespace YesiLdefter
 
         #region timer_
 
-        private void timer_Mesaj_Suresi_Bitti_Tick(object sender, EventArgs e)
+        private void timer_Mesaj_Suresini_Bitir_Tick(object sender, EventArgs e)
         {
-            if ((!string.IsNullOrEmpty(v.Kullaniciya_Mesaj_Var)) |
-                (barMesajlar.Caption != ""))
+            if (v.Kullaniciya_Mesaj_Var == "YolHaritasi")
+            {
+                YolHaritasi();
+                v.Kullaniciya_Mesaj_Var = "";
+                timer_Mesaj_Suresini_Bitir.Interval = 6000;
+                return;
+            }
+
+            /// mesaj gösteriminni bitir, mesaj kutusunu temizle
+            if (barMesajlar.Caption != "")
             {
                 barMesajlar.Caption = "";
                 v.Kullaniciya_Mesaj_Var = "";
-                timer_Mesaj_Suresi_Bitti.Enabled = false;
-
+                timer_Mesaj_Suresini_Bitir.Enabled = false;
             }
         }
 
-        private void timer_Kullaniciya_Mesaj_Varmi_Tick(object sender, EventArgs e)
+        private void timer_Kullaniciya_Mesaj_Var_Tick(object sender, EventArgs e)
         {
             if (barMesajlar == null) return;
 
             this.barMSConn_.EditValue = v.SP_ConnBool_Manager;
-            
+
             this.barPrjConn_.EditValue = v.SP_ConnBool_Project;
 
             if (!string.IsNullOrEmpty(v.Kullaniciya_Mesaj_Var))
             {
                 barMesajlar.Caption = v.Kullaniciya_Mesaj_Var;
-                timer_Mesaj_Suresi_Bitti.Enabled = true;
-                v.Kullaniciya_Mesaj_Var = "";
-
-                /*
-                if ((v.Kullaniciya_Mesaj_Var == v.DBRec_Insert) ||
-                    (v.Kullaniciya_Mesaj_Var.IndexOf(v.DBRec_Update) > -1))
-                {
-                    if (v.SP_OpenApplication == false)
-                    {
-                        //    v.SP_OpenApplication = true;
-
-                        SplashScreenManager.ShowForm(v.mainForm, typeof(DevExpress.XtraWaitForm.AutoLayoutDemoWaitForm), true, true, false);
-                        SplashScreenManager.Default.SetWaitFormCaption(v.Wait_Caption);
-                        SplashScreenManager.Default.SetWaitFormDescription(v.Kullaniciya_Mesaj_Var);
-
-                        Thread.Sleep(500);
-                        SplashScreenManager.CloseForm(false);
-
-                        //    v.SP_OpenApplication = false;
-                        v.Kullaniciya_Mesaj_Var = "";
-                    }
-                }
-                */
+                timer_Mesaj_Suresini_Bitir.Enabled = true;
+                //v.Kullaniciya_Mesaj_Var = "";
             }
         }
 

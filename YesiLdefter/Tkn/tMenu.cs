@@ -1885,7 +1885,7 @@ namespace Tkn_Menu
                     //tItem.Name = itemName;
                     tItem.Name = "item_YILAY";
                     tItem.Caption = evm.getYilAyCaption(v.BUGUN_YILAY);
-                    v.USER_YILAY = v.BUGUN_YILAY;
+                    v.DONEMTIPI_YILAY = v.BUGUN_YILAY;
 
                     // itemCaption = Belge Türü Seçin
                     if (t.IsNotNull(shortcut_keys))

@@ -42,10 +42,11 @@ begin transaction
    AlacakDovizYeriId SmallInt      null,
    
    --40
+   KrediLimiti       Numeric(22,5) null,
    HesapKesimGunu    SmallInt      null,
    OdemeKacGunSonra  SmallInt      null,
-   SonOdemeGunu      SmallInt      null,
-   SonKullanimTarihi nVarchar(10)  null,
+   SonOdemeGunu      SmallInt      null, /* ? neden bu fieldi eklemişim hatırlamadım */
+   SonKullanimTarihi nVarchar(10)  null, /* kartın geçerlilik süresi Ay/Yil  */
    CheckId           nVarchar(10)  null, /* kartın güvenlik kodu */
    SorumluPersonelId Int           null, /* banka kartlarında kartı kullanan personel Id  */
 
@@ -463,6 +464,33 @@ INSERT INTO [Lkp].[OnmHesapFinansHesapTipi] (Id, HesapTipi)
   (11,  N"Maliyet grubu"),
   (12,  N"Varlık hesabı"),
   (13,  N"Abone hesabı")
+
+
+-- ------------------------------------------------------- 
+-- SahiplikTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmHesapFinansSahiplikTipi')
+drop table [Lkp].[OnmHesapFinansSahiplikTipi]
+
+create table [Lkp].[OnmHesapFinansSahiplikTipi]
+(
+   Id             Int Unique Not Null,
+   SahiplikTipi   nVarchar(50)
+   GrupTipiId     SmallInt Null,
+
+   constraint  pk_OnmHesapFinansSahiplikTipi primary key (Id)
+)
+
+-- 1 : Gelir oluşturur
+-- 2 : Gider oluşturur
+delete from [Lkp].[OnmHesapFinansSahiplikTipi]
+INSERT INTO [Lkp].[OnmHesapFinansSahiplikTipi] (Id, SahiplikTipi, GrupTipiId)
+ VALUES 
+  (0,    N"Tanımsız", 0),
+  (11,   N"İşletmeye ait", 1),
+  (12,   N"Ortağa ait", 1),
+  (21,   N"Kiralık", 2)
+
 
 
 -- ------------------------------------------------------- 

@@ -30,26 +30,25 @@
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(main));
-            this.timer_Kullaniciya_Mesaj_Varmi = new System.Windows.Forms.Timer(this.components);
-            this.timer_Mesaj_Suresi_Bitti = new System.Windows.Forms.Timer(this.components);
+            this.timer_Kullaniciya_Mesaj_Var = new System.Windows.Forms.Timer(this.components);
+            this.timer_Mesaj_Suresini_Bitir = new System.Windows.Forms.Timer(this.components);
             this.SuspendLayout();
             // 
-            // timer_Kullaniciya_Mesaj_Varmi
+            // timer_Kullaniciya_Mesaj_Var
             // 
-            this.timer_Kullaniciya_Mesaj_Varmi.Tick += new System.EventHandler(this.timer_Kullaniciya_Mesaj_Varmi_Tick);
+            this.timer_Kullaniciya_Mesaj_Var.Tick += new System.EventHandler(this.timer_Kullaniciya_Mesaj_Var_Tick);
             // 
-            // timer_Mesaj_Suresi_Bitti
+            // timer_Mesaj_Suresini_Bitir
             // 
-            this.timer_Mesaj_Suresi_Bitti.Interval = 6000;
-            this.timer_Mesaj_Suresi_Bitti.Tick += new System.EventHandler(this.timer_Mesaj_Suresi_Bitti_Tick);
+            this.timer_Mesaj_Suresini_Bitir.Interval = 6000;
+            this.timer_Mesaj_Suresini_Bitir.Tick += new System.EventHandler(this.timer_Mesaj_Suresini_Bitir_Tick);
             // 
             // main
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1698, 910);
+            this.ClientSize = new System.Drawing.Size(1455, 739);
             this.IconOptions.Icon = ((System.Drawing.Icon)(resources.GetObject("main.IconOptions.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Name = "main";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "yesiLdefter";
@@ -61,8 +60,8 @@
 
         #endregion
 
-        private System.Windows.Forms.Timer timer_Kullaniciya_Mesaj_Varmi;
-        private System.Windows.Forms.Timer timer_Mesaj_Suresi_Bitti;
+        private System.Windows.Forms.Timer timer_Kullaniciya_Mesaj_Var;
+        private System.Windows.Forms.Timer timer_Mesaj_Suresini_Bitir;
     }
 }
 

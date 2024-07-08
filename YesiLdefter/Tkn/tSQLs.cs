@@ -933,6 +933,7 @@ Select distinct
 
         #endregion System SQLs
 
+        
         #region ManagerServer Tables SQLs Preparing
 
         public string SQL_MS_TABLES_IP_LIST(string softCode, string projectCode, string TableCode, string IPCode)
@@ -3088,10 +3089,21 @@ INSERT INTO [dbo].[SYS_UPDATES]
                                             Where_Lines = Where_Lines.Replace(s,
                                                 "declare @" + fname + " " + t.Get_FieldTypeName(Convert.ToInt16(field_type), "800"));
 
-                                            s = "/*setEnd." + krtLineNo.ToString() + "*/";
-                                            Where_Lines = Where_Lines.Replace(s,
-                                                "/*prm*/ set " + t.Set_FieldName_Value_(field_type, "@" + fname, MasterValue1, "@", toperand_type.ToString()) +
-                                                "   -- :D.SD." + RefId.ToString() + ": --");
+
+                                            if (MasterValue1 != ":DONEM_YILAY")
+                                            {
+                                                s = "/*setEnd." + krtLineNo.ToString() + "*/";
+                                                Where_Lines = Where_Lines.Replace(s,
+                                                    "/*prm*/ set " + t.Set_FieldName_Value_(field_type, "@" + fname, MasterValue1, "@", toperand_type.ToString()) +
+                                                    "   -- :D.SD." + RefId.ToString() + ": --");
+                                            }
+                                            else
+                                            {
+                                                s = "/*setEnd." + krtLineNo.ToString() + "*/";
+                                                Where_Lines = Where_Lines.Replace(s,
+                                                    "/*prm*/ set " + t.Set_FieldName_Value_(field_type, "@" + fname, MasterValue1, "@", toperand_type.ToString()) +
+                                                    "   -- :@@YILAY --");
+                                            }
 
                                             s = "/*paramEnd." + krtLineNo.ToString() + "*/";
                                             Where_Lines = Where_Lines.Replace(s, virgul + " @" + fname);

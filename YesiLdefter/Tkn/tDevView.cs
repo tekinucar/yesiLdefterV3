@@ -282,7 +282,7 @@ namespace Tkn_DevView
             }
             #endregion
 
-            #region Scheduler
+            #region CalenderAndScheduler
 
             if (ViewType == v.obj_vw_CalenderAndScheduler)
             {
@@ -297,7 +297,7 @@ namespace Tkn_DevView
                 return tSchedulerView; // <<<< dönen cntrl
             }
 
-            #endregion Scheduler
+            #endregion CalenderAndScheduler
 
             #region Charts
 
@@ -3467,8 +3467,13 @@ MS_FIELDS                                          T03_MSFIELDS                 
                 startDateFieldName = Preparing_Mappings(JSON_PropView, storage);
 
             tSchedulerControl.BeginInit();
+            
             tSchedulerControl.ActiveViewType = SchedulerViewType.FullWeek;
+            tSchedulerControl.ActiveViewType = SchedulerViewType.Month;
+
             tSchedulerControl.MonthView.AppointmentDisplayOptions.StartTimeVisibility = AppointmentTimeVisibility.Auto;
+            
+
 
             if (t.IsNotNull(startDateFieldName) && t.IsNotNull(dsData))
                 tSchedulerControl.Start = Convert.ToDateTime(dsData.Tables[0].Rows[0][startDateFieldName].ToString());
@@ -3498,6 +3503,10 @@ MS_FIELDS                                          T03_MSFIELDS                 
 
             tSchedulerControl.DoubleClick += new System.EventHandler(evg.myGridView_DoubleClick);
 
+            tSchedulerControl.MonthView.AppointmentDisplayOptions.StartTimeVisibility = AppointmentTimeVisibility.Never;
+            tSchedulerControl.MonthView.AppointmentDisplayOptions.EndTimeVisibility = AppointmentTimeVisibility.Never;
+            tSchedulerControl.MonthView.AppointmentDisplayOptions.ShowReminder = false;
+            
             //tSchedulerControl.WorkWeekView.VisibleTime = true;
 
             timeRulerAdd(tSchedulerControl);
@@ -3527,7 +3536,12 @@ MS_FIELDS                                          T03_MSFIELDS                 
             scheduler.ActiveViewType = SchedulerViewType.Day;
             scheduler.DayView.DayCount = 7;
             scheduler.DayView.TopRowTime = DateTime.Now.AddHours(-1).TimeOfDay;
-            scheduler.Start = DateTime.Today.AddDays(-1);
+            //scheduler.Start = DateTime.Today.AddDays(-1);
+
+            scheduler.ActiveViewType = SchedulerViewType.Month;
+            //scheduler.MonthView.
+            scheduler.Start = DateTime.Today.AddDays(-7);
+
         }
 
 
@@ -3754,7 +3768,7 @@ MS_FIELDS                                          T03_MSFIELDS                 
             storage.Appointments.Mappings.Subject = prop_.SCHEDULER.Subject.ToString();// "Lkp_DerslikTipiId";
             storage.Appointments.Mappings.Label = prop_.SCHEDULER.Label.ToString(); // "AdayNo";
             storage.Appointments.Mappings.Description = prop_.SCHEDULER.Description.ToString(); // "Lkp_DonemTipiGrupTipiSubeTipi"; 
-
+            //storage.Appointments.Mappings.AllDay = 
             return prop_.SCHEDULER.StartDate.ToString();
         }
 

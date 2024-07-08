@@ -314,7 +314,7 @@ namespace Tkn_Variable
         public static DataSet ds_Computer = new DataSet();
         public static DataSet ds_ExeUpdates = new DataSet();
         public static DataSet ds_LookUpTableList = new DataSet();
-        public static DataSet ds_YilAyList = new DataSet();
+        public static DataSet ds_DonemTipiList = new DataSet();
 
         public static List<string> tableList = new List<string>();
         public static List<string> tableIPCodeTableList = new List<string>();
@@ -670,7 +670,7 @@ namespace Tkn_Variable
         public static string SQL { get; set; }
         public static string SQLSave { get; set; }
         public static string SQLState { get; set; }
-        public static System.Windows.Forms.Timer timer_Kullaniciya_Mesaj_Varmi = null;
+        public static System.Windows.Forms.Timer timer_Kullaniciya_Mesaj_Var_ = null;
         public static string Kullaniciya_Mesaj_Var { get; set; }
         public static Boolean Kullaniciya_Mesaj_Show = false;
         public static Boolean Onay { get; set; }
@@ -856,7 +856,7 @@ namespace Tkn_Variable
         public static int BUGUN_YILAY = 0;
         public static int GECEN_YILAY = 0;
         public static int GELECEK_YILAY = 0;
-        public static int USER_YILAY = 0;
+        public static int DONEMTIPI_YILAY = 0;
 
 
         public static string Declare_bugun = string.Empty;

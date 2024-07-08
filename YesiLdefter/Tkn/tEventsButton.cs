@@ -833,7 +833,7 @@ namespace Tkn_Events
             //if (dsData.Tables[0].Namespace == "NewRecord") return;
             if (dsData.Tables[0].CaseSensitive == true) return false;
 
-            bool onay = false;
+            bool onay = true;
             bool old_PositionChange = false;
             string myProp = dsData.Namespace;
             string DetailSubDetail = t.MyProperties_Get(myProp, "DetailSubDetail:");
@@ -1140,7 +1140,7 @@ namespace Tkn_Events
             if (onay)
             {
                 v.Kullaniciya_Mesaj_Var = "Kayıt işlemi başladı ...";
-                v.timer_Kullaniciya_Mesaj_Varmi.Enabled = true;
+                v.timer_Kullaniciya_Mesaj_Var_.Enabled = true;
 
                 tSave sv = new tSave();
                 onay = sv.tDataSave(tForm, tableIPCode);
@@ -2560,22 +2560,20 @@ namespace Tkn_Events
                     if (item.BUTTONTYPE.ToString() == Convert.ToString((byte)buttonType))
                     {
                         isFormOpen = CheckValue(tForm, item, tableIPCode);
-                        
-                        
-                        // else satırı mı kontrol et
-                        elseItem = (item.CHC_VALUE.ToString().IndexOf("ELSE") > -1);
 
                         // bu satır daha önce çalıştı mı ?
                         transactionRun = item.TransactionRun;
 
-                        if (elseItem) // else satırına geldik
-                        {
-                            elseOncesiCalisti = elseOncesiniKontrolEt(propList_, buttonType);
-                            if ((elseOncesiCalisti) && // elseden öncede çalıştı
-                                (isFormOpen))          // else satırının çalışması için onay da aldı
-                                isFormOpen = false;    // fakat else den önce çalıştığı için else satırının onayı iptal, çalışmasın
-                        }
-                        
+                        // else satırı mı kontrol et
+                        elseItem = (item.CHC_VALUE.ToString().IndexOf("ELSE") > -1);
+                        //if (elseItem) // else satırına geldik
+                        //{
+                        //    elseOncesiCalisti = elseOncesiniKontrolEt(propList_, buttonType);
+                        //    if ((elseOncesiCalisti) && // elseden öncede çalıştı
+                        //        (isFormOpen))          // else satırının çalışması için onay da aldı
+                        //        isFormOpen = false;    // fakat else den önce çalıştığı için else satırının onayı iptal, çalışmasın
+                        //}
+
                         // form açılması için onaylandı ise
                         // eğer daha önce çalışmamış ise çalışsın
                         if ((isFormOpen) && (transactionRun == false))

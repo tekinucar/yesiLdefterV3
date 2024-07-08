@@ -128,7 +128,7 @@ namespace Tkn_Save
                 vTable vt = new vTable();
 
                 v.Kullaniciya_Mesaj_Var = "Kayıt işlemi gerçekleşiyor...";
-                v.timer_Kullaniciya_Mesaj_Varmi.Enabled = true;
+                v.timer_Kullaniciya_Mesaj_Var_.Enabled = true;
 
                 //t.WaitFormOpen(tForm, v.Kullaniciya_Mesaj_Var);
                 //v.SP_OpenApplication = true;
@@ -1053,8 +1053,31 @@ namespace Tkn_Save
                     }
                 }
 
+                //if (fType == 58) s = "Smalldatetime";
+                //if (fType == 61) s = "Datetime";
+                //if (fType == 40) s = "Date";
+                //* date 58, 61
+                if ((f.ftype == 58) || (f.ftype == 61))
+                {
+                    f._setInsField = f.bos + f.fname + ", ";
+
+                    if ((f.fvalue != "") && (f.fvalue.IndexOf("01.01.0001") == -1) && f.fvalue != "null")
+                    {
+                        f._setInsValue = t.TarihSaat_Formati(Convert.ToDateTime(f.fvalue)) + ", ";
+                        if (f.fVisible == "True")
+                            f._setEditField = " [" + f.fname + "] = " + t.Tarih_Formati(Convert.ToDateTime(f.fvalue)) + ", ";
+                        f._setSelectControl = " and [" + f.fname + "] = " + t.Tarih_Formati(Convert.ToDateTime(f.fvalue)) + " ";
+                    }
+                    else
+                    {
+                        f._setInsValue = "null, ";
+                        if (f.fVisible == "True")
+                            f._setEditField = " [" + f.fname + "] = " + "null, ";
+                        f._setSelectControl = " and [" + f.fname + "] = null ";
+                    }
+                }
                 //* date 40
-                if ((f.ftype == 40) || (f.ftype == 61))
+                if (f.ftype == 40)
                 {
                     f._setInsField = f.bos + f.fname + ", ";
 
@@ -1073,6 +1096,7 @@ namespace Tkn_Save
                         f._setSelectControl = " and [" + f.fname + "] = null ";
                     }
                 }
+
 
                 //* time türü 41
                 if (f.ftype == 41)

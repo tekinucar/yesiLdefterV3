@@ -284,10 +284,10 @@ namespace Tkn_InputPanel
                 co.Create_Navigator(tForm, tPanelControl.Parent, row_Table, ds_Data,
                                     TableIPCode + MultiPageID, External_TableIPCode);
             }
-                        
+
             #endregion NavigatorPanel
 
-            #region VievControl Create
+            #region Create VievControl 
 
             int ViewType = 0;
             Control cntrl = new Control();
@@ -335,9 +335,9 @@ namespace Tkn_InputPanel
                 }
             }
 
-            #endregion VievControl
+            #endregion Create VievControl
 
-            #region ViewObject Create
+            #region preparing ViewControl
 
             // ViewControl var ise veya yeni oluşturulmuş ise ViewObject ekle 
 
@@ -463,7 +463,7 @@ namespace Tkn_InputPanel
                 // t.Control_Enabled(ds_Data, cntrl);
             }
 
-            #endregion ViewObject 
+            #endregion preparing ViewControl 
 
             if (tPanelControl.TabIndex == 0)
             {

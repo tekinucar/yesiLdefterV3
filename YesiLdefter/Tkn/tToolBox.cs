@@ -2481,8 +2481,8 @@ namespace Tkn_ToolBox
 
             if (v.SP_ConnBool_Project != v.SP_ConnBool_Project_Old)
             {
-                v.Kullaniciya_Mesaj_Var = "Project bağlantı değişikliği ... " + v.SP_ConnBool_Project.ToString();
-                v.timer_Kullaniciya_Mesaj_Varmi.Enabled = true;
+                v.Kullaniciya_Mesaj_Var = "Project bağlantı değişikliği : " + v.SP_ConnBool_Project.ToString();
+                v.timer_Kullaniciya_Mesaj_Var_.Enabled = true;
             }
 
             v.SP_ConnBool_Project_Old = v.SP_ConnBool_Project;
@@ -2513,8 +2513,8 @@ namespace Tkn_ToolBox
 
                 if (v.SP_ConnBool_Manager != v.SP_ConnBool_Manager_Old)
                 {
-                    v.Kullaniciya_Mesaj_Var = "ManagerServer bağlantı değişikliği ... " + v.SP_ConnBool_Manager.ToString();
-                    v.timer_Kullaniciya_Mesaj_Varmi.Enabled = true;
+                    v.Kullaniciya_Mesaj_Var = "ManagerServer bağlantı değişikliği : " + v.SP_ConnBool_Manager.ToString();
+                    v.timer_Kullaniciya_Mesaj_Var_.Enabled = true;
                 }
 
                 v.SP_ConnBool_Manager_Old = v.SP_ConnBool_Manager;
@@ -2671,8 +2671,11 @@ namespace Tkn_ToolBox
             //string Sql = ds.Tables[0].Namespace.ToString();
 
             string myProp = ds.Namespace.ToString();
-            string Sql = Set(MyProperties_Get(myProp, "SqlSecond:"),
-                             MyProperties_Get(myProp, "SqlFirst:"), "");
+
+            string SqlFirst = MyProperties_Get(myProp, "SqlFirst:");
+            string SqlSecond = MyProperties_Get(myProp, "SqlSecond:");
+
+            string Sql = Set(SqlSecond, SqlFirst, "");
 
             if (Sql.IndexOf("-99") > -1)
             {
@@ -2682,7 +2685,7 @@ namespace Tkn_ToolBox
                 ev.tSubDetail_Refresh(ds, dN);
                 return true;
             }
-
+            
             if (IsNotNull(Sql))
             {
                 #region
@@ -3061,6 +3064,7 @@ namespace Tkn_ToolBox
             Str_Replace(ref Sql, ":SectorTypeId", v.SP_Firm_SectorTypeId.ToString());
 
 
+            Str_Replace(ref Sql, ":DONEM_YILAY", v.DONEMTIPI_YILAY.ToString());
             Str_Replace(ref Sql, ":BUGUN_YILAY", v.BUGUN_YILAY.ToString());
             Str_Replace(ref Sql, ":BUGUN_GUN", v.BUGUN_GUN.ToString());
             Str_Replace(ref Sql, ":BUGUN_AY", v.BUGUN_AY.ToString());
@@ -4423,13 +4427,13 @@ namespace Tkn_ToolBox
             if (i1 == -1)
                 i1 = Veri.IndexOf("--:@@YILAY");
 
-            int i2 = Veri.IndexOf(":BUGUN_YILAY");
+            int i2 = Veri.IndexOf(":DONEM_YILAY");
 
-            // eğer :@@YILAY ifadesi var, :BUGUN_YILAY yoksa
-            // :BUGUN_YILAY value değerini yenileyebilmek için tekrar düzenleme gerekiyor
+            // eğer :@@YILAY ifadesi var, :DONEM_YILAY yoksa
+            // :DONEM_YILAY value değerini yenileyebilmek için tekrar düzenleme gerekiyor
             //
             // declare @DonemTipiId int = 202205 -- :@@YILAY   şeklindeki satır
-            // declare @DonemTipiId int = :BUGUN_YILAY  -- :@@YILAY şekline dönüyor
+            // declare @DonemTipiId int = :DONEM_YILAY  -- :@@YILAY şekline dönüyor
             if ((i1 > -1) && (i2 == -1))
             {
                 for (int i = i1; i > -1; i--)
@@ -4443,7 +4447,7 @@ namespace Tkn_ToolBox
 
                 Veri = Veri.Remove(i2 + 1, i1 - i2 - 1);
 
-                Veri = Veri.Insert(i2 + 1, " :BUGUN_YILAY ");
+                Veri = Veri.Insert(i2 + 1, " :DONEM_YILAY ");
             }
 
             return Veri;
@@ -6990,16 +6994,21 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
         #endregion MsFileUpdates
 
         #region YilAy - Mali Dönem Read
-        public void YilAyRead()
+        public void DonemTipiYilAyRead()
         {
-            if (v.tMainFirm.SectorTypeId == 201) // Mtsk
-            {
-                string tableName = "MtskDonemTipi";
-                string Sql = " Select * from [Lkp].[" + tableName + "] order by Id desc ";
+            if (v.tMainFirm.SectorTypeId == (Int16)v.msSectorType.UstadCrm) return;
 
-                v.dBaseNo dBaseNo = v.dBaseNo.Project;
-                SQL_Read_Execute(dBaseNo, v.ds_YilAyList, ref Sql, tableName, "");
-            }
+            string tableName = "";
+            string Sql = "";
+              
+            if (v.tMainFirm.SectorTypeId == (Int16)v.msSectorType.UstadMtsk) // Mtsk
+                tableName = "MtskDonemTipi";
+            else
+                tableName = "BelgeDonemTipi";
+
+            Sql = " Select * from [Lkp].[" + tableName + "] order by Id desc ";
+            v.dBaseNo dBaseNo = v.dBaseNo.Project;
+            SQL_Read_Execute(dBaseNo, v.ds_DonemTipiList, ref Sql, tableName, "");
         }
 
         public void TestRead()
@@ -14620,7 +14629,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             if (onay)
             {
                 v.Kullaniciya_Mesaj_Var = "Download gerçekleşti ...";
-                v.timer_Kullaniciya_Mesaj_Varmi.Start();
+                v.timer_Kullaniciya_Mesaj_Var_.Start();
             }
             return onay;
         }
@@ -14648,7 +14657,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             if (onay)
             {
                 v.Kullaniciya_Mesaj_Var = "Download gerçekleşti ...";
-                v.timer_Kullaniciya_Mesaj_Varmi.Start();
+                v.timer_Kullaniciya_Mesaj_Var_.Start();
             }
             return onay;
         }

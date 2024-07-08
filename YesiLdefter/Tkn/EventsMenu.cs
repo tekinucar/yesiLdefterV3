@@ -489,21 +489,21 @@ namespace Tkn_Events
             #region YILAYBACK - NEXT
             if (ButtonName.IndexOf("YILAY_BACK") > 0)
             {
-                int value = v.USER_YILAY;
+                int value = v.DONEMTIPI_YILAY;
                 string caption = getYilAyCaption(value);
-                v.USER_YILAY = getBackYilAy(value, 1, ref caption);
-                setYilAyCaption(tForm, v.USER_YILAY, caption, myFormLoadValue, t);
+                v.DONEMTIPI_YILAY = getBackYilAy(value, 1, ref caption);
+                setYilAyCaption(tForm, v.DONEMTIPI_YILAY, caption, myFormLoadValue, t);
                 yilAyFormRefresh(tForm);
-                //MessageBox.Show(v.USER_YILAY.ToString() + " ; " + caption);
+                //MessageBox.Show(v.DONEMTIPI_YILAY.ToString() + " ; " + caption);
             }
             if (ButtonName.IndexOf("YILAY_NEXT") > 0)
             {
-                int value = v.USER_YILAY;
+                int value = v.DONEMTIPI_YILAY;
                 string caption = getYilAyCaption(value);
-                v.USER_YILAY = getBackYilAy(value, 2, ref caption);
-                setYilAyCaption(tForm, v.USER_YILAY, caption, myFormLoadValue, t);
+                v.DONEMTIPI_YILAY = getBackYilAy(value, 2, ref caption);
+                setYilAyCaption(tForm, v.DONEMTIPI_YILAY, caption, myFormLoadValue, t);
                 yilAyFormRefresh(tForm);
-                //MessageBox.Show(v.USER_YILAY.ToString() + " ; " + caption);
+                //MessageBox.Show(v.DONEMTIPI_YILAY.ToString() + " ; " + caption);
             }
             #endregion YILAYBACK - NEXT
 
@@ -601,11 +601,11 @@ namespace Tkn_Events
         {
             int rowNo = 0;
             int yeniYilAy = yilAy;
-            int count = v.ds_YilAyList.Tables[0].Rows.Count;
+            int count = v.ds_DonemTipiList.Tables[0].Rows.Count;
 
             for (int i = 0; i < count; i++)
             {
-                if (yilAy.ToString() == v.ds_YilAyList.Tables[0].Rows[i][0].ToString())
+                if (yilAy.ToString() == v.ds_DonemTipiList.Tables[0].Rows[i][0].ToString())
                 {
                     rowNo = i;
                     break;
@@ -617,8 +617,8 @@ namespace Tkn_Events
             {
                 if (count > rowNo + 1)
                 {
-                    yeniYilAy = Convert.ToInt32(v.ds_YilAyList.Tables[0].Rows[rowNo + 1][0].ToString());
-                    yilAyCapiton = v.ds_YilAyList.Tables[0].Rows[rowNo + 1][1].ToString();
+                    yeniYilAy = Convert.ToInt32(v.ds_DonemTipiList.Tables[0].Rows[rowNo + 1][0].ToString());
+                    yilAyCapiton = v.ds_DonemTipiList.Tables[0].Rows[rowNo + 1][1].ToString();
                 }
             }
             // next ise
@@ -626,8 +626,8 @@ namespace Tkn_Events
             {
                 if (rowNo > 0)
                 {
-                    yeniYilAy = Convert.ToInt32(v.ds_YilAyList.Tables[0].Rows[rowNo - 1][0].ToString());
-                    yilAyCapiton = v.ds_YilAyList.Tables[0].Rows[rowNo - 1][1].ToString();
+                    yeniYilAy = Convert.ToInt32(v.ds_DonemTipiList.Tables[0].Rows[rowNo - 1][0].ToString());
+                    yilAyCapiton = v.ds_DonemTipiList.Tables[0].Rows[rowNo - 1][1].ToString();
                 }
             }
 
@@ -670,10 +670,6 @@ namespace Tkn_Events
 
         private void yilAyFormRefresh(Form tForm)
         {
-            int emanet = v.BUGUN_YILAY;
-
-            v.BUGUN_YILAY = v.USER_YILAY;
-
             vSubWork vSW = new vSubWork();
             vSW._01_tForm = tForm;
             vSW._02_TableIPCode = "";
@@ -681,31 +677,31 @@ namespace Tkn_Events
             vSW._04_WorkWhom = v.tWorkWhom.All;
 
             ev.tSubWork_(vSW);
-
-
-            v.BUGUN_YILAY = emanet;
         }
 
 
         public string getYilAyCaption(int yilAy)
         {
             tToolBox t = new tToolBox();
-            if (t.IsNotNull(v.ds_YilAyList) == false) return "";
+            if (t.IsNotNull(v.ds_DonemTipiList) == false) return "";
 
+            string fieldName = "BelgeDonemTipi";
             string caption = "";
             string yilAy_ = yilAy.ToString();
 
-            int count = v.ds_YilAyList.Tables[0].Rows.Count;
+            int count = v.ds_DonemTipiList.Tables[0].Rows.Count;
+
+            if (v.tMainFirm.SectorTypeId == (Int16)v.msSectorType.UstadMtsk) // Mtsk
+                fieldName = "DonemTipi";
 
             for (int i = 0; i < count; i++)
             {
-                if (yilAy_ == v.ds_YilAyList.Tables[0].Rows[i]["Id"].ToString())
+                if (yilAy_ == v.ds_DonemTipiList.Tables[0].Rows[i]["Id"].ToString())
                 {
-                    caption = v.ds_YilAyList.Tables[0].Rows[i]["DonemTipi"].ToString();
+                    caption = v.ds_DonemTipiList.Tables[0].Rows[i][fieldName].ToString();
                     break;
                 }
             }
-
 
             return caption;
         }
