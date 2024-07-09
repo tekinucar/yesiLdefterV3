@@ -1,4 +1,11 @@
-﻿/*CreateTable*/
+﻿/*
+   İşletmenin eline geçen
+   fatura, parekende fişi, kontrat vb... lere dayalı olarak bir ödeme emri belgesi oluşturulur.
+   Zamanı gelince OnmBelgeDekont aracılığıylada bu belge ödenmiş olur. 
+   IsPaid = 1 olunca görevi biter.
+*/
+
+/*CreateTable*/
 
 begin transaction
 

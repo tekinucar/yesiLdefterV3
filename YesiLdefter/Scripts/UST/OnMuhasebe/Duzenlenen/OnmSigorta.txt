@@ -1,0 +1,123 @@
+﻿/*
+    Mevcut sigorta poliçesini kaydet
+    bu poliçeye bakarak sigorta bitiş tarihine bağlı OnmTakip tablosunda yeni bir takip satırı oluşur
+    Bu takip satırı ile yeni poliçe kaydedilir.
+    Yeni poliçe ise OnmBelgeMaliyet tablosunda bir maliyet satırı oluşturur
+    Bu maliyet satırıda OnmBelgeDekont ile ödenir.
+    
+    Poliçenin SigortaBitisTarihi ne bakarak yeniden OnmTakip satırı oluşur
+*/
+
+/*CreateTable*/
+
+begin transaction
+
+ create table OnmSigorta
+ (
+
+   Id                Int IDENTITY(1,1) NOT NULL, 
+   FirmId            Int       not null,
+   VarlikTipiId      smallInt  not null, /* 250, 251, 252, 253, 254, 255, 256 */
+   VarlikId          Int       not null, /* OnmHesapFinans.Id  : sigorta yapılan nesnenin id si */
+
+   IsActive          Bit       not null, /* default : 1 = active, 0 = not active */  
+   IsPaid            Bit       not null, /* default : 0 = ödenmedi, 1 = ödendi */  
+
+   PoliceTipiId          smallint      null,
+   PoliceTarihi          Date          null,
+   SigortaBelgeNo        nVarchar(30)  null,
+   SigortaFirmasi        nVarchar(100) null,
+   CariId                Int           null,  /* sigorta poliçesinden dolayı alacaklı olan cari */
+   AcenteFirmaAdi        nVarchar(100) null,
+   AcenteYetkiliAdi      nVarchar(50)  null,
+   AcenteTelefonu        nVarchar(30)  null,
+   SigortaTeminatTutari  Numeric(22,5)  null,
+   SigortaTutari         Numeric(22,5)  null,
+   PeriyodTipiId         SmallInt      null,  
+   SigortaBaslamaTarihi  Date          null,
+   SigortaBitisTarihi    Date          null,
+
+   KayitTarihi           DateTime      null, 
+   BelgeMaliyetId        Int           null, /* OnmBelgeMaliyet.Id = Maliyet belge ıd */  
+   BelgeDekontId         Int           null, /* OnmBelgeDekont.Id = Ödeme yapan belge ıd */  
+
+   constraint		pk_OnmSigorta primary key (Id)
+ )
+
+ create index X_OnmSigorta01 on OnmSigorta (FirmId)
+ create index X_OnmSigorta02 on OnmSigorta (VarlikId)
+ create index X_OnmSigorta03 on OnmSigorta (SigortaBitisTarihi)
+ 
+ grant select, insert, update, delete on OnmSigorta to public
+
+commit transaction
+
+/*CreateTableEnd*/
+
+/*CreateData*/
+
+-- ------------------------------------------------------- 
+-- VarlikTipiId   
+-- ------------------------------------------------------- 
+
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmSigortaVarlikTipi')
+drop table [Lkp].[OnmSigortaVarlikTipi]
+
+create table [Lkp].[OnmSigortaVarlikTipi]
+(
+   Id             Int Unique Not Null,
+   VarlikTipi     nVarchar(50),
+
+   constraint  pk_OnmSigortaVarlikTipi primary key (Id)
+)
+
+delete from [Lkp].[OnmSigortaVarlikTipi]
+INSERT INTO [Lkp].[OnmSigortaVarlikTipi] (Id, VarlikTipi)
+ VALUES 
+  ( 0,    N"Tanımsız"),
+  ( 250,  N"Arazi Ve Arsalar"),
+  ( 251,  N"Yer Altı Ve Yer Üstü Düzenleri"),
+  ( 252,  N"Binalar"),
+  ( 253,  N"Tesis, Makine Ve Cihazlar"),
+  ( 254,  N"Taşıtlar"),
+  ( 255,  N"Demirbaşlar"),
+  ( 256,  N"Diğer Maddi Duran Varlıklar")
+
+
+-- ------------------------------------------------------- 
+-- PoliceTipiId   
+-- ------------------------------------------------------- 
+
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmSigortaPoliceTipi')
+drop table [Lkp].[OnmSigortaPoliceTipi]
+
+create table [Lkp].[OnmSigortaPoliceTipi]
+(
+   Id             Int Unique Not Null,
+   PoliceTipi     nVarchar(50),
+
+   constraint  pk_OnmSigortaPoliceTipi primary key (Id)
+)
+
+delete from [Lkp].[OnmSigortaPoliceTipi]
+INSERT INTO [Lkp].[OnmSigortaPoliceTipi] (Id, PoliceTipi)
+ VALUES 
+  ( 0,  N"Tanımsız"),
+  ( 1,  N"Kasko"),
+  ( 2,  N"Trafik"),
+  ( 3,  N"İhtiyari Mali Mesuliyet (İMM)"),
+  ( 4,  N"Tamamlayıcı Sağlık Sigortası"),
+  ( 5,  N"Özel Sağlık Sigortası"),
+  ( 6,  N"Konut Sigortası"),
+  ( 7,  N"Dask"),
+  ( 8,  N"Evim Güvende Sigortası"),
+  ( 9,  N"Ferdi Kaza Sigortası"),
+  ( 10,  N"Telefon Kaskosu"),
+  ( 11,  N"Seyahat Sağlık Sigortası"),
+  ( 12,  N"Evcil Hayvan Sigortası"),
+  ( 13,  N"Doğum Sigortası"),
+  ( 14,  N"Hamileyken Doğum Sigortası")
+
+
+/*CreateDataEnd*/
+

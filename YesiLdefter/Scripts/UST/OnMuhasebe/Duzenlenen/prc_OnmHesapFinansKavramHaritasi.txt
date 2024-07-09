@@ -1,0 +1,76 @@
+﻿
+/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_OnmHesapFinansKavramHaritasi]   
+AS BEGIN
+
+Select x.* from (
+
+Select 
+ ks.Id as RefId
+,ks.FirmId
+,    1 as FinanasTipiId 
+,'100' as FinansKodu
+,ks.Id as FinansId, 'Kasa' as FinansTipi1, ks.HesapKodu, ks.HesapKisaAdi as FinansAdi
+,0 as SubeId,       '' as FinansTipi2, '' as SubeAdi 
+,0 as BankaHesapId, '' as FinansTipi3, '' as HesapNo, null as KMHLimiti, ks.ParaTipiId
+,0 as KartId,       '' as FinansTipi4, '' as KartNo,  null as KrediLimiti, null as HesapKesimGunu, null as OdemeKacGunSonra
+from OnmHesapFinans as ks
+where ks.AltGrupTipiId = 100
+and   ks.IsActive = 1
+
+union all
+
+Select 
+ kk.Id as RefId
+,bn.FirmId
+,    2 as FinanasTipiId 
+,'102' as FinansKodu
+,bn.Id as FinansId,     'Banka'        as FinansTipi1, bn.HesapKodu, bn.HesapKisaAdi as FinansAdi
+,sb.Id as SubeId,       'Şube'         as FinansTipi2, sb.HesapAdi + ', ' + sb.HesapKodu as SubeAdi 
+,hs.Id as BankaHesapId, 'Banka hesabı' as FinansTipi3, hs.HesapAdi + '.' + hs.Numarasi as HesapNo, hs.KrediLimiti as KMHLimiti, hs.ParaTipiId
+,kk.Id as KartId,       'KKartı'       as FinansTipi4, kk.HesapAdi + '.' + kk.Numarasi as KartNo, kk.KrediLimiti, kk.HesapKesimGunu, kk.OdemeKacGunSonra
+
+from OnmHesapFinans as bn 
+  left outer join OnmHesapFinans as sb on ( bn.Id = sb.ParentId ) 
+  left outer join OnmHesapFinans as hs on ( sb.Id = hs.ParentId ) 
+  left outer join OnmHesapFinans as kk on ( hs.Id = kk.ParentId ) 
+
+where bn.AltGrupTipiId = 1020
+and   bn.IsActive = 1
+and   sb.IsActive = 1
+and   hs.IsActive = 1
+and   kk.IsActive = 1
+and   kk.AltGrupTipiId = 1023
+
+union all 
+
+Select 
+ ps.Id as RefId
+,bn.FirmId
+,    2 as FinanasTipiId 
+,'102' as FinansKodu
+,bn.Id as FinansId,     'Banka'        as FinansTipi1, bn.HesapKodu, bn.HesapKisaAdi as FinansAdi
+,sb.Id as SubeId,       'Şube'         as FinansTipi2, sb.HesapAdi + ', ' + sb.HesapKodu  as SubeAdi 
+,hs.Id as BankaHesapId, 'Banka hesabı' as FinansTipi3, hs.HesapAdi + '.' + hs.Numarasi as HesapNo, hs.KrediLimiti as KMHLimiti, hs.ParaTipiId
+,ps.Id as KartId,       'Pos'          as FinansTipi4, ps.HesapAdi + '.' + ps.Numarasi as KartNo, null as KrediLimiti, null as HesapKesimGunu, ps.OdemeKacGunSonra
+
+from OnmHesapFinans as bn 
+  left outer join OnmHesapFinans as sb on ( bn.Id = sb.ParentId ) 
+  left outer join OnmHesapFinans as hs on ( sb.Id = hs.ParentId ) 
+  left outer join OnmHesapFinans as ps on ( hs.Id = ps.ParentId ) 
+
+where bn.AltGrupTipiId = 1020
+and   bn.IsActive = 1
+and   sb.IsActive = 1
+and   hs.IsActive = 1
+and   ps.IsActive = 1
+and   ps.AltGrupTipiId = 1024
+
+) as x
+
+order by x.FinanasTipiId , x.HesapKodu,  x.FinansAdi, x.SubeAdi, x.HesapNo, x.KartNo
+
+END -- procedure
+
+/*CreateProcedureEnd*/
