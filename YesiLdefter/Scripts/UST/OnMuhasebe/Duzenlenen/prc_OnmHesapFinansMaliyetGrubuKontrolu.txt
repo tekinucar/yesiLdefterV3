@@ -41,6 +41,7 @@ AS BEGIN
            ,[KaynakTipiId]
            ,[KdvOrani]
            ,[IsKiralik]
+           ,[MaliyetinKapsamTipiId]
            )
       Select 
             0 --ParentId
@@ -61,6 +62,7 @@ AS BEGIN
            ,KaynakTipiId
            ,KdvOrani
            ,IsKiralik
+		   ,MaliyetinKapsamTipiId
       from Lkp.OnmHesapMaster
       where 0 = 0
       and UstGrupTipiId = @UstGrupTipiId_Where

@@ -79,6 +79,7 @@ begin transaction
    IsKiralik               Bit       null,
    KiralikGun              SmallInt  null,
    KiralikAy               SmallInt  null,
+   MaliyetinKapsamTipiId   SmallInt  null,
 
    --98,99
    JoinTableTypeId    SmallInt       null, /* ilgili table 1: OnmBelgeMaliyet,  */
@@ -491,7 +492,23 @@ INSERT INTO [Lkp].[OnmHesapFinansSahiplikTipi] (Id, SahiplikTipi, GrupTipiId)
   (12,   N"Ortağa ait", 1),
   (21,   N"Kiralık", 2)
 
+-- ------------------------------------------------------- 
+-- MaliyetinKapsamTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[OnmHesapFinansMaliyetinKapsamTipi]
+(
+   Id                    Int Unique Not Null,
+   MaliyetinKapsamTipi   nVarchar(50),
 
+   constraint  pk_OnmHesapFinansMaliyetinKapsamTipi primary key (Id)
+)
+
+delete from [Lkp].[OnmHesapFinansMaliyetinKapsamTipi]
+INSERT INTO [Lkp].[OnmHesapFinansMaliyetinKapsamTipi] (Id, MaliyetinKapsamTipi)
+ VALUES 
+  (0,   N'Tüm varlıklar için'),
+  (1,   N'Sahip olduğumuz varlıklar için'), 
+  (2,   N'Kiralık olan varlıklar için')
 
 -- ------------------------------------------------------- 
 -- JoinTableTypeId
