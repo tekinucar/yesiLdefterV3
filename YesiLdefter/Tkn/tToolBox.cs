@@ -188,6 +188,7 @@ namespace Tkn_ToolBox
             string cumle =
             @" if ( Select count(*) ADET from [dbo].[FileUpdates] where 0 = 0 
                     and [PcName] = '" + pcName + @"' 
+                    and [NetworkMacAddress] = '" + networkKey + @"'
                     and [MsFileUpdateId] = " + v.tMsFileUpdate.id.ToString() + @" ) = 0 
         begin
             INSERT INTO [dbo].[FileUpdates]
@@ -217,7 +218,6 @@ namespace Tkn_ToolBox
         end ";
             return cumle;
         }
-
 
         #endregion fileUpdates
 
@@ -7000,7 +7000,9 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
             string tableName = "";
             string Sql = "";
-              
+
+            TableRemove(v.ds_DonemTipiList);
+
             if (v.tMainFirm.SectorTypeId == (Int16)v.msSectorType.UstadMtsk) // Mtsk
                 tableName = "MtskDonemTipi";
             else
@@ -12693,20 +12695,23 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 return;
             }
 
-            
             //Mesaj = "  " + Mesaj.PadRight(100);
 
             if (v.SP_OpenApplication == false)
             {
-                SplashScreenManager.ShowForm(tForm, typeof(DevExpress.XtraWaitForm.AutoLayoutDemoWaitForm), true, true, false);
-                
+                if (tForm != null)
+                {
+                    SplashScreenManager.ShowForm(tForm, typeof(DevExpress.XtraWaitForm.AutoLayoutDemoWaitForm), true, true, false);
+                    SplashScreenManager.Default.SetWaitFormCaption(" " + Mesaj);
+                    if (v.SP_TabimDbConnection)
+                        SplashScreenManager.Default.SetWaitFormDescription(v.ENTER + "  " + "Tabim.MTSK");
+                    else SplashScreenManager.Default.SetWaitFormDescription(v.ENTER + "  " + "Lütfen bekleyiniz...");
+                }
+                //else
+                //    SplashScreenManager.ShowDefaultSplashScreen();
+
                 //SplashScreenManager.Default.SetWaitFormCaption("üstadın yeşiL defteri");
                 //SplashScreenManager.Default.SetWaitFormDescription(Mesaj);
-
-                SplashScreenManager.Default.SetWaitFormCaption(" " + Mesaj);
-                if (v.SP_TabimDbConnection)
-                     SplashScreenManager.Default.SetWaitFormDescription(v.ENTER + "  " + "Tabim.MTSK");
-                else SplashScreenManager.Default.SetWaitFormDescription(v.ENTER + "  " + "...");
 
                 //SplashScreenManager.ShowForm(tForm, typeof(DevExpress.XtraWaitForm.ManualLayoutDemoWaitForm), true, true, false);
                 //SplashScreenManager.ShowForm(tForm, typeof(DevExpress.XtraWaitForm.DemoWaitForm), true, true, false);
@@ -12716,13 +12721,13 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 //SplashScreenManager.ShowDefaultProgressSplashScreen(Mesaj);
             }
 
-            //SplashScreenManager.ShowDefaultProgressSplashScreen(Mesaj);
+                //SplashScreenManager.ShowDefaultProgressSplashScreen(Mesaj);
 
-            //SplashScreenManager.Default.SetWaitFormCaption(v.Wait_Caption);
-            //SplashScreenManager.Default.SetWaitFormDescription(Mesaj);
+                //SplashScreenManager.Default.SetWaitFormCaption(v.Wait_Caption);
+                //SplashScreenManager.Default.SetWaitFormDescription(Mesaj);
 
-            // acildı.
-            v.IsWaitOpen = true;
+                // acildı.
+                v.IsWaitOpen = true;
         }
 
         public void WaitFormClose()

@@ -261,6 +261,9 @@ namespace YesiLdefter
                 t.WaitFormOpen(v.mainForm, "SysTypes tanımları okunuyor...");
                 t.SYS_Types_Read();
 
+                t.WaitFormOpen(v.mainForm, "Dönem listesi okunuyor...");
+                t.DonemTipiYilAyRead();
+
                 //t.WaitFormOpen(v.mainForm, "Read : SysGlyph ...");
                 //t.SYS_Glyph_Read();
 
@@ -284,8 +287,8 @@ namespace YesiLdefter
         {
             /// Ön Muhasebe için başlangıç işlemleri
             if (v.SP_Firm_SectorTypeId == (Int16)v.msSectorType.OnMuhasebe) autoOpenForm("UST/OMS/FNS/MALIISLEM");
-                //autoOpenForm("UST/OMS/AYR/YHBaslangic");
-                
+            //autoOpenForm("UST/OMS/AYR/YHBaslangic");
+            if (v.SP_Firm_SectorTypeId == (Int16)v.msSectorType.UstadMtsk) autoOpenForm("UST/MEB/MTS/YHBaslangic");
         }
 
         void autoOpenForm(string FormCode)
@@ -609,6 +612,9 @@ namespace YesiLdefter
             //
             if (v.tMainFirm.MenuCodeOld != v.tMainFirm.MenuCode)
             {
+                t.WaitFormOpen(v.mainForm, "Dönem listesi okunuyor...");
+                t.DonemTipiYilAyRead();
+
                 // değişien firmanın menüsü 
                 v.tMainFirm.MenuCodeOld = v.tMainFirm.MenuCode;
 
@@ -618,6 +624,8 @@ namespace YesiLdefter
             }
 
             t.getUserLookAndFeelSkins();
+
+            YolHaritasi();
         }
 
         //btnTEST

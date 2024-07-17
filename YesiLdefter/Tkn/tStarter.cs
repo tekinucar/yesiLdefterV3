@@ -144,7 +144,7 @@ namespace Tkn_Starter
             /// onun açılması için burada bunlar false yapılıyor
             v.IsWaitOpen = false;
             v.SP_OpenApplication = false;
-            t.WaitFormOpen(v.mainForm, "");
+            t.WaitFormOpen(v.mainForm, "İşlemler devam ediyor...");
 
             t.WaitFormOpen(v.mainForm, "Kullanıcı teması hazırlanıyor...");
             setLoginSkins();
@@ -165,7 +165,7 @@ namespace Tkn_Starter
 
             t.WaitFormOpen(v.mainForm, "Sistem tarihleri okunuyor, hazırlanıyor...");
             t.MSSQL_Server_Tarihi();
-            t.DonemTipiYilAyRead();
+            //t.DonemTipiYilAyRead();
 
             //t.TestRead();
 

@@ -410,12 +410,22 @@ INSERT INTO [Lkp].[OnmHesapFinansUstGrupTipi] (Id, UstGrupTipi, GrupTipiId)
 delete from [Lkp].[OnmHesapFinansAnaGrupTipi]
 INSERT INTO [Lkp].[OnmHesapFinansAnaGrupTipi] (Id, AnaGrupTipi, GrupTipiId)
  VALUES 
-  (0,    N"Tanımsız", 0 ),
-  (100,  N"Kasa", 1),
-  (102,  N"Banka", 1),
-  (702,  N"Maliyet Hesapları (7/A Seçeneği)", 1),
-  (703,  N"Maliyet Hesapları (7/B Seçeneği)", 1),
-  (770,  N"Genel Yönetim Giderleri",  1 )
+  ( 0,    N"Tanımsız", 0 ),
+  ( 100,  N"Kasa", 1),
+  ( 102,  N"Banka", 1),
+
+  ( 250,  N"Arazi Ve Arsalar", 1),
+  ( 251,  N"Yer Altı Ve Yer Üstü Düzenleri", 1),
+  ( 252,  N"Binalar", 1),
+  ( 253,  N"Tesis, Makine Ve Cihazlar", 1),
+  ( 254,  N"Taşıtlar", 1),
+  ( 255,  N"Demirbaşlar", 1),
+  ( 256,  N"Diğer Maddi Duran Varlıklar", 1),
+  ( 259,  N"Abonelikler", 1),
+
+  ( 702,  N"Maliyet Hesapları (7/A Seçeneği)", 1),
+  ( 703,  N"Maliyet Hesapları (7/B Seçeneği)", 1),
+  ( 770,  N"Genel Yönetim Giderleri",  1 )
 
 delete from [Lkp].[OnmHesapFinansAltGrupTipi]
 INSERT INTO [Lkp].[OnmHesapFinansAltGrupTipi] (Id, AltGrupTipi, GrupTipiId)
