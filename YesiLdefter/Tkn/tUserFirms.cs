@@ -215,18 +215,9 @@ namespace Tkn_UserFirms
             // 
             if (dsUserFirmList != null)
             {
-                string Sql = Sqls.Sql_prcUstadUserFirmsList() + v.tUser.UserId.ToString(); 
-                string myProp = string.Empty;
-                t.MyProperties_Set(ref myProp, "DBaseNo", "3");
-                t.MyProperties_Set(ref myProp, "TableName", "UstadFirms");
-                t.MyProperties_Set(ref myProp, "SqlFirst", Sql);
-                t.MyProperties_Set(ref myProp, "SqlSecond", "null");
-                t.MyProperties_Set(ref myProp, "TableType", "3");
-                t.MyProperties_Set(ref myProp, "Cargo", "data");
-                t.MyProperties_Set(ref myProp, "KeyFName", "FirmId");
-                dsUserFirmList.Namespace = myProp;
-
-                t.Data_Read_Execute(tForm, dsUserFirmList, ref Sql, "UstadFirms", null);
+                // UserId = 0 olduğu için SqlSecond siliniyor, yeniden SqlFirst çalışsın
+                t.tSqlSecond_Set(ref dsUserFirmList, "null");
+                t.TableRefresh(tForm, dsUserFirmList);
 
                 // kullanıcının en son çalıştığı firmayı bul
                 //

@@ -288,7 +288,9 @@ namespace YesiLdefter
             /// Ön Muhasebe için başlangıç işlemleri
             if (v.SP_Firm_SectorTypeId == (Int16)v.msSectorType.OnMuhasebe) autoOpenForm("UST/OMS/FNS/MALIISLEM");
             //autoOpenForm("UST/OMS/AYR/YHBaslangic");
-            if (v.SP_Firm_SectorTypeId == (Int16)v.msSectorType.UstadMtsk) autoOpenForm("UST/MEB/MTS/YHBaslangic");
+            if ((v.SP_Firm_SectorTypeId == (Int16)v.msSectorType.UstadMtsk) ||
+                (v.SP_Firm_SectorTypeId == (Int16)v.msSectorType.TabimMtsk))
+                autoOpenForm("UST/MEB/MTS/YHBaslangic");
         }
 
         void autoOpenForm(string FormCode)
@@ -302,7 +304,6 @@ namespace YesiLdefter
 
             t.OpenForm(new ms_Form(), Prop_Navigator);
         }
-
 
         void setMainFormCaption()
         {

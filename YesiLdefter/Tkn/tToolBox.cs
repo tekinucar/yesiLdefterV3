@@ -2906,6 +2906,12 @@ namespace Tkn_ToolBox
             tFirm.DbTypeId = myInt16(row["DbTypeId"].ToString()); // 2 = Abone database (Ustad yazılım müşterileri)
             tFirm.MebbisCode = row["MebbisCode"].ToString();
             tFirm.MebbisPass = row["MebbisPass"].ToString();
+
+            /// şimdilik manuel çözüm yaptım
+            /// Tabim localdb ve Tabim yeni projesi ayrışımını çözemedim şu an için
+            /// aynı müşteri hem local hemde yeni projeye geçiş yapmış olabilir
+            ///
+            menuCodeChecked();
         }
 
         public void setSelectFirm(tUstadFirm tFirm)
@@ -3055,6 +3061,7 @@ namespace Tkn_ToolBox
             Str_Replace(ref Sql, ":VT_COMP_ID", v.tComputer.UstadCrmComputerId.ToString()); //v.tComp.SP_COMP_ID.ToString());
             Str_Replace(ref Sql, ":VT_PERIOD_ID", v.vt_PERIOD_ID.ToString());
             Str_Replace(ref Sql, ":VT_USER_ID", v.tUser.UserId.ToString());
+
             Str_Replace(ref Sql, ":USER_ID", v.tUser.UserId.ToString());
             Str_Replace(ref Sql, ":USER_TCNO", "'" + v.tUser.UserTcNo + "'");
             Str_Replace(ref Sql, ":USER_DBTYPE_ID", v.tUser.UserDbTypeId.ToString());
@@ -6983,15 +6990,39 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             //v.dBaseNo.Local,
 
             v.dBaseNo dBaseNo = v.active_DB.projectDBaseNo;
-            if ((v.SP_Firm_SectorTypeId == 211) ||
-                (v.SP_Firm_SectorTypeId == 212) ||
-                (v.SP_Firm_SectorTypeId == 213)) dBaseNo = v.dBaseNo.Local;
- 
+            if ((v.SP_Firm_SectorTypeId == 211) || 
+                 (v.SP_Firm_SectorTypeId == 212) || 
+                 (v.SP_Firm_SectorTypeId == 213))
+            {
+                if (v.active_DB.localDbUses)
+                    dBaseNo = v.dBaseNo.Local;
+            }
+
             bool onay = preparingCreateTable(dBaseNo, "dbo", "FileUpdates", 211);
             if (onay) 
                 fileUpdatesChecked();
         }
         #endregion MsFileUpdates
+
+        #region MenuCodeChecked
+        public void menuCodeChecked()
+        {
+            /* sil
+            if ((v.active_DB.localDbUses == false) &&
+                ((v.SP_Firm_SectorTypeId == 211) ||
+                 (v.SP_Firm_SectorTypeId == 212) ||
+                 (v.SP_Firm_SectorTypeId == 213)))
+                    v.tMainFirm.MenuCode = "UST/MEB/MTS/MAIN";
+            */
+            if ((v.active_DB.localDbUses == false) &&
+                ((v.tMainFirm.SectorTypeId == (Int16)v.msSectorType.TabimMtsk) ||
+                 (v.tMainFirm.SectorTypeId == (Int16)v.msSectorType.TabimSrc) ||
+                 (v.tMainFirm.SectorTypeId == (Int16)v.msSectorType.TabimIsmak))
+                 )
+                v.tMainFirm.MenuCode = "UST/MEB/MTS/MAIN";
+
+        }
+        #endregion MenuCodeChecked
 
         #region YilAy - Mali Dönem Read
         public void DonemTipiYilAyRead()
@@ -7003,7 +7034,10 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
             TableRemove(v.ds_DonemTipiList);
 
-            if (v.tMainFirm.SectorTypeId == (Int16)v.msSectorType.UstadMtsk) // Mtsk
+            if ((v.tMainFirm.SectorTypeId == (Int16)v.msSectorType.UstadMtsk) ||
+                (v.tMainFirm.SectorTypeId == (Int16)v.msSectorType.TabimMtsk) ||
+                (v.tMainFirm.SectorTypeId == (Int16)v.msSectorType.TabimSrc) ||
+                (v.tMainFirm.SectorTypeId == (Int16)v.msSectorType.TabimIsmak))
                 tableName = "MtskDonemTipi";
             else
                 tableName = "BelgeDonemTipi";

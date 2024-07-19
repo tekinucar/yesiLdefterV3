@@ -61,7 +61,8 @@ namespace YesiLdefter
         string Login_TableIPCode = "UST/CRM/UstadUsers.Login_F01"; 
         string NewPass_TableIPCode = "UST/CRM/UstadUsers.NewPassword_F01";
         string NewUser_TableIPCode = "UST/CRM/UstadUsers.NewUser_F01";
-        string FirmList_TableIPCode = "UST/CRM/UstadFirms.UserFirmList_L01";
+        string FirmList_TableIPCode = "UST/CRM/UstadFirmsUsers.KullanicininFirmaSecimi_L01";
+            //"UST/CRM/UstadFirms.UserFirmList_L01";
         
         string regPath = v.registryPath;//"Software\\Üstad\\YesiLdefter";
         #endregion
@@ -270,7 +271,7 @@ namespace YesiLdefter
                     v.tUserRegister.UserLastLoginEMail = u_user_email;
                     v.tUserRegister.UserLastKey = u_user_key;
                     v.tUserRegister.UserRemember = ((DevExpress.XtraEditors.CheckButton)btn_BHatirla).Checked;
-                                        
+                    
                     t.TableRemove(ds_Query);
 
                     // şimdi [ e-mail ile şifre ] databaseden kontrol ediliyor
