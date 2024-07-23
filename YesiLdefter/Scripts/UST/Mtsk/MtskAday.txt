@@ -30,6 +30,7 @@ begin transaction
    Eposta                Varchar(98)   null,
    UseWhatssApp          Bit           null,
    
+   TalepTipiId             SmallInt      null,
    MevcutSertifikaTipiId   SmallInt      null,
    MevcutSurucuBelgeTarihi Date          null, 
    MevcutSurucuBelgeNo     nVarchar(30)  null,
@@ -714,12 +715,47 @@ END -- create trigger
 
 begin transaction
 
+-- TalepTipiId
 -- MevcutSertifikaTipiId
 -- IsteneSertifikaTipiId
 -- [Lkp].[MtskSertifikaTipi]  tablosuna bak
 -- TaksitSayisiTipiId
 -- OdemeTipiId
 -- DurumTipiId
+
+
+-- ------------------------------------------------------- 
+-- TalepTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdayTalepTipi')
+drop table [Lkp].[MtskAdayTalepTipi]
+
+create table [Lkp].[MtskAdayTalepTipi]
+(
+   Id               Int Unique not null, 
+   TalepTipi        nVarchar(50)   null,
+   IsActive         Bit            null,
+   
+   constraint  pk_MtskAdayTalepTipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskAdayTalepTipi]
+INSERT INTO [Lkp].[MtskAdayTalepTipi] (Id, TalepTipi, IsActive)
+ VALUES 
+  ( 0,    N'Seçiniz', 1),
+  ( 1,    N'Yeni sertifika kaydı', 1),
+  ( 2,    N'2.+4 hak ', 1),
+  ( 3,    N'Nakil 2.+4 hak', 1),
+  ( 4,    N'100 Ceza', 1),
+  ( 5,    N'Özel direksiyon ders', 1),
+  ( 6,    N'Özel teorik ders', 1)
+
+
+
+
+
+
+
 
 -- ------------------------------------------------------- 
 -- TaksitSayisiTipiId

@@ -388,6 +388,8 @@ namespace Tkn_DevColumn
 
                 string Sql = " Select * from [Lkp].[" + tableName + "]  ";
 
+                if (tableName.IndexOf("SectorType") > -1)
+                    Sql = " Select * from [Lkp].[MsSectorType] ";
                 if (tableName.IndexOf("ParaTipi") > -1)
                     Sql = " Select * from [Lkp].[OnmParaTipi] where IsActive = 1 ";
                 if (tableName == "BirimTipi")

@@ -9,6 +9,10 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Drawing;
 using System.Windows.Forms;
+
+//using System.IO;
+
+
 //using OpenQA.Selenium;
 
 namespace Tkn_Variable
@@ -381,6 +385,7 @@ namespace Tkn_Variable
         public static string lyt_dataWizard = "dataWizard";
 
         public static string lyt_webBrowser = "webBrowser";
+        public static string lyt_cefWebBrowser = "cefWebBrowser";
         public static string lyt_headerPanel = "headerPanel";
         public static string lyt_editPanel = "editPanel";
         public static string lyt_labelControl = "labelControl";
@@ -427,6 +432,7 @@ namespace Tkn_Variable
         #endregion Save 
 
         #region Enum
+
 
         public enum msSectorType : Int16
         {
@@ -1128,6 +1134,12 @@ namespace Tkn_Variable
 
         #endregion
 
+        public enum tBrowserType
+        {
+            none,
+            CefSharp,
+            Selenium
+        }
         public enum tUserType
         {
             EndUser,
@@ -1180,6 +1192,11 @@ namespace Tkn_Variable
 
         public static vMsFileUpdate tMsFileUpdate = new vMsFileUpdate();
         public static vMsDbUpdate tMsDbUpdate = new vMsDbUpdate();
+
+
+        public static bool cefBrowserLoading = false;
+        public static CefSharp.WinForms.ChromiumWebBrowser cefBrowser_ = null;
+        public static CefSharp.WinForms.Host.ChromiumHostControl cefHostControl_ = null;
 
         public static OpenQA.Selenium.IWebDriver webDriver_ = null;
         public static string tWebLoginPageCode = "MEBBISLOGIN"; // bunu öndeğerlere bağlaman gerekiyor
@@ -1287,6 +1304,9 @@ namespace Tkn_Variable
         {
             Clear();
         }
+        public v.tBrowserType browserType { get; set; }
+        public OpenQA.Selenium.IWebDriver wbSel { get; set; }
+        public CefSharp.WinForms.ChromiumWebBrowser wbCef { get; set; }
         public string aktifPageCode { get; set; }
         public string talepEdilenUrl { get; set; }
         public string talepEdilenUrl2 { get; set; }
@@ -1306,8 +1326,19 @@ namespace Tkn_Variable
         public Int16 talepPageLeft { get; set; }
         public Int16 talepPageTop { get; set; }
 
+        public Control btn_PageView = null;
+        public Control btn_AlwaysSet = null;
+        public Control btn_FullGet1 = null;  // birinci get butonu
+        public Control btn_FullGet2 = null;  // ikinci  get butonu
+        public Control btn_FullPost1 = null; // birinci post butonu
+        public Control btn_FullPost2 = null; // ikinci  post butonu
+        public Control btn_FullSave = null;  // save    post butonu
+        public Control btn_AutoSubmit = null;// auto    kaydet butonu 
+
+        public Form tForm = null;
         public void Clear()
         {
+            browserType = v.tBrowserType.none;
             aktifPageCode = "";
             talepEdilenUrl = "";
             talepEdilenUrl2 = "";

@@ -390,6 +390,8 @@ namespace Tkn_Events
             #region FEXIT
             if (ButtonName.IndexOf("FEXIT") > 0)
             {
+                if (v.cefBrowser_ != null)
+                    v.cefBrowser_.Parent = null;
                 tForm.Dispose();
                 return onay;
             }

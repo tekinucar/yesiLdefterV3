@@ -1447,5 +1447,206 @@ namespace YesiLdefter.Selenium
 
         }
 
+        ///-- CEFSharp ile Selenium Formların ortak fonksiyon çalışmaları
+        ///
+        public v.tBrowserType GetBrowserType(Form tForm)
+        {
+            v.tBrowserType browserType = v.tBrowserType.none;
+
+            string acc = tForm.AccessibilityObject.ToString();
+
+            if (acc.IndexOf("ms_CefSharp") > -1) browserType = v.tBrowserType.CefSharp;
+            if (acc.IndexOf("ms_Selenium") > -1) browserType = v.tBrowserType.Selenium;
+
+            return browserType;
+        }
+
+        public void scrapingPages_PositionChanged(webWorkPageNodes workPageNodes, webForm f)
+        {
+            if (f.autoSubmit)
+            {
+                if ((workPageNodes.aktifPageCode != "MTSKADAYRESIM") &&
+                    (workPageNodes.aktifPageCode != "MTSKADAYSOZLESME") &&
+                    (workPageNodes.aktifPageCode != "MTSKADAYIMZA"))
+                    f.btn_FullPost1.Visible = true;
+                else f.btn_FullPost1.Visible = false;
+
+                if ((workPageNodes.aktifPageCode == "MTSKADAYRESIM") ||
+                    (workPageNodes.aktifPageCode == "MTSKADAYSOZLESME") ||
+                    (workPageNodes.aktifPageCode == "MTSKADAYIMZA"))
+                    f.btn_FullPost2.Visible = true;
+                else f.btn_FullPost2.Visible = false;
+            }
+            else
+            {
+                if (f.btn_FullPost1 != null) f.btn_FullPost1.Visible = true;
+                if (f.btn_FullPost2 != null) f.btn_FullPost2.Visible = true;
+                if (f.btn_FullSave != null) f.btn_FullSave.Visible = true;
+            }
+        }
+
+        public void preparingMsWebPagesButtons(Form tForm, webForm f, string TableIPCode)
+        {
+            /// simpleButton_ek1 :  line get  / pageView
+            /// simpleButton_ek2 :  line post / AlwaysSet Tc sorgula gibi
+            /// simpleButton_ek3 :  full get1  : v.tWebEventsType.button1
+            /// simpleButton_ek4 :  full get2  : v.tWebEventsType.button2
+            /// simpleButton_ek5 :  full post1 : v.tWebEventsType.button3
+            /// simpleButton_ek6 :  full post2 : v.tWebEventsType.button4
+            /// simpleButton_ek7 :  full save  : v.tWebEventsType.button5
+            //Control cntrl = null;
+            string[] controls = new string[] { };
+            #region
+            f.btn_PageView = t.Find_Control(tForm, "simpleButton_ek1", TableIPCode, controls);
+            // Page View
+            //if (f.btn_PageView != null)
+            //{
+            //    ((DevExpress.XtraEditors.SimpleButton)f.btn_PageView).Click += new System.EventHandler(myPageViewClick);
+            //}
+            // Bilgileri Sorgula / AlwaysSet  (TcNo sorgula gibi) // Bu henüz hiç kullanılmadı 
+            f.btn_AlwaysSet = t.Find_Control(tForm, "simpleButton_ek2", TableIPCode, controls);
+            //if (f.btn_AlwaysSet != null)
+            //{
+            //    ((DevExpress.XtraEditors.SimpleButton)f.btn_AlwaysSet).Click += new System.EventHandler(myAlwaysSetClick);
+            //}
+            // Bilgileri Al 1
+            f.btn_FullGet1 = t.Find_Control(tForm, "simpleButton_ek3", TableIPCode, controls);
+            //if (f.btn_FullGet1 != null)
+            //{
+            //    ((DevExpress.XtraEditors.SimpleButton)f.btn_FullGet1).Click += new System.EventHandler(myFullGet1Click);
+            //}
+            // Bilgileri Al 2
+            f.btn_FullGet2 = t.Find_Control(tForm, "simpleButton_ek4", TableIPCode, controls);
+            //if (f.btn_FullGet2 != null)
+            //{
+            //    ((DevExpress.XtraEditors.SimpleButton)f.btn_FullGet2).Click += new System.EventHandler(myFullGet2Click);
+            //}
+            // Bilgileri Gönder 1
+            f.btn_FullPost1 = t.Find_Control(tForm, "simpleButton_ek5", TableIPCode, controls);
+            //if (f.btn_FullPost1 != null)
+            //{
+            //    ((DevExpress.XtraEditors.SimpleButton)f.btn_FullPost1).Click += new System.EventHandler(myFullPost1Click);
+            //}
+            // Bilgileri Gönder 2
+            f.btn_FullPost2 = t.Find_Control(tForm, "simpleButton_ek6", TableIPCode, controls);
+            //if (f.btn_FullPost2 != null)
+            //{
+            //    ((DevExpress.XtraEditors.SimpleButton)f.btn_FullPost2).Click += new System.EventHandler(myFullPost2Click);
+            //}
+            // Bilgileri Kaydet
+            f.btn_FullSave = t.Find_Control(tForm, "simpleButton_ek7", TableIPCode, controls);
+            //if (f.btn_FullSave != null)
+            //{
+            //    ((DevExpress.XtraEditors.SimpleButton)f.btn_FullSave).Click += new System.EventHandler(myFullSaveClick);
+            //}
+            // Otomatik kaydet için
+            f.btn_AutoSubmit = t.Find_Control(tForm, "checkButton_ek1", TableIPCode, controls);
+            //if (f.btn_AutoSubmit != null)
+            //{
+            //    ((DevExpress.XtraEditors.SimpleButton)f.btn_AutoSubmit).Click += new System.EventHandler(myAutoSubmit);
+            //}
+            #endregion
+
+
+        }
+
+        public void preparingMsWebPages(DataSet ds_MsWebPages, ref List<MsWebPage> msWebPages)
+        {
+            msWebPages = t.RunQueryModels<MsWebPage>(ds_MsWebPages);
+        }
+        public void preparingMsWebNodesFields(Form tForm,
+            ref List<MsWebPage> msWebPage,
+            ref List<MsWebNode> msWebNodes,
+            ref webWorkPageNodes workPageNodes,
+            List<MsWebScrapingDbFields> msWebScrapingDbFields,
+            DataSet ds_MsWebPages,
+            DataSet ds_MsWebNodes,
+            DataNavigator dN_MsWebPages
+            )
+        {
+            msWebPage = t.RunQueryModelsSingle<MsWebPage>(ds_MsWebPages, dN_MsWebPages.Position);
+            msWebNodes = t.RunQueryModels<MsWebNode>(ds_MsWebNodes);
+            
+            workPageNodes.Clear();
+            workPageNodes.aktifPageCode = msWebPage[0].PageCode;
+            workPageNodes.aktifPageUrl = msWebPage[0].PageUrl;
+
+            //msPagesService.
+            checkedSiraliIslemVarmi(tForm, workPageNodes, msWebScrapingDbFields);
+        }
+
+        public bool LoginOnayi(DataSet ds_MsWebPages, DataNavigator dN_MsWebPages)
+        {
+            bool onay = false;
+            string soru = "Mebbis Giriş sayfasını açmak ister misiniz ?";
+
+            string loginPage = ds_MsWebPages.Tables[0].Rows[dN_MsWebPages.Position]["LoginPage"].ToString();
+
+            if (loginPage == "True")
+            {
+                DialogResult cevap = t.mySoru(soru);
+                if (DialogResult.Yes == cevap)
+                {
+                    onay = true;
+                }
+            }
+
+            return onay;
+        }
+        /*
+            Form tForm = (((DevExpress.XtraGrid.Views.Tile.TileView)sender).GridControl).FindForm();
+            v.browserType browserType = msPagesService.GetBrowserType(tForm);
+            if (browserType == v.browserType.Selenium)
+
+        */
+
+        public void getPageUrls(webForm f, List<MsWebPage> msWebPage)
+        {
+            f.aktifPageCode = msWebPage[0].PageCode;
+            f.talepEdilenUrl = msWebPage[0].PageUrl;
+            f.talepEdilenUrl2 = msWebPage[0].PageUrl;
+            f.talepOncesiUrl = msWebPage[0].BeforePageUrl;
+            f.talepPageLeft = msWebPage[0].PageLeft;
+            f.talepPageTop = msWebPage[0].PageTop;
+        }
+
+        public void preparingMsWebLoginPage(webForm f, DataSet ds_LoginPageNodes, List<MsWebNode> msWebLoginNodes)
+        {
+            bool onay = false;
+
+            if (t.IsNotNull(ds_LoginPageNodes) == false)
+            {
+                f.aktifUrl = "loginPageYükle";
+                onay = readLoginPageControl(ref ds_LoginPageNodes, f);
+                f.aktifUrl = "";
+
+                if ((onay) && (msWebLoginNodes == null))
+                    msWebLoginNodes = t.RunQueryModels<MsWebNode>(ds_LoginPageNodes);
+            }
+        }
+
+        public void preparingDataSets(Form tForm, System.EventHandler positionChanged)
+        {
+            #region DataNavigator Listesi Hazırlanıyor
+
+            List<string> list = new List<string>();
+            t.Find_DataNavigator_List(tForm, ref list);
+
+            Control cntrl = new Control();
+            string[] controls = new string[] { "DevExpress.XtraEditors.DataNavigator" };
+
+            foreach (string value in list)
+            {
+                cntrl = t.Find_Control(tForm, value, "", controls);
+                if (cntrl != null)
+                {
+                    //((DevExpress.XtraEditors.DataNavigator)cntrl).PositionChanged += new System.EventHandler(dataNavigator_PositionChanged);
+                    ((DevExpress.XtraEditors.DataNavigator)cntrl).PositionChanged += new System.EventHandler(positionChanged);
+                } // if cntrl != null
+            }//foreach
+
+            #endregion DataNavigator Listesi
+        }
+
     }
 }

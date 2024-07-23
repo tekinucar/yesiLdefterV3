@@ -13,6 +13,9 @@ using Tkn_Menu;
 using Tkn_TablesRead;
 using Tkn_ToolBox;
 using Tkn_Variable;
+using YesiLdefter.CEFSharp;
+using CefSharp;
+using CefSharp.WinForms;
 
 namespace Tkn_Layout
 {
@@ -53,7 +56,7 @@ namespace Tkn_Layout
             Cursor.Current = Cursors.Hand;
 
             tToolBox t = new tToolBox();
-            
+
             if (t.IsNotNull(ds_Layout) == false) return;
 
             int pos = -1;
@@ -83,7 +86,7 @@ namespace Tkn_Layout
                     sf_TableIPCode = row["TABLEIPCODE"].ToString();
                     sf_FieldName = row["FIELD_NAME"].ToString();
                     sf_CmpName = row["CMP_NAME"].ToString();
-                    
+
                     if (subView == null)
                         lForm_Preparing(tForm, row);
                 }
@@ -101,7 +104,7 @@ namespace Tkn_Layout
                     }
                     if (LayoutType == v.lyt_tableLayoutPanel) ltableLayoutPanel_Preparing(tForm, subView, ds_Layout, row, pos);
                     if (LayoutType == v.lyt_splitContainer) lSplitContainer_Preparing(tForm, subView, ds_Layout, row, pos);
-                    if (LayoutType == v.lyt_groupControl) 
+                    if (LayoutType == v.lyt_groupControl)
                         lGroupControl_Preparing(tForm, subView, ds_Layout, row, pos);
                     if (LayoutType == v.lyt_panelControl) lPanelControl_Preparing(tForm, subView, ds_Layout, row, pos);
 
@@ -120,6 +123,8 @@ namespace Tkn_Layout
                     if (LayoutType == v.lyt_backstageViewItemSeparator) lBackstageViewItemSeparator_Preparing(tForm, ds_Layout, row, pos);
 
                     if (LayoutType == v.lyt_webBrowser) lWebBrowser_Preparing(tForm, subView, ds_Layout, row, pos);
+                    if (LayoutType == v.lyt_cefWebBrowser) lCefWebBrowser_Preparing(tForm, subView, ds_Layout, row, pos);
+
                     if (LayoutType == v.lyt_headerPanel) lHeaderPanel_Preparing(tForm, subView, ds_Layout, row, pos);
                     if (LayoutType == v.lyt_editPanel) lEditPanel_Preparing(tForm, subView, ds_Layout, row, pos);
                     if (LayoutType == v.lyt_labelControl) lLabelControl_Preparing(tForm, subView, ds_Layout, row, pos);
@@ -425,7 +430,7 @@ namespace Tkn_Layout
                                     tDockPanel = UstPanel.ParentPanel.AddPanel();
                                     UstPanel.ParentPanel.Tabbed = true;
                                 }
-                                    
+
                                 //tDockPanel.DockAsTab(UstPanel, i);
                             }
                         }
@@ -557,9 +562,9 @@ namespace Tkn_Layout
             if (t.IsNotNull(CmpName))
                 tableLayoutPanel1.Name = CmpName;
             //tableLayoutPanel1.Size = new System.Drawing.Size(610, 358);
-                       
+
             tableLayoutPanel1.TabIndex = pos;
-                        
+
 
             #region // Çerçeve çizigileri
             // 0 None
@@ -774,7 +779,7 @@ namespace Tkn_Layout
                 //tableLayoutPanel1.BackColor = tForm.BackColor;
                 tableLayoutPanel1.Size = new System.Drawing.Size(tForm.Width, tForm.Height);
             }
-            
+
             tableLayoutPanel1.BringToFront();
 
             #endregion
@@ -1063,9 +1068,9 @@ namespace Tkn_Layout
             //
             DevExpress.XtraEditors.GroupControl groupControl1 = new DevExpress.XtraEditors.GroupControl();
             ((System.ComponentModel.ISupportInitialize)(groupControl1)).BeginInit();
-            
+
             //groupControl1.GroupStyle = DevExpress.Utils.GroupStyle.
-            
+
             UstHesapRow = UstHesap_Get(ds_Layout, pos);
 
             #region // Ust hesabı var ise
@@ -1100,7 +1105,7 @@ namespace Tkn_Layout
             groupControl1.Location = new System.Drawing.Point(0, 0);
             groupControl1.Name = v.lyt_Name + t.Str_Replace(ref layout_code, ".", "_"); // RefId.ToString();
             groupControl1.Size = new System.Drawing.Size(203, 435);
-            
+
             if (DockType == v.dock_Bottom) groupControl1.Dock = System.Windows.Forms.DockStyle.Bottom;
             if (DockType == v.dock_Fill) groupControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             if (DockType == v.dock_Left) groupControl1.Dock = System.Windows.Forms.DockStyle.Left;
@@ -1317,7 +1322,7 @@ namespace Tkn_Layout
             tabPane1.Text = v.lyt_Name + RefId.ToString();
 
             //tabPane1. header location sadece bottom var.
-            
+
             if (DockType == v.dock_Bottom) tabPane1.Dock = System.Windows.Forms.DockStyle.Bottom;
             if (DockType == v.dock_Fill) tabPane1.Dock = System.Windows.Forms.DockStyle.Fill;
             if (DockType == v.dock_Left) tabPane1.Dock = System.Windows.Forms.DockStyle.Left;
@@ -1403,8 +1408,8 @@ namespace Tkn_Layout
 
 
             tabNavigationPage1.Size = new System.Drawing.Size(v.Screen_Width, v.Screen_Height);//  400, 200);
-            //tabNavigationPage1.Padding = new System.Windows.Forms.Padding(v.Padding4);                                                                                      
-            
+                                                                                               //tabNavigationPage1.Padding = new System.Windows.Forms.Padding(v.Padding4);                                                                                      
+
             //
             // InputPanel Create
             //
@@ -1685,7 +1690,7 @@ namespace Tkn_Layout
                     tForm.Controls.Add(xtraTabControl1);
                 else subView.Controls.Add(xtraTabControl1);
             }
-            
+
 
             #endregion
 
@@ -1704,7 +1709,7 @@ namespace Tkn_Layout
             xtraTabControl1.Size = new System.Drawing.Size(v.Screen_Width, v.Screen_Height); //300, 300);
             xtraTabControl1.TabIndex = pos;
             xtraTabControl1.HeaderLocation = DevExpress.XtraTab.TabHeaderLocation.Left;
-            
+
             //xtraTabControl1.TabPages.AddRange(new DevExpress.XtraTab.XtraTabPage[] {
             //xtraTabPage1,
             //xtraTabPage2});
@@ -1775,7 +1780,7 @@ namespace Tkn_Layout
 
                 lParentControlAdd(tForm, xtraTabPage1, ustItemName, ustItemType, row);
             }
-            
+
             #endregion
 
             // 
@@ -1800,7 +1805,7 @@ namespace Tkn_Layout
             xtraTabPage1.Size = new System.Drawing.Size(v.Screen_Width, v.Screen_Height); //400, 200);
             xtraTabPage1.Padding = new System.Windows.Forms.Padding(v.Padding4);
             //xtraTabPage1.BackColor = System.Drawing.Color.BlueViolet;
-                       
+
             //
             // InputPanel Create
             //
@@ -1882,7 +1887,7 @@ namespace Tkn_Layout
                     tForm.Controls.Add(backstageViewControl1);
                 else subView.Controls.Add(backstageViewControl1);
             }
-            
+
 
             #endregion
             //backstageViewControl1.Items.
@@ -1988,7 +1993,7 @@ namespace Tkn_Layout
                 backstageViewClientControl1.AccessibleName = TableIPCode;// + MultiPageID;
                 //backstageViewClientControl1.BackColor = System.Drawing.Color.GhostWhite;
                 backstageViewClientControl1.Location = new System.Drawing.Point(188, 0);
-                
+
                 backstageViewClientControl1.Name = v.lyt_Name + t.Str_Replace(ref layout_code, ".", "_");  //RefId.ToString();
                 if ((ustItemName.IndexOf("tabControl_SUBVIEW") > -1) &&
                     (t.IsNotNull(TableIPCode)))
@@ -2817,12 +2822,12 @@ namespace Tkn_Layout
                 documentViewer.Name = "documentViewer"; //v.lyt_Name + t.Str_Replace(ref layout_code, ".", "_");  //RefId.ToString();
                 if (t.IsNotNull(CmpName))
                     documentViewer.Name = CmpName;
-                
+
                 documentViewer.Padding = new System.Windows.Forms.Padding(4);
                 documentViewer.Size = new System.Drawing.Size(874, 40);
                 documentViewer.TabStop = true;
                 documentViewer.TabIndex = 0;
-                                
+
                 //Panel panel1 = new Panel();
                 //panel1.Controls.Add(documentViewerBar);
                 //panel1.Controls.Add(documentViewer);
@@ -2898,7 +2903,7 @@ namespace Tkn_Layout
                 webBrowser1.Size = new System.Drawing.Size(874, 40);
                 webBrowser1.TabStop = true;
                 webBrowser1.TabIndex = 0;
-                
+
                 lParentControlAdd(tForm, webBrowser1, ustItemName, ustItemType, row);
 
                 webBrowser1.SendToBack();
@@ -2907,6 +2912,107 @@ namespace Tkn_Layout
             #endregion
         }
 
+        private void lCefWebBrowser_Preparing(Form tForm, Control subView, DataSet ds_Layout, DataRow row, int pos)
+        {
+            tToolBox t = new tToolBox();
+
+            int RefId = 0;
+            int width = 0;
+            int height = 0;
+            int top = 0;
+            int left = 0;
+            int DockType = 0;
+
+            string CmpName = string.Empty;
+            string caption = string.Empty;
+            string layout_code = string.Empty;
+
+            //string Prop_View = string.Empty;
+            string TableIPCode = string.Empty;
+            string fieldName = string.Empty;
+
+            string ustItemType = string.Empty;
+            string ustHesapRefId = string.Empty;
+            string ustHesapItemName = string.Empty;
+            string ustItemName = string.Empty;
+            DataRow UstHesapRow = null;
+
+            RefId = t.myInt32(row["REF_ID"].ToString());
+            layout_code = t.Set(row["LAYOUT_CODE"].ToString(), "", "");
+            caption = t.Set(row["LAYOUT_CAPTION"].ToString(), "", "");
+            TableIPCode = t.Set(row["TABLEIPCODE"].ToString(), "", "");
+            fieldName = t.Set(row["FIELD_NAME"].ToString(), "", "");
+            CmpName = t.Set(row["CMP_NAME"].ToString(), "", "");
+
+            width = t.myInt32(row["CMP_WIDTH"].ToString());
+            height = t.myInt32(row["CMP_HEIGHT"].ToString());
+            top = t.myInt32(row["CMP_TOP"].ToString());
+            left = t.myInt32(row["CMP_LEFT"].ToString());
+
+            DockType = t.Set(row["CMP_DOCK"].ToString(), v.dock_Fill.ToString(), (int)0);
+
+            UstHesapRow = UstHesap_Get(ds_Layout, pos);
+
+            #region // Ust hesabı var ise
+
+            if (UstHesapRow != null)
+            {
+                // browser için sadece panel hazırlıyoruz,
+                // ms_CefSharp.cs shown sırasında bu paneli bulup panelin içine (v.cefBrowser_) add oluyor
+                // böylece v.cefBrowser_ bir siteye connect olduktan sonra çalışma yapılan form kapansada bağlantı kopmuyor
+
+                ustItemType = UstHesapRow["LAYOUT_TYPE"].ToString();
+                ustHesapRefId = UstHesapRow["LAYOUT_CODE"].ToString();
+                t.Str_Replace(ref ustHesapRefId, ".", "_");
+                ustItemName = v.lyt_Name + ustHesapRefId;
+
+                if (t.IsNotNull(UstHesapRow["CMP_NAME"].ToString()))
+                    ustItemName = UstHesapRow["CMP_NAME"].ToString();
+                /*
+                ChromiumWebBrowser webBrowser1 = CEFHelper.CreateBrowser;
+                webBrowser1.Dock = DockStyle.Fill;
+                webBrowser1.Name = "CefSharpBrowser";
+
+                lParentControlAdd(tForm, webBrowser1, ustItemName, ustItemType, row);
+                */
+                
+                DevExpress.XtraEditors.PanelControl panelControl1 = new DevExpress.XtraEditors.PanelControl();
+                ((System.ComponentModel.ISupportInitialize)(panelControl1)).BeginInit();
+                panelControl1.SuspendLayout();
+                //
+                // panelControl1
+                // 
+                panelControl1.Location = new System.Drawing.Point(0, 0);
+                panelControl1.Name = "CefSharpBrowser";
+                    //v.lyt_Name + t.Str_Replace(ref layout_code, ".", "_");  //RefId.ToString();
+                //if (t.IsNotNull(CmpName))
+                //    panelControl1.Name = CmpName;   WebMain atanıyor
+                panelControl1.Padding = new System.Windows.Forms.Padding(2);
+                panelControl1.Size = new System.Drawing.Size(200, 40);
+                panelControl1.TabIndex = 0;
+
+                // paneli içine yeni create edilen editin Dock ayarlanıyor
+                if (panelControl1.Controls.Count > 0)
+                    panelControl1.Controls[0].Dock = DockStyle.Fill;
+
+                if (DockType == v.dock_Bottom) panelControl1.Dock = System.Windows.Forms.DockStyle.Bottom;
+                if (DockType == v.dock_Fill) panelControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+                if (DockType == v.dock_Left) panelControl1.Dock = System.Windows.Forms.DockStyle.Left;
+                if (DockType == v.dock_Right) panelControl1.Dock = System.Windows.Forms.DockStyle.Right;
+                if (DockType == v.dock_Top) panelControl1.Dock = System.Windows.Forms.DockStyle.Top;
+
+                t.myControl_Size_And_Location(panelControl1, width, height, left, top);
+
+                ((System.ComponentModel.ISupportInitialize)(panelControl1)).EndInit();
+                panelControl1.ResumeLayout(false);
+                lParentControlAdd(tForm, panelControl1, ustItemName, ustItemType, row);
+
+                panelControl1.SendToBack();
+                
+            }
+
+            #endregion
+        }
         private void lHeaderPanel_Preparing(Form tForm, Control subView, DataSet ds_Layout, DataRow row, int pos)
         {
             tToolBox t = new tToolBox();

@@ -300,6 +300,8 @@ namespace Tkn_Events
 
             if (buttonType == v.tButtonType.btCikis) // (buttonName == "cikis") 
             {
+                if (v.cefBrowser_ != null)
+                    v.cefBrowser_.Parent = null;
                 tForm.Close();
                 return onay;
             }

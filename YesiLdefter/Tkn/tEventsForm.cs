@@ -661,15 +661,20 @@ namespace Tkn_Events
             //MessageBox.Show("myForm_Validated");
         }
 
+        public void myForm_Closing(object sender, FormClosingEventArgs e)
+        {
+            if (v.cefBrowser_ != null)
+                v.cefBrowser_.Parent = null;
+            // 1. numara bu çalışıyor
+            //MessageBox.Show("myForm_FormClosing : " + ((Form)sender).Text);
+        }
+
         public void myForm_Closed(object sender, FormClosedEventArgs e)
         {
+            // 2. numara bu çalışıyor
             //MessageBox.Show("myForm_FormClosed : " + ((Form)sender).Text);
         }
 
-        public void myForm_Closing(object sender, FormClosingEventArgs e)
-        {
-            //MessageBox.Show("myForm_FormClosing : " + ((Form)sender).Text);
-        }
 
         public string myFormGetActiveControlTableIPCode(Form tForm, ref string controlType)
         {

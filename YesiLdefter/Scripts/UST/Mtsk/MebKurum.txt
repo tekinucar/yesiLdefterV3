@@ -9,7 +9,7 @@ begin transaction
    ParentId            Int       not null, /* default 0 */
    FirmId              Int       not null,
    IsActive            Bit       not null, /* default : 1 = active, 0 = not active */  
-   KurumTipiId         SmallInt      null, /* 1. Mtsk, 2. ???, 3. ??? */
+   SectorTypeId        SmallInt      null, /* 1. Mtsk, 2. ???, 3. ??? */
 
    KurumKodu           nvarchar(15)  NULL,
    KurumTamAdi         nvarchar(150) NULL,
@@ -47,28 +47,6 @@ commit transaction
 
 /*CreateLkpTable*/
 
--- ------------------------------------------------------- 
--- KurumTipiId
--- ------------------------------------------------------- 
-
-IF EXISTS (Select * From sys.objects WHERE name = 'MebKurumKurumTipi')
-drop table [Lkp].[MebKurumKurumTipi]
-
-create table Lkp.MebKurumKurumTipi
-(
-   Id          Int Unique Not Null,
-   KurumTipi   nVarchar(50)   null,
-   GrupTipiId  SmallInt       null,
-   
-   constraint  pk_MebKurumKurumTipi primary key (Id)
-)
-
-INSERT INTO Lkp.MebKurumKurumTipi (Id, KurumTipi, GrupTipiId)
- VALUES 
-  (0, N'Tanımsız', 0),
-  (1, N'Mtsk',  1),
-  (2, N'İşMak', 1),
-  (3, N'SRC',   1)
 
 /*CreateLkpTableEnd*/
 

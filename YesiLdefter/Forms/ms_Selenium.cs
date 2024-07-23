@@ -38,6 +38,7 @@ namespace YesiLdefter
 
         //IWebDriver webDriver;
         MsWebPagesService msPagesService = new MsWebPagesService();
+        MsScrapingService msScraping = new MsScrapingService();
 
         /// Scraping
         DataSet ds_MsWebPages = null;
@@ -49,6 +50,7 @@ namespace YesiLdefter
         // web sayfalarının adını gösteren viewControl
         Control view_MsWebPages = null;
 
+        /*
         // User butonları
         Control btn_PageView = null;
         //Control btn_PageViewAnalysis = null;
@@ -60,7 +62,7 @@ namespace YesiLdefter
         Control btn_FullSave = null;  // save    post butonu
         Control btn_AutoSubmit = null;// auto    kaydet butonu 
         Control btn_SiraliIslem = null;
-
+        */
         // Test butonları
         Control btn_LineGet = null;   // test get
         Control btn_LinePost = null;  // test set
@@ -115,7 +117,7 @@ namespace YesiLdefter
             MsWebNodesButtonsPreparing();
             MsWebPagesButtonsPreparing();
             preparingWebPagesViewControl();
-            preparingMsWebLoginPage();
+            msPagesService.preparingMsWebLoginPage(f, ds_LoginPageNodes, this.msWebLoginNodes_);
 
 
             // TileNavMenu buttons
@@ -130,13 +132,14 @@ namespace YesiLdefter
             // scraping ilişkisi olan TableIPCode ve ilgili fieldler
             // 
             this.msWebScrapingDbFields_ = msPagesService.readScrapingTablesAndFields(this.msWebPages_);
-            //msPagesService.checkedSiraliIslemVarmi(this, this.workPageNodes_, this.msWebScrapingDbFields_);
             
             /// DataSet ve DataNavigatorleri işaretle
             /// 
-            preparingDataSets();
+            msPagesService.preparingDataSets(this, dataNavigator_PositionChanged);
         }
 
+        // taşındı çalışınca sil
+        /*
         private void preparingDataSets()
         {
             #region DataNavigator Listesi Hazırlanıyor
@@ -158,6 +161,7 @@ namespace YesiLdefter
 
             #endregion DataNavigator Listesi
         }
+        */
         private void preparingWebMain()
         {
             /*
@@ -168,11 +172,12 @@ namespace YesiLdefter
             webMain.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(SeleniumHelper.ImplicitlyWait);
             webMain.Manage().Timeouts().PageLoad = TimeSpan.FromSeconds(SeleniumHelper.PageLoadTimeout);
             */
-
-            SeleniumHelper.ResetDriver();
-            v.webDriver_ = SeleniumHelper.WebDriver;
-
-            preparingWebDriverChangeSize(v.webDriver_);
+            if (v.webDriver_ == null)
+            {
+                SeleniumHelper.ResetDriver();
+                v.webDriver_ = SeleniumHelper.WebDriver;
+                preparingWebDriverChangeSize(v.webDriver_);
+            }
         }
         private void preparingWebDriverChangeSize(IWebDriver wb)
         {
@@ -242,7 +247,8 @@ namespace YesiLdefter
             /// driver.Manage().Window.Maximize();
             /// 
         }
-        
+
+        #region MsWebPagesButtonsPreparing
         private void MsWebPagesButtonsPreparing()
         {
             /// MsWebPages tablosu
@@ -251,81 +257,58 @@ namespace YesiLdefter
             TableIPCode = t.Find_TableIPCode(this, "MsWebPages");
 
             if (t.IsNotNull(TableIPCode) == false) return;
-
-            //Control cntrl = null;
-            string[] controls = new string[] { };
-
+            
             t.Find_DataSet(this, ref ds_MsWebPages, ref dN_MsWebPages, TableIPCode);
 
             if (t.IsNotNull(ds_MsWebPages))
             {
-
+                f.Clear();
+                f.tForm = this;
+                f.browserType = v.tBrowserType.Selenium;
+                
                 dN_MsWebPages.PositionChanged += new System.EventHandler(dNScrapingPages_PositionChanged);
-                preparingMsWebPages();
-                preparingMsWebNodesFields();
+                msPagesService.preparingMsWebPages(ds_MsWebPages, ref msWebPages_);
+                msPagesService.preparingMsWebNodesFields(this, 
+                  ref this.msWebPage_,
+                  ref this.msWebNodes_,
+                  ref this.workPageNodes_,
+                  this.msWebScrapingDbFields_,
+                  ds_MsWebPages,
+                  ds_MsWebNodes,
+                  dN_MsWebPages );
 
-                /// simpleButton_ek1 :  line get  / pageView
-                /// simpleButton_ek2 :  line post / AlwaysSet Tc sorgula gibi
-                /// simpleButton_ek3 :  full get1  : v.tWebEventsType.button1
-                /// simpleButton_ek4 :  full get2  : v.tWebEventsType.button2
-                /// simpleButton_ek5 :  full post1 : v.tWebEventsType.button3
-                /// simpleButton_ek6 :  full post2 : v.tWebEventsType.button4
-                /// simpleButton_ek7 :  full save  : v.tWebEventsType.button5
-
-                btn_PageView = t.Find_Control(this, "simpleButton_ek1", TableIPCode, controls);
-                // Page View
-                if (btn_PageView != null)
-                {
-                    ((DevExpress.XtraEditors.SimpleButton)btn_PageView).Click += new System.EventHandler(myPageViewClick);
-                }
-                #region
-                //
-                // Bilgileri Sorgula / AlwaysSet  (TcNo sorgula gibi) // Bu henüz hiç kullanılmadı 
-                btn_AlwaysSet = t.Find_Control(this, "simpleButton_ek2", TableIPCode, controls);
-                if (btn_AlwaysSet != null)
-                {
-                    ((DevExpress.XtraEditors.SimpleButton)btn_AlwaysSet).Click += new System.EventHandler(myAlwaysSetClick);
-                }
-                // Bilgileri Al 1
-                btn_FullGet1 = t.Find_Control(this, "simpleButton_ek3", TableIPCode, controls);
-                if (btn_FullGet1 != null)
-                {
-                    ((DevExpress.XtraEditors.SimpleButton)btn_FullGet1).Click += new System.EventHandler(myFullGet1Click);
-                }
-                // Bilgileri Al 2
-                btn_FullGet2 = t.Find_Control(this, "simpleButton_ek4", TableIPCode, controls);
-                if (btn_FullGet2 != null)
-                {
-                    ((DevExpress.XtraEditors.SimpleButton)btn_FullGet2).Click += new System.EventHandler(myFullGet2Click);
-                }
-                // Bilgileri Gönder 1
-                btn_FullPost1 = t.Find_Control(this, "simpleButton_ek5", TableIPCode, controls);
-                if (btn_FullPost1 != null)
-                {
-                    ((DevExpress.XtraEditors.SimpleButton)btn_FullPost1).Click += new System.EventHandler(myFullPost1Click);
-                }
-                // Bilgileri Gönder 2
-                btn_FullPost2 = t.Find_Control(this, "simpleButton_ek6", TableIPCode, controls);
-                if (btn_FullPost2 != null)
-                {
-                    ((DevExpress.XtraEditors.SimpleButton)btn_FullPost2).Click += new System.EventHandler(myFullPost2Click);
-                }
-                // Bilgileri Kaydet
-                btn_FullSave = t.Find_Control(this, "simpleButton_ek7", TableIPCode, controls);
-                if (btn_FullSave != null)
-                {
-                    ((DevExpress.XtraEditors.SimpleButton)btn_FullSave).Click += new System.EventHandler(myFullSaveClick);
-                }
-                // Otomatik kaydet için
-                btn_AutoSubmit = t.Find_Control(this, "checkButton_ek1", TableIPCode, controls);
-                if (btn_AutoSubmit != null)
-                {
-                    ((DevExpress.XtraEditors.SimpleButton)btn_AutoSubmit).Click += new System.EventHandler(myAutoSubmit);
-                }
-                #endregion
+                msPagesService.preparingMsWebPagesButtons(this, f, TableIPCode);
+                preparingMsWebPagesButtons_();
             }
-
         }
+        private void preparingMsWebPagesButtons_()
+        {
+            if (f.btn_PageView != null)
+                ((DevExpress.XtraEditors.SimpleButton)f.btn_PageView).Click += new System.EventHandler(myPageViewClick);
+            // Bilgileri Sorgula / AlwaysSet  (TcNo sorgula gibi) // Bu henüz hiç kullanılmadı 
+            if (f.btn_AlwaysSet != null)
+                ((DevExpress.XtraEditors.SimpleButton)f.btn_AlwaysSet).Click += new System.EventHandler(myAlwaysSetClick);
+            // Bilgileri Al 1
+            if (f.btn_FullGet1 != null)
+                ((DevExpress.XtraEditors.SimpleButton)f.btn_FullGet1).Click += new System.EventHandler(myFullGet1Click);
+            // Bilgileri Al 2
+            if (f.btn_FullGet2 != null)
+                ((DevExpress.XtraEditors.SimpleButton)f.btn_FullGet2).Click += new System.EventHandler(myFullGet2Click);
+            // Bilgileri Gönder 1
+            if (f.btn_FullPost1 != null)
+                ((DevExpress.XtraEditors.SimpleButton)f.btn_FullPost1).Click += new System.EventHandler(myFullPost1Click);
+            // Bilgileri Gönder 2
+            if (f.btn_FullPost2 != null)
+                ((DevExpress.XtraEditors.SimpleButton)f.btn_FullPost2).Click += new System.EventHandler(myFullPost2Click);
+            // Bilgileri Kaydet
+            if (f.btn_FullSave != null)
+                ((DevExpress.XtraEditors.SimpleButton)f.btn_FullSave).Click += new System.EventHandler(myFullSaveClick);
+            // Otomatik kaydet için
+            if (f.btn_AutoSubmit != null)
+                ((DevExpress.XtraEditors.SimpleButton)f.btn_AutoSubmit).Click += new System.EventHandler(myAutoSubmit);
+        }
+        #endregion MsWebPagesButtonsPreparing
+
         private void MsWebNodesButtonsPreparing()
         {
             /// MsWebNodes tablosu
@@ -339,10 +322,9 @@ namespace YesiLdefter
             }
             t.Find_DataSet(this, ref ds_MsWebNodes, ref dN_MsWebNodes, TableIPCode);
 
-            // Hiç kullanma ihtiyacı olmadı 
-            //
-            
-            //Control cntrl = null;
+            /// Selenium ve CEFSharp için henüz gerek olmadı, Microsoft.WebBrowser de kulanıldı
+            ///
+
             string[] controls = new string[] { };
 
             btn_LineGet = t.Find_Control(this, "simpleButton_ek1", TableIPCode, controls);
@@ -406,7 +388,7 @@ namespace YesiLdefter
             {
                 if (((DevExpress.XtraBars.Navigation.NavButton)sender).Name == buttonMebbisGiris)
                 {
-                    await loginPageViev();
+                    await seleniumLoginPageViev();
                 }
                 if (((DevExpress.XtraBars.Navigation.NavButton)sender).Name == buttonManuelSave)
                 {
@@ -427,7 +409,7 @@ namespace YesiLdefter
                     buttonAutoSaveControl.Appearance.ForeColor = v.AppearanceTextColor;
                 }
 
-                btn_FullSave.Visible = !f.autoSubmit;
+                f.btn_FullSave.Visible = !f.autoSubmit;
             }
 
             if (sender.GetType().ToString() == "DevExpress.XtraBars.Navigation.TileNavItem")
@@ -437,35 +419,11 @@ namespace YesiLdefter
         }
         public async void myTileView_ItemClick(object sender, DevExpress.XtraGrid.Views.Tile.TileViewItemClickEventArgs e)
         {
-            
             if (t.IsNotNull(ds_MsWebPages) == false) return;
             if (dN_MsWebPages.Position == -1) return;
 
-            string soru = "Mebbis Giriş sayfasını açmak ister misiniz ?";
-            //if (v.webDriver_ != null) soru = "Yeniden Mebbis Giriş sayfasını"
-
-            string loginPage = ds_MsWebPages.Tables[0].Rows[dN_MsWebPages.Position]["LoginPage"].ToString();
-
-            if (loginPage == "True")
-            {
-                DialogResult cevap = t.mySoru(soru);
-                if (DialogResult.Yes == cevap)
-                {
-                    await loginPageViev();
-
-                    //try
-                    //{
-                    //    await loginPageViev();
-                    //}
-                    //catch (Exception ex)
-                    //{
-                    //    //İstek gönderilirken bir hata oluştu
-                    //    MessageBox.Show("İstek gönderilirken bir hata oluştu" + v.ENTER + ex.Message.ToString());
-                    //    //throw;
-                    //}
-
-                }
-            }
+            if (msPagesService.LoginOnayi(ds_MsWebPages, dN_MsWebPages))
+                await seleniumLoginPageViev();
         }
         
         #region Test buttons click
@@ -485,7 +443,8 @@ namespace YesiLdefter
                 if (wnv.TagName == "select")
                     wnv.workRequestType = v.tWebRequestType.getNodeItems;
 
-                await WebScrapingAsync(v.webDriver_, wnv);
+                //await WebScrapingAsync(v.webDriver_, wnv);
+                await msScraping.WebScrapingAsync(wnv, f);
 
                 if (wnv.TagName == "select")
                 {
@@ -506,13 +465,13 @@ namespace YesiLdefter
 
                 msPagesService.nodeValuesPreparing(row, ref wnv, f.aktifPageCode);
 
-
                 // node nin items okunacak (getNodeItems)
                 // sonrada MsWebNodeItems tablosuna yazılacak  
                 //if (wnv.TagName == "select")
                 //    wnv.workRequestType = v.tWebRequestType.getNodeItems;
 
-                await WebScrapingAsync(v.webDriver_, wnv);
+                //await WebScrapingAsync(v.webDriver_, wnv);
+                await msScraping.WebScrapingAsync(wnv, f);
 
                 //if (wnv.TagName == "select")
                 //{
@@ -547,6 +506,8 @@ namespace YesiLdefter
             preparingMsWebNodesFields();
             preparingAktifPageLoad();
 
+            msPagesService.scrapingPages_PositionChanged(this.workPageNodes_, this.f);
+            /* silinecek
             if (f.autoSubmit)
             {
                 if ((this.workPageNodes_.aktifPageCode != "MTSKADAYRESIM") &&
@@ -567,6 +528,7 @@ namespace YesiLdefter
                 if (btn_FullPost2 != null) btn_FullPost2.Visible = true;
                 if (btn_FullSave != null) btn_FullSave.Visible = true;
             }
+            */
         }
         private async void dataNavigator_PositionChanged(object sender, EventArgs e)
         {
@@ -601,13 +563,12 @@ namespace YesiLdefter
                 await myPageViewClickAsync(v.webDriver_, this.msWebPage_);
             }
         }
-        private void preparingMsWebPages()
-        {
-            this.msWebPages_ = t.RunQueryModels<MsWebPage>(ds_MsWebPages);
-        }
         private void preparingMsWebNodesFields()
         {
             this.f.Clear();
+            this.f.tForm = this;
+            this.f.browserType = v.tBrowserType.Selenium;
+
             this.msWebPage_ = t.RunQueryModelsSingle<MsWebPage>(ds_MsWebPages, dN_MsWebPages.Position);
             this.msWebNodes_ = t.RunQueryModels<MsWebNode>(ds_MsWebNodes);
             this.workPageNodes_.Clear();
@@ -617,20 +578,7 @@ namespace YesiLdefter
             msPagesService.checkedSiraliIslemVarmi(this, this.workPageNodes_, this.msWebScrapingDbFields_);
             //this.btn_SiraliIslem = this.workPageNodes_.siraliIslem_Btn;
         }
-        private void preparingMsWebLoginPage()
-        {
-            bool onay = false;
-
-            if (t.IsNotNull(ds_LoginPageNodes) == false)
-            {
-                f.aktifUrl = "loginPageYükle";
-                onay = msPagesService.readLoginPageControl(ref ds_LoginPageNodes, f);
-                f.aktifUrl = "";
-
-                if ((onay) && (this.msWebLoginNodes_ == null))
-                    this.msWebLoginNodes_ = t.RunQueryModels<MsWebNode>(ds_LoginPageNodes);
-            }
-        }
+        
 
         #endregion Form preparing
         /// 
@@ -639,9 +587,9 @@ namespace YesiLdefter
         #region user buttons
         private async void myPageViewClick(object sender, EventArgs e)
         {
-            await loginPageViev();
+            await seleniumLoginPageViev();
         }
-        private async Task loginPageViev()
+        private async Task seleniumLoginPageViev()
         {
             /// Kullanıcının mebbisCode ve şifresini yeniden oku
             /// değiştirmiş olabilir
@@ -650,11 +598,17 @@ namespace YesiLdefter
             //MessageBox.Show("Mebbis : " + v.tUser.MebbisCode + " : " + v.tUser.MebbisPass);
 
             f.Clear();
+            f.tForm = this;
+            f.browserType = v.tBrowserType.Selenium;
+            //f.wbSel = v.webDriver_;
 
             if (v.webDriver_ == null)
                 preparingWebMain();
+            
+            //f.wbSel = v.webDriver_;
 
             await myPageViewClickAsync(v.webDriver_, this.msWebPage_);
+            //await myPageViewClickAsync(f.wbSel, this.msWebPage_);
         }
         private void myAlwaysSetClick(object sender, EventArgs e)
         {
@@ -718,6 +672,8 @@ namespace YesiLdefter
             /// 
             f.anErrorOccurred = false;
             f.tableIPCodeIsSave = "";
+            f.wbSel = v.webDriver_;
+
             //f.tableIPCodesInLoad = ""; Açma 
 
             /// tableIPCodesInLoad view lerin enabled = false yap
@@ -784,7 +740,8 @@ namespace YesiLdefter
                     //
                     if (onayValue)
                     {
-                        await WebScrapingAsync(v.webDriver_, wnv);
+                        //await WebScrapingAsync(v.webDriver_, wnv);
+                        await msScraping.WebScrapingAsync(wnv, f);
 
                         // 4. adım
                         //
@@ -1144,6 +1101,7 @@ namespace YesiLdefter
         /// WebScrapingAsync - Kazıma işlemi
         /// 
         /// 
+        /*
         private async Task WebScrapingAsync(IWebDriver wb, webNodeValue wnv)
         {
             if (f.anErrorOccurred) return;
@@ -1350,7 +1308,7 @@ namespace YesiLdefter
             #endregion
             wnv.readValue = readValue;
         }
-
+        */
         #endregion Scraping functions
 
         #region subFunctions
@@ -1360,14 +1318,7 @@ namespace YesiLdefter
             {
                 bool onay = false;
 
-                //v.SQL = v.SQL + v.ENTER + myNokta + " PageView : ";
-
-                f.aktifPageCode = msWebPage[0].PageCode;    
-                f.talepEdilenUrl = msWebPage[0].PageUrl;
-                f.talepEdilenUrl2 = msWebPage[0].PageUrl;
-                f.talepOncesiUrl = msWebPage[0].BeforePageUrl; 
-                f.talepPageLeft = msWebPage[0].PageLeft;       
-                f.talepPageTop = msWebPage[0].PageTop;         
+                msPagesService.getPageUrls(f, msWebPage);
 
                 if (f.aktifUrl != f.talepEdilenUrl)
                 {
@@ -1428,7 +1379,6 @@ namespace YesiLdefter
                 return;
 
             bool onay = false;
-                        
 
             if (f.talepEdilenUrl != f.aktifUrl)
             {
@@ -1481,7 +1431,6 @@ namespace YesiLdefter
                     t.WaitFormClose();
                 }
             }
-
         }
         private async Task runLoginPage(IWebDriver wb)
         {
@@ -1496,8 +1445,6 @@ namespace YesiLdefter
             }
             else
             {
-
-                //t.FlyoutMessage(this, "Yeniden giriş :", "Bağlıntınız kopmuş durumda yeniden giriş işlemi yapılacaktır ...");
                 t.AlertMessage("Bağlantı kopukluğu :", "Bağlıntınız kopmuş durumda yeniden giriş işlemi yapılacaktır ...");
                 /// Login page bilgilerine focus ol
                 if (t.IsNotNull(ds_MsWebPages))
@@ -1506,13 +1453,27 @@ namespace YesiLdefter
                     Application.DoEvents();
                     ((DevExpress.XtraGrid.GridControl)view_MsWebPages).MainView.Focus();
                 }
-                /// login işlemlerini gerçekleştir
-                /// 
-                //await startNodes(this.msWebLoginNodes_, this.workPageNodes_, v.tWebRequestType.post, v.tWebEventsType.load);
-                
-
             }
         }
+        private async Task preparingViewControls(bool value)
+        {
+            if (t.IsNotNull(f.tableIPCodesInLoad) == false) return;
+
+            /// tableIPCodesInLoad üzerindeki tableIPCode viewleri tespit et ve Enabled durumunu değiştir
+            /// 
+            string tableIPCode = "";
+            string list = f.tableIPCodesInLoad;
+            while (list.IndexOf("||") > -1)
+            {
+                tableIPCode = t.Get_And_Clear(ref list, "||");
+                if (t.IsNotNull(tableIPCode))
+                    t.ViewControl_Enabled(this, tableIPCode, value);
+            }
+        }
+        #endregion 
+
+        #region WebScrapingAsync SubFunctions
+        /*
         private void displayNone(IWebDriver wb, string tagName, string idName, string XPath, string InnerText)
         {
             if (t.IsNotNull(idName))
@@ -1524,7 +1485,7 @@ namespace YesiLdefter
                     IJavaScriptExecutor js = (IJavaScriptExecutor)wb;
                     js.ExecuteScript("arguments[0].style.display = 'none';", element);
                 }
-                */
+                * /
                 IList<IWebElement> elements = wb.FindElements(By.TagName(tagName));
                 foreach (IWebElement element in elements)
                 {
@@ -1568,7 +1529,7 @@ namespace YesiLdefter
                         js.ExecuteScript("arguments[0].style.display = 'none';", element);
                     }
                 }
-                */
+                * /
                 #endregion
             }
             else
@@ -1577,6 +1538,8 @@ namespace YesiLdefter
             }
 
         }
+        */
+        /*
         private void preparingItemButtonsList(IWebDriver wb, webNodeValue wnv, string tagName, string attSrc)
         {
             // şimdilik sadece itemButton var
@@ -1598,6 +1561,8 @@ namespace YesiLdefter
                 }
             }
         }
+        */
+        /*
         private void selectItemsRead(IWebDriver wb, ref webNodeValue wnv, string idName)
         {
             //SelectElement selectElement = new SelectElement(driver.FindElement(By.Id("comboElementId")));
@@ -1640,6 +1605,8 @@ namespace YesiLdefter
             v.IsWaitOpen = false;
             t.WaitFormClose();
         }
+        */
+        /*
         private string selectItemsGetValue(IWebDriver wb, ref webNodeValue wnv, string idName, string findText)
         {
             IList<IWebElement> elements = wb.FindElements(By.Id(idName));
@@ -1670,7 +1637,8 @@ namespace YesiLdefter
 
             return value;
         }
-        //private void buttonsClick(IWebDriver wb, string tagName, string idName, string innerText, string outerText, v.tWebInvokeMember invokeMember, v.tWebEventsType workEventsType)
+        */
+        /*
         private async Task buttonsClick(IWebDriver wb, webNodeValue wnv)
         {
             if (f.anErrorOccurred) return;
@@ -1718,6 +1686,8 @@ namespace YesiLdefter
                 }
             }
         }
+        */
+        /*
         private void SetAutoSubmit(IWebDriver wb, webNodeValue wnv)
         {
             // AutoSubmit, otomatik kaydet var ise
@@ -1757,6 +1727,8 @@ namespace YesiLdefter
                     v.ENTER2 + inner);
             }
         }
+        */
+        /*
         private async Task divOperations(IWebDriver wb, webNodeValue wnv)
         {
             if (wnv.TagName == "div")
@@ -1785,6 +1757,8 @@ namespace YesiLdefter
                 }
             }
         }
+        */
+        /*
         private async Task spanOperations(IWebDriver wb, webNodeValue wnv)
         {
             if (wnv.TagName == "span")
@@ -1839,6 +1813,8 @@ namespace YesiLdefter
 
             }
         }
+        */
+        /*
         private async Task<v.tWebInvokeMember> setElementValues(IWebDriver wb, string tagName, string attType, string idName, string writeValue, v.tWebInvokeMember invokeMember)
         {
             //
@@ -1873,7 +1849,7 @@ namespace YesiLdefter
                             oSelect.SelectByIndex(index);
                             oSelect.SelectByText(text);
                             oSelect.SelectByValue(value);
-                            */
+                            * /
                         }
                         else
                         {
@@ -1906,7 +1882,7 @@ namespace YesiLdefter
 
                         IList<IWebElement> cmbSubesiOptionElements = cmbSubesi.FindElements(By.TagName("option"));
                         cmbSubesiOptionElements.FirstOrDefault(x => x.Text == kursiyer.Sube)?.Click();
-                        */
+                        * /
                         //v.SQL = v.SQL + v.ENTER + myNokta + " set value : " + writeValue;
                     }
 
@@ -1987,6 +1963,8 @@ namespace YesiLdefter
             return invokeMember;
             #endregion
         }
+        */
+        /*
         private async Task<string> getElementValues(IWebDriver wb, webNodeValue wnv, string tagName, string attType, string attRole, string idName)
         {
             //
@@ -2098,6 +2076,8 @@ namespace YesiLdefter
             return readValue;
             #endregion
         }
+        */
+        /*
         private async Task invokeMemberExec(IWebDriver wb, webNodeValue wnv, v.tWebInvokeMember invokeMember, string writeValue, string idName)
         {
             if (f.anErrorOccurred) return;
@@ -2176,6 +2156,8 @@ namespace YesiLdefter
                     v.ENTER2 + inner);
             }
         }
+        */
+        /*
         private async Task<bool> getSecurityImageValue(IWebDriver wb, webNodeValue wnv, string idName)
         {
             bool onay = false;
@@ -2193,7 +2175,7 @@ namespace YesiLdefter
 
             // image yi bitmap a çevir
             Bitmap workingImage = new Bitmap(oldImage, oldImage.Width, oldImage.Height);
-            */
+            * /
 
             // Download the image from the src URL
             using (WebClient webClient = new WebClient())
@@ -2216,7 +2198,7 @@ namespace YesiLdefter
 
                 // Save the image data to a file
                 System.IO.File.WriteAllBytes("image.jpg", data);
-                */
+                * /
 
                 /*
                                 try
@@ -2246,7 +2228,7 @@ namespace YesiLdefter
                                     MessageBox.Show(e.Message);
                                     //throw;
                                 }
-                 */
+                 * /
             }
 
             return onay;
@@ -2303,9 +2285,11 @@ namespace YesiLdefter
             // Close the driver
             driver.Quit();
 
-            */
+            * /
             #endregion
         }
+        */
+        /*
         private async Task<string> getInputBoxValue(IWebDriver wb, webNodeValue wnv)
         {
             vUserInputBox iBox = new vUserInputBox();
@@ -2328,25 +2312,9 @@ namespace YesiLdefter
              
             return wnv.writeValue;
         }
-        private async Task preparingViewControls(bool value)
-        {
-            if (t.IsNotNull(f.tableIPCodesInLoad) == false) return;
-
-            /// tableIPCodesInLoad üzerindeki tableIPCode viewleri tespit et ve Enabled durumunu değiştir
-            /// 
-            string tableIPCode = "";
-            string list = f.tableIPCodesInLoad;
-            while (list.IndexOf("||") > -1)
-            {
-                tableIPCode = t.Get_And_Clear(ref list, "||");
-                if (t.IsNotNull(tableIPCode))
-                    t.ViewControl_Enabled(this, tableIPCode, value);
-            }
-        }
-        #endregion subFunctions
-
-
+        */
         #region getHtmlTable
+        /*
         private void getHtmlTable(IWebDriver wb, ref webNodeValue wnv, string idName)
         {
             // Mevcudu yok et, yeni hazırlanacak
@@ -2464,11 +2432,11 @@ namespace YesiLdefter
                     // Do something with the cell
                 }
             }
-*/
+* /
 
 
         }
-
+        */
         // table içinde sayfalar var mı ?
         private bool areThereTablePages(HtmlElement htmlTable)
         {
@@ -2553,8 +2521,10 @@ namespace YesiLdefter
         #endregion getHtmlTable
 
         #region postHtmlTable
+        /*
         // database üzerindeki tabloyu bul ve gönderilecek colums/kolonları oku 
         // ve okunan bu bu colums/kolonları htmlTable anahtar value ile post için gönder
+        
         private void postHtmlTable(IWebDriver wb, ref webNodeValue wnv, string idName)
         {
             string _TableIPCode = wnv.TableIPCode;
@@ -2596,7 +2566,8 @@ namespace YesiLdefter
                 }
             }
         }
-
+        */
+        /*
         ///  html tablodaki doğru satırı/row u bul ve bulduğun satırın columns value leri doldur
         private void postHtmlTable_(IWebDriver wb, ref webNodeValue wnv, string idName)
         {
@@ -2650,6 +2621,8 @@ namespace YesiLdefter
                 if (onay) break;
             }
         }
+        */
+        /*
         /// onaylanmış html satırı ise db Table den okunan value html columns value ye atanır
         private void postColumsValue_(IWebDriver wb, IList<IWebElement> htmlCols, tTable _tTable)
         {
@@ -2718,7 +2691,7 @@ namespace YesiLdefter
                                <option value="20ABJ334">20ABJ334</option>
                                <option value="20BT473">20BT473</option>
                             </select>
-                            */
+                            * /
 
                             // yemiyor
                             //hCol.SetAttribute("option value", _dbValue);
@@ -2747,8 +2720,10 @@ namespace YesiLdefter
                 }
             }
         }
-
+        */
         #endregion postHtmlTable
+        #endregion WebScrapingAsync SubFunctions
+
 
     }
 

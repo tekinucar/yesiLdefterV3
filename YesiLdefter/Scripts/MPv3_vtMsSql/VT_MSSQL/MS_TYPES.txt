@@ -487,6 +487,7 @@ begin transaction
  insert into MS_TYPES values ( 1, 0, 'ITEM_TYPE',  1, '', 'Form');
  insert into MS_TYPES values ( 1, 0, 'ITEM_TYPE',  2, '', 'User Control');
  
+ --DELETE MS_TYPES WHERE TYPES_NAME = 'LAYOUT'
  insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14100, 'menu',             'Menu');
  insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14000, 'h0',               '---------------------------');
  insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14110, 'dockPanel',        'dockPanel');
@@ -524,6 +525,7 @@ begin transaction
   
  insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14000, 'h7',             '---------------------------');
  insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14310, 'webBrowser',     'webBrowser');
+ insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14312, 'cefWebBrowser',  'cefWebBrowser');
  insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14320, 'headerPanel',    'headerPanel');
  insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14330, 'editPanel',      'editPanel');
  insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14340, 'labelControl',   'labelControl');
