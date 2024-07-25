@@ -1,0 +1,54 @@
+﻿/*
+MtskUcretSinav
+MtskUcretUygulama
+MtskUcretTeorik
+
+MtskSaatTeorik
+MtskSaatUygulama
+
+*/
+
+/*CreateTable*/
+
+begin transaction
+
+ create table MtskUcretUygulama
+ (
+
+   Id                     Int IDENTITY(1,1) NOT NULL, 
+   FirmId                 Int       not null,
+   IsActive               Bit       not null, /* default : 1 = active, 0 = not active */  
+   IlId                   Int       not null, /* il bazlı */  
+   SiraNo                 SmallInt      null,
+   GecerlilikTarihiId     Int       not null,
+
+   MevcutSertifikaTipiId  Int           null,
+   IstenenSertifikaTipiId Int           null,
+
+   /* Sertifika Ücretleri */  
+   SertifikaUcreti                      Numeric(22,5) null,  
+   SertifikaUcreti2016Oncesi            Numeric(22,5) null,  
+
+   Sertifika24HakUcreti                 Numeric(22,5) null,  
+   Sertifika24HakUcreti2016             Numeric(22,5) null,  
+
+   /* Uygulama Saat Ücretleri */  
+   BirSaatUygDersUcreti                 Numeric(22,5) null,  
+   BirSaatUygDersUcreti2016             Numeric(22,5) null,  
+
+   BirSaatBasarisizDersUcreti           Numeric(22,5) null,  
+   BirSaatBasarisizDersUcreti2016       Numeric(22,5) null,  
+
+   BirSaatOzelDersUcreti                Numeric(22,5) null,  
+
+  constraint pk_MtskUcretUygulama primary key (Id)
+ )
+
+ create index X_MtskUcretUygulama01 on MtskUcretUygulama (GecerlilikTarihiId, IstenenSertifikaTipiId, MevcutSertifikaTipiId)
+ 
+ grant select, insert, update, delete on MtskUcretUygulama to public
+
+commit transaction
+
+/*CreateTableEnd*/
+

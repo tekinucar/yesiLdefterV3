@@ -1091,6 +1091,12 @@ namespace YesiLdefter.Selenium
             // Mevcudu yok et, yeni hazırlanacak
             wnv.tTable = null;
 
+            if (t.IsNotNull(idName) == false)
+            {
+                MessageBox.Show("error: 1005,  getHtmlTable için " + wnv.TagName + "  idName yok ..."); 
+                return;
+            }
+
             IWebElement htmlTable = wb.FindElement(By.Id(idName));
 
             if (htmlTable == null) return;
@@ -1110,79 +1116,80 @@ namespace YesiLdefter.Selenium
             {
                 IWebElement hRow = htmlRows[i];
 
-                name = hRow.GetAttribute("name");
+                //name = hRow.GetAttribute("name");
+                //if (name != null)
+                //{
+                //    if (name != "pages")
+                //    {
+                        tRow _tRow = new tRow();
 
-                if (name != "pages")
-                {
-                    tRow _tRow = new tRow();
+                        IList<IWebElement> htmlCols = hRow.FindElements(By.TagName("td"));
+                        colCount = htmlCols.Count;
 
-                    IList<IWebElement> htmlCols = hRow.FindElements(By.TagName("td"));
-                    colCount = htmlCols.Count;
-
-                    for (int i2 = 0; i2 < colCount; i2++)
-                    {
-                        value = "";
-
-                        IWebElement hCol = htmlCols[i2];
-
-                        // <input name="dgListele$ctl04$ab" id="dgListele_ctl04_chkOnayBekliyor" type="radio" checked="checked" value="chkOnayBekliyor">
-                        // <input name="dgListele$ctl04$ab" id="dgListele_ctl04_chkOnayDurum" type="radio" value="chkOnayDurum">
-                        dtyHtml = hCol.GetAttribute("innerHTML");
-
-                        if (dtyHtml.IndexOf("type=\"radio\"") > -1)
+                        for (int i2 = 0; i2 < colCount; i2++)
                         {
-                            //hCol.Click();  get sırasında neden click yapmışım ?
-                        }
+                            value = "";
 
-                        if (hCol.Text != null)
-                        {
-                            value = hCol.Text.Trim();
-                        }
-                        else
-                        {
-                            // <img onmouseover="this.src="/images/toolimages/open_kucuk_a.gif";this.style.cursor="hand";" 
-                            // onmouseout="this.src="/images/toolimages/open_kucuk.gif";this.style.cursor="default";" 
-                            // onclick="fnIslemSec("99969564|01/08/2017|NMZVAN93C15010059");" 
-                            // src="/images/toolimages/open_kucuk.gif">
+                            IWebElement hCol = htmlCols[i2];
 
-                            pos = -1;
-                            dtyHtml = hCol.GetAttribute("outerHTML");
-                            pos = dtyHtml.IndexOf("onclick");
+                            // <input name="dgListele$ctl04$ab" id="dgListele_ctl04_chkOnayBekliyor" type="radio" checked="checked" value="chkOnayBekliyor">
+                            // <input name="dgListele$ctl04$ab" id="dgListele_ctl04_chkOnayDurum" type="radio" value="chkOnayDurum">
+                            dtyHtml = hCol.GetAttribute("innerHTML");
 
-                            // <td align="center" style="width: 30px;">
-                            // <a href="javascript:__doPostBack('dgIstekOnaylanan','Select$0')">
-                            // <img title="Aç" onmouseover="this.src='/images/toolimages/open_kucuk_a.gif';this.style.cursor='pointer';" onmouseout="this.src='/images/toolimages/open_kucuk.gif';this.style.cursor='default';" src="/images/toolimages/open_kucuk.gif">
-                            // </a></td>                        
-
-                            if (pos == -1) // 
-                                pos = dtyHtml.IndexOf("__doPostBack(");
-
-                            if (pos > -1)
+                            if (dtyHtml.IndexOf("type=\"radio\"") > -1)
                             {
-                                //   /images/toolimages/open_kucuk.gif
-
-                                //html = hCol.OuterHtml.Remove(0, hCol.OuterHtml.IndexOf(" src=") + 6);
-                                //value = html.Remove(html.IndexOf(">") - 1);
-                                value = dtyHtml.Remove(0, dtyHtml.IndexOf(" src=") + 6);
-                                value = value.Remove(dtyHtml.IndexOf(">") - 1);
+                                //hCol.Click();  get sırasında neden click yapmışım ?
                             }
-                            else value = "";
+
+                            if (hCol.Text != null)
+                            {
+                                value = hCol.Text.Trim();
+                            }
+                            else
+                            {
+                                // <img onmouseover="this.src="/images/toolimages/open_kucuk_a.gif";this.style.cursor="hand";" 
+                                // onmouseout="this.src="/images/toolimages/open_kucuk.gif";this.style.cursor="default";" 
+                                // onclick="fnIslemSec("99969564|01/08/2017|NMZVAN93C15010059");" 
+                                // src="/images/toolimages/open_kucuk.gif">
+
+                                pos = -1;
+                                dtyHtml = hCol.GetAttribute("outerHTML");
+                                pos = dtyHtml.IndexOf("onclick");
+
+                                // <td align="center" style="width: 30px;">
+                                // <a href="javascript:__doPostBack('dgIstekOnaylanan','Select$0')">
+                                // <img title="Aç" onmouseover="this.src='/images/toolimages/open_kucuk_a.gif';this.style.cursor='pointer';" onmouseout="this.src='/images/toolimages/open_kucuk.gif';this.style.cursor='default';" src="/images/toolimages/open_kucuk.gif">
+                                // </a></td>                        
+
+                                if (pos == -1) // 
+                                    pos = dtyHtml.IndexOf("__doPostBack(");
+
+                                if (pos > -1)
+                                {
+                                    //   /images/toolimages/open_kucuk.gif
+
+                                    //html = hCol.OuterHtml.Remove(0, hCol.OuterHtml.IndexOf(" src=") + 6);
+                                    //value = html.Remove(html.IndexOf(">") - 1);
+                                    value = dtyHtml.Remove(0, dtyHtml.IndexOf(" src=") + 6);
+                                    value = value.Remove(dtyHtml.IndexOf(">") - 1);
+                                }
+                                else value = "";
+                            }
+
+                            // Add column
+                            tColumn _tColumn = new tColumn();
+                            _tColumn.value = value;
+                            _tRow.tColumns.Add(_tColumn);
                         }
 
-                        // Add column
-                        tColumn _tColumn = new tColumn();
-                        _tColumn.value = value;
-                        _tRow.tColumns.Add(_tColumn);
-                    }
-
-                    // Add row
-                    if (_tRow.tColumns.Count > 0)
-                    {
-                        if (_tRow.tColumns[0].value != "pages")
-                            _tTable.tRows.Add(_tRow);
-                    }
-                }
-
+                        // Add row
+                        if (_tRow.tColumns.Count > 0)
+                        {
+                            if (_tRow.tColumns[0].value != "pages")
+                                _tTable.tRows.Add(_tRow);
+                        }
+                //    }
+                //}
             }
             // Add table
             wnv.tTable = _tTable;
@@ -1685,7 +1692,7 @@ namespace YesiLdefter.Selenium
                         readValue = element.Text;
                     }
                 }
-                if (tagName == "img")
+                if ((tagName == "img") && t.IsNotNull(idName))
                 {
                     element = null;
                     element = wb.FindElement(By.Id(idName));

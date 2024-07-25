@@ -422,7 +422,12 @@ namespace YesiLdefter
             if (t.IsNotNull(ds_MsWebPages) == false) return;
             if (dN_MsWebPages.Position == -1) return;
 
-            if (msPagesService.LoginOnayi(ds_MsWebPages, dN_MsWebPages))
+            bool onay = true;
+            
+            if (v.webDriver_ == null)
+                onay = msPagesService.LoginOnayi(ds_MsWebPages, dN_MsWebPages);
+            
+            if (onay)    
                 await seleniumLoginPageViev();
         }
         
@@ -595,18 +600,14 @@ namespace YesiLdefter
             /// değiştirmiş olabilir
             /// 
             msPagesService.getMebbisCode();
-            //MessageBox.Show("Mebbis : " + v.tUser.MebbisCode + " : " + v.tUser.MebbisPass);
-
+            
             f.Clear();
             f.tForm = this;
             f.browserType = v.tBrowserType.Selenium;
-            //f.wbSel = v.webDriver_;
 
             if (v.webDriver_ == null)
                 preparingWebMain();
             
-            //f.wbSel = v.webDriver_;
-
             await myPageViewClickAsync(v.webDriver_, this.msWebPage_);
             //await myPageViewClickAsync(f.wbSel, this.msWebPage_);
         }

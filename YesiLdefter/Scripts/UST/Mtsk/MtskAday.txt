@@ -37,19 +37,25 @@ begin transaction
    IstenenSertifikaTipiId  SmallInt      null,
    IsOtomatik              Bit           null, /* 0 = Manuel vites, 1 = Otomatik vites */
    IsEngelli               Bit           null, /* 0 = yok, 1 = var */
-   
+   IsMuafiyetiVar          Bit           null, /* 0 = yok, 1 = var */  
+
+
    --51
    IsUcretli               Bit           null, /* 0 = Ücretsiz, 1 = Ücretli */
    IsUcretsiz              Bit           null, /* 0 = Ücretsiz, 1 = Ücretli */
-   SertifikaUcreti         Numeric(22,8) null,
-   AnlasilanUcret          Numeric(22,8) null,
+   KontejanTipiId          SmallInt      null, /* şehit, gazi vb...  */
+   KontejanIndirimOrani    Numeric(12,8) null, /* %25 indirim dersek : %75 aday öder, %25 kurs indirim yapmış olur */
+
+
+   SertifikaUcreti         Numeric(22,5) null,
+   AnlasilanUcret          Numeric(22,5) null,
    IskontoOrani            Numeric(12,8) null,
-   PesinatTutari           Numeric(22,8) null, 
+   PesinatTutari           Numeric(22,5) null, 
    TaksitSayisiTipiId      SmallInt      null, /* 1.Peşin, 2 Ay, 3 Ay .... */
-   KalanUcret              Numeric(22,8) null,
-   ESinavUcreti            Numeric(22,8) null,
-   UygulamaSinavUcreti     Numeric(22,8) null,
-   SertifikaVeSinavUcreti  Numeric(22,8) null,
+   KalanUcret              Numeric(22,5) null,
+   ESinavUcreti            Numeric(22,5) null,
+   UygulamaSinavUcreti     Numeric(22,5) null,
+   SertifikaVeSinavUcreti  Numeric(22,5) null,
    IsSinavUcretiTaksitli   Bit           null,
    OdemeTipiId             SmallInt      null, /* 1. Kredi Kartı, 2. Nakit, 3. Banka Havalesi, 4. Senet, 5. Açık Hesap */
    OdemeBaslamaTarihi      Date          null,
