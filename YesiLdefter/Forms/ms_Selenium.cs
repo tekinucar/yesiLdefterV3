@@ -81,7 +81,7 @@ namespace YesiLdefter
 
         DevExpress.XtraBars.Navigation.NavButton navButtonMebbisKaydet = null;
 
-        string TableIPCode = string.Empty;
+        string msWebPages_TableIPCode = string.Empty;
 
         //IWebDriver webDriver_ = null;
 
@@ -254,11 +254,11 @@ namespace YesiLdefter
             /// MsWebPages tablosu
             /// 
 
-            TableIPCode = t.Find_TableIPCode(this, "MsWebPages");
+            msWebPages_TableIPCode = t.Find_TableIPCode(this, "MsWebPages");
 
-            if (t.IsNotNull(TableIPCode) == false) return;
+            if (t.IsNotNull(msWebPages_TableIPCode) == false) return;
             
-            t.Find_DataSet(this, ref ds_MsWebPages, ref dN_MsWebPages, TableIPCode);
+            t.Find_DataSet(this, ref ds_MsWebPages, ref dN_MsWebPages, msWebPages_TableIPCode);
 
             if (t.IsNotNull(ds_MsWebPages))
             {
@@ -277,7 +277,7 @@ namespace YesiLdefter
                   ds_MsWebNodes,
                   dN_MsWebPages );
 
-                msPagesService.preparingMsWebPagesButtons(this, f, TableIPCode);
+                msPagesService.preparingMsWebPagesButtons(this, f, msWebPages_TableIPCode);
                 preparingMsWebPagesButtons_();
             }
         }
@@ -313,7 +313,7 @@ namespace YesiLdefter
         {
             /// MsWebNodes tablosu
             /// 
-            TableIPCode = t.Find_TableIPCode(this, "MsWebNodes");
+            string TableIPCode = t.Find_TableIPCode(this, "MsWebNodes");
 
             if (t.IsNotNull(TableIPCode) == false)
             {
@@ -363,7 +363,7 @@ namespace YesiLdefter
         }
         private void preparingWebPagesViewControl()
         {
-            TableIPCode = t.Find_TableIPCode(this, "MsWebPages");
+            string TableIPCode = t.Find_TableIPCode(this, "MsWebPages");
             view_MsWebPages = t.Find_Control_View(this, TableIPCode);
             if (view_MsWebPages != null)
             {
@@ -508,6 +508,7 @@ namespace YesiLdefter
 
         private void dNScrapingPages_PositionChanged(object sender, EventArgs e)
         {
+            if (this.workPageNodes_.ds_PagesNodesRefresh) return;
             preparingMsWebNodesFields();
             preparingAktifPageLoad();
 
@@ -574,12 +575,27 @@ namespace YesiLdefter
             this.f.tForm = this;
             this.f.browserType = v.tBrowserType.Selenium;
 
+            /// dN_MsWebPages.Position bir şekilde data boşalıyor postion kayboluyor (:
+            /// 
+            if (t.IsNotNull(msWebPages_TableIPCode) && (dN_MsWebPages.Position == -1))
+            {
+                this.workPageNodes_.ds_PagesNodesRefresh = true;
+                t.TableRefresh(this, ds_MsWebPages);
+            }
+            if (this.workPageNodes_.ds_PagesNodesRefresh)
+            {
+                this.workPageNodes_.ds_PagesNodesRefresh = false;
+                dN_MsWebPages.Position = this.workPageNodes_.lastPagePostion;
+            }
+            //---
+            
             this.msWebPage_ = t.RunQueryModelsSingle<MsWebPage>(ds_MsWebPages, dN_MsWebPages.Position);
             this.msWebNodes_ = t.RunQueryModels<MsWebNode>(ds_MsWebNodes);
             this.workPageNodes_.Clear();
             this.workPageNodes_.aktifPageCode = this.msWebPage_[0].PageCode;
             this.workPageNodes_.aktifPageUrl = this.msWebPage_[0].PageUrl;
-            
+            this.workPageNodes_.lastPagePostion = dN_MsWebPages.Position;
+
             msPagesService.checkedSiraliIslemVarmi(this, this.workPageNodes_, this.msWebScrapingDbFields_);
             //this.btn_SiraliIslem = this.workPageNodes_.siraliIslem_Btn;
         }

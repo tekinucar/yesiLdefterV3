@@ -10,6 +10,8 @@ begin transaction
    IsActive               Bit       not null, /* default : 1 = active, 0 = not active */  
    GecerlilikTarihiId     Int       not null,
 
+   /* 0 = normal, 125 = 125 cc altı :  zamanla farklı bir tanımlama gelirse uygun bir EtiketTipiId ekle */
+   EtiketTipiId           SmallInt      null,
    MevcutSertifikaTipiId  Int           null,
    IstenenSertifikaTipiId Int           null,
 
@@ -31,3 +33,34 @@ begin transaction
 commit transaction
 
 /*CreateTableEnd*/
+
+
+/*CreateLkpTable*/
+
+begin transaction
+
+-- ------------------------------------------------------- 
+-- EtiketTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskSaatUygulamaEtiketTipi')
+drop table [Lkp].[MtskSaatUygulamaEtiketTipi]
+
+create table [Lkp].[MtskSaatUygulamaEtiketTipi]
+(
+   Id               Int Unique not null, 
+   EtiketTipi       nVarchar(50)   null,
+   GrupTipiId       SmallInt       null,
+   
+   constraint  pk_MtskSaatUygulamaEtiketTipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskSaatUygulamaEtiketTipi]
+INSERT INTO [Lkp].[MtskSaatUygulamaetiketTipi] (Id, EtiketTipi, GrupTipiId)
+ VALUES 
+  ( 0,    N'Normal',0),
+  ( 125,  N'A1 125 CC altı', 0)
+  
+commit transaction
+
+  /*CreateLkpTableEnd*/
+

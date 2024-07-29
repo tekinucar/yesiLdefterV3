@@ -1282,6 +1282,8 @@ namespace Tkn_Variable
         public DataSet aktif_ds = null;
         public DataNavigator aktif_dN = null;
         public Control siraliIslem_Btn = null;
+        public int lastPagePostion { get; set; }
+        public bool ds_PagesNodesRefresh { get; set; }
         public void Clear()
         {
             aktifPageCode = "";
@@ -1295,6 +1297,8 @@ namespace Tkn_Variable
             siraliIslem_dN = null;
             aktif_ds = null;
             aktif_dN = null;
+            lastPagePostion = 0;
+            ds_PagesNodesRefresh = false;
         }
 
     }

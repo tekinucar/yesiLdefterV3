@@ -6,10 +6,10 @@ begin transaction
  (
 
    Id                     Int IDENTITY(1,1) NOT NULL, 
-   FirmId                 Int       not null,
-   IsActive               Bit       not null, /* default : 1 = active, 0 = not active */  
-   IlId                   Int       not null, /* il bazlı */  
-   GecerlilikTarihiId     Int       not null,
+   FirmId                 Int        not null,
+   IsActive               Bit        not null, /* default : 1 = active, 0 = not active */  
+   IlKodu                 Varchar(3) not null, /* il bazlı */  
+   GecerlilikTarihiId     Int        not null,
 
    /* Ücretler */  
    BirSaatTeorikDersUcreti    Numeric(22,5) null,  
@@ -17,7 +17,7 @@ begin transaction
   constraint pk_MtskUcretTeorik primary key (Id)
  )
 
- create index X_MtskUcretTeorik01 on MtskUcretTeorik (GecerlilikTarihi)
+ create index X_MtskUcretTeorik01 on MtskUcretTeorik (IlKodu, GecerlilikTarihiId)
  
  grant select, insert, update, delete on MtskUcretTeorik to public
 

@@ -16,15 +16,19 @@ begin transaction
  (
 
    Id                     Int IDENTITY(1,1) NOT NULL, 
-   FirmId                 Int       not null,
-   IsActive               Bit       not null, /* default : 1 = active, 0 = not active */  
-   IlId                   Int       not null, /* il bazlı */  
-   SiraNo                 SmallInt      null,
-   GecerlilikTarihiId     Int       not null,
+   FirmId                 Int        not null,
+   IsActive               Bit        not null, /* default : 1 = active, 0 = not active */  
+   IlKodu                 Varchar(3) not null, /* il bazlı */  
+   SiraNo                 SmallInt       null,
+   GecerlilikTarihiId     Int        not null,
 
-   MevcutSertifikaTipiId  Int           null,
-   IstenenSertifikaTipiId Int           null,
+   -- 11
+   /* 0 = normal, 125 = 125 cc altı :  zamanla farklı bir tanımlama gelirse uygun bir EtiketTipiId ekle */
+   EtiketTipiId           SmallInt       null,
+   MevcutSertifikaTipiId  Int            null,
+   IstenenSertifikaTipiId Int            null,
 
+   -- 21
    /* Sertifika Ücretleri */  
    SertifikaUcreti                      Numeric(22,5) null,  
    SertifikaUcreti2016Oncesi            Numeric(22,5) null,  
@@ -44,11 +48,40 @@ begin transaction
   constraint pk_MtskUcretUygulama primary key (Id)
  )
 
- create index X_MtskUcretUygulama01 on MtskUcretUygulama (GecerlilikTarihiId, IstenenSertifikaTipiId, MevcutSertifikaTipiId)
+ create index X_MtskUcretUygulama01 on MtskUcretUygulama (IlKodu, GecerlilikTarihiId, IstenenSertifikaTipiId, MevcutSertifikaTipiId)
  
  grant select, insert, update, delete on MtskUcretUygulama to public
 
 commit transaction
 
 /*CreateTableEnd*/
+
+/*CreateLkpTable*/
+
+begin transaction
+
+-- ------------------------------------------------------- 
+-- EtiketTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskUcretUygulamaEtiketTipi')
+drop table [Lkp].[MtskUcretUygulamaEtiketTipi]
+
+create table [Lkp].[MtskUcretUygulamaEtiketTipi]
+(
+   Id               Int Unique not null, 
+   EtiketTipi       nVarchar(50)   null,
+   GrupTipiId       SmallInt       null,
+   
+   constraint  pk_MtskUcretUygulamaEtiketTipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskUcretUygulamaEtiketTipi]
+INSERT INTO [Lkp].[MtskUcretUygulamaetiketTipi] (Id, EtiketTipi, GrupTipiId)
+ VALUES 
+  ( 0,    N'Normal',0),
+  ( 125,  N'A1 125 CC altı', 0)
+  
+commit transaction
+
+  /*CreateLkpTableEnd*/
 

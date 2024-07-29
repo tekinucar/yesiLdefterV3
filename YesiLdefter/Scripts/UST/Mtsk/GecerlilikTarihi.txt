@@ -54,3 +54,5 @@ INSERT INTO [Lkp].[GecerlilikTarihiKonuTipi] (Id, KonuTipi, GrupTipiId)
 commit transaction
 
   /*CreateLkpTableEnd*/
+
+

@@ -38,7 +38,7 @@ begin transaction
    IsOtomatik              Bit           null, /* 0 = Manuel vites, 1 = Otomatik vites */
    IsEngelli               Bit           null, /* 0 = yok, 1 = var */
    IsMuafiyetiVar          Bit           null, /* 0 = yok, 1 = var */  
-
+   Is2016Oncesi            Bit           null, 
 
    --51
    IsUcretli               Bit           null, /* 0 = Ücretsiz, 1 = Ücretli */
