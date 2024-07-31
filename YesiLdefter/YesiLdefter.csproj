@@ -126,6 +126,9 @@
     <Reference Include="DevExpress.XtraTreeList.v19.2, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
     <Reference Include="DevExpress.XtraVerticalGrid.v19.2, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
     <Reference Include="DevExpress.XtraWizard.v19.2, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="FastReport">
+      <HintPath>..\..\..\..\FastReport.Net\Framework 4.0\FastReport.dll</HintPath>
+    </Reference>
     <Reference Include="Google.Protobuf, Version=3.6.1.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604, processorArchitecture=MSIL">
       <HintPath>..\packages\Google.Protobuf.3.6.1\lib\net45\Google.Protobuf.dll</HintPath>
     </Reference>
@@ -246,6 +249,12 @@
     </Compile>
     <Compile Include="Forms\ms_DestekServiceTool.Designer.cs">
       <DependentUpon>ms_DestekServiceTool.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ms_FastReport.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ms_FastReport.Designer.cs">
+      <DependentUpon>ms_FastReport.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\ms_FileUpdates.cs">
       <SubType>Form</SubType>
@@ -450,6 +459,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\ms_DBList.resx">
       <DependentUpon>ms_DBList.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ms_FastReport.resx">
+      <DependentUpon>ms_FastReport.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\ms_Form.resx">
       <DependentUpon>ms_Form.cs</DependentUpon>

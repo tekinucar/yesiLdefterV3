@@ -1096,8 +1096,18 @@ namespace YesiLdefter.Selenium
                 MessageBox.Show("error: 1005,  getHtmlTable için " + wnv.TagName + "  idName yok ..."); 
                 return;
             }
-
-            IWebElement htmlTable = wb.FindElement(By.Id(idName));
+            
+            IWebElement htmlTable = null;
+            wb.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(1);
+            try
+            {
+                htmlTable = wb.FindElement(By.Id(idName));
+            }
+            catch (Exception)
+            {
+                //throw;
+            }
+            wb.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(30);
 
             if (htmlTable == null) return;
 

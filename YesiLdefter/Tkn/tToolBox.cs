@@ -1466,7 +1466,8 @@ namespace Tkn_ToolBox
             //string fields = "_FIELDS";
             string sqlA = string.Empty;
 
-            var matchingTable = v.tableList.Where(stringToCheck => stringToCheck.Contains(vt.TableName));
+            //var matchingTable = v.tableList.Where(stringToCheck => stringToCheck.Contains(vt.TableName));
+            var matchingTable = v.tableList.Where(stringToCheck => stringToCheck.Equals(vt.TableName));
             if (matchingTable.Any())
             {
                 // bu table için fieldlist1 daha önce yüklenmiş demektir
@@ -9940,8 +9941,19 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 
                 // yine kontrol fields gelmiş mi
                 dt = v.ds_MsTableFields.Tables[tableName];
+
+                // gelen datasete de bakma 
+                // aranan tablo fieldleri muhakkak v.ds_MsTableFields içinde olmalı
+                //if (dt == null)
+                //    dt = dsData.Tables[vt.TableIPCode];
+
                 // halen yok ise elveda
-                if (dt == null) return false;
+                if (dt == null)
+                {
+                    v.Kullaniciya_Mesaj_Var = "Dikkat field listesi yok : " + tableName + " " + vt.TableIPCode + " için ";
+                    v.timer_Kullaniciya_Mesaj_Var_.Enabled = true;
+                    return false;
+                }
             }
 
             if (dt.Rows.Count == 0) return false;

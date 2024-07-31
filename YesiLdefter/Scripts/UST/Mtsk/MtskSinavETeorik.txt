@@ -119,8 +119,7 @@ AS BEGIN
 		  begin
               
 			  INSERT INTO [dbo].[MtskAday]
-                 ([ParentId]
-                 ,[FirmId]
+                 ([FirmId]
                  ,[IsActive]
                  ,[TcNo]
                  ,[TamAdiSoyadi]
@@ -130,8 +129,7 @@ AS BEGIN
                  ,[KaynakKayitTipiId]
                  )
               VALUES
-               (  0        --ParentId, int
-                , @yFirmId --FirmId, int
+               (  @yFirmId --FirmId, int
                 , 1        --IsActive, bit
                 , @yTcNo   --TcNo, varchar(11)
                 , @yTamAdiSoyadi --TamAdiSoyadi, nvarchar(100)

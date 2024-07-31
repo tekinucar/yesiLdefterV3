@@ -561,8 +561,6 @@ namespace YesiLdefter.Selenium
         }
         public void transferFromWebToDatabase(Form tForm, webNodeValue wnv, List<MsWebScrapingDbFields> msWebScrapingDbFields, List<webNodeItemsList> aktifPageNodeItemsList, webForm f)
         {
-            //v.SQL = v.SQL + v.ENTER + myNokta + " transferFromWebToDatabase : Get : " + wnv.dbFieldName;
-
             /// web deki veriyi database aktar
             ///
             if (msWebScrapingDbFields == null) return;
@@ -657,35 +655,17 @@ namespace YesiLdefter.Selenium
             }
 
         }
-        public async Task transferFromWebTableToDatabase(Form tForm, webNodeValue wnv, List<MsWebNode> msWebNodes, List<MsWebScrapingDbFields> msWebScrapingDbFields, List<webNodeItemsList> aktifPageNodeItemsList)
+        public async Task<bool> transferFromWebTableToDatabase(Form tForm, webNodeValue wnv, List<MsWebNode> msWebNodes, List<MsWebScrapingDbFields> msWebScrapingDbFields, List<webNodeItemsList> aktifPageNodeItemsList)
         {
-            //v.SQL = v.SQL + v.ENTER + myNokta + " transferFromWebTableToDatabase";
-            
+            bool onay = true;
             Application.DoEvents();
-            
-            //if (this.myTriggerTableCount <= this.myTriggerTableRowNo)
-            //{
-            //    // bitti
-            //    // tetiklenecek başka row kalmadı
-            //    this.myTriggering = false;
-            //    this.myTriggeringTable = false;
-            //    return;
-            //}
-
-            //if ((this.myTriggerPageRefresh) &&
-            //    (this.myTriggerPageRefreshTick))
-            //    return;
 
             if (wnv.tTable == null)
-                return;
+                return onay;
 
             t.WaitFormOpen(tForm, "Alınan bilgiler veritabanına yazılıyor ...");
 
             tTable tb = wnv.tTable;
-
-            //this.myTriggerWmvTableRows = null;
-            //this.myTriggerWmvTableRows = tb.tRows[this.myTriggerTableRowNo];
-
             int myTriggerTableRowNo = 0;
             tRow myTriggerWmvTableRows = tb.tRows[myTriggerTableRowNo];
 
@@ -695,15 +675,11 @@ namespace YesiLdefter.Selenium
 
             /// itemButton varsa uygula
             ///
-
-            //this.myTriggerItemButton = findTableItemButton(msWebNodes, this.myTriggerWmvTableRows, this.myTriggerTableRowNo);
             bool myTriggerItemButton = findTableItemButton(msWebNodes, myTriggerWmvTableRows, myTriggerTableRowNo);
 
             /// itemButton yoksa 
             /// itemButton false ise burada kayıt işlemi yapılıyor
             /// 
-
-            //if ((this.myTriggerItemButton == false) && (this.myTriggerTableRowNo == 0))
             if ((myTriggerItemButton == false) && (myTriggerTableRowNo == 0))
             {
                 // itemButton olmadığı için table nin bütün row larını bir defada buradan kayıt işlemini gerçekleştir
@@ -729,25 +705,17 @@ namespace YesiLdefter.Selenium
                         //saveRowAsync(tForm, this.myTriggerTableWnv, row, msWebScrapingDbFields, aktifPageNodeItemsList);
                         saveRowAsync(tForm, wnv, row, msWebScrapingDbFields, aktifPageNodeItemsList);
 
-                        if (editKayitKontrolu()) break;
+                        if (editKayitKontrolu())
+                        {
+                            onay = false;
+                            break;
+                        }
                     }
                 }
-                //this.myTriggeringTable = false;
             }
-
             v.IsWaitOpen = false;
             t.WaitFormClose();
-
-            /// itemButton varsa kayıt işlem aşağıdaki adreste yapılıyor
-            ///
-
-            //if (this.myTriggerItemButton)
-            //{
-            //    // tetikleme işi timerTriggerAsync() içinde 1.1
-            //    //
-            //    // transferFromWebTableRowToDatabase();
-            //}
-
+            return onay;
         }
         public void transferFromWebSelectToDatabase(Form tForm, webNodeValue wnv, List<MsWebScrapingDbFields> msWebScrapingDbFields, List<webNodeItemsList> aktifPageNodeItemsList, webForm f)
         {
@@ -1053,6 +1021,7 @@ namespace YesiLdefter.Selenium
                 if (tableIPCode == "")
                 {
                     taramaOnayi = false;
+                    break;
                 }
 
                 siraliIslemButonOnayi = findSiraliIslemButonu(tForm, workPageNodes, tableIPCode);
@@ -1084,7 +1053,7 @@ namespace YesiLdefter.Selenium
 
                 /// ilk bulduğunda default olarak işaretli olsun
                 /// 
-                ((DevExpress.XtraEditors.CheckButton)btn_SiraliIslem).Checked = true;
+                //((DevExpress.XtraEditors.CheckButton)btn_SiraliIslem).Checked = true;
                 
                 workPageNodes.siraliIslemAktif = ((DevExpress.XtraEditors.CheckButton)btn_SiraliIslem).Checked;
 
@@ -1402,7 +1371,8 @@ namespace YesiLdefter.Selenium
         {
             bool onay = false;
 
-            if ((v.con_EditSaveCount == 10) || (v.con_EditSaveCount == 25) || (v.con_EditSaveCount == 50))
+            if ((v.con_EditSaveControl) &&
+                ((v.con_EditSaveCount == 10) || (v.con_EditSaveCount == 25) || (v.con_EditSaveCount == 50)))
             {
                 string soru = "Sürekli olarak eski kayıtlar denk gelmeye başladı. İşlemi durdurmak ister misiniz ?";
                 DialogResult cevap = t.mySoru(soru);
@@ -1411,6 +1381,8 @@ namespace YesiLdefter.Selenium
                     v.con_EditSaveCount = 0;
                     onay = true;
                 }
+                else
+                    v.con_EditSaveControl = false;
             }
             return onay;
         }

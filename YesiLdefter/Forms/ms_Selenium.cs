@@ -424,10 +424,12 @@ namespace YesiLdefter
 
             bool onay = true;
             
-            if (v.webDriver_ == null)
+            if ((v.webDriver_ == null) && (dN_MsWebPages.Position == 0))
                 onay = msPagesService.LoginOnayi(ds_MsWebPages, dN_MsWebPages);
             
-            if (onay)    
+            if ((onay) &&                        // onaylı olacak ve
+                ((v.webDriver_ != null ||        // ( webDriver create edilmiş veya 
+                  dN_MsWebPages.Position == 0))) //   Login sayfası olacak ) 
                 await seleniumLoginPageViev();
         }
         
@@ -508,7 +510,8 @@ namespace YesiLdefter
 
         private void dNScrapingPages_PositionChanged(object sender, EventArgs e)
         {
-            if (this.workPageNodes_.ds_PagesNodesRefresh) return;
+            v.con_EditSaveControl = true;
+            v.con_EditSaveCount = 0;
             preparingMsWebNodesFields();
             preparingAktifPageLoad();
 
@@ -574,27 +577,12 @@ namespace YesiLdefter
             this.f.Clear();
             this.f.tForm = this;
             this.f.browserType = v.tBrowserType.Selenium;
-
-            /// dN_MsWebPages.Position bir şekilde data boşalıyor postion kayboluyor (:
-            /// 
-            if (t.IsNotNull(msWebPages_TableIPCode) && (dN_MsWebPages.Position == -1))
-            {
-                this.workPageNodes_.ds_PagesNodesRefresh = true;
-                t.TableRefresh(this, ds_MsWebPages);
-            }
-            if (this.workPageNodes_.ds_PagesNodesRefresh)
-            {
-                this.workPageNodes_.ds_PagesNodesRefresh = false;
-                dN_MsWebPages.Position = this.workPageNodes_.lastPagePostion;
-            }
-            //---
             
             this.msWebPage_ = t.RunQueryModelsSingle<MsWebPage>(ds_MsWebPages, dN_MsWebPages.Position);
             this.msWebNodes_ = t.RunQueryModels<MsWebNode>(ds_MsWebNodes);
             this.workPageNodes_.Clear();
             this.workPageNodes_.aktifPageCode = this.msWebPage_[0].PageCode;
             this.workPageNodes_.aktifPageUrl = this.msWebPage_[0].PageUrl;
-            this.workPageNodes_.lastPagePostion = dN_MsWebPages.Position;
 
             msPagesService.checkedSiraliIslemVarmi(this, this.workPageNodes_, this.msWebScrapingDbFields_);
             //this.btn_SiraliIslem = this.workPageNodes_.siraliIslem_Btn;
@@ -634,28 +622,36 @@ namespace YesiLdefter
             //startNodesRun(ds_MsWebNodes, v.tWebRequestType.alwaysSet, v.tWebEventsType.buttonAlwaysSet);
         }
 
+        private void viewFinalMessage()
+        {
+            t.FlyoutMessage(this, "Bilgilendirme", "İşlem tamamlandı...");
+        }
         private async void myFullGet1Click(object sender, EventArgs e)
         {
             Cursor.Current = Cursors.WaitCursor;
             await startNodes(this.msWebNodes_, this.workPageNodes_, v.tWebRequestType.get, v.tWebEventsType.button3);
+            viewFinalMessage();
         }
 
         private async void myFullGet2Click(object sender, EventArgs e)
         {
             Cursor.Current = Cursors.WaitCursor;
             await startNodes (this.msWebNodes_, this.workPageNodes_, v.tWebRequestType.get, v.tWebEventsType.button4);
+            viewFinalMessage();
         }
 
         private async void myFullPost1Click(object sender, EventArgs e)
         {
             Cursor.Current = Cursors.WaitCursor;
             await startNodes(this.msWebNodes_, this.workPageNodes_, v.tWebRequestType.post, v.tWebEventsType.button5);
+            viewFinalMessage();
         }
 
         private async void myFullPost2Click(object sender, EventArgs e)
         {
             Cursor.Current = Cursors.WaitCursor;
             await startNodes(this.msWebNodes_, this.workPageNodes_, v.tWebRequestType.post, v.tWebEventsType.button6);
+            viewFinalMessage();
         }
 
         private async void myFullSaveClick(object sender, EventArgs e)
@@ -678,6 +674,8 @@ namespace YesiLdefter
             bool onayPageRefresh = false;
             bool onayValue = false;
             bool onaySiraliIslem = false;
+            bool onayWebScrapingAfter = true;
+
             /// daha çalışanları temizle yani
             /// load çalıştı diyelim
             /// kullanıcı veri gönder/veri al talebinde bulununca 
@@ -700,20 +698,10 @@ namespace YesiLdefter
 
             foreach (MsWebNode item in msWebNodes)
             {
+                /// hata var ise
                 if (f.anErrorOccurred) break;
-
-                //if ((item.EventsType == (short)v.tWebEventsType.button5) && (workEventsType == v.tWebEventsType.button5))
-                //{
-                //   // test
-                //   //string aa = "aaa555";
-                //}
-                //if ((item.EventsType == (short)v.tWebEventsType.button6) && (workEventsType == v.tWebEventsType.button6))
-                //{
-                //    // test
-                //    //string aa = "aaa6666";
-                //}
-
-                //MessageBox.Show(item.TagName + " ; " + item.AttId + " ; " + item.AttName + " ; ");
+                /// save sırasında tekrar eden kayıtların kesilmesi istenirse
+                if (onayWebScrapingAfter == false) break;
 
                 // 2. adımda 
                 // IsActive = 1, nodeIdList += item.Id
@@ -762,17 +750,23 @@ namespace YesiLdefter
 
                         // 4. adım
                         //
-                        // WebScrapingAsync sonrası (get için ) yapılacak işler
-                        await WebScrapingAfter(wnv);
+                        // WebScrapingAsync sonrası (get için save) yapılacak işler
+
+                        // save sırasında tekrar eden kayıtların kesilmesi istenirse
+                        onayWebScrapingAfter = await WebScrapingAfter(wnv);
                     }
                 }
             }
 
             /// Sıralı islem butonu çalışıcak
-            if ((workEventsType == v.tWebEventsType.button5) ||
+            /// 
+            if ((workEventsType == v.tWebEventsType.button3) ||
+                (workEventsType == v.tWebEventsType.button4) ||
+                (workEventsType == v.tWebEventsType.button5) ||
                 (workEventsType == v.tWebEventsType.button6))
             {
-                if ((workRequestType == v.tWebRequestType.post) &&
+                if (((workRequestType == v.tWebRequestType.get || workRequestType == v.tWebRequestType.post))   &&
+                    (onayWebScrapingAfter) &&
                     (workPageNodes.siraliIslemVar) &&
                     (f.anErrorOccurred == false))
                 {
@@ -915,11 +909,12 @@ namespace YesiLdefter
             
             return onay;
         }
-        private async Task WebScrapingAfter(webNodeValue wnv)
+        private async Task<bool> WebScrapingAfter(webNodeValue wnv)
         {
             //  web deki veriyi database aktar
             //  webden alınan veriyi (readValue yi)  db ye aktar
-            
+            bool onay = true;
+
             if ((wnv.InjectType == v.tWebInjectType.Get ||
                 (wnv.InjectType == v.tWebInjectType.GetAndSet && wnv.workRequestType == v.tWebRequestType.get)) &&
                 (wnv.IsInvoke == false)) //(this.myTriggerInvoke == false)) // invoke gerçekleşmişse hiç başlama : get sırasında set edip bilgi çağrılıyor demekki
@@ -961,11 +956,9 @@ namespace YesiLdefter
 
                         webNodeValue myTriggerTableWnv = wnv.Copy();
                                                 
-                        await msPagesService.transferFromWebTableToDatabase(this, myTriggerTableWnv, msWebNodes_, msWebScrapingDbFields_, aktifPageNodeItemsList_);
+                        onay = await msPagesService.transferFromWebTableToDatabase(this, myTriggerTableWnv, msWebNodes_, msWebScrapingDbFields_, aktifPageNodeItemsList_);
 
                         t.TableRefresh(this, myTriggerTableWnv.TableIPCode);
-                        //t.TableRefresh(this, wnv.TableIPCode);
-
                     }
                 }
 
@@ -983,6 +976,8 @@ namespace YesiLdefter
                     }
                 }
             }
+
+            return onay;
         }
         
         private bool listControl(MsWebNode item, webWorkPageNodes workPageNodes)

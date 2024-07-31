@@ -286,17 +286,19 @@ namespace Tkn_CreateObject
                     if (nButton.buttonText.IndexOf("<") > -1)
                         checkButton_ek.AllowHtmlDraw = DevExpress.Utils.DefaultBoolean.True;
 
-                    if (nButton.events)
-                        checkButton_ek.Click += new System.EventHandler(ev.btn_Navigotor_Click);
+                    checkButton_ek.CheckedChanged += new System.EventHandler(ev.btn_CheckButton_CheckedChanged);
 
                     checkButton_ek.Enter += new System.EventHandler(ev.btn_Navigotor_Enter);
                     checkButton_ek.Leave += new System.EventHandler(ev.btn_Navigotor_Leave);
 
-                    if (nButton.backColor != null)
-                    {
-                        checkButton_ek.Appearance.BackColor = nButton.backColor;   //System.Drawing.Color.LightGreen;
-                        checkButton_ek.Appearance.Options.UseBackColor = true;
-                    }
+                    //if (nButton.backColor != null)
+                    //{
+                    checkButton_ek.Appearance.BackColor = System.Drawing.Color.AliceBlue;
+                    checkButton_ek.Appearance.Options.UseBackColor = true;
+                    checkButton_ek.Appearance.ForeColor = System.Drawing.Color.Black;
+                    checkButton_ek.Appearance.Options.UseForeColor = true;
+                    checkButton_ek.LookAndFeel.UseDefaultLookAndFeel = false;
+                    //}
                     nButton.navigatorPanel.Controls.Add(checkButton_ek);
                     Buttons_CaptionChange(checkButton_ek, nButton.navigatorList, "");
                 }

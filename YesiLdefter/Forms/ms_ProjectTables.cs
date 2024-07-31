@@ -78,6 +78,7 @@ namespace YesiLdefter
         string buttonAllFileReadDbWrite = "ALL_FILE_READ_DB_WRITE";
 
         string menuName2 = "MENU_" + "UST/PMS/PMS/ProjectTablesCreate";
+        string menuName22 = "MENU_" + "UST/PMS/PMS/ProjectTablesCreate2";
         string buttonDbConnection = "DB_CONNECTION";
         string buttonDbCreate = "DB_CREATE";
         string buttonFieldList = "FIELDS_LIST";
@@ -131,8 +132,14 @@ namespace YesiLdefter
             // Yeni Firma için Database, tables, procedures ve functions oluşturmak için
             if (dsFirm == null)
             {
-                tableIPCode = "UST/CRM/UstadFirms.DBKart_F02";
+                tableIPCode = "UST/CRM/UstadFirms.DBKart_F01";
                 t.Find_DataSet(this, ref dsFirm, ref dNFirm, tableIPCode);
+
+                if (dsFirm == null)
+                {
+                    tableIPCode = "UST/CRM/UstadFirms.DBKart_F02";
+                    t.Find_DataSet(this, ref dsFirm, ref dNFirm, tableIPCode);
+                }
 
                 // Database create işlemleri
                 if (t.IsNotNull(dsFirm))
@@ -145,23 +152,23 @@ namespace YesiLdefter
             // aranan nesne memoEdit ()
             // memoEdit aslında bir panelin içinde sıfırncı kontrol olarak duruyor
             //
-            editpanel_Sonuc = t.Find_Control(this, v.lyt_Name + "30_30");
-            if (editpanel_Sonuc != null)
-            {
-                if (((DevExpress.XtraEditors.PanelControl)editpanel_Sonuc).Controls.Count > 0)
-                {
-                    ((DevExpress.XtraEditors.PanelControl)editpanel_Sonuc).Controls[0].Font = new System.Drawing.Font("Courier New", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-                }
-            }
+            //editpanel_Sonuc = t.Find_Control(this, v.lyt_Name + "30_30");
+            //if (editpanel_Sonuc != null)
+            //{
+            //    if (((DevExpress.XtraEditors.PanelControl)editpanel_Sonuc).Controls.Count > 0)
+            //    {
+            //        ((DevExpress.XtraEditors.PanelControl)editpanel_Sonuc).Controls[0].Font = new System.Drawing.Font("Courier New", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            //    }
+            //}
 
-            editpanel_Sql = t.Find_Control(this, v.lyt_Name + "30_20_10_10");
-            if (editpanel_Sql != null)
-            {
-                if (((DevExpress.XtraEditors.PanelControl)editpanel_Sql).Controls.Count > 0)
-                {
-                    ((DevExpress.XtraEditors.PanelControl)editpanel_Sql).Controls[0].Font = new System.Drawing.Font("Courier New", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-                }
-            }
+            //editpanel_Sql = t.Find_Control(this, v.lyt_Name + "30_20_10_10");
+            //if (editpanel_Sql != null)
+            //{
+            //    if (((DevExpress.XtraEditors.PanelControl)editpanel_Sql).Controls.Count > 0)
+            //    {
+            //        ((DevExpress.XtraEditors.PanelControl)editpanel_Sql).Controls[0].Font = new System.Drawing.Font("Courier New", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            //    }
+            //}
 
 
         }
@@ -220,8 +227,8 @@ namespace YesiLdefter
             string vHasATrigger = "";
 
             v.active_DB.runDBaseNo = v.dBaseNo.UstadCrm;
-
-            if (pageIndex == 0)
+            /// tables
+            if (pageIndex == 1)
             {
                 if (t.IsNotNull(dsTables))
                 {
@@ -244,8 +251,8 @@ namespace YesiLdefter
                     }
                 }
             }
-
-            if (pageIndex == 1)
+            /// procedures
+            if (pageIndex == 2)
             {
                 fileName = dsProcedures.Tables[0].Rows[dNProcedures.Position][fProcedureName].ToString();
                 
@@ -254,8 +261,8 @@ namespace YesiLdefter
                     tFileReadAndWrite(dsProcedures, dNProcedures, fSqlScript, fileName);
                 }
             }
-
-            if (pageIndex == 2)
+            /// functions
+            if (pageIndex == 3)
             {
                 fileName = dsFunctions.Tables[0].Rows[dNFunctions.Position][fFunctionName].ToString();
 
@@ -270,15 +277,15 @@ namespace YesiLdefter
         {
             int pageIndex = t.Find_TabControlPageIndex(this.tabControl);
 
-            if (pageIndex == 0)
+            if (pageIndex == 1)
             {
                 allTableFileReadDbWrite();
             }
-            if (pageIndex == 1)
+            if (pageIndex == 2)
             {
                 allProcedureFileReadDbWrite();
             }
-            if (pageIndex == 2)
+            if (pageIndex == 3)
             {
                 allFunctionFileReadDbWrite();
             }
@@ -1708,6 +1715,7 @@ namespace YesiLdefter
         {
             if (t.IsNotNull(dsFirm))
             {
+                #region create Tables, Proceduru, Function ve Veri aktarımı olan menu
                 // preparing Tables, Proceduru, Function write database
                 t.Find_Button_AddClick(this, menuName2, buttonSingFileReadDbWrite, myNavElementClick);
                 t.Find_Button_AddClick(this, menuName2, buttonAllFileReadDbWrite, myNavElementClick);
@@ -1734,6 +1742,18 @@ namespace YesiLdefter
                 t.Find_Button_AddClick(this, menuName2, buttonSourceTablesList, myNavElementClick);
                 t.Find_Button_AddClick(this, menuName2, buttonSingleTableTransfer, myNavElementClick);
                 t.Find_Button_AddClick(this, menuName2, buttonTablesTransfer, myNavElementClick);
+                #endregion create Tables, Proceduru, Function ve Veri aktarımı olan menu
+
+                // Sadece data aktar işlemi olan menü için
+                #region Sadece Veri aktarımı olan menu
+                // database
+                t.Find_Button_AddClick(this, menuName22, buttonDbConnection, myNavElementClick);
+                // veri aktarımı
+                t.Find_Button_AddClick(this, menuName22, buttonSourceDBConnect, myNavElementClick);
+                t.Find_Button_AddClick(this, menuName22, buttonSourceTablesList, myNavElementClick);
+                t.Find_Button_AddClick(this, menuName22, buttonSingleTableTransfer, myNavElementClick);
+                t.Find_Button_AddClick(this, menuName22, buttonTablesTransfer, myNavElementClick);
+                #endregion Sadece Veri aktarımı olan menu
             }
         }
         private bool dbConnction(bool test, bool masterConnect)

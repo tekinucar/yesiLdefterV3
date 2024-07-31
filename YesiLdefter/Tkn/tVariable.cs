@@ -202,6 +202,7 @@ namespace Tkn_Variable
 
         public static string con_Save_dsState { get; set; }
         public static int con_EditSaveCount { get; set; }
+        public static bool con_EditSaveControl { get; set; }
 
         public static byte[] con_Images = null;
         public static string con_Images_FieldName { get; set; }
@@ -1282,8 +1283,6 @@ namespace Tkn_Variable
         public DataSet aktif_ds = null;
         public DataNavigator aktif_dN = null;
         public Control siraliIslem_Btn = null;
-        public int lastPagePostion { get; set; }
-        public bool ds_PagesNodesRefresh { get; set; }
         public void Clear()
         {
             aktifPageCode = "";
@@ -1297,8 +1296,6 @@ namespace Tkn_Variable
             siraliIslem_dN = null;
             aktif_ds = null;
             aktif_dN = null;
-            lastPagePostion = 0;
-            ds_PagesNodesRefresh = false;
         }
 
     }

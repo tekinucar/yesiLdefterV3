@@ -354,7 +354,8 @@ namespace YesiLdefter
 
             foreach (DriveInfo d in allDrives)
             {
-                if (v.EXE_PATH.IndexOf(d.Name) > -1)
+                //if (v.EXE_PATH.IndexOf(d.Name) > -1)
+                if (Path.GetDirectoryName(Application.ExecutablePath).IndexOf(d.Name) > -1)
                 {
                     v.EXE_DRIVE = d.Name.ToString();
                     break;

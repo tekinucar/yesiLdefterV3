@@ -1675,6 +1675,23 @@ namespace Tkn_Events
             v.tButtonHint.Clear();
         }
 
+        public void btn_CheckButton_CheckedChanged(object sender, EventArgs e)
+        {
+            bool checked_ = ((DevExpress.XtraEditors.CheckButton)sender).Checked;
+            if (checked_)
+            {
+                ((DevExpress.XtraEditors.CheckButton)sender).Text = "@ " + ((DevExpress.XtraEditors.CheckButton)sender).Text;
+                //((DevExpress.XtraEditors.CheckButton)sender).Appearance.BackColor = System.Drawing.Color.LightGreen;
+
+            }
+            else
+            {
+                ((DevExpress.XtraEditors.CheckButton)sender).Text = ((DevExpress.XtraEditors.CheckButton)sender).Text.Replace("@ ", "");
+                //((DevExpress.XtraEditors.CheckButton)sender).Appearance.BackColor = System.Drawing.Color.LightYellow;
+
+            }
+        }
+
         #endregion
 
         // düzenle

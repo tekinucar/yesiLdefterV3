@@ -720,8 +720,11 @@ namespace Tkn_Events
                 (buttonType == v.tButtonType.btEk6) ||
                 (buttonType == v.tButtonType.btEk7))
             {
-                onay = ekButtonIslemi(tForm, tableIPCode, prop_, buttonType);
-                saveRefreshControl(tForm, tableIPCode);
+                if (prop_ != null)
+                {
+                    onay = ekButtonIslemi(tForm, tableIPCode, prop_, buttonType);
+                    saveRefreshControl(tForm, tableIPCode);
+                }
                 return onay;
             }
             #endregion ek1,ek2 butonları

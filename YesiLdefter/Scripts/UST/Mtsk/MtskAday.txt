@@ -5,7 +5,6 @@ begin transaction
  create table MtskAday
  (
    Id                    Int IDENTITY(1,1) not null, 
-   ParentId              Int       not null, /* default 0 */
    FirmId                Int       not null,
    IsActive              Bit       not null, /* default : 1 = active, 0 = not active */  
    AdayKayitTarihi       Date          null, 

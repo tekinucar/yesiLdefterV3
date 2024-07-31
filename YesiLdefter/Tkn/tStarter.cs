@@ -39,8 +39,6 @@ namespace Tkn_Starter
             */
 
             v.EXE_PATH = Path.GetDirectoryName(Application.ExecutablePath);
-            v.EXE_TempPath = v.EXE_PATH + "\\Temp";
-            v.EXE_ScriptsPath = v.EXE_PATH + "\\Scripts";
             v.tExeAbout.activeExeName = Application.ProductName + ".exe";
             v.tExeAbout.activePath = Application.StartupPath;
             

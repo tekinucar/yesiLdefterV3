@@ -693,7 +693,10 @@ namespace Tkn_Events
 
             int count = v.ds_DonemTipiList.Tables[0].Rows.Count;
 
-            if (v.tMainFirm.SectorTypeId == (Int16)v.msSectorType.UstadMtsk) // Mtsk
+            if ((v.tMainFirm.SectorTypeId == (Int16)v.msSectorType.UstadMtsk) ||
+                (v.tMainFirm.SectorTypeId == (Int16)v.msSectorType.TabimMtsk) ||
+                (v.tMainFirm.SectorTypeId == (Int16)v.msSectorType.TabimSrc) ||
+                (v.tMainFirm.SectorTypeId == (Int16)v.msSectorType.TabimIsmak))
                 fieldName = "DonemTipi";
 
             for (int i = 0; i < count; i++)
