@@ -2896,8 +2896,8 @@ namespace Tkn_ToolBox
             tFirm.FirmLongName = row["FirmLongName"].ToString();
             tFirm.FirmShortName = row["FirmShortName"].ToString();
             tFirm.FirmGuid = row["FirmGUID"].ToString();
-            tFirm.IlKodu = row["IlKodu"].ToString();
-            tFirm.IlceKodu = row["IlceKodu"].ToString();
+            tFirm.IlKodu = row["CityTypeId"].ToString();
+            tFirm.IlceKodu = row["DistrictTypeId"].ToString();
 
             tFirm.MenuCode = row["MenuCode"].ToString();
             tFirm.SectorTypeId = myInt16(row["SectorTypeId"].ToString());
@@ -14331,6 +14331,8 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 OzelType = fieldName.IndexOf("IlceTipi");
 
             if (OzelType == -1)
+                OzelType = fieldName.IndexOf("CityType");
+            if (OzelType == -1)
                 OzelType = fieldName.IndexOf("IlKodu");
             if (OzelType == -1)
                 OzelType = fieldName.IndexOf("IlceKodu");
@@ -14423,7 +14425,9 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 }
 
 
-                if (fieldName.IndexOf("IlKodu") > -1)
+                if ((fieldName.IndexOf("IlKodu") > -1) ||
+                    (fieldName.IndexOf("City") > -1))
+
                 {
                     idFieldName = "IlKodu";
                     fieldName = "IlAdiBUYUK";
