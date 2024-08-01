@@ -57,7 +57,6 @@ AS BEGIN
       set @SertifikaId = 0
       set @IsActive = 0
 
-      if (@EhliyetSinifi = 'A1 SINIFI SERTİFİKA') begin set @IsActive = 1 set @SertifikaId = 2502 end 
       if (@EhliyetSinifi = 'A2 SINIFI SERTİFİKA') begin set @IsActive = 1 set @SertifikaId = 2503 end 
       if (@EhliyetSinifi = 'B SINIFI SERTİFİKA') begin set @IsActive = 1 set @SertifikaId = 2504 end 
       if (@EhliyetSinifi = 'C SINIFI SERTİFİKA') begin set @IsActive = 1 set @SertifikaId = 2505 end 
@@ -84,6 +83,13 @@ AS BEGIN
       UPDATE [Lkp].[MtskSertifikaTipi]
       SET [IsActive] = @IsActive
       WHERE Id = @SertifikaId
+
+      if (@EhliyetSinifi = 'A1 SINIFI SERTİFİKA') 
+	  begin 
+        UPDATE [Lkp].[MtskSertifikaTipi]
+        SET [IsActive] = 1
+        WHERE Id in (2502, 9022)
+	  end 
     	
       FETCH NEXT FROM myCursor INTO @curId
     END

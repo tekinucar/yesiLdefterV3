@@ -10,10 +10,6 @@ create table [Lkp].[MtskSertifikaTipi]
    Id                  Int IDENTITY(1,1) not null, 
    SertifikaTipi       nVarchar(50)   null,
    IsActive            Bit            null,
-   TeorikDersSaati     SmallInt       null,
-   SimulatorDersSaati  SmallInt       null,
-   AkanTrafikDersSaati SmallInt       null,
-   UygulamaDersSaati   SmallInt       null,
    
    constraint  pk_MtskSertifikaTipi primary key (Id)
 )
@@ -21,57 +17,57 @@ create table [Lkp].[MtskSertifikaTipi]
 set IDENTITY_INSERT [Lkp].[MtskSertifikaTipi] ON
 
 Delete from [Lkp].[MtskSertifikaTipi]
-INSERT INTO [Lkp].[MtskSertifikaTipi] (Id, SertifikaTipi, IsActive, TeorikDersSaati, SimulatorDersSaati, AkanTrafikDersSaati, UygulamaDersSaati )
+INSERT INTO [Lkp].[MtskSertifikaTipi] (Id, SertifikaTipi, IsActive )
  VALUES 
-  ( 0,    N'', 1, 0, 0, 0, 0 ),
-  ( 2514, N'A Sınıfı Sertifika',      1,  0,  2,  10,  12 ),
-  ( 2502, N'A1 Sınıfı Sertifika',     1,  0,  2,  10,  12 ),
-  ( 2503, N'A2 Sınıfı Sertifika',     1,  0,  2,  10,  12 ),
+  (    0, N'', 0 ),
+  ( 2514, N'A Sınıfı Sertifika',      0 ),
+  ( 2502, N'A1 Sınıfı Sertifika',     0 ),
+  ( 2503, N'A2 Sınıfı Sertifika',     0 ),
   
-  ( 2504, N'B Sınıfı Sertifika',      1,  0,  2,  10,  12 ),
-  ( 2518, N'BE Sınıfı Sertifika',     1,  0,  2,  10,  12 ),
-  ( 2515, N'B1 Sınıfı Sertifika',     1,  0,  2,  10,  12 ),
-  ( 2505, N'C Sınıfı Sertifika',      1,  0,  2,  10,  12 ),
-  ( 2520, N'CE Sınıfı Sertifika',     1,  0,  2,  10,  12 ),
-  ( 2516, N'C1 Sınıfı Sertifika',     1,  0,  2,  10,  12 ),
-  ( 2519, N'C1E Sınıfı Sertifika',    1,  0,  2,  10,  12 ),
-  ( 2506, N'D Sınıfı Sertifika',      1,  0,  2,  10,  12 ),
-  ( 2522, N'DE Sınıfı Sertifika',     1,  0,  2,  10,  12 ),
-  ( 2517, N'D1 Sınıfı Sertifika',     1,  0,  2,  10,  12 ),
-  ( 2521, N'D1E Sınıfı Sertifika',    1,  0,  2,  10,  12 ),
-  ( 2507, N'E Sınıfı Sertifika',      1,  0,  2,  10,  12 ),
+  ( 2504, N'B Sınıfı Sertifika',      0 ),
+  ( 2518, N'BE Sınıfı Sertifika',     0 ),
+  ( 2515, N'B1 Sınıfı Sertifika',     0 ),
+  ( 2505, N'C Sınıfı Sertifika',      0 ),
+  ( 2520, N'CE Sınıfı Sertifika',     0 ),
+  ( 2516, N'C1 Sınıfı Sertifika',     0 ),
+  ( 2519, N'C1E Sınıfı Sertifika',    0 ),
+  ( 2506, N'D Sınıfı Sertifika',      0 ),
+  ( 2522, N'DE Sınıfı Sertifika',     0 ),
+  ( 2517, N'D1 Sınıfı Sertifika',     0 ),
+  ( 2521, N'D1E Sınıfı Sertifika',    0 ),
+  ( 2507, N'E Sınıfı Sertifika',      0 ),
 
-  ( 2508, N'F Sınıfı Sertifika',      1,  0,  2,  10,  12 ),
-  ( 2509, N'G Sınıfı Sertifika',      1,  0,  2,  10,  12 ),
-  ( 2510, N'H Sınıfı (Otomobil)',     1,  0,  2,  10,  12 ),
-  ( 2511, N'H Sınıfı (Motosiklet)',   1,  0,  2,  10,  12 ),
-  ( 2513, N'M Sınıfı Sertifika',      1,  0,  2,  10,  12 ),
-  ( 2512, N'RÖMORK Sınıfı Sertifika', 1,  0,  2,  10,  12 ),
+  ( 2508, N'F Sınıfı Sertifika',      0 ),
+  ( 2509, N'G Sınıfı Sertifika',      0 ),
+  ( 2510, N'H Sınıfı (Otomobil)',     0 ),
+  ( 2511, N'H Sınıfı (Motosiklet)',   0 ),
+  ( 2513, N'M Sınıfı Sertifika',      0 ),
+  ( 2512, N'RÖMORK Sınıfı Sertifika', 0 ),
   
-  ( 9010, N'A Sınıfı Sertifika (Manuel)',      0,  0,  2,  10,  12 ), 
+  ( 9010, N'A Sınıfı Sertifika (Manuel)',      0 ), 
 
-  ( 9020, N'A1 Sınıfı Sertifika (Manuel)',     0,  0,  2,  10,  12 ), -- 9001
-  ( 9021, N'A1 Sınıfı Sertifika (Otomatik)',   0,  0,  2,  10,  12 ), -- 9002
-  ( 9022, N'A1 Sınıfı Sertifika (125 cc altı)',1,  0,  2,  10,  12 ), -- yeni eklendi diğer ıdler 1 arttı
+  ( 9020, N'A1 Sınıfı Sertifika (Manuel)',     0 ), -- 9001
+  ( 9021, N'A1 Sınıfı Sertifika (Otomatik)',   0 ), -- 9002
+  ( 9022, N'A1 Sınıfı Sertifika (125 cc altı)',0 ), -- yeni eklendi diğer ıdler 1 arttı
 
-  ( 9030, N'A2 Sınıfı Sertifika (Manuel)',     0,  0,  2,  10,  12 ), -- 9003
-  ( 9031, N'A2 Sınıfı Sertifika (Otomatik)',   0,  0,  2,  10,  12 ), -- 9004
+  ( 9030, N'A2 Sınıfı Sertifika (Manuel)',     0 ), -- 9003
+  ( 9031, N'A2 Sınıfı Sertifika (Otomatik)',   0 ), -- 9004
 
-  ( 9040, N'B Sınıfı Sertifika (Manuel)',      0,  0,  2,  10,  12 ), -- 9005
-  ( 9041, N'B Sınıfı Sertifika (Otomatik)',    0,  0,  2,  10,  12 ), -- 9006
+  ( 9040, N'B Sınıfı Sertifika (Manuel)',      0 ), -- 9005
+  ( 9041, N'B Sınıfı Sertifika (Otomatik)',    0 ), -- 9006
 
-  ( 9050, N'C Sınıfı Sertifika (Manuel)',      0,  0,  2,  10,  12 ), -- 9007
-  ( 9051, N'C Sınıfı Sertifika (Otomatik)',    0,  0,  2,  10,  12 ), -- 9008
+  ( 9050, N'C Sınıfı Sertifika (Manuel)',      0 ), -- 9007
+  ( 9051, N'C Sınıfı Sertifika (Otomatik)',    0 ), -- 9008
 
-  ( 9060, N'D Sınıfı Sertifika (Manuel)',      0,  0,  2,  10,  12 ), -- 9009
-  ( 9061, N'D Sınıfı Sertifika (Otomatik)',    0,  0,  2,  10,  12 ), -- 9010
+  ( 9060, N'D Sınıfı Sertifika (Manuel)',      0 ), -- 9009
+  ( 9061, N'D Sınıfı Sertifika (Otomatik)',    0 ), -- 9010
 
-  ( 9070, N'E Sınıfı Sertifika (Manuel)',      0,  0,  2,  10,  12 ), -- 9011
-  ( 9071, N'E Sınıfı Sertifika (Otomatik)',    0,  0,  2,  10,  12 ), -- 9012
+  ( 9070, N'E Sınıfı Sertifika (Manuel)',      0 ), -- 9011
+  ( 9071, N'E Sınıfı Sertifika (Otomatik)',    0 ), -- 9012
 
-  ( 9200, N'100 Ceza Puanı',                   1,  0,  2,  10,  12 ), -- 9200
-  ( 9201, N'100 Ceza Puanı (Manuel)',          0,  0,  2,  10,  12 ), -- 9201
-  ( 9202, N'100 Ceza Puanı (Otomatik)',        0,  0,  2,  10,  12 )  -- 9202
+  ( 9200, N'100 Ceza Puanı',                   1 ), -- 9200
+  ( 9201, N'100 Ceza Puanı (Manuel)',          0 ), -- 9201
+  ( 9202, N'100 Ceza Puanı (Otomatik)',        0 )  -- 9202
 
 set IDENTITY_INSERT [Lkp].[MtskSertifikaTipi] OFF
 
