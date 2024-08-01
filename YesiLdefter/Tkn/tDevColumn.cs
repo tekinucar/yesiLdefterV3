@@ -395,14 +395,23 @@ namespace Tkn_DevColumn
                 if (tableName == "BirimTipi")
                     Sql = " Select * from [Lkp].[OnmStokBirimTipi] where IsActive = 1 ";
 
+                // eski
+                //if (tableName == "ILTipi")
+                //    Sql = " Select * from [Lkp].[" + tableName + "] order by IlAdi ";
+                // yeni 
                 if (tableName == "ILTipi")
-                    Sql = " Select * from [Lkp].[" + tableName + "] order by IlAdi ";
+                    Sql = " Select * from [Lkp].[" + tableName + "] order by IlAdiBUYUK ";
+
 
                 if (tableName == "MtskDonemTipi")
                     Sql = " Select * from [Lkp].[" + tableName + "] order by Id desc ";
 
                 v.dBaseNo dBaseNo = t.getDBaseNo(dbaseType);
-                t.SQL_Read_Execute(dBaseNo, v.ds_LookUpTableList, ref Sql, tableName, "");
+
+                if (tableName == "ILTipi")
+                    dBaseNo = v.dBaseNo.publishManager;
+
+               t.SQL_Read_Execute(dBaseNo, v.ds_LookUpTableList, ref Sql, tableName, "");
             }
         }
         private void LookUpTableFill_(string tableName, string idFieldName, string captionFieldName, string groupListTypes, Int16 type,

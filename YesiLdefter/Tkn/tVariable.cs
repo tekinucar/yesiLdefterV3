@@ -1608,6 +1608,8 @@ namespace Tkn_Variable
         public string FirmLongName { get; set; }
         public string FirmShortName { get; set; }
         public string FirmGuid { get; set; }
+        public string IlKodu { get; set; }
+        public string IlceKodu { get; set; }
         public string MenuCode { get; set; }
         public string MenuCodeOld { get; set; }
 

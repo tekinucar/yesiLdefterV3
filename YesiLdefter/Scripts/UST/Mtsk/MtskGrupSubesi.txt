@@ -45,6 +45,7 @@ AS BEGIN
     declare @SubeTipiId smallint
     declare @GrupBaslamaTarihi date
     declare @KurumOnayTipiId smallint
+    declare @LkpMtskDonemiId int
 
     WHILE @@FETCH_STATUS = 0
     BEGIN

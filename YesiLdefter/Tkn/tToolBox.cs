@@ -2896,6 +2896,9 @@ namespace Tkn_ToolBox
             tFirm.FirmLongName = row["FirmLongName"].ToString();
             tFirm.FirmShortName = row["FirmShortName"].ToString();
             tFirm.FirmGuid = row["FirmGUID"].ToString();
+            tFirm.IlKodu = row["IlKodu"].ToString();
+            tFirm.IlceKodu = row["IlceKodu"].ToString();
+
             tFirm.MenuCode = row["MenuCode"].ToString();
             tFirm.SectorTypeId = myInt16(row["SectorTypeId"].ToString());
             tFirm.DatabaseType = "1"; // MSSQL 
@@ -3054,6 +3057,8 @@ namespace Tkn_ToolBox
             Str_Replace(ref Sql, ":VT_FIRM_ID", v.SP_FIRM_ID.ToString());
             Str_Replace(ref Sql, "\':FIRM_ID\'", v.SP_FIRM_ID.ToString());
             Str_Replace(ref Sql, ":FIRM_ID", v.SP_FIRM_ID.ToString());
+            Str_Replace(ref Sql, ":FIRM_ILKODU", v.tMainFirm.IlKodu);
+            Str_Replace(ref Sql, ":FIRM_ILCEKODU", v.tMainFirm.IlceKodu);
             //Str_Replace(ref Sql, ":FIRM_USERLIST", v.SP_FIRM_USERLIST);
             //Str_Replace(ref Sql, ":FIRM_USER_LIST", v.SP_FIRM_USERLIST);
             //Str_Replace(ref Sql, ":FIRM_FULLLIST", v.SP_FIRM_FULLLIST);
@@ -14318,10 +14323,19 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 OzelType = fieldName.IndexOf("BirimTipi");
             if (OzelType == -1)
                 OzelType = fieldName.IndexOf("KdvOrani");
+
+
             if (OzelType == -1)
                 OzelType = fieldName.IndexOf("IlTipi");
             if (OzelType == -1)
                 OzelType = fieldName.IndexOf("IlceTipi");
+
+            if (OzelType == -1)
+                OzelType = fieldName.IndexOf("IlKodu");
+            if (OzelType == -1)
+                OzelType = fieldName.IndexOf("IlceKodu");
+
+
             if (OzelType == -1)
                 OzelType = fieldName.IndexOf("UlkeTipi");
             if (OzelType == -1)
@@ -14401,12 +14415,19 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 // BirimAdi oluştu
                 fieldName = fieldName + "Adi";
 
-                
                 if (fieldName.IndexOf("Cinsiyet") > -1)
                 {
                     idFieldName = "Id";
                     fieldName = "CinsiyetTipi";
                     tableName = "CinsiyetTipi";
+                }
+
+
+                if (fieldName.IndexOf("IlKodu") > -1)
+                {
+                    idFieldName = "IlKodu";
+                    fieldName = "IlAdiBUYUK";
+                    tableName = "ILTipi";
                 }
 
                 if (fieldName.IndexOf("Birim") > -1)

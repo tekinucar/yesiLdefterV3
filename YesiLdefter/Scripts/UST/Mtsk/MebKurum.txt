@@ -23,8 +23,8 @@ begin transaction
    Adres2              nvarchar(200) NULL,
    AdresKodu           nvarchar(10)  NULL,
 
-   KurumIlce           nVarChar(20)  null,
-   KurumIl             nVarChar(15)  null,
+   IlKodu              VarChar(3)    null,
+   IlceKodu            VarChar(5)    null,
    
    KurumAcilisTarihi   date          NULL,
    KurumBinaKontejani  int           NULL,

@@ -32,7 +32,7 @@ INSERT INTO [Lkp].[ILTipi] (Id, IlKodu, IlKoduSifirli, IlGIBKodu, IlAdiBUYUK )
   (  1, '1',  '01', 'Adana', N'ADANA' ),
   (  2, '2',  '02', 'Adıyaman', N'ADIYAMAN' ),
   (  3, '3',  '03', 'Afyon', N'AFYONKARAHİSAR' ),
-  (  4, '5',  '04', 'Ağrı', N'AĞRI' ),
+  (  4, '4',  '04', 'Ağrı', N'AĞRI' ),
   ( 68, '68', '68', 'Aksaray', N'AKSARAY' ),
   (  5, '5',  '05', 'Amasya', N'AMASYA' ),
   (  6, '6',  '06', 'Ankara', N'ANKARA' ),
@@ -113,3 +113,19 @@ INSERT INTO [Lkp].[ILTipi] (Id, IlKodu, IlKoduSifirli, IlGIBKodu, IlAdiBUYUK )
 
 
     /*CreateDataEnd*/
+
+
+/*
+
+EXEC sp_RENAME 'MebKurum.KurumIlce' , 'IlKodu', 'COLUMN'
+
+
+ALTER TABLE MebKurum ALTER COLUMN IlKodu Varchar(3) NULL
+
+
+EXEC sp_RENAME 'MebKurum.KurumIl' , 'IlceKodu', 'COLUMN'
+
+
+ALTER TABLE MebKurum ALTER COLUMN IlceKodu Varchar(5) NULL
+
+*/
