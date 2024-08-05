@@ -6,12 +6,14 @@ begin transaction
  (
    Id                    Int IDENTITY(1,1) not null, 
    FirmId                Int       not null,
-   IsActive              Bit       not null, /* default : 1 = active, 0 = not active */  
-   AdayId                Int       not null, /* default 0 */
+   IsActive              Bit       not null, 
+   TalepId               Int       not null, 
+   AdayId                Int       not null, 
    TcNo                  Varchar(11)   null,
    DonemTipiId           Int           null,
 
    BiyometrikTarandi     Bit   null,
+   BasvuruFotoTarandi    Bit   null,
    OgrenimTarandi        Bit   null,
    SaglikTarandi         Bit   null,
    AdliSicilTarandi      Bit   null,
@@ -23,6 +25,7 @@ begin transaction
 
    AdayKaydiYapildi      Bit   null,
    BiyometrikYuklendi    Bit   null,
+   BasvuruFotoYuklendi   Bit   null,
    OgrenimYuklendi       Bit   null,
    SaglikYuklendi        Bit   null,
    AdliSicilYuklendi     Bit   null,
@@ -42,9 +45,10 @@ begin transaction
   
   grant select, insert, update, delete on MtskAdayBelgeler to public
 
-  create index X_MtskAdayBelgeler01 on MtskAdayBelgeler (AdayId)
-  create index X_MtskAdayBelgeler02 on MtskAdayBelgeler (TcNo)
-  create index X_MtskAdayBelgeler03 on MtskAdayBelgeler (DonemTipiId)
+  create index X_MtskAdayBelgeler01 on MtskAdayBelgeler (TalepId)
+  create index X_MtskAdayBelgeler02 on MtskAdayBelgeler (AdayId)
+  create index X_MtskAdayBelgeler03 on MtskAdayBelgeler (TcNo)
+  create index X_MtskAdayBelgeler04 on MtskAdayBelgeler (DonemTipiId)
 
 commit transaction
 

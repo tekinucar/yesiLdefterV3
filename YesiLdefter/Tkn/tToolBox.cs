@@ -10035,6 +10035,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
         public void OtherValues_Get(DataSet ds, saveVariables f)
         {
             f.fVisible = "False";
+            f.ValidationInsert = "False";
 
             if (ds == null) return;
             if (ds.Tables == null) return;

@@ -5,9 +5,10 @@ begin transaction
  create table MtskAdayAdliSicil
  (
    Id                    Int IDENTITY(1,1) not null, 
-   AdayId                Int       not null, /* default 0 */
    FirmId                Int       not null,
-   IsActive              Bit       not null, /* default : 1 = active, 0 = not active */  
+   IsActive              Bit       not null, 
+   TalepId               Int       not null, 
+   AdayId                Int       not null, 
    TcNo                  Varchar(11)   null,
    DonemTipiId           Int           null,
 
@@ -22,9 +23,10 @@ begin transaction
   
  grant select, insert, update, delete on MtskAdayAdliSicil to public
 
-  create index X_MtskAdayAdliSicil01 on MtskAdayAdliSicil (AdayId)
-  create index X_MtskAdayAdliSicil02 on MtskAdayAdliSicil (TcNo)
-  create index X_MtskAdayAdliSicil03 on MtskAdayAdliSicil (DonemTipiId)
+  create index X_MtskAdayAdliSicil01 on MtskAdayAdliSicil (TalepId)
+  create index X_MtskAdayAdliSicil02 on MtskAdayAdliSicil (AdayId)
+  create index X_MtskAdayAdliSicil03 on MtskAdayAdliSicil (TcNo)
+  create index X_MtskAdayAdliSicil04 on MtskAdayAdliSicil (DonemTipiId)
 
 commit transaction
 

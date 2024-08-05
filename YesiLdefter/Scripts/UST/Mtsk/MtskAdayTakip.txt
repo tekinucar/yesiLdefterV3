@@ -6,10 +6,12 @@ begin transaction
  (
    Id                    Int IDENTITY(1,1) not null, 
    FirmId                Int       not null,
-   AdayId                Int       not null, /* default 0 */
-   IsActive              Bit       not null, /* default : 1 = active, 0 = not active */  
-   TcNo                  Varchar(11)   null, /* trg_MtskAday */
-   DonemTipiId           Int           null, /* trg_MtskAday */ 
+   IsActive              Bit       not null, 
+   TalepId               Int       not null, 
+   AdayId                Int       not null, 
+   TcNo                  Varchar(11)   null,
+   DonemTipiId           Int           null,
+
    GrupTipiId            SmallInt      null, /* trg_MtskAday */
    SubeTipiId            SmallInt      null, /* trg_MtskAday */
 
@@ -25,7 +27,8 @@ begin transaction
    BelgelerYuklendi       Bit          null,
 
    --20 ödemeleri
-   SertifikaUcretTipiId   SmallInt     null, /* trg_MtskAday */
+   BorcDurumuTipiId         SmallInt     null,
+   --SertifikaUcretTipiId   SmallInt     null, /* trg_MtskAday */
    
    --100 eSınav aşaması
    TeorikBaslamaTarihi    Date         null,
@@ -164,21 +167,22 @@ INSERT INTO [Lkp].[MtskAdayTakipMebbisDurumTipi] (Id, MebbisDurumTipi)
 
 
 -- ------------------------------------------------------- 
--- SertifikaUcretTipiId
+-- SertifikaUcretTipiId ipta
+-- BorcDurumuTipiId
 -- ------------------------------------------------------- 
-IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdayTakipSertifikaUcretTipi')
-drop table [Lkp].[MtskAdayTakipSertifikaUcretTipi]
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdayTakipBorcDurumuTipi')
+drop table [Lkp].[MtskAdayTakipBorcDurumuTipi]
 
-create table [Lkp].[MtskAdayTakipSertifikaUcretTipi]
+create table [Lkp].[MtskAdayTakipBorcDurumuTipi]
 (
    Id                 Int Unique not null, 
-   SertifikaUcretTipi nVarchar(50)   null
+   BorcDurumuTipi     nVarchar(50)   null
    
-   constraint  pk_MtskAdayTakipSertifikaUcretTipi primary key (Id)
+   constraint  pk_MtskAdayTakipBorcDurumuTipi primary key (Id)
 )
 
-Delete from [Lkp].[MtskAdayTakipSertifikaUcretTipi]
-INSERT INTO [Lkp].[MtskAdayTakipSertifikaUcretTipi] (Id, SertifikaUcretTipi)
+Delete from [Lkp].[MtskAdayTakipBorcDurumuTipi]
+INSERT INTO [Lkp].[MtskAdayTakipBorcDurumuTipi] (Id, BorcDurumuTipi)
  VALUES 
   ( 0,    N'Hiç ödemesi yok'),
   ( 1,    N'Kısmi ödemesi var'),

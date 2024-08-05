@@ -1143,7 +1143,8 @@ namespace Tkn_Save
                 //* image 34, varbinary (max) 165 
                 if ((f.ftype == 34) || (f.ftype == 165))
                 {
-                    f._setInsField = f.bos + f.fname + ", ";
+                    /// f._setInsField = f.bos + f.fname + ", ";
+                    f._setInsField = "";
 
                     // bir tabloda 1 den fazla resim olabiliyor (şimdilik 2 resim kontrolü var)
                     //
@@ -1155,10 +1156,19 @@ namespace Tkn_Save
 
                         // üzerindeki eskim varsa tekrar onu gösteriyor
                         // bu nedenle bu atama yapılıyor
-                        f._setInsValue = " @" + f.fname + ", ";
+                        //f._setInsValue = " @" + f.fname + ", ";
+                        //if (f.fVisible == "True")
+                        //    f._setEditField = " [" + f.fname + "] = " + " @" + f.fname + " , ";
+                        //ds.Tables[0].Rows[f.position][f.fname] = v.con_Images;
+
                         if (f.fVisible == "True")
+                        {
+                            f._setInsField = f.bos + f.fname + ", ";
+                            f._setInsValue = " @" + f.fname + ", ";
                             f._setEditField = " [" + f.fname + "] = " + " @" + f.fname + " , ";
-                        ds.Tables[0].Rows[f.position][f.fname] = v.con_Images;
+                            ds.Tables[0].Rows[f.position][f.fname] = v.con_Images;
+                        }
+
                     }
                     // 2. resim var ise
                     if ((v.con_Images_FieldName2 == f.fname) && (v.con_Images2 != null))
@@ -1168,10 +1178,18 @@ namespace Tkn_Save
 
                         // üzerindeki eskim varsa tekrar onu gösteriyor
                         // bu nedenle bu atama yapılıyor
-                        f._setInsValue = " @" + f.fname + ", ";
+                        //f._setInsValue = " @" + f.fname + ", ";
+                        //if (f.fVisible == "True")
+                        //    f._setEditField = " [" + f.fname + "] = " + " @" + f.fname + " , ";
+                        //ds.Tables[0].Rows[f.position][f.fname] = v.con_Images2;
+
                         if (f.fVisible == "True")
+                        {
+                            f._setInsField = f.bos + f.fname + ", ";
+                            f._setInsValue = " @" + f.fname + ", ";
                             f._setEditField = " [" + f.fname + "] = " + " @" + f.fname + " , ";
-                        ds.Tables[0].Rows[f.position][f.fname] = v.con_Images2;
+                            ds.Tables[0].Rows[f.position][f.fname] = v.con_Images2;
+                        }
                     }
 
                     // 1. resim null ise
@@ -1182,10 +1200,18 @@ namespace Tkn_Save
 
                         // üzerindeki eski resim varsa tekrar onu gösteriyor
                         // bu nedenle bu atama yapılıyor
-                        f._setInsValue = " null, ";
+                        //f._setInsValue = " null, ";
+                        //if (f.fVisible == "True")
+                        //    f._setEditField = " [" + f.fname + "] = null , ";
+                        //ds.Tables[0].Rows[f.position][f.fname] = null;
+
                         if (f.fVisible == "True")
+                        {
+                            f._setInsField = f.bos + f.fname + ", ";
+                            f._setInsValue = " null, ";
                             f._setEditField = " [" + f.fname + "] = null , ";
-                        ds.Tables[0].Rows[f.position][f.fname] = null;
+                            ds.Tables[0].Rows[f.position][f.fname] = null;
+                        }
                     }
                     // 2. resim null ise
                     if ((v.con_Images_FieldName2 == f.fname) && (v.con_Images2 == null))
@@ -1195,10 +1221,18 @@ namespace Tkn_Save
 
                         // üzerindeki eski resim varsa tekrar onu gösteriyor
                         // bu nedenle bu atama yapılıyor
-                        f._setInsValue = " null, ";
+                        //f._setInsValue = " null, ";
+                        //if (f.fVisible == "True")
+                        //    f._setEditField = " [" + f.fname + "] = null , ";
+                        //ds.Tables[0].Rows[f.position][f.fname] = null;
+
                         if (f.fVisible == "True")
+                        {
+                            f._setInsField = f.bos + f.fname + ", ";
+                            f._setInsValue = " null, ";
                             f._setEditField = " [" + f.fname + "] = null , ";
-                        ds.Tables[0].Rows[f.position][f.fname] = null;
+                            ds.Tables[0].Rows[f.position][f.fname] = null;
+                        }
                     }
                 }
 

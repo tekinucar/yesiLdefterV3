@@ -1,0 +1,25 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table HubMtskUcretSinav
+ (
+
+   Id                     Int IDENTITY(1,1) NOT NULL, 
+   FirmId                 Int       not null,
+   IsActive               Bit       not null, /* default : 1 = active, 0 = not active */  
+   GecerlilikTarihiId     Int       not null,
+
+   ESinavUcreti                     Numeric(22,5) null,  
+   UygulamaSinavUcreti              Numeric(22,5) null,  
+
+  constraint pk_HubMtskUcretSinav primary key (Id)
+ )
+
+ create index X_HubMtskUcretSinavi01 on HubMtskUcretSinav (GecerlilikTarihiId)
+ 
+ grant select, insert, update, delete on HubMtskUcretSinav to public
+
+commit transaction
+
+/*CreateTableEnd*/

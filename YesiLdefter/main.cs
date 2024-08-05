@@ -620,9 +620,13 @@ namespace YesiLdefter
                 // değişien firmanın menüsü 
                 v.tMainFirm.MenuCodeOld = v.tMainFirm.MenuCode;
 
+                t.WaitFormOpen(v.mainForm, "Menüler oluşturuluyor...");
                 mn.Create_Menu(toolboxControl1, v.tMainFirm.MenuCode, "");
 
                 selectedGroups((DevExpress.XtraToolbox.ToolboxControl)toolboxControl1);
+
+                v.IsWaitOpen = false;
+                t.WaitFormClose();
             }
 
             t.getUserLookAndFeelSkins();

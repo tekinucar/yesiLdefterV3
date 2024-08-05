@@ -2,7 +2,7 @@
 
 begin transaction
 
- create table MtskSaatUygulama
+ create table HubMtskSaatUygulama
  (
 
    Id                     Int IDENTITY(1,1) NOT NULL, 
@@ -21,15 +21,16 @@ begin transaction
    /* Yaş sınırı  */
    YasSiniri              smallInt     null,
 
-  constraint pk_MtskSaatUygulama primary key (Id)
+  constraint pk_HubMtskSaatUygulama primary key (Id)
  )
 
- create index X_MtskSaatUygulama01 on MtskSaatUygulama (GecerlilikTarihiId, IstenenSertifikaTipiId, MevcutSertifikaTipiId)
+ create index X_HubMtskSaatUygulama01 on HubMtskSaatUygulama (GecerlilikTarihiId, IstenenSertifikaTipiId, MevcutSertifikaTipiId)
  
- grant select, insert, update, delete on MtskSaatUygulama to public
+ grant select, insert, update, delete on HubMtskSaatUygulama to public
 
 commit transaction
 
 /*CreateTableEnd*/
+
 
 

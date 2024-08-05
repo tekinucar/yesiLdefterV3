@@ -5,9 +5,10 @@ begin transaction
  create table MtskAdayAdres
  (
    Id                    Int IDENTITY(1,1) not null, 
-   AdayId                Int       not null, /* default 0 */
    FirmId                Int       not null,
-   IsActive              Bit       not null, /* default : 1 = active, 0 = not active */  
+   IsActive              Bit       not null, 
+   TalepId               Int       not null, 
+   AdayId                Int       not null, 
    TcNo                  Varchar(11)   null,
    DonemTipiId           Int           null,
 
@@ -43,9 +44,10 @@ begin transaction
   
  grant select, insert, update, delete on MtskAdayAdres to public
 
-  create index X_MtskAdayAdres01 on MtskAdayAdres (AdayId)
-  create index X_MtskAdayAdres02 on MtskAdayAdres (TcNo)
-  create index X_MtskAdayAdres03 on MtskAdayAdres (DonemTipiId)
+  create index X_MtskAdayAdres01 on MtskAdayAdres (TalepId)
+  create index X_MtskAdayAdres02 on MtskAdayAdres (AdayId)
+  create index X_MtskAdayAdres03 on MtskAdayAdres (TcNo)
+  create index X_MtskAdayAdres04 on MtskAdayAdres (DonemTipiId)
 
 commit transaction
 

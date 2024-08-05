@@ -6,9 +6,12 @@ begin transaction
  (
    Id                    Int IDENTITY(1,1) not null, 
    FirmId                Int       not null,
-   AdayId                Int       not null, /* default 0 */
-   TcNo                  Varchar(11)   null, /* trg_MtskAday */
-   
+   IsActive              Bit       not null, 
+   TalepId               Int       not null, 
+   AdayId                Int       not null, 
+   TcNo                  Varchar(11)   null,
+   DonemTipiId           Int           null,
+  
    --10 sertifika aşaması
    SertifikaAlmayiHakKazandi Bit           null, -- hak kazandı   : false/true
    SertifikaTarihi           Date          null, --
@@ -27,9 +30,10 @@ begin transaction
   
  grant select, insert, update, delete on MtskAdaySertifika to public
 
- create index X_MtskAdaySertifika01 on MtskAdaySertifika (AdayId)
- create index X_MtskAdaySertifika02 on MtskAdaySertifika (TcNo)
- create index X_MtskAdaySertifika03 on MtskAdaySertifika (DuzenlemeTarihi)
+ create index X_MtskAdaySertifika01 on MtskAdaySertifika (TalepId)
+ create index X_MtskAdaySertifika02 on MtskAdaySertifika (AdayId)
+ create index X_MtskAdaySertifika03 on MtskAdaySertifika (TcNo)
+ create index X_MtskAdaySertifika04 on MtskAdaySertifika (DuzenlemeTarihi)
    
 commit transaction
 

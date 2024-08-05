@@ -93,6 +93,8 @@ namespace YesiLdefter
             preparingWebPagesViewControl();
             msPagesService.preparingMsWebLoginPage(f, ds_LoginPageNodes, this.msWebLoginNodes_);
 
+            if (this.msWebPages_ == null) return;
+
             // scraping ilişkisi olan TableIPCode ve ilgili fieldler
             // 
             this.msWebScrapingDbFields_ = msPagesService.readScrapingTablesAndFields(this.msWebPages_);
@@ -273,7 +275,8 @@ namespace YesiLdefter
 
         private void ms_CefSharp_FormClosing(object sender, FormClosingEventArgs e)
         {
-            v.cefBrowser_.Parent = null;
+            if (v.cefBrowser_ != null)
+                v.cefBrowser_.Parent = null;
         }
 
         #endregion Form preparing

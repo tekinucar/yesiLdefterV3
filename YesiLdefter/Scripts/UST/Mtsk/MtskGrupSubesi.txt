@@ -14,7 +14,7 @@ begin transaction
    SubeTipiId           SmallInt      null,
    GrupBaslamaTarihi    Date          null,
    SubeAdaySayisi       SmallInt      null,
-   KurumOnayTipiId      SmallInt      null, /* 1-Onaylandı */		
+   KurumOnayTipiId      SmallInt      null,  /* 0. Onay bekliyor, 1-Onaylandı  tablo = [Lkp].[MtskKurumOnayTipi]   */		
       
    constraint		pk_MtskGrupSubesi primary key (Id)
  )

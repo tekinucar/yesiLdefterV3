@@ -1443,12 +1443,12 @@ namespace Tkn_Variable
             Lkp_fname = "";
             fvalue = "";
             bos = "   ";
-            ValidationInsert = string.Empty;
+            ValidationInsert = "False";
             fForeing = string.Empty;
             fTrigger = string.Empty;
             fTriggerFields = string.Empty;
             displayFormat = string.Empty;
-            fVisible = string.Empty;
+            fVisible = "False";
             fieldNewValue = "";
             myProp = "";
             SqlF = "";

@@ -537,6 +537,12 @@
     <Content Include="Scripts\2019VtMsSql\HP_FINANS.txt" />
     <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\SYS_UPDATES.txt" />
     <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\YatayKolon SQL.txt" />
+    <Content Include="Scripts\UST\Hub\HubGecerlilikTarihi.txt" />
+    <Content Include="Scripts\UST\Hub\HubMtskSaatTeorik.txt" />
+    <Content Include="Scripts\UST\Hub\HubMtskSaatUygulama.txt" />
+    <Content Include="Scripts\UST\Hub\HubMtskUcretSinav.txt" />
+    <Content Include="Scripts\UST\Hub\HubMtskUcretTeorik.txt" />
+    <Content Include="Scripts\UST\Hub\HubMtskUcretUygulama.txt" />
     <Content Include="Scripts\UST\MsV3\EduMtskDenemeSinavi.txt" />
     <Content Include="Scripts\UST\MsV3\EduMtskDersler.txt" />
     <Content Include="Scripts\UST\MsV3\EduMtskKonular.txt" />
@@ -553,6 +559,9 @@
     <Content Include="Scripts\UST\MsV3\tempEduUsersList.txt" />
     <Content Include="Scripts\UST\Mtsk\FileUpdates.txt" />
     <Content Include="Scripts\UST\Mtsk\GecerlilikTarihi.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskAday - Kopyala.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskAday.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskAdayUcret.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskSaatUygulama.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskSertifikaSaatleri.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskSaatTeorik.txt" />
@@ -666,7 +675,7 @@
     <Content Include="Scripts\UST\Mtsk\Lkp_MebBransTipi.txt" />
     <Content Include="Scripts\UST\Mtsk\Lkp_MtskSertifikaTipi.txt" />
     <Content Include="Scripts\UST\Mtsk\MebKurum.txt" />
-    <Content Include="Scripts\UST\Mtsk\MtskAday.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskAdayTalep.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskAdayAdliSicil.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskAdayAdres.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskAdayBelgeler.txt" />

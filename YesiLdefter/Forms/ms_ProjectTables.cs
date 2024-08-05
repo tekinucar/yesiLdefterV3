@@ -77,8 +77,8 @@ namespace YesiLdefter
         string buttonSingFileReadDbWrite = "SINGLE_FILE_READ_DB_WRITE";
         string buttonAllFileReadDbWrite = "ALL_FILE_READ_DB_WRITE";
 
-        string menuName2 = "MENU_" + "UST/PMS/PMS/ProjectTablesCreate";
-        string menuName22 = "MENU_" + "UST/PMS/PMS/ProjectTablesCreate2";
+        string menuName2 = "MENU_" + "UST/CRM/ABO/ProjectTablesCreate";
+        string menuName22 = "MENU_" + "UST/CRM/ABO/ProjectTablesCreate2";
         string buttonDbConnection = "DB_CONNECTION";
         string buttonDbCreate = "DB_CREATE";
         string buttonFieldList = "FIELDS_LIST";
