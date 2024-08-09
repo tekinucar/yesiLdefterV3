@@ -6,7 +6,6 @@ begin transaction
  (
    Id                    Int IDENTITY(1,1) not null, 
    FirmId                Int       not null,
-   IsActive              Bit       not null, 
    TalepId               Int       not null, 
    AdayId                Int       not null, 
    TcNo                  Varchar(11)   null,
@@ -65,6 +64,7 @@ AS BEGIN
     DECLARE @curId bigint
 
     declare @BiyometrikTarandi Bit = 0
+    declare @BasvuruFotoTarandi Bit = 0
     declare @OgrenimTarandi Bit = 0
     declare @SaglikTarandi Bit = 0
     declare @AdliSicilTarandi Bit = 0
@@ -77,6 +77,7 @@ AS BEGIN
      -- Mebbise yüklendimi
     declare @AdayKaydiYapildi Bit = 0
     declare @BiyometrikYuklendi Bit = 0
+    declare @BasvuruFotoYuklendi Bit = 0
     declare @OgrenimYuklendi Bit = 0
     declare @SaglikYuklendi Bit = 0
     declare @AdliSicilYuklendi Bit = 0
@@ -95,6 +96,7 @@ AS BEGIN
 
         select 
           @BiyometrikTarandi = isnull(ins.BiyometrikTarandi,0)
+        , @BasvuruFotoTarandi = isnull(ins.BasvuruFotoTarandi,0)
         , @OgrenimTarandi = isnull(ins.OgrenimTarandi,0)
         , @SaglikTarandi = isnull(ins.SaglikTarandi,0)
         , @AdliSicilTarandi = isnull(ins.AdliSicilTarandi,0)
@@ -105,6 +107,7 @@ AS BEGIN
 
         , @AdayKaydiYapildi = isnull(ins.AdayKaydiYapildi,0)
         , @BiyometrikYuklendi = isnull(ins.BiyometrikYuklendi,0)
+        , @BasvuruFotoYuklendi = isnull(ins.BasvuruFotoYuklendi,0)
         , @OgrenimYuklendi = isnull(ins.OgrenimYuklendi,0)
         , @SaglikYuklendi = isnull(ins.SaglikYuklendi,0)
         , @AdliSicilYuklendi = isnull(ins.AdliSicilYuklendi,0)
@@ -120,6 +123,7 @@ AS BEGIN
 
         if ((@BiyometrikTarandi = 1) and 
             (@OgrenimTarandi = 1) and
+            (@BasvuruFotoTarandi = 1) and
             (@SaglikTarandi = 1) and
             (@AdliSicilTarandi = 1) and
             (@ImzaTarandi = 1) and
@@ -129,7 +133,8 @@ AS BEGIN
             ) set @BelgelerTarandi = 1
 
         if ((@AdayKaydiYapildi = 1) and
-            (@BiyometrikYuklendi = 1) and 
+            (@BiyometrikYuklendi = 1) and
+            (@BasvuruFotoYuklendi = 1) and            
             (@OgrenimYuklendi = 1) and 
             (@SaglikYuklendi = 1) and 
             (@AdliSicilYuklendi = 1) and 

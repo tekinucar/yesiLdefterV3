@@ -38,7 +38,7 @@ namespace YesiLdefter
             this.ClientSize = new System.Drawing.Size(800, 450);
             this.Name = "ms_CefSharp";
             this.Text = "ms_CefSharp";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.ms_CefSharp_FormClosing);
+            //this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.ms_CefSharp_FormClosing);
             this.ResumeLayout(false);
 
         }

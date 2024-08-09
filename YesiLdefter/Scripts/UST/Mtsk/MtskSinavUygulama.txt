@@ -7,11 +7,12 @@ begin transaction
    Id                    Int IDENTITY(1,1) not null, 
    FirmId                Int       not null,
    IsActive              Bit       not null, /* default : 1 = active, 0 = not active */  
-   SinavDonemTipiId      Int           null, /* sınavın yapıldığı dönem */
+   TalepId               Int       not null, 
    AdayId                Int       not null, /* default 0 */
    TcNo                  Varchar(11)   null,
    TamAdiSoyadi          nVarchar(100) null,
    AdayDonemTipiId       Int           null, /* bu mebbisde e-sınav listelerinde yok, uyg. sınav listelerinde var */ 
+   SinavDonemTipiId      Int           null, /* sınavın yapıldığı dönem */
 
    --10
    SinavNo               SmallInt      null,  
@@ -24,7 +25,7 @@ begin transaction
    SinavSonucYorumu      nVarchar(250) null, /* aday durum sorgu sayfasında mevcut */
    
    UcretDurumuTipiId     SmallInt      null, /* mebbisten okunuyor : Sınav Ücreti Yatırılmamış ,  */
-   YatanToplamUcret      Numeric(22,8) null,
+   YatanToplamUcret      Numeric(22,5) null,
    UcretSayisi           SmallInt      null,
    RandevuId             Int           null,
    
@@ -33,8 +34,9 @@ begin transaction
   
  grant select, insert, update, delete on MtskSinavUygulama to public
 
- create index X_MtskSinavUygulama01 on MtskSinavUygulama (AdayId)
- create index X_MtskSinavUygulama02 on MtskSinavUygulama (TcNo)
+ create index X_MtskSinavUygulama01 on MtskSinavUygulama (TalepId)
+ create index X_MtskSinavUygulama02 on MtskSinavUygulama (AdayId)
+ create index X_MtskSinavUygulama03 on MtskSinavUygulama (TcNo)
  
 commit transaction
 

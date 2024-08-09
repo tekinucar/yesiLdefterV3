@@ -7034,6 +7034,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
         public void DonemTipiYilAyRead()
         {
             if (v.tMainFirm.SectorTypeId == (Int16)v.msSectorType.UstadCrm) return;
+            if (v.active_DB.localDbUses) return;
 
             string tableName = "";
             string Sql = "";
@@ -13921,17 +13922,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 {
                     if (IsNotNull(pageName))
                     {
-                        i2 = ((DevExpress.XtraBars.Ribbon.BackstageViewControl)c).Controls.Count;
-
-                        for (int i = 0; i < i2; i++)
-                        {
-                            if (((DevExpress.XtraBars.Ribbon.BackstageViewControl)c).Controls[i].Name == pageName)
-                            {
-                                // sıfırda ekranda görmediğimiz bir nesne daha mevcut
-                                ((DevExpress.XtraBars.Ribbon.BackstageViewControl)c).SelectedTabIndex = (i - 1);
-                                break;
-                            }
-                        }
+                        selectBackstageViewTabItem(c, pageName);
                     }
 
                     if ((IsNotNull(pageName) == false) && (pageIndex > -1))
@@ -13942,6 +13933,51 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 #endregion BackstageViewControl
             }
         }
+
+        public void selectBackstageViewTabItem(Control c, string pageName)
+        {
+            int i2 = ((DevExpress.XtraBars.Ribbon.BackstageViewControl)c).Controls.Count;
+
+            for (int i = 0; i < i2; i++)
+            {
+                if (((DevExpress.XtraBars.Ribbon.BackstageViewControl)c).Controls[i].Name == pageName)
+                {
+                    // sıfırda ekranda görmediğimiz bir nesne daha mevcut
+                    ((DevExpress.XtraBars.Ribbon.BackstageViewControl)c).SelectedTabIndex = (i - 1);
+                    break;
+                }
+            }
+        }
+
+        public void selectBackstageViewTabItem(Form tForm, string tabControlName, string pageName)
+        {
+            Control c = Find_Control(tForm, tabControlName);
+            if (c == null) return;
+
+            selectBackstageViewTabItem(c, pageName);
+        }
+        public Control Find_BackstageViewTabItem(Form tForm, string tabControlName, string pageName)
+        {
+            Control c = Find_Control(tForm, tabControlName);
+            if (c == null) return null;
+            if (c.GetType().ToString() != "DevExpress.XtraBars.Ribbon.BackstageViewControl") return null;
+            //DevExpress.XtraBars.Ribbon.BackstageViewTabItem
+            Control item = null;
+
+            int i2 = ((DevExpress.XtraBars.Ribbon.BackstageViewControl)c).Controls.Count;
+            for (int i = 0; i < i2; i++)
+            {
+                if (((DevExpress.XtraBars.Ribbon.BackstageViewControl)c).Controls[i].Name == pageName) 
+                {
+                    item = ((DevExpress.XtraBars.Ribbon.BackstageViewControl)c).Controls[i];
+                    break;
+                }
+            }
+
+            return item;
+        }
+
+
 
         public void Table_FieldsGroups_Count(vTableAbout vTA, DataSet dsFields)
         {

@@ -24,7 +24,6 @@ begin transaction
    CepTelefonu2          Varchar(15)   null,
    Eposta                Varchar(98)   null, 
    -- 40
-   MesajTipiId             SmallInt       null,
    SMSGonder               Bit            null,
    EpostaGonder            Bit            null,
    WhatsAppGonder          Bit            null,
@@ -86,16 +85,12 @@ AS BEGIN
         set @newTamAdi = ''
 
         Select 
-            @eAdayId = isnull(dlt.AdayId,0)
+            @eAdayId = isnull(dlt.Id,0)
            ,@eIsActive = isnull(dlt.IsActive,0)
            ,@eTamAdi = isnull(dlt.TamAdiSoyadi,'')
 
-           ,@eSMSGonder = isnull(dlt.SMSGonder,0)
-           ,@eEpostaGonder = isnull(dlt.EpostaGonder,0)
-           ,@eWhatsAppGonder = isnull(dlt.WhatsAppGonder,0)
-
         From deleted dlt
-        Where dlt.Id = @TalepId
+        Where dlt.Id = @adayId
 			   
         Select 
             @yFirmId = ins.FirmId
@@ -104,12 +99,9 @@ AS BEGIN
            ,@yTamAdi = isnull(ins.TamAdiSoyadi, '')
            ,@yAdi = isnull(ins.Adi,'')
            ,@ySoyadi = isnull(ins.Soyadi,'')
-           ,@ySMSGonder = isnull(ins.SMSGonder,0)
-           ,@yEpostaGonder = isnull(ins.EpostaGonder,0)
-           ,@yWhatsAppGonder = isnull(ins.WhatsAppGonder,0)
 
         From inserted ins
-        Where ins.Id = @TalepId
+        Where ins.Id = @adayId
      	   	
         -- TamAdiSoyadi var ise Adi ve Soyadi tespit ediliyor 
         if ((@yTamAdi <> '') and
@@ -131,54 +123,22 @@ AS BEGIN
             Update MtskAday set 
              Adi = RTRIM(LTRIM(@yAdi))
             ,Soyadi = RTRIM(LTRIM(@ySoyadi))
-            Where Id = @TalepId
+            Where Id = @adayId
         end
 		
     	set @newTamAdi = @yAdi + ' ' +  @ySoyadi
 
         if ((@newTamAdi <> @eTamAdi) or 
             (@eTamAdi = '') or
-            (@yTamAdi = '') or
-            (@eAdayId <> @yAdayId) 
+            (@yTamAdi = '') 
             )  
     	begin
     	    update MtskAday set 
-              AdayId = @yAdayId 
-            , IsActive = @yIsActive 
-            , TamAdiSoyadi = RTRIM(LTRIM(@newTamAdi))
-
-            where Id = @AdayId 
+            TamAdiSoyadi = RTRIM(LTRIM(@newTamAdi))
+            where Id = @adayId 
     	end
 
-        -- MtskAdayBelgeler tablosunu işaretle
-        Update MtskAdayBelgeler set
-           BiyometrikTarandi = x.Sonuc 
-        From MtskAdayBelgeler a, 
-        (
-            Select isnull(count(Id),0) as Sonuc
-            From MtskAday
-            Where BiyometrikResim is not null
-            and Id = @AdayId
-        ) as x
-        Where a.FirmId = @yFirmId
-        and a.AdayId = @yAdayId
-
-        Update MtskAday set
-           BiyometrikGeldi = x.Sonuc 
-        From MtskAday a, 
-        (
-            Select isnull(count(Id),0) as Sonuc
-            From MtskAday
-            Where BiyometrikResim is not null
-            and Id = @TalepId
-        ) as x
-        Where a.Id = @AdayId
-		and   isnull(a.BiyometrikGeldi,0) = 0
-
-        --  @eEpostaGonder <> @yEpostaGonder
-        --  @eWhatsAppGonder <> @yWhatsAppGonder
-
-      FETCH NEXT FROM talepCursor INTO @TalepId
+      FETCH NEXT FROM adayCursor INTO @adayId
     END -- While
 
 	-- Veri transferi yapılmıyorsa 

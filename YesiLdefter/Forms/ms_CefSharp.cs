@@ -8,9 +8,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
-using CefSharp;
-using CefSharp.WinForms;
-using CefSharp.SchemeHandler;
+//using CefSharp;
+//using CefSharp.WinForms;
+//using CefSharp.SchemeHandler;
 using Tkn_Events;
 using Tkn_ToolBox;
 using YesiLdefter.Selenium;
@@ -77,12 +77,12 @@ namespace YesiLdefter
 
             this.Load += new System.EventHandler(evf.myForm_Load);
             this.Shown += new System.EventHandler(evf.myForm_Shown);
-            this.Shown += new System.EventHandler(this.ms_CefSharp_Shown);
+            //this.Shown += new System.EventHandler(this.ms_CefSharp_Shown);
 
             this.KeyPreview = true;
 
         }
-
+        /*
         #region Form preparing
         private void ms_CefSharp_Shown(object sender, EventArgs e)
         {
@@ -203,7 +203,7 @@ namespace YesiLdefter
             // Otomatik kaydet için
             if (f.btn_AutoSubmit != null)
                 ((DevExpress.XtraEditors.SimpleButton)f.btn_AutoSubmit).Click += new System.EventHandler(myAutoSubmit);
-            */
+            *+/
         }
         #endregion MsWebPagesButtonsPreparing
 
@@ -380,7 +380,7 @@ namespace YesiLdefter
                     string title = response.Result.ToString();
                     MessageBox.Show($"Page title is: {title}");
                 }
-                */
+                *+/
                 return true;
             }
             else
@@ -406,7 +406,7 @@ namespace YesiLdefter
                 string title = response.Result.ToString();
                 MessageBox.Show($"Page title is: {title}");
             }
-            */
+            *+/
 
             bool onay = false;
 
@@ -503,6 +503,6 @@ namespace YesiLdefter
         }
 
         #endregion subFunctions
-
+        */
     }
 }

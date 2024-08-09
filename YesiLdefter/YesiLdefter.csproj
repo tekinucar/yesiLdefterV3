@@ -81,18 +81,6 @@
     <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AngleSharp, Version=1.1.0.0, Culture=neutral, PublicKeyToken=e83494dcdc6d31ea, processorArchitecture=MSIL">
-      <HintPath>..\packages\AngleSharp.1.1.0\lib\net472\AngleSharp.dll</HintPath>
-    </Reference>
-    <Reference Include="CefSharp, Version=126.2.70.0, Culture=neutral, PublicKeyToken=40c4b6fc221f4138, processorArchitecture=MSIL">
-      <HintPath>..\packages\CefSharp.Common.126.2.70\lib\net462\CefSharp.dll</HintPath>
-    </Reference>
-    <Reference Include="CefSharp.Core, Version=126.2.70.0, Culture=neutral, PublicKeyToken=40c4b6fc221f4138, processorArchitecture=MSIL">
-      <HintPath>..\packages\CefSharp.Common.126.2.70\lib\net462\CefSharp.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="CefSharp.WinForms, Version=126.2.70.0, Culture=neutral, PublicKeyToken=40c4b6fc221f4138, processorArchitecture=MSIL">
-      <HintPath>..\packages\CefSharp.WinForms.126.2.70\lib\net462\CefSharp.WinForms.dll</HintPath>
-    </Reference>
     <Reference Include="DevExpress.BonusSkins.v19.2, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
     <Reference Include="DevExpress.Data.v19.2, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
     <Reference Include="DevExpress.Printing.v19.2.Core, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
@@ -126,9 +114,6 @@
     <Reference Include="DevExpress.XtraTreeList.v19.2, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
     <Reference Include="DevExpress.XtraVerticalGrid.v19.2, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
     <Reference Include="DevExpress.XtraWizard.v19.2, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
-    <Reference Include="FastReport">
-      <HintPath>..\..\..\..\FastReport.Net\Framework 4.0\FastReport.dll</HintPath>
-    </Reference>
     <Reference Include="Google.Protobuf, Version=3.6.1.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604, processorArchitecture=MSIL">
       <HintPath>..\packages\Google.Protobuf.3.6.1\lib\net45\Google.Protobuf.dll</HintPath>
     </Reference>
@@ -559,8 +544,10 @@
     <Content Include="Scripts\UST\MsV3\tempEduUsersList.txt" />
     <Content Include="Scripts\UST\Mtsk\FileUpdates.txt" />
     <Content Include="Scripts\UST\Mtsk\GecerlilikTarihi.txt" />
+    <Content Include="Scripts\UST\Mtsk\Lkp_MtskTalepTipi.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskAday - Kopyala.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskAday.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskAdayEvrak.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskAdayUcret.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskSaatUygulama.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskSertifikaSaatleri.txt" />
@@ -768,7 +755,7 @@
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmHesapVezne.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\IBelgeStokAdres.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\JoinTables.txt" />
-    <Content Include="Scripts\UST\OnMuhasebe\OnmOdemePlani.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmOdemePlani.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\LkpOnmStokBirimTipi.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\LkpCinsiyetTipi.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\LkpOnmFaturaEkVergiTipi.txt" />

@@ -1431,7 +1431,7 @@ INSERT INTO [dbo].[SYS_UPDATES]
             {
                 tForm.IsAccessible = true;
             } // json
-            else if (t.Find_Properties_Value(Prop_SubView, "SV_ENABLED") == "TRUE")
+            else if (t.Find_Properties_Value(Prop_SubView, "SUBVIEW_ENABLED") == "TRUE")
             {
                 tForm.IsAccessible = true;
             }

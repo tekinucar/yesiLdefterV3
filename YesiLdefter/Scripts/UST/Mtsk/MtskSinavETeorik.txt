@@ -7,6 +7,7 @@ begin transaction
    Id                    Int IDENTITY(1,1) not null, 
    FirmId                Int       not null,
    IsActive              Bit       not null, /* default : 1 = active, 0 = not active */  
+   TalepId               Int       not null, 
    AdayId                Int       not null, /* default 0 */
    TcNo                  Varchar(11)   null,
    TamAdiSoyadi          nVarchar(100) null,
@@ -23,14 +24,14 @@ begin transaction
    MebbisESinavTarihValue  Varchar(20)   null, /* mebbis valuesi */ 
 
    --20
-   SinavUcreti           Numeric(22,8) null,
+   SinavUcreti           Numeric(22,5) null,
    KayitSirasindaAlindi  Bit           null, /* sertifika ücreti ile birlikte alındı */
    TahsilEdildi          Bit           null, /* sonradan kursiyerden makbuzla tahsil edildi */
    DekontId              Int           null, /* tahsil dekont ıd */
    --30
    /* mebbis bilgileri */
    UcretDurumuTipiId     SmallInt      null, /* mebbisten okunuyor : Sınav Ücreti Yatırılmamış ,  */
-   YatanToplamUcret      Numeric(22,8) null,
+   YatanToplamUcret      Numeric(22,5) null,
    UcretSayisi           SmallInt      null, 
    TestMerkeziBilgisi    Varchar(50)   null,
 
@@ -39,8 +40,9 @@ begin transaction
   
  grant select, insert, update, delete on MtskSinavETeorik to public
 
- create index X_MtskSinavETeorik01 on MtskSinavETeorik (AdayId)
- create index X_MtskSinavETeorik02 on MtskSinavETeorik (TcNo)
+ create index X_MtskSinavETeorik01 on MtskSinavETeorik (TalepId)
+ create index X_MtskSinavETeorik02 on MtskSinavETeorik (AdayId)
+ create index X_MtskSinavETeorik03 on MtskSinavETeorik (TcNo)
   
 commit transaction
 

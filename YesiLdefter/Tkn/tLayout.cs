@@ -14,8 +14,8 @@ using Tkn_TablesRead;
 using Tkn_ToolBox;
 using Tkn_Variable;
 using YesiLdefter.CEFSharp;
-using CefSharp;
-using CefSharp.WinForms;
+//using CefSharp;
+//using CefSharp.WinForms;
 
 namespace Tkn_Layout
 {
@@ -2019,14 +2019,11 @@ namespace Tkn_Layout
                 backstageViewTabItem1.Caption = caption;
                 backstageViewTabItem1.ContentControl = backstageViewClientControl1;
                 backstageViewTabItem1.Name = "backstageViewTabItem_" + RefId.ToString();
-                //backstageViewTabItem1.
-                //backstageViewTabItem1.Selected = true;
 
                 //
                 // InputPanel Create
                 //
                 InputPanel_Preparing(tForm, backstageViewClientControl1, TableIPCode, IPDataType);
-
             }
 
             #endregion

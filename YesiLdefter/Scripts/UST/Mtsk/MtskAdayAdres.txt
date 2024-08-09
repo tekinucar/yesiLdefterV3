@@ -6,7 +6,6 @@ begin transaction
  (
    Id                    Int IDENTITY(1,1) not null, 
    FirmId                Int       not null,
-   IsActive              Bit       not null, 
    TalepId               Int       not null, 
    AdayId                Int       not null, 
    TcNo                  Varchar(11)   null,
@@ -66,8 +65,7 @@ AS BEGIN
 
     FETCH NEXT FROM adresCursor INTO @curId
 
-    declare @yAdayId int 
-    declare @yFirmId int
+    declare @TalepId int 
 
     declare @eSozluAdresBeyani nVarchar(250) = null
     declare @ySozluAdresBeyani nVarchar(250) = null
@@ -86,8 +84,7 @@ AS BEGIN
     	where dlt.Id = @curId
 			   
         select 
-           @yAdayId = ins.AdayId
-         , @yFirmId = ins.FirmId
+           @TalepId = ins.TalepId
          , @ySozluAdresBeyani = isnull(ins.SozluAdresBeyani, '')
          , @yAdresKodu = isnull(ins.AdresKodu, '')
 		from inserted ins
@@ -98,10 +95,9 @@ AS BEGIN
           if (@ySozluAdresBeyani <> '') set @durum = 1
           if (@ySozluAdresBeyani = '') set @durum = 0
 
-          update dbo.MtskAday set
+          update dbo.MtskAdayTalep set
             AdresAlindi = @durum
-          Where Id = @yAdayId
-          and FirmId = @yFirmId
+          Where Id = @TalepId
         end
 
         if (@eAdresKodu <> @yAdresKodu) 
@@ -111,8 +107,7 @@ AS BEGIN
 
           update dbo.MtskAdayBelgeler set
             AdresKodlandi = @durum
-          Where AdayId = @yAdayId
-          and FirmId = @yFirmId
+          Where TalepId = @TalepId
         end
 
       FETCH NEXT FROM adresCursor INTO @curId

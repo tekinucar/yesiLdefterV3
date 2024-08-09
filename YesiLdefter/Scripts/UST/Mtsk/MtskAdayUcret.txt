@@ -6,10 +6,10 @@ begin transaction
  (
    Id                    Int IDENTITY(1,1) not null, 
    FirmId                Int       not null,
-   IsActive              Bit       not null, 
    TalepId               Int       not null, 
    AdayId                Int       not null, 
    DonemTipiId           Int           null,
+   TalepTipiId           SmallInt      null, /* = MtskAdayTalep.TalepTipi */
 
    -- 10
    /* Ücretlendirme bilgileri */
@@ -39,9 +39,9 @@ begin transaction
 
    -- 50 Mebbise bildirilecek ücretler
    MebbisSertifikaUcreti      Numeric(22,5) null,
-   Mebbis1SaatTeoDersSaati    SmallInt      null, 
+   MebbisTeoDersSaati         SmallInt      null, 
    Mebbis1SaatTeoDersUcreti   Numeric(22,5) null, 
-   Mebbis1SaatUygDersSaati    SmallInt       null, 
+   MebbisUygDersSaati         SmallInt       null, 
    Mebbis1SaatUygDersUcreti   Numeric(22,5) null, 
       
 
@@ -70,8 +70,7 @@ begin transaction
 
   create index X_MtskAdayUcret01 on MtskAdayUcret (TalepId)
   create index X_MtskAdayUcret02 on MtskAdayUcret (AdayId)
-  create index X_MtskAdayUcret03 on MtskAdayUcret (TcNo)
-  create index X_MtskAdayUcret04 on MtskAdayUcret (DonemTipiId)
+  create index X_MtskAdayUcret03 on MtskAdayUcret (DonemTipiId)
 
 commit transaction
 
@@ -121,20 +120,20 @@ begin transaction
 
 --IF EXISTS (SELECT * FROM sys.objects WHERE name = '')
 
-IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdayTalepTaksitSayisiTipi')
-drop table [Lkp].[MtskAdayTalepTaksitSayisiTipi]
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdayUcretTaksitSayisiTipi')
+drop table [Lkp].[MtskAdayUcretTaksitSayisiTipi]
 
-create table [Lkp].[MtskAdayTalepTaksitSayisiTipi]
+create table [Lkp].[MtskAdayUcretTaksitSayisiTipi]
 (
    Id               Int Unique not null, 
    TaksitSayisiTipi nVarchar(20)   null,
    IsActive         Bit            null,
    
-   constraint  pk_MtskAdayTalepTaksitSayisiTipi primary key (Id)
+   constraint  pk_MtskAdayUcretTaksitSayisiTipi primary key (Id)
 )
 
-Delete from [Lkp].[MtskAdayTalepTaksitSayisiTipi]
-INSERT INTO [Lkp].[MtskAdayTalepTaksitSayisiTipi] (Id, TaksitSayisiTipi, IsActive)
+Delete from [Lkp].[MtskAdayUcretTaksitSayisiTipi]
+INSERT INTO [Lkp].[MtskAdayUcretTaksitSayisiTipi] (Id, TaksitSayisiTipi, IsActive)
  VALUES 
   ( 0,    N'Peşin', 1),
   ( 1,    N'1 Ay', 1),
@@ -154,20 +153,20 @@ INSERT INTO [Lkp].[MtskAdayTalepTaksitSayisiTipi] (Id, TaksitSayisiTipi, IsActiv
   -- ------------------------------------------------------- 
 -- OdemeTipiId
 -- ------------------------------------------------------- 
-IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdayTalepOdemeTipi')
-drop table [Lkp].[MtskAdayTalepOdemeTipi]
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdayUcretOdemeTipi')
+drop table [Lkp].[MtskAdayUcretOdemeTipi]
 
-create table [Lkp].[MtskAdayTalepOdemeTipi]
+create table [Lkp].[MtskAdayUcretOdemeTipi]
 (
    Id               Int Unique not null, 
    OdemeTipi        nVarchar(20)   null,
    IsActive         Bit            null,
    
-   constraint  pk_MtskAdayTalepOdemeTipi primary key (Id)
+   constraint  pk_MtskAdayUcretOdemeTipi primary key (Id)
 )
 
-Delete from [Lkp].[MtskAdayTalepOdemeTipi]
-INSERT INTO [Lkp].[MtskAdayTalepOdemeTipi] (Id, OdemeTipi, IsActive)
+Delete from [Lkp].[MtskAdayUcretOdemeTipi]
+INSERT INTO [Lkp].[MtskAdayUcretOdemeTipi] (Id, OdemeTipi, IsActive)
  VALUES 
   (-1,    N'', 1),
   ( 0,    N'Seçiniz', 1),
@@ -180,3 +179,4 @@ INSERT INTO [Lkp].[MtskAdayTalepOdemeTipi] (Id, OdemeTipi, IsActive)
 commit transaction
 
 /*CreateLkpTableEnd*/
+

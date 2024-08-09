@@ -46,7 +46,13 @@ begin transaction
    -- Ders veya yaş için muafiyeti var
    IsMuafiyetiVar          Bit           null, /* 0 = yok, 1 = var */  
    MuafiyetAciklmasi       nVarchar(50)  null, 
+
+   Ceza100BelgeTarihi      Date          null,
+   Ceza100BelgeNo          nVarchar(50)  null, 
    
+   OzelDersSaatSayisi      SmallInt      null, /* hem teo için hem uygulama için geçerli */
+   BirSaatOzelDersUcreti   Numeric(22,5) null, /* hem teo için hem uygulama için geçerli */ 
+
    -- 60
    /* Dönem bilgileri */
    /* mebbisden Nakil için kayıt olduğu dönem bilgisi isteyebilir */ 
@@ -109,6 +115,7 @@ AS BEGIN
 
     FETCH NEXT FROM talepCursor INTO @TalepId --@curId
 
+    declare @mevcutAdayId int = 0
     declare @yAdayId int = 0
     declare @eAdayId int = 0
     declare @yFirmId int = 0
@@ -295,6 +302,40 @@ AS BEGIN
 
 		if (@yMevcutSertifikaTipiId < 0)
             set @yMevcutSertifikaTipiId = 0
+
+        -- MtskAday tablosu
+        if ((@yAdayId = 0) and (@yTcNo <> ''))
+        begin
+            set @mevcutAdayId = 0
+            Select @mevcutAdayId = isnull(Id, 0) from MtskAday 
+            Where TcNo = @yTcNo
+            
+            if (@mevcutAdayId = 0)
+            begin
+                INSERT INTO [dbo].[MtskAday]
+                 (  [AdayGUID]
+                    ,[FirmId]
+                    ,[IsActive]
+                    ,[TcNo]
+                    ,[TamAdiSoyadi]
+                    ,[Adi]
+                    ,[Soyadi] )
+                VALUES
+                   (  NEWID
+                    , @yFirmId
+                    , 1 
+                    , @yTcNo
+                    , @newTamAdi 
+                    , @yAdi 
+                    , @ySoyadi )
+                
+                -- Yeni @mevcutAdayId ye kavuştuk
+                Select @yAdayId = Id from MtskAday
+                Where TcNo = @yTcNo
+
+            end else 
+              set @yAdayId = @mevcutAdayId
+        end
 
         -- Mevcut ehliyetler
 		if (@yMevcutSertifikaTipiId = 9010) -- A Manuel işareti varsa
@@ -743,8 +784,8 @@ AS BEGIN
         , MebbisDurumTipiId = @yMebbisDurumTipiId
         --, SertifikaDurumTipiId = @SertifikaAlmayiHakKazandi
         , SertifikaTarihi = SertifikaTarihi
-        From MtskAdayTakip a
-        Where a.TalepId = @TalepId
+        From MtskAdayTakip as takip
+        Where takip.TalepId = @TalepId
 
 
         -- Bildirim gönderme varsa BildirimXXXX tablolarını çalıştır
@@ -763,8 +804,7 @@ AS BEGIN
             EXECUTE [dbo].[prc_BildirimSMS] @yFirmId, 1, @AdayId, @ySMSGonder, @yMesajTipiId 
         end
 		*/
-        --  @eEpostaGonder <> @yEpostaGonder
-        --  @eWhatsAppGonder <> @yWhatsAppGonder
+
 
       FETCH NEXT FROM talepCursor INTO @TalepId
     END -- While
@@ -817,7 +857,7 @@ Delete from [Lkp].[MtskAdayTalepTalepTipi]
 INSERT INTO [Lkp].[MtskAdayTalepTalepTipi] (Id, TalepTipi, IsActive)
  VALUES 
   ( 0,    N'Seçiniz', 1),
-  ( 1,    N'Yeni sertifika kaydı', 1),
+  ( 1,    N'Sertifika', 1),
   ( 2,    N'2.+4 hak ', 1),
   ( 3,    N'Nakil 2.+4 hak', 1),
   ( 4,    N'100 Ceza', 1),
@@ -970,3 +1010,42 @@ INSERT INTO [Lkp].[MtskAdayTalepMesajTipi] (Id, MesajTipi)
   ( 2,  N'Eksik Belgeler' )
 */
 
+/*
+
+           ,[KimlikSeriNo]
+           ,[IlkKayitTarihi]
+           ,[DogumTarihi]
+           ,[BabaAdi]
+           ,[AnneAdi]
+           ,[CinsiyetTipiId]
+           ,[CepTelefonu]
+           ,[CepTelefonu2]
+           ,[Eposta]
+           ,[MesajTipiId]
+           ,[SMSGonder]
+           ,[EpostaGonder]
+           ,[WhatsAppGonder]
+           ,[KullaniciUyarilari]
+           ,[BiyometrikResim]
+           ,[BiyometrikResimSmall])
+
+           ,<IlkKayitTarihi, date,>
+           ,<KimlikSeriNo, varchar(10),>
+           ,<DogumTarihi, date,>
+           ,<BabaAdi, nvarchar(50),>
+           ,<AnneAdi, nvarchar(50),>
+           ,<CinsiyetTipiId, smallint,>
+           ,<CepTelefonu, varchar(15),>
+           ,<CepTelefonu2, varchar(15),>
+           ,<Eposta, varchar(98),>
+           ,<MesajTipiId, smallint,>
+           ,<SMSGonder, bit,>
+           ,<EpostaGonder, bit,>
+           ,<WhatsAppGonder, bit,>
+           ,<KullaniciUyarilari, nvarchar(200),>
+           ,<BiyometrikResim, varbinary(max),>
+           ,<BiyometrikResimSmall, varbinary(max),>)
+
+
+
+*/

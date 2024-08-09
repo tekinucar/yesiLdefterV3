@@ -663,8 +663,8 @@ namespace Tkn_Events
 
         public void myForm_Closing(object sender, FormClosingEventArgs e)
         {
-            if (v.cefBrowser_ != null)
-                v.cefBrowser_.Parent = null;
+            //if (v.cefBrowser_ != null)
+            //    v.cefBrowser_.Parent = null;
             // 1. numara bu çalışıyor
             //MessageBox.Show("myForm_FormClosing : " + ((Form)sender).Text);
         }

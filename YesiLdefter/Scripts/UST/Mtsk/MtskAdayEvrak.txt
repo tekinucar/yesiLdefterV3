@@ -1,0 +1,66 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table MtskAdayEvrak
+ (
+   Id                    Int IDENTITY(1,1) not null, 
+   FirmId                Int       not null,
+   TalepId               Int       not null, 
+   AdayId                Int       not null, 
+   TcNo                  Varchar(11)   null,
+   DonemTipiId           Int           null,
+
+   -- 10
+   OgrenimBelgesiniVerenKurum  nVarchar(200)  null,
+   OgrenimBelgesiTipiId        SmallInt       null,
+   OgrenimBelgesiTarihi        Date           null,
+   OgrenimBelgesiSayisi        nVarchar(20)   null,
+   --OgrenimBelgesiResim         VarBinary(max) null,
+   --OgrenimBelgesiResimSmall    VarBinary(max) null,
+   OgrenimBelgesiFileName      Varchar(100)   null,
+
+   -- 20
+   RaporReferansNo             nVarchar(50)   null,
+   SaglikRaprunuVerenKurum     nVarchar(200)  null,
+   SaglikRaporuSonuc           nVarchar(30)   null,
+   SaglikRaporuTarihi          Date           null,
+   SaglikRaporuSayisi          nVarchar(30)   null,
+   OzurDurumuTipiId            SmallInt       null,
+   OkutmanTalebi               Bit            null,
+   TercumanTalebi              Bit            null,
+   YabanciDilTipiId            SmallInt       null,
+   --SaglikRaporuResim           VarBinary(max) null,
+   --SaglikRaporuResimSmall      VarBinary(max) null,
+   SaglikBelgesiFileName       Varchar(100)   null,
+
+   -- 30
+   SavcilikBelgesiVerenKurum   nVarchar(200)  null,
+   SavcilikBelgesiTarihi       Date           null,
+   SavcilikBelgesiSayisi       nVarchar(30)   null,
+   --SavcilikBelgesiResim        VarBinary(max) null,
+   --SavcilikBelgesiResimSmall   VarBinary(max) null,
+   SavcilikBelgesiFileName     Varchar(100)   null,
+
+   -- 40 imza veri yok
+   ImzaFileName                Varchar(100)   null,
+
+   -- 50 
+   SozlesmeTarihi              Date          null,
+   Sozlesme1BelgesiFileName    Varchar(100)   null,
+   Sozlesme2BelgesiFileName    Varchar(100)   null,
+
+   constraint		pk_MtskAdayEvrak primary key (Id)
+ )
+  
+  grant select, insert, update, delete on MtskAdayEvrak to public
+
+  create index X_MtskAdayEvrak01 on MtskAdayEvrak (TalepId)
+  create index X_MtskAdayEvrak02 on MtskAdayEvrak (AdayId)
+  create index X_MtskAdayEvrak03 on MtskAdayEvrak (TcNo)
+  create index X_MtskAdayEvrak04 on MtskAdayEvrak (DonemTipiId)
+
+commit transaction
+
+/*CreateTableEnd*/
+

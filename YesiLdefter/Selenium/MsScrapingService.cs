@@ -1,4 +1,4 @@
-﻿using CefSharp.WinForms;
+﻿//using CefSharp.WinForms;
 using DevExpress.XtraEditors;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
@@ -29,7 +29,7 @@ namespace YesiLdefter.Selenium
         {
             if (f.anErrorOccurred) return;
             if ((f.browserType == v.tBrowserType.Selenium) && (f.wbSel.PageSource == null)) return;
-            if ((f.browserType == v.tBrowserType.CefSharp) && (f.wbCef == null)) return;
+            //if ((f.browserType == v.tBrowserType.CefSharp) && (f.wbCef == null)) return;
             if (wnv.TagName == null) return;
 
             string AttType = wnv.AttType;
@@ -61,8 +61,8 @@ namespace YesiLdefter.Selenium
             {
                 if (f.browserType == v.tBrowserType.Selenium) 
                     await displayNone(f.wbSel, TagName, idName, XPath, InnerText);
-                if (f.browserType == v.tBrowserType.CefSharp)
-                    await displayNone(f.wbCef, TagName, idName, XPath, InnerText);
+                //if (f.browserType == v.tBrowserType.CefSharp)
+                //    await displayNone(f.wbCef, TagName, idName, XPath, InnerText);
                 return;
             }
 
@@ -73,8 +73,8 @@ namespace YesiLdefter.Selenium
                 //
                 if (f.browserType == v.tBrowserType.Selenium)
                     preparingItemButtonsList(f.wbSel, wnv, TagName, AttSrc);
-                if (f.browserType == v.tBrowserType.CefSharp)
-                    preparingItemButtonsList(f.wbCef, wnv, TagName, AttSrc);
+                //if (f.browserType == v.tBrowserType.CefSharp)
+                //    preparingItemButtonsList(f.wbCef, wnv, TagName, AttSrc);
             }
 
             if (TagName == "a")
@@ -110,16 +110,16 @@ namespace YesiLdefter.Selenium
                 {
                     if (f.browserType == v.tBrowserType.Selenium)
                         selectItemsRead(f.wbSel, ref wnv, idName);
-                    if (f.browserType == v.tBrowserType.CefSharp)
-                        selectItemsRead(f.wbCef, ref wnv, idName);
+                    //if (f.browserType == v.tBrowserType.CefSharp)
+                    //    selectItemsRead(f.wbCef, ref wnv, idName);
                 }
                 if ((workRequestType == v.tWebRequestType.get) &&
                     (AttRole == "ItemTable"))
                 {
                     if (f.browserType == v.tBrowserType.Selenium)
                         selectItemsRead(f.wbSel, ref wnv, idName);
-                    if (f.browserType == v.tBrowserType.CefSharp)
-                        selectItemsRead(f.wbCef, ref wnv, idName);
+                    //if (f.browserType == v.tBrowserType.CefSharp)
+                    //    selectItemsRead(f.wbCef, ref wnv, idName);
 
                     TagName = ""; // aşağıdaki get işlemine girmesin, teğet geçsin
                 }
@@ -136,8 +136,8 @@ namespace YesiLdefter.Selenium
                     {
                         if (f.browserType == v.tBrowserType.Selenium)
                             writeValue = selectItemsGetValue(f.wbSel, ref wnv, idName, writeValue);
-                        if (f.browserType == v.tBrowserType.CefSharp)
-                            writeValue = selectItemsGetValue(f.wbCef, ref wnv, idName, writeValue);
+                        //if (f.browserType == v.tBrowserType.CefSharp)
+                        //    writeValue = selectItemsGetValue(f.wbCef, ref wnv, idName, writeValue);
                     }
                 }
             }
@@ -146,8 +146,8 @@ namespace YesiLdefter.Selenium
             {
                 if (f.browserType == v.tBrowserType.Selenium)
                     await divOperations(f.wbSel, wnv, f);
-                if (f.browserType == v.tBrowserType.CefSharp)
-                    await divOperations(f.wbCef, wnv, f);
+                //if (f.browserType == v.tBrowserType.CefSharp)
+                //    await divOperations(f.wbCef, wnv, f);
                 return;
             }
 
@@ -155,8 +155,8 @@ namespace YesiLdefter.Selenium
             {
                 if (f.browserType == v.tBrowserType.Selenium)
                     await spanOperations(f.wbSel, wnv, f);
-                if (f.browserType == v.tBrowserType.CefSharp)
-                    await spanOperations(f.wbCef, wnv, f);
+                //if (f.browserType == v.tBrowserType.CefSharp)
+                //    await spanOperations(f.wbCef, wnv, f);
                 
                 if (wnv.AttRole != "GetCaption") return;
             }
@@ -169,8 +169,8 @@ namespace YesiLdefter.Selenium
 
                 if (f.browserType == v.tBrowserType.Selenium)
                     await buttonsClick(f.wbSel, wnv, f);
-                if (f.browserType == v.tBrowserType.CefSharp)
-                    await buttonsClick(f.wbCef, wnv, f);
+                //if (f.browserType == v.tBrowserType.CefSharp)
+                //    await buttonsClick(f.wbCef, wnv, f);
                 return;
             }
 
@@ -181,8 +181,8 @@ namespace YesiLdefter.Selenium
                 bool secOnay = false;
                 if (f.browserType == v.tBrowserType.Selenium)
                     secOnay = await getSecurityImageValue(f.wbSel, wnv, idName);
-                if (f.browserType == v.tBrowserType.CefSharp)
-                    secOnay = await getSecurityImageValue(f.wbCef, wnv, idName);
+                //if (f.browserType == v.tBrowserType.CefSharp)
+                //    secOnay = await getSecurityImageValue(f.wbCef, wnv, idName);
 
             }
             /// Güvenlik kodunu sor veya başka bir değerde sorabilir
@@ -211,8 +211,8 @@ namespace YesiLdefter.Selenium
                 {
                     if (f.browserType == v.tBrowserType.Selenium)
                         getHtmlTable(f.wbSel, ref wnv, idName);
-                    if (f.browserType == v.tBrowserType.CefSharp)
-                        getHtmlTable(f.wbCef, ref wnv, idName);
+                    //if (f.browserType == v.tBrowserType.CefSharp)
+                    //    getHtmlTable(f.wbCef, ref wnv, idName);
                 }
 
                 if ((injectType == v.tWebInjectType.Set ||
@@ -221,8 +221,8 @@ namespace YesiLdefter.Selenium
                 {
                     if (f.browserType == v.tBrowserType.Selenium)
                         postHtmlTable(f.wbSel, ref wnv, idName, f);
-                    if (f.browserType == v.tBrowserType.CefSharp)
-                        postHtmlTable(f.wbCef, ref wnv, idName, f);
+                    //if (f.browserType == v.tBrowserType.CefSharp)
+                    //    postHtmlTable(f.wbCef, ref wnv, idName, f);
                 }
             }
 
@@ -239,8 +239,8 @@ namespace YesiLdefter.Selenium
             {
                 if (f.browserType == v.tBrowserType.Selenium)
                     invokeMember = await setElementValues(f.wbSel, TagName, AttType, idName, writeValue, invokeMember, f);
-                if (f.browserType == v.tBrowserType.CefSharp)
-                    invokeMember = await setElementValues(f.wbCef, TagName, AttType, idName, writeValue, invokeMember, f);
+                //if (f.browserType == v.tBrowserType.CefSharp)
+                //    invokeMember = await setElementValues(f.wbCef, TagName, AttType, idName, writeValue, invokeMember, f);
             }
 
             ///
@@ -253,8 +253,8 @@ namespace YesiLdefter.Selenium
             {
                 if (f.browserType == v.tBrowserType.Selenium)
                     await getElementValues(f.wbSel, wnv, TagName, AttType, AttRole, idName, f);
-                if (f.browserType == v.tBrowserType.CefSharp)
-                    await getElementValues(f.wbCef, wnv, TagName, AttType, AttRole, idName, f);
+                //if (f.browserType == v.tBrowserType.CefSharp)
+                //    await getElementValues(f.wbCef, wnv, TagName, AttType, AttRole, idName, f);
             }
 
             if (f.anErrorOccurred) return;
@@ -271,8 +271,8 @@ namespace YesiLdefter.Selenium
                 {
                     if (f.browserType == v.tBrowserType.Selenium)
                         await invokeMemberExec(f.wbSel, wnv, invokeMember, writeValue, idName, f);
-                    if (f.browserType == v.tBrowserType.CefSharp)
-                        await invokeMemberExec(f.wbCef, wnv, invokeMember, writeValue, idName, f);
+                    //if (f.browserType == v.tBrowserType.CefSharp)
+                    //    await invokeMemberExec(f.wbCef, wnv, invokeMember, writeValue, idName, f);
                 }
             }
 
@@ -348,7 +348,7 @@ namespace YesiLdefter.Selenium
             }
 
         }
-
+        /*
         private async Task displayNone(ChromiumWebBrowser wb, string tagName, string idName, string XPath, string InnerText)
         {
             if (t.IsNotNull(idName))
@@ -364,7 +364,7 @@ namespace YesiLdefter.Selenium
                 var br = wb.GetBrowser(); 
                 br.MainFrame.ExecuteJavaScriptAsync(script);
             }
-        }
+        } */
         #endregion displayNone
 
         #region preparingItemButtonsList
@@ -389,6 +389,7 @@ namespace YesiLdefter.Selenium
                 }
             }
         }
+        /*
         private void preparingItemButtonsList(ChromiumWebBrowser wb, webNodeValue wnv, string tagName, string attSrc)
         {
             MessageBox.Show("preparingItemButtonsList kodlanacak");
@@ -411,8 +412,8 @@ namespace YesiLdefter.Selenium
                     wnv.elementsSelenium.Add(item);
                 }
             }
-            */
-        }
+            *+/
+        }*/
         #endregion preparingItemButtonsList
 
         #region selectItemsRead
@@ -458,6 +459,7 @@ namespace YesiLdefter.Selenium
             v.IsWaitOpen = false;
             t.WaitFormClose();
         }
+        /*
         private void selectItemsRead(ChromiumWebBrowser wb, ref webNodeValue wnv, string idName)
         {
             MessageBox.Show("selectItemsRead KODLANACAK");
@@ -491,8 +493,8 @@ namespace YesiLdefter.Selenium
             
             v.IsWaitOpen = false;
             t.WaitFormClose();
-            */
-        }
+            *+/
+        }*/
         #endregion selectItemsRead
 
         #region selectItemsGetValue
@@ -526,6 +528,7 @@ namespace YesiLdefter.Selenium
 
             return value;
         }
+        /*
         private string selectItemsGetValue(ChromiumWebBrowser wb, ref webNodeValue wnv, string idName, string findText)
         {
             MessageBox.Show("selectItemsGetValue Kodlanacak");
@@ -558,8 +561,8 @@ namespace YesiLdefter.Selenium
             }
 
             return value;
-            */
-        }
+            *+/
+        }*/
         #endregion selectItemsGetValue
 
         #region divOperations
@@ -591,6 +594,7 @@ namespace YesiLdefter.Selenium
                 }
             }
         }
+        /*
         private async Task divOperations(ChromiumWebBrowser wb, webNodeValue wnv, webForm f)
         {
             MessageBox.Show("divOperations Kodlanacak");
@@ -620,9 +624,9 @@ namespace YesiLdefter.Selenium
                     }
                 }
             }
-            */
+            *+/
         }
-
+        */
         #endregion divOperations
 
         #region spanOperations
@@ -682,6 +686,7 @@ namespace YesiLdefter.Selenium
                 wb.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(30);
             }
         }
+        /*
         private async Task spanOperations(ChromiumWebBrowser wb, webNodeValue wnv, webForm f)
         {
             MessageBox.Show("spanOperations Kodlanacak");
@@ -735,8 +740,9 @@ namespace YesiLdefter.Selenium
                 }
                 wb.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(30);
             }
-            */
+            *+/
         }
+        */
         #endregion spanOperations
         
         #region buttonsClick
@@ -787,6 +793,7 @@ namespace YesiLdefter.Selenium
                 }
             }
         }
+        /*
         private async Task buttonsClick(ChromiumWebBrowser wb, webNodeValue wnv, webForm f)
         {
             MessageBox.Show("buttonsClick kodlanacak");
@@ -833,8 +840,8 @@ namespace YesiLdefter.Selenium
                         v.ENTER2 + inner);
                 }
             }
-            */
-        }
+            *+/
+        }*/
         #endregion buttonsClick
 
         #region SetAutoSubmit
@@ -877,6 +884,7 @@ namespace YesiLdefter.Selenium
                     v.ENTER2 + inner);
             }
         }
+        /*
         private void SetAutoSubmit(ChromiumWebBrowser wb, webNodeValue wnv, webForm f)
         {
             MessageBox.Show("SetAutoSubmit kodlanacak");
@@ -917,11 +925,12 @@ namespace YesiLdefter.Selenium
                 MessageBox.Show("DİKKAT [error 1004] : [ " + idName + " ] sırasında sorun oluştu ..." +
                     v.ENTER2 + inner);
             }
-            */
-        }
+            *+/
+        }*/
         #endregion SetAutoSubmit
 
         #region getSecurityImageValue
+        
         private async Task<bool> getSecurityImageValue(IWebDriver wb, webNodeValue wnv, string idName)
         {
             bool onay = false;
@@ -1052,11 +1061,13 @@ namespace YesiLdefter.Selenium
             */
             #endregion
         }
+        /*
         private async Task<bool> getSecurityImageValue(ChromiumWebBrowser wb, webNodeValue wnv, string idName)
         {
             MessageBox.Show("getSecurityImageValue kodlanacak");
             return false;
         }
+        */
         #endregion getSecurityImageValue
 
         #region getInputBoxValue
@@ -1222,10 +1233,11 @@ namespace YesiLdefter.Selenium
                         }
             */
         }
+        /*
         private void getHtmlTable(ChromiumWebBrowser wb, ref webNodeValue wnv, string idName)
         {
             MessageBox.Show("getHtmlTable kodlanacak");
-        }
+        }*/
         #endregion getHtmlTable
 
         #region postHtmlTable
@@ -1271,6 +1283,7 @@ namespace YesiLdefter.Selenium
                 }
             }
         }
+        /*
         private void postHtmlTable(ChromiumWebBrowser wb, ref webNodeValue wnv, string idName, webForm f)
         {
             string _TableIPCode = wnv.TableIPCode;
@@ -1310,7 +1323,7 @@ namespace YesiLdefter.Selenium
                     }
                 }
             }
-        }
+        }*/
         #endregion postHtmlTable
 
         #region postHtmlTable_
@@ -1367,10 +1380,11 @@ namespace YesiLdefter.Selenium
                 if (onay) break;
             }
         }
+        /*
         private void postHtmlTable_(ChromiumWebBrowser wb, ref webNodeValue wnv, string idName)
         {
             MessageBox.Show("postHtmlTable_ kodlanacak ");
-        }
+        }*/
         #endregion postHtmlTable_
 
         #region postColumsValue_
@@ -1471,11 +1485,11 @@ namespace YesiLdefter.Selenium
                 }
             }
         }
-
+        /*
         private void postColumsValue_(ChromiumWebBrowser wb, IList<IWebElement> htmlCols, tTable _tTable)
         {
             MessageBox.Show("postColumsValue_  kodlanacak");
-        }
+        }*/
         #endregion postColumsValue_
 
         #region setElementValues
@@ -1627,11 +1641,12 @@ namespace YesiLdefter.Selenium
             return invokeMember;
             #endregion
         }
+        /*
         private async Task<v.tWebInvokeMember> setElementValues(ChromiumWebBrowser wb, string tagName, string attType, string idName, string writeValue, v.tWebInvokeMember invokeMember, webForm f)
         {
             MessageBox.Show("setElementValues kodlanacak");
             return invokeMember;
-        }
+        }*/
         #endregion setElementValues
 
         #region getElementValues
@@ -1740,6 +1755,7 @@ namespace YesiLdefter.Selenium
             return readValue;
             #endregion
         }
+        /*
         private async Task<string> getElementValues(ChromiumWebBrowser wb, webNodeValue wnv, string tagName, string attType, string attRole, string idName, webForm f)
         {
             string readValue = "";
@@ -1748,6 +1764,7 @@ namespace YesiLdefter.Selenium
 
             return readValue;
         }
+        */
         #endregion getElementValues
 
         #region invokeMemberExec
@@ -1810,10 +1827,12 @@ namespace YesiLdefter.Selenium
                     v.ENTER2 + inner);
             }
         }
+        /*
         private async Task invokeMemberExec(ChromiumWebBrowser wb, webNodeValue wnv, v.tWebInvokeMember invokeMember, string writeValue, string idName, webForm f)
         {
             MessageBox.Show("invokeMemberExec kodlanacak"); 
         }
+        */
         #endregion invokeMemberExec
 
         #endregion WebScrapingAsync SubFunctions

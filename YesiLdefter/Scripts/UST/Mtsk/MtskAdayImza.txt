@@ -6,7 +6,6 @@ begin transaction
  (
    Id                    Int IDENTITY(1,1) not null, 
    FirmId                Int       not null,
-   IsActive              Bit       not null, 
    TalepId               Int       not null, 
    AdayId                Int       not null, 
    TcNo                  Varchar(11)   null,
@@ -39,8 +38,7 @@ AS BEGIN
     DECLARE myCursor cursor for select Id from Inserted
     DECLARE @curId bigint
 
-    Declare @AdayId int = 0
-    Declare @FirmId int = 0
+    Declare @TalepId int = 0
 
     OPEN myCursor
 
@@ -50,8 +48,7 @@ AS BEGIN
     BEGIN
 
         select 
-           @AdayId = ins.AdayId
-          ,@FirmId = ins.FirmId
+           @TalepId = ins.TalepId
 		from inserted ins
     	where ins.Id = @curId
 
@@ -64,11 +61,9 @@ AS BEGIN
             From MtskAdayImza
             Where 0 = 0
             and ImzaResim is not null
-            and AdayId = @AdayId
-            and FirmId = @FirmId
+            and TalepId = @TalepId
         ) as x
-        Where a.AdayId = @AdayId
-        and   a.FirmId = @FirmId
+        Where a.TalepId = @TalepId
 
 
       FETCH NEXT FROM myCursor INTO @curId

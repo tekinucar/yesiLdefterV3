@@ -56,17 +56,14 @@ namespace Tkn_Events
                 v.con_Cancel = false;
                 return;
             }
-
             #endregion
 
-            //string function_name = "tdataNavigator_PositionChanged";
-            //t.Takipci(function_name, "", '{');
-
             DataNavigator dN = ((DevExpress.XtraEditors.DataNavigator)sender);
-            int NewPosition = dN.Position;
-            if (NewPosition == -1) return;
             object tDataTable = dN.DataSource;
             DataSet dsData = ((DataTable)tDataTable).DataSet;
+
+            int NewPosition = dN.Position;
+            if (NewPosition == -1) return;
             DataRow dtRow = dsData.Tables[0].Rows[NewPosition];
 
             //((DataTable)tDataTable).Columns[""].Expression
@@ -3332,7 +3329,8 @@ namespace Tkn_Events
                         {
                             if (buttonType == v.tButtonType.btAutoInsert)
                                 Prop_RunTime_Work_AUTO_INSERT(tForm, dsData, Prop_RunTime);
-                            
+
+
                             if ((buttonType == v.tButtonType.btKaydet) ||
                                 (buttonType == v.tButtonType.btSilSatir))
                                 Prop_RunTime_Work_AUTO_LIST(tForm, Prop_RunTime, buttonType);
@@ -3343,7 +3341,12 @@ namespace Tkn_Events
                         if (beforeAfter == v.tBeforeAfter.After)
                         {
                             if (buttonType == v.tButtonType.btListele)
+                            {
                                 Prop_RunTime_Work_AUTO_REFRESH(tForm, Prop_RunTime);
+                                // deneme
+                                
+
+                            }
                         }
                     }
                 }
@@ -3377,11 +3380,13 @@ namespace Tkn_Events
 
                         if (t.IsNotNull(TABLEIPCODE))
                         {
-                            DataSet ds = t.Find_DataSet(tForm, "", TABLEIPCODE, "");
-                            if (ds != null)
-                            {
-                                t.TableRefresh(tForm, ds, TABLEIPCODE);
-                            }
+                            //DataSet ds = null;
+                            //DataNavigator dN = null;
+                            //t.Find_DataSet(tForm, ref ds, ref dN, TABLEIPCODE);
+                            //if (ds != null)
+                            //{
+                            //    dN.Position = 0;
+                            //}
                         }
                     }
                 }
@@ -3412,10 +3417,17 @@ namespace Tkn_Events
                 t.Find_DataSet(tForm, ref ds, ref dN, tableIPCode);
                 if (ds != null)
                 {
+                    // buraya position nerede olacak seçeneği ekle
+                    // position first
+                    // position normal
+                    // position last
+
+                    // mevcut normale göre çalışıyor 
                     v.con_PositionChange = true;
                     int pos = dN.Position;
                     t.TableRefresh(tForm, ds);
                     dN.Position = pos;
+                    //dN.Position = 0;
                     v.con_PositionChange = false;
                 }
             }
@@ -5968,12 +5980,6 @@ namespace Tkn_Events
             // TabPage aranıyor
             Control c = null;
 
-            /*
-            if (TableIPCode_NotDot.IndexOf("tTabPage_") == -1)
-                 c = t.Find_Control(tForm, "tTabPage_" + TableIPCode_NotDot + readValue);
-            else c = t.Find_Control(tForm, TableIPCode_NotDot + readValue);
-            */
-
             if (t.IsNotNull(tabPageCode))
             {
                 c = t.Find_Control(tForm, tabPageCode);
@@ -6040,6 +6046,24 @@ namespace Tkn_Events
                 }
                 #endregion
 
+
+                #region DevExpress.XtraBars.Ribbon.BackstageViewTabItem
+                if (c.GetType().ToString() == "DevExpress.XtraBars.Ribbon.BackstageViewClientControl")
+                {
+                    t.selectBackstageViewTabItem(tForm, TabControlName, "tTabPage_" + TableIPCode_NotDot + readValue);
+
+                    //((DevExpress.XtraBars.Ribbon.BackstageViewControl)c).Parent.AccessibleName =
+                    //    ((DevExpress.XtraBars.Ribbon.BackstageViewControl)c).AccessibleName;
+
+                    //Control cntrl = ((DevExpress.XtraBars.Ribbon.BackstageViewTabItem)c).Parent;
+                    //if (cntrl.GetType().ToString() == "DevExpress.XtraBars.Ribbon.BackstageViewControl")
+                    //{
+                    //    ((DevExpress.XtraBars.Ribbon.BackstageViewControl)cntrl).SelectedPage =
+                    //        ((DevExpress.XtraBars.Ribbon.BackstageViewTabItem)c);
+                    //}
+                }
+                #endregion
+
                 return;
             }
 
@@ -6054,7 +6078,7 @@ namespace Tkn_Events
             // 1. Form üzerindeki TabPage aranır ve ilk bulunan getirilir
             // 2. TabPage nin MasterKey i belirtilmiş ise direk o TabPage aranır
 
-                string Item_MasterKey = string.Empty;
+            string Item_MasterKey = string.Empty;
             string Caption = string.Empty;
 
             if (t.IsNotNull(TableIPCode_NotDot))
@@ -6087,6 +6111,7 @@ namespace Tkn_Events
             /// TabControl or 
             /// TabPane or
             /// NavigationPane or
+            /// BackstageViewControl
             /// 
             /// bulunduysa yeni Page oluştur
 
@@ -6189,9 +6214,36 @@ namespace Tkn_Events
 
                 }
                 #endregion
+
+                #region DevExpress.XtraBars.Ribbon.BackstageViewControl
+                if (c.GetType().ToString() == "DevExpress.XtraBars.Ribbon.BackstageViewControl")
+                {
+                    DevExpress.XtraBars.Ribbon.BackstageViewClientControl backstageViewClientControl1 = new DevExpress.XtraBars.Ribbon.BackstageViewClientControl();
+                    DevExpress.XtraBars.Ribbon.BackstageViewTabItem backstageViewTabItem1 = new DevExpress.XtraBars.Ribbon.BackstageViewTabItem();
+                    // 
+                    // backstageViewClientControl1
+                    // 
+                    backstageViewClientControl1.AccessibleName = TableIPCode;
+                    backstageViewClientControl1.AccessibleDescription = TableIPCode_NotDot + "|" + readValue;
+                    backstageViewClientControl1.Name = "tTabPage_" + TableIPCode_NotDot;
+                    backstageViewClientControl1.Size = new System.Drawing.Size(c.Width, c.Height);
+                    backstageViewClientControl1.TabIndex = ((DevExpress.XtraBars.Ribbon.BackstageViewControl)c).Controls.Count;
+                    backstageViewClientControl1.Padding = new System.Windows.Forms.Padding(v.Padding4);
+                    //
+                    // backstageViewTabItem1
+                    //
+                    backstageViewTabItem1.Caption = Caption;
+                    backstageViewTabItem1.ContentControl = backstageViewClientControl1;
+                    backstageViewTabItem1.Name = "backstageViewTabItem_" + TableIPCode_NotDot;
+
+                    ((DevExpress.XtraBars.Ribbon.BackstageViewControl)c).Items.Add(backstageViewTabItem1);
+
+                    if (show) ((DevExpress.XtraBars.Ribbon.BackstageViewControl)c).SelectedTabIndex =
+                        ((DevExpress.XtraBars.Ribbon.BackstageViewControl)c).Items.Count;
+
+                }
+                #endregion
             }
-
-
         }
 
         #endregion CreateOrSelect TabPage
@@ -6214,12 +6266,12 @@ namespace Tkn_Events
             {
                 // yukarıda oluşturulan TabPage aranıyor
                 Control cntrl = null;
-                string[] controls = new string[] {
-                    "DevExpress.XtraTab.XtraTabPage",
-                    "DevExpress.XtraBars.Navigation.NavigationPage",
-                    "DevExpress.XtraBars.Navigation.TabNavigationPage",
-                    "DevExpress.XtraBars.Ribbon.BackstageViewClientControl"
-                };
+                string[] controls = new string[] { };
+                //    "DevExpress.XtraTab.XtraTabPage",
+                //    "DevExpress.XtraBars.Navigation.NavigationPage",
+                //    "DevExpress.XtraBars.Navigation.TabNavigationPage",
+                //    "DevExpress.XtraBars.Ribbon.BackstageViewTabItem"
+                //};
 
                 // yok ise yeni TabPage oluşturulacak
                 // var ise Show etmesi sağlanacak
@@ -6239,8 +6291,13 @@ namespace Tkn_Events
                     CreateOrSelect_Page(tForm, TabControlName, "", FormCode, ReadValue, ReadCaption, show);
                     //tTabPage_UST/OMS/FNS/MASRAFKAYDET|
                     if (FormCode.IndexOf("tTabPage_") == -1)
-                         cntrl = t.Find_Control(tForm, "tTabPage_" + t.AntiStr_Dot(FormCode), "", controls);
-                    else cntrl = t.Find_Control(tForm, t.AntiStr_Dot(FormCode), "", controls);
+                        cntrl = t.Find_Control(tForm, "tTabPage_" + t.AntiStr_Dot(FormCode), "", controls);
+                    if (cntrl == null)
+                        cntrl = t.Find_Control(tForm, t.AntiStr_Dot(FormCode), "", controls);
+                    if (cntrl == null)
+                        cntrl = t.Find_BackstageViewTabItem(tForm, TabControlName, "tTabPage_" + t.AntiStr_Dot(FormCode) + ReadValue);
+
+
                 }
 
                 if (t.IsNotNull(tabPageCode))
@@ -6404,6 +6461,7 @@ namespace Tkn_Events
         }
         private void propSubView_(Form tForm, DataSet dsData, DevExpress.XtraEditors.DataNavigator tDataNavigator)
         {
+            if (t.IsNotNull(dsData) == false) return;
             string readValue = "";
             PROP_SUBVIEW prop_ = propSubViewReadValue(dsData, tDataNavigator, ref readValue);
             if (prop_ == null) return;
@@ -6413,6 +6471,7 @@ namespace Tkn_Events
 
             bool onay = false;
             string TableIPCode = "";
+            string FormCode = "";
             string showMenuPageName = "";
             string elseShowTableIPCode = "";
             string elseShowMenuPageName = "";
@@ -6426,6 +6485,7 @@ namespace Tkn_Events
                 if (item.SUBVIEW_VALUE.IndexOf(readValue) > -1)
                 {
                     TableIPCode = item.SUBVIEW_TABLEIPCODE.ToString();
+                    FormCode = item.SUBVIEW_FORMCODE.ToString();
 
                     if (t.IsNotNull(TableIPCode))
                     {
@@ -6437,9 +6497,17 @@ namespace Tkn_Events
                         break;
                     }
                     
+                    if (t.IsNotNull(FormCode))
+                    {
+                        onay = subViewExec(tForm, subViewType, FormCode, "", "", "", item.CAPTION.ToString(), "");
+                    }
+
                     /// tabPage in CmpName yazdığını kod ile tetiklenmesini sağlayan table.Rows.Column.value eşleşiyorsa çalışacak
                     ///
-                    if (t.IsNotNull(item.SUBVIEW_VALUE))
+                    if (t.IsNotNull(item.SUBVIEW_VALUE) &&
+                        t.IsNotNull(TableIPCode) == false &&
+                        t.IsNotNull(FormCode) == false
+                        )
                     {
                         string subViewValue = item.SUBVIEW_VALUE;
                         onay = subViewExec(tForm, subViewType, "", "", subViewValue, "", "", "");
@@ -6686,6 +6754,7 @@ namespace Tkn_Events
             string DetailSubDetail = string.Empty;
             string DataCopyCode = string.Empty;
             string SqlFirst = string.Empty;
+            string Prop_SubView = string.Empty;
             string activeTableIPCode = string.Empty;
             byte btnType = 0;
             string tabPageName = string.Empty;
@@ -6779,6 +6848,7 @@ namespace Tkn_Events
                         DetailSubDetail = t.MyProperties_Get(myProp, "DetailSubDetail:");
                         DataCopyCode = t.MyProperties_Get(myProp, "DataCopyCode:");
                         SqlFirst = t.MyProperties_Get(myProp, "SqlFirst:");
+                        Prop_SubView = t.MyProperties_Get(myProp, "Prop_SubView:");
 
                         #region tWorkTD.Save - tDataSave 
                         if (vSW._03_WorkTD == v.tWorkTD.Save)
@@ -6809,11 +6879,14 @@ namespace Tkn_Events
                         if ((vSW._03_WorkTD == v.tWorkTD.Refresh_SubDetail) ||
                             (vSW._03_WorkTD == v.tWorkTD.NewAndRef))
                         {
-                            // önce View/Show işi yapılıyor 
-                            // tSubView_Refresh(dsData, dN);
-
-                            //if (dN.Position > -1)
                             tSubWork_Refresh_(tForm, dsData, dN);
+
+                            if (t.IsNotNull(Prop_SubView))
+                            {
+                                if (dN.AccessibleDescription != null)
+                                    propSubView(tForm, dsData, dN);
+                            }
+
                         }
                         #endregion Refresh_SubDetail
 

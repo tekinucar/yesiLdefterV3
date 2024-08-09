@@ -5,36 +5,36 @@ begin transaction
 
  create table OnmOdemePlani
  (
-   Id                Int IDENTITY(1,1) not null, 
-   FirmId            Int       not null,
-   IsActive          Bit       not null, /* default : 1 = active, 0 = not active */ 
-   DonemTipiId       Int           null,  /* borcun oluştuğu YılAy */
-   UcretTipiId       SmallInt      null,  /* 1. MtskAday tablosu, 2. yeni eklenecek borçlandırma sebepleri olacak   */
-   CariId            Int           null,  /* MtskAday.Id     */
-
-   TaksitTipiId      SmallInt      null,  /* 1. Peşinat, 2. Taksit, 3. Tek Borç  */
-   TaksitNo          Numeric(3)    null, 
-   VadeTarihi        Date          null,
-   VadeYil           SmallInt      null,
-   VadeAy            SmallInt      null,
-   VadeGun           SmallInt      null,
-   TaksitTutari      Numeric(22,8) null, 
-   IsPaid            Bit       not null, /* default : 0 = ödenmedi,  1 = Ödendi */  
-   TahsilTarihi      Date          null,
-
-   YedekTaksitTutari   Numeric(22,8) null, /* taksit tutarı eksik tahsil edildiği zaman ( YedekTaksitTutari = TaksitTutari, TaksitTutari = EksikTahsilTutarı ) şeklinde işleniyor */
-   BelgeDekontId       Int         null, /* OnmBelgeDekont.Id */
-   PatchBelgeDekontId  Int         null, /* eksik tahsil edildiğinde yeni oluşturulan satıra hangi BelgeDekontId den dolayı oluşturulduğunun işareti */
-   BelgeStokBId        Int         null, /* Fatura için : BelgeStokB.Id  : BelgeStokB başlık tablosu */
-   SourceTypeId        SmallInt    null, /* 0. manuel giriş, 1. Tabim Transfer */      
-   SourceId            Int         null, /* Tabim CariAlt.Ulas */
+   Id                  Int IDENTITY(1,1) not null, 
+   OdmemePlaniGUID     uniqueidentifier  null,
+   FirmId              Int       not null,
+   IsActive            Bit       not null, /* default : 1 = active, 0 = not active */ 
+   DonemTipiId         Int           null, /* borcun oluştuğu YılAy ? neden kullanıldım, gereksizse sil */
+   TalepId             Int           null, /* = MtskAdayTalep.Id */
+   TalepTipiId         SmallInt      null, /* = MtskAdayTalep.TalepTipi */
+   CariId              Int           null, /* = MtskAdayTalep.AdayId    */
+   -- 20
+   TaksitTipiId        SmallInt      null,  /* 1. Peşinat, 2. Taksit, 3. Tek Borç  */
+   TaksitNo            Numeric(3)    null, 
+   VadeTarihi          Date          null,
+   TaksitTutari        Numeric(22,5) null, 
+   IsPaid              Bit       not null, /* default : 0 = ödenmedi,  1 = Ödendi */  
+   TahsilTarihi        Date          null,
+   -- 30
+   YedekTaksitTutari   Numeric(22,5) null, /* taksit tutarı eksik tahsil edildiği zaman ( YedekTaksitTutari = TaksitTutari, TaksitTutari = EksikTahsilTutarı ) şeklinde işleniyor */
+   BelgeDekontId       Int           null, /* OnmBelgeDekont.Id */
+   PatchBelgeDekontId  Int           null, /* eksik tahsil edildiğinde yeni oluşturulan satıra hangi BelgeDekontId den dolayı oluşturulduğunun işareti */
+   BelgeStokBId        Int           null, /* Fatura için : BelgeStokB.Id  : BelgeStokB başlık tablosu */
+   -- 40
+   SourceTypeId        SmallInt      null, /* 0. manuel giriş, 1. Tabim Transfer */      
+   SourceId            Int           null, /* Tabim CariAlt.Ulas */
 
    constraint		pk_OnmOdemePlani primary key (Id)
  )
   
  grant select, insert, update, delete on OnmOdemePlani to public
 
-  create index X_OnmOdemePlani01 on OnmOdemePlani (UcretTipiId)
+  create index X_OnmOdemePlani01 on OnmOdemePlani (TalepTipiId)
   create index X_OnmOdemePlani02 on OnmOdemePlani (CariId)
   create index X_OnmOdemePlani03 on OnmOdemePlani (VadeTarihi)
   create index X_OnmOdemePlani04 on OnmOdemePlani (TahsilTarihi)
@@ -51,26 +51,28 @@ begin transaction
 -- ------------------------------------------------------- 
 -- UcretTipiId
 -- ------------------------------------------------------- 
-create table [Lkp].[OnmOdemePlaniUcretTipi]
+create table [Lkp].[OnmOdemePlaniTalepTipi]
 (
-   Id               Int Unique not null, 
-   UcretTipi         nVarchar(50)   null,
+   Id                Int Unique not null, 
+   TalepTipi         nVarchar(50)   null,
    
-   constraint  pk_OnmOdemePlaniUcretTipi primary key (Id)
+   constraint  pk_OnmOdemePlaniTalepTipi primary key (Id)
 )
 
-Delete from [Lkp].[OnmOdemePlaniUcretTipi]
-INSERT INTO [Lkp].[OnmOdemePlaniUcretTipi] (Id, UcretTipi)
+Delete from [Lkp].[OnmOdemePlaniTalepTipi]
+INSERT INTO [Lkp].[OnmOdemePlaniTalepTipi] (Id, TalepTipi)
  VALUES 
-  ( 0,    N''),
-  ( 1000,    N'ÖnMuhasebe Modülü'),
-  ( 2000,    N'Eğitim Modülü'),
-  ( 2100,    N'Mtsk Modülü'),
-  ( 2110,    N'Mtsk Sertifika Ücreti'),   -- join = MtskAday tablosu
-  ( 2111,    N'Mtsk Teorik Sınav Ücreti'),
-  ( 2112,    N'Mtsk Uygulama Sınav Ücreti'),
-  ( 2113,    N'Mtsk Özel Teorik Ders Ücreti'),
-  ( 2114,    N'Mtsk Özel Uygulama Ders Ücreti')
+  ( 0,        N''),
+  ( 1000,     N'ÖnMuhasebe Modülü'),
+  ( 21101,    N'Sertifika'),
+  ( 21102,    N'2.+4 hak'),
+  ( 21103,    N'Nakil 2.+4 hak'),
+  ( 21104,    N'100 Ceza'),
+  ( 21105,    N'Özel direksiyon ders (Aday değil)'),
+  ( 21106,    N'Özel teorik ders'),
+  ( 21111,    N'e-Sınav ücreti'),
+  ( 21112,    N'Uygulama sınav ücreti'),
+  ( 21113,    N'Başarısız eğitim ücreti')
   
 -- ------------------------------------------------------- 
 -- TaksitTipiId

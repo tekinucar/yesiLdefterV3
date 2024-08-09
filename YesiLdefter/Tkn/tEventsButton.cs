@@ -300,8 +300,8 @@ namespace Tkn_Events
 
             if (buttonType == v.tButtonType.btCikis) // (buttonName == "cikis") 
             {
-                if (v.cefBrowser_ != null)
-                    v.cefBrowser_.Parent = null;
+                //if (v.cefBrowser_ != null)
+                //    v.cefBrowser_.Parent = null;
                 tForm.Close();
                 return onay;
             }
@@ -891,7 +891,8 @@ namespace Tkn_Events
                     //dN.Buttons.DoClick(btn);
                     //return true;
 
-                    v.con_Cancel = true;
+                    //v.con_Cancel = true;  bunu yüzünden subview çalışmıyor 
+
                     NavigatorButton btnR = dN.Buttons.Remove;
                     dN.Buttons.DoClick(btnR);
                 }

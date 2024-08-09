@@ -5,12 +5,11 @@ begin transaction
  create table MtskAdaySertifika
  (
    Id                    Int IDENTITY(1,1) not null, 
-   FirmId                Int       not null,
-   IsActive              Bit       not null, 
-   TalepId               Int       not null, 
-   AdayId                Int       not null, 
-   TcNo                  Varchar(11)   null,
-   DonemTipiId           Int           null,
+   FirmId                Int       not null, -- 2
+   TalepId               Int       not null, -- 4
+   AdayId                Int       not null, -- 5
+   TcNo                  Varchar(11)   null, -- 6
+   DonemTipiId           Int           null, -- 7
   
    --10 sertifika aşaması
    SertifikaAlmayiHakKazandi Bit           null, -- hak kazandı   : false/true
@@ -53,8 +52,7 @@ AS BEGIN
 
     FETCH NEXT FROM curSertifika INTO @curId
  
-	declare @yFirmId int = 0
-
+    declare @eTalepId int = 0
 	declare @eAdayId int = 0
 	declare @eTcNo varchar(11) = ''
 	--declare @eSertifikaAlmayiHakKazandi bit  = 0
@@ -62,6 +60,8 @@ AS BEGIN
 	declare @eSertifikaDonemTipiId int = 0
 	declare @eSertifikaNo varchar(20)
 
+	declare @yFirmId int = 0
+	declare @yTalepId int = 0
 	declare @yAdayId int = 0
 	declare @yTcNo varchar(11) = ''
 	declare @ySertifikaAlmayiHakKazandi bit  = 0
@@ -73,8 +73,9 @@ AS BEGIN
     WHILE @@FETCH_STATUS = 0
     BEGIN
 	    
-		select 
-    	  @eAdayId = isnull(dlt.AdayId,0)
+		select
+		  @eTalepId = isnull(dlt.talepId,0)
+    	, @eAdayId = isnull(dlt.AdayId,0)
 	    , @eTcNo = isnull(dlt.TcNo,'')
 		--, @eSertifikaAlmayiHakKazandi = isnull(dlt.SertifikaAlmayiHakKazandi,0)
 		--, @eSertifikaTarihi = dlt.SertifikaTarihi 
@@ -86,6 +87,7 @@ AS BEGIN
 
         select 
           @yFirmId = ins.FirmId
+        , @yTalepId = ins.TalepId
     	, @yAdayId = isnull(ins.AdayId,0)
 	    , @yTcNo = isnull(ins.TcNo,'')
 		, @ySertifikaAlmayiHakKazandi = isnull(ins.SertifikaAlmayiHakKazandi,0)
@@ -100,9 +102,9 @@ AS BEGIN
                set @ySertifikaDonemTipiId = convert(int, convert(varchar(5), YEAR(@ySertifikaTarihi)) + '0' + convert(varchar(3), MONTH(@ySertifikaTarihi)))
           else set @ySertifikaDonemTipiId = convert(int, convert(varchar(5), YEAR(@ySertifikaTarihi)) + convert(varchar(3), MONTH(@ySertifikaTarihi)))
 
-		if ((@yAdayId = 0) and (@yTcNo <> ''))
+		if ((@yTalepId = 0) and (@yTcNo <> ''))
 		begin
-           Select top 1 @yAdayId = Id  From MtskAday
+           Select top 1 @yTalepId = Id  From MtskAdayTalep
            Where TcNo = @yTcNo
            and   DonemTipiId <= @ySertifikaDonemTipiId
            order by DonemTipiId desc
@@ -116,24 +118,24 @@ AS BEGIN
 		    (@ySertifikaNo = '') and
 		    (@yDuzenlemeTarihi is not null)) set @yDuzenlemeTarihi = null
 
-		if ((@eAdayId <> @yAdayId) or
+		if ((@eTalepId <> @yTalepId) or
 		    (@eTcNo <> @yTcNo) or
 			(@eSertifikaDonemTipiId <> @ySertifikaDonemTipiId))
         begin 
 		   Update MtskAdaySertifika set
-		     AdayId = @yAdayId
+		     TalepId = @yTalepId
            , TcNo = @yTcNo 
 		   , SertifikaDonemTipiId = @ySertifikaDonemTipiId
 		   , DuzenlemeTarihi = @yDuzenlemeTarihi
 		   Where Id = @curId
 		end
 
-		if ((@yAdayId > 0) and 
+		if ((@yTalepId > 0) and 
 		    (@ySertifikaAlmayiHakKazandi = 1))
         begin
-           Update MtskAday set KayitTipiId = 4 -- Sertifikayı hak kazandı
-		   Where FirmId = @yFirmId
-           and   Id = @yAdayId
+           Update MtskAdayTalep 
+		   set KayitTipiId = 4 -- Sertifikayı hak kazandı
+		   Where Id = @yTalepId
 		end
 
         FETCH NEXT FROM curSertifika INTO @curId

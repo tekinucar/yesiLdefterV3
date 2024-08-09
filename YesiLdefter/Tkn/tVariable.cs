@@ -1196,8 +1196,8 @@ namespace Tkn_Variable
 
 
         public static bool cefBrowserLoading = false;
-        public static CefSharp.WinForms.ChromiumWebBrowser cefBrowser_ = null;
-        public static CefSharp.WinForms.Host.ChromiumHostControl cefHostControl_ = null;
+        //public static CefSharp.WinForms.ChromiumWebBrowser cefBrowser_ = null;
+        //public static CefSharp.WinForms.Host.ChromiumHostControl cefHostControl_ = null;
 
         public static OpenQA.Selenium.IWebDriver webDriver_ = null;
         public static string tWebLoginPageCode = "MEBBISLOGIN"; // bunu öndeğerlere bağlaman gerekiyor
@@ -1307,7 +1307,7 @@ namespace Tkn_Variable
         }
         public v.tBrowserType browserType { get; set; }
         public OpenQA.Selenium.IWebDriver wbSel { get; set; }
-        public CefSharp.WinForms.ChromiumWebBrowser wbCef { get; set; }
+        //public CefSharp.WinForms.ChromiumWebBrowser wbCef { get; set; }
         public string aktifPageCode { get; set; }
         public string talepEdilenUrl { get; set; }
         public string talepEdilenUrl2 { get; set; }
@@ -2425,6 +2425,7 @@ namespace Tkn_Variable
         public string CAPTION { get; set; }
         public string SUBVIEW_VALUE { get; set; }
         public string SUBVIEW_TABLEIPCODE { get; set; }
+        public string SUBVIEW_FORMCODE { get; set; }
         public string SHOWMENU_PAGENAME { get; set; }
     }
 
