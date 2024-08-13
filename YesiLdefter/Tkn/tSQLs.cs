@@ -1400,7 +1400,6 @@ INSERT INTO [dbo].[SYS_UPDATES]
             if (t.IsNotNull(KeyFName) == false)
                 KeyFName = t.Find_Table_Ref_FieldName(dsFields.Tables[0]);
 
-
             string SchemasDot = "";
             string Schemas = t.Set(row["LKP_SCHEMAS_CODE"].ToString(), "", "null");
             if (t.IsNotNull(Schemas))
@@ -1422,6 +1421,11 @@ INSERT INTO [dbo].[SYS_UPDATES]
             string Data_Find = t.Set(row["DATA_FIND"].ToString(), "", ""); /* 0= Find yok, 1. standart, 2. List&Data   */
             string Find_FName = t.Set(row["FIND_FNAME"].ToString(), "", "");
             string AutoInsert = t.Set(row["AUTO_INSERT"].ToString(), "", "");
+            bool IsUseNewRefId = t.Set(row["IS_USE_NEW_REFID"].ToString(), "", false);
+            string UseNewRefId = "";
+
+            if (IsUseNewRefId)
+                UseNewRefId = " and " + TableLabel + "." + KeyFName + " = -1 ";
 
             string Prop_SubView = t.Set(row["PROP_SUBVIEW"].ToString(), row["LKP_PROP_SUBVIEW"].ToString(), "");
             #region Prop_SubView (Kendi altında SUBVIEW var ise)
@@ -1597,7 +1601,7 @@ INSERT INTO [dbo].[SYS_UPDATES]
                     {
                         Preparing_RefID_JSON(dsFields,
                                              ref NewSQL, ref TargetValue, ref DataCopyCode,
-                                             TableIPCode, TableLabel, form_prp, Data_Read_Type);
+                                             TableIPCode, TableLabel, form_prp, UseNewRefId, Data_Read_Type);
                     }
                 }
 
@@ -1707,6 +1711,13 @@ INSERT INTO [dbo].[SYS_UPDATES]
                 }
                 #endregion // Where_IP_Add add
 
+                #region // UseNewRefId add
+                if (t.IsNotNull(UseNewRefId))
+                {
+                    NewSQL = t.SQLWhereAdd(NewSQL, TableLabel, UseNewRefId + v.ENTER, "DEFAULT");
+                }
+                #endregion // UseNewRefId add
+
                 #region // Where_Lines add
                 if (t.IsNotNull(Where_Lines))
                 {
@@ -1728,7 +1739,7 @@ INSERT INTO [dbo].[SYS_UPDATES]
                         {
                             Preparing_RefID_JSON(dsFields,
                                                  ref NewSQL, ref TargetValue, ref DataCopyCode,
-                                                 TableIPCode, TableLabel, form_prp, Data_Read_Type);
+                                                 TableIPCode, TableLabel, form_prp, UseNewRefId, Data_Read_Type);
                         }
                     }
                     else
@@ -1818,6 +1829,7 @@ INSERT INTO [dbo].[SYS_UPDATES]
             t.MyProperties_Set(ref myProp, "DataFind", Data_Find);
             t.MyProperties_Set(ref myProp, "FindFName", Find_FName);
             t.MyProperties_Set(ref myProp, "AutoInsert", AutoInsert);
+            t.MyProperties_Set(ref myProp, "IsUseNewRefId", IsUseNewRefId.ToString());
             t.MyProperties_Set(ref myProp, "OrderBy", OrderBy);
             t.MyProperties_Set(ref myProp, "JoinFields", join_Fields); // "LkpFields", Lkp_Fields);
             t.MyProperties_Set(ref myProp, "JoinTables", join_Tables); // "LkpTables", Lkp_Tables);
@@ -1889,6 +1901,7 @@ INSERT INTO [dbo].[SYS_UPDATES]
                      ref string DataCopyCode,
                      string Main_TableIPCode, string Main_TableLabel,
                      string form_prp,
+                     string UseNewRefId,
                      int Data_Read_Type)
         {
             // kendinden önceki formdan gelen bilgiler
@@ -1992,6 +2005,12 @@ INSERT INTO [dbo].[SYS_UPDATES]
                     if (t.IsNotNull(RefID))
                     {
                         NewSQL = t.SQLWhereAdd(NewSQL, TABLEALIAS, RefID, "DEFAULT");
+
+                        /// RefId ye bir Id yükleniyorsa UseNewRefId yi iptal etmek gerekiyor
+                        /// and [Alias].Id = -1   siliniyor 
+                        if (t.IsNotNull(UseNewRefId))
+                            NewSQL = NewSQL.Replace(UseNewRefId + v.ENTER, "");
+
 
                         if ((MSETVALUE == "0") || (WORKTYPE == "NEW"))
                             TargetValue = "NewRecord";

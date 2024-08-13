@@ -163,7 +163,7 @@ namespace Tkn_DefaultValue
                         //Control c = t.Find_Control(tForm, fname, "FIELDNAME", controls);
                         //if (c != null)
                         //{
-                        //    c.BackColor = v.Validate_New;
+                        //    c.BackColor = v.ColorValidation;
                         //}
                     }
 

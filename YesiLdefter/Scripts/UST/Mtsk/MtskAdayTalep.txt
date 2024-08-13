@@ -9,7 +9,7 @@ begin transaction
    FirmId                Int       not null,
    AdayId                Int       not null,
    IsActive              Bit       not null, 
-   AdayKayitTarihi       Date          null, 
+   TalepKayitTarihi       Date          null, 
    AdayNo                Int           null,
 
    -- 20
@@ -52,6 +52,9 @@ begin transaction
    
    OzelDersSaatSayisi      SmallInt      null, /* hem teo için hem uygulama için geçerli */
    BirSaatOzelDersUcreti   Numeric(22,5) null, /* hem teo için hem uygulama için geçerli */ 
+
+   UygulamaPersonelId      Int           null, /* aday direk bir personeli isteyebilir   */
+   UygPersCinsiyetTipiId   SmallInt      null, /* aday personelin cinsiyetini belirtebilir */
 
    -- 60
    /* Dönem bilgileri */

@@ -14374,16 +14374,11 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             if (OzelType == -1)
                 OzelType = fieldName.IndexOf("IlceKodu");
 
-
-            if (OzelType == -1)
-                OzelType = fieldName.IndexOf("UlkeTipi");
-            if (OzelType == -1)
-                OzelType = fieldName.IndexOf("Ulke");
             if (OzelType == -1)
                 OzelType = fieldName.IndexOf("Cinsiyet");
             if (OzelType == -1)
                 OzelType = fieldName.IndexOf("Sector");
-
+            /*
             if (tableName.ToUpper().IndexOf("MTSK") > -1)
             {
                 if (OzelType == -1)
@@ -14400,6 +14395,116 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                     OzelType = fieldName.IndexOf("SertifikaTipi");
                 if (OzelType == -1)
                     OzelType = fieldName.IndexOf("Brans");
+            }
+            */
+            if (orjinalTableName.ToUpper().IndexOf("MTSK") > -1)
+            {
+                if (orjinalFieldName.IndexOf("KurumOnay") > -1)
+                {
+                    idFieldName = "Id";
+                    fieldName = "OnayTipi";
+                    tableName = "MtskKurumOnayTipi";
+                    return;
+                }
+                if (orjinalFieldName.IndexOf("DonemTipi") > -1)
+                {
+                    idFieldName = "Id";
+                    fieldName = "DonemTipi";
+                    tableName = "MtskDonemTipi";
+                    return;
+                }
+                if (orjinalFieldName.IndexOf("GrupTipi") > -1)
+                {
+                    idFieldName = "Id";
+                    fieldName = "GrupTipi";
+                    tableName = "MtskGrupTipi";
+                    return;
+                }
+                if (orjinalFieldName.IndexOf("SertifikaGrupTipi") > -1)
+                {
+                    idFieldName = "Id";
+                    fieldName = "SertifikaGrupTipi";
+                    tableName = "EduMtskDerslerSertifikaGrupTipi";
+                    return;
+                }
+                if (orjinalFieldName.IndexOf("SubeTipi") > -1)
+                {
+                    idFieldName = "Id";
+                    fieldName = "SubeTipi";
+                    tableName = "MtskSubeTipi";
+                    return;
+                }
+                if (orjinalFieldName.IndexOf("SertifikaTipi") > -1)
+                {
+                    idFieldName = "Id";
+                    fieldName = "SertifikaTipi";
+                    tableName = "MtskSertifikaTipi";
+                    return;
+                }
+                if (orjinalFieldName.IndexOf("Brans") > -1)
+                {
+                    idFieldName = "Id";
+                    fieldName = "BransTipi";
+                    tableName = "MebBransTipi";
+                    return;
+                }
+            }
+
+
+            if (fieldName.IndexOf("UlkeTipiIds") > -1)
+            {
+                idFieldName = "UlkeKodu";
+                fieldName = "UlkeKodu";
+                tableName = "UlkeTipi";
+                return;
+            }
+            if (fieldName.IndexOf("UlkeTipiId") > -1)
+            {
+                idFieldName = "Id";
+                fieldName = "UlkeKodu";
+                tableName = "UlkeTipi";
+                return;
+            }
+            if (fieldName.IndexOf("Cinsiyet") > -1)
+            {
+                idFieldName = "Id";
+                fieldName = "CinsiyetTipi";
+                tableName = "CinsiyetTipi";
+                return;
+            }
+            if ((fieldName.IndexOf("IlKodu") > -1) ||
+                (fieldName.IndexOf("City") > -1))
+            {
+                idFieldName = "IlKodu";
+                fieldName = "IlAdiBUYUK";
+                tableName = "ILTipi";
+                return;
+            }
+            if (fieldName.IndexOf("KdvOrani") > -1)
+            {
+                idFieldName = "Id";
+                fieldName = "KdvOraniAdi";
+                tableName = "OnmKdvOraniTipi";
+                return;
+            }
+            if (fieldName.IndexOf("Para") > -1)
+            {
+                idFieldName = "ParaKodu";
+                fieldName = "ParaAdi";
+                tableName = "OnmParaTipi";
+                return;
+            }
+            if (fieldName.ToUpper().IndexOf("SECTOR") > -1)
+            {
+                // (MsProjectTablesSectorTypeId ve
+                //  MsProjectProceduresSectorTypeId ve
+                //  MsProjectFunctionsSectorTypeId ) = MsSectorType
+                //  veya 
+                //  UstadFirmsSectorTypeId gibi
+                idFieldName = "Id";
+                fieldName = "SectorType";
+                tableName = "MsSectorType";
+                return;
             }
 
 
@@ -14454,107 +14559,11 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 // BirimAdi oluştu
                 fieldName = fieldName + "Adi";
 
-                if (fieldName.IndexOf("Cinsiyet") > -1)
-                {
-                    idFieldName = "Id";
-                    fieldName = "CinsiyetTipi";
-                    tableName = "CinsiyetTipi";
-                }
-
-
-                if ((fieldName.IndexOf("IlKodu") > -1) ||
-                    (fieldName.IndexOf("City") > -1))
-
-                {
-                    idFieldName = "IlKodu";
-                    fieldName = "IlAdiBUYUK";
-                    tableName = "ILTipi";
-                }
 
                 if (fieldName.IndexOf("Birim") > -1)
                 {
                     tableName = "OnmStokBirimTipi";
                 }
-
-                if (fieldName.IndexOf("KdvOrani") > -1)
-                {
-                    idFieldName = "Id";
-                    fieldName = "KdvOraniAdi";
-                    tableName = "OnmKdvOraniTipi";
-                }
-
-                if (fieldName.IndexOf("Para") > -1)
-                {
-                    idFieldName = "ParaKodu";
-                    fieldName = "ParaAdi";
-                    tableName = "OnmParaTipi";
-                }
-
-
-                if (fieldName.ToUpper().IndexOf("SECTOR") > -1)
-                {
-                    // (MsProjectTablesSectorTypeId ve
-                    //  MsProjectProceduresSectorTypeId ve
-                    //  MsProjectFunctionsSectorTypeId ) = MsSectorType
-                    //  veya 
-                    //  UstadFirmsSectorTypeId gibi
-                    idFieldName = "Id";
-                    fieldName = "SectorType";
-                    tableName = "MsSectorType";
-                    /*
-                    if ((orjinalTableName.ToUpper().IndexOf("MSPROJECT") > -1) ||
-                        (orjinalTableName.ToUpper() == "MSSECTORTYPE"))
-                        tableName = "MsSectorType";
-                    else tableName = orjinalTableName + fieldName;
-                    */
-                }
-
-                if (orjinalTableName.ToUpper().IndexOf("MTSK") > -1)
-                {
-                    if (fieldName.IndexOf("KurumOnay") > -1)
-                    {
-                        idFieldName = "Id";
-                        fieldName = "OnayTipi";
-                        tableName = "MtskKurumOnayTipi";
-                    }
-                    if (orjinalFieldName.IndexOf("DonemTipi") > -1)
-                    {
-                        idFieldName = "Id";
-                        fieldName = "DonemTipi";
-                        tableName = "MtskDonemTipi";
-                    }
-                    if (orjinalFieldName.IndexOf("GrupTipi") > -1)
-                    {
-                        idFieldName = "Id";
-                        fieldName = "GrupTipi";
-                        tableName = "MtskGrupTipi";
-                    }
-                    if (orjinalFieldName.IndexOf("SertifikaGrupTipi") > -1)
-                    {
-                        idFieldName = "Id";
-                        fieldName = "SertifikaGrupTipi";
-                        tableName = "EduMtskDerslerSertifikaGrupTipi";
-                    }
-                    if (orjinalFieldName.IndexOf("SubeTipi") > -1)
-                    {
-                        idFieldName = "Id";
-                        fieldName = "SubeTipi";
-                        tableName = "MtskSubeTipi";
-                    }
-                    if (orjinalFieldName.IndexOf("SertifikaTipi") > -1)
-                    {
-                        idFieldName = "Id";
-                        fieldName = "SertifikaTipi";
-                        tableName = "MtskSertifikaTipi";
-                    }
-                    if (orjinalFieldName.IndexOf("Brans") > -1)
-                    {
-                        idFieldName = "Id";
-                        fieldName = "BransTipi";
-                        tableName = "MebBransTipi";
-                    }
-                }
-
             }
         }
 

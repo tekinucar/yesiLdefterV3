@@ -42,10 +42,10 @@ namespace Tkn_DevColumn
             else List_Name = t.Set(Row["LIST_TYPES_NAME"].ToString(), "", "");
 
             //if (t.IsNotNull(List_Name) && (tLookUpField == false))
-            if (t.IsNotNull(List_Name) && (List_Name.IndexOf(" = ") == -1)) // IsActive = True  gibi koşullar varsa çalışmasın
+            if (t.IsNotNull(List_Name) && (List_Name.IndexOf("=") == -1)) // IsActive = True  gibi koşullar varsa çalışmasın
                 tRepositoryItem_Fill(ItemBox, null, null, null, null, null, List_Name, default_value, tview_type);
             //if (tLookUpField)
-            if ((tLookUpField) && ((t.IsNotNull(List_Name) == false) || (List_Name.IndexOf(" = ") > -1) || (List_Name.IndexOf("Lkp.") > -1)))
+            if ((tLookUpField) && ((t.IsNotNull(List_Name) == false) || (List_Name.IndexOf("=") > -1) || (List_Name.IndexOf("Lkp.") > -1)))
                 LookUpTableFill(Row, ItemBox, null, null, null, null, null);
         }
 
@@ -57,10 +57,10 @@ namespace Tkn_DevColumn
             bool tLookUpField = t.Set(Row["LKP_FLOOKUP_FIELD"].ToString(), "", false);
 
             //if (t.IsNotNull(List_Name) && (tLookUpField == false))
-            if (t.IsNotNull(List_Name) && (List_Name.IndexOf(" = ") == -1)) // IsActive = True  gibi koşullar varsa çalışmasın
+            if (t.IsNotNull(List_Name) && (List_Name.IndexOf("=") == -1)) // IsActive = True  gibi koşullar varsa çalışmasın
                 tRepositoryItem_Fill(null, ItemBox, null, null, null, null, List_Name, default_value, tview_type);
             //if (tLookUpField)
-            if ((tLookUpField) && ((t.IsNotNull(List_Name) == false) || (List_Name.IndexOf(" = ") > -1) || (List_Name.IndexOf("Lkp.") > -1)))
+            if ((tLookUpField) && ((t.IsNotNull(List_Name) == false) || (List_Name.IndexOf("=") > -1) || (List_Name.IndexOf("Lkp.") > -1)))
                 LookUpTableFill(Row, null, ItemBox, null, null, null, null);
         }
 
@@ -1804,8 +1804,10 @@ namespace Tkn_DevColumn
 
                 if (vld_operator > 11)
                 {
-                    Column.AppearanceCell.BackColor = v.Validate_New;
-                    Column.AppearanceCell.Options.UseBackColor = true;
+                    //Column.AppearanceCell.BackColor = v.ColorValidation;
+                    //Column.AppearanceCell.Options.UseBackColor = true;
+                    Column.AppearanceCell.BorderColor = v.ColorValidation;
+                    Column.AppearanceCell.Options.UseBorderColor = true;
                 }
 
                 if (tenabled == false)
@@ -2505,7 +2507,7 @@ namespace Tkn_DevColumn
 
                 if (vld_operator > 11)
                 {
-                    Column.Appearance.BackColor = v.Validate_New;
+                    Column.Appearance.BackColor = v.ColorValidation;
                     Column.Appearance.Options.UseBackColor = true;
                 }
 
@@ -3422,7 +3424,8 @@ namespace Tkn_DevColumn
 
                 if (Column.ToString() == s)
                 {
-                    ((LayoutControlItem)Column).TextVisible = false; // caption olamsın
+                    //((LayoutControlItem)Column).TextVisible = false; // caption olmasın
+                    //((LayoutControlItem)Column).TextLocation = DevExpress.Utils.Locations.Top;
                     ((LayoutControlItem)Column).Control = Create_UserPictureControl(tEdit, FormName, TableIPCode, tFieldName, ImagesMasterTableIPCode);
                 }
                 else ((Control)Column).Controls.Add(Create_UserPictureControl(tEdit, FormName, TableIPCode, tFieldName, ImagesMasterTableIPCode));
@@ -3785,65 +3788,68 @@ namespace Tkn_DevColumn
             {
                 if ((tcolumn_type == "ButtonEdit") ||
                     (tcolumn_type == "tSearchEdit"))
-                    ((DevExpress.XtraEditors.ButtonEdit)tEdit).BackColor = v.Validate_New;
+                    ((DevExpress.XtraEditors.ButtonEdit)tEdit).BackColor = v.ColorValidation;
                 if (tcolumn_type == "CalcEdit")
-                    ((DevExpress.XtraEditors.CalcEdit)tEdit).BackColor = v.Validate_New;
+                    ((DevExpress.XtraEditors.CalcEdit)tEdit).BackColor = v.ColorValidation;
                 if (tcolumn_type == "CheckButton")
-                    ((DevExpress.XtraEditors.CheckButton)tEdit).BackColor = v.Validate_New;
+                    ((DevExpress.XtraEditors.CheckButton)tEdit).BackColor = v.ColorValidation;
                 if (tcolumn_type == "CheckedComboBoxEdit")
-                    ((DevExpress.XtraEditors.CheckedComboBoxEdit)tEdit).BackColor = v.Validate_New;
+                    ((DevExpress.XtraEditors.CheckedComboBoxEdit)tEdit).BackColor = v.ColorValidation;
                 if (tcolumn_type == "CheckEdit")
-                    ((DevExpress.XtraEditors.CheckEdit)tEdit).BackColor = v.Validate_New;
+                    ((DevExpress.XtraEditors.CheckEdit)tEdit).BackColor = v.ColorValidation;
                 if (tcolumn_type == "CheckedListBoxControl")
-                    ((DevExpress.XtraEditors.CheckedListBoxControl)tEdit).BackColor = v.Validate_New;
+                    ((DevExpress.XtraEditors.CheckedListBoxControl)tEdit).BackColor = v.ColorValidation;
                 if (tcolumn_type == "ComboBoxEdit")
-                    ((DevExpress.XtraEditors.ComboBoxEdit)tEdit).BackColor = v.Validate_New;
+                    ((DevExpress.XtraEditors.ComboBoxEdit)tEdit).BackColor = v.ColorValidation;
                 if (tcolumn_type == "DateEdit")
-                    ((DevExpress.XtraEditors.DateEdit)tEdit).BackColor = v.Validate_New;
+                    ((DevExpress.XtraEditors.DateEdit)tEdit).BackColor = v.ColorValidation;
                 if (tcolumn_type == "HyperLinkEdit")
-                    ((DevExpress.XtraEditors.HyperLinkEdit)tEdit).BackColor = v.Validate_New;
+                    ((DevExpress.XtraEditors.HyperLinkEdit)tEdit).BackColor = v.ColorValidation;
                 if ((tcolumn_type == "ImageComboBoxEdit") ||
                     (tcolumn_type == "tImageComboBoxEdit2Button") ||
                     (tcolumn_type == "tImageComboBoxEditSEC") ||
                     (tcolumn_type == "tImageComboBoxEditSubView")
                     )
-                    ((DevExpress.XtraEditors.ImageComboBoxEdit)tEdit).BackColor = v.Validate_New;
+                    ((DevExpress.XtraEditors.ImageComboBoxEdit)tEdit).BackColor = v.ColorValidation;
                 if (tcolumn_type == "ImageEdit")
-                    ((DevExpress.XtraEditors.ImageEdit)tEdit).BackColor = v.Validate_New;
+                    ((DevExpress.XtraEditors.ImageEdit)tEdit).BackColor = v.ColorValidation;
                 if (tcolumn_type == "ImageListBoxControl")
-                    ((DevExpress.XtraEditors.ImageListBoxControl)tEdit).BackColor = v.Validate_New;
+                    ((DevExpress.XtraEditors.ImageListBoxControl)tEdit).BackColor = v.ColorValidation;
                 if (tcolumn_type == "LabelControl")
-                    ((DevExpress.XtraEditors.LabelControl)tEdit).BackColor = v.Validate_New;
+                    ((DevExpress.XtraEditors.LabelControl)tEdit).BackColor = v.ColorValidation;
                 if (tcolumn_type == "ListBoxControl")
-                    ((DevExpress.XtraEditors.ListBoxControl)tEdit).BackColor = v.Validate_New;
+                    ((DevExpress.XtraEditors.ListBoxControl)tEdit).BackColor = v.ColorValidation;
                 if (tcolumn_type == "LookUpEdit")
-                    ((DevExpress.XtraEditors.LookUpEdit)tEdit).BackColor = v.Validate_New;
+                    ((DevExpress.XtraEditors.LookUpEdit)tEdit).BackColor = v.ColorValidation;
                 if (tcolumn_type == "MemoEdit")
-                    ((DevExpress.XtraEditors.MemoEdit)tEdit).BackColor = v.Validate_New;
+                    ((DevExpress.XtraEditors.MemoEdit)tEdit).BackColor = v.ColorValidation;
                 if (tcolumn_type == "MemoExEdit")
-                    ((DevExpress.XtraEditors.MemoExEdit)tEdit).BackColor = v.Validate_New;
+                    ((DevExpress.XtraEditors.MemoExEdit)tEdit).BackColor = v.ColorValidation;
                 if (tcolumn_type == "MRUEdit")
-                    ((DevExpress.XtraEditors.MemoExEdit)tEdit).BackColor = v.Validate_New;
+                    ((DevExpress.XtraEditors.MemoExEdit)tEdit).BackColor = v.ColorValidation;
                 if (tcolumn_type == "PictureEdit")
-                    ((DevExpress.XtraEditors.PictureEdit)tEdit).BackColor = v.Validate_New;
+                    ((DevExpress.XtraEditors.PictureEdit)tEdit).BackColor = v.ColorValidation;
                 if (tcolumn_type == "PopupContainerControl")
-                    ((DevExpress.XtraEditors.PopupContainerControl)tEdit).BackColor = v.Validate_New;
+                    ((DevExpress.XtraEditors.PopupContainerControl)tEdit).BackColor = v.ColorValidation;
                 if (tcolumn_type == "PopupContainerEdit")
-                    ((DevExpress.XtraEditors.PopupContainerEdit)tEdit).BackColor = v.Validate_New;
+                    ((DevExpress.XtraEditors.PopupContainerEdit)tEdit).BackColor = v.ColorValidation;
                 if (tcolumn_type == "RadioGroup")
-                    ((DevExpress.XtraEditors.RadioGroup)tEdit).BackColor = v.Validate_New;
+                    ((DevExpress.XtraEditors.RadioGroup)tEdit).BackColor = v.ColorValidation;
                 if (tcolumn_type == "RangeTrackBarControl")
-                    ((DevExpress.XtraEditors.RangeTrackBarControl)tEdit).BackColor = v.Validate_New;
+                    ((DevExpress.XtraEditors.RangeTrackBarControl)tEdit).BackColor = v.ColorValidation;
                 if (tcolumn_type == "SpinEdit")
-                    ((DevExpress.XtraEditors.SpinEdit)tEdit).BackColor = v.Validate_New;
+                    ((DevExpress.XtraEditors.SpinEdit)tEdit).BackColor = v.ColorValidation;
                 if (tcolumn_type == "TextEdit")
-                    ((DevExpress.XtraEditors.TextEdit)tEdit).BackColor = v.Validate_New;
+                {
+                    ((DevExpress.XtraEditors.TextEdit)tEdit).BackColor = v.ColorValidation;
+                    // direk olarak desteklemiyor : LookAndFeel.Style'ı Flat değerine ayarlayın ve UseDefaultLookAndFeel özelliğini kapatın
+                    //((DevExpress.XtraEditors.TextEdit)tEdit).Properties.Appearance.BorderColor = v.ColorValidation;
+                    //((DevExpress.XtraEditors.TextEdit)tEdit).Properties.Appearance.Options.UseBorderColor = true;
+                }
                 if (tcolumn_type == "TimeEdit")
-                    ((DevExpress.XtraEditors.TimeEdit)tEdit).BackColor = v.Validate_New;
+                    ((DevExpress.XtraEditors.TimeEdit)tEdit).BackColor = v.ColorValidation;
                 if (tcolumn_type == "TrackBarControl")
-                    ((DevExpress.XtraEditors.TrackBarControl)tEdit).BackColor = v.Validate_New;
-
-
+                    ((DevExpress.XtraEditors.TrackBarControl)tEdit).BackColor = v.ColorValidation;
 
                 #region dxValidationProvider denemesi
                 /*

@@ -25,7 +25,7 @@ begin transaction
   /* MahalleKoy(50) + CaddeSokak(50) + DisKapi(30) + IcKapi(20) = 150 > 120  */
   YarimAdres     nVarchar(120) null, 
   
-  UlkeTipiId     nVarchar(25) null,
+  UlkeTipiIds    nVarchar(25) null,  /* UlkeTipiIds : s iþaretiyle ülke Id yerine ulke adýyla kaydedilecek  */
   IlTipiId       Varchar(3)  null,
   IlceTipiId     Varchar(5)  null,
   MahalleKoyKodu Varchar(10) null,

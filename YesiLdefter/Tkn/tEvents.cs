@@ -1091,6 +1091,12 @@ namespace Tkn_Events
         {
             string value = ((DevExpress.XtraEditors.ButtonEdit)sender).EditValue.ToString();
 
+            if (v.con_SearchBackValue == value)
+            {
+                v.con_SearchBackValue = "";
+                return;
+            }
+
             /// Auto Search Start
             /// arama yaparken herhangi bir butona veya extra bir tşa basmadan otomatik Search ekranlarının açılması
             if ((value.Length >= v.searchStartCount) && (v.searchOnay == false))
@@ -1116,6 +1122,15 @@ namespace Tkn_Events
                     {
                         v.searchOnay = false;
                         System.Windows.Forms.SendKeys.Send("{ENTER}");
+                    }
+                    else
+                    {
+                        /// arama motorun aradığını bulamadı ve eli boş geri döndü
+                        /// arama için yazdığı kelimeyi aramanın başladığı yere ata
+                        ((DevExpress.XtraEditors.ButtonEdit)sender).EditValue = v.con_SearchBackValue;
+                        ((DevExpress.XtraEditors.ButtonEdit)sender).Refresh();
+                        ((DevExpress.XtraEditors.ButtonEdit)sender).SelectionStart = 100;// v.con_SearchBackValue.Length + 1;
+
                     }
                 }
             }
@@ -1507,8 +1522,9 @@ namespace Tkn_Events
 
         public void tXtraEdit_Leave(object sender, EventArgs e)
         {
-            ((DevExpress.XtraEditors.TextEdit)sender).Properties.Appearance.BackColor =
-                ((DevExpress.XtraEditors.TextEdit)sender).Properties.Appearance.BackColor2;
+            if (((DevExpress.XtraEditors.TextEdit)sender).Properties.Appearance.BackColor != v.ColorValidation)
+                ((DevExpress.XtraEditors.TextEdit)sender).Properties.Appearance.BackColor =
+                             ((DevExpress.XtraEditors.TextEdit)sender).Properties.Appearance.BackColor2;
 
             #region Expression
 
@@ -1529,7 +1545,6 @@ namespace Tkn_Events
             }
             #endregion Expression
 
-            
         }
 
         public void myBarcodeEdit_KeyUp(object sender, KeyEventArgs e)
@@ -5689,9 +5704,6 @@ namespace Tkn_Events
             }
             if (findType == 100) v.search_CARI_ARAMA_TD = v.search_onList;
             if (findType == 200) v.search_CARI_ARAMA_TD = v.search_inData;
-
-
-
         }
                 
         public void textEdit_Find_Leave(object sender, EventArgs e)
@@ -6045,7 +6057,6 @@ namespace Tkn_Events
                     }
                 }
                 #endregion
-
 
                 #region DevExpress.XtraBars.Ribbon.BackstageViewTabItem
                 if (c.GetType().ToString() == "DevExpress.XtraBars.Ribbon.BackstageViewClientControl")
@@ -6485,7 +6496,8 @@ namespace Tkn_Events
                 if (item.SUBVIEW_VALUE.IndexOf(readValue) > -1)
                 {
                     TableIPCode = item.SUBVIEW_TABLEIPCODE.ToString();
-                    FormCode = item.SUBVIEW_FORMCODE.ToString();
+                    if (item.SUBVIEW_FORMCODE != null)
+                        FormCode = item.SUBVIEW_FORMCODE.ToString();
 
                     if (t.IsNotNull(TableIPCode))
                     {

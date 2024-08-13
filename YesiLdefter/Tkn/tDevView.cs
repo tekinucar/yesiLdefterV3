@@ -4811,6 +4811,7 @@ MS_FIELDS                                          T03_MSFIELDS                 
             string function_name = "tDataLayoutControl Columns_Create";
             string tfield_name = string.Empty;
             string tcaption = string.Empty;
+            string thint = string.Empty;
             string tTableLabel = string.Empty;
             string tfieldname = string.Empty;
             string tcolumn_type = string.Empty;
@@ -4891,6 +4892,7 @@ MS_FIELDS                                          T03_MSFIELDS                 
                 if (tvisible)
                 {
                     tcaption = t.Set(Row["FCAPTION"].ToString(), Row["LKP_FCAPTION"].ToString(), tfield_name);
+                    thint = t.Set(Row["FHINT"].ToString(), "", "");
                     tfield_name = t.Set(Row["LKP_FIELD_NAME"].ToString(), "", "null");
                     tfieldtype = t.Set(Row["LKP_FIELD_TYPE"].ToString(), "", (int)167);
                     tcolumn_type = t.Set(Row["CMP_COLUMN_TYPE"].ToString(), Row["LKP_CMP_COLUMN_TYPE"].ToString(), "TextEdit");
@@ -4915,6 +4917,19 @@ MS_FIELDS                                          T03_MSFIELDS                 
                     column.Name = "Column_" + tfield_name;
                     column.ParentName = TableIPCode;
                     column.Text = t.Set(Row["FCAPTION"].ToString(), Row["LKP_FCAPTION"].ToString(), tfield_name);
+
+                    // default top caption olsun
+                    if (tcolumn_type == "PictureEdit")
+                    {
+                        if (t.IsNotNull(thint) == false)
+                            thint = "TOPCAPTION";
+                    }
+
+                    if ((thint == "TOPCAPTION") || (thint == "CAPTIONTOP"))
+                        column.TextLocation = DevExpress.Utils.Locations.Top;
+                    if ((thint == "NOTCAPTION") || (thint == "CAPTIONNOT"))
+                        column.TextVisible = false;
+
                     //column.FillControlToClientArea = false;
                     //column.Control.MaximumSize = new System.Drawing.Size(width+200, 20);
                     //column.ControlAlignment = System.Drawing.ContentAlignment.MiddleCenter;

@@ -268,7 +268,6 @@ namespace YesiLdefter
                 //t.SYS_Glyph_Read();
 
                 preparingMenus();
-
                 
                 /// Ustad Crm ve TabimMtsk değil ise DbUpdates çalışacak
                 /// TabimMtsk ya ait güncellemeler ise ms_TabimMtsk.cs içinde çalışıyor
@@ -278,8 +277,6 @@ namespace YesiLdefter
                     t.dbUpdatesChecked();
 
                 setMainFormCaption();
-
-                
             }
         }
 

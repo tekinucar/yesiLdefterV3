@@ -728,10 +728,7 @@ namespace Tkn_Events
                 return onay;
             }
             #endregion ek1,ek2 butonları
-
-                        
-
-
+            
             return onay;
         }
 
@@ -1169,10 +1166,10 @@ namespace Tkn_Events
             return onay;
         }
 
-        private bool readData_(Form tForm, TABLEIPCODE_LIST item)
+        public bool readData_(Form tForm, TABLEIPCODE_LIST item)
         {
-            return true;
-            /* şimdilik işe yaramıyor
+            //return true;
+            // şimdilik işe yaramıyor
             string workType = string.Empty;
             string targetTABLEIPCODE = string.Empty;
             string targetKEYFNAME = string.Empty;
@@ -1200,7 +1197,7 @@ namespace Tkn_Events
                 }
             }
             return onay;
-            */
+            
         }
 
         private bool readAndSetData_(Form tForm, TABLEIPCODE_LIST item)
@@ -3286,7 +3283,13 @@ namespace Tkn_Events
 
                         /// kullanıcı arama yaptı ve uygun data bulunmadıysa
                         /// işlem yapmasın
-                        if (tGridHint.focusedRow == null) return;
+                        //if (tGridHint.focusedRow == null) return;
+                        if (tGridHint.focusedRow == null)
+                        {
+                            v.con_SearchBackValue = ((DevExpress.XtraEditors.TextEdit)sender).EditValue.ToString();
+                            tForm.Dispose();
+                            return;
+                        }
                     }
                 }
 

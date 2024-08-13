@@ -11,7 +11,6 @@ namespace Tkn_TablesRead
 
         public void MS_Tables_IP_Read(DataSet ds, string TableIPCode)
         {
-            string function_name = "MS_Tables_IP_Read";
             string tSql = string.Empty;
 
             tToolBox t = new tToolBox();

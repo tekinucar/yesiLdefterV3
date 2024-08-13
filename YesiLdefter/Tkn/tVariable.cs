@@ -805,7 +805,7 @@ namespace Tkn_Variable
 
 
 
-        public static Color Validate_New = Color.LightGoldenrodYellow; //Yellow; //Color.LightGoldenrodYellow;
+        public static Color ColorValidation = Color.LightGoldenrodYellow; 
         public static Color Validate_Ok = Color.GreenYellow;
         public static Color Validate_Not = Color.MistyRose;
         public static Color AppearanceFocusedColor = Color.MediumSpringGreen;
@@ -933,6 +933,7 @@ namespace Tkn_Variable
         public static string search_STOK_ARAMA_TD = "";
         public static string con_Search_NullText { get; set; }
         public static string con_SearchValue = string.Empty;
+        public static string con_SearchBackValue = string.Empty;
         public static string con_SearchValueCopy = string.Empty;
         public static string con_SearchTableIPCode = string.Empty;
         public static string search_readTableIPCode = "";

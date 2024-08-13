@@ -16,7 +16,6 @@ begin transaction
    SaglikRaporuSonuc           nVarchar(30)   null,
    SaglikRaporuTarihi          Date           null,
    SaglikRaporuSayisi          nVarchar(30)   null,
-   HESKodu                     nVarchar(15)   null,
    OzurDurumuTipiId            SmallInt       null,
    OkutmanTalebi               Bit            null,
    TercumanTalebi              Bit            null,

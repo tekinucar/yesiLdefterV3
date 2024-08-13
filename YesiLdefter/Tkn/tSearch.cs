@@ -782,9 +782,12 @@ namespace Tkn_Events
                 bool editing = false;
                 string readValue = string.Empty;
 
-                DataSet dsData = null;
-                DataNavigator tDataNavigator = null;
-                t.Find_DataSet(tForm, ref dsData, ref tDataNavigator, TargetTableIPCode);
+                //DataSet dsData = null;
+                //DataNavigator tDataNavigator = null;
+                //t.Find_DataSet(tForm, ref dsData, ref tDataNavigator, TargetTableIPCode);
+                DataSet dsTarget = null;
+                DataNavigator dNTarget = null;
+                t.Find_DataSet(tForm, ref dsTarget, ref dNTarget, TargetTableIPCode);
 
                 #region GetFieldList
                 if (GetFieldList != null)
@@ -796,7 +799,7 @@ namespace Tkn_Events
                         MSETVALUE = item.MSETVALUE.ToString();
                         try
                         {
-                            dsData.Tables[0].Rows[tDataNavigator.Position][targetFName] = v.con_DataRow[sourceFName];
+                            dsTarget.Tables[0].Rows[dNTarget.Position][targetFName] = v.con_DataRow[sourceFName];
                             editing = true;
                         }
                         catch (Exception)
@@ -819,7 +822,46 @@ namespace Tkn_Events
                         sourceFName = item.RKEYFNAME.ToString();
                         MSETVALUE = item.MSETVALUE.ToString();
                         WORKTYPE = item.WORKTYPE.ToString();
-                                                
+
+                        if (WORKTYPE == "READ")
+                        {
+                            //tEventsButton evb = new tEventsButton();
+                            //onay = evb.readData_(tForm, item);
+                            try
+                            {
+                                readValue = v.con_DataRow[sourceFName].ToString();
+
+                            }
+                            catch (Exception)
+                            {
+                                readValue = "Err";
+                                MessageBox.Show("DİKKAT : Source ( " + sourceFName + " )  fieldName sorunlu ... Target fieldName : " + targetFName);
+                                //throw;
+                            }
+                                                        
+                            
+                            readValue = t.tCheckedValue(dsTarget, targetFName, readValue);
+
+                            if (t.IsNotNull(readValue))
+                            {
+                                //string targetTableIpCode = item.TABLEIPCODE;
+                                string myProp = dsTarget.Namespace.ToString();
+                                string TableLabel = t.MyProperties_Get(myProp, "TableLabel:");
+                                string KeyFName = t.MyProperties_Get(myProp, "KeyFName:"); 
+                                string IsUseNewRefId = t.MyProperties_Get(myProp, "IsUseNewRefId:");
+                                string SqlF = t.MyProperties_Get(myProp, "SqlFirst:");
+                                string SqlS = t.MyProperties_Get(myProp, "SqlSecond:");
+                                string SqlSOld = SqlS;
+                                string UseNewRefId = " and " + TableLabel + "." + KeyFName + " = -1 ";
+                                string UseReadRefId = " and " + TableLabel + "." + KeyFName + " = " + readValue + " ";
+                                t.Str_Replace(ref SqlS, UseNewRefId, UseReadRefId);
+                                t.Str_Replace(ref myProp, SqlSOld, SqlS);
+                                dsTarget.Namespace = myProp;
+                                t.TableRefresh(tForm, dsTarget);
+                                nextControl(tForm);
+                            }
+
+                        }
                         if (WORKTYPE == "SETDATA")
                         {
                             //dsData.Tables[0].Rows[tDataNavigator.Position][targetFName] = v.con_DataRow[sourceFName];
@@ -839,9 +881,9 @@ namespace Tkn_Events
                                 // readValue "" veya null olunca sorun oluyor
                                 // bu neden okunan (readValue) kontrol ediliyor, gerekli düzeltme yapılıyor öyle atanıyor
                                 // 
-                                readValue = t.tCheckedValue(dsData, targetFName, readValue);
+                                readValue = t.tCheckedValue(dsTarget, targetFName, readValue);
 
-                                dsData.Tables[0].Rows[tDataNavigator.Position][targetFName] = readValue;
+                                dsTarget.Tables[0].Rows[dNTarget.Position][targetFName] = readValue;
 
                                 uT_FNAME = targetFName;
                                 uR_FNAME = sourceFName;
@@ -869,12 +911,12 @@ namespace Tkn_Events
                 if (editing)
                 {
                     // atama önce kabul ediliyor
-                    dsData.Tables[0].AcceptChanges();
+                    dsTarget.Tables[0].AcceptChanges();
                     // tekrar Editlemek için en son yapılan atama tekrar yapılıyor
                     try
                     {
                         // 
-                        dsData.Tables[0].Rows[tDataNavigator.Position][uT_FNAME] = v.con_DataRow[uR_FNAME];
+                        dsTarget.Tables[0].Rows[dNTarget.Position][uT_FNAME] = v.con_DataRow[uR_FNAME];
                         //
                         onay = true;
                     }
