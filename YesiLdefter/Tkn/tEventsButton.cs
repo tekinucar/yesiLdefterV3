@@ -3307,7 +3307,8 @@ namespace Tkn_Events
                 if ((e.KeyCode == Keys.Enter) || (e.KeyCode == Keys.Return))
                 {
                     cntrl = t.Find_SimpleButton(tForm, "simpleButton_listeye_ekle", TableIPCode);
-                    if (cntrl != null)  v.tButtonHint.buttonType = v.tButtonType.btListeyeEkle;
+                    if (cntrl != null)  
+                        v.tButtonHint.buttonType = v.tButtonType.btListeyeEkle;
 
                     if (cntrl == null)
                     {
@@ -3319,7 +3320,7 @@ namespace Tkn_Events
                 propNavigator = t.getPropNavigator(v.tButtonHint.tForm, v.tButtonHint.tableIPCode);
                 v.tButtonHint.propNavigator = propNavigator;
                 v.tButtonHint.senderType = sender.GetType().ToString();
-
+                
                 //v.tButtonHint.Clear();
                 //v.tButtonHint.tForm = tForm;
                 //v.tButtonHint.tableIPCode = TableIPCode;
@@ -3328,6 +3329,7 @@ namespace Tkn_Events
                 //v.tButtonHint.columnEditValue = editValue;
                 //v.tButtonHint.senderType = sender.GetType().ToString();
                 //v.tButtonHint.checkedValue = editValue;
+                
                 btnClick(v.tButtonHint);
 
                 return;

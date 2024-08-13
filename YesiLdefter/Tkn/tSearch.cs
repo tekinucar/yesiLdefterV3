@@ -492,6 +492,7 @@ namespace Tkn_Events
             /// set Values 
             /// 
             if (v.searchSet)
+                
                 onay = setSearchEngineValues(tForm, targetTableIPCode, null, prop_.TABLEIPCODE_LIST);
             else onay = false;
             
@@ -521,8 +522,8 @@ namespace Tkn_Events
             /// 
             Application.OpenForms[formName].ActiveControl = searchControl;
             
+            
             System.Windows.Forms.SendKeys.Send("{ENTER}");
-
             v.con_SearchValue = "";
 
             #region
@@ -859,6 +860,7 @@ namespace Tkn_Events
                                 dsTarget.Namespace = myProp;
                                 t.TableRefresh(tForm, dsTarget);
                                 nextControl(tForm);
+                                onay = true;
                             }
 
                         }

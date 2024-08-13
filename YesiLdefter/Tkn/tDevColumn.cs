@@ -2745,7 +2745,7 @@ namespace Tkn_DevColumn
                 //tEdit.KeyDown += new KeyEventHandler(ev.buttonEdit_KeyDown);
                 tEdit.KeyPress += new KeyPressEventHandler(ev.buttonEdit_KeyPress);
                 //tEdit.KeyUp += new System.Windows.Forms.KeyEventHandler(evg.myRepositoryItemEdit_KeyDown);
-                tEdit.KeyDown += new System.Windows.Forms.KeyEventHandler(evg.myRepositoryItemEdit_KeyDown);
+                //tEdit.KeyDown += new System.Windows.Forms.KeyEventHandler(evg.myRepositoryItemEdit_KeyDown);
                 tEdit.Leave += new EventHandler(ev.buttonEdit_Leave);
                 tEdit.ButtonClick += new
                      DevExpress.XtraEditors.Controls.ButtonPressedEventHandler(ev.buttonEdit_ButtonClick);

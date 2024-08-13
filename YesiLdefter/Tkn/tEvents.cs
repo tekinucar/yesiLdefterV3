@@ -1120,8 +1120,9 @@ namespace Tkn_Events
 
                     if (v.searchOnay)
                     {
+                        ((DevExpress.XtraEditors.ButtonEdit)sender).Refresh();
                         v.searchOnay = false;
-                        System.Windows.Forms.SendKeys.Send("{ENTER}");
+                        //System.Windows.Forms.SendKeys.Send("{ENTER}");
                     }
                     else
                     {
