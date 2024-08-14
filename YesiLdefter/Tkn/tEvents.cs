@@ -1379,10 +1379,7 @@ namespace Tkn_Events
                         ((DevExpress.XtraEditors.TextEdit)sender).EditValue = "";
                     }
                 }
-
-
             }
-
         }
 
         private void ExpressionRun(Form tForm, string tableIPCode, string fieldName, string value)
@@ -3352,7 +3349,6 @@ namespace Tkn_Events
                                 //tView.ApplyFindFilter(sp.con_SearchValue);
                                 //tView
                             }
-
                         }
                     }
                     #endregion diğer işlemler

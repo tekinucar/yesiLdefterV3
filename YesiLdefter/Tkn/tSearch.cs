@@ -425,6 +425,9 @@ namespace Tkn_Search
 
         public bool searchEngines(Form tForm, string targetTableIPCode, string searchValue, PROP_NAVIGATOR prop_)
         {
+            /// EditText ve ButtonEdit lerin changeValue olması veya
+            /// ButonEdit lerdeki butonların tetiklenmesi buraya geliniyor
+
             if (prop_ == null) return false;
 
             tToolBox t = new tToolBox();
@@ -488,7 +491,6 @@ namespace Tkn_Search
             bool onay = false;
             
             Form tSearchForm = createSearchForm(prop_);
-
             /// Open SearchForm
             /// 
             t.DialogForm_View(tSearchForm, FormWindowState.Normal);
@@ -525,9 +527,9 @@ namespace Tkn_Search
             /// Nihayi çalışır hali bu
             /// 
             Application.OpenForms[formName].ActiveControl = searchControl;
+                        
+            //System.Windows.Forms.SendKeys.Send("{ENTER}");
             
-            
-            System.Windows.Forms.SendKeys.Send("{ENTER}");
             v.con_SearchValue = "";
 
             #region
@@ -558,8 +560,6 @@ namespace Tkn_Search
             }
             */
             #endregion
-
-
         }
 
         private Form createSearchForm(PROP_NAVIGATOR prop_)
@@ -941,6 +941,8 @@ namespace Tkn_Search
 
             v.IsWaitOpen = false;
             t.WaitFormClose();
+            
+            v.con_SearchValueCopy = "";
 
             // True ise aranan bulundu
             v.tSearch.IsSearchFound = onay;
