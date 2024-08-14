@@ -1834,7 +1834,7 @@ INSERT INTO [dbo].[SYS_UPDATES]
             t.MyProperties_Set(ref myProp, "JoinFields", join_Fields); // "LkpFields", Lkp_Fields);
             t.MyProperties_Set(ref myProp, "JoinTables", join_Tables); // "LkpTables", Lkp_Tables);
             t.MyProperties_Set(ref myProp, "KeyFName", KeyFName);
-            t.MyProperties_Set(ref myProp, "KeyIDValue", "0");
+            t.MyProperties_Set(ref myProp, "KeyIdValue", "-1");
             t.MyProperties_Set(ref myProp, "Kisitlama", Kisitlama);
             t.MyProperties_Set(ref myProp, "ForeingID", ForeingID);
             t.MyProperties_Set(ref myProp, "Where_IP_Add", Where_IP_Add);

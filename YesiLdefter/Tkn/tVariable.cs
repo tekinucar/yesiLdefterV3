@@ -921,22 +921,6 @@ namespace Tkn_Variable
         public static string vt_USER_SHOP_LIST = "";
 
         
-        public static bool searchOnay = false;
-        public static bool searchSet = false;
-        public static bool searchEnter = true;
-        public static int searchCount = 0;
-        public static int searchStartCount = 1; /* 1 ile 5 arası kullanıcı ayarlasın */
-        public static string SearchEngine = "SearchEngine";
-        public static string search_onList = "onList";
-        public static string search_inData = "inData";
-        public static string search_CARI_ARAMA_TD = search_inData; //search_onList;//
-        public static string search_STOK_ARAMA_TD = "";
-        public static string con_Search_NullText { get; set; }
-        public static string con_SearchValue = string.Empty;
-        public static string con_SearchBackValue = string.Empty;
-        public static string con_SearchValueCopy = string.Empty;
-        public static string con_SearchTableIPCode = string.Empty;
-        public static string search_readTableIPCode = "";
         #endregion
 
         #region Keys
@@ -1191,6 +1175,8 @@ namespace Tkn_Variable
         public static vButtonHint tButtonHint = new vButtonHint();
         // resim editorunu açarken gerekli olan bilgiler
         public static vResimEditor tResimEditor = new vResimEditor();
+        // search hakkında
+        public static searchForm tSearch = new searchForm();
 
         public static vMsFileUpdate tMsFileUpdate = new vMsFileUpdate();
         public static vMsDbUpdate tMsDbUpdate = new vMsDbUpdate();
@@ -1263,6 +1249,50 @@ namespace Tkn_Variable
             Set
         }
 
+
+        public static bool searchOnay = false;
+        public static bool searchSet = false;
+        public static bool searchEnter = true;
+        public static int searchCount = 0;
+        //public static int searchStartCount = 1; /* 1 ile 5 arası kullanıcı ayarlasın */
+        public static string search_onList = "onList";
+        public static string search_inData = "inData";
+        public static string search_CARI_ARAMA_TD = search_inData; //search_onList;//
+        public static string search_STOK_ARAMA_TD = "";
+        public static string con_Search_NullText { get; set; } //+
+        public static string con_SearchValue = string.Empty; //+
+        //public static string con_SearchBackValue = string.Empty;//++
+        public static string con_SearchValueCopy = string.Empty;
+        public static string con_SearchTableIPCode = string.Empty;
+        public static string search_readTableIPCode = "";
+
+
+    }
+
+    public class searchForm
+    {
+        public searchForm()
+        {
+            Clear();
+        }
+        public bool IsRun { get; set; } // çalışıyor / çalışmıyor
+        public bool IsSearchFound { get; set; }
+        public string searchEngine = "SearchEngine";
+        public string searchNullText { get; set; }
+        public string searchValue { get; set; }
+        public string searchInputValue { get; set; }
+        public string searchOutputValue { get; set; }
+        public int searchStartCount { get; set; }
+        public void Clear()
+        {
+            IsRun = false;
+            IsSearchFound = false;
+            searchNullText = "";
+            searchValue = "";
+            searchInputValue = "";
+            searchOutputValue = "";
+            searchStartCount = 1;
+        }
     }
 
     public class webWorkPageNodes
@@ -1360,7 +1390,6 @@ namespace Tkn_Variable
             talepPageTop = 0;
         }
     }
-
     public class saveVariables
     {
         public saveVariables()
@@ -1475,7 +1504,6 @@ namespace Tkn_Variable
             position = 0;
         }
     }
-
     public class vMsFileUpdate
     {
         public vMsFileUpdate()
@@ -1501,7 +1529,6 @@ namespace Tkn_Variable
             about = "";
         }
     }
-
     public class vMsDbUpdate
     {
         public vMsDbUpdate()

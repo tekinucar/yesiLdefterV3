@@ -13726,7 +13726,61 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
         #endregion Open Exe / Execute
 
         #region Order
+        public bool IsSearchControl(object sender)
+        {
+            bool onay = false;
+            string funcName = "";
+            string myProp = "";
+            string tableIPCode = "";
+            string senderType = sender.GetType().ToString();
+            Form tForm = null;
 
+            if (senderType == "DevExpress.XtraEditors.ButtonEdit")
+            {
+                tableIPCode = ((DevExpress.XtraEditors.ButtonEdit)sender).Properties.AccessibleName;
+                myProp = ((DevExpress.XtraEditors.ButtonEdit)sender).Properties.AccessibleDescription;
+                tForm = ((DevExpress.XtraEditors.ButtonEdit)sender).FindForm();
+            }
+
+            
+            funcName = MyProperties_Get(myProp, "Type:");
+
+            if (funcName == v.tSearch.searchEngine)
+            {
+                onay = true;
+
+                // btArama / search işlemi başlasın
+                if (myProp != "")
+                {
+                    PROP_NAVIGATOR prop_ = null;
+                    List<PROP_NAVIGATOR> propList_ = null;
+                    v.tButtonType propButtonType = v.tButtonType.btNone;
+
+                    readProNavigator(myProp, ref prop_, ref propList_);
+
+                    if (propList_ != null)
+                    {
+                        tEvents ev = new tEvents();
+                        tEventsButton evb = new tEventsButton();
+                        foreach (PROP_NAVIGATOR item in propList_)
+                        {
+                            if (item.BUTTONTYPE.ToString() != "null")
+                            {
+                                propButtonType = ev.getClickType(Convert.ToInt32(item.BUTTONTYPE.ToString()));
+                            }
+                            if (v.tButtonType.btArama == propButtonType)
+                            {
+                                
+                                onay = evb.CheckValue(tForm, item, tableIPCode);
+                            }
+                        }
+                    }
+                }
+
+
+            }
+            return onay;
+        }
         public string tReadTextFile(string fileName)
         {
             //fname = v.EXE_ScriptsPath + "\\" + tableName + ".txt";

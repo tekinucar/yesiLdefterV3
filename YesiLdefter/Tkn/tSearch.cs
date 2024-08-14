@@ -13,19 +13,23 @@ using Tkn_Variable;
 using Tkn_Events;
 using Tkn_Forms;
 using Tkn_Layout;
+using Tkn_CreateObject;
 
-namespace Tkn_Events
+namespace Tkn_Search
 {
 
     public class tSearch : tBase
     {
-        tEvents ev = new tEvents();
+        //tToolBox t = new tToolBox();
+        //tEvents ev = new tEvents();
 
         #region directSearch
 
         public bool directSearch(vButtonHint buttonHint)
         {
+            tToolBox t = new tToolBox();
             tEventsButton evb = new tEventsButton();
+            tEvents ev = new tEvents();
 
             bool onay = false;
             bool oncekiOnay = false;
@@ -41,7 +45,6 @@ namespace Tkn_Events
         
             // arama motorunun IP si
             string searchTableIPCode = "";
-            tToolBox t = new tToolBox();
             List<PROP_NAVIGATOR> prop_ = t.readPropList<PROP_NAVIGATOR>(myProp);
             v.tButtonType propButtonType = v.tButtonType.btNone;
 
@@ -461,7 +464,8 @@ namespace Tkn_Events
 
             /// sadece SearchTableIPCode var ise 
             if (t.IsNotNull(SearchTableIPCode) && (t.IsNotNull(SearchFormCode) == false))
-                onay = searchEngineByTableIPCode(tForm, prop_, targetTableIPCode); // SearchTableIPCode);
+                
+            onay = searchEngineByTableIPCode(tForm, prop_, targetTableIPCode); // SearchTableIPCode);
 
             /// sadece SearchFormCode var ise 
             //if ((t.IsNotNull(SearchTableIPCode) == false) && t.IsNotNull(SearchFormCode))
@@ -491,8 +495,8 @@ namespace Tkn_Events
                         
             /// set Values 
             /// 
+            
             if (v.searchSet)
-                
                 onay = setSearchEngineValues(tForm, targetTableIPCode, null, prop_.TABLEIPCODE_LIST);
             else onay = false;
             
@@ -759,6 +763,7 @@ namespace Tkn_Events
             List<TABLEIPCODE_LIST> TableIPCodeList)
         {
             tToolBox t = new tToolBox();
+            tEvents ev = new tEvents();
 
             /// Seçilen DataRow 
             ///
@@ -783,9 +788,6 @@ namespace Tkn_Events
                 bool editing = false;
                 string readValue = string.Empty;
 
-                //DataSet dsData = null;
-                //DataNavigator tDataNavigator = null;
-                //t.Find_DataSet(tForm, ref dsData, ref tDataNavigator, TargetTableIPCode);
                 DataSet dsTarget = null;
                 DataNavigator dNTarget = null;
                 t.Find_DataSet(tForm, ref dsTarget, ref dNTarget, TargetTableIPCode);
@@ -831,7 +833,6 @@ namespace Tkn_Events
                             try
                             {
                                 readValue = v.con_DataRow[sourceFName].ToString();
-
                             }
                             catch (Exception)
                             {
@@ -839,7 +840,6 @@ namespace Tkn_Events
                                 MessageBox.Show("DİKKAT : Source ( " + sourceFName + " )  fieldName sorunlu ... Target fieldName : " + targetFName);
                                 //throw;
                             }
-                                                        
                             
                             readValue = t.tCheckedValue(dsTarget, targetFName, readValue);
 
@@ -850,17 +850,20 @@ namespace Tkn_Events
                                 string TableLabel = t.MyProperties_Get(myProp, "TableLabel:");
                                 string KeyFName = t.MyProperties_Get(myProp, "KeyFName:"); 
                                 string IsUseNewRefId = t.MyProperties_Get(myProp, "IsUseNewRefId:");
+                                string KeyIdValue = t.MyProperties_Get(myProp, "KeyIdValue:");
                                 string SqlF = t.MyProperties_Get(myProp, "SqlFirst:");
                                 string SqlS = t.MyProperties_Get(myProp, "SqlSecond:");
                                 string SqlSOld = SqlS;
-                                string UseNewRefId = " and " + TableLabel + "." + KeyFName + " = -1 ";
+                                string UseOldRefId = " and " + TableLabel + "." + KeyFName + " = " + KeyIdValue + " ";
                                 string UseReadRefId = " and " + TableLabel + "." + KeyFName + " = " + readValue + " ";
-                                t.Str_Replace(ref SqlS, UseNewRefId, UseReadRefId);
-                                t.Str_Replace(ref myProp, SqlSOld, SqlS);
+                                                                
+                                t.Str_Replace(ref SqlS, UseOldRefId, UseReadRefId);
+                                t.Str_Replace(ref myProp, "SqlSecond:" + SqlSOld, "SqlSecond:" + SqlS);
+                                t.Str_Replace(ref myProp, "KeyIdValue:" + KeyIdValue, "KeyIdValue:" + readValue);
+
                                 dsTarget.Namespace = myProp;
-                                t.TableRefresh(tForm, dsTarget);
+                                onay = t.TableRefresh(tForm, dsTarget);
                                 nextControl(tForm);
-                                onay = true;
                             }
 
                         }
@@ -870,7 +873,6 @@ namespace Tkn_Events
                             try
                             {
                                 readValue = v.con_DataRow[sourceFName].ToString();
-                                
                             }
                             catch (Exception)
                             {
@@ -897,7 +899,6 @@ namespace Tkn_Events
                                 //throw;
                             }
                         }
-
                         if (WORKTYPE == "IBOX")
                         {
                             tEventsButton evb = new tEventsButton();
@@ -941,6 +942,9 @@ namespace Tkn_Events
             v.IsWaitOpen = false;
             t.WaitFormClose();
 
+            // True ise aranan bulundu
+            v.tSearch.IsSearchFound = onay;
+            v.tSearch.IsRun = false;
             return onay;
         }
 
@@ -958,6 +962,7 @@ namespace Tkn_Events
             /// arama listesi üzerinde, gidip yeniden set focus olmasını sağlamak
 
             tToolBox t = new tToolBox();
+            tEvents ev = new tEvents();
 
             string s = string.Empty;
             string T_FNAME = string.Empty;
@@ -1029,9 +1034,6 @@ namespace Tkn_Events
 
         }
 
-
-
-
         #endregion Search Engine / Arama Motoru
 
         #region findListDataEngines
@@ -1092,5 +1094,228 @@ namespace Tkn_Events
         }
 
         #endregion findListDataEngines
+
+        #region new SearchFunctions  
+        public void searchEditValueChanged(object sender, EventArgs e)
+        {
+            string senderType = sender.GetType().ToString();
+            
+            if (senderType == "DevExpress.XtraEditors.ButtonEdit")
+            {
+                string value = ((DevExpress.XtraEditors.ButtonEdit)sender).EditValue.ToString();
+                
+                if (v.tSearch.searchOutputValue == value)
+                {
+                    v.tSearch.searchOutputValue = "";
+                    return;
+                }
+
+                if ((value.Length >= v.tSearch.searchStartCount) && (v.tSearch.IsRun == false))
+                {
+                    DevExpress.XtraEditors.Controls.ButtonPredefines button = 
+                        DevExpress.XtraEditors.Controls.ButtonPredefines.Search;
+
+                    buttonEdit_ButtonClick_(sender, button);
+
+                    if (v.tSearch.IsSearchFound) //(v.searchOnay)
+                    {
+                        ((DevExpress.XtraEditors.ButtonEdit)sender).Refresh();
+                        //v.searchOnay = false;
+                        //System.Windows.Forms.SendKeys.Send("{ENTER}");
+                    }
+                    else
+                    {
+                        /// arama motorun aradığını bulamadı ve eli boş geri döndü
+                        /// arama için yazdığı kelimeyi aramanın başladığı yere ata
+                        ((DevExpress.XtraEditors.ButtonEdit)sender).EditValue = v.tSearch.searchOutputValue; // v.con_SearchBackValue;
+                        ((DevExpress.XtraEditors.ButtonEdit)sender).Refresh();
+                        ((DevExpress.XtraEditors.ButtonEdit)sender).SelectionStart = 100;// v.con_SearchBackValue.Length + 1;
+                    }
+                }
+            }
+        }
+
+        public void buttonEdit_ButtonClick_(object sender, DevExpress.XtraEditors.Controls.ButtonPredefines button)
+        {
+            tToolBox t = new tToolBox();
+            tEvents ev = new tEvents();
+
+            string TableIPCode = string.Empty;
+            string senderType = sender.GetType().ToString();
+            string myProp = ((DevExpress.XtraEditors.ButtonEdit)sender).Properties.AccessibleDescription;
+            string editValue = "";
+            string funcName = "";
+
+            if (t.IsNotNull(myProp))
+            {
+                v.tButtonType buttonType = v.tButtonType.btNone;
+
+                #region Find Form
+                Form tForm = null;
+
+                if (senderType == "DevExpress.XtraEditors.ImageComboBoxEdit")
+                {
+                    TableIPCode = ((DevExpress.XtraEditors.ImageComboBoxEdit)sender).Properties.AccessibleName;
+                    tForm = ((DevExpress.XtraEditors.ImageComboBoxEdit)sender).FindForm();
+                }
+
+                if (senderType == "DevExpress.XtraEditors.ButtonEdit")
+                {
+                    TableIPCode = ((DevExpress.XtraEditors.ButtonEdit)sender).Properties.AccessibleName;
+                    tForm = ((DevExpress.XtraEditors.ButtonEdit)sender).FindForm();
+                }
+
+                if (senderType == "DevExpress.XtraEditors.SimpleButton")
+                {
+                    TableIPCode = ((DevExpress.XtraEditors.SimpleButton)sender).AccessibleName;
+                    tForm = ((DevExpress.XtraEditors.SimpleButton)sender).FindForm();
+                }
+
+                #endregion
+
+                //Type: SearchEngine;[
+                //   {
+                //     "CAPTION": "Search",
+                //     "BUTTONTYPE": "58",
+                //     "TABLEIPCODE_LIST": [
+
+                myProp = myProp.Replace((char)34, (char)39);
+
+                funcName = t.MyProperties_Get(myProp, "Type:");
+
+                #region Search_Engines and Buttons
+                if ((funcName == v.tSearch.searchEngine) || (funcName == v.ButtonEdit))
+                {
+                    if (senderType == "DevExpress.XtraEditors.ImageComboBoxEdit")
+                    {
+                        /// atama yapılacak değer GET_FIELD_LIST={ içinden tespit edilmeli ama hangisi ?
+                        /// aslında gerekte yok, çünkü gelen değer  editvalue  
+                        v.con_Value_Old = string.Empty;
+                    }
+
+                    if (senderType == "DevExpress.XtraEditors.ButtonEdit")
+                    {
+                        //v.con_Value_Old = "";
+                        //v.con_SearchValue = "";
+
+                        buttonType = ev.getClickType(myProp);
+
+                        if (button == DevExpress.XtraEditors.Controls.ButtonPredefines.Search)
+                        {
+                            if (funcName == v.tSearch.searchEngine)
+                                buttonType = v.tButtonType.btArama;
+
+                            if (funcName == v.ButtonEdit)
+                                buttonType = v.tButtonType.btGoster;
+                        }
+
+                        if ((button == DevExpress.XtraEditors.Controls.ButtonPredefines.Ellipsis) &&
+                            (funcName == v.ButtonEdit))
+                            buttonType = v.tButtonType.btKartAc;
+
+                        if ((button == DevExpress.XtraEditors.Controls.ButtonPredefines.Plus) &&
+                            (funcName == v.ButtonEdit))
+                            buttonType = v.tButtonType.btYeniKart;
+
+                        if (buttonType == v.tButtonType.btArama)
+                        {
+                            if (((DevExpress.XtraEditors.ButtonEdit)sender).EditValue != null)
+                                v.tSearch.searchInputValue = ((DevExpress.XtraEditors.ButtonEdit)sender).EditValue.ToString();
+                            
+                            //v.con_Value_Old = v.tSearch.searchInputValue; // editValue;
+                            //v.con_SearchValue = v.tSearch.searchInputValue; // editValue;
+                        }
+                    }
+                }
+                #endregion Search_Engines
+
+                #region Properties & Plus 
+                if ((funcName == v.Properties) ||
+                    (funcName == v.PropertiesPlus))
+                {
+                    string TableName = t.MyProperties_Get(myProp, "TableName:");
+                    string FieldName = t.MyProperties_Get(myProp, "FieldName:");
+                    string Width = t.MyProperties_Get(myProp, "Width:");
+
+                    string thisValue = ((DevExpress.XtraEditors.ButtonEdit)sender).EditValue.ToString();
+
+                    tCreateObject co = new tCreateObject();
+
+                    string NewValue = thisValue;
+
+                    if (funcName == v.Properties)
+                        NewValue = co.Create_PropertiesEdit_JSON(TableName, FieldName, Width, thisValue);
+
+                    if (funcName == v.PropertiesPlus)
+                        NewValue = co.Create_PropertiesPlusEdit_JSON(TableName, FieldName, Width, thisValue);
+
+                    ((DevExpress.XtraEditors.ButtonEdit)sender).EditValue = NewValue;
+                }
+                #endregion Properties & Plus 
+
+                #region PropertiesNav
+                if (funcName == v.PropertiesNav)
+                {
+                    string thisValue = ((DevExpress.XtraEditors.ButtonEdit)sender).EditValue.ToString();
+
+                    tCreateObject co = new tCreateObject();
+
+                    string NewValue = thisValue;
+
+                    NewValue = co.Create_PropertiesNavEdit(thisValue);
+
+                    ((DevExpress.XtraEditors.ButtonEdit)sender).EditValue = NewValue;
+                }
+                #endregion PropertiesNav 
+
+                if (buttonType != v.tButtonType.btNone)
+                {
+                    if (buttonType != v.tButtonType.btArama)
+                    {
+                        v.tButtonHint.Clear();
+                        v.tButtonHint.tForm = tForm;
+                        v.tButtonHint.tableIPCode = TableIPCode;
+                        v.tButtonHint.propNavigator = myProp;
+                        v.tButtonHint.buttonType = buttonType;
+                        v.tButtonHint.columnEditValue = editValue;
+                        v.tButtonHint.senderType = sender.GetType().ToString();
+                        v.tButtonHint.checkedValue = editValue;
+                        tEventsButton evb = new tEventsButton();
+                        evb.btnClick(v.tButtonHint);
+                    }
+                    else
+                    {
+                        // btArama / search işlemi başlasın
+                        if (myProp != "")
+                        {
+                            PROP_NAVIGATOR prop_ = null;
+                            List<PROP_NAVIGATOR> propList_ = null;
+                            v.tButtonType propButtonType = v.tButtonType.btNone;
+
+                            t.readProNavigator(myProp, ref prop_, ref propList_);
+
+                            if (propList_ != null)
+                            {
+                                foreach (PROP_NAVIGATOR item in propList_)
+                                {
+                                    if (item.BUTTONTYPE.ToString() != "null")
+                                    {
+                                        propButtonType = ev.getClickType(Convert.ToInt32(item.BUTTONTYPE.ToString()));
+                                    }
+                                    if (buttonType == propButtonType)
+                                    {
+                                        v.tSearch.IsRun = true;
+                                        searchEngines(tForm, TableIPCode, editValue, item);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+
+        #endregion new SearchFunctions 
     }
 }

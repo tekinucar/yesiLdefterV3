@@ -1220,7 +1220,7 @@ namespace Tkn_DevColumn
                 if ((tcolumn_type == "tSearchEdit") ||
                     (tcolumn_type == "tSearchEditOnly"))
                 {
-                    tProp_Navigator = "Type:" + v.SearchEngine + ";" + tProp_Navigator;
+                    tProp_Navigator = "Type:" + v.tSearch.searchEngine + ";" + tProp_Navigator;
                     tEdit.NullText = v.con_Search_NullText;
                 }
 
@@ -1474,7 +1474,7 @@ namespace Tkn_DevColumn
                     tBtn.Width = 30;
                     tBtn.Kind = DevExpress.XtraEditors.Controls.ButtonPredefines.Search;
 
-                    tProp_Navigator = "Type:" + v.SearchEngine + ";" + tProp_Navigator;
+                    tProp_Navigator = "Type:" + v.tSearch.searchEngine + ";" + tProp_Navigator;
                     tEdit.AccessibleDescription = tProp_Navigator;
 
                     tEdit.ReadOnly = true;
@@ -2046,7 +2046,7 @@ namespace Tkn_DevColumn
                     if ((tcolumn_type == "tSearchEdit") ||
                         (tcolumn_type == "tSearchEditOnly"))
                     {
-                        tProp_Navigator = "Type:" + v.SearchEngine + ";" + tProp_Navigator;
+                        tProp_Navigator = "Type:" + v.tSearch.searchEngine + ";" + tProp_Navigator;
                         tEdit.NullText = v.con_Search_NullText;
                     }
 
@@ -2243,7 +2243,7 @@ namespace Tkn_DevColumn
                     tBtn.Width = 30;
                     tBtn.Kind = DevExpress.XtraEditors.Controls.ButtonPredefines.Search;
 
-                    tProp_Navigator = "Type:" + v.SearchEngine + ";" + tProp_Navigator;
+                    tProp_Navigator = "Type:" + v.tSearch.searchEngine + ";" + tProp_Navigator;
                     tEdit.AccessibleDescription = tProp_Navigator;
 
                     tEdit.ReadOnly = true;
@@ -2774,7 +2774,7 @@ namespace Tkn_DevColumn
                 if ((tcolumn_type == "tSearchEdit") ||
                     (tcolumn_type == "tSearchEditOnly"))
                 {
-                    tProp_Navigator = "Type:" + v.SearchEngine + ";" + tProp_Navigator;
+                    tProp_Navigator = "Type:" + v.tSearch.searchEngine + ";" + tProp_Navigator;
                     tEdit.Properties.NullText = v.con_Search_NullText;
                     tEdit.Properties.AccessibleDescription = tProp_Navigator;
                     //tEdit.Properties.ReadOnly = true;
@@ -3128,7 +3128,7 @@ namespace Tkn_DevColumn
                 tEdit.Properties.AccessibleName = TableIPCode;
                 if (t.IsNotNull(tProp_Navigator))
                 {
-                    tProp_Navigator = "Type:" + v.SearchEngine + ";" + tProp_Navigator;
+                    tProp_Navigator = "Type:" + v.tSearch.searchEngine + ";" + tProp_Navigator;
                     tEdit.Properties.AccessibleDescription = tProp_Navigator;
                 }
 
@@ -4486,7 +4486,7 @@ namespace Tkn_DevColumn
                 if ((tcolumn_type == "tSearchEdit") ||
                     (tcolumn_type == "tSearchEditOnly"))
                 {
-                    tProp_Navigator = "Type:" + v.SearchEngine + ";" + tProp_Navigator;
+                    tProp_Navigator = "Type:" + v.tSearch.searchEngine + ";" + tProp_Navigator;
                     tEdit.NullText = v.con_Search_NullText;
                     tEdit.AccessibleDescription = tProp_Navigator;
 
@@ -4654,7 +4654,7 @@ namespace Tkn_DevColumn
                     tBtn.Width = 30;
                     tBtn.Kind = DevExpress.XtraEditors.Controls.ButtonPredefines.Search;
 
-                    tProp_Navigator = "Type:" + v.SearchEngine + ";" + tProp_Navigator;
+                    tProp_Navigator = "Type:" + v.tSearch.searchEngine + ";" + tProp_Navigator;
                     tEdit.AccessibleDescription = tProp_Navigator;
 
                     tEdit.ReadOnly = true;
@@ -4980,7 +4980,7 @@ namespace Tkn_DevColumn
                 #region tSearchEdit
                 if (tcolumn_type == "tSearchEdit")
                 {
-                    tProp_Navigator = "Type:" + v.SearchEngine + ";" + tProp_Navigator;
+                    tProp_Navigator = "Type:" + v.tSearch.searchEngine + ";" + tProp_Navigator;
                     tEdit.AccessibleDescription = tProp_Navigator;
                     tEdit.Buttons[0].Kind = DevExpress.XtraEditors.Controls.ButtonPredefines.Search;
                 }

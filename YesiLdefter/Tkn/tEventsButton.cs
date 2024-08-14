@@ -19,6 +19,7 @@ using Tkn_Forms;
 using Tkn_InputPanel;
 using Tkn_Report;
 using Tkn_Save;
+using Tkn_Search;
 using Tkn_ToolBox;
 using Tkn_Variable;
 
@@ -37,7 +38,6 @@ namespace Tkn_Events
             /// propList_     : List < PROP_NAVIGATOR > olabilir
             /// bunlar kontrol edilerek ona göre alt procedureler çalıştırılacak
             /// 
-                       
 
             bool onay = false;
             bool transactionRun = false;
@@ -2380,7 +2380,7 @@ namespace Tkn_Events
 
         }
 
-        private bool CheckValue(Form tForm, PROP_NAVIGATOR prop_item, string mst_TableIPCode)
+        public bool CheckValue(Form tForm, PROP_NAVIGATOR prop_item, string mst_TableIPCode)
         {
             //tToolBox t = new tToolBox();
 
@@ -3250,12 +3250,20 @@ namespace Tkn_Events
         {
             /// arama motorunu tetikleyen nesne üzerindeki ilk harfleri alıp
             /// açılan arama motoru sayfasındaki textEdit nesnesi üzerinde göstermeye çalışıyor
-            /// 
+            ///
+            /*
             if (v.con_SearchValueCopy != "")
             {
                 ((DevExpress.XtraEditors.TextEdit)sender).Text = v.con_SearchValueCopy + ((DevExpress.XtraEditors.TextEdit)sender).Text;
                 ((DevExpress.XtraEditors.TextEdit)sender).SelectionStart = ((DevExpress.XtraEditors.TextEdit)sender).Text.Length + 1;
                 v.con_SearchValueCopy = "";
+            }
+            */
+            if (v.tSearch.searchInputValue != "")
+            {
+                ((DevExpress.XtraEditors.TextEdit)sender).Text = v.tSearch.searchInputValue + ((DevExpress.XtraEditors.TextEdit)sender).Text;
+                ((DevExpress.XtraEditors.TextEdit)sender).SelectionStart = ((DevExpress.XtraEditors.TextEdit)sender).Text.Length + 1;
+                v.tSearch.searchInputValue = "";
             }
 
         }
@@ -3286,7 +3294,7 @@ namespace Tkn_Events
                         //if (tGridHint.focusedRow == null) return;
                         if (tGridHint.focusedRow == null)
                         {
-                            v.con_SearchBackValue = ((DevExpress.XtraEditors.TextEdit)sender).EditValue.ToString();
+                            v.tSearch.searchOutputValue = ((DevExpress.XtraEditors.TextEdit)sender).EditValue.ToString();
                             tForm.Dispose();
                             return;
                         }

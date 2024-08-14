@@ -24,6 +24,7 @@ using Tkn_Save;
 using Tkn_ToolBox;
 using Tkn_Variable;
 using Tkn_Registry;
+using Tkn_Search;
 
 namespace Tkn_Events
 {
