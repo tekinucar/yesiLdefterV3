@@ -1133,6 +1133,7 @@ namespace Tkn_Search
                         ((DevExpress.XtraEditors.ButtonEdit)sender).Refresh();
                         ((DevExpress.XtraEditors.ButtonEdit)sender).SelectionStart = 100;// v.con_SearchBackValue.Length + 1;
                     }
+                    v.tSearch.IsRun = false;
                 }
             }
         }
