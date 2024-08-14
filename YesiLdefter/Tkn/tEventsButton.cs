@@ -1971,6 +1971,8 @@ namespace Tkn_Events
 
         private bool aramaIslemi(Form tForm, string tableIPCode, PROP_NAVIGATOR prop_, string columnValue)
         {
+            /// Search form create
+            /// 
             tSearch se = new tSearch();
 
             v.searchOnay = false;

@@ -897,6 +897,7 @@ namespace Tkn_Events
                 v.tButtonType buttonType = v.tButtonType.btNone;
 
                 #region Find Form
+
                 Form tForm = null;
 
                 if (sender.GetType().ToString() == "DevExpress.XtraEditors.ImageComboBoxEdit")
@@ -923,12 +924,6 @@ namespace Tkn_Events
 
                 #endregion
 
-                //Type: SearchEngine;[
-                //   {
-                //     "CAPTION": "Search",
-                //     "BUTTONTYPE": "58",
-                //     "TABLEIPCODE_LIST": [
-
                 myProp = myProp.Replace((char)34, (char)39);
 
                 funcName = t.MyProperties_Get(myProp, "Type:");
@@ -947,27 +942,21 @@ namespace Tkn_Events
                     {
                         v.con_Value_Old = "";
                         v.con_SearchValue = "";
-
-                        //if (((DevExpress.XtraEditors.ButtonEdit)sender).Properties.Name.IndexOf("LKP_LISTEYE_EKLE") > -1)
-                        //    buttonType = v.tButtonType.btListeyeEkle;
+                        
                         buttonType = getClickType(myProp);
 
-                        //if ((e.Button.Kind == DevExpress.XtraEditors.Controls.ButtonPredefines.Search) &&
                         if ((button == DevExpress.XtraEditors.Controls.ButtonPredefines.Search) &&
                             (funcName == v.SearchEngine))
                             buttonType = v.tButtonType.btArama;
 
-                        //if ((e.Button.Kind == DevExpress.XtraEditors.Controls.ButtonPredefines.Search) &&
                         if ((button == DevExpress.XtraEditors.Controls.ButtonPredefines.Search) &&
                             (funcName == v.ButtonEdit))
                             buttonType = v.tButtonType.btGoster;
 
-                        //if ((e.Button.Kind == DevExpress.XtraEditors.Controls.ButtonPredefines.Ellipsis) &&
                         if ((button == DevExpress.XtraEditors.Controls.ButtonPredefines.Ellipsis) &&
                             (funcName == v.ButtonEdit))
                             buttonType = v.tButtonType.btKartAc;
 
-                        //if ((e.Button.Kind == DevExpress.XtraEditors.Controls.ButtonPredefines.Plus) &&
                         if ((button == DevExpress.XtraEditors.Controls.ButtonPredefines.Plus) &&
                             (funcName == v.ButtonEdit))
                             buttonType = v.tButtonType.btYeniKart;
@@ -976,22 +965,12 @@ namespace Tkn_Events
                         {
                             if (((DevExpress.XtraEditors.ButtonEdit)sender).EditValue != null)
                                 editValue = ((DevExpress.XtraEditors.ButtonEdit)sender).EditValue.ToString();
+
+                            v.con_Value_New = editValue;
                             v.con_Value_Old = editValue;
                             v.con_SearchValue = editValue;
                         }
                     }
-                    /*
-                    if (e.Button.Kind == DevExpress.XtraEditors.Controls.ButtonPredefines.Ellipsis)
-                    {
-                        // eğer value yoksa yeni kart aç
-                        if (editValue == "")
-                            buttonType = v.tButtonType.btYeniKart;
-                        
-                        // eğer value varsa kartı aç
-                        if (editValue != "")
-                            buttonType = v.tButtonType.btKartAc;
-                    }
-                    */
                 }
                 #endregion Search_Engines
 
@@ -1047,10 +1026,8 @@ namespace Tkn_Events
                     tEventsButton evb = new tEventsButton();
                     evb.btnClick(v.tButtonHint);
                 }
-
             }
         }
-
 
         public void ImageComboBoxEdit_ButtonClick(object sender, DevExpress.XtraEditors.Controls.ButtonPressedEventArgs e)
         {
@@ -1065,14 +1042,9 @@ namespace Tkn_Events
         
         public void buttonEdit_Enter(object sender, EventArgs e)
         {
-            //string function_name = "buttonEdit_Enter";
-            //sp.Takipci(function_name, "", '{');
-
-
             string func_name = string.Empty;
             string myProp = "";
 
-            //if (sender.GetType().ToString() == "DevExpress.XtraEditors.ButtonEdit")
             myProp = ((DevExpress.XtraEditors.ButtonEdit)sender).Properties.AccessibleDescription;
 
             func_name = t.MyProperties_Get(myProp, "Type:");
@@ -1083,8 +1055,6 @@ namespace Tkn_Events
                 if (((DevExpress.XtraEditors.ButtonEdit)sender).EditValue != null)
                     v.con_Value_New = ((DevExpress.XtraEditors.ButtonEdit)sender).EditValue.ToString();
             }
-
-            //sp.Takipci(function_name, "", '}');
         }
 
         public void buttonEdit_EditValueChanged(object sender, EventArgs e)
@@ -1107,17 +1077,19 @@ namespace Tkn_Events
 
                 if (func_name == v.SearchEngine)
                 {
-                    v.con_Value_New = "";
-                    
-                    if (((DevExpress.XtraEditors.ButtonEdit)sender).EditValue != null)
-                        v.con_Value_New = ((DevExpress.XtraEditors.ButtonEdit)sender).EditValue.ToString();
-                    
-                    v.con_SearchValue = v.con_Value_New;
+                    //v.con_Value_New = "";
+                    //if (((DevExpress.XtraEditors.ButtonEdit)sender).EditValue != null)
+                    //    v.con_Value_New = ((DevExpress.XtraEditors.ButtonEdit)sender).EditValue.ToString();
+                    //v.con_SearchValue = v.con_Value_New;
 
                     DevExpress.XtraEditors.Controls.ButtonPredefines button = DevExpress.XtraEditors.Controls.ButtonPredefines.Search;
 
+                    /// search form start
+                    /// 
                     buttonEdit_ButtonClick_(sender, button);
 
+                    /// search response
+                    /// 
                     if (v.searchOnay)
                     {
                         ((DevExpress.XtraEditors.ButtonEdit)sender).Refresh();
@@ -1131,7 +1103,6 @@ namespace Tkn_Events
                         ((DevExpress.XtraEditors.ButtonEdit)sender).EditValue = v.con_SearchBackValue;
                         ((DevExpress.XtraEditors.ButtonEdit)sender).Refresh();
                         ((DevExpress.XtraEditors.ButtonEdit)sender).SelectionStart = 100;// v.con_SearchBackValue.Length + 1;
-
                     }
                 }
             }
@@ -1590,10 +1561,7 @@ namespace Tkn_Events
                         ((DevExpress.XtraEditors.TextEdit)sender).EditValue = "";
                     }
                 }
-
-
             }
-
         }
 
         private void ExpressionRun(Form tForm, string tableIPCode, string fieldName, string value)
@@ -3563,7 +3531,6 @@ namespace Tkn_Events
                                 //tView.ApplyFindFilter(sp.con_SearchValue);
                                 //tView
                             }
-
                         }
                     }
                     #endregion diğer işlemler
