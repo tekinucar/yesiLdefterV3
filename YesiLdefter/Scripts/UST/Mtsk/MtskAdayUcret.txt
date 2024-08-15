@@ -22,22 +22,26 @@ begin transaction
    SertifikaUcreti         Numeric(22,5) null, /* il bazlı sertifika ücreti - readOnly */
    BirSaatOzelDersUcreti   Numeric(22,5) null, /* Özel ders için */
    AlacagiOzelDersSayisi   SmallInt      null, /* Özel ders için */
+   KontejanIndirimUcret    Numeric(22,5) null,
+   KontejanSonrasiUcret    Numeric(22,5) null,
+   
+   -- 30
    AnlasilanUcret          Numeric(22,5) null,
    IskontoOrani            Numeric(12,8) null,
    PesinatTutari           Numeric(22,5) null, 
    TaksitSayisiTipiId      SmallInt      null, /* 0.Peşin, 1 Ay, 2 Ay, 3 Ay .... */
    TaksitlendirilecekUcret Numeric(22,5) null, /* AnlasilanUcret - PesinatTutari */
-   -- 30
+   -- 40
    ESinavUcreti            Numeric(22,5) null,
    UygulamaSinavUcreti     Numeric(22,5) null,
    SertifikaVeSinavUcreti  Numeric(22,5) null, /* AnlasilanUcret + ESinavUcreti + UygulamaSinavUcreti */
    IsSinavUcretiTaksitli   Bit           null, /* Taksitlendirirken sinav ücretlerini birleştir */
-   -- 40
+   -- 50
    OdemeTipiId             SmallInt      null, /* 1. Kredi Kartı, 2. Nakit, 3. Banka Havalesi, 4. Senet, 5. Açık Hesap */
    OdemeBaslamaTarihi      Date          null,
    OdemeCepTelefonu        nVarchar(15)  null,  
 
-   -- 50 Mebbise bildirilecek ücretler
+   -- 60 Mebbise bildirilecek ücretler
    MebbisSertifikaUcreti      Numeric(22,5) null,
    MebbisTeoDersSaati         SmallInt      null, 
    Mebbis1SaatTeoDersUcreti   Numeric(22,5) null, 
@@ -45,14 +49,14 @@ begin transaction
    Mebbis1SaatUygDersUcreti   Numeric(22,5) null, 
       
 
-   -- 60 Mevcut borçlar
+   -- 70 Mevcut borçlar
    BorcSertifikaUcreti        Numeric(22,5) null,
    BorcESinavUcreti           Numeric(22,5) null,
    BorcUygulamaSinavUcreti    Numeric(22,5) null,
    BorcBasarisizEgitimUcreti  Numeric(22,5) null,
    BorcUcretlerToplami        Numeric(22,5) null,
 
-   -- 70 Vadesi geçmiş olan borçlar
+   -- 80 Vadesi geçmiş olan borçlar
    VGSertifikaUcreti          Numeric(22,5) null,
    VGESinavUcreti             Numeric(22,5) null,
    VGUygulamaSinavUcreti      Numeric(22,5) null,
