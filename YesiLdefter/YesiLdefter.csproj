@@ -566,6 +566,7 @@
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmHesapFinansKavramHaritasi.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmHesapFinansMaliyetGrubuKontrolu.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmMaliyetHesaplariTakibi.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmOdemePlaniOlustur.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\prc_OnmBelgeDekontOzetler.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\prc_OnmBelgeDekontTbmGelirHesaplari.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\prc_OnmBelgeDekontTbmGiderHesaplari.txt" />
@@ -701,7 +702,7 @@
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakip.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakipUygSinavKatilabilirOnayi.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakipUygSinavMebbisRandevuAktar.txt" />
-    <Content Include="Scripts\UST\OnMuhasebe\prc_OnmOdemePlaniOlustur.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\prc_OnmOdemePlaniOlustur_OLD.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MonthName.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayBelgeResimleri.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskDonemKontrolu.txt" />
@@ -2973,7 +2974,7 @@
       <IncludeHash>True</IncludeHash>
       <FileType>File</FileType>
     </PublishFile>
-    <PublishFile Include="Scripts\UST\OnMuhasebe\prc_OnmOdemePlaniOlustur.txt">
+    <PublishFile Include="Scripts\UST\OnMuhasebe\prc_OnmOdemePlaniOlustur_OLD.txt">
       <Visible>False</Visible>
       <Group>
       </Group>

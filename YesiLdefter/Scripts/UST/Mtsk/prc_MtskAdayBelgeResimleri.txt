@@ -1,6 +1,6 @@
 ﻿/*CreateProcedure*/
 
-CREATE PROCEDURE [dbo].[prc_MtskAdayBelgeResimleri] (@AdayId int, @DonemTipiId Int)  
+CREATE PROCEDURE [dbo].[prc_MtskAdayBelgeResimleri] (@TalepId int)  
 AS BEGIN
    
 --declare @AdayId Int = 1454
@@ -112,3 +112,127 @@ AS BEGIN
 END -- procedure
 
 /*CreateProcedureEnd*/
+
+
+
+
+yeni hali
+
+
+
+--alter table MtskAdayTalep add BasvuruResimSmall       VarBinary(max) null 
+
+  declare @TalepId Int = 200
+--declare @DonemTipiId Int = 202101
+  declare @AdayId int
+  declare @TamAdiSoyadi nvarchar(100)
+  declare @TcNo varchar(11)
+
+  Select  @AdayId = talep.AdayId, @TamAdiSoyadi = aday.TamAdiSoyadi, @TcNo = aday.TcNo
+  From MtskAdayTalep as talep, MtskAday as aday
+  Where talep.AdayId = aday.Id
+  and   talep.Id =@TalepId 
+
+  Select @TalepId as TalepId, Id as AdayId, TamAdiSoyadi, TcNo, 
+  'Biyometrik' as LkpImageType, 'Biyometrik' as LkpBelgeAdi, 
+  'MtskAday' as LkpTableName, 'BiyometrikResim' as LkpFieldName, 'BiyometrikResimSmall' as LkpSmallFieldName, 'Id' as LkpIdFieldName, 
+  BiyometrikResim as LkpImage, BiyometrikResimSmall as LkpSmallImage,
+  394 as LkpWidth,
+  512 as LkpHeight,
+  400 as LkpDpi
+
+  From MtskAday
+  Where Id = @AdayId
+
+  Union All
+
+  Select Id as TalepId, AdayId, @TamAdiSoyadi as TamAdiSoyadi, @TcNo as TcNo, 
+  'KiloByteKontrollu' as LkpImageType, 'Başvuru' as LkpBelgeAdi, 
+  'MtskAdayTalep' as LkpTableName, 'BasvuruResim' as LkpFieldName, 'BasvuruResimSmall' as LkpSmallFieldName, 'AdayId' as LkpIdFieldName, 
+  BasvuruResim as LkpImage, BasvuruResimSmall as LkpSmallImage,
+  800 as LkpWidth,
+  600 as LkpHeight,
+  96  as LkpDpi 
+  
+  From MtskAdayTalep
+  Where Id = @TalepId
+
+  Union All
+
+  Select TalepId, AdayId, @TamAdiSoyadi as TamAdiSoyadi, @TcNo as TcNo, 
+  'KiloByteKontrollu' as LkpImageType, 'Öğrenim Belgesi' as LkpBelgeAdi, 
+  'MtskAdayOgrenim' as LkpTableName, 'OgrenimBelgesiResim' as LkpFieldName, 'OgrenimBelgesiResimSmall' as LkpSmallFieldName, 'AdayId' as LkpIdFieldName, 
+  OgrenimBelgesiResim as LkpImage, OgrenimBelgesiResimSmall as LkpSmallImage,
+  800 as LkpWidth,
+  600 as LkpHeight,
+  96  as LkpDpi 
+  
+  From MtskAdayOgrenim
+  Where TalepId = @TalepId
+  
+  Union All
+
+  Select TalepId, AdayId, @TamAdiSoyadi as TamAdiSoyadi, @TcNo as TcNo, 
+  'KiloByteKontrollu' as LkpImageType, 'Sağlık Raporu' as LkpBelgeAdi, 
+  'MtskAdaySaglik' as LkpTableName, 'SaglikRaporuResim' as LkpFieldName, 'SaglikRaporuResimSmall' as LkpSmallFieldName, 'AdayId' as LkpIdFieldName, 
+  SaglikRaporuResim as LkpImage, SaglikRaporuResimSmall as LkpSmallImage,
+  800 as LkpWidth,
+  600 as LkpHeight,
+  96  as LkpDpi  
+  
+  From MtskAdaySaglik
+  Where TalepId = @TalepId
+
+  Union All
+
+  Select TalepId, AdayId, @TamAdiSoyadi as TamAdiSoyadi, @TcNo as TcNo, 
+  'KiloByteKontrollu' as LkpImageType, 'Adli Sicil Raporu' as LkpBelgeAdi, 
+  'MtskAdayAdliSicil' as LkpTableName, 'SavcilikBelgesiResim' as LkpFieldName, 'SavcilikBelgesiResimSmall' as LkpSmallFieldName, 'AdayId' as LkpIdFieldName, 
+  SavcilikBelgesiResim as LkpImage, SavcilikBelgesiResimSmall as LkpSmallImage,
+  800 as LkpWidth,
+  600 as LkpHeight,
+  96  as LkpDpi  
+  
+  From MtskAdayAdliSicil
+  Where TalepId = @TalepId
+
+  Union All
+
+  Select TalepId, AdayId, @TamAdiSoyadi as TamAdiSoyadi, @TcNo as TcNo, 
+  'KiloByteKontrollu' as LkpImageType, 'İmza' as LkpBelgeAdi, 
+  'MtskAdayImza' as LkpTableName, 'ImzaResim' as LkpFieldName, 'ImzaResimSmall' as LkpSmallFieldName, 'AdayId' as LkpIdFieldName, 
+  ImzaResim as LkpImage, ImzaResimSmall as LkpSmallImage,
+  472 as LkpWidth,
+  472 as LkpHeight,
+  400 as LkpDpi  
+  
+  From MtskAdayImza
+  Where TalepId = @TalepId
+
+  Union All
+
+  Select TalepId, AdayId, @TamAdiSoyadi as TamAdiSoyadi, @TcNo as TcNo, 
+  'KiloByteKontrollu' as LkpImageType, 'Sözleşme 1' as LkpBelgeAdi, 
+  'MtskAdaySozlesme' as LkpTableName, 'Sozlesme1Resim' as LkpFieldName, 'Sozlesme1ResimSmall' as LkpSmallFieldName, 'AdayId' as LkpIdFieldName, 
+  Sozlesme1Resim as LkpImage, Sozlesme1ResimSmall as LkpSmallImage,
+  653 as LkpWidth,
+  928 as LkpHeight,
+  96  as LkpDpi  
+  
+  From MtskAdaySozlesme
+  Where TalepId = @TalepId
+
+
+  Union All
+
+  Select TalepId, AdayId, @TamAdiSoyadi as TamAdiSoyadi, @TcNo as TcNo, 
+  'KiloByteKontrollu' as LkpImageType, 'Sözleşme 2' as LkpBelgeAdi, 
+  'MtskAdaySozlesme' as LkpTableName, 'Sozlesme2Resim' as LkpFieldName,  'Sozlesme2ResimSmall' as LkpSmallFieldName, 'AdayId' as LkpIdFieldName, 
+  Sozlesme2Resim as LkpImage, Sozlesme2ResimSmall as LkpSmallImage,
+  653 as LkpWidth,
+  928 as LkpHeight,
+  96  as LkpDpi  
+  
+  From MtskAdaySozlesme
+  Where TalepId = @TalepId
+

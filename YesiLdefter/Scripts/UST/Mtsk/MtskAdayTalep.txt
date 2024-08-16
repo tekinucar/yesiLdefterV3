@@ -72,6 +72,7 @@ begin transaction
 
    -- 70
    BasvuruResim            VarBinary(max) null,
+   BasvuruResimSmall       VarBinary(max) null,
   
    -- 80 
    EtiketTipiId            SmallInt       null,

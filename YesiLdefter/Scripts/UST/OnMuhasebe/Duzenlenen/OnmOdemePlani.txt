@@ -12,12 +12,14 @@ begin transaction
    DonemTipiId         Int           null, /* borcun oluştuğu YılAy ? neden kullanıldım, gereksizse sil */
    TalepId             Int           null, /* = MtskAdayTalep.Id */
    TalepTipiId         SmallInt      null, /* = MtskAdayTalep.TalepTipi */
+   UcretTipiId         Int           null, /* = Ücret tipleri */
    CariId              Int           null, /* = MtskAdayTalep.AdayId    */
    -- 20
    TaksitTipiId        SmallInt      null,  /* 1. Peşinat, 2. Taksit, 3. Tek Borç  */
    TaksitNo            Numeric(3)    null, 
    VadeTarihi          Date          null,
    TaksitTutari        Numeric(22,5) null, 
+   OdemeTipiId         SmallInt      null, /* 1. Kredi Kartı, 2. Nakit, 3. Banka Havalesi, 4. Senet, 5. Açık Hesap */
    IsPaid              Bit       not null, /* default : 0 = ödenmedi,  1 = Ödendi */  
    TahsilTarihi        Date          null,
    -- 30
@@ -34,11 +36,13 @@ begin transaction
   
  grant select, insert, update, delete on OnmOdemePlani to public
 
-  create index X_OnmOdemePlani01 on OnmOdemePlani (TalepTipiId)
-  create index X_OnmOdemePlani02 on OnmOdemePlani (CariId)
-  create index X_OnmOdemePlani03 on OnmOdemePlani (VadeTarihi)
-  create index X_OnmOdemePlani04 on OnmOdemePlani (TahsilTarihi)
-  create index X_OnmOdemePlani05 on OnmOdemePlani (DonemTipiId)
+  create index X_OnmOdemePlani01 on OnmOdemePlani (TalepId)
+  create index X_OnmOdemePlani02 on OnmOdemePlani (TalepTipiId)
+  create index X_OnmOdemePlani03 on OnmOdemePlani (UcretTipiId)
+  create index X_OnmOdemePlani04 on OnmOdemePlani (CariId)
+  create index X_OnmOdemePlani05 on OnmOdemePlani (VadeTarihi)
+  create index X_OnmOdemePlani06 on OnmOdemePlani (TahsilTarihi)
+  create index X_OnmOdemePlani07 on OnmOdemePlani (DonemTipiId)
  
 commit transaction
 
@@ -49,7 +53,7 @@ commit transaction
 begin transaction
 
 -- ------------------------------------------------------- 
--- UcretTipiId
+-- TalepTipiId
 -- ------------------------------------------------------- 
 create table [Lkp].[OnmOdemePlaniTalepTipi]
 (
@@ -62,8 +66,30 @@ create table [Lkp].[OnmOdemePlaniTalepTipi]
 Delete from [Lkp].[OnmOdemePlaniTalepTipi]
 INSERT INTO [Lkp].[OnmOdemePlaniTalepTipi] (Id, TalepTipi)
  VALUES 
+  ( 0,    N''),
+  ( 1,    N'Sertifika'),
+  ( 2,    N'2.+4 hak'),
+  ( 3,    N'Nakil 2.+4 hak'),
+  ( 4,    N'100 Ceza'),
+  ( 5,    N'Özel direksiyon ders (Aday değil)'),
+  ( 6,    N'Özel teorik ders')
+
+
+-- ------------------------------------------------------- 
+-- UcretTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[OnmOdemePlaniUcretTipi]
+(
+   Id                Int Unique not null, 
+   UcretTipi         nVarchar(50)   null,
+   
+   constraint  pk_OnmOdemePlaniUcretTipi primary key (Id)
+)
+
+Delete from [Lkp].[OnmOdemePlaniUcretTipi]
+INSERT INTO [Lkp].[OnmOdemePlaniUcretTipi] (Id, UcretTipi)
+ VALUES 
   ( 0,        N''),
-  ( 1000,     N'ÖnMuhasebe Modülü'),
   ( 21101,    N'Sertifika'),
   ( 21102,    N'2.+4 hak'),
   ( 21103,    N'Nakil 2.+4 hak'),
@@ -73,6 +99,7 @@ INSERT INTO [Lkp].[OnmOdemePlaniTalepTipi] (Id, TalepTipi)
   ( 21111,    N'e-Sınav ücreti'),
   ( 21112,    N'Uygulama sınav ücreti'),
   ( 21113,    N'Başarısız eğitim ücreti')
+
   
 -- ------------------------------------------------------- 
 -- TaksitTipiId
@@ -93,6 +120,34 @@ INSERT INTO [Lkp].[OnmOdemePlaniTaksitTipi] (Id, TaksitTipi)
   ( 2,    N'Taksit'),
   ( 3,    N'Tek Ödeme')
     
+
+-- ------------------------------------------------------- 
+-- OdemeTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmOdemePlaniOdemeTipi')
+drop table [Lkp].[OnmOdemePlaniOdemeTipi]
+
+create table [Lkp].[OnmOdemePlaniOdemeTipi]
+(
+   Id               Int Unique not null, 
+   OdemeTipi        nVarchar(20)   null,
+   IsActive         Bit            null,
+   
+   constraint  pk_OnmOdemePlaniOdemeTipi primary key (Id)
+)
+
+Delete from [Lkp].[OnmOdemePlaniOdemeTipi]
+INSERT INTO [Lkp].[OnmOdemePlaniOdemeTipi] (Id, OdemeTipi, IsActive)
+ VALUES 
+  (-1,    N'', 1),
+  ( 0,    N'Seçiniz', 1),
+  ( 1,    N'Kredi Kartı', 1),
+  ( 2,    N'Nakit', 1),
+  ( 3,    N'Banka Havalesi', 1),
+  ( 4,    N'Senet', 1),
+  ( 5,    N'Açık Hesap', 1)
+
+
 
 -- ------------------------------------------------------- 
 -- SourceTypeId
