@@ -942,12 +942,12 @@ namespace YesiLdefter
                 dsDataTarget.Tables[0].AcceptChanges();
 
                 string tSql = "";
-
+                // büyük normal resmi kaydediyor
                 if (t.IsNotNull(smallFieldName) == false)
                     tSql = " Update " + tableName + " set "
                     + fieldName + " =  @" + fieldName
                     + " where " + idFieldName + " = " + idValue;
-                else
+                else // hem normal hemde small resmi aynı anda kaydediyor
                     tSql = " Update " + tableName + " set "
                     + fieldName + " =  @" + fieldName + ", "
                     + smallFieldName + " =  @" + smallFieldName
@@ -960,7 +960,8 @@ namespace YesiLdefter
                     t.Preparing_DataSet(this, dsDataTarget, vt);
                     v.con_Refresh = sv.Record_SQL_RUN(dsDataTarget, vt, "dsEdit", dNTarget.Position, ref tSql, "");
 
-                    MessageBox.Show("Resim başarıyla kaydedildi...");
+                    t.FlyoutMessage(this, ":)", "Resim başarıyla kaydedildi...");
+                    //MessageBox.Show("Resim başarıyla kaydedildi...");
                 }
                 catch (Exception ex)
                 {

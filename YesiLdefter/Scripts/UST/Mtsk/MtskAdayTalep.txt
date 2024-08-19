@@ -9,7 +9,8 @@ begin transaction
    FirmId                Int       not null,
    AdayId                Int       not null,
    IsActive              Bit       not null, 
-   TalepKayitTarihi       Date          null, 
+   TalepKayitTarihi      Date          null, 
+   ParentId              Int           null, /* 2.+4 hakkın bağlı olduğu sertifika talep Id si */
    AdayNo                Int           null,
 
    -- 20
@@ -952,11 +953,13 @@ Delete from [Lkp].[MtskAdayTalepVeriKaynakTipi]
 INSERT INTO [Lkp].[MtskAdayTalepVeriKaynakTipi] (Id, VeriKaynakTipi)
  VALUES 
   ( 0,  N'' ),
-  ( 1,  N'Kullanıcı Girişi' ),
-  ( 2,  N'Mebbis Dönem Aday Onaylama Listesi' ),
-  ( 3,  N'Mebbis Uygulama Sınav Listesi' ),
-  ( 4,  N'Mebbis Aday Durum Bilgileri' ),
-  ( 5,  N'Veri Aktarımı' )
+  ( 1,  N'Kullanıcı girişi, kaydı' ),
+  ( 2,  N'Mebbis dönem aday onaylama listesi' ),
+  ( 3,  N'Mebbis uygulama sınav listesi' ),
+  ( 4,  N'Mebbis aday durum bilgileri' ),
+  ( 5,  N'Veri aktarımı' ),
+  ( 6,  N'2.+4 hak için veri aktarımı' )
+
 
 commit transaction
 

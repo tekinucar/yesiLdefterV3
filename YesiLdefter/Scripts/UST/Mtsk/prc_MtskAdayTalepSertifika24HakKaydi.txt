@@ -1,0 +1,72 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_MtskAdayTalepSertifika24HakKaydi] (@FirmId int, @AdayId int)  
+AS BEGIN
+
+INSERT INTO [dbo].[MtskAdayTalep]
+           ([FirmId]
+           ,[AdayId]
+           ,[IsActive]
+           ,[TalepKayitTarihi]
+           ,[ParentId]
+           ,[TalepTipiId]
+           ,[MevcutSertifikaTipiId]
+           ,[MevcutSurucuBelgeTarihi]
+           ,[MevcutSurucuBelgeNo]
+           ,[IsMevcutOtomatik]
+           ,[IsMevcut2016Oncesi]
+           ,[IsMevcut125ccAlti]
+           ,[IstenenSertifikaTipiId]
+           ,[IsOtomatik]
+           ,[IsEngelli]
+           ,[Is125ccAlti]
+           ,[IsMuafiyetiVar]
+           ,[MuafiyetAciklmasi]
+           ,[DonemTipiId]
+           ,[GrupTipiId]
+           ,[SubeTipiId]
+           ,[KayitTipiId]
+           ,[VeriKaynakTipiId]
+           ,[EtiketTipiId]
+           ,[KullaniciUyarilari]
+           ,[UygulamaPersonelId]
+           ,[UygPersCinsiyetTipiId]
+          )
+
+Select top 1
+      FirmId
+    , AdayId
+    , 1         -- <IsActive, bit,>
+    , GETDATE() -- <TalepKayitTarihi, date,>
+    , Id        -- <ParentId, int,>
+    , 2         -- <TalepTipiId, smallint,>
+    , MevcutSertifikaTipiId
+    , MevcutSurucuBelgeTarihi
+    , MevcutSurucuBelgeNo
+    , IsMevcutOtomatik
+    , IsMevcut2016Oncesi
+    , IsMevcut125ccAlti
+    , IstenenSertifikaTipiId
+    , IsOtomatik
+    , IsEngelli
+    , Is125ccAlti
+    , IsMuafiyetiVar
+    , MuafiyetAciklmasi
+    , DonemTipiId
+    , GrupTipiId
+    , SubeTipiId
+    , KayitTipiId
+    , 6        -- <VeriKaynakTipiId, smallint,>
+    , EtiketTipiId 
+    , KullaniciUyarilari
+    , UygulamaPersonelId
+    , UygPersCinsiyetTipiId
+
+from  MtskAdayTalep
+Where FirmId = @FirmId 
+and   AdayId = @AdayId
+and   TalepTipiId = 1
+order by TalepKayitTarihi desc
+
+
+END -- procedure
