@@ -6059,7 +6059,15 @@ namespace Tkn_Events
             #region TabPage ise
             if ((ViewType == "TabPage") ||
                 (ViewType == "TabPage2") ||
-                (ViewType == "TabPage3"))
+                (ViewType == "TabPage3") ||
+                (ViewType == "TabPage4") ||
+                (ViewType == "TabPage5") ||
+                (ViewType == "TabPage6") ||
+                (ViewType == "TabPage7") ||
+                (ViewType == "TabPage8") ||
+                (ViewType == "TabPage9") ||
+                (ViewType == "TabPage10") 
+                )
             {
                 // yukarıda oluşturulan TabPage aranıyor
                 Control cntrl = null;
@@ -6076,6 +6084,14 @@ namespace Tkn_Events
                 if (ViewType == "TabPage") TabControlName = "tabControl_SUBVIEW";
                 if (ViewType == "TabPage2") TabControlName = "tabControl_SUBVIEW2";
                 if (ViewType == "TabPage3") TabControlName = "tabControl_SUBVIEW3";
+                if (ViewType == "TabPage4") TabControlName = "tabControl_SUBVIEW4";
+                if (ViewType == "TabPage5") TabControlName = "tabControl_SUBVIEW5";
+                if (ViewType == "TabPage6") TabControlName = "tabControl_SUBVIEW6";
+                if (ViewType == "TabPage7") TabControlName = "tabControl_SUBVIEW7";
+                if (ViewType == "TabPage8") TabControlName = "tabControl_SUBVIEW8";
+                if (ViewType == "TabPage9") TabControlName = "tabControl_SUBVIEW9";
+                if (ViewType == "TabPage10") TabControlName = "tabControl_SUBVIEW10";
+
 
                 if (t.IsNotNull(TableIPCode))
                 {
@@ -6149,7 +6165,15 @@ namespace Tkn_Events
             #region TabPage
             if ((ViewType == "TabPage") ||
                 (ViewType == "TabPage2") ||
-                (ViewType == "TabPage3"))
+                (ViewType == "TabPage3") ||
+                (ViewType == "TabPage4") ||
+                (ViewType == "TabPage5") ||
+                (ViewType == "TabPage6") ||
+                (ViewType == "TabPage7") ||
+                (ViewType == "TabPage8") ||
+                (ViewType == "TabPage9") ||
+                (ViewType == "TabPage10")
+                )
             {
                 ip.Create_InputPanel(tForm, cntrl, TableIPCode, ReadValue, 1, true);
 

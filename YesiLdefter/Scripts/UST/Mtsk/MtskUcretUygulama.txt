@@ -22,6 +22,7 @@ begin transaction
    SiraNo                 SmallInt       null,
    GecerlilikTarihiId     Int        not null,
 
+   -- 11
    MevcutSertifikaTipiId  Int            null,
    IstenenSertifikaTipiId Int            null,
 
@@ -34,13 +35,16 @@ begin transaction
    Sertifika24HakUcreti2016             Numeric(22,5) null,  
 
    /* Uygulama Saat Ücretleri */  
+   -- 31
    BirSaatUygDersUcreti                 Numeric(22,5) null,  
    BirSaatUygDersUcreti2016             Numeric(22,5) null,  
 
    BirSaatBasarisizDersUcreti           Numeric(22,5) null,  
    BirSaatBasarisizDersUcreti2016       Numeric(22,5) null,  
 
-   BirSaatOzelDersUcreti                Numeric(22,5) null,  
+   BirSaatOzelDersUcretiAday            Numeric(22,5) null,  
+   BirSaatOzelDersUcretiHarici          Numeric(22,5) null,  
+
 
   constraint pk_MtskUcretUygulama primary key (Id)
  )
