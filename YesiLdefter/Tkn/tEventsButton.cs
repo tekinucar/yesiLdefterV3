@@ -950,8 +950,13 @@ namespace Tkn_Events
                 v.con_PositionChange = false;
 
             if (dN.IsAccessible == true)
-                tNewDataAfterSubWork(tForm, tableIPCode);
+            {
+                // subView var ise silelim
+                t.tRemoveTabPagesForNewData(tForm);
 
+                // master-detail çalıştıralım
+                tNewDataAfterSubWork(tForm, tableIPCode);
+            }
             // setFocus ( SubWork hariç )
             // 
             if (v.con_SubWork_Run == false)
@@ -997,7 +1002,7 @@ namespace Tkn_Events
 
             return onay;
         }
-
+        
         private bool SubDetail_MasterIDValueChecked(Form tForm, string SubDetail_List)
         {
             //tToolBox t = new tToolBox();

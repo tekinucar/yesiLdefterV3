@@ -53,6 +53,7 @@ begin transaction
    
    OzelDersSaatSayisi      SmallInt      null, /* hem teo için hem uygulama için geçerli */
    BirSaatOzelDersUcreti   Numeric(22,5) null, /* hem teo için hem uygulama için geçerli */ 
+   OzelDersUcretToplami    Numeric(22,5) null, /* hem teo için hem uygulama için geçerli */ 
 
    UygulamaPersonelId      Int           null, /* aday direk bir personeli isteyebilir   */
    UygPersCinsiyetTipiId   SmallInt      null, /* aday personelin cinsiyetini belirtebilir */

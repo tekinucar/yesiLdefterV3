@@ -861,6 +861,9 @@ namespace Tkn_Search
                                 t.Str_Replace(ref myProp, "SqlSecond:" + SqlSOld, "SqlSecond:" + SqlS);
                                 t.Str_Replace(ref myProp, "KeyIdValue:" + KeyIdValue, "KeyIdValue:" + readValue);
 
+                                // subView var ise silelim
+                                t.tRemoveTabPagesForNewData(tForm);
+
                                 dsTarget.Namespace = myProp;
                                 onay = t.TableRefresh(tForm, dsTarget);
                                 nextControl(tForm);

@@ -960,7 +960,8 @@ namespace YesiLdefter
                     t.Preparing_DataSet(this, dsDataTarget, vt);
                     v.con_Refresh = sv.Record_SQL_RUN(dsDataTarget, vt, "dsEdit", dNTarget.Position, ref tSql, "");
 
-                    t.FlyoutMessage(this, ":)", "Resim başarıyla kaydedildi...");
+                    t.AlertMessage(":)", "Resim başarıyla kaydedildi...");
+                    //t.FlyoutMessage(this, ":)", "Resim başarıyla kaydedildi...");
                     //MessageBox.Show("Resim başarıyla kaydedildi...");
                 }
                 catch (Exception ex)

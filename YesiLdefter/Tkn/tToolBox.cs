@@ -5938,7 +5938,20 @@ namespace Tkn_ToolBox
 
         #region Find_Control_List
 
-        
+        public void tRemoveTabPagesForNewData(Form tForm)
+        {
+            List<string> list = new List<string>();
+            FindName_Control_List(tForm, list, "tTabPage_");
+
+            Control cntrl = null;
+            foreach (string value in list)
+            {
+                cntrl = Find_Control(tForm, value);
+                if (cntrl != null)
+                    cntrl.Dispose();
+            }
+        }
+
         public void Find_Control_List(Form tForm, List<string> list, string[] ControlType, string tabPageName)
         {
             // 0 : tabpege arama yok 
@@ -5962,6 +5975,33 @@ namespace Tkn_ToolBox
             list.Sort();
         }
 
+        public void FindName_Control_List(Form tForm, List<string> list, string controlName)
+        {
+            list.Clear();
+
+            foreach (Control c in tForm.Controls)
+            {
+                FindName_Control_List_(c, list, controlName);
+            }
+
+            list.Sort();
+        }
+
+        private void FindName_Control_List_(Control cntrl, List<string> list, string controlName)
+        {
+            string cName = cntrl?.Name;
+            
+            if (cName?.IndexOf(controlName) > -1)
+                list.Add(cntrl.Name.ToString());
+
+            if (cntrl.Controls.Count > 0)
+            {
+                foreach (Control item in cntrl.Controls)
+                {
+                    FindName_Control_List_(item, list, controlName);
+                }
+            }
+        }
 
         public void Find_Control_List(Form tForm, List<string> list, string[] ControlType)
         {
