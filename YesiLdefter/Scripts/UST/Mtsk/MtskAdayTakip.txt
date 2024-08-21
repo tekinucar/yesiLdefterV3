@@ -14,15 +14,20 @@ begin transaction
    SubeTipiId            SmallInt      null, /* trg_MtskAday */
 
    --10 kayıt aşaması
-   KayitTipiId            SmallInt     null, /* trg_MtskAday : 0. Teklif verildi, 1. Kayıt aşamasında, 2. Kesin Kayıt   */ 
+   TalepTipiId            SmallInt     null, /* 1. sertifika, 2. (2.+4 hak), 3. Nakil 2.+4hak, 4. 100Ceza, 5. Özel Uyg Ders   */ 
+   KayitTipiId            SmallInt     null, /* trg_MtskAday : 1. Ön kayıt, 2. Kayıt aşamasında, 3. Kesin Kayıt ...  */ 
+   ZamanlamaTipiId        SmallInt     null, /* detay aşağıda */
+   IsGrupSubeYok          Bit          null, /* grup veya şubesi belli değilse  */
+   IsEgitimDevamEdiyor    Bit          null, /* eğitim devam edenler = 1, değilse = 0 : sorgularda kolaylık olsun diye var  */ 
    MebbisKurumOnayi       Bit          null, /* trg_MtskAday : 0-Onaysız, 1-Onaylandı */	
    MebbisDurumTipiId      SmallInt     null, /* trg_MtskAday :  detay aşağıda */
-   YasOnayiTipiId         SmallInt     null, /* 1-Yaşı Tutmuyor, 2-Yaşı Tutuyor, 3. Diğer sebeplerle onaylı */
+   YasOnayiTipiId         SmallInt     null, /* 1-Yaşı Tutuyor, 2-Yaşı Tutmuyor,  3. Diğer sebeplerle onaylı */
    OzurDurumTipiId        SmallInt     null, /* MtskAdaySaglik tan gelecek bilgi  */
    
-   BelgelerGeldi          Bit          null,
-   BelgelerTarandi        Bit          null,
-   BelgelerYuklendi       Bit          null,
+   BelgelerGeldi          Bit          null, /* tamamı geldiyse */
+   BelgelerTarandi        Bit          null, /* tamamı tarandıysa */
+   BelgelerYuklendi       Bit          null, /* tamamı yüklendiyse */
+   EgitimSureciTipiId     SmallInt     null, /* detay aşağıda */
 
    --20 ödemeleri
    BorcDurumuTipiId         SmallInt     null,
@@ -96,9 +101,41 @@ commit transaction
 
 /* Tablonun her aday için gerekli olan satırı :  trg_MtskAday içinde insert ediliyor   */
 
+
 /*CreateLkpTable*/
 
 begin transaction
+
+-- ------------------------------------------------------- 
+-- TalepTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdayTakipTalepTipi')
+drop table [Lkp].[MtskAdayTakipTalepTipi]
+
+create table [Lkp].[MtskAdayTakipTalepTipi]
+(
+   Id               Int Unique not null, 
+   TalepTipi        nVarchar(50)   null,
+   KonuGrupId       SmallInt       null,
+   KonuId           Int            null,
+   KonuCaption      nVarchar(20)   null,
+   ChartCaption     nVarchar(20)   null,
+   FormCaption      nVarchar(15)   null,
+   
+   constraint  pk_MtskAdayTakipTalepTipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskAdayTakipTalepTipi]
+INSERT INTO [Lkp].[MtskAdayTakipTalepTipi] (Id, TalepTipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption)
+ VALUES 
+  ( 1,    N'Sertifika',             1, 1111, 'Talep tipi', '', ''),
+  ( 2,    N'2.+4 hak ',             1, 1112, 'Talep tipi', '', ''),
+  ( 3,    N'Nakil 2.+4 hak',        1, 1113, 'Talep tipi', '', ''),
+  ( 4,    N'100 Ceza',              1, 1114, 'Talep tipi', '', ''),
+  ( 5,    N'Özel direksiyon dersi', 1, 1115, 'Talep tipi', '', ''),
+  ( 6,    N'Özel teorik dersi',     1, 1116, 'Talep tipi', '', '')
+
+
 
 -- ------------------------------------------------------- 
 -- KayitTipiId
@@ -110,6 +147,9 @@ create table [Lkp].[MtskAdayTakipKayitTipi]
 (
    Id               Int Unique not null, 
    KayitTipi        nVarchar(30)   null,
+   KonuGrupId       SmallInt       null,
+   KonuId           Int            null,
+   KonuCaption      nVarchar(20)   null,
    ChartCaption     nVarchar(20)   null,
    FormCaption      nVarchar(15)   null,
 
@@ -117,17 +157,40 @@ create table [Lkp].[MtskAdayTakipKayitTipi]
 )
 
 Delete from [Lkp].[MtskAdayTakipKayitTipi]
-INSERT INTO [Lkp].[MtskAdayTakipKayitTipi] (Id, KayitTipi, ChartCaption, FormCaption)
+INSERT INTO [Lkp].[MtskAdayTakipKayitTipi] (Id, KayitTipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption)
  VALUES 
-  ( 0,    N'', '', ''),
-  ( 1,    N'Ön kayıt',                  'Ön kayıt',     'Yeni Aday' ),
-  ( 2,    N'Kayıt aşamasında',          'K.Aşamasında', 'Mebbis' ),
-  ( 3,    N'Kesin kayıt',               'Kesin kay.', '' ),
-  ( 4,    N'Sertifikayı hak kazandı',   '', '' ),
-  ( 5,    N'Sertifikası teslim edildi', '', '' ),
-  ( 6,    N'Diğerleri',                 '', '' ),
-  ( 7,    N'Dosya kapandı',             '', '' )
-            
+  ( 1,    N'Ön kayıt',          1, 1121, 'Kayıt durumu',  'Ön kayıt',     'Yeni Aday' ),
+  ( 2,    N'Kayıt aşamasında',  1, 1122, 'Kayıt durumu',  'K.Aşamasında', 'Mebbis' ),
+  ( 3,    N'Kesin kayıt',       1, 1123, 'Kayıt durumu',  'Kesin kay.', '' )
+
+
+-- ------------------------------------------------------- 
+-- ZamanlamaTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdayTakipZamanlamaTipi')
+drop table [Lkp].[MtskAdayTakipZamanlamaTipi]
+
+create table [Lkp].[MtskAdayTakipZamanlamaTipi]
+(
+   Id               Int Unique not null, 
+   ZamanlamaTipi    nVarchar(30)   null,
+   KonuGrupId       SmallInt       null,
+   KonuId           Int            null,
+   KonuCaption      nVarchar(20)   null,
+   ChartCaption     nVarchar(20)   null,
+   FormCaption      nVarchar(15)   null,
+   
+   constraint  pk_MtskAdayTakipZamanlamaTipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskAdayTakipZamanlamaTipi]
+INSERT INTO [Lkp].[MtskAdayTakipZamanlamaTipi] (Id, ZamanlamaTipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption)
+ VALUES 
+  ( 0,  N'Belirsiz',         1, 1130, 'Zamanlama',  '', '' ),
+  ( 1,  N'Bu dönem',         1, 1131, 'Zamanlama',  '', '' ),
+  ( 2,  N'Gelecek ay',       1, 1132, 'Zamanlama',  '', '' ),
+  ( 3,  N'İleriki dönemler', 1, 1133, 'Zamanlama',  '', '' )
+
 -- ------------------------------------------------------- 
 -- MebbisDurumTipiId
 -- ------------------------------------------------------- 
@@ -137,31 +200,137 @@ drop table [Lkp].[MtskAdayTakipMebbisDurumTipi]
 create table [Lkp].[MtskAdayTakipMebbisDurumTipi]
 (
    Id               Int Unique not null, 
-   MebbisDurumTipi  nVarchar(70)   null
+   MebbisDurumTipi  nVarchar(70)   null,
+   KonuGrupId       SmallInt       null,
+   KonuId           Int            null,
+   KonuCaption      nVarchar(20)   null,
+   ChartCaption     nVarchar(20)   null,
+   FormCaption      nVarchar(15)   null,
    
-   constraint  pk_MtskAdayTakipDurumTipi primary key (Id)
+   constraint  pk_MtskAdayTakipMebbisDurumTipi primary key (Id)
 )
 
 Delete from [Lkp].[MtskAdayTakipMebbisDurumTipi]
-INSERT INTO [Lkp].[MtskAdayTakipMebbisDurumTipi] (Id, MebbisDurumTipi)
+INSERT INTO [Lkp].[MtskAdayTakipMebbisDurumTipi] (Id, MebbisDurumTipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption)
  VALUES 
-  (-1,  N'' ),
-  ( 0,  N'Kursa Başvuru Aşamasında' ),
-  ( 1,  N'Teorik Sınav Aşamasında' ),
-  ( 2,  N'Uygulama Sınav Aşamasında' ),
-  ( 3,  N'Teorik Sınav Hakkı Doldu' ),
-  ( 4,  N'Uygulama Sınav Hakkı Doldu' ),
-  ( 5,  N'Sertifika Almaya Hak Kazandı' ),
-  ( 6,  N'Sertifikası İptal Edildi' ),
-  ( 7,  N'e-Sınav Aşamasında' ),
-  ( 8,  N'e-Sınav Test Aşamasında' ),
-  ( 9,  N'e-Sınavdan Başarısız Oldu' ),
-  ( 10,  N'e-Sınav Hakkı Doldu' ),
-  ( 11,  N'Kaydı Silindi' ),
-  ( 12,  N'Ceza Kaydı Var' ),
-  ( 13,  N'Teorik Dersten Muaf' ),
-  ( 14,  N'Adli Sicil Kaydı Uygun Olmadığından Dönem Kaydı Durdurulmuştur.' ),
-  ( 22,  N'2.Direksiyon Aşamasında' )
+  (-1,  N'Belirsiz',                     1, 1169, 'Mebbis durumu',  '', ''  ),
+  ( 0,  N'Kursa Başvuru Aşamasında',     1, 1170, 'Mebbis durumu',  '', ''  ),
+  ( 1,  N'Teorik Sınav Aşamasında',      1, 1171, 'Mebbis durumu',  '', ''  ),
+  ( 2,  N'Uygulama Sınav Aşamasında',    1, 1172, 'Mebbis durumu',  '', ''  ),
+  ( 3,  N'Teorik Sınav Hakkı Doldu',     1, 1173, 'Mebbis durumu',  '', ''  ),
+  ( 4,  N'Uygulama Sınav Hakkı Doldu',   1, 1174, 'Mebbis durumu',  '', ''  ),
+  ( 5,  N'Sertifika Almaya Hak Kazandı', 1, 1175, 'Mebbis durumu',  '', ''  ),
+  ( 6,  N'Sertifikası İptal Edildi',     1, 1176, 'Mebbis durumu',  '', ''  ),
+  ( 7,  N'e-Sınav Aşamasında',           1, 1177, 'Mebbis durumu',  '', ''  ),
+  ( 8,  N'e-Sınav Test Aşamasında',      1, 1178, 'Mebbis durumu',  '', ''  ),
+  ( 9,  N'e-Sınavdan Başarısız Oldu',    1, 1179, 'Mebbis durumu',  '', ''  ),
+  ( 10,  N'e-Sınav Hakkı Doldu',         1, 1180, 'Mebbis durumu',  '', ''  ),
+  ( 11,  N'Kaydı Silindi',               1, 1181, 'Mebbis durumu',  '', ''  ),
+  ( 12,  N'Ceza Kaydı Var',              1, 1182, 'Mebbis durumu',  '', ''  ),
+  ( 13,  N'Teorik Dersten Muaf',         1, 1183, 'Mebbis durumu',  '', ''  ),
+  ( 14,  N'Adli Sicil Kaydı Uygun Olmadığından Dönem Kaydı Durdurulmuştur.', 1, 1184, 'Mebbis durumu',  '', ''  ),
+  ( 22,  N'2.Direksiyon Aşamasında',     1, 1185, 'Mebbis durumu',  '', ''  )
+
+
+
+-- ------------------------------------------------------- 
+-- YasOnayiTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdayTakipYasOnayiTipi')
+drop table [Lkp].[MtskAdayTakipTalepTipi]
+
+create table [Lkp].[MtskAdayTakipYasOnayiTipi]
+(
+   Id               Int Unique not null, 
+   YasOnayiTipi     nVarchar(50)   null,
+   KonuGrupId       SmallInt       null,
+   KonuId           Int            null,
+   KonuCaption      nVarchar(20)   null,
+   ChartCaption     nVarchar(20)   null,
+   FormCaption      nVarchar(15)   null,
+   
+   constraint  pk_MtskAdayTakipYasOnayiTipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskAdayTakipYasOnayiTipi]
+INSERT INTO [Lkp].[MtskAdayTakipYasOnayiTipi] (Id, YasOnayiTipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption)
+ VALUES 
+  ( 0,    N'Belirsiz',                 1, 1210, 'Yaş onayı', '', ''),
+  ( 1,    N'Yaşı tutuyor',             1, 1211, 'Yaş onayı', '', ''),
+  ( 2,    N'Yaşı tutmuyor',            1, 1212, 'Yaş onayı', '', ''),
+  ( 3,    N'Muhafiyetle onaylı',       1, 1213, 'Yaş onayı', '', '')
+
+
+
+-- ------------------------------------------------------- 
+-- OzurDurumuTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdayTakipOzurDurumuTipi')
+drop table [Lkp].[MtskAdayTakipOzurDurumuTipi]
+
+create table [Lkp].[MtskAdayTakipOzurDurumuTipi]
+(
+   Id               Int Unique Not    null,
+   OzurDurumuTipi   nVarchar(60)   null,
+   KonuGrupId       SmallInt       null,
+   KonuId           Int            null,
+   KonuCaption      nVarchar(20)   null,
+   ChartCaption     nVarchar(20)   null,
+   FormCaption      nVarchar(15)   null,
+
+   constraint  pk_MtskAdayTakipOzurDurumuTipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskAdayTakipOzurDurumuTipi]
+INSERT INTO [Lkp].[MtskAdayTakipOzurDurumuTipi] (Id, OzurDurumuTipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption)
+ VALUES 
+  (  0, N'Belirsiz', 1, 1220, 'Sağlık durumu', '', ''),
+  (  1, N'Engeli Yok', 1, 1221, 'Sağlık durumu', '', ''),
+  (100, N'Ortopedik Engelli (Ellerini ve/veya Kollarını Kullanamıyor)', 1, 1222, 'Sağlık durumu', '', ''),
+  (110, N'Ortopedik Engelli (Yürüyemiyor)', 1, 1223, 'Sağlık durumu', '', ''),
+  (120, N'İşitme, Dil veya Konuşma Engelli', 1, 1224, 'Sağlık durumu', '', ''),
+  (140, N'Görme Engelli (Bir Gözü Görmüyor)', 1, 1225, 'Sağlık durumu', '', ''),
+  (150, N'Görme Engelli (Büyüteç Yardımı İle Görebiliyor)', 1, 1226, 'Sağlık durumu', '', ''),
+  (160, N'Süreğen hastalığı var.', 1, 1226, 'Sağlık durumu', '', '')
+
+-- ------------------------------------------------------- 
+-- 1231  BelgelerGeldi         /* tamamı geldiyse */
+-- 1232  BelgelerTarandi       /* tamamı tarandıysa */
+-- 1233  BelgelerYuklendi      /* tamamı yüklendiyse */
+-- ------------------------------------------------------- 
+
+-- ------------------------------------------------------- 
+-- EgitimSureciTipiId : 1260
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdayTakipEgitimSureciTipi')
+drop table [Lkp].[MtskAdayTakipEgitimSureciTipi]
+
+create table [Lkp].[MtskAdayTakipEgitimSureciTipi]
+(
+   Id               Int Unique not null, 
+   EgitimSureciTipi nVarchar(50)   null,
+   KonuGrupId       SmallInt       null,
+   KonuId           Int            null,
+   KonuCaption      nVarchar(20)   null,
+   ChartCaption     nVarchar(20)   null,
+   FormCaption      nVarchar(15)   null,
+
+   constraint  pk_MtskAdayTakipEgitimSureciTipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskAdayTakipEgitimSureciTipi]
+INSERT INTO [Lkp].[MtskAdayTakipEgitimSureciTipi] (Id, EgitimSureciTipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption)
+ VALUES 
+  ( 0,    N'Belirsiz',                             1, 1260, 'Eğitim süreci', '', '' ),
+  ( 1,    N'Eğitimleri başlamadı',                 1, 1261, 'Eğitim süreci', '', '' ),
+  ( 2,    N'Eğitimleri ve sınavları devam ediyor', 1, 1262, 'Eğitim süreci', '', '' ),
+  ( 3,    N'Sertifikayı hak kazandı',              1, 1263, 'Eğitim süreci', '', '' ),
+  ( 4,    N'Sertifikası teslim edildi',            1, 1264, 'Eğitim süreci', '', '' ),
+  ( 5,    N'Dosya yaktı',                          1, 1265, 'Eğitim süreci', '', '' ), /* esınav veya uyg sınavları başarısız oldu */
+  ( 6,    N'Nakil gitti',                          1, 1266, 'Eğitim süreci', '', '' )  /* 2. +4 hak için başka yere nakil oldu */
+
+
+
 
 
 -- ------------------------------------------------------- 
@@ -175,6 +344,9 @@ create table [Lkp].[MtskAdayTakipBorcDurumuTipi]
 (
    Id                 Int Unique not null, 
    BorcDurumuTipi     nVarchar(50)   null
+   KonuGrupId       SmallInt       null, 
+   KonuId           Int            null,
+   KonuCaption      nVarchar(20)   null,
    
    constraint  pk_MtskAdayTakipBorcDurumuTipi primary key (Id)
 )
@@ -203,6 +375,9 @@ create table [Lkp].[MtskAdayTakipTeorikDersTipi]
 (
    Id               Int Unique not null, 
    TeorikDersTipi   nVarchar(50)   null
+   KonuGrupId       SmallInt       null,
+   KonuId           Int            null,
+   KonuCaption      nVarchar(20)   null,
    
    constraint  pk_MtskAdayTakipTeorikDersTipi primary key (Id)
 )
@@ -226,6 +401,9 @@ create table [Lkp].[MtskAdayTakipeSinavDurumTipi]
 (
    Id               Int Unique not null, 
    eSinavDurumTipi  nVarchar(50)   null,
+   KonuGrupId       SmallInt       null,
+   KonuId           Int            null,
+   KonuCaption      nVarchar(20)   null,
    ChartCaption     nVarchar(20)   null,
    FormCaption      nVarchar(15)   null,
    
@@ -254,6 +432,9 @@ create table [Lkp].[MtskAdayTakipeSinavSonucTipi]
 (
    Id               Int Unique not null, 
    eSinavSonucTipi  nVarchar(50)   null,
+   KonuGrupId       SmallInt       null,
+   KonuId           Int            null,
+   KonuCaption      nVarchar(20)   null,
    ChartCaption     nVarchar(20)   null,
    FormCaption      nVarchar(15)   null,
    
@@ -278,6 +459,9 @@ create table [Lkp].[MtskAdayTakipeSinavSonrasiTipi]
 (
    Id               Int Unique not null, 
    eSinavSonrasiTipi  nVarchar(50)   null,
+   KonuGrupId       SmallInt       null,
+   KonuId           Int            null,
+   KonuCaption      nVarchar(20)   null,
    ChartCaption       nVarchar(20)   null,
    FormCaption        nVarchar(15)   null,   
 
@@ -303,6 +487,9 @@ create table [Lkp].[MtskAdayTakipeSinavUcretTipi]
 (
    Id               Int Unique not null, 
    eSinavUcretTipi  nVarchar(50)   null
+   KonuGrupId       SmallInt       null,
+   KonuId           Int            null,
+   KonuCaption      nVarchar(20)   null,
    
    constraint  pk_MtskAdayTakipeSinavUcretTipi primary key (Id)
 )
@@ -327,6 +514,9 @@ create table [Lkp].[MtskAdayTakipUygulamaliDersTipi]
 (
    Id                  Int Unique not null, 
    UygulamaliDersTipi  nVarchar(50)   null,
+   KonuGrupId       SmallInt       null,
+   KonuId           Int            null,
+   KonuCaption      nVarchar(20)   null,
    ChartCaption        nVarchar(20)   null,
    FormCaption         nVarchar(15)   null,   
    
@@ -353,6 +543,9 @@ create table [Lkp].[MtskAdayTakipBasarisizDersTipi]
 (
    Id                  Int Unique not null, 
    BasarisizDersTipi   nVarchar(50)   null,
+   KonuGrupId       SmallInt       null,
+   KonuId           Int            null,
+   KonuCaption      nVarchar(20)   null,
    ChartCaption        nVarchar(20)   null,
    FormCaption         nVarchar(15)   null,   
    
@@ -380,6 +573,9 @@ create table [Lkp].[MtskAdayTakipArti4DersTipi]
 (
    Id              Int Unique not null, 
    Arti4DersTipi   nVarchar(50)   null,
+   KonuGrupId       SmallInt       null,
+   KonuId           Int            null,
+   KonuCaption      nVarchar(20)   null,
    ChartCaption    nVarchar(20)   null,
    FormCaption     nVarchar(15)   null,   
    
@@ -406,6 +602,9 @@ create table [Lkp].[MtskAdayTakipuSinavDurumTipi]
 (
    Id               Int Unique not null, 
    uSinavDurumTipi  nVarchar(60)   null,
+   KonuGrupId       SmallInt       null,
+   KonuId           Int            null,
+   KonuCaption      nVarchar(20)   null,
    ChartCaption     nVarchar(25)   null,
    FormCaption      nVarchar(15)   null,   
       
@@ -441,6 +640,9 @@ create table [Lkp].[MtskAdayTakipuSinavSonucTipi]
 (
    Id               Int Unique not null, 
    uSinavSonucTipi  nVarchar(50)   null,
+   KonuGrupId       SmallInt       null,
+   KonuId           Int            null,
+   KonuCaption      nVarchar(20)   null,
    ChartCaption     nVarchar(20)   null,
    FormCaption      nVarchar(15)   null,   
    
@@ -465,6 +667,9 @@ create table [Lkp].[MtskAdayTakipuSinavSonrasiTipi]
 (
    Id               Int Unique not null, 
    uSinavSonrasiTipi  nVarchar(100)   null,
+   KonuGrupId       SmallInt       null,
+   KonuId           Int            null,
+   KonuCaption      nVarchar(20)   null,
    ChartCaption       nVarchar(20)   null,
    FormCaption        nVarchar(15)   null, 
    
@@ -491,6 +696,9 @@ create table [Lkp].[MtskAdayTakipuSinavUcretTipi]
 (
    Id               Int Unique not null, 
    uSinavUcretTipi  nVarchar(50)   null
+   KonuGrupId       SmallInt       null,
+   KonuId           Int            null,
+   KonuCaption      nVarchar(20)   null,
    
    constraint  pk_MtskAdayTakipuSinavUcretTipi primary key (Id)
 )
@@ -512,6 +720,9 @@ create table [Lkp].[MtskAdayTakipSertifikaDurumTipi]
 (
    Id                 Int Unique not null, 
    SertifikaDurumTipi nVarchar(50)   null,
+   KonuGrupId       SmallInt       null,
+   KonuId           Int            null,
+   KonuCaption      nVarchar(20)   null,
    ChartCaption       nVarchar(20)   null,
    FormCaption        nVarchar(15)   null,
    
@@ -531,3 +742,58 @@ INSERT INTO [Lkp].[MtskAdayTakipSertifikaDurumTipi] (Id, SertifikaDurumTipi, Cha
 commit transaction
 
 /*CreateLkpTableEnd*/
+
+
+/*
+
+   KonuGrupId  = 1 : Aday kayıtları
+   -----------------------------------------
+ 1110  TalepTipiId            SmallInt     null, /* 1. sertifika, 2. (2.+4 hak), 3. Nakil 2.+4hak, 4. 100Ceza, 5. Özel Uyg Ders   */ 
+ 1120  KayitTipiId            SmallInt     null, /* trg_MtskAday : 1. Ön kayıt, 2. Kayıt aşamasında, 3. Kesin Kayıt ...  */ 
+ 1130  ZamanlamaTipiId        SmallInt     null, /* detay aşağıda */
+ 1140  IsGrupSubeYok          Bit          null, /* grup veya şubesi belli değilse  */
+ 1150  IsEgitimDevamEdiyor    Bit          null, /* eğitim devam edenler = 1, değilse = 0 : sorgularda kolaylık olsun diye var  */ 
+ 1160  MebbisKurumOnayi       Bit          null, /* trg_MtskAday : 0-Onaysız, 1-Onaylandı */	
+ 1170  MebbisDurumTipiId      SmallInt     null, /* trg_MtskAday :  detay aşağıda */
+ 1210  YasOnayiTipiId         SmallInt     null, /* 1-Yaşı Tutmuyor, 2-Yaşı Tutuyor, 3. Diğer sebeplerle onaylı */
+ 1220  OzurDurumTipiId        SmallInt     null, /* MtskAdaySaglik tan gelecek bilgi  */
+ 1230  BelgelerGeldi          Bit          null, /* tamamı geldiyse */
+ 1240  BelgelerTarandi        Bit          null, /* tamamı tarandıysa */
+ 1250  BelgelerYuklendi       Bit          null, /* tamamı yüklendiyse */
+ 1260  EgitimSureciTipiId     SmallInt     null, /* detay aşağıda */
+
+   BorcDurumuTipiId         SmallInt     null,
+
+
+   KonuGrupId  = 2 : Dönem grup şube
+   -----------------------------------------
+
+
+   KonuGrupId  = 3 : Teorik dersler
+   -----------------------------------------
+
+   KonuGrupId  = 4 : e-Sınav süreci
+   -----------------------------------------
+
+
+   KonuGrupId  = 5 : uygulamalı dersler
+   -----------------------------------------
+
+
+   KonuGrupId  = 6 : uygulamalı sınavlar
+   -----------------------------------------
+
+
+   KonuGrupId  = 7 : sertifika süreci
+   -----------------------------------------
+
+
+   KonuGrupId  = 8 : aday listesi ve borçları
+   -----------------------------------------
+
+
+
+
+
+*/
+
