@@ -191,6 +191,63 @@ INSERT INTO [Lkp].[MtskAdayTakipZamanlamaTipi] (Id, ZamanlamaTipi, KonuGrupId, K
   ( 2,  N'Gelecek ay',       1, 1132, 'Zamanlama',  '', '' ),
   ( 3,  N'İleriki dönemler', 1, 1133, 'Zamanlama',  '', '' )
 
+
+
+-- ------------------------------------------------------- 
+-- GrupSubeTipiId -- bu field MtskAdayTakip tablosunda yok
+-- bazı koşulları takip için var
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdayTakipGrupSubeTipi')
+drop table [Lkp].[MtskAdayTakipGrupSubeTipi]
+
+create table [Lkp].[MtskAdayTakipGrupSubeTipi]
+(
+   Id               Int Unique not null, 
+   GrupSubeTipi     nVarchar(50)   null,
+   KonuGrupId       SmallInt       null,
+   KonuId           Int            null,
+   KonuCaption      nVarchar(20)   null,
+   ChartCaption     nVarchar(20)   null,
+   FormCaption      nVarchar(15)   null,
+   
+   constraint  pk_MtskAdayTakipGrupSubeTipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskAdayTakipGrupSubeTipi]
+INSERT INTO [Lkp].[MtskAdayTakipGrupSubeTipi] (Id, GrupSubeTipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption)
+ VALUES 
+  ( 1,  N'Şubesi belli olmayan adaylar',   1, 1141, 'Grup ve şube',  '', '' ),
+  ( 2,  N'Süreci devam eden adaylar',      1, 1151, 'Grup ve şube',  '', '' )
+
+
+-- ------------------------------------------------------- 
+-- MebbisOnayiTipiId -- bu field MtskAdayTakip tablosunda yok
+-- bazı koşulları takip için var
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdayTakipMebbisOnayiTipi')
+drop table [Lkp].[MtskAdayTakipMebbisOnayiTipi]
+
+create table [Lkp].[MtskAdayTakipMebbisOnayiTipi]
+(
+   Id                Int Unique not null, 
+   MebbisOnayiTipi   nVarchar(50)   null,
+   KonuGrupId        SmallInt       null,
+   KonuId            Int            null,
+   KonuCaption       nVarchar(20)   null,
+   ChartCaption      nVarchar(20)   null,
+   FormCaption       nVarchar(15)   null,
+   
+   constraint  pk_MtskAdayTakipMebbisOnayiTipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskAdayTakipMebbisOnayiTipi]
+INSERT INTO [Lkp].[MtskAdayTakipMebbisOnayiTipi] (Id, MebbisOnayiTipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption)
+ VALUES 
+  ( 1,  N'Onaysız',        1, 1161, 'Mebbis kurum onayı',  '', '' ),
+  ( 2,  N'Onaylandı',      1, 1162, 'Mebbis kurum onayı',  '', '' )
+
+
+
 -- ------------------------------------------------------- 
 -- MebbisDurumTipiId
 -- ------------------------------------------------------- 
@@ -291,13 +348,43 @@ INSERT INTO [Lkp].[MtskAdayTakipOzurDurumuTipi] (Id, OzurDurumuTipi, KonuGrupId,
   (120, N'İşitme, Dil veya Konuşma Engelli', 1, 1224, 'Sağlık durumu', '', ''),
   (140, N'Görme Engelli (Bir Gözü Görmüyor)', 1, 1225, 'Sağlık durumu', '', ''),
   (150, N'Görme Engelli (Büyüteç Yardımı İle Görebiliyor)', 1, 1226, 'Sağlık durumu', '', ''),
-  (160, N'Süreğen hastalığı var.', 1, 1226, 'Sağlık durumu', '', '')
+  (160, N'Süreğen hastalığı var.', 1, 1227, 'Sağlık durumu', '', '')
 
+
+-- ------------------------------------------------------- 
+-- BelgelerTipiId -- bu field MtskAdayTakip tablosunda yok
+-- bazı koşulları takip için var
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdayTakipBelgelerTipi')
+drop table [Lkp].[MtskAdayTakipBelgelerTipi]
+
+create table [Lkp].[MtskAdayTakipBelgelerTipi]
+(
+   Id                Int Unique not null, 
+   BelgelerTipi      nVarchar(50)   null,
+   KonuGrupId        SmallInt       null,
+   KonuId            Int            null,
+   KonuCaption       nVarchar(20)   null,
+   ChartCaption      nVarchar(20)   null,
+   FormCaption       nVarchar(15)   null,
+   
+   constraint  pk_MtskAdayTakipBelgelerTipi primary key (Id)
+)
 -- ------------------------------------------------------- 
 -- 1231  BelgelerGeldi         /* tamamı geldiyse */
 -- 1232  BelgelerTarandi       /* tamamı tarandıysa */
 -- 1233  BelgelerYuklendi      /* tamamı yüklendiyse */
 -- ------------------------------------------------------- 
+
+Delete from [Lkp].[MtskAdayTakipBelgelerTipi]
+INSERT INTO [Lkp].[MtskAdayTakipBelgelerTipi] (Id, BelgelerTipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption)
+ VALUES 
+  ( 1,  N'Belgeleri eksik olanlar',         1, 1231, 'Belgeler',  '', '' ),
+  ( 2,  N'Belgeleri taranmayan',            1, 1232, 'Belgeler',  '', '' ),
+  ( 3,  N'Belgeleri Mebbis"e yüklenmeyen',  1, 1233, 'Belgeler',  '', '' )
+
+
+
 
 -- ------------------------------------------------------- 
 -- EgitimSureciTipiId : 1260
