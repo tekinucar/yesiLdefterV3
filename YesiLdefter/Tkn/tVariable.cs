@@ -434,6 +434,11 @@ namespace Tkn_Variable
 
         #region Enum
 
+        public enum BackNext 
+        {
+            back,
+            next
+        }
 
         public enum msSectorType : Int16
         {
@@ -864,7 +869,7 @@ namespace Tkn_Variable
         public static int GECEN_YILAY = 0;
         public static int GELECEK_YILAY = 0;
         public static int DONEMTIPI_YILAY = 0;
-
+        public static int DONEMTIPI_YILAY_OLD = 0;
 
         public static string Declare_bugun = string.Empty;
         public static string Declare_Gun = string.Empty;
@@ -2441,6 +2446,7 @@ namespace Tkn_Variable
         }
         public string SUBVIEW_ENABLED { get; set; }
         public string SUBVIEW_KEYFNAME { get; set; }
+        public string SUBVIEW_KEYFNAME2 { get; set; }
         public string SUBVIEW_CAPTION_FNAME { get; set; }
         public string SUBVIEW_CMP_TYPE { get; set; }
         public string SUBVIEW_CMP_LOCATION { get; set; }

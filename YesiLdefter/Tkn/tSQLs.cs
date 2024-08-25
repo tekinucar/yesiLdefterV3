@@ -2922,6 +2922,11 @@ INSERT INTO [dbo].[SYS_UPDATES]
                             MasterValue1 = t.Find_Kriter_Value(tForm, mst_TableIPCode, mst_FName, default_type);
                         }
 
+                        if (mst_FName == ":DONEM_YILAY")
+                        {
+                            MasterValue1 = ":DONEM_YILAY"; // v.DONEMTIPI_YILAY.ToString();
+                        }
+
                         // aldığın bilgiyi set et
                         if ((toperand_type == 2) ||  // odd single  
                             (default_type == 31) ||

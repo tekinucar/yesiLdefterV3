@@ -491,18 +491,20 @@ namespace Tkn_Events
             #region YILAYBACK - NEXT
             if (ButtonName.IndexOf("YILAY_BACK") > 0)
             {
+                v.DONEMTIPI_YILAY_OLD = v.DONEMTIPI_YILAY;
                 int value = v.DONEMTIPI_YILAY;
                 string caption = getYilAyCaption(value);
-                v.DONEMTIPI_YILAY = getBackYilAy(value, 1, ref caption);
+                v.DONEMTIPI_YILAY = getBackYilAy(value, v.BackNext.back, ref caption);
                 setYilAyCaption(tForm, v.DONEMTIPI_YILAY, caption, myFormLoadValue, t);
                 yilAyFormRefresh(tForm);
                 //MessageBox.Show(v.DONEMTIPI_YILAY.ToString() + " ; " + caption);
             }
             if (ButtonName.IndexOf("YILAY_NEXT") > 0)
             {
+                v.DONEMTIPI_YILAY_OLD = v.DONEMTIPI_YILAY;
                 int value = v.DONEMTIPI_YILAY;
                 string caption = getYilAyCaption(value);
-                v.DONEMTIPI_YILAY = getBackYilAy(value, 2, ref caption);
+                v.DONEMTIPI_YILAY = getBackYilAy(value, v.BackNext.next, ref caption);
                 setYilAyCaption(tForm, v.DONEMTIPI_YILAY, caption, myFormLoadValue, t);
                 yilAyFormRefresh(tForm);
                 //MessageBox.Show(v.DONEMTIPI_YILAY.ToString() + " ; " + caption);
@@ -599,7 +601,7 @@ namespace Tkn_Events
 
             return value;
         }
-        private int getBackYilAy(int yilAy, byte backNext, ref string yilAyCapiton)
+        private int getBackYilAy(int yilAy, v.BackNext backNext, ref string yilAyCapiton)
         {
             int rowNo = 0;
             int yeniYilAy = yilAy;
@@ -615,7 +617,7 @@ namespace Tkn_Events
             }
 
             // back ise
-            if (backNext == 1)
+            if (backNext == v.BackNext.back)
             {
                 if (count > rowNo + 1)
                 {
@@ -624,7 +626,7 @@ namespace Tkn_Events
                 }
             }
             // next ise
-            if (backNext == 2)
+            if (backNext == v.BackNext.next)
             {
                 if (rowNo > 0)
                 {

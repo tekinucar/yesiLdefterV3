@@ -52,6 +52,20 @@ AS BEGIN
 		from inserted ins
     	where ins.Id = @curId
 
+		-- MtskAdayTalep tablosunu işaretle
+		Update MtskAdayTalep set
+        ImzaAlindi = x.Sonuc
+        From MtskAdayTalep a, 
+        (
+            Select count(Id) as Sonuc
+            From MtskAdayImza
+            Where 0 = 0
+            and ImzaResim is not null
+            and TalepId = @TalepId
+        ) as x
+        Where a.Id = @TalepId
+
+
 		-- MtskAdayBelgeler tablosunu işaretle
 		Update MtskAdayBelgeler set
         ImzaTarandi = x.Sonuc
@@ -64,6 +78,7 @@ AS BEGIN
             and TalepId = @TalepId
         ) as x
         Where a.TalepId = @TalepId
+
 
 
       FETCH NEXT FROM myCursor INTO @curId

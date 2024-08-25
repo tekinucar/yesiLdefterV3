@@ -6284,7 +6284,8 @@ namespace Tkn_Events
         {
             if (t.IsNotNull(dsData) == false) return;
             string readValue = "";
-            PROP_SUBVIEW prop_ = propSubViewReadValue(dsData, tDataNavigator, ref readValue);
+            string readValue2 = "";
+            PROP_SUBVIEW prop_ = propSubViewReadValue(dsData, tDataNavigator, ref readValue, ref readValue2);
             if (prop_ == null) return;
 
             List<SUBVIEW_LIST> subViewList = prop_.SUBVIEW_LIST;
@@ -6303,7 +6304,8 @@ namespace Tkn_Events
                     elseShowTableIPCode = item.SUBVIEW_TABLEIPCODE.ToString();
                     elseShowMenuPageName = item.SHOWMENU_PAGENAME.ToString();
                 }
-                if (item.SUBVIEW_VALUE.IndexOf(readValue) > -1)
+                if ((item.SUBVIEW_VALUE.IndexOf(readValue) > -1) ||
+                    (item.SUBVIEW_VALUE.IndexOf(readValue2) > -1))
                 {
                     TableIPCode = item.SUBVIEW_TABLEIPCODE.ToString();
                     if (item.SUBVIEW_FORMCODE != null)
@@ -6346,12 +6348,16 @@ namespace Tkn_Events
 
         }
 
-        private PROP_SUBVIEW propSubViewReadValue(DataSet dsData, DevExpress.XtraEditors.DataNavigator tDataNavigator, ref string readValue)
+        private PROP_SUBVIEW propSubViewReadValue(DataSet dsData, DevExpress.XtraEditors.DataNavigator tDataNavigator, ref string readValue, ref string readValue2)
         {
             string subView = tDataNavigator.AccessibleDescription;
             PROP_SUBVIEW prop_ = t.readProp<PROP_SUBVIEW>(subView);
 
             string subViewKeyFName = prop_.SUBVIEW_KEYFNAME.ToString();
+            string subViewKeyFName2 = "";
+
+            subViewKeyFName2 = prop_.SUBVIEW_KEYFNAME2?.ToString();
+
             //string subViewCaptionFName = prop_.SUBVIEW_CAPTION_FNAME.ToString();
             //string subViewCmpType = prop_.SUBVIEW_CMP_TYPE.ToString();
             //string subViewCmpLocation = prop_.SUBVIEW_CMP_LOCATION.ToString();
@@ -6382,6 +6388,23 @@ namespace Tkn_Events
                     catch (Exception e)
                     {
                         MessageBox.Show(e.Message.ToString());
+                    }
+                }
+
+            }
+
+            if (t.IsNotNull(subViewKeyFName2))
+            {
+                //Now_Value = detail_Row[SV_KeyFName].ToString();
+                if (tDataNavigator.Position > -1)
+                {
+                    try
+                    {
+                        readValue2 = dsData.Tables[0].Rows[tDataNavigator.Position][subViewKeyFName2].ToString();
+                    }
+                    catch (Exception e)
+                    {
+                        //MessageBox.Show(e.Message.ToString());
                     }
                 }
 
@@ -6576,6 +6599,7 @@ namespace Tkn_Events
             string DetailSubDetail = string.Empty;
             string DataCopyCode = string.Empty;
             string SqlFirst = string.Empty;
+            string SqlSecond = string.Empty;
             string Prop_SubView = string.Empty;
             string activeTableIPCode = string.Empty;
             byte btnType = 0;
@@ -6670,6 +6694,7 @@ namespace Tkn_Events
                         DetailSubDetail = t.MyProperties_Get(myProp, "DetailSubDetail:");
                         DataCopyCode = t.MyProperties_Get(myProp, "DataCopyCode:");
                         SqlFirst = t.MyProperties_Get(myProp, "SqlFirst:");
+                        SqlSecond = t.MyProperties_Get(myProp, "SqlSecond:");
                         Prop_SubView = t.MyProperties_Get(myProp, "Prop_SubView:");
 
                         #region tWorkTD.Save - tDataSave 
@@ -6925,7 +6950,16 @@ namespace Tkn_Events
                             if (vSW._03_WorkTD == v.tWorkTD.Refresf_DataYilAy)
                             {
                                 if (SqlFirst.IndexOf(":@@YILAY") == -1 &&
-                                    SqlFirst.IndexOf(":DONEM_YILAY") == -1)   onay2 = false;
+                                    SqlFirst.IndexOf(":DONEM_YILAY") == -1 &&
+                                    SqlFirst.IndexOf("DonemTipiId") == -1
+                                    )   onay2 = false;
+                            
+                                if (SqlSecond.IndexOf(v.DONEMTIPI_YILAY_OLD.ToString()) > -1)
+                                {
+                                    string newSqlSecond = SqlSecond.Replace(v.DONEMTIPI_YILAY_OLD.ToString(), v.DONEMTIPI_YILAY.ToString());
+                                    myProp = myProp.Replace(SqlSecond, newSqlSecond);
+                                    dsData.Namespace = myProp;
+                                }
                             }
 
                             if (onay2)
@@ -7467,6 +7501,11 @@ namespace Tkn_Events
                         else
                         {
                             read_mst_value = "-1";
+                        }
+
+                        if (read_mst_FName == ":DONEM_YILAY")
+                        {
+                            read_mst_value = v.DONEMTIPI_YILAY.ToString();
                         }
 
                         if (read_mst_value != "-98")

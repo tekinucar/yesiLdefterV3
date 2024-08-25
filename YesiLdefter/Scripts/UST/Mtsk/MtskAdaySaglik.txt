@@ -61,6 +61,22 @@ AS BEGIN
 		from inserted ins
     	where ins.Id = @curId
 
+		-- MtskAdayTalep tablosunu işaretle
+		Update MtskAdayTalep set
+        SaglikGeldi = x.Sonuc
+        From MtskAdayTalep a, 
+        (
+            Select count(Id) as Sonuc
+            From MtskAdaySaglik
+            Where 0 = 0
+            and (
+			   SaglikRaporuResim is not null 
+			or Len(isnull(RaporReferansNo,'')) > 0
+			)
+            and TalepId = @TalepId
+        ) as x
+        Where a.Id = @TalepId
+
 		-- MtskAdayBelgeler tablosunu işaretle
 		Update MtskAdayBelgeler set
         SaglikTarandi = x.Sonuc

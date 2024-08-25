@@ -54,7 +54,19 @@ AS BEGIN
 		from inserted ins
     	where ins.Id = @curId
 
-		-- MtskAdayBelgeler tablosunu işaretle
+		-- MtskAdayTalep tablosunu işaretle
+		Update MtskAdayTalep set
+        AdliSicilGeldi = x.Sonuc
+        From MtskAdayTalep a, 
+        (
+            Select count(Id) as Sonuc
+            From MtskAdayAdliSicil
+            Where 0 = 0
+            and SavcilikBelgesiResim is not null
+            and TalepId = @TalepId
+        ) as x
+        Where a.Id = @TalepId
+
 		Update MtskAdayBelgeler set
         AdliSicilTarandi = x.Sonuc
         From MtskAdayBelgeler a, 
@@ -78,4 +90,4 @@ END -- create trigger
 /*CreateTriggerEnd*/
 
 ALTER TABLE dbo.MtskAdayAdliSicil ENABLE TRIGGER trg_MtskAdayAdliSicil
-GO
+

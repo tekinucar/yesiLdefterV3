@@ -54,6 +54,19 @@ AS BEGIN
 		from inserted ins
     	where ins.Id = @curId
 
+		-- MtskAdayTalep tablosunu işaretle
+		Update MtskAdayTalep set
+        SozlesmeYapildi = x.Sonuc
+        From MtskAdayTalep a, 
+        (
+            Select count(Id) as Sonuc
+            From MtskAdaySozlesme
+            Where 0 = 0
+            and Sozlesme1Resim is not null
+            and TalepId = @TalepId
+        ) as x
+        Where a.Id = @TalepId
+
 		-- MtskAdayBelgeler tablosunu işaretle
 		Update MtskAdayBelgeler set
         Sozlesme1Tarandi = x.Sonuc
