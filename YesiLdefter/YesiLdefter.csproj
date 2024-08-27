@@ -548,6 +548,7 @@
     <Content Include="Scripts\UST\Mtsk\MtskAday - Kopyala.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskAday.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskAdayEvrak.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskAdayTakipKurallari.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskAdayUcret.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskSaatUygulama.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskSertifikaSaatleri.txt" />

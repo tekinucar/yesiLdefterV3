@@ -10,7 +10,7 @@ begin transaction
    AdayId                Int       not null, 
    TcNo                  Varchar(11)   null,
    DonemTipiId           Int           null,
-
+   -- 20
    BiyometrikTarandi     Bit   null,
    BasvuruFotoTarandi    Bit   null,
    OgrenimTarandi        Bit   null,
@@ -22,7 +22,8 @@ begin transaction
    AdresKodlandi         Bit   null,  
    BelgelerTarandi       Bit   null,
 
-   AdayKaydiYapildi      Bit   null,
+   -- 40
+   AdayKaydiYapildi      Bit   null, /* mebbise aday kaydı yapıldı işareti */
    BiyometrikYuklendi    Bit   null,
    BasvuruFotoYuklendi   Bit   null,
    OgrenimYuklendi       Bit   null,
@@ -34,6 +35,7 @@ begin transaction
    AdresYuklendi         Bit   null,
    BelgelerYuklendi      Bit   null,
 
+   -- 60
    IsSertifikaUcreti     Bit   null, -- ücret planlandı mı
    SertifikaUcretiIsPaid Bit   null, -- ücretin tamamı tahsil edildi mi
    IsUcretsiz            Bit   null, -- ücretsiz mi

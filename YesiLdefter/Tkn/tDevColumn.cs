@@ -2,6 +2,7 @@
 using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Repository;
 using DevExpress.XtraGrid.Columns;
+using DevExpress.XtraGrid.Views.BandedGrid;
 using DevExpress.XtraLayout;
 using DevExpress.XtraVerticalGrid.Rows;
 using System;
@@ -1104,9 +1105,12 @@ namespace Tkn_DevColumn
         //----------------------------------------------------------
 
         #region Grid_ColumnEdit
-
-        public void Grid_ColumnEdit(DataRow Row, GridColumn Column, string tcolumn_type, string TableIPCode)
+        
+        public void Grid_ColumnEdit(DataRow Row, GridColumn Column, BandedGridColumn BandedColumn, string tcolumn_type, string TableIPCode)
         {
+            // DevExpress.XtraGrid.Columns.GridColumn
+            // DevExpress.XtraGrid.Views.BandedGrid.BandedGridColumn
+
             tToolBox t = new tToolBox();
             tEvents ev = new tEvents();
             tEventsGrid evg = new tEventsGrid();
@@ -1152,7 +1156,10 @@ namespace Tkn_DevColumn
 
                 tEdit.AccessibleDescription = s;
 
-                Column.ColumnEdit = tEdit;
+                if (Column != null)
+                    Column.ColumnEdit = tEdit;
+                if (BandedColumn != null)
+                    BandedColumn.ColumnEdit = tEdit;
             }
             #endregion
 
@@ -1178,8 +1185,10 @@ namespace Tkn_DevColumn
                 t.MyProperties_Set(ref s, "Width", width.ToString());
 
                 tEdit.AccessibleDescription = s;
-
-                Column.ColumnEdit = tEdit;
+                if (Column != null)
+                    Column.ColumnEdit = tEdit;
+                if (BandedColumn != null)
+                    BandedColumn.ColumnEdit = tEdit;
             }
             #endregion
 
@@ -1212,7 +1221,11 @@ namespace Tkn_DevColumn
                     tEdit.Buttons[0].Kind = DevExpress.XtraEditors.Controls.ButtonPredefines.OK;
                     tEdit.Buttons[0].Width = 40; // Column.Width / 2;
                     tEdit.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.DisableTextEditor;
-                    Column.ShowButtonMode = DevExpress.XtraGrid.Views.Base.ShowButtonModeEnum.ShowAlways;
+
+                    if (Column != null)
+                        Column.ShowButtonMode = DevExpress.XtraGrid.Views.Base.ShowButtonModeEnum.ShowAlways;
+                    if (BandedColumn != null)
+                        BandedColumn.ShowButtonMode = DevExpress.XtraGrid.Views.Base.ShowButtonModeEnum.ShowAlways;
                 }
 
                 #region tSearchEdit
@@ -1230,9 +1243,12 @@ namespace Tkn_DevColumn
                     tProp_Navigator = "Type:" + v.ButtonEdit + ";" + tProp_Navigator;
                     tEdit.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.DisableTextEditor;
                     tEdit.NullText = "";
-                    Column.ShowButtonMode = DevExpress.XtraGrid.Views.Base.ShowButtonModeEnum.ShowAlways;
+                    if (Column != null) 
+                        Column.ShowButtonMode = DevExpress.XtraGrid.Views.Base.ShowButtonModeEnum.ShowAlways;
+                    if (BandedColumn != null)
+                        BandedColumn.ShowButtonMode = DevExpress.XtraGrid.Views.Base.ShowButtonModeEnum.ShowAlways;
                 }
-                    
+
                 tEdit.AccessibleDescription = tProp_Navigator;
                     
                 if (tcolumn_type == "tSearchEditOnly")
@@ -1260,8 +1276,9 @@ namespace Tkn_DevColumn
 
 
                 #endregion tSearchEdit
-                
-                Column.ColumnEdit = tEdit;
+
+                if (Column != null) Column.ColumnEdit = tEdit;
+                if (BandedColumn != null) BandedColumn.ColumnEdit = tEdit;
             }
             #endregion
 
@@ -1276,7 +1293,9 @@ namespace Tkn_DevColumn
                 //tEdit.
                 if (tExpressionType > 0)
                     Column.Tag = "EXPRESSION";
-                Column.ColumnEdit = tEdit;
+
+                if (Column != null) Column.ColumnEdit = tEdit;
+                if (BandedColumn != null) BandedColumn.ColumnEdit = tEdit;
             }
             #endregion
 
@@ -1293,7 +1312,9 @@ namespace Tkn_DevColumn
                 tEdit.Name = "Column_" + tFieldName;
 
                 RepositoryItemCheckedComboBoxEdit_Fill(tEdit, Row);
-                Column.ColumnEdit = tEdit;
+
+                if (Column != null) Column.ColumnEdit = tEdit;
+                if (BandedColumn != null) BandedColumn.ColumnEdit = tEdit;
             }
             #endregion
 
@@ -1340,7 +1361,9 @@ namespace Tkn_DevColumn
 
                 if (tExpressionType > 0)
                     Column.Tag = "EXPRESSION";
-                Column.ColumnEdit = tEdit;
+
+                if (Column != null) Column.ColumnEdit = tEdit;
+                if (BandedColumn != null) BandedColumn.ColumnEdit = tEdit;
             }
             #endregion
 
@@ -1359,7 +1382,8 @@ namespace Tkn_DevColumn
                 tEdit.KeyDown += new System.Windows.Forms.KeyEventHandler(evg.myRepositoryItemEdit_KeyDown);
                 tEdit.StoreColorAsInteger = true;
 
-                Column.ColumnEdit = tEdit;
+                if (Column != null) Column.ColumnEdit = tEdit;
+                if (BandedColumn != null) BandedColumn.ColumnEdit = tEdit;
             }
             #endregion
 
@@ -1371,7 +1395,9 @@ namespace Tkn_DevColumn
                 tEdit.KeyDown += new System.Windows.Forms.KeyEventHandler(evg.myRepositoryItemEdit_KeyDown);
 
                 RepositoryItemComboBox_Fill(tEdit, Row, "", 1); // Tumu = hayır
-                Column.ColumnEdit = tEdit;
+
+                if (Column != null) Column.ColumnEdit = tEdit;
+                if (BandedColumn != null) BandedColumn.ColumnEdit = tEdit;
             }
             #endregion
 
@@ -1384,7 +1410,9 @@ namespace Tkn_DevColumn
 
                 if (tExpressionType > 0)
                     Column.Tag = "EXPRESSION";
-                Column.ColumnEdit = tEdit;
+
+                if (Column != null) Column.ColumnEdit = tEdit;
+                if (BandedColumn != null) BandedColumn.ColumnEdit = tEdit;
             }
             #endregion
 
@@ -1395,7 +1423,8 @@ namespace Tkn_DevColumn
                 tEdit.Name = "Column_" + tFieldName;
                 tEdit.KeyDown += new System.Windows.Forms.KeyEventHandler(evg.myRepositoryItemEdit_KeyDown);
 
-                Column.ColumnEdit = tEdit;
+                if (Column != null) Column.ColumnEdit = tEdit;
+                if (BandedColumn != null) BandedColumn.ColumnEdit = tEdit;
             }
             #endregion
 
@@ -1496,7 +1525,8 @@ namespace Tkn_DevColumn
                 if (tExpressionType > 0)
                     Column.Tag = "EXPRESSION";
 
-                Column.ColumnEdit = tEdit;
+                if (Column != null) Column.ColumnEdit = tEdit;
+                if (BandedColumn != null) BandedColumn.ColumnEdit = tEdit;
             }
             #endregion
 
@@ -1507,7 +1537,8 @@ namespace Tkn_DevColumn
                 tEdit.Name = "Column_" + tFieldName;
                 tEdit.KeyDown += new System.Windows.Forms.KeyEventHandler(evg.myRepositoryItemEdit_KeyDown);
 
-                Column.ColumnEdit = tEdit;
+                if (Column != null) Column.ColumnEdit = tEdit;
+                if (BandedColumn != null) BandedColumn.ColumnEdit = tEdit;
             }
             #endregion
 
@@ -1518,7 +1549,8 @@ namespace Tkn_DevColumn
                 tEdit.Name = "Column_" + tFieldName;
                 tEdit.KeyDown += new System.Windows.Forms.KeyEventHandler(evg.myRepositoryItemEdit_KeyDown);
 
-                Column.ColumnEdit = tEdit;
+                if (Column != null) Column.ColumnEdit = tEdit;
+                if (BandedColumn != null) BandedColumn.ColumnEdit = tEdit;
             }
             #endregion
 
@@ -1549,8 +1581,8 @@ namespace Tkn_DevColumn
                 if (tExpressionType > 0)
                     Column.Tag = "EXPRESSION";
 
-                Column.ColumnEdit = tEdit;
-
+                if (Column != null) Column.ColumnEdit = tEdit;
+                if (BandedColumn != null) BandedColumn.ColumnEdit = tEdit;
             }
             #endregion
 
@@ -1562,7 +1594,8 @@ namespace Tkn_DevColumn
                 tEdit.KeyDown += new System.Windows.Forms.KeyEventHandler(evg.myRepositoryItemEdit_KeyDown);
                 tEdit.AutoHeight = true;
 
-                Column.ColumnEdit = tEdit;
+                if (Column != null) Column.ColumnEdit = tEdit;
+                if (BandedColumn != null) BandedColumn.ColumnEdit = tEdit;
             }
             #endregion
 
@@ -1573,7 +1606,8 @@ namespace Tkn_DevColumn
                 tEdit.Name = "Column_" + tFieldName;
                 tEdit.KeyDown += new System.Windows.Forms.KeyEventHandler(evg.myRepositoryItemEdit_KeyDown);
 
-                Column.ColumnEdit = tEdit;
+                if (Column != null) Column.ColumnEdit = tEdit;
+                if (BandedColumn != null) BandedColumn.ColumnEdit = tEdit;
             }
             #endregion
 
@@ -1584,7 +1618,8 @@ namespace Tkn_DevColumn
                 tEdit.Name = "Column_" + tFieldName;
                 tEdit.KeyDown += new System.Windows.Forms.KeyEventHandler(evg.myRepositoryItemEdit_KeyDown);
 
-                Column.ColumnEdit = tEdit;
+                if (Column != null) Column.ColumnEdit = tEdit;
+                if (BandedColumn != null) BandedColumn.ColumnEdit = tEdit;
             }
             #endregion
 
@@ -1599,7 +1634,9 @@ namespace Tkn_DevColumn
                 tEdit.OptionsMask.MaskType = DevExpress.XtraEditors.Controls.PictureEditMaskType.RoundedRect;
                 tEdit.SizeMode = DevExpress.XtraEditors.Controls.PictureSizeMode.Zoom;
                 tEdit.ZoomPercent = 10;
-                Column.ColumnEdit = tEdit;
+
+                if (Column != null) Column.ColumnEdit = tEdit;
+                if (BandedColumn != null) BandedColumn.ColumnEdit = tEdit;
                 //Column.ImageOptions.SvgImageSize = new Size(50, 50);
             }
             #endregion
@@ -1624,7 +1661,9 @@ namespace Tkn_DevColumn
                 tEdit.KeyDown += new System.Windows.Forms.KeyEventHandler(evg.myRepositoryItemEdit_KeyDown);
 
                 RepositoryItemRadioGroup_Fill(tEdit, Row, "", 1); // Tumu = hayır
-                Column.ColumnEdit = tEdit;
+
+                if (Column != null) Column.ColumnEdit = tEdit;
+                if (BandedColumn != null) BandedColumn.ColumnEdit = tEdit;
             }
             #endregion
 
@@ -1646,7 +1685,9 @@ namespace Tkn_DevColumn
 
                 if (tExpressionType > 0)
                     Column.Tag = "EXPRESSION";
-                Column.ColumnEdit = tEdit;
+
+                if (Column != null) Column.ColumnEdit = tEdit;
+                if (BandedColumn != null) BandedColumn.ColumnEdit = tEdit;
             }
             #endregion
 
@@ -1690,7 +1731,9 @@ namespace Tkn_DevColumn
                 //tEdit.AllowFocused = false;
                 //tEdit
                 //Column.
-                Column.ColumnEdit = tEdit;
+
+                if (Column != null) Column.ColumnEdit = tEdit;
+                if (BandedColumn != null) BandedColumn.ColumnEdit = tEdit;
             }
             #endregion
 
@@ -1701,7 +1744,8 @@ namespace Tkn_DevColumn
                 tEdit.Name = "Column_" + tFieldName;
                 tEdit.KeyDown += new System.Windows.Forms.KeyEventHandler(evg.myRepositoryItemEdit_KeyDown);
 
-                Column.ColumnEdit = tEdit;
+                if (Column != null) Column.ColumnEdit = tEdit;
+                if (BandedColumn != null) BandedColumn.ColumnEdit = tEdit;
             }
             #endregion
 
@@ -1735,7 +1779,9 @@ namespace Tkn_DevColumn
                 #endregion displayformat
                                
                 Column.UnboundType = DevExpress.Data.UnboundColumnType.DateTime;
-                Column.ColumnEdit = tEdit;
+
+                if (Column != null) Column.ColumnEdit = tEdit;
+                if (BandedColumn != null) BandedColumn.ColumnEdit = tEdit;
             }
             #endregion
 
@@ -1748,7 +1794,9 @@ namespace Tkn_DevColumn
 
                 if (tExpressionType > 0)
                     Column.Tag = "EXPRESSION";
-                Column.ColumnEdit = tEdit;
+
+                if (Column != null) Column.ColumnEdit = tEdit;
+                if (BandedColumn != null) BandedColumn.ColumnEdit = tEdit;
             }
             #endregion
 
@@ -1774,46 +1822,88 @@ namespace Tkn_DevColumn
                 int fontColor = t.Set(Row["CMP_FONT_COLOR"].ToString(), "", (int)0);
                 int backColor = t.Set(Row["CMP_BACK_COLOR"].ToString(), "", (int)0);
 
-                if (backColor != 0)
-                {
-                    Column.AppearanceCell.BackColor = Color.FromArgb(backColor);
-                    Column.AppearanceCell.Options.UseBackColor = true;
-                }
-
-                /// 'FONT_STYLE', 0, '', 'None'
-                /// 'FONT_STYLE', 1, '', 'Bold');
-                /// 'FONT_STYLE', 2, '', 'Italic');
-                /// 'FONT_STYLE', 3, '', 'Regular');
-                /// 'FONT_STYLE', 4, '', 'Strikeout');
-                /// 'FONT_STYLE', 5, '', 'Underline');
-
-                if (font_size > 0)
-                {
-                    if ((font_size != 8) || (font_style != 0))
+                if (Column != null)
+                { 
+                    if (backColor != 0)
                     {
-                        if (font_style == 0) Column.AppearanceCell.Font = new System.Drawing.Font(Column.AppearanceCell.Font.FontFamily, font_size, FontStyle.Regular);
-                        if (font_style == 1) Column.AppearanceCell.Font = new System.Drawing.Font(Column.AppearanceCell.Font.FontFamily, font_size, FontStyle.Bold);
-                        if (font_style == 2) Column.AppearanceCell.Font = new System.Drawing.Font(Column.AppearanceCell.Font.FontFamily, font_size, FontStyle.Italic);
-                        if (font_style == 3) Column.AppearanceCell.Font = new System.Drawing.Font(Column.AppearanceCell.Font.FontFamily, font_size, FontStyle.Regular);
-                        if (font_style == 4) Column.AppearanceCell.Font = new System.Drawing.Font(Column.AppearanceCell.Font.FontFamily, font_size, FontStyle.Strikeout);
-                        if (font_style == 5) Column.AppearanceCell.Font = new System.Drawing.Font(Column.AppearanceCell.Font.FontFamily, font_size, FontStyle.Underline);
-                        Column.AppearanceCell.Options.UseFont = true;
+                        Column.AppearanceCell.BackColor = Color.FromArgb(backColor);
+                        Column.AppearanceCell.Options.UseBackColor = true;
                     }
+
+                    /// 'FONT_STYLE', 0, '', 'None'
+                    /// 'FONT_STYLE', 1, '', 'Bold');
+                    /// 'FONT_STYLE', 2, '', 'Italic');
+                    /// 'FONT_STYLE', 3, '', 'Regular');
+                    /// 'FONT_STYLE', 4, '', 'Strikeout');
+                    /// 'FONT_STYLE', 5, '', 'Underline');
+                    if (font_size > 0)
+                    {
+                        if ((font_size != 8) || (font_style != 0))
+                        {
+                            if (font_style == 0) Column.AppearanceCell.Font = new System.Drawing.Font(Column.AppearanceCell.Font.FontFamily, font_size, FontStyle.Regular);
+                            if (font_style == 1) Column.AppearanceCell.Font = new System.Drawing.Font(Column.AppearanceCell.Font.FontFamily, font_size, FontStyle.Bold);
+                            if (font_style == 2) Column.AppearanceCell.Font = new System.Drawing.Font(Column.AppearanceCell.Font.FontFamily, font_size, FontStyle.Italic);
+                            if (font_style == 3) Column.AppearanceCell.Font = new System.Drawing.Font(Column.AppearanceCell.Font.FontFamily, font_size, FontStyle.Regular);
+                            if (font_style == 4) Column.AppearanceCell.Font = new System.Drawing.Font(Column.AppearanceCell.Font.FontFamily, font_size, FontStyle.Strikeout);
+                            if (font_style == 5) Column.AppearanceCell.Font = new System.Drawing.Font(Column.AppearanceCell.Font.FontFamily, font_size, FontStyle.Underline);
+                            Column.AppearanceCell.Options.UseFont = true;
+                        }
+                    }
+
+                    if (vld_operator > 11)
+                    {
+                        //Column.AppearanceCell.BackColor = v.ColorValidation;
+                        //Column.AppearanceCell.Options.UseBackColor = true;
+                        Column.AppearanceCell.BorderColor = v.ColorValidation;
+                        Column.AppearanceCell.Options.UseBorderColor = true;
+                    }
+
+                    if (tenabled == false)
+                        Column.OptionsColumn.ReadOnly = true;
+
+                    Column.OptionsColumn.AllowEdit = tenabled;
                 }
-
-
-                if (vld_operator > 11)
+                if (BandedColumn != null)
                 {
-                    //Column.AppearanceCell.BackColor = v.ColorValidation;
-                    //Column.AppearanceCell.Options.UseBackColor = true;
-                    Column.AppearanceCell.BorderColor = v.ColorValidation;
-                    Column.AppearanceCell.Options.UseBorderColor = true;
+                    if (backColor != 0)
+                    {
+                        BandedColumn.AppearanceCell.BackColor = Color.FromArgb(backColor);
+                        BandedColumn.AppearanceCell.Options.UseBackColor = true;
+                    }
+
+                    /// 'FONT_STYLE', 0, '', 'None'
+                    /// 'FONT_STYLE', 1, '', 'Bold');
+                    /// 'FONT_STYLE', 2, '', 'Italic');
+                    /// 'FONT_STYLE', 3, '', 'Regular');
+                    /// 'FONT_STYLE', 4, '', 'Strikeout');
+                    /// 'FONT_STYLE', 5, '', 'Underline');
+                    if (font_size > 0)
+                    {
+                        if ((font_size != 8) || (font_style != 0))
+                        {
+                            if (font_style == 0) BandedColumn.AppearanceCell.Font = new System.Drawing.Font(BandedColumn.AppearanceCell.Font.FontFamily, font_size, FontStyle.Regular);
+                            if (font_style == 1) BandedColumn.AppearanceCell.Font = new System.Drawing.Font(BandedColumn.AppearanceCell.Font.FontFamily, font_size, FontStyle.Bold);
+                            if (font_style == 2) BandedColumn.AppearanceCell.Font = new System.Drawing.Font(BandedColumn.AppearanceCell.Font.FontFamily, font_size, FontStyle.Italic);
+                            if (font_style == 3) BandedColumn.AppearanceCell.Font = new System.Drawing.Font(BandedColumn.AppearanceCell.Font.FontFamily, font_size, FontStyle.Regular);
+                            if (font_style == 4) BandedColumn.AppearanceCell.Font = new System.Drawing.Font(BandedColumn.AppearanceCell.Font.FontFamily, font_size, FontStyle.Strikeout);
+                            if (font_style == 5) BandedColumn.AppearanceCell.Font = new System.Drawing.Font(BandedColumn.AppearanceCell.Font.FontFamily, font_size, FontStyle.Underline);
+                            BandedColumn.AppearanceCell.Options.UseFont = true;
+                        }
+                    }
+
+                    if (vld_operator > 11)
+                    {
+                        BandedColumn.AppearanceCell.BorderColor = v.ColorValidation;
+                        BandedColumn.AppearanceCell.Options.UseBorderColor = true;
+                    }
+
+                    if (tenabled == false)
+                        BandedColumn.OptionsColumn.ReadOnly = true;
+
+                    BandedColumn.OptionsColumn.AllowEdit = tenabled;
                 }
 
-                if (tenabled == false)
-                    Column.OptionsColumn.ReadOnly = true;
 
-                Column.OptionsColumn.AllowEdit = tenabled;
 
                 /*
                 GridColumn colID = gridView.Columns["ID"];

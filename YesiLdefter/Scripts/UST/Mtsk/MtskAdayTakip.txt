@@ -23,13 +23,14 @@ begin transaction
    MebbisDurumTipiId      SmallInt     null, /* trg_MtskAday :  detay aşağıda */
    YasOnayiTipiId         SmallInt     null, /* 1-Yaşı Tutuyor, 2-Yaşı Tutmuyor,  3. Diğer sebeplerle onaylı */
    OzurDurumTipiId        SmallInt     null, /* MtskAdaySaglik tan gelecek bilgi  */
-   
+
+   -- 30
    BelgelerGeldi          Bit          null, /* tamamı geldiyse */
    BelgelerTarandi        Bit          null, /* tamamı tarandıysa */
    BelgelerYuklendi       Bit          null, /* tamamı yüklendiyse */
    EgitimSureciTipiId     SmallInt     null, /* detay aşağıda */
 
-   --20 ödemeleri
+   -- 40 ödemeleri
    BorcDurumuTipiId         SmallInt     null,
    --SertifikaUcretTipiId   SmallInt     null, /* trg_MtskAday */
    
@@ -186,10 +187,11 @@ create table [Lkp].[MtskAdayTakipZamanlamaTipi]
 Delete from [Lkp].[MtskAdayTakipZamanlamaTipi]
 INSERT INTO [Lkp].[MtskAdayTakipZamanlamaTipi] (Id, ZamanlamaTipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption)
  VALUES 
-  ( 0,  N'Belirsiz',         1, 1130, 'Zamanlama',  '', '' ),
-  ( 1,  N'Bu dönem',         1, 1131, 'Zamanlama',  '', '' ),
-  ( 2,  N'Gelecek ay',       1, 1132, 'Zamanlama',  '', '' ),
-  ( 3,  N'İleriki dönemler', 1, 1133, 'Zamanlama',  '', '' )
+  ( 0,  N'Belirsiz',                 1, 1130, 'Zamanlama',  '', '' ),
+  ( 1,  N'Geçmiş dönem devam eden',  1, 1131, 'Zamanlama',  '', '' ),
+  ( 2,  N'Bu dönem',                 1, 1132, 'Zamanlama',  '', '' ),
+  ( 3,  N'Gelecek ay',               1, 1133, 'Zamanlama',  '', '' ),
+  ( 4,  N'İleriki dönemler',         1, 1134, 'Zamanlama',  '', '' )
 
 
 
@@ -342,7 +344,7 @@ Delete from [Lkp].[MtskAdayTakipOzurDurumuTipi]
 INSERT INTO [Lkp].[MtskAdayTakipOzurDurumuTipi] (Id, OzurDurumuTipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption)
  VALUES 
   (  0, N'Belirsiz', 1, 1220, 'Sağlık durumu', '', ''),
-  (  1, N'Engeli Yok', 1, 1221, 'Sağlık durumu', '', ''),
+  --(  1, N'Engeli Yok', 1, 1221, 'Sağlık durumu', '', ''),
   (100, N'Ortopedik Engelli (Ellerini ve/veya Kollarını Kullanamıyor)', 1, 1222, 'Sağlık durumu', '', ''),
   (110, N'Ortopedik Engelli (Yürüyemiyor)', 1, 1223, 'Sağlık durumu', '', ''),
   (120, N'İşitme, Dil veya Konuşma Engelli', 1, 1224, 'Sağlık durumu', '', ''),
@@ -414,7 +416,8 @@ INSERT INTO [Lkp].[MtskAdayTakipEgitimSureciTipi] (Id, EgitimSureciTipi, KonuGru
   ( 3,    N'Sertifikayı hak kazandı',              1, 1263, 'Eğitim süreci', '', '' ),
   ( 4,    N'Sertifikası teslim edildi',            1, 1264, 'Eğitim süreci', '', '' ),
   ( 5,    N'Dosya yaktı',                          1, 1265, 'Eğitim süreci', '', '' ), /* esınav veya uyg sınavları başarısız oldu */
-  ( 6,    N'Nakil gitti',                          1, 1266, 'Eğitim süreci', '', '' )  /* 2. +4 hak için başka yere nakil oldu */
+  ( 6,    N'Nakil gitti',                          1, 1266, 'Eğitim süreci', '', '' ), /* 2. +4 hak için başka yere nakil oldu */
+  ( 7,    N'Kayıt sildirdi',                       1, 1267, 'Eğitim süreci', '', '' )
 
 
 

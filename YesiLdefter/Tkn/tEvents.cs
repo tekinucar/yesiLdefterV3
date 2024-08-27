@@ -6304,8 +6304,8 @@ namespace Tkn_Events
                     elseShowTableIPCode = item.SUBVIEW_TABLEIPCODE.ToString();
                     elseShowMenuPageName = item.SHOWMENU_PAGENAME.ToString();
                 }
-                if ((item.SUBVIEW_VALUE.IndexOf(readValue) > -1) ||
-                    (item.SUBVIEW_VALUE.IndexOf(readValue2) > -1))
+                if ((item.SUBVIEW_VALUE.IndexOf(readValue) > -1 && readValue.Length > 0) ||
+                    (item.SUBVIEW_VALUE.IndexOf(readValue2) > -1 && readValue2.Length > 0))
                 {
                     TableIPCode = item.SUBVIEW_TABLEIPCODE.ToString();
                     if (item.SUBVIEW_FORMCODE != null)
@@ -6390,7 +6390,6 @@ namespace Tkn_Events
                         MessageBox.Show(e.Message.ToString());
                     }
                 }
-
             }
 
             if (t.IsNotNull(subViewKeyFName2))

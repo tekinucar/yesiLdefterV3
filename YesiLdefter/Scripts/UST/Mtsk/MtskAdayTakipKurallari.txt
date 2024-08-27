@@ -1,0 +1,22 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table MtskAdayTakipKurallari
+ (
+   Id               Int IDENTITY(1,1) not null, 
+   KonuGrupId       SmallInt       null,
+   KonuId           Int            null,
+
+   KuralAciklamasi  nvarchar(1000) null,
+
+   constraint		pk_MtskAdayTakipKurallari primary key (Id)
+ )
+  
+ grant select, insert, update, delete on MtskAdayTakipKurallari to public
+
+ create index X_MtskAdayTakipKurallari01 on MtskAdayTakipKurallari (KonuGrupId, KonuId)
+   
+commit transaction
+
+/*CreateTableEnd*/

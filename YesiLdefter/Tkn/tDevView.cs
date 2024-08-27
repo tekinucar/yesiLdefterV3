@@ -839,9 +839,7 @@ namespace Tkn_DevView
                 tGridView.ViewCaption = t.Set(row_Table["IP_CAPTION"].ToString(), "", "");
                 tGridControl.MainView = tGridView;
                 tGridControl.BringToFront();
-                
                 //tGridView.OptionsBehavior.EditingMode = GridEditingMode.EditForm;
-
             }
             else
             {
@@ -851,7 +849,6 @@ namespace Tkn_DevView
             // Add Bands >> Gridin Üzerindeki Bands ları oluştur
             GridBands_Add(tGridView, null, null, dsFields, TableIPCode);
 
-            
             // GridView in Column ları ekleniyor  
             tAdvBandedGrid_Columns_Create(dsFields, tGridView, TableIPCode);
 
@@ -862,7 +859,7 @@ namespace Tkn_DevView
 
             #region GridViewe ait properties ve events bağlantıları hazırlanıyor
 
-            
+
             int find = t.Set(row_Table["DATA_FIND"].ToString(), "0", 0);
             tGridView.OptionsFind.AllowFindPanel = false;
             tGridView.OptionsFind.AlwaysVisible = (find > 0);
@@ -1263,7 +1260,7 @@ MS_FIELDS                                          T03_MSFIELDS                 
                     //if (tGrpNo > 0)
                     //    column.GroupIndex = tGrpNo;
 
-                    dc.Grid_ColumnEdit(Row, column, tcolumn_type, TableIPCode);
+                    dc.Grid_ColumnEdit(Row, column, null, tcolumn_type, TableIPCode);
 
                     i++;
                 }
@@ -1566,7 +1563,7 @@ MS_FIELDS                                          T03_MSFIELDS                 
                     tGrpNo = t.Set(Row["GROUP_NO"].ToString(), Row["LKP_GROUP_NO"].ToString(), (int)0);
                     tGrpLineNo = t.Set(Row["GROUP_LINE_NO"].ToString(), Row["LKP_GROUP_LINE_NO"].ToString(), i);
 
-                    dc.Grid_ColumnEdit(Row, column, tcolumn_type, TableIPCode);
+                    dc.Grid_ColumnEdit(Row, column, null, tcolumn_type, TableIPCode);
 
                     tGridView.Columns.Add(column);
 
@@ -4454,7 +4451,7 @@ MS_FIELDS                                          T03_MSFIELDS                 
                 ColumnSortOrder.Ascending, firstGroupingColumn);
                     */
 
-                col.Grid_ColumnEdit(Row, column, tcolumn_type, TableIPCode);
+                col.Grid_ColumnEdit(Row, column, null, tcolumn_type, TableIPCode);
 
 
                 if (tsum)
@@ -4516,6 +4513,7 @@ MS_FIELDS                                          T03_MSFIELDS                 
                     if (t.IsNotNull(tdisplayformat) == false)
                         tdisplayformat = "n2";
 
+                    
                     BandedGridColumn column = new BandedGridColumn();
                     column.Name = "Column_" + tfield_name;
                     column.FieldName = tfield_name;
@@ -4526,8 +4524,13 @@ MS_FIELDS                                          T03_MSFIELDS                 
                     //column.BestFit();
                     column.MinWidth = t.Set(Row["CMP_WIDTH"].ToString(), Row["LKP_CMP_WIDTH"].ToString(), (int)100);
 
+                    // DevExpress.XtraGrid.Views.BandedGrid.BandedGridColumn
+
                     //column                                        
-                    col.Grid_ColumnEdit(Row, column, tcolumn_type, TableIPCode);
+                    col.Grid_ColumnEdit(Row, null, column, tcolumn_type, TableIPCode);
+
+                    if (tcolumn_type == "PictureEdit")
+                        tGridView.RowHeight = 50;
 
                     if (column.Width < 10)
                         column.Width = t.Set(Row["LKP_CMP_WIDTH"].ToString(), "100", (Int16)100);
