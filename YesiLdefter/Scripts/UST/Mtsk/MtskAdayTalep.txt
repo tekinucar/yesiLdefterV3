@@ -66,8 +66,7 @@ begin transaction
    SubeTipiId              SmallInt      null,
       
    MebbisKurumOnayi        Bit           null, /* 0-Onaysız, 1-Onaylandı */		
-   
-   SmallInt      null,
+   MebbisDurumTipiId       SmallInt      null,
    MebbisDurumOkundu       Bit           null,
    KayitTipiId             SmallInt      null, /* 1.'Ön kayıt', 2.'Kayıt aşamasında', 3.'Kesin kayıt' ... */
    VeriKaynakTipiId        SmallInt      null, /* 1. Kullanıcı Manuel, 2. Mebbis Dönem Aday Onaylama, 3. Mebbis Uygulama Sınav Listesi, 4. Mebbis Aday Durum Bilgileri  */
@@ -881,7 +880,7 @@ drop table [Lkp].[MtskAdayTalepKayitTipi]
 create table [Lkp].[MtskAdayTalepKayitTipi]
 (
    Id               Int Unique not null, 
-   KayitTipi        nVarchar(30)   null,
+   KayitTipi        nVarchar(40)   null,
    ChartCaption     nVarchar(20)   null,
    FormCaption      nVarchar(15)   null,
 
@@ -894,11 +893,7 @@ INSERT INTO [Lkp].[MtskAdayTalepKayitTipi] (Id, KayitTipi, ChartCaption, FormCap
   ( 0,    N'', '', ''),
   ( 1,    N'Ön kayıt',                  'Ön kayıt',     'Yeni Aday' ),
   ( 2,    N'Kayıt aşamasında',          'K.Aşamasında', 'Mebbis' ),
-  ( 3,    N'Kesin kayıt',               'Kesin kay.', '' ),
-  ( 4,    N'Sertifikayı hak kazandı',   '', '' ),
-  ( 5,    N'Sertifikası teslim edildi', '', '' ),
-  ( 6,    N'Diğerleri',                 '', '' ),
-  ( 7,    N'Dosya kapandı',             '', '' )
+  ( 3,    N'Kesin kayıt',               'Kesin kay.', '' )
 
 
 -- ------------------------------------------------------- 

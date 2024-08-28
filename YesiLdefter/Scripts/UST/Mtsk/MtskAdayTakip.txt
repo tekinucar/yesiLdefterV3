@@ -9,19 +9,20 @@ begin transaction
    TalepId               Int       not null, 
    AdayId                Int       not null, 
 
-   DonemTipiId           Int           null,
-   GrupTipiId            SmallInt      null, /* trg_MtskAday */
-   SubeTipiId            SmallInt      null, /* trg_MtskAday */
+ --*  DonemTipiId           Int           null,
+ --*  GrupTipiId            SmallInt      null, /* trg_MtskAday */
+ --*  SubeTipiId            SmallInt      null, /* trg_MtskAday */
 
    --10 kayıt aşaması
-   TalepTipiId            SmallInt     null, /* 1. sertifika, 2. (2.+4 hak), 3. Nakil 2.+4hak, 4. 100Ceza, 5. Özel Uyg Ders   */ 
-   KayitTipiId            SmallInt     null, /* trg_MtskAday : 1. Ön kayıt, 2. Kayıt aşamasında, 3. Kesin Kayıt ...  */ 
+ --*  TalepTipiId            SmallInt     null, /* 1. sertifika, 2. (2.+4 hak), 3. Nakil 2.+4hak, 4. 100Ceza, 5. Özel Uyg Ders   */ 
+ --*  KayitTipiId            SmallInt     null, /* trg_MtskAday : 1. Ön kayıt, 2. Kayıt aşamasında, 3. Kesin Kayıt ...  */ 
    ZamanlamaTipiId        SmallInt     null, /* detay aşağıda */
    IsGrupSubeYok          Bit          null, /* grup veya şubesi belli değilse  */
    IsEgitimDevamEdiyor    Bit          null, /* eğitim devam edenler = 1, değilse = 0 : sorgularda kolaylık olsun diye var  */ 
-   MebbisKurumOnayi       Bit          null, /* trg_MtskAday : 0-Onaysız, 1-Onaylandı */	
-   MebbisDurumTipiId      SmallInt     null, /* trg_MtskAday :  detay aşağıda */
-   YasOnayiTipiId         SmallInt     null, /* 1-Yaşı Tutuyor, 2-Yaşı Tutmuyor,  3. Diğer sebeplerle onaylı */
+ --*  MebbisKurumOnayi       Bit          null, /* trg_MtskAday : 0-Onaysız, 1-Onaylandı */	
+ --*  MebbisDurumTipiId      SmallInt     null, /* trg_MtskAday :  detay aşağıda */
+   YasOnayiTipiId         SmallInt     null, /* 1-Yaşı Tutmuyor, 2-Yaş için bekleme süresi doldu,  3. Diğer sebeplerle onaylı */
+   YasHazirTarihi         Date         null, /* yaş sınırını dolduğu tarih */
    OzurDurumTipiId        SmallInt     null, /* MtskAdaySaglik tan gelecek bilgi  */
 
    -- 30
@@ -32,7 +33,6 @@ begin transaction
 
    -- 40 ödemeleri
    BorcDurumuTipiId         SmallInt     null,
-   --SertifikaUcretTipiId   SmallInt     null, /* trg_MtskAday */
    
    --100 eSınav aşaması
    TeorikBaslamaTarihi    Date         null,
@@ -107,6 +107,7 @@ commit transaction
 
 begin transaction
 
+/*
 -- ------------------------------------------------------- 
 -- TalepTipiId
 -- ------------------------------------------------------- 
@@ -163,7 +164,7 @@ INSERT INTO [Lkp].[MtskAdayTakipKayitTipi] (Id, KayitTipi, KonuGrupId, KonuId, K
   ( 1,    N'Ön kayıt',          1, 1121, 'Kayıt durumu',  'Ön kayıt',     'Yeni Aday' ),
   ( 2,    N'Kayıt aşamasında',  1, 1122, 'Kayıt durumu',  'K.Aşamasında', 'Mebbis' ),
   ( 3,    N'Kesin kayıt',       1, 1123, 'Kayıt durumu',  'Kesin kay.', '' )
-
+*/
 
 -- ------------------------------------------------------- 
 -- ZamanlamaTipiId
@@ -218,8 +219,7 @@ create table [Lkp].[MtskAdayTakipGrupSubeTipi]
 Delete from [Lkp].[MtskAdayTakipGrupSubeTipi]
 INSERT INTO [Lkp].[MtskAdayTakipGrupSubeTipi] (Id, GrupSubeTipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption)
  VALUES 
-  ( 1,  N'Şubesi belli olmayan adaylar',   1, 1141, 'Grup ve şube',  '', '' ),
-  ( 2,  N'Süreci devam eden adaylar',      1, 1151, 'Grup ve şube',  '', '' )
+  ( 1,  N'Grup veya şubesi belli olmayan adaylar',   1, 1141, 'Grup ve şube',  '', '' )
 
 
 -- ------------------------------------------------------- 
@@ -245,8 +245,8 @@ create table [Lkp].[MtskAdayTakipMebbisOnayiTipi]
 Delete from [Lkp].[MtskAdayTakipMebbisOnayiTipi]
 INSERT INTO [Lkp].[MtskAdayTakipMebbisOnayiTipi] (Id, MebbisOnayiTipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption)
  VALUES 
-  ( 1,  N'Onaysız',        1, 1161, 'Mebbis kurum onayı',  '', '' ),
-  ( 2,  N'Onaylandı',      1, 1162, 'Mebbis kurum onayı',  '', '' )
+  ( 0,  N'Onaysız',        1, 1161, 'Mebbis kurum onayı',  '', '' ),
+  ( 1,  N'Onaylandı',      1, 1162, 'Mebbis kurum onayı',  '', '' )
 
 
 
@@ -315,8 +315,8 @@ Delete from [Lkp].[MtskAdayTakipYasOnayiTipi]
 INSERT INTO [Lkp].[MtskAdayTakipYasOnayiTipi] (Id, YasOnayiTipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption)
  VALUES 
   ( 0,    N'Belirsiz',                 1, 1210, 'Yaş onayı', '', ''),
-  ( 1,    N'Yaşı tutuyor',             1, 1211, 'Yaş onayı', '', ''),
-  ( 2,    N'Yaşı tutmuyor',            1, 1212, 'Yaş onayı', '', ''),
+  ( 1,    N'Yaşı tutmuyor',            1, 1211, 'Yaş onayı', '', ''),
+  ( 2,    N'Yaş için bekleme süresi doldu', 1, 1212, 'Yaş onayı', '', ''),
   ( 3,    N'Muhafiyetle onaylı',       1, 1213, 'Yaş onayı', '', '')
 
 
@@ -410,14 +410,12 @@ create table [Lkp].[MtskAdayTakipEgitimSureciTipi]
 Delete from [Lkp].[MtskAdayTakipEgitimSureciTipi]
 INSERT INTO [Lkp].[MtskAdayTakipEgitimSureciTipi] (Id, EgitimSureciTipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption)
  VALUES 
-  ( 0,    N'Belirsiz',                             1, 1260, 'Eğitim süreci', '', '' ),
-  ( 1,    N'Eğitimleri başlamadı',                 1, 1261, 'Eğitim süreci', '', '' ),
-  ( 2,    N'Eğitimleri ve sınavları devam ediyor', 1, 1262, 'Eğitim süreci', '', '' ),
-  ( 3,    N'Sertifikayı hak kazandı',              1, 1263, 'Eğitim süreci', '', '' ),
-  ( 4,    N'Sertifikası teslim edildi',            1, 1264, 'Eğitim süreci', '', '' ),
-  ( 5,    N'Dosya yaktı',                          1, 1265, 'Eğitim süreci', '', '' ), /* esınav veya uyg sınavları başarısız oldu */
-  ( 6,    N'Nakil gitti',                          1, 1266, 'Eğitim süreci', '', '' ), /* 2. +4 hak için başka yere nakil oldu */
-  ( 7,    N'Kayıt sildirdi',                       1, 1267, 'Eğitim süreci', '', '' )
+  ( 0,    N'Belirsiz',                                1, 1260, 'Eğitim süreci', '', '' ),
+  ( 1,    N'Eğitimleri başlamadı',                    1, 1261, 'Eğitim süreci', '', '' ),
+  ( 2,    N'Eğitimleri ve sınavları devam ediyor',    1, 1262, 'Eğitim süreci', '', '' ),
+  ( 3,    N'Sertifikayı hak kazandı',                 1, 1263, 'Eğitim süreci', '', '' ),
+  ( 4,    N'Dosya yaktı',                             1, 1264, 'Eğitim süreci', '', '' ), /* esınav veya uyg sınavları başarısız oldu */
+  ( 5,    N'Kendi isteğiyle ayrıldı, kayıt sildirdi', 1, 1264, 'Eğitim süreci', '', '' )
 
 
 
