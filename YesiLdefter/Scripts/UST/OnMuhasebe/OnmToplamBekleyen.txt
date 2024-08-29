@@ -122,6 +122,9 @@ INSERT INTO [Lkp].[OnmToplamBekleyenAltGrupTipi] (Id, AltGrupTipi, HesapKodu)
 -- ------------------------------------------------------- 
 -- AltCesitTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmToplamBekleyenAltCesitTipi')
+drop table [Lkp].[OnmToplamBekleyenAltCesitTipi]
+
 create table [Lkp].[OnmToplamBekleyenAltCesitTipi]
 (
    Id           Int Unique Not Null,
@@ -176,7 +179,7 @@ commit transaction
 declare @FirmId int
 declare @AnaGrupTipiId smallInt
 declare @AltGrupTipiId smallInt
-set @FirmId = 21
+set @FirmId = ?
 
 Delete [dbo].[OnmToplamBekleyen]
 
@@ -237,15 +240,3 @@ INSERT INTO [dbo].[OnmToplamBekleyen]
 /*CreateDataEnd*/
 
 
-/*CreateProcedure*/
-
-CREATE PROCEDURE [dbo].[prc_OnmToplamBekleyen] (@firmId int)  
-AS BEGIN
-  /* 
-  declare @firmId int
-
-
-
-END -- procedure
-
-/*CreateProcedureEnd*/

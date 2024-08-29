@@ -40,7 +40,7 @@ commit transaction
 
 /*CreateTrigger*/
 
-CREATE TRIGGER dbo.trg_MtskAdaySaglik on dbo.MtskAdaySaglik
+CREATE TRIGGER [dbo].[trg_MtskAdaySaglik] on [dbo].[MtskAdaySaglik]
 AFTER INSERT, UPDATE
 AS BEGIN
 
@@ -48,6 +48,7 @@ AS BEGIN
     DECLARE @curId bigint
 
     Declare @TalepId int = 0
+	Declare @OzurDurumuTipiId smallInt = 0
 
     OPEN myCursor
 
@@ -57,11 +58,17 @@ AS BEGIN
     BEGIN
 
         select 
-           @TalepId = ins.TalepId
+            @TalepId = ins.TalepId
+		   ,@OzurDurumuTipiId = isnull(ins.OzurDurumuTipiId,0)
 		from inserted ins
     	where ins.Id = @curId
-
-		-- MtskAdayTalep tablosunu işaretle
+		
+        -- Takip
+		Update MtskAdayTakip set
+		  OzurDurumuTipiId = @OzurDurumuTipiId
+        Where TalepId = @TalepId
+		
+		-- Talep tablosunu işaretle
 		Update MtskAdayTalep set
         SaglikGeldi = x.Sonuc
         From MtskAdayTalep a, 

@@ -407,6 +407,8 @@ namespace Tkn_DevColumn
                 if (tableName == "MtskDonemTipi")
                     Sql = " Select * from [Lkp].[" + tableName + "] order by Id desc ";
 
+                //if (tableName == "MtskSertifikaTipi")
+
                 v.dBaseNo dBaseNo = t.getDBaseNo(dbaseType);
 
                 if (tableName == "ILTipi")

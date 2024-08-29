@@ -49,7 +49,7 @@ commit transaction
 
 /*CreateTrigger*/
 
-CREATE TRIGGER [dbo].[trg_MtskAday] on [dbo].[MtskAday]
+ALTER TRIGGER [dbo].[trg_MtskAday] on [dbo].[MtskAday]
 AFTER INSERT, UPDATE
 AS BEGIN
 
@@ -71,8 +71,15 @@ AS BEGIN
     declare @yTamAdi varchar(100) = null
     declare @eTamAdi varchar(100) = null
     declare @newTamAdi varchar(100) = null
+
+    declare @eAdi varchar(50) = null
+    declare @eSoyadi varchar(50) = null
+	declare @eDogumTarihi Date = null
+
     declare @yAdi varchar(50) = null
     declare @ySoyadi varchar(50) = null
+    declare @yDogumTarihi Date = null
+
 
 	-- Veri Transferi başladımı
     --Select @DbUpdatesIsActive = u.IsActive
@@ -89,10 +96,12 @@ AS BEGIN
             @eAdayId = isnull(dlt.Id,0)
            ,@eIsActive = isnull(dlt.IsActive,0)
            ,@eTamAdi = isnull(dlt.TamAdiSoyadi,'')
-
+           ,@eAdi = isnull(dlt.Adi,'')
+           ,@eSoyadi = isnull(dlt.Soyadi,'')
+           ,@eDogumTarihi = dlt.DogumTarihi 
         From deleted dlt
         Where dlt.Id = @adayId
-			   
+				
         Select 
             @yFirmId = ins.FirmId
            ,@yIsActive = isnull(ins.IsActive,0)
@@ -100,10 +109,10 @@ AS BEGIN
            ,@yTamAdi = isnull(ins.TamAdiSoyadi, '')
            ,@yAdi = isnull(ins.Adi,'')
            ,@ySoyadi = isnull(ins.Soyadi,'')
-
+           ,@yDogumTarihi = ins.DogumTarihi
         From inserted ins
         Where ins.Id = @adayId
-     	   	
+     			
         -- TamAdiSoyadi var ise Adi ve Soyadi tespit ediliyor 
         if ((@yTamAdi <> '') and
             (@yAdi = '') and
@@ -129,16 +138,27 @@ AS BEGIN
 		
     	set @newTamAdi = @yAdi + ' ' +  @ySoyadi
 
-        if ((@newTamAdi <> @eTamAdi) or 
-            (@eTamAdi = '') or
-            (@yTamAdi = '') 
-            )  
-    	begin
+        --if ((UPPER(@newTamAdi) <> UPPER(@eTamAdi)) or 
+		--    (UPPER(@newTamAdi) <> UPPER(@yTamAdi)) or 
+        --    (@eAdi <> @yAdi) or
+        --    (@eSoyadi <> @ySoyadi) or
+        --    (@eTamAdi = '') or
+        --    (@yTamAdi = '') 
+        --         )  
+        --begin
     	    update MtskAday set 
             TamAdiSoyadi = RTRIM(LTRIM(@newTamAdi))
             where Id = @adayId 
-    	end
+    	--end
 
+		-- Doğum tarihi değişirse 
+		-- her talep için yeniden doğum tarihi hesaplansın
+        if (@eDogumTarihi <> @yDogumTarihi or @eDogumTarihi is null or @yDogumTarihi is null)
+		begin
+		    Update MtskAdayTalep set FirmId = @yFirmId
+			Where AdayId = @adayId
+		end
+		
       FETCH NEXT FROM adayCursor INTO @adayId
     END -- While
 
@@ -157,6 +177,7 @@ END -- create trigger
 
 
 /*CreateTriggerEnd*/
+
 
 
 

@@ -23,7 +23,7 @@ begin transaction
  --*  MebbisDurumTipiId      SmallInt     null, /* trg_MtskAday :  detay aşağıda */
    YasOnayiTipiId         SmallInt     null, /* 1-Yaşı Tutmuyor, 2-Yaş için bekleme süresi doldu,  3. Diğer sebeplerle onaylı */
    YasHazirTarihi         Date         null, /* yaş sınırını dolduğu tarih */
-   OzurDurumTipiId        SmallInt     null, /* MtskAdaySaglik tan gelecek bilgi  */
+   OzurDurumuTipiId       SmallInt     null, /* MtskAdaySaglik tan gelecek bilgi  */
 
    -- 30
    BelgelerGeldi          Bit          null, /* tamamı geldiyse */
@@ -130,7 +130,7 @@ create table [Lkp].[MtskAdayTakipTalepTipi]
 Delete from [Lkp].[MtskAdayTakipTalepTipi]
 INSERT INTO [Lkp].[MtskAdayTakipTalepTipi] (Id, TalepTipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption)
  VALUES 
-  ( 1,    N'Sertifika',             1, 1111, 'Talep tipi', '', ''),
+  ( 1,    N'Sertifika',             1, 1111, 'Talep tipi', '', 'Yeni aday'),
   ( 2,    N'2.+4 hak ',             1, 1112, 'Talep tipi', '', ''),
   ( 3,    N'Nakil 2.+4 hak',        1, 1113, 'Talep tipi', '', ''),
   ( 4,    N'100 Ceza',              1, 1114, 'Talep tipi', '', ''),
@@ -314,10 +314,11 @@ create table [Lkp].[MtskAdayTakipYasOnayiTipi]
 Delete from [Lkp].[MtskAdayTakipYasOnayiTipi]
 INSERT INTO [Lkp].[MtskAdayTakipYasOnayiTipi] (Id, YasOnayiTipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption)
  VALUES 
-  ( 0,    N'Belirsiz',                 1, 1210, 'Yaş onayı', '', ''),
-  ( 1,    N'Yaşı tutmuyor',            1, 1211, 'Yaş onayı', '', ''),
+  --( 0,    N'Yaşı tutuyor',                  1, 1210, 'Yaş onayı', '', ''),
+  ( 1,    N'Yaşı tutmuyor',                 1, 1211, 'Yaş onayı', '', ''),
   ( 2,    N'Yaş için bekleme süresi doldu', 1, 1212, 'Yaş onayı', '', ''),
-  ( 3,    N'Muhafiyetle onaylı',       1, 1213, 'Yaş onayı', '', '')
+  ( 3,    N'Muhafiyetle onaylı',            1, 1213, 'Yaş onayı', '', ''),
+  ( 4,    N'Doğum tarihi yok, belirsiz',    1, 1214, 'Yaş onayı', '', '')
 
 
 
@@ -343,7 +344,7 @@ create table [Lkp].[MtskAdayTakipOzurDurumuTipi]
 Delete from [Lkp].[MtskAdayTakipOzurDurumuTipi]
 INSERT INTO [Lkp].[MtskAdayTakipOzurDurumuTipi] (Id, OzurDurumuTipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption)
  VALUES 
-  (  0, N'Belirsiz', 1, 1220, 'Sağlık durumu', '', ''),
+  --(  0, N'Belirsiz', 1, 1220, 'Sağlık durumu', '', ''),
   --(  1, N'Engeli Yok', 1, 1221, 'Sağlık durumu', '', ''),
   (100, N'Ortopedik Engelli (Ellerini ve/veya Kollarını Kullanamıyor)', 1, 1222, 'Sağlık durumu', '', ''),
   (110, N'Ortopedik Engelli (Yürüyemiyor)', 1, 1223, 'Sağlık durumu', '', ''),
