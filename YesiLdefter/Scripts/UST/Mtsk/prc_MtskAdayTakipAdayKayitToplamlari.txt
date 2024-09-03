@@ -1,0 +1,276 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_MtskAdayTakipAdayKayitToplamlari] (@FirmId int, @DonemTipiId int)  
+AS BEGIN
+
+-- TalepTipi
+Select 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.TalepTipi as KonuAciklama
+ , tip.FormCaption as Islem
+ , count(talep.Id) as AdaySayisi 
+
+From MtskAdayTalep as talep
+     left outer join Lkp.MtskAdayTakipTalepTipi as tip on 
+	   ( talep.TalepTipiId = tip.Id )
+Where FirmId = @FirmId
+and   DonemTipiId = @DonemTipiId
+
+Group by 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.TalepTipi
+ , tip.FormCaption 
+ 
+union all
+
+-- KayitTipi = 1, 2, 3 
+Select 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.KayitTipi as KonuAciklama
+ , tip.FormCaption as Islem
+ , count(talep.Id) as AdaySayisi 
+
+From MtskAdayTalep as talep
+     left outer join Lkp.MtskAdayTakipKayitTipi as tip on 
+	   ( talep.KayitTipiId = tip.Id )
+Where FirmId = @FirmId
+and   DonemTipiId = @DonemTipiId
+
+Group by 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.KayitTipi
+ , tip.FormCaption 
+
+union all
+
+-- Belgeleri eksik olanlar
+Select 
+   tip.KonuId 
+ , tip.KonuCaption
+ , tip.BelgelerTipi as KonuAciklama
+ , tip.FormCaption as Islem
+ , count(takip.Id) as AdaySayisi 
+
+From MtskAdayTakip as takip
+     left outer join Lkp.MtskAdayTakipBelgelerTipi as tip on ( tip.KonuId = 1231 )
+
+Where FirmId = @FirmId
+and   DonemTipiId = @DonemTipiId
+and   takip.BelgelerGeldi = 0 
+and  (takip.KayitTipiId = 2 or takip.KayitTipiId = 3 ) 
+
+group by tip.KonuId 
+       , tip.KonuCaption
+       , tip.BelgelerTipi
+	   , tip.FormCaption
+
+union all
+
+-- Belgeleri taranmayanlar
+Select 
+   tip.KonuId 
+ , tip.KonuCaption
+ , tip.BelgelerTipi as KonuAciklama
+ , tip.FormCaption as Islem
+ , count(takip.Id) as AdaySayisi 
+
+From MtskAdayTakip as takip
+     left outer join Lkp.MtskAdayTakipBelgelerTipi as tip on ( tip.KonuId = 1232 )
+
+Where FirmId = @FirmId
+and   DonemTipiId = @DonemTipiId
+and   takip.BelgelerTarandi = 0 
+and  (takip.KayitTipiId = 2 or takip.KayitTipiId = 3 ) 
+
+group by tip.KonuId 
+       , tip.KonuCaption
+       , tip.BelgelerTipi
+	   , tip.FormCaption
+
+union all
+
+-- Belgeleri yüklenmeyenler
+Select 
+   tip.KonuId 
+ , tip.KonuCaption
+ , tip.BelgelerTipi as KonuAciklama
+ , tip.FormCaption as Islem
+ , count(takip.Id) as AdaySayisi 
+
+From MtskAdayTakip as takip
+     left outer join Lkp.MtskAdayTakipBelgelerTipi as tip on ( tip.KonuId = 1233 )
+
+Where FirmId = @FirmId
+and   DonemTipiId = @DonemTipiId
+and   takip.BelgelerYuklendi = 0 
+and  (takip.KayitTipiId = 2 or takip.KayitTipiId = 3 ) 
+
+group by tip.KonuId 
+       , tip.KonuCaption
+       , tip.BelgelerTipi
+	   , tip.FormCaption
+
+union all
+
+-- MebbisKurumOnayi yok
+Select 
+   tip.KonuId 
+ , tip.KonuCaption
+ , tip.MebbisOnayiTipi as KonuAciklama
+ , tip.FormCaption as Islem
+ , count(talep.Id) as AdaySayisi 
+
+From MtskAdayTalep as talep
+     left outer join Lkp.MtskAdayTakipMebbisOnayiTipi as tip on ( talep.MebbisKurumOnayi = tip.Id )
+
+Where FirmId = @FirmId
+and   DonemTipiId = @DonemTipiId
+
+group by tip.KonuId 
+       , tip.KonuCaption
+       , tip.MebbisOnayiTipi
+	   , tip.FormCaption
+
+union all
+
+-- EgitimSureciTipi
+Select 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.EgitimSureciTipi as KonuAciklama
+ , tip.FormCaption as Islem
+ , count(takip.Id) as AdaySayisi 
+
+From MtskAdayTakip as takip
+     left outer join Lkp.MtskAdayTakipEgitimSureciTipi as tip on 
+	   ( takip.EgitimSureciTipiId = tip.Id )
+Where FirmId = @FirmId
+and   DonemTipiId = @DonemTipiId
+
+Group by 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.EgitimSureciTipi
+ , tip.FormCaption 
+
+union all
+
+-- ZamanlamaTipi
+Select 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.ZamanlamaTipi as KonuAciklama
+ , tip.FormCaption as Islem
+ , count(takip.Id) as AdaySayisi 
+
+From MtskAdayTakip as takip
+     left outer join Lkp.MtskAdayTakipZamanlamaTipi as tip on 
+	   ( takip.ZamanlamaTipiId = tip.Id )
+Where FirmId = @FirmId
+--and   DonemTipiId = @DonemTipiId
+
+Group by 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.ZamanlamaTipi
+ , tip.FormCaption 
+
+union all
+
+-- IsGrupSubeYok
+Select 
+   tip.KonuId 
+ , tip.KonuCaption
+ , tip.GrupSubeTipi as KonuAciklama
+ , tip.FormCaption as Islem
+ , count(takip.Id) as AdaySayisi 
+
+From MtskAdayTakip as takip
+     left outer join Lkp.MtskAdayTakipGrupSubeTipi as tip on ( tip.KonuId = 1141 )
+
+Where FirmId = @FirmId
+and   DonemTipiId = @DonemTipiId
+and   IsGrupSubeYok = 1
+
+group by tip.KonuId 
+       , tip.KonuCaption
+       , tip.GrupSubeTipi
+	   , tip.FormCaption
+
+union all
+
+-- YasOnayiTipi
+Select 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.YasOnayiTipi as KonuAciklama
+ , tip.FormCaption as Islem
+ , count(takip.Id) as AdaySayisi 
+
+From MtskAdayTakip as takip
+     left outer join Lkp.MtskAdayTakipYasOnayiTipi as tip on 
+	   ( takip.YasOnayiTipiId = tip.Id )
+Where FirmId = @FirmId
+and   DonemTipiId = @DonemTipiId
+and   takip.YasOnayiTipiId > 0 -- Yaşı tutuyor
+
+Group by 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.YasOnayiTipi
+ , tip.FormCaption 
+
+union all
+
+-- Sağlık, OzurDurumTipi
+Select 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.OzurDurumuTipi as KonuAciklama
+ , tip.FormCaption as Islem
+ , count(takip.Id) as AdaySayisi 
+
+From MtskAdayTakip as takip
+     left outer join Lkp.MtskAdayTakipOzurDurumuTipi as tip on 
+	   ( takip.OzurDurumuTipiId = tip.Id )
+Where FirmId = @FirmId
+and   DonemTipiId = @DonemTipiId
+and   takip.OzurDurumuTipiId > 0
+
+Group by 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.OzurDurumuTipi
+ , tip.FormCaption
+
+/*
+-- MebbisDurumTipi
+Select 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.MebbisDurumTipi as KonuAciklama
+ , tip.FormCaption as Islem
+ , count(takip.Id) as AdaySayisi 
+
+From MtskAdayTakip as takip
+     left outer join Lkp.MtskAdayTakipMebbisDurumTipi as tip on 
+	   ( takip.MebbisDurumTipiId = tip.Id )
+Where FirmId = @FirmId
+and   DonemTipiId = @DonemTipiId
+
+Group by 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.MebbisDurumTipi
+ , tip.FormCaption 
+
+union all
+*/
+
+END -- procedure
+
+/*CreateProcedureEnd*/

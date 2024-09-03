@@ -827,7 +827,7 @@ namespace Tkn_DevView
             #region AdvBandedGridView ve Columns İşlemleri
 
             AdvBandedGridView tGridView = null;
-
+            //BandedGridView tGridView = null;
             // Gelen GridControlu içinde GridView yok ise yeni bir View ekleyelim
             // var ise olanı kullanalım
             if ((tGridControl.MainView == null) ||
@@ -835,6 +835,7 @@ namespace Tkn_DevView
             {
                 int RefId = t.Set(row_Table[0].ToString(), "", 0);
                 tGridView = new AdvBandedGridView(tGridControl);
+                //tGridView = new BandedGridView(tGridControl);
                 tGridView.Name = "tAdvBandedGridView_" + RefId.ToString();
                 tGridView.ViewCaption = t.Set(row_Table["IP_CAPTION"].ToString(), "", "");
                 tGridControl.MainView = tGridView;
@@ -844,6 +845,7 @@ namespace Tkn_DevView
             else
             {
                 tGridView = (DevExpress.XtraGrid.Views.BandedGrid.AdvBandedGridView)tGridControl.MainView;
+                //tGridView = (DevExpress.XtraGrid.Views.BandedGrid.BandedGridView)tGridControl.MainView;
             }
 
             // Add Bands >> Gridin Üzerindeki Bands ları oluştur
@@ -3842,7 +3844,8 @@ MS_FIELDS                                          T03_MSFIELDS                 
             #region GridView
             if (tGridView != null)
             {
-                if (ALLOWCELLMERGE == "TRUE") tGridView.OptionsView.AllowCellMerge = true;
+                if (ALLOWCELLMERGE == "TRUE") 
+                    tGridView.OptionsView.AllowCellMerge = true;
                 if (ALLOWCELLMERGE == "FALSE") tGridView.OptionsView.AllowCellMerge = false;
 
                 if (COLUMNAUTOVIEW == "TRUE") tGridView.OptionsView.ColumnAutoWidth = true;
@@ -4470,6 +4473,7 @@ MS_FIELDS                                          T03_MSFIELDS                 
 
         #region AdvBandedGridView Columns Create
         public void tAdvBandedGrid_Columns_Create(DataSet dsFields, AdvBandedGridView tGridView, string TableIPCode)
+        //public void tAdvBandedGrid_Columns_Create(DataSet dsFields, BandedGridView tGridView, string TableIPCode)
         {
             Boolean tvisible = false;
             string tcolumn_type = string.Empty;
@@ -4545,7 +4549,9 @@ MS_FIELDS                                          T03_MSFIELDS                 
 
 
                     column.GroupIndex = fgroup_no;
-                    column.VisibleIndex = fgroup_line_no;
+                    if (fgroup_line_no < 0)
+                        column.VisibleIndex = fgroup_line_no * -1;
+                    else column.VisibleIndex = fgroup_line_no;
 
                     #region summary add
                     if (tsummary > 0)

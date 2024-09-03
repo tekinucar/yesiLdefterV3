@@ -3319,7 +3319,8 @@ namespace Tkn_Events
 
             if (cntrl != null)
             {
-                AdvBandedGridView tView = ((DevExpress.XtraGrid.GridControl)cntrl).MainView as AdvBandedGridView;
+                //AdvBandedGridView tView = ((DevExpress.XtraGrid.GridControl)cntrl).MainView as AdvBandedGridView;
+                BandedGridView tView = ((DevExpress.XtraGrid.GridControl)cntrl).MainView as BandedGridView;
                 tView.BeginInit();
                 int j = tView.Bands.Count;
                 for (int i = 0; i < j; i++)

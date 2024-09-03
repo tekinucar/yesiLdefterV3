@@ -15,11 +15,10 @@ AS BEGIN
   , @TcNo = aday.TcNo
   From MtskAdayTalep as talep, MtskAday as aday
   Where talep.AdayId = aday.Id
-  and   talep.Id =@TalepId 
+  and   talep.Id = @TalepId 
 
   Select 
     Id as Id
-  , Id as AdayId
   , TamAdiSoyadi, TcNo
   , 'Biyometrik' as LkpImageType
   , 'Biyometrik' as LkpBelgeAdi
@@ -40,7 +39,6 @@ AS BEGIN
 
   Select 
     Id 
-  , AdayId
   , @TamAdiSoyadi as TamAdiSoyadi
   , @TcNo as TcNo
   , 'KiloByteKontrollu' as LkpImageType
@@ -62,7 +60,6 @@ AS BEGIN
 
   Select 
     TalepId as Id
-  , AdayId
   , @TamAdiSoyadi as TamAdiSoyadi
   , @TcNo as TcNo
   , 'KiloByteKontrollu' as LkpImageType
@@ -84,7 +81,6 @@ AS BEGIN
 
   Select 
     TalepId as Id
-  , AdayId
   , @TamAdiSoyadi as TamAdiSoyadi
   , @TcNo as TcNo
   , 'KiloByteKontrollu' as LkpImageType
@@ -106,7 +102,6 @@ AS BEGIN
 
   Select 
     TalepId as Id
-  , AdayId
   , @TamAdiSoyadi as TamAdiSoyadi
   , @TcNo as TcNo
   , 'KiloByteKontrollu' as LkpImageType
@@ -128,7 +123,6 @@ AS BEGIN
 
   Select 
     TalepId as Id
-  , AdayId
   , @TamAdiSoyadi as TamAdiSoyadi
   , @TcNo as TcNo
   , 'KiloByteKontrollu' as LkpImageType
@@ -150,7 +144,6 @@ AS BEGIN
 
   Select 
     TalepId as Id
-  , AdayId
   , @TamAdiSoyadi as TamAdiSoyadi
   , @TcNo as TcNo
   , 'KiloByteKontrollu' as LkpImageType
@@ -173,7 +166,6 @@ AS BEGIN
 
   Select 
     TalepId as Id
-  , AdayId
   , @TamAdiSoyadi as TamAdiSoyadi
   , @TcNo as TcNo
   , 'KiloByteKontrollu' as LkpImageType

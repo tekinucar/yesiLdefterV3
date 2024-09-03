@@ -119,7 +119,6 @@ AS BEGIN
 
     CLOSE mgSubesiCursor
     DEALLOCATE mgSubesiCursor   
-        
 
 END
 

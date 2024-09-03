@@ -18,9 +18,9 @@ begin transaction
       
    -- 10 Dekont Belgesi Hakkında
    BelgeTarihi        Date          null, 
-   BelgeYil           Smallint      null, 
-   BelgeAy            Smallint      null, 
-   BelgeGun           Smallint      null, 
+   --BelgeYil           Smallint      null, 
+   --BelgeAy            Smallint      null, 
+   --BelgeGun           Smallint      null, 
    BelgeSeri          nVarChar(5)   null,
    BelgeNo            nVarChar(50)  null,
    BelgeDonemTipiId   Int           null,
@@ -477,50 +477,93 @@ delete from [Lkp].[OnmBelgeDekontIslemTipi]
 INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, AlacakHesapId)
  VALUES 
 
- ( '100.100',  'Kasalar arası virman' , 100,  100  ), 
- ( '100.120',  'Cariden nakit tahsilat' , 100,  120  ), 
- ( '100.131',  'Ortaklardan alınan nakit' , 100,  131  ), 
- ( '100.135',  'Personelden alınan nakit' , 100,  135  ), 
- ( '100.196',  'Personele ödenen nakit avans' , 100,  196  ), 
- ( '100.320',  'Cariden nakit tahsilat' , 100,  320  ), 
- ( '100.600',  'Satışlardan nakit tahsilat' , 100,  600  ), 
- ( '100.602',  'Verilen hizmetlerden nakit tahsilat' , 100,  602  ), 
+ ( '100.100',   'Kasalar arası virman' , 100,  100  ), 
+ ( '100.120',   'Cariden nakit tahsilat' , 100,  120  ), 
+ ( '100.131',   'Ortaklardan alınan nakit' , 100,  131  ), 
+ ( '100.135',   'Personelden alınan nakit' , 100,  135  ), 
+ ( '100.196',   'Personele ödenen nakit avans' , 100,  196  ), 
+ ( '100.320',   'Cariden nakit tahsilat' , 100,  320  ), 
+ ( '100.600',   'Satışlardan nakit tahsilat' , 100,  600  ), 
+ ( '100.602',   'Verilen hizmetlerden nakit tahsilat' , 100,  602  ), 
  ( '100.1022',  'Banka hesabından çekilen nakit' , 100,  1022  ), 
  ( '100.1023',  'Kredi kartından çekilen nakit avans' , 100,  1023  ), 
- ( '100.2110',  'Mtsk sertifika ücreti, nakit tahsilat ' , 100,  2110  ), 
- ( '100.2111',  'Mtsk teorik sınav ücreti, nakit tahsilat' , 100,  2111  ), 
- ( '100.2112',  'Mtsk uygulama sınav ücreti, nakit tahsilat' , 100,  2112  ), 
- ( '100.2113',  'Mtsk özel teorik ders ücreti, nakit tahsilat' , 100,  2113  ), 
- ( '100.2114',  'Mtsk özel uygulama ders ücreti, nakit tahsilat' , 100,  2114  ), 
- ( '1022.100',  'Kasadan banka hesabına yatırılan' , 1022,  100  ), 
- ( '1022.120',  'Cariden gelen havale/Eft' , 1022,  120  ), 
- ( '1022.131',  'Ortaklardan gelen havale/Eft' , 1022,  131  ), 
- ( '1022.135',  'Personelden gelen havale/Eft' , 1022,  135  ), 
- ( '1022.300',  'Banka kredisi girişi' , 1022,  300  ), 
- ( '1022.320',  'Cariden gelen havale/Eft' , 1022,  320  ), 
- ( '1022.602',  'Verilen hizmet için banka hesabına yatırılan' , 1022,  602  ), 
+
+ --( '100.2110',  'Mtsk sertifika ücreti, nakit tahsilat ' , 100,  2110  ), 
+ --( '100.2111',  'Mtsk teorik sınav ücreti, nakit tahsilat' , 100,  2111  ), 
+ --( '100.2112',  'Mtsk uygulama sınav ücreti, nakit tahsilat' , 100,  2112  ), 
+ --( '100.2113',  'Mtsk özel teorik ders ücreti, nakit tahsilat' , 100,  2113  ), 
+ --( '100.2114',  'Mtsk özel uygulama ders ücreti, nakit tahsilat' , 100,  2114  ), 
+ --
+ -- OnmOdemePlani.UcretTipiId
+ --
+ ( '100.21101',    N'Sertifika ücreti, nakit tahsilat ' , 100,  21101  ), 
+ ( '100.21102',    N'2.+4 hak ücreti, nakit tahsilat ' , 100,  21102  ), 
+ ( '100.21103',    N'Nakil 2.+4 hak ücreti, nakit tahsilat ' , 100,  21103  ), 
+ ( '100.21104',    N'100 Ceza ücreti, nakit tahsilat ' , 100,  21104  ), 
+ ( '100.21105',    N'Özel direksiyon ders ücreti, nakit tahsilat ' , 100,  21105  ), 
+ ( '100.21106',    N'Özel teorik ders ücreti, nakit tahsilat ' , 100,  21106  ), 
+ ( '100.21111',    N'e-Sınav ücreti, nakit tahsilat ' , 100,  211111  ), 
+ ( '100.21112',    N'Uygulama sınav ücreti, nakit tahsilat ' , 100,  211112  ), 
+ ( '100.21113',    N'Başarısız eğitim ücreti, nakit tahsilat ' , 100,  211113  ), 
+
+ ( '1022.100',   'Kasadan banka hesabına yatırılan' , 1022,  100  ), 
+ ( '1022.120',   'Cariden gelen havale/Eft' , 1022,  120  ), 
+ ( '1022.131',   'Ortaklardan gelen havale/Eft' , 1022,  131  ), 
+ ( '1022.135',   'Personelden gelen havale/Eft' , 1022,  135  ), 
+ ( '1022.300',   'Banka kredisi girişi' , 1022,  300  ), 
+ ( '1022.320',   'Cariden gelen havale/Eft' , 1022,  320  ), 
+ ( '1022.602',   'Verilen hizmet için banka hesabına yatırılan' , 1022,  602  ), 
  ( '1022.1022',  'Banka hesapları arası havale' , 1022,  1022  ), 
  ( '1022.1023',  'Kredi kartından çekilen nakit avans' , 1022,  1023  ), 
  ( '1022.1024',  'POS hesabından banka hesabına geçen' , 1022,  1024  ), 
- ( '1022.2110',  'Mtsk sertifika ücreti, banka hesabına yatan' , 1022,  2110  ), 
- ( '1022.2111',  'Mtsk teorik sınav ücreti, banka hesabına yatan' , 1022,  2111  ), 
- ( '1022.2112',  'Mtsk uygulama sınav ücreti, banka hesabına yatan' , 1022,  2112  ), 
- ( '1022.2113',  'Mtsk özel teorik ders ücreti, banka hesabına yatan' , 1022,  2113  ), 
- ( '1022.2114',  'Mtsk özel uygulama ders ücreti, banka hesabına ya' , 1022,  2114  ), 
- ( '1023.100',  'Kredi kartı borcunu kasadan ödeme' , 1023,  100  ), 
+
+ --( '1022.2110',  'Mtsk sertifika ücreti, banka hesabına yatan' , 1022,  2110  ), 
+ --( '1022.2111',  'Mtsk teorik sınav ücreti, banka hesabına yatan' , 1022,  2111  ), 
+ --( '1022.2112',  'Mtsk uygulama sınav ücreti, banka hesabına yatan' , 1022,  2112  ), 
+ --( '1022.2113',  'Mtsk özel teorik ders ücreti, banka hesabına yatan' , 1022,  2113  ), 
+ --( '1022.2114',  'Mtsk özel uygulama ders ücreti, banka hesabına ya' , 1022,  2114  ), 
+ --
+ -- OnmOdemePlani.UcretTipiId
+ --
+ ( '1022.21101',    N'Sertifika ücreti, banka hesabına yatan' , 1022,  21101  ), 
+ ( '1022.21102',    N'2.+4 hak ücreti, banka hesabına yatan' , 1022,  21102  ), 
+ ( '1022.21103',    N'Nakil 2.+4 hak ücreti, banka hesabına yatan' , 1022,  21103  ), 
+ ( '1022.21104',    N'100 Ceza ücreti, banka hesabına yatan' , 1022,  21104  ), 
+ ( '1022.21105',    N'Özel direksiyon ders ücreti, banka hesabına yatan' , 1022,  21105  ), 
+ ( '1022.21106',    N'Özel teorik ders ücreti, banka hesabına yatan' , 1022,  21106  ), 
+ ( '1022.21111',    N'e-Sınav ücreti, banka hesabına yatan' , 1022,  211111  ), 
+ ( '1022.21112',    N'Uygulama sınav ücreti, banka hesabına yatan' , 1022,  211112  ), 
+ ( '1022.21113',    N'Başarısız eğitim ücreti, banka hesabına yatan' , 1022,  211113  ), 
+
+ ( '1023.100',   'Kredi kartı borcunu kasadan ödeme' , 1023,  100  ), 
  ( '1023.1022',  'Kredi kartı borcunu banka hesabından ödeme' , 1023,  1022  ), 
- ( '1024.120',  'Cariden banka/kredi kartı ile tahsilat' , 1024,  120  ), 
- ( '1024.131',  'Ortağın banka/kredi kartından çekilen ' , 1024,  131  ), 
- ( '1024.135',  'Personelin banka/kredi kartından çekilen' , 1024,  135  ), 
- ( '1024.320',  'Cariden banka/kredi kartı ile tahsilat' , 1024,  320  ), 
- ( '1024.600',  'Kesilen fatura için banka/kredi kartı tahsilat' , 1024,  600  ), 
- ( '1024.601',  'Yurtdışı satışlar için çekilen banka/kredi kartı tahsilat' , 1024,  601  ), 
- ( '1024.602',  'Verilen hizmetler için çekilen banka/kredi kartı tahsilat' , 1024,  602  ), 
- ( '1024.2110',  'Mtsk sertifika ücreti, POS ile tahsilat' , 1024,  2110  ), 
- ( '1024.2111',  'Mtsk teorik sınav ücreti, POS ile tahsilat' , 1024,  2111  ), 
- ( '1024.2112',  'Mtsk uygulama sınav ücreti, POS ile tahsilat' , 1024,  2112  ), 
- ( '1024.2113',  'Mtsk özel teorik ders ücreti, POS ile tahsilat' , 1024,  2113  ), 
- ( '1024.2114',  'Mtsk özel uygulama ders ücreti, POS ile tahsilat' , 1024,  2114  ), 
+ ( '1024.120',   'Cariden banka/kredi kartı ile tahsilat' , 1024,  120  ), 
+ ( '1024.131',   'Ortağın banka/kredi kartından çekilen ' , 1024,  131  ), 
+ ( '1024.135',   'Personelin banka/kredi kartından çekilen' , 1024,  135  ), 
+ ( '1024.320',   'Cariden banka/kredi kartı ile tahsilat' , 1024,  320  ), 
+ ( '1024.600',   'Kesilen fatura için banka/kredi kartı tahsilat' , 1024,  600  ), 
+ ( '1024.601',   'Yurtdışı satışlar için çekilen banka/kredi kartı tahsilat' , 1024,  601  ), 
+ ( '1024.602',   'Verilen hizmetler için çekilen banka/kredi kartı tahsilat' , 1024,  602  ), 
+
+ --( '1024.2110',  'Mtsk sertifika ücreti, POS ile tahsilat' , 1024,  2110  ), 
+ --( '1024.2111',  'Mtsk teorik sınav ücreti, POS ile tahsilat' , 1024,  2111  ), 
+ --( '1024.2112',  'Mtsk uygulama sınav ücreti, POS ile tahsilat' , 1024,  2112  ), 
+ --( '1024.2113',  'Mtsk özel teorik ders ücreti, POS ile tahsilat' , 1024,  2113  ), 
+ --( '1024.2114',  'Mtsk özel uygulama ders ücreti, POS ile tahsilat' , 1024,  2114  ), 
+ --
+ -- OnmOdemePlani.UcretTipiId
+ --
+ ( '1024.21101',    N'Sertifika ücreti, POS ile tahsilat' , 1024,  21101  ), 
+ ( '1024.21102',    N'2.+4 hak ücreti, POS ile tahsilat' , 1024,  21102  ), 
+ ( '1024.21103',    N'Nakil 2.+4 hak ücreti, POS ile tahsilat' , 1024,  21103  ), 
+ ( '1024.21104',    N'100 Ceza ücreti, POS ile tahsilat' , 1024,  21104  ), 
+ ( '1024.21105',    N'Özel direksiyon ders ücreti, POS ile tahsilat' , 1024,  21105  ), 
+ ( '1024.21106',    N'Özel teorik ders ücreti, POS ile tahsilat' , 1024,  21106  ), 
+ ( '1024.21111',    N'e-Sınav ücreti, POS ile tahsilat' , 1024,  21111  ), 
+ ( '1024.21112',    N'Uygulama sınav ücreti, POS ile tahsilat' , 1024,  21112  ), 
+ ( '1024.21113',    N'Başarısız eğitim ücreti, POS ile tahsilat' , 1024,  21113  ), 
+
+
  ( '120.100',  'Cari hesaba ödenen nakit' , 120,  100  ), 
  ( '131.100',  'Ortaklara verilen nakit ' , 131,  100  ), 
  ( '135.100',  'Personele verilen nakit' , 135,  100  ), 
@@ -529,9 +572,24 @@ INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, A
  ( '300.100',  'Banka kredisi için nakit ödeme' , 300,  100  ), 
  ( '320.100',  'Cari hesaba ödenen nakit' , 320,  100  ), 
  ( '770.100',  'Genel yönetim giderleri için nakit ödeme' , 770,  100  ), 
- ( '2110.100',  'Mtsk sertifika ücreti, nakit iadesi' , 2110,  100  ), 
- ( '2113.100',  'Mtsk özel teorik ders ücreti, nakit iadesi' , 2113,  100  ), 
- ( '2114.100',  'Mtsk özel uygulama ders ücreti, nakit iadesi' , 2114,  100  ), 
+
+ --( '2110.100',  'Mtsk sertifika ücreti, nakit iadesi' , 2110,  100  ), 
+ --( '2113.100',  'Mtsk özel teorik ders ücreti, nakit iadesi' , 2113,  100  ), 
+ --( '2114.100',  'Mtsk özel uygulama ders ücreti, nakit iadesi' , 2114,  100  ), 
+ --
+ -- OnmOdemePlani.UcretTipiId
+ --
+ ( '21101.100',    N'Sertifika ücreti, nakit iadesi' , 21101,  100  ), 
+ ( '21102.100',    N'2.+4 hak ücreti, nakit iadesi' , 21102,  100  ), 
+ ( '21103.100',    N'Nakil 2.+4 hak ücreti, nakit iadesi' , 21103,  100  ), 
+ ( '21104.100',    N'100 Ceza ücreti, nakit iadesi' , 21104,  100  ), 
+ ( '21105.100',    N'Özel direksiyon ders ücreti, nakit iadesi' , 21105,  100  ), 
+ ( '21106.100',    N'Özel teorik ders ücreti, nakit iadesi' , 21106,  100  ), 
+ ( '21111.100',    N'e-Sınav ücreti, nakit iadesi' , 211111,  100  ), 
+ ( '21112.100',    N'Uygulama sınav ücreti, nakit iadesi' , 211112,  100  ), 
+ ( '21113.100',    N'Başarısız eğitim ücreti, nakit iadesi' , 21113,  100  ), 
+
+
  ( '120.1022',  'Cari hesabına gönderilen havale/Eft' , 120,  1022  ), 
  ( '131.1022',  'Ortaklara banka hesabından havale/Eft' , 131,  1022  ), 
  ( '135.1022',  'Personel banka hesabından havale/Eft' , 135,  1022  ), 
@@ -540,22 +598,37 @@ INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, A
  ( '300.1022',  'Banka kredisi için banka hesabından ödeme' , 300,  1022  ), 
  ( '320.1022',  'Cari hesabına havale/Eft' , 320,  1022  ), 
  ( '770.1022',  'Genel yönetim giderleri için banka hesabından havale/Eft' , 770,  1022  ), 
- ( '2110.1022',  'Mtsk sertifika ücreti, banka hesabından iade' , 2110,  1022  ), 
- ( '2111.1022',  'Mtsk teorik sınav ücreti, banka hesabından iade' , 2111,  1022  ), 
- ( '2112.1022',  'Mtsk uygulama sınav ücreti, banka hesabından iade' , 2112,  1022  ), 
- ( '2113.1022',  'Mtsk özel teorik ders ücreti, banka hesabından iade' , 2113,  1022  ), 
- ( '2114.1022',  'Mtsk özel uygulama ders ücreti, banka hesabından iade' , 2114,  1022  ), 
- ( '2111.100',  'Mtsk teorik sınav ücreti, nakit iadesi' , 2111,  100  ), 
- ( '2112.100',  'Mtsk uygulama sınav ücreti, nakit iadesi' , 2112,  100  ), 
+
+ --( '2110.1022',  'Mtsk sertifika ücreti, banka hesabından iade' , 2110,  1022  ), 
+ --( '2111.1022',  'Mtsk teorik sınav ücreti, banka hesabından iade' , 2111,  1022  ), 
+ --( '2112.1022',  'Mtsk uygulama sınav ücreti, banka hesabından iade' , 2112,  1022  ), 
+ --( '2113.1022',  'Mtsk özel teorik ders ücreti, banka hesabından iade' , 2113,  1022  ), 
+ --( '2114.1022',  'Mtsk özel uygulama ders ücreti, banka hesabından iade' , 2114,  1022  ), 
+ --( '2111.100',  'Mtsk teorik sınav ücreti, nakit iadesi' , 2111,  100  ), 
+ --( '2112.100',  'Mtsk uygulama sınav ücreti, nakit iadesi' , 2112,  100  ), 
+ --
+ -- OnmOdemePlani.UcretTipiId
+ --
+ ( '21101.1022',    N'Sertifika ücreti, banka hesabından iade' , 21101,  1022  ), 
+ ( '21102.1022',    N'2.+4 hak ücreti, banka hesabından iade' , 21102,  1022  ), 
+ ( '21103.1022',    N'Nakil 2.+4 hak ücreti, banka hesabından iade' , 21103,  1022  ), 
+ ( '21104.1022',    N'100 Ceza ücreti, banka hesabından iade' , 21104,  1022  ), 
+ ( '21105.1022',    N'Özel direksiyon ders ücreti, banka hesabından iade' , 21105,  1022  ), 
+ ( '21106.1022',    N'Özel teorik ders ücreti, banka hesabından iade' , 21106,  1022  ), 
+ ( '21111.1022',    N'e-Sınav ücreti, banka hesabından iade' , 211111,  1022  ), 
+ ( '21112.1022',    N'Uygulama sınav ücreti, banka hesabından iade' , 211112,  1022  ), 
+ ( '21113.1022',    N'Başarısız eğitim ücreti, banka hesabından iade' , 211113,  1022  ), 
+
+
  ( '120.1023',  'Cari hesaba kredi kartı ile ödeme' , 120,  1023  ), 
  ( '131.1023',  'Ortakların kredi kartı ile yaptığı harcama' , 131,  1023  ), 
  ( '135.1023',  'Personelin kredi kartı ile yaptığı harcama' , 135,  1023  ), 
  ( '153.1023',  'Stok alımı için kredi kartıyla ödeme' , 153,  1023  ), 
  ( '320.1023',  'Cari hesaba kredi kartı ile ödeme' , 320,  1023  ), 
  ( '770.1023',  'Genel yönetim giderleri için kredi kartıyla ödeme' , 770,  1023  ), 
- ( '791.100',  'İşçi ücret ve giderleri için nakit ödeme' , 791,  100  ), 
+ ( '791.100',   'İşçi ücret ve giderleri için nakit ödeme' , 791,  100  ), 
  ( '793.1023',  'Dışarıdan sağlanan hizmetler için kredi kartıyla ödeme' , 793,  1023  ), 
- ( '793.100',  'Dışarıdan sağlanan hizmetler için nakit ödeme' , 793,  100  ), 
+ ( '793.100',   'Dışarıdan sağlanan hizmetler için nakit ödeme' , 793,  100  ), 
  ( '793.1022',  'Dışarıdan sağlanan hizmetler için banka hesabından havale/Eft' , 793,  1022  ) 
 
 -- ------------------------------------------------------- 
@@ -605,11 +678,24 @@ INSERT INTO [Lkp].[OnmBelgeDekontBHesapTipi] (Id, BHesapTipi, GrupTipiId)
   --( 911,   N'Bağkur giderleri', 1),
   --( 921,   N'Belediye harçları', 1),
 
-  ( 2110,  N'Mtsk sertifika ücreti', 1),  
-  ( 2111,  N'Mtsk teorik sınav ücreti', 1),
-  ( 2112,  N'Mtsk uygulama sınav ücreti', 1),
-  ( 2113,  N'Mtsk özel teorik ders ücreti', 1),
-  ( 2114,  N'Mtsk özel uygulama ders ücreti', 1)
+  --( 2110,  N'Mtsk sertifika ücreti', 1),  
+  --( 2111,  N'Mtsk teorik sınav ücreti', 1),
+  --( 2112,  N'Mtsk uygulama sınav ücreti', 1),
+  --( 2113,  N'Mtsk özel teorik ders ücreti', 1),
+  --( 2114,  N'Mtsk özel uygulama ders ücreti', 1)
+  --
+  -- OnmOdemePlani.UcretTipiId
+  --
+  ( 21101,    N'Sertifika', 1),
+  ( 21102,    N'2.+4 hak', 1),
+  ( 21103,    N'Nakil 2.+4 hak', 1),
+  ( 21104,    N'100 Ceza', 1),
+  ( 21105,    N'Özel direksiyon ders (Aday değil)', 1),
+  ( 21106,    N'Özel teorik ders', 1),
+  ( 21111,    N'e-Sınav ücreti', 1),
+  ( 21112,    N'Uygulama sınav ücreti', 1),
+  ( 21113,    N'Başarısız eğitim ücreti', 1)
+
 
 
   
@@ -660,11 +746,24 @@ INSERT INTO [Lkp].[OnmBelgeDekontAHesapTipi] (Id, AHesapTipi, GrupTipiId)
   --( 911,   N'Bağkur giderleri', 1),
   --( 921,   N'Belediye harçları', 1),
 
-  ( 2110,  N'Mtsk sertifika ücreti', 1),  
-  ( 2111,  N'Mtsk teorik sınav ücreti', 1),
-  ( 2112,  N'Mtsk uygulama sınav ücreti', 1),
-  ( 2113,  N'Mtsk özel teorik ders ücreti', 1),
-  ( 2114,  N'Mtsk özel uygulama ders ücreti', 1)
+  --( 2110,  N'Mtsk sertifika ücreti', 1),  
+  --( 2111,  N'Mtsk teorik sınav ücreti', 1),
+  --( 2112,  N'Mtsk uygulama sınav ücreti', 1),
+  --( 2113,  N'Mtsk özel teorik ders ücreti', 1),
+  --( 2114,  N'Mtsk özel uygulama ders ücreti', 1)
+  --
+  -- OnmOdemePlani.UcretTipiId
+  --
+  ( 21101,    N'Sertifika', 1),
+  ( 21102,    N'2.+4 hak', 1),
+  ( 21103,    N'Nakil 2.+4 hak', 1),
+  ( 21104,    N'100 Ceza', 1),
+  ( 21105,    N'Özel direksiyon ders (Aday değil)', 1),
+  ( 21106,    N'Özel teorik ders', 1),
+  ( 21111,    N'e-Sınav ücreti', 1),
+  ( 21112,    N'Uygulama sınav ücreti', 1),
+  ( 21113,    N'Başarısız eğitim ücreti', 1)
+
 
 -- ------------------------------------------------------- 
 -- SourceTypeId
@@ -680,16 +779,18 @@ create table [Lkp].[OnmBelgeDekontSourceType]
 delete from [Lkp].[OnmBelgeDekontSourceType]
 INSERT INTO [Lkp].[OnmBelgeDekontSourceType] (Id, SourceType)
  VALUES 
-  ( 0,     N'Tanımsız'),
-  ( 1,     N'OnmBelgeMaliyet'),
-  ( 2,     N'OnmOdemePlani'),
-  ( 2100,  N'Mtsk Modülü'),
+  ( 0,   N'Tanımsız'),
+  ( 1,   N'OnmBelgeMaliyet'),
+  ( 2,   N'OnmOdemePlani'),
+  ( 201, N'UstadMtsk'),
+  ( 202, N'UstadIsmak'),
+  ( 203, N'UstadSrc'),
+  ( 211, N'TabimMtsk'),
+  ( 212, N'TabimSrc'),
+  ( 213, N'TabimIsmak'),
   ( 2103,  N'Mtsk Veri Transferi - Giderler'),
   ( 2104,  N'Mtsk Veri Transferi - CariAlt'),
   ( 2105,  N'Mtsk Veri Transferi - Kurharc')
-
-
-
 
 
 commit transaction

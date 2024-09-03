@@ -64,26 +64,29 @@ begin transaction
    NazimHesapKodu          nvarchar(50) null,
 
    --80, 81, ..., 90, 91
-   BAHesapTipiId           SmallInt  null, /* OnmBelgeDekont tablsundaki BHesapTipiId veya AHesapTipiId nin bağlantısı */
-   UruneYuklenmesiTipiId   SmallInt  null, 
-   UretimHacmiTipiId       SmallInt  null,
-   IsletmeFonksiyonuTipiId SmallInt  null,
-   PeriyodTipiId           SmallInt  null, /* dönem */
-   BelgeTipiId             SmallInt  null, /* e-devlet, fatura vb */
-   KaynakTipiId            SmallInt  null, /* 1. kağıt, 2. elektronik belge */
-   IsKkeg                  Bit       null, /* kanunen kabul edilmeyen gider */
-   IsOncekiTutar           Bit       null, /* bir maliyet belgesi işlenirken bir önceki tutarı oku */  
-   OncekiTutar             Numeric(22,5)  null,
-   KdvOrani                SmallInt  null,
-   OtoOdemeBankaHesapId    Int       null,
-   IsKiralik               Bit       null,
-   KiralikGun              SmallInt  null,
-   KiralikAy               SmallInt  null,
-   MaliyetinKapsamTipiId   SmallInt  null,
+   BAHesapTipiId           SmallInt      null, /* OnmBelgeDekont tablsundaki BHesapTipiId veya AHesapTipiId nin bağlantısı */
+   UruneYuklenmesiTipiId   SmallInt      null, 
+   UretimHacmiTipiId       SmallInt      null,
+   IsletmeFonksiyonuTipiId SmallInt      null,
+   PeriyodTipiId           SmallInt      null, /* dönem */
+   BelgeTipiId             SmallInt      null, /* e-devlet, fatura vb */
+   KaynakTipiId            SmallInt      null, /* 1. kağıt, 2. elektronik belge */
+   IsKkeg                  Bit           null, /* kanunen kabul edilmeyen gider */
+   IsOncekiTutar           Bit           null, /* bir maliyet belgesi işlenirken bir önceki tutarı oku */  
+   OncekiTutar             Numeric(22,5) null,
+   KdvOrani                SmallInt      null,
+   OtoOdemeBankaHesapId    Int           null,
 
-   --98,99
-   JoinTableTypeId    SmallInt       null, /* ilgili table 1: OnmBelgeMaliyet,  */
-   JoinId             Int            null, /* ilgili table ref Id */
+   -- 100
+   SahiplikTipiId          SmallInt      null, 
+   IsKiralik               Bit           null,
+   KiralikGun              SmallInt      null,
+   KiralikAy               SmallInt      null,
+   MaliyetinKapsamTipiId   SmallInt      null,
+
+   --198,199
+   JoinTableTypeId         SmallInt      null, /* ilgili table 1: OnmBelgeMaliyet,  */
+   JoinId                  Int           null, /* ilgili table ref Id */
 
    constraint		pk_OnmHesapFinans primary key (Id)
  )
@@ -486,7 +489,7 @@ drop table [Lkp].[OnmHesapFinansSahiplikTipi]
 create table [Lkp].[OnmHesapFinansSahiplikTipi]
 (
    Id             Int Unique Not Null,
-   SahiplikTipi   nVarchar(50)
+   SahiplikTipi   nVarchar(50),
    GrupTipiId     SmallInt Null,
 
    constraint  pk_OnmHesapFinansSahiplikTipi primary key (Id)
@@ -1082,6 +1085,10 @@ INSERT INTO [dbo].[OnmHesapFinans] (ParentId, FirmId, IsActive, UstGrupTipiId, A
 
  /* Default masraf gruplarını insert et */
 
+ /* bu iptal oldu aynı işlemi yapan prc_OnmHesapFinansDefaultMaliyetGrublari oluşturuldu */
+ /* henüz tetiklenecek yer bulunamadı */
+
+/* 
 --declare @FirmId int
 --set @FirmId = :FIRM_ID
 
@@ -1131,7 +1138,7 @@ INSERT INTO [dbo].[OnmHesapFinans] (ParentId, FirmId, IsActive, UstGrupTipiId, A
   ,'81.17.10','81.17.20','81.17.30','81.17.40' -- Ücretler
   ,'81.18.10','81.18.20','81.18.30','81.18.40' -- Yeme/İçme
   )
-
+*/
 
 commit transaction
 

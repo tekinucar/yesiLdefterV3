@@ -27,9 +27,9 @@ begin transaction
    -- 10 Belge Hakkında
    BelgeTarihi        Date          null,
    BelgeSaati         VarChar(8)    null,
-   BelgeYil           Smallint      null, 
-   BelgeAy            Smallint      null, 
-   BelgeGun           Smallint      null,
+   --BelgeYil           Smallint      null, 
+   --BelgeAy            Smallint      null, 
+   --BelgeGun           Smallint      null,
    BelgeSeri          nVarChar(10)  null,
    BelgeNo            nVarChar(50)  null,
    BelgeDonemTipiId   Int           null,

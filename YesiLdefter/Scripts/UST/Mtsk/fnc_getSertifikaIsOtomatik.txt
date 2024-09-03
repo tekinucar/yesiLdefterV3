@@ -1,0 +1,33 @@
+﻿
+/*CreateFunction*/
+
+CREATE FUNCTION [dbo].[fnc_getSertifikaIsOtomatik]( @sertifikaId int)  
+RETURNS bit
+AS   
+BEGIN 
+  declare @response bit
+
+  -- Mevcut ehliyetler
+  if ((@sertifikaId = 9010) or -- A Manuel işareti varsa
+      (@sertifikaId = 9020) or -- A1 Manuel işareti varsa
+      (@sertifikaId = 9030) or -- A2 Manuel işareti varsa
+      (@sertifikaId = 9040) or -- B Manuel işareti varsa
+      (@sertifikaId = 9050) or -- C Manuel işareti varsa
+      (@sertifikaId = 9060) or -- D Manuel işareti varsa
+      (@sertifikaId = 9070) or -- E Manuel işareti varsa
+	  (@sertifikaId = 9201))   -- 100 Ceza Manuel işareti varsa
+      set @response = 0
+
+   if ((@sertifikaId = 9021) or -- A1 Otomatik işareti varsa
+       (@sertifikaId = 9031) or -- A2 Otomatik işareti varsa
+       (@sertifikaId = 9041) or -- B Otomatik işareti varsa
+       (@sertifikaId = 9051) or -- C Otomatik işareti varsa
+       (@sertifikaId = 9061) or -- D Otomatik işareti varsa
+       (@sertifikaId = 9071) or -- E Otomatik işareti varsa
+       (@sertifikaId = 9202))   -- 100 Ceza Otomatik işareti varsa
+       set @response = 1
+
+  RETURN @response;
+END; -- function
+
+/*CreateFunctionEnd*/

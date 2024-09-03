@@ -1,0 +1,121 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_MtskAdayTakipSingleSet] (@TalepId int)  
+AS BEGIN
+
+  -- Variables
+  declare @GelecekAy Datetime
+  declare @BugunDonemTipiId int = 0
+  declare @GelecekDonemTipiId int = 0
+  declare @YasSiniri smallint = 0
+
+  declare @zamanlamaTipiId int = 0
+  declare @isGrupSubeYok bit = 0
+  declare @yasOnayiTipiId smallint = 0
+  declare @yasHazirTarihi date = null
+
+  -- MtskAdayTalep
+  declare @yDogumTarihi date 
+  declare @yIstenenSertifikaTipiId smallint = 0
+  declare @yIsMuafiyetiVar bit = 0
+  declare @yDonemTipiId int = 0
+  declare @yGrupTipiId smallint = 0
+  declare @ySubeTipiId smallint = 0
+
+  -- MtskAdayTakip
+  declare @eYasHazirTarihi date 
+  declare @eYasOnayiTipiId smallint = 0
+
+  set @GelecekAy = DATEADD(month, 1, getdate());
+	
+  -- Bugün hangi dönem ?  tespit ediliyor
+  if (MONTH(getdate()) < 10)
+       set @BugunDonemTipiId = convert(int, convert(varchar(5), YEAR(getdate())) + '0' + convert(varchar(3), MONTH(getdate())))
+  else set @BugunDonemTipiId = convert(int, convert(varchar(5), YEAR(getdate())) + convert(varchar(3), MONTH(getdate())))
+
+  if (MONTH(@GelecekAy) < 10)
+       set @GelecekDonemTipiId = convert(int, convert(varchar(5), YEAR(@GelecekAy)) + '0' + convert(varchar(3), MONTH(@GelecekAy)))
+  else set @GelecekDonemTipiId = convert(int, convert(varchar(5), YEAR(@GelecekAy)) + convert(varchar(3), MONTH(@GelecekAy)))
+
+  Select 
+    @yDogumTarihi = aday.DogumTarihi
+   ,@yIstenenSertifikaTipiId = isnull(ins.IstenenSertifikaTipiId,0)
+   ,@yDonemTipiId = isnull(ins.DonemTipiId,0)
+   ,@yGrupTipiId = isnull(ins.GrupTipiId,0)
+   ,@ySubeTipiId = isnull(ins.SubeTipiId,0)
+   ,@yIsMuafiyetiVar = isnull(ins.IsMuafiyetiVar,0)	
+  From  MtskAdayTalep as ins, MtskAday as aday
+  Where ins.AdayId = aday.Id
+  and ins.Id = @TalepId
+  
+  -- gerek kalmadı
+  Select 
+    @eYasOnayiTipiId = YasOnayiTipiId
+   ,@eYasHazirTarihi = YasHazirTarihi
+  From  MtskAdayTakip 
+  Where TalepId = @TalepId
+
+
+  Select @YasSiniri = isnull(YasSiniri,0)
+  From MtskSaatUygulama
+  Where IstenenSertifikaTipiId = @yIstenenSertifikaTipiId
+   
+
+  -- ZamanlamaTipiId 
+  -- Aktif eğitim süreci devam edenler için geçerli
+  -- eğitimi bitenleri -1 yapacağız
+  if (@yDonemTipiId < @BugunDonemTipiId) set @zamanlamaTipiId = 1
+  if (@yDonemTipiId = @BugunDonemTipiId) set @zamanlamaTipiId = 2
+  if (@yDonemTipiId = @GelecekDonemTipiId) set @zamanlamaTipiId = 3
+  if (@yDonemTipiId > @GelecekDonemTipiId) set @zamanlamaTipiId = 4
+  if (@yDonemTipiId = 0) set @zamanlamaTipiId = 0
+  -- 
+
+  -- IsGrupSubeYok 
+  if (@yGrupTipiId = 0 or @ySubeTipiId = 0)
+      set @isGrupSubeYok = 1
+
+  -- Yas Onayi
+  if (@yDogumTarihi is not null)
+  begin
+      --declare @yDogumTarihi date = convert(date, '29.05.2003', 103)
+	  set @yasOnayiTipiId = 0 -- yaşı tutuyor
+	  set @yasHazirTarihi = null
+
+      declare @bugun date = convert(date,GETDATE(),103)
+      declare @Yasi int = 0
+      declare @YilFarki int = 0
+      declare @AyFarki int = 0
+
+	  -- Yaş için muhafiyeti var ise 2 yıl daha sınırı aşağıya çek
+	  if (@yIsMuafiyetiVar = 1)
+         set @YasSiniri = @YasSiniri - 2 
+	  set @Yasi = DATEDIFF(YEAR, @yDogumTarihi, @bugun) 
+      set @YilFarki = @Yasi - @YasSiniri 
+      set @yasHazirTarihi = DATEADD(YEAR, @YasSiniri, @yDogumTarihi) 
+      set @AyFarki = DATEDIFF(MONTH, @yasHazirTarihi, @bugun) 
+
+      if (@bugun < @yasHazirTarihi) set @yasOnayiTipiId = 1 -- yaşı tutmuyor
+      if (@bugun >= @yasHazirTarihi and @YilFarki = 0 and (@AyFarki >= 0 and @AyFarki < 4) ) set @yasOnayiTipiId = 2 -- üç aydır yaşı tutuyor
+  end else  
+  begin
+      set @yasOnayiTipiId = 4 -- belirsiz
+  end
+
+  -- (  yaşı tutuyor     veya yaşını doldurmuş ise) ve   Muhafiyeti var ise
+  if ((@yasOnayiTipiId = 0 or @yasOnayiTipiId = 2) and @yIsMuafiyetiVar = 1) 
+      set @yasOnayiTipiId = 3 -- yaş muafiyeti var
+
+  -- Tespitleri kaydet
+  Update MtskAdayTakip set
+    ZamanlamaTipiId = @zamanlamaTipiId
+  , IsGrupSubeYok = @isGrupSubeYok
+  , YasOnayiTipiId = @yasOnayiTipiId
+  , YasHazirTarihi = @yasHazirTarihi
+
+  Where TalepId = @TalepId
+
+
+END -- procedure
+
+/*CreateProcedureEnd*/

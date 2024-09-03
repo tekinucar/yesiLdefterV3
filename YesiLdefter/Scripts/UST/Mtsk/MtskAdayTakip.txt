@@ -107,7 +107,7 @@ commit transaction
 
 begin transaction
 
-/*
+
 -- ------------------------------------------------------- 
 -- TalepTipiId
 -- ------------------------------------------------------- 
@@ -162,9 +162,9 @@ Delete from [Lkp].[MtskAdayTakipKayitTipi]
 INSERT INTO [Lkp].[MtskAdayTakipKayitTipi] (Id, KayitTipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption)
  VALUES 
   ( 1,    N'Ön kayıt',          1, 1121, 'Kayıt durumu',  'Ön kayıt',     'Yeni Aday' ),
-  ( 2,    N'Kayıt aşamasında',  1, 1122, 'Kayıt durumu',  'K.Aşamasında', 'Mebbis' ),
+  ( 2,    N'Kayıt aşamasında',  1, 1122, 'Kayıt durumu',  'K.Aşamasında', 'Mebbise bağlan' ),
   ( 3,    N'Kesin kayıt',       1, 1123, 'Kayıt durumu',  'Kesin kay.', '' )
-*/
+
 
 -- ------------------------------------------------------- 
 -- ZamanlamaTipiId
@@ -245,7 +245,7 @@ create table [Lkp].[MtskAdayTakipMebbisOnayiTipi]
 Delete from [Lkp].[MtskAdayTakipMebbisOnayiTipi]
 INSERT INTO [Lkp].[MtskAdayTakipMebbisOnayiTipi] (Id, MebbisOnayiTipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption)
  VALUES 
-  ( 0,  N'Onaysız',        1, 1161, 'Mebbis kurum onayı',  '', '' ),
+  ( 0,  N'Onaysız',        1, 1161, 'Mebbis kurum onayı',  '', 'Mebbis"e bağlan' ),
   ( 1,  N'Onaylandı',      1, 1162, 'Mebbis kurum onayı',  '', '' )
 
 

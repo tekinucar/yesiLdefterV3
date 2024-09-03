@@ -3,43 +3,50 @@
 CREATE PROCEDURE [dbo].[prc_MtskAdayTalepSertifika24HakKaydi] (@FirmId int, @AdayId int)  
 AS BEGIN
 
-INSERT INTO [dbo].[MtskAdayTalep]
-           ([FirmId]
-           ,[AdayId]
-           ,[IsActive]
-           ,[TalepKayitTarihi]
-           ,[ParentId]
-           ,[TalepTipiId]
-           ,[MevcutSertifikaTipiId]
-           ,[MevcutSurucuBelgeTarihi]
-           ,[MevcutSurucuBelgeNo]
-           ,[IsMevcutOtomatik]
-           ,[IsMevcut2016Oncesi]
-           ,[IsMevcut125ccAlti]
-           ,[IstenenSertifikaTipiId]
-           ,[IsOtomatik]
-           ,[IsEngelli]
-           ,[Is125ccAlti]
-           ,[IsMuafiyetiVar]
-           ,[MuafiyetAciklmasi]
-           ,[DonemTipiId]
-           ,[GrupTipiId]
-           ,[SubeTipiId]
-           ,[KayitTipiId]
-           ,[VeriKaynakTipiId]
-           ,[EtiketTipiId]
-           ,[KullaniciUyarilari]
-           ,[UygulamaPersonelId]
-           ,[UygPersCinsiyetTipiId]
-          )
+Declare @FirmId int = 0
+Declare @AdayId int = 0
 
-Select top 1
-      FirmId
-    , AdayId
-    , 1         -- <IsActive, bit,>
-    , GETDATE() -- <TalepKayitTarihi, date,>
-    , Id        -- <ParentId, int,>
-    , 2         -- <TalepTipiId, smallint,>
+-- new 2. + hak talep kaydından 
+-- FirmId ve AdayId bilgisi okunuyor
+--
+  Select 
+    @FirmId = FirmId 
+  , @AdayId = AdayId  
+  from  MtskAdayTalep
+  Where Id = @TalepId
+
+
+UPDATE [dbo].[MtskAdayTalep]
+   SET 
+       [ParentId] = x.ParentId
+      ,[TalepTipiId] = x.TalepTipiId
+      ,[MevcutSertifikaTipiId] = x.MevcutSertifikaTipiId
+      ,[MevcutSurucuBelgeTarihi] = x.MevcutSurucuBelgeTarihi
+      ,[MevcutSurucuBelgeNo] = x.MevcutSurucuBelgeNo
+      ,[IsMevcutOtomatik] = x.IsMevcutOtomatik
+      ,[IsMevcut2016Oncesi] = x.IsMevcut2016Oncesi
+      ,[IsMevcut125ccAlti] = x.IsMevcut125ccAlti
+      ,[IstenenSertifikaTipiId] = x.IstenenSertifikaTipiId
+      ,[IsOtomatik] = x.IsOtomatik
+      ,[IsEngelli] = x.IsEngelli
+      ,[Is125ccAlti] = x.Is125ccAlti
+      ,[IsMuafiyetiVar] = x.IsMuafiyetiVar
+      ,[MuafiyetAciklmasi] = x.MuafiyetAciklmasi
+      ,[DonemTipiId] = x.DonemTipiId
+      ,[GrupTipiId] = x.GrupTipiId
+      ,[SubeTipiId] = x.SubeTipiId
+      ,[KayitTipiId] = x.KayitTipiId
+      ,[VeriKaynakTipiId] = x.VeriKaynakTipiId
+      ,[EtiketTipiId] = x.EtiketTipiId
+      ,[KullaniciUyarilari] = x.KullaniciUyarilari
+      ,[UygulamaPersonelId] = x.UygulamaPersonelId
+      ,[UygPersCinsiyetTipiId] = x.UygPersCinsiyetTipiId
+ From MtskAdayTalep as newTalep,
+ (  
+  -- 2. +4 hak talebinden önceki en yeni sertifika talebi bulunuyor
+  Select top 1
+      Id as ParentId
+    , 2  as TalepTipiId
     , MevcutSertifikaTipiId
     , MevcutSurucuBelgeTarihi
     , MevcutSurucuBelgeNo
@@ -56,7 +63,7 @@ Select top 1
     , GrupTipiId
     , SubeTipiId
     , KayitTipiId
-    , 6        -- <VeriKaynakTipiId, smallint,>
+    , 6 as VeriKaynakTipiId
     , EtiketTipiId 
     , KullaniciUyarilari
     , UygulamaPersonelId
@@ -68,5 +75,8 @@ and   AdayId = @AdayId
 and   TalepTipiId = 1
 order by TalepKayitTarihi desc
 
+) as x
+
+ WHERE Id = @TalepId
 
 END -- procedure

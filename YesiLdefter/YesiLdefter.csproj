@@ -543,6 +543,9 @@
     <Content Include="Scripts\UST\MsV3\prc_GetTableModel.txt" />
     <Content Include="Scripts\UST\MsV3\tempEduUsersList.txt" />
     <Content Include="Scripts\UST\Mtsk\FileUpdates.txt" />
+    <Content Include="Scripts\UST\Mtsk\fnc_getSertifikaId.txt" />
+    <Content Include="Scripts\UST\Mtsk\fnc_getSertifikaIsOtomatik.txt" />
+    <Content Include="Scripts\UST\Mtsk\fnc_getSertifikaKayitTipi.txt" />
     <Content Include="Scripts\UST\Mtsk\GecerlilikTarihi.txt" />
     <Content Include="Scripts\UST\Mtsk\Lkp_MtskTalepTipi.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskAday - Kopyala.txt" />
@@ -555,7 +558,10 @@
     <Content Include="Scripts\UST\Mtsk\MtskSaatTeorik.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskUcretSinav.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskUcretTeorik.txt" />
-    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakipAdayKayitlariToplami.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTablesCreate.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakipAdayKayitKonulari.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakipAdayKayitToplamlari.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakipSingleSet.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTalepSertifika24HakKaydi.txt" />
     <Content Include="Scripts\UST\Mtsk\TempTabimBankalar.txt" />
     <Content Include="Scripts\UST\Mtsk\TempTabimHesaplar.txt" />
@@ -570,6 +576,7 @@
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmHesapFinansMaliyetGrubuKontrolu.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmMaliyetHesaplariTakibi.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmOdemePlaniOlustur.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmHesapFinansDefaultMaliyetGruplari.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\prc_OnmBelgeDekontOzetler.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\prc_OnmBelgeDekontTbmGelirHesaplari.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\prc_OnmBelgeDekontTbmGiderHesaplari.txt" />
