@@ -17,7 +17,7 @@ begin transaction
    IslemTipiId        Varchar(10)   null, /* peşinat, taksit vb gibi alt detay seçenekleri için */ 
       
    -- 10 Dekont Belgesi Hakkında
-   BelgeTarihi        Date          null, 
+   BelgeTarihi        DateTime        null, 
    --BelgeYil           Smallint      null, 
    --BelgeAy            Smallint      null, 
    --BelgeGun           Smallint      null, 
@@ -99,7 +99,7 @@ begin transaction
 
  /*CreateTrigger*/
 
-CREATE TRIGGER [dbo].[trg_OnmBelgeDekont] on [dbo].[OnmBelgeDekont] 
+ALTER TRIGGER [dbo].[trg_OnmBelgeDekont] on [dbo].[OnmBelgeDekont] 
 AFTER INSERT, UPDATE
 AS BEGIN
 
@@ -111,7 +111,7 @@ AS BEGIN
     declare @TipiId smallInt
     declare @IslemTipiId varchar(10)
     declare @_IslemTipiId varchar(10)
-    declare @BelgeTarihi date
+    declare @BelgeTarihi datetime
     declare @BHesapTipiId smallInt
     declare @AHesapTipiId smallInt
     declare @BelgeTutari numeric(22,8)
@@ -144,7 +144,7 @@ AS BEGIN
 	    , @BelgeTutari = round(ins.BelgeTutari,2)
 		, @CariId = ins.CariId
 		, @SourceTypeId = ins.SourceTypeId
-		, @SourceId = ins.SourceId
+		, @SourceId = ins.SourceId 
       from Inserted ins
       where ins.Id = @curId
 	  
@@ -162,16 +162,17 @@ AS BEGIN
           , BelgeDekontId = @curId -- OnmBelgeDekont.Id
           Where Id = @SourceId
 	  end
-	  /*	  
+	  	  
 	  if (@TipiId = 2) and -- Tahsilat
-	     (@AHesapTipiId >= 2100) -- Mtskİşlemleri
+	     (@AHesapTipiId >= 21100) -- Mtskİşlemleri
       begin
 	      set @makbuzCount = 0
           -- OnmBelgeDekont.Id = @curId daha önce OnmOdemePlani tablosuna işlenmiş mi ?
 		  Select @makbuzCount = count(Id)
           from dbo.OnmOdemePlani
           where CariId = @CariId
-          and UcretTipiId = @AHesapTipiId
+		  and   TalepId = @SourceId
+          and   UcretTipiId = @AHesapTipiId
 		  and ( BelgeDekontId = @curId or PatchBelgeDekontId = @curId )
 		  		  
 		  if (@_BelgeTutari > 1) and -- 0 değil 1 liradan büyük ise
@@ -186,8 +187,9 @@ AS BEGIN
               , @OnmOdemePlaniTaksitTutari = round(TaksitTutari,2)
 		      from dbo.OnmOdemePlani
 		      where CariId = @CariId
-		      and UcretTipiId = @AHesapTipiId
-		      and IsPaid = 0
+		      and   TalepId = @SourceId   
+			  and   UcretTipiId = @AHesapTipiId
+		      and   IsPaid = 0
 		      order by VadeTarihi, TaksitNo, Id
 
               if (@_BelgeTutari >= @OnmOdemePlaniTaksitTutari)
@@ -215,12 +217,12 @@ AS BEGIN
 
                   Insert into dbo.OnmOdemePlani
                   ( FirmId, DonemTipiId, UcretTipiId, CariId, TaksitTipiId
-                   ,TaksitNo, VadeTarihi, VadeYil, VadeAy, VadeGun
+                   ,TaksitNo, VadeTarihi 
                    ,TaksitTutari, IsPaid
                    ,YedekTaksitTutari, BelgeDekontId, PatchBelgeDekontId, BelgeStokBId )
                   Select 
 				    FirmId, DonemTipiId, UcretTipiId, CariId, TaksitTipiId
-                   ,TaksitNo, VadeTarihi, VadeYil, VadeAy, VadeGun
+                   ,TaksitNo, VadeTarihi 
                    ,@OnmOdemePlaniTaksitTutari - @_BelgeTutari  --TaksitTutari
 				   ,0      --IsPaid
                    ,null   --YedekTaksitTutari
@@ -236,7 +238,7 @@ AS BEGIN
 
           end -- @_BelgeTutari > 0
       end -- if (@TipiId = 2)
-      */
+      
 	  
 
       set @Yil = convert(varchar(4), YEAR(@BelgeTarihi))

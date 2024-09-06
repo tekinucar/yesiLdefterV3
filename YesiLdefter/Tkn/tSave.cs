@@ -1065,8 +1065,8 @@ namespace Tkn_Save
                     {
                         f._setInsValue = t.TarihSaat_Formati(Convert.ToDateTime(f.fvalue)) + ", ";
                         if (f.fVisible == "True")
-                            f._setEditField = " [" + f.fname + "] = " + t.Tarih_Formati(Convert.ToDateTime(f.fvalue)) + ", ";
-                        f._setSelectControl = " and [" + f.fname + "] = " + t.Tarih_Formati(Convert.ToDateTime(f.fvalue)) + " ";
+                            f._setEditField = " [" + f.fname + "] = " + t.TarihSaat_Formati(Convert.ToDateTime(f.fvalue)) + ", ";
+                        f._setSelectControl = " and [" + f.fname + "] = " + t.TarihSaat_Formati(Convert.ToDateTime(f.fvalue)) + " ";
                     }
                     else
                     {

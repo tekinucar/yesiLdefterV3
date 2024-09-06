@@ -24,6 +24,7 @@ begin transaction
         MASTER_KEY_FNAME        VarChar(30)           NULL,	
         FOREING_FNAME           VarChar(30)           NULL,	
         PARENT_FNAME            VarChar(30)           NULL, /* tree viewler için gerekli */
+        LOCK_FIELD_NAME         VarChar(30)           NULL, 
 
         PROP_SUBVIEW            VarChar(4000)         NULL,
         PROP_JOINTABLE          VarChar(8000)         NULL,

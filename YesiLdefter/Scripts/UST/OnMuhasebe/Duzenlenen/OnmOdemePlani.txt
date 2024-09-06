@@ -21,7 +21,7 @@ begin transaction
    TaksitTutari        Numeric(22,5) null, 
    OdemeTipiId         SmallInt      null, /* 1. Kredi Kartı, 2. Nakit, 3. Banka Havalesi, 4. Senet, 5. Açık Hesap */
    IsPaid              Bit       not null, /* default : 0 = ödenmedi,  1 = Ödendi */  
-   TahsilTarihi        Date          null,
+   TahsilTarihi        DateTime      null,
    -- 30
    YedekTaksitTutari   Numeric(22,5) null, /* taksit tutarı eksik tahsil edildiği zaman ( YedekTaksitTutari = TaksitTutari, TaksitTutari = EksikTahsilTutarı ) şeklinde işleniyor */
    BelgeDekontId       Int           null, /* OnmBelgeDekont.Id */
