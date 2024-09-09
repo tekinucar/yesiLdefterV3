@@ -2144,6 +2144,7 @@ namespace Tkn_Variable
         public byte TableCount { get; set; }
         public byte TableType { get; set; }
         public string KeyId_FName { get; set; }
+        public string Lock_FName { get; set; }
         public string functionName { get; set; }
         public string SoftwareCode { get; set; }
         public string ProjectCode { get; set; }
@@ -2166,6 +2167,7 @@ namespace Tkn_Variable
             TableCode = "";
             IPCode = "";
             KeyId_FName = "";
+            Lock_FName = "";
             functionName = "";
             Cargo = "";
             TableCount = 0;

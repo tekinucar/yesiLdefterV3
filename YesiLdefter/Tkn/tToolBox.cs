@@ -1055,6 +1055,7 @@ namespace Tkn_ToolBox
                 vt.TableName = Set(MyProperties_Get(myProp, "=TableName:"), "TABLE1", "TABLE1");
                 vt.TableIPCode = Set(MyProperties_Get(myProp, "=TableIPCode:"), "", "");
                 vt.KeyId_FName = Set(MyProperties_Get(myProp, "=KeyFName:"), "", "");
+                vt.Lock_FName = Set(MyProperties_Get(myProp, "=LockFName:"), "", "");
                 vt.Cargo = Set(MyProperties_Get(myProp, "=Cargo:"), "", ""); // cargo = data, param, report
 
                 string softwareCode = "";
@@ -1814,6 +1815,7 @@ namespace Tkn_ToolBox
                , b.TB_SELECT_SQL       LKP_TB_SELECT_SQL 
                , b.TB_WHERE_SQL        LKP_TB_WHERE_SQL 
                , b.TB_ORDER_BY         LKP_TB_ORDER_BY 
+               , b.LOCK_FIELD_NAME     LKP_LOCK_FIELD_NAME
                , b.PROP_SUBVIEW        LKP_PROP_SUBVIEW 
                , b.PROP_JOINTABLE      LKP_PROP_JOINTABLE 
                              

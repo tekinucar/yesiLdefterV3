@@ -959,6 +959,7 @@ Select distinct
                , b.TB_SELECT_SQL       LKP_TB_SELECT_SQL 
                , b.TB_WHERE_SQL        LKP_TB_WHERE_SQL 
                , b.TB_ORDER_BY         LKP_TB_ORDER_BY 
+               , b.LOCK_FIELD_NAME     LKP_LOCK_FIELD_NAME 
                , b.PROP_SUBVIEW        LKP_PROP_SUBVIEW 
                , b.PROP_JOINTABLE      LKP_PROP_JOINTABLE 
                              
@@ -1420,6 +1421,7 @@ INSERT INTO [dbo].[SYS_UPDATES]
                        
             string Data_Find = t.Set(row["DATA_FIND"].ToString(), "", ""); /* 0= Find yok, 1. standart, 2. List&Data   */
             string Find_FName = t.Set(row["FIND_FNAME"].ToString(), "", "");
+            string Lock_FName = t.Set(row["LKP_LOCK_FIELD_NAME"].ToString(), "", "");
             string AutoInsert = t.Set(row["AUTO_INSERT"].ToString(), "", "");
             bool IsUseNewRefId = t.Set(row["IS_USE_NEW_REFID"].ToString(), "", false);
             string UseNewRefId = "";
@@ -1828,6 +1830,7 @@ INSERT INTO [dbo].[SYS_UPDATES]
             t.MyProperties_Set(ref myProp, "MultiPageID", MultiPageID);
             t.MyProperties_Set(ref myProp, "DataFind", Data_Find);
             t.MyProperties_Set(ref myProp, "FindFName", Find_FName);
+            t.MyProperties_Set(ref myProp, "LockFName", Lock_FName);
             t.MyProperties_Set(ref myProp, "AutoInsert", AutoInsert);
             t.MyProperties_Set(ref myProp, "IsUseNewRefId", IsUseNewRefId.ToString());
             t.MyProperties_Set(ref myProp, "OrderBy", OrderBy);
@@ -1888,7 +1891,7 @@ INSERT INTO [dbo].[SYS_UPDATES]
                // if (dsData.Tables[0].Rows.Count == 0)
                //     v.con_AutoNewRecords = true;
             }
-
+            
             #endregion Read dsData
 
         }

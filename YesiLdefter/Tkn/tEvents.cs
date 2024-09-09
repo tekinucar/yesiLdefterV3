@@ -113,14 +113,27 @@ namespace Tkn_Events
             }
 
             #region HasChanges
-            if ((dsData.HasChanges()) &&
+            //if ((dsData.HasChanges()) &&
+            //    (v.con_LkpOnayChange == false)) // silme işlemi değil ise
+            object x = ((DevExpress.XtraEditors.DataNavigator)sender).Tag;
+
+            int OldPosition = ((int)x);
+
+            DataRowState state = checkedChangeValue(dsData, OldPosition);
+            //DataRowState state = dsData.Tables[0].Rows[OldPosition].RowState;
+
+            if ((state == DataRowState.Modified) &&
                 (v.con_LkpOnayChange == false)) // silme işlemi değil ise
             {
-                object x = ((DevExpress.XtraEditors.DataNavigator)sender).Tag;
+                //object x = ((DevExpress.XtraEditors.DataNavigator)sender).Tag;
 
-                int OldPosition = ((int)x);
+                //int OldPosition = ((int)x);
 
                 // -97 Delete işlemine işaret ediyor ( Rows[position].Delete() )
+
+                // lock row ise işlem başlamasın 
+                if (checkedLockRow(dsData, OldPosition)) 
+                    OldPosition = -1;
 
                 if ((OldPosition != -97) && // Değil ise 
                     (OldPosition > -1))
@@ -169,7 +182,6 @@ namespace Tkn_Events
 
                 }
 
-
             }
             #endregion HasChanges
 
@@ -181,8 +193,84 @@ namespace Tkn_Events
 
         }
 
+        private DataRowState checkedChangeValue(DataSet dsData, int position)
+        {
+            DataRowState state = DataRowState.Unchanged;
+
+            int colCount = dsData.Tables[0].Columns.Count;
+
+            string fieldName = "";
+            DataRow row = dsData.Tables[0].Rows[position];
+
+            for (int i = 0; i < colCount; i++)
+            {
+                fieldName = dsData.Tables[0].Columns[i].ColumnName;
+                
+                if (!row[fieldName, DataRowVersion.Original].Equals(row[fieldName, DataRowVersion.Current]))
+                {
+                    //string oldValue = row[fieldName, DataRowVersion.Original].ToString();
+                    //string newValue = row[fieldName, DataRowVersion.Current].ToString();
+                    state = DataRowState.Modified;
+                    break;
+                }
+            }
+
+            return state;
+        }
+
+        private bool checkedLockRow(DataSet dsData, int position)
+        {
+            string myProp = dsData.Namespace;
+            string lockFieldName = t.MyProperties_Get(myProp, "LockFName:");
+
+            if (t.IsNotNull(lockFieldName))
+            {
+                //bool isLockRecord = false;
+
+                string lockValue = dsData.Tables[0].Rows[position][lockFieldName].ToString();
+
+                if (lockValue == "1" || lockValue == "True")
+                {
+                    /// bu yemiyor, yemesi için .BeginEdit(); başlaması gerekiyor onuda denedim olmadı
+                    /// demekki doğru yerde başlatamadım...
+                    ///
+                    /// ds.Tables[Table_Name].Rows[Position].CancelEdit();
+
+                    CancelChangeValues(dsData, position);
+
+                    v.Kullaniciya_Mesaj_Var = "Bu kayıt kilitli ... Değiştirilemez.";
+                    return true;
+                }
+            }
+
+            return false;
+        }
+        private void CancelChangeValues(DataSet dsData, int position)
+        {
+            int colCount = dsData.Tables[0].Columns.Count;
+
+            string fieldName = "";
+            DataRow row = dsData.Tables[0].Rows[position];
+            string oldValue = "";
+            string newValue = "";
+
+            for (int i = 0; i < colCount; i++)
+            {
+                fieldName = dsData.Tables[0].Columns[i].ColumnName;
+                oldValue = row[fieldName, DataRowVersion.Original].ToString();
+                newValue = row[fieldName, DataRowVersion.Current].ToString();
+
+                if (!row[fieldName, DataRowVersion.Original].Equals(row[fieldName, DataRowVersion.Current]))
+                {
+                    oldValue = row[fieldName, DataRowVersion.Original].ToString();
+                    //newValue = row[fieldName, DataRowVersion.Current].ToString();
+                    row[fieldName] = oldValue;
+                }
+            }
+        }
+
         #endregion dataNavigator
-        
+
         #region tDataSet Row Events
 
         public void tRow_Changed(object sender, DataRowChangeEventArgs e)
@@ -192,6 +280,12 @@ namespace Tkn_Events
             //    e.Row["name"], e.Action);
             //v.Kullaniciya_Mesaj_Var = String.Format("Row_Changed Event: name={0}; action={1}",
             //    e.Row.Table.TableName, e.Action);
+
+
+            //ds.Tables[Table_Name].Rows[Position].CancelEdit();
+            //((DataTable)sender).DataSet.Tables[0].Rows[]
+            
+            //e.Row.BeginEdit();
 
             tSetDataStateChanges(sender);
         }
@@ -3145,9 +3239,6 @@ namespace Tkn_Events
                             if (buttonType == v.tButtonType.btListele)
                             {
                                 Prop_RunTime_Work_AUTO_REFRESH(tForm, Prop_RunTime);
-                                // deneme
-                                
-
                             }
                         }
                     }
