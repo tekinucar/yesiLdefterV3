@@ -132,7 +132,7 @@ namespace Tkn_Events
                 // -97 Delete işlemine işaret ediyor ( Rows[position].Delete() )
 
                 // lock row ise işlem başlamasın 
-                if (checkedLockRow(dsData, OldPosition)) 
+                if (t.checkedLockRow(dsData, OldPosition)) 
                     OldPosition = -1;
 
                 if ((OldPosition != -97) && // Değil ise 
@@ -197,6 +197,8 @@ namespace Tkn_Events
         {
             DataRowState state = DataRowState.Unchanged;
 
+            if (position < 0) return state;
+
             int colCount = dsData.Tables[0].Columns.Count;
 
             string fieldName = "";
@@ -218,57 +220,7 @@ namespace Tkn_Events
             return state;
         }
 
-        private bool checkedLockRow(DataSet dsData, int position)
-        {
-            string myProp = dsData.Namespace;
-            string lockFieldName = t.MyProperties_Get(myProp, "LockFName:");
-
-            if (t.IsNotNull(lockFieldName))
-            {
-                //bool isLockRecord = false;
-
-                string lockValue = dsData.Tables[0].Rows[position][lockFieldName].ToString();
-
-                if (lockValue == "1" || lockValue == "True")
-                {
-                    /// bu yemiyor, yemesi için .BeginEdit(); başlaması gerekiyor onuda denedim olmadı
-                    /// demekki doğru yerde başlatamadım...
-                    ///
-                    /// ds.Tables[Table_Name].Rows[Position].CancelEdit();
-
-                    CancelChangeValues(dsData, position);
-
-                    v.Kullaniciya_Mesaj_Var = "Bu kayıt kilitli ... Değiştirilemez.";
-                    return true;
-                }
-            }
-
-            return false;
-        }
-        private void CancelChangeValues(DataSet dsData, int position)
-        {
-            int colCount = dsData.Tables[0].Columns.Count;
-
-            string fieldName = "";
-            DataRow row = dsData.Tables[0].Rows[position];
-            string oldValue = "";
-            string newValue = "";
-
-            for (int i = 0; i < colCount; i++)
-            {
-                fieldName = dsData.Tables[0].Columns[i].ColumnName;
-                oldValue = row[fieldName, DataRowVersion.Original].ToString();
-                newValue = row[fieldName, DataRowVersion.Current].ToString();
-
-                if (!row[fieldName, DataRowVersion.Original].Equals(row[fieldName, DataRowVersion.Current]))
-                {
-                    oldValue = row[fieldName, DataRowVersion.Original].ToString();
-                    //newValue = row[fieldName, DataRowVersion.Current].ToString();
-                    row[fieldName] = oldValue;
-                }
-            }
-        }
-
+        
         #endregion dataNavigator
 
         #region tDataSet Row Events

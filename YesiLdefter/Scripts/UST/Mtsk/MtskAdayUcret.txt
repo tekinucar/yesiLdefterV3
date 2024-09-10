@@ -15,6 +15,7 @@ begin transaction
    /* Ücretlendirme bilgileri */
    IsUcretli               Bit           null, /* 0 = Ücretsiz, 1 = Ücretli */
    IsUcretsiz              Bit           null, /* 0 = Ücretsiz, 1 = Ücretli */
+   IsLock                  Bit           null,
 
    -- 20
    SertifikaUcreti         Numeric(22,5) null, /* il bazlı sertifika ücreti - readOnly */

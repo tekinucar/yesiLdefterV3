@@ -50,7 +50,15 @@ namespace Tkn_Save
 
                 if (pos > -1)
                 {
-                    
+                    // Bu kayıt kilitli mi ? kontrol ediyor
+                    // kilitli ise buradan geri dönüyor
+                    if (t.checkedLockRow(dsData, pos))
+                    {
+                        onay = false;
+                        v.con_OnaySave = onay;
+                        return onay;
+                    }
+
                     // DataLayout nesnesi olunca bulundğu texttedeki değişiklikleri algılamıyordu
                     // bu nedenle cursor ün buluduğu nesneden exit yapması sağlandı.
 
@@ -1946,31 +1954,7 @@ namespace Tkn_Save
 
             return ftype;
         }
-
-
-        private void CancelChangeValues(DataSet dsData, int position)
-        {
-            int colCount = dsData.Tables[0].Columns.Count;
-
-            string fieldName = "";
-            DataRow row = dsData.Tables[0].Rows[position];
-            string oldValue = "";
-            string newValue = "";
-            
-            for (int i = 0; i < colCount; i++)
-            {
-                fieldName = dsData.Tables[0].Columns[i].ColumnName;
-                oldValue = row[fieldName, DataRowVersion.Original].ToString();
-                newValue = row[fieldName, DataRowVersion.Current].ToString();
-
-                if (!row[fieldName, DataRowVersion.Original].Equals(row[fieldName, DataRowVersion.Current]))
-                {
-                    oldValue = row[fieldName, DataRowVersion.Original].ToString();
-                    //newValue = row[fieldName, DataRowVersion.Current].ToString();
-                    row[fieldName] = oldValue;
-                }
-            }
-        }
+               
 
         #region MSSQL Veri Tipleri ve ID leri
 

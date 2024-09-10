@@ -2200,16 +2200,7 @@ namespace Tkn_ToolBox
             return sonuc;
         }
         #endregion TableRemove
-
-        public void TableRemoveOnDataSet(DataSet ds, string name)
-        {
-            if (ds != null)
-            {
-                ds.Tables[name].Rows.Clear();
-                ds.Tables.Remove(ds.Tables[name]);
-            }
-        }
-
+        
         #region TableFieldsListRefresh
         public void TableFieldsListRefresh(Form tForm, DataSet dsData)
         {
@@ -2242,8 +2233,15 @@ namespace Tkn_ToolBox
             preparingTableAndFields(tForm, dsData);
         }
 
+        public void TableRemoveOnDataSet(DataSet ds, string name)
+        {
+            if (ds != null)
+            {
+                ds.Tables[name].Rows.Clear();
+                ds.Tables.Remove(ds.Tables[name]);
+            }
+        }
         #endregion TableFieldsListRefresh
-
 
         #region TableRowDelete
         public Boolean TableRowDelete(DataSet ds, int TableNo)
@@ -2886,6 +2884,72 @@ namespace Tkn_ToolBox
         }
 
         #endregion RunQueryModels
+
+        #region lockFName, lockFieldName kontrolleri
+
+        public bool checkedLockRow(DataSet dsData, int position)
+        {
+            string myProp = dsData.Namespace;
+            string lockFieldName = MyProperties_Get(myProp, "LockFName:");
+
+            if (IsNotNull(lockFieldName))
+            {
+                //bool isLockRecord = false;
+
+                string lockValue = dsData.Tables[0].Rows[position][lockFieldName].ToString();
+
+                if (lockValue == "1" || lockValue == "True")
+                {
+                    /// bu yemiyor, yemesi için .BeginEdit(); başlaması gerekiyor onuda denedim olmadı
+                    /// demekki doğru yerde başlatamadım...
+                    ///
+                    /// ds.Tables[Table_Name].Rows[Position].CancelEdit();
+
+                    CancelChangeValues(dsData, position);
+
+                    v.Kullaniciya_Mesaj_Var = "Bu kayıt kilitli ... Değiştirilemez.";
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private void CancelChangeValues(DataSet dsData, int position)
+        {
+            int colCount = dsData.Tables[0].Columns.Count;
+
+            string fieldName = "";
+            DataRow row = dsData.Tables[0].Rows[position];
+            string orjValue = "";
+            string curValue = "";
+            string value = "";
+            bool onay = false;
+
+            for (int i = 0; i < colCount; i++)
+            {
+                fieldName = dsData.Tables[0].Columns[i].ColumnName;
+                orjValue = row[fieldName, DataRowVersion.Original].ToString();
+                curValue = row[fieldName, DataRowVersion.Current].ToString();
+                value = row[fieldName].ToString();
+                
+                //if (!row[fieldName, DataRowVersion.Original].Equals(row[fieldName, DataRowVersion.Current])) 
+                if (!orjValue.Equals(curValue) ||
+                    !orjValue.Equals(value))
+                {
+                    //orjValue = row[fieldName, DataRowVersion.Original].ToString();
+                    //curValue = row[fieldName, DataRowVersion.Current].ToString();
+                    row[fieldName] = orjValue;
+                    string xxxx = row[fieldName].ToString();
+                    onay = true;
+                }
+
+            }
+            if (onay)
+                dsData.Tables[0].Rows[position].AcceptChanges();
+        }
+
+        #endregion lockFName, lockFieldName kontrolleri
 
         #endregion Database İşlemleri
 

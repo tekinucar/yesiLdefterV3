@@ -26,6 +26,7 @@ begin transaction
    YedekTaksitTutari   Numeric(22,5) null, /* taksit tutarı eksik tahsil edildiği zaman ( YedekTaksitTutari = TaksitTutari, TaksitTutari = EksikTahsilTutarı ) şeklinde işleniyor */
    BelgeDekontId       Int           null, /* OnmBelgeDekont.Id */
    PatchBelgeDekontId  Int           null, /* eksik tahsil edildiğinde yeni oluşturulan satıra hangi BelgeDekontId den dolayı oluşturulduğunun işareti */
+                                           /* ? bu Id sayesinde hangi tahsilat makbuzu yüzünden (eksik tahsilat) oluştuğu bulunuyor, yani sebep olan OnmBelgeDekont.Id  */
    BelgeStokBId        Int           null, /* Fatura için : BelgeStokB.Id  : BelgeStokB başlık tablosu */
    -- 40
    SourceTypeId        SmallInt      null, /* 0. manuel giriş, 1. Tabim Transfer */      
@@ -246,6 +247,53 @@ END
 
 /*CreateTriggerEnd*/
 
+/*CreateTrigger*/
 
+CREATE TRIGGER [dbo].[trg_OnmOdemePlani] on [dbo].[OnmOdemePlani]
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    declare planCursor cursor for select Id from Inserted
+    declare @planId bigint
+
+    OPEN planCursor
+
+    FETCH NEXT FROM planCursor INTO @planId --@curId
+
+    declare @yTalepId int = 0
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        Select 
+            @yTalepId = isnull(ins.TalepId,0)
+        From inserted ins
+        Where ins.Id = @planId
+     	
+		-- Tahsil edilmiş bir taksit var ise kilitle
+        if (
+            select count(Id) as Adet from OnmOdemePlani
+            where IsPaid = 1
+            and   TalepId = @yTalepId
+            ) > 0 
+        begin
+            Update MtskAdayUcret set IsLock = 1
+            Where TalepId = @yTalepId
+        end else 
+        begin
+            Update MtskAdayUcret set IsLock = 0
+            Where TalepId = @yTalepId
+        end
+		
+		
+      FETCH NEXT FROM planCursor INTO @planId
+    END -- While
+
+    CLOSE planCursor
+    DEALLOCATE planCursor   
+
+END -- create trigger
+
+
+/*CreateTriggerEnd*/
 
 
