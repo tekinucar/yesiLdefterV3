@@ -960,7 +960,8 @@ namespace Tkn_Events
             /// çünkü arama butonuna basabilir
             if (t.IsSearchControl(sender))
             {
-                v.tSearch.searchValue = ((DevExpress.XtraEditors.ButtonEdit)sender).EditValue.ToString();
+                if (((DevExpress.XtraEditors.ButtonEdit)sender).EditValue != null)
+                    v.tSearch.searchValue = ((DevExpress.XtraEditors.ButtonEdit)sender).EditValue.ToString();
             }
         }
 

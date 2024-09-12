@@ -3339,37 +3339,39 @@ INSERT INTO [dbo].[SYS_UPDATES]
 
             bool isSubJoin = (fieldName.IndexOf("Lkp") == 0);
 
-            if (t.IsNotNull(Row["KRT_CAPTION"].ToString()))
-                lookUpFieldName = Row["KRT_CAPTION"].ToString();
-            if (t.IsNotNull(Row["KRT_TABLE_ALIAS"].ToString()))
-                tableCode = Row["KRT_TABLE_ALIAS"].ToString();
-            if (t.IsNotNull(Row["KRT_ALIAS"].ToString()))
-                tableName = Row["KRT_ALIAS"].ToString();
+            if (joinFields.IndexOf(joinTableAlias) == -1)
+            {
+                if (t.IsNotNull(Row["KRT_CAPTION"].ToString()))
+                    lookUpFieldName = Row["KRT_CAPTION"].ToString();
+                if (t.IsNotNull(Row["KRT_TABLE_ALIAS"].ToString()))
+                    tableCode = Row["KRT_TABLE_ALIAS"].ToString();
+                if (t.IsNotNull(Row["KRT_ALIAS"].ToString()))
+                    tableName = Row["KRT_ALIAS"].ToString();
 
 
-            //if (fieldName.IndexOf("Lkp_") > -1)
-            fieldName = fieldName.Replace("Lkp_", "");
+                //if (fieldName.IndexOf("Lkp_") > -1)
+                fieldName = fieldName.Replace("Lkp_", "");
 
-            t.LookUpFieldNameChecked(ref tableName, ref fieldName, ref idFieldName, fieldType);
+                t.LookUpFieldNameChecked(ref tableName, ref fieldName, ref idFieldName, fieldType);
 
-            //int adet = t.tFindWordCount(joinTables, "as " + joinTableAlias);
-            //if (adet > 0)
-            //    joinTableAlias = joinTableAlias + "_" + Convert.ToString(adet + 1);
+                //int adet = t.tFindWordCount(joinTables, "as " + joinTableAlias);
+                //if (adet > 0)
+                //    joinTableAlias = joinTableAlias + "_" + Convert.ToString(adet + 1);
 
-            joinTables += "   left outer join Lkp." + tableName + " as " + joinTableAlias  + " with (nolock) on ( " + tableCode + "." + lookUpFieldName.Replace("Lkp_", "") + " = " + joinTableAlias + "." + idFieldName + " ) " + v.ENTER;
+                joinTables += "   left outer join Lkp." + tableName + " as " + joinTableAlias + " with (nolock) on ( " + tableCode + "." + lookUpFieldName.Replace("Lkp_", "") + " = " + joinTableAlias + "." + idFieldName + " ) " + v.ENTER;
 
-            if (lookUpFieldName.IndexOf("Lkp_") == -1)
-                lookUpFieldName = "Lkp_" + lookUpFieldName;
+                if (lookUpFieldName.IndexOf("Lkp_") == -1)
+                    lookUpFieldName = "Lkp_" + lookUpFieldName;
 
-            if (lookUpFieldName.IndexOf("TipiId") > -1)
-                lookUpFieldName = lookUpFieldName.Replace("TipiId", "Tipi");
-            if (lookUpFieldName.IndexOf("TypeId") > -1)
-                lookUpFieldName = lookUpFieldName.Replace("TypeId", "Type");
-            // 
-            if (fieldName == "Type") fieldName = fieldName + "Name";
+                if (lookUpFieldName.IndexOf("TipiId") > -1)
+                    lookUpFieldName = lookUpFieldName.Replace("TipiId", "Tipi");
+                if (lookUpFieldName.IndexOf("TypeId") > -1)
+                    lookUpFieldName = lookUpFieldName.Replace("TypeId", "Type");
+                // 
+                if (fieldName == "Type") fieldName = fieldName + "Name";
 
-            joinFields += " , " + joinTableAlias + "." + fieldName + " as " + lookUpFieldName + v.ENTER;
-
+                joinFields += " , " + joinTableAlias + "." + fieldName + " as " + lookUpFieldName + v.ENTER;
+            }
         }
 
         private void specialCase_JoinTableForLookUpField(DataSet dsFields, string joinTables, ref string joinFields)
