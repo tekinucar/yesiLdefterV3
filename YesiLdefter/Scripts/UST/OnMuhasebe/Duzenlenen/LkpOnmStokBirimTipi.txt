@@ -6,6 +6,9 @@
 
 begin transaction
 
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmStokBirimTipi')
+drop table [Lkp].[OnmStokBirimTipi]
+
 create table [Lkp].[OnmStokBirimTipi]
 (
    Id          Int Unique Not null,

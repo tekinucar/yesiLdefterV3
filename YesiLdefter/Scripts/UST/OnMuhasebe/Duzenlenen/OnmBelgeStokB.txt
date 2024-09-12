@@ -1,8 +1,9 @@
-﻿begin transaction
+﻿
+/*CreateTable*/
 
--- Stok Belgesi  Kaydı 
+begin transaction
 
- create table BelgeStokB
+ create table OnmBelgeStokB
  (
 
    Id                 Int IDENTITY(1,1) NOT NULL, 
@@ -13,7 +14,8 @@
    IsCommit           Bit       not null, /* default : 0 = Muh. işlenmedi, 1 = Muh. İşlendi */  
    IsLock             Bit           null, /* default : 0 = Açık, 1 = Kilitli  */
 
-   --belge tip bilgileri
+   -- belge tip bilgileri
+   -- 10
    GCTipiId           SmallInt      null, /* 0 = etkisiz, 1 = Giriş Hareketi, 2 = Çıkış Hareketi */
    BelgeTipiId        SmallInt      null, /*   */
    KaynakTipiId       SmallInt      null, /* 1. kağıt, 2. elektronik belge */
@@ -22,33 +24,35 @@
 
 
    --fatura bilgileri
-   -- 10 Belge Hakkında
+   -- 20 Belge Hakkında
    BelgeTarihi        Date          null,
    BelgeSaati         VarChar(8)    null,
-   BelgeYil           Smallint      null, 
-   BelgeAy            Smallint      null, 
-   BelgeGun           Smallint      null,
    BelgeSeri          nVarChar(5)   null,
    BelgeNo            nVarChar(50)  null,
+   -- 30
    GIBEttn            nVarChar(50)  null,
    GIBFaturaTipiId    SmallInt      null,
    
+   -- 40
    VadeGun            SmallInt      null,  
    SonOdemeTarihi     Date          null, 
    GecerlilikTarihi   Date          null, /* sigortanın son tarihi */
    Aciklama           nVarChar(100) null,
-
+   -- 50
    ParaTipiId         nVarChar(3)   null, /* belgenin para birimi */
    DovizYeriId        SmallInt      null,
    DovizKuru          Numeric(12,5) null,
 
    --cari bilgisi
+   -- 60
    CariTipiId         SmallInt      null, /* 1. Gerçek Kişi, 2. Özel Firma, 3. Kamu Kurumu */
    CariId             Int           null,
    CariTcVkNo         nVarChar(11)  null,
    CariUnvan          nVarChar(100) null, /* cari hesabı yok ise */
    CariAdi            nVarChar(50)  null,
    CariSoyadi         nVarChar(50)  null,
+
+   -- 70
    CariAdresi         nVarChar(200) null,
    CariIlce           nVarChar(20)  null,
    CariIl             nVarChar(20)  null,
@@ -66,32 +70,33 @@
    --
 
    -- 90
-   KayitTarihi        Date          null, 
-   KayitSaati         VarChar(8)    null,
+   KayitTarihi        Datetime      null, 
 
-   --100 Tutarlar
    -- Satırlar
+   -- 100 
    IOKdvliToplamTutar Numeric(22,8)  null, /* BURASI SATIRLARDAKİ TUTARLAR */
    IskontoOrani       Numeric(12,8)  null,
    IskontoTutari      Numeric(22,8)  null,
    ISEkVergiTutari    Numeric(22,8)  null,
    ISKdvliToplamTutar Numeric(22,8)  null,
    
-   ISKdv01Matrahi     Numeric(22,8)  null,
-   ISKdv08Matrahi     Numeric(22,8)  null,
-   ISKdv18Matrahi     Numeric(22,8)  null,
+   ISKdv1Matrahi      Numeric(22,8)  null,
+   ISKdv2Matrahi      Numeric(22,8)  null,
+   ISKdv3Matrahi      Numeric(22,8)  null,
+   ISKdv0Matrahi      Numeric(22,8)  null,
    
    -- FA : Fatura Altı
+   -- 110
    FA1IskontoOrani    Numeric(12,8)  null,
    FA2IskontoOrani    Numeric(12,8)  null,
    FA3IskontoOrani    Numeric(12,8)  null,
    FA4IskontoOrani    Numeric(12,8)  null,
-
+   -- 120
    FA1IskontoTutari   Numeric(22,8)  null,
    FA2IskontoTutari   Numeric(22,8)  null,
    FA3IskontoTutari   Numeric(22,8)  null,
    FA4IskontoTutari   Numeric(22,8)  null,
-
+   -- 130
    FAIskontoOrani     Numeric(12,8)  null,
    FAIskontoTutari    Numeric(22,8)  null,    
    dFAIskontoTutari   Numeric(22,8)  null,   
@@ -99,72 +104,87 @@
    dKdvsizToplam      Numeric(22,8)  null,
    
    -- FA sonraki Matrah ve Tutarlar
+   -- 140
    NoKdv              Bit            null, /* 1 ise kdv uygulaması yok */
-   Kdv01Matrahi       Numeric(22,8)  null,
-   Kdv01Tutari        Numeric(22,8)  null,
-   Kdv08Matrahi       Numeric(22,8)  null,
-   Kdv08Tutari        Numeric(22,8)  null,
-   Kdv18Matrahi       Numeric(22,8)  null,
-   Kdv18Tutari        Numeric(22,8)  null,
+   Kdv1Matrahi        Numeric(22,8)  null,
+   Kdv1Tutari         Numeric(22,8)  null,
+   Kdv2Matrahi        Numeric(22,8)  null,
+   Kdv2Tutari         Numeric(22,8)  null,
+   Kdv3Matrahi        Numeric(22,8)  null,
+   Kdv3Tutari         Numeric(22,8)  null,
+   Kdv0Matrahi        Numeric(22,8)  null,
+   -- 150
    ToplamKdvMatrahi   Numeric(22,8)  null, /* Toplam Matrah %1,8,18 olan satırların toplamı */
    ToplamKdvTutari    Numeric(22,8)  null, /* Toplam Kdv Tutarı */
-   
+   -- 160
    TevkifatTutari     Numeric(22,8)  null, /*  (( kdv_tutarı / 10 payda ) X 7 pay )       tutarı */
    HesaplananKdv      Numeric(22,8)  null, /* KdvTutariToplam - TevkifatTutari */
-   
+   -- 170
    GenelToplam        Numeric(22,8)  null,
    dGenelToplam       Numeric(22,8)  null,
 
-   constraint		pk_BelgeStokB primary key (Id)
+   constraint		pk_OnmBelgeStokB primary key (Id)
  )
 
- create index X_BelgeStokB01 on BelgeStokB (FirmId)
- create index X_BelgeStokB02 on BelgeStokB (GCTipiId)
- create index X_BelgeStokB03 on BelgeStokB (BelgeTipiId)
- create index X_BelgeStokB04 on BelgeStokB (KaynakTipiId)
- create index X_BelgeStokB05 on BelgeStokB (SebepTipiId)
- create index X_BelgeStokB06 on BelgeStokB (TuruTipiId)
- create index X_BelgeStokB011 on BelgeStokB (BelgeTarihi)
- create index X_BelgeStokB012 on BelgeStokB (KayitTarihi)
+ create index X_OnmBelgeStokB01 on OnmBelgeStokB (FirmId)
+ create index X_OnmBelgeStokB02 on OnmBelgeStokB (GCTipiId)
+ create index X_OnmBelgeStokB03 on OnmBelgeStokB (BelgeTipiId)
+ create index X_OnmBelgeStokB04 on OnmBelgeStokB (KaynakTipiId)
+ create index X_OnmBelgeStokB05 on OnmBelgeStokB (SebepTipiId)
+ create index X_OnmBelgeStokB06 on OnmBelgeStokB (TuruTipiId)
+ create index X_OnmBelgeStokB011 on OnmBelgeStokB (BelgeTarihi)
+ create index X_OnmBelgeStokB012 on OnmBelgeStokB (KayitTarihi)
  
+commit transaction
 
- -- ALTER TABLE BelgeStokB ADD  CariVergiDairesi   nVarChar(20)  null
+/*CreateTableEnd*/
 
 
 
+/*CreateLkpTable*/
+
+begin transaction
 
 -- ------------------------------------------------------- 
 -- GCTipiId
 -- ------------------------------------------------------- 
-create table [Lkp].[BelgeStokBGCTipi]
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmBelgeStokBGCTipi')
+drop table [Lkp].[OnmBelgeStokBGCTipi]
+
+create table [Lkp].[OnmBelgeStokBGCTipi]
 (
    Id           Int Unique Not Null,
    GCTipi       nVarchar(50),
    GrupTipiId   SmallInt Null,
 
-   constraint  pk_BelgeStokBGCTipi primary key (Id)
+   constraint  pk_OnmBelgeStokBGCTipi primary key (Id)
 )
 
-INSERT INTO [Lkp].[BelgeStokBGCTipi] (Id, GCTipi, GrupTipiId)
+INSERT INTO [Lkp].[OnmBelgeStokBGCTipi] (Id, GCTipi, GrupTipiId)
  VALUES 
   (0,   N'Stok Hareketsiz', 0),
   (1,   N'Stok Giriş', 1),
-  (2,   N'Stok Çıkış', 1)
+  (2,   N'Stok Çıkış', 1),
+  (3,   N'Stok Sayım', 1)
+
   
 
 -- ------------------------------------------------------- 
 -- BelgeTipiId
 -- ------------------------------------------------------- 
-create table [Lkp].[BelgeStokBBelgeTipi]
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmBelgeStokBBelgeTipi')
+drop table [Lkp].[OnmBelgeStokBBelgeTipi]
+
+create table [Lkp].[OnmBelgeStokBBelgeTipi]
 (
    Id           Int Unique Not Null,
    BelgeTipi    nVarchar(50),
    GrupTipiId   SmallInt Null,
 
-   constraint  pk_BelgeStokBBelgeTipi primary key (Id)
+   constraint  pk_OnmBelgeStokBBelgeTipi primary key (Id)
 )
 
-INSERT INTO [Lkp].[BelgeStokBBelgeTipi] (Id, BelgeTipi, GrupTipiId)
+INSERT INTO [Lkp].[OnmBelgeStokBBelgeTipi] (Id, BelgeTipi, GrupTipiId)
  VALUES 
   (0,   N'Tanımsız', 0),
   (11,   N'Alınan sipariş', 1),
@@ -183,17 +203,20 @@ INSERT INTO [Lkp].[BelgeStokBBelgeTipi] (Id, BelgeTipi, GrupTipiId)
 -- ------------------------------------------------------- 
 -- KaynakTipiId
 -- ------------------------------------------------------- 
-create table [Lkp].[BelgeStokBKaynakTipi]
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmBelgeStokBKaynakTipi')
+drop table [Lkp].[OnmBelgeStokBKaynakTipi]
+
+create table [Lkp].[OnmBelgeStokBKaynakTipi]
 (
    Id           Int Unique Not Null,
    KaynakTipi   nVarchar(50),
    GrupTipiId   SmallInt Null,
 
-   constraint  pk_BelgeStokBKaynakTipi primary key (Id)
+   constraint  pk_OnmBelgeStokBKaynakTipi primary key (Id)
 )
 
 
-INSERT INTO [Lkp].[BelgeStokBKaynakTipi] (Id, KaynakTipi, GrupTipiId)
+INSERT INTO [Lkp].[OnmBelgeStokBKaynakTipi] (Id, KaynakTipi, GrupTipiId)
  VALUES 
   (0,   N'Tanımsız', 0),
   (1,   N'e-devlet', 1),
@@ -202,24 +225,22 @@ INSERT INTO [Lkp].[BelgeStokBKaynakTipi] (Id, KaynakTipi, GrupTipiId)
   (5,   N'Fax', 1),
   (7,   N'Diğer', 1)
 
-
-
-
-
-
 -- ------------------------------------------------------- 
 -- BelgeStokBSebepTipi
 -- ------------------------------------------------------- 
-create table [Lkp].[BelgeStokBSebepTipi]
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmBelgeStokBSebepTipi')
+drop table [Lkp].[OnmBelgeStokBSebepTipi]
+
+create table [Lkp].[OnmBelgeStokBSebepTipi]
 (
    Id           Int Unique Not Null,
    SebepTipi    nVarchar(50),
    GrupTipiId   SmallInt Null,
 
-   constraint  pk_BelgeStokBSebepTipi primary key (Id)
+   constraint  pk_OnmBelgeStokBSebepTipi primary key (Id)
 )
 
-INSERT INTO [Lkp].[BelgeStokBSebepTipi] (Id, SebepTipi, GrupTipiId)
+INSERT INTO [Lkp].[OnmBelgeStokBSebepTipi] (Id, SebepTipi, GrupTipiId)
  VALUES 
   (0,     N'Tanımsız', 0),
   (153,   N'Ticari mal alımları', 1),
@@ -233,16 +254,19 @@ INSERT INTO [Lkp].[BelgeStokBSebepTipi] (Id, SebepTipi, GrupTipiId)
 -- ------------------------------------------------------- 
 -- BelgeStokBTuruTipi
 -- ------------------------------------------------------- 
-create table [Lkp].[BelgeStokBTuruTipi]
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmBelgeStokBTuruTipi')
+drop table [Lkp].[OnmBelgeStokBTuruTipi]
+
+create table [Lkp].[OnmBelgeStokBTuruTipi]
 (
    Id           Int Unique Not Null,
-   TuruTipi    nVarchar(50),
+   TuruTipi     nVarchar(50),
    GrupTipiId   SmallInt Null,
 
-   constraint  pk_BelgeStokBTuruTipi primary key (Id)
+   constraint  pk_OnmBelgeStokBTuruTipi primary key (Id)
 )
 
-INSERT INTO [Lkp].[BelgeStokBTuruTipi] (Id, TuruTipi, GrupTipiId)
+INSERT INTO [Lkp].[OnmBelgeStokBTuruTipi] (Id, TuruTipi, GrupTipiId)
  VALUES 
   (0,     N'Tanımsız', 0),
   (1,     N'Sipariş', 1),
@@ -252,7 +276,7 @@ INSERT INTO [Lkp].[BelgeStokBTuruTipi] (Id, TuruTipi, GrupTipiId)
 
 commit transaction
 
-
+/*CreateLkpTable*/
 
 
 /*

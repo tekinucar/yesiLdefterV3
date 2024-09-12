@@ -1,0 +1,49 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_OnmOdemePlaniIadeIsle] (@dekontId int)
+AS BEGIN
+  --declare @dekontId int
+  --set @dekontId = 15
+
+  declare @iadeId int
+
+  select @iadeId = ins.IadeId
+  from OnmBelgeDekont as ins
+  where ins.Id = @dekontId
+
+  -- bu dekontla daha önce OnmOdemePlani tablosunda iade satırları oluşturumamış ise
+  if (Select count(Id) as Adet from OnmOdemePlani
+      Where SourceTypeId = 2 
+	  and   SourceId = @dekontId 
+     ) = 0
+  begin
+      -- OnmBelgeDekont ile OnmOdemePlani nda bir veya birden fazla tahsil edilmiştir.
+	  -- Bu tahsil dekonutuna bağlı olarak iade dekontu oluşturuluyor 
+	  -- OnmBelgeDekont.IadeId = OnmBelgeDekont.Id : IadeDekontu = TahsilDekontu
+	  -- İade dekontu oluşturulunca Tahsil dekontu ile hangi ödemeler kapatılmışsa onlar için
+	  -- OnmOdemePlani tablosunda yeni borç satırları oluşturuluyor. 
+	  -- İşaretleri ise
+	  -- OnmOdemePlani.TaksitTipiId = 4
+	  -- OnmOdemePlani.SourceTypeId = 2
+	  -- OnmOdemePlani.SourceId = OnmBelgeDekont.Id (iade dekontunun Id si)
+	  
+      Insert into dbo.OnmOdemePlani
+          ( FirmId, IsActive, DonemTipiId, TalepId, TalepTipiId, UcretTipiId, CariId, TaksitTipiId
+           ,TaksitNo, VadeTarihi 
+           ,TaksitTutari, IsPaid
+           ,SourceTypeId, SourceId )
+            Select 
+            FirmId,        1, DonemTipiId, TalepId, TalepTipiId, UcretTipiId, CariId, 4 -- iade işareti 
+           ,TaksitNo, VadeTarihi 
+           ,TaksitTutari 
+           ,0  -- IsPaid
+           ,2  -- SourceTypeId
+           ,@dekontId -- SourceId 
+           from dbo.OnmOdemePlani
+	       where BelgeDekontId = @iadeId
+   end -- if
+
+
+END
+
+/*CreateProcedureEnd*/

@@ -1,8 +1,8 @@
-﻿begin transaction
+﻿/*CreateTable*/
 
--- Stok Belgesi Satırlar Kaydı 
+begin transaction
 
- create table BelgeStokS
+ create table OnmBelgeStokS
  (
 
    Id                  Int IDENTITY(1,1) NOT NULL, 
@@ -109,15 +109,19 @@
    KayitSaati          VarChar(8)    null,
       
 
-   constraint		pk_BelgeStokS primary key (Id)
+   constraint		pk_OnmBelgeStokS primary key (Id)
  )
 
- create index X_BelgeStokS01 on BelgeStokS (FirmId,BelgeStokBId,SatirNo)
- create index X_BelgeStokS02 on BelgeStokS (FirmId,IslemTarihi)
+ create index X_OnmBelgeStokS01 on OnmBelgeStokS (FirmId,BelgeStokBId,SatirNo)
+ create index X_OnmBelgeStokS02 on OnmBelgeStokS (FirmId,IslemTarihi)
 
- -- ALTER TABLE BelgeStokS ALTER COLUMN KdvOrani Numeric(4,2) null
- -- ALTER TABLE BelgeStokS ADD ISEkVergiTutari     Numeric(22,8) null
- -- ALTER TABLE BelgeStokS ADD ISKdvMatrahi        Numeric(22,8) null
+ commit transaction
+
+/*CreateTableEnd*/
+ 
+
+
+
  
  /*
  -------------------------------------------------------------------------
@@ -143,21 +147,27 @@
  -------------------------------------------------------------------------
  */
 
+/*CreateLkpTable*/
+
+begin transaction
 
 -- ------------------------------------------------------- 
 -- StokTipiId
 -- ------------------------------------------------------- 
-create table [Lkp].[BelgeStokSStokTipi]
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmBelgeStokSStokTipi')
+drop table [Lkp].[OnmBelgeStokSStokTipi]
+
+create table [Lkp].[OnmBelgeStokSStokTipi]
 (
    Id          Int Unique Not Null,
    StokTipi    nVarchar(50)   null,
    GrupTipiId  SmallInt       null,
    
-   constraint  pk_BelgeStokSStokTipi primary key (Id)
+   constraint  pk_OnmBelgeStokSStokTipi primary key (Id)
 )
 
 
-INSERT INTO [Lkp].[BelgeStokSStokTipi] (Id, StokTipi, GrupTipiId)
+INSERT INTO [Lkp].[OnmBelgeStokSStokTipi] (Id, StokTipi, GrupTipiId)
  VALUES 
   (0,    N'Tanımsız',    0),
   (150,  N'150 İlk Madde Malzeme',  1),
@@ -168,6 +178,11 @@ INSERT INTO [Lkp].[BelgeStokSStokTipi] (Id, StokTipi, GrupTipiId)
   --(750,  N'750 ArGe Malzemesi', 1), -- 750. Araştırma Ve Geliştirme
   (770,  N'770 Tüketim Malzemesi', 1) -- 770. Genel Yönetim Giderleri
   
+commit transaction   
+
+/*CreateLkpTableEnd*/
+
+
 
 
  create table IBelgeStokSEkVergi
@@ -193,4 +208,3 @@ INSERT INTO [Lkp].[BelgeStokSStokTipi] (Id, StokTipi, GrupTipiId)
 
 
 
-commit transaction   

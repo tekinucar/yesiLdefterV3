@@ -3215,9 +3215,9 @@ namespace Tkn_Events
                 /// v.nv_22_Kaydet 
                 /// v.nv_26_Sil_Satir
                 /// 
-                MessageBox.Show("Alo : ButtonType kontrol etmen gerekiyor");
+                //MessageBox.Show("Alo : ButtonType kontrol etmen gerekiyor");
 
-                if (item.BUTTONTYPE.ToString() ==  buttonType.ToString()) //Button_Type.ToString())
+                if (item.BUTTONTYPE.ToString() == Convert.ToString((byte)buttonType)) //Button_Type.ToString())
                 {
                     foreach (var item2 in item.TABLEIPCODE_LIST2)
                     {
@@ -3225,13 +3225,13 @@ namespace Tkn_Events
 
                         if (t.IsNotNull(TABLEIPCODE))
                         {
-                            //DataSet ds = null;
-                            //DataNavigator dN = null;
-                            //t.Find_DataSet(tForm, ref ds, ref dN, TABLEIPCODE);
-                            //if (ds != null)
-                            //{
-                            //    dN.Position = 0;
-                            //}
+                            DataSet ds = null;
+                            DataNavigator dN = null;
+                            t.Find_DataSet(tForm, ref ds, ref dN, TABLEIPCODE);
+                            if (ds != null)
+                            {
+                                t.TableRefresh(tForm, ds);
+                            }
                         }
                     }
                 }

@@ -73,7 +73,7 @@ begin transaction
    KayitTarihi        Datetime      null, 
    SourceTypeId       SmallInt      null, /* ilgili table 1: OnmBelgeMaliyet,  */
    SourceId           Int           null, /* ilgili table ref Id */
-
+   IadeId             Int           null, /* iade kaynağı kendisidir. Yani tahsil ettiği dekonta bağlı olarak tediye dekontu oluşturuluyor. Iadeye sebep olan tahsilatın Id si */
    constraint		pk_OnmBelgeDekont primary key (Id)
  )
 
@@ -166,6 +166,8 @@ AS BEGIN
 	  if (@TipiId = 2) and -- Tahsilat
 	     (@AHesapTipiId >= 21100) -- Mtskİşlemleri
       begin
+          EXECUTE [dbo].[prc_OnmOdemePlaniTahsilatiIsle] @curId
+          /*
 	      set @makbuzCount = 0
           -- OnmBelgeDekont.Id = @curId daha önce OnmOdemePlani tablosuna işlenmiş mi ?
 		  Select @makbuzCount = count(Id)
@@ -235,8 +237,8 @@ AS BEGIN
 				  set @_BelgeTutari = 0
 				  set @onay = 0
               end
-
           end -- @_BelgeTutari > 0
+          */
       end -- if (@TipiId = 2)
       
 	  
@@ -286,6 +288,7 @@ AS BEGIN
 	declare @CariId int
 	declare @SourceTypeId smallInt
 	declare @SourceId int
+	declare @IadeId int
 
 	OPEN cursor_BDekontDlt
 
@@ -304,9 +307,20 @@ AS BEGIN
 		, @CariId = dlt.CariId
 		, @SourceTypeId = dlt.SourceTypeId
 		, @SourceId = dlt.SourceId
+		, @IadeId = isnull(dlt.IadeId,0)
       from deleted dlt
       where dlt.Id = @curId
 	  
+	  if (@TipiId = 3) and -- Tediye    
+	     (@IadeId > 0) -- kendisi iade dekontu ise
+      begin
+          -- İade dekontu sebebiyle olşturuluşmuş OnmOdemePlani.Id var var henüz tahsil edilmemiş ise
+          Delete from OnmOdemePlani  
+          Where SourceTypeId = 2
+          and   SourceId = @curId
+          and   IsPaid = 0 
+      end
+
 	  if (@TipiId = 3) and -- Tediye    
 	     (@SourceTypeId = 1) -- OnmBelgeMaliyet tablosu
       begin
@@ -315,9 +329,9 @@ AS BEGIN
           , BelgeDekontId = 0  -- OnmBelgeDekont.Id
           Where Id = @SourceId
 	  end
-/*
+
 	  if (@TipiId = 2) and -- Tahsilat
-	     (@AHesapTipiId >= 2100) -- Mtskİşlemleri
+	     (@AHesapTipiId >= 21100) -- Mtskİşlemleri
       begin
 	      -- iki türlü taksit satırı mevcut
 		  -- 1. esas TaksitTutari : kullanıcının oluşturduğu
@@ -342,6 +356,7 @@ AS BEGIN
 		  Update dbo.OnmOdemePlani set
 		    IsPaid = 0
           , BelgeDekontId = 0
+		  , TahsilTarihi = null
 		  Where BelgeDekontId = @curId
 		  and   isnull(YedekTaksitTutari,0) = 0
 		  and   isnull(PatchBelgeDekontId,0) = 0
@@ -354,6 +369,7 @@ AS BEGIN
           , YedekTaksitTutari = null
 		  , IsPaid = 0
           , BelgeDekontId = 0
+		  , TahsilTarihi = null
 		  Where BelgeDekontId = @curId
 		  and   isnull(YedekTaksitTutari,0) > 0
 		  and   isnull(PatchBelgeDekontId,0) = 0
@@ -378,6 +394,7 @@ AS BEGIN
 		  Update dbo.OnmOdemePlani set
 		    IsPaid = 0
           , BelgeDekontId = 0
+		  , TahsilTarihi = null
 		  Where BelgeDekontId = @curId
 		  and   isnull(YedekTaksitTutari,0) = 0
 		  and   isnull(PatchBelgeDekontId,0) > 0
@@ -390,13 +407,14 @@ AS BEGIN
           , YedekTaksitTutari = null
 		  , IsPaid = 0
           , BelgeDekontId = 0
+		  , TahsilTarihi = null
 		  Where BelgeDekontId = @curId
 		  and   isnull(YedekTaksitTutari,0) > 0
 		  and   isnull(PatchBelgeDekontId,0) > 0
 		  and   IsPaid = 1
 		  		   
       end -- if (@TipiId = 2)
-*/
+
       FETCH NEXT FROM cursor_BDekontDlt INTO @curId
     END
 
@@ -438,6 +456,9 @@ begin transaction
 -- ------------------------------------------------------- 
 -- TipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmBelgeDekontTipi')
+drop table [Lkp].[OnmBelgeDekontTipi]
+
 create table [Lkp].[OnmBelgeDekontTipi]
 (
    Id           Int Unique Not Null,
@@ -461,6 +482,8 @@ INSERT INTO [Lkp].[OnmBelgeDekontTipi] (Id, Tipi, GrupTipiId)
 -- ------------------------------------------------------- 
 -- IslemTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmBelgeDekontIslemTipi')
+drop table [Lkp].[OnmBelgeDekontIslemTipi]
 
 create table [Lkp].[OnmBelgeDekontIslemTipi]
 (
@@ -472,8 +495,6 @@ create table [Lkp].[OnmBelgeDekontIslemTipi]
 
    constraint  pk_OnmBelgeDekontIslemTipi primary key (Id)
 )
-
-
 
 delete from [Lkp].[OnmBelgeDekontIslemTipi]
 INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, AlacakHesapId)
@@ -636,6 +657,9 @@ INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, A
 -- ------------------------------------------------------- 
 -- BHesapTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmBelgeDekontBHesapTipi')
+drop table [Lkp].[OnmBelgeDekontBHesapTipi]
+
 create table [Lkp].[OnmBelgeDekontBHesapTipi]
 (
    Id           Int Unique Not Null,
@@ -704,6 +728,9 @@ INSERT INTO [Lkp].[OnmBelgeDekontBHesapTipi] (Id, BHesapTipi, GrupTipiId)
 -- ------------------------------------------------------- 
 -- AHesapTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmBelgeDekontAHesapTipi')
+drop table [Lkp].[OnmBelgeDekontAHesapTipi]
+
 create table [Lkp].[OnmBelgeDekontAHesapTipi]
 (
    Id           Int Unique Not Null,
@@ -770,6 +797,9 @@ INSERT INTO [Lkp].[OnmBelgeDekontAHesapTipi] (Id, AHesapTipi, GrupTipiId)
 -- ------------------------------------------------------- 
 -- SourceTypeId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmBelgeDekontSourceType')
+drop table [Lkp].[OnmBelgeDekontSourceType]
+
 create table [Lkp].[OnmBelgeDekontSourceType]
 (
    Id               Int Unique Not Null,

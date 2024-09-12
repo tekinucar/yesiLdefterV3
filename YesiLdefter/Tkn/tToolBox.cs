@@ -14515,11 +14515,11 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             
             int OzelType = -1;
 
-            OzelType = fieldName.IndexOf("ParaTipi");
-            if (OzelType == -1)
-                OzelType = fieldName.IndexOf("BirimTipi");
-            if (OzelType == -1)
-                OzelType = fieldName.IndexOf("KdvOrani");
+            //OzelType = fieldName.IndexOf("ParaTipi");
+            //if (OzelType == -1)
+            //    OzelType = fieldName.IndexOf("BirimTipi");
+            //if (OzelType == -1)
+            //    OzelType = fieldName.IndexOf("KdvOrani");
 
 
             if (OzelType == -1)
@@ -14654,6 +14654,14 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 tableName = "OnmParaTipi";
                 return;
             }
+            if (fieldName.IndexOf("BirimTipi") > -1)
+            {
+                idFieldName = "BirimKodu";
+                fieldName = "BirimAdi";
+                tableName = "OnmStokBirimTipi";
+                return;
+            }
+
             if (fieldName.ToUpper().IndexOf("SECTOR") > -1)
             {
                 // (MsProjectTablesSectorTypeId ve
@@ -14705,7 +14713,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
                 // BirimTipiId1, BirimTipiId2
                 // AlimBirimTipiId, SatisBirimTipiId
-                if (fieldName.IndexOf("Birim") > -1) fieldName = "Birim";
+                if (fieldName.IndexOf("BirimTipi") > -1) fieldName = "Birim";
                 // AlimKdvOrani, SatisKdvOrani
                 if (fieldName.IndexOf("KdvOrani") > -1) fieldName = "KdvOrani";
 
@@ -14720,7 +14728,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 fieldName = fieldName + "Adi";
 
 
-                if (fieldName.IndexOf("Birim") > -1)
+                if (fieldName.IndexOf("BirimTipi") > -1)
                 {
                     tableName = "OnmStokBirimTipi";
                 }

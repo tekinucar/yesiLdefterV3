@@ -393,8 +393,8 @@ namespace Tkn_DevColumn
                     Sql = " Select * from [Lkp].[MsSectorType] ";
                 if (tableName.IndexOf("ParaTipi") > -1)
                     Sql = " Select * from [Lkp].[OnmParaTipi] where IsActive = 1 ";
-                if (tableName == "BirimTipi")
-                    Sql = " Select * from [Lkp].[OnmStokBirimTipi] where IsActive = 1 ";
+                //if (tableName == "BirimTipi")
+                //    Sql = " Select * from [Lkp].[OnmStokBirimTipi] where IsActive = 1 ";
 
                 // eski
                 //if (tableName == "ILTipi")

@@ -575,8 +575,10 @@
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmHesapFinansKavramHaritasi.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmHesapFinansMaliyetGrubuKontrolu.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmMaliyetHesaplariTakibi.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmOdemePlaniIadeIsle.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmOdemePlaniOlustur.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmHesapFinansDefaultMaliyetGruplari.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmOdemePlaniTahsilatiIsle.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\prc_OnmBelgeDekontOzetler.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\prc_OnmBelgeDekontTbmGelirHesaplari.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\prc_OnmBelgeDekontTbmGiderHesaplari.txt" />
@@ -733,8 +735,8 @@
     <Content Include="Scripts\UST\Mtsk\trg_ORNEK.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmBelgeDekont.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmBelgeMaliyet.txt" />
-    <Content Include="Scripts\UST\OnMuhasebe\BelgeStokB.txt" />
-    <Content Include="Scripts\UST\OnMuhasebe\BelgeStokS.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmBelgeStokB.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmBelgeStokS.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\CariAdres.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\CariBanka.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\CariHesap_trg.txt" />

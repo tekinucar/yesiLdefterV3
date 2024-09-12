@@ -105,10 +105,13 @@ INSERT INTO [Lkp].[OnmOdemePlaniUcretTipi] (Id, UcretTipi)
 -- ------------------------------------------------------- 
 -- TaksitTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmOdemePlaniTaksitTipi')
+drop table [Lkp].[OnmOdemePlaniTaksitTipi]
+
 create table [Lkp].[OnmOdemePlaniTaksitTipi]
 (
    Id               Int Unique not null, 
-   TaksitTipi       nVarchar(20)   null,
+   TaksitTipi       nVarchar(50)   null,
    
    constraint  pk_OnmOdemePlaniTaksitTipi primary key (Id)
 )
@@ -119,7 +122,8 @@ INSERT INTO [Lkp].[OnmOdemePlaniTaksitTipi] (Id, TaksitTipi)
   ( 0,    N''),
   ( 1,    N'Peşinat'),
   ( 2,    N'Taksit'),
-  ( 3,    N'Tek Ödeme')
+  ( 3,    N'Tek Ödeme'),
+  ( 4,    N'İade nedeniyle oluşan borç')
     
 
 -- ------------------------------------------------------- 
@@ -165,6 +169,8 @@ Delete from [Lkp].[OnmOdemePlaniSourceType]
 INSERT INTO [Lkp].[OnmOdemePlaniSourceType] (Id, SourceType)
  VALUES 
   ( 0,     N''),
+  ( 1,     N'OnmOdemePlani - Kendisi'),
+  ( 2,     N'OnmBelgeDekont'),
   ( 2100,  N'Mtsk Modülü - Kullanıcı girişi'),
   ( 2103,  N'Mtsk Veri Transferi - Giderler'),
   ( 2104,  N'Mtsk Veri Transferi - CariAlt'),
