@@ -134,10 +134,10 @@ namespace Tkn_DevColumn
 
             string dbaseType = Row["LKP_DBASE_TYPE"].ToString();
             string tFieldName = Row["LKP_FIELD_NAME"].ToString();
-            string jTableName = t.Set(Row["FJOIN_TABLE_NAME"].ToString(), "", "");//, Row["LKP_FJOIN_TABLE_NAME"].ToString(), "");
-            string jKeyFName = t.Set(Row["FJOIN_KEY_FNAME"].ToString(), "", "");//, Row["LKP_FJOIN_KEY_FNAME"].ToString(), "");
-            string jAlias = t.Set(Row["FJOIN_TABLE_ALIAS"].ToString(), "", "");//, Row["LKP_FJOIN_TABLE_ALIAS"].ToString(), "");
-            string jCaptionFName = t.Set(Row["FJOIN_CAPTION_FNAME"].ToString(), "", "");//, Row["LKP_FJOIN_CAPTION_FNAME"].ToString(), "");
+            string jTableName = t.Set(Row["FJOIN_TABLE_NAME"].ToString(), Row["LKP_FJOIN_TABLE_NAME"].ToString(), "");
+            string jKeyFName = t.Set(Row["FJOIN_KEY_FNAME"].ToString(), Row["LKP_FJOIN_KEY_FNAME"].ToString(), "");
+            string jAlias = t.Set(Row["FJOIN_TABLE_ALIAS"].ToString(), Row["LKP_FJOIN_TABLE_ALIAS"].ToString(), "");
+            string jCaptionFName = t.Set(Row["FJOIN_CAPTION_FNAME"].ToString(), Row["LKP_FJOIN_CAPTION_FNAME"].ToString(), "");
 
             if ((t.IsNotNull(jTableName) == false) ||
                 (t.IsNotNull(jKeyFName) == false) ||

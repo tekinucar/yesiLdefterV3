@@ -579,6 +579,7 @@
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmOdemePlaniOlustur.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmHesapFinansDefaultMaliyetGruplari.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmOdemePlaniTahsilatiIsle.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Kategoriler.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\prc_OnmBelgeDekontOzetler.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\prc_OnmBelgeDekontTbmGelirHesaplari.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\prc_OnmBelgeDekontTbmGiderHesaplari.txt" />
@@ -764,7 +765,7 @@
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\LkpOnmHesapMaster.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\HesapNesne.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\HesapNesne_MSTABLES_Insert.txt" />
-    <Content Include="Scripts\UST\OnMuhasebe\HesapStok.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmHesapStok.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmHesapVezne.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\IBelgeStokAdres.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\JoinTables.txt" />
@@ -2667,6 +2668,16 @@
       <IncludeHash>True</IncludeHash>
       <FileType>File</FileType>
     </PublishFile>
+    <PublishFile Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmHesapStok.txt">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Exclude</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
     <PublishFile Include="Scripts\UST\OnMuhasebe\FinansIslemi.txt">
       <Visible>False</Visible>
       <Group>
@@ -2798,16 +2809,6 @@
       <FileType>File</FileType>
     </PublishFile>
     <PublishFile Include="Scripts\UST\OnMuhasebe\HesapNesne_MSTABLES_Insert.txt">
-      <Visible>False</Visible>
-      <Group>
-      </Group>
-      <TargetPath>
-      </TargetPath>
-      <PublishState>Exclude</PublishState>
-      <IncludeHash>True</IncludeHash>
-      <FileType>File</FileType>
-    </PublishFile>
-    <PublishFile Include="Scripts\UST\OnMuhasebe\HesapStok.txt">
       <Visible>False</Visible>
       <Group>
       </Group>

@@ -1989,10 +1989,11 @@ namespace Tkn_ToolBox
            + " , " + Alias + ".EXPRESSION_TYPE          LKP_EXPRESSION_TYPE " + v.ENTER
            + " , " + Alias + ".PROP_EXPRESSION          LKP_PROP_EXPRESSION " + v.ENTER // LKP_EXPRESSION
 
-           //+ " , " + Alias + ".FJOIN_TABLE_NAME         LKP_FJOIN_TABLE_NAME " + v.ENTER
-           //+ " , " + Alias + ".FJOIN_TABLE_ALIAS        LKP_FJOIN_TABLE_ALIAS " + v.ENTER
-           //+ " , " + Alias + ".FJOIN_KEY_FNAME          LKP_FJOIN_KEY_FNAME " + v.ENTER
-           //+ " , " + Alias + ".FJOIN_CAPTION_FNAME      LKP_FJOIN_CAPTION_FNAME " + v.ENTER
+           // searchLookUpTableFill sırasında gerekiyor
+           + " , " + Alias + ".FJOIN_TABLE_NAME         LKP_FJOIN_TABLE_NAME " + v.ENTER 
+           + " , " + Alias + ".FJOIN_TABLE_ALIAS        LKP_FJOIN_TABLE_ALIAS " + v.ENTER
+           + " , " + Alias + ".FJOIN_KEY_FNAME          LKP_FJOIN_KEY_FNAME " + v.ENTER
+           + " , " + Alias + ".FJOIN_CAPTION_FNAME      LKP_FJOIN_CAPTION_FNAME " + v.ENTER
            ;
 
             return s;

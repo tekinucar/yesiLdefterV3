@@ -1,6 +1,9 @@
-﻿begin transaction
+﻿
+/*CreateTable*/
 
- create table HesapStok
+begin transaction
+
+ create table OnmHesapStok
  (
 
    Id                  Int IDENTITY(1,1) NOT NULL, /* Id  DİĞER TABLOLARDA Stok_ID OLUYOR  */
@@ -38,31 +41,37 @@
    TevkifatPaydasi     Numeric(3)    null, /* 3, 10,    100   */
    TevkifatOrani       nVarChar(4)   null, /* 2/3 , 2/10 ... 9/10 veya %90 gibi açıklamalar taşır  */
 
-   constraint  pk_HesapStok primary key (Id)
+   constraint  pk_OnmHesapStok primary key (Id)
  )
 
- create index X_HesapStok01 on HesapStok (FirmId)
- create index X_HesapStok02 on HesapStok (StokTipiId)
- --create index X_HesapStok03 on HesapStok (CalismaTipiId)
+ create index X_OnmHesapStok01 on OnmHesapStok (FirmId)
+ create index X_OnmHesapStok02 on OnmHesapStok (StokTipiId)
  
- grant select, insert, update, delete on HesapStok to public
+ grant select, insert, update, delete on OnmHesapStok to public
 
- -- ALTER TABLE HesapStok ALTER COLUMN AlimKdvOrani Numeric(4,2) null
- -- ALTER TABLE HesapStok ALTER COLUMN SatisKdvOrani Numeric(4,2) null
+ commit transaction
+
+/*CreateTableEnd*/
+
+
+
+/*CreateLkpTable*/
+
+begin transaction
 
 -- ------------------------------------------------------- 
 -- StokTipiId
 -- ------------------------------------------------------- 
-create table [Lkp].[HesapStokStokTipi]
+create table [Lkp].[OnmHesapStokStokTipi]
 (
    Id          Int Unique Not Null,
    StokTipi    nVarchar(50)   null,
    GrupTipiId  SmallInt       null,
    
-   constraint  pk_HesapStokStokTipi primary key (Id)
+   constraint  pk_OnmHesapStokStokTipi primary key (Id)
 )
 
-INSERT INTO [Lkp].[HesapStokStokTipi] (Id, StokTipi, GrupTipiId)
+INSERT INTO [Lkp].[OnmHesapStokStokTipi] (Id, StokTipi, GrupTipiId)
  VALUES 
   (0,    N'Tanımsız',    0),
   (150,  N'150 İlk Madde Malzeme',  1),
@@ -72,7 +81,11 @@ INSERT INTO [Lkp].[HesapStokStokTipi] (Id, StokTipi, GrupTipiId)
   (600,  N'600 Verilen Hizmetler', 1),
   --(750,  N'750 ArGe Malzemesi', 1), -- 750. Araştırma Ve Geliştirme
   (770,  N'770 Tüketim Malzemesi', 1) -- 770. Genel Yönetim Giderleri
-  
+
+
+commit transaction
+
+/*CreateLkpTableEnd*/
 
 
  create table IStokFaturaEkVergi
@@ -93,7 +106,6 @@ INSERT INTO [Lkp].[HesapStokStokTipi] (Id, StokTipi, GrupTipiId)
  create index X_IStokFaturaEkVergi01 on IStokFaturaEkVergi (FirmId,StokId)
  
  grant select, insert, update, delete on IStokFaturaEkVergi to public
-
 
 
  create table IStokFiyat
