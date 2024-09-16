@@ -13,6 +13,7 @@ begin transaction
    StokTipiId          SmallInt      null, /* 150,151,153,600(verilen Hizmetler),740 */
    --CalismaTipiId       SmallInt      null, /* ? */
 
+   KategoriKodu        nVarchar(50)  null,
    StokKodu            nVarChar(50)  null,
    StokAdi             nVarChar(100) null,
   
@@ -58,10 +59,12 @@ begin transaction
 /*CreateLkpTable*/
 
 begin transaction
-
 -- ------------------------------------------------------- 
 -- StokTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmHesapStokStokTipi')
+drop table [Lkp].[OnmHesapStokStokTipi]
+
 create table [Lkp].[OnmHesapStokStokTipi]
 (
    Id          Int Unique Not Null,

@@ -567,6 +567,7 @@
     <Content Include="Scripts\UST\Mtsk\TempTabimHesaplar.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\DbUpdates.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\FileUpdates.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\LkpOnmStokKategoriTipi.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\Lkp_BelgeDonemTipi.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmKira.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmSigorta.txt" />
@@ -579,7 +580,7 @@
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmOdemePlaniOlustur.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmHesapFinansDefaultMaliyetGruplari.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmOdemePlaniTahsilatiIsle.txt" />
-    <Content Include="Scripts\UST\OnMuhasebe\Kategoriler.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\dokumanKategoriler.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\prc_OnmBelgeDekontOzetler.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\prc_OnmBelgeDekontTbmGelirHesaplari.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\prc_OnmBelgeDekontTbmGiderHesaplari.txt" />
@@ -891,7 +892,7 @@
     <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\prc_STK_FIYAT_CALC.txt" />
     <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\prc_STK_GCS_CALC.txt" />
     <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\sekreterya.txt" />
-    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\SEKTORLER_GRUPLU.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\dokumanSektorler.txt" />
     <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\STK_FIYAT.txt" />
     <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\STK_GCB - Kopya.txt" />
     <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\STK_GCB.txt" />
@@ -2638,6 +2639,16 @@
       <IncludeHash>True</IncludeHash>
       <FileType>File</FileType>
     </PublishFile>
+    <PublishFile Include="Scripts\UST\OnMuhasebe\dokumanSektorler.txt">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Exclude</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
     <PublishFile Include="Scripts\UST\OnMuhasebe\dokumanStoklar.txt">
       <Visible>False</Visible>
       <Group>
@@ -3479,16 +3490,6 @@
       <FileType>File</FileType>
     </PublishFile>
     <PublishFile Include="Scripts\yesiL_vtMsSql\VT_MSSQL\sekreterya.txt">
-      <Visible>False</Visible>
-      <Group>
-      </Group>
-      <TargetPath>
-      </TargetPath>
-      <PublishState>Exclude</PublishState>
-      <IncludeHash>True</IncludeHash>
-      <FileType>File</FileType>
-    </PublishFile>
-    <PublishFile Include="Scripts\yesiL_vtMsSql\VT_MSSQL\SEKTORLER_GRUPLU.txt">
       <Visible>False</Visible>
       <Group>
       </Group>

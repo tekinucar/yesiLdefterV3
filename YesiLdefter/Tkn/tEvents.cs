@@ -6527,6 +6527,8 @@ namespace Tkn_Events
             DevExpress.XtraTab.XtraTabPage page =
               ((DevExpress.XtraTab.XtraTabControl)sender).SelectedTabPage;
 
+            if (page == null) return;
+
             if (page.AccessibleDefaultActionDescription != null)
             {
                 Form tForm = ((DevExpress.XtraTab.XtraTabControl)sender).FindForm();

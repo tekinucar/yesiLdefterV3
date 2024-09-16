@@ -943,6 +943,9 @@ namespace Tkn_Save
             if (f.fIdentity == true)
                 f.Key_Id_FieldName = f.fname;
 
+            if (i == 0 && f.fIdentity == false)
+                f.Key_Id_FieldName = f.fname;
+
             // dsData yapısı TableType == Table değilise
             if ((f.TableType != 1) &&  // Table
                 (f.TableType != 3))    // StoredProcedure
@@ -1263,6 +1266,15 @@ namespace Tkn_Save
                     // Tarihce için gerekiyor
                     // KeyID_Value := Value; 
                 }
+
+                if ((f.fIdentity == false) && (f.fname == f.Key_Id_FieldName))
+                {
+                    f._setEditField = "";
+                    //f.MyStr2 = " where [" + f.fname + "] = " + f.fvalue + " " + f.line_end;
+                    f._editWhere = " Where [" + f.fname + "] = " + f.fvalue + " " + f.line_end;
+                    f.MyStr3 = " select " + f.fname + ", 'dsEdit' as dsState from [" + f.tableName + "] where 0 = 0 ";
+                }
+
 
                 // sadece belli field ismi seçilmişse o fieldler update olacak
                 // diğer fieldler update olmayacak

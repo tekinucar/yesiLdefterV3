@@ -1,0 +1,137 @@
+﻿/*CreateTable*/
+
+-- ------------------------------------------------------- 
+-- BirimTipi
+-- ------------------------------------------------------- 
+
+begin transaction
+
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmStokKategoriTipi')
+drop table [Lkp].[OnmStokKategoriTipi]
+
+create table [Lkp].[OnmStokKategoriTipi]
+(
+   Id             Int Unique Not null,
+   IsActive       Bit null,
+   ParentKodu     nVarchar(50) null,
+   KategoriKodu   nVarchar(50) null,
+   KategoriAdi    nVarchar(100) null,
+   
+   constraint  pk_OnmStokKategoriTipi primary key (Id)
+)
+
+ grant select, insert, update, delete on [Lkp].[OnmStokKategoriTipi] to public
+
+commit transaction
+
+/*CreateTableEnd*/
+
+
+
+/*CreateData*/
+
+
+DELETE FROM [Lkp].[OnmStokKategoriTipi]
+INSERT INTO [Lkp].[OnmStokKategoriTipi] (Id, IsActive, ParentKodu, KategoriKodu, KategoriAdi )
+ VALUES 
+
+  (  10,  1, N'',  N'T',    N'Tüketici ürünleri' ),
+
+  ( 1010, 0, N'T', N'T.GDA', N'Gıda ve İçecek' ),
+  ( 1020, 0, N'T', N'T.GIY', N'Giyim ve Aksesuarlar' ),
+  ( 1030, 0, N'T', N'T.ELK', N'Elektronik ve Teknoloji' ),
+  ( 1040, 0, N'T', N'T.EVY', N'Ev ve Yaşam' ),
+  ( 1050, 0, N'T', N'T.BKM', N'Kişisel Bakım ve Sağlık' ),
+  ( 1060, 0, N'T', N'T.SPR', N'Spor ve Outdoor' ),
+  ( 1070, 0, N'T', N'T.BEB', N'Bebek ve Çocuk Ürünleri' ),
+  ( 1080, 0, N'T', N'T.HAY', N'Evcil Hayvan Ürünleri' ),
+  ( 1090, 0, N'T', N'T.OFS', N'Ofis ve Kırtasiye Ürünleri' ),
+  ( 1100, 0, N'T', N'T.OTO', N'Otomotiv ve Aksesuarlar' ),
+  ( 1120, 0, N'T', N'T.INS', N'İnşaat ve Yapı Malzemeleri' ),
+
+  (   20, 1, N'',  N'S',    N'Sanayi ürünleri' ),
+
+  ( 2010, 0, N'S', N'S.HAM', N'Hammaddeler' ),
+  ( 2020, 0, N'S', N'S.MAK', N'Makine ve Ekipmanlar' ),
+  ( 2030, 0, N'S', N'S.ELK', N'Elektrik Ürünleri' ),
+  ( 2040, 0, N'S', N'S.ELT', N'Elektronik Ürünleri' ),
+  ( 2050, 0, N'S', N'S.YED', N'Yedek Parçalar ve Aksesuarlar' ),
+  ( 2060, 0, N'S', N'S.ISG', N'İş Güvenliği ve Koruma Ekipmanları' ),
+  ( 2070, 0, N'S', N'S.YMU', N'Yarı Mamul Ürünler' ),
+  ( 2080, 0, N'S', N'S.LAB', N'Laboratuvar ve Test Ekipmanları' ),
+  ( 2090, 0, N'S', N'S.INS', N'İnşaat ve Yapı Malzemeleri' ),
+
+  (   60, 1, N'',  N'H',    N'Hizmet sektörü' ),
+
+  ( 6010, 0, N'H', N'H.SAG', N'Sağlık ve Bakım Hizmetleri' ),
+  ( 6020, 0, N'H', N'H.EGT', N'Eğitim ve Danışmanlık Hizmetleri' ),
+  ( 6030, 0, N'H', N'H.FNS', N'Finans ve Sigorta Hizmetleri' ),
+  ( 6040, 0, N'H', N'H.ULA', N'Ulaşım ve Lojistik Hizmetleri' ),
+  ( 6050, 0, N'H', N'H.BTT', N'Bilgi Teknolojileri ve Telekomünikasyon Hizmetleri' ),
+  ( 6060, 0, N'H', N'H.ING', N'İnşaat ve Gayrimenkul Hizmetleri' ),
+  ( 6070, 0, N'H', N'H.EGL', N'Eğlence ve Rekreasyon Hizmetleri' ),
+  ( 6080, 0, N'H', N'H.KSI', N'Kişisel Hizmetler' ),
+
+
+
+( 1012,      0, N'T.GDA',       N'T.GDA.G',         N'Gıda ürünleri' ),
+( 1012010,   0, N'T.GDA.G',     N'T.GDA.G.TZE',     N'Taze Gıdalar' ),
+( 101201010, 0, N'T.GDA.G.TZE', N'T.GDA.G.TZE.MVS', N'Meyve ve sebzeler' ),
+( 101201020, 0, N'T.GDA.G.TZE', N'T.GDA.G.TZE.ETU', N'Et ürünleri' ),
+( 101201030, 0, N'T.GDA.G.TZE', N'T.GDA.G.TZE.DNZ', N'Deniz ürünleri' ),
+( 101201040, 0, N'T.GDA.G.TZE', N'T.GDA.G.TZE.SUT', N'Süt ve süt ürünleri' ),
+( 101201050, 0, N'T.GDA.G.TZE', N'T.GDA.G.TZE.YUM', N'Yumurta' ),
+
+( 1012020,   0, N'T.GDA.G',     N'T.GDA.G.KRU',     N'Kuru Gıdalar' ),
+( 101202010, 0, N'T.GDA.G.KRU', N'T.GDA.G.KRU.BAK', N'Bakliyat (fasulye, mercimek)' ),
+( 101202020, 0, N'T.GDA.G.KRU', N'T.GDA.G.KRU.TAH', N'Tahıllar (pirinç, buğday)' ),
+( 101202030, 0, N'T.GDA.G.KRU', N'T.GDA.G.KRU.KRU', N'Kuruyemişler ve kuru meyveler' ),
+( 101202040, 0, N'T.GDA.G.KRU', N'T.GDA.G.KRU.MAK', N'Makarna ve erişte' ), 
+
+( 1012030,   0, N'T.GDA.G',     N'T.GDA.G.PAK',     N'Paketli Gıdalar' ),
+( 101203010, 0, N'T.GDA.G.PAK', N'T.GDA.G.PAK.KON', N'Konserve gıdalar' ),
+( 101203020, 0, N'T.GDA.G.PAK', N'T.GDA.G.PAK.HYM', N'Hazır yemekler' ),
+( 101203030, 0, N'T.GDA.G.PAK', N'T.GDA.G.PAK.ATI', N'Atıştırmalıklar (cips, kraker)' ),
+( 101203040, 0, N'T.GDA.G.PAK', N'T.GDA.G.PAK.TAT', N'Tatlılar ve çikolatalar' ),
+
+( 1012040,   0, N'T.GDA.G',     N'T.GDA.G.UNL',     N'Unlu Mamuller' ),
+( 101204010, 0, N'T.GDA.G.UNL', N'T.GDA.G.UNL.EKM', N'Ekmek ve ekmek çeşitleri' ),
+( 101204020, 0, N'T.GDA.G.UNL', N'T.GDA.G.UNL.PAS', N'Pasta ve kekler' ),
+( 101204030, 0, N'T.GDA.G.UNL', N'T.GDA.G.UNL.BIS', N'Bisküvi ve kurabiyeler' ),
+( 101204040, 0, N'T.GDA.G.UNL', N'T.GDA.G.UNL.POG', N'Poğaça ve börekler' ),
+
+( 1012050,   0, N'T.GDA.G',     N'T.GDA.G.DON',     N'Dondurulmuş Gıdalar' ),
+( 101205010, 0, N'T.GDA.G.DON', N'T.GDA.G.DON.SEB', N'Dondurulmuş sebzeler ve meyveler' ),
+( 101205020, 0, N'T.GDA.G.DON', N'T.GDA.G.DON.ETU', N'Dondurulmuş et ve deniz ürünleri' ),
+( 101205030, 0, N'T.GDA.G.DON', N'T.GDA.G.DON.DNZ', N'Dondurulmuş et ve deniz ürünleri' ),
+( 101205040, 0, N'T.GDA.G.DON', N'T.GDA.G.DON.HYM', N'Dondurulmuş hazır yemekler' ),
+( 101205050, 0, N'T.GDA.G.DON', N'T.GDA.G.DON.TAT', N'Dondurma ve tatlılar' ),
+
+( 1014,      0, N'T.GDA',       N'T.GDA.I',         N'İçecekler' ),
+( 1014010,   0, N'T.GDA.I',     N'T.GDA.I.ALZ',     N'Alkolsüz İçecekler' ),
+( 101401010, 0, N'T.GDA.I.ALZ', N'T.GDA.I.ALZ.SUM', N'Su ve maden suyu' ),
+( 101401020, 0, N'T.GDA.I.ALZ', N'T.GDA.I.ALZ.MEY', N'Meyve suları' ),
+( 101401030, 0, N'T.GDA.I.ALZ', N'T.GDA.I.ALZ.GAZ', N'Gazlı içecekler' ),
+( 101401040, 0, N'T.GDA.I.ALZ', N'T.GDA.I.ALZ.ENJ', N'Enerji ve spor içecekleri' ),
+
+( 1014020,   0, N'T.GDA.I',     N'T.GDA.I.SCA',     N'Sıcak İçecekler' ),
+( 101402010, 0, N'T.GDA.I.SCA', N'T.GDA.I.CAY',     N'Çay ve bitki çayları' ),
+( 101402020, 0, N'T.GDA.I.SCA', N'T.GDA.I.KAH',     N'Kahve ve kahve çeşitleri' ),
+( 101402030, 0, N'T.GDA.I.SCA', N'T.GDA.I.CKO',     N'Sıcak çikolata' ),
+( 101402040, 0, N'T.GDA.I.SCA', N'T.GDA.I.MYV',     N'Sıcak meyve içecekleri' ),
+
+( 1014030,   0, N'T.GDA.I',     N'T.GDA.I.ALK',     N'Alkollü İçecekler' ),
+( 101403010, 0, N'T.GDA.I.ALK', N'T.GDA.I.ALK.TKL', N'Tekel' ),
+( 101403020, 0, N'T.GDA.I.ALK', N'T.GDA.I.ALK.BRA', N'Bira' ),
+( 101403030, 0, N'T.GDA.I.ALK', N'T.GDA.I.ALK.SRA', N'Şarap' ),
+( 101403040, 0, N'T.GDA.I.ALK', N'T.GDA.I.ALK.LIK', N'Likör ve sert içkiler' ),
+( 101403050, 0, N'T.GDA.I.ALK', N'T.GDA.I.ALK.KOK', N'Kokteyl karışımları' ),
+
+
+
+
+
+/*CreateDataEnd*/
+
+
+

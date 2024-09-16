@@ -335,3 +335,233 @@ Kişisel Hizmetler
 
 
 
+
+
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+Türkiye’deki sektörler genel olarak şu kategorilere ayrılabilir:
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+1.  Tarım ve Hayvancılık: Bu sektör, tarım ürünleri, hayvancılık ve ormancılık faaliyetlerini içerir.
+2.  Sanayi: Otomotiv, kimya, çelik, tekstil ve hazır giyim gibi alt sektörleri kapsar.
+3.  Enerji: Elektrik üretimi, petrol ve gaz, yenilenebilir enerji kaynakları gibi alanları içerir.
+4.  İnşaat ve Mühendislik: İnşaat projeleri, altyapı çalışmaları ve mühendislik hizmetleri bu kategoride yer alır.
+5.  Teknoloji ve Telekomünikasyon: Yazılım geliştirme, bilgi teknolojileri, telekomünikasyon hizmetleri gibi alanları kapsar.
+6.  Finansal Hizmetler: Bankacılık, sigortacılık, bireysel emeklilik ve varlık yönetimi gibi hizmetleri içerir.
+7.  Sağlık ve İlaç: Hastaneler, sağlık hizmetleri, ilaç üretimi ve biyoteknoloji bu sektörde yer alır.
+8.  Turizm: Seyahat, konaklama, sağlık turizmi ve eğlence hizmetlerini kapsar.
+9.  Taşımacılık ve Lojistik: Kara, hava, deniz ve demiryolu taşımacılığı ile lojistik hizmetleri bu kategoride yer alır.
+10. Perakende ve Tüketici Ürünleri: Gıda, giyim, elektronik ve diğer tüketici ürünlerinin satışı bu sektöre dahildir.
+11. Eğitim: 
+
+
+
+
+Eğitim sektörü çeşitli alt kategorilere ayrılabilir. İşte bazı ana kategoriler:
+
+	Okul Öncesi Eğitim: Anaokulları ve kreşler gibi erken çocukluk eğitimi kurumları.
+	İlköğretim: İlkokul ve ortaokul düzeyindeki eğitim kurumları.
+	Ortaöğretim: Liseler ve meslek liseleri gibi ortaöğretim kurumları.
+	Yükseköğretim: Üniversiteler, yüksekokullar ve meslek yüksekokulları.
+	Yetişkin Eğitimi: Halk eğitim merkezleri, yetişkinler için kurslar ve sertifika programları.
+	Özel Eğitim: Özel gereksinimli bireyler için eğitim hizmetleri.
+	Dil Eğitimi: Yabancı dil kursları ve dil okulları.
+	Mesleki Eğitim: Meslek edindirme kursları ve teknik eğitim programları.
+	Uzaktan Eğitim: Online eğitim platformları ve uzaktan eğitim programları.
+	Özel Ders ve Etüt Merkezleri: Bireysel veya grup dersleri sunan özel eğitim merkezleri.
+
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+Özel ders ve kursları çeşitli kategorilere ayırabiliriz. İşte bazı ana kategoriler:
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Akademik Dersler
+	Matematik
+		İlkokul matematik
+		Ortaokul matematik
+		Lise matematik (TYT, AYT)
+		Üniversite matematik (Calculus, Diferansiyel Denklemler)
+	Fen Bilimleri
+		Fizik
+		Kimya
+		Biyoloji
+	Dil Dersleri
+		İngilizce
+		Almanca
+		Fransızca
+		İspanyolca
+		Türkçe (yabancılar için)
+	Sosyal Bilimler
+		Tarih
+		Coğrafya
+		Felsefe
+		Sosyoloji
+	Sınav Hazırlık Kursları
+		Yurtiçi Sınavlar
+			LGS (Liselere Geçiş Sistemi)
+			TYT (Temel Yeterlilik Testi)
+			AYT (Alan Yeterlilik Testi)
+			KPSS (Kamu Personeli Seçme Sınavı)
+		Yurtdışı Sınavlar
+			TOEFL
+			IELTS
+			SAT
+			GRE
+			GMAT
+		Sanat ve Hobi Kursları
+			Müzik
+			Gitar
+			Piyano
+			Keman
+			Şan dersleri
+		Görsel Sanatlar
+			Resim
+			Heykel
+			Fotoğrafçılık
+			Grafik tasarım
+		Performans Sanatları
+			Tiyatro
+			Dans (bale, modern dans, halk dansları)
+			Diksiyon ve hitabet
+		Spor ve Fitness Kursları
+			Bireysel Sporlar
+			Yüzme
+			Tenis
+			Yoga
+			Pilates
+		Takım Sporları
+			Futbol
+			Basketbol
+			Voleybol
+		Mesleki ve Teknik Eğitim
+			Bilgisayar ve Teknoloji
+			Yazılım geliştirme
+			Web tasarımı
+			Grafik tasarım
+			Veri analizi
+		İş ve Yönetim
+			İşletme yönetimi
+			Pazarlama
+			Finans
+			İnsan kaynakları
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+Mesleki eğitim ve sertifikasyon programlarını çeşitli kategorilere ayırabiliriz. İşte bazı ana kategoriler:
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Teknik ve Endüstriyel Eğitim
+Makine ve Metal Teknolojileri
+CNC Operatörlüğü
+Kaynakçılık
+Makine Bakım ve Onarım
+Elektrik ve Elektronik Teknolojileri
+Elektrik Tesisatçılığı
+Elektronik Teknikerliği
+Otomasyon Sistemleri
+İnşaat Teknolojileri
+İnşaat Teknikerliği
+Tesisat Teknolojisi
+Yapı Denetimi
+Sağlık ve Bakım Eğitimleri
+Sağlık Hizmetleri
+Hemşirelik
+Ebe ve Hemşire Yardımcılığı
+Tıbbi Sekreterlik
+Bakım ve Rehabilitasyon
+Yaşlı Bakımı
+Fizik Tedavi Yardımcılığı
+Engelli Bakımı
+Bilişim ve Teknoloji Eğitimleri
+Yazılım ve Programlama
+Web Geliştirme
+Mobil Uygulama Geliştirme
+Veri Tabanı Yönetimi
+Ağ ve Sistem Yönetimi
+Ağ Yönetimi
+Sistem Yönetimi
+Siber Güvenlik
+İş ve Yönetim Eğitimleri
+İşletme ve Yönetim
+İşletme Yönetimi
+İnsan Kaynakları Yönetimi
+Proje Yönetimi
+Pazarlama ve Satış
+Dijital Pazarlama
+Satış Teknikleri
+Müşteri İlişkileri Yönetimi
+Sanat ve Tasarım Eğitimleri
+Görsel Sanatlar
+Grafik Tasarım
+Fotoğrafçılık
+Moda Tasarımı
+Performans Sanatları
+Tiyatro
+Müzik
+Dans
+Turizm ve Hizmet Eğitimleri
+Turizm ve Otelcilik
+Turizm Rehberliği
+Otel Yönetimi
+Aşçılık
+Kişisel Hizmetler
+Kuaförlük
+Güzellik ve Bakım
+Masaj Terapisi
+
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+Ehliyet almak için eğitim gerektiren kursları çeşitli kategorilere ayırabiliriz. İşte bazı ana kategoriler:
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+Motosiklet Ehliyetleri
+M Sınıfı
+Motorlu bisiklet (moped) kullanımı için
+16 yaş ve üzeri
+A1 Sınıfı
+125 cc’ye kadar motosikletler için
+16 yaş ve üzeri
+A2 Sınıfı
+35 kW’a kadar motosikletler için
+18 yaş ve üzeri
+A Sınıfı
+Tüm motosikletler için
+24 yaş ve üzeri veya 2 yıllık A2 deneyimi
+Otomobil ve Hafif Araç Ehliyetleri
+B Sınıfı
+Otomobil ve kamyonetler için
+18 yaş ve üzeri
+B1 Sınıfı
+4 tekerlekli motosikletler (quad) için
+16 yaş ve üzeri
+BE Sınıfı
+Römorklu araçlar için
+18 yaş ve üzeri
+Ağır Vasıta Ehliyetleri
+C1 Sınıfı
+7.5 tona kadar kamyonlar için
+18 yaş ve üzeri
+C Sınıfı
+7.5 tonun üzerindeki kamyonlar için
+21 yaş ve üzeri
+CE Sınıfı
+Römorklu kamyonlar için
+21 yaş ve üzeri
+Otobüs ve Minibüs Ehliyetleri
+D1 Sınıfı
+16 kişiye kadar minibüsler için
+21 yaş ve üzeri
+D Sınıfı
+Otobüsler için
+24 yaş ve üzeri
+DE Sınıfı
+Römorklu otobüsler için
+24 yaş ve üzeri
+Özel Amaçlı Ehliyetler
+F Sınıfı
+Traktörler için
+18 yaş ve üzeri
+G Sınıfı
+İş makineleri için
+18 yaş ve üzeri
