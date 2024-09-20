@@ -9,7 +9,6 @@ AS BEGIN
   declare @BelgeTarihi datetime
   declare @AHesapTipiId int 
   declare @BelgeTutari numeric(22,5)
-  --declare @CariId int 
   declare @SourceTypeId smallInt
   declare @talepId int -- = SourceId
 
@@ -17,24 +16,21 @@ AS BEGIN
   declare @TaksitTutari numeric(22,5)
   declare @KalanTutar numeric(22,5)
 
-  select /*
-      @FirmId = ins.FirmId
-    , @IsActive = ins.IsActive
-    , @TipiId = ins.TipiId
-    , @IslemTipiId = ins.IslemTipiId
-	, @BHesapTipiId = isnull(ins.BHesapTipiId,0) */
+  set @BelgeTutari = 0
+  select 
        @BelgeTarihi = ins.BelgeTarihi
      , @AHesapTipiId = isnull(ins.AHesapTipiId,0) 
-     , @BelgeTutari = round(ins.BelgeTutari,2)
-     --, @CariId = ins.CariId
+     , @BelgeTutari = round(isnull(ins.BelgeTutari,0),2)
      , @SourceTypeId = ins.SourceTypeId
      , @talepId = ins.SourceId 
    from OnmBelgeDekont as ins
-   where ins.Id = @dekontId
+   where ins.IsActive = 1
+   and   isnull(ins.IsIptal,0) = 0 
+   and   ins.Id = @dekontId 
 
    set @KalanTutar = @BelgeTutari 
 
-   while (@KalanTutar > 0)
+   while ((@KalanTutar > 0) and (@BelgeTutari > 0))
    begin
 
        Select top 1 @odemePlaniId = Id, @TaksitTutari = TaksitTutari from OnmOdemePlani 
@@ -93,8 +89,6 @@ AS BEGIN
        --print @BelgeTutari
        --print @TaksitTutari
        --print @KalanTutar
-
-
    end -- While
 
 END -- prc_

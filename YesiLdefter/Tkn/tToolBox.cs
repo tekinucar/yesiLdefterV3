@@ -1379,6 +1379,10 @@ namespace Tkn_ToolBox
                 // 1. adım
                 onay = Sql_Execute(dsData, ref SQL, vt);
 
+                DataNavigator dN = Find_DataNavigator(tForm, vt.TableIPCode);
+                if (dN != null)
+                    dN.Tag = dN.Position;
+
                 // buraya yeni kondu
                 // table refreshde çalışmadığı tespit edildi
                 // 
@@ -14815,6 +14819,9 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             SourceDbUses = YesiLdefterTabimIni.Read("SourceDbUses");
             if (SourceDbUses.ToUpper() == "TRUE")
             {
+                if (v.SP_TabimParamsKurumTipi == "")
+                    v.SP_TabimParamsKurumTipi = "MTSK";
+
                 if (MainManagerDbUses.ToUpper() == "TRUE")
                 {
                     v.active_DB.managerServerName = YesiLdefterIni.Read("MainManagerServerIp");

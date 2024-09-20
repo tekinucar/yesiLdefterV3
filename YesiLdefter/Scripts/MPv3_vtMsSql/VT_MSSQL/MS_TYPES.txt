@@ -524,14 +524,15 @@ begin transaction
  
   
  insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14000, 'h7',             '---------------------------');
- insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14310, 'webBrowser',     'webBrowser');
- insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14312, 'cefWebBrowser',  'cefWebBrowser');
- insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14320, 'headerPanel',    'headerPanel');
- insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14330, 'editPanel',      'editPanel');
- insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14340, 'labelControl',   'labelControl');
- insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14350, 'documentViewer', 'documentViewer');
- insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14400, 'dataWizard',     'dataWizard');
- insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14411, 'barcodeControl1','barcodeControl1');
+ insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14310, 'webBrowser',      'webBrowser');
+ insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14312, 'cefWebBrowser',   'cefWebBrowser');
+ insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14320, 'headerPanel',     'headerPanel');
+ insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14330, 'editPanel',       'editPanel');
+ insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14340, 'labelControl',    'labelControl');
+ insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14350, 'documentViewer',  'documentViewer');
+ insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14400, 'dataWizard',      'dataWizard');
+ insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14411, 'barcodeControl1', 'barcodeControl1');
+ insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14412, 'componentControl','componentControl');
 
  insert into MS_TYPES values ( 3,  0, 'LYT_DP_TABBED', 0, '',        'none');
  insert into MS_TYPES values ( 3,  0, 'LYT_DP_TABBED', 1, 'Tab',     'Tabbed');

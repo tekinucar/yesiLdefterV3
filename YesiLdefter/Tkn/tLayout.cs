@@ -65,10 +65,10 @@ namespace Tkn_Layout
             string LayoutType = string.Empty;
             string visible = string.Empty;
             // sf : SetFocus
-            string sf_TableIPCode = string.Empty;
-            string sf_FieldName = string.Empty;
-            string sf_CmpName = string.Empty;
-            string sf_FormName = string.Empty;
+            string setfocus_TableIPCode = string.Empty;
+            string setfocus_FieldName = string.Empty;
+            string setfocus_CmpName = string.Empty;
+            string setfocus_FormName = string.Empty;
 
             bool dockPanel = false;
 
@@ -83,9 +83,9 @@ namespace Tkn_Layout
                 if ((MasterLayoutType == 1) && (LayoutType == ""))
                 {
                     // sf : SetFocus
-                    sf_TableIPCode = row["TABLEIPCODE"].ToString();
-                    sf_FieldName = row["FIELD_NAME"].ToString();
-                    sf_CmpName = row["CMP_NAME"].ToString();
+                    setfocus_TableIPCode = row["TABLEIPCODE"].ToString();
+                    setfocus_FieldName = row["FIELD_NAME"].ToString();
+                    setfocus_CmpName = row["CMP_NAME"].ToString();
 
                     if (subView == null)
                         lForm_Preparing(tForm, row);
@@ -102,7 +102,8 @@ namespace Tkn_Layout
                         lDockPanel_Preparing(tForm, ds_Layout, row);
                         dockPanel = true;
                     }
-                    if (LayoutType == v.lyt_tableLayoutPanel) ltableLayoutPanel_Preparing(tForm, subView, ds_Layout, row, pos);
+                    if (LayoutType == v.lyt_tableLayoutPanel) 
+                        ltableLayoutPanel_Preparing(tForm, subView, ds_Layout, row, pos);
                     if (LayoutType == v.lyt_splitContainer) lSplitContainer_Preparing(tForm, subView, ds_Layout, row, pos);
                     if (LayoutType == v.lyt_groupControl)
                         lGroupControl_Preparing(tForm, subView, ds_Layout, row, pos);
@@ -129,6 +130,9 @@ namespace Tkn_Layout
                     if (LayoutType == v.lyt_editPanel) lEditPanel_Preparing(tForm, subView, ds_Layout, row, pos);
                     if (LayoutType == v.lyt_labelControl) lLabelControl_Preparing(tForm, subView, ds_Layout, row, pos);
                     if (LayoutType == v.lyt_BarcodeControl1) lBarcodControl1_Preparing(tForm, subView, ds_Layout, row, pos);
+                    if (LayoutType == v.lyt_ComponentControl) 
+                        lComponentControl_Preparing(tForm, subView, ds_Layout, row, pos);
+
                     if (LayoutType == v.lyt_documentViewer) lDocumentViewer_Preparing(tForm, subView, ds_Layout, row, pos);
 
                     if (LayoutType == v.lyt_documentManager) lDocumentManager_Preparing(tForm, subView, ds_Layout, row, pos);
@@ -142,8 +146,8 @@ namespace Tkn_Layout
 
             // TableIPCode ve fieldName belli ise
             //
-            if (t.IsNotNull(sf_TableIPCode) &&
-                t.IsNotNull(sf_FieldName))
+            if (t.IsNotNull(setfocus_TableIPCode) &&
+                t.IsNotNull(setfocus_FieldName))
             {
                 if (tForm.AccessibleDefaultActionDescription != null)
                 {
@@ -153,30 +157,30 @@ namespace Tkn_Layout
                 {
                     /// formun üzerine bu bilgiyi yapıştıralım, çünkü Yeni butonuna basılıncada 
                     /// bu sistem yeniden çalışsın
-                    tForm.AccessibleDefaultActionDescription = sf_TableIPCode + "||" + sf_FieldName + "||";
+                    tForm.AccessibleDefaultActionDescription = setfocus_TableIPCode + "||" + setfocus_FieldName + "||";
                 }
 
-                t.tFormActiveControl(tForm, sf_TableIPCode, "Column_", sf_FieldName);
+                t.tFormActiveControl(tForm, setfocus_TableIPCode, "Column_", setfocus_FieldName);
             }
 
             //  direk componnet belirtilmişse
             //
-            if (t.IsNotNull(sf_CmpName))
+            if (t.IsNotNull(setfocus_CmpName))
             {
-                t.tFormActiveControl(tForm, sf_CmpName);
+                t.tFormActiveControl(tForm, setfocus_CmpName);
             }
 
             // hiç birşey belitilmemişse
             //
-            if (t.IsNotNull(sf_TableIPCode) == false)
+            if (t.IsNotNull(setfocus_TableIPCode) == false)
             {
-                sf_TableIPCode = t.Find_FirstTableIPCode(tForm);
+                setfocus_TableIPCode = t.Find_FirstTableIPCode(tForm);
             }
 
             // sadece TaleIPCode belirtilmişse
             //
-            if (t.IsNotNull(sf_TableIPCode) &&
-                t.IsNotNull(sf_FieldName) == false)
+            if (t.IsNotNull(setfocus_TableIPCode) &&
+                t.IsNotNull(setfocus_FieldName) == false)
             {
                 if (tForm.AccessibleDefaultActionDescription != null)
                 {
@@ -186,11 +190,11 @@ namespace Tkn_Layout
                 {
                     /// formun üzerine bu bilgiyi yapıştıralım, çünkü Yeni butonuna basılıncada 
                     /// bu sistem yeniden çalışsın
-                    tForm.AccessibleDefaultActionDescription = sf_TableIPCode + "||null||";
+                    tForm.AccessibleDefaultActionDescription = setfocus_TableIPCode + "||null||";
                 }
 
                 // focus için iptal
-                t.tFormActiveControl(tForm, sf_TableIPCode, "", "");
+                t.tFormActiveControl(tForm, setfocus_TableIPCode, "", "");
             }
 
             Cursor.Current = Cursors.Default;
@@ -1030,6 +1034,7 @@ namespace Tkn_Layout
 
             string caption = string.Empty;
             string TableIPCode = string.Empty;
+            string CmpName = string.Empty;
             string layout_code = string.Empty;
             string fieldName = string.Empty;
             byte IPDataType = 1;
@@ -1060,6 +1065,7 @@ namespace Tkn_Layout
 
             FrontBack = t.myInt32(row["CMP_FRONT_BACK"].ToString());
             DockType = t.Set(row["CMP_DOCK"].ToString(), v.dock_Fill.ToString(), (int)0);
+            CmpName = t.Set(row["CMP_NAME"].ToString(), "", "");
 
             if (fieldName == "KRITER") IPDataType = 2;
 
@@ -1105,6 +1111,9 @@ namespace Tkn_Layout
             groupControl1.Location = new System.Drawing.Point(0, 0);
             groupControl1.Name = v.lyt_Name + t.Str_Replace(ref layout_code, ".", "_"); // RefId.ToString();
             groupControl1.Size = new System.Drawing.Size(203, 435);
+
+            if (t.IsNotNull(CmpName))
+                groupControl1.Name = CmpName;
 
             if (DockType == v.dock_Bottom) groupControl1.Dock = System.Windows.Forms.DockStyle.Bottom;
             if (DockType == v.dock_Fill) groupControl1.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -3452,9 +3461,118 @@ namespace Tkn_Layout
             #endregion
         }
 
-        /// BarcodControl 
-        #region BarcodControl
+        /// ComponentControl, BarcodControl 
+        #region ComponentControl, BarcodControl
+        public void lComponentControl_Preparing(Form tForm, Control subView, DataSet ds_Layout, DataRow row, int pos)
+        {
+            tToolBox t = new tToolBox();
 
+            string TableIPCode = string.Empty;
+            string CmpName = string.Empty;
+            string layout_code = string.Empty;
+            string fieldName = string.Empty;
+            //byte IPDataType = 1;
+            int RefId = 0;
+            int width = 0;
+            int height = 0;
+            int top = 0;
+            int left = 0;
+            int DockType = 0;
+            int FrontBack = 0;
+
+            string ustItemType = string.Empty;
+            string ustHesapRefId = string.Empty;
+            string ustHesapItemName = string.Empty;
+            string ustItemName = string.Empty;
+            DataRow UstHesapRow = null;
+
+            RefId = t.myInt32(row["REF_ID"].ToString());
+
+            // aslında TABLEIPCODE yerine başka bir MS_LAYOUT.MasterCode geliyor 
+            TableIPCode = t.Set(row["TABLEIPCODE"].ToString(), "", "");
+
+            fieldName = t.Set(row["FIELD_NAME"].ToString(), "", "");
+            layout_code = t.Set(row["LAYOUT_CODE"].ToString(), "", "");
+
+            width = t.myInt32(row["CMP_WIDTH"].ToString());
+            height = t.myInt32(row["CMP_HEIGHT"].ToString());
+            top = t.myInt32(row["CMP_TOP"].ToString());
+            left = t.myInt32(row["CMP_LEFT"].ToString());
+
+            FrontBack = t.myInt32(row["CMP_FRONT_BACK"].ToString());
+            DockType = t.Set(row["CMP_DOCK"].ToString(), v.dock_Fill.ToString(), (int)0);
+            CmpName = t.Set(row["CMP_NAME"].ToString(), "", "");
+
+
+            //
+            //
+            //
+            DevExpress.XtraEditors.PanelControl panelControl1 = new DevExpress.XtraEditors.PanelControl();
+            ((System.ComponentModel.ISupportInitialize)(panelControl1)).BeginInit();
+
+            UstHesapRow = UstHesap_Get(ds_Layout, pos);
+
+            #region // Ust hesabı var ise
+
+            if (UstHesapRow != null)
+            {
+                ustItemType = UstHesapRow["LAYOUT_TYPE"].ToString();
+                //ustHesapRefId = UstHesapRow["REF_ID"].ToString();
+                ustHesapRefId = UstHesapRow["LAYOUT_CODE"].ToString();
+                t.Str_Replace(ref ustHesapRefId, ".", "_");
+                ustItemName = v.lyt_Name + ustHesapRefId;
+
+                if (t.IsNotNull(UstHesapRow["CMP_NAME"].ToString()))
+                    ustItemName = UstHesapRow["CMP_NAME"].ToString();
+
+                lParentControlAdd(tForm, panelControl1, ustItemName, ustItemType, row);
+            }
+            else
+            {
+                if (subView == null)
+                    tForm.Controls.Add(panelControl1);
+                else subView.Controls.Add(panelControl1);
+            }
+
+            #endregion
+
+            // 
+            // panelControl1
+            // 
+            if (FrontBack == 2) panelControl1.SendToBack();
+            else panelControl1.BringToFront();
+
+            panelControl1.Location = new System.Drawing.Point(0, 0);
+            panelControl1.Name = v.lyt_Name + t.Str_Replace(ref layout_code, ".", "_");  //RefId.ToString();
+            if (t.IsNotNull(CmpName))
+                panelControl1.Name = CmpName;
+            panelControl1.Size = new System.Drawing.Size(200, 435);
+            //panelControl1.BorderStyle = DevExpress.XtraEditors.Controls.BorderStyles.NoBorder;
+
+            if (DockType == v.dock_Bottom) panelControl1.Dock = System.Windows.Forms.DockStyle.Bottom;
+            if (DockType == v.dock_Fill) panelControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+            if (DockType == v.dock_Left) panelControl1.Dock = System.Windows.Forms.DockStyle.Left;
+            if (DockType == v.dock_Right) panelControl1.Dock = System.Windows.Forms.DockStyle.Right;
+            if (DockType == v.dock_Top) panelControl1.Dock = System.Windows.Forms.DockStyle.Top;
+
+            t.myControl_Size_And_Location(panelControl1, width, height, left, top);
+
+            ((System.ComponentModel.ISupportInitialize)(panelControl1)).EndInit();
+
+
+            //
+            // InputPanel Create
+            //
+            //InputPanel_Preparing(tForm, panelControl1, TableIPCode, IPDataType);
+
+            string FormCode = TableIPCode;
+
+            Create_Layout(tForm, FormCode, panelControl1);
+
+
+            panelControl1.TabIndex = pos;
+
+        }
         public void lBarcodControl1_Preparing(Form tForm, Control subView, DataSet ds_Layout, DataRow row, int pos)
         {
             tToolBox t = new tToolBox();
@@ -3529,9 +3647,9 @@ namespace Tkn_Layout
             groupControl1.Name = v.lyt_Name + t.Str_Replace(ref layout_code, ".", "_");
             groupControl1.Size = new System.Drawing.Size(312, 74);
             groupControl1.TabIndex = 0;
-            groupControl1.Text = "Barkod Okuma (New)";
+            groupControl1.Text = "Barkod okuma alanı";
             groupControl1.Location = new System.Drawing.Point(462, 422);
-
+            
             TableLayoutPanel tTableLayoutPanel = new TableLayoutPanel();
             groupControl1.Controls.Add(tTableLayoutPanel);
 
@@ -3542,7 +3660,7 @@ namespace Tkn_Layout
             tTableLayoutPanel.RowCount = 1;
             tTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             tTableLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            tTableLayoutPanel.CellBorderStyle = TableLayoutPanelCellBorderStyle.Single;
+            tTableLayoutPanel.CellBorderStyle = TableLayoutPanelCellBorderStyle.None;// Single;
 
             DevExpress.XtraEditors.TextEdit tEditMiktar = new DevExpress.XtraEditors.TextEdit();
             tEditMiktar.Name = "tEditMiktar";

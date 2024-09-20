@@ -45,11 +45,30 @@ namespace Tkn_Menu
 
             short ItemType = t.myInt16(ds_Items.Tables[0].Rows[0]["ITEM_TYPE"].ToString());
             string Prop_View = t.Set(ds_Items.Tables[0].Rows[0]["PROP_VIEWS"].ToString(), "", "");
+            
             bool dontReport = false;
             bool dontEDI = false;
-            dontReport = (Prop_View.IndexOf("DONTREPORT\": \"TRUE") > -1);
-            dontEDI = (Prop_View.IndexOf("DONTEDI\": \"TRUE") > -1);
+            string reportTableIPCode = "";
 
+            //dontReport = (Prop_View.IndexOf("DONTREPORT\": \"TRUE") > -1);
+            //dontEDI = (Prop_View.IndexOf("DONTEDI\": \"TRUE") > -1);
+
+            PROP_VIEWS_ITEMS JSON_PropView = null;
+
+            if (t.IsNotNull(Prop_View))
+            {
+                JSON_PropView = t.readProp<PROP_VIEWS_ITEMS>(Prop_View);
+
+                if (JSON_PropView.ALLMENU != null)
+                {
+                    if (t.IsNotNull(JSON_PropView.ALLMENU.DONTEDI))
+                        dontEDI = Convert.ToBoolean(JSON_PropView.ALLMENU.DONTEDI);
+                    if (t.IsNotNull(JSON_PropView.ALLMENU.DONTREPORT))
+                        dontReport = Convert.ToBoolean(JSON_PropView.ALLMENU.DONTREPORT);
+                    if (JSON_PropView.ALLMENU.RPRT_TABLEIPCODE != null)
+                        reportTableIPCode = JSON_PropView.ALLMENU.RPRT_TABLEIPCODE;
+                }
+            }
             //if (ItemType == 101) Create_BarManager((DevExpress.XtraBars.BarManager)menuControl, ds_Items);
             if (ItemType == 102) Create_Ribbon((DevExpress.XtraBars.Ribbon.RibbonControl)menuControl, ds_Items, MenuCode);
             if (ItemType == 103) Create_NavBar((DevExpress.XtraNavBar.NavBarControl)menuControl, ds_Items);
@@ -114,8 +133,27 @@ namespace Tkn_Menu
             */
             bool dontReport = false;
             bool dontEDI = false;
-            dontReport = (Prop_View.IndexOf("DONTREPORT\": \"TRUE") > -1);
-            dontEDI = (Prop_View.IndexOf("DONTEDI\": \"TRUE") > -1);
+            string reportTableIPCode = "";
+            //dontReport = (Prop_View.IndexOf("DONTREPORT\": \"TRUE") > -1);
+            //dontEDI = (Prop_View.IndexOf("DONTEDI\": \"TRUE") > -1);
+
+            PROP_VIEWS_ITEMS JSON_PropView = null;
+
+            if (t.IsNotNull(Prop_View))
+            {
+                JSON_PropView = t.readProp<PROP_VIEWS_ITEMS>(Prop_View);
+
+                if (JSON_PropView.ALLMENU != null)
+                {
+                    if (t.IsNotNull(JSON_PropView.ALLMENU.DONTEDI))
+                        dontEDI = Convert.ToBoolean(JSON_PropView.ALLMENU.DONTEDI);
+                    if (t.IsNotNull(JSON_PropView.ALLMENU.DONTREPORT))
+                        dontReport = Convert.ToBoolean(JSON_PropView.ALLMENU.DONTREPORT);
+                    if (JSON_PropView.ALLMENU.RPRT_TABLEIPCODE != null)
+                        reportTableIPCode = JSON_PropView.ALLMENU.RPRT_TABLEIPCODE;
+                }
+            }
+
 
             #region // 102 - RibbonControl
             if (ItemType == 102)

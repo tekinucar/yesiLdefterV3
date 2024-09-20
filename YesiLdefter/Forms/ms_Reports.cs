@@ -28,9 +28,14 @@ namespace YesiLdefter
         
         string sourceFormCodeAndName = "";
 
+        Control cntrlReportNames = null;
+        string controlNames = "controlReportNameList";
+
         string menuName = "MENU_" + "UST/PMS/PMS/REPORT";
         string buttonRaporYazdir = "RAPOR_YAZDIR";
         string buttonRaporOnizleme = "RAPOR_ONIZLEME";
+
+
 
         public ms_Reports()
         {
@@ -47,6 +52,13 @@ namespace YesiLdefter
 
         private void ms_Reports_Shown(object sender, EventArgs e)
         {
+            string ipCodes = this.AccessibleDefaultActionDescription;
+            if (this.AccessibleDescription != null)
+                sourceFormCodeAndName = this.AccessibleDescription;
+
+            cntrlReportNames = t.Find_Control(this, controlNames);
+
+            /*
             // DİKKAT : Bu atamanın yerini değiştirme
             //
             // ms_Reports u çağıaran formun FormCode si
@@ -63,11 +75,12 @@ namespace YesiLdefter
 
             dNMsReports.PositionChanged += new System.EventHandler(dNMsReports_PositionChanged);
 
+
             documentViewer = (DocumentViewer)t.Find_Control(this, "documentViewer");
 
             if (this.AccessibleDescription != null)
                 sourceFormCodeAndName = this.AccessibleDescription;
-
+            */
 
             t.Find_Button_AddClick(this, menuName, buttonRaporYazdir, myNavElementClick);
             t.Find_Button_AddClick(this, menuName, buttonRaporOnizleme, myNavElementClick);

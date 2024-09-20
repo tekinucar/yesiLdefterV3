@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace YesiLdefter.Forms
+namespace YesiLdefter
 {
     public partial class ms_FastReport : Form
     {

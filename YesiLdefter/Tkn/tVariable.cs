@@ -261,7 +261,7 @@ namespace Tkn_Variable
         public static string EXE_ScriptsPath = string.Empty;
         public static string sp_Sakla = string.Empty;
 
-        public static string SP_TabimParamsKurumTipi = "MTSK";
+        public static string SP_TabimParamsKurumTipi = "";
         public static string SP_TabimParamsServerName = string.Empty;
 
         public static Boolean SP_TabimDbConnection = false;
@@ -391,6 +391,7 @@ namespace Tkn_Variable
         public static string lyt_editPanel = "editPanel";
         public static string lyt_labelControl = "labelControl";
         public static string lyt_BarcodeControl1 = "barcodeControl1";
+        public static string lyt_ComponentControl = "componentControl";
         public static string lyt_documentViewer = "documentViewer";
 
 
@@ -2765,6 +2766,7 @@ namespace Tkn_Variable
     {
         public string DONTREPORT { get; set; }
         public string DONTEDI { get; set; } // Eğitim/Destek/İstek
+        public string RPRT_TABLEIPCODE { get; set; }
     }
 
     public class NAVBAR

@@ -124,6 +124,7 @@ INSERT INTO [Lkp].[OnmOdemePlaniTaksitTipi] (Id, TaksitTipi)
   ( 2,    N'Taksit'),
   ( 3,    N'Tek Ödeme'),
   ( 4,    N'İade nedeniyle oluşan borç')
+  ( 5,    N'Borcun tamamı')
     
 
 -- ------------------------------------------------------- 

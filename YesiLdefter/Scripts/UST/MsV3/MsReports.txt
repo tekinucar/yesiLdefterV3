@@ -1,27 +1,100 @@
-﻿begin transaction
+﻿
+begin transaction
+
  create table MsReports
  (
     Id              Int IDENTITY(1,1) not null,
 	IsActive        Bit               not null,
     LineNumber      int               not null,
 
+    -- 10
+	ReportCode      nvarChar(50)      null,     
+	ParentCode      nvarChar(50)      null,     
 	ReportName      nvarChar(100)     null,     
     About           nvarChar(100)     null,     
-    
-    ReportTypeId    SmallInt          null, /* 1.Liste, 2. Tasarımlı form, 3. Matbu baskı form  */
+    TableIPCode     varchar(100)      null, /* açıklama aşağıda */
+
+    -- 20
+    RecordTypeId    SmallInt          null,  
+    ReportTypeId    SmallInt          null, 
     PrivateTypeId   SmallInt          null, /* 0, 1. Genel, 2. Üst Yönetim, 3. Sadece Ortaklar */  
 
-	SoftWareCode    varchar(20)       null,
+    -- 90
+	SoftwareCode    varchar(20)       null,
     ProjectCode     varchar(20)       null,
     ModulCode       varchar(20)       null,
-    FormCode        varchar(100)      null,
+
+    -- 100
     ReportTemp      nvarchar(max)     null,
 
    Constraint pk_MsReports primary key (Id)
  )
 
- create index X_MsReports_01 on MsReports (SoftWareCode, ProjectCode, ModulCode, FormCode)
+ create index X_MsReports_01 on MsReports (SoftWareCode, ProjectCode, ModulCode)
  
  grant select, insert, update, delete on MsReports to public
 
 commit transaction
+
+/*
+
+TableIPCode : ?
+
+Menülerde Rapor butonu kullanılarak, bulunduğu formu ilgilendiren raporlara ulaşılacak
+
+Nasıl ?
+Menudeki Prop-Views içinde All-Menu, Report-TableIPCode ye 
+
+UST/PMS/MsReports  tablo altındaki TableIPCode ler giriliecek
+
+Bu TableIPCode ler sayesinde bir formun çağırabileceği raporların listesi gelecek
+
+
+
+
+ReportTypeId
+    List 
+    Single
+    Form
+
+LocalTypeId
+    Ulke
+    Il
+    Ilce
+    Firm
+
+RecordType
+    ReportGroupName
+    ReportName
+
+
+Master-Detail ?????
+
+*/
+
+
+
+USE [MainManagerV3]
+GO
+
+delete from [dbo].[MsReports]
+INSERT INTO [dbo].[MsReports]
+           ([IsActive],[LineNumber],[ReportCode],[ParentCode],[ReportName],[About],[TableIPCode],[RecordTypeId],[ReportTypeId],[PrivateTypeId],[SoftwareCode],[ProjectCode],[ModulCode],[ReportTemp])
+     VALUES
+           ( 1        , 0         , 'KRM'       , ''         , 'Kurum işlemleri' , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'MLI'       , ''         , 'Mali işlemler'   , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM'       , ''         , 'Dönem işlemler'  , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'IDA'       , ''         , 'İdari işlemler'  , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+
+
+           ( 1        , 0         , 'DNM.TAKP'  , 'DNM'      , 'Takip raporları'                 , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.ADAY'  , 'DNM'      , 'Aday raporları'                  , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.TALP'  , 'DNM'      , 'Talep raporları'                 , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.DONM'  , 'DNM'      , 'Dönem ve grup raporları'         , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.TEOD'  , 'DNM'      , 'Teorik ders planı raporları'     , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.TEOS'  , 'DNM'      , 'e-Sınav raporları'               , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.UYGD'  , 'DNM'      , 'Uygulama ders planı raporları'   , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.UYGS'  , 'DNM'      , 'Uygulama sınav raporları'        , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.SERT'  , 'DNM'      , 'Sertifika raporları'             , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.ISTA'  , 'DNM'      , 'İstatistik raporları'            , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       )
+

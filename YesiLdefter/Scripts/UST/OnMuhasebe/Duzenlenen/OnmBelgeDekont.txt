@@ -74,6 +74,8 @@ begin transaction
    SourceTypeId       SmallInt      null, /* ilgili table 1: OnmBelgeMaliyet,  */
    SourceId           Int           null, /* ilgili table ref Id */
    IadeId             Int           null, /* iade kaynağı kendisidir. Yani tahsil ettiği dekonta bağlı olarak tediye dekontu oluşturuluyor. Iadeye sebep olan tahsilatın Id si */
+   IsIptal            Bit           null, /* kullanıcı tarafından İPTAL edilen kayıt */
+
    constraint		pk_OnmBelgeDekont primary key (Id)
  )
 
@@ -99,7 +101,8 @@ begin transaction
 
  /*CreateTrigger*/
 
-ALTER TRIGGER [dbo].[trg_OnmBelgeDekont] on [dbo].[OnmBelgeDekont] 
+
+CREATE TRIGGER [dbo].[trg_OnmBelgeDekont] on [dbo].[OnmBelgeDekont] 
 AFTER INSERT, UPDATE
 AS BEGIN
 
@@ -108,6 +111,8 @@ AS BEGIN
 
     declare @FirmId int
     declare @IsActive bit
+	declare @IsIptal bit
+	declare @eIsIptal bit
     declare @TipiId smallInt
     declare @IslemTipiId varchar(10)
     declare @_IslemTipiId varchar(10)
@@ -134,8 +139,14 @@ AS BEGIN
     WHILE @@FETCH_STATUS = 0
     BEGIN
       select 
+	      @eIsIptal = isnull(dlt.IsIptal,0)
+      from deleted dlt 
+      where dlt.Id = @curId
+
+      select 
 	      @FirmId = ins.FirmId
 	    , @IsActive = ins.IsActive
+	    , @IsIptal = isnull(ins.IsIptal,0)
 	    , @TipiId = ins.TipiId
 	    , @IslemTipiId = ins.IslemTipiId
         , @BelgeTarihi = ins.BelgeTarihi
@@ -162,86 +173,41 @@ AS BEGIN
           , BelgeDekontId = @curId -- OnmBelgeDekont.Id
           Where Id = @SourceId
 	  end
+
+	  if (@TipiId = 3) and -- Tediye
+	     (@BHesapTipiId >= 21100) -- Mtskİşlemleri
+      begin
+	      --print 'İade'
+		  EXECUTE [dbo].[prc_OnmOdemePlaniIadeIsle] @curId
+	  end
 	  	  
 	  if (@TipiId = 2) and -- Tahsilat
-	     (@AHesapTipiId >= 21100) -- Mtskİşlemleri
+		 (@AHesapTipiId >= 21100) and -- Mtskİşlemleri
+	     (@IsActive = 1) and 
+	     (@IsIptal = 0)  
       begin
-          EXECUTE [dbo].[prc_OnmOdemePlaniTahsilatiIsle] @curId
-          /*
-	      set @makbuzCount = 0
-          -- OnmBelgeDekont.Id = @curId daha önce OnmOdemePlani tablosuna işlenmiş mi ?
-		  Select @makbuzCount = count(Id)
-          from dbo.OnmOdemePlani
-          where CariId = @CariId
-		  and   TalepId = @SourceId
-          and   UcretTipiId = @AHesapTipiId
-		  and ( BelgeDekontId = @curId or PatchBelgeDekontId = @curId )
-		  		  
-		  if (@_BelgeTutari > 1) and -- 0 değil 1 liradan büyük ise
-		     (@makbuzCount = 0)     -- OnmBelgeDekont.Id henüz işlenmemiş  
-		  begin
-              set @onay = 1
-		      set @OnmOdemePlaniId = 0
-              set @OnmOdemePlaniTaksitTutari = 0
-
-	          Select top 1
-                @OnmOdemePlaniId = Id
-              , @OnmOdemePlaniTaksitTutari = round(TaksitTutari,2)
-		      from dbo.OnmOdemePlani
-		      where CariId = @CariId
-		      and   TalepId = @SourceId   
-			  and   UcretTipiId = @AHesapTipiId
-		      and   IsPaid = 0
-		      order by VadeTarihi, TaksitNo, Id
-
-              if (@_BelgeTutari >= @OnmOdemePlaniTaksitTutari)
-              begin
-                  Update dbo.OnmOdemePlani set
-				    IsPaid = 1
-                  , TahsilTarihi = @BelgeTarihi
-				  , BelgeDekontId = @curId 
-                  Where Id = @OnmOdemePlaniId
-
-                  set @_BelgeTutari = @_BelgeTutari - @OnmOdemePlaniTaksitTutari
-                  set @onay = 0 
-              end
-
-              if (@_BelgeTutari < @OnmOdemePlaniTaksitTutari) and
-                 (@onay = 1)
-              begin
-			      Update dbo.OnmOdemePlani set
-				    YedekTaksitTutari = TaksitTutari
-                  , TaksitTutari = @_BelgeTutari
-                  , IsPaid = 1
-                  
-				  , BelgeDekontId = @curId 
-                  Where Id = @OnmOdemePlaniId
-
-                  Insert into dbo.OnmOdemePlani
-                  ( FirmId, DonemTipiId, UcretTipiId, CariId, TaksitTipiId
-                   ,TaksitNo, VadeTarihi 
-                   ,TaksitTutari, IsPaid
-                   ,YedekTaksitTutari, BelgeDekontId, PatchBelgeDekontId, BelgeStokBId )
-                  Select 
-				    FirmId, DonemTipiId, UcretTipiId, CariId, TaksitTipiId
-                   ,TaksitNo, VadeTarihi 
-                   ,@OnmOdemePlaniTaksitTutari - @_BelgeTutari  --TaksitTutari
-				   ,0      --IsPaid
-                   ,null   --YedekTaksitTutari
-                   ,null   --BelgeDekontId
-                   ,@curId --PatchBelgeDekontId
-				   ,null   --BelgeStokBId
-                  from dbo.OnmOdemePlani
-				  where Id = @OnmOdemePlaniId
-
-				  set @_BelgeTutari = 0
-				  set @onay = 0
-              end
-          end -- @_BelgeTutari > 0
-          */
-      end -- if (@TipiId = 2)
+	      EXECUTE [dbo].[prc_OnmOdemePlaniTahsilatiIsle] @curId
+      end 
       
-	  
+	  if (@TipiId = 2) and -- Tahsilat
+		 (@AHesapTipiId >= 21100) and -- Mtskİşlemleri
+	     (@IsIptal = 1)  
+      begin
+          Update dbo.OnmBelgeDekont set IsActive = 0
+          Where Id = @curId 
+
+	      EXECUTE [dbo].[prc_OnmOdemePlaniTahsilatiIptalEt] @curId
+      end 
+
+	  -- Kullanıcı iptali pasif hale getirmeye çalışırsa
+
+	  if (@eIsIptal = 1) and (@IsIptal = 0)
+	  begin
+          Update dbo.OnmBelgeDekont set 
+		      IsActive = 0
+            , IsIptal = 1  
+          Where Id = @curId 
+	  end
 
       set @Yil = convert(varchar(4), YEAR(@BelgeTarihi))
       set @Ay = convert(varchar(2), MONTH(@BelgeTarihi)) 		
@@ -333,86 +299,7 @@ AS BEGIN
 	  if (@TipiId = 2) and -- Tahsilat
 	     (@AHesapTipiId >= 21100) -- Mtskİşlemleri
       begin
-	      -- iki türlü taksit satırı mevcut
-		  -- 1. esas TaksitTutari : kullanıcının oluşturduğu
-		  -- 2. eksik tahsilatlardan dolayı sonradan türetilmiş ve PatchBelgeDekontId ile kaynağı belirtilmiş eksik TaksitTutari
-		  -- yani 
-		  -- BelgeDekontId      : taksidi kapatan tahsilat dekontun Id si 
-	      -- PatchBelgeDekontId : taksidin tamamı kapatılmadıysa kalan tutarın yeni taksit oluşmasına sebep olan tahsilat dekont Id (bu sadece borçlandırıyor)
-
-		  -- EsasTaksitTutari  : EsTT
-		  -- EksikTaksitTutari : EkTT
-
-		  -- işlem1 : EsTT tamamı tahsil edildi
-		  -- işlem2 : EsTT eksik tahsil edildi, EkTT üretildi
-		  -- işlem3 : EkTT tamamı tahsil edildi
-		  -- işlem4 : EkTT tahsil edilmedi 
-		  -- işlem5 : EkTT tamamı tahsil edildi 
-		  -- işlem6 : EkTT eksik tahsil edildi, yeni EkTT2 üretildi
-		  -- işlem7 : EkTT2 üretildikten sonra EkTT gibi tekrarlamakta
-
-		  -- esas taksidin tahsilatını iptal et
-		  -- işlem1
-		  Update dbo.OnmOdemePlani set
-		    IsPaid = 0
-          , BelgeDekontId = 0
-		  , TahsilTarihi = null
-		  Where BelgeDekontId = @curId
-		  and   isnull(YedekTaksitTutari,0) = 0
-		  and   isnull(PatchBelgeDekontId,0) = 0
-		  and   IsPaid = 1
-	      
-	      -- esas taksit tutarı eksik tahsil edilmiş 
-		  -- işlem2
-		  Update dbo.OnmOdemePlani set
-		    TaksitTutari = YedekTaksitTutari
-          , YedekTaksitTutari = null
-		  , IsPaid = 0
-          , BelgeDekontId = 0
-		  , TahsilTarihi = null
-		  Where BelgeDekontId = @curId
-		  and   isnull(YedekTaksitTutari,0) > 0
-		  and   isnull(PatchBelgeDekontId,0) = 0
-		  and   IsPaid = 1
-
-          -- eksik taksit üretilmiş ve oda başka bir tahsilat makbuzu ile tahsil edilmiş ise
-		  -- işlem3
-		  Update dbo.OnmOdemePlani set
-            PatchBelgeDekontId = null
-          Where PatchBelgeDekontId = @curId
-          and   BelgeDekontId > 0
-		  and   IsPaid = 1
-		  
-		  -- eksik taksit üretilmiş ve tahsil edilmemiş ise
-		  -- işlem4 ve işlem6 için
-          Delete from dbo.OnmOdemePlani 
-          Where PatchBelgeDekontId = @curId
-		  and   IsPaid = 0
-
-		  -- eksik taksidin tamamını tahsilmiş ise
-		  -- işlem5
-		  Update dbo.OnmOdemePlani set
-		    IsPaid = 0
-          , BelgeDekontId = 0
-		  , TahsilTarihi = null
-		  Where BelgeDekontId = @curId
-		  and   isnull(YedekTaksitTutari,0) = 0
-		  and   isnull(PatchBelgeDekontId,0) > 0
-		  and   IsPaid = 1
-
-		  -- kendisi eksik taksit zaten, ve yine eksik tahsil edilmiş ise
-		  -- işlem6
-		  Update dbo.OnmOdemePlani set
-		    TaksitTutari = YedekTaksitTutari
-          , YedekTaksitTutari = null
-		  , IsPaid = 0
-          , BelgeDekontId = 0
-		  , TahsilTarihi = null
-		  Where BelgeDekontId = @curId
-		  and   isnull(YedekTaksitTutari,0) > 0
-		  and   isnull(PatchBelgeDekontId,0) > 0
-		  and   IsPaid = 1
-		  		   
+	      EXECUTE [dbo].[prc_OnmOdemePlaniTahsilatiIptalEt] @curId
       end -- if (@TipiId = 2)
 
       FETCH NEXT FROM cursor_BDekontDlt INTO @curId
@@ -425,6 +312,7 @@ AS BEGIN
 	--EXECUTE [dbo].[prc_OnmToplamBekleyenGelirler] @FirmId
 
 END
+
 
  /*CreateTriggerEnd*/
 
@@ -812,8 +700,13 @@ delete from [Lkp].[OnmBelgeDekontSourceType]
 INSERT INTO [Lkp].[OnmBelgeDekontSourceType] (Id, SourceType)
  VALUES 
   ( 0,   N'Tanımsız'),
-  ( 1,   N'OnmBelgeMaliyet'),
-  ( 2,   N'OnmOdemePlani'),
+
+--  ( 1,   N'OnmBelgeMaliyet'),
+--  ( 2,   N'OnmOdemePlani'),
+  ( 1,   N'OnmBelgeDekont - Kendisi'), -- kaynak kendisi
+  ( 2,   N'OnmBelgeMaliyet'),
+  ( 3,   N'OnmOdemePlani'),
+
   ( 201, N'UstadMtsk'),
   ( 202, N'UstadIsmak'),
   ( 203, N'UstadSrc'),

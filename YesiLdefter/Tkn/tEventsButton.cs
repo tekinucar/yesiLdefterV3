@@ -53,9 +53,9 @@ namespace Tkn_Events
             // kullanıcının seçtiği esas button
             v.tButtonType mainButtonType = buttonHint.buttonType;
 
-            if ((mainButtonType == v.tButtonType.btYeniHesapSatir) ||
-                (mainButtonType == v.tButtonType.btYeniBelgeSatir) ||
-                (mainButtonType == v.tButtonType.btYeniAltHesapSatir)) mainButtonType = v.tButtonType.btYeniKartSatir;
+            //if ((mainButtonType == v.tButtonType.btYeniHesapSatir) ||
+            //    (mainButtonType == v.tButtonType.btYeniBelgeSatir) ||
+            //    (mainButtonType == v.tButtonType.btYeniAltHesapSatir)) mainButtonType = v.tButtonType.btYeniKartSatir;
 
             if (mainButtonType == v.tButtonType.btNoneButton)
                 birOncekiOnay = true;

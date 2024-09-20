@@ -70,9 +70,9 @@ namespace YesiLdefter
         }
         private void mainForm_Shown(object sender, EventArgs e)
         {
-            v.Kullaniciya_Mesaj_Var = "YolHaritasi";
-            timer_Mesaj_Suresini_Bitir.Interval = 500;
-            v.timer_Kullaniciya_Mesaj_Var_.Start();
+            //v.Kullaniciya_Mesaj_Var = "YolHaritasi";
+            //timer_Mesaj_Suresini_Bitir.Interval = 500;
+            //v.timer_Kullaniciya_Mesaj_Var_.Start();
         }
         public main(string[] args)
         {
@@ -155,8 +155,12 @@ namespace YesiLdefter
 
             #endregion
 
+            v.Kullaniciya_Mesaj_Var = "YolHaritasi";
+            timer_Mesaj_Suresini_Bitir.Interval = 500;
+            v.timer_Kullaniciya_Mesaj_Var_.Start();
+
             #region UserLOGIN
-            
+
             if (v.SP_UserLOGIN)
             {
                 // application set skins
@@ -282,11 +286,12 @@ namespace YesiLdefter
 
         void YolHaritasi()
         {
-            /// Ön Muhasebe için başlangıç işlemleri
+            // Ön Muhasebe için başlangıç işlemleri
             if (v.SP_Firm_SectorTypeId == (Int16)v.msSectorType.OnMuhasebe) autoOpenForm("UST/OMS/FNS/MALIISLEM");
             //autoOpenForm("UST/OMS/AYR/YHBaslangic");
-            if ((v.SP_Firm_SectorTypeId == (Int16)v.msSectorType.UstadMtsk) ||
-                (v.SP_Firm_SectorTypeId == (Int16)v.msSectorType.TabimMtsk))
+            if ((v.SP_TabimParamsKurumTipi == "") &&
+                ((v.SP_Firm_SectorTypeId == (Int16)v.msSectorType.UstadMtsk) ||
+                (v.SP_Firm_SectorTypeId == (Int16)v.msSectorType.TabimMtsk)))
                 autoOpenForm("UST/MEB/MTS/YHBaslangic");
         }
 

@@ -202,19 +202,40 @@ namespace Tkn_Events
             int colCount = dsData.Tables[0].Columns.Count;
 
             string fieldName = "";
+            string orjValue = "";
+            //string curValue = "";
+            string value = "";
+
+            int count = dsData.Tables[0].Rows.Count;
+            if (position > count) position = count - 1;
+
             DataRow row = dsData.Tables[0].Rows[position];
 
             for (int i = 0; i < colCount; i++)
             {
                 fieldName = dsData.Tables[0].Columns[i].ColumnName;
+                try
+                {
+                    orjValue = row[fieldName, DataRowVersion.Original].ToString();
+                    //curValue = row[fieldName, DataRowVersion.Current].ToString();
+                    value = row[fieldName].ToString();
+                }
+                catch (Exception)
+                {
+                    break;
+                    //throw;
+                }
+
+                //if (!row[fieldName, DataRowVersion.Original].Equals(row[fieldName, DataRowVersion.Current]))
                 
-                if (!row[fieldName, DataRowVersion.Original].Equals(row[fieldName, DataRowVersion.Current]))
+                if (!orjValue.Equals(value))
                 {
                     //string oldValue = row[fieldName, DataRowVersion.Original].ToString();
                     //string newValue = row[fieldName, DataRowVersion.Current].ToString();
                     state = DataRowState.Modified;
                     break;
                 }
+
             }
 
             return state;
@@ -7809,8 +7830,13 @@ namespace Tkn_Events
 
                                 Sql = Sql.Insert(i_bgn, new_And);
 
-                                f_bgn = Sql.IndexOf(str_bgn, i_bgn + new_And.Length);
-                                f_end = Sql.IndexOf(str_end, i_end + 2);// new_And.Length);
+                                //f_bgn = Sql.IndexOf(str_bgn, i_bgn + new_And.Length);
+                                //f_end = Sql.IndexOf(str_end, i_end + 2);// new_And.Length);
+                                //int f_bgn_test = Sql.IndexOf(str_bgn, i_bgn + 2);
+                                //int f_end_test = Sql.IndexOf(str_end, f_bgn_test + 2);
+                                f_bgn = Sql.IndexOf(str_bgn, i_bgn + 2);
+                                f_end = Sql.IndexOf(str_end, f_bgn + 2);
+                                if (f_bgn == -1) f_end = -1;
 
                                 if ((f_bgn > 0) && (f_end > 0))
                                 {

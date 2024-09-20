@@ -31,6 +31,7 @@ namespace Tkn_Forms
                 tForm.Name = "ms_Reports";
             }
             if (FormName == "ms_ReportDesign") tForm = new YesiLdefter.ms_ReportDesign();
+            if (FormName == "ms_FastReport") tForm = new YesiLdefter.ms_FastReport();
             if (FormName == "ms_ProjectTables") tForm = new YesiLdefter.ms_ProjectTables();
             if (FormName == "ms_FileUpdates") tForm = new YesiLdefter.ms_FileUpdates();
 

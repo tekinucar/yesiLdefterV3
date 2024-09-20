@@ -114,6 +114,9 @@
     <Reference Include="DevExpress.XtraTreeList.v19.2, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
     <Reference Include="DevExpress.XtraVerticalGrid.v19.2, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
     <Reference Include="DevExpress.XtraWizard.v19.2, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="FastReport">
+      <HintPath>..\..\..\..\FastReport.Net\FastReport.dll</HintPath>
+    </Reference>
     <Reference Include="Google.Protobuf, Version=3.6.1.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604, processorArchitecture=MSIL">
       <HintPath>..\packages\Google.Protobuf.3.6.1\lib\net45\Google.Protobuf.dll</HintPath>
     </Reference>
@@ -541,6 +544,7 @@
     <Content Include="Scripts\UST\MsV3\prc_EduMtskSoruKitabiDetayiSiraNo.txt" />
     <Content Include="Scripts\UST\MsV3\prc_EduMtskYonetmelikTreeList.txt" />
     <Content Include="Scripts\UST\MsV3\prc_GetTableModel.txt" />
+    <Content Include="Scripts\UST\MsV3\prc_MsReportsList.txt" />
     <Content Include="Scripts\UST\MsV3\tempEduUsersList.txt" />
     <Content Include="Scripts\UST\Mtsk\FileUpdates.txt" />
     <Content Include="Scripts\UST\Mtsk\fnc_getSertifikaId.txt" />
@@ -579,6 +583,7 @@
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmOdemePlaniIadeIsle.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmOdemePlaniOlustur.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmHesapFinansDefaultMaliyetGruplari.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmOdemePlaniTahsilatiIptalEt.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmOdemePlaniTahsilatiIsle.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\dokumanKategoriler.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\prc_OnmBelgeDekontOzetler.txt" />
@@ -4449,6 +4454,9 @@
       <IncludeHash>True</IncludeHash>
       <FileType>File</FileType>
     </PublishFile>
+  </ItemGroup>
+  <ItemGroup>
+    <Analyzer Include="..\..\..\..\FastReport.Net\FastReport.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
