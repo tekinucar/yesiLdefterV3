@@ -599,21 +599,81 @@ begin transaction
  insert into MS_TYPES values ( 1, 0, 'FONT_STYLE',  4, '', 'Strikeout');
  insert into MS_TYPES values ( 1, 0, 'FONT_STYLE',  5, '', 'Underline');
 
- insert into MS_TYPES values ( 1, 0, 'CLICK_EVENTS',  0, '', 'None');
- insert into MS_TYPES values ( 1, 0, 'CLICK_EVENTS',  1, '', 'FEXIT');
- insert into MS_TYPES values ( 1, 0, 'CLICK_EVENTS',  2, '', 'FSAVE');
- insert into MS_TYPES values ( 1, 0, 'CLICK_EVENTS',  3, '', 'FSAVENEW');
- insert into MS_TYPES values ( 1, 0, 'CLICK_EVENTS',  4, '', 'FSAVEXIT');
- insert into MS_TYPES values ( 1, 0, 'CLICK_EVENTS',  5, '', 'FNEW_IP');
- insert into MS_TYPES values ( 1, 0, 'CLICK_EVENTS',  6, '', 'FOPEN_IP');
 
- insert into MS_TYPES values ( 1, 0, 'CLICK_EVENTS',  7, '', 'APPEXIT');
- insert into MS_TYPES values ( 1, 0, 'CLICK_EVENTS',  8, '', 'REPORTVIEW');
- insert into MS_TYPES values ( 1, 0, 'CLICK_EVENTS',  9, '', 'SMS_SEND');
- insert into MS_TYPES values ( 1, 0, 'CLICK_EVENTS', 10, '', 'SMS_SETUP');
- insert into MS_TYPES values ( 1, 0, 'CLICK_EVENTS', 11, '', 'TBOX_MAIN');
- insert into MS_TYPES values ( 1, 0, 'CLICK_EVENTS', 12, '', 'TBOX_GROUP');
- insert into MS_TYPES values ( 1, 0, 'CLICK_EVENTS', 13, '', 'FOPEN_SUBVIEW');
+--DELETE MS_TYPES WHERE TYPES_NAME = 'CLICK_EVENTS'
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS',   0, '', 'None');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS',   1, '', 'FEXIT');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 202, '', 'FSAVE');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 203, '', 'FSAVENEW');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 204, '', 'FSAVEXIT');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 205, '', 'FNEW_IP');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 206, '', 'FOPEN_IP');
+
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 207, '', 'APPEXIT');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 208, '', 'REPORTVIEW');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 209, '', 'SMS_SEND');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 210, '', 'SMS_SETUP');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 211, '', 'TBOX_MAIN');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 212, '', 'TBOX_GROUP');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 213, '', 'FOPEN_SUBVIEW');
+ 
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1020, '', '---------------------');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1012, '', 'SeçÇýk');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1013, '', 'ListeyeEkle');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1014, '', 'ListeHazirla');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1015, '', 'Listele');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1020, '', '---------------------');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1021, '', 'Kaydet Yeni');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1022, '', 'Kaydet'); 
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1023, '', 'Kaydet Devam');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1024, '', 'Kaydet Çýk');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1031, '', 'Yeni Kart (Form)');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1032, '', 'Yeni Hesap (Form)');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1033, '', 'Yeni Belge (Form)');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1034, '', 'Yeni Alt Hesap (Form)');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1036, '', 'Yeni Kart (Satýr)');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1037, '', 'Yeni Hesap (Satýr)');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1038, '', 'Yeni Belge (Satýr)');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1039, '', 'Yeni Alt Hesap (Satýr)');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1041, '', 'Göster');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1042, '', 'Kartý Aç');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1043, '', 'Hesabý Aç');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1044, '', 'Belgeyi Aç');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1045, '', 'Resim Editörü');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1046, '', 'Rapor Dizayný');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1051, '', 'Sil (Satýr)');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1052, '', 'Sil (Kart)');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1053, '', 'Sil (Hesap)');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1054, '', 'Sil (Belge)');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1055, '', 'Sil (Liste)');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1060, '', '---------------------');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1061, '', 'En Sona');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1062, '', 'Sonraki Syf');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1063, '', 'Sonraki');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1064, '', 'Kayýt Adedi');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1065, '', 'Önceki');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1066, '', 'Önceki Syf');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1067, '', 'En Baþa');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1068, '', 'SihirbazDevam');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1069, '', 'SihirbazGeri');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1070, '', '---------------------');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1071, '', 'Grup Aç/Kapa');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1073, '', 'Onay Ekle/Kaldýr');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1081, '', 'Yazýcý');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1090, '', '---------------------');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1091, '', 'Ek Button 1');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1092, '', 'Ek Button 2');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1093, '', 'Ek Button 3');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1094, '', 'Ek Button 4');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1095, '', 'Ek Button 5');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1096, '', 'Ek Button 6');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1097, '', 'Ek Button 7');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1101, '', 'Check Button 1'); --checkButton_ek1
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1111, '', 'DragDown Button 1'); --dragDownButton_ek1
+
+
+
+
 
 
  insert into MS_TYPES values ( 1, 0, 'LINE_TYPE',  0, '', 'None');

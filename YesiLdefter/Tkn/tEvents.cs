@@ -421,6 +421,27 @@ namespace Tkn_Events
             return propButtonType;
         }
 
+        public v.tButtonType getButtonNameClickType(string buttonName)
+        {
+            int value = 0;
+
+            int i1 = buttonName.IndexOf("simpleButton_") + 13;
+            string values = buttonName.Remove(0, i1);
+            try
+            {
+                value = Convert.ToInt32(values);
+                value = value - 1000;
+            }
+            catch (Exception)
+            {
+                value = 0;
+                //throw;
+            }
+
+            return getClickType(value);
+        }
+
+
         public v.tButtonType getClickType(int value)
         {
             if (value == 0) return v.tButtonType.btNone;

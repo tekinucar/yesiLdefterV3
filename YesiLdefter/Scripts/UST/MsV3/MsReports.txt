@@ -36,6 +36,54 @@ begin transaction
 
 commit transaction
 
+
+-- ------------------------------------------------------- 
+-- RecordTypeId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MsReportsRecordType')
+drop table [Lkp].[MsRepotsRecordType]
+
+create table [Lkp].[MsReportsRecordType]
+(
+   Id               Int Unique not null, 
+   RecordType       nVarchar(50)   null,
+   
+   constraint  pk_MsReportsRecordType primary key (Id)
+)
+
+Delete from [Lkp].[MsReportsRecordType]
+INSERT INTO [Lkp].[MsReportsRecordType] (Id, RecordType)
+ VALUES 
+  ( 0,    N'Seçiniz'),
+  ( 1,    N'Group name'),
+  ( 2,    N'Report name')
+  
+
+-- ------------------------------------------------------- 
+-- ReportTypeId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MsReportsReportType')
+drop table [Lkp].[MsRepotsReportType]
+
+create table [Lkp].[MsReportsReportType]
+(
+   Id               Int Unique not null, 
+   ReportType       nVarchar(50)   null,
+   
+   constraint  pk_MsReportsReportType primary key (Id)
+)
+
+Delete from [Lkp].[MsReportsReportType]
+INSERT INTO [Lkp].[MsReportsReportType] (Id, ReportType)
+ VALUES 
+  ( 0,    N'Seçiniz'),
+  ( 1,    N'List type report'),
+  ( 2,    N'Single record report'),
+  ( 3,    N'Form desing report')
+
+
+
+
 /*
 
 TableIPCode : ?
@@ -77,7 +125,7 @@ Master-Detail ?????
 USE [MainManagerV3]
 GO
 
-delete from [dbo].[MsReports]
+delete from [dbo].[MsReports] Where RecordTypeId = 1
 INSERT INTO [dbo].[MsReports]
            ([IsActive],[LineNumber],[ReportCode],[ParentCode],[ReportName],[About],[TableIPCode],[RecordTypeId],[ReportTypeId],[PrivateTypeId],[SoftwareCode],[ProjectCode],[ModulCode],[ReportTemp])
      VALUES
@@ -85,6 +133,10 @@ INSERT INTO [dbo].[MsReports]
            ( 1        , 0         , 'MLI'       , ''         , 'Mali işlemler'   , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
            ( 1        , 0         , 'DNM'       , ''         , 'Dönem işlemler'  , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
            ( 1        , 0         , 'IDA'       , ''         , 'İdari işlemler'  , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+
+
+           ( 1        , 0         , 'KRM.PERS'  , 'KRM'      , 'Personel raporları' , null  , ''       , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'KRM.ARAC'  , 'KRM'      , 'Taşıt raporları'    , null  , ''       , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
 
 
            ( 1        , 0         , 'DNM.TAKP'  , 'DNM'      , 'Takip raporları'                 , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),

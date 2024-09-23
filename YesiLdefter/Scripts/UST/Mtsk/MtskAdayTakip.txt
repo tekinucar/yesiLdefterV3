@@ -153,7 +153,7 @@ create table [Lkp].[MtskAdayTakipKayitTipi]
    KonuId           Int            null,
    KonuCaption      nVarchar(20)   null,
    ChartCaption     nVarchar(20)   null,
-   FormCaption      nVarchar(15)   null,
+   FormCaption      nVarchar(30)   null,
 
    constraint  pk_MtskAdayTakipKayitTipi primary key (Id)
 )
@@ -162,7 +162,7 @@ Delete from [Lkp].[MtskAdayTakipKayitTipi]
 INSERT INTO [Lkp].[MtskAdayTakipKayitTipi] (Id, KayitTipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption)
  VALUES 
   ( 1,    N'Ön kayıt',          1, 1121, 'Kayıt durumu',  'Ön kayıt',     'Yeni Aday' ),
-  ( 2,    N'Kayıt aşamasında',  1, 1122, 'Kayıt durumu',  'K.Aşamasında', 'Mebbise bağlan' ),
+  ( 2,    N'Kayıt aşamasında',  1, 1122, 'Kayıt durumu',  'K.Aşamasında', 'Mebbis"e bağlan .' ),
   ( 3,    N'Kesin kayıt',       1, 1123, 'Kayıt durumu',  'Kesin kay.', '' )
 
 
@@ -237,7 +237,7 @@ create table [Lkp].[MtskAdayTakipMebbisOnayiTipi]
    KonuId            Int            null,
    KonuCaption       nVarchar(20)   null,
    ChartCaption      nVarchar(20)   null,
-   FormCaption       nVarchar(15)   null,
+   FormCaption       nVarchar(30)   null,
    
    constraint  pk_MtskAdayTakipMebbisOnayiTipi primary key (Id)
 )
@@ -245,7 +245,7 @@ create table [Lkp].[MtskAdayTakipMebbisOnayiTipi]
 Delete from [Lkp].[MtskAdayTakipMebbisOnayiTipi]
 INSERT INTO [Lkp].[MtskAdayTakipMebbisOnayiTipi] (Id, MebbisOnayiTipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption)
  VALUES 
-  ( 0,  N'Onaysız',        1, 1161, 'Mebbis kurum onayı',  '', 'Mebbis"e bağlan' ),
+  ( 0,  N'Onaysız',        1, 1161, 'Mebbis kurum onayı',  '', 'Mebbis"e bağlan ..' ),
   ( 1,  N'Onaylandı',      1, 1162, 'Mebbis kurum onayı',  '', '' )
 
 
@@ -369,7 +369,7 @@ create table [Lkp].[MtskAdayTakipBelgelerTipi]
    KonuId            Int            null,
    KonuCaption       nVarchar(20)   null,
    ChartCaption      nVarchar(20)   null,
-   FormCaption       nVarchar(15)   null,
+   FormCaption       nVarchar(30)   null,
    
    constraint  pk_MtskAdayTakipBelgelerTipi primary key (Id)
 )
@@ -384,7 +384,7 @@ INSERT INTO [Lkp].[MtskAdayTakipBelgelerTipi] (Id, BelgelerTipi, KonuGrupId, Kon
  VALUES 
   ( 1,  N'Belgeleri eksik olanlar',         1, 1231, 'Belgeler',  '', '' ),
   ( 2,  N'Belgeleri taranmayan',            1, 1232, 'Belgeler',  '', '' ),
-  ( 3,  N'Belgeleri Mebbis"e yüklenmeyen',  1, 1233, 'Belgeler',  '', '' )
+  ( 3,  N'Belgeleri Mebbis"e yüklenmeyen',  1, 1233, 'Belgeler',  '', 'Mebbis"e bağlan ...' )
 
 
 

@@ -1647,7 +1647,7 @@ namespace Tkn_Menu
                     if (t.IsNotNull(CmpName))
                         tItem.Name = CmpName;
                     tItem.Caption = itemCaption;
-
+                    
                     // itemCaption = Belge Türü Seçin
                     if (t.IsNotNull(shortcut_keys))
                     {
@@ -1694,7 +1694,9 @@ namespace Tkn_Menu
                         tItem.Alignment = NavButtonAlignment.Right;
 
                     if (clickEvents > 0)
+                    {
                         tItem.ElementClick += new DevExpress.XtraBars.Navigation.NavElementClickEventHandler(evm.tNavButton_ElementClick);
+                    }
 
                     #region Image set
                     if (!DBNull.Value.Equals(ds_Items.Tables[0].Rows[i]["LKP_GLYPH16"]))
@@ -1774,7 +1776,9 @@ namespace Tkn_Menu
                             tItem.AppearanceSelected.Options.UseBackColor = true;
 
                             if (clickEvents > 0)
+                            {
                                 tItem.ElementClick += new DevExpress.XtraBars.Navigation.NavElementClickEventHandler(evm.tNavButton_ElementClick);
+                            }
 
                             #region Image set
                             if (!DBNull.Value.Equals(ds_Items.Tables[0].Rows[i]["LKP_GLYPH16"]))
@@ -1828,7 +1832,9 @@ namespace Tkn_Menu
 
                             tItem.Enabled = tenabled;
                             tItem.Visible = tvisible;
-                            tItem.Tag = Prop_Navigator;
+                            //tItem.Tag = Prop_Navigator;
+                            if (t.IsNotNull(Prop_Navigator))
+                                tItem.Tag = Prop_Navigator + "|Prop_Navigator|";
 
                             tItem.Appearance.BackColor = v.colorNew;
                             tItem.AppearanceHovered.BackColor = v.colorFocus;
@@ -1838,7 +1844,9 @@ namespace Tkn_Menu
                             tItem.AppearanceSelected.Options.UseBackColor = true;
 
                             if (clickEvents > 0)
+                            {
                                 tItem.ElementClick += new DevExpress.XtraBars.Navigation.NavElementClickEventHandler(evm.tNavButton_ElementClick);
+                            }
 
                             #region Image set
                             if (!DBNull.Value.Equals(ds_Items.Tables[0].Rows[i]["LKP_GLYPH16"]))
@@ -1884,8 +1892,6 @@ namespace Tkn_Menu
                             }
                         }
                     }
-
-
                 }
                 #endregion / TileNavItem
 
@@ -3200,23 +3206,8 @@ namespace Tkn_Menu
             if (clickEvents == 21) buttonName = buttonName + "_" + "YILAY_BACK";
             if (clickEvents == 22) buttonName = buttonName + "_" + "YILAY_NEXT";
 
-            //if (clickEvents == 1) buttonName = buttonName + "_" + "FEXIT";
-
-            /*
-            insert into MS_TYPES values ( 1, 0, 'CLICK_EVENTS',  1, '', 'FEXIT');
-            insert into MS_TYPES values ( 1, 0, 'CLICK_EVENTS',  2, '', 'FSAVE');
-            insert into MS_TYPES values ( 1, 0, 'CLICK_EVENTS',  3, '', 'FSAVENEW');
-            insert into MS_TYPES values ( 1, 0, 'CLICK_EVENTS',  4, '', 'FSAVEXIT');
-            insert into MS_TYPES values ( 1, 0, 'CLICK_EVENTS',  5, '', 'FNEW_IP');
-            insert into MS_TYPES values ( 1, 0, 'CLICK_EVENTS',  6, '', 'FOPEN_IP');
-            insert into MS_TYPES values ( 1, 0, 'CLICK_EVENTS',  7, '', 'APPEXIT');
-            insert into MS_TYPES values ( 1, 0, 'CLICK_EVENTS',  8, '', 'REPORTVIEW');
-            insert into MS_TYPES values ( 1, 0, 'CLICK_EVENTS',  9, '', 'SMS_SEND');
-            insert into MS_TYPES values ( 1, 0, 'CLICK_EVENTS', 10, '', 'SMS_SETUP');
-            insert into MS_TYPES values ( 1, 0, 'CLICK_EVENTS', 11, '', 'TBOX_MAIN');
-            insert into MS_TYPES values ( 1, 0, 'CLICK_EVENTS', 12, '', 'TBOX_GROUP');
-            insert into MS_TYPES values ( 1, 0, 'CLICK_EVENTS', 13, '', 'FOPEN_SUBVIEW');
-            */
+            if (clickEvents > 1000)
+                buttonName = buttonName + "_" + "simpleButton_" + clickEvents;
         }
 
         private void toolBox_Preparing(

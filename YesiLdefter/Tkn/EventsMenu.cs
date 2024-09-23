@@ -512,6 +512,12 @@ namespace Tkn_Events
             }
             #endregion YILAYBACK - NEXT
 
+            if (ButtonName.IndexOf("simpleButton") > 0) 
+            {
+                buttonType = ev.getButtonNameClickType(ButtonName);
+            }
+
+
             if ((onay) &&
                 (buttonType != v.tButtonType.btNone))
             {
