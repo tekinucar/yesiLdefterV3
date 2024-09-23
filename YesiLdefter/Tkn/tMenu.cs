@@ -75,7 +75,7 @@ namespace Tkn_Menu
             if (ItemType == 104) Create_TileBar((DevExpress.XtraBars.Navigation.TileBar)menuControl, ds_Items);
             if (ItemType == 105) Create_TileControl((DevExpress.XtraEditors.TileControl)menuControl, ds_Items);
             //--- Genelde Kullanılan Menü Tipi
-            if (ItemType == 106) Create_TileNavPane((DevExpress.XtraBars.Navigation.TileNavPane)menuControl, ds_Items, fieldName, dontReport, dontEDI);
+            if (ItemType == 106) Create_TileNavPane((DevExpress.XtraBars.Navigation.TileNavPane)menuControl, ds_Items, fieldName, dontReport, dontEDI, reportTableIPCode);
             if (ItemType == 107) Create_NavigationPane((DevExpress.XtraBars.Navigation.NavigationPane)menuControl, ds_Items);
             if (ItemType == 108) Create_AccordionControl((DevExpress.XtraBars.Navigation.AccordionControl)menuControl, ds_Items);
             if (ItemType == 109) Create_ToolBoxControl((DevExpress.XtraToolbox.ToolboxControl)menuControl, ds_Items);
@@ -394,7 +394,7 @@ namespace Tkn_Menu
                 if (DockType == v.dock_Top) menuControl.Dock = DockStyle.Top;
 
                 // ExtraValue = "FIRM||" + TABLEIPCODE2 + "|ds|"
-                Create_TileNavPane(menuControl, ds_Items, ExtraValue, dontReport, dontEDI);
+                Create_TileNavPane(menuControl, ds_Items, ExtraValue, dontReport, dontEDI, reportTableIPCode);
             }
             #endregion
 
@@ -1508,7 +1508,7 @@ namespace Tkn_Menu
         #region Create_TileNavPane    << --- Genelde Kullanılan Menü Tipi
 
         public void Create_TileNavPane(DevExpress.XtraBars.Navigation.TileNavPane mControl, 
-            DataSet ds_Items, string fieldName, bool dontReport, bool dontEDI)
+            DataSet ds_Items, string fieldName, bool dontReport, bool dontEDI, string reportTableIPCode)
         {
             tToolBox t = new tToolBox();
             tEvents ev = new tEvents();
@@ -1675,7 +1675,8 @@ namespace Tkn_Menu
                     tItem.Enabled = tenabled;
                     tItem.Visible = tvisible;
                     if (t.IsNotNull(Prop_Navigator))
-                        tItem.Tag = Prop_Navigator;
+                        tItem.Tag = Prop_Navigator + "|Prop_Navigator|";
+                    
                     //tItem.
                     //tItem.Appearance.BackColor = v.colorNew;
                     //tItem.AppearanceHovered.BackColor = v.colorFocus;
@@ -1761,7 +1762,9 @@ namespace Tkn_Menu
 
                             tItem.Enabled = tenabled;
                             tItem.Visible = tvisible;
-                            tItem.Tag = Prop_Navigator;
+                            //tItem.Tag = Prop_Navigator;
+                            if (t.IsNotNull(Prop_Navigator))
+                                tItem.Tag = Prop_Navigator + "|Prop_Navigator|";
 
                             tItem.Appearance.BackColor = v.colorNew;
                             tItem.AppearanceHovered.BackColor = v.colorFocus;
@@ -1952,17 +1955,7 @@ namespace Tkn_Menu
                     tItem.Enabled = tenabled;
                     tItem.Visible = tvisible;
                     if (t.IsNotNull(Prop_Navigator))
-                        tItem.Tag = Prop_Navigator;
-                    //tItem.
-                    //tItem.Appearance.BackColor = v.colorNew;
-                    //tItem.AppearanceHovered.BackColor = v.colorFocus;
-                    //tItem.AppearanceHovered.ForeColor = v.AppearanceFocusedTextColor;
-                    //tItem.AppearanceSelected.BackColor = v.colorSave;
-                    //tItem.Appearance.Options.UseBackColor = true;
-                    //tItem.AppearanceHovered.Options.UseBackColor = true;
-                    //tItem.AppearanceHovered.Options.UseForeColor = true;
-                    //tItem.AppearanceSelected.Options.UseBackColor = true;
-
+                        tItem.Tag = Prop_Navigator + "|Prop_Navigator|";
 
                     if ((DockType == v.dock_None) | (DockType == v.dock_Left))
                         tItem.Alignment = NavButtonAlignment.Left;
@@ -2050,6 +2043,10 @@ namespace Tkn_Menu
                 //tItemEDI.Appearance.Options.UseBackColor = true;
                 tItemReport.AppearanceHovered.Options.UseBackColor = true;
                 tItemReport.AppearanceSelected.Options.UseBackColor = true;
+
+                // Rapor formu açılınca hangi raporları select edeceği bilgisini taşıyan TableIPCode 
+                tItemReport.Tag = reportTableIPCode + "|TableIPCode|";
+
                 mControl.Buttons.Add(tItemReport);
             }
             #endregion Report            

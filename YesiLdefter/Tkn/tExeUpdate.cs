@@ -193,7 +193,7 @@ namespace Tkn_ExeUpdate
 
                 onay = true;
             }
-            catch (Exception e1)
+            catch //(Exception e1)
             {
                 //MessageBox.Show("Hata : Dosya isimleri değiştirilirken problem oluştu ..." + v.ENTER2 + e1.Message);
                 //throw;

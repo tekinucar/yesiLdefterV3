@@ -6466,7 +6466,7 @@ namespace Tkn_Events
                     {
                         readValue2 = dsData.Tables[0].Rows[tDataNavigator.Position][subViewKeyFName2].ToString();
                     }
-                    catch (Exception e)
+                    catch //(Exception e)
                     {
                         //MessageBox.Show(e.Message.ToString());
                     }

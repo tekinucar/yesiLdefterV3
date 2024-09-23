@@ -64,11 +64,11 @@ namespace Tkn_Layout
             short MasterLayoutType = 0;
             string LayoutType = string.Empty;
             string visible = string.Empty;
-            // sf : SetFocus
+            
             string setfocus_TableIPCode = string.Empty;
             string setfocus_FieldName = string.Empty;
             string setfocus_CmpName = string.Empty;
-            string setfocus_FormName = string.Empty;
+            //string setfocus_FormName = string.Empty;
 
             bool dockPanel = false;
 
@@ -104,40 +104,59 @@ namespace Tkn_Layout
                     }
                     if (LayoutType == v.lyt_tableLayoutPanel) 
                         ltableLayoutPanel_Preparing(tForm, subView, ds_Layout, row, pos);
-                    if (LayoutType == v.lyt_splitContainer) lSplitContainer_Preparing(tForm, subView, ds_Layout, row, pos);
+                    if (LayoutType == v.lyt_splitContainer) 
+                        lSplitContainer_Preparing(tForm, subView, ds_Layout, row, pos);
                     if (LayoutType == v.lyt_groupControl)
                         lGroupControl_Preparing(tForm, subView, ds_Layout, row, pos);
-                    if (LayoutType == v.lyt_panelControl) lPanelControl_Preparing(tForm, subView, ds_Layout, row, pos);
+                    if (LayoutType == v.lyt_panelControl) 
+                        lPanelControl_Preparing(tForm, subView, ds_Layout, row, pos);
 
-                    if (LayoutType == v.lyt_tabPane) lTabPane_Preparing(tForm, subView, ds_Layout, row, pos);
-                    if (LayoutType == v.lyt_tabNavigationPage) lTabNavigationPage_Preparing(tForm, ds_Layout, row, pos);
+                    if (LayoutType == v.lyt_tabPane) 
+                        lTabPane_Preparing(tForm, subView, ds_Layout, row, pos);
+                    if (LayoutType == v.lyt_tabNavigationPage) 
+                        lTabNavigationPage_Preparing(tForm, ds_Layout, row, pos);
 
-                    if (LayoutType == v.lyt_navigationPane) lNavigationPane_Preparing(tForm, subView, ds_Layout, row, pos);
-                    if (LayoutType == v.lyt_navigationPage) lNavigationPage_Preparing(tForm, ds_Layout, row, pos);
+                    if (LayoutType == v.lyt_navigationPane) 
+                        lNavigationPane_Preparing(tForm, subView, ds_Layout, row, pos);
+                    if (LayoutType == v.lyt_navigationPage) 
+                        lNavigationPage_Preparing(tForm, ds_Layout, row, pos);
 
-                    if (LayoutType == v.lyt_tabControl) lTabControl_Preparing(tForm, subView, ds_Layout, row, pos);
-                    if (LayoutType == v.lyt_tabPage) lTabPage_Preparing(tForm, ds_Layout, row, pos);
+                    if (LayoutType == v.lyt_tabControl) 
+                        lTabControl_Preparing(tForm, subView, ds_Layout, row, pos);
+                    if (LayoutType == v.lyt_tabPage) 
+                        lTabPage_Preparing(tForm, ds_Layout, row, pos);
 
-                    if (LayoutType == v.lyt_backstageViewControl) lBackstageViewControl_Preparing(tForm, subView, ds_Layout, row, pos);
-                    if (LayoutType == v.lyt_backstageViewTabItem) lBackstageViewTabItem_Preparing(tForm, ds_Layout, row, pos);
-                    if (LayoutType == v.lyt_backstageViewButtonItem) lBackstageViewButtonItem_Preparing(tForm, ds_Layout, row, pos);
-                    if (LayoutType == v.lyt_backstageViewItemSeparator) lBackstageViewItemSeparator_Preparing(tForm, ds_Layout, row, pos);
+                    if (LayoutType == v.lyt_backstageViewControl) 
+                        lBackstageViewControl_Preparing(tForm, subView, ds_Layout, row, pos);
+                    if (LayoutType == v.lyt_backstageViewTabItem) 
+                        lBackstageViewTabItem_Preparing(tForm, ds_Layout, row, pos);
+                    if (LayoutType == v.lyt_backstageViewButtonItem) 
+                        lBackstageViewButtonItem_Preparing(tForm, ds_Layout, row, pos);
+                    if (LayoutType == v.lyt_backstageViewItemSeparator) 
+                        lBackstageViewItemSeparator_Preparing(tForm, ds_Layout, row, pos);
 
-                    if (LayoutType == v.lyt_webBrowser) lWebBrowser_Preparing(tForm, subView, ds_Layout, row, pos);
-                    if (LayoutType == v.lyt_cefWebBrowser) lCefWebBrowser_Preparing(tForm, subView, ds_Layout, row, pos);
+                    if (LayoutType == v.lyt_webBrowser) 
+                        lWebBrowser_Preparing(tForm, subView, ds_Layout, row, pos);
+                    if (LayoutType == v.lyt_cefWebBrowser) 
+                        lCefWebBrowser_Preparing(tForm, subView, ds_Layout, row, pos);
 
-                    if (LayoutType == v.lyt_headerPanel) lHeaderPanel_Preparing(tForm, subView, ds_Layout, row, pos);
-                    if (LayoutType == v.lyt_editPanel) lEditPanel_Preparing(tForm, subView, ds_Layout, row, pos);
-                    if (LayoutType == v.lyt_labelControl) lLabelControl_Preparing(tForm, subView, ds_Layout, row, pos);
-                    if (LayoutType == v.lyt_BarcodeControl1) lBarcodControl1_Preparing(tForm, subView, ds_Layout, row, pos);
+                    if (LayoutType == v.lyt_headerPanel) 
+                        lHeaderPanel_Preparing(tForm, subView, ds_Layout, row, pos);
+                    if (LayoutType == v.lyt_editPanel) 
+                        lEditPanel_Preparing(tForm, subView, ds_Layout, row, pos);
+                    if (LayoutType == v.lyt_labelControl) 
+                        lLabelControl_Preparing(tForm, subView, ds_Layout, row, pos);
+                    if (LayoutType == v.lyt_BarcodeControl1) 
+                        lBarcodControl1_Preparing(tForm, subView, ds_Layout, row, pos);
                     if (LayoutType == v.lyt_ComponentControl) 
                         lComponentControl_Preparing(tForm, subView, ds_Layout, row, pos);
 
-                    if (LayoutType == v.lyt_documentViewer) lDocumentViewer_Preparing(tForm, subView, ds_Layout, row, pos);
-
-                    if (LayoutType == v.lyt_documentManager) lDocumentManager_Preparing(tForm, subView, ds_Layout, row, pos);
-
-                    if (LayoutType == v.lyt_dataWizard) lDataWizard_Preparing(tForm, ds_Layout, row, pos);
+                    if (LayoutType == v.lyt_documentViewer) 
+                        lDocumentViewer_Preparing(tForm, subView, ds_Layout, row, pos);
+                    if (LayoutType == v.lyt_documentManager) 
+                        lDocumentManager_Preparing(tForm, subView, ds_Layout, row, pos);
+                    if (LayoutType == v.lyt_dataWizard) 
+                        lDataWizard_Preparing(tForm, ds_Layout, row, pos);
                 }
             }
 

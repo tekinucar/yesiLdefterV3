@@ -230,6 +230,7 @@ namespace Tkn_Variable
         public static string con_Source_FormCode { get; set; }
         //public static 
         public static string con_Source_FormCodeAndName { get; set; }
+        public static string con_Source_ReportTableIPCode { get; set; }
 
         //public static string con_Images_Name { get; set; }
 

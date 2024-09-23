@@ -1752,7 +1752,7 @@ namespace Tkn_Events
         {
             
             bool onay = false;
-            bool isChecked = false;
+            //bool isChecked = false;
 
             foreach (PROP_NAVIGATOR prop_ in propList_)
             {
@@ -2559,7 +2559,7 @@ namespace Tkn_Events
             bool islemOnayi = false;
             bool isFormOpen = true;
             bool elseItem = false;
-            bool elseOncesiCalisti = false;
+            //bool elseOncesiCalisti = false;
 
             if (propList_ != null)
             {

@@ -11,6 +11,7 @@ using DevExpress.XtraEditors;
 using DevExpress.XtraPrinting.Preview;
 using DevExpress.XtraReports.UI;
 using Tkn_Events;
+using Tkn_InputPanel;
 using Tkn_Report;
 using Tkn_ToolBox;
 using Tkn_Variable;
@@ -57,6 +58,9 @@ namespace YesiLdefter
                 sourceFormCodeAndName = this.AccessibleDescription;
 
             cntrlReportNames = t.Find_Control(this, controlNames);
+
+            tInputPanel ip = new tInputPanel();
+            ip.Create_InputPanel(this, cntrlReportNames, v.con_Source_ReportTableIPCode, 1, true);
 
             /*
             // DİKKAT : Bu atamanın yerini değiştirme

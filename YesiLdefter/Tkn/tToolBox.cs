@@ -5105,7 +5105,7 @@ namespace Tkn_ToolBox
 
         public string Get_And_Clear(ref string Veri, string Separator)
         {
-            string snc = Veri;
+            string snc = ""; // Veri;
             int i1 = Veri.IndexOf(Separator);
             if (i1 > -1)
             {

@@ -413,6 +413,7 @@ namespace Tkn_Events
                 {
                     v.con_Source_FormCode = tForm.AccessibleName;
                     v.con_Source_FormCodeAndName = tForm.AccessibleName + "||" + tForm.Name + "||";
+                    v.con_Source_ReportTableIPCode = tableIPCode;
                 }
                 string FormName = "ms_Reports";
                 string FormCode = "UST/PMS/PMS/ReportsView";
@@ -1003,10 +1004,13 @@ namespace Tkn_Events
             string ButtonName = string.Empty;
             string myFormLoadValue = string.Empty;
             string formName = string.Empty;
+            string values = "";
             #endregion Tanımlar
 
             //DevExpress.XtraBars.Navigation.TileNavItem
             //DevExpress.XtraBars.Navigation.TileNavSubItem
+
+            //   satir = t.Get_And_Clear(ref values, "|ds|") + "||";
 
             if (sender.GetType().ToString() == "DevExpress.XtraBars.Navigation.TileNavSubItem")
             {
@@ -1021,7 +1025,11 @@ namespace Tkn_Events
                     Form tForm = Application.OpenForms[formName];
 
                     if (((DevExpress.XtraBars.Navigation.TileNavSubItem)sender).Tag != null)
-                        myFormLoadValue = ((DevExpress.XtraBars.Navigation.TileNavSubItem)sender).Tag.ToString();
+                    {
+                        values = ((DevExpress.XtraBars.Navigation.TileNavSubItem)sender).Tag.ToString();
+                        myFormLoadValue = t.Get_And_Clear(ref values, "|Prop_Navigator|");
+                        TableIPCode = t.Get_And_Clear(ref values, "|TableIPCode|");
+                    }
 
                     // Belge Türü Seçiniz  << butonu
                     Control mControl = t.findControlMenu(tForm, "DevExpress.XtraBars.Navigation.TileNavPane");
@@ -1044,8 +1052,15 @@ namespace Tkn_Events
 
                     Form tForm = Application.OpenForms[formName];
 
+                    //if (((DevExpress.XtraBars.Navigation.TileNavItem)sender).Tag != null)
+                    //    myFormLoadValue = ((DevExpress.XtraBars.Navigation.TileNavItem)sender).Tag.ToString();
+
                     if (((DevExpress.XtraBars.Navigation.TileNavItem)sender).Tag != null)
-                        myFormLoadValue = ((DevExpress.XtraBars.Navigation.TileNavItem)sender).Tag.ToString();
+                    {
+                        values = ((DevExpress.XtraBars.Navigation.TileNavItem)sender).Tag.ToString();
+                        myFormLoadValue = t.Get_And_Clear(ref values, "|Prop_Navigator|");
+                        TableIPCode = t.Get_And_Clear(ref values, "|TableIPCode|");
+                    }
 
                     // Belge Türü Seçiniz  << butonu
                     shortcutButtonSet(mControl, ((DevExpress.XtraBars.Navigation.TileNavItem)sender).Caption, ButtonName, myFormLoadValue);
@@ -1072,8 +1087,15 @@ namespace Tkn_Events
 
                     //  Form tForm = ((DevExpress.XtraBars.Navigation.TileNavElement)sender).TileNavPane.FindForm();
 
+                    //if (((DevExpress.XtraBars.Navigation.NavButton)sender).Tag != null)
+                    //    myFormLoadValue = ((DevExpress.XtraBars.Navigation.NavButton)sender).Tag.ToString();
+
                     if (((DevExpress.XtraBars.Navigation.NavButton)sender).Tag != null)
-                        myFormLoadValue = ((DevExpress.XtraBars.Navigation.NavButton)sender).Tag.ToString();
+                    {
+                        values = ((DevExpress.XtraBars.Navigation.NavButton)sender).Tag.ToString();
+                        myFormLoadValue = t.Get_And_Clear(ref values, "|Prop_Navigator|");
+                        TableIPCode = t.Get_And_Clear(ref values, "|TableIPCode|");
+                    }
 
                     // Belge Türü Seçiniz  << butonu
                     // aslında navButton görünürde olduğu için gerekte yok
