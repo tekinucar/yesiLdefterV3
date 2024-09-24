@@ -3406,6 +3406,15 @@ namespace Tkn_CreateObject
                 textEdit_Find.Location = new System.Drawing.Point(30, 1);
                 textEdit_Find.Size = new System.Drawing.Size(200, 20);
                 textEdit_Find.Name = "textEdit_Find_" + t.AntiStr_Dot(TableIPCode); //cntrlName;
+                textEdit_Find.SelectionStart = 100;
+
+
+                if (v.tSearch.searchInputValue != "")
+                {
+                    textEdit_Find.Text = v.tSearch.searchInputValue;
+                    v.tSearch.searchInputValue = "";
+                }
+
 
                 //textEdit_Find.Properties.Appearance.BackColor = v.AppearanceFocusedColor;
                 //textEdit_Find.Properties.Appearance.Options.UseBackColor = true;

@@ -3198,20 +3198,38 @@ namespace Tkn_Events
         {
             string findText = ((DevExpress.XtraEditors.TextEdit)sender).Text;
             if (findText == v.con_Search_NullText) findText = "";//return
+            
+            setFindFilterText(sender, findText);
 
-            if (v.con_SearchValue != "")
-            {
-                /// gridin  FindFilterText için 
-                findText = v.con_SearchValue + ((DevExpress.XtraEditors.TextEdit)sender).Text;
-                v.con_SearchValueCopy = v.con_SearchValue;
-                v.con_SearchValue = "";
-            }
-                        
+            /// ( 100 * find )  neden bunu yapıyorum ?
+            /// findDelay = 100 ise standart find
+            /// findDelay = 200 ise list && data  yı işaret ediyor 
+            int findType = t.myInt32(((DevExpress.XtraEditors.TextEdit)sender).Tag.ToString());
+
+            int valueCount = findText.Length;
+
+            //if ((findType == 200) &&
+            //    (v.searchCount > 0) &&
+            //    (v.searchCount > valueCount))
+            //    InData_Close(tForm, TableIPCode);
+        }
+
+        private void setFindFilterText(object sender, string findText)
+        {
+            if (((DevExpress.XtraEditors.TextEdit)sender).Properties.NullText == findText)
+                findText = "";
+
+            v.tSearch.searchOutputValue = findText;
+
             Control cntrl = null;
             Form tForm = ((DevExpress.XtraEditors.TextEdit)sender).FindForm();
             string TableIPCode = ((DevExpress.XtraEditors.TextEdit)sender).Properties.AccessibleDefaultActionDescription;
             cntrl = t.Find_Control_View(tForm, TableIPCode);
 
+            setFindFilterText(cntrl, findText);
+        }
+        private void setFindFilterText(Control cntrl, string findText)
+        {
             if (cntrl != null)
             {
                 if (cntrl.GetType().ToString() == "DevExpress.XtraGrid.GridControl")
@@ -3237,42 +3255,13 @@ namespace Tkn_Events
                 {
                     ((DevExpress.XtraTreeList.TreeList)cntrl).FindFilterText = "\"" + findText + "\"";
                 }
-
             }
 
-            /// ( 100 * find )  neden bunu yapıyorum ?
-            /// findDelay = 100 ise standart find
-            /// findDelay = 200 ise list && data  yı işaret ediyor 
-            int findType = t.myInt32(((DevExpress.XtraEditors.TextEdit)sender).Tag.ToString());
-
-            int valueCount = findText.Length;
-
-            //if ((findType == 200) &&
-            //    (v.searchCount > 0) &&
-            //    (v.searchCount > valueCount))
-            //    InData_Close(tForm, TableIPCode);
         }
 
         public void textEdit_Find_KeyUp(object sender, KeyEventArgs e)
         {
-            /// arama motorunu tetikleyen nesne üzerindeki ilk harfleri alıp
-            /// açılan arama motoru sayfasındaki textEdit nesnesi üzerinde göstermeye çalışıyor
             ///
-            /*
-            if (v.con_SearchValueCopy != "")
-            {
-                ((DevExpress.XtraEditors.TextEdit)sender).Text = v.con_SearchValueCopy + ((DevExpress.XtraEditors.TextEdit)sender).Text;
-                ((DevExpress.XtraEditors.TextEdit)sender).SelectionStart = ((DevExpress.XtraEditors.TextEdit)sender).Text.Length + 1;
-                v.con_SearchValueCopy = "";
-            }
-            */
-            if (v.tSearch.searchInputValue != "")
-            {
-                ((DevExpress.XtraEditors.TextEdit)sender).Text = v.tSearch.searchInputValue + ((DevExpress.XtraEditors.TextEdit)sender).Text;
-                ((DevExpress.XtraEditors.TextEdit)sender).SelectionStart = ((DevExpress.XtraEditors.TextEdit)sender).Text.Length + 1;
-                v.tSearch.searchInputValue = "";
-            }
-
         }
         public void textEdit_Find_KeyDown(object sender, KeyEventArgs e)//***New Ok
         {
@@ -3302,6 +3291,7 @@ namespace Tkn_Events
                         if (tGridHint.focusedRow == null)
                         {
                             v.tSearch.searchOutputValue = ((DevExpress.XtraEditors.TextEdit)sender).EditValue.ToString();
+                            v.tSearch.IsRun = false;
                             tForm.Dispose();
                             return;
                         }
@@ -3377,7 +3367,17 @@ namespace Tkn_Events
                    if (t.findReturnKey(e))
                        evg.commonGridClick(sender, e, tGridHint);
                }
-               return;
+
+                if (e.KeyCode == Keys.Escape)
+                {
+                    tForm = ((DevExpress.XtraEditors.TextEdit)sender).FindForm();
+                    v.tSearch.searchOutputValue = ((DevExpress.XtraEditors.TextEdit)sender).EditValue.ToString();
+                    v.tSearch.IsRun = false;
+                    //tForm.Dispose();
+                    //return;
+                }
+
+                return;
            }
 
         }
@@ -3407,21 +3407,20 @@ namespace Tkn_Events
             {
                 findType = (int)((DevExpress.XtraEditors.TextEdit)sender).Tag;
                 findText = ((DevExpress.XtraEditors.TextEdit)sender).Text;
-                if (findText != v.con_Search_NullText)
-                    v.searchCount = findText.Length;
+
                 ((DevExpress.XtraEditors.TextEdit)sender).Properties.Appearance.BackColor = v.AppearanceFocusedColor;
 
-                if (v.con_SearchValue != "") 
+                if (((DevExpress.XtraEditors.TextEdit)sender).Text.Length > 0) 
                 {
-                    /// gridin  FindFilterText için 
-                    findText = v.con_SearchValue + ((DevExpress.XtraEditors.TextEdit)sender).Text;
-                    v.con_SearchValueCopy = v.con_SearchValue;
-                    v.con_SearchValue = "";
+                    // cursorun sona yerleşmesi sağlanıyor
+                    ((DevExpress.XtraEditors.TextEdit)sender).Select(100, 1);
                 }
 
+                setFindFilterText(sender, findText);
+
             }
-            if (findType == 100) v.search_CARI_ARAMA_TD = v.search_onList;
-            if (findType == 200) v.search_CARI_ARAMA_TD = v.search_inData;
+            //if (findType == 100) v.search_CARI_ARAMA_TD = v.search_onList;
+            //if (findType == 200) v.search_CARI_ARAMA_TD = v.search_inData;
         }
 
         public void textEdit_Find_Leave(object sender, EventArgs e)

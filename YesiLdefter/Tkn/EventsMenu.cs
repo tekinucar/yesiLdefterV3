@@ -1,4 +1,5 @@
-﻿using DevExpress.XtraEditors;
+﻿using DevExpress.XtraBars.Navigation;
+using DevExpress.XtraEditors;
 using DevExpress.XtraGrid;
 using System;
 using System.Collections.Generic;
@@ -672,12 +673,54 @@ namespace Tkn_Events
                             tnPane.Buttons[i2].Element.Caption = caption;
                             //tnPane.Buttons[i2].Element.ElementClick += null;
                             //tnPane.Buttons[i2].Element.ElementClick += myClick;
+                            changeColorYILAY(tnPane, i2, null);
                             break;
                         }
                     }
                 }
             }
         }
+
+        public void changeColorYILAY(DevExpress.XtraBars.Navigation.TileNavPane tnPane, int pos, NavButton tItem)
+        {
+            if ((tnPane != null) && (tItem == null))
+            {
+                if (v.DONEMTIPI_YILAY < v.BUGUN_YILAY)
+                {
+                    tnPane.Buttons[pos].Element.Appearance.BackColor = System.Drawing.Color.OrangeRed;
+                    tnPane.Buttons[pos].Element.Appearance.ForeColor = System.Drawing.Color.White;
+                }
+                if (v.DONEMTIPI_YILAY > v.BUGUN_YILAY)
+                {
+                    tnPane.Buttons[pos].Element.Appearance.BackColor = System.Drawing.Color.DodgerBlue;
+                    tnPane.Buttons[pos].Element.Appearance.ForeColor = System.Drawing.Color.White;
+                }
+                if (v.DONEMTIPI_YILAY == v.BUGUN_YILAY)
+                {
+                    tnPane.Buttons[pos].Element.Appearance.BackColor = tnPane.Buttons[pos].Element.Appearance.BackColor2;
+                    tnPane.Buttons[pos].Element.Appearance.ForeColor = tnPane.Buttons[pos - 1].Element.Appearance.ForeColor;
+                }
+            }
+            if (tItem != null)
+            {
+                if (v.DONEMTIPI_YILAY < v.BUGUN_YILAY)
+                {
+                    tItem.Appearance.BackColor = System.Drawing.Color.OrangeRed;
+                    tItem.Appearance.ForeColor = System.Drawing.Color.White;
+                }
+                if (v.DONEMTIPI_YILAY > v.BUGUN_YILAY)
+                {
+                    tItem.Appearance.BackColor = System.Drawing.Color.DodgerBlue;
+                    tItem.Appearance.ForeColor = System.Drawing.Color.White;
+                }
+                if (v.DONEMTIPI_YILAY == v.BUGUN_YILAY)
+                {
+                    tItem.Appearance.BackColor = tItem.Appearance.BackColor2;
+                    tItem.Appearance.ForeColor = tnPane.Appearance.ForeColor;
+                }
+            }
+        }
+
 
         private void yilAyFormRefresh(Form tForm)
         {
@@ -1033,8 +1076,12 @@ namespace Tkn_Events
                     if (((DevExpress.XtraBars.Navigation.TileNavSubItem)sender).Tag != null)
                     {
                         values = ((DevExpress.XtraBars.Navigation.TileNavSubItem)sender).Tag.ToString();
-                        myFormLoadValue = t.Get_And_Clear(ref values, "|Prop_Navigator|");
-                        TableIPCode = t.Get_And_Clear(ref values, "|TableIPCode|");
+                        if (values.IndexOf("|ControlName|") > -1)
+                            myFormLoadValue = t.Get_And_Clear(ref values, "|ControlName|");
+                        if (values.IndexOf("|Prop_Navigator|") > -1)
+                            myFormLoadValue = t.Get_And_Clear(ref values, "|Prop_Navigator|");
+                        if (values.IndexOf("|TableIPCode|") > -1)
+                            TableIPCode = t.Get_And_Clear(ref values, "|TableIPCode|");
                     }
 
                     // Belge Türü Seçiniz  << butonu
@@ -1064,8 +1111,12 @@ namespace Tkn_Events
                     if (((DevExpress.XtraBars.Navigation.TileNavItem)sender).Tag != null)
                     {
                         values = ((DevExpress.XtraBars.Navigation.TileNavItem)sender).Tag.ToString();
-                        myFormLoadValue = t.Get_And_Clear(ref values, "|Prop_Navigator|");
-                        TableIPCode = t.Get_And_Clear(ref values, "|TableIPCode|");
+                        if (values.IndexOf("|ControlName|") > -1)
+                            myFormLoadValue = t.Get_And_Clear(ref values, "|ControlName|");
+                        if (values.IndexOf("|Prop_Navigator|") > -1)
+                            myFormLoadValue = t.Get_And_Clear(ref values, "|Prop_Navigator|");
+                        if (values.IndexOf("|TableIPCode|") > -1)
+                            TableIPCode = t.Get_And_Clear(ref values, "|TableIPCode|");
                     }
 
                     // Belge Türü Seçiniz  << butonu
@@ -1099,8 +1150,12 @@ namespace Tkn_Events
                     if (((DevExpress.XtraBars.Navigation.NavButton)sender).Tag != null)
                     {
                         values = ((DevExpress.XtraBars.Navigation.NavButton)sender).Tag.ToString();
-                        myFormLoadValue = t.Get_And_Clear(ref values, "|Prop_Navigator|");
-                        TableIPCode = t.Get_And_Clear(ref values, "|TableIPCode|");
+                        if (values.IndexOf("|ControlName|") > -1)
+                            myFormLoadValue = t.Get_And_Clear(ref values, "|ControlName|");
+                        if (values.IndexOf("|Prop_Navigator|") > -1)
+                            myFormLoadValue = t.Get_And_Clear(ref values, "|Prop_Navigator|");
+                        if (values.IndexOf("|TableIPCode|") > -1)
+                            TableIPCode = t.Get_And_Clear(ref values, "|TableIPCode|");
                     }
 
                     // Belge Türü Seçiniz  << butonu

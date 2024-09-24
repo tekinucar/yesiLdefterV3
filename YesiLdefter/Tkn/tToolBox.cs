@@ -10917,22 +10917,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 }
             }
         }
-
-        public void textEdit_Find_SetValue(Form tForm, string SearchTableIPCode, string value)
-        {
-            return; // iptal 
-            /// .Text = v.con_SearchValue yi  textEdit_Find_ içine set ediyor
-            Control cntrl = Find_Control(tForm, "textEdit_Find_" + AntiStr_Dot(SearchTableIPCode));
-            if (cntrl != null)
-            {
-                //((DevExpress.XtraEditors.TextEdit)cntrl).Text = value + "+";
-                //System.Windows.Forms.SendKeys.Send("{END}");
-                //System.Windows.Forms.SendKeys.Send("{BACKSPACE}");
-                ((DevExpress.XtraEditors.TextEdit)cntrl).Text = value + ((DevExpress.XtraEditors.TextEdit)cntrl).Text;
-                ((DevExpress.XtraEditors.TextEdit)cntrl).DeselectAll();
-            }
-        }
-
+                
         public string Find_Properties_Value(string SelectBlockValue, string tRowFName)
         {
             string tValue = string.Empty;

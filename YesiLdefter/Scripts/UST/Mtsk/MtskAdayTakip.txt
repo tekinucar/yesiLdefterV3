@@ -130,7 +130,7 @@ create table [Lkp].[MtskAdayTakipTalepTipi]
 Delete from [Lkp].[MtskAdayTakipTalepTipi]
 INSERT INTO [Lkp].[MtskAdayTakipTalepTipi] (Id, TalepTipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption)
  VALUES 
-  ( 1,    N'Sertifika',             1, 1111, 'Talep tipi', '', 'Yeni aday'),
+  ( 1,    N'Sertifika',             1, 1111, 'Talep tipi', '', 'Yeni aday kaydı'),
   ( 2,    N'2.+4 hak ',             1, 1112, 'Talep tipi', '', ''),
   ( 3,    N'Nakil 2.+4 hak',        1, 1113, 'Talep tipi', '', ''),
   ( 4,    N'100 Ceza',              1, 1114, 'Talep tipi', '', ''),
@@ -161,7 +161,7 @@ create table [Lkp].[MtskAdayTakipKayitTipi]
 Delete from [Lkp].[MtskAdayTakipKayitTipi]
 INSERT INTO [Lkp].[MtskAdayTakipKayitTipi] (Id, KayitTipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption)
  VALUES 
-  ( 1,    N'Ön kayıt',          1, 1121, 'Kayıt durumu',  'Ön kayıt',     'Yeni Aday' ),
+  ( 1,    N'Ön kayıt',          1, 1121, 'Kayıt durumu',  'Ön kayıt',     'Yeni aday kaydı' ),
   ( 2,    N'Kayıt aşamasında',  1, 1122, 'Kayıt durumu',  'K.Aşamasında', 'Mebbis"e bağlan .' ),
   ( 3,    N'Kesin kayıt',       1, 1123, 'Kayıt durumu',  'Kesin kay.', '' )
 

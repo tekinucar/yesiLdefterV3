@@ -558,28 +558,6 @@ namespace Tkn_Events
 
             //v.con_AutoNewRecords = false;
             /// end yeni süreç
-
-            if (t.IsNotNull(v.con_SearchValue) && t.IsNotNull(v.con_SearchTableIPCode))
-            {
-                /// v.con_SearchValue yi  textEdit_Find_ içine set ediyor
-
-                t.textEdit_Find_SetValue(((Form)sender), v.con_SearchTableIPCode, v.con_SearchValue);
-            }
-
-        }
-
-        private void mySearchValuePreparing(Form tForm)
-        {
-            /// search formu açmadan önce kullanıcının girdiği veri
-            /// gridin üzerinde seçilmesi, boyanması sağlanıyor
-            ///
-            //tSearch se = new tSearch();
-            Control cntrl = cntrl = null;
-            cntrl = t.Find_Control(tForm, "textEdit_Find");  //// <<<< buraya TableIPCode eklendi
-            if (cntrl != null)
-            {
-                //evb.textEdit_Find_EditValueChanged((object)cntrl, null);
-            }
         }
 
         public void myForm_Refresh(Form tForm, string Kim)

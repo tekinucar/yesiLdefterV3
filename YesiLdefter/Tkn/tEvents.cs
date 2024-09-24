@@ -29,8 +29,7 @@ namespace Tkn_Events
     public class tEvents : tBase
     {
         tToolBox t = new tToolBox();
-        //tSearch se = new tSearch();
-
+        
         #region dataNavigator_PositionChanged, dataSet_Row
 
         #region dataNavigator
@@ -5523,8 +5522,8 @@ namespace Tkn_Events
 
                     if (((DevExpress.XtraEditors.TextEdit)sender).Text.IndexOf("Aradığınız") == -1)
                     {
-                        v.searchCount = ((DevExpress.XtraEditors.TextEdit)sender).Text.Length;
-                        ((DevExpress.XtraEditors.TextEdit)sender).SelectionStart = v.searchCount;
+                        //v.searchCount = ((DevExpress.XtraEditors.TextEdit)sender).Text.Length;
+                        //((DevExpress.XtraEditors.TextEdit)sender).SelectionStart = v.searchCount + 1;
                     }
                 }
                 #endregion Keys.Return & e.handle = false

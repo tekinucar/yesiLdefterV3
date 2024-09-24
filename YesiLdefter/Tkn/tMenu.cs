@@ -1910,14 +1910,14 @@ namespace Tkn_Menu
                     tItemBack.Name = itemName;
                     tItemBack.Caption = "<";
                     tItemBack.Appearance.Name = formName;
-                    tItemBack.Tag = mControl.Name;
+                    tItemBack.Tag = mControl.Name + "|ControlName|";
 
                     itemName = "item_";
                     Preparing_ButtonName(22, ref itemName);
                     tItemNext.Name = itemName;
                     tItemNext.Caption = ">";
                     tItemNext.Appearance.Name = formName;
-                    tItemNext.Tag = mControl.Name;
+                    tItemNext.Tag = mControl.Name + "|ControlName|";
 
                     tItemBack.ElementClick += new DevExpress.XtraBars.Navigation.NavElementClickEventHandler(evm.tNavButton_ElementClick);
                     tItemNext.ElementClick += new DevExpress.XtraBars.Navigation.NavElementClickEventHandler(evm.tNavButton_ElementClick);
@@ -1926,14 +1926,19 @@ namespace Tkn_Menu
                     //if (clickEvents > 0)
                     //    Preparing_ButtonName(clickEvents, ref itemName);
 
+                    // ilk defa çalıştı ve henüz atama yapılmamış ise 
+                    if (v.DONEMTIPI_YILAY == 0)
+                        v.DONEMTIPI_YILAY = v.BUGUN_YILAY;
+
                     NavButton tItem = new DevExpress.XtraBars.Navigation.NavButton();
 
                     tItem.Appearance.Name = formName;
                     //tItem.Name = itemName;
                     tItem.Name = "item_YILAY";
-                    tItem.Caption = evm.getYilAyCaption(v.BUGUN_YILAY);
-                    v.DONEMTIPI_YILAY = v.BUGUN_YILAY;
+                    tItem.Caption = evm.getYilAyCaption(v.DONEMTIPI_YILAY);
 
+                    evm.changeColorYILAY(mControl, 0, tItem);
+                    
                     // itemCaption = Belge Türü Seçin
                     if (t.IsNotNull(shortcut_keys))
                     {

@@ -2906,8 +2906,16 @@ namespace Tkn_DevColumn
                     ((LayoutControlItem)Column).Control = tEdit;
                 else ((Control)Column).Controls.Add(tEdit);
 
-                if (t.IsNotNull(tdisplayformat))
-                    tEdit.Properties.DisplayFormat.FormatString = tdisplayformat;
+               //if (t.IsNotNull(tdisplayformat))
+               //     tEdit.Properties.DisplayFormat.FormatString = tdisplayformat;
+
+                #region displayformat
+                if (tcmp_format_type > 0)
+                {
+                    XtraEditorsTextEdit_DisplayFormat(tEdit, tdisplayformat, teditformat, tcmp_format_type);
+                }
+                #endregion displayformat
+
 
                 tXtraEditors_Properties(row_Fields, tEdit, tcolumn_type, tview_type);
 
@@ -3811,7 +3819,9 @@ namespace Tkn_DevColumn
 
             if (field_length > 0)
             {
-                if (tcolumn_type == "ButtonEdit")
+                if ((tcolumn_type == "ButtonEdit") ||
+                    (tcolumn_type == "tSearchEdit") ||
+                    (tcolumn_type == "tSearchEditOnly"))
                     ((DevExpress.XtraEditors.ButtonEdit)tEdit).Properties.MaxLength = field_length;
                 if (tcolumn_type == "CalcEdit")
                     ((DevExpress.XtraEditors.CalcEdit)tEdit).Properties.MaxLength = field_length;
