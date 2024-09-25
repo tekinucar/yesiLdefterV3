@@ -1281,6 +1281,7 @@ namespace Tkn_Variable
             Clear();
         }
         public bool IsRun { get; set; } // çalışıyor / çalışmıyor
+        public bool AutoSearch { get; set; }
         public bool IsSearchFound { get; set; }
         public string searchEngine = "SearchEngine";
         public string searchNullText { get; set; }
@@ -1288,9 +1289,12 @@ namespace Tkn_Variable
         public string searchInputValue { get; set; }
         public string searchOutputValue { get; set; }
         public int searchStartCount { get; set; }
+        public object messageObj { get; set; }
+
         public void Clear()
         {
             IsRun = false;
+            AutoSearch = true;
             IsSearchFound = false;
             searchNullText = "";
             searchValue = "";
@@ -2765,6 +2769,7 @@ namespace Tkn_Variable
     {
         public string DONTREPORT { get; set; }
         public string DONTEDI { get; set; } // Eğitim/Destek/İstek
+        public string DONTEXIT { get; set; }
         public string RPRT_TABLEIPCODE { get; set; }
     }
 

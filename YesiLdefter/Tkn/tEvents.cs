@@ -188,6 +188,9 @@ namespace Tkn_Events
 
             dsData.Dispose();
 
+            /// her kayıt satırı değiştiğinde otomatik arama aktif olsun
+            v.tSearch.AutoSearch = true;
+
             //t.Takipci(function_name, "", '}');
 
         }

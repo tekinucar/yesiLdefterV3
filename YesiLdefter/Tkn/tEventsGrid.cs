@@ -298,7 +298,18 @@ namespace Tkn_Events
 
             return view;
         }
-        
+
+        public void getGridHint_(Form tForm, string tableIPCode, ref vGridHint tGridHint)
+        {
+            Control cntrl = null;
+            cntrl = t.Find_Control_View(tForm, tableIPCode);
+
+            if (cntrl != null)
+            {
+                getGridHint_(cntrl, ref tGridHint);
+            }
+        }
+
         public void getGridHint_(object sender, ref vGridHint tGridHint)
         {
             tGridHint.Clear();

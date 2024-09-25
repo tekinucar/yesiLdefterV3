@@ -168,7 +168,8 @@ create table [Lkp].[MtskAdayUcretTaksitSayisiTipi]
 Delete from [Lkp].[MtskAdayUcretTaksitSayisiTipi]
 INSERT INTO [Lkp].[MtskAdayUcretTaksitSayisiTipi] (Id, TaksitSayisiTipi, IsActive)
  VALUES 
-  ( 0,    N'Peşin', 1),
+  ( 0,    N'Seçiniz', 1),
+  (100,   N'Peşin', 1),
   ( 1,    N'1 Ay', 1),
   ( 2,    N'2 Ay', 1),
   ( 3,    N'3 Ay', 1),

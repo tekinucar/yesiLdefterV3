@@ -973,6 +973,8 @@ namespace Tkn_Events
             t.ViewControl_Enabled(tForm, dsData, tableIPCode);
             // bu IPCode bağlı ExternalIPCode olabilir...
             t.ViewControl_Enabled_ExtarnalIP(tForm, dsData);
+            // AutoSearch 
+            v.tSearch.AutoSearch = true;
 
             return onay;
         }
@@ -3197,21 +3199,55 @@ namespace Tkn_Events
         public void textEdit_Find_EditValueChanged(object sender, EventArgs e)
         {
             string findText = ((DevExpress.XtraEditors.TextEdit)sender).Text;
-            if (findText == v.con_Search_NullText) findText = "";//return
+            if (findText == v.con_Search_NullText) findText = "";
             
             setFindFilterText(sender, findText);
 
             /// ( 100 * find )  neden bunu yapıyorum ?
             /// findDelay = 100 ise standart find
             /// findDelay = 200 ise list && data  yı işaret ediyor 
-            int findType = t.myInt32(((DevExpress.XtraEditors.TextEdit)sender).Tag.ToString());
+            //int findType = t.myInt32(((DevExpress.XtraEditors.TextEdit)sender).Tag.ToString());
 
-            int valueCount = findText.Length;
+            //int valueCount = findText.Length;
 
             //if ((findType == 200) &&
             //    (v.searchCount > 0) &&
             //    (v.searchCount > valueCount))
             //    InData_Close(tForm, TableIPCode);
+        }
+
+        private void notFoundMessage(Form tForm, string tableIPCode)
+        {
+            tEventsGrid evg = new tEventsGrid();
+            vGridHint tGridHint = new vGridHint();
+
+            /*
+            Form tForm = null;
+            string tableIPCode = "";
+            Control cntrl = null;
+
+            tForm = ((DevExpress.XtraEditors.TextEdit)sender).FindForm();
+            tableIPCode = ((DevExpress.XtraEditors.TextEdit)sender).Properties.AccessibleDefaultActionDescription;
+            */
+            evg.getGridHint_(tForm, tableIPCode, ref tGridHint);
+
+            /// Aranan kayıt yok ise, grid üzerinde focus olacak row yoktur
+            /// 
+            if (tGridHint.focusedRow == null)
+            {
+                if (v.tSearch.messageObj != null)
+                    ((DevExpress.XtraEditors.LabelControl)v.tSearch.messageObj).Visible = true;
+
+                v.tSearch.AutoSearch = false;
+            }
+            else
+            {
+                if (v.tSearch.messageObj != null)
+                    ((DevExpress.XtraEditors.LabelControl)v.tSearch.messageObj).Visible = false;
+
+                v.tSearch.AutoSearch = true;
+            }
+
         }
 
         private void setFindFilterText(object sender, string findText)
@@ -3223,10 +3259,12 @@ namespace Tkn_Events
 
             Control cntrl = null;
             Form tForm = ((DevExpress.XtraEditors.TextEdit)sender).FindForm();
-            string TableIPCode = ((DevExpress.XtraEditors.TextEdit)sender).Properties.AccessibleDefaultActionDescription;
-            cntrl = t.Find_Control_View(tForm, TableIPCode);
+            string tableIPCode = ((DevExpress.XtraEditors.TextEdit)sender).Properties.AccessibleDefaultActionDescription;
+            cntrl = t.Find_Control_View(tForm, tableIPCode);
 
             setFindFilterText(cntrl, findText);
+
+            notFoundMessage(tForm, tableIPCode);
         }
         private void setFindFilterText(Control cntrl, string findText)
         {
@@ -3263,38 +3301,40 @@ namespace Tkn_Events
         {
             ///
         }
+        
         public void textEdit_Find_KeyDown(object sender, KeyEventArgs e)//***New Ok
         {
-           if (t.findAttendantKey(e))
-           {
-                Form tForm = null;
-                string TableIPCode = "";
-                string propNavigator = "";
-                Control cntrl = null;
+            tEventsGrid evg = new tEventsGrid();
+            Form tForm = null;
+            string tableIPCode = "";
+            vGridHint tGridHint = new vGridHint();
+            Control cntrl = null;
 
+            if (t.findAttendantKey(e) ||
+                t.findDirectionKey(e) ||
+                t.findReturnKey(e))
+            {
+                tForm = ((DevExpress.XtraEditors.TextEdit)sender).FindForm();
+                tableIPCode = ((DevExpress.XtraEditors.TextEdit)sender).Properties.AccessibleDefaultActionDescription;
+
+                evg.getGridHint_(tForm, tableIPCode, ref tGridHint);
+            }
+
+            /// Enter veya görevli tuşlar çalışması için
+            /// 
+            if (t.findAttendantKey(e))
+            {
                 if (e.KeyCode == Keys.Enter)
                 {
-                    tEventsGrid evg = new tEventsGrid();
-                    vGridHint tGridHint = new vGridHint();
-                    
-                    tForm = ((DevExpress.XtraEditors.TextEdit)sender).FindForm();
-                    TableIPCode = ((DevExpress.XtraEditors.TextEdit)sender).Properties.AccessibleDefaultActionDescription;
-                    cntrl = t.Find_Control_View(tForm, TableIPCode);
-
-                    if (cntrl != null)
+                    /// Search Engine : kullanıcı arama yaptı ve uygun data bulunmadıysa
+                    /// işlem yapmasın
+                    if (tGridHint.focusedRow == null)
                     {
-                        evg.getGridHint_(cntrl, ref tGridHint);
-
-                        /// kullanıcı arama yaptı ve uygun data bulunmadıysa
-                        /// işlem yapmasın
-                        //if (tGridHint.focusedRow == null) return;
-                        if (tGridHint.focusedRow == null)
-                        {
-                            v.tSearch.searchOutputValue = ((DevExpress.XtraEditors.TextEdit)sender).EditValue.ToString();
-                            v.tSearch.IsRun = false;
-                            tForm.Dispose();
-                            return;
-                        }
+                        /// new Input Panel for Search Engine 
+                        v.tSearch.searchOutputValue = ((DevExpress.XtraEditors.TextEdit)sender).EditValue.ToString();
+                        v.tSearch.IsRun = false;
+                        tForm.Dispose();
+                        return;
                     }
                 }
 
@@ -3311,18 +3351,19 @@ namespace Tkn_Events
 
                 if ((e.KeyCode == Keys.Enter) || (e.KeyCode == Keys.Return))
                 {
-                    cntrl = t.Find_SimpleButton(tForm, "simpleButton_listeye_ekle", TableIPCode);
+                    cntrl = t.Find_SimpleButton(tForm, "simpleButton_listeye_ekle", tableIPCode);
                     if (cntrl != null)  
                         v.tButtonHint.buttonType = v.tButtonType.btListeyeEkle;
 
                     if (cntrl == null)
                     {
-                        cntrl = t.Find_SimpleButton(tForm, "simpleButton_sec", TableIPCode);
-                        if (cntrl != null) v.tButtonHint.buttonType = v.tButtonType.btSecCik;
+                        cntrl = t.Find_SimpleButton(tForm, "simpleButton_sec", tableIPCode);
+                        if (cntrl != null) 
+                            v.tButtonHint.buttonType = v.tButtonType.btSecCik;
                     }
                 }
 
-                propNavigator = t.getPropNavigator(v.tButtonHint.tForm, v.tButtonHint.tableIPCode);
+                string propNavigator = t.getPropNavigator(v.tButtonHint.tForm, v.tButtonHint.tableIPCode);
                 v.tButtonHint.propNavigator = propNavigator;
                 v.tButtonHint.senderType = sender.GetType().ToString();
                 
@@ -3340,46 +3381,33 @@ namespace Tkn_Events
                 return;
             }
 
-           if (t.findDirectionKey(e) ||
-               t.findReturnKey(e))
-           {
-               // tSearch açıldığında otomatik find çalışsın diye iptal edildi
-               //
-               if (e.KeyCode == Keys.Home) return;
-               if (e.KeyCode == Keys.End) return;
+            /// Gridin üzerinde yön tuşlarıyla gezmesini sağlamak için
+            /// 
+            if (t.findDirectionKey(e) ||
+                t.findReturnKey(e))
+            {
+                // tSearch açıldığında otomatik find çalışsın diye iptal edildi
+                //
+                if (e.KeyCode == Keys.Home) return;
+                if (e.KeyCode == Keys.End) return;
 
-               tEventsGrid evg = new tEventsGrid();
-               // preparing tGridHint
-               vGridHint tGridHint = new vGridHint();
+                if (tGridHint.view != null)
+                {
+                    if (t.findDirectionKey(e))
+                        evg.gridSpeedKeys(tGridHint, e);
 
-               Control cntrl = null;
-               Form tForm = ((DevExpress.XtraEditors.TextEdit)sender).FindForm();
-               string TableIPCode = ((DevExpress.XtraEditors.TextEdit)sender).Properties.AccessibleDefaultActionDescription;
-               cntrl = t.Find_Control_View(tForm, TableIPCode);
-
-               if (cntrl != null)
-               {
-                   evg.getGridHint_(cntrl, ref tGridHint);
-
-                   if (t.findDirectionKey(e))
-                       evg.gridSpeedKeys(tGridHint, e);
-                    
-                   if (t.findReturnKey(e))
-                       evg.commonGridClick(sender, e, tGridHint);
-               }
-
+                    if (t.findReturnKey(e))
+                        evg.commonGridClick(sender, e, tGridHint);
+                }
+                /// Esc ile çıkış
                 if (e.KeyCode == Keys.Escape)
                 {
-                    tForm = ((DevExpress.XtraEditors.TextEdit)sender).FindForm();
                     v.tSearch.searchOutputValue = ((DevExpress.XtraEditors.TextEdit)sender).EditValue.ToString();
                     v.tSearch.IsRun = false;
-                    //tForm.Dispose();
-                    //return;
                 }
 
                 return;
-           }
-
+            }
         }
 
         public void textEdit_Find_Enter(object sender, EventArgs e)

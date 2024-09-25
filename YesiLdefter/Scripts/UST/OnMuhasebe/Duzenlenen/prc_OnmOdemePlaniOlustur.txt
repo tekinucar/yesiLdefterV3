@@ -86,6 +86,10 @@ AS BEGIN
   Where u.TalepId = t.Id
   and   u.TalepId = @TalepId
 
+  -- Eğer peşin seçilmişse
+  if (@TaksitSayisiTipiId = 100) 
+      set @TaksitSayisiTipiId = 0
+
   -- ucret tipleri belirleniyor
   if (@TalepTipiId = 1) set @UcretTipiId = 21101
   if (@TalepTipiId = 2) set @UcretTipiId = 21102

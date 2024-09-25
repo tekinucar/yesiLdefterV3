@@ -13866,7 +13866,8 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                             }
                             if (v.tButtonType.btArama == propButtonType)
                             {
-                                
+                                /// Search Engine nin çalışıp çalışmayacağının kararı alınıyor
+                                /// 
                                 onay = evb.CheckValue(tForm, item, tableIPCode);
                             }
                         }

@@ -39,6 +39,9 @@ namespace Tkn_Search
                     return;
                 }
 
+                // Otomatik arama kapalı ise geri dön
+                if (v.tSearch.AutoSearch == false) return;
+
                 /// kullanıcı klavye ile veri girerken 
                 /// Search işlemi başlasın mı ?
                 /// 
@@ -252,7 +255,7 @@ namespace Tkn_Search
         {
             /// arama motorun aradığını bulamadı ve eli boş geri döndü
             /// arama için yazdığı kelimeyi aramanın başladığı yere ata
-            ((DevExpress.XtraEditors.ButtonEdit)sender).EditValue = v.tSearch.searchOutputValue; // v.con_SearchBackValue;
+            ((DevExpress.XtraEditors.ButtonEdit)sender).EditValue = v.tSearch.searchOutputValue; 
             ((DevExpress.XtraEditors.ButtonEdit)sender).Refresh();
             ((DevExpress.XtraEditors.ButtonEdit)sender).Select(100, 1);
         }
@@ -297,19 +300,13 @@ namespace Tkn_Search
 
             string SearchFormCode = prop_.FORMCODE.ToString();
 
-            //v.con_SearchValue = searchValue;
-
             /// sadece SearchTableIPCode var ise 
             if (t.IsNotNull(SearchTableIPCode) && (t.IsNotNull(SearchFormCode) == false))
                 onay = searchEngineByTableIPCode(tForm, prop_, targetTableIPCode); // SearchTableIPCode);
 
             /// sadece SearchFormCode var ise 
-            //if ((t.IsNotNull(SearchTableIPCode) == false) && t.IsNotNull(SearchFormCode))
             if (t.IsNotNull(SearchFormCode))
                 onay = searchEngineByFormCode(tForm, prop_, targetTableIPCode);
-
-            /// işi bitti
-            //v.con_SearchValue = "";
 
             return onay;
         }
@@ -835,13 +832,54 @@ namespace Tkn_Search
             tSearchForm.Name = "tSearchForm";
             evf.myFormEventsAdd(tSearchForm);
 
+            // Uyarı Mesajı için ---------------
+            DevExpress.XtraEditors.PanelControl panelControl1 = new DevExpress.XtraEditors.PanelControl();
+            DevExpress.XtraEditors.LabelControl labelControl1 = new DevExpress.XtraEditors.LabelControl();
+            ((System.ComponentModel.ISupportInitialize)(panelControl1)).BeginInit();
+            panelControl1.SuspendLayout();
+
+
+            // 
+            // panelControl1
+            // 
+
+            panelControl1.Dock = System.Windows.Forms.DockStyle.Top;
+            panelControl1.Location = new System.Drawing.Point(0, 0);
+            panelControl1.Name = "SearchNotFoundMessagePanel";
+            panelControl1.Padding = new System.Windows.Forms.Padding(4);
+            panelControl1.Size = new System.Drawing.Size(874, 40);
+            panelControl1.TabStop = false;
+            panelControl1.TabIndex = 0;
+            // 
+            // labelControl1
+            // 
+            labelControl1.Appearance.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            labelControl1.Appearance.Options.UseFont = true;
+            labelControl1.AutoSizeMode = DevExpress.XtraEditors.LabelAutoSizeMode.None;
+            labelControl1.Dock = System.Windows.Forms.DockStyle.Left;
+            labelControl1.Location = new System.Drawing.Point(6, 6);
+            labelControl1.Name = "SearchNotFoundMessageLabel";
+            labelControl1.Size = new System.Drawing.Size(150, 28);
+            labelControl1.TabIndex = 0;
+            labelControl1.Text = "     Aradığınız kayıt bulunamadı :..";
+            labelControl1.Dock = DockStyle.Fill;
+            labelControl1.Visible = false;
+
+            panelControl1.Controls.Add(labelControl1);
+            v.tSearch.messageObj = labelControl1;
+
+            ((System.ComponentModel.ISupportInitialize)(panelControl1)).EndInit();
+            panelControl1.ResumeLayout(false);
+
+
+            //---------------
             //
             // tabPane1
             //
             DevExpress.XtraBars.Navigation.TabPane tabPane1 = new DevExpress.XtraBars.Navigation.TabPane();
             ((System.ComponentModel.ISupportInitialize)(tabPane1)).BeginInit();
 
-            tSearchForm.Controls.Add(tabPane1);
+            //tSearchForm.Controls.Add(tabPane1);
 
             //
             // tabPane1
@@ -869,15 +907,16 @@ namespace Tkn_Search
             if (t.IsNotNull(SearchTableIPCode))
                 ip.Create_InputPanel(tSearchForm, tabNavigationPage1, SearchTableIPCode, 1, true);
 
-
             tabPane1.Controls.Add(tabNavigationPage1);
             tabPane1.Pages.Add(tabNavigationPage1);
 
             ((System.ComponentModel.ISupportInitialize)(tabPane1)).EndInit();
             tabPane1.ResumeLayout(false);
-
+            
+            // add sıralamasını değiştirme
             tSearchForm.Controls.Add(tabPane1);
-                        
+            tSearchForm.Controls.Add(panelControl1);
+
             #endregion Create tSearchForm 
 
             return tSearchForm;

@@ -48,10 +48,8 @@ namespace Tkn_Menu
             
             bool dontReport = false;
             bool dontEDI = false;
+            bool dontExit = false;
             string reportTableIPCode = "";
-
-            //dontReport = (Prop_View.IndexOf("DONTREPORT\": \"TRUE") > -1);
-            //dontEDI = (Prop_View.IndexOf("DONTEDI\": \"TRUE") > -1);
 
             PROP_VIEWS_ITEMS JSON_PropView = null;
 
@@ -65,6 +63,8 @@ namespace Tkn_Menu
                         dontEDI = Convert.ToBoolean(JSON_PropView.ALLMENU.DONTEDI);
                     if (t.IsNotNull(JSON_PropView.ALLMENU.DONTREPORT))
                         dontReport = Convert.ToBoolean(JSON_PropView.ALLMENU.DONTREPORT);
+                    if (JSON_PropView.ALLMENU.DONTEXIT != null)
+                        dontExit = Convert.ToBoolean(JSON_PropView.ALLMENU.DONTEXIT);
                     if (JSON_PropView.ALLMENU.RPRT_TABLEIPCODE != null)
                         reportTableIPCode = JSON_PropView.ALLMENU.RPRT_TABLEIPCODE;
                 }
@@ -75,7 +75,7 @@ namespace Tkn_Menu
             if (ItemType == 104) Create_TileBar((DevExpress.XtraBars.Navigation.TileBar)menuControl, ds_Items);
             if (ItemType == 105) Create_TileControl((DevExpress.XtraEditors.TileControl)menuControl, ds_Items);
             //--- Genelde Kullanılan Menü Tipi
-            if (ItemType == 106) Create_TileNavPane((DevExpress.XtraBars.Navigation.TileNavPane)menuControl, ds_Items, fieldName, dontReport, dontEDI, reportTableIPCode);
+            if (ItemType == 106) Create_TileNavPane((DevExpress.XtraBars.Navigation.TileNavPane)menuControl, ds_Items, fieldName, dontReport, dontEDI, dontExit, reportTableIPCode);
             if (ItemType == 107) Create_NavigationPane((DevExpress.XtraBars.Navigation.NavigationPane)menuControl, ds_Items);
             if (ItemType == 108) Create_AccordionControl((DevExpress.XtraBars.Navigation.AccordionControl)menuControl, ds_Items);
             if (ItemType == 109) Create_ToolBoxControl((DevExpress.XtraToolbox.ToolboxControl)menuControl, ds_Items);
@@ -133,6 +133,7 @@ namespace Tkn_Menu
             */
             bool dontReport = false;
             bool dontEDI = false;
+            bool dontExit = false;
             string reportTableIPCode = "";
             //dontReport = (Prop_View.IndexOf("DONTREPORT\": \"TRUE") > -1);
             //dontEDI = (Prop_View.IndexOf("DONTEDI\": \"TRUE") > -1);
@@ -149,6 +150,8 @@ namespace Tkn_Menu
                         dontEDI = Convert.ToBoolean(JSON_PropView.ALLMENU.DONTEDI);
                     if (t.IsNotNull(JSON_PropView.ALLMENU.DONTREPORT))
                         dontReport = Convert.ToBoolean(JSON_PropView.ALLMENU.DONTREPORT);
+                    if (JSON_PropView.ALLMENU.DONTEXIT != null)
+                        dontExit = Convert.ToBoolean(JSON_PropView.ALLMENU.DONTEXIT);
                     if (JSON_PropView.ALLMENU.RPRT_TABLEIPCODE != null)
                         reportTableIPCode = JSON_PropView.ALLMENU.RPRT_TABLEIPCODE;
                 }
@@ -394,7 +397,7 @@ namespace Tkn_Menu
                 if (DockType == v.dock_Top) menuControl.Dock = DockStyle.Top;
 
                 // ExtraValue = "FIRM||" + TABLEIPCODE2 + "|ds|"
-                Create_TileNavPane(menuControl, ds_Items, ExtraValue, dontReport, dontEDI, reportTableIPCode);
+                Create_TileNavPane(menuControl, ds_Items, ExtraValue, dontReport, dontEDI, dontExit, reportTableIPCode);
             }
             #endregion
 
@@ -1508,7 +1511,7 @@ namespace Tkn_Menu
         #region Create_TileNavPane    << --- Genelde Kullanılan Menü Tipi
 
         public void Create_TileNavPane(DevExpress.XtraBars.Navigation.TileNavPane mControl, 
-            DataSet ds_Items, string fieldName, bool dontReport, bool dontEDI, string reportTableIPCode)
+            DataSet ds_Items, string fieldName, bool dontReport, bool dontEDI, bool dontExit, string reportTableIPCode)
         {
             tToolBox t = new tToolBox();
             tEvents ev = new tEvents();
@@ -1538,6 +1541,9 @@ namespace Tkn_Menu
 
             string formName = string.Empty;
             Form tForm = mControl.FindForm();
+
+            TileNavCategory tFirstItemCategory = null;
+
 
             /// tekil formu oluşturmak için ticks kullanıyorum
             /// çünkü  DevExpress.XtraBars.Navigation.NavButton FindFormu yok
@@ -1587,6 +1593,7 @@ namespace Tkn_Menu
                     TileNavCategory pGroup = new TileNavCategory();
                     pGroup.Name = "item_" + refid;
                     pGroup.Caption = itemCaption;
+                    pGroup.TileText = itemCaption;
                     pGroup.Tile.Text = itemCaption;
                     pGroup.Visible = tvisible;
 
@@ -1625,7 +1632,26 @@ namespace Tkn_Menu
                     // Not : Category nin altına sadece TileNavItem eklene bilmekte
 
                     //mControl.Categories.Add(pGroup);
-                    mControl.Buttons.Add(pGroup);
+                    if (itemType == 201)
+                    {
+                        pGroup.Tile.AppearanceItem.Normal.BackColor = Color.Red;
+                        pGroup.Tile.AppearanceItem.Hovered.BackColor = Color.Green;
+                        // Customize tile colors in different states.
+                        pGroup.OptionsDropDown.AppearanceItem.Normal.BackColor = Color.Coral;
+                        pGroup.OptionsDropDown.AppearanceItem.Hovered.BackColor = Color.LightCoral;
+                        // Customize the group caption color.
+                        pGroup.OptionsDropDown.AppearanceGroupText.ForeColor = Color.Purple;
+
+                        mControl.Categories.Add(pGroup);
+
+                        if (tFirstItemCategory == null)
+                            tFirstItemCategory = pGroup;
+
+                    }
+                    else mControl.Buttons.Add(pGroup);
+
+                    //tileNavPane1.Categories.AddRange(new TileNavCategory[] { cat1, cat2 });
+
 
                 }
                 #endregion Category / group
@@ -1645,7 +1671,13 @@ namespace Tkn_Menu
                     tItem.Appearance.Name = formName;
                     tItem.Name = itemName;
                     if (t.IsNotNull(CmpName))
-                        tItem.Name = CmpName;
+                    {
+                        if (CmpName == "IsMain")
+                        {
+                            tItem.IsMain = true;
+                        }
+                        else tItem.Name = CmpName;
+                    }
                     tItem.Caption = itemCaption;
                     
                     // itemCaption = Belge Türü Seçin
@@ -1804,13 +1836,28 @@ namespace Tkn_Menu
                             }
                             #endregion Image set
 
-                            int i3 = mControl.Buttons.Count;
-                            for (int i2 = 0; i2 < i3; i2++)
+                            if (ustItemType == 203)
                             {
-                                if (mControl.Buttons[i2].Element.Name.ToString() == ustItemName)
+                                int i3 = mControl.Buttons.Count;
+                                for (int i2 = 0; i2 < i3; i2++)
                                 {
-                                    ((TileNavCategory)mControl.Buttons[i2].Element).Items.Add(tItem);
-                                    break;
+                                    if (mControl.Buttons[i2].Element.Name.ToString() == ustItemName)
+                                    {
+                                        ((TileNavCategory)mControl.Buttons[i2].Element).Items.Add(tItem);
+                                        break;
+                                    }
+                                }
+                            }
+                            if (ustItemType == 201)
+                            {
+                                int i3 = mControl.Categories.Count;
+                                for (int i2 = 0; i2 < i3; i2++)
+                                {
+                                    if (mControl.Categories[i2].Name.ToString() == ustItemName)
+                                    {
+                                        ((TileNavCategory)mControl.Categories[i2]).Items.Add(tItem);
+                                        break;
+                                    }
                                 }
                             }
                         }
@@ -1876,7 +1923,7 @@ namespace Tkn_Menu
                             int i3 = mControl.Buttons.Count;
                             for (int i2 = 0; i2 < i3; i2++)
                             {
-                                if (mControl.Buttons[i2].Element.GetType().ToString() == "DevExpress.XtraBars.Navigation.TileNavCategory")
+                                if (mControl.Buttons[i2].Element.GetType().ToString() == "DevExpress.XtraBars.Navigation.TileNavCategory") 
                                 {
                                     int i5 = ((TileNavCategory)mControl.Buttons[i2].Element).Items.Count;
                                     for (int i4 = 0; i4 < i5; i4++)
@@ -2091,24 +2138,32 @@ namespace Tkn_Menu
             #region Exit
             // Exit - Çıkış Butonu
             //
-            NavButton tItemExit = new DevExpress.XtraBars.Navigation.NavButton();
-            tItemExit.Appearance.Name = formName;
-            tItemExit.Name = "item_FEXIT";
-            tItemExit.Caption = "Çıkış";
-            //tItemExit.Enabled = tenabled;
-            //tItemExit.Visible = tvisible;
-            //tItemExit.Tag = Prop_Navigator;
-            tItemExit.Alignment = NavButtonAlignment.Right;
-            tItemExit.ElementClick += new DevExpress.XtraBars.Navigation.NavElementClickEventHandler(evm.tNavButton_ElementClick);
-            tItemExit.Glyph = t.Find_Glyph("40_408_Delete_32x32"); //("40_401_Close_32x32");// ("40_418_Up_32x32");//("40_401_Close_32x32");
-            //tItemExit.Appearance.BackColor = v.colorNew;
-            tItemExit.AppearanceHovered.BackColor = v.colorExit;
-            //tItemExit.AppearanceSelected.BackColor = v.colorSave;
-            //tItemExit.Appearance.Options.UseBackColor = true;
-            tItemExit.AppearanceHovered.Options.UseBackColor = true;
-            tItemExit.AppearanceSelected.Options.UseBackColor = true;
-            mControl.Buttons.Add(tItemExit);
+            if (dontExit == false)
+            {
+                NavButton tItemExit = new DevExpress.XtraBars.Navigation.NavButton();
+                tItemExit.Appearance.Name = formName;
+                tItemExit.Name = "item_FEXIT";
+                tItemExit.Caption = "Çıkış";
+                //tItemExit.Enabled = tenabled;
+                //tItemExit.Visible = tvisible;
+                //tItemExit.Tag = Prop_Navigator;
+                tItemExit.Alignment = NavButtonAlignment.Right;
+                tItemExit.ElementClick += new DevExpress.XtraBars.Navigation.NavElementClickEventHandler(evm.tNavButton_ElementClick);
+                tItemExit.Glyph = t.Find_Glyph("40_408_Delete_32x32"); //("40_401_Close_32x32");// ("40_418_Up_32x32");//("40_401_Close_32x32");
+                                                                       //tItemExit.Appearance.BackColor = v.colorNew;
+                tItemExit.AppearanceHovered.BackColor = v.colorExit;
+                //tItemExit.AppearanceSelected.BackColor = v.colorSave;
+                //tItemExit.Appearance.Options.UseBackColor = true;
+                tItemExit.AppearanceHovered.Options.UseBackColor = true;
+                tItemExit.AppearanceSelected.Options.UseBackColor = true;
+                mControl.Buttons.Add(tItemExit);
+            }
             #endregion Exit            
+
+            if (tFirstItemCategory != null)
+                mControl.SelectedElement = tFirstItemCategory;
+
+            //InvokeOnClick //(checkBox1, EventArgs.Empty);
 
             ////************************************
             #region örnek

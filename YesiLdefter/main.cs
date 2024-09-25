@@ -674,15 +674,21 @@ namespace YesiLdefter
                 MessageBox.Show("DİKKAT : Önce -Exeyi Paketle- işlemini çalıştırın");
                 return;
             }
-            /// Son kullanıcı için // vt : UstadManagerV3.dbo.MsExeUpdates tablosuna yazılıyor 
-            ///
-            bool onay = t.ftpUpload(v.tExeAbout);
-            if (onay)
+
+            string soru = "Hazırlanan yeni EXE son kullanıcı için yüklenecek eminmisiniz ?";
+            DialogResult Cevap = t.mySoru(soru);
+            if (DialogResult.Yes == Cevap)
             {
-                tSQLs sqls = new tSQLs();
-                DataSet ds = new DataSet();
-                string sql = sqls.Sql_MsExeUpdates_Insert();
-                t.SQL_Read_Execute(v.dBaseNo.publishManager, ds, ref sql, "", "MsExeUpdates");
+                /// Son kullanıcı için // vt : UstadManagerV3.dbo.MsExeUpdates tablosuna yazılıyor 
+                ///
+                bool onay = t.ftpUpload(v.tExeAbout);
+                if (onay)
+                {
+                    tSQLs sqls = new tSQLs();
+                    DataSet ds = new DataSet();
+                    string sql = sqls.Sql_MsExeUpdates_Insert();
+                    t.SQL_Read_Execute(v.dBaseNo.publishManager, ds, ref sql, "", "MsExeUpdates");
+                }
             }
         }
 
