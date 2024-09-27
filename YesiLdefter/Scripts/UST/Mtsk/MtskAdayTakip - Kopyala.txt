@@ -9,21 +9,30 @@ begin transaction
    TalepId               Int       not null, 
    AdayId                Int       not null, 
 
+ --*  DonemTipiId           Int           null,
+ --*  GrupTipiId            SmallInt      null, /* trg_MtskAday */
+ --*  SubeTipiId            SmallInt      null, /* trg_MtskAday */
 
    --10 kayıt aşaması
-   TalepTipiId            SmallInt     null, /* 1. sertifika, 2. (2.+4 hak), 3. Nakil 2.+4hak, 4. 100Ceza, 5. Özel Uyg Ders   */ 
-   KayitTipiId            SmallInt     null, /* trg_MtskAday : 1. Ön kayıt, 2. Kayıt aşamasında, 3. Kesin Kayıt ...  */ 
+ --*  TalepTipiId            SmallInt     null, /* 1. sertifika, 2. (2.+4 hak), 3. Nakil 2.+4hak, 4. 100Ceza, 5. Özel Uyg Ders   */ 
+ --*  KayitTipiId            SmallInt     null, /* trg_MtskAday : 1. Ön kayıt, 2. Kayıt aşamasında, 3. Kesin Kayıt ...  */ 
    ZamanlamaTipiId        SmallInt     null, /* detay aşağıda */
    IsGrupSubeYok          Bit          null, /* grup veya şubesi belli değilse  */
    IsEgitimDevamEdiyor    Bit          null, /* eğitim devam edenler = 1, değilse = 0 : sorgularda kolaylık olsun diye var  */ 
-   MebbisKurumOnayi       Bit          null, /* trg_MtskAday : 0-Onaysız, 1-Onaylandı */	
-   MebbisDurumTipiId      SmallInt     null, /* trg_MtskAday :  detay aşağıda */
+ --*  MebbisKurumOnayi       Bit          null, /* trg_MtskAday : 0-Onaysız, 1-Onaylandı */	
+ --*  MebbisDurumTipiId      SmallInt     null, /* trg_MtskAday :  detay aşağıda */
    YasOnayiTipiId         SmallInt     null, /* 1-Yaşı Tutmuyor, 2-Yaş için bekleme süresi doldu,  3. Diğer sebeplerle onaylı */
    YasHazirTarihi         Date         null, /* yaş sınırını dolduğu tarih */
    DeneyimSartiTipiId     SmallInt     null, /*  MtskSaatUygulama dan okunacak  */       
    IsDeneyimEnAz          Bit          null, /*  MtskSaatUygulama dan okunacak  */
    DeneyimSertifikaTipiId SmallInt     null, /*  MtskSaatUygulama dan okunacak  */
+
    OzurDurumuTipiId       SmallInt     null, /* MtskAdaySaglik tan gelecek bilgi  */
+
+   1. deneyim şartı yok
+   2. deneyim şartına uygun
+   3. deneyim şartına uygun değil
+
 
 
 
@@ -298,7 +307,7 @@ INSERT INTO [Lkp].[MtskAdayTakipMebbisDurumTipi] (Id, MebbisDurumTipi, KonuGrupI
 -- YasOnayiTipiId
 -- ------------------------------------------------------- 
 IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdayTakipYasOnayiTipi')
-drop table [Lkp].[MtskAdayTakipYasOnayiTipi]
+drop table [Lkp].[MtskAdayTakipTalepTipi]
 
 create table [Lkp].[MtskAdayTakipYasOnayiTipi]
 (
@@ -316,39 +325,12 @@ create table [Lkp].[MtskAdayTakipYasOnayiTipi]
 Delete from [Lkp].[MtskAdayTakipYasOnayiTipi]
 INSERT INTO [Lkp].[MtskAdayTakipYasOnayiTipi] (Id, YasOnayiTipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption)
  VALUES 
-  --( 0,    N'Yaşı tutuyor',                1, 1210, 'Yaş onayı', '', ''),
+  --( 0,    N'Yaşı tutuyor',                  1, 1210, 'Yaş onayı', '', ''),
   ( 1,    N'Yaşı tutmuyor',                 1, 1211, 'Yaş onayı', '', ''),
   ( 2,    N'Yaş için bekleme süresi doldu', 1, 1212, 'Yaş onayı', '', ''),
   ( 3,    N'Muhafiyetle onaylı',            1, 1213, 'Yaş onayı', '', ''),
   ( 4,    N'Doğum tarihi yok, belirsiz',    1, 1214, 'Yaş onayı', '', '')
 
-
-
--- ------------------------------------------------------- 
--- DeneyimSartiTipiId
--- ------------------------------------------------------- 
-IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdayTakipDeneyimSartiTipi')
-drop table [Lkp].[MtskAdayTakipDeneyimSartiTipi]
-
-create table [Lkp].[MtskAdayTakipDeneyimSartiTipi]
-(
-   Id                Int Unique not null, 
-   DeneyimSartiTipi  nVarchar(50)   null,
-   KonuGrupId        SmallInt       null,
-   KonuId            Int            null,
-   KonuCaption       nVarchar(20)   null,
-   ChartCaption      nVarchar(20)   null,
-   FormCaption       nVarchar(15)   null,
-   
-   constraint  pk_MtskAdayTakipDeneyimSartiTipi primary key (Id)
-)
-
-Delete from [Lkp].[MtskAdayTakipDeneyimSartiTipi]
-INSERT INTO [Lkp].[MtskAdayTakipDeneyimSartiTipi] (Id, DeneyimSartiTipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption)
- VALUES 
-  ( 1,    N'Deneyim şartı yok',            1, 1221, 'Deneyim şartı', '', ''),
-  ( 2,    N'Deneyim şartına uygun',        1, 1222, 'Deneyim şartı', '', ''),
-  ( 3,    N'Deneyim şartına uygun değil',  1, 1223, 'Deneyim şartı', '', '')
 
 
 -- ------------------------------------------------------- 
@@ -359,7 +341,7 @@ drop table [Lkp].[MtskAdayTakipOzurDurumuTipi]
 
 create table [Lkp].[MtskAdayTakipOzurDurumuTipi]
 (
-   Id               Int Unique Not null,
+   Id               Int Unique Not    null,
    OzurDurumuTipi   nVarchar(60)   null,
    KonuGrupId       SmallInt       null,
    KonuId           Int            null,
@@ -373,14 +355,14 @@ create table [Lkp].[MtskAdayTakipOzurDurumuTipi]
 Delete from [Lkp].[MtskAdayTakipOzurDurumuTipi]
 INSERT INTO [Lkp].[MtskAdayTakipOzurDurumuTipi] (Id, OzurDurumuTipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption)
  VALUES 
-  --(  0, N'Belirsiz',                                      1, 1230, 'Sağlık durumu', '', ''),
-  --(  1, N'Engeli Yok',                                    1, 1231, 'Sağlık durumu', '', ''),
-  (100, N'Ortopedik Engelli (Ellerini ve/veya Kollarını Kullanamıyor)', 1, 1232, 'Sağlık durumu', '', ''),
-  (110, N'Ortopedik Engelli (Yürüyemiyor)',                 1, 1233, 'Sağlık durumu', '', ''),
-  (120, N'İşitme, Dil veya Konuşma Engelli',                1, 1234, 'Sağlık durumu', '', ''),
-  (140, N'Görme Engelli (Bir Gözü Görmüyor)',               1, 1235, 'Sağlık durumu', '', ''),
-  (150, N'Görme Engelli (Büyüteç Yardımı İle Görebiliyor)', 1, 1236, 'Sağlık durumu', '', ''),
-  (160, N'Süreğen hastalığı var.',                          1, 1237, 'Sağlık durumu', '', '')
+  --(  0, N'Belirsiz', 1, 1220, 'Sağlık durumu', '', ''),
+  --(  1, N'Engeli Yok', 1, 1221, 'Sağlık durumu', '', ''),
+  (100, N'Ortopedik Engelli (Ellerini ve/veya Kollarını Kullanamıyor)', 1, 1222, 'Sağlık durumu', '', ''),
+  (110, N'Ortopedik Engelli (Yürüyemiyor)', 1, 1223, 'Sağlık durumu', '', ''),
+  (120, N'İşitme, Dil veya Konuşma Engelli', 1, 1224, 'Sağlık durumu', '', ''),
+  (140, N'Görme Engelli (Bir Gözü Görmüyor)', 1, 1225, 'Sağlık durumu', '', ''),
+  (150, N'Görme Engelli (Büyüteç Yardımı İle Görebiliyor)', 1, 1226, 'Sağlık durumu', '', ''),
+  (160, N'Süreğen hastalığı var.', 1, 1227, 'Sağlık durumu', '', '')
 
 
 -- ------------------------------------------------------- 
@@ -403,23 +385,23 @@ create table [Lkp].[MtskAdayTakipBelgelerTipi]
    constraint  pk_MtskAdayTakipBelgelerTipi primary key (Id)
 )
 -- ------------------------------------------------------- 
--- 1241  BelgelerGeldi         /* tamamı geldiyse */
--- 1242  BelgelerTarandi       /* tamamı tarandıysa */
--- 1243  BelgelerYuklendi      /* tamamı yüklendiyse */
+-- 1231  BelgelerGeldi         /* tamamı geldiyse */
+-- 1232  BelgelerTarandi       /* tamamı tarandıysa */
+-- 1233  BelgelerYuklendi      /* tamamı yüklendiyse */
 -- ------------------------------------------------------- 
 
 Delete from [Lkp].[MtskAdayTakipBelgelerTipi]
 INSERT INTO [Lkp].[MtskAdayTakipBelgelerTipi] (Id, BelgelerTipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption)
  VALUES 
-  ( 1,  N'Belgeleri eksik olanlar',         1, 1241, 'Belgeler',  '', '' ),
-  ( 2,  N'Belgeleri taranmayan',            1, 1242, 'Belgeler',  '', '' ),
-  ( 3,  N'Belgeleri Mebbis"e yüklenmeyen',  1, 1243, 'Belgeler',  '', 'Mebbis"e bağlan ...' )
+  ( 1,  N'Belgeleri eksik olanlar',         1, 1231, 'Belgeler',  '', '' ),
+  ( 2,  N'Belgeleri taranmayan',            1, 1232, 'Belgeler',  '', '' ),
+  ( 3,  N'Belgeleri Mebbis"e yüklenmeyen',  1, 1233, 'Belgeler',  '', 'Mebbis"e bağlan ...' )
 
 
 
 
 -- ------------------------------------------------------- 
--- EgitimSureciTipiId : 1270
+-- EgitimSureciTipiId : 1260
 -- ------------------------------------------------------- 
 IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdayTakipEgitimSureciTipi')
 drop table [Lkp].[MtskAdayTakipEgitimSureciTipi]
@@ -440,12 +422,12 @@ create table [Lkp].[MtskAdayTakipEgitimSureciTipi]
 Delete from [Lkp].[MtskAdayTakipEgitimSureciTipi]
 INSERT INTO [Lkp].[MtskAdayTakipEgitimSureciTipi] (Id, EgitimSureciTipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption)
  VALUES 
-  ( 0,    N'Belirsiz',                                1, 1270, 'Eğitim süreci', '', '' ),
-  ( 1,    N'Eğitimleri başlamadı',                    1, 1271, 'Eğitim süreci', '', '' ),
-  ( 2,    N'Eğitimleri ve sınavları devam ediyor',    1, 1272, 'Eğitim süreci', '', '' ),
-  ( 3,    N'Sertifikayı hak kazandı',                 1, 1273, 'Eğitim süreci', '', '' ),
-  ( 4,    N'Dosya yaktı',                             1, 1274, 'Eğitim süreci', '', '' ), /* esınav veya uyg sınavları başarısız oldu */
-  ( 5,    N'Kendi isteğiyle ayrıldı, kayıt sildirdi', 1, 1275, 'Eğitim süreci', '', '' )
+  ( 0,    N'Belirsiz',                                1, 1260, 'Eğitim süreci', '', '' ),
+  ( 1,    N'Eğitimleri başlamadı',                    1, 1261, 'Eğitim süreci', '', '' ),
+  ( 2,    N'Eğitimleri ve sınavları devam ediyor',    1, 1262, 'Eğitim süreci', '', '' ),
+  ( 3,    N'Sertifikayı hak kazandı',                 1, 1263, 'Eğitim süreci', '', '' ),
+  ( 4,    N'Dosya yaktı',                             1, 1264, 'Eğitim süreci', '', '' ), /* esınav veya uyg sınavları başarısız oldu */
+  ( 5,    N'Kendi isteğiyle ayrıldı, kayıt sildirdi', 1, 1264, 'Eğitim süreci', '', '' )
 
 
 
@@ -874,13 +856,11 @@ commit transaction
  1160  MebbisKurumOnayi       Bit          null, /* trg_MtskAday : 0-Onaysız, 1-Onaylandı */	
  1170  MebbisDurumTipiId      SmallInt     null, /* trg_MtskAday :  detay aşağıda */
  1210  YasOnayiTipiId         SmallInt     null, /* 1-Yaşı Tutmuyor, 2-Yaşı Tutuyor, 3. Diğer sebeplerle onaylı */
- 1220  DeneyimSartiTipiId     SmallInt     null, /*  MtskSaatUygulama dan okunacak  */       
-
- 1230   OzurDurumTipiId        SmallInt     null, /* MtskAdaySaglik tan gelecek bilgi  */
- 1241   BelgelerGeldi          Bit          null, /* tamamı geldiyse */
- 1242   BelgelerTarandi        Bit          null, /* tamamı tarandıysa */
- 1243   BelgelerYuklendi       Bit          null, /* tamamı yüklendiyse */
- 1270   EgitimSureciTipiId     SmallInt     null, /* detay aşağıda */
+ 1220  OzurDurumTipiId        SmallInt     null, /* MtskAdaySaglik tan gelecek bilgi  */
+ 1230  BelgelerGeldi          Bit          null, /* tamamı geldiyse */
+ 1240  BelgelerTarandi        Bit          null, /* tamamı tarandıysa */
+ 1250  BelgelerYuklendi       Bit          null, /* tamamı yüklendiyse */
+ 1260  EgitimSureciTipiId     SmallInt     null, /* detay aşağıda */
 
    BorcDurumuTipiId         SmallInt     null,
 

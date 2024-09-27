@@ -45,19 +45,16 @@ CREATE TRIGGER [dbo].[trg_MtskAdaySertifika] on [dbo].[MtskAdaySertifika]
 AFTER INSERT, UPDATE
 AS BEGIN
 
-    DECLARE curSertifika cursor for select Id from Inserted 
-    DECLARE @curId bigint
+    DECLARE sertifikaCursor cursor local for select Id from Inserted 
+    DECLARE @sertifikaId bigint
 
-    OPEN curSertifika
+    OPEN sertifikaCursor
 
-    FETCH NEXT FROM curSertifika INTO @curId
+    FETCH NEXT FROM sertifikaCusor INTO @sertifikaId
  
     declare @eTalepId int = 0
 	declare @eAdayId int = 0
 	declare @eTcNo varchar(11) = ''
-	--declare @eSertifikaAlmayiHakKazandi bit  = 0
-	--declare @eSertifikaTarihi date = null
-	declare @eSertifikaDonemTipiId int = 0
 	declare @eSertifikaNo varchar(20)
 
 	declare @yFirmId int = 0
@@ -77,13 +74,8 @@ AS BEGIN
 		  @eTalepId = isnull(dlt.talepId,0)
     	, @eAdayId = isnull(dlt.AdayId,0)
 	    , @eTcNo = isnull(dlt.TcNo,'')
-		--, @eSertifikaAlmayiHakKazandi = isnull(dlt.SertifikaAlmayiHakKazandi,0)
-		--, @eSertifikaTarihi = dlt.SertifikaTarihi 
-		, @eSertifikaNo = dlt.SertifikaNo
-		, @eSertifikaDonemTipiId = dlt.SertifikaDonemTipiId
-
 		from deleted dlt
-    	where dlt.Id = @curId
+    	where dlt.Id = @sertifikaId
 
         select 
           @yFirmId = ins.FirmId
@@ -95,19 +87,25 @@ AS BEGIN
 		, @ySertifikaNo = ins.SertifikaNo
 		, @yDuzenlemeTarihi = ins.DuzenlemeTarihi
 		from inserted ins
-    	where ins.Id = @curId
+    	where ins.Id = @sertifikaId
 
 		-- Sertifikanın hangi dönemde verildiği tespit ediliyor
 		if (MONTH(@ySertifikaTarihi) < 10)
                set @ySertifikaDonemTipiId = convert(int, convert(varchar(5), YEAR(@ySertifikaTarihi)) + '0' + convert(varchar(3), MONTH(@ySertifikaTarihi)))
           else set @ySertifikaDonemTipiId = convert(int, convert(varchar(5), YEAR(@ySertifikaTarihi)) + convert(varchar(3), MONTH(@ySertifikaTarihi)))
 
-		if ((@yTalepId = 0) and (@yTcNo <> ''))
+		if (@yTalepId = 0 and @yTcNo <> '')
 		begin
-           Select top 1 @yTalepId = Id  From MtskAdayTalep
+           Select top 1 @yTalepId = Id 
+           From MtskAdayTalep
            Where TcNo = @yTcNo
            and   DonemTipiId <= @ySertifikaDonemTipiId
            order by DonemTipiId desc
+		end
+        if (@yAdayId = 0)
+		begin
+		    Select @yAdayId = Id from MtskAday 
+			Where TcNo = @yTcNo
 		end
 		
 		if ((@eSertifikaNo <> @ySertifikaNo) and
@@ -119,17 +117,16 @@ AS BEGIN
 		    (@yDuzenlemeTarihi is not null)) set @yDuzenlemeTarihi = null
 
 		if ((@eTalepId <> @yTalepId) or
-		    (@eTcNo <> @yTcNo) or
-			(@eSertifikaDonemTipiId <> @ySertifikaDonemTipiId))
+		    (@eAdayId <> @yAdayId) or
+		    (@eTcNo <> @yTcNo))
         begin 
 		   Update MtskAdaySertifika set
 		     TalepId = @yTalepId
+           , AdayId = @yAdayId
            , TcNo = @yTcNo 
-		   , SertifikaDonemTipiId = @ySertifikaDonemTipiId
 		   , DuzenlemeTarihi = @yDuzenlemeTarihi
-		   Where Id = @curId
+		   Where Id = @sertifikaId
 		end
-
 		if ((@yTalepId > 0) and 
 		    (@ySertifikaAlmayiHakKazandi = 1))
         begin
@@ -138,18 +135,17 @@ AS BEGIN
 		   Where Id = @yTalepId
 		end
 
-        FETCH NEXT FROM curSertifika INTO @curId
+        FETCH NEXT FROM sertifikaCursor INTO @sertifikaId
     END
 
 	--EXECUTE [dbo].[prc_MtskAdayTakip] 2 @yFirmId
 
-    CLOSE curSertifika
-    DEALLOCATE curSertifika   
+    CLOSE sertifikaCursor
+    DEALLOCATE sertifikaCursor
 
-END
-
-/*CreateTriggerEnd*/
-
+END --- trg_
 
 ALTER TABLE [dbo].[MtskAdaySertifika] ENABLE TRIGGER [trg_MtskAdaySertifika]
+
+/*CreateTriggerEnd*/
 

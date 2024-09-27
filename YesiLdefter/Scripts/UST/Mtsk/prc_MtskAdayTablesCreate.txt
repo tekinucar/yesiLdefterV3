@@ -43,7 +43,6 @@ AS BEGIN
       set @onaySertifika = 1
       set @onaySozlesme = 1
   end 
-  else return
 
   -- MtskAdayBelgeler Insert
   if ( Select count(*) ADET from dbo.MtskAdayBelgeler 

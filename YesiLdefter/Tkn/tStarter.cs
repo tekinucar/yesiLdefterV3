@@ -138,6 +138,12 @@ namespace Tkn_Starter
                 }
             }
 
+            if (v.SP_ApplicationExit)
+            {
+                //Application.Exit();
+                return;
+            }
+
             /// Mesaj formu nedense kayboluyor
             /// onun açılması için burada bunlar false yapılıyor
             v.IsWaitOpen = false;

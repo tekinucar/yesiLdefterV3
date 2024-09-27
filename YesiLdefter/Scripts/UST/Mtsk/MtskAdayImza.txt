@@ -35,14 +35,14 @@ CREATE TRIGGER dbo.trg_MtskAdayImza on dbo.MtskAdayImza
 AFTER INSERT, UPDATE
 AS BEGIN
 
-    DECLARE myCursor cursor for select Id from Inserted
-    DECLARE @curId bigint
+    DECLARE imzaCursor cursor local for select Id from Inserted
+    DECLARE @imzaId bigint
 
     Declare @TalepId int = 0
 
-    OPEN myCursor
+    OPEN imzaCursor
 
-    FETCH NEXT FROM myCursor INTO @curId
+    FETCH NEXT FROM imzaCursor INTO @imzaId
 
     WHILE @@FETCH_STATUS = 0
     BEGIN
@@ -50,7 +50,7 @@ AS BEGIN
         select 
            @TalepId = ins.TalepId
 		from inserted ins
-    	where ins.Id = @curId
+    	where ins.Id = @imzaId
 
 		-- MtskAdayTalep tablosunu işaretle
 		Update MtskAdayTalep set
@@ -79,17 +79,16 @@ AS BEGIN
         ) as x
         Where a.TalepId = @TalepId
 
-
-
-      FETCH NEXT FROM myCursor INTO @curId
+      FETCH NEXT FROM imzaCursor INTO @imzaId
     END -- While
 
-    CLOSE myCursor
-    DEALLOCATE myCursor   
+    CLOSE imzaCursor
+    DEALLOCATE imzaCursor   
 
 END -- create trigger
 
+ALTER TABLE dbo.MtskAdayImza ENABLE TRIGGER trg_MtskAdayImza
+
 /*CreateTriggerEnd*/
 
-ALTER TABLE dbo.MtskAdayImza ENABLE TRIGGER trg_MtskAdayImza
 

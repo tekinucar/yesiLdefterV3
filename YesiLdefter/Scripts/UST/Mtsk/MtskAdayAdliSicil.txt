@@ -37,14 +37,14 @@ CREATE TRIGGER dbo.trg_MtskAdayAdliSicil on dbo.MtskAdayAdliSicil
 AFTER INSERT, UPDATE
 AS BEGIN
 
-    DECLARE myCursor cursor for select Id from Inserted
-    DECLARE @curId bigint
+    DECLARE sicilCursor cursor local for select Id from Inserted
+    DECLARE @sicilId bigint
 
     Declare @TalepId int = 0
 
-    OPEN myCursor
+    OPEN sicilCursor
 
-    FETCH NEXT FROM myCursor INTO @curId
+    FETCH NEXT FROM sicilCursor INTO @sicilId
 
     WHILE @@FETCH_STATUS = 0
     BEGIN
@@ -52,9 +52,10 @@ AS BEGIN
         select 
            @TalepId = ins.TalepId
 		from inserted ins
-    	where ins.Id = @curId
+    	where ins.Id = @sicilId
 
 		-- MtskAdayTalep tablosunu işaretle
+		
 		Update MtskAdayTalep set
         AdliSicilGeldi = x.Sonuc
         From MtskAdayTalep a, 
@@ -66,7 +67,7 @@ AS BEGIN
             and TalepId = @TalepId
         ) as x
         Where a.Id = @TalepId
-
+		
 		Update MtskAdayBelgeler set
         AdliSicilTarandi = x.Sonuc
         From MtskAdayBelgeler a, 
@@ -79,11 +80,11 @@ AS BEGIN
         ) as x
         Where a.TalepId = @TalepId
 
-      FETCH NEXT FROM myCursor INTO @curId
+      FETCH NEXT FROM sicilCursor INTO @sicilId
     END -- While
 
-    CLOSE myCursor
-    DEALLOCATE myCursor   
+    CLOSE sicilCursor
+    DEALLOCATE sicilCursor   
 
 END -- create trigger
 

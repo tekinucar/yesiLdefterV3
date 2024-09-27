@@ -461,7 +461,12 @@ namespace Tkn_Events
         {
             //MessageBox.Show("myForm_Shown");
             //Application.OpenForms[0].Text = Application.OpenForms[0].Text + ";Show";
-            
+            if (v.SP_ApplicationExit)
+            {
+                Application.Exit();
+                return;
+            }
+
             if (v.SP_CheckedNewApplication == false)
             {
                 tExeUpdate exe = new tExeUpdate();
@@ -623,7 +628,7 @@ namespace Tkn_Events
         {
             //MessageBox.Show("myForm_Leave : " + ((Form)sender).Text);
             //Application.OpenForms[0].Text = Application.OpenForms[0].Text + ";Lea";
-
+            
             //v.Kullaniciya_Mesaj_Var = "Form Leave";
 
         }

@@ -37,14 +37,14 @@ CREATE TRIGGER dbo.trg_MtskAdaySozlesme on dbo.MtskAdaySozlesme
 AFTER INSERT, UPDATE
 AS BEGIN
 
-    DECLARE myCursor cursor for select Id from Inserted
-    DECLARE @curId bigint
+    DECLARE sozlesmeCursor cursor local for select Id from Inserted
+    DECLARE @sozlesmeId bigint
 
     Declare @TalepId int = 0
 
-    OPEN myCursor
+    OPEN sozlesmeCursor
 
-    FETCH NEXT FROM myCursor INTO @curId
+    FETCH NEXT FROM sozlesmeCursor INTO @sozlesmeId
 
     WHILE @@FETCH_STATUS = 0
     BEGIN
@@ -52,7 +52,7 @@ AS BEGIN
         select 
            @TalepId = ins.TalepId
 		from inserted ins
-    	where ins.Id = @curId
+    	where ins.Id = @sozlesmeId
 
 		-- MtskAdayTalep tablosunu işaretle
 		Update MtskAdayTalep set
@@ -93,11 +93,12 @@ AS BEGIN
         Where a.TalepId = @TalepId
 
 
-      FETCH NEXT FROM myCursor INTO @curId
+      FETCH NEXT FROM sozlesmeCursor INTO @sozlesmeId
     END -- While
 
-    CLOSE myCursor
-    DEALLOCATE myCursor   
+    CLOSE sozlesmeCursor
+    DEALLOCATE sozlesmeCursor   
+
 
 END -- create trigger
 

@@ -601,21 +601,20 @@ begin transaction
 
 
 --DELETE MS_TYPES WHERE TYPES_NAME = 'CLICK_EVENTS'
- insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS',   0, '', 'None');
- insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS',   1, '', 'FEXIT');
- insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 202, '', 'FSAVE');
- insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 203, '', 'FSAVENEW');
- insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 204, '', 'FSAVEXIT');
- insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 205, '', 'FNEW_IP');
- insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 206, '', 'FOPEN_IP');
-
- insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 207, '', 'APPEXIT');
- insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 208, '', 'REPORTVIEW');
- insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 209, '', 'SMS_SEND');
- insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 210, '', 'SMS_SETUP');
- insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 211, '', 'TBOX_MAIN');
- insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 212, '', 'TBOX_GROUP');
- insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 213, '', 'FOPEN_SUBVIEW');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS',    0, '', 'None');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS',    1, '', 'FEXIT');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS',    2, '', 'FSAVE');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS',    3, '', 'FSAVENEW');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS',    4, '', 'FSAVEXIT');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS',    5, '', 'FNEW_IP');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS',    6, '', 'FOPEN_IP');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS',    7, '', 'APPEXIT');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS',    8, '', 'REPORTVIEW');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS',    9, '', 'SMS_SEND');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS',   10, '', 'SMS_SETUP');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS',   11, '', 'TBOX_MAIN');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS',   12, '', 'TBOX_GROUP');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS',   13, '', 'FOPEN_SUBVIEW');
  
  insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1020, '', '---------------------');
  insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1012, '', 'SeçÇýk');
@@ -901,6 +900,7 @@ begin transaction
  insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'SUBREFRESH', 'Sub Data Refresh');
  insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'READ',       'Read Data');
  insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'NEW',        'New Data');
+ insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'ADDDATA',    'Add New Data');
  insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'GOTO',       'Goto Record');
  insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'SVIEW',      'Sub View');
  insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'SVIEWVALUE', 'Sub View Value');

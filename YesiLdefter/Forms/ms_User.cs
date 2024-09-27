@@ -102,6 +102,7 @@ namespace YesiLdefter
             this.Load += new System.EventHandler(evf.myForm_Load);
             this.Shown += new System.EventHandler(evf.myForm_Shown);
             this.Shown += new System.EventHandler(this.ms_User_Shown);
+            this.Leave += new System.EventHandler(evf.myForm_Leave);
 
             this.KeyPreview = true;
         }
@@ -528,8 +529,16 @@ namespace YesiLdefter
             }
         }
 
-        
+        private void ms_User_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            //
+        }
 
-
+        private void ms_User_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if ((v.SP_UserLOGIN == false) &&
+                (v.SP_UserIN == false))
+                v.SP_ApplicationExit = true;
+        }
     }
 }

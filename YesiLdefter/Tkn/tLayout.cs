@@ -4161,6 +4161,7 @@ namespace Tkn_Layout
 
             if (TableIPCode != string.Empty)
             {
+                TableIPCode = TableIPCode.Trim();
                 tInputPanel ip = new tInputPanel();
                 ip.Create_InputPanel(tForm, cntrl, TableIPCode, IPDataType, false);
             }

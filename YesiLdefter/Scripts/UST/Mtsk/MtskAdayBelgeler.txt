@@ -62,8 +62,8 @@ CREATE TRIGGER [dbo].[trg_MtskAdayBelgeler] on [dbo].[MtskAdayBelgeler]
 AFTER INSERT, UPDATE
 AS BEGIN
 
-    DECLARE belgeCursor cursor for select Id from Inserted
-    DECLARE @curId bigint
+    DECLARE belgeCursor cursor local for select Id from Inserted
+    DECLARE @belgeId bigint
 
     declare @BiyometrikTarandi Bit = 0
     declare @BasvuruFotoTarandi Bit = 0
@@ -91,7 +91,7 @@ AS BEGIN
 
     OPEN belgeCursor
 
-    FETCH NEXT FROM belgeCursor INTO @curId
+    FETCH NEXT FROM belgeCursor INTO @belgeId
 
     WHILE @@FETCH_STATUS = 0
     BEGIN
@@ -118,7 +118,7 @@ AS BEGIN
         , @Sozlesme2Yuklendi = isnull(ins.Sozlesme2Yuklendi,0)
         , @AdresYuklendi = isnull(ins.AdresYuklendi,0)
 		from inserted ins
-    	where ins.Id = @curId
+    	where ins.Id = @belgeId
 
         Set @BelgelerTarandi = 0
         Set @BelgelerYuklendi = 0
@@ -145,13 +145,13 @@ AS BEGIN
             (@Sozlesme2Yuklendi = 1) and
             (@AdresYuklendi = 1)
             ) set @BelgelerYuklendi = 1
-     
+     /*
         Update MtskAdayBelgeler set
           BelgelerTarandi = @BelgelerTarandi
         , BelgelerYuklendi = @BelgelerYuklendi
         Where Id = @curId
-
-      FETCH NEXT FROM belgeCursor INTO @curId
+    */
+      FETCH NEXT FROM belgeCursor INTO @belgeId
     END -- While
 
     CLOSE belgeCursor

@@ -38,14 +38,14 @@ CREATE TRIGGER dbo.trg_MtskAdayOgrenim on dbo.MtskAdayOgrenim
 AFTER INSERT, UPDATE
 AS BEGIN
 
-    DECLARE myCursor cursor for select Id from Inserted
-    DECLARE @curId bigint
+    DECLARE ogrenimCursor cursor local for select Id from Inserted
+    DECLARE @ogrenimId bigint
 
     Declare @TalepId int = 0
 
-    OPEN myCursor
+    OPEN ogrenimCursor
 
-    FETCH NEXT FROM myCursor INTO @curId
+    FETCH NEXT FROM ogrenimCursor INTO @ogrenimId
 
     WHILE @@FETCH_STATUS = 0
     BEGIN
@@ -53,7 +53,7 @@ AS BEGIN
         select 
            @TalepId = ins.TalepId
 		from inserted ins
-    	where ins.Id = @curId
+    	where ins.Id = @ogrenimId
 
 		-- MtskAdayTalep tablosunu işaretle
 		Update MtskAdayTalep set
@@ -82,17 +82,17 @@ AS BEGIN
         Where a.TalepId = @TalepId
 
 
-      FETCH NEXT FROM myCursor INTO @curId
+      FETCH NEXT FROM ogrenimCursor INTO @ogrenimId
     END -- While
 
-    CLOSE myCursor
-    DEALLOCATE myCursor   
+    CLOSE ogrenimCursor
+    DEALLOCATE ogrenimCursor   
 
 END -- create trigger
 
-/*CreateTriggerEnd*/
-
 ALTER TABLE dbo.MtskAdayOgrenim ENABLE TRIGGER trg_MtskAdayOgrenim
+
+/*CreateTriggerEnd*/
 
 
 /*CreateLkpTable*/

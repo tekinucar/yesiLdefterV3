@@ -2376,6 +2376,8 @@ namespace Tkn_ToolBox
         {
             string value = string.Empty;
 
+            TableIPCode = TableIPCode.Trim();
+
             DataSet ds = null;
             DataNavigator dN = null;
             Find_DataSet(tForm, ref ds, ref dN, TableIPCode);
@@ -2390,6 +2392,8 @@ namespace Tkn_ToolBox
         public string TableFieldValueGet(Form tForm, string TableIPCode, string FieldName)
         {
             string value = string.Empty;
+
+            TableIPCode = TableIPCode.Trim();
 
             v.con_DataRow = null;
 

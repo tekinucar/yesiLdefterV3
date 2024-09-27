@@ -58,12 +58,12 @@ CREATE TRIGGER [dbo].[trg_MtskAdayAdres] on [dbo].[MtskAdayAdres]
 AFTER INSERT, UPDATE
 AS BEGIN
 
-    DECLARE adresCursor cursor for select Id from Inserted
-    DECLARE @curId bigint
+    DECLARE adresCursor cursor local for select Id from Inserted
+    DECLARE @adresId bigint
 
     OPEN adresCursor
 
-    FETCH NEXT FROM adresCursor INTO @curId
+    FETCH NEXT FROM adresCursor INTO @adresId
 
     declare @TalepId int 
 
@@ -81,14 +81,14 @@ AS BEGIN
            @eSozluAdresBeyani = isnull(dlt.SozluAdresBeyani, '')
          , @eAdresKodu = isnull(dlt.AdresKodu, '') 
     	from deleted dlt
-    	where dlt.Id = @curId
+    	where dlt.Id = @adresId
 			   
         select 
            @TalepId = ins.TalepId
          , @ySozluAdresBeyani = isnull(ins.SozluAdresBeyani, '')
          , @yAdresKodu = isnull(ins.AdresKodu, '')
 		from inserted ins
-    	where ins.Id = @curId
+    	where ins.Id = @adresId
      	   	
         if (@eSozluAdresBeyani <> @ySozluAdresBeyani) 
         begin
@@ -110,7 +110,7 @@ AS BEGIN
           Where TalepId = @TalepId
         end
 
-      FETCH NEXT FROM adresCursor INTO @curId
+      FETCH NEXT FROM adresCursor INTO @adresId
     END -- While
 
     CLOSE adresCursor
@@ -118,7 +118,6 @@ AS BEGIN
 
 END -- create trigger
 
-/*CreateTriggerEnd*/
-
 ALTER TABLE dbo.MtskAdayAdres ENABLE TRIGGER trg_MtskAdayAdres
 
+/*CreateTriggerEnd*/

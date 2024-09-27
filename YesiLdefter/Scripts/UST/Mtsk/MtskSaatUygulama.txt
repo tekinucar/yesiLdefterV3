@@ -20,6 +20,8 @@ begin transaction
 
    /* Yaş sınırı  */
    YasSiniri              smallInt     null,
+   IsEnAz                 bit          null,
+   DeneyimSertifikaTipiId Int          null,       
 
   constraint pk_MtskSaatUygulama primary key (Id)
  )

@@ -209,7 +209,7 @@ namespace Tkn_Events
             string value = "";
 
             int count = dsData.Tables[0].Rows.Count;
-            if (position > count) position = count - 1;
+            if (position >= count) position = count - 1;
 
             DataRow row = dsData.Tables[0].Rows[position];
 

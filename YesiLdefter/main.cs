@@ -135,7 +135,7 @@ namespace YesiLdefter
             #endregion mainForm
 
             #region Starter
-
+            
             t.WaitFormOpen(v.mainForm, "Program hazırlanmaya başlıyor ...");
             using (tStarter s = new tStarter())
             {
@@ -891,8 +891,24 @@ namespace YesiLdefter
             //MessageBox.Show("myForm_Deactivate : " + ((Form)sender).Text);
         }
 
+        private void main_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (v.SP_ApplicationExit == false)
+            {
+                /* genel kullanıma geçince aç
+                tToolBox t = new tToolBox();
+                DialogResult cevap = t.mySoru("EXIT");
+                if (DialogResult.Yes == cevap)
+                {
+                    //
+                }
+                else e.Cancel = true; // Main formun kapanmasını engeller
+                */
+            }
+        }
+
         #endregion Events
-        
+
         /*
         internal class CustomApplicationSettings : ApplicationSettingsBase
         {

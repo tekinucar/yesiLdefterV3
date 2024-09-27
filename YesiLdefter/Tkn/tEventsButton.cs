@@ -801,7 +801,8 @@ namespace Tkn_Events
 
         public bool newData(Form tForm, string tableIPCode)
         {
-            bool onay = newDataExecute(tForm, tableIPCode, null, v.tButtonType.btNone);
+            string workType = "NEW";
+            bool onay = newDataExecute(tForm, tableIPCode, null, v.tButtonType.btNone, workType);
 
             return onay;
         }
@@ -813,7 +814,8 @@ namespace Tkn_Events
             if (propList_ != null)
                 onay = extraIslemVar(tForm, tableIPCode, buttonType, v.tBeforeAfter.Before, propList_);
 
-            onay = newDataExecute(tForm, tableIPCode, propList_, buttonType);
+            string workType = "NEW";
+            onay = newDataExecute(tForm, tableIPCode, propList_, buttonType, workType);
 
             if (propList_ != null)
                 onay = extraIslemVar(tForm, tableIPCode, buttonType, v.tBeforeAfter.After, propList_);
@@ -821,7 +823,7 @@ namespace Tkn_Events
             return onay;
         }
 
-        private bool newDataExecute(Form tForm, string tableIPCode, List<PROP_NAVIGATOR> propList_, v.tButtonType buttonType)
+        private bool newDataExecute(Form tForm, string tableIPCode, List<PROP_NAVIGATOR> propList_, v.tButtonType buttonType, string wortType)
         /*string keyFName,string Parent_FName, string Value) */
         {
             //tToolBox t = new tToolBox();
@@ -909,6 +911,7 @@ namespace Tkn_Events
                      "tData_NewRecord");
             }
 
+            #region
             /* silme Alt Hesap Aç çalıştığında gerek olacak
              * 
             if (t.IsNotNull(Parent_FName) && t.IsNotNull(Value))
@@ -933,7 +936,8 @@ namespace Tkn_Events
                 }
             }
             */
-
+            #endregion
+            
             old_PositionChange = v.con_PositionChange;
             v.con_NewRecords = true;
             v.con_PositionChange = true;
@@ -952,7 +956,8 @@ namespace Tkn_Events
             if (dN.IsAccessible == true)
             {
                 // subView var ise silelim
-                t.tRemoveTabPagesForNewData(tForm);
+                if (wortType == "NEW")
+                    t.tRemoveTabPagesForNewData(tForm);
 
                 // master-detail çalıştıralım
                 tNewDataAfterSubWork(tForm, tableIPCode);
@@ -2758,9 +2763,9 @@ namespace Tkn_Events
                         islemOnayi = onay;
                     }
 
-                    if (workType == "NEW")
+                    if (workType == "NEW" || workType == "ADDDATA")
                     {
-                        onay = newDataExecute(tForm, TABLEIPCODE, null, v.tButtonType.btNone);
+                        onay = newDataExecute(tForm, TABLEIPCODE, null, v.tButtonType.btNone, workType);
                         islemOnayi = onay;
                     }
 

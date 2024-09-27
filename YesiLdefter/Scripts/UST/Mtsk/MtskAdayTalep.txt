@@ -92,6 +92,8 @@ begin transaction
    SozlesmeYapildi         Bit            null,
    AdresAlindi             Bit            null,
    BelgelerGeldi           Bit            null,
+
+
          
    constraint		pk_MtskAdayTalep primary key (Id)
  )
@@ -107,19 +109,20 @@ commit transaction
 
 /*CreateTableEnd*/
 
+
 /*CreateTrigger*/
 
-ALTER TRIGGER [dbo].[trg_MtskAdayTalep2] on [dbo].[MtskAdayTalep]
+ALTER TRIGGER [dbo].[trg_MtskAdayTalep] on [dbo].[MtskAdayTalep]
 AFTER INSERT, UPDATE
 AS BEGIN
-  print 'trigger start'
+  print 'talep trigger start'
 
-  declare talepCursor cursor for select Id from Inserted
+  declare talepCursor_ cursor local for select Id from Inserted
   declare @TalepId bigint
 
-  OPEN talepCursor
+  OPEN talepCursor_
 
-  FETCH NEXT FROM talepCursor INTO @TalepId
+  FETCH NEXT FROM talepCursor_ INTO @TalepId
 
   -- eski datalar
   declare @eAdayId int = 0
@@ -280,7 +283,6 @@ AS BEGIN
               INSERT INTO [dbo].[MtskAday] 
 			  (  [AdayGUID], [FirmId], [IsActive], [TcNo], [TamAdiSoyadi], [Adi], [Soyadi] ) VALUES
               (  NEWID(),    @yFirmId,  1,         @yTcNo,  @newTamAdi   , @yAdi, @ySoyadi )
-                
               -- Yeni @mevcutAdayId ye kavuştuk
               Select @yAdayId = Id from MtskAday
               Where TcNo = @yTcNo
@@ -366,7 +368,7 @@ AS BEGIN
 	  Execute [dbo].[prc_MtskAdayTablesCreate] @TalepId
 	  Execute [dbo].[prc_MtskAdayTakipSingleSet] @TalepId
 
-      FETCH NEXT FROM talepCursor INTO @TalepId
+      FETCH NEXT FROM talepCursor_ INTO @TalepId
 	  print 'while end'
   END -- While
 
@@ -380,15 +382,59 @@ AS BEGIN
       --EXECUTE [dbo].[prc_MtskAdayTakip] @yFirmId
   end
 
-  CLOSE talepCursor
-  DEALLOCATE talepCursor   
+  CLOSE talepCursor_
+  DEALLOCATE talepCursor_   
 
-  print 'trigger End'
+  print 'talep trigger End'
 
 END -- create trigger
 
 /*CreateTriggerEnd*/
 
+
+
+
+/*CreateTrigger*/
+
+ALTER TRIGGER [dbo].[trg_MtskAdayTalepDelete] on [dbo].[MtskAdayTalep]
+FOR DELETE
+AS BEGIN
+
+    declare talepCursorDlt cursor local for select Id from deleted
+	declare @curId bigint
+    declare @talepId bigint
+
+	OPEN talepCursorDlt
+
+    FETCH NEXT FROM talepCursorDlt INTO @curId
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+      select 
+	      @talepId = dlt.Id
+      from deleted dlt
+      where dlt.Id = @curId
+	  
+	  Delete from MtskAdayAdliSicil  Where TalepId = @talepId
+	  Delete from MtskAdayAdres      Where TalepId = @talepId
+	  Delete from MtskAdayBelgeler   Where TalepId = @talepId
+	  Delete from MtskAdayImza       Where TalepId = @talepId
+	  Delete from MtskAdaySaglik     Where TalepId = @talepId
+	  Delete from MtskAdaySertifika  Where TalepId = @talepId
+	  Delete from MtskAdaySozlesme   Where TalepId = @talepId
+	  Delete from MtskAdayTakip      Where TalepId = @talepId
+	  Delete from MtskAdayUcret      Where TalepId = @talepId
+
+
+      FETCH NEXT FROM talepCursorDlt INTO @curId
+    END
+
+    CLOSE talepCursorDlt
+    DEALLOCATE talepCursorDlt
+
+END -- trg_
+
+/*CreateTriggerEnd*/
 
 
 
