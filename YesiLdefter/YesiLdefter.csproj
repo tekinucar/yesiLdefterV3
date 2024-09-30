@@ -81,6 +81,15 @@
     <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AForge, Version=2.2.5.0, Culture=neutral, PublicKeyToken=c1db6ff4eaa06aeb, processorArchitecture=MSIL">
+      <HintPath>..\packages\AForge.2.2.5\lib\AForge.dll</HintPath>
+    </Reference>
+    <Reference Include="AForge.Video, Version=2.2.5.0, Culture=neutral, PublicKeyToken=cbfb6e07d173c401, processorArchitecture=MSIL">
+      <HintPath>..\packages\AForge.Video.2.2.5\lib\AForge.Video.dll</HintPath>
+    </Reference>
+    <Reference Include="AForge.Video.DirectShow, Version=2.2.5.0, Culture=neutral, PublicKeyToken=61ea4348d43881b7, processorArchitecture=MSIL">
+      <HintPath>..\packages\AForge.Video.DirectShow.2.2.5\lib\AForge.Video.DirectShow.dll</HintPath>
+    </Reference>
     <Reference Include="DevExpress.BonusSkins.v19.2, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
     <Reference Include="DevExpress.Data.v19.2, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
     <Reference Include="DevExpress.Printing.v19.2.Core, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
@@ -547,6 +556,7 @@
     <Content Include="Scripts\UST\MsV3\prc_MsReportsList.txt" />
     <Content Include="Scripts\UST\MsV3\tempEduUsersList.txt" />
     <Content Include="Scripts\UST\Mtsk\FileUpdates.txt" />
+    <Content Include="Scripts\UST\Mtsk\fnc_getSertifikaDeneyimSarti.txt" />
     <Content Include="Scripts\UST\Mtsk\fnc_getSertifikaId.txt" />
     <Content Include="Scripts\UST\Mtsk\fnc_getSertifikaIsOtomatik.txt" />
     <Content Include="Scripts\UST\Mtsk\fnc_getSertifikaKayitTipi.txt" />
@@ -554,7 +564,7 @@
     <Content Include="Scripts\UST\Mtsk\Lkp_MtskTalepTipi.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskAday - Kopyala.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskAday.txt" />
-    <Content Include="Scripts\UST\Mtsk\MtskAdayEvrak.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskAdayEvrak_IPTAL.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskAdayTakip - Kopyala.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskAdayTakipKurallari.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskAdayUcret.txt" />
@@ -566,8 +576,10 @@
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTablesCreate.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakipAdayKayitKonulari.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakipAdayKayitToplamlari.txt" />
-    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakipSingleSet.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakipTalepKaydiMultiSet.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakipTalepKaydiSingleSet.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTalepSertifika24HakKaydi.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTalepYasiniHesapla.txt" />
     <Content Include="Scripts\UST\Mtsk\TempTabimBankalar.txt" />
     <Content Include="Scripts\UST\Mtsk\TempTabimHesaplar.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\DbUpdates.txt" />

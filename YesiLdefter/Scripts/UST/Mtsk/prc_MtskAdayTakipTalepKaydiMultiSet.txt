@@ -1,0 +1,54 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_MtskAdayTakipTalepKaydiMultiSet] (@FirmId int) 
+AS BEGIN
+
+  -- Variables
+  declare @GelecekAy Datetime
+  declare @BugunDonemTipiId int = 0
+  declare @GelecekDonemTipiId int = 0
+
+  set @GelecekAy = DATEADD(month, 1, getdate());
+	
+  -- Bugün hangi dönem ?  tespit ediliyor
+  if (MONTH(getdate()) < 10)
+       set @BugunDonemTipiId = convert(int, convert(varchar(5), YEAR(getdate())) + '0' + convert(varchar(3), MONTH(getdate())))
+  else set @BugunDonemTipiId = convert(int, convert(varchar(5), YEAR(getdate())) + convert(varchar(3), MONTH(getdate())))
+
+  if (MONTH(@GelecekAy) < 10)
+       set @GelecekDonemTipiId = convert(int, convert(varchar(5), YEAR(@GelecekAy)) + '0' + convert(varchar(3), MONTH(@GelecekAy)))
+  else set @GelecekDonemTipiId = convert(int, convert(varchar(5), YEAR(@GelecekAy)) + convert(varchar(3), MONTH(@GelecekAy)))
+  
+
+  Select 
+      tlp.Id as TalepId
+      -- getdate() göre zamanlamaTipiId değişime uğrar
+     ,( case 
+        when tlp.DonemTipiId < @BugunDonemTipiId then 1
+        when tlp.DonemTipiId = @BugunDonemTipiId then 2
+        when tlp.DonemTipiId = @GelecekDonemTipiId then 3
+        when tlp.DonemTipiId > @GelecekDonemTipiId then 4
+        when tlp.DonemTipiId = 0 then 0
+		else 0 end ) as zamanlamaTipiId
+     --  tkp.YasHazirTarihi ile getdate()  karşılaştırmasıyla  YasOnayiTipiId değişime uğrar
+     --, DATEDIFF(MONTH,tkp.YasHazirTarihi,getdate()) as AyFarki
+     ,( case 
+        when DATEDIFF(MONTH,tkp.YasHazirTarihi,getdate()) > 3 then 0  --  yaşı tutuyor
+        when DATEDIFF(MONTH,tkp.YasHazirTarihi,getdate()) < 0 then 1  --  yaşı tutmuyor
+        when DATEDIFF(MONTH,tkp.YasHazirTarihi,getdate()) >= 0 and
+             DATEDIFF(MONTH,tkp.YasHazirTarihi,getdate()) <= 3 then 2 -- Yaş için bekleme süresi doldu
+        when tkp.YasHazirTarihi is null then 4                        -- Doğum tarihi yok, belirsiz          
+        else 5 end ) as YasOnayiTipiId
+
+  From MtskAdayTalep as tlp 
+     left outer join MtskAdayTakip as tkp on ( tlp.Id = tkp.TalepId )
+
+  Where tlp.IsActive = 1 
+  and   tlp.FirmId = @FirmId
+  
+END -- procedure
+
+/*CreateProcedureEnd*/
+
+
+  

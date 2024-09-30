@@ -9,29 +9,30 @@ begin transaction
    TalepId               Int       not null, 
    AdayId                Int       not null, 
 
+   -- MtskAdayTalep trigger içinden prc_MtskAdayTakipSingleSet çağırılıyor
+   -- 10 kayıt aşaması
+   TalepTipiId            SmallInt     null, /*  prc_MtskAdayTakipSingleSet üzerinden işaretleniyor : 1. sertifika, 2. (2.+4 hak), 3. Nakil 2.+4hak, 4. 100Ceza, 5. Özel Uyg Ders   */ 
+   KayitTipiId            SmallInt     null, /*  prc_MtskAdayTakipSingleSet üzerinden işaretleniyor : 1. Ön kayıt, 2. Kayıt aşamasında, 3. Kesin Kayıt ...  */ 
+   ZamanlamaTipiId        SmallInt     null, /*  prc_MtskAdayTakipSingleSet üzerinden işaretleniyor : */
+   IsGrupSubeYok          Bit          null, /*  prc_MtskAdayTakipSingleSet üzerinden işaretleniyor : grup veya şubesi belli değilse  */
+   IsActive               Bit          null, /*  Aktif talep : süreci devam edenler = 1, değilse = 0 : sorgularda kolaylık olsun diye var  */ 
+   MebbisKurumOnayi       Bit          null, /*  prc_MtskAdayTakipSingleSet üzerinden işaretleniyor : 0-Onaysız, 1-Onaylandı */	
+   MebbisDurumTipiId      SmallInt     null, /*  prc_MtskAdayTakipSingleSet üzerinden işaretleniyor : detayı aşağıda*/
+   SertifikaYasSiniri     SmallInt     null, /*  trg_MtskAdayTalep          üzerinden prc_MtskAdayTalepYasiniHesapla çağırılıyor : almak istediği sertifikanın yaş sınırı  */  
+   YasOnayiTipiId         SmallInt     null, /*  trg_MtskAdayTalep          üzerinden prc_MtskAdayTalepYasiniHesapla çağırılıyor : */
+   YasHazirTarihi         Date         null, /*  trg_MtskAdayTalep          üzerinden prc_MtskAdayTalepYasiniHesapla çağırılıyor : yaş sınırını doldurduğu tarih */
+   DeneyimSartiTipiId     SmallInt     null, /*  prc_MtskAdayTakipSingleSet içinde fnc_getSertifikaDeneyimSarti ile tespit ediliyor */       
+   IsDeneyimEnAz          Bit          null, /*  prc_MtskAdayTakipSingleSet üzerinden işaretleniyor  */
+   DeneyimSertifikaTipiId SmallInt     null, /*  prc_MtskAdayTakipSingleSet üzerinden işaretleniyor  */
+   OzurDurumuTipiId       SmallInt     null, /*  trg_MtskAdaySaglik         üzerinden işaretleniyor  */
 
-   --10 kayıt aşaması
-   TalepTipiId            SmallInt     null, /* 1. sertifika, 2. (2.+4 hak), 3. Nakil 2.+4hak, 4. 100Ceza, 5. Özel Uyg Ders   */ 
-   KayitTipiId            SmallInt     null, /* trg_MtskAday : 1. Ön kayıt, 2. Kayıt aşamasında, 3. Kesin Kayıt ...  */ 
-   ZamanlamaTipiId        SmallInt     null, /* detay aşağıda */
-   IsGrupSubeYok          Bit          null, /* grup veya şubesi belli değilse  */
-   IsEgitimDevamEdiyor    Bit          null, /* eğitim devam edenler = 1, değilse = 0 : sorgularda kolaylık olsun diye var  */ 
-   MebbisKurumOnayi       Bit          null, /* trg_MtskAday : 0-Onaysız, 1-Onaylandı */	
-   MebbisDurumTipiId      SmallInt     null, /* trg_MtskAday :  detay aşağıda */
-   YasOnayiTipiId         SmallInt     null, /* 1-Yaşı Tutmuyor, 2-Yaş için bekleme süresi doldu,  3. Diğer sebeplerle onaylı */
-   YasHazirTarihi         Date         null, /* yaş sınırını dolduğu tarih */
-   DeneyimSartiTipiId     SmallInt     null, /*  MtskSaatUygulama dan okunacak  */       
-   IsDeneyimEnAz          Bit          null, /*  MtskSaatUygulama dan okunacak  */
-   DeneyimSertifikaTipiId SmallInt     null, /*  MtskSaatUygulama dan okunacak  */
-   OzurDurumuTipiId       SmallInt     null, /* MtskAdaySaglik tan gelecek bilgi  */
-
-
-
+   -- MtskAdayAdliSicil, ...Adres, ...Imza, ...Ogrenim, ...Saglik, ...Sozlesme MtskAdayBelgeler tablosunu tetikliyor
+   -- MtskAdayBelgeler trigger da buraya yazıyor
    -- 30
-   BelgelerGeldi          Bit          null, /* tamamı geldiyse */
-   BelgelerTarandi        Bit          null, /* tamamı tarandıysa */
-   BelgelerYuklendi       Bit          null, /* tamamı yüklendiyse */
-   EgitimSureciTipiId     SmallInt     null, /* detay aşağıda */
+   BelgelerGeldi          Bit          null, /* prc_MtskAdayTakipSingleSet üzerinden işaretleniyor : tamamı geldiyse */
+   BelgelerTarandi        Bit          null, /* trg_MtskAdayBelgeler       üzerinden işaretleniyor : tamamı tarandıysa */
+   BelgelerYuklendi       Bit          null, /* trg_MtskAdayBelgeler       üzerinden işaretleniyor : tamamı yüklendiyse */
+   EgitimSureciTipiId     SmallInt     null, /* detay aşağıda : Eğitimin hangi aşamasında olduğu işaretleniyor :    */
 
    -- 40 ödemeleri
    BorcDurumuTipiId         SmallInt     null,
@@ -320,7 +321,8 @@ INSERT INTO [Lkp].[MtskAdayTakipYasOnayiTipi] (Id, YasOnayiTipi, KonuGrupId, Kon
   ( 1,    N'Yaşı tutmuyor',                 1, 1211, 'Yaş onayı', '', ''),
   ( 2,    N'Yaş için bekleme süresi doldu', 1, 1212, 'Yaş onayı', '', ''),
   ( 3,    N'Muhafiyetle onaylı',            1, 1213, 'Yaş onayı', '', ''),
-  ( 4,    N'Doğum tarihi yok, belirsiz',    1, 1214, 'Yaş onayı', '', '')
+  ( 4,    N'Doğum tarihi yok, belirsiz',    1, 1214, 'Yaş onayı', '', ''),
+  ( 5,    N'Yaş kontrolü yok',              1, 1215, 'Yaş onayı', '', '')
 
 
 
@@ -346,9 +348,9 @@ create table [Lkp].[MtskAdayTakipDeneyimSartiTipi]
 Delete from [Lkp].[MtskAdayTakipDeneyimSartiTipi]
 INSERT INTO [Lkp].[MtskAdayTakipDeneyimSartiTipi] (Id, DeneyimSartiTipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption)
  VALUES 
-  ( 1,    N'Deneyim şartı yok',            1, 1221, 'Deneyim şartı', '', ''),
-  ( 2,    N'Deneyim şartına uygun',        1, 1222, 'Deneyim şartı', '', ''),
-  ( 3,    N'Deneyim şartına uygun değil',  1, 1223, 'Deneyim şartı', '', '')
+  ( 1,    N'Şart yok',     1, 1221, 'Deneyim şartı', '', ''),
+  ( 2,    N'Uygun',        1, 1222, 'Deneyim şartı', '', ''),
+  ( 3,    N'Uygun değil',  1, 1223, 'Deneyim şartı', '', '')
 
 
 -- ------------------------------------------------------- 
@@ -870,7 +872,7 @@ commit transaction
  1120  KayitTipiId            SmallInt     null, /* trg_MtskAday : 1. Ön kayıt, 2. Kayıt aşamasında, 3. Kesin Kayıt ...  */ 
  1130  ZamanlamaTipiId        SmallInt     null, /* detay aşağıda */
  1140  IsGrupSubeYok          Bit          null, /* grup veya şubesi belli değilse  */
- 1150  IsEgitimDevamEdiyor    Bit          null, /* eğitim devam edenler = 1, değilse = 0 : sorgularda kolaylık olsun diye var  */ 
+ 1150  IsActive               Bit          null, /* eğitim devam edenler = 1, değilse = 0 : sorgularda kolaylık olsun diye var (IsEgitimDevamEdiyor) */ 
  1160  MebbisKurumOnayi       Bit          null, /* trg_MtskAday : 0-Onaysız, 1-Onaylandı */	
  1170  MebbisDurumTipiId      SmallInt     null, /* trg_MtskAday :  detay aşağıda */
  1210  YasOnayiTipiId         SmallInt     null, /* 1-Yaşı Tutmuyor, 2-Yaşı Tutuyor, 3. Diğer sebeplerle onaylı */

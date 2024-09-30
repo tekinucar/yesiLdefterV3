@@ -13,6 +13,8 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+using AForge.Video;
+using AForge.Video.DirectShow;
 using Tkn_InputPanel;
 using Tkn_Save;
 using Tkn_ToolBox;
@@ -26,75 +28,28 @@ namespace YesiLdefter
     {
         private class vImageProperties
         {
-            int width_ = 0;
-            int height_ = 0;
-            float horizontalResolation_ = 0;
-            float verticalResolation_ = 0;
-            long byteSize_ = 0;
-            decimal kbSize_ = 0;
-            private System.Drawing.Imaging.ImageFormat imageFormat_;
-            string imagePath_ = string.Empty;
-            string imageName_ = string.Empty;
-                        
-            public int width
-            {
-                get { return width_; }
-                set { width_ = value; }
-            }
-            public int height
-            {
-                get { return height_; }
-                set { height_ = value; }
-            }
-            public float horizontalResolation
-            {
-                get { return horizontalResolation_; }
-                set { horizontalResolation_ = value; }
-            }
-            public float verticalResolation
-            {
-                get { return verticalResolation_; }
-                set { verticalResolation_ = value; }
-            }
-            public long byteSize
-            {
-                get { return byteSize_; }
-                set { byteSize_ = value; }
-            }
-            public decimal kbSize
-            {
-                get { return kbSize_; }
-                set { kbSize_ = value; }
-            }
-            public System.Drawing.Imaging.ImageFormat imageFormat
-            {
-                get { return imageFormat_; }
-                set { imageFormat_ = value; }
-            }
-            public string imagePath
-            {
-                get { return imagePath_; }
-                set { imagePath_ = value; }
-            }
-            public string imageName
-            {
-                get { return imageName_; }
-                set { imageName_ = value; }
-            }
+            public int width { get; set; }
+            public int height { get; set; }
+            public float horizontalResolation { get; set; }
+            public float verticalResolation { get; set; }
+            public long byteSize { get; set; }
+            public decimal kbSize { get; set; }
+            public System.Drawing.Imaging.ImageFormat imageFormat { get; set; }
+            public string imagePath { get; set; }
+            public string imageName { get; set; }
 
             public void Clear()
             {
-                width_ = 0;
-                height_ = 0;
-                horizontalResolation_ = 0;
-                verticalResolation_ = 0;
-                byteSize_ = 0;
-                kbSize_ = 0;
-                imageFormat_ = null;
-                imagePath_ = string.Empty;
-                imageName_ = string.Empty;
+                width = 0;
+                height = 0;
+                horizontalResolation = 0;
+                verticalResolation = 0;
+                byteSize = 0;
+                kbSize = 0;
+                imageFormat = null;
+                imagePath = string.Empty;
+                imageName = string.Empty;
             }
-
         }
 
         tToolBox t = new tToolBox();
@@ -132,6 +87,9 @@ namespace YesiLdefter
         DataSet dsDataTarget = null;
         DataNavigator dNTarget = null;
 
+        FilterInfoCollection fico;
+        VideoCaptureDevice vcd;
+
         string imagesSourceFormName = "";
         string imagesSourceTableIPCode = "";
         string imagesSourceFieldName = "";
@@ -152,6 +110,9 @@ namespace YesiLdefter
 
             ImagesMasterTableIPCode(v.tResimEditor);
 
+            AddScannerList();
+            AddWebCamList();
+
             startCropX = 0;
             startCropY = 0;
                         
@@ -163,6 +124,42 @@ namespace YesiLdefter
 
             cropPen3 = new Pen(Color.MediumSpringGreen, 4);
             cropPen3.DashStyle = DashStyle.DashDotDot;
+        }
+
+        void AddWebCamList()
+        {
+            Int16 camNo = 1; 
+            fico = new FilterInfoCollection(FilterCategory.VideoInputDevice);
+            foreach (AForge.Video.DirectShow.FilterInfo item in fico)
+            {
+                imageComboBox_WebCam.Properties.Items.Add(new DevExpress.XtraEditors.Controls.ImageComboBoxItem(item.Name, (short)camNo, -1));
+                camNo++;
+            }
+            if (camNo == 1) // kamera bulamadıysa
+                imageComboBox_WebCam.Properties.Items.Add(new DevExpress.XtraEditors.Controls.ImageComboBoxItem("Bilgisayarınıza bağlı kamera tespit edilemedi.", (short)1, -1));
+
+            barEditItem_WebCam.EditValue = (short)1;
+            //imageComboBox_WebCam.Items[0].Value = 1;
+        }
+        void AddScannerList()
+        {
+            Int16 scanNo = 1;
+            DeviceManager deviceManager = new DeviceManager();
+            foreach (DeviceInfo deviceInfo in deviceManager.DeviceInfos)
+            {
+                if (deviceInfo.Type == WiaDeviceType.ScannerDeviceType)
+                {
+                    //Console.WriteLine("Scanner found: " + deviceInfo.Properties["Name"].get_Value());
+                    imageComboBox_Tarayici.Properties.Items.Add(new DevExpress.XtraEditors.Controls.ImageComboBoxItem(deviceInfo.Properties["Name"].get_Value(), (short)scanNo, -1));
+                    scanNo++;
+                }
+            }
+
+            if (scanNo == 1) // tarayıcı bulamadıysa
+                imageComboBox_Tarayici.Properties.Items.Add(new DevExpress.XtraEditors.Controls.ImageComboBoxItem("Bilgisayarınıza bağlı tarayıcı tespit edilemedi.", (short)1, -1));
+
+            barEditItem_Tarayici.EditValue = (short)1;
+            //imageComboBox_Tarayici.Items[0].Value = 1;
         }
 
         void ImagesMasterTableIPCode(vResimEditor tResimEditor)
@@ -974,6 +971,8 @@ namespace YesiLdefter
 
         private void btn_TarayicidanAl_ItemClick(object sender, ItemClickEventArgs e)
         {
+            if (vcd.IsRunning) vcd.Stop();
+            return;
             //
             this.hScrollBar = null;
             this.vScrollBar = null;
@@ -991,6 +990,10 @@ namespace YesiLdefter
 
                 //Tarayıcı bağlı değil ise img alınırken hataya düşüyor, catch ile yakalanıp tarayıcı olmadığı basılıyor.
                 //if (((DevExpress.XtraEditors.CheckEdit)checkEdit_Tarayici).Checked)
+                
+                /// Tarayıcı Listesi burada
+                
+                /*
                 if (this.checkEdit_Tarayici.Checked)
                 {
                     //Her girişte Cihaz seçimi yapılacaksa.
@@ -998,9 +1001,12 @@ namespace YesiLdefter
                 }
                 else
                 {
+                */
                     //cihaz seçimi yapılmaksızın seçili cihaz ile sürekli devam edilecekse.
                     ImgFile = dialog.ShowAcquireImage(WiaDeviceType.ScannerDeviceType, WiaImageIntent.ColorIntent, WiaImageBias.MinimizeSize, "{00000000-0000-0000-0000-000000000000}", false, true, false);
-                }
+                //}
+                
+
 
                 try
                 {
@@ -1032,6 +1038,77 @@ namespace YesiLdefter
                 MessageBox.Show("Bilgisayara bağlı bir tarayıcı bulunamadı.", "Uyarı", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
 
+        }
+
+        private void btn_WebCamdenAl_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            WebCamClick();
+        }
+
+        void WebCamClick()
+        {
+            string caption = btn_WebCamdenAl.Caption;
+
+            if (caption == "Kameradan Al")
+            {
+                pictureEdit1.Visible = false;
+                pictureEdit2.Visible = true;
+                btn_WebCamResimCek.Enabled = true;
+
+                if (vcd == null)
+                {
+                    vcd = new VideoCaptureDevice(fico[Convert.ToInt32(barEditItem_WebCam.EditValue) - 1].MonikerString);
+                    vcd.NewFrame += Vcd_NewFrame;
+                }
+
+                if (vcd.IsRunning) vcd.Stop();
+                vcd.Start();
+
+                btn_WebCamdenAl.Caption = "Kamerayı kapat";
+            }
+            else
+            {
+                pictureEdit1.Visible = true;
+                pictureEdit2.Visible = false;
+                btn_WebCamResimCek.Enabled = false;
+
+                if (vcd != null)
+                    if (vcd.IsRunning) vcd.Stop();
+                btn_WebCamdenAl.Caption = "Kameradan Al";
+            }
+        }
+
+        private void Vcd_NewFrame(object sender, NewFrameEventArgs eventArgs)
+        {
+            try
+            {
+                // Devexpress pictureEdit1 hata veriyor
+                // Bitmap frameBitmap = (Bitmap)eventArgs.Frame.Clone();
+                // pictureEdit1.Image = frameBitmap;
+
+                pictureEdit2.Image = (Bitmap)eventArgs.Frame.Clone();
+            }
+            catch (Exception)
+            {
+                //throw;
+            }
+        }
+
+        private void btn_WebCamResimCek_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            if (vcd != null)
+            {
+                try
+                {
+                    pictureEdit1.Image = pictureEdit2.Image;
+                    if (vcd.IsRunning) vcd.Stop();
+                    WebCamClick();
+                }
+                catch (Exception)
+                {
+                    //throw;
+                }
+            }
         }
 
         private void btn_DosyadanAl_ItemClick(object sender, ItemClickEventArgs e)
@@ -1144,7 +1221,7 @@ namespace YesiLdefter
         private void btn_Kalite_ItemClick(object sender, ItemClickEventArgs e)
         {
             //
-            MessageBox.Show("kalite");
+            //MessageBox.Show("kalite");
         }
 
         private void barEditItem_Boyut_EditValueChanged(object sender, EventArgs e)
@@ -1221,7 +1298,6 @@ namespace YesiLdefter
                     this.zoomPercent = (int)pictureEdit1.Properties.ZoomPercent;
 
                     if (this.viewInfo == null)
-
                         tPictureEdit_CommonSetup(pictureEdit1, ref hScrollBar, ref vScrollBar, ref viewInfo);
 
                     Cursor = Cursors.Cross;
@@ -1231,10 +1307,11 @@ namespace YesiLdefter
 
                     //Point my = ScreenPoint(pictureEdit1, e.Location);
                     //Point my = pictureEdit1.PointToClient(new Point(e.X, e.Y));
+                    
                     Point my = tImagePoint(pictureEdit1, e.Location);
                     startCropX = my.X;
                     startCropY = my.Y;
-
+                    
                     drawRectangle();
                 }
             }
@@ -1318,8 +1395,8 @@ namespace YesiLdefter
             if ((barCheckItem_Manuel.Checked) ||
                 (barCheckItem_Otomatik.Checked))
             {
-                if (this.zoomPercent <= 0)
-                    this.zoomPercent = (int)pictureEdit1.Properties.ZoomPercent;
+                //if (this.zoomPercent <= 0)
+                //    this.zoomPercent = (int)pictureEdit1.Properties.ZoomPercent;
 
                 decimal oran = 0;
                 int _cropWidth = 0;
@@ -1423,8 +1500,8 @@ namespace YesiLdefter
         {
             if (cropWidth < 1) return;
 
-            if (this.zoomPercent <= 0)
-                this.zoomPercent = (int)pictureEdit1.Properties.ZoomPercent;
+            //if (this.zoomPercent <= 0)
+            //    this.zoomPercent = (int)pictureEdit1.Properties.ZoomPercent;
 
             try
             {

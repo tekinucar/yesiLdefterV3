@@ -65,7 +65,8 @@ AS BEGIN
     DECLARE belgeCursor cursor local for select Id from Inserted
     DECLARE @belgeId bigint
 
-    declare @BiyometrikTarandi Bit = 0
+    declare @TalepId int
+	declare @BiyometrikTarandi Bit = 0
     declare @BasvuruFotoTarandi Bit = 0
     declare @OgrenimTarandi Bit = 0
     declare @SaglikTarandi Bit = 0
@@ -97,7 +98,8 @@ AS BEGIN
     BEGIN
 
         select 
-          @BiyometrikTarandi = isnull(ins.BiyometrikTarandi,0)
+		  @TalepId = isnull(ins.TalepId,0)
+        , @BiyometrikTarandi = isnull(ins.BiyometrikTarandi,0)
         , @BasvuruFotoTarandi = isnull(ins.BasvuruFotoTarandi,0)
         , @OgrenimTarandi = isnull(ins.OgrenimTarandi,0)
         , @SaglikTarandi = isnull(ins.SaglikTarandi,0)
@@ -145,12 +147,17 @@ AS BEGIN
             (@Sozlesme2Yuklendi = 1) and
             (@AdresYuklendi = 1)
             ) set @BelgelerYuklendi = 1
-     /*
+     
         Update MtskAdayBelgeler set
           BelgelerTarandi = @BelgelerTarandi
         , BelgelerYuklendi = @BelgelerYuklendi
-        Where Id = @curId
-    */
+        Where Id = @belgeId
+  
+        Update MtskAdayTakip set
+          BelgelerTarandi = @BelgelerTarandi
+        , BelgelerYuklendi = @BelgelerYuklendi
+        Where Id = @TalepId
+
       FETCH NEXT FROM belgeCursor INTO @belgeId
     END -- While
 

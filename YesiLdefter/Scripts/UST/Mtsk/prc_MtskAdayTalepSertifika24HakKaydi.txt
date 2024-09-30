@@ -80,3 +80,6 @@ order by TalepKayitTarihi desc
  WHERE Id = @TalepId
 
 END -- procedure
+
+/*CreateProcedureEnd*/
+

@@ -6,6 +6,12 @@ AS
 BEGIN 
   declare @response smallint
 
+  --[Lkp].[MtskAdayTalepKayitTipi]
+  -- 0,  ''
+  -- 1,  'Ön kayıt'
+  -- 2,  'Kayıt aşamasında'
+  -- 3,  'Kesin kayıt'
+
   declare @yKayitTipiId smallInt = 0
   declare @yMebbisKurumOnayi bit = null
   declare @yMebbisDurumTipiId smallInt = 0
@@ -18,12 +24,6 @@ BEGIN
       ,@yBelgelerGeldi = isnull(ins.BelgelerGeldi,0)
   From MtskAdayTalep as ins
   Where ins.Id = @talepId
-
-  -- [Lkp].[MtskAdayTalepKayitTipi]
-  -- 0, ''
-  -- 1, 'Ön kayıt'
-  -- 2, 'Kayıt aşamasında'
-  -- 3, 'Kesin kayıt'
       
   if (@yMebbisDurumTipiId = 0) 
       set @yKayitTipiId = 2 -- 'Kayıt aşamasında'
@@ -40,20 +40,6 @@ BEGIN
      (@yMebbisDurumTipiId = 12) or
      (@yMebbisDurumTipiId = 13) or 
      (@yMebbisDurumTipiId = 22) set @yKayitTipiId = 3 -- 'Kesin kayıt'
-
-  -- 'Sertifika Almaya Hak Kazandı'
-  -- 'Sertifikayı hak kazandı' değilse
-  if (@yMebbisDurumTipiId = 5) and (@yKayitTipiId <> 4) 
-      set @yKayitTipiId = 4
-		
-  -- Sertifikası var ise
-  declare @SertifikaAlmayiHakKazandi bit  = 0
-  Select @SertifikaAlmayiHakKazandi = isnull(SertifikaAlmayiHakKazandi,0) 
-  From MtskAdaySertifika
-  Where TalepId = @talepId
-
-  if (@SertifikaAlmayiHakKazandi = 1)
-      set @yKayitTipiId = 4
 
   set @response = @yKayitTipiId
 

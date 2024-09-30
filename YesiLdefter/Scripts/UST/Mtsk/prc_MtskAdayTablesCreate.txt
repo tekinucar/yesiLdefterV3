@@ -169,7 +169,7 @@ AS BEGIN
             [FirmId],[TalepId],[AdayId]
            ,[DonemTipiId],[GrupTipiId],[SubeTipiId]
            ,[TalepTipiId],[KayitTipiId],[ZamanlamaTipiId]
-           ,[IsGrupSubeYok],[IsEgitimDevamEdiyor]
+           ,[IsGrupSubeYok],[IsActive] --[IsEgitimDevamEdiyor]
            ,[MebbisKurumOnayi],[MebbisDurumTipiId]
            ,[YasOnayiTipiId],[OzurDurumuTipiId]
            ,[BelgelerGeldi],[BelgelerTarandi],[BelgelerYuklendi]
@@ -187,7 +187,7 @@ AS BEGIN
             ( @yFirmId,  @TalepId, @yAdayId,
               @yDonemTipiId,  @yGrupTipiId,  @ySubeTipiId, 
               @yTalepTipiId, 0,  0,  --@yKayitTipiId,  0, 
-			  0,  0,  -- [IsGrupSubeYok]
+			  0,  1,  -- [IsGrupSubeYok]
               0,  0,  -- @yMebbisKurumOnayi, @yMebbisDurumTipiId,
 			  0,  0,  -- [YasOnayiTipiId]
 			  0,  0,  0, -- [BelgelerGeldi]

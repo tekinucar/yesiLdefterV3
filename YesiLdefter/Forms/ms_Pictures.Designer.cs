@@ -52,8 +52,16 @@
             DevExpress.XtraBars.BarButtonItem btn_DatabaseKaydet = new DevExpress.XtraBars.BarButtonItem();
 
             this.ribbonControl1 = new DevExpress.XtraBars.Ribbon.RibbonControl();
-            this.checkEdit_Tarayici = new DevExpress.XtraBars.BarToggleSwitchItem();
+            //this.checkEdit_Tarayici = new DevExpress.XtraBars.BarToggleSwitchItem();
+
+            this.barEditItem_Tarayici = new DevExpress.XtraBars.BarEditItem();
+            this.barEditItem_WebCam = new DevExpress.XtraBars.BarEditItem();
+            this.imageComboBox_Tarayici = new DevExpress.XtraEditors.Repository.RepositoryItemImageComboBox();
+            this.imageComboBox_WebCam = new DevExpress.XtraEditors.Repository.RepositoryItemImageComboBox();
+
             this.btn_TarayicidanAl = new DevExpress.XtraBars.BarButtonItem();
+            this.btn_WebCamdenAl = new DevExpress.XtraBars.BarButtonItem();
+            this.btn_WebCamResimCek = new DevExpress.XtraBars.BarButtonItem();
             this.btn_DosyadanAl = new DevExpress.XtraBars.BarButtonItem();
             this.btn_DosyayaKaydet = new DevExpress.XtraBars.BarButtonItem();
             //this.btn_DatabaseKaydet = new DevExpress.XtraBars.BarButtonItem();
@@ -130,6 +138,7 @@
             this.navigationPage_Resim = new DevExpress.XtraBars.Navigation.NavigationPage();
             this.splitContainerControl1 = new DevExpress.XtraEditors.SplitContainerControl();
             this.pictureEdit1 = new DevExpress.XtraEditors.PictureEdit();
+            this.pictureEdit2 = new System.Windows.Forms.PictureBox();
             this.navigationPage_Dosya = new DevExpress.XtraBars.Navigation.NavigationPage();
             this.splitContainerControl2 = new DevExpress.XtraEditors.SplitContainerControl();
             this.panelControl1 = new DevExpress.XtraEditors.PanelControl();
@@ -162,6 +171,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.tButtonEdit_Compress)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.tButtonEdit_AutoCorps)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.tButtonEdit_DPI)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.imageComboBox_Tarayici)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.imageComboBox_WebCam)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.imageComboBox_Boyut)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.imageComboBox_ResimTuru)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.tButtonEdit_Quality)).BeginInit();
@@ -172,6 +183,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerControl1)).BeginInit();
             this.splitContainerControl1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureEdit1.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureEdit2)).BeginInit();
             this.navigationPage_Dosya.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerControl2)).BeginInit();
             this.splitContainerControl2.SuspendLayout();
@@ -195,8 +207,14 @@
             this.ribbonControl1.ExpandCollapseItem.Id = 0;
             this.ribbonControl1.Items.AddRange(new DevExpress.XtraBars.BarItem[] {
             this.ribbonControl1.ExpandCollapseItem,
-            this.checkEdit_Tarayici,
+            
+            //this.checkEdit_Tarayici,
+            this.barEditItem_Tarayici,
+            this.barEditItem_WebCam,
+
             this.btn_TarayicidanAl,
+            this.btn_WebCamdenAl,
+            this.btn_WebCamResimCek,
             this.btn_DosyadanAl,
             this.btn_DosyayaKaydet,
             btn_DatabaseKaydet,
@@ -270,13 +288,44 @@
             this.ribbonControl1.StatusBar = this.ribbonStatusBar1;
             this.ribbonControl1.ToolbarLocation = DevExpress.XtraBars.Ribbon.RibbonQuickAccessToolbarLocation.Hidden;
             this.ribbonControl1.SelectedPageChanged += new System.EventHandler(this.ribbonControl1_SelectedPageChanged);
+
             // 
             // checkEdit_Tarayici
             // 
-            this.checkEdit_Tarayici.Id = 2;
-            this.checkEdit_Tarayici.MergeType = DevExpress.XtraBars.BarMenuMerge.MergeItems;
-            this.checkEdit_Tarayici.Name = "checkEdit_Tarayici";
-            this.checkEdit_Tarayici.ShortcutKeyDisplayString = "ggg";
+            //this.checkEdit_Tarayici.Id = 2;
+            //this.checkEdit_Tarayici.MergeType = DevExpress.XtraBars.BarMenuMerge.MergeItems;
+            //this.checkEdit_Tarayici.Name = "checkEdit_Tarayici";
+            //this.checkEdit_Tarayici.ShortcutKeyDisplayString = "ggg";
+
+
+            // 
+            // barEditItem_Tarayici
+            // 
+            this.barEditItem_Tarayici.Edit = this.imageComboBox_Tarayici;
+            this.barEditItem_Tarayici.EditWidth = 175;
+            this.barEditItem_Tarayici.Id = 32;
+            this.barEditItem_Tarayici.Name = "barEditItem_Tarayici";
+            // 
+            // imageComboBox_Tarayici
+            // 
+            this.imageComboBox_Tarayici.AutoHeight = false;
+            this.imageComboBox_Tarayici.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
+            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
+            this.imageComboBox_Tarayici.Name = "imageComboBox_Tarayici";
+            // 
+            // barEditItem_WebCam
+            // 
+            this.barEditItem_WebCam.Edit = this.imageComboBox_WebCam;
+            this.barEditItem_WebCam.EditWidth = 175;
+            this.barEditItem_WebCam.Id = 32;
+            this.barEditItem_WebCam.Name = "barEditItem_WebCam";
+            // 
+            // imageComboBox_WebCam
+            // 
+            this.imageComboBox_WebCam.AutoHeight = false;
+            this.imageComboBox_WebCam.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
+            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
+            this.imageComboBox_WebCam.Name = "imageComboBox_WebCam";
             // 
             // btn_TarayicidanAl
             // 
@@ -286,10 +335,27 @@
             this.btn_TarayicidanAl.RibbonStyle = DevExpress.XtraBars.Ribbon.RibbonItemStyles.Large;
             this.btn_TarayicidanAl.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btn_TarayicidanAl_ItemClick);
             // 
+            // btn_WebCamdenAl
+            // 
+            this.btn_WebCamdenAl.Caption = "Kameradan Al";
+            this.btn_WebCamdenAl.Id = 4;
+            this.btn_WebCamdenAl.Name = "btn_WebCemdenAl";
+            this.btn_WebCamdenAl.RibbonStyle = DevExpress.XtraBars.Ribbon.RibbonItemStyles.Default;
+            this.btn_WebCamdenAl.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btn_WebCamdenAl_ItemClick);
+            // 
+            // btn_WebCamResimCek
+            // 
+            this.btn_WebCamResimCek.Caption = "Resmi çek";
+            this.btn_WebCamResimCek.Id = 4;
+            this.btn_WebCamResimCek.Name = "btn_WebCamResimCek";
+            this.btn_WebCamResimCek.RibbonStyle = DevExpress.XtraBars.Ribbon.RibbonItemStyles.Default;
+            this.btn_WebCamResimCek.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btn_WebCamResimCek_ItemClick);
+            this.btn_WebCamResimCek.Enabled = false;
+            // 
             // btn_DosyadanAl
             // 
             this.btn_DosyadanAl.Caption = "Dosyadan Al";
-            this.btn_DosyadanAl.Id = 4;
+            this.btn_DosyadanAl.Id = 5;
             this.btn_DosyadanAl.Name = "btn_DosyadanAl";
             this.btn_DosyadanAl.RibbonStyle = DevExpress.XtraBars.Ribbon.RibbonItemStyles.Large;
             this.btn_DosyadanAl.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btn_DosyadanAl_ItemClick);
@@ -297,7 +363,7 @@
             // btn_DosyayaKaydet
             // 
             this.btn_DosyayaKaydet.Caption = "Dosyaya Kaydet";
-            this.btn_DosyayaKaydet.Id = 5;
+            this.btn_DosyayaKaydet.Id = 6;
             this.btn_DosyayaKaydet.Name = "btn_DosyayaKaydet";
             this.btn_DosyayaKaydet.RibbonStyle = DevExpress.XtraBars.Ribbon.RibbonItemStyles.Large;
             this.btn_DosyayaKaydet.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btn_DosyayaKaydet_ItemClick);
@@ -305,7 +371,7 @@
             // btn_DatabaseKaydet
             // 
             btn_DatabaseKaydet.Caption = "Veri Tabanına Kaydet";
-            btn_DatabaseKaydet.Id = 6;
+            btn_DatabaseKaydet.Id = 7;
             btn_DatabaseKaydet.Name = "btn_DatabaseKaydet";
             btn_DatabaseKaydet.RibbonStyle = DevExpress.XtraBars.Ribbon.RibbonItemStyles.Large;
             btn_DatabaseKaydet.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btn_DatabaseKaydet_ItemClick);
@@ -314,21 +380,21 @@
             // btn_FarkliKaydet
             // 
             this.btn_FarkliKaydet.Caption = "Farklı Kaydet";
-            this.btn_FarkliKaydet.Id = 6;
+            this.btn_FarkliKaydet.Id = 7;
             this.btn_FarkliKaydet.Name = "btn_FarkliKaydet";
             this.btn_FarkliKaydet.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btn_FarkliKaydet_ItemClick);
             // 
             // btn_ResimSil
             // 
             this.btn_ResimSil.Caption = "Resmi Sil";
-            this.btn_ResimSil.Id = 7;
+            this.btn_ResimSil.Id = 8;
             this.btn_ResimSil.Name = "btn_ResimSil";
             this.btn_ResimSil.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btn_ResimSil_ItemClick);
             // 
             // barStaticItem1
             // 
-            this.barStaticItem1.Caption = "Tarayıcı Listesi";
-            this.barStaticItem1.Id = 8;
+            this.barStaticItem1.Caption = "Tarayıcı/WebCam Listesi";
+            this.barStaticItem1.Id = 9;
             this.barStaticItem1.Name = "barStaticItem1";
             this.barStaticItem1.TextAlignment = System.Drawing.StringAlignment.Near;
             // 
@@ -336,7 +402,7 @@
             // 
             this.barEditItem2.Edit = this.repositoryItemSpinEdit1;
             this.barEditItem2.EditWidth = 100;
-            this.barEditItem2.Id = 12;
+            this.barEditItem2.Id = 13;
             this.barEditItem2.Name = "barEditItem2";
             // 
             // repositoryItemSpinEdit1
@@ -350,7 +416,7 @@
             // 
             this.barEditItem3.Edit = this.repositoryItemSpinEdit2;
             this.barEditItem3.EditWidth = 100;
-            this.barEditItem3.Id = 13;
+            this.barEditItem3.Id = 14;
             this.barEditItem3.Name = "barEditItem3";
             // 
             // repositoryItemSpinEdit2
@@ -364,7 +430,7 @@
             // 
             this.barEditItem4.Edit = this.repositoryItemSpinEdit3;
             this.barEditItem4.EditWidth = 100;
-            this.barEditItem4.Id = 14;
+            this.barEditItem4.Id = 15;
             this.barEditItem4.Name = "barEditItem4";
             // 
             // repositoryItemSpinEdit3
@@ -377,27 +443,27 @@
             // barButtonGroup1
             // 
             this.barButtonGroup1.Caption = "barButtonGroup1";
-            this.barButtonGroup1.Id = 15;
+            this.barButtonGroup1.Id = 16;
             this.barButtonGroup1.Name = "barButtonGroup1";
             // 
             // barStaticItem_Kirp
             // 
             this.barStaticItem_Kirp.Caption = "Kırp ";
-            this.barStaticItem_Kirp.Id = 16;
+            this.barStaticItem_Kirp.Id = 17;
             this.barStaticItem_Kirp.Name = "barStaticItem_Kirp";
             this.barStaticItem_Kirp.TextAlignment = System.Drawing.StringAlignment.Near;
             // 
             // barStaticItem_Sikistir
             // 
             this.barStaticItem_Sikistir.Caption = "Sıkıştır ";
-            this.barStaticItem_Sikistir.Id = 17;
+            this.barStaticItem_Sikistir.Id = 18;
             this.barStaticItem_Sikistir.Name = "barStaticItem_Sikistir";
             this.barStaticItem_Sikistir.TextAlignment = System.Drawing.StringAlignment.Near;
             // 
             // barStaticItem_DPI
             // 
             this.barStaticItem_DPI.Caption = "DPI";
-            this.barStaticItem_DPI.Id = 18;
+            this.barStaticItem_DPI.Id = 19;
             this.barStaticItem_DPI.Name = "barStaticItem_DPI";
             this.barStaticItem_DPI.TextAlignment = System.Drawing.StringAlignment.Near;
             // 
@@ -406,7 +472,7 @@
             this.btn_Compress.Edit = this.tButtonEdit_Compress;
             this.btn_Compress.EditValue = "10  pixel";
             this.btn_Compress.EditWidth = 120;
-            this.btn_Compress.Id = 19;
+            this.btn_Compress.Id = 20;
             this.btn_Compress.Name = "btn_Compress";
             // 
             // tButtonEdit_Compress
@@ -824,10 +890,14 @@
             // ribbonPageGroup1
             // 
             this.ribbonPageGroup1.ItemLinks.Add(this.barStaticItem1);
-            this.ribbonPageGroup1.ItemLinks.Add(this.checkEdit_Tarayici);
+            //this.ribbonPageGroup1.ItemLinks.Add(this.checkEdit_Tarayici);
+            this.ribbonPageGroup1.ItemLinks.Add(this.barEditItem_Tarayici);
+            this.ribbonPageGroup1.ItemLinks.Add(this.barEditItem_WebCam);
             this.ribbonPageGroup1.ItemLinks.Add(this.btn_TarayicidanAl, true);
-            this.ribbonPageGroup1.ItemLinks.Add(this.btn_DosyadanAl);
-            this.ribbonPageGroup1.ItemLinks.Add(this.btn_DosyayaKaydet);
+            this.ribbonPageGroup1.ItemLinks.Add(this.btn_WebCamdenAl,true);
+            this.ribbonPageGroup1.ItemLinks.Add(this.btn_WebCamResimCek);
+            this.ribbonPageGroup1.ItemLinks.Add(this.btn_DosyadanAl,true);
+            this.ribbonPageGroup1.ItemLinks.Add(this.btn_DosyayaKaydet,true);
             this.ribbonPageGroup1.ItemLinks.Add(btn_DatabaseKaydet);
             this.ribbonPageGroup1.ItemLinks.Add(this.btn_FarkliKaydet, true);
             this.ribbonPageGroup1.ItemLinks.Add(this.btn_ResimSil);
@@ -958,6 +1028,7 @@
             this.splitContainerControl1.Panel2.BorderStyle = DevExpress.XtraEditors.Controls.BorderStyles.Simple;
             this.splitContainerControl1.Panel2.CaptionLocation = DevExpress.Utils.Locations.Top;
             this.splitContainerControl1.Panel2.Controls.Add(this.pictureEdit1);
+            this.splitContainerControl1.Panel2.Controls.Add(this.pictureEdit2);
             this.splitContainerControl1.Panel2.ShowCaption = true;
             this.splitContainerControl1.Panel2.Text = "Resim";
             this.splitContainerControl1.ShowCaption = true;
@@ -965,6 +1036,7 @@
             this.splitContainerControl1.SplitterPosition = 300;
             this.splitContainerControl1.TabIndex = 1;
             this.splitContainerControl1.Text = "splitContainerControl1";
+
             // 
             // pictureEdit1
             // 
@@ -974,7 +1046,7 @@
             this.pictureEdit1.MenuManager = this.ribbonControl1;
             this.pictureEdit1.Name = "pictureEdit1";
             this.pictureEdit1.Properties.BorderStyle = DevExpress.XtraEditors.Controls.BorderStyles.NoBorder;
-            this.pictureEdit1.Properties.Caption.Text = " Tekin Uçar ";
+            this.pictureEdit1.Properties.Caption.Text = " Üstad Yazılım ";
             this.pictureEdit1.Properties.Caption.Visible = false;
             this.pictureEdit1.Properties.NullText = "Resim Yok";
             this.pictureEdit1.Properties.ShowCameraMenuItem = DevExpress.XtraEditors.Controls.CameraMenuItemVisibility.Auto;
@@ -982,6 +1054,15 @@
             this.pictureEdit1.Properties.ZoomAccelerationFactor = 1D;
             this.pictureEdit1.Size = new System.Drawing.Size(1143, 346);
             this.pictureEdit1.TabIndex = 0;
+            this.pictureEdit1.Visible = true; // false;
+            // 
+            // pictureEdit2
+            // 
+            this.pictureEdit2.Cursor = System.Windows.Forms.Cursors.Default;
+            this.pictureEdit2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pictureEdit2.Location = new System.Drawing.Point(0, 0);
+            this.pictureEdit2.Name = "pictureEdit2";
+            this.pictureEdit2.Visible = false; // true;
             // 
             // navigationPage_Dosya
             // 
@@ -1295,6 +1376,10 @@
             ((System.ComponentModel.ISupportInitialize)(this.tButtonEdit_AutoCorps)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.tButtonEdit_DPI)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.imageComboBox_Boyut)).EndInit();
+
+            ((System.ComponentModel.ISupportInitialize)(this.imageComboBox_Tarayici)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.imageComboBox_WebCam)).EndInit();
+
             ((System.ComponentModel.ISupportInitialize)(this.imageComboBox_ResimTuru)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.tButtonEdit_Quality)).EndInit();
             //((System.ComponentModel.ISupportInitialize)(this.repositoryItemZOOM)).EndInit();
@@ -1304,6 +1389,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerControl1)).EndInit();
             this.splitContainerControl1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pictureEdit1.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureEdit2)).BeginInit();
             this.navigationPage_Dosya.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerControl2)).EndInit();
             this.splitContainerControl2.ResumeLayout(false);
@@ -1335,11 +1421,20 @@
         private DevExpress.XtraBars.Navigation.NavigationPage navigationPage_Resim;
         private DevExpress.XtraEditors.SplitContainerControl splitContainerControl1;
         private DevExpress.XtraEditors.PictureEdit pictureEdit1;
+        private System.Windows.Forms.PictureBox pictureEdit2;
         private DevExpress.XtraBars.Navigation.NavigationPage navigationPage_Dosya;
         private DevExpress.XtraBars.Ribbon.RibbonPage ribbonPage_Dosya;
         private DevExpress.XtraBars.Ribbon.RibbonPageGroup PageGroupViewLayouts;
-        private DevExpress.XtraBars.BarToggleSwitchItem checkEdit_Tarayici;
+
+        //private DevExpress.XtraBars.BarToggleSwitchItem checkEdit_Tarayici;
+        private DevExpress.XtraBars.BarEditItem barEditItem_Tarayici;
+        private DevExpress.XtraBars.BarEditItem barEditItem_WebCam;
+        private DevExpress.XtraEditors.Repository.RepositoryItemImageComboBox imageComboBox_Tarayici;
+        private DevExpress.XtraEditors.Repository.RepositoryItemImageComboBox imageComboBox_WebCam;
+
         private DevExpress.XtraBars.BarButtonItem btn_TarayicidanAl;
+        private DevExpress.XtraBars.BarButtonItem btn_WebCamdenAl;
+        private DevExpress.XtraBars.BarButtonItem btn_WebCamResimCek;
         private DevExpress.XtraBars.BarButtonItem btn_DosyadanAl;
         private DevExpress.XtraBars.BarButtonItem btn_DosyayaKaydet;
         //private DevExpress.XtraBars.BarButtonItem btn_DatabaseKaydet;

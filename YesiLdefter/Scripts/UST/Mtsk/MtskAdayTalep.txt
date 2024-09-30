@@ -110,8 +110,6 @@ commit transaction
 /*CreateTableEnd*/
 
 
-/*CreateTrigger*/
-
 ALTER TRIGGER [dbo].[trg_MtskAdayTalep] on [dbo].[MtskAdayTalep]
 AFTER INSERT, UPDATE
 AS BEGIN
@@ -290,50 +288,57 @@ AS BEGIN
               set @yAdayId = @mevcutAdayId
       end -- if @yAdayId = 0
 
+	  if ((@yAdayId > 0) and (@yTcNo = ''))
+	  begin
+          Select @yTcNo = isnull(TcNo, '') from MtskAday 
+          Where Id = @yAdayId
+
+		  if (@yTcNo <> '')
+		  begin
+		      Update MtskAdayTalep set TcNo = @yTcNo
+			  Where Id = @TalepId
+		  end
+	  end
+
       if (@yMevcutSertifikaTipiId < 0) set @yMevcutSertifikaTipiId = 0
       if (@yMevcutSertifikaTipiId > 9000)
       begin
 	      if (@yMevcutSertifikaTipiId = 9022) set @yIsMevcut125ccAlti = 1 -- A1 125 cc altı
 		  if (@yMevcutSertifikaTipiId <> 9200) -- 100 Ceza
-		      set @yIsMevcutOtomatik = [dbo].[fnc_getSertifikaIsOtomatik](@yMevcutSertifikaTipiId)
+		  set @yIsMevcutOtomatik = [dbo].[fnc_getSertifikaIsOtomatik](@yMevcutSertifikaTipiId)
 	      set @yMevcutSertifikaTipiId = [dbo].[fnc_getSertifikaId](@yMevcutSertifikaTipiId)
       end
       if (@yIstenenSertifikaTipiId > 9000)
       begin
 	      if (@yIstenenSertifikaTipiId = 9022) set @yIs125ccAlti = 1 -- A1 125 cc altı
 		  if (@yIstenenSertifikaTipiId <> 9200) -- 100 Ceza
-              set @yIsOtomatik = [dbo].[fnc_getSertifikaIsOtomatik](@yIstenenSertifikaTipiId)
+          set @yIsOtomatik = [dbo].[fnc_getSertifikaIsOtomatik](@yIstenenSertifikaTipiId)
 	      set @yIstenenSertifikaTipiId = [dbo].[fnc_getSertifikaId](@yIstenenSertifikaTipiId)
       end
 
 	  set @yKayitTipiId = [dbo].[fnc_getSertifikaKayitTipi]( @TalepId )
 	  
-/*
-      --if (@yKayitTipiId = 2) set @yMebbisDurumTipiId = 0
-
-      if (@yKayitTipiId = 0) or
-         (@yKayitTipiId = 1) or
-         (@yKayitTipiId = 2) or
-         (@yKayitTipiId = 3) set @yIsActive = 1
-
-      if (@yKayitTipiId = 4) or
-         (@yKayitTipiId = 5) or
-         (@yKayitTipiId = 6) or
-         (@yKayitTipiId = 7) set @yIsActive = 0
-*/
       if ((@yBiyometrikGeldi = 1) and
           (@yBasvuruFotoCekildi = 1) and
           (@yOgrenimGeldi = 1) and
-          (@ySaglikGeldi = 1) and
           (@yAdliSicilGeldi = 1) and
+          (@ySaglikGeldi = 1) and
           (@yImzaAlindi = 1) and
           (@ySozlesmeYapildi = 1) and
           (@yAdresAlindi = 1)) 
            set @yBelgelerGeldi = 1
       else set @yBelgelerGeldi = 0
 
-
-	  if ((@eAdayId <> @yAdayId) or
+	  -- @yAdayId   : ilk mebbisden kayıt alındığında adayId = 0, MtskAday yeni kayıt oluşturuluyor ve adayId belli oluyor
+      -- @yIsActive : kayıtTipiId ye göre IsActive değişiyor
+      -- @newTamAdi : ad veya soyad değişebiliyor
+      -- @yMevcutSertifikaTipiId or
+      -- @yIsMevcutOtomatik or
+      -- @yIstenenSertifikaTipiId or
+      -- @yIsOtomatik or 
+      -- @yIs125ccAlti : ( xx Manuel veya xx Otomatik ) şeklinde kayıt edilebiliyor 
+	  
+	  if ((@eAdayId <> @yAdayId) or 
           (@eIsActive <> @yIsActive) or
 	      (@eTamAdi <> @newTamAdi) or
 		  (@eMevcutSertifikaTipiId <> @yMevcutSertifikaTipiId) or
@@ -366,7 +371,8 @@ AS BEGIN
       end
 
 	  Execute [dbo].[prc_MtskAdayTablesCreate] @TalepId
-	  Execute [dbo].[prc_MtskAdayTakipSingleSet] @TalepId
+	  Execute [dbo].[prc_MtskAdayTakipTalepKaydiSingleSet] @TalepId
+	  Execute [dbo].[prc_MtskAdayTalepYasiniHesapla] @TalepId
 
       FETCH NEXT FROM talepCursor_ INTO @TalepId
 	  print 'while end'
@@ -376,8 +382,8 @@ AS BEGIN
   -- diğer işlemleri yapmaya başlasın
   if (@DbUpdatesIsActive = 0)
   begin
-	  print 'veri transferi harici işler'
-      -- MtskDonemKontrolu
+	  --print 'veri transferi harici işler'
+      Execute [dbo].[prc_MtskAdayTakipTalepKaydiMultiSet] @yFirmId 
       --EXECUTE [dbo].[prc_MtskDonemKontrolu] @yFirmId 
       --EXECUTE [dbo].[prc_MtskAdayTakip] @yFirmId
   end
@@ -390,6 +396,7 @@ AS BEGIN
 END -- create trigger
 
 /*CreateTriggerEnd*/
+
 
 
 

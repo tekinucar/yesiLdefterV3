@@ -1,0 +1,105 @@
+﻿/*CreateFunction*/
+
+CREATE FUNCTION [dbo].[fnc_getSertifikaDeneyimSarti]( @TalepId int)  
+RETURNS smallInt
+AS   
+BEGIN 
+  -- [Lkp].[MtskAdayTakipDeneyimSartiTipi] 
+  -- 1,    N'Deneyim şartı yok'
+  -- 2,    N'Deneyim şartına uygun'
+  -- 3,    N'Deneyim şartına uygun değil'
+  
+  --declare @TalepId int
+  --set @TalepId = 310
+
+  declare @yMevcutSertifikaTipiId smallInt = 0
+  declare @yIstenenSertifikaTipiId smallInt = 0
+  declare @isEnAz bit
+  declare @deneyimSertifikaTipiId smallInt = 0
+  declare @deneyimSartiTipiId smallInt = 0
+
+  Select 
+    @yMevcutSertifikaTipiId = isnull(ins.MevcutSertifikaTipiId,0)
+   ,@yIstenenSertifikaTipiId = isnull(ins.IstenenSertifikaTipiId,0)
+  From  MtskAdayTalep as ins, MtskAday as aday
+  Where ins.AdayId = aday.Id
+  and ins.Id = @TalepId
+
+  Select top 1 @isEnAz = isnull(saat.IsEnAz,0), @deneyimSertifikaTipiId = isnull(saat.DeneyimSertifikaTipiId,0) 
+  From MtskSaatUygulama as saat
+       left outer join GecerlilikTarihi as gt on ( saat.GecerlilikTarihiId = gt.Id )
+  Where saat.IstenenSertifikaTipiId = @yIstenenSertifikaTipiId
+  and   gt.KonuTipiId = 21102 -- Uygulama saatleri
+  order by gt.Tarih desc
+
+  --print '   Mevcut ehliyet : ' + convert(varchar(5), @yMevcutSertifikaTipiId) 
+  --print '   isEnAz : ' + convert(varchar(3), @isEnAz) + ',  deneyimSertifikaTipiId : ' + convert(varchar(5), @deneyimSertifikaTipiId)
+  
+  -- Deneyim şartı yok
+  if (@deneyimSertifikaTipiId = 0)
+      set @deneyimSartiTipiId = 1
+
+  -- Deneyim isteniyor fakat mevcut ehliyet yok ise	   
+  if ((@deneyimSertifikaTipiId > 0) and (@yMevcutSertifikaTipiId = 0))
+      set @deneyimSartiTipiId = 3
+
+  if ((@deneyimSertifikaTipiId > 0) and (@isEnAz = 0))
+  begin
+      if (@deneyimSertifikaTipiId = @yMevcutSertifikaTipiId)
+	       set @deneyimSartiTipiId = 2 -- uygun
+	  else set @deneyimSartiTipiId = 3 -- uygun değil
+  end;
+
+
+  if ((@deneyimSertifikaTipiId > 0) and (@isEnAz = 1) and (@yMevcutSertifikaTipiId > 0)) 
+  begin
+      -- kafadan uygun değil dedik
+	  set @deneyimSartiTipiId = 3 -- uygun değil
+      
+	  declare @deneyimName varchar(5)  
+	  Select  @deneyimName = trim(replace(replace(replace(SertifikaTipi, 'Sınıfı Sertifika', ''), '(Manuel)',''), '(Otomatik)',''))
+	  from Lkp.MtskSertifikaTipi
+	  Where Id = @deneyimSertifikaTipiId
+
+	  --print '   @deneyimName = >' + @deneyimName + '<'
+	  
+      declare @serId int
+      declare @serName varchar(30)
+      declare serCursor CURSOR
+      for 
+      Select Id, SertifikaTipi
+      from Lkp.MtskSertifikaTipi
+      Where Id > 0
+      order by SertifikaTipi;
+  
+      OPEN serCursor;
+  
+      FETCH NEXT
+      FROM serCursor
+      INTO @serId, @serName;
+	  
+      While @@FETCH_STATUS = 0
+      begin
+	      if (charindex(@deneyimName, @serName) > 0)-- and (charindex(@deneyimName, @serName) < 4))
+          begin 
+	          --print '   ' + convert(varchar(5), @serId) + '          ' + @serName
+              if (@serId = @yMevcutSertifikaTipiId)
+			      set @deneyimSartiTipiId = 2 -- uygun 
+          end -- if
+          --print  '   Uygunluk : ' + convert(varchar(2), @deneyimSartiTipiId) +  '  ' + @serName           
+		  if (@deneyimSartiTipiId = 2) break;
+		  FETCH NEXT FROM serCursor INTO @serId, @serName;
+      end -- While
+
+      Close serCursor;
+      DealLocate serCUrsor;
+
+  end -- if ((@deneyimSertifikaTipiId > 0) and (@isEnAz = 0))
+
+  --print @deneyimSartiTipiId;
+  RETURN @deneyimSartiTipiId;
+END; -- function
+
+/*CreateFunctionEnd*/
+
+
