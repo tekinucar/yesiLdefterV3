@@ -553,12 +553,13 @@ namespace Tkn_Events
 
             /// Yeni Süreç ----
             /// 
+            v.SP_NewWorkType = "NEW";
+            
             vSubWork vSW = new vSubWork();
             vSW._01_tForm = (Form)sender;
             vSW._02_TableIPCode = "";
             vSW._03_WorkTD = v.tWorkTD.NewAndRef;
             vSW._04_WorkWhom = v.tWorkWhom.All;
-            
             ev.tSubWork_(vSW);
 
             //v.con_AutoNewRecords = false;

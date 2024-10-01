@@ -115,6 +115,7 @@
             this.barCheckItem_Otomatik = new DevExpress.XtraBars.BarCheckItem();
             this.barCheckItem_Manuel = new DevExpress.XtraBars.BarCheckItem();
             this.barButtonItem_Vazgec = new DevExpress.XtraBars.BarCheckItem(); // BarButtonItem
+            this.btnKirpOnayi = new DevExpress.XtraBars.BarButtonItem();
             this.barStaticItem4 = new DevExpress.XtraBars.BarStaticItem();
             this.barStaticItem14 = new DevExpress.XtraBars.BarStaticItem();
             this.barStaticItem5 = new DevExpress.XtraBars.BarStaticItem();
@@ -259,6 +260,7 @@
             this.barCheckItem_Otomatik,
             this.barCheckItem_Manuel,
             this.barButtonItem_Vazgec,
+            this.btnKirpOnayi,
             this.barStaticItem4,
             this.barStaticItem14,
             this.barStaticItem5,
@@ -332,7 +334,7 @@
             this.btn_TarayicidanAl.Caption = "Tarayıcıdan Al";
             this.btn_TarayicidanAl.Id = 3;
             this.btn_TarayicidanAl.Name = "btn_TarayicidanAl";
-            this.btn_TarayicidanAl.RibbonStyle = DevExpress.XtraBars.Ribbon.RibbonItemStyles.Large;
+            //this.btn_TarayicidanAl.RibbonStyle = DevExpress.XtraBars.Ribbon.RibbonItemStyles.Large;
             this.btn_TarayicidanAl.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btn_TarayicidanAl_ItemClick);
             // 
             // btn_WebCamdenAl
@@ -365,7 +367,7 @@
             this.btn_DosyayaKaydet.Caption = "Dosyaya Kaydet";
             this.btn_DosyayaKaydet.Id = 6;
             this.btn_DosyayaKaydet.Name = "btn_DosyayaKaydet";
-            this.btn_DosyayaKaydet.RibbonStyle = DevExpress.XtraBars.Ribbon.RibbonItemStyles.Large;
+            //this.btn_DosyayaKaydet.RibbonStyle = DevExpress.XtraBars.Ribbon.RibbonItemStyles.Large;
             this.btn_DosyayaKaydet.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btn_DosyayaKaydet_ItemClick);
             // 
             // btn_DatabaseKaydet
@@ -806,14 +808,6 @@
             this.barStaticItem_H.TextAlignment = System.Drawing.StringAlignment.Near;
             this.barStaticItem_H.Width = 80;
             // 
-            // barButtonItem_Kirp
-            // 
-            this.barButtonItem_Kirp.Caption = "Kırp ";
-            this.barButtonItem_Kirp.Id = 16;
-            this.barButtonItem_Kirp.Name = "barButtonItem_Kirp";
-            this.barButtonItem_Kirp.SmallWithTextWidth = 90;
-            this.barButtonItem_Kirp.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.barButtonItem_Kirp_ItemClick);
-            // 
             // barButtonItem2
             // 
             this.barButtonItem2.Caption = "barButtonItem2";
@@ -842,6 +836,7 @@
             this.barCheckItem_Otomatik.Id = 20;
             this.barCheckItem_Otomatik.Name = "barCheckItem_Otomatik";
             this.barCheckItem_Otomatik.SmallWithTextWidth = 90;
+            this.barCheckItem_Otomatik.CheckedChanged += new DevExpress.XtraBars.ItemClickEventHandler(this.barCheckItem_Otomatik_ItemClick);
             // 
             // barCheckItem_Manuel
             // 
@@ -851,6 +846,16 @@
             this.barCheckItem_Manuel.Id = 21;
             this.barCheckItem_Manuel.Name = "barCheckItem_Manuel";
             this.barCheckItem_Manuel.SmallWithTextWidth = 90;
+            this.barCheckItem_Manuel.CheckedChanged += new DevExpress.XtraBars.ItemClickEventHandler(this.barCheckItem_Manuel_ItemClick);
+            // 
+            // barButtonItem_Kirp
+            // 
+            this.barButtonItem_Kirp.Caption = "Kırp ";
+            this.barButtonItem_Kirp.Id = 16;
+            this.barButtonItem_Kirp.Name = "barButtonItem_Kirp";
+            this.barButtonItem_Kirp.SmallWithTextWidth = 90;
+            this.barButtonItem_Kirp.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.barButtonItem_Kirp_ItemClick);
+            this.barButtonItem_Kirp.Enabled = false;
             // 
             // barButtonItem_Vazgec
             // 
@@ -862,6 +867,14 @@
             this.barButtonItem_Vazgec.Name = "barButtonItem_Vazgec";
             this.barButtonItem_Vazgec.SmallWithTextWidth = 90;
             this.barButtonItem_Vazgec.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.barButtonItem_Vazgec_ItemClick);
+            //
+            // btnKirpOnayi
+            //
+            this.btnKirpOnayi.Caption = "Kırpmayı onayla";
+            this.btnKirpOnayi.Id = 25;
+            this.btnKirpOnayi.Name = "btnKirpOnayi";
+            this.btnKirpOnayi.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnKirpOnayi_ItemClick);
+            this.btnKirpOnayi.Enabled = false;
             // 
             // barStaticItem4
             // 
@@ -894,12 +907,12 @@
             this.ribbonPageGroup1.ItemLinks.Add(this.barEditItem_Tarayici);
             this.ribbonPageGroup1.ItemLinks.Add(this.barEditItem_WebCam);
             this.ribbonPageGroup1.ItemLinks.Add(this.btn_TarayicidanAl, true);
-            this.ribbonPageGroup1.ItemLinks.Add(this.btn_WebCamdenAl,true);
+            this.ribbonPageGroup1.ItemLinks.Add(this.btn_WebCamdenAl);
             this.ribbonPageGroup1.ItemLinks.Add(this.btn_WebCamResimCek);
             this.ribbonPageGroup1.ItemLinks.Add(this.btn_DosyadanAl,true);
-            this.ribbonPageGroup1.ItemLinks.Add(this.btn_DosyayaKaydet,true);
-            this.ribbonPageGroup1.ItemLinks.Add(btn_DatabaseKaydet);
-            this.ribbonPageGroup1.ItemLinks.Add(this.btn_FarkliKaydet, true);
+            this.ribbonPageGroup1.ItemLinks.Add(btn_DatabaseKaydet,true);
+            this.ribbonPageGroup1.ItemLinks.Add(this.btn_DosyayaKaydet, true);
+            this.ribbonPageGroup1.ItemLinks.Add(this.btn_FarkliKaydet);
             this.ribbonPageGroup1.ItemLinks.Add(this.btn_ResimSil);
             this.ribbonPageGroup1.Name = "ribbonPageGroup1";
             this.ribbonPageGroup1.Text = "Resim Yükleme İşlemleri";
@@ -919,15 +932,16 @@
             // 
             this.ribbonPageGroup5.ItemLinks.Add(this.barCheckItem_Otomatik);
             this.ribbonPageGroup5.ItemLinks.Add(this.barCheckItem_Manuel);
-            this.ribbonPageGroup5.ItemLinks.Add(this.barButtonItem_Vazgec);
+            this.ribbonPageGroup5.ItemLinks.Add(this.barButtonItem_Kirp);
 
             this.ribbonPageGroup5.ItemLinks.Add(this.barStaticItem_X, true);
             this.ribbonPageGroup5.ItemLinks.Add(this.barStaticItem_Y);
-            this.ribbonPageGroup5.ItemLinks.Add(this.barButtonItem_Kirp);
+            this.ribbonPageGroup5.ItemLinks.Add(this.barButtonItem_Vazgec);
 
             this.ribbonPageGroup5.ItemLinks.Add(this.barStaticItem_H, true);
             this.ribbonPageGroup5.ItemLinks.Add(this.barStaticItem_W);
-            this.ribbonPageGroup5.ItemLinks.Add(this.barStaticItem4);
+            this.ribbonPageGroup5.ItemLinks.Add(this.btnKirpOnayi);
+            //this.ribbonPageGroup5.ItemLinks.Add(this.barStaticItem4);
             this.ribbonPageGroup5.Name = "ribbonPageGroup5";
             this.ribbonPageGroup5.Text = "Resim Ölçüleri";
             // 
@@ -1519,6 +1533,7 @@
         private DevExpress.XtraBars.BarStaticItem barStaticItem4;
         private DevExpress.XtraBars.BarStaticItem barStaticItem14;
         private DevExpress.XtraBars.BarStaticItem barStaticItem5;
+        private DevExpress.XtraBars.BarButtonItem btnKirpOnayi;
 
         private DevExpress.XtraBars.BarEditItem btn_Quality;
         private DevExpress.XtraEditors.Repository.RepositoryItemButtonEdit tButtonEdit_Quality;

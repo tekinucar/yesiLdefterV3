@@ -94,6 +94,9 @@ namespace YesiLdefter
         string imagesSourceTableIPCode = "";
         string imagesSourceFieldName = "";
         string imagesMasterTableIPCode = "";
+        string tarayiciYokMesaji = "Bilgisayarınıza bağlı tarayıcı tespit edilemedi.";
+        bool IsActiveOlcek = false;
+        string olcekName = "";
 
         public ms_Pictures()
         {
@@ -111,7 +114,10 @@ namespace YesiLdefter
             ImagesMasterTableIPCode(v.tResimEditor);
 
             AddScannerList();
+            
             AddWebCamList();
+
+            printImageProperties();
 
             startCropX = 0;
             startCropY = 0;
@@ -156,7 +162,7 @@ namespace YesiLdefter
             }
 
             if (scanNo == 1) // tarayıcı bulamadıysa
-                imageComboBox_Tarayici.Properties.Items.Add(new DevExpress.XtraEditors.Controls.ImageComboBoxItem("Bilgisayarınıza bağlı tarayıcı tespit edilemedi.", (short)1, -1));
+                imageComboBox_Tarayici.Properties.Items.Add(new DevExpress.XtraEditors.Controls.ImageComboBoxItem(tarayiciYokMesaji, (short)1, -1));
 
             barEditItem_Tarayici.EditValue = (short)1;
             //imageComboBox_Tarayici.Items[0].Value = 1;
@@ -971,29 +977,30 @@ namespace YesiLdefter
 
         private void btn_TarayicidanAl_ItemClick(object sender, ItemClickEventArgs e)
         {
-            if (vcd.IsRunning) vcd.Stop();
-            return;
+            string scannerName = barEditItem_Tarayici.EditValue.ToString();
+
+            if (scannerName == tarayiciYokMesaji)
+            {
+                t.FlyoutMessage(this, "Dikkat : ", tarayiciYokMesaji);
+                return;
+            }
             //
             this.hScrollBar = null;
             this.vScrollBar = null;
             this.viewInfo = null;
 
+            ImageFile ImgFile = null;
+
             try
             {
-                tToolBox t = new tToolBox();
-
                 //Tarayıcı kontrolü, bağlı değilse catch e düşer.
 
-                ImageFile ImgFile;
-
+                /*    
                 WIA.CommonDialog dialog = new WIA.CommonDialog();
 
                 //Tarayıcı bağlı değil ise img alınırken hataya düşüyor, catch ile yakalanıp tarayıcı olmadığı basılıyor.
                 //if (((DevExpress.XtraEditors.CheckEdit)checkEdit_Tarayici).Checked)
                 
-                /// Tarayıcı Listesi burada
-                
-                /*
                 if (this.checkEdit_Tarayici.Checked)
                 {
                     //Her girişte Cihaz seçimi yapılacaksa.
@@ -1001,11 +1008,10 @@ namespace YesiLdefter
                 }
                 else
                 {
-                */
                     //cihaz seçimi yapılmaksızın seçili cihaz ile sürekli devam edilecekse.
                     ImgFile = dialog.ShowAcquireImage(WiaDeviceType.ScannerDeviceType, WiaImageIntent.ColorIntent, WiaImageBias.MinimizeSize, "{00000000-0000-0000-0000-000000000000}", false, true, false);
                 //}
-                
+                */
 
 
                 try
@@ -1013,10 +1019,40 @@ namespace YesiLdefter
                     // exenin bulunduğu path altına images isimli path içine guid isimli dosya hazırlanıyor
                     string ImagesPath = t.Find_Path("images") + tFileGuidName + ".jpg";
 
-                    //Tarama bölümüne girip iptal dedikten sonra işlemler devam ediyor ve hataya sebebiyet veriyor. Kontrol altına alındı.img.savefile da patlıyor iptal dendiğinde.
-                    ImgFile.SaveFile(ImagesPath);
+                    DeviceManager deviceManager = new DeviceManager();
+                    Device device = null;
 
-                    pictureEdit1.Image = Image.FromFile(ImagesPath);
+                    foreach (DeviceInfo deviceInfo in deviceManager.DeviceInfos)
+                    {
+                        if (deviceInfo.Type == WiaDeviceType.ScannerDeviceType && 
+                            deviceInfo.Properties["Name"].get_Value().ToString() == scannerName)
+                        {
+                            device = deviceInfo.Connect();
+                            break;
+                        }
+                    }
+
+                    if (device != null)
+                    {
+                        Item item = device.Items[1];
+                        WIA.CommonDialog dialog = new WIA.CommonDialog();
+                
+                        //ImgFile = (ImageFile)dialog.ShowTransfer(item, WiaFormatJPEG.WiaFormatJPEG, false);
+                        ImgFile = (ImageFile)dialog.ShowAcquireImage(WiaDeviceType.ScannerDeviceType, WiaImageIntent.ColorIntent, WiaImageBias.MinimizeSize, "{00000000-0000-0000-0000-000000000000}", false, true, false);
+
+                        ImgFile.SaveFile(ImagesPath);
+                        MessageBox.Show("Tarama işlemi tamamlandı.");
+                    }
+                    else
+                    {
+                        MessageBox.Show("Tarayıcı bulunamadı.");
+                    }
+
+                    //Tarama bölümüne girip iptal dedikten sonra işlemler devam ediyor ve hataya sebebiyet veriyor. Kontrol altına alındı.img.savefile da patlıyor iptal dendiğinde.
+                    //ImgFile.SaveFile(ImagesPath);
+
+                    if (ImgFile != null)
+                        pictureEdit1.Image = Image.FromFile(ImagesPath);
 
                     newImageProperties(ImagesPath);
 
@@ -1182,7 +1218,8 @@ namespace YesiLdefter
             {
                 tamAdi = dsDataTarget.Tables[0].Rows[dNTarget.Position]["TamAdiSoyadi"].ToString();
                 tamAdi = tamAdi.Replace(" ", "");
-                tamAdi = tamAdi + "_" + dsDataTarget.Tables[0].Rows[dNTarget.Position]["TcNo"].ToString();
+                tamAdi = tamAdi + "_" + dsDataTarget.Tables[0].Rows[dNTarget.Position]["TcNo"].ToString() 
+                                + "_" + dsDataTarget.Tables[0].Rows[dNTarget.Position]["LkpFieldName"].ToString();
             }
             return tamAdi;
         }
@@ -1268,8 +1305,6 @@ namespace YesiLdefter
 
         }
 
-
-
         #endregion Resim Edit
 
         #region pictureEdit1 events
@@ -1292,8 +1327,8 @@ namespace YesiLdefter
 
             if (e.Button == System.Windows.Forms.MouseButtons.Left)
             {
-                if ((barCheckItem_Manuel.Checked) ||
-                    (barCheckItem_Otomatik.Checked))
+                //if ((barCheckItem_Manuel.Checked) || (barCheckItem_Otomatik.Checked))
+                if (this.IsActiveOlcek)
                 {
                     this.zoomPercent = (int)pictureEdit1.Properties.ZoomPercent;
 
@@ -1332,13 +1367,15 @@ namespace YesiLdefter
 
             if (e.Button == System.Windows.Forms.MouseButtons.Left)
             {
-                if (barCheckItem_Manuel.Checked)
+                //if (barCheckItem_Manuel.Checked)
+                if (this.olcekName == "Manuel")
                 {
                     cropWidth = e.X - cropX;
                     cropHeight = e.Y - cropY;
                 }
 
-                if (barCheckItem_Otomatik.Checked)
+                //if (barCheckItem_Otomatik.Checked)
+                if (this.olcekName == "Auto")
                 {
                     cropX = e.X;
                     cropY = e.Y;
@@ -1346,14 +1383,11 @@ namespace YesiLdefter
                     cropHeight = autoCropHeight;
                 }
 
-                barButtonItem_Vazgec.Enabled = true;
-
                 Cursor = Cursors.Cross;
             }
 
-            if ((e.Button == System.Windows.Forms.MouseButtons.Left) ||
-                (barCheckItem_Manuel.Checked) ||
-                (barCheckItem_Otomatik.Checked))
+            if ((e.Button == System.Windows.Forms.MouseButtons.Left) || (this.IsActiveOlcek))
+                //(barCheckItem_Manuel.Checked) || (barCheckItem_Otomatik.Checked))
             {
                 drawRectangle();
             }
@@ -1392,8 +1426,8 @@ namespace YesiLdefter
         {
             pictureEdit1.Refresh();
 
-            if ((barCheckItem_Manuel.Checked) ||
-                (barCheckItem_Otomatik.Checked))
+            //if ((barCheckItem_Manuel.Checked) ||  (barCheckItem_Otomatik.Checked))
+            if (this.IsActiveOlcek)
             {
                 //if (this.zoomPercent <= 0)
                 //    this.zoomPercent = (int)pictureEdit1.Properties.ZoomPercent;
@@ -1402,7 +1436,8 @@ namespace YesiLdefter
                 int _cropWidth = 0;
                 int _cropHeight = 0;
 
-                if (barCheckItem_Otomatik.Checked)
+                //if (barCheckItem_Otomatik.Checked)
+                if (this.olcekName == "Auto")
                 {
                     oran = ((decimal)this.zoomPercent / 100);
                     _cropWidth = (int)((decimal)cropWidth * oran);
@@ -1419,44 +1454,85 @@ namespace YesiLdefter
                 pictureEdit1.CreateGraphics().DrawLine(cropPen2, 
                     cropX + (_cropWidth / 2), cropY, 
                     cropX + (_cropWidth / 2), cropY + _cropHeight);
-            }
 
-            barStaticItem_H.Caption = "Yükseklik: " + cropHeight.ToString();
-            barStaticItem_W.Caption = "Genişlik : " + cropWidth.ToString();
+
+                barStaticItem_H.Caption = "Yükseklik: " + cropHeight.ToString();
+                barStaticItem_W.Caption = "Genişlik : " + cropWidth.ToString();
+
+            } else
+            {
+                barStaticItem_H.Caption = "Yükseklik: ";
+                barStaticItem_W.Caption = "Genişlik : ";
+            }
         }
 
         #endregion pictureEdit1 events
 
 
-        #region Vazgec Click
         
-        private void barButtonItem_Vazgec_ItemClick(object sender, ItemClickEventArgs e)
-        {
-            barCheckItem_Manuel.Checked = false;
-            barCheckItem_Otomatik.Checked = false;
 
-            /// ne yaparsan yap ilk orjinal kalite yakalnmıyor
-            /// bu nedenle tekrar dosyadan okundu
-            /// 
-            
-            if (OriginalImage != null)
-                pictureEdit1.Image = new Bitmap(OriginalImage, OriginalImage.Width, OriginalImage.Height);
-
-            barButtonItem_Vazgec.Enabled = false;
-
-            printImageProperties();
-        }
-
-        #endregion Vazgeç Click
 
         #region Corps - Kırp
 
+        private void barCheckItem_Otomatik_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            kirpmaIslemi(true);
+            this.olcekName = "Auto";
+        }
+        private void barCheckItem_Manuel_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            kirpmaIslemi(true);
+            this.olcekName = "Manuel";
+        }
+        private void kirpmaIslemi(bool IsActive)
+        {
+            this.barCheckItem_Otomatik.Enabled = !IsActive;
+            this.barCheckItem_Manuel.Enabled = !IsActive;
+
+            this.barButtonItem_Kirp.Enabled = IsActive;
+            this.barButtonItem_Vazgec.Enabled = IsActive;
+
+            this.IsActiveOlcek = IsActive;
+
+            if (IsActive)
+                checkedOrjinalImageControl();
+            else
+                this.btnKirpOnayi.Enabled = false;
+        }
+
         private void barButtonItem_Kirp_ItemClick(object sender, ItemClickEventArgs e)
         {
-            if ((barCheckItem_Manuel.Checked == false) &&
-                (barCheckItem_Otomatik.Checked == false)) return;
-
             myImageCrop();
+
+            kirpmaIslemi(false);
+
+            printImageProperties();
+
+            this.btnKirpOnayi.Enabled = true;
+            this.barButtonItem_Vazgec.Enabled = true;
+        }
+        private void barButtonItem_Vazgec_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            /// ne yaparsan yap ilk orjinal kalite yakalnmıyor
+            /// bu nedenle tekrar dosyadan okundu
+            ///
+            if (OriginalImage != null)
+                pictureEdit1.Image = new Bitmap(OriginalImage, OriginalImage.Width, OriginalImage.Height);
+
+            printImageProperties();
+
+            kirpmaIslemi(false);
+
+        }
+        private void btnKirpOnayi_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            
+            kirpmaIslemi(false);
+            this.btnKirpOnayi.Enabled = false;
+
+            printImageProperties();
+
+            
         }
 
         private void btn_AutoCorps_ButtonClick(object sender, DevExpress.XtraEditors.Controls.ButtonPressedEventArgs e)
@@ -1541,7 +1617,6 @@ namespace YesiLdefter
                 cropWidth = 0;
                 cropHeight = 0;
                 Cursor = Cursors.Default;
-                barButtonItem_Vazgec.Enabled = true;
                 
                 printImageProperties();
 
@@ -1668,7 +1743,6 @@ namespace YesiLdefter
                 pictureEdit1.Image = _img;
 
                 Cursor = Cursors.Default;
-                barButtonItem_Vazgec.Enabled = true;
                 //workingImage.Dispose();
 
                 printImageProperties();
@@ -2056,6 +2130,8 @@ namespace YesiLdefter
 
         private void printImageProperties()
         {
+            /// Resim Hakkında group
+            ///
             if (pictureEdit1.Image == null) //(tImageProperties.originalImage == null)
             {
                 barStaticItem_imgKb.Caption = "0.0 kb";
@@ -2190,6 +2266,15 @@ namespace YesiLdefter
         {
             return
                imageCoord * zoomPercent / 100 - (scrollBar.Visible ? scrollBar.Value : -pictureStart);
+        }
+
+        private void checkedOrjinalImageControl()
+        {
+            if ((pictureEdit1.Image != null) && (OriginalImage == null))
+            {
+                OriginalImage = new Bitmap(pictureEdit1.Image, pictureEdit1.Image.Width, pictureEdit1.Image.Height);
+                OriginalImage.SetResolution(pictureEdit1.Image.HorizontalResolution, pictureEdit1.Image.VerticalResolution);
+            }
         }
 
         #endregion subFunctions

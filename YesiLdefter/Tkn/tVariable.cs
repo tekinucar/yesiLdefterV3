@@ -283,16 +283,12 @@ namespace Tkn_Variable
         public static Boolean SP_ConnBool_FirmMain = false;
 
         public static string SP_Conn_Caption { get; set; }
-
         public static string SP_Conn_Text_Master { get; set; }
         //public static string SP_Conn_Text_Manager { get; set; }
         public static string SP_Conn_Text_MainManager { get; set; }
         //public static string SP_Conn_Text_Project { get; set; }
-
-
+        public static string SP_NewWorkType = "NEW";
         
-        
-
         public static Boolean IsWaitOpen = false;
         public static Boolean SP_OpenApplication = false;
         public static Boolean SP_ConnectBool_TR = false;

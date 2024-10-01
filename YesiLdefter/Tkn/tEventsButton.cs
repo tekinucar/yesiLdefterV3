@@ -801,8 +801,8 @@ namespace Tkn_Events
 
         public bool newData(Form tForm, string tableIPCode)
         {
-            string workType = "NEW";
-            bool onay = newDataExecute(tForm, tableIPCode, null, v.tButtonType.btNone, workType);
+            //string workType = "NEW";
+            bool onay = newDataExecute(tForm, tableIPCode, null, v.tButtonType.btNone, v.SP_NewWorkType);
 
             return onay;
         }
@@ -823,7 +823,7 @@ namespace Tkn_Events
             return onay;
         }
 
-        private bool newDataExecute(Form tForm, string tableIPCode, List<PROP_NAVIGATOR> propList_, v.tButtonType buttonType, string wortType)
+        private bool newDataExecute(Form tForm, string tableIPCode, List<PROP_NAVIGATOR> propList_, v.tButtonType buttonType, string workType)
         /*string keyFName,string Parent_FName, string Value) */
         {
             //tToolBox t = new tToolBox();
@@ -956,10 +956,11 @@ namespace Tkn_Events
             if (dN.IsAccessible == true)
             {
                 // subView var ise silelim
-                if (wortType == "NEW")
+                if (workType == "NEW")
                     t.tRemoveTabPagesForNewData(tForm);
 
                 // master-detail çalıştıralım
+                v.SP_NewWorkType = workType;
                 tNewDataAfterSubWork(tForm, tableIPCode);
             }
             // setFocus ( SubWork hariç )
