@@ -328,7 +328,6 @@ namespace YesiLdefter
             v.EXE_TempPath = v.EXE_DRIVE + "UstadYazilim\\Temp";
             v.EXE_ScriptsPath = v.EXE_DRIVE + "UstadYazilim\\Scripts";
 
-
             //MakeFolderWritable(v.EXE_PATH);
 
             System.IO.Directory.CreateDirectory(v.EXE_TempPath);

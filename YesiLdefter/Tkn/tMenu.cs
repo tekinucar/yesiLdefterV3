@@ -1025,7 +1025,7 @@ namespace Tkn_Menu
         public void alterRibbon(DevExpress.XtraBars.Ribbon.RibbonControl mControl, string proje)
         {
             tEvents ev = new tEvents();
-            tReport rapor = new tReport();
+            tReportDevEx  rapor = new tReportDevEx();
 
             DevExpress.XtraBars.Ribbon.RibbonPage ribbonPage1 = new DevExpress.XtraBars.Ribbon.RibbonPage();
             DevExpress.XtraBars.Ribbon.RibbonPage ribbonPage2 = new DevExpress.XtraBars.Ribbon.RibbonPage();

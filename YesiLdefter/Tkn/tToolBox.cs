@@ -13915,6 +13915,18 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
             return text;
         }
+        public string getFormName(string sourceFormCodeAndName)
+        {
+            string formCode = "";
+            string formName = "";
+
+            if (sourceFormCodeAndName.IndexOf("||") > -1)
+            {
+                formCode = Get_And_Clear(ref sourceFormCodeAndName, "||");
+                formName = Get_And_Clear(ref sourceFormCodeAndName, "||");
+            }
+            return formName;
+        }
 
         private void newExeUpdate(DataSet ds)
         {

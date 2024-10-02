@@ -10,6 +10,8 @@ using System.Windows.Forms;
 using DevExpress.XtraEditors;
 using DevExpress.XtraPrinting.Preview;
 using DevExpress.XtraReports.UI;
+using FastReport;
+using FastReport.Preview;
 using Tkn_Events;
 using Tkn_InputPanel;
 using Tkn_Report;
@@ -21,12 +23,14 @@ namespace YesiLdefter
     public partial class ms_Reports : Form
     {
         tToolBox t = new tToolBox();
-        tReport rapor = new tReport();
+        tReportDevEx raporDevEx = new tReportDevEx();
+        tReportFast raporFast = new tReportFast();
 
         private DataSet dsMsReports = null;
         private DataNavigator dNMsReports = null;
-        private DocumentViewer documentViewer = null;
-        
+        private DevExpress.XtraPrinting.Preview.DocumentViewer documentViewerDevEx = null;
+        private FastReport.Preview.PreviewControl documentViewerFast = null;
+
         string sourceFormCodeAndName = "";
 
         Control cntrlReportNames = null;
@@ -36,7 +40,8 @@ namespace YesiLdefter
         string buttonRaporYazdir = "RAPOR_YAZDIR";
         string buttonRaporOnizleme = "RAPOR_ONIZLEME";
 
-
+        Int16 desingerType = 0;
+        bool lockSelect = false;
 
         public ms_Reports()
         {
@@ -59,8 +64,35 @@ namespace YesiLdefter
 
             cntrlReportNames = t.Find_Control(this, controlNames);
 
+            string tableIPCode = v.con_Source_ReportTableIPCode;
+
             tInputPanel ip = new tInputPanel();
-            ip.Create_InputPanel(this, cntrlReportNames, v.con_Source_ReportTableIPCode, 1, true);
+            ip.Create_InputPanel(this, cntrlReportNames, tableIPCode, 1, true);
+
+
+            t.Find_DataSet(this, ref dsMsReports, ref dNMsReports, tableIPCode);
+            dNMsReports.PositionChanged += new System.EventHandler(dNMsReports_PositionChanged);
+
+            documentViewerDevEx = (DevExpress.XtraPrinting.Preview.DocumentViewer)t.Find_Control(this, "documentViewerDevEx");
+            documentViewerFast = (FastReport.Preview.PreviewControl)t.Find_Control(this, "documentViewerFast");
+            
+            documentViewerFast.Buttons =
+             ((FastReport.PreviewButtons)((((((((((((((((FastReport.PreviewButtons.Print 
+            | FastReport.PreviewButtons.Open)
+            | FastReport.PreviewButtons.Save)
+            | FastReport.PreviewButtons.Email)
+            | FastReport.PreviewButtons.Find)
+            | FastReport.PreviewButtons.Zoom)
+            | FastReport.PreviewButtons.Outline)
+            | FastReport.PreviewButtons.PageSetup)
+            | FastReport.PreviewButtons.Edit)
+            | FastReport.PreviewButtons.Watermark)
+            | FastReport.PreviewButtons.Navigator)
+            | FastReport.PreviewButtons.Close)
+            | FastReport.PreviewButtons.Design)
+            | FastReport.PreviewButtons.CopyPage)
+            | FastReport.PreviewButtons.DeletePage)
+            | FastReport.PreviewButtons.About)));
 
             /*
             // DİKKAT : Bu atamanın yerini değiştirme
@@ -101,9 +133,16 @@ namespace YesiLdefter
                 return;
             }
 
-            rapor.ReportDocumentViewer(this, dsMsReports, dNMsReports, sourceFormCodeAndName, ref documentViewer);
-            
+            if (t.IsNotNull(dsMsReports))
+            { 
+                desingerType = Convert.ToInt16(dsMsReports.Tables[0].Rows[dNMsReports.Position]["DesignerTypeId"].ToString());
 
+                if (desingerType == (Int16)v.ReportDesignerTool.DevExpress)
+                    raporDevEx.ReportDocumentViewer(this, dsMsReports, dNMsReports, sourceFormCodeAndName, ref documentViewerDevEx);
+                else
+                    raporFast.ReportDocumentViewer(this, dsMsReports, dNMsReports, sourceFormCodeAndName, ref documentViewerFast);
+
+            }
             /*
             t.WaitFormOpen("Rapor hazırlanıyor ...");
 
@@ -181,16 +220,16 @@ namespace YesiLdefter
 
         private void RaporYazdir()
         {
-            if (documentViewer != null)
-                if (documentViewer.DocumentSource != null)
-                    ((XtraReport)documentViewer.DocumentSource).PrintDialog();
+            if (documentViewerDevEx != null)
+                if (documentViewerDevEx.DocumentSource != null)
+                    ((XtraReport)documentViewerDevEx.DocumentSource).PrintDialog();
         }
 
         private void RaporOnizleme()
         {
-            if (documentViewer != null)
-                if (documentViewer.DocumentSource != null)
-                    ((XtraReport)documentViewer.DocumentSource).ShowRibbonPreview();
+            if (documentViewerDevEx != null)
+                if (documentViewerDevEx.DocumentSource != null)
+                    ((XtraReport)documentViewerDevEx.DocumentSource).ShowRibbonPreview();
         }
 
 

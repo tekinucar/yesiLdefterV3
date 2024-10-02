@@ -255,7 +255,6 @@ namespace YesiLdefter
 
         void PropertiesChange()
         {
-
             barEditItem_ZoomLine.EditValue = 100;
             zoomTrackBarControl1.LargeChange = 25;
             zoomTrackBarControl1.Maximum = 400;
@@ -266,8 +265,6 @@ namespace YesiLdefter
             //zoomTrackBarControl1.AccessibleDescription = FormName;
 
             barEditItem_Boyut.EditValue = GetSizeMode(pictureEdit1.Properties.SizeMode);
-
-            //btn_TarayicidanAl.
 
             tButtonEdit_AutoCorps.ButtonClick += new
                 DevExpress.XtraEditors.Controls.ButtonPressedEventHandler(this.btn_AutoCorps_ButtonClick);
@@ -293,6 +290,7 @@ namespace YesiLdefter
             this.pictureEdit1.Paint += new System.Windows.Forms.PaintEventHandler(this.pictureEdit1_Paint);
             this.pictureEdit1.ZoomPercentChanged += new System.EventHandler(this.pictureEdit1_ZoomPercentChanged);
 
+            this.zoomPercent = (int)pictureEdit1.Properties.ZoomPercent;
         }
 
         int GetSizeMode(DevExpress.XtraEditors.Controls.PictureSizeMode sizeMode)
@@ -1467,9 +1465,7 @@ namespace YesiLdefter
         }
 
         #endregion pictureEdit1 events
-
-
-        
+                
 
 
         #region Corps - Kırp
@@ -1496,8 +1492,7 @@ namespace YesiLdefter
 
             if (IsActive)
                 checkedOrjinalImageControl();
-            else
-                this.btnKirpOnayi.Enabled = false;
+            //else this.btnKirpOnayi.Enabled = false;
         }
 
         private void barButtonItem_Kirp_ItemClick(object sender, ItemClickEventArgs e)
@@ -1508,8 +1503,7 @@ namespace YesiLdefter
 
             printImageProperties();
 
-            this.btnKirpOnayi.Enabled = true;
-            this.barButtonItem_Vazgec.Enabled = true;
+            MessageBox.Show("Kırpma işlemi gerçekleştirildi...");
         }
         private void barButtonItem_Vazgec_ItemClick(object sender, ItemClickEventArgs e)
         {
@@ -1522,17 +1516,18 @@ namespace YesiLdefter
             printImageProperties();
 
             kirpmaIslemi(false);
-
         }
         private void btnKirpOnayi_ItemClick(object sender, ItemClickEventArgs e)
         {
-            
+            // çalışmadı
+            /*
             kirpmaIslemi(false);
             this.btnKirpOnayi.Enabled = false;
 
-            printImageProperties();
+            MessageBox.Show("Kırpma işlemi gerçekleştirildi...");
 
-            
+            printImageProperties();
+            */
         }
 
         private void btn_AutoCorps_ButtonClick(object sender, DevExpress.XtraEditors.Controls.ButtonPressedEventArgs e)
@@ -1565,10 +1560,11 @@ namespace YesiLdefter
                 cropWidth = pictureEdit1.Image.Width - (value * 2);
                 cropHeight = pictureEdit1.Image.Height - (value * 2);
 
-                if (
-                    (cropWidth > (value * 2)) &&
+                if ((cropWidth > (value * 2)) &&
                     (cropHeight > (value * 2))
                     ) myImageCrop();
+
+                MessageBox.Show("Kırpma işlemi gerçekleştirildi...");
             }
         }
 
@@ -1620,7 +1616,7 @@ namespace YesiLdefter
                 
                 printImageProperties();
 
-                MessageBox.Show("Kırpma işlemi gerçekleştirildi...");
+                //MessageBox.Show("Kırpma işlemi gerçekleştirildi...");
             }
             catch (Exception ex)
             {
@@ -1773,7 +1769,6 @@ namespace YesiLdefter
 
             return _img;
         }
-
 
         #endregion Compress - Sıkştır
 
@@ -1975,7 +1970,7 @@ namespace YesiLdefter
 
                 printImageProperties();
 
-                MessageBox.Show("Resim Kaliletesini düzenleme çalışması yapılmıştır...");
+                MessageBox.Show("Resim kaliletesini düzenleme çalışması yapılmıştır...");
             }
             catch (Exception ex)
             {
@@ -2063,7 +2058,6 @@ namespace YesiLdefter
             autoCropWidth = 0;
             autoCropHeight = 0;
             autoDPI = 0;
-
 
             if (dNTarget.Position > -1)
             {

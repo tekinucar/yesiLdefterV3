@@ -15,6 +15,7 @@ begin transaction
     TableIPCode     varchar(100)      null, /* açıklama aşağıda */
 
     -- 20
+    DesignerTypeId  SmallInt          null,
     RecordTypeId    SmallInt          null,  
     ReportTypeId    SmallInt          null, 
     PrivateTypeId   SmallInt          null, /* 0, 1. Genel, 2. Üst Yönetim, 3. Sadece Ortaklar */  
@@ -35,6 +36,31 @@ begin transaction
  grant select, insert, update, delete on MsReports to public
 
 commit transaction
+
+
+
+
+-- ------------------------------------------------------- 
+-- DesignerTypeId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MsReportsDesignerType')
+drop table [Lkp].[MsRepotsRecordType]
+
+create table [Lkp].[MsReportsDesignerType]
+(
+   Id               Int Unique not null, 
+   DesignerType     nVarchar(50)   null,
+   
+   constraint  pk_MsReportsDesignerType primary key (Id)
+)
+
+Delete from [Lkp].[MsReportsDesignerType]
+INSERT INTO [Lkp].[MsReportsDesignerType] (Id, DesignerType)
+ VALUES 
+  ( 0,    N'Seçiniz'),
+  ( 1,    N'FastReport'),
+  ( 2,    N'DevExpress')
+
 
 
 -- ------------------------------------------------------- 

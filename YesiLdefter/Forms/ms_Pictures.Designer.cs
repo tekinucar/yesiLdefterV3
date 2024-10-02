@@ -940,8 +940,8 @@
 
             this.ribbonPageGroup5.ItemLinks.Add(this.barStaticItem_H, true);
             this.ribbonPageGroup5.ItemLinks.Add(this.barStaticItem_W);
-            this.ribbonPageGroup5.ItemLinks.Add(this.btnKirpOnayi);
-            //this.ribbonPageGroup5.ItemLinks.Add(this.barStaticItem4);
+            //this.ribbonPageGroup5.ItemLinks.Add(this.btnKirpOnayi);
+            this.ribbonPageGroup5.ItemLinks.Add(this.barStaticItem4);
             this.ribbonPageGroup5.Name = "ribbonPageGroup5";
             this.ribbonPageGroup5.Text = "Resim Ölçüleri";
             // 

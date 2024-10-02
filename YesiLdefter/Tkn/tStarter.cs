@@ -41,7 +41,9 @@ namespace Tkn_Starter
             v.EXE_PATH = Path.GetDirectoryName(Application.ExecutablePath);
             v.tExeAbout.activeExeName = Application.ProductName + ".exe";
             v.tExeAbout.activePath = Application.StartupPath;
-            
+            v.EXE_FastReportsPath = v.EXE_PATH + "\\ReportsFast\\";
+            v.EXE_DevExReportsPath = v.EXE_PATH + "\\ReportsDevEx\\";
+
             // output : { 25.03.2019 22:59:22 }
             DateTime dt = File.GetLastWriteTime(System.IO.Path.Combine(v.tExeAbout.activePath, v.tExeAbout.activeExeName));
             string yil = dt.Year.ToString();

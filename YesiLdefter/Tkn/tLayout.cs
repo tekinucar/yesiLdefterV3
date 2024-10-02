@@ -151,8 +151,11 @@ namespace Tkn_Layout
                     if (LayoutType == v.lyt_ComponentControl) 
                         lComponentControl_Preparing(tForm, subView, ds_Layout, row, pos);
 
-                    if (LayoutType == v.lyt_documentViewer) 
-                        lDocumentViewer_Preparing(tForm, subView, ds_Layout, row, pos);
+                    if (LayoutType == v.lyt_documentViewerFast) 
+                        lDocumentViewerFast_Preparing(tForm, subView, ds_Layout, row, pos);
+                    if (LayoutType == v.lyt_documentViewerDev)
+                        lDocumentViewerDev_Preparing(tForm, subView, ds_Layout, row, pos);
+
                     if (LayoutType == v.lyt_documentManager) 
                         lDocumentManager_Preparing(tForm, subView, ds_Layout, row, pos);
                     if (LayoutType == v.lyt_dataWizard) 
@@ -2791,7 +2794,79 @@ namespace Tkn_Layout
 
         #region Order Panels
 
-        private void lDocumentViewer_Preparing(Form tForm, Control subView, DataSet ds_Layout, DataRow row, int pos)
+        private void lDocumentViewerFast_Preparing(Form tForm, Control subView, DataSet ds_Layout, DataRow row, int pos)
+        {
+            tToolBox t = new tToolBox();
+
+            int RefId = 0;
+            string CmpName = string.Empty;
+            string caption = string.Empty;
+            string layout_code = string.Empty;
+
+            string TableIPCode = string.Empty;
+            string fieldName = string.Empty;
+
+            int width = 0;
+
+            string ustItemType = string.Empty;
+            string ustHesapRefId = string.Empty;
+            string ustHesapItemName = string.Empty;
+            string ustItemName = string.Empty;
+            DataRow UstHesapRow = null;
+
+            RefId = t.myInt32(row["REF_ID"].ToString());
+            layout_code = t.Set(row["LAYOUT_CODE"].ToString(), "", "");
+            caption = t.Set(row["LAYOUT_CAPTION"].ToString(), "", "");
+            TableIPCode = t.Set(row["TABLEIPCODE"].ToString(), "", "");
+            fieldName = t.Set(row["FIELD_NAME"].ToString(), "", "");
+            CmpName = t.Set(row["CMP_NAME"].ToString(), "", "");
+
+            width = t.myInt32(row["CMP_WIDTH"].ToString());
+
+            UstHesapRow = UstHesap_Get(ds_Layout, pos);
+
+            #region // Ust hesabı var ise
+
+            if (UstHesapRow != null)
+            {
+                ustItemType = UstHesapRow["LAYOUT_TYPE"].ToString();
+                ustHesapRefId = UstHesapRow["LAYOUT_CODE"].ToString();
+                t.Str_Replace(ref ustHesapRefId, ".", "_");
+                ustItemName = v.lyt_Name + ustHesapRefId;
+
+                if (t.IsNotNull(UstHesapRow["CMP_NAME"].ToString()))
+                    ustItemName = UstHesapRow["CMP_NAME"].ToString();
+
+                FastReport.Preview.PreviewControl documentViewer = new FastReport.Preview.PreviewControl();
+                                
+                // 
+                // documentViewer
+                // 
+                documentViewer.Dock = System.Windows.Forms.DockStyle.Fill;
+                documentViewer.Name = "documentViewerFast"; //v.lyt_Name + t.Str_Replace(ref layout_code, ".", "_");  //RefId.ToString();
+                if (t.IsNotNull(CmpName))
+                    documentViewer.Name = CmpName;
+
+                documentViewer.Padding = new System.Windows.Forms.Padding(4);
+                documentViewer.Size = new System.Drawing.Size(874, 40);
+                documentViewer.TabStop = true;
+                documentViewer.TabIndex = 0;
+
+                //Panel panel1 = new Panel();
+                //panel1.Controls.Add(documentViewerBar);
+                //panel1.Controls.Add(documentViewer);
+
+                lParentControlAdd(tForm, documentViewer, ustItemName, ustItemType, row);
+                //lParentControlAdd(tForm, printTool, ustItemName, ustItemType, row);
+
+                documentViewer.SendToBack();
+            }
+
+            #endregion
+
+        }
+
+        private void lDocumentViewerDev_Preparing(Form tForm, Control subView, DataSet ds_Layout, DataRow row, int pos)
         {
             tToolBox t = new tToolBox();
 
@@ -2844,7 +2919,7 @@ namespace Tkn_Layout
                 // documentViewer
                 // 
                 documentViewer.Dock = System.Windows.Forms.DockStyle.Fill;
-                documentViewer.Name = "documentViewer"; //v.lyt_Name + t.Str_Replace(ref layout_code, ".", "_");  //RefId.ToString();
+                documentViewer.Name = "documentViewerDevEx"; //v.lyt_Name + t.Str_Replace(ref layout_code, ".", "_");  //RefId.ToString();
                 if (t.IsNotNull(CmpName))
                     documentViewer.Name = CmpName;
 

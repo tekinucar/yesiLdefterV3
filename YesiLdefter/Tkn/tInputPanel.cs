@@ -95,8 +95,15 @@ namespace Tkn_InputPanel
             tr.MS_Tables_IP_Read(ds_Table, TableIPCode);
             tr.MS_Fields_IP_Read(ds_Fields, TableIPCode);
 
-            if ((t.IsNotNull(ds_Table) == false) ||
-                (t.IsNotNull(ds_Fields) == false)) return;
+            /// Gridin aşağıdaki özelliği için kontrol kapatıldı... 
+            /// if (tGridView.Columns.Count == 0)
+            ///     tGridView.OptionsBehavior.AutoPopulateColumns = true;
+
+            //if ((t.IsNotNull(ds_Table) == false) ||
+            //    (t.IsNotNull(ds_Fields) == false)) return;
+
+            if (t.IsNotNull(ds_Table) == false) return;
+
 
             DataRow row_Table = ds_Table.Tables[0].Rows[0] as DataRow;
 

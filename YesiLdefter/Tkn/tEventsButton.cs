@@ -1844,7 +1844,7 @@ namespace Tkn_Events
                 if (tForm.AccessibleDescription != null)
                    sourceFormCodeAndName = tForm.AccessibleDescription;
 
-                tReport rapor = new tReport();
+                tReportDevEx rapor = new tReportDevEx();
                 rapor.tShowReportDesigner(tForm, dsMsReports, dNReports, sourceFormCodeAndName);
             }
         }

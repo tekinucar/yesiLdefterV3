@@ -15,7 +15,7 @@ using Tkn_Variable;
 
 namespace Tkn_Report
 {
-    class tReport
+    class tReportDevEx
     {
         tToolBox t = new tToolBox();
 
@@ -43,7 +43,7 @@ namespace Tkn_Report
             tFormReports = tForm;
 
             // Raporlar Formunu çağıran formun tespiti
-            string formName = getFormName(sourceFormCodeAndName);
+            string formName = t.getFormName(sourceFormCodeAndName);
             Form tFormSource = Application.OpenForms[formName];
 
             // xtraReport1 MsReport tablosundan okunacak
@@ -79,7 +79,7 @@ namespace Tkn_Report
             tFormReports = tForm;
 
             // Raporlar Formunu çağıran formun tespiti
-            string formName = getFormName(sourceFormCodeAndName);
+            string formName = t.getFormName(sourceFormCodeAndName);
             Form tFormSource = Application.OpenForms[formName];
 
             // xtraReport1 MsReport tablosundan okunacak
@@ -111,20 +111,7 @@ namespace Tkn_Report
             //v.IsWaitOpen = false;
             //t.WaitFormClose();
         }
-
-        private string getFormName(string sourceFormCodeAndName)
-        {
-            string formCode = "";
-            string formName = "";
-
-            if (sourceFormCodeAndName.IndexOf("||") > -1)
-            {
-                formCode = t.Get_And_Clear(ref sourceFormCodeAndName, "||");
-                formName = t.Get_And_Clear(ref sourceFormCodeAndName, "||");
-            }
-            return formName;
-        }
-
+                
         private void dbLoadReport(DataSet dsReports, DataNavigator dNReports, ref XtraReport xtraReport1)
         {
             // Rapor tasarımın text dosyasından alınması

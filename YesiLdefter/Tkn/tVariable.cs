@@ -259,6 +259,8 @@ namespace Tkn_Variable
         public static string EXE_DRIVE = string.Empty;
         public static string EXE_PATH = string.Empty;
         public static string EXE_TempPath = string.Empty;
+        public static string EXE_FastReportsPath = string.Empty;
+        public static string EXE_DevExReportsPath = string.Empty;
         public static string EXE_ScriptsPath = string.Empty;
         public static string sp_Sakla = string.Empty;
 
@@ -389,7 +391,8 @@ namespace Tkn_Variable
         public static string lyt_labelControl = "labelControl";
         public static string lyt_BarcodeControl1 = "barcodeControl1";
         public static string lyt_ComponentControl = "componentControl";
-        public static string lyt_documentViewer = "documentViewer";
+        public static string lyt_documentViewerFast = "documentViewerFast";
+        public static string lyt_documentViewerDev = "documentViewerDev";
 
 
         //public static string lyt_ = "";
@@ -495,9 +498,10 @@ namespace Tkn_Variable
             None = 0, False = 1, True = 2
         }
 
-        public enum ReportTool : byte
+        public enum ReportDesignerTool : byte
         {
-            DevExpress = 1, FastReport = 2
+            FastReport = 1,
+            DevExpress = 2 
         }
 
         //public enum DataReadType : byte
@@ -1122,6 +1126,13 @@ namespace Tkn_Variable
         }
 
         #endregion
+
+        public enum tRDesignerType
+        {
+            none,
+            FastReport,
+            DevExpress
+        }
 
         public enum tBrowserType
         {
