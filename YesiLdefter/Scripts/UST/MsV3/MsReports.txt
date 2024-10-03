@@ -12,7 +12,7 @@ begin transaction
 	ParentCode      nvarChar(50)      null,     
 	ReportName      nvarChar(100)     null,     
     About           nvarChar(100)     null,     
-    TableIPCode     varchar(100)      null, /* açıklama aşağıda */
+    TableIPCode     nvarChar(100)     null,     
 
     -- 20
     DesignerTypeId  SmallInt          null,
@@ -112,16 +112,18 @@ INSERT INTO [Lkp].[MsReportsReportType] (Id, ReportType)
 
 /*
 
-TableIPCode : ?
+Menu başlık kayıt satırındaki PropViews içindeki ALLMENU altında
+
+
+Report TableIPCode : ?
 
 Menülerde Rapor butonu kullanılarak, bulunduğu formu ilgilendiren raporlara ulaşılacak
+Bu TableIPCode ler sayesinde bir ekranın/formun çağırabileceği raporların listesi gelecek
 
-Nasıl ?
-Menudeki Prop-Views içinde All-Menu, Report-TableIPCode ye 
+Report FormCode : ? 
 
-UST/PMS/MsReports  tablo altındaki TableIPCode ler giriliecek
+Açılan Raporlar formu içindeki raporların kullanacağı tüm Dataların bulunduğu Layout MasterCode saklar.
 
-Bu TableIPCode ler sayesinde bir formun çağırabileceği raporların listesi gelecek
 
 
 

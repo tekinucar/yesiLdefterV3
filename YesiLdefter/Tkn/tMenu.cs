@@ -50,6 +50,7 @@ namespace Tkn_Menu
             bool dontEDI = false;
             bool dontExit = false;
             string reportTableIPCode = "";
+            string reportFormCode = "";
 
             PROP_VIEWS_ITEMS JSON_PropView = null;
 
@@ -67,6 +68,8 @@ namespace Tkn_Menu
                         dontExit = Convert.ToBoolean(JSON_PropView.ALLMENU.DONTEXIT);
                     if (JSON_PropView.ALLMENU.RPRT_TABLEIPCODE != null)
                         reportTableIPCode = JSON_PropView.ALLMENU.RPRT_TABLEIPCODE;
+                    if (JSON_PropView.ALLMENU.RPRT_FORMCODE != null)
+                        reportFormCode = JSON_PropView.ALLMENU.RPRT_FORMCODE;
                 }
             }
             //if (ItemType == 101) Create_BarManager((DevExpress.XtraBars.BarManager)menuControl, ds_Items);
@@ -135,8 +138,7 @@ namespace Tkn_Menu
             bool dontEDI = false;
             bool dontExit = false;
             string reportTableIPCode = "";
-            //dontReport = (Prop_View.IndexOf("DONTREPORT\": \"TRUE") > -1);
-            //dontEDI = (Prop_View.IndexOf("DONTEDI\": \"TRUE") > -1);
+            string reportFormCode = "";
 
             PROP_VIEWS_ITEMS JSON_PropView = null;
 
@@ -154,6 +156,8 @@ namespace Tkn_Menu
                         dontExit = Convert.ToBoolean(JSON_PropView.ALLMENU.DONTEXIT);
                     if (JSON_PropView.ALLMENU.RPRT_TABLEIPCODE != null)
                         reportTableIPCode = JSON_PropView.ALLMENU.RPRT_TABLEIPCODE;
+                    if (JSON_PropView.ALLMENU.RPRT_FORMCODE != null)
+                        reportFormCode = JSON_PropView.ALLMENU.RPRT_FORMCODE;
                 }
             }
 

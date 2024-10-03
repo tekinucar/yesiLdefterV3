@@ -62,17 +62,21 @@ namespace YesiLdefter
             if (this.AccessibleDescription != null)
                 sourceFormCodeAndName = this.AccessibleDescription;
 
+            /*
             cntrlReportNames = t.Find_Control(this, controlNames);
 
             string tableIPCode = v.con_Source_ReportTableIPCode;
 
-            tInputPanel ip = new tInputPanel();
-            ip.Create_InputPanel(this, cntrlReportNames, tableIPCode, 1, true);
+            if (t.IsNotNull(tableIPCode))
+            {
+                tInputPanel ip = new tInputPanel();
+                ip.Create_InputPanel(this, cntrlReportNames, tableIPCode, 1, true);
 
 
-            t.Find_DataSet(this, ref dsMsReports, ref dNMsReports, tableIPCode);
-            dNMsReports.PositionChanged += new System.EventHandler(dNMsReports_PositionChanged);
-
+                t.Find_DataSet(this, ref dsMsReports, ref dNMsReports, tableIPCode);
+                dNMsReports.PositionChanged += new System.EventHandler(dNMsReports_PositionChanged);
+            }
+            */
             documentViewerDevEx = (DevExpress.XtraPrinting.Preview.DocumentViewer)t.Find_Control(this, "documentViewerDevEx");
             documentViewerFast = (FastReport.Preview.PreviewControl)t.Find_Control(this, "documentViewerFast");
             

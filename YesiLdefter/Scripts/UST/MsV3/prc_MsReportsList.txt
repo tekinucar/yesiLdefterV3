@@ -5,9 +5,9 @@ AS BEGIN
 
  --declare @ReportCode varchar(50)
  --set @ReportCode = ''--'DNM'
-
- if (@ReportCode = 'null') 
-     set @ReportCode = ''
+   if (@ReportCode = 'null') 
+       set @ReportCode = ''
+       
 
  ;WITH CTE
      AS  (
@@ -29,7 +29,22 @@ AS BEGIN
         Join MsReports as mr ON ( c.Cte_Code = mr.ParentCode )
   ) 
 Select distinct
-   mr.*
+       mr.[Id]
+      ,mr.[IsActive]
+      ,mr.[LineNumber]
+      ,isnull(mr.[DesignerTypeId],0) as DesignerTypeId
+      ,mr.[ReportCode]
+      ,mr.[ParentCode]
+      ,mr.[ReportName]
+      ,mr.[About]
+      ,mr.[TableIPCode]
+      ,mr.[RecordTypeId]
+      ,mr.[ReportTypeId]
+      ,mr.[PrivateTypeId]
+      ,mr.[SoftwareCode]
+      ,mr.[ProjectCode]
+      ,mr.[ModulCode]
+      ,mr.[ReportTemp]
 
 From CTE as c
    left outer join MsReports as mr on ( c.Cte_Code = mr.ReportCode )

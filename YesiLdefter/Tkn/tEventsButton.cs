@@ -470,8 +470,18 @@ namespace Tkn_Events
                     (buttonHint.senderType == "DevExpress.XtraEditors.ButtonEdit"))
                 {
                     if ((prop_ != null) && (propListCount_ <= 1))
-                        t.OpenForm_JSON(tForm, prop_);
+                    {
+                        Form newForm = t.OpenForm_JSON(tForm, prop_);
 
+                        if (prop_.TABLEIPCODE_LIST.Count > 0)
+                        {
+                            if (newForm != null)
+                                onay = extraIslemVar(newForm, tableIPCode, buttonType, v.tBeforeAfter.After, propList_);
+                            else onay = extraIslemVar(tForm, tableIPCode, buttonType, v.tBeforeAfter.After, propList_);
+                        }
+                    }
+                    
+                    
                     if (propListCount_ > 1)
                         onay = openControlForm_(tForm, tableIPCode, propList_, buttonType);
 
@@ -3050,7 +3060,11 @@ namespace Tkn_Events
                             // formCode var ise
                             if (t.IsNotNull(formCode))
                             {
-                                ev.subViewExec(tForm, controlName, formCode, "", "", "", caption, MenuValue);
+                                // bu kontrole rapor formunu açarken ihtiyaç duyuldu
+                                // rapor formunu create olduktan sonra raporların listesini gösteren tableIPCode yukarıda çalışyor
+                                // burada tekrar çalışyor ve çift görüntü oluşuyor
+                                if (buttonType != v.tButtonType.btKartAc) 
+                                    ev.subViewExec(tForm, controlName, formCode, "", "", "", caption, MenuValue);
                             }
                             // tabPageCode var ise
                             if (t.IsNotNull(tabPageCode))

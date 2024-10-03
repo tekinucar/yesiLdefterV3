@@ -415,6 +415,7 @@ namespace Tkn_Events
                     v.con_Source_FormCode = tForm.AccessibleName;
                     v.con_Source_FormCodeAndName = tForm.AccessibleName + "||" + tForm.Name + "||";
                     v.con_Source_ReportTableIPCode = tableIPCode;
+                    v.con_Source_ReportFormCode = "";
                 }
                 string FormName = "ms_Reports";
                 string FormCode = "UST/PMS/PMS/ReportsView";
@@ -1155,7 +1156,7 @@ namespace Tkn_Events
                         if (values.IndexOf("|Prop_Navigator|") > -1)
                             myFormLoadValue = t.Get_And_Clear(ref values, "|Prop_Navigator|");
                         if (values.IndexOf("|TableIPCode|") > -1)
-                            TableIPCode = t.Get_And_Clear(ref values, "|TableIPCode|");
+                            TableIPCode = t.Get_And_Clear(ref values, "|TableIPCode|"); //reportTableIPCode
                     }
 
                     // Belge Türü Seçiniz  << butonu

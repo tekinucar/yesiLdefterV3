@@ -231,6 +231,7 @@ namespace Tkn_Variable
         //public static 
         public static string con_Source_FormCodeAndName { get; set; }
         public static string con_Source_ReportTableIPCode { get; set; }
+        public static string con_Source_ReportFormCode { get; set; }
 
         //public static string con_Images_Name { get; set; }
 
@@ -2777,7 +2778,8 @@ namespace Tkn_Variable
         public string DONTREPORT { get; set; }
         public string DONTEDI { get; set; } // Eğitim/Destek/İstek
         public string DONTEXIT { get; set; }
-        public string RPRT_TABLEIPCODE { get; set; }
+        public string RPRT_TABLEIPCODE { get; set; } //Report_TableIPCode, ReportTableIPCode
+        public string RPRT_FORMCODE { get; set; } //Report_FormCode, ReportFormCode
     }
 
     public class NAVBAR

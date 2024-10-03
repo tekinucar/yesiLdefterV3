@@ -3339,7 +3339,7 @@ namespace Tkn_ToolBox
 
         #region *Form View
 
-        public void OpenForm_JSON(Form tForm, PROP_NAVIGATOR prop_)
+        public Form OpenForm_JSON(Form tForm, PROP_NAVIGATOR prop_)
         {
 
             //'FORMTYPE',      0,  '',       'none')
@@ -3355,7 +3355,7 @@ namespace Tkn_ToolBox
             if (prop_ == null)
             {
                 MessageBox.Show("Açılmak istenen Formun bilgileri eksik...");
-                return;
+                return null;
             }
 
             string FORMNAME = Set(prop_.FORMNAME.ToString(), "", "");
@@ -3452,7 +3452,8 @@ namespace Tkn_ToolBox
                     Cursor.Current = Cursors.Default;
 
             }
-            
+
+            return tNewForm;
             #endregion
         }
 
