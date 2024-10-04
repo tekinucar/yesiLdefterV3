@@ -41,7 +41,8 @@ namespace YesiLdefter
         string buttonRaporOnizleme = "RAPOR_ONIZLEME";
 
         Int16 desingerType = 0;
-        bool lockSelect = false;
+        List<string> dataSetList = null; 
+
 
         public ms_Reports()
         {
@@ -124,6 +125,55 @@ namespace YesiLdefter
 
             t.Find_Button_AddClick(this, menuName, buttonRaporYazdir, myNavElementClick);
             t.Find_Button_AddClick(this, menuName, buttonRaporOnizleme, myNavElementClick);
+
+            preparingDataSets();
+        }
+
+        private void preparingDataSets()
+        {
+            #region DataNavigator Listesi Hazırlanıyor
+
+            dataSetList = new List<string>();
+            List<string> list = new List<string>();
+            t.Find_DataNavigator_List(this, ref list);
+
+            Control cntrl = new Control();
+            string[] controls = new string[] { "DevExpress.XtraEditors.DataNavigator" };
+                        
+            DataNavigator dN = null;
+            object tDataTable = null;
+            string tableName = "";
+
+            foreach (string value in list)
+            {
+                cntrl = t.Find_Control(this, value, "", controls);
+                if (cntrl != null)
+                {
+                    dN = (DevExpress.XtraEditors.DataNavigator)cntrl;
+
+                    if (dN.DataSource != null)
+                    {
+                        tDataTable = dN.DataSource;
+
+                        tableName = ((DataTable)tDataTable).TableName;
+
+                        if (tableName.IndexOf("MsReports") > -1)
+                        {
+                            dsMsReports = ((DataTable)tDataTable).DataSet;
+                            dNMsReports = dN;
+                            dNMsReports.PositionChanged += new System.EventHandler(dNMsReports_PositionChanged);
+                        }
+                        else
+                        {
+                            dataSetList.Add(value);
+                        }
+                    }
+
+                } // if cntrl != null
+            }//foreach
+
+
+            #endregion DataNavigator Listesi
         }
 
         private void dNMsReports_PositionChanged(object sender, EventArgs e)
@@ -144,7 +194,7 @@ namespace YesiLdefter
                 if (desingerType == (Int16)v.ReportDesignerTool.DevExpress)
                     raporDevEx.ReportDocumentViewer(this, dsMsReports, dNMsReports, sourceFormCodeAndName, ref documentViewerDevEx);
                 else
-                    raporFast.ReportDocumentViewer(this, dsMsReports, dNMsReports, sourceFormCodeAndName, ref documentViewerFast);
+                    raporFast.ReportDocumentViewer(this, dsMsReports, dNMsReports, dataSetList, sourceFormCodeAndName, ref documentViewerFast);
 
             }
             /*

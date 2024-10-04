@@ -60,16 +60,21 @@ namespace Tkn_Menu
 
                 if (JSON_PropView.ALLMENU != null)
                 {
-                    if (t.IsNotNull(JSON_PropView.ALLMENU.DONTEDI))
-                        dontEDI = Convert.ToBoolean(JSON_PropView.ALLMENU.DONTEDI);
-                    if (t.IsNotNull(JSON_PropView.ALLMENU.DONTREPORT))
-                        dontReport = Convert.ToBoolean(JSON_PropView.ALLMENU.DONTREPORT);
+                    if (JSON_PropView.ALLMENU.DONTEDI != null)
+                        if (t.IsNotNull(JSON_PropView.ALLMENU.DONTEDI))
+                            dontEDI = Convert.ToBoolean(JSON_PropView.ALLMENU.DONTEDI);
+                    if (JSON_PropView.ALLMENU.DONTREPORT != null)
+                        if (t.IsNotNull(JSON_PropView.ALLMENU.DONTREPORT))
+                            dontReport = Convert.ToBoolean(JSON_PropView.ALLMENU.DONTREPORT);
                     if (JSON_PropView.ALLMENU.DONTEXIT != null)
-                        dontExit = Convert.ToBoolean(JSON_PropView.ALLMENU.DONTEXIT);
+                        if (t.IsNotNull(JSON_PropView.ALLMENU.DONTEXIT))
+                            dontExit = Convert.ToBoolean(JSON_PropView.ALLMENU.DONTEXIT);
                     if (JSON_PropView.ALLMENU.RPRT_TABLEIPCODE != null)
-                        reportTableIPCode = JSON_PropView.ALLMENU.RPRT_TABLEIPCODE;
+                        if (t.IsNotNull(JSON_PropView.ALLMENU.RPRT_TABLEIPCODE))
+                            reportTableIPCode = JSON_PropView.ALLMENU.RPRT_TABLEIPCODE;
                     if (JSON_PropView.ALLMENU.RPRT_FORMCODE != null)
-                        reportFormCode = JSON_PropView.ALLMENU.RPRT_FORMCODE;
+                        if (t.IsNotNull(JSON_PropView.ALLMENU.RPRT_FORMCODE))
+                            reportFormCode = JSON_PropView.ALLMENU.RPRT_FORMCODE;
                 }
             }
             //if (ItemType == 101) Create_BarManager((DevExpress.XtraBars.BarManager)menuControl, ds_Items);
@@ -148,16 +153,21 @@ namespace Tkn_Menu
 
                 if (JSON_PropView.ALLMENU != null)
                 {
-                    if (t.IsNotNull(JSON_PropView.ALLMENU.DONTEDI))
-                        dontEDI = Convert.ToBoolean(JSON_PropView.ALLMENU.DONTEDI);
-                    if (t.IsNotNull(JSON_PropView.ALLMENU.DONTREPORT))
-                        dontReport = Convert.ToBoolean(JSON_PropView.ALLMENU.DONTREPORT);
+                    if (JSON_PropView.ALLMENU.DONTEDI != null)
+                        if (t.IsNotNull(JSON_PropView.ALLMENU.DONTEDI))
+                            dontEDI = Convert.ToBoolean(JSON_PropView.ALLMENU.DONTEDI);
+                    if (JSON_PropView.ALLMENU.DONTREPORT != null)
+                        if (t.IsNotNull(JSON_PropView.ALLMENU.DONTREPORT))
+                            dontReport = Convert.ToBoolean(JSON_PropView.ALLMENU.DONTREPORT);
                     if (JSON_PropView.ALLMENU.DONTEXIT != null)
-                        dontExit = Convert.ToBoolean(JSON_PropView.ALLMENU.DONTEXIT);
+                        if (t.IsNotNull(JSON_PropView.ALLMENU.DONTEXIT))
+                            dontExit = Convert.ToBoolean(JSON_PropView.ALLMENU.DONTEXIT);
                     if (JSON_PropView.ALLMENU.RPRT_TABLEIPCODE != null)
-                        reportTableIPCode = JSON_PropView.ALLMENU.RPRT_TABLEIPCODE;
+                        if (t.IsNotNull(JSON_PropView.ALLMENU.RPRT_TABLEIPCODE))
+                            reportTableIPCode = JSON_PropView.ALLMENU.RPRT_TABLEIPCODE;
                     if (JSON_PropView.ALLMENU.RPRT_FORMCODE != null)
-                        reportFormCode = JSON_PropView.ALLMENU.RPRT_FORMCODE;
+                        if (t.IsNotNull(JSON_PropView.ALLMENU.RPRT_FORMCODE))
+                            reportFormCode = JSON_PropView.ALLMENU.RPRT_FORMCODE;
                 }
             }
 
