@@ -41,8 +41,18 @@ namespace Tkn_Starter
             v.EXE_PATH = Path.GetDirectoryName(Application.ExecutablePath);
             v.tExeAbout.activeExeName = Application.ProductName + ".exe";
             v.tExeAbout.activePath = Application.StartupPath;
+
+            v.EXE_TempPath = v.EXE_DRIVE + "UstadYazilim\\Temp";
+            v.EXE_ScriptsPath = v.EXE_DRIVE + "UstadYazilim\\Scripts";
             v.EXE_FastReportsPath = v.EXE_PATH + "\\ReportsFast\\";
             v.EXE_DevExReportsPath = v.EXE_PATH + "\\ReportsDevEx\\";
+
+            //MakeFolderWritable(v.EXE_PATH);
+
+            System.IO.Directory.CreateDirectory(v.EXE_TempPath);
+            System.IO.Directory.CreateDirectory(v.EXE_ScriptsPath);
+            System.IO.Directory.CreateDirectory(v.EXE_FastReportsPath);
+            System.IO.Directory.CreateDirectory(v.EXE_DevExReportsPath);
 
             // output : { 25.03.2019 22:59:22 }
             DateTime dt = File.GetLastWriteTime(System.IO.Path.Combine(v.tExeAbout.activePath, v.tExeAbout.activeExeName));

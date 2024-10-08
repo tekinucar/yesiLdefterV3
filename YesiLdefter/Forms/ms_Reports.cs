@@ -40,6 +40,10 @@ namespace YesiLdefter
         string buttonRaporYazdir = "RAPOR_YAZDIR";
         string buttonRaporOnizleme = "RAPOR_ONIZLEME";
 
+        //private string FirmAbout_TableIPCode = "";
+        //private DataSet dsFirmAbout = null;
+        //private DataNavigator dNFirmAbout = null;
+
         Int16 desingerType = 0;
         List<string> dataSetList = null; 
 
@@ -127,6 +131,9 @@ namespace YesiLdefter
             t.Find_Button_AddClick(this, menuName, buttonRaporOnizleme, myNavElementClick);
 
             preparingDataSets();
+
+            //preparingFirmAboutDataSets();
+
         }
 
         private void preparingDataSets()
@@ -176,6 +183,24 @@ namespace YesiLdefter
             #endregion DataNavigator Listesi
         }
 
+        private void preparingFirmAboutDataSets()
+        {
+            /*
+            if ((v.tMainFirm.SectorTypeId == (Int16)v.msSectorType.UstadMtsk) ||
+                (v.tMainFirm.SectorTypeId == (Int16)v.msSectorType.TabimMtsk)) FirmAbout_TableIPCode = "UST/MEB/MebKurum.MsReports";
+
+            //    (v.tMainFirm.SectorTypeId == (Int16)v.msSectorType.TabimSrc) ||
+            //    (v.tMainFirm.SectorTypeId == (Int16)v.msSectorType.TabimIsmak))
+
+            if (t.IsNotNull(FirmAbout_TableIPCode))
+            {
+                tInputPanel ip = new tInputPanel();
+                ip.Create_InputPanel(this, cntrlReportNames, FirmAbout_TableIPCode, 1, true);
+                t.Find_DataSet(this, ref dsFirmAbout, ref dNFirmAbout, FirmAbout_TableIPCode);
+            }
+            */
+        }
+
         private void dNMsReports_PositionChanged(object sender, EventArgs e)
         {
             // LKP_ONAY için ise işlem olmasın
@@ -186,7 +211,7 @@ namespace YesiLdefter
                 v.con_Cancel = false;
                 return;
             }
-
+            
             if (t.IsNotNull(dsMsReports))
             { 
                 desingerType = Convert.ToInt16(dsMsReports.Tables[0].Rows[dNMsReports.Position]["DesignerTypeId"].ToString());

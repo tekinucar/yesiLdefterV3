@@ -21,8 +21,7 @@ namespace Tkn_Report
         tToolBox t = new tToolBox();
         
         Form tFormReports = null;
-        private DataSet dataSet;
-
+        
 
         public void ReportDocumentViewer(Form tForm, DataSet dsMsReports, DataNavigator dNMsReports, List<string> dataSetList, string sourceFormCodeAndName, ref FastReport.Preview.PreviewControl documentViewer1)
 
@@ -39,6 +38,9 @@ namespace Tkn_Report
 
             string reportCode = dsMsReports.Tables[0].Rows[dNMsReports.Position]["ReportCode"].ToString();
             string reportName = dsMsReports.Tables[0].Rows[dNMsReports.Position]["ReportName"].ToString();
+            string reportCaption = dsMsReports.Tables[0].Rows[dNMsReports.Position]["ReportCaption"].ToString();
+
+
             string reportFileName = "";
 
             t.Str_Replace(ref reportCode, ".", "_");
@@ -58,37 +60,29 @@ namespace Tkn_Report
                 ///
                 Report report = new Report();
                 ReportPage page1 = new ReportPage();
-                ReportTitleBand reportTitleBand1 = new ReportTitleBand();
-                //PageHeaderBand pageHeaderBand1 = new PageHeaderBand();
                 DataBand dataBand1 = new DataBand();
-                //ReportSummaryBand reportSummaryBand1 = new ReportSummaryBand();
-                PageFooterBand pageFooterBand1 = new PageFooterBand();
 
                 page1.Name = "Page1";
-                reportTitleBand1.Name = "ReportTitleBand1";
-                //pageHeaderBand1.Name = "PageHeaderBand1";
                 dataBand1.Name = "DataBand1";
-                pageFooterBand1.Name = "PageFooterBand1";
-
-                reportTitleBand1.Height = Units.Centimeters * (float)1.0;
-                //pageHeaderBand1.Height = Units.Centimeters * (float)0.75;
                 dataBand1.Height = Units.Centimeters * (float)2.0;
-                pageFooterBand1.Height = Units.Centimeters * (float)0.5;
 
-                page1.Bands.Add(reportTitleBand1);
+                //page1.Bands.Add(reportTitleBand1);
                 //page1.Bands.Add(pageHeaderBand1);
                 page1.Bands.Add(dataBand1);
                 //page1.Bands.Add(reportSummaryBand1);
-                page1.Bands.Add(pageFooterBand1);
+                //page1.Bands.Add(pageFooterBand1);
 
                 report.Pages.Add(page1);
 
                 report.Save(reportFileName);
+                MessageBox.Show(reportCaption + " : için yeni rapor dosyası oluşturuldu.");
+
+                v.IsWaitOpen = false;
+                t.WaitFormClose();
+                return;
             }
 
-            //dataSet = dsMsReports;
-
-                try 
+            try 
             {
                 //  previewControl1
                 if (documentViewer1.Report != null)
@@ -101,52 +95,9 @@ namespace Tkn_Report
                     Report FReport = new Report();
 
                     FReport.Preview = documentViewer1; // previewControl1;
-
                     FReport.Load(reportFileName);
-
-                    Report report = FReport.Report;
-
-                    PageCollection page = report.Pages;
-
-                    PageBase page1 = page[0];
-
-                    ReportSummaryBand reportSummaryBand1 = new ReportSummaryBand();
-                    reportSummaryBand1.Name = "UstadYazilim";
-                    reportSummaryBand1.Height = Units.Centimeters * (float)2.0;
-
-                    DataBand dataBand2 = new DataBand();
-                    dataBand2.Name = "DataBand2";
-                    dataBand2.Height = Units.Centimeters * (float)4.0;
-
-                    PageHeaderBand pageHeaderBand1 = new PageHeaderBand();
-                    pageHeaderBand1.Name = "PageHeaderBand1";
-                    pageHeaderBand1.Height = Units.Centimeters * (float)4.0;
-
-                    FastReport.TextObject textObject = new TextObject();
-                    textObject.Name = "text1";
-                    textObject.Text = "Üstad Yazılım";
-                    textObject.Left = Units.Centimeters * (float)0;
-                    textObject.Height = Units.Centimeters * (float)0.5;
-                    textObject.HorzAlign = HorzAlign.Center;
-                    textObject.Dock = DockStyle.Fill;
-
-                    pageHeaderBand1.AddChild(textObject);
-
-                    report.BeginInit();
-                    ((ReportPage)(report.Pages[0])).Bands.Add(pageHeaderBand1);
-
-                    report.EndInit();
-                    report.Refresh();
-                    report.Save(reportFileName);
-
-                    //((ReportPage)page1).Bands.Add(reportSummaryBand1);
-
-                    //((ReportPage)((PageBase)((PageCollection)report.Pages)[0])).Bands.Add(reportSummaryBand1);
-
-
-                    //string tableName = dsMsReports.Tables[0].TableName.ToString();
-                    //FReport.RegisterData(dsMsReports);
-                    //FReport.GetDataSource(tableName).Enabled = true;
+                    preparingReportHeaderAndFooter(dsMsReports, dNMsReports, FReport, reportFileName);
+                    
 
                     allRegisterData(tForm, FReport, dataSetList);
 
@@ -169,6 +120,162 @@ namespace Tkn_Report
             t.WaitFormClose();
         }
 
+        private void preparingReportHeaderAndFooter(DataSet dsMsReports, DataNavigator dNMsReports, Report FReport, string reportFileName)
+        {
+            string reportHeader = "";
+            string pageHeader = "";
+            string reportSummary = "";
+            string pageSummary = "";
+            
+            if (t.IsNotNull(dsMsReports.Tables[0].Rows[dNMsReports.Position]["ReportHeader"].ToString()))
+                reportHeader = dsMsReports.Tables[0].Rows[dNMsReports.Position]["ReportHeader"].ToString();
+            if (t.IsNotNull(dsMsReports.Tables[0].Rows[dNMsReports.Position]["PageHeader"].ToString()))
+                pageHeader = dsMsReports.Tables[0].Rows[dNMsReports.Position]["PageHeader"].ToString();
+            if (t.IsNotNull(dsMsReports.Tables[0].Rows[dNMsReports.Position]["ReportSummary"].ToString()))
+                reportSummary = dsMsReports.Tables[0].Rows[dNMsReports.Position]["ReportSummary"].ToString();
+            if (t.IsNotNull(dsMsReports.Tables[0].Rows[dNMsReports.Position]["PageSummary"].ToString()))
+                pageSummary = dsMsReports.Tables[0].Rows[dNMsReports.Position]["PageSummary"].ToString();
+
+            if ((reportHeader == "") &&
+                (pageHeader == "") &&
+                (reportSummary == "") &&
+                (pageSummary == "")) return;
+
+            string bandFileName = v.EXE_FastReportsPath;
+
+            Report fReport = new Report();
+
+            FReport.BeginInit();
+
+            if (t.IsNotNull(reportHeader))
+            {
+                reportHeader = reportHeader.Replace(".","_");
+                bandFileName = v.EXE_FastReportsPath + reportHeader + ".fr3";
+                BandBase bandReportHeader = getBandBase(fReport, bandFileName, 1);
+                //((ReportPage)(FReport.Pages[0])).Bands.Add(bandReportHeader);
+                ((ReportPage)(FReport.Pages[0])).ReportTitle = (ReportTitleBand)bandReportHeader;
+            }
+            if (t.IsNotNull(pageHeader))
+            {
+                pageHeader = pageHeader.Replace(".", "_");
+                bandFileName = v.EXE_FastReportsPath + pageHeader + ".fr3";
+                BandBase bandPageHeader = getBandBase(fReport, bandFileName, 2);
+                //((ReportPage)(FReport.Pages[0])).Bands.Add(bandPageHeader);
+                ((ReportPage)(FReport.Pages[0])).PageHeader = (PageHeaderBand)bandPageHeader;
+            }
+
+            if (t.IsNotNull(reportSummary))
+            {
+                reportSummary = reportSummary.Replace(".", "_");
+                bandFileName = v.EXE_FastReportsPath + reportSummary + ".fr3";
+                BandBase bandReportSummary = getBandBase(fReport, bandFileName, 3);
+                //((ReportPage)(FReport.Pages[0])).Bands.Add(bandReportSummary);
+                ((ReportPage)(FReport.Pages[0])).ReportSummary = (ReportSummaryBand)bandReportSummary;
+            }
+            if (t.IsNotNull(pageSummary))
+            {
+                pageSummary = pageSummary.Replace(".", "_");
+                bandFileName = v.EXE_FastReportsPath + pageSummary + ".fr3";
+                BandBase bandPageSummary = getBandBase(fReport, bandFileName, 4);
+                //((ReportPage)(FReport.Pages[0])).Bands.Add(bandPageSummary);
+                ((ReportPage)(FReport.Pages[0])).PageFooter = (PageFooterBand)bandPageSummary;
+            }
+
+            FReport.EndInit();
+            FReport.Refresh();
+            FReport.Save(reportFileName);
+
+
+
+            /*
+            ReportTitleBand reportTitleBand1 = new ReportTitleBand();
+            PageHeaderBand pageHeaderBand1 = new PageHeaderBand();
+            ReportSummaryBand reportSummaryBand1 = new ReportSummaryBand();
+            PageFooterBand pageFooterBand1 = new PageFooterBand();
+
+            reportTitleBand1.Name = "ReportTitleBand1";
+            pageHeaderBand1.Name = "PageHeaderBand1";
+            reportSummaryBand1.Name = "ReportSummaryBand1";
+            pageFooterBand1.Name = "PageFooterBand1";
+
+            reportTitleBand1.Height = Units.Centimeters * (float)1.0;
+            pageHeaderBand1.Height = Units.Centimeters * (float)0.75;
+            reportSummaryBand1.Height = Units.Centimeters * (float)0.75;
+            pageFooterBand1.Height = Units.Centimeters * (float)0.75;
+
+            page1.Bands.Add(reportTitleBand1);
+            //page1.Bands.Add(pageHeaderBand1);
+            //page1.Bands.Add(reportSummaryBand1);
+            page1.Bands.Add(pageFooterBand1);
+            */
+
+            /*
+                                Report report = FReport.Report;
+                                PageCollection page = report.Pages;
+                                PageBase page1 = page[0];
+
+                                ReportSummaryBand reportSummaryBand1 = new ReportSummaryBand();
+                                reportSummaryBand1.Name = "UstadYazilim";
+                                reportSummaryBand1.Height = Units.Centimeters * (float)2.0;
+                                DataBand dataBand2 = new DataBand();
+                                dataBand2.Name = "DataBand2";
+                                dataBand2.Height = Units.Centimeters * (float)4.0;
+                                */
+            /*
+            PageHeaderBand pageHeaderBand1 = new PageHeaderBand();
+            pageHeaderBand1.Name = "PageHeaderBand1";
+            pageHeaderBand1.Height = Units.Centimeters * (float)4.0;
+
+            FastReport.TextObject textObject = new TextObject();
+            textObject.Name = "text1";
+            textObject.Text = "Üstad Yazılım";
+            textObject.Left = Units.Centimeters * (float)0;
+            textObject.Height = Units.Centimeters * (float)0.5;
+            textObject.HorzAlign = HorzAlign.Center;
+            textObject.Dock = DockStyle.Fill;
+
+            pageHeaderBand1.AddChild(textObject);
+
+            FReport.BeginInit();
+            ((ReportPage)(FReport.Pages[0])).Bands.Add(pageHeaderBand1);
+            FReport.EndInit();
+            FReport.Refresh();
+            FReport.Save(reportFileName);
+            */
+
+            /*
+            report.BeginInit();
+            ((ReportPage)(report.Pages[0])).Bands.Add(pageHeaderBand1);
+            report.EndInit();
+            report.Refresh();
+            report.Save(reportFileName);
+            */
+
+
+
+        }
+
+        private BandBase getBandBase(Report fReport, string bandFileName, Int16 pos)
+        {
+            fReport.Load(bandFileName);
+
+            PageCollection page = fReport.Pages;
+            PageBase page1 = page[0];
+            BandBase bandBase = null;
+
+            if (pos == 1) bandBase = ((ReportPage)page1).ReportTitle;
+            if (pos == 2) bandBase = ((ReportPage)page1).PageHeader;
+            if (pos == 3) bandBase = ((ReportPage)page1).ReportSummary;
+            if (pos == 4) bandBase = ((ReportPage)page1).PageFooter;
+
+            // dataBand için geçerli galiba
+            //BandBase band1 = ((ReportPage)page1).Bands[0];
+            //BandBase band1 = ((ReportPage)(fReport.Pages[0])).Bands[0];
+
+            return bandBase;
+        }
+
+
         private void allRegisterData(Form tForm, Report FReport, List<string> dataSetList)
         {
             DataSet dsData = null;
@@ -190,12 +297,7 @@ namespace Tkn_Report
                         tableName = ((DataTable)tDataTable).TableName;
                         dsData = ((DataTable)tDataTable).DataSet;
                         
-                        DataTable newDataTable = ((DataTable)tDataTable).Clone();
-                        DataSet newDataSet = new DataSet();
-                        newDataSet.Tables.Add(newDataTable);
-
                         FReport.RegisterData(dsData);
-                        //FReport.RegisterData(newDataSet);
                         FReport.GetDataSource(tableName).Enabled = true;
                     }
                 }
@@ -204,18 +306,7 @@ namespace Tkn_Report
 
         private void PreviewReport(Report FReport, string tableName)
         {
-            //RegisterData(FReport, tableName);
             FReport.Show();
-        }
-
-        private void RegisterData(Report FReport, string tableName)
-        {
-            FReport.RegisterData(dataSet, tableName);
-
-            foreach (DataSourceBase source in FReport.Dictionary.DataSources)
-            {
-                source.Enabled = true;
-            }
         }
 
     }

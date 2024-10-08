@@ -14648,6 +14648,15 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 tableName = "ILTipi";
                 return;
             }
+            if (fieldName.IndexOf("IlceKodu") > -1) 
+            {
+                idFieldName = "IlceKodu";
+                fieldName = "IlceAdi";
+                tableName = "IlceTipi";
+                return;
+            }
+
+
             if (fieldName.IndexOf("KdvOrani") > -1)
             {
                 idFieldName = "Id";

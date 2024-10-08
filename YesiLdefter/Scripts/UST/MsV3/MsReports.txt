@@ -20,6 +20,17 @@ begin transaction
     ReportTypeId    SmallInt          null, 
     PrivateTypeId   SmallInt          null, /* 0, 1. Genel, 2. Üst Yönetim, 3. Sadece Ortaklar */  
 
+    -- 30
+    ReportHeader    nVarchar(100)     null,
+    PageHeader      nVarchar(100)     null,     
+    ReportSummary   nVarchar(100)     null,
+    PageSummary     nVarchar(100)     null,     
+
+    -- 40 
+    IlKodu          varChar(3)        null,
+    IlceKodu        varChar(5)        null,
+    FirmaDbName     varChar(50)       null, 
+
     -- 90
 	SoftwareCode    varchar(20)       null,
     ProjectCode     varchar(20)       null,
@@ -82,7 +93,11 @@ INSERT INTO [Lkp].[MsReportsRecordType] (Id, RecordType)
  VALUES 
   ( 0,    N'Seçiniz'),
   ( 1,    N'Group name'),
-  ( 2,    N'Report name')
+  ( 2,    N'Report name'),
+  ( 3,    N'İl bazlı rapor'),
+  ( 4,    N'İlçe bazlı rapor'),
+  ( 5,    N'Firma bazlı rapor')
+
   
 
 -- ------------------------------------------------------- 
@@ -161,6 +176,7 @@ INSERT INTO [dbo].[MsReports]
            ( 1        , 0         , 'MLI'       , ''         , 'Mali işlemler'                   , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
            ( 1        , 0         , 'DNM'       , ''         , 'Dönem işlemler'                  , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
            ( 1        , 0         , 'IDA'       , ''         , 'İdari işlemler'                  , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'RPR'       , ''         , 'Rapor işlemleri'                 , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
 
            ( 1        , 0         , 'KRM.PERS'  , 'KRM'      , 'Personel raporları'              , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
            ( 1        , 0         , 'KRM.ARAC'  , 'KRM'      , 'Taşıt raporları'                 , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
@@ -183,4 +199,10 @@ INSERT INTO [dbo].[MsReports]
            ( 1        , 0         , 'DNM.TALP.UCR'  , 'DNM.TALP' , 'Ücretler'                    , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
            ( 1        , 0         , 'DNM.TALP.BIL'  , 'DNM.TALP' , 'Bildirimler'                 , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
            ( 1        , 0         , 'DNM.TALP.TKP'  , 'DNM.TALP' , 'Takip durumu'                , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
-           ( 1        , 0         , 'DNM.TALP.FRM'  , 'DNM.TALP' , 'Formlar'                     , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       )
+           ( 1        , 0         , 'DNM.TALP.FRM'  , 'DNM.TALP' , 'Formlar'                     , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+
+           ( 1        , 0         , 'RPR.RBAS'      , 'RPR'      , 'Rapor başlığı'               , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'RPR.SBAS'      , 'RPR'      , 'Sayfa başlığı'               , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'RPR.RTOP'      , 'RPR'      , 'Rapor toplamı'               , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'RPR.STOP'      , 'RPR'      , 'Sayfa toplamı'               , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       )
+
