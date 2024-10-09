@@ -37,7 +37,7 @@ begin transaction
     ModulCode       varchar(20)       null,
 
     -- 100
-    ReportTemp      nvarchar(max)     null,
+    ReportTemp      VarBinary(max)    null,
 
    Constraint pk_MsReports primary key (Id)
  )

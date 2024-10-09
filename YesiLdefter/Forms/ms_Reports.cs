@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,10 +12,13 @@ using DevExpress.XtraEditors;
 using DevExpress.XtraPrinting.Preview;
 using DevExpress.XtraReports.UI;
 using FastReport;
+using FastReport.Design;
 using FastReport.Preview;
+using FastReport.Utils;
 using Tkn_Events;
 using Tkn_InputPanel;
 using Tkn_Report;
+using Tkn_Save;
 using Tkn_ToolBox;
 using Tkn_Variable;
 
@@ -84,24 +88,53 @@ namespace YesiLdefter
             */
             documentViewerDevEx = (DevExpress.XtraPrinting.Preview.DocumentViewer)t.Find_Control(this, "documentViewerDevEx");
             documentViewerFast = (FastReport.Preview.PreviewControl)t.Find_Control(this, "documentViewerFast");
+
+            // ustad elemanları
+            if (v.tUser.UserDbTypeId < 30)
+            {
+                documentViewerFast.Buttons =
+                 ((FastReport.PreviewButtons)((((((((((((((((FastReport.PreviewButtons.Print
+                | FastReport.PreviewButtons.Open)
+                | FastReport.PreviewButtons.Save)
+                | FastReport.PreviewButtons.Email)
+                | FastReport.PreviewButtons.Find)
+                | FastReport.PreviewButtons.Zoom)
+                | FastReport.PreviewButtons.Outline)
+                | FastReport.PreviewButtons.PageSetup)
+                | FastReport.PreviewButtons.Edit)
+                | FastReport.PreviewButtons.Watermark)
+                | FastReport.PreviewButtons.Navigator)
+                | FastReport.PreviewButtons.Close)
+                | FastReport.PreviewButtons.Design)
+                | FastReport.PreviewButtons.CopyPage)
+                | FastReport.PreviewButtons.DeletePage)
+                | FastReport.PreviewButtons.About)));
+            }
+            else
+            {
+                documentViewerFast.Buttons =
+                 ((FastReport.PreviewButtons)((((((((((FastReport.PreviewButtons.Print
+                | FastReport.PreviewButtons.Save)
+                | FastReport.PreviewButtons.Email)
+                | FastReport.PreviewButtons.Find)
+                | FastReport.PreviewButtons.Zoom)
+                | FastReport.PreviewButtons.Outline)
+                | FastReport.PreviewButtons.PageSetup)
+                | FastReport.PreviewButtons.Watermark)
+                | FastReport.PreviewButtons.Navigator)
+                | FastReport.PreviewButtons.About)));
+
+                //| FastReport.PreviewButtons.Open)
+                //| FastReport.PreviewButtons.Design)
+                //| FastReport.PreviewButtons.Edit)
+                //| FastReport.PreviewButtons.CopyPage)
+                //| FastReport.PreviewButtons.DeletePage)
+                //| FastReport.PreviewButtons.Close)
+
+            }
             
-            documentViewerFast.Buttons =
-             ((FastReport.PreviewButtons)((((((((((((((((FastReport.PreviewButtons.Print 
-            | FastReport.PreviewButtons.Open)
-            | FastReport.PreviewButtons.Save)
-            | FastReport.PreviewButtons.Email)
-            | FastReport.PreviewButtons.Find)
-            | FastReport.PreviewButtons.Zoom)
-            | FastReport.PreviewButtons.Outline)
-            | FastReport.PreviewButtons.PageSetup)
-            | FastReport.PreviewButtons.Edit)
-            | FastReport.PreviewButtons.Watermark)
-            | FastReport.PreviewButtons.Navigator)
-            | FastReport.PreviewButtons.Close)
-            | FastReport.PreviewButtons.Design)
-            | FastReport.PreviewButtons.CopyPage)
-            | FastReport.PreviewButtons.DeletePage)
-            | FastReport.PreviewButtons.About)));
+            /// FastReport config
+            WireupDesignerEvents();
 
             /*
             // DİKKAT : Bu atamanın yerini değiştirme
@@ -310,7 +343,81 @@ namespace YesiLdefter
                 if (documentViewerDevEx.DocumentSource != null)
                     ((XtraReport)documentViewerDevEx.DocumentSource).ShowRibbonPreview();
         }
+        private void WireupDesignerEvents()
+        {
+            //Config.DesignerSettings.CustomOpenDialog += new OpenSaveDialogEventHandler(DesignerSettings_CustomOpenDialog);
+            //Config.DesignerSettings.CustomOpenReport += new OpenSaveReportEventHandler(DesignerSettings_CustomOpenReport);
+            Config.DesignerSettings.CustomSaveDialog += new OpenSaveDialogEventHandler(DesignerSettings_CustomSaveDialog);
+            Config.DesignerSettings.CustomSaveReport += new OpenSaveReportEventHandler(DesignerSettings_CustomSaveReport);
+        }
 
+        private void DesignerSettings_CustomSaveDialog(object sender, OpenSaveDialogEventArgs e)
+        {
+            // return the report name in the e.FileName
+            string reportCode = dsMsReports.Tables[0].Rows[dNMsReports.Position]["ReportCode"].ToString();
+            e.FileName = reportCode + ".frx";
+        }
+        private void DesignerSettings_CustomSaveReport(object sender, OpenSaveReportEventArgs e)
+        {
+            SaveFastReport(e.Report);
+        }
+
+        private void SaveFastReport(Report report)
+        {
+            if (t.IsNotNull(dsMsReports))
+            {
+                bool onay = false;
+                string reportCode = dsMsReports.Tables[0].Rows[dNMsReports.Position]["ReportCode"].ToString();
+                string reportCaption = dsMsReports.Tables[0].Rows[dNMsReports.Position]["ReportCaption"].ToString();
+
+                try
+                {
+                    report.Save(v.EXE_FastReportsPath + reportCode + ".frx");
+                    onay = true;
+                }
+                catch (Exception)
+                {
+                    //throw;
+                }
+
+                if (onay)
+                {
+                    string soru = " Rapor Kodu : " + reportCode + v.ENTER
+                                + " Rapor Adı  : " + reportCaption + v.ENTER2
+                                + reportCode + ".frx isimle dosyaya kayıt edildi. " + v.ENTER2
+                                + " Bu rapor dosyası database'de kayıt edilecek, onaylıyor musunuz ?";
+
+                    DialogResult cevap = t.mySoru(soru);
+                    if (DialogResult.Yes == cevap)
+                    {
+                        try
+                        {
+                            // save the report to a stream, then put byte[] array to the datarow
+                            using (MemoryStream stream = new MemoryStream())
+                            {
+                                report.Save(stream);
+
+                                dsMsReports.Tables[0].Rows[dNMsReports.Position]["ReportTemp"] = stream.ToArray();
+                                dsMsReports.Tables[0].AcceptChanges();
+
+                                v.con_Images = stream.ToArray();
+                                v.con_Images_FieldName = "ReportTemp";
+
+                                tSave sv = new tSave();
+                                sv.tDataSave(this, dsMsReports, dNMsReports, dNMsReports.Position);
+
+                            }
+                            t.FlyoutMessage(this, reportCaption, "Rapor dosyası başarıyla database kaydedildi.");
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show("Dikkat : Kayıt gerçekleşmedi..." + v.ENTER2 + ex.Message);
+                            //throw;
+                        }
+                    }
+                }
+            }
+        }
 
     }
 }

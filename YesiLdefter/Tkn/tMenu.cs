@@ -1599,6 +1599,14 @@ namespace Tkn_Menu
                 ustHesapItemName = string.Empty;
                 ustItemName = string.Empty;
 
+                if (CmpName.ToUpper() == "DESIGN")
+                {
+                    CmpName = "";
+                    if (v.tUser.UserDbTypeId > 30) // Eğer son kullanıcı ise bu butonu görmesin
+                        tvisible = false;
+                }
+
+
                 #region Category veya group
                 // yeni Category/Group oluşturma
                 if ((t.IsNotNull(itemName) == false) &&

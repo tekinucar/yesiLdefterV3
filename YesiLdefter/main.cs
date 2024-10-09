@@ -411,8 +411,7 @@ namespace YesiLdefter
             if (v.SP_TabimDbConnection == false)
                 mn.Create_Menu(ribbon, "UST/PMS/PMS/PublicUser", "");
 
-            if ((v.tUser.UserDbTypeId == 1) || // yazılım
-                (v.tUser.UserDbTypeId == 21))  // kurucu
+            if (v.tUser.UserDbTypeId == 21)  // Ustad Admin
             {
                 t.WaitFormOpen(v.mainForm, "MsV3Menu menüsü hazırlanıyor...");
                 mn.Create_Menu(ribbon, "UST/PMS/PMS/MsV3Menu", "");

@@ -3134,6 +3134,7 @@ namespace Tkn_ToolBox
             Str_Replace(ref Sql, ":FIRM_ID", v.SP_FIRM_ID.ToString());
             Str_Replace(ref Sql, ":FIRM_ILKODU", v.tMainFirm.IlKodu);
             Str_Replace(ref Sql, ":FIRM_ILCEKODU", v.tMainFirm.IlceKodu);
+            Str_Replace(ref Sql, ":FIRM_DBNAME", v.tMainFirm.DatabaseName);
             //Str_Replace(ref Sql, ":FIRM_USERLIST", v.SP_FIRM_USERLIST);
             //Str_Replace(ref Sql, ":FIRM_USER_LIST", v.SP_FIRM_USERLIST);
             //Str_Replace(ref Sql, ":FIRM_FULLLIST", v.SP_FIRM_FULLLIST);
@@ -14145,8 +14146,6 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             return item;
         }
 
-
-
         public void Table_FieldsGroups_Count(vTableAbout vTA, DataSet dsFields)
         {
             // tableCount ? 1 = sadece fields bilgileri var, 
@@ -14510,7 +14509,6 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             return _img;
         }
 
-
         public void LookUpFieldNameChecked(
             ref string tableName,
             ref string fieldName,
@@ -14520,51 +14518,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
         {
             string orjinalTableName = tableName;
             string orjinalFieldName = fieldName;
-            
-            int OzelType = -1;
 
-            //OzelType = fieldName.IndexOf("ParaTipi");
-            //if (OzelType == -1)
-            //    OzelType = fieldName.IndexOf("BirimTipi");
-            //if (OzelType == -1)
-            //    OzelType = fieldName.IndexOf("KdvOrani");
-
-
-            if (OzelType == -1)
-                OzelType = fieldName.IndexOf("IlTipi");
-            if (OzelType == -1)
-                OzelType = fieldName.IndexOf("IlceTipi");
-
-            if (OzelType == -1)
-                OzelType = fieldName.IndexOf("CityType");
-            if (OzelType == -1)
-                OzelType = fieldName.IndexOf("IlKodu");
-            if (OzelType == -1)
-                OzelType = fieldName.IndexOf("IlceKodu");
-
-            if (OzelType == -1)
-                OzelType = fieldName.IndexOf("Cinsiyet");
-            if (OzelType == -1)
-                OzelType = fieldName.IndexOf("Sector");
-            /*
-            if (tableName.ToUpper().IndexOf("MTSK") > -1)
-            {
-                if (OzelType == -1)
-                    OzelType = fieldName.IndexOf("KurumOnayTipi");
-                if (OzelType == -1)
-                    OzelType = fieldName.IndexOf("SertikaGrupTipi");
-                if (OzelType == -1)
-                    OzelType = fieldName.IndexOf("GrupTipi");
-                if (OzelType == -1)
-                    OzelType = fieldName.IndexOf("DonemTipi");
-                if (OzelType == -1)
-                    OzelType = fieldName.IndexOf("SubeTipi");
-                if (OzelType == -1)
-                    OzelType = fieldName.IndexOf("SertifikaTipi");
-                if (OzelType == -1)
-                    OzelType = fieldName.IndexOf("Brans");
-            }
-            */
             if (orjinalTableName.ToUpper().IndexOf("MTSK") > -1)
             {
                 if (orjinalFieldName.IndexOf("KurumOnay") > -1)
@@ -14618,7 +14572,6 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 }
             }
 
-
             if (fieldName.IndexOf("UlkeTipiIds") > -1)
             {
                 idFieldName = "UlkeKodu";
@@ -14648,14 +14601,14 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 tableName = "ILTipi";
                 return;
             }
-            if (fieldName.IndexOf("IlceKodu") > -1) 
+            if ((fieldName.IndexOf("IlceKodu") > -1) ||
+                (fieldName.IndexOf("District") > -1))
             {
                 idFieldName = "IlceKodu";
                 fieldName = "IlceAdi";
                 tableName = "IlceTipi";
                 return;
             }
-
 
             if (fieldName.IndexOf("KdvOrani") > -1)
             {
@@ -14692,8 +14645,6 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 return;
             }
 
-
-
             /// BelgeTipiId >> BelgeTipi ne dönüşüyor 
             /// ParaTipiId  >> ParaTipi
             /// ILTipiId    >> ILTipi
@@ -14715,43 +14666,8 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
                 if (fieldName.IndexOf("Para") > -1)
                     tableName = "OnmParaTipi";
-                
-            }
-
-            if (OzelType > -1)
-            {
-                /// ParaTipiId >> ParaTipi ne dönmüştü zaten
-                /// ParaTipi   >> Para  ya dönsün
-                /// BirimTipi  >> Birim e  dönsün
-                /// ILTipi     >> IL    e  dönsün
-                /// ILCETipi   >> ILCE  ye dönsün
-                fieldName = fieldName.Replace("Tipi", "");
-                fieldName = fieldName.Replace("Type", "");
-
-                // BirimTipiId1, BirimTipiId2
-                // AlimBirimTipiId, SatisBirimTipiId
-                if (fieldName.IndexOf("BirimTipi") > -1) fieldName = "Birim";
-                // AlimKdvOrani, SatisKdvOrani
-                if (fieldName.IndexOf("KdvOrani") > -1) fieldName = "KdvOrani";
-
-                // ParaTipi oluştu
-                // BirimTipi oluştu
-                tableName = fieldName + "Tipi";
-                // ParaKodu oluştu
-                // BirimKodu oluştu
-                idFieldName = fieldName + "Kodu";
-                // ParaAdi oluştu
-                // BirimAdi oluştu
-                fieldName = fieldName + "Adi";
-
-
-                if (fieldName.IndexOf("BirimTipi") > -1)
-                {
-                    tableName = "OnmStokBirimTipi";
-                }
             }
         }
-
 
         public DataSet getTabimValues(string tableName, string where)
         {
@@ -14767,8 +14683,6 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             
             return ds;
         }
-
-
 
         #endregion Order
 

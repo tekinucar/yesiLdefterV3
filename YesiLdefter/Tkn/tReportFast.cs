@@ -40,43 +40,28 @@ namespace Tkn_Report
             string reportName = dsMsReports.Tables[0].Rows[dNMsReports.Position]["ReportName"].ToString();
             string reportCaption = dsMsReports.Tables[0].Rows[dNMsReports.Position]["ReportCaption"].ToString();
 
+            // load the report from a stream contained in the "ReportStream" datacolumn
+            byte[] reportBytes = null;
 
-            string reportFileName = "";
+            try
+            {
+                reportBytes = (byte[])dsMsReports.Tables[0].Rows[dNMsReports.Position]["ReportTemp"];
+            }
+            catch (Exception)
+            {
+                //
+            }
 
             t.Str_Replace(ref reportCode, ".", "_");
 
             if (t.IsNotNull(reportName) == false)
                 reportName = reportCode;
 
-            reportFileName = v.EXE_FastReportsPath + reportName + ".fr3";
+            string reportFileName = v.EXE_FastReportsPath + reportName + ".frx";
 
-            if (File.Exists(@"" + reportFileName))
+            if (!File.Exists(@"" + reportFileName) && (reportBytes == null || reportBytes?.Length == 0))
             {
-
-            }
-            else
-            {
-                /// Auto FastReport Page Create
-                ///
-                Report report = new Report();
-                ReportPage page1 = new ReportPage();
-                DataBand dataBand1 = new DataBand();
-
-                page1.Name = "Page1";
-                dataBand1.Name = "DataBand1";
-                dataBand1.Height = Units.Centimeters * (float)2.0;
-
-                //page1.Bands.Add(reportTitleBand1);
-                //page1.Bands.Add(pageHeaderBand1);
-                page1.Bands.Add(dataBand1);
-                //page1.Bands.Add(reportSummaryBand1);
-                //page1.Bands.Add(pageFooterBand1);
-
-                report.Pages.Add(page1);
-
-                report.Save(reportFileName);
-                MessageBox.Show(reportCaption + " : için yeni rapor dosyası oluşturuldu.");
-
+                preparingAutoFastReportFile(reportFileName, reportCaption);
                 v.IsWaitOpen = false;
                 t.WaitFormClose();
                 return;
@@ -95,16 +80,26 @@ namespace Tkn_Report
                     Report FReport = new Report();
 
                     FReport.Preview = documentViewer1; // previewControl1;
-                    FReport.Load(reportFileName);
+
+                    // Eğer database kayıtlı bir rapor yok ise dosyadan oku
+                    if (reportBytes == null || reportBytes?.Length == 0)
+                    {
+                        FReport.Load(reportFileName);
+                    }
+                    else
+                    {
+                        // database kayıtlı bir rapor var ise onu oku
+                        using (MemoryStream stream = new MemoryStream(reportBytes))
+                        {
+                            FReport.Load(stream);
+                        }
+                    }
+
                     preparingReportHeaderAndFooter(dsMsReports, dNMsReports, FReport, reportFileName);
-                    
 
                     allRegisterData(tForm, FReport, dataSetList);
 
                     FReport.Show();
-
-                    //PreviewReport(FReport, tableName);
-
                 }
                 catch (Exception err)
                 {
@@ -118,6 +113,30 @@ namespace Tkn_Report
 
             v.IsWaitOpen = false;
             t.WaitFormClose();
+        }
+
+        private void preparingAutoFastReportFile(string reportFileName, string reportCaption)
+        {
+            /// Auto FastReport Page Create
+            ///
+            Report report = new Report();
+            ReportPage page1 = new ReportPage();
+            DataBand dataBand1 = new DataBand();
+
+            page1.Name = "Page1";
+            dataBand1.Name = "DataBand1";
+            dataBand1.Height = Units.Centimeters * (float)2.0;
+
+            //page1.Bands.Add(reportTitleBand1);
+            //page1.Bands.Add(pageHeaderBand1);
+            page1.Bands.Add(dataBand1);
+            //page1.Bands.Add(reportSummaryBand1);
+            //page1.Bands.Add(pageFooterBand1);
+
+            report.Pages.Add(page1);
+
+            report.Save(reportFileName);
+            MessageBox.Show(reportCaption + " : için yeni rapor dosyası oluşturuldu.");
         }
 
         private void preparingReportHeaderAndFooter(DataSet dsMsReports, DataNavigator dNMsReports, Report FReport, string reportFileName)
@@ -150,7 +169,7 @@ namespace Tkn_Report
             if (t.IsNotNull(reportHeader))
             {
                 reportHeader = reportHeader.Replace(".","_");
-                bandFileName = v.EXE_FastReportsPath + reportHeader + ".fr3";
+                bandFileName = v.EXE_FastReportsPath + reportHeader + ".frx";
                 BandBase bandReportHeader = getBandBase(fReport, bandFileName, 1);
                 //((ReportPage)(FReport.Pages[0])).Bands.Add(bandReportHeader);
                 ((ReportPage)(FReport.Pages[0])).ReportTitle = (ReportTitleBand)bandReportHeader;
@@ -158,7 +177,7 @@ namespace Tkn_Report
             if (t.IsNotNull(pageHeader))
             {
                 pageHeader = pageHeader.Replace(".", "_");
-                bandFileName = v.EXE_FastReportsPath + pageHeader + ".fr3";
+                bandFileName = v.EXE_FastReportsPath + pageHeader + ".frx";
                 BandBase bandPageHeader = getBandBase(fReport, bandFileName, 2);
                 //((ReportPage)(FReport.Pages[0])).Bands.Add(bandPageHeader);
                 ((ReportPage)(FReport.Pages[0])).PageHeader = (PageHeaderBand)bandPageHeader;
@@ -167,7 +186,7 @@ namespace Tkn_Report
             if (t.IsNotNull(reportSummary))
             {
                 reportSummary = reportSummary.Replace(".", "_");
-                bandFileName = v.EXE_FastReportsPath + reportSummary + ".fr3";
+                bandFileName = v.EXE_FastReportsPath + reportSummary + ".frx";
                 BandBase bandReportSummary = getBandBase(fReport, bandFileName, 3);
                 //((ReportPage)(FReport.Pages[0])).Bands.Add(bandReportSummary);
                 ((ReportPage)(FReport.Pages[0])).ReportSummary = (ReportSummaryBand)bandReportSummary;
@@ -175,7 +194,7 @@ namespace Tkn_Report
             if (t.IsNotNull(pageSummary))
             {
                 pageSummary = pageSummary.Replace(".", "_");
-                bandFileName = v.EXE_FastReportsPath + pageSummary + ".fr3";
+                bandFileName = v.EXE_FastReportsPath + pageSummary + ".frx";
                 BandBase bandPageSummary = getBandBase(fReport, bandFileName, 4);
                 //((ReportPage)(FReport.Pages[0])).Bands.Add(bandPageSummary);
                 ((ReportPage)(FReport.Pages[0])).PageFooter = (PageFooterBand)bandPageSummary;
