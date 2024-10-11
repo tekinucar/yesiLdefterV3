@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\packages\CefSharp.Common.126.2.70\build\CefSharp.Common.props" Condition="Exists('..\packages\CefSharp.Common.126.2.70\build\CefSharp.Common.props')" />
-  <Import Project="..\packages\chromiumembeddedframework.runtime.win-x86.126.2.7\build\chromiumembeddedframework.runtime.win-x86.props" Condition="Exists('..\packages\chromiumembeddedframework.runtime.win-x86.126.2.7\build\chromiumembeddedframework.runtime.win-x86.props')" />
-  <Import Project="..\packages\chromiumembeddedframework.runtime.win-x64.126.2.7\build\chromiumembeddedframework.runtime.win-x64.props" Condition="Exists('..\packages\chromiumembeddedframework.runtime.win-x64.126.2.7\build\chromiumembeddedframework.runtime.win-x64.props')" />
+  <Import Project="..\packages\CefSharp.Common.129.0.110\build\CefSharp.Common.props" Condition="Exists('..\packages\CefSharp.Common.129.0.110\build\CefSharp.Common.props')" />
+  <Import Project="..\packages\chromiumembeddedframework.runtime.win-x86.129.0.11\build\chromiumembeddedframework.runtime.win-x86.props" Condition="Exists('..\packages\chromiumembeddedframework.runtime.win-x86.129.0.11\build\chromiumembeddedframework.runtime.win-x86.props')" />
+  <Import Project="..\packages\chromiumembeddedframework.runtime.win-x64.129.0.11\build\chromiumembeddedframework.runtime.win-x64.props" Condition="Exists('..\packages\chromiumembeddedframework.runtime.win-x64.129.0.11\build\chromiumembeddedframework.runtime.win-x64.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -89,6 +89,15 @@
     </Reference>
     <Reference Include="AForge.Video.DirectShow, Version=2.2.5.0, Culture=neutral, PublicKeyToken=61ea4348d43881b7, processorArchitecture=MSIL">
       <HintPath>..\packages\AForge.Video.DirectShow.2.2.5\lib\AForge.Video.DirectShow.dll</HintPath>
+    </Reference>
+    <Reference Include="CefSharp, Version=129.0.110.0, Culture=neutral, PublicKeyToken=40c4b6fc221f4138, processorArchitecture=MSIL">
+      <HintPath>..\packages\CefSharp.Common.129.0.110\lib\net462\CefSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="CefSharp.Core, Version=129.0.110.0, Culture=neutral, PublicKeyToken=40c4b6fc221f4138, processorArchitecture=MSIL">
+      <HintPath>..\packages\CefSharp.Common.129.0.110\lib\net462\CefSharp.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="CefSharp.WinForms, Version=129.0.110.0, Culture=neutral, PublicKeyToken=40c4b6fc221f4138, processorArchitecture=MSIL">
+      <HintPath>..\packages\CefSharp.WinForms.129.0.110\lib\net462\CefSharp.WinForms.dll</HintPath>
     </Reference>
     <Reference Include="DevExpress.BonusSkins.v19.2, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
     <Reference Include="DevExpress.Data.v19.2, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
@@ -223,11 +232,25 @@
     <Compile Include="Entities\MsWebNode.cs" />
     <Compile Include="Entities\MsWebPage.cs" />
     <Compile Include="Entities\MsWebScrapingDbFields.cs" />
+    <Compile Include="Forms\BrowserForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\BrowserForm.Designer.cs">
+      <DependentUpon>BrowserForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ControlExtensions.cs" />
+    <Compile Include="Forms\Controls\ControlExtensions.cs" />
     <Compile Include="Forms\ms_CefSharp.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Forms\ms_CefSharp.Designer.cs">
       <DependentUpon>ms_CefSharp.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ms_CefSharp_OLD.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ms_CefSharp_OLD.Designer.cs">
+      <DependentUpon>ms_CefSharp_OLD.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\ms_Computer.cs">
       <SubType>Form</SubType>
@@ -413,6 +436,7 @@
     <Compile Include="Selenium\SeleniumService.cs" />
     <Compile Include="tForms.cs" />
     <Compile Include="Tkn\EventsMenu.cs" />
+    <Compile Include="Tkn\tCefSharp.cs" />
     <Compile Include="Tkn\tCookieReader.cs" />
     <Compile Include="Tkn\tCreateDatabase.cs" />
     <Compile Include="Tkn\tEventsButton.cs" />
@@ -449,8 +473,11 @@
     <Compile Include="Tkn\tVariable.cs" />
     <Compile Include="Tkn\tXMLRead.cs" />
     <Compile Include="tMainForm.cs" />
-    <EmbeddedResource Include="Forms\ms_CefSharp.resx">
-      <DependentUpon>ms_CefSharp.cs</DependentUpon>
+    <EmbeddedResource Include="Forms\BrowserForm.resx">
+      <DependentUpon>BrowserForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ms_CefSharp_OLD.resx">
+      <DependentUpon>ms_CefSharp_OLD.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\ms_Computer.resx">
       <DependentUpon>ms_Computer.cs</DependentUpon>
@@ -645,6 +672,7 @@
     <Content Include="Scripts\UST\MsV3\MsProjectFunctions.txt" />
     <Content Include="Scripts\UST\MsV3\MsProjectProcedures.txt" />
     <Content Include="Scripts\UST\MsV3\MsProjectTables.txt" />
+    <Content Include="Scripts\UST\MsV3\MsEducations.txt" />
     <Content Include="Scripts\UST\MsV3\MsReports.txt" />
     <Content Include="Scripts\UST\MsV3\MsSoftware.txt" />
     <Content Include="Scripts\UST\MsV3\MsSqlLog.txt" />
@@ -768,6 +796,7 @@
     <Content Include="Scripts\UST\Mtsk\prc_MtskUygulamaDersPlaniGruplariBugun.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskUygulamaDersPlaniOlustur.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskUygulamaDersPlaniSaatleriGuncelle.txt" />
+    <Content Include="Scripts\UST\Mtsk\Settings.txt" />
     <Content Include="Scripts\UST\Mtsk\TempTabimBankalar.txt" />
     <Content Include="Scripts\UST\Mtsk\TempTabimHesaplar.txt" />
     <Content Include="Scripts\UST\Mtsk\trg_ORNEK.txt" />
@@ -4491,13 +4520,13 @@
     <Error Condition="!Exists('..\packages\Tesseract.5.2.0\build\Tesseract.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Tesseract.5.2.0\build\Tesseract.targets'))" />
     <Error Condition="!Exists('..\packages\Selenium.WebDriver.ChromeDriver.122.0.6261.11100\build\Selenium.WebDriver.ChromeDriver.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Selenium.WebDriver.ChromeDriver.122.0.6261.11100\build\Selenium.WebDriver.ChromeDriver.targets'))" />
     <Error Condition="!Exists('..\packages\Selenium.WebDriver.4.20.0\build\Selenium.WebDriver.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Selenium.WebDriver.4.20.0\build\Selenium.WebDriver.targets'))" />
-    <Error Condition="!Exists('..\packages\chromiumembeddedframework.runtime.win-x64.126.2.7\build\chromiumembeddedframework.runtime.win-x64.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\chromiumembeddedframework.runtime.win-x64.126.2.7\build\chromiumembeddedframework.runtime.win-x64.props'))" />
-    <Error Condition="!Exists('..\packages\chromiumembeddedframework.runtime.win-x86.126.2.7\build\chromiumembeddedframework.runtime.win-x86.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\chromiumembeddedframework.runtime.win-x86.126.2.7\build\chromiumembeddedframework.runtime.win-x86.props'))" />
-    <Error Condition="!Exists('..\packages\CefSharp.Common.126.2.70\build\CefSharp.Common.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\CefSharp.Common.126.2.70\build\CefSharp.Common.props'))" />
-    <Error Condition="!Exists('..\packages\CefSharp.Common.126.2.70\build\CefSharp.Common.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\CefSharp.Common.126.2.70\build\CefSharp.Common.targets'))" />
+    <Error Condition="!Exists('..\packages\chromiumembeddedframework.runtime.win-x64.129.0.11\build\chromiumembeddedframework.runtime.win-x64.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\chromiumembeddedframework.runtime.win-x64.129.0.11\build\chromiumembeddedframework.runtime.win-x64.props'))" />
+    <Error Condition="!Exists('..\packages\chromiumembeddedframework.runtime.win-x86.129.0.11\build\chromiumembeddedframework.runtime.win-x86.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\chromiumembeddedframework.runtime.win-x86.129.0.11\build\chromiumembeddedframework.runtime.win-x86.props'))" />
+    <Error Condition="!Exists('..\packages\CefSharp.Common.129.0.110\build\CefSharp.Common.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\CefSharp.Common.129.0.110\build\CefSharp.Common.props'))" />
+    <Error Condition="!Exists('..\packages\CefSharp.Common.129.0.110\build\CefSharp.Common.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\CefSharp.Common.129.0.110\build\CefSharp.Common.targets'))" />
   </Target>
   <Import Project="..\packages\Tesseract.5.2.0\build\Tesseract.targets" Condition="Exists('..\packages\Tesseract.5.2.0\build\Tesseract.targets')" />
   <Import Project="..\packages\Selenium.WebDriver.ChromeDriver.122.0.6261.11100\build\Selenium.WebDriver.ChromeDriver.targets" Condition="Exists('..\packages\Selenium.WebDriver.ChromeDriver.122.0.6261.11100\build\Selenium.WebDriver.ChromeDriver.targets')" />
   <Import Project="..\packages\Selenium.WebDriver.4.20.0\build\Selenium.WebDriver.targets" Condition="Exists('..\packages\Selenium.WebDriver.4.20.0\build\Selenium.WebDriver.targets')" />
-  <Import Project="..\packages\CefSharp.Common.126.2.70\build\CefSharp.Common.targets" Condition="Exists('..\packages\CefSharp.Common.126.2.70\build\CefSharp.Common.targets')" />
+  <Import Project="..\packages\CefSharp.Common.129.0.110\build\CefSharp.Common.targets" Condition="Exists('..\packages\CefSharp.Common.129.0.110\build\CefSharp.Common.targets')" />
 </Project>

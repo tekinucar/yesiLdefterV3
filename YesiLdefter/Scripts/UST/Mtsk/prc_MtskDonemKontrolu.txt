@@ -323,7 +323,7 @@ AS BEGIN
   From MtskDonemi as a,
   (
      Select DonemTipiId, Count(Id) Adet 
-     From MtskAday
+     From MtskAdayTalep
      Group by DonemTipiId
   ) x
   Where a.DonemTipiId = x.DonemTipiId
@@ -333,7 +333,7 @@ AS BEGIN
   From MtskDonemi as a,
   (
      Select DonemTipiId, GrupTipiId, Count(Id) Adet 
-     From MtskAday
+     From MtskAdayTalep
      Group by DonemTipiId, GrupTipiId
   ) x
   Where a.DonemTipiId = x.DonemTipiId
@@ -348,7 +348,7 @@ AS BEGIN
   From MtskGrupSubesi as a,
   (
      Select DonemTipiId, GrupTipiId, SubeTipiId, Count(Id) Adet 
-     From MtskAday
+     From MtskAdayTalep
      Group by DonemTipiId, GrupTipiId, SubeTipiId 
   ) x
   Where a.DonemTipiId = x.DonemTipiId

@@ -110,6 +110,8 @@ commit transaction
 /*CreateTableEnd*/
 
 
+/*CreateTrigger*/
+
 ALTER TRIGGER [dbo].[trg_MtskAdayTalep] on [dbo].[MtskAdayTalep]
 AFTER INSERT, UPDATE
 AS BEGIN
@@ -384,7 +386,7 @@ AS BEGIN
   begin
 	  --print 'veri transferi harici işler'
       Execute [dbo].[prc_MtskAdayTakipTalepKaydiMultiSet] @yFirmId 
-      --EXECUTE [dbo].[prc_MtskDonemKontrolu] @yFirmId 
+      Execute [dbo].[prc_MtskDonemKontrolu] @yFirmId 
       --EXECUTE [dbo].[prc_MtskAdayTakip] @yFirmId
   end
 

@@ -4,16 +4,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
-//using CefSharp;
-//using CefSharp.WinForms;
-//using CefSharp.SchemeHandler;
+using CefSharp;
+using CefSharp.WinForms;
+using CefSharp.SchemeHandler;
 using System.Reflection;
 
 namespace YesiLdefter.CEFSharp
 {
     public static class CEFHelper
     {
-        /*
+        
         private static ChromiumWebBrowser _cefBrowser = null;
 
         public static ChromiumWebBrowser CreateBrowser
@@ -47,7 +47,7 @@ namespace YesiLdefter.CEFSharp
                 /// şeklinde değiştirmen gerekiyor
                 /// Eğer index.html içinde çağırdığın resim dosyaları var ise onlara aynısı yapacaksın
 
-                *+/
+                */
 
                 Cef.Initialize(settings);
                 _cefBrowser = new ChromiumWebBrowser();
@@ -112,12 +112,11 @@ namespace YesiLdefter.CEFSharp
         public class CustomProtocolSchemeHandlerFactory : ISchemeHandlerFactory
         {
             public const string SchemeName = "resource";
-
             public IResourceHandler Create (IBrowser browser, IFrame frame, string schemeName, IRequest request)
             {
                 return new ResourceSchemeHandler();
             }
         }
-        */
+                
     }
 }

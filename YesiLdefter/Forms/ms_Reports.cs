@@ -361,7 +361,6 @@ namespace YesiLdefter
         {
             SaveFastReport(e.Report);
         }
-
         private void SaveFastReport(Report report)
         {
             if (t.IsNotNull(dsMsReports))

@@ -88,6 +88,13 @@ namespace YesiLdefter
                     if (arg != "")
                     {
                         //MessageBox.Show("param:" + arg);
+                        if (arg.IndexOf("CEF") > -1)
+                        {
+                            // CefSharp ın çalışmasını durdur, çalışmasın.
+                            // Aynı Exe birden fazla aynı anda çalışınca CefSharp hata veriyor
+                            v.SP_Debug = true;
+                        }
+
                         if (arg.IndexOf("UserId=") > -1)
                         {
                             v.tUser.UserId = t.myInt32(arg.Replace("UserId=", ""));
@@ -286,19 +293,33 @@ namespace YesiLdefter
 
         void YolHaritasi()
         {
-            // Ön Muhasebe için başlangıç işlemleri
-            if (v.SP_Firm_SectorTypeId == (Int16)v.msSectorType.OnMuhasebe) autoOpenForm("UST/OMS/FNS/MALIISLEM");
-            //autoOpenForm("UST/OMS/AYR/YHBaslangic");
-            if ((v.SP_TabimParamsKurumTipi == "") &&
-                ((v.SP_Firm_SectorTypeId == (Int16)v.msSectorType.UstadMtsk) ||
-                (v.SP_Firm_SectorTypeId == (Int16)v.msSectorType.TabimMtsk)))
-                autoOpenForm("UST/MEB/MTS/YHBaslangic");
+            bool onay = t.getSettingsBoolValue((Int16)v.settings.BaslangictaYapilmasiGerekenlerMenu);
+
+            if (onay)
+            {
+                // Ön Muhasebe için başlangıç işlemleri
+                if (v.SP_Firm_SectorTypeId == (Int16)v.msSectorType.OnMuhasebe)
+                    autoOpenForm("UST/OMS/FNS/MALIISLEM","");
+
+                //autoOpenForm("UST/OMS/AYR/YHBaslangic");
+                if ((v.SP_TabimParamsKurumTipi == "") &&
+                    ((v.SP_Firm_SectorTypeId == (Int16)v.msSectorType.UstadMtsk) ||
+                    (v.SP_Firm_SectorTypeId == (Int16)v.msSectorType.TabimMtsk)))
+                    autoOpenForm("UST/MEB/MTS/YHBaslangic","");
+            }
+            else
+            {
+                autoOpenForm("UST/PMS/HUB/MainWebMtsk", "ms_CefSharp");
+            }
         }
 
-        void autoOpenForm(string FormCode)
+        void autoOpenForm(string FormCode, string FormName)
         {
+            if (FormName == "")
+                FormName = "null";
+
             string Prop_Navigator = @"
-            0=FORMNAME:null;
+            0=FORMNAME:" + FormName + @";
             0=FORMCODE:" + FormCode + @";
             0=FORMTYPE:CHILD;
             0=FORMSTATE:NORMAL;
@@ -623,6 +644,8 @@ namespace YesiLdefter
             }
 
             t.getUserLookAndFeelSkins();
+
+            t.read_Settings();
 
             YolHaritasi();
         }

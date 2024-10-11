@@ -53,6 +53,21 @@ namespace Tkn_Events
             // kullanıcının seçtiği esas button
             v.tButtonType mainButtonType = buttonHint.buttonType;
 
+
+            if (buttonHint.buttonType == v.tButtonType.btEk7)
+            {
+                CefSharp.MinimalExample.WinForms.BrowserForm xForm = new CefSharp.MinimalExample.WinForms.BrowserForm();
+
+                Form tMdiForm = Application.OpenForms[0];
+
+                if (tMdiForm.IsMdiContainer)
+                    xForm.MdiParent = tMdiForm;
+
+                xForm.WindowState = FormWindowState.Normal;
+                xForm.Show();
+                return true;
+            }
+
             //if ((mainButtonType == v.tButtonType.btYeniHesapSatir) ||
             //    (mainButtonType == v.tButtonType.btYeniBelgeSatir) ||
             //    (mainButtonType == v.tButtonType.btYeniAltHesapSatir)) mainButtonType = v.tButtonType.btYeniKartSatir;

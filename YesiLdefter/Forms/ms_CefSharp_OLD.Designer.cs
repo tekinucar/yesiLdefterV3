@@ -1,5 +1,5 @@
 ﻿
-namespace YesiLdefter.Forms
+namespace YesiLdefter
 {
     partial class ms_CefSharp
     {
@@ -29,10 +29,18 @@ namespace YesiLdefter.Forms
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
+            this.SuspendLayout();
+            // 
+            // ms_CefSharp
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Name = "ms_CefSharp";
             this.Text = "ms_CefSharp";
+            //this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.ms_CefSharp_FormClosing);
+            this.ResumeLayout(false);
+
         }
 
         #endregion

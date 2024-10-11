@@ -183,6 +183,10 @@ namespace Tkn_Starter
             t.MSSQL_Server_Tarihi();
             //t.DonemTipiYilAyRead();
 
+            // Settings table
+            t.WaitFormOpen(v.mainForm, "Settings okunuyor...");
+            t.read_Settings();
+
             //t.TestRead();
 
             v.SP_UserIN = true;

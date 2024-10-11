@@ -7063,8 +7063,100 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
         }
         #endregion MSSQL_Server_Tarihi
 
+        #region Setting Table Read
+        public void read_Settings()
+        {
+            /*
+            string Mesaj =
+                 "User Id : " + v.tUser.UserId.ToString() + v.ENTER
+               + "User Name : " + v.tUser.FullName + v.ENTER
+               + "Firm Id : " + v.tMainFirm.FirmId.ToString() + v.ENTER
+               + "Computer Name : " + v.tComputer.PcName + v.ENTER
+               + "Computer MAC : " + v.tComputer.Network_MACAddress;
+            MessageBox.Show(Mesaj);
+            */
+            string fields = @"
+       [Id]
+      ,[IsActive]
+      ,[SettingTypeId]
+      ,[FirmId]
+      ,[PcName]
+      ,[NetworkMacAddress]
+      ,[UserId]
+      ,[SettingGroupNo]
+      ,[SettingNo]
+      ,[About]
+      ,[DefaultTypeId]
+      ,[DefaultBool]
+      ,[DefaultNumeric]
+      ,[DefaultText]
+      ,[DefaultInt] ";
+
+            string Sql =
+                   " Select " + fields + " from Settings " + v.ENTER
+                 + " Where UserId = " + v.tUser.UserId.ToString() + v.ENTER;
+            
+            Sql += " union all "
+                + " Select " + fields + " from Settings " + v.ENTER
+                + " Where  PcName = '" + v.tComputer.PcName + "' "
+                + " and    NetworkMacAddress = '" + v.tComputer.Network_MACAddress + "' " + v.ENTER;
+
+            Sql += " union all "
+                + " Select " + fields + " from Settings " + v.ENTER
+                + " Where  FirmId = " + v.tMainFirm.FirmId;
+
+            try
+            {
+                if (v.ds_Settings != null)
+                    TableRemove(v.ds_Settings);
+
+                SQL_Read_Execute(v.dBaseNo.Project, v.ds_Settings, ref Sql, "Settings", "");
+            }
+            catch (Exception)
+            {
+                v.ds_Settings = null;
+                //throw;
+            }
+        }
+        #endregion Setting Table Read
+
+        #region Settings get value
+        public bool getSettingsBoolValue(Int16 SettingNo)
+        {
+            bool value = false;
+
+            DataRow row = getSettingsRow(SettingNo);
+
+            if (row != null)
+                value = Convert.ToBoolean(row["DefaultBool"]);
+            else value = true; // default 
+
+            return value;
+        }
+        private DataRow getSettingsRow(Int16 SettingNo)
+        {
+            DataRow row = null;
+
+            if (IsNotNull(v.ds_Settings))
+            {
+                int count = v.ds_Settings.Tables[0].Rows.Count;
+
+                for (int i = 0; i < count; i++)
+                {
+                    if (Convert.ToInt32(v.ds_Settings.Tables[0].Rows[i]["SettingNo"]) == SettingNo)
+                    {
+                        row = v.ds_Settings.Tables[0].Rows[i];
+                        break;
+                    }
+                }
+            }
+            return row;
+        }
+
+        #endregion Settings get value
+
         #region MsExeUpdates Read
-        
+
         public void read_MsExeUpdates(v.tUserType userType)
         {
             string ySql =

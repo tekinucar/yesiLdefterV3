@@ -271,6 +271,7 @@ namespace Tkn_Variable
         public static Boolean SP_TabimDbConnection = false;
         public static Boolean SP_TabimIniWrite = false;
 
+        public static Boolean SP_Debug = false;
         public static Boolean SP_UserIN = false;
         public static Boolean SP_UserLOGIN = true;
         public static Boolean SP_CheckedNewApplication = false;
@@ -311,6 +312,7 @@ namespace Tkn_Variable
         //--
 
         // *** Global DataSet *** //
+        public static DataSet ds_Settings = new DataSet();
         public static DataSet ds_TypesList = new DataSet();
         public static DataSet ds_MsTypesList = new DataSet();
         public static DataSet ds_Firm = new DataSet();
@@ -442,6 +444,12 @@ namespace Tkn_Variable
             next
         }
 
+        public enum settings : Int16
+        {
+            None = 0,
+            BaslangictaYapilmasiGerekenlerMenu = 101
+        }
+
         public enum msSectorType : Int16
         {
             None = 0,
@@ -472,15 +480,7 @@ namespace Tkn_Variable
             Row,
             Column
         };
-
-        //public enum TableType : byte
-        //{
-        //    None = 0, Table = 1, View = 2, StoredProcedure = 3,
-        //    Function = 4, Trigger = 5, Select = 6  
-        //}
-
-        
-
+                
         public enum TableType
         {
             None, Table, View, StoredProcedure,
@@ -504,13 +504,7 @@ namespace Tkn_Variable
             FastReport = 1,
             DevExpress = 2 
         }
-
-        //public enum DataReadType : byte
-        //{
-        //    None = 0, NotReadData = 1, ReadRefID = 2, DetailTable = 3, 
-        //    SubDetailTable = 4, DataCollection = 5, ReadSubView = 6
-        //}
-
+                
         public enum DataReadType
         {
             None, NotReadData, ReadRefID, DetailTable,
@@ -540,21 +534,6 @@ namespace Tkn_Variable
             AllFirm
         }
 
-        
-
-        /*
-                11	Kayıt	1
-        12	Giriş	1
-        13	Çıkış	1
-        14	Giriş-Çıkış	1
-        15	Görüş	1
-        16	Sayım	1
-        21	Kayıt	2
-        22	Giriş	2
-        23	Çıkış	2
-        24	Giriş-Çıkış	2
-        25	Mola	2
-                */
         public enum cihazCalismaTipi : byte
         {
             None = 0,
@@ -609,9 +588,6 @@ namespace Tkn_Variable
 
             chNull = 100
         }
-
-
-
         public enum tEnabled
         {
             Enable,

@@ -1,4 +1,6 @@
-﻿using DevExpress.XtraBars.Docking;
+﻿using CefSharp;
+using CefSharp.WinForms;
+using DevExpress.XtraBars.Docking;
 using DevExpress.XtraReports.UI;
 using Newtonsoft.Json;
 using System;
@@ -14,8 +16,8 @@ using Tkn_TablesRead;
 using Tkn_ToolBox;
 using Tkn_Variable;
 using YesiLdefter.CEFSharp;
-//using CefSharp;
-//using CefSharp.WinForms;
+using CefSharp;
+using CefSharp.WinForms;
 
 namespace Tkn_Layout
 {
@@ -3007,6 +3009,9 @@ namespace Tkn_Layout
                 lParentControlAdd(tForm, webBrowser1, ustItemName, ustItemType, row);
 
                 webBrowser1.SendToBack();
+
+                // test
+                // webBrowser1.Navigate("https://ustadyazilim.com/");
             }
 
             #endregion
@@ -3014,6 +3019,8 @@ namespace Tkn_Layout
 
         private void lCefWebBrowser_Preparing(Form tForm, Control subView, DataSet ds_Layout, DataRow row, int pos)
         {
+            if (v.SP_Debug) return;
+
             tToolBox t = new tToolBox();
 
             int RefId = 0;
@@ -3068,14 +3075,57 @@ namespace Tkn_Layout
 
                 if (t.IsNotNull(UstHesapRow["CMP_NAME"].ToString()))
                     ustItemName = UstHesapRow["CMP_NAME"].ToString();
+
                 /*
                 ChromiumWebBrowser webBrowser1 = CEFHelper.CreateBrowser;
                 webBrowser1.Dock = DockStyle.Fill;
                 webBrowser1.Name = "CefSharpBrowser";
+                webBrowser1.LoadUrl("https://ustadyazilim.com/");
+                */
+
+                string cefPath = "CEF_" + DateTime.Now.Ticks.ToString();
+                //string rootPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + Application.StartupPath;
+                string rootPath = v.EXE_PATH;
+                string newPath = rootPath + "\\" + cefPath;
+
+                //System.IO.Directory.CreateDirectory(newPath);
+
+                //CefSettings settings = new CefSettings();
+                //settings.IgnoreCertificateErrors = true;
+                //settings.RootCachePath = newPath;
+
+                //Cef.Initialize(settings);
+
+                if (t.IsNotNull(TableIPCode) == false)
+                    TableIPCode = "www.google.com";
+
+                ChromiumWebBrowser webBrowser1 = new ChromiumWebBrowser(TableIPCode);
+
+                Tkn_CefSharp.tCefSharp tCefSharp = new Tkn_CefSharp.tCefSharp();
+                
+                webBrowser1.IsBrowserInitializedChanged += tCefSharp.OnIsBrowserInitializedChanged;
+                webBrowser1.LoadingStateChanged += tCefSharp.OnLoadingStateChanged;
+                webBrowser1.ConsoleMessage += tCefSharp.OnBrowserConsoleMessage;
+                webBrowser1.StatusMessage += tCefSharp.OnBrowserStatusMessage;
+                webBrowser1.TitleChanged += tCefSharp.OnBrowserTitleChanged;
+                webBrowser1.AddressChanged += tCefSharp.OnBrowserAddressChanged;
+                webBrowser1.LoadError += tCefSharp.OnBrowserLoadError;
+                
+#if NETCOREAPP
+            // .NET Core
+            var environment = string.Format("Environment: {0}, Runtime: {1}",
+                System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture.ToString().ToLowerInvariant(),
+                System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription);
+#else
+                // .NET Framework
+                var bitness = Environment.Is64BitProcess ? "x64" : "x86";
+                var environment = String.Format("Environment: {0}", bitness);
+#endif
 
                 lParentControlAdd(tForm, webBrowser1, ustItemName, ustItemType, row);
-                */
                 
+                
+                /*
                 DevExpress.XtraEditors.PanelControl panelControl1 = new DevExpress.XtraEditors.PanelControl();
                 ((System.ComponentModel.ISupportInitialize)(panelControl1)).BeginInit();
                 panelControl1.SuspendLayout();
@@ -3108,6 +3158,7 @@ namespace Tkn_Layout
                 lParentControlAdd(tForm, panelControl1, ustItemName, ustItemType, row);
 
                 panelControl1.SendToBack();
+                */
                 
             }
 
