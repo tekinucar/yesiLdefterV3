@@ -3451,15 +3451,16 @@ MS_FIELDS                                          T03_MSFIELDS                 
             //SchedulerControl scheduler = new SchedulerControl();
 
             SchedulerDataStorage storage = new SchedulerDataStorage();
-            storage.AppointmentDependencies.AutoReload = false;
-            storage.Appointments.AutoReload = false;
-            storage.Resources.AutoReload = false;
+            storage.AppointmentDependencies.AutoReload = true;
+            storage.Appointments.AutoReload = true;
+            storage.Resources.AutoReload = true;
 
-            if (t.IsNotNull(dsData))
+            //if (t.IsNotNull(dsData))
                 storage.Appointments.DataSource = dsData.Tables[0];
             //storage.Appointments.DataMember = "Appointments";
             //storage.Resources.DataSource = dsData;
             //storage.Resources.DataMember = "Resources";
+
 
             string startDateFieldName = "";
             if (JSON_PropView != null)
@@ -3472,7 +3473,6 @@ MS_FIELDS                                          T03_MSFIELDS                 
 
             tSchedulerControl.MonthView.AppointmentDisplayOptions.StartTimeVisibility = AppointmentTimeVisibility.Auto;
             
-
 
             if (t.IsNotNull(startDateFieldName) && t.IsNotNull(dsData))
                 tSchedulerControl.Start = Convert.ToDateTime(dsData.Tables[0].Rows[0][startDateFieldName].ToString());

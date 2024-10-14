@@ -2531,7 +2531,8 @@ INSERT INTO [dbo].[SYS_UPDATES]
             string J_STN_FIELDS = string.Empty;
             string J_CASE_FIELDS = string.Empty;
 
-            Boolean tvisible = false;
+            bool tVisible = false;
+            bool tEnabled = false;
             Boolean tLkpMemoryField = false;
             Boolean tLookUpField = false;
             Boolean tUseLookUpField = false;
@@ -2623,12 +2624,13 @@ INSERT INTO [dbo].[SYS_UPDATES]
                 tLkpMemoryField = t.Set(Row["LKP_FMEMORY_FIELD"].ToString(), "", false);
                 tLookUpField    = t.Set(Row["LKP_FLOOKUP_FIELD"].ToString(), "", false);
                 
-                tvisible = t.Set(Row["CMP_VISIBLE"].ToString(), Row["LKP_FVISIBLE"].ToString(), true);
+                tVisible = t.Set(Row["CMP_VISIBLE"].ToString(), "", true);
+                tEnabled = t.Set(Row["CMP_ENABLED"].ToString(), "", true);
 
                 if (fieldname.ToUpper().IndexOf("LKP") == -1)
                     masterFields = masterFields + " , [" + tableCode + "]." + fieldname + v.ENTER;
 
-                if (tvisible)
+                if (tVisible || tEnabled)
                 {
                     fcaption = t.Set(Row["FCAPTION"].ToString(), Row["LKP_FCAPTION"].ToString(), fieldname);
 
@@ -3339,7 +3341,7 @@ INSERT INTO [dbo].[SYS_UPDATES]
 
             bool isSubJoin = (fieldName.IndexOf("Lkp") == 0);
 
-            if (joinFields.IndexOf(joinTableAlias) == -1)
+            if (joinFields.IndexOf("as " + joinTableAlias) == -1)
             {
                 if (t.IsNotNull(Row["KRT_CAPTION"].ToString()))
                     lookUpFieldName = Row["KRT_CAPTION"].ToString();
@@ -3378,8 +3380,9 @@ INSERT INTO [dbo].[SYS_UPDATES]
         {
             tToolBox t = new tToolBox();
             
-            Boolean tvisible = false;
-            Boolean tLookUpField = false;
+            bool tvisible = false;
+            bool tenabled = false;
+            bool tLookUpField = false;
 
             string idFieldName = "";
             string tableName = "";
@@ -3395,13 +3398,14 @@ INSERT INTO [dbo].[SYS_UPDATES]
             {
                 tLookUpField = t.Set(Row["LKP_FLOOKUP_FIELD"].ToString(), "", false);
 
-                tvisible = t.Set(Row["CMP_VISIBLE"].ToString(), Row["LKP_FVISIBLE"].ToString(), true);
+                tvisible = t.Set(Row["CMP_VISIBLE"].ToString(), "", true);
+                tenabled = t.Set(Row["CMP_ENABLED"].ToString(), "", true);
 
                 // kendi tablosuna ait olmayan başka bir type tablosu kullanıyorsa çalışmasın
                 // Lkp.MsSectorType||Id||SectorType
                 groupTables = Row["LKP_LIST_TYPES_NAME"].ToString();
 
-                if ((tvisible) && (tLookUpField) && (t.IsNotNull(groupTables) == false))
+                if ((tvisible || tenabled) && (tLookUpField) && (t.IsNotNull(groupTables) == false))
                 {
                     idFieldName = "Id";
                     tableName = Row["LKP_TABLE_NAME"].ToString();

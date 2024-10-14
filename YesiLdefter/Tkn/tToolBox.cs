@@ -2594,7 +2594,13 @@ namespace Tkn_ToolBox
                         {
                             //object tDataTable = ((DevExpress.XtraScheduler.SchedulerControl)cntrl).DataStorage.Appointments.DataSource.DataSource;
                             //DataSet dsData = ((DataTable)tDataTable).DataSet;
+                            ((DevExpress.XtraScheduler.SchedulerControl)cntrl).BeginInit();
                             ((DevExpress.XtraScheduler.SchedulerControl)cntrl).Start = Convert.ToDateTime(dsData.Tables[0].Rows[0][startDateFieldName].ToString());
+                            ((DevExpress.XtraScheduler.SchedulerControl)cntrl).EndInit();
+                            ((DevExpress.XtraScheduler.SchedulerControl)cntrl).DataStorage.RefreshData();
+                            ((DevExpress.XtraScheduler.SchedulerControl)cntrl).RefreshData();
+                            Object dataSetx = new Object();
+                            dataSetx = ((DevExpress.XtraScheduler.SchedulerControl)cntrl).DataStorage.Appointments.DataSource;
                         }
                     }
 

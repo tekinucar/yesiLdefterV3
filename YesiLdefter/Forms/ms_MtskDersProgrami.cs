@@ -210,6 +210,10 @@ namespace YesiLdefter
         bool IsPreparing = false;
         string _dBaseNo = "";
         string TableIPCode = string.Empty;
+        string teoSablonHazirlamaTableIPCode = "UST/MEB/MtskSablonTeorikB.Planlama_L01";
+        string teoPlanlamaTableIPCode = "UST/MEB/MtskSablonTeorikB.TeoPlanlama_L01";
+        string uygSablonHazirlamaTableIPCode = "UST/MEB/MtskSablonUygulamaB.Planlama_L01";
+        string uygPlanlamaTableIPCode = "UST/MEB/MtskSablonUygulamaB.Planlama_L02";
         string TabControlName = string.Empty;
         Control tabControl = null;
         AdvBandedGridView tGridView = null;
@@ -253,8 +257,8 @@ namespace YesiLdefter
         {
             // Teorik Sablon Hazırlama Fonksiyonlar
             //
-            TableIPCode = "UST/MEB/MtskSablonTeorikB.Planlama_L01";
-            t.Find_DataSet(this, ref ds_SablonB, ref dN_SablonB, TableIPCode);
+            //TableIPCode = "UST/MEB/MtskSablonTeorikB.Planlama_L01";
+            t.Find_DataSet(this, ref ds_SablonB, ref dN_SablonB, teoSablonHazirlamaTableIPCode);
 
             if (ds_SablonB != null)
             {
@@ -263,7 +267,7 @@ namespace YesiLdefter
 
                 _planTipi = planTipi.teorik;
 
-                if (ds_SablonB.DataSetName == TableIPCode)
+                if (ds_SablonB.DataSetName == teoSablonHazirlamaTableIPCode)
                     preparingTeorikSablonHazirlamaFormu();
 
                 return;
@@ -271,8 +275,8 @@ namespace YesiLdefter
 
             // Teorik Planlama Fonksiyonlar
             //
-            TableIPCode = "UST/MEB/MtskSablonTeorikB.Planlama_L02";
-            t.Find_DataSet(this, ref ds_SablonB, ref dN_SablonB, TableIPCode);
+            //TableIPCode = "UST/MEB/MtskSablonTeorikB.Planlama_L02";
+            t.Find_DataSet(this, ref ds_SablonB, ref dN_SablonB, teoPlanlamaTableIPCode);
 
             if (ds_SablonB != null)
             {
@@ -281,7 +285,7 @@ namespace YesiLdefter
 
                 _planTipi = planTipi.teorik;
 
-                if (ds_SablonB.DataSetName == TableIPCode)
+                if (ds_SablonB.DataSetName == teoPlanlamaTableIPCode)
                     preparingPlanTeorikFormu();
                 
                 return;
@@ -290,8 +294,8 @@ namespace YesiLdefter
 
             // Uygulama Sablon Hazırlama Fonksiyonları
             //
-            TableIPCode = "UST/MEB/MtskSablonUygulamaB.Planlama_L01";
-            t.Find_DataSet(this, ref ds_SablonB, ref dN_SablonB, TableIPCode);
+            //TableIPCode = "UST/MEB/MtskSablonUygulamaB.Planlama_L01";
+            t.Find_DataSet(this, ref ds_SablonB, ref dN_SablonB, uygSablonHazirlamaTableIPCode);
 
             if (ds_SablonB != null)
             {
@@ -300,7 +304,7 @@ namespace YesiLdefter
 
                 _planTipi = planTipi.uygulama;
 
-                if (ds_SablonB.DataSetName == TableIPCode)
+                if (ds_SablonB.DataSetName == uygSablonHazirlamaTableIPCode)
                     preparingUygulamaSablonHazirlamaFormu();
 
                 return;
@@ -308,8 +312,8 @@ namespace YesiLdefter
 
             // Uygulama Planlama Fonksiyonlar
             //             
-            TableIPCode = "UST/MEB/MtskSablonUygulamaB.Planlama_L02";
-            t.Find_DataSet(this, ref ds_SablonB, ref dN_SablonB, TableIPCode);
+            //TableIPCode = "UST/MEB/MtskSablonUygulamaB.Planlama_L02";
+            t.Find_DataSet(this, ref ds_SablonB, ref dN_SablonB, uygPlanlamaTableIPCode);
 
             if (ds_SablonB != null)
             {
@@ -318,7 +322,7 @@ namespace YesiLdefter
 
                 _planTipi = planTipi.uygulama;
 
-                if (ds_SablonB.DataSetName == TableIPCode)
+                if (ds_SablonB.DataSetName == uygPlanlamaTableIPCode)
                     preparingPlanlamaFormu();
 
                 return;
@@ -337,10 +341,10 @@ namespace YesiLdefter
             dN_SablonB.PositionChanged += new System.EventHandler(dataNavigatorB_PositionChanged);
 
             // Sablon Göster
-            TableIPCode = "UST/MEB/MtskSablonTeorikB.Planlama_L02";
+            //TableIPCode = "UST/MEB/MtskSablonTeorikB.Planlama_L02";
             Control cntrl = null;
             string[] controls = new string[] { };
-            cntrl = t.Find_Control(this, "simpleButton_ek1", TableIPCode, controls);
+            cntrl = t.Find_Control(this, "simpleButton_ek1", teoPlanlamaTableIPCode, controls);
 
             if (cntrl != null)
             {
@@ -442,10 +446,10 @@ namespace YesiLdefter
             dN_SablonB.PositionChanged += new System.EventHandler(dataNavigatorB_PositionChanged);
 
             // Sablon Göster
-            TableIPCode = "UST/MEB/MtskSablonUygulamaB.Planlama_L02";
+            //TableIPCode = "UST/MEB/MtskSablonUygulamaB.Planlama_L02";
             Control cntrl = null;
             string[] controls = new string[] { };
-            cntrl = t.Find_Control(this, "simpleButton_ek1", TableIPCode, controls);
+            cntrl = t.Find_Control(this, "simpleButton_ek1", uygPlanlamaTableIPCode, controls);
 
             if (cntrl != null)
             {
@@ -467,8 +471,8 @@ namespace YesiLdefter
             }
 
             // Sablon      
-            TableIPCode = "UST/MEB/MtskSablonUygulamaB.Planlama_L02";
-            t.Find_DataSet(this, ref ds_MtskSablonUygulamaBPlanlama, ref dN_MtskSablonUygulamaBPlanlama, TableIPCode);
+            //TableIPCode = "UST/MEB/MtskSablonUygulamaB.Planlama_L02";
+            t.Find_DataSet(this, ref ds_MtskSablonUygulamaBPlanlama, ref dN_MtskSablonUygulamaBPlanlama, uygPlanlamaTableIPCode);
             if (ds_MtskSablonUygulamaBPlanlama != null)
             {
                 dN_MtskSablonUygulamaBPlanlama.PositionChanged += new System.EventHandler(dN_MtskSablonUygulamaBPlanlama_PositionChanged);
