@@ -14,15 +14,23 @@ AS BEGIN
 -- DerslikAdiTipiId        : Derslik
 -- PersonelId              : Usta Öğretici
 
-   
- --declare @DonemTipiId Int 
- --declare @GrupTipiId Int 
- --declare @SubeTipiId Int 
- --declare @DerslikAdiTipiId Int 
- --declare @PersonelId varchar(30)
- --declare @ElemanGrubu varchar(30)
+ /*  
+ declare @DonemTipiId Int 
+ declare @GrupTipiId Int 
+ declare @SubeTipiId Int 
+ declare @DerslikAdiTipiId Int 
+ declare @PersonelId varchar(30)
+ declare @ElemanGrubu varchar(30)
  
- --set @DonemTipiId = 202101
+ set @ElemanGrubu = 'Dönem'
+ set @DonemTipiId = 202407
+
+ set @ElemanGrubu = 'Gruplar'
+ set @GrupTipiId = 1
+ set @SubeTipiId = 1
+ 
+ --set @ElemanGrubu = 'Derslikler'
+ */
  
  if (@DonemTipiId <= 0)
  begin
@@ -37,44 +45,53 @@ AS BEGIN
  set @EgitimBaslangicTarihi = dbo.fnc_MtskDonemDersBasBitTarihiniBul(@DonemTipiId, 1, 0, 1, 0)
  set @EgitimBitisTarihi = dbo.fnc_MtskDonemDersBasBitTarihiniBul(@DonemTipiId, 1, 0, 0, 1)
  
+ print @EgitimBaslangicTarihi
+ print @EgitimBitisTarihi
+
  declare @sql nvarchar(max)
  declare @sqlWhere nvarchar(500)
  declare @sqlOrderBy nvarchar(100)
 
  set @sql = '
- Select [MtskTeorikDers].* 
- , FNo5.DonemTipi  as  Lkp_DonemTipi
- , FNo6.GrupTipi   as  Lkp_GrupTipi
- , FNo7.SubeTipi   as  Lkp_SubeTipi
- , FNo8.DerslikTipi  as  Lkp_DerslikTipi
- , FNo9.DerslikAdiTipi  as  Lkp_DerslikAdiTipi
- , FNo11.DersSaatiTipi  as  Lkp_DersSaatiTipi
- , FNo13.EgitimTipi  as  Lkp_EgitimTipi
- , FNo5.DonemTipi + '' : '' + FNo6.GrupTipi + '' : '' + FNo7.SubeTipi as Lkp_DonemTipiGrupTipiSubeTipi
- , [MtskPersoneli].TamAdiSoyadi as  Lkp_PersonelTamAdiSoyadi
- , [MtskPersoneli].TcVkNo  as  Lkp_PersonelTcNo
- 
- from MtskTeorikDers as [MtskTeorikDers]
-   left outer join Lkp.MtskDonemTipi as FNo5 on ( MtskTeorikDers.DonemTipiId = FNo5.Id ) 
-   left outer join Lkp.MtskGrupTipi  as FNo6 on ( MtskTeorikDers.GrupTipiId = FNo6.Id ) 
-   left outer join Lkp.MtskSubeTipi  as FNo7 on ( MtskTeorikDers.SubeTipiId = FNo7.Id ) 
-   left outer join Lkp.MtskTeorikDersDerslikTipi as FNo8 on ( MtskTeorikDers.DerslikTipiId = FNo8.Id ) 
-   left outer join Lkp.MtskTeorikDersDerslikAdiTipi as FNo9 on ( MtskTeorikDers.DerslikAdiTipiId = FNo9.Id ) 
-   left outer join Lkp.MtskTeorikDersDersSaatiTipi as FNo11 on ( MtskTeorikDers.DersSaatiTipiId = FNo11.Id ) 
-   left outer join Lkp.MtskTeorikDersEgitimTipi as FNo13 on ( MtskTeorikDers.EgitimTipiId = FNo13.Id ) 
-   left outer join MtskPersoneli [MtskPersoneli] on ( [MtskTeorikDers].PersonelId = [MtskPersoneli].TcNoCalismaIzniNo  ) 
+   Select [MtskTeorikDers].* 
+ , [personel].TamAdiSoyadi as Lkp_PersonelTamAdiSoyadi
+ , [personel].TcVkNo as Lkp_PersonelTcNo
+ , [personel].TamAdiSoyadi + ' . ' + FNo9.DerslikAdiTipi as Lkp_DerslikVePersonel
+ , [personel].TamAdiSoyadi + ', ' + FNo9.DerslikAdiTipi + ', ' + FNo5.DonemTipi + ', ' + FNo6.GrupTipi + ', ' + FNo7.SubeTipi as Lkp_DerslikPersDonemGrupSube
+ , FNo5.DonemTipi as Lkp_DonemTipi
+ , FNo6.GrupTipi as Lkp_GrupTipi
+ , FNo7.SubeTipi as Lkp_SubeTipi
+ , FNo8.DerslikTipi as Lkp_DerslikTipi
+ , FNo9.DerslikAdiTipi as Lkp_DerslikAdiTipi
+ , FNo11.DersSaatiTipi as Lkp_DersSaatiTipi
+ , FNo13.EgitimTipi as Lkp_EgitimTipi
+ , FNo5.DonemTipi + ' : ' + FNo6.GrupTipi + ' : ' + FNo7.SubeTipi as Lkp_DonemTipiGrupTipiSubeTipi
+
+ from MtskTeorikDers as [MtskTeorikDers] with (nolock) 
+   left outer join MtskPersoneli as [personel] with (nolock) on ( [MtskTeorikDers].PersonelId = [personel].TcNoCalismaIzniNo  ) 
+   left outer join Lkp.MtskDonemTipi as FNo5 with (nolock) on ( MtskTeorikDers.DonemTipiId = FNo5.Id ) 
+   left outer join Lkp.MtskGrupTipi as FNo6 with (nolock) on ( MtskTeorikDers.GrupTipiId = FNo6.Id ) 
+   left outer join Lkp.MtskSubeTipi as FNo7 with (nolock) on ( MtskTeorikDers.SubeTipiId = FNo7.Id ) 
+   left outer join Lkp.MtskTeorikDersDerslikTipi as FNo8 with (nolock) on ( MtskTeorikDers.DerslikTipiId = FNo8.Id ) 
+   left outer join Lkp.MtskTeorikDersDerslikAdiTipi as FNo9 with (nolock) on ( MtskTeorikDers.DerslikAdiTipiId = FNo9.Id ) 
+   left outer join Lkp.MtskTeorikDersDersSaatiTipi as FNo11 with (nolock) on ( MtskTeorikDers.DersSaatiTipiId = FNo11.Id ) 
+   left outer join Lkp.MtskTeorikDersEgitimTipi as FNo13 with (nolock) on ( MtskTeorikDers.EgitimTipiId = FNo13.Id ) 
 
  Where 0 = 0
  '
  set @sqlOrderBy = ' Order by DersTarihi, DersSaatiTipiId '
 
+ -- Dönem ve grupla bilgisi isteniyorsa DonemTipiId koşulu olsun
+ --if (@ElemanGrubu = 'Dönem' or @ElemanGrubu = 'Gruplar') -- bunu açınca ilk okumada boş data geliyor ve dataset formun üzerine işlenmiyor
+ set @sqlWhere = '  and [MtskTeorikDers].DonemTipiId = ' + Convert(varchar(30), @DonemTipiId) + ' '
 
- set @sqlWhere = 
- '  and [MtskTeorikDers].DonemTipiId = ' + Convert(varchar(30), @DonemTipiId) + ' '
+ -- Elemenanlar ver derslikler onlunca grubun başlangıç tarihinden sonra olan tüm diğer gruplardaki derslikleride getirsin
+ if (@ElemanGrubu = 'Derslikler' or @ElemanGrubu = 'Usta Eğitici')
+     set @sqlWhere = '  and Convert(date, [MtskTeorikDers].DersTarihi, 103 ) >= Convert(date, ''' + Convert(varchar(30), Format(@EgitimBaslangicTarihi, 'dd.MM.yyyy')) + ''', 103) '
 
-
+ --ser @ElemanGrubu = 'Dönem'
  --set @ElemanGrubu = 'Gruplar'
- --set @ElemanGrubu = 'Derslik'
+ --set @ElemanGrubu = 'Derslikler'
  --set @ElemanGrubu = 'Usta Eğitici'
 
  --set @GrupTipiId = 1

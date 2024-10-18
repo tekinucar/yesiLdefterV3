@@ -18,6 +18,12 @@ using Tkn_Variable;
 using YesiLdefter.CEFSharp;
 using CefSharp;
 using CefSharp.WinForms;
+using DevExpress.XtraGauges.Win;
+using DevExpress.XtraGauges.Core.Model;
+using DevExpress.XtraGauges.Core.Base;
+using DevExpress.XtraGauges.Win.Gauges.Digital;
+using DevExpress.XtraGauges.Core.Drawing;
+using System.Drawing;
 
 namespace Tkn_Layout
 {
@@ -152,6 +158,11 @@ namespace Tkn_Layout
                         lBarcodControl1_Preparing(tForm, subView, ds_Layout, row, pos);
                     if (LayoutType == v.lyt_ComponentControl) 
                         lComponentControl_Preparing(tForm, subView, ds_Layout, row, pos);
+                    if (LayoutType == v.lyt_SimpleButton)
+                        lSimpleButton_Preparing(tForm, subView, ds_Layout, row, pos);
+                    if (LayoutType == v.lyt_DigitalGauge)
+                        lDigitalPanel_Preparing(tForm, subView, ds_Layout, row, pos);
+
 
                     if (LayoutType == v.lyt_documentViewerFast) 
                         lDocumentViewerFast_Preparing(tForm, subView, ds_Layout, row, pos);
@@ -3179,7 +3190,7 @@ namespace Tkn_Layout
 
             int width = 0;
             int DockType = 0;
-
+            float font_size = (float)0;
             string ustItemType = string.Empty;
             string ustHesapRefId = string.Empty;
             string ustHesapItemName = string.Empty;
@@ -3199,11 +3210,12 @@ namespace Tkn_Layout
             //FieldName = t.Set(t.MyProperties_Get(Prop_View, "HP_FNAME:"), "", "");
 
             width = t.myInt32(row["CMP_WIDTH"].ToString());
+            font_size = t.Set(row["CMP_FONT_SIZE"].ToString(), "", (float)0);
 
             UstHesapRow = UstHesap_Get(ds_Layout, pos);
 
             #region // Ust hesabı var ise
-
+            
             if (UstHesapRow != null)
             {
                 ustItemType = UstHesapRow["LAYOUT_TYPE"].ToString();
@@ -3224,7 +3236,7 @@ namespace Tkn_Layout
                 // 
                 // panelControl1
                 // 
-                panelControl1.Controls.Add(textEdit1);
+                panelControl1.Controls.Add(textEdit1); 
                 panelControl1.Controls.Add(labelControl1);
 
                 if (DockType == v.dock_Bottom) panelControl1.Dock = System.Windows.Forms.DockStyle.Bottom;
@@ -3266,7 +3278,13 @@ namespace Tkn_Layout
                 textEdit1.Name = "textEdit_" + RefId.ToString();
                 //textEdit1.Properties.Appearance.BackColor = System.Drawing.Color.FloralWhite;
                 //textEdit1.Properties.Appearance.Options.UseBackColor = true;
-                textEdit1.Properties.Appearance.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+                if (font_size == 0)
+                    textEdit1.Properties.Appearance.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+                else
+                {
+                    Single fontS = Convert.ToInt32(font_size);
+                    textEdit1.Properties.Appearance.Font = new System.Drawing.Font("Tahoma", fontS, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+                }
                 textEdit1.Properties.Appearance.Options.UseFont = true;
                 textEdit1.Properties.BorderStyle = DevExpress.XtraEditors.Controls.BorderStyles.HotFlat;
                 textEdit1.Size = new System.Drawing.Size(712, 28);
@@ -3295,10 +3313,7 @@ namespace Tkn_Layout
                     labelControl1.Dock = DockStyle.Fill;
                 }
 
-                
-
                 if (caption == "") labelControl1.Visible = false;
-
 
                 ((System.ComponentModel.ISupportInitialize)(panelControl1)).EndInit();
                 panelControl1.ResumeLayout(false);
@@ -3310,6 +3325,204 @@ namespace Tkn_Layout
             }
 
             #endregion
+        }
+
+        private void lDigitalPanel_Preparing(Form tForm, Control subView, DataSet ds_Layout, DataRow row, int pos)
+        {
+            tToolBox t = new tToolBox();
+
+            int RefId = 0;
+            int width = 0;
+            int height = 0;
+            int top = 0;
+            int left = 0;
+            int DockType = 0;
+
+            string CmpName = string.Empty;
+            string caption = string.Empty;
+            string Prop_View = string.Empty;
+            string TableIPCode = string.Empty;
+            string fieldName = string.Empty;
+            string tcolumntype = string.Empty;
+            string tdisplayformat = "";
+            string layout_code = string.Empty;
+
+            string ustItemType = string.Empty;
+            string ustHesapRefId = string.Empty;
+            string ustHesapItemName = string.Empty;
+            string ustItemName = string.Empty;
+            DataRow UstHesapRow = null;
+
+            string s1 = "=ROW_PROP_VIEWS:";
+            string s2 = (char)34 + "EDITPANEL" + (char)34 + ": {";
+            //"EDITPANEL": {
+
+            RefId = t.myInt32(row["REF_ID"].ToString());
+            caption = t.Set(row["LAYOUT_CAPTION"].ToString(), "", "");
+            layout_code = t.Set(row["LAYOUT_CODE"].ToString(), "", "");
+            TableIPCode = t.Set(row["TABLEIPCODE"].ToString(), "", "");
+            fieldName = t.Set(row["FIELD_NAME"].ToString(), "", "");
+            CmpName = t.Set(row["CMP_NAME"].ToString(), "", "");
+
+            width = t.myInt32(row["CMP_WIDTH"].ToString());
+            height = t.myInt32(row["CMP_HEIGHT"].ToString());
+            top = t.myInt32(row["CMP_TOP"].ToString());
+            left = t.myInt32(row["CMP_LEFT"].ToString());
+
+            DockType = t.Set(row["CMP_DOCK"].ToString(), v.dock_Fill.ToString(), (int)0);
+
+            Prop_View = t.Set(row["PROP_VIEWS"].ToString(), "", "");
+
+            // default
+            tcolumntype = "MemoEdit";
+
+            // old
+            if (Prop_View.IndexOf(s1) > -1)
+                tcolumntype = t.Set(t.MyProperties_Get(Prop_View, "EP_CMP_TYPE:"), "MemoEdit", "");
+            // json 
+            if (Prop_View.IndexOf(s2) > -1)
+                tcolumntype = t.Set(t.Find_Properties_Value(Prop_View, "EP_CMP_TYPE"), "MemoEdit", "");
+
+
+            width = t.myInt32(row["CMP_WIDTH"].ToString());
+
+            UstHesapRow = UstHesap_Get(ds_Layout, pos);
+
+            #region // Ust hesabı var ise
+
+            if (UstHesapRow != null)
+            {
+                tDevColumn dc = new tDevColumn();
+
+                ustItemType = UstHesapRow["LAYOUT_TYPE"].ToString();
+                //ustHesapRefId = UstHesapRow["REF_ID"].ToString();
+                ustHesapRefId = UstHesapRow["LAYOUT_CODE"].ToString();
+                t.Str_Replace(ref ustHesapRefId, ".", "_");
+                ustItemName = v.lyt_Name + ustHesapRefId;
+
+                /*
+                GaugeControl gc = new GaugeControl();
+                // Add a digital gauge.
+                DigitalGauge digitalGauge = gc.AddDigitalGauge();
+                // The text to be displayed.
+                digitalGauge.Text = "Gauge Control";
+                // The number of digits.
+                digitalGauge.DigitCount = 14;
+                // Use 14 segment display mode.
+                digitalGauge.DisplayMode = DigitalGaugeDisplayMode.FourteenSegment;
+                // Add a background layer and set its painting style.
+                DigitalBackgroundLayerComponent background = digitalGauge.AddBackgroundLayer();
+                background.ShapeType = DigitalBackgroundShapeSetType.Style2;
+                // Set the color of digits.
+                digitalGauge.AppearanceOn.ContentBrush = new SolidBrushObject(Color.Red);
+                // Add the gauge control to the form.
+                //gc.Size = new Size(250, 100);
+                digitalGauge.Bounds = new System.Drawing.Rectangle(6, 6, 378, 288);
+                digitalGauge.DigitCount = 20;
+
+                gc.Dock = DockStyle.Fill;
+
+                panelControl1.Controls.Add(gc);
+
+                try
+                {
+                    DataSet dsData = t.Find_DataSet(tForm, "", TableIPCode, "");
+
+                    if (dsData != null)
+                        digitalGauge.DataBindings.Add(new Binding("Text", dsData.Tables[0], fieldName));
+                }
+                catch (Exception)
+                {
+
+                    //throw;
+                }
+                */
+
+                GaugeControl gaugeControl1 = new GaugeControl();
+                DigitalGauge digitalGauge1 = gaugeControl1.AddDigitalGauge();
+                DigitalBackgroundLayerComponent digitalBackgroundLayerComponent1 = new DigitalBackgroundLayerComponent();
+                ((System.ComponentModel.ISupportInitialize)(digitalGauge1)).BeginInit();
+                ((System.ComponentModel.ISupportInitialize)(digitalBackgroundLayerComponent1)).BeginInit();
+                //
+                // gaugeControl1
+                // 
+                gaugeControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+                gaugeControl1.Gauges.AddRange(new DevExpress.XtraGauges.Base.IGauge[] {digitalGauge1});
+                gaugeControl1.Location = new System.Drawing.Point(0, 0);
+                gaugeControl1.Name = v.lyt_Name + t.Str_Replace(ref layout_code, ".", "_");  
+                if (t.IsNotNull(CmpName))
+                    gaugeControl1.Name = CmpName;
+                gaugeControl1.Size = new System.Drawing.Size(100, 100);
+                gaugeControl1.TabIndex = 0;
+                // 
+                // digitalGauge1
+                // 
+                digitalGauge1.AppearanceOff.ContentBrush = new DevExpress.XtraGauges.Core.Drawing.SolidBrushObject("Color:#00FFFFFF");
+                digitalGauge1.AppearanceOn.ContentBrush = new DevExpress.XtraGauges.Core.Drawing.SolidBrushObject("Color:WhiteSmoke");
+                digitalGauge1.BackgroundLayers.AddRange(new DevExpress.XtraGauges.Win.Gauges.Digital.DigitalBackgroundLayerComponent[] {
+                    digitalBackgroundLayerComponent1});
+                digitalGauge1.Bounds = new System.Drawing.Rectangle(6, 6, 378, 288);
+                digitalGauge1.DigitCount = 20;
+                digitalGauge1.Name = "";
+                digitalGauge1.Text = "00,00";
+                // 
+                // digitalBackgroundLayerComponent1
+                // 
+                digitalBackgroundLayerComponent1.BottomRight = new DevExpress.XtraGauges.Core.Base.PointF2D(307.775F, 99.9625F);
+                digitalBackgroundLayerComponent1.Name = "digitalBackgroundLayerComponent1";
+                digitalBackgroundLayerComponent1.ShapeType = DevExpress.XtraGauges.Core.Model.DigitalBackgroundShapeSetType.Style7;
+                digitalBackgroundLayerComponent1.TopLeft = new DevExpress.XtraGauges.Core.Base.PointF2D(0F, 0F);
+                digitalBackgroundLayerComponent1.ZOrder = 1000;
+
+
+                // Add a background layer and set its painting style.
+                //DigitalBackgroundLayerComponent background = digitalGauge1.AddBackgroundLayer();
+                //background.ShapeType = DigitalBackgroundShapeSetType.Style1;
+
+
+                //digitalGauge1.DisplayMode = DigitalGaugeDisplayMode.FourteenSegment;
+
+                ((System.ComponentModel.ISupportInitialize)(digitalGauge1)).EndInit();
+                ((System.ComponentModel.ISupportInitialize)(digitalBackgroundLayerComponent1)).EndInit();
+
+                if (t.IsNotNull(TableIPCode) == false)
+                    TableIPCode = "null";
+                if (t.IsNotNull(fieldName) == false)
+                    fieldName = "null";
+                
+                if ((t.IsNotNull(TableIPCode)) && (t.IsNotNull(fieldName)))
+                {
+                    try
+                    {
+                        DataSet dsData = t.Find_DataSet(tForm, "", TableIPCode, "");
+
+                        if (dsData != null)
+                            digitalGauge1.DataBindings.Add(new Binding("Text", dsData.Tables[0], fieldName));
+                    }
+                    catch (Exception)
+                    {
+                        //throw;
+                    }
+                }
+                
+                gaugeControl1.AccessibleName = TableIPCode;
+                gaugeControl1.AccessibleDescription = fieldName;
+
+                if (DockType == v.dock_Bottom) gaugeControl1.Dock = System.Windows.Forms.DockStyle.Bottom;
+                if (DockType == v.dock_Fill) gaugeControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+                if (DockType == v.dock_Left) gaugeControl1.Dock = System.Windows.Forms.DockStyle.Left;
+                if (DockType == v.dock_Right) gaugeControl1.Dock = System.Windows.Forms.DockStyle.Right;
+                if (DockType == v.dock_Top) gaugeControl1.Dock = System.Windows.Forms.DockStyle.Top;
+
+                t.myControl_Size_And_Location(gaugeControl1, width, height, left, top);
+                
+                gaugeControl1.ResumeLayout(false);
+                lParentControlAdd(tForm, gaugeControl1, ustItemName, ustItemType, row);
+
+                gaugeControl1.SendToBack();
+            }
+            #endregion 
+
         }
 
         private void lEditPanel_Preparing(Form tForm, Control subView, DataSet ds_Layout, DataRow row, int pos)
@@ -3367,7 +3580,6 @@ namespace Tkn_Layout
             // json 
             if (Prop_View.IndexOf(s2) > -1)
                 tcolumntype = t.Set(t.Find_Properties_Value(Prop_View, "EP_CMP_TYPE"), "MemoEdit", "");
-
 
             width = t.myInt32(row["CMP_WIDTH"].ToString());
 
@@ -3471,7 +3683,6 @@ namespace Tkn_Layout
             string CmpName = string.Empty;
             string caption = string.Empty;
 
-            //string Prop_View = string.Empty;
             string TableIPCode = string.Empty;
             string fieldName = string.Empty;
 
@@ -3493,10 +3704,6 @@ namespace Tkn_Layout
             TableIPCode = t.Set(row["TABLEIPCODE"].ToString(), "", "");
             fieldName = t.Set(row["FIELD_NAME"].ToString(), "", "");
             CmpName = t.Set(row["CMP_NAME"].ToString(), "", "");
-
-            //Prop_View = t.Set(row["PROP_VIEWS"].ToString(), "", "");
-            //TableIPCode = t.Set(t.MyProperties_Get(Prop_View, "HP_TABLEIPCODE:"), "", "");
-            //FieldName = t.Set(t.MyProperties_Get(Prop_View, "HP_FNAME:"), "", "");
 
             DockType = t.Set(row["CMP_DOCK"].ToString(), v.dock_Fill.ToString(), (int)0);
             height = t.myInt32(row["CMP_HEIGHT"].ToString());
@@ -3520,22 +3727,7 @@ namespace Tkn_Layout
                 if (t.IsNotNull(UstHesapRow["CMP_NAME"].ToString()))
                     ustItemName = UstHesapRow["CMP_NAME"].ToString();
 
-                //DevExpress.XtraEditors.PanelControl panelControl1 = new DevExpress.XtraEditors.PanelControl();
                 DevExpress.XtraEditors.LabelControl labelControl1 = new DevExpress.XtraEditors.LabelControl();
-                //((System.ComponentModel.ISupportInitialize)(panelControl1)).BeginInit();
-                //panelControl1.SuspendLayout();
-                // 
-                // panelControl1
-                // 
-                //panelControl1.Controls.Add(labelControl1);
-                //panelControl1.Dock = System.Windows.Forms.DockStyle.Top;
-                //panelControl1.Location = new System.Drawing.Point(0, 0);
-                //panelControl1.Name = v.lyt_Name + t.Str_Replace(ref layout_code, ".", "_");  //RefId.ToString();
-                //if (t.IsNotNull(CmpName))
-                //    panelControl1.Name = CmpName;
-                //panelControl1.Padding = new System.Windows.Forms.Padding(4);
-                //panelControl1.Size = new System.Drawing.Size(874, 40);
-                //panelControl1.TabIndex = 0;
                 // 
                 // labelControl1
                 // 
@@ -3544,6 +3736,8 @@ namespace Tkn_Layout
                 labelControl1.AutoSizeMode = DevExpress.XtraEditors.LabelAutoSizeMode.Vertical;
                 labelControl1.Location = new System.Drawing.Point(0, 0);
                 labelControl1.Name = "labelControl_" + RefId.ToString();
+                if (t.IsNotNull(CmpName))
+                    labelControl1.Name = CmpName;
                 labelControl1.Size = new System.Drawing.Size(150, 28);
                 labelControl1.TabIndex = 0;
                 labelControl1.Text = caption;
@@ -3558,8 +3752,6 @@ namespace Tkn_Layout
 
                 if (DockType != v.dock_None) labelControl1.AutoSizeMode = DevExpress.XtraEditors.LabelAutoSizeMode.Vertical;
 
-                //labelControl1.BringToFront();
-
                 if (font_size > 0)
                 {
                     font_size = font_size + .25F;
@@ -3570,16 +3762,16 @@ namespace Tkn_Layout
                     }
                 }
 
+                DataSet dsData = null;
+
                 if ((TableIPCode != "") && (fieldName != ""))
                 {
                     try
                     {
-                        DataSet dsData = t.Find_DataSet(tForm, "", TableIPCode, "");
+                        dsData = t.Find_DataSet(tForm, "", TableIPCode, "");
 
                         if (dsData != null)
                             labelControl1.DataBindings.Add(new Binding("Text", dsData.Tables[0], fieldName));
-                        //labelControl1.DataBindings.Add(new Binding("EditValue", dsData.Tables[0], FieldName));
-
                     }
                     catch (Exception)
                     {
@@ -3591,16 +3783,7 @@ namespace Tkn_Layout
                     labelControl1.Dock = DockStyle.Fill;
                 }
 
-                //if (caption == "") labelControl1.Visible = false;
-
-
-                //((System.ComponentModel.ISupportInitialize)(panelControl1)).EndInit();
-                //panelControl1.ResumeLayout(false);
-
                 lParentControlAdd(tForm, labelControl1, ustItemName, ustItemType, row);
-                //lParentControlAdd(tForm, panelControl1, ustItemName, ustItemType, row);
-
-                //panelControl1.SendToBack();
             }
 
             #endregion
@@ -3868,7 +4051,6 @@ namespace Tkn_Layout
 
             ((System.ComponentModel.ISupportInitialize)(groupControl1)).EndInit();
         }
-
         private void myBarcodeEdit_KeyDown(object sender, KeyEventArgs e)
         {
             int l1 = 0;
@@ -3910,6 +4092,112 @@ namespace Tkn_Layout
             }
             */
         }
+
+        private void lSimpleButton_Preparing(Form tForm, Control subView, DataSet ds_Layout, DataRow row, int pos)
+        {
+            tToolBox t = new tToolBox();
+
+            string TableIPCode = string.Empty;
+            string CmpName = string.Empty;
+            string layout_code = string.Empty;
+            string fieldName = string.Empty;
+            //byte IPDataType = 1;
+            int RefId = 0;
+            int width = 0;
+            int height = 0;
+            int top = 0;
+            int left = 0;
+            int DockType = 0;
+            int FrontBack = 0;
+
+            string caption = string.Empty;
+            string ustItemType = string.Empty;
+            string ustHesapRefId = string.Empty;
+            string ustHesapItemName = string.Empty;
+            string ustItemName = string.Empty;
+            DataRow UstHesapRow = null;
+
+            RefId = t.myInt32(row["REF_ID"].ToString());
+
+            // aslında TABLEIPCODE yerine başka bir MS_LAYOUT.MasterCode geliyor 
+            TableIPCode = t.Set(row["TABLEIPCODE"].ToString(), "", "");
+            caption = row["LAYOUT_CAPTION"].ToString();
+
+            fieldName = t.Set(row["FIELD_NAME"].ToString(), "", "");
+            layout_code = t.Set(row["LAYOUT_CODE"].ToString(), "", "");
+
+            width = t.myInt32(row["CMP_WIDTH"].ToString());
+            height = t.myInt32(row["CMP_HEIGHT"].ToString());
+            top = t.myInt32(row["CMP_TOP"].ToString());
+            left = t.myInt32(row["CMP_LEFT"].ToString());
+
+            FrontBack = t.myInt32(row["CMP_FRONT_BACK"].ToString());
+            DockType = t.Set(row["CMP_DOCK"].ToString(), v.dock_Fill.ToString(), (int)0);
+            CmpName = t.Set(row["CMP_NAME"].ToString(), "", "");
+
+
+            //
+            //
+            //
+            DevExpress.XtraEditors.SimpleButton simpleButton1 = new DevExpress.XtraEditors.SimpleButton();
+            //((System.ComponentModel.ISupportInitialize)(simpleButton1)).BeginInit();
+
+            UstHesapRow = UstHesap_Get(ds_Layout, pos);
+
+            #region // Ust hesabı var ise
+
+            if (UstHesapRow != null)
+            {
+                ustItemType = UstHesapRow["LAYOUT_TYPE"].ToString();
+                //ustHesapRefId = UstHesapRow["REF_ID"].ToString();
+                ustHesapRefId = UstHesapRow["LAYOUT_CODE"].ToString();
+                t.Str_Replace(ref ustHesapRefId, ".", "_");
+                ustItemName = v.lyt_Name + ustHesapRefId;
+
+                if (t.IsNotNull(UstHesapRow["CMP_NAME"].ToString()))
+                    ustItemName = UstHesapRow["CMP_NAME"].ToString();
+
+                lParentControlAdd(tForm, simpleButton1, ustItemName, ustItemType, row);
+            }
+            else
+            {
+                if (subView == null)
+                    tForm.Controls.Add(simpleButton1);
+                else subView.Controls.Add(simpleButton1);
+            }
+
+            #endregion
+
+            // 
+            // panelControl1
+            // 
+            if (FrontBack == 2) simpleButton1.SendToBack();
+            else simpleButton1.BringToFront();
+
+            simpleButton1.Location = new System.Drawing.Point(0, 0);
+            simpleButton1.Text = caption;
+            simpleButton1.Name = v.lyt_Name + t.Str_Replace(ref layout_code, ".", "_");  //RefId.ToString();
+            if (t.IsNotNull(CmpName))
+                simpleButton1.Name = CmpName;
+            simpleButton1.Size = new System.Drawing.Size(20, 20);
+
+            if (DockType == v.dock_Bottom) simpleButton1.Dock = System.Windows.Forms.DockStyle.Bottom;
+            if (DockType == v.dock_Fill) simpleButton1.Dock = System.Windows.Forms.DockStyle.Fill;
+            if (DockType == v.dock_Left) simpleButton1.Dock = System.Windows.Forms.DockStyle.Left;
+            if (DockType == v.dock_Right) simpleButton1.Dock = System.Windows.Forms.DockStyle.Right;
+            if (DockType == v.dock_Top) simpleButton1.Dock = System.Windows.Forms.DockStyle.Top;
+
+            t.myControl_Size_And_Location(simpleButton1, width, height, left, top);
+
+            
+
+            string FormCode = TableIPCode;
+
+            Create_Layout(tForm, FormCode, simpleButton1);
+
+            simpleButton1.TabIndex = pos;
+        }
+
 
         #endregion BarcodControl
 

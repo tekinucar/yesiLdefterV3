@@ -7150,7 +7150,6 @@ namespace Tkn_Events
             tEventsButton evb = new tEventsButton();
                         
             #region Tanımlar
-
             // yeniden okunacak SubDetail dataseti bul
             DataSet dsSubDetail_Data = null;
             DataNavigator dN_SubDetail = null;

@@ -298,8 +298,8 @@ namespace YesiLdefter
             if (onay)
             {
                 // Ön Muhasebe için başlangıç işlemleri
-                if (v.SP_Firm_SectorTypeId == (Int16)v.msSectorType.OnMuhasebe)
-                    autoOpenForm("UST/OMS/FNS/MALIISLEM","");
+                //if (v.SP_Firm_SectorTypeId == (Int16)v.msSectorType.OnMuhasebe)
+                //    autoOpenForm("UST/OMS/FNS/MALIISLEM","");
 
                 //autoOpenForm("UST/OMS/AYR/YHBaslangic");
                 if ((v.SP_TabimParamsKurumTipi == "") &&

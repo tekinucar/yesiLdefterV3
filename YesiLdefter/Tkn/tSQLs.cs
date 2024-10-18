@@ -393,6 +393,7 @@ namespace Tkn_SQLs
                 , ''                 WHERE_SQL 
                 , ''                 ORDER_BY
                 , ''                 TABLE_SQL 
+                , ''                 DB_NAMES
 
                 from SYS_TYPES_L a 
                   
@@ -409,6 +410,7 @@ namespace Tkn_SQLs
                 , a.WHERE_SQL      
                 , a.ORDER_BY
                 , a.TABLE_SQL                 
+                , a.DB_NAMES
 
                 from SYS_TYPES_T a 
                 ) x order by TYPES_NAME  
@@ -1247,6 +1249,26 @@ INSERT INTO [dbo].[SYS_UPDATES]
               + " and SectorTypeId in ( 0, " + sectorTypeId + " ) ";
             //" Select * from " + v.publishManager_DB.databaseName + ".dbo.MsDbUpdates "
         }
+        public string Sql_DataUpdate_On_MsDbUpdates(string tableList, string whereAdd)
+        {
+            // publishManager database
+            //" Select * from dbo.MsDbUpdates Where Id not in ( " + IdList + " ) "
+            string sectorTypeId = v.SP_Firm_SectorTypeId.ToString();
+            // TabimSrc, TabimIsmak ise TabimMtsk dahil olarak hepsi aynı güncelleme olsun 
+            // örnek : ( 0, 212, 211 ) veya ( 0, 213, 211 )
+            if (v.SP_Firm_SectorTypeId == 212) sectorTypeId += ", 211";
+            if (v.SP_Firm_SectorTypeId == 213) sectorTypeId += ", 211";
+
+            return
+                " Select * from dbo.MsDbUpdates Where TableName in ( " + tableList + " )  "
+              + " and IsActive = 1 "
+              + " and SectorTypeId in ( 0, " + sectorTypeId + " ) "
+              + whereAdd;
+            //" Select * from " + v.publishManager_DB.databaseName + ".dbo.MsDbUpdates "
+        }
+
+
+
         public string Sql_MsFileUpdates(string IdList)
         {
             // read publishManager database
@@ -3360,19 +3382,22 @@ INSERT INTO [dbo].[SYS_UPDATES]
                 //if (adet > 0)
                 //    joinTableAlias = joinTableAlias + "_" + Convert.ToString(adet + 1);
 
-                joinTables += "   left outer join Lkp." + tableName + " as " + joinTableAlias + " with (nolock) on ( " + tableCode + "." + lookUpFieldName.Replace("Lkp_", "") + " = " + joinTableAlias + "." + idFieldName + " ) " + v.ENTER;
+                if (joinFields.IndexOf(joinTableAlias + "." + fieldName) == -1)
+                {
+                    joinTables += "   left outer join Lkp." + tableName + " as " + joinTableAlias + " with (nolock) on ( " + tableCode + "." + lookUpFieldName.Replace("Lkp_", "") + " = " + joinTableAlias + "." + idFieldName + " ) " + v.ENTER;
 
-                if (lookUpFieldName.IndexOf("Lkp_") == -1)
-                    lookUpFieldName = "Lkp_" + lookUpFieldName;
+                    if (lookUpFieldName.IndexOf("Lkp_") == -1)
+                        lookUpFieldName = "Lkp_" + lookUpFieldName;
 
-                if (lookUpFieldName.IndexOf("TipiId") > -1)
-                    lookUpFieldName = lookUpFieldName.Replace("TipiId", "Tipi");
-                if (lookUpFieldName.IndexOf("TypeId") > -1)
-                    lookUpFieldName = lookUpFieldName.Replace("TypeId", "Type");
-                // 
-                if (fieldName == "Type") fieldName = fieldName + "Name";
+                    if (lookUpFieldName.IndexOf("TipiId") > -1)
+                        lookUpFieldName = lookUpFieldName.Replace("TipiId", "Tipi");
+                    if (lookUpFieldName.IndexOf("TypeId") > -1)
+                        lookUpFieldName = lookUpFieldName.Replace("TypeId", "Type");
+                    // 
+                    if (fieldName == "Type") fieldName = fieldName + "Name";
 
-                joinFields += " , " + joinTableAlias + "." + fieldName + " as " + lookUpFieldName + v.ENTER;
+                    joinFields += " , " + joinTableAlias + "." + fieldName + " as " + lookUpFieldName + v.ENTER;
+                }
             }
         }
 

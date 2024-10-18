@@ -78,7 +78,7 @@ AS BEGIN
            ,null -- BaslamaSaati
            ,null -- BitisSaati
            ,0    -- TDersIsUploaded
-           ,null -- SablonTeorikBId
+           ,-2   -- SablonTeorikBId   : Default -2 değeri veriyorum, maunel ekranından ınsert olduğunun işareti
 		   ,@SablonTeorikSId
            ,@SablonTeorikFId)
 	

@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Tkn_SQLs;
 using Tkn_ToolBox;
 using Tkn_Variable;
 
@@ -23,6 +24,7 @@ namespace YesiLdefter
         string buttonSqlView = "ButtonSQLView";   // SQL View
         string buttonRecSQLView = "ButtonRecSQLView";
         string buttonDowloadIni2 = "ButtonDownloadIni2";
+        string buttonSablonlar = "ButtonSablonlar";
         string editPanelName = "editpanel_ViewSQL";
         Control editpanel_ViewSQL = null;
 
@@ -46,6 +48,8 @@ namespace YesiLdefter
             t.Find_Button_AddClick(this, menuName, buttonSqlView, myNavElementClick);
             t.Find_Button_AddClick(this, menuName, buttonRecSQLView, myNavElementClick);
             t.Find_Button_AddClick(this, menuName, buttonDowloadIni2, myNavElementClick);
+            t.Find_Button_AddClick(this, menuName, buttonSablonlar, myNavElementClick);
+
             //
             // aranan nesne memoEdit ()
             // memoEdit aslında bir panelin içinde sıfırncı kontrol olarak duruyor
@@ -68,6 +72,7 @@ namespace YesiLdefter
                 if (((DevExpress.XtraBars.Navigation.NavButton)sender).Name == buttonSqlView) SqlView();
                 if (((DevExpress.XtraBars.Navigation.NavButton)sender).Name == buttonRecSQLView) SqlRecView();
                 if (((DevExpress.XtraBars.Navigation.NavButton)sender).Name == buttonDowloadIni2) DowloadIni2();
+                if (((DevExpress.XtraBars.Navigation.NavButton)sender).Name == buttonSablonlar) Sablonlar();
             }
             if (sender.GetType().ToString() == "DevExpress.XtraBars.Navigation.TileNavItem")
             {
@@ -146,6 +151,36 @@ namespace YesiLdefter
                 }
             }
             
+        }
+
+        private void Sablonlar()
+        {
+            tSQLs sqls = new tSQLs();
+            DataSet ds = new DataSet();
+
+            // Şablonların adı            
+            string msDbUpdatesName = " 'MtskSablonTeorikB', 'MtskSablonTeorikS', 'MtskSablonUygulamaB', 'MtskSablonUygulamaS' "; 
+            string sql = sqls.Sql_DataUpdate_On_MsDbUpdates(msDbUpdatesName, " and UpdateTypeId = 11 ");
+
+            /// Kodlama ve Test aşamasında kullan
+            //if (SQL_Read_Execute(v.dBaseNo.Manager, ds, ref sql, "", "MsDbUpdates")) 
+            /// publish sırasında kullan
+            /// 
+
+            v.dBaseNo dBaseNo = v.dBaseNo.publishManager;
+            //if (v.active_DB.mainManagerDbUses)
+            //    dBaseNo = v.dBaseNo.Manager;
+
+            if (t.SQL_Read_Execute(dBaseNo, ds, ref sql, "MsDbUpdates", ""))
+            {
+                //MessageBox.Show("dbUpdatesChecked - 2 " + sql);
+                if (t.IsNotNull(ds))
+                {
+                    //MessageBox.Show("dbUpdatesChecked - 3 ");
+                    t.runMsDbUpdates(ds);
+                }
+            }
+
         }
 
         private void viewText(string text)

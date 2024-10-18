@@ -229,7 +229,8 @@ namespace Tkn_ToolBox
             /// Burdaki Id Project Database den [dbo].[DbUpdates] tablosundan okunuyor
             /// yani Müşteri database den
             /// 
-            string lastMsDbUpdatesId = getMusteriDbUpdateIdList();
+            string lastMsDbUpdatesId = 
+                getMusteriDbUpdateIdList();
             bool onay = false;
             tSQLs sqls = new tSQLs();
             DataSet ds = new DataSet();
@@ -296,7 +297,7 @@ namespace Tkn_ToolBox
 
             return IdList;            
         }
-        private void runMsDbUpdates(DataSet ds)
+        public void runMsDbUpdates(DataSet ds)
         {
             Int16 typeId = 0;
             bool onay = true;

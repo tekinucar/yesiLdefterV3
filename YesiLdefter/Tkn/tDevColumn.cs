@@ -666,6 +666,7 @@ namespace Tkn_DevColumn
             string where = t.Set(ds.Tables[0].Rows[pos]["WHERE_SQL"].ToString(), "", "");
             string orderby = t.Set(ds.Tables[0].Rows[pos]["ORDER_BY"].ToString(), "", "");
             string tableSQL = t.Set(ds.Tables[0].Rows[pos]["TABLE_SQL"].ToString(), "", "");
+            string dbName = t.Set(ds.Tables[0].Rows[pos]["DB_NAMES"].ToString(), "", "");
 
             if (t.IsNotNull(where)) where = " where 0 = 0 " + where;
 
@@ -691,7 +692,7 @@ namespace Tkn_DevColumn
 
             DataSet dsData = new DataSet();
 
-            if ((Sql.IndexOf("[MSV3]") > -1) | (Sql.IndexOf("MSV3") > -1))
+            if ((Sql.IndexOf("[MSV3]") > -1) | (Sql.IndexOf("MSV3") > -1) | (dbName.IndexOf("Manager") > -1))
                 t.SQL_Read_Execute(v.dBaseNo.Manager, dsData, ref Sql, "LKP_TABLE_" + tableName, "");
             else t.SQL_Read_Execute(v.dBaseNo.Project, dsData, ref Sql, "LKP_TABLE_" + tableName, "");
 

@@ -214,26 +214,40 @@ namespace YesiLdefter
         string teoPlanlamaTableIPCode = "UST/MEB/MtskSablonTeorikB.TeoPlanlama_L01";
         string uygSablonHazirlamaTableIPCode = "UST/MEB/MtskSablonUygulamaB.Planlama_L01";
         string uygPlanlamaTableIPCode = "UST/MEB/MtskSablonUygulamaB.Planlama_L02";
+        string buttonInsertPaketOlustur = "ButtonPaketOlustur";
+
+        string menuNameTeorik = "MENU_" + "UST/MEB/MTS/SablonTeorik";
+        string menuNameUygulama = "MENU_" + "UST/MEB/MTS/SablonUygulama";
+
+        string cumleBaslik = "";
+        string cumleSatirlar = "";
+
         string TabControlName = string.Empty;
         Control tabControl = null;
         AdvBandedGridView tGridView = null;
 
         // TasarımFormu
         DataSet ds_Fields = null;
+
         DataSet ds_SablonB = null;
         DataNavigator dN_SablonB = null;
+
         DataSet ds_SablonS = null;
         DataNavigator dN_SablonS = null;
+
         DataSet ds_SablonSSave = null;
         DataNavigator dN_SablonSSave = null;
 
         //PlanlamaFormu
         DataSet ds_UygPlanYapilacakAdaylar = null;
         DataNavigator dN_UygPlanYapilacakAdaylar = null;
+
         DataSet ds_MtskSablonUygulamaBPlanlama = null;
         DataNavigator dN_MtskSablonUygulamaBPlanlama = null;
+
         DataSet ds_MtskSablonUygulamaFKayit_F01 = null;
         DataNavigator dN_MtskSablonUygulamaFKayit_F01 = null;
+
         DataSet ds_MtskUygulamaliDersPlan_L01 = null;
         DataNavigator dN_MtskUygulamaliDersPlan_L01 = null;
 
@@ -255,6 +269,8 @@ namespace YesiLdefter
 
         private void ms_MtskDersProgrami_Shown(object sender, EventArgs e)
         {
+            
+
             // Teorik Sablon Hazırlama Fonksiyonlar
             //
             //TableIPCode = "UST/MEB/MtskSablonTeorikB.Planlama_L01";
@@ -269,6 +285,8 @@ namespace YesiLdefter
 
                 if (ds_SablonB.DataSetName == teoSablonHazirlamaTableIPCode)
                     preparingTeorikSablonHazirlamaFormu();
+
+                t.Find_Button_AddClick(this, menuNameTeorik, buttonInsertPaketOlustur, myNavElementClick);
 
                 return;
             }
@@ -307,6 +325,8 @@ namespace YesiLdefter
                 if (ds_SablonB.DataSetName == uygSablonHazirlamaTableIPCode)
                     preparingUygulamaSablonHazirlamaFormu();
 
+                t.Find_Button_AddClick(this, menuNameUygulama, buttonInsertPaketOlustur, myNavElementClick);
+
                 return;
             }
 
@@ -328,6 +348,15 @@ namespace YesiLdefter
                 return;
             }
 
+        }
+
+        private void myNavElementClick(object sender, DevExpress.XtraBars.Navigation.NavElementEventArgs e)
+        {
+            if (sender.GetType().ToString() == "DevExpress.XtraBars.Navigation.TileNavItem")
+            {
+                if (((DevExpress.XtraBars.Navigation.TileNavItem)sender).Name == buttonInsertPaketOlustur) InsertPaketOlustur();
+                //if (((DevExpress.XtraBars.Navigation.TileNavItem)sender).Name == buttonPaketiGonder) PaketiGonder();
+            }
         }
 
         /// Planlama Formu
@@ -1698,6 +1727,67 @@ namespace YesiLdefter
         }
 
         #endregion Teorik ve Uygulama Sablon Hazirlama Ortak Fonksiyonlar 1
+
+
+
+        private void InsertPaketOlustur()
+        {
+            if (t.IsNotNull(ds_SablonB) == false) return;
+
+
+            // _planTipi = planTipi.uygulama;
+
+            string myProp = ds_SablonB.Namespace;
+            string databaseName = t.MyProperties_Get(myProp, "DBaseName:");
+            string schemaName = t.MyProperties_Get(myProp, "SchemasCode:");
+
+
+            string soru = " Şablonlar için INSERT paketi oluşturulacak, Onaylıyor musunuz ?";
+            DialogResult cevap = t.mySoru(soru);
+            if (DialogResult.Yes == cevap)
+            {
+                cumleBaslik = "";
+                cumleSatirlar = "";
+
+                if (_planTipi == planTipi.teorik)
+                {
+                    cumleBaslik = preparingInsertScript(databaseName, schemaName, "MtskSablonTeorikB");
+                    cumleSatirlar = preparingInsertScript(databaseName, schemaName, "MtskSablonTeorikS");
+                }
+                if (_planTipi == planTipi.uygulama)
+                {
+                    cumleBaslik = preparingInsertScript(databaseName, schemaName, "MtskSablonUygulamaB");
+                    cumleSatirlar = preparingInsertScript(databaseName, schemaName, "MtskSablonUygulamaS");
+                }
+
+                PaketiGonder();
+            }
+        }
+
+        private string preparingInsertScript(string databaseName, string schemaName, string tableName)
+        {
+            vScripts scripts = new vScripts();
+
+            scripts.SourceDBaseName = databaseName;
+            scripts.SchemaName = schemaName;
+            scripts.SourceTableName = tableName;
+            scripts.Where = " 0 = 0 ";
+            scripts.IdentityInsertOnOff = true;
+
+            string cumle = t.preparingInsertScript(scripts);
+
+            return cumle;
+        }
+
+        private void PaketiGonder()
+        {
+            if (cumleBaslik != "") t.runScript(v.dBaseNo.publishManager, cumleBaslik);
+            if (cumleSatirlar != "") t.runScript(v.dBaseNo.publishManager, cumleSatirlar);
+
+            t.FlyoutMessage(this, "Web Manager Database Update", "Insert paketler gönderildi...");
+        }
+
+
 
     }
 }

@@ -11,6 +11,7 @@ begin transaction
         STR_FNAME         VarChar(30)   NULL,
         CAPTION_FNAME     VarChar(30)   NULL,
         WHERE_SQL         VarChar(100)  NULL,
+        DB_NAMES          VarChar(30)   NULL,
 
    Constraint PK_SYS_TYPES_T primary key (REF_ID)
 

@@ -394,6 +394,8 @@ namespace Tkn_Variable
         public static string lyt_labelControl = "labelControl";
         public static string lyt_BarcodeControl1 = "barcodeControl1";
         public static string lyt_ComponentControl = "componentControl";
+        public static string lyt_SimpleButton = "simpleButton";
+        public static string lyt_DigitalGauge = "digitalGauge";
         public static string lyt_documentViewerFast = "documentViewerFast";
         public static string lyt_documentViewerDev = "documentViewerDev";
 
