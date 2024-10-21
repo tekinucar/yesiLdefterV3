@@ -1564,6 +1564,92 @@ namespace Tkn_Events
             evb.btnClick(v.tButtonHint);
             v.tButtonHint.Clear();
         }
+        public void btn_Number_Click(object sender, EventArgs e)
+        {
+            Form tForm = t.Find_Form(sender);
+
+            string cmpName = ((DevExpress.XtraEditors.SimpleButton)sender).AccessibleDescription;
+            string caption = ((DevExpress.XtraEditors.SimpleButton)sender).Text;
+
+            Control cntrl = t.Find_NumberControlDisplay(tForm, cmpName);
+
+            if (cntrl != null)
+            {
+                if (caption == "ce")
+                {
+                    ((DevExpress.XtraEditors.TextEdit)cntrl).Text = "1";
+                }
+                else
+                        if (caption == "<")
+                {
+                    string value = ((DevExpress.XtraEditors.TextEdit)cntrl).Text;
+                    if (value.Length > 0)
+                    {
+                        value = value.Remove(value.Length - 1);
+                        ((DevExpress.XtraEditors.TextEdit)cntrl).Text = value;
+                    }
+                }
+                else
+                        if (caption == "=")
+                {
+                    MessageBox.Show("Hesap yapılacak..");
+                }
+                else
+                {
+                    ((DevExpress.XtraEditors.TextEdit)cntrl).Text += caption;
+                }
+
+                /*
+                if (cntrl.GetType().ToString() == "DevExpress.XtraEditors.PanelControl")
+                {
+                    Control cntrl2 = ((DevExpress.XtraEditors.PanelControl)cntrl).Controls[0];
+                    if (cntrl2.GetType().ToString() == "DevExpress.XtraEditors.TextEdit")
+                    {
+                        if (caption == "ce")
+                        {
+                            ((DevExpress.XtraEditors.TextEdit)cntrl2).Text = "1";
+                        }
+                        else
+                        if (caption == "<")
+                        {
+                            string value = ((DevExpress.XtraEditors.TextEdit)cntrl2).Text;
+                            if (value.Length > 0)
+                            {
+                                value = value.Remove(value.Length - 1);
+                                ((DevExpress.XtraEditors.TextEdit)cntrl2).Text = value;
+                            }
+                        }
+                        else
+                        if (caption == "=")
+                        {
+                            MessageBox.Show("Hesap yapılacak..");
+                        }
+                        else
+                        {
+                            ((DevExpress.XtraEditors.TextEdit)cntrl2).Text += caption;
+                        }
+                    }
+                }
+            */
+            }
+
+            /*
+            string TableIPCode = ((DevExpress.XtraEditors.SimpleButton)sender).AccessibleName;
+            string fieldName = ((DevExpress.XtraEditors.SimpleButton)sender).AccessibleDescription;
+            string caption = ((DevExpress.XtraEditors.SimpleButton)sender).Text;
+
+            DataSet ds = null;
+            DataNavigator dN = null;
+
+            t.Find_DataSet(tForm, ref ds, ref dN, TableIPCode);
+
+            if (t.IsNotNull(ds))
+            {
+                ds.Tables[0].Rows[dN.Position][fieldName] += caption;
+                ds.Tables[0].AcceptChanges();
+            }
+            */
+        }
 
         public void btn_CheckButton_CheckedChanged(object sender, EventArgs e)
         {

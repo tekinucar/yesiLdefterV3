@@ -127,19 +127,26 @@ namespace Tkn_Events
             v.tButtonHint.parentObject = tGridHint.parentObject;
             v.tButtonHint.sender = tGridHint.view;
             v.tButtonHint.senderType = tGridHint.viewType;
+            v.tButtonHint.buttonType = tGridHint.buttonType;
 
-            buttonType = v.tButtonHint.buttonType = ev.getClickType(tGridHint.tForm, tGridHint.tableIPCode, e, ref propNavigator, ref buttonName);
+            if (v.tButtonHint.buttonType == v.tButtonType.btNone)
+            {
+                buttonType = v.tButtonHint.buttonType = ev.getClickType(tGridHint.tForm, tGridHint.tableIPCode, e, ref propNavigator, ref buttonName);
 
-            if (propNavigator != "" && e.KeyCode != Keys.None)
-                v.tButtonHint.propNavigator = propNavigator;
-            if (buttonName != "")
-                v.tButtonHint.buttonName = buttonName;
+                if (propNavigator != "" && e.KeyCode != Keys.None)
+                    v.tButtonHint.propNavigator = propNavigator;
+                if (buttonName != "")
+                    v.tButtonHint.buttonName = buttonName;
+            }
+            else
+            {
+                buttonType = v.tButtonHint.buttonType;
+            }
 
             // iptal edildi
             //if (v.tButtonHint.buttonType == v.tButtonType.btNone)
             //    v.tButtonHint.buttonType = ev.getClickType(e);
-
-            
+                        
             // editValue ile oldValue bir türlü set dataSet e set olmuyor
             // control üzerinde değişiklik yapıp o controlda çıkış yapmadıkca dataSet bir türlü newValue ye ulaşamıyor
             // 
@@ -407,6 +414,16 @@ namespace Tkn_Events
 
                     tGridHint.columnOldValue = oldValue.Trim();
                     tGridHint.columnEditValue = editValue.Trim();
+                }
+            }
+
+            if (sender.GetType().ToString() == "DevExpress.XtraGrid.Views.Tile.TileView")
+            {
+                if (((DevExpress.XtraGrid.Views.Tile.TileView)sender) != null)
+                {
+                    tGridHint.focusedRow = ((DevExpress.XtraGrid.Views.Tile.TileView)sender).GetFocusedRow();
+
+                    //tGridHint.parentObject = sender.GetType().ToString();
                 }
             }
 
@@ -3149,7 +3166,19 @@ namespace Tkn_Events
 
         public void myTileView_ItemClick(object sender, DevExpress.XtraGrid.Views.Tile.TileViewItemClickEventArgs e)
         {
-            //
+            //cntrl.AccessibleDescription = Prop_Runtime + v.ENTER + "|ds|" + v.ENTER + Prop_Navigator;
+            var item = e.Item;
+            object obj = sender;
+
+            vGridHint tGridHint = new vGridHint();
+            getGridHint_(sender, ref tGridHint);
+
+            // default
+            tGridHint.buttonType = v.tButtonType.btListeyeEkle;
+
+            System.Windows.Forms.KeyEventArgs key = new KeyEventArgs(Keys.None);
+            bool onay = commonGridClick(sender, key, tGridHint);
+
             //MessageBox.Show("aaa");
         }
 

@@ -919,6 +919,7 @@ begin transaction
  insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'NEWOPENFORM','New Open Form');
  insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'CLOSEFORM',  'Close Form');
  insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'IBOX',       'Input Box');
+ insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'NUMBERDISPLAY', 'Number Display');
  insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'CLEARDATA',  'Clear Data');
  insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'MESSAGESHOW','Message Show');
  insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'QUESTION',   'Question / Soru');

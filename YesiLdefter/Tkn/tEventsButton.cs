@@ -501,7 +501,7 @@ namespace Tkn_Events
                 openReportDesignForm_(tForm, tableIPCode, propList_);
             }
 
-            if ((buttonType == v.tButtonType.btYeniKart) || //btYeniHesapForm)  // (ButtonName == "yeni_kart_ac")   // 52 - kart + form
+            if ((buttonType == v.tButtonType.btYeniKart) || 
                 (buttonType == v.tButtonType.btYeniHesap) ||
                 (buttonType == v.tButtonType.btYeniBelge) ||
                 (buttonType == v.tButtonType.btYeniAltHesap))
@@ -515,11 +515,11 @@ namespace Tkn_Events
                 return onay;
             }
 
-            if ((buttonType == v.tButtonType.btYeniSatir) ||    // (ButtonName == "yeni_hesap") ||       // 53 - yeni hesap
+            if ((buttonType == v.tButtonType.btYeniSatir) ||    
                 (buttonType == v.tButtonType.btYeniKartSatir) ||
                 (buttonType == v.tButtonType.btYeniHesapSatir) ||
                 (buttonType == v.tButtonType.btYeniBelgeSatir) ||
-                (buttonType == v.tButtonType.btYeniAltHesapSatir))   // (ButtonName == "yeni_alt_hesap")) &&  // 54 - yeni alt hesap
+                (buttonType == v.tButtonType.btYeniAltHesapSatir))   
             {
                 onay = newDataButtonClick(tForm, tableIPCode, propList_, buttonType);
             }
@@ -792,7 +792,7 @@ namespace Tkn_Events
                 if (onay)
                     extraIslemVar(tForm, tableIPCode, v.tButtonType.btListeyeEkle, v.tBeforeAfter.After, propList_);
             }
-            else MessageBox.Show("Listeye Ekleme işi için gerekli olan bilgiler eksik...");
+            //else MessageBox.Show("Listeye Ekleme işi için gerekli olan bilgiler eksik...");
 
             return onay;
         }//listeyeEkle
@@ -2187,7 +2187,7 @@ namespace Tkn_Events
                 }
             }
         }
-        
+     
         public bool InputBox(Form tForm, string TableIPCode, TABLEIPCODE_LIST item)
         {
             if (item.WORKTYPE.ToString() != "IBOX") return false;
@@ -2310,7 +2310,102 @@ namespace Tkn_Events
 
             return onay;
         }
-        
+
+        private void NumberDisplayRead(Form tForm, string TableIPCode, PROP_NAVIGATOR prop_)
+        {
+            //
+            foreach (TABLEIPCODE_LIST item in prop_.TABLEIPCODE_LIST)
+            {
+                if (item.WORKTYPE.ToString() == "NUMBERDISPLAY")
+                {
+                    ReadNumberDidplay(tForm, item);
+                }
+            }
+        }
+        public bool ReadNumberDidplay(Form tForm, TABLEIPCODE_LIST item)
+        {
+            if (item.WORKTYPE.ToString() != "NUMBERDISPLAY") return false;
+
+
+            ///"TABLEIPCODE_LIST": [
+            ///{
+            ///  "CAPTION": "Miktar için NumberControl oku",
+            ///  "TABLEIPCODE": "UST/OMS/BStokS.HIZLISATIS600_L01",
+            ///  "TABLEALIAS": "null",
+            ///  "KEYFNAME": "MIKTAR",
+            ///  "RTABLEIPCODE": "null",
+            ///  "RKEYFNAME": "null",
+            ///  "MSETVALUE": "1",
+            ///  "WORKTYPE": "NUMBERDISPLAY",
+            ///  "CONTROLNAME": "NumberDisplay",
+            ///  "DCCODE": "null"
+            ///}
+
+            bool onay = true;
+            string controlName = string.Empty;
+            controlName = item.CONTROLNAME.ToString();
+            Control cntrl = t.Find_NumberControlDisplay(tForm, controlName);
+            
+            if (cntrl != null)
+            {
+                string TableIPCode = string.Empty;
+                string target_FName = string.Empty;
+                string mySetValue = string.Empty;
+                string readValue = string.Empty;
+
+                TableIPCode = item.TABLEIPCODE.ToString();
+                target_FName = item.KEYFNAME.ToString();
+                mySetValue = item.MSETVALUE.ToString();
+
+                int pos = -1;
+                DataSet dS = null;
+                DataNavigator dN = null;
+                t.Find_DataSet(tForm, ref dS, ref dN, TableIPCode);
+
+                if (dN != null) pos = dN.Position;
+
+                string displayFormat = string.Empty;
+                int ftype = t.Find_Field_Type_Id(dS, target_FName, ref displayFormat);
+
+                // Header Panel içindeki textEdit okundu
+                readValue = ((DevExpress.XtraEditors.TextEdit)cntrl).Text;
+
+                if (t.IsNotNull(mySetValue) == false) mySetValue = "";
+
+                if (t.IsNotNull(readValue) == false) readValue = "1"; // mySetValue;
+
+                try
+                {
+                    dS.Tables[0].Rows[pos][target_FName] = readValue;
+
+                    /// hesaplama görevi Run_Expression metoduna atandı
+                    // hesaplamalar çalışıyor
+                    //work_EXPRESSION(tForm, TableIPCode, v.con_Expression_FieldName, input_Value);
+
+                    // atama kabul ediliyor
+                    dS.Tables[0].AcceptChanges();
+                    // tekrar Editlemek için en son yapılan atama tekrar yapılıyor
+                    dS.Tables[0].Rows[pos][target_FName] = readValue;
+
+                    // mySetValue boş ta olabiliyor, yani display boşaltılıyor
+                    ((DevExpress.XtraEditors.TextEdit)cntrl).Text = mySetValue;
+
+                    // atanan veriler anında viewcontrol üzerinde görünsün
+                    ev.viewControlFocusedValue(tForm, TableIPCode);
+                    v.con_Expression_FieldName = "";
+                    v.con_InputBox_FieldName = target_FName;
+                }
+                catch (Exception)
+                {
+                    //throw;
+                }
+
+            }
+
+            return onay;
+        }
+
+
         private void tSetData_(List<TABLEIPCODE_LIST> TableIPCodeList,
             DataSet read_dsData,
             DataNavigator read_dN,
@@ -2892,7 +2987,12 @@ namespace Tkn_Events
 
                     if (workType == "IBOX")
                     {
-                        MessageBox.Show("Bu bölüm eksik hemen yazmaya başla : " + workType);
+                        InputBox(tForm, TABLEIPCODE, item);
+                    }
+
+                    if (workType == "NUMBERDISPLAY")
+                    {
+                        ReadNumberDidplay(tForm, item);
                     }
 
                     if (workType == "CLEARDATA")

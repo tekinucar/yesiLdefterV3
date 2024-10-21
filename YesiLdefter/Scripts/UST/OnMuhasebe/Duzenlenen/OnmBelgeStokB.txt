@@ -184,6 +184,7 @@ create table [Lkp].[OnmBelgeStokBBelgeTipi]
    constraint  pk_OnmBelgeStokBBelgeTipi primary key (Id)
 )
 
+DELETE FROM [Lkp].[OnmBelgeStokBBelgeTipi]
 INSERT INTO [Lkp].[OnmBelgeStokBBelgeTipi] (Id, BelgeTipi, GrupTipiId)
  VALUES 
   (0,   N'Tanımsız', 0),
@@ -197,8 +198,9 @@ INSERT INTO [Lkp].[OnmBelgeStokBBelgeTipi] (Id, BelgeTipi, GrupTipiId)
   (22,   N'Satış irsaliyesi', 1),
   (23,   N'Satış faturası', 1),
   (24,   N'Satış İADE faturası', 1),
-  (25,   N'Satış İSKONTO faturası', 1)
+  (25,   N'Satış İSKONTO faturası', 1),
 
+  (33,   N'Parkende satış', 1)
 
 -- ------------------------------------------------------- 
 -- KaynakTipiId

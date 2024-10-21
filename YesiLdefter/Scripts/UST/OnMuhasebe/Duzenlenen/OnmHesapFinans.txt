@@ -355,9 +355,10 @@ drop table [Lkp].[OnmHesapFinansAltGrupTipi]
 
 create table [Lkp].[OnmHesapFinansAltGrupTipi]
 (
-   Id          Int Unique Not Null,
-   AltGrupTipi nVarchar(50) Null,
-   GrupTipiId  SmallInt Null,
+   Id           Int Unique Not Null,
+   AltGrupTipi  nVarchar(50) Null,
+   AltGrupTipi2 nVarchar(50) Null,
+   GrupTipiId   SmallInt Null,
 
    constraint  pk_OnmHesapFinansAltGrupTipi primary key (Id)
 )
@@ -431,24 +432,24 @@ INSERT INTO [Lkp].[OnmHesapFinansAnaGrupTipi] (Id, AnaGrupTipi, GrupTipiId)
   ( 770,  N"Genel Yönetim Giderleri",  1 )
 
 delete from [Lkp].[OnmHesapFinansAltGrupTipi]
-INSERT INTO [Lkp].[OnmHesapFinansAltGrupTipi] (Id, AltGrupTipi, GrupTipiId)
+INSERT INTO [Lkp].[OnmHesapFinansAltGrupTipi] (Id, AltGrupTipi, AltGrupTipi2, GrupTipiId)
  VALUES 
-  (0,    N"Tanımsız",      0 ),
-  (100,  N"Nakit Kasası",  1 ), 
-  (1020, N"Banka",         1 ), 
-  (1021, N"Şube",          1 ), 
-  (1022, N"Banka Hesabı",  1 ), 
-  (1023, N"Banka Kartı",   1 ), 
-  (1024, N"POS",           1 ),
-  (1029, N"Banka Listesi", 1 ),
-  ( 860, N"Doğalgaz Sayacı (Bina)", 3 ),
-  ( 861, N"Doğalgaz Sayacı (Tesis, Makine ve Cihaz)", 3 ),
-  ( 862, N"Elektrik Sayacı (Bina)", 3 ),
-  ( 863, N"Elektrik Sayacı (Taşıt)", 3 ),
-  ( 864, N"Elektrik Sayacı (Tesis, Makine ve Cihaz)", 3 ),
-  ( 865, N"Su Sayacı (Bina)", 3 ),
-  ( 866, N"Su Sayacı (Tesis, Makine ve Cihaz)", 3 ),
-  ( 890, N"Diğer", 3)
+  (0,    N"Tanımsız", "",     0 ),
+  (100,  N"Nakit Kasası","Nakit",  1 ), 
+  (1020, N"Banka","",         1 ), 
+  (1021, N"Şube","",          1 ), 
+  (1022, N"Banka Hesabı","EFT",  1 ), 
+  (1023, N"Banka Kartı","Kredi kartı",   1 ), 
+  (1024, N"POS","Kredi kartı",           1 ),
+  (1029, N"Banka Listesi","", 1 ),
+  ( 860, N"Doğalgaz Sayacı (Bina)","", 3 ),
+  ( 861, N"Doğalgaz Sayacı (Tesis, Makine ve Cihaz)","", 3 ),
+  ( 862, N"Elektrik Sayacı (Bina)","", 3 ),
+  ( 863, N"Elektrik Sayacı (Taşıt)","", 3 ),
+  ( 864, N"Elektrik Sayacı (Tesis, Makine ve Cihaz)","", 3 ),
+  ( 865, N"Su Sayacı (Bina)","", 3 ),
+  ( 866, N"Su Sayacı (Tesis, Makine ve Cihaz)","", 3 ),
+  ( 890, N"Diğer","", 3)
 
 delete from [Lkp].[OnmHesapFinansAltCesitTipi]
 INSERT INTO [Lkp].[OnmHesapFinansAltCesitTipi] (Id, AltCesitTipi, GrupTipiId)

@@ -838,6 +838,8 @@
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmHesapCari.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmHesapFinans.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmHesapStok.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmHesapStokFiyat.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmHesapStokImg.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmHesapVezne.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmKira.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmOdemePlani.txt" />

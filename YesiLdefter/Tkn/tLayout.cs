@@ -4092,10 +4092,10 @@ namespace Tkn_Layout
             }
             */
         }
-
         private void lSimpleButton_Preparing(Form tForm, Control subView, DataSet ds_Layout, DataRow row, int pos)
         {
             tToolBox t = new tToolBox();
+            tEvents ev = new tEvents();
 
             string TableIPCode = string.Empty;
             string CmpName = string.Empty;
@@ -4140,7 +4140,25 @@ namespace Tkn_Layout
             //
             //
             DevExpress.XtraEditors.SimpleButton simpleButton1 = new DevExpress.XtraEditors.SimpleButton();
-            //((System.ComponentModel.ISupportInitialize)(simpleButton1)).BeginInit();
+            //
+            // simpleButton1
+            //
+            simpleButton1.Click += new System.EventHandler(ev.btn_Number_Click);
+            //simpleButton1.AccessibleName = TableIPCode; şimdilik ihtiyaç yok
+            simpleButton1.AccessibleDescription = fieldName;
+            simpleButton1.Location = new System.Drawing.Point(0, 0);
+            simpleButton1.Text = caption;
+            simpleButton1.Name = v.lyt_Name + t.Str_Replace(ref layout_code, ".", "_");  //RefId.ToString();
+            if (t.IsNotNull(CmpName))
+                simpleButton1.Name = CmpName;
+            simpleButton1.Size = new System.Drawing.Size(20, 20);
+            simpleButton1.TabStop = false;
+
+            if (DockType == v.dock_Bottom) simpleButton1.Dock = System.Windows.Forms.DockStyle.Bottom;
+            if (DockType == v.dock_Fill) simpleButton1.Dock = System.Windows.Forms.DockStyle.Fill;
+            if (DockType == v.dock_Left) simpleButton1.Dock = System.Windows.Forms.DockStyle.Left;
+            if (DockType == v.dock_Right) simpleButton1.Dock = System.Windows.Forms.DockStyle.Right;
+            if (DockType == v.dock_Top) simpleButton1.Dock = System.Windows.Forms.DockStyle.Top;
 
             UstHesapRow = UstHesap_Get(ds_Layout, pos);
 
@@ -4167,35 +4185,6 @@ namespace Tkn_Layout
             }
 
             #endregion
-
-            // 
-            // panelControl1
-            // 
-            if (FrontBack == 2) simpleButton1.SendToBack();
-            else simpleButton1.BringToFront();
-
-            simpleButton1.Location = new System.Drawing.Point(0, 0);
-            simpleButton1.Text = caption;
-            simpleButton1.Name = v.lyt_Name + t.Str_Replace(ref layout_code, ".", "_");  //RefId.ToString();
-            if (t.IsNotNull(CmpName))
-                simpleButton1.Name = CmpName;
-            simpleButton1.Size = new System.Drawing.Size(20, 20);
-
-            if (DockType == v.dock_Bottom) simpleButton1.Dock = System.Windows.Forms.DockStyle.Bottom;
-            if (DockType == v.dock_Fill) simpleButton1.Dock = System.Windows.Forms.DockStyle.Fill;
-            if (DockType == v.dock_Left) simpleButton1.Dock = System.Windows.Forms.DockStyle.Left;
-            if (DockType == v.dock_Right) simpleButton1.Dock = System.Windows.Forms.DockStyle.Right;
-            if (DockType == v.dock_Top) simpleButton1.Dock = System.Windows.Forms.DockStyle.Top;
-
-            t.myControl_Size_And_Location(simpleButton1, width, height, left, top);
-
-            
-
-            string FormCode = TableIPCode;
-
-            Create_Layout(tForm, FormCode, simpleButton1);
-
-            simpleButton1.TabIndex = pos;
         }
 
 

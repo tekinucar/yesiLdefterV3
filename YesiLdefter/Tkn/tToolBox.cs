@@ -9662,6 +9662,24 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
         #region Diğerleri >>
 
+        public Control Find_NumberControlDisplay(Form tForm, string cmpName)
+        {
+            Control cntrl2 = null;
+            Control cntrl = Find_Control(tForm, cmpName);
+            if (cntrl != null)
+            {
+                if (cntrl.GetType().ToString() == "DevExpress.XtraEditors.PanelControl")
+                {
+                    cntrl2 = ((DevExpress.XtraEditors.PanelControl)cntrl).Controls[0];
+                    if (cntrl2.GetType().ToString() == "DevExpress.XtraEditors.TextEdit")
+                    {
+                        return cntrl2;
+                    }
+                }
+            }
+            return cntrl2;
+        }
+
         // görevli anahtar
         public bool findAttendantKey(System.Windows.Forms.KeyEventArgs e)
         {

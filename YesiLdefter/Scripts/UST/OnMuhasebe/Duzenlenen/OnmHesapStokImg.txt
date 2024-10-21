@@ -1,0 +1,23 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table OnmHesapStokImg
+ (
+   Id                    Int IDENTITY(1,1) not null, 
+   FirmId                Int       not null,
+   StokId                Int       not null, 
+
+   StokResim             VarBinary(max) null,
+   StokResimSmall        VarBinary(max) null,
+
+   constraint		pk_OnmHesapStokImg primary key (Id)
+ )
+  
+ grant select, insert, update, delete on OnmHesapStokImg to public
+
+  create index X_OnmHesapStokImg01 on OnmHesapStokImg (StokId)
+
+commit transaction
+
+/*CreateTableEnd*/
