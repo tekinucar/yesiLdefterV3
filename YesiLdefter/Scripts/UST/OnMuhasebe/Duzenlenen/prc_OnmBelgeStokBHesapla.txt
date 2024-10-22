@@ -1,0 +1,100 @@
+﻿
+
+/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_OnmBelgeStokBHesapla] ( @BelgeStokBId Integer )
+as begin
+
+  declare @IOKdvliToplamTutar Numeric(22,8) -- IskOncesiTutar
+  declare @IskontoOrani       Numeric(12,8) --IskOrani
+  declare @IskontoTutari      Numeric(22,8) --IskTutari
+  declare @ISEkVergiTutari    Numeric(22,8)
+  declare @ISKdvliToplamTutar Numeric(22,8) --IskSonrasiTutar
+  
+  declare @ISKdv00Matrahi     Numeric(22,8)
+  declare @ISKdv01Matrahi     Numeric(22,8)
+  declare @ISKdv10Matrahi     Numeric(22,8)
+  declare @ISKdv20Matrahi     Numeric(22,8)
+  
+  declare @Kdv00Matrahi       Numeric(22,8)
+  declare @Kdv01Matrahi       Numeric(22,8)
+  declare @Kdv01Tutari        Numeric(22,8)
+  declare @Kdv10Matrahi       Numeric(22,8)
+  declare @Kdv10Tutari        Numeric(22,8)
+  declare @Kdv20Matrahi       Numeric(22,8)
+  declare @Kdv20Tutari        Numeric(22,8)
+  
+  declare @KdvsizToplam       Numeric(22,8)
+  declare @TevkifatTutari     Numeric(22,8)
+  declare @HesaplananKdv      Numeric(22,8)
+  declare @GenelToplam        Numeric(22,8)
+   
+  Select 
+       @IOKdvliToplamTutar = sum([ToplamTutarKdvli])
+      ,@IskontoOrani = ( case when (sum([ToplamTutarKdvli]) > 0) then (sum([IskontoTutari]) / (sum([ToplamTutarKdvli]) / 100)) else 0 end)
+	  ,@IskontoTutari = sum([IskontoTutari])
+	  ,@ISEkVergiTutari = sum([ISEkVergiTutari])
+      ,@ISKdvliToplamTutar = sum([ISToplamTutar] + [ISEkVergiTutari] + [ISKdvTutari])
+	  ,@KdvsizToplam = sum([ISToplamTutar] + [ISEkVergiTutari])
+
+	  ,@ISKdv00Matrahi = sum(case [KdvOrani] when 0  then ([ISToplamTutar] + [ISEkVergiTutari]) else 0 end)
+	  ,@ISKdv01Matrahi = sum(case [KdvOrani] when 1  then ([ISToplamTutar] + [ISEkVergiTutari]) else 0 end)
+      ,@ISKdv10Matrahi = sum(case [KdvOrani] when 10 then ([ISToplamTutar] + [ISEkVergiTutari]) else 0 end)
+      ,@ISKdv20Matrahi = sum(case [KdvOrani] when 20 then ([ISToplamTutar] + [ISEkVergiTutari]) else 0 end)
+
+	  ,@Kdv01Tutari = sum(case [KdvOrani] when 1  then [ISKdvTutari] else 0 end)
+      ,@Kdv10Tutari = sum(case [KdvOrani] when 10 then [ISKdvTutari] else 0 end)
+      ,@Kdv20Tutari = sum(case [KdvOrani] when 20 then [ISKdvTutari] else 0 end)
+	  
+	  ,@TevkifatTutari = sum([ISTevkifatTutari])
+	  ,@HesaplananKdv = sum([ISHesaplananKdv])
+	  ,@GenelToplam = sum([ISToplamTutarKdvli])
+
+  from [dbo].[OnmBelgeStokS]
+  where BelgeStokBId = @BelgeStokBId
+
+  set @Kdv00Matrahi = @ISKdv00Matrahi
+  set @Kdv01Matrahi = @ISKdv01Matrahi
+  set @Kdv10Matrahi = @ISKdv10Matrahi
+  set @Kdv20Matrahi = @ISKdv20Matrahi
+   
+  Update [dbo].[OnmBelgeStokB] set
+   [IOKdvliToplamTutar] = @IOKdvliToplamTutar
+  ,[IskontoOrani] = @IskontoOrani
+  ,[IskontoTutari] = @IskontoTutari
+  ,[ISEkVergiTutari] = @ISEkVergiTutari
+  ,[ISKdvliToplamTutar] = @ISKdvliToplamTutar
+
+  -- FA çalışırsa gerekecek
+  --,[IskKdv01Matrahi] = @IskKdv01Matrahi
+  --,[IskKdv10Matrahi] = @IskKdv10Matrahi
+  --,[IskKdv20Matrahi] = @IskKdv20Matrahi
+
+  -- FA dan sonra tekrar düzenle
+  ,[KdvsizToplam] = @KdvsizToplam
+  ,[dKdvsizToplam] = 0
+
+  ,[ToplamKdvMatrahi] = @ISKdv00Matrahi + @ISKdv01Matrahi + @ISKdv10Matrahi + @ISKdv20Matrahi
+  ,[ToplamKdvTutari]  = @Kdv01Tutari + @Kdv10Tutari + @Kdv20Tutari
+
+  ,[Kdv0Matrahi] = @Kdv00Matrahi
+  ,[Kdv1Matrahi] = @Kdv01Matrahi
+  ,[Kdv1Tutari]  = @Kdv01Tutari
+  ,[Kdv2Matrahi] = @Kdv10Matrahi
+  ,[Kdv2Tutari]  = @Kdv10Tutari
+  ,[Kdv3Matrahi] = @Kdv20Matrahi
+  ,[Kdv3Tutari]  = @Kdv20Tutari
+
+  ,[TevkifatTutari] = @TevkifatTutari
+  ,[HesaplananKdv] = @HesaplananKdv
+  ,[GenelToplam] = @GenelToplam
+  ,[dGenelToplam] = 0
+
+  from [dbo].[OnmBelgeStokB] as B 
+  where B.Id = @BelgeStokBId
+  
+end -- prc_
+
+
+/*CreateProcedureEnd*/
+

@@ -2763,6 +2763,31 @@ namespace Tkn_ToolBox
             return onay;
         }
 
+        public bool TableRefreshNewValue(Form tForm, DataSet dsTarget, string newValue)
+        {
+            bool onay = true;
+
+            //string targetTableIpCode = item.TABLEIPCODE;
+            string myProp = dsTarget.Namespace.ToString();
+            string TableLabel = MyProperties_Get(myProp, "TableLabel:");
+            string KeyFName = MyProperties_Get(myProp, "KeyFName:");
+            string IsUseNewRefId = MyProperties_Get(myProp, "IsUseNewRefId:");
+            string KeyIdValue = MyProperties_Get(myProp, "KeyIdValue:");
+            string SqlF = MyProperties_Get(myProp, "SqlFirst:");
+            string SqlS = MyProperties_Get(myProp, "SqlSecond:");
+            string SqlSOld = SqlS;
+            string UseOldRefId = " and " + TableLabel + "." + KeyFName + " = " + KeyIdValue + " ";
+            string UseReadRefId = " and " + TableLabel + "." + KeyFName + " = " + newValue + " ";
+
+            Str_Replace(ref SqlS, UseOldRefId, UseReadRefId);
+            Str_Replace(ref myProp, "SqlSecond:" + SqlSOld, "SqlSecond:" + SqlS);
+            Str_Replace(ref myProp, "KeyIdValue:" + KeyIdValue, "KeyIdValue:" + newValue);
+
+            dsTarget.Namespace = myProp;
+            onay = TableRefresh(tForm, dsTarget);
+
+            return onay;
+        }
         #endregion TableRefresh
 
         #region TriggerOnOff
@@ -3816,6 +3841,8 @@ namespace Tkn_ToolBox
             int p2 = propNavigator.IndexOf("Type:SearchEngine;[");
             if (p2 == -1)
                 p2 = propNavigator.IndexOf("Type:Buttons;[");
+
+            int len = propNavigator.Length;
 
             if (((p1 == -1) || (p1 > 10)) && // başlangıçta aray işareti olmaz ve
                 (p2 == -1))                  // searchEngine yok ise

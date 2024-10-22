@@ -847,6 +847,7 @@
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmVezneFinans.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmVezneKullanici.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_KullaniciFinansHesaplariGet.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmBelgeStokBHesapla.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmHesapFinansBankaTumHesaplar.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmHesapFinansDefaultMaliyetGruplari.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmHesapFinansKavramHaritasi.txt" />

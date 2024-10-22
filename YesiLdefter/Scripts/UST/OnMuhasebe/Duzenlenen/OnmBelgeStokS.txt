@@ -95,8 +95,8 @@ begin transaction
    ISKdvMatrahi        Numeric(22,8) null, /* ISToplamTutar + ISEkVergiTutari */
    ISKdvTutari         Numeric(22,8) null, /* ( Toplam tutarı / 100 ) x Kdv Oranı */     
    ISTevkifatTutari    Numeric(22,8) null, /* ( Kdv tutarı / 10 )  x Tevkifat Oranı */
-   ISHesaplananKdv     Numeric(22,8) null, /* Kdv Tutarı - Tevkifat Tutarı */ 
-   ISToplamTutarKdvli  Numeric(22,8) null, /* Toplam Tutar + Hesaplanan Kdv */ 
+   ISHesaplananKdv     Numeric(22,8) null, /* Kdv Tutarı - Tevkifat Tutarı */  <ISKdvTutari> - <ISTevkifatTutari>
+   ISToplamTutarKdvli  Numeric(22,8) null, /* Toplam Tutar + Hesaplanan Kdv */ <ISKdvMatrahi> + <ISHesaplananKDV>
          
    
    -- 310

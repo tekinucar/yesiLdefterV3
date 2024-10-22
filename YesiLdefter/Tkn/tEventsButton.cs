@@ -219,7 +219,8 @@ namespace Tkn_Events
                             if ((propButtonType == v.tButtonType.btFormulleriHesapla) ||
                                 (propButtonType == v.tButtonType.btDataTransferi) ||
                                 (propButtonType == v.tButtonType.btInputBox) ||
-                                (propButtonType == v.tButtonType.btOpenSubView)
+                                (propButtonType == v.tButtonType.btOpenSubView) ||
+                                (propButtonType == v.tButtonType.btExtraIslem)
                                 )
                             {
                                 onay = true;
@@ -1194,32 +1195,56 @@ namespace Tkn_Events
         {
             //return true;
             // şimdilik işe yaramıyor
+            //tToolBox t = new tToolBox();
+            bool onay = false;
+            
             string workType = string.Empty;
             string targetTABLEIPCODE = string.Empty;
             string targetKEYFNAME = string.Empty;
             string readTABLEIPCODE = string.Empty;
+            string readKEYFNAME = string.Empty;
+            string manuelSetValue = string.Empty;
+            string readValue = string.Empty;
 
-            //tToolBox t = new tToolBox();
-            bool onay = false;
-
+            DataSet dsTarget = null;
+            DataNavigator dNTarget = null;
             DataSet dsRead = null;
             DataNavigator dNRead = null;
 
             workType = item.WORKTYPE.ToString();
-            readTABLEIPCODE = t.Set(item.RTABLEIPCODE.ToString(), "", "");
+
+            if (t.IsNotNull(item.TABLEIPCODE))
+                targetTABLEIPCODE = t.Set(item.TABLEIPCODE.ToString(), "", "");
+            if (t.IsNotNull(item.KEYFNAME))
+                targetKEYFNAME = t.Set(item.KEYFNAME.ToString(), "", "");
+            if (t.IsNotNull(item.RTABLEIPCODE))
+                readTABLEIPCODE = t.Set(item.RTABLEIPCODE.ToString(), "", "");
+            if (t.IsNotNull(item.RKEYFNAME))
+                readKEYFNAME = t.Set(item.RKEYFNAME.ToString(), "", "");
+            if (t.IsNotNull(item.MSETVALUE))
+                manuelSetValue = t.Set(item.MSETVALUE.ToString(), "", "");
 
             dsRead = null;
             dNRead = null;
             if (t.IsNotNull(readTABLEIPCODE))
-            {
                 t.Find_DataSet(tForm, ref dsRead, ref dNRead, readTABLEIPCODE);
-                if (dsRead != null)
-                {
-                    
-                    //t.TableRefresh(tForm, dsRead);  <<<<< bu hatalı, OpenForm bunun yüzündedn çalışmıyor
-                    onay = true;
-                }
+
+            if (t.IsNotNull(dsRead) &&
+                t.IsNotNull(readKEYFNAME))
+            {
+                readValue = dsRead.Tables[0].Rows[dNRead.Position][readKEYFNAME].ToString();
             }
+
+            dsTarget = null;
+            dNTarget = null;
+            if (t.IsNotNull(targetTABLEIPCODE))
+                t.Find_DataSet(tForm, ref dsTarget, ref dNTarget, targetTABLEIPCODE);
+
+            if (t.IsNotNull(dsTarget))
+            {
+                onay = t.TableRefreshNewValue(tForm, dsTarget, readValue);
+            }
+
             return onay;
             
         }

@@ -1117,6 +1117,7 @@ namespace Tkn_Search
 
                             if (t.IsNotNull(readValue))
                             {
+                                /*
                                 //string targetTableIpCode = item.TABLEIPCODE;
                                 string myProp = dsTarget.Namespace.ToString();
                                 string TableLabel = t.MyProperties_Get(myProp, "TableLabel:");
@@ -1132,12 +1133,15 @@ namespace Tkn_Search
                                 t.Str_Replace(ref SqlS, UseOldRefId, UseReadRefId);
                                 t.Str_Replace(ref myProp, "SqlSecond:" + SqlSOld, "SqlSecond:" + SqlS);
                                 t.Str_Replace(ref myProp, "KeyIdValue:" + KeyIdValue, "KeyIdValue:" + readValue);
-
+                                */
                                 // subView var ise silelim
                                 t.tRemoveTabPagesForNewData(tForm);
-
+                                /*
                                 dsTarget.Namespace = myProp;
                                 onay = t.TableRefresh(tForm, dsTarget);
+                                */
+                                onay = t.TableRefreshNewValue(tForm, dsTarget, readValue);
+
                                 nextControl(tForm);
                             }
 
