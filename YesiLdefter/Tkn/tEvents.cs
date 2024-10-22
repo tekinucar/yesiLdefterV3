@@ -568,7 +568,19 @@ namespace Tkn_Events
                 }
                 /// BelgeStokB headeri hatırla
                 /// bu istekler var fakat butonlar görükmediği için bulamıyor ama bu istekler var
-                
+                if (e.KeyCode == v.Key_ExtraIslem)
+                {
+                    /*
+                    DataSet ds = null;
+                    DataNavigator dN = null;
+                    t.Find_DataSet(tForm, ref ds, ref dN, TableIPCode);
+                    string myProp = ds.Namespace.ToString();
+                    if (t.IsNotNull(myProp))
+                    {
+                        //propNavigator = t.MyProperties_Get(myProp, "PropNavigator:");
+                    }
+                    */
+                }
                 if (e.KeyCode == v.Key_Yeni) return v.tButtonType.btYeniKartSatir;
                 if (e.KeyCode == v.Key_Kaydet) return v.tButtonType.btKaydet;
                 if (e.KeyCode == v.Key_KaydetYeni) return v.tButtonType.btKaydetYeni;

@@ -80,6 +80,7 @@ namespace Tkn_DevView
                 // RunTime Sırasında yapılacak işlerin listesi
                 if (t.IsNotNull(Prop_Runtime) || (t.IsNotNull(Prop_Navigator)))
                 {
+                    // propNavigator =
                     cntrl.AccessibleDescription = Prop_Runtime + v.ENTER + "|ds|" + v.ENTER + Prop_Navigator;
                 }
             }

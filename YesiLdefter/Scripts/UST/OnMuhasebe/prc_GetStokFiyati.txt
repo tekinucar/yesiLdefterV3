@@ -49,7 +49,7 @@ as begin
 
   -- sonuç SQL
       
-  Select Top 1 fyt.* From [dbo].[IStokFiyat] fyt
+  Select Top 1 fyt.* From [dbo].[OnmHesapStokFiyat] fyt
   where fyt.FirmId = @FirmId
   and   fyt.IsActive = 1
   and   fyt.StokId = @StokId

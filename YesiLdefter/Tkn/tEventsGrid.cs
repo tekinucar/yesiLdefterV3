@@ -140,6 +140,8 @@ namespace Tkn_Events
             }
             else
             {
+                //ev.getClickType(tGridHint.tForm, tGridHint.tableIPCode, e, ref propNavigator, ref buttonName);
+
                 buttonType = v.tButtonHint.buttonType;
             }
 
@@ -350,6 +352,11 @@ namespace Tkn_Events
                           tGridHint.columnPropNavigator = ((DevExpress.XtraGrid.Views.Grid.GridView)sender).FocusedColumn.ColumnEdit.AccessibleDescription;
                 }
 
+                if ((((DevExpress.XtraGrid.Views.Grid.GridView)sender).GridControl).AccessibleDescription != null)
+                {
+                    tGridHint.gridPropNavigator = (((DevExpress.XtraGrid.Views.Grid.GridView)sender).GridControl).AccessibleDescription.ToString();
+                }
+
                 //if (tGridHint.columnValue != null)
                 //    if ((tGridHint.columnValue != "") &&
                 if (((DevExpress.XtraGrid.Views.Grid.GridView)sender).FocusedValue != null)
@@ -373,6 +380,11 @@ namespace Tkn_Events
                     if (((DevExpress.XtraGrid.Views.BandedGrid.AdvBandedGridView)sender).FocusedColumn.ColumnEdit != null)
                         if (((DevExpress.XtraGrid.Views.BandedGrid.AdvBandedGridView)sender).FocusedColumn.ColumnEdit.AccessibleDescription != null)
                             tGridHint.columnPropNavigator = ((DevExpress.XtraGrid.Views.BandedGrid.AdvBandedGridView)sender).FocusedColumn.ColumnEdit.AccessibleDescription;
+                }
+
+                if ((((DevExpress.XtraGrid.Views.BandedGrid.AdvBandedGridView)sender).GridControl).AccessibleDescription != null)
+                {
+                    tGridHint.gridPropNavigator = (((DevExpress.XtraGrid.Views.BandedGrid.AdvBandedGridView)sender).GridControl).AccessibleDescription.ToString();
                 }
 
                 //if (tGridHint.columnValue != null)
@@ -402,6 +414,11 @@ namespace Tkn_Events
                                 tGridHint.columnPropNavigator = ((DevExpress.XtraGrid.Views.Card.CardView)sender).FocusedColumn.ColumnEdit.AccessibleDescription;
                     }
 
+                    if ((((DevExpress.XtraGrid.Views.Card.CardView)sender).GridControl).AccessibleDescription != null)
+                    {
+                        tGridHint.gridPropNavigator = (((DevExpress.XtraGrid.Views.Card.CardView)sender).GridControl).AccessibleDescription.ToString();
+                    }
+
                     //if (tGridHint.columnValue != null)
                     //    if ((tGridHint.columnValue != "") &&
                     if (((DevExpress.XtraGrid.Views.Card.CardView)sender).FocusedValue != null)
@@ -422,6 +439,11 @@ namespace Tkn_Events
                 if (((DevExpress.XtraGrid.Views.Tile.TileView)sender) != null)
                 {
                     tGridHint.focusedRow = ((DevExpress.XtraGrid.Views.Tile.TileView)sender).GetFocusedRow();
+
+                    if ((((DevExpress.XtraGrid.Views.Tile.TileView)sender).GridControl).AccessibleDescription != null)
+                    {
+                        tGridHint.gridPropNavigator = (((DevExpress.XtraGrid.Views.Tile.TileView)sender).GridControl).AccessibleDescription.ToString();
+                    }
 
                     //tGridHint.parentObject = sender.GetType().ToString();
                 }
@@ -2171,6 +2193,7 @@ namespace Tkn_Events
         {
             ((GridView)tGridHint.view).PostEditor(); // gridView1.PostEditor();
             System.Windows.Forms.KeyEventArgs key = new KeyEventArgs(v.Key_ExtraIslem);
+            tGridHint.buttonType = v.tButtonType.btExtraIslem;
             commonGridClick(tGridHint.view, key, tGridHint);
 
             v.con_ColumnValueChanging = false;
@@ -2179,6 +2202,7 @@ namespace Tkn_Events
         private void myGridRowAdd(vGridHint tGridHint)
         {
             System.Windows.Forms.KeyEventArgs key = new KeyEventArgs(v.Key_KaydetYeni);
+            tGridHint.buttonType = v.tButtonType.btKaydetYeni;
             commonGridClick(tGridHint.view, key, tGridHint);
         }
 
@@ -3176,7 +3200,7 @@ namespace Tkn_Events
             // default
             tGridHint.buttonType = v.tButtonType.btListeyeEkle;
 
-            System.Windows.Forms.KeyEventArgs key = new KeyEventArgs(Keys.None);
+            System.Windows.Forms.KeyEventArgs key = new KeyEventArgs(v.Key_ExtraIslem);
             bool onay = commonGridClick(sender, key, tGridHint);
 
             //MessageBox.Show("aaa");
