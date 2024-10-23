@@ -7334,13 +7334,23 @@ namespace Tkn_Events
                 if (ds_Master == null)
                 {
                     if (dsSubDetail_Data.Tables[0].Rows.Count == 0)
+                    {
+                        string unutma = v.SP_NewWorkType;
+                        v.SP_NewWorkType = "SubDetailNEW";
                         onay = evb.newData(tForm, SubDetail_TableIPCode);
+                        v.SP_NewWorkType = unutma;
+                    }
                 }
                 else
                 {
                     if ((ds_Master.Tables[0].Rows.Count > 0) &&
                         (dsSubDetail_Data.Tables[0].Rows.Count == 0))
+                    {
+                        string unutma = v.SP_NewWorkType;
+                        v.SP_NewWorkType = "SubDetailNEW";
                         onay = evb.newData(tForm, SubDetail_TableIPCode);
+                        v.SP_NewWorkType = unutma;
+                    }
                 }
             }
 

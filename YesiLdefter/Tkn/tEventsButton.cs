@@ -968,6 +968,7 @@ namespace Tkn_Events
             if (dN.IsAccessible == true)
             {
                 // subView var ise silelim
+                // workType == "NEW" || workType == "ADDDATA" || workType == "SubDetailNEW"
                 if (workType == "NEW")
                     t.tRemoveTabPagesForNewData(tForm);
 
@@ -1193,8 +1194,13 @@ namespace Tkn_Events
 
         public bool readData_(Form tForm, TABLEIPCODE_LIST item)
         {
-            //return true;
-            // şimdilik işe yaramıyor
+            /// bir tablodan bir Id oku                : ReadTableIPCode
+            /// diğer tabloyuda bu Id ile yeniden oku  : TargetTableIPCode
+            /// Örnek
+            /// OnmBelgeStokS.BelgeStokBId : ReadTableIPCode
+            /// OnmBelgeStokB.Id yenile    : TargetTableIPCode
+            /// 
+
             //tToolBox t = new tToolBox();
             bool onay = false;
             

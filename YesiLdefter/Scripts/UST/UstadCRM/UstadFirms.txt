@@ -266,3 +266,7 @@ INSERT INTO [Lkp].[UstadFirmsSourceDataType] (Id, SourceDataType)
 
 
 
+-- DistrictTypeId  int               null, /* İlçe */
+-- CityTypeId      int               null, /* İl */ 
+
+

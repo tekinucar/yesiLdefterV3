@@ -782,6 +782,7 @@
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTalepSertifika24HakKaydi.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTalepYasiniHesapla.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskDonemKontrolu.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskGrupSubesiTeorikDersToplami.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskSertifikaSeriNoIptalEt.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskSertifikaSeriNoUret.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskSertifikaUcreti.txt" />
@@ -915,6 +916,8 @@
     <Content Include="Scripts\UST\UstadCRM\EduMtskUserSertifikasi.txt" />
     <Content Include="Scripts\UST\UstadCRM\EduUsers.txt" />
     <Content Include="Scripts\UST\UstadCRM\EduUserTokens.txt" />
+    <Content Include="Scripts\UST\UstadCRM\LkpDistrictType.txt" />
+    <Content Include="Scripts\UST\UstadCRM\LkpCityType.txt" />
     <Content Include="Scripts\UST\UstadCRM\MtskVeriAktarimi.txt" />
     <Content Include="Scripts\UST\UstadCRM\prc_FirmUsers.txt" />
     <Content Include="Scripts\UST\UstadCRM\prc_UstadUserFirmsListGet.txt" />

@@ -114,6 +114,8 @@ namespace YesiLdefter
                 }
             }
 
+            //v.SP_Debug = true;
+
             /// params giriş TESTi için 
             // KÖREN FirmGUID : 0fe40e88-bccf-4f58-9531-7e39c47a1385
 

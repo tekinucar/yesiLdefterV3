@@ -2606,6 +2606,10 @@ INSERT INTO [dbo].[SYS_UPDATES]
             //          Hazır döngü var iken diğer field işlemleride yapılıyor
             //          Nasıl iyi fikir değil mi ?
             #region foreach
+            
+            joinFields += " -- LookUp Fields" + v.ENTER;
+            joinTables += "   -- LookUp Tables" + v.ENTER;
+
             foreach (DataRow Row in dsFields.Tables[0].Rows)
             {
                 MasterValue1 = "";
@@ -3363,6 +3367,11 @@ INSERT INTO [dbo].[SYS_UPDATES]
 
             bool isSubJoin = (fieldName.IndexOf("Lkp") == 0);
 
+            /// joinFields += " -- LookUp Fields" + v.ENTER;
+            /// joinTables += "   -- LookUp Tables" + v.ENTER;
+            /// hazılandığı yer
+
+
             if (joinFields.IndexOf("as " + joinTableAlias) == -1)
             {
                 if (t.IsNotNull(Row["KRT_CAPTION"].ToString()))
@@ -3372,17 +3381,12 @@ INSERT INTO [dbo].[SYS_UPDATES]
                 if (t.IsNotNull(Row["KRT_ALIAS"].ToString()))
                     tableName = Row["KRT_ALIAS"].ToString();
 
-
                 //if (fieldName.IndexOf("Lkp_") > -1)
                 fieldName = fieldName.Replace("Lkp_", "");
 
                 t.LookUpFieldNameChecked(ref tableName, ref fieldName, ref idFieldName, fieldType);
 
-                //int adet = t.tFindWordCount(joinTables, "as " + joinTableAlias);
-                //if (adet > 0)
-                //    joinTableAlias = joinTableAlias + "_" + Convert.ToString(adet + 1);
-
-                if (joinFields.IndexOf(joinTableAlias + "." + fieldName) == -1)
+                if (joinTables.IndexOf(tableName + " as " + joinTableAlias) == -1)
                 {
                     joinTables += "   left outer join Lkp." + tableName + " as " + joinTableAlias + " with (nolock) on ( " + tableCode + "." + lookUpFieldName.Replace("Lkp_", "") + " = " + joinTableAlias + "." + idFieldName + " ) " + v.ENTER;
 
@@ -3419,6 +3423,8 @@ INSERT INTO [dbo].[SYS_UPDATES]
             string groupTables = "";
             Int16 fieldType = 0;
 
+            /// burada Özel olarak   Lkp_ + Donem + Grup + Sube  field üretiliyor
+            ///
             foreach (DataRow Row in dsFields.Tables[0].Rows)
             {
                 tLookUpField = t.Set(Row["LKP_FLOOKUP_FIELD"].ToString(), "", false);
@@ -3439,31 +3445,27 @@ INSERT INTO [dbo].[SYS_UPDATES]
                     joinTableAlias = "FNo" + Row["LKP_FIELD_NO"].ToString();
                     fieldType = Convert.ToInt16(Row["LKP_FIELD_TYPE"].ToString());
 
-                    //int adet = t.tFindWordCount(joinTables, "as " + joinTableAlias);
-                    //if (adet > 0)
-                    //    joinTableAlias = joinTableAlias + "_" + Convert.ToString(adet + 1);
-
-
                     //, FNo5.DonemTipi + ' : ' + FNo6.GrupTipi + ' : ' + FNo7.SubeTipi  as  Lkp_DonemTipiGrupTipiSubeTipi
 
                     if (((fieldName.IndexOf("DonemTipi") > -1) ||
                          (fieldName.IndexOf("GrupTipi") > -1) ||
                          (fieldName.IndexOf("SubeTipi") > -1)))
-                    //     (joinFields.IndexOf(joinTableAlias) == -1))
                     {
                         
                         t.LookUpFieldNameChecked(ref tableName, ref fieldName, ref idFieldName, fieldType);
 
                         if (aliasFieldName == "")
                             aliasFieldName = " , " + joinTableAlias + "." + fieldName;
-                        else aliasFieldName += " + ' : ' + " + joinTableAlias + "." + fieldName;
+                        else aliasFieldName += " + ' , ' + " + joinTableAlias + "." + fieldName;
 
                         if (newLkpFieldName == "")
-                            newLkpFieldName = "Lkp_" + fieldName;
-                        else newLkpFieldName += fieldName;
+                            newLkpFieldName = "Lkp_" + fieldName.Replace("Tipi", "");
+                        else newLkpFieldName += fieldName.Replace("Tipi", "");
                     }
                 }
             }
+
+            joinFields += " -- Özel field : Donem + Grup + Sube " + v.ENTER;
 
             if (t.IsNotNull(aliasFieldName))
                 joinFields += aliasFieldName + " as " + newLkpFieldName + v.ENTER;
@@ -3525,6 +3527,12 @@ INSERT INTO [dbo].[SYS_UPDATES]
 
             //J_CASE_FIELDS    (j_format == "CASE")
             Preparing_Select_Case_Fields_JSON(prop_.J_CASE_FIELDS, ref joinFields, j_table_alias, MasterTableAlias);
+        
+            if (joinTables != "")
+            {
+                joinTables = "   -- Join Tables " + v.ENTER + joinTables;
+                joinFields = " -- Join Tables standart fields " + v.ENTER + joinFields;
+            }
         }
 
         private string Preparing_JoinWhere_JSON(List<J_WHERE> J_WHERE,

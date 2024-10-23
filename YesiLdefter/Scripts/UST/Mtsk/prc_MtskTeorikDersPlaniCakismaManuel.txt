@@ -23,10 +23,9 @@ AS BEGIN
       ,[TDersIsUploaded]
       ,[SablonTeorikBId]
       ,[SablonTeorikFId]
-      ,[SablonTeorikSId]
+      ,[CakismaId]
      From [dbo].[MtskTeorikDers]
      Where SablonTeorikFId = @SablonTeorikFId
-     and   SablonTeorikSId > 0
 
    ) as x, [dbo].[MtskTeorikDers] as td 
   Where 0 = 0 
