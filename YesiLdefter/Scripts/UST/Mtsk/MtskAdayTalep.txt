@@ -403,15 +403,14 @@ END -- create trigger
 
 
 
-/*CreateTrigger*/
+ /*CreateTrigger*/
 
-ALTER TRIGGER [dbo].[trg_MtskAdayTalepDelete] on [dbo].[MtskAdayTalep]
-FOR DELETE
+CREATE TRIGGER [dbo].[trg_MtskAdayTalepDelete] on [dbo].[MtskAdayTalep]
+AFTER DELETE
 AS BEGIN
 
     declare talepCursorDlt cursor local for select Id from deleted
 	declare @curId bigint
-    declare @talepId bigint
 
 	OPEN talepCursorDlt
 
@@ -419,21 +418,16 @@ AS BEGIN
 
     WHILE @@FETCH_STATUS = 0
     BEGIN
-      select 
-	      @talepId = dlt.Id
-      from deleted dlt
-      where dlt.Id = @curId
-	  
-	  Delete from MtskAdayAdliSicil  Where TalepId = @talepId
-	  Delete from MtskAdayAdres      Where TalepId = @talepId
-	  Delete from MtskAdayBelgeler   Where TalepId = @talepId
-	  Delete from MtskAdayImza       Where TalepId = @talepId
-	  Delete from MtskAdaySaglik     Where TalepId = @talepId
-	  Delete from MtskAdaySertifika  Where TalepId = @talepId
-	  Delete from MtskAdaySozlesme   Where TalepId = @talepId
-	  Delete from MtskAdayTakip      Where TalepId = @talepId
-	  Delete from MtskAdayUcret      Where TalepId = @talepId
-
+	  Delete from MtskAdayAdliSicil  Where TalepId = @curId
+	  Delete from MtskAdayAdres      Where TalepId = @curId
+	  Delete from MtskAdayBelgeler   Where TalepId = @curId
+	  Delete from MtskAdayImza       Where TalepId = @curId
+	  Delete from MtskAdayOgrenim    Where TalepId = @curId
+	  Delete from MtskAdaySaglik     Where TalepId = @curId
+	  Delete from MtskAdaySertifika  Where TalepId = @curId
+	  Delete from MtskAdaySozlesme   Where TalepId = @curId
+	  Delete from MtskAdayTakip      Where TalepId = @curId
+	  Delete from MtskAdayUcret      Where TalepId = @curId
 
       FETCH NEXT FROM talepCursorDlt INTO @curId
     END
@@ -441,9 +435,9 @@ AS BEGIN
     CLOSE talepCursorDlt
     DEALLOCATE talepCursorDlt
 
-END -- trg_
+END
 
-/*CreateTriggerEnd*/
+ /*CreateTriggerEnd*/
 
 
 

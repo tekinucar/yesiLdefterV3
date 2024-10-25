@@ -9,7 +9,6 @@ AS BEGIN
   declare @GrupTipiId smallint
   declare @SubeTipiId smallint
   declare @BaslangicTarihi date
-  declare @SablonTeorikSId int
   declare @DerslikTipiId smallint
   declare @DerslikAdiTipiId smallint
   declare @DersSaatiTipiId smallint
@@ -24,7 +23,6 @@ AS BEGIN
       ,@GrupTipiId = [GrupTipiId]
       ,@SubeTipiId = [SubeTipiId]
       ,@BaslangicTarihi = [BaslangicTarihi]
-      ,@SablonTeorikSId = [SablonTeorikSId]
       ,@DerslikTipiId = [DerslikTipiId]
       ,@DerslikAdiTipiId = [DerslikAdiTipiId]
       ,@DersSaatiTipiId = [DersSaatiTipiId]
@@ -40,6 +38,11 @@ AS BEGIN
     if (@DerslikTipiId = 5)
 	    Select @DerslikAdiTipiId = DerslikAdiTipiId from MtskDerslik Where DerslikTipiId = 1
   end
+
+  -- Bir ders günde Maximum 6 saat olabilir
+  if (@SaatSayisi > 6) set @SaatSayisi = 6
+  -- Bir ders günde Minimum 2 saat olabilir
+  if (@SaatSayisi < 2) set @SaatSayisi = 2
 
   set @Count = 1
   WHILE ( @Count <= @SaatSayisi )
@@ -61,8 +64,8 @@ AS BEGIN
            ,[BitisSaati]
            ,[TDersIsUploaded]
 		   ,[SablonTeorikBId]
-		   ,[SablonTeorikSId]
 		   ,[SablonTeorikFId]
+		   ,[CakismaId]
 		   )
     Values (@FirmId
            ,1
@@ -79,8 +82,9 @@ AS BEGIN
            ,null -- BitisSaati
            ,0    -- TDersIsUploaded
            ,-2   -- SablonTeorikBId   : Default -2 değeri veriyorum, maunel ekranından ınsert olduğunun işareti
-		   ,@SablonTeorikSId
-           ,@SablonTeorikFId)
+           ,@SablonTeorikFId
+		   ,0    -- CakismaId
+           )
 	
 	set @Count = @Count + 1
 	set @DersSaatiTipiId = @DersSaatiTipiId + 1

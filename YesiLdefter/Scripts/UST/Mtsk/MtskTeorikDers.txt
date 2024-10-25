@@ -107,55 +107,50 @@ AS BEGIN
       , BitisSaati   = CONVERT(smalldatetime, CONVERT(varchar(10), @eDersTarihi) + ' ' + SUBSTRING(@eSaat,9,5))
       Where Id = @curId
 
-	  -- Çakışma kontrolü
-      Select @insId = ins.Id
-           , @CakismaId = isnull(ins.CakismaId,0) 
-           , @mvcId = isnull(mvc.Id,0) 
-      From [dbo].[MtskTeorikDers] as ins 
-         left outer join [dbo].[MtskTeorikDers] as mvc on (
-	         ins.FirmId = mvc.FirmId 
-	     and ins.DersTarihi = mvc.DersTarihi
-		 and ins.BaslamaSaati = mvc.BaslamaSaati
-		 and ( ins.DerslikAdiTipiId = mvc.DerslikAdiTipiId 
-		 or    ins.PersonelId = mvc.PersonelId )
-         and   ins.Id != mvc.Id
-	  )
-      Where 0 = 0
-      and   ins.Id = @curId
 
-	  -- çakışma tespit edildi yaz
-      if (@CakismaId = 0 and @mvcId > 0)
-	  begin
-	      -- inserted olan kayıt
-	      Update [dbo].[MtskTeorikDers] set CakismaId = @mvcId
-		  Where Id = @curId
-	      -- çakışma yaşanan kayıt
-	      Update [dbo].[MtskTeorikDers] set CakismaId = @curId
-		  Where Id = @mvcId
-	  end
-
-	  -- çakışma bitti sıfırla
-      if (@CakismaId > 0 and @mvcId = 0)
-	  begin
-	      -- inserted olan kayıt
-	      Update [dbo].[MtskTeorikDers] set CakismaId = 0
-		  Where Id = @curId
-	      -- çakışma yaşanan kayıt
-	      Update [dbo].[MtskTeorikDers] set CakismaId = 0
-		  Where Id = @CakismaId
-	  end
-	  	   
+	  Execute [dbo].[prc_MtskTeorikDersIhlalleri] @curId
 
       FETCH NEXT FROM myCursor INTO @curId
     END
 
     CLOSE myCursor
     DEALLOCATE myCursor   
-  
 
 END -- create trigger
 
 /*CreateTriggerEnd*/
+
+
+ /*CreateTrigger*/
+
+CREATE TRIGGER [dbo].[trg_MtskTeorikDersDelete] on [dbo].[MtskTeorikDers]
+AFTER DELETE
+AS BEGIN
+
+    declare teoCursorDlt cursor local for select Id from deleted
+	declare @curId bigint
+
+	OPEN teoCursorDlt
+
+    FETCH NEXT FROM teoCursorDlt INTO @curId
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+	  Delete from MtskKIhlalTeorikD  
+	  Where ( InsertedId = @curId 
+	  or      MevcutId = @curId )
+
+      FETCH NEXT FROM teoCursorDlt INTO @curId
+    END
+
+    CLOSE teoCursorDlt
+    DEALLOCATE teoCursorDlt
+
+END
+
+ /*CreateTriggerEnd*/
+
+
 
 /*CreateLkpTable*/
 

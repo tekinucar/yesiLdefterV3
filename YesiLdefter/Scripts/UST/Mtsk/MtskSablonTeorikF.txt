@@ -21,7 +21,6 @@ begin transaction
    /* şablon için */
 
    /* manuel kısım */
-   SablonTeorikSId         Int           null,
    DerslikTipiId           SmallInt      null, -- default  /* 1. Trafik ve Çevre Bilgisi, İlk Yardım, Araç Tekniği */
    DerslikAdiTipiId        SmallInt      null, -- default  /* Derslik-1, -2 ... -10 */
    DersSaatiTipiId         SmallInt      null, -- user     /* 07:00 - 07:50 ... */

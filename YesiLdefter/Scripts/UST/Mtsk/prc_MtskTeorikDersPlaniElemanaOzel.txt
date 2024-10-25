@@ -56,8 +56,8 @@ AS BEGIN
    Select [MtskTeorikDers].* 
  , [personel].TamAdiSoyadi as Lkp_PersonelTamAdiSoyadi
  , [personel].TcVkNo as Lkp_PersonelTcNo
- , [personel].TamAdiSoyadi + ' . ' + FNo9.DerslikAdiTipi as Lkp_DerslikVePersonel
- , [personel].TamAdiSoyadi + ', ' + FNo9.DerslikAdiTipi + ', ' + FNo5.DonemTipi + ', ' + FNo6.GrupTipi + ', ' + FNo7.SubeTipi as Lkp_DerslikPersDonemGrupSube
+ , [personel].TamAdiSoyadi + '' . '' + FNo9.DerslikAdiTipi as Lkp_DerslikVePersonel
+ , [personel].TamAdiSoyadi + '', '' + FNo9.DerslikAdiTipi + '', '' + FNo5.DonemTipi + '', '' + FNo6.GrupTipi + '', '' + FNo7.SubeTipi as Lkp_DerslikPersDonemGrupSube
  , FNo5.DonemTipi as Lkp_DonemTipi
  , FNo6.GrupTipi as Lkp_GrupTipi
  , FNo7.SubeTipi as Lkp_SubeTipi
@@ -65,7 +65,7 @@ AS BEGIN
  , FNo9.DerslikAdiTipi as Lkp_DerslikAdiTipi
  , FNo11.DersSaatiTipi as Lkp_DersSaatiTipi
  , FNo13.EgitimTipi as Lkp_EgitimTipi
- , FNo5.DonemTipi + ' : ' + FNo6.GrupTipi + ' : ' + FNo7.SubeTipi as Lkp_DonemTipiGrupTipiSubeTipi
+ , FNo5.DonemTipi + '', '' + FNo6.GrupTipi + '', '' + FNo7.SubeTipi as Lkp_DonemGrupSube
 
  from MtskTeorikDers as [MtskTeorikDers] with (nolock) 
    left outer join MtskPersoneli as [personel] with (nolock) on ( [MtskTeorikDers].PersonelId = [personel].TcNoCalismaIzniNo  ) 
@@ -89,7 +89,8 @@ AS BEGIN
  if (@ElemanGrubu = 'Derslikler' or @ElemanGrubu = 'Usta Eğitici')
      set @sqlWhere = '  and Convert(date, [MtskTeorikDers].DersTarihi, 103 ) >= Convert(date, ''' + Convert(varchar(30), Format(@EgitimBaslangicTarihi, 'dd.MM.yyyy')) + ''', 103) '
 
- --ser @ElemanGrubu = 'Dönem'
+ 
+ --set @ElemanGrubu = 'Dönem'
  --set @ElemanGrubu = 'Gruplar'
  --set @ElemanGrubu = 'Derslikler'
  --set @ElemanGrubu = 'Usta Eğitici'

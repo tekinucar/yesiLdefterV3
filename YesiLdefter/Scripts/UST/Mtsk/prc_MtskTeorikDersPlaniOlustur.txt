@@ -11,7 +11,6 @@ AS BEGIN
   , @BaslangicTarihi = isnull(BaslangicTarihi, getdate())
   From [dbo].[MtskSablonTeorikF]
   Where Id = @SablonTeorikFId
-  
 
   Insert Into [dbo].[MtskTeorikDers]
            ([FirmId]
@@ -29,8 +28,8 @@ AS BEGIN
            ,[BitisSaati]
            ,[TDersIsUploaded]
 		   ,[SablonTeorikBId]
-           ,[SablonTeorikSId]
 		   ,[SablonTeorikFId]
+           ,[CakismaId]
 		   )
 
   Select  
@@ -49,8 +48,9 @@ AS BEGIN
      ,x.[BitisSaati]
      ,x.[TDersIsUploaded]
 	 ,x.[SablonTeorikBId] 
-     ,x.[SablonTeorikSId] 
 	 ,x.[SablonTeorikFId]
+     ,x.[CakismaId] 
+
   from (
   Select 
     @FirmId as FirmId
@@ -99,8 +99,8 @@ AS BEGIN
   , null as BitisSaati
   , 0 as TDersIsUploaded
   , s.SablonTeorikBId
-  , null as SablonTeorikSId 
   , f.Id as SablonTeorikFId
+  , 0    as CakismaId 
   from MtskSablonTeorikS as s 
      left outer join MtskSablonTeorikB as b on ( s.SablonTeorikBId = b.Id )
      left outer join MtskSablonTeorikF as f on ( s.SablonTeorikBId = f.SablonTeorikBId )

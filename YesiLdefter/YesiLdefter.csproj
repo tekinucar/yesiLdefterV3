@@ -741,6 +741,10 @@
     <Content Include="Scripts\UST\Mtsk\MtskDonemi.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskEgitimAraci.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskGrupSubesi.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskKIhlalAday.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskKIhlalTalep.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskKIhlalTeorikD.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskKIhlalUygulamaD.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskKurumAltProgramlari.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskPersoneli.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskSaatTeorik.txt" />

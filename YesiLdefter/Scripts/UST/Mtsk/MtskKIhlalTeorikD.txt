@@ -1,0 +1,151 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table MtskKIhlalTeorikD
+ (
+
+   Id                     Int IDENTITY(1,1) NOT NULL, 
+   FirmId                 Int       not null,
+
+   DonemTipiId            Int           null,
+   GrupTipiId             SmallInt      null,
+   SubeTipiId             SmallInt      null,
+
+   IhlalTipiId            SmallInt      null,  /* detay aşağıda */
+   DerslikTipiId          SmallInt      null,  /* 1. Trafik ve Çevre Dersi, 2. İlkyardım Dersi .... */
+   DersSaatSayisi         SmallInt      null,  /* ya eksik saat yada fazla saat yazılacak */
+   DerslikAdiTipiId       SmallInt      null,  /* 1. DERSLİK-1, 2. DERSLİK-2 ... */ 
+   PersonelId             Varchar(20)   null,  /* perspnel çakışması yada personelin ders saati dolunca */
+   DersTarihi             Date          null,
+
+   InsertedId             Int           null,  /* o an işlem yapılan satır MtskTeorikDers.Id */
+   MevcutId               Int           null,  /* önceden kaydedilen satır MtskTeorikDers.Id */
+
+   Tarih                  Datetime      null,  /* tespit edildiği kayıt tarihi */
+
+  constraint pk_MtskKIhlalTeorikD primary key (Id)
+ )
+
+ create index X_MtskKIhlalTeorikD01 on MtskKIhlalTeorikD (DonemTipiId, GrupTipiId, SubeTipiId)
+ 
+ grant select, insert, update, delete on MtskKIhlalTeorikD to public
+
+commit transaction
+
+/*CreateTableEnd*/
+
+
+/*CreateLkpTable*/
+
+begin transaction
+
+
+-- ------------------------------------------------------- 
+-- DerslikTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskKIhlalTeorikDDerslikTipi')
+drop table [Lkp].[MtskKIhlalTeorikDDerslikTipi]
+
+create table Lkp.MtskKIhlalTeorikDDerslikTipi
+(
+   Id          Int Unique Not Null,
+   DerslikTipi nVarchar(50)   null
+   
+   constraint  pk_MtskKIhlalTeorikDDerslikTipi primary key (Id)
+)
+
+INSERT INTO Lkp.MtskKIhlalTeorikDDerslikTipi (Id, DerslikTipi)
+ VALUES 
+  (-1, N'--Seçiniz--'),
+  ( 0, N'Tanımsız'),
+  ( 1, N'Trafik ve Çevre Dersi'),
+  ( 2, N'İlkyardım Dersi'),
+  ( 3, N'Araç Tekniği Dersi'),
+  ( 5, N'Trafik Adabı Dersi')
+
+-- ------------------------------------------------------- 
+-- DerslikAdiTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskKIhlalTeorikDDerslikAdiTipi')
+drop table [Lkp].[MtskKIhlalTeorikDDerslikAdiTipi]
+
+create table Lkp.MtskKIhlalTeorikDDerslikAdiTipi
+(
+   Id             Int Unique Not Null,
+   DerslikAdiTipi nVarchar(50)   null
+   
+   constraint  pk_MtskKIhlalTeorikDDerslikAdiTipi primary key (Id)
+)
+
+INSERT INTO Lkp.MtskKIhlalTeorikDDerslikAdiTipi (Id, DerslikAdiTipi)
+ VALUES 
+  ( 0, N'Tanımsız'),
+  ( 1, N'DERSLİK-1'),
+  ( 2, N'DERSLİK-2'),
+  ( 3, N'DERSLİK-3'),
+  ( 4, N'DERSLİK-4'),
+  ( 5, N'DERSLİK-5'),
+  ( 6, N'DERSLİK-6'),
+  ( 7, N'DERSLİK-7'),
+  ( 8, N'DERSLİK-8'),
+  ( 9, N'DERSLİK-9'),
+  (10, N'DERSLİK-10')
+
+
+
+
+-- IhlalTipiId
+
+-- ------------------------------------------------------- 
+-- IhlalTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskKIhlalTeorikDIhlalTipi')
+drop table [Lkp].[MtskKIhlalTeorikDIhlalTipi]
+
+create table [Lkp].[MtskKIhlalTeorikDIhlalTipi]
+(
+   Id               Int Unique not null, 
+   IhlalTipi        nVarchar(50)   null,
+   IsActive         Bit            null, /* ihlal yok sadece 1 olacak */
+   
+   constraint  pk_MtskKIhlalTeorikDIhlalTipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskKIhlalTeorikDIhlalTipi]
+INSERT INTO [Lkp].[MtskKIhlalTeorikDIhlalTipi] (Id, IhlalTipi, IsActive)
+ VALUES 
+  ( 0,    N'', 1),
+  ( 1,    N'Kural ihlali yok', 1),
+  (11,    N'Bir ders en az 2 saat olabilir', 0),
+  (12,    N'Bir ders en fazla 6 saat olabilir', 0),
+  (13,    N'Ders saati eksik', 0),
+  (14,    N'Ders saati fazla', 0),
+
+  (21,    N'Derslik çakışması var', 0),
+  (22,    N'Personel çakışması var', 0),
+  (23,    N'Hem derslik hemde personel çakışması var', 0),
+  (24,    N'Farklı bir dersle çakışması var', 0),
+  (25,    N'Çift kayıt çakışması var', 0),
+  (29,    N'Sebebi bilinmeyen çakışma var', 0)
+
+  (31,    N'Personel haftalık ders saatini aştı', 0),
+  (32,    N'Personel izin gününe uygun değil', 0),
+  (33,    N'Personel çalışma saatlerine uymuyor', 0),
+  (34,    N'Personelin sözleşme süresi dolmuştur', 0)
+
+
+  personelin uygulama saatlerinide 31 maddeye ekle
+
+commit transaction
+
+/*CreateLkpTableEnd*/
+
+  firmanın araç otomomatik mi kontrolü
+  sertifikaya bağlı aracın otomatiği yoksa talep kaydı sırasında otomatik seçeneğini işaretleyemez
+
+
+
+
+
+ 
