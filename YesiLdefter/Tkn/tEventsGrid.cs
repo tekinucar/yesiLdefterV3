@@ -3438,6 +3438,15 @@ namespace Tkn_Events
 
             selectSchedulerView(tForm, TableIPCode, h);
         }
+        public void checkSchedulerWeekCount(object sender, EventArgs e)
+        {
+            Form tForm = t.Find_Form(sender);
+            
+            string TableIPCode = ((DevExpress.XtraEditors.SpinEdit)sender).AccessibleName;
+
+            //selectSchedulerView(tForm, TableIPCode, h);
+        }
+
 
         public void selectSchedulerView(Form tForm, string TableIPCode, int tabIndex)
         {
@@ -3475,6 +3484,7 @@ namespace Tkn_Events
                     ((DevExpress.XtraScheduler.SchedulerControl)cntrl).ActiveViewType = DevExpress.XtraScheduler.SchedulerViewType.FullWeek;
                     ((DevExpress.XtraScheduler.SchedulerControl)cntrl).FullWeekView.TimeRulers.Add(v.timeRuler);
                     ((DevExpress.XtraScheduler.SchedulerControl)cntrl).FullWeekView.TimeRulers[0].Visible = true;
+                    //((DevExpress.XtraScheduler.SchedulerControl)cntrl).FullWeekView.ShowMoreButtonsOnEachColumn = true;
                 }
                 if (tabIndex == 4) 
                     ((DevExpress.XtraScheduler.SchedulerControl)cntrl).ActiveViewType = DevExpress.XtraScheduler.SchedulerViewType.Gantt;

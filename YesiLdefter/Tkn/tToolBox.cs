@@ -45,6 +45,7 @@ using DevExpress.XtraBars.Docking2010.Customization;
 using System.Data.Sql;
 using System.IO.Compression;
 using Tkn_ExeUpdate;
+using DevExpress.XtraCharts;
 
 namespace Tkn_ToolBox
 {
@@ -2593,15 +2594,33 @@ namespace Tkn_ToolBox
                         //MessageBox.Show("ViewControl_Enabled : " + startDateFieldName);
                         if (startDateFieldName != "")
                         {
+                            //Control tEdit1 = Find_Control(tForm, "spinEdit1_" + TableIPCode);
+
+                            int hafta = 2; // Convert.ToInt32(((DevExpress.XtraEditors.SpinEdit)tEdit1).EditValue);
+
+                            // Start date of the first week
+                            DateTime startDate = Convert.ToDateTime(dsData.Tables[0].Rows[0][startDateFieldName].ToString()); 
+                            DateTime endDate = startDate.AddDays(7*hafta);
+
                             //object tDataTable = ((DevExpress.XtraScheduler.SchedulerControl)cntrl).DataStorage.Appointments.DataSource.DataSource;
                             //DataSet dsData = ((DataTable)tDataTable).DataSet;
                             ((DevExpress.XtraScheduler.SchedulerControl)cntrl).BeginInit();
-                            ((DevExpress.XtraScheduler.SchedulerControl)cntrl).Start = Convert.ToDateTime(dsData.Tables[0].Rows[0][startDateFieldName].ToString());
+                            ((DevExpress.XtraScheduler.SchedulerControl)cntrl).Start = startDate;
+
+                            //((DevExpress.XtraScheduler.SchedulerControl)cntrl).Views.FullWeekView.SetVisibleIntervals(new TimeInterval(startDate, endDate));
+
                             ((DevExpress.XtraScheduler.SchedulerControl)cntrl).EndInit();
                             ((DevExpress.XtraScheduler.SchedulerControl)cntrl).DataStorage.RefreshData();
                             ((DevExpress.XtraScheduler.SchedulerControl)cntrl).RefreshData();
                             Object dataSetx = new Object();
                             dataSetx = ((DevExpress.XtraScheduler.SchedulerControl)cntrl).DataStorage.Appointments.DataSource;
+
+                            if (((DevExpress.XtraScheduler.SchedulerControl)cntrl).ActiveViewType == DevExpress.XtraScheduler.SchedulerViewType.Day)
+                            {
+                                ((DevExpress.XtraScheduler.SchedulerControl)cntrl).DayView.TimeRulers.Add(v.timeRuler);
+                                ((DevExpress.XtraScheduler.SchedulerControl)cntrl).DayView.TimeRulers[0].Visible = true;
+                            }
+
                         }
                     }
 
@@ -7126,19 +7145,21 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
       ,[DefaultText]
       ,[DefaultInt] ";
 
-            string Sql =
-                   " Select " + fields + " from Settings " + v.ENTER
-                 + " Where UserId = " + v.tUser.UserId.ToString() + v.ENTER;
+            string Sql = // Tablo varsa Select çalışsın
+                   " IF EXISTS (Select * From sys.objects WHERE name = 'Settings') "
+                 + " begin "
+                 + "     Select " + fields + " from Settings " + v.ENTER
+                 + "     Where UserId = " + v.tUser.UserId.ToString() + v.ENTER;
             
-            Sql += " union all "
-                + " Select " + fields + " from Settings " + v.ENTER
-                + " Where  PcName = '" + v.tComputer.PcName + "' "
-                + " and    NetworkMacAddress = '" + v.tComputer.Network_MACAddress + "' " + v.ENTER;
+            Sql += "     union all " + v.ENTER
+                 + "     Select " + fields + " from Settings " + v.ENTER
+                 + "     Where  PcName = '" + v.tComputer.PcName + "' "
+                 + "     and    NetworkMacAddress = '" + v.tComputer.Network_MACAddress + "' " + v.ENTER;
 
-            Sql += " union all "
-                + " Select " + fields + " from Settings " + v.ENTER
-                + " Where  FirmId = " + v.tMainFirm.FirmId;
-
+            Sql += "     union all "
+                 + "     Select " + fields + " from Settings " + v.ENTER
+                 + "     Where  FirmId = " + v.tMainFirm.FirmId + v.ENTER
+                 + " end -- if exists ";
             try
             {
                 if (v.ds_Settings != null)
@@ -8432,6 +8453,12 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             if (MyObjectName == "DevExpress.XtraBars.BarLargeButtonItem")
             {
                 tForm = (((DevExpress.XtraBars.BarLargeButtonItem)sender).Manager).Form.FindForm();
+                return tForm;
+            }
+
+            if (MyObjectName == "DevExpress.XtraEditors.SpinEdit")
+            {
+                tForm = ((DevExpress.XtraEditors.SpinEdit)sender).FindForm();
                 return tForm;
             }
 

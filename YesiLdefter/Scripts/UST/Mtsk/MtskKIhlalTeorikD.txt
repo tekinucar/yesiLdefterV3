@@ -18,6 +18,7 @@ begin transaction
    DerslikAdiTipiId       SmallInt      null,  /* 1. DERSLİK-1, 2. DERSLİK-2 ... */ 
    PersonelId             Varchar(20)   null,  /* perspnel çakışması yada personelin ders saati dolunca */
    DersTarihi             Date          null,
+   DersSaatiTipiId        SmallInt      null,
 
    InsertedId             Int           null,  /* o an işlem yapılan satır MtskTeorikDers.Id */
    MevcutId               Int           null,  /* önceden kaydedilen satır MtskTeorikDers.Id */
@@ -92,6 +93,39 @@ INSERT INTO Lkp.MtskKIhlalTeorikDDerslikAdiTipi (Id, DerslikAdiTipi)
   ( 9, N'DERSLİK-9'),
   (10, N'DERSLİK-10')
 
+-- ------------------------------------------------------- 
+-- DersSaatiTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskKIhlalTeorikDDersSaatiTipi')
+drop table [Lkp].[MtskKIhlalTeorikDDersSaatiTipi]
+
+create table Lkp.MtskKIhlalTeorikDDersSaatiTipi
+(
+   Id              Int Unique Not Null,
+   DersSaatiTipi   nVarchar(50)   null
+
+   constraint  pk_MtskKIhlalTeorikDDersSaatiTipi primary key (Id)
+)
+
+INSERT INTO Lkp.MtskKIhlalTeorikDDersSaatiTipi (Id, DersSaatiTipi)
+ VALUES 
+  (-1, N' Seçiniz'),
+  ( 0, N'07:00 - 07:50'),
+  ( 1, N'08:00 - 08:50'),
+  ( 2, N'09:00 - 09:50'),
+  ( 3, N'10:00 - 10:50'),
+  ( 4, N'11:00 - 11:50'),
+  ( 5, N'12:00 - 12:50'),
+  ( 6, N'13:00 - 13:50'),
+  ( 7, N'14:00 - 14:50'),
+  ( 8, N'15:00 - 15:50'),
+  ( 9, N'16:00 - 16:50'),
+  (10, N'17:00 - 17:50'),
+  (11, N'18:00 - 18:50'),
+  (12, N'19:00 - 19:50'),
+  (13, N'20:00 - 20:50'),
+  (14, N'21:00 - 21:50'),
+  (15, N'22:00 - 22:50')
 
 
 
@@ -132,7 +166,8 @@ INSERT INTO [Lkp].[MtskKIhlalTeorikDIhlalTipi] (Id, IhlalTipi, IsActive)
   (31,    N'Personel haftalık ders saatini aştı', 0),
   (32,    N'Personel izin gününe uygun değil', 0),
   (33,    N'Personel çalışma saatlerine uymuyor', 0),
-  (34,    N'Personelin sözleşme süresi dolmuştur', 0)
+  (34,    N'Personelin sözleşme süresi dolmuştur', 0),
+  (35,    N'Personelin uygulama dersi mevcut', 0)
 
 
   personelin uygulama saatlerinide 31 maddeye ekle

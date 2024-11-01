@@ -1439,13 +1439,17 @@ namespace YesiLdefter.Selenium
             {
                 if ((workPageNodes.aktifPageCode != "MTSKADAYRESIM") &&
                     (workPageNodes.aktifPageCode != "MTSKADAYSOZLESME") &&
-                    (workPageNodes.aktifPageCode != "MTSKADAYIMZA"))
+                    (workPageNodes.aktifPageCode != "MTSKADAYIMZA") &&
+                    (workPageNodes.aktifPageCode != "SRCADAYRESIM")
+                    )
                     f.btn_FullPost1.Visible = true;
                 else f.btn_FullPost1.Visible = false;
 
                 if ((workPageNodes.aktifPageCode == "MTSKADAYRESIM") ||
                     (workPageNodes.aktifPageCode == "MTSKADAYSOZLESME") ||
-                    (workPageNodes.aktifPageCode == "MTSKADAYIMZA"))
+                    (workPageNodes.aktifPageCode == "MTSKADAYIMZA") ||
+                    (workPageNodes.aktifPageCode == "SRCADAYRESIM") 
+                    )
                     f.btn_FullPost2.Visible = true;
                 else f.btn_FullPost2.Visible = false;
             }

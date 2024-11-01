@@ -24,6 +24,7 @@ using Tkn_Events;
 using Tkn_ToolBox;
 using Tkn_Variable;
 using System.Drawing;
+using System.Threading.Tasks;
 
 namespace Tkn_DevView
 {
@@ -481,6 +482,7 @@ namespace Tkn_DevView
                 tTileView.OptionsFilter.AllowFilterEditor = false;
                 tTileView.Appearance.ItemFocused.BackColor = v.AppearanceFocusedColor;
                 tTileView.Appearance.ItemFocused.Options.UseBackColor = true;
+                tTileView.OptionsTiles.LayoutMode = DevExpress.XtraGrid.Views.Tile.TileViewLayoutMode.Kanban;
 
                 tGridControl.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] { tTileView });
                 tGridControl.BringToFront();
@@ -548,7 +550,6 @@ namespace Tkn_DevView
                     tGridControl.DataSource = dsData.Tables[0];
 
             #endregion TielView ve Columns İşlemleri
-
         }
 
         #region GridTileViewColumns Create
@@ -630,6 +631,8 @@ namespace Tkn_DevView
                         (tfield_name == GROUPFNAME2) ||
                         (tfield_name == GROUPFNAME3))
                     {
+                        ///tTileView.GroupedColumns
+
                         //column.VisibleIndex = 99;
                         //i--;
                     }
@@ -3385,7 +3388,7 @@ MS_FIELDS                                          T03_MSFIELDS                 
             SchedulerButtonAdd(TableIPCode, "6", "Zaman Çizelgesi", tButtonPanel);
             SchedulerButtonAdd(TableIPCode, "7", "Hafta", tButtonPanel);
             SchedulerButtonAdd(TableIPCode, "8", "Çalışma Haftası", tButtonPanel);
-
+            //SchedulerWeekCounterAdd(TableIPCode, "9", "Hafta Sayısı", tButtonPanel);
         }
         private void SchedulerButtonAdd(string TableIPCode, string groupno, string caption,
             DevExpress.XtraEditors.PanelControl tButtonPanel)
@@ -3417,6 +3420,71 @@ MS_FIELDS                                          T03_MSFIELDS                 
             tButtonPanel.Controls.Add(simpleButton_Gbutton);
             simpleButton_Gbutton.BringToFront();
         }
+
+        private void SchedulerWeekCounterAdd(string TableIPCode, string groupno, string caption,
+                    DevExpress.XtraEditors.PanelControl tButtonPanel)
+        {
+            tToolBox t = new tToolBox();
+            tEvents ev = new tEvents();
+            tEventsGrid evg = new tEventsGrid();
+                                    
+            System.Windows.Forms.TableLayoutPanel panel1 = new System.Windows.Forms.TableLayoutPanel();
+            DevExpress.XtraEditors.LabelControl labelControl1 = new DevExpress.XtraEditors.LabelControl();
+            DevExpress.XtraEditors.SpinEdit tEdit1 = new DevExpress.XtraEditors.SpinEdit();
+
+            panel1.Name = "panel1";
+            panel1.Width = 150;
+            panel1.Dock = DockStyle.Left;
+
+            panel1.CellBorderStyle = TableLayoutPanelCellBorderStyle.None;
+            panel1.ColumnCount = 2;
+            panel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            panel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+
+            labelControl1.Text = "Hafta sayısı";
+            labelControl1.Dock = DockStyle.Left;
+
+            tEdit1.Name = "spinEdit1";
+            tEdit1.Properties.AccessibleName = "spinEdit1_" + TableIPCode;
+            tEdit1.EnterMoveNextControl = true;
+            tEdit1.Dock = DockStyle.Fill;
+            tEdit1.EditValueChanged += new System.EventHandler(evg.checkSchedulerWeekCount);
+
+            tEdit1.Properties.SpinStyle = SpinStyles.Horizontal;
+            tEdit1.Properties.IsFloatValue = false;
+            tEdit1.Properties.MinValue = 1;
+            tEdit1.Properties.MaxValue = 6;
+            tEdit1.EditValue = 2;
+
+            panel1.Controls.Add(labelControl1, 0, 0);
+            panel1.Controls.Add(tEdit1, 1, 0);
+            
+
+            /*
+            DevExpress.XtraEditors.CheckButton simpleButton_Gbutton = new DevExpress.XtraEditors.CheckButton();
+            simpleButton_Gbutton.AccessibleDescription = TableIPCode;
+            simpleButton_Gbutton.AllowHtmlDraw = DevExpress.Utils.DefaultBoolean.True;
+            simpleButton_Gbutton.Name = "tGbutton_" + groupno;
+            simpleButton_Gbutton.Text = caption;
+            simpleButton_Gbutton.Dock = DockStyle.Left;
+            simpleButton_Gbutton.Width = 40 + ((caption.Length) * 4);
+            simpleButton_Gbutton.GroupIndex = 1;
+            simpleButton_Gbutton.TabIndex = t.myInt32(groupno);
+            simpleButton_Gbutton.BorderStyle = BorderStyles.UltraFlat;
+
+            //simpleButton_Gbutton.Checked = t.myVisible(visible);
+            simpleButton_Gbutton.Click += new System.EventHandler(evg.checkSchedulerGroupButton_Click);
+
+            simpleButton_Gbutton.AppearanceHovered.BackColor = v.colorOrder;
+            simpleButton_Gbutton.AppearanceHovered.Options.UseBackColor = true;
+
+            simpleButton_Gbutton.Enter += new System.EventHandler(ev.btn_Navigotor_Enter);
+            simpleButton_Gbutton.Leave += new System.EventHandler(ev.btn_Navigotor_Leave);
+            */
+            tButtonPanel.Controls.Add(panel1);
+            panel1.BringToFront();
+        }
+
 
         public void tCalenderAndScheduler_Create(DataRow row_Table, DataSet dsFields, DataSet dsData,
             DevExpress.XtraScheduler.SchedulerControl tSchedulerControl, Control tPanelControl)
@@ -3462,24 +3530,37 @@ MS_FIELDS                                          T03_MSFIELDS                 
             //storage.Resources.DataSource = dsData;
             //storage.Resources.DataMember = "Resources";
 
+            string schedulerViewType = null; 
 
             string startDateFieldName = "";
             if (JSON_PropView != null)
-                startDateFieldName = Preparing_Mappings(JSON_PropView, storage);
+                startDateFieldName = Preparing_Mappings(JSON_PropView, storage, ref schedulerViewType);
 
             tSchedulerControl.BeginInit();
             
-            tSchedulerControl.ActiveViewType = SchedulerViewType.FullWeek;
-            tSchedulerControl.ActiveViewType = SchedulerViewType.Month;
+            if (schedulerViewType == "Agenda")
+                tSchedulerControl.ActiveViewType = SchedulerViewType.Agenda;
+            if (schedulerViewType == "Day")
+                tSchedulerControl.ActiveViewType = SchedulerViewType.Day;
+            if (schedulerViewType == "FullWeek")
+                tSchedulerControl.ActiveViewType = SchedulerViewType.FullWeek;
+            if (schedulerViewType == "Gantt")
+                tSchedulerControl.ActiveViewType = SchedulerViewType.Gantt;
+            if (schedulerViewType == "Month")
+                tSchedulerControl.ActiveViewType = SchedulerViewType.Month;
+            if (schedulerViewType == "Timeline")
+                tSchedulerControl.ActiveViewType = SchedulerViewType.Timeline;
+            if (schedulerViewType == "Week")
+                tSchedulerControl.ActiveViewType = SchedulerViewType.Week;
+            if (schedulerViewType == "WorkWeek")
+                tSchedulerControl.ActiveViewType = SchedulerViewType.WorkWeek;
 
             tSchedulerControl.MonthView.AppointmentDisplayOptions.StartTimeVisibility = AppointmentTimeVisibility.Auto;
-            
 
             if (t.IsNotNull(startDateFieldName) && t.IsNotNull(dsData))
                 tSchedulerControl.Start = Convert.ToDateTime(dsData.Tables[0].Rows[0][startDateFieldName].ToString());
 
             tSchedulerControl.DataStorage = storage;
-                       
 
             //SchedulerViewType.Agenda
             //SchedulerViewType.Day
@@ -3530,16 +3611,19 @@ MS_FIELDS                                          T03_MSFIELDS                 
             // Hide the time marker in the second time ruler.
             //scheduler.DayView.TimeRulers[1].TimeMarkerVisibility = TimeMarkerVisibility.Never;
 
-            //scheduler.DayView.TimeRulers[0].ShowCurrentTime = CurrentTimeVisibility.Always;
+            scheduler.DayView.TimeRulers[0].ShowCurrentTime = CurrentTimeVisibility.Always;
             scheduler.DayView.TimeRulers[0].Visible = true;
+            scheduler.DayView.ShowDayHeaders = true;
+            scheduler.DayView.ShowAllDayArea = false;// true;
+            scheduler.DayView.ShowWorkTimeOnly = false; // Normal Çalışma saatleri 9-18 arası
 
-            scheduler.ActiveViewType = SchedulerViewType.Day;
-            scheduler.DayView.DayCount = 7;
+            scheduler.DayView.DayCount = 14;
             scheduler.DayView.TopRowTime = DateTime.Now.AddHours(-1).TimeOfDay;
-            //scheduler.Start = DateTime.Today.AddDays(-1);
 
-            scheduler.ActiveViewType = SchedulerViewType.Month;
-            //scheduler.MonthView.
+            scheduler.AgendaView.DayCount = 14;
+            scheduler.AgendaView.AppointmentDisplayOptions.ShowLabel = true;
+            scheduler.AgendaView.AppointmentDisplayOptions.StatusDisplayType = AppointmentStatusDisplayType.Bounds;
+
             scheduler.Start = DateTime.Today.AddDays(-7);
 
         }
@@ -3757,7 +3841,7 @@ MS_FIELDS                                          T03_MSFIELDS                 
             }
         }
 
-        private string Preparing_Mappings(PROP_VIEWS_IP prop_, SchedulerDataStorage storage)
+        private string Preparing_Mappings(PROP_VIEWS_IP prop_, SchedulerDataStorage storage, ref string schedulerViewType)
         {
             tToolBox t = new tToolBox();
              
@@ -3769,6 +3853,11 @@ MS_FIELDS                                          T03_MSFIELDS                 
             storage.Appointments.Mappings.Label = prop_.SCHEDULER.Label.ToString(); // "AdayNo";
             storage.Appointments.Mappings.Description = prop_.SCHEDULER.Description.ToString(); // "Lkp_DonemTipiGrupTipiSubeTipi"; 
             //storage.Appointments.Mappings.AllDay = 
+
+            if (prop_.SCHEDULER.SchedulerViewType != null)
+                schedulerViewType = prop_.SCHEDULER.SchedulerViewType;
+            else schedulerViewType = "Month";
+
             return prop_.SCHEDULER.StartDate.ToString();
         }
 
@@ -3906,8 +3995,6 @@ MS_FIELDS                                          T03_MSFIELDS                 
                     tGridView.Columns[GROUPFNAME2].GroupIndex = 1;
                 if ((GROUPFNAME3 != "") && (GROUPFNAME3 != "null"))
                     tGridView.Columns[GROUPFNAME3].GroupIndex = 2;
-
-
                 //if ( == "TRUE") tGridView.OptionsView. = true;
             }
             #endregion GridView

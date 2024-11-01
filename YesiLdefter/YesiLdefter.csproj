@@ -747,6 +747,7 @@
     <Content Include="Scripts\UST\Mtsk\MtskKIhlalUygulamaD.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskKurumAltProgramlari.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskPersoneli.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmCalismaSaatleri.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskSaatTeorik.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskSaatUygulama.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskSablonSMS.txt" />

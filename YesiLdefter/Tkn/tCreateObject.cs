@@ -3076,7 +3076,7 @@ namespace Tkn_CreateObject
             DevExpress.XtraEditors.PanelControl tButtonPanel = new DevExpress.XtraEditors.PanelControl();
             //buttonsPanelControl.Name = "tPanel_Navigator_" + RefID.ToString();
             tButtonPanel.Name = panelName;
-            tButtonPanel.Height = 26;
+            tButtonPanel.Height = 30;
             tButtonPanel.Dock = DockStyle.Top;
             tButtonPanel.SendToBack();
             tButtonPanel.TabStop = false;

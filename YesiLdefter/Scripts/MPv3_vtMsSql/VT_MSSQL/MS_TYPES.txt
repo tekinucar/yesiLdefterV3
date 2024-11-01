@@ -930,6 +930,16 @@ begin transaction
 
 
 
+--DELETE MS_TYPES WHERE TYPES_NAME = 'Scheduler'
+ insert into MS_TYPES values ( 3,  0, 'Scheduler',   1, 'Agenda',   'Agenda');
+ insert into MS_TYPES values ( 3,  0, 'Scheduler',   2, 'Day',      'Day');
+ insert into MS_TYPES values ( 3,  0, 'Scheduler',   3, 'FullWeek', 'FullWeek');
+ insert into MS_TYPES values ( 3,  0, 'Scheduler',   4, 'Gantt',    'Gantt');
+ insert into MS_TYPES values ( 3,  0, 'Scheduler',   5, 'Month',    'Month');
+ insert into MS_TYPES values ( 3,  0, 'Scheduler',   6, 'Timeline', 'Timeline');
+ insert into MS_TYPES values ( 3,  0, 'Scheduler',   7, 'Week',     'Week');
+ insert into MS_TYPES values ( 3,  0, 'Scheduler',   8, 'WorkWeek', 'WorkWeek');
+
 
  
  insert into MS_TYPES values ( 3,  0, 'BEFOREAFTER',   0, '',       'none');

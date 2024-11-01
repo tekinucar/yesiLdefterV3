@@ -100,7 +100,7 @@ namespace Tkn_Starter
             /// 
             t.WaitFormOpen(v.mainForm, "Bilgisayar hakkındaki bilgiler okunuyor...");
             Get_MacAddress();
-            Get_ComputerAbout();
+            //Get_ComputerAbout();
             
 
             t.WaitFormOpen(v.mainForm, "Database bağlantı bilgileri hazırlanıyor...");

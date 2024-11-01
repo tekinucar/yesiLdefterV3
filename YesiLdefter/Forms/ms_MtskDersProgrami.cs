@@ -782,48 +782,53 @@ namespace YesiLdefter
             string field = "";
             string value = "";
 
-            teoTaskakS.pos = pos;
+            bool IsActive = Convert.ToBoolean(ds_SablonS.Tables[0].Rows[pos]["IsActive"].ToString());
 
-            field = "gun" + x + "_Id";
-            teoTaskakS.Id = t.myInt32(ds_SablonS.Tables[0].Rows[pos][field].ToString());
-
-            field = "gun" + x + "_SablonTeorikBId";
-            teoTaskakS.SablonTeorikBId = t.myInt32(ds_SablonS.Tables[0].Rows[pos][field].ToString());
-
-            if (teoTaskakS.SablonTeorikBId == 0) teoTaskakS.SablonTeorikBId = teoSablonB.Id;
-
-            field = "gun" + x + "_IsActive";
-            value = ds_SablonS.Tables[0].Rows[pos][field].ToString();
-            if (value == "")
+            if (IsActive)
             {
-                ds_SablonS.Tables[0].Rows[pos][field] = true;
+
+                teoTaskakS.pos = pos;
+
+                field = "gun" + x + "_Id";
+                teoTaskakS.Id = t.myInt32(ds_SablonS.Tables[0].Rows[pos][field].ToString());
+
+                field = "gun" + x + "_SablonTeorikBId";
+                teoTaskakS.SablonTeorikBId = t.myInt32(ds_SablonS.Tables[0].Rows[pos][field].ToString());
+
+                if (teoTaskakS.SablonTeorikBId == 0) teoTaskakS.SablonTeorikBId = teoSablonB.Id;
+
+                field = "gun" + x + "_IsActive";
+                value = ds_SablonS.Tables[0].Rows[pos][field].ToString();
+                if (value == "")
+                {
+                    ds_SablonS.Tables[0].Rows[pos][field] = true;
+                }
+                teoTaskakS.IsActive = Convert.ToBoolean(ds_SablonS.Tables[0].Rows[pos][field].ToString());
+
+                field = "gun" + x + "_GunId";
+                teoTaskakS.GunId = t.myInt16(ds_SablonS.Tables[0].Rows[pos][field].ToString());
+
+                if (teoTaskakS.GunId == 0) teoTaskakS.GunId = gunId;
+
+                field = "gun" + x + "_SaatTipiId";
+                teoTaskakS.SaatTipiId = t.myInt16(ds_SablonS.Tables[0].Rows[pos][field].ToString());
+
+                if (teoTaskakS.SaatTipiId == 0) teoTaskakS.SaatTipiId = t.myInt16(ds_SablonS.Tables[0].Rows[pos]["Lkp_SaatId"].ToString());
+
+                field = "gun" + x + "_GrupTipiId";
+                teoTaskakS.GrupTipiId = t.myInt16(ds_SablonS.Tables[0].Rows[pos][field].ToString());
+                field = "gun" + x + "_SubeTipiId";
+                teoTaskakS.SubeTipiId = t.myInt16(ds_SablonS.Tables[0].Rows[pos][field].ToString());
+
+                field = "gun" + x + "_DerslikTipiId";
+                teoTaskakS.DerslikTipiId = t.myInt16(ds_SablonS.Tables[0].Rows[pos][field].ToString());
+                field = "gun" + x + "_DerslikAdiTipiId";
+                teoTaskakS.DerslikAdiTipiId = t.myInt16(ds_SablonS.Tables[0].Rows[pos][field].ToString());
+                field = "gun" + x + "_DersSaatiTipiId";
+                teoTaskakS.DersSaatiTipiId = t.myInt16(ds_SablonS.Tables[0].Rows[pos][field].ToString());
+                field = "gun" + x + "_EgitimTipiId";
+                teoTaskakS.EgitimTipiId = t.myInt16(ds_SablonS.Tables[0].Rows[pos][field].ToString());
             }
-            teoTaskakS.IsActive = Convert.ToBoolean(ds_SablonS.Tables[0].Rows[pos][field].ToString());
-
-            field = "gun" + x + "_GunId";
-            teoTaskakS.GunId = t.myInt16(ds_SablonS.Tables[0].Rows[pos][field].ToString());
-
-            if (teoTaskakS.GunId == 0) teoTaskakS.GunId = gunId;
-
-            field = "gun" + x + "_SaatTipiId";
-            teoTaskakS.SaatTipiId = t.myInt16(ds_SablonS.Tables[0].Rows[pos][field].ToString());
-
-            if (teoTaskakS.SaatTipiId == 0) teoTaskakS.SaatTipiId = t.myInt16(ds_SablonS.Tables[0].Rows[pos]["Lkp_SaatId"].ToString());
-
-            field = "gun" + x + "_GrupTipiId";
-            teoTaskakS.GrupTipiId = t.myInt16(ds_SablonS.Tables[0].Rows[pos][field].ToString());
-            field = "gun" + x + "_SubeTipiId";
-            teoTaskakS.SubeTipiId = t.myInt16(ds_SablonS.Tables[0].Rows[pos][field].ToString());
-
-            field = "gun" + x + "_DerslikTipiId";
-            teoTaskakS.DerslikTipiId = t.myInt16(ds_SablonS.Tables[0].Rows[pos][field].ToString());
-            field = "gun" + x + "_DerslikAdiTipiId";
-            teoTaskakS.DerslikAdiTipiId = t.myInt16(ds_SablonS.Tables[0].Rows[pos][field].ToString());
-            field = "gun" + x + "_DersSaatiTipiId";
-            teoTaskakS.DersSaatiTipiId = t.myInt16(ds_SablonS.Tables[0].Rows[pos][field].ToString());
-            field = "gun" + x + "_EgitimTipiId";
-            teoTaskakS.EgitimTipiId = t.myInt16(ds_SablonS.Tables[0].Rows[pos][field].ToString());
-
         }
 
         private void writeDataTeorik()
@@ -991,44 +996,48 @@ namespace YesiLdefter
             string x = gunId.ToString();
             string field = "";
             string value = "";
-
-            uygTaskakS.pos = pos;
-
-            field = "gun" + x + "_Id";
-            uygTaskakS.Id = t.myInt32(ds_SablonS.Tables[0].Rows[pos][field].ToString());
             
-            field = "gun" + x + "_SablonUygulamaBId";
-            uygTaskakS.SablonUygulamaBId = t.myInt32(ds_SablonS.Tables[0].Rows[pos][field].ToString());
+            bool IsActive = Convert.ToBoolean(ds_SablonS.Tables[0].Rows[pos]["IsActive"].ToString());
 
-            if (uygTaskakS.SablonUygulamaBId == 0) uygTaskakS.SablonUygulamaBId = uygSablonB.Id;
-
-            field = "gun" + x + "_IsActive";
-            value = ds_SablonS.Tables[0].Rows[pos][field].ToString();
-            if (value == "")
+            if (IsActive)
             {
-                ds_SablonS.Tables[0].Rows[pos][field] = true;
+                uygTaskakS.pos = pos;
+
+                field = "gun" + x + "_Id";
+                uygTaskakS.Id = t.myInt32(ds_SablonS.Tables[0].Rows[pos][field].ToString());
+
+                field = "gun" + x + "_SablonUygulamaBId";
+                uygTaskakS.SablonUygulamaBId = t.myInt32(ds_SablonS.Tables[0].Rows[pos][field].ToString());
+
+                if (uygTaskakS.SablonUygulamaBId == 0) uygTaskakS.SablonUygulamaBId = uygSablonB.Id;
+
+                field = "gun" + x + "_IsActive";
+                value = ds_SablonS.Tables[0].Rows[pos][field].ToString();
+                if (value == "")
+                {
+                    ds_SablonS.Tables[0].Rows[pos][field] = true;
+                }
+                uygTaskakS.IsActive = Convert.ToBoolean(ds_SablonS.Tables[0].Rows[pos][field].ToString());
+
+                field = "gun" + x + "_GunId";
+                uygTaskakS.GunId = t.myInt16(ds_SablonS.Tables[0].Rows[pos][field].ToString());
+
+                if (uygTaskakS.GunId == 0) uygTaskakS.GunId = gunId;
+
+                field = "gun" + x + "_SaatTipiId";
+                uygTaskakS.SaatTipiId = t.myInt16(ds_SablonS.Tables[0].Rows[pos][field].ToString());
+
+                if (uygTaskakS.SaatTipiId == 0) uygTaskakS.SaatTipiId = t.myInt16(ds_SablonS.Tables[0].Rows[pos]["Lkp_SaatId"].ToString());
+
+                field = "gun" + x + "_AracTipiId";
+                uygTaskakS.AracTipiId = t.myInt16(ds_SablonS.Tables[0].Rows[pos][field].ToString());
+
+                field = "gun" + x + "_OgreticiTipiId";
+                uygTaskakS.OgreticiTipiId = t.myInt16(ds_SablonS.Tables[0].Rows[pos][field].ToString());
+
+                field = "gun" + x + "_AdayTipiId";
+                uygTaskakS.AdayTipiId = t.myInt16(ds_SablonS.Tables[0].Rows[pos][field].ToString());
             }
-            uygTaskakS.IsActive = Convert.ToBoolean(ds_SablonS.Tables[0].Rows[pos][field].ToString());
-            
-            field = "gun" + x + "_GunId";
-            uygTaskakS.GunId = t.myInt16(ds_SablonS.Tables[0].Rows[pos][field].ToString());
-
-            if (uygTaskakS.GunId == 0) uygTaskakS.GunId = gunId;
-
-            field = "gun" + x + "_SaatTipiId";
-            uygTaskakS.SaatTipiId = t.myInt16(ds_SablonS.Tables[0].Rows[pos][field].ToString());
-
-            if (uygTaskakS.SaatTipiId == 0) uygTaskakS.SaatTipiId = t.myInt16(ds_SablonS.Tables[0].Rows[pos]["Lkp_SaatId"].ToString());
-
-            field = "gun" + x + "_AracTipiId";
-            uygTaskakS.AracTipiId = t.myInt16(ds_SablonS.Tables[0].Rows[pos][field].ToString());
-
-            field = "gun" + x + "_OgreticiTipiId";
-            uygTaskakS.OgreticiTipiId = t.myInt16(ds_SablonS.Tables[0].Rows[pos][field].ToString());
-
-            field = "gun" + x + "_AdayTipiId";
-            uygTaskakS.AdayTipiId = t.myInt16(ds_SablonS.Tables[0].Rows[pos][field].ToString());
-
         }
 
         private void writeDataUygula()
@@ -1553,7 +1562,8 @@ namespace YesiLdefter
 " + fields + @"
   From Lkp.MtskSablonTeorikSSaatTipi as saat 
 " + leftJoin + @" 
-  Where saat.GrupTipiId = " + Convert.ToString((byte)_saatTipi);
+  Where saat.Id > 100
+  and   saat.GrupTipiId = " + Convert.ToString((byte)_saatTipi);
             
 
             if (_planTipi == planTipi.uygulama)
@@ -1602,10 +1612,10 @@ namespace YesiLdefter
             #region Database için
 
             if (_planTipi == planTipi.teorik)
-                tSql = @" Select * From MtskSablonTeorikS Where SablonTeorikBId = " + RefId.ToString();
+                tSql = @" Select * From MtskSablonTeorikS Where IsActive = 0 and SablonTeorikBId = " + RefId.ToString();
 
             if (_planTipi == planTipi.uygulama)
-                tSql = @" Select * From MtskSablonUygulamaS Where SablonUygulamaBId = " + RefId.ToString();
+                tSql = @" Select * From MtskSablonUygulamaS Where IsActive = 0 and SablonUygulamaBId = " + RefId.ToString();
 
             myProp = string.Empty;
             t.MyProperties_Set(ref myProp, "DBaseNo", _dBaseNo);
@@ -1692,10 +1702,10 @@ namespace YesiLdefter
             string leftjoin = "";
 
             if (_planTipi == planTipi.teorik)
-                leftjoin = "    left outer join MtskSablonTeorikS as gun" + x + " on ( saat.Id = gun" + x + ".SaatTipiId and gun" + x + ".GunId = " + x + " and gun" + x + ".SablonTeorikBId = " + SablonBId.ToString() + "  ) " + v.ENTER;
+                leftjoin = "    left outer join MtskSablonTeorikS as gun" + x + " on ( saat.Id = gun" + x + ".SaatTipiId and gun" + x + ".GunId = " + x + " and gun" + x + ".SablonTeorikBId = " + SablonBId.ToString() + " and gun" + x + ".IsActive = 1 ) " + v.ENTER;
 
             if (_planTipi == planTipi.uygulama)
-                leftjoin = "    left outer join MtskSablonUygulamaS as gun" + x + " on ( saat.Id = gun" + x + ".SaatTipiId and gun" + x + ".GunId = " + x + " and gun" + x + ".SablonUygulamaBId = " + SablonBId.ToString() + "  ) " + v.ENTER;
+                leftjoin = "    left outer join MtskSablonUygulamaS as gun" + x + " on ( saat.Id = gun" + x + ".SaatTipiId and gun" + x + ".GunId = " + x + " and gun" + x + ".SablonUygulamaBId = " + SablonBId.ToString() + " and gun" + x + ".IsActive = 1  ) " + v.ENTER;
 
             return leftjoin;
         }
