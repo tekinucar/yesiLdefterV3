@@ -166,8 +166,9 @@ INSERT INTO [Lkp].[MtskKIhlalTeorikDIhlalTipi] (Id, IhlalTipi, IsActive)
   (31,    N'Personel haftalık ders saatini aştı', 0),
   (32,    N'Personel izin gününe uygun değil', 0),
   (33,    N'Personel çalışma saatlerine uymuyor', 0),
-  (34,    N'Personelin sözleşme süresi dolmuştur', 0),
-  (35,    N'Personelin uygulama dersi mevcut', 0)
+  (34,    N'Personelin çalışma izin tarihi henüz başlamadı', 0),
+  (35,    N'Personelin çalışma izin tarihi bitmiş', 0),
+  (36,    N'Personelin uygulama dersi mevcut', 0)
 
 
   personelin uygulama saatlerinide 31 maddeye ekle

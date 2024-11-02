@@ -1189,7 +1189,6 @@ begin transaction
  insert into MS_TYPES values ( 2, 0, 'TbmSrcSertifika', 13608, '', N'ÜDY4');
 
  --DELETE MS_TYPES WHERE TYPES_NAME = 'Saat6'
- insert into MS_TYPES values ( 1, 0, 'Saat6',   1, '', N'1 Saat' );
  insert into MS_TYPES values ( 1, 0, 'Saat6',   2, '', N'2 Saat' );
  insert into MS_TYPES values ( 1, 0, 'Saat6',   3, '', N'3 Saat' );
  insert into MS_TYPES values ( 1, 0, 'Saat6',   4, '', N'4 Saat' );

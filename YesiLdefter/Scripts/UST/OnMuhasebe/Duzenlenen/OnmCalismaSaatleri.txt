@@ -9,7 +9,6 @@ begin transaction
    IsActive             Bit       not null, /* default : 1 = active, 0 = not active */  
    GunTipiId            SmallInt      null,  /* 1,2,3... gun  */
    SaatTipiId           SmallInt      null,  /* tek saat : 7,,22, ||  çift saat : 07-08,,21-22 || çift saat : 08-09,,20-21 */
-
    TcVkNo               Varchar(11)   null, /* personel için tc */
 
    constraint		pk_OnmCalismaSaatleri primary key (Id)
@@ -66,8 +65,10 @@ create table Lkp.OnmCalismaSaatleriSaatTipi
    constraint  pk_OnmCalismaSaatleriSaatTipi primary key (Id)
 )
 
+DELETE From Lkp.OnmCalismaSaatleriSaatTipi
 INSERT INTO Lkp.OnmCalismaSaatleriSaatTipi (Id, SaatTipi, GrupTipiId)
  VALUES 
+  ( 100, N'Tam gün', 1),
   ( 107, N'07', 1),
   ( 108, N'08', 1),
   ( 109, N'09', 1),
@@ -90,3 +91,79 @@ commit transaction
 /*CreateLkpTableEnd*/
 
 
+/*CreateTrigger*/
+
+CREATE TRIGGER [dbo].[trg_OnmCalismaSaatleri] on [dbo].[OnmCalismaSaatleri]
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    DECLARE curCSaatler cursor local for select Id from Inserted
+    DECLARE @curId bigint
+
+    OPEN curCSaatler
+
+    FETCH NEXT FROM curCSaatler INTO @curId
+
+    declare @FirmId int = 0    
+    declare @IsActive bit = 0
+	declare @GunTipiId SmallInt = 0
+    declare @SaatTipiId SmallInt = 0
+	declare @TcVkNo varchar(11) 
+	
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        select 
+          @FirmId = ins.FirmId
+		, @IsActive = ins.IsActive
+        , @GunTipiId = isnull(ins.GunTipiId,0)
+        , @SaatTipiId = isnull(ins.SaatTipiId,0)
+		, @TcVkNo = ins.TcVkNo
+        from inserted ins
+    	where ins.Id = @curId
+
+		-- SaatTipiId = 100 Tam gün
+		if (@SaatTipiId = 100)
+        begin 
+		    -- IsActive : 1 ise çalışıyor,  onun için tüm gün saatlerinide aktif et
+		    -- IsActive : 0 ise çalışmıyor, onun için tüm gün saatlerinide pasif et
+			Update [dbo].[OnmCalismaSaatleri] set 
+			IsActive = @IsActive
+			Where TcVkNo = @TcVkNo
+			and   GunTipiId = @GunTipiId 
+			and   SaatTipiId > 100 -- Tam gun satırına dokunma
+
+			-- Saat için satırlar yok ise oluştur
+            INSERT INTO [dbo].[OnmCalismaSaatleri]
+            (   [FirmId]
+              , [IsActive]
+              , [GunTipiId]
+              , [SaatTipiId]
+              , [TcVkNo] ) 
+            Select 
+                @FirmId
+              , @IsActive
+              , @GunTipiId
+              , saat.Id as Lkp_SaatTipiId
+              , @TcVkNo
+
+            From Lkp.OnmCalismaSaatleriSaatTipi as saat
+                left outer join OnmCalismaSaatleri as CalismaSaatleri on ( CalismaSaatleri.SaatTipiId > 100
+                     and CalismaSaatleri.SaatTipiId = saat.Id 
+                     and [CalismaSaatleri].TcVkNo = @TcVkNo
+                     and [CalismaSaatleri].GunTipiId = @GunTipiId
+                ) 
+            Where 0 = 0 
+            and saat.Id > 100
+            and [CalismaSaatleri].Id is null
+
+        end -- if (@SaatTipiId = 100)
+		
+        FETCH NEXT FROM curCSaatler INTO @curId
+    END -- While
+
+    CLOSE curCSaatler
+    DEALLOCATE curCSaatler
+
+END -- create trigger
+
+/*CreateTriggerEnd*/

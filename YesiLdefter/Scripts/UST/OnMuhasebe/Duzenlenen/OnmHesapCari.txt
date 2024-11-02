@@ -136,13 +136,14 @@ commit transaction
 CREATE TRIGGER [dbo].[trg_OnmHesapCari] on [dbo].[OnmHesapCari] 
 AFTER INSERT, UPDATE
 AS BEGIN
-    DECLARE cursorOnmHCari cursor for select Id from Inserted
+    DECLARE cursorOnmHCari cursor local for select Id from Inserted
     DECLARE @curId bigint
 
     OPEN cursorOnmHCari
 
     FETCH NEXT FROM cursorOnmHCari INTO @curId
 
+    declare @yFirmId int = 0
     declare @yAdi nvarchar(50) = null
     declare @ySoyadi nvarchar(50) = null
     
@@ -153,6 +154,8 @@ AS BEGIN
 	declare @yTamAdiSoyadi nvarchar(200) = null
     declare @eTamAdiSoyadi nvarchar(200) = null
     
+	declare @yCalismaTipiId smallInt = 0
+
     WHILE @@FETCH_STATUS = 0
     BEGIN
         set @yAdi = ''
@@ -169,11 +172,13 @@ AS BEGIN
     	where dlt.Id = @curId
 
         select 
-    	   @yAdi = isnull(ins.Adi,'')
+           @yFirmId = isnull(ins.FirmId,0)
+    	  ,@yAdi = isnull(ins.Adi,'')
     	  ,@ySoyadi = isnull(ins.Soyadi,'')
 		  ,@yCariKisaAdi = isnull(ins.CariKisaAdi,'')
     	  ,@yUnvani1 = isnull(ins.Unvani1,'')
 		  ,@yUnvani2 = isnull(ins.Unvani2,'')
+          ,@yCalismaTipiId = isnull(ins.CalismaTipiId,0)
 		from inserted ins
     	where ins.Id = @curId
      	   	
@@ -204,11 +209,36 @@ AS BEGIN
 			where Id = @curId 
 		end
     	
+		if (@yCalismaTipiId = 19) -- Personel hesabı ise
+        begin 
+            INSERT INTO [dbo].[OnmCalismaSaatleri]
+                ( [FirmId]
+                , [IsActive]
+                , [GunTipiId]
+                , [SaatTipiId]
+                , [TcVkNo])
+            Select 
+                  cari.FirmId
+                , 1 -- default her gün çalışyor işaretlensin
+                , gun.Id
+                , 100 -- tam gün işareti
+                , cari.TcVkNo
+            From Lkp.OnmCalismaSaatleriGunTipi as gun 
+                left outer join dbo.OnmHesapCari as cari on ( cari.CalismaTipiId = 19 )
+                left outer join OnmCalismaSaatleri as CSaat on ( cari.TcVkNo = CSaat.TcVkNo 
+                           and  CSaat.SaatTipiId = 100 
+                           and gun.Id = CSaat.GunTipiId )
+            Where CSaat.Id is null
+            and   cari.Id = @curId
+
+        end -- if (@yCalismaTipiId = 19)
+
     	FETCH NEXT FROM cursorOnmHCari INTO @curId
     END
 
     CLOSE cursorOnmHCari
     DEALLOCATE cursorOnmHCari   
+
 END
 
 ALTER TABLE [dbo].[OnmHesapCari] ENABLE TRIGGER [trg_OnmHesapCari]
