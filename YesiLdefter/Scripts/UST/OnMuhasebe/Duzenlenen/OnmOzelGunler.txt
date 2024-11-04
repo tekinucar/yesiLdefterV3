@@ -1,0 +1,31 @@
+﻿
+
+/*CreateTable*/
+
+begin transaction
+
+ create table OnmOzelGunler
+ (
+   Id                   Int IDENTITY(1,1) not null, 
+   FirmId               Int       not null,
+   IsActive             Bit       not null, /* default : 1 = active, 0 = not active */  
+
+   OzelGunTipiId        SmallInt      null,  /* 1. Resmi tatiller, 2. Mali günler, 3. Dini bayramlar */
+   GunAdi               nVarChar(100) null, 
+
+   AyTipiId             SmallInt      null, /* hangi ayda  : 1-12 */
+   GunTipiId            SmallInt      null, /* hangi günde : 1-31 */       
+
+   IsArefeGunu          Bit           null, /* 1 . Arefe günü var, başlangıç saati arefe gününe göre ayarlanır : örnek Arefe günü saat 13 de başlar */  
+   BaslaSaatTipiId      SmallInt      null, /* 1,,24  */
+   GunSayisi            SmallInt      null, /* 1 gün, 3 gün veya 4 gün sürer gibi */ 
+   BitisSaatTipiId      SmallInt      null, /* 1,,24  */
+
+   constraint		pk_OnmOzelGunler primary key (Id)
+ )
+  
+ grant select, insert, update, delete on OnmOzelGunler to public
+
+commit transaction
+
+/*CreateTableEnd*/

@@ -850,6 +850,7 @@
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmHesapVezne.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmKira.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmOdemePlani.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmOzelGunler.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmSigorta.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmVezneFinans.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmVezneKullanici.txt" />
