@@ -79,7 +79,7 @@ AS BEGIN
        When 2 then arac.PlakaNumarasi 
        else '' end) as EgitimAraciId
 
-    , [dbo].fnc_IsGununuBul(f.BaslangicTarihi, s.GunId, b.GunTipiId) as DersTarihi
+    , [dbo].fnc_IsGununuBul(f.BaslangicTarihi, s.GunId, b.GunTipiId, s.SaatTipiId) as DersTarihi
 
     , (Case s.SaatTipiId 
        When 107 then 0 -- 07:00 - 07:50

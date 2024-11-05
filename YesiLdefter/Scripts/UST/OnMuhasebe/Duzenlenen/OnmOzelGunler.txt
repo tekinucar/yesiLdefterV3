@@ -13,13 +13,17 @@ begin transaction
    OzelGunTipiId        SmallInt      null,  /* 1. Resmi tatiller, 2. Mali günler, 3. Dini bayramlar */
    GunAdi               nVarChar(100) null, 
 
-   AyTipiId             SmallInt      null, /* hangi ayda  : 1-12 */
-   GunTipiId            SmallInt      null, /* hangi günde : 1-31 */       
+   Yil                  SmallInt      null, /* hangi yıl   : 2025... */
+   Ay                   SmallInt      null, /* hangi ayda  : 1-12 */
+   Gun                  SmallInt      null, /* hangi günde : 1-31 */       
 
    IsArefeGunu          Bit           null, /* 1 . Arefe günü var, başlangıç saati arefe gününe göre ayarlanır : örnek Arefe günü saat 13 de başlar */  
    BaslaSaatTipiId      SmallInt      null, /* 1,,24  */
-   GunSayisi            SmallInt      null, /* 1 gün, 3 gün veya 4 gün sürer gibi */ 
    BitisSaatTipiId      SmallInt      null, /* 1,,24  */
+   GunSayisi            SmallInt      null, /* 1 gün, 3 gün veya 4 gün sürer gibi */ 
+
+   BaslangicTarihi      Date          null, /* Arefe varsa bir gün önce başlar */
+   BitisTarihi          Date          null,
 
    constraint		pk_OnmOzelGunler primary key (Id)
  )
@@ -29,3 +33,155 @@ begin transaction
 commit transaction
 
 /*CreateTableEnd*/
+
+
+/*CreateLkpTable*/
+
+begin transaction
+
+
+-- ------------------------------------------------------- 
+-- OzelGunTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmOzelGunlerOzelGunTipi')
+drop table [Lkp].[OnmOzelGunlerOzelGunTipi]
+
+create table Lkp.OnmOzelGunlerOzelGunTipi
+(
+   Id          Int Unique Not Null,
+   OzelGunTipi nVarchar(50)   null
+   
+   constraint  pk_OnmOzelGunlerOzelGunTipi primary key (Id)
+)
+
+Delete from [Lkp].[OnmOzelGunlerOzelGunTipi]
+INSERT INTO Lkp.OnmOzelGunlerOzelGunTipi (Id, OzelGunTipi)
+ VALUES 
+  ( 0, N'Tanımsız'),
+  ( 1, N'Resmi tatil'),
+  ( 2, N'Mali işlem günleri'),
+  ( 3, N'Dini bayramlar'),
+  ( 4, N'İstisna günler')   /* devlet tarafından açıklanan özel günler, bilgi amaçlı */
+
+
+
+commit transaction
+
+/*CreateLkpTableEnd*/
+
+
+/*CreateTrigger*/
+
+CREATE TRIGGER [dbo].[trg_OnmOzelGunler] on [dbo].[OnmOzelGunler]
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    DECLARE curOGunler cursor local for select Id from Inserted
+    DECLARE @curId bigint
+
+    OPEN curOGunler
+
+    FETCH NEXT FROM curOGunler INTO @curId
+
+    declare @FirmId int = 0    
+    declare @IsActive bit = 0
+	declare @OzelGunTipiId SmallInt = 0
+
+	declare @Yil varchar(4)
+	declare @Ay  varchar(2)
+	declare @Gun varchar(2)
+
+	declare @IsArefeGunu Bit
+    declare @BaslaSaatTipiId SmallInt = 0
+	declare @BitisSaatTipiId SmallInt = 0
+	declare @GunSayisi smallInt = 0
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+
+        Select 
+             @IsActive = ins.IsActive
+            ,@OzelGunTipiId = ins.OzelGunTipiId
+            ,@Yil = convert(varchar(4), ins.Yil)
+            ,@Ay  = convert(varchar(2), ins.Ay)
+            ,@Gun = convert(varchar(2), ins.Gun)
+            ,@IsArefeGunu = ins.IsArefeGunu
+            ,@BaslaSaatTipiId = ins.BaslaSaatTipiId
+            ,@BitisSaatTipiId = ins.BitisSaatTipiId
+            ,@GunSayisi = ins.GunSayisi
+        From inserted ins
+    	where ins.Id = @curId
+
+		-- Dini bayramlar
+        if (@OzelGunTipiId = 3)
+        begin
+		
+		    if (@Yil = '') set @Yil = '1999'
+		    if (@Ay  = '') set @Ay  = '01'
+		    if (@Gun = '') set @Gun = '01'
+		    if (@Ay  = '0') set @Ay  = '01'
+		    if (@Gun = '0') set @Gun = '01'
+
+            declare @BaslangicTarihi date
+            declare @BitisTarihi date
+
+            -- Başlangıç tarihini belirle
+			set @BaslangicTarihi = Convert(date, '' + @Gun + '.' + @Ay + '.' + @Yil + '', 103)
+            -- Baslangic tarihininde sayılması için -1 var
+            set @BitisTarihi = DATEADD(dd, @GunSayisi - 1, @BaslangicTarihi)
+
+			-- Arefe günü var ise
+			if (@IsArefeGunu = 1)
+			    set @BaslangicTarihi = DATEADD(dd, -1, @BaslangicTarihi)
+
+            Update OnmOzelGunler Set 
+			    BaslangicTarihi = @BaslangicTarihi 
+              , BitisTarihi = @BitisTarihi
+			Where Id = @curId
+        end -- 3
+		
+        FETCH NEXT FROM curOGunler INTO @curId
+    END -- While
+
+    CLOSE curOGunler
+    DEALLOCATE curOGunler
+
+END -- create trigger
+
+/*CreateTriggerEnd*/
+
+
+
+/*CreateData*/
+     Delete From [dbo].[OnmOzelGunler]
+     Insert INTO [dbo].[OnmOzelGunler]
+           (FirmId, IsActive, OzelGunTipiId, Yil,  Ay,  Gun,  IsArefeGunu, BaslaSaatTipiId, BitisSaatTipiId, GunSayisi, GunAdi  )
+     Values
+           (0,      1,        1,             0,    1,   1,    0,           1,               24,              1,  'Yılbaşı'),      
+           (0,      1,        1,             0,    4,   23,   0,           1,               24,              1,  '23 Nisan Ulusal Egemenlik ve Çocuk Bayramı'),      
+           (0,      1,        1,             0,    5,   1,    0,           1,               24,              1,  '1 Mayıs İşci Bayramı'),      
+           (0,      1,        1,             0,    5,   19,   0,           1,               24,              1,  '19 Mayıs Gençlik ve Spor Bayramı'),      
+           (0,      1,        1,             0,    7,   15,   0,           1,               24,              1,  '15 Temmuz Demokrasi ve Milli Birlik Günü'),      
+           (0,      1,        1,             0,    8,   30,   0,           1,               24,              1,  '30 Ağustos Zafer Bayramı'),      
+           (0,      1,        1,             0,    10,  29,   0,           1,               24,              1,  '29 Ekim Cumhuriyet Bayramı'),      
+
+           (0,      1,        3,             2025, 3,   30,   1,           13,              24,              3,  'Ramazan Bayramı'),      
+           (0,      1,        3,             2025, 6,   6,    1,           13,              24,              4,  'Kurban Bayramı'),      
+
+           (0,      1,        3,             2026, 0,   0,    1,           13,              24,              3,  'Ramazan Bayramı'),      
+           (0,      1,        3,             2026, 0,   0,    1,           13,              24,              4,  'Kurban Bayramı'),      
+
+           (0,      1,        3,             2027, 0,   0,    1,           13,              24,              3,  'Ramazan Bayramı'),      
+           (0,      1,        3,             2027, 0,   0,    1,           13,              24,              4,  'Kurban Bayramı'),      
+
+           (0,      1,        3,             2028, 0,   0,    1,           13,              24,              3,  'Ramazan Bayramı'),      
+           (0,      1,        3,             2028, 0,   0,    1,           13,              24,              4,  'Kurban Bayramı'),      
+
+           (0,      1,        3,             2029, 0,   0,    1,           13,              24,              3,  'Ramazan Bayramı'),      
+           (0,      1,        3,             2029, 0,   0,    1,           13,              24,              4,  'Kurban Bayramı'),      
+
+           (0,      1,        3,             2030, 0,   0,    1,           13,              24,              3,  'Ramazan Bayramı'),      
+           (0,      1,        3,             2030, 0,   0,    1,           13,              24,              4,  'Kurban Bayramı')      
+
+
+/*CreateDataEnd*/

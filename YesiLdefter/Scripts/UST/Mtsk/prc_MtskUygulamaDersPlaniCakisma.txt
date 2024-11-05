@@ -11,7 +11,7 @@ AS BEGIN
   Select ud.*,  x.DersSaatiTipiId, x.DersTarihi, x.EgitimAraciId, x.PersonelId FROM 
   (
    Select 
-     [dbo].fnc_IsGununuBul(f.BaslangicTarihi, s.GunId, b.GunTipiId) as DersTarihi
+     [dbo].fnc_IsGununuBul(f.BaslangicTarihi, s.GunId, b.GunTipiId, s.SaatTipiId) as DersTarihi
    , (Case s.SaatTipiId 
       When 107 then 0 -- 07:00 - 07:50
       When 108 then 1 -- 08:00 - 08:50

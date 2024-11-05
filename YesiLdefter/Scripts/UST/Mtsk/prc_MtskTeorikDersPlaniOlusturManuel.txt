@@ -74,7 +74,7 @@ AS BEGIN
            ,@SubeTipiId
            ,@DerslikTipiId
            ,@DerslikAdiTipiId
-           ,@BaslangicTarihi
+           ,[dbo].fnc_IsGununuBul(@BaslangicTarihi, 1, 0, @DersSaatiTipiId + 107) -- 107 : Saatipi tanımı 107 den başlıyor
            ,@DersSaatiTipiId
            ,@PersonelId
            ,@EgitimTipiId

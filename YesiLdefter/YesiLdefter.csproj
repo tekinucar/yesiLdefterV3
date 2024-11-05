@@ -748,6 +748,7 @@
     <Content Include="Scripts\UST\Mtsk\MtskKurumAltProgramlari.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskPersoneli.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskTeorikDersIhlalleri.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\fnc_IsTatilGunumu.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmCalismaSaatleri.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskSaatTeorik.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskSaatUygulama.txt" />
