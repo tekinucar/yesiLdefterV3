@@ -159,12 +159,12 @@ INSERT INTO [Lkp].[MtskKIhlalTeorikDIhlalTipi] (Id, IhlalTipi, IsActive)
   (13,    N'Ders saati eksik', 0),
   (14,    N'Ders saati fazla', 0),
 
-  (21,    N'Derslik çakışması var', 0),
+  (21,    N'Ders çakışması var', 0),
   (22,    N'Personel çakışması var', 0),
-  (23,    N'Hem derslik hemde personel çakışması var', 0),
+  (23,    N'Hem ders hemde personel çakışması var', 0),
   (24,    N'Farklı bir dersle çakışması var', 0),
   (25,    N'Çift kayıt çakışması var', 0),
-  (29,    N'Sebebi bilinmeyen çakışma var', 0)
+  (29,    N'Sebebi bilinmeyen çakışma var', 0),
 
   (31,    N'Personel haftalık ders saatini aştı', 0),
   (32,    N'Personel izin gününe uygun değil', 0),

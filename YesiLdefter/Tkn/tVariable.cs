@@ -464,8 +464,8 @@ namespace Tkn_Variable
             UstadIsmak = 202,
             UstadSrc = 203,
             TabimMtsk = 211,
-            TabimSrc = 212,
-            TabimIsmak = 213
+            TabimIsmak = 212,
+            TabimSrc = 213,
         }
 
         public enum formType

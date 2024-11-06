@@ -435,14 +435,18 @@ namespace Tkn_Events
                 (buttonType == v.tButtonType.btSilHesap) ||
                 (buttonType == v.tButtonType.btSilBelge))
             {
-                satirSil(tForm, tableIPCode, propList_);
-                return onay;
+                onay = satirSil(tForm, tableIPCode, propList_);
 
-                // (ButtonName == "sil_fis")   // 27
-                //t.Find_MOS("Win32_Processor","Name");
-                //t.Find_MOS("Win32_DiskDrive", "Name");
-                //t.Find_MOS("Win32_NetworkAdapter", "Name");
-                //t.Find_MOS_MacAddr();
+                if ((buttonType == v.tButtonType.btSilSatir))
+                {
+                    return onay;
+                }
+                else
+                {
+                    // Kart, Hesap, Belge silden silme onayı geldiyse Açık olan formu kapat
+                    if (onay)
+                        tForm.Close();
+                }
             }
 
             if (buttonType == v.tButtonType.btSilListe)
@@ -486,6 +490,9 @@ namespace Tkn_Events
                     
                     if (propListCount_ > 1)
                         onay = openControlForm_(tForm, tableIPCode, propList_, buttonType);
+
+                    if (onay)
+                        t.TableRefresh(tForm, tableIPCode);
 
                     //extraIslemVar(tForm, tableIPCode, v.tButtonType.btKartAc, v.tBeforeAfter.After, propList_);
                 }
@@ -1550,26 +1557,29 @@ namespace Tkn_Events
 
             return tSql;
         }
-        private void satirSil(Form tForm, string tableIPCode, List<PROP_NAVIGATOR> propList_)
+        private bool satirSil(Form tForm, string tableIPCode, List<PROP_NAVIGATOR> propList_)
         {
             //tToolBox t = new tToolBox();
-
+            bool onaySil = false;
             bool onay = true;
-
+            bool IsLock = false;
+            
             DataNavigator tDataNavigator = t.Find_DataNavigator(tForm, tableIPCode);
             if (tDataNavigator != null)
             {
                 object tDataTable = tDataNavigator.DataSource;
                 DataSet dsData = ((DataTable)tDataTable).DataSet;
                 int pos = tDataNavigator.Position;
-                if (pos == -1) return;
+                if (pos == -1) return onaySil;
                 Control viewCntrl = t.Find_Control_View(tForm, tableIPCode);
 
                 // Gerekli olan verileri topla
                 vTable vt = new vTable();
                 t.Preparing_DataSet(tForm, dsData, vt);
 
-                if (t.IsNotNull(vt.TableName) && t.IsNotNull(vt.KeyId_FName))
+                IsLock = IsLockRecord(dsData, vt, pos);
+
+                if (t.IsNotNull(vt.TableName) && t.IsNotNull(vt.KeyId_FName) && (IsLock == false))
                 {
                     string RefId = dsData.Tables[vt.TableName].Rows[pos][vt.KeyId_FName].ToString();
 
@@ -1603,7 +1613,10 @@ namespace Tkn_Events
                                         // buton click ten dolayı tDataSave gidiyor, gidince fonksiyonun 
                                         // girişi geri dönmesi için true ataması yapılıyor
                                         v.con_LkpOnayChange = true;
-
+                                        
+                                        // Silindi onayı
+                                        onaySil = true;
+                                                                                
                                         NavigatorButton btn = tDataNavigator.Buttons.Remove;
                                         tDataNavigator.Buttons.DoClick(btn);
 
@@ -1628,6 +1641,7 @@ namespace Tkn_Events
                                 {
                                     MessageBox.Show("DİKKAT : Silme işlemi sırasında bir sorun oluştu..." + v.ENTER2 + e.Message.ToString());
                                     //throw;
+                                    onaySil = false;
                                 }
                             }
 
@@ -1640,33 +1654,42 @@ namespace Tkn_Events
                         if (viewCntrl.GetType().ToString() == "DevExpress.XtraGrid.GridControl")
                         {
                             if (MessageBox.Show("Satır Sil ?", "Confirmation", MessageBoxButtons.YesNo) != DialogResult.Yes)
-                                return;
+                                return onaySil;
                             GridView view = ((DevExpress.XtraGrid.GridControl)viewCntrl).MainView as GridView;
                             view.DeleteRow(view.FocusedRowHandle);
+
                         }
                     }
-
-                    //if (viewCntrl.GetType().ToString() == "DevExpress.XtraGrid.GridControl")
-                    //{
-                    //    GridView view = ((DevExpress.XtraGrid.GridControl)viewCntrl).MainView as GridView;
-                    //    view.
-                    //}
 
                     // hiç satır kalmadıysa
                     if (dsData.Tables[vt.TableName].Rows.Count == 0)
                     {
                         newData(tForm, tableIPCode);
                     }
-                    else
-                    {
-                        //v.con_Cancel = true;
-
-                        //t.TableRefresh(tForm, dsData);
-                    }
-
                 }
 
+                if (IsLock)
+                {
+                    t.FlyoutMessage(tForm, "Uyarı :", "Silmeye çalıştığınız kayıt kilitlendiği için silemezsiniz...");
+                }
             }
+
+            return onaySil;
+        }
+
+        private bool IsLockRecord(DataSet ds, vTable vt, int pos)
+        {
+            bool onay = false;
+
+            string lockFieldName = vt.Lock_FName;
+
+            if (t.IsNotNull(lockFieldName))
+            {
+                string value = ds.Tables[0].Rows[pos][lockFieldName].ToString();
+                if (value == "True")
+                    onay = true;
+            }
+            return onay;
         }
 
         private void hesapAc(Form tForm, PROP_NAVIGATOR prop_)

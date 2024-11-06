@@ -2952,6 +2952,10 @@ namespace Tkn_ToolBox
             string myProp = dsData.Namespace;
             string lockFieldName = MyProperties_Get(myProp, "LockFName:");
 
+            /// LockField ekran üzerinden kullanıcı tarafından değiştirilemiyor
+            /// Ne true > false, ne de false > true ye çevrilebiliyor
+            /// 
+
             if (IsNotNull(lockFieldName))
             {
                 //bool isLockRecord = false;
@@ -2965,17 +2969,37 @@ namespace Tkn_ToolBox
                     ///
                     /// ds.Tables[Table_Name].Rows[Position].CancelEdit();
 
-                    CancelChangeValues(dsData, position);
+                    CancelChangeValues(dsData, position, lockFieldName);
 
                     v.Kullaniciya_Mesaj_Var = "Bu kayıt kilitli ... Değiştirilemez.";
                     return true;
                 }
+
+
+                /// Bu kontrol olmuyor
+                /// True > false olabiliyor
+                /// lockFieldName değişikliğini engellemek için ekranda enable = false olmalı
+                /// lockFieldName = false durumundayken diğer alanları değişitire bilmesi gerekiyor
+                /// lockFieldName = true  olunca silinemez ve değiştirlemez olması gerekiyor
+                /// 
+                /*
+                /// şimdiki değeri false olabilir fakat kullanıcı true > false yapmış olabilir
+                if (lockValue == "False")
+                {
+                    bool IsLockChange = FalseChangeValues(dsData, position, lockFieldName);
+                    if (IsLockChange)
+                    {
+                        CancelChangeValues(dsData, position, lockFieldName);
+                        return;
+                    }
+                }
+                */
             }
 
             return false;
         }
 
-        private void CancelChangeValues(DataSet dsData, int position)
+        private void CancelChangeValues(DataSet dsData, int position, string lockFieldName)
         {
             int colCount = dsData.Tables[0].Columns.Count;
 
@@ -3000,7 +3024,14 @@ namespace Tkn_ToolBox
                     //orjValue = row[fieldName, DataRowVersion.Original].ToString();
                     //curValue = row[fieldName, DataRowVersion.Current].ToString();
                     row[fieldName] = orjValue;
-                    string xxxx = row[fieldName].ToString();
+                    onay = true;
+                }
+
+                /// lockFieldName manuel değiştirilmesin
+                /// 
+                if (lockFieldName == fieldName)
+                {
+                    row[fieldName] = orjValue;
                     onay = true;
                 }
 
@@ -3008,6 +3039,32 @@ namespace Tkn_ToolBox
             if (onay)
                 dsData.Tables[0].Rows[position].AcceptChanges();
         }
+
+        private bool FalseChangeValues(DataSet dsData, int position, string lockFieldName)
+        {
+            int colCount = dsData.Tables[0].Columns.Count;
+
+            DataRow row = dsData.Tables[0].Rows[position];
+            string orjValue = "";
+            string curValue = "";
+            string value = "";
+            bool onay = false;
+
+            orjValue = row[lockFieldName, DataRowVersion.Original].ToString();
+            curValue = row[lockFieldName, DataRowVersion.Current].ToString();
+            value = row[lockFieldName].ToString();
+
+            if (!orjValue.Equals(curValue) ||
+                !orjValue.Equals(value))
+            {
+                //orjValue = row[fieldName, DataRowVersion.Original].ToString();
+                //curValue = row[fieldName, DataRowVersion.Current].ToString();
+                onay = true;
+            }
+
+            return onay;
+        }
+
 
         #endregion lockFName, lockFieldName kontrolleri
 

@@ -711,8 +711,8 @@ INSERT INTO [Lkp].[OnmBelgeDekontSourceType] (Id, SourceType)
   ( 202, N'UstadIsmak'),
   ( 203, N'UstadSrc'),
   ( 211, N'TabimMtsk'),
-  ( 212, N'TabimSrc'),
-  ( 213, N'TabimIsmak'),
+  ( 212, N'TabimIsmak'),
+  ( 213, N'TabimSrc'),
   ( 2103,  N'Mtsk Veri Transferi - Giderler'),
   ( 2104,  N'Mtsk Veri Transferi - CariAlt'),
   ( 2105,  N'Mtsk Veri Transferi - Kurharc')
