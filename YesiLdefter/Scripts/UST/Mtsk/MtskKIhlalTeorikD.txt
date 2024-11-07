@@ -158,6 +158,7 @@ INSERT INTO [Lkp].[MtskKIhlalTeorikDIhlalTipi] (Id, IhlalTipi, IsActive)
   (12,    N'Bir ders en fazla 6 saat olabilir', 0),
   (13,    N'Ders saati eksik', 0),
   (14,    N'Ders saati fazla', 0),
+  (15,    N'Tatil gününe ders verildi', 0),
 
   (21,    N'Ders çakışması var', 0),
   (22,    N'Personel çakışması var', 0),

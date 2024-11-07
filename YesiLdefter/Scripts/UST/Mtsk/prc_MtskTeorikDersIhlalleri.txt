@@ -1,6 +1,6 @@
 ﻿/*CreateProcedure*/
 
-ALTER PROCEDURE [dbo].[prc_MtskTeorikDersIhlalleri] (@curId int)  
+CREATE PROCEDURE [dbo].[prc_MtskTeorikDersIhlalleri] (@curId int)  
 AS BEGIN
 
   --declare @curId int = 355

@@ -1,0 +1,52 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_MtskTeorikDersOzelGunleriEkle] (@OzelGunlerId bigint,
+  @BaslamaSaati datetime, @BitisSaati datetime )  
+AS BEGIN
+
+  /*
+  declare @OzelGunlerId int = 8
+  declare @BaslamaSaati datetime = Convert(datetime,'2025-03-29 13:00:00.000',101)
+  declare @BitisSaati   datetime = Convert(datetime,'2025-04-01 23:59:00.000',101) 
+  */
+  declare @Id int = 0
+  
+  SELECT @Id = Id
+  FROM dbo.MtskTeorikDers
+  Where OzelGunlerId = @OzelGunlerId
+  --and   YEAR(BaslamaSaati) = YEAR(@BaslamaSaati)
+
+  if (@Id = 0)
+  begin
+      INSERT INTO [dbo].[MtskTeorikDers]
+           ([FirmId]
+           ,[IsActive]
+		   ,[PersonelId]
+		   ,[TDersIsUploaded]
+           ,[BaslamaSaati]
+           ,[BitisSaati]
+           ,[OzelGunlerId])
+      VALUES
+           (0
+           ,1
+		   ,'ÖzelGünler'
+		   ,1
+           ,@BaslamaSaati
+           ,@BitisSaati
+           ,@OzelGunlerId
+		   )
+  end else
+  begin
+      UPDATE [dbo].[MtskTeorikDers]
+         SET [PersonelId] = 'ÖzelGünler'
+		    ,[TDersIsUploaded] = 1
+		    ,[BaslamaSaati] = @BaslamaSaati
+            ,[BitisSaati] = @BitisSaati
+            ,[OzelGunlerId] = @OzelGunlerId
+      WHERE Id = @Id
+  end
+
+
+END -- procedure
+/*CreateProcedureEnd*/
+

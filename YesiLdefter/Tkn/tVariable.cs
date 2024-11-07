@@ -1923,6 +1923,7 @@ namespace Tkn_Variable
 
         public string KrtOperandType { get; set; }
         public string CheckValue { get; set; }
+        public int CheckNodeId { get; set; }
 
         public DataSet ds { get; set; }
         public DataNavigator dN { get; set; }
@@ -1962,6 +1963,7 @@ namespace Tkn_Variable
             GetSave = false;
             KrtOperandType = "";
             CheckValue = "";
+            CheckNodeId = 0;
 
             ds = null; // o anda işlem yapılan dataset 
             dN = null; //   ve datanavigator
@@ -2507,6 +2509,7 @@ namespace Tkn_Variable
     {
         public string CAPTION { get; set; }
         public string CASE_FOR_FNAME { get; set; }
+        public string KRT_ODD { get; set; }
         public string WHERE_VALUE { get; set; }
         public string THEN_ALIAS { get; set; }
         public string THEN_FNAME { get; set; }

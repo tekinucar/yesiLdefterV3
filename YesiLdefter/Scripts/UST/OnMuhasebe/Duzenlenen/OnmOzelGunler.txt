@@ -11,6 +11,7 @@ begin transaction
    IsActive             Bit       not null, /* default : 1 = active, 0 = not active */  
 
    OzelGunTipiId        SmallInt      null,  /* 1. Resmi tatiller, 2. Mali günler, 3. Dini bayramlar */
+   TatilTipiId          SmallInt      null,
    GunAdi               nVarChar(100) null, 
 
    Yil                  SmallInt      null, /* hangi yıl   : 2025... */
@@ -22,8 +23,11 @@ begin transaction
    BitisSaatTipiId      SmallInt      null, /* 1,,24  */
    GunSayisi            SmallInt      null, /* 1 gün, 3 gün veya 4 gün sürer gibi */ 
 
-   BaslangicTarihi      Date          null, /* Arefe varsa bir gün önce başlar */
+   BaslamaTarihi        Date          null, /* Arefe varsa bir gün önce başlar */
    BitisTarihi          Date          null,
+
+   BaslamaSaati         Datetime      null, /* Tarih ve saat */
+   BitisSaati           Datetime      null,
 
    constraint		pk_OnmOzelGunler primary key (Id)
  )
@@ -49,7 +53,7 @@ drop table [Lkp].[OnmOzelGunlerOzelGunTipi]
 create table Lkp.OnmOzelGunlerOzelGunTipi
 (
    Id          Int Unique Not Null,
-   OzelGunTipi nVarchar(50)   null
+   OzelGunTipi nVarchar(50)   null,
    
    constraint  pk_OnmOzelGunlerOzelGunTipi primary key (Id)
 )
@@ -62,6 +66,35 @@ INSERT INTO Lkp.OnmOzelGunlerOzelGunTipi (Id, OzelGunTipi)
   ( 2, N'Mali işlem günleri'),
   ( 3, N'Dini bayramlar'),
   ( 4, N'İstisna günler')   /* devlet tarafından açıklanan özel günler, bilgi amaçlı */
+
+
+-- ------------------------------------------------------- 
+-- TatilTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmOzelGunlerTatilTipi')
+drop table [Lkp].[OnmOzelGunlerTatilTipi]
+
+create table Lkp.OnmOzelGunlerTatilTipi
+(
+   Id          Int Unique Not Null,
+   TatilTipi   nVarchar(100)  null,
+   
+   constraint  pk_OnmOzelGunlerTatilTipi primary key (Id)
+)
+
+Delete from [Lkp].[OnmOzelGunlerTatilTipi]
+INSERT INTO Lkp.OnmOzelGunlerTatilTipi (Id, TatilTipi)
+ VALUES 
+  ( 0,  N'Tanımsız'),
+  ( 101, N'Yılbaşı'),
+  ( 102, N'23 Nisan Ulusal Egemenlik ve Çocuk Bayramı'),
+  ( 103, N'1 Mayıs İşci Bayramı'),
+  ( 104, N'19 Mayıs Gençlik ve Spor Bayramı'),
+  ( 105, N'15 Temmuz Demokrasi ve Milli Birlik Günü'),
+  ( 106, N'30 Ağustos Zafer Bayramı'),
+  ( 107, N'29 Ekim Cumhuriyet Bayramı'),
+  ( 301, N'Ramazan Bayramı'),
+  ( 302, N'Kurban Bayramı')
 
 
 
@@ -122,21 +155,23 @@ AS BEGIN
 		    if (@Ay  = '0') set @Ay  = '01'
 		    if (@Gun = '0') set @Gun = '01'
 
-            declare @BaslangicTarihi date
+            declare @BaslamaTarihi date
             declare @BitisTarihi date
 
             -- Başlangıç tarihini belirle
-			set @BaslangicTarihi = Convert(date, '' + @Gun + '.' + @Ay + '.' + @Yil + '', 103)
+			set @BaslamaTarihi = Convert(date, '' + @Gun + '.' + @Ay + '.' + @Yil + '', 103)
             -- Baslangic tarihininde sayılması için -1 var
-            set @BitisTarihi = DATEADD(dd, @GunSayisi - 1, @BaslangicTarihi)
+            set @BitisTarihi = DATEADD(dd, @GunSayisi - 1, @BaslamaTarihi)
 
 			-- Arefe günü var ise
 			if (@IsArefeGunu = 1)
-			    set @BaslangicTarihi = DATEADD(dd, -1, @BaslangicTarihi)
+			    set @BaslamaTarihi = DATEADD(dd, -1, @BaslamaTarihi)
 
             Update OnmOzelGunler Set 
-			    BaslangicTarihi = @BaslangicTarihi 
-              , BitisTarihi = @BitisTarihi
+			    BaslamaTarihi = @BaslamaTarihi 
+              , BitisTarihi   = @BitisTarihi
+              , BaslamaSaati  = Convert(datetime, Convert(varchar(10), @BaslamaTarihi, 103) + ' ' + Convert(varchar(2), @BaslaSaatTipiId) + ':00:00', 103)
+              , BitisSaati    = Convert(datetime, Convert(varchar(10), @BitisTarihi, 103)   + ' ' + Convert(varchar(2), (@BitisSaatTipiId - 1)) + ':59:00', 103)			
 			Where Id = @curId
         end -- 3
 		
@@ -151,37 +186,36 @@ END -- create trigger
 /*CreateTriggerEnd*/
 
 
-
 /*CreateData*/
      Delete From [dbo].[OnmOzelGunler]
      Insert INTO [dbo].[OnmOzelGunler]
-           (FirmId, IsActive, OzelGunTipiId, Yil,  Ay,  Gun,  IsArefeGunu, BaslaSaatTipiId, BitisSaatTipiId, GunSayisi, GunAdi  )
+           (FirmId, IsActive, OzelGunTipiId, Yil,  Ay,  Gun,  IsArefeGunu, BaslaSaatTipiId, BitisSaatTipiId, GunSayisi, TatilTipiId, GunAdi  )
      Values
-           (0,      1,        1,             0,    1,   1,    0,           1,               24,              1,  'Yılbaşı'),      
-           (0,      1,        1,             0,    4,   23,   0,           1,               24,              1,  '23 Nisan Ulusal Egemenlik ve Çocuk Bayramı'),      
-           (0,      1,        1,             0,    5,   1,    0,           1,               24,              1,  '1 Mayıs İşci Bayramı'),      
-           (0,      1,        1,             0,    5,   19,   0,           1,               24,              1,  '19 Mayıs Gençlik ve Spor Bayramı'),      
-           (0,      1,        1,             0,    7,   15,   0,           1,               24,              1,  '15 Temmuz Demokrasi ve Milli Birlik Günü'),      
-           (0,      1,        1,             0,    8,   30,   0,           1,               24,              1,  '30 Ağustos Zafer Bayramı'),      
-           (0,      1,        1,             0,    10,  29,   0,           1,               24,              1,  '29 Ekim Cumhuriyet Bayramı'),      
+           (0,      1,        1,             0,    1,   1,    0,           1,               24,              1,         101, 'Yılbaşı'),      
+           (0,      1,        1,             0,    4,   23,   0,           1,               24,              1,         102, '23 Nisan Ulusal Egemenlik ve Çocuk Bayramı'),      
+           (0,      1,        1,             0,    5,   1,    0,           1,               24,              1,         103, '1 Mayıs İşci Bayramı'),      
+           (0,      1,        1,             0,    5,   19,   0,           1,               24,              1,         104, '19 Mayıs Gençlik ve Spor Bayramı'),      
+           (0,      1,        1,             0,    7,   15,   0,           1,               24,              1,         105, '15 Temmuz Demokrasi ve Milli Birlik Günü'),      
+           (0,      1,        1,             0,    8,   30,   0,           1,               24,              1,         106, '30 Ağustos Zafer Bayramı'),      
+           (0,      1,        1,             0,    10,  29,   0,           1,               24,              1,         107, '29 Ekim Cumhuriyet Bayramı'),      
 
-           (0,      1,        3,             2025, 3,   30,   1,           13,              24,              3,  'Ramazan Bayramı'),      
-           (0,      1,        3,             2025, 6,   6,    1,           13,              24,              4,  'Kurban Bayramı'),      
+           (0,      1,        3,             2025, 3,   30,   1,           13,              24,              3,         301, 'Ramazan Bayramı'),      
+           (0,      1,        3,             2025, 6,   6,    1,           13,              24,              4,         302, 'Kurban Bayramı'),      
 
-           (0,      1,        3,             2026, 0,   0,    1,           13,              24,              3,  'Ramazan Bayramı'),      
-           (0,      1,        3,             2026, 0,   0,    1,           13,              24,              4,  'Kurban Bayramı'),      
+           (0,      1,        3,             2026, 0,   0,    1,           13,              24,              3,         301, 'Ramazan Bayramı'),      
+           (0,      1,        3,             2026, 0,   0,    1,           13,              24,              4,         302, 'Kurban Bayramı'),      
 
-           (0,      1,        3,             2027, 0,   0,    1,           13,              24,              3,  'Ramazan Bayramı'),      
-           (0,      1,        3,             2027, 0,   0,    1,           13,              24,              4,  'Kurban Bayramı'),      
+           (0,      1,        3,             2027, 0,   0,    1,           13,              24,              3,         301, 'Ramazan Bayramı'),      
+           (0,      1,        3,             2027, 0,   0,    1,           13,              24,              4,         302, 'Kurban Bayramı'),      
 
-           (0,      1,        3,             2028, 0,   0,    1,           13,              24,              3,  'Ramazan Bayramı'),      
-           (0,      1,        3,             2028, 0,   0,    1,           13,              24,              4,  'Kurban Bayramı'),      
+           (0,      1,        3,             2028, 0,   0,    1,           13,              24,              3,         301, 'Ramazan Bayramı'),      
+           (0,      1,        3,             2028, 0,   0,    1,           13,              24,              4,         302, 'Kurban Bayramı'),      
 
-           (0,      1,        3,             2029, 0,   0,    1,           13,              24,              3,  'Ramazan Bayramı'),      
-           (0,      1,        3,             2029, 0,   0,    1,           13,              24,              4,  'Kurban Bayramı'),      
+           (0,      1,        3,             2029, 0,   0,    1,           13,              24,              3,         301, 'Ramazan Bayramı'),      
+           (0,      1,        3,             2029, 0,   0,    1,           13,              24,              4,         302, 'Kurban Bayramı'),      
 
-           (0,      1,        3,             2030, 0,   0,    1,           13,              24,              3,  'Ramazan Bayramı'),      
-           (0,      1,        3,             2030, 0,   0,    1,           13,              24,              4,  'Kurban Bayramı')      
+           (0,      1,        3,             2030, 0,   0,    1,           13,              24,              3,         301, 'Ramazan Bayramı'),      
+           (0,      1,        3,             2030, 0,   0,    1,           13,              24,              4,         302, 'Kurban Bayramı')      
 
 
 /*CreateDataEnd*/

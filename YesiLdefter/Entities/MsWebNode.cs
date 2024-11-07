@@ -41,6 +41,7 @@ namespace YesiLdefter.Entities
 		public string TestValue { get; set; }
 		public string KrtOperandType { get; set; }
 		public string CheckValue { get; set; }
+		public int CheckNodeId { get; set; }
 
 	}
 }

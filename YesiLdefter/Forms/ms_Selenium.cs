@@ -727,7 +727,7 @@ namespace YesiLdefter
                     wnv.workRequestType = workRequestType;
                     wnv.workEventsType = workEventsType;
                     wnv.pageCode = workPageNodes.aktifPageCode;
-                    msPagesService.nodeValuesPreparing(item, ref wnv);
+                    msPagesService.nodeValuesPreparing(this, msWebNodes, item, ref wnv, msWebScrapingDbFields_);
 
                     // 4. adım 
                     //

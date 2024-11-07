@@ -3148,6 +3148,8 @@ namespace Tkn_Events
             /// change " çift tırnağı  ' tek tırnak ile değiştir
             ///
             FullBlocks = FullBlocks.Replace((char)34, (char)39);
+            //FullBlocks = FullBlocks.Replace((char)39, (char)134 + (char)39);
+            //FullBlocks = FullBlocks.Replace("\"", "\\'");
 
             var myList = JsonConvert.DeserializeObject(FullBlocks);
 

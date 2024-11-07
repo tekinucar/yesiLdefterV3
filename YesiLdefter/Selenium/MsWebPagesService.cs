@@ -198,7 +198,7 @@ namespace YesiLdefter.Selenium
             }
         }
 
-        public void nodeValuesPreparing(MsWebNode item, ref webNodeValue wnv)
+        public void nodeValuesPreparing(Form tForm, List<MsWebNode> msWebNodes,  MsWebNode item, ref webNodeValue wnv, List<MsWebScrapingDbFields> msWebScrapingDbFields)
         {
             //wnv.pageCode = aktifPageCode;
             wnv.nodeId = item.NodeId;// Convert.ToInt32(row["NodeId"].ToString());
@@ -221,6 +221,7 @@ namespace YesiLdefter.Selenium
             wnv.EventsType = (v.tWebEventsType)item.EventsType;   //t.myInt16(row["EventsType"].ToString());
             wnv.KrtOperandType = item.KrtOperandType;
             wnv.CheckValue = item.CheckValue;
+            wnv.CheckNodeId = item.CheckNodeId;
 
             if (wnv.writeValue == "BUGUN_YILAY")
                 wnv.writeValue = v.BUGUN_YILAY.ToString();
@@ -238,6 +239,35 @@ namespace YesiLdefter.Selenium
                     wnv.writeValue = v.tUser.MebbisPass;
                 else wnv.writeValue = v.tMainFirm.MebbisPass;
             }
+
+            /// Başka bir NodeId nin database den gelen valuesini okuyacak
+            /// 
+            if (wnv.CheckNodeId > 0)
+            {
+                wnv.writeValue = getCheckNodeIdValue(tForm, msWebNodes, wnv.CheckNodeId, msWebScrapingDbFields);
+            }
+        }
+
+        private string getCheckNodeIdValue(Form tForm, List<MsWebNode> msWebNodes, int checkNodeId, List<MsWebScrapingDbFields> msWebScrapingDbFields)
+        {
+            /// List<MsWebNode> msWebNodes  all Node list
+            ///
+            string value = "";
+
+            foreach (MsWebNode item in msWebNodes)
+            {
+                /// Value'si bulunacak NodeId yi bul
+                if (item.NodeId == checkNodeId)
+                {
+                    webNodeValue wnv = new webNodeValue();
+
+                    transferFromDatabaseToWeb(tForm, wnv, msWebScrapingDbFields);
+
+                    value = wnv.writeValue;
+                }
+            }
+
+            return value;
         }
 
         public List<MsWebScrapingDbFields> readScrapingTablesAndFields(List<MsWebPage> msWebPages)
@@ -396,12 +426,9 @@ namespace YesiLdefter.Selenium
 
         public bool transferFromDatabaseToWeb(Form tForm, webNodeValue wnv, List<MsWebScrapingDbFields> msWebScrapingDbFields)
         {
-            //v.SQL = v.SQL + v.ENTER + myNokta + " transferFromDatabaseToWeb : Set : ";
-
             /// database deki veriyi web e aktar
             ///
 
-            //if (t.IsNotNull(ds_ScrapingDbConnectionList) == false) return;
             bool onay = false;
 
             if (msWebScrapingDbFields.Count == 0) 

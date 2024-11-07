@@ -24,7 +24,7 @@ begin transaction
    TDersIsUploaded      Bit           null,
    SablonTeorikBId      Int           null, /* SablonTeorikBId ve DonemTipiId ile beraber bakıldığında hangi taslak formundan (MtskTaslakTeorikF) bilgi alındığı bulunur  */
    SablonTeorikFId      Int           null,
-   CakismaId            Int           null,
+   OzelGunlerId         Int           null, /* OnmOzelGunler.Id */
 
    constraint		pk_MtskTeorikDers primary key (Id)
  )
@@ -101,11 +101,14 @@ AS BEGIN
         Where Id = @curId
       end
 
-	  -- BaslangicSaat ve BitisSaat 
-	  update dbo.MtskTeorikDers set 
-        BaslamaSaati = CONVERT(smalldatetime, CONVERT(varchar(10), @eDersTarihi) + ' ' + SUBSTRING(@eSaat,1,5))
-      , BitisSaati   = CONVERT(smalldatetime, CONVERT(varchar(10), @eDersTarihi) + ' ' + SUBSTRING(@eSaat,9,5))
-      Where Id = @curId
+	  if (@eDersSaatiTipiId > -1 and @eDersSaatiTipiId < 20)
+	  begin
+	      -- BaslangicSaat ve BitisSaat 
+	      update dbo.MtskTeorikDers set 
+              BaslamaSaati = CONVERT(smalldatetime, CONVERT(varchar(10), @eDersTarihi) + ' ' + SUBSTRING(@eSaat,1,5))
+            , BitisSaati   = CONVERT(smalldatetime, CONVERT(varchar(10), @eDersTarihi) + ' ' + SUBSTRING(@eSaat,9,5))
+          Where Id = @curId
+	  end --
 
 
 	  Execute [dbo].[prc_MtskTeorikDersIhlalleri] @curId
@@ -222,6 +225,7 @@ create table Lkp.MtskTeorikDersDersSaatiTipi
    constraint  pk_MtskTeorikDersDersSaatiTipi primary key (Id)
 )
 
+Delete From Lkp.MtskTeorikDersDersSaatiTipi
 INSERT INTO Lkp.MtskTeorikDersDersSaatiTipi (Id, DersSaatiTipi)
  VALUES 
   (-1, N' Seçiniz'),
@@ -240,7 +244,10 @@ INSERT INTO Lkp.MtskTeorikDersDersSaatiTipi (Id, DersSaatiTipi)
   (12, N'19:00 - 19:50'),
   (13, N'20:00 - 20:50'),
   (14, N'21:00 - 21:50'),
-  (15, N'22:00 - 22:50')
+  (15, N'22:00 - 22:50'),
+  (100,N'00:00 - 23:59'),
+  (113,N'13:00 - 23:59')
+
 
 -- ------------------------------------------------------- 
 -- EgitimTipiId

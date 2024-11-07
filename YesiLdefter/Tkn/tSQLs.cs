@@ -3693,6 +3693,7 @@ INSERT INTO [dbo].[SYS_UPDATES]
         {
             string s = string.Empty;
             string case_for_fname = string.Empty;
+            string krt_odd = string.Empty;
             string where_value = string.Empty;
             string then_alias = string.Empty;
             string then_fname = string.Empty;
@@ -3711,19 +3712,38 @@ INSERT INTO [dbo].[SYS_UPDATES]
                 then_fname = item.THEN_FNAME.ToString();
                 final_fname = item.FINAL_FNAME.ToString();
 
-                satir_sonu = "  else '' end ) " + final_fname + "  ";
+                if (item.KRT_ODD != null)
+                    krt_odd = item.KRT_ODD.ToString();
+
+                if (t.IsNotNull(krt_odd) == false)
+                    krt_odd = "=";
+
+                //satir_sonu = "  else '' end ) " + final_fname + "  ";
+                satir_sonu = " end ) as " + final_fname + "  ";
+
+                /// genel çerçeveyi oluştur 
+                /// 
+                /// , ( case 
+                /// end ) as Lkp_DerslikPersDonemGrupSube
 
                 if (nsatir.IndexOf(final_fname) == -1)
                 {
                     if ((MasterTableAlias != "") && (case_for_fname != ""))
                     {
-                        satir = " , ( case " + MasterTableAlias + "." + case_for_fname + satir_sonu + v.ENTER;
+                        //satir = " , ( case " + MasterTableAlias + "." + case_for_fname + satir_sonu + v.ENTER;
+                        satir = " , ( case " + v.ENTER + satir_sonu + v.ENTER;
                         nsatir = nsatir + satir;
                     }
                 }
 
+                //if ((where_value != "") && (then_alias != "") && (then_fname != ""))
+                //    satir = " when " + where_value + " then " + then_alias + "." + then_fname;
+
+                ///   when OzelGunlerId = 0 then personel.TamAdiSoyadi + ', ' + FNo9.DerslikAdiTipi + ', ' + FNo5.DonemTipi + ', ' + FNo6.GrupTipi + ', ' + FNo7.SubeTipi 
+                ///   when OzelGunlerId > 0 then ozelGunler.GunAdi
+                ///   -- final_fname  ? : case için kullanılan anahtar field birden çok case de kullanılabiliyor
                 if ((where_value != "") && (then_alias != "") && (then_fname != ""))
-                    satir = " when " + where_value + " then " + then_alias + "." + then_fname;
+                    satir = " when " + case_for_fname + " " + krt_odd + " " + where_value + " then " + then_alias + "." + then_fname + " -- " + final_fname + v.ENTER;
 
                 if (nsatir.IndexOf(satir) == -1)
                 {
@@ -3731,6 +3751,12 @@ INSERT INTO [dbo].[SYS_UPDATES]
                     nsatir = nsatir.Insert(i1, satir);
                 }
             }
+
+            /// Sonuç
+            ///  , ( case 
+            ///  when OzelGunlerId = 0 then personel.TamAdiSoyadi + ', ' + FNo9.DerslikAdiTipi + ', ' + FNo5.DonemTipi + ', ' + FNo6.GrupTipi + ', ' + FNo7.SubeTipi
+            ///  when OzelGunlerId > 0 then ozelGunler.GunAdi
+            ///  end ) as Lkp_DerslikPersDonemGrupSube
 
             if (nsatir.Length > 0)
                 joinFields = joinFields + nsatir;

@@ -34,7 +34,7 @@
 	TestValue       varChar(200)     null, 
 	KrtOperandType  varChar(5)       null,
 	CheckValue      varChar(200)     null, 
-	
+	CheckNodeId     int              null, 
 	
    Constraint pk_MsWebNodes primary key (Id)
  )

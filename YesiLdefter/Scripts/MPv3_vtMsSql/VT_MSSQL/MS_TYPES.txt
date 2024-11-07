@@ -473,6 +473,7 @@ begin transaction
 
 
  --DELETE MS_TYPES WHERE TYPES_NAME = 'KRT_ODD_NOTLIKE_STR'
+ insert into MS_TYPES values ( 3, 0, 'KRT_ODD_NOTLIKE_STR',  0, '', '');
  insert into MS_TYPES values ( 3, 0, 'KRT_ODD_NOTLIKE_STR',  1, '>=', '>=');
  insert into MS_TYPES values ( 3, 0, 'KRT_ODD_NOTLIKE_STR',  2, '>',  '>');
  insert into MS_TYPES values ( 3, 0, 'KRT_ODD_NOTLIKE_STR',  3, '=',  '=');
