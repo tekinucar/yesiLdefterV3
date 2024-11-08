@@ -1,0 +1,70 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_OnmOzelGunlerInsert] (@Id int, @YilId int)  
+AS BEGIN
+
+    declare @FirmId int = 0    
+    declare @IsActive bit = 0
+	declare @OzelGunTipiId SmallInt = 0
+
+	declare @Yil varchar(4)
+	declare @Ay  varchar(2)
+	declare @Gun varchar(2)
+
+	declare @IsArefeGunu Bit
+    declare @BaslaSaatTipiId SmallInt = 0
+	declare @BitisSaatTipiId SmallInt = 0
+	declare @GunSayisi smallInt = 0
+
+    declare @BaslamaTarihi date
+    declare @BitisTarihi date
+    declare @BaslamaSaati datetime
+    declare @BitisSaati datetime
+
+    Select 
+        @OzelGunTipiId = ins.OzelGunTipiId
+        --,@YilId = ins.Yil
+       ,@Ay  = convert(varchar(2), ins.Ay)
+       ,@Gun = convert(varchar(2), ins.Gun)
+       ,@IsArefeGunu = ins.IsArefeGunu
+       ,@BaslaSaatTipiId = ins.BaslaSaatTipiId
+       ,@BitisSaatTipiId = ins.BitisSaatTipiId
+       ,@GunSayisi = ins.GunSayisi
+    From OnmOzelGunler ins
+    where ins.Id = @Id
+		
+    if (@YilId = 0) set @YilId = YEAR(getdate())  
+    set @Yil = Convert(varchar(4),@YilId)
+    if (@Ay  = '') set @Ay  = '0'
+    if (@Gun = '') set @Gun = '0'
+    
+    if (@Ay <> '0' and @Gun <> '0')
+    begin
+        -- Başlangıç tarihini belirle
+        set @BaslamaTarihi = Convert(date, '' + @Gun + '.' + @Ay + '.' + @Yil + '', 103)
+        -- Baslangic tarihininde sayılması için -1 var
+        set @BitisTarihi = DATEADD(dd, @GunSayisi - 1, @BaslamaTarihi)
+
+        -- Arefe günü var ise
+        if (@IsArefeGunu = 1)
+            set @BaslamaTarihi = DATEADD(dd, -1, @BaslamaTarihi)
+
+        set @BaslamaSaati = Convert(datetime, Convert(varchar(10), @BaslamaTarihi, 103) + ' ' + Convert(varchar(2), @BaslaSaatTipiId) + ':00:00', 103)
+        set @BitisSaati   = Convert(datetime, Convert(varchar(10), @BitisTarihi, 103)   + ' ' + Convert(varchar(2), (@BitisSaatTipiId - 1)) + ':59:00', 103)			
+
+        -- Dini bayramlar
+        if (@OzelGunTipiId = 3)
+        begin
+            Update OnmOzelGunler Set 
+              BaslamaTarihi = @BaslamaTarihi 
+            , BitisTarihi   = @BitisTarihi
+            , BaslamaSaati  = @BaslamaSaati
+            , BitisSaati    = @BitisSaati
+            Where Id = @Id
+        end -- 3
+
+        Execute [dbo].[prc_MtskTeorikDersOzelGunleriEkle] @Id, @BaslamaSaati, @BitisSaati	
+    end -- @Ay 
+
+END -- procedure
+/*CreateProcedureEnd*/

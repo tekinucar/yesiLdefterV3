@@ -867,6 +867,7 @@
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmOdemePlaniOlustur.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmOdemePlaniTahsilatiIptalEt.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmOdemePlaniTahsilatiIsle.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmOzelGunlerInsert.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\FinansIslemi.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\GIB_BirimSeti.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\GIB_FaturaCesitleri.txt" />

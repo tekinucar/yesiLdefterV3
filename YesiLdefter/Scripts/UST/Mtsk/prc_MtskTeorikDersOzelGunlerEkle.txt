@@ -14,7 +14,7 @@ AS BEGIN
   SELECT @Id = Id
   FROM dbo.MtskTeorikDers
   Where OzelGunlerId = @OzelGunlerId
-  --and   YEAR(BaslamaSaati) = YEAR(@BaslamaSaati)
+  and   YEAR(BaslamaSaati) = YEAR(@BaslamaSaati)
 
   if (@Id = 0)
   begin
