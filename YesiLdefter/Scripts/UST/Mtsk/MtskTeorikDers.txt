@@ -53,7 +53,7 @@ AS BEGIN
     declare @eSubeTipiId smallInt = 0
     declare @eDersTarihi date = null
     declare @eDersSaatiTipiId smallInt = -1
-    declare @ePersonelId varchar(20) = null
+    declare @ePersonelId varchar(20) = ''
     declare @eSaat varchar(20) = null
     declare @TcNoCalismaIzniNo varchar(20) = null
 
@@ -100,7 +100,7 @@ AS BEGIN
         PersonelId = @TcNoCalismaIzniNo
         Where Id = @curId
       end
-
+	  
 	  if (@eDersSaatiTipiId > -1 and @eDersSaatiTipiId < 20)
 	  begin
 	      -- BaslangicSaat ve BitisSaat 
@@ -110,8 +110,10 @@ AS BEGIN
           Where Id = @curId
 	  end --
 
-
-	  Execute [dbo].[prc_MtskTeorikDersIhlalleri] @curId
+	  --Execute [dbo].[prc_MtskTeorikDersIhlalleri] @curId iptal
+	  Execute [dbo].[prc_MtskTeorikDersIhlalleriSaatler] @curId
+      Execute [dbo].[prc_MtskTeorikDersIhlalleriCakismalar] @curId
+	  Execute [dbo].[prc_MtskDersIhlalleriPersonel] @curId
 
       FETCH NEXT FROM myCursor INTO @curId
     END

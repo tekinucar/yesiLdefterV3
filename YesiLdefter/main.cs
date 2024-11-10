@@ -63,6 +63,7 @@ namespace YesiLdefter
 
         #endregion
 
+        ihlal prc_ler db den all
 
         private void mainForm_Load(object sender, EventArgs e)
         {

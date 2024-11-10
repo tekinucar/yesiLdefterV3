@@ -40,15 +40,16 @@ create table Lkp.OnmCalismaSaatleriGunTipi
    constraint  pk_OnmCalismaSaatleriGunTipi primary key (Id)
 )
 
+DELETE Lkp.OnmCalismaSaatleriGunTipi
 INSERT INTO Lkp.OnmCalismaSaatleriGunTipi (Id, GunTipi, GrupTipiId)
  VALUES 
-  ( 1,  N'Pazartesi', 1),
-  ( 2,  N'Salı', 1),
-  ( 3,  N'Çarşamba', 1),
-  ( 4,  N'Perşembe', 1),
-  ( 5,  N'Cuma', 1),
-  ( 6,  N'Cumartesi', 1),
-  ( 7,  N'Pazar', 1)
+  ( 1,  N'Pazar', 1),
+  ( 2,  N'Pazartesi', 1),
+  ( 3,  N'Salı', 1),
+  ( 4,  N'Çarşamba', 1),
+  ( 5,  N'Perşembe', 1),
+  ( 6,  N'Cuma', 1),
+  ( 7,  N'Cumartesi', 1)
 
 -- ------------------------------------------------------- 
 -- SaatTipiId
@@ -69,22 +70,22 @@ DELETE From Lkp.OnmCalismaSaatleriSaatTipi
 INSERT INTO Lkp.OnmCalismaSaatleriSaatTipi (Id, SaatTipi, GrupTipiId)
  VALUES 
   ( 100, N'Tam gün', 1),
-  ( 107, N'07', 1),
-  ( 108, N'08', 1),
-  ( 109, N'09', 1),
-  ( 110, N'10', 1),
-  ( 111, N'11', 1),
-  ( 112, N'12', 1),
-  ( 113, N'13', 1),
-  ( 114, N'14', 1),
-  ( 115, N'15', 1),
-  ( 116, N'16', 1),
-  ( 117, N'17', 1),
-  ( 118, N'18', 1),
-  ( 119, N'19', 1),
-  ( 120, N'20', 1),
-  ( 121, N'21', 1),
-  ( 122, N'22', 1)
+  ( 0, N'07', 1),
+  ( 1, N'08', 1),
+  ( 2, N'09', 1),
+  ( 3, N'10', 1),
+  ( 4, N'11', 1),
+  ( 5, N'12', 1),
+  ( 6, N'13', 1),
+  ( 7, N'14', 1),
+  ( 8, N'15', 1),
+  ( 9, N'16', 1),
+  ( 10, N'17', 1),
+  ( 11, N'18', 1),
+  ( 12, N'19', 1),
+  ( 13, N'20', 1),
+  ( 14, N'21', 1),
+  ( 15, N'22', 1)
 
 commit transaction
 
@@ -130,7 +131,8 @@ AS BEGIN
 			IsActive = @IsActive
 			Where TcVkNo = @TcVkNo
 			and   GunTipiId = @GunTipiId 
-			and   SaatTipiId > 100 -- Tam gun satırına dokunma
+			and   SaatTipiId >= 0  -- Tam gun satırına dokunma
+			and   SaatTipiId <= 15 -- Tam gun satırına dokunma
 
 			-- Saat için satırlar yok ise oluştur
             INSERT INTO [dbo].[OnmCalismaSaatleri]
@@ -147,13 +149,16 @@ AS BEGIN
               , @TcVkNo
 
             From Lkp.OnmCalismaSaatleriSaatTipi as saat
-                left outer join OnmCalismaSaatleri as CalismaSaatleri on ( CalismaSaatleri.SaatTipiId > 100
+                left outer join OnmCalismaSaatleri as CalismaSaatleri on ( 
+                         CalismaSaatleri.SaatTipiId >= 0
+                     and CalismaSaatleri.SaatTipiId <= 15
                      and CalismaSaatleri.SaatTipiId = saat.Id 
                      and [CalismaSaatleri].TcVkNo = @TcVkNo
                      and [CalismaSaatleri].GunTipiId = @GunTipiId
                 ) 
             Where 0 = 0 
-            and saat.Id > 100
+            and saat.Id >= 0
+            and saat.Id <= 15
             and [CalismaSaatleri].Id is null
 
         end -- if (@SaatTipiId = 100)

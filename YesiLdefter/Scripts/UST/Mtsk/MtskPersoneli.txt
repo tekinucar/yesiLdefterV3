@@ -45,6 +45,7 @@ begin transaction
    AylikBrutUcretiKurus     Numeric(5)    null,
    MaasKarsiligiDersSayisi  SmallInt      null,
    DersUcretiKarsiligiDersSayisi  SmallInt      null,
+   HaftalikDersSayisi       SmallInt      null,
    
    --71
    CalismaIzniBaslamaTarihi Date          null,
@@ -85,7 +86,7 @@ CREATE TRIGGER [dbo].[trg_MtskPersoneli] on [dbo].[MtskPersoneli]
 AFTER INSERT, UPDATE
 AS BEGIN
 
-    DECLARE cursorMtskPersoneli cursor for select Id from Inserted
+    DECLARE cursorMtskPersoneli cursor local for select Id from Inserted
     DECLARE @curId bigint
 
     OPEN cursorMtskPersoneli
@@ -106,6 +107,9 @@ AS BEGIN
 	declare @eCalismaIzniKayitNo varchar(7) = null
 	declare @yTcVkNo varchar(11) = null
 	declare @yCalismaIzniKayitNo varchar(7) = null
+    declare @yMaasKarsiligiDersSayisi smallint
+	declare @yDersUcretiKarsiligiDersSayisi smallInt
+
 
     WHILE @@FETCH_STATUS = 0
     BEGIN
@@ -128,7 +132,8 @@ AS BEGIN
 		  ,@yTamAdi = isnull(ins.TamAdiSoyadi, '')
     	  ,@yAdi = isnull(ins.Adi,'')
     	  ,@ySoyadi = isnull(ins.SoyAdi,'')
-
+          ,@yMaasKarsiligiDersSayisi = isnull(ins.MaasKarsiligiDersSayisi,0) 
+          ,@yDersUcretiKarsiligiDersSayisi = isnull(ins.DersUcretiKarsiligiDersSayisi,0)
 		from inserted ins
     	where ins.Id = @curId
      	   	
@@ -214,12 +219,17 @@ AS BEGIN
                 WHERE Id = @CariId
 	        end
  	    end -- if (LEN(@yTcVkNo) = 11)
+          
+        update dbo.MtskPersoneli set 
+          HaftalikDersSayisi = @yMaasKarsiligiDersSayisi + @yDersUcretiKarsiligiDersSayisi
+        where Id = @curId 
 
       FETCH NEXT FROM cursorMtskPersoneli INTO @curId
     END -- While
 
     CLOSE cursorMtskPersoneli
     DEALLOCATE cursorMtskPersoneli   
+
 END -- create trigger
 
 /*CreateTriggerEnd*/
