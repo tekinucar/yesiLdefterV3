@@ -583,6 +583,7 @@
     <Content Include="Scripts\2019VtMsSql\SYS_TYPES_L.txt" />
     <Content Include="Scripts\2019VtMsSql\SYS_TYPES_T.txt" />
     <Content Include="Scripts\2019VtMsSql\SYS_VARIABLES.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\01_Ekran_Kopyalama_SQLi.txt" />
     <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\MS_DBCONN.txt" />
     <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\MS_DC.txt" />
     <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\MS_DC_LINE.txt" />
@@ -748,7 +749,7 @@
     <Content Include="Scripts\UST\Mtsk\MtskKurumAltProgramlari.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskPersoneli.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskDersIhlalleriPersonel.txt" />
-    <Content Include="Scripts\UST\Mtsk\prc_MtskTeorikDersIhlalleri.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskTeorikDersIhlalleri_IPTAL.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskTeorikDersIhlalleriCakismalar.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskTeorikDersIhlalleriSaatler.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskTeorikDersOzelGunlerEkle.txt" />

@@ -201,6 +201,32 @@ INSERT INTO [dbo].[MsReports]
            ( 1        , 0         , 'DNM.TALP.TKP'  , 'DNM.TALP' , 'Takip durumu'                , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
            ( 1        , 0         , 'DNM.TALP.FRM'  , 'DNM.TALP' , 'Formlar'                     , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
 
+        -- ( 1        , 0         , 'DNM.TEOD.005'     , 'DNM.TEOD'     , 'Günlük planları'             , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.TEOD.005.01'  , 'DNM.TEOD.005' , 'Trafik ve Çevre Bilgisi'     , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.TEOD.005.02'  , 'DNM.TEOD.005' , 'İlkyardım Dersi'             , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.TEOD.005.03'  , 'DNM.TEOD.005' , 'Araç Tekniği Dersi'          , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.TEOD.005.05'  , 'DNM.TEOD.005' , 'Trafik Adabı Dersi'          , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+
+        -- ( 1        , 0         , 'DNM.TEOD.006'     , 'DNM.TEOD'     , 'Dönem planları'              , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.TEOD.006.01'  , 'DNM.TEOD.006' , 'Trafik ve Çevre Bilgisi'     , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.TEOD.006.02'  , 'DNM.TEOD.006' , 'İlkyardım Dersi'             , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.TEOD.006.03'  , 'DNM.TEOD.006' , 'Araç Tekniği Dersi'          , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.TEOD.006.05'  , 'DNM.TEOD.006' , 'Trafik Adabı Dersi'          , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+
+        -- ( 1        , 0         , 'DNM.TEOD.007'     , 'DNM.TEOD'     , 'Yıllık planları'             , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.TEOD.007.01'  , 'DNM.TEOD.007' , 'Trafik ve Çevre Bilgisi'     , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.TEOD.007.02'  , 'DNM.TEOD.007' , 'İlkyardım Dersi'             , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.TEOD.007.03'  , 'DNM.TEOD.007' , 'Araç Tekniği Dersi'          , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.TEOD.007.05'  , 'DNM.TEOD.007' , 'Trafik Adabı Dersi'          , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+
+        -- ( 1        , 0         , 'DNM.TEOD.008'     , 'DNM.TEOD'     , 'Yoklama defterleri'          , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.TEOD.008.01'  , 'DNM.TEOD.008' , 'Trafik ve Çevre Bilgisi'     , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.TEOD.008.02'  , 'DNM.TEOD.008' , 'İlkyardım Dersi'             , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.TEOD.008.03'  , 'DNM.TEOD.008' , 'Araç Tekniği Dersi'          , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.TEOD.008.05'  , 'DNM.TEOD.008' , 'Trafik Adabı Dersi'          , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+
+         
+         
            ( 1        , 0         , 'RPR.RBAS'      , 'RPR'      , 'Rapor başlığı'               , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
            ( 1        , 0         , 'RPR.SBAS'      , 'RPR'      , 'Sayfa başlığı'               , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
            ( 1        , 0         , 'RPR.RTOP'      , 'RPR'      , 'Rapor toplamı'               , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),

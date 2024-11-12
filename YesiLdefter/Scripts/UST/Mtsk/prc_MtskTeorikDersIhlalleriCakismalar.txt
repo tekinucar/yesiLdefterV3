@@ -1,7 +1,7 @@
 ﻿
 /*CreateProcedure*/
 
-ALTER PROCEDURE [dbo].[prc_MtskTeorikDersIhlalleriCakismalar] (@curId bigint)  
+CREATE PROCEDURE [dbo].[prc_MtskTeorikDersIhlalleriCakismalar] (@curId bigint)  
 AS BEGIN
 
   --declare @curId int = 576--test 710
@@ -31,6 +31,9 @@ AS BEGIN
          , GrupTipiId
          , SubeTipiId
          , IhlalTipiId
+         , DerslikTipiId
+         , DerslikAdiTipiId
+         , PersonelId  
          , DersTarihi
          , DersSaatiTipiId
          , InsertedId
@@ -43,6 +46,9 @@ AS BEGIN
         , tespit.GrupTipiId
         , tespit.SubeTipiId
         , tespit.IhlalTipiId 
+		, tespit.DerslikTipiId
+		, tespit.DerslikAdiTipiId
+        , tespit.PersonelId
         , tespit.DersTarihi
         , tespit.DersSaatiTipiId
         , tespit.InsertedId
@@ -65,6 +71,9 @@ AS BEGIN
                and td.DerslikTipiId   <> mvc.DerslikTipiId ) then 24 -- Farklı bir dersle çakışması var
             when  td.DerslikTipiId    =  mvc.DerslikTipiId then 25 -- Çift kayıt çakışması var            else 0 end) as IhlalTipiId 
             else 29 end) as IhlalTipiId
+        , td.DerslikTipiId
+        , td.DerslikAdiTipiId
+        , td.PersonelId 
         , td.DersTarihi 
         , td.DersSaatiTipiId
         , td.Id as InsertedId

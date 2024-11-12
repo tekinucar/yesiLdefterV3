@@ -4,7 +4,7 @@
 CREATE PROCEDURE [dbo].[prc_MtskDersIhlalleriPersonel] (@curId bigint)  
 AS BEGIN
 
-  --declare @curId int = 576--test 710
+--declare @curId int = 576--test 710
   declare @FirmId int
   declare @DonemTipiId int = 0
   declare @DersTarihi date
@@ -25,14 +25,15 @@ AS BEGIN
 
   Delete dbo.MtskKIhlalTeorikD
   Where  FirmId = @FirmId
-  and  ( DonemTipiId = @DonemTipiId or  DonemTipiId = 0 )
+  and  ( DonemTipiId = @DonemTipiId or  isnull(DonemTipiId,0) = 0 )
   and    IhlalTipiId > 30
   and    IhlalTipiId < 40   
   
-  -- Select @DersTarihi, @DersTarihiBasla, @DersTarihiBitis
+  --Select @DersTarihi, @DersTarihiBasla, @DersTarihiBitis
 
   -- ---------------------------------------------------------------------
-  -- Personelin ders sayılarının tespiti : 31 idli ihlaller
+  -- Personelin haftalık ders sayılarının tespiti : 31 idli ihlaller
+  -- 31 :  Personelin haftalık ders saati aştı
   -- ---------------------------------------------------------------------
 
      -- Tespit et ve yaz  
@@ -41,19 +42,21 @@ AS BEGIN
        , IhlalTipiId
        , DersSaatSayisi
        , PersonelId
+       , DersHaftasiId
        , Tarih )
      Select   
          toplam.FirmId
        , 31 as IhlalTipiId
        , sum(toplam.DersSaatSayisi) as DersSaatSayisi
        , toplam.PersonelId
+	   , toplam.DersHaftasiId
        , GETDATE()
      from (
          -- Teorik dersler
          Select 
              td.FirmId
            , td.PersonelId
-           , DatePart(ww, td.DersTarihi) as DersHaftasi
+           , DatePart(ww, td.DersTarihi) as DersHaftasiId
            , count(td.Id) as DersSaatSayisi
          From dbo.MtskTeorikDers as td 
          Where 0 = 0
@@ -70,7 +73,7 @@ AS BEGIN
          Select 
              ud.FirmId
            , ud.PersonelId
-           , DatePart(ww, ud.DersTarihi) as DersHaftasi
+           , DatePart(ww, ud.DersTarihi) as DersHaftasiId
            , count(ud.Id) as DersSaatSayisi
          From dbo.MtskUygulamaliDers as ud 
          Where 0 = 0
@@ -88,9 +91,9 @@ AS BEGIN
 	  Group by 
          toplam.FirmId
        , toplam.PersonelId
-       , toplam.DersHaftasi
+       , toplam.DersHaftasiId
 	   , personel.HaftalikDersSayisi
-      Having sum(toplam.DersSaatSayisi) < personel.HaftalikDersSayisi 
+      Having sum(toplam.DersSaatSayisi) > personel.HaftalikDersSayisi 
 
 
   -- ---------------------------------------------------------------------
@@ -350,7 +353,6 @@ AS BEGIN
          and   td.DersTarihi >= @DersTarihiBasla
          and   td.DersTarihi <= @DersTarihiBitis
 		 and   ud.Id is not null
-
 
 END -- procedure
 /*CreateProcedureEnd*/

@@ -3333,7 +3333,12 @@ namespace Tkn_Events
                         // mevcut dataset ten sonra refresh olması istenen başka bir TableIPCode için
                         if (beforeAfter == v.tBeforeAfter.After)
                         {
-                            if (buttonType == v.tButtonType.btListele)
+                            if ((buttonType == v.tButtonType.btListele) ||
+                                (buttonType == v.tButtonType.btSilListe) ||
+                                (buttonType == v.tButtonType.btSilSatir) ||
+                                (buttonType == v.tButtonType.btSilBelge) ||
+                                (buttonType == v.tButtonType.btSilHesap)
+                                )
                             {
                                 Prop_RunTime_Work_AUTO_REFRESH(tForm, Prop_RunTime);
                             }
@@ -3398,8 +3403,24 @@ namespace Tkn_Events
             string tableIPCode = string.Empty;
 
             if (prop_ != null)
+            {
                 tableIPCode = prop_.AUTO_REFRESH_IP;
-            
+                Prop_RunTime_Work_AUTO_REFRESH_(tForm, tableIPCode);
+            }
+            if (prop_.AUTO_REFRESH_IP2 != null)
+            {
+                tableIPCode = prop_.AUTO_REFRESH_IP2;
+                Prop_RunTime_Work_AUTO_REFRESH_(tForm, tableIPCode);
+            }
+            if (prop_.AUTO_REFRESH_IP3 != null)
+            {
+                tableIPCode = prop_.AUTO_REFRESH_IP3;
+                Prop_RunTime_Work_AUTO_REFRESH_(tForm, tableIPCode);
+            }
+        }
+
+        private void Prop_RunTime_Work_AUTO_REFRESH_(Form tForm, string tableIPCode)
+        {
             if (t.IsNotNull(tableIPCode))
             {
                 DataSet ds = null;
@@ -3422,6 +3443,7 @@ namespace Tkn_Events
                 }
             }
         }
+
         private void Prop_RunTime_Work_AUTO_INSERT(Form tForm, DataSet dsData, string Prop_RunTime)
         {
             /// Kendisinden önce kayıt oluşturması gereken bir TableIPCode var ise o çalışacak

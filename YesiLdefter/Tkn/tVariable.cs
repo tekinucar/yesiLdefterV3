@@ -2622,6 +2622,8 @@ namespace Tkn_Variable
         public string AUTO_INS_MST_IP { get; set; }
         public List<AUTO_LST> AUTO_LST { get; set; }
         public string AUTO_REFRESH_IP { get; set; }
+        public string AUTO_REFRESH_IP2 { get; set; }
+        public string AUTO_REFRESH_IP3 { get; set; }
 
     }
 

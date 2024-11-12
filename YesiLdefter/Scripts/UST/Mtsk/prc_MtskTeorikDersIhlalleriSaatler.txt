@@ -1,6 +1,6 @@
 ﻿/*CreateProcedure*/
 
-CREATE PROCEDURE [dbo].[prc_MtskTeorikDersIhlalleriSaatler] (@curId int)  
+CREATE PROCEDURE [dbo].[prc_MtskTeorikDersIhlalleriSaatler] (@curId bigint, @deleteFirmId int, @deleteDonemTipiId int)  
 AS BEGIN
 
   --declare @curId int = 710--576--test
@@ -14,14 +14,20 @@ AS BEGIN
 	  ,@DonemTipiId = ins.DonemTipiId
   From dbo.MtskTeorikDers as ins
   Where ins.Id = @curId
-  
+
+  -- Bu @delete... değerlerleri  
+  if (@deleteFirmId > 0) set @FirmId = @deleteFirmId
+  if (@deleteDonemTipiId > 0) set @DonemTipiId = @deleteDonemTipiId
+
   Delete MtskKIhlalTeorikD
   Where  FirmId = @FirmId
   and    DonemTipiId = @DonemTipiId
-  and    IhlalTipiId in (11,12,13,14,15)
+  and    IhlalTipiId in (11,12,13,14,15,16)
      
   -- ---------------------------------------------------------------------
   -- Günlük ders sayılarının tespiti : 11, 12 idli ihlaller
+  -- 11 :  Bir ders, bir gün içinde en az 2 saat olabilir
+  -- 12 :  Bir ders, bir gün içinde en fazla 6 saat olabilir
   -- ---------------------------------------------------------------------
 
   -- Id DerslikTipi
@@ -50,8 +56,8 @@ AS BEGIN
                when count(td.Id) < @EnKucuk then 11
                when count(td.Id) > @EnBuyuk then 12
                else 0 end ) as IhlalTipiId
-           , count(td.Id) as DersSaatSayisi
            , td.DerslikTipiId
+           , count(td.Id) as DersSaatSayisi
 		   , td.DersTarihi
 		   , GETDATE()
          From dbo.MtskTeorikDers as td 
@@ -69,6 +75,8 @@ AS BEGIN
 
   -- ---------------------------------------------------------------------
   -- Grup bazlı ders sayılarının tespiti : 13, 14 idli ihlaller
+  -- 13 :  Ders saati eksik
+  -- 14 :  Ders saati fazla
   -- ---------------------------------------------------------------------
 
   declare @DersSayisiTrf smallInt = 0
@@ -87,7 +95,7 @@ AS BEGIN
        left outer join GecerlilikTarihi as trh on (saat.GecerlilikTarihiId = trh.Id )
   Where trh.Tarih <= GETDATE()
     
-  /*
+  
       -- Tespit et ve yaz  
       INSERT INTO [dbo].[MtskKIhlalTeorikD]
            ( FirmId
@@ -97,7 +105,8 @@ AS BEGIN
            , IhlalTipiId
            , DersSaatSayisi
            , DerslikTipiId
-           , Tarih)  */
+           --, DersTarihi  : Ders tarihi olmaz
+           , Tarih)  
          Select 
 		     td.FirmId
            , td.DonemTipiId
@@ -115,6 +124,7 @@ AS BEGIN
                else 0 end ) as IhlalTipiId
            , count(td.Id) as DersSaatSayisi
            , td.DerslikTipiId
+           --, td.DersTarihi
 		   , GETDATE()
          From dbo.MtskTeorikDers as td 
          Where td.FirmId = @FirmId
@@ -125,6 +135,7 @@ AS BEGIN
            , td.GrupTipiId
            , td.SubeTipiId
            , td.DerslikTipiId
+           --, td.DersTarihi  DersTarihi olmaz
          HAVING 
            ( td.DerslikTipiId = 1 and count(td.Id) < @DersSayisiTrf ) or
            ( td.DerslikTipiId = 1 and count(td.Id) > @DersSayisiTrf ) or
@@ -140,17 +151,18 @@ AS BEGIN
   -- ---------------------------------------------------------------------
 
       -- Tespit et ve yaz  
-/*      INSERT INTO [dbo].[MtskKIhlalTeorikD]
+      INSERT INTO [dbo].[MtskKIhlalTeorikD]
            ( FirmId
            , DonemTipiId
            , GrupTipiId
            , SubeTipiId
            , IhlalTipiId
            , DerslikTipiId
+           , PersonelId
            , DersTarihi
            , DersSaatiTipiId
 		   , InsertedId
-           , Tarih)  */
+           , Tarih)  
          Select 
              td.FirmId
            , td.DonemTipiId
@@ -158,6 +170,8 @@ AS BEGIN
            , td.SubeTipiId
            , 15 as IhlalTipiId -- tatil
            , td.DerslikTipiId 
+           , td.PersonelId 
+		   , td.DersTarihi
            , td.DersSaatiTipiId
 		   , td.Id
            , GETDATE()
@@ -168,6 +182,43 @@ AS BEGIN
          Where ttl.OzelGunlerId > 0 -- tatil Id varsa
          and   td.FirmId      = @FirmId
 		 and   td.DonemTipiId = @DonemTipiId
+
+  -- ---------------------------------------------------------------------
+  -- Dönem açılış tarihinden önce ders verildi : 16 idli ihlal
+  -- ---------------------------------------------------------------------
+      -- Tespit et ve yaz  
+      INSERT INTO [dbo].[MtskKIhlalTeorikD]
+           ( FirmId
+           , DonemTipiId
+           , GrupTipiId
+           , SubeTipiId
+           , IhlalTipiId
+           , DerslikTipiId
+           , PersonelId
+           , DersTarihi
+           , DersSaatiTipiId
+		   , InsertedId
+           , Tarih)  
+         Select 
+             td.FirmId
+           , td.DonemTipiId
+		   , td.GrupTipiId
+           , td.SubeTipiId
+           , 16 as IhlalTipiId 
+           , td.DerslikTipiId 
+           , td.PersonelId 
+		   , td.DersTarihi
+           , td.DersSaatiTipiId
+		   , td.Id
+           , GETDATE()
+         From dbo.MtskTeorikDers as td
+             left outer join dbo.MtskDonemi as dnm on (
+	                dnm.GrupBaslamaTarihi > td.DersTarihi
+		         )
+         Where td.FirmId      = @FirmId
+		 and   td.DonemTipiId = @DonemTipiId
+		 and   td.DonemTipiId = dnm.DonemTipiId
+         and   td.GrupTipiId  = dnm.GrupTipiId
 
 END -- procedure
 /*CreateProcedureEnd*/

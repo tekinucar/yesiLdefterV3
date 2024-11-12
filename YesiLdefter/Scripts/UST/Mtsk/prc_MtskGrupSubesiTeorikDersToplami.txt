@@ -8,6 +8,8 @@ AS BEGIN
    MtskGrupSubesi.DonemTipiId
  , MtskGrupSubesi.GrupTipiId
  , MtskGrupSubesi.SubeTipiId
+ , FNo6.GrupTipi + '.' + FNo7.SubeTipi as Lkp_GrupSubeTipi
+ , donem.GrupBaslamaTarihi
  , ders.DerslikTipi as Lkp_DerslikTipi
  , count(teo.Id) as Lkp_DersSayisi
 
@@ -38,9 +40,12 @@ AS BEGIN
    MtskGrupSubesi.DonemTipiId
  , MtskGrupSubesi.GrupTipiId
  , MtskGrupSubesi.SubeTipiId
+ , FNo6.GrupTipi 
+ , FNo7.SubeTipi
+ , donem.GrupBaslamaTarihi
  , ders.DerslikTipi
 
- END -- procedure
+END -- procedure
 
 
 /*CreateProcedureEnd*/

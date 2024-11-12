@@ -976,8 +976,8 @@ namespace Tkn_Events
             {
                 // subView var ise silelim
                 // workType == "NEW" || workType == "ADDDATA" || workType == "SubDetailNEW"
-                if (workType == "NEW")
-                    t.tRemoveTabPagesForNewData(tForm);
+                //if (workType == "NEW")
+                //    t.tRemoveTabPagesForNewData(tForm);
 
                 // master-detail çalıştıralım
                 v.SP_NewWorkType = workType;
@@ -1524,6 +1524,10 @@ namespace Tkn_Events
                             if ((onay) && (propList_ != null))
                                 onay = extraIslemVar(tForm, tableIPCode, v.tButtonType.btSilListe, v.tBeforeAfter.After, propList_);
 
+                            if (vt.RunTime)
+                            {
+                                ev.Prop_RunTimeClick(tForm, null, tableIPCode, v.tButtonType.btSilSatir, v.tBeforeAfter.After); // before nedeni için fonksina bak
+                            }
                         }
                         catch (Exception e)
                         {
@@ -1636,6 +1640,11 @@ namespace Tkn_Events
                                     if ((onay) && (propList_ != null))
                                         onay = extraIslemVar(tForm, tableIPCode, v.tButtonType.btSilSatir, v.tBeforeAfter.After, propList_);
 
+                                    if (vt.RunTime)
+                                    {
+                                        ev.Prop_RunTimeClick(tForm, null, tableIPCode, v.tButtonType.btSilSatir, v.tBeforeAfter.After); // before nedeni için fonksina bak
+                                    }
+
                                 }
                                 catch (Exception e)
                                 {
@@ -1664,6 +1673,7 @@ namespace Tkn_Events
                     // hiç satır kalmadıysa
                     if (dsData.Tables[vt.TableName].Rows.Count == 0)
                     {
+                        v.SP_NewWorkType = "DeleteNEW";
                         newData(tForm, tableIPCode);
                     }
                 }
@@ -2800,6 +2810,17 @@ namespace Tkn_Events
                 //if (buttonType == v.tButtonType.btOpenSubView)
                 //    onay = openSubView(tForm, tableIPCode, propList_, v.tButtonType.btOpenSubView);
                 onay = extraIslemCalistir(tForm, tableIPCode, prop_);
+
+                DataSet dsData = null;
+                DataNavigator dN = null;
+                t.Find_DataSet(tForm, ref dsData, ref dN, tableIPCode);
+                vTable vt = new vTable();
+                t.Preparing_DataSet(tForm, dsData, vt);
+
+                if (vt.RunTime)
+                {
+                    ev.Prop_RunTimeClick(tForm, null, tableIPCode, v.tButtonType.btListele, v.tBeforeAfter.After); 
+                }
             }
             return onay;
         }
@@ -3039,6 +3060,12 @@ namespace Tkn_Events
                             tForm.Close();
                     }
 
+                    if (workType == "CLOSESVIEW")
+                    {
+                        if (onay)
+                            t.tRemoveTabPagesForNewData(tForm);
+                    }
+                    
                     if (workType == "IBOX")
                     {
                         InputBox(tForm, TABLEIPCODE, item);

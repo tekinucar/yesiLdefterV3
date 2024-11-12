@@ -8,6 +8,7 @@ RETURNS bit
 AS   
 BEGIN  
 
+  
   declare @return bit
   Set @return = 0 -- default tatil değil işareti verildi
 
@@ -22,7 +23,7 @@ BEGIN
   declare @Id int
   declare @OzelGunTipiId smallInt 
   declare @IsArefeGunu bit
-  declare @BaslangicTarihi date
+  declare @BaslamaTarihi date
   declare @BitisTarihi date
   declare @BaslaSaatTipiId smallInt
   declare @yil int
@@ -40,26 +41,26 @@ BEGIN
      ,@OzelGunTipiId = OzelGunTipiId
      ,@IsArefeGunu = IsArefeGunu
      ,@BaslaSaatTipiId = BaslaSaatTipiId
-     ,@BaslangicTarihi = BaslangicTarihi
+     ,@BaslamaTarihi = BaslamaTarihi
 	 ,@BitisTarihi = BitisTarihi
   From OnmOzelGunler
   Where ( Gun = @gun and Ay = @ay and OzelGunTipiId = 1 )
-  or    ( OzelGunTipiId = 3 and BaslangicTarihi <= @islemTarihi and BitisTarihi >= @islemTarihi ) 
+  or    ( OzelGunTipiId = 3 and BaslamaTarihi <= @islemTarihi and BitisTarihi >= @islemTarihi ) 
 
   Set @IsTatil = 0
   -- Tatil var ise 
-  if (@BaslangicTarihi is not null)
+  if (@BaslamaTarihi is not null)
   begin
       --print 'Bayrama denk geldi'
 	  --     tatilin 1. günü veya arefe günü ise ( arefe var ise tatilin başlangıç tarihidir ) 
 	  -- and tatilin başladığı saatinide geçen bir istek var ise
-	  if ((@BaslangicTarihi = @islemTarihi) and 
+	  if ((@BaslamaTarihi = @islemTarihi) and 
 	      (@BaslaSaatTipiId <= @saatTipiId)) 
 	      Set @return = 1 -- 'tatil başladı'
 
 	  -- 1. günden veya arefenden sonraki gün
 	  -- bayram bitmedi ise 
-	  if (@BaslangicTarihi < @islemTarihi) and 
+	  if (@BaslamaTarihi < @islemTarihi) and 
 	     (@BitisTarihi >= @islemTarihi)
          Set @return = 1 -- 'tatil başladı'
   end

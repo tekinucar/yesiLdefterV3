@@ -63,8 +63,6 @@ namespace YesiLdefter
 
         #endregion
 
-        ihlal prc_ler db den all
-
         private void mainForm_Load(object sender, EventArgs e)
         {
             //
@@ -378,6 +376,7 @@ namespace YesiLdefter
                     v.EXE_DRIVE = d.Name.ToString();
                     break;
                 }
+
                 /*
                 Console.WriteLine("Drive {0}", d.Name);
                 Console.WriteLine("  Drive type: {0}", d.DriveType);

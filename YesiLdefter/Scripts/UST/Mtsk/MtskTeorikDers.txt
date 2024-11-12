@@ -65,27 +65,16 @@ AS BEGIN
     BEGIN
     	
       Select
-      -- Id
-      --,FirmId
-      --,IsActive
        @eDonemTipiId = ins.DonemTipiId
       ,@eGrupTipiId = ins.GrupTipiId
       ,@eSubeTipiId = ins.SubeTipiId
-      --,DerslikTipiId]
-      --,DerslikAdiTipiId]
       ,@eDersTarihi = ins.DersTarihi
       ,@eDersSaatiTipiId = ins.DersSaatiTipiId
       ,@ePersonelId = isnull(ins.PersonelId,'')
-      --,[EgitimTipiId]
-      --,[BaslamaSaati]
-      --,[BitisSaati]
-      --,[TDersIsUploaded]
       ,@eSaat = isnull(saat.DersSaatiTipi,'00:00 - 00:00')
-
       From inserted ins
 	    left outer join Lkp.MtskTeorikDersDersSaatiTipi saat on (ins.DersSaatiTipiId = saat.Id)
       Where ins.Id = @curId
-
       
       -- personelId kontrolu
       Select @TcNoCalismaIzniNo = isnull(TcNoCalismaIzniNo,'')
@@ -111,10 +100,9 @@ AS BEGIN
 	  end --
 
 	  --Execute [dbo].[prc_MtskTeorikDersIhlalleri] @curId iptal
-	  Execute [dbo].[prc_MtskTeorikDersIhlalleriSaatler] @curId
+	  Execute [dbo].[prc_MtskTeorikDersIhlalleriSaatler] @curId, 0, 0
       Execute [dbo].[prc_MtskTeorikDersIhlalleriCakismalar] @curId
 	  Execute [dbo].[prc_MtskDersIhlalleriPersonel] @curId
-
       FETCH NEXT FROM myCursor INTO @curId
     END
 
@@ -134,20 +122,37 @@ AS BEGIN
 
     declare teoCursorDlt cursor local for select Id from deleted
 	declare @curId bigint
+	declare @FirmId int
+	declare @DonemTipiId int
 
 	OPEN teoCursorDlt
-
+	
     FETCH NEXT FROM teoCursorDlt INTO @curId
+
+	set @FirmId = 0
+	set @DonemTipiId = 0
 
     WHILE @@FETCH_STATUS = 0
     BEGIN
-	  Delete from MtskKIhlalTeorikD  
-	  Where ( InsertedId = @curId 
-	  or      MevcutId = @curId )
+        Select   
+		    @FirmId = FirmId
+          , @DonemTipiId = DonemTipiId 
+		From deleted
+		Where Id = @curId
+
+	    Delete From dbo.MtskKIhlalTeorikD 
+		Where InsertedId = @curId 
+		or    MevcutId   = @curId
+
+        Execute [dbo].[prc_MtskTeorikDersIhlalleriSaatler] @curId, @FirmId, @DonemTipiId
+        -- çakışmaları düzeltemiyor çünkü InsertedId li kayıt silinmiş oluyor
+	    -- Execute [dbo].[prc_MtskTeorikDersIhlalleriCakismalar] @curId
+        Execute [dbo].[prc_MtskDersIhlalleriPersonel] @curId
 
       FETCH NEXT FROM teoCursorDlt INTO @curId
     END
 
+	
     CLOSE teoCursorDlt
     DEALLOCATE teoCursorDlt
 

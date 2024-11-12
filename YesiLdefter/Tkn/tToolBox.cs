@@ -1419,7 +1419,7 @@ namespace Tkn_ToolBox
 
             if (Cursor.Current == Cursors.WaitCursor)
                 Cursor.Current = Cursors.Default;
-
+            
             if (cntrl != null)
             {
                 if (cntrl.GetType().ToString().IndexOf("DevExpress.XtraGrid.GridControl") > -1)
@@ -2707,6 +2707,7 @@ namespace Tkn_ToolBox
             //string Sql = ds.Tables[0].Namespace.ToString();
 
             string myProp = ds.Namespace.ToString();
+            string TableIPCode = Set(ds.DataSetName.ToString(), "", "");
 
             string SqlFirst = MyProperties_Get(myProp, "SqlFirst:");
             string SqlSecond = MyProperties_Get(myProp, "SqlSecond:");
@@ -2716,7 +2717,7 @@ namespace Tkn_ToolBox
             if (Sql.IndexOf("-99") > -1)
             {
                 tEvents ev = new tEvents();
-                string TableIPCode = Set(ds.DataSetName.ToString(), "", "");
+                
                 DataNavigator dN = Find_DataNavigator(tForm, TableIPCode);
                 ev.tSubDetail_Refresh(ds, dN);
                 return true;
@@ -2727,14 +2728,10 @@ namespace Tkn_ToolBox
                 #region
                 try
                 {
-                    /*
-                    string TableIPCode = Set(ds.DataSetName.ToString(), "", "");
-
-                    Control cntrl = null;// new Control();
-                    cntrl = Find_Control_View(tForm, TableIPCode);
-                    */
                     Control cntrl = null;
+                    //cntrl = Find_Control_View(tForm, TableIPCode);
                     sonuc = Data_Read_Execute(tForm, ds, ref Sql, "", cntrl);
+                    ViewControl_Enabled(tForm, TableIPCode, sonuc);
                 }
                 catch (Exception)
                 {
@@ -6127,6 +6124,7 @@ namespace Tkn_ToolBox
 
         public void tRemoveTabPagesForNewData(Form tForm)
         {
+            
             List<string> list = new List<string>();
             FindName_Control_List(tForm, list, "tTabPage_");
 
