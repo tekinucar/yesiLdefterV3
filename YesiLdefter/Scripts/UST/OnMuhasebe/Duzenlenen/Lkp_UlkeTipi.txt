@@ -22,7 +22,7 @@ commit transaction
 
 
 /*CreateData*/
-
+DELETE from Lkp.UlkeTipi
 INSERT INTO [Lkp].[UlkeTipi] (Id, UlkeKodu, UlkeAdi, UlkeAdi2 )
  VALUES 
   (  0,   '', '', 'Ülke Seçin...' ),

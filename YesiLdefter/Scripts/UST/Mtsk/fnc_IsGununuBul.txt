@@ -63,6 +63,9 @@ BEGIN
   if (@saatTipiId > 100) 
       set @saatTipiId = @saatTipiId - 100
 
+  -- @say ile sürekli +1 ile işlemTarihi arttırarak sonucTarihi bulunuyor 
+  -- @isGunu ile @istenenIsGunu yakalanıyor
+
   while (@sonuc = 0)
   begin
       set @IsTatil = 0
@@ -76,17 +79,18 @@ BEGIN
       if (@IsTatil = 0)
       begin
           --print @sonucTarih
-          if (@gunTipiId = 0) or (@gunTipiId = 1)
+          --if (@gunTipiId = 0) or (@gunTipiId = 1)
+          if (@gunTipiId = 1)
           begin
               -- 7 : Cumartesi ve 1 : Pazar değilse
               if (@gunNo <> 7) and (@gunNo <> 1) 
-                  set @isGunu = @isGunu + 1
+                  set @isGunu = @isGunu + 1 -- yani hafta için günler ise isGünü +1 olsun
           end
 
           -- @gunTipiId : 2 = 6 iş günü, 1 gün izin 
           -- @gunNo     : 1 = Pazar değilse
           if (@gunTipiId = 2) and (@gunNo <> 1) 
-              set @isGunu = @isGunu + 1
+              set @isGunu = @isGunu + 1 -- pazar değilse isGunu +1 olsun 
 
           if (@istenenIsGunu = @isGunu - 1) 
               set @sonuc = @isGunu
@@ -102,6 +106,7 @@ BEGIN
   --print @sonucTarih  
 
   RETURN @return;  
+
 END;
 
 /*CreateFunctionEnd*/

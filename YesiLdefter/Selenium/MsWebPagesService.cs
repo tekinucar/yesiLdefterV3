@@ -1462,6 +1462,8 @@ namespace YesiLdefter.Selenium
 
         public void scrapingPages_PositionChanged(webWorkPageNodes workPageNodes, webForm f)
         {
+            v.Kullaniciya_Mesaj_Var = workPageNodes.aktifPageCode;
+
             if (f.autoSubmit)
             {
                 if ((workPageNodes.aktifPageCode != "MTSKADAYRESIM") &&

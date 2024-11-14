@@ -4010,6 +4010,8 @@ namespace Tkn_ToolBox
             if ((i == -1) || (i > 10))
                 prop_ = "[" + prop_ + "]";
 
+            prop_ = prop_.Replace("|Prop_Navigator|", "");
+
             try
             {
                 var propL = JsonConvert.DeserializeAnonymousType(prop_, packet); // dip

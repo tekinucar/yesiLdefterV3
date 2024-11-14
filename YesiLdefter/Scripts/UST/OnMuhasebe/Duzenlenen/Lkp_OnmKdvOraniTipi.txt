@@ -23,7 +23,7 @@ create table [Lkp].[OnmKdvOraniTipi]
 
 
 /*CreateData*/
--- delete from Lkp.OnmKdvOraniTipi
+DELETE from Lkp.OnmKdvOraniTipi
 INSERT INTO [Lkp].[OnmKdvOraniTipi] (Id, IsActive, KdvOraniKodu, KdvOrani, KdvOraniAdi )
  VALUES 
   ( -1, 1,    0, -1, N'Farklı Kdv oranları mevcut' ),

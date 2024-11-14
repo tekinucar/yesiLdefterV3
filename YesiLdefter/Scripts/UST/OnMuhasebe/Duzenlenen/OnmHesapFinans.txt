@@ -509,6 +509,10 @@ INSERT INTO [Lkp].[OnmHesapFinansSahiplikTipi] (Id, SahiplikTipi, GrupTipiId)
 -- ------------------------------------------------------- 
 -- MaliyetinKapsamTipiId
 -- ------------------------------------------------------- 
+
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmHesapFinansMaliyetinKapsamTipi')
+drop table [Lkp].[OnmHesapFinansMaliyetinKapsamTipi]
+
 create table [Lkp].[OnmHesapFinansMaliyetinKapsamTipi]
 (
    Id                    Int Unique Not Null,

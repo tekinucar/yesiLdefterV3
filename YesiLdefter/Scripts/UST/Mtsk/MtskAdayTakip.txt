@@ -96,7 +96,6 @@ begin transaction
 
  create index X_MtskAdayTakip01 on MtskAdayTakip (TalepId)
  create index X_MtskAdayTakip02 on MtskAdayTakip (AdayId)
- create index X_MtskAdayTakip03 on MtskAdayTakip (DonemTipiId,GrupTipiId,SubeTipiId)
    
 commit transaction
 
@@ -165,7 +164,7 @@ Delete from [Lkp].[MtskAdayTakipKayitTipi]
 INSERT INTO [Lkp].[MtskAdayTakipKayitTipi] (Id, KayitTipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption)
  VALUES 
   ( 1,    N'Ön kayıt',          1, 1121, 'Kayıt durumu',  'Ön kayıt',     'Yeni aday kaydı' ),
-  ( 2,    N'Kayıt aşamasında',  1, 1122, 'Kayıt durumu',  'K.Aşamasında', 'Mebbis"e bağlan .' ),
+  ( 2,    N'Kayıt aşamasında',  1, 1122, 'Kayıt durumu',  'K.Aşamasında', 'Mebbise bağlan .' ),
   ( 3,    N'Kesin kayıt',       1, 1123, 'Kayıt durumu',  'Kesin kay.', '' )
 
 
@@ -248,7 +247,7 @@ create table [Lkp].[MtskAdayTakipMebbisOnayiTipi]
 Delete from [Lkp].[MtskAdayTakipMebbisOnayiTipi]
 INSERT INTO [Lkp].[MtskAdayTakipMebbisOnayiTipi] (Id, MebbisOnayiTipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption)
  VALUES 
-  ( 0,  N'Onaysız',        1, 1161, 'Mebbis kurum onayı',  '', 'Mebbis"e bağlan ..' ),
+  ( 0,  N'Onaysız',        1, 1161, 'Mebbis kurum onayı',  '', 'Mebbise bağlan ..' ),
   ( 1,  N'Onaylandı',      1, 1162, 'Mebbis kurum onayı',  '', '' )
 
 
@@ -415,7 +414,7 @@ INSERT INTO [Lkp].[MtskAdayTakipBelgelerTipi] (Id, BelgelerTipi, KonuGrupId, Kon
  VALUES 
   ( 1,  N'Belgeleri eksik olanlar',         1, 1241, 'Belgeler',  '', '' ),
   ( 2,  N'Belgeleri taranmayan',            1, 1242, 'Belgeler',  '', '' ),
-  ( 3,  N'Belgeleri Mebbis"e yüklenmeyen',  1, 1243, 'Belgeler',  '', 'Mebbis"e bağlan ...' )
+  ( 3,  N'Belgeleri Mebbise yüklenmeyen',  1, 1243, 'Belgeler',  '', 'Mebbise bağlan ...' )
 
 
 
@@ -462,8 +461,8 @@ drop table [Lkp].[MtskAdayTakipBorcDurumuTipi]
 
 create table [Lkp].[MtskAdayTakipBorcDurumuTipi]
 (
-   Id                 Int Unique not null, 
-   BorcDurumuTipi     nVarchar(50)   null
+   Id               Int Unique not null, 
+   BorcDurumuTipi   nVarchar(50)   null,
    KonuGrupId       SmallInt       null, 
    KonuId           Int            null,
    KonuCaption      nVarchar(20)   null,
@@ -494,7 +493,7 @@ drop table [Lkp].[MtskAdayTakipTeorikDersTipi]
 create table [Lkp].[MtskAdayTakipTeorikDersTipi]
 (
    Id               Int Unique not null, 
-   TeorikDersTipi   nVarchar(50)   null
+   TeorikDersTipi   nVarchar(50)   null,
    KonuGrupId       SmallInt       null,
    KonuId           Int            null,
    KonuCaption      nVarchar(20)   null,
@@ -577,11 +576,11 @@ drop table [Lkp].[MtskAdayTakipeSinavSonrasiTipi]
 
 create table [Lkp].[MtskAdayTakipeSinavSonrasiTipi]
 (
-   Id               Int Unique not null, 
+   Id                 Int Unique not null, 
    eSinavSonrasiTipi  nVarchar(50)   null,
-   KonuGrupId       SmallInt       null,
-   KonuId           Int            null,
-   KonuCaption      nVarchar(20)   null,
+   KonuGrupId         SmallInt       null,
+   KonuId             Int            null,
+   KonuCaption        nVarchar(20)   null,
    ChartCaption       nVarchar(20)   null,
    FormCaption        nVarchar(15)   null,   
 
@@ -606,7 +605,7 @@ drop table [Lkp].[MtskAdayTakipeSinavUcretTipi]
 create table [Lkp].[MtskAdayTakipeSinavUcretTipi]
 (
    Id               Int Unique not null, 
-   eSinavUcretTipi  nVarchar(50)   null
+   eSinavUcretTipi  nVarchar(50)   null,
    KonuGrupId       SmallInt       null,
    KonuId           Int            null,
    KonuCaption      nVarchar(20)   null,
@@ -634,9 +633,9 @@ create table [Lkp].[MtskAdayTakipUygulamaliDersTipi]
 (
    Id                  Int Unique not null, 
    UygulamaliDersTipi  nVarchar(50)   null,
-   KonuGrupId       SmallInt       null,
-   KonuId           Int            null,
-   KonuCaption      nVarchar(20)   null,
+   KonuGrupId          SmallInt       null,
+   KonuId              Int            null,
+   KonuCaption         nVarchar(20)   null,
    ChartCaption        nVarchar(20)   null,
    FormCaption         nVarchar(15)   null,   
    
@@ -663,9 +662,9 @@ create table [Lkp].[MtskAdayTakipBasarisizDersTipi]
 (
    Id                  Int Unique not null, 
    BasarisizDersTipi   nVarchar(50)   null,
-   KonuGrupId       SmallInt       null,
-   KonuId           Int            null,
-   KonuCaption      nVarchar(20)   null,
+   KonuGrupId          SmallInt       null,
+   KonuId              Int            null,
+   KonuCaption         nVarchar(20)   null,
    ChartCaption        nVarchar(20)   null,
    FormCaption         nVarchar(15)   null,   
    
@@ -693,9 +692,9 @@ create table [Lkp].[MtskAdayTakipArti4DersTipi]
 (
    Id              Int Unique not null, 
    Arti4DersTipi   nVarchar(50)   null,
-   KonuGrupId       SmallInt       null,
-   KonuId           Int            null,
-   KonuCaption      nVarchar(20)   null,
+   KonuGrupId      SmallInt       null,
+   KonuId          Int            null,
+   KonuCaption     nVarchar(20)   null,
    ChartCaption    nVarchar(20)   null,
    FormCaption     nVarchar(15)   null,   
    
@@ -785,11 +784,11 @@ drop table [Lkp].[MtskAdayTakipuSinavSonrasiTipi]
 
 create table [Lkp].[MtskAdayTakipuSinavSonrasiTipi]
 (
-   Id               Int Unique not null, 
-   uSinavSonrasiTipi  nVarchar(100)   null,
-   KonuGrupId       SmallInt       null,
-   KonuId           Int            null,
-   KonuCaption      nVarchar(20)   null,
+   Id                 Int Unique not null, 
+   uSinavSonrasiTipi  nVarchar(100)  null,
+   KonuGrupId         SmallInt       null,
+   KonuId             Int            null,
+   KonuCaption        nVarchar(20)   null,
    ChartCaption       nVarchar(20)   null,
    FormCaption        nVarchar(15)   null, 
    
@@ -815,7 +814,7 @@ drop table [Lkp].[MtskAdayTakipuSinavUcretTipi]
 create table [Lkp].[MtskAdayTakipuSinavUcretTipi]
 (
    Id               Int Unique not null, 
-   uSinavUcretTipi  nVarchar(50)   null
+   uSinavUcretTipi  nVarchar(50)   null,
    KonuGrupId       SmallInt       null,
    KonuId           Int            null,
    KonuCaption      nVarchar(20)   null,
@@ -840,9 +839,9 @@ create table [Lkp].[MtskAdayTakipSertifikaDurumTipi]
 (
    Id                 Int Unique not null, 
    SertifikaDurumTipi nVarchar(50)   null,
-   KonuGrupId       SmallInt       null,
-   KonuId           Int            null,
-   KonuCaption      nVarchar(20)   null,
+   KonuGrupId         SmallInt       null,
+   KonuId             Int            null,
+   KonuCaption        nVarchar(20)   null,
    ChartCaption       nVarchar(20)   null,
    FormCaption        nVarchar(15)   null,
    

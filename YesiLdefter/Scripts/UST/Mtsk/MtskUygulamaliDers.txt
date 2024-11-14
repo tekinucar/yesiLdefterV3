@@ -70,6 +70,8 @@ AS BEGIN
 
     declare @TcNoCalismaIzniNo varchar(20) = null
 
+    /* düzeltme gerekiyor
+
     WHILE @@FETCH_STATUS = 0
     BEGIN
     	
@@ -186,6 +188,8 @@ AS BEGIN
 
       FETCH NEXT FROM myCursor INTO @curId
     END
+
+    */
 
     CLOSE myCursor
     DEALLOCATE myCursor   

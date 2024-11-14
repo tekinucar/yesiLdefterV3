@@ -73,6 +73,8 @@ AS BEGIN
 	declare @ySinavSonucYorumu nvarchar(250) = ''
 	declare @DosyaYakti bit = 0
 
+	/* düzeltme gerekiyor
+
     WHILE @@FETCH_STATUS = 0
     BEGIN
 	    set @ySinavNo = 0 
@@ -238,6 +240,8 @@ AS BEGIN
 
         FETCH NEXT FROM curSinavUyg INTO @curId
     END
+
+	*/
 
     CLOSE curSinavUyg
     DEALLOCATE curSinavUyg   

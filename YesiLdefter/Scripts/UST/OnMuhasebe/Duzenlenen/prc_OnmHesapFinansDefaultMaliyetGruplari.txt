@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[prc_OnmHesapFinansDefaultMaliyetGrublari]( @FirmId int )  
+﻿CREATE PROCEDURE [dbo].[prc_OnmHesapFinansDefaultMaliyetGruplari]( @FirmId int )  
 AS BEGIN  
    -- Her işletmede olması gereken default maliyet gruplarının otomatik açılması sağlanıyor
 

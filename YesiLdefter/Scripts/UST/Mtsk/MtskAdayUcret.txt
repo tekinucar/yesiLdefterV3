@@ -82,14 +82,14 @@ commit transaction
 /*CreateTableEnd*/
 
 
-/*CreateTrigger*/
+/*CreateTrigger_HENUZ_GEREK_YOK*/
 
 CREATE TRIGGER dbo.trg_MtskAdayUcret on dbo.MtskAdayUcret
 AFTER INSERT, UPDATE
 AS BEGIN
 
     DECLARE ucretCursor cursor local for select Id from Inserted
-    DECLARE @ucretId bigint
+    DECLARE @curId bigint
 
     Declare @AdayId int = 0
     Declare @FirmId int = 0
@@ -102,7 +102,7 @@ AS BEGIN
     BEGIN
 
 
-      FETCH NEXT FROM ucretCursor INTO @ucretId
+      FETCH NEXT FROM ucretCursor INTO @curId
     END -- While
 
     CLOSE ucretCursor
@@ -112,7 +112,7 @@ END -- create trigger
 
 ALTER TABLE dbo.MtskAdayUcret ENABLE TRIGGER trg_MtskAdayUcret
 
-/*CreateTriggerEnd*/
+/*CreateTriggerEnd_HENUZ_GEREK_YOK*/
 
 
 

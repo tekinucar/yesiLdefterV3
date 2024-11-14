@@ -123,7 +123,7 @@ INSERT INTO [Lkp].[OnmOdemePlaniTaksitTipi] (Id, TaksitTipi)
   ( 1,    N'Peşinat'),
   ( 2,    N'Taksit'),
   ( 3,    N'Tek Ödeme'),
-  ( 4,    N'İade nedeniyle oluşan borç')
+  ( 4,    N'İade nedeniyle oluşan borç'),
   ( 5,    N'Borcun tamamı')
     
 

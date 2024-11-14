@@ -112,7 +112,7 @@ commit transaction
 
 /*CreateTrigger*/
 
-ALTER TRIGGER [dbo].[trg_MtskAdayTalep] on [dbo].[MtskAdayTalep]
+CREATE TRIGGER [dbo].[trg_MtskAdayTalep] on [dbo].[MtskAdayTalep]
 AFTER INSERT, UPDATE
 AS BEGIN
   print 'talep trigger start'

@@ -75,6 +75,8 @@ AS BEGIN
 	declare @yMebbisESinavTarihValue varchar(20) = ''
 	declare @SinavSonucTipiId smallInt = 0
 	
+	
+	/*  düzeltme gerekiyor
 
     WHILE @@FETCH_STATUS = 0
     BEGIN
@@ -190,6 +192,8 @@ AS BEGIN
     END
 
 	EXECUTE [dbo].[prc_MtskAdayTakip]  @yFirmId
+
+	*/
 
     CLOSE eSinavCursor
     DEALLOCATE eSinavCursor   

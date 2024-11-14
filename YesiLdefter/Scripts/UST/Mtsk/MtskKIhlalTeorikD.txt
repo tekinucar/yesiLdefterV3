@@ -172,22 +172,20 @@ INSERT INTO [Lkp].[MtskKIhlalTeorikDIhlalTipi] (Id, IhlalTipi, IsActive)
   (25,    N'Çift kayıt çakışması var', 0),
   (29,    N'Sebebi bilinmeyen çakışma var', 0),
 
-  (31,    N'Personelin haftalık ders saati aştı', 0), -- ilgili haftanı teo ve uyg derslerinin listesi
-  (32,    N'Personelin izin gününe uygun değil', 0),             -- personel o günki teo ve uyg derslerinin listesi 
+  (31,    N'Personelin haftalık ders saati aştı', 0), 
+  (32,    N'Personelin izin gününe uygun değil', 0),  
   (33,    N'Personelin çalışma saatlerine uymuyor', 0),          -- personel o günki teo ve uyg derslerinin listesi 
   (34,    N'Personelin çalışma izin tarihi henüz başlamadı', 0), -- 
   (35,    N'Personelin çalışma izin tarihi bitmiş', 0),
   (36,    N'Personelin uygulama dersi mevcut', 0)
 
-
-  personelin uygulama saatlerinide 31 maddeye ekle
-
 commit transaction
 
 /*CreateLkpTableEnd*/
 
-  firmanın araç otomomatik mi kontrolü
-  sertifikaya bağlı aracın otomatiği yoksa talep kaydı sırasında otomatik seçeneğini işaretleyemez
+--  personelin uygulama saatlerinide 31 maddeye ekle
+--  firmanın araç otomomatik mi kontrolü
+--  sertifikaya bağlı aracın otomatiği yoksa talep kaydı sırasında otomatik seçeneğini işaretleyemez
 
 
 

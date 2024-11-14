@@ -49,7 +49,7 @@ commit transaction
 
 /*CreateTrigger*/
 
-ALTER TRIGGER [dbo].[trg_MtskAday] on [dbo].[MtskAday]
+CREATE TRIGGER [dbo].[trg_MtskAday] on [dbo].[MtskAday]
 AFTER INSERT, UPDATE
 AS BEGIN
 

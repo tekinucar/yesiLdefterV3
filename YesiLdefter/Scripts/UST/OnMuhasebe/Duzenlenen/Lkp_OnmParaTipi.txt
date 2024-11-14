@@ -24,7 +24,7 @@ commit transaction
 
 
 /*CreateData*/
-
+DELETE from Lkp.OnmParaTipi
 INSERT INTO [Lkp].[OnmParaTipi] (Id, IsActive, ParaKodu, ParaAdi )
  VALUES 
   ( 0,   1, N'',    N'Tanımsız' ),

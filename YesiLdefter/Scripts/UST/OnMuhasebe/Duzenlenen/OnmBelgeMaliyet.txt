@@ -278,6 +278,10 @@ END
 -- ------------------------------------------------------- 
 -- BelgeTipiId
 -- ------------------------------------------------------- 
+
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmBelgeMaliyetBelgeTipi')
+drop table [Lkp].[OnmBelgeMaliyetBelgeTipi]
+
 create table [Lkp].[OnmBelgeMaliyetBelgeTipi]
 (
    Id           Int Unique Not Null,
@@ -306,6 +310,9 @@ INSERT INTO [Lkp].[OnmBelgeMaliyetBelgeTipi] (Id, BelgeTipi, GrupTipiId)
 -- ------------------------------------------------------- 
 -- KaynakTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmBelgeMaliyetKaynakTipi')
+drop table [Lkp].[OnmBelgeMaliyetKaynakTipi]
+
 create table [Lkp].[OnmBelgeMaliyetKaynakTipi]
 (
    Id           Int Unique Not Null,
