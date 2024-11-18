@@ -1,52 +1,103 @@
 ﻿
 /*CreateProcedure*/
 
-CREATE PROCEDURE [dbo].[prc_MtskGrupSubesiTeorikDersToplami] (@FirmId int, @DonemTipiId int)  
+CREATE PROCEDURE [dbo].[prc_MtskGrupSubesiTeorikDersToplami] (@FirmId int, @DonemTipiId int, @GrupTipiId smallint, @SubeTipiId smallint)  
 AS BEGIN
  
- Select 
-   MtskGrupSubesi.DonemTipiId
- , MtskGrupSubesi.GrupTipiId
- , MtskGrupSubesi.SubeTipiId
- , FNo6.GrupTipi + '.' + FNo7.SubeTipi as Lkp_GrupSubeTipi
- , donem.GrupBaslamaTarihi
- , ders.DerslikTipi as Lkp_DerslikTipi
- , count(teo.Id) as Lkp_DersSayisi
+  /*
+  declare @FirmId int
+  declare @DonemTipiId int = 0
+  set @FirmId = 30
+  set @DonemTipiId = 202407
+  */
+   
+   -- GrupBitisTarihi set ediliyor
+   UPDATE dbo.MtskGrupSubesi
+       SET GrupBitisTarihi = x.GrupBitisTarihi
+   From dbo.MtskGrupSubesi as sube, (
+         Select 
+		     td.FirmId
+           , td.DonemTipiId
+           , td.GrupTipiId
+           , td.SubeTipiId
+           , max(td.DersTarihi) as GrupBitisTarihi
+         From dbo.MtskTeorikDers as td 
+         Where td.FirmId = @FirmId
+         and   td.DonemTipiId = @DonemTipiId
+         and   td.GrupTipiId  = @GrupTipiId
+         and   td.SubeTipiId  = @SubeTipiId
+         group by
+             td.FirmId
+           , td.DonemTipiId
+           , td.GrupTipiId
+           , td.SubeTipiId
+   ) as x 
+   Where sube.FirmId = x.FirmId
+   and   sube.DonemTipiId = x.DonemTipiId
+   and   sube.GrupTipiId  = x.GrupTipiId 
+   and   sube.SubeTipiId  = x.SubeTipiId 
+   
 
- from MtskGrupSubesi as [MtskGrupSubesi] with (nolock) 
-   -- Join Tables 
-   left outer join MtskDonemi as [donem] with (nolock) on ( [MtskGrupSubesi].DonemTipiId = [donem].DonemTipiId 
-   and  [MtskGrupSubesi].GrupTipiId = [donem].GrupTipiId  ) 
-   -- LookUp Tables
-   left outer join Lkp.MtskDonemTipi as FNo5 with (nolock) on ( MtskGrupSubesi.DonemTipiId = FNo5.Id ) 
-   left outer join Lkp.MtskGrupTipi as FNo6 with (nolock) on ( MtskGrupSubesi.GrupTipiId = FNo6.Id ) 
-   left outer join Lkp.MtskSubeTipi as FNo7 with (nolock) on ( MtskGrupSubesi.SubeTipiId = FNo7.Id ) 
-   left outer join Lkp.MtskKurumOnayTipi as FNo10 with (nolock) on ( MtskGrupSubesi.KurumOnayTipiId = FNo10.Id ) 
+   -- Derslerin toplam kaç saat olduğu hesaplanıyor
+   UPDATE dbo.MtskGrupSubesi
+        SET TrafikDersSayisi      = x.TrafikDersSayisi
+          , IlkYardimDersSayisi   = x.IlkYardimDersSayisi
+          , AracTeknigiDersSayisi = x.AracTeknigiDersSayisi
+          , AdapDersSayisi        = x.AdapDersSayisi
+   From dbo.MtskGrupSubesi as sube, 
+   (
+         Select 
+              sm.FirmId
+            , sm.DonemTipiId
+            , sm.GrupTipiId
+            , sm.SubeTipiId
+            , sum(isnull(sm.d1,0)) as TrafikDersSayisi
+            , sum(isnull(sm.d2,0)) as IlkYardimDersSayisi
+            , sum(isnull(sm.d3,0)) as AracTeknigiDersSayisi
+            , sum(isnull(sm.d5,0)) as AdapDersSayisi
+         from (
+	         Select 
+                  ders.FirmId
+                , ders.DonemTipiId
+                , ders.GrupTipiId
+                , ders.SubeTipiId
+                , (case when ders.DerslikTipiId = 1 then ders.DersSaatSayisi end ) as d1
+                , (case when ders.DerslikTipiId = 2 then ders.DersSaatSayisi end ) as d2
+                , (case when ders.DerslikTipiId = 3 then ders.DersSaatSayisi end ) as d3
+                , (case when ders.DerslikTipiId = 5 then ders.DersSaatSayisi end ) as d5
+             from (
+                 Select 
+                      td.FirmId
+                    , td.DonemTipiId
+                    , td.GrupTipiId
+                    , td.SubeTipiId
+                    , td.DerslikTipiId
+                    , count(td.Id) as DersSaatSayisi
+                 From dbo.MtskTeorikDers as td 
+                 Where td.FirmId = @FirmId
+                 and   td.DonemTipiId = @DonemTipiId
+                 and   td.GrupTipiId  = @GrupTipiId
+                 and   td.SubeTipiId  = @SubeTipiId
+                 group by
+                      td.FirmId
+                    , td.DonemTipiId
+                    , td.GrupTipiId
+                    , td.SubeTipiId
+                    , td.DerslikTipiId
+                 ) as ders
+	     ) as sm
+         group by
+		      sm.FirmId
+            , sm.DonemTipiId
+            , sm.GrupTipiId
+            , sm.SubeTipiId
+   ) as x
+   Where sube.FirmId      = x.FirmId
+   and   sube.DonemTipiId = x.DonemTipiId
+   and   sube.GrupTipiId  = x.GrupTipiId 
+   and   sube.SubeTipiId  = x.SubeTipiId 
 
-   left outer join MtskTeorikDers as teo on (
-           MtskGrupSubesi.DonemTipiId = teo.DonemTipiId  
-       and MtskGrupSubesi.GrupTipiId = teo.GrupTipiId  
-       and MtskGrupSubesi.SubeTipiId = teo.SubeTipiId  
-   )
-   left outer join Lkp.MtskTeorikDersDerslikTipi as ders on ( teo.DerslikTipiId = ders.Id )
-
- where 0 = 0 
- /*[MtskGrupSubesi].DEFAULT_VALUE*/
- and [MtskGrupSubesi].FirmId = @FirmId
- and [MtskGrupSubesi].DonemTipiId = @DonemTipiId
- and MtskGrupSubesi.IsActive = 1 
- 
- group by
-   MtskGrupSubesi.DonemTipiId
- , MtskGrupSubesi.GrupTipiId
- , MtskGrupSubesi.SubeTipiId
- , FNo6.GrupTipi 
- , FNo7.SubeTipi
- , donem.GrupBaslamaTarihi
- , ders.DerslikTipi
 
 END -- procedure
 
-
 /*CreateProcedureEnd*/
-

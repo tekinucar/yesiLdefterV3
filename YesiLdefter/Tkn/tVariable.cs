@@ -666,7 +666,7 @@ namespace Tkn_Variable
         public static System.Windows.Forms.Timer timer_Kullaniciya_Mesaj_Var_ = null;
         public static string Kullaniciya_Mesaj_Var { get; set; }
         public static Boolean Kullaniciya_Mesaj_Show = false;
-        public static Boolean Onay { get; set; }
+        public static Boolean SaveOnay { get; set; }
 
         public static Boolean Takip = false;
         public static Boolean Takip_Find = false;
@@ -1419,6 +1419,7 @@ namespace Tkn_Variable
         public string fTriggerFields { get; set; }
         public string displayFormat { get; set; }
         public string fVisible { get; set; }
+        public string fEnabled { get; set; }
         public string fieldNewValue { get; set; }
         public string myProp { get; set; }
         public string SqlF { get; set; }
@@ -1474,6 +1475,7 @@ namespace Tkn_Variable
             fTriggerFields = string.Empty;
             displayFormat = string.Empty;
             fVisible = "False";
+            fEnabled = "False";
             fieldNewValue = "";
             myProp = "";
             SqlF = "";

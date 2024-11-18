@@ -1,6 +1,6 @@
 ﻿/*CreateProcedure*/
 
-CREATE PROCEDURE [dbo].[prc_MtskAdayTablesCreate] (@TalepId int)  
+CREATE PROCEDURE [dbo].[prc_MtskAdayTablesInsert] (@TalepId int)  
 AS BEGIN
 
   declare @yFirmId int = 0
@@ -43,6 +43,7 @@ AS BEGIN
       set @onaySertifika = 1
       set @onaySozlesme = 1
   end 
+  
 
   -- MtskAdayBelgeler Insert
   if ( Select count(*) ADET from dbo.MtskAdayBelgeler 
@@ -58,6 +59,7 @@ AS BEGIN
                 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
                 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
                 0,  0,  0,  0 ) 
+       print ' create : [MtskAdayBelgeler]'
   end -- MtskAdayBelgeler
         
   -- MtskAdayAdliSicil Insert
@@ -66,7 +68,8 @@ AS BEGIN
      ) = 0 and (@onayAdliSicil = 1)
   begin 
        Insert into [dbo].[MtskAdayAdliSicil]
-           (FirmId, TalepId, AdayId) VALUES (@yFirmId, @TalepId, @yAdayId )
+           (FirmId, TalepId, AdayId) VALUES (@yFirmId, @TalepId, @yAdayId ) 
+       print ' create : [MtskAdayAdliSicil]'
   end
 
   -- MtskAdayAdres Insert
@@ -75,7 +78,8 @@ AS BEGIN
      ) = 0 and (@onayAdres = 1) 
   begin 
        Insert into [dbo].[MtskAdayAdres]
-            (FirmId, TalepId, AdayId) VALUES (@yFirmId, @TalepId, @yAdayId )
+            (FirmId, TalepId, AdayId) VALUES (@yFirmId, @TalepId, @yAdayId )  
+       print ' create : [MtskAdayAdres]'
   end
 
   -- MtskAdayImza Insert
@@ -84,7 +88,8 @@ AS BEGIN
      ) = 0 and (@onayImza = 1) 
   begin 
        Insert into [dbo].[MtskAdayImza]
-            (FirmId, TalepId, AdayId) VALUES (@yFirmId, @TalepId, @yAdayId )
+            (FirmId, TalepId, AdayId) VALUES (@yFirmId, @TalepId, @yAdayId ) 
+       print ' create : [MtskAdayImza]'
   end
 
   -- MtskAdayOgrenim Insert
@@ -93,7 +98,8 @@ AS BEGIN
      ) = 0 and (@onayOgrenim = 1) 
   begin 
        Insert into [dbo].[MtskAdayOgrenim]
-            (FirmId, TalepId, AdayId) VALUES (@yFirmId, @TalepId, @yAdayId )
+            (FirmId, TalepId, AdayId) VALUES (@yFirmId, @TalepId, @yAdayId )   
+       print ' create : [MtskAdayOgrenim]'
   end
 
   -- MtskAdaySaglik Insert
@@ -102,7 +108,8 @@ AS BEGIN
      ) = 0 and (@onaySaglik = 1) 
   begin 
        Insert into [dbo].[MtskAdaySaglik]
-            (FirmId, TalepId, AdayId) VALUES (@yFirmId, @TalepId, @yAdayId )
+            (FirmId, TalepId, AdayId) VALUES (@yFirmId, @TalepId, @yAdayId )   
+       print ' create : [MtskAdaySaglik]'
   end
 
   -- MtskAdaySertifika Insert
@@ -111,7 +118,8 @@ AS BEGIN
      ) = 0 and (@onaySertifika = 1) 
   begin 
        Insert into [dbo].[MtskAdaySertifika]
-            (FirmId, TalepId, AdayId) VALUES (@yFirmId, @TalepId, @yAdayId )
+            (FirmId, TalepId, AdayId) VALUES (@yFirmId, @TalepId, @yAdayId ) 
+       print ' create : [MtskAdaySertifika]'
   end
 
   -- MtskAdaySozlesme Insert
@@ -120,7 +128,8 @@ AS BEGIN
      ) = 0 and (@onaySozlesme = 1) 
   begin 
        Insert into [dbo].[MtskAdaySozlesme]
-            ([FirmId],[TalepId],[AdayId]) VALUES (@yFirmId, @TalepId, @yAdayId)
+            ([FirmId],[TalepId],[AdayId]) VALUES (@yFirmId, @TalepId, @yAdayId) 
+       print ' create : [MtskAdaySozlesme]'
   end
 
   -- MtskAdayUcret Insert
@@ -158,6 +167,7 @@ AS BEGIN
 			, 0, 0, 0, 0, 0 -- VGSer..
 			, 0, null       -- Perso..
 			)
+       print ' create : [MtskAdayUcret]'
   end
 			   
   -- MtskAdayTakip Insert
@@ -167,7 +177,6 @@ AS BEGIN
   begin 
        insert into dbo.[MtskAdayTakip] ( 
             [FirmId],[TalepId],[AdayId]
-           ,[DonemTipiId],[GrupTipiId],[SubeTipiId]
            ,[TalepTipiId],[KayitTipiId],[ZamanlamaTipiId]
            ,[IsGrupSubeYok],[IsActive] --[IsEgitimDevamEdiyor]
            ,[MebbisKurumOnayi],[MebbisDurumTipiId]
@@ -185,7 +194,6 @@ AS BEGIN
            ,[SertifikaDurumTipiId],[SertifikaTarihi],[DosyaYakti]
             ) values
             ( @yFirmId,  @TalepId, @yAdayId,
-              @yDonemTipiId,  @yGrupTipiId,  @ySubeTipiId, 
               @yTalepTipiId, 0,  0,  --@yKayitTipiId,  0, 
 			  0,  1,  -- [IsGrupSubeYok]
               0,  0,  -- @yMebbisKurumOnayi, @yMebbisDurumTipiId,
@@ -202,8 +210,10 @@ AS BEGIN
               0,  0,  0,  0,  0,  0,  null, -- [uSinavNo]
               0,  null,   0 -- SertifikaurumTipiId
             ) 
+       print ' create : [MtskAdayTakip]'
   end -- MtskAdayBelgeler
 
 END -- procedure
 
 /*CreateProcedureEnd*/
+

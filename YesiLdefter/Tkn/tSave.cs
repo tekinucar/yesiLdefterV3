@@ -912,7 +912,7 @@ namespace Tkn_Save
             f.fname = v.ds_MsTableFields.Tables[f.tableName].Rows[i]["name"].ToString();
 
             f.isFieldFind = t.Find_FieldName(ds, f.fname);
-
+            
             /// bu field mevcut TableIPCode.DataSet üzerinde kullanılmamış anlamına geliyor
             /// onun için bu fieldi atla
             ///
@@ -1173,7 +1173,7 @@ namespace Tkn_Save
                         //    f._setEditField = " [" + f.fname + "] = " + " @" + f.fname + " , ";
                         //ds.Tables[0].Rows[f.position][f.fname] = v.con_Images;
 
-                        if (f.fVisible == "True")
+                        if ((f.fVisible == "True") || (f.fEnabled == "True"))
                         {
                             f._setInsField = f.bos + f.fname + ", ";
                             f._setInsValue = " @" + f.fname + ", ";
@@ -1720,6 +1720,7 @@ namespace Tkn_Save
             ref string SQL,
             string TriggerSQL)
         {
+            v.SaveOnay = false;
             Boolean sonuc = false;
             string Table_Name = vt.TableName;
             string Key_Id_FieldName = vt.KeyId_FName;
@@ -1896,7 +1897,8 @@ namespace Tkn_Save
             } // if (SQL != "")
 
             //sp.con_Refresh = sonuc;
-
+            
+            v.SaveOnay = sonuc;
             return sonuc;
         }
 

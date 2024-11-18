@@ -23,7 +23,7 @@ AS BEGIN
       ,[TDersIsUploaded]
       ,[SablonTeorikBId]
       ,[SablonTeorikFId]
-      ,[CakismaId]
+      
      From [dbo].[MtskTeorikDers]
      Where SablonTeorikFId = @SablonTeorikFId
 

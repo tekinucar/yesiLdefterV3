@@ -148,7 +148,7 @@ END -- create trigger
 /*CreateTriggerEnd*/
 
 
-/*CreateData*/
+/*CreateData_ BURADA OLMAYACAK henüz procedure create edilmemiş durumda */
      Delete From [dbo].[OnmOzelGunler]
      Insert INTO [dbo].[OnmOzelGunler]
            (Id,    FirmId, IsActive, OzelGunTipiId, Yil,  Ay,  Gun,  IsArefeGunu, BaslaSaatTipiId, BitisSaatTipiId, GunSayisi, TatilTipiId, GunAdi  )
@@ -166,7 +166,7 @@ END -- create trigger
 
 
 
-/*CreateDataEnd*/
+/*CreateDataEnd **********  */
 
 /* test
      Insert INTO [dbo].[OnmOzelGunler]

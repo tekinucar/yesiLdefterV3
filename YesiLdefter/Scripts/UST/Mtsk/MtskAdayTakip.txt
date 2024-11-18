@@ -8,7 +8,8 @@ begin transaction
    FirmId                Int       not null,
    TalepId               Int       not null, 
    AdayId                Int       not null, 
-
+   AsamaTipiId           SmallInt      null, /* Şu anda aday hangi aşamada */
+   
    -- MtskAdayTalep trigger içinden prc_MtskAdayTakipSingleSet çağırılıyor
    -- 10 kayıt aşaması
    TalepTipiId            SmallInt     null, /*  prc_MtskAdayTakipSingleSet üzerinden işaretleniyor : 1. sertifika, 2. (2.+4 hak), 3. Nakil 2.+4hak, 4. 100Ceza, 5. Özel Uyg Ders   */ 
@@ -62,17 +63,21 @@ begin transaction
    UygulamaliDersTipiId   SmallInt     null,
 
    --210
+   BasarisizDersNo        SmallInt     null,
    BasarisizBaslamaTarihi Date         null,
    BasarisizBitisTarihi   Date         null,
    BasarisizDersToplami   SmallInt     null,
    BasarisizDersTipiId    SmallInt     null,
    
+   /* gerek kalmadı
    --220
    Arti4BaslamaTarihi     Date         null,
    Arti4BitisTarihi       Date         null,
    Arti4DersToplami       SmallInt     null, /* prc_MtskUygulamaDersPlaniSaatleriGuncelle  içinde hesplanıyor */
    Arti4DersTipiId        SmallInt     null,
-   
+   */
+
+
    --230
    uSinavaKatilabilir      Bit          null,
    uRandevuMebbisAktarildi Bit          null, 
@@ -103,6 +108,72 @@ commit transaction
 
 
 /* Tablonun her aday için gerekli olan satırı :  trg_MtskAday içinde insert ediliyor   */
+
+Delete from [Lkp].[MtskAdayTakipAsamaTipi]
+INSERT INTO [Lkp].[MtskAdayTakipAsamaTipi] (Id, AsamaTipi)
+ VALUES 
+  ( 101,    N'Ön kayıt' ),
+  ( 102,    N'Kayıt aşamasında' ),
+  ( 103,    N'Kesin kayıt' ),
+
+  ( 201,    N'Teorik ders başlamadı'),
+  ( 202,    N'Teorik ders alıyor'),
+  ( 203,    N'Teorik dersleri tamamladı'), 
+
+  ( 211,    N'1. e-Sınav başvurusu yapılacak'  ),
+  ( 212,    N'1. e-Sınav başvurusu yapıldı' ),
+  ( 213,    N'1. e-Sınav sonucu okunacak' ),
+  ( 214,    N'1. e-Sınav başarılı, uyg. ders aşamasına geçti' ),
+  ( 215,    N'1. e-Sınav başarısız' ),
+
+  ( 221,    N'2. e-Sınav başvurusu yapılacak'  ),
+  ( 222,    N'2. e-Sınav başvurusu yapıldı' ),
+  ( 223,    N'2. e-Sınav sonucu okunacak' ),
+  ( 224,    N'2. e-Sınav başarılı, uyg. ders aşamasına geçti' ),
+  ( 225,    N'2. e-Sınav başarısız' ),
+
+  ( 231,    N'3. e-Sınav başvurusu yapılacak'  ),
+  ( 232,    N'3. e-Sınav başvurusu yapıldı' ),
+  ( 233,    N'3. e-Sınav sonucu okunacak' ),
+  ( 234,    N'3. e-Sınav başarılı, uyg. ders aşamasına geçti' ),
+  ( 235,    N'3. e-Sınav başarısız' ),
+
+  ( 241,    N'4. e-Sınav başvurusu yapılacak'  ),
+  ( 242,    N'4. e-Sınav başvurusu yapıldı' ),
+  ( 243,    N'4. e-Sınav sonucu okunacak' ),
+  ( 244,    N'4. e-Sınav başarılı, uyg. ders aşamasına geçti' ),
+  ( 245,    N'4. e-Sınav başarısız, dosya yaktı' ),
+  ( 246,    N'Tüm e-Sınav hakkı bitti' ),
+
+  ( 301,    N'Uygulamalı dersler planlanacak' ),
+  ( 302,    N'Uygulamalı dersler planlandı, MEBBİSe aktarılacak' ),
+  ( 303,    N'Uygulamalı dersler için beklemede' ),
+  ( 304,    N'Uygulamalı dersleri alıyor' ),
+  ( 305,    N'Uygulamalı dersleri tamamladı' ),
+
+  ( 306,    N'Uygulama sınav için hazır değil' ),
+  ( 307,    N'Uygulama sınav için MEBBİS de onaylanacak' ),
+
+  ( 311,    N'1. Uygulama sınav randevusu planlanacak' ),
+  ( 312,    N'1. Uygulama sınav randevusu MEBBİSe aktarılacak' ),
+  ( 313,    N'1. Uygulama sınavına girecek' ),
+  ( 314,    N'1. Uygulama sınav sonucu okunacak' ),
+  ( 315,    N'1. Uygulama sınav sonucu okundu' ),
+  ( 316,    N'1. Uygulama sınav başarılı, sertifika aşamasına geçti' ),
+
+  ( 321,    N'1. başarısız aday eğitimi planlanacak' ),
+  ( 322,    N'1. başarısız aday eğitimi MEBBİSe aktarılacak' ),
+  ( 323,    N'1. başarısız aday eğitimi için beklemede' ),
+  ( 324,    N'1. başarısız aday eğitimini alıyor' ),
+  ( 325,    N'1. başarısız aday eğitimi tamamlandı' ),
+  ( 326,    N'Eğitime gerek yok (Sınava girmedi)' ),
+
+
+
+
+
+
+
 
 
 /*CreateLkpTable*/
@@ -414,10 +485,10 @@ INSERT INTO [Lkp].[MtskAdayTakipBelgelerTipi] (Id, BelgelerTipi, KonuGrupId, Kon
  VALUES 
   ( 1,  N'Belgeleri eksik olanlar',         1, 1241, 'Belgeler',  '', '' ),
   ( 2,  N'Belgeleri taranmayan',            1, 1242, 'Belgeler',  '', '' ),
-  ( 3,  N'Belgeleri Mebbise yüklenmeyen',  1, 1243, 'Belgeler',  '', 'Mebbise bağlan ...' )
+  ( 3,  N'Belgeleri Mebbise yüklenmeyen',   1, 1243, 'Belgeler',  '', 'Mebbise bağlan ...' )
 
 
-
+-- iptal edebilirsin
 
 -- ------------------------------------------------------- 
 -- EgitimSureciTipiId : 1270

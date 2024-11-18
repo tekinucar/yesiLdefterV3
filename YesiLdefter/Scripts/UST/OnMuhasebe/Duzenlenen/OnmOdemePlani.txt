@@ -56,6 +56,9 @@ begin transaction
 -- ------------------------------------------------------- 
 -- TalepTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmOdemePlaniTalepTipi')
+drop table [Lkp].[OnmOdemePlaniTalepTipi]
+
 create table [Lkp].[OnmOdemePlaniTalepTipi]
 (
    Id                Int Unique not null, 
@@ -79,6 +82,9 @@ INSERT INTO [Lkp].[OnmOdemePlaniTalepTipi] (Id, TalepTipi)
 -- ------------------------------------------------------- 
 -- UcretTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmOdemePlaniUcretTipi')
+drop table [Lkp].[OnmOdemePlaniUcretTipi]
+
 create table [Lkp].[OnmOdemePlaniUcretTipi]
 (
    Id                Int Unique not null, 
@@ -158,6 +164,9 @@ INSERT INTO [Lkp].[OnmOdemePlaniOdemeTipi] (Id, OdemeTipi, IsActive)
 -- ------------------------------------------------------- 
 -- SourceTypeId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmOdemePlaniSourceType')
+drop table [Lkp].[OnmOdemePlaniSourceType]
+
 create table [Lkp].[OnmOdemePlaniSourceType]
 (
    Id               Int Unique not null, 

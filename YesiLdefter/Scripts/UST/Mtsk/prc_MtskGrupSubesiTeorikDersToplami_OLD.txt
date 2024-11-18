@@ -1,0 +1,52 @@
+﻿
+/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_MtskGrupSubesiTeorikDersToplami] (@FirmId int, @DonemTipiId int)  
+AS BEGIN
+ 
+ Select 
+   MtskGrupSubesi.DonemTipiId
+ , MtskGrupSubesi.GrupTipiId
+ , MtskGrupSubesi.SubeTipiId
+ , FNo6.GrupTipi + '.' + FNo7.SubeTipi as Lkp_GrupSubeTipi
+ , donem.GrupBaslamaTarihi
+ , ders.DerslikTipi as Lkp_DerslikTipi
+ , count(teo.Id) as Lkp_DersSayisi
+
+ from MtskGrupSubesi as [MtskGrupSubesi] with (nolock) 
+   -- Join Tables 
+   left outer join MtskDonemi as [donem] with (nolock) on ( [MtskGrupSubesi].DonemTipiId = [donem].DonemTipiId 
+   and  [MtskGrupSubesi].GrupTipiId = [donem].GrupTipiId  ) 
+   -- LookUp Tables
+   left outer join Lkp.MtskDonemTipi as FNo5 with (nolock) on ( MtskGrupSubesi.DonemTipiId = FNo5.Id ) 
+   left outer join Lkp.MtskGrupTipi as FNo6 with (nolock) on ( MtskGrupSubesi.GrupTipiId = FNo6.Id ) 
+   left outer join Lkp.MtskSubeTipi as FNo7 with (nolock) on ( MtskGrupSubesi.SubeTipiId = FNo7.Id ) 
+   left outer join Lkp.MtskKurumOnayTipi as FNo10 with (nolock) on ( MtskGrupSubesi.KurumOnayTipiId = FNo10.Id ) 
+
+   left outer join MtskTeorikDers as teo on (
+           MtskGrupSubesi.DonemTipiId = teo.DonemTipiId  
+       and MtskGrupSubesi.GrupTipiId = teo.GrupTipiId  
+       and MtskGrupSubesi.SubeTipiId = teo.SubeTipiId  
+   )
+   left outer join Lkp.MtskTeorikDersDerslikTipi as ders on ( teo.DerslikTipiId = ders.Id )
+
+ where 0 = 0 
+ /*[MtskGrupSubesi].DEFAULT_VALUE*/
+ and [MtskGrupSubesi].FirmId = @FirmId
+ and [MtskGrupSubesi].DonemTipiId = @DonemTipiId
+ and MtskGrupSubesi.IsActive = 1 
+ 
+ group by
+   MtskGrupSubesi.DonemTipiId
+ , MtskGrupSubesi.GrupTipiId
+ , MtskGrupSubesi.SubeTipiId
+ , FNo6.GrupTipi 
+ , FNo7.SubeTipi
+ , donem.GrupBaslamaTarihi
+ , ders.DerslikTipi
+
+END -- procedure
+
+
+/*CreateProcedureEnd*/
+

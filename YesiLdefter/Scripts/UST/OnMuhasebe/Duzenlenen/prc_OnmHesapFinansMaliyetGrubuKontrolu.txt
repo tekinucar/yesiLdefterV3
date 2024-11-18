@@ -1,4 +1,6 @@
 ﻿
+/*CreateProcedure*/
+
 CREATE PROCEDURE [dbo].[prc_OnmHesapFinansMaliyetGrubuKontrolu](
  @FirmId int 
 ,@UstGrupTipiId smallInt 
@@ -72,3 +74,5 @@ AS BEGIN
     end
 
 END
+
+/*CreateProcedureEnd*/

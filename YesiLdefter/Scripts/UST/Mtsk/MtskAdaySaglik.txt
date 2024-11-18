@@ -121,6 +121,9 @@ begin transaction
 -- ------------------------------------------------------- 
 -- OzurDurumuTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdaySaglikOzurDurumuTipi')
+drop table [Lkp].[MtskAdaySaglikOzurDurumuTipi]
+
 create table [Lkp].[MtskAdaySaglikOzurDurumuTipi]
 (
    Id               Int Unique Not    null,
@@ -146,6 +149,9 @@ INSERT INTO [Lkp].[MtskAdaySaglikOzurDurumuTipi] (Id, OzurDurumuTipi)
 -- ------------------------------------------------------- 
 -- YabanciDilTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdaySaglikYabanciDilTipi')
+drop table [Lkp].[MtskAdaySaglikYabanciDilTipi]
+
 create table [Lkp].[MtskAdaySaglikYabanciDilTipi]
 (
    Id               Int Unique Not    null,

@@ -372,7 +372,7 @@ AS BEGIN
           Execute [dbo].[prc_MtskAdayTalepSertifika24HakKaydi] @TalepId
       end
 
-	  Execute [dbo].[prc_MtskAdayTablesCreate] @TalepId
+	  Execute [dbo].[prc_MtskAdayTablesInsert] @TalepId
 	  Execute [dbo].[prc_MtskAdayTakipTalepKaydiSingleSet] @TalepId
 	  Execute [dbo].[prc_MtskAdayTalepYasiniHesapla] @TalepId
 

@@ -354,20 +354,34 @@ namespace YesiLdefter
         private void DesignerSettings_CustomSaveDialog(object sender, OpenSaveDialogEventArgs e)
         {
             // return the report name in the e.FileName
-            string reportCode = dsMsReports.Tables[0].Rows[dNMsReports.Position]["ReportCode"].ToString();
-            e.FileName = reportCode + ".frx";
+            string reportCode = "NoReportCode";
+
+            int pos = t.getDataNavigatorPosition(dNMsReports, true);
+
+            if (pos > -1)
+            {
+                reportCode = dsMsReports.Tables[0].Rows[pos]["ReportCode"].ToString();
+                e.FileName = reportCode + ".frx";
+            }
         }
+
+        
+
         private void DesignerSettings_CustomSaveReport(object sender, OpenSaveReportEventArgs e)
         {
-            SaveFastReport(e.Report);
+            if (e.FileName.IndexOf("NoReportCode") == -1)
+                SaveFastReport(e.Report);
         }
         private void SaveFastReport(Report report)
         {
             if (t.IsNotNull(dsMsReports))
             {
                 bool onay = false;
-                string reportCode = dsMsReports.Tables[0].Rows[dNMsReports.Position]["ReportCode"].ToString();
-                string reportCaption = dsMsReports.Tables[0].Rows[dNMsReports.Position]["ReportCaption"].ToString();
+                int pos = t.getDataNavigatorPosition(dNMsReports, true);
+                if (pos == -1) return;
+
+                string reportCode = dsMsReports.Tables[0].Rows[pos]["ReportCode"].ToString();
+                string reportCaption = dsMsReports.Tables[0].Rows[pos]["ReportCaption"].ToString();
 
                 try
                 {
@@ -396,17 +410,25 @@ namespace YesiLdefter
                             {
                                 report.Save(stream);
 
-                                dsMsReports.Tables[0].Rows[dNMsReports.Position]["ReportTemp"] = stream.ToArray();
+                                dsMsReports.Tables[0].Rows[pos]["ReportTemp"] = stream.ToArray();
                                 dsMsReports.Tables[0].AcceptChanges();
 
                                 v.con_Images = stream.ToArray();
                                 v.con_Images_FieldName = "ReportTemp";
 
-                                tSave sv = new tSave();
-                                sv.tDataSave(this, dsMsReports, dNMsReports, dNMsReports.Position);
+                                if (v.con_Images != null)
+                                {
+                                    tSave sv = new tSave();
+                                    sv.tDataSave(this, dsMsReports, dNMsReports, pos);
+                                }
+                                else
+                                {
+                                    MessageBox.Show("Raporu kaydetmek için önce küçükte olsa bir değişiklik yapın, ondan sonra kayıt edebilirsiniz.");
+                                }
 
                             }
-                            t.FlyoutMessage(this, reportCaption, "Rapor dosyası başarıyla database kaydedildi.");
+                            if (v.SaveOnay)
+                                t.FlyoutMessage(this, reportCaption, "Rapor dosyası başarıyla database kaydedildi.");
                         }
                         catch (Exception ex)
                         {

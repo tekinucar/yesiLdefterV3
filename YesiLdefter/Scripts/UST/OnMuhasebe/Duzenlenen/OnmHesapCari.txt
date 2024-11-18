@@ -67,6 +67,9 @@ begin transaction
 -- ------------------------------------------------------- 
 -- CariTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmHesapCariCariTipi')
+drop table [Lkp].[OnmHesapCariCariTipi]
+
 create table [Lkp].[OnmHesapCariCariTipi]
 (
    Id          Int Unique Not Null,
@@ -88,6 +91,9 @@ INSERT INTO [Lkp].[OnmHesapCariCariTipi] (Id, CariTipi, GrupTipiId)
 -- ------------------------------------------------------- 
 -- CalismaTipiId 
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmHesapCariCalismaTipi')
+drop table [Lkp].[OnmHesapCariCalismaTipi]
+
 create table [Lkp].[OnmHesapCariCalismaTipi]
 (
    Id           Int        Not Null,
@@ -110,6 +116,9 @@ INSERT INTO [Lkp].[OnmHesapCariCalismaTipi] (Id, CalismaTipi, GrupTipiId, IsMast
 -- ------------------------------------------------------- 
 -- MuhasebeTipiId
 -- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmHesapCariMuhasebeTipi')
+drop table [Lkp].[OnmHesapCariMuhasebeTipi]
+
 create table [Lkp].[OnmHesapCariMuhasebeTipi]
 (
    Id            Int Unique Not Null,

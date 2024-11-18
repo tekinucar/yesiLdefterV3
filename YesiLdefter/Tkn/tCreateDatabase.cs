@@ -826,7 +826,13 @@ namespace Tkn_CreateDatabase
             int length = create.Length;
 
             int i_bgn = SqlText.IndexOf(create) + length; // ("/*CreateTable*/") + 15; 
+            if (i_bgn < 0)
+                MessageBox.Show("DİKKAT : " + vt.TableName + " için " + create + " ifadesi tespit edilemedi");
+
             int i_end = SqlText.IndexOf(createEnd) - 1;   // ("/*CreateTableEnd*/") - 1;
+            if (i_end < 0)
+                MessageBox.Show("DİKKAT : " + vt.TableName + " için " + createEnd + " ifadesi tespit edilemedi");
+
             Sql = SqlText.Substring(i_bgn, i_end - i_bgn);
             Sql = Sql.Replace("--USE ", "USE ");
             Sql = Sql.Replace(":DBNAME", vt.DBaseName);

@@ -13,8 +13,16 @@ begin transaction
    GrupTipiId           SmallInt      null,
    SubeTipiId           SmallInt      null,
    GrupBaslamaTarihi    Date          null,
+   GrupBitisTarihi      Date          null,
    SubeAdaySayisi       SmallInt      null,
    KurumOnayTipiId      SmallInt      null,  /* 0. Onay bekliyor, 1-Onaylandı  tablo = [Lkp].[MtskKurumOnayTipi]   */		
+
+   TakipTipiId            SmallInt      null,
+   TrafikDersSayisi       SmallInt      null, /* Trafik ve Çevre Dersi */   
+   IlkYardimDersSayisi    SmallInt      null, /* İlkyardım Dersi */   
+   AracTeknigiDersSayisi  SmallInt      null, /* Araç Tekniği Dersi */   
+   AdapDersSayisi         SmallInt      null, /* Trafik Adabı Dersi */   
+   TDersIsUploaded        Bit           null, /* Teorik derslerin tamamı Mebbise yüklenince 1 oluyor */
       
    constraint		pk_MtskGrupSubesi primary key (Id)
  )
@@ -24,6 +32,8 @@ begin transaction
 commit transaction
 
 /*CreateTableEnd*/
+
+
 
 /*CreateTrigger*/
 
@@ -114,6 +124,9 @@ AS BEGIN
            )
       end
       
+	  Execute [dbo].[prc_MtskGrupSubesiTeorikDersToplami] @FirmId, @DonemTipiId, @GrupTipiId, @SubeTipiId
+	  Execute [dbo].[prc_MtskGrupSubesiTakipSet] @FirmId, @DonemTipiId, @GrupTipiId, @SubeTipiId
+
       FETCH NEXT FROM mgSubesiCursor INTO @curId
     END
 
@@ -125,4 +138,39 @@ END
 /*CreateTriggerEnd*/
 
 
+/*CreateLkpTable*/
+
+begin transaction
+
+-- ------------------------------------------------------- 
+-- TakipTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskGrupSubesiTakipTipi')
+drop table [Lkp].[MtskGrupSubesiTakipTipi]
+
+create table Lkp.MtskGrupSubesiTakipTipi
+(
+   Id          Int Unique Not Null,
+   TakipTipi   nVarchar(50)   null
+   
+   constraint  pk_MtskGrupSubesiTakipTipi primary key (Id)
+)
+
+INSERT INTO Lkp.MtskGrupSubesiTakipTipi (Id, TakipTipi)
+ VALUES 
+  ( 0,  N'Tanımsız'),
+  ( 1,  N'Teorik ders planı yok'),
+  ( 2,  N'Teorik ders planı eksik'),
+  ( 3,  N'Teorik ders planı mevcut'),
+
+  ( 11, N'Grup başlangıç tarihi belli değil'),
+  ( 12, N'Teorik dersler planlanacak'),
+  ( 13, N'Teorik dersler planlandı, Mebbise aktarılacak'),
+  ( 14, N'Teorik dersler Mebbise aktarıldı'),
+  ( 15, N'Teorik dersler başladı'),
+  ( 16, N'Teorik dersler tamamlandı')
+
+commit transaction
+
+/*CreateLkpTableEnd*/
 

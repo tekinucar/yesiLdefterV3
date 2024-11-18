@@ -1,0 +1,61 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_MtskGunlukTakipler] (@FirmId int)  
+AS BEGIN  
+
+  --declare @FirmId int
+  --set @FirmId = 30
+
+  declare @BugunDonemTipiId int = 0
+  declare @DonemTipiId int = 0
+  declare @GrupTipiId  smallint = 0
+  declare @SubeTipiId  smallint = 0
+  
+  -- Bugün hangi dönem ?  tespit ediliyor
+  if (MONTH(getdate()) < 10)
+       set @BugunDonemTipiId = convert(int, convert(varchar(5), YEAR(getdate())) + '0' + convert(varchar(3), MONTH(getdate())))
+  else set @BugunDonemTipiId = convert(int, convert(varchar(5), YEAR(getdate())) + convert(varchar(3), MONTH(getdate())))
+
+  set @BugunDonemTipiId = 202408
+
+  -- Döngüye alınacak Select cümlesi
+  declare myCursor CURSOR local FOR 
+  Select DonemTipiId, GrupTipiId, SubeTipiId From MtskGrupSubesi
+  Where  DonemTipiId = @BugunDonemTipiId
+  and    FirmId = @FirmId
+
+  OPEN myCursor; 
+  
+  FETCH NEXT FROM myCursor INTO @DonemTipiId, @GrupTipiId, @SubeTipiId
+  
+  WHILE @@FETCH_STATUS = 0 
+  BEGIN -- İşlemler burada yapılır 
+  
+     PRINT '@DonemTipiId: ' + CAST(@DonemTipiId AS NVARCHAR) + ', @GrupTipiId: ' + CAST(@GrupTipiId AS NVARCHAR)  + ', @SubeTipiId: ' + CAST(@SubeTipiId AS NVARCHAR) ; 
+  
+	 -- Şubelerin TakipTipiId için çalıştırılıyor
+	 Execute [dbo].[prc_MtskGrupSubesiTakipSet] @FirmId, @DonemTipiId, @GrupTipiId, @SubeTipiId     
+
+
+     FETCH NEXT FROM myCursor INTO @DonemTipiId, @GrupTipiId, @SubeTipiId; 
+  END; 
+  
+  CLOSE myCursor;
+
+
+
+
+END -- procedure
+
+/*CreateProcedureEnd*/
+
+
+
+ 	  bir adayın takip edilecek aşamaları
+      -- kayıt aşamaları  
+	  -- teorik dersleri 
+      -- e-sınav aşamaları 
+      -- uygulama dersleri 
+      -- uygulama sınav aşamaları
+      -- sertifika aşamaları
+

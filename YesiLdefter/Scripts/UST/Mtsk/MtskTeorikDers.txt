@@ -48,6 +48,7 @@ AS BEGIN
 
     FETCH NEXT FROM myCursor INTO @curId
 
+    declare @eFirmId int = 0
     declare @eDonemTipiId int = 0
     declare @eGrupTipiId smallInt = 0
     declare @eSubeTipiId smallInt = 0
@@ -65,7 +66,8 @@ AS BEGIN
     BEGIN
     	
       Select
-       @eDonemTipiId = ins.DonemTipiId
+	   @eFirmId = ins.FirmId
+      ,@eDonemTipiId = ins.DonemTipiId
       ,@eGrupTipiId = ins.GrupTipiId
       ,@eSubeTipiId = ins.SubeTipiId
       ,@eDersTarihi = ins.DersTarihi
@@ -106,6 +108,9 @@ AS BEGIN
       FETCH NEXT FROM myCursor INTO @curId
     END
 
+    Execute [dbo].[prc_MtskGrupSubesiTeorikDersToplami] @eFirmId, @eDonemTipiId, @eGrupTipiId, @eSubeTipiId
+    Execute [dbo].[prc_MtskGrupSubesiTakipSet] @eFirmId, @eDonemTipiId, @eGrupTipiId, @eSubeTipiId
+
     CLOSE myCursor
     DEALLOCATE myCursor   
 
@@ -124,6 +129,8 @@ AS BEGIN
 	declare @curId bigint
 	declare @FirmId int
 	declare @DonemTipiId int
+    declare @GrupTipiId smallInt = 0
+    declare @SubeTipiId smallInt = 0
 
 	OPEN teoCursorDlt
 	
@@ -137,6 +144,8 @@ AS BEGIN
         Select   
 		    @FirmId = FirmId
           , @DonemTipiId = DonemTipiId 
+          , @GrupTipiId  = GrupTipiId
+          , @SubeTipiId  = SubeTipiId
 		From deleted
 		Where Id = @curId
 
@@ -152,7 +161,9 @@ AS BEGIN
       FETCH NEXT FROM teoCursorDlt INTO @curId
     END
 
-	
+    Execute [dbo].[prc_MtskGrupSubesiTeorikDersToplami] @FirmId, @DonemTipiId, @GrupTipiId, @SubeTipiId
+    Execute [dbo].[prc_MtskGrupSubesiTakipSet] @FirmId, @DonemTipiId, @GrupTipiId, @SubeTipiId
+    
     CLOSE teoCursorDlt
     DEALLOCATE teoCursorDlt
 

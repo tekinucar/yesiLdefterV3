@@ -6052,6 +6052,25 @@ namespace Tkn_ToolBox
 
         #region *Get Functions 
 
+        public int getDataNavigatorPosition(DataNavigator dN, bool showMessage)
+        {
+            int pos = dN.Position;
+            if (pos == -1)
+            {
+                try
+                {
+                    pos = Convert.ToInt32(dN.Tag.ToString());
+                }
+                catch (Exception)
+                {
+                    pos = -1;
+                    if (showMessage)
+                        MessageBox.Show("Dikkat : Data position okunurken beklenmedik bir sorun oluştu...");
+                }
+            }
+            return pos;
+        }
+
         #region <myStart> Get
         public string myStart_Get(Form tForm)
         {
@@ -10404,6 +10423,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                     f.fTrigger = Set(ds.Tables[tableName_].Rows[i]["LKP_FTRIGGER"].ToString(), "", "False");
                     f.displayFormat = Set(ds.Tables[tableName_].Rows[i]["CMP_DISPLAY_FORMAT"].ToString(), "", "");
                     f.fVisible = Set(ds.Tables[tableName_].Rows[i]["CMP_VISIBLE"].ToString(), "", "");
+                    f.fEnabled = Set(ds.Tables[tableName_].Rows[i]["CMP_ENABLED"].ToString(), "", "");
                     break;
                 }
             }
@@ -10871,7 +10891,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
             return values;
         }
-
+        
         public string TableIPCodeList_Get_Values_OLD(Form tForm, string TableIPCode_RowBlock)
         {
             #region örnek

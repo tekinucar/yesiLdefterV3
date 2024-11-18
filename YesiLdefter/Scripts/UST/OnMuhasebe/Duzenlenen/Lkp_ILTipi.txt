@@ -26,6 +26,7 @@ commit transaction
 
 /*CreateData*/
 
+DELETE [Lkp].[ILTipi]
 INSERT INTO [Lkp].[ILTipi] (Id, IlKodu, IlKoduSifirli, IlGIBKodu, IlAdiBUYUK )
  VALUES 
   (  0, '0',  '0',  '', N'İl Seçin...' ),

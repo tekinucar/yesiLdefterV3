@@ -1,6 +1,6 @@
 ﻿/*CreateProcedure*/
 
-CREATE PROCEDURE [dbo].[prc_MtskAdayTalepSertifika24HakKaydi] (@FirmId int, @AdayId int)  
+CREATE PROCEDURE [dbo].[prc_MtskAdayTalepSertifika24HakKaydi] (@TalepId int)  
 AS BEGIN
 
 Declare @FirmId int = 0
@@ -79,7 +79,7 @@ order by TalepKayitTarihi desc
 
  WHERE Id = @TalepId
 
+
 END -- procedure
 
 /*CreateProcedureEnd*/
-
