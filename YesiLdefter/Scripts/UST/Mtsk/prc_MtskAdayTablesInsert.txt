@@ -184,7 +184,8 @@ AS BEGIN
            ,[BelgelerGeldi],[BelgelerTarandi],[BelgelerYuklendi]
            ,[EgitimSureciTipiId]
            ,[BorcDurumuTipiId]  
-           ,[TeorikBaslamaTarihi],[ToerikBitisTarihi],[TeorikDersToplami],[TeorikDersTipiId]
+           
+           ,[TeorikBaslamaTarihi],[TeorikBitisTarihi],[TeorikDersToplami],[TeorikDersTipiId]
            ,[eSinavNo],[eSinavDurumTipiId],[eSinavSonucTipiId],[eSinavSonrasiTipiId],[OnBesGunBitisTarihi],[eSinavUcretTipiId],[eSinavDetayId],[eSinavBasariTarihi]
            ,[UygulamaBaslamaTarihi],[UygulamaBitisTarihi],[SimulatorDersToplami],[AkanTrafikDersToplami],[UygulamaliDersToplami],[UygulamaliDersTipiId]
            ,[BasarisizBaslamaTarihi],[BasarisizBitisTarihi],[BasarisizDersToplami],[BasarisizDersTipiId]

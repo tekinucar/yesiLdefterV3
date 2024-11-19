@@ -63,9 +63,11 @@ AS BEGIN
 	   when ( (sube.DonemTipiId >= @BugunDonemTipiId) and (sube.GrupBaslamaTarihi is not null) and (sube.TDersIsUploaded = 1) and
 	          (( isnull(sube.TrafikDersSayisi,0) + isnull(sube.IlkYardimDersSayisi,0) + isnull(sube.AracTeknigiDersSayisi,0) + isnull(sube.AdapDersSayisi,0) ) = @DersSayisiToplami) ) then 14
 
-	   when ( (sube.DonemTipiId >= @BugunDonemTipiId) and (sube.GrupBaslamaTarihi <= getdate()) and (sube.GrupBitisTarihi >= getdate()) ) then 15
+	   when ( (sube.DonemTipiId >= @BugunDonemTipiId) and (sube.GrupBaslamaTarihi > getdate()) and (sube.TDersIsUploaded = 1) ) then 15 -- başlamadı
 
-	   when ( (sube.DonemTipiId >= @BugunDonemTipiId) and (sube.GrupBitisTarihi < getdate())) then 16
+	   when ( (sube.DonemTipiId >= @BugunDonemTipiId) and (sube.GrupBaslamaTarihi <= getdate()) and (sube.GrupBitisTarihi >= getdate()) ) then 16 -- başladı 
+
+	   when ( (sube.DonemTipiId >= @BugunDonemTipiId) and (sube.GrupBitisTarihi < getdate())) then 17 -- tamamlandı
 
        end
      ) as TakipTipiId
@@ -89,8 +91,9 @@ AS BEGIN
   ( 12, N'Teorik dersler planlanacak'),
   ( 13, N'Teorik dersler planlandı, Mebbise aktarılacak'),
   ( 14, N'Teorik dersler Mebbise aktarıldı'),
-  ( 15, N'Teorik dersler başladı'),
-  ( 16, N'Teorik dersler tamamlandı')
+  ( 15, N'Teorik dersler başlamadı'),
+  ( 16, N'Teorik dersler başladı'),
+  ( 17, N'Teorik dersler tamamlandı')
   */
 
 END -- procedure

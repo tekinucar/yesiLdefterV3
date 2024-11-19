@@ -1,7 +1,7 @@
 ﻿
 /*CreateProcedure*/
 
-CREATE PROCEDURE [dbo].[prc_MtskGrupSubesiTeorikDersToplami] (@FirmId int, @DonemTipiId int)  
+CREATE PROCEDURE [dbo].[prc_MtskGrupSubesiTeorikDersToplamList] (@FirmId int, @DonemTipiId int)  
 AS BEGIN
  
  Select 

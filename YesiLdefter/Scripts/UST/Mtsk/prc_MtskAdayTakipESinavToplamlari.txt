@@ -1,0 +1,115 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_MtskAdayTakipESinavToplamlari] (@FirmId int)  
+AS BEGIN
+
+-- declare @FirmId int = 30
+
+-- TeorikDersTipi
+Select 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.TeorikDersTipi as KonuAciklama
+ , tip.FormCaption as Islem
+ , count(takip.Id) as AdaySayisi 
+
+From MtskAdayTakip as takip
+     left outer join Lkp.MtskAdayTakipTeorikDersTipi as tip on 
+	   ( takip.TeorikDersTipiId = tip.Id )
+Where FirmId = @FirmId
+
+Group by 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.TeorikDersTipi
+ , tip.FormCaption 
+
+union all
+
+-- eSinavDurumTipi
+Select 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.eSinavDurumTipi as KonuAciklama
+ , tip.FormCaption as Islem
+ , count(takip.Id) as AdaySayisi 
+
+From MtskAdayTakip as takip
+     left outer join Lkp.MtskAdayTakipeSinavDurumTipi as tip on 
+	   ( takip.eSinavDurumTipiId = tip.Id )
+Where FirmId = @FirmId
+
+Group by 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.eSinavDurumTipi
+ , tip.FormCaption 
+
+union all
+
+-- eSinavSonucTipi
+Select 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.eSinavSonucTipi as KonuAciklama
+ , tip.FormCaption as Islem
+ , count(takip.Id) as AdaySayisi 
+
+From MtskAdayTakip as takip
+     left outer join Lkp.MtskAdayTakipeSinavSonucTipi as tip on 
+	   ( takip.eSinavSonucTipiId = tip.Id )
+Where FirmId = @FirmId
+
+Group by 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.eSinavSonucTipi
+ , tip.FormCaption 
+
+union all
+
+-- eSinavSonrasiTipi
+Select 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.eSinavSonrasiTipi as KonuAciklama
+ , tip.FormCaption as Islem
+ , count(takip.Id) as AdaySayisi 
+
+From MtskAdayTakip as takip
+     left outer join Lkp.MtskAdayTakipeSinavSonrasiTipi as tip on 
+	   ( takip.eSinavSonrasiTipiId = tip.Id )
+Where FirmId = @FirmId
+
+Group by 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.eSinavSonrasiTipi
+ , tip.FormCaption 
+
+union all
+
+-- eSinavUcretTipi
+Select 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.eSinavUcretTipi as KonuAciklama
+ , tip.FormCaption as Islem
+ , count(takip.Id) as AdaySayisi 
+
+From MtskAdayTakip as takip
+     left outer join Lkp.MtskAdayTakipeSinavUcretTipi as tip on 
+	   ( takip.eSinavUcretTipiId = tip.Id )
+Where FirmId = @FirmId
+
+Group by 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.eSinavUcretTipi
+ , tip.FormCaption 
+
+
+
+END -- procedure
+
+/*CreateProcedureEnd*/

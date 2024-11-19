@@ -47,19 +47,7 @@ AS BEGIN
   declare @YILAY6 varchar(6)
   declare @YILAY7 varchar(6)
 
-  declare @SinifKontejani int
-  declare @GruplarKontejani int
-  declare @DonemAdaySayisi int
-  declare @oran0 numeric(22,8)
-
-  -- SınıfKontajini 
-  Select @SinifKontejani = (sum(OdaKontenjani) / Count(Id))
-  From MtskDerslik
-  Where OdaninDurumTipiId = 1
-  Group by DerslikAdiTipiId
-
-  -- GruplarKontejani = SınıfKontajini x Grup Sayısı
-  Set @GruplarKontejani = @SinifKontejani * 3
+  print 'prc_MtskDonemKontrolu başladı'
 
   -- Mevcut yil, ay
   select 
@@ -119,7 +107,6 @@ AS BEGIN
     set @ayI7 = @ayI7 - 12
     set @YIL7 = Convert(varchar(4), @yilI1 + 1)
   end
-
 
   /*
   print @YIL1
@@ -312,88 +299,7 @@ AS BEGIN
   if ( Select count(Id) ADET from [MtskGrupSubesi] where [DonemTipiId] = @YILAY7 and GrupTipiId = 1 ) = 0 
        insert into [MtskGrupSubesi] (ParentId, FirmId, IsActive, DonemTipiId, GrupTipiId, SubeTipiId, KurumOnayTipiId) values (0, @FirmId, 1, @YILAY7, 1, 0, 0 )  
 
-
-  -- Donem Aday Sayısı Tespiti
-  Update MtskDonemi set
-   AdaySayisi = 0
-  ,GrupAdaySayisi = 0
-  --
-  Update MtskDonemi set
-  AdaySayisi = x.Adet
-  From MtskDonemi as a,
-  (
-     Select DonemTipiId, Count(Id) Adet 
-     From MtskAdayTalep
-     Group by DonemTipiId
-  ) x
-  Where a.DonemTipiId = x.DonemTipiId
-  --
-  Update MtskDonemi set
-  GrupAdaySayisi = Adet
-  From MtskDonemi as a,
-  (
-     Select DonemTipiId, GrupTipiId, Count(Id) Adet 
-     From MtskAdayTalep
-     Group by DonemTipiId, GrupTipiId
-  ) x
-  Where a.DonemTipiId = x.DonemTipiId
-  and   a.GrupTipiId = x.GrupTipiId
-
-  -- GrupSube Aday Sayısı
-  Update MtskGrupSubesi set
-  SubeAdaySayisi = 0
-  --
-  Update MtskGrupSubesi set
-  SubeAdaySayisi = x.Adet
-  From MtskGrupSubesi as a,
-  (
-     Select DonemTipiId, GrupTipiId, SubeTipiId, Count(Id) Adet 
-     From MtskAdayTalep
-     Group by DonemTipiId, GrupTipiId, SubeTipiId 
-  ) x
-  Where a.DonemTipiId = x.DonemTipiId
-  and   a.GrupTipiId = x.GrupTipiId
-  and   a.SubeTipiId = x.SubeTipiId
-
-
-  -- Yeni Grup Açma için hesaplar
-  -- Grup2 ve Grup3 açmak için yapılan hesaplar
-  Select @DonemAdaySayisi = AdaySayisi From MtskDonemi
-  Where DonemTipiId = @YILAY1
-
-  --Select @Grup1AdaySayisi = GrupAdaySayisi From MtskDonemi
-  --Where DonemTipiId = @YILAY1
-  --and   GrupTipiId = 1
-
-  set @oran0 = ( @DonemAdaySayisi  / (cast(@GruplarKontejani as decimal(22,8)) )) * 100
-  --set @oran1 = ( @Grup1AdaySayisi  / (cast(@SinifKontejani as decimal(22,8)) )) * 100
-
-  
-  -- MtskDonem
-  if ( @oran0 > 22 ) and -- yüzde 22 yi geçtiyse
-     ( Select count(Id) ADET from [MtskDonemi] where [DonemTipiId] = @YILAY1 and GrupTipiId = 2 ) = 0 
-  begin 
-    insert into [MtskDonemi] ( ParentId, FirmId, IsActive, DonemTipiId, GrupTipiId, KurumOnayTipiId ) values ( 0, @FirmId, 1, @YILAY1, 2, 0 ) 
-  end
-
-  if ( @oran0 > 55 ) and -- yüzde 55 i geçtiyse
-     ( Select count(Id) ADET from [MtskDonemi] where [DonemTipiId] = @YILAY1 and GrupTipiId = 3 ) = 0 
-  begin 
-    insert into [MtskDonemi] ( ParentId, FirmId, IsActive, DonemTipiId, GrupTipiId, KurumOnayTipiId ) values ( 0, @FirmId, 1, @YILAY1, 3, 0 ) 
-  end
-
-  -- MtskGrupSubesi
-  if ( @oran0 > 22 ) and -- yüzde 22 yi geçtiyse
-     ( Select count(Id) ADET from [MtskGrupSubesi] where [DonemTipiId] = @YILAY1 and GrupTipiId = 2 ) = 0 
-  begin 
-    insert into [MtskGrupSubesi] (ParentId, FirmId, IsActive, DonemTipiId, GrupTipiId, SubeTipiId, KurumOnayTipiId) values (0, @FirmId, 1, @YILAY1, 2, 0, 0 )  
-  end
-
-  if ( @oran0 > 55 ) and -- yüzde 55 i geçtiyse
-     ( Select count(Id) ADET from [MtskGrupSubesi] where [DonemTipiId] = @YILAY1 and GrupTipiId = 3 ) = 0 
-  begin 
-    insert into [MtskGrupSubesi] (ParentId, FirmId, IsActive, DonemTipiId, GrupTipiId, SubeTipiId, KurumOnayTipiId) values (0, @FirmId, 1, @YILAY1, 3, 0, 0 )  
-  end
+  print 'prc_MtskDonemKontrolu bitti'
 
 
 END -- procedure

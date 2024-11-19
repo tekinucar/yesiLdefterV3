@@ -15,9 +15,7 @@ AS BEGIN
   if (MONTH(getdate()) < 10)
        set @BugunDonemTipiId = convert(int, convert(varchar(5), YEAR(getdate())) + '0' + convert(varchar(3), MONTH(getdate())))
   else set @BugunDonemTipiId = convert(int, convert(varchar(5), YEAR(getdate())) + convert(varchar(3), MONTH(getdate())))
-
-  set @BugunDonemTipiId = 202408
-
+  
   -- Döngüye alınacak Select cümlesi
   declare myCursor CURSOR local FOR 
   Select DonemTipiId, GrupTipiId, SubeTipiId From MtskGrupSubesi

@@ -747,7 +747,10 @@
     <Content Include="Scripts\UST\Mtsk\MtskKIhlalUygulamaD.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskKurumAltProgramlari.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskPersoneli.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakipESinavToplamlari.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakipTeorikDersSet.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskDersIhlalleriPersonel.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskDonemAdaySayilariSet.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskGrupSubesiTakipSet.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskGrupSubesiTeorikDersToplami.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskGunlukTakipler.txt" />
@@ -796,7 +799,7 @@
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTalepSertifika24HakKaydi.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTalepYasiniHesapla.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskDonemKontrolu.txt" />
-    <Content Include="Scripts\UST\Mtsk\prc_MtskGrupSubesiTeorikDersToplami_OLD.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskGrupSubesiTeorikDersToplamList.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskSertifikaSeriNoIptalEt.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskSertifikaSeriNoUret.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskSertifikaUcreti.txt" />

@@ -14,8 +14,11 @@ AS BEGIN
   declare @yIstenenSertifikaTipiId smallint = 0
   declare @yIsMuafiyetiVar bit = 0
   declare @YasSiniri smallint = 0
+
   declare @yasOnayiTipiId smallint = 0
   declare @yasHazirTarihi date = null
+
+  print '    prc_MtskAdayTalepYasiniHesapla başladı'
 
   -- [Lkp].[MtskAdayTakipYasOnayiTipi]
   -- 0,  'Yaşı tutuyor'
@@ -51,6 +54,8 @@ AS BEGIN
   -- Yaş için muhafiyeti var ise 2 yıl daha sınırı aşağıya çek
   if (@yIsMuafiyetiVar = 1)
       set @YasSiniri = @YasSiniri - 2 
+
+  --print @YasSiniri
 
   -- Yas Onayi
   if (@yDogumTarihi is not null)
@@ -94,7 +99,7 @@ AS BEGIN
   , YasHazirTarihi = @yasHazirTarihi
   Where TalepId = @TalepId
 
-
+  print '    prc_MtskAdayTalepYasiniHesapla bitti'
 
 END -- procedure
 

@@ -37,7 +37,7 @@ commit transaction
 
 /*CreateTrigger*/
 
-CREATE TRIGGER [dbo].[trg_MtskGrupSubesi] on [dbo].[MtskGrupSubesi] 
+CREATE ALTER TRIGGER [dbo].[trg_MtskGrupSubesi] on [dbo].[MtskGrupSubesi] 
 AFTER INSERT, UPDATE
 AS BEGIN
 
@@ -56,6 +56,8 @@ AS BEGIN
     declare @GrupBaslamaTarihi date
     declare @KurumOnayTipiId smallint
     declare @LkpMtskDonemiId int
+
+	declare @DonemGrupBaslamaTarihi date
 
     WHILE @@FETCH_STATUS = 0
     BEGIN
@@ -76,6 +78,7 @@ AS BEGIN
 
       -- MtskDonemi tablosunda gerekli olan satır mevcut mu ?
       Select @MtskDonemiId = isnull(Id, 0)
+	       , @DonemGrupBaslamaTarihi = GrupBaslamaTarihi
       From dbo.MtskDonemi
       Where FirmId = @FirmId
       and DonemTipiId = @DonemTipiId
@@ -93,6 +96,14 @@ AS BEGIN
          and SubeTipiId <= 0
       end
       
+	  if ((@GrupBaslamaTarihi is null) and 
+	      (@DonemGrupBaslamaTarihi is not null))
+      begin
+          Update dbo.MtskGrupSubesi Set
+		  GrupBaslamaTarihi = @DonemGrupBaslamaTarihi
+          Where Id = @curId
+      end
+
       if (@MtskDonemiId = 0)
       begin
          INSERT INTO [dbo].[MtskDonemi]
@@ -123,15 +134,17 @@ AS BEGIN
            ,0 --GrupAdaySayisi
            )
       end
-      
+
 	  Execute [dbo].[prc_MtskGrupSubesiTeorikDersToplami] @FirmId, @DonemTipiId, @GrupTipiId, @SubeTipiId
 	  Execute [dbo].[prc_MtskGrupSubesiTakipSet] @FirmId, @DonemTipiId, @GrupTipiId, @SubeTipiId
+	  Execute [dbo].[prc_MtskAdayTakipTeorikDersSet] @FirmId, @DonemTipiId, @GrupTipiId, @SubeTipiId
 
       FETCH NEXT FROM mgSubesiCursor INTO @curId
     END
 
     CLOSE mgSubesiCursor
     DEALLOCATE mgSubesiCursor   
+        
 
 END
 
@@ -156,6 +169,7 @@ create table Lkp.MtskGrupSubesiTakipTipi
    constraint  pk_MtskGrupSubesiTakipTipi primary key (Id)
 )
 
+DELETE Lkp.MtskGrupSubesiTakipTipi
 INSERT INTO Lkp.MtskGrupSubesiTakipTipi (Id, TakipTipi)
  VALUES 
   ( 0,  N'Tanımsız'),
@@ -167,8 +181,9 @@ INSERT INTO Lkp.MtskGrupSubesiTakipTipi (Id, TakipTipi)
   ( 12, N'Teorik dersler planlanacak'),
   ( 13, N'Teorik dersler planlandı, Mebbise aktarılacak'),
   ( 14, N'Teorik dersler Mebbise aktarıldı'),
-  ( 15, N'Teorik dersler başladı'),
-  ( 16, N'Teorik dersler tamamlandı')
+  ( 15, N'Teorik dersler başlamadı'),
+  ( 16, N'Teorik dersler başladı'),
+  ( 17, N'Teorik dersler tamamlandı')
 
 commit transaction
 
