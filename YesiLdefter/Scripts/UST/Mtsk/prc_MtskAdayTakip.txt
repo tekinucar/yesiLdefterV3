@@ -11,29 +11,31 @@ AS BEGIN
       BelgelerGeldi = x.BelgelerGeldi
    from MtskAdayTakip a, 
    (
-       Select FirmId, Id as AdayId
+       Select FirmId, Id as TalepId
 	   , case 
 	     when ( KimlikGeldi = 1 
             and BiyometrikGeldi = 1
+            and BasvuruFotoCekildi = 1
             and OgrenimGeldi = 1
             and SaglikGeldi = 1
             and AdliSicilGeldi = 1
             and ImzaAlindi = 1
             and SozlesmeYapildi = 1 
             and AdresAlindi = 1) then 1 else 0 end as BelgelerGeldi
-	   From MtskAday	   
+	   From MtskAdayTalep	   
 	   Where FirmId = @FirmId
    ) as x
    Where a.FirmId = x.FirmId
-   and   a.AdayId = x.AdayId 
+   and   a.TalepId = x.TalepId 
 
    update MtskAdayTakip set
       BelgelerTarandi = x.BelgelerTarandi
    from MtskAdayTakip a, 
    (
-       Select FirmId, Id as AdayId
+       Select FirmId, TalepId
 	   , case 
 	     when ( BiyometrikTarandi = 1
+            and BasvuruFotoTarandi = 1 
             and OgrenimTarandi = 1
             and SaglikTarandi = 1 
             and AdliSicilTarandi = 1
@@ -45,16 +47,17 @@ AS BEGIN
 	   Where FirmId = @FirmId
    ) as x
    Where a.FirmId = x.FirmId
-   and   a.AdayId = x.AdayId 
+   and   a.TalepId = x.TalepId 
 
    update MtskAdayTakip set
       BelgelerYuklendi = x.BelgelerYuklendi
    from MtskAdayTakip a, 
    (
-       Select FirmId, Id as AdayId
+       Select FirmId, TalepId
 	   , case 
 	     when ( AdayKaydiYapildi = 1
             and BiyometrikYuklendi = 1
+            and BasvuruFotoYuklendi = 1
             and OgrenimYuklendi = 1
             and SaglikYuklendi = 1
             and AdliSicilYuklendi = 1
@@ -66,7 +69,7 @@ AS BEGIN
 	   Where FirmId = @FirmId
    ) as x
    Where a.FirmId = x.FirmId
-   and   a.AdayId = x.AdayId 
+   and   a.TalepId = x.TalepId 
 
    -- -------------------------------------------------------------------
    -- TeorikDersTipiId

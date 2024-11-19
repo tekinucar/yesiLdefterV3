@@ -64,7 +64,7 @@ BEGIN
     select 
 		  @ySinavTarihSaat = isnull(ins.SinavTarihSaat,'')
 		, @ySinavTarihi = isnull(ins.SinavTarihi, CONVERT(date, getdate(),103))
-    , @yMebbisESinavTarihValue = isnull(ins.MebbisESinavTarihValue, '')
+        , @yMebbisESinavTarihValue = isnull(ins.MebbisESinavTarihValue, '')
 		, @yMebbisRandevuTarihValue = isnull(ins.MebbisRandevuTarihValue, '')
 		, @yMebbisUSinavTarihValue = isnull(ins.MebbisUSinavTarihValue, '')
 		from inserted ins
