@@ -11,6 +11,7 @@ begin transaction
    DonemTipiId          Int           null,
    GrupTipiId           SmallInt      null,
    SubeTipiId           SmallInt      null,
+   TalepId              Int           null,
    AdayNo               SmallInt      null, /* 1,2,3..8,9 */
    AdayId               Int           null,
    AdayTcNo             Varchar(11)   null,

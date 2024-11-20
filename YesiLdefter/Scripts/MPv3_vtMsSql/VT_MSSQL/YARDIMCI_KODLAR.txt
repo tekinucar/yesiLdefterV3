@@ -208,11 +208,12 @@ and   FIELD_NO = @old_FIELD_NO
 
  *** ARAYA FIELD EKLEMEK İÇİN ****
 
-declare @tablo_kodu varchar(30) = 'FinansHesap'
+declare @tablo_kodu varchar(30) = 'MtskUygulamaliDers'
 declare @softwareCode varchar(30) = 'UST'
-declare @projectCode varchar(30) = 'OMS'
+declare @projectCode varchar(30) = 'MEB'
 
-declare @field_no int = 5
+declare @field_no int = 6
+declare @field_no_Sinir int = 100
 declare @adim int = 1
 
 UPDATE MS_FIELDS SET FIELD_NO = FIELD_NO + @adim
@@ -220,12 +221,14 @@ WHERE TABLE_CODE = @tablo_kodu
 AND SOFTWARE_CODE = @softwareCode
 AND PROJECT_CODE = @projectCode
 AND FIELD_NO > @field_no
+AND FIELD_NO < @field_no_Sinir
 
 UPDATE MS_FIELDS_IP SET FIELD_NO = FIELD_NO + @adim
 WHERE TABLE_CODE = @tablo_kodu
 AND SOFTWARE_CODE = @softwareCode
 AND PROJECT_CODE = @projectCode
 AND FIELD_NO > @field_no
+AND FIELD_NO < @field_no_Sinir
 
 
 /* ************** TABLE_CODE değişikliği ******************* */

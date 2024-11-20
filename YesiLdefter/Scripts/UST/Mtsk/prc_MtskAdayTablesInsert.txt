@@ -175,43 +175,68 @@ AS BEGIN
        where TalepId = @TalepId 
      ) = 0 
   begin 
-       insert into dbo.[MtskAdayTakip] ( 
-            [FirmId],[TalepId],[AdayId]
-           ,[TalepTipiId],[KayitTipiId],[ZamanlamaTipiId]
-           ,[IsGrupSubeYok],[IsActive] --[IsEgitimDevamEdiyor]
-           ,[MebbisKurumOnayi],[MebbisDurumTipiId]
-           ,[YasOnayiTipiId],[OzurDurumuTipiId]
-           ,[BelgelerGeldi],[BelgelerTarandi],[BelgelerYuklendi]
-           ,[EgitimSureciTipiId]
-           ,[BorcDurumuTipiId]  
-           
-           ,[TeorikBaslamaTarihi],[TeorikBitisTarihi],[TeorikDersToplami],[TeorikDersTipiId]
-           ,[eSinavNo],[eSinavDurumTipiId],[eSinavSonucTipiId],[eSinavSonrasiTipiId],[OnBesGunBitisTarihi],[eSinavUcretTipiId],[eSinavDetayId],[eSinavBasariTarihi]
-           ,[UygulamaBaslamaTarihi],[UygulamaBitisTarihi],[SimulatorDersToplami],[AkanTrafikDersToplami],[UygulamaliDersToplami],[UygulamaliDersTipiId]
-           ,[BasarisizBaslamaTarihi],[BasarisizBitisTarihi],[BasarisizDersToplami],[BasarisizDersTipiId]
-           ,[Arti4BaslamaTarihi],[Arti4BitisTarihi],[Arti4DersToplami],[Arti4DersTipiId]
-           ,[uSinavaKatilabilir], [uRandevuMebbisAktarildi] 
-           ,[uSinavNo],[uSinavDurumTipiId],[uSinavSonucTipiId],[uSinavSonrasiTipiId],[uSinavUcretTipiId],[uSinavDetayId],[uSinavBasariTarihi]
-           ,[SertifikaDurumTipiId],[SertifikaTarihi],[DosyaYakti]
-            ) values
-            ( @yFirmId,  @TalepId, @yAdayId,
-              @yTalepTipiId, 0,  0,  --@yKayitTipiId,  0, 
-			  0,  1,  -- [IsGrupSubeYok]
-              0,  0,  -- @yMebbisKurumOnayi, @yMebbisDurumTipiId,
-			  0,  0,  -- [YasOnayiTipiId]
-			  0,  0,  0, -- [BelgelerGeldi]
-			  0, -- [EgitimSureciTipiId]
-              0, -- BorcDurumu
-              null, null, 0,  0,  -- [TeorikBaslamaTarihi]
-              0,  0,  0,  0,  null,  0,  0,  null, -- [eSinavNo]
-              null, null, 0,  0,  0,  0,  -- [UygulamaBaslamaTarihi]
-              null, null, 0,  0, -- [BasarisizBaslamaTarihi]
-              null, null, 0,  0, -- [Arti4BaslamaTarihi]
-              0,  0,             -- [uSinavaKatilabilir]
-              0,  0,  0,  0,  0,  0,  null, -- [uSinavNo]
-              0,  null,   0 -- SertifikaurumTipiId
-            ) 
-       print ' create : [MtskAdayTakip]'
+     INSERT INTO dbo.MtskAdayTakip
+           (FirmId, TalepId, AdayId,
+            DonemTipiId, GrupTipiId,SubeTipiId,
+            AsamaTipiId, TalepTipiId, KayitTipiId, ZamanlamaTipiId,
+            IsGrupSubeYok, IsActive,
+            MebbisKurumOnayi, MebbisDurumTipiId,
+            SertifikaYasSiniri, YasOnayiTipiId, YasHazirTarihi,
+            DeneyimSartiTipiId, IsDeneyimEnAz, DeneyimSertifikaTipiId,
+            OzurDurumuTipiId,
+            BelgelerGeldi, BelgelerTarandi, BelgelerYuklendi,
+            BorcDurumuTipiId,
+
+            TeorikBaslamaTarihi, TeorikBitisTarihi, TeorikDersTipiId, eSinavNo,
+            eSinavDurumTipiId, eSinavSonucTipiId, eSinavSonrasiTipiId, eSinavMuracatTarihi,
+            eSinavUcretTipiId, eSinavDetayId, eSinavBasariTarihi,
+
+            IsUygulamaliDersPlanli, UygulamaBaslamaTarihi, UygulamaBitisTarihi,
+		    SimulatorDersToplami, EgitimPistiDersToplami, AkanTrafikDersToplami, UygulamaliDersToplami,
+            UygulamaliDersTipiId, IsUygulamaDersMebbis,
+
+            IsBasarisizDersPlanli, BasarisizDersNo, BasarisizBaslamaTarihi, BasarisizBitisTarihi,
+            BasarisizDersToplami, BasarisizDersTipiId, IsBasarisizDersMebbis,
+
+            IsArti4DersPlanli, Arti4BaslamaTarihi, Arti4BitisTarihi,
+		    Arti4EgitimPistiDersToplami, Arti4AkanTrafikDersToplami, Arti4DersToplami,
+            Arti4DersTipiId, IsArti4DersMebbis,
+
+            uSinavaKatilabilir, uRandevuMebbisAktarildi, uSinavNo,
+            uSinavDurumTipiId, uSinavSonucTipiId, uSinavSonrasiTipiId,
+		    uSinavUcretTipiId, uSinavDetayId, uSinavBasariTarihi,
+
+            SertifikaDurumTipiId, SertifikaTarihi, DosyaYakti)
+     VALUES
+           (@yFirmId,  @TalepId, @yAdayId,  
+		    @yDonemTipiId, @yGrupTipiId, @ySubeTipiId, 
+            0,  @yTalepTipiId,  0,  0,  -- AsamaTipiId, TalepTipiId, KayitTipiId, ZamanlamaTipiId,
+            0,  0,        -- IsGrupSubeYok, IsActive
+            0,  0,        -- MebbisKurumOnayi, MebbisDurumTipiId
+            0,  0,  null, -- SertifikaYasSiniri, YasOnayiTipiId, YasHazirTarihi
+            0,  0,  0,    -- DeneyimSartiTipiId, IsDeneyimEnAz, DeneyimSertifikaTipiId
+            0,            -- OzurDurumuTipiId
+            0,  0,  0,    -- BelgelerGeldi, BelgelerTarandi, BelgelerYuklendi, 
+            0,            -- BorcDurumuTipiId, 
+            null, null,  0,  0, -- TeorikBaslamaTarihi, TeorikBitisTarihi, TeorikDersTipiId, eSinavNo
+            0,  0,  0,  null,   -- eSinavDurumTipiId, eSinavSonucTipiId, eSinavSonrasiTipiId, eSinavMuracatTarihi
+            0,  0,  null,       -- eSinavUcretTipiId, eSinavDetayId, eSinavBasariTarihi, 
+            0,  null, null,     -- IsUygulamaliDersPlanli, UygulamaBaslamaTarihi, UygulamaBitisTarihi, 
+            0,  0,  0,  0,      -- SimulatorDersToplami, EgitimPistiDersToplami, AkanTrafikDersToplami, UygulamaliDersToplami
+            0,  0,              -- UygulamaliDersTipiId, IsUygulamaDersMebbis,
+            0,  0,  null, null, -- IsBasarisizDersPlanli, BasarisizDersNo, BasarisizBaslamaTarihi, BasarisizBitisTarihi, 
+            0,  0,  0,          -- BasarisizDersToplami, BasarisizDersTipiId, IsBasarisizDersMebbis,
+            0,  null, null,     -- IsArti4DersPlanli, Arti4BaslamaTarihi, Arti4BitisTarihi, 
+            0,  0,  0,          -- Arti4EgitimPistiDersToplami, Arti4AkanTrafikDersToplami, Arti4DersToplami, 
+            0,  0,              -- Arti4DersTipiId, IsArti4DersMebbis,
+            0,  0,  0,          -- uSinavaKatilabilir, uRandevuMebbisAktarildi, uSinavNo, 
+            0,  0,  0,          -- uSinavDurumTipiId, uSinavSonucTipiId, uSinavSonrasiTipiId,
+            0,  0,  null,       -- uSinavUcretTipiId, uSinavDetayId, uSinavBasariTarihi,
+            0,  null,  0        -- SertifikaDurumTipiId, SertifikaTarihi, DosyaYakti
+			)       
+            
+            print ' create : [MtskAdayTakip]'
+  
   end -- MtskAdayBelgeler
 
 END -- procedure

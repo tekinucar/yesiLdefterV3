@@ -749,6 +749,7 @@
     <Content Include="Scripts\UST\Mtsk\MtskPersoneli.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakipESinavToplamlari.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakipTeorikDersSet.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakipUygulamaToplamlari.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskDersIhlalleriPersonel.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskDonemAdaySayilariSet.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskGrupSubesiTakipSet.txt" />
