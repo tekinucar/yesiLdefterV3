@@ -19,8 +19,11 @@ AS BEGIN
 	and   GrupTipiId = @GrupTipiId
 	and   SubeTipiId = @SubeTipiId
 	and   uSinavDurumTipiId = 2 -- 'Uygulama sınavına katılabilir' 
-    and   uSinavaKatilabilir = 1 -- kullanıcı onayı
+    --- iptal and   uSinavaKatilabilir = 1 -- kullanıcı onayı
+    and   UstaOgreticiOnayTipiId = 1
 
+
+    /*  iptal
     -- 12,   '+4 Uygulama sınavına katılabilir'
     -- 13,   '+4 Uygulama sınav randevusu planlanacak'
 	-- 12 den > 13 e geçecek
@@ -33,8 +36,8 @@ AS BEGIN
 	and   GrupTipiId = @GrupTipiId
 	and   SubeTipiId = @SubeTipiId
 	and   uSinavDurumTipiId = 12 -- 'Uygulama sınavına katılabilir' 
-    and   uSinavaKatilabilir = 1 -- kullanıcı onayı
-
+    -- iptal and   uSinavaKatilabilir = 1 -- kullanıcı onayı
+    */
 
 END -- procedure
 

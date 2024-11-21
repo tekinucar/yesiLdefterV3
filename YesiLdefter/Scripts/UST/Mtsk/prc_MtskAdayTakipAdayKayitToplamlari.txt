@@ -137,28 +137,6 @@ group by tip.KonuId
 
 union all
 
--- EgitimSureciTipi
-Select 
-   tip.KonuId
- , tip.KonuCaption   
- , tip.EgitimSureciTipi as KonuAciklama
- , tip.FormCaption as Islem
- , count(takip.Id) as AdaySayisi 
-
-From MtskAdayTakip as takip
-     left outer join Lkp.MtskAdayTakipEgitimSureciTipi as tip on 
-	   ( takip.EgitimSureciTipiId = tip.Id )
-Where FirmId = @FirmId
-and   DonemTipiId = @DonemTipiId
-
-Group by 
-   tip.KonuId
- , tip.KonuCaption   
- , tip.EgitimSureciTipi
- , tip.FormCaption 
-
-union all
-
 -- ZamanlamaTipi
 Select 
    tip.KonuId

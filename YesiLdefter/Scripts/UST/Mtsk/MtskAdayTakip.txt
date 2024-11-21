@@ -90,17 +90,17 @@ begin transaction
    IsArti4DersMebbis           Bit          null, /* Mebbise aktarılmadı, aktarrıldı */
    IsArti4UstaOgreticiOnayi    Bit          null, /* Usta Öğretici aday hakkında sınava hazır olup olmadığını onaylacak */
 
----
-   -- 230 
-   UstaOgreticiOnayTipiId  SmallInt     null, /* 1. Onay, 2. Sınav için hazır değil  */
-   IsMebbisUygSinavOnayi   Bit          null, /* uSinavDurumTipi = 4, 'Uygulama sınavı için MEBBİS de onaylanacak' için gerekli */
-   IsRandevuPlanlandi      Bit          null, /* Randevu tarafında planlanınca burası True olacak */
-   --****IsRandevuMebbis         Bit          null, /* Randevu Mebbise aktarılınca */
 
-   --230
-   uSinavaKatilabilir      Bit          null, silebilirsin
-   uRandevuMebbisAktarildi Bit          null, 
-----
+   -- 230 
+   uSinavaHazirmiTipiId    SmallInt     null, /* 1. Onay, 2. Sınav için hazır değil  */
+   IsTakviyeDersleHazir    Bit          null, /* hazır olmayana takviye ders verildikten sonra hazır hale gelince onaylanır ve uSinavaHazirmiTipiId = 3 olur */ 
+   IsUygSinavMebbisOnayi   Bit          null, /* uSinavDurumTipi = 4, 'Uygulama sınavı için MEBBİS de onaylanacak' için gerekli */
+   IsRandevuPlanlandi      Bit          null, /* Randevu tarafında planlanınca burası True olacak */
+   IsRandevuMebbis         Bit          null, /* Randevu Mebbise aktarılınca */
+--   uSinavaKatilabilir      Bit          null, iptal
+--   uRandevuMebbisAktarildi Bit          null, iptal
+
+   -- 240 
    uSinavNo                SmallInt     null,
    uSinavDurumTipiId       SmallInt     null,
    uSinavSonucTipiId       SmallInt     null, /* Başarılı, Başarısız, Girmedi */
@@ -109,7 +109,7 @@ begin transaction
    uSinavDetayId           Int          null, /* en son hangi sınavsa onun id si. sınav1 ise sınav1 in id si, 2 ise 2 nin id si, 3, 4 ... */
    uSinavBasariTarihi      Date         null,
    
-   --300 sertifika aşaması
+   --260 sertifika aşaması
    SertifikaDurumTipiId    SmallInt     null,
    SertifikaTarihi         Date         null,
    DosyaYakti              Bit          null, -- false/true
@@ -125,6 +125,10 @@ begin transaction
 commit transaction
 
 /*CreateTableEnd*/
+
+
+
+
 
 
 /* Tablonun her aday için gerekli olan satırı :  trg_MtskAday içinde insert ediliyor   */
@@ -841,7 +845,7 @@ INSERT INTO [Lkp].[MtskAdayTakipuSinavDurumTipi] (Id, uSinavDurumTipi, KonuGrupI
   ( 8,    N'Uygulama sınav sonucu okunacak',                     1, 3148, 'Sınav durumu', 'Sonuç okunacak', 'Mebbis..' ),
   ( 9,    N'Uygulama sınav sonucu okundu',                       1, 3149, 'Sınav durumu', 'Sonuç okundu', '' ),
 
-/*  
+/*  gerek kalmadı 
   ( 11,   N'2. +4 sınavı için usta öğretici onayı isteniyor', 1, 3151, 'Sınav durumu', '', '' ),
   ( 12,   N'2. +4 sınavı için hazır değil',                   1, 3152, 'Sınav durumu', '+4 hazır değil', '' ),
   ( 14,   N'2. +4 sınavı randevusu planlanacak',              1, 3154, 'Sınav durumu', '+4 rand.planlanacak', 'Planlama.' ),
@@ -850,6 +854,35 @@ INSERT INTO [Lkp].[MtskAdayTakipuSinavDurumTipi] (Id, uSinavDurumTipi, KonuGrupI
   ( 17,   N'2. +4 sınavı sonucu okunacak',                    1, 3157, 'Sınav durumu', '+4 sınav okunacak', 'Mebbis....' ),
   ( 18,   N'2. +4 sınavı sonucu okundu',                      1, 3158, 'Sınav durumu', '+4 sınav okundu', '' )
 */  
+
+-- ------------------------------------------------------- 
+-- uSinavaHazirmiTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdayTakipuSinavaHazirmiTipi')
+drop table [Lkp].[MtskAdayTakipuSinavaHazirmiTipi]
+
+create table [Lkp].[MtskAdayTakipuSinavaHazirmiTipi]
+(
+   Id                  Int Unique not null, 
+   uSinavaHazirmiTipi  nVarchar(50)   null,
+   KonuGrupId          SmallInt       null,
+   KonuId              Int            null,
+   KonuCaption         nVarchar(20)   null,
+   ChartCaption        nVarchar(20)   null,
+   FormCaption         nVarchar(15)   null,
+   
+   constraint  pk_MtskAdayTakipuSinavaHazirmiTipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskAdayTakipuSinavaHazirmiTipi]
+INSERT INTO [Lkp].[MtskAdayTakipuSinavaHazirmiTipi] (Id, uSinavaHazirmiTipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption)
+ VALUES 
+  ( 0,    N'Tanımsız',                        1, 3150, 'Sınava hazır mı', '', ''),
+  ( 1,    N'Sınava hazır',                    1, 3151, 'Sınava hazır mı', '', ''),
+  ( 2,    N'Sınav için hazır değil',          1, 3152, 'Sınava hazır mı', '', ''),
+  ( 3,    N'Takviye derslerle sınava hazır',  0, 3153, 'Sınava hazır mı', '', '')
+
+
 -- ------------------------------------------------------- 
 -- uSinavSonucTipiId
 -- ------------------------------------------------------- 

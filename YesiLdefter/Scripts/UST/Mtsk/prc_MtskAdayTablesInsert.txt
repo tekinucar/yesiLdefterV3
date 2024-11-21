@@ -177,13 +177,13 @@ AS BEGIN
   begin 
      INSERT INTO dbo.MtskAdayTakip
            (FirmId, TalepId, AdayId,
-            DonemTipiId, GrupTipiId,SubeTipiId,
+            DonemTipiId, GrupTipiId, SubeTipiId,
             AsamaTipiId, TalepTipiId, KayitTipiId, ZamanlamaTipiId,
             IsGrupSubeYok, IsActive,
             MebbisKurumOnayi, MebbisDurumTipiId,
             SertifikaYasSiniri, YasOnayiTipiId, YasHazirTarihi,
             DeneyimSartiTipiId, IsDeneyimEnAz, DeneyimSertifikaTipiId,
-            OzurDurumuTipiId,
+            OzurDurumuTipiId, OkutmanTalebi, TercumanTalebi, YabanciDilTipiId,
             BelgelerGeldi, BelgelerTarandi, BelgelerYuklendi,
             BorcDurumuTipiId,
 
@@ -202,7 +202,9 @@ AS BEGIN
 		    Arti4EgitimPistiDersToplami, Arti4AkanTrafikDersToplami, Arti4DersToplami,
             Arti4DersTipiId, IsArti4DersMebbis,
 
-            uSinavaKatilabilir, uRandevuMebbisAktarildi, uSinavNo,
+			uSinavaHazirmiTipiId, IsTakviyeDersleHazir, IsUygSinavMebbisOnayi, 
+			IsRandevuPlanlandi,  IsRandevuMebbis, uSinavNo, 
+
             uSinavDurumTipiId, uSinavSonucTipiId, uSinavSonrasiTipiId,
 		    uSinavUcretTipiId, uSinavDetayId, uSinavBasariTarihi,
 
@@ -211,13 +213,12 @@ AS BEGIN
            (@yFirmId,  @TalepId, @yAdayId,  
 		    @yDonemTipiId, @yGrupTipiId, @ySubeTipiId, 
             0,  @yTalepTipiId,  0,  0,  -- AsamaTipiId, TalepTipiId, KayitTipiId, ZamanlamaTipiId,
-            0,  0,        -- IsGrupSubeYok, IsActive
-            0,  0,        -- MebbisKurumOnayi, MebbisDurumTipiId
-            0,  0,  null, -- SertifikaYasSiniri, YasOnayiTipiId, YasHazirTarihi
-            0,  0,  0,    -- DeneyimSartiTipiId, IsDeneyimEnAz, DeneyimSertifikaTipiId
-            0,            -- OzurDurumuTipiId
-            0,  0,  0,    -- BelgelerGeldi, BelgelerTarandi, BelgelerYuklendi, 
-            0,            -- BorcDurumuTipiId, 
+            0,  0,              -- IsGrupSubeYok, IsActive
+            0,  0,              -- MebbisKurumOnayi, MebbisDurumTipiId
+            0,  0,  null,       -- SertifikaYasSiniri, YasOnayiTipiId, YasHazirTarihi
+            0,  0,  0,          -- DeneyimSartiTipiId, IsDeneyimEnAz, DeneyimSertifikaTipiId
+            0,  0,  0,   0,     -- OzurDurumuTipiId, OkutmanTalebi, TercumanTalebi, YabanciDilTipiId
+            0,  0,  0,   0,     -- BelgelerGeldi, BelgelerTarandi, BelgelerYuklendi, BorcDurumuTipiId, 
             null, null,  0,  0, -- TeorikBaslamaTarihi, TeorikBitisTarihi, TeorikDersTipiId, eSinavNo
             0,  0,  0,  null,   -- eSinavDurumTipiId, eSinavSonucTipiId, eSinavSonrasiTipiId, eSinavMuracatTarihi
             0,  0,  null,       -- eSinavUcretTipiId, eSinavDetayId, eSinavBasariTarihi, 
@@ -229,7 +230,8 @@ AS BEGIN
             0,  null, null,     -- IsArti4DersPlanli, Arti4BaslamaTarihi, Arti4BitisTarihi, 
             0,  0,  0,          -- Arti4EgitimPistiDersToplami, Arti4AkanTrafikDersToplami, Arti4DersToplami, 
             0,  0,              -- Arti4DersTipiId, IsArti4DersMebbis,
-            0,  0,  0,          -- uSinavaKatilabilir, uRandevuMebbisAktarildi, uSinavNo, 
+			0,  0,  0,          -- uSinavaHazirmiTipiId, IsTakviyeDersleHazir, IsUygSinavMebbisOnayi, 
+			0,  0,  0,          -- IsRandevuPlanlandi,  IsRandevuMebbis, uSinavNo, 
             0,  0,  0,          -- uSinavDurumTipiId, uSinavSonucTipiId, uSinavSonrasiTipiId,
             0,  0,  null,       -- uSinavUcretTipiId, uSinavDetayId, uSinavBasariTarihi,
             0,  null,  0        -- SertifikaDurumTipiId, SertifikaTarihi, DosyaYakti

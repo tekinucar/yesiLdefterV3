@@ -825,12 +825,17 @@ namespace Tkn_CreateDatabase
             createEnd = createEnd.Replace("???", ObjType);
             int length = create.Length;
 
-            int i_bgn = SqlText.IndexOf(create) + length; // ("/*CreateTable*/") + 15; 
-            if (i_bgn < 0)
-                MessageBox.Show("DİKKAT : " + vt.TableName + " için " + create + " ifadesi tespit edilemedi");
+            int i_bgn = SqlText.IndexOf(create); // ("/*CreateTable*/") + 15; 
+            
+            /// yoksa zaten mesaj olmaması gerekiyor
+            /// begin var end yok ise o zaman mesaj versin
+            //if (i_bgn < 0)
+            //    MessageBox.Show("DİKKAT : " + vt.TableName + " için " + create + " ifadesi tespit edilemedi");
+
+            if (i_bgn > -1) i_bgn += length;
 
             int i_end = SqlText.IndexOf(createEnd) - 1;   // ("/*CreateTableEnd*/") - 1;
-            if (i_end < 0)
+            if (i_bgn > -1 && i_end < 0)
                 MessageBox.Show("DİKKAT : " + vt.TableName + " için " + createEnd + " ifadesi tespit edilemedi");
 
             Sql = SqlText.Substring(i_bgn, i_end - i_bgn);

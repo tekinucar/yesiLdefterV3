@@ -54,14 +54,14 @@ CREATE TRIGGER [dbo].[trg_MtskSinavETeorik] on [dbo].[MtskSinavETeorik]
 AFTER INSERT, UPDATE
 AS BEGIN
 
-    DECLARE eSinavCursor cursor for select Id from Inserted
+    DECLARE eSinavCursor cursor local for select Id from Inserted
     DECLARE @curId bigint
 
     OPEN eSinavCursor
-
     FETCH NEXT FROM eSinavCursor INTO @curId
     
 	declare @yFirmId int = 0
+	declare @yTalepId int = 0
 	declare @yAdayId int = 0
 	declare @yTcNo varchar(11)
 	declare @yTamAdiSoyadi nVarchar(100)
@@ -74,9 +74,6 @@ AS BEGIN
 	declare @yTeorikPuani int = 0
 	declare @yMebbisESinavTarihValue varchar(20) = ''
 	declare @SinavSonucTipiId smallInt = 0
-	
-	
-	/*  düzeltme gerekiyor
 
     WHILE @@FETCH_STATUS = 0
     BEGIN
@@ -86,6 +83,7 @@ AS BEGIN
 				
         select 
          @yFirmId = ins.FirmId
+        ,@yTalepId = isnull(ins.TalepId,0)
         ,@yAdayId = isnull(ins.AdayId,0)
 		,@yTcNo = isnull(ins.TcNo,'')
 		,@yTamAdiSoyadi = isnull(ins.TamAdiSoyadi,'')
@@ -110,19 +108,20 @@ AS BEGIN
           else set @SinavDonemTipiId = convert(int, convert(varchar(5), YEAR(@ySinavTarihi)) + convert(varchar(3), MONTH(@ySinavTarihi)))
 		
 		
-		if (@yAdayId = 0) and (@yTcNo <> '')
+		if (@yTalepId = 0 and @yAdayId = 0 and @yTcNo <> '')
 		begin
-		  Select top 1 @yAdayId = Id  From MtskAday
+		  -- Talepleri kontrol et
+		  Select top 1 @yAdayId = AdayId  From MtskAdayTalep
           Where TcNo = @yTcNo
           and   isnull(DonemTipiId,0) <= @SinavDonemTipiId
           order by DonemTipiId desc, Id desc
 
 		  -- demekki aday hiç kayıtlı değil 
 		  -- yani ilk defa MEBBİS in sınav sonuçları (uygulama) sayfasından okunuyor demek
-		  if (@yAdayId = 0)
+		  if (@yTalepId = 0)
 		  begin
               
-			  INSERT INTO [dbo].[MtskAday]
+			  INSERT INTO [dbo].[MtskAdayTalep]
                  ([FirmId]
                  ,[IsActive]
                  ,[TcNo]
@@ -130,25 +129,25 @@ AS BEGIN
 				 ,[DonemTipiId]
                  ,[MebbisKurumOnayi]
                  ,[KayitTipiId]
-                 ,[KaynakKayitTipiId]
+                 ,[VeriKaynakTipiId]
                  )
               VALUES
                (  @yFirmId --FirmId, int
                 , 1        --IsActive, bit
                 , @yTcNo   --TcNo, varchar(11)
                 , @yTamAdiSoyadi --TamAdiSoyadi, nvarchar(100)
-				, 0 -- @AdayDonemTipiId --DonemTipiId, int   << e-sınavda bu bilgi yok
+				, 0        --DonemTipiId, int   << e-sınavda bu bilgi yok
                 , 1        --MebbisKurumOnayi, bit
-                , 2        --KayitTipiId
-                , 3        --KaynakKayitTipiId 
+                , 2        --KayitTipiId     : Kesin kayıt 
+                , 3        --VeriKayitTipiId : Mebbis e-sınav listesi
                )
-             
-			  --Select @yAdayId = @@IDENTITY
-			  Select @yAdayId = aday.Id
-		      From MtskAday as aday
-		      Where aday.FirmId = @yFirmId
-		      and   aday.TcNo = @yTcNo 
-		  end -- @yAdayId = 0
+			  
+			  Select top 1 @yTalepId = talep.Id
+		      From MtskAdayTalep as talep
+		      Where talep.FirmId = @yFirmId
+		      and   talep.TcNo = @yTcNo 
+			  order by Id desc
+		  end -- @yTalepId = 0
 		end
 		
 		if (@yTeorikPuani >= 70) 
@@ -160,18 +159,29 @@ AS BEGIN
 		-- Sınav tarihinden 7 gün geçtiği halde okunmamışsa girmedi yap
 		if ((@yTeorikPuani = 0) and (@ySinavTarihi < (GETDATE() - 7))) 
 		   set @SinavSonucTipiId = 3 -- Girmedi
-		
+
+        if (@yMebbisESinavTarihValue <> '')-- and (@ySinavTarihSaat = '' or @ySinavTarihSaat = '0'))        
+        begin 
+            Select Top 1
+                 @SinavDonemTipiId = SinavDonemTipiId
+               , @ySinavTarihSaat = SinavTarihSaat
+               , @ySinavTarihi = SinavTarihi
+               , @ySinavSaati = SinavSaati
+            from dbo.MtskSinavTarihi as tarihler
+            Where tarihler.MebbisESinavTarihValue = @yMebbisESinavTarihValue
+        end -- if (@yMebbisESinavTarihValue <> ''
+
 		Select @ySinavNo = (count(Id) + 1) From MtskSinavETeorik
 		Where IsActive = 1
 		and FirmId = @yFirmId
-		and AdayId = @yAdayId
+		and TalepId = @yTalepId
 		and SinavTarihi < @ySinavTarihi
 
 		update MtskSinavETeorik set
-           AdayId = @yAdayId
+           TalepId = @yTalepId
 		 , SinavDonemTipiId = @SinavDonemTipiId
 		 , SinavNo = @ySinavNo
-		 --, SinavTarihSaat = @ySinavTarihSaat
+		 , SinavTarihSaat = @ySinavTarihSaat
 		 , SinavTarihi = @ySinavTarihi
          , SinavSaati = @ySinavSaati
 		 , DurumuTipiId = @SinavSonucTipiId
@@ -182,19 +192,17 @@ AS BEGIN
 		-- çift kayıt oluşuyor. Bu nedenle önceki saat bilgisi olmayan yani ilk datada okunan silinmesi gerekiyor
 		if (@yMebbisESinavTarihValue <> '')
 		begin
-		  Delete From MtskSinavETeorik
-		  Where SinavTarihi = @ySinavTarihi
-		  and   isnull(MebbisESinavTarihValue,'') = ''
-		  and   Id <> @curId 
+            Delete From MtskSinavETeorik
+            Where SinavTarihi = @ySinavTarihi
+            and   isnull(MebbisESinavTarihValue,'') = ''
+            and   Id <> @curId 
 		end
+
+		Execute [dbo].[prc_MtskAdayTakipTalepKaydiSingleSet] @yTalepId
 
         FETCH NEXT FROM eSinavCursor INTO @curId
     END
-
-	EXECUTE [dbo].[prc_MtskAdayTakip]  @yFirmId
-
-	*/
-
+	
     CLOSE eSinavCursor
     DEALLOCATE eSinavCursor   
 
@@ -202,7 +210,9 @@ END -- trigger
 
 /*CreateTriggerEnd*/
 
-ALTER TABLE [dbo].[MtskSinavETeorik] ENABLE TRIGGER [trg_MtskSinavETeorik]
+
+
+
 
 
 /*CreateLkpTable*/

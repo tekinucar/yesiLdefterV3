@@ -563,10 +563,11 @@ INSERT INTO [Lkp].[MtskAdayTalepVeriKaynakTipi] (Id, VeriKaynakTipi)
   ( 0,  N'' ),
   ( 1,  N'Kullanıcı girişi, kaydı' ),
   ( 2,  N'Mebbis dönem aday onaylama listesi' ),
-  ( 3,  N'Mebbis uygulama sınav listesi' ),
-  ( 4,  N'Mebbis aday durum bilgileri' ),
-  ( 5,  N'Veri aktarımı' ),
-  ( 6,  N'2.+4 hak için veri aktarımı' )
+  ( 3,  N'Mebbis e-sınav listesi' ),
+  ( 4,  N'Mebbis uygulama sınav listesi' ),
+  ( 5,  N'Mebbis aday durum bilgileri' ),
+  ( 6,  N'2.+4 hak için veri aktarımı' ), --- ??? hatırlamadım
+  ( 11, N'Veri aktarımı' )
 
 
 commit transaction

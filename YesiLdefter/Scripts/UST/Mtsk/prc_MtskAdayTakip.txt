@@ -142,7 +142,8 @@ AS BEGIN
 	--   2, Uygulamalı dersler planlandı
     --   3, Uygulamalı ders alıyor
     --   4, Uygulamalı dersleri tamamladı
-	
+
+    -- DİKKAT : Aynı kod prc_MtskAdayTakipTalepKaydiSingleSet içinde var	
     update MtskAdayTakip set
       eSinavNo = x.SinavNo
     , eSinavDurumTipiId = x.eSinavDurumTipiId

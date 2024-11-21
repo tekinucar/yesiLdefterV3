@@ -701,18 +701,20 @@ namespace Tkn_DevColumn
             Int16 type = 0;
 
             // İlk satırdaki boş satır
-            if ((ItemBox_ICB != null) || (tEdit_ICB != null))
-                RepositoryItem_Add_(ItemBox_ICB, tEdit_ICB, null, null, null, null, null, null, "", "0", 2);
+            if ((ItemBox_ICB != null || tEdit_ICB != null) && (val_type_ == "1" || val_type_ == "2"))
+                RepositoryItem_Add_(ItemBox_ICB, tEdit_ICB, null, null, null, null, null, null, "", "0", t.myInt16(val_type_));
+            if ((ItemBox_ICB != null || tEdit_ICB != null) && (val_type_ == "3"))
+                RepositoryItem_Add_(ItemBox_ICB, tEdit_ICB, null, null, null, null, null, null, "", "", t.myInt16(val_type_));
 
             int i1 = dsData.Tables[0].Rows.Count;
             for (int i = 0; i < i1; i++)
             {
                 type = Convert.ToInt16(dsData.Tables[0].Rows[i]["VALUE_TYPE"].ToString());
                 caption = dsData.Tables[0].Rows[i]["VALUE_CAPTION"].ToString();
-                //if ((type == 1) || (type == 2))
-                value = dsData.Tables[0].Rows[i]["VALUE_INT"].ToString();
-                //if ((type == 3) || (type == 4))
-                //    value = dsData.Tables[0].Rows[i]["VALUE_STR"].ToString();
+                if ((type == 1) || (type == 2))
+                    value = dsData.Tables[0].Rows[i]["VALUE_INT"].ToString();
+                if ((type == 3) || (type == 4))
+                    value = dsData.Tables[0].Rows[i]["VALUE_STR"].ToString();
 
                 if ((ItemBox_ICB != null) || (tEdit_ICB != null) ||
                     (ItemBox_CCmb != null) || (tEdit_CCmb != null))
@@ -744,7 +746,7 @@ namespace Tkn_DevColumn
             if (tEdit_CB != null)
                 tEdit_CB.Properties.Items.Add(new DevExpress.XtraEditors.Controls.ComboBoxItem(caption));
 
-
+            /* type = 3 gelince sorun başlıyor
             // Byte değilse
             if ((type != 4) && (type < 6)) // burası kim için çalışıyor hatırlamadım ?
             {
@@ -760,7 +762,7 @@ namespace Tkn_DevColumn
                     return;
                 }
             }
-
+            */
             // Numeric   ToDecimal
             if ((type == 5) || (type == 108))
             {

@@ -10,6 +10,7 @@ AS BEGIN
   declare @GelecekAy Datetime
   declare @BugunDonemTipiId int = 0
   declare @GelecekDonemTipiId int = 0
+  declare @bugun smalldatetime = getdate()
 
   declare @zamanlamaTipiId int = 0
   declare @isGrupSubeYok bit = 0
@@ -144,6 +145,72 @@ AS BEGIN
      , TeorikBitisTarihi   = @TeorikBitisTarihi  
      , TeorikDersTipiId    = @TeorikDersTakipTipi 
   Where TalepId = @TalepId
+
+    -- -------------------------------------------------------------------------
+    -- eSinav sonuçları
+    -- -------------------------------------------------------------------------
+    -- DİKKAT : Aynı kod prc_MtskAdayTakip içinde var	
+    ----------------------------------------------------------------------------
+    update MtskAdayTakip set
+      eSinavNo = x.SinavNo
+    , eSinavDurumTipiId = x.eSinavDurumTipiId
+    , eSinavSonucTipiId = x.DurumuTipiId
+    , eSinavSonrasiTipiId = x.eSinavSonrasiTipiId
+    , eSinavMuracatTarihi = x.eSinavMuracatTarihi
+	, eSinavDetayId = x.sinavId
+	, eSinavBasariTarihi = x.SinavTarihi
+	, UygulamaliDersTipiId = x.UygulamaliDersTipiId
+    from MtskAdayTakip a, 
+    (
+	Select 
+	       eSinav.Id as sinavId
+	     , eSinav.FirmId
+         , eSinav.TalepId
+	     , eSinav.AdayId 
+	     , eSinav.SinavNo
+         , eSinav.DurumuTipiId
+		 , convert(date, eSinav.SinavTarihi, 103) as SinavTarihi
+	     , case
+             when (eSinav.DurumuTipiId = 0 and convert(date, @bugun,103) <  convert(date, eSinav.SinavTarihi, 103)) then 3 -- e-Sınav başvurusu yapıldı
+             when (eSinav.DurumuTipiId = 0 and convert(date, @bugun,103) >= convert(date, eSinav.SinavTarihi, 103)) then 4 -- e-Sınav sonucu okunacak
+	         when (eSinav.DurumuTipiId > 0) then 5 -- e-Sınav sonucu okundu
+           end as eSinavDurumTipiId
+         , case
+	         when (eSinav.DurumuTipiId = 1) then 2 -- Uygulama aşamasına geçti
+             when (eSinav.DurumuTipiId > 1) and (eSinav.SinavNo < 4 ) then 1  -- Tekrar sınava girecek
+             when (eSinav.DurumuTipiId > 1) and (eSinav.SinavNo >= 4 ) then 3 -- Tüm e-Sınav hakkı bitti
+           end as eSinavSonrasiTipiId
+         , case 
+	         when (eSinav.DurumuTipiId > 1) and (eSinav.SinavNo < 4 ) then (
+                  case when DAY(eSinav.SinavTarihi) >= 1 and DAY(eSinav.SinavTarihi) <= 15 then DATEADD(DAY, 16 - DAY(eSinav.SinavTarihi), eSinav.SinavTarihi)
+                  else DATEADD(DAY, 1, EOMONTH(eSinav.SinavTarihi)) end
+			 )
+             else null
+	       end as eSinavMuracatTarihi
+         , case
+	         when (eSinav.DurumuTipiId = 1 ) then 1   -- eSinav.Başarılı ise Uygulamalı dersler planlanacak
+             when (eSinav.DurumuTipiId <> 1) then 0   -- boşluk
+           end as UygulamaliDersTipiId
+
+         from MtskSinavETeorik as eSinav,
+	     (     -- Adayların son sınavlarını buluyor
+	           Select TalepId, AdayId
+			   , max(convert(smallDatetime,SinavTarihi,103)) as SinavTarihi
+               from MtskSinavETeorik
+		       Where FirmId = @yFirmId
+			   and IsActive = 1
+               -- ----------------------------------------
+			   and TalepId = @TalepId -- Bu procedure özel
+               -- ----------------------------------------
+               group by TalepId, AdayId
+         ) as aday
+	     Where eSinav.TalepId = aday.TalepId
+		 and   eSinav.AdayId = aday.AdayId
+	     and   convert(smallDatetime,eSinav.SinavTarihi,103) = aday.SinavTarihi
+    ) as x
+    Where a.FirmId  = x.FirmId
+    and   a.TalepId = x.TalepId
+	and   a.AdayId  = x.AdayId 
 
 
 END -- procedure
