@@ -95,7 +95,7 @@ AS BEGIN
    Where sube.FirmId      = x.FirmId
    and   sube.DonemTipiId = x.DonemTipiId
    and   sube.GrupTipiId  = x.GrupTipiId 
-   and   sube.SubeTipiId  = x.SubeTipiId 
+   and   sube.SubeTipiId  = x.SubeTipiId   
 
 
 END -- procedure

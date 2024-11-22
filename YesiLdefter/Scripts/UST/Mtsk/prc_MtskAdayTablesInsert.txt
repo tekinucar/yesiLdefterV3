@@ -236,9 +236,7 @@ AS BEGIN
             0,  0,  null,       -- uSinavUcretTipiId, uSinavDetayId, uSinavBasariTarihi,
             0,  null,  0        -- SertifikaDurumTipiId, SertifikaTarihi, DosyaYakti
 			)       
-            
-            print ' create : [MtskAdayTakip]'
-  
+			print ' create : [MtskAdayTakip]'
   end -- MtskAdayBelgeler
 
 END -- procedure

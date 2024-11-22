@@ -37,15 +37,14 @@ commit transaction
 
 /*CreateTrigger*/
 
-CREATE ALTER TRIGGER [dbo].[trg_MtskGrupSubesi] on [dbo].[MtskGrupSubesi] 
+CREATE TRIGGER [dbo].[trg_MtskGrupSubesi] on [dbo].[MtskGrupSubesi] 
 AFTER INSERT, UPDATE
 AS BEGIN
 
-    DECLARE mgSubesiCursor cursor for select Id from Inserted
+    DECLARE mgSubesiCursor cursor local for select Id from Inserted
     DECLARE @curId bigint
 
     OPEN mgSubesiCursor
-
     FETCH NEXT FROM mgSubesiCursor INTO @curId
    
     declare @MtskDonemiId int 
@@ -64,9 +63,9 @@ AS BEGIN
 
       Select
          @FirmId = FirmId
-        ,@DonemTipiId = DonemTipiId
-        ,@GrupTipiId = GrupTipiId
-        ,@SubeTipiId = SubeTipiId
+        ,@DonemTipiId = isnull(DonemTipiId,0)
+        ,@GrupTipiId  = isnull(GrupTipiId,0)
+        ,@SubeTipiId  = isnull(SubeTipiId,0)
         ,@GrupBaslamaTarihi = GrupBaslamaTarihi
         ,@KurumOnayTipiId = KurumOnayTipiId
 
@@ -144,7 +143,6 @@ AS BEGIN
 
     CLOSE mgSubesiCursor
     DEALLOCATE mgSubesiCursor   
-        
 
 END
 

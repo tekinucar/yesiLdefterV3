@@ -12,6 +12,8 @@ AS BEGIN
   --- Teorik derslerle ilgili bir değişiklik olduğunda 
   --- MtskAdayTakip tablosuna yansıtmak gerekiyor
 
+  print '   prc_MtskAdayTakipTeorikDersSet başladı'
+
   Update dbo.MtskAdayTakip Set
       TeorikBaslamaTarihi = ders.GrupBaslamaTarihi
     , TeorikBitisTarihi   = ders.GrupBitisTarihi
@@ -37,6 +39,8 @@ AS BEGIN
   and   tkp.DonemTipiId = ders.DonemTipiId
   and   tkp.GrupTipiId  = ders.GrupTipiId
   and   tkp.SubeTipiId  = ders.SubeTipiId
+
+  print '   prc_MtskAdayTakipTeorikDersSet bitti'
 
 
 END -- procedure

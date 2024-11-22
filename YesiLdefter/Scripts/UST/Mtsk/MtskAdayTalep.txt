@@ -22,6 +22,7 @@ begin transaction
    Soyadi                nVarchar(50)  null,
    DogumTarihi           Date          null,
    BabaAdi               nVarchar(50)  null,
+   AnneAdi               nVarchar(50)  null,
    CinsiyetTipiId        SmallInt      null, /* SİLİNEBİLİR */ 
    CepTelefonu           Varchar(15)   null,
    Eposta                Varchar(98)   null, 
@@ -69,7 +70,8 @@ begin transaction
    MebbisDurumTipiId       SmallInt      null,
    MebbisDurumOkundu       Bit           null,
    KayitTipiId             SmallInt      null, /* 1.'Ön kayıt', 2.'Kayıt aşamasında', 3.'Kesin kayıt' ... */
-   VeriKaynakTipiId        SmallInt      null, /* 1. Kullanıcı Manuel, 2. Mebbis Dönem Aday Onaylama, 3. Mebbis Uygulama Sınav Listesi, 4. Mebbis Aday Durum Bilgileri  */
+   VeriKaynakTipiId        SmallInt      null, /* 1. Kullanıcı Manuel, 2. Mebbis Dönem Aday Onaylama, 3. Mebbis Uygulama Sınav Listesi, 4. Mebbis Aday Durum Bilgileri, 5. Tabim veritabanı  */
+   VeriKaynakId            Int           null, /* Veri transferi edildiği tablodaki Id . Sorun olduğunda bilginin nereden geldiğine referans olsun */
    /* Dönem bilgileri SON */
 
    -- 70
@@ -115,6 +117,7 @@ commit transaction
 CREATE TRIGGER [dbo].[trg_MtskAdayTalep] on [dbo].[MtskAdayTalep]
 AFTER INSERT, UPDATE
 AS BEGIN
+
   print 'talep trigger start'
 
   declare talepCursor_ cursor local for select Id from Inserted
@@ -187,8 +190,8 @@ AS BEGIN
 
   WHILE @@FETCH_STATUS = 0
   BEGIN
-      print 'while begin '
-	  print 'TalepId : ' + Convert(varchar(10), @TalepId)
+      print '  talep while begin '
+	  print '    TalepId : ' + Convert(varchar(10), @TalepId)
 
       Select 
           @eAdayId = isnull(dlt.AdayId,0)
@@ -371,23 +374,22 @@ AS BEGIN
       begin
           Execute [dbo].[prc_MtskAdayTalepSertifika24HakKaydi] @TalepId
       end
-
+	  
 	  Execute [dbo].[prc_MtskAdayTablesInsert] @TalepId
 	  Execute [dbo].[prc_MtskAdayTakipTalepKaydiSingleSet] @TalepId
 	  Execute [dbo].[prc_MtskAdayTalepYasiniHesapla] @TalepId
-
+	  
       FETCH NEXT FROM talepCursor_ INTO @TalepId
-	  print 'while end'
+	  print '  talep while end'
   END -- While
 
   -- Veri transferi yapılmıyorsa 
   -- diğer işlemleri yapmaya başlasın
   if (@DbUpdatesIsActive = 0)
   begin
-	  --print 'veri transferi harici işler'
-      Execute [dbo].[prc_MtskAdayTakipTalepKaydiMultiSet] @yFirmId 
-      Execute [dbo].[prc_MtskDonemKontrolu] @yFirmId 
-      --EXECUTE [dbo].[prc_MtskAdayTakip] @yFirmId
+	  print 'talep veri transferi harici işler'
+      --Execute [dbo].[prc_MtskAdayTakipTalepKaydiMultiSet] @yFirmId 
+      ----EXECUTE [dbo].[prc_MtskAdayTakip] @yFirmId
   end
 
   CLOSE talepCursor_

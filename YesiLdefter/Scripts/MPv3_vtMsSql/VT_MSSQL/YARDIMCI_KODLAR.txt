@@ -6,6 +6,17 @@
 --exec sys.sp_addsrvrolemember TABIM, 'sysadmin'
 
 
+/*  Sistemden tabloları sorgulamalar */
+
+Select * From sys.objects
+Where name like '%Mtsk%'
+and schema_id = 1
+and ( type_desc = 'USER_TABLE'
+   or type_desc = 'SQL_STORED_PROCEDUREx')
+
+order by modify_date desc
+
+
 
 /* ldf dosyası bozulan database kurtarmak için */
 

@@ -15,17 +15,23 @@ AS BEGIN
   if (MONTH(getdate()) < 10)
        set @BugunDonemTipiId = convert(int, convert(varchar(5), YEAR(getdate())) + '0' + convert(varchar(3), MONTH(getdate())))
   else set @BugunDonemTipiId = convert(int, convert(varchar(5), YEAR(getdate())) + convert(varchar(3), MONTH(getdate())))
-  
+
   -- Döngüye alınacak Select cümlesi
   declare myCursor CURSOR local FOR 
   Select DonemTipiId, GrupTipiId, SubeTipiId From MtskGrupSubesi
-  Where  DonemTipiId = @BugunDonemTipiId
+  Where  0 = 0 --DonemTipiId = @BugunDonemTipiId
   and    FirmId = @FirmId
 
   OPEN myCursor; 
   
   FETCH NEXT FROM myCursor INTO @DonemTipiId, @GrupTipiId, @SubeTipiId
-  
+
+  print 'prc_MtskGunlukTakipler başladı'
+
+  -- Bir defa çalışacak olanlar
+  Execute [dbo].[prc_MtskDonemKontrolu] @FirmId
+  Execute [dbo].[prc_MtskDonemAdaySayilariSet] @FirmId --- Gün içinde birden fazla kursiyer kaydına bağlı olması gerekiyor 
+
   WHILE @@FETCH_STATUS = 0 
   BEGIN -- İşlemler burada yapılır 
   
@@ -34,21 +40,19 @@ AS BEGIN
 	 -- Şubelerin TakipTipiId için çalıştırılıyor
 	 Execute [dbo].[prc_MtskGrupSubesiTakipSet] @FirmId, @DonemTipiId, @GrupTipiId, @SubeTipiId     
 
-
      FETCH NEXT FROM myCursor INTO @DonemTipiId, @GrupTipiId, @SubeTipiId; 
   END; 
   
   CLOSE myCursor;
 
-
-
+  print 'prc_MtskGunlukTakipler bitti'
 
 END -- procedure
 
 /*CreateProcedureEnd*/
 
 
-
+/*
  	  bir adayın takip edilecek aşamaları
       -- kayıt aşamaları  
 	  -- teorik dersleri 
@@ -57,3 +61,4 @@ END -- procedure
       -- uygulama sınav aşamaları
       -- sertifika aşamaları
 
+*/

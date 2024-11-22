@@ -2946,6 +2946,12 @@ namespace Tkn_ToolBox
 
         public bool checkedLockRow(DataSet dsData, int position)
         {
+            /// v.con_FieldLockControl = True ise contrrol et değilse dön
+            /// Mebbisden data alırken Lock kontrolünün olmaması gerekiyor
+            /// 
+            if (v.con_FieldLockControl == false) 
+                return false;
+            
             string myProp = dsData.Namespace;
             string lockFieldName = MyProperties_Get(myProp, "LockFName:");
 
@@ -3010,13 +3016,30 @@ namespace Tkn_ToolBox
             for (int i = 0; i < colCount; i++)
             {
                 fieldName = dsData.Tables[0].Columns[i].ColumnName;
-                orjValue = row[fieldName, DataRowVersion.Original].ToString();
-                curValue = row[fieldName, DataRowVersion.Current].ToString();
+                try
+                {
+                    orjValue = row[fieldName, DataRowVersion.Original].ToString();
+                }
+                catch (Exception)
+                {
+                    orjValue = "tError";
+                    //throw;
+                }
+                try
+                {
+                    curValue = row[fieldName, DataRowVersion.Current].ToString();
+                }
+                catch (Exception)
+                {
+                    //throw;
+                }
+                                
                 value = row[fieldName].ToString();
                 
                 //if (!row[fieldName, DataRowVersion.Original].Equals(row[fieldName, DataRowVersion.Current])) 
-                if (!orjValue.Equals(curValue) ||
-                    !orjValue.Equals(value))
+                if ((orjValue != "tError") &&
+                    (!orjValue.Equals(curValue) ||
+                     !orjValue.Equals(value)))
                 {
                     //orjValue = row[fieldName, DataRowVersion.Original].ToString();
                     //curValue = row[fieldName, DataRowVersion.Current].ToString();
@@ -3026,7 +3049,7 @@ namespace Tkn_ToolBox
 
                 /// lockFieldName manuel değiştirilmesin
                 /// 
-                if (lockFieldName == fieldName)
+                if (lockFieldName == fieldName && orjValue != "tError")
                 {
                     row[fieldName] = orjValue;
                     onay = true;
@@ -4020,7 +4043,8 @@ namespace Tkn_ToolBox
             catch (Exception)
             {
                 MessageBox.Show("DİKKAT : JSon paketi kontrol et, sorun mevcut...");
-                throw;
+                //throw;
+                return null;
             }
         }
 

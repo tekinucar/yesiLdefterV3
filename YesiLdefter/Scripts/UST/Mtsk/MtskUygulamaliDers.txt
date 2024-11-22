@@ -48,26 +48,25 @@ CREATE TRIGGER [dbo].[trg_MtskUygulamaliDers] on [dbo].[MtskUygulamaliDers]
 AFTER INSERT, UPDATE
 AS BEGIN
 
-    DECLARE myCursor cursor for select Id from Inserted
+    DECLARE myCursor cursor local for select Id from Inserted
     DECLARE @curId bigint
 
     OPEN myCursor
-
     FETCH NEXT FROM myCursor INTO @curId
 
-	  declare @yFirmId int = 0
+    declare @yFirmId int = 0
     declare @yDonemTipiId int = 0
     declare @yGrupTipiId smallInt = 0
     declare @ySubeTipiId smallInt = 0
     declare @yAdayId int = 0
     declare @yAdayTcNo varchar(11) = null
-	  declare @yAdayAdiSoyadi nVarchar(100) = null
+    declare @yAdayAdiSoyadi nVarchar(100) = null
     declare @yDersTarihi date = null
     declare @yDersSaatiTipiId smallInt = -1
-	  declare @DersDonemTipiId int = 0
-	  declare @yPersonelAdiSoyadi nVarchar(100) = null
+    declare @DersDonemTipiId int = 0
+    declare @yPersonelAdiSoyadi nVarchar(100) = null
     declare @yPersonelId varchar(20) = null
-	  declare @ySaat varchar(20) = null
+    declare @ySaat varchar(20) = null
 
     declare @TcNoCalismaIzniNo varchar(20) = null
 
@@ -77,28 +76,27 @@ AS BEGIN
     BEGIN
     	
       Select
-      -- Id
        @yFirmId = isnull(ins.FirmId,0)
-      --,IsActive
       ,@yDonemTipiId = ins.DonemTipiId
       ,@yGrupTipiId = isnull(ins.GrupTipiId,0)
       ,@ySubeTipiId = isnull(ins.SubeTipiId,0)
       ,@yAdayId = isnull(ins.AdayId,0)
       ,@yAdayTcNo = isnull(ins.AdayTcNo,'')
-	    ,@yAdayAdiSoyadi = isnull(ins.AdayAdiSoyadi,'')
+      ,@yAdayAdiSoyadi = isnull(ins.AdayAdiSoyadi,'')
       --,EgitimYeriTipiId
       --,EgitimAraciId
       ,@yDersTarihi = ins.DersTarihi
       ,@yDersSaatiTipiId = ins.DersSaatiTipiId
-	    ,@yPersonelAdiSoyadi = isnull(ins.PersonelAdiSoyadi, '')
+      ,@yPersonelAdiSoyadi = isnull(ins.PersonelAdiSoyadi, '')
       ,@yPersonelId = isnull(ins.PersonelId,'')
       --,EgitimTipiId
       --,@yBaslamaSaati = ins.BaslamaSaati
       --,@yBitisSaati = ins.BitisSaati
       --,UDersIsUploaded
-	    ,@ySaat = isnull(saat.DersSaatiTipi,'00:00 - 00:00')
+      ,@ySaat = isnull(saat.DersSaatiTipi,'00:00 - 00:00')
+
       From inserted ins
-	    left outer join Lkp.MtskUygulamaliDersDersSaatiTipi saat on (ins.DersSaatiTipiId = saat.Id)
+         left outer join Lkp.MtskUygulamaliDersDersSaatiTipi saat on (ins.DersSaatiTipiId = saat.Id)
       Where ins.Id = @curId
 
       if (@yAdayId = 0) and (@yAdayTcNo <> '')
@@ -117,16 +115,16 @@ AS BEGIN
       if (@yAdayId = 0) and (@yAdayTcNo = '') and (@yAdayAdiSoyadi <> '')
       begin
         Select @yAdayId = Id, @yAdayTcNo = TcNo
-		    From dbo.MtskAday
+        From dbo.MtskAday
         Where TamAdiSoyadi = @yAdayAdiSoyadi
         and DonemTipiId = @yDonemTipiId
-		    --and GrupTipiId = @yGrupTipiId
-		    --and SubeTipiId = @ySubeTipiId
-		    and FirmId = @yFirmId
+        --and GrupTipiId = @yGrupTipiId
+        --and SubeTipiId = @ySubeTipiId
+        and FirmId = @yFirmId
 	
-		    update dbo.MtskUygulamaliDers set 
-          AdayId = @yAdayId
-        , AdayTcNo = @yAdayTcNo
+        update dbo.MtskUygulamaliDers set 
+            AdayId = @yAdayId
+          , AdayTcNo = @yAdayTcNo
         Where Id = @curId 
       end
 	  
@@ -146,14 +144,14 @@ AS BEGIN
           (@ySubeTipiId = 0))
       begin
         Select @yGrupTipiId = GrupTipiId
-		    , @ySubeTipiId = SubeTipiId
+             , @ySubeTipiId = SubeTipiId
         From dbo.MtskAday
         Where Id = @yAdayId
         and DonemTipiId = @yDonemTipiId
 
         update dbo.MtskUygulamaliDers set 
           GrupTipiId = @yGrupTipiId
-		    , SubeTipiId = @ySubeTipiId
+        , SubeTipiId = @ySubeTipiId
         Where Id = @curId 
 	  end
 

@@ -714,6 +714,7 @@ namespace Tkn_Variable
         public static Boolean myFormBox_Visible = false;
         //public static Point myGrid_Location { get; set; } şimdilik gerek kalmadı
         //public static Boolean con_SubDetail_Refresh = true;
+        public static bool con_FieldLockControl = true;
         public static Boolean con_Refresh = false;
         public static Boolean con_SubWork_Refresh = true;
         public static Boolean con_SubWork_Run = false;

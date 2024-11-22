@@ -43,7 +43,7 @@ AFTER INSERT,UPDATE
 AS 
 BEGIN
 
-    DECLARE myCursor cursor for select Id from Inserted 
+    DECLARE myCursor cursor local for select Id from Inserted 
     DECLARE @curId bigint
 
     OPEN myCursor
@@ -69,21 +69,22 @@ BEGIN
 		, @yMebbisUSinavTarihValue = isnull(ins.MebbisUSinavTarihValue, '')
 		from inserted ins
    	where ins.Id = @curId
-				
-		-- E Sınav
+		
+    -- E Sınav
     if (@ySinavTarihSaat <> '0')
-		begin
-		  set @ySinavTarihSaat = replace(@ySinavTarihSaat, '/E-Sınav', '') 
-		  set @ySinavTarihi = convert(date, @ySinavTarihSaat, 103)
-		  set @ySinavSaati = convert(time, @ySinavTarihSaat, 103)
-		end
+	begin
+        set @ySinavTarihSaat = replace(@ySinavTarihSaat, '/E-Sınav', '') 
+        set @ySinavTarihi = convert(date, @ySinavTarihSaat, 103)
+        set @ySinavSaati = convert(time, @ySinavTarihSaat, 103)
+    end
 				
-		--	<option value="12020134-05/12/2021">05/12/2021</option>
-		if ((@yMebbisRandevuTarihValue <> '') and
-		    (@yMebbisRandevuTarihValue <> '-1'))
-        begin
-		  set @ySinavTarihi = CONVERT(date, substring(@yMebbisRandevuTarihValue, CHARINDEX('-', @yMebbisRandevuTarihValue) + 1, 10), 103)
-        end 
+    --	<option value="12020134-05/12/2021">05/12/2021</option>
+    if ((@yMebbisRandevuTarihValue <> '') and
+        (@yMebbisRandevuTarihValue <> '-1'))
+    begin
+        set @ySinavTarihi = CONVERT(date, substring(@yMebbisRandevuTarihValue, CHARINDEX('-', @yMebbisRandevuTarihValue) + 1, 10), 103)
+    end 
+
 		-- <option value="12020134?05/12/2021">05/12/2021</option>
 		if ((@yMebbisUSinavTarihValue <> '') and
 		    (@yMebbisUSinavTarihValue <> '-1'))
@@ -95,7 +96,7 @@ BEGIN
              set @SinavDonemTipiId = convert(int, convert(varchar(5), YEAR(@ySinavTarihi)) + '0' + convert(varchar(3), MONTH(@ySinavTarihi)))
         else set @SinavDonemTipiId = convert(int, convert(varchar(5), YEAR(@ySinavTarihi)) + convert(varchar(3), MONTH(@ySinavTarihi)))
 		
-    Update MtskSinavTarihi set
+        Update MtskSinavTarihi set
           SinavTarihi = @ySinavTarihi
         , SinavSaati = @ySinavSaati 
         , SinavDonemTipiId = @SinavDonemTipiId 
@@ -118,6 +119,11 @@ END
 /*CreateTriggerEnd*/
 
 ALTER TABLE [dbo].[MtskSinavTarihi] ENABLE TRIGGER [trg_MtskSinavTarihi]
+
+
+
+
+
 
 /*CreateLkpTable*/
 

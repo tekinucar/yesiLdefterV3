@@ -1132,9 +1132,9 @@ namespace YesiLdefter.Selenium
             //for (int i = 0; i < length; i++)
             foreach (webNodeItemsList item in aktifPageNodeItemsList)
             {
-                pageCode_ = item.PageCode;   // ds_WebNodeItemsList.Tables[0].Rows[i]["PageCode"].ToString().Trim();
-                itemValue_ = item.ItemValue; // ds_WebNodeItemsList.Tables[0].Rows[i]["ItemValue"].ToString().Trim();
-                itemText_ = item.ItemText;   // ds_WebNodeItemsList.Tables[0].Rows[i]["ItemText"].ToString().Trim();
+                pageCode_ = item.PageCode.Trim();   // ds_WebNodeItemsList.Tables[0].Rows[i]["PageCode"].ToString().Trim();
+                itemValue_ = item.ItemValue.Trim(); // ds_WebNodeItemsList.Tables[0].Rows[i]["ItemValue"].ToString().Trim();
+                itemText_ = item.ItemText.Trim();   // ds_WebNodeItemsList.Tables[0].Rows[i]["ItemText"].ToString().Trim();
 
                 /// nodeId kontrolü olmadı  
                 /// get ve set node ler farklı oluyor
@@ -1226,6 +1226,10 @@ namespace YesiLdefter.Selenium
         private async Task<bool> saveRowAsync(Form tForm, webNodeValue wnv, tRow tableRows, List<MsWebScrapingDbFields> msWebScrapingDbFields, List<webNodeItemsList> aktifPageNodeItemsList)
         {
             //v.SQL = v.SQL + v.ENTER + myNokta + " saveRow";
+
+            /// Mebbisden alınan verileri kaydederken Lock kontrolünün olmaması gerekiyor
+            /// 
+            v.con_FieldLockControl = false;
 
             /// table in bir row unu alıp tüm column larını tarayarak db ye kaydet işlemini gerçekleşitiriyor
             ///
@@ -1335,6 +1339,9 @@ namespace YesiLdefter.Selenium
                 }
             }
 
+            /// Mebbisden alınan verileri kaydetme işi bitti, Lock kontrolünü aç
+            /// 
+            v.con_FieldLockControl = true;
             return onay;
         }
 

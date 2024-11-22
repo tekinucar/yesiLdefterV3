@@ -1,6 +1,6 @@
 ﻿/*CreateFunction*/
 
-ALTER FUNCTION [dbo].[fnc_getSertifikaKayitTipi]( @talepId int)  
+CREATE FUNCTION [dbo].[fnc_getSertifikaKayitTipi]( @talepId int)  
 RETURNS smallint
 AS   
 BEGIN 

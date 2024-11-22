@@ -143,7 +143,11 @@ AS BEGIN
     --   3, Uygulamalı ders alıyor
     --   4, Uygulamalı dersleri tamamladı
 
+
+    -- -----------------------------------------------------------------------
     -- DİKKAT : Aynı kod prc_MtskAdayTakipTalepKaydiSingleSet içinde var	
+    -- -----------------------------------------------------------------------
+
     update MtskAdayTakip set
       eSinavNo = x.SinavNo
     , eSinavDurumTipiId = x.eSinavDurumTipiId
@@ -202,6 +206,44 @@ AS BEGIN
     and   a.TalepId = x.TalepId
 	and   a.AdayId  = x.AdayId 
     	   
+    -- -----------------------------------------------------------------------
+    -- DİKKAT : Aynı kod prc_MtskAdayTakipTalepKaydiSingleSet içinde var	
+    -- -----------------------------------------------------------------------
+
+	-- ---------------------------------------------------
+    -- eSınavlar tamamen silinmiş olabilir
+	-- ---------------------------------------------------
+	
+	update MtskAdayTakip set
+      eSinavNo = 0
+    , eSinavDurumTipiId = x.eSinavDurumTipiId
+    , eSinavSonucTipiId = 0
+    , eSinavSonrasiTipiId = 0
+    , eSinavMuracatTarihi = null
+	, eSinavDetayId = 0
+	, eSinavBasariTarihi = null
+	, UygulamaliDersTipiId = 0
+    from MtskAdayTakip a, 
+    (
+		 Select takip.Id as TakipId
+        ,(case  
+          when takip.TeorikDersTipiId = 17 then 2 -- e-Sınav başvurusu yapılacak
+          else 1 end ) as eSinavDurumTipiId       -- e-Sınav için hazır değil
+		 from dbo.MtskAdayTakip as takip
+		     left outer join dbo.MtskSinavETeorik as sinav on ( 
+			          takip.TalepId = sinav.TalepId 
+			      and sinav.IsActive = 1 )
+         Where takip.FirmId = @yFirmId
+         and   takip.eSinavDurumTipiId > 0  
+         and   takip.eSinavDurumTipiId <> 6 -- Muaf değilse
+
+		 Group by takip.Id
+		        , takip.TeorikDersTipiId
+		 Having COUNT(sinav.Id) = 0
+     ) as x
+	 Where a.Id = x.TakipId 
+
+
 
     -- Tekrar sınava girecek için bekleme süresi bitince
     -- eSinavDurumTipiId = e-Sınav başvurusu yapılacak

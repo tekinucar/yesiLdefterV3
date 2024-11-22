@@ -31,7 +31,7 @@ begin transaction
    OzurDurumuTipiId       SmallInt     null, /*  trg_MtskAdaySaglik         üzerinden işaretleniyor  */
    OkutmanTalebi          Bit          null, 
    TercumanTalebi         Bit          null, 
-   YabanciDilTipi         SmallInt     null,
+   YabanciDilTipiId       SmallInt     null,
 
    -- MtskAdayAdliSicil, ...Adres, ...Imza, ...Ogrenim, ...Saglik, ...Sozlesme MtskAdayBelgeler tablosunu tetikliyor
    -- MtskAdayBelgeler trigger da buraya yazıyor
@@ -132,7 +132,7 @@ commit transaction
 
 
 /* Tablonun her aday için gerekli olan satırı :  trg_MtskAday içinde insert ediliyor   */
-
+/*
 Delete from [Lkp].[MtskAdayTakipAsamaTipi]
 INSERT INTO [Lkp].[MtskAdayTakipAsamaTipi] (Id, AsamaTipi)
  VALUES 
@@ -192,11 +192,7 @@ INSERT INTO [Lkp].[MtskAdayTakipAsamaTipi] (Id, AsamaTipi)
   ( 325,    N'1. başarısız aday eğitimi tamamlandı' ),
   ( 326,    N'Eğitime gerek yok (Sınava girmedi)' ),
 
-
-
-
-
-
+*/
 
 
 

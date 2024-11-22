@@ -210,6 +210,36 @@ END -- trigger
 
 /*CreateTriggerEnd*/
 
+/*CreateTrigger*/
+
+CREATE TRIGGER [dbo].[trg_MtskSinavETeorikDelete] on [dbo].[MtskSinavETeorik]
+AFTER DELETE
+AS BEGIN
+
+    declare eSinavCursorDlt cursor local for select Id from deleted
+	declare @curId bigint
+
+	OPEN eSinavCursorDlt
+    FETCH NEXT FROM eSinavCursorDlt INTO @curId
+
+    declare @TalepId int
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+	    Select @TalepId = dlt.TalepId
+	    From deleted dlt
+	    Where dlt.Id = @curId
+	  
+	    Execute [dbo].[prc_MtskAdayTakipTalepKaydiSingleSet] @TalepId
+        FETCH NEXT FROM eSinavCursorDlt INTO @curId
+    END
+
+    CLOSE eSinavCursorDlt
+    DEALLOCATE eSinavCursorDlt
+
+END
+
+/*CreateTriggerEnd*/
 
 
 
