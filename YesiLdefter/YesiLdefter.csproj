@@ -759,6 +759,7 @@
     <Content Include="Scripts\UST\Mtsk\prc_MtskTeorikDersIhlalleriCakismalar.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskTeorikDersIhlalleriSaatler.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskTeorikDersOzelGunleriEkle.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\fnc_getIsDbUpdate.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\fnc_IsTatilGunumu.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmCalismaSaatleri.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskSaatTeorik.txt" />

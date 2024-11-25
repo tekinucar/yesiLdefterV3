@@ -53,7 +53,7 @@ CREATE TRIGGER [dbo].[trg_MtskAday] on [dbo].[MtskAday]
 AFTER INSERT, UPDATE
 AS BEGIN
 
-    DECLARE adayCursor cursor for select Id from Inserted
+    DECLARE adayCursor cursor local for select Id from Inserted
     --DECLARE @curId bigint
     declare @adayId bigint
 

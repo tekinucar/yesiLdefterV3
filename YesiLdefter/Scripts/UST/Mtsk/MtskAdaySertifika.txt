@@ -10,6 +10,7 @@ begin transaction
    AdayId                Int       not null, -- 5
    TcNo                  Varchar(11)   null, -- 6
    DonemTipiId           Int           null, -- 7
+   VeriKaynakId          Int           null, /* Veri transferi edildiği tablodaki Id . Sorun olduğunda bilginin nereden geldiğine referans olsun */
   
    --10 sertifika aşaması
    SertifikaAlmayiHakKazandi Bit           null, -- hak kazandı   : false/true
@@ -50,7 +51,7 @@ AS BEGIN
 
     OPEN sertifikaCursor
 
-    FETCH NEXT FROM sertifikaCusor INTO @sertifikaId
+    FETCH NEXT FROM sertifikaCursor INTO @sertifikaId
  
     declare @eTalepId int = 0
 	declare @eAdayId int = 0
@@ -144,8 +145,6 @@ AS BEGIN
     DEALLOCATE sertifikaCursor
 
 END --- trg_
-
-ALTER TABLE [dbo].[MtskAdaySertifika] ENABLE TRIGGER [trg_MtskAdaySertifika]
 
 /*CreateTriggerEnd*/
 

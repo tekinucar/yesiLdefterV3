@@ -31,6 +31,7 @@ begin transaction
    -- 40
    SourceTypeId        SmallInt      null, /* 0. manuel giriş, 1. Tabim Transfer */      
    SourceId            Int           null, /* Tabim CariAlt.Ulas */
+   VeriKaynakId        Int           null, /* Veri transferi edildiği tablodaki KURSIYER.Ulas. Sorun olduğunda bilginin nereden geldiğine referans olsun */
 
    constraint		pk_OnmOdemePlani primary key (Id)
  )

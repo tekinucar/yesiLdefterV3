@@ -66,22 +66,22 @@ begin transaction
    GrupTipiId              SmallInt      null,
    SubeTipiId              SmallInt      null,
       
+   -- 70
    MebbisKurumOnayi        Bit           null, /* 0-Onaysız, 1-Onaylandı */		
    MebbisDurumTipiId       SmallInt      null,
    MebbisDurumOkundu       Bit           null,
    KayitTipiId             SmallInt      null, /* 1.'Ön kayıt', 2.'Kayıt aşamasında', 3.'Kesin kayıt' ... */
-   VeriKaynakTipiId        SmallInt      null, /* 1. Kullanıcı Manuel, 2. Mebbis Dönem Aday Onaylama, 3. Mebbis Uygulama Sınav Listesi, 4. Mebbis Aday Durum Bilgileri, 5. Tabim veritabanı  */
-   VeriKaynakId            Int           null, /* Veri transferi edildiği tablodaki Id . Sorun olduğunda bilginin nereden geldiğine referans olsun */
+
    /* Dönem bilgileri SON */
 
-   -- 70
+   -- 80
    BasvuruResim            VarBinary(max) null,
    BasvuruResimSmall       VarBinary(max) null,
-  
-   -- 80 
-   EtiketTipiId            SmallInt       null,
    KullaniciUyarilari      nVarchar(200)  null,
    SistemUyarilari         nVarchar(200)  null,
+   EtiketTipiId            SmallInt       null,
+   VeriKaynakTipiId        SmallInt       null, /* 1. Kullanıcı Manuel, 2. Mebbis Dönem Aday Onaylama, 3. Mebbis Uygulama Sınav Listesi, 4. Mebbis Aday Durum Bilgileri, 5. Tabim veritabanı  */
+   VeriKaynakId            Int            null, /* Veri transferi edildiği tablodaki Id . Sorun olduğunda bilginin nereden geldiğine referans olsun */
 
    -- 90
    KimlikGeldi             Bit            null,
@@ -94,8 +94,6 @@ begin transaction
    SozlesmeYapildi         Bit            null,
    AdresAlindi             Bit            null,
    BelgelerGeldi           Bit            null,
-
-
          
    constraint		pk_MtskAdayTalep primary key (Id)
  )

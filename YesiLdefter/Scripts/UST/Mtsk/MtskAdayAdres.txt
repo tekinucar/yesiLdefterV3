@@ -10,6 +10,7 @@ begin transaction
    AdayId                Int       not null, 
    TcNo                  Varchar(11)   null,
    DonemTipiId           Int           null,
+   VeriKaynakId          Int           null, /* Veri transferi edildiği tablodaki Id . Sorun olduğunda bilginin nereden geldiğine referans olsun */
 
    SozluAdresBeyani      nVarchar(250) null,
    AliciTcNo             Varchar(11)   null,

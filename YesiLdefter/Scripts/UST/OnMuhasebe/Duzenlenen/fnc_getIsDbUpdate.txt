@@ -1,0 +1,22 @@
+﻿
+/*CreateFunction*/
+
+CREATE FUNCTION [dbo].[fnc_getIsDbUpdate]( @typeId int )
+RETURNS Bit
+AS   
+BEGIN 
+    if (@typeId = 0)
+	    Set @typeId = 13
+
+    declare @DbUpdatesIsActive Bit = 0 
+    Select @DbUpdatesIsActive = u.IsActive
+    From [dbo].[DbUpdates] as u
+    Where u.MsDbUpdateId = -1
+    and   u.UpdateTypeId = @typeId
+    and   u.DBaseNoTypeId = 6
+
+  -- True ise Data Transferi yapılıyor
+  RETURN @DbUpdatesIsActive;
+END; -- function
+
+/*CreateFunctionEnd*/

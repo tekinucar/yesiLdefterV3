@@ -100,6 +100,7 @@ namespace YesiLdefter
         string buttonSourceDBConnect = "SOURCE_DB_CONNECTION";
         string buttonSourceTablesList = "SOURCE_TABLES";
         string buttonSingleTableTransfer = "SINGLE_TABLE_TRANSFER";
+        string buttonSingleTableTransferContinue = "SINGLE_TABLE_TRANSFER_CONTINUE";
         string buttonTablesTransfer = "TABLES_TRANSFER";
         #endregion
         public ms_ProjectTables()
@@ -211,6 +212,7 @@ namespace YesiLdefter
                 if (((DevExpress.XtraBars.Navigation.TileNavItem)sender).Name == buttonSourceDBConnect) sourceDBConnect();
                 if (((DevExpress.XtraBars.Navigation.TileNavItem)sender).Name == buttonSourceTablesList) sourceTablesList((DevExpress.XtraBars.Navigation.TileNavItem)sender);
                 if (((DevExpress.XtraBars.Navigation.TileNavItem)sender).Name == buttonSingleTableTransfer) singleTableTransfer();
+                if (((DevExpress.XtraBars.Navigation.TileNavItem)sender).Name == buttonSingleTableTransferContinue) singleTableTransferContinue();
                 if (((DevExpress.XtraBars.Navigation.TileNavItem)sender).Name == buttonTablesTransfer) tablesTransfer();
             }
         }
@@ -929,11 +931,11 @@ namespace YesiLdefter
 
                 string about = dsDataTransfer.Tables[0].Rows[dNDataTransfer.Position]["About"].ToString();
 
-                string soru = "[ " + about + " ] açıklamalı tablosundan Data Transferi yapılacak, onaylıyor musunuz ?";
+                string soru = "[ " + about + " ] tablosundan, en baştan başlayarak Data Transferi yapılacak, onaylıyor musunuz ?";
                 DialogResult cevap = t.mySoru(soru);
                 if (DialogResult.Yes == cevap)
                 {
-                    onay = preparingTableDataTransfer(dNDataTransfer.Position);
+                    onay = preparingTableDataTransfer(dNDataTransfer.Position, false);
 
                     if (onay)
                         t.FlyoutMessage(this, "[ " + about + " ]", "Data transferi gerçekleştirildi...");
@@ -941,12 +943,35 @@ namespace YesiLdefter
             }
 
         }
+
+        private void singleTableTransferContinue()
+        {
+            if (t.IsNotNull(dsDataTransfer))
+            {
+                bool onay = true;
+
+                //v.active_DB.runDBaseNo = v.dBaseNo.aktrilacakDb;
+
+                string about = dsDataTransfer.Tables[0].Rows[dNDataTransfer.Position]["About"].ToString();
+
+                string soru = "[ " + about + " ] tablosundan, kaldığı yerden başlayarak Data Transferi yapılacak, onaylıyor musunuz ?";
+                DialogResult cevap = t.mySoru(soru);
+                if (DialogResult.Yes == cevap)
+                {
+                    onay = preparingTableDataTransfer(dNDataTransfer.Position, true);
+
+                    if (onay)
+                        t.FlyoutMessage(this, "[ " + about + " ]", "Data transferi gerçekleştirildi...");
+                }
+            }
+        }
+
         private void tablesTransfer()
         {
 
         }
 
-        private bool preparingTableDataTransfer(int pos)
+        private bool preparingTableDataTransfer(int pos, bool continue_)
         {
             bool onay = false;
             string sAlias = string.Empty;
@@ -995,7 +1020,7 @@ namespace YesiLdefter
             /// işlem yapılırken kırılmış olabilir
             /// işleme kaldığı yerden devam etmesi için gerekli where koşulu uygulanıyor
             /// 
-            if (lastIdControlSql != "")
+            if ((continue_) && (lastIdControlSql != ""))
             {
                 whereLastId = preparingGetLastId(tAlias, tTableName, lastIdControlSql);
 
@@ -1037,7 +1062,8 @@ namespace YesiLdefter
                 
                 onay = preparingDataTransfer(dsSource, tAlias, tTableName, targetInsertHeaderSql, editWhereSql, isIdentityInsert, isEditScript);
             }
-               
+
+            t.WaitFormClose();
             Thread.Sleep(100);
 
             return onay;

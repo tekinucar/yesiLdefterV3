@@ -525,9 +525,11 @@ create table [Lkp].[MtskAdayTakipBorcDurumuTipi]
 (
    Id               Int Unique not null, 
    BorcDurumuTipi   nVarchar(50)   null,
-   KonuGrupId       SmallInt       null, 
-   KonuId           Int            null,
-   KonuCaption      nVarchar(20)   null,
+   KonuGrupId        SmallInt       null,
+   KonuId            Int            null,
+   KonuCaption       nVarchar(20)   null,
+   ChartCaption      nVarchar(20)   null,
+   FormCaption       nVarchar(30)   null,
    
    constraint  pk_MtskAdayTakipBorcDurumuTipi primary key (Id)
 )
@@ -839,7 +841,7 @@ INSERT INTO [Lkp].[MtskAdayTakipuSinavDurumTipi] (Id, uSinavDurumTipi, KonuGrupI
   ( 6,    N'Uygulama sınav randevusu MEBBİSe aktarılacak',       1, 3146, 'Sınav durumu', 'Randevu mebbise aktar', 'Mebbis.' ),
   ( 7,    N'Uygulama sınavına girecek',                          1, 3147, 'Sınav durumu', 'Sınava girecek', '' ),
   ( 8,    N'Uygulama sınav sonucu okunacak',                     1, 3148, 'Sınav durumu', 'Sonuç okunacak', 'Mebbis..' ),
-  ( 9,    N'Uygulama sınav sonucu okundu',                       1, 3149, 'Sınav durumu', 'Sonuç okundu', '' ),
+  ( 9,    N'Uygulama sınav sonucu okundu',                       1, 3149, 'Sınav durumu', 'Sonuç okundu', '' )
 
 /*  gerek kalmadı 
   ( 11,   N'2. +4 sınavı için usta öğretici onayı isteniyor', 1, 3151, 'Sınav durumu', '', '' ),
