@@ -18,7 +18,7 @@ begin transaction
    AdayAdiSoyadi        nVarchar(100) null, /* mebbisden almak için kullanılıyor */
    
    EgitimYeriTipiId     SmallInt      null,
-   EgitimAraciId        Varchar(10)   null,
+   EgitimAraciId        Varchar(30)   null,
    DersTarihi           Date          null,
    DersSaatiTipiId      SmallInt      null,
    DersDonemTipiId      Int           null,

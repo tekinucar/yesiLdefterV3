@@ -1,6 +1,13 @@
-﻿/*CreateProcedure*/
+﻿USE [Mtsk00000011]
+GO
+/****** Object:  StoredProcedure [dbo].[prc_MtskAdayTakip]    Script Date: 26.11.2024 19:46:22 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+/*CreateProcedure*/
 
-CREATE PROCEDURE [dbo].[prc_MtskAdayTakip] (@FirmId int)  
+ALTER PROCEDURE [dbo].[prc_MtskAdayTakip] (@FirmId int)  
 AS BEGIN
    
    declare @bugun smalldatetime = getdate() 
@@ -233,7 +240,7 @@ AS BEGIN
 		     left outer join dbo.MtskSinavETeorik as sinav on ( 
 			          takip.TalepId = sinav.TalepId 
 			      and sinav.IsActive = 1 )
-         Where takip.FirmId = @yFirmId
+         Where takip.FirmId = @FirmId
          and   takip.eSinavDurumTipiId > 0  
          and   takip.eSinavDurumTipiId <> 6 -- Muaf değilse
 
@@ -263,9 +270,9 @@ AS BEGIN
        UygulamaliDersTipiId = 1 -- Uygulamalı dersler planlanacak
     from MtskAdayTakip as takip
     Where takip.FirmId = @FirmId
-	and   takip.UygulamaliDersTipiId = 0 -- Tanımsız
-	and   ( takip.TeorikDersTipiId = 6   -- Muaf
-         or takip.eSinavSonucTipiI = 1 ) -- Başarılı
+	and   takip.UygulamaliDersTipiId = 0  -- Tanımsız
+	and   ( takip.TeorikDersTipiId = 6    -- Muaf
+         or takip.eSinavSonucTipiId = 1 ) -- Başarılı
 
 
    -- -------------------------------------------------------------------
@@ -366,7 +373,7 @@ AS BEGIN
    Where FirmId = @FirmId
    and   UygulamaliDersTipiId <> 5 
    and   Arti4DersTipiId <> 4
-   and   BasarisizDersTipiId < 5)
+   and   BasarisizDersTipiId < 5 
 
 
    -- 2,  Uygulama sınav için usta öğretici onayı isteniyor
@@ -396,12 +403,12 @@ AS BEGIN
    ( 
          Select takip.Id as TakipId
 		 , ( case
-			 when takip.UstaOgreticiOnayTipiId = 1 then 4  -- Onaylı  ise >  Uygulama sınavı için MEBBİS de onaylanacak
-			 when takip.UstaOgreticiOnayTipiId = 2 then 3  -- Onaysız ise >  Uygulama sınavı için hazır değil
+			 when takip.uSinavaHazirmiTipiId = 1 then 4  -- Onaylı  ise >  Uygulama sınavı için MEBBİS de onaylanacak
+			 when takip.uSinavaHazirmiTipiId = 2 then 3  -- Onaysız ise >  Uygulama sınavı için hazır değil
              end ) as uSinavDurumTipiId 
          From MtskAdayTakip as takip
          Where takip.FirmId = @FirmId
-		 and   takip.uSinavDurumTipi = 2 -- Uygulama sınav için usta öğretici onayı isteniyor
+		 and   takip.uSinavDurumTipiId = 2 -- Uygulama sınav için usta öğretici onayı isteniyor
    ) as x
    Where a.Id = x.TakipId		 
 
@@ -412,18 +419,100 @@ AS BEGIN
        uSinavDurumTipiId = 5 -- Uygulama sınav randevusu planlanacak
    From MtskAdayTakip as takip
    Where takip.FirmId = @FirmId
-   and   takip.IsMebbisUygSinavOnayi = 1 -- Uygulama sınavı için mebbisden onay verilince
-   and   takip.uSinavDurumTipi = 4       -- Uygulama sınavı için MEBBİS de onaylanacak
+   and   takip.IsUygSinavMebbisOnayi = 1 -- Uygulama sınavı için mebbisden onay verilince
+   and   takip.uSinavDurumTipiId = 4       -- Uygulama sınavı için MEBBİS de onaylanacak
 
 
+  -- -----------------------------------------------------------------
+  -- Uygulama sınav sonuclarını değerlendir
+  -- -----------------------------------------------------------------
 
+  -- MtskAdayTakipuSinavDurumTipi
+  -- 0,    'Tanımsız
+  -- 1,    'Henüz sınav aşamasında değil
+  -- 2,    'Uygulama sınavı için usta öğretici onayı isteniyor
+  -- 3,    'Uygulama sınavı için hazır değil
+  -- 4,    'Uygulama sınavı için MEBBİS de onaylanacak
+  -- 5,    'Uygulama sınav randevusu planlanacak
+  -- 6,    'Uygulama sınav randevusu MEBBİSe aktarılacak
+  -- 7,    'Uygulama sınavına girecek
+  -- 8,    'Uygulama sınav sonucu okunacak
+  -- 9,    'Uygulama sınav sonucu okundu
+
+  -- MtskSinavUygulamaPuanTipi
+  --  -2  Durumu Girilmemiş
+  --  -1  Girmedi
+  --   0	
+  --   1  Başarısız
+  -- 100  Başarılı
+
+  -- MtskSinavUygulama.DurumuTipiId
+  -- 0,    ''
+  -- 1,    'Uygulama Sınav Aşamasında'
+  -- 2,    '2.Direksiyon Aşamasında'
+  -- 3,    'Sertifika Almaya Hak Kazandı'
+  -- 4,    'Uygulama Sınav Hakkı Doldu'
+  -- 5,    'Sertifikası İptal Edildi'
+  -- 6,	 'Durumu Girilmemiş'
+
+    update MtskAdayTakip set
+      uSinavNo = x.SinavNo
+    , uSinavDurumTipiId = x.uSinavDurumTipiId
+    , uSinavSonucTipiId = x.uSinavSonucTipiId
+    , uSinavSonrasiTipiId = x.uSinavSonrasiTipiId
+	, uSinavDetayId = x.sinavId
+	, uSinavBasariTarihi = x.uSinavBasariTarihi
+    from MtskAdayTakip a, 
+    (
+         Select 
+	       uSinav.Id as sinavId
+	     , uSinav.FirmId
+         , uSinav.TalepId
+	     , uSinav.AdayId 
+	     , uSinav.SinavNo
+         , uSinav.DurumuTipiId
+		 , convert(date, uSinav.SinavTarihi, 103) as SinavTarihi
+	     , ( case
+             when (uSinav.PuanTipiId = 0 and convert(date, @bugun,103) <  convert(date, uSinav.SinavTarihi, 103)) then 7 -- Uygulama sınavına girecek
+             when (uSinav.PuanTipiId = 0 and convert(date, @bugun,103) >= convert(date, uSinav.SinavTarihi, 103)) then 8 -- Uygulama sınav sonucu okunacak
+	         when (uSinav.PuanTipiId > 0) then 9  -- 'Uygulama sınav sonucu okundu
+             end ) as uSinavDurumTipiId
+	     , ( case
+			 when uSinav.PuanTipiId = 100 then 1 -- Başarılı
+             when uSinav.PuanTipiId =   1 then 2 -- Başarısız
+             when uSinav.PuanTipiId =  -1 then 3 -- Girmedi 
+			 else 0 end ) as uSinavSonucTipiId
+         , ( case
+	         when (uSinav.PuanTipiId = 100) then 2    -- Sertifika aşamasına geçti
+             when (uSinav.PuanTipiId = 1) and (uSinav.SinavNo  < 4 ) then 1  -- Tekrar sınava girecek
+             when (uSinav.PuanTipiId > 1) and (uSinav.SinavNo >= 4 ) then 3  -- Tüm uygulamalı sınav hakkı bitti
+             end ) as uSinavSonrasiTipiId
+         , ( case 
+	         when uSinav.PuanTipiId = 100 then uSinav.SinavTarihi 
+             else null end ) as uSinavBasariTarihi
+         from MtskSinavUygulama as uSinav,
+	     (     -- Adayların son sınavlarını buluyor
+	           Select TalepId, AdayId
+			   , max(convert(smallDatetime,SinavTarihi,103)) as SinavTarihi
+               from MtskSinavUygulama
+		       Where FirmId = @FirmId
+			   and IsActive = 1
+               group by TalepId, AdayId
+         ) as aday
+	     Where uSinav.TalepId = aday.TalepId
+		 and   uSinav.AdayId = aday.AdayId
+	     and   convert(smallDatetime,uSinav.SinavTarihi,103) = aday.SinavTarihi
+    ) as x
+    Where a.FirmId  = x.FirmId
+    and   a.TalepId = x.TalepId
+	and   a.AdayId  = x.AdayId 
 
 
 
 
 ----***** eskiler
 
-
+/*
 
 
 	-- uSinavDurumTipiId = 1. Uygulama sınav için hazır değil
@@ -459,6 +548,8 @@ AS BEGIN
 	and mat.AdayId = z.AdayId
 	and (mat.uSinavDurumTipiId = 2 
 	 or  mat.uSinavDurumTipiId = 12)
+
+*/
 
 /*	
 	-- uSinavDurumTipiId = 4. Uygulama sınav randevusu MEBBİSe aktarılacak
@@ -695,7 +786,7 @@ AS BEGIN
 	and mat.AdayId = z.AdayId
 */	
 
-
+/*
 
     update MtskAdayTakip set
       uSinavNo = x.SinavNo
@@ -839,7 +930,7 @@ AS BEGIN
 	and   isnull(sertifika.SertifikaNo,'') <> ''
 	and   isnull(sertifika.SertifikaBaskiAdedi,0) > 0
 	and   isnull(sertifika.SertifikaTeslimTarihi, convert(date, '01.01.1900',103)) > convert(date, '01.01.1990',103)
-	
+*/	
 
 END -- procedure
 
