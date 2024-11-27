@@ -60,6 +60,7 @@ begin transaction
    eSinavBasariTarihi     Date         null,
    
    --200 uygulama ders + Sınav aşaması
+   
    IsUygulamaliDersPlanli Bit          null,
    UygulamaBaslamaTarihi  Date         null,
    UygulamaBitisTarihi    Date         null,
@@ -88,11 +89,9 @@ begin transaction
    Arti4DersToplami            SmallInt     null, /* prc_MtskUygulamaDersPlaniSaatleriGuncelle  içinde hesplanıyor */
    Arti4DersTipiId             SmallInt     null,
    IsArti4DersMebbis           Bit          null, /* Mebbise aktarılmadı, aktarrıldı */
-   IsArti4UstaOgreticiOnayi    Bit          null, /* Usta Öğretici aday hakkında sınava hazır olup olmadığını onaylacak */
-
 
    -- 230 
-   uSinavaHazirmiTipiId    SmallInt     null, /* 1. Onay, 2. Sınav için hazır değil  */
+   uSinavaHazirmiTipiId    SmallInt     null, /* 1. Onay, 2. Sınav için hazır değil : bu seçimi usta öğretici karar veriyor */
    IsTakviyeDersleHazir    Bit          null, /* hazır olmayana takviye ders verildikten sonra hazır hale gelince onaylanır ve uSinavaHazirmiTipiId = 3 olur */ 
    IsUygSinavMebbisOnayi   Bit          null, /* uSinavDurumTipi = 4, 'Uygulama sınavı için MEBBİS de onaylanacak' için gerekli */
    IsRandevuPlanlandi      Bit          null, /* Randevu tarafında planlanınca burası True olacak */
@@ -746,7 +745,7 @@ drop table [Lkp].[MtskAdayTakipUygulamaliDersTipi]
 create table [Lkp].[MtskAdayTakipUygulamaliDersTipi]
 (
    Id                  Int Unique not null, 
-   UygulamaliDersTipi  nVarchar(50)   null,
+   UygulamaliDersTipi  nVarchar(60)   null,
    KonuGrupId          SmallInt       null,
    KonuId              Int            null,
    KonuCaption         nVarchar(20)   null,
@@ -759,12 +758,12 @@ create table [Lkp].[MtskAdayTakipUygulamaliDersTipi]
 Delete from [Lkp].[MtskAdayTakipUygulamaliDersTipi]
 INSERT INTO [Lkp].[MtskAdayTakipUygulamaliDersTipi] (Id, UygulamaliDersTipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption)
  VALUES 
-  ( 0,    N'Tanımsız',                                          1, 3100, 'Uygulamalı dersler', '', '' ),
-  ( 1,    N'Uygulamalı dersler planlanacak',                    1, 3101, 'Uygulamalı dersler', 'Planlanacak', 'Planlama' ),
-  ( 2,    N'Uygulamalı dersler planlandı, Mebbise aktarılacak', 1, 3102, 'Uygulamalı dersler', 'Planlandı', 'Mebbis' ),
-  ( 3,    N'Uygulamalı dersler Mebbise aktarıldı',              1, 3103, 'Uygulamalı dersler', 'Planlandı', '' ),
-  ( 4,    N'Uygulamalı dersleri başladı',                       1, 3104, 'Uygulamalı dersler', 'Ders alıyor', '' ),
-  ( 5,    N'Uygulamalı dersleri tamamladı',                     1, 3105, 'Uygulamalı dersler', 'Ders tamamlandı', '' )
+  ( 0,    N'Uygulamalı dersler için hazır değil',                      1, 3100, 'Uygulamalı dersler', '', '' ),
+  ( 1,    N'Uygulamalı dersler planlanacak',                           1, 3101, 'Uygulamalı dersler', 'Planlanacak', 'Planlama' ),
+  ( 2,    N'Uygulamalı dersler planlandı, Mebbise aktarılacak',        1, 3102, 'Uygulamalı dersler', 'Planlandı', 'Mebbis' ),
+  ( 3,    N'Uygulamalı dersler Mebbise aktarıldı, dersler başlamadı',  1, 3103, 'Uygulamalı dersler', 'Planlandı', '' ),
+  ( 4,    N'Uygulamalı dersleri başladı',                              1, 3104, 'Uygulamalı dersler', 'Ders alıyor', '' ),
+  ( 5,    N'Uygulamalı dersleri tamamladı',                            1, 3105, 'Uygulamalı dersler', 'Ders tamamlandı', '' )
 
 -- ------------------------------------------------------- 
 -- BasarisizDersTipiId
@@ -791,7 +790,7 @@ INSERT INTO [Lkp].[MtskAdayTakipBasarisizDersTipi] (Id, BasarisizDersTipi, KonuG
   ( 0,    N'Tanımsız',                                                     1, 3120, 'Başarısız aday eğitimi',  '', ''),
   ( 1,    N'2 saat başarısız aday eğitimi planlanacak',                    1, 3121, 'Başarısız aday eğitimi', '2 saat planlanacak', 'Planlama.' ),
   ( 2,    N'2 saat başarısız aday eğitimi planlandı, Mebbise aktarılacak', 1, 3122, 'Başarısız aday eğitimi', '2 saat planlandı', 'Mebbis.' ),
-  ( 3,    N'2 saat başarısız aday eğitimi Mebbise aktarıldı',              1, 3123, 'Başarısız aday eğitimi', '2 saat planlandı', '' ),
+  ( 3,    N'2 saat başarısız aday eğitimi Mebbise aktarıldı, başlamadı',   1, 3123, 'Başarısız aday eğitimi', '2 saat planlandı', '' ),
   ( 4,    N'2 saat başarısız aday eğitimi alıyor',                         1, 3124, 'Başarısız aday eğitimi', '2 saat eğitim alıyor', '' ),
   ( 5,    N'2 saat başarısız aday eğitimi tamamlandı',                     1, 3125, 'Başarısız aday eğitimi', '2 saat eğitim tamam', '' ),
   ( 6,    N'Eğitime gerek yok (Sınava girmedi)',                           1, 3126, 'Başarısız aday eğitimi', 'Sınava girmedi', '' )
@@ -819,12 +818,12 @@ create table [Lkp].[MtskAdayTakipArti4DersTipi]
 Delete from [Lkp].[MtskAdayTakipArti4DersTipi]
 INSERT INTO [Lkp].[MtskAdayTakipArti4DersTipi] (Id, Arti4DersTipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption)
  VALUES 
-  ( 0,    N'Tanımsız',                                          1, 3130, '2. +4 hak eğitimi', '', ''),
-  ( 1,    N'2. +4 hak dersleri planlanacak',                    1, 3131, '2. +4 hak eğitimi', '+4 planlanacak', 'Planlama' ),
-  ( 2,    N'2. +4 hak dersleri planlandı, Mebbise aktarılacak', 1, 3132, '2. +4 hak eğitimi', '+4 planlandı', 'Mebbis' ),
-  ( 3,    N'2. +4 hak dersleri Mebbise aktarıldı',              1, 3133, '2. +4 hak eğitimi', '+4 planlandı', 'Mebbis' ),
-  ( 4,    N'2. +4 hak dersleri başladı',                        1, 3134, '2. +4 hak eğitimi', '+4 alıyor', '' ),
-  ( 5,    N'2. +4 hak dersleri tamamlandı',                     1, 3135, '2. +4 hak eğitimi', '+4 tamamlandı', '' )
+  ( 0,    N'Tanımsız',                                                1, 3130, '2. +4 hak eğitimi', '', ''),
+  ( 1,    N'2. +4 hak dersleri planlanacak',                          1, 3131, '2. +4 hak eğitimi', '+4 planlanacak', 'Planlama' ),
+  ( 2,    N'2. +4 hak dersleri planlandı, Mebbise aktarılacak',       1, 3132, '2. +4 hak eğitimi', '+4 planlandı', 'Mebbis' ),
+  ( 3,    N'2. +4 hak dersleri Mebbise aktarıldı, derler başlamadı',  1, 3133, '2. +4 hak eğitimi', '+4 planlandı', 'Mebbis' ),
+  ( 4,    N'2. +4 hak dersleri başladı',                              1, 3134, '2. +4 hak eğitimi', '+4 alıyor', '' ),
+  ( 5,    N'2. +4 hak dersleri tamamlandı',                           1, 3135, '2. +4 hak eğitimi', '+4 tamamlandı', '' )
 
 
 -- ------------------------------------------------------- 

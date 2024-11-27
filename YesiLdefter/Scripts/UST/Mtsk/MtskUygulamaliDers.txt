@@ -21,7 +21,7 @@ begin transaction
    EgitimAraciId        Varchar(30)   null,
    DersTarihi           Date          null,
    DersSaatiTipiId      SmallInt      null,
-   DersDonemTipiId      Int           null,
+   --DersDonemTipiId      Int           null,
 
    PersonelAdiSoyadi    nVarchar(100) null, /* mebbisden almak için kullanılıyor */
    PersonelId           Varchar(20)   null,
