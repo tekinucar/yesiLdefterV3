@@ -92,7 +92,7 @@ begin transaction
 
    -- 230 
    uSinavaHazirmiTipiId    SmallInt     null, /* 1. Onay, 2. Sınav için hazır değil : bu seçimi usta öğretici karar veriyor */
-   IsTakviyeDersleHazir    Bit          null, /* hazır olmayana takviye ders verildikten sonra hazır hale gelince onaylanır ve uSinavaHazirmiTipiId = 3 olur */ 
+ -- gerek kalmadı  IsTakviyeDersleHazir    Bit          null, /* hazır olmayana takviye ders verildikten sonra hazır hale gelince onaylanır ve uSinavaHazirmiTipiId = 3 olur */ 
    IsUygSinavMebbisOnayi   Bit          null, /* uSinavDurumTipi = 4, 'Uygulama sınavı için MEBBİS de onaylanacak' için gerekli */
    IsRandevuPlanlandi      Bit          null, /* Randevu tarafında planlanınca burası True olacak */
    IsRandevuMebbis         Bit          null, /* Randevu Mebbise aktarılınca */
@@ -1072,4 +1072,76 @@ commit transaction
 
 
 */
+
+
+/*CreateTrigger*/
+
+USE [Mtsk00000011]
+GO
+
+
+CREATE TRIGGER [dbo].[trg_MtskAdayTakip] on [dbo].[MtskAdayTakip]
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    DECLARE takipCursor cursor local for select Id from Inserted
+    DECLARE @takipId bigint
+
+    OPEN takipCursor
+    FETCH NEXT FROM takipCursor INTO @takipId
+
+    -- Veri Transferi başladımı
+    declare @DbUpdatesIsActive Bit = 0
+    set @DbUpdatesIsActive = [dbo].[fnc_getIsDbUpdate] (13)
+
+    declare @TalepId int = 0
+	declare @AdayId int
+	declare @yuSinavaHazirmiTipiId smallInt 
+
+	declare @euSinavaHazirmiTipiId smallInt 
+
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+
+        select 
+		    @euSinavaHazirmiTipiId = isnull(dlt.uSinavaHazirmiTipiId,0)
+		from deleted dlt
+    	where dlt.Id = @takipId
+
+        select 
+            @TalepId = ins.TalepId
+           ,@AdayId = ins.AdayId
+		   ,@yuSinavaHazirmiTipiId = isnull(ins.uSinavaHazirmiTipiId,0)
+		from inserted ins
+    	where ins.Id = @takipId
+		
+		
+        if (@DbUpdatesIsActive = 0)
+        begin 
+            if (@yuSinavaHazirmiTipiId = 1 and @euSinavaHazirmiTipiId = 2)
+            begin 
+                -- 2 > 1 olmaz, 2 > 3 olabilir
+                -- 1, Sınava hazır
+                -- 2, Sınav için hazır değil
+                -- 3, Takviye derslerle sınava hazır
+                Update MtskAdayTakip set
+                    uSinavaHazirmiTipiId = 3
+                Where TalepId = @TalepId
+            end
+
+        end	-- 	@DbUpdatesIsActive = 0
+
+
+        FETCH NEXT FROM takipCursor INTO @takipId
+    END -- While
+
+    CLOSE takipCursor
+    DEALLOCATE takipCursor   
+
+END -- create trigger
+
+
+
+/*CreateTriggerEnd*/
 
