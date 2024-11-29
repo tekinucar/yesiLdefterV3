@@ -118,7 +118,7 @@ begin transaction
   
  grant select, insert, update, delete on MtskAdayTakip to public
 
- create index X_MtskAdayTakip01 on MtskAdayTakip (TalepId)
+ create index X_MtskAdayTakip01 on MtskAdayTakip (FirmId, TalepId)
  create index X_MtskAdayTakip02 on MtskAdayTakip (AdayId)
    
 commit transaction

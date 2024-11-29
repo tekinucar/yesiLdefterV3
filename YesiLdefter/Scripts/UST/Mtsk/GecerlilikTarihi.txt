@@ -55,4 +55,14 @@ commit transaction
 
   /*CreateLkpTableEnd*/
 
+  /*CreateData*/
 
+  Declare @FirmId Int 
+  Set @FirmId = :FIRM_ID
+
+  INSERT INTO [dbo].[GecerlilikTarihi]
+           ([FirmId],[IsActive],[KonuTipiId],[Tarih])
+     VALUES
+           ( @FirmId, 1, 21101, convert(date, '01.01.2012', 103)) --- Teorik dersler saatleri için
+
+  /*CreateDataEnd*/

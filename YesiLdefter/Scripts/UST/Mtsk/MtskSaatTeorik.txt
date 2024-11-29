@@ -26,3 +26,38 @@ begin transaction
 commit transaction
 
 /*CreateTableEnd*/
+
+
+  /*CreateData*/
+
+  Declare @FirmId Int 
+  Set @FirmId = :FIRM_ID
+
+  declare @GecerlilikTarihiId int = 0
+
+  Select top 1 @GecerlilikTarihiId = Id
+  From dbo.GecerlilikTarihi 
+  Where FirmId = @FirmId
+  and   KonuTipiId = 21101 -- Teorik ders saatleri
+  order by Tarih desc
+
+
+  INSERT INTO [dbo].[MtskSaatTeorik]
+           ([FirmId]
+           ,[IsActive]
+           ,[GecerlilikTarihiId]
+           ,[TrafikVeCevreDersSaati]
+           ,[IlkYardimDersSaati]
+           ,[AracTeknigiDersSaati]
+           ,[TrafikAdabiDersSaati])
+     VALUES
+           (@FirmId
+           ,1  -- IsActive
+           ,@GecerlilikTarihiId
+           ,16 -- TrafikVeCevreDersSaati
+           ,8  -- IlkYardimDersSaati
+           ,6  -- AracTeknigiDersSaati
+           ,4  -- TrafikAdabiDersSaati
+		   )
+
+  /*CreateDataEnd*/
