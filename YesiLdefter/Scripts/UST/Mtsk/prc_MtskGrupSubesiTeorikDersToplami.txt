@@ -44,6 +44,7 @@ AS BEGIN
           , IlkYardimDersSayisi   = x.IlkYardimDersSayisi
           , AracTeknigiDersSayisi = x.AracTeknigiDersSayisi
           , AdapDersSayisi        = x.AdapDersSayisi
+          , ToplamDersSayisi      = x.TrafikDersSayisi + x.IlkYardimDersSayisi + x.AracTeknigiDersSayisi + x.AdapDersSayisi
    From dbo.MtskGrupSubesi as sube, 
    (
          Select 

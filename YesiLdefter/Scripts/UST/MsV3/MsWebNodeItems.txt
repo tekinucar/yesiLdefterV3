@@ -811,7 +811,8 @@ delete [dbo].MsWebNodeItems where NodeId = 630 and PageCode = 'MTSKSINAVTEOESONU
 INSERT INTO [dbo].MsWebNodeItems (NodeId, PageCode, IsActive, ItemValue, ItemText)
  VALUES 
 ( 630, 'MTSKSINAVTEOESONUC', 0,  '0',  '' ),
-( 630, 'MTSKSINAVTEOESONUC', 3,  '3',  'Girmedi' )
+( 630, 'MTSKSINAVTEOESONUC', 3,  '3',  'Girmedi' ),
+( 630, 'MTSKSINAVTEOESONUC', 3,  '5',  'İptal Edildi(Sınav Yasaklı)' )
 
 
 

@@ -258,7 +258,7 @@ drop table [Lkp].[MtskSinavETeorikDurumuTipi]
 create table [Lkp].[MtskSinavETeorikDurumuTipi]
 (
    Id               Int Unique not null, 
-   DurumuTipi       nVarchar(20)   null
+   DurumuTipi       nVarchar(50)   null
    
    constraint  pk_MtskSinavETeorikDurumuTipi primary key (Id)
 )
@@ -269,7 +269,10 @@ INSERT INTO [Lkp].[MtskSinavETeorikDurumuTipi] (Id, DurumuTipi)
   ( 0,    N''),
   ( 1,    N'Başarılı'),
   ( 2,    N'Başarısız'),
-  ( 3,    N'Girmedi')
+  ( 3,    N'Girmedi'),
+  ( 4,    N'Raporlu'),
+  ( 5,    N'İptal Edildi(Sınav Yasaklı)')
+
 
 -- ------------------------------------------------------- 
 -- UcretDurumuTipiId

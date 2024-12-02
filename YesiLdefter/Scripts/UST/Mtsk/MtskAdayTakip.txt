@@ -284,7 +284,8 @@ INSERT INTO [Lkp].[MtskAdayTakipZamanlamaTipi] (Id, ZamanlamaTipi, KonuGrupId, K
   ( 1,  N'Geçmiş dönem devam eden',  1, 1131, 'Zamanlama',  '', '' ),
   ( 2,  N'Bu dönem',                 1, 1132, 'Zamanlama',  '', '' ),
   ( 3,  N'Gelecek ay',               1, 1133, 'Zamanlama',  '', '' ),
-  ( 4,  N'İleriki dönemler',         1, 1134, 'Zamanlama',  '', '' )
+  ( 4,  N'İleriki dönemler',         1, 1134, 'Zamanlama',  '', '' ),
+  ( 5,  N'Sertifikasını hak etmiş',  1, 1135, 'Zamanlama',  '', '' )
 
 
 
@@ -505,6 +506,35 @@ INSERT INTO [Lkp].[MtskAdayTakipYabanciDilTipi] (Id, YabanciDilTipiTipi, KonuGru
  (  6, N'Farsça',      1, 1246, 'Yabancı dil', '', ''),
  (  7, N'Rusca',       1, 1247, 'Yabancı dil', '', '')
 
+
+-- ------------------------------------------------------- 
+-- OzelDurumuTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdayTakipOzelDurumuTipi')
+drop table [Lkp].[MtskAdayTakipOzelDurumuTipi]
+
+create table [Lkp].[MtskAdayTakipOzelDurumuTipi]
+(
+   Id               Int Unique Not null,
+   OzelDurumuTipi   nVarchar(60)   null,
+   KonuGrupId       SmallInt       null,
+   KonuId           Int            null,
+   KonuCaption      nVarchar(20)   null,
+   ChartCaption     nVarchar(20)   null,
+   FormCaption      nVarchar(15)   null,
+
+   constraint  pk_MtskAdayTakipOzelDurumuTipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskAdayTakipOzelDurumuTipi]
+INSERT INTO [Lkp].[MtskAdayTakipOzelDurumuTipi] (Id, OzelDurumuTipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption)
+ VALUES 
+  (  1, N'Özür durumu',        1, 1251, 'Özel durumu', '', ''),
+  (  2, N'Okutman talebi',     1, 1252, 'Özel durumu', '', ''),
+  (  3, N'Tercüman talebi',    1, 1253, 'Özel durumu', '', ''),
+  (  4, N'Yabancı dil',        1, 1254, 'Özel durumu', '', '')
+
+
 -- ------------------------------------------------------- 
 -- BelgelerTipiId -- bu field MtskAdayTakip tablosunda yok
 -- bazı koşulları takip için var
@@ -525,17 +555,17 @@ create table [Lkp].[MtskAdayTakipBelgelerTipi]
    constraint  pk_MtskAdayTakipBelgelerTipi primary key (Id)
 )
 -- ------------------------------------------------------- 
--- 1241  BelgelerGeldi         /* tamamı geldiyse */
--- 1242  BelgelerTarandi       /* tamamı tarandıysa */
--- 1243  BelgelerYuklendi      /* tamamı yüklendiyse */
+-- 1261  BelgelerGeldi         /* tamamı geldiyse */
+-- 1262  BelgelerTarandi       /* tamamı tarandıysa */
+-- 1263  BelgelerYuklendi      /* tamamı yüklendiyse */
 -- ------------------------------------------------------- 
 
 Delete from [Lkp].[MtskAdayTakipBelgelerTipi]
 INSERT INTO [Lkp].[MtskAdayTakipBelgelerTipi] (Id, BelgelerTipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption)
  VALUES 
-  ( 1,  N'Belgeleri eksik olanlar',         1, 1241, 'Belgeler',  '', '' ),
-  ( 2,  N'Belgeleri taranmayan',            1, 1242, 'Belgeler',  '', '' ),
-  ( 3,  N'Belgeleri Mebbise yüklenmeyen',   1, 1243, 'Belgeler',  '', 'Mebbise bağlan ...' )
+  ( 1,  N'Belgeleri eksik olanlar',         1, 1261, 'Belgeler',  '', '' ),
+  ( 2,  N'Belgeleri taranmayan',            1, 1262, 'Belgeler',  '', '' ),
+  ( 3,  N'Belgeleri Mebbise yüklenmeyen',   1, 1263, 'Belgeler',  '', 'Mebbise bağlan ...' )
 
 
 -- iptal edildi
@@ -669,11 +699,12 @@ create table [Lkp].[MtskAdayTakipeSinavSonucTipi]
 Delete from [Lkp].[MtskAdayTakipeSinavSonucTipi]
 INSERT INTO [Lkp].[MtskAdayTakipeSinavSonucTipi] (Id, eSinavSonucTipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption) --, ChartCaption, FormCaption)
  VALUES 
-  ( 0,    N'Tanımsız',  1, 2130, 'Sınav sonucu', '', '' ),
-  ( 1,    N'Başarılı',  1, 2131, 'Sınav sonucu', 'Başarılı', ''),
-  ( 2,    N'Başarısız', 1, 2132, 'Sınav sonucu', 'Başarısız', ''),
-  ( 3,    N'Girmedi',   1, 2133, 'Sınav sonucu', 'Girmedi', ''),
-  ( 4,    N'Raporlu',   1, 2134, 'Sınav sonucu', 'Raporlu', '')
+  ( 0,    N'Tanımsız',                    1, 2130, 'Sınav sonucu', '', '' ),
+  ( 1,    N'Başarılı',                    1, 2131, 'Sınav sonucu', 'Başarılı', ''),
+  ( 2,    N'Başarısız',                   1, 2132, 'Sınav sonucu', 'Başarısız', ''),
+  ( 3,    N'Girmedi',                     1, 2133, 'Sınav sonucu', 'Girmedi', ''),
+  ( 4,    N'Raporlu',                     1, 2134, 'Sınav sonucu', 'Raporlu', ''),
+  ( 5,    N'İptal Edildi(Sınav Yasaklı)', 1, 2133, 'Sınav sonucu', 'İptal', '')
 
 -- ------------------------------------------------------- 
 -- eSinavSonrasiTipiId

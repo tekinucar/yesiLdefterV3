@@ -47,37 +47,38 @@ AS BEGIN
     Select sube.Id,
      ( case 
 
-	   when ( (sube.DonemTipiId >= @BugunDonemTipiId) and (sube.GrupBitisTarihi < getdate())) then 17 -- tamamlandı
-
-	   when ( (sube.DonemTipiId >= @BugunDonemTipiId) and (sube.GrupBaslamaTarihi <= getdate()) and (sube.GrupBitisTarihi >= getdate()) ) then 16 -- başladı 
-
-	   when ( (sube.DonemTipiId >= @BugunDonemTipiId) and (sube.GrupBaslamaTarihi > getdate()) and (sube.TDersIsUploaded = 1) ) then 15 -- başlamadı
+	   --when ( (sube.DonemTipiId >= @BugunDonemTipiId) and (sube.GrupBitisTarihi < getdate())) then 17 -- tamamlandı
+	   --when ( (sube.DonemTipiId >= @BugunDonemTipiId) and (sube.GrupBaslamaTarihi <= getdate()) and (sube.GrupBitisTarihi >= getdate()) ) then 16 -- başladı 
+	   --when ( (sube.DonemTipiId >= @BugunDonemTipiId) and (sube.GrupBaslamaTarihi > getdate()) and (sube.TDersIsUploaded = 1) ) then 15 -- başlamadı
 
 	   when ( (sube.DonemTipiId >= @BugunDonemTipiId) and (sube.GrupBaslamaTarihi is not null) and (sube.TDersIsUploaded = 1) and
-	          (( isnull(sube.TrafikDersSayisi,0) + isnull(sube.IlkYardimDersSayisi,0) + isnull(sube.AracTeknigiDersSayisi,0) + isnull(sube.AdapDersSayisi,0) ) = @DersSayisiToplami) ) then 14
+	          (isnull(sube.ToplamDersSayisi,0) = @DersSayisiToplami) ) then 14
 
 	   when ( (sube.DonemTipiId >= @BugunDonemTipiId) and (sube.GrupBaslamaTarihi is not null) and (sube.TDersIsUploaded = 0) and
-	          (( isnull(sube.TrafikDersSayisi,0) + isnull(sube.IlkYardimDersSayisi,0) + isnull(sube.AracTeknigiDersSayisi,0) + isnull(sube.AdapDersSayisi,0) ) = @DersSayisiToplami) ) then 13
+	          (isnull(sube.ToplamDersSayisi,0) = @DersSayisiToplami) ) then 13
 
 	   when ( (sube.DonemTipiId >= @BugunDonemTipiId) and (sube.GrupBaslamaTarihi is not null) and
-	          (( isnull(sube.TrafikDersSayisi,0) + isnull(sube.IlkYardimDersSayisi,0) + isnull(sube.AracTeknigiDersSayisi,0) + isnull(sube.AdapDersSayisi,0) ) < @DersSayisiToplami) ) then 12
+	          (isnull(sube.ToplamDersSayisi,0) < @DersSayisiToplami) ) then 12
 
 	   when ( (sube.DonemTipiId >= @BugunDonemTipiId) and (sube.GrupBaslamaTarihi is null)) then 11
 
 	   -- gelecek 
        when ( (sube.GrupBaslamaTarihi > getdate()) and (( isnull(sube.TrafikDersSayisi,0) + isnull(sube.IlkYardimDersSayisi,0) + isnull(sube.AracTeknigiDersSayisi,0) + isnull(sube.AdapDersSayisi,0) ) = 0 )) then 1 
 	   when ( (sube.GrupBaslamaTarihi > getdate()) and (( sube.TrafikDersSayisi + sube.IlkYardimDersSayisi + sube.AracTeknigiDersSayisi + sube.AdapDersSayisi ) < @DersSayisiToplami )) then 2 
-	   when ( (sube.GrupBaslamaTarihi > getdate()) and (( sube.TrafikDersSayisi + sube.IlkYardimDersSayisi + sube.AracTeknigiDersSayisi + sube.AdapDersSayisi ) = @DersSayisiToplami )) then 3 
+	   when ( (sube.GrupBaslamaTarihi > convert(date, getdate(),103)) and (( sube.TrafikDersSayisi + sube.IlkYardimDersSayisi + sube.AracTeknigiDersSayisi + sube.AdapDersSayisi ) = @DersSayisiToplami )) then 3 
 
        -- Geçmiş dönemler için
-       when ( (isnull(sube.GrupBaslamaTarihi, getdate()) <= getdate()) and (( isnull(sube.TrafikDersSayisi,0) + isnull(sube.IlkYardimDersSayisi,0) + isnull(sube.AracTeknigiDersSayisi,0) + isnull(sube.AdapDersSayisi,0) ) = 0 )) then 1 
-       when ( (isnull(sube.GrupBaslamaTarihi, getdate()) <= getdate()) and (( isnull(sube.TrafikDersSayisi,0) + isnull(sube.IlkYardimDersSayisi,0) + isnull(sube.AracTeknigiDersSayisi,0) + isnull(sube.AdapDersSayisi,0) ) = 0 )) then 1 
-       when ( (isnull(sube.GrupBaslamaTarihi, getdate()) <= getdate()) and (( isnull(sube.TrafikDersSayisi,0) + isnull(sube.IlkYardimDersSayisi,0) + isnull(sube.AracTeknigiDersSayisi,0) + isnull(sube.AdapDersSayisi,0) ) < @DersSayisiToplami )) then 2 
-       when ( (isnull(sube.GrupBaslamaTarihi, getdate()) <= getdate()) and (( isnull(sube.TrafikDersSayisi,0) + isnull(sube.IlkYardimDersSayisi,0) + isnull(sube.AracTeknigiDersSayisi,0) + isnull(sube.AdapDersSayisi,0) ) = @DersSayisiToplami )) then 3 
+       when ( (isnull(sube.GrupBaslamaTarihi, getdate()) <= getdate()) and ( isnull(sube.ToplamDersSayisi,0) = 0 )) then 1 -- Teorik ders planı yok
+       when ( (isnull(sube.GrupBaslamaTarihi, getdate()) <= getdate()) and ( isnull(sube.ToplamDersSayisi,0) < @DersSayisiToplami )) then 2 -- Teorik ders planı eksik
+       when ( sube.GrupBaslamaTarihi > getdate() and ( isnull(sube.ToplamDersSayisi,0) = @DersSayisiToplami )) then 3 -- Teorik ders planı mevcut << bu gereksiz, 15 var
+
+       when ( (sube.GrupBaslamaTarihi < getdate() and sube.GrupBitisTarihi < getdate()) and ( isnull(sube.ToplamDersSayisi,0) = @DersSayisiToplami ) ) then 17 -- Teorik dersler tamamlandı
+       when ( (sube.GrupBaslamaTarihi < getdate() and sube.GrupBitisTarihi > getdate()) and ( isnull(sube.ToplamDersSayisi,0) = @DersSayisiToplami ) ) then 16 -- Teorik dersler başladı
+       when ( (sube.GrupBaslamaTarihi > getdate() and sube.GrupBitisTarihi > getdate()) and ( isnull(sube.ToplamDersSayisi,0) = @DersSayisiToplami ) ) then 15 -- Teorik dersler başlamadı
 
        end
      ) as TakipTipiId
-
+	 , sube.GrupBaslamaTarihi
     From MtskGrupSubesi as sube
     Where sube.FirmId = @FirmId
     and   sube.DonemTipiId = @DonemTipiId

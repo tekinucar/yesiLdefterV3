@@ -56,7 +56,7 @@ Select
  , count(takip.Id) as AdaySayisi 
 
 From MtskAdayTakip as takip
-     left outer join Lkp.MtskAdayTakipBelgelerTipi as tip on ( tip.KonuId = 1231 )
+     left outer join Lkp.MtskAdayTakipBelgelerTipi as tip on ( tip.KonuId = 1261 )
 
 Where FirmId = @FirmId
 and   DonemTipiId = @DonemTipiId
@@ -79,7 +79,7 @@ Select
  , count(takip.Id) as AdaySayisi 
 
 From MtskAdayTakip as takip
-     left outer join Lkp.MtskAdayTakipBelgelerTipi as tip on ( tip.KonuId = 1232 )
+     left outer join Lkp.MtskAdayTakipBelgelerTipi as tip on ( tip.KonuId = 1262 )
 
 Where FirmId = @FirmId
 and   DonemTipiId = @DonemTipiId
@@ -102,7 +102,7 @@ Select
  , count(takip.Id) as AdaySayisi 
 
 From MtskAdayTakip as takip
-     left outer join Lkp.MtskAdayTakipBelgelerTipi as tip on ( tip.KonuId = 1233 )
+     left outer join Lkp.MtskAdayTakipBelgelerTipi as tip on ( tip.KonuId = 1263 )
 
 Where FirmId = @FirmId
 and   DonemTipiId = @DonemTipiId
@@ -225,29 +225,101 @@ Group by
  , tip.OzurDurumuTipi
  , tip.FormCaption
 
-/*
--- MebbisDurumTipi
+
+union all
+
+-- OzelDurumuTipi -- özürlü sayısı
 Select 
    tip.KonuId
  , tip.KonuCaption   
- , tip.MebbisDurumTipi as KonuAciklama
+ , tip.OzelDurumuTipi as KonuAciklama
  , tip.FormCaption as Islem
- , count(takip.Id) as AdaySayisi 
+ , count(saglik.Id) as AdaySayisi 
 
-From MtskAdayTakip as takip
-     left outer join Lkp.MtskAdayTakipMebbisDurumTipi as tip on 
-	   ( takip.MebbisDurumTipiId = tip.Id )
+From MtskAdaySaglik as saglik
+     left outer join Lkp.MtskAdayTakipOzelDurumuTipi as tip on 
+	   ( tip.Id = 1)
 Where FirmId = @FirmId
 and   DonemTipiId = @DonemTipiId
+and   saglik.OzurDurumuTipiId > 1
 
 Group by 
    tip.KonuId
  , tip.KonuCaption   
- , tip.MebbisDurumTipi
- , tip.FormCaption 
+ , tip.OzelDurumuTipi
+ , tip.FormCaption
+
 
 union all
-*/
+
+-- OzelDurumuTipi -- okutmanlı sayısı
+Select 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.OzelDurumuTipi as KonuAciklama
+ , tip.FormCaption as Islem
+ , count(saglik.Id) as AdaySayisi 
+
+From MtskAdaySaglik as saglik
+     left outer join Lkp.MtskAdayTakipOzelDurumuTipi as tip on 
+	   ( tip.Id = 2)
+Where FirmId = @FirmId
+and   DonemTipiId = @DonemTipiId
+and   saglik.OkutmanTalebi = 1
+
+Group by 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.OzelDurumuTipi
+ , tip.FormCaption
+
+
+union all
+
+-- OzelDurumuTipi -- TercumanTalebi sayısı
+Select 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.OzelDurumuTipi as KonuAciklama
+ , tip.FormCaption as Islem
+ , count(saglik.Id) as AdaySayisi 
+
+From MtskAdaySaglik as saglik
+     left outer join Lkp.MtskAdayTakipOzelDurumuTipi as tip on 
+	   ( tip.Id = 3)
+Where FirmId = @FirmId
+and   DonemTipiId = @DonemTipiId
+and   saglik.TercumanTalebi = 1
+
+Group by 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.OzelDurumuTipi
+ , tip.FormCaption
+
+union all
+
+-- OzelDurumuTipi -- YabanciDilTipiId sayısı
+Select 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.OzelDurumuTipi as KonuAciklama
+ , tip.FormCaption as Islem
+ , count(saglik.Id) as AdaySayisi 
+
+From MtskAdaySaglik as saglik
+     left outer join Lkp.MtskAdayTakipOzelDurumuTipi as tip on 
+	   ( tip.Id = 4)
+Where FirmId = @FirmId
+and   DonemTipiId = @DonemTipiId
+and   saglik.YabanciDilTipiId > 0
+
+Group by 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.OzelDurumuTipi
+ , tip.FormCaption
+
 
 END -- procedure
 

@@ -747,14 +747,17 @@
     <Content Include="Scripts\UST\Mtsk\MtskKIhlalUygulamaD.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskKurumAltProgramlari.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskPersoneli.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTablesInsertKontrolu.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakipESinavToplamlari.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakipTeorikDersSet.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakipUygulamaSinavToplamlari.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakipUygulamaToplamlari.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskDersIhlalleriPersonel.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskDonemAdaySayilariSet.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskGrupSubesiTakipSet.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskGrupSubesiTeorikDersToplami.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskGunlukTakipler.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskTeorikDersIhlalleriSaatlerKontrolu.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskTeorikDersIhlalleri_IPTAL.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskTeorikDersIhlalleriCakismalar.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskTeorikDersIhlalleriSaatler.txt" />
