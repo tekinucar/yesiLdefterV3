@@ -49,15 +49,15 @@ CREATE TRIGGER [dbo].[trg_MtskSinavUygulama] on [dbo].[MtskSinavUygulama]
 AFTER INSERT, UPDATE
 AS BEGIN
 
-	DECLARE curSinavUyg cursor for select Id from Inserted 
+	DECLARE curSinavUyg cursor local for select Id from Inserted 
     DECLARE @curId bigint
 
     OPEN curSinavUyg
-
     FETCH NEXT FROM curSinavUyg INTO @curId
  
 	declare @yFirmId int = 0
 	declare @SinavDonemTipiId int = 0
+    declare @yTalepId int = 0
 	declare @yAdayId int = 0
 	declare @yTcNo varchar(11) = ''
 	declare @yTamAdiSoyadi nvarchar(100) = ''
@@ -72,8 +72,12 @@ AS BEGIN
 	declare @ySinavDurumu nvarchar(20) = ''
 	declare @ySinavSonucYorumu nvarchar(250) = ''
 	declare @DosyaYakti bit = 0
+	declare @TalepTipiId smallInt = 0
 
-	/* düzeltme gerekiyor
+    -- Veri Transferi başladımı
+    declare @DbUpdatesIsActive Bit = 0
+    set @DbUpdatesIsActive = [dbo].[fnc_getIsDbUpdate] (13)
+
 
     WHILE @@FETCH_STATUS = 0
     BEGIN
@@ -83,6 +87,7 @@ AS BEGIN
 
         select 
           @yFirmId = ins.FirmId
+    	, @yTalepId = isnull(ins.TalepId,0)
     	, @yAdayId = isnull(ins.AdayId,0)
 	    , @yTcNo = isnull(ins.TcNo,'')
 	    , @yTamAdiSoyadi = isnull(ins.TamAdiSoyadi,'') 
@@ -101,52 +106,69 @@ AS BEGIN
                set @SinavDonemTipiId = convert(int, convert(varchar(5), YEAR(@ySinavTarihi)) + '0' + convert(varchar(3), MONTH(@ySinavTarihi)))
           else set @SinavDonemTipiId = convert(int, convert(varchar(5), YEAR(@ySinavTarihi)) + convert(varchar(3), MONTH(@ySinavTarihi)))
 		
-		if (@yAdayId = 0) and (@yTcNo <> '')
+		if (@yTalepId = 0) and @yAdayId = 0 and (@yTcNo <> '')
 		begin
-		  Select top 1 @yAdayId = Id  From MtskAday
+		  -- Talepleri kontrol et
+		  Select top 1 @yAdayId = AdayId, @yTalepId = Id From MtskAdayTalep
           Where TcNo = @yTcNo
           and   isnull(DonemTipiId,0) <= @SinavDonemTipiId
-          order by DonemTipiId desc
-
+          order by DonemTipiId desc, Id desc
+		  
+		  /*
 		  -- demekki aday hiç kayıtlı değil 
 		  -- yani ilk defa MEBBİS in sınav sonuçları (uygulama) sayfasından okunuyor demek
-		  if (@yAdayId = 0)
+		  if (@yTalepId = 0)
 		  begin
-              INSERT INTO [dbo].[MtskAday]
+              INSERT INTO [dbo].[MtskAdayTalep]
                  ([FirmId]
+				 ,[AdayId]
                  ,[IsActive]
                  ,[TcNo]
                  ,[TamAdiSoyadi]
 				 ,[DonemTipiId]
                  ,[MebbisKurumOnayi]
                  ,[KayitTipiId]
-                 ,[KaynakKayitTipiId]
+                 ,[VeriKaynakTipiId]
                  )
               VALUES
                (  @yFirmId --FirmId, int
+                , @yAdayId --AdayId 
                 , 1        --IsActive, bit
                 , @yTcNo   --TcNo, varchar(11)
                 , @yTamAdiSoyadi --TamAdiSoyadi, nvarchar(100)
 				, @AdayDonemTipiId --DonemTipiId, int
                 , 1        --MebbisKurumOnayi, bit
                 , 2        --KayitTipiId
-                , 3        --KaynakKayitTipiId 
+                , 4        --KaynakKayitTipiId 
                ) 
-			  --Select @yAdayId = @@IDENTITY
-			  Select @yAdayId = aday.Id
-		      From MtskAday as aday
-		      Where aday.FirmId = @yFirmId
-		      and   aday.TcNo = @yTcNo 
-		  end -- @yAdayId = 0
+
+			  Select top 1 @yTalepId = talep.Id, @yAdayId = talep.AdayId
+		      From MtskAdayTalep as talep
+		      Where talep.FirmId = @yFirmId
+		      and   talep.TcNo = @yTcNo 
+			  order by Id desc
+
+		  end -- @yTalepId = 0
+		  */
 		end
 
+
+		Select @TalepTipiId = talep.TalepTipiId
+		From dbo.MtskAdayTalep as talep
+		Where talep.Id = @yTalepId
+			   
         -- daha önce kayıtlı ise TcNo sunu bul 			
-		if (@yAdayId > 0) and (@yTcNo = '')
+		if (@yAdayId > 0) and (@yTcNo = '' or @yTamAdiSoyadi = '' or @AdayDonemTipiId = 0)
 		begin
-          Select @yTcNo = aday.TcNo
-          From MtskAday as aday
-          Where aday.FirmId = @yFirmId
-          and   aday.Id = @yAdayId
+            Select @yTcNo = aday.TcNo
+               , @yTamAdiSoyadi = isnull(aday.TamAdiSoyadi,'')
+            From dbo.MtskAday as aday
+            Where aday.FirmId = @yFirmId
+            and   aday.Id = @yAdayId
+
+            Select @AdayDonemTipiId = DonemTipiId 
+            From dbo.MtskAdayTalep
+            Where Id = @yTalepId
 		end	
 
 	    if (isnull(charindex('Başarılı', @ySinavSonucYorumu),0) = 1)  set @yPuanTipiId = 100
@@ -159,18 +181,20 @@ AS BEGIN
 		and AdayId = @yAdayId
 		and SinavTarihi < @ySinavTarihi
 				
-		if (@ySinavNo <= 4) 
+        -- Sertifika istiyor
+		if (@TalepTipiId = 1) and (@ySinavNo <= 4) 
 		begin
 		  set @newSinavNo = @ySinavNo
 		  set @yEgitimTipiId = 1 -- Normal Eğitim sınavı
 		end
-		if (@ySinavNo > 4) 
+
+		-- 2. +4 hak veya Nakil 2. +4 hak
+        if (@TalepTipiId = 2 or @TalepTipiId = 3) and (@ySinavNo <= 4) 
 		begin
-		  set @newSinavNo = @ySinavNo - 4
+		  set @newSinavNo = @ySinavNo + 4
 		  set @yEgitimTipiId = 3 -- 2. Direksiyon Eğitim sınavı ( +4 eğitimin sınavı )
 		end
-		
-		
+				
 		-- MtskSinavUygulama.PuanTipiId
         -- -1,  'Girmedi'
         -- 0,   ''
@@ -191,7 +215,7 @@ AS BEGIN
 		    if (@yPuanTipiId = 100)  set @yDurumuTipiId = 3  -- Sertifika Almaya Hak Kazandı
 		
 		    -- Normal eğitimlerin başarısız sınav sonuçları
-		    if (@ySinavNo < 4 and @yEgitimTipiId = 1)
+		    if (@TalepTipiId = 1 and @ySinavNo < 4 and @yEgitimTipiId = 1)
             begin
                 if ((@yPuanTipiId = 1) or -- başarısız
 		            (@yPuanTipiId = -1)) -- girmedi
@@ -199,14 +223,14 @@ AS BEGIN
             end
 
 		    -- Normal Uygulama derslerinin son sınavı
-		    if (@ySinavNo = 4 and @yEgitimTipiId = 1)
+		    if (@TalepTipiId = 1 and @ySinavNo = 4 and @yEgitimTipiId = 1)
             begin
                 if (@yPuanTipiId = 1 or @yPuanTipiId = -1) -- başarısız veya girmediyse
                    set @yDurumuTipiId = 4         -- Uygulama Sınav Hakkı Doldu
             end
 
 		    -- 2. Direksiyon (+4) eğitimlerinin başarısız sınav sonuçları
-		    if (@ySinavNo > 4 and @ySinavNo < 8 and @yEgitimTipiId = 3)
+		    if ((@TalepTipiId = 2 or @TalepTipiId = 3) and @ySinavNo < 4 and @yEgitimTipiId = 3)
             begin
                 if ((@yPuanTipiId = 1) or  -- başarısız
 		            (@yPuanTipiId = -1)) -- girmedi 
@@ -214,7 +238,7 @@ AS BEGIN
             end
 
 		    -- 2. Direksiyon (+4) derslerinin son sınavı
-		    if (@ySinavNo = 8 and @yEgitimTipiId = 3)
+		    if ((@TalepTipiId = 2 or @TalepTipiId = 3) and @ySinavNo = 4 and @yEgitimTipiId = 3)
             begin
 		        if (@yPuanTipiId = 1 or @yPuanTipiId = -1) -- başarısız veya girmediyse
                 begin     
@@ -222,13 +246,15 @@ AS BEGIN
   	                set @DosyaYakti = 1
                 end
             end
-
 		end -- @yDurumuTipiId <> 5
 				
 		
 		Update MtskSinavUygulama set
-		  AdayId = @yAdayId
+          TalepId = @yTalepId
+		, AdayId = @yAdayId
         , TcNo = @yTcNo 
+        , TamAdiSoyadi = @yTamAdiSoyadi
+		, AdayDonemTipiId = @AdayDonemTipiId
         , SinavDonemTipiId = @SinavDonemTipiId 
         , SinavNo = @ySinavNo
 		, PuanTipiId = @yPuanTipiId
@@ -236,17 +262,21 @@ AS BEGIN
 		, DurumuTipiId = @yDurumuTipiId
 		Where Id = @curId
 
-		EXECUTE [dbo].[prc_MtskAdaySertifika] @yFirmId, @yAdayId
+	--	EXECUTE [dbo].[prc_MtskAdaySertifika] @yFirmId, @yAdayId
 
         FETCH NEXT FROM curSinavUyg INTO @curId
     END
-
-	*/
+	
+    -- Veri transferi yapılmıyorsa 
+    -- diğer işlemleri yapmaya başlasın
+    if (@DbUpdatesIsActive = 0)
+    begin
+	    print 'talep veri transferi harici işler'
+        EXECUTE [dbo].[prc_MtskAdayTakip] @yFirmId
+    end
 
     CLOSE curSinavUyg
     DEALLOCATE curSinavUyg   
-
-	EXECUTE [dbo].[prc_MtskAdayTakip] @yFirmId
 
 
 END

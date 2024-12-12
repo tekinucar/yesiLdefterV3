@@ -22,6 +22,7 @@ begin transaction
    YasSiniri              smallInt     null,
    IsEnAz                 bit          null,
    DeneyimSertifikaTipiId Int          null,       
+   DeneyimEnAzYilFarki    smallInt     null,
 
   constraint pk_MtskSaatUygulama primary key (Id)
  )

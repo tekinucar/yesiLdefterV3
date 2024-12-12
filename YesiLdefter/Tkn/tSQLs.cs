@@ -1993,7 +1993,7 @@ INSERT INTO [dbo].[SYS_UPDATES]
                         (WORKTYPE == "SVIEWVALUE") ||
                         (WORKTYPE == "SVIEW") ||
                         (WORKTYPE == "OPENFORM"))
-                        Preparing_RefID_Set(dsFields, ref RefID, TABLEALIAS, KEYFNAME, MSETVALUE);
+                        Preparing_RefID_Set(dsFields, ref RefID, TABLEALIAS, KEYFNAME, MSETVALUE, ref NewSQL);
 
                     if (WORKTYPE == "NEW")
                     {
@@ -2003,7 +2003,7 @@ INSERT INTO [dbo].[SYS_UPDATES]
                         }
                         else
                         {
-                            Preparing_RefID_Set(dsFields, ref RefID, TABLEALIAS, KEYFNAME, "0");
+                            Preparing_RefID_Set(dsFields, ref RefID, TABLEALIAS, KEYFNAME, "0", ref NewSQL);
                         }
                     }
 
@@ -2125,7 +2125,7 @@ INSERT INTO [dbo].[SYS_UPDATES]
                             (WORKTYPE == "CREATEVIEW") ||
                             (WORKTYPE == "SVIEWVALUE") ||
                             (WORKTYPE == "SVIEW") && (MSETVALUE == "0"))
-                            Preparing_RefID_Set(dsFields, ref RefID, TABLEALIAS, KEYFNAME, MSETVALUE);
+                            Preparing_RefID_Set(dsFields, ref RefID, TABLEALIAS, KEYFNAME, MSETVALUE, ref NewSQL);
 
                         if (WORKTYPE == "NEW")
                         {
@@ -2135,7 +2135,7 @@ INSERT INTO [dbo].[SYS_UPDATES]
                             }
                             else
                             {
-                                Preparing_RefID_Set(dsFields, ref RefID, TABLEALIAS, KEYFNAME, "0");
+                                Preparing_RefID_Set(dsFields, ref RefID, TABLEALIAS, KEYFNAME, "0", ref NewSQL);
                             }
                         }
 
@@ -2160,16 +2160,47 @@ INSERT INTO [dbo].[SYS_UPDATES]
         }
 
         private void Preparing_RefID_Set(DataSet dsFields, ref string RefID,
-                     string TableAlias, string FieldName, string Value)
+                     string TableAlias, string FieldName, string Value, ref string NewSQL)
         {
             string snc1 = string.Empty;
             string snc2 = string.Empty;
+            string findFieldName = string.Empty;
+            ///  and [xxx].REF_ID = xxx   veya  
+            ///  and [xxx].REF_ID = -1    
+            ///
+            ///  veya
+            ///
+            ///  declare @KonuId int
+            ///  / *prm * /
+            ///  set @KonuId = -99  -- :D.SD.54834: --
+            ///  EXEC[dbo].[prc_MtskAdayTakipKonulari]
+            ///      @KonuId
+            ///  / *paramEnd * /
+            ///
+            findFieldName = "@" + FieldName;
+            // Sql  storedProcedure mi ?
+            if (NewSQL.IndexOf(findFieldName) == -1)
+            {
+                snc1 = t.Set_FieldName_Value(dsFields, FieldName, Value, "and", "=");
+                snc2 = " and " + TableAlias + "." + snc1 + v.ENTER;
+                if (snc1 != "") RefID = RefID + snc2;
+            }
+            else
+            {
+                /// Burası form içinde ilk çalışan TableIPCode ve tek parametreli storedProcedure olduğunda düzgün çalışıyor
+                /// birden fazla parametreli ve parametre dışarıdan gelecekse burayı yeniden kurgulamak gerekiyor
+                ///
+                snc1 = t.Set_FieldName_Value(dsFields, FieldName, Value, "@", "=");
+                snc2 = " set " + snc1 + " ";
 
-            //  and [xxx].REF_ID = xxx   veya  
-            //  and [xxx].REF_ID = -1    
-            snc1 = t.Set_FieldName_Value(dsFields, FieldName, Value, "and", "=");
-            snc2 = " and " + TableAlias + "." + snc1 + v.ENTER;
-            if (snc1 != "") RefID = RefID + snc2;
+                findFieldName = "set @" + FieldName + " = -99";
+
+                /// buraya kadar gelmişken valueyi değerini değiştir, dönünce daha da zorlaşıyor
+                if (NewSQL.IndexOf(findFieldName) > -1)
+                    NewSQL = NewSQL.Replace(findFieldName, snc2);
+                //if (snc1 != "") RefID = RefID + snc2;
+            }
+
         }
 
         private void Preparing_Manuel_RefID(DataSet dsFields, ref string NewSQL, ref string Main_TargetValue,

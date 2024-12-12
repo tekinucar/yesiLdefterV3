@@ -12,8 +12,8 @@ begin transaction
    DonemTipiId          Int           null,
    GrupTipiId           SmallInt      null,
    GrupBaslamaTarihi    Date          null,
-   GrupSubeSayisi       SmallInt      null,
-   AdaySayisi           SmallInt      null,
+   GrupSubeSayisi       SmallInt      null, /* kaç şube açıldığı bilgisi , fakat ekranda hiç kullanılmadı */
+   DonemAdaySayisi      SmallInt      null,
    GrupAdaySayisi       SmallInt      null,
    TeorikDersSayisi     SmallInt      null,
    UygulamaDersSayisi   SmallInt      null,

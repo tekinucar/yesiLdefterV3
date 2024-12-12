@@ -65,4 +65,11 @@ commit transaction
      VALUES
            ( @FirmId, 1, 21101, convert(date, '01.01.2012', 103)) --- Teorik dersler saatleri için
 
+  INSERT INTO [dbo].[GecerlilikTarihi]
+           ([FirmId],[IsActive],[KonuTipiId],[Tarih])
+     VALUES
+           ( @FirmId, 1, 21102, convert(date, '01.01.2012', 103)) --- Uygulama dersler saatleri için
+
+
+
   /*CreateDataEnd*/

@@ -39,11 +39,11 @@ begin transaction
     BLOCK_WHERE_FNAME       VarChar(30)  NULL,	
     BLOCK_TYPE_CODE         varchar(15)  NULL,
     -- 70
-    PROP_SUBVIEW            VarChar(4000) NULL,
+    PROP_SUBVIEW            VarChar(max)  NULL,
     PROP_JOINTABLE          VarChar(8000) NULL,
     PROP_VIEWS              VarChar(4000) NULL,
     PROP_RUNTIME            VarChar(4000) NULL,
-    PROP_NAVIGATOR          VarChar(8000) NULL,
+    PROP_NAVIGATOR          VarChar(max)  NULL,
     PROP_FOREING            VarChar(4000) NULL,
     PROP_SEARCH             VarChar(4000) NULL, 
     -- 90

@@ -1,7 +1,7 @@
 ﻿
 /*CreateProcedure*/
 
-CREATE PROCEDURE [dbo].[prc_MtskAdayTakipUygulamaToplamlari] (@FirmId int)  
+CREATE PROCEDURE [dbo].[prc_MtskAdayTakipUygulamaToplamlari] (@FirmId int, @DonemTipiId int)  
 AS BEGIN
 
  --declare @FirmId int = 30
@@ -17,7 +17,8 @@ Select
 From MtskAdayTakip as takip
      left outer join Lkp.MtskAdayTakipUygulamaliDersTipi as tip on 
 	   ( takip.UygulamaliDersTipiId = tip.Id )
-Where FirmId = @FirmId
+Where takip.FirmId = @FirmId
+and   takip.UygulamaliDersTipiId > 0 -- tanımsız
 
 Group by 
    tip.KonuId
@@ -38,7 +39,8 @@ Select
 From MtskAdayTakip as takip
      left outer join Lkp.MtskAdayTakipBasarisizDersTipi as tip on 
 	   ( takip.BasarisizDersTipiId = tip.Id )
-Where FirmId = @FirmId
+Where takip.FirmId = @FirmId
+and   takip.BasarisizDersTipiId > 0
 
 Group by 
    tip.KonuId
@@ -58,8 +60,9 @@ Select
 
 From MtskAdayTakip as takip
      left outer join Lkp.MtskAdayTakipArti4DersTipi as tip on 
-	   ( takip.BasarisizDersTipiId = tip.Id )
-Where FirmId = @FirmId
+	   ( takip.Arti4DersTipiId = tip.Id )
+Where takip.FirmId = @FirmId
+and   takip.Arti4DersTipiId > 0
 
 Group by 
    tip.KonuId
@@ -69,5 +72,6 @@ Group by
 
 
 END -- procedure
+
 
 /*CreateProcedureEnd*/

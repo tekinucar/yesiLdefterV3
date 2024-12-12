@@ -26,13 +26,11 @@ AS BEGIN
   -- GruplarKontejani = SınıfKontajini x Grup Sayısı
   Set @GruplarKontejani = @SinifKontejani * 3
 
+  -- ---------------------------------------------------
   -- Donem Aday Sayısı Tespiti
-  --Update MtskDonemi set
-  -- AdaySayisi = 0
-  --,GrupAdaySayisi = 0
-  --
+  -- ---------------------------------------------------
   Update MtskDonemi set
-  AdaySayisi = x.Adet
+  DonemAdaySayisi = x.Adet
   From MtskDonemi as a,
   (
      Select DonemTipiId, Count(Id) Adet 
@@ -42,8 +40,11 @@ AS BEGIN
   ) x
   Where a.DonemTipiId = x.DonemTipiId
   and   a.FirmId = @FirmId
+  and   a.DonemAdaySayisi <> x.Adet
 
-  --
+  -- ---------------------------------------------------
+  -- Grup Aday Sayısı
+  -- ---------------------------------------------------
   Update MtskDonemi set
   GrupAdaySayisi = Adet
   From MtskDonemi as a,
@@ -56,11 +57,11 @@ AS BEGIN
   Where a.DonemTipiId = x.DonemTipiId
   and   a.GrupTipiId = x.GrupTipiId
   and   a.FirmId = @FirmId
+  and   a.GrupAdaySayisi <> Adet
 
-  -- GrupSube Aday Sayısı
-  --Update MtskGrupSubesi set
-  --SubeAdaySayisi = 0
-  --
+  -- ---------------------------------------------------
+  -- Sube Aday Sayısı
+  -- ---------------------------------------------------
   Update MtskGrupSubesi set
   SubeAdaySayisi = x.Adet
   From MtskGrupSubesi as a,
@@ -74,11 +75,16 @@ AS BEGIN
   and   a.GrupTipiId = x.GrupTipiId
   and   a.SubeTipiId = x.SubeTipiId
   and   a.FirmId = @FirmId
+  and   a.SubeAdaySayisi <> x.Adet
 
 
+
+  -- ---------------------------------------------------
   -- Yeni Grup Açma için hesaplar
   -- Grup2 ve Grup3 açmak için yapılan hesaplar
-  Select @DonemAdaySayisi = AdaySayisi From MtskDonemi
+  -- ---------------------------------------------------
+
+  Select @DonemAdaySayisi = DonemAdaySayisi From MtskDonemi
   Where DonemTipiId = @YILAY1
   and   FirmId = @FirmId
 
@@ -131,6 +137,41 @@ AS BEGIN
   begin 
     insert into [MtskGrupSubesi] (ParentId, FirmId, IsActive, DonemTipiId, GrupTipiId, SubeTipiId, KurumOnayTipiId) values (0, @FirmId, 1, @YILAY1, 3, 0, 0 )  
   end
+
+  -- -------------------------------------------------------
+  -- Kapasite Tipi hesaplaması
+  -- -------------------------------------------------------
+
+  declare @OdaKontenjani smallInt = 0
+
+  Select Top 1 @OdaKontenjani = OdaKontenjani  
+  From dbo.MtskDerslik
+  Where FirmId = @FirmId
+  and   IsActive = 1
+
+  Update MtskGrupSubesi set
+      KapasiteTipiId = x.KapasiteTipiId
+  From MtskGrupSubesi as a,
+  (
+     Select sube.DonemTipiId, sube.GrupTipiId, sube.SubeTipiId
+	      , sube.SubeAdaySayisi
+          --, sube.SubeAdaySayisi - @OdaKontenjani 
+          ,( case 
+             when sube.SubeAdaySayisi - @OdaKontenjani = 0 then 0
+             when sube.SubeAdaySayisi - @OdaKontenjani < 0 and sube.SubeAdaySayisi - @OdaKontenjani > -6 then (sube.SubeAdaySayisi - @OdaKontenjani)
+	         when sube.SubeAdaySayisi - @OdaKontenjani < -5 then -6
+	         when sube.SubeAdaySayisi - @OdaKontenjani > 0  then 1
+	         end ) as KapasiteTipiId
+     From dbo.MtskGrupSubesi as sube  
+     Where sube.FirmId = @FirmId
+  ) x
+  Where a.DonemTipiId = x.DonemTipiId
+  and   a.GrupTipiId = x.GrupTipiId
+  and   a.SubeTipiId = x.SubeTipiId
+  and   a.FirmId = @FirmId
+  and   isnull(a.KapasiteTipiId,-9) <> x.KapasiteTipiId
+
+
 
 
 END -- procedure

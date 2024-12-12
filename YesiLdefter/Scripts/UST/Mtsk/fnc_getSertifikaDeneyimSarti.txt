@@ -4,19 +4,22 @@ CREATE FUNCTION [dbo].[fnc_getSertifikaDeneyimSarti]( @TalepId int)
 RETURNS smallInt
 AS   
 BEGIN 
+
   -- [Lkp].[MtskAdayTakipDeneyimSartiTipi] 
-  -- 1,    N'Deneyim şartı yok'
-  -- 2,    N'Deneyim şartına uygun'
-  -- 3,    N'Deneyim şartına uygun değil'
+  -- 1, 'Deneyim şartı yok'
+  -- 2, 'Deneyim şartına uygun'
+  -- 3, 'Deneyim şartına uygun değil'
   
   --declare @TalepId int
-  --set @TalepId = 310
+  --set @TalepId = 3358
 
+  declare @FirmId int = 0
   declare @yMevcutSertifikaTipiId smallInt = 0
   declare @yIstenenSertifikaTipiId smallInt = 0
   declare @isEnAz bit
   declare @deneyimSertifikaTipiId smallInt = 0
   declare @deneyimSartiTipiId smallInt = 0
+  declare @deneyimEnAzYilFarki smallInt = 0
 
   Select 
     @yMevcutSertifikaTipiId = isnull(ins.MevcutSertifikaTipiId,0)
@@ -25,23 +28,28 @@ BEGIN
   Where ins.AdayId = aday.Id
   and ins.Id = @TalepId
 
-  Select top 1 @isEnAz = isnull(saat.IsEnAz,0), @deneyimSertifikaTipiId = isnull(saat.DeneyimSertifikaTipiId,0) 
+  Select top 1 
+      @isEnAz = isnull(saat.IsEnAz,0)
+    , @deneyimSertifikaTipiId = isnull(saat.DeneyimSertifikaTipiId,0) 
+    , @deneyimEnAzYilFarki = isnull(saat.DeneyimEnAzYilFarki,0) 
   From MtskSaatUygulama as saat
        left outer join GecerlilikTarihi as gt on ( saat.GecerlilikTarihiId = gt.Id )
   Where saat.IstenenSertifikaTipiId = @yIstenenSertifikaTipiId
+  --and   saat.MevcutSertifikaTipiId  = @yMevcutSertifikaTipiId  <<< sakın açma olmaz
   and   gt.KonuTipiId = 21102 -- Uygulama saatleri
   order by gt.Tarih desc
-
-  --print '   Mevcut ehliyet : ' + convert(varchar(5), @yMevcutSertifikaTipiId) 
-  --print '   isEnAz : ' + convert(varchar(3), @isEnAz) + ',  deneyimSertifikaTipiId : ' + convert(varchar(5), @deneyimSertifikaTipiId)
   
-  -- Deneyim şartı yok
+  -- print '   Mevcut  ehliyet : ' + convert(varchar(5), @yMevcutSertifikaTipiId) 
+  -- print '   İstenen ehliyet : ' + convert(varchar(5), @yIstenenSertifikaTipiId) 
+  -- print '   isEnAz : ' + convert(varchar(3), @isEnAz) + ',  deneyimSertifikaTipiId : ' + convert(varchar(5), @deneyimSertifikaTipiId)
+  
+  -- Deneyim sertifikası yok ise şart yok
   if (@deneyimSertifikaTipiId = 0)
-      set @deneyimSartiTipiId = 1
+      set @deneyimSartiTipiId = 1 -- Şart yok
 
   -- Deneyim isteniyor fakat mevcut ehliyet yok ise	   
   if ((@deneyimSertifikaTipiId > 0) and (@yMevcutSertifikaTipiId = 0))
-      set @deneyimSartiTipiId = 3
+      set @deneyimSartiTipiId = 3 -- uygun değil
 
   if ((@deneyimSertifikaTipiId > 0) and (@isEnAz = 0))
   begin
@@ -56,6 +64,27 @@ BEGIN
       -- kafadan uygun değil dedik
 	  set @deneyimSartiTipiId = 3 -- uygun değil
       
+	  declare @istenenSertifikaSiraNo smallInt = 0
+	  declare @mevcutSertifikaSiraNo  smallInt = 0
+	  declare @deneyimSertifikaSiraNo smallInt = 0
+	  
+      Select @istenenSertifikaSiraNo = isnull(SiraNo,0) from Lkp.MtskSertifikaTipi
+	  Where Id = @yIstenenSertifikaTipiId
+
+      Select @mevcutSertifikaSiraNo = isnull(SiraNo,0) from Lkp.MtskSertifikaTipi
+	  Where Id = @yMevcutSertifikaTipiId
+
+      Select @deneyimSertifikaSiraNo = isnull(SiraNo,0) from Lkp.MtskSertifikaTipi
+	  Where Id = @deneyimSertifikaTipiId
+
+      if ((@mevcutSertifikaSiraNo >= @deneyimSertifikaSiraNo) and
+	      (@mevcutSertifikaSiraNo <  @istenenSertifikaSiraNo)) set @deneyimSartiTipiId = 2 -- uygun
+
+       -- print '   @istenenSertifikaSiraNo : ' + convert(varchar(4), @istenenSertifikaSiraNo)
+       -- print '   @mevcutSertifikaSiraNo  : ' + convert(varchar(4), @mevcutSertifikaSiraNo)
+       -- print '   @deneyimSertifikaSiraNo : ' + convert(varchar(4), @deneyimSertifikaSiraNo)
+
+	  /*
 	  declare @deneyimName varchar(5)  
 	  Select  @deneyimName = trim(replace(replace(replace(SertifikaTipi, 'Sınıfı Sertifika', ''), '(Manuel)',''), '(Otomatik)',''))
 	  from Lkp.MtskSertifikaTipi
@@ -93,11 +122,17 @@ BEGIN
 
       Close serCursor;
       DealLocate serCUrsor;
-
+	  */
   end -- if ((@deneyimSertifikaTipiId > 0) and (@isEnAz = 0))
 
-  --print @deneyimSartiTipiId;
+  -- Id  DeneyimSartiTipi
+  -- 1   Şart yok
+  -- 2   Uygun
+  -- 3   Uygun değil
+
+  -- print '   Sonuc : ' + convert(varchar(2), @deneyimSartiTipiId);
   RETURN @deneyimSartiTipiId;
+
 END; -- function
 
 /*CreateFunctionEnd*/

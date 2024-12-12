@@ -29,10 +29,11 @@ begin transaction
    IsDeneyimEnAz          Bit          null, /*  prc_MtskAdayTakipSingleSet üzerinden işaretleniyor  */
    DeneyimSertifikaTipiId SmallInt     null, /*  prc_MtskAdayTakipSingleSet üzerinden işaretleniyor  */
    OzurDurumuTipiId       SmallInt     null, /*  trg_MtskAdaySaglik         üzerinden işaretleniyor  */
-   OkutmanTalebi          Bit          null, 
-   TercumanTalebi         Bit          null, 
-   YabanciDilTipiId       SmallInt     null,
-
+   OkutmanTalebi          Bit          null, /*  trg_MtskAdaySaglik         üzerinden işaretleniyor  */
+   TercumanTalebi         Bit          null, /*  trg_MtskAdaySaglik         üzerinden işaretleniyor  */
+   YabanciDilTipiId       SmallInt     null, /*  trg_MtskAdaySaglik         üzerinden işaretleniyor  */
+   IsKontejan             Bit          null, /*  trg_MtskAdayUcret          üzerinden işaretleniyor  */
+   
    -- MtskAdayAdliSicil, ...Adres, ...Imza, ...Ogrenim, ...Saglik, ...Sozlesme MtskAdayBelgeler tablosunu tetikliyor
    -- MtskAdayBelgeler trigger da buraya yazıyor
    -- 30
@@ -56,6 +57,7 @@ begin transaction
    eSinavSonrasiTipiId    SmallInt     null, 
    eSinavMuracatTarihi    Date         null, /* Müracat Tarihi */
    eSinavUcretTipiId      SmallInt     null, /* kendisi yatıracak, biz yatıracağız */
+   IseSinavBTeslimEdildi  Bit          null, /* e-Sınav belgesi kursiyere teslim edildi veya edilmedi */
    eSinavDetayId          Int          null, /* en son hangi sınavsa onun id si. sınav1 ise sınav1 in id si, 2 ise 2 nin id si, 3, 4 ... */
    eSinavBasariTarihi     Date         null,
    
@@ -107,7 +109,9 @@ begin transaction
    uSinavUcretTipiId       SmallInt     null, /* kendisi yatıracak, biz yatıracağız */
    uSinavDetayId           Int          null, /* en son hangi sınavsa onun id si. sınav1 ise sınav1 in id si, 2 ise 2 nin id si, 3, 4 ... */
    uSinavBasariTarihi      Date         null,
-   
+   uSinavEgitimAraciId     Varchar(10)  null, /* uygulama sınav randevusundaki araç */  
+   uSinavPersonelId        Varchar(20)  null, /* uygulama sınavında sorumlu olan öğretmen */  
+
    --260 sertifika aşaması
    SertifikaDurumTipiId    SmallInt     null,
    SertifikaTarihi         Date         null,
@@ -407,12 +411,13 @@ create table [Lkp].[MtskAdayTakipYasOnayiTipi]
 Delete from [Lkp].[MtskAdayTakipYasOnayiTipi]
 INSERT INTO [Lkp].[MtskAdayTakipYasOnayiTipi] (Id, YasOnayiTipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption)
  VALUES 
-  --( 0,    N'Yaşı tutuyor',                1, 1210, 'Yaş onayı', '', ''),
+  ( 0,    N'Tanımsız',                      1, 1210, 'Yaş onayı', '', ''),
   ( 1,    N'Yaşı tutmuyor',                 1, 1211, 'Yaş onayı', '', ''),
-  ( 2,    N'Yaş için bekleme süresi doldu', 1, 1212, 'Yaş onayı', '', ''),
+  ( 2,    N'Yaşını doldurdu',               1, 1212, 'Yaş onayı', '', ''),
   ( 3,    N'Muhafiyetle onaylı',            1, 1213, 'Yaş onayı', '', ''),
   ( 4,    N'Doğum tarihi yok, belirsiz',    1, 1214, 'Yaş onayı', '', ''),
-  ( 5,    N'Yaş kontrolü yok',              1, 1215, 'Yaş onayı', '', '')
+  ( 5,    N'Yaşı tutuyor',                  1, 1215, 'Yaş onayı', '', ''),
+  ( 6,    N'Yaş kontrolü yok',              1, 1216, 'Yaş onayı', '', '')
 
 
 
@@ -529,10 +534,13 @@ create table [Lkp].[MtskAdayTakipOzelDurumuTipi]
 Delete from [Lkp].[MtskAdayTakipOzelDurumuTipi]
 INSERT INTO [Lkp].[MtskAdayTakipOzelDurumuTipi] (Id, OzelDurumuTipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption)
  VALUES 
-  (  1, N'Özür durumu',        1, 1251, 'Özel durumu', '', ''),
-  (  2, N'Okutman talebi',     1, 1252, 'Özel durumu', '', ''),
-  (  3, N'Tercüman talebi',    1, 1253, 'Özel durumu', '', ''),
-  (  4, N'Yabancı dil',        1, 1254, 'Özel durumu', '', '')
+  (  1, N'Özür durumu',          1, 1251, 'Özel durumu', '', ''),
+  (  2, N'Okutman talebi',       1, 1252, 'Özel durumu', '', ''),
+  (  3, N'Tercüman talebi',      1, 1253, 'Özel durumu', '', ''),
+  (  4, N'Yabancı dil',          1, 1254, 'Özel durumu', '', ''),
+  (  5, N'Yabancı uyruklar',     1, 1255, 'Özel durumu', '', ''),
+  (  6, N'Etiketli kursiyerler', 1, 1256, 'Özel durumu', '', ''),
+  (  7, N'Kontejan',             1, 1257, 'Özel durumu', '', '')
 
 
 -- ------------------------------------------------------- 
@@ -704,7 +712,7 @@ INSERT INTO [Lkp].[MtskAdayTakipeSinavSonucTipi] (Id, eSinavSonucTipi, KonuGrupI
   ( 2,    N'Başarısız',                   1, 2132, 'Sınav sonucu', 'Başarısız', ''),
   ( 3,    N'Girmedi',                     1, 2133, 'Sınav sonucu', 'Girmedi', ''),
   ( 4,    N'Raporlu',                     1, 2134, 'Sınav sonucu', 'Raporlu', ''),
-  ( 5,    N'İptal Edildi(Sınav Yasaklı)', 1, 2133, 'Sınav sonucu', 'İptal', '')
+  ( 5,    N'İptal Edildi(Sınav Yasaklı)', 1, 2135, 'Sınav sonucu', 'İptal', '')
 
 -- ------------------------------------------------------- 
 -- eSinavSonrasiTipiId
@@ -789,7 +797,7 @@ create table [Lkp].[MtskAdayTakipUygulamaliDersTipi]
 Delete from [Lkp].[MtskAdayTakipUygulamaliDersTipi]
 INSERT INTO [Lkp].[MtskAdayTakipUygulamaliDersTipi] (Id, UygulamaliDersTipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption)
  VALUES 
-  ( 0,    N'Uygulamalı dersler için hazır değil',                      1, 3100, 'Uygulamalı dersler', '', '' ),
+  ( 0,    N'Tanımsız',                                                 1, 3100, 'Uygulamalı dersler', '', '' ),
   ( 1,    N'Uygulamalı dersler planlanacak',                           1, 3101, 'Uygulamalı dersler', 'Planlanacak', 'Planlama' ),
   ( 2,    N'Uygulamalı dersler planlandı, Mebbise aktarılacak',        1, 3102, 'Uygulamalı dersler', 'Planlandı', 'Mebbis' ),
   ( 3,    N'Uygulamalı dersler Mebbise aktarıldı, dersler başlamadı',  1, 3103, 'Uygulamalı dersler', 'Planlandı', '' ),
@@ -881,7 +889,7 @@ INSERT INTO [Lkp].[MtskAdayTakipuSinavDurumTipi] (Id, uSinavDurumTipi, KonuGrupI
  VALUES 
   ( 0,    N'Tanımsız',                                           1, 3140, 'Sınav durumu', '', '' ),
   ( 1,    N'Henüz sınav aşamasında değil',                       1, 3141, 'Sınav durumu', '', '' ),
-  ( 2,    N'Uygulama sınavı için usta öğretici onayı isteniyor', 1, 3142, 'Sınav durumu', '', '' ),
+  ( 2,    N'Uygulama sınavı için usta öğretici onayı isteniyor', 1, 3142, 'Sınav durumu', '', 'Onayla' ),
   ( 3,    N'Uygulama sınavı için hazır değil',                   1, 3143, 'Sınav durumu', 'Uyg.hazır değil', '' ),
   ( 4,    N'Uygulama sınavı için MEBBİS de onaylanacak',         1, 3144, 'Sınav durumu', 'Mebbisde onaylanacak', 'Mebbis' ),
   ( 5,    N'Uygulama sınav randevusu planlanacak',               1, 3145, 'Sınav durumu', 'Randevu planlanacak', 'Planlama' ),
@@ -890,15 +898,6 @@ INSERT INTO [Lkp].[MtskAdayTakipuSinavDurumTipi] (Id, uSinavDurumTipi, KonuGrupI
   ( 8,    N'Uygulama sınav sonucu okunacak',                     1, 3148, 'Sınav durumu', 'Sonuç okunacak', 'Mebbis..' ),
   ( 9,    N'Uygulama sınav sonucu okundu',                       1, 3149, 'Sınav durumu', 'Sonuç okundu', '' )
 
-/*  gerek kalmadı 
-  ( 11,   N'2. +4 sınavı için usta öğretici onayı isteniyor', 1, 3151, 'Sınav durumu', '', '' ),
-  ( 12,   N'2. +4 sınavı için hazır değil',                   1, 3152, 'Sınav durumu', '+4 hazır değil', '' ),
-  ( 14,   N'2. +4 sınavı randevusu planlanacak',              1, 3154, 'Sınav durumu', '+4 rand.planlanacak', 'Planlama.' ),
-  ( 15,   N'2. +4 sınavı randevusu MEBBİSe aktarılacak',      1, 3155, 'Sınav durumu', '+4 Mebbise aktar', 'Mebbis...' ),
-  ( 16,   N'2. +4 sınavına girecek',                          1, 3156, 'Sınav durumu', '+4 sınava girecek', '' ),
-  ( 17,   N'2. +4 sınavı sonucu okunacak',                    1, 3157, 'Sınav durumu', '+4 sınav okunacak', 'Mebbis....' ),
-  ( 18,   N'2. +4 sınavı sonucu okundu',                      1, 3158, 'Sınav durumu', '+4 sınav okundu', '' )
-*/  
 
 -- ------------------------------------------------------- 
 -- uSinavaHazirmiTipiId
@@ -922,10 +921,10 @@ create table [Lkp].[MtskAdayTakipuSinavaHazirmiTipi]
 Delete from [Lkp].[MtskAdayTakipuSinavaHazirmiTipi]
 INSERT INTO [Lkp].[MtskAdayTakipuSinavaHazirmiTipi] (Id, uSinavaHazirmiTipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption)
  VALUES 
-  ( 0,    N'Tanımsız',                        1, 3150, 'Sınava hazır mı', '', ''),
-  ( 1,    N'Sınava hazır',                    1, 3151, 'Sınava hazır mı', '', ''),
-  ( 2,    N'Sınav için hazır değil',          1, 3152, 'Sınava hazır mı', '', ''),
-  ( 3,    N'Takviye derslerle sınava hazır',  0, 3153, 'Sınava hazır mı', '', '')
+  ( 0,    N'Sınava hazır mı ?',              1, 3150, 'Sınava hazır mı', '', ''),
+  ( 1,    N'Evet - Sınava hazır',            1, 3151, 'Sınava hazır mı', '', ''),
+  ( 2,    N'Hayır - Sınav için hazır değil', 1, 3152, 'Sınava hazır mı', '', ''),
+  ( 3,    N'Takviye derslerle sınava hazır', 2, 3153, 'Sınava hazır mı', '', '')
 
 
 -- ------------------------------------------------------- 
@@ -977,11 +976,12 @@ create table [Lkp].[MtskAdayTakipuSinavSonrasiTipi]
 Delete from [Lkp].[MtskAdayTakipuSinavSonrasiTipi]
 INSERT INTO [Lkp].[MtskAdayTakipuSinavSonrasiTipi] (Id, uSinavSonrasiTipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption)
  VALUES 
-  ( 0,    N'Tanımsız',                         1, 3170, 'Sınav sonrası', '', '' ),
-  ( 1,    N'Sınava tekrar girecek',            1, 3171, 'Sınav sonrası', 'Tekrar girecek', '' ),
-  ( 2,    N'Sertifika aşamasına geçti',        1, 3172, 'Sınav sonrası', 'Sertifikayı kazandı', '' ),
-  ( 3,    N'Tüm uygulamalı sınav hakkı bitti', 1, 3173, 'Sınav sonrası', 'Sınav hakkı bitti', '' ),
-  ( 4,    N'2. +4 sınav hakkı bitti',          1, 3174, 'Sınav sonrası', '2.+4 sınav hak bitti', '' )
+  ( 0,    N'Tanımsız',                            1, 3170, 'Sınav sonrası', '', '' ),
+  ( 1,    N'Sınava tekrar girecek',               1, 3171, 'Sınav sonrası', 'Tekrar girecek', '' ),
+  ( 2,    N'Sertifika aşamasına geçti',           1, 3172, 'Sınav sonrası', 'Sertifikayı kazandı', '' ),
+  ( 3,    N'Tüm uygulamalı sınav hakkı bitti',    1, 3173, 'Sınav sonrası', 'Sınav hakkı bitti', '' ),
+  ( 4,    N'2. +4 sınav hakkı bitti',             1, 3174, 'Sınav sonrası', '2.+4 sınav hak bitti', '' ),
+  ( 5,    N'Sınava giren toplam kursiyer sayısı', 1, 3175, 'Sınav sonrası', 'Toplam kursiyer', '' )
 
 
 -- ------------------------------------------------------- 
@@ -1035,13 +1035,13 @@ create table [Lkp].[MtskAdayTakipSertifikaDurumTipi]
 )
 
 Delete from [Lkp].[MtskAdayTakipSertifikaDurumTipi]
-INSERT INTO [Lkp].[MtskAdayTakipSertifikaDurumTipi] (Id, SertifikaDurumTipi, ChartCaption, FormCaption)
+INSERT INTO [Lkp].[MtskAdayTakipSertifikaDurumTipi] (Id, SertifikaDurumTipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption)
  VALUES 
-  ( 0,    N'', '', '' ),
-  ( 1,    N'Sertifikası hazırlanacak (Seri No verilecek)', 'Sert. hazırlanacak', '' ),
-  ( 2,    N'Sertifika formu yazdırılacak', 'Sert. formu yaz', '' ),
-  ( 3,    N'Sertifikası hazır', 'Sert. hazır', '' ),
-  ( 4,    N'Sertifikası teslim edildi', 'Sert. teslim edildi', '' )
+  ( 0,    N'Tanımsız',                                     1, 4110, 'Sertifika işlemleri',  '', '' ),
+  ( 1,    N'Sertifikası hazırlanacak (Seri No verilecek)', 1, 4111, 'Sertifika işlemleri', 'Sert. hazırlanacak', '' ),
+  ( 2,    N'Sertifika formu yazdırılacak',                 1, 4112, 'Sertifika işlemleri', 'Sert. formu yaz', '' ),
+  ( 3,    N'Sertifikası hazır',                            1, 4113, 'Sertifika işlemleri', 'Sert. hazır', '' ),
+  ( 4,    N'Sertifikası teslim edildi',                    1, 4114, 'Sertifika işlemleri', 'Sert. teslim edildi', '' )
 
 
 commit transaction

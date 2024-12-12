@@ -17,6 +17,7 @@ begin transaction
    GrupBitisTarihi      Date          null,
    SubeAdaySayisi       SmallInt      null,
    KurumOnayTipiId      SmallInt      null,  /* 0. Onay bekliyor, 1-Onaylandı  tablo = [Lkp].[MtskKurumOnayTipi]   */		
+   KapasiteTipiId       SmallInt      null,  /* şubenin doluluk durumu hakkında */ 
 
    TakipTipiId            SmallInt      null,
    TrafikDersSayisi       SmallInt      null, /* Trafik ve Çevre Dersi */   
@@ -204,6 +205,34 @@ INSERT INTO Lkp.MtskGrupSubesiTakipTipi (Id, TakipTipi)
   ( 15, N'Teorik dersler başlamadı'),
   ( 16, N'Teorik dersler başladı'),
   ( 17, N'Teorik dersler tamamlandı')
+
+-- ------------------------------------------------------- 
+-- KapasiteTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskGrupSubesiKapasiteTipi')
+drop table [Lkp].[MtskGrupSubesiKapasiteTipi]
+
+create table Lkp.MtskGrupSubesiKapasiteTipi
+(
+   Id                 Int Unique Not Null,
+   KapasiteTipiTipi   nVarchar(50)   null
+   
+   constraint  pk_MtskGrupSubesiKapasiteTipi primary key (Id)
+)
+
+DELETE Lkp.MtskGrupSubesiKapasiteTipi
+INSERT INTO Lkp.MtskGrupSubesiKapasiteTipi (Id, KapasiteTipi)
+ VALUES 
+  ( -6,  N''),
+  ( -5,  N'Son 5 aday'),
+  ( -4,  N'Son 4 aday'),
+  ( -3,  N'Son 3 aday'),
+  ( -2,  N'Son 2 aday'),
+  ( -1,  N'Son 1 aday'),
+  (  0,  N'Kapasite tam dolu'),
+  (  1,  N'Sorun : Kapasite fazlası var')
+
+
 
 commit transaction
 

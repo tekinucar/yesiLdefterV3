@@ -48,43 +48,71 @@ AS BEGIN
     DECLARE saglikCursor cursor local for select Id from Inserted
     DECLARE @saglikId bigint
 
-    Declare @TalepId int = 0
-	Declare @OzurDurumuTipiId smallInt = 0
-
     OPEN saglikCursor
-
     FETCH NEXT FROM saglikCursor INTO @saglikId
+
+    -- Veri Transferi başladımı
+    declare @DbUpdatesIsActive Bit = 0
+    set @DbUpdatesIsActive = [dbo].[fnc_getIsDbUpdate] (13)
+
+    Declare @TalepId int = 0
+	declare @AdayId int
+	declare @VeriKaynakId int
+	declare @OzurDurumuTipiId smallInt = 0
+    declare @OkutmanTalebi bit
+    declare @TercumanTalebi bit
+    declare @YabanciDilTipiId smallInt
 
     WHILE @@FETCH_STATUS = 0
     BEGIN
 
         select 
             @TalepId = ins.TalepId
+           ,@AdayId = ins.AdayId
+		   ,@VeriKaynakId = ins.VeriKaynakId
 		   ,@OzurDurumuTipiId = isnull(ins.OzurDurumuTipiId,0)
+           ,@OkutmanTalebi = isnull(ins.OkutmanTalebi,0)
+           ,@TercumanTalebi = isnull(ins.TercumanTalebi,0)
+           ,@YabanciDilTipiId = isnull(ins.YabanciDilTipiId,0)
 		from inserted ins
     	where ins.Id = @saglikId
 		
+        if (@VeriKaynakId > 0 and (@TalepId = 0 or @AdayId = 0))
+        begin
+            Update dbo.MtskAdaySaglik set
+                TalepId = t.Id  
+               ,AdayId  = t.AdayId 
+            From dbo.MtskAdaySaglik as a,
+                 dbo.MtskAdayTalep as t
+            Where a.VeriKaynakId = t.VeriKaynakId				 
+            and   a.Id = @saglikId
+        end
+
         -- Takip
 		Update MtskAdayTakip set
-		  OzurDurumuTipiId = @OzurDurumuTipiId
+            OzurDurumuTipiId = @OzurDurumuTipiId
+          , OkutmanTalebi = @OkutmanTalebi 
+          , TercumanTalebi = @TercumanTalebi  
+          , YabanciDilTipiId = @YabanciDilTipiId
         Where TalepId = @TalepId
 		
-		-- Talep tablosunu işaretle
-		Update MtskAdayTalep set
-        SaglikGeldi = x.Sonuc
-        From MtskAdayTalep a, 
-        (
-            Select count(Id) as Sonuc
-            From MtskAdaySaglik
-            Where 0 = 0
-            and (
-			   SaglikRaporuResim is not null 
-			or Len(isnull(RaporReferansNo,'')) > 0
-			)
-            and TalepId = @TalepId
-        ) as x
-        Where a.Id = @TalepId
-		
+        if (@DbUpdatesIsActive = 0)
+        begin 
+            -- Talep tablosunu işaretle
+            Update MtskAdayTalep set
+                SaglikGeldi = x.Sonuc
+            From MtskAdayTalep a, 
+            (
+               Select count(Id) as Sonuc
+               From MtskAdaySaglik
+               Where 0 = 0
+               and ( SaglikRaporuResim is not null 
+			   or Len(isnull(RaporReferansNo,'')) > 0
+			   )
+               and TalepId = @TalepId
+            ) as x
+            Where a.Id = @TalepId
+        end		
 
 		-- MtskAdayBelgeler tablosunu işaretle
 		Update MtskAdayBelgeler set
@@ -102,11 +130,12 @@ AS BEGIN
         ) as x
         Where a.TalepId = @TalepId
 
-      FETCH NEXT FROM saglikCursor INTO @saglikId
+        FETCH NEXT FROM saglikCursor INTO @saglikId
     END -- While
 
     CLOSE saglikCursor
     DEALLOCATE saglikCursor   
+
 
 END -- create trigger
 

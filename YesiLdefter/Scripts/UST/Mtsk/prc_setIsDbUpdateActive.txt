@@ -1,0 +1,19 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_setIsDbUpdateActive] ( @typeId int, @value bit )  
+AS BEGIN
+    -- value 1 gelirse IsActive = True
+	-- value 0 gelirse IsActive = False
+    if (@typeId = 0)
+	    Set @typeId = 13
+
+    Update [dbo].[DbUpdates] set IsActive = @value
+	From [dbo].[DbUpdates] as u
+    Where u.MsDbUpdateId = -1
+    and   u.UpdateTypeId = @typeId
+    and   u.DBaseNoTypeId = 6
+  
+END; -- procedure
+
+/*CreateProcedureEnd*/
+

@@ -1,0 +1,140 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_MtskAdayTalepMebbisDonemKayitListesi] (@FirmId int, @DonemTipiId int, @KonuId smallInt)
+AS BEGIN
+
+  declare @sql nvarchar(max)
+  declare @sqlWhere nvarchar(500)
+  declare @sqlOrderBy nvarchar(100)    
+
+/*
+ --, [MtskAdayTalep].[TalepGUID]
+ --, [MtskAdayTalep].[ParentId]
+
+ --, [MtskAdayTalep].[EtiketTipiId]
+ --, [MtskAdayTalep].[KullaniciUyarilari]
+ --, [MtskAdayTalep].[SistemUyarilari]
+ --, [MtskAdayTalep].[KimlikGeldi]
+ --, [MtskAdayTalep].[BiyometrikGeldi]
+ --, [MtskAdayTalep].[BasvuruFotoCekildi]
+ --, [MtskAdayTalep].[OgrenimGeldi]
+ --, [MtskAdayTalep].[SaglikGeldi]
+ --, [MtskAdayTalep].[AdliSicilGeldi]
+ --, [MtskAdayTalep].[ImzaAlindi]
+ --, [MtskAdayTalep].[SozlesmeYapildi]
+ --, [MtskAdayTalep].[AdresAlindi]
+*/
+ set @sql = '
+ Select 
+   [MtskAdayTalep].[Id]
+ , [MtskAdayTalep].[FirmId]
+ , [MtskAdayTalep].[AdayId]
+ , [MtskAdayTalep].[IsActive]
+ , [MtskAdayTalep].[TalepKayitTarihi]
+ , [MtskAdayTalep].[AdayNo]
+ , [MtskAdayTalep].[TcNo]
+ , [MtskAdayTalep].[KimlikSeriNo]
+ , [MtskAdayTalep].[TamAdiSoyadi]
+ , [MtskAdayTalep].[Adi]
+ , [MtskAdayTalep].[Soyadi]
+ , [MtskAdayTalep].[DogumTarihi]
+ , [MtskAdayTalep].[BabaAdi]
+ , [MtskAdayTalep].[AnneAdi]
+ , [MtskAdayTalep].[CinsiyetTipiId]
+ , [MtskAdayTalep].[CepTelefonu]
+ , [MtskAdayTalep].[Eposta]
+ , [MtskAdayTalep].[TalepTipiId]
+ , [MtskAdayTalep].[MevcutSertifikaTipiId]
+ , [MtskAdayTalep].[MevcutSurucuBelgeTarihi]
+ , [MtskAdayTalep].[MevcutSurucuBelgeNo]
+ , [MtskAdayTalep].[IsMevcutOtomatik]
+ , [MtskAdayTalep].[IsMevcut2016Oncesi]
+ , [MtskAdayTalep].[IsMevcut125ccAlti]
+ , [MtskAdayTalep].[IstenenSertifikaTipiId]
+ , [MtskAdayTalep].[IsOtomatik]
+ , [MtskAdayTalep].[IsEngelli]
+ , [MtskAdayTalep].[Is125ccAlti]
+ , [MtskAdayTalep].[IsMuafiyetiVar]
+ , [MtskAdayTalep].[MuafiyetAciklmasi]
+ , [MtskAdayTalep].[Ceza100BelgeTarihi]
+ , [MtskAdayTalep].[Ceza100BelgeNo]
+ , [MtskAdayTalep].[UygulamaPersonelId]
+ , [MtskAdayTalep].[UygPersCinsiyetTipiId]
+ , [MtskAdayTalep].[DonemTipiId]
+ , [MtskAdayTalep].[GrupTipiId]
+ , [MtskAdayTalep].[SubeTipiId]
+ , [MtskAdayTalep].[MebbisKurumOnayi]
+ , [MtskAdayTalep].[MebbisDurumTipiId]
+ , [MtskAdayTalep].[MebbisDurumOkundu]
+ , [MtskAdayTalep].[KayitTipiId]
+ --, [MtskAdayTalep].[BasvuruResim]
+ --, [MtskAdayTalep].[BasvuruResimSmall]
+ , [MtskAdayTalep].[BelgelerGeldi]
+
+ -- Join Tables standart fields 
+ , [aday].BiyometrikResimSmall as Lkp_BiyometrikResimSmall
+ , [aday].TcNo  as Lkp_TcNo
+ , [aday].TamAdiSoyadi as Lkp_TamAdiSoyadi
+ , [aday].CepTelefonu as Lkp_CepTelefonu
+ , [takip].ZamanlamaTipiId as Lkp_ZamanlamaTipiId
+ , [takip].IsGrupSubeYok as Lkp_IsGrupSubeYok
+ , [takip].YasOnayiTipiId as Lkp_YasOnayiTipiId
+ , [takip].YasHazirTarihi as Lkp_YasHazirTarihi
+ , [takip].OzurDurumuTipiId as Lkp_OzurDurumuTipiId
+ , [belgeler].BelgelerTarandi as Lkp_BelgelerTarandi
+ , [belgeler].BelgelerYuklendi as Lkp_BelgelerYuklendi
+ -- LookUp Fields
+ , FNo31.SertifikaTipi as Lkp_MevcutSertifikaTipi
+ , FNo41.SertifikaTipi as Lkp_IstenenSertifikaTipi
+ , FNo61.DonemTipi as Lkp_DonemTipi
+ , FNo62.GrupTipi as Lkp_GrupTipi
+ , FNo63.SubeTipi as Lkp_SubeTipi
+ , FNo30.TalepTipi as Lkp_TalepTipi
+ -- Özel field : Donem + Grup + Sube 
+ -- , FNo61.DonemTipi + '' , '' + FNo62.GrupTipi + '' , '' + FNo63.SubeTipi as Lkp_DonemGrupSube
+  
+ from MtskAdayTalep as [MtskAdayTalep] with (nolock) 
+   -- Join Tables 
+   left outer join MtskAday as [aday] with (nolock) on ( [MtskAdayTalep].AdayId = [aday].Id  ) 
+   left outer join MtskAdayTakip as [takip] with (nolock) on ( [MtskAdayTalep].Id = [takip].TalepId  ) 
+   left outer join MtskAdayBelgeler as [belgeler] with (nolock) on ( [MtskAdayTalep].Id = [belgeler].TalepId  ) 
+   -- LookUp Tables
+   left outer join Lkp.MtskSertifikaTipi as FNo31 with (nolock) on ( MtskAdayTalep.MevcutSertifikaTipiId = FNo31.Id ) 
+   left outer join Lkp.MtskSertifikaTipi as FNo41 with (nolock) on ( MtskAdayTalep.IstenenSertifikaTipiId = FNo41.Id ) 
+   left outer join Lkp.MtskDonemTipi as FNo61 with (nolock) on ( MtskAdayTalep.DonemTipiId = FNo61.Id ) 
+   left outer join Lkp.MtskGrupTipi as FNo62 with (nolock) on ( MtskAdayTalep.GrupTipiId = FNo62.Id ) 
+   left outer join Lkp.MtskSubeTipi as FNo63 with (nolock) on ( MtskAdayTalep.SubeTipiId = FNo63.Id ) 
+   left outer join Lkp.MtskAdayTalepTalepTipi as FNo30 with (nolock) on ( MtskAdayTalep.TalepTipiId = FNo30.Id ) 
+
+ where 0 = 0 
+ and MtskAdayTalep.IsActive = 1 '
+ 
+ 
+ set @sqlOrderBy = ' order by [aday].TamAdiSoyadi '
+
+ set @sqlWhere = 
+ '  and [MtskAdayTalep].FirmId = ' + Convert(varchar(10), @FirmId) + ' ' +
+ '  and [MtskAdayTalep].DonemTipiId = ' + Convert(varchar(30), @DonemTipiId) + ' '
+
+ -- Kayıt aşamasında 
+ if (@KonuId = 1122)
+     set @sqlWhere = @sqlWhere + ' and takip.KayitTipiId = 2 '
+
+ -- Belgeleri Mebbise yüklenmeyen
+ if (@KonuId = 1263)
+     set @sqlWhere = @sqlWhere + ' and takip.BelgelerYuklendi = 0 '
+
+ -- Mebbis kurum onayı : Onaysız 
+ if (@KonuId = 1161)
+     set @sqlWhere = @sqlWhere + ' and takip.MebbisKurumOnayi = 0 '
+
+ set @sql = @sql + @sqlWhere + @sqlOrderBy
+
+ --print @sql
+ EXEC sp_executesql @sql
+
+
+END -- procedure
+
+/*CreateProcedureEnd*/
+

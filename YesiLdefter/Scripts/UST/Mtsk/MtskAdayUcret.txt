@@ -67,6 +67,7 @@ begin transaction
    -- 90
    PersonelId              Int           null,
    TeklifTarihi            Datetime      null,
+   VeriKaynakId            Int           null, /* Veri transferi edildiği tablodaki Id . Sorun olduğunda bilginin nereden geldiğine referans olsun */
 
    constraint		pk_MtskAdayUcret primary key (Id)
  )
@@ -82,7 +83,7 @@ commit transaction
 /*CreateTableEnd*/
 
 
-/*CreateTrigger_HENUZ_GEREK_YOK*/
+/*CreateTrigger*/
 
 CREATE TRIGGER dbo.trg_MtskAdayUcret on dbo.MtskAdayUcret
 AFTER INSERT, UPDATE
@@ -91,18 +92,55 @@ AS BEGIN
     DECLARE ucretCursor cursor local for select Id from Inserted
     DECLARE @curId bigint
 
-    Declare @AdayId int = 0
-    Declare @FirmId int = 0
-
     OPEN ucretCursor
+    FETCH NEXT FROM ucretCursor INTO @curId
 
-    FETCH NEXT FROM myCursor INTO @curId
+    -- Veri Transferi başladımı
+    declare @DbUpdatesIsActive Bit = 0
+    set @DbUpdatesIsActive = [dbo].[fnc_getIsDbUpdate] (13)
+
+    declare @TalepId int = 0
+    declare @AdayId int = 0
+    declare @FirmId int = 0
+    declare @VeriKaynakId int = 0
+    declare @KontejanTipiId smallint
+	declare @IsKontejan bit = 0
 
     WHILE @@FETCH_STATUS = 0
     BEGIN
+        select 
+            @TalepId = ins.TalepId
+           ,@AdayId = ins.AdayId
+		   ,@VeriKaynakId = ins.VeriKaynakId
+           ,@KontejanTipiId = ins.KontejanTipiId 
+		from inserted ins
+    	where ins.Id = @curId
+
+        if (@VeriKaynakId > 0 and (@TalepId = 0 or @AdayId = 0))
+        begin
+            Update dbo.MtskAdayUcret set
+                TalepId = t.Id  
+              , AdayId  = t.AdayId 
+              , TalepTipiId = t.TalepTipiId  
+            From dbo.MtskAdayUcret as a,
+                 dbo.MtskAdayTalep as t
+            Where a.VeriKaynakId = t.VeriKaynakId				 
+            and   a.Id = @curId
+        end
+
+        if (@DbUpdatesIsActive = 0)
+        begin 
+            if (@KontejanTipiId > 0) set @IsKontejan = 1 else set @IsKontejan = 0
+
+            -- Takip
+            Update MtskAdayTakip set
+                IsKontejan = @IsKontejan
+            Where TalepId = @TalepId
+            and   IsKontejan <> @IsKontejan 
+        end		
 
 
-      FETCH NEXT FROM ucretCursor INTO @curId
+        FETCH NEXT FROM ucretCursor INTO @curId
     END -- While
 
     CLOSE ucretCursor
@@ -110,9 +148,9 @@ AS BEGIN
 
 END -- create trigger
 
-ALTER TABLE dbo.MtskAdayUcret ENABLE TRIGGER trg_MtskAdayUcret
+ALTER TABLE dbo.MtskAdayUcret ENABLE TRIGGER trg_MtskAdayUcret 
 
-/*CreateTriggerEnd_HENUZ_GEREK_YOK*/
+/*CreateTriggerEnd*/
 
 
 

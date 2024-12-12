@@ -3047,11 +3047,11 @@ namespace Tkn_Events
                     }
                     if (workType == "OPENFORM") 
                     {
-                        if (istekbuttonType != v.tButtonType.btKartAc)
-                        {
+                       if (istekbuttonType != v.tButtonType.btKartAc)
+                       {
                             t.OpenForm_JSON(tForm, prop_);
                             islemOnayi = true;
-                        }
+                       }
                     }
 
                     if (workType == "CLOSEFORM")

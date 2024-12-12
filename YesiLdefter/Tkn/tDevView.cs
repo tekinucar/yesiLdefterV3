@@ -1086,7 +1086,7 @@ namespace Tkn_DevView
                         simpleButton_Gbutton.Name = "tGbutton_" + groupno;
                         simpleButton_Gbutton.Text = caption;
                         simpleButton_Gbutton.Dock = DockStyle.Left;
-                        simpleButton_Gbutton.Width = 40 + ((caption.Length) * 3);
+                        simpleButton_Gbutton.Width = 40 + ((caption.Length) * 4);
                         simpleButton_Gbutton.GroupIndex = 1;
                         simpleButton_Gbutton.TabIndex = t.myInt32(groupno);
                         simpleButton_Gbutton.BorderStyle = BorderStyles.UltraFlat;

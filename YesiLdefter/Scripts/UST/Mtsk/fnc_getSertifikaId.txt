@@ -35,7 +35,8 @@ BEGIN
       (@sertifikaId = 9071))   -- E Otomatik işareti varsa
        set @responseId = 2507
 
-  if ((@sertifikaId = 9201) or -- 100 Ceza Manuel işareti varsa
+  if ((@sertifikaId = 9200) or -- 100 Ceza
+      (@sertifikaId = 9201) or -- 100 Ceza Manuel işareti varsa
       (@sertifikaId = 9202))   -- 100 Ceza Otomatik işareti varsa
        set @responseId = 9200
 

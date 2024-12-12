@@ -151,7 +151,7 @@ AS BEGIN
            ,[MebbisSertifikaUcreti],[MebbisTeoDersSaati],[Mebbis1SaatTeoDersUcreti],[MebbisUygDersSaati],[Mebbis1SaatUygDersUcreti]
            ,[BorcSertifikaUcreti],[BorcESinavUcreti],[BorcUygulamaSinavUcreti],[BorcBasarisizEgitimUcreti],[BorcUcretlerToplami]
            ,[VGSertifikaUcreti],[VGESinavUcreti],[VGUygulamaSinavUcreti],[VGBasarisizEgitimUcreti],[VGUcretlerToplami]
-           ,[PersonelId],[TeklifTarihi])
+           ,[PersonelId],[TeklifTarihi],[VeriKaynakId])
 			VALUES (@yFirmId, @TalepId, @yAdayId, @yDonemTipiId, @yTalepTipiId
 			, 0, 0 -- IsUcretli
 			, 0    -- SertifikaUcreti
@@ -165,7 +165,7 @@ AS BEGIN
 			, 0, 0, 0, 0, 0 -- Mebbi..
 			, 0, 0, 0, 0, 0 -- BorcS..
 			, 0, 0, 0, 0, 0 -- VGSer..
-			, 0, null       -- Perso..
+			, 0, null, 0    -- Perso..
 			)
        print ' create : [MtskAdayUcret]'
   end
