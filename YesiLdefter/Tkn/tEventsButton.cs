@@ -771,7 +771,10 @@ namespace Tkn_Events
             /// 
             v.con_Listele_TableIPCode = tableIPCode;
 
-            DataSet ds = t.Find_DataSet(tForm, "", tableIPCode, "btnClick/listele");
+            DataSet ds = null;//t.Find_DataSet(tForm, "", tableIPCode, "btnClick/listele");
+            DataNavigator dN = null;
+            t.Find_DataSet(tForm, ref ds, ref dN, tableIPCode);
+            
             if (ds != null)
             {
                 t.TableRefresh(tForm, ds, tableIPCode);

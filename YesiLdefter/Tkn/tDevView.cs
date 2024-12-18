@@ -25,6 +25,7 @@ using Tkn_ToolBox;
 using Tkn_Variable;
 using System.Drawing;
 using System.Threading.Tasks;
+using DevExpress.Utils.DragDrop;
 
 namespace Tkn_DevView
 {
@@ -401,8 +402,11 @@ namespace Tkn_DevView
             tGridView.ValidateRow += new DevExpress.XtraGrid.Views.Base.ValidateRowEventHandler(evg.myGridView_ValidateRow);
             tGridView.MouseMove += new System.Windows.Forms.MouseEventHandler(evg.myGridView_MouseMove);
             tGridView.MouseDown += new System.Windows.Forms.MouseEventHandler(evg.myGridView_MouseDown);
+            tGridView.MouseUp += new System.Windows.Forms.MouseEventHandler(evg.myGridView_MouseUp);
             tGridView.ColumnFilterChanged += new System.EventHandler(evg.myGridView_ColumnFilterChanged);
             tGridView.ShownEditor += new System.EventHandler(evg.myGridView_ShownEditor);
+            
+
             //tGridView.
 
             // BUNU AÇINCA CHECKBOX BOZULUYOR

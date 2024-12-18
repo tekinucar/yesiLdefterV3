@@ -160,11 +160,9 @@ namespace Tkn_DataCopy
                 // dragdrop un oluştuğu yeni form ise v.con_DragDropForm da
 
                 Target_TableIPCode = v.con_DragDropOpenFormInTableIPCode;
-                //ds_Target = t.Find_DataSet(tForm, "", Target_TableIPCode, "");
                 t.Find_DataSet(tForm, ref ds_Target, ref dN_Target, Target_TableIPCode);
 
                 Source_TableIPCode = v.con_DragDropSourceTableIPCode;
-                //ds_Source = t.Find_DataSet(v.con_DragDropForm, "", Source_TableIPCode, "");
                 t.Find_DataSet(tForm, ref ds_Source, ref dN_Source, Source_TableIPCode);
             }
             else

@@ -252,6 +252,7 @@ begin transaction
  insert into MS_TYPES values ( 1, 0, 'DB_TYPE',  8, '', 'SourceDB(Aktarýlacak)');
 
 
+ --DELETE MS_TYPES WHERE TYPES_NAME = 'DEFAULT_TYPE'
  insert into MS_TYPES values ( 1, 0, 'DEFAULT_TYPE',  0, '', '');
  insert into MS_TYPES values ( 1, 0, 'DEFAULT_TYPE',  1, '', 'Var (Integer)');
  insert into MS_TYPES values ( 1, 0, 'DEFAULT_TYPE',  2, '', 'Var (Numeric)');
@@ -267,6 +268,7 @@ begin transaction
  
  insert into MS_TYPES values ( 1, 0, 'DEFAULT_TYPE', 31, '', 'Master=Detail');
  insert into MS_TYPES values ( 1, 0, 'DEFAULT_TYPE', 32, '', 'Master=Detail Multi');
+ insert into MS_TYPES values ( 1, 0, 'DEFAULT_TYPE', 33, '', 'Master=Detail Column');
  insert into MS_TYPES values ( 1, 0, 'DEFAULT_TYPE', 41, '', 'Line No'); -- 32 > 41
  insert into MS_TYPES values ( 1, 0, 'DEFAULT_TYPE', 51, '', 'Kriter READ (Even.Bas)'); 
  insert into MS_TYPES values ( 1, 0, 'DEFAULT_TYPE', 52, '', 'Kriter READ (Even.Bit)'); 
@@ -535,8 +537,9 @@ begin transaction
  insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14400, 'dataWizard',      'dataWizard');
  insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14411, 'barcodeControl1', 'barcodeControl1');
  insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14412, 'componentControl','componentControl');
- insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14413, 'simpleButton','simpleButton');
- insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14421, 'digitalGauge','digitalGauge');
+ insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14413, 'simpleButton',    'simpleButton');
+ insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14421, 'digitalGauge',    'digitalGauge');
+
 
  insert into MS_TYPES values ( 3,  0, 'LYT_DP_TABBED', 0, '',        'none');
  insert into MS_TYPES values ( 3,  0, 'LYT_DP_TABBED', 1, 'Tab',     'Tabbed');

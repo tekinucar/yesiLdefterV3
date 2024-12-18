@@ -747,6 +747,7 @@
     <Content Include="Scripts\UST\Mtsk\MtskKIhlalUygulamaD.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskKurumAltProgramlari.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskPersoneli.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskSablonUygulamaM.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTablesInsertKontrolu.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakipESinavToplamlari.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakipKonulari.txt" />
@@ -764,6 +765,8 @@
     <Content Include="Scripts\UST\Mtsk\prc_MtskTeorikDersIhlalleriCakismalar.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskTeorikDersIhlalleriSaatler.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskTeorikDersOzelGunleriEkle.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskUygulamaDersInsert.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskUygulamaDersPlanHazirlaManuel.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_setIsDbUpdateActive.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\fnc_getIsDbUpdate.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\fnc_IsTatilGunumu.txt" />

@@ -1,0 +1,69 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_MtskUygulamaDersInsert] (  
+   @FirmId int
+  ,@TalepId int
+  ,@AdayId int
+  ,@EgitimYeriTipiId smallint
+  ,@EgitimAraciId varchar(30)
+  ,@DersTarihi date
+  ,@DersSaatiTipiId smallint
+  ,@PersonelId varchar(30)
+  ,@EgitimTipiId smallint
+  ,@SaatSiraNo smallint
+  )
+AS BEGIN
+
+     INSERT INTO [dbo].[MtskUygulamaliDers]
+           ([FirmId]
+           ,[IsActive]
+           --,[DonemTipiId]
+           --,[GrupTipiId]
+           --,[SubeTipiId]
+           ,[TalepId]
+           --,[AdayNo]
+           ,[AdayId]
+           --,[AdayTcNo]
+           --,[AdayAdiSoyadi]
+           ,[EgitimYeriTipiId]
+           ,[EgitimAraciId]
+           ,[DersTarihi]
+           ,[DersSaatiTipiId]
+           --,[PersonelAdiSoyadi]
+           ,[PersonelId]
+           ,[EgitimTipiId]
+           --,[BaslamaSaati]
+           --,[BitisSaati]
+           ,[UDersIsUploaded]
+           ,[SablonUygulamaFId]
+           ,[SaatSiraNo])
+     VALUES
+           (@FirmId
+           ,1 -- IsActive
+           --,<DonemTipiId, int,>
+           --,<GrupTipiId, smallint,>
+           --,<SubeTipiId, smallint,>
+           ,@TalepId
+           --,<AdayNo, smallint,>
+           ,@AdayId
+           --,<AdayTcNo, varchar(11),>
+           --,<AdayAdiSoyadi, nvarchar(100),>
+           ,@EgitimYeriTipiId
+           ,@EgitimAraciId
+           ,@DersTarihi
+           ,@DersSaatiTipiId
+           --,<PersonelAdiSoyadi, nvarchar(100),>
+           ,@PersonelId
+           ,@EgitimTipiId
+           --,<BaslamaSaati, datetime,>
+           --,<BitisSaati, datetime,>
+           ,0 -- UDersIsUploaded
+           ,0 -- SablonUygulamaFId
+           ,@SaatSiraNo
+		   )
+
+END -- procedure 
+
+/*CreateProcedureEnd*/
+
+

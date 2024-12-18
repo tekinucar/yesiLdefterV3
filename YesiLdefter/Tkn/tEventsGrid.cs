@@ -25,6 +25,8 @@ using Tkn_ToolBox;
 using Tkn_Variable;
 using Tkn_Registry;
 using Tkn_Search;
+using DevExpress.Utils.DragDrop;
+using System.ComponentModel;
 
 namespace Tkn_Events
 {
@@ -2330,9 +2332,17 @@ namespace Tkn_Events
 
         public void myGridView_DragEnter(object sender, DragEventArgs e)
         {
-            e.Effect = DragDropEffects.Copy;
+            //e.Effect = DragDropEffects.Copy;
+            if (e.Data.GetDataPresent(typeof(DataRow))) 
+            { e.Effect = DragDropEffects.Move; } 
+            else 
+            { e.Effect = DragDropEffects.None; }
         }
 
+        public void myGridView_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            v.con_DragDropEdit = false;
+        }
         public void myGridView_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
         {
 
@@ -2353,6 +2363,8 @@ namespace Tkn_Events
 
                 if (e.Button == MouseButtons.Left && hitInfo.InRow && hitInfo.RowHandle != GridControl.NewItemRowHandle)
                     gridHitInfo = hitInfo;
+
+                v.con_DragDropEdit = true;
             }
 
             if (sender.GetType().ToString() == "DevExpress.XtraGrid.Views.WinExplorer.WinExplorerView")
@@ -2375,16 +2387,75 @@ namespace Tkn_Events
 
         public void myGridView_MouseMove(object sender, System.Windows.Forms.MouseEventArgs e)
         {
-            //Application.OpenForms[0].Text = "MouseMove : " + ...
+            Application.OpenForms[0].Text = "MouseMove : ";
 
-            /// DragDrop Edit
-            /// 
-            /// aslında burası yanlış tetikleme yeri NEDEN ?
-            /// gridControl_DragDrop anından sonra gridControl_MouseMove tetikleniyor
-            /// onun için burdan iş başlatılmış (tDC_Run)
-            /// işin aslı myGridControl_DragDrop sırasında işlem başlamalı
-            /// 
+            //myGridView_MouseMove_(sender, e);
 
+            #region Drag anında mouse nin ucunda kutu ve + işareti oluşturyor
+
+            if (sender.GetType().ToString() == "DevExpress.XtraGrid.Views.Layout.LayoutView")
+            {
+                LayoutView view = sender as DevExpress.XtraGrid.Views.Layout.LayoutView;
+                if (e.Button == MouseButtons.Left && gridHitInfo != null)
+                {
+                    Size dragSize = SystemInformation.DragSize;
+                    Rectangle dragRect = new Rectangle(new Point(gridHitInfo.HitPoint.X - dragSize.Width / 2,
+                        gridHitInfo.HitPoint.Y - dragSize.Height / 2), dragSize);
+
+                    if (!dragRect.Contains(new Point(e.X, e.Y)))
+                    {
+                        view.GridControl.DoDragDrop(gridHitInfo, DragDropEffects.All);
+                        gridHitInfo = null;
+                    }
+                    
+                }
+            }
+
+            if (sender.GetType().ToString() == "DevExpress.XtraGrid.Views.Grid.GridView")
+            {
+                
+                GridView view = sender as GridView;
+                if (e.Button == MouseButtons.Left && gridHitInfo != null)
+                {
+                    Size dragSize = SystemInformation.DragSize;
+                    Rectangle dragRect = new Rectangle(new Point(gridHitInfo.HitPoint.X - dragSize.Width / 2,
+                        gridHitInfo.HitPoint.Y - dragSize.Height / 2), dragSize);
+                    
+                    if (!dragRect.Contains(new Point(e.X, e.Y)))
+                    {
+                        view.GridControl.DoDragDrop(gridHitInfo, DragDropEffects.All);
+                        gridHitInfo = null;
+                    }
+                    
+                }
+                
+            }
+
+            if (sender.GetType().ToString() == "DevExpress.XtraGrid.Views.WinExplorer.WinExplorerView")
+            {
+                DevExpress.XtraGrid.Views.WinExplorer.WinExplorerView view =
+                    sender as DevExpress.XtraGrid.Views.WinExplorer.WinExplorerView;
+
+                if (e.Button == MouseButtons.Left && winExplorerHitInfo != null)
+                {
+                    Size dragSize = SystemInformation.DragSize;
+                    Rectangle dragRect = new Rectangle(new Point(winExplorerHitInfo.HitPoint.X - dragSize.Width / 2,
+                        winExplorerHitInfo.HitPoint.Y - dragSize.Height / 2), dragSize);
+
+                    if (!dragRect.Contains(new Point(e.X, e.Y)))
+                    {
+                        view.GridControl.DoDragDrop(winExplorerHitInfo, DragDropEffects.All);
+                        winExplorerHitInfo = null;
+                    }
+                }
+            }
+            
+            #endregion Drag anında
+
+        }
+
+        private void myGridView_MouseMove_(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
             #region Mouse gezerken bulunduğu kaydın position değişmesi sağlanıyor
 
             /// DİKKAT : Burası DataCopy içindeki tDC_Run tarafından tetikleniyor yani çalışıyor 
@@ -2393,8 +2464,8 @@ namespace Tkn_Events
             /// burada mouse hangi kaydın üzerinde ise 
             /// DataNavigator ün Position u değiştirmek gerekiyor
 
-            //if (v.con_DragDropEdit) asıl olan bu
-            if (v.con_DragDropEdit)
+
+            if (v.con_DragDropEdit) // true idi
             {
                 // yukarıda sender olan nesne gridControl içindeki view
                 // bu view aracılığıyla gridControla ulaşıyoruz
@@ -2431,90 +2502,39 @@ namespace Tkn_Events
                         v.con_GridMouseValue = view.GetDataSourceRowIndex(gridHI.RowHandle).ToString();
                         grid = ((DevExpress.XtraGrid.Views.Grid.GridView)sender).GridControl as GridControl;
                     }
+
                 }
 
-                if (grid != null)
-                {
-                    Form tForm = t.Find_Form(grid);
-                    string Prop_RunTime = grid.AccessibleDescription;
-
-                    // Herzaman yemiyor
-                    //if (gridHI.InLayoutItem)
-                    //    view.FocusedRowHandle = gridHI.RowHandle;
-                    // bunun yerine manuel yaptım 
-                    myGridDataNavigatorPositionSet(grid, t.myInt32(v.con_GridMouseValue));
-
-                    myDragDrop_RUN_(tForm, Prop_RunTime);
-
-                    grid.Invalidate();
-
-                    // işi sonlandır
-                    v.con_DragDropEdit = false;
-                }
+                myGridDataNavigatorPositionSetPreparing(grid);
             }
 
             #endregion Mouse gezerken
-
-
-            #region Drag anında mouse nin ucunda kutu ve + işareti oluşturyor
-            
-            if (sender.GetType().ToString() == "DevExpress.XtraGrid.Views.Layout.LayoutView")
-            {
-                LayoutView view = sender as DevExpress.XtraGrid.Views.Layout.LayoutView;
-                if (e.Button == MouseButtons.Left && gridHitInfo != null)
-                {
-                    Size dragSize = SystemInformation.DragSize;
-                    Rectangle dragRect = new Rectangle(new Point(gridHitInfo.HitPoint.X - dragSize.Width / 2,
-                        gridHitInfo.HitPoint.Y - dragSize.Height / 2), dragSize);
-
-                    if (!dragRect.Contains(new Point(e.X, e.Y)))
-                    {
-                        view.GridControl.DoDragDrop(gridHitInfo, DragDropEffects.All);
-                        gridHitInfo = null;
-                    }
-                }
-            }
-
-            if (sender.GetType().ToString() == "DevExpress.XtraGrid.Views.Grid.GridView")
-            {
-                GridView view = sender as GridView;
-                if (e.Button == MouseButtons.Left && gridHitInfo != null)
-                {
-                    Size dragSize = SystemInformation.DragSize;
-                    Rectangle dragRect = new Rectangle(new Point(gridHitInfo.HitPoint.X - dragSize.Width / 2,
-                        gridHitInfo.HitPoint.Y - dragSize.Height / 2), dragSize);
-
-                    if (!dragRect.Contains(new Point(e.X, e.Y)))
-                    {
-                        view.GridControl.DoDragDrop(gridHitInfo, DragDropEffects.All);
-                        gridHitInfo = null;
-                    }
-                }
-            }
-
-            if (sender.GetType().ToString() == "DevExpress.XtraGrid.Views.WinExplorer.WinExplorerView")
-            {
-                DevExpress.XtraGrid.Views.WinExplorer.WinExplorerView view =
-                    sender as DevExpress.XtraGrid.Views.WinExplorer.WinExplorerView;
-
-                if (e.Button == MouseButtons.Left && winExplorerHitInfo != null)
-                {
-                    Size dragSize = SystemInformation.DragSize;
-                    Rectangle dragRect = new Rectangle(new Point(winExplorerHitInfo.HitPoint.X - dragSize.Width / 2,
-                        winExplorerHitInfo.HitPoint.Y - dragSize.Height / 2), dragSize);
-
-                    if (!dragRect.Contains(new Point(e.X, e.Y)))
-                    {
-                        view.GridControl.DoDragDrop(winExplorerHitInfo, DragDropEffects.All);
-                        winExplorerHitInfo = null;
-                    }
-                }
-            }
-            
-            #endregion Drag anında
-
         }
-        
+
+        private void myGridDataNavigatorPositionSetPreparing(GridControl grid)
+        {
+            Application.OpenForms[0].Text = "myGridDataNavigatorPositionSetPreparing : " + v.con_GridMouseValue;
+            if (grid != null)
+            {
+                Form tForm = t.Find_Form(grid);
+                string Prop_RunTime = grid.AccessibleDescription;
+
+                // Herzaman yemiyor
+                //if (gridHI.InLayoutItem)
+                //    view.FocusedRowHandle = gridHI.RowHandle;
+
+                // bunun yerine manuel yaptım 
+                myGridDataNavigatorPositionSet(grid, t.myInt32(v.con_GridMouseValue));
+
+                //myDragDrop_RUN_(tForm, Prop_RunTime);
+
+                grid.Invalidate();
+
+                // işi sonlandır
+                //v.con_DragDropEdit = false;
+            }
+        }
+
         public void myGridView_ShownEditor(object sender, EventArgs e)
         {
             //gridView.ShownEditor += (s, e) => {
@@ -2538,6 +2558,21 @@ namespace Tkn_Events
 
         }
 
+        public void gridView_ShowingEditor(object sender, CancelEventArgs e)
+        {
+            e.Cancel = true;
+        }
+
+        public void myBehavior_DragDropToGrid1(object sender, DragDropEventArgs e)
+        {
+            //
+            v.Kullaniciya_Mesaj_Var = "grid1";
+        }
+        public void myBehavior_DragDropToGrid2(object sender, DragDropEventArgs e)
+        {
+            //
+            v.Kullaniciya_Mesaj_Var = "grid2";
+        }
         #endregion myGridView Events
 
         #region myGridControl
@@ -2559,7 +2594,7 @@ namespace Tkn_Events
 
         public void myGridControl_DragEnter(object sender, DragEventArgs e)
         {
-            //Application.OpenForms[0].Text = "DragEnter : " + sender.ToString();
+            Application.OpenForms[0].Text = "DragEnter : " + sender.ToString();
 
             //e.Effect = DragDropEffects.Copy;
 
@@ -2571,9 +2606,9 @@ namespace Tkn_Events
 
         public void myGridControl_DragOver(object sender, System.Windows.Forms.DragEventArgs e)
         {
+            
             //v.myGrid_Location = new Point(e.X, e.Y);
-
-            //Application.OpenForms[0].Text = "DragOver : " + sender.ToString() + " : " + v.myGrid_Location.ToString();
+            ///Application.OpenForms[0].Text = "DragOver : " + sender.ToString() + " : " + v.myGrid_Location.ToString();
 
             //if (e.Data.GetDataPresent(typeof(DataRow)))
             //    e.Effect = DragDropEffects.Move;
@@ -2592,6 +2627,68 @@ namespace Tkn_Events
                 GridControl grid = sender as GridControl;
                 v.con_DragDropSourceTableIPCode = grid.AccessibleName;
             }
+                        
+            myGridView_DragOver_(sender, e);
+        }
+
+        private void myGridView_DragOver_(object sender, System.Windows.Forms.DragEventArgs e)
+        {
+            #region Mouse gezerken bulunduğu kaydın position değişmesi sağlanıyor
+
+            /// DİKKAT : Burası DataCopy içindeki tDC_Run tarafından tetikleniyor yani çalışıyor 
+            /// DC.WORK_TYPE > de 
+            /// 3 = Satır Düzenle, Row.Update()   işlemini yapmak için önce 
+            /// burada mouse hangi kaydın üzerinde ise 
+            /// DataNavigator ün Position u değiştirmek gerekiyor
+
+            if (v.con_DragDropEdit) // true idi
+            {
+                GridControl grid = sender as GridControl;
+
+                if (grid.MainView.GetType().ToString() == "DevExpress.XtraGrid.Views.Layout.LayoutView")
+                {
+                    LayoutView view = grid.MainView as LayoutView;
+                    //DataRow row = view.GetFocusedDataRow();
+                    Point pt = grid.PointToClient(new Point(e.X, e.Y));
+
+                    LayoutViewHitInfo hitInfo = view.CalcHitInfo(pt);
+                    //if (hitInfo.HitTest == LayoutViewHitTest.? //  GridHitTest.EmptyRow)
+                    //    v.DropTargetRowHandle = view.DataRowCount;
+                    //else
+                    v.DropTargetRowHandle = hitInfo.RowHandle;
+
+                    if (v.DropTargetRowHandle < 0)
+                        v.DropTargetRowHandle = view.SourceRowHandle;
+
+                    v.con_GridMouseValue = view.GetDataSourceRowIndex(v.DropTargetRowHandle).ToString();
+
+                    grid.Invalidate();
+                }
+
+                if (grid.MainView.GetType().ToString() == "DevExpress.XtraGrid.Views.Grid.GridView")
+                {
+                    GridView view = grid.MainView as GridView;
+                    Point pt = grid.PointToClient(new Point(e.X, e.Y));
+
+                    GridHitInfo hitInfo = view.CalcHitInfo(pt);
+                    if (hitInfo.HitTest == GridHitTest.EmptyRow)
+                        v.con_GridMouseValue = view.DataRowCount.ToString();
+                    else
+                        v.con_GridMouseValue = hitInfo.RowHandle.ToString();
+                    /*
+                    if (v.DropTargetRowHandle < 0)
+                        v.DropTargetRowHandle = view.SourceRowHandle;
+
+                    v.con_GridMouseValue = view.GetDataSourceRowIndex(v.DropTargetRowHandle).ToString();
+                    */
+                    //v.con_GridMouseValue = v.DropTargetRowHandle.ToString();
+                }
+
+                //Application.OpenForms[0].Text = "myGridView_DragOver_ : " + v.con_GridMouseValue;
+                myGridDataNavigatorPositionSetPreparing(grid);
+            }
+
+            #endregion Mouse gezerken
         }
 
         public void myGridControl_DragDrop(object sender, System.Windows.Forms.DragEventArgs e)
@@ -2652,7 +2749,6 @@ namespace Tkn_Events
                 /*
                 BaseHitInfo baseHI = view.CalcHitInfo(v.myGrid_Location);
                 GridHitInfo gridHI = baseHI as GridHitInfo;
-
                 if (gridHI.HitTest == GridHitTest.EmptyRow)
                     v.DropTargetRowHandle = view.DataRowCount;
                 else
@@ -2662,16 +2758,9 @@ namespace Tkn_Events
                 if (v.DropTargetRowHandle < 0)
                     v.DropTargetRowHandle = view.SourceRowHandle;
 
-                //if ((gridHI != null) && (gridHI.RowHandle > -1))
-                //{
-                //    v.con_GridMouseValue = view.GetDataSourceRowIndex(gridHI.RowHandle).ToString();
-                //}
-
                 v.con_GridMouseValue = view.GetDataSourceRowIndex(v.DropTargetRowHandle).ToString();
 
                 grid.Invalidate();
-
-                //v.DropTargetRowHandle = -1;
             }
 
             if (grid.MainView.GetType().ToString() == "DevExpress.XtraGrid.Views.WinExplorer.WinExplorerView")
@@ -2751,7 +2840,7 @@ namespace Tkn_Events
                     grid.Invalidate();
                 }
             }
-
+            v.con_DragDropEdit = false;
         }
 
         public void myGridControl_Paint(object sender, PaintEventArgs e)
@@ -2883,6 +2972,7 @@ namespace Tkn_Events
 
         private void myGridDataNavigatorPositionSet(GridControl grid, int tPosition)
         {
+            
             Form tForm = t.Find_Form(grid);
             string target_tableipcode = grid.AccessibleName;
 
@@ -2893,6 +2983,7 @@ namespace Tkn_Events
                 tDataNavigator.Position = tPosition;
                 //Application.OpenForms[0].Text = ":"+tPosition.ToString();
             }
+           
         }
 
         private void myDragDrop_RUN_(Form tForm, string Prop_RunTime)

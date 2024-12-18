@@ -58,6 +58,8 @@ BEGIN
     declare @PersonelId2 Varchar(20)
     declare @PersonelId3 Varchar(20)
     declare @SaatTipiId SmallInt
+	declare @TalepId int 
+	declare @AdayId int
 
     declare @masterPersonelId1 Varchar(20)
     declare @masterPersonelId2 Varchar(20)
@@ -78,6 +80,9 @@ BEGIN
            ,@PersonelId2 = isnull(ins.PersonelId2,'')
            ,@PersonelId3 = isnull(ins.PersonelId3,'')
            ,@SaatTipiId  = isnull(ins.SaatTipiId,0)
+           ,@TalepId = isnull(ins.TalepId,0)
+           ,@AdayId = isnull(ins.AdayId,0)
+
 		From inserted ins
         Where ins.Id = @curId
 
@@ -115,12 +120,25 @@ BEGIN
 			else 
 			   Set @oncekiSaatTipiId = @SaatTipiId
 
-			-- seçil noya göre personel value set oluyor
+			-- seçili noya göre personel value set oluyor
 			Update dbo.MtskSinavRandevu set
                 PersonelNoTipiId = @PersonelNoTipiId 
               , PersonelId1 = @PersonelId0
               , SaatTipiId = @oncekiSaatTipiId
 			Where Id = @curId
+
+            if (@TalepId > 0)
+            begin
+                -- MtskAdayTakip 
+                Update dbo.MtskAdayTakip set
+                     IsRandevuPlanlandi = 1
+                    ,RandevuTarihi = @Tarih
+                    ,RandevuSaatTipiId = @oncekiSaatTipiId
+                    ,RandevuEgitimAraciId = @EgitimAraciId
+                    ,RandevuPersonelId = @PersonelId0
+                    ,uSinavDurumTipiId = 6 -- Uygulama sınav randevusu MEBBİSe aktarılacak
+                Where TalepId = @TalepId
+            end
 
         end -- @IsMasterRow = 0
 
@@ -143,14 +161,6 @@ BEGIN
 
         end -- @IsMasterRow = 1
 
-        FETCH NEXT FROM randevuCursor INTO @curId
-    END -- While
-
-	--EXECUTE [dbo].[prc_MtskAdayTakip] @FirmId
-
-    CLOSE randevuCursor
-    DEALLOCATE randevuCursor  
-
 
 END
 
@@ -159,46 +169,50 @@ END
 
 /*CreateTrigger*/
 
-CREATE TRIGGER [dbo].[trg_MtskSinavRandevuDelete] on [dbo].[MtskSinavRandevu] 
-FOR DELETE
+CREATE TRIGGER [dbo].[trg_MtskSinavRandevuDelete] on [dbo].[MtskSinavRandevu]
+AFTER DELETE
 AS BEGIN
 
-    declare myCursor cursor for select Id from deleted
-    declare @curId bigint
+    declare randevuCursorDlt cursor local for select Id from deleted
+	declare @curId bigint
 
-    declare @FirmId Int = 0
-	declare @TalepId Int = 0
+	OPEN randevuCursorDlt
+    FETCH NEXT FROM randevuCursorDlt INTO @curId
 
-	OPEN myCursor
-
-    FETCH NEXT FROM myCursor INTO @curId
+    declare @TalepId int
 
     WHILE @@FETCH_STATUS = 0
     BEGIN
+	    Select @TalepId = dlt.TalepId
+	    From deleted dlt
+	    Where dlt.Id = @curId
+	  
+        if (@TalepId > 0)
+        begin
+            -- MtskAdayTakip 
+            Update dbo.MtskAdayTakip set
+                IsRandevuPlanlandi = 0
+               ,RandevuTarihi = null
+               ,RandevuSaatTipiId = null
+               ,RandevuEgitimAraciId = null
+               ,RandevuPersonelId = null
+               ,uSinavDurumTipiId = 5 -- Uygulama sınav randevusu planlanacak
+            Where TalepId = @TalepId
+        end	    
 
-      select 
-         @FirmId = isnull(dlt.FirmId,0)  
-        ,@TalepId = isnull(dlt.TalepId,0)
-      from deleted as dlt
-      where dlt.Id = @curId
-
-      Update dbo.MtskAdayTakip set
-          IsRandevuPlanlandi = 0
-         ,uSinavDurumTipiId = 5 --Uygulama sınav randevusu planlanacak
-      Where FirmId = @FirmId
-      and   TalepId = @TalepId
-
-      FETCH NEXT FROM myCursor INTO @curId
+        FETCH NEXT FROM randevuCursorDlt INTO @curId
     END
 
-    CLOSE myCursor
-    DEALLOCATE myCursor
+    CLOSE randevuCursorDlt
+    DEALLOCATE randevuCursorDlt
 
 END
 
 /*CreateTriggerEnd*/
 
-ALTER TABLE [dbo].[MtskSinavRandevu] ENABLE TRIGGER [trg_MtskSinavRandevuDelete]
+
+
+
 
 /*CreateLkpTable*/
 

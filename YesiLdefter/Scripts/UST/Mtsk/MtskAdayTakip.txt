@@ -93,13 +93,16 @@ begin transaction
    IsArti4DersMebbis           Bit          null, /* Mebbise aktarılmadı, aktarrıldı */
 
    -- 230 
+   PlanlanacakEgitimTipiId SmallInt     null, /* 
    uSinavaHazirmiTipiId    SmallInt     null, /* 1. Onay, 2. Sınav için hazır değil : bu seçimi usta öğretici karar veriyor */
- -- gerek kalmadı  IsTakviyeDersleHazir    Bit          null, /* hazır olmayana takviye ders verildikten sonra hazır hale gelince onaylanır ve uSinavaHazirmiTipiId = 3 olur */ 
    IsUygSinavMebbisOnayi   Bit          null, /* uSinavDurumTipi = 4, 'Uygulama sınavı için MEBBİS de onaylanacak' için gerekli */
    IsRandevuPlanlandi      Bit          null, /* Randevu tarafında planlanınca burası True olacak */
    IsRandevuMebbis         Bit          null, /* Randevu Mebbise aktarılınca */
---   uSinavaKatilabilir      Bit          null, iptal
---   uRandevuMebbisAktarildi Bit          null, iptal
+   RandevuTarihi           Date         null, /* Randevu tarafında planınca plan tarihi buraya set ediliyor */ 
+   RandevuSaatTipiId       SmallInt     null, /* Randevu tarafında planınca plan tarihi buraya set ediliyor */   
+   RandevuEgitimAraciId    Varchar(10)  null, /* uygulama sınav randevusundaki araç */  
+   RandevuPersonelId       Varchar(20)  null, /* uygulama sınavında sorumlu olan öğretmen */  
+
 
    -- 240 
    uSinavNo                SmallInt     null,
@@ -109,8 +112,6 @@ begin transaction
    uSinavUcretTipiId       SmallInt     null, /* kendisi yatıracak, biz yatıracağız */
    uSinavDetayId           Int          null, /* en son hangi sınavsa onun id si. sınav1 ise sınav1 in id si, 2 ise 2 nin id si, 3, 4 ... */
    uSinavBasariTarihi      Date         null,
-   uSinavEgitimAraciId     Varchar(10)  null, /* uygulama sınav randevusundaki araç */  
-   uSinavPersonelId        Varchar(20)  null, /* uygulama sınavında sorumlu olan öğretmen */  
 
    --260 sertifika aşaması
    SertifikaDurumTipiId    SmallInt     null,
@@ -863,6 +864,37 @@ INSERT INTO [Lkp].[MtskAdayTakipArti4DersTipi] (Id, Arti4DersTipi, KonuGrupId, K
   ( 3,    N'2. +4 hak dersleri Mebbise aktarıldı, derler başlamadı',  1, 3133, '2. +4 hak eğitimi', '+4 planlandı', 'Mebbis' ),
   ( 4,    N'2. +4 hak dersleri başladı',                              1, 3134, '2. +4 hak eğitimi', '+4 alıyor', '' ),
   ( 5,    N'2. +4 hak dersleri tamamlandı',                           1, 3135, '2. +4 hak eğitimi', '+4 tamamlandı', '' )
+
+
+
+-- ------------------------------------------------------- 
+-- PlanlanacakEgitimTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdayTakipPlanlanacakEgitimTipi')
+drop table [Lkp].[MtskAdayTakipPlanlanacakEgitimTipi]
+
+create table Lkp.MtskAdayTakipPlanlanacakEgitimTipi
+(
+   Id                      Int Unique Not Null,
+   PlanlanacakEgitimTipi   nVarchar(50)   null,
+   KonuGrupId       SmallInt       null,
+   KonuId           Int            null,
+   KonuCaption      nVarchar(20)   null,
+   ChartCaption     nVarchar(25)   null,
+   FormCaption      nVarchar(15)   null,   
+
+   constraint  pk_MtskAdayTakipPlanlanacakEgitimTipi primary key (Id)
+)
+
+Delete from Lkp.MtskAdayTakipPlanlanacakEgitimTipi
+INSERT INTO Lkp.MtskAdayTakipPlanlanacakEgitimTipi (Id, PlanlanacakEgitimTipi)
+ VALUES 
+  ( 0, N''),
+  ( 1, N'Normal Eğitim'),
+  ( 2, N'Telafi Eğitim(Ön Sınav )'),
+  ( 3, N'2.Direksiyon Eğitimi'),
+  ( 4, N'Başarısız Aday Eğitimi')
+
 
 
 -- ------------------------------------------------------- 

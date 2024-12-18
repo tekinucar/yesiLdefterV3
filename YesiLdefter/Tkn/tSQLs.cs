@@ -1496,6 +1496,7 @@ INSERT INTO [dbo].[SYS_UPDATES]
             string Lkp_Memory_Fields = string.Empty;
             string DataWizardTabPage = string.Empty;
             string DataCopyCode = string.Empty;
+            string MasterDetailColumns = string.Empty;
 
             /// TABLE_TYPE  
             /// 1, 'Table'
@@ -1661,7 +1662,8 @@ INSERT INTO [dbo].[SYS_UPDATES]
                       ref setlist,
                       ref NewSQL,
                       ref REF_CALL,
-                      ref Report_FieldsName);
+                      ref Report_FieldsName,
+                      ref MasterDetailColumns);
 
             #endregion Preparing Join Tables and Fields
 
@@ -1840,6 +1842,7 @@ INSERT INTO [dbo].[SYS_UPDATES]
             string FieldsListSQL = SQL_Table_FieldsList(DBaseName, TableName, IPCode);
 
             //DBaseType >> DBase_Type >> DBaseName DBaseNo
+            t.MyProperties_Set(ref myProp, "FormName", tForm.Name.ToString());
             t.MyProperties_Set(ref myProp, "DBaseNo", dBaseNo.ToString());
             t.MyProperties_Set(ref myProp, "DBaseName", DBaseName.ToString());
             t.MyProperties_Set(ref myProp, "SchemasCode", Schemas);
@@ -1868,6 +1871,8 @@ INSERT INTO [dbo].[SYS_UPDATES]
             t.MyProperties_Set(ref myProp, "DataReadType", Data_Read_Type.ToString());
             t.MyProperties_Set(ref myProp, "DataWizardTabPage", DataWizardTabPage);
             t.MyProperties_Set(ref myProp, "DataCopyCode", DataCopyCode);
+            t.MyProperties_Set(ref myProp, "MasterDetailColumns", MasterDetailColumns);
+
             //t.MyProperties_Set(ref myProp, "FieldsListSQL", FieldsListSQL);
 
             if (t.IsNotNull(About_Detail_SubDetail))
@@ -2511,7 +2516,8 @@ INSERT INTO [dbo].[SYS_UPDATES]
                           ref string setlist,
                           ref string NewSQL,
                           ref string REF_CALL,
-                          ref string Report_FieldsName
+                          ref string Report_FieldsName,
+                          ref string MasterDetailColumns
                           )
         {
 
@@ -2653,6 +2659,7 @@ INSERT INTO [dbo].[SYS_UPDATES]
                 /// 21,  'Source TableIPCode READ'
                 /// 31,  'Master=Detail'
                 /// 32,  'Master=Detail Multi'
+                /// 33,  'Master=Detail Column'
                 /// 41,  'Line No'
                 /// 51,  'Kriter READ (Even.Bas)' 
                 /// 52,  'Kriter READ (Even.Bit)' 
@@ -2802,6 +2809,7 @@ INSERT INTO [dbo].[SYS_UPDATES]
                 /// 21,  'Source TableIPCode READ'
                 /// 31,  'Master=Detail'
                 /// 32,  'Master=Detail Multi'
+                /// 33,  'Master=Detail Column'
                 /// 41,  'Line No'
                 /// 51,  'Kriter READ (Even.Bas)' 
                 /// 52,  'Kriter READ (Even.Bit)' 
@@ -2810,6 +2818,7 @@ INSERT INTO [dbo].[SYS_UPDATES]
                 if ((default_type == 21) ||
                     (default_type == 31) ||
                     (default_type == 32) ||
+                    (default_type == 33) ||
                     (default_type == 51) ||
                     (default_type == 52) ||
                     (default_type == 53) ||
@@ -2858,9 +2867,10 @@ INSERT INTO [dbo].[SYS_UPDATES]
                     /// 21,  'Source TableIPCode READ'
                     /// 31,  'Master=Detail'
                     /// 32,  'Master=Detail Multi'
+                    /// 33,  'Master=Detail Column'
                     if ((default_type == 21) ||
                         (default_type == 31) ||
-                        (default_type == 32))
+                        (default_type == 33))
                     {
                         About_Detail_SubDetail = About_Detail_SubDetail +
                             "=Detail_SubDetail:" +
@@ -2868,11 +2878,21 @@ INSERT INTO [dbo].[SYS_UPDATES]
                             mst_FName + "||" +
                             tkrt_table_alias + "." + fname + "||" +
                             field_type.ToString() + "||" +
-                            default_type.ToString() + "||" + // 21, 31, 32
+                            default_type.ToString() + "||" + // 21, 31, 32, 33
                             toperand_type.ToString() + "||" +
                             mst_CheckFName + "||" +
                             mst_CheckValue + "||" +
                             RefId.ToString() + "|ds|" + v.ENTER;
+                    }
+
+                    /// column daki value değişikliğine göre tetikleyecek fieldlerin listesi toparlanıyor
+                    /// public void tColumn_Changed(..)  bu column field name varsa 
+                    /// kendisine bağlı SubDetail tableIPCode ler tetikleniyor
+                    /// Kendisne bağlı olan tableIPCode ler yine normal Master=Default olarak bağlı
+                    ///
+                    if (default_type == 33)
+                    {
+                        MasterDetailColumns += "||" + fieldname + "||";
                     }
 
                     /// 51,  'Kriter READ (Even.Bas)' 

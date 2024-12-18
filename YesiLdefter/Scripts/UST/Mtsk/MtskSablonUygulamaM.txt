@@ -1,0 +1,185 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table MtskSablonUygulamaM
+ (
+   Id                      Int IDENTITY(1,1) not null, 
+   FirmId                  Int       not null,
+   TalepId                 Int           null,
+   AdayId                  Int           null,
+   AdayTamAdiSoyadi        nVarchar(100) null,
+
+   -- 10
+   Tarih                   Date          null,
+   EgitimTarihi            Date          null, /* Eğitimin başlayacağı tarih */
+   EgitimTipiId            SmallInt      null, /* 1. Normal Eğitim , 2. Telafi Eğitim(Ön Sınav ), 3. 2.Direksiyon Eğitimi ,  4. Başarısız Aday Eğitimi */
+   DersTercihiTipiId       SmallInt      null, /* 1. Sim + AT , 2. EA + AT , 3. AT  */
+   IzinGunuTipiId          SmallInt      null, /* 1. Ctesi, pazar eğitim verme, 2. Pazar eğitim verme, 3. Ctesi eğitim verme. 4. Personel izin tablosu geçerli ... */
+   SaatSayisiTipiId        SmallInt      null, /* 0. 2 saat veya 2. 4 saat */
+
+   -- 20
+   SimulatorDersSayisi     SmallInt      null,
+   EgitimAlaniDersSayisi   SmallInt      null,
+   AkanTrafikDersSayisi    SmallInt      null,    
+
+   -- 30
+   PersonelId              Varchar(20)   null,
+   SimulatorId             Varchar(30)   null,
+   EgitimAraciId           Varchar(30)   null,
+   -- 40 
+   IsPlanTamamlandi        Bit           null,  /* Kullanıcı planın bittiğene onay verir */
+   
+   constraint		pk_MtskSablonUygulamaM primary key (Id)
+ )
+  
+ grant select, insert, update, delete on MtskSablonUygulamaM to public
+
+ 
+commit transaction
+
+/*CreateTableEnd*/
+
+
+
+/*CreateTrigger*/
+
+CREATE TRIGGER [dbo].[trg_MtskSablonUygulamaM] on [dbo].[MtskSablonUygulamaM] 
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    DECLARE myCursor cursor local for select Id from Inserted
+    DECLARE @curId bigint
+
+    OPEN myCursor
+    FETCH NEXT FROM myCursor INTO @curId
+
+	declare @IsPlanTamamlandi bit
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        Select 
+            @IsPlanTamamlandi = IsPlanTamamlandi
+        From inserted
+        Where Id = @curId      
+
+        if (@IsPlanTamamlandi = 1)
+        begin 
+            Update dbo.MtskSablonUygulamaM set 
+                AdayTamAdiSoyadi = ''
+               ,TalepId = 0
+			   ,IsPlanTamamlandi = 0
+            Where Id = @curId
+        end
+
+      FETCH NEXT FROM myCursor INTO @curId
+    END
+
+
+    CLOSE myCursor
+    DEALLOCATE myCursor   
+
+END -- create trigger
+
+
+
+
+
+
+/*CreateLkpTable*/
+
+
+-- ------------------------------------------------------- 
+-- EgitimTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskSablonUygulamaMEgitimTipi')
+drop table [Lkp].[MtskSablonUygulamaMEgitimTipi]
+
+create table Lkp.MtskSablonUygulamaMEgitimTipi
+(
+   Id           Int Unique Not Null,
+   EgitimTipi   nVarchar(50)   null
+
+   constraint  pk_MtskSablonUygulamaMEgitimTipi primary key (Id)
+)
+
+Delete from Lkp.MtskSablonUygulamaMEgitimTipi
+INSERT INTO Lkp.MtskSablonUygulamaMEgitimTipi (Id, EgitimTipi)
+ VALUES 
+  ( 0, N''),
+  ( 1, N'Normal Eğitim'),
+  ( 2, N'Telafi Eğitim(Ön Sınav )'),
+  ( 3, N'2.Direksiyon Eğitimi'),
+  ( 4, N'Başarısız Aday Eğitimi')
+
+
+-- ------------------------------------------------------- 
+-- DersTercihiTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskSablonUygulamaMDersTercihiTipi')
+drop table [Lkp].[MtskSablonUygulamaMDersTercihiTipi]
+
+create table Lkp.MtskSablonUygulamaMDersTercihiTipi
+(
+   Id               Int Unique Not Null,
+   DersTercihiTipi  nVarchar(50)   null
+   
+   constraint  pk_MtskSablonUygulamaMDersTercihiTipi primary key (Id)
+)
+
+Delete from Lkp.MtskSablonUygulamaMDersTercihiTipi
+INSERT INTO Lkp.MtskSablonUygulamaMDersTercihiTipi (Id, DersTercihiTipi)
+ VALUES 
+  ( 0, N'--Seçiniz--'),
+  ( 1, N'Simülatör + Akan Trafik'),
+  ( 2, N'Eğitim Alanı + Akan Trafik'),
+  ( 3, N'Akan Trafik')
+
+
+-- ------------------------------------------------------- 
+-- IzinGunuTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskSablonUygulamaMIzinGunuTipi')
+drop table [Lkp].[MtskSablonUygulamaMIzinGunuTipi]
+
+create table Lkp.MtskSablonUygulamaMIzinGunuTipi
+(
+   Id            Int Unique Not Null,
+   IzinGunuTipi  nVarchar(50)   null
+
+   constraint  pk_MtskSablonUygulamaMIzinGunuTipi primary key (Id)
+)
+
+Delete from Lkp.MtskSablonUygulamaMIzinGunuTipi
+INSERT INTO Lkp.MtskSablonUygulamaMIzinGunuTipi (Id, IzinGunuTipi)
+ VALUES 
+  ( 0, N''),
+  ( 1, N'Personel izin tablosu geçerli'),
+  ( 2, N'Ctesi ve Pazar günü eğitim yok'),
+  ( 3, N'Pazar günü eğitim yok')
+
+
+
+-- ------------------------------------------------------- 
+-- SaatSayisiTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskSablonUygulamaMSaatSayisiTipi')
+drop table [Lkp].[MtskSablonUygulamaMSaatSayisiTipi]
+
+create table Lkp.MtskSablonUygulamaMSaatSayisiTipi
+(
+   Id              Int Unique Not Null,
+   SaatSayisiTipi  nVarchar(50)   null
+
+   constraint  pk_MtskSablonUygulamaMSaatSayisiTipi primary key (Id)
+)
+
+Delete from Lkp.MtskSablonUygulamaMSaatSayisiTipi
+INSERT INTO Lkp.MtskSablonUygulamaMSaatSayisiTipi (Id, SaatSayisiTipi)
+ VALUES 
+  ( 2, N'Günde 2 saat'),
+  ( 4, N'Günde 4 saat')
+  
+
+
+/*CreateLkpTableEnd*/

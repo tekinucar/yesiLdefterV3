@@ -2628,9 +2628,17 @@ namespace Tkn_ToolBox
                 }
                 else
                 {
-                    //if (TableIPCode == "HPFNS.HPFNS_BN01")
-                    //    MessageBox.Show("false");
+                    string myProp = dsData.Namespace.ToString();
+                    string AutoInsert = MyProperties_Get(myProp, "AutoInsert:");
 
+                    if (AutoInsert == "True")
+                    {
+                        tEvents ev = new tEvents();
+                        DataNavigator dN = Find_DataNavigator(tForm, TableIPCode);
+                        ev.tSubWork_Refresh_(tForm, dsData, dN);
+                    }
+
+                    /*
                     cntrl.Enabled = false;
 
                     Control btn = null;
@@ -2646,7 +2654,7 @@ namespace Tkn_ToolBox
                                     ((DevExpress.XtraEditors.SimpleButton)btn).Tag.ToString();
                         }
                     }
-
+                    */
                 }
             }
         }
@@ -5844,7 +5852,7 @@ namespace Tkn_ToolBox
                 string myprop = dsData.Namespace.ToString();
                 myprop = myprop.Replace(oldValue, newValue);
                 dsData.Namespace = myprop;
-                //v.Kullaniciya_Mesaj_Var = "DataState : Update";
+                v.Kullaniciya_Mesaj_Var = "DataState : Update, Column Changed";
             }
         }
         #endregion

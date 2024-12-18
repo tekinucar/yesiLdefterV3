@@ -31,7 +31,8 @@ begin transaction
    BitisSaati           Datetime      null, /* Calender and Scheduling için gerekli */
    UDersIsUploaded      Bit           null,
    SablonUygulamaFId    Int           null, /* MtskSablonUygulamaF.Id = Hangi plan formu ile hazırlandı, hazırlanırken seçilen araç, usta öğreticiler ve adayların Id leri */ 
-
+   SaatSiraNo           SmallInt      null, /* adayın 1. saati, 2. saati, 3. saati, 4. saati  bilgisi */
+   
    constraint		pk_MtskUygulamaliDers primary key (Id)
  )
   

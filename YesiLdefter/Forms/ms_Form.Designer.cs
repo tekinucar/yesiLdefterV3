@@ -5,7 +5,7 @@
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        public System.ComponentModel.IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -32,6 +32,7 @@
             // 
             // ms_Form
             // 
+            System.ComponentModel.IContainer components = new System.ComponentModel.Container();
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(888, 400);
@@ -39,9 +40,15 @@
             this.Name = "ms_Form";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "ms_Form";
-            this.ResumeLayout(false);
+            this.behaviorManager1 = new DevExpress.Utils.Behaviors.BehaviorManager(this.components);
 
+            components.Add(behaviorManager1);
+
+            this.ResumeLayout(false);
+            
         }
+
+        private DevExpress.Utils.Behaviors.BehaviorManager behaviorManager1;
 
         #endregion
     }

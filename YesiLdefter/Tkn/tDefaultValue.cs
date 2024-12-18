@@ -327,6 +327,7 @@ namespace Tkn_DefaultValue
             ///'DEFAULT_TYPE', 22, '', 'Source ParentControl.Tag READ'); 
             ///'DEFAULT_TYPE', 31, '', '1Master=Detail');
             ///'DEFAULT_TYPE', 32, '', '2Master=Detail Multi');
+            ///'DEFAULT_TYPE', 33, '', '3Master=Detail Column');
             ///'DEFAULT_TYPE', 41, '', 'Line No'); -- 32 > 41
 
             if ((default_type == 21) || // DEFAULT_TYPE', 21, '', 'Source TableIPCode READ'
@@ -521,6 +522,7 @@ namespace Tkn_DefaultValue
             ///*  23, '', 'Source ParentControl.TagCaption READ');
             ///*  31, '', 'Master=Detail');
             ///*  32, '', 'Master=Detail Multi');
+            ///*  33, '', 'Master=Detail Column');
             ///*  41, '', 'Line No'); -- 32 > 41
             ///*  51, '', 'Kriter READ (Even.Bas)'); 
             ///*  52, '', 'Kriter READ (Even.Bit)'); 

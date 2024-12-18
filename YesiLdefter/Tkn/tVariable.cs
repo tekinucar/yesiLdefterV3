@@ -196,6 +196,8 @@ namespace Tkn_Variable
         public static Form mainForm { get; set; }
         public static DevExpress.XtraScheduler.TimeRuler timeRuler = new TimeRuler();
 
+        public static DevExpress.Utils.Behaviors.BehaviorManager behaviorManager1 = new DevExpress.Utils.Behaviors.BehaviorManager();
+
         public static string spFormName = "ustad";
         public static string registryPath = "Software\\Üstad\\YesiLdefter";
         public static Control formLastActiveControl { get; set; }
@@ -232,6 +234,8 @@ namespace Tkn_Variable
         public static string con_Source_FormCodeAndName { get; set; }
         public static string con_Source_ReportTableIPCode { get; set; }
         public static string con_Source_ReportFormCode { get; set; }
+
+        public static Point myGrid_Location { get; set; }
 
         //public static string con_Images_Name { get; set; }
 
@@ -396,6 +400,7 @@ namespace Tkn_Variable
         public static string lyt_ComponentControl = "componentControl";
         public static string lyt_SimpleButton = "simpleButton";
         public static string lyt_DigitalGauge = "digitalGauge";
+        
         public static string lyt_documentViewerFast = "documentViewerFast";
         public static string lyt_documentViewerDev = "documentViewerDev";
 
@@ -685,6 +690,7 @@ namespace Tkn_Variable
         public static string DBRec_ListAdd = " Başarıyla listeye eklenmiştir...";
         public static string dataStateNull = "DataState:null";
         public static string dataStateUpdate = "DataState:Update";
+        public static string masterDetailColumns = "MasterDetailColumns:null";
 
         public static string softCode { get; set; }
         public static string projectCode { get; set; }

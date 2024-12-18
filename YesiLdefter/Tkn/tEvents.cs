@@ -262,7 +262,7 @@ namespace Tkn_Events
             
             //e.Row.BeginEdit();
 
-            tSetDataStateChanges(sender);
+            tSetDataStateChanges(sender, null, "");
         }
 
         public void tRow_Changing(object sender, DataRowChangeEventArgs e)
@@ -294,8 +294,10 @@ namespace Tkn_Events
         {
             //v.Kullaniciya_Mesaj_Var = String.Format("Column_Changed Event: ColumnName={0}; RowState={1}",
             //    e.Column.ColumnName, e.Row.RowState);
-
-            tSetDataStateChanges(sender);
+            DataRow row = e.Row;
+            string columnName = e.Column.ColumnName;
+                        
+            tSetDataStateChanges(sender, row, columnName);
         }
 
         public void tColumn_Changing(object sender, DataColumnChangeEventArgs e)
@@ -374,8 +376,9 @@ namespace Tkn_Events
             return onay;
         }
 
-        private void tSetDataStateChanges(object sender)
+        private void tSetDataStateChanges(object sender, DataRow row, string columnName)
         {
+            
             //
             if (v.con_DefaultValuePreparing) return;
             // LKP_ONAY için ise işlem olmasın
@@ -388,6 +391,28 @@ namespace Tkn_Events
                     //tToolBox t = new tToolBox();
                     DataSet ds = ((DataTable)sender).DataSet;
                     t.mypropChanged(ref ds, v.dataStateNull, v.dataStateUpdate);
+                }
+
+                /// Demek ki MasterDetailColmns fields mevcut
+                if (((DataTable)sender).DataSet.Namespace.IndexOf(v.masterDetailColumns) == -1)
+                {
+                    string myProp = ((DataTable)sender).DataSet.Namespace;
+                    string columnNames = t.MyProperties_Get(myProp, "MasterDetailColumns:");
+                    if (columnNames.IndexOf(columnName) > -1)
+                    {
+                        //string value = row[columnName].ToString();
+                        //v.Kullaniciya_Mesaj_Var = String.Format("Column_Changed Event: ColumnName={0}; value={1}", columnName, value);
+                        string formName = t.MyProperties_Get(myProp, "FormName:");
+                        string tableIPCode = ((DataTable)sender).DataSet.DataSetName;
+
+                        Form tForm = Application.OpenForms[formName];
+
+                        DataSet ds = null;
+                        DataNavigator dN = null;
+                        t.Find_DataSet(tForm, ref ds, ref dN, tableIPCode);
+
+                        Data_Refresh(tForm, ds, dN);
+                    }
                 }
             }
         }
@@ -6963,7 +6988,6 @@ namespace Tkn_Events
                             {
                                 if (vSW._03_WorkTD == v.tWorkTD.NewData)
                                 {
-                                    
                                     btn = t.Find_Control(tForm, "simpleButton_yeni_kart", TableIPCode, controls2);
                                     if (btn == null)
                                     {
@@ -6986,8 +7010,6 @@ namespace Tkn_Events
                                         btnType = 1;
                                     }
 
-
-
                                     if (btn == null)
                                     {
                                         btn = t.Find_Control(tForm, "simpleButton_yeni_kart_satir", TableIPCode, controls2);
@@ -7008,10 +7030,6 @@ namespace Tkn_Events
                                         btn = t.Find_Control(tForm, "simpleButton_yeni_alt_hesap_satir", TableIPCode, controls2);
                                         btnType = 2;
                                     }
-
-                                    
-                                    //if (btn != null)
-                                    //    buttonName = btn.Name.ToString();
 
                                     if (btn != null)
                                     {
@@ -7106,8 +7124,7 @@ namespace Tkn_Events
                                     old_PositionChange = v.con_PositionChange;
                                     v.con_PositionChange = true;
 
-                                    //
-                                    //evb.newDataExec(tForm, dsData, dN, TableIPCode, "", "", "");
+                                    ///
                                     evb.newData(tForm, TableIPCode);
 
                                     if (old_PositionChange == false)
@@ -7135,7 +7152,6 @@ namespace Tkn_Events
 
                                         tDataCopy dc = new tDataCopy();
                                         dc.tDC_Run(tForm, DataCopyCode);
-                                        //dc.tDC_Run(tForm, v.SP_Conn_Proje_MSSQL, DataCopyCode);
 
                                         v.con_DragDropEdit = false;
                                         //***
@@ -7716,7 +7732,15 @@ namespace Tkn_Events
 
                         if (mst_Row != null)
                         {
-                            read_mst_value = mst_Row[read_mst_FName].ToString();
+                            try
+                            {
+                                read_mst_value = mst_Row[read_mst_FName].ToString();
+                            }
+                            catch (Exception e)
+                            {
+                                read_mst_value = "-1";
+                                //throw;
+                            }
                         }
                         else
                         {
@@ -8065,7 +8089,7 @@ namespace Tkn_Events
 
             // yerine ata
             dsSubDetail_Data.Namespace = myProp;
-
+            
             string Sql = string.Empty;
 
             if (Sql_OldS != "")

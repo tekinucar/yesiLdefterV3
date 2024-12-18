@@ -1034,7 +1034,7 @@ namespace Tkn_CreateObject
             nButton.propSearch = "";
 
             nButton.buttonName = "simpleButton_listele";
-            nButton.buttonText = "Listele";
+            nButton.buttonText = "Yenile";//"Listele";
             nButton.buttonKey = "<b>" + v.Key_Listele.ToString() + "</b>";
             nButton.dock = DockStyle.Right;
             nButton.tabIndex = 15;
@@ -1172,9 +1172,9 @@ namespace Tkn_CreateObject
                 tForm.Padding = new System.Windows.Forms.Padding(0);
             }
 
-            System.ComponentModel.IContainer components = null;
-            components = new System.ComponentModel.Container();
-            components.Add(tForm);
+            //System.ComponentModel.IContainer components = null;
+            //components = new System.ComponentModel.Container();
+            //components.Add(tForm);
 
             tForm.AccessibleDescription = FormCode;
             tForm.Name = "tForm_" + t.AntiStr_Dot(FormCode);

@@ -1,0 +1,148 @@
+﻿
+/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_MtskUygulamaDersPlanHazirlaManuel] (@Id int)  
+AS BEGIN
+
+  --Declare @Id int = 1
+
+  declare @FirmId int
+  declare @TalepId int
+  declare @AdayId int
+  declare @EgitimTarihi date
+  declare @EgitimTipiId smallInt
+  declare @DersTercihiTipiId smallInt
+  declare @IzinGunuTipiId smallInt
+  declare @SaatSayisiTipiId smallInt
+  declare @SimulatorDersSayisi smallInt
+  declare @EgitimAlaniDersSayisi smallInt
+  declare @AkanTrafikDersSayisi smallInt
+  declare @PersonelId varchar(50)
+  declare @SimulatorId varchar(50)
+  declare @EgitimAraciId varchar(50)
+
+  declare @toplamDersSayisi smallInt
+  declare @bugunDersSayisi smallInt
+  declare @bugunDersSayisi_ smallInt
+  declare @gunNo smallInt = 1
+
+  declare @EgitimYeriTipiId_ smallint
+  declare @EgitimAraciId_ varchar(50)
+  declare @DersTarihi_ date
+  declare @gunTipiId_ smallInt 
+  declare @saatSiraNo_ smallInt
+  declare @dersSaatiTipiId_ smallInt
+
+  Select
+       @FirmId = FirmId
+      ,@TalepId = TalepId
+      ,@AdayId = AdayId
+      ,@EgitimTarihi = EgitimTarihi
+      ,@EgitimTipiId = EgitimTipiId
+      ,@DersTercihiTipiId = DersTercihiTipiId
+      ,@IzinGunuTipiId = IzinGunuTipiId
+      ,@SaatSayisiTipiId = SaatSayisiTipiId
+      ,@SimulatorDersSayisi = SimulatorDersSayisi
+      ,@EgitimAlaniDersSayisi = EgitimAlaniDersSayisi
+      ,@AkanTrafikDersSayisi = AkanTrafikDersSayisi
+      ,@PersonelId = PersonelId
+      ,@SimulatorId = SimulatorId
+      ,@EgitimAraciId = EgitimAraciId
+  From dbo.MtskSablonUygulamaM 
+  Where Id = @Id
+
+  -- @EgitimTipiId
+  -- 1, 'Normal Eğitim'
+  -- 2, 'Telafi Eğitim(Ön Sınav )'
+  -- 3, '2.Direksiyon Eğitimi'
+  -- 4, 'Başarısız Aday Eğitimi'
+ 
+  -- @DersTercihiTipiId
+  -- 1, 'Simülatör + Akan Trafik'
+  -- 2, 'Eğitim Alanı + Akan Trafik'
+  -- 3, 'Akan Trafik'  
+  
+  if (@EgitimTipiId = 1 and @DersTercihiTipiId = 1) Set @toplamDersSayisi = @SimulatorDersSayisi + @AkanTrafikDersSayisi
+  if (@EgitimTipiId = 1 and @DersTercihiTipiId = 2) Set @toplamDersSayisi = @EgitimAlaniDersSayisi + @AkanTrafikDersSayisi
+  if (@EgitimTipiId = 1 and @DersTercihiTipiId = 3) Set @toplamDersSayisi = @AkanTrafikDersSayisi + 2
+
+  --if (@EgitimTipiId = 3 and @DersTercihiTipiId = 1) Set @dersSayisi = @SimulatorDersSayisi + @AkanTrafikDersSayisi
+  --if (@EgitimTipiId = 3 and @DersTercihiTipiId = 2) Set @dersSayisi = @EgitimAlaniDersSayisi + @AkanTrafikDersSayisi
+  --if (@EgitimTipiId = 3 and @DersTercihiTipiId = 3) Set @dersSayisi = @AkanTrafikDersSayisi + 2
+  if (@EgitimTipiId = 3) Set @toplamDersSayisi = @AkanTrafikDersSayisi
+
+  if (@EgitimTipiId = 2) Set @toplamDersSayisi = 2
+  if (@EgitimTipiId = 4) Set @toplamDersSayisi = 2
+
+  if (@SaatSayisiTipiId = 0) Set @SaatSayisiTipiId = 2
+
+  while (@toplamDersSayisi > 0)
+  begin
+	  Set @bugunDersSayisi = @SaatSayisiTipiId
+      if (@EgitimTipiId = 1 and @gunNo = 1 and @DersTercihiTipiId <> 3) Set @bugunDersSayisi = 2 
+	  if (@EgitimTipiId = 2) or (@EgitimTipiId = 4) Set @bugunDersSayisi = 2 
+	  if (@toplamDersSayisi < @bugunDersSayisi) Set @bugunDersSayisi = @toplamDersSayisi
+
+      print '@gunNo : ' + Convert(varchar(2) , @gunNo)
+	  print '@bugunDersSayisi : '  + Convert(varchar(2) , @bugunDersSayisi)
+
+      --Id  @EgitimYeriTipiId
+      -- 1  Direksiyon Eğitim Alanı
+      -- 2  Akan Trafik
+      -- 3  Simülatör  
+      Set @EgitimYeriTipiId_ = 2 
+	  if (@EgitimTipiId = 1 and @DersTercihiTipiId = 1 and @gunNo = 1) Set @EgitimYeriTipiId_ = 3
+      if (@EgitimTipiId = 1 and @DersTercihiTipiId = 2 and @gunNo = 1) Set @EgitimYeriTipiId_ = 1
+
+	  Set @EgitimAraciId_ = @EgitimAraciId
+	  if (@EgitimTipiId = 1 and @DersTercihiTipiId = 1 and @gunNo = 1) Set @EgitimAraciId_ = @SimulatorId
+
+      -- @IzinGunuTipiId
+      -- 1, 'Personel izin tablosu geçerli'
+      -- 2, 'Ctesi ve Pazar günü eğitim yok'
+      -- 3, 'Pazar günü eğitim yok'
+
+      -- @gunTipiId 
+      -- 1.  5 iş günü, 2 gün izin 
+      -- 2.  6 iş günü, 1 gün izin 
+	  if (@IzinGunuTipiId = 1) Set @gunTipiId_ = 1 -- şimdilik c ve p izinli uygula, personele göre olacak
+	  if (@IzinGunuTipiId = 2) Set @gunTipiId_ = 1
+	  if (@IzinGunuTipiId = 3) Set @gunTipiId_ = 2
+	  
+	  Set @DersTarihi_ = [dbo].fnc_IsGununuBul(@EgitimTarihi, @gunNo, @gunTipiId_, 107) --s.SaatTipiId)
+
+	  print '@DersTarihi_ = ' + convert(varchar(10),@DersTarihi_,103)
+
+	  Set @bugunDersSayisi_ = @bugunDersSayisi
+	  Set @saatSiraNo_ = 1
+	  Set @dersSaatiTipiId_ = 1
+	  
+	  while (@bugunDersSayisi_ > 0)
+      begin
+          print '    @saatSiraNo_ : '  + Convert(varchar(2) , @saatSiraNo_)
+          print '    @@dersSaatiTipiId_ : '  + Convert(varchar(2) , @dersSaatiTipiId_)
+
+          Execute [dbo].[prc_MtskUygulamaDersInsert]   
+           @FirmId
+          ,@TalepId
+          ,@AdayId
+          ,@EgitimYeriTipiId_
+          ,@EgitimAraciId_
+          ,@DersTarihi_
+          ,@dersSaatiTipiId_
+          ,@PersonelId
+          ,@EgitimTipiId
+          ,@saatSiraNo_
+
+          Set @saatSiraNo_ += 1
+          Set @dersSaatiTipiId_ += 1
+          Set @bugunDersSayisi_ -= 1
+      end -- while 2 
+
+	  Set @toplamDersSayisi = @toplamDersSayisi - @bugunDersSayisi 
+	  Set @gunNo += 1
+  end -- While 1
+
+END -- procedure 
+
+/*CreateProcedureEnd*/

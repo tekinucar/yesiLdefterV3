@@ -24,6 +24,10 @@ using DevExpress.XtraGauges.Core.Base;
 using DevExpress.XtraGauges.Win.Gauges.Digital;
 using DevExpress.XtraGauges.Core.Drawing;
 using System.Drawing;
+using DevExpress.Utils.DragDrop;
+using DevExpress.XtraGrid.Views.Grid;
+using DevExpress.XtraGrid.Views.BandedGrid;
+using System.ComponentModel;
 
 namespace Tkn_Layout
 {
@@ -162,7 +166,6 @@ namespace Tkn_Layout
                         lSimpleButton_Preparing(tForm, subView, ds_Layout, row, pos);
                     if (LayoutType == v.lyt_DigitalGauge)
                         lDigitalPanel_Preparing(tForm, subView, ds_Layout, row, pos);
-
 
                     if (LayoutType == v.lyt_documentViewerFast) 
                         lDocumentViewerFast_Preparing(tForm, subView, ds_Layout, row, pos);
@@ -3524,6 +3527,8 @@ namespace Tkn_Layout
             #endregion 
 
         }
+                
+
 
         private void lEditPanel_Preparing(Form tForm, Control subView, DataSet ds_Layout, DataRow row, int pos)
         {
