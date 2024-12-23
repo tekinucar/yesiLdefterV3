@@ -35,8 +35,8 @@
 
 	Mebbis Onayi Tipi
 
-   0,  Onaysız'
-   1,  Onaylandı'
+   0,  Onaysız
+   1,  Onaylandı
 
 	Yaş Onayi Tipi
 
@@ -51,9 +51,9 @@
 
 	Deneyim Şarti Tipi
 
-   1,    Şart yok'
+   1,    Şart yok
    2,    Uygu
-   3,    Uygun değil'
+   3,    Uygun değil
 
 
 	Özür Durumu Tipi
@@ -63,7 +63,7 @@
   120, İşitme, Dil veya Konuşma Engelli'
   140, Görme Engelli (Bir Gözü Görmüyor)'
   150, Görme Engelli (Büyüteç Yardımı İle Görebiliyor)
-  160, Süreğen hastalığı var.'
+  160, Süreğen hastalığı var.
 
 	Yabanci Dil Tipi
 
@@ -113,53 +113,53 @@
 
 	Teorik Ders Tipi
 
-   0,  N'Tanımsız
-   1,  N'Teorik ders planı yok
-   2,  N'Teorik ders planı eksik
-   3,  N'Teorik ders planı mevcut
-   6,  N'Muaf
-   11, N'Grup başlangıç tarihi belli değil
-   12, N'Teorik dersler planlanacak
-   13, N'Teorik dersler planlandı, Mebbise aktarılacak
-   14, N'Teorik dersler Mebbise aktarıldı
-   15, N'Teorik dersler başlamadı
-   16, N'Teorik dersler başladı
-   17, N'Teorik dersler tamamlandı
+   0,  Tanımsız
+   1,  Teorik ders planı yok
+   2,  Teorik ders planı eksik
+   3,  Teorik ders planı mevcut
+   6,  Muaf
+   11, Grup başlangıç tarihi belli değil
+   12, Teorik dersler planlanacak
+   13, Teorik dersler planlandı, Mebbise aktarılacak
+   14, Teorik dersler Mebbise aktarıldı
+   15, Teorik dersler başlamadı
+   16, Teorik dersler başladı
+   17, Teorik dersler tamamlandı
 
 	eSinav Durum Tipi
 
-   0,    N'Tanımsız
-   1,    N'e-Sınav için hazır değil
-   2,    N'e-Sınav başvurusu yapılacak
-   3,    N'e-Sınav başvurusu yapıldı
-   4,    N'e-Sınav sonucu okunacak
-   5,    N'e-Sınav sonucu okundu
-   6,    N'Muaf
+   0,    Tanımsız
+   1,    e-Sınav için hazır değil
+   2,    e-Sınav başvurusu yapılacak
+   3,    e-Sınav başvurusu yapıldı
+   4,    e-Sınav sonucu okunacak
+   5,    e-Sınav sonucu okundu
+   6,    Muaf
 
 
 	eSinav Sonuc Tipi
 
-   0,    N'Tanımsız
-   1,    N'Başarılı
-   2,    N'Başarısız
-   3,    N'Girmedi
-   4,    N'Raporlu
-   5,    N'İptal Edildi(Sınav Yasaklı)
+   0,    Tanımsız
+   1,    Başarılı
+   2,    Başarısız
+   3,    Girmedi
+   4,    Raporlu
+   5,    İptal Edildi(Sınav Yasaklı)
 
 
 
 	eSinav Sonrasi Tipi
 
-   0,    N'Tanımsız
-   1,    N'Tekrar sınava girecek
-   2,    N'Uygulama aşamasına geçti
-   3,    N'Tüm e-Sınav hakkı bitti
+   0,    Tanımsız
+   1,    Tekrar sınava girecek
+   2,    Uygulama aşamasına geçti
+   3,    Tüm e-Sınav hakkı bitti
 
 
 	eSinav Ücret Tipi
 
-   1,    N'Biz yatıracağız
-   2,    N'Adayın kendisi yatıracak
+   1,    Biz yatıracağız
+   2,    Adayın kendisi yatıracak
 
 
 
@@ -176,41 +176,41 @@
 
 	Uygulamali Ders Tipi
 
-   0,    N'Tanımsız
-   1,    N'Uygulamalı dersler planlanacak
-   2,    N'Uygulamalı dersler planlandı, Mebbise aktarılacak
-   3,    N'Uygulamalı dersler Mebbise aktarıldı, dersler başlamadı
-   4,    N'Uygulamalı dersleri başladı
-   5,    N'Uygulamalı dersleri tamamladı
+   0,    Tanımsız
+   1,    Uygulamalı dersler planlanacak
+   2,    Uygulamalı dersler planlandı, Mebbise aktarılacak
+   3,    Uygulamalı dersler Mebbise aktarıldı, dersler başlamadı
+   4,    Uygulamalı dersleri başladı
+   5,    Uygulamalı dersleri tamamladı
 
 
 	Basarisiz Ders Tipi
 
-   0,    N'Tanımsız
-   1,    N'2 saat başarısız aday eğitimi planlanacak
-   2,    N'2 saat başarısız aday eğitimi planlandı, Mebbise aktarılacak
-   3,    N'2 saat başarısız aday eğitimi Mebbise aktarıldı, başlamadı
-   4,    N'2 saat başarısız aday eğitimi alıyor
-   5,    N'2 saat başarısız aday eğitimi tamamlandı
-   6,    N'Eğitime gerek yok (Sınava girmedi)
+   0,    Tanımsız
+   1,    2 saat başarısız aday eğitimi planlanacak
+   2,    2 saat başarısız aday eğitimi planlandı, Mebbise aktarılacak
+   3,    2 saat başarısız aday eğitimi Mebbise aktarıldı, başlamadı
+   4,    2 saat başarısız aday eğitimi alıyor
+   5,    2 saat başarısız aday eğitimi tamamlandı
+   6,    Eğitime gerek yok (Sınava girmedi)
 
 
 	Arti4 Ders Tipi
 
-   0,    N'Tanımsız
-   1,    N'2. +4 hak dersleri planlanacak
-   2,    N'2. +4 hak dersleri planlandı, Mebbise aktarılacak
-   3,    N'2. +4 hak dersleri Mebbise aktarıldı, derler başlamadı
-   4,    N'2. +4 hak dersleri başladı
-   5,    N'2. +4 hak dersleri tamamlandı
+   0,    Tanımsız
+   1,    2. +4 hak dersleri planlanacak
+   2,    2. +4 hak dersleri planlandı, Mebbise aktarılacak
+   3,    2. +4 hak dersleri Mebbise aktarıldı, derler başlamadı
+   4,    2. +4 hak dersleri başladı
+   5,    2. +4 hak dersleri tamamlandı
 
 
 	Planlanacak Egitim Tipi
 
-   1, N'Normal Eğitim
-   2, N'Telafi Eğitim(Ön Sınav )
-   3, N'2.Direksiyon Eğitimi
-   4, N'Başarısız Aday Eğitimi
+   1, Normal Eğitim
+   2, Telafi Eğitim(Ön Sınav )
+   3, 2.Direksiyon Eğitimi
+   4, Başarısız Aday Eğitimi
 
 
 
@@ -220,15 +220,15 @@
 
 	uSinav Durum Tipi
 
-  ( 1,    N'Henüz sınav aşamasında değil
-  ( 2,    N'Uygulama sınavı için usta öğretici onayı isteniyor
-  ( 3,    N'Uygulama sınavı için hazır değil
-  ( 4,    N'Uygulama sınavı için MEBBİS de onaylanacak
-  ( 5,    N'Uygulama sınav randevusu planlanacak
-  ( 6,    N'Uygulama sınav randevusu MEBBİSe aktarılacak
-  ( 7,    N'Uygulama sınavına girecek
-  ( 8,    N'Uygulama sınav sonucu okunacak
-  ( 9,    N'Uygulama sınav sonucu okundu
+  ( 1,    Henüz sınav aşamasında değil
+  ( 2,    Uygulama sınavı için usta öğretici onayı isteniyor
+  ( 3,    Uygulama sınavı için hazır değil
+  ( 4,    Uygulama sınavı için MEBBİS de onaylanacak
+  ( 5,    Uygulama sınav randevusu planlanacak
+  ( 6,    Uygulama sınav randevusu MEBBİSe aktarılacak
+  ( 7,    Uygulama sınavına girecek
+  ( 8,    Uygulama sınav sonucu okunacak
+  ( 9,    Uygulama sınav sonucu okundu
 
 
 
@@ -247,6 +247,74 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+Yapılması gereken işler
+-----------------------------------------------------------------------------------
+Madde 1 :
+
+Tabim ehliyet adresine küçük bir mesaj ve link ile yeni sayfaya yönlendirme.
+
+Yeni sayfada bulunması gerekenler.
+
+Eski programın güncellemesine son veridiği,
+onu yerine yeni YesiLdefter Mtsk ile yola devam edileceğine dair bir yazı.
+
+Yeni programın özelliklerini temel özellikleri
+
+Talep formu oluşturma işlemi
+
+Yeni fiyat politikası hakkında yazı
+
+
+
+Madde 2 :
+
+Mtsk Platformu :
+
+2.1. Yapay zeka : x Asistan
+    1. Mtsk nın ne iş yaptığını anlatan bir yazı (Yeni personeller için) 
+	2. Programın ne yaptığını, nasıl çalıştığı hakkında bilgi
+	3. Programın kullanımı, eğitimi
+	4. Yönetmelikler
+
+2.2. Eğitim videoları nasıl hazırlarız.
+
+2.3. Acil duyuru sistemi
+
+
+
+
+Madde 3 : 
+Şenol :
+	Data aktarım işleri
+	Raporlar
+
+
+Madde 4 :
+	Linux server yönetimi, yedekleme, 
+
+
+Madde 5 : 
+	Tekin in devam etmesi gereken konuları
+	Uyg. ders ihlalleri
+	Ön muhasebenin açılması
+	Sınav ücretlerinin oluşturulması, takibi
+	Kursiyer tahsilatları
+	Sertifika aşaması sayfaları
+	Temel yetkilendirme
+	SMS
+	E-Fatura
+	Sanal-POS
 
 
 
