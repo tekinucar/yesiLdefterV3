@@ -1,0 +1,266 @@
+---------------------------------------------------------------------
+-- Kursiyer kayıtları
+---------------------------------------------------------------------
+
+	Talep nedir ?
+
+	Talep tipleri
+
+   1,    Sertifika
+   2,    2.+4 hak 
+   3,    Nakil 2.+4 hak
+   4,    100 Ceza'
+   5,    Özel direksiyon dersi
+
+
+	Kayıt tipleri
+
+   1,    Ön kayıt
+   2,    Kayıt aşamasında
+   3,    Kesin kayıt
+
+	Zamanlama ne demek?
+
+   0,  Belirsiz
+   1,  Geçmiş dönem devam eden
+   2,  Bu dönem
+   3,  Gelecek ay
+   4,  İleriki dönemler
+   5,  Sertifikasını hak etmiş
+
+	Grup Sube Tipi
+
+   1,  Grup veya şubesi belli olmayan adaylar
+
+
+	Mebbis Onayi Tipi
+
+   0,  Onaysız'
+   1,  Onaylandı'
+
+	Yaş Onayi Tipi
+
+   0,    Tanımsız
+   1,    Yaşı tutmuyor
+   2,    Yaşını doldurdu
+   3,    Muhafiyetle onaylı
+   4,    Doğum tarihi yok, belirsiz
+   5,    Yaşı tutuyor
+   6,    Yaş kontrolü yok
+
+
+	Deneyim Şarti Tipi
+
+   1,    Şart yok'
+   2,    Uygu
+   3,    Uygun değil'
+
+
+	Özür Durumu Tipi
+
+  100, Ortopedik Engelli (Ellerini ve/veya Kollarını Kullanamıyor)
+  110, Ortopedik Engelli (Yürüyemiyor)
+  120, İşitme, Dil veya Konuşma Engelli'
+  140, Görme Engelli (Bir Gözü Görmüyor)'
+  150, Görme Engelli (Büyüteç Yardımı İle Görebiliyor)
+  160, Süreğen hastalığı var.'
+
+	Yabanci Dil Tipi
+
+   1, Arapça
+   2, Çince
+   3, İngilizce
+   4, Almanca
+   5, Fransızca
+   6, Farsça
+   7, Rusca
+
+
+	Özel Durumu Tipi
+
+    1, Özür durumu
+    2, Okutman talebi
+    3, Tercüman talebi
+    4, Yabancı dil
+    5, Yabancı uyruklar
+    6, Etiketli kursiyerler
+    7, Kontejan
+
+
+	Belgeler Tipi
+
+   1,  Belgeleri eksik olanlar
+   2,  Belgeleri taranmayan
+   3,  Belgeleri Mebbise yüklenmeyen
+
+
+
+---------------------------------------------------------------------
+-- Dönem, grup ve şube işlemleri
+---------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+---------------------------------------------------------------------
+-- Teorik dersler ve e-sınavlar
+---------------------------------------------------------------------
+
+	Teorik Ders Tipi
+
+   0,  N'Tanımsız
+   1,  N'Teorik ders planı yok
+   2,  N'Teorik ders planı eksik
+   3,  N'Teorik ders planı mevcut
+   6,  N'Muaf
+   11, N'Grup başlangıç tarihi belli değil
+   12, N'Teorik dersler planlanacak
+   13, N'Teorik dersler planlandı, Mebbise aktarılacak
+   14, N'Teorik dersler Mebbise aktarıldı
+   15, N'Teorik dersler başlamadı
+   16, N'Teorik dersler başladı
+   17, N'Teorik dersler tamamlandı
+
+	eSinav Durum Tipi
+
+   0,    N'Tanımsız
+   1,    N'e-Sınav için hazır değil
+   2,    N'e-Sınav başvurusu yapılacak
+   3,    N'e-Sınav başvurusu yapıldı
+   4,    N'e-Sınav sonucu okunacak
+   5,    N'e-Sınav sonucu okundu
+   6,    N'Muaf
+
+
+	eSinav Sonuc Tipi
+
+   0,    N'Tanımsız
+   1,    N'Başarılı
+   2,    N'Başarısız
+   3,    N'Girmedi
+   4,    N'Raporlu
+   5,    N'İptal Edildi(Sınav Yasaklı)
+
+
+
+	eSinav Sonrasi Tipi
+
+   0,    N'Tanımsız
+   1,    N'Tekrar sınava girecek
+   2,    N'Uygulama aşamasına geçti
+   3,    N'Tüm e-Sınav hakkı bitti
+
+
+	eSinav Ücret Tipi
+
+   1,    N'Biz yatıracağız
+   2,    N'Adayın kendisi yatıracak
+
+
+
+
+
+
+
+
+
+
+---------------------------------------------------------------------
+-- Uygulamalı ders programları
+---------------------------------------------------------------------
+
+	Uygulamali Ders Tipi
+
+   0,    N'Tanımsız
+   1,    N'Uygulamalı dersler planlanacak
+   2,    N'Uygulamalı dersler planlandı, Mebbise aktarılacak
+   3,    N'Uygulamalı dersler Mebbise aktarıldı, dersler başlamadı
+   4,    N'Uygulamalı dersleri başladı
+   5,    N'Uygulamalı dersleri tamamladı
+
+
+	Basarisiz Ders Tipi
+
+   0,    N'Tanımsız
+   1,    N'2 saat başarısız aday eğitimi planlanacak
+   2,    N'2 saat başarısız aday eğitimi planlandı, Mebbise aktarılacak
+   3,    N'2 saat başarısız aday eğitimi Mebbise aktarıldı, başlamadı
+   4,    N'2 saat başarısız aday eğitimi alıyor
+   5,    N'2 saat başarısız aday eğitimi tamamlandı
+   6,    N'Eğitime gerek yok (Sınava girmedi)
+
+
+	Arti4 Ders Tipi
+
+   0,    N'Tanımsız
+   1,    N'2. +4 hak dersleri planlanacak
+   2,    N'2. +4 hak dersleri planlandı, Mebbise aktarılacak
+   3,    N'2. +4 hak dersleri Mebbise aktarıldı, derler başlamadı
+   4,    N'2. +4 hak dersleri başladı
+   5,    N'2. +4 hak dersleri tamamlandı
+
+
+	Planlanacak Egitim Tipi
+
+   1, N'Normal Eğitim
+   2, N'Telafi Eğitim(Ön Sınav )
+   3, N'2.Direksiyon Eğitimi
+   4, N'Başarısız Aday Eğitimi
+
+
+
+---------------------------------------------------------------------
+-- Uygulamalı sınav işlemleri
+---------------------------------------------------------------------
+
+	uSinav Durum Tipi
+
+  ( 1,    N'Henüz sınav aşamasında değil
+  ( 2,    N'Uygulama sınavı için usta öğretici onayı isteniyor
+  ( 3,    N'Uygulama sınavı için hazır değil
+  ( 4,    N'Uygulama sınavı için MEBBİS de onaylanacak
+  ( 5,    N'Uygulama sınav randevusu planlanacak
+  ( 6,    N'Uygulama sınav randevusu MEBBİSe aktarılacak
+  ( 7,    N'Uygulama sınavına girecek
+  ( 8,    N'Uygulama sınav sonucu okunacak
+  ( 9,    N'Uygulama sınav sonucu okundu
+
+
+
+
+
+
+
+
+
+
+
+
+---------------------------------------------------------------------
+-- Sertifika işlemleri
+---------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

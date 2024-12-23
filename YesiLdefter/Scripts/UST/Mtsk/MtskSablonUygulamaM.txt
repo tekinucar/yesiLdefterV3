@@ -29,7 +29,7 @@ begin transaction
    EgitimAraciId           Varchar(30)   null,
    -- 40 
    IsPlanTamamlandi        Bit           null,  /* Kullanıcı planın bittiğene onay verir */
-   
+   IsSaatleriDuzenle       Bit           null,  /* True ise kullanıcıya ders saatlerini düzenlesmesi için mesaj verir. */ 
    constraint		pk_MtskSablonUygulamaM primary key (Id)
  )
   
@@ -54,28 +54,51 @@ AS BEGIN
     OPEN myCursor
     FETCH NEXT FROM myCursor INTO @curId
 
+    declare @FirmId int
+    declare @TalepId int
 	declare @IsPlanTamamlandi bit
 
     WHILE @@FETCH_STATUS = 0
     BEGIN
         Select 
-            @IsPlanTamamlandi = IsPlanTamamlandi
+            @FirmId = FirmId
+           ,@TalepId = TalepId
+           ,@IsPlanTamamlandi = IsPlanTamamlandi
         From inserted
         Where Id = @curId      
 
         if (@IsPlanTamamlandi = 1)
         begin 
-            Update dbo.MtskSablonUygulamaM set 
-                AdayTamAdiSoyadi = ''
-               ,TalepId = 0
-			   ,IsPlanTamamlandi = 0
-            Where Id = @curId
-        end
+            -- 0 ile 6 saat arası henüz yerleşmemiş saat var mı kontrol et             
+            if ( Select count(Id) as Adet 
+                 From dbo.MtskUygulamaliDers
+                 Where TalepId = @TalepId
+                 and   DersSaatiTipiId < 0
+            ) = 0 
+            begin
+                Update dbo.MtskSablonUygulamaM set 
+                     AdayTamAdiSoyadi = ''
+                    ,TalepId = 0
+			        ,AdayId = 0 
+                    ,IsPlanTamamlandi = 0
+                    ,IsSaatleriDuzenle = 0
+                Where Id = @curId
+
+                Execute dbo.prc_MtskAdayTakip @FirmId
+
+            end else
+            begin
+			    -- Plan tamamlandı olayını iptal et
+                Update dbo.MtskSablonUygulamaM set 
+                    IsPlanTamamlandi = 0
+                   ,IsSaatleriDuzenle = 1
+                Where Id = @curId
+            end -- if = 0
+        end -- if (@IsPlanTamamlandi = 1)
 
       FETCH NEXT FROM myCursor INTO @curId
     END
-
-
+	
     CLOSE myCursor
     DEALLOCATE myCursor   
 

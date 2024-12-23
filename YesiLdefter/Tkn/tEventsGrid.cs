@@ -2151,6 +2151,7 @@ namespace Tkn_Events
         public void myGridView_ColumnChanged(object sender, EventArgs e)
         {
             //Application.OpenForms[0].Text = "ColumnChanged : " + sender.ToString() + "; " + e.ToString();
+
         }
 
         public void myGridView_GotFocus(object sender, EventArgs e)
@@ -2573,9 +2574,70 @@ namespace Tkn_Events
             //
             v.Kullaniciya_Mesaj_Var = "grid2";
         }
-        #endregion myGridView Events
 
-        #region myGridControl
+        public void mySchedulerControl_AppointmentDrag(object sender, AppointmentDragEventArgs e)
+        { 
+            // Sürüklenen randevuyu belirgin yap
+            e.EditedAppointment.LabelKey = 1;
+        }
+        public void mySchedulerControl_AppointmentDrop(object sender, AppointmentDragEventArgs e) 
+        { 
+            // Bırakılan randevuyu belirgin yap
+            e.EditedAppointment.LabelKey = 10;
+
+            if (((DevExpress.XtraScheduler.SchedulerControl)sender).AccessibleName == null) return;
+            if (((DevExpress.XtraScheduler.SchedulerControl)sender).AccessibleDescription == null) return;
+            if (((DevExpress.XtraScheduler.SchedulerControl)sender).AccessibleDefaultActionDescription == null) return;
+
+            string gun = e.EditedAppointment.Start.Date.ToString();
+            int saat = e.EditedAppointment.Start.Hour;
+            string saat_ = "";
+            if (saat < 10) saat_ = "0" + saat.ToString() + ":00:11";
+            else saat_ = saat.ToString() + ":00:11";
+
+            //05.12.2024 00:00:00 >>  05.12.2024 ??:00:11  şekline getiriliyor
+            string gun2 = gun.Replace("00:00:00", saat_);
+
+            Form tForm = ((DevExpress.XtraScheduler.SchedulerControl)sender).FindForm();
+            string tableIPCode = ((DevExpress.XtraScheduler.SchedulerControl)sender).AccessibleName;
+            string IdFieldName = ((DevExpress.XtraScheduler.SchedulerControl)sender).AccessibleDescription;
+            string startDateFieldName = ((DevExpress.XtraScheduler.SchedulerControl)sender).AccessibleDefaultActionDescription;
+            
+            DataSet ds = null;
+            DataNavigator dN = null;
+            t.Find_DataSet(tForm, ref ds, ref dN, tableIPCode);
+
+            object  pattern = e.SourceAppointment.RowHandle;
+            DataRow row = ((DataRowView)pattern).Row;
+
+            if (ds != null)
+            {
+                string IdValue = row[IdFieldName].ToString();
+                row[startDateFieldName] = gun2;
+                ds.Tables[0].AcceptChanges();
+
+                /// datnın positionu bul
+                int pos = 0;
+                foreach (DataRow item in ds.Tables[0].Rows)
+                {
+                    if (item[IdFieldName].ToString() == IdValue) break;
+                    pos += 1;
+                }
+
+                tSave sv = new tSave();
+                sv.tDataSave(tForm, ds, dN, pos);
+
+                t.TableRefresh(tForm, ds);
+            }
+
+            // Örneğin, 2 numaralı etiketle belirgin yapın
+            v.Kullaniciya_Mesaj_Var = "mySchedulerControl_AppointmentDrop";
+        }
+
+
+            #endregion myGridView Events
+
+            #region myGridControl
 
         public void myGridControl_DragLeave(object sender, EventArgs e)
         {
@@ -3452,6 +3514,15 @@ namespace Tkn_Events
             DevExpress.XtraVerticalGrid.VGridControl grid = sender as DevExpress.XtraVerticalGrid.VGridControl;
             grid.CloseEditor();
             grid.BorderStyle = DevExpress.XtraEditors.Controls.BorderStyles.NoBorder;
+        }
+
+        public void myVGridControl_CellValueChanging(object sender, DevExpress.XtraVerticalGrid.Events.CellValueChangedEventArgs e)
+        {
+            v.con_ColumnChangesCount = 0;
+        }
+        public void myVGridControl_CellValueChanged(object sender, DevExpress.XtraVerticalGrid.Events.CellValueChangedEventArgs e)
+        {
+            //v.con_ColumnChangesCount = 0;
         }
 
         #endregion myVGridControl Events

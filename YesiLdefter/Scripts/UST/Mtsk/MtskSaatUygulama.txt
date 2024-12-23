@@ -5,24 +5,29 @@ begin transaction
  create table MtskSaatUygulama
  (
 
-   Id                     Int IDENTITY(1,1) NOT NULL, 
-   FirmId                 Int       not null,
-   IsActive               Bit       not null, /* default : 1 = active, 0 = not active */  
-   GecerlilikTarihiId     Int       not null,
+   Id                      Int IDENTITY(1,1) NOT NULL, 
+   FirmId                  Int       not null,
+   IsActive                Bit       not null, /* default : 1 = active, 0 = not active */  
+   GecerlilikTarihiId      Int       not null,
 
-   MevcutSertifikaTipiId  Int           null,
-   IstenenSertifikaTipiId Int           null,
+   MevcutSertifikaTipiId   Int           null,
+   IstenenSertifikaTipiId  Int           null,
 
-   /* Saatler */  
-   SimulatorSaati         smallInt     null,
-   UygulamaSaati          smallInt     null,
-   UygulamaSaati2016      smallInt     null,
+   /* 20 : Saatler */  
+   SimulatorSaati          smallInt     null,
+   EgitimAlaniSaati        smallInt     null,
+   UygulamaSaati           smallInt     null,
+   UygulamaToplamSaat      smallInt     null,
+   UygulamaSaati2016Oncesi smallInt     null,
+   Arti4HakUygulamaSaati   smallInt     null,
+   BasarisizEgitimSaati    smallInt     null,
+   TelafiEgitimSaati       smallInt     null,
 
-   /* Yaş sınırı  */
-   YasSiniri              smallInt     null,
-   IsEnAz                 bit          null,
-   DeneyimSertifikaTipiId Int          null,       
-   DeneyimEnAzYilFarki    smallInt     null,
+   /* 30 : Yaş sınırı  */
+   YasSiniri               smallInt     null,
+   IsEnAz                  bit          null,
+   DeneyimSertifikaTipiId  Int          null,       
+   DeneyimEnAzYilFarki     smallInt     null,
 
   constraint pk_MtskSaatUygulama primary key (Id)
  )
@@ -36,3 +41,47 @@ commit transaction
 /*CreateTableEnd*/
 
 
+/*
+
+
+INSERT INTO [dbo].[MtskSaatUygulama]
+           ([FirmId]
+           ,[IsActive]
+           ,[GecerlilikTarihiId]
+           ,[MevcutSertifikaTipiId]
+           ,[IstenenSertifikaTipiId]
+           ,[SimulatorSaati]
+           ,[EgitimAlaniSaati]
+           ,[UygulamaSaati]
+           ,[UygulamaToplamSaat]
+           ,[UygulamaSaati2016Oncesi]
+           ,[Arti4HakUygulamaSaati]
+           ,[BasarisizEgitimSaati]
+           ,[TelafiEgitimSaati]
+           ,[YasSiniri]
+           ,[IsEnAz]
+           ,[DeneyimSertifikaTipiId]
+           ,[DeneyimEnAzYilFarki])
+		   
+SELECT [FirmId]
+      ,[IsActive]
+      ,[GecerlilikTarihiId]
+      ,[MevcutSertifikaTipiId]
+      ,[IstenenSertifikaTipiId]
+      ,2 --[SimulatorSaati]
+      ,2
+      ,14 -- [UygulamaSaati]
+      ,16 
+      ,[UygulamaSaati2016]
+      ,14 --[Arti4HakUygulamaSaati]
+      ,2  --[BasarisizEgitimSaati]
+      ,2  --[TelafiEgitimSaati]
+      ,[YasSiniri]
+      ,[IsEnAz]
+      ,[DeneyimSertifikaTipiId]
+      ,[DeneyimEnAzYilFarki]
+  FROM [dbo].[MtskSaatUygulama2]
+
+
+
+*/

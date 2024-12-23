@@ -738,6 +738,7 @@
     <Content Include="Scripts\UST\Mtsk\MtskAdayTalep.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskAdayUcret.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskDerslik.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskDokumantasyon.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskDonemi.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskEgitimAraci.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskGrupSubesi.txt" />

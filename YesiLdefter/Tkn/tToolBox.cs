@@ -2609,9 +2609,17 @@ namespace Tkn_ToolBox
 
                             //((DevExpress.XtraScheduler.SchedulerControl)cntrl).Views.FullWeekView.SetVisibleIntervals(new TimeInterval(startDate, endDate));
 
-                            ((DevExpress.XtraScheduler.SchedulerControl)cntrl).EndInit();
-                            ((DevExpress.XtraScheduler.SchedulerControl)cntrl).DataStorage.RefreshData();
-                            ((DevExpress.XtraScheduler.SchedulerControl)cntrl).RefreshData();
+                            try
+                            {
+                                ((DevExpress.XtraScheduler.SchedulerControl)cntrl).EndInit();
+                                ((DevExpress.XtraScheduler.SchedulerControl)cntrl).DataStorage.RefreshData();
+                                ((DevExpress.XtraScheduler.SchedulerControl)cntrl).RefreshData();
+                            }
+                            catch (Exception)
+                            {
+                                //throw;
+                            }
+                            
                             Object dataSetx = new Object();
                             dataSetx = ((DevExpress.XtraScheduler.SchedulerControl)cntrl).DataStorage.Appointments.DataSource;
 
@@ -10713,11 +10721,18 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             DataNavigator dN = null;
             Find_DataSet(tForm, ref dS, ref dN, TableIPCode);
 
-            if ((IsNotNull(dS)) &&
-                (dN.Position > -1) &&
+            if (IsNotNull(dS) &&
+                dN.Position > -1 &&
                 IsNotNull(FieldName))
             {
                 tValue = dS.Tables[0].Rows[dN.Position][FieldName].ToString();
+            }
+            if (IsNotNull(dS) &&
+                dN.Position == -1 &&
+                IsNotNull(FieldName))
+            {
+                if (dS.Tables[0].Rows.Count == 1)
+                    tValue = dS.Tables[0].Rows[0][FieldName].ToString();
             }
 
             return tValue;

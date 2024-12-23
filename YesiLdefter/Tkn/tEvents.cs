@@ -259,9 +259,8 @@ namespace Tkn_Events
 
             //ds.Tables[Table_Name].Rows[Position].CancelEdit();
             //((DataTable)sender).DataSet.Tables[0].Rows[]
-            
-            //e.Row.BeginEdit();
 
+            //e.Row.BeginEdit();
             tSetDataStateChanges(sender, null, "");
         }
 
@@ -394,7 +393,9 @@ namespace Tkn_Events
                 }
 
                 /// Demek ki MasterDetailColmns fields mevcut
-                if (((DataTable)sender).DataSet.Namespace.IndexOf(v.masterDetailColumns) == -1)
+                if (t.IsNotNull(columnName) &&
+                    (v.con_ColumnChangesCount == 0) &&
+                    ((DataTable)sender).DataSet.Namespace.IndexOf(v.masterDetailColumns) == -1)
                 {
                     string myProp = ((DataTable)sender).DataSet.Namespace;
                     string columnNames = t.MyProperties_Get(myProp, "MasterDetailColumns:");
@@ -412,6 +413,11 @@ namespace Tkn_Events
                         t.Find_DataSet(tForm, ref ds, ref dN, tableIPCode);
 
                         Data_Refresh(tForm, ds, dN);
+
+                        /// DatoCopy ve Save işlemleri sırasında column change yüzünden aynı row için birden fazla aynı datayı okuyup duruyor
+                        /// bunu önlemek için 1 defa çalışması sağlanıyor
+                        /// 
+                        v.con_ColumnChangesCount += 1; 
                     }
                 }
             }

@@ -289,15 +289,15 @@ namespace Tkn_DevView
 
             if (ViewType == v.obj_vw_CalenderAndScheduler)
             {
-                DevExpress.XtraScheduler.SchedulerControl tSchedulerView =
+                DevExpress.XtraScheduler.SchedulerControl tSchedulerControl =
                     new DevExpress.XtraScheduler.SchedulerControl();
 
-                tSchedulerView.Name = "tSchedulerView_" + RefID.ToString();
-                tSchedulerView.AccessibleName = TableIPCode + MultiPageID;
-                tSchedulerView.Dock = DockStyle.Fill;
-                tSchedulerView.BorderStyle = DevExpress.XtraEditors.Controls.BorderStyles.NoBorder;
-                tSchedulerView.Location = new System.Drawing.Point(0, 0);
-                return tSchedulerView; // <<<< dönen cntrl
+                tSchedulerControl.Name = "tSchedulerView_" + RefID.ToString();
+                tSchedulerControl.AccessibleName = TableIPCode + MultiPageID;
+                tSchedulerControl.Dock = DockStyle.Fill;
+                tSchedulerControl.BorderStyle = DevExpress.XtraEditors.Controls.BorderStyles.NoBorder;
+                tSchedulerControl.Location = new System.Drawing.Point(0, 0);
+                return tSchedulerControl; // <<<< dönen cntrl
             }
 
             #endregion CalenderAndScheduler
@@ -1768,6 +1768,9 @@ MS_FIELDS                                          T03_MSFIELDS                 
             tVGridControl.Enter += new System.EventHandler(evg.myVGridControl_Enter);
             tVGridControl.Leave += new System.EventHandler(evg.myVGridControl_Leave);
 
+            tVGridControl.CellValueChanging += evg.myVGridControl_CellValueChanging;
+            tVGridControl.CellValueChanged += evg.myVGridControl_CellValueChanged;
+
             //tVGridControl.GotFocus += new System.EventHandler(evg.myGridView_GotFocus);
             //tVGridControl.KeyDown += new System.Windows.Forms.KeyEventHandler(evg.myGridView_KeyDown);
             //tVGridControl.KeyUp += new System.Windows.Forms.KeyEventHandler(evg.myGridView_KeyUp);
@@ -1818,6 +1821,7 @@ MS_FIELDS                                          T03_MSFIELDS                 
 
         }
 
+        
         #endregion tVGridControl Create Base
 
         #region tTreeList Create Base
@@ -3565,7 +3569,8 @@ MS_FIELDS                                          T03_MSFIELDS                 
                 tSchedulerControl.Start = Convert.ToDateTime(dsData.Tables[0].Rows[0][startDateFieldName].ToString());
 
             tSchedulerControl.DataStorage = storage;
-
+            tSchedulerControl.AccessibleDescription = storage.Appointments.Mappings.AppointmentId.ToString();
+            tSchedulerControl.AccessibleDefaultActionDescription = storage.Appointments.Mappings.Start.ToString();
             //SchedulerViewType.Agenda
             //SchedulerViewType.Day
             //SchedulerViewType.FullWeek
@@ -3578,11 +3583,19 @@ MS_FIELDS                                          T03_MSFIELDS                 
             //tSchedulerControl.AgendaView
             //tSchedulerControl.DayView.VisibleTime = true;
             //tSchedulerControl.FullWeekView.VisibleTime =    
-            //tSchedulerControl.GanttView.ti
+ 
             tSchedulerControl.MonthView.DateTimeScrollbarVisible = true;
             tSchedulerControl.TimelineView.DateTimeScrollbarVisible = true;
             tSchedulerControl.WeekView.DateTimeScrollbarVisible = true;
             
+            // Saat aralığı            
+            tSchedulerControl.DayView.TimeScale = TimeSpan.FromHours(1);
+            // mesai başlangıç saatlerini ayarlar
+            tSchedulerControl.DayView.WorkTime.Start = TimeSpan.FromHours(7); // Başlangıç saati: 09:00
+            tSchedulerControl.DayView.WorkTime.End = TimeSpan.FromHours(23); // Bitiş saati: 18:00
+            // Sadece çalışma saatlerinin görünmesini sağlayın
+            tSchedulerControl.DayView.ShowWorkTimeOnly = true;
+
             tSchedulerControl.OptionsCustomization.AllowDisplayAppointmentForm = AllowDisplayAppointmentForm.Never;
             tSchedulerControl.OptionsCustomization.AllowAppointmentCreate = UsedAppointmentType.None;
 
@@ -3591,7 +3604,10 @@ MS_FIELDS                                          T03_MSFIELDS                 
             tSchedulerControl.MonthView.AppointmentDisplayOptions.StartTimeVisibility = AppointmentTimeVisibility.Never;
             tSchedulerControl.MonthView.AppointmentDisplayOptions.EndTimeVisibility = AppointmentTimeVisibility.Never;
             tSchedulerControl.MonthView.AppointmentDisplayOptions.ShowReminder = false;
-            
+
+            tSchedulerControl.AppointmentDrag += evg.mySchedulerControl_AppointmentDrag;
+            tSchedulerControl.AppointmentDrop += evg.mySchedulerControl_AppointmentDrop;
+
             //tSchedulerControl.WorkWeekView.VisibleTime = true;
 
             timeRulerAdd(tSchedulerControl);

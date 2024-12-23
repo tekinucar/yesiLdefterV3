@@ -67,7 +67,7 @@ begin transaction
    UygulamaBaslamaTarihi  Date         null,
    UygulamaBitisTarihi    Date         null,
    SimulatorDersToplami   SmallInt     null,
-   EgitimPistiDersToplami SmallInt     null,
+   EgitimAlaniDersToplami SmallInt     null,
    AkanTrafikDersToplami  SmallInt     null, /* prc_MtskUygulamaDersPlaniSaatleriGuncelle  içinde hesplanıyor */
    UygulamaliDersToplami  SmallInt     null, /* prc_MtskUygulamaDersPlaniSaatleriGuncelle  içinde hesplanıyor */
    UygulamaliDersTipiId   SmallInt     null,
@@ -86,7 +86,7 @@ begin transaction
    IsArti4DersPlanli           Bit          null,
    Arti4BaslamaTarihi          Date         null,
    Arti4BitisTarihi            Date         null,
-   Arti4EgitimPistiDersToplami SmallInt     null,
+   Arti4EgitimAlaniDersToplami SmallInt     null,
    Arti4AkanTrafikDersToplami  SmallInt     null, /* prc_MtskUygulamaDersPlaniSaatleriGuncelle  içinde hesplanıyor */
    Arti4DersToplami            SmallInt     null, /* prc_MtskUygulamaDersPlaniSaatleriGuncelle  içinde hesplanıyor */
    Arti4DersTipiId             SmallInt     null,

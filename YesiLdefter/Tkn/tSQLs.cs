@@ -3301,7 +3301,7 @@ INSERT INTO [dbo].[SYS_UPDATES]
                             // MasterTable/DetailTable ın üzerine kendisine bağlı olan SubDetail_TableIPCode nin bilgiler işleniyor
                             s = "";
                             t.MyProperties_Set(ref s, "SubDetail_TableIPCode", TableIPCode);
-                            if (tDataNavigator.Text.IndexOf(TableIPCode) == -1)
+                            if (tDataNavigator.Text.IndexOf(TableIPCode+";") == -1) /// Benzer isimlerde çalışmadığı için ; kontrolu eklendi
                             {
                                 tDataNavigator.IsAccessible = true;
                                 tDataNavigator.Text = tDataNavigator.Text + s;

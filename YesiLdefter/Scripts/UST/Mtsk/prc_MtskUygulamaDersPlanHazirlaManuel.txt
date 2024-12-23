@@ -51,6 +51,8 @@ AS BEGIN
   From dbo.MtskSablonUygulamaM 
   Where Id = @Id
 
+  if (@TalepId <= 0) return;
+
   -- @EgitimTipiId
   -- 1, 'Normal Eğitim'
   -- 2, 'Telafi Eğitim(Ön Sınav )'

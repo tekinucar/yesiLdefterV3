@@ -205,6 +205,8 @@ namespace Tkn_Variable
         public static string con_Save_dsState { get; set; }
         public static int con_EditSaveCount { get; set; }
         public static bool con_EditSaveControl { get; set; }
+        public static bool con_ColumnChangesStop { get; set; }
+        public static Int16 con_ColumnChangesCount { get; set; }
 
         public static byte[] con_Images = null;
         public static string con_Images_FieldName { get; set; }

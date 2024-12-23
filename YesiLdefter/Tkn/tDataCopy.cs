@@ -732,6 +732,9 @@ namespace Tkn_DataCopy
             // işlem yapılacak data copy bilgileri
             // 
             #region // DcLine döngüsü
+
+            v.con_ColumnChangesCount = 0;
+
             for (int i = 0; i < i1; i++)
             {
                 #region read DCLine
@@ -951,9 +954,8 @@ namespace Tkn_DataCopy
                     {
                         //if (t.IsNotNull(Read_Value))
                         //{
-                            Read_Value = t.tCheckedValue(ds_Target, target_fieldname, Read_Value);
-
-                            ds_Target.Tables[0].Rows[pos][target_fieldname] = Read_Value;
+                        Read_Value = t.tCheckedValue(ds_Target, target_fieldname, Read_Value);
+                        ds_Target.Tables[0].Rows[pos][target_fieldname] = Read_Value;
                         //}
                     }
                     catch (Exception e)
@@ -966,6 +968,9 @@ namespace Tkn_DataCopy
                 }
 
             }
+
+            v.con_ColumnChangesCount = 0;
+
             #endregion // DCLine döngüsü
 
 

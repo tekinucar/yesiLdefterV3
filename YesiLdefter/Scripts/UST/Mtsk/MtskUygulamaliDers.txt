@@ -21,7 +21,7 @@ begin transaction
    EgitimAraciId        Varchar(30)   null,
    DersTarihi           Date          null,
    DersSaatiTipiId      SmallInt      null,
-   --DersDonemTipiId      Int           null,
+   DersDonemTipiId      Int           null,
 
    PersonelAdiSoyadi    nVarchar(100) null, /* mebbisden almak için kullanılıyor */
    PersonelId           Varchar(20)   null,
@@ -59,140 +59,221 @@ AS BEGIN
     declare @yDonemTipiId int = 0
     declare @yGrupTipiId smallInt = 0
     declare @ySubeTipiId smallInt = 0
-    declare @yAdayId int = 0
+    declare @yTalepId int = 0
+	declare @yAdayId int = 0
     declare @yAdayTcNo varchar(11) = null
     declare @yAdayAdiSoyadi nVarchar(100) = null
     declare @yDersTarihi date = null
     declare @yDersSaatiTipiId smallInt = -1
+	declare @eDersSaatiTipiId smallInt = -1
     declare @DersDonemTipiId int = 0
     declare @yPersonelAdiSoyadi nVarchar(100) = null
     declare @yPersonelId varchar(20) = null
+	declare @yBaslamaSaati datetime
+	declare @yBitisSaati datetime
     declare @ySaat varchar(20) = null
-
+    declare @yEgitimAraciId varchar(30) = null
+    declare @ySaatSiraNo smallInt
+	declare @posManuel int = 0
+	declare @posOtomatik int = 0
     declare @TcNoCalismaIzniNo varchar(20) = null
-
-    /* düzeltme gerekiyor
-
+    declare @yBaslamaSaatiChechked varchar(20) 
+	
     WHILE @@FETCH_STATUS = 0
     BEGIN
-    	
-      Select
-       @yFirmId = isnull(ins.FirmId,0)
-      ,@yDonemTipiId = ins.DonemTipiId
-      ,@yGrupTipiId = isnull(ins.GrupTipiId,0)
-      ,@ySubeTipiId = isnull(ins.SubeTipiId,0)
-      ,@yAdayId = isnull(ins.AdayId,0)
-      ,@yAdayTcNo = isnull(ins.AdayTcNo,'')
-      ,@yAdayAdiSoyadi = isnull(ins.AdayAdiSoyadi,'')
-      --,EgitimYeriTipiId
-      --,EgitimAraciId
-      ,@yDersTarihi = ins.DersTarihi
-      ,@yDersSaatiTipiId = ins.DersSaatiTipiId
-      ,@yPersonelAdiSoyadi = isnull(ins.PersonelAdiSoyadi, '')
-      ,@yPersonelId = isnull(ins.PersonelId,'')
-      --,EgitimTipiId
-      --,@yBaslamaSaati = ins.BaslamaSaati
-      --,@yBitisSaati = ins.BitisSaati
-      --,UDersIsUploaded
-      ,@ySaat = isnull(saat.DersSaatiTipi,'00:00 - 00:00')
+        Select @eDersSaatiTipiId = dlt.DersSaatiTipiId
+        From  deleted as dlt
+        Where dlt.Id = @curId
+		
+        Select
+            @yFirmId = isnull(ins.FirmId,0)
+           ,@yDonemTipiId = ins.DonemTipiId
+           ,@yGrupTipiId = isnull(ins.GrupTipiId,0)
+           ,@ySubeTipiId = isnull(ins.SubeTipiId,0)
+           ,@yTalepId = isnull(ins.TalepId,0)
+           ,@yAdayId = isnull(ins.AdayId,0)
+           ,@yAdayTcNo = isnull(ins.AdayTcNo,'')
+           ,@yAdayAdiSoyadi = isnull(ins.AdayAdiSoyadi,'')
+           --,EgitimYeriTipiId
+           ,@yEgitimAraciId =isnull(ins.EgitimAraciId,'')
+           ,@yDersTarihi = ins.DersTarihi
+           ,@yDersSaatiTipiId = ins.DersSaatiTipiId
+           ,@yPersonelAdiSoyadi = isnull(ins.PersonelAdiSoyadi, '')
+           ,@yPersonelId = isnull(ins.PersonelId,'')
+           --,EgitimTipiId
+           ,@yBaslamaSaati = ins.BaslamaSaati
+           ,@yBitisSaati = ins.BitisSaati
+           ,@yBaslamaSaatiChechked = Convert(varchar(20), ins.BaslamaSaati, 108) -- saati al
+           --,UDersIsUploaded
+           ,@ySaat = isnull(saat.DersSaatiTipi,'00:00 - 00:00')
+           ,@ySaatSiraNo = isnull(ins.SaatSiraNo,0)
+        From inserted ins
+            left outer join Lkp.MtskUygulamaliDersDersSaatiTipi saat on (ins.DersSaatiTipiId = saat.Id)
+        Where ins.Id = @curId
 
-      From inserted ins
-         left outer join Lkp.MtskUygulamaliDersDersSaatiTipi saat on (ins.DersSaatiTipiId = saat.Id)
-      Where ins.Id = @curId
 
-      if (@yAdayId = 0) and (@yAdayTcNo <> '')
-      begin
-        Select @yAdayId = Id 
-        From dbo.MtskAday
-        Where TcNo = @yAdayTcNo
-        and DonemTipiId = @yDonemTipiId
-	      and FirmId = @yFirmId
+        if (@yTalepId = 0 and @yAdayId = 0 and @yAdayTcNo <> '')
+        begin
+            -- Talepleri kontrol et
+            Select top 1 @yAdayId = AdayId, @yTalepId = Id 
+            From MtskAdayTalep
+            Where TcNo = @yAdayTcNo
+            and   isnull(DonemTipiId,0) <= @yDonemTipiId
+            order by DonemTipiId desc, Id desc
 		
 		    update dbo.MtskUygulamaliDers set 
-        AdayId = @yAdayId
-        Where Id = @curId 
-      end
-
-      if (@yAdayId = 0) and (@yAdayTcNo = '') and (@yAdayAdiSoyadi <> '')
-      begin
-        Select @yAdayId = Id, @yAdayTcNo = TcNo
-        From dbo.MtskAday
-        Where TamAdiSoyadi = @yAdayAdiSoyadi
-        and DonemTipiId = @yDonemTipiId
-        --and GrupTipiId = @yGrupTipiId
-        --and SubeTipiId = @ySubeTipiId
-        and FirmId = @yFirmId
-	
-        update dbo.MtskUygulamaliDers set 
-            AdayId = @yAdayId
-          , AdayTcNo = @yAdayTcNo
-        Where Id = @curId 
-      end
-	  
-      if (@yAdayTcNo = '')
-      begin
-        Select @yAdayTcNo = TcNo 
-        From dbo.MtskAday
-        Where Id = @yAdayId
-        and DonemTipiId = @yDonemTipiId
-
-        update dbo.MtskUygulamaliDers set 
-        AdayTcNo = @yAdayTcNo
-        Where Id = @curId 
-      end
-
-      if ((@yGrupTipiId = 0) or
-          (@ySubeTipiId = 0))
-      begin
-        Select @yGrupTipiId = GrupTipiId
-             , @ySubeTipiId = SubeTipiId
-        From dbo.MtskAday
-        Where Id = @yAdayId
-        and DonemTipiId = @yDonemTipiId
-
-        update dbo.MtskUygulamaliDers set 
-          GrupTipiId = @yGrupTipiId
-        , SubeTipiId = @ySubeTipiId
-        Where Id = @curId 
-	  end
-
-	  if (@yPersonelId = '') and (@yPersonelAdiSoyadi <> '')
-	  begin
-	    -- personelId kontrolu
-        Select @TcNoCalismaIzniNo = isnull(TcNoCalismaIzniNo,'')
-        From dbo.MtskPersoneli
-        Where TamAdiSoyadi like @yPersonelAdiSoyadi+'%'
-      
-	    -- Mebbisten okuma yapınca alınan ismi alınıyor
-        -- alınan bu ismi TcNoIzinNo ya çeviriyor
-        if (@TcNoCalismaIzniNo <> '')
-        begin
-          update dbo.MtskUygulamaliDers set 
-          PersonelId = @TcNoCalismaIzniNo
-          Where Id = @curId
+                TalepId     = @yTalepId
+              , AdayId      = @yAdayId 
+            Where Id = @curId
         end
-	  end
 
-	  -- Sınavın hangi dönemde yapıldığı tespit ediliyor
-	  if (MONTH(@yDersTarihi) < 10)
-           set @DersDonemTipiId = convert(int, convert(varchar(5), YEAR(@yDersTarihi)) + '0' + convert(varchar(3), MONTH(@yDersTarihi)))
-      else set @DersDonemTipiId = convert(int, convert(varchar(5), YEAR(@yDersTarihi)) + convert(varchar(3), MONTH(@yDersTarihi)))
+        if (@yAdayTcNo = '')
+        begin
+            Select @yAdayTcNo = TcNo 
+            From dbo.MtskAdayTalep
+            Where Id = @yTalepId
 
+            update dbo.MtskUygulamaliDers set 
+                AdayTcNo = @yAdayTcNo
+            Where Id = @curId 
+        end
+		
+        if ((@yGrupTipiId = 0) or
+            (@ySubeTipiId = 0))
+        begin
+            Select @yDonemTipiId = DonemTipiId 
+                 , @yGrupTipiId  = GrupTipiId
+                 , @ySubeTipiId  = SubeTipiId
+            From dbo.MtskAdayTalep
+            Where Id = @yTalepId
 
-	  -- BaslangicSaat ve BitisSaat 
-	  update dbo.MtskUygulamaliDers set 
-        BaslamaSaati = CONVERT(smalldatetime, CONVERT(varchar(10), @yDersTarihi) + ' ' + SUBSTRING(@ySaat,1,5))
-      , BitisSaati   = CONVERT(smalldatetime, CONVERT(varchar(10), @yDersTarihi) + ' ' + SUBSTRING(@ySaat,9,5))
-	  , DersDonemTipiId = @DersDonemTipiId
-      Where Id = @curId
+            update dbo.MtskUygulamaliDers set 
+                 DonemTipiId = @yDonemTipiId
+               , GrupTipiId = @yGrupTipiId
+               , SubeTipiId = @ySubeTipiId
+            Where Id = @curId 
+	    end 
 
-      FETCH NEXT FROM myCursor INTO @curId
+        if (@yPersonelId = '') and (@yPersonelAdiSoyadi <> '')
+        begin
+            -- personelId kontrolu
+            Select @TcNoCalismaIzniNo = isnull(TcNoCalismaIzniNo,'')
+            From dbo.MtskPersoneli
+            Where TamAdiSoyadi like @yPersonelAdiSoyadi+'%'
+      
+            -- Mebbisten okuma yapınca alınan ismi alınıyor
+            -- alınan bu ismi TcNoIzinNo ya çeviriyor
+            if (@TcNoCalismaIzniNo <> '')
+            begin
+                update dbo.MtskUygulamaliDers set 
+                    PersonelId = @TcNoCalismaIzniNo
+                Where Id = @curId
+            end
+	    end
+		
+		-- tabloda grünen : 2024-12-05 08:00:11.000
+		-- @yBaslamaSaatiChechked atanan : 08:00:11
+        if (CHARINDEX(':00:11', @yBaslamaSaatiChechked) > 0)
+        begin
+		    Set @yDersTarihi = Convert(date, @yBaslamaSaati, 103)
+			Set @ySaat = SUBSTRING(@yBaslamaSaatiChechked,1,5);
+
+			Select @yDersSaatiTipiId = Id, @ySaat = DersSaatiTipi  
+            From Lkp.MtskUygulamaliDersDersSaatiTipi
+            Where DersSaatiTipi like @ySaat+'%'
+
+	        -- Dersin hangi dönemde yapıldığı tespit ediliyor
+	        if (MONTH(@yDersTarihi) < 10)
+                 set @DersDonemTipiId = convert(int, convert(varchar(5), YEAR(@yDersTarihi)) + '0' + convert(varchar(3), MONTH(@yDersTarihi)))
+            else set @DersDonemTipiId = convert(int, convert(varchar(5), YEAR(@yDersTarihi)) + convert(varchar(3), MONTH(@yDersTarihi)))
+			
+			update dbo.MtskUygulamaliDers set 
+			    DersTarihi = @yDersTarihi
+              , DersSaatiTipiId = @yDersSaatiTipiId
+              , BaslamaSaati = CONVERT(smalldatetime, CONVERT(varchar(10), @yDersTarihi) + ' ' + SUBSTRING(@ySaat,1,5))
+              , BitisSaati   = CONVERT(smalldatetime, CONVERT(varchar(10), @yDersTarihi) + ' ' + SUBSTRING(@ySaat,9,5))
+			  , DersDonemTipiId = @DersDonemTipiId
+            Where Id = @curId
+
+        end else 
+        begin        
+	        -- Dersin hangi dönemde yapıldığı tespit ediliyor
+	        if (MONTH(@yDersTarihi) < 10)
+                 set @DersDonemTipiId = convert(int, convert(varchar(5), YEAR(@yDersTarihi)) + '0' + convert(varchar(3), MONTH(@yDersTarihi)))
+            else set @DersDonemTipiId = convert(int, convert(varchar(5), YEAR(@yDersTarihi)) + convert(varchar(3), MONTH(@yDersTarihi)))
+
+            -- BaslangicSaat ve BitisSaat 
+	        update dbo.MtskUygulamaliDers set 
+                BaslamaSaati = CONVERT(smalldatetime, CONVERT(varchar(10), @yDersTarihi) + ' ' + SUBSTRING(@ySaat,1,5))
+              , BitisSaati   = CONVERT(smalldatetime, CONVERT(varchar(10), @yDersTarihi) + ' ' + SUBSTRING(@ySaat,9,5))
+			  , DersDonemTipiId = @DersDonemTipiId
+            Where Id = @curId
+		end
+		
+        set @posManuel = CHARINDEX('(Manuel)', @yEgitimAraciId)
+        set @posOtomatik = CHARINDEX('(Otomatik)', @yEgitimAraciId)
+
+		if (@posManuel > 0 or @posOtomatik > 0)
+        begin
+		   set @yEgitimAraciId = REPLACE(@yEgitimAraciId, '(Manuel)', '')
+		   set @yEgitimAraciId = REPLACE(@yEgitimAraciId, '(Otomatik)', '')
+		   set @yEgitimAraciId = RTRIM(LTRIM(@yEgitimAraciId))
+        end
+
+        declare @AracId Int = 0
+        Select @AracId = Id
+        From dbo.MtskEgitimAraci
+        Where PlakaNumarasi = @yEgitimAraciId
+		   
+		-- Araç var ise temizleniş halini kaydet 
+		if (@AracId > 0)
+        begin
+		    Update dbo.MtskUygulamaliDers set
+                EgitimAraciId = @yEgitimAraciId 
+            Where Id = @curId
+        end
+        -- Araç yok ise (adayın başka bir kursdan aldığı ders programı)
+        if (@AracId = 0 and @yTalepId = 0 and @yAdayId = 0) 
+        begin              
+            Delete From dbo.MtskUygulamaliDers Where Id = @curId
+        end
+		        
+		-- kursiyerin 1. ders saati değiştirilirse on bağlı ardışık saatlerde güncelleniyor, yani sıralınıyor
+		if (@ySaatSiraNo = 1 and @eDersSaatiTipiId <> @yDersSaatiTipiId) 
+        begin
+		    declare @SaatSayisi smallInt = 2
+            while (@SaatSayisi < 5) 
+            begin
+                Set @yDersSaatiTipiId += 1
+                if ( Select count(Id) Adet
+                     From dbo.MtskUygulamaliDers
+                     Where TalepId = @yTalepId
+                     and   DersTarihi = @yDersTarihi
+                     and   SaatSiraNo = @SaatSayisi ) = 1
+                begin
+		            Select @ySaat = isnull(saat.DersSaatiTipi,'00:00 - 00:00')
+                    From Lkp.MtskUygulamaliDersDersSaatiTipi saat 
+					Where saat.Id = @yDersSaatiTipiId
+					
+                    Update dbo.MtskUygulamaliDers set
+                        DersSaatiTipiId = @yDersSaatiTipiId
+                      , BaslamaSaati = CONVERT(smalldatetime, CONVERT(varchar(10), @yDersTarihi) + ' ' + SUBSTRING(@ySaat,1,5))
+                      , BitisSaati   = CONVERT(smalldatetime, CONVERT(varchar(10), @yDersTarihi) + ' ' + SUBSTRING(@ySaat,9,5))
+                    Where TalepId = @yTalepId
+                    and   DersTarihi = @yDersTarihi
+                    and   SaatSiraNo = @SaatSayisi
+                end -- if
+                Set @SaatSayisi += 1
+            end -- while
+		end -- if (@ySaatSiraNo = 1) 
+		
+
+        FETCH NEXT FROM myCursor INTO @curId
     END
-
-    */
 
     CLOSE myCursor
     DEALLOCATE myCursor   
+
 
 END -- create trigger
 
@@ -245,7 +326,12 @@ create table Lkp.MtskUygulamaliDersDersSaatiTipi
 Delete from Lkp.MtskUygulamaliDersDersSaatiTipi
 INSERT INTO Lkp.MtskUygulamaliDersDersSaatiTipi (Id, DersSaatiTipi)
  VALUES 
-  (-1, N''),
+  (-6, N''),
+  (-5, N'02:00 - 02:50'),
+  (-4, N'03:00 - 03:50'),
+  (-3, N'04:00 - 04:50'),
+  (-2, N'05:00 - 05:50'),
+  (-1, N'06:00 - 06:50'),
   ( 0, N'07:00 - 07:50'),
   ( 1, N'08:00 - 08:50'),
   ( 2, N'09:00 - 09:50'),
