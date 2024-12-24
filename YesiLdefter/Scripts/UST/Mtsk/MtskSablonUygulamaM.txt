@@ -30,6 +30,7 @@ begin transaction
    -- 40 
    IsPlanTamamlandi        Bit           null,  /* Kullanıcı planın bittiğene onay verir */
    IsSaatleriDuzenle       Bit           null,  /* True ise kullanıcıya ders saatlerini düzenlesmesi için mesaj verir. */ 
+
    constraint		pk_MtskSablonUygulamaM primary key (Id)
  )
   
@@ -56,6 +57,7 @@ AS BEGIN
 
     declare @FirmId int
     declare @TalepId int
+    declare @EgitimTipiId smallint
 	declare @IsPlanTamamlandi bit
 
     WHILE @@FETCH_STATUS = 0
@@ -63,6 +65,7 @@ AS BEGIN
         Select 
             @FirmId = FirmId
            ,@TalepId = TalepId
+           ,@EgitimTipiId = EgitimTipiId
            ,@IsPlanTamamlandi = IsPlanTamamlandi
         From inserted
         Where Id = @curId      
@@ -84,6 +87,28 @@ AS BEGIN
                     ,IsSaatleriDuzenle = 0
                 Where Id = @curId
 
+                -- Id EgitimTipi
+                -- 1  Normal Eğitim
+                -- 2  Telafi Eğitim(Ön Sınav )
+                -- 3  2.Direksiyon Eğitimi
+                -- 4  Başarısız Aday Eğitimi
+                /*
+				if (@EgitimTipiId = 1) 
+                begin
+                    Update dbo.MtskAdayTakip set IsUygulamaliDersPlanli = 1
+                    Where TalepId = @TalepId
+                end
+                if (@EgitimTipiId = 3) 
+                begin
+                    Update dbo.MtskAdayTakip set IsArti4DersPlanli = 1
+                    Where TalepId = @TalepId
+                end
+                if (@EgitimTipiId = 4) 
+                begin
+                    Update dbo.MtskAdayTakip set IsBasarisizDersPlanli = 1
+                    Where TalepId = @TalepId
+                end
+				*/
                 Execute dbo.prc_MtskAdayTakip @FirmId
 
             end else
@@ -100,8 +125,7 @@ AS BEGIN
     END
 	
     CLOSE myCursor
-    DEALLOCATE myCursor   
-
+    DEALLOCATE myCursor  
 END -- create trigger
 
 

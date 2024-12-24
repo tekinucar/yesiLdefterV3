@@ -136,7 +136,7 @@ AS BEGIN
            ,[GrupTipiId]
            ,[GrupBaslamaTarihi]
            ,[GrupSubeSayisi]
-           ,[AdaySayisi]
+           ,[DonemAdaySayisi]
            ,[TeorikDersSayisi]
            ,[UygulamaDersSayisi]
            ,[KurumOnayTipiId]
@@ -149,7 +149,7 @@ AS BEGIN
            ,@GrupTipiId
            ,@GrupBaslamaTarihi
            ,0 --GrupSubeSayisi
-           ,0 --AdaySayisi
+           ,0 --DonemAdaySayisi
            ,0 --TeorikDersSayisi
            ,0 --UygulamaDersSayisi
            ,@KurumOnayTipiId
@@ -165,7 +165,7 @@ AS BEGIN
     END
 
     CLOSE mgSubesiCursor
-    DEALLOCATE mgSubesiCursor    
+    DEALLOCATE mgSubesiCursor   
 
 END
 

@@ -16,7 +16,7 @@ begin transaction
    /* 20 : Saatler */  
    SimulatorSaati          smallInt     null,
    EgitimAlaniSaati        smallInt     null,
-   UygulamaSaati           smallInt     null,
+   AkanTrafikSaati         smallInt     null,
    UygulamaToplamSaat      smallInt     null,
    UygulamaSaati2016Oncesi smallInt     null,
    Arti4HakUygulamaSaati   smallInt     null,
@@ -52,7 +52,7 @@ INSERT INTO [dbo].[MtskSaatUygulama]
            ,[IstenenSertifikaTipiId]
            ,[SimulatorSaati]
            ,[EgitimAlaniSaati]
-           ,[UygulamaSaati]
+           ,[AkanTrafikSaati]
            ,[UygulamaToplamSaat]
            ,[UygulamaSaati2016Oncesi]
            ,[Arti4HakUygulamaSaati]
@@ -70,7 +70,7 @@ SELECT [FirmId]
       ,[IstenenSertifikaTipiId]
       ,2 --[SimulatorSaati]
       ,2
-      ,14 -- [UygulamaSaati]
+      ,14 -- [AkanTrafikSaati]
       ,16 
       ,[UygulamaSaati2016]
       ,14 --[Arti4HakUygulamaSaati]

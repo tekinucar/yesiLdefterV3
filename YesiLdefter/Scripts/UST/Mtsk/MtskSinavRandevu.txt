@@ -161,6 +161,14 @@ BEGIN
 
         end -- @IsMasterRow = 1
 
+        FETCH NEXT FROM randevuCursor INTO @curId
+    END -- While
+
+	--EXECUTE [dbo].[prc_MtskAdayTakip] @FirmId
+
+    CLOSE randevuCursor
+    DEALLOCATE randevuCursor  
+
 
 END
 

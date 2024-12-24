@@ -88,16 +88,17 @@ AS BEGIN
             and   a.Id = @saglikId
         end
 
-        -- Takip
-		Update MtskAdayTakip set
-            OzurDurumuTipiId = @OzurDurumuTipiId
-          , OkutmanTalebi = @OkutmanTalebi 
-          , TercumanTalebi = @TercumanTalebi  
-          , YabanciDilTipiId = @YabanciDilTipiId
-        Where TalepId = @TalepId
 		
         if (@DbUpdatesIsActive = 0)
         begin 
+            -- Takip
+            Update MtskAdayTakip set
+                OzurDurumuTipiId = @OzurDurumuTipiId
+              , OkutmanTalebi = @OkutmanTalebi 
+              , TercumanTalebi = @TercumanTalebi  
+              , YabanciDilTipiId = @YabanciDilTipiId
+            Where TalepId = @TalepId
+
             -- Talep tablosunu işaretle
             Update MtskAdayTalep set
                 SaglikGeldi = x.Sonuc

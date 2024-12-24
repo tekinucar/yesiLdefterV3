@@ -26,5 +26,6 @@ begin transaction
 
 commit transaction
 
+
 /*CreateTableEnd*/
 

@@ -64,6 +64,7 @@ AS BEGIN
     declare @yAdayTcNo varchar(11) = null
     declare @yAdayAdiSoyadi nVarchar(100) = null
     declare @yDersTarihi date = null
+	declare @eDersTarihi date = null
     declare @yDersSaatiTipiId smallInt = -1
 	declare @eDersSaatiTipiId smallInt = -1
     declare @DersDonemTipiId int = 0
@@ -81,7 +82,9 @@ AS BEGIN
 	
     WHILE @@FETCH_STATUS = 0
     BEGIN
-        Select @eDersSaatiTipiId = dlt.DersSaatiTipiId
+        Select 
+            @eDersTarihi = dlt.DersTarihi
+           ,@eDersSaatiTipiId = dlt.DersSaatiTipiId
         From  deleted as dlt
         Where dlt.Id = @curId
 		
@@ -239,31 +242,32 @@ AS BEGIN
         end
 		        
 		-- kursiyerin 1. ders saati değiştirilirse on bağlı ardışık saatlerde güncelleniyor, yani sıralınıyor
-		if (@ySaatSiraNo = 1 and @eDersSaatiTipiId <> @yDersSaatiTipiId) 
+		if (@ySaatSiraNo = 1 and (@eDersSaatiTipiId <> @yDersSaatiTipiId or @eDersTarihi <> @yDersTarihi)) 
         begin
-		    declare @SaatSayisi smallInt = 2
-            while (@SaatSayisi < 5) 
+		    declare @SaatSiraNo_ smallInt = 2
+            while (@SaatSiraNo_ < 5) 
             begin
                 Set @yDersSaatiTipiId += 1
                 if ( Select count(Id) Adet
                      From dbo.MtskUygulamaliDers
                      Where TalepId = @yTalepId
-                     and   DersTarihi = @yDersTarihi
-                     and   SaatSiraNo = @SaatSayisi ) = 1
+                     and   DersTarihi = @eDersTarihi
+                     and   SaatSiraNo = @SaatSiraNo_ ) = 1
                 begin
 		            Select @ySaat = isnull(saat.DersSaatiTipi,'00:00 - 00:00')
                     From Lkp.MtskUygulamaliDersDersSaatiTipi saat 
 					Where saat.Id = @yDersSaatiTipiId
 					
                     Update dbo.MtskUygulamaliDers set
-                        DersSaatiTipiId = @yDersSaatiTipiId
+                        DersTarihi = @yDersTarihi
+                      , DersSaatiTipiId = @yDersSaatiTipiId
                       , BaslamaSaati = CONVERT(smalldatetime, CONVERT(varchar(10), @yDersTarihi) + ' ' + SUBSTRING(@ySaat,1,5))
                       , BitisSaati   = CONVERT(smalldatetime, CONVERT(varchar(10), @yDersTarihi) + ' ' + SUBSTRING(@ySaat,9,5))
                     Where TalepId = @yTalepId
-                    and   DersTarihi = @yDersTarihi
-                    and   SaatSiraNo = @SaatSayisi
+                    and   DersTarihi = @eDersTarihi
+                    and   SaatSiraNo = @SaatSiraNo_
                 end -- if
-                Set @SaatSayisi += 1
+                Set @SaatSiraNo_ += 1
             end -- while
 		end -- if (@ySaatSiraNo = 1) 
 		

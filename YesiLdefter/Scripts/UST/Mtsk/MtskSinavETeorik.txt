@@ -110,19 +110,20 @@ AS BEGIN
 		
 		if (@yTalepId = 0 and @yAdayId = 0 and @yTcNo <> '')
 		begin
-		  -- Talepleri kontrol et
-		  Select top 1 @yAdayId = AdayId  From MtskAdayTalep
-          Where TcNo = @yTcNo
-          and   isnull(DonemTipiId,0) <= @SinavDonemTipiId
-          order by DonemTipiId desc, Id desc
+            -- Talepleri kontrol et
+            Select top 1 @yAdayId = AdayId, @yTalepId = Id From MtskAdayTalep
+            Where TcNo = @yTcNo
+            and   isnull(DonemTipiId,0) <= @SinavDonemTipiId
+            order by DonemTipiId desc, Id desc
 
 		  -- demekki aday hiç kayıtlı değil 
 		  -- yani ilk defa MEBBİS in sınav sonuçları (uygulama) sayfasından okunuyor demek
+		  /*
 		  if (@yTalepId = 0)
 		  begin
-              
 			  INSERT INTO [dbo].[MtskAdayTalep]
                  ([FirmId]
+				 ,[AdayId]
                  ,[IsActive]
                  ,[TcNo]
                  ,[TamAdiSoyadi]
@@ -133,6 +134,7 @@ AS BEGIN
                  )
               VALUES
                (  @yFirmId --FirmId, int
+			    , @yAdayId
                 , 1        --IsActive, bit
                 , @yTcNo   --TcNo, varchar(11)
                 , @yTamAdiSoyadi --TamAdiSoyadi, nvarchar(100)
@@ -148,6 +150,7 @@ AS BEGIN
 		      and   talep.TcNo = @yTcNo 
 			  order by Id desc
 		  end -- @yTalepId = 0
+          */
 		end
 		
 		if (@yTeorikPuani >= 70) 
@@ -179,6 +182,7 @@ AS BEGIN
 
 		update MtskSinavETeorik set
            TalepId = @yTalepId
+         , AdayId = @yAdayId
 		 , SinavDonemTipiId = @SinavDonemTipiId
 		 , SinavNo = @ySinavNo
 		 , SinavTarihSaat = @ySinavTarihSaat
@@ -205,6 +209,7 @@ AS BEGIN
 	
     CLOSE eSinavCursor
     DEALLOCATE eSinavCursor   
+
 
 END -- trigger
 

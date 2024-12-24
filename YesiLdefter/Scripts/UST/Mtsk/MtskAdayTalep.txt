@@ -454,13 +454,14 @@ AS BEGIN
   begin
 	  print 'talep veri transferi harici işler'
       --Execute [dbo].[prc_MtskAdayTakipTalepKaydiMultiSet] @yFirmId 
-      ----EXECUTE [dbo].[prc_MtskAdayTakip] @yFirmId
+      EXECUTE [dbo].[prc_MtskAdayTakip] @yFirmId
   end
 
   CLOSE talepCursor_
   DEALLOCATE talepCursor_   
 
   print 'talep trigger End'
+
 
 END -- create trigger
 

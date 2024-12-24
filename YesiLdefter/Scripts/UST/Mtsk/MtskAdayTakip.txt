@@ -1139,8 +1139,6 @@ commit transaction
 
 /*CreateTrigger*/
 
-USE [Mtsk00000011]
-GO
 
 
 CREATE TRIGGER [dbo].[trg_MtskAdayTakip] on [dbo].[MtskAdayTakip]
@@ -1159,39 +1157,68 @@ AS BEGIN
 
     declare @TalepId int = 0
 	declare @AdayId int
-	declare @yuSinavaHazirmiTipiId smallInt 
+    declare @FirmId int
+	
+    declare @yuSinavaHazirmiTipiId smallInt 
+    declare @yuSinavDurumTipiId smallInt
+    declare @yIsUygSinavMebbisOnayi bit 
+    declare @yIsRandevuPlanlandi bit
+    declare @yIsRandevuMebbis bit
 
-	declare @euSinavaHazirmiTipiId smallInt 
-
+    declare @euSinavaHazirmiTipiId smallInt 
+    declare @euSinavDurumTipiId smallInt
+    declare @eIsUygSinavMebbisOnayi bit 
+    declare @eIsRandevuPlanlandi bit
+    declare @eIsRandevuMebbis bit
 
     WHILE @@FETCH_STATUS = 0
     BEGIN
-
+	
         select 
 		    @euSinavaHazirmiTipiId = isnull(dlt.uSinavaHazirmiTipiId,0)
+           ,@euSinavDurumTipiId = isnull(dlt.uSinavDurumTipiId,0)
+           ,@eIsUygSinavMebbisOnayi = isnull(dlt.IsUygSinavMebbisOnayi,0)
+           ,@eIsRandevuPlanlandi = isnull(dlt.IsRandevuPlanlandi,0)
+           ,@eIsRandevuMebbis = isnull(dlt.IsRandevuMebbis,0)
+
 		from deleted dlt
     	where dlt.Id = @takipId
 
         select 
-            @TalepId = ins.TalepId
+            @FirmId  = ins.FirmId
+           ,@TalepId = ins.TalepId
            ,@AdayId = ins.AdayId
 		   ,@yuSinavaHazirmiTipiId = isnull(ins.uSinavaHazirmiTipiId,0)
+           ,@yuSinavDurumTipiId = isnull(ins.uSinavDurumTipiId,0)
+           ,@yIsUygSinavMebbisOnayi = isnull(ins.IsUygSinavMebbisOnayi,0)
+           ,@yIsRandevuPlanlandi = isnull(ins.IsRandevuPlanlandi,0)
+           ,@yIsRandevuMebbis = isnull(ins.IsRandevuMebbis,0)
+
 		from inserted ins
     	where ins.Id = @takipId
 		
 		
         if (@DbUpdatesIsActive = 0)
         begin 
-            if (@yuSinavaHazirmiTipiId = 1 and @euSinavaHazirmiTipiId = 2)
+            if (@euSinavaHazirmiTipiId = 2 and  -- eski kayıt hazır değilse
+			    @yuSinavaHazirmiTipiId = 1 )    -- yeni kayıt hazır ise
             begin 
-                -- 2 > 1 olmaz, 2 > 3 olabilir
+                -- 2 > 1 olamaz
+				-- 2 > 3 olabilir
                 -- 1, Sınava hazır
                 -- 2, Sınav için hazır değil
                 -- 3, Takviye derslerle sınava hazır
-                Update MtskAdayTakip set
-                    uSinavaHazirmiTipiId = 3
+                update MtskAdayTakip set uSinavaHazirmiTipiId = 3
                 Where TalepId = @TalepId
-            end
+			end
+
+			if ((@euSinavaHazirmiTipiId <> @yuSinavaHazirmiTipiId) or
+			    (@euSinavDurumTipiId <> @yuSinavDurumTipiId) or
+                (@eIsUygSinavMebbisOnayi <> @yIsUygSinavMebbisOnayi) or
+                (@eIsRandevuPlanlandi <> @yIsRandevuPlanlandi) or
+                (@eIsRandevuMebbis <> @yIsRandevuMebbis)
+               )
+			    exec dbo.prc_MtskAdayTakip @FirmId
 
         end	-- 	@DbUpdatesIsActive = 0
 
@@ -1201,6 +1228,7 @@ AS BEGIN
 
     CLOSE takipCursor
     DEALLOCATE takipCursor   
+
 
 END -- create trigger
 
