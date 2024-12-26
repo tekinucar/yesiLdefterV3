@@ -1324,9 +1324,9 @@ INSERT INTO [dbo].[SYS_UPDATES]
         , fieldsIP.SOFTWARE_CODE + '/' + 
           fieldsIP.PROJECT_CODE + '/' +
           fieldsIP.TABLE_CODE + '.' + fieldsIP.IP_CODE as TableIPCode 
-        , fields.FIELD_NAME as FieldName
-        , fields.FLOOKUP_FIELD as FLookUpField
-        , fields.FIELD_TYPE as FieldType
+        , isnull(fields.FIELD_NAME,'') as FieldName
+        , isnull(fields.FLOOKUP_FIELD,'') as FLookUpField
+        , isnull(fields.FIELD_TYPE,0) as FieldType
 
         From MS_FIELDS_IP as fieldsIP
           left outer join MS_FIELDS as fields on ( 

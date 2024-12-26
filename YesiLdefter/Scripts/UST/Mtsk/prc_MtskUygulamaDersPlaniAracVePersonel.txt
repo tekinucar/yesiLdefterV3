@@ -3,34 +3,34 @@
 CREATE PROCEDURE [dbo].[prc_MtskUygulamaDersPlaniAracVePersonel] (@EgitimAraciId varchar(20), @PersonelId varchar(20))  
 AS BEGIN
 
- declare @bugun date = getdate()
+  declare @bugun date = getdate()
  set @bugun = DATEADD(ww, DATEDIFF(ww,0,@bugun), 0)
 
  -- sadece Araca ait olan planlar
  Select  
-  [MtskUygulamaliDers].[Id]
- ,[MtskUygulamaliDers].[FirmId]
- ,[MtskUygulamaliDers].[IsActive]
- ,[MtskUygulamaliDers].[DonemTipiId]
- ,[MtskUygulamaliDers].[GrupTipiId]
- ,[MtskUygulamaliDers].[SubeTipiId]
- ,[MtskUygulamaliDers].[AdayNo]
- ,[MtskUygulamaliDers].[AdayId]
- ,[MtskUygulamaliDers].[AdayTcNo]
- ,[MtskUygulamaliDers].[EgitimYeriTipiId]
- ,[MtskUygulamaliDers].[EgitimAraciId]
- ,[MtskUygulamaliDers].[DersTarihi]
- ,[MtskUygulamaliDers].[DersSaatiTipiId]
- ,[MtskUygulamaliDers].[PersonelId]
- ,[MtskUygulamaliDers].[EgitimTipiId]
- ,[MtskUygulamaliDers].[BaslamaSaati]
- ,[MtskUygulamaliDers].[BitisSaati]
- ,[MtskUygulamaliDers].[UDersIsUploaded]
- ,[MtskUygulamaliDers].[SablonUygulamaFId]
- , [MtskAday].TamAdiSoyadi                   Lkp_AdayTamAdiSoyadi
- , [MtskAday].TcNo                           Lkp_AdayTcNo
- , [MtskPersoneli].TamAdiSoyadi                   Lkp_PersonelTamAdiSoyadi
- , [MtskPersoneli].TcVkNo                         Lkp_PersonelTcNo 
+   [MtskUygulamaliDers].[Id]
+ , [MtskUygulamaliDers].[FirmId]
+ , [MtskUygulamaliDers].[IsActive]
+ , [MtskUygulamaliDers].[DonemTipiId]
+ , [MtskUygulamaliDers].[GrupTipiId]
+ , [MtskUygulamaliDers].[SubeTipiId]
+ , [MtskUygulamaliDers].[AdayNo]
+ , [MtskUygulamaliDers].[AdayId]
+ , [MtskUygulamaliDers].[AdayTcNo]
+ , [MtskUygulamaliDers].[EgitimYeriTipiId]
+ , [MtskUygulamaliDers].[EgitimAraciId]
+ , [MtskUygulamaliDers].[DersTarihi]
+ , [MtskUygulamaliDers].[DersSaatiTipiId]
+ , [MtskUygulamaliDers].[PersonelId]
+ , [MtskUygulamaliDers].[EgitimTipiId]
+ , [MtskUygulamaliDers].[BaslamaSaati]
+ , [MtskUygulamaliDers].[BitisSaati]
+ , [MtskUygulamaliDers].[UDersIsUploaded]
+ , [MtskUygulamaliDers].[SablonUygulamaFId]
+ , [MtskAday].TamAdiSoyadi  as  Lkp_AdayTamAdiSoyadi
+ , [MtskAday].TcNo  as  Lkp_AdayTcNo
+ , [MtskPersoneli].TamAdiSoyadi  as  Lkp_PersonelTamAdiSoyadi
+ , [MtskPersoneli].TcVkNo  as  Lkp_PersonelTcNo 
  , FNo4.DonemTipi  as  Lkp_DonemTipiId
  , FNo5.GrupTipi  as  Lkp_GrupTipiId
  , FNo6.SubeTipi  as  Lkp_SubeTipiId
@@ -60,29 +60,29 @@ AS BEGIN
 
  -- sadece personele ait olan planlar
  Select  
-  [MtskUygulamaliDers].[Id]
- ,[MtskUygulamaliDers].[FirmId]
- ,[MtskUygulamaliDers].[IsActive]
- ,[MtskUygulamaliDers].[DonemTipiId]
- ,[MtskUygulamaliDers].[GrupTipiId]
- ,[MtskUygulamaliDers].[SubeTipiId]
- ,[MtskUygulamaliDers].[AdayNo]
- ,[MtskUygulamaliDers].[AdayId]
- ,[MtskUygulamaliDers].[AdayTcNo]
- ,[MtskUygulamaliDers].[EgitimYeriTipiId]
- ,[MtskUygulamaliDers].[EgitimAraciId]
- ,[MtskUygulamaliDers].[DersTarihi]
- ,[MtskUygulamaliDers].[DersSaatiTipiId]
- ,[MtskUygulamaliDers].[PersonelId]
- ,[MtskUygulamaliDers].[EgitimTipiId]
- ,[MtskUygulamaliDers].[BaslamaSaati]
- ,[MtskUygulamaliDers].[BitisSaati]
- ,[MtskUygulamaliDers].[UDersIsUploaded]
- ,[MtskUygulamaliDers].[SablonUygulamaFId]
- , [MtskAday].TamAdiSoyadi                   Lkp_AdayTamAdiSoyadi
- , [MtskAday].TcNo                           Lkp_AdayTcNo
- , [MtskPersoneli].TamAdiSoyadi                   Lkp_PersonelTamAdiSoyadi
- , [MtskPersoneli].TcVkNo                         Lkp_PersonelTcNo 
+   [MtskUygulamaliDers].[Id]
+ , [MtskUygulamaliDers].[FirmId]
+ , [MtskUygulamaliDers].[IsActive]
+ , [MtskUygulamaliDers].[DonemTipiId]
+ , [MtskUygulamaliDers].[GrupTipiId]
+ , [MtskUygulamaliDers].[SubeTipiId]
+ , [MtskUygulamaliDers].[AdayNo]
+ , [MtskUygulamaliDers].[AdayId]
+ , [MtskUygulamaliDers].[AdayTcNo]
+ , [MtskUygulamaliDers].[EgitimYeriTipiId]
+ , [MtskUygulamaliDers].[EgitimAraciId]
+ , [MtskUygulamaliDers].[DersTarihi]
+ , [MtskUygulamaliDers].[DersSaatiTipiId]
+ , [MtskUygulamaliDers].[PersonelId]
+ , [MtskUygulamaliDers].[EgitimTipiId]
+ , [MtskUygulamaliDers].[BaslamaSaati]
+ , [MtskUygulamaliDers].[BitisSaati]
+ , [MtskUygulamaliDers].[UDersIsUploaded]
+ , [MtskUygulamaliDers].[SablonUygulamaFId]
+ , [MtskAday].TamAdiSoyadi  as  Lkp_AdayTamAdiSoyadi
+ , [MtskAday].TcNo  as  Lkp_AdayTcNo
+ , [MtskPersoneli].TamAdiSoyadi  as  Lkp_PersonelTamAdiSoyadi
+ , [MtskPersoneli].TcVkNo  as  Lkp_PersonelTcNo 
  , FNo4.DonemTipi  as  Lkp_DonemTipiId
  , FNo5.GrupTipi  as  Lkp_GrupTipiId
  , FNo6.SubeTipi  as  Lkp_SubeTipiId
@@ -112,29 +112,29 @@ AS BEGIN
 
  -- sadece Arac ve personele ait olan ortak planlar
  Select  
-  [MtskUygulamaliDers].[Id]
- ,[MtskUygulamaliDers].[FirmId]
- ,[MtskUygulamaliDers].[IsActive]
- ,[MtskUygulamaliDers].[DonemTipiId]
- ,[MtskUygulamaliDers].[GrupTipiId]
- ,[MtskUygulamaliDers].[SubeTipiId]
- ,[MtskUygulamaliDers].[AdayNo]
- ,[MtskUygulamaliDers].[AdayId]
- ,[MtskUygulamaliDers].[AdayTcNo]
- ,[MtskUygulamaliDers].[EgitimYeriTipiId]
- ,[MtskUygulamaliDers].[EgitimAraciId]
- ,[MtskUygulamaliDers].[DersTarihi]
- ,[MtskUygulamaliDers].[DersSaatiTipiId]
- ,[MtskUygulamaliDers].[PersonelId]
- ,[MtskUygulamaliDers].[EgitimTipiId]
- ,[MtskUygulamaliDers].[BaslamaSaati]
- ,[MtskUygulamaliDers].[BitisSaati]
- ,[MtskUygulamaliDers].[UDersIsUploaded]
- ,[MtskUygulamaliDers].[SablonUygulamaFId]
- , [MtskAday].TamAdiSoyadi                   Lkp_AdayTamAdiSoyadi
- , [MtskAday].TcNo                           Lkp_AdayTcNo
- , [MtskPersoneli].TamAdiSoyadi                   Lkp_PersonelTamAdiSoyadi
- , [MtskPersoneli].TcVkNo                         Lkp_PersonelTcNo 
+   [MtskUygulamaliDers].[Id]
+ , [MtskUygulamaliDers].[FirmId]
+ , [MtskUygulamaliDers].[IsActive]
+ , [MtskUygulamaliDers].[DonemTipiId]
+ , [MtskUygulamaliDers].[GrupTipiId]
+ , [MtskUygulamaliDers].[SubeTipiId]
+ , [MtskUygulamaliDers].[AdayNo]
+ , [MtskUygulamaliDers].[AdayId]
+ , [MtskUygulamaliDers].[AdayTcNo]
+ , [MtskUygulamaliDers].[EgitimYeriTipiId]
+ , [MtskUygulamaliDers].[EgitimAraciId]
+ , [MtskUygulamaliDers].[DersTarihi]
+ , [MtskUygulamaliDers].[DersSaatiTipiId]
+ , [MtskUygulamaliDers].[PersonelId]
+ , [MtskUygulamaliDers].[EgitimTipiId]
+ , [MtskUygulamaliDers].[BaslamaSaati]
+ , [MtskUygulamaliDers].[BitisSaati]
+ , [MtskUygulamaliDers].[UDersIsUploaded]
+ , [MtskUygulamaliDers].[SablonUygulamaFId]
+ , [MtskAday].TamAdiSoyadi  as  Lkp_AdayTamAdiSoyadi
+ , [MtskAday].TcNo  as  Lkp_AdayTcNo
+ , [MtskPersoneli].TamAdiSoyadi  as  Lkp_PersonelTamAdiSoyadi
+ , [MtskPersoneli].TcVkNo  as  Lkp_PersonelTcNo 
  , FNo4.DonemTipi  as  Lkp_DonemTipiId
  , FNo5.GrupTipi  as  Lkp_GrupTipiId
  , FNo6.SubeTipi  as  Lkp_SubeTipiId
@@ -159,6 +159,7 @@ AS BEGIN
  and [MtskUygulamaliDers].EgitimAraciId = @EgitimAraciId 
  and [MtskUygulamaliDers].PersonelId = @PersonelId
  and [MtskUygulamaliDers].DersTarihi >= @bugun
+
 
 END -- procedure
 

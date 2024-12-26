@@ -44,7 +44,7 @@ AS BEGIN
       set @onaySozlesme = 1
   end 
   
-
+  
   -- MtskAdayBelgeler Insert
   if ( Select count(*) ADET from dbo.MtskAdayBelgeler 
        where TalepId = @TalepId 
@@ -183,29 +183,29 @@ AS BEGIN
             MebbisKurumOnayi, MebbisDurumTipiId,
             SertifikaYasSiniri, YasOnayiTipiId, YasHazirTarihi,
             DeneyimSartiTipiId, IsDeneyimEnAz, DeneyimSertifikaTipiId,
-            OzurDurumuTipiId, OkutmanTalebi, TercumanTalebi, YabanciDilTipiId,
-            BelgelerGeldi, BelgelerTarandi, BelgelerYuklendi,
-            BorcDurumuTipiId,
+            OzurDurumuTipiId, OkutmanTalebi, TercumanTalebi, YabanciDilTipiId, IsKontejan,
+            BelgelerGeldi, BelgelerTarandi, BelgelerYuklendi, BorcDurumuTipiId,
 
             TeorikBaslamaTarihi, TeorikBitisTarihi, TeorikDersTipiId, eSinavNo,
             eSinavDurumTipiId, eSinavSonucTipiId, eSinavSonrasiTipiId, eSinavMuracatTarihi,
-            eSinavUcretTipiId, eSinavDetayId, eSinavBasariTarihi,
+            eSinavUcretTipiId, IseSinavBTeslimEdildi, eSinavDetayId, eSinavBasariTarihi,
 
             IsUygulamaliDersPlanli, UygulamaBaslamaTarihi, UygulamaBitisTarihi,
-		    SimulatorDersToplami, EgitimPistiDersToplami, AkanTrafikDersToplami, UygulamaliDersToplami,
+		    SimulatorDersToplami, EgitimAlaniDersToplami, AkanTrafikDersToplami, UygulamaliDersToplami,
             UygulamaliDersTipiId, IsUygulamaDersMebbis,
 
             IsBasarisizDersPlanli, BasarisizDersNo, BasarisizBaslamaTarihi, BasarisizBitisTarihi,
             BasarisizDersToplami, BasarisizDersTipiId, IsBasarisizDersMebbis,
 
             IsArti4DersPlanli, Arti4BaslamaTarihi, Arti4BitisTarihi,
-		    Arti4EgitimPistiDersToplami, Arti4AkanTrafikDersToplami, Arti4DersToplami,
+		    Arti4EgitimAlaniDersToplami, Arti4AkanTrafikDersToplami, Arti4DersToplami,
             Arti4DersTipiId, IsArti4DersMebbis,
 
-			uSinavaHazirmiTipiId, IsTakviyeDersleHazir, IsUygSinavMebbisOnayi, 
-			IsRandevuPlanlandi,  IsRandevuMebbis, uSinavNo, 
+			PlanlanacakEgitimTipiId, uSinavaHazirmiTipiId, IsUygSinavMebbisOnayi, 
+			IsRandevuPlanlandi,  IsRandevuMebbis, RandevuTarihi,
+            RandevuSaatTipiId, RandevuEgitimAraciId, RandevuPersonelId, 
 
-            uSinavDurumTipiId, uSinavSonucTipiId, uSinavSonrasiTipiId,
+            uSinavNo, uSinavDurumTipiId, uSinavSonucTipiId, uSinavSonrasiTipiId,
 		    uSinavUcretTipiId, uSinavDetayId, uSinavBasariTarihi,
 
             SertifikaDurumTipiId, SertifikaTarihi, DosyaYakti)
@@ -217,27 +217,36 @@ AS BEGIN
             0,  0,              -- MebbisKurumOnayi, MebbisDurumTipiId
             0,  0,  null,       -- SertifikaYasSiniri, YasOnayiTipiId, YasHazirTarihi
             0,  0,  0,          -- DeneyimSartiTipiId, IsDeneyimEnAz, DeneyimSertifikaTipiId
-            0,  0,  0,   0,     -- OzurDurumuTipiId, OkutmanTalebi, TercumanTalebi, YabanciDilTipiId
+            0,  0,  0,   0,  0, -- OzurDurumuTipiId, OkutmanTalebi, TercumanTalebi, YabanciDilTipiId, IsKontejan
             0,  0,  0,   0,     -- BelgelerGeldi, BelgelerTarandi, BelgelerYuklendi, BorcDurumuTipiId, 
-            null, null,  0,  0, -- TeorikBaslamaTarihi, TeorikBitisTarihi, TeorikDersTipiId, eSinavNo
+            
+			null, null,  0,  0, -- TeorikBaslamaTarihi, TeorikBitisTarihi, TeorikDersTipiId, eSinavNo
             0,  0,  0,  null,   -- eSinavDurumTipiId, eSinavSonucTipiId, eSinavSonrasiTipiId, eSinavMuracatTarihi
-            0,  0,  null,       -- eSinavUcretTipiId, eSinavDetayId, eSinavBasariTarihi, 
+            0,  0,  0,  null,   -- eSinavUcretTipiId, IseSinavBTeslimEdildi , eSinavDetayId, eSinavBasariTarihi, 
+
             0,  null, null,     -- IsUygulamaliDersPlanli, UygulamaBaslamaTarihi, UygulamaBitisTarihi, 
-            0,  0,  0,  0,      -- SimulatorDersToplami, EgitimPistiDersToplami, AkanTrafikDersToplami, UygulamaliDersToplami
+            0,  0,  0,  0,      -- SimulatorDersToplami, EgitimAlaniDersToplami, AkanTrafikDersToplami, UygulamaliDersToplami
             0,  0,              -- UygulamaliDersTipiId, IsUygulamaDersMebbis,
+
             0,  0,  null, null, -- IsBasarisizDersPlanli, BasarisizDersNo, BasarisizBaslamaTarihi, BasarisizBitisTarihi, 
             0,  0,  0,          -- BasarisizDersToplami, BasarisizDersTipiId, IsBasarisizDersMebbis,
+
             0,  null, null,     -- IsArti4DersPlanli, Arti4BaslamaTarihi, Arti4BitisTarihi, 
-            0,  0,  0,          -- Arti4EgitimPistiDersToplami, Arti4AkanTrafikDersToplami, Arti4DersToplami, 
+            0,  0,  0,          -- Arti4EgitimAlaniDersToplami, Arti4AkanTrafikDersToplami, Arti4DersToplami, 
             0,  0,              -- Arti4DersTipiId, IsArti4DersMebbis,
-			0,  0,  0,          -- uSinavaHazirmiTipiId, IsTakviyeDersleHazir, IsUygSinavMebbisOnayi, 
-			0,  0,  0,          -- IsRandevuPlanlandi,  IsRandevuMebbis, uSinavNo, 
-            0,  0,  0,          -- uSinavDurumTipiId, uSinavSonucTipiId, uSinavSonrasiTipiId,
+
+			0,  0,  0,          -- PlanlanacakEgitimTipiId, uSinavaHazirmiTipiId, IsUygSinavMebbisOnayi, 
+			0,  0,    null,     -- IsRandevuPlanlandi,  IsRandevuMebbis, RandevuTarihi,
+            0,  null, null,     -- RandevuSaatTipiId, RandevuEgitimAraciId, RandevuPersonelId, 
+
+            0,  0,  0,  0,      -- uSinavNo, uSinavDurumTipiId, uSinavSonucTipiId, uSinavSonrasiTipiId,
             0,  0,  null,       -- uSinavUcretTipiId, uSinavDetayId, uSinavBasariTarihi,
+
             0,  null,  0        -- SertifikaDurumTipiId, SertifikaTarihi, DosyaYakti
 			)       
 			print ' create : [MtskAdayTakip]'
   end -- MtskAdayBelgeler
+
 
 END -- procedure
 

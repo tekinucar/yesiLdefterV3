@@ -3,7 +3,7 @@
 CREATE PROCEDURE [dbo].[prc_MtskAdayTalepMebbisDonemKayitListesi] (@FirmId int, @DonemTipiId int, @KonuId smallInt)
 AS BEGIN
 
-  declare @sql nvarchar(max)
+declare @sql nvarchar(max)
   declare @sqlWhere nvarchar(500)
   declare @sqlOrderBy nvarchar(100)    
 
@@ -132,6 +132,7 @@ AS BEGIN
 
  --print @sql
  EXEC sp_executesql @sql
+
 
 
 END -- procedure

@@ -768,6 +768,7 @@
     <Content Include="Scripts\UST\Mtsk\prc_MtskTeorikDersOzelGunleriEkle.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskUygulamaDersInsert.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskUygulamaDersPlanHazirlaManuel.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskUygulamaDersPlaniListele.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_setIsDbUpdateActive.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\fnc_getIsDbUpdate.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\fnc_IsTatilGunumu.txt" />

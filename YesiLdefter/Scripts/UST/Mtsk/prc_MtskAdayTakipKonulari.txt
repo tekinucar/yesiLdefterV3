@@ -141,7 +141,6 @@ From Lkp.MtskAdayTakipOzelDurumuTipi as tip
 
 union all
 
-
 -- MtskAdayTakipBorcDurumuTipi
 Select 
    tip.KonuGrupId

@@ -47,29 +47,30 @@ AS BEGIN
      VALUES
            (@FirmId
            ,1 -- IsActive
-           --,<DonemTipiId, int,>
-           --,<GrupTipiId, smallint,>
-           --,<SubeTipiId, smallint,>
+           --,DonemTipiId
+           --,GrupTipiId
+           --,SubeTipiId
            ,@TalepId
-           --,<AdayNo, smallint,>
+           --,AdayNo
            ,@AdayId
-           --,<AdayTcNo, varchar(11),>
-           --,<AdayAdiSoyadi, nvarchar(100),>
+           --,AdayTcNo
+           --,AdayAdiSoyadi
            ,@EgitimYeriTipiId
            ,@EgitimAraciId
            ,@DersTarihi
            ,@DersSaatiTipiId
-           --,<PersonelAdiSoyadi, nvarchar(100),>
+           --,PersonelAdiSoyadi
            ,@PersonelId
            ,@EgitimTipiId
-           --,<BaslamaSaati, datetime,>
-           --,<BitisSaati, datetime,>
+           --,BaslamaSaati
+           --,BitisSaati
            ,0 -- UDersIsUploaded
            ,0 -- SablonUygulamaFId
            ,@SaatSiraNo
 		   )
-
+    
   end -- if
+
 
 END -- procedure 
 

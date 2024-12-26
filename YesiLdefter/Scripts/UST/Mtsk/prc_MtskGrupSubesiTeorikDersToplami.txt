@@ -56,7 +56,7 @@ AS BEGIN
             , sum(isnull(sm.d2,0)) as IlkYardimDersSayisi
             , sum(isnull(sm.d3,0)) as AracTeknigiDersSayisi
             , sum(isnull(sm.d5,0)) as AdapDersSayisi
-         from (
+		 from (
 	         Select 
                   ders.FirmId
                 , ders.DonemTipiId
@@ -97,6 +97,7 @@ AS BEGIN
    and   sube.DonemTipiId = x.DonemTipiId
    and   sube.GrupTipiId  = x.GrupTipiId 
    and   sube.SubeTipiId  = x.SubeTipiId   
+
 
 
 END -- procedure

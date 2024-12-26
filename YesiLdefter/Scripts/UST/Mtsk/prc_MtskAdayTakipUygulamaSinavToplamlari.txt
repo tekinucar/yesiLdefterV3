@@ -3,7 +3,7 @@ AS BEGIN
 
  --declare @FirmId int = 30
 
--- uSinavDurumTipi
+-- uSinavDurumTipi < 9
 Select 
    tip.KonuId
  , tip.KonuCaption   
@@ -11,10 +11,12 @@ Select
  , tip.FormCaption as Islem
  , count(takip.Id) as AdaySayisi 
 
-From MtskAdayTakip as takip
+From dbo.MtskAdayTakip as takip
      left outer join Lkp.MtskAdayTakipuSinavDurumTipi as tip on 
 	   ( takip.uSinavDurumTipiId = tip.Id )
-Where FirmId = @FirmId
+Where takip.FirmId = @FirmId
+and ( takip.KayitTipiId = 2 or takip.KayitTipiId = 3 )
+and   takip.uSinavDurumTipiId < 9  -- 9, 'Uygulama sınav sonucu okundu'
 
 Group by 
    tip.KonuId
@@ -24,18 +26,44 @@ Group by
 
 union all
 
--- uSinavSonucTipi
+-- uSinavDurumTipi = 9
+Select 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.uSinavDurumTipi as KonuAciklama
+ , tip.FormCaption as Islem
+ , count(takip.Id) as AdaySayisi 
+
+From dbo.MtskSinavUygulama as sinav
+     left outer join dbo.MtskAdayTakip as takip on ( sinav.TalepId = takip.TalepId )
+     left outer join Lkp.MtskAdayTakipuSinavDurumTipi as tip on ( takip.uSinavDurumTipiId = tip.Id )
+Where takip.FirmId = @FirmId
+and ( takip.KayitTipiId = 2 or takip.KayitTipiId = 3 )
+and   takip.uSinavDurumTipiId = 9  -- 9, 'Uygulama sınav sonucu okundu'
+and   sinav.SinavDonemTipiId = @DonemTipiId
+and   sinav.DurumuTipiId > 0
+
+Group by 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.uSinavDurumTipi
+ , tip.FormCaption 
+
+union all
+
+-- uSinavSonucTipi : Başarılı
 Select 
    tip.KonuId
  , tip.KonuCaption   
  , tip.uSinavSonucTipi as KonuAciklama
  , tip.FormCaption as Islem
- , count(takip.Id) as AdaySayisi 
+ , count(sinav.Id) as AdaySayisi 
 
-From MtskAdayTakip as takip
-     left outer join Lkp.MtskAdayTakipuSinavSonucTipi as tip on 
-	   ( takip.uSinavSonucTipiId = tip.Id )
-Where FirmId = @FirmId
+From dbo.MtskSinavUygulama as sinav
+     left outer join Lkp.MtskAdayTakipuSinavSonucTipi as tip on ( tip.Id = 1 )
+Where sinav.FirmId = @FirmId
+and   sinav.SinavDonemTipiId = @DonemTipiId
+and   sinav.PuanTipiId = 100 -- Başarılı
 
 Group by 
    tip.KonuId
@@ -45,6 +73,51 @@ Group by
 
 union all
 
+-- uSinavSonucTipi : Başarısız
+Select 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.uSinavSonucTipi as KonuAciklama
+ , tip.FormCaption as Islem
+ , count(sinav.Id) as AdaySayisi 
+
+From dbo.MtskSinavUygulama as sinav
+     left outer join Lkp.MtskAdayTakipuSinavSonucTipi as tip on ( tip.Id = 2 )
+Where sinav.FirmId = @FirmId
+and   sinav.SinavDonemTipiId = @DonemTipiId
+and   sinav.PuanTipiId = 1 -- Başarısız
+
+Group by 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.uSinavSonucTipi
+ , tip.FormCaption 
+
+union all
+
+-- uSinavSonucTipi : Girmedi
+Select 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.uSinavSonucTipi as KonuAciklama
+ , tip.FormCaption as Islem
+ , count(sinav.Id) as AdaySayisi 
+
+From dbo.MtskSinavUygulama as sinav
+     left outer join Lkp.MtskAdayTakipuSinavSonucTipi as tip on ( tip.Id = 3 )
+Where sinav.FirmId = @FirmId
+and   sinav.SinavDonemTipiId = @DonemTipiId
+and   sinav.PuanTipiId = -1 -- Girmedi
+
+Group by 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.uSinavSonucTipi
+ , tip.FormCaption 
+
+union all
+
+
 -- uSinavSonrasiTipi
 Select 
    tip.KonuId
@@ -53,10 +126,12 @@ Select
  , tip.FormCaption as Islem
  , count(takip.Id) as AdaySayisi 
 
-From MtskAdayTakip as takip
-     left outer join Lkp.MtskAdayTakipuSinavSonrasiTipi as tip on 
-	   ( takip.uSinavSonrasiTipiId = tip.Id )
-Where FirmId = @FirmId
+From dbo.MtskAdayTakip as takip
+     left outer join dbo.MtskSinavUygulama as sinav on ( takip.TalepId = sinav.TalepId )
+     left outer join Lkp.MtskAdayTakipuSinavSonrasiTipi as tip on ( takip.uSinavSonrasiTipiId = tip.Id )
+Where takip.FirmId = @FirmId
+and   sinav.SinavDonemTipiId = @DonemTipiId
+and   takip.uSinavDetayId = sinav.Id -- takipdeki asamalar son sınavına ait kararlardır. Aynı ay içinde birden fazla sınava girebiliyor
 
 Group by 
    tip.KonuId
@@ -66,6 +141,31 @@ Group by
 
 union all
 
+-- uSinavSonrasiTipi : Toplam kursiyer sayısı
+Select 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.uSinavSonrasiTipi as KonuAciklama
+ , tip.FormCaption as Islem
+ , count(takip.Id) as AdaySayisi 
+
+From dbo.MtskAdayTakip as takip
+     left outer join dbo.MtskSinavUygulama as sinav on ( takip.TalepId = sinav.TalepId )
+     left outer join Lkp.MtskAdayTakipuSinavSonrasiTipi as tip on ( tip.Id = 5 )
+Where takip.FirmId = @FirmId
+and   sinav.SinavDonemTipiId = @DonemTipiId
+and   takip.uSinavDetayId = sinav.Id -- takipdeki asamalar son sınavına ait kararlardır. Aynı ay içinde birden fazla sınava girebiliyor
+
+Group by 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.uSinavSonrasiTipi
+ , tip.FormCaption 
+
+
+union all
+
+
 -- uSinavUcretTipi
 Select 
    tip.KonuId
@@ -74,16 +174,18 @@ Select
  , tip.FormCaption as Islem
  , count(takip.Id) as AdaySayisi 
 
-From MtskAdayTakip as takip
-     left outer join Lkp.MtskAdayTakipuSinavUcretTipi as tip on 
-	   ( takip.uSinavUcretTipiId = tip.Id )
-Where FirmId = @FirmId
+From dbo.MtskSinavUygulama as sinav
+     left outer join dbo.MtskAdayTakip as takip on ( sinav.TalepId = takip.TalepId )
+     left outer join Lkp.MtskAdayTakipuSinavUcretTipi as tip on ( takip.uSinavUcretTipiId = tip.Id )
+Where takip.FirmId = @FirmId
+and   sinav.SinavDonemTipiId = @DonemTipiId
 
 Group by 
    tip.KonuId
  , tip.KonuCaption   
  , tip.uSinavUcretTipi
  , tip.FormCaption 
+
 
 END -- procedure
 

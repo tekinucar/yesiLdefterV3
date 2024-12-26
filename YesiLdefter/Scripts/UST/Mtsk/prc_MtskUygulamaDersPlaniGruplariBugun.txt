@@ -23,7 +23,6 @@ AS BEGIN
    else set @DonemTipiId = convert(int, convert(varchar(5), YEAR(@EgitimBaslangicTarihi)) + convert(varchar(3), MONTH(@EgitimBaslangicTarihi)))
 
  
- 
    Select  
      @DonemTipiId as DersDonemTipiId
    , null as DersTarihi
@@ -100,7 +99,6 @@ AS BEGIN
      Where [uygDers].DersTarihi >= @EgitimBaslangicTarihi
      and   [uygDers].DersTarihi <= @EgitimBitisTarihi
    ) x
-   
 
  
 END -- procedure

@@ -493,7 +493,21 @@ namespace Tkn_ToolBox
                                 insertDbUpdates();
                         }
                     }
+                    else
+                    {
+                        MessageBox.Show("DİKKAT : Yeni oluşturmak istediğiniz tabloaya ait script bulunamdı." + v.ENTER2 +
+                            "TableName : " + vt.TableName + v.ENTER +
+                            "SectorTypeId : " + sectorTypeId.ToString()
+                            );
+                    }
                 }
+            }
+            else
+            {
+                MessageBox.Show("DİKKAT : Yeni oluşturmak istediğiniz tabloaya ait script bulunamdı." + v.ENTER2 +
+                    "TableName : " + vt.TableName + v.ENTER +
+                    "SectorTypeId : " + sectorTypeId.ToString()
+                    ) ;
             }
             return onay;
         }

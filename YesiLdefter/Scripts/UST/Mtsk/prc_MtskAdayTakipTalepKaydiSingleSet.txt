@@ -18,6 +18,7 @@ AS BEGIN
   declare @yasOnayiTipiId smallint = 0
   declare @yasHazirTarihi date = null
   declare @deneyimSartiTipiId smallInt = 0
+  declare @sertifikaTeslimEdildi bit = 0
 
   -- MtskAdayTalep
   declare @yFirmId Int 
@@ -64,15 +65,19 @@ AS BEGIN
   -- ----------------------------------------------------------------------------------
   -- Aday kayıt aşaması
   -- ----------------------------------------------------------------------------------
+  Select @sertifikaTeslimEdildi = isnull(sertifika.SertifikaTeslimEdildi,0)
+  From dbo.MtskAdaySertifika as sertifika
+  Where sertifika.TalepId = @TalepId
 
   -- ZamanlamaTipiId 
   -- Aktif eğitim süreci devam edenler için geçerli
   -- eğitimi bitenleri -1 yapacağız
-  if (@yDonemTipiId < @BugunDonemTipiId) set @zamanlamaTipiId = 1
   if (@yDonemTipiId = @BugunDonemTipiId) set @zamanlamaTipiId = 2
   if (@yDonemTipiId = @GelecekDonemTipiId) set @zamanlamaTipiId = 3
   if (@yDonemTipiId > @GelecekDonemTipiId) set @zamanlamaTipiId = 4
   if (@yDonemTipiId = 0) set @zamanlamaTipiId = 0
+  if (@yDonemTipiId < @BugunDonemTipiId and @sertifikaTeslimEdildi = 0) set @zamanlamaTipiId = 1
+  if (@yDonemTipiId < @BugunDonemTipiId and @sertifikaTeslimEdildi = 1) set @zamanlamaTipiId = 5
   -- 
 
   -- IsGrupSubeYok 
@@ -247,6 +252,7 @@ AS BEGIN
 		 Having COUNT(sinav.Id) = 0
      ) as x
 	 Where a.Id = x.TakipId 
+
 
 
 END -- procedure

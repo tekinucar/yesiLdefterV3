@@ -3,6 +3,29 @@
 CREATE PROCEDURE [dbo].[prc_MtskAdayTakipAdayKayitToplamlari] (@FirmId int, @DonemTipiId int)  
 AS BEGIN
 
+-- SertifikaTipi
+Select 
+   tip.Id as KonuId
+ , 'Serftikalar' as KonuCaption   
+ , tip.SertifikaTipi as KonuAciklama
+ , '' as Islem
+ , count(talep.Id) as AdaySayisi 
+
+From MtskAdayTalep as talep
+     left outer join Lkp.MtskSertifikaTipi as tip on 
+	   ( talep.IstenenSertifikaTipiId = tip.Id )
+Where FirmId = @FirmId
+and   DonemTipiId = @DonemTipiId
+
+Group by 
+   tip.Id
+ , tip.SertifikaTipi
+ , tip.SiraNo 
+ 
+--order by tip.SiraNo;
+
+union all
+
 -- TalepTipi
 Select 
    tip.KonuId
@@ -150,6 +173,31 @@ From MtskAdayTakip as takip
 	   ( takip.ZamanlamaTipiId = tip.Id )
 Where FirmId = @FirmId
 --and   DonemTipiId = @DonemTipiId
+and   takip.ZamanlamaTipiId <> 5
+
+Group by 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.ZamanlamaTipi
+ , tip.FormCaption 
+
+
+union all
+
+-- ZamanlamaTipi : 5	Sertifikasını hak etmiş
+Select 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.ZamanlamaTipi as KonuAciklama
+ , tip.FormCaption as Islem
+ , count(takip.Id) as AdaySayisi 
+
+From MtskAdayTakip as takip
+     left outer join Lkp.MtskAdayTakipZamanlamaTipi as tip on 
+	   ( takip.ZamanlamaTipiId = tip.Id )
+Where FirmId = @FirmId
+and   DonemTipiId = @DonemTipiId
+and   takip.ZamanlamaTipiId = 5 
 
 Group by 
    tip.KonuId
@@ -171,7 +219,7 @@ From MtskAdayTakip as takip
      left outer join Lkp.MtskAdayTakipGrupSubeTipi as tip on ( tip.KonuId = 1141 )
 
 Where FirmId = @FirmId
-and   DonemTipiId = @DonemTipiId
+-- and   DonemTipiId = @DonemTipiId : kontrol olmaması gerekiyor
 and   IsGrupSubeYok = 1
 
 group by tip.KonuId 
@@ -193,8 +241,9 @@ From MtskAdayTakip as takip
      left outer join Lkp.MtskAdayTakipYasOnayiTipi as tip on 
 	   ( takip.YasOnayiTipiId = tip.Id )
 Where FirmId = @FirmId
-and   DonemTipiId = @DonemTipiId
-and   takip.YasOnayiTipiId > 0 -- Yaşı tutuyor
+--and   DonemTipiId = @DonemTipiId : kontrol olmaması gerekiyor
+and   takip.YasOnayiTipiId >= 1 -- Yaşı tutmuyor
+and   takip.YasOnayiTipiId <= 4 -- Doğum tarihi yok
 
 Group by 
    tip.KonuId
@@ -204,6 +253,52 @@ Group by
 
 union all
 
+-- YasOnayiTipi
+Select 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.YasOnayiTipi as KonuAciklama
+ , tip.FormCaption as Islem
+ , count(takip.Id) as AdaySayisi 
+
+From MtskAdayTakip as takip
+     left outer join Lkp.MtskAdayTakipYasOnayiTipi as tip on 
+	   ( takip.YasOnayiTipiId = tip.Id )
+Where FirmId = @FirmId
+and   DonemTipiId = @DonemTipiId 
+and   takip.YasOnayiTipiId = 5 -- Yaşı tutuyor
+
+Group by 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.YasOnayiTipi
+ , tip.FormCaption 
+
+union all
+
+-- DeneyimSartiTipi
+Select 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.DeneyimSartiTipi as KonuAciklama
+ , tip.FormCaption as Islem
+ , count(takip.Id) as AdaySayisi 
+
+From MtskAdayTakip as takip
+     left outer join Lkp.MtskAdayTakipDeneyimSartiTipi as tip on 
+	   ( takip.DeneyimSartiTipiId = tip.Id )
+Where FirmId = @FirmId
+--and   DonemTipiId = @DonemTipiId : kontrol olmaması gerekiyor
+and   takip.DeneyimSartiTipiId = 3 -- Uygun değil
+
+Group by 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.DeneyimSartiTipi
+ , tip.FormCaption 
+
+union all
+/*
 -- Sağlık, OzurDurumTipi
 Select 
    tip.KonuId
@@ -215,8 +310,8 @@ Select
 From MtskAdayTakip as takip
      left outer join Lkp.MtskAdayTakipOzurDurumuTipi as tip on 
 	   ( takip.OzurDurumuTipiId = tip.Id )
-Where FirmId = @FirmId
-and   DonemTipiId = @DonemTipiId
+Where takip.FirmId = @FirmId
+and   takip.DonemTipiId = @DonemTipiId
 and   takip.OzurDurumuTipiId > 0
 
 Group by 
@@ -225,8 +320,12 @@ Group by
  , tip.OzurDurumuTipi
  , tip.FormCaption
 
-
 union all
+*/
+
+-- ---------------------------------------------------------------------------------
+-- DİKKAT : Özel durumdakilerin toplam sayıları için ayrı ayrı sql ile hesaplanıyor
+-- ---------------------------------------------------------------------------------
 
 -- OzelDurumuTipi -- özürlü sayısı
 Select 
@@ -239,8 +338,8 @@ Select
 From MtskAdaySaglik as saglik
      left outer join Lkp.MtskAdayTakipOzelDurumuTipi as tip on 
 	   ( tip.Id = 1)
-Where FirmId = @FirmId
-and   DonemTipiId = @DonemTipiId
+Where saglik.FirmId = @FirmId
+and   saglik.DonemTipiId = @DonemTipiId
 and   saglik.OzurDurumuTipiId > 1
 
 Group by 
@@ -248,7 +347,6 @@ Group by
  , tip.KonuCaption   
  , tip.OzelDurumuTipi
  , tip.FormCaption
-
 
 union all
 
@@ -319,6 +417,77 @@ Group by
  , tip.KonuCaption   
  , tip.OzelDurumuTipi
  , tip.FormCaption
+
+union all
+
+-- OzelDurumuTipi -- Yabanci uyruklar sayısı
+Select 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.OzelDurumuTipi as KonuAciklama
+ , tip.FormCaption as Islem
+ , count(talep.Id) as AdaySayisi 
+
+From dbo.MtskAdayTalep as talep, dbo.MtskAday as aday
+     left outer join Lkp.MtskAdayTakipOzelDurumuTipi as tip on 
+	   ( tip.Id = 5)
+Where talep.FirmId = @FirmId
+and   talep.DonemTipiId = @DonemTipiId
+and   talep.AdayId = aday.Id
+and   aday.UlkeTipiId <> 1000
+
+Group by 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.OzelDurumuTipi
+ , tip.FormCaption
+
+union all
+
+-- OzelDurumuTipi -- Etiketli sayısı
+Select 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.OzelDurumuTipi as KonuAciklama
+ , tip.FormCaption as Islem
+ , count(talep.Id) as AdaySayisi 
+
+From dbo.MtskAdayTalep as talep
+     left outer join Lkp.MtskAdayTakipOzelDurumuTipi as tip on 
+	   ( tip.Id = 6)
+Where talep.FirmId = @FirmId
+and   talep.DonemTipiId = @DonemTipiId
+and   talep.EtiketTipiId > 0
+
+Group by 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.OzelDurumuTipi
+ , tip.FormCaption
+
+union all
+
+-- OzelDurumuTipi -- Kontejanlı sayısı
+Select 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.OzelDurumuTipi as KonuAciklama
+ , tip.FormCaption as Islem
+ , count(takip.Id) as AdaySayisi 
+
+From dbo.MtskAdayTakip as takip
+     left outer join Lkp.MtskAdayTakipOzelDurumuTipi as tip on 
+	   ( tip.Id = 7)
+Where takip.FirmId = @FirmId
+and   takip.DonemTipiId = @DonemTipiId
+and   takip.IsKontejan = 1
+
+Group by 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.OzelDurumuTipi
+ , tip.FormCaption
+
 
 
 END -- procedure

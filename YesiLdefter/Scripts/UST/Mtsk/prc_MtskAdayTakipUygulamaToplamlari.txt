@@ -4,7 +4,7 @@
 CREATE PROCEDURE [dbo].[prc_MtskAdayTakipUygulamaToplamlari] (@FirmId int, @DonemTipiId int)  
 AS BEGIN
 
- --declare @FirmId int = 30
+--declare @FirmId int = 30
 
 -- UygulamaliDersTipi
 Select 
@@ -69,6 +69,7 @@ Group by
  , tip.KonuCaption   
  , tip.Arti4DersTipi
  , tip.FormCaption 
+
 
 
 END -- procedure

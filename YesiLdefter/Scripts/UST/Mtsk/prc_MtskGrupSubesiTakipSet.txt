@@ -3,17 +3,17 @@
 CREATE PROCEDURE [dbo].[prc_MtskGrupSubesiTakipSet] (@FirmId int, @DonemTipiId int, @GrupTipiId smallint, @SubeTipiId smallint)  
 AS BEGIN
 
-  /*
+  /*  
   declare @FirmId int
   declare @DonemTipiId int = 0
   declare @GrupTipiId  smallint = 0
   declare @SubeTipiId  smallint = 0
 
-  set @FirmId = 30
-  set @DonemTipiId = 202407
+  set @FirmId = 11
+  set @DonemTipiId = 202411
   set @GrupTipiId = 1
   set @SubeTipiId = 1
-  */
+*/  
   declare @BugunDonemTipiId int = 0
   declare @DersSayisiTrf smallInt = 0
   declare @DersSayisiIlk smallInt = 0
@@ -42,7 +42,6 @@ AS BEGIN
 
   UPDATE dbo.MtskGrupSubesi
      SET TakipTipiId = x.TakipTipiId
-  
   From dbo.MtskGrupSubesi as gs, (
     Select sube.Id,
      ( case 

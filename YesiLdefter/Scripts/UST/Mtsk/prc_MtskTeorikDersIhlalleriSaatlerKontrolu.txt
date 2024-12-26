@@ -1,4 +1,6 @@
-﻿/*CreateProcedure*/
+﻿/* While / WHILE / WHILE @@FETCH_STATUS  :  MSSQL ÖRNEĞİ */
+
+/*CreateProcedure*/
 
 CREATE PROCEDURE [dbo].[prc_MtskTeorikDersIhlalleriSaatlerKontrolu] (@FirmId int)  
 AS BEGIN

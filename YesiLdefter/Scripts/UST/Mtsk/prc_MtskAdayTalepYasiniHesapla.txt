@@ -4,12 +4,13 @@
 CREATE PROCEDURE [dbo].[prc_MtskAdayTalepYasiniHesapla] (@TalepId int)  
 AS BEGIN
 
-  --declare @TalepId int
-  --set @TalepId = 315
+--declare @TalepId int
+  --set @TalepId = 3358
 
   declare @AdayId int
   declare @yTalepTipiId smallint = 0
   declare @yDogumTarihi date 
+  declare @yMevcutSurucuBelgeTarihi date
   declare @yMevcutSertifikaTipiId smallInt = 0
   declare @yIstenenSertifikaTipiId smallint = 0
   declare @yIsMuafiyetiVar bit = 0
@@ -31,6 +32,7 @@ AS BEGIN
   Select 
     @yDogumTarihi = aday.DogumTarihi
    ,@yTalepTipiId = isnull(ins.TalepTipiId,0)
+   ,@yMevcutSurucuBelgeTarihi = isnull(ins.MevcutSurucuBelgeTarihi, getdate())
    ,@yMevcutSertifikaTipiId = isnull(ins.MevcutSertifikaTipiId,0)
    ,@yIstenenSertifikaTipiId = isnull(ins.IstenenSertifikaTipiId,0)
    ,@yIsMuafiyetiVar = isnull(ins.IsMuafiyetiVar,0)	
@@ -50,6 +52,24 @@ AS BEGIN
   Where saat.IstenenSertifikaTipiId = @yIstenenSertifikaTipiId
   and   gt.KonuTipiId = 21102 -- Uygulama saatleri
   order by gt.Tarih desc
+
+  -- A2 > A için hazırlandı
+  declare @farkIcinYasSiniri smallint = 0
+  declare @deneyimEnAzYilFarki smallint = 0
+
+  if (@yMevcutSertifikaTipiId > 0 and @yIstenenSertifikaTipiId > 0)
+  begin
+      Select top 1 @farkIcinYasSiniri = isnull(saat.YasSiniri,0), @deneyimEnAzYilFarki = isnull(saat.DeneyimEnAzYilFarki,0)
+      From MtskSaatUygulama as saat
+          left outer join GecerlilikTarihi as gt on ( saat.GecerlilikTarihiId = gt.Id )
+      Where saat.IstenenSertifikaTipiId = @yIstenenSertifikaTipiId
+      and   saat.MevcutSertifikaTipiId  = @yMevcutSertifikaTipiId
+      and   gt.KonuTipiId = 21102 -- Uygulama saatleri
+      order by gt.Tarih desc
+
+      -- Örnek : A2 > A : yaş sınırı 24 den 20 ye iniyor
+      if  (@farkIcinYasSiniri > 0) set @YasSiniri = @farkIcinYasSiniri 
+  end
 
   -- Yaş için muhafiyeti var ise 2 yıl daha sınırı aşağıya çek
   if (@yIsMuafiyetiVar = 1)
@@ -80,13 +100,50 @@ AS BEGIN
           if (@bugun < @yasHazirTarihi) set @yasOnayiTipiId = 1 -- yaşı tutmuyor
           
           set @GunFarki = DATEDIFF(DAY, @yasHazirTarihi, @bugun)
-		  if (@GunFarki >=0 and @GunFarki <= 30)
-		      set @yasOnayiTipiId = 2 --  2, Yaş için bekleme süresi doldu
+          
+		  --print '  @GunFarki = ' + COnvert(varchar(4), @GunFarki)
+
+		  if (@GunFarki >= 0 and @GunFarki <= 30)
+              set @yasOnayiTipiId = 2 --  2, Yaşını doldurdu
+		  if (@GunFarki > 30)
+              set @yasOnayiTipiId = 5 --  5, Yaşı tutuyor
       end else
       begin
-          set @yasOnayiTipiId = 5 -- yaş kontrolü yok
+          set @yasOnayiTipiId = 6 -- yaş kontrolü yok
           set @yasHazirTarihi = null 
       end
+
+      -- A2 > A : en az deniyim farkı varsa o kontrol edilecek
+      if (@deneyimEnAzYilFarki > 0)  
+      begin
+          -- deneyim yılını bul  
+          declare @deneyimGunu smallInt = 0  
+	      set @deneyimGunu = DATEDIFF(DAY, @yMevcutSurucuBelgeTarihi, @bugun) 
+
+          --print '  @yMevcutSurucuBelgeTarihi = ' + Convert(varchar(10), @yMevcutSurucuBelgeTarihi, 103)
+          --print '  @deneyimEnAzYilFarki * 365 = ' + Convert(varchar(2),@deneyimEnAzYilFarki)
+          --print '  @deneyimGunu = ' + Convert(varchar(2),@deneyimGunu)     
+
+		  -- deneyim şartı varsa
+          if (((@deneyimEnAzYilFarki * 365) < @deneyimGunu) and @yMevcutSurucuBelgeTarihi < @bugun)          
+          begin
+              --print '  uygun'
+              -- 2, 'Deneyim şartına uygun'
+              Update MtskAdayTakip set
+                  DeneyimSartiTipiId = 2
+              Where TalepId = @TalepId
+			  and DeneyimSartiTipiId <> 2 
+          end else
+          begin
+              --print '  uygun değil'
+              -- 3, 'Deneyim şartına uygun değil'
+              Update MtskAdayTakip set
+                  DeneyimSartiTipiId = 3
+              Where TalepId = @TalepId
+			  and DeneyimSartiTipiId <> 3 
+          end --
+      end -- A2 > A
+
   end else  
   begin
       set @yasOnayiTipiId = 4 -- belirsiz
@@ -104,6 +161,7 @@ AS BEGIN
   Where TalepId = @TalepId
 
   print '    prc_MtskAdayTalepYasiniHesapla bitti'
+
 
 END -- procedure
 

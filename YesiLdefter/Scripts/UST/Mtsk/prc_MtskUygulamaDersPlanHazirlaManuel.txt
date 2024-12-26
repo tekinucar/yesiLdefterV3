@@ -4,7 +4,7 @@
 CREATE PROCEDURE [dbo].[prc_MtskUygulamaDersPlanHazirlaManuel] (@Id int)  
 AS BEGIN
 
-  --Declare @Id int = 1
+  --Declare @Id int = 2
 
   declare @FirmId int
   declare @TalepId int
@@ -64,6 +64,8 @@ AS BEGIN
   -- 2, 'Eğitim Alanı + Akan Trafik'
   -- 3, 'Akan Trafik'  
   
+  --set @EgitimTipiId = 3 test için
+
   if (@EgitimTipiId = 1 and @DersTercihiTipiId = 1) Set @toplamDersSayisi = @SimulatorDersSayisi + @AkanTrafikDersSayisi
   if (@EgitimTipiId = 1 and @DersTercihiTipiId = 2) Set @toplamDersSayisi = @EgitimAlaniDersSayisi + @AkanTrafikDersSayisi
   if (@EgitimTipiId = 1 and @DersTercihiTipiId = 3) Set @toplamDersSayisi = @AkanTrafikDersSayisi + 2
@@ -81,8 +83,13 @@ AS BEGIN
   while (@toplamDersSayisi > 0)
   begin
 	  Set @bugunDersSayisi = @SaatSayisiTipiId
-      if (@EgitimTipiId = 1 and @gunNo = 1 and @DersTercihiTipiId <> 3) Set @bugunDersSayisi = 2 
+      
+	  --  @EgitimTipiId = Normal eğitim ve    @DersTercihiTipiId = Akan trafik değilse birinci gün sadece Simülatör veya Eğitim pisti 2 saat olsun
+	  -- if (@EgitimTipiId = 1 and @gunNo = 1 and @DersTercihiTipiId <> 3) Set @bugunDersSayisi = 2 
+
+	  --  @EgitimTipiId = Telafi Eğitim veya Başarısız Aday Eğitimi
 	  if (@EgitimTipiId = 2) or (@EgitimTipiId = 4) Set @bugunDersSayisi = 2 
+
 	  if (@toplamDersSayisi < @bugunDersSayisi) Set @bugunDersSayisi = @toplamDersSayisi
 
       print '@gunNo : ' + Convert(varchar(2) , @gunNo)
@@ -117,13 +124,15 @@ AS BEGIN
 
 	  Set @bugunDersSayisi_ = @bugunDersSayisi
 	  Set @saatSiraNo_ = 1
-	  Set @dersSaatiTipiId_ = 1
+	  
+	  if (@SaatSayisiTipiId = 2) Set @dersSaatiTipiId_ = -3
+	  if (@SaatSayisiTipiId = 4) Set @dersSaatiTipiId_ = -5
 	  
 	  while (@bugunDersSayisi_ > 0)
       begin
           print '    @saatSiraNo_ : '  + Convert(varchar(2) , @saatSiraNo_)
           print '    @@dersSaatiTipiId_ : '  + Convert(varchar(2) , @dersSaatiTipiId_)
-
+		  
           Execute [dbo].[prc_MtskUygulamaDersInsert]   
            @FirmId
           ,@TalepId
@@ -135,15 +144,18 @@ AS BEGIN
           ,@PersonelId
           ,@EgitimTipiId
           ,@saatSiraNo_
-
+		  
           Set @saatSiraNo_ += 1
           Set @dersSaatiTipiId_ += 1
           Set @bugunDersSayisi_ -= 1
       end -- while 2 
-
+	  
 	  Set @toplamDersSayisi = @toplamDersSayisi - @bugunDersSayisi 
 	  Set @gunNo += 1
   end -- While 1
+
+  Execute dbo.prc_MtskAdayTakip @FirmId
+
 
 END -- procedure 
 
