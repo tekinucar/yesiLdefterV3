@@ -165,9 +165,9 @@ INSERT INTO [Lkp].[MtskKIhlalTeorikDIhlalTipi] (Id, IhlalTipi, IsActive)
   (15,    N'Tatil gününe ders verildi', 0), 
   (16,    N'Dönem açılış tarihinden önce ders verildi', 0), 
 
-  (21,    N'Ders çakışması var', 0),   -- IhlalTipiId  > 20 and IhlalTipiId < 30 
-  (22,    N'Personel çakışması var', 0),
-  (23,    N'Hem ders hemde personel çakışması var', 0),
+  (21,    N'Derslikte başka ders var', 0),   -- IhlalTipiId  > 20 and IhlalTipiId < 30 
+  (22,    N'Personelin başka dersi var', 0),
+  (23,    N'Hem dersliğin hemde personel başka dersi var', 0),
   (24,    N'Farklı bir dersle çakışması var', 0),
   (25,    N'Çift kayıt çakışması var', 0),
   (29,    N'Sebebi bilinmeyen çakışma var', 0),
@@ -177,7 +177,8 @@ INSERT INTO [Lkp].[MtskKIhlalTeorikDIhlalTipi] (Id, IhlalTipi, IsActive)
   (33,    N'Personelin çalışma saatlerine uymuyor', 0),          -- personel o günki teo ve uyg derslerinin listesi 
   (34,    N'Personelin çalışma izin tarihi henüz başlamadı', 0), -- 
   (35,    N'Personelin çalışma izin tarihi bitmiş', 0),
-  (36,    N'Personelin uygulama dersi mevcut', 0)
+  (36,    N'Personelin uygulama dersi mevcut', 0),
+  (37,    N'Personel bu ders için uygun değil', 0) -- henüz kontrole eklenmedi
 
 commit transaction
 

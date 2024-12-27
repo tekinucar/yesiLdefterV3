@@ -766,6 +766,7 @@
     <Content Include="Scripts\UST\Mtsk\prc_MtskTeorikDersIhlalleriCakismalar.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskTeorikDersIhlalleriSaatler.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskTeorikDersOzelGunleriEkle.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskUygDersIhlalleriCakismalar.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskUygulamaDersInsert.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskUygulamaDersPlanHazirlaManuel.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskUygulamaDersPlaniListele.txt" />
