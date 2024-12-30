@@ -32,6 +32,7 @@ begin transaction
    UDersIsUploaded      Bit           null,
    SablonUygulamaFId    Int           null, /* MtskSablonUygulamaF.Id = Hangi plan formu ile hazırlandı, hazırlanırken seçilen araç, usta öğreticiler ve adayların Id leri */ 
    SaatSiraNo           SmallInt      null, /* adayın 1. saati, 2. saati, 3. saati, 4. saati  bilgisi */
+   OzelGunlerId         Int           null, /* OnmOzelGunler.Id */
    
    constraint		pk_MtskUygulamaliDers primary key (Id)
  )
@@ -270,7 +271,11 @@ AS BEGIN
                 Set @SaatSiraNo_ += 1
             end -- while
 		end -- if (@ySaatSiraNo = 1) 
-		
+	
+	
+	    Execute [dbo].[prc_MtskUygDersIhlalleriSaatler] @curId, 0, 0
+        Execute [dbo].[prc_MtskUygDersIhlalleriCakismalar] @curId
+	    Execute [dbo].[prc_MtskDersIhlalleriPersonel] @curId
 
         FETCH NEXT FROM myCursor INTO @curId
     END
@@ -283,7 +288,50 @@ END -- create trigger
 
 /*CreateTriggerEnd*/
 
-ALTER TABLE dbo.MtskUygulamaliDers ENABLE TRIGGER trg_MtskUygulamaliDers
+
+/*CreateTrigger*/
+
+CREATE TRIGGER [dbo].[trg_MtskUygulamaDersDelete] on [dbo].[MtskUygulamaliDers]
+AFTER DELETE
+AS BEGIN
+
+    declare uygCursorDlt cursor local for select Id from deleted
+	declare @curId bigint
+	declare @FirmId int
+	declare @DersDonemTipiId int
+
+	OPEN uygCursorDlt
+    FETCH NEXT FROM uygCursorDlt INTO @curId
+
+	set @FirmId = 0
+	set @DersDonemTipiId = 0
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        Select   
+		    @FirmId = FirmId
+          , @DersDonemTipiId = DersDonemTipiId 
+		From deleted
+		Where Id = @curId
+
+	    Delete From dbo.MtskKIhlalUygulamaD 
+		Where InsertedId = @curId 
+		or    MevcutId   = @curId
+
+        Execute [dbo].[prc_MtskUygDersIhlalleriSaatler] @curId, @FirmId, @DersDonemTipiId
+        -- çakışmaları düzeltemiyor çünkü InsertedId li kayıt silinmiş oluyor
+	    -- Execute [dbo].[prc_MtskTeorikDersIhlalleriCakismalar] @curId
+        Execute [dbo].[prc_MtskDersIhlalleriPersonel] @curId
+
+      FETCH NEXT FROM uygCursorDlt INTO @curId
+    END
+
+    CLOSE uygCursorDlt
+    DEALLOCATE uygCursorDlt
+
+END
+
+/*CreateTriggerEnd*/
 
 
 /*CreateLkpTable*/

@@ -16,6 +16,7 @@ begin transaction
 
    EgitimAraciId          Varchar(30)   null,  /* eğitim aracı veya simulatör */
    PersonelId             Varchar(20)   null,  /* perspnel çakışması yada personelin ders saati dolunca */
+   TalepId                Int           null,  /* talepId */ 
 
    DersTarihi             Date          null,
    DersSaatiTipiId        SmallInt      null,

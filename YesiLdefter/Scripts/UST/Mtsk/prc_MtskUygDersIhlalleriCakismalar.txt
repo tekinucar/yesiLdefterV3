@@ -5,7 +5,7 @@
 CREATE PROCEDURE [dbo].[prc_MtskUygDersIhlalleriCakismalar] (@curId bigint)  
 AS BEGIN
 
-  --declare @curId int = 576--test 710
+  --declare @curId int = 4343--test 710
   declare @FirmId int
   declare @DersDonemTipiId int = 0
 
@@ -102,7 +102,7 @@ AS BEGIN
 
         ) as tespit     
 
-           left join MtskKIhlalUygulamaliD as ihl on (
+           left join dbo.MtskKIhlalUygulamaD as ihl on (
                  tespit.FirmId = ihl.FirmId 
            and   tespit.DersDonemTipiId = ihl.DersDonemTipiId 
            and   tespit.IhlalTipiId = ihl.IhlalTipiId
@@ -112,11 +112,11 @@ AS BEGIN
       Where ihl.Id is null
 
   -- Çift oluşan kayıtlardan birini sil 
-  Delete From dbo.MtskKIhlalUygulamaliD 
+  Delete From dbo.MtskKIhlalUygulamaD 
   Where Id in (
      Select top 1 ihl1.Id --, ihl2.Id
-     From dbo.MtskKIhlalUygulamaliD as ihl1
-        left outer join dbo.MtskKIhlalUygulamaliD as ihl2 on (
+     From dbo.MtskKIhlalUygulamaD as ihl1
+        left outer join dbo.MtskKIhlalUygulamaD as ihl2 on (
 	          ihl1.InsertedId = ihl2.MevcutId
 		  and ihl1.MevcutId   = ihl2.InsertedId
         )

@@ -2388,7 +2388,7 @@ namespace Tkn_Events
 
         public void myGridView_MouseMove(object sender, System.Windows.Forms.MouseEventArgs e)
         {
-            Application.OpenForms[0].Text = "MouseMove : ";
+            //Application.OpenForms[0].Text = "MouseMove : ";
 
             //myGridView_MouseMove_(sender, e);
 
@@ -2514,7 +2514,7 @@ namespace Tkn_Events
 
         private void myGridDataNavigatorPositionSetPreparing(GridControl grid)
         {
-            Application.OpenForms[0].Text = "myGridDataNavigatorPositionSetPreparing : " + v.con_GridMouseValue;
+            //Application.OpenForms[0].Text = "myGridDataNavigatorPositionSetPreparing : " + v.con_GridMouseValue;
             if (grid != null)
             {
                 Form tForm = t.Find_Form(grid);
@@ -2656,7 +2656,7 @@ namespace Tkn_Events
 
         public void myGridControl_DragEnter(object sender, DragEventArgs e)
         {
-            Application.OpenForms[0].Text = "DragEnter : " + sender.ToString();
+            //Application.OpenForms[0].Text = "DragEnter : " + sender.ToString();
 
             //e.Effect = DragDropEffects.Copy;
 

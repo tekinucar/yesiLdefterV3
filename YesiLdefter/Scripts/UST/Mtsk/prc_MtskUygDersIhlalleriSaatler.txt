@@ -1,0 +1,261 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_MtskUygDersIhlalleriSaatler] (@curId bigint, @deleteFirmId int, @deleteDonemTipiId int)  
+AS BEGIN
+
+/*
+  declare @deleteFirmId int
+  declare @deleteDonemTipiId int
+  declare @curId int = 4343--576--test
+*/
+  declare @FirmId int
+  declare @DersDonemTipiId int = 0
+  declare @EnKucuk smallInt = 2
+  declare @EnBuyuk smallInt = 4
+
+  Select 
+       @FirmId      = ins.FirmId  
+	  ,@DersDonemTipiId = ins.DersDonemTipiId
+  From dbo.MtskUygulamaliDers as ins
+  Where ins.Id = @curId
+
+  -- Bu @delete... değerlerleri  
+  if (@deleteFirmId > 0) set @FirmId = @deleteFirmId
+  if (@deleteDonemTipiId > 0) set @DersDonemTipiId = @deleteDonemTipiId
+
+  Delete dbo.MtskKIhlalUygulamaD
+  Where  FirmId = @FirmId
+  --and    DersDonemTipiId = @DersDonemTipiId
+  and    IhlalTipiId in (11,12,13,14,15,16)
+     
+  -- ---------------------------------------------------------------------
+  -- Günlük ders sayılarının tespiti : 11, 12 idli ihlaller
+  -- 11 :  Bir ders, bir gün içinde en az 2 saat olabilir
+  -- 12 :  Bir ders, bir gün içinde en fazla 4 saat olabilir
+  -- ---------------------------------------------------------------------
+
+      -- Tespit et ve yaz  
+      INSERT INTO [dbo].[MtskKIhlalUygulamaD]
+           ( FirmId
+           , DersDonemTipiId
+           , IhlalTipiId
+           , EgitimYeriTipiId
+           , DersSaatSayisi
+           , EgitimAraciId
+           , PersonelId
+           , TalepId
+           , DersTarihi
+           , EgitimTipiId
+           , Tarih) 
+
+         Select 
+		     td.FirmId
+           , td.DersDonemTipiId
+           , ( case 
+               when count(td.Id) < @EnKucuk then 11
+               when count(td.Id) > @EnBuyuk then 12
+               else 0 end ) as IhlalTipiId
+           , td.EgitimYeriTipiId
+           , count(td.Id) as DersSaatSayisi
+           , td.EgitimAraciId
+           , td.PersonelId
+           , td.TalepId
+		   , td.DersTarihi
+           , td.EgitimTipiId
+		   , GETDATE()
+         From dbo.MtskUygulamaliDers as td 
+              left outer join dbo.MtskAdayTalep as talep on ( td.TalepId = talep.Id ) 
+         Where 0 = 0
+         and   td.FirmId = @FirmId
+         and   td.DersDonemTipiId = @DersDonemTipiId
+         group by
+             td.FirmId
+           , td.DersDonemTipiId
+           , td.EgitimYeriTipiId
+           , td.EgitimAraciId
+           , td.PersonelId
+           , td.TalepId
+		   , td.DersTarihi
+           , td.EgitimTipiId
+
+         HAVING count(td.Id) < @EnKucuk or count(td.Id) > @EnBuyuk
+
+  -- ---------------------------------------------------------------------
+  -- Grup bazlı ders sayılarının tespiti : 13, 14 idli ihlaller
+  -- 13 :  Ders saati eksik
+  -- 14 :  Ders saati fazla
+  -- ---------------------------------------------------------------------
+
+    -- Id  EgitimTipi
+    -- 1   Normal Eğitim
+    -- 2   Telafi Eğitim(Ön Sınav )
+    -- 3   2.Direksiyon Eğitimi
+    -- 4   Başarısız Aday Eğitimi
+
+    -- Id  TalepTipi
+    -- 1   Sertifika
+    -- 2   2.+4 hak 
+    -- 3   Nakil 2.+4 hak
+    -- 4   100 Ceza
+    -- 5   Özel direksiyon ders (Aday değil)
+
+      -- Tespit et ve yaz  
+      INSERT INTO [dbo].[MtskKIhlalUygulamaD]
+           ( FirmId
+           , DersDonemTipiId
+           , IhlalTipiId
+           --, EgitimYeriTipiId : olmaz, 16 saatlik ders farklı eğitim yerlerinde oluyor, SM, EA, AK 
+           , DersSaatSayisi
+           --, EgitimAraciId : olmaz, 16 saatlik ders farklı araçlarda olabilir
+           --, PersonelId    : olmaz, 16 saatlik ders farklı personeller olabilir
+           , TalepId
+           , EgitimTipiId
+           , Tarih)  
+		   
+         Select 
+		     td.FirmId
+           , min(td.DersDonemTipiId) as DersDonemTipiId
+           , ( case 
+               -- talepTipi : Sertifika
+               when td.EgitimTipiId = 1 and talep.TalepTipiId = 1 and isnull(talep.MevcutSertifikaTipiId,0) = 0 and count(td.Id) < isnull(saat.UygulamaToplamSaat,16) then 13 
+               when td.EgitimTipiId = 1 and talep.TalepTipiId = 1 and isnull(talep.MevcutSertifikaTipiId,0) = 0 and count(td.Id) > isnull(saat.UygulamaToplamSaat,16) then 14
+               when td.EgitimTipiId = 1 and talep.TalepTipiId = 1 and isnull(talep.MevcutSertifikaTipiId,0) > 0 and count(td.Id) < (isnull(saat.UygulamaToplamSaat,16)-2) then 13 
+               when td.EgitimTipiId = 1 and talep.TalepTipiId = 1 and isnull(talep.MevcutSertifikaTipiId,0) > 0 and count(td.Id) > (isnull(saat.UygulamaToplamSaat,16)-2) then 14
+               --when td.EgitimTipiId = 2 and talep.TalepTipiId = 1 and count(td.Id) < isnull(saat.TelafiEgitimSaati,2) then 13    Birden fazla tefali ve başarısız eğitim aldığı için şimdilik çözüm bulamadım
+               --when td.EgitimTipiId = 2 and talep.TalepTipiId = 1 and count(td.Id) > isnull(saat.TelafiEgitimSaati,2) then 14
+               --when td.EgitimTipiId = 4 and talep.TalepTipiId = 1 and count(td.Id) < isnull(saat.BasarisizEgitimSaati,2) then 13 
+               --when td.EgitimTipiId = 4 and talep.TalepTipiId = 1 and count(td.Id) > isnull(saat.BasarisizEgitimSaati,2) then 14
+
+               -- talepTipi : 2.+4 hak 
+               when td.EgitimTipiId = 1 and talep.TalepTipiId = 2 and count(td.Id) < isnull(saat.Arti4HakUygulamaSaati,14) then 13 
+               when td.EgitimTipiId = 1 and talep.TalepTipiId = 2 and count(td.Id) > isnull(saat.Arti4HakUygulamaSaati,14) then 14
+
+               -- talepTipi : Nakil 2.+4 hak 
+               when td.EgitimTipiId = 1 and talep.TalepTipiId = 3 and count(td.Id) < isnull(saat.Arti4HakUygulamaSaati,14) then 13 
+               when td.EgitimTipiId = 1 and talep.TalepTipiId = 3 and count(td.Id) > isnull(saat.Arti4HakUygulamaSaati,14) then 14
+
+               else 0 end ) as IhlalTipiId
+           --, td.EgitimYeriTipiId
+           , count(td.Id) as DersSaatSayisi
+           --, td.EgitimAraciId
+           --, td.PersonelId
+           , td.TalepId
+           , td.EgitimTipiId
+		   , GETDATE()
+         From dbo.MtskUygulamaliDers as td 
+              left outer join dbo.MtskAdayTalep as talep on ( td.TalepId = talep.Id ) 
+		      left outer join dbo.MtskSaatUygulama as saat on ( talep.IstenenSertifikaTipiId = saat.IstenenSertifikaTipiId  and saat.MevcutSertifikaTipiId = 0 )
+              left outer join dbo.GecerlilikTarihi as trh on ( saat.GecerlilikTarihiId = trh.Id )
+
+         Where td.FirmId = @FirmId
+         -- and   td.DersDonemTipiId = @DersDonemTipiId : ders aynı ay içinde olmayabilior
+		 and   trh.Tarih <= GETDATE()
+         group by
+             td.FirmId
+           , td.TalepId
+           , td.EgitimTipiId
+           , talep.TalepTipiId
+		   , talep.MevcutSertifikaTipiId
+		   , saat.UygulamaToplamSaat
+		   , saat.Arti4HakUygulamaSaati
+         HAVING 
+               -- talepTipi : Sertifika
+               ( td.EgitimTipiId = 1 and talep.TalepTipiId = 1 and isnull(talep.MevcutSertifikaTipiId,0) = 0 and count(td.Id) < isnull(saat.UygulamaToplamSaat,16) ) or
+               ( td.EgitimTipiId = 1 and talep.TalepTipiId = 1 and isnull(talep.MevcutSertifikaTipiId,0) = 0 and count(td.Id) > isnull(saat.UygulamaToplamSaat,16) ) or
+               ( td.EgitimTipiId = 1 and talep.TalepTipiId = 1 and isnull(talep.MevcutSertifikaTipiId,0) > 0 and count(td.Id) < (isnull(saat.UygulamaToplamSaat,16)-2) ) or
+               ( td.EgitimTipiId = 1 and talep.TalepTipiId = 1 and isnull(talep.MevcutSertifikaTipiId,0) > 0 and count(td.Id) > (isnull(saat.UygulamaToplamSaat,16)-2) ) or
+
+               -- talepTipi : 2.+4 hak 
+               ( td.EgitimTipiId = 1 and talep.TalepTipiId = 2 and count(td.Id) < isnull(saat.Arti4HakUygulamaSaati,14) ) or
+               ( td.EgitimTipiId = 1 and talep.TalepTipiId = 2 and count(td.Id) > isnull(saat.Arti4HakUygulamaSaati,14) ) or
+               -- talepTipi : Nakil 2.+4 hak 
+               ( td.EgitimTipiId = 1 and talep.TalepTipiId = 3 and count(td.Id) < isnull(saat.Arti4HakUygulamaSaati,14) ) or
+               ( td.EgitimTipiId = 1 and talep.TalepTipiId = 3 and count(td.Id) > isnull(saat.Arti4HakUygulamaSaati,14) ) 
+
+
+
+
+  -- ---------------------------------------------------------------------
+  -- Tatil gününe ders verildi : 15 idli ihlal
+  -- ---------------------------------------------------------------------
+
+      -- Tespit et ve yaz  
+      INSERT INTO [dbo].[MtskKIhlalUygulamaD]
+           ( FirmId
+           , DersDonemTipiId
+           , IhlalTipiId
+           , EgitimYeriTipiId
+           , DersSaatSayisi
+           , EgitimAraciId
+           , PersonelId
+           , TalepId
+           , DersTarihi
+           , EgitimTipiId
+		   , InsertedId
+           , Tarih)  
+
+         Select 
+             td.FirmId
+           , td.DersDonemTipiId
+           , 15 as IhlalTipiId -- tatil
+           , td.EgitimYeriTipiId
+           , 0 as DersSaatSayisi
+           , td.EgitimAraciId
+           , td.PersonelId 
+           , td.TalepId 
+		   , td.DersTarihi
+           , td.EgitimTipiId
+		   , td.Id as InsertedId
+           , GETDATE()
+         From dbo.MtskUygulamaliDers as td
+             left outer join dbo.MtskUygulamaliDers as ttl on (
+	                ttl.BaslamaSaati <= td.BaslamaSaati 
+		        and ttl.BitisSaati >= td.BitisSaati )
+         Where ttl.OzelGunlerId > 0 -- tatil Id varsa
+         and   td.FirmId      = @FirmId
+		 --and   td.DersDonemTipiId = @DersDonemTipiId
+
+  -- ---------------------------------------------------------------------
+  -- Dönem açılış tarihinden önce ders verildi : 16 idli ihlal
+  -- ---------------------------------------------------------------------
+
+      -- Tespit et ve yaz  
+      INSERT INTO [dbo].[MtskKIhlalUygulamaD]
+           ( FirmId
+           , DersDonemTipiId
+           , IhlalTipiId
+           , EgitimYeriTipiId
+           , DersSaatSayisi
+           , EgitimAraciId
+           , PersonelId
+           , TalepId
+           , DersTarihi
+           , EgitimTipiId
+		   , InsertedId
+           , Tarih)  
+
+         Select 
+             td.FirmId
+           , td.DersDonemTipiId
+           , 16 as IhlalTipiId 
+           , td.EgitimYeriTipiId
+           , 0 as DersSaatSayisi
+           , td.EgitimAraciId
+           , td.PersonelId 
+           , td.TalepId 
+		   , td.DersTarihi
+           , td.EgitimTipiId
+		   , td.Id as InsertedId
+           , GETDATE()
+         From dbo.MtskUygulamaliDers as td
+             left outer join dbo.MtskAdayTalep as talep on ( td.TalepId = talep.Id )
+             left outer join dbo.MtskDonemi as dnm on ( dnm.GrupBaslamaTarihi > td.DersTarihi )
+         Where td.FirmId = @FirmId
+		 --and   td.DersDonemTipiId = @DersDonemTipiId
+		 and   talep.DonemTipiId = dnm.DonemTipiId
+         and   talep.GrupTipiId  = dnm.GrupTipiId
+
+
+END -- procedure 
+
+/*CreateProcedureEnd*/
