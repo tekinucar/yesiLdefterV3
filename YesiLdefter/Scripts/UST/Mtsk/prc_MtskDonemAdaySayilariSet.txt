@@ -40,7 +40,7 @@ AS BEGIN
   ) x
   Where a.DonemTipiId = x.DonemTipiId
   and   a.FirmId = @FirmId
-  and   a.DonemAdaySayisi <> x.Adet
+  and   isnull(a.DonemAdaySayisi,0) <> x.Adet
 
   -- ---------------------------------------------------
   -- Grup Aday Sayısı
@@ -57,7 +57,7 @@ AS BEGIN
   Where a.DonemTipiId = x.DonemTipiId
   and   a.GrupTipiId = x.GrupTipiId
   and   a.FirmId = @FirmId
-  and   a.GrupAdaySayisi <> Adet
+  and   isnull(a.GrupAdaySayisi,0) <> Adet
 
   -- ---------------------------------------------------
   -- Sube Aday Sayısı
@@ -75,7 +75,7 @@ AS BEGIN
   and   a.GrupTipiId = x.GrupTipiId
   and   a.SubeTipiId = x.SubeTipiId
   and   a.FirmId = @FirmId
-  and   a.SubeAdaySayisi <> x.Adet
+  and   isnull(a.SubeAdaySayisi,0) <> x.Adet
 
 
 
@@ -83,7 +83,7 @@ AS BEGIN
   -- Yeni Grup Açma için hesaplar
   -- Grup2 ve Grup3 açmak için yapılan hesaplar
   -- ---------------------------------------------------
-
+  /*
   Select @DonemAdaySayisi = DonemAdaySayisi From MtskDonemi
   Where DonemTipiId = @YILAY1
   and   FirmId = @FirmId
@@ -137,7 +137,7 @@ AS BEGIN
   begin 
     insert into [MtskGrupSubesi] (ParentId, FirmId, IsActive, DonemTipiId, GrupTipiId, SubeTipiId, KurumOnayTipiId) values (0, @FirmId, 1, @YILAY1, 3, 0, 0 )  
   end
-
+  */
   -- -------------------------------------------------------
   -- Kapasite Tipi hesaplaması
   -- -------------------------------------------------------
@@ -170,7 +170,6 @@ AS BEGIN
   and   a.SubeTipiId = x.SubeTipiId
   and   a.FirmId = @FirmId
   and   isnull(a.KapasiteTipiId,-9) <> x.KapasiteTipiId
-
 
 
 

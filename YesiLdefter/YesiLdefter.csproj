@@ -749,6 +749,7 @@
     <Content Include="Scripts\UST\Mtsk\MtskKurumAltProgramlari.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskPersoneli.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskSablonUygulamaM.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayBiyometrikResmi.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTablesInsertKontrolu.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakipESinavToplamlari.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakipKonulari.txt" />

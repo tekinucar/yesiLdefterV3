@@ -897,80 +897,7 @@ namespace YesiLdefter
 
         private void btn_DatabaseKaydet_ItemClick(object sender, EventArgs e)
         {
-            if (dNTarget.Position > -1)
-            {
-                string idValue = dsDataTarget.Tables[0].Rows[dNTarget.Position]["Id"].ToString();
-                string tableName = dsDataTarget.Tables[0].Rows[dNTarget.Position]["LkpTableName"].ToString();
-                string fieldName = dsDataTarget.Tables[0].Rows[dNTarget.Position]["LkpFieldName"].ToString();
-                string smallFieldName = dsDataTarget.Tables[0].Rows[dNTarget.Position]["LkpSmallFieldName"].ToString();
-                string idFieldName = dsDataTarget.Tables[0].Rows[dNTarget.Position]["LkpIdFieldName"].ToString();
-
-
-                // resim png formatına dönüyor
-                //v.con_Images = t.imageBinaryArrayConverterMem((byte[])dsDataTarget.Tables[0].Rows[dNTarget.Position]["LkpImage"]);
-
-                string fileGuid = tFileGuidName;
-                string Images_Path = t.Find_Path("images") + fileGuid + ".jpg";
-                Bitmap workingImage = new Bitmap(pictureEdit1.Image, pictureEdit1.Image.Width, pictureEdit1.Image.Height);
-                workingImage.SetResolution(autoDPI, autoDPI);
-                workingImage.Save(Images_Path, ImageFormat.Jpeg);
-                pictureEdit1.Image = workingImage;
-
-                long imageLength = 0;
-                v.con_Images = t.imageBinaryArrayConverter(Images_Path, ref imageLength);
-                v.con_Images_FieldName = fieldName;
-
-
-                if (t.IsNotNull(smallFieldName))
-                {
-                    // % 80 oranında küçült
-                    int newWidth = (int)(workingImage.Width * 0.2);
-                    int newHeight = (int)(workingImage.Height * 0.2);
-
-                    Bitmap _img = myImageCompress_(workingImage, newWidth, newHeight);
-
-                    Images_Path = t.Find_Path("images") + fileGuid + "_Small.jpg";
-                    _img.Save(Images_Path, ImageFormat.Jpeg);
-
-                    v.con_Images2 = t.imageBinaryArrayConverter(Images_Path, ref imageLength);
-                    v.con_Images_FieldName2 = smallFieldName;
-
-                    dsDataTarget.Tables[0].Rows[dNTarget.Position]["LkpSmallImage"] = v.con_Images2;
-                }
-
-
-                dsDataTarget.Tables[0].Rows[dNTarget.Position]["LkpImage"] = v.con_Images;
-                dsDataTarget.Tables[0].AcceptChanges();
-
-                string tSql = "";
-                // büyük normal resmi kaydediyor
-                if (t.IsNotNull(smallFieldName) == false)
-                    tSql = " Update " + tableName + " set "
-                    + fieldName + " =  @" + fieldName
-                    + " where " + idFieldName + " = " + idValue;
-                else // hem normal hemde small resmi aynı anda kaydediyor
-                    tSql = " Update " + tableName + " set "
-                    + fieldName + " =  @" + fieldName + ", "
-                    + smallFieldName + " =  @" + smallFieldName
-                    + " where " + idFieldName + " = " + idValue;
-
-                try
-                {
-                    tSave sv = new tSave();
-                    vTable vt = new vTable();
-                    t.Preparing_DataSet(this, dsDataTarget, vt);
-                    v.con_Refresh = sv.Record_SQL_RUN(dsDataTarget, vt, "dsEdit", dNTarget.Position, ref tSql, "");
-
-                    t.AlertMessage(":)", "Resim başarıyla kaydedildi...");
-                    //t.FlyoutMessage(this, ":)", "Resim başarıyla kaydedildi...");
-                    //MessageBox.Show("Resim başarıyla kaydedildi...");
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message.ToString());
-                    //throw;
-                }
-            }
+            dataBaseKaydet();
         }
 
         private void btn_TarayicidanAl_ItemClick(object sender, ItemClickEventArgs e)
@@ -1246,6 +1173,13 @@ namespace YesiLdefter
             this.vScrollBar = null;
             this.viewInfo = null;
 
+            string soru = " Resim veri tabanından silinecek. Onaylıyor musunuz ?";
+            DialogResult cevap = t.mySoru(soru);
+            if (DialogResult.Yes == cevap)
+            {
+                dataBasedenResmiSil();
+            }
+           
         }
         // Sıkıştır
         private void btn_Sikistir_ItemClick(object sender, ItemClickEventArgs e)
@@ -2043,6 +1977,135 @@ namespace YesiLdefter
 
 
         #region subFunctions       
+        
+        private void dataBaseKaydet()
+        {
+            if (dNTarget.Position > -1)
+            {
+                string idValue = dsDataTarget.Tables[0].Rows[dNTarget.Position]["Id"].ToString();
+                string tableName = dsDataTarget.Tables[0].Rows[dNTarget.Position]["LkpTableName"].ToString();
+                string fieldName = dsDataTarget.Tables[0].Rows[dNTarget.Position]["LkpFieldName"].ToString();
+                string smallFieldName = dsDataTarget.Tables[0].Rows[dNTarget.Position]["LkpSmallFieldName"].ToString();
+                string idFieldName = dsDataTarget.Tables[0].Rows[dNTarget.Position]["LkpIdFieldName"].ToString();
+
+
+                // resim png formatına dönüyor
+                //v.con_Images = t.imageBinaryArrayConverterMem((byte[])dsDataTarget.Tables[0].Rows[dNTarget.Position]["LkpImage"]);
+
+                string fileGuid = tFileGuidName;
+                string Images_Path = t.Find_Path("images") + fileGuid + ".jpg";
+                Bitmap workingImage = new Bitmap(pictureEdit1.Image, pictureEdit1.Image.Width, pictureEdit1.Image.Height);
+                workingImage.SetResolution(autoDPI, autoDPI);
+                workingImage.Save(Images_Path, ImageFormat.Jpeg);
+                pictureEdit1.Image = workingImage;
+
+                long imageLength = 0;
+                v.con_Images = t.imageBinaryArrayConverter(Images_Path, ref imageLength);
+                v.con_Images_FieldName = fieldName;
+
+
+                if (t.IsNotNull(smallFieldName))
+                {
+                    // % 80 oranında küçült
+                    int newWidth = (int)(workingImage.Width * 0.2);
+                    int newHeight = (int)(workingImage.Height * 0.2);
+
+                    Bitmap _img = myImageCompress_(workingImage, newWidth, newHeight);
+
+                    Images_Path = t.Find_Path("images") + fileGuid + "_Small.jpg";
+                    _img.Save(Images_Path, ImageFormat.Jpeg);
+
+                    v.con_Images2 = t.imageBinaryArrayConverter(Images_Path, ref imageLength);
+                    v.con_Images_FieldName2 = smallFieldName;
+
+                    dsDataTarget.Tables[0].Rows[dNTarget.Position]["LkpSmallImage"] = v.con_Images2;
+                }
+
+
+                dsDataTarget.Tables[0].Rows[dNTarget.Position]["LkpImage"] = v.con_Images;
+                dsDataTarget.Tables[0].AcceptChanges();
+
+                string tSql = "";
+                // büyük normal resmi kaydediyor
+                if (t.IsNotNull(smallFieldName) == false)
+                    tSql = " Update " + tableName + " set "
+                    + fieldName + " =  @" + fieldName
+                    + " where " + idFieldName + " = " + idValue;
+                else // hem normal hemde small resmi aynı anda kaydediyor
+                    tSql = " Update " + tableName + " set "
+                    + fieldName + " =  @" + fieldName + ", "
+                    + smallFieldName + " =  @" + smallFieldName
+                    + " where " + idFieldName + " = " + idValue;
+
+                try
+                {
+                    tSave sv = new tSave();
+                    vTable vt = new vTable();
+                    t.Preparing_DataSet(this, dsDataTarget, vt);
+                    v.con_Refresh = sv.Record_SQL_RUN(dsDataTarget, vt, "dsEdit", dNTarget.Position, ref tSql, "");
+
+                    t.AlertMessage(":)", "Resim başarıyla kaydedildi...");
+                    //t.FlyoutMessage(this, ":)", "Resim başarıyla kaydedildi...");
+                    //MessageBox.Show("Resim başarıyla kaydedildi...");
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message.ToString());
+                    //throw;
+                }
+            }
+        }
+        
+        private void dataBasedenResmiSil()
+        {
+            if (dNTarget.Position > -1)
+            {
+                string idValue = dsDataTarget.Tables[0].Rows[dNTarget.Position]["Id"].ToString();
+                string tableName = dsDataTarget.Tables[0].Rows[dNTarget.Position]["LkpTableName"].ToString();
+                string fieldName = dsDataTarget.Tables[0].Rows[dNTarget.Position]["LkpFieldName"].ToString();
+                string smallFieldName = dsDataTarget.Tables[0].Rows[dNTarget.Position]["LkpSmallFieldName"].ToString();
+                string idFieldName = dsDataTarget.Tables[0].Rows[dNTarget.Position]["LkpIdFieldName"].ToString();
+
+                if (t.IsNotNull(smallFieldName))
+                {
+                    dsDataTarget.Tables[0].Rows[dNTarget.Position]["LkpSmallImage"] = null;
+                }
+
+                dsDataTarget.Tables[0].Rows[dNTarget.Position]["LkpImage"] = null;
+                dsDataTarget.Tables[0].AcceptChanges();
+
+                string tSql = "";
+                // büyük normal resmi kaydediyor
+                if (t.IsNotNull(smallFieldName) == false)
+                    tSql = " Update " + tableName + " set "
+                    + fieldName + " =  null "
+                    + " where " + idFieldName + " = " + idValue;
+                else // hem normal hemde small resmi aynı anda kaydediyor
+                    tSql = " Update " + tableName + " set "
+                    + fieldName + " =  null, "
+                    + smallFieldName + " =  null "
+                    + " where " + idFieldName + " = " + idValue;
+
+                try
+                {
+                    tSave sv = new tSave();
+                    vTable vt = new vTable();
+                    t.Preparing_DataSet(this, dsDataTarget, vt);
+                    v.con_Refresh = sv.Record_SQL_RUN(dsDataTarget, vt, "dsEdit", dNTarget.Position, ref tSql, "");
+
+                    t.AlertMessage(":)", "Resim başarıyla silindi...");
+                    t.FlyoutMessage(this, ":)", "Resim başarıyla silindi...");
+                    //MessageBox.Show("Resim başarıyla kaydedildi...");
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message.ToString());
+                    //throw;
+                }
+            }
+
+        }
+
         private void dataNavigator_PositionChanged(object sender, EventArgs e)
         {
             // resmin orjinalini sakla

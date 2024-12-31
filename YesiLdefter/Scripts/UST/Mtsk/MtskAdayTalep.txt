@@ -439,6 +439,59 @@ AS BEGIN
 
       if (@DbUpdatesIsActive = 0)
       begin 
+          if ( Select Count(Id) as ADET
+               From [dbo].[MtskDonemi]
+               Where DonemTipiId = @yDonemTipiId
+               and   GrupTipiId = @yGrupTipiId ) = 0 
+               and @yGrupTipiId > 1
+          begin
+              INSERT INTO [dbo].[MtskDonemi]
+                   ([ParentId]
+                   ,[FirmId]
+                   ,[IsActive]
+                   ,[DonemTipiId]
+                   ,[GrupTipiId]
+                   ,[KurumOnayTipiId])
+              VALUES
+                   (0 --ParentId
+                   ,@yFirmId
+                   ,1 --IsActive
+                   ,@yDonemTipiId
+                   ,@yGrupTipiId
+                   ,0 -- KurumOnayTipiId
+				   )
+          end
+
+          if ( Select Count(Id) as ADET
+               From [dbo].[MtskGrupSubesi]
+               Where DonemTipiId = @yDonemTipiId
+               and   GrupTipiId = @yGrupTipiId 
+               and   SubeTipiId = @ySubeTipiId ) = 0 
+               and   @yGrupTipiId > 0
+               and   @ySubeTipiId > 0
+          begin
+              INSERT INTO [dbo].[MtskGrupSubesi]
+                  ([ParentId]
+                  ,[FirmId]
+                  ,[IsActive]
+                  ,[DonemTipiId]
+                  ,[GrupTipiId]
+                  ,[SubeTipiId]
+                  ,[KurumOnayTipiId]
+                  ,[TDersIsUploaded]
+                  )
+              VALUES
+                  (0 --ParentId
+                  ,@yFirmId
+                  ,1 --IsActive
+                  ,@yDonemTipiId
+                  ,@yGrupTipiId
+                  ,@ySubeTipiId
+                  ,0 --KurumOnayTipiId
+                  ,0 --TDersIsUploaded
+                  )
+          end
+
           Execute [dbo].[prc_MtskAdayTablesInsert] @TalepId  -- Data transferi sırasında oluşturuluyor zaten insert oluyor
           Execute [dbo].[prc_MtskAdayTakipTalepKaydiSingleSet] @TalepId
 	      Execute [dbo].[prc_MtskAdayTalepYasiniHesapla] @TalepId

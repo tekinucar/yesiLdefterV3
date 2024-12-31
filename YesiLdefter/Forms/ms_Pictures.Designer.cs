@@ -392,6 +392,7 @@
             this.btn_ResimSil.Id = 8;
             this.btn_ResimSil.Name = "btn_ResimSil";
             this.btn_ResimSil.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btn_ResimSil_ItemClick);
+            ///this.btn_ResimSil.Visibility = DevExpress.XtraBars.BarItemVisibility.Never;
             // 
             // barStaticItem1
             // 

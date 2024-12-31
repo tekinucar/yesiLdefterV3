@@ -53,13 +53,15 @@ CREATE TRIGGER [dbo].[trg_MtskAday] on [dbo].[MtskAday]
 AFTER INSERT, UPDATE
 AS BEGIN
 
-    DECLARE adayCursor cursor local for select Id from Inserted
-    --DECLARE @curId bigint
+    declare adayCursor cursor local for select Id from Inserted
     declare @adayId bigint
 
     OPEN adayCursor
-
     FETCH NEXT FROM adayCursor INTO @adayId --@curId
+
+    -- Veri Transferi başladımı
+    declare @DbUpdatesIsActive Bit = 0
+    set @DbUpdatesIsActive = [dbo].[fnc_getIsDbUpdate] (13)
 
     declare @yAdayId int = 0
     declare @eAdayId int = 0
@@ -79,7 +81,8 @@ AS BEGIN
     declare @yAdi varchar(50) = null
     declare @ySoyadi varchar(50) = null
     declare @yDogumTarihi Date = null
-
+	declare @yUlkeTipiId smallInt 
+	declare @AdayGUID uniqueidentifier
 
 	-- Veri Transferi başladımı
     --Select @DbUpdatesIsActive = u.IsActive
@@ -110,6 +113,8 @@ AS BEGIN
            ,@yAdi = isnull(ins.Adi,'')
            ,@ySoyadi = isnull(ins.Soyadi,'')
            ,@yDogumTarihi = ins.DogumTarihi
+		   ,@yUlkeTipiId = isnull(ins.UlkeTipiId,-1)
+		   ,@AdayGUID = ins.AdayGUID
         From inserted ins
         Where ins.Id = @adayId
      			
@@ -136,6 +141,21 @@ AS BEGIN
             Where Id = @adayId
         end
 		
+        if (@yUlkeTipiId = -1 or @yUlkeTipiId = 0)
+        begin 
+            Update MtskAday set 
+			    UlkeTipiId = (case when SUBSTRING(@yTcNo,1,1) <> '9' then 1000 else 0 end)
+            Where Id = @adayId
+        end 
+
+        if (@AdayGUID is null)
+        begin         
+            Update MtskAday set 
+			    AdayGUID = NEWID()
+            Where Id = @adayId
+        end
+
+
     	set @newTamAdi = @yAdi + ' ' +  @ySoyadi
 
         --if ((UPPER(@newTamAdi) <> UPPER(@eTamAdi)) or 
@@ -153,22 +173,27 @@ AS BEGIN
 
 		-- Doğum tarihi değişirse 
 		-- her talep için yeniden doğum tarihi hesaplansın
-        if (@eDogumTarihi <> @yDogumTarihi or @eDogumTarihi is null or @yDogumTarihi is null)
-		begin
-		    Update MtskAdayTalep set FirmId = @yFirmId
-			Where AdayId = @adayId
-		end
-		
-      FETCH NEXT FROM adayCursor INTO @adayId
+        if (@DbUpdatesIsActive = 0)
+        begin
+            if (@eDogumTarihi <> @yDogumTarihi or @eDogumTarihi is null or @yDogumTarihi is null)
+            begin
+                Update MtskAdayTalep set FirmId = @yFirmId
+                Where AdayId = @adayId
+            end
+
+            -- trg_MtskAdayTalep üzerinden tetikleniyor   
+            -- IstedigiSertifikaTipiId ye göre kontrollerin yapılması gerekiyor
+            -- Exec prc_MtskAdayTakipTalepKaydiSingleSet
+        end 		
+
+        FETCH NEXT FROM adayCursor INTO @adayId
     END -- While
 
 	-- Veri transferi yapılmıyorsa 
-	--if (@DbUpdatesIsActive = 0)
-	--begin
-       -- MtskDonemKontrolu
-       --EXECUTE [dbo].[prc_MtskDonemKontrolu] @yFirmId 
-       --EXECUTE [dbo].[prc_MtskAdayTakip] @yFirmId
-    --end
+	if (@DbUpdatesIsActive = 0)
+	begin
+	   EXECUTE dbo.prc_MtskDonemAdaySayilariSet @yFirmId
+    end
 
     CLOSE adayCursor
     DEALLOCATE adayCursor   
