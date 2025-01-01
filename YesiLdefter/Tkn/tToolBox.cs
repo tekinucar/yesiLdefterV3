@@ -14400,7 +14400,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 {
                     if (IsNotNull(pageName))
                     {
-                        selectBackstageViewTabItem(c, pageName);
+                        selectBackstageViewTabItem(c, pageName, "???");
                     }
 
                     if ((IsNotNull(pageName) == false) && (pageIndex > -1))
@@ -14412,13 +14412,14 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             }
         }
 
-        public void selectBackstageViewTabItem(Control c, string pageName)
+        public void selectBackstageViewTabItem(Control c, string pageName, string tabPageCode)
         {
             int i2 = ((DevExpress.XtraBars.Ribbon.BackstageViewControl)c).Controls.Count;
-
+            if (tabPageCode == "") tabPageCode = "???";
             for (int i = 0; i < i2; i++)
             {
-                if (((DevExpress.XtraBars.Ribbon.BackstageViewControl)c).Controls[i].Name == pageName)
+                if (((DevExpress.XtraBars.Ribbon.BackstageViewControl)c).Controls[i].Name == pageName || 
+                    ((DevExpress.XtraBars.Ribbon.BackstageViewControl)c).Controls[i].Name == tabPageCode)
                 {
                     // sıfırda ekranda görmediğimiz bir nesne daha mevcut
                     ((DevExpress.XtraBars.Ribbon.BackstageViewControl)c).SelectedTabIndex = (i - 1);
@@ -14427,12 +14428,12 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             }
         }
 
-        public void selectBackstageViewTabItem(Form tForm, string tabControlName, string pageName)
+        public void selectBackstageViewTabItem(Form tForm, string tabControlName, string pageName, string tabPageCode)
         {
             Control c = Find_Control(tForm, tabControlName);
             if (c == null) return;
 
-            selectBackstageViewTabItem(c, pageName);
+            selectBackstageViewTabItem(c, pageName, tabPageCode);
         }
         public Control Find_BackstageViewTabItem(Form tForm, string tabControlName, string pageName)
         {

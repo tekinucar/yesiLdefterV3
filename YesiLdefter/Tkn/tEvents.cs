@@ -6088,7 +6088,7 @@ namespace Tkn_Events
                 #region DevExpress.XtraBars.Ribbon.BackstageViewTabItem
                 if (c.GetType().ToString() == "DevExpress.XtraBars.Ribbon.BackstageViewClientControl")
                 {
-                    t.selectBackstageViewTabItem(tForm, TabControlName, "tTabPage_" + TableIPCode_NotDot + readValue);
+                    t.selectBackstageViewTabItem(tForm, TabControlName, "tTabPage_" + TableIPCode_NotDot + readValue, tabPageCode);
 
                     //((DevExpress.XtraBars.Ribbon.BackstageViewControl)c).Parent.AccessibleName =
                     //    ((DevExpress.XtraBars.Ribbon.BackstageViewControl)c).AccessibleName;
