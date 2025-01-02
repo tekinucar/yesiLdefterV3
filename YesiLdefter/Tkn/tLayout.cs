@@ -264,6 +264,8 @@ namespace Tkn_Layout
         {
             tMenu mn = new tMenu();
 
+
+            
             string TABLEIPCODE = row["TABLEIPCODE"].ToString();
 
             // olabilecek valueler hakkında : 
@@ -308,15 +310,19 @@ namespace Tkn_Layout
                     if (t.IsNotNull(UstHesapRow["CMP_NAME"].ToString()))
                         ustItemName = UstHesapRow["CMP_NAME"].ToString();
 
+                    //lParentControlAdd(tForm, panelControl1, ustItemName, ustItemType, row);
+
                     string[] controls = new string[] { };
                     Control c = t.Find_Control(tForm, ustItemName, "", controls);
-
+                        
+                        
                     if (c != null)
                     {
                         v.con_Menu_Prop_Value = Prop_View;
                         mn.Create_Menu_IN_Control(c, TABLEIPCODE, fieldName);
                         v.con_Menu_Prop_Value = string.Empty;
                     }
+
                 }
                 else if (subView != null)
                 {
@@ -328,6 +334,7 @@ namespace Tkn_Layout
                 {
                     mn.Create_Menu_IN_Control(tForm, TABLEIPCODE, fieldName);
                 }
+
 
             }
             #endregion

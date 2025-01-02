@@ -306,7 +306,8 @@ namespace YesiLdefter
                 if ((v.SP_TabimParamsKurumTipi == "") &&
                     ((v.SP_Firm_SectorTypeId == (Int16)v.msSectorType.UstadMtsk) ||
                     (v.SP_Firm_SectorTypeId == (Int16)v.msSectorType.TabimMtsk)))
-                    autoOpenForm("UST/MEB/MTS/YHBaslangic","");
+                    autoOpenForm("UST/MEB/MTS/YHYasamDongusu", "");
+                //autoOpenForm("UST/MEB/MTS/YHBaslangic","");
             }
             else
             {

@@ -80,8 +80,10 @@ namespace Tkn_Menu
             //if (ItemType == 101) Create_BarManager((DevExpress.XtraBars.BarManager)menuControl, ds_Items);
             if (ItemType == 102) Create_Ribbon((DevExpress.XtraBars.Ribbon.RibbonControl)menuControl, ds_Items, MenuCode);
             if (ItemType == 103) Create_NavBar((DevExpress.XtraNavBar.NavBarControl)menuControl, ds_Items);
-            if (ItemType == 104) Create_TileBar((DevExpress.XtraBars.Navigation.TileBar)menuControl, ds_Items);
-            if (ItemType == 105) Create_TileControl((DevExpress.XtraEditors.TileControl)menuControl, ds_Items);
+            if (ItemType == 104) 
+                Create_TileBar((DevExpress.XtraBars.Navigation.TileBar)menuControl, ds_Items);
+            if (ItemType == 105) 
+                Create_TileControl((DevExpress.XtraEditors.TileControl)menuControl, ds_Items);
             //--- Genelde Kullanılan Menü Tipi
             if (ItemType == 106) Create_TileNavPane((DevExpress.XtraBars.Navigation.TileNavPane)menuControl, ds_Items, fieldName, dontReport, dontEDI, dontExit, reportTableIPCode);
             if (ItemType == 107) Create_NavigationPane((DevExpress.XtraBars.Navigation.NavigationPane)menuControl, ds_Items);
