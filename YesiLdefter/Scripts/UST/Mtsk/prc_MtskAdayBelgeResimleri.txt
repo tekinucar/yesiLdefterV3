@@ -36,7 +36,7 @@ AS BEGIN
   Where Id = @AdayId
 
   Union All
-
+  /*
   Select 
     Id 
   , @TamAdiSoyadi as TamAdiSoyadi
@@ -57,7 +57,7 @@ AS BEGIN
   Where Id = @TalepId
 
   Union All
-
+  */
   Select 
     TalepId as Id
   , @TamAdiSoyadi as TamAdiSoyadi

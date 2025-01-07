@@ -174,7 +174,10 @@ namespace Tkn_Starter
             // önce yeni dosya varsa onla download olması gerekiyor
             t.WaitFormOpen(v.mainForm, "DbUpdates işlemleri yapılıyor...");
             t.read_MsFileUpdates();
-            
+
+            t.WaitFormOpen(v.mainForm, "Data Updates işlemleri yapılıyor...");
+            t.dataUpdates();
+
             // dosyalardan son yeni exenin download olması gerekiyor
             t.WaitFormOpen(v.mainForm, "Exe güncelleme kontrolü yapılıyor...");
             t.read_MsExeUpdates(v.SP_tUserType);

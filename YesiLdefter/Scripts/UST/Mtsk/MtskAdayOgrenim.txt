@@ -82,6 +82,13 @@ AS BEGIN
         ) as x
         Where a.TalepId = @TalepId
 
+        -- Data transferi oldu fakat daha önce bu talep için boş kayıt oluşturulmuş ise onu sil
+        if (@VeriKaynakId > 0)
+        begin
+		    Delete From dbo.MtskAdayOgrenim 
+            Where TalepId = @TalepId
+            and   isnull(VeriKaynakId,0) = 0
+        end
 
       FETCH NEXT FROM ogrenimCursor INTO @ogrenimId
     END -- While

@@ -222,6 +222,163 @@ namespace Tkn_ToolBox
 
         #endregion fileUpdates
 
+        #region DataUpdates
+
+
+        public void dataUpdates()
+        {
+            tSQLs sqls = new tSQLs();
+            DataSet ds = new DataSet();
+
+            //string gecerlilikTarihiIdSql = "  declare @GecerlilikTarihiId int = 0 ";
+            string insertSql = @"  declare @FIRM_ID int 
+  Set @FIRM_ID = :FIRM_ID 
+  declare @TarihId int = 0
+";
+            string finalSql = "";
+            string MtskSaatTeorikSql = "";
+            string MtskSaatUygulamaSql = "";
+            string MtskUcretSinavSql = "";
+            string MtskUcretTeorikSql = "";
+            string MtskUcretUygulamaSql = "";
+            /// 
+            string selectSql = sqls.getGecerliTarihSql();
+            
+            if (SQL_Read_Execute(v.dBaseNo.Manager, ds, ref selectSql, "", "GecerliTarih"))
+            {
+                if (IsNotNull(ds))
+                {
+                    foreach (DataRow row in ds.Tables[0].Rows)
+                    {
+                        insertSql += row[0].ToString() + v.ENTER;
+                    }
+
+                    if (insertSql.Length > 100)
+                    {
+
+                        /// HubMtskSaatUygulama > MtskSaatTeorik
+                        /// 
+                        insertSql += sqls.getGecerlilikTarihiIdSql(21101);
+                        MtskSaatTeorikSql = sqls.getMtskSaatTeorikSql();
+                        
+                        TableRemove(ds);
+                        
+                        if (SQL_Read_Execute(v.dBaseNo.Manager, ds, ref MtskSaatTeorikSql, "", "MtskSaatTeorik"))
+                        {
+                            foreach (DataRow row in ds.Tables[0].Rows)
+                            {
+                                insertSql += row[0].ToString() + v.ENTER;
+                            }
+                        }
+
+                        /// HubMtskSaatUygulama > MtskSaatUygulama
+                        /// 
+                        insertSql += sqls.getGecerlilikTarihiIdSql(21102);
+                        MtskSaatUygulamaSql = sqls.getMtskSaatUygulamaSql();
+
+                        TableRemove(ds);
+
+                        if (SQL_Read_Execute(v.dBaseNo.Manager, ds, ref MtskSaatUygulamaSql, "", "MtskSaatUygulama"))
+                        {
+                            foreach (DataRow row in ds.Tables[0].Rows)
+                            {
+                                insertSql += row[0].ToString() + v.ENTER;
+                            }
+                        }
+
+
+                        /// HubMtskUcretSinav > MtskUcretSinav
+                        ///
+                        insertSql += sqls.getGecerlilikTarihiIdSql(21103);
+                        MtskUcretSinavSql = sqls.getMtskUcretSinavSql();
+
+                        TableRemove(ds);
+
+                        if (SQL_Read_Execute(v.dBaseNo.Manager, ds, ref MtskUcretSinavSql, "", "MtskUcretSinav"))
+                        {
+                            foreach (DataRow row in ds.Tables[0].Rows)
+                            {
+                                insertSql += row[0].ToString() + v.ENTER;
+                            }
+                        }
+
+                        insertSql += sqls.getGecerlilikTarihiIdSql(21104);
+                        MtskUcretTeorikSql = sqls.getMtskUcretTeorikSql();
+
+                        TableRemove(ds);
+
+                        if (SQL_Read_Execute(v.dBaseNo.Manager, ds, ref MtskUcretTeorikSql, "", "MtskUcretTeorik"))
+                        {
+                            foreach (DataRow row in ds.Tables[0].Rows)
+                            {
+                                insertSql += row[0].ToString() + v.ENTER;
+                            }
+                        }
+
+                        insertSql += sqls.getGecerlilikTarihiIdSql(21104);
+                        MtskUcretUygulamaSql = sqls.getMtskUcretUygulamaSql();
+
+                        TableRemove(ds);
+
+                        if (SQL_Read_Execute(v.dBaseNo.Manager, ds, ref MtskUcretUygulamaSql, "", "MtskUcretUygulama"))
+                        {
+                            foreach (DataRow row in ds.Tables[0].Rows)
+                            {
+                                insertSql += row[0].ToString() + v.ENTER;
+                            }
+                        }
+
+                        if (IsNotNull(insertSql))
+                        {
+                            TableRemove(ds);
+
+                            if (SQL_Read_Execute(v.dBaseNo.Project, ds, ref insertSql, "", "SaatlerUcretler"))
+                            {
+                                //
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+
+
+
+        public void dataUpdates_IPTAL()
+        {
+            /// Hub ile başlayan tablolar bizim serverlerde tuttuğumuz ortak paylaşımlı tablolardır.
+            /// Biz bu Hubxxxx tablolara bir kayıt girince otomatik olarak müşteri database lerde olmasını sağladığımız datalardır
+            /// Ücretler, saatler vb ortak olan ve herkesi ilgilendiren datalardır
+            /// 
+
+            tSQLs sqls = new tSQLs();
+            DataSet dsLastIds = new DataSet();
+            string lastIdSql = sqls.getDataUpdatesLastIdSql();
+            
+            if (SQL_Read_Execute(v.dBaseNo.Manager, dsLastIds, ref lastIdSql, "", "LastIds"))
+            {
+                if (IsNotNull(dsLastIds))
+                {
+                    
+                    string newRowsSql = sqls.getHubDataUpdatesFindNewRowsSql(dsLastIds);
+                    DataSet newHubDataRows = new DataSet();
+
+                    if (SQL_Read_Execute(v.dBaseNo.Manager, newHubDataRows, ref newRowsSql, "", "newRowsSql"))
+                    {
+                        if (IsNotNull(newHubDataRows))
+                        {
+                            ////.... insert yapılacatı kaldı , çünkü FirmId faktöündn dolayı olmadı
+                        }
+
+                    }
+                    
+                }
+            }
+        }
+
+        #endregion DataUpdates
+
         #region *Database İşlemleri
 
         #region dbUpdatesChecked
@@ -14829,8 +14986,8 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             string orjinalTableName = tableName;
             string orjinalFieldName = fieldName;
 
-            if (orjinalTableName.ToUpper().IndexOf("MTSK") > -1)
-            {
+            //if (orjinalTableName.ToUpper().IndexOf("MTSK") > -1)
+            //{
                 if (orjinalFieldName.IndexOf("KurumOnay") > -1)
                 {
                     idFieldName = "Id";
@@ -14880,7 +15037,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                     tableName = "MebBransTipi";
                     return;
                 }
-            }
+            //}
 
             if (fieldName.IndexOf("UlkeTipiIds") > -1)
             {

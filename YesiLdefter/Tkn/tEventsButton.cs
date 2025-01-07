@@ -1895,6 +1895,17 @@ namespace Tkn_Events
                         v.tResimEditor.imagesSourceTableIPCode = tableIPCode;
                         v.tResimEditor.imagesSourceFieldName = "";
                         v.tResimEditor.imagesMasterTableIPCode = prop_.READ_TABLEIPCODE;
+                        v.tResimEditor.listTableIPCode = prop_.TARGET_TABLEIPCODE;
+
+                        /// listeli işlem mi geldi kontrol et
+                        if (t.IsNotNull(v.tResimEditor.imagesMasterTableIPCode) == false)
+                        {
+                            foreach (TABLEIPCODE_LIST item in prop_.TABLEIPCODE_LIST)
+                            {
+                                v.tResimEditor.imagesMasterTableIPCode = item.RTABLEIPCODE;
+                                v.tResimEditor.listTableIPCode = item.TABLEIPCODE;
+                            }
+                        }
 
                         onay = openPictureEditForm(v.tResimEditor);
                         return onay;
@@ -1930,7 +1941,10 @@ namespace Tkn_Events
         {
             bool onay = false;
 
-            if (tResimEditor.imagesMasterTableIPCode != "")
+            /// Sadece bir kişi için yapılacaksa
+            /// 
+            if ((tResimEditor.imagesMasterTableIPCode != "") &&
+                (tResimEditor.listTableIPCode == ""))
             {
                 // ms_Pictures içindeki Resimler için dataset hazırlanıyor
                 // yani gerekli datasetin prc_xxxxx çalıştırılıyor
@@ -1939,6 +1953,15 @@ namespace Tkn_Events
                 Form tFormMaster = Application.OpenForms[tResimEditor.imagesSourceFormName];
                 tInputPanel ip = new tInputPanel();
                 v.con_ImagesMasterDataSet = ip.Create_DataSet(tFormMaster,  tResimEditor.imagesMasterTableIPCode);
+            }
+
+            if ((tResimEditor.imagesMasterTableIPCode != "") &&
+                (tResimEditor.listTableIPCode != ""))
+            {
+                v.con_ImagesMasterDataSet = null;
+                /// Listeli tarama yapılacaksa bu işleme gerek yok
+                /// Çünkü listeye bağlı olarak kişi resimleri okunuyor
+                ///
             }
 
             //tToolBox t = new tToolBox();

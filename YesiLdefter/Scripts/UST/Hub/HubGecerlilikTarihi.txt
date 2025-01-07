@@ -45,11 +45,10 @@ Delete from [Lkp].[HubGecerlilikTarihiKonuTipi]
 INSERT INTO [Lkp].[HubGecerlilikTarihiKonuTipi] (Id, KonuTipi, GrupTipiId)
  VALUES 
   ( 0,      N'',0),
-  ( 21101,  N'Teodrik saatler', 211),
+  ( 21101,  N'Teorik saatler', 211),
   ( 21102,  N'Uygulama saatleri', 211),
   ( 21103,  N'Sınav ücreti', 211),
-  ( 21104,  N'Teodrik ders ücreti', 211),
-  ( 21105,  N'Uygulama ders ücreti', 211)
+  ( 21104,  N'Sertifika/ders ücreti', 211)
   
 commit transaction
 

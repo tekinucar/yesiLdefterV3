@@ -135,13 +135,17 @@
             this.PageGroupViewShowHide = new DevExpress.XtraBars.Ribbon.RibbonPageGroup();
             this.ribbonPageGroup2 = new DevExpress.XtraBars.Ribbon.RibbonPageGroup();
             this.ribbonStatusBar1 = new DevExpress.XtraBars.Ribbon.RibbonStatusBar();
-            this.navigationPane1 = new DevExpress.XtraBars.Navigation.NavigationPane();
-            this.navigationPage_Resim = new DevExpress.XtraBars.Navigation.NavigationPage();
-            this.splitContainerControl1 = new DevExpress.XtraEditors.SplitContainerControl();
+
+            this.tabPane1 = new  DevExpress.XtraBars.Navigation.TabPane();
+            this.tabPage_Resim = new DevExpress.XtraBars.Navigation.TabNavigationPage();
+            this.tabPage_Dosya = new DevExpress.XtraBars.Navigation.TabNavigationPage();
+
             this.pictureEdit1 = new DevExpress.XtraEditors.PictureEdit();
             this.pictureEdit2 = new System.Windows.Forms.PictureBox();
-            this.navigationPage_Dosya = new DevExpress.XtraBars.Navigation.NavigationPage();
             this.splitContainerControl2 = new DevExpress.XtraEditors.SplitContainerControl();
+            this.groupControlList = new DevExpress.XtraEditors.GroupControl();
+            this.groupControlKisi = new DevExpress.XtraEditors.GroupControl();
+            
             this.panelControl1 = new DevExpress.XtraEditors.PanelControl();
             this.navigationPanel = new DevExpress.XtraEditors.PanelControl();
             this.btnNavigationHistory = new DevExpress.XtraEditors.LabelControl();
@@ -178,16 +182,20 @@
             ((System.ComponentModel.ISupportInitialize)(this.imageComboBox_ResimTuru)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.tButtonEdit_Quality)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.tButtonEdit_Zoom)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.navigationPane1)).BeginInit();
-            this.navigationPane1.SuspendLayout();
-            this.navigationPage_Resim.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainerControl1)).BeginInit();
-            this.splitContainerControl1.SuspendLayout();
+
+            ((System.ComponentModel.ISupportInitialize)(this.tabPane1)).BeginInit();
+            this.tabPane1.SuspendLayout();
+            this.tabPage_Resim.SuspendLayout();
+            this.tabPage_Dosya.SuspendLayout();
+
             ((System.ComponentModel.ISupportInitialize)(this.pictureEdit1.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureEdit2)).BeginInit();
-            this.navigationPage_Dosya.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerControl2)).BeginInit();
             this.splitContainerControl2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.groupControlList)).BeginInit();
+            this.groupControlList.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.groupControlKisi)).BeginInit();
+            this.groupControlKisi.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.panelControl1)).BeginInit();
             this.panelControl1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.navigationPanel)).BeginInit();
@@ -1002,56 +1010,56 @@
             this.ribbonStatusBar1.Ribbon = this.ribbonControl1;
             this.ribbonStatusBar1.Size = new System.Drawing.Size(1552, 27);
             // 
-            // navigationPane1
+            // tabPane1
             // 
-            this.navigationPane1.Controls.Add(this.navigationPage_Resim);
-            this.navigationPane1.Controls.Add(this.navigationPage_Dosya);
-            this.navigationPane1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.navigationPane1.Location = new System.Drawing.Point(0, 116);
-            this.navigationPane1.Name = "navigationPane1";
-            this.navigationPane1.Pages.AddRange(new DevExpress.XtraBars.Navigation.NavigationPageBase[] {
-            this.navigationPage_Resim,
-            this.navigationPage_Dosya});
-            this.navigationPane1.RegularSize = new System.Drawing.Size(1552, 414);
-            this.navigationPane1.SelectedPage = this.navigationPage_Resim;
-            this.navigationPane1.Size = new System.Drawing.Size(1552, 414);
-            this.navigationPane1.TabIndex = 2;
-            this.navigationPane1.Text = "navigationPane1";
-            this.navigationPane1.SelectedPageChanged += new DevExpress.XtraBars.Navigation.SelectedPageChangedEventHandler(this.navigationPane1_SelectedPageChanged);
+            this.tabPane1.Controls.Add(this.tabPage_Resim);
+            this.tabPane1.Controls.Add(this.tabPage_Dosya);
+            this.tabPane1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tabPane1.Location = new System.Drawing.Point(0, 116);
+            this.tabPane1.Name = "tabPane1";
+            this.tabPane1.Pages.AddRange(new DevExpress.XtraBars.Navigation.TabNavigationPage [] {
+            this.tabPage_Resim,
+            this.tabPage_Dosya});
+            this.tabPane1.RegularSize = new System.Drawing.Size(1552, 414);
+            this.tabPane1.SelectedPage = this.tabPage_Resim;
+            this.tabPane1.Size = new System.Drawing.Size(1552, 414);
+            this.tabPane1.TabIndex = 2;
+            this.tabPane1.Text = "tabPane1";
+            this.tabPane1.SelectedPageChanged += new DevExpress.XtraBars.Navigation.SelectedPageChangedEventHandler(this.navigationPane1_SelectedPageChanged);
             // 
-            // navigationPage_Resim
+            // tabPage_Resim
             // 
-            this.navigationPage_Resim.Caption = "Resim Panosu";
-            this.navigationPage_Resim.Controls.Add(this.splitContainerControl1);
-            this.navigationPage_Resim.Name = "navigationPage_Resim";
-            this.navigationPage_Resim.Properties.ShowCollapseButton = DevExpress.Utils.DefaultBoolean.False;
-            this.navigationPage_Resim.Properties.ShowExpandButton = DevExpress.Utils.DefaultBoolean.False;
-            this.navigationPage_Resim.Properties.ShowMode = DevExpress.XtraBars.Navigation.ItemShowMode.ImageAndText;
-            this.navigationPage_Resim.Size = new System.Drawing.Size(1452, 368);
+            this.tabPage_Resim.Caption = "Resim Panosu";
+            this.tabPage_Resim.Controls.Add(this.groupControlKisi);
+            this.tabPage_Resim.Controls.Add(this.groupControlList);
+            this.tabPage_Resim.Controls.Add(this.pictureEdit1);
+            this.tabPage_Resim.Name = "tabPage_Resim";
+            this.tabPage_Resim.Properties.ShowMode = DevExpress.XtraBars.Navigation.ItemShowMode.ImageAndText;
+            this.tabPage_Resim.Size = new System.Drawing.Size(1452, 368);
             // 
-            // splitContainerControl1
+            // tabPage_Dosya
             // 
-            this.splitContainerControl1.CaptionLocation = DevExpress.Utils.Locations.Left;
-            this.splitContainerControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainerControl1.FixedPanel = DevExpress.XtraEditors.SplitFixedPanel.None;
-            this.splitContainerControl1.Location = new System.Drawing.Point(0, 0);
-            this.splitContainerControl1.Name = "splitContainerControl1";
-            this.splitContainerControl1.Panel1.BorderStyle = DevExpress.XtraEditors.Controls.BorderStyles.Simple;
-            this.splitContainerControl1.Panel1.CaptionLocation = DevExpress.Utils.Locations.Top;
-            this.splitContainerControl1.Panel1.ShowCaption = true;
-            this.splitContainerControl1.Panel1.Text = "Resim Listesi";
-            this.splitContainerControl1.Panel2.BorderStyle = DevExpress.XtraEditors.Controls.BorderStyles.Simple;
-            this.splitContainerControl1.Panel2.CaptionLocation = DevExpress.Utils.Locations.Top;
-            this.splitContainerControl1.Panel2.Controls.Add(this.pictureEdit1);
-            this.splitContainerControl1.Panel2.Controls.Add(this.pictureEdit2);
-            this.splitContainerControl1.Panel2.ShowCaption = true;
-            this.splitContainerControl1.Panel2.Text = "Resim";
-            this.splitContainerControl1.ShowCaption = true;
-            this.splitContainerControl1.Size = new System.Drawing.Size(1452, 368);
-            this.splitContainerControl1.SplitterPosition = 300;
-            this.splitContainerControl1.TabIndex = 1;
-            this.splitContainerControl1.Text = "splitContainerControl1";
-
+            this.tabPage_Dosya.Caption = "Dosyalar";
+            this.tabPage_Dosya.Controls.Add(this.splitContainerControl2);
+            this.tabPage_Dosya.Name = "tabPage_Dosya";
+            this.tabPage_Dosya.Properties.ShowMode = DevExpress.XtraBars.Navigation.ItemShowMode.ImageAndText;
+            this.tabPage_Dosya.Size = new System.Drawing.Size(1452, 368);
+            // 
+            // groupControlList
+            // 
+            this.groupControlList.Dock = System.Windows.Forms.DockStyle.Left;
+            this.groupControlList.Width = 400;
+            this.groupControlList.Text = "Liste";
+            this.groupControlList.ShowCaption = true;
+            this.groupControlList.Visible = true;
+            // 
+            // groupControlKisi
+            // 
+            this.groupControlKisi.Dock = System.Windows.Forms.DockStyle.Left;
+            this.groupControlKisi.Width = 400;
+            this.groupControlKisi.Text = "Kişi";
+            this.groupControlKisi.ShowCaption = true;
+            this.groupControlKisi.Visible = true;
             // 
             // pictureEdit1
             // 
@@ -1070,6 +1078,7 @@
             this.pictureEdit1.Size = new System.Drawing.Size(1143, 346);
             this.pictureEdit1.TabIndex = 0;
             this.pictureEdit1.Visible = true; // false;
+            this.pictureEdit1.BringToFront();
             // 
             // pictureEdit2
             // 
@@ -1078,16 +1087,7 @@
             this.pictureEdit2.Location = new System.Drawing.Point(0, 0);
             this.pictureEdit2.Name = "pictureEdit2";
             this.pictureEdit2.Visible = false; // true;
-            // 
-            // navigationPage_Dosya
-            // 
-            this.navigationPage_Dosya.Caption = "Dosyalar";
-            this.navigationPage_Dosya.Controls.Add(this.splitContainerControl2);
-            this.navigationPage_Dosya.Name = "navigationPage_Dosya";
-            this.navigationPage_Dosya.Properties.ShowCollapseButton = DevExpress.Utils.DefaultBoolean.False;
-            this.navigationPage_Dosya.Properties.ShowExpandButton = DevExpress.Utils.DefaultBoolean.False;
-            this.navigationPage_Dosya.Properties.ShowMode = DevExpress.XtraBars.Navigation.ItemShowMode.ImageAndText;
-            this.navigationPage_Dosya.Size = new System.Drawing.Size(1452, 368);
+
             // 
             // splitContainerControl2
             // 
@@ -1377,7 +1377,8 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1552, 557);
-            this.Controls.Add(this.navigationPane1);
+            //this.Controls.Add(this.navigationPane1);
+            this.Controls.Add(this.tabPane1);
             this.Controls.Add(this.ribbonStatusBar1);
             this.Controls.Add(this.ribbonControl1);
             this.Name = "ms_Pictures";
@@ -1398,14 +1399,17 @@
             ((System.ComponentModel.ISupportInitialize)(this.imageComboBox_ResimTuru)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.tButtonEdit_Quality)).EndInit();
             //((System.ComponentModel.ISupportInitialize)(this.repositoryItemZOOM)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.navigationPane1)).EndInit();
-            this.navigationPane1.ResumeLayout(false);
-            this.navigationPage_Resim.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainerControl1)).EndInit();
-            this.splitContainerControl1.ResumeLayout(false);
+
+            ((System.ComponentModel.ISupportInitialize)(this.tabPane1)).EndInit();
+            this.tabPane1.ResumeLayout(false);
+            this.tabPage_Resim.ResumeLayout(false);
+            this.tabPage_Dosya.ResumeLayout(false);
+            this.groupControlList.ResumeLayout(false);
+            this.groupControlKisi.ResumeLayout(false);
+
+
             ((System.ComponentModel.ISupportInitialize)(this.pictureEdit1.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureEdit2)).BeginInit();
-            this.navigationPage_Dosya.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerControl2)).EndInit();
             this.splitContainerControl2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.panelControl1)).EndInit();
@@ -1432,12 +1436,17 @@
         private DevExpress.XtraBars.Ribbon.RibbonPage ribbonPage_Resim;
         private DevExpress.XtraBars.Ribbon.RibbonPageGroup ribbonPageGroup1;
         private DevExpress.XtraBars.Ribbon.RibbonStatusBar ribbonStatusBar1;
-        private DevExpress.XtraBars.Navigation.NavigationPane navigationPane1;
-        private DevExpress.XtraBars.Navigation.NavigationPage navigationPage_Resim;
-        private DevExpress.XtraEditors.SplitContainerControl splitContainerControl1;
+        
+        //private DevExpress.XtraBars.Navigation.NavigationPane navigationPane1;
+        //private DevExpress.XtraBars.Navigation.NavigationPage navigationPage_Resim;
+        //private DevExpress.XtraBars.Navigation.NavigationPage navigationPage_Dosya;
+
+        private DevExpress.XtraBars.Navigation.TabPane tabPane1;
+        private DevExpress.XtraBars.Navigation.TabNavigationPage tabPage_Resim;
+        private DevExpress.XtraBars.Navigation.TabNavigationPage tabPage_Dosya;
+
         private DevExpress.XtraEditors.PictureEdit pictureEdit1;
         private System.Windows.Forms.PictureBox pictureEdit2;
-        private DevExpress.XtraBars.Navigation.NavigationPage navigationPage_Dosya;
         private DevExpress.XtraBars.Ribbon.RibbonPage ribbonPage_Dosya;
         private DevExpress.XtraBars.Ribbon.RibbonPageGroup PageGroupViewLayouts;
 
@@ -1508,6 +1517,8 @@
         private DevExpress.XtraEditors.ButtonEdit EditSearch;
         private DevExpress.XtraEditors.BreadCrumbEdit editBreadCrumb;
         private DevExpress.XtraBars.RibbonGalleryBarItem rgbiViewStyle;
+        private DevExpress.XtraEditors.GroupControl groupControlList;
+        private DevExpress.XtraEditors.GroupControl groupControlKisi;
         private DevExpress.XtraEditors.PanelControl panelControl1;
         private DevExpress.XtraEditors.SplitContainerControl splitContainerControl2;
         private System.Windows.Forms.TreeView treeView1;

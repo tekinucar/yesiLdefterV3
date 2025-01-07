@@ -5,21 +5,29 @@ begin transaction
  create table HubMtskSaatUygulama
  (
 
-   Id                     Int IDENTITY(1,1) NOT NULL, 
-   FirmId                 Int       not null,
-   IsActive               Bit       not null, /* default : 1 = active, 0 = not active */  
-   GecerlilikTarihiId     Int       not null,
+   Id                      Int IDENTITY(1,1) NOT NULL, 
+   FirmId                  Int       not null,
+   IsActive                Bit       not null, /* default : 1 = active, 0 = not active */  
+   GecerlilikTarihiId      Int       not null,
 
-   MevcutSertifikaTipiId  Int           null,
-   IstenenSertifikaTipiId Int           null,
+   MevcutSertifikaTipiId   Int           null,
+   IstenenSertifikaTipiId  Int           null,
 
-   /* Saatler */  
-   SimulatorSaati         smallInt     null,
-   UygulamaSaati          smallInt     null,
-   UygulamaSaati2016      smallInt     null,
+   /* 20 : Saatler */  
+   SimulatorSaati          smallInt     null,
+   EgitimAlaniSaati        smallInt     null,
+   AkanTrafikSaati         smallInt     null,
+   UygulamaToplamSaat      smallInt     null,
+   UygulamaSaati2016Oncesi smallInt     null,
+   Arti4HakUygulamaSaati   smallInt     null,
+   BasarisizEgitimSaati    smallInt     null,
+   TelafiEgitimSaati       smallInt     null,
 
-   /* Yaş sınırı  */
-   YasSiniri              smallInt     null,
+   /* 30 : Yaş sınırı  */
+   YasSiniri               smallInt     null,
+   IsEnAz                  bit          null,
+   DeneyimSertifikaTipiId  Int          null,       
+   DeneyimEnAzYilFarki     smallInt     null,
 
   constraint pk_HubMtskSaatUygulama primary key (Id)
  )
@@ -31,6 +39,5 @@ begin transaction
 commit transaction
 
 /*CreateTableEnd*/
-
 
 

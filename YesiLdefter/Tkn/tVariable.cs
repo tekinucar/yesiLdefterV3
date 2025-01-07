@@ -20,6 +20,18 @@ namespace Tkn_Variable
 
     public static class v
     {
+        #region dataUpdateTable 
+        public enum dataUpdateTable : byte
+        {
+            GecerlilikTarihi = 1,
+            MtskSaatTeorik = 2,
+            MtskSaatUygulama = 3,
+            MtskUcretSinav = 4,
+            MtskUcretTeorik = 5,
+            MtskUcretUygulama = 6
+        }
+        #endregion dataUpdateTable 
+
         #region Database Yapısı
         public enum dBaseType : byte
         {
@@ -2400,13 +2412,14 @@ namespace Tkn_Variable
         public string imagesSourceTableIPCode { get; set; }
         public string imagesSourceFieldName { get; set; }
         public string imagesMasterTableIPCode { get; set; }
-
+        public string listTableIPCode { get; set; }
         public void Clear()
         {
             imagesSourceFormName = "";
             imagesSourceTableIPCode = "";
             imagesSourceFieldName = "";
             imagesMasterTableIPCode = "";
+            listTableIPCode = "";
         }
     }
 

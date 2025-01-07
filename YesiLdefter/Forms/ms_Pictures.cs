@@ -84,8 +84,8 @@ namespace YesiLdefter
 
         vImageProperties tImageProperties = new vImageProperties();
 
-        DataSet dsDataTarget = null;
-        DataNavigator dNTarget = null;
+        DataSet dsImages = null;        // dsDataTarget
+        DataNavigator dNImages = null;  // dNTarget
 
         FilterInfoCollection fico;
         VideoCaptureDevice vcd;
@@ -180,8 +180,14 @@ namespace YesiLdefter
             // IPdataType_Kategori = 3;
             // IPdataType_HGSView = 4;
             #endregion IP_VIEW_TYPE
-                        
-            //if (t.IsNotNull(v.con_ImagesMasterTableIPCode))
+
+            if (t.IsNotNull(tResimEditor.listTableIPCode))
+            {
+                tInputPanel ip = new tInputPanel();
+                ip.Create_InputPanel(this, groupControlList, tResimEditor.listTableIPCode, 1, true);
+            }
+            else groupControlList.Visible = false;
+
             if (t.IsNotNull(tResimEditor.imagesMasterTableIPCode))
             {
                 this.imagesSourceFormName = tResimEditor.imagesSourceFormName;  //v.con_ImagesSourceFormName;
@@ -193,51 +199,55 @@ namespace YesiLdefter
                 this.imagesSourceFieldName = this.imagesSourceFieldName.Replace("Small", "");
 
                 tInputPanel ip = new tInputPanel();
-                ip.Create_InputPanel(this, splitContainerControl1.Panel1, this.imagesMasterTableIPCode, 1, true);
+                // ip.Create_InputPanel(this, splitContainerControl1.Panel1, this.imagesMasterTableIPCode, 1, true);
+                ip.Create_InputPanel(this, groupControlKisi, this.imagesMasterTableIPCode, 1, true);
 
-                t.Find_DataSet(this, ref dsDataTarget, ref dNTarget, this.imagesMasterTableIPCode);
+                t.Find_DataSet(this, ref dsImages, ref dNImages, this.imagesMasterTableIPCode);
                 
                 //pictureEdit1. için kaynak olan masterTableIPCode
-                if (dsDataTarget != null)
+                if (dsImages != null) 
                 {
                     Control cntrl = t.Find_Control_View(this, this.imagesMasterTableIPCode);
-                    
-                    //dsDataTarget = null;
-                    //dsDataTarget = v.con_ImagesMasterDataSet.Clone();
-                    dsDataTarget = v.con_ImagesMasterDataSet.Copy();
-                    dNTarget.DataSource = dsDataTarget.Tables[0];
-                    dNTarget.PositionChanged += new System.EventHandler(dataNavigator_PositionChanged);
-                    
-                    if ((cntrl != null) &&
-                        (dsDataTarget.Tables.Count > 0))
+
+                    if (t.IsNotNull(v.con_ImagesMasterDataSet))
                     {
-                        if (cntrl.GetType().ToString() == "DevExpress.XtraGrid.GridControl")
-                            ((DevExpress.XtraGrid.GridControl)cntrl).DataSource = dsDataTarget.Tables[0];
+                        //dsImages = v.con_ImagesMasterDataSet.Clone();
+                        dsImages = v.con_ImagesMasterDataSet.Copy();
+                        dNImages.DataSource = dsImages.Tables[0];
 
-                        if (cntrl.GetType().ToString() == "DevExpress.XtraVerticalGrid.VGridControl")
-                            ((DevExpress.XtraVerticalGrid.VGridControl)cntrl).DataSource = dsDataTarget.Tables[0];
+                        if ((cntrl != null) &&
+                            (dsImages.Tables.Count > 0))
+                        {
+                            if (cntrl.GetType().ToString() == "DevExpress.XtraGrid.GridControl")
+                                ((DevExpress.XtraGrid.GridControl)cntrl).DataSource = dsImages.Tables[0];
 
-                        if (cntrl.GetType().ToString() == "DevExpress.XtraDataLayout.DataLayoutControl")
-                            ((DevExpress.XtraDataLayout.DataLayoutControl)cntrl).DataSource =  dsDataTarget.Tables[0];
+                            if (cntrl.GetType().ToString() == "DevExpress.XtraVerticalGrid.VGridControl")
+                                ((DevExpress.XtraVerticalGrid.VGridControl)cntrl).DataSource = dsImages.Tables[0];
 
-                        if (cntrl.GetType().ToString() == "DevExpress.XtraTreeList.TreeList")
-                            ((DevExpress.XtraTreeList.TreeList)cntrl).DataSource = dsDataTarget.Tables[0];
+                            if (cntrl.GetType().ToString() == "DevExpress.XtraDataLayout.DataLayoutControl")
+                                ((DevExpress.XtraDataLayout.DataLayoutControl)cntrl).DataSource = dsImages.Tables[0];
 
-                        if (cntrl.GetType().ToString() == "DevExpress.XtraEditors.DataNavigator")
-                            ((DevExpress.XtraEditors.DataNavigator)cntrl).DataSource = dsDataTarget.Tables[0];
+                            if (cntrl.GetType().ToString() == "DevExpress.XtraTreeList.TreeList")
+                                ((DevExpress.XtraTreeList.TreeList)cntrl).DataSource = dsImages.Tables[0];
+
+                            if (cntrl.GetType().ToString() == "DevExpress.XtraEditors.DataNavigator")
+                                ((DevExpress.XtraEditors.DataNavigator)cntrl).DataSource = dsImages.Tables[0];
+                        }
                     }
+
+                    dNImages.PositionChanged += new System.EventHandler(dataNavigator_PositionChanged);
 
                     // işlem yapılacak resimin row unu bul ve göster
                     int i = -1;
-                    if (t.IsNotNull(dsDataTarget))
-                        i = t.Find_GotoRecord(dsDataTarget, "LkpFieldName", this.imagesSourceFieldName);
-                    dNTarget.Position = i;
+                    if (t.IsNotNull(dsImages))
+                        i = t.Find_GotoRecord(dsImages, "LkpFieldName", this.imagesSourceFieldName);
+                    dNImages.Position = i;
 
                     // pictureEdit1 database bağla
-                    pictureEdit1.DataBindings.Add(new Binding("EditValue", dsDataTarget.Tables[0], "LkpImage"));
+                    pictureEdit1.DataBindings.Add(new Binding("EditValue", dsImages.Tables[0], "LkpImage"));
 
                     // resim hakkındaki bilgiler okunsun ekrana basılsın
-                    dataNavigator_PositionChanged((object)dNTarget, null);
+                    dataNavigator_PositionChanged((object)dNImages, null);
 
                     // Database Kaydet butonunu ayarla
                     cntrl = null;
@@ -350,9 +360,9 @@ namespace YesiLdefter
                 barStaticItem_DPI.Glyph = t.Find_Glyph(glName);
 
                 glName = "30_311_Image_32x32";
-                navigationPage_Resim.Image = t.Find_Glyph(glName);
+                tabPage_Resim.Image = t.Find_Glyph(glName);
                 glName = "10_104_FolderPanel_32x32";
-                navigationPage_Dosya.Image = t.Find_Glyph(glName);
+                tabPage_Dosya.Image = t.Find_Glyph(glName);
 
                 glName = "30_312_InitialState_32x32";
                 PageGroupViewEmpty.LargeGlyph = t.Find_Glyph(glName);
@@ -374,18 +384,18 @@ namespace YesiLdefter
 
         private void navigationPane1_SelectedPageChanged(object sender, DevExpress.XtraBars.Navigation.SelectedPageChangedEventArgs e)
         {
-            if (navigationPane1.SelectedPage == navigationPage_Resim)
+            if (tabPane1.SelectedPage == tabPage_Resim)
                 ribbonControl1.SelectedPage = ribbonControl1.Pages[0];
-            if (navigationPane1.SelectedPage == navigationPage_Dosya)
+            if (tabPane1.SelectedPage == tabPage_Dosya)
                 ribbonControl1.SelectedPage = ribbonControl1.Pages[1];
         }
 
         private void ribbonControl1_SelectedPageChanged(object sender, EventArgs e)
         {
             if (ribbonControl1.SelectedPage == ribbonControl1.Pages[0])
-                navigationPane1.SelectedPage = navigationPage_Resim;
+                tabPane1.SelectedPage = tabPage_Resim;
             if (ribbonControl1.SelectedPage == ribbonControl1.Pages[1])
-                navigationPane1.SelectedPage = navigationPage_Dosya;
+                tabPane1.SelectedPage = tabPage_Dosya;
         }
 
         #region // DevExpress </treeList1>
@@ -1139,12 +1149,12 @@ namespace YesiLdefter
         private string imageName()
         {
             string tamAdi = "noname";
-            if (t.IsNotNull(dsDataTarget))
+            if (t.IsNotNull(dsImages))
             {
-                tamAdi = dsDataTarget.Tables[0].Rows[dNTarget.Position]["TamAdiSoyadi"].ToString();
+                tamAdi = dsImages.Tables[0].Rows[dNImages.Position]["TamAdiSoyadi"].ToString();
                 tamAdi = tamAdi.Replace(" ", "");
-                tamAdi = tamAdi + "_" + dsDataTarget.Tables[0].Rows[dNTarget.Position]["TcNo"].ToString() 
-                                + "_" + dsDataTarget.Tables[0].Rows[dNTarget.Position]["LkpFieldName"].ToString();
+                tamAdi = tamAdi + "_" + dsImages.Tables[0].Rows[dNImages.Position]["TcNo"].ToString() 
+                                + "_" + dsImages.Tables[0].Rows[dNImages.Position]["LkpFieldName"].ToString();
             }
             return tamAdi;
         }
@@ -1980,17 +1990,17 @@ namespace YesiLdefter
         
         private void dataBaseKaydet()
         {
-            if (dNTarget.Position > -1)
+            if (dNImages.Position > -1)
             {
-                string idValue = dsDataTarget.Tables[0].Rows[dNTarget.Position]["Id"].ToString();
-                string tableName = dsDataTarget.Tables[0].Rows[dNTarget.Position]["LkpTableName"].ToString();
-                string fieldName = dsDataTarget.Tables[0].Rows[dNTarget.Position]["LkpFieldName"].ToString();
-                string smallFieldName = dsDataTarget.Tables[0].Rows[dNTarget.Position]["LkpSmallFieldName"].ToString();
-                string idFieldName = dsDataTarget.Tables[0].Rows[dNTarget.Position]["LkpIdFieldName"].ToString();
+                string idValue = dsImages.Tables[0].Rows[dNImages.Position]["Id"].ToString();
+                string tableName = dsImages.Tables[0].Rows[dNImages.Position]["LkpTableName"].ToString();
+                string fieldName = dsImages.Tables[0].Rows[dNImages.Position]["LkpFieldName"].ToString();
+                string smallFieldName = dsImages.Tables[0].Rows[dNImages.Position]["LkpSmallFieldName"].ToString();
+                string idFieldName = dsImages.Tables[0].Rows[dNImages.Position]["LkpIdFieldName"].ToString();
 
 
                 // resim png formatına dönüyor
-                //v.con_Images = t.imageBinaryArrayConverterMem((byte[])dsDataTarget.Tables[0].Rows[dNTarget.Position]["LkpImage"]);
+                //v.con_Images = t.imageBinaryArrayConverterMem((byte[])dsImages.Tables[0].Rows[dNImages.Position]["LkpImage"]);
 
                 string fileGuid = tFileGuidName;
                 string Images_Path = t.Find_Path("images") + fileGuid + ".jpg";
@@ -2018,12 +2028,12 @@ namespace YesiLdefter
                     v.con_Images2 = t.imageBinaryArrayConverter(Images_Path, ref imageLength);
                     v.con_Images_FieldName2 = smallFieldName;
 
-                    dsDataTarget.Tables[0].Rows[dNTarget.Position]["LkpSmallImage"] = v.con_Images2;
+                    dsImages.Tables[0].Rows[dNImages.Position]["LkpSmallImage"] = v.con_Images2;
                 }
 
 
-                dsDataTarget.Tables[0].Rows[dNTarget.Position]["LkpImage"] = v.con_Images;
-                dsDataTarget.Tables[0].AcceptChanges();
+                dsImages.Tables[0].Rows[dNImages.Position]["LkpImage"] = v.con_Images;
+                dsImages.Tables[0].AcceptChanges();
 
                 string tSql = "";
                 // büyük normal resmi kaydediyor
@@ -2041,8 +2051,8 @@ namespace YesiLdefter
                 {
                     tSave sv = new tSave();
                     vTable vt = new vTable();
-                    t.Preparing_DataSet(this, dsDataTarget, vt);
-                    v.con_Refresh = sv.Record_SQL_RUN(dsDataTarget, vt, "dsEdit", dNTarget.Position, ref tSql, "");
+                    t.Preparing_DataSet(this, dsImages, vt);
+                    v.con_Refresh = sv.Record_SQL_RUN(dsImages, vt, "dsEdit", dNImages.Position, ref tSql, "");
 
                     t.AlertMessage(":)", "Resim başarıyla kaydedildi...");
                     //t.FlyoutMessage(this, ":)", "Resim başarıyla kaydedildi...");
@@ -2058,21 +2068,21 @@ namespace YesiLdefter
         
         private void dataBasedenResmiSil()
         {
-            if (dNTarget.Position > -1)
+            if (dNImages.Position > -1)
             {
-                string idValue = dsDataTarget.Tables[0].Rows[dNTarget.Position]["Id"].ToString();
-                string tableName = dsDataTarget.Tables[0].Rows[dNTarget.Position]["LkpTableName"].ToString();
-                string fieldName = dsDataTarget.Tables[0].Rows[dNTarget.Position]["LkpFieldName"].ToString();
-                string smallFieldName = dsDataTarget.Tables[0].Rows[dNTarget.Position]["LkpSmallFieldName"].ToString();
-                string idFieldName = dsDataTarget.Tables[0].Rows[dNTarget.Position]["LkpIdFieldName"].ToString();
+                string idValue = dsImages.Tables[0].Rows[dNImages.Position]["Id"].ToString();
+                string tableName = dsImages.Tables[0].Rows[dNImages.Position]["LkpTableName"].ToString();
+                string fieldName = dsImages.Tables[0].Rows[dNImages.Position]["LkpFieldName"].ToString();
+                string smallFieldName = dsImages.Tables[0].Rows[dNImages.Position]["LkpSmallFieldName"].ToString();
+                string idFieldName = dsImages.Tables[0].Rows[dNImages.Position]["LkpIdFieldName"].ToString();
 
                 if (t.IsNotNull(smallFieldName))
                 {
-                    dsDataTarget.Tables[0].Rows[dNTarget.Position]["LkpSmallImage"] = null;
+                    dsImages.Tables[0].Rows[dNImages.Position]["LkpSmallImage"] = null;
                 }
 
-                dsDataTarget.Tables[0].Rows[dNTarget.Position]["LkpImage"] = null;
-                dsDataTarget.Tables[0].AcceptChanges();
+                dsImages.Tables[0].Rows[dNImages.Position]["LkpImage"] = null;
+                dsImages.Tables[0].AcceptChanges();
 
                 string tSql = "";
                 // büyük normal resmi kaydediyor
@@ -2090,8 +2100,8 @@ namespace YesiLdefter
                 {
                     tSave sv = new tSave();
                     vTable vt = new vTable();
-                    t.Preparing_DataSet(this, dsDataTarget, vt);
-                    v.con_Refresh = sv.Record_SQL_RUN(dsDataTarget, vt, "dsEdit", dNTarget.Position, ref tSql, "");
+                    t.Preparing_DataSet(this, dsImages, vt);
+                    v.con_Refresh = sv.Record_SQL_RUN(dsImages, vt, "dsEdit", dNImages.Position, ref tSql, "");
 
                     t.AlertMessage(":)", "Resim başarıyla silindi...");
                     t.FlyoutMessage(this, ":)", "Resim başarıyla silindi...");
@@ -2122,12 +2132,12 @@ namespace YesiLdefter
             autoCropHeight = 0;
             autoDPI = 0;
 
-            if (dNTarget.Position > -1)
+            if (dNImages.Position > -1)
             {
-                imageType = dsDataTarget.Tables[0].Rows[dNTarget.Position]["LkpImageType"].ToString();
-                autoCropWidth = t.myInt32(dsDataTarget.Tables[0].Rows[dNTarget.Position]["LkpWidth"].ToString());
-                autoCropHeight = t.myInt32(dsDataTarget.Tables[0].Rows[dNTarget.Position]["LkpHeight"].ToString());
-                autoDPI = t.myInt32(dsDataTarget.Tables[0].Rows[dNTarget.Position]["LkpDpi"].ToString());
+                imageType = dsImages.Tables[0].Rows[dNImages.Position]["LkpImageType"].ToString();
+                autoCropWidth = t.myInt32(dsImages.Tables[0].Rows[dNImages.Position]["LkpWidth"].ToString());
+                autoCropHeight = t.myInt32(dsImages.Tables[0].Rows[dNImages.Position]["LkpHeight"].ToString());
+                autoDPI = t.myInt32(dsImages.Tables[0].Rows[dNImages.Position]["LkpDpi"].ToString());
             }
 
             if (imageType == "Normal")

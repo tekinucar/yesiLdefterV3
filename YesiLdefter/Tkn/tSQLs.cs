@@ -1275,6 +1275,337 @@ INSERT INTO [dbo].[SYS_UPDATES]
             return " Select * from dbo.MsFileUpdates Where Id > " + IdList + "  and IsActive = 1 order by RecordDate ";
         }
 
+
+        public string getGecerliTarihSql()
+        {
+            string sql = "";
+
+            sql = @"
+  Select
+        ' if ( Select count(Id) as Adet From dbo.GecerlilikTarihi '
+	  + ' Where FirmId = @FIRM_ID '  
+      + ' and KonuTipiId = ' + Convert(varchar(10), [KonuTipiId]) 
+      + ' and Convert(date,Tarih,103) = Convert(date,' + '''' + Convert(varchar(10), [Tarih], 103) + ''',103)  '
+	  + ' ) = 0 '
+	  + ' begin '
+	  + ' Insert into [dbo].[GecerlilikTarihi] ( [FirmId],[IsActive],[KonuTipiId],[Tarih] ) Values ' 
+      + ' ( ' + '@FIRM_ID, '  
+      + Convert(varchar(2) , [IsActive]) + ', '
+      + Convert(varchar(10), [KonuTipiId]) + ', '
+      + ' Convert(date, ' + '''' + Convert(varchar(10), [Tarih], 103) + ''', 103) ) '
+	  + ' end '
+
+  From [dbo].[HubGecerlilikTarihi]
+  Where IsActive = 1
+
+";
+
+            return sql;
+        }
+
+        public string getMtskSaatTeorikSql()
+        {
+            string sql = "";
+
+            sql = @"
+  Declare @GecerlilikTarihiId int
+
+  Select top 1 @GecerlilikTarihiId = [Id]
+  From [dbo].[HubGecerlilikTarihi]
+  Where KonuTipiId = 21101
+  and   IsActive = 1
+  order by Tarih desc
+
+  Select ' if ( Select count(Id) as Adet From dbo.MtskSaatTeorik '
+  + ' Where FirmId = @FIRM_ID '  
+  + ' and GecerlilikTarihiId = @TarihId ' 
+  + ' ) = 0 begin '
+  + ' Insert into [dbo].[MtskSaatTeorik] ( [FirmId],[IsActive],[GecerlilikTarihiId],[TrafikVeCevreDersSaati],[IlkYardimDersSaati],[AracTeknigiDersSaati],[TrafikAdabiDersSaati]) Values '
+  + ' ( @FIRM_ID, '
+  + Convert(varchar(2), [IsActive]) + ', '
+  + ' @TarihId, '
+  + Convert(varchar(5), [TrafikVeCevreDersSaati]) + ', '
+  + Convert(varchar(5), [IlkYardimDersSaati]) + ', '
+  + Convert(varchar(5), [AracTeknigiDersSaati]) + ', '
+  + Convert(varchar(5), [TrafikAdabiDersSaati]) + ' ) end '
+
+  From [dbo].[HubMtskSaatTeorik]
+  Where GecerlilikTarihiId = @GecerlilikTarihiId
+
+";
+
+            return sql;
+        }
+
+        public string getMtskSaatUygulamaSql()
+        {
+            string sql = "";
+
+            sql = @"
+  Declare @GecerlilikTarihiId int
+
+  Select top 1 @GecerlilikTarihiId = [Id]
+  From [dbo].[HubGecerlilikTarihi]
+  Where KonuTipiId = 21102
+  and   IsActive = 1
+  order by Tarih desc
+
+  Select ' if ( Select count(Id) as Adet From dbo.MtskSaatUygulama '
+  + ' Where FirmId = @FIRM_ID '  
+  + ' and GecerlilikTarihiId = @TarihId ' 
+  + ' ) = 0 begin '
+  + ' INSERT INTO [dbo].[MtskSaatUygulama] '
+  + '  ( [FirmId],[IsActive],[GecerlilikTarihiId],[MevcutSertifikaTipiId],[IstenenSertifikaTipiId],[SimulatorSaati],[EgitimAlaniSaati],[AkanTrafikSaati],[UygulamaToplamSaat], '
+  + '    [UygulamaSaati2016Oncesi],[Arti4HakUygulamaSaati],[BasarisizEgitimSaati],[TelafiEgitimSaati],[YasSiniri],[IsEnAz],[DeneyimSertifikaTipiId],[DeneyimEnAzYilFarki] ) Values '
+  + ' ( @FIRM_ID, '
+  + Convert(varchar(2), [IsActive]) + ', '
+  + ' @TarihId, '
+  +  Convert(varchar(8), isnull([MevcutSertifikaTipiId],0)) + ', '
+  +  Convert(varchar(8), isnull([IstenenSertifikaTipiId],0)) + ', '
+  +  Convert(varchar(5), isnull([SimulatorSaati],0)) + ', '
+  +  Convert(varchar(5), isnull([EgitimAlaniSaati],0)) + ', '
+  +  Convert(varchar(5), isnull([AkanTrafikSaati],0)) + ', '
+  +  Convert(varchar(5), isnull([UygulamaToplamSaat],0)) + ', '
+  +  Convert(varchar(5), isnull([UygulamaSaati2016Oncesi],0)) + ', '
+  +  Convert(varchar(5), isnull([Arti4HakUygulamaSaati],0)) + ', '
+  +  Convert(varchar(5), isnull([BasarisizEgitimSaati],0)) + ', '
+  +  Convert(varchar(5), isnull([TelafiEgitimSaati],0)) + ', '
+  +  Convert(varchar(5), isnull([YasSiniri],0)) + ', '
+  +  Convert(varchar(2), isnull([IsEnAz],0)) + ', '
+  +  Convert(varchar(8), isnull([DeneyimSertifikaTipiId],0)) + ', '
+  +  Convert(varchar(5), isnull([DeneyimEnAzYilFarki],0)) + ') end '
+  From [dbo].[HubMtskSaatUygulama]
+  Where GecerlilikTarihiId = @GecerlilikTarihiId
+
+";
+            return sql;
+        }
+
+        public string getMtskUcretSinavSql()
+        {
+            string sql = "";
+            sql = @"
+  Declare @GecerlilikTarihiId int
+
+  Select top 1 @GecerlilikTarihiId = [Id]
+  From [dbo].[HubGecerlilikTarihi]
+  Where KonuTipiId = 21103
+  and   IsActive = 1
+  order by Tarih desc
+
+  Select ' if ( Select count(Id) as Adet From dbo.MtskUcretSinav '
+  + ' Where FirmId = @FIRM_ID '  
+  + ' and GecerlilikTarihiId = @TarihId ' 
+  + ' ) = 0 begin '
+  + '  Insert into [dbo].[MtskUcretSinav] ([FirmId],[IsActive],[GecerlilikTarihiId],[ESinavUcreti],[UygulamaSinavUcreti]) Values '
+  + ' ( @FIRM_ID, '
+  + Convert(varchar(2), [IsActive]) + ', '
+  + ' @TarihId, '
+  + Convert(varchar(22), isnull([ESinavUcreti],0)) + ', ' 
+  + Convert(varchar(22), isnull([UygulamaSinavUcreti],0)) + ') end '
+  From [dbo].[HubMtskUcretSinav]
+  Where GecerlilikTarihiId = @GecerlilikTarihiId
+
+";
+            return sql;
+        }
+
+        public string getMtskUcretTeorikSql()
+        {
+            string sql = "";
+            sql = @"
+  Declare @GecerlilikTarihiId int
+
+  Select top 1 @GecerlilikTarihiId = [Id]
+  From [dbo].[HubGecerlilikTarihi]
+  Where KonuTipiId = 21104
+  and IsActive = 1
+  order by Tarih desc
+
+  Select ' if ( Select count(Id) as Adet From dbo.MtskUcretTeorik '
+  + ' Where FirmId = @FIRM_ID '  
+  + ' and GecerlilikTarihiId = @TarihId ' 
+  + ' ) = 0 begin '
+  + '  Insert into [dbo].[MtskUcretTeorik] ([FirmId],[IsActive],[IlKodu],[GecerlilikTarihiId],[BirSaatTeorikDersUcreti]) Values '
+  + ' ( @FIRM_ID, '
+  + Convert(varchar(2), [IsActive]) + ', '
+  + Convert(varchar(4), isnull([IlKodu],0)) + ', '
+  + ' @TarihId, '
+  + Convert(varchar(22), isnull([BirSaatTeorikDersUcreti],0)) + ') end '
+  From [dbo].[HubMtskUcretTeorik]
+  Where GecerlilikTarihiId = @GecerlilikTarihiId
+  and   IlKodu = :FIRM_ILKODU 
+
+";
+            return sql;
+        }
+
+        public string getMtskUcretUygulamaSql()
+        {
+            string sql = "";
+            sql = @"
+  Declare @GecerlilikTarihiId int
+
+  Select top 1 @GecerlilikTarihiId = [Id]
+  From [dbo].[HubGecerlilikTarihi]
+  Where KonuTipiId = 21104
+  and IsActive = 1
+  order by Tarih desc
+
+  Select ' if ( Select count(Id) as Adet From dbo.MtskUcretUygulama '
+  + ' Where FirmId = @FIRM_ID '  
+  + ' and GecerlilikTarihiId = @TarihId ' 
+  + ' and isnull([MevcutSertifikaTipiId],0) = ' + Convert(varchar(6),  isnull([MevcutSertifikaTipiId],0))
+  + ' and isnull([IstenenSertifikaTipiId],0) = ' + Convert(varchar(6),  isnull([IstenenSertifikaTipiId],0))
+  + ' ) = 0 begin '
+  + ' Insert into [dbo].[MtskUcretUygulama] ([FirmId],[IsActive],[IlKodu],[SiraNo],[GecerlilikTarihiId] '
+  + '      ,[MevcutSertifikaTipiId],[IstenenSertifikaTipiId] '
+  + '      ,[SertifikaUcreti],[SertifikaUcreti2016Oncesi],[Arti24HakUcreti],[NakilArti24HakUcreti] '
+  + '      ,[BirSaatUygDersUcreti],[BirSaatArti24DersUcreti],[BirSaatNakilArti24DersUcreti] '
+  + '      ,[BirSaatBasarisizDersUcreti],[BirSaatTelafiDersUcreti] '
+  + '      ,[BirSaatOzelDersUcretiAday],[BirSaatOzelDersUcretiHarici]) Values '
+  + ' ( @FIRM_ID, '
+  + Convert(varchar(2), [IsActive]) + ', '
+  + Convert(varchar(4), isnull([IlKodu],0)) + ', '
+  + Convert(varchar(4), [SiraNo]) + ', '
+  + ' @TarihId, '
+  + Convert(varchar(6),  isnull([MevcutSertifikaTipiId],0)) + ', '
+  + Convert(varchar(6),  isnull([IstenenSertifikaTipiId],0)) + ', '
+  + Convert(varchar(22), isnull([SertifikaUcreti],0)) + ', '
+  + Convert(varchar(22), isnull([SertifikaUcreti2016Oncesi],0)) + ', '
+  + Convert(varchar(22), isnull([Arti24HakUcreti],0)) + ', '
+  + Convert(varchar(22), isnull([NakilArti24HakUcreti],0)) + ', '
+  + Convert(varchar(22), isnull([BirSaatUygDersUcreti],0)) + ', '
+  + Convert(varchar(22), isnull([BirSaatArti24DersUcreti],0)) + ', '
+  + Convert(varchar(22), isnull([BirSaatNakilArti24DersUcreti],0)) + ', '
+  + Convert(varchar(22), isnull([BirSaatBasarisizDersUcreti],0)) + ', '
+  + Convert(varchar(22), isnull([BirSaatTelafiDersUcreti],0)) + ', '
+  + Convert(varchar(22), isnull([BirSaatOzelDersUcretiAday],0)) + ', '
+  + Convert(varchar(22), isnull([BirSaatOzelDersUcretiHarici],0)) + ') end '
+  From [dbo].[HubMtskUcretUygulama]
+  Where GecerlilikTarihiId = @GecerlilikTarihiId
+  and   IlKodu = :FIRM_ILKODU 
+
+";
+            return sql;
+        }
+
+
+        public string getGecerlilikTarihiIdSql(Int16 KonuTipiId)
+        {
+            string sql = "";
+
+            /*
+            Id      KonuTipi              GrupTipiId
+            21101	Teorik saatler        211
+            21102   Uygulama saatleri     211
+            21103   Sınav ücreti          211
+            21104   Teodrik ders ücreti   211
+            21105   Uygulama ders ücreti  211
+            */
+            sql = @"
+  Select top 1 @TarihId = [Id]
+  From [dbo].[GecerlilikTarihi]
+  Where KonuTipiId = " + KonuTipiId.ToString() + @"
+  and IsActive = 1
+  order by Tarih desc
+
+";
+            return sql;
+        }
+
+
+        public string getDataUpdatesLastIdSql()
+        {
+            string lastId = "";
+            lastId = getDataUpdateTableLastId(v.dataUpdateTable.GecerlilikTarihi);
+            setUnionAll(ref lastId);
+            lastId += getDataUpdateTableLastId(v.dataUpdateTable.MtskSaatTeorik);
+            setUnionAll(ref lastId);
+            lastId += getDataUpdateTableLastId(v.dataUpdateTable.MtskSaatUygulama);
+            setUnionAll(ref lastId);
+            lastId += getDataUpdateTableLastId(v.dataUpdateTable.MtskUcretSinav);
+            setUnionAll(ref lastId);
+            lastId += getDataUpdateTableLastId(v.dataUpdateTable.MtskUcretTeorik);
+            setUnionAll(ref lastId);
+            lastId += getDataUpdateTableLastId(v.dataUpdateTable.MtskUcretUygulama);
+            return lastId;
+        }
+
+        public string getHubDataUpdatesFindNewRowsSql(DataSet dsLastIds)
+        {
+            string sql = "";
+            
+            sql = getHubDataUpdatesTableNewRows_(v.dataUpdateTable.GecerlilikTarihi, dsLastIds);
+            setUnionAll(ref sql);
+            sql += getHubDataUpdatesTableNewRows_(v.dataUpdateTable.MtskSaatTeorik, dsLastIds);
+            setUnionAll(ref sql);
+            sql += getHubDataUpdatesTableNewRows_(v.dataUpdateTable.MtskSaatUygulama, dsLastIds);
+            setUnionAll(ref sql);
+            sql += getHubDataUpdatesTableNewRows_(v.dataUpdateTable.MtskUcretSinav, dsLastIds);
+            setUnionAll(ref sql);
+            sql += getHubDataUpdatesTableNewRows_(v.dataUpdateTable.MtskUcretTeorik, dsLastIds);
+            setUnionAll(ref sql);
+            sql += getHubDataUpdatesTableNewRows_(v.dataUpdateTable.MtskUcretUygulama, dsLastIds);
+
+            return sql;
+        }
+
+        private string getHubDataUpdatesTableNewRows_(v.dataUpdateTable dataUpdateTable, DataSet dsLastIds)
+        {
+            string sql = "";
+            int pos = ((byte)dataUpdateTable);
+            string hubTableName = getHubDataUpdateTabeleName(dataUpdateTable);
+            string lastId = "0";
+
+            int length = dsLastIds.Tables[0].Rows.Count;
+            for (int i = 0; i < length; i++)
+            {
+                var xx = dsLastIds.Tables[0].Rows[i]["TableId"];
+                if (dsLastIds.Tables[0].Rows[i]["TableId"].ToString() == pos.ToString())
+                {
+                    lastId = dsLastIds.Tables[0].Rows[i]["LastId"].ToString();
+                    break;
+                }
+            }
+
+            sql = " Select " + ((byte)dataUpdateTable).ToString() + " as TableId, isnull(min(Id),0) as startId From " + hubTableName + " Where Id > " + lastId + " ";
+
+            return sql;
+        }
+        private string getDataUpdateTabeleName(v.dataUpdateTable dataUpdateTable)
+        {
+            string tName = "";
+            if (dataUpdateTable == v.dataUpdateTable.GecerlilikTarihi) tName = "GecerlilikTarihi";
+            if (dataUpdateTable == v.dataUpdateTable.MtskSaatTeorik) tName = "MtskSaatTeorik";
+            if (dataUpdateTable == v.dataUpdateTable.MtskSaatUygulama) tName = "MtskSaatUygulama";
+            if (dataUpdateTable == v.dataUpdateTable.MtskUcretSinav) tName = "MtskUcretSinav";
+            if (dataUpdateTable == v.dataUpdateTable.MtskUcretTeorik) tName = "MtskUcretTeorik";
+            if (dataUpdateTable == v.dataUpdateTable.MtskUcretUygulama) tName = "MtskUcretUygulama";
+            return tName;
+        }
+        private string getHubDataUpdateTabeleName(v.dataUpdateTable dataUpdateTable)
+        {
+            string tName = "";
+            if (dataUpdateTable == v.dataUpdateTable.GecerlilikTarihi) tName = "HubGecerlilikTarihi";
+            if (dataUpdateTable == v.dataUpdateTable.MtskSaatTeorik) tName = "HubMtskSaatTeorik";
+            if (dataUpdateTable == v.dataUpdateTable.MtskSaatUygulama) tName = "HubMtskSaatUygulama";
+            if (dataUpdateTable == v.dataUpdateTable.MtskUcretSinav) tName = "HubMtskUcretSinav";
+            if (dataUpdateTable == v.dataUpdateTable.MtskUcretTeorik) tName = "HubMtskUcretTeorik";
+            if (dataUpdateTable == v.dataUpdateTable.MtskUcretUygulama) tName = "HubMtskUcretUygulama";
+            return tName;
+        }
+        private string getDataUpdateTableLastId(v.dataUpdateTable dataUpdateTable)
+        {
+            string tableName = getDataUpdateTabeleName(dataUpdateTable);
+            return " Select " + ((byte)dataUpdateTable).ToString() + " as TableId, isnull(max(Id),0) as LastId from " + tableName + " "; 
+        }
+        private void setUnionAll(ref string sql)
+        {
+            sql += " union all " + v.ENTER;
+        }
+
+
         public string Sql_MsProjectTables(string tableName, Int16 sectorTypeId)
         {
             return @"
