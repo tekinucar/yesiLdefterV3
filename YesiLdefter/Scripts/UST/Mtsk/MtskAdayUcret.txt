@@ -41,6 +41,7 @@ begin transaction
    OdemeTipiId             SmallInt      null, /* 1. Kredi Kartı, 2. Nakit, 3. Banka Havalesi, 4. Senet, 5. Açık Hesap */
    OdemeBaslamaTarihi      Date          null,
    OdemeCepTelefonu        nVarchar(15)  null,  
+   SinavUcretTipiId        SmallInt      null, /* 1. Biz yatıracağız,  2. Adayın kendisi yatıracak */   
 
    -- 60 Mebbise bildirilecek ücretler
    MebbisSertifikaUcreti      Numeric(22,5) null,
@@ -105,6 +106,7 @@ AS BEGIN
     declare @VeriKaynakId int = 0
     declare @KontejanTipiId smallint
 	declare @IsKontejan bit = 0
+	declare @SinavUcretTipiId smallInt 
 
     WHILE @@FETCH_STATUS = 0
     BEGIN
@@ -113,6 +115,7 @@ AS BEGIN
            ,@AdayId = ins.AdayId
 		   ,@VeriKaynakId = ins.VeriKaynakId
            ,@KontejanTipiId = ins.KontejanTipiId 
+		   ,@SinavUcretTipiId = ins.SinavUcretTipiId
 		from inserted ins
     	where ins.Id = @curId
 
@@ -135,8 +138,11 @@ AS BEGIN
             -- Takip
             Update MtskAdayTakip set
                 IsKontejan = @IsKontejan
+              , eSinavUcretTipiId = @SinavUcretTipiId 
+              , uSinavUcretTipiId = @SinavUcretTipiId 
             Where TalepId = @TalepId
-            and   IsKontejan <> @IsKontejan 
+            and ( IsKontejan <> @IsKontejan 
+             or   eSinavUcretTipiId <> @SinavUcretTipiId )  
         end		
 
         -- Data transferi oldu fakat daha önce bu talep için boş kayıt oluşturulmuş ise onu sil
@@ -146,6 +152,7 @@ AS BEGIN
             Where TalepId = @TalepId
             and   isnull(VeriKaynakId,0) = 0
         end
+
 
         FETCH NEXT FROM ucretCursor INTO @curId
     END -- While
@@ -255,6 +262,30 @@ INSERT INTO [Lkp].[MtskAdayUcretOdemeTipi] (Id, OdemeTipi, IsActive)
   ( 3,    N'Banka Havalesi', 1),
   ( 4,    N'Senet', 1),
   ( 5,    N'Açık Hesap', 1)
+
+
+-- ------------------------------------------------------- 
+-- SinavUcretTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdayUcretSinavUcretTipi')
+drop table [Lkp].[MtskAdayUcretSinavUcretTipi]
+
+create table [Lkp].[MtskAdayUcretSinavUcretTipi]
+(
+   Id               Int Unique not null, 
+   SinavUcretTipi   nVarchar(50)   null,
+  
+   constraint  pk_MtskAdayUcretSinavUcretTipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskAdayUcretSinavUcretTipi]
+INSERT INTO [Lkp].[MtskAdayUcretSinavUcretTipi] (Id, SinavUcretTipi)
+ VALUES 
+  ( 0,    N'Tanımsız'),
+  ( 1,    N'Biz yatıracağız'),
+  ( 2,    N'Adayın kendisi yatıracak')
+
+
 
 commit transaction
 

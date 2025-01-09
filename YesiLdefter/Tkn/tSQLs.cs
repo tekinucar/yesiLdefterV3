@@ -1328,7 +1328,16 @@ INSERT INTO [dbo].[SYS_UPDATES]
   + Convert(varchar(5), [IlkYardimDersSaati]) + ', '
   + Convert(varchar(5), [AracTeknigiDersSaati]) + ', '
   + Convert(varchar(5), [TrafikAdabiDersSaati]) + ' ) end '
-
+  + ' else begin '
+  + ' UPDATE [dbo].[MtskSaatTeorik] '
+  + ' SET [IsActive] = ' + Convert(varchar(2), [IsActive]) 
+  + ' ,[TrafikVeCevreDersSaati] = ' + Convert(varchar(5), [TrafikVeCevreDersSaati]) 
+  + ' ,[IlkYardimDersSaati] = ' + Convert(varchar(5), [IlkYardimDersSaati]) 
+  + ' ,[AracTeknigiDersSaati] = ' + Convert(varchar(5), [AracTeknigiDersSaati]) 
+  + ' ,[TrafikAdabiDersSaati] = ' + Convert(varchar(5), [TrafikAdabiDersSaati]) 
+  + ' Where FirmId = @FIRM_ID '  
+  + ' and GecerlilikTarihiId = @TarihId ' 
+  + ' end '
   From [dbo].[HubMtskSaatTeorik]
   Where GecerlilikTarihiId = @GecerlilikTarihiId
 
@@ -1353,6 +1362,8 @@ INSERT INTO [dbo].[SYS_UPDATES]
   Select ' if ( Select count(Id) as Adet From dbo.MtskSaatUygulama '
   + ' Where FirmId = @FIRM_ID '  
   + ' and GecerlilikTarihiId = @TarihId ' 
+  + ' and isnull([MevcutSertifikaTipiId],0) = ' + Convert(varchar(6),  isnull([MevcutSertifikaTipiId],0))
+  + ' and isnull([IstenenSertifikaTipiId],0) = ' + Convert(varchar(6),  isnull([IstenenSertifikaTipiId],0))
   + ' ) = 0 begin '
   + ' INSERT INTO [dbo].[MtskSaatUygulama] '
   + '  ( [FirmId],[IsActive],[GecerlilikTarihiId],[MevcutSertifikaTipiId],[IstenenSertifikaTipiId],[SimulatorSaati],[EgitimAlaniSaati],[AkanTrafikSaati],[UygulamaToplamSaat], '
@@ -1374,6 +1385,26 @@ INSERT INTO [dbo].[SYS_UPDATES]
   +  Convert(varchar(2), isnull([IsEnAz],0)) + ', '
   +  Convert(varchar(8), isnull([DeneyimSertifikaTipiId],0)) + ', '
   +  Convert(varchar(5), isnull([DeneyimEnAzYilFarki],0)) + ') end '
+  + ' else begin '
+  + ' UPDATE [dbo].[MtskSaatUygulama] '
+  + ' SET [IsActive] = ' + Convert(varchar(2), [IsActive]) 
+  + ' ,[SimulatorSaati] = ' + Convert(varchar(5), isnull([SimulatorSaati],0)) 
+  + ' ,[EgitimAlaniSaati] = ' + Convert(varchar(5), isnull([EgitimAlaniSaati],0))
+  + ' ,[AkanTrafikSaati] = ' + Convert(varchar(5), isnull([AkanTrafikSaati],0)) 
+  + ' ,[UygulamaToplamSaat] = ' + Convert(varchar(5), isnull([UygulamaToplamSaat],0)) 
+  + ' ,[UygulamaSaati2016Oncesi] = ' + Convert(varchar(5), isnull([UygulamaSaati2016Oncesi],0))
+  + ' ,[Arti4HakUygulamaSaati] = ' + Convert(varchar(5), isnull([Arti4HakUygulamaSaati],0))
+  + ' ,[BasarisizEgitimSaati] = ' + Convert(varchar(5), isnull([BasarisizEgitimSaati],0))
+  + ' ,[TelafiEgitimSaati] = ' +  Convert(varchar(5), isnull([TelafiEgitimSaati],0))
+  + ' ,[YasSiniri] = ' +  Convert(varchar(5), isnull([YasSiniri],0)) 
+  + ' ,[IsEnAz] = ' +  Convert(varchar(2), isnull([IsEnAz],0))
+  + ' ,[DeneyimSertifikaTipiId] = ' + Convert(varchar(8), isnull([DeneyimSertifikaTipiId],0))
+  + ' ,[DeneyimEnAzYilFarki] = ' + Convert(varchar(5), isnull([DeneyimEnAzYilFarki],0))
+  + ' Where FirmId = @FIRM_ID '  
+  + ' and GecerlilikTarihiId = @TarihId ' 
+  + ' and isnull([MevcutSertifikaTipiId],0) = ' + Convert(varchar(6),  isnull([MevcutSertifikaTipiId],0))
+  + ' and isnull([IstenenSertifikaTipiId],0) = ' + Convert(varchar(6),  isnull([IstenenSertifikaTipiId],0))
+  + ' end '
   From [dbo].[HubMtskSaatUygulama]
   Where GecerlilikTarihiId = @GecerlilikTarihiId
 
@@ -1403,6 +1434,12 @@ INSERT INTO [dbo].[SYS_UPDATES]
   + ' @TarihId, '
   + Convert(varchar(22), isnull([ESinavUcreti],0)) + ', ' 
   + Convert(varchar(22), isnull([UygulamaSinavUcreti],0)) + ') end '
+  + ' else begin '
+  + ' UPDATE [dbo].[MtskUcretSinav] '
+  + ' SET [IsActive] = ' + Convert(varchar(2), [IsActive]) 
+  + ' ,[ESinavUcreti] = ' + Convert(varchar(22), isnull([ESinavUcreti],0)) 
+  + ' ,[UygulamaSinavUcreti] = ' + Convert(varchar(22), isnull([UygulamaSinavUcreti],0)) 
+  + ' end '
   From [dbo].[HubMtskUcretSinav]
   Where GecerlilikTarihiId = @GecerlilikTarihiId
 
@@ -1432,6 +1469,13 @@ INSERT INTO [dbo].[SYS_UPDATES]
   + Convert(varchar(4), isnull([IlKodu],0)) + ', '
   + ' @TarihId, '
   + Convert(varchar(22), isnull([BirSaatTeorikDersUcreti],0)) + ') end '
+  + ' else begin '
+  + ' UPDATE [dbo].[MtskUcretTeorik] '
+  + ' SET [IsActive] = ' + Convert(varchar(2), [IsActive]) 
+  + ' ,[BirSaatTeorikDersUcreti] = ' + Convert(varchar(22), isnull([BirSaatTeorikDersUcreti],0)) 
+  + ' Where FirmId = @FIRM_ID '  
+  + ' and GecerlilikTarihiId = @TarihId ' 
+  + ' end '
   From [dbo].[HubMtskUcretTeorik]
   Where GecerlilikTarihiId = @GecerlilikTarihiId
   and   IlKodu = :FIRM_ILKODU 
@@ -1482,6 +1526,25 @@ INSERT INTO [dbo].[SYS_UPDATES]
   + Convert(varchar(22), isnull([BirSaatTelafiDersUcreti],0)) + ', '
   + Convert(varchar(22), isnull([BirSaatOzelDersUcretiAday],0)) + ', '
   + Convert(varchar(22), isnull([BirSaatOzelDersUcretiHarici],0)) + ') end '
+  + ' else begin '
+  + ' UPDATE [dbo].[MtskUcretUygulama] '
+  + ' SET [IsActive] = ' + Convert(varchar(2), [IsActive])
+  + ' ,[SertifikaUcreti] = '+ Convert(varchar(22), isnull([SertifikaUcreti],0))
+  + ' ,[SertifikaUcreti2016Oncesi] = ' + Convert(varchar(22), isnull([SertifikaUcreti2016Oncesi],0))
+  + ' ,[Arti24HakUcreti] = ' + Convert(varchar(22), isnull([Arti24HakUcreti],0)) 
+  + ' ,[NakilArti24HakUcreti] = ' + Convert(varchar(22), isnull([NakilArti24HakUcreti],0)) 
+  + ' ,[BirSaatUygDersUcreti] = ' + Convert(varchar(22), isnull([BirSaatUygDersUcreti],0)) 
+  + ' ,[BirSaatArti24DersUcreti] = ' + Convert(varchar(22), isnull([BirSaatArti24DersUcreti],0)) 
+  + ' ,[BirSaatNakilArti24DersUcreti] = ' + Convert(varchar(22), isnull([BirSaatNakilArti24DersUcreti],0)) 
+  + ' ,[BirSaatBasarisizDersUcreti] = ' + Convert(varchar(22), isnull([BirSaatBasarisizDersUcreti],0)) 
+  + ' ,[BirSaatTelafiDersUcreti] = ' + Convert(varchar(22), isnull([BirSaatTelafiDersUcreti],0)) 
+  + ' ,[BirSaatOzelDersUcretiAday] = ' + Convert(varchar(22), isnull([BirSaatOzelDersUcretiAday],0)) 
+  + ' ,[BirSaatOzelDersUcretiHarici] = ' + Convert(varchar(22), isnull([BirSaatOzelDersUcretiHarici],0)) 
+  + ' Where FirmId = @FIRM_ID '  
+  + ' and GecerlilikTarihiId = @TarihId ' 
+  + ' and isnull([MevcutSertifikaTipiId],0) = ' + Convert(varchar(6),  isnull([MevcutSertifikaTipiId],0))
+  + ' and isnull([IstenenSertifikaTipiId],0) = ' + Convert(varchar(6),  isnull([IstenenSertifikaTipiId],0))
+  + ' end '
   From [dbo].[HubMtskUcretUygulama]
   Where GecerlilikTarihiId = @GecerlilikTarihiId
   and   IlKodu = :FIRM_ILKODU 

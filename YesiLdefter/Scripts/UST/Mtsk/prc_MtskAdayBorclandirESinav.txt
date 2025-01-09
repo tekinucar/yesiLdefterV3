@@ -1,0 +1,38 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_MtskAdayBorclandirESinav] (@FirmId int)
+AS BEGIN  
+
+  declare @UcretTipiId Int  = 21111
+  declare @TalepId int
+
+  -- Döngüye alınacak Select cümlesi
+  declare myCursor CURSOR local FOR 
+
+  Select TalepId From dbo.MtskAdayTakip
+  Where  eSinavDurumTipiId = 2
+  and    FirmId = @FirmId
+
+  OPEN myCursor; 
+  
+  FETCH NEXT FROM myCursor INTO @TalepId
+
+  print 'e-Sınav için prc_MtskAdayBorclandir başladı'
+  
+  WHILE @@FETCH_STATUS = 0 
+  BEGIN -- İşlemler burada yapılır 
+  
+     PRINT '@TalepId: ' + CAST(@TalepId AS NVARCHAR) + ', @UcretTipiId: ' + CAST(@UcretTipiId AS NVARCHAR); 
+  
+	 Execute [dbo].[prc_MtskAdayBorclandir] @TalepId, @UcretTipiId 
+
+     FETCH NEXT FROM myCursor INTO @TalepId; 
+  END; 
+  
+  CLOSE myCursor;
+
+  print 'e-Sınav için prc_MtskAdayBorclandir bitti'
+
+END -- procedure
+
+/*CreateProcedureEnd*/

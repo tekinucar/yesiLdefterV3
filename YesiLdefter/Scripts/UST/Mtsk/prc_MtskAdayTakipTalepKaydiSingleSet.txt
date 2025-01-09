@@ -157,8 +157,9 @@ AS BEGIN
     -- DİKKAT : Aynı kod prc_MtskAdayTakip içinde var	
     ----------------------------------------------------------------------------
     update MtskAdayTakip set
-      eSinavNo = x.SinavNo
+	  eSinavNo = x.SinavNoYeni
     , eSinavDurumTipiId = x.eSinavDurumTipiId
+    , eSinavNoGirdigi = x.SinavNoGirdigi
     , eSinavSonucTipiId = x.DurumuTipiId
     , eSinavSonrasiTipiId = x.eSinavSonrasiTipiId
     , eSinavMuracatTarihi = x.eSinavMuracatTarihi
@@ -172,14 +173,38 @@ AS BEGIN
 	     , eSinav.FirmId
          , eSinav.TalepId
 	     , eSinav.AdayId 
-	     , eSinav.SinavNo
+	     , eSinav.SinavNo as SinavNoGirdigi
          , eSinav.DurumuTipiId
 		 , convert(date, eSinav.SinavTarihi, 103) as SinavTarihi
+
+    -- eSinavDurumTipiId
+    --   0 : ''
+    --   1 : e-Sınav için hazır değil
+    --   2 : e-Sınav başvurusu yapılacak
+    --   3 : e-Sınav başvurusu yapıldı
+    --   4 : e-Sınav sonucu okunacak
+    --   5 : e-Sınav sonucu okundu
+	--   6 : Muaf
+
+	--   eSinav.DurumuTipi
+	--   1   Başarılı
+	--   2   Başarısız
+	--   3   Girmedi
+	--   4   Raporlu
+	--   5   İptal Edildi(Sınav Yasaklı)
+
 	     , case
              when (eSinav.DurumuTipiId = 0 and convert(date, @bugun,103) <  convert(date, eSinav.SinavTarihi, 103)) then 3 -- e-Sınav başvurusu yapıldı
              when (eSinav.DurumuTipiId = 0 and convert(date, @bugun,103) >= convert(date, eSinav.SinavTarihi, 103)) then 4 -- e-Sınav sonucu okunacak
-	         when (eSinav.DurumuTipiId > 0) then 5 -- e-Sınav sonucu okundu
+	         when (eSinav.DurumuTipiId = 1) then 5 -- e-Sınav sonucu okundu < sınav başarılıysa
+	         when (eSinav.DurumuTipiId > 1 and eSinav.SinavNo < 4) then 2 -- e-Sınav başvurusu yapılacak < 1,2,3 sınavlarda başarılı değilse 
+	         when (eSinav.DurumuTipiId > 1 and eSinav.SinavNo = 4) then 5 -- e-Sınav sonucu okundu       < 4. sınavda başarılı değilse
            end as eSinavDurumTipiId
+	     , case
+	         when (eSinav.DurumuTipiId = 1) then 0 -- < sınav başarılıysa
+	         when (eSinav.DurumuTipiId > 1 and eSinav.SinavNo < 4) then (eSinav.SinavNo + 1) --  < 1,2,3 sınavlarda başarılı değilse
+	         when (eSinav.DurumuTipiId > 1 and eSinav.SinavNo = 4) then 0 --  < 4. sınavda başarılı değilse
+           end as SinavNoYeni
          , case
 	         when (eSinav.DurumuTipiId = 1) then 2 -- Uygulama aşamasına geçti
              when (eSinav.DurumuTipiId > 1) and (eSinav.SinavNo < 4 ) then 1  -- Tekrar sınava girecek
@@ -223,8 +248,9 @@ AS BEGIN
 	-- ---------------------------------------------------
 	
 	update MtskAdayTakip set
-      eSinavNo = 0
-    , eSinavDurumTipiId = x.eSinavDurumTipiId
+      eSinavDurumTipiId = x.eSinavDurumTipiId
+    , eSinavNo = 1
+    , eSinavNoGirdigi = 0
     , eSinavSonucTipiId = 0
     , eSinavSonrasiTipiId = 0
     , eSinavMuracatTarihi = null

@@ -262,6 +262,11 @@ AS BEGIN
 		, DurumuTipiId = @yDurumuTipiId
 		Where Id = @curId
 
+        -- Aday ken kayıt durumuna halen geçmemişse
+		Update dbo.MtskAdayTalep set KayitTipiId = 3
+        Where Id = @yTalepId
+        and   KayitTipiId < 3 -- Kesin Kayıt değilse ? kesin kayıt durumuna getir
+
 	--	EXECUTE [dbo].[prc_MtskAdaySertifika] @yFirmId, @yAdayId
 
         FETCH NEXT FROM curSinavUyg INTO @curId

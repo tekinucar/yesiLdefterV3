@@ -202,6 +202,11 @@ AS BEGIN
             and   Id <> @curId 
 		end
 
+        -- Aday ken kayıt durumuna halen geçmemişse
+		Update dbo.MtskAdayTalep set KayitTipiId = 3
+        Where Id = @yTalepId
+        and   KayitTipiId < 3 -- Kesin Kayıt değilse ? kesin kayıt durumuna getir
+
 		Execute [dbo].[prc_MtskAdayTakipTalepKaydiSingleSet] @yTalepId
 
         FETCH NEXT FROM eSinavCursor INTO @curId

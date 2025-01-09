@@ -76,8 +76,8 @@ INSERT INTO [Lkp].[OnmOdemePlaniTalepTipi] (Id, TalepTipi)
   ( 2,    N'2.+4 hak'),
   ( 3,    N'Nakil 2.+4 hak'),
   ( 4,    N'100 Ceza'),
-  ( 5,    N'Özel direksiyon ders (Aday değil)'),
-  ( 6,    N'Özel teorik ders')
+  ( 5,    N'Özel direksiyon dersi (Aday değil)')
+  --( 6,    N'Özel teorik ders')
 
 
 -- ------------------------------------------------------- 
@@ -103,10 +103,11 @@ INSERT INTO [Lkp].[OnmOdemePlaniUcretTipi] (Id, UcretTipi)
   ( 21103,    N'Nakil 2.+4 hak'),
   ( 21104,    N'100 Ceza'),
   ( 21105,    N'Özel direksiyon ders (Aday değil)'),
-  ( 21106,    N'Özel teorik ders'),
+  --( 21106,    N'Özel teorik ders'),
   ( 21111,    N'e-Sınav ücreti'),
   ( 21112,    N'Uygulama sınav ücreti'),
-  ( 21113,    N'Başarısız eğitim ücreti')
+  ( 21113,    N'Başarısız eğitim ücreti'),
+  ( 21114,    N'Telafi eğitim ücreti')
 
   
 -- ------------------------------------------------------- 
@@ -183,6 +184,7 @@ INSERT INTO [Lkp].[OnmOdemePlaniSourceType] (Id, SourceType)
   ( 1,     N'OnmOdemePlani - Kendisi'),
   ( 2,     N'OnmBelgeDekont'),
   ( 2100,  N'Mtsk Modülü - Kullanıcı girişi'),
+  ( 2101,  N'Mtsk Modülü - Otomatik, kullanıcı onaylı'),
   ( 2103,  N'Mtsk Veri Transferi - Giderler'),
   ( 2104,  N'Mtsk Veri Transferi - CariAlt'),
   ( 2105,  N'Mtsk Veri Transferi - Kurharc')
@@ -198,32 +200,62 @@ CREATE TRIGGER [dbo].[trg_OnmOdemePlani] on [dbo].[OnmOdemePlani]
 AFTER INSERT, UPDATE
 AS BEGIN
 
-    declare odemePlaniCursor cursor for select Id from Inserted
-    declare @Id bigint
-	declare @FirmId int
-	declare @ItemTypeId smallInt
+    declare odmPlaniCursor_ cursor local for select Id from Inserted
+    declare @curId bigint
 
-    OPEN odemePlaniCursor
+    OPEN odmPlaniCursor_
+    FETCH NEXT FROM odmPlaniCursor_ INTO @curId
 
-    FETCH NEXT FROM odemePlaniCursor INTO @Id --@curId
+    declare @TalepId int = 0
+	declare @AdayId int
+	declare @VeriKaynakId int
+	declare @SourceTypeId smallint
 
     WHILE @@FETCH_STATUS = 0
     BEGIN
         Select 
-            @FirmId = ins.FirmId
-           ,@ItemTypeId = ins.UcretTipiId
+            @TalepId = isnull(ins.TalepId,0)
+           ,@AdayId = isnull(ins.CariId,0)
+		   ,@VeriKaynakId = ins.VeriKaynakId
+           ,@SourceTypeId = ins.SourceTypeId
         From inserted ins
-        Where ins.Id = @Id
+        Where ins.Id = @curId
+     	
+        if (@VeriKaynakId > 0 and (@TalepId = 0 or @AdayId = 0) and @SourceTypeId = 2104)
+        begin
+            Update dbo.OnmOdemePlani set
+                TalepId = t.Id  
+               ,CariId  = t.AdayId 
+            From dbo.OnmOdemePlani as a,
+                 dbo.MtskAdayTalep as t
+            Where a.VeriKaynakId = t.VeriKaynakId				 
+            and   a.Id = @curId
+        end		
 
-      FETCH NEXT FROM odemePlaniCursor INTO @Id
+		-- Tahsil edilmiş bir taksit var ise MtskAdayUcret tablosunu kilitle
+        if (
+            select count(Id) as Adet from OnmOdemePlani
+            where IsPaid = 1
+            and   TalepId = @TalepId
+            ) > 0 
+        begin
+            Update MtskAdayUcret set IsLock = 1
+            Where TalepId = @TalepId
+        end else 
+        begin
+            Update MtskAdayUcret set IsLock = 0
+            Where TalepId = @TalepId
+        end
+		
+		
+      FETCH NEXT FROM odmPlaniCursor_ INTO @curId
     END -- While
 
-    CLOSE odemePlaniCursor
-    DEALLOCATE odemePlaniCursor   
-
-    EXECUTE [dbo].[prc_OnmToplamBekleyenGelirler] @FirmId
+    CLOSE odmPlaniCursor_
+    DEALLOCATE odmPlaniCursor_   
 
 END -- create trigger
+
 
 /*CreateTriggerEnd*/
 
@@ -234,14 +266,15 @@ CREATE TRIGGER [dbo].[trg_OnmOdemePlaniDelete] on [dbo].[OnmOdemePlani]
 FOR DELETE
 AS BEGIN
 
-    declare cursor_odemePlaniDlt cursor for select Id from deleted
+    declare odmPlaniCursor_ cursor local for select Id from deleted
     declare @curId bigint
+
+	OPEN odmPlaniCursor_
+    FETCH NEXT FROM odmPlaniCursor_ INTO @curId
+
 	declare @FirmId int
 	declare @ItemTypeId smallInt
 	
-	OPEN cursor_odemePlaniDlt
-
-    FETCH NEXT FROM cursor_odemePlaniDlt INTO @curId
 
     WHILE @@FETCH_STATUS = 0
     BEGIN
@@ -252,65 +285,17 @@ AS BEGIN
         Where dlt.Id = @curId
 
 
-      FETCH NEXT FROM cursor_odemePlaniDlt INTO @curId
+      FETCH NEXT FROM odmPlaniCursor_ INTO @curId
     END
 
-    CLOSE cursor_odemePlaniDlt
-    DEALLOCATE cursor_odemePlaniDlt
+    CLOSE odmPlaniCursor_
+    DEALLOCATE odmPlaniCursor_
 
-    EXECUTE [dbo].[prc_OnmToplamBekleyenGelirler] @FirmId
+    --EXECUTE [dbo].[prc_OnmToplamBekleyenGelirler] @FirmId
 
 END
 
 /*CreateTriggerEnd*/
 
-/*CreateTrigger*/
-
-CREATE TRIGGER [dbo].[trg_OnmOdemePlani] on [dbo].[OnmOdemePlani]
-AFTER INSERT, UPDATE
-AS BEGIN
-
-    declare planCursor cursor for select Id from Inserted
-    declare @planId bigint
-
-    OPEN planCursor
-
-    FETCH NEXT FROM planCursor INTO @planId --@curId
-
-    declare @yTalepId int = 0
-
-    WHILE @@FETCH_STATUS = 0
-    BEGIN
-        Select 
-            @yTalepId = isnull(ins.TalepId,0)
-        From inserted ins
-        Where ins.Id = @planId
-     	
-		-- Tahsil edilmiş bir taksit var ise kilitle
-        if (
-            select count(Id) as Adet from OnmOdemePlani
-            where IsPaid = 1
-            and   TalepId = @yTalepId
-            ) > 0 
-        begin
-            Update MtskAdayUcret set IsLock = 1
-            Where TalepId = @yTalepId
-        end else 
-        begin
-            Update MtskAdayUcret set IsLock = 0
-            Where TalepId = @yTalepId
-        end
-		
-		
-      FETCH NEXT FROM planCursor INTO @planId
-    END -- While
-
-    CLOSE planCursor
-    DEALLOCATE planCursor   
-
-END -- create trigger
-
-
-/*CreateTriggerEnd*/
 
 

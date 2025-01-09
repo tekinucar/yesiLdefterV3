@@ -235,6 +235,20 @@ AS BEGIN
    Where a.Id = x.TakipId
    and   a.eSinavDurumTipiId <> x.eSinavDurumTipiId
 
+   /*
+
+      Select 
+          takip.Id as TakipId
+         ,takip.TalepId
+         ,count(eSinav.Id) + 1 
+      From MtskAdayTakip as takip
+          left outer join dbo.MtskSinavETeorik as eSinav on (takip.TalepId = eSinav.TalepId)
+      Where takip.eSinavDurumTipiId = 2 -- e-Sınav başvurusu yapılacak
+      Group by takip.Id, takip.TalepId 
+
+	  select * from MtskAdayTakip where TalepId = 3324
+
+   */
     -- eSinavDurumTipiId
     --   0 : ''
     --   1 : e-Sınav için hazır değil
@@ -263,8 +277,9 @@ AS BEGIN
 
     print 'e-Sınav sonuçları'
     update MtskAdayTakip set
-      eSinavNo = x.SinavNo
+	  eSinavNo = x.SinavNoYeni
     , eSinavDurumTipiId = x.eSinavDurumTipiId
+    , eSinavNoGirdigi = x.SinavNoGirdigi
     , eSinavSonucTipiId = x.DurumuTipiId
     , eSinavSonrasiTipiId = x.eSinavSonrasiTipiId
     , eSinavMuracatTarihi = x.eSinavMuracatTarihi
@@ -278,14 +293,38 @@ AS BEGIN
 	     , eSinav.FirmId
          , eSinav.TalepId
 	     , eSinav.AdayId 
-	     , eSinav.SinavNo
+	     , eSinav.SinavNo as SinavNoGirdigi
          , eSinav.DurumuTipiId
 		 , convert(date, eSinav.SinavTarihi, 103) as SinavTarihi
+
+    -- eSinavDurumTipiId
+    --   0 : ''
+    --   1 : e-Sınav için hazır değil
+    --   2 : e-Sınav başvurusu yapılacak
+    --   3 : e-Sınav başvurusu yapıldı
+    --   4 : e-Sınav sonucu okunacak
+    --   5 : e-Sınav sonucu okundu
+	--   6 : Muaf
+
+	--   eSinav.DurumuTipi
+	--   1   Başarılı
+	--   2   Başarısız
+	--   3   Girmedi
+	--   4   Raporlu
+	--   5   İptal Edildi(Sınav Yasaklı)
+
 	     , case
              when (eSinav.DurumuTipiId = 0 and convert(date, @bugun,103) <  convert(date, eSinav.SinavTarihi, 103)) then 3 -- e-Sınav başvurusu yapıldı
              when (eSinav.DurumuTipiId = 0 and convert(date, @bugun,103) >= convert(date, eSinav.SinavTarihi, 103)) then 4 -- e-Sınav sonucu okunacak
-	         when (eSinav.DurumuTipiId > 0) then 5 -- e-Sınav sonucu okundu
+	         when (eSinav.DurumuTipiId = 1) then 5 -- e-Sınav sonucu okundu < sınav başarılıysa
+	         when (eSinav.DurumuTipiId > 1 and eSinav.SinavNo < 4) then 2 -- e-Sınav başvurusu yapılacak < 1,2,3 sınavlarda başarılı değilse 
+	         when (eSinav.DurumuTipiId > 1 and eSinav.SinavNo = 4) then 5 -- e-Sınav sonucu okundu       < 4. sınavda başarılı değilse
            end as eSinavDurumTipiId
+	     , case
+	         when (eSinav.DurumuTipiId = 1) then 0 -- < sınav başarılıysa
+	         when (eSinav.DurumuTipiId > 1 and eSinav.SinavNo < 4) then (eSinav.SinavNo + 1) --  < 1,2,3 sınavlarda başarılı değilse
+	         when (eSinav.DurumuTipiId > 1 and eSinav.SinavNo = 4) then 0 --  < 4. sınavda başarılı değilse
+           end as SinavNoYeni
          , case
 	         when (eSinav.DurumuTipiId = 1) then 2 -- Uygulama aşamasına geçti
              when (eSinav.DurumuTipiId > 1) and (eSinav.SinavNo < 4 ) then 1  -- Tekrar sınava girecek
@@ -339,8 +378,9 @@ AS BEGIN
 	-- ---------------------------------------------------
     print 'e-Sınav sonuçları silinmişse'
 	update MtskAdayTakip set
-      eSinavNo = 0
-    , eSinavDurumTipiId = x.eSinavDurumTipiId
+      eSinavDurumTipiId = x.eSinavDurumTipiId
+    , eSinavNo = 1
+    , eSinavNoGirdigi = 0
     , eSinavSonucTipiId = 0
     , eSinavSonrasiTipiId = 0
     , eSinavMuracatTarihi = null
@@ -381,7 +421,7 @@ AS BEGIN
     Where FirmId = @FirmId
     and   eSinavDurumTipiId < 2   -- e-Sınav için hazır değil
 	and   eSinavSonrasiTipiId = 1 -- Tekrar sınava girecek
-    and   eSinavNo > 0
+    and   eSinavNoGirdigi > 0
 	and   eSinavMuracatTarihi < @bugun
 	
 
@@ -1057,7 +1097,7 @@ AS BEGIN
   -- 5,    'Sertifikası İptal Edildi'
   -- 6,	 'Durumu Girilmemiş'
   
-    print 'Uygulamalı sınav sonuçları işleniyor     geçici kapatıldı ************'
+    print 'Uygulamalı sınav sonuçları işleniyor '
     update MtskAdayTakip set
       uSinavNo = x.SinavNo
     , uSinavDurumTipiId = x.uSinavDurumTipiId
@@ -1223,6 +1263,7 @@ AS BEGIN
 
 
   Execute [dbo].[prc_setIsDbUpdateActive] 13, 0	
+
 
 END -- procedure
 

@@ -227,20 +227,27 @@ namespace Tkn_ToolBox
 
         public void dataUpdates()
         {
+            // UstadMtsk ise
+            if (v.SP_Firm_SectorTypeId == 211)
+                dataUpdatesUstadMtsk();
+        }
+
+        public void dataUpdatesUstadMtsk()
+        { 
             tSQLs sqls = new tSQLs();
             DataSet ds = new DataSet();
 
-            //string gecerlilikTarihiIdSql = "  declare @GecerlilikTarihiId int = 0 ";
-            string insertSql = @"  declare @FIRM_ID int 
-  Set @FIRM_ID = :FIRM_ID 
-  declare @TarihId int = 0
-";
-            string finalSql = "";
             string MtskSaatTeorikSql = "";
             string MtskSaatUygulamaSql = "";
             string MtskUcretSinavSql = "";
             string MtskUcretTeorikSql = "";
             string MtskUcretUygulamaSql = "";
+            string insertSql = @"  declare @FIRM_ID int 
+  Set @FIRM_ID = :FIRM_ID 
+  declare @TarihId int = 0
+";
+
+            /// HubGecerliTarih'leri okuyup GecerliTarih tablosuna insert eden sql
             /// 
             string selectSql = sqls.getGecerliTarihSql();
             
@@ -248,11 +255,14 @@ namespace Tkn_ToolBox
             {
                 if (IsNotNull(ds))
                 {
+                    /// GecerliTarih tablo insert satırları
+                    /// 
                     foreach (DataRow row in ds.Tables[0].Rows)
                     {
                         insertSql += row[0].ToString() + v.ENTER;
                     }
 
+                    /// GeciciTarih insertleri varsa
                     if (insertSql.Length > 100)
                     {
 
@@ -302,6 +312,8 @@ namespace Tkn_ToolBox
                             }
                         }
 
+                        /// HubMtskUcretTeorik > MtskUcretTeorik
+                        /// 
                         insertSql += sqls.getGecerlilikTarihiIdSql(21104);
                         MtskUcretTeorikSql = sqls.getMtskUcretTeorikSql();
 
@@ -315,6 +327,7 @@ namespace Tkn_ToolBox
                             }
                         }
 
+                        /// HubMtskUcretUygulama > MtskUcretUygulama
                         insertSql += sqls.getGecerlilikTarihiIdSql(21104);
                         MtskUcretUygulamaSql = sqls.getMtskUcretUygulamaSql();
 
@@ -328,6 +341,8 @@ namespace Tkn_ToolBox
                             }
                         }
 
+                        /// Tüm insert satılarını çalıştır
+                        /// 
                         if (IsNotNull(insertSql))
                         {
                             TableRemove(ds);
