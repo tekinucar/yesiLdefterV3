@@ -55,14 +55,18 @@ begin transaction
    BorcSertifikaUcreti        Numeric(22,5) null,
    BorcESinavUcreti           Numeric(22,5) null,
    BorcUygulamaSinavUcreti    Numeric(22,5) null,
+   BorcTelafiEgitimUcreti     Numeric(22,5) null,
    BorcBasarisizEgitimUcreti  Numeric(22,5) null,
+   BorcDigerUcretler          Numeric(22,5) null,
    BorcUcretlerToplami        Numeric(22,5) null,
 
    -- 80 Vadesi geçmiş olan borçlar
    VGSertifikaUcreti          Numeric(22,5) null,
    VGESinavUcreti             Numeric(22,5) null,
    VGUygulamaSinavUcreti      Numeric(22,5) null,
+   VGTelafiEgitimUcreti       Numeric(22,5) null,
    VGBasarisizEgitimUcreti    Numeric(22,5) null,
+   VGDigerUcretler            Numeric(22,5) null,
    VGUcretlerToplami          Numeric(22,5) null,
 
    -- 90
@@ -107,6 +111,11 @@ AS BEGIN
     declare @KontejanTipiId smallint
 	declare @IsKontejan bit = 0
 	declare @SinavUcretTipiId smallInt 
+	declare @SertifikaUcreti numeric(22,5)
+	declare @KontejanSonrasiUcret numeric(22,5)
+    declare @AnlasilanUcret numeric(22,5)
+    declare @TaksitlendirilecekUcret numeric (22,5)
+    declare @MebbisSertifikaUcreti numeric(22,5)
 
     WHILE @@FETCH_STATUS = 0
     BEGIN
@@ -116,6 +125,12 @@ AS BEGIN
 		   ,@VeriKaynakId = ins.VeriKaynakId
            ,@KontejanTipiId = ins.KontejanTipiId 
 		   ,@SinavUcretTipiId = ins.SinavUcretTipiId
+           ,@SertifikaUcreti = ins.SertifikaUcreti
+	       ,@KontejanSonrasiUcret = ins.KontejanSonrasiUcret
+           ,@AnlasilanUcret = ins.AnlasilanUcret
+           ,@TaksitlendirilecekUcret = ins.TaksitlendirilecekUcret
+           ,@MebbisSertifikaUcreti = ins.MebbisSertifikaUcreti
+
 		from inserted ins
     	where ins.Id = @curId
 
@@ -134,7 +149,6 @@ AS BEGIN
         if (@DbUpdatesIsActive = 0)
         begin 
             if (@KontejanTipiId > 0) set @IsKontejan = 1 else set @IsKontejan = 0
-
             -- Takip
             Update MtskAdayTakip set
                 IsKontejan = @IsKontejan
@@ -143,7 +157,23 @@ AS BEGIN
             Where TalepId = @TalepId
             and ( IsKontejan <> @IsKontejan 
              or   eSinavUcretTipiId <> @SinavUcretTipiId )  
-        end		
+
+            if ((@KontejanSonrasiUcret = 0) or
+			    (@AnlasilanUcret = 0) or
+				(@TaksitlendirilecekUcret = 0))
+            begin
+                if (@KontejanSonrasiUcret = 0) Set @KontejanSonrasiUcret = @SertifikaUcreti  
+                if (@AnlasilanUcret = 0) Set @AnlasilanUcret = @KontejanSonrasiUcret
+                if (@TaksitlendirilecekUcret = 0) Set @TaksitlendirilecekUcret = @AnlasilanUcret
+
+                Update dbo.MtskAdayUcret Set
+                     KontejanSonrasiUcret = @KontejanSonrasiUcret
+                    ,AnlasilanUcret = @AnlasilanUcret
+                    ,TaksitlendirilecekUcret = @TaksitlendirilecekUcret
+                Where Id = @curId 
+            end -- @KontejanSonrasi
+
+        end	-- if (@DbUpdatesIsActive = 0)	
 
         -- Data transferi oldu fakat daha önce bu talep için boş kayıt oluşturulmuş ise onu sil
         if (@VeriKaynakId > 0)
@@ -162,7 +192,6 @@ AS BEGIN
 
 END -- create trigger
 
-ALTER TABLE dbo.MtskAdayUcret ENABLE TRIGGER trg_MtskAdayUcret 
 
 /*CreateTriggerEnd*/
 

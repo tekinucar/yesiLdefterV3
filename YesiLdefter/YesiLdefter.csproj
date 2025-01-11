@@ -752,6 +752,9 @@
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayBiyometrikResmi.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayBorclandir.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayBorclandirESinav.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayBorclandirUygulamaSinavi.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayBorclariniHesapla.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayBorcunuHesapla.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTablesInsertKontrolu.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakipESinavToplamlari.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakipKonulari.txt" />

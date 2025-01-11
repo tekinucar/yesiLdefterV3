@@ -241,7 +241,15 @@ AS BEGIN
     Where a.FirmId  = x.FirmId
     and   a.TalepId = x.TalepId
 	and   a.AdayId  = x.AdayId 
-
+    and (
+       isnull(a.eSinavDurumTipiId,0)   <> x.eSinavDurumTipiId
+    or isnull(a.eSinavSonucTipiId,0)   <> x.DurumuTipiId
+    or isnull(a.eSinavSonrasiTipiId,0) <> x.eSinavSonrasiTipiId
+	or isnull(a.eSinavDetayId,0)       <> x.sinavId
+    or a.eSinavMuracatTarihi           <> x.eSinavMuracatTarihi
+	or a.eSinavBasariTarihi            <> x.SinavTarihi
+	--or a.UygulamaliDersTipiId <> x.UygulamaliDersTipiId : bu değişir
+	)
 
 	-- ---------------------------------------------------
     -- eSınavlar tamamen silinmiş olabilir
@@ -266,6 +274,9 @@ AS BEGIN
 		 from dbo.MtskAdayTakip as takip
 		     left outer join dbo.MtskSinavETeorik as sinav on ( 
 			          takip.TalepId = sinav.TalepId 
+                  -- ----------------------------------------
+			      and sinav.TalepId = @TalepId -- Bu procedure özel
+                  -- ----------------------------------------
 			      and sinav.IsActive = 1 )
          Where takip.FirmId = @yFirmId
          and   takip.eSinavDurumTipiId > 0  
@@ -279,6 +290,175 @@ AS BEGIN
      ) as x
 	 Where a.Id = x.TakipId 
 
+
+
+    -- -------------------------------------------------------------------------
+    -- uSinav sonuçları
+    -- -------------------------------------------------------------------------
+    -- DİKKAT : Aynı kod prc_MtskAdayTakip içinde var	
+    ----------------------------------------------------------------------------
+
+    update MtskAdayTakip set
+      uSinavNo = x.SinavNoYeni
+    , uSinavDurumTipiId = x.uSinavDurumTipiId
+    , uSinavNoGirdigi = x.SinavNoGirdigi
+    , uSinavSonucTipiId = x.uSinavSonucTipiId
+    , uSinavSonrasiTipiId = x.uSinavSonrasiTipiId
+	, uSinavDetayId = x.sinavId
+	, uSinavBasariTarihi = x.SinavTarihi --x.uSinavBasariTarihi
+	, BasarisizDersTipiId = x.BasarisizDersTipiId
+
+    from MtskAdayTakip a, 
+    (
+         Select 
+	       uSinav.Id as sinavId
+	     , uSinav.FirmId
+         , uSinav.TalepId
+	     , uSinav.AdayId 
+	     , uSinav.SinavNo as SinavNoGirdigi
+         , uSinav.DurumuTipiId
+		 , convert(date, uSinav.SinavTarihi, 103) as SinavTarihi
+
+	--   Id  MtskAdayTakipi.uSinavDurumTipi
+	--   0   Tanımsız
+	--   1   Henüz sınav aşamasında değil
+	--   2   Uygulama sınavı için usta öğretici onayı isteniyor
+	--   3   Uygulama sınavı için hazır değil
+	--   4   Uygulama sınavı için MEBBİS de onaylanacak
+	--   5   Uygulama sınav randevusu planlanacak
+	--   6   Uygulama sınav randevusu MEBBİSe aktarılacak
+	--   7   Uygulama sınavına girecek
+	--   8   Uygulama sınav sonucu okunacak
+	--   9   Uygulama sınav sonucu okundu
+	--   
+	--   Id  MtskSinavUygulama.DurumuTipi
+	--   0
+	--   1   Uygulama Sınav Aşamasında
+	--   2   2.Direksiyon Aşamasında
+	--   3   Sertifika Almaya Hak Kazandı
+	--   4   Uygulama Sınav Hakkı Doldu
+	--   5   Sertifikası İptal Edildi
+	--   6   Durumu Girilmemiş
+    -- 
+	--   Id  MtskSinavUygulama.PuanTipi
+	--   -2  Durumu Girilmemiş
+	--   -1  Girmedi
+	--   0   
+	--   1   Başarısız
+	--   100 Başarılı
+
+	     , ( case
+             when (uSinav.PuanTipiId = 0 and convert(date, @bugun,103) <  convert(date, uSinav.SinavTarihi, 103)) then 7 -- Uygulama sınavına girecek
+             when (uSinav.PuanTipiId = 0 and convert(date, @bugun,103) >= convert(date, uSinav.SinavTarihi, 103)) then 8 -- Uygulama sınav sonucu okunacak
+	         when (uSinav.PuanTipiId = 100) then 9 -- Uygulama sınav sonucu okundu < sınav başarılıysa
+	         when ((uSinav.PuanTipiId = 1 or uSinav.PuanTipiId = -1) and uSinav.SinavNo < 4) then 5 -- Uygulama sınav randevusu planlanacak < 1,2,3 sınavlarda başarılı değilse 
+	         when ((uSinav.PuanTipiId = 1 or uSinav.PuanTipiId = -1) and uSinav.SinavNo = 4) then 9 -- Uygulama sınav sonucu okundu         < 4. sınavda başarılı değilse
+             end ) as uSinavDurumTipiId
+	     , case
+	         when (uSinav.PuanTipiId = 100) then 0 -- < sınav başarılıysa
+	         when ((uSinav.PuanTipiId = 1 or uSinav.PuanTipiId = -1) and uSinav.SinavNo < 4) then (uSinav.SinavNo + 1) --  < 1,2,3 sınavlarda başarılı değilse
+	         when ((uSinav.PuanTipiId = 1 or uSinav.PuanTipiId = -1) and uSinav.SinavNo = 4) then 0 --  < 4. sınavda başarılı değilse
+           end as SinavNoYeni
+
+
+	     , ( case
+			 when uSinav.PuanTipiId = 100 then 1 -- Başarılı
+             when uSinav.PuanTipiId =   1 then 2 -- Başarısız
+             when uSinav.PuanTipiId =  -1 then 3 -- Girmedi 
+			 else 0 end ) as uSinavSonucTipiId
+         , ( case
+	         when (uSinav.PuanTipiId = 100) then 2    -- Sertifika aşamasına geçti
+             when (uSinav.PuanTipiId = 1) and (uSinav.SinavNo  < 4 ) then 1  -- Tekrar sınava girecek
+             when (uSinav.PuanTipiId = 1) and (uSinav.SinavNo >= 4 ) and (talep.TalepTipiId = 1)  then 3  -- sertifikaTalebi ve sınavdan başarısız ise   Tüm uygulamalı sınav hakkı bitti
+             when (uSinav.PuanTipiId = 1) and (uSinav.SinavNo >= 4 ) and (talep.TalepTipiId = 2 or talep.TalepTipiId = 3)  then 4  -- 2.+4 veya nakil 2.+4  ve sınavdan başarısız ise   2. +4 sınav hakkı bitti
+             end ) as uSinavSonrasiTipiId
+         --, ( case 
+	     --    when uSinav.PuanTipiId = 100 then uSinav.SinavTarihi 
+         --    else null end ) as uSinavBasariTarihi
+         , ( case
+	         when (uSinav.PuanTipiId = 100) then 0    -- tanımsız, başarısız eğitim planlanmayacak
+             when (uSinav.PuanTipiId = 1) and (uSinav.SinavNo  < 4 ) then 1  -- 2 saat başarısız aday eğitimi planlanacak
+             when (uSinav.PuanTipiId = 1) and (uSinav.SinavNo >= 4 ) and (talep.TalepTipiId = 1)  then 0  -- sertifikaTalebi ve sınavdan başarısız ise   Tüm uygulamalı sınav hakkı bittiği için Tanımsız, başarısız eğitim planlanmayacak
+             when (uSinav.PuanTipiId = 1) and (uSinav.SinavNo >= 4 ) and (talep.TalepTipiId = 2 or talep.TalepTipiId = 3)  then 0  -- 2.+4 veya nakil 2.+4  ve sınavdan başarısız ise 2. +4 sınav hakkı bittiği için Tanımsız, başarısız eğitim planlanmayacak
+             when (uSinav.PuanTipiId = -1) then 6 -- Girmedi için Eğitime gerek yok (Sınava girmedi)
+             end ) as BasarisizDersTipiId
+
+         from MtskSinavUygulama as uSinav, dbo.MtskAdayTalep as talep,
+	     (     -- Adayların son sınavlarını buluyor
+	           Select TalepId, AdayId
+			   , max(convert(smallDatetime,SinavTarihi,103)) as SinavTarihi
+               from MtskSinavUygulama
+		       Where FirmId = @yFirmId
+			   and IsActive = 1
+               -- ----------------------------------------
+			   and TalepId = @TalepId -- Bu procedure özel
+               -- ----------------------------------------
+
+               group by TalepId, AdayId
+         ) as aday
+	     Where uSinav.TalepId = talep.Id
+         and   uSinav.TalepId = aday.TalepId
+		 and   uSinav.AdayId = aday.AdayId
+	     and   convert(smallDatetime,uSinav.SinavTarihi,103) = aday.SinavTarihi
+    ) as x
+    Where a.FirmId  = x.FirmId
+    and   a.TalepId = x.TalepId
+	and   a.AdayId  = x.AdayId 
+    and (
+       isnull(a.uSinavNo,0)            <> x.SinavNoGirdigi
+    or isnull(a.uSinavDurumTipiId,0)   <> x.uSinavDurumTipiId
+    or isnull(a.uSinavSonucTipiId,0)   <> x.uSinavSonucTipiId
+    or isnull(a.uSinavSonrasiTipiId,0) <> x.uSinavSonrasiTipiId
+	or isnull(a.uSinavDetayId,0)       <> x.sinavId
+	or a.uSinavBasariTarihi  <> x.SinavTarihi )
+
+
+	-- ---------------------------------------------------
+    -- uSınavlar tamamen silinmiş olabilir
+	-- ---------------------------------------------------
+    print 'u-Sınav sonuçları silinmişse'
+	update MtskAdayTakip set
+      uSinavDurumTipiId = x.uSinavDurumTipiId
+    , uSinavNo = 1
+    , uSinavNoGirdigi = 0
+    , uSinavSonucTipiId = 0
+    , uSinavSonrasiTipiId = 0
+    --, uSinavMuracatTarihi = null
+	, uSinavDetayId = 0
+	, uSinavBasariTarihi = null
+	, BasarisizDersTipiId = 0
+    from MtskAdayTakip a, 
+    (
+	     -- Id   MtskAdayTakipi.UygulamaliDersTipi
+         -- 5    Uygulamalı dersleri tamamladı
+
+		 -- Id   MtskAdayTakipi.uSinavDurumTipi
+		 -- 5    Uygulama sınav randevusu planlanacak
+
+		 Select takip.Id as TakipId
+        ,(case  
+          when takip.UygulamaliDersTipiId = 5 then 5 -- Uygulama sınav randevusu planlanacak
+          else 5 end ) as uSinavDurumTipiId          -- hangi aşamayı döndüreceğimi bilemedim, yine 5 yaptım
+		 from dbo.MtskAdayTakip as takip
+		     left outer join dbo.MtskSinavUygulama as sinav on ( 
+			          takip.TalepId = sinav.TalepId 
+                  -- ----------------------------------------
+			      and sinav.TalepId = @TalepId -- Bu procedure özel
+                  -- ----------------------------------------
+			      and sinav.IsActive = 1 )
+         Where takip.FirmId = @yFirmId
+         and   takip.uSinavDurumTipiId > 0  
+		 -- ----------------------------------------
+         and takip.TalepId = @TalepId -- Bu procedure özel
+         -- ----------------------------------------
+
+		 Group by takip.Id
+		        , takip.UygulamaliDersTipiId
+		 Having COUNT(sinav.Id) = 0
+     ) as x
+	 Where a.Id = x.TakipId 
+     and ( a.uSinavDurumTipiId <> x.uSinavDurumTipiId
+        or a.uSinavSonucTipiId <> 0 )
 
 
 END -- procedure

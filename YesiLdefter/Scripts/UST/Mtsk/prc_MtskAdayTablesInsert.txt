@@ -149,8 +149,8 @@ AS BEGIN
            ,[SertifikaVeSinavUcreti],[IsSinavUcretiTaksitli]
            ,[OdemeTipiId],[OdemeBaslamaTarihi],[OdemeCepTelefonu]
            ,[MebbisSertifikaUcreti],[MebbisTeoDersSaati],[Mebbis1SaatTeoDersUcreti],[MebbisUygDersSaati],[Mebbis1SaatUygDersUcreti]
-           ,[BorcSertifikaUcreti],[BorcESinavUcreti],[BorcUygulamaSinavUcreti],[BorcBasarisizEgitimUcreti],[BorcUcretlerToplami]
-           ,[VGSertifikaUcreti],[VGESinavUcreti],[VGUygulamaSinavUcreti],[VGBasarisizEgitimUcreti],[VGUcretlerToplami]
+           ,[BorcSertifikaUcreti],[BorcESinavUcreti],[BorcUygulamaSinavUcreti],[BorcTelafiEgitimUcreti],[BorcBasarisizEgitimUcreti],[BorcUcretlerToplami]
+           ,[VGSertifikaUcreti],[VGESinavUcreti],[VGUygulamaSinavUcreti],[VGTelafiEgitimUcreti],[VGBasarisizEgitimUcreti],[VGUcretlerToplami]
            ,[PersonelId],[TeklifTarihi],[VeriKaynakId])
 			VALUES (@yFirmId, @TalepId, @yAdayId, @yDonemTipiId, @yTalepTipiId
 			, 0, 0 -- IsUcretli
@@ -163,12 +163,13 @@ AS BEGIN
 			, 0, 0       -- Serti..
 			, 0, null, 0 -- Odeme..
 			, 0, 0, 0, 0, 0 -- Mebbi..
-			, 0, 0, 0, 0, 0 -- BorcS..
-			, 0, 0, 0, 0, 0 -- VGSer..
+			, 0, 0, 0, 0, 0, 0 -- BorcS..
+			, 0, 0, 0, 0, 0, 0 -- VGSer..
 			, 0, null, 0    -- Perso..
 			)
        print ' create : [MtskAdayUcret]'
   end
+
 			   
   -- MtskAdayTakip Insert
   if ( Select count(*) ADET from dbo.[MtskAdayTakip] 
@@ -186,9 +187,10 @@ AS BEGIN
             OzurDurumuTipiId, OkutmanTalebi, TercumanTalebi, YabanciDilTipiId, IsKontejan,
             BelgelerGeldi, BelgelerTarandi, BelgelerYuklendi, BorcDurumuTipiId,
 
-            TeorikBaslamaTarihi, TeorikBitisTarihi, TeorikDersTipiId, eSinavNo,
-            eSinavDurumTipiId, eSinavSonucTipiId, eSinavSonrasiTipiId, eSinavMuracatTarihi,
-            eSinavUcretTipiId, IseSinavBTeslimEdildi, eSinavDetayId, eSinavBasariTarihi,
+            TeorikBaslamaTarihi, TeorikBitisTarihi, TeorikDersTipiId, 
+
+            eSinavNo, eSinavDurumTipiId, eSinavMuracatTarihi, eSinavUcretTipiId, IseSinavBTeslimEdildi, 
+            eSinavNoGirdigi, eSinavSonucTipiId, eSinavSonrasiTipiId, eSinavDetayId, eSinavBasariTarihi,
 
             IsUygulamaliDersPlanli, UygulamaBaslamaTarihi, UygulamaBitisTarihi,
 		    SimulatorDersToplami, EgitimAlaniDersToplami, AkanTrafikDersToplami, UygulamaliDersToplami,
@@ -205,8 +207,8 @@ AS BEGIN
 			IsRandevuPlanlandi,  IsRandevuMebbis, RandevuTarihi,
             RandevuSaatTipiId, RandevuEgitimAraciId, RandevuPersonelId, 
 
-            uSinavNo, uSinavDurumTipiId, uSinavSonucTipiId, uSinavSonrasiTipiId,
-		    uSinavUcretTipiId, uSinavDetayId, uSinavBasariTarihi,
+            uSinavNo, uSinavDurumTipiId, uSinavRandevuTarihi, uSinavUcretTipiId, IsuSinavBTeslimEdildi,
+            uSinavNoGirdigi, uSinavSonucTipiId, uSinavSonrasiTipiId, uSinavDetayId, uSinavBasariTarihi,
 
             SertifikaDurumTipiId, SertifikaTarihi, DosyaYakti)
      VALUES
@@ -220,9 +222,10 @@ AS BEGIN
             0,  0,  0,   0,  0, -- OzurDurumuTipiId, OkutmanTalebi, TercumanTalebi, YabanciDilTipiId, IsKontejan
             0,  0,  0,   0,     -- BelgelerGeldi, BelgelerTarandi, BelgelerYuklendi, BorcDurumuTipiId, 
             
-			null, null,  0,  0, -- TeorikBaslamaTarihi, TeorikBitisTarihi, TeorikDersTipiId, eSinavNo
-            0,  0,  0,  null,   -- eSinavDurumTipiId, eSinavSonucTipiId, eSinavSonrasiTipiId, eSinavMuracatTarihi
-            0,  0,  0,  null,   -- eSinavUcretTipiId, IseSinavBTeslimEdildi , eSinavDetayId, eSinavBasariTarihi, 
+            null, null,  0,     -- TeorikBaslamaTarihi, TeorikBitisTarihi, TeorikDersTipiId,
+
+            0,  0, null, 0,  0, -- eSinavNo, eSinavDurumTipiId, eSinavMuracatTarihi, eSinavUcretTipiId, IseSinavBTeslimEdildi, 
+            0,  0,  0,  0, null,-- eSinavNoGirdigi, eSinavSonucTipiId, eSinavSonrasiTipiId, eSinavDetayId, eSinavBasariTarihi,
 
             0,  null, null,     -- IsUygulamaliDersPlanli, UygulamaBaslamaTarihi, UygulamaBitisTarihi, 
             0,  0,  0,  0,      -- SimulatorDersToplami, EgitimAlaniDersToplami, AkanTrafikDersToplami, UygulamaliDersToplami
@@ -239,13 +242,14 @@ AS BEGIN
 			0,  0,    null,     -- IsRandevuPlanlandi,  IsRandevuMebbis, RandevuTarihi,
             0,  null, null,     -- RandevuSaatTipiId, RandevuEgitimAraciId, RandevuPersonelId, 
 
-            0,  0,  0,  0,      -- uSinavNo, uSinavDurumTipiId, uSinavSonucTipiId, uSinavSonrasiTipiId,
-            0,  0,  null,       -- uSinavUcretTipiId, uSinavDetayId, uSinavBasariTarihi,
+            0,  0, null, 0,  0, -- uSinavNo, uSinavDurumTipiId, uSinavRandevuTarihi, uSinavUcretTipiId, IsuSinavBTeslimEdildi,
+            0,  0,  0,  0, null,-- uSinavNoGirdigi, uSinavSonucTipiId, uSinavSonrasiTipiId, uSinavDetayId, uSinavBasariTarihi,
 
             0,  null,  0        -- SertifikaDurumTipiId, SertifikaTarihi, DosyaYakti
 			)       
-			print ' create : [MtskAdayTakip]'
-  end -- MtskAdayBelgeler
+     print ' create : [MtskAdayTakip]'
+
+  end -- MtskAdayTakip
 
 
 END -- procedure

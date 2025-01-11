@@ -1099,13 +1099,15 @@ AS BEGIN
   
     print 'Uygulamalı sınav sonuçları işleniyor '
     update MtskAdayTakip set
-      uSinavNo = x.SinavNo
+      uSinavNo = x.SinavNoYeni
     , uSinavDurumTipiId = x.uSinavDurumTipiId
+    , uSinavNoGirdigi = x.SinavNoGirdigi
     , uSinavSonucTipiId = x.uSinavSonucTipiId
     , uSinavSonrasiTipiId = x.uSinavSonrasiTipiId
 	, uSinavDetayId = x.sinavId
-	, uSinavBasariTarihi = x.uSinavBasariTarihi
+	, uSinavBasariTarihi = x.SinavTarihi --x.uSinavBasariTarihi
 	, BasarisizDersTipiId = x.BasarisizDersTipiId
+
     from MtskAdayTakip a, 
     (
          Select 
@@ -1113,14 +1115,52 @@ AS BEGIN
 	     , uSinav.FirmId
          , uSinav.TalepId
 	     , uSinav.AdayId 
-	     , uSinav.SinavNo
+	     , uSinav.SinavNo as SinavNoGirdigi
          , uSinav.DurumuTipiId
 		 , convert(date, uSinav.SinavTarihi, 103) as SinavTarihi
+
+	--   Id  MtskAdayTakipi.uSinavDurumTipi
+	--   0   Tanımsız
+	--   1   Henüz sınav aşamasında değil
+	--   2   Uygulama sınavı için usta öğretici onayı isteniyor
+	--   3   Uygulama sınavı için hazır değil
+	--   4   Uygulama sınavı için MEBBİS de onaylanacak
+	--   5   Uygulama sınav randevusu planlanacak
+	--   6   Uygulama sınav randevusu MEBBİSe aktarılacak
+	--   7   Uygulama sınavına girecek
+	--   8   Uygulama sınav sonucu okunacak
+	--   9   Uygulama sınav sonucu okundu
+	--   
+	--   Id  MtskSinavUygulama.DurumuTipi
+	--   0
+	--   1   Uygulama Sınav Aşamasında
+	--   2   2.Direksiyon Aşamasında
+	--   3   Sertifika Almaya Hak Kazandı
+	--   4   Uygulama Sınav Hakkı Doldu
+	--   5   Sertifikası İptal Edildi
+	--   6   Durumu Girilmemiş
+    -- 
+	--   Id  MtskSinavUygulama.PuanTipi
+	--   -2  Durumu Girilmemiş
+	--   -1  Girmedi
+	--   0   
+	--   1   Başarısız
+	--   100 Başarılı
+
 	     , ( case
              when (uSinav.PuanTipiId = 0 and convert(date, @bugun,103) <  convert(date, uSinav.SinavTarihi, 103)) then 7 -- Uygulama sınavına girecek
              when (uSinav.PuanTipiId = 0 and convert(date, @bugun,103) >= convert(date, uSinav.SinavTarihi, 103)) then 8 -- Uygulama sınav sonucu okunacak
-	         when (uSinav.PuanTipiId > 0) then 9  -- 'Uygulama sınav sonucu okundu
+	         when (uSinav.PuanTipiId = 100) then 9 -- Uygulama sınav sonucu okundu < sınav başarılıysa
+	         when ((uSinav.PuanTipiId = 1 or uSinav.PuanTipiId = -1) and uSinav.SinavNo < 4) then 5 -- Uygulama sınav randevusu planlanacak < 1,2,3 sınavlarda başarılı değilse 
+	         when ((uSinav.PuanTipiId = 1 or uSinav.PuanTipiId = -1) and uSinav.SinavNo = 4) then 9 -- Uygulama sınav sonucu okundu         < 4. sınavda başarılı değilse
              end ) as uSinavDurumTipiId
+	     , case
+	         when (uSinav.PuanTipiId = 100) then 0 -- < sınav başarılıysa
+	         when ((uSinav.PuanTipiId = 1 or uSinav.PuanTipiId = -1) and uSinav.SinavNo < 4) then (uSinav.SinavNo + 1) --  < 1,2,3 sınavlarda başarılı değilse
+	         when ((uSinav.PuanTipiId = 1 or uSinav.PuanTipiId = -1) and uSinav.SinavNo = 4) then 0 --  < 4. sınavda başarılı değilse
+           end as SinavNoYeni
+
+
 	     , ( case
 			 when uSinav.PuanTipiId = 100 then 1 -- Başarılı
              when uSinav.PuanTipiId =   1 then 2 -- Başarısız
@@ -1132,9 +1172,9 @@ AS BEGIN
              when (uSinav.PuanTipiId = 1) and (uSinav.SinavNo >= 4 ) and (talep.TalepTipiId = 1)  then 3  -- sertifikaTalebi ve sınavdan başarısız ise   Tüm uygulamalı sınav hakkı bitti
              when (uSinav.PuanTipiId = 1) and (uSinav.SinavNo >= 4 ) and (talep.TalepTipiId = 2 or talep.TalepTipiId = 3)  then 4  -- 2.+4 veya nakil 2.+4  ve sınavdan başarısız ise   2. +4 sınav hakkı bitti
              end ) as uSinavSonrasiTipiId
-         , ( case 
-	         when uSinav.PuanTipiId = 100 then uSinav.SinavTarihi 
-             else null end ) as uSinavBasariTarihi
+         --, ( case 
+	     --    when uSinav.PuanTipiId = 100 then uSinav.SinavTarihi 
+         --    else null end ) as uSinavBasariTarihi
          , ( case
 	         when (uSinav.PuanTipiId = 100) then 0    -- tanımsız, başarısız eğitim planlanmayacak
              when (uSinav.PuanTipiId = 1) and (uSinav.SinavNo  < 4 ) then 1  -- 2 saat başarısız aday eğitimi planlanacak
@@ -1161,12 +1201,12 @@ AS BEGIN
     and   a.TalepId = x.TalepId
 	and   a.AdayId  = x.AdayId 
     and (
-       isnull(a.uSinavNo,0)            <> x.SinavNo
+       isnull(a.uSinavNo,0)            <> x.SinavNoGirdigi
     or isnull(a.uSinavDurumTipiId,0)   <> x.uSinavDurumTipiId
     or isnull(a.uSinavSonucTipiId,0)   <> x.uSinavSonucTipiId
     or isnull(a.uSinavSonrasiTipiId,0) <> x.uSinavSonrasiTipiId
 	or isnull(a.uSinavDetayId,0)       <> x.sinavId
-	or a.uSinavBasariTarihi  <> x.uSinavBasariTarihi )
+	or a.uSinavBasariTarihi  <> x.SinavTarihi )
 	
 
 
@@ -1263,7 +1303,7 @@ AS BEGIN
 
 
   Execute [dbo].[prc_setIsDbUpdateActive] 13, 0	
-
+  
 
 END -- procedure
 

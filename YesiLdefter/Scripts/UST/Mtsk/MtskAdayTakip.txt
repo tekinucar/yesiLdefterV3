@@ -109,7 +109,7 @@ begin transaction
    -- 240 
    uSinavNo                SmallInt     null,
    uSinavDurumTipiId       SmallInt     null,
-   -- 243 boş kalacak
+   uSinavRandevuTarihi     Date         null,
    uSinavUcretTipiId       SmallInt     null, /* kendisi yatıracak, biz yatıracağız */
    IsuSinavBTeslimEdildi   Bit          null, /* uygulama sınav belgesi kursiyere teslim edildi veya edilmedi */
    -- 250

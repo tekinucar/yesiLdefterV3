@@ -11,6 +11,8 @@ AS BEGIN
   Select @TahsilatAdedi = count(Id)
   From [dbo].[OnmOdemePlani]
   Where TalepId = @TalepId
+  and UcretTipiId >= 21101
+  and UcretTipiId <= 21105
   and   (IsPaid = 1      -- ödendi
     or BelgeDekontId > 0 -- tahsilat dekontu var ise
 	or BelgeStokBId > 0) -- fatura kesilmişse
@@ -103,6 +105,8 @@ AS BEGIN
   Delete
   From [dbo].[OnmOdemePlani]
   Where TalepId = @TalepId
+  and UcretTipiId >= 21101
+  and UcretTipiId <= 21105
 
   if (@PesinatTutari > 0)
   begin
@@ -305,6 +309,9 @@ AS BEGIN
            ,0
            ,0)
   end -- @UygulamaSinavUcreti > 0
+
+
+  Execute dbo.prc_MtskAdayBorcunuHesapla @FirmId, @TalepId
 
   -- Bunu kapatma veya silme. 
   -- Bu sonuca kodun içinde kontrol ediliyor

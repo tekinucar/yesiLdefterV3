@@ -24,9 +24,10 @@ BEGIN
       ,@yBelgelerGeldi = isnull(ins.BelgelerGeldi,0)
   From MtskAdayTalep as ins
   Where ins.Id = @talepId
-      
-  if (@yMebbisDurumTipiId = 0) 
-      set @yKayitTipiId = 2 -- 'Kayıt aşamasında'
+
+  -- sonra karar verirsin      
+  -- if (@yMebbisDurumTipiId = 0) 
+  --    set @yKayitTipiId = 2 -- 'Kayıt aşamasında'
 
   -- Belgeler geldiyse ön kayıttan > kayıt aşamasına geç
   if (@yKayitTipiId = 1 and @yBelgelerGeldi = 1) 

@@ -290,6 +290,43 @@ END
 
 ALTER TABLE [dbo].[MtskSinavUygulama] ENABLE TRIGGER [trg_MtskSinavUygulama]
 
+
+
+/*CreateTrigger*/
+
+CREATE TRIGGER [dbo].[trg_MtskSinavUygulamaDelete] on [dbo].[MtskSinavUygulama]
+AFTER DELETE
+AS BEGIN
+
+    declare uygCursorDlt cursor local for select Id from deleted
+	declare @curId bigint
+
+	OPEN uygCursorDlt
+    FETCH NEXT FROM uygCursorDlt INTO @curId
+
+    declare @TalepId int
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+	    Select @TalepId = dlt.TalepId
+	    From deleted dlt
+	    Where dlt.Id = @curId
+	  
+	    Execute [dbo].[prc_MtskAdayTakipTalepKaydiSingleSet] @TalepId
+        FETCH NEXT FROM uygCursorDlt INTO @curId
+    END
+
+    CLOSE uygCursorDlt
+    DEALLOCATE uygCursorDlt
+
+END
+
+/*CreateTriggerEnd*/
+
+
+
+
+
 /*CreateLkpTable*/
 
 begin transaction
