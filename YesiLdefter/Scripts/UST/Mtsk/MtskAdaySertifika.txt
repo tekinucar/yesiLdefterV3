@@ -50,9 +50,12 @@ AS BEGIN
     DECLARE @sertifikaId bigint
 
     OPEN sertifikaCursor
-
     FETCH NEXT FROM sertifikaCursor INTO @sertifikaId
  
+    -- Veri Transferi başladımı
+    declare @DbUpdatesIsActive Bit = 0
+    set @DbUpdatesIsActive = [dbo].[fnc_getIsDbUpdate] (13)
+	
     declare @eTalepId int = 0
 	declare @eAdayId int = 0
 	declare @eTcNo varchar(11) = ''
@@ -61,6 +64,7 @@ AS BEGIN
 	declare @yFirmId int = 0
 	declare @yTalepId int = 0
 	declare @yAdayId int = 0
+	declare @VeriKaynakId int
 	declare @yTcNo varchar(11) = ''
 	declare @ySertifikaAlmayiHakKazandi bit  = 0
 	declare @ySertifikaTarihi date = null
@@ -79,22 +83,45 @@ AS BEGIN
     	where dlt.Id = @sertifikaId
 
         select 
-          @yFirmId = ins.FirmId
-        , @yTalepId = ins.TalepId
-    	, @yAdayId = isnull(ins.AdayId,0)
-	    , @yTcNo = isnull(ins.TcNo,'')
-		, @ySertifikaAlmayiHakKazandi = isnull(ins.SertifikaAlmayiHakKazandi,0)
-		, @ySertifikaTarihi = ins.SertifikaTarihi
-		, @ySertifikaNo = ins.SertifikaNo
-		, @yDuzenlemeTarihi = ins.DuzenlemeTarihi
+            @yFirmId = ins.FirmId
+          , @yTalepId = ins.TalepId
+    	  , @yAdayId = isnull(ins.AdayId,0)
+		  , @VeriKaynakId = ins.VeriKaynakId
+	      , @yTcNo = isnull(ins.TcNo,'')
+		  , @ySertifikaAlmayiHakKazandi = isnull(ins.SertifikaAlmayiHakKazandi,0)
+		  , @ySertifikaTarihi = ins.SertifikaTarihi
+		  , @ySertifikaNo = ins.SertifikaNo
+		  , @yDuzenlemeTarihi = ins.DuzenlemeTarihi
 		from inserted ins
     	where ins.Id = @sertifikaId
+
+        if (@VeriKaynakId > 0 and (@yTalepId = 0 or @yAdayId = 0))
+        begin
+            Update dbo.MtskAdaySertifika set
+                TalepId = t.Id  
+               ,AdayId  = t.AdayId 
+            From dbo.MtskAdaySertifika as a,
+                 dbo.MtskAdayTalep as t
+            Where a.VeriKaynakId = t.VeriKaynakId				 
+            and   a.Id = @sertifikaId
+
+            Select
+                @yTalepId = t.Id  
+               ,@yAdayId  = t.AdayId 
+            From dbo.MtskAdaySertifika as a,
+                 dbo.MtskAdayTalep as t
+            Where a.VeriKaynakId = t.VeriKaynakId				 
+            and   a.Id = @sertifikaId
+        end
 
 		-- Sertifikanın hangi dönemde verildiği tespit ediliyor
 		if (MONTH(@ySertifikaTarihi) < 10)
                set @ySertifikaDonemTipiId = convert(int, convert(varchar(5), YEAR(@ySertifikaTarihi)) + '0' + convert(varchar(3), MONTH(@ySertifikaTarihi)))
           else set @ySertifikaDonemTipiId = convert(int, convert(varchar(5), YEAR(@ySertifikaTarihi)) + convert(varchar(3), MONTH(@ySertifikaTarihi)))
 
+
+        -- Buraya gerek kalmadı sanki  
+        /*
 		if (@yTalepId = 0 and @yTcNo <> '')
 		begin
            Select top 1 @yTalepId = Id 
@@ -108,6 +135,8 @@ AS BEGIN
 		    Select @yAdayId = Id from MtskAday 
 			Where TcNo = @yTcNo
 		end
+        */
+        -- ----------------------
 		
 		if ((@eSertifikaNo <> @ySertifikaNo) and
 		    (@ySertifikaNo <> '') and
@@ -129,7 +158,8 @@ AS BEGIN
 		   Where Id = @sertifikaId
 		end
 		if ((@yTalepId > 0) and 
-		    (@ySertifikaAlmayiHakKazandi = 1))
+		    (@ySertifikaAlmayiHakKazandi = 1) and
+			(@DbUpdatesIsActive = 0))
         begin
            Update MtskAdayTalep 
 		   set KayitTipiId = 4 -- Sertifikayı hak kazandı
@@ -151,6 +181,7 @@ AS BEGIN
 
     CLOSE sertifikaCursor
     DEALLOCATE sertifikaCursor
+
 
 END --- trg_
 

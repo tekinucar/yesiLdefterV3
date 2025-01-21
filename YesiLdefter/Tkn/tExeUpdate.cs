@@ -154,7 +154,12 @@ namespace Tkn_ExeUpdate
 
                 // YesiLdefter.exe  >>>  YesiLdefter_20190328_2205.exe  ismine çevrilecek
                 // string newFileName = v.tExeAbout.activeExeName.Remove(v.tExeAbout.activeExeName.IndexOf(".exe"), 4) + "_" + v.tExeAbout.activeVersionNo + ".exe";
-                string newFileName = activeFileName.Remove(activeFileName.IndexOf("." + extension), extension.Length + 1) + "_" + oldVersionNo + "." + extension;
+                string newFileName = "";
+                
+                //if (packetName.IndexOf(extension) > -1)
+                //    newFileName = activeFileName.Remove(activeFileName.IndexOf("." + extension), extension.Length + 1) + "_" + oldVersionNo + "_" + extension + "." + extension;
+                //else
+                newFileName = activeFileName.Remove(activeFileName.IndexOf("." + extension), extension.Length + 1) + "_" + oldVersionNo + "." + extension;
 
                 // newFileName varsa sil
                 File.Delete(path + "\\" + newFileName);

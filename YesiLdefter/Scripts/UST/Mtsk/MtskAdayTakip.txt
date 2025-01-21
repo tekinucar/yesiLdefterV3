@@ -42,7 +42,7 @@ begin transaction
    BelgelerYuklendi       Bit          null, /* trg_MtskAdayBelgeler       üzerinden işaretleniyor : tamamı yüklendiyse */
 
    -- 40 ödemeleri
-   BorcDurumuTipiId         SmallInt     null,
+   BorcDurumuTipiId         SmallInt      null,
    
    --100 eSınav aşaması
    TeorikBaslamaTarihi    Date         null,
@@ -95,7 +95,7 @@ begin transaction
    IsArti4DersMebbis           Bit          null, /* Mebbise aktarılmadı, aktarrıldı */
 
    -- 230 
-   PlanlanacakEgitimTipiId SmallInt     null, /* 
+   PlanlanacakEgitimTipiId SmallInt     null, 
    uSinavaHazirmiTipiId    SmallInt     null, /* 1. Onay, 2. Sınav için hazır değil : bu seçimi usta öğretici karar veriyor */
    IsUygSinavMebbisOnayi   Bit          null, /* uSinavDurumTipi = 4, 'Uygulama sınavı için MEBBİS de onaylanacak' için gerekli */
    IsRandevuPlanlandi      Bit          null, /* Randevu tarafında planlanınca burası True olacak */
@@ -508,7 +508,7 @@ create table [Lkp].[MtskAdayTakipYabanciDilTipi]
 )
 
 Delete from [Lkp].[MtskAdayTakipYabanciDilTipi]
-INSERT INTO [Lkp].[MtskAdayTakipYabanciDilTipi] (Id, YabanciDilTipiTipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption)
+INSERT INTO [Lkp].[MtskAdayTakipYabanciDilTipi] (Id, YabanciDilTipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption)
  VALUES 
  (  1, N'Arapça',      1, 1241, 'Yabancı dil', '', ''),
  (  2, N'Çince',       1, 1242, 'Yabancı dil', '', ''),
@@ -612,11 +612,9 @@ create table [Lkp].[MtskAdayTakipBorcDurumuTipi]
 Delete from [Lkp].[MtskAdayTakipBorcDurumuTipi]
 INSERT INTO [Lkp].[MtskAdayTakipBorcDurumuTipi] (Id, BorcDurumuTipi)
  VALUES 
-  ( 0,    N'Hiç ödemesi yok'),
-  ( 1,    N'Kısmi ödemesi var'),
-  ( 2,    N'Gecikmiş ödemesi var'),
-  ( 3,    N'Tamamı tahsil edildi'),
-  ( 4,    N'Ücretsiz')
+  ( 0,    N'Borcu yok'),
+  ( 1,    N'Vadesi gecikmiş borcu var'),
+  ( 2,    N'Borcu var, vadesi gelmedi')
 
 
 -- --------------------------------------------------------------------------------

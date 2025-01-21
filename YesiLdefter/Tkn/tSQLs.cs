@@ -1267,14 +1267,11 @@ INSERT INTO [dbo].[SYS_UPDATES]
             //" Select * from " + v.publishManager_DB.databaseName + ".dbo.MsDbUpdates "
         }
 
-
-
         public string Sql_MsFileUpdates(string IdList)
         {
             // read publishManager database
             return " Select * from dbo.MsFileUpdates Where Id > " + IdList + "  and IsActive = 1 order by RecordDate ";
         }
-
 
         public string getGecerliTarihSql()
         {
@@ -1553,7 +1550,6 @@ INSERT INTO [dbo].[SYS_UPDATES]
             return sql;
         }
 
-
         public string getGecerlilikTarihiIdSql(Int16 KonuTipiId)
         {
             string sql = "";
@@ -1576,7 +1572,6 @@ INSERT INTO [dbo].[SYS_UPDATES]
 ";
             return sql;
         }
-
 
         public string getDataUpdatesLastIdSql()
         {

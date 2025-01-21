@@ -206,15 +206,22 @@ AS BEGIN
     OPEN odmPlaniCursor_
     FETCH NEXT FROM odmPlaniCursor_ INTO @curId
 
+    declare @FirmId int = 0
     declare @TalepId int = 0
 	declare @AdayId int
 	declare @VeriKaynakId int
 	declare @SourceTypeId smallint
 
+
+    -- Veri Transferi başladımı
+    declare @DbUpdatesIsActive Bit = 0
+    set @DbUpdatesIsActive = [dbo].[fnc_getIsDbUpdate] (0)
+
     WHILE @@FETCH_STATUS = 0
     BEGIN
         Select 
-            @TalepId = isnull(ins.TalepId,0)
+            @FirmId = isnull(ins.FirmId,0)
+           ,@TalepId = isnull(ins.TalepId,0)
            ,@AdayId = isnull(ins.CariId,0)
 		   ,@VeriKaynakId = ins.VeriKaynakId
            ,@SourceTypeId = ins.SourceTypeId
@@ -246,8 +253,13 @@ AS BEGIN
             Update MtskAdayUcret set IsLock = 0
             Where TalepId = @TalepId
         end
-		
-		
+	
+	    if (@DbUpdatesIsActive = 0)
+        begin  
+           Execute [dbo].[prc_MtskAdayBorcunuHesapla] @FirmId, @TalepId
+        end
+
+
       FETCH NEXT FROM odmPlaniCursor_ INTO @curId
     END -- While
 
@@ -273,6 +285,7 @@ AS BEGIN
     FETCH NEXT FROM odmPlaniCursor_ INTO @curId
 
 	declare @FirmId int
+    declare @TalepId int = 0
 	declare @ItemTypeId smallInt
 	
 
@@ -280,10 +293,12 @@ AS BEGIN
     BEGIN
         Select 
             @FirmId = dlt.FirmId
+           ,@TalepId = dlt.TalepId
            ,@ItemTypeId = dlt.UcretTipiId
         From deleted dlt
         Where dlt.Id = @curId
 
+		Execute [dbo].[prc_MtskAdayBorcunuHesapla] @FirmId, @TalepId
 
       FETCH NEXT FROM odmPlaniCursor_ INTO @curId
     END
@@ -292,6 +307,7 @@ AS BEGIN
     DEALLOCATE odmPlaniCursor_
 
     --EXECUTE [dbo].[prc_OnmToplamBekleyenGelirler] @FirmId
+
 
 END
 

@@ -1667,8 +1667,8 @@ namespace Tkn_Variable
         public string DbLoginName { get; set; }
         public string DbPassword { get; set; }
         public Int16 DbTypeId { get; set; }
-        public string MebbisCode { get; set; }
-        public string MebbisPass { get; set; }
+        public string FirmMebbisCode { get; set; }
+        public string FirmMebbisPass { get; set; }
         public void Clear()
         {
             FirmId = 0;
@@ -1679,8 +1679,8 @@ namespace Tkn_Variable
             MenuCodeOld = "";
             SectorTypeId = 0;
             DbTypeId = 0;
-            MebbisCode = "";
-            MebbisPass = "";
+            FirmMebbisCode = "";
+            FirmMebbisPass = "";
         }
     }
     // Surucu07
@@ -2413,6 +2413,7 @@ namespace Tkn_Variable
         public string imagesSourceFieldName { get; set; }
         public string imagesMasterTableIPCode { get; set; }
         public string listTableIPCode { get; set; }
+        public string formCode { get; set; }
         public void Clear()
         {
             imagesSourceFormName = "";
@@ -2420,6 +2421,7 @@ namespace Tkn_Variable
             imagesSourceFieldName = "";
             imagesMasterTableIPCode = "";
             listTableIPCode = "";
+            formCode = "";
         }
     }
 

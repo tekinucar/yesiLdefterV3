@@ -32,10 +32,12 @@ begin transaction
    AHesapTipiId       SmallInt      null,
    AlacakliId         Int           null,
    
+   
    MaliyetId          Int           null,
    VarlikId           Int           null,
    AboneId            Int           null,
    ProjeId            Int           null,
+   TalepId            Int           null,
    CariId             Int           null,
    CariUnvan          nVarChar(200) null, /* cari hesabı yok ise */
    

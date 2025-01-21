@@ -59,14 +59,15 @@ CREATE TRIGGER [dbo].[trg_MtskAdayAdres] on [dbo].[MtskAdayAdres]
 AFTER INSERT, UPDATE
 AS BEGIN
 
-    DECLARE adresCursor cursor local for select Id from Inserted
+   DECLARE adresCursor cursor local for select Id from Inserted
     DECLARE @adresId bigint
 
     OPEN adresCursor
-
     FETCH NEXT FROM adresCursor INTO @adresId
 
-    declare @TalepId int 
+    -- Veri Transferi başladımı
+    declare @DbUpdatesIsActive Bit = 0
+    set @DbUpdatesIsActive = [dbo].[fnc_getIsDbUpdate] (13)
 
     declare @eSozluAdresBeyani nVarchar(250) = null
     declare @ySozluAdresBeyani nVarchar(250) = null
@@ -74,31 +75,51 @@ AS BEGIN
     declare @yAdresKodu varchar(20) = null
     
     declare @durum bit
+    declare @TalepId int 
+	declare @AdayId int
+	declare @VeriKaynakId int
 
     WHILE @@FETCH_STATUS = 0
     BEGIN
 
         select 
-           @eSozluAdresBeyani = isnull(dlt.SozluAdresBeyani, '')
-         , @eAdresKodu = isnull(dlt.AdresKodu, '') 
+            @eSozluAdresBeyani = isnull(dlt.SozluAdresBeyani, '')
+           ,@eAdresKodu = isnull(dlt.AdresKodu, '') 
     	from deleted dlt
     	where dlt.Id = @adresId
 			   
         select 
-           @TalepId = ins.TalepId
-         , @ySozluAdresBeyani = isnull(ins.SozluAdresBeyani, '')
-         , @yAdresKodu = isnull(ins.AdresKodu, '')
+            @TalepId = ins.TalepId
+           ,@ySozluAdresBeyani = isnull(ins.SozluAdresBeyani, '')
+           ,@yAdresKodu = isnull(ins.AdresKodu, '')
+           ,@AdayId = ins.AdayId
+		   ,@VeriKaynakId = ins.VeriKaynakId
 		from inserted ins
     	where ins.Id = @adresId
-     	   	
+
+        if (@VeriKaynakId > 0 and (@TalepId = 0 or @AdayId = 0))
+        begin
+            Update dbo.MtskAdayAdres set
+                TalepId = t.Id  
+               ,AdayId  = t.AdayId 
+            From dbo.MtskAdayAdres as a,
+                 dbo.MtskAdayTalep as t
+            Where a.VeriKaynakId = t.VeriKaynakId				 
+            and   a.Id = @adresId
+        end
+		     	   	
         if (@eSozluAdresBeyani <> @ySozluAdresBeyani) 
         begin
           if (@ySozluAdresBeyani <> '') set @durum = 1
           if (@ySozluAdresBeyani = '') set @durum = 0
 
-          update dbo.MtskAdayTalep set
-            AdresAlindi = @durum
-          Where Id = @TalepId
+
+          if (@DbUpdatesIsActive = 0)
+          begin
+              update dbo.MtskAdayTalep set
+                  AdresAlindi = @durum
+              Where Id = @TalepId
+          end
         end
 
         if (@eAdresKodu <> @yAdresKodu) 
@@ -119,7 +140,7 @@ AS BEGIN
             and   isnull(VeriKaynakId,0) = 0
         end
 
-      FETCH NEXT FROM adresCursor INTO @adresId
+        FETCH NEXT FROM adresCursor INTO @adresId
     END -- While
 
     CLOSE adresCursor

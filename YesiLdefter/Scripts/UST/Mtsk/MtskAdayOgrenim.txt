@@ -42,32 +42,52 @@ AS BEGIN
     DECLARE ogrenimCursor cursor local for select Id from Inserted
     DECLARE @ogrenimId bigint
 
-    Declare @TalepId int = 0
-
     OPEN ogrenimCursor
-
     FETCH NEXT FROM ogrenimCursor INTO @ogrenimId
+
+    -- Veri Transferi başladımı
+    declare @DbUpdatesIsActive Bit = 0
+    set @DbUpdatesIsActive = [dbo].[fnc_getIsDbUpdate] (13)
+
+    Declare @TalepId int = 0
+	declare @AdayId int
+	declare @VeriKaynakId int
 
     WHILE @@FETCH_STATUS = 0
     BEGIN
 
         select 
-           @TalepId = ins.TalepId
+            @TalepId = ins.TalepId
+           ,@AdayId = ins.AdayId
+		   ,@VeriKaynakId = isnull(ins.VeriKaynakId,0)
 		from inserted ins
     	where ins.Id = @ogrenimId
 
+        if (@VeriKaynakId > 0 and (@TalepId = 0 or @AdayId = 0))
+        begin
+            Update dbo.MtskAdayOgrenim set
+                TalepId = t.Id  
+               ,AdayId  = t.AdayId 
+            From dbo.MtskAdayOgrenim as a,
+                 dbo.MtskAdayTalep as t
+            Where a.VeriKaynakId = t.VeriKaynakId				 
+            and   a.Id = @ogrenimId
+        end
+
 		-- MtskAdayTalep tablosunu işaretle
-		Update MtskAdayTalep set
-        OgrenimGeldi = x.Sonuc
-        From MtskAdayTalep a, 
-        (
-            Select count(Id) as Sonuc
-            From MtskAdayOgrenim
-            Where 0 = 0
-            and OgrenimBelgesiResim is not null
-            and TalepId = @TalepId
-        ) as x
-        Where a.Id = @TalepId
+        if (@DbUpdatesIsActive = 0)
+        begin
+            Update MtskAdayTalep set
+                OgrenimGeldi = x.Sonuc
+            From MtskAdayTalep a, 
+            (
+               Select count(Id) as Sonuc
+               From MtskAdayOgrenim
+               Where OgrenimBelgesiResim is not null
+               and TalepId = @TalepId
+            ) as x
+            Where a.Id = @TalepId
+        end
 
 		-- MtskAdayBelgeler tablosunu işaretle
 		Update MtskAdayBelgeler set
@@ -90,11 +110,12 @@ AS BEGIN
             and   isnull(VeriKaynakId,0) = 0
         end
 
-      FETCH NEXT FROM ogrenimCursor INTO @ogrenimId
+        FETCH NEXT FROM ogrenimCursor INTO @ogrenimId
     END -- While
 
     CLOSE ogrenimCursor
     DEALLOCATE ogrenimCursor   
+
 
 END -- create trigger
 

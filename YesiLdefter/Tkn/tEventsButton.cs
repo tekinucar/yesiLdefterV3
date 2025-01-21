@@ -1896,7 +1896,7 @@ namespace Tkn_Events
                         v.tResimEditor.imagesSourceFieldName = "";
                         v.tResimEditor.imagesMasterTableIPCode = prop_.READ_TABLEIPCODE;
                         v.tResimEditor.listTableIPCode = prop_.TARGET_TABLEIPCODE;
-
+                        v.tResimEditor.formCode = prop_.FORMCODE;
                         /// listeli işlem mi geldi kontrol et
                         if (t.IsNotNull(v.tResimEditor.imagesMasterTableIPCode) == false)
                         {
@@ -1944,7 +1944,7 @@ namespace Tkn_Events
             /// Sadece bir kişi için yapılacaksa
             /// 
             if ((tResimEditor.imagesMasterTableIPCode != "") &&
-                (tResimEditor.listTableIPCode == ""))
+                (tResimEditor.listTableIPCode == "" && tResimEditor.formCode == ""))
             {
                 // ms_Pictures içindeki Resimler için dataset hazırlanıyor
                 // yani gerekli datasetin prc_xxxxx çalıştırılıyor
@@ -1956,7 +1956,7 @@ namespace Tkn_Events
             }
 
             if ((tResimEditor.imagesMasterTableIPCode != "") &&
-                (tResimEditor.listTableIPCode != ""))
+                (tResimEditor.listTableIPCode != "" || tResimEditor.formCode != ""))
             {
                 v.con_ImagesMasterDataSet = null;
                 /// Listeli tarama yapılacaksa bu işleme gerek yok

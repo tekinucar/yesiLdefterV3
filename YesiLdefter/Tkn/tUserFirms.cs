@@ -114,7 +114,7 @@ namespace Tkn_UserFirms
         {
             bool onay = false;
             DataSet ds_Query = new DataSet();
-            string Sql = Sqls.Sql_UstadFirmsWithFirmGUID(v.tUser.UserFirmGUID);
+            string Sql = Sqls.Sql_UstadFirmsWithFirmGUID(firmGUID);// v.tUser.UserFirmGUID);
 
             t.SQL_Read_Execute(v.dBaseNo.UstadCrm, ds_Query, ref Sql, "UserFirmGUID", "FirmAbout");
 

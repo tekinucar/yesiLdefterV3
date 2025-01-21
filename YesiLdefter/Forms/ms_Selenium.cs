@@ -27,7 +27,7 @@ using OpenQA.Selenium.Support.UI;
 
 using Tesseract;
 using System.Net;
-
+using Tkn_UserFirms;
 
 namespace YesiLdefter
 {
@@ -600,6 +600,12 @@ namespace YesiLdefter
         }
         private async Task seleniumLoginPageViev()
         {
+            /// Firmanın Mebbis konu ve şifresini yeniden oku
+            /// değiştirmiş olabilir
+            /// 
+            tUserFirms userFirms = new tUserFirms();
+            userFirms.getFirmAboutWithUserFirmGUID(v.tMainFirm.FirmGuid);
+                
             /// Kullanıcının mebbisCode ve şifresini yeniden oku
             /// değiştirmiş olabilir
             /// 
@@ -614,6 +620,7 @@ namespace YesiLdefter
             
             await myPageViewClickAsync(v.webDriver_, this.msWebPage_);
             //await myPageViewClickAsync(f.wbSel, this.msWebPage_);
+
         }
         private void myAlwaysSetClick(object sender, EventArgs e)
         {

@@ -138,7 +138,7 @@ AS BEGIN
             Where TalepId = @TalepId
             and   isnull(VeriKaynakId,0) = 0
         end
-
+		
         FETCH NEXT FROM saglikCursor INTO @saglikId
     END -- While
 

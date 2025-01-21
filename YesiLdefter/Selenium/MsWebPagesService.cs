@@ -187,14 +187,14 @@ namespace YesiLdefter.Selenium
             {
                 if (v.tUser.MebbisCode != "")
                     wnv.writeValue = v.tUser.MebbisCode;
-                else wnv.writeValue = v.tMainFirm.MebbisCode;
+                else wnv.writeValue = v.tMainFirm.FirmMebbisCode;
             }
 
             if (wnv.writeValue == "MEBBIS_SIFRE")
             {
                 if (v.tUser.MebbisPass != "")
                     wnv.writeValue = v.tUser.MebbisPass;
-                else wnv.writeValue = v.tMainFirm.MebbisPass;
+                else wnv.writeValue = v.tMainFirm.FirmMebbisPass;
             }
         }
 
@@ -230,14 +230,14 @@ namespace YesiLdefter.Selenium
             {
                 if (v.tUser.MebbisCode != "")
                     wnv.writeValue = v.tUser.MebbisCode;
-                else wnv.writeValue = v.tMainFirm.MebbisCode;
+                else wnv.writeValue = v.tMainFirm.FirmMebbisCode;
             }
 
             if (wnv.writeValue == "MEBBIS_SIFRE")
             {
                 if (v.tUser.MebbisPass != "")
                     wnv.writeValue = v.tUser.MebbisPass;
-                else wnv.writeValue = v.tMainFirm.MebbisPass;
+                else wnv.writeValue = v.tMainFirm.FirmMebbisPass;
             }
 
             /// Başka bir NodeId nin database den gelen valuesini okuyacak
@@ -1439,16 +1439,8 @@ namespace YesiLdefter.Selenium
 
             if (t.IsNotNull(ds))
             {
-                if (v.SP_TabimDbConnection)
-                {
-                    v.tUser.MebbisCode = ds.Tables[0].Rows[0]["MebbisCode"].ToString();
-                    v.tUser.MebbisPass = ds.Tables[0].Rows[0]["MebbisPass"].ToString();
-                }
-                else
-                {
-                    v.tUser.MebbisCode = ds.Tables[0].Rows[0]["MebbisCode"].ToString();
-                    v.tUser.MebbisPass = ds.Tables[0].Rows[0]["MebbisPass"].ToString();
-                }
+                v.tUser.MebbisCode = ds.Tables[0].Rows[0]["MebbisCode"].ToString();
+                v.tUser.MebbisPass = ds.Tables[0].Rows[0]["MebbisPass"].ToString();
             }
 
         }

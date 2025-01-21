@@ -1,4 +1,7 @@
-﻿CREATE PROCEDURE [dbo].[prc_MtskAdayTakipUygulamaSinavToplamlari] (@FirmId int)  
+﻿
+/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_MtskAdayTakipUygulamaSinavToplamlari] (@FirmId int, @DonemTipiId int)  
 AS BEGIN
 
  --declare @FirmId int = 30
@@ -189,3 +192,5 @@ Group by
 
 END -- procedure
 
+
+/*CreateProcedureEnd*/

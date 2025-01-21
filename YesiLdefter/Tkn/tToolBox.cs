@@ -122,29 +122,56 @@ namespace Tkn_ToolBox
             foreach (DataRow row in ds.Tables[0].Rows)
             {
                 readMsFileUpdate(row);
-                
-                if (IsNotNull(v.tMsFileUpdate.pathName) == false)
-                    v.tMsFileUpdate.pathName = v.tExeAbout.activePath;
 
-                onay = ftpDownload(v.tMsFileUpdate.pathName, v.tMsFileUpdate.packetName); // MsFileUpdates te indirilmesi istenen dosyalar 
-                if (onay)
+                /// Bu dosya, daha önce bu pc de varmı kontrol et
+                ///
+                onay = checkedFileOnPc(v.tMsFileUpdate.fileName);
+
+                if (onay == false)
                 {
-                    AlertMessage("File download", v.tMsFileUpdate.fileName);
+                    if (IsNotNull(v.tMsFileUpdate.pathName) == false)
+                        v.tMsFileUpdate.pathName = v.tExeAbout.activePath;
 
-                    onay = exe.ExtractFile(v.tMsFileUpdate.pathName, v.tMsFileUpdate.packetName);
+                    onay = ftpDownload(v.tMsFileUpdate.pathName, v.tMsFileUpdate.packetName); // MsFileUpdates te indirilmesi istenen dosyalar 
+                    if (onay)
+                    {
+                        AlertMessage("File download", v.tMsFileUpdate.fileName);
+
+                        onay = exe.ExtractFile(v.tMsFileUpdate.pathName, v.tMsFileUpdate.packetName);
+                    }
+                    // activeFileName   = v.tExeAbout.activeExeName
+                    // extension        = 
+                    // oldVersionNo     = v.tExeAbout.activeVersionNo
+                    // packetName       = v.tExeAbout.ftpPacketName
+
+                    if (onay)
+                        onay = exe.fileNameChange(v.tMsFileUpdate.pathName, v.tMsFileUpdate.fileName, v.tMsFileUpdate.extension, v.tMsFileUpdate.versionNo, v.tMsFileUpdate.packetName);
                 }
-                // activeFileName   = v.tExeAbout.activeExeName
-                // extension        = 
-                // oldVersionNo     = v.tExeAbout.activeVersionNo
-                // packetName       = v.tExeAbout.ftpPacketName
-                if (onay)
-                    onay = exe.fileNameChange(v.tMsFileUpdate.pathName, v.tMsFileUpdate.fileName, v.tMsFileUpdate.extension, v.tMsFileUpdate.versionNo, v.tMsFileUpdate.packetName);
 
                 // FileUpdates tablosuna işle
                 if (onay)
                     insertFileUpdates();
             }
         }
+
+        private bool checkedFileOnPc(string fileName)
+        {
+            bool onay = false;
+
+            try
+            {
+                string fName = v.tExeAbout.activePath + "\\" + fileName;
+                if (File.Exists(@"" + fName))
+                {
+                    onay = true;
+                }
+            }
+            catch
+            { }
+
+            return onay;
+        }
+
         private void readMsFileUpdate(DataRow msFileUpdatesRow)
         {
             v.tMsFileUpdate.Clear();
@@ -228,7 +255,8 @@ namespace Tkn_ToolBox
         public void dataUpdates()
         {
             // UstadMtsk ise
-            if (v.SP_Firm_SectorTypeId == 211)
+            if ((v.active_DB.localDbUses == false) &&
+                (v.SP_Firm_SectorTypeId == 211))
                 dataUpdatesUstadMtsk();
         }
 
@@ -356,8 +384,6 @@ namespace Tkn_ToolBox
                 }
             }
         }
-
-
 
 
         public void dataUpdates_IPTAL()
@@ -3313,8 +3339,8 @@ namespace Tkn_ToolBox
             tFirm.DbLoginName = row["DbLoginName"].ToString();
             tFirm.DbPassword = row["DbPass"].ToString();
             tFirm.DbTypeId = myInt16(row["DbTypeId"].ToString()); // 2 = Abone database (Ustad yazılım müşterileri)
-            tFirm.MebbisCode = row["MebbisCode"].ToString();
-            tFirm.MebbisPass = row["MebbisPass"].ToString();
+            tFirm.FirmMebbisCode = row["MebbisCode"].ToString();
+            tFirm.FirmMebbisPass = row["MebbisPass"].ToString();
 
             /// şimdilik manuel çözüm yaptım
             /// Tabim localdb ve Tabim yeni projesi ayrışımını çözemedim şu an için
@@ -7571,6 +7597,10 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             }
 
             bool onay = preparingCreateTable(dBaseNo, "dbo", "FileUpdates", 211);
+
+            /// UstadCrmV1 ise iptal, file kontrole gerek yok
+            if (v.SP_Firm_SectorTypeId == 5) onay = false;
+
             if (onay) 
                 fileUpdatesChecked();
         }
@@ -7586,12 +7616,18 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                  (v.SP_Firm_SectorTypeId == 213)))
                     v.tMainFirm.MenuCode = "UST/MEB/MTS/MAIN";
             */
-            if ((v.active_DB.localDbUses == false) &&
-                ((v.tMainFirm.SectorTypeId == (Int16)v.msSectorType.TabimMtsk) ||
-                 (v.tMainFirm.SectorTypeId == (Int16)v.msSectorType.TabimSrc) ||
-                 (v.tMainFirm.SectorTypeId == (Int16)v.msSectorType.TabimIsmak))
-                 )
-                v.tMainFirm.MenuCode = "UST/MEB/MTS/MAIN";
+            if (v.active_DB.localDbUses == false)
+            {
+                /// src ve işmak için ayrıca belirlenecek
+                //if ((v.tMainFirm.SectorTypeId == (Int16)v.msSectorType.TabimSrc) ||
+                //    (v.tMainFirm.SectorTypeId == (Int16)v.msSectorType.TabimIsmak))
+                //     v.tMainFirm.MenuCode = "UST/MEB/MTS/MAIN";
+
+                if (((v.tMainFirm.SectorTypeId == (Int16)v.msSectorType.TabimMtsk) ||
+                     (v.tMainFirm.SectorTypeId == (Int16)v.msSectorType.UstadMtsk)) &&
+                     (v.tMainFirm.MenuCode != "UST/MEB/MTS/MAIN"))
+                     v.tMainFirm.MenuCode = "UST/MEB/MTS/MAIN";
+            }
 
         }
         #endregion MenuCodeChecked
@@ -10917,7 +10953,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 dN.Position == -1 &&
                 IsNotNull(FieldName))
             {
-                if (dS.Tables[0].Rows.Count == 1)
+                if (dS.Tables[0].Rows.Count > 0)
                     tValue = dS.Tables[0].Rows[0][FieldName].ToString();
             }
 
@@ -15326,7 +15362,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Ftp download" + v.ENTER2 + ex.Message);
+                MessageBox.Show("Ftp download" + v.ENTER2 + ex.Message + v.ENTER2 + "FileName : " + fileName);
                 //throw;
             }
             /* Release Resources */
@@ -15572,7 +15608,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 exeFileAbout.newFileName = exeFileAbout.orderFileName;
                 exeFileAbout.newPacketName =
                     exeFileAbout.orderFileName.Remove(exeFileAbout.orderFileName.IndexOf(fi.Extension), fi.Extension.Length) + "_"
-                  + exeFileAbout.orderFileVersionNo.Replace('.', '_') + ".gz";
+                  + exeFileAbout.orderFileVersionNo.Replace('.', '_') + "_" + fi.Extension.Replace(".","") + ".gz";
 
                 // bu da aynı sonucu veriyor 
                 //fi.FullName.Remove(fi.FullName.IndexOf(fi.Extension), fi.Extension.Length) + "_" + v.tExeAbout.activeVersionNo + ".gz";

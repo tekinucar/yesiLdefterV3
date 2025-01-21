@@ -336,7 +336,8 @@ namespace YesiLdefter
                     {
                         dN.Position = i;
 
-                        vSchemaName = ds.Tables[0].Rows[i][fieldSchemaName].ToString();
+                        if (fileTypeName != "Function")
+                            vSchemaName = ds.Tables[0].Rows[i][fieldSchemaName].ToString();
                         vEntityName = ds.Tables[0].Rows[i][fieldEntityName].ToString();
                         vParentTable = "";
 

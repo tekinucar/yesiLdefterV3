@@ -1,4 +1,9 @@
-﻿-- ------------------------------------------------------- 
+﻿
+
+
+/*CreateTable*/
+
+-- ------------------------------------------------------- 
 -- CinsiyetTipiId
 -- ------------------------------------------------------- 
 create table [Lkp].[CinsiyetTipi]
@@ -17,4 +22,5 @@ INSERT INTO [Lkp].[CinsiyetTipi] (Id, CinsiyetTipi)
 
 
 
+/*CreateTableEnd*/
 

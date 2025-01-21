@@ -687,7 +687,7 @@ namespace YesiLdefter
 
             /// UstadCrm den gelen Firmaya ait bilgileri v.tMainFirm üzerine oku
             /// 
-            onay = userFirms.getFirmAboutWithUserFirmGUID(v.tUser.UserFirmGUID);
+            onay = userFirms.getFirmAboutWithUserFirmGUID(v.tMainFirm.FirmGuid);
  
             return onay;
         }

@@ -181,6 +181,7 @@ AS BEGIN
 
     CLOSE belgeCursor
     DEALLOCATE belgeCursor   
+    
 
 END -- create trigger
 

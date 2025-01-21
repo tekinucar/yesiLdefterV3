@@ -215,7 +215,7 @@ drop table [Lkp].[MtskGrupSubesiKapasiteTipi]
 create table Lkp.MtskGrupSubesiKapasiteTipi
 (
    Id                 Int Unique Not Null,
-   KapasiteTipiTipi   nVarchar(50)   null
+   KapasiteTipi       nVarchar(50)   null
    
    constraint  pk_MtskGrupSubesiKapasiteTipi primary key (Id)
 )

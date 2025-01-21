@@ -100,7 +100,7 @@ namespace Tkn_Starter
             /// 
             t.WaitFormOpen(v.mainForm, "Bilgisayar hakkındaki bilgiler okunuyor...");
             Get_MacAddress();
-            //Get_ComputerAbout();
+            Get_ComputerAbout();
             
 
             t.WaitFormOpen(v.mainForm, "Database bağlantı bilgileri hazırlanıyor...");
@@ -146,7 +146,7 @@ namespace Tkn_Starter
                     /// ExternalUserId ile açılış
                     /// 
                     tUserFirms userFirms = new tUserFirms();
-                    userFirms.getFirmAboutWithUserFirmGUID(v.tUser.UserFirmGUID);
+                    userFirms.getFirmAboutWithUserFirmGUID(v.tMainFirm.FirmGuid);
                 }
             }
 
@@ -172,7 +172,7 @@ namespace Tkn_Starter
             Screen_Sizes_Get();
 
             // önce yeni dosya varsa onla download olması gerekiyor
-            t.WaitFormOpen(v.mainForm, "DbUpdates işlemleri yapılıyor...");
+            t.WaitFormOpen(v.mainForm, "FileUpdates işlemleri yapılıyor...");
             t.read_MsFileUpdates();
 
             t.WaitFormOpen(v.mainForm, "Data Updates işlemleri yapılıyor...");

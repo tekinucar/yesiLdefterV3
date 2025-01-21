@@ -39,33 +39,52 @@ AS BEGIN
     DECLARE imzaCursor cursor local for select Id from Inserted
     DECLARE @imzaId bigint
 
-    Declare @TalepId int = 0
-
     OPEN imzaCursor
-
     FETCH NEXT FROM imzaCursor INTO @imzaId
+
+    -- Veri Transferi başladımı
+    declare @DbUpdatesIsActive Bit = 0
+    set @DbUpdatesIsActive = [dbo].[fnc_getIsDbUpdate] (13)
+
+    Declare @TalepId int = 0
+	declare @AdayId int
+	declare @VeriKaynakId int
 
     WHILE @@FETCH_STATUS = 0
     BEGIN
 
         select 
-           @TalepId = ins.TalepId
+            @TalepId = ins.TalepId
+           ,@AdayId = ins.AdayId
+		   ,@VeriKaynakId = ins.VeriKaynakId
 		from inserted ins
     	where ins.Id = @imzaId
 
-		-- MtskAdayTalep tablosunu işaretle
-		Update MtskAdayTalep set
-        ImzaAlindi = x.Sonuc
-        From MtskAdayTalep a, 
-        (
-            Select count(Id) as Sonuc
-            From MtskAdayImza
-            Where 0 = 0
-            and ImzaResim is not null
-            and TalepId = @TalepId
-        ) as x
-        Where a.Id = @TalepId
+        if (@VeriKaynakId > 0 and (@TalepId = 0 or @AdayId = 0))
+        begin
+            Update dbo.MtskAdayImza set
+                TalepId = t.Id  
+               ,AdayId  = t.AdayId 
+            From dbo.MtskAdayImza as a,
+                 dbo.MtskAdayTalep as t
+            Where a.VeriKaynakId = t.VeriKaynakId				 
+            and   a.Id = @imzaId
+        end
 
+		-- MtskAdayTalep tablosunu işaretle
+        if (@DbUpdatesIsActive = 0)
+        begin
+            Update MtskAdayTalep set
+                ImzaAlindi = x.Sonuc
+            From MtskAdayTalep a, 
+            (
+              Select count(Id) as Sonuc
+              From MtskAdayImza
+              Where ImzaResim is not null
+              and TalepId = @TalepId
+            ) as x
+            Where a.Id = @TalepId
+        end
 
 		-- MtskAdayBelgeler tablosunu işaretle
 		Update MtskAdayBelgeler set
@@ -88,11 +107,12 @@ AS BEGIN
             and   isnull(VeriKaynakId,0) = 0
         end
 
-      FETCH NEXT FROM imzaCursor INTO @imzaId
+        FETCH NEXT FROM imzaCursor INTO @imzaId
     END -- While
 
     CLOSE imzaCursor
     DEALLOCATE imzaCursor   
+
 
 END -- create trigger
 

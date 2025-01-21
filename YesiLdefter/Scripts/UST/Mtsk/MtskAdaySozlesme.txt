@@ -41,32 +41,52 @@ AS BEGIN
     DECLARE sozlesmeCursor cursor local for select Id from Inserted
     DECLARE @sozlesmeId bigint
 
-    Declare @TalepId int = 0
-
     OPEN sozlesmeCursor
-
     FETCH NEXT FROM sozlesmeCursor INTO @sozlesmeId
+
+    -- Veri Transferi başladımı
+    declare @DbUpdatesIsActive Bit = 0
+    set @DbUpdatesIsActive = [dbo].[fnc_getIsDbUpdate] (13)
+
+    Declare @TalepId int = 0
+	declare @AdayId int
+	declare @VeriKaynakId int
 
     WHILE @@FETCH_STATUS = 0
     BEGIN
 
         select 
-           @TalepId = ins.TalepId
+            @TalepId = ins.TalepId
+           ,@AdayId = ins.AdayId
+		   ,@VeriKaynakId = ins.VeriKaynakId
 		from inserted ins
     	where ins.Id = @sozlesmeId
 
+        if (@VeriKaynakId > 0 and (@TalepId = 0 or @AdayId = 0))
+        begin
+            Update dbo.MtskAdaySozlesme set
+                TalepId = t.Id  
+               ,AdayId  = t.AdayId 
+            From dbo.MtskAdaySozlesme as a,
+                 dbo.MtskAdayTalep as t
+            Where a.VeriKaynakId = t.VeriKaynakId				 
+            and   a.Id = @sozlesmeId
+        end
+
 		-- MtskAdayTalep tablosunu işaretle
-		Update MtskAdayTalep set
-        SozlesmeYapildi = x.Sonuc
-        From MtskAdayTalep a, 
-        (
-            Select count(Id) as Sonuc
-            From MtskAdaySozlesme
-            Where 0 = 0
-            and Sozlesme1Resim is not null
-            and TalepId = @TalepId
-        ) as x
-        Where a.Id = @TalepId
+        if (@DbUpdatesIsActive = 0)
+        begin
+            Update MtskAdayTalep set
+                SozlesmeYapildi = x.Sonuc
+            From MtskAdayTalep a, 
+            (
+               Select count(Id) as Sonuc
+               From MtskAdaySozlesme
+               Where Sozlesme1Resim is not null
+               and TalepId = @TalepId
+            ) as x
+            Where a.Id = @TalepId
+        end
 
 		-- MtskAdayBelgeler tablosunu işaretle
 		Update MtskAdayBelgeler set
@@ -101,7 +121,7 @@ AS BEGIN
             and   isnull(VeriKaynakId,0) = 0
         end
 
-      FETCH NEXT FROM sozlesmeCursor INTO @sozlesmeId
+        FETCH NEXT FROM sozlesmeCursor INTO @sozlesmeId
     END -- While
 
     CLOSE sozlesmeCursor
