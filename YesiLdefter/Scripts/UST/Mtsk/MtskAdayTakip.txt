@@ -251,7 +251,7 @@ drop table [Lkp].[MtskAdayTakipKayitTipi]
 create table [Lkp].[MtskAdayTakipKayitTipi]
 (
    Id               Int Unique not null, 
-   KayitTipi        nVarchar(30)   null,
+   KayitTipi        nVarchar(50)   null,
    KonuGrupId       SmallInt       null,
    KonuId           Int            null,
    KonuCaption      nVarchar(20)   null,
@@ -264,10 +264,14 @@ create table [Lkp].[MtskAdayTakipKayitTipi]
 Delete from [Lkp].[MtskAdayTakipKayitTipi]
 INSERT INTO [Lkp].[MtskAdayTakipKayitTipi] (Id, KayitTipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption)
  VALUES 
-  ( 1,    N'Ön kayıt',          1, 1121, 'Kayıt durumu',  'Ön kayıt',     'Yeni aday kaydı' ),
-  ( 2,    N'Kayıt aşamasında',  1, 1122, 'Kayıt durumu',  'K.Aşamasında', 'Mebbise bağlan .' ),
-  ( 3,    N'Kesin kayıt',       1, 1123, 'Kayıt durumu',  'Kesin kay.', '' )
-
+  ( 1,    N'Ön kayıt',                               1, 1121, 'Kayıt durumu',  'Ön kayıt',     'Yeni aday kaydı' ),
+  ( 2,    N'Kayıt aşamasında',                       1, 1122, 'Kayıt durumu',  'K.Aşamasında', 'Mebbise bağlan .' ),
+  ( 3,    N'Kesin kayıt',                            1, 1123, 'Kayıt durumu',  'Kesin kay.', '' ),
+  ( 5,    N'Sertifika almaya hak kazandı',           1, 1124, 'Kayıt durumu', '', '' ),
+  ( 6,    N'Tüm e-Sınav hakkı bitti. Dosya yandı',   1, 1125, 'Kayıt durumu', '', '' ),
+  ( 7,    N'Tüm uygulamalı sınav hakkı bitti',       1, 1126, 'Kayıt durumu', '', '' ),
+  ( 8,    N'2. +4 sınav hakkı bitti. Dosya yandı',   1, 1127, 'Kayıt durumu', '', '' ),
+  ( 9,    N'Diğer sebeplerden dolayı dosya kapandı', 1, 1128, 'Kayıt durumu', '', '' )
 
 -- ------------------------------------------------------- 
 -- ZamanlamaTipiId

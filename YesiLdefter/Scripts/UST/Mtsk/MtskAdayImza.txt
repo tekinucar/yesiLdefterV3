@@ -69,6 +69,10 @@ AS BEGIN
                  dbo.MtskAdayTalep as t
             Where a.VeriKaynakId = t.VeriKaynakId				 
             and   a.Id = @imzaId
+
+			Select @TalepId = Id, @AdayId = AdayId 
+			From dbo.MtskAdayTalep 
+			Where VeriKaynakId = @VeriKaynakId
         end
 
 		-- MtskAdayTalep tablosunu işaretle

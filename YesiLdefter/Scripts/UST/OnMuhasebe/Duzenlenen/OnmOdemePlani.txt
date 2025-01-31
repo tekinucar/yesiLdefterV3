@@ -228,7 +228,7 @@ AS BEGIN
         From inserted ins
         Where ins.Id = @curId
      	
-        if (@VeriKaynakId > 0 and (@TalepId = 0 or @AdayId = 0) and @SourceTypeId = 2104)
+        if (@VeriKaynakId > 0 and (@TalepId = 0 or @AdayId = 0) and @SourceTypeId > 2000)
         begin
             Update dbo.OnmOdemePlani set
                 TalepId = t.Id  
@@ -237,6 +237,10 @@ AS BEGIN
                  dbo.MtskAdayTalep as t
             Where a.VeriKaynakId = t.VeriKaynakId				 
             and   a.Id = @curId
+
+            Select @TalepId = Id, @AdayId = AdayId 
+            From dbo.MtskAdayTalep 
+            Where VeriKaynakId = @VeriKaynakId
         end		
 
 		-- Tahsil edilmiş bir taksit var ise MtskAdayUcret tablosunu kilitle

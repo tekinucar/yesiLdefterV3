@@ -47,6 +47,7 @@ namespace YesiLdefter
         List<string> imagefieldsNameList = new List<string>();
         bool imageFieldAvailable = false;
         bool DbUpdatesIsActive = false;
+        bool IsImageScripts = false;
 
         string fSchemaName = "SchemaName";
         string fTableName = "TableName";
@@ -931,7 +932,7 @@ namespace YesiLdefter
                 //v.active_DB.runDBaseNo = v.dBaseNo.aktrilacakDb;
 
                 string about = dsDataTransfer.Tables[0].Rows[dNDataTransfer.Position]["About"].ToString();
-
+                
                 string soru = "[ " + about + " ] tablosundan, en baştan başlayarak Data Transferi yapılacak, onaylıyor musunuz ?";
                 DialogResult cevap = t.mySoru(soru);
                 if (DialogResult.Yes == cevap)
@@ -1007,6 +1008,8 @@ namespace YesiLdefter
             isEditScript = (dsDataTransfer.Tables[0].Rows[pos]["IsEditScript"].ToString() == "True");
             /// Data aktarımı sırasında kırılmalar olduğunda yeniden aktarım başladğında kaldığı yerden devam etmesini sağlıyor
             lastIdControlSql = dsDataTransfer.Tables[0].Rows[pos]["LastIdControlSql"].ToString();
+            /// Images data aktarımı mı ?
+            this.IsImageScripts = Convert.ToBoolean(dsDataTransfer.Tables[0].Rows[pos]["IsImageScripts"].ToString());
 
             sAlias = "";
             sTableName = "";
@@ -1063,6 +1066,10 @@ namespace YesiLdefter
                 
                 onay = preparingDataTransfer(dsSource, tAlias, tTableName, targetInsertHeaderSql, editWhereSql, isIdentityInsert, isEditScript);
             }
+            else
+            {
+                MessageBox.Show("DİKKAT : Aktarılacak data bulunamadı...");
+            }
 
             t.WaitFormClose();
             Thread.Sleep(100);
@@ -1089,8 +1096,8 @@ namespace YesiLdefter
                 else
                 {
                     /// image Field mevcut
-                    imagefieldsNameList.Add(fName);
-                    imageFieldAvailable = true;
+                    this.imagefieldsNameList.Add(fName);
+                    this.imageFieldAvailable = true;
                 }
             }
             fieldsName = fieldsName.Remove(0, 1);
@@ -1110,6 +1117,35 @@ namespace YesiLdefter
         {
             bool onay = false;
 
+            /// resim data aktarma işlemi ise bu kısım hiç çalışmasın
+            ///
+            if (this.IsImageScripts == false)
+                onay = preparingDataTransfer_(dsSource, alias, tableName,
+                                              targetInsertHeaderSql, editWhereSql,
+                                              isIdentityInsert, isEditScript);
+
+            /// Resim / image fields mevcut
+            if (this.imageFieldAvailable)
+            {
+                v.SP_OpenApplication = false;
+                t.WaitFormOpen(v.mainForm, "Resim aktarım işlemi başlıyor...");
+                viewText("Resim aktarım işlemi başlıyor...");
+
+                onay = executeImage(dsSource, alias, tableName, editWhereSql);
+
+                v.IsWaitOpen = false;
+                t.WaitFormClose();
+            }
+
+            return onay;
+        }
+
+        private bool preparingDataTransfer_(DataSet dsSource,
+            string alias, string tableName,
+            string targetInsertHeaderSql, string editWhereSql,
+            bool isIdentityInsert, bool isEditScript)
+        {
+            bool onay = false;
             int rowCount = dsSource.Tables[0].Rows.Count;
             int recCount = 1;
             int counted = 0;
@@ -1122,22 +1158,21 @@ namespace YesiLdefter
             string targetSelectSql = "";
 
             IsCrmDb = (tableName.IndexOf("UstadFirms") > -1);
-                        
-            //test için
-            //rowCount = 10;
-            v.SP_OpenApplication = false;
-            t.WaitFormOpen(v.mainForm, "Veri aktarım işlemi başlıyor...");
-            viewText("Veri aktarım işlemi başlıyor...");
 
+            v.SP_OpenApplication = false;
+            t.WaitFormOpen(v.mainForm, "");
+            t.WaitFormOpen(v.mainForm, "Veri aktarım işlemi yapılıyor...");
+            viewText("Veri aktarım işlemi başlıyor...");
+            
             for (int i = 0; i < rowCount; i++)
             {
                 insertValue = preparingInsertValues(dsSource, i);
                 targetInsertSql = targetInsertHeaderSql + " ( " + insertValue + " ) ";
                 if (isEditScript)
-                     targetEditSql = preparingEditValues(dsSource, i, alias, tableName, editWhereSql);
+                    targetEditSql = preparingEditValues(dsSource, i, alias, tableName, editWhereSql);
                 targetSelectSql = preparingSelectControl(dsSource, i, alias, tableName, editWhereSql, isEditScript);
                 sql += preparingTransferSql(targetSelectSql, targetInsertSql, targetEditSql, isEditScript);
-                
+
                 if (recCount == 50)
                 {
                     Application.DoEvents();
@@ -1162,16 +1197,19 @@ namespace YesiLdefter
                     else
                     {
                         viewText("DİKKAT : Veri aktarım işlemi durduruldu ...");
-                        imageFieldAvailable = false;
+                        this.imageFieldAvailable = false;
                         recCount = 0;
                         Application.DoEvents();
+
+                        v.IsWaitOpen = false;
+                        t.WaitFormClose();
                         break;
                     }
                 }
 
                 recCount += 1;
             }
-                       
+
             if ((recCount > 0) && (sql != ""))
             {
                 if (isIdentityInsert)
@@ -1189,19 +1227,9 @@ namespace YesiLdefter
             v.IsWaitOpen = false;
             t.WaitFormClose();
 
-            /// Resim / image fields mevcut
-            if (imageFieldAvailable)
-            {
-                v.SP_OpenApplication = false;
-                t.WaitFormOpen(v.mainForm, "Resim aktarım işlemi başlıyor...");
-                viewText("Resim aktarım işlemi başlıyor...");
-                //onay = executeImage(dsSource, alias, tableName, editWhereSql);
-                v.IsWaitOpen = false;
-                t.WaitFormClose();
-            }
-
             return onay;
         }
+
 
         private string preparingInsertValues(DataSet dsSource, int rowNo)
         {
@@ -1594,6 +1622,9 @@ namespace YesiLdefter
 
             //if (Cursor.Current == Cursors.Default)
             //    Cursor.Current = Cursors.WaitCursor;
+            v.SP_OpenApplication = false;
+            t.WaitFormOpen(v.mainForm, "");
+            t.WaitFormOpen(v.mainForm, "Resim aktarım işlemi yapılıyor...");
 
             vTable vt = new vTable();
             preparingTargetVTable(vt, alias, tableName);
@@ -1612,7 +1643,11 @@ namespace YesiLdefter
                 try
                 {
                     executeTargetSql(dsTarget, selectSql, vt);
-                                        
+
+                    v.SP_OpenApplication = true;
+                    t.WaitFormOpen(v.mainForm, "");
+                    t.WaitFormOpen(v.mainForm, i.ToString() + "/" + rowCount.ToString() + " resim aktarım işlemi devam ediyor...");
+
                     if (t.IsNotNull(dsTarget))
                     {
                         v.con_Images = null;
@@ -1663,14 +1698,12 @@ namespace YesiLdefter
                             }
                         }
 
-                        if ((v.con_Images != null) || 
-                            (v.con_Images2 != null) || 
-                            (v.con_Images3 != null) || 
+                        if ((v.con_Images != null) ||
+                            (v.con_Images2 != null) ||
+                            (v.con_Images3 != null) ||
                             (v.con_Images4 != null))
-                        onay = sv.Record_SQL_RUN(dsTarget, vt, "dsEdit", dNTarget.Position, ref updateSql, "");
+                            onay = sv.Record_SQL_RUN(dsTarget, vt, "dsEdit", dNTarget.Position, ref updateSql, "");
                         
-                        v.SP_OpenApplication = false;
-                        t.WaitFormOpen(v.mainForm, i.ToString() + "/" + rowCount.ToString() + " resim aktarım işlemi devam ediyor...");
                     }
                 }
                 catch (Exception ex)
@@ -1685,6 +1718,9 @@ namespace YesiLdefter
 
             //if (Cursor.Current == Cursors.WaitCursor)
             //    Cursor.Current = Cursors.Default;
+
+            v.IsWaitOpen = false;
+            t.WaitFormClose();
 
             return onay;
         }
@@ -1823,15 +1859,15 @@ namespace YesiLdefter
                 v.newFirm_DB.MSSQLConn = new SqlConnection(v.newFirm_DB.connectionText);
                 //v.newFirm_DB.MSSQLConn.StateChange += new StateChangeEventHandler(DBConnectStateProject);
 
-                t.WaitFormOpen(v.mainForm, "Database bağlantısı test ediliyor...");
-                v.SP_OpenApplication = true;
+                //t.WaitFormOpen(v.mainForm, "Database bağlantısı test ediliyor...");
+                //v.SP_OpenApplication = true;
 
                 //v.newFirm_DB.projectMSSQLConn.Close();
 
                 onay = t.Db_Open(v.newFirm_DB.MSSQLConn);
 
-                v.IsWaitOpen = false;
-                t.WaitFormClose();
+                //v.IsWaitOpen = false;
+                //t.WaitFormClose();
 
                 if (onay && test && masterConnect) 
                     MessageBox.Show(":) Bağlantı başarıyla sağlanmıştır ...");

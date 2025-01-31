@@ -71,6 +71,10 @@ DECLARE sicilCursor cursor local for select Id from inserted
                  dbo.MtskAdayTalep as t
             Where a.VeriKaynakId = t.VeriKaynakId				 
             and   a.Id = @sicilId
+
+			Select @TalepId = Id, @AdayId = AdayId 
+			From dbo.MtskAdayTalep 
+			Where VeriKaynakId = @VeriKaynakId
         end
 
 		-- MtskAdayTalep tablosunu işaretle

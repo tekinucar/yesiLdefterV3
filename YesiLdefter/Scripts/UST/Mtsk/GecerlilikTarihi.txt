@@ -48,28 +48,9 @@ INSERT INTO [Lkp].[GecerlilikTarihiKonuTipi] (Id, KonuTipi, GrupTipiId)
   ( 21101,  N'Teodrik saatler', 211),
   ( 21102,  N'Uygulama saatleri', 211),
   ( 21103,  N'Sınav ücreti', 211),
-  ( 21104,  N'Teodrik ders ücreti', 211),
-  ( 21105,  N'Uygulama ders ücreti', 211)
+  ( 21104,  N'Sertifika/ders ücreti', 211)
   
 commit transaction
 
   /*CreateLkpTableEnd*/
 
-  /*CreateData*/
-
-  Declare @FirmId Int 
-  Set @FirmId = :FIRM_ID
-
-  INSERT INTO [dbo].[GecerlilikTarihi]
-           ([FirmId],[IsActive],[KonuTipiId],[Tarih])
-     VALUES
-           ( @FirmId, 1, 21101, convert(date, '01.01.2012', 103)) --- Teorik dersler saatleri için
-
-  INSERT INTO [dbo].[GecerlilikTarihi]
-           ([FirmId],[IsActive],[KonuTipiId],[Tarih])
-     VALUES
-           ( @FirmId, 1, 21102, convert(date, '01.01.2012', 103)) --- Uygulama dersler saatleri için
-
-
-
-  /*CreateDataEnd*/

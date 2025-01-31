@@ -173,7 +173,7 @@ From MtskAdayTakip as takip
 	   ( takip.ZamanlamaTipiId = tip.Id )
 Where FirmId = @FirmId
 --and   DonemTipiId = @DonemTipiId
-and   takip.ZamanlamaTipiId <> 5
+--and   takip.ZamanlamaTipiId <> 5
 
 Group by 
    tip.KonuId
@@ -183,7 +183,7 @@ Group by
 
 
 union all
-
+/*
 -- ZamanlamaTipi : 5	Sertifikasını hak etmiş
 Select 
    tip.KonuId
@@ -206,7 +206,7 @@ Group by
  , tip.FormCaption 
 
 union all
-
+*/
 -- IsGrupSubeYok
 Select 
    tip.KonuId 
@@ -487,7 +487,6 @@ Group by
  , tip.KonuCaption   
  , tip.OzelDurumuTipi
  , tip.FormCaption
-
 
 
 END -- procedure

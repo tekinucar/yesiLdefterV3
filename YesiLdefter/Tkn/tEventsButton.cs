@@ -1875,46 +1875,6 @@ namespace Tkn_Events
             }
             return onay;
         }
-
-        private bool openPictureEditForm_(Form tForm, string tableIPCode, List<PROP_NAVIGATOR> propList_)
-        {
-            bool onay = false;
-            bool isChecked = false;
-            
-            foreach (PROP_NAVIGATOR prop_ in propList_)
-            {
-                if (prop_.BUTTONTYPE.ToString() == Convert.ToString((byte)v.tButtonType.btResimEditor))
-                {
-                    isChecked = CheckValue(tForm, prop_, tableIPCode);
-
-                    // form açılması için onaylandı ise
-                    if (isChecked)
-                    {
-                        v.tResimEditor.Clear();
-                        v.tResimEditor.imagesSourceFormName = tForm.Name;
-                        v.tResimEditor.imagesSourceTableIPCode = tableIPCode;
-                        v.tResimEditor.imagesSourceFieldName = "";
-                        v.tResimEditor.imagesMasterTableIPCode = prop_.READ_TABLEIPCODE;
-                        v.tResimEditor.listTableIPCode = prop_.TARGET_TABLEIPCODE;
-                        v.tResimEditor.formCode = prop_.FORMCODE;
-                        /// listeli işlem mi geldi kontrol et
-                        if (t.IsNotNull(v.tResimEditor.imagesMasterTableIPCode) == false)
-                        {
-                            foreach (TABLEIPCODE_LIST item in prop_.TABLEIPCODE_LIST)
-                            {
-                                v.tResimEditor.imagesMasterTableIPCode = item.RTABLEIPCODE;
-                                v.tResimEditor.listTableIPCode = item.TABLEIPCODE;
-                            }
-                        }
-
-                        onay = openPictureEditForm(v.tResimEditor);
-                        return onay;
-                    }
-                }
-            }
-            return onay;
-        }
-
         private void openReportDesignForm_(Form tForm, string tableIPCode, List<PROP_NAVIGATOR> propList_)
         {
             if (tableIPCode.IndexOf("MsReports") > -1)
@@ -1937,14 +1897,53 @@ namespace Tkn_Events
                 rapor.tShowReportDesigner(tForm, dsMsReports, dNReports, sourceFormCodeAndName);
             }
         }
-        public bool openPictureEditForm(vResimEditor tResimEditor)
+        private bool openPictureEditForm_(Form tForm, string tableIPCode, List<PROP_NAVIGATOR> propList_)
+        {
+            bool onay = false;
+            bool isChecked = false;
+
+            foreach (PROP_NAVIGATOR prop_ in propList_)
+            {
+                if (prop_.BUTTONTYPE.ToString() == Convert.ToString((byte)v.tButtonType.btResimEditor))
+                {
+                    isChecked = CheckValue(tForm, prop_, tableIPCode);
+
+                    // form açılması için onaylandı ise
+                    if (isChecked)
+                    {
+                        v.tResimEditor.Clear();
+                        v.tResimEditor.imagesSourceFormName = tForm.Name;
+                        v.tResimEditor.imagesSourceTableIPCode = tableIPCode;
+                        v.tResimEditor.imagesSourceFieldName = "";
+                        v.tResimEditor.formCode = prop_.FORMCODE; // kaynak kişilerin olduğu formCode
+                        /// listeli işlem mi geldi kontrol et
+                        if (t.IsNotNull(v.tResimEditor.imagesMasterTableIPCode) == false)
+                        {
+                            foreach (TABLEIPCODE_LIST item in prop_.TABLEIPCODE_LIST)
+                            {
+                                v.tResimEditor.imagesMasterFormCode = item.TABLEIPCODE; // eğer targetTableIPCode de value varsa; images liste ve images veri datasını tutan formCode mevcut
+                                v.tResimEditor.imagesMasterTableIPCode = item.RTABLEIPCODE; // eğer readTableIPCode de value varsa sadece images listesini tutan TableIPCode var  
+                            }
+                        }
+
+                        onay = openPictureEditForm(v.tResimEditor);
+                        return onay;
+                    }
+                }
+            }
+            return onay;
+        }
+
+        private bool openPictureEditForm(vResimEditor tResimEditor)
         {
             bool onay = false;
 
-            /// Sadece bir kişi için yapılacaksa
+            /// Sadece bir kişi için ve sadece images listesi ise 
             /// 
-            if ((tResimEditor.imagesMasterTableIPCode != "") &&
-                (tResimEditor.listTableIPCode == "" && tResimEditor.formCode == ""))
+            if (tResimEditor.imagesMasterTableIPCode != "" &&
+                tResimEditor.imagesMasterFormCode == "" &&
+                tResimEditor.listTableIPCode == "" && 
+                tResimEditor.formCode == "")
             {
                 // ms_Pictures içindeki Resimler için dataset hazırlanıyor
                 // yani gerekli datasetin prc_xxxxx çalıştırılıyor
@@ -1955,7 +1954,10 @@ namespace Tkn_Events
                 v.con_ImagesMasterDataSet = ip.Create_DataSet(tFormMaster,  tResimEditor.imagesMasterTableIPCode);
             }
 
-            if ((tResimEditor.imagesMasterTableIPCode != "") &&
+            /// Images ve datası için form var ise ve
+            /// Kaynak kişi listesi için form  var ise
+            /// 
+            if ((tResimEditor.imagesMasterTableIPCode != "" || tResimEditor.imagesMasterFormCode != "") &&
                 (tResimEditor.listTableIPCode != "" || tResimEditor.formCode != ""))
             {
                 v.con_ImagesMasterDataSet = null;

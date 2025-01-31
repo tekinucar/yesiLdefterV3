@@ -256,7 +256,7 @@ namespace Tkn_ToolBox
         {
             // UstadMtsk ise
             if ((v.active_DB.localDbUses == false) &&
-                (v.SP_Firm_SectorTypeId == 211))
+                (v.SP_Firm_SectorTypeId == (Int16)v.msSectorType.UstadMtsk ))
                 dataUpdatesUstadMtsk();
         }
 
@@ -270,15 +270,25 @@ namespace Tkn_ToolBox
             string MtskUcretSinavSql = "";
             string MtskUcretTeorikSql = "";
             string MtskUcretUygulamaSql = "";
-            string insertSql = @"  declare @FIRM_ID int 
+            string insertSql = "";
+            string insertSqlMaster = @"  declare @FIRM_ID int 
   Set @FIRM_ID = :FIRM_ID 
   declare @TarihId int = 0
 ";
 
+            /// 1. GecerliTarih çalıştırılıyor
+            /// 2. Saatler çalıştırılıyor
+            /// 3. Ücretler çalıştırılıyor
+
+
+            /// 1. Hazırlık
+            /// 
+            insertSql = insertSqlMaster;
+
             /// HubGecerliTarih'leri okuyup GecerliTarih tablosuna insert eden sql
             /// 
             string selectSql = sqls.getGecerliTarihSql();
-            
+            /// Sadece GecerlilikTarihi ni insert et
             if (SQL_Read_Execute(v.dBaseNo.Manager, ds, ref selectSql, "", "GecerliTarih"))
             {
                 if (IsNotNull(ds))
@@ -289,101 +299,133 @@ namespace Tkn_ToolBox
                     {
                         insertSql += row[0].ToString() + v.ENTER;
                     }
-
-                    /// GeciciTarih insertleri varsa
-                    if (insertSql.Length > 100)
-                    {
-
-                        /// HubMtskSaatUygulama > MtskSaatTeorik
-                        /// 
-                        insertSql += sqls.getGecerlilikTarihiIdSql(21101);
-                        MtskSaatTeorikSql = sqls.getMtskSaatTeorikSql();
-                        
-                        TableRemove(ds);
-                        
-                        if (SQL_Read_Execute(v.dBaseNo.Manager, ds, ref MtskSaatTeorikSql, "", "MtskSaatTeorik"))
-                        {
-                            foreach (DataRow row in ds.Tables[0].Rows)
-                            {
-                                insertSql += row[0].ToString() + v.ENTER;
-                            }
-                        }
-
-                        /// HubMtskSaatUygulama > MtskSaatUygulama
-                        /// 
-                        insertSql += sqls.getGecerlilikTarihiIdSql(21102);
-                        MtskSaatUygulamaSql = sqls.getMtskSaatUygulamaSql();
-
-                        TableRemove(ds);
-
-                        if (SQL_Read_Execute(v.dBaseNo.Manager, ds, ref MtskSaatUygulamaSql, "", "MtskSaatUygulama"))
-                        {
-                            foreach (DataRow row in ds.Tables[0].Rows)
-                            {
-                                insertSql += row[0].ToString() + v.ENTER;
-                            }
-                        }
-
-
-                        /// HubMtskUcretSinav > MtskUcretSinav
-                        ///
-                        insertSql += sqls.getGecerlilikTarihiIdSql(21103);
-                        MtskUcretSinavSql = sqls.getMtskUcretSinavSql();
-
-                        TableRemove(ds);
-
-                        if (SQL_Read_Execute(v.dBaseNo.Manager, ds, ref MtskUcretSinavSql, "", "MtskUcretSinav"))
-                        {
-                            foreach (DataRow row in ds.Tables[0].Rows)
-                            {
-                                insertSql += row[0].ToString() + v.ENTER;
-                            }
-                        }
-
-                        /// HubMtskUcretTeorik > MtskUcretTeorik
-                        /// 
-                        insertSql += sqls.getGecerlilikTarihiIdSql(21104);
-                        MtskUcretTeorikSql = sqls.getMtskUcretTeorikSql();
-
-                        TableRemove(ds);
-
-                        if (SQL_Read_Execute(v.dBaseNo.Manager, ds, ref MtskUcretTeorikSql, "", "MtskUcretTeorik"))
-                        {
-                            foreach (DataRow row in ds.Tables[0].Rows)
-                            {
-                                insertSql += row[0].ToString() + v.ENTER;
-                            }
-                        }
-
-                        /// HubMtskUcretUygulama > MtskUcretUygulama
-                        insertSql += sqls.getGecerlilikTarihiIdSql(21104);
-                        MtskUcretUygulamaSql = sqls.getMtskUcretUygulamaSql();
-
-                        TableRemove(ds);
-
-                        if (SQL_Read_Execute(v.dBaseNo.Manager, ds, ref MtskUcretUygulamaSql, "", "MtskUcretUygulama"))
-                        {
-                            foreach (DataRow row in ds.Tables[0].Rows)
-                            {
-                                insertSql += row[0].ToString() + v.ENTER;
-                            }
-                        }
-
-                        /// Tüm insert satılarını çalıştır
-                        /// 
-                        if (IsNotNull(insertSql))
-                        {
-                            TableRemove(ds);
-
-                            if (SQL_Read_Execute(v.dBaseNo.Project, ds, ref insertSql, "", "SaatlerUcretler"))
-                            {
-                                //
-                            }
-                        }
-                    }
                 }
             }
+            /// hazırlanan insert satılarını çalıştır
+            /// 
+            if (IsNotNull(insertSql))
+            {
+                TableRemove(ds);
+
+                if (SQL_Read_Execute(v.dBaseNo.Project, ds, ref insertSql, "", "GecerliTarih"))
+                {
+                    //
+                }
+            }
+
+
+            /// 2. Hazırlık
+            /// 
+            insertSql = insertSqlMaster;
+
+            /// HubMtskSaatUygulama > MtskSaatTeorik
+            /// 
+            insertSql += sqls.getGecerlilikTarihiIdSql(21101);
+            MtskSaatTeorikSql = sqls.getMtskSaatTeorikSql();
+
+            TableRemove(ds);
+
+            if (SQL_Read_Execute(v.dBaseNo.Manager, ds, ref MtskSaatTeorikSql, "", "MtskSaatTeorik"))
+            {
+                foreach (DataRow row in ds.Tables[0].Rows)
+                {
+                    insertSql += row[0].ToString() + v.ENTER;
+                }
+            }
+
+            /// HubMtskSaatUygulama > MtskSaatUygulama
+            /// 
+            insertSql += sqls.getGecerlilikTarihiIdSql(21102);
+            MtskSaatUygulamaSql = sqls.getMtskSaatUygulamaSql();
+
+            TableRemove(ds);
+
+            if (SQL_Read_Execute(v.dBaseNo.Manager, ds, ref MtskSaatUygulamaSql, "", "MtskSaatUygulama"))
+            {
+                foreach (DataRow row in ds.Tables[0].Rows)
+                {
+                    insertSql += row[0].ToString() + v.ENTER;
+                }
+            }
+
+            /// hazırlanan insert satılarını çalıştır
+            /// 
+            if (IsNotNull(insertSql))
+            {
+                TableRemove(ds);
+
+                if (SQL_Read_Execute(v.dBaseNo.Project, ds, ref insertSql, "", "Saatler"))
+                {
+                    //
+                }
+            }
+
+
+            /// 3. Hazırlık
+            /// 
+            insertSql = insertSqlMaster;
+
+            /// HubMtskUcretSinav > MtskUcretSinav
+            ///
+            insertSql += sqls.getGecerlilikTarihiIdSql(21103);
+            MtskUcretSinavSql = sqls.getMtskUcretSinavSql();
+
+            TableRemove(ds);
+
+            if (SQL_Read_Execute(v.dBaseNo.Manager, ds, ref MtskUcretSinavSql, "", "MtskUcretSinav"))
+            {
+                foreach (DataRow row in ds.Tables[0].Rows)
+                {
+                    insertSql += row[0].ToString() + v.ENTER;
+                }
+            }
+
+            /// HubMtskUcretTeorik > MtskUcretTeorik
+            /// 
+            insertSql += sqls.getGecerlilikTarihiIdSql(21104);
+            MtskUcretTeorikSql = sqls.getMtskUcretTeorikSql();
+
+            TableRemove(ds);
+
+            if (SQL_Read_Execute(v.dBaseNo.Manager, ds, ref MtskUcretTeorikSql, "", "MtskUcretTeorik"))
+            {
+                foreach (DataRow row in ds.Tables[0].Rows)
+                {
+                    insertSql += row[0].ToString() + v.ENTER;
+                }
+            }
+
+            /// HubMtskUcretUygulama > MtskUcretUygulama
+            insertSql += sqls.getGecerlilikTarihiIdSql(21104);
+            MtskUcretUygulamaSql = sqls.getMtskUcretUygulamaSql();
+
+            TableRemove(ds);
+
+            if (SQL_Read_Execute(v.dBaseNo.Manager, ds, ref MtskUcretUygulamaSql, "", "MtskUcretUygulama"))
+            {
+                foreach (DataRow row in ds.Tables[0].Rows)
+                {
+                    insertSql += row[0].ToString() + v.ENTER;
+                }
+            }
+
+
+            /// hazırlanan insert satılarını çalıştır
+            /// 
+            if (IsNotNull(insertSql))
+            {
+                TableRemove(ds);
+
+                if (SQL_Read_Execute(v.dBaseNo.Project, ds, ref insertSql, "", "Ucretler"))
+                {
+                    //
+                }
+            }
+
+
         }
+
+
 
 
         public void dataUpdates_IPTAL()
@@ -1117,7 +1159,7 @@ namespace Tkn_ToolBox
             {
                 byte i = 0;
 
-                WaitFormOpen(v.mainForm, "MsSQL " + v.Wait_Desc_DBBaglanti);
+                //WaitFormOpen(v.mainForm, "MsSQL " + v.Wait_Desc_DBBaglanti);
 
                 try
                 {
@@ -1127,12 +1169,12 @@ namespace Tkn_ToolBox
 
                     if (v.SP_OpenApplication == false)
                     {
-                        Thread.Sleep(500);
-                        SplashScreenManager.CloseForm(false);
+                        //Thread.Sleep(500);
+                        //SplashScreenManager.CloseForm(false);
                     }
                     else
                     {
-                        WaitFormOpen(v.mainForm, v.Wait_Desc_ProgramYukDevam);
+                        //WaitFormOpen(v.mainForm, v.Wait_Desc_ProgramYukDevam);
                     }
                 }
                 catch (Exception e)

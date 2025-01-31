@@ -1,0 +1,44 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_MtskAdayTalepForTablesInsert] (@FirmId int)  
+AS BEGIN
+
+  --declare @FirmId int = 617
+
+  -- DbUpdate ye DataTransferi başlıyor işareti ver
+  Execute dbo.prc_setIsDbUpdateActive 13, 1
+
+  -- Döngüye alınacak Select cümlesi
+  declare @TalepId int
+  declare myCursor CURSOR local FOR 
+
+  Select talep.Id as TalepId
+  From dbo.MtskAdayTalep as talep
+  Where talep.FirmId = @FirmId
+
+  OPEN myCursor; 
+  
+  FETCH NEXT FROM myCursor INTO @TalepId
+
+  print 'MtskAdayTalep tablosuna bağlı alt tablolardaki eksik satırların giderilmesi başladı'
+  
+  WHILE @@FETCH_STATUS = 0 
+  BEGIN -- İşlemler burada yapılır 
+  
+     --PRINT '@TalepId: ' + CAST(@TalepId AS NVARCHAR)
+  
+	 Execute [dbo].[prc_MtskAdayTablesInsert] @TalepId 
+
+     FETCH NEXT FROM myCursor INTO @TalepId; 
+  END; 
+  
+  CLOSE myCursor;
+
+  -- DbUpdate ye DataTransferi bitti işareti ver
+  Execute dbo.prc_setIsDbUpdateActive 13, 0
+
+  print 'MtskAdayTalep tablosuna bağlı alt tablolardaki eksik satırların giderilmesi bitti'
+
+END -- procedure
+
+/*CreateProcedureEnd*/

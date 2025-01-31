@@ -30,7 +30,7 @@ BEGIN
   --    set @yKayitTipiId = 2 -- 'Kayıt aşamasında'
 
   -- Belgeler geldiyse ön kayıttan > kayıt aşamasına geç
-  if (@yKayitTipiId = 1 and @yBelgelerGeldi = 1) 
+  if (@yKayitTipiId <= 1 and @yBelgelerGeldi = 1) 
       set @yKayitTipiId = 2  -- 'Kayıt aşamasında'
 
   if (@yMebbisDurumTipiId = 1) or

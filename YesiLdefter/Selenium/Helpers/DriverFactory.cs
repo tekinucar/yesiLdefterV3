@@ -64,7 +64,11 @@ namespace YesiLdefter.Selenium.Helpers
                     var chromeDriverService = ChromeDriverService.CreateDefaultService(driverPath);
                     chromeDriverService.HideCommandPromptWindow = true;
 
-                    driver = new ChromeDriver(chromeDriverService, new ChromeOptions());
+                    var chromeOptions = new ChromeOptions();
+                    chromeOptions.AddArgument("--disable-gpu"); // Disable GPU acceleration
+                    chromeOptions.AddArgument("--no-sandbox");
+
+                    driver = new ChromeDriver(chromeDriverService, chromeOptions);
 
                     break;
                 default:

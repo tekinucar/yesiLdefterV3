@@ -334,7 +334,7 @@ AS BEGIN
       end -- if
 
       -- MtskAday tablosu burada olmak zorunda : AdayId tespit ediliyor
-      if ((@yAdayId = 0) and (@yTcNo <> '') and @DbUpdatesIsActive = 1)
+      if (@yAdayId = 0 and @yTcNo <> '' and @mevcutAdayId = 0) --@DbUpdatesIsActive = 1)
       begin
           if (@mevcutAdayId = 0)
           begin
@@ -377,10 +377,13 @@ AS BEGIN
 	      set @yIstenenSertifikaTipiId = [dbo].[fnc_getSertifikaId](@yIstenenSertifikaTipiId)
       end
 
-	  set @yKayitTipiId = [dbo].[fnc_getSertifikaKayitTipi]( @TalepId )
+      -- Yeni kayıt ise kontrol et
+      -- Diğer aşamalara geçmişse dokunma
+      if (@yKayitTipiId < 3)
+	      set @yKayitTipiId = [dbo].[fnc_getSertifikaKayitTipi]( @TalepId )
 	  
       if ((@yBiyometrikGeldi = 1) and
-          (@yBasvuruFotoCekildi = 1) and
+          --(@yBasvuruFotoCekildi = 1) and
           (@yOgrenimGeldi = 1) and
           (@yAdliSicilGeldi = 1) and
           (@ySaglikGeldi = 1) and
@@ -599,8 +602,8 @@ INSERT INTO [Lkp].[MtskAdayTalepTalepTipi] (Id, TalepTipi, IsActive)
   ( 2,    N'2.+4 hak ', 1),
   ( 3,    N'Nakil 2.+4 hak', 1),
   ( 4,    N'100 Ceza', 1),
-  ( 5,    N'Özel direksiyon ders (Aday değil)', 1),
-  ( 6,    N'Özel teorik ders', 1)
+  ( 5,    N'Özel direksiyon ders (Aday değil)', 1)
+  --( 6,    N'Özel teorik ders', 1)
 
 
 -- ------------------------------------------------------- 
@@ -623,9 +626,14 @@ Delete from [Lkp].[MtskAdayTalepKayitTipi]
 INSERT INTO [Lkp].[MtskAdayTalepKayitTipi] (Id, KayitTipi, ChartCaption, FormCaption)
  VALUES 
   ( 0,    N'', '', ''),
-  ( 1,    N'Ön kayıt',                  'Ön kayıt',     'Yeni Aday' ),
-  ( 2,    N'Kayıt aşamasında',          'K.Aşamasında', 'Mebbis' ),
-  ( 3,    N'Kesin kayıt',               'Kesin kay.', '' )
+  ( 1,    N'Ön kayıt',                      'Ön kayıt',     'Yeni Aday' ),
+  ( 2,    N'Kayıt aşamasında',              'K.Aşamasında', 'Mebbis' ),
+  ( 3,    N'Kesin kayıt',                   'Kesin kay.', '' ),
+  ( 5,    N'Sertifika almaya hak kazandı',  '', '' ),
+  ( 6,    N'Tüm e-Sınav hakkı bitti. Dosya yandı',  '', '' ),
+  ( 7,    N'Tüm uygulamalı sınav hakkı bitti',  '', '' ),
+  ( 8,    N'2. +4 sınav hakkı bitti. Dosya yandı',  '', '' ),
+  ( 9,    N'Diğer sebeplerden dolayı dosya kapandı',  '', '' )
 
 
 -- ------------------------------------------------------- 

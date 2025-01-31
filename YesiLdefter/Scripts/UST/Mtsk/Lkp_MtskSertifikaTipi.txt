@@ -57,9 +57,9 @@ INSERT INTO [Lkp].[MtskSertifikaTipi] (Id, SertifikaTipi, KSertifikaTipi, IsActi
   ( 9061,  N'D Sınıfı Sertifika (Otomatik)',     'D oto.', 0, 14 ), 
   ( 9070,  N'E Sınıfı Sertifika (Manuel)',       'E man.', 0, 98 ), 
   ( 9071,  N'E Sınıfı Sertifika (Otomatik)',     'E oto.', 0, 98 ), 
-  ( 9200,  N'100 Ceza Puanı',                    '100 Ceza', 0, 99 ), 
-  ( 9201,  N'100 Ceza Puanı (Manuel)',           '100 Ceza man.', 0, 99 ), 
-  ( 9202,  N'100 Ceza Puanı (Otomatik)',         '100 Ceza oto.', 0, 99 ) 
+  ( 9200,  N'100 Ceza Puanı',                    '100 Ceza', 1, 99 ), 
+  ( 9201,  N'100 Ceza Puanı (Manuel)',           '100 Ceza man.', 1, 99 ), 
+  ( 9202,  N'100 Ceza Puanı (Otomatik)',         '100 Ceza oto.', 1, 99 ) 
 
 set IDENTITY_INSERT [Lkp].[MtskSertifikaTipi] OFF
 

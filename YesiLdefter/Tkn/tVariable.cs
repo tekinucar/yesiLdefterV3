@@ -2411,6 +2411,7 @@ namespace Tkn_Variable
         public string imagesSourceFormName { get; set; }
         public string imagesSourceTableIPCode { get; set; }
         public string imagesSourceFieldName { get; set; }
+        public string imagesMasterFormCode { get; set; }
         public string imagesMasterTableIPCode { get; set; }
         public string listTableIPCode { get; set; }
         public string formCode { get; set; }
@@ -2419,6 +2420,7 @@ namespace Tkn_Variable
             imagesSourceFormName = "";
             imagesSourceTableIPCode = "";
             imagesSourceFieldName = "";
+            imagesMasterFormCode = "";
             imagesMasterTableIPCode = "";
             listTableIPCode = "";
             formCode = "";

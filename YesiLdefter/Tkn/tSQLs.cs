@@ -1502,7 +1502,7 @@ INSERT INTO [dbo].[SYS_UPDATES]
   + ' Insert into [dbo].[MtskUcretUygulama] ([FirmId],[IsActive],[IlKodu],[SiraNo],[GecerlilikTarihiId] '
   + '      ,[MevcutSertifikaTipiId],[IstenenSertifikaTipiId] '
   + '      ,[SertifikaUcreti],[SertifikaUcreti2016Oncesi],[Arti24HakUcreti],[NakilArti24HakUcreti] '
-  + '      ,[BirSaatUygDersUcreti],[BirSaatArti24DersUcreti],[BirSaatNakilArti24DersUcreti] '
+  + '      ,[BirSaatUygDersUcreti],[BirSaatUygDersUcreti2016Oncesi],[BirSaatArti24DersUcreti],[BirSaatNakilArti24DersUcreti] '
   + '      ,[BirSaatBasarisizDersUcreti],[BirSaatTelafiDersUcreti] '
   + '      ,[BirSaatOzelDersUcretiAday],[BirSaatOzelDersUcretiHarici]) Values '
   + ' ( @FIRM_ID, '
@@ -1517,6 +1517,7 @@ INSERT INTO [dbo].[SYS_UPDATES]
   + Convert(varchar(22), isnull([Arti24HakUcreti],0)) + ', '
   + Convert(varchar(22), isnull([NakilArti24HakUcreti],0)) + ', '
   + Convert(varchar(22), isnull([BirSaatUygDersUcreti],0)) + ', '
+  + Convert(varchar(22), isnull([BirSaatUygDersUcreti2016Oncesi],0)) + ', '
   + Convert(varchar(22), isnull([BirSaatArti24DersUcreti],0)) + ', '
   + Convert(varchar(22), isnull([BirSaatNakilArti24DersUcreti],0)) + ', '
   + Convert(varchar(22), isnull([BirSaatBasarisizDersUcreti],0)) + ', '
@@ -1531,6 +1532,7 @@ INSERT INTO [dbo].[SYS_UPDATES]
   + ' ,[Arti24HakUcreti] = ' + Convert(varchar(22), isnull([Arti24HakUcreti],0)) 
   + ' ,[NakilArti24HakUcreti] = ' + Convert(varchar(22), isnull([NakilArti24HakUcreti],0)) 
   + ' ,[BirSaatUygDersUcreti] = ' + Convert(varchar(22), isnull([BirSaatUygDersUcreti],0)) 
+  + ' ,[BirSaatUygDersUcreti2016Oncesi] = ' + Convert(varchar(22), isnull([BirSaatUygDersUcreti2016Oncesi],0)) 
   + ' ,[BirSaatArti24DersUcreti] = ' + Convert(varchar(22), isnull([BirSaatArti24DersUcreti],0)) 
   + ' ,[BirSaatNakilArti24DersUcreti] = ' + Convert(varchar(22), isnull([BirSaatNakilArti24DersUcreti],0)) 
   + ' ,[BirSaatBasarisizDersUcreti] = ' + Convert(varchar(22), isnull([BirSaatBasarisizDersUcreti],0)) 

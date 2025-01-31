@@ -281,6 +281,7 @@ BEGIN TRANSACTION
 
 /* ************* */
 
+ /*
  insert into SYS_TYPES_H values( 0, 1, 1, 'TAHSIL_TIPI')
 
  insert into SYS_TYPES_L values( 0, 1, 1, 0, 'TAHSIL_TIPI',   0, '', '' )
@@ -295,7 +296,74 @@ BEGIN TRANSACTION
  insert into SYS_TYPES_L values( 0, 1, 1, 0, 'TAHSIL_TIPI',   8, '', 'Doktora' )
  insert into SYS_TYPES_L values( 0, 1, 1, 0, 'TAHSIL_TIPI',   9, '', 'Yetiþkin 2.Kademe' )
  insert into SYS_TYPES_L values( 0, 1, 1, 0, 'TAHSIL_TIPI',   10, '', 'Denklik/Öðr.Bel.Noter Tastikli' )
+ */
+
+ /* buradaki Id ler ve caption lar Mebbisde olanlardýr. */ 
+ --- DELETE FROM SYS_TYPES_L WHERE  TYPES_NAME = 'TAHSIL_TIPI'
+ insert into SYS_TYPES_H values( 0, 3, 'TAHSIL_TIPI', '')
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'TAHSIL_TIPI',   0, '0', '' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'TAHSIL_TIPI',   1, '1', 'II. Kademe Okur Yazarlýk Belgesi' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'TAHSIL_TIPI',   2, '2', 'Ýlkokul Diploma' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'TAHSIL_TIPI',   3, '3', 'Ýlköðretim Diploma' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'TAHSIL_TIPI',   4, '4', 'Ýlköðretim Tasdikname' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'TAHSIL_TIPI',   5, '5', 'Açýk Ýlköðretim Öðrenci Belgesi' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'TAHSIL_TIPI',   6, '6', 'Ortaokul Diploma' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'TAHSIL_TIPI',   7, '7', 'Ortaokul Tasdikname' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'TAHSIL_TIPI',   8, '8', 'Lise Diploma' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'TAHSIL_TIPI',   9, '9', 'Lise Tasdikname' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'TAHSIL_TIPI',   10, '10', 'Lise Öðrenci Belgesi' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'TAHSIL_TIPI',   11, '11', 'Üniversite Öðrenci Belgesi' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'TAHSIL_TIPI',   12, '12', 'Üniversite Diploma' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'TAHSIL_TIPI',   13, '13', 'Üniversite Geçici Mezuniyet Belgesi' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'TAHSIL_TIPI',   14, '14', 'Denklik - Öðrenim Belgesinin Noter Tasdikli Türkçe Tercümesi' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'TAHSIL_TIPI',   15, '15', 'Yüksek Lisans Belgesi' )
+
+ --- DELETE FROM SYS_TYPES_L WHERE  TYPES_NAME = 'TABIM_YABANCI_DIL_TIPI'
+ insert into SYS_TYPES_H values( 1, 3, 'TABIM_YABANCI_DIL_TIPI','')
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'TABIM_YABANCI_DIL_TIPI',   0, '', '' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'TABIM_YABANCI_DIL_TIPI', 101, '', 'Okutman ve/veya Yazman Ýhtiyacý Var' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'TABIM_YABANCI_DIL_TIPI',   1, '', 'Arapça' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'TABIM_YABANCI_DIL_TIPI',   2, '', 'Çince' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'TABIM_YABANCI_DIL_TIPI',   3, '', 'Ýngilizce' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'TABIM_YABANCI_DIL_TIPI',   4, '', 'Almanca' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'TABIM_YABANCI_DIL_TIPI',   5, '', 'Fransýzca' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'TABIM_YABANCI_DIL_TIPI',   6, '', 'Farsca' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'TABIM_YABANCI_DIL_TIPI',   7, '', 'Rusca' )
+
+
+ -- DELETE FROM SYS_TYPES_L WHERE  TYPES_NAME = 'TABIM_OZURLU_DURUM_TIPI'
+ insert into SYS_TYPES_H values( 1, 3, 'TABIM_OZURLU_DURUM_TIPI', '')
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'TABIM_OZURLU_DURUM_TIPI',   0, '0', '' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'TABIM_OZURLU_DURUM_TIPI',   1, '1', 'Bedensel Özrüm Yoktur' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'TABIM_OZURLU_DURUM_TIPI',   2, '2', 'Ortopedik Özürlüyüm. (El. - kol. kulla.)' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'TABIM_OZURLU_DURUM_TIPI',   3, '3', 'Ortopedik Özürlüyüm. (Yürüyemiyorum.)' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'TABIM_OZURLU_DURUM_TIPI',   4, '4', 'Ýþitme, Dil veya Konuþma Özürlüyüm.' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'TABIM_OZURLU_DURUM_TIPI',   5, '5', 'Görme Özürlüyüm. (Her iki göz. görmüyor.)' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'TABIM_OZURLU_DURUM_TIPI',   6, '6', 'Görme Özürlüyüm. (Bir gözüm görmüyor.)' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'TABIM_OZURLU_DURUM_TIPI',   7, '7', 'Görme Özürlüyüm. (Büyüteç yar. ile göre.)' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'TABIM_OZURLU_DURUM_TIPI',   8, '8', 'Süreðen hastalýðým var.' )
+
+
+ -- DELETE FROM SYS_TYPES_L WHERE  TYPES_NAME = 'TABIM_GRUP_TIPI'
+ insert into SYS_TYPES_H values( 1, 2, 'TABIM_GRUP_TIPI', '')
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'TABIM_GRUP_TIPI',   0, '0', '' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'TABIM_GRUP_TIPI',   1, '1', 'Grup 1' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'TABIM_GRUP_TIPI',   2, '2', 'Grup 2' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'TABIM_GRUP_TIPI',   3, '3', 'Grup 3' )
  
+ -- DELETE FROM SYS_TYPES_L WHERE  TYPES_NAME = 'TABIM_SUBE_TIPI'
+ insert into SYS_TYPES_H values( 1, 2, 'TABIM_SUBE_TIPI', '')
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'TABIM_SUBE_TIPI',   0, '0', '' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'TABIM_SUBE_TIPI',   1, '0', 'A' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'TABIM_SUBE_TIPI',   2, '0', 'B' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'TABIM_SUBE_TIPI',   3, '0', 'C' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'TABIM_SUBE_TIPI',   4, '0', 'D' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'TABIM_SUBE_TIPI',   5, '0', 'E' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'TABIM_SUBE_TIPI',   6, '0', 'F' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'TABIM_SUBE_TIPI',   7, '0', 'G' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'TABIM_SUBE_TIPI',   8, '0', 'H' )
+
+
  insert into SYS_TYPES_H values( 0, 1, 1, 'MESLEK_TIPI')
 
  insert into SYS_TYPES_L values( 0, 1, 1, 0, 'MESLEK_TIPI',   0, '', '' )

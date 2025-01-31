@@ -36,6 +36,7 @@ begin transaction
    /* Uygulama Saat Ücretleri */  
    -- 31
    BirSaatUygDersUcreti                 Numeric(22,5) null,  
+   BirSaatUygDersUcreti2016Oncesi       Numeric(22,5) null,  
    BirSaatArti24DersUcreti              Numeric(22,5) null,  
    BirSaatNakilArti24DersUcreti         Numeric(22,5) null,  
    BirSaatBasarisizDersUcreti           Numeric(22,5) null,  

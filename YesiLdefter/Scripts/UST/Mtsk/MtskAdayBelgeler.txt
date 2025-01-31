@@ -74,8 +74,8 @@ AS BEGIN
 
     declare @TalepId int
     declare @AdayId int
-	declare @BiyometrikTarandi Bit = 0
-    --declare @BasvuruFotoTarandi Bit = 0
+    declare @BiyometrikTarandi Bit = 0
+    declare @BasvuruFotoTarandi Bit = 0
     declare @OgrenimTarandi Bit = 0
     declare @SaglikTarandi Bit = 0
     declare @AdliSicilTarandi Bit = 0
@@ -88,7 +88,7 @@ AS BEGIN
      -- Mebbise yüklendimi
     declare @AdayKaydiYapildi Bit = 0
     declare @BiyometrikYuklendi Bit = 0
-    --declare @BasvuruFotoYuklendi Bit = 0
+    declare @BasvuruFotoYuklendi Bit = 0
     declare @OgrenimYuklendi Bit = 0
     declare @SaglikYuklendi Bit = 0
     declare @AdliSicilYuklendi Bit = 0
@@ -102,10 +102,10 @@ AS BEGIN
     BEGIN
 
         select 
-		  @TalepId = isnull(ins.TalepId,0)
+          @TalepId = isnull(ins.TalepId,0)
         , @AdayId = isnull(ins.AdayId,0)
         , @BiyometrikTarandi = isnull(ins.BiyometrikTarandi,0)
-        --, @BasvuruFotoTarandi = isnull(ins.BasvuruFotoTarandi,0)
+        , @BasvuruFotoTarandi = isnull(ins.BasvuruFotoTarandi,0)
         , @OgrenimTarandi = isnull(ins.OgrenimTarandi,0)
         , @SaglikTarandi = isnull(ins.SaglikTarandi,0)
         , @AdliSicilTarandi = isnull(ins.AdliSicilTarandi,0)
@@ -116,7 +116,7 @@ AS BEGIN
 
         , @AdayKaydiYapildi = isnull(ins.AdayKaydiYapildi,0)
         , @BiyometrikYuklendi = isnull(ins.BiyometrikYuklendi,0)
-        --, @BasvuruFotoYuklendi = isnull(ins.BasvuruFotoYuklendi,0)
+        , @BasvuruFotoYuklendi = isnull(ins.BasvuruFotoYuklendi,0)
         , @OgrenimYuklendi = isnull(ins.OgrenimYuklendi,0)
         , @SaglikYuklendi = isnull(ins.SaglikYuklendi,0)
         , @AdliSicilYuklendi = isnull(ins.AdliSicilYuklendi,0)
@@ -124,7 +124,7 @@ AS BEGIN
         , @Sozlesme1Yuklendi = isnull(ins.Sozlesme1Yuklendi,0)
         , @Sozlesme2Yuklendi = isnull(ins.Sozlesme2Yuklendi,0)
         , @AdresYuklendi = isnull(ins.AdresYuklendi,0)
-		from inserted ins
+        from inserted ins
     	where ins.Id = @belgeId
 
         Set @BelgelerTarandi = 0
@@ -137,8 +137,9 @@ AS BEGIN
             (@AdliSicilTarandi = 1) and
             (@ImzaTarandi = 1) and
             (@Sozlesme1Tarandi = 1) and
-            (@Sozlesme2Tarandi = 1) and
-            (@AdresKodlandi = 1)
+            (@Sozlesme2Tarandi = 1) --and
+            --(@AdresKodlandi = 1
+            )
             ) set @BelgelerTarandi = 1
 
         if ((@AdayKaydiYapildi = 1) and
@@ -162,12 +163,11 @@ AS BEGIN
         begin 
             if (@AdayId = 0)
             begin
-			    Select @AdayId = AdayId from dbo.MtskAdayTalep
+                Select @AdayId = AdayId from dbo.MtskAdayTalep
                 Where Id = @TalepId
             
-			    Update dbo.MtskAdayBelgeler set
-                    AdayId = @AdayId
-				Where Id = @belgeId	
+                Update dbo.MtskAdayBelgeler set AdayId = @AdayId
+                Where Id = @belgeId	
             end
 
             Update MtskAdayTakip set
@@ -184,5 +184,6 @@ AS BEGIN
     
 
 END -- create trigger
+
 
 /*CreateTriggerEnd*/

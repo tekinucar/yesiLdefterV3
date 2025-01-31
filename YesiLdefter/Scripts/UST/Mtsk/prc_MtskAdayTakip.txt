@@ -1,10 +1,4 @@
-﻿USE [Mtsk00000011]
-GO
-/****** Object:  StoredProcedure [dbo].[prc_MtskAdayTakip]    Script Date: 26.11.2024 19:46:22 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
+﻿
 /*CreateProcedure*/
 
 CREATE PROCEDURE [dbo].[prc_MtskAdayTakip] (@FirmId int)  
@@ -93,11 +87,11 @@ AS BEGIN
    from MtskAdayTakip a, 
    (
        Select talep.FirmId, talep.Id as TalepId
-	   , ( case when talep.DonemTipiId = @BugunDonemTipiId then 2  
-                when talep.DonemTipiId = @GelecekDonemTipiId then 3  
-                when talep.DonemTipiId > @GelecekDonemTipiId then 4  
-                when ( talep.DonemTipiId < @BugunDonemTipiId and isnull(sertifika.SertifikaTeslimEdildi,0) = 0 ) then 1  
-                when ( talep.DonemTipiId < @BugunDonemTipiId and isnull(sertifika.SertifikaTeslimEdildi,0) = 1 ) then 5  
+	   , ( case when ( talep.DonemTipiId = @BugunDonemTipiId ) then 2  -- bu dönem
+                when ( talep.DonemTipiId = @GelecekDonemTipiId and isnull(talep.KayitTipiId,0) < 3 ) then 3 -- gelecek dönem 
+                when ( talep.DonemTipiId > @GelecekDonemTipiId and isnull(talep.KayitTipiId,0) < 3 ) then 4 -- ileri dönem 
+                when ( talep.DonemTipiId < @BugunDonemTipiId and (isnull(talep.KayitTipiId,0) = 2 or isnull(talep.KayitTipiId,0) = 3)) then 1 -- devam eden  
+                when ( talep.DonemTipiId < @BugunDonemTipiId and isnull(talep.KayitTipiId,0) = 5 ) then 5 -- sertifikasını almış 
            else 0 end ) as ZamanlamaTipiId
        From dbo.MtskAdayTalep as talep	   
           left outer join dbo.MtskAdaySertifika as sertifika on (talep.Id = sertifika.TalepId)
@@ -119,9 +113,9 @@ AS BEGIN
    (
        Select FirmId, Id as TalepId
 	   , case 
-	     when ( KimlikGeldi = 1 
-            and BiyometrikGeldi = 1
-            and BasvuruFotoCekildi = 1
+	     when ( --KimlikGeldi = 1 
+            BiyometrikGeldi = 1
+            --and BasvuruFotoCekildi = 1
             and OgrenimGeldi = 1
             and SaglikGeldi = 1
             and AdliSicilGeldi = 1
@@ -144,14 +138,15 @@ AS BEGIN
        Select FirmId, TalepId
 	   , case 
 	     when ( BiyometrikTarandi = 1
-            and BasvuruFotoTarandi = 1 
+            --and BasvuruFotoTarandi = 1 
             and OgrenimTarandi = 1
             and SaglikTarandi = 1 
             and AdliSicilTarandi = 1
             and ImzaTarandi = 1 
             and Sozlesme1Tarandi = 1
             and Sozlesme2Tarandi = 1 
-            and AdresKodlandi = 1) then 1 else 0 end as BelgelerTarandi
+            --and AdresKodlandi = 1
+			) then 1 else 0 end as BelgelerTarandi
 	   From MtskAdayBelgeler	   
 	   Where FirmId = @FirmId
    ) as x
@@ -169,7 +164,7 @@ AS BEGIN
 	   , case 
 	     when ( AdayKaydiYapildi = 1
             and BiyometrikYuklendi = 1
-            and BasvuruFotoYuklendi = 1
+            --and BasvuruFotoYuklendi = 1
             and OgrenimYuklendi = 1
             and SaglikYuklendi = 1
             and AdliSicilYuklendi = 1
@@ -1208,6 +1203,469 @@ AS BEGIN
 	or isnull(a.uSinavDetayId,0)       <> x.sinavId
 	or a.uSinavBasariTarihi  <> x.SinavTarihi )
 	
+   -- -----------------------------------------------------------------
+   --
+   -- KayitTipiId değerlendir
+   --
+   -- -----------------------------------------------------------------
+
+   -- Grup açılış tarihini kontrol et
+   Print 'KayitTipiId için Grup açılış tarihini kontrol et'
+   Update dbo.MtskAdayTalep set
+      KayitTipiId = 3
+   From dbo.MtskAdayTalep as a, 
+   (
+      Select talep.Id as TalepId
+      From dbo.MtskAdayTalep as talep, dbo.MtskDonemi as donem
+      Where talep.FirmId = @FirmId
+      and talep.TalepTipiId < 5
+      and talep.DonemTipiId = donem.DonemTipiId
+      and talep.GrupTipiId = donem.GrupTipiId
+      and isnull(talep.KayitTipiId,0) < 3
+      and donem.GrupBaslamaTarihi < GETDATE()
+      and talep.DonemTipiId = @BugunDonemTipiId
+   ) as x
+   Where a.Id = x.TalepId
+   and   a.FirmId = @FirmId
+   and isnull(a.KayitTipiId,0) < 3
+   
+   -- e-Sınav girişi varsa
+   Print 'KayitTipiId için e-Sınav girişi varsa'
+   Update dbo.MtskAdayTalep set
+      KayitTipiId = 3
+   From dbo.MtskAdayTalep as a, 
+   (
+      Select distinct sinav.TalepId
+      from MtskSinavETeorik as sinav, MtskAdayTalep as talep
+      Where sinav.FirmId = @FirmId
+      and sinav.TalepId = talep.Id
+      and talep.KayitTipiId < 3
+   ) as x
+   Where a.Id = x.TalepId
+   and   a.FirmId = @FirmId
+   and isnull(a.KayitTipiId,0) < 3
+
+   -- Uygulamalı sınav girişi varsa
+   Print 'KayitTipiId için Uygulamalı sınav girişi varsa'
+   Update dbo.MtskAdayTalep set
+      KayitTipiId = 3
+   From dbo.MtskAdayTalep as a, 
+   (
+      Select distinct sinav.TalepId
+      from MtskSinavUygulama as sinav, MtskAdayTalep as talep
+      Where sinav.FirmId = @FirmId
+      and sinav.TalepId = talep.Id
+      and talep.KayitTipiId < 3
+   ) as x
+   Where a.Id = x.TalepId
+   and   a.FirmId = @FirmId
+   and isnull(a.KayitTipiId,0) < 3
+
+   -- -----------------------------------------------------------------
+   --
+   -- KayıtTipiId
+   --
+   -- -----------------------------------------------------------------
+   -- ( 1,    N'Ön kayıt'
+   -- ( 2,    N'Kayıt aşamasında'
+   -- ( 3,    N'Kesin kayıt'
+   -- ( 5,    N'Sertifika almaya hak kazandı'
+   -- ( 6,    N'Tüm e-Sınav hakkı bitti. Dosya yandı'
+   -- ( 7,    N'Tüm uygulamalı sınav hakkı bitti'
+   -- ( 8,    N'2. +4 sınav hakkı bitti. Dosya yandı'
+   -- ( 9,    N'Diğer sebeplerden dolayı dosya kapandı'
+
+
+   -- N'Tüm e-Sınav hakkı bitti' yse
+   Print 'KayitTipiId için Tüm e-Sınav hakkı bitti kontrolü'
+   Update dbo.MtskAdayTalep set KayitTipiId = x.KayitTipiId
+   From dbo.MtskAdayTalep as a, 
+   (
+       Select oldTakip.TalepId, 6 as KayitTipiId 
+       From dbo.MtskAdayTakip as oldTakip, dbo.MtskAdayTakip as newTakip
+       Where oldTakip.FirmId = @FirmId
+       and newTakip.Id = oldTakip.Id
+       and newTakip.eSinavSonrasiTipiId = 3  -- N'Tüm e-Sınav hakkı bitti'
+       and oldTakip.KayitTipiId <> 6 -- 'Tüm e-Sınav hakkı bitti. Dosya yandı' değilse 
+   ) as x
+   Where a.FirmId = @FirmId
+   and a.Id = x.TalepId
+   and isnull(a.KayitTipiId,0) <> x.KayitTipiId
+
+   -- N'Tüm uygulamalı sınav hakkı bitti' yse
+   Print 'KayitTipiId için Tüm uygulamalı sınav hakkı bitti kontrolü'
+   Update dbo.MtskAdayTalep set KayitTipiId = x.KayitTipiId
+   From dbo.MtskAdayTalep as a, 
+   (
+       Select oldTakip.TalepId, 7 as KayitTipiId 
+       From dbo.MtskAdayTakip as oldTakip, dbo.MtskAdayTakip as newTakip
+       Where oldTakip.FirmId = @FirmId
+       and newTakip.Id = oldTakip.Id
+       and newTakip.uSinavSonrasiTipiId = 3  -- N'Tüm uygulamalı sınav hakkı bitti'
+       and oldTakip.KayitTipiId <> 7 -- 'Tüm uygulamalı sınav hakkı bitti' değilse 
+   ) as x
+   Where a.FirmId = @FirmId
+   and a.Id = x.TalepId
+   and isnull(a.KayitTipiId,0) <> x.KayitTipiId
+
+   -- N'2. +4 sınav hakkı bitti' yse
+   Print 'KayitTipiId için 2. +4 sınav hakkı bitti kontrolü'
+   Update dbo.MtskAdayTalep set KayitTipiId = x.KayitTipiId
+   From dbo.MtskAdayTalep as a, 
+   (
+       Select oldTakip.TalepId, 8 as KayitTipiId 
+       From dbo.MtskAdayTakip as oldTakip, dbo.MtskAdayTakip as newTakip
+       Where oldTakip.FirmId = @FirmId
+       and newTakip.Id = oldTakip.Id
+       and newTakip.uSinavSonrasiTipiId = 4  -- N'2. +4 sınav hakkı bitti'
+       and oldTakip.KayitTipiId <> 8 -- '2. +4 sınav hakkı bitti. Dosya yandı' değilse 
+   ) as x
+   Where a.FirmId = @FirmId
+   and a.Id = x.TalepId
+   and isnull(a.KayitTipiId,0) <> x.KayitTipiId
+
+   -- N'Sertifika aşamasına geçti' yse
+   Print 'KayitTipiId için Sertifika aşamasına geçti kontrolü'
+   Update dbo.MtskAdayTalep set KayitTipiId = x.KayitTipiId
+   From dbo.MtskAdayTalep as a, 
+   (
+       Select oldTakip.TalepId, 5 as KayitTipiId 
+       From dbo.MtskAdayTakip as oldTakip, dbo.MtskAdayTakip as newTakip
+       Where oldTakip.FirmId = @FirmId
+       and newTakip.Id = oldTakip.Id
+       and newTakip.uSinavSonrasiTipiId = 2  -- N'Sertifika aşamasına geçti'
+       and oldTakip.KayitTipiId <> 5 -- 'Sertifika almaya hak kazandı' değilse 
+   ) as x
+   Where a.FirmId = @FirmId
+   and a.Id = x.TalepId
+   and isnull(a.KayitTipiId,0) <> x.KayitTipiId
+
+   -- -----------------------------------------------------------------
+   --
+   -- Talep ve takip arasında KayitTipiId farkı varsa
+   --
+   -- -----------------------------------------------------------------
+   Print 'Talep ve takip arasında KayitTipiId farkı varsa'
+   Update dbo.MtskAdayTakip set KayitTipiId = x.KayitTipiId
+   From dbo.MtskAdayTakip as a, 
+   (
+       Select talep.Id as TalepId, talep.KayitTipiId 
+       From dbo.MtskAdayTalep as talep, dbo.MtskAdayTakip as takip
+       Where talep.FirmId = @FirmId
+       and takip.FirmId = @FirmId
+       and talep.Id = takip.TalepId
+       and talep.KayitTipiId <> takip.KayitTipiId
+   ) as x
+   Where a.FirmId = @FirmId
+   and a.TalepId = x.TalepId
+   and a.KayitTipiId <> x.KayitTipiId
+
+   -- -----------------------------------------------------------------
+   --
+   -- Taranan belgeleri geldi ve tarandı diye işaretle
+   --
+   -- -----------------------------------------------------------------
+
+   -- Biyometrik
+   -- Biyometrik tarandı 
+   Print 'Adayın biyometrik tarandı mı? kontrol ediliyor'
+   Update dbo.MtskAdayBelgeler set BiyometrikTarandi = 1
+   From dbo.MtskAdayBelgeler as a, 
+   (
+       Select kaynak.Id as AdayId
+       From dbo.MtskAday as kaynak, dbo.MtskAdayBelgeler as belge
+       Where kaynak.FirmId = @FirmId
+       and belge.FirmId = @FirmId
+       and kaynak.Id = belge.AdayId
+       and kaynak.BiyometrikResim is not null
+       and isnull(belge.BiyometrikTarandi,0) = 0
+   ) as x
+   Where a.FirmId = @FirmId
+   and a.AdayId = x.AdayId
+   and isnull(a.BiyometrikTarandi,0) = 0
+
+   -- Talep biyometrik geldi
+   Print 'Adayın biyometrik geldi mi? kontrol ediliyor'
+   Update dbo.MtskAdayTalep set BiyometrikGeldi = 1
+   From dbo.MtskAdayTalep as a, 
+   (
+       Select kaynak.Id as AdayId
+       From dbo.MtskAday as kaynak, dbo.MtskAdayTalep as talep
+       Where kaynak.FirmId = @FirmId
+       and talep.FirmId = @FirmId
+       and kaynak.Id = talep.AdayId
+       and kaynak.BiyometrikResim is not null
+       and isnull(talep.BiyometrikGeldi,0) = 0
+   ) as x
+   Where a.FirmId = @FirmId
+   and a.AdayId = x.AdayId
+   and isnull(a.BiyometrikGeldi,0) = 0
+
+   -- ÖğrenimBelgesi
+   -- Belgeler tarandı 
+   Print 'Adayın öğrenim belgesi tarandı mı? kontrol ediliyor'
+   Update dbo.MtskAdayBelgeler set OgrenimTarandi = 1
+   From dbo.MtskAdayBelgeler as a, 
+   (
+       Select kaynak.TalepId 
+       From dbo.MtskAdayOgrenim as kaynak, dbo.MtskAdayBelgeler as belge
+       Where kaynak.FirmId = @FirmId
+       and belge.FirmId = @FirmId
+       and kaynak.TalepId = belge.TalepId
+       and kaynak.OgrenimBelgesiResim is not null
+       and isnull(belge.OgrenimTarandi,0) = 0
+   ) as x
+   Where a.FirmId = @FirmId
+   and a.TalepId = x.TalepId
+   and isnull(a.OgrenimTarandi,0) = 0
+
+   -- Talep belgeler geldi
+   Print 'Adayın öğrenim belgesi geldi mi? kontrol ediliyor'
+   Update dbo.MtskAdayTalep set OgrenimGeldi = 1
+   From dbo.MtskAdayTalep as a, 
+   (
+       Select kaynak.TalepId 
+       From dbo.MtskAdayOgrenim as kaynak, dbo.MtskAdayTalep as talep
+       Where kaynak.FirmId = @FirmId
+       and talep.FirmId = @FirmId
+       and kaynak.TalepId = talep.Id
+       and kaynak.OgrenimBelgesiResim is not null
+       and isnull(talep.OgrenimGeldi,0) = 0
+   ) as x
+   Where a.FirmId = @FirmId
+   and a.Id = x.TalepId
+   and isnull(a.OgrenimGeldi,0) = 0
+
+   -- Sağlık Raporu
+   -- Belgeler tarandı 
+   Print 'Adayın sağlık raporu tarandı mı? kontrol ediliyor'
+   Update dbo.MtskAdayBelgeler set SaglikTarandi = 1
+   From dbo.MtskAdayBelgeler as a, 
+   (
+       Select kaynak.TalepId 
+       From dbo.MtskAdaySaglik as kaynak, dbo.MtskAdayBelgeler as belge
+       Where kaynak.FirmId = @FirmId
+       and belge.FirmId = @FirmId
+       and kaynak.TalepId = belge.TalepId
+       and kaynak.SaglikRaporuResim is not null
+       and isnull(belge.SaglikTarandi,0) = 0
+   ) as x
+   Where a.FirmId = @FirmId
+   and a.TalepId = x.TalepId
+   and isnull(a.SaglikTarandi,0) = 0
+
+   -- Talep belgeler geldi
+   Print 'Adayın sağlık raporu geldi mi? kontrol ediliyor'
+   Update dbo.MtskAdayTalep set SaglikGeldi = 1
+   From dbo.MtskAdayTalep as a, 
+   (
+       Select kaynak.TalepId 
+       From dbo.MtskAdaySaglik as kaynak, dbo.MtskAdayTalep as talep
+       Where kaynak.FirmId = @FirmId
+       and talep.FirmId = @FirmId
+       and kaynak.TalepId = talep.Id
+       and kaynak.SaglikRaporuResim is not null
+       and isnull(talep.SaglikGeldi,0) = 0
+   ) as x
+   Where a.FirmId = @FirmId
+   and a.Id = x.TalepId
+   and isnull(a.SaglikGeldi,0) = 0
+
+
+   -- AdliSicil
+   -- Belgeler tarandı 
+   Print 'Adayın adli sicil tarandı mı? kontrol ediliyor'
+   Update dbo.MtskAdayBelgeler set AdliSicilTarandi = 1
+   From dbo.MtskAdayBelgeler as a, 
+   (
+       Select kaynak.TalepId 
+       From dbo.MtskAdayAdliSicil as kaynak, dbo.MtskAdayBelgeler as belge
+       Where kaynak.FirmId = @FirmId
+       and belge.FirmId = @FirmId
+       and kaynak.TalepId = belge.TalepId
+       and kaynak.SavcilikBelgesiResim is not null
+       and isnull(belge.AdliSicilTarandi,0) = 0
+   ) as x
+   Where a.FirmId = @FirmId
+   and a.TalepId = x.TalepId
+   and isnull(a.AdliSicilTarandi,0) = 0
+
+   -- Talep belgeler geldi
+   Print 'Adayın adli sicil geldi mi? kontrol ediliyor'
+   Update dbo.MtskAdayTalep set AdliSicilGeldi = 1
+   From dbo.MtskAdayTalep as a, 
+   (
+       Select kaynak.TalepId 
+       From dbo.MtskAdayAdliSicil as kaynak, dbo.MtskAdayTalep as talep
+       Where kaynak.FirmId = @FirmId
+       and talep.FirmId = @FirmId
+       and kaynak.TalepId = talep.Id
+       and kaynak.SavcilikBelgesiResim is not null
+       and isnull(talep.AdliSicilGeldi,0) = 0
+   ) as x
+   Where a.FirmId = @FirmId
+   and a.Id = x.TalepId
+   and isnull(a.AdliSicilGeldi,0) = 0
+
+
+   -- İmza
+   -- Belgeler tarandı 
+   Print 'Adayın imzası tarandı mı? kontrol ediliyor'
+   Update dbo.MtskAdayBelgeler set ImzaTarandi = 1
+   From dbo.MtskAdayBelgeler as a, 
+   (
+       Select kaynak.TalepId 
+       From dbo.MtskAdayImza as kaynak, dbo.MtskAdayBelgeler as belge
+       Where kaynak.FirmId = @FirmId
+       and belge.FirmId = @FirmId
+       and kaynak.TalepId = belge.TalepId
+       and kaynak.ImzaResim is not null
+       and isnull(belge.ImzaTarandi,0) = 0
+   ) as x
+   Where a.FirmId = @FirmId
+   and a.TalepId = x.TalepId
+   and isnull(a.ImzaTarandi,0) = 0
+
+   -- Talep belgeler geldi
+   Print 'Adayın imza alındı mı? kontrol ediliyor'
+   Update dbo.MtskAdayTalep set ImzaAlindi = 1
+   From dbo.MtskAdayTalep as a, 
+   (
+       Select kaynak.TalepId 
+       From dbo.MtskAdayImza as kaynak, dbo.MtskAdayTalep as talep
+       Where kaynak.FirmId = @FirmId
+       and talep.FirmId = @FirmId
+       and kaynak.TalepId = talep.Id
+       and kaynak.ImzaResim is not null
+       and isnull(talep.ImzaAlindi,0) = 0
+   ) as x
+   Where a.FirmId = @FirmId
+   and a.Id = x.TalepId
+   and isnull(a.ImzaAlindi,0) = 0
+
+   -- Sözleşme1
+   -- Belgeler tarandı 
+   Print 'Adayın sözleşme1 tarandı mı? kontrol ediliyor'
+   Update dbo.MtskAdayBelgeler set Sozlesme1Tarandi = 1
+   From dbo.MtskAdayBelgeler as a, 
+   (
+       Select kaynak.TalepId 
+       From dbo.MtskAdaySozlesme as kaynak, dbo.MtskAdayBelgeler as belge
+       Where kaynak.FirmId = @FirmId
+       and belge.FirmId = @FirmId
+       and kaynak.TalepId = belge.TalepId
+       and kaynak.Sozlesme1Resim is not null
+       and isnull(belge.Sozlesme1Tarandi,0) = 0
+   ) as x
+   Where a.FirmId = @FirmId
+   and a.TalepId = x.TalepId
+   and isnull(a.Sozlesme1Tarandi,0) = 0
+
+   -- Talep belgeler geldi
+   Print 'Adayın sözleşme(1) yapıldı mı? kontrol ediliyor'
+   Update dbo.MtskAdayTalep set SozlesmeYapildi = 1
+   From dbo.MtskAdayTalep as a, 
+   (
+       Select kaynak.TalepId 
+       From dbo.MtskAdaySozlesme as kaynak, dbo.MtskAdayTalep as talep
+       Where kaynak.FirmId = @FirmId
+       and talep.FirmId = @FirmId
+       and kaynak.TalepId = talep.Id
+       and kaynak.Sozlesme1Resim is not null
+       and isnull(talep.SozlesmeYapildi,0) = 0
+   ) as x
+   Where a.FirmId = @FirmId
+   and a.Id = x.TalepId
+   and isnull(a.SozlesmeYapildi,0) = 0
+
+   -- Sözleşme2
+   -- Belgeler tarandı 
+   Print 'Adayın sözleşme2 tarandı mı? kontrol ediliyor'
+   Update dbo.MtskAdayBelgeler set Sozlesme2Tarandi = 1
+   From dbo.MtskAdayBelgeler as a, 
+   (
+       Select kaynak.TalepId 
+       From dbo.MtskAdaySozlesme as kaynak, dbo.MtskAdayBelgeler as belge
+       Where kaynak.FirmId = @FirmId
+       and belge.FirmId = @FirmId
+       and kaynak.TalepId = belge.TalepId
+       and kaynak.Sozlesme2Resim is not null
+       and isnull(belge.Sozlesme2Tarandi,0) = 0
+   ) as x
+   Where a.FirmId = @FirmId
+   and a.TalepId = x.TalepId
+   and isnull(a.Sozlesme2Tarandi,0) = 0
+
+   -- Talep belgeler geldi
+   Print 'Adayın sözleşme(2) yapıldı mı? kontrol ediliyor'
+   Update dbo.MtskAdayTalep set SozlesmeYapildi = 1
+   From dbo.MtskAdayTalep as a, 
+   (
+       Select kaynak.TalepId 
+       From dbo.MtskAdaySozlesme as kaynak, dbo.MtskAdayTalep as talep
+       Where kaynak.FirmId = @FirmId
+       and talep.FirmId = @FirmId
+       and kaynak.TalepId = talep.Id
+       and kaynak.Sozlesme2Resim is not null
+       and isnull(talep.SozlesmeYapildi,0) = 0
+   ) as x
+   Where a.FirmId = @FirmId
+   and a.Id = x.TalepId
+   and isnull(a.SozlesmeYapildi,0) = 0
+
+   -- Adres alındı
+   Print 'Adayın adres alındı mı? kontrol ediliyor'
+   Update dbo.MtskAdayTalep set AdresAlindi = 1
+   From dbo.MtskAdayTalep as a, 
+   (
+       Select kaynak.TalepId as TalepId
+       From dbo.MtskAdayAdres as kaynak, dbo.MtskAdayTalep as talep
+       Where kaynak.FirmId = @FirmId
+       and talep.FirmId = @FirmId
+       and kaynak.TalepId = talep.Id
+       and isnull(kaynak.SozluAdresBeyani,'') <> ''
+       and isnull(talep.AdresAlindi,0) = 0
+   ) as x
+   Where a.FirmId = @FirmId
+   and a.AdayId = x.TalepId
+   and isnull(a.AdresAlindi,0) = 0 
+
+   -- -----------------------------------------------------------------
+   --
+   -- OzurDurumuTipiId, OkutmanTalebi, TercumanTalebi, YabanciDilTipiId 
+   --
+   -- -----------------------------------------------------------------
+   Print 'Adayın sağlık belgesi kontrol ediliyor'
+   Update dbo.MtskAdayTakip set 
+        OzurDurumuTipiId = x.OzurDurumuTipiId
+	  , OkutmanTalebi = x.OkutmanTalebi 
+	  , TercumanTalebi = x.TercumanTalebi 
+      , YabanciDilTipiId = x.YabanciDilTipiId 
+   From dbo.MtskAdayTakip as a, 
+   (
+       Select 
+	     kaynak.TalepId 
+       , kaynak.OzurDurumuTipiId
+	   , kaynak.OkutmanTalebi 
+	   , kaynak.TercumanTalebi 
+	   , kaynak.YabanciDilTipiId 
+       From dbo.MtskAdaySaglik as kaynak, dbo.MtskAdayTakip as takip
+       Where kaynak.FirmId = @FirmId
+       and takip.FirmId = @FirmId
+       and kaynak.TalepId = takip.TalepId
+       and ( kaynak.OzurDurumuTipiId > 0
+	   or    kaynak.OkutmanTalebi = 1
+	   or    kaynak.TercumanTalebi = 1
+	   or    kaynak.YabanciDilTipiId > 0 )
+   ) as x
+   Where a.FirmId = @FirmId
+   and a.TalepId = x.TalepId
+   and ( a.OzurDurumuTipiId <> x.OzurDurumuTipiId
+   or    a.OkutmanTalebi <> x.OkutmanTalebi 
+   or    a.TercumanTalebi <> x.TercumanTalebi 
+   or   a.YabanciDilTipiId <> x.YabanciDilTipiId  )
+       
+
 
 
   -- -----------------------------------------------------------------
@@ -1303,7 +1761,7 @@ AS BEGIN
 
 
   Execute [dbo].[prc_setIsDbUpdateActive] 13, 0	
-  
+
 
 END -- procedure
 

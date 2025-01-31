@@ -29,6 +29,7 @@ begin transaction
    -- 30
    AnlasilanUcret          Numeric(22,5) null,
    IskontoOrani            Numeric(12,8) null,
+   IskontoTutari           Numeric(22,5) null,
    PesinatTutari           Numeric(22,5) null, 
    TaksitSayisiTipiId      SmallInt      null, /* 0.Peşin, 1 Ay, 2 Ay, 3 Ay .... */
    TaksitlendirilecekUcret Numeric(22,5) null, /* AnlasilanUcret - PesinatTutari */
@@ -139,11 +140,16 @@ AS BEGIN
             Update dbo.MtskAdayUcret set
                 TalepId = t.Id  
               , AdayId  = t.AdayId 
+			  , DonemTipiId = t.DonemTipiId
               , TalepTipiId = t.TalepTipiId  
             From dbo.MtskAdayUcret as a,
                  dbo.MtskAdayTalep as t
             Where a.VeriKaynakId = t.VeriKaynakId				 
             and   a.Id = @curId
+
+            Select @TalepId = Id, @AdayId = AdayId 
+            From dbo.MtskAdayTalep 
+            Where VeriKaynakId = @VeriKaynakId
         end
 
         if (@DbUpdatesIsActive = 0)

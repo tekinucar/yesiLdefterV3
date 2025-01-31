@@ -255,7 +255,9 @@ INSERT INTO [Lkp].[MtskEgitimAraciHizmetDurumuTipi] (Id, HizmetDurumuTipi, GrupT
   ( 0,     N'', 1),
   ( 1,     N'Hizmette', 1),
   ( 2,     N'Hizmet Dışı', 1),
-  ( 3,     N'Trafik Sigortası Süresi Doldu', 1)
+  ( 3,     N'Trafik Sigortası Süresi Doldu', 1),
+  ( 4,     N'Muayene Tarihi Doldu', 1)
+
 
 -- ------------------------------------------------------- 
 -- SanzimanTipiId

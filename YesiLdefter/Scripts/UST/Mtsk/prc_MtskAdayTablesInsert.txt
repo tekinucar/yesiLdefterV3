@@ -149,8 +149,8 @@ AS BEGIN
            ,[SertifikaVeSinavUcreti],[IsSinavUcretiTaksitli]
            ,[OdemeTipiId],[OdemeBaslamaTarihi],[OdemeCepTelefonu]
            ,[MebbisSertifikaUcreti],[MebbisTeoDersSaati],[Mebbis1SaatTeoDersUcreti],[MebbisUygDersSaati],[Mebbis1SaatUygDersUcreti]
-           ,[BorcSertifikaUcreti],[BorcESinavUcreti],[BorcUygulamaSinavUcreti],[BorcTelafiEgitimUcreti],[BorcBasarisizEgitimUcreti],[BorcUcretlerToplami]
-           ,[VGSertifikaUcreti],[VGESinavUcreti],[VGUygulamaSinavUcreti],[VGTelafiEgitimUcreti],[VGBasarisizEgitimUcreti],[VGUcretlerToplami]
+           ,[BorcSertifikaUcreti],[BorcESinavUcreti],[BorcUygulamaSinavUcreti],[BorcTelafiEgitimUcreti],[BorcBasarisizEgitimUcreti],[BorcDigerUcretler],[BorcUcretlerToplami]
+           ,[VGSertifikaUcreti],[VGESinavUcreti],[VGUygulamaSinavUcreti],[VGTelafiEgitimUcreti],[VGBasarisizEgitimUcreti],[VGDigerUcretler],[VGUcretlerToplami]
            ,[PersonelId],[TeklifTarihi],[VeriKaynakId])
 			VALUES (@yFirmId, @TalepId, @yAdayId, @yDonemTipiId, @yTalepTipiId
 			, 0, 0 -- IsUcretli
@@ -163,8 +163,8 @@ AS BEGIN
 			, 0, 0       -- Serti..
 			, 0, null, 0 -- Odeme..
 			, 0, 0, 0, 0, 0 -- Mebbi..
-			, 0, 0, 0, 0, 0, 0 -- BorcS..
-			, 0, 0, 0, 0, 0, 0 -- VGSer..
+			, 0, 0, 0, 0, 0, 0, 0 -- BorcS..
+			, 0, 0, 0, 0, 0, 0, 0 -- VGSer..
 			, 0, null, 0    -- Perso..
 			)
        print ' create : [MtskAdayUcret]'

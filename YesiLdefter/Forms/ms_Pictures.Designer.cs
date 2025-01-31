@@ -122,9 +122,14 @@
             this.barButtonItem2 = new DevExpress.XtraBars.BarButtonItem();
             this.barStaticItem2 = new DevExpress.XtraBars.BarStaticItem();
             this.barStaticItem3 = new DevExpress.XtraBars.BarStaticItem();
-            this.barCheckItem_Otomatik = new DevExpress.XtraBars.BarCheckItem();
-            this.barCheckItem_Manuel = new DevExpress.XtraBars.BarCheckItem();
-            this.barButtonItem_Vazgec = new DevExpress.XtraBars.BarCheckItem(); // BarButtonItem
+
+            //this.barCheckItem_Otomatik = new DevExpress.XtraBars.BarCheckItem();
+            //this.barCheckItem_Manuel = new DevExpress.XtraBars.BarCheckItem();
+            //this.barButtonItem_Vazgec = new DevExpress.XtraBars.BarCheckItem(); // BarButtonItem
+            this.barCheckItem_Otomatik = new DevExpress.XtraBars.BarButtonItem();
+            this.barCheckItem_Manuel = new DevExpress.XtraBars.BarButtonItem();
+            this.barButtonItem_Vazgec = new DevExpress.XtraBars.BarButtonItem(); 
+
             this.btnKirpOnayi = new DevExpress.XtraBars.BarButtonItem();
             this.barStaticItem4 = new DevExpress.XtraBars.BarStaticItem();
             this.barStaticItem14 = new DevExpress.XtraBars.BarStaticItem();
@@ -903,22 +908,25 @@
             // barCheckItem_Otomatik
             // 
             this.barCheckItem_Otomatik.Caption = "Otomatik Ölçek ";
-            this.barCheckItem_Otomatik.CheckStyle = DevExpress.XtraBars.BarCheckStyles.Radio;
+            //this.barCheckItem_Otomatik.CheckStyle = DevExpress.XtraBars.BarCheckStyles.Radio;
             this.barCheckItem_Otomatik.GroupIndex = 1;
             this.barCheckItem_Otomatik.Id = 20;
             this.barCheckItem_Otomatik.Name = "barCheckItem_Otomatik";
             this.barCheckItem_Otomatik.SmallWithTextWidth = 90;
-            this.barCheckItem_Otomatik.CheckedChanged += new DevExpress.XtraBars.ItemClickEventHandler(this.barCheckItem_Otomatik_ItemClick);
+            //this.barCheckItem_Otomatik.CheckedChanged += new DevExpress.XtraBars.ItemClickEventHandler(this.barCheckItem_Otomatik_ItemClick);
+            this.barCheckItem_Otomatik.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.barCheckItem_Otomatik_ItemClick);
             // 
             // barCheckItem_Manuel
             // 
             this.barCheckItem_Manuel.Caption = "Manuel Ölçek";
-            this.barCheckItem_Manuel.CheckStyle = DevExpress.XtraBars.BarCheckStyles.Radio;
+            //this.barCheckItem_Manuel.CheckStyle = DevExpress.XtraBars.BarCheckStyles.Radio;
             this.barCheckItem_Manuel.GroupIndex = 1;
             this.barCheckItem_Manuel.Id = 21;
             this.barCheckItem_Manuel.Name = "barCheckItem_Manuel";
             this.barCheckItem_Manuel.SmallWithTextWidth = 90;
-            this.barCheckItem_Manuel.CheckedChanged += new DevExpress.XtraBars.ItemClickEventHandler(this.barCheckItem_Manuel_ItemClick);
+            //this.barCheckItem_Manuel.CheckedChanged += new DevExpress.XtraBars.ItemClickEventHandler(this.barCheckItem_Manuel_ItemClick);
+            this.barCheckItem_Manuel.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.barCheckItem_Manuel_ItemClick);
+
             // 
             // barButtonItem_Kirp
             // 
@@ -1156,7 +1164,7 @@
             // 
             this.labelBelgeSecUyarisi.Dock = System.Windows.Forms.DockStyle.Top;
             this.labelBelgeSecUyarisi.Width = 400;
-            this.labelBelgeSecUyarisi.Height = 50;
+            this.labelBelgeSecUyarisi.Height = 30;
             this.labelBelgeSecUyarisi.Text = "<b>Uyarı</b> : Önce işlem yapacağınız belgeyi seçmelisiniz.";
             this.labelBelgeSecUyarisi.Appearance.ForeColor = System.Drawing.Color.White;
             this.labelBelgeSecUyarisi.Appearance.BackColor = System.Drawing.Color.OrangeRed;
@@ -1676,9 +1684,14 @@
         private DevExpress.XtraBars.BarButtonItem barButtonItem2;
         private DevExpress.XtraBars.BarStaticItem barStaticItem2;
         private DevExpress.XtraBars.BarStaticItem barStaticItem3;
-        private DevExpress.XtraBars.BarCheckItem barCheckItem_Otomatik;
-        private DevExpress.XtraBars.BarCheckItem barCheckItem_Manuel;
-        private DevExpress.XtraBars.BarCheckItem barButtonItem_Vazgec; //BarButtonItem
+
+        //private DevExpress.XtraBars.BarCheckItem barCheckItem_Otomatik;
+        //private DevExpress.XtraBars.BarCheckItem barCheckItem_Manuel;
+        //private DevExpress.XtraBars.BarCheckItem barButtonItem_Vazgec;
+        private DevExpress.XtraBars.BarButtonItem barCheckItem_Otomatik;
+        private DevExpress.XtraBars.BarButtonItem barCheckItem_Manuel;
+        private DevExpress.XtraBars.BarButtonItem barButtonItem_Vazgec;
+
         private DevExpress.XtraBars.BarStaticItem barStaticItem4;
         private DevExpress.XtraBars.BarStaticItem barStaticItem14;
         private DevExpress.XtraBars.BarStaticItem barStaticItem5;

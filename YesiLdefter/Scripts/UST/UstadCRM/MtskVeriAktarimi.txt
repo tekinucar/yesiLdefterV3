@@ -20,6 +20,7 @@ begin transaction
    LastIdControlSql      nVarchar(1000)    null, 
    IsIdentityInsert      bit               null,
    IsEditScript          bit               null,
+   IsImageScripts        bit               null,
 
    constraint		pk_MtskDataTransfer primary key (Id)
  )

@@ -162,8 +162,12 @@ AS BEGIN
 			(@DbUpdatesIsActive = 0))
         begin
            Update MtskAdayTalep 
-		   set KayitTipiId = 4 -- Sertifikayı hak kazandı
+		   set KayitTipiId = 5 -- Sertifikayı hak kazandı
 		   Where Id = @yTalepId
+
+           Update MtskAdayTakip 
+		   set KayitTipiId = 5 -- Sertifikayı hak kazandı
+		   Where TalepId = @yTalepId
 		end
 
         -- Data transferi oldu fakat daha önce bu talep için boş kayıt oluşturulmuş ise onu sil
