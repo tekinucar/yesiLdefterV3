@@ -1,6 +1,6 @@
 ﻿/*CreateProcedure*/
 
-CREATE PROCEDURE [dbo].[prc_MtskUygulamaDersPlaniGruplari] (@DersDonemTipiId int)  
+CREATE PROCEDURE [dbo].[prc_MtskUygulamaDersPlaniGruplari] (@DonemTipiId int)  
 AS BEGIN
 
 -- DonemTipiId   : Dönem
@@ -9,16 +9,10 @@ AS BEGIN
 -- AdayId        : Aday
 
 -- declare @DonemTipiId Int 
--- set @DonemTipiId = 202101
-/*
- declare @EgitimBaslangicTarihi date
- declare @EgitimBitisTarihi date
+-- set @DonemTipiId = 202411
 
- set @EgitimBaslangicTarihi = dbo.fnc_MtskDonemDersBasBitTarihiniBul(@DonemTipiId, 0, 1, 1, 0)
- set @EgitimBitisTarihi = dbo.fnc_MtskDonemDersBasBitTarihiniBul(@DonemTipiId, 0, 1, 0, 1)
-*/ 
    Select  
-     @DersDonemTipiId as DonemTipiId
+     @DonemTipiId as DonemTipiId
    , '' as EgitimAraciId 
    , '' as PersonelId
    , 0  AdayId 
@@ -26,12 +20,12 @@ AS BEGIN
    , donem.DonemTipi as Lkp_ElemanAdi
    , '' as Lkp_SertifikaTipi
    from Lkp.MtskDonemTipi as donem
-   Where donem.Id = @DersDonemTipiId
+   Where donem.Id = @DonemTipiId
 
    union all
 
    Select 
-     @DersDonemTipiId as DonemTipiId
+     @DonemTipiId as DonemTipiId
    , x.EgitimAraciId 
    , '' as PersonelId 
    , 0  as AdayId
@@ -43,16 +37,14 @@ AS BEGIN
    from (
      Select distinct [uygDers].EgitimAraciId, [uygDers].EgitimYeriTipiId
      from MtskUygulamaliDers as [uygDers]
-     Where [uygDers].DersDonemTipiId = @DersDonemTipiId
-	 --and   [uygDers].DersTarihi >= @EgitimBaslangicTarihi
-     --and   [uygDers].DersTarihi <= @EgitimBitisTarihi
+     Where [uygDers].DersDonemTipiId = @DonemTipiId
    ) as x
    --order by  EgitimYeriTipiId, EgitimAraciId
 
    union all
 
    Select 
-     @DersDonemTipiId as DonemTipiId
+     @DonemTipiId as DonemTipiId
    , '' as EgitimAraciId 
    , x.PersonelId
    , 0  AdayId 
@@ -63,15 +55,13 @@ AS BEGIN
      Select distinct [uygDers].PersonelId, per.TamAdiSoyadi
      from MtskUygulamaliDers as [uygDers]
 	   left outer join MtskPersoneli as [per] on (uygDers.PersonelId = per.TcNoCalismaIzniNo)
-     Where [uygDers].DersDonemTipiId = @DersDonemTipiId
-	 --and   [uygDers].DersTarihi >= @EgitimBaslangicTarihi
-     --and   [uygDers].DersTarihi <= @EgitimBitisTarihi
+     Where [uygDers].DersDonemTipiId = @DonemTipiId
    ) x
 
    union all
 
    Select 
-     @DersDonemTipiId as DonemTipiId
+     @DonemTipiId as DonemTipiId
    , '' as EgitimAraciId 
    , '' PersonelId
    , x.AdayId 
@@ -81,11 +71,11 @@ AS BEGIN
    from (
      Select distinct [uygDers].AdayId, aday.TamAdiSoyadi, ser.SertifikaTipi
      from MtskUygulamaliDers as [uygDers]
+	   left outer join MtskAdayTalep as [talep] on (uygDers.TalepId = Talep.Id)
 	   left outer join MtskAday as [aday] on (uygDers.AdayId = aday.Id)
-	   left outer join Lkp.MtskSertifikaTipi [ser] on (aday.IstenenSertifikaTipiId = ser.Id)
-     Where [uygDers].DersDonemTipiId = @DersDonemTipiId
-	 --and   [uygDers].DersTarihi >= @EgitimBaslangicTarihi
-     --and   [uygDers].DersTarihi <= @EgitimBitisTarihi
+	   left outer join Lkp.MtskSertifikaTipi [ser] on (talep.IstenenSertifikaTipiId = ser.Id)
+     Where [uygDers].DersDonemTipiId = @DonemTipiId
+
    ) x
  
 END -- procedure

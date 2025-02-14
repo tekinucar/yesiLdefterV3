@@ -450,10 +450,10 @@ namespace Tkn_Search
             
             if (t.IsNotNull(schemasCode) == false) 
                 schemasCode = "dbo";
-                                    
+
             if (t.IsNotNull(FindFName) == false)
             {
-                MessageBox.Show("DİKKAT : ( " + searchTableIPCode + " ) için -Find FName- tanımı eksik ...");
+                //MessageBox.Show("DİKKAT : ( " + searchTableIPCode + " ) için -Find FName- tanımı eksik ...");
                 return onay;
             }
 
@@ -619,7 +619,7 @@ namespace Tkn_Search
 
             if (fieldName == "")
             {
-                MessageBox.Show("Arama yapılacak olan -Find FieldName- belli değil...");
+                //MessageBox.Show("Arama yapılacak olan -Find FieldName- belli değil...");
                 onay = false;
                 return onay;
             }

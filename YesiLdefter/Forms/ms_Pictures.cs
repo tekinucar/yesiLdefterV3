@@ -22,8 +22,14 @@ using Tkn_Variable;
 using WIA;
 using Tkn_Layout;
 using System.Management;
+
 using Spire.Pdf;
 using Spire.Pdf.Graphics;
+using Spire.Additions.Chrome;
+
+using Spire.Doc;
+using Spire.Doc.Documents;
+using System.Drawing.Imaging;
 
 
 namespace YesiLdefter
@@ -57,7 +63,7 @@ namespace YesiLdefter
         }
 
         tToolBox t = new tToolBox();
-
+        #region tanımlar
         object tFileDataTable = null;
         bool loadDrives = false;
         string currentPath = string.Empty;
@@ -109,7 +115,7 @@ namespace YesiLdefter
         bool onayDPI = false;
         bool onayKb = false;
         bool onayFormat = false;
-
+        #endregion
         public ms_Pictures()
         {
 
@@ -146,6 +152,7 @@ namespace YesiLdefter
             pictureEdit1.BackColor = System.Drawing.Color.WhiteSmoke;
         }
 
+        
         void AddWebCamList()
         {
             Int16 camNo = 1; 
@@ -1071,9 +1078,9 @@ namespace YesiLdefter
                         if ((tImageProperties.horizontalResolation < ( autoDPI - 10 )) || // 400 - 10 : 390 na kadar kabul
                             (tImageProperties.horizontalResolation > 600))  
                         {
-                            MessageBox.Show("DİKKAT : Tarama işleminiz 600 Dpi olmalı, onun için resim taramayı 600 Dpi olacak şekilde yeniden yapın...");
-                            pictureEdit1.Image = null;
-                            return;
+                            //MessageBox.Show("DİKKAT : Tarama işleminiz 600 Dpi olmalı, onun için resim taramayı 600 Dpi olacak şekilde yeniden yapın...");
+                            //pictureEdit1.Image = null;
+                            //return;
                         }
 
                         Format_Ayarla();
@@ -1237,6 +1244,11 @@ namespace YesiLdefter
                     Image restoreImage = CropImage(readPdfImage, 0, kirpPixel, readPdfImage.Width, readPdfImage.Height - kirpPixel, autoDPI);
                     pictureEdit1.Image = restoreImage;
                 }
+                else if (ImagesPath.IndexOf(".html") > -1)
+                {
+                    convertHtmlToPDFSpire(ImagesPath);
+                    //convertHtmlToPDFAspose(ImagesPath);
+                }
                 else
                 {
                     pictureEdit1.Image = Image.FromFile(newImagesPath);
@@ -1272,6 +1284,11 @@ namespace YesiLdefter
 
                 using (Image image_ = doc.SaveAsImage(i, 100, 100))
                 {
+                    if (File.Exists(outputName))
+                    {
+                        // Dosya varsa sil
+                        File.Delete(outputName);
+                    }
                     image_.Save(outputName, ImageFormat.Jpeg);
                 }
             }
@@ -1982,6 +1999,14 @@ namespace YesiLdefter
             /// Sıkıştıma işlemi için yeni newWidth ve newHeight hesaplanıyor
             /// 
 
+
+            if (autoDPI == 400 && (autoCropHeight == oldHeight || autoCropWidth == oldWidth))
+            {
+                newWidth = oldWidth;
+                newHeight = oldHeight;
+                return;
+            }
+
             Size yeni_boyut = new Size(-1, -1);
             float nPercent = 0;
             float nPercentW = 0;
@@ -2012,15 +2037,16 @@ namespace YesiLdefter
             /// tarayıcı tarafında kırıpılarak gelirse
             /// kullanıcı tarama sırasında önce önizleme yapıyor ve kırpılmış vaziyette tarama yaptırıyor ise
             /// 
+            /// 600 dpi taranınca resim büyük geliyor
+            if (autoDPI == 400 && (autoCropHeight != oldHeight || autoCropWidth != oldWidth))
+            {
+                int fark = 120;
+                if (autoCropHeight == 512 && oldHeight > 512) fark = autoCropHeight + 140; // biyometrik için
+                if (autoCropHeight == 472 && oldHeight > 472) fark = autoCropHeight + 10;  // imza için
 
-            int fark = 120; 
-            if (autoCropHeight == 512) fark = autoCropHeight + 140; // biyometrik için
-            if (autoCropHeight == 472) fark = autoCropHeight + 10;  // imza için
-            
-
-            if (autoDPI == 400 && oldHeight < 2000)
-                nPercent = (float)(fark) / (float)oldHeight;  /// 650 / ??????
-
+                if (oldHeight > autoCropHeight && oldHeight < 2000)
+                    nPercent = (float)(fark) / (float)oldHeight;  /// 650 / ??????
+            }
 
             newWidth = (int)(oldWidth * nPercent);
             newHeight = (int)(oldHeight * nPercent);
@@ -2447,14 +2473,28 @@ INSERT INTO [dbo].[EksEvraklar]
             /// 
             if (autoDPI != tImageProperties.horizontalResolation)
             {
-                mesaj = "DPI uygun değil." + v.ENTER
+                DPI_Ayarla();
+                /// Yeniden ayarlanan DPI yı tekrar kontrol et
+                getImageProperties(pictureEdit1);
+
+                if (autoDPI != tImageProperties.horizontalResolation)
+                {
+
+                    mesaj = "DPI uygun değil." + v.ENTER
                     + "   Gerekli olan DPI = " + autoDPI.ToString() + ",  mevcut DPI : " + tImageProperties.horizontalResolation.ToString() + v.ENTER
                     + "";
-                onay = false;
+                    onay = false;
+                }
+            }
+
+            if ((autoCropWidth > 0 && autoCropWidth != tImageProperties.width) ||
+                (autoCropHeight > 0 && autoCropHeight != tImageProperties.height))
+            {
+                preparingAutoSize();
             }
 
             /// Width uygunmu
-            /// 
+                /// 
             if (autoCropWidth > 0 && autoCropWidth != tImageProperties.width)
             {
                 mesaj += "Resim genişlik uygun değil." + v.ENTER
@@ -2505,6 +2545,32 @@ INSERT INTO [dbo].[EksEvraklar]
             }
 
             return onay;
+        }
+
+        private void preparingAutoSize()
+        {
+            int oldWidth = pictureEdit1.Image.Width;
+            int oldHeight = pictureEdit1.Image.Height;
+            int newWidth = autoCropWidth;
+            int newHeight = autoCropHeight;
+
+            Bitmap workingImage = new Bitmap(pictureEdit1.Image, oldWidth, oldHeight);
+            workingImage.SetResolution(pictureEdit1.Image.HorizontalResolution, pictureEdit1.Image.VerticalResolution);
+
+            Bitmap _img = myImageCompress_(workingImage, newWidth, newHeight);
+
+            getBitmapProperties(_img);
+
+            pictureEdit1.Image = _img;
+            printImageProperties();
+
+            newHeight = (int)tImageProperties.height;
+            newWidth = (int)tImageProperties.width;
+
+            if (autoCropWidth == newWidth && autoCropHeight == newHeight)
+                t.AlertMessage("Düzeltme", "Otomotik olarak genişlik ve yükseklik düzenlemesi yapıldı...");
+            else t.AlertMessage("Başarısız Düzeltme", "Otomotik olarak genişlik ve yükseklik ayarlaması yapılamadı...");
+
         }
 
         private void dataBasedenResmiSil()
@@ -2698,16 +2764,16 @@ INSERT INTO [dbo].[EksEvraklar]
             {
                 /// Nedenini anlayamadığım bir şekilde mevcut Jpeg formatı PNG ye dönüşüyor
                 /// onun için tekrar düzenleme yapılıyor
-                if (tImageProperties.imageFormat.ToString() != "Jpeg")
-                {
+                //if (tImageProperties.imageFormat.ToString() != "Jpeg")
+                //{
                     myImageDPI(autoDPI);
 
                     getImageProperties(pictureEdit1);
 
-                    t.AlertMessage("Düzeltme", "PNG den Jpeg düzeltmesi yapıldı...");
+                    t.AlertMessage("Düzeltme", "Kb fazlası veya Jpeg olmadığı için DPI düzenlemesi yapıldı...");
 
                     oldSize = (int)tImageProperties.kbSize;
-                }
+                //}
 
                 /// yukarıdaki düzeltme işlemi yüzünden tekrar kontrol gerekiyor
                 if (oldSize > 100)
@@ -2720,7 +2786,7 @@ INSERT INTO [dbo].[EksEvraklar]
                 Bitmap _img = null;
 
                 newValue = 300;
-                farkValue = 100;
+                farkValue = 10;
 
                 t.WaitFormOpen(v.mainForm, "");
                 t.WaitFormOpen(v.mainForm, "Resim 100 kb altına düşürülüyor...");
@@ -2756,7 +2822,7 @@ INSERT INTO [dbo].[EksEvraklar]
                         if (farkSize > 20)
                         {
                             newValue = newValue - farkValue;
-                            farkValue -= 10;
+                            //farkValue -= 5;
                             if (farkValue <= 0) farkValue = 10;
 
                             if (newValue < 100)
@@ -2764,10 +2830,10 @@ INSERT INTO [dbo].[EksEvraklar]
                         }
 
                         // yeni resim halen 100 kd büyük
-                        if (farkSize < 0)
+                        if (farkSize <= 0)
                         {
                             newValue = newValue + farkValue;
-                            farkValue += 20;
+                            //farkValue += 10;
 
                             if (newValue > 10000)
                                 onayCompress = false; // işlem bitti
@@ -2995,5 +3061,66 @@ INSERT INTO [dbo].[EksEvraklar]
 
 
         #endregion subFunctions
+
+
+        private void convertHtmlToPDFSpire(string ImagesPath)
+        {
+            //Specify the input URL and output PDF file path
+            string inputUrl = @"https://www.e-iceblue.com/Tutorials/Spire.PDF/Spire.PDF-Program-Guide/C-/VB.NET-Convert-Image-to-PDF.html";
+            string outputFile = @"HtmlToPDF.pdf";
+
+
+
+            inputUrl = ImagesPath;
+            outputFile = ImagesPath.Replace(".html", ".jpg");
+
+            try
+            {
+                //Create a Document instance
+                Document mydoc = new Document();
+                //Load an HTML sample document
+                mydoc.LoadFromFile(ImagesPath, Spire.Doc.FileFormat.Html, XHTMLValidationType.None);
+                //Save to image. You can convert HTML to BMP, JPEG, PNG, GIF, Tiff etc
+                Image image = mydoc.SaveToImages(0, ImageType.Bitmap);
+                image.Save(outputFile, System.Drawing.Imaging.ImageFormat.Jpeg);
+            }
+            catch (Exception e)
+            {
+
+                //throw;
+            }
+
+
+
+
+            /*
+            //Specify the path to the Chrome plugin
+            string chromeLocation = @"C:\Program Files\Google\Chrome\Application\chrome.exe";
+            //Create an instance of the ChromeHtmlConverter class
+            ChromeHtmlConverter converter = new ChromeHtmlConverter(chromeLocation);
+            // Create an instance of the ConvertOptions class
+            ConvertOptions options = new ConvertOptions();
+            //Set conversion timeout
+            options.Timeout = 10 * 3000;
+            //Set paper size and page margins of the converted PDF
+            options.PageSettings = new PageSettings()
+            {
+                PaperWidth = 8.27,
+                PaperHeight = 11.69,
+                MarginTop = 0,
+                MarginLeft = 0,
+                MarginRight = 0,
+                MarginBottom = 0
+            };
+            //Convert the URL to PDF
+            converter.ConvertToPdf(inputUrl, outputFile, options);
+            */
+
+
+
+
+        }
+
+
     }
 }

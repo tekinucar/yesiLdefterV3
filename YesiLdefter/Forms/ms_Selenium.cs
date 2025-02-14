@@ -27,7 +27,14 @@ using OpenQA.Selenium.Support.UI;
 
 using Tesseract;
 using System.Net;
+using Spire.Additions.Chrome;
+
+
 using Tkn_UserFirms;
+using System.Diagnostics;
+using System.IO;
+using Tkn_ExeUpdate;
+using System.IO.Compression;
 
 namespace YesiLdefter
 {
@@ -47,13 +54,17 @@ namespace YesiLdefter
         DataNavigator dN_MsWebNodes = null;
         // sadece login için kullanılan dataset
         DataSet ds_LoginPageNodes = null;
+        // analiz için kullanılan dataset
+        DataSet ds_AnalysisNodes = null;
+        DataNavigator dN_AnalysisNodes = null;
         // web sayfalarının adını gösteren viewControl
         Control view_MsWebPages = null;
+        WebBrowser webTest = null;
 
         /*
         // User butonları
         Control btn_PageView = null;
-        //Control btn_PageViewAnalysis = null;
+        Control btn_Analysis = null;
         Control btn_AlwaysSet = null;
         Control btn_FullGet1 = null;  // birinci get butonu
         Control btn_FullGet2 = null;  // ikinci  get butonu
@@ -75,6 +86,7 @@ namespace YesiLdefter
         string buttonMebbisGiris = "ButtonMebbisGiris";
         string buttonAutoSave = "ButtonOtomatikMebbisKaydet";
         string buttonManuelSave = "ButtonManuelMebbisKaydet";
+
         DevExpress.XtraBars.Navigation.NavElement buttonManuelSaveControl = null;
         DevExpress.XtraBars.Navigation.NavElement buttonAutoSaveControl = null;
 
@@ -136,6 +148,18 @@ namespace YesiLdefter
             /// DataSet ve DataNavigatorleri işaretle
             /// 
             msPagesService.preparingDataSets(this, dataNavigator_PositionChanged);
+
+            // web sayfalarının adını gösteren viewControl
+            this.webTest = new WebBrowser();
+
+            string TableIPCode = "UST/PMS/MsWebNodes.Analysis_L01";
+            t.Find_DataSet(this, ref this.ds_AnalysisNodes, ref this.dN_AnalysisNodes, TableIPCode);
+
+            if (this.dN_AnalysisNodes != null)
+                this.dN_AnalysisNodes.PositionChanged += new System.EventHandler(dN_AnalysisNodes_PositionChanged);
+
+            this.webTest = (WebBrowser)t.Find_Control(this, "webTest");
+            
         }
 
         // taşındı çalışınca sil
@@ -188,7 +212,7 @@ namespace YesiLdefter
             Screen screen = Screen.FromControl(mainF); // formun bulunduğu ekranı al
             //string text = screen.DeviceName; // ekranın adını etikete yaz
             bool primary = screen.Primary; // Birinci ekran mı kontrol et 
-
+            
             /// Birinci ekranda ise
             /// 
             if (primary)
@@ -203,16 +227,27 @@ namespace YesiLdefter
             }
             else
             {
-                /// - 140 browser nedense tam Y koordinatına gelmiyor, -140 ile yaklaştırıyorum
-                wb.Manage().Window.Position = new Point(screen.Bounds.X / 2, screen.Bounds.Y);
-                wb.Manage().Window.Size = new Size(screen.Bounds.Width / 2, screen.Bounds.Height - 50);
+                int x = 0;
+                int y = 0;
 
+                Screen[] screens = Screen.AllScreens;
+                if (screens.Length > 1)
+                {
+                    // İkinci monitörün sol üst köşesinin koordinatlarını alın
+                    //x = screens[1].Bounds.X;
+                    y = screens[1].Bounds.Y;
+                    x = screens[0].Bounds.Width + screens[1].Bounds.Width / 2;
+                }
+                
                 /// Başka bir ekranda ise
                 /// 
                 mainF.WindowState = FormWindowState.Normal;
                 mainF.Left = screen.Bounds.X;
                 mainF.Top = screen.Bounds.Y;
                 mainF.Size = new Size(screen.Bounds.Width / 2, screen.Bounds.Height - 50);
+                 
+                wb.Manage().Window.Position = new Point(x + 10, screen.Bounds.Y);
+                wb.Manage().Window.Size = new Size(screen.Bounds.Width / 2, screen.Bounds.Height - 50);
             }
 
             //Screen[] screens = Screen.AllScreens; // tüm ekranları al
@@ -277,7 +312,11 @@ namespace YesiLdefter
                   ds_MsWebNodes,
                   dN_MsWebPages );
 
+                /// Analysis butonu için
+                msPagesService.preparingMsWebPagesButtons(this, f, "UST/PMS/MsWebNodes.Analysis_L01");
+                /// standart pageler için butonları tespit et
                 msPagesService.preparingMsWebPagesButtons(this, f, msWebPages_TableIPCode);
+                
                 preparingMsWebPagesButtons_();
             }
         }
@@ -285,6 +324,10 @@ namespace YesiLdefter
         {
             if (f.btn_PageView != null)
                 ((DevExpress.XtraEditors.SimpleButton)f.btn_PageView).Click += new System.EventHandler(myPageViewClick);
+            if (f.btn_Analysis != null)
+                ((DevExpress.XtraEditors.SimpleButton)f.btn_Analysis).Click += new System.EventHandler(myPageAnalysisClick);
+
+
             // Bilgileri Sorgula / AlwaysSet  (TcNo sorgula gibi) // Bu henüz hiç kullanılmadı 
             if (f.btn_AlwaysSet != null)
                 ((DevExpress.XtraEditors.SimpleButton)f.btn_AlwaysSet).Click += new System.EventHandler(myAlwaysSetClick);
@@ -598,6 +641,10 @@ namespace YesiLdefter
         {
             await seleniumLoginPageViev();
         }
+        private async void myPageAnalysisClick(object sender, EventArgs e)
+        {
+            await seleniumAnalysis();
+        }
         private async Task seleniumLoginPageViev()
         {
             /// Firmanın Mebbis konu ve şifresini yeniden oku
@@ -617,10 +664,43 @@ namespace YesiLdefter
 
             if (v.webDriver_ == null)
                 preparingWebMain();
-            
+
+
             await myPageViewClickAsync(v.webDriver_, this.msWebPage_);
+
             //await myPageViewClickAsync(f.wbSel, this.msWebPage_);
 
+        }
+        private async Task seleniumAnalysis()
+        {
+            if (v.webDriver_ != null)
+            {
+                string pageSource = v.webDriver_.PageSource;
+                HtmlAgilityPack.HtmlNode htmlBody = null;
+                loadBody(pageSource, ref htmlBody);
+
+                f.analysisNodeId = 1;
+                f.analysisParentId = 0;
+
+                if (htmlBody != null)
+                    msPagesService.listNode_(htmlBody.ChildNodes, this.ds_AnalysisNodes, f);
+            }
+        }
+
+        private void loadBody(string htmlDocumentBody, ref HtmlAgilityPack.HtmlNode htmlBody)
+        {
+            /// htmlDocumentBody ile okunan sayfanın html yapısı string olarak geliyor
+            /// burada herbir tag node nesnesine dönüşüyor
+            /// 
+            if (string.IsNullOrEmpty(htmlDocumentBody)) return;
+            var htmlDoc = new HtmlAgilityPack.HtmlDocument();
+            htmlDoc.LoadHtml(htmlDocumentBody);
+            htmlBody = htmlDoc.DocumentNode.SelectSingleNode("//body");
+
+            // tüm page bilgisi alındıktan (head+body) sonra bu şekilde body e ulaşılmaya çalışıldığında 
+            // input nodeler gelmiyor
+            //
+            //HtmlAgilityPack.HtmlNode htmlBody = htmlDoc.DocumentNode.SelectSingleNode("//body");
         }
         private void myAlwaysSetClick(object sender, EventArgs e)
         {
@@ -635,9 +715,117 @@ namespace YesiLdefter
         }
         private async void myFullGet1Click(object sender, EventArgs e)
         {
+
+            KlasorIcindekileriSil(v.EXE_GIBDownloadPath);
+
             Cursor.Current = Cursors.WaitCursor;
             await startNodes(this.msWebNodes_, this.workPageNodes_, v.tWebRequestType.get, v.tWebEventsType.button3);
             viewFinalMessage();
+
+            downloadFiles();
+
+            //LAPTOP-ACER1\SQLEXPRESS
+            //DESKTOP-RF7MNOG\SQLEXPRESS
+            // TakeSnapshot(v.webDriver_, v.EXE_PATH + "\\Test\\snahshot.png");
+        }
+
+        private void downloadFiles()
+        {
+            
+            // Dosyanın indirilmesini bekleyin (basit bir bekleme yöntemi olarak Thread.Sleep kullanabilirsiniz)
+            System.Threading.Thread.Sleep(2000);
+            bool onay = false;
+
+            // İndirilen dosyanın adını ve konumunu kontrol edin
+            var downloadedFiles = Directory.GetFiles(v.EXE_GIBDownloadPath);
+            if (downloadedFiles.Any())
+            {
+                string downloadedFile = downloadedFiles.First();
+                
+                //MessageBox.Show("Dosya Adı: " + Path.GetFileName(downloadedFile) + v.ENTER2 +
+                //                "İndirildiği Konum: " + Path.GetDirectoryName(downloadedFile));
+                
+                string pathName = Path.GetDirectoryName(downloadedFile);
+                string packetName = Path.GetFileName(downloadedFile);
+
+                //zip tan önce temp klasörünün için boşalt/sil
+                KlasorIcindekileriSil(pathName + "\\Temp");
+
+                try
+                {
+                    // Zip dosyasını aç ve belirtilen dizine çıkar
+                    ZipFile.ExtractToDirectory(pathName +"\\" + packetName , pathName + "\\Temp");
+                    //MessageBox.Show("Dosya başarıyla açıldı.");
+                    onay = true;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error 1006 : " + ex.Message);
+                }
+
+                /// zip açılmış
+                if (onay)
+                {
+                    string htmlFileName = pathName + "\\Temp\\" + packetName.Replace(".zip", ".html");
+                    htmlDosyayiAc(htmlFileName);
+                }
+
+            }
+            else
+            {
+                MessageBox.Show("İndirilen dosya bulunamadı.");
+            }
+                       
+        }
+
+        private void htmlDosyayiAc(string fileName)
+        {
+            OpenQA.Selenium.IWebDriver localWebDriver_ = null;
+            SeleniumHelper.ResetDriver();
+            localWebDriver_ = SeleniumHelper.WebDriver;
+                        
+            localWebDriver_.Manage().Window.Size = new Size(830, 1220);
+
+            localWebDriver_.Navigate().GoToUrl(fileName);
+
+            string jpgName = fileName.Replace(".html", ".png");
+
+            TakeSnapshot(localWebDriver_, jpgName);
+
+            localWebDriver_.Dispose();
+        }
+
+
+        private void KlasorIcindekileriSil(string pathName)
+        {
+            try
+            {
+                // Klasördeki tüm dosyaları alın
+                string[] files = Directory.GetFiles(pathName);
+
+                if (files != null)
+                {
+                    // Her bir dosyayı sil
+                    foreach (string file in files)
+                    {
+                        File.Delete(file);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                //MessageBox.Show("Error 1005 : " + ex.Message);
+            }
+        }
+
+
+        public async void TakeSnapshot(IWebDriver driver, string filePath)
+        {
+            // Ekran görüntüsünü al
+            Screenshot screenshot = ((ITakesScreenshot)driver).GetScreenshot();
+
+            // Dosyaya kaydet
+            screenshot.SaveAsFile(filePath);//,    //ScreenshotImageFormat.Png); // PNG, JPEG, GIF vb. formatlar kullanılabilir
         }
 
         private async void myFullGet2Click(object sender, EventArgs e)
@@ -926,7 +1114,7 @@ namespace YesiLdefter
                 (wnv.InjectType == v.tWebInjectType.GetAndSet && wnv.workRequestType == v.tWebRequestType.get)) &&
                 (wnv.IsInvoke == false)) //(this.myTriggerInvoke == false)) // invoke gerçekleşmişse hiç başlama : get sırasında set edip bilgi çağrılıyor demekki
             {
-                
+
                 if (wnv.TagName != "table")
                     msPagesService.transferFromWebToDatabase(this, wnv, msWebScrapingDbFields_, aktifPageNodeItemsList_, f);
 
@@ -982,6 +1170,7 @@ namespace YesiLdefter
                         }
                     }
                 }
+            
             }
 
             return onay;
@@ -1088,14 +1277,17 @@ namespace YesiLdefter
                 // istek get ise
                 // item.inject = none veya set veya alwaysset ise 
                 if (workRequestType == v.tWebRequestType.get)
-                    if (injectType_ == v.tWebInjectType.none ||
-                        injectType_ == v.tWebInjectType.Set || 
-                        injectType_ == v.tWebInjectType.AlwaysSet) onay = false;
+                    if (injectType_ == v.tWebInjectType.none) onay = false;
+                //if (injectType_ == v.tWebInjectType.none ||
+                //    injectType_ == v.tWebInjectType.Set ||
+                //    injectType_ == v.tWebInjectType.AlwaysSet) onay = false;
+
                 // istek post
                 // item.inject = none veya get ise 
                 if (workRequestType == v.tWebRequestType.post)
-                    if (injectType_ == v.tWebInjectType.none ||
-                        injectType_ == v.tWebInjectType.Get) onay = false;
+                    if (injectType_ == v.tWebInjectType.none) onay = false;
+                //if (injectType_ == v.tWebInjectType.none ||
+                //    injectType_ == v.tWebInjectType.Get) onay = false;
             }
 
             if (eventsType_ == v.tWebEventsType.displayNone) onay = true;
@@ -1489,7 +1681,30 @@ namespace YesiLdefter
                     t.ViewControl_Enabled(this, tableIPCode, value);
             }
         }
-        #endregion 
+
+        private void dN_AnalysisNodes_PositionChanged(object sender, EventArgs e)
+        {
+            if (f.btn_AnalysisNodeView != null)
+            {
+                if (((DevExpress.XtraEditors.CheckButton)f.btn_AnalysisNodeView).Checked)
+                {
+                    analysisNodeHtmlView();
+                }
+            }
+        }
+        private void analysisNodeHtmlView()
+        {
+            if (ds_AnalysisNodes != null)
+            {
+                if (dN_AnalysisNodes.Position > -1)
+                {
+                    string html = ds_AnalysisNodes.Tables[0].Rows[dN_AnalysisNodes.Position]["outerHtml"].ToString();
+                    this.webTest.DocumentText = html;
+                }
+            }
+        }
+
+        #endregion
 
         #region WebScrapingAsync SubFunctions
         /*
@@ -2743,6 +2958,34 @@ namespace YesiLdefter
         #endregion postHtmlTable
         #endregion WebScrapingAsync SubFunctions
 
+        private void convertHtmlToPDFSpire()
+        {
+            //Specify the input URL and output PDF file path
+            string inputUrl = @"https://www.e-iceblue.com/Tutorials/Spire.PDF/Spire.PDF-Program-Guide/C-/VB.NET-Convert-Image-to-PDF.html";
+            string outputFile = @"HtmlToPDF.pdf";
+            
+            //Specify the path to the Chrome plugin
+            string chromeLocation = @"C:\Program Files\Google\Chrome\Application\chrome.exe";
+            //Create an instance of the ChromeHtmlConverter class
+            ChromeHtmlConverter converter = new ChromeHtmlConverter(chromeLocation);
+            // Create an instance of the ConvertOptions class
+            ConvertOptions options = new ConvertOptions();
+            //Set conversion timeout
+            options.Timeout = 10 * 3000;
+            //Set paper size and page margins of the converted PDF
+            options.PageSettings = new PageSettings()
+            {
+                PaperWidth = 8.27,
+                PaperHeight = 11.69,
+                MarginTop = 0,
+                MarginLeft = 0,
+                MarginRight = 0,
+                MarginBottom = 0
+            };
+            //Convert the URL to PDF
+            converter.ConvertToPdf(inputUrl, outputFile, options);
+
+        }
 
     }
 

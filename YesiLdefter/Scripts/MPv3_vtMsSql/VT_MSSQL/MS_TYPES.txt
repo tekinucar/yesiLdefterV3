@@ -180,6 +180,8 @@ begin transaction
  insert into MS_TYPES values ( 3, 0, 'CMP_TYPE', 28, 'TimeEdit',               'TimeEdit');
  insert into MS_TYPES values ( 3, 0, 'CMP_TYPE', 29, 'TimeSpanEdit',           'TimeSpanEdit');
  insert into MS_TYPES values ( 3, 0, 'CMP_TYPE', 30, 'TrackBarControl',        'TrackBarControl');
+ insert into MS_TYPES values ( 3, 0, 'CMP_TYPE', 31, 'TextEditNotUpper',       'TextEditNotUpper');
+
 
  insert into MS_TYPES values ( 3, 0, 'CMP_TYPE', 50, '---',                      '---------------------------');
  insert into MS_TYPES values ( 3, 0, 'CMP_TYPE', 51, 'tPropertiesEdit',           'tPropertiesEdit');
@@ -270,6 +272,7 @@ begin transaction
  insert into MS_TYPES values ( 1, 0, 'DEFAULT_TYPE', 32, '', 'Master=Detail Multi');
  insert into MS_TYPES values ( 1, 0, 'DEFAULT_TYPE', 33, '', 'Master=Detail Column');
  insert into MS_TYPES values ( 1, 0, 'DEFAULT_TYPE', 41, '', 'Line No'); -- 32 > 41
+ insert into MS_TYPES values ( 1, 0, 'DEFAULT_TYPE', 42, '', 'MaliDonem Changer'); 
  insert into MS_TYPES values ( 1, 0, 'DEFAULT_TYPE', 51, '', 'Kriter READ (Even.Bas)'); 
  insert into MS_TYPES values ( 1, 0, 'DEFAULT_TYPE', 52, '', 'Kriter READ (Even.Bit)'); 
  insert into MS_TYPES values ( 1, 0, 'DEFAULT_TYPE', 53, '', 'Kriter READ (Odd)'); 

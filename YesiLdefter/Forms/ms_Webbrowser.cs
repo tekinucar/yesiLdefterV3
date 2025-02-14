@@ -194,7 +194,7 @@ namespace YesiLdefter
         List<MsWebScrapingDbFields> msWebScrapingFields = null;
 
         webForm f = new webForm();
-
+        
         #endregion Tanımlar
 
         public ms_Webbrowser()
@@ -698,10 +698,14 @@ namespace YesiLdefter
             HtmlAgilityPack.HtmlNode htmlBody = null;
             loadBody(this.htmlDocumentBody, ref htmlBody);
 
-            this.nodeId = 1;
-            parentId = 0;
+            //this.nodeId = 1;
+            //this.parentId = 0;
+
+            f.analysisNodeId = 1;
+            f.analysisParentId = 0;
+
             if (htmlBody != null)
-                listNode_(htmlBody.ChildNodes);
+                msPagesService.listNode_(htmlBody.ChildNodes, this.ds_AnalysisNodes, f);
         }
         private void loadBody(string htmlDocumentBody, ref HtmlAgilityPack.HtmlNode htmlBody)
         {
@@ -718,25 +722,31 @@ namespace YesiLdefter
             //
             //HtmlAgilityPack.HtmlNode htmlBody = htmlDoc.DocumentNode.SelectSingleNode("//body");
         }
-        private void listNode_(HtmlNodeCollection listNode)
+        /*
+        public void listNode_(HtmlNodeCollection listNode, DataSet ds_AnalysisNodes, webForm f)
         {
             foreach (HtmlNode nNode in listNode)
             {
                 if (nNode.GetType().ToString() != "HtmlAgilityPack.HtmlTextNode")
                 {
-                    listAdd(this.nodeId, parentId, nNode);
+                    //listAdd(this.nodeId, this.parentId, nNode);
+                    listAdd(ds_AnalysisNodes, f, nNode);
 
                     if (nNode.ChildNodes != null)
                     {
-                        parentId = -1;
-                        listNode_(nNode.ChildNodes);
+                        //parentId = -1;
+                        f.analysisParentId = -1;
+                        listNode_(nNode.ChildNodes, ds_AnalysisNodes, f);
                     }
                 }
             }
         }
-        private void listAdd(int NodeId, int parentId, HtmlNode nNode)
+        private void listAdd(DataSet ds_AnalysisNodes, webForm f, HtmlNode nNode)
         {
             if (nNode.Name == "br") return;
+
+            int NodeId = f.analysisNodeId;
+            int parentId = f.analysisParentId;
 
             DataRow row = ds_AnalysisNodes.Tables[0].NewRow();
 
@@ -761,9 +771,10 @@ namespace YesiLdefter
 
             ds_AnalysisNodes.Tables[0].Rows.Add(row);
 
-            this.nodeId++;
+            //this.nodeId++;
+            f.analysisNodeId++;
         }
-
+        */
         #endregion Analysis
 
         #region WebUpdate
@@ -2161,8 +2172,7 @@ namespace YesiLdefter
 
         #region transferFrom... , saveRow
 
-        
-        
+              
         
         private void transferFromDatabaseToWeb(webNodeValue wnv)
         {

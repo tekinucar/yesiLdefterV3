@@ -19,7 +19,7 @@ AS BEGIN
       While @@FETCH_STATUS = 0
       begin
 	      Execute [dbo].[prc_MtskAdayTablesInsert] @talepId
-		  FETCH NEXT FROM talepCursor INTO @talepId;
+		  FETCH NEXT FROM myCursor INTO @talepId;
       end -- While
 
       Close myCursor;

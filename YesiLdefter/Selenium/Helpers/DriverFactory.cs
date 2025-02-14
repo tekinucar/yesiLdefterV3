@@ -8,6 +8,7 @@ using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Firefox;
 using OpenQA.Selenium.IE;
+using Tkn_Variable;
 using WebDriverManager.DriverConfigs.Impl;
 using WebDriverManager.Helpers;
 
@@ -67,6 +68,10 @@ namespace YesiLdefter.Selenium.Helpers
                     var chromeOptions = new ChromeOptions();
                     chromeOptions.AddArgument("--disable-gpu"); // Disable GPU acceleration
                     chromeOptions.AddArgument("--no-sandbox");
+                    string downloadDirectory = v.EXE_GIBDownloadPath;
+                    chromeOptions.AddUserProfilePreference("download.default_directory", downloadDirectory);
+                    chromeOptions.AddUserProfilePreference("download.prompt_for_download", false);
+                    chromeOptions.AddUserProfilePreference("directory_upgrade", true);
 
                     driver = new ChromeDriver(chromeDriverService, chromeOptions);
 

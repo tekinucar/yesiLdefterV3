@@ -27,6 +27,18 @@ BEGIN
       (@sertifikaId = 9051))   -- C Otomatik işareti varsa
        set @responseId = 2505
 
+  if ((@sertifikaId = 9052) or -- C1 Manuel işareti varsa
+      (@sertifikaId = 9053))   -- C1 Otomatik işareti varsa
+       set @responseId = 2516
+
+  if ((@sertifikaId = 9054) or -- C1E Manuel işareti varsa
+      (@sertifikaId = 9055))   -- C1E Otomatik işareti varsa
+       set @responseId = 2519
+
+  if ((@sertifikaId = 9056) or -- CE Manuel işareti varsa
+      (@sertifikaId = 9057))   -- CE Otomatik işareti varsa
+       set @responseId = 2520
+
   if ((@sertifikaId = 9060) or -- D Manuel işareti varsa
       (@sertifikaId = 9061))   -- D Otomatik işareti varsa
        set @responseId = 2506

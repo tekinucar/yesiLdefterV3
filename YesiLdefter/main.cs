@@ -912,7 +912,7 @@ namespace YesiLdefter
         {
             if (v.SP_ApplicationExit == false)
             {
-                /* genel kullanıma geçince aç
+                
                 tToolBox t = new tToolBox();
                 DialogResult cevap = t.mySoru("EXIT");
                 if (DialogResult.Yes == cevap)
@@ -920,7 +920,6 @@ namespace YesiLdefter
                     //
                 }
                 else e.Cancel = true; // Main formun kapanmasını engeller
-                */
             }
         }
 

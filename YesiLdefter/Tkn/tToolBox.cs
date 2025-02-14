@@ -1190,8 +1190,9 @@ namespace Tkn_ToolBox
                         "*  Bunun çeşitli sebepleri olabilir." + v.ENTER2 +
                         "1. Database in bulunduğu bilgisayar ( SERVER ) kapalı olabilir ..." + v.ENTER +
                         "2. MSSQL Server kapalı olabilir ..." + v.ENTER +
-                        "3. Network bağlantınızda sorun olabilir ..." + v.ENTER +
-                        "4. Database bağlantı tanımlarında sorun olabilir ..." + v.ENTER2 +
+                        "3. SQL Server Authentication ( Windows Authentication yerine [sa] ) ayarlı olmayabilir." + v.ENTER +
+                        "4. Network bağlantınızda sorun olabilir ..." + v.ENTER +
+                        "5. Database bağlantı tanımlarında sorun olabilir ..." + v.ENTER2 +
                         "   Bu nedenle size sorulan soruları kontrol edin, yine olmaz ise yardım isteyin ..."
                         + v.ENTER2
                         + e.Message.ToString());
@@ -1718,11 +1719,10 @@ namespace Tkn_ToolBox
             }
         }
 
-
         #endregion Data_Read_Execute
 
         #region Read : msTables, msTableIPCodeTables, msTableIPCodeFields, msTableIPGroups
-        private void preparing_MsTableFields(vTable vt)
+        public void preparing_MsTableFields(vTable vt)
         {
             //string fields = "_FIELDS";
             string sqlA = string.Empty;
@@ -3886,7 +3886,8 @@ namespace Tkn_ToolBox
                      (WORKTYPE == "SVIEW") ||
                      (WORKTYPE == "SVIEWVALUE") ||
                      (WORKTYPE == "CREATEVIEW") ||
-                     (WORKTYPE == "OPENFORM"))
+                     (WORKTYPE == "OPENFORM") ||
+                     (WORKTYPE == "GOTO"))
                     )
                 {
                     ds = Find_DataSet(tForm, "", RTABLEIPCODE, "");
@@ -11831,7 +11832,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 Question = "İşleme devam etmek istediğinize emin misiniz?";
 
             if (Soru.ToUpper() == "EXIT")
-                Question = "Program kapatılacak, devam etmek istediğinize emin misiniz?";
+                Question = "Program kapatılacak, kapatmak istediğinize emin misiniz?";
 
 
             DialogResult answer = MessageBox.Show(Question, "Onay İşlemi", MessageBoxButtons.YesNoCancel);

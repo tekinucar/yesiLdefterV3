@@ -646,7 +646,7 @@ namespace Tkn_Events
 
             return yeniYilAy;
         }
-        private void setYilAyCaption(Form tForm, int yilAy, string caption, string menuControlName, tToolBox t)
+        public void setYilAyCaption(Form tForm, int yilAy, string caption, string menuControlName, tToolBox t)
         {
             //tItem.Caption = t.getYilAyCaption(yilAy);
 
@@ -723,7 +723,7 @@ namespace Tkn_Events
         }
 
 
-        private void yilAyFormRefresh(Form tForm)
+        public void yilAyFormRefresh(Form tForm)
         {
             vSubWork vSW = new vSubWork();
             vSW._01_tForm = tForm;

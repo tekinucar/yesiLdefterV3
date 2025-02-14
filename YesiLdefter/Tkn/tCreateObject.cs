@@ -138,6 +138,9 @@ namespace Tkn_CreateObject
                     // Add a TableClearing event handler.
                     dsData.Tables[0].TableClearing += new
                         DataTableClearEventHandler(ev.tTable_Clearing);
+
+
+                    preparingMaliDonemChanger(dsData, tDataNavigator, t);
                 }
             }
 
@@ -221,6 +224,24 @@ namespace Tkn_CreateObject
             tPanelControl.TabIndex = 0;
             tPanelControl.TabStop = true;
             tPanelControl.Controls.Add(NavPanel);
+        }
+
+        private void preparingMaliDonemChanger(DataSet dsData, DataNavigator tDataNavigator, tToolBox t)
+        {
+            string myProp = dsData.Namespace;
+
+            if (myProp.IndexOf("MaliDonemChanger:") > -1 && myProp.IndexOf("MaliDonemChanger:null") == -1)
+            {
+                // gerekli bilgiler toplandıysa  
+                string fieldName = t.MyProperties_Get(myProp, "MaliDonemChanger:");
+                string s = "";
+                t.MyProperties_Set(ref s, "MaliDonemChanger", fieldName);
+                if (tDataNavigator.Text.IndexOf("MaliDonemChanger") == -1)
+                {
+                    tDataNavigator.IsAccessible = true;
+                    tDataNavigator.Text = tDataNavigator.Text + s;
+                }
+            }
         }
 
         private void createDropDownButton(vNavigatorButton nButton)
@@ -3428,6 +3449,7 @@ namespace Tkn_CreateObject
                 textEdit_Find.Leave += new System.EventHandler(evb.textEdit_Find_Leave);
                 textEdit_Find.KeyDown += new System.Windows.Forms.KeyEventHandler(evb.textEdit_Find_KeyDown);
                 textEdit_Find.KeyUp += new System.Windows.Forms.KeyEventHandler(evb.textEdit_Find_KeyUp);
+                textEdit_Find.KeyPress += new System.Windows.Forms.KeyPressEventHandler(evb.textEdit_Find_KeyPress);
 
                 textEdit_Find.EditValueChanged += new System.EventHandler(evb.textEdit_Find_EditValueChanged);
 

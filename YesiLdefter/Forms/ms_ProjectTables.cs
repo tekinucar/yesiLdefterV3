@@ -1081,6 +1081,7 @@ namespace YesiLdefter
         {
             fieldsNameList.Clear();
             imagefieldsNameList.Clear();
+            this.imageFieldAvailable = false;
             string fName = "";
             string fieldsName = "";
             int colCount = dsSource.Tables[0].Columns.Count;
@@ -1116,6 +1117,15 @@ namespace YesiLdefter
             bool isIdentityInsert, bool isEditScript)
         {
             bool onay = false;
+
+            /// Data aktarılacak tablo hakkında detaylı teknik bilgileri oku
+            /// 
+            vTable vt = new vTable();
+            vt.TableName = tableName;
+            dbConnction(false, false);
+            vt.SchemasCode = "Lkp";
+            vt.msSqlConnection = v.newFirm_DB.MSSQLConn;
+            t.preparing_MsTableFields(vt);
 
             /// resim data aktarma işlemi ise bu kısım hiç çalışmasın
             ///
@@ -1166,7 +1176,7 @@ namespace YesiLdefter
             
             for (int i = 0; i < rowCount; i++)
             {
-                insertValue = preparingInsertValues(dsSource, i);
+                insertValue = preparingInsertValues(dsSource, i, tableName);
                 targetInsertSql = targetInsertHeaderSql + " ( " + insertValue + " ) ";
                 if (isEditScript)
                     targetEditSql = preparingEditValues(dsSource, i, alias, tableName, editWhereSql);
@@ -1231,12 +1241,16 @@ namespace YesiLdefter
         }
 
 
-        private string preparingInsertValues(DataSet dsSource, int rowNo)
+        private string preparingInsertValues(DataSet dsSource, int rowNo, string tableName)
         {
             string type = "";
             string value = "";
             string values = "";
             string fName = "";
+            int ftype = 0;
+            int fmax_length = 0;
+
+            //
 
             int colCount = dsSource.Tables[0].Columns.Count;
             for (int i = 0; i < colCount; i++)
@@ -1244,13 +1258,16 @@ namespace YesiLdefter
                 /// Resim fieldları null geldiği zaman onu yakalayamıyorum 
                 //  type = dsSource.Tables[0].Rows[rowNo][i].GetType().ToString();
                 //  value = dsSource.Tables[0].Rows[rowNo][i].ToString();
-                                
+
                 fName = fieldsNameList[i];
 
                 if (fName.IndexOf("Resim") == -1)
                 {
                     type = dsSource.Tables[0].Rows[rowNo][fName].GetType().ToString();
                     value = dsSource.Tables[0].Rows[rowNo][fName].ToString();
+
+                    ftype = Convert.ToInt32(v.ds_MsTableFields.Tables[tableName].Rows[i]["user_type_id"].ToString());
+                    fmax_length = Convert.ToInt32(v.ds_MsTableFields.Tables[tableName].Rows[i]["max_length"].ToString());
 
                     // adres verisinde görülebiliyor
                     if (value.IndexOf("<option value=\"") > -1)
@@ -1264,7 +1281,21 @@ namespace YesiLdefter
                     if (value.IndexOf("'") > -1)
                         value = value.Replace("'", " ");
 
-                    //if (value == "\"") value = "";
+                    //* text = (char)175, (varchar)167, (ntext)99, (text)35, (nchar)239, (nvarchar)231, (uniqueidentifier)36 //39 
+                    if ((ftype == 175) | (ftype == 167) | (ftype == 99) | (ftype == 35) | (ftype == 239) | (ftype == 231) | (ftype == 36))
+                    {
+                        // varchar(max), nvarchar(max) olunca -1 geliyor
+                        if (fmax_length == -1) fmax_length = 128000;
+                        if (ftype == 36) // GUID / uniqueidentifier
+                            fmax_length = 128000;
+                        if (ftype == 231) // nVarchar ise
+                            fmax_length = fmax_length / 2;
+
+                        if (value.Length > fmax_length)
+                            value = value.Substring(0, fmax_length - 1);
+
+                        value = t.Str_Check(value);
+                    }
 
                     if (type == "System.Int16") values += " , " + value;
                     if (type == "System.Int32") values += " , " + value;
@@ -1313,12 +1344,18 @@ namespace YesiLdefter
             string editWhere = editWhereSql;
             int x = 0;
             int colCount = dsSource.Tables[0].Columns.Count;
+            int ftype = 0;
+            int fmax_length = 0;
+
             for (int i = 0; i < colCount; i++)
             {
                 type = dsSource.Tables[0].Rows[rowNo][i].GetType().ToString();
                 value = dsSource.Tables[0].Rows[rowNo][i].ToString();
                 fieldName = dsSource.Tables[0].Columns[i].ColumnName;
                 //fieldName = fieldsNameList[i]; ikiside olur
+
+                ftype = Convert.ToInt32(v.ds_MsTableFields.Tables[tableName].Rows[i]["user_type_id"].ToString());
+                fmax_length = Convert.ToInt32(v.ds_MsTableFields.Tables[tableName].Rows[i]["max_length"].ToString());
 
                 // adres verisinde görülebiliyor
                 if (value.IndexOf("<option value=\"") > -1)
@@ -1332,7 +1369,21 @@ namespace YesiLdefter
                 if (value.IndexOf("'") > -1)
                     value = value.Replace("'", " ");
 
-                //if (value == "\"") value = "";
+                //* text = (char)175, (varchar)167, (ntext)99, (text)35, (nchar)239, (nvarchar)231, (uniqueidentifier)36 //39 
+                if ((ftype == 175) | (ftype == 167) | (ftype == 99) | (ftype == 35) | (ftype == 239) | (ftype == 231) | (ftype == 36))
+                {
+                    // varchar(max), nvarchar(max) olunca -1 geliyor
+                    if (fmax_length == -1) fmax_length = 128000;
+                    if (ftype == 36) // GUID / uniqueidentifier
+                        fmax_length = 128000;
+                    if (ftype == 231) // nVarchar ise
+                        fmax_length = fmax_length / 2;
+
+                    if (value.Length > fmax_length)
+                        value = value.Substring(0, fmax_length - 1);
+
+                    value = t.Str_Check(value);
+                }
 
                 // Where koşulunda var mı?
                 x = editWhere.IndexOf(":" + fieldName + "Value");
@@ -1398,23 +1449,26 @@ namespace YesiLdefter
             }
 
             count = imagefieldsNameList.Count;
-            for (int i = 0; i < count; i++)
+            if (count > 0)
             {
-                imgFieldsNameSelect += " , " + imagefieldsNameList[i];
-                imgFieldsNameUpdate += " , " + imagefieldsNameList[i] + " = @" + imagefieldsNameList[i];
+                for (int i = 0; i < count; i++)
+                {
+                    imgFieldsNameSelect += " , " + imagefieldsNameList[i];
+                    imgFieldsNameUpdate += " , " + imagefieldsNameList[i] + " = @" + imagefieldsNameList[i];
+                }
+
+                imgFieldsNameSelect = imgFieldsNameSelect.Remove(0, 2);
+                imgFieldsNameUpdate = imgFieldsNameUpdate.Remove(0, 2);
+
+                selectSql =
+                  " select " + imgFieldsNameSelect + " from " + alias + "." + tableName + " "
+                + " Where 0 = 0 " + editWhere;
+
+                updateSql =
+                  " Update " + alias + "." + tableName + " set "
+                + imgFieldsNameUpdate
+                + " Where 0 = 0 " + editWhere;
             }
-
-            imgFieldsNameSelect = imgFieldsNameSelect.Remove(0, 2);
-            imgFieldsNameUpdate = imgFieldsNameUpdate.Remove(0, 2);
-
-            selectSql = 
-              " select " + imgFieldsNameSelect + " from " + alias + "." + tableName + " "
-            + " Where 0 = 0 " + editWhere;
-
-            updateSql =
-              " Update " + alias + "." + tableName + " set "
-            + imgFieldsNameUpdate
-            + " Where 0 = 0 " + editWhere;
         }
 
         private string preparingSelectControl(DataSet dsSource, int rowNo, string alias, string tableName, string editWhereSql, bool isEditScript)

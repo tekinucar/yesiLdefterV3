@@ -43,20 +43,34 @@ INSERT INTO [Lkp].[MtskSertifikaTipi] (Id, SertifikaTipi, KSertifikaTipi, IsActi
   ( 2520,  N'CE Sınıfı Sertifika',  'CE',   0, 11 ), 
   ( 2521,  N'D1E Sınıfı Sertifika', 'D1E',  0, 13 ), 
   ( 2522,  N'DE Sınıfı Sertifika',  'DE',   0, 15 ), 
+
   ( 9010,  N'A Sınıfı Sertifika (Manuel)',       'A man.', 0, 4 ), 
   ( 9020,  N'A1 Sınıfı Sertifika (Manuel)',      'A1 man.', 0, 2 ), 
   ( 9021,  N'A1 Sınıfı Sertifika (Otomatik)',    'A1 oto.', 0, 2 ), 
   ( 9022,  N'A1 Sınıfı Sertifika (125 cc altı)', 'A1 125', 0, 2 ), 
+
   ( 9030,  N'A2 Sınıfı Sertifika (Manuel)',      'A2 man.', 0, 3 ), 
   ( 9031,  N'A2 Sınıfı Sertifika (Otomatik)',    'A2 oto.', 0, 3 ), 
+
   ( 9040,  N'B Sınıfı Sertifika (Manuel)',       'B man.', 0, 6 ), 
   ( 9041,  N'B Sınıfı Sertifika (Otomatik)',     'B oto.', 0, 6 ), 
+  
+  -- C, C1, C1E, CE
   ( 9050,  N'C Sınıfı Sertifika (Manuel)',       'C man.', 0, 10 ), 
   ( 9051,  N'C Sınıfı Sertifika (Otomatik)',     'C oto.', 0, 10 ), 
+  ( 9052,  N'C1 Sınıfı Sertifika (Manuel)',      'C1 man.', 0, 11 ), 
+  ( 9053,  N'C1 Sınıfı Sertifika (Otomatik)',    'C1 oto.', 0, 11 ), 
+  ( 9054,  N'C1E Sınıfı Sertifika (Manuel)',     'C1E man.', 0, 12 ), 
+  ( 9055,  N'C1E Sınıfı Sertifika (Otomatik)',   'C1E oto.', 0, 12 ), 
+  ( 9056,  N'CE Sınıfı Sertifika (Manuel)',      'CE man.', 0, 13 ), 
+  ( 9057,  N'CE Sınıfı Sertifika (Otomatik)',    'CE oto.', 0, 13 ), 
+
   ( 9060,  N'D Sınıfı Sertifika (Manuel)',       'D man.', 0, 14 ), 
   ( 9061,  N'D Sınıfı Sertifika (Otomatik)',     'D oto.', 0, 14 ), 
+
   ( 9070,  N'E Sınıfı Sertifika (Manuel)',       'E man.', 0, 98 ), 
   ( 9071,  N'E Sınıfı Sertifika (Otomatik)',     'E oto.', 0, 98 ), 
+
   ( 9200,  N'100 Ceza Puanı',                    '100 Ceza', 1, 99 ), 
   ( 9201,  N'100 Ceza Puanı (Manuel)',           '100 Ceza man.', 1, 99 ), 
   ( 9202,  N'100 Ceza Puanı (Otomatik)',         '100 Ceza oto.', 1, 99 ) 

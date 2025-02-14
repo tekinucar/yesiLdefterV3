@@ -65,7 +65,7 @@ AS BEGIN
            ,[TDersIsUploaded]
 		   ,[SablonTeorikBId]
 		   ,[SablonTeorikFId]
-		   ,[CakismaId]
+		   ,[OzelGunlerId]
 		   )
     Values (@FirmId
            ,1
@@ -83,7 +83,7 @@ AS BEGIN
            ,0    -- TDersIsUploaded
            ,-2   -- SablonTeorikBId   : Default -2 değeri veriyorum, maunel ekranından ınsert olduğunun işareti
            ,@SablonTeorikFId
-		   ,0    -- CakismaId
+		   ,0    -- OzelGunlerId
            )
 	
 	set @Count = @Count + 1

@@ -487,7 +487,7 @@ namespace YesiLdefter
                         int userId = t.myInt32(ds_Query.Tables[0].Rows[0]["UserId"].ToString());
                         bool IsActive = Convert.ToBoolean(ds_Query.Tables[0].Rows[0]["IsActive"].ToString());
                         string userFullName = ds_Query.Tables[0].Rows[0]["UserFullName"].ToString();
-                        string db_user_key = ds_Query.Tables[0].Rows[0]["Key"].ToString();
+                        string db_user_key = ds_Query.Tables[0].Rows[0]["UserKey"].ToString();
 
                         if (IsActive == false)
                         {
@@ -501,10 +501,19 @@ namespace YesiLdefter
                             {
                                 if ((user_new_pass == user_rpt_pass) && // yeni şifre = tekrarlanan şifre
                                     (user_new_pass != "") &&            // yeni şifre boş değilse
-                                    (user_new_pass != user_old_pass)    // yeni şifre ile eski şifre  aynı değilse
+                                    (user_new_pass != user_old_pass) && // yeni şifre ile eski şifre  aynı değilse
+                                    (user_new_pass.Length >= 4)         // en az 4 karekter   
                                     )
                                 {
                                     tSql = Sqls.preparingUstadUsersSql("", user_new_pass, userId);
+
+                                    string myProp = string.Empty;
+                                    t.MyProperties_Set(ref myProp, "DBaseNo", "3");
+                                    t.MyProperties_Set(ref myProp, "TableName", "UstadUsers");
+                                    t.MyProperties_Set(ref myProp, "SqlFirst", tSql);
+                                    t.MyProperties_Set(ref myProp, "SqlSecond", "null");
+                                    ds_Query2.Namespace = myProp;
+
                                     bool onay = t.Data_Read_Execute(this, ds_Query2, ref tSql, "NEW_USER_KEY", null);
 
                                     if (onay) MessageBox.Show("Şifreniz başarıyla güncellenmiştir...");
@@ -516,6 +525,8 @@ namespace YesiLdefter
                                 if (user_new_pass != user_rpt_pass)
                                     MessageBox.Show("DİKKAT : Yeni şifre ile tekrar yazdığınız şifre aynı değil...");
 
+                                if (user_new_pass.Length < 4)
+                                    MessageBox.Show("Lütfen en az 4 karekterlik bir şifre giriniz.");
                             }
                         }
                     }

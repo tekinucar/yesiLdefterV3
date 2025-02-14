@@ -278,6 +278,7 @@ namespace Tkn_Variable
         public static string EXE_DRIVE = string.Empty;
         public static string EXE_PATH = string.Empty;
         public static string EXE_TempPath = string.Empty;
+        public static string EXE_GIBDownloadPath = string.Empty;
         public static string EXE_FastReportsPath = string.Empty;
         public static string EXE_DevExReportsPath = string.Empty;
         public static string EXE_ScriptsPath = string.Empty;
@@ -713,6 +714,9 @@ namespace Tkn_Variable
         public static int Screen_Height { get; set; }
         public static int Primary_Screen_Width { get; set; }
         public static int Primary_Screen_Height { get; set; }
+        public static int Secondery_Screen_Width { get; set; }
+        public static int Secondery_Screen_Height { get; set; }
+
         public static int NavBar_Width { get; set; }
         public static int Ribbon_Height { get; set; }
         public static int Padding4 = 4;
@@ -1373,8 +1377,13 @@ namespace Tkn_Variable
 
         public Int16 talepPageLeft { get; set; }
         public Int16 talepPageTop { get; set; }
+        public Int16 analysisNodeId { get; set; }
+        public Int16 analysisParentId { get; set; }
+
 
         public Control btn_PageView = null;
+        public Control btn_Analysis = null;
+        public Control btn_AnalysisNodeView = null;
         public Control btn_AlwaysSet = null;
         public Control btn_FullGet1 = null;  // birinci get butonu
         public Control btn_FullGet2 = null;  // ikinci  get butonu
@@ -1404,6 +1413,8 @@ namespace Tkn_Variable
             //autoSubmit = false;
             talepPageLeft = 0;
             talepPageTop = 0;
+            analysisNodeId = 1;
+            analysisParentId = 0;
         }
     }
     public class saveVariables
@@ -1941,6 +1952,7 @@ namespace Tkn_Variable
         public bool dbLookUpField { get; set; }
 
         public Int16 dbFieldType { get; set; }
+        public Int16 dbColNo { get; set; }
         public bool DontSave { get; set; }
         public bool GetSave { get; set; }
 
@@ -1982,6 +1994,7 @@ namespace Tkn_Variable
             dbFieldName = "";
             dbLookUpField = false;
             dbFieldType = 0;
+            dbColNo = 0;
             DontSave = false;
             GetSave = false;
             KrtOperandType = "";

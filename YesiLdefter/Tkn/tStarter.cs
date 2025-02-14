@@ -46,13 +46,15 @@ namespace Tkn_Starter
             v.EXE_ScriptsPath = v.EXE_DRIVE + "UstadYazilim\\Scripts";
             v.EXE_FastReportsPath = v.EXE_PATH + "\\ReportsFast\\";
             v.EXE_DevExReportsPath = v.EXE_PATH + "\\ReportsDevEx\\";
-
+            v.EXE_GIBDownloadPath = v.EXE_PATH + "\\GIBDownload\\";
             //MakeFolderWritable(v.EXE_PATH);
 
             System.IO.Directory.CreateDirectory(v.EXE_TempPath);
             System.IO.Directory.CreateDirectory(v.EXE_ScriptsPath);
             System.IO.Directory.CreateDirectory(v.EXE_FastReportsPath);
             System.IO.Directory.CreateDirectory(v.EXE_DevExReportsPath);
+            System.IO.Directory.CreateDirectory(v.EXE_GIBDownloadPath);
+            System.IO.Directory.CreateDirectory(v.EXE_GIBDownloadPath+"\\Temp\\");
 
             // output : { 25.03.2019 22:59:22 }
             DateTime dt = File.GetLastWriteTime(System.IO.Path.Combine(v.tExeAbout.activePath, v.tExeAbout.activeExeName));
@@ -469,6 +471,8 @@ namespace Tkn_Starter
             v.Screen_Height = Screen.PrimaryScreen.Bounds.Height - (90 + v.Ribbon_Height);
             v.Primary_Screen_Width = Screen.PrimaryScreen.Bounds.Width;
             v.Primary_Screen_Height = Screen.PrimaryScreen.Bounds.Height - 50;
+            //v.Secondery_Screen_Width = Screen.
+            //v.Secondery_Screen_Height = 
         }
 
         #endregion Variable Set

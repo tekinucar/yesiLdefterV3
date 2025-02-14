@@ -42,7 +42,12 @@ namespace Tkn_Events
         GridHitInfo gridHitInfo = null;
         TileViewHitInfo tileHitInfo = null;
 
-        
+
+        public void myRepositoryItemEdit_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            // Basılan tuşu büyük harfe dönüştür
+            e.KeyChar = char.ToUpper(e.KeyChar);
+        }
         public void myRepositoryItemEdit_KeyDown(object sender, KeyEventArgs e) //*** New Ok
         {
             #region KeyCode

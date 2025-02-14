@@ -1202,6 +1202,74 @@ namespace Tkn_Events
             return onay;
         }
 
+        public bool gotoData_(Form tForm, TABLEIPCODE_LIST item)
+        {
+            /// bir tablodan bir Id oku                : ReadTableIPCode
+            /// diğer tabloyuda bu Id ile yeniden oku  : TargetTableIPCode
+            /// Örnek
+            /// OnmBelgeStokS.BelgeStokBId : ReadTableIPCode
+            /// OnmBelgeStokB.Id yenile    : TargetTableIPCode
+            /// 
+
+            //tToolBox t = new tToolBox();
+            bool onay = false;
+
+            string workType = string.Empty;
+            string targetTABLEIPCODE = string.Empty;
+            string targetKEYFNAME = string.Empty;
+            string readTABLEIPCODE = string.Empty;
+            string readKEYFNAME = string.Empty;
+            string manuelSetValue = string.Empty;
+            string readValue = string.Empty;
+
+            DataSet dsTarget = null;
+            DataNavigator dNTarget = null;
+            DataSet dsRead = null;
+            DataNavigator dNRead = null;
+
+            workType = item.WORKTYPE.ToString();
+
+            if (t.IsNotNull(item.TABLEIPCODE))
+                targetTABLEIPCODE = t.Set(item.TABLEIPCODE.ToString(), "", "");
+            if (t.IsNotNull(item.KEYFNAME))
+                targetKEYFNAME = t.Set(item.KEYFNAME.ToString(), "", "");
+            if (t.IsNotNull(item.RTABLEIPCODE))
+                readTABLEIPCODE = t.Set(item.RTABLEIPCODE.ToString(), "", "");
+            if (t.IsNotNull(item.RKEYFNAME))
+                readKEYFNAME = t.Set(item.RKEYFNAME.ToString(), "", "");
+            if (t.IsNotNull(item.MSETVALUE))
+                manuelSetValue = t.Set(item.MSETVALUE.ToString(), "", "");
+            /* read datayı burada okumaya gerek yok 
+             * zaten yeni formu açmak isteyen diğer mevcut form üzerinden manuelSetValue ile okunarak geliryor
+             * yani read formu ayrı, target formu ayrı
+             * iki farklı form
+             * 
+            dsRead = null;
+            dNRead = null;
+            if (t.IsNotNull(readTABLEIPCODE))
+                t.Find_DataSet(tForm, ref dsRead, ref dNRead, readTABLEIPCODE);
+
+            if (t.IsNotNull(dsRead) &&
+                t.IsNotNull(readKEYFNAME))
+            {
+                readValue = dsRead.Tables[0].Rows[dNRead.Position][readKEYFNAME].ToString();
+            }
+            */
+            dsTarget = null;
+            dNTarget = null;
+            if (t.IsNotNull(targetTABLEIPCODE))
+                t.Find_DataSet(tForm, ref dsTarget, ref dNTarget, targetTABLEIPCODE);
+
+            if (t.IsNotNull(dsTarget))
+            {
+                int i = t.Find_GotoRecord(dsTarget, targetKEYFNAME, manuelSetValue);
+                dNTarget.Position = i;
+                if (i > 0) onay = true;
+            }
+
+            return onay;
+
+        }
         public bool readData_(Form tForm, TABLEIPCODE_LIST item)
         {
             /// bir tablodan bir Id oku                : ReadTableIPCode
@@ -2980,7 +3048,10 @@ namespace Tkn_Events
                     }
 
                     if (workType == "GOTO")
-                    { }
+                    {
+                        onay = gotoData_(tForm, item);
+                        islemOnayi = onay;
+                    }
 
                     if (workType == "SVIEW")
                     {
@@ -3527,6 +3598,12 @@ namespace Tkn_Events
 
         }
 
+        public void textEdit_Find_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            // Basılan tuşu büyük harfe dönüştür
+            e.KeyChar = char.ToUpper(e.KeyChar);
+        }
+
         public void textEdit_Find_KeyUp(object sender, KeyEventArgs e)
         {
             ///
@@ -3632,7 +3709,7 @@ namespace Tkn_Events
                 /// Esc ile çıkış
                 if (e.KeyCode == Keys.Escape)
                 {
-                    v.tSearch.searchOutputValue = ((DevExpress.XtraEditors.TextEdit)sender).EditValue.ToString();
+                    v.tSearch.searchOutputValue = ((DevExpress.XtraEditors.TextEdit)sender).EditValue?.ToString();
                     v.tSearch.IsRun = false;
                 }
 

@@ -1888,6 +1888,7 @@ INSERT INTO [dbo].[SYS_UPDATES]
             string DataWizardTabPage = string.Empty;
             string DataCopyCode = string.Empty;
             string MasterDetailColumns = string.Empty;
+            string MaliDonemChanger = "null";
 
             /// TABLE_TYPE  
             /// 1, 'Table'
@@ -2054,7 +2055,8 @@ INSERT INTO [dbo].[SYS_UPDATES]
                       ref NewSQL,
                       ref REF_CALL,
                       ref Report_FieldsName,
-                      ref MasterDetailColumns);
+                      ref MasterDetailColumns,
+                      ref MaliDonemChanger);
 
             #endregion Preparing Join Tables and Fields
 
@@ -2263,6 +2265,7 @@ INSERT INTO [dbo].[SYS_UPDATES]
             t.MyProperties_Set(ref myProp, "DataWizardTabPage", DataWizardTabPage);
             t.MyProperties_Set(ref myProp, "DataCopyCode", DataCopyCode);
             t.MyProperties_Set(ref myProp, "MasterDetailColumns", MasterDetailColumns);
+            t.MyProperties_Set(ref myProp, "MaliDonemChanger", MaliDonemChanger);
 
             //t.MyProperties_Set(ref myProp, "FieldsListSQL", FieldsListSQL);
 
@@ -2309,7 +2312,7 @@ INSERT INTO [dbo].[SYS_UPDATES]
                // if (dsData.Tables[0].Rows.Count == 0)
                //     v.con_AutoNewRecords = true;
             }
-            
+
             #endregion Read dsData
 
         }
@@ -2908,7 +2911,8 @@ INSERT INTO [dbo].[SYS_UPDATES]
                           ref string NewSQL,
                           ref string REF_CALL,
                           ref string Report_FieldsName,
-                          ref string MasterDetailColumns
+                          ref string MasterDetailColumns,
+                          ref string MaliDonemChanger
                           )
         {
 
@@ -3202,6 +3206,7 @@ INSERT INTO [dbo].[SYS_UPDATES]
                 /// 32,  'Master=Detail Multi'
                 /// 33,  'Master=Detail Column'
                 /// 41,  'Line No'
+                /// 42,  'MaliDonem Changer'
                 /// 51,  'Kriter READ (Even.Bas)' 
                 /// 52,  'Kriter READ (Even.Bit)' 
                 /// 53,  'Kriter READ (Odd)'
@@ -3210,6 +3215,7 @@ INSERT INTO [dbo].[SYS_UPDATES]
                     (default_type == 31) ||
                     (default_type == 32) ||
                     (default_type == 33) ||
+                    (default_type == 42) ||
                     (default_type == 51) ||
                     (default_type == 52) ||
                     (default_type == 53) ||
@@ -3285,7 +3291,13 @@ INSERT INTO [dbo].[SYS_UPDATES]
                     {
                         MasterDetailColumns += "||" + fieldname + "||";
                     }
-
+                    /// MaliDonemChanger
+                    /// 
+                    if (default_type == 42)
+                    {
+                        /// menu code ve MailDonemin okunacağı fieldName
+                        MaliDonemChanger = mst_TableIPCode + "||" + mainFName + "||";
+                    } 
                     /// 51,  'Kriter READ (Even.Bas)' 
                     /// 52,  'Kriter READ (Even.Bit)' 
                     /// 53,  'Kriter READ (Odd)'

@@ -80,6 +80,7 @@ namespace YesiLdefter.Selenium
             if (TagName == "a")
             {
                 // button TagName olmayan fakat click eventi olan taga button rolü yükleniyor 
+                Thread.Sleep(200);
                 if (!string.IsNullOrEmpty(AttHRef) && AttRole != "button")
                     AttRole = "Button";
             }
@@ -761,13 +762,19 @@ namespace YesiLdefter.Selenium
             string idName = "";
             if (wnv.AttId != "") idName = wnv.AttId;
             if ((wnv.AttId == "") && (wnv.AttName != "")) idName = wnv.AttName;
-
+                        
             if (t.IsNotNull(idName) == false)
             {
                 IList<IWebElement> elements = wb.FindElements(By.TagName(wnv.TagName));
                 foreach (IWebElement item in elements)
                 {
-                    if (item.Text == wnv.InnerText)
+                    string text = item.Text;
+                    string innerText = wnv.InnerText;
+                    // GIB in girişinde böyle bir saçmalık var 
+                    if (text.IndexOf("\r\n") > -1) text = text.Replace("\r\n", "\\r\\n");
+
+                    //if (item.Text == wnv.InnerText)
+                    if (text == innerText)
                     {
                         item.Click();
                         break;
@@ -1668,7 +1675,9 @@ namespace YesiLdefter.Selenium
                     {
                         //tagName == "input"
                         readValue = element.Text;
-
+                        if (readValue == "")
+                            readValue = element.GetAttribute("value");
+                        
                         // select in value si değilde text kısmı okunacak ise 
                         // writeValeu veya AttRole bizim tarafımızdan manuel işaretleniyor
 
@@ -1688,6 +1697,11 @@ namespace YesiLdefter.Selenium
                                 readValue = selectElement.SelectedOption.GetAttribute("value");
                             }
                         }
+
+                        /// GİB de böyle saçmalık var
+                        if (wnv.AttType == "button")
+                            element.Click();
+
                         // önceki hali
                         //readValue = element.GetAttribute("value");
                         //if ((tagName == "select") &&
@@ -1715,6 +1729,8 @@ namespace YesiLdefter.Selenium
                     if (element != null)
                     {
                         readValue = element.Text;
+                        if (readValue == "")
+                            readValue = element.GetAttribute("value");
                     }
                 }
                 if ((tagName == "img") && t.IsNotNull(idName))
@@ -1795,7 +1811,7 @@ namespace YesiLdefter.Selenium
 
             try
             {
-                if ((idName != "") && (invoke != ""))
+                if (idName != null && idName != "" && invoke != "")
                 {
                     IWebElement element = null;
                     element = wb.FindElement(By.Id(idName));
@@ -1815,6 +1831,15 @@ namespace YesiLdefter.Selenium
                     }
                     Thread.Sleep(1000);
                     Application.DoEvents();
+                }
+            
+                if ((wnv.AttSrc != "") && (wnv.AttSrc != null) && (idName == null || idName == ""))
+                {
+                    // src attribute'üne sahip bir node'u bul
+                    IWebElement element = wb.FindElement(By.XPath("//img[@src='" + wnv.AttSrc + "']"));
+
+                    // Bulunan elementin src attribute'ünü yazdır
+                    element.Click();
                 }
             }
             catch (Exception exc2)

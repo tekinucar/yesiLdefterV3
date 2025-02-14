@@ -25,6 +25,7 @@ AS BEGIN
   , 'MtskAday' as LkpTableName
   , 'BiyometrikResim' as LkpFieldName
   , 'BiyometrikResimSmall' as LkpSmallFieldName
+  , 'Id' as LkpMasterIdValue
   , 'Id' as LkpIdFieldName
   , BiyometrikResim as LkpImage
   , BiyometrikResimSmall as LkpSmallImage
@@ -67,11 +68,12 @@ AS BEGIN
   , 'MtskAdayOgrenim' as LkpTableName
   , 'OgrenimBelgesiResim' as LkpFieldName
   , 'OgrenimBelgesiResimSmall' as LkpSmallFieldName
+  , 'TalepId' as LkpMasterIdValue
   , 'TalepId' as LkpIdFieldName
   , OgrenimBelgesiResim as LkpImage
   , OgrenimBelgesiResimSmall as LkpSmallImage
-  , 653 as LkpWidth
-  , 928 as LkpHeight
+  , 0 as LkpWidth
+  , 0 as LkpHeight
   , 96  as LkpDpi 
   
   From MtskAdayOgrenim
@@ -88,11 +90,12 @@ AS BEGIN
   , 'MtskAdaySaglik' as LkpTableName
   , 'SaglikRaporuResim' as LkpFieldName
   , 'SaglikRaporuResimSmall' as LkpSmallFieldName
+  , 'TalepId' as LkpMasterIdValue
   , 'TalepId' as LkpIdFieldName
   , SaglikRaporuResim as LkpImage
   , SaglikRaporuResimSmall as LkpSmallImage
-  , 653 as LkpWidth
-  , 928 as LkpHeight
+  , 0 as LkpWidth
+  , 0 as LkpHeight
   , 96  as LkpDpi  
   
   From MtskAdaySaglik
@@ -109,11 +112,12 @@ AS BEGIN
   , 'MtskAdayAdliSicil' as LkpTableName
   , 'SavcilikBelgesiResim' as LkpFieldName
   , 'SavcilikBelgesiResimSmall' as LkpSmallFieldName
+  , 'TalepId' as LkpMasterIdValue
   , 'TalepId' as LkpIdFieldName
   , SavcilikBelgesiResim as LkpImage
   , SavcilikBelgesiResimSmall as LkpSmallImage
-  , 653 as LkpWidth
-  , 928 as LkpHeight
+  , 0 as LkpWidth
+  , 0 as LkpHeight
   , 96  as LkpDpi  
   
   From MtskAdayAdliSicil
@@ -125,11 +129,12 @@ AS BEGIN
     TalepId as Id
   , @TamAdiSoyadi as TamAdiSoyadi
   , @TcNo as TcNo
-  , 'KiloByteKontrollu' as LkpImageType
+  , 'Imza' as LkpImageType
   , 'İmza' as LkpBelgeAdi
   , 'MtskAdayImza' as LkpTableName
   , 'ImzaResim' as LkpFieldName
   , 'ImzaResimSmall' as LkpSmallFieldName
+  , 'TalepId' as LkpMasterIdValue
   , 'TalepId' as LkpIdFieldName
   , ImzaResim as LkpImage
   , ImzaResimSmall as LkpSmallImage
@@ -151,11 +156,12 @@ AS BEGIN
   , 'MtskAdaySozlesme' as LkpTableName
   , 'Sozlesme1Resim' as LkpFieldName
   , 'Sozlesme1ResimSmall' as LkpSmallFieldName
+  , 'TalepId' as LkpMasterIdValue
   , 'TalepId' as LkpIdFieldName
   , Sozlesme1Resim as LkpImage
   , Sozlesme1ResimSmall as LkpSmallImage
-  , 653 as LkpWidth
-  , 928 as LkpHeight
+  , 0 as LkpWidth
+  , 0 as LkpHeight
   , 96  as LkpDpi  
   
   From MtskAdaySozlesme
@@ -173,16 +179,16 @@ AS BEGIN
   , 'MtskAdaySozlesme' as LkpTableName
   , 'Sozlesme2Resim' as LkpFieldName
   , 'Sozlesme2ResimSmall' as LkpSmallFieldName
+  , 'TalepId' as LkpMasterIdValue
   , 'TalepId' as LkpIdFieldName
   , Sozlesme2Resim as LkpImage
   , Sozlesme2ResimSmall as LkpSmallImage
-  , 653 as LkpWidth
-  , 928 as LkpHeight
+  , 0 as LkpWidth
+  , 0 as LkpHeight
   , 96  as LkpDpi  
   
   From MtskAdaySozlesme
   Where TalepId = @TalepId
-
 
 
 END -- procedure

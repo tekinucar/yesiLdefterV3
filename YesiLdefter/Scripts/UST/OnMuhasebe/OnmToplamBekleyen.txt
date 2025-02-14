@@ -179,7 +179,7 @@ commit transaction
 declare @FirmId int
 declare @AnaGrupTipiId smallInt
 declare @AltGrupTipiId smallInt
-set @FirmId = ?
+set @FirmId = :FIRM_ID
 
 Delete [dbo].[OnmToplamBekleyen]
 

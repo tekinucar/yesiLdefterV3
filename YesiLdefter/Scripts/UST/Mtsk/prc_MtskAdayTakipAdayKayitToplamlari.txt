@@ -3,12 +3,37 @@
 CREATE PROCEDURE [dbo].[prc_MtskAdayTakipAdayKayitToplamlari] (@FirmId int, @DonemTipiId int)  
 AS BEGIN
 
+  -- Variables
+  --declare @FirmId int = 629
+  --declare @DonemTipiId int = 202501
+  declare @sql nvarchar(max)
+  declare @sqlDonemTipiVar nvarchar(max)
+  declare @sqlDonemTipiYok nvarchar(max)
+
+  declare @sql1 nvarchar(200)
+  declare @BugunDonemTipiId int = 0
+  declare @bugun smalldatetime = getdate()
+	
+  -- Bugün hangi dönem ?  tespit ediliyor
+  if (MONTH(getdate()) < 10)
+       set @BugunDonemTipiId = convert(int, convert(varchar(5), YEAR(getdate())) + '0' + convert(varchar(3), MONTH(getdate())))
+  else set @BugunDonemTipiId = convert(int, convert(varchar(5), YEAR(getdate())) + convert(varchar(3), MONTH(getdate())))
+
+
+  Set @sql1 = '
+  declare @FirmId int 
+  declare @DonemTipiId int 
+  Set @FirmId = ' + Convert(varchar(10),@FirmId) + '
+  Set @DonemTipiId = ' + Convert(varchar(10),@DonemTipiId) + '
+  ';  
+
+  Set @sqlDonemTipiVar = ' 
 -- SertifikaTipi
 Select 
    tip.Id as KonuId
- , 'Serftikalar' as KonuCaption   
+ , ''Serftikalar'' as KonuCaption   
  , tip.SertifikaTipi as KonuAciklama
- , '' as Islem
+ , '''' as Islem
  , count(talep.Id) as AdaySayisi 
 
 From MtskAdayTalep as talep
@@ -21,8 +46,6 @@ Group by
    tip.Id
  , tip.SertifikaTipi
  , tip.SiraNo 
- 
---order by tip.SiraNo;
 
 union all
 
@@ -158,76 +181,7 @@ group by tip.KonuId
        , tip.MebbisOnayiTipi
 	   , tip.FormCaption
 
-union all
-
--- ZamanlamaTipi
-Select 
-   tip.KonuId
- , tip.KonuCaption   
- , tip.ZamanlamaTipi as KonuAciklama
- , tip.FormCaption as Islem
- , count(takip.Id) as AdaySayisi 
-
-From MtskAdayTakip as takip
-     left outer join Lkp.MtskAdayTakipZamanlamaTipi as tip on 
-	   ( takip.ZamanlamaTipiId = tip.Id )
-Where FirmId = @FirmId
---and   DonemTipiId = @DonemTipiId
---and   takip.ZamanlamaTipiId <> 5
-
-Group by 
-   tip.KonuId
- , tip.KonuCaption   
- , tip.ZamanlamaTipi
- , tip.FormCaption 
-
-
-union all
-/*
--- ZamanlamaTipi : 5	Sertifikasını hak etmiş
-Select 
-   tip.KonuId
- , tip.KonuCaption   
- , tip.ZamanlamaTipi as KonuAciklama
- , tip.FormCaption as Islem
- , count(takip.Id) as AdaySayisi 
-
-From MtskAdayTakip as takip
-     left outer join Lkp.MtskAdayTakipZamanlamaTipi as tip on 
-	   ( takip.ZamanlamaTipiId = tip.Id )
-Where FirmId = @FirmId
-and   DonemTipiId = @DonemTipiId
-and   takip.ZamanlamaTipiId = 5 
-
-Group by 
-   tip.KonuId
- , tip.KonuCaption   
- , tip.ZamanlamaTipi
- , tip.FormCaption 
-
-union all
-*/
--- IsGrupSubeYok
-Select 
-   tip.KonuId 
- , tip.KonuCaption
- , tip.GrupSubeTipi as KonuAciklama
- , tip.FormCaption as Islem
- , count(takip.Id) as AdaySayisi 
-
-From MtskAdayTakip as takip
-     left outer join Lkp.MtskAdayTakipGrupSubeTipi as tip on ( tip.KonuId = 1141 )
-
-Where FirmId = @FirmId
--- and   DonemTipiId = @DonemTipiId : kontrol olmaması gerekiyor
-and   IsGrupSubeYok = 1
-
-group by tip.KonuId 
-       , tip.KonuCaption
-       , tip.GrupSubeTipi
-	   , tip.FormCaption
-
-union all
+union all 
 
 -- YasOnayiTipi
 Select 
@@ -236,37 +190,13 @@ Select
  , tip.YasOnayiTipi as KonuAciklama
  , tip.FormCaption as Islem
  , count(takip.Id) as AdaySayisi 
-
-From MtskAdayTakip as takip
-     left outer join Lkp.MtskAdayTakipYasOnayiTipi as tip on 
-	   ( takip.YasOnayiTipiId = tip.Id )
-Where FirmId = @FirmId
---and   DonemTipiId = @DonemTipiId : kontrol olmaması gerekiyor
-and   takip.YasOnayiTipiId >= 1 -- Yaşı tutmuyor
-and   takip.YasOnayiTipiId <= 4 -- Doğum tarihi yok
-
-Group by 
-   tip.KonuId
- , tip.KonuCaption   
- , tip.YasOnayiTipi
- , tip.FormCaption 
-
-union all
-
--- YasOnayiTipi
-Select 
-   tip.KonuId
- , tip.KonuCaption   
- , tip.YasOnayiTipi as KonuAciklama
- , tip.FormCaption as Islem
- , count(takip.Id) as AdaySayisi 
-
+ 
 From MtskAdayTakip as takip
      left outer join Lkp.MtskAdayTakipYasOnayiTipi as tip on 
 	   ( takip.YasOnayiTipiId = tip.Id )
 Where FirmId = @FirmId
 and   DonemTipiId = @DonemTipiId 
-and   takip.YasOnayiTipiId = 5 -- Yaşı tutuyor
+and   takip.YasOnayiTipiId = 5
 
 Group by 
    tip.KonuId
@@ -275,53 +205,6 @@ Group by
  , tip.FormCaption 
 
 union all
-
--- DeneyimSartiTipi
-Select 
-   tip.KonuId
- , tip.KonuCaption   
- , tip.DeneyimSartiTipi as KonuAciklama
- , tip.FormCaption as Islem
- , count(takip.Id) as AdaySayisi 
-
-From MtskAdayTakip as takip
-     left outer join Lkp.MtskAdayTakipDeneyimSartiTipi as tip on 
-	   ( takip.DeneyimSartiTipiId = tip.Id )
-Where FirmId = @FirmId
---and   DonemTipiId = @DonemTipiId : kontrol olmaması gerekiyor
-and   takip.DeneyimSartiTipiId = 3 -- Uygun değil
-
-Group by 
-   tip.KonuId
- , tip.KonuCaption   
- , tip.DeneyimSartiTipi
- , tip.FormCaption 
-
-union all
-/*
--- Sağlık, OzurDurumTipi
-Select 
-   tip.KonuId
- , tip.KonuCaption   
- , tip.OzurDurumuTipi as KonuAciklama
- , tip.FormCaption as Islem
- , count(takip.Id) as AdaySayisi 
-
-From MtskAdayTakip as takip
-     left outer join Lkp.MtskAdayTakipOzurDurumuTipi as tip on 
-	   ( takip.OzurDurumuTipiId = tip.Id )
-Where takip.FirmId = @FirmId
-and   takip.DonemTipiId = @DonemTipiId
-and   takip.OzurDurumuTipiId > 0
-
-Group by 
-   tip.KonuId
- , tip.KonuCaption   
- , tip.OzurDurumuTipi
- , tip.FormCaption
-
-union all
-*/
 
 -- ---------------------------------------------------------------------------------
 -- DİKKAT : Özel durumdakilerin toplam sayıları için ayrı ayrı sql ile hesaplanıyor
@@ -370,7 +253,6 @@ Group by
  , tip.KonuCaption   
  , tip.OzelDurumuTipi
  , tip.FormCaption
-
 
 union all
 
@@ -487,6 +369,119 @@ Group by
  , tip.KonuCaption   
  , tip.OzelDurumuTipi
  , tip.FormCaption
+';
+
+  Set @sqlDonemTipiYok = ' 
+
+union all
+
+-- YasOnayiTipi
+Select 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.YasOnayiTipi as KonuAciklama
+ , tip.FormCaption as Islem
+ , count(takip.Id) as AdaySayisi 
+
+From MtskAdayTakip as takip
+     left outer join Lkp.MtskAdayTakipYasOnayiTipi as tip on 
+	   ( takip.YasOnayiTipiId = tip.Id )
+Where FirmId = @FirmId
+--and   DonemTipiId = @DonemTipiId : kontrol olmaması gerekiyor
+and   takip.YasOnayiTipiId >= 1 -- Yaşı tutmuyor
+and   takip.YasOnayiTipiId <= 4 -- Doğum tarihi yok
+
+Group by 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.YasOnayiTipi
+ , tip.FormCaption 
+
+union all
+
+-- IsGrupSubeYok
+Select 
+   tip.KonuId 
+ , tip.KonuCaption
+ , tip.GrupSubeTipi as KonuAciklama
+ , tip.FormCaption as Islem
+ , count(takip.Id) as AdaySayisi 
+
+From MtskAdayTakip as takip
+     left outer join Lkp.MtskAdayTakipGrupSubeTipi as tip on ( tip.KonuId = 1141 )
+
+Where FirmId = @FirmId
+-- and   DonemTipiId = @DonemTipiId : kontrol olmaması gerekiyor
+and   IsGrupSubeYok = 1
+
+group by tip.KonuId 
+       , tip.KonuCaption
+       , tip.GrupSubeTipi
+	   , tip.FormCaption
+
+union all
+
+-- DeneyimSartiTipi
+Select 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.DeneyimSartiTipi as KonuAciklama
+ , tip.FormCaption as Islem
+ , count(takip.Id) as AdaySayisi 
+
+From MtskAdayTakip as takip
+     left outer join Lkp.MtskAdayTakipDeneyimSartiTipi as tip on 
+	   ( takip.DeneyimSartiTipiId = tip.Id )
+Where FirmId = @FirmId
+--and   DonemTipiId = @DonemTipiId : kontrol olmaması gerekiyor
+and   takip.DeneyimSartiTipiId = 3 -- Uygun değil
+
+Group by 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.DeneyimSartiTipi
+ , tip.FormCaption 
+
+union all
+
+-- ZamanlamaTipi
+Select 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.ZamanlamaTipi as KonuAciklama
+ , tip.FormCaption as Islem
+ , count(takip.Id) as AdaySayisi 
+
+From MtskAdayTakip as takip
+     left outer join Lkp.MtskAdayTakipZamanlamaTipi as tip on 
+	   ( takip.ZamanlamaTipiId = tip.Id )
+Where FirmId = @FirmId
+--and   DonemTipiId = @DonemTipiId
+
+Group by 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.ZamanlamaTipi
+ , tip.FormCaption 
+
+'
+
+  if (@BugunDonemTipiId <= @DonemTipiId)
+  begin
+     Set @sql = @sql1 + @sqlDonemTipiVar + @sqlDonemTipiYok
+  end else
+  begin
+     Set @sql = @sql1 + @sqlDonemTipiVar 
+  end
+  
+  --Select len(@sqlDonemTipiVar)
+  --Select len(@sqlDonemTipiYok)
+  --Select len(@sql)
+  
+  --  print @sql
+  EXEC sp_executesql @sql
+
+
 
 
 END -- procedure

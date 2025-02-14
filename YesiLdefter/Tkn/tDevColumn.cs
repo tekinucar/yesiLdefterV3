@@ -395,17 +395,16 @@ namespace Tkn_DevColumn
                     Sql = " Select * from [Lkp].[OnmParaTipi] where IsActive = 1 ";
                 //if (tableName == "BirimTipi")
                 //    Sql = " Select * from [Lkp].[OnmStokBirimTipi] where IsActive = 1 ";
-
                 // eski
                 //if (tableName == "ILTipi")
                 //    Sql = " Select * from [Lkp].[" + tableName + "] order by IlAdi ";
                 // yeni 
                 if (tableName == "ILTipi")
                     Sql = " Select * from [Lkp].[" + tableName + "] order by IlAdiBUYUK ";
-
-
                 if (tableName == "MtskDonemTipi")
                     Sql = " Select * from [Lkp].[" + tableName + "] order by Id desc ";
+                if (tableName == "MtskSertifikaTipi")
+                    Sql = " Select * from [Lkp].[" + tableName + "] order by SiraNo ";
 
                 //if (tableName == "MtskSertifikaTipi")
 
@@ -1211,11 +1210,13 @@ namespace Tkn_DevColumn
                 //tEdit.KeyDown += new KeyEventHandler(ev.buttonEdit_KeyDown);
                 tEdit.KeyDown += new System.Windows.Forms.KeyEventHandler(evg.myRepositoryItemEdit_KeyDown);
                 tEdit.KeyPress += new KeyPressEventHandler(ev.buttonEdit_KeyPress);
-                tEdit.KeyUp += new KeyEventHandler(ev.buttonEdit_KeyUp);
+                //tEdit.KeyUp += new KeyEventHandler(ev.buttonEdit_KeyUp);
+                tEdit.KeyUp += new KeyEventHandler(evg.myRepositoryItemEdit_KeyUp);
+
                 tEdit.Leave += new EventHandler(ev.buttonEdit_Leave);
                 tEdit.ButtonClick += new
                      DevExpress.XtraEditors.Controls.ButtonPressedEventHandler(ev.buttonEdit_ButtonClick);
-
+                
                 // SİLME ÇALIŞIYOR
                 if ((tFieldName == "LKP_KOMUT") ||
                     (tFieldName == "LKP_LISTEYE_EKLE"))
@@ -1697,12 +1698,14 @@ namespace Tkn_DevColumn
             #endregion
 
             #region TextEdit
-            if (tcolumn_type == "TextEdit")
+            if (tcolumn_type == "TextEdit" || tcolumn_type == "TextEditNotUpper")
             {
                 RepositoryItemTextEdit tEdit = new RepositoryItemTextEdit();
                 tEdit.Name = "Column_" + tFieldName;
                 tEdit.AccessibleName = TableIPCode;
                 tEdit.KeyDown += new System.Windows.Forms.KeyEventHandler(evg.myRepositoryItemEdit_KeyDown);
+                if (tcolumn_type == "TextEdit")
+                    tEdit.KeyPress += new System.Windows.Forms.KeyPressEventHandler(evg.myRepositoryItemEdit_KeyPress);
 
                 //if (tProp_Navigator != "")
                 //{
@@ -2837,17 +2840,21 @@ namespace Tkn_DevColumn
                 ButtonEdit tEdit = new DevExpress.XtraEditors.ButtonEdit();
                 tEdit.Name = "Column_" + tFieldName;
                 tEdit.Enter += new EventHandler(ev.buttonEdit_Enter);
-                //tEdit.KeyDown += new KeyEventHandler(ev.buttonEdit_KeyDown);
-                tEdit.KeyPress += new KeyPressEventHandler(ev.buttonEdit_KeyPress);
-                //tEdit.KeyUp += new System.Windows.Forms.KeyEventHandler(evg.myRepositoryItemEdit_KeyDown);
-                //tEdit.KeyDown += new System.Windows.Forms.KeyEventHandler(evg.myRepositoryItemEdit_KeyDown);
-                tEdit.Leave += new EventHandler(ev.buttonEdit_Leave);
                 tEdit.ButtonClick += new
                      DevExpress.XtraEditors.Controls.ButtonPressedEventHandler(ev.buttonEdit_ButtonClick);
                 //tEdit.Tag = field_no;
                 tEdit.Properties.AccessibleName = TableIPCode;
                 tEdit.EnterMoveNextControl = true;
+
+                //tEdit.KeyDown += new KeyEventHandler(ev.buttonEdit_KeyDown);
+                tEdit.KeyUp += new System.Windows.Forms.KeyEventHandler(evg.myRepositoryItemEdit_KeyDown);
+                tEdit.KeyDown += new System.Windows.Forms.KeyEventHandler(evg.myRepositoryItemEdit_KeyDown);
                 tEdit.EditValueChanged += new EventHandler(ev.buttonEdit_EditValueChanged);
+                tEdit.KeyPress += new KeyPressEventHandler(ev.buttonEdit_KeyPress);
+                tEdit.KeyPress += new System.Windows.Forms.KeyPressEventHandler(evb.textEdit_Find_KeyPress);
+                tEdit.Leave += new EventHandler(ev.buttonEdit_Leave);
+
+
 
                 if (tFieldName == "LKP_KOMUT")
                 {
@@ -3643,7 +3650,7 @@ namespace Tkn_DevColumn
             #endregion
 
             #region TextEdit
-            if (tcolumn_type == "TextEdit")
+            if (tcolumn_type == "TextEdit" || tcolumn_type == "TextEditNotUpper")
             {
                 TextEdit tEdit = new DevExpress.XtraEditors.TextEdit();
                 tEdit.Name = "Column_" + tFieldName;
@@ -3666,7 +3673,12 @@ namespace Tkn_DevColumn
                 tEdit.EditValueChanging += new DevExpress.XtraEditors.Controls.ChangingEventHandler(ev.tXtraEdit_EditValueChanging);
                 tEdit.KeyDown += new System.Windows.Forms.KeyEventHandler(evg.myRepositoryItemEdit_KeyDown);
                 //new System.Windows.Forms.KeyEventHandler(ev.tXtraEdit_KeyDown);
-                tEdit.KeyPress += new System.Windows.Forms.KeyPressEventHandler(ev.tXtraEdit_KeyPress);
+
+                //tcolumn_type == "TextEditNotUpper" : Küçük veya büyük harf çevirimi yok, serbest giriş
+                if (tcolumn_type == "TextEdit") // sürekli büyük harfe çeviriyor
+                    tEdit.KeyPress += new System.Windows.Forms.KeyPressEventHandler(ev.tXtraEdit_KeyPress);
+                
+
                 tEdit.KeyUp += new System.Windows.Forms.KeyEventHandler(ev.tXtraEdit_KeyUp);
                 tEdit.Leave += new System.EventHandler(ev.tXtraEdit_Leave);
 

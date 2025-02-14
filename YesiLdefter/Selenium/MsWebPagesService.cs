@@ -16,6 +16,7 @@ using Tkn_SQLs;
 using Tkn_CookieReader;
 using YesiLdefter.Entities;
 using DevExpress.XtraEditors;
+using HtmlAgilityPack;
 
 namespace YesiLdefter.Selenium
 {
@@ -617,6 +618,45 @@ namespace YesiLdefter.Selenium
                     {
                         string itemText = wnv.readValue;
 
+
+                        if (wnv.TagName == "span")
+                        {
+                            /// Persoenel Branş1, Branş2, Branş3, Branş4 örneği
+                            /// Eğer tek branş varsa yani birden fazla value yok ise 
+                            /// 1. den sonra atama yapmasın
+                            if (wnv.dbColNo > 1 && itemText.IndexOf("\r\n") == -1)
+                                itemText = "";
+
+                            ///   <span id=\"lblBransi" style="color:Blue;font-weight:bold;">TRAFIK VE ÇEVRE BILGISI<BR>MOTOR VE ARAÇ TEKNIĞI<BR>DIREKSIYON EĞITIMI<BR>İLKYARDIM BILGISI</span></strong> 
+                            ///  
+                            //if (itemText != "" && itemText.IndexOf("<BR>") > -1)
+                            if (itemText != "" && itemText.IndexOf("\r\n") > -1)
+                            {
+                                    
+                                string fullText = itemText + "\r\n";
+                                string itemValue = "";
+                                bool devam = true;
+                                Int16 say = 1;
+                                while (devam)
+                                {
+                                    itemValue = t.Get_And_Clear(ref fullText, "\r\n");
+                                    if (say == wnv.dbColNo)
+                                    {
+                                        if (itemValue != "")
+                                            itemText = itemValue;
+                                        else
+                                        {
+                                            itemText = fullText;
+                                            fullText = "";
+                                        } 
+                                        break;
+                                    }
+                                    if (fullText == "\r\n") fullText = "";
+                                    say++; 
+                                }
+                            }
+                        }
+
                         if (wnv.dbLookUpField == false)
                         {
                             if (wnv.dbFieldType == 108)
@@ -834,8 +874,8 @@ namespace YesiLdefter.Selenium
             Int16 _dbColNo = 0;
             Control cntrl = null;
 
-            if (wnv.tTable != null)
-                _colNo = wnv.tTableColNo;
+            //if (wnv.tTable != null)
+            _colNo = wnv.tTableColNo;
 
             DataRow findDbRow = null;
 
@@ -850,6 +890,13 @@ namespace YesiLdefter.Selenium
                     {
                         _dbNodeId = item.WebScrapingGetNodeId;   //t.myInt32(row["WebScrapingGetNodeId"].ToString());
                         _dbColNo = item.WebScrapingGetColumnNo;  //t.myInt16(row["WebScrapingGetColumnNo"].ToString());
+
+                        /// table değil ve yine col no var ise okunan value (örnek : span) üzerinde <BR> ayrımı ile ayrılacak data var demektir
+                        /// bu nedenle aşağıda  (_dbColNo == _colNo) koşulunu geçmesi için aşağıda atama yapılıyor
+                        if (wnv.tTable == null && _dbColNo > 0)
+                            _colNo = _dbColNo;
+                        if (wnv.tTable == null && _dbColNo == 0)
+                            _colNo = 0;
                     }
                     if (select == v.tSelect.Set)
                     {
@@ -876,6 +923,7 @@ namespace YesiLdefter.Selenium
                             wnv.dbFieldName = item.FieldName;       //row["FIELD_NAME"].ToString();
                             wnv.dbLookUpField = item.FLookUpField;  //Convert.ToBoolean(row["FLOOKUP_FIELD"].ToString());
                             wnv.dbFieldType = item.FieldType;       //t.myInt16(row["FIELD_TYPE"].ToString());
+                            wnv.dbColNo = _dbColNo;
 
                             DataSet ds = null;
                             DataNavigator dN = null;
@@ -1165,7 +1213,7 @@ namespace YesiLdefter.Selenium
 
             // bir eşleşmezse bulmaz ise gelen value dönsün
             // böylece bazı WebNodeItems lar saklanmaya gerek kalmadı
-            if (value == "")
+            if (value == "" && findText != "")
             {
                 MessageBox.Show("DİKKAT : MsWebNodeItems tablosunda aranan text in valuesi tespit edilemedi ..." + v.ENTER2 + wnv.AttName + " = " + findText);
                 value = findText;
@@ -1501,18 +1549,43 @@ namespace YesiLdefter.Selenium
             //Control cntrl = null;
             string[] controls = new string[] { };
             #region
-            f.btn_PageView = t.Find_Control(tForm, "simpleButton_ek1", TableIPCode, controls);
-            // Page View
-            //if (f.btn_PageView != null)
-            //{
-            //    ((DevExpress.XtraEditors.SimpleButton)f.btn_PageView).Click += new System.EventHandler(myPageViewClick);
-            //}
+            Control cntrlBtn = null;
+            
+            cntrlBtn = t.Find_Control(tForm, "simpleButton_ek1", TableIPCode, controls);
+
+            if (cntrlBtn != null)
+            {
+                if (((DevExpress.XtraEditors.SimpleButton)cntrlBtn).Text.Trim() == "Page View")
+                    f.btn_PageView = t.Find_Control(tForm, "simpleButton_ek1", TableIPCode, controls);
+            }
+
+            cntrlBtn = null;
+            cntrlBtn = t.Find_Control(tForm, "simpleButton_ek2", TableIPCode, controls);
+
+            if (cntrlBtn != null)
+            {
+                if (((DevExpress.XtraEditors.SimpleButton)cntrlBtn).Text.Trim() == "Page Analysis")
+                    f.btn_Analysis = t.Find_Control(tForm, "simpleButton_ek2", TableIPCode, controls);
+            }
+
+            if (TableIPCode == "UST/PMS/MsWebNodes.Analysis_L01")
+            {
+                cntrlBtn = null;
+                cntrlBtn = t.Find_Control(tForm, "checkButton_ek1", TableIPCode, controls);
+                if (cntrlBtn != null)
+                {
+                    if (((DevExpress.XtraEditors.CheckButton)cntrlBtn).Text.Trim() == "Node View")
+                        f.btn_AnalysisNodeView = t.Find_Control(tForm, "checkButton_ek1", TableIPCode, controls);
+                }
+            }
+
             // Bilgileri Sorgula / AlwaysSet  (TcNo sorgula gibi) // Bu henüz hiç kullanılmadı 
-            f.btn_AlwaysSet = t.Find_Control(tForm, "simpleButton_ek2", TableIPCode, controls);
+            //f.btn_AlwaysSet = t.Find_Control(tForm, "simpleButton_ek2", TableIPCode, controls);
             //if (f.btn_AlwaysSet != null)
             //{
             //    ((DevExpress.XtraEditors.SimpleButton)f.btn_AlwaysSet).Click += new System.EventHandler(myAlwaysSetClick);
             //}
+
             // Bilgileri Al 1
             f.btn_FullGet1 = t.Find_Control(tForm, "simpleButton_ek3", TableIPCode, controls);
             //if (f.btn_FullGet1 != null)
@@ -1582,7 +1655,8 @@ namespace YesiLdefter.Selenium
         public bool LoginOnayi(DataSet ds_MsWebPages, DataNavigator dN_MsWebPages)
         {
             bool onay = false;
-            string soru = "Mebbis Giriş sayfasını açmak ister misiniz ?";
+            string pageName = ds_MsWebPages.Tables[0].Rows[dN_MsWebPages.Position]["About"].ToString();
+            string soru = pageName + " giriş sayfasını açmak ister misiniz ?";
 
             string loginPage = ds_MsWebPages.Tables[0].Rows[dN_MsWebPages.Position]["LoginPage"].ToString();
 
@@ -1651,6 +1725,60 @@ namespace YesiLdefter.Selenium
 
             #endregion DataNavigator Listesi
         }
+
+        public void listNode_(HtmlNodeCollection listNode, DataSet ds_AnalysisNodes, webForm f)
+        {
+            foreach (HtmlNode nNode in listNode)
+            {
+                if (nNode.GetType().ToString() != "HtmlAgilityPack.HtmlTextNode")
+                {
+                    //listAdd(this.nodeId, this.parentId, nNode);
+                    listAdd(ds_AnalysisNodes, f, nNode);
+
+                    if (nNode.ChildNodes != null)
+                    {
+                        //parentId = -1;
+                        f.analysisParentId = -1;
+                        listNode_(nNode.ChildNodes, ds_AnalysisNodes, f);
+                    }
+                }
+            }
+        }
+        private void listAdd(DataSet ds_AnalysisNodes, webForm f, HtmlNode nNode)
+        {
+            if (nNode.Name == "br") return;
+
+            int NodeId = f.analysisNodeId;
+            int parentId = f.analysisParentId;
+
+            DataRow row = ds_AnalysisNodes.Tables[0].NewRow();
+
+            row["NodeId"] = NodeId;
+            row["ParentId"] = parentId;
+            row["IsActive"] = 0;
+            row["TagName"] = nNode.Name;
+
+            if (nNode.Attributes["id"] != null) row["AttId"] = nNode.Attributes["id"].Value;
+            if (nNode.Attributes["name"] != null) row["AttName"] = nNode.Attributes["name"].Value;
+            if (nNode.Attributes["class"] != null) row["AttClass"] = nNode.Attributes["class"].Value;
+            if (nNode.Attributes["type"] != null) row["AttType"] = nNode.Attributes["type"].Value;
+            if (nNode.Attributes["role"] != null) row["AttRole"] = nNode.Attributes["role"].Value;
+            if (nNode.Attributes["href"] != null) row["AttHRef"] = nNode.Attributes["href"].Value;
+            if (nNode.Attributes["src"] != null) row["AttSrc"] = nNode.Attributes["src"].Value;
+            if (nNode.XPath != null) row["xPath"] = nNode.XPath;
+
+            row["InnerHtml"] = nNode.InnerHtml;
+            row["InnerText"] = nNode.InnerText;
+            row["OuterHtml"] = nNode.OuterHtml;
+            //row["OuterText"] = nNode.OuterText; burda outer text yokmuş
+
+            ds_AnalysisNodes.Tables[0].Rows.Add(row);
+
+            //this.nodeId++;
+            f.analysisNodeId++;
+        }
+
+
 
     }
 }

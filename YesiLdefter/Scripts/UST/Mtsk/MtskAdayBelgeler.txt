@@ -138,8 +138,7 @@ AS BEGIN
             (@ImzaTarandi = 1) and
             (@Sozlesme1Tarandi = 1) and
             (@Sozlesme2Tarandi = 1) --and
-            --(@AdresKodlandi = 1
-            )
+            --(@AdresKodlandi = 1)
             ) set @BelgelerTarandi = 1
 
         if ((@AdayKaydiYapildi = 1) and

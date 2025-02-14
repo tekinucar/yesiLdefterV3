@@ -351,9 +351,494 @@ delete [Lkp].[MtskPersoneliStatusuTipi]
 INSERT INTO [Lkp].[MtskPersoneliStatusuTipi] (Id, StatusuTipi, GrupTipiId)
  VALUES 
   ( -1,   N'', 1),
-  (  0,   N'Ders Ücretli', 1 ), 
+  (  0,   N'Ders Ücretli Eğitim Personeli', 1 ), 
   (  2,   N'Diğer Personel', 1 ), 
   (  1,   N'Kadrolu', 1 ), 
-  (  3,   N'Kısmi Süreli Çalıştırılacak Personel', 1 )
+  (  3,   N'Kısmi Süreli Çalıştırılacak Personel', 1 ),
+  (  4,   N'Asıl Görevli Aylık Ücretli Eğitim Personeli', 1)
+
+
+
+-- ------------------------------------------------------- 
+-- Brans1Tipi
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskPersoneliBrans1Tipi')
+drop table [Lkp].[MtskPersoneliBrans1Tipi]
+
+create table [Lkp].[MtskPersoneliBrans1Tipi]
+(
+   Id               Int Unique Not null,
+   Brans1Tipi       nVarchar(50)   null,
+   GrupTipiId       SmallInt       null,
+
+   constraint  pk_MtskPersoneliBrans1Tipi primary key (Id)
+)
+
+delete [Lkp].[MtskPersoneliBrans1Tipi] 
+
+INSERT INTO [Lkp].[MtskPersoneliBrans1Tipi] (Id, Brans1Tipi, GrupTipiId)
+ VALUES 
+  (  0,     N'', 1 ), 
+  ( 1246,   N'Direksiyon Eğitimi', 1 ), 
+  ( 1803,   N'Motor ve Araç Tekniği', 1 ),
+  ( 4878,   N'Trafik ve Çevre Bilgisi', 1 ), 
+  ( 9988,   N'İlkyardım Bilgisi', 1 ), 
+  ( 10000,  N'Trafik ve İlk Yardım', 1 )
+
+-- ------------------------------------------------------- 
+-- Brans2Tipi
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskPersoneliBrans2Tipi')
+drop table [Lkp].[MtskPersoneliBrans2Tipi]
+
+create table [Lkp].[MtskPersoneliBrans2Tipi]
+(
+   Id               Int Unique Not null,
+   Brans2Tipi       nVarchar(50)   null,
+   GrupTipiId       SmallInt       null,
+
+   constraint  pk_MtskPersoneliBrans2Tipi primary key (Id)
+)
+
+delete [Lkp].[MtskPersoneliBrans2Tipi] 
+
+INSERT INTO [Lkp].[MtskPersoneliBrans2Tipi] (Id, Brans2Tipi, GrupTipiId)
+ VALUES 
+  (  0,     N'', 1 ), 
+  ( 1246,   N'Direksiyon Eğitimi', 1 ), 
+  ( 1803,   N'Motor ve Araç Tekniği', 1 ),
+  ( 4878,   N'Trafik ve Çevre Bilgisi', 1 ), 
+  ( 9988,   N'İlkyardım Bilgisi', 1 ), 
+  ( 10000,  N'Trafik ve İlk Yardım', 1 )
+
+
+-- ------------------------------------------------------- 
+-- Brans3Tipi
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskPersoneliBrans3Tipi')
+drop table [Lkp].[MtskPersoneliBrans3Tipi]
+
+create table [Lkp].[MtskPersoneliBrans3Tipi]
+(
+   Id               Int Unique Not null,
+   Brans3Tipi       nVarchar(50)   null,
+   GrupTipiId       SmallInt       null,
+
+   constraint  pk_MtskPersoneliBrans3Tipi primary key (Id)
+)
+
+delete [Lkp].[MtskPersoneliBrans3Tipi] 
+
+INSERT INTO [Lkp].[MtskPersoneliBrans3Tipi] (Id, Brans3Tipi, GrupTipiId)
+ VALUES 
+  (  0,     N'', 1 ), 
+  ( 1246,   N'Direksiyon Eğitimi', 1 ), 
+  ( 1803,   N'Motor ve Araç Tekniği', 1 ),
+  ( 4878,   N'Trafik ve Çevre Bilgisi', 1 ), 
+  ( 9988,   N'İlkyardım Bilgisi', 1 ), 
+  ( 10000,  N'Trafik ve İlk Yardım', 1 )
+
+
+
+-- ------------------------------------------------------- 
+-- Brans4Tipi
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskPersoneliBrans4Tipi')
+drop table [Lkp].[MtskPersoneliBrans4Tipi]
+
+create table [Lkp].[MtskPersoneliBrans4Tipi]
+(
+   Id               Int Unique Not null,
+   Brans4Tipi       nVarchar(50)   null,
+   GrupTipiId       SmallInt       null,
+
+   constraint  pk_MtskPersoneliBrans4Tipi primary key (Id)
+)
+
+delete [Lkp].[MtskPersoneliBrans4Tipi] 
+
+INSERT INTO [Lkp].[MtskPersoneliBrans4Tipi] (Id, Brans4Tipi, GrupTipiId)
+ VALUES 
+  (  0,     N'', 1 ), 
+  ( 1246,   N'Direksiyon Eğitimi', 1 ), 
+  ( 1803,   N'Motor ve Araç Tekniği', 1 ),
+  ( 4878,   N'Trafik ve Çevre Bilgisi', 1 ), 
+  ( 9988,   N'İlkyardım Bilgisi', 1 ), 
+  ( 10000,  N'Trafik ve İlk Yardım', 1 )
+
+
 
 /*CreateLkpTableEnd*/
+
+
+/*
+
+    <option value="-1"> </option>
+	<option value="7200">Acil Sağlık Hizmetleri</option>
+	<option value="7028">Adalet</option>
+	<option value="2196">Ağaç İşleri</option>
+	<option value="2208">Ağaç İşleri 1</option>
+	<option value="2246">Almanca</option>
+	<option value="10019">Almanca Drama</option>
+	<option value="9989">Alt Özel Sınıf Öğretmenliği</option>
+	<option value="2250">Alt Yapı</option>
+	<option value="5002">Anestezi ve Reanimasyon</option>
+	<option value="1528">Arapça</option>
+	<option value="2422">Astronomi</option>
+	<option value="4599">Ayakkabıcılık</option>
+	<option value="4825">Ayakkabıcılık 1</option>
+	<option value="4898">Bale</option>
+	<option value="10008">Basketbol</option>
+	<option value="2265">Beden Eğitimi</option>
+	<option value="2792">Bes/Gıda Tek.Ev Y.ve Bes.</option>
+	<option value="2299">Bes/Gıda Tek.Ev Y.ve Bes.</option>
+	<option value="2284">Besin Teknolojisi</option>
+	<option value="4806">Beslenme ve Ev Yonetimi</option>
+	<option value="9975">Bilgi Teknolojileri</option>
+	<option value="1139">Bilgisayar</option>
+	<option value="1138">Bilgisayar İşletmenliği</option>
+	<option value="9987">Bilgisayar Okuryazarlığı</option>
+	<option value="1140">Bilgisayar Öğretmenliği</option>
+	<option value="1119">Bilgisayar Programcısı</option>
+	<option value="1142">Bilgisayarlı Muhasebe</option>
+	<option value="1120">Bilişim Teknolojileri</option>
+	<option value="9980">Biyoloji</option>
+	<option value="4760">Biyoloji(Alm)/Fen B.(Alm)</option>
+	<option value="1123">Biyoloji/Fen Bilgisi</option>
+	<option value="4756">Biyoloji(Fra)/Fen B.(Fra)</option>
+	<option value="4741">Biyoloji(İng)/Fen B.(İng)</option>
+	<option value="10027">Buz Pateni</option>
+	<option value="4918">Büro Yönetimi ve Sekreterlik</option>
+	<option value="10012">Cam Tasarım</option>
+	<option value="1314">Cilt Bakımı Makyaj</option>
+	<option value="1161">Ciltleme ve Serigrafi</option>
+	<option value="10004">Cimnastik</option>
+	<option value="1206">Coğrafya</option>
+	<option value="9981">Coğrafya</option>
+	<option value="1207">Coğrafya/Milli Coğrafya</option>
+	<option value="10001">Çağdaş Türk Lehçeleri ve Edebiyatları</option>
+	<option value="8500">Çevre ve Bilim</option>
+	<option value="1157">Çiçek Örgü Dokuma</option>
+	<option value="4881">Çince</option>
+	<option value="1176">Çinicilik ve Seramik</option>
+	<option value="10053">Çocuk Gelişimcisi</option>
+	<option value="1180">Çocuk Gelişimi ve Bakımı</option>
+	<option value="4443">Çocuk Gelişimi ve Eğit. </option>
+	<option value="10014">Dans</option>
+	<option value="1264">Dekoratif Ürünleri</option>
+	<option value="1230">Denizcilik</option>
+	<option value="1226">Deri Hazır Giyim</option>
+	<option value="10069">Diksiyon</option>
+	<option value="9991">Dil ve Konuşma Bozuklukları Uzmanı</option>
+	<option value="9993">Dil ve Konuşma Pataloğu</option>
+	<option value="9992">Dil ve Konuşma Terapisti</option>
+	<option value="1245">Din Kül.ve Ahlak Bilgisi</option>
+	<option value="1246">Direksiyon Eğitimi</option>
+	<option value="2930">Diş Protez</option>
+	<option value="2300">Dizgi</option>
+	<option value="10030">Doktor</option>
+	<option value="1231">Drama</option>
+	<option value="1298">Eğitim Araçları</option>
+	<option value="9995">Eğitim Odyoloğu</option>
+	<option value="10043">Eğlence Hizmetleri</option>
+	<option value="10048">Ekoloji Öğretmenliği</option>
+	<option value="9994">Ekonomi</option>
+	<option value="2315">El Sanatları Çiçek</option>
+	<option value="1334">Elektrik</option>
+	<option value="10047">Elektrik-Elektronik Teknolojisi</option>
+	<option value="1333">Elektronik</option>
+	<option value="4909">Emlakçılık</option>
+	<option value="1352">Endüstriyel Boya Dekoras.</option>
+	<option value="4405">Endüstriyel Elektrik</option>
+	<option value="1367">Endüstriyel Elektronik</option>
+	<option value="10036">Endüstriyel Otomasyon</option>
+	<option value="10052">Ergoterapist</option>
+	<option value="1368">Ermenice</option>
+	<option value="10062">Eskrim</option>
+	<option value="2559">Ev Ekonomisi ve Beslenme</option>
+	<option value="2506">Ev Yönetimi Bes.Grubu</option>
+	<option value="2227">Ev Yönetimi ve Beslenme</option>
+	<option value="2231">Ev Yönetimi ve Beslenme 1</option>
+	<option value="10032">Farsça</option>
+	<option value="9982">Felsefe</option>
+	<option value="1371">Felsefe Grubu</option>
+	<option value="9996">Felsefe Grubu(Rehber Öğretmenlik Görevi Yürütecektir)</option>
+	<option value="1386">Fen Bilgisi</option>
+	<option value="4672">Fen Bilgisi ( Alm )</option>
+	<option value="4668">Fen Bilgisi ( Fra )</option>
+	<option value="4653">Fen Bilgisi ( İng )</option>
+	<option value="10063">Fen Bilimleri</option>
+	<option value="1388">Fen ve Teknoloji</option>
+	<option value="1390">Fizik</option>
+	<option value="4703">Fizik (Alm)/Fen Bil.(Alm)</option>
+	<option value="4691">Fizik (Fra)/Fen Bil.(Fra)</option>
+	<option value="4687">Fizik(İng)/Fen Bil.(İng)</option>
+	<option value="5000">Fizyoterapist</option>
+	<option value="4902">Folklör</option>
+	<option value="1402">Fotoğraf ve Klişe</option>
+	<option value="1417">Fransızca</option>
+	<option value="1418">Fransızca (1-5.Sınıflar)</option>
+	<option value="10015">Futbol</option>
+	<option value="4600">Gazetecilik</option>
+	<option value="2460">Geleneksel Türk El Sanatları</option>
+	<option value="1421">Gemi Elekt. ve Haberleşme</option>
+	<option value="2895">Gemi İnşaa</option>
+	<option value="1436">Gemi Makineleri</option>
+	<option value="1440">Gemicilik</option>
+	<option value="10044">Gıda Teknolojisi</option>
+	<option value="10022">Girişimcilik</option>
+	<option value="10011">Gitar</option>
+	<option value="1474">Giyim ve Ev Aksesuarları</option>
+	<option value="2418">Giyim 1</option>
+	<option value="1455">Giyim-Hazır Giyim</option>
+	<option value="2334">Giyim-Hazır Giyim</option>
+	<option value="2647">Görme Engelliler Sın.Öğr.</option>
+	<option value="1926">Görsel Sanatlar/Resim</option>
+	<option value="9977">Grafik</option>
+	<option value="1489">Güverte</option>
+	<option value="1493">Güverte Avlama</option>
+	<option value="10056">Güzellik ve Saç Bakım Hizmetleri</option>
+	<option value="2494">Halıcılık Kursu</option>
+	<option value="2822">Halk Oyunları</option>
+	<option value="4900">Halkla İlişkiler</option>
+	<option value="1505">Harita Kadastro</option>
+	<option value="5001">Hemşirelik</option>
+	<option value="3000">Heykelcilik</option>
+	<option value="10031">Hızlı Okuma</option>
+	<option value="2773">Hollandaca</option>
+	<option value="4901">Hosteslik</option>
+	<option value="10003">Hukuk</option>
+	<option value="9974">İbranice</option>
+	<option value="1348">İç Mimar Dekorasyon</option>
+	<option value="4897">İHL.Arapça Meslek Dersi</option>
+	<option value="4913">İki Boyutlu Sanat Atölye</option>
+	<option value="1608">İktisat</option>
+	<option value="10050">İlköğretim Matematik</option>
+	<option value="2475">İlköğretim Müf. Yard.</option>
+	<option selected="selected" value="9988">İlkyardım Bilgisi</option>
+	<option value="1524">İngilizce</option>
+	<option value="1523">İngilizce (1-5.Sınıflar)</option>
+	<option value="10065">İnşaat Mühendisliği</option>
+	<option value="1539">İplik</option>
+	<option value="1529">İspanyolca</option>
+	<option value="1609">İstatistik</option>
+	<option value="1562">İş Eğitimi ( Tarım )</option>
+	<option value="1577">İş Eğitimi ( Ticaret )</option>
+	<option value="1543">İş Eğitimi (Ev Ekonomisi)</option>
+	<option value="1558">İş Eğit.(İş ve Tek. Eğit)</option>
+	<option value="1581">İş Makineleri</option>
+	<option value="10035">İşaret Dili</option>
+	<option value="2651">İşitme Engelliler Sınıfı Öğretmeni</option>
+	<option value="1596">İşletme </option>
+	<option value="1525">İtalyanca</option>
+	<option value="4903">İtalyanca-Latince</option>
+	<option value="4882">Japonca</option>
+	<option value="1612">Kalıpçılık</option>
+	<option value="4584">Kamu Yönetimi</option>
+	<option value="10010">Kayak</option>
+	<option value="10006">Keman</option>
+	<option value="2628">Kimya</option>
+	<option value="10054">Kimya / Kimya Teknolojisi</option>
+	<option value="4737">Kimya (Alm)/Fen Bil.(Alm)</option>
+	<option value="4722">Kimya (Fra)/Fen Bil.(Fra)</option>
+	<option value="4718">Kimya (İng)/Fen Bil.(İng)</option>
+	<option value="10024">Kimya Mühendisliği</option>
+	<option value="1627">Kimya/Fen Bilgisi</option>
+	<option value="2788">Klasik Ciltcilik</option>
+	<option value="10040">Korece</option>
+	<option value="1631">Kuaförlük</option>
+	<option value="1646">Kuaförlük 1</option>
+	<option value="10033">Kuran-ı Kerim</option>
+	<option value="2544">Kurs Öğretmenliği</option>
+	<option value="1647">Kürtçe</option>
+	<option value="1650">Kütüphanecilik</option>
+	<option value="10042">Laboratuvar Hizmetleri</option>
+	<option value="9973">Latince </option>
+	<option value="1665">Liman İşletmeciliği</option>
+	<option value="10023">Lojistik</option>
+	<option value="2349">Maden</option>
+	<option value="2926">Mahalli İdareler Grubu</option>
+	<option value="1684">Makine</option>
+	<option value="1699">Makine Ressamlığı</option>
+	<option value="2055">Makine Teknik Resmi</option>
+	<option value="10055">Makine Teknolojisi / Makine ve Tasarım Teknolojisi</option>
+	<option value="1690">Maliye</option>
+	<option value="9972">Masa Tenisi</option>
+	<option value="1700">Matbaa</option>
+	<option value="2353">Matematik</option>
+	<option value="4649">Matematik ( Alm )</option>
+	<option value="4634">Matematik ( Fra )</option>
+	<option value="4615">Matematik ( İng )</option>
+	<option value="1715">Matematik 1</option>
+	<option value="7064">Mekatronik</option>
+	<option value="8888">Merkez Personeli</option>
+	<option value="9979">Meslek Dersleri</option>
+	<option value="2525">Metal İşleri</option>
+	<option value="1734">Metal İşleri 1</option>
+	<option value="1749">Metoroloji</option>
+	<option value="1753">Mikroteknoloji</option>
+	<option value="2931">Milli Güvenlik</option>
+	<option value="1772">Mobilya Dekorasyon</option>
+	<option value="2582">Mobilya Dekorasyon 1</option>
+	<option value="1787">Model</option>
+	<option value="10038">Model Hava Araçları</option>
+	<option value="4906">Modern Dans</option>
+	<option value="1791">Motor</option>
+	<option value="1803">Motor ve Araç Tekniği</option>
+	<option value="10058">Motorlu Araçlar Teknolojisi</option>
+	<option value="1768">M.Tarih M.Coğ.Vat.Bilgisi</option>
+	<option value="1819">Muhasebe</option>
+	<option value="1818">Muhasebe Grubu</option>
+	<option value="1822">Müzik</option>
+	<option value="1837">Nakış</option>
+	<option value="2441">Nakış 1</option>
+	<option value="10051">Odyolog</option>
+	<option value="10028">Odyoloji</option>
+	<option value="9990">Odyoloji ve Konuşma Bozuklukları Uzmanı</option>
+	<option value="4904">Odyometri</option>
+	<option value="1856">Ofset</option>
+	<option value="10037">Okçuluk</option>
+	<option value="4439">Okul Öncesi</option>
+	<option value="2857">Okul Öncesi Öğr.Çoc.Gel.</option>
+	<option value="10009">Orientiring</option>
+	<option value="2437">Otelcilik ve Turizm</option>
+	<option value="10025">Otobüs Kaptanlığı</option>
+	<option value="2819">Otomatik Kumanda</option>
+	<option value="1860">Öğretmenlik Mes.Bil.Ders.</option>
+	<option value="9997">Ölçme ve Değerlendirme Uzmanı (Rehber Öğretmenlik Görevi Yürütecektir.)</option>
+	<option value="4916">Özel Destek Eğitim Rehber Öğretmeni</option>
+	<option value="10002">Özel Eğitim Alanı</option>
+	<option value="4844">Özel Eğitim Kursu</option>
+	<option value="2563">Özel Eğitim Öğretmenliği</option>
+	<option value="9998">Pazarlama ve Perakende</option>
+	<option value="10005">Perküsyon</option>
+	<option value="10060">Piyano</option>
+	<option value="10057">Plastik Sanatlar</option>
+	<option value="10013">Pop Orkestra</option>
+	<option value="2369">Psikolog</option>
+	<option value="2368">Psikoloji</option>
+	<option value="2838">Radyo Televizyon</option>
+	<option value="2212">Rehber</option>
+	<option value="1894">Rehber Öğretmenliği</option>
+	<option value="10026">Rehberlik</option>
+	<option value="1895">Rehberlik ve Ölçme Değ. Ser.</option>
+	<option value="4795">Rekreasyon Uzmanı</option>
+	<option value="1906">Resim</option>
+	<option value="1925">Resim İş / Resim</option>
+	<option value="1910">Resim 1</option>
+	<option value="4794">Resim-Grafik</option>
+	<option value="9983">Resim-iş</option>
+	<option value="2372">Restorasyon</option>
+	<option value="1526">Rumca</option>
+	<option value="1527">Rusça</option>
+	<option value="1945">Sağlık Bilgisi</option>
+	<option value="1944">Sağlık Mes. Lis. Mes.Der.</option>
+	<option value="7115">Sağlık/Sağlık Hizmetleri</option>
+	<option value="10018">Salsa</option>
+	<option value="1958">Sanat</option>
+	<option value="1959">Sanat Tarihi</option>
+	<option value="9976">Satranç</option>
+	<option value="1963">Sekreterlik Grubu</option>
+	<option value="1978">Seramik</option>
+	<option value="1982">Seramik Sanatı</option>
+	<option value="2403">Sınıf Öğretmenliği</option>
+	<option value="10039">Sivil Havacılık</option>
+	<option value="2510">Sosyal Bilgiler</option>
+	<option value="10059">Sosyal Hizmet Uzmanı</option>
+	<option value="9986">Sosyoloji</option>
+	<option value="4907">Spikerlik ve Sunuculuk</option>
+	<option value="10016">Step-Aerobik</option>
+	<option value="1841">Stilistik-Modelistik</option>
+	<option value="2017">Su Ürünleri</option>
+	<option value="2804">Sus Bitkileri ve Seracılk</option>
+	<option value="2021">Süsleme Taşçılığı</option>
+	<option value="7080">Tarım Tek./Tarım Makineleri</option>
+	<option value="2035">Tarih</option>
+	<option value="2036">Tarih/Milli Tarih</option>
+	<option value="2667">Tasarım</option>
+	<option value="10046">Tasarım Teknolojileri</option>
+	<option value="10061">Tehlikeli Madde Güvenlik Danışmanı</option>
+	<option value="2040">Teknik Resim</option>
+	<option value="4915">Teknoloji ve Tasarım</option>
+	<option value="1279">Tekstil Dokuma</option>
+	<option value="2456">Tekstil İplik</option>
+	<option value="2074">Tekstil Kalite Kontrol</option>
+	<option value="1875">Tekstil Örme</option>
+	<option value="2666">Tekstil Tasarim</option>
+	<option value="2089">Telekominikasyon</option>
+	<option value="2093">Terzilik</option>
+	<option value="2842">Tesisat Teknolojisi</option>
+	<option value="1997">Tesisat Teknolojisi</option>
+	<option value="2105">Tesviye</option>
+	<option value="4424">Tesviye 1</option>
+	<option value="7100">Tıbbi Laboratuvar</option>
+	<option value="4910">Tıbbi Sekreterlik</option>
+	<option value="4565">Ticaret Grubu</option>
+	<option value="4393">Ticaret Lis. Meslek Der.</option>
+	<option value="2124">Tipo Baskı</option>
+	<option value="2391">Tipo Baskı 1</option>
+	<option value="2824">Tiyatro</option>
+	<option value="4908">Toplum Önünde Söz Söyleme</option>
+	<option value="4877">Trafik Eğitimi</option>
+	<option value="4878">Trafik ve Çevre Bilgisi</option>
+	<option value="10000">Trafik ve İlk Yardım</option>
+	<option value="2139">Trikotaj</option>
+	<option value="4810">Turizm ve Otelcilik Grubu</option>
+	<option value="9985">Türk Dili</option>
+	<option value="9984">Türk Dili Ve Edebiyatı</option>
+	<option value="2823">Türk Halk Oyunları</option>
+	<option value="2143">Türkçe</option>
+	<option value="1998">Türkçe</option>
+	<option value="2907">Uçak Bakımı</option>
+	<option value="4905">Uçuş</option>
+	<option value="9999">Ulaştırma Hizmetleri</option>
+	<option value="10064">Uluslararası İlişkiler</option>
+	<option value="2162">Uygulamalı Resim</option>
+	<option value="4914">Üç Boyutlu Sanat Atölye</option>
+	<option value="2158">Üst Yapı</option>
+	<option value="10017">Vals</option>
+	<option value="4899">Vatandaşlık Bilgisi</option>
+	<option value="10007">Viyolonsel</option>
+	<option value="2301">Voleybol</option>
+	<option value="2177">Yapı</option>
+	<option value="2181">Yapı Ressamlığı</option>
+	<option value="2387">Yapı Teknik Resmi</option>
+	<option value="10034">Yelkenci</option>
+	<option value="10041">Yenilenebilir Enerji Teknolojileri</option>
+	<option value="7300">Yiyecek İçecek Hizmetleri</option>
+	<option value="10045">Yoga</option>
+	<option value="10021">Yönetim Bilimi</option>
+	<option value="10020">Yönetişim</option>
+	<option value="4911">Yüzme</option>
+	<option value="10029">Zeka Oyunları</option>
+	<option value="2632">Zihinsel Engelliler Sın.Öğr.</option>
+
+
+
+*/
+
+
+/*   görev 
+
+	<option value="-1"> </option>
+	<option value="64">Alan/Bölüm Şefi</option>
+	<option value="51">Dil ve Konuşma Bozuklukları Pataloğu</option>
+	<option value="50">Dil ve Konuşma Bozuklukları Terapisti</option>
+	<option value="49">Dil ve Konuşma Bozuklukları Uzmanı</option>
+	<option value="29">Fizyoterapist</option>
+	<option value="1">Genel Müdür</option>
+	<option value="2">Genel Müdür Yardımcısı</option>
+	<option value="72">Koordinatör Müdür</option>
+	<option value="3">Kurum Müdürü</option>
+	<option value="21">Müdür Başyardımcısı</option>
+	<option value="5">Müdür Yardımcısı</option>
+	<option value="48">Odyoloji ve Konuşma Bozuklukları Uzmanı</option>
+	<option value="11">Öğretmen</option>
+	<option value="27">Psikolog</option>
+	<option value="9">Rehber Öğretmen</option>
+	<option value="41">Sosyal Hizmet Uzmanı</option>
+	<option value="4">Türk Müdür Başyardımcısı</option>
+	<option selected="selected" value="17">Usta Öğretici</option>
+	<option value="15">Uzman Öğretici</option>
+
+*/

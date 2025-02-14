@@ -92,6 +92,11 @@ BEGIN
           if (@gunTipiId = 2) and (@gunNo <> 1) 
               set @isGunu = @isGunu + 1 -- pazar değilse isGunu +1 olsun 
 
+          -- @gunTipiId : 0 tatil gün şekli belirtilmemiş ise
+          -- @gunNo     : 1 = Pazar değilse
+          if (@gunTipiId = 0) and (@gunNo <> 1) 
+              set @isGunu = @isGunu + 1 -- pazar değilse isGunu +1 olsun 
+
           if (@istenenIsGunu = @isGunu - 1) 
               set @sonuc = @isGunu
 

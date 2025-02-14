@@ -50,6 +50,7 @@
   <PropertyGroup>
     <ApplicationIcon>Toma4025-Rumax-Network.ico</ApplicationIcon>
   </PropertyGroup>
+  <PropertyGroup />
   <ItemGroup>
     <Reference Include="AxInterop.zkemkeeper, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>

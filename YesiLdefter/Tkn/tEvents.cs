@@ -295,7 +295,7 @@ namespace Tkn_Events
             //    e.Column.ColumnName, e.Row.RowState);
             DataRow row = e.Row;
             string columnName = e.Column.ColumnName;
-                        
+            
             tSetDataStateChanges(sender, row, columnName);
         }
 
@@ -1054,11 +1054,13 @@ namespace Tkn_Events
 
         public void buttonEdit_EditValueChanged(object sender, EventArgs e)
         {
-            if (t.IsSearchControl(sender))
-            {
-                tSearch se = new tSearch();
-                se.searchEditValueChanged(sender, e);
-            }
+
+            //if (t.IsSearchControl(sender))
+            //{
+            //    tSearch se = new tSearch();
+            //    se.searchEditValueChanged(sender, e);
+            //}
+
         }
 
         public void buttonEdit_Leave(object sender, EventArgs e)
@@ -1094,6 +1096,8 @@ namespace Tkn_Events
 
         public void buttonEdit_KeyPress(object sender, KeyPressEventArgs e)
         {
+            // Basılan tuşu büyük harfe dönüştür
+            e.KeyChar = char.ToUpper(e.KeyChar);
             //MessageBox.Show("buttonEdit1_KeyPress");
         }
 
@@ -1431,6 +1435,8 @@ namespace Tkn_Events
 
         public void tXtraEdit_KeyPress(object sender, KeyPressEventArgs e)
         {
+            // Basılan tuşu büyük harfe dönüştür
+            e.KeyChar = char.ToUpper(e.KeyChar);
             v.con_Expression = true;
         }
 
@@ -7280,7 +7286,38 @@ namespace Tkn_Events
                 onay = tSubDetail_Read(tForm, ds_Master, dN_Master, mst_TableIPCode, SubDetail_TableIPCode);
             }
 
+            SubDetail_List = dN_Master.Text;
+            if (SubDetail_List.IndexOf("MaliDonemChanger:null") == -1)
+            {
+                string menuCodeAndFieldName = t.Get_And_Clear(ref SubDetail_List, ";");
+                menuCodeAndFieldName = t.MyProperties_Get(menuCodeAndFieldName, "MaliDonemChanger:");
+                string menuCode = t.Get_And_Clear(ref menuCodeAndFieldName, "||");
+                string fieldName = t.Get_And_Clear(ref menuCodeAndFieldName, "||");
+                maliDonemChanger(tForm, ds_Master, dN_Master, menuCode, fieldName);
+            }
+
             return onay;
+        }
+
+        private void maliDonemChanger(Form tForm, DataSet ds, DataNavigator dN, string menuCode, string fieldName)
+        {
+            if (t.IsNotNull(ds))
+            {
+                int pos = dN.Position;
+                if (pos == -1 && ds.Tables[0].Rows.Count > 0)
+                    pos = 0;
+                    
+                if (pos > -1 && t.IsNotNull(fieldName))
+                {
+                    tEventsMenu evm = new tEventsMenu();
+                    v.DONEMTIPI_YILAY_OLD = v.DONEMTIPI_YILAY;
+                    int value =  t.myInt32(ds.Tables[0].Rows[pos][fieldName].ToString());
+                    string caption = evm.getYilAyCaption(value);
+                    v.DONEMTIPI_YILAY = value;
+                    evm.setYilAyCaption(tForm, v.DONEMTIPI_YILAY, caption, "MENU_" + menuCode, t);
+                    //evm.yilAyFormRefresh(tForm);
+                }
+            }
         }
 
         public bool tSubDetail_Read(Form tForm,
