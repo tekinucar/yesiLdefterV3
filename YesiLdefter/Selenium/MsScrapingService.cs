@@ -5,15 +5,23 @@ using OpenQA.Selenium.Support.UI;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml;
+using System.Xml.Linq;
 using Tkn_CookieReader;
+using Tkn_Images;
 using Tkn_ToolBox;
 using Tkn_Variable;
+using YesiLdefter.Selenium.Helpers;
 
 namespace YesiLdefter.Selenium
 {
@@ -234,12 +242,12 @@ namespace YesiLdefter.Selenium
                 (injectType == v.tWebInjectType.GetAndSet && workRequestType == v.tWebRequestType.post) ||
                 (injectType == v.tWebInjectType.AlwaysSet && workEventsType == v.tWebEventsType.load)
                ) &&
-                (TagName == "input" || TagName == "select") &&
+                (TagName == "input" || TagName == "select" || TagName == "img") &&
                 (writeValue != "") &&
                 (idName != ""))
             {
                 if (f.browserType == v.tBrowserType.Selenium)
-                    invokeMember = await setElementValues(f.wbSel, TagName, AttType, idName, writeValue, invokeMember, f);
+                    invokeMember = await setElementValues(f.wbSel, TagName, AttType, AttRole, idName, writeValue, invokeMember, f);
                 //if (f.browserType == v.tBrowserType.CefSharp)
                 //    invokeMember = await setElementValues(f.wbCef, TagName, AttType, idName, writeValue, invokeMember, f);
             }
@@ -308,15 +316,22 @@ namespace YesiLdefter.Selenium
                         {
                             if (innerText.IndexOf(InnerText) > -1)
                             {
-                                IJavaScriptExecutor js = (IJavaScriptExecutor)wb;
-                                js.ExecuteScript("arguments[0].style.display = 'none';", element);
+                                //IJavaScriptExecutor js = (IJavaScriptExecutor)wb;
+                                //js.ExecuteScript("arguments[0].style.display = 'none';", element);
+
+                                /// görünür hale getirir
+                                ///((IJavaScriptExecutor)wb).ExecuteScript("arguments[0].style.display = 'block';", gizliElement);
+                                /// gizler
+                                ((IJavaScriptExecutor)wb).ExecuteScript("arguments[0].style.display = 'none';", element);
                                 break;
                             }
                         }
                         else
                         {
-                            IJavaScriptExecutor js = (IJavaScriptExecutor)wb;
-                            js.ExecuteScript("arguments[0].style.display = 'none';", element);
+                            //IJavaScriptExecutor js = (IJavaScriptExecutor)wb;
+                            //js.ExecuteScript("arguments[0].style.display = 'none';", element);
+                            ((IJavaScriptExecutor)wb).ExecuteScript("arguments[0].style.display = 'none';", element);
+                            break;
                         }
                     }
                 }
@@ -1500,7 +1515,7 @@ namespace YesiLdefter.Selenium
         #endregion postColumsValue_
 
         #region setElementValues
-        private async Task<v.tWebInvokeMember> setElementValues(IWebDriver wb, string tagName, string attType, string idName, string writeValue, v.tWebInvokeMember invokeMember, webForm f)
+        private async Task<v.tWebInvokeMember> setElementValues(IWebDriver wb, string tagName, string attType, string attRole, string idName, string writeValue, v.tWebInvokeMember invokeMember, webForm f)
         {
             //
             // Value atama işlemi 
@@ -1535,10 +1550,29 @@ namespace YesiLdefter.Selenium
                             oSelect.SelectByText(text);
                             oSelect.SelectByValue(value);
                             */
+                        } else if (tagName == "img")
+                        {
+                            /// Mebbis de webcam in çekip sayfada gösterdiği element burası
+                            /// 
+                            ((IJavaScriptExecutor)wb).ExecuteScript("arguments[0].style.display = 'block';", element);
+                            
+                            string base64Verisi = Convert.ToBase64String(File.ReadAllBytes(writeValue));
+                            // Doğru base64 biçimi:
+                            ((IJavaScriptExecutor)wb).ExecuteScript("arguments[0].src = 'data:image/png;base64,' + arguments[1];", element, base64Verisi);
+
+                            //MessageBox.Show(writeValue);
+                        } else if (tagName == "input" && attRole == "ImageData")
+                        {
+                            /// Mebbis de webcam in çekip sayfada gizlediği element burası
+                            /// 
+                            string base64Verisi = Convert.ToBase64String(File.ReadAllBytes(writeValue));
+                            // Doğru base64 biçimi:
+                            ((IJavaScriptExecutor)wb).ExecuteScript("arguments[0].value = 'data:image/png;base64,' + arguments[1];", element, base64Verisi);
                         }
                         else
                         {
                             // normal text gibi inputlar 
+                            
                             if (attType != "radio")
                             {
                                 if (idName.IndexOf("Tarih") > -1)
@@ -1551,24 +1585,6 @@ namespace YesiLdefter.Selenium
                             if (attType == "radio")
                                 element.SendKeys(writeValue);
                         }
-
-                        /*
-                        //cmbEgitimDonemi
-                        IWebElement cmbEgitimDonemi = seleniumWebDriver.FindElement(By.Name("cmbEgitimDonemi"));
-                        IWebElement cmbGrubu = seleniumWebDriver.FindElement(By.Name("cmbGrubu"));
-                        IWebElement cmbSubesi = seleniumWebDriver.FindElement(By.Name("cmbSubesi"));
-
-                        // SelectElement sınıfını kullanarak "select" elementini seçin
-                        IList<IWebElement> cmbEgitimDonemiOptionElements = cmbEgitimDonemi.FindElements(By.TagName("option"));
-                        cmbEgitimDonemiOptionElements.FirstOrDefault(x => x.Text == kursiyer.Donem)?.Click();
-
-                        IList<IWebElement> cmbGrubuOptionElements = cmbGrubu.FindElements(By.TagName("option"));
-                        cmbGrubuOptionElements.FirstOrDefault(x => x.Text == kursiyer.Grup)?.Click();
-
-                        IList<IWebElement> cmbSubesiOptionElements = cmbSubesi.FindElements(By.TagName("option"));
-                        cmbSubesiOptionElements.FirstOrDefault(x => x.Text == kursiyer.Sube)?.Click();
-                        */
-                        //v.SQL = v.SQL + v.ENTER + myNokta + " set value : " + writeValue;
                     }
 
                     if (writeValue.ToLower().IndexOf("selectedindex=") > -1)
@@ -1759,6 +1775,10 @@ namespace YesiLdefter.Selenium
                         readValue = element.GetAttribute("checked");
                     }
                 }
+                if (attRole == "GIBeArsivFaturaIndir")
+                {
+                    await GIBDownloadFiles(wnv);
+                }
             }
             catch (Exception exc1)
             {
@@ -1859,6 +1879,288 @@ namespace YesiLdefter.Selenium
         }
         */
         #endregion invokeMemberExec
+
+
+        #region GIBDownloadFiles
+        private async Task GIBDownloadFiles(webNodeValue wnv)
+        {
+            
+            // Dosyanın indirilmesini bekleyin (basit bir bekleme yöntemi olarak Thread.Sleep kullanabilirsiniz)
+            System.Threading.Thread.Sleep(2000);
+            bool onay = false;
+
+            // İndirilen dosyanın adını ve konumunu kontrol edin
+            var downloadedFiles = Directory.GetFiles(v.EXE_GIBDownloadPath);
+            if (downloadedFiles.Any())
+            {
+                string downloadedFile = downloadedFiles.First();
+
+                //MessageBox.Show("Dosya Adı: " + Path.GetFileName(downloadedFile) + v.ENTER2 +
+                //                "İndirildiği Konum: " + Path.GetDirectoryName(downloadedFile));
+
+                string pathName = Path.GetDirectoryName(downloadedFile);
+                string packetName = Path.GetFileName(downloadedFile);
+
+                //zip tan önce temp klasörünün için boşalt/sil
+                KlasorIcindekileriSil(pathName + "\\Temp");
+
+                try
+                {
+                    // Zip dosyasını aç ve belirtilen dizine çıkar
+                    ZipFile.ExtractToDirectory(pathName + "\\" + packetName, pathName + "\\Temp");
+                    onay = true;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error 1006 : " + ex.Message);
+                }
+
+                /// zip açılmış
+                if (onay)
+                {
+                    /// hazırlanan jpg dosyanın adı bu
+                    /// 
+                    string htmlFileName = pathName + "\\Temp\\" + packetName.Replace(".zip", ".html");
+                    wnv.readValue = htmlFileName.Replace(".html", "_Under100K.jpg");
+
+                    /// Mebbis faturanın resmini almaktan vazgectiği için şimdilik kapatıldı
+                    /// başka bir zaman web in fotoğrafını çekme işlemine yarar
+                    /// 
+                    /// htmlDosyayiAc(htmlFileName, wnv);
+                }
+            }
+            else
+            {
+                MessageBox.Show("İndirilen dosya bulunamadı.");
+            }
+
+        }
+        private void htmlDosyayiAc(string fileName, webNodeValue wnv)
+        {
+            /// burada açılan web sayfasını fotografı çekilecek
+            /// 
+            OpenQA.Selenium.IWebDriver localWebDriver_ = null;
+            SeleniumHelper.ResetDriver();
+            localWebDriver_ = SeleniumHelper.WebDriver;
+            localWebDriver_.Manage().Window.Size = new Size(830, 1220);
+            localWebDriver_.Navigate().GoToUrl(fileName);
+
+            string imageFName = fileName.Replace(".html", ".png");
+            TakeSnapshot(localWebDriver_, imageFName, wnv);
+
+            localWebDriver_?.Dispose();
+        }
+        public void KlasorIcindekileriSil(string pathName)
+        {
+            try
+            {
+                // Klasördeki tüm dosyaları alın
+                string[] files = Directory.GetFiles(pathName);
+
+                if (files != null)
+                {
+                    // Her bir dosyayı sil
+                    foreach (string file in files)
+                    {
+                        File.Delete(file);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                //MessageBox.Show("Error 1005 : " + ex.Message);
+            }
+        }
+        private async void TakeSnapshot(IWebDriver driver, string filePath, webNodeValue wnv)
+        {
+            // Ekran görüntüsünü al
+            Screenshot screenshot = ((ITakesScreenshot)driver).GetScreenshot();
+            // Dosyaya kaydet
+            screenshot.SaveAsFile(filePath);  
+            // İndirilen resmi üzerinde değişikler yap
+            preparingImageFile(filePath, wnv);
+        }
+        public void preparingImageFile(string filePath, webNodeValue wnv)
+        {
+            
+            /// resim işlemleri başlıyor
+            /// 
+            tImageService imageService = new tImageService();
+            vImageProperties tImageProperties = new vImageProperties();
+
+            // png yi jpg e çevir
+            string jpgFilePath = filePath.Replace(".png", ".jpg");
+
+            // okunan faturanın altındaki boşluğu silmek için aşağıyı kırpıyoruz
+            int kirpPixel = 120;
+            Image readPngImage = Image.FromFile(filePath);
+            // kırpılmış resim
+            Image newJpgImage = imageService.cropImage(readPngImage, 0, 0, readPngImage.Width, readPngImage.Height - kirpPixel, 96);
+
+            if (newJpgImage != null)
+            {
+                // Image nin properties ni oku
+                imageService.getImageProperties(newJpgImage, ref tImageProperties);
+                // 100 kb nin üstü ise
+                if ((int)tImageProperties.kbSize > 100)
+                {
+                    // önce imagenin sizenı 100 kb nin altına düşür ve 96 DPI yı ayarla
+                    Image smallImage = imageService.setImageSizeUnder100K(newJpgImage, 96, 0, 0, ImageFormat.Jpeg);
+                    // yeniden yeni kb için properties ni oku
+                    imageService.getImageProperties(smallImage, ref tImageProperties);
+                    // isten 100 kb nin altına düşmüşse
+                    if ((int)tImageProperties.kbSize < 100)
+                    {
+                        jpgFilePath = jpgFilePath.Replace(".jpg", "_Under100K.jpg");
+                        smallImage.Save(jpgFilePath, ImageFormat.Jpeg);
+                    }
+                }
+                else
+                {
+                    // zaten 100 kb nin altında ise
+                    jpgFilePath = jpgFilePath.Replace(".jpg", "_Under100K.jpg");
+                    newJpgImage.Save(jpgFilePath, ImageFormat.Jpeg);
+                }
+            }
+            
+
+            /// XML den bazı verileri okuyalım
+            /// 
+            string xmlFilePath = filePath.Replace(".png", ".xml");
+            string faturaNo = "";
+            string duzenlemeTarihi = "";
+            string faturaToplamTutar = "";
+            string aliciAdi = "";
+
+            //xmlFilePath = "C:\\UstadProjects\\yesiLdefter\\yesiLdefterV3\\YesiLdefter\\bin\\Debug\\GIBDownload\\Temp\\a7878658-bc33-4948-a4b9-5af9ff56554d_f.xml";
+
+            XmlDocument belge = new XmlDocument();
+            belge.Load(xmlFilePath);
+
+            /// Saçma sapan bir xml okuma metodu oldu,
+            /// düzgün kod bulamadım, bulunca değiştir
+            
+            // Kök düğümü al
+            XmlNode kokDugum = belge.DocumentElement;
+
+            string liste = "";
+            string findDugumAdi = "";
+            AltElementleriListele(kokDugum, ref liste, ref duzenlemeTarihi, ref faturaNo, ref faturaToplamTutar, ref aliciAdi, ref findDugumAdi);
+            string mesaj =
+                "Tarih     : " + duzenlemeTarihi + v.ENTER +
+                "FaturaNo  : " + faturaNo + v.ENTER +
+                "Top. Tutar: " + faturaToplamTutar + v.ENTER2 +
+                "Alıcı     : " + v.ENTER2 + aliciAdi;
+            //MessageBox.Show(mesaj);
+            //MessageBox.Show(liste);
+
+            string soru = "Aşağıdaki bilgilere göre doğru fatura olduğunu onaylıyor musunuz ?"  + v.ENTER2 + mesaj;
+            DialogResult cevap = t.mySoru(soru);
+            if (DialogResult.Yes == cevap)
+            {
+                tTable table = new tTable();
+                tRow row = new tRow();
+
+                tColumn column0 = new tColumn();
+                column0.value = "1";
+                tColumn column1 = new tColumn();
+                column1.value = duzenlemeTarihi;
+                tColumn column2 = new tColumn();
+                column2.value = faturaNo;
+                tColumn column3 = new tColumn();
+                column3.value = faturaToplamTutar;
+                tColumn column4 = new tColumn();
+                column4.value = wnv.readValue; // resim dosyasının adı
+
+                row.tColumns.Add(column0); // sahte Id value oluyor
+                row.tColumns.Add(column1);
+                row.tColumns.Add(column2);
+                row.tColumns.Add(column3);
+                row.tColumns.Add(column4);
+                table.tRows.Add(row);
+
+                wnv.tTable = table;
+            }
+
+
+            /*
+            var faturaNo = fatura.Element(faturaNamespace + "ID").Value;
+            var duzenlemeTarihi = fatura.Element(faturaNamespace + "IssueDate").Value;
+            var faturaToplamTutar = fatura.Element(faturaNamespace + "PayableAmount").Value;
+            var aliciAdi = fatura.Element(faturaNamespace + "AccountingCustomerParty")
+                                .Element(faturaNamespace + "Party")
+                                .Element(faturaNamespace + "PartyName")
+                                .Element(faturaNamespace + "Name").Value;
+            */
+        }
+        private void AltElementleriListele(XmlNode dugum, ref string liste, ref string duzenlemeTarihi, ref string faturaNo, ref string faturaToplamTutar, ref string aliciAdi, ref string findDugumAdi)
+        {
+            /*
+       Düğüm Adı: cbc:ID
+       Düğüm Adı: #text
+       Değeri: GIB2025000000001
+             */
+            string dugumAdi = "";
+            string value = "";
+
+            /// dugumAdi ? : o an döngüdeki node nin adi
+            /// istenen value ise kendinden sonraki node üzerinde
+            /// bu nedenle önce aranan nodeyi bul, hemen sonraki nodeden de value yi oku
+
+            foreach (XmlNode altDugum in dugum.ChildNodes)
+            {
+                dugumAdi = altDugum.Name;
+                liste += "  Düğüm Adı: " + altDugum.Name + v.ENTER;
+
+                // Değeri oku (eğer varsa)
+                if (altDugum.NodeType == XmlNodeType.Text || altDugum.NodeType == XmlNodeType.CDATA)
+                {
+                    if (dugumAdi != "cbc:EmbeddedDocumentBinaryObject")
+                        liste += "       Değeri: " + altDugum.Value + v.ENTER;
+
+                    //value = altDugum.Value;
+
+                    if (dugumAdi == "#text" && findDugumAdi !="")
+                    {
+                        if (findDugumAdi == "cbc:ID" && faturaNo == "") faturaNo = altDugum.Value;
+                        if (findDugumAdi == "cbc:IssueDate" && duzenlemeTarihi == "") duzenlemeTarihi = altDugum.Value;
+                        if (findDugumAdi == "cbc:PayableAmount" && faturaToplamTutar == "") faturaToplamTutar = altDugum.Value;
+                        if (findDugumAdi == "cbc:AccountingCustomerParty" ||
+                            findDugumAdi == "cbc:Party" ||
+                            findDugumAdi == "cbc:PartyName" ||
+                            findDugumAdi == "cbc:Name")
+                        {
+                            if (altDugum.Value != "Türkiye" && altDugum.Value != "KDV")
+                                aliciAdi += altDugum.Value + " " + v.ENTER;
+                        }
+                        // işi bitti boşalt
+                        if (findDugumAdi != "") findDugumAdi = "";
+                    }
+                }
+
+                if (dugumAdi == "cbc:ID")
+                    findDugumAdi = dugumAdi;
+                if (dugumAdi == "cbc:IssueDate")
+                    findDugumAdi = dugumAdi;
+                if (dugumAdi == "cbc:PayableAmount")
+                    findDugumAdi = dugumAdi;
+                if (dugumAdi == "cbc:AccountingCustomerParty" ||
+                    dugumAdi == "cbc:Party" ||
+                    dugumAdi == "cbc:PartyName" ||
+                    dugumAdi == "cbc:Name")
+                    findDugumAdi = dugumAdi;
+
+
+                // Alt elementleri listele (recursive olarak)
+                if (altDugum.HasChildNodes)
+                {
+                    AltElementleriListele(altDugum, ref liste, ref duzenlemeTarihi, ref faturaNo, ref faturaToplamTutar, ref aliciAdi, ref findDugumAdi);
+                }
+            }
+        }
+
+        #endregion
+
 
         #endregion WebScrapingAsync SubFunctions
     }

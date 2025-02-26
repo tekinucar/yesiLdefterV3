@@ -119,41 +119,99 @@ namespace Tkn_ToolBox
 
             bool onay = false;
 
+            WaitFormOpen(Application.OpenForms[0] , "Yeni dosyalar indiriliyor ...");
+
+
             foreach (DataRow row in ds.Tables[0].Rows)
             {
                 readMsFileUpdate(row);
 
-                /// Bu dosya, daha önce bu pc de varmı kontrol et
-                ///
-                onay = checkedFileOnPc(v.tMsFileUpdate.fileName);
+                if (IsNotNull(v.tMsFileUpdate.pathName) == false)
+                    v.tMsFileUpdate.pathName = v.tExeAbout.activePath;
 
-                if (onay == false)
+                if (v.tMsFileUpdate.extension == "DIR" || v.tMsFileUpdate.extension == "Directory")
                 {
-                    if (IsNotNull(v.tMsFileUpdate.pathName) == false)
-                        v.tMsFileUpdate.pathName = v.tExeAbout.activePath;
+                    onay = false;
+
+                    DosyaVarsaSil(v.tMsFileUpdate.pathName + "\\" + v.tMsFileUpdate.packetName);
+
+                    WaitFormOpen(Application.OpenForms[0], v.tMsFileUpdate.fileName + " klasörü indiriliyor...");
 
                     onay = ftpDownload(v.tMsFileUpdate.pathName, v.tMsFileUpdate.packetName); // MsFileUpdates te indirilmesi istenen dosyalar 
+
                     if (onay)
                     {
-                        AlertMessage("File download", v.tMsFileUpdate.fileName);
+                        try
+                        {
+                            onay = false;
 
-                        onay = exe.ExtractFile(v.tMsFileUpdate.pathName, v.tMsFileUpdate.packetName);
+                            if (Directory.Exists(v.tMsFileUpdate.pathName + "\\" + v.tMsFileUpdate.fileName))
+                            {
+                                // Klasörü ve içindeki her şeyi sil
+                                Directory.Delete(v.tMsFileUpdate.pathName + "\\" + v.tMsFileUpdate.fileName, true);
+                            }
+
+                            if (Directory.Exists(v.tMsFileUpdate.pathName + "\\" + v.tMsFileUpdate.fileName) == false)
+                            {
+                                Directory.CreateDirectory(v.tMsFileUpdate.pathName + "\\" + v.tMsFileUpdate.fileName);
+                            }
+
+                            WaitFormOpen(Application.OpenForms[0], v.tMsFileUpdate.fileName + " ZIP dosyası açılıyor...");
+                            ZipFile.ExtractToDirectory(v.tMsFileUpdate.pathName + "\\" + v.tMsFileUpdate.packetName, v.tMsFileUpdate.pathName + "\\" + v.tMsFileUpdate.fileName + "\\");// + "\\" + v.tMsFileUpdate.fileName);
+                            onay = true;
+                            AlertMessage(v.tMsFileUpdate.fileName, "ZIP dosyası başarıyla açıldı.");
+                        }
+                        catch (FileNotFoundException)
+                        {
+                            MessageBox.Show("ZIP dosyası bulunamadı.");
+                        }
+                        //catch (InvalidDataException)
+                        //{
+                        //    MessageBox.Show("ZIP dosyası bozuk veya geçersiz.");
+                        //}
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show("Hata oluştu: " + ex.Message);
+                        }
                     }
-                    // activeFileName   = v.tExeAbout.activeExeName
-                    // extension        = 
-                    // oldVersionNo     = v.tExeAbout.activeVersionNo
-                    // packetName       = v.tExeAbout.ftpPacketName
+                }
+                else
+                {
+                    /// Bu dosya, daha önce bu pc de varmı kontrol et
+                    ///
+                    onay = checkedFileOnPc(v.tMsFileUpdate.fileName);
 
-                    if (onay)
-                        onay = exe.fileNameChange(v.tMsFileUpdate.pathName, v.tMsFileUpdate.fileName, v.tMsFileUpdate.extension, v.tMsFileUpdate.versionNo, v.tMsFileUpdate.packetName);
+                    if (onay == false)
+                    {
+                        if (IsNotNull(v.tMsFileUpdate.pathName) == false)
+                            v.tMsFileUpdate.pathName = v.tExeAbout.activePath;
+
+                        WaitFormOpen(Application.OpenForms[0], "Dosya indiriliyor : " + v.tMsFileUpdate.fileName);
+
+                        onay = ftpDownload(v.tMsFileUpdate.pathName, v.tMsFileUpdate.packetName); // MsFileUpdates te indirilmesi istenen dosyalar 
+                        if (onay)
+                        {
+                            onay = false;
+                            WaitFormOpen(Application.OpenForms[0], "ZIP dosya açılıyor : " + v.tMsFileUpdate.fileName);
+                            onay = exe.ExtractFile(v.tMsFileUpdate.pathName, v.tMsFileUpdate.packetName);
+                        }
+                        // activeFileName   = v.tExeAbout.activeExeName
+                        // extension        = 
+                        // oldVersionNo     = v.tExeAbout.activeVersionNo
+                        // packetName       = v.tExeAbout.ftpPacketName
+                        if (onay)
+                            onay = exe.fileNameChange(v.tMsFileUpdate.pathName, v.tMsFileUpdate.fileName, v.tMsFileUpdate.extension, v.tMsFileUpdate.versionNo, v.tMsFileUpdate.packetName);
+                    }
                 }
 
                 // FileUpdates tablosuna işle
                 if (onay)
                     insertFileUpdates();
             }
-        }
 
+            v.IsWaitOpen = false;
+            WaitFormClose();
+        }
         private bool checkedFileOnPc(string fileName)
         {
             bool onay = false;
@@ -3233,40 +3291,41 @@ namespace Tkn_ToolBox
             {
                 //bool isLockRecord = false;
 
-                string lockValue = dsData.Tables[0].Rows[position][lockFieldName].ToString();
+                string lockValue = "";
+                string orjValue = "";
 
-                if (lockValue == "1" || lockValue == "True")
+                try
                 {
-                    /// bu yemiyor, yemesi için .BeginEdit(); başlaması gerekiyor onuda denedim olmadı
-                    /// demekki doğru yerde başlatamadım...
-                    ///
-                    /// ds.Tables[Table_Name].Rows[Position].CancelEdit();
-
-                    CancelChangeValues(dsData, position, lockFieldName);
-
-                    v.Kullaniciya_Mesaj_Var = "Bu kayıt kilitli ... Değiştirilemez.";
-                    return true;
+                    orjValue = dsData.Tables[0].Rows[position][lockFieldName, DataRowVersion.Original].ToString();
+                }
+                catch (Exception)
+                {
+                    orjValue = "tError";
+                    //throw;
+                }
+                try
+                {
+                    lockValue = dsData.Tables[0].Rows[position][lockFieldName].ToString();
+                }
+                catch (Exception)
+                {
+                    //throw;
                 }
 
-
-                /// Bu kontrol olmuyor
-                /// True > false olabiliyor
-                /// lockFieldName değişikliğini engellemek için ekranda enable = false olmalı
-                /// lockFieldName = false durumundayken diğer alanları değişitire bilmesi gerekiyor
-                /// lockFieldName = true  olunca silinemez ve değiştirlemez olması gerekiyor
-                /// 
-                /*
-                /// şimdiki değeri false olabilir fakat kullanıcı true > false yapmış olabilir
-                if (lockValue == "False")
+                if (orjValue != "tError")
                 {
-                    bool IsLockChange = FalseChangeValues(dsData, position, lockFieldName);
-                    if (IsLockChange)
+                    if (orjValue == "True" && lockValue == "False")
                     {
                         CancelChangeValues(dsData, position, lockFieldName);
-                        return;
+
+                        v.Kullaniciya_Mesaj_Var = "Bu kayıt kilitli ... Değiştirilemez.";
+                        return true;
                     }
                 }
-                */
+                else
+                {
+                    v.Kullaniciya_Mesaj_Var = "DİKKAT : Kilit kontrolünde hata oluşuyor...";
+                }
             }
 
             return false;
@@ -4322,6 +4381,36 @@ namespace Tkn_ToolBox
         #endregion JSON işlemleri
 
         #region *String İşlemler
+
+        public string getNewFileGuidName
+        {
+            get
+            {
+                string guid = Guid.NewGuid().ToString();
+                return guid.Substring(0, 20);
+            }
+        }
+
+        public string getFileName(v.tFileName tFileName)
+        {
+            string fileName = "none";
+            if (tFileName == v.tFileName.dbKayit) fileName = "DatabaseKayit";
+            if (tFileName == v.tFileName.tarayici) fileName = "TarayicidanAlinan";
+            if (tFileName == v.tFileName.setImageDPI) fileName = "SetImageDPI";
+            if (tFileName == v.tFileName.setImageQuality) fileName = "SetImageQuality";
+            if (tFileName == v.tFileName.transferFromDatabaseToWeb) fileName = "TransferFromDatabaseToWeb";
+            return fileName;
+        }
+
+        public void DosyaVarsaSil(string pathFileName)
+        {
+            if (File.Exists(pathFileName))
+            {
+                // Dosya varsa sil
+                File.Delete(pathFileName);
+            }
+        }
+
 
         #region TurkceKarakterDuzenle
         public string TurkceKarakterDuzenle(string metin)
@@ -15546,7 +15635,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             
             if (fileType == v.fileType.ActiveExe) fileName = exeFileAbout.activeExeName;
             if (fileType == v.fileType.OrderFile) fileName = exeFileAbout.orderFileName;
-
+            
             foreach (FileInfo fi in di.GetFiles())
             {
                 //for specific file 
@@ -15554,6 +15643,19 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 {
                     onay = CompressFile_(fi, exeFileAbout);
                     break;
+                }
+            }
+
+            if (exeFileAbout.orderFileExtension == "DIR" || exeFileAbout.orderFileExtension == "Directory")
+            {
+                foreach (DirectoryInfo dinfo in di.GetDirectories())
+                {
+                    
+                    if (dinfo.ToString() == fileName)
+                    {
+                        onay = CompressDIR_(dinfo, exeFileAbout);
+                        break;
+                    }
                 }
             }
 
@@ -15661,6 +15763,65 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
             return myFileName;
         }
+        
+        private bool CompressDIR_(DirectoryInfo di, exeAbout exeFileAbout)
+        {
+            bool onay = false;
+
+            string myPacketName = "";
+            if (exeFileAbout.FileType == v.fileType.OrderFile)
+                myPacketName = preparingOrderDIRName(di, exeFileAbout);
+
+            string path = "";
+            if (exeFileAbout.orderFilePath != null)
+                path = exeFileAbout.orderFilePath;
+            else path = exeFileAbout.activePath;
+            
+            path += "\\" + exeFileAbout.orderFileName;
+
+            try
+            {
+                // Klasörü ZIP'le
+                ZipFile.CreateFromDirectory(path, myPacketName);
+                onay = true;
+                MessageBox.Show("Klasör başarıyla ZIP'lendi.");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Hata oluştu: " + ex.Message);
+            }
+
+            return onay;
+        }
+
+        private string preparingOrderDIRName(DirectoryInfo di, exeAbout exeFileAbout)
+        {
+            string myFileName = "";
+
+            if (di.FullName.IndexOf(exeFileAbout.orderFileName) > -1)
+            {
+                /// orderVersionNo : 20190329_1545
+                /// orderFileName  : x64 klasörü >> x64_v250224.zip  şeklinde olacak
+                /// activePath      : E:\TekinOzel\yesiLdefter\yesiLdefterV3\YesiLdefter\bin\Debug\x64_v250224.zip
+                /// dikkat : kafan karışmasın şuan exenin çalıştığın path içindeki bir klasörü  ftpye atmak istiyorsun
+                /// bu nedenle mevcut olan dosyadan faydalanıyor onu new diye ftp göndeririyoruz
+
+                exeFileAbout.newVersionNo = exeFileAbout.orderFileVersionNo;
+                exeFileAbout.newFileName = exeFileAbout.orderFileName;
+                exeFileAbout.newPacketName =
+                    exeFileAbout.orderFileName + "_"
+                  + exeFileAbout.orderFileVersionNo.Replace('.', '_') + ".zip";
+
+                // bu da aynı sonucu veriyor 
+                //fi.FullName.Remove(fi.FullName.IndexOf(fi.Extension), fi.Extension.Length) + "_" + v.tExeAbout.activeVersionNo + ".gz";
+
+                myFileName = exeFileAbout.activePath + "\\" + exeFileAbout.newPacketName;
+            }
+
+            return myFileName;
+        }
+
+
         #endregion CompressFile
     }
 

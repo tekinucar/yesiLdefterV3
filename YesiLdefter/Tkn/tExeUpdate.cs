@@ -79,6 +79,7 @@ namespace Tkn_ExeUpdate
                 // Call WaitForExit and then the using statement will close.
                 using (Process exeProcess = Process.Start(startInfo))
                 {
+                    v.SP_ApplicationExit = true;
                     //exeProcess.WaitForExit();
                     Application.Exit();
                 }

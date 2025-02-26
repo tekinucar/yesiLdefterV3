@@ -1270,8 +1270,10 @@ namespace YesiLdefter
                     fmax_length = Convert.ToInt32(v.ds_MsTableFields.Tables[tableName].Rows[i]["max_length"].ToString());
 
                     // adres verisinde görülebiliyor
-                    if (value.IndexOf("<option value=\"") > -1)
-                        value = value.Replace("<option value=\"", "");
+                    if (value.IndexOf("option") > -1) 
+                        value = "";
+                    //if (value.IndexOf("<option value=\"") > -1)
+                    //    value = value.Replace("<option value=\"", "");
                     if (value.IndexOf("\">") > -1)
                         value = value.Replace("\">", "");
 
@@ -1432,7 +1434,9 @@ namespace YesiLdefter
             string editWhere = editWhereSql;
             int x = 0;
             int count = dsSource.Tables[0].Columns.Count;
-            
+            //byte[] imgSourceValue;
+            string imgSourceValue = "";
+
             for (int i = 0; i < count; i++)
             {
                 type = dsSource.Tables[0].Rows[rowNo][i].GetType().ToString();
@@ -1453,21 +1457,31 @@ namespace YesiLdefter
             {
                 for (int i = 0; i < count; i++)
                 {
+                    imgSourceValue = "";
                     imgFieldsNameSelect += " , " + imagefieldsNameList[i];
-                    imgFieldsNameUpdate += " , " + imagefieldsNameList[i] + " = @" + imagefieldsNameList[i];
+                    imgSourceValue = dsSource.Tables[0].Rows[rowNo][imagefieldsNameList[i]].ToString();
+                    if (imgSourceValue?.Length > 0)
+                        imgFieldsNameUpdate += " , " + imagefieldsNameList[i] + " = @" + imagefieldsNameList[i];
                 }
 
-                imgFieldsNameSelect = imgFieldsNameSelect.Remove(0, 2);
-                imgFieldsNameUpdate = imgFieldsNameUpdate.Remove(0, 2);
+                if (imgFieldsNameSelect.Length > 0)
+                    imgFieldsNameSelect = imgFieldsNameSelect.Remove(0, 2);
+                if (imgFieldsNameUpdate.Length > 0)
+                    imgFieldsNameUpdate = imgFieldsNameUpdate.Remove(0, 2);
 
                 selectSql =
                   " select " + imgFieldsNameSelect + " from " + alias + "." + tableName + " "
                 + " Where 0 = 0 " + editWhere;
 
-                updateSql =
-                  " Update " + alias + "." + tableName + " set "
-                + imgFieldsNameUpdate
-                + " Where 0 = 0 " + editWhere;
+                if (imgFieldsNameUpdate.Length > 0)
+                {
+                    updateSql =
+                        " Update " + alias + "." + tableName + " set "
+                    + imgFieldsNameUpdate
+                    + " Where 0 = 0 " + editWhere;
+                }
+                else updateSql = "";
+
             }
         }
 
@@ -1722,7 +1736,8 @@ namespace YesiLdefter
                                 imgTargetValue = (byte[])dsTarget.Tables[0].Rows[i][imgFieldName];
 
                             // Kaynak img var, hedef img yok ise image taşı
-                            if ((imgSourceValue != null) && (imgTargetValue == null))
+                            //if ((imgSourceValue != null) && (imgTargetValue == null))
+                            if (imgSourceValue != null)
                             {
                                 if (imgFieldName.IndexOf("Small") > -1)
                                 {
@@ -1752,10 +1767,11 @@ namespace YesiLdefter
                             }
                         }
 
-                        if ((v.con_Images != null) ||
+                        if (((v.con_Images != null) ||
                             (v.con_Images2 != null) ||
                             (v.con_Images3 != null) ||
-                            (v.con_Images4 != null))
+                            (v.con_Images4 != null)) &&
+                            (updateSql != ""))
                             onay = sv.Record_SQL_RUN(dsTarget, vt, "dsEdit", dNTarget.Position, ref updateSql, "");
                         
                     }

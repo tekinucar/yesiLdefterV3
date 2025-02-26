@@ -1,0 +1,42 @@
+﻿
+begin transaction
+
+ create table MsSpeedUser
+ (
+    Id              Int IDENTITY(1,1) not null,
+    SectorTypeId    SmallInt          not null, 
+    PageCode        nVarChar(50)      not null,     
+	
+    Constraint pk_MsSpeedUser primary key (Id)
+ )
+ create index X_MsSpeedUser_01 on MsSpeedUser (SectorTypeId)
+ create index X_MsSpeedUser_02 on MsSpeedUser (PageCode)
+  
+ grant select, insert, update, delete on MsSpeedUser to public
+
+commit transaction
+
+
+begin transaction
+ create table MsSpeedUserGuid
+ (
+    Id              Int IDENTITY(1,1) not null,
+    SectorTypeId    SmallInt          not null, 
+    PageCode        nVarChar(50)      not null,     
+    KonuCode        nVarChar(50)      not null,
+    ParentCode      nVarChar(50)      null,
+    IsActive        Bit               null,
+    KonuSiraNo      SmallInt          null,   
+    KonuBasligi     nVarChar(200)     null,
+    KonuDetayi      nVarChar(4000)    null,
+    KonuResmi       VarBinary(max)    null,
+    KonuOnemli      nVarChar(2000)    null,
+	
+    Constraint pk_MsSpeedUserGuid primary key (Id)
+ )
+ create index X_MsSpeedUserGuid_01 on MsSpeedUserGuid (SectorTypeId)
+ create index X_MsSpeedUserGuid_02 on MsSpeedUserGuid (PageCode)
+  
+ grant select, insert, update, delete on MsSpeedUserGuid to public
+
+commit transaction

@@ -71,6 +71,7 @@ begin transaction
  insert into MS_TYPES values ( 1, 0, 'WEBNODE_ATT_ROLE', 18, '', 'SecurityAgain');
  insert into MS_TYPES values ( 1, 0, 'WEBNODE_ATT_ROLE', 19, '', 'InputBox');
  insert into MS_TYPES values ( 1, 0, 'WEBNODE_ATT_ROLE', 20, '', 'Success');
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_ATT_ROLE', 30, '', 'GIBeArsivFaturaIndir');
 
 
 

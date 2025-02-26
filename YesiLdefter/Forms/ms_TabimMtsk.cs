@@ -673,11 +673,17 @@ namespace YesiLdefter
         {
             bool onay = false;
 
+            /// Surucu07 üzerindeki paramalt tablosundaki gerekli bilgileri oku
+            /// GIBeArsivFaturaKullanici ve sifresi için sürekli okumak gerekiyor
+            read_FirmAbout();
+
+
             if (v.tUser.UserFirmGUID == "")
             {
                 /// Surucu07 üzerindeki paramalt tablosundaki gerekli bilgileri oku
                 /// 
-                read_FirmAbout();
+                /// read_FirmAbout();
+
                 /// UstadCrm e kaydet ve FirmGUID üret
                 /// Üretilen FirmGUID de hem paramalt tablosuna 
                 /// hemde users tablosundaki tüm kullanıcılara ekle
@@ -689,6 +695,8 @@ namespace YesiLdefter
             /// 
             onay = userFirms.getFirmAboutWithUserFirmGUID(v.tMainFirm.FirmGuid);
  
+
+
             return onay;
         }
         private void read_FirmAbout()
@@ -714,6 +722,9 @@ namespace YesiLdefter
                     if (item["KOD"].ToString() == "321") v.tTabimFirm.MebbisKullaniciAdi = item["DEGER"].ToString();
                     if (item["KOD"].ToString() == "322") v.tTabimFirm.MebbisSifresi = item["DEGER"].ToString();
                     if (item["KOD"].ToString() == "119") v.tTabimFirm.FirmGUID = item["DEGER"].ToString();
+                    // 21.02.2025 de eklendi 
+                    if (item["KOD"].ToString() == "121") v.tTabimFirm.GIBeArsivFaturaKullaniciAdi = item["DEGER"].ToString();
+                    if (item["KOD"].ToString() == "122") v.tTabimFirm.GIBeArsivFaturaSifresi = item["DEGER"].ToString();
 
                     /// ULASPARAMTOP = 1 and KOD = 119  FirmGUID 
                     /// aslında böyle bir bilgi TabimMtsk da yok
@@ -721,6 +732,10 @@ namespace YesiLdefter
                     /// 
                 }
             }
+
+            v.tMainFirm.FirmGIBeArsivFaturaCode = v.tTabimFirm.GIBeArsivFaturaKullaniciAdi;
+            v.tMainFirm.FirmGIBeArsivFaturaPass = v.tTabimFirm.GIBeArsivFaturaSifresi;
+
             ds.Dispose();
         }
         private bool InitFirmGUID()

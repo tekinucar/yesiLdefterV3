@@ -45,8 +45,8 @@ namespace Tkn_DevColumn
             //if (t.IsNotNull(List_Name) && (tLookUpField == false))
             if (t.IsNotNull(List_Name) && (List_Name.IndexOf("=") == -1)) // IsActive = True  gibi koşullar varsa çalışmasın
                 tRepositoryItem_Fill(ItemBox, null, null, null, null, null, List_Name, default_value, tview_type);
-            //if (tLookUpField)
-            if ((tLookUpField) && ((t.IsNotNull(List_Name) == false) || (List_Name.IndexOf("=") > -1) || (List_Name.IndexOf("Lkp.") > -1)))
+            /// Lkp.MsSectorType||Id||SectorType||
+            if ((tLookUpField) && (t.IsNotNull(List_Name) == false || List_Name.IndexOf("=") > -1 || List_Name.IndexOf("||") > -1))
                 LookUpTableFill(Row, ItemBox, null, null, null, null, null);
         }
 
@@ -353,7 +353,7 @@ namespace Tkn_DevColumn
                 // tablonun kendisi için Lkp.{tableName}Type tablosu hazırlanmamış 
                 // onun yerine başka bir tablonun Lkp.xxxxType tablusu kullanılacak
 
-                //Lkp.MsSectorType||Id||SectorType
+                //Lkp.MsSectorType||Id||SectorType||
 
                 if (groupTables.IndexOf("Lkp.") > -1)
                     groupTables = groupTables.Replace("Lkp.", "");

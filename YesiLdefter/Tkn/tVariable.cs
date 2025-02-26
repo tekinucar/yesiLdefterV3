@@ -1267,6 +1267,16 @@ namespace Tkn_Variable
             Set
         }
 
+        public enum tFileName  
+        {
+            none,
+            dbKayit,
+            tarayici,
+            setImageDPI,
+            setImageQuality,
+            transferFromDatabaseToWeb
+        }
+
 
         public static bool searchOnay = false;
         public static bool searchSet = false;
@@ -1680,6 +1690,9 @@ namespace Tkn_Variable
         public Int16 DbTypeId { get; set; }
         public string FirmMebbisCode { get; set; }
         public string FirmMebbisPass { get; set; }
+        public string FirmGIBeArsivFaturaCode { get; set; }
+        public string FirmGIBeArsivFaturaPass { get; set; }
+
         public void Clear()
         {
             FirmId = 0;
@@ -1692,6 +1705,8 @@ namespace Tkn_Variable
             DbTypeId = 0;
             FirmMebbisCode = "";
             FirmMebbisPass = "";
+            FirmGIBeArsivFaturaCode = "";
+            FirmGIBeArsivFaturaPass = "";
         }
     }
     // Surucu07
@@ -1710,6 +1725,9 @@ namespace Tkn_Variable
         public string KursunKodu { get; set; }
         public string MebbisKullaniciAdi { get; set; }
         public string MebbisSifresi { get; set; }
+        public string GIBeArsivFaturaKullaniciAdi { get; set; }
+        public string GIBeArsivFaturaSifresi { get; set; }
+
         public string FirmGUID { get; set; }
         public void Clear()
         {
@@ -1722,6 +1740,8 @@ namespace Tkn_Variable
             KursunKodu = "";
             MebbisKullaniciAdi = "";
             MebbisSifresi = "";
+            GIBeArsivFaturaKullaniciAdi = "";
+            GIBeArsivFaturaSifresi = "";
             FirmGUID = "";
         }
     }
@@ -2439,6 +2459,34 @@ namespace Tkn_Variable
             formCode = "";
         }
     }
+
+    public class vImageProperties
+    {
+        public int width { get; set; }
+        public int height { get; set; }
+        public float horizontalResolation { get; set; }
+        public float verticalResolation { get; set; }
+        public long byteSize { get; set; }
+        public decimal kbSize { get; set; }
+        public System.Drawing.Imaging.ImageFormat imageFormat { get; set; }
+        public string imagePath { get; set; }
+        public string imageName { get; set; }
+
+        public void Clear()
+        {
+            width = 0;
+            height = 0;
+            horizontalResolation = 0;
+            verticalResolation = 0;
+            byteSize = 0;
+            kbSize = 0;
+            imageFormat = null;
+            imagePath = string.Empty;
+            imageName = string.Empty;
+        }
+    }
+
+
 
     // ------------------------------------------------------------------
     // ------------------------------------------------------------------

@@ -348,6 +348,8 @@ create table [Lkp].[MtskSinavUygulamaPuanTipi]
 Delete from [Lkp].[MtskSinavUygulamaPuanTipi]
 INSERT INTO [Lkp].[MtskSinavUygulamaPuanTipi] (Id, PuanTipi)
  VALUES 
+  ( -4,   N'Kaydı Silindi'),
+  ( -3,   N'Ceza Kaydı Var'),
   ( -2,   N'Durumu Girilmemiş'),
   ( -1,   N'Girmedi'),
   ( 0,    N''),

@@ -4,23 +4,47 @@
 CREATE PROCEDURE [dbo].[prc_MtskGrupSubesiTeorikDersToplamList] (@FirmId int, @DonemTipiId int)  
 AS BEGIN
  
+ /*
+ declare @FirmId int = 11
+ declare @DonemTipiId int = 202503
+ */
  Select 
    MtskGrupSubesi.DonemTipiId
  , MtskGrupSubesi.GrupTipiId
  , MtskGrupSubesi.SubeTipiId
  , FNo6.GrupTipi + '.' + FNo7.SubeTipi as Lkp_GrupSubeTipi
  , donem.GrupBaslamaTarihi
+ , ders.Id as Lkp_DerslikTipiId
  , ders.DerslikTipi as Lkp_DerslikTipi
- , count(teo.Id) as Lkp_DersSayisi
+ , ( case 
+     when ders.Id = 1 then saat.TrafikVeCevreDersSaati
+     when ders.Id = 2 then saat.IlkYardimDersSaati
+     when ders.Id = 3 then saat.AracTeknigiDersSaati
+     when ders.Id = 5 then saat.TrafikAdabiDersSaati 
+     else 0 end) as Lkp_DersSaatSayisi
+
+ , ( case 
+     when ders.Id = 1 then saat.TrafikVeCevreDersSaati
+     when ders.Id = 2 then saat.IlkYardimDersSaati
+     when ders.Id = 3 then saat.AracTeknigiDersSaati
+     when ders.Id = 5 then saat.TrafikAdabiDersSaati 
+     else 0 end) as Lkp_DersSaatSayisi
+
+ , count(teo.Id) as Lkp_VerilenDersSayisi
+ 
+
 
  from MtskGrupSubesi as [MtskGrupSubesi] with (nolock) 
+   left outer join Lkp.MtskTeorikDersDerslikTipi as ders on (ders.Id > 0)
+
    -- Join Tables 
-   left outer join MtskDonemi as [donem] with (nolock) on ( [MtskGrupSubesi].DonemTipiId = [donem].DonemTipiId 
-   and  [MtskGrupSubesi].GrupTipiId = [donem].GrupTipiId  ) 
+   left outer join MtskDonemi as [donem] with (nolock) on ( [MtskGrupSubesi].DonemTipiId = [donem].DonemTipiId and  [MtskGrupSubesi].GrupTipiId = [donem].GrupTipiId  ) 
+   left outer join dbo.MtskSaatTeorik as saat on ( saat.GecerlilikTarihiId = dbo.fnc_getGecerlilikTarihiId(@FirmId, 21101, donem.GrupBaslamaTarihi)  )
+
    -- LookUp Tables
    left outer join Lkp.MtskDonemTipi as FNo5 with (nolock) on ( MtskGrupSubesi.DonemTipiId = FNo5.Id ) 
-   left outer join Lkp.MtskGrupTipi as FNo6 with (nolock) on ( MtskGrupSubesi.GrupTipiId = FNo6.Id ) 
-   left outer join Lkp.MtskSubeTipi as FNo7 with (nolock) on ( MtskGrupSubesi.SubeTipiId = FNo7.Id ) 
+   left outer join Lkp.MtskGrupTipi  as FNo6 with (nolock) on ( MtskGrupSubesi.GrupTipiId = FNo6.Id ) 
+   left outer join Lkp.MtskSubeTipi  as FNo7 with (nolock) on ( MtskGrupSubesi.SubeTipiId = FNo7.Id ) 
    left outer join Lkp.MtskKurumOnayTipi as FNo10 with (nolock) on ( MtskGrupSubesi.KurumOnayTipiId = FNo10.Id ) 
 
    left outer join MtskTeorikDers as teo on (
@@ -28,14 +52,13 @@ AS BEGIN
        and MtskGrupSubesi.GrupTipiId = teo.GrupTipiId  
        and MtskGrupSubesi.SubeTipiId = teo.SubeTipiId  
    )
-   left outer join Lkp.MtskTeorikDersDerslikTipi as ders on ( teo.DerslikTipiId = ders.Id )
 
  where 0 = 0 
  /*[MtskGrupSubesi].DEFAULT_VALUE*/
  and [MtskGrupSubesi].FirmId = @FirmId
  and [MtskGrupSubesi].DonemTipiId = @DonemTipiId
  and MtskGrupSubesi.IsActive = 1 
- 
+
  group by
    MtskGrupSubesi.DonemTipiId
  , MtskGrupSubesi.GrupTipiId
@@ -43,7 +66,13 @@ AS BEGIN
  , FNo6.GrupTipi 
  , FNo7.SubeTipi
  , donem.GrupBaslamaTarihi
+ , ders.Id
  , ders.DerslikTipi
+ , saat.TrafikVeCevreDersSaati
+ , saat.IlkYardimDersSaati
+ , saat.AracTeknigiDersSaati
+ , saat.TrafikAdabiDersSaati 
+
 
 END -- procedure
 

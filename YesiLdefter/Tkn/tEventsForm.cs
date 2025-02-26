@@ -220,6 +220,7 @@ namespace Tkn_Events
 
                     if (e.KeyCode == Keys.Escape)
                     {
+                        // Program kapatılacak, kapatmak istediğinize emin misiniz
                         DialogResult cevap = t.mySoru("EXIT");
                         if (DialogResult.Yes == cevap)
                         {

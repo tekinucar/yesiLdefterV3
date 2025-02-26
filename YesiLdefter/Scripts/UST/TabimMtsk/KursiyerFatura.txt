@@ -1,0 +1,24 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table KursiyerFatura
+ (
+   Id                              Int IDENTITY(1,1) not null, 
+   KursiyerUlas                    Int               not null,
+   FaturaTarihi                    DateTime          null,
+   FaturaNo                        nVarchar(20)      null,
+   FaturaToplamTutari              Numeric(22,5)     null,
+   FaturaResim                     VarBinary(max)    null,
+   FaturaYuklendi                  Bit               null, /* mebbise yüklendi */
+
+   constraint		pk_KursiyerFatura primary key (Id)
+ )
+  
+grant select, insert, update, delete on KursiyerFatura to public
+
+create index X_KursiyerFatura01 on KursiyerFatura (KursiyerUlas)
+
+commit transaction
+
+/*CreateTableEnd*/

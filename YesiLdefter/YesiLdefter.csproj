@@ -436,6 +436,7 @@
     <Compile Include="Selenium\MsWebPagesService.cs" />
     <Compile Include="Selenium\SeleniumService.cs" />
     <Compile Include="tForms.cs" />
+    <Compile Include="Tkn\tImageService.cs" />
     <Compile Include="Tkn\EventsMenu.cs" />
     <Compile Include="Tkn\tCefSharp.cs" />
     <Compile Include="Tkn\tCookieReader.cs" />
@@ -681,6 +682,7 @@
     <Content Include="Scripts\UST\MsV3\MsSqlLog.txt" />
     <Content Include="Scripts\UST\MsV3\MsTables.txt" />
     <Content Include="Scripts\UST\MsV3\MsTablesIP.txt" />
+    <Content Include="Scripts\UST\MsV3\MsSpeedUserGuid.txt" />
     <Content Include="Scripts\UST\MsV3\MsWebNodeItems.txt" />
     <Content Include="Scripts\UST\MsV3\MsWebNodes.txt" />
     <Content Include="Scripts\UST\MsV3\MsWebPages.txt" />
@@ -704,6 +706,7 @@
     <Content Include="Scripts\UST\Mtsk\BildirimSMS.txt" />
     <Content Include="Scripts\UST\Mtsk\DbUpdates.txt" />
     <Content Include="Scripts\UST\Mtsk\FileUpdates.txt" />
+    <Content Include="Scripts\UST\Mtsk\fnc_getGecerlilikTarihiId.txt" />
     <Content Include="Scripts\UST\Mtsk\fnc_getSertifikaDeneyimSarti.txt" />
     <Content Include="Scripts\UST\Mtsk\fnc_getSertifikaId.txt" />
     <Content Include="Scripts\UST\Mtsk\fnc_getSertifikaIsOtomatik.txt" />
@@ -941,6 +944,7 @@
     <Content Include="Scripts\UST\ResmiMuhasebe\HesapPlani.txt" />
     <Content Include="Scripts\UST\TabimMtsk\prc_KursiyerSinavDurumu.txt" />
     <Content Include="Scripts\UST\TabimMtsk\SinavTar_Update.txt" />
+    <Content Include="Scripts\UST\TabimMtsk\KursiyerFatura.txt" />
     <Content Include="Scripts\UST\TabimMtsk\trg_DERSPRG_PLAN.txt" />
     <Content Include="Scripts\UST\TabimMtsk\trg_sinavnot.txt" />
     <Content Include="Scripts\UST\TabimMtsk\trg_users.txt" />

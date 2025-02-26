@@ -190,13 +190,21 @@ namespace YesiLdefter.Selenium
                     wnv.writeValue = v.tUser.MebbisCode;
                 else wnv.writeValue = v.tMainFirm.FirmMebbisCode;
             }
-
             if (wnv.writeValue == "MEBBIS_SIFRE")
             {
                 if (v.tUser.MebbisPass != "")
                     wnv.writeValue = v.tUser.MebbisPass;
                 else wnv.writeValue = v.tMainFirm.FirmMebbisPass;
             }
+            if (wnv.writeValue == "GIBEARSIVFATURAKULLANICI")
+            {
+                wnv.writeValue = v.tMainFirm.FirmGIBeArsivFaturaCode;
+            }
+            if (wnv.writeValue == "GIBEARSIVFATURASIFRE")
+            {
+                wnv.writeValue = v.tMainFirm.FirmGIBeArsivFaturaPass;
+            }
+
         }
 
         public void nodeValuesPreparing(Form tForm, List<MsWebNode> msWebNodes,  MsWebNode item, ref webNodeValue wnv, List<MsWebScrapingDbFields> msWebScrapingDbFields)
@@ -233,12 +241,19 @@ namespace YesiLdefter.Selenium
                     wnv.writeValue = v.tUser.MebbisCode;
                 else wnv.writeValue = v.tMainFirm.FirmMebbisCode;
             }
-
             if (wnv.writeValue == "MEBBIS_SIFRE")
             {
                 if (v.tUser.MebbisPass != "")
                     wnv.writeValue = v.tUser.MebbisPass;
                 else wnv.writeValue = v.tMainFirm.FirmMebbisPass;
+            }
+            if (wnv.writeValue == "GIBEARSIVFATURAKULLANICI")
+            {
+                wnv.writeValue = v.tMainFirm.FirmGIBeArsivFaturaCode;
+            }
+            if (wnv.writeValue == "GIBEARSIVFATURASIFRE")
+            {
+                wnv.writeValue = v.tMainFirm.FirmGIBeArsivFaturaPass;
             }
 
             /// Başka bir NodeId nin database den gelen valuesini okuyacak
@@ -476,7 +491,9 @@ namespace YesiLdefter.Selenium
                     {
                         bool valueOnay = false;
                         string imgName = wnv.writeValue;
-                        if (imgName == "") imgName = wnv.dbFieldName;
+                        if (imgName == null || imgName == "")
+                            imgName = t.getNewFileGuidName;  
+                        //imgName = t.getFileName(v.tFileName.transferFromDatabaseToWeb); //t.getNewFileGuidName;  //wnv.dbFieldName;
 
                         try
                         {
@@ -679,8 +696,6 @@ namespace YesiLdefter.Selenium
                 }
                 else
                 {
-                    //v.SQL = v.SQL + wnv.dbFieldName;
-
                     if (t.IsNotNull(v.con_Images_FieldName) == false)
                         v.con_Images_FieldName = wnv.dbFieldName;
                     else v.con_Images_FieldName2 = wnv.dbFieldName;
@@ -733,6 +748,7 @@ namespace YesiLdefter.Selenium
             t.WaitFormOpen(tForm, "Alınan bilgiler veritabanına yazılıyor ...");
 
             tTable tb = wnv.tTable;
+            if (tb.tRows.Count == 0) return onay;
             int myTriggerTableRowNo = 0;
             tRow myTriggerWmvTableRows = tb.tRows[myTriggerTableRowNo];
 
@@ -769,7 +785,6 @@ namespace YesiLdefter.Selenium
 
                     if (value >= kayitBaslangisId)
                     {
-                        //saveRowAsync(tForm, this.myTriggerTableWnv, row, msWebScrapingDbFields, aktifPageNodeItemsList);
                         saveRowAsync(tForm, wnv, row, msWebScrapingDbFields, aktifPageNodeItemsList);
 
                         if (editKayitKontrolu())
@@ -876,7 +891,7 @@ namespace YesiLdefter.Selenium
 
             //if (wnv.tTable != null)
             _colNo = wnv.tTableColNo;
-
+            
             DataRow findDbRow = null;
 
             //foreach (DataRow row in ds_ScrapingDbConnectionList.Tables[0].Rows)
@@ -1312,6 +1327,9 @@ namespace YesiLdefter.Selenium
                     (wnv.AttRole != "ItemTable"))//(wnv.EventsType != v.tWebEventsType.itemTable))
                     dbRow = findRightRowForSelect(tForm, wnv, v.tSelect.Get, msWebScrapingDbFields);
 
+                if (wnv.AttRole == "GIBeArsivFaturaIndir")
+                    dbRow = findRightRow(tForm, wnv, v.tSelect.Get, msWebScrapingDbFields);
+
                 /// yeni data satırı oluştur
                 /// tabloy aktarmaya başladığında ilk yeni row oluştursun
                 /// bir defa çalışıyor
@@ -1322,9 +1340,31 @@ namespace YesiLdefter.Selenium
                     firstColumn = false;
                 }
 
+                if (dbRow != null && wnv.AttRole == "GIBeArsivFaturaIndir")
+                {
+                    /// value ler
+                    itemText = tableRows.tColumns[colNo + 1].value;
+                    if (wnv.dbFieldName.IndexOf("Resim") == -1)
+                    {
+                        if (itemText != "")
+                            dbRow[wnv.dbFieldName] = itemText;
+                    }
+                    else
+                    {
+                        // resmin pathi, ataması
+                        if (itemText != "")
+                        {
+                            long imageLength = 0;
+                            v.con_Images = t.imageBinaryArrayConverter(itemText, ref imageLength);
+                            v.con_Images_FieldName = wnv.dbFieldName;
+                        }
+                    }
+                }
+
                 /// dbRow geldiyse ilgili tablo ve column bulunmuş demektir
                 /// webden okunan veriyi db ye aktardığı an
-                if (dbRow != null)
+                /// standart tablolar
+                if (dbRow != null && wnv.AttRole != "GIBeArsivFaturaIndir")
                 {
                     // select node için itemValue tespiti
                     itemText = tableRows.tColumns[colNo].value;
@@ -1374,7 +1414,9 @@ namespace YesiLdefter.Selenium
             //}
 
             if ((wnv.TagName == "table") ||
-                (wnv.TagName == "select"))
+                (wnv.TagName == "select") ||
+                (wnv.AttRole == "GIBeArsivFaturaIndir")
+                )
             {
                 /// final : yeni dbrow oluşturuldu, 
                 /// wnv.table üzerindeki tüm colomn tarandı ve gerekli atamalar yapıldı
@@ -1513,7 +1555,7 @@ namespace YesiLdefter.Selenium
 
             if (f.autoSubmit)
             {
-                if ((workPageNodes.aktifPageCode != "MTSKADAYRESIM") &&
+                if (//(workPageNodes.aktifPageCode != "MTSKADAYRESIM") &&
                     (workPageNodes.aktifPageCode != "MTSKADAYSOZLESME") &&
                     (workPageNodes.aktifPageCode != "MTSKADAYIMZA") &&
                     (workPageNodes.aktifPageCode != "SRCADAYRESIM")
@@ -1528,6 +1570,17 @@ namespace YesiLdefter.Selenium
                     )
                     f.btn_FullPost2.Visible = true;
                 else f.btn_FullPost2.Visible = false;
+            
+                if (f.btn_FullPost1.Visible)
+                {
+                    if (f.btn_FullPost1.Tag == null)
+                        f.btn_FullPost1.Tag = f.btn_FullPost1.Text;
+
+                    if (workPageNodes.aktifPageCode == "MTSKADAYRESIM")
+                        f.btn_FullPost1.Text = "Başvuru resmini gönder";
+                    else f.btn_FullPost1.Text = f.btn_FullPost1.Tag.ToString();
+                }
+            
             }
             else
             {
@@ -1655,13 +1708,13 @@ namespace YesiLdefter.Selenium
         public bool LoginOnayi(DataSet ds_MsWebPages, DataNavigator dN_MsWebPages)
         {
             bool onay = false;
-            string pageName = ds_MsWebPages.Tables[0].Rows[dN_MsWebPages.Position]["About"].ToString();
-            string soru = pageName + " giriş sayfasını açmak ister misiniz ?";
-
             string loginPage = ds_MsWebPages.Tables[0].Rows[dN_MsWebPages.Position]["LoginPage"].ToString();
 
             if (loginPage == "True")
             {
+                string pageName = ds_MsWebPages.Tables[0].Rows[dN_MsWebPages.Position]["About"].ToString();
+                string soru = pageName + " giriş sayfasını açmak ister misiniz ?";
+
                 DialogResult cevap = t.mySoru(soru);
                 if (DialogResult.Yes == cevap)
                 {

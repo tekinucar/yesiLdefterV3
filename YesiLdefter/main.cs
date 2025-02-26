@@ -667,9 +667,6 @@ namespace YesiLdefter
                 " ActiveStyle : " + UserLookAndFeel.Default.ActiveStyle.ToString() + " // " + v.ENTER +
                 " ActiveSvgPaletteName : " + UserLookAndFeel.Default.ActiveSvgPaletteName.ToString()
                 );
-
-
-
         }
 
         #endregion buttonsClick
@@ -889,6 +886,7 @@ namespace YesiLdefter
                     if (e.KeyCode == Keys.Escape)
                     {
                         tToolBox t = new tToolBox();
+                        //Program kapatılacak, kapatmak istediğinize emin misiniz
                         DialogResult cevap = t.mySoru("EXIT");
                         if (DialogResult.Yes == cevap)
                         {
@@ -912,8 +910,8 @@ namespace YesiLdefter
         {
             if (v.SP_ApplicationExit == false)
             {
-                
                 tToolBox t = new tToolBox();
+                // Program kapatılacak, kapatmak istediğinize emin misiniz
                 DialogResult cevap = t.mySoru("EXIT");
                 if (DialogResult.Yes == cevap)
                 {

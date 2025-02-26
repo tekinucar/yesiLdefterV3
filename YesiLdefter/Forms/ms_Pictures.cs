@@ -29,40 +29,19 @@ using Spire.Additions.Chrome;
 
 using Spire.Doc;
 using Spire.Doc.Documents;
-using System.Drawing.Imaging;
+using Tkn_Images;
+//using System.Drawing.Imaging;
 
 
 namespace YesiLdefter
 {
     public partial class ms_Pictures : DevExpress.XtraEditors.XtraForm
     {
-        private class vImageProperties
-        {
-            public int width { get; set; }
-            public int height { get; set; }
-            public float horizontalResolation { get; set; }
-            public float verticalResolation { get; set; }
-            public long byteSize { get; set; }
-            public decimal kbSize { get; set; }
-            public System.Drawing.Imaging.ImageFormat imageFormat { get; set; }
-            public string imagePath { get; set; }
-            public string imageName { get; set; }
-
-            public void Clear()
-            {
-                width = 0;
-                height = 0;
-                horizontalResolation = 0;
-                verticalResolation = 0;
-                byteSize = 0;
-                kbSize = 0;
-                imageFormat = null;
-                imagePath = string.Empty;
-                imageName = string.Empty;
-            }
-        }
 
         tToolBox t = new tToolBox();
+        tImageService imageService = new tImageService();
+
+
         #region tanımlar
         object tFileDataTable = null;
         bool loadDrives = false;
@@ -81,10 +60,10 @@ namespace YesiLdefter
         int autoCropWidth;
         int autoCropHeight;
         int autoDPI;
-        string autoFormat = "Jpeg";
+        ImageFormat autoImageFormat = ImageFormat.Jpeg;
 
         string activeControlName = null;
-        Bitmap OriginalImage = null;
+        Bitmap OrginalImage = null;
         Pen cropPen;
         Pen cropPen2;
         Pen cropPen3;
@@ -987,31 +966,13 @@ namespace YesiLdefter
 
             try
             {
-                //Tarayıcı kontrolü, bağlı değilse catch e düşer.
-
-                /*    
-                WIA.CommonDialog dialog = new WIA.CommonDialog();
-
-                //Tarayıcı bağlı değil ise img alınırken hataya düşüyor, catch ile yakalanıp tarayıcı olmadığı basılıyor.
-                //if (((DevExpress.XtraEditors.CheckEdit)checkEdit_Tarayici).Checked)
-                
-                if (this.checkEdit_Tarayici.Checked)
-                {
-                    //Her girişte Cihaz seçimi yapılacaksa.
-                    ImgFile = dialog.ShowAcquireImage(WiaDeviceType.ScannerDeviceType, WiaImageIntent.ColorIntent, WiaImageBias.MinimizeSize, "{00000000-0000-0000-0000-000000000000}", true, true, false);
-                }
-                else
-                {
-                    //cihaz seçimi yapılmaksızın seçili cihaz ile sürekli devam edilecekse.
-                    ImgFile = dialog.ShowAcquireImage(WiaDeviceType.ScannerDeviceType, WiaImageIntent.ColorIntent, WiaImageBias.MinimizeSize, "{00000000-0000-0000-0000-000000000000}", false, true, false);
-                //}
-                */
-
-
                 try
                 {
                     // exenin bulunduğu path altına images isimli path içine guid isimli dosya hazırlanıyor
-                    string ImagesPath = t.Find_Path("images") + tFileGuidName + ".jpg";
+                    
+                    string formatName = imageService.getImageFormatName(autoImageFormat);
+                    string ImagesPath = t.Find_Path("images") + t.getNewFileGuidName + "." + formatName; //".jpg";
+                    //string ImagesPath = t.Find_Path("images") + t.getFileName(v.tFileName.tarayici) + ".jpg";
 
                     DeviceManager deviceManager = new DeviceManager();
                     Device device = null;
@@ -1030,8 +991,6 @@ namespace YesiLdefter
                     {
                         WIA.CommonDialog dialog = new WIA.CommonDialog();
 
-                        //ImgFile = (ImageFile)dialog.ShowTransfer(item, WiaFormatJPEG.WiaFormatJPEG, false);
-
                         if (this.imageType == "Biyometrik" || this.imageType == "Imza")
                         {
                             this.btn_Zoom.EditValue = "100";
@@ -1043,29 +1002,17 @@ namespace YesiLdefter
                             this.btn_Zoom.EditValue = "35";
                             this.barEditItem_ZoomLine.EditValue = 35;
                             ImgFile = (ImageFile)dialog.ShowAcquireImage(WiaDeviceType.ScannerDeviceType, WiaImageIntent.TextIntent, WiaImageBias.MinimizeSize, "{00000000-0000-0000-0000-000000000000}", false, true, false);
-                            //ImgFile = (ImageFile)dialog.ShowAcquireImage(FormatID.wiaFormatJPEG, WiaImageIntent.ColorIntent, "{00000000-0000-0000-0000-000000000000}");
-                                //WiaDeviceType.ScannerDeviceType, WiaImageIntent.TextIntent, WiaImageBias.MinimizeSize, "{00000000-0000-0000-0000-000000000000}", false, true, false);
-
                         }
                         if (ImgFile != null)
                         {
                             ImgFile.SaveFile(ImagesPath);
                             t.AlertMessage("Tarayıcı", "Evrak tarama işlemi tamamlandı.");
                         }
-
-                        //WIA.CommonDialog dlg = new WIA.CommonDialog();
-                        //WIA.ImageFile imgFile = dlg.ShowAcquireImage(WIA.FormatID.wiaFormatBMP, WIA.Intent.wiaIntentPreview);
-
-                        // Görüntüyü kaydetme (örneğin, BMP formatında)
-                        //imgFile.SaveFile("taramali_goruntu.bmp");
                     }
                     else
                     {
                         MessageBox.Show("Tarayıcı bulunamadı.");
                     }
-
-                    //Tarama bölümüne girip iptal dedikten sonra işlemler devam ediyor ve hataya sebebiyet veriyor. Kontrol altına alındı.img.savefile da patlıyor iptal dendiğinde.
-                    //ImgFile.SaveFile(ImagesPath);
 
                     if (ImgFile != null)
                     {
@@ -1101,7 +1048,7 @@ namespace YesiLdefter
                             //return;
                         }
 
-                        preparing_OriginalImage();
+                        preparing_OrginalImage();
 
                         v.SP_OpenApplication = false;
                         v.IsWaitOpen = false;
@@ -1168,11 +1115,16 @@ namespace YesiLdefter
         {
             try
             {
-                // Devexpress pictureEdit1 hata veriyor
-                // Bitmap frameBitmap = (Bitmap)eventArgs.Frame.Clone();
-                // pictureEdit1.Image = frameBitmap;
+                //pictureEdit2.Image = (Bitmap)eventArgs.Frame.Clone();
 
-                pictureEdit2.Image = (Bitmap)eventArgs.Frame.Clone();
+                Bitmap orjinalGoruntu = (Bitmap)eventArgs.Frame.Clone();
+                //int width = 350; // Kırpılacak genişlik
+                //int height = 450; // Kırpılacak yükseklik
+                int x = (int)(orjinalGoruntu.Width/2) - 175; // Başlangıç x koordinatı
+                int y = (int)(orjinalGoruntu.Height/2) - 225;  // Başlangıç y koordinatı
+                Rectangle kirpmaAlani = new Rectangle(x, y, 350, 450);
+                Bitmap kirpilmisGoruntu = orjinalGoruntu.Clone(kirpmaAlani, orjinalGoruntu.PixelFormat);
+                pictureEdit2.Image = kirpilmisGoruntu;
             }
             catch (Exception)
             {
@@ -1186,10 +1138,6 @@ namespace YesiLdefter
             {
                 try
                 {
-                    //pictureEdit1.Image = pictureEdit2.Image;
-                    //pictureEdit1.Image = new Bitmap(pictureEdit2.Image, pictureEdit2.Image.Width, pictureEdit2.Image.Height);
-                    //pictureEdit1.Image = new Bitmap(pictureEdit2.Image, pictureEdit2.Width, pictureEdit2.Height);
-
                     cropX = 0;
                     cropY = 0;
                     cropWidth = pictureEdit2.Width;
@@ -1219,20 +1167,13 @@ namespace YesiLdefter
             this.vScrollBar = null;
             this.viewInfo = null;
 
-            //Bilgiler kaydedilirken gelen resmin neye dair olduğunu anlayıp ona göre kayıt gerekli.
-            //Bundan dolayı tip bilgisi enum olarak saklanıyor.
-            //HelperMethod.IslemTur = HelperMethod.Tur.Dosya;
-
             //Resim seçilir, resmin yolu pbx1 in tag ine atılır.
             OpenFileDialog fdialog = new OpenFileDialog();
             fdialog.Filter = "Pictures|*.*";
-            //fdialog.InitialDirectory = "C://"; 
             string ImagesPath = string.Empty;
 
             if (DialogResult.OK == fdialog.ShowDialog())
             {
-                // şimdilik gerek kalmadı
-                //v.con_Images_Name = fdialog.SafeFileName; // RESİM ADI.
                 ImagesPath = fdialog.FileName;   // Seçilen resme ait tam yol.
                 string newImagesPath = ImagesPath;
 
@@ -1241,13 +1182,12 @@ namespace YesiLdefter
                     int kirpPixel = 45;
                     newImagesPath = readPdfFileSpire(ImagesPath);
                     Image readPdfImage = Image.FromFile(newImagesPath);
-                    Image restoreImage = CropImage(readPdfImage, 0, kirpPixel, readPdfImage.Width, readPdfImage.Height - kirpPixel, autoDPI);
+                    Image restoreImage = imageService.cropImage(readPdfImage, 0, kirpPixel, readPdfImage.Width, readPdfImage.Height - kirpPixel, autoDPI);
                     pictureEdit1.Image = restoreImage;
                 }
                 else if (ImagesPath.IndexOf(".html") > -1)
                 {
                     convertHtmlToPDFSpire(ImagesPath);
-                    //convertHtmlToPDFAspose(ImagesPath);
                 }
                 else
                 {
@@ -1262,7 +1202,7 @@ namespace YesiLdefter
                 newImageProperties(ImagesPath);
                 Format_Ayarla();
                 DPI_Ayarla();
-                preparing_OriginalImage();
+                preparing_OrginalImage();
             }
         }
 
@@ -1284,12 +1224,13 @@ namespace YesiLdefter
 
                 using (Image image_ = doc.SaveAsImage(i, 100, 100))
                 {
-                    if (File.Exists(outputName))
-                    {
-                        // Dosya varsa sil
-                        File.Delete(outputName);
-                    }
-                    image_.Save(outputName, ImageFormat.Jpeg);
+                    //if (File.Exists(outputName))
+                    //{
+                    //    // Dosya varsa sil
+                    //    File.Delete(outputName);
+                    //}
+                    t.DosyaVarsaSil(outputName);
+                    image_.Save(outputName, autoImageFormat);// ImageFormat.Jpeg);
                 }
             }
             return firstOutputName;
@@ -1297,22 +1238,19 @@ namespace YesiLdefter
         
         private void btn_DosyayaKaydet_ItemClick(object sender, ItemClickEventArgs e)
         {
-            //string Images_Path = t.Find_Path("images") + tFileGuidName + ".jpg";
-
             if (pictureEdit1.Image != null)
             {
                 try
                 {
                     string tamAdi = imageName();
                     string Images_Path = t.Find_Path("images") + tamAdi + ".jpg";
-                    pictureEdit1.Image.Save(Images_Path, ImageFormat.Jpeg);
+                    pictureEdit1.Image.Save(Images_Path, autoImageFormat);//  ImageFormat.Jpeg);
 
                     MessageBox.Show("Dosyaya başarıyla kaydedilmiştir..." + v.ENTER2 + Images_Path);
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show(ex.Message);
-                    //throw;
                 }
             }
         }
@@ -1339,7 +1277,6 @@ namespace YesiLdefter
         {
             SaveFileDialog fdialog = new SaveFileDialog();
             fdialog.Filter = "Pictures|*.*";
-            //fdialog.InitialDirectory = "C://"; 
             string ImagesPath = string.Empty;
 
             fdialog.FileName = imageName() + ".jpg";
@@ -1348,7 +1285,7 @@ namespace YesiLdefter
             {
                 ImagesPath = fdialog.FileName;   // Seçilen resme ait tam yol.
 
-                pictureEdit1.Image.Save(ImagesPath, ImageFormat.Jpeg);
+                pictureEdit1.Image.Save(ImagesPath, autoImageFormat);// ImageFormat.Jpeg);
             }
         }
 
@@ -1376,7 +1313,6 @@ namespace YesiLdefter
         private void btn_Kalite_ItemClick(object sender, ItemClickEventArgs e)
         {
             //
-            //MessageBox.Show("kalite");
         }
 
         private void barEditItem_Boyut_EditValueChanged(object sender, EventArgs e)
@@ -1419,8 +1355,6 @@ namespace YesiLdefter
             //     Bir görüntü, gerçek boyutu kabın boyutundan daha küçükmüş gibi görüntülenir.
             //     Görüntü boyutu kabın boyutundan daha büyükse, kabın sınırlarına uyması için görüntü orantılı olarak küçültülür.
             // Squeeze = 5
-
-
         }
 
         #endregion Resim Edit
@@ -1432,7 +1366,6 @@ namespace YesiLdefter
             //Point my = tImagePoint(pictureEdit1, e.Location);
             //oCropX = my.X;
             //oCropY = my.Y;
-
             Cursor = Cursors.Default;
         }
 
@@ -1445,7 +1378,6 @@ namespace YesiLdefter
 
             if (e.Button == System.Windows.Forms.MouseButtons.Left)
             {
-                //if ((barCheckItem_Manuel.Checked) || (barCheckItem_Otomatik.Checked))
                 if (this.IsActiveOlcek)
                 {
                     this.zoomPercent = (int)pictureEdit1.Properties.ZoomPercent;
@@ -1457,10 +1389,7 @@ namespace YesiLdefter
 
                     cropX = e.X;
                     cropY = e.Y;
-
-                    //Point my = ScreenPoint(pictureEdit1, e.Location);
-                    //Point my = pictureEdit1.PointToClient(new Point(e.X, e.Y));
-                    
+                   
                     Point my = tImagePoint(pictureEdit1, e.Location);
                     startCropX = my.X;
                     startCropY = my.Y;
@@ -1485,14 +1414,12 @@ namespace YesiLdefter
 
             if (e.Button == System.Windows.Forms.MouseButtons.Left)
             {
-                //if (barCheckItem_Manuel.Checked)
                 if (this.olcekName == "Manuel")
                 {
                     cropWidth = e.X - cropX;
                     cropHeight = e.Y - cropY;
                 }
 
-                //if (barCheckItem_Otomatik.Checked)
                 if (this.olcekName == "Auto")
                 {
                     cropX = e.X;
@@ -1505,7 +1432,6 @@ namespace YesiLdefter
             }
 
             if ((e.Button == System.Windows.Forms.MouseButtons.Left) || (this.IsActiveOlcek))
-                //(barCheckItem_Manuel.Checked) || (barCheckItem_Otomatik.Checked))
             {
                 drawRectangle();
             }
@@ -1514,21 +1440,17 @@ namespace YesiLdefter
         
         private void pictureEdit1_MouseHover(object sender, EventArgs e)
         {
-            //if ((cropX > 0) && (cropY > 0))
             drawRectangle();
         }
 
         private void pictureEdit1_MouseLeave(object sender, EventArgs e)
         {
-            //if ((cropX > 0) && (cropY > 0))
             drawRectangle();
         }
 
         private void pictureEdit1_Validated(object sender, EventArgs e)
         {
-            //if ((cropX > 0) && (cropY > 0))
             drawRectangle();
-            //pictureEdit1.CreateGraphics().DrawRectangle(cropPen, 0, 0, pictureEdit1.Image.Width, pictureEdit1.Image.Height);
         }
 
         private void pictureEdit1_Paint(object sender, PaintEventArgs e)
@@ -1546,17 +1468,12 @@ namespace YesiLdefter
             
             pictureEdit1.Refresh();
 
-            //if ((barCheckItem_Manuel.Checked) ||  (barCheckItem_Otomatik.Checked))
             if (this.IsActiveOlcek)
             {
-                //if (this.zoomPercent <= 0)
-                //    this.zoomPercent = (int)pictureEdit1.Properties.ZoomPercent;
-
                 decimal oran = 0;
                 int _cropWidth = 0;
                 int _cropHeight = 0;
 
-                //if (barCheckItem_Otomatik.Checked)
                 if (this.olcekName == "Auto")
                 {
                     oran = ((decimal)this.zoomPercent / 100);
@@ -1609,12 +1526,8 @@ namespace YesiLdefter
         {
             this.barCheckItem_Otomatik.Enabled = !IsActive;
             this.barCheckItem_Manuel.Enabled = !IsActive;
-
             this.barButtonItem_Kirp.Enabled = IsActive;
-            //this.barButtonItem_Vazgec.Enabled = IsActive;
-
             this.IsActiveOlcek = IsActive;
-
             if (IsActive)
                 checkedOrjinalImageControl();
         }
@@ -1622,24 +1535,17 @@ namespace YesiLdefter
         private void barButtonItem_Kirp_ItemClick(object sender, ItemClickEventArgs e)
         {
             myImageCrop(pictureEdit1);
-
             kirpmaIslemi(false);
-
-            // vazgeçebilir
-            //this.barButtonItem_Vazgec.Enabled = true;
-
             printImageProperties();
-
             t.AlertMessage("Bilgilendirme", "Resim kırpma işlem yapılmıştır...");
-            //MessageBox.Show("Kırpma işlemi gerçekleştirildi...");
         }
         private void barButtonItem_Vazgec_ItemClick(object sender, ItemClickEventArgs e)
         {
             /// ne yaparsan yap ilk orjinal kalite yakalnmıyor
             /// bu nedenle tekrar dosyadan okundu
             ///
-            if (OriginalImage != null)
-                pictureEdit1.Image = new Bitmap(OriginalImage, OriginalImage.Width, OriginalImage.Height);
+            if (OrginalImage != null)
+                pictureEdit1.Image = new Bitmap(OrginalImage, OrginalImage.Width, OrginalImage.Height);
 
             printImageProperties();
 
@@ -1700,23 +1606,9 @@ namespace YesiLdefter
         {
             if (cropWidth < 1) return;
 
-            //if (this.zoomPercent <= 0)
-            //    this.zoomPercent = (int)pictureEdit1.Properties.ZoomPercent;
-
             try
             {
                 pictureEdit_.CreateGraphics().DrawRectangle(cropPen3, cropX, cropY, cropWidth, cropHeight);
-
-                /*
-                /// zoom dan dolayı genişlik ve yükseklik yeniden hesaplanıyor
-                /// 
-                decimal oran = 1; // ((decimal)this.zoomPercent/100);
-                //cropWidth = (int)((decimal)cropWidth * (100 / (decimal)this.zoomPercent));
-                //cropHeight = (int)((decimal)cropHeight * (100 / (decimal)this.zoomPercent));
-                
-                cropWidth = (int)((decimal)cropWidth * oran);
-                cropHeight = (int)((decimal)cropHeight * oran);
-                */
 
                 // kaynak okunacak alan
                 Rectangle sourceRect = new Rectangle(startCropX+1, startCropY+1, cropWidth, cropHeight);
@@ -1746,13 +1638,10 @@ namespace YesiLdefter
                 Cursor = Cursors.Default;
                 
                 printImageProperties();
-
-                //MessageBox.Show("Kırpma işlemi gerçekleştirildi...");
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
-                //throw;
             }
 
         }
@@ -1760,8 +1649,10 @@ namespace YesiLdefter
         {
             if (cropWidth < 1) return;
 
-            //if (this.zoomPercent <= 0)
-            //    this.zoomPercent = (int)pictureEdit1.Properties.ZoomPercent;
+
+
+            //System.Drawing.Imaging.ImageFormat imageFormat = tGetImageFormat(bitmap.RawFormat);
+
 
             try
             {
@@ -1770,8 +1661,6 @@ namespace YesiLdefter
                 /// zoom dan dolayı genişlik ve yükseklik yeniden hesaplanıyor
                 /// 
                 decimal oran = 1;// (100 / (decimal)this.zoomPercent);
-                //cropWidth = (int)((decimal)cropWidth * (100 / (decimal)this.zoomPercent));
-                //cropHeight = (int)((decimal)cropHeight * (100 / (decimal)this.zoomPercent));
                 cropWidth = (int)((decimal)cropWidth * oran);
                 cropHeight = (int)((decimal)cropHeight * oran);
 
@@ -1803,8 +1692,6 @@ namespace YesiLdefter
                 Cursor = Cursors.Default;
 
                 //printImageProperties();
-
-                //MessageBox.Show("Kırpma işlemi gerçekleştirildi...");
             }
             catch (Exception ex)
             {
@@ -1825,11 +1712,13 @@ namespace YesiLdefter
             // program çalışırsken 400 dpi olan biyometrik resmin Auto ölçek ile en uygun olan küçültme oranı 
             // gözlenerek yapıldı
 
-            oldWidth = pictureEdit1.Image.Width;
-            oldHeight = pictureEdit1.Image.Height;
+            //oldWidth = pictureEdit1.Image.Width;
+            //oldHeight = pictureEdit1.Image.Height;
+            //Bitmap workingImage = new Bitmap(pictureEdit1.Image, oldWidth, oldHeight);
+            //workingImage.SetResolution(pictureEdit1.Image.HorizontalResolution, pictureEdit1.Image.VerticalResolution);
 
-            Bitmap workingImage = new Bitmap(pictureEdit1.Image, oldWidth, oldHeight);
-            workingImage.SetResolution(pictureEdit1.Image.HorizontalResolution, pictureEdit1.Image.VerticalResolution);
+            Bitmap workingImage = imageService.getImage(pictureEdit1.Image, ref oldWidth, ref oldHeight);
+
             preparingNewWidthNewHeight(newValue, oldWidth, oldHeight, ref newWidth, ref newHeight);
 
             if (newWidth < 0 || newHeight < 0)
@@ -1838,7 +1727,8 @@ namespace YesiLdefter
                 newHeight = oldHeight;
             }
 
-            Bitmap _img = myImageCompress_(workingImage, newWidth, newHeight);
+            //Bitmap _img = myImageCompress_(workingImage, newWidth, newHeight);
+            Bitmap _img = imageService.setImageCompress_(workingImage, newWidth, newHeight);
 
             pictureEdit1.Image = _img;
 
@@ -1848,10 +1738,9 @@ namespace YesiLdefter
                 this.barEditItem_ZoomLine.EditValue = 35;
             }
 
-
             t.AlertMessage("Bilgilendirme", "400 DPI için özel resim sıkıştırma işlemi uygulanmıştır...");
         }
-        //var croppedImage = CropImage(Image.FromStream(Request.Files[0].InputStream), x, y, 500, 500);
+        /*
         public Bitmap CropImage(Image oldImage, int x, int y, int width, int height, int newDpi)
         {
 
@@ -1880,7 +1769,7 @@ namespace YesiLdefter
 
             return _newImage;
         }
-
+        */
         #endregion Corps - Kırp
 
         #region Compress - Sıkıştır
@@ -1892,7 +1781,6 @@ namespace YesiLdefter
             //string FieldName = ((DevExpress.XtraEditors.ButtonEdit)sender).AccessibleName;
             //string FormName = ((DevExpress.XtraEditors.ButtonEdit)sender).AccessibleDescription;
             string txt = ((DevExpress.XtraEditors.ButtonEdit)sender).Text;
-            //txt = txt.Replace("pixel", "");
             int value = t.myInt32(txt);
 
             // 10 ile 100 arası olsun ( 100 arttırılabilir )
@@ -1917,48 +1805,25 @@ namespace YesiLdefter
         ///
         public void myImageCompress(int newValue) //mypixel
         {
-            //Size yeni_boyut = new Size(-1, -1);
             int oldWidth = 0;
             int oldHeight = 0;
-            //float nPercent = 0;
-            //float nPercentW = 0;
-            //float nPercentH = 0;
-
-            /// First we define a rectangle with the help of already calculated points
-            ///if (this.OriginalImage == null)
-            ///    this.OriginalImage = new Bitmap(pictureEdit1.Image, pictureEdit1.Image.Width, pictureEdit1.Image.Height);
-            ///Bitmap workingImage = new Bitmap(pictureEdit1.Image, pictureEdit1.Image.Width, pictureEdit1.Image.Height);
 
             try
             {
-                oldWidth = pictureEdit1.Image.Width;
-                oldHeight = pictureEdit1.Image.Height;
+                oldWidth = 0;
+                oldHeight = 0;
                 int newWidth = 0; 
                 int newHeight = 0;
 
+
+                //Bitmap workingImage = new Bitmap(pictureEdit1.Image, pictureEdit1.Image.Width, pictureEdit1.Image.Height);
+                //workingImage.SetResolution(pictureEdit1.Image.HorizontalResolution, pictureEdit1.Image.VerticalResolution);
+                Bitmap workingImage = imageService.getImage(pictureEdit1.Image, ref oldWidth, ref oldHeight);
+
                 preparingNewWidthNewHeight(newValue, oldWidth, oldHeight, ref newWidth, ref newHeight);
 
-                /*
-                /// Original image
-                //Bitmap _img = new Bitmap(newWidth, newHeight, workingImage.PixelFormat);
-                Bitmap _img = new Bitmap(newWidth, newHeight, pictureEdit1.Image.PixelFormat);
-                _img.SetResolution(pictureEdit1.Image.HorizontalResolution, pictureEdit1.Image.VerticalResolution);
-
-                /// for new image
-                Graphics g = Graphics.FromImage(_img);
-                /// create graphics
-                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-                g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
-                g.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
-
-                /// eskiden yeniye aktarım yapılıyor
-                //g.DrawImage(workingImage, 0, 0, newWidth, newHeight);
-                g.DrawImage(pictureEdit1.Image, 0, 0, newWidth, newHeight);
-                */
-                Bitmap workingImage = new Bitmap(pictureEdit1.Image, pictureEdit1.Image.Width, pictureEdit1.Image.Height);
-                workingImage.SetResolution(pictureEdit1.Image.HorizontalResolution, pictureEdit1.Image.VerticalResolution);
-
-                Bitmap _img = myImageCompress_(workingImage, newWidth, newHeight);
+                //Bitmap _img = myImageCompress_(workingImage, newWidth, newHeight);
+                Bitmap _img = imageService.setImageCompress_(workingImage, newWidth, newHeight);
 
                 pictureEdit1.Image = _img;
 
@@ -1966,17 +1831,15 @@ namespace YesiLdefter
 
                 printImageProperties();
 
-                //MessageBox.Show("Sıkıştırma işlemi gerçekleştirildi...");
                 t.AlertMessage("Bilgilendirme", "Sıkıştırma işlemi gerçekleştirildi...");
 
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
-                //throw;
             }
         }
-
+        /*
         private Bitmap myImageCompress_(Bitmap workingImage, int newWidth, int newHeight)
         {
             Bitmap _img = new Bitmap(newWidth, newHeight,  workingImage.PixelFormat);
@@ -1993,13 +1856,11 @@ namespace YesiLdefter
 
             return _img;
         }
-
+        */
         private void preparingNewWidthNewHeight(int newPixel, int oldWidth, int oldHeight, ref int newWidth, ref int newHeight)
         {
             /// Sıkıştıma işlemi için yeni newWidth ve newHeight hesaplanıyor
             /// 
-
-
             if (autoDPI == 400 && (autoCropHeight == oldHeight || autoCropWidth == oldWidth))
             {
                 newWidth = oldWidth;
@@ -2085,18 +1946,14 @@ namespace YesiLdefter
         /// <summary>
         /// Resmin dpi ayarlarını değiştirir.
         /// </summary>
+        
         private void myImageDPI(int newDpi)
         {
-            /// Dpi = Dots per inch , Bir inç karedeki nokta sayısı demektir. 
-            /// Bir inch diye tabir edilen 2,54 cm’lik alanda bulunan nokta sayısına denir. 
-            /// 2,54 cm x 2,54 cm kare içine düşen nokta sayısı. 
-            /// Bir inç kare ye ne kadar çok nokta sığdırırsanız o kadar kaliteli sonuç elde edersiniz.
-            ///
-            /// Örnek verek olursak;
-            /// 72 Dpi bir inç kare içinde 72 nokta demektir.
-            /// 300 Dpi bir inç kare içinde 300 nokta demektir.
-            /// 1440 Dpi bir inç kare içinde 1440 nokta demektir.
+            pictureEdit1.Image = imageService.setImageDPI(pictureEdit1.Image, newDpi, autoImageFormat);
 
+            printImageProperties();
+
+            /*
             try
             {
                 Bitmap workingImage = null;
@@ -2154,42 +2011,8 @@ namespace YesiLdefter
                 MessageBox.Show(ex.Message.ToString());
                 //throw;
             }
-            
-            //---
-
-            #region başka bir yöntem
-            /* 
-            /// Burda gerçekleşen olay şu 
-            /// bir resmi 96 dpi dan 300 dpi yüksekseltiğinde resmin width ve height de artması gerekiyor
-            /// İşte burada bu büyümede gerçekleşiyor
-
-            ///  300 > 96
-            if (newDpi > horizontalResolation)
-            {
-               width = (int)((decimal)width * ((decimal)newDpi / (decimal)horizontalResolation));
-               height = (int)((decimal)height * ((decimal)newDpi / (decimal)verticalResolation));
-            }
-                        
-            /// yeni çizilen alan ölçüsü
-            Rectangle rect = new Rectangle(0, 0, width, height);
-
-            /// Original image
-            Bitmap _img = new Bitmap(width, height);
-
-            /// new dpi set
-            _img.SetResolution(newDpi, newDpi);
-                        
-            /// for cropinf image
-            Graphics g = Graphics.FromImage(_img);
-            /// create graphics
-            g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-            g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
-            g.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
-            
-            /// set image attributes
-            g.DrawImage(workingImage, 0, 0, rect, GraphicsUnit.Pixel);
             */
-            #endregion
+            //---
 
         }
 
@@ -2217,78 +2040,10 @@ namespace YesiLdefter
 
             if (e.Button.Index == 2) // Uygula butonu ise
             {
-                myImageQuality(value);
-            }
-        }
-
-        /// <summary>
-        /// Resmin Quality ayarlarını değiştirir.
-        /// </summary>
-        private void myImageQuality(int newValue)
-        {
-            /// newValue 1 ile 100 arası olması gerekiyor
-            ///   1 en düşük kalite
-            /// 100 en yüksek kalite
-            /// 
-            
-            ImageCodecInfo myImageCodecInfo;
-            System.Drawing.Imaging.Encoder myEncoder;
-            EncoderParameter myEncoderParameter = null;
-            EncoderParameters myEncoderParameters = null;
-            Bitmap workingImage = null;
-
-            try
-            {
-                workingImage = new Bitmap(pictureEdit1.Image, pictureEdit1.Image.Width, pictureEdit1.Image.Height);
-
-                /// önce resmin kalitesi yükseltilecek            
-                myImageCodecInfo = TipBilgisi("image/jpeg");
-
-                myEncoder = System.Drawing.Imaging.Encoder.Quality;
-
-                myEncoderParameters = new EncoderParameters(1);
-
-                // orjinali
-                // myEncoderParameter = new EncoderParameter(myEncoder, 65L);
-                myEncoderParameter = new EncoderParameter(myEncoder, (long)newValue);
-
-                myEncoderParameters.Param[0] = myEncoderParameter;
-
-                // Klasör oluşturulur 
-                string Images_Path = t.Find_Path("images") + tFileGuidName + ".jpg";
-
-                workingImage.Save(Images_Path, myImageCodecInfo, myEncoderParameters);
-
-                pictureEdit1.Image = Image.FromFile(Images_Path);
-
+                //myImageQuality(value);
+                pictureEdit1.Image = imageService.setImageQuality(pictureEdit1.Image, value, autoImageFormat);
                 printImageProperties();
-
-                t.AlertMessage("Bilgilendirme", "Resim kaliletesini düzenleme çalışması yapılmıştır...");
-                //MessageBox.Show("Resim kaliletesini düzenleme çalışması yapılmıştır...");
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message.ToString());
-                //throw;
-            }
-
-            workingImage.Dispose();
-            myEncoderParameter.Dispose();
-            myEncoderParameters.Dispose();
-        }
-
-        private ImageCodecInfo TipBilgisi(string mimeType)
-        {
-            //Üst metodun yardımcı metodu.
-            int j;
-            ImageCodecInfo[] encoders;
-            encoders = ImageCodecInfo.GetImageEncoders();
-            for (j = 0; j < encoders.Length; ++j)
-            {
-                if (encoders[j].MimeType == mimeType)
-                    return encoders[j];
-            }
-            return null;
         }
 
         #endregion Kalite
@@ -2357,16 +2112,32 @@ namespace YesiLdefter
                 string smallFieldName = dsImages.Tables[0].Rows[dNImages.Position]["LkpSmallFieldName"].ToString();
                 string idFieldName = dsImages.Tables[0].Rows[dNImages.Position]["LkpIdFieldName"].ToString();
                 string masterIdValue = dsImages.Tables[0].Rows[dNImages.Position]["LkpMasterIdValue"].ToString();
-
+                string imageFormat = "";
+                try
+                {
+                    imageFormat = dsImages.Tables[0].Rows[dNImages.Position]["LkpFormat"].ToString();
+                    if (imageFormat == "" || imageFormat == "jpeg")
+                        imageFormat = "jpg";
+                }
+                catch (Exception)
+                {
+                    imageFormat = "jpg";
+                }
 
                 // resim png formatına dönüyor
                 //v.con_Images = t.imageBinaryArrayConverterMem((byte[])dsImages.Tables[0].Rows[dNImages.Position]["LkpImage"]);
 
-                string fileGuid = tFileGuidName;
-                string Images_Path = t.Find_Path("images") + fileGuid + ".jpg";
+                //string fileGuid = t.getFileName(v.tFileName.dbKayit);
+                string fileGuid = t.getNewFileGuidName;
+                string Images_Path = t.Find_Path("images") + fileGuid + "." + imageFormat; //"jpg/png"
                 Bitmap workingImage = new Bitmap(pictureEdit1.Image, pictureEdit1.Image.Width, pictureEdit1.Image.Height);
-                workingImage.SetResolution(autoDPI, autoDPI);
-                workingImage.Save(Images_Path, ImageFormat.Jpeg);
+                
+                if (autoImageFormat == ImageFormat.Png)
+                    workingImage.SetResolution(autoDPI+1, autoDPI+1);
+                else workingImage.SetResolution(autoDPI, autoDPI);
+
+                workingImage.Save(Images_Path, autoImageFormat);
+                
                 pictureEdit1.Image = workingImage;
 
                 long imageLength = 0;
@@ -2380,17 +2151,16 @@ namespace YesiLdefter
                     int newWidth = (int)(workingImage.Width * 0.2);
                     int newHeight = (int)(workingImage.Height * 0.2);
 
-                    Bitmap _img = myImageCompress_(workingImage, newWidth, newHeight);
+                    Bitmap _img = imageService.setImageCompress_(workingImage, newWidth, newHeight);
 
-                    Images_Path = t.Find_Path("images") + fileGuid + "_Small.jpg";
-                    _img.Save(Images_Path, ImageFormat.Jpeg);
+                    Images_Path = t.Find_Path("images") + fileGuid + "_Small." + imageFormat;  // "_Small.jpg";
+                    _img.Save(Images_Path, autoImageFormat);
 
                     v.con_Images2 = t.imageBinaryArrayConverter(Images_Path, ref imageLength);
                     v.con_Images_FieldName2 = smallFieldName;
 
                     dsImages.Tables[0].Rows[dNImages.Position]["LkpSmallImage"] = v.con_Images2;
                 }
-
 
                 dsImages.Tables[0].Rows[dNImages.Position]["LkpImage"] = v.con_Images;
                 dsImages.Tables[0].AcceptChanges();
@@ -2421,6 +2191,7 @@ namespace YesiLdefter
                         if (belgeAdi == "İmza") dosyaIsmi = "IMZA";
                         if (belgeAdi == "Sözleşme 1") dosyaIsmi = "SOZLESME1";
                         if (belgeAdi == "Sözleşme 2") dosyaIsmi = "SOZLESME2";
+                        if (belgeAdi == "Başvuru (Kamera)") dosyaIsmi = "BASVURU";
 
                         tSql = " INSERT INTO [dbo].[EksEvraklar] ([UlasKursiyer],[DosyaIsmi],[Belge],[ET]) Values ( "
                         + masterIdValue + ", "
@@ -2451,13 +2222,10 @@ INSERT INTO [dbo].[EksEvraklar]
                     v.con_Refresh = sv.Record_SQL_RUN(dsImages, vt, "dsEdit", dNImages.Position, ref tSql, "");
 
                     t.AlertMessage(":)", "Resim başarıyla kaydedildi...");
-                    //t.FlyoutMessage(this, ":)", "Resim başarıyla kaydedildi...");
-                    //MessageBox.Show("Resim başarıyla kaydedildi...");
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show(ex.Message.ToString());
-                    //throw;
                 }
             }
         }
@@ -2466,7 +2234,7 @@ INSERT INTO [dbo].[EksEvraklar]
         {
             bool onay = true;
 
-            getImageProperties(pictureEdit1);
+            imageService.getImageProperties(pictureEdit1.Image, ref tImageProperties);
 
             string mesaj = "";
             /// DPI uygunmu
@@ -2475,9 +2243,9 @@ INSERT INTO [dbo].[EksEvraklar]
             {
                 DPI_Ayarla();
                 /// Yeniden ayarlanan DPI yı tekrar kontrol et
-                getImageProperties(pictureEdit1);
+                imageService.getImageProperties(pictureEdit1.Image, ref tImageProperties);
 
-                if (autoDPI != tImageProperties.horizontalResolation)
+                if (autoDPI != tImageProperties.horizontalResolation && tImageProperties.imageFormat == ImageFormat.Jpeg)
                 {
 
                     mesaj = "DPI uygun değil." + v.ENTER
@@ -2518,7 +2286,7 @@ INSERT INTO [dbo].[EksEvraklar]
             /// 
             if (onay)
             {
-                if (tImageProperties.kbSize > 100)
+                if (tImageProperties.kbSize > 100 && tImageProperties.imageFormat == ImageFormat.Jpeg)
                 {
                     t.AlertMessage("Bilgilendirme", "Resim kayıt öncesi 100 kb altına düşürülmeye çalışılıyor...");
 
@@ -2526,7 +2294,7 @@ INSERT INTO [dbo].[EksEvraklar]
 
                     /// resim üzerinde yeni işlem yapıldığı için tekrar kontrol gerekiyor
                     /// 
-                    getImageProperties(pictureEdit1);
+                    imageService.getImageProperties(pictureEdit1.Image, ref tImageProperties);
 
                     /// resim kb düşürme işlemi yapıldığı halde yinede uygun değilse
                     if (tImageProperties.kbSize > 100)
@@ -2549,19 +2317,25 @@ INSERT INTO [dbo].[EksEvraklar]
 
         private void preparingAutoSize()
         {
-            int oldWidth = pictureEdit1.Image.Width;
-            int oldHeight = pictureEdit1.Image.Height;
             int newWidth = autoCropWidth;
             int newHeight = autoCropHeight;
 
+            /*
+            int oldWidth = pictureEdit1.Image.Width;
+            int oldHeight = pictureEdit1.Image.Height;
             Bitmap workingImage = new Bitmap(pictureEdit1.Image, oldWidth, oldHeight);
             workingImage.SetResolution(pictureEdit1.Image.HorizontalResolution, pictureEdit1.Image.VerticalResolution);
+            */
 
-            Bitmap _img = myImageCompress_(workingImage, newWidth, newHeight);
+            Bitmap workingImage = imageService.getImage(pictureEdit1.Image);
+            
+            //Bitmap _img = myImageCompress_(workingImage, newWidth, newHeight);
+            Bitmap _img = imageService.setImageCompress_(workingImage, newWidth, newHeight);
 
-            getBitmapProperties(_img);
+            imageService.getBitmapProperties(_img, ref tImageProperties);
 
             pictureEdit1.Image = _img;
+            
             printImageProperties();
 
             newHeight = (int)tImageProperties.height;
@@ -2623,24 +2397,25 @@ INSERT INTO [dbo].[EksEvraklar]
 
         }
 
-        private void preparing_OriginalImage()
+        private void preparing_OrginalImage()
         {
-            OriginalImage = null;
+            this.OrginalImage = null;
             // resmin orjinalini sakla
             if (pictureEdit1.Image != null)
             {
-                OriginalImage = new Bitmap(pictureEdit1.Image, pictureEdit1.Image.Width, pictureEdit1.Image.Height);
-                OriginalImage.SetResolution(pictureEdit1.Image.HorizontalResolution, pictureEdit1.Image.VerticalResolution);
+                this.OrginalImage = new Bitmap(pictureEdit1.Image, pictureEdit1.Image.Width, pictureEdit1.Image.Height);
+                this.OrginalImage.SetResolution(pictureEdit1.Image.HorizontalResolution, pictureEdit1.Image.VerticalResolution);
             }
         }
 
         private void dataNavigator_PositionChanged(object sender, EventArgs e)
         {
-            preparing_OriginalImage();
+            preparing_OrginalImage();
 
             autoCropWidth = 0;
             autoCropHeight = 0;
             autoDPI = 0;
+            string format = "jpg";
 
             if (dNImages.Position > -1)
             {
@@ -2648,6 +2423,18 @@ INSERT INTO [dbo].[EksEvraklar]
                 autoCropWidth = t.myInt32(dsImages.Tables[0].Rows[dNImages.Position]["LkpWidth"].ToString());
                 autoCropHeight = t.myInt32(dsImages.Tables[0].Rows[dNImages.Position]["LkpHeight"].ToString());
                 autoDPI = t.myInt32(dsImages.Tables[0].Rows[dNImages.Position]["LkpDpi"].ToString());
+                try
+                {
+                    format = dsImages.Tables[0].Rows[dNImages.Position]["LkpFormat"].ToString();
+                    if (format == "" || format == "jpeg")
+                        format = "jpg";
+                }
+                catch (Exception)
+                {
+                    format = "jpg";
+                }
+                if (format == "jpg") autoImageFormat = ImageFormat.Jpeg;
+                if (format == "png") autoImageFormat = ImageFormat.Png;
             }
 
             if (imageType == "Normal")
@@ -2659,9 +2446,6 @@ INSERT INTO [dbo].[EksEvraklar]
             if (imageType == "Imza")
                 barEditItem_ResimTuru.EditValue = (short)3;
 
-
-            //if (autoCropWidth == 0) autoCropWidth = 394;
-            //if (autoCropHeight == 0) autoCropHeight = 512;
             if (autoDPI == 0) autoDPI = 96;
 
             cropWidth = autoCropWidth;
@@ -2669,7 +2453,7 @@ INSERT INTO [dbo].[EksEvraklar]
 
             btn_DPI.EditValue = autoDPI;
 
-            this.barStaticItem_imgDPIIstenen.Caption = autoDPI.ToString() + " dpi";
+            this.barStaticItem_imgDPIIstenen.Caption = autoDPI.ToString() + " dpi, " + format;
             this.barStaticItem_imgWHIstenen.Caption = autoCropWidth.ToString() + " X " + autoCropHeight.ToString();
             this.barStaticItem_imgKbIstenen.Caption = "max : 100 kb";
 
@@ -2680,67 +2464,13 @@ INSERT INTO [dbo].[EksEvraklar]
         private void newImageProperties(string ImagesPath)
         {
             // yeni veya düzenleme görmüş image hakkındaki bilgiler
-            getImageProperties(pictureEdit1);
+            imageService.getImageProperties(pictureEdit1.Image, ref tImageProperties);
 
             tImageProperties.imagePath = ImagesPath.ToString();
                 
             printImageProperties();
         }
-
-        private void getImageProperties(PictureEdit pictureEdit_)
-        {
-            if (pictureEdit_.Image == null) return;
-            tImageProperties.Clear();
-            int horResolation = (int)pictureEdit_.Image.HorizontalResolution;
-            int verResolation = (int)pictureEdit_.Image.VerticalResolution;
-            System.Drawing.Imaging.ImageFormat imageFormat = tGetImageFormat(pictureEdit_.Image);
-
-            if (imageFormat == System.Drawing.Imaging.ImageFormat.MemoryBmp)
-                imageFormat = System.Drawing.Imaging.ImageFormat.Jpeg;
-
-            tImageProperties.imageFormat = imageFormat;
-            tImageProperties.width = pictureEdit_.Image.Width;
-            tImageProperties.height = pictureEdit_.Image.Height;
-            tImageProperties.horizontalResolation = horResolation; // pictureEdit1.Image.HorizontalResolution;
-            tImageProperties.verticalResolation = verResolation; // pictureEdit1.Image.VerticalResolution;
-            long imageByteSize;
-            using (var ms = new MemoryStream())
-            {
-                //pictureEdit1.Image.Save(ms, ImageFormat.Jpeg);
-                pictureEdit_.Image.Save(ms, tImageProperties.imageFormat);
-                imageByteSize = ms.Length;
-            }
-            tImageProperties.byteSize = imageByteSize;
-            tImageProperties.kbSize = (int)((decimal)imageByteSize / 1024);
-        }
-
-        private void getBitmapProperties(Bitmap bitmap)
-        {
-            tImageProperties.Clear();
-
-            int horResolation = (int)bitmap.HorizontalResolution;  //pictureEdit1.Image.HorizontalResolution;
-            int verResolation = (int)bitmap.VerticalResolution;    //pictureEdit1.Image.VerticalResolution;
-            System.Drawing.Imaging.ImageFormat imageFormat = tGetImageFormat(bitmap.RawFormat);
-            
-            if (imageFormat == System.Drawing.Imaging.ImageFormat.MemoryBmp)
-                imageFormat = System.Drawing.Imaging.ImageFormat.Jpeg;
-
-            tImageProperties.imageFormat = imageFormat;
-            tImageProperties.width = bitmap.Width;   // pictureEdit1.Image.Width;
-            tImageProperties.height = bitmap.Height; // pictureEdit1.Image.Height;
-            tImageProperties.horizontalResolation = horResolation; // pictureEdit1.Image.HorizontalResolution;
-            tImageProperties.verticalResolation = verResolation; // pictureEdit1.Image.VerticalResolution;
-            long imageByteSize;
-            using (var ms = new MemoryStream())
-            {
-                //pictureEdit1.Image.Save(ms, ImageFormat.Jpeg);
-                bitmap.Save(ms, tImageProperties.imageFormat);
-                imageByteSize = ms.Length;
-            }
-            tImageProperties.byteSize = imageByteSize;
-            tImageProperties.kbSize = (int)((decimal)imageByteSize / 1024);
-        }
-
+                
         private void resmi100KbAltinaDusur()
         {
             ///  
@@ -2756,7 +2486,7 @@ INSERT INTO [dbo].[EksEvraklar]
             int farkSize = 0;
             bool onayCompress = false;
 
-            getImageProperties(pictureEdit1);
+            imageService.getImageProperties(pictureEdit1.Image, ref tImageProperties);
 
             oldSize = (int)tImageProperties.kbSize;
 
@@ -2766,13 +2496,13 @@ INSERT INTO [dbo].[EksEvraklar]
                 /// onun için tekrar düzenleme yapılıyor
                 //if (tImageProperties.imageFormat.ToString() != "Jpeg")
                 //{
-                    myImageDPI(autoDPI);
+                myImageDPI(autoDPI);
 
-                    getImageProperties(pictureEdit1);
+                imageService.getImageProperties(pictureEdit1.Image, ref tImageProperties);
 
-                    t.AlertMessage("Düzeltme", "Kb fazlası veya Jpeg olmadığı için DPI düzenlemesi yapıldı...");
+                t.AlertMessage("Düzeltme", "Kb fazlası veya Jpeg olmadığı için DPI düzenlemesi yapıldı...");
 
-                    oldSize = (int)tImageProperties.kbSize;
+                oldSize = (int)tImageProperties.kbSize;
                 //}
 
                 /// yukarıdaki düzeltme işlemi yüzünden tekrar kontrol gerekiyor
@@ -2803,9 +2533,10 @@ INSERT INTO [dbo].[EksEvraklar]
 
                     preparingNewWidthNewHeight(newValue, oldWidth, oldHeight, ref newWidth, ref newHeight);
 
-                    _img = myImageCompress_(workingImage, newWidth, newHeight);
+                    //_img = myImageCompress_(workingImage, newWidth, newHeight);
+                    _img = imageService.setImageCompress_(workingImage, newWidth, newHeight);
 
-                    getBitmapProperties(_img);
+                    imageService.getBitmapProperties(_img, ref this.tImageProperties);
 
                     newSize = (int)tImageProperties.kbSize;
                     farkSize = 100 - newSize;
@@ -2852,7 +2583,7 @@ INSERT INTO [dbo].[EksEvraklar]
             /// Resim Hakkında group
             ///
 
-            if (pictureEdit1.Image == null) //(tImageProperties.originalImage == null)
+            if (pictureEdit1.Image == null) //(tImageProperties.OrginalImage == null)
             {
                 barStaticItem_imgDPI.Caption = "0 dpi";
                 barStaticItem_imgWH.Caption = "0 x 0";
@@ -2860,7 +2591,7 @@ INSERT INTO [dbo].[EksEvraklar]
                 return;
             }
 
-            getImageProperties(pictureEdit1);
+            imageService.getImageProperties(pictureEdit1.Image, ref tImageProperties);
 
             try
             {
@@ -2872,7 +2603,7 @@ INSERT INTO [dbo].[EksEvraklar]
                 onayWidth = (autoCropWidth == tImageProperties.width);
                 onayHeight = (autoCropHeight == tImageProperties.height);
                 onayDPI = (autoDPI == tImageProperties.horizontalResolation);
-                onayFormat = (autoFormat == tImageProperties.imageFormat.ToString());
+                onayFormat = (autoImageFormat == tImageProperties.imageFormat);
 
                 onayKb = true;
                 if (tImageProperties.kbSize > 100) onayKb = false;
@@ -2892,67 +2623,12 @@ INSERT INTO [dbo].[EksEvraklar]
             }
 
         }
-
-        private System.Drawing.Imaging.ImageFormat tGetImageFormat(ImageFormat RawFormat)
-        {
-            if (RawFormat.Equals(System.Drawing.Imaging.ImageFormat.Jpeg))
-                return System.Drawing.Imaging.ImageFormat.Jpeg;
-            if (RawFormat.Equals(System.Drawing.Imaging.ImageFormat.Bmp))
-                return System.Drawing.Imaging.ImageFormat.Bmp;
-            if (RawFormat.Equals(System.Drawing.Imaging.ImageFormat.Png))
-                return System.Drawing.Imaging.ImageFormat.Png;
-            if (RawFormat.Equals(System.Drawing.Imaging.ImageFormat.Emf))
-                return System.Drawing.Imaging.ImageFormat.Emf;
-            if (RawFormat.Equals(System.Drawing.Imaging.ImageFormat.Exif))
-                return System.Drawing.Imaging.ImageFormat.Exif;
-            if (RawFormat.Equals(System.Drawing.Imaging.ImageFormat.Gif))
-                return System.Drawing.Imaging.ImageFormat.Gif;
-            if (RawFormat.Equals(System.Drawing.Imaging.ImageFormat.Icon))
-                return System.Drawing.Imaging.ImageFormat.Icon;
-            if (RawFormat.Equals(System.Drawing.Imaging.ImageFormat.MemoryBmp))
-                return System.Drawing.Imaging.ImageFormat.MemoryBmp;
-            if (RawFormat.Equals(System.Drawing.Imaging.ImageFormat.Tiff))
-                return System.Drawing.Imaging.ImageFormat.Tiff;
-            else
-                return System.Drawing.Imaging.ImageFormat.Wmf;
-        }
-        private System.Drawing.Imaging.ImageFormat tGetImageFormat(System.Drawing.Image img)
-        {
-            if (img.RawFormat.Equals(System.Drawing.Imaging.ImageFormat.Jpeg))
-                return System.Drawing.Imaging.ImageFormat.Jpeg;
-            if (img.RawFormat.Equals(System.Drawing.Imaging.ImageFormat.Bmp))
-                return System.Drawing.Imaging.ImageFormat.Bmp;
-            if (img.RawFormat.Equals(System.Drawing.Imaging.ImageFormat.Png))
-                return System.Drawing.Imaging.ImageFormat.Png;
-            if (img.RawFormat.Equals(System.Drawing.Imaging.ImageFormat.Emf))
-                return System.Drawing.Imaging.ImageFormat.Emf;
-            if (img.RawFormat.Equals(System.Drawing.Imaging.ImageFormat.Exif))
-                return System.Drawing.Imaging.ImageFormat.Exif;
-            if (img.RawFormat.Equals(System.Drawing.Imaging.ImageFormat.Gif))
-                return System.Drawing.Imaging.ImageFormat.Gif;
-            if (img.RawFormat.Equals(System.Drawing.Imaging.ImageFormat.Icon))
-                return System.Drawing.Imaging.ImageFormat.Icon;
-            if (img.RawFormat.Equals(System.Drawing.Imaging.ImageFormat.MemoryBmp))
-                return System.Drawing.Imaging.ImageFormat.MemoryBmp;
-            if (img.RawFormat.Equals(System.Drawing.Imaging.ImageFormat.Tiff))
-                return System.Drawing.Imaging.ImageFormat.Tiff;
-            else
-                return System.Drawing.Imaging.ImageFormat.Wmf;
-        }
         
         /// <summary>
         /// İstenen sayıda guid döndürür. 
         /// Sayı çok önemli değil, resim create yapılmasının ardından save işlemi sonrası zaten pics altından resimler temizleniyor.
         /// </summary>
-        private string tFileGuidName
-        {
-            get
-            {
-                string guid = Guid.NewGuid().ToString();
-                return guid.Substring(0, 20);
-            }
-        }
-        
+              
         /// <summary>
         /// 
         /// Extension method for PictureEdit to convert screen coordinates to image coordinates.
@@ -3031,10 +2707,10 @@ INSERT INTO [dbo].[EksEvraklar]
 
         private void checkedOrjinalImageControl()
         {
-            if ((pictureEdit1.Image != null) && (OriginalImage == null))
+            if ((pictureEdit1.Image != null) && (OrginalImage == null))
             {
-                OriginalImage = new Bitmap(pictureEdit1.Image, pictureEdit1.Image.Width, pictureEdit1.Image.Height);
-                OriginalImage.SetResolution(pictureEdit1.Image.HorizontalResolution, pictureEdit1.Image.VerticalResolution);
+                OrginalImage = new Bitmap(pictureEdit1.Image, pictureEdit1.Image.Width, pictureEdit1.Image.Height);
+                OrginalImage.SetResolution(pictureEdit1.Image.HorizontalResolution, pictureEdit1.Image.VerticalResolution);
             }
         }
 
@@ -3052,10 +2728,9 @@ INSERT INTO [dbo].[EksEvraklar]
             if (onayFormat == false)
             {
                 // Resim kalitesi aracılığı ile formatı değişitiriliyor
-                //myImageQuality(100);  
                 myImageDPI(autoDPI);
-                t.AlertMessage("Bilgilendirme", "Resim formatı Jpeg yapılmıştır...");
-                preparing_OriginalImage();
+                //t.AlertMessage("Bilgilendirme", "Resim formatı Jpeg yapılmıştır...");
+                preparing_OrginalImage();
             }
         }
 
@@ -3069,8 +2744,6 @@ INSERT INTO [dbo].[EksEvraklar]
             string inputUrl = @"https://www.e-iceblue.com/Tutorials/Spire.PDF/Spire.PDF-Program-Guide/C-/VB.NET-Convert-Image-to-PDF.html";
             string outputFile = @"HtmlToPDF.pdf";
 
-
-
             inputUrl = ImagesPath;
             outputFile = ImagesPath.Replace(".html", ".jpg");
 
@@ -3082,42 +2755,13 @@ INSERT INTO [dbo].[EksEvraklar]
                 mydoc.LoadFromFile(ImagesPath, Spire.Doc.FileFormat.Html, XHTMLValidationType.None);
                 //Save to image. You can convert HTML to BMP, JPEG, PNG, GIF, Tiff etc
                 Image image = mydoc.SaveToImages(0, ImageType.Bitmap);
-                image.Save(outputFile, System.Drawing.Imaging.ImageFormat.Jpeg);
+                image.Save(outputFile, autoImageFormat);//  System.Drawing.Imaging.ImageFormat.Jpeg);
             }
             catch (Exception e)
             {
 
                 //throw;
             }
-
-
-
-
-            /*
-            //Specify the path to the Chrome plugin
-            string chromeLocation = @"C:\Program Files\Google\Chrome\Application\chrome.exe";
-            //Create an instance of the ChromeHtmlConverter class
-            ChromeHtmlConverter converter = new ChromeHtmlConverter(chromeLocation);
-            // Create an instance of the ConvertOptions class
-            ConvertOptions options = new ConvertOptions();
-            //Set conversion timeout
-            options.Timeout = 10 * 3000;
-            //Set paper size and page margins of the converted PDF
-            options.PageSettings = new PageSettings()
-            {
-                PaperWidth = 8.27,
-                PaperHeight = 11.69,
-                MarginTop = 0,
-                MarginLeft = 0,
-                MarginRight = 0,
-                MarginBottom = 0
-            };
-            //Convert the URL to PDF
-            converter.ConvertToPdf(inputUrl, outputFile, options);
-            */
-
-
-
 
         }
 

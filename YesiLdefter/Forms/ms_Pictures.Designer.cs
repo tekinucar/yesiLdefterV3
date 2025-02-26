@@ -1214,7 +1214,7 @@
             this.pictureEdit2.Cursor = System.Windows.Forms.Cursors.Default;
             //this.pictureEdit2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pictureEdit2.Location = new System.Drawing.Point(850, 50);
-            this.pictureEdit2.Size = new System.Drawing.Size(500, 400);
+            this.pictureEdit2.Size = new System.Drawing.Size(350, 450);
             this.pictureEdit2.Name = "pictureEdit2";
             this.pictureEdit2.Visible = false; // true;
 

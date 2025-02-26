@@ -126,6 +126,7 @@ namespace Tkn_CreateDatabase
                 {
                     tableOnay = tTableCreate(sqlScript, vt);
                 }
+                else tableOnay = onay; /// table var mesajı dönsün
 
                 // tablo oluşturuldu şimdi trigger leri oluşturalım
                 onay = false;

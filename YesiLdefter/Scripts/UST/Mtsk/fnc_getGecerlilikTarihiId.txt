@@ -1,0 +1,23 @@
+﻿/*CreateFunction*/
+
+CREATE FUNCTION [dbo].[fnc_getGecerlilikTarihiId](@FirmId int, @KonuTipiId int, @Tarih date)  
+RETURNS int
+AS   
+BEGIN 
+  declare @responseId int = 0
+  /*
+  declare @FirmId int = 11
+  declare @KonuTipiId int = 21101 -- teorik ders saati tarihi
+  declare @Tarih date = getdate()
+  */
+  Select top 1 @responseId = gtarih.Id 
+  From GecerlilikTarihi as gtarih 
+  Where gtarih.FirmId = @FirmId
+  and   gtarih.KonuTipiId = @KonuTipiId
+  and   gtarih.Tarih <= @Tarih
+  order by Tarih --desc
+
+  RETURN @responseId;
+END; -- function
+
+/*CreateFunctionEnd*/

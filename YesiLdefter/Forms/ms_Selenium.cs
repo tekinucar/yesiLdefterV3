@@ -467,12 +467,13 @@ namespace YesiLdefter
 
             bool onay = true;
             
-            if ((v.webDriver_ == null) && (dN_MsWebPages.Position == 0))
+            if (v.webDriver_ == null)// && (dN_MsWebPages.Position == 0)
                 onay = msPagesService.LoginOnayi(ds_MsWebPages, dN_MsWebPages);
             
-            if ((onay) &&                        // onaylı olacak ve
-                ((v.webDriver_ != null ||        // ( webDriver create edilmiş veya 
-                  dN_MsWebPages.Position == 0))) //   Login sayfası olacak ) 
+            //if ((onay) &&                        // onaylı olacak ve
+            //    ((v.webDriver_ != null ||        // ( webDriver create edilmiş veya 
+            //      dN_MsWebPages.Position == 0))) //   Login sayfası olacak ) 
+            if (onay)
                 await seleniumLoginPageViev();
         }
         
@@ -715,117 +716,13 @@ namespace YesiLdefter
         }
         private async void myFullGet1Click(object sender, EventArgs e)
         {
-
-            KlasorIcindekileriSil(v.EXE_GIBDownloadPath);
+            // test
+            //webNodeValue wnv = new webNodeValue();
+            //msScraping.preparingImageFile("", wnv);
 
             Cursor.Current = Cursors.WaitCursor;
             await startNodes(this.msWebNodes_, this.workPageNodes_, v.tWebRequestType.get, v.tWebEventsType.button3);
             viewFinalMessage();
-
-            downloadFiles();
-
-            //LAPTOP-ACER1\SQLEXPRESS
-            //DESKTOP-RF7MNOG\SQLEXPRESS
-            // TakeSnapshot(v.webDriver_, v.EXE_PATH + "\\Test\\snahshot.png");
-        }
-
-        private void downloadFiles()
-        {
-            
-            // Dosyanın indirilmesini bekleyin (basit bir bekleme yöntemi olarak Thread.Sleep kullanabilirsiniz)
-            System.Threading.Thread.Sleep(2000);
-            bool onay = false;
-
-            // İndirilen dosyanın adını ve konumunu kontrol edin
-            var downloadedFiles = Directory.GetFiles(v.EXE_GIBDownloadPath);
-            if (downloadedFiles.Any())
-            {
-                string downloadedFile = downloadedFiles.First();
-                
-                //MessageBox.Show("Dosya Adı: " + Path.GetFileName(downloadedFile) + v.ENTER2 +
-                //                "İndirildiği Konum: " + Path.GetDirectoryName(downloadedFile));
-                
-                string pathName = Path.GetDirectoryName(downloadedFile);
-                string packetName = Path.GetFileName(downloadedFile);
-
-                //zip tan önce temp klasörünün için boşalt/sil
-                KlasorIcindekileriSil(pathName + "\\Temp");
-
-                try
-                {
-                    // Zip dosyasını aç ve belirtilen dizine çıkar
-                    ZipFile.ExtractToDirectory(pathName +"\\" + packetName , pathName + "\\Temp");
-                    //MessageBox.Show("Dosya başarıyla açıldı.");
-                    onay = true;
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Error 1006 : " + ex.Message);
-                }
-
-                /// zip açılmış
-                if (onay)
-                {
-                    string htmlFileName = pathName + "\\Temp\\" + packetName.Replace(".zip", ".html");
-                    htmlDosyayiAc(htmlFileName);
-                }
-
-            }
-            else
-            {
-                MessageBox.Show("İndirilen dosya bulunamadı.");
-            }
-                       
-        }
-
-        private void htmlDosyayiAc(string fileName)
-        {
-            OpenQA.Selenium.IWebDriver localWebDriver_ = null;
-            SeleniumHelper.ResetDriver();
-            localWebDriver_ = SeleniumHelper.WebDriver;
-                        
-            localWebDriver_.Manage().Window.Size = new Size(830, 1220);
-
-            localWebDriver_.Navigate().GoToUrl(fileName);
-
-            string jpgName = fileName.Replace(".html", ".png");
-
-            TakeSnapshot(localWebDriver_, jpgName);
-
-            localWebDriver_.Dispose();
-        }
-
-
-        private void KlasorIcindekileriSil(string pathName)
-        {
-            try
-            {
-                // Klasördeki tüm dosyaları alın
-                string[] files = Directory.GetFiles(pathName);
-
-                if (files != null)
-                {
-                    // Her bir dosyayı sil
-                    foreach (string file in files)
-                    {
-                        File.Delete(file);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                //MessageBox.Show("Error 1005 : " + ex.Message);
-            }
-        }
-
-
-        public async void TakeSnapshot(IWebDriver driver, string filePath)
-        {
-            // Ekran görüntüsünü al
-            Screenshot screenshot = ((ITakesScreenshot)driver).GetScreenshot();
-
-            // Dosyaya kaydet
-            screenshot.SaveAsFile(filePath);//,    //ScreenshotImageFormat.Png); // PNG, JPEG, GIF vb. formatlar kullanılabilir
         }
 
         private async void myFullGet2Click(object sender, EventArgs e)
@@ -885,6 +782,9 @@ namespace YesiLdefter
             f.wbSel = v.webDriver_;
 
             //f.tableIPCodesInLoad = ""; Açma 
+
+            /// şimdilik emanet burada dursun doğru yeri bulunca değiştirirsin
+            msScraping.KlasorIcindekileriSil(v.EXE_GIBDownloadPath);
 
             /// tableIPCodesInLoad view lerin enabled = false yap
             await preparingViewControls(false);
@@ -1115,7 +1015,7 @@ namespace YesiLdefter
                 (wnv.IsInvoke == false)) //(this.myTriggerInvoke == false)) // invoke gerçekleşmişse hiç başlama : get sırasında set edip bilgi çağrılıyor demekki
             {
 
-                if (wnv.TagName != "table")
+                if (wnv.TagName != "table" && wnv.AttRole != "GIBeArsivFaturaIndir")
                     msPagesService.transferFromWebToDatabase(this, wnv, msWebScrapingDbFields_, aktifPageNodeItemsList_, f);
 
                 if (wnv.TagName == "table")
@@ -1150,7 +1050,7 @@ namespace YesiLdefter
                         //this.myTriggerTableRowNo = 0;
 
                         webNodeValue myTriggerTableWnv = wnv.Copy();
-                                                
+
                         onay = await msPagesService.transferFromWebTableToDatabase(this, myTriggerTableWnv, msWebNodes_, msWebScrapingDbFields_, aktifPageNodeItemsList_);
 
                         t.TableRefresh(this, myTriggerTableWnv.TableIPCode);
@@ -1170,10 +1070,22 @@ namespace YesiLdefter
                         }
                     }
                 }
-            
-            }
 
+                if (wnv.AttRole == "GIBeArsivFaturaIndir")
+                {
+                    /// okunan tabloyu db ye yaz
+                    if (wnv.tTable != null)
+                    {
+                        webNodeValue myTriggerTableWnv = wnv.Copy();
+
+                        onay = await msPagesService.transferFromWebTableToDatabase(this, myTriggerTableWnv, msWebNodes_, msWebScrapingDbFields_, aktifPageNodeItemsList_);
+
+                        t.TableRefresh(this, myTriggerTableWnv.TableIPCode);
+                    }
+                }
+            }
             return onay;
+
         }
         
         private bool listControl(MsWebNode item, webWorkPageNodes workPageNodes)
