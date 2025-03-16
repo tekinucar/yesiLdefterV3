@@ -1,0 +1,145 @@
+﻿
+/*CreateTable*/
+
+begin transaction
+
+ create table CrsBildirimB
+ (
+
+   Id                  Int IDENTITY(1,1) NOT NULL, 
+   FirmId              Int         not null,
+   IsActive            Bit         not null, /* default : 1 = active, 0 = not active */  
+   IsLock              Bit             null, 
+   KanalTypeId         SmallInt        null,
+   SablonId            Int             null,
+   MesajKodu           nVarChar(50)    null, /*  MTSKEKSIKBELGELER, vb  */
+   BildirimMetni       nVarChar(1000)  null,
+   GonderimTypeId      SmallInt        null, /* 1. Hemen gönder, 2. Zamanlı gönderim */  
+   GonderimTarihi      Date            null,
+   GonderimSaati       VarChar(8)      null,
+   UserId              Int             null,
+   Tarih               Datetime        null,
+   WorkTypeId          SmallInt        null,
+   
+  constraint pk_CrsBildirimB primary key (Id)
+ )
+
+ create index X_CrsBildirimB01 on CrsBildirimB (FirmId)
+ create index X_CrsBildirimB02 on CrsBildirimB (UserId)
+ create index X_CrsBildirimB03 on CrsBildirimB (KanalTypeId)
+ create index X_CrsBildirimB04 on CrsBildirimB (SablonId)
+
+
+ grant select, insert, update, delete on CrsBildirimB to public
+
+commit transaction
+
+/*CreateTableEnd*/
+
+
+ /*CreateTrigger*/
+
+CREATE TRIGGER [dbo].[trg_CrsBildirimBDelete] on [dbo].[CrsBildirimB]
+AFTER DELETE
+AS BEGIN
+
+    declare bildirimBCursorDlt cursor local for select Id from deleted
+	declare @curId bigint
+
+	OPEN bildirimBCursorDlt
+
+    FETCH NEXT FROM bildirimBCursorDlt INTO @curId
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        Delete from dbo.CrsBildirimS  Where CrsBildirimBId = @curId
+
+        FETCH NEXT FROM bildirimBCursorDlt INTO @curId
+    END
+
+    CLOSE bildirimBCursorDlt
+    DEALLOCATE bildirimBCursorDlt
+
+END
+
+ /*CreateTriggerEnd*/
+
+
+
+/*CreateLkpTable*/
+
+begin transaction
+
+-- ------------------------------------------------------- 
+-- KanalTypeId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'CrsBildirimBKanalType')
+drop table [Lkp].[CrsBildirimBKanalType]
+
+create table [Lkp].[CrsBildirimBKanalType]
+(
+   Id               Int Unique Not    null,
+   KanalType        nVarchar(50)      null,
+
+   constraint  pk_CrsBildirimBKanalType primary key (Id)
+)
+
+Delete from [Lkp].[CrsBildirimBKanalType]
+INSERT INTO [Lkp].[CrsBildirimBKanalType] (Id, KanalType)
+ VALUES 
+  ( -1, N''),
+  (  0, N'Tanımsız'),
+  (  1, N'SMS'),
+  (  2, N'WhatsApp'),
+  (  3, N'e-Mail'),
+  (  4, N'Mobil App')
+
+
+-- ------------------------------------------------------- 
+-- GonderimTypeId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'CrsBildirimBGonderimType')
+drop table [Lkp].[CrsBildirimBGonderimType]
+
+create table [Lkp].[CrsBildirimBGonderimType]
+(
+   Id               Int Unique Not    null,
+   GonderimType     nVarchar(50)      null,
+
+   constraint  pk_CrsBildirimBGonderimType primary key (Id)
+)
+
+Delete from [Lkp].[CrsBildirimBGonderimType]
+INSERT INTO [Lkp].[CrsBildirimBGonderimType] (Id, GonderimType)
+ VALUES 
+  (  0, N'Tanımsız'),
+  (  1, N'Hemen gönder'),
+  (  2, N'Zamanlanmış gönderim')
+
+
+
+-- ------------------------------------------------------- 
+-- WorkTypeId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'CrsBildirimBWorkType')
+drop table [Lkp].[CrsBildirimBWorkType]
+
+create table [Lkp].[CrsBildirimBWorkType]
+(
+   Id               Int Unique Not    null,
+   WorkType         nVarchar(30)      null,
+
+   constraint  pk_CrsBildirimBWorkType primary key (Id)
+)
+
+Delete from [Lkp].[CrsBildirimBWorkType]
+INSERT INTO [Lkp].[CrsBildirimBWorkType] (Id, WorkType)
+ VALUES 
+  (  0, N'Tanımsız'),
+  (  1, N'Tek kişiye bildirim'),
+  (  2, N'Listeye bildirim')
+
+commit transaction
+
+/*CreateLkpTableEnd*/
+

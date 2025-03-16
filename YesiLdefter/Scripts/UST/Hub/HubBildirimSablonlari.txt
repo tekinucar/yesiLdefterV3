@@ -1,0 +1,59 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table HubBildirimSablonlari
+ (
+   Id                      Int IDENTITY(1,1) not null, 
+   IsActive                Bit           not null, /* default : 1 = active, 0 = not active */  
+   SectorTypeId            SmallInt          null, /* 201. Mtsk , ... */
+   KanalTypeId             SmallInt          null,
+   MesajKodu               nVarChar(50)      null, /*  MTSKEKSIKBELGELER, vb  */
+   MesajBasligi            nVarChar(100)     null, /*  'Eksik evrak bildirimi', vb  */
+   Mesaj                   nVarChar(1000)    null,
+
+   constraint		pk_HubBildirimSablonlari primary key (Id)
+ )
+  
+ create index X_HubBildirimSablonlari01 on HubBildirimSablonlari (SectorTypeId, MesajKodu)
+ 
+ grant select, insert, update, delete on HubBildirimSablonlari to public
+
+
+commit transaction
+
+/*CreateTableEnd*/
+
+
+/*CreateLkpTable*/
+
+begin transaction
+
+-- ------------------------------------------------------- 
+-- KanalTypeId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'HubBildirimSablonlariKanalType')
+drop table [Lkp].[HubBildirimSablonlariKanalType]
+
+create table [Lkp].[HubBildirimSablonlariKanalType]
+(
+   Id               Int Unique Not    null,
+   KanalType        nVarchar(50)      null,
+
+   constraint  pk_HubBildirimSablonlariKanalType primary key (Id)
+)
+
+Delete from [Lkp].[HubBildirimSablonlariKanalType]
+INSERT INTO [Lkp].[HubBildirimSablonlariKanalType] (Id, KanalType)
+ VALUES 
+  ( -1, N''),
+  (  0, N'Tanımsız'),
+  (  1, N'SMS'),
+  (  2, N'WhatsApp'),
+  (  3, N'e-Mail'),
+  (  4, N'Mobil App')
+
+commit transaction
+
+/*CreateLkpTableEnd*/
+

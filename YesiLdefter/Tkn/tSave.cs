@@ -20,7 +20,8 @@ namespace Tkn_Save
         {
 
             // LKP_ONAY için ise işlem olmasın
-            if (v.con_OnayChange) return false;
+            if (v.con_OnayChange) 
+                return false;
 
             if (v.con_LkpOnayChange)
             {
@@ -52,7 +53,7 @@ namespace Tkn_Save
                 {
                     // Bu kayıt kilitli mi ? kontrol ediyor
                     // kilitli ise buradan geri dönüyor
-                    if (t.checkedLockRow(dsData, pos))
+                    if (t.checkedIsLockRow(dsData, pos))
                     {
                         onay = false;
                         v.con_OnaySave = onay;
@@ -118,14 +119,20 @@ namespace Tkn_Save
         public void tDataSave(Form tForm, DataSet dsData,
              DevExpress.XtraEditors.DataNavigator tDataNavigator, int pos)
         {
+            tToolBox t = new tToolBox();
+
+
+            /// sadece Lkp_ONAY değişmiş kontrol et
+            if (v.con_LkpOnayChange == false)
+                v.con_LkpOnayChange = t.onlyChanged_Lkp_Onay_Field(dsData, pos);
+
 
             if (v.con_LkpOnayChange)
             {
                 v.con_LkpOnayChange = false;
                 return;
             }
-
-            tToolBox t = new tToolBox();
+            
 
             if ((dsData != null) && (pos > -1))
             {

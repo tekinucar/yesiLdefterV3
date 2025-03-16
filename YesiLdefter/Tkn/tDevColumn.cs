@@ -53,15 +53,25 @@ namespace Tkn_DevColumn
         public void XtraEditorsImageComboBox_Fill(ImageComboBoxEdit ItemBox, DataRow Row, string default_value, byte tview_type)
         {
             tToolBox t = new tToolBox();
+            //string List_Name = t.Set(Row["LIST_TYPES_NAME"].ToString(), Row["LKP_LIST_TYPES_NAME"].ToString(), "");
+            //bool tLookUpField = t.Set(Row["LKP_FLOOKUP_FIELD"].ToString(), "", false);
+            string tableName = Row.Table.TableName;
+            bool tLookUpField = false;
 
-            string List_Name = t.Set(Row["LIST_TYPES_NAME"].ToString(), Row["LKP_LIST_TYPES_NAME"].ToString(), "");
-            bool tLookUpField = t.Set(Row["LKP_FLOOKUP_FIELD"].ToString(), "", false);
+            string List_Name = "";
+            if (tableName != "MS_PROPERTIES")
+            {
+                List_Name = t.Set(Row["LIST_TYPES_NAME"].ToString(), Row["LKP_LIST_TYPES_NAME"].ToString(), "");
+                tLookUpField = t.Set(Row["LKP_FLOOKUP_FIELD"].ToString(), "", false);
+            }
+            else List_Name = t.Set(Row["LIST_TYPES_NAME"].ToString(), "", "");
+
 
             //if (t.IsNotNull(List_Name) && (tLookUpField == false))
             if (t.IsNotNull(List_Name) && (List_Name.IndexOf("=") == -1)) // IsActive = True  gibi koşullar varsa çalışmasın
                 tRepositoryItem_Fill(null, ItemBox, null, null, null, null, List_Name, default_value, tview_type);
             //if (tLookUpField)
-            if ((tLookUpField) && ((t.IsNotNull(List_Name) == false) || (List_Name.IndexOf("=") > -1) || (List_Name.IndexOf("Lkp.") > -1)))
+            if ((tLookUpField) && ((t.IsNotNull(List_Name) == false) || (List_Name.IndexOf("=") > -1) || (List_Name.IndexOf("||") > -1)))
                 LookUpTableFill(Row, null, ItemBox, null, null, null, null);
         }
 
@@ -389,6 +399,8 @@ namespace Tkn_DevColumn
 
                 string Sql = " Select * from [Lkp].[" + tableName + "]  ";
 
+                if (tableName == "HubBildirimSablonlari")
+                    Sql = " Select * from [dbo].[HubBildirimSablonlari] where IsActive = 1 ";
                 if (tableName.IndexOf("SectorType") > -1)
                     Sql = " Select * from [Lkp].[MsSectorType] ";
                 if (tableName.IndexOf("ParaTipi") > -1)
@@ -412,8 +424,10 @@ namespace Tkn_DevColumn
 
                 if (tableName == "ILTipi")
                     dBaseNo = v.dBaseNo.publishManager;
+                if (tableName == "HubBildirimSablonlari")
+                    dBaseNo = v.dBaseNo.Manager;
 
-               t.SQL_Read_Execute(dBaseNo, v.ds_LookUpTableList, ref Sql, tableName, "");
+                t.SQL_Read_Execute(dBaseNo, v.ds_LookUpTableList, ref Sql, tableName, "");
             }
         }
         private void LookUpTableFill_(string tableName, string idFieldName, string captionFieldName, string groupListTypes, Int16 type,
@@ -2853,8 +2867,7 @@ namespace Tkn_DevColumn
                 tEdit.KeyPress += new KeyPressEventHandler(ev.buttonEdit_KeyPress);
                 tEdit.KeyPress += new System.Windows.Forms.KeyPressEventHandler(evb.textEdit_Find_KeyPress);
                 tEdit.Leave += new EventHandler(ev.buttonEdit_Leave);
-
-
+                               
 
                 if (tFieldName == "LKP_KOMUT")
                 {

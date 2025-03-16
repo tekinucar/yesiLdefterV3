@@ -1,4 +1,5 @@
-﻿using DevExpress.XtraBars.Ribbon;
+﻿using DevExpress.XtraBars;
+using DevExpress.XtraBars.Ribbon;
 using DevExpress.XtraEditors;
 using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Views.BandedGrid;
@@ -10,12 +11,14 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Drawing;
 using System.Windows.Forms;
 using Tkn_DefaultValue;
 using Tkn_DevColumn;
 using Tkn_DevView;
 using Tkn_Events;
 using Tkn_InputPanel;
+using Tkn_SQLs;
 using Tkn_TablesRead;
 using Tkn_ToolBox;
 using Tkn_Variable;
@@ -209,7 +212,8 @@ namespace Tkn_CreateObject
 
             #region Create Buttons
 
-            Create_Navigator_Buttons(NavPanel,
+            Create_Navigator_Buttons(tForm, 
+                                     NavPanel,
                                      tDataNavigator,
                                      TableIPCode,
                                      External_TableIPCode,
@@ -349,7 +353,6 @@ namespace Tkn_CreateObject
             if (nButton.tabIndex == 74)
                 i = nButton.navigatorList.IndexOf("[73]");
 
-
             if (i > -1)
             {
                 Int16 height = 23;
@@ -401,13 +404,551 @@ namespace Tkn_CreateObject
                     nButton.navigatorPanel.Controls.Add(simpleButton);
                     Buttons_CaptionChange(simpleButton, nButton.navigatorList, nButton.buttonKey);
 
+                    if (nButton.tabIndex == 75)
+                        Create_PopupMenu_Add(nButton, simpleButton, ev);
+                    
                     return simpleButton;
                 }
             }
             return null;
         }
 
-        private void Create_Navigator_Buttons(Control NavPanel, DataNavigator tDataNavigator,
+        #region Bilidirim SMS, WhatsApp, e-Mail, Mobil App
+        private void createNavigatorPopupEdit(vNavigatorButton nButton)
+        {
+            int i = nButton.navigatorList.IndexOf(nButton.tabIndex.ToString() + " ");
+            
+            if (i == -1) i = nButton.navigatorList.IndexOf("[" + nButton.tabIndex.ToString() + "]");
+            
+            //v.con_CreatePopupContainer = false;
+
+            if (i > -1)
+            {
+                string mesajKodu = "";
+                string workType = "";
+                string readKeyFieldNames = "";
+                getMessagePropNavigator(nButton.propNavigator, ref mesajKodu, ref workType, ref readKeyFieldNames);
+
+                Int16 height = 23;
+
+                tEvents ev = new tEvents();
+
+                v.con_CreatePopupContainer = true;
+
+                //
+                // tableLayoutPanel1
+                // 
+                #region
+                System.Windows.Forms.TableLayoutPanel tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+                tableLayoutPanel1.SuspendLayout();
+                //tableLayoutPanel1.CellBorderStyle = TableLayoutPanelCellBorderStyle.Inset;
+                tableLayoutPanel1.ColumnCount = 8;
+                tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 10F));
+                tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 140F));
+                tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 140F));
+                tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 10F));
+                tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 280F));
+                tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+                tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+                tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 10F));
+                tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+                tableLayoutPanel1.Location = new System.Drawing.Point(2, 2);
+                tableLayoutPanel1.Name = "tableLayoutPanel_" + i.ToString();
+                tableLayoutPanel1.Padding = new System.Windows.Forms.Padding(8);
+                tableLayoutPanel1.RowCount = 13;
+                tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
+                tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
+                tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
+                tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
+                tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
+                tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
+                tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 70F)); // 6 nolu satır
+                tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F)); // 7
+                tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F)); // 8
+                tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F)); // 9
+                tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F)); // 10
+                tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F)); // 11
+
+                tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+                tableLayoutPanel1.Size = new System.Drawing.Size(200, 200);
+                tableLayoutPanel1.TabIndex = 0;
+                tableLayoutPanel1.Visible = true;
+                #endregion
+                ///
+                /// Bildirim componentleri
+                /// 
+                #region
+                ///
+                /// Bildirim onayları
+                /// 
+                SimpleButton simpleButtonOnayla = new SimpleButton();
+                simpleButtonOnayla.AccessibleName = nButton.TableIPCode;
+                simpleButtonOnayla.AccessibleDescription = nButton.tForm.Name;
+                simpleButtonOnayla.Dock = DockStyle.Fill;
+                simpleButtonOnayla.Text = "Listeyi onayla";
+                simpleButtonOnayla.Click += new System.EventHandler(ev.btn_Navigator_MesajOnayi_Click);
+                simpleButtonOnayla.Tag = true; // onay işlemi
+
+                SimpleButton simpleButtonOnayIptal = new SimpleButton();
+                simpleButtonOnayIptal.AccessibleName = nButton.TableIPCode;
+                simpleButtonOnayIptal.AccessibleDescription = nButton.tForm.Name;
+                simpleButtonOnayIptal.Dock = DockStyle.Fill;
+                simpleButtonOnayIptal.Text = "Onayları kaldır";
+                simpleButtonOnayIptal.Click += new System.EventHandler(ev.btn_Navigator_MesajOnayi_Click);
+                simpleButtonOnayIptal.Tag = false; // iptal işlemi
+
+                ///
+                /// Bildirim şablonları
+                ///
+                LabelControl tLabel_Sablon = new DevExpress.XtraEditors.LabelControl();
+                tLabel_Sablon.Text = "Bildirim şablonları";
+                tLabel_Sablon.Dock = DockStyle.Fill;
+                ImageComboBoxEdit tEdit_BildirimSablonlari = new DevExpress.XtraEditors.ImageComboBoxEdit();
+                tEdit_BildirimSablonlari.AccessibleDescription = nButton.tForm.Name;
+                tEdit_BildirimSablonlari.Name = "tEdit_BildirimSablonlari";
+                //tEdit_BildirimSablonlari.Properties.AccessibleName = TableIPCode;
+                tEdit_BildirimSablonlari.EnterMoveNextControl = true;
+                tEdit_BildirimSablonlari.Dock = DockStyle.Fill;
+                AddBildirimSablonlariList(tEdit_BildirimSablonlari, mesajKodu);
+                tEdit_BildirimSablonlari.EditValueChanged += new System.EventHandler(ev.tEdit_BildirimSablonlari_EditValueChanged);
+
+                ///
+                /// Bildirim Kanal seçimi
+                ///
+                LabelControl tLabel_KanalType = new DevExpress.XtraEditors.LabelControl();
+                tLabel_KanalType.Text = "Bildirim kanalı";
+                tLabel_KanalType.Dock = DockStyle.Fill;
+                ImageComboBoxEdit tEdit_BildirimKanali = new DevExpress.XtraEditors.ImageComboBoxEdit();
+                tEdit_BildirimKanali.Name = "tEdit_BildirimKanali";
+                //tEdit_BildirimKanali.Properties.AccessibleName = TableIPCode;
+                tEdit_BildirimKanali.EnterMoveNextControl = true;
+                tEdit_BildirimKanali.Dock = DockStyle.Fill;
+                AddBildirimKanallariList(tEdit_BildirimKanali);
+
+                ///
+                /// Bildirim seçenekleri
+                ///
+                LabelControl tLabel_BildirimSecenekleri = new DevExpress.XtraEditors.LabelControl();
+                tLabel_BildirimSecenekleri.Text = "Bildirim seçenekleri";
+                tLabel_BildirimSecenekleri.Dock = DockStyle.Fill;
+                RadioGroup tEdit_BildirimSecenekleri = new DevExpress.XtraEditors.RadioGroup();
+                tEdit_BildirimSecenekleri.Name = "tEdit_BildirimSecenekleri";
+                //tEdit_BildirimSecenekleri.Properties.AccessibleName = TableIPCode;
+                tEdit_BildirimSecenekleri.EnterMoveNextControl = true;
+                tEdit_BildirimSecenekleri.Dock = DockStyle.Fill;
+                AddBildirimSecenekleri(tEdit_BildirimSecenekleri);
+                tEdit_BildirimSecenekleri.SelectedIndex = 0;
+
+                ///
+                /// Bildirim tarihi
+                /// 
+                LabelControl tLabel_BildirimTarihi = new DevExpress.XtraEditors.LabelControl();
+                tLabel_BildirimTarihi.Text = "Bildirim tarihi";
+                tLabel_BildirimTarihi.Dock = DockStyle.Fill;
+                DateEdit tEdit_BidirimTarihi = new DevExpress.XtraEditors.DateEdit();
+                tEdit_BidirimTarihi.Name = "tEdit_BidirimTarihi";
+                //tEdit_BidirimTarihi.Properties.AccessibleName = TableIPCode;
+                tEdit_BidirimTarihi.Dock = DockStyle.Fill;
+                tEdit_BidirimTarihi.EnterMoveNextControl = true;
+                tEdit_BidirimTarihi.EditValue = v.BUGUN_TARIH;
+
+                ///
+                /// Bildirim Saati
+                /// 
+                LabelControl tLabel_BildirimSaati = new DevExpress.XtraEditors.LabelControl();
+                tLabel_BildirimSaati.Text = "Bildirim saati";
+                tLabel_BildirimSaati.Dock = DockStyle.Fill;
+                TimeEdit tEdit_BildirimSaati = new DevExpress.XtraEditors.TimeEdit();
+                tEdit_BildirimSaati.Name = "tEdit_BildirimSaati";
+                //tEdit_BildirimSaati.Properties.AccessibleName = TableIPCode;
+                tEdit_BildirimSaati.Dock = DockStyle.Fill;
+                tEdit_BildirimSaati.EnterMoveNextControl = true;
+                tEdit_BildirimSaati.EditValue = DateTime.Now.ToShortTimeString();
+
+                ///
+                /// Bildirim Metni
+                /// 
+                LabelControl tLabel_BildirimMetni = new DevExpress.XtraEditors.LabelControl();
+                tLabel_BildirimMetni.Text = "Bildirim metni";
+                tLabel_BildirimMetni.Dock = DockStyle.Fill;
+                MemoEdit tEdit_BildirimMetni = new DevExpress.XtraEditors.MemoEdit();
+                tEdit_BildirimMetni.Name = "tEdit_BildirimMetni";
+                //tEdit_OzelBildirim.Properties.AccessibleName = TableIPCode;
+                tEdit_BildirimMetni.Dock = DockStyle.Fill;
+                tEdit_BildirimMetni.EnterMoveNextControl = true;
+                tEdit_BildirimMetni.Properties.Appearance.Font = new Font(FontFamily.GenericMonospace, (float)9.25);
+                /// 
+                /// default gelen mesaj kodun içeriğini memoya bas
+                /// 
+                getBildirimSablonuContext(tEdit_BildirimMetni, mesajKodu);
+
+                ///
+                /// Bildirimleri hazırla
+                /// 
+                SimpleButton simpleButtonHazirla = new SimpleButton();
+                simpleButtonHazirla.AccessibleName = nButton.TableIPCode;
+                simpleButtonHazirla.AccessibleDescription = nButton.tForm.Name;
+                simpleButtonHazirla.Text = "Bildirimleri hazırla / oluştur";
+                simpleButtonHazirla.Dock = DockStyle.Fill;
+                simpleButtonHazirla.Click += new System.EventHandler(ev.btn_Navigator_BildirimHazirla_Click);
+
+
+                ///
+                /// Bildirimleri gönder
+                /// 
+                SimpleButton simpleButtonGonder = new SimpleButton();
+                simpleButtonGonder.AccessibleName = nButton.TableIPCode;
+                simpleButtonGonder.AccessibleDescription = nButton.tForm.Name;
+                simpleButtonGonder.Text = "Bildirimleri gönder";
+                simpleButtonGonder.Dock = DockStyle.Fill;
+                simpleButtonGonder.Click += new System.EventHandler(ev.btn_Navigator_BildirimGonder_Click);
+
+                ///
+                /// Yeni bildirim paketi
+                /// 
+                SimpleButton simpleButtonYeniBildirim = new SimpleButton();
+                simpleButtonYeniBildirim.AccessibleName = nButton.TableIPCode;
+                simpleButtonYeniBildirim.AccessibleDescription = nButton.tForm.Name;
+                simpleButtonYeniBildirim.Text = "Yeni bildirim paketi";
+                simpleButtonYeniBildirim.Dock = DockStyle.Fill;
+                simpleButtonYeniBildirim.Click += new System.EventHandler(ev.btn_Navigator_YeniBildirim_Click);
+
+                ///
+                /// Bildirim Listeleri
+                /// 
+                SimpleButton simpleButtonBildirimListesi = new SimpleButton();
+                simpleButtonBildirimListesi.AccessibleName = nButton.TableIPCode;
+                simpleButtonBildirimListesi.AccessibleDescription = nButton.tForm.Name;
+                simpleButtonBildirimListesi.Text = "Bildirim listeleri ...";
+                simpleButtonBildirimListesi.Dock = DockStyle.Fill;
+                simpleButtonBildirimListesi.Click += new System.EventHandler(ev.btn_Navigator_BildirimListeleri_Click);
+
+                ///
+                /// Kalan kontör sorgu butonu
+                /// 
+                SimpleButton simpleButtonKalanKontor = new SimpleButton();
+                simpleButtonKalanKontor.AccessibleName = nButton.TableIPCode;
+                simpleButtonKalanKontor.AccessibleDescription = nButton.tForm.Name;
+                simpleButtonKalanKontor.Text = "Kalan kontör ?";
+                simpleButtonKalanKontor.Dock = DockStyle.Fill;
+                simpleButtonKalanKontor.Click += new System.EventHandler(ev.btn_Navigator_KalanKontorSorgusu_Click);
+
+                LabelControl tLabel_KalanKontorSayisi = new DevExpress.XtraEditors.LabelControl();
+                tLabel_KalanKontorSayisi.Name = "tLabel_KalanKontorSayisi";
+                tLabel_KalanKontorSayisi.Text = "?";
+                tLabel_KalanKontorSayisi.Dock = DockStyle.Fill;
+                tLabel_KalanKontorSayisi.Appearance.Font = new Font(FontFamily.GenericMonospace, (float)14.25);
+
+
+
+                /////// Bu bilgiler Manager.CrossSettings tablosundan okunacak 
+                ///
+                ///  UNUTMA BildirimListesiFormCode ataması ms_Bilidirimler formunda da var
+                /// 
+                /// bunlar gönderim sırasında kullanılan TableIPCodeler 
+                string TableIPCodeHeader = "UST/PMS/CrsBildirimB.Kayit_F01";
+                string TableIPCodeLines = "UST/PMS/CrsBildirimS.Kayit_F01";
+                
+                /// bunlar gönderilen bildirimleri listelendiği ayrıca açılan liste ekranı
+                /// 
+                string BildirimListesiFormCode = "UST/PMS/CRS/SmsBildirimleri";
+                string BildirimListesiHeader = "UST/PMS/CrsBildirimB.List_01";
+                string BildirimListesiLines = "UST/PMS/CrsBildirimS.List_01";
+
+                simpleButtonHazirla.AccessibleDefaultActionDescription =
+                    TableIPCodeHeader + "||" +
+                    TableIPCodeLines + "||" +
+                    BildirimListesiFormCode + "||" +
+                    BildirimListesiHeader + "||" +
+                    BildirimListesiLines + "||" +
+                    workType + "||" +
+                    readKeyFieldNames + "||";
+
+                simpleButtonBildirimListesi.AccessibleDefaultActionDescription = 
+                    simpleButtonHazirla.AccessibleDefaultActionDescription;
+                simpleButtonKalanKontor.AccessibleDefaultActionDescription =
+                    simpleButtonHazirla.AccessibleDefaultActionDescription;
+                simpleButtonYeniBildirim.AccessibleDefaultActionDescription =
+                    simpleButtonHazirla.AccessibleDefaultActionDescription;
+                #endregion
+
+
+                Control panel1 = prepraringCreateCrossBildirim(TableIPCodeHeader, nButton.tForm.Name);
+                Control panel2 = prepraringCreateCrossBildirim(TableIPCodeLines, nButton.tForm.Name);
+
+                //=SubDetail_TableIPCode:UST/PMS/CrsBildirimS.Kayit_F01;
+                //DataSet dsBildirimB = null;
+                //DataNavigator dNBildirimB = null;
+
+
+                if (workType == "MESSAGESINGLE")
+                {
+                    simpleButtonOnayla.Enabled = false;
+                    simpleButtonOnayIptal.Enabled = false;
+                    simpleButtonHazirla.Text = "Bildirimi hazırla / oluştur";
+                    simpleButtonGonder.Text = "Bildirimi gönder";
+                }
+
+                ///
+                /// tableLayoutPanel1.Controls.Add
+                /// 
+                #region
+                //if (colSpan > 0)
+                //    ((System.Windows.Forms.TableLayoutPanel)c).SetColumnSpan(newControl, colSpan);
+                //if (rowSpan > 0)
+                //    ((System.Windows.Forms.TableLayoutPanel)c).SetRowSpan(newControl, rowSpan);
+                /// Bildirim onayları
+                tableLayoutPanel1.Controls.Add(simpleButtonOnayla, 1, 0);
+                tableLayoutPanel1.Controls.Add(simpleButtonOnayIptal, 2, 0);
+                /// Bildirim şablonları
+                tableLayoutPanel1.Controls.Add(tLabel_Sablon, 1, 1);
+                tableLayoutPanel1.Controls.Add(tEdit_BildirimSablonlari, 1, 2);
+                tableLayoutPanel1.SetColumnSpan(tEdit_BildirimSablonlari, 2);
+                /// Bildirim Kanal seçimi
+                tableLayoutPanel1.Controls.Add(tLabel_KanalType, 1, 3);
+                tableLayoutPanel1.Controls.Add(tEdit_BildirimKanali, 1, 4);
+                tableLayoutPanel1.SetColumnSpan(tEdit_BildirimKanali, 2);
+                /// Bildirim seçenekleri
+                tableLayoutPanel1.Controls.Add(tLabel_BildirimSecenekleri, 1, 5);
+                tableLayoutPanel1.Controls.Add(tEdit_BildirimSecenekleri, 1, 6);
+                tableLayoutPanel1.SetColumnSpan(tEdit_BildirimSecenekleri, 2);
+                /// Bildirim tarihi
+                tableLayoutPanel1.Controls.Add(tLabel_BildirimTarihi, 1, 7);
+                tableLayoutPanel1.Controls.Add(tEdit_BidirimTarihi, 1, 8);
+                /// Bildirim Saati
+                tableLayoutPanel1.Controls.Add(tLabel_BildirimSaati, 2, 7);
+                tableLayoutPanel1.Controls.Add(tEdit_BildirimSaati, 2, 8);
+                /// Kredi sorgu butonu
+                tableLayoutPanel1.Controls.Add(simpleButtonKalanKontor, 1, 9);
+                /// Kredi göstergesi
+                tableLayoutPanel1.Controls.Add(tLabel_KalanKontorSayisi, 2, 9);
+
+
+                /// Bildirim metni
+                tableLayoutPanel1.Controls.Add(tLabel_BildirimMetni, 4, 1);
+                tableLayoutPanel1.Controls.Add(tEdit_BildirimMetni, 4, 2);
+                tableLayoutPanel1.SetRowSpan(tEdit_BildirimMetni, 7);
+                /// Bildirimleri hazırla
+                tableLayoutPanel1.Controls.Add(simpleButtonHazirla, 4, 9);
+                /// Bildirimleri gönder
+                tableLayoutPanel1.Controls.Add(simpleButtonGonder, 4, 10);
+                /// Yeni Bildirim 
+                tableLayoutPanel1.Controls.Add(simpleButtonYeniBildirim, 4, 11);
+                /// Bildirimleri sorgula
+                tableLayoutPanel1.Controls.Add(simpleButtonBildirimListesi, 4, 12);
+
+                tableLayoutPanel1.Controls.Add(panel1, 6, 0);
+                tableLayoutPanel1.SetRowSpan(panel1, 6);
+
+                tableLayoutPanel1.Controls.Add(panel2, 6, 6);
+                tableLayoutPanel1.SetRowSpan(panel2, 7);
+
+                tableLayoutPanel1.ResumeLayout(false);
+                #endregion
+
+
+                // 
+                //  DevExpress.XtraEditors.PopupContainerControl  açılan pencere
+                // 
+                #region
+                DevExpress.XtraEditors.PopupContainerControl popupContainerControlMesaj = new DevExpress.XtraEditors.PopupContainerControl();
+                ((System.ComponentModel.ISupportInitialize)(popupContainerControlMesaj)).BeginInit();
+                popupContainerControlMesaj.SuspendLayout();
+
+                popupContainerControlMesaj.Controls.Add(tableLayoutPanel1);
+                popupContainerControlMesaj.Location = new System.Drawing.Point(0, 306);
+                popupContainerControlMesaj.Name = "popupContainerControlSample";
+                popupContainerControlMesaj.Padding = new System.Windows.Forms.Padding(4);
+                popupContainerControlMesaj.Size = new System.Drawing.Size(1250, 450);
+                popupContainerControlMesaj.TabIndex = 2;
+
+                #endregion
+
+                // 
+                // DevExpress.XtraEditors.PopupContainerEdit -- penceriyi açan combo nesnesi, Navigotor panelinde görünen nesne
+                // 
+                #region
+
+                DevExpress.XtraEditors.PopupContainerEdit popupContainerEditMesaj = new DevExpress.XtraEditors.PopupContainerEdit();
+                ((System.ComponentModel.ISupportInitialize)(popupContainerEditMesaj.Properties)).BeginInit();
+
+                popupContainerEditMesaj.EditValue = "Mesaj gönder";
+                popupContainerEditMesaj.Location = new System.Drawing.Point(32, 150);
+                popupContainerEditMesaj.Name = "popupContainerEditMesaj";
+                popupContainerEditMesaj.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
+        new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
+                popupContainerEditMesaj.Properties.PopupControl = popupContainerControlMesaj;
+                popupContainerEditMesaj.Size = new System.Drawing.Size(nButton.width, height);
+                //popupContainerEditSample.StyleController = this.layoutControl1;
+                popupContainerEditMesaj.TabIndex = 0;
+                /// bunlar ile comboda görünmesini istediğin textleri ayarlayabiliyorsun
+                /// popupContainerEditSample.QueryResultValue += new DevExpress.XtraEditors.Controls.QueryResultValueEventHandler(this.popupContainerEditSample_QueryResultValue);
+                /// popupContainerEditSample.QueryPopUp += new System.ComponentModel.CancelEventHandler(this.popupContainerEditSample_QueryPopUp);
+                popupContainerEditMesaj.BackColor = System.Drawing.Color.DeepSkyBlue;
+                popupContainerEditMesaj.ForeColor = System.Drawing.Color.White;
+                popupContainerEditMesaj.Dock = nButton.dock;
+
+                ((System.ComponentModel.ISupportInitialize)(popupContainerEditMesaj.Properties)).EndInit();
+                ((System.ComponentModel.ISupportInitialize)(popupContainerControlMesaj)).EndInit();
+                popupContainerControlMesaj.ResumeLayout(false);
+                #endregion
+
+                nButton.navigatorPanel.Controls.Add(popupContainerEditMesaj);
+
+            }
+        }
+        private Control prepraringCreateCrossBildirim(string TableIPCode, string formName)
+        {
+            //Form tForm = t.Find_Form(sender); Buton bir popupForm üzerinde 
+            Form tForm = Application.OpenForms[formName];
+
+            DevExpress.XtraEditors.GroupControl panelControl1 = new DevExpress.XtraEditors.GroupControl();
+            ((System.ComponentModel.ISupportInitialize)(panelControl1)).BeginInit();
+                        
+            tInputPanel ip = new tInputPanel();
+            ip.Create_InputPanel(tForm, panelControl1, TableIPCode, 1, false);
+            
+            panelControl1.Dock = DockStyle.Fill;
+
+            if (TableIPCode.IndexOf("CrsBildirimB") > -1)
+                panelControl1.Text = "Bildirim paketi hakkında";
+            if (TableIPCode.IndexOf("CrsBildirimS") > -1)
+                panelControl1.Text = "Detaylı bildirim listesi";
+
+            return panelControl1;
+        }
+        private void getMessagePropNavigator(string propNavigator, ref string mesajKodu, ref string workType, ref string readKeyFieldNames)
+        {
+            //if (propNavigator.IndexOf("=KEY_FNAME:") > -1) return "";
+            int i2 = propNavigator.IndexOf("=KEY_FNAME:");
+            if (i2 > -1)
+                propNavigator = propNavigator.Substring(0, i2);
+
+            // yinede varsa kontrol 
+            i2 = propNavigator.IndexOf("KEY_FNAME:");
+            if (i2 > -1) return; 
+
+                        
+            PROP_NAVIGATOR prop_ = null;
+            List<PROP_NAVIGATOR> propList_ = null;
+            
+            propNavigator = propNavigator.Replace((char)34, (char)39);
+            if (propNavigator != "")
+            {
+                t.readProNavigator(propNavigator, ref prop_, ref propList_);
+            }
+
+            if(propList_ != null)
+            {
+                foreach (PROP_NAVIGATOR propItem_ in propList_)
+                {
+                    if (propItem_.BUTTONTYPE.ToString() == Convert.ToString((byte)v.tButtonType.btMesajGonder))
+                    {
+                        foreach (TABLEIPCODE_LIST item_ in propItem_.TABLEIPCODE_LIST)
+                        {
+                            workType = item_.WORKTYPE;
+                            mesajKodu = item_.MSETVALUE;
+                            readKeyFieldNames = item_.RKEYFNAME;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        void AddBildirimSablonlariList(ImageComboBoxEdit tEdit, string mesajKodu)
+        {
+            tSQLs Sqls = new tSQLs();
+            DataSet ds = new DataSet();
+            string tSql = Sqls.Sql_GetBildirimSablonlariList("");
+            t.SQL_Read_Execute(v.dBaseNo.Manager, ds, ref tSql, "HubBildirimSablonlari", "HubBildirimSablonlari");
+
+            Int16 bildirimNo = 1;
+            if (t.IsNotNull(ds))
+            {
+                foreach (DataRow row in ds.Tables[0].Rows)
+                {
+                    //tEdit.Properties.Items.Add(new DevExpress.XtraEditors.Controls.ImageComboBoxItem(row["MesajBasligi"].ToString() + "        [" + row["MesajKodu"].ToString() + "]", (int)row["Id"], -1));
+                    tEdit.Properties.Items.Add(new DevExpress.XtraEditors.Controls.ImageComboBoxItem(row["MesajBasligi"].ToString(),  (string)row["MesajKodu"].ToString(), -1));
+                    bildirimNo++;
+                }
+            }
+                        
+            if (bildirimNo == 1) 
+               tEdit.Properties.Items.Add(new DevExpress.XtraEditors.Controls.ImageComboBoxItem("Bildirim mesajları bulunamadı.", (string)"", -1));
+
+            if (mesajKodu != "") tEdit.EditValue = (string)mesajKodu;
+            else tEdit.EditValue = (string)"";
+        }
+        void AddBildirimKanallariList(ImageComboBoxEdit tEdit)
+        {
+            tSQLs Sqls = new tSQLs();
+            DataSet ds = new DataSet();
+            string tSql = Sqls.Sql_GetBildirimKanallariList("");
+            t.SQL_Read_Execute(v.dBaseNo.Manager, ds, ref tSql, "HubBildirimKanallari", "HubBildirimKanallari");
+
+            Int16 bildirimNo = 1;
+            if (t.IsNotNull(ds))
+            {
+                foreach (DataRow row in ds.Tables[0].Rows)
+                {
+                    //tEdit.Properties.Items.Add(new DevExpress.XtraEditors.Controls.ImageComboBoxItem(row["MesajBasligi"].ToString() + "        [" + row["MesajKodu"].ToString() + "]", (int)row["Id"], -1));
+                    tEdit.Properties.Items.Add(new DevExpress.XtraEditors.Controls.ImageComboBoxItem(row["KanalType"].ToString(), (int)row["Id"], -1));
+                    bildirimNo++;
+                }
+            }
+
+            if (bildirimNo == 1) // kamera bulamadıysa
+                tEdit.Properties.Items.Add(new DevExpress.XtraEditors.Controls.ImageComboBoxItem("Bildirim kanalları bulunamadı.", (int)1, -1));
+
+            tEdit.EditValue = (int)1;
+        }
+        void getBildirimSablonuContext(MemoEdit tEdit, string mesajKodu)
+        {
+            tSQLs Sqls = new tSQLs();
+            DataSet ds = new DataSet();
+            string tSql = Sqls.Sql_GetBildirimSablonlariList(" and MesajKodu = '" + mesajKodu + "' ");
+            t.SQL_Read_Execute(v.dBaseNo.Manager, ds, ref tSql, "HubBildirimSablonlari", "HubBildirimSablonlari");
+
+            string mesajContext = "";
+            if (t.IsNotNull(ds))
+            {
+                mesajContext = ds.Tables[0].Rows[0]["Mesaj"].ToString();
+            }
+            tEdit.EditValue = mesajContext;
+        }
+        void AddBildirimSecenekleri(DevExpress.XtraEditors.RadioGroup tEdit_RG)
+        {
+            tEdit_RG.Properties.Items.Add(new DevExpress.XtraEditors.Controls.RadioGroupItem(Convert.ToInt16("1"), "Hemen gönder"));
+            tEdit_RG.Properties.Items.Add(new DevExpress.XtraEditors.Controls.RadioGroupItem(Convert.ToInt16("2"), "Zamanlanmış gönderim (Tarih ve saat belirterek)"));
+        }
+
+        #endregion Bilidirim SMS, WhatsApp, e-Mail, Mobil App
+
+        private void Create_PopupMenu_Add(vNavigatorButton nButton, DevExpress.XtraEditors.SimpleButton simpleButton, tEvents ev)
+        {
+            //BarManager existingBarManager = null;
+            //foreach (Control control in nButton.tForm.Controls)
+            //{
+            //    if (control.GetType().ToString() == "DevExpress.XtraBars.BarManager")
+            //    {
+            //        existingBarManager = ((BarManager)control);
+            //        break;
+            //    }
+            //}
+            
+            BarManager barManager = new BarManager(); // PopupMenu için bir BarManager gerekir
+            barManager.Form = nButton.tForm;
+
+            PopupMenu popupMenu = new PopupMenu();
+            popupMenu.Manager = barManager;
+
+
+            simpleButton.Click += ev.btn_Navigator_PopupMenu;
+
+        }
+
+        private void Create_Navigator_Buttons(Form tForm, Control NavPanel, DataNavigator tDataNavigator,
                                               string TableIPCode,
                                               string External_TableIPCode,
                                               string navigator,
@@ -431,7 +972,7 @@ namespace Tkn_CreateObject
             DevExpress.XtraEditors.SimpleButton simpleButton = null;
 
             vNavigatorButton nButton = new vNavigatorButton();
-
+            nButton.tForm = tForm;
             nButton.navigatorPanel = NavPanel;
             nButton.TableIPCode = TableIPCode;
             nButton.navigatorList = navigator;
@@ -558,9 +1099,10 @@ namespace Tkn_CreateObject
             createNavigatorButton(nButton);
 
             //simpleButton_collexp.GroupIndex = -1;
-
-            nButton.buttonName = "simpleButton_onay_iptal";
-            nButton.buttonText = "-";
+            // onayEkle
+            // onayKaldir
+            nButton.buttonName = "simpleButton_onay_Ekle";
+            nButton.buttonText = "+";
             nButton.dock = DockStyle.Left;
             nButton.tabIndex = 73;
             nButton.tabStop = false;
@@ -569,8 +1111,8 @@ namespace Tkn_CreateObject
             nButton.events = true;
             createNavigatorButton(nButton);
 
-            nButton.buttonName = "simpleButton_onayla";
-            nButton.buttonText = "+";
+            nButton.buttonName = "simpleButton_onay_Kaldir";
+            nButton.buttonText = "-";
             nButton.dock = DockStyle.Left;
             nButton.tabIndex = 74;
             nButton.tabStop = false;
@@ -578,7 +1120,17 @@ namespace Tkn_CreateObject
             nButton.width = width25;
             nButton.events = true;
             createNavigatorButton(nButton);
-                        
+
+            nButton.buttonName = "simpleButton_mesaj";
+            nButton.buttonText = "Mesaj gönder";
+            nButton.dock = DockStyle.Left;
+            nButton.tabIndex = 75;
+            nButton.tabStop = false;
+            nButton.imageName = "30_327_Send_16x16";
+            nButton.width = width90;
+            nButton.events = true;
+            createNavigatorPopupEdit(nButton);
+
             nButton.buttonName = "simpleButton_yazici";
             nButton.buttonText = "Yazdır...";
             nButton.dock = DockStyle.Left;
@@ -3355,7 +3907,7 @@ namespace Tkn_CreateObject
 
             Create_MyFindPanel_(tForm, tPanelControl, find, TableIPCode, propNavigator, cntrlName, findType);
             
-            if (tForm.Name.ToString().IndexOf("tSearchForm") > -1)
+            if (tForm?.Name.ToString().IndexOf("tSearchForm") > -1)
             {
                 ((DevExpress.XtraGrid.GridControl)cntrl).TabStop = false;
             }

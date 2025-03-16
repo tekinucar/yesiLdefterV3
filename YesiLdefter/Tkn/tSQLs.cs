@@ -932,10 +932,36 @@ Select distinct
             ";
         }
 
+        public string Sql_GetBildirimSablonlariList(string where)
+        {
+            return @" Select * from dbo.HubBildirimSablonlari where 0 = 0 " + where;
+        }
+        public string Sql_GetBildirimKanallariList(string where)
+        {
+            return @" Select * from Lkp.HubBildirimSablonlariKanalType where 0 = 0 " + where;
+        }
+        
+        public string Sql_CrsSmsSettings()
+        {
+            string sql = @"
+  Select Top 1 s.[Id]
+      ,s.[FirmId]
+      ,s.[IsActive]
+      ,s.[ServisTypeId]
+      ,s.[KullaniciAdi]
+      ,s.[Sifre]
+      ,s.[BayiiKodu]
+      ,s.[Origin]
+  FROM [dbo].[CrsSmsSettings] as s
+  Where s.IsActive = 1
+  And   s.FirmId = :FIRM_ID 
+";
+            return sql;
+        }
 
         #endregion System SQLs
 
-        
+
         #region ManagerServer Tables SQLs Preparing
 
         public string SQL_MS_TABLES_IP_LIST(string softCode, string projectCode, string TableCode, string IPCode)
@@ -2068,7 +2094,7 @@ INSERT INTO [dbo].[SYS_UPDATES]
             if (Table_Type == 1)  // v.TableType.Table
             {
                 //if (masterFields == "")
-                    masterFields = TableLabel + ".* " + v.ENTER;
+                masterFields = TableLabel + ".* " + v.ENTER;
 
                 NewSQL =
                      " Select " + masterFields + //TableLabel + ".* " + v.ENTER +
@@ -2235,7 +2261,7 @@ INSERT INTO [dbo].[SYS_UPDATES]
             string FieldsListSQL = SQL_Table_FieldsList(DBaseName, TableName, IPCode);
 
             //DBaseType >> DBase_Type >> DBaseName DBaseNo
-            t.MyProperties_Set(ref myProp, "FormName", tForm.Name.ToString());
+            t.MyProperties_Set(ref myProp, "FormName", tForm?.Name.ToString());
             t.MyProperties_Set(ref myProp, "DBaseNo", dBaseNo.ToString());
             t.MyProperties_Set(ref myProp, "DBaseName", DBaseName.ToString());
             t.MyProperties_Set(ref myProp, "SchemasCode", Schemas);
@@ -2277,7 +2303,8 @@ INSERT INTO [dbo].[SYS_UPDATES]
 
                 // IsAccessible == true  ise formun üzerinde 
                 // kendisine (detail'e) bağlı alt tablolar(subdetail) vardır 
-                tForm.IsAccessible = true;
+                if (tForm != null)
+                    tForm.IsAccessible = true;
             }
 
             t.MyProperties_Set(ref myProp, "SqlFirst", NewSQL);
@@ -2301,9 +2328,6 @@ INSERT INTO [dbo].[SYS_UPDATES]
 
             #region Read dsData
 
-            //t.Data_Read_Execute(tForm, dsData, ref NewSQL, TableName, null);
-
-            //if (Data_Find != "2")
             t.Data_Read_Execute(tForm, dsData, ref NewSQL, TableIPCode, null);
 
             if ((TargetValue == "NewRecord") ||
@@ -3108,6 +3132,10 @@ INSERT INTO [dbo].[SYS_UPDATES]
                         tUseLookUpField = true;
                         Preparing_JoinTableForLookUpField(Row, ref joinTables, ref joinFields);
                     }
+
+                    // aşağıda  specialCase_JoinTableForLookUpField uğrasın
+                    if (fieldname == "LKP_ONAY")
+                        tUseLookUpField = true;
                 }
 
                 if ((tLkpMemoryField) ||    // LKP_ MemoryField  ise
@@ -3874,6 +3902,7 @@ INSERT INTO [dbo].[SYS_UPDATES]
             string joinTableAlias = "";
             string aliasFieldName = "";
             string newLkpFieldName = "";
+            string onayFieldName = "";
             string groupTables = "";
             Int16 fieldType = 0;
 
@@ -3890,39 +3919,53 @@ INSERT INTO [dbo].[SYS_UPDATES]
                 // Lkp.MsSectorType||Id||SectorType
                 groupTables = Row["LKP_LIST_TYPES_NAME"].ToString();
 
-                if ((tvisible || tenabled) && (tLookUpField) && (t.IsNotNull(groupTables) == false))
+                if (tvisible || tenabled) 
                 {
-                    idFieldName = "Id";
-                    tableName = Row["LKP_TABLE_NAME"].ToString();
-
                     fieldName = Row["LKP_FIELD_NAME"].ToString();
-                    joinTableAlias = "FNo" + Row["LKP_FIELD_NO"].ToString();
-                    fieldType = Convert.ToInt16(Row["LKP_FIELD_TYPE"].ToString());
 
-                    //, FNo5.DonemTipi + ' : ' + FNo6.GrupTipi + ' : ' + FNo7.SubeTipi  as  Lkp_DonemTipiGrupTipiSubeTipi
-
-                    if (((fieldName.IndexOf("DonemTipi") > -1) ||
-                         (fieldName.IndexOf("GrupTipi") > -1) ||
-                         (fieldName.IndexOf("SubeTipi") > -1)))
+                    if (tLookUpField && t.IsNotNull(groupTables) == false)
                     {
-                        
-                        t.LookUpFieldNameChecked(ref tableName, ref fieldName, ref idFieldName, fieldType);
+                        idFieldName = "Id";
+                        tableName = Row["LKP_TABLE_NAME"].ToString();
+                        joinTableAlias = "FNo" + Row["LKP_FIELD_NO"].ToString();
+                        fieldType = Convert.ToInt16(Row["LKP_FIELD_TYPE"].ToString());
 
-                        if (aliasFieldName == "")
-                            aliasFieldName = " , " + joinTableAlias + "." + fieldName;
-                        else aliasFieldName += " + ' , ' + " + joinTableAlias + "." + fieldName;
+                        //, FNo5.DonemTipi + ' : ' + FNo6.GrupTipi + ' : ' + FNo7.SubeTipi  as  Lkp_DonemTipiGrupTipiSubeTipi
 
-                        if (newLkpFieldName == "")
-                            newLkpFieldName = "Lkp_" + fieldName.Replace("Tipi", "");
-                        else newLkpFieldName += fieldName.Replace("Tipi", "");
+                        if (((fieldName.IndexOf("DonemTipi") > -1) ||
+                             (fieldName.IndexOf("GrupTipi") > -1) ||
+                             (fieldName.IndexOf("SubeTipi") > -1)))
+                        {
+
+                            t.LookUpFieldNameChecked(ref tableName, ref fieldName, ref idFieldName, fieldType);
+
+                            if (aliasFieldName == "")
+                                aliasFieldName = " , " + joinTableAlias + "." + fieldName;
+                            else aliasFieldName += " + ' , ' + " + joinTableAlias + "." + fieldName;
+
+                            if (newLkpFieldName == "")
+                                newLkpFieldName = "Lkp_" + fieldName.Replace("Tipi", "");
+                            else newLkpFieldName += fieldName.Replace("Tipi", "");
+                        }
                     }
+
+                    if (fieldName == "LKP_ONAY")
+                        onayFieldName = " , Convert(bit,0) as LKP_ONAY ";
                 }
             }
 
-            joinFields += " -- Özel field : Donem + Grup + Sube " + v.ENTER;
-
             if (t.IsNotNull(aliasFieldName))
+            {
+                joinFields += " -- Özel field : Donem + Grup + Sube " + v.ENTER;
                 joinFields += aliasFieldName + " as " + newLkpFieldName + v.ENTER;
+            }
+
+            if (t.IsNotNull(onayFieldName))
+            {
+                joinFields += " -- Özel field : Lkp_Onay " + v.ENTER;
+                joinFields += onayFieldName + v.ENTER;
+            }
+
         }
 
 

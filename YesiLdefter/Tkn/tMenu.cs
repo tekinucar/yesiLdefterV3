@@ -393,7 +393,7 @@ namespace Tkn_Menu
                 menuControl.Name = "MENU_" + MasterCode; // RefId.ToString();
                 menuControl.Text = "REF_ID[" + RefId.ToString() + "],CAPTION[" + caption + "]";
                 menuControl.TabStop = false;
-
+                menuControl.OptionsPrimaryDropDown.CloseOnOuterClick = DefaultBoolean.True;
                 //menuControl.Appearance.Font = new System.Drawing.Font("Roboto", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
 
                 if (mainControl is Form)
@@ -2138,6 +2138,7 @@ namespace Tkn_Menu
             //
             if (dontEDI == false)
             {
+                /*
                 NavButton tItemEDI = new DevExpress.XtraBars.Navigation.NavButton();
                 tItemEDI.Appearance.Name = formName;
                 tItemEDI.Name = "item_FEDI";
@@ -2156,6 +2157,7 @@ namespace Tkn_Menu
                 tItemEDI.AppearanceHovered.Options.UseBackColor = true;
                 tItemEDI.AppearanceSelected.Options.UseBackColor = true;
                 mControl.Buttons.Add(tItemEDI);
+                */
             }
             #endregion EDİ            
 

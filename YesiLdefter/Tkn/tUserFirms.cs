@@ -62,7 +62,7 @@ namespace Tkn_UserFirms
                         //SetUserIsActive(UserId);
                     }
 
-                    if (userKey == u_db_user_key)
+                    if (userKey == u_db_user_key.ToUpper())
                     {
 
                         // RegEdit defterine kayıt

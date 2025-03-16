@@ -1,0 +1,99 @@
+﻿
+
+/*CreateTable*/
+
+begin transaction
+
+ create table CrossSettings
+ (
+    Id                Int IDENTITY(1,1)  NOT NULL,
+    IsActive          bit           NULL,
+    SettingTypeId     SmallInt      NULL, /* 1. firma bazlı, 2. bilgisayar bazlı, 3. kullanıcı bazlı  */
+
+    FirmId            Int           NULL,
+    PcName            varchar(50)   NULL,
+    NetworkMacAddress varchar(30)   NULL,
+    UserId            Int           NULL,
+    
+    SettingGroupNo    SmallInt      NULL, 
+    SettingNo         SmallInt      NULL,  
+    About             varchar(100)  NULL, /* ayar hakkında açıklama  */
+
+    DefaultTypeId     SmallInt      NULL,
+    DefaultBool       Bit           NULL,
+    DefaultNumeric    Numeric(26,8) NULL,
+    DefaultText       nVarChar(200) NULL,
+    DefaultInt        Int           NULL,
+    TableIPCode       VarChar(100)  NULL,
+
+
+	Constraint pk_CrossSettings primary key (Id)
+ )
+
+ grant select, insert, update, delete on CrossSettings to public
+
+commit transaction
+
+/*CreateTableEnd*/
+
+
+/*CreateLkpTable*/
+
+begin transaction
+
+
+-- ------------------------------------------------------- 
+-- SettingTypeId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'CrossSettingsSettingType')
+drop table [Lkp].[CrossSettingsSettingType]
+
+create table [Lkp].[CrossSettingsSettingType]
+(
+   Id            Int Unique Not Null,
+   SettingType   nVarchar(50),
+
+   constraint  pk_CrossSettingsSettingType primary key (Id)
+)
+
+delete from [Lkp].[CrossSettingsSettingType]
+INSERT INTO [Lkp].[CrossSettingsSettingType] (Id, SettingType)
+ VALUES 
+  (0,   N'Tanımsız'),
+  (1,   N'Firma'),
+  (2,   N'Bilgisayar'),
+  (3,   N'Kullanıcı'),
+  (101,  N'Bildirimler için başlık TableIPCode'),
+  (102,  N'Bildirimler için satır  TableIPCode')
+
+
+
+-- ------------------------------------------------------- 
+-- DefaultTypeId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'CrossSettingsDefaultType')
+drop table [Lkp].[CrossSettingsDefaultType]
+
+create table [Lkp].[CrossSettingsDefaultType]
+(
+   Id           Int Unique Not Null,
+   DefaultType  nVarchar(50),
+
+   constraint  pk_CrossSettingsDefaultType primary key (Id)
+)
+
+delete from [Lkp].[CrossSettingsDefaultType]
+INSERT INTO [Lkp].[CrossSettingsDefaultType] (Id, DefaultType)
+ VALUES 
+  (0,   N'Tanımsız'),
+  (1,   N'Bool'),
+  (2,   N'Integer'),
+  (3,   N'Numeric'),
+  (4,   N'Text'),
+  (5,   N'TableIPCode')
+
+
+
+commit transaction
+
+/*CreateLkpTableEnd*/

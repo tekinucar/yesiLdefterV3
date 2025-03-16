@@ -2086,7 +2086,7 @@ namespace Tkn_Events
 
             if (e.Column.FieldName == "LKP_ONAY")
             {
-                v.con_LkpOnayChange = true;
+                //v.con_LkpOnayChange = true;
 
                 vGridHint tGridHint = new vGridHint();
                 getGridFormAndTableIPCode(sender, ref tGridHint);

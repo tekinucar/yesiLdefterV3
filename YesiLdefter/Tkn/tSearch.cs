@@ -72,7 +72,7 @@ namespace Tkn_Search
         public void buttonEdit_ButtonClick_(object sender, DevExpress.XtraEditors.Controls.ButtonPredefines button)
         {
             tToolBox t = new tToolBox();
-            tEvents ev = new tEvents();
+            //tEvents ev = new tEvents();
 
             bool onay = false;
             string TableIPCode = string.Empty;
@@ -133,7 +133,7 @@ namespace Tkn_Search
                         //v.con_Value_Old = "";
                         //v.con_SearchValue = "";
 
-                        buttonType = ev.getClickType(myProp);
+                        buttonType = t.getClickType(myProp);
 
                         if (button == DevExpress.XtraEditors.Controls.ButtonPredefines.Search)
                         {
@@ -233,7 +233,7 @@ namespace Tkn_Search
                                 {
                                     if (item.BUTTONTYPE.ToString() != "null")
                                     {
-                                        propButtonType = ev.getClickType(Convert.ToInt32(item.BUTTONTYPE.ToString()));
+                                        propButtonType = t.getClickType(Convert.ToInt32(item.BUTTONTYPE.ToString()));
                                     }
                                     if (buttonType == propButtonType)
                                     {
@@ -315,7 +315,7 @@ namespace Tkn_Search
         {
             tToolBox t = new tToolBox();
             tEventsButton evb = new tEventsButton();
-            tEvents ev = new tEvents();
+            //tEvents ev = new tEvents();
 
             bool onay = false;
             bool oncekiOnay = false;
@@ -337,7 +337,7 @@ namespace Tkn_Search
             foreach (PROP_NAVIGATOR item in prop_)
             {
                 if (item.BUTTONTYPE.ToString() != "null")
-                    propButtonType = ev.getClickType(Convert.ToInt32(item.BUTTONTYPE.ToString()));
+                    propButtonType = t.getClickType(Convert.ToInt32(item.BUTTONTYPE.ToString()));
 
                 //if (item.BUTTONTYPE.ToString().IndexOf("58") > -1)
                 //if (item.BUTTONTYPE.ToString() == ((byte)v.tButtonType.btArama).ToString())

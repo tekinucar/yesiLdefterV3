@@ -120,7 +120,7 @@ namespace Tkn_Events
                 {
                     // propNavigator üzerindeki tanım
 
-                    propButtonType = ev.getClickType(Convert.ToInt32(prop_.BUTTONTYPE.ToString()));
+                    propButtonType = t.getClickType(Convert.ToInt32(prop_.BUTTONTYPE.ToString()));
                     if (mainButtonType == propButtonType)
                     {
                         onay = true;
@@ -177,7 +177,7 @@ namespace Tkn_Events
                         // propNavigator üzerindeki tanım
                         if (item.BUTTONTYPE.ToString() != "null")
                         {
-                            propButtonType = ev.getClickType(Convert.ToInt32(item.BUTTONTYPE.ToString()));
+                            propButtonType = t.getClickType(Convert.ToInt32(item.BUTTONTYPE.ToString()));
                             buttonHint.buttonType = propButtonType;
                         }
                         else
@@ -695,7 +695,7 @@ namespace Tkn_Events
                 string Caption = "";
 
                 if (sender != null) // + veya - 
-                    Caption = ((DevExpress.XtraEditors.SimpleButton)sender).Text;
+                    Caption = ((DevExpress.XtraEditors.SimpleButton)sender).Text.Trim();
 
                 onayIslemi(tForm, tableIPCode, Caption);
                 return onay;
@@ -914,8 +914,9 @@ namespace Tkn_Events
 
                     //v.con_Cancel = true;  bunu yüzünden subview çalışmıyor 
 
-                    NavigatorButton btnR = dN.Buttons.Remove;
-                    dN.Buttons.DoClick(btnR);
+                    /// yeni satır çalışmasını engelliyor : sms yeni satır click olunca 
+                    //NavigatorButton btnR = dN.Buttons.Remove;
+                    //dN.Buttons.DoClick(btnR);
                 }
                 else state = "dsEdit";
             }
@@ -1764,6 +1765,8 @@ namespace Tkn_Events
 
             string lockFieldName = vt.Lock_FName;
 
+            /// IsLock Kontrolü yapılıyor
+            ///
             if (t.IsNotNull(lockFieldName))
             {
                 string value = ds.Tables[0].Rows[pos][lockFieldName].ToString();
@@ -2056,7 +2059,6 @@ namespace Tkn_Events
         private void onayIslemi(Form tForm, string TableIPCode, string Caption)
         {
             //tToolBox t = new tToolBox();
-            
             DataNavigator tDataNavigator = t.Find_DataNavigator(tForm, TableIPCode);
 
             if (tDataNavigator != null)
@@ -2949,7 +2951,7 @@ namespace Tkn_Events
             string BEFOREAFTER = string.Empty;
             string beforeAfter = string.Empty;
             
-            v.tButtonType buttonType = ev.getClickType(Convert.ToInt32(prop_.BUTTONTYPE.ToString()));
+            v.tButtonType buttonType = t.getClickType(Convert.ToInt32(prop_.BUTTONTYPE.ToString()));
             bool onay = true;
 
             if (tBeforeAfter == v.tBeforeAfter.Before)

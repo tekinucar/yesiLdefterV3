@@ -667,8 +667,9 @@ begin transaction
  insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1068, '', 'SihirbazDevam');
  insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1069, '', 'SihirbazGeri');
  insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1070, '', '---------------------');
- insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1071, '', 'Grup Aç/Kapa');
- insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1073, '', 'Onay Ekle/Kaldýr');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1071, '', 'Grup Aç/Kapa'); -- 71,72
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1073, '', 'Onay Ekle/Kaldýr'); -- 73,74
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1075, '', 'Mesaj Gönder');
  insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1081, '', 'Yazýcý');
  insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1090, '', '---------------------');
  insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1091, '', 'Ek Button 1');
@@ -815,8 +816,9 @@ begin transaction
  insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   68, '', 'SihirbazDevam');
  insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   69, '', 'SihirbazGeri');
  insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   70, '', '---------------------');
- insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   71, '', 'Grup Aç/Kapa');
- insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   73, '', 'Onay Ekle/Kaldýr');
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   71, '', 'Grup Aç/Kapa'); -- 71,72
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   73, '', 'Onay Ekle/Kaldýr'); -- 73, 74
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   75, '', 'Mesaj Gönder');
  insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   81, '', 'Yazýcý');
  insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   90, '', '---------------------');
  insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   91, '', 'Ek Button 1');
@@ -862,6 +864,7 @@ begin transaction
  insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   55, '55', '55 Sil (Liste)');
  insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   63, '63', '63 Sonraki');
  insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   65, '65', '65 Önceki');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   75, '75', '75 Mesaj Gönder');
  insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   91, '91', '91 Ek Button 1');
  insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   92, '92', '92 Ek Button 2');
  insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   93, '93', '93 Ek Button 3');
@@ -936,6 +939,8 @@ begin transaction
  insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'USERCREATE', 'User Create');
  insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'PASSRESET',  'Password Reset');
  insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'PASSUPDATE', 'Password Update');
+ insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'MESSAGESINGLE', 'Single Message');
+ insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'MESSAGEMULTI',  'Multi Message');
 
 
 

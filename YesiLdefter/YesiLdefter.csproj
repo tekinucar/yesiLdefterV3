@@ -241,6 +241,12 @@
     </Compile>
     <Compile Include="Forms\ControlExtensions.cs" />
     <Compile Include="Forms\Controls\ControlExtensions.cs" />
+    <Compile Include="Forms\ms_Bildirimler.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ms_Bildirimler.Designer.cs">
+      <DependentUpon>ms_Bildirimler.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\ms_CefSharp.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -466,6 +472,7 @@
     <Compile Include="Tkn\tSave.cs" />
     <Compile Include="Tkn\tScraping.cs" />
     <Compile Include="Tkn\tSearch.cs" />
+    <Compile Include="Tkn\tSMS.cs" />
     <Compile Include="Tkn\tSQLs.cs" />
     <Compile Include="Tkn\tStarter.cs" />
     <Compile Include="Tkn\tSubViews.cs" />
@@ -654,6 +661,7 @@
     <Content Include="Scripts\UST\Hub\HubMtskUcretSinav.txt" />
     <Content Include="Scripts\UST\Hub\HubMtskUcretTeorik.txt" />
     <Content Include="Scripts\UST\Hub\HubMtskUcretUygulama.txt" />
+    <Content Include="Scripts\UST\MsV3\CrossSettings.txt" />
     <Content Include="Scripts\UST\MsV3\EduMtskDenemeSinavi.txt" />
     <Content Include="Scripts\UST\MsV3\EduMtskDenemeSinavSonuc.txt" />
     <Content Include="Scripts\UST\MsV3\EduMtskDersler.txt" />
@@ -703,6 +711,7 @@
     <Content Include="Scripts\UST\MsV3\prc_TablesList.txt" />
     <Content Include="Scripts\UST\MsV3\prc_UsesTableIPCode.txt" />
     <Content Include="Scripts\UST\MsV3\tempEduUsersList.txt" />
+    <Content Include="Scripts\UST\Hub\HubBildirimSablonlari.txt" />
     <Content Include="Scripts\UST\Mtsk\BildirimSMS.txt" />
     <Content Include="Scripts\UST\Mtsk\DbUpdates.txt" />
     <Content Include="Scripts\UST\Mtsk\FileUpdates.txt" />
@@ -781,6 +790,9 @@
     <Content Include="Scripts\UST\Mtsk\prc_MtskUygulamaDersPlanHazirlaManuel.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskUygulamaDersPlaniListele.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_setIsDbUpdateActive.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\CrsBildirimB.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\CrsBildirimS.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\CrsSmsSettings.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\fnc_getIsDbUpdate.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\fnc_IsTatilGunumu.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmCalismaSaatleri.txt" />

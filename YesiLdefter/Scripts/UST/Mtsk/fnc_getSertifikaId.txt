@@ -1,4 +1,5 @@
-﻿/*CreateFunction*/
+﻿
+/*CreateFunction*/
 
 CREATE FUNCTION [dbo].[fnc_getSertifikaId]( @sertifikaId int)  
 RETURNS int
@@ -43,9 +44,31 @@ BEGIN
       (@sertifikaId = 9061))   -- D Otomatik işareti varsa
        set @responseId = 2506
 
+  if ((@sertifikaId = 9062) or -- DE Manuel işareti varsa
+      (@sertifikaId = 9063))   -- DE Otomatik işareti varsa
+       set @responseId = 2522
+
+  if ((@sertifikaId = 9064) or -- D1 Manuel işareti varsa
+      (@sertifikaId = 9065))   -- D1 Otomatik işareti varsa
+       set @responseId = 2517
+
+  if ((@sertifikaId = 9066) or -- D1E Manuel işareti varsa
+      (@sertifikaId = 9067))   -- D1E Otomatik işareti varsa
+       set @responseId = 2521
+
   if ((@sertifikaId = 9070) or -- E Manuel işareti varsa
       (@sertifikaId = 9071))   -- E Otomatik işareti varsa
        set @responseId = 2507
+
+  if ((@sertifikaId = 9110) or -- H Otomobil Manuel işareti varsa
+      (@sertifikaId = 9111))   -- H Otomobil Otomatik işareti varsa
+       set @responseId = 2510
+
+  if ((@sertifikaId = 9112) or -- H Motosiklet Manuel işareti varsa
+      (@sertifikaId = 9113))   -- H Motosiklet Otomatik işareti varsa
+       set @responseId = 2511
+
+
 
   if ((@sertifikaId = 9200) or -- 100 Ceza
       (@sertifikaId = 9201) or -- 100 Ceza Manuel işareti varsa

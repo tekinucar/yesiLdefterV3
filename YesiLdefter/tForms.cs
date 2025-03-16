@@ -46,7 +46,7 @@ namespace Tkn_Forms
             if (FormName == "ms_MtskSinavRandevu") tForm = new YesiLdefter.ms_MtskSinavRandevu();
             if (FormName == "ms_TabimMtsk") tForm = new YesiLdefter.ms_TabimMtsk();
             if (FormName == "ms_DestekServiceTool") tForm = new YesiLdefter.ms_DestekServiceTool();
-
+            if (FormName == "ms_Bildirimler") tForm = new YesiLdefter.ms_Bildirimler();
 
             if (FormName == "SekCevHukumlu") tForm = new YesiLdefter.Forms.SEK.SekCevHukumlu();
             if (FormName == "SekCevHukumluList") tForm = new YesiLdefter.Forms.SEK.SekCevHukumluList();

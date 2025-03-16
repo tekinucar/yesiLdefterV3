@@ -237,6 +237,7 @@ namespace Tkn_Layout
 
             Cursor.Current = Cursors.Default;
 
+            v.con_CreatePopupContainer = false;
             v.IsWaitOpen = false;
             t.WaitFormClose();
         }

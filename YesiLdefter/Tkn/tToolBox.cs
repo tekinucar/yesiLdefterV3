@@ -46,6 +46,7 @@ using System.Data.Sql;
 using System.IO.Compression;
 using Tkn_ExeUpdate;
 using DevExpress.XtraCharts;
+using System.Text.RegularExpressions;
 
 namespace Tkn_ToolBox
 {
@@ -3271,8 +3272,60 @@ namespace Tkn_ToolBox
         #endregion RunQueryModels
 
         #region lockFName, lockFieldName kontrolleri
+        /// <summary>
+        /// IsLock fonksiyomları
+        /// </summary>
+        public bool onlyChanged_Lkp_Onay_Field(DataSet dsData, int position)
+        {
+            if (IsNotNull(dsData) == false) return false;
+            if (position < 0) return false;
 
-        public bool checkedLockRow(DataSet dsData, int position)
+            int colCount = dsData.Tables[0].Columns.Count;
+            DataRow row = dsData.Tables[0].Rows[position];
+            string fieldName = "";
+            string orjValue = "";
+            string curValue = "";
+            bool onay = false;
+            bool onay_LpkOnayFieldChanged = false;
+            bool onay_OrderFieldsChanged = false;
+
+            for (int i = 0; i < colCount; i++)
+            {
+                fieldName = dsData.Tables[0].Columns[i].ColumnName;
+                try
+                {
+                    orjValue = row[fieldName, DataRowVersion.Original].ToString();
+                }
+                catch (Exception)
+                {
+                    orjValue = "tError";
+                }
+                try
+                {
+                    curValue = row[fieldName, DataRowVersion.Current].ToString();
+                }
+                catch (Exception)
+                {
+                    //throw;
+                }
+
+                // 
+                if (orjValue != "tError")
+                {
+                    if (fieldName == "LKP_ONAY")
+                        if (orjValue != curValue) onay_LpkOnayFieldChanged = true;
+                    if (fieldName != "LKP_ONAY")
+                        if (orjValue != curValue) onay_OrderFieldsChanged = true;
+                }
+            }
+
+            if ((onay_LpkOnayFieldChanged == true) && (onay_OrderFieldsChanged == false))
+                onay = true;
+
+            return onay;
+        }
+
+        public bool checkedIsLockRow(DataSet dsData, int position)
         {
             /// v.con_FieldLockControl = True ise contrrol et değilse dön
             /// Mebbisden data alırken Lock kontrolünün olmaması gerekiyor
@@ -3287,6 +3340,8 @@ namespace Tkn_ToolBox
             /// Ne true > false, ne de false > true ye çevrilebiliyor
             /// 
 
+            /// IsLock Kontrolü yapılıyor
+            ///
             if (IsNotNull(lockFieldName))
             {
                 //bool isLockRecord = false;
@@ -3314,7 +3369,7 @@ namespace Tkn_ToolBox
 
                 if (orjValue != "tError")
                 {
-                    if (orjValue == "True" && lockValue == "False")
+                    if (orjValue == "True")// && lockValue == "False")
                     {
                         CancelChangeValues(dsData, position, lockFieldName);
 
@@ -3618,7 +3673,8 @@ namespace Tkn_ToolBox
             Str_Replace(ref Sql, ":BUGUN", v.BUGUN_TARIH.ToString());
 
             Str_Replace(ref Sql, ":GECEN_YILAY", v.GECEN_YILAY.ToString());
-            Str_Replace(ref Sql, ":GELECEL_YILAY", v.GELECEK_YILAY.ToString());
+            Str_Replace(ref Sql, ":GELECEL_YILAY", v.GELECEK_YILAY.ToString()); // update den sonra kaldır
+            Str_Replace(ref Sql, ":GELECEK_YILAY", v.GELECEK_YILAY.ToString());
 
             Str_Replace(ref Sql, ":FORM_CODE", "'" + vt.FormCode + "'");
             Str_Replace(ref Sql, ":MANAGER_DBNAME", v.active_DB.managerDBName);
@@ -4426,6 +4482,98 @@ namespace Tkn_ToolBox
 
             return metin;
         }
+
+        public string TelefonNumarasiGecerliMi(string telefonNumarasi)
+        {
+            if (string.IsNullOrEmpty(telefonNumarasi))
+                return "";
+
+            telefonNumarasi = telefonNumarasi.Trim();
+            telefonNumarasi = telefonNumarasi.Replace("(", "");
+            telefonNumarasi = telefonNumarasi.Replace(")", "");
+            telefonNumarasi = telefonNumarasi.Replace("+90", "");
+            telefonNumarasi = telefonNumarasi.Replace(" ", "");
+
+            if (telefonNumarasi.Substring(0, 2) == "90")
+                telefonNumarasi = telefonNumarasi.Substring(2, telefonNumarasi.Length - 2);
+
+            if (telefonNumarasi.All(char.IsDigit) == false)
+                telefonNumarasi = "";
+            //if (Regex.IsMatch(telefonNumarasi, "^[0-9]*$") == false)
+            //    telefonNumarasi = "";
+            //foreach (char karakter in telefonNumarasi)
+            //{
+            //    if (!char.IsDigit(karakter))
+            //    {
+            //        telefonNumarasi = "";
+            //        break;
+            //    }
+            //}
+
+            if (telefonNumarasi.Substring(0, 1) != "5")
+                telefonNumarasi = "";
+
+            if (telefonNumarasi.Length != 10)
+                telefonNumarasi = "";
+
+            return telefonNumarasi;
+            /*
+            // Farklı telefon numarası formatlarını kontrol eden düzenli ifadeler
+            string[] telefonNumarasiDesenleri = {
+            @"^\(5\d{3}\) \d{3} \d{4}$", // (5XX) XXX XXXX
+            @"^5\d{9}$",                 // 5XXXXXXXXX
+            @"^\+905\d{9}$",             // +905XXXXXXXXX
+            @"^05\d{9}$"                 // 05XXXXXXXXX
+            };
+
+            foreach (string desen in telefonNumarasiDesenleri)
+            {
+                if (Regex.IsMatch(telefonNumarasi, desen))
+                {
+                }
+            }
+
+            return "";
+            */
+        }
+        
+        public string SmsTarihKontrolu(string tarih)
+        {
+            try
+            {
+                tarih = tarih.Trim();
+                Str_Replace(ref tarih, " ", "");
+                Str_Replace(ref tarih, ".", "");
+                Str_Replace(ref tarih, ":", "");
+                if (tarih.Length > 8)
+                    tarih = tarih.Substring(0, 8); //ddmmyyyy
+                return tarih;
+            }
+            catch (Exception)
+            {
+                return "";
+                //throw;
+            }
+        }
+        
+        public string SmsSaatKontrolu(string saat)
+        {
+            try
+            {
+                saat = saat.Trim();
+                saat = saat.Replace(" ", "");
+                saat = saat.Replace(".", "");
+                saat = saat.Replace(":", "");
+                if (saat.Length > 4)
+                    saat = saat.Substring(0, 4);
+                return saat;
+            }
+            catch (Exception)
+            {
+                return "";
+                //throw;
+            }
+        }        
         #endregion
 
         #region myControl_Size_And_Location
@@ -6436,6 +6584,110 @@ namespace Tkn_ToolBox
 
         #region *Get Functions 
 
+        public v.tButtonType getClickType(string myProp)
+        {
+            //tToolBox t = new tToolBox();
+            v.tButtonType propButtonType = v.tButtonType.btNone;
+            PROP_NAVIGATOR prop_ = null;
+            List<PROP_NAVIGATOR> propList_ = null;
+
+            readProNavigator(myProp, ref prop_, ref propList_);
+
+            if (propList_ != null)
+            {
+                foreach (PROP_NAVIGATOR item in propList_)
+                {
+                    // ilk bulduğu type gönderir
+                    if (item.BUTTONTYPE.ToString() != "null")
+                    {
+                        return propButtonType = getClickType(Convert.ToInt32(item.BUTTONTYPE.ToString()));
+                    }
+                }
+            }
+
+            return propButtonType;
+        }
+
+        public v.tButtonType getClickType(int value)
+        {
+            if (value == 0) return v.tButtonType.btNone;
+            if (value == 1) return v.tButtonType.btEnter;
+            if (value == 2) return v.tButtonType.btEscape;
+            if (value == 11) return v.tButtonType.btCikis;
+            if (value == 999) return v.tButtonType.btCikis;
+
+            if (value == 68) return v.tButtonType.btSihirbazDevam;
+            if (value == 69) return v.tButtonType.btSihirbazGeri;
+
+            if (value == 12) return v.tButtonType.btSecCik;
+            if (value == 13) return v.tButtonType.btListeyeEkle;
+            if (value == 14) return v.tButtonType.btListeHazirla;
+            if (value == 15) return v.tButtonType.btListele;
+
+            if (value == 21) return v.tButtonType.btKaydetYeni;
+            if (value == 22) return v.tButtonType.btKaydet;
+            if (value == 23) return v.tButtonType.btKaydetDevam;
+            if (value == 24) return v.tButtonType.btKaydetCik;
+
+            if (value == 31) return v.tButtonType.btYeniKart;
+            if (value == 32) return v.tButtonType.btYeniHesap;
+            if (value == 33) return v.tButtonType.btYeniBelge;
+            if (value == 34) return v.tButtonType.btYeniAltHesap;
+
+            if (value == 36) return v.tButtonType.btYeniKartSatir;
+            if (value == 37) return v.tButtonType.btYeniHesapSatir;
+            if (value == 38) return v.tButtonType.btYeniBelgeSatir;
+            if (value == 39) return v.tButtonType.btYeniAltHesapSatir;
+
+            if (value == 41) return v.tButtonType.btGoster;
+            if (value == 42) return v.tButtonType.btKartAc;
+            if (value == 43) return v.tButtonType.btHesapAc;
+            if (value == 44) return v.tButtonType.btBelgeAc;
+            if (value == 45) return v.tButtonType.btResimEditor;
+            if (value == 46) return v.tButtonType.btReportDesign;
+
+            // unutma
+            if (value == 51) return v.tButtonType.btSilSatir;
+            if (value == 52) return v.tButtonType.btSilKart;
+            if (value == 53) return v.tButtonType.btSilHesap;
+            if (value == 54) return v.tButtonType.btSilBelge;
+            if (value == 55) return v.tButtonType.btSilListe;
+
+            if (value == 61) return v.tButtonType.btEnSona;
+            if (value == 62) return v.tButtonType.btSonrakiSayfa;
+            if (value == 63) return v.tButtonType.btSonraki;
+            if (value == 65) return v.tButtonType.btOnceki;
+            if (value == 66) return v.tButtonType.btOncekiSayfa;
+            if (value == 67) return v.tButtonType.btEnBasa;
+
+            if (value == 71) return v.tButtonType.btCollapse;
+            if (value == 72) return v.tButtonType.btExpanded;
+
+            if (value == 73) return v.tButtonType.btOnayEkle;
+            if (value == 74) return v.tButtonType.btOnayKaldir;
+
+            if (value == 75) return v.tButtonType.btMesajGonder;
+
+            if (value == 81) return v.tButtonType.btYazici;
+
+            if (value == 91) return v.tButtonType.btEk1;
+            if (value == 92) return v.tButtonType.btEk2;
+            if (value == 93) return v.tButtonType.btEk3;
+            if (value == 94) return v.tButtonType.btEk4;
+            if (value == 95) return v.tButtonType.btEk5;
+            if (value == 96) return v.tButtonType.btEk6;
+            if (value == 97) return v.tButtonType.btEk7;
+
+            if (value == 121) return v.tButtonType.btArama;
+            if (value == 122) return v.tButtonType.btFormulleriHesapla;
+            if (value == 123) return v.tButtonType.btDataTransferi;
+            if (value == 124) return v.tButtonType.btInputBox;
+            if (value == 125) return v.tButtonType.btOpenSubView;
+            if (value == 126) return v.tButtonType.btExtraIslem;
+            if (value == 127) return v.tButtonType.btFindListData;
+
+            return v.tButtonType.btNone;
+        }
         public int getDataNavigatorPosition(DataNavigator dN, bool showMessage)
         {
             int pos = dN.Position;
@@ -6544,6 +6796,7 @@ namespace Tkn_ToolBox
 
         public void Find_Control_List(Form tForm, List<string> list, string[] ControlType, string tabPageName)
         {
+            if (tForm == null) return;
             // 0 : tabpege arama yok 
             // 1 : tabpege aramaya başla
             // 2 : aranan tabPage bulundu
@@ -7016,8 +7269,10 @@ namespace Tkn_ToolBox
         ///
         public void tFormActiveControl(Form tForm, Control cntrl)
         {
+            if (v.con_CreatePopupContainer) return;
             if (cntrl != null)
             {
+                
                 tForm.ActiveControl = cntrl;
                 tForm.ActiveControl.Focus();
 
@@ -9170,12 +9425,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
             // controlun TAG üzerindeki MASTEITEM_NO kontrol edilecek
             if (AccessibleName == "TAG") i = 9;
-            /*
-            if (AccessibleName == "CR.CR_OMARA_L01")
-            {
-            //    v.Kullaniciya_Mesaj_Var = AccessibleName;
-            }
-            */
+
             #region Control1
 
             if (v.ControlListView)
@@ -9183,166 +9433,45 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 v.ControlList = string.Empty;
                 v.ControlList = v.ControlList + "[ *** " + tForm.Name.ToString() + " *** ]" + v.ENTER2;
             }
-
-            foreach (Control c in tForm.Controls)
-            {
-
-                if (Control_(c, Name, AccessibleName, ControlType, i)) return c;
-
-                if (c.Controls.Count > 0)
-                {
-                    #region Control2
-                    foreach (Control c2 in c.Controls)
-                    {
-                        if (Control_(c2, Name, AccessibleName, ControlType, i)) return c2;
-
-                        if (c2.Controls.Count > 0)
-                        {
-                            #region Control3
-                            foreach (Control c3 in c2.Controls)
-                            {
-                                if (Control_(c3, Name, AccessibleName, ControlType, i)) return c3;
-
-                                if (c3.Controls.Count > 0)
-                                {
-                                    #region Control4
-                                    foreach (Control c4 in c3.Controls)
-                                    {
-                                        if (Control_(c4, Name, AccessibleName, ControlType, i)) return c4;
-
-                                        if (c4.Controls.Count > 0)
-                                        {
-                                            #region Control5
-                                            foreach (Control c5 in c4.Controls)
-                                            {
-                                                if (Control_(c5, Name, AccessibleName, ControlType, i)) return c5;
-
-                                                if (c5.Controls.Count > 0)
-                                                {
-                                                    #region Control6
-                                                    foreach (Control c6 in c5.Controls)
-                                                    {
-                                                        if (Control_(c6, Name, AccessibleName, ControlType, i)) return c6;
-
-                                                        if (c6.Controls.Count > 0)
-                                                        {
-                                                            #region Control7
-                                                            foreach (Control c7 in c6.Controls)
-                                                            {
-                                                                if (Control_(c7, Name, AccessibleName, ControlType, i)) return c7;
-
-                                                                if (c7.Controls.Count > 0)
-                                                                {
-                                                                    #region Control8
-                                                                    foreach (Control c8 in c7.Controls)
-                                                                    {
-                                                                        if (Control_(c8, Name, AccessibleName, ControlType, i)) return c8;
-
-                                                                        if (c8.Controls.Count > 0)
-                                                                        {
-                                                                            #region Control9
-                                                                            foreach (Control c9 in c8.Controls)
-                                                                            {
-                                                                                if (Control_(c9, Name, AccessibleName, ControlType, i)) return c9;
-
-                                                                                if (c9.Controls.Count > 0)
-                                                                                {
-                                                                                    #region Control10
-                                                                                    foreach (Control c10 in c9.Controls)
-                                                                                    {
-                                                                                        if (Control_(c10, Name, AccessibleName, ControlType, i)) return c10;
-
-                                                                                        if (c10.Controls.Count > 0)
-                                                                                        {
-                                                                                            #region Control11
-                                                                                            foreach (Control c11 in c10.Controls)
-                                                                                            {
-                                                                                                if (Control_(c11, Name, AccessibleName, ControlType, i)) return c11;
-
-                                                                                                if (c11.Controls.Count > 0)
-                                                                                                {
-                                                                                                    #region Control12
-                                                                                                    foreach (Control c12 in c11.Controls)
-                                                                                                    {
-                                                                                                        if (Control_(c12, Name, AccessibleName, ControlType, i)) return c12;
-
-                                                                                                        if (c12.Controls.Count > 0)
-                                                                                                        {
-                                                                                                            #region Control13
-                                                                                                            foreach (Control c13 in c12.Controls)
-                                                                                                            {
-                                                                                                                if (Control_(c13, Name, AccessibleName, ControlType, i)) return c13;
-
-                                                                                                                if (c13.Controls.Count > 0)
-                                                                                                                {
-                                                                                                                    #region Control14
-                                                                                                                    foreach (Control c14 in c13.Controls)
-                                                                                                                    {
-                                                                                                                        if (Control_(c14, Name, AccessibleName, ControlType, i)) return c14;
-
-                                                                                                                        if (c14.Controls.Count > 0)
-                                                                                                                        {
-                                                                                                                            #region Control15
-                                                                                                                            foreach (Control c15 in c14.Controls)
-                                                                                                                            {
-                                                                                                                                if (Control_(c15, Name, AccessibleName, ControlType, i)) return c15;
-
-                                                                                                                                if (c15.Controls.Count > 0)
-                                                                                                                                {
-                                                                                                                                    //...
-                                                                                                                                }
-                                                                                                                            }
-                                                                                                                            #endregion // Control13
-                                                                                                                        }
-                                                                                                                    }
-                                                                                                                    #endregion // Control14
-                                                                                                                }
-                                                                                                            }
-                                                                                                            #endregion // Control13
-                                                                                                        }
-                                                                                                    }
-                                                                                                    #endregion // Control12
-                                                                                                }
-                                                                                            }
-                                                                                            #endregion // Control11
-                                                                                        }
-                                                                                    }
-                                                                                    #endregion // Control10
-                                                                                }
-                                                                            }
-                                                                            #endregion // Control9
-                                                                        }
-                                                                    }
-                                                                    #endregion // Control8
-                                                                }
-
-                                                            }
-                                                            #endregion // Control7
-                                                        }
-                                                    }
-                                                    #endregion // Control6
-                                                }
-                                            }
-                                            #endregion // Control5
-                                        }
-                                    }
-                                    #endregion // Control4
-                                }
-
-                            }
-                            #endregion // Control3
-                        }
-                    }
-                    #endregion // Control2
-                }
-            }
+            
+            Control fc = _Control(tForm.Controls, Name, AccessibleName, ControlType, i);
+            
             #endregion // Control1
 
             if (v.ControlListView)
                 v.SQL = v.ControlList + v.SQL;
 
-            return null;
+            return fc; // null
         }
+
+        private Control _Control(Control.ControlCollection controlCollection, string Name, string AccessibleName, string[] ControlType, int i)
+        {
+            Control ret = null;
+            foreach (Control c in controlCollection)
+            {
+                if (c.Controls.Count > 0)
+                {
+                    ret = _Control(c.Controls, Name, AccessibleName, ControlType, i);
+                    if (ret != null)
+                        break;
+                }
+                if (Control_(c, Name, AccessibleName, ControlType, i))
+                {
+                    ret = c;
+                    break;
+                }
+                if (c.GetType().ToString() == "DevExpress.XtraEditors.PopupContainerEdit")
+                {
+                    DevExpress.XtraEditors.PopupContainerControl popupContainerControl = ((DevExpress.XtraEditors.PopupContainerEdit)c).Properties.PopupControl;
+                    //Control.ControlCollection popupControlCollection = popupContainerControl.Controls;
+                    ret = _Control(popupContainerControl.Controls, Name, AccessibleName, ControlType, i);
+                    if (ret != null)
+                        break;
+                }
+            }
+            return ret;
+        }
+
 
         public void External_Controls_Enabled(Form tForm, DataSet dsData, Control cntrl)
         {
@@ -10510,8 +10639,8 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
             "simpleButton_Coll"
             "simpleButton_Exp"
-            "simpleButton_onay_iptal"
-            "simpleButton_onayla"
+            "simpleButton_onay_Kaldir"
+            "simpleButton_onay_Ekle"
             "simpleButton_yazici"
 
             "simpleButton_en_basa"
@@ -14511,13 +14640,13 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
                     if (propList_ != null)
                     {
-                        tEvents ev = new tEvents();
+                        //tEvents ev = new tEvents();
                         tEventsButton evb = new tEventsButton();
                         foreach (PROP_NAVIGATOR item in propList_)
                         {
                             if (item.BUTTONTYPE.ToString() != "null")
                             {
-                                propButtonType = ev.getClickType(Convert.ToInt32(item.BUTTONTYPE.ToString()));
+                                propButtonType = getClickType(Convert.ToInt32(item.BUTTONTYPE.ToString()));
                             }
                             if (v.tButtonType.btArama == propButtonType)
                             {
@@ -15294,6 +15423,11 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 tableName = "MsSectorType";
                 return;
             }
+            if (tableName == "HubBildirimSablonlari")
+            {
+                /// değişikliğe gerek yok
+                return;
+            }
 
             /// BelgeTipiId >> BelgeTipi ne dönüşüyor 
             /// ParaTipiId  >> ParaTipi
@@ -15876,5 +16010,163 @@ bilgisayar üzerinde çalışan diğer programların listesi
 
 */
     #endregion
+
+    #region
+    /*
+    foreach (Control c in tForm.Controls)
+    {
+
+        if (Control_(c, Name, AccessibleName, ControlType, i)) return c;
+
+        if (c.Controls.Count > 0)
+        {
+            #region Control2
+            foreach (Control c2 in c.Controls)
+            {
+                if (Control_(c2, Name, AccessibleName, ControlType, i)) return c2;
+
+                if (c2.Controls.Count > 0)
+                {
+                    #region Control3
+                    foreach (Control c3 in c2.Controls)
+                    {
+                        if (Control_(c3, Name, AccessibleName, ControlType, i)) return c3;
+
+                        if (c3.Controls.Count > 0)
+                        {
+                            #region Control4
+                            foreach (Control c4 in c3.Controls)
+                            {
+                                if (Control_(c4, Name, AccessibleName, ControlType, i)) return c4;
+
+                                if (c4.Controls.Count > 0)
+                                {
+                                    #region Control5
+                                    foreach (Control c5 in c4.Controls)
+                                    {
+                                        if (Control_(c5, Name, AccessibleName, ControlType, i)) return c5;
+
+                                        if (c5.Controls.Count > 0)
+                                        {
+                                            #region Control6
+                                            foreach (Control c6 in c5.Controls)
+                                            {
+                                                if (Control_(c6, Name, AccessibleName, ControlType, i)) return c6;
+
+                                                if (c6.Controls.Count > 0)
+                                                {
+                                                    #region Control7
+                                                    foreach (Control c7 in c6.Controls)
+                                                    {
+                                                        if (Control_(c7, Name, AccessibleName, ControlType, i)) return c7;
+
+                                                        if (c7.Controls.Count > 0)
+                                                        {
+                                                            #region Control8
+                                                            foreach (Control c8 in c7.Controls)
+                                                            {
+                                                                if (Control_(c8, Name, AccessibleName, ControlType, i)) return c8;
+
+                                                                if (c8.Controls.Count > 0)
+                                                                {
+                                                                    #region Control9
+                                                                    foreach (Control c9 in c8.Controls)
+                                                                    {
+                                                                        if (Control_(c9, Name, AccessibleName, ControlType, i)) return c9;
+
+                                                                        if (c9.Controls.Count > 0)
+                                                                        {
+                                                                            #region Control10
+                                                                            foreach (Control c10 in c9.Controls)
+                                                                            {
+                                                                                if (Control_(c10, Name, AccessibleName, ControlType, i)) return c10;
+
+                                                                                if (c10.Controls.Count > 0)
+                                                                                {
+                                                                                    #region Control11
+                                                                                    foreach (Control c11 in c10.Controls)
+                                                                                    {
+                                                                                        if (Control_(c11, Name, AccessibleName, ControlType, i)) return c11;
+
+                                                                                        if (c11.Controls.Count > 0)
+                                                                                        {
+                                                                                            #region Control12
+                                                                                            foreach (Control c12 in c11.Controls)
+                                                                                            {
+                                                                                                if (Control_(c12, Name, AccessibleName, ControlType, i)) return c12;
+
+                                                                                                if (c12.Controls.Count > 0)
+                                                                                                {
+                                                                                                    #region Control13
+                                                                                                    foreach (Control c13 in c12.Controls)
+                                                                                                    {
+                                                                                                        if (Control_(c13, Name, AccessibleName, ControlType, i)) return c13;
+
+                                                                                                        if (c13.Controls.Count > 0)
+                                                                                                        {
+                                                                                                            #region Control14
+                                                                                                            foreach (Control c14 in c13.Controls)
+                                                                                                            {
+                                                                                                                if (Control_(c14, Name, AccessibleName, ControlType, i)) return c14;
+
+                                                                                                                if (c14.Controls.Count > 0)
+                                                                                                                {
+                                                                                                                    #region Control15
+                                                                                                                    foreach (Control c15 in c14.Controls)
+                                                                                                                    {
+                                                                                                                        if (Control_(c15, Name, AccessibleName, ControlType, i)) return c15;
+
+                                                                                                                        if (c15.Controls.Count > 0)
+                                                                                                                        {
+                                                                                                                            //...
+                                                                                                                        }
+                                                                                                                    }
+                                                                                                                    #endregion // Control13
+                                                                                                                }
+                                                                                                            }
+                                                                                                            #endregion // Control14
+                                                                                                        }
+                                                                                                    }
+                                                                                                    #endregion // Control13
+                                                                                                }
+                                                                                            }
+                                                                                            #endregion // Control12
+                                                                                        }
+                                                                                    }
+                                                                                    #endregion // Control11
+                                                                                }
+                                                                            }
+                                                                            #endregion // Control10
+                                                                        }
+                                                                    }
+                                                                    #endregion // Control9
+                                                                }
+                                                            }
+                                                            #endregion // Control8
+                                                        }
+
+                                                    }
+                                                    #endregion // Control7
+                                                }
+                                            }
+                                            #endregion // Control6
+                                        }
+                                    }
+                                    #endregion // Control5
+                                }
+                            }
+                            #endregion // Control4
+                        }
+
+                    }
+                    #endregion // Control3
+                }
+            }
+            #endregion // Control2
+        }
+    }
+    */
+    #endregion // */
+
 
 }

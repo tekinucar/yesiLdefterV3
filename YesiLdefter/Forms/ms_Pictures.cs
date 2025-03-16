@@ -134,15 +134,23 @@ namespace YesiLdefter
         
         void AddWebCamList()
         {
-            Int16 camNo = 1; 
-            fico = new FilterInfoCollection(FilterCategory.VideoInputDevice);
-            foreach (AForge.Video.DirectShow.FilterInfo item in fico)
+            Int16 camNo = 1;
+            try
             {
-                imageComboBox_WebCam.Properties.Items.Add(new DevExpress.XtraEditors.Controls.ImageComboBoxItem(item.Name, (short)camNo, -1));
-                camNo++;
+                fico = new FilterInfoCollection(FilterCategory.VideoInputDevice);
+                foreach (AForge.Video.DirectShow.FilterInfo item in fico)
+                {
+                    imageComboBox_WebCam.Properties.Items.Add(new DevExpress.XtraEditors.Controls.ImageComboBoxItem(item.Name, (short)camNo, -1));
+                    camNo++;
+                }
+                if (camNo == 1) // kamera bulamadıysa
+                    imageComboBox_WebCam.Properties.Items.Add(new DevExpress.XtraEditors.Controls.ImageComboBoxItem("Bilgisayarınıza bağlı kamera tespit edilemedi.", (short)1, -1));
             }
-            if (camNo == 1) // kamera bulamadıysa
-                imageComboBox_WebCam.Properties.Items.Add(new DevExpress.XtraEditors.Controls.ImageComboBoxItem("Bilgisayarınıza bağlı kamera tespit edilemedi.", (short)1, -1));
+            catch (Exception ex)
+            {
+                MessageBox.Show("Hata : Kamera tespiti sırasında hata oluştu. " + v.ENTER + ex.Message);
+                //throw;
+            }
 
             barEditItem_WebCam.EditValue = (short)1;
             //imageComboBox_WebCam.Items[0].Value = 1;
@@ -151,18 +159,27 @@ namespace YesiLdefter
         {
             Int16 scanNo = 1;
             string firstScanner = "";
-            DeviceManager deviceManager = new DeviceManager();
-            foreach (DeviceInfo deviceInfo in deviceManager.DeviceInfos)
+            try
             {
-                if (deviceInfo.Type == WiaDeviceType.ScannerDeviceType)
+                DeviceManager deviceManager = new DeviceManager();
+                foreach (DeviceInfo deviceInfo in deviceManager.DeviceInfos)
                 {
-                    //Console.WriteLine("Scanner found: " + deviceInfo.Properties["Name"].get_Value());
-                    //imageComboBox_Tarayici.Properties.Items.Add(new DevExpress.XtraEditors.Controls.ImageComboBoxItem(deviceInfo.Properties["Name"].get_Value(), (short)scanNo, -1));
-                    itemComboBox_Tarayici1.Items.Add(new DevExpress.XtraEditors.Controls.ComboBoxItem(deviceInfo.Properties["Name"].get_Value()));
-                    if (firstScanner == "")
-                        firstScanner = deviceInfo.Properties["Name"].get_Value();
-                    scanNo++;
+                    if (deviceInfo.Type == WiaDeviceType.ScannerDeviceType)
+                    {
+                        //Console.WriteLine("Scanner found: " + deviceInfo.Properties["Name"].get_Value());
+                        //imageComboBox_Tarayici.Properties.Items.Add(new DevExpress.XtraEditors.Controls.ImageComboBoxItem(deviceInfo.Properties["Name"].get_Value(), (short)scanNo, -1));
+                        itemComboBox_Tarayici1.Items.Add(new DevExpress.XtraEditors.Controls.ComboBoxItem(deviceInfo.Properties["Name"].get_Value()));
+                        if (firstScanner == "")
+                            firstScanner = deviceInfo.Properties["Name"].get_Value();
+                        scanNo++;
+                    }
                 }
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Hata : Scanner tespiti sırasında hata oluştu. "  + v.ENTER + ex.Message);
+                ///throw;
             }
 
             //if (scanNo == 1) // tarayıcı bulamadıysa

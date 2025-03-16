@@ -16,10 +16,13 @@ using System.Windows.Forms;
 using Tkn_CreateObject;
 using Tkn_DataCopy;
 using Tkn_DefaultValue;
+using Tkn_Forms;
 using Tkn_InputPanel;
 using Tkn_Layout;
 using Tkn_Save;
 using Tkn_Search;
+using Tkn_SMS;
+using Tkn_SQLs;
 using Tkn_ToolBox;
 using Tkn_Variable;
 
@@ -121,6 +124,11 @@ namespace Tkn_Events
             DataRowState state = checkedChangeValue(dsData, OldPosition);
             //DataRowState state = dsData.Tables[0].Rows[OldPosition].RowState;
 
+            /// LKP_ONAY değişikliği var mı kontrol et
+            /// 
+            v.con_LkpOnayChange = t.onlyChanged_Lkp_Onay_Field(dsData, OldPosition);
+
+
             if ((state == DataRowState.Modified) &&
                 (v.con_LkpOnayChange == false)) // silme işlemi değil ise
             {
@@ -131,12 +139,13 @@ namespace Tkn_Events
                 // -97 Delete işlemine işaret ediyor ( Rows[position].Delete() )
 
                 // lock row ise işlem başlamasın 
-                if (t.checkedLockRow(dsData, OldPosition)) 
+                if (t.checkedIsLockRow(dsData, OldPosition)) 
                     OldPosition = -1;
 
                 if ((OldPosition != -97) && // Değil ise 
                     (OldPosition > -1))
                 {
+
                     string TableIPCode = dsData.DataSetName;
 
                     Form tForm = t.Find_Form(sender);
@@ -149,7 +158,6 @@ namespace Tkn_Events
                             TableIPCode,
                             "tdataNavigator_PositionChanged") == true) // Table Save 
                     {
-
                         tSave sv = new tSave();
 
                         sv.tDataSave(tForm, dsData, ((DevExpress.XtraEditors.DataNavigator)sender), OldPosition);
@@ -178,10 +186,16 @@ namespace Tkn_Events
 
                         v.Kullaniciya_Mesaj_Var = "İPTAL : Kayıt işleminden vazgeçildi ....";
                     }
-
                 }
-
             }
+
+            if (v.con_LkpOnayChange)
+            {
+                /// LKP_ONAY değişikliği anlaşıdı ve save ye gitmesi engellendi
+                /// onun için görevi bitti
+                v.con_LkpOnayChange = false;
+            }
+
             #endregion HasChanges
 
             ((DevExpress.XtraEditors.DataNavigator)sender).Tag = ((DevExpress.XtraEditors.DataNavigator)sender).Position;
@@ -446,35 +460,13 @@ namespace Tkn_Events
                     // ilk bulduğu type gönderir
                     if (item.BUTTONTYPE.ToString() != "null")
                     {
-                        return propButtonType = getClickType(Convert.ToInt32(item.BUTTONTYPE.ToString()));
+                        return propButtonType = t.getClickType(Convert.ToInt32(item.BUTTONTYPE.ToString()));
                     }
                 }
             }
 
             return propButtonType;
         }
-
-        public v.tButtonType getButtonNameClickType(string buttonName)
-        {
-            int value = 0;
-
-            int i1 = buttonName.IndexOf("simpleButton_") + 13;
-            string values = buttonName.Remove(0, i1);
-            try
-            {
-                value = Convert.ToInt32(values);
-                value = value - 1000;
-            }
-            catch (Exception)
-            {
-                value = 0;
-                //throw;
-            }
-
-            return getClickType(value);
-        }
-
-
         public v.tButtonType getClickType(int value)
         {
             if (value == 0) return v.tButtonType.btNone;
@@ -482,10 +474,10 @@ namespace Tkn_Events
             if (value == 2) return v.tButtonType.btEscape;
             if (value == 11) return v.tButtonType.btCikis;
             if (value == 999) return v.tButtonType.btCikis;
-            
+
             if (value == 68) return v.tButtonType.btSihirbazDevam;
             if (value == 69) return v.tButtonType.btSihirbazGeri;
-            
+
             if (value == 12) return v.tButtonType.btSecCik;
             if (value == 13) return v.tButtonType.btListeyeEkle;
             if (value == 14) return v.tButtonType.btListeHazirla;
@@ -554,6 +546,28 @@ namespace Tkn_Events
             return v.tButtonType.btNone;
         }
 
+        public v.tButtonType getButtonNameClickType(string buttonName)
+        {
+            int value = 0;
+
+            int i1 = buttonName.IndexOf("simpleButton_") + 13;
+            string values = buttonName.Remove(0, i1);
+            try
+            {
+                value = Convert.ToInt32(values);
+                value = value - 1000;
+            }
+            catch (Exception)
+            {
+                value = 0;
+                //throw;
+            }
+
+            return t.getClickType(value);
+        }
+
+
+        
         public v.tButtonType getClickType(Form tForm, string TableIPCode,
             KeyEventArgs e, ref string propNavigator, ref string buttonName)
         {
@@ -593,7 +607,7 @@ namespace Tkn_Events
                             if (((DevExpress.XtraEditors.SimpleButton)item).AccessibleDescription != null)
                                 propNavigator = ((DevExpress.XtraEditors.SimpleButton)item).AccessibleDescription;
 
-                            return getClickType(value);
+                            return t.getClickType(value);
                         }
                     }
                 }
@@ -624,7 +638,7 @@ namespace Tkn_Events
             }
 
             // yukarıda bulamazsa O yani None dönecek;
-            return getClickType(value);
+            return t.getClickType(value);
         }
 
         public void viewControlFocusedValue(Form tForm, string TableIPCode)
@@ -1606,7 +1620,7 @@ namespace Tkn_Events
             v.tButtonHint.tForm = tForm;
             v.tButtonHint.tableIPCode = TableIPCode;
             v.tButtonHint.propNavigator = Prop_Navigator;
-            v.tButtonHint.buttonType = getClickType(Button_Click_Type);
+            v.tButtonHint.buttonType = t.getClickType(Button_Click_Type);
             v.tButtonHint.sender = sender;
             v.tButtonHint.senderType = "Button";
             tEventsButton evb = new tEventsButton();
@@ -1699,6 +1713,475 @@ namespace Tkn_Events
             }
             */
         }
+        public void btn_Navigator_PopupMenu(object sender, EventArgs e)
+        {
+            Form tForm = t.Find_Form(sender);
+
+            MessageBox.Show("popup mesaj");
+        }
+        public void btn_Navigator_MesajOnayi_Click(object sender, EventArgs e)
+        {
+            string tableIPCode = ((DevExpress.XtraEditors.SimpleButton)sender).AccessibleName;
+            string formName = ((DevExpress.XtraEditors.SimpleButton)sender).AccessibleDescription;
+            
+            //Form tForm = t.Find_Form(sender); Buton bir popupForm üzerinde 
+            Form tForm = Application.OpenForms[formName];
+
+            bool onay = (bool)((DevExpress.XtraEditors.SimpleButton)sender).Tag;
+
+            DataSet ds = null;
+            DataNavigator dN = null;
+
+            t.Find_DataSet(tForm, ref ds, ref dN, tableIPCode);
+
+            if (t.IsNotNull(ds))
+            {
+                foreach (DataRow row  in ds.Tables[0].Rows)
+                {
+                    row["LKP_ONAY"] = onay;
+                }
+            }
+        }
+        public void btn_Navigator_BildirimHazirla_Click(object sender, EventArgs e)
+        {
+            preparingBildirimHakkinda(sender);
+
+            Form tForm = Application.OpenForms[v.tBildirim.formName];
+
+            ///
+            /// kullanıcı seçimlerini al
+            ///
+            getSecilenBildirimSecenekleri(tForm, v.tBildirim);
+
+            bool onay = bildirimTarihVeSaatOnayi(v.tBildirim);
+
+            //'WORKTYPE', 'MESSAGESINGLE', 'Single Message'
+            //'WORKTYPE', 'MESSAGEMULTI',  'Multi Message'
+            if (onay)
+            {
+                t.WaitFormOpen(v.mainForm, "");
+                t.WaitFormOpen(v.mainForm, "Bildirim/lerin içeriği hazırlanıyor...");
+
+                if (v.tBildirim.workType == "MESSAGEMULTI")
+                    preparingMultiMessage(tForm, v.tBildirim);
+                if (v.tBildirim.workType == "MESSAGESINGLE")
+                    preparingSingleMessage(tForm, v.tBildirim);
+
+                v.SP_OpenApplication = false;
+                v.IsWaitOpen = false;
+                t.WaitFormClose();
+
+                t.AlertMessage("Yeni bildirim paketi hazırlandı", "Kontrol ettikten sonra gönderbilirsiniz.");
+            }
+        }
+        public void btn_Navigator_BildirimGonder_Click(object sender, EventArgs e)
+        {
+            string formName = ((DevExpress.XtraEditors.SimpleButton)sender).AccessibleDescription;
+            Form tForm = Application.OpenForms[formName];
+
+            bool onayBildirimlerHazir = hazirlanmisBildirimVarmi(tForm, v.tBildirim);
+
+            if (onayBildirimlerHazir)
+            {
+                tSMS sms = new tSMS();
+                sms.bildirimleriSMSKanaliylaGonder(tForm, v.tBildirim);
+                t.AlertMessage("Bildirim paketi ilgili servise gönderildi", "");
+            }
+        }
+        public void btn_Navigator_BildirimSorgula_Click(object sender, EventArgs e)
+        {
+            string formName = ((DevExpress.XtraEditors.SimpleButton)sender).AccessibleDescription;
+            Form tForm = Application.OpenForms[formName];
+
+            bool onayBildirimlerHazir = hazirlanmisBildirimVarmi(tForm, v.tBildirim);
+            onayBildirimlerHazir = true;
+            if (onayBildirimlerHazir)
+            {
+                //tSMS sms = new tSMS();
+                //sms.bildirimleriSMSKanalindaSorgula(tForm, v.tBildirim);
+            }
+        }
+        public void btn_Navigator_BildirimListeleri_Click(object sender, EventArgs e)
+        {
+            preparingBildirimHakkinda(sender);
+
+            string FormName = "ms_Bildirimler";
+            string FormCode = v.tBildirim.bildirimListesiFormCode;
+
+            tForms fr = new tForms();
+            Form tNewForm = null;
+            
+            tNewForm = fr.Get_Form(FormName);
+
+            // MS_LAYOUT Preparing
+            // form code var ise boş formu kullanarak Layout dizayn et
+            if (FormCode != "")
+            {
+                string Prop_Navigator = @"
+                  0=FORMNAME:" + FormName + @";
+                  0=FORMCODE:" + FormCode + @";
+                  0=FORMTYPE:CHILD;
+                  0=FORMSTATE:NORMAL;
+";
+                t.OpenForm(tNewForm, Prop_Navigator);
+            }
+        }
+        public void btn_Navigator_YeniBildirim_Click(object sender, EventArgs e)
+        {
+            preparingBildirimHakkinda(sender);
+            bool onay = false;
+            string formName = ((DevExpress.XtraEditors.SimpleButton)sender).AccessibleDescription;
+            Form tForm = Application.OpenForms[formName];
+
+            string tableIPCodeHeader = v.tBildirim.TableIPCodeHeader;
+            DataSet dsHeader = null;
+            DataNavigator dNHeader = null;
+            /// Bildirim header tablosu
+            t.Find_DataSet(tForm, ref dsHeader, ref dNHeader, tableIPCodeHeader);
+            if (dsHeader != null)
+            {
+                onay = t.TableRefresh(tForm, dsHeader);
+            }
+
+            string tableIPCodeLines = v.tBildirim.TableIPCodeLines;
+            DataSet dsLines = null;
+            DataNavigator dNLines = null;
+            /// Bildirim lines tablosu
+            t.Find_DataSet(tForm, ref dsLines, ref dNLines, tableIPCodeLines);
+            if (dsLines != null)
+            {
+                onay = t.TableRefresh(tForm, dsLines);
+            }
+
+            if (onay)
+                t.AlertMessage("Yeni boş bir bildirim paketi hazırlandı.", "Kullanıma hazır.");
+        }
+        public void btn_Navigator_KalanKontorSorgusu_Click(object sender, EventArgs e)
+        {
+            preparingBildirimHakkinda(sender);
+            Form tForm = Application.OpenForms[v.tBildirim.formName];
+
+            tSMS sms = new tSMS();
+            sms.getSMSCreditCount(tForm, v.tBildirim);
+        }
+        public void tEdit_BildirimSablonlari_EditValueChanged(object sender, EventArgs e)
+        {
+            string formName = ((DevExpress.XtraEditors.ImageComboBoxEdit)sender).AccessibleDescription;
+            getBildirimMesajiAndView(formName);
+        }
+        private void preparingBildirimHakkinda(object sender)
+        {
+            string readTableIPCode = ((DevExpress.XtraEditors.SimpleButton)sender).AccessibleName;
+            string formName = ((DevExpress.XtraEditors.SimpleButton)sender).AccessibleDescription;
+            string bilgiler = ((DevExpress.XtraEditors.SimpleButton)sender).AccessibleDefaultActionDescription;
+
+            string TableIPCodeHeader = t.Get_And_Clear(ref bilgiler, "||");
+            string TableIPCodeLines = t.Get_And_Clear(ref bilgiler, "||");
+            string bildirimListesiFormCode = t.Get_And_Clear(ref bilgiler, "||");
+            string bildirimListesiHeader = t.Get_And_Clear(ref bilgiler, "||");
+            string bildirimListesiLines = t.Get_And_Clear(ref bilgiler, "||");
+            string workType = t.Get_And_Clear(ref bilgiler, "||");
+            string readKeyFieldNames = t.Get_And_Clear(ref bilgiler, "||");
+
+            v.tBildirim.Clear();
+            v.tBildirim.formName = formName; 
+            v.tBildirim.readTableIPCode = readTableIPCode;
+            v.tBildirim.TableIPCodeHeader = TableIPCodeHeader;
+            v.tBildirim.TableIPCodeLines = TableIPCodeLines;
+            v.tBildirim.bildirimListesiFormCode = bildirimListesiFormCode;
+            v.tBildirim.bildirimListesiHeader = bildirimListesiHeader;
+            v.tBildirim.bildirimListesiLines = bildirimListesiLines;
+            v.tBildirim.workType = workType;
+            ///
+            /// readKeyFieldNames = "RKEYFNAME": "TalepId=Id;CariId=AdayId;TelefonNo=Lkp_CepTelefonu;AlicininAdiSoyadi=Lkp_TamAdiSoyadi;",
+            ///
+            v.tBildirim.hedefTalepIdFName = t.Get_And_Clear(ref readKeyFieldNames, "=");     //  TalepId= 
+            v.tBildirim.kaynakTalepIdFName = t.Get_And_Clear(ref readKeyFieldNames, ";");    //  Id ye ulaşıyor 
+            v.tBildirim.hedefCariIdFName = t.Get_And_Clear(ref readKeyFieldNames, "=");      //  CariId= 
+            v.tBildirim.kaynakCariIdFName = t.Get_And_Clear(ref readKeyFieldNames, ";");     //  AdayId ye ulaşıyor
+            v.tBildirim.hedefTelefonNoFName = t.Get_And_Clear(ref readKeyFieldNames, "=");   //  TelefonNo= 
+            v.tBildirim.kaynakTelefonNoFName = t.Get_And_Clear(ref readKeyFieldNames, ";");  //  Lkp_CepTelefonu ye ulaşıyor
+            v.tBildirim.hedefAliciAdiFName = t.Get_And_Clear(ref readKeyFieldNames, "=");    //  AlicininAdiSoyadi= 
+            v.tBildirim.kaynakAliciAdiFName = t.Get_And_Clear(ref readKeyFieldNames, ";");   //  Lkp_TamAdiSoyadi ye ulaşıyor
+        }
+        private void getBildirimMesajiAndView(string formName)
+        {
+            Form tForm = Application.OpenForms[formName];
+            Control tEdit_BildirimSablonlari = t.Find_Control(tForm, "tEdit_BildirimSablonlari");
+            string secilenMesajKodu = ((ImageComboBoxEdit)tEdit_BildirimSablonlari).EditValue.ToString();
+
+            tSQLs Sqls = new tSQLs();
+            DataSet ds = new DataSet();
+            string tSql = Sqls.Sql_GetBildirimSablonlariList(" and MesajKodu = '" + secilenMesajKodu + "' ");
+            t.SQL_Read_Execute(v.dBaseNo.Manager, ds, ref tSql, "HubBildirimSablonlari", "HubBildirimSablonlari");
+
+            string mesajContext = "";
+            if (t.IsNotNull(ds))
+            {
+                mesajContext = ds.Tables[0].Rows[0]["Mesaj"].ToString();
+            }
+
+            Control tEdit_BildirimMetni = t.Find_Control(tForm, "tEdit_BildirimMetni");
+            ((MemoEdit)tEdit_BildirimMetni).EditValue = mesajContext;
+        }
+        private void preparingMultiMessage(Form tForm, bildirimPaketi tBildirim_)
+        {
+            /// listede onaylı kişi varmı kontrol et
+            bool listeOnayi = listedeOnayliKisiVarmi(tForm, tBildirim_);
+
+            if (listeOnayi)
+            {
+                yeniBildirimPaketBasligiOlustur(tForm, tBildirim_);
+                yeniBildirimPaketSatirlariOlustur(tForm, tBildirim_);
+            }
+            else
+            {
+                MessageBox.Show("Dikkat : Listede onaylı bir kayıt bulunamdı...");
+            }
+        }
+        private void preparingSingleMessage(Form tForm, bildirimPaketi tBildirim_)
+        {
+            yeniBildirimPaketBasligiOlustur(tForm, tBildirim_);
+            yeniBildirimPaketSatirlariOlustur(tForm, tBildirim_);
+        }
+        private bool listedeOnayliKisiVarmi(Form tForm, bildirimPaketi tBildirim_)
+        {
+            string readTableIPCode = tBildirim_.readTableIPCode;
+            DataSet dsData = null;
+            DataNavigator dNData = null;
+            /// kaynak olarak okunacak liste
+            t.Find_DataSet(tForm, ref dsData, ref dNData, readTableIPCode);
+
+            bool onay = false;
+            if (t.IsNotNull(dsData))
+            {
+                foreach (DataRow row in dsData.Tables[0].Rows)
+                {
+                    onay = (bool)row["LKP_ONAY"];
+                    if (onay)
+                    {
+                        /// listede bir tane onaylı kişi bulması yeterli
+                        break;
+                    }
+                }
+            }
+            return onay;
+        }
+        private void getSecilenBildirimSecenekleri(Form tForm, bildirimPaketi tBildirim_)
+        {
+            try
+            {
+                Control tEdit_BildirimKanali = t.Find_Control(tForm, "tEdit_BildirimKanali");
+                tBildirim_.secilenKanalTypeId = t.myInt16(((ImageComboBoxEdit)tEdit_BildirimKanali).EditValue.ToString());
+
+                tBildirim_.secilenSablonId = 0;
+
+                Control tEdit_BildirimSablonlari = t.Find_Control(tForm, "tEdit_BildirimSablonlari");
+                tBildirim_.secilenMesajKodu = ((ImageComboBoxEdit)tEdit_BildirimSablonlari).EditValue.ToString();
+
+                Control tEdit_BildirimMetni = t.Find_Control(tForm, "tEdit_BildirimMetni");
+                tBildirim_.secilenBildirimMetni = ((MemoEdit)tEdit_BildirimMetni).EditValue?.ToString();
+
+                Control tEdit_BildirimSecenekleri = t.Find_Control(tForm, "tEdit_BildirimSecenekleri");
+                tBildirim_.secilenGonderimTypeId = t.myInt16(((RadioGroup)tEdit_BildirimSecenekleri).EditValue.ToString());
+
+                Control tEdit_BidirimTarihi = t.Find_Control(tForm, "tEdit_BidirimTarihi");
+                tBildirim_.secilenGonderimTarihi = Convert.ToDateTime(((DateEdit)tEdit_BidirimTarihi).EditValue.ToString());
+
+                Control tEdit_BildirimSaati = t.Find_Control(tForm, "tEdit_BildirimSaati");
+                tBildirim_.secilenGonderimSaati = ((TimeEdit)tEdit_BildirimSaati).EditValue.ToString();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Hata : Bildirim seçeneklerini okurken..." + v.ENTER + ex.Message);
+                //throw;
+            }
+        }
+        private bool bildirimTarihVeSaatOnayi(bildirimPaketi tBildirim_)
+        {
+            bool onay = true;
+            if (tBildirim_.secilenGonderimTypeId == 2)
+            {
+                string soru = "Zamanlanmış gönderim seçeneği için " + v.ENTER2 +
+                    "  Tarih : " + tBildirim_.secilenGonderimTarihi.ToString().Substring(0,10) + v.ENTER +
+                    "  Saat  : " + tBildirim_.secilenGonderimSaati + v.ENTER2 +
+                    "Onaylıyor musunuz ?";
+                DialogResult cevap = t.mySoru(soru);
+                if (DialogResult.Yes != cevap)
+                {
+                    onay = false;
+                }
+            }
+            return onay;
+        }
+        private void yeniBildirimPaketBasligiOlustur(Form tForm, bildirimPaketi tBildirim_)
+        {
+            string tableIPCode = tBildirim_.TableIPCodeHeader;
+            DataSet dsHeader = null;
+            DataNavigator dNHeader = null;
+            /// Bildirim header tablosu
+            t.Find_DataSet(tForm, ref dsHeader, ref dNHeader, tableIPCode);
+
+            int Id = 0;
+            if (dsHeader != null)
+            {
+                if (dsHeader.Tables[0].Rows.Count > 0)
+                {
+                    Id = t.myInt32(dsHeader.Tables[0].Rows[0]["Id"].ToString());
+                    if (Id == 0)
+                    {
+                        dsHeader.Tables[0].Rows[0]["IsActive"] = 1;
+                        dsHeader.Tables[0].Rows[0]["KanalTypeId"] = tBildirim_.secilenKanalTypeId;
+                        dsHeader.Tables[0].Rows[0]["SablonId"] = tBildirim_.secilenSablonId;
+                        dsHeader.Tables[0].Rows[0]["MesajKodu"] = tBildirim_.secilenMesajKodu;
+                        dsHeader.Tables[0].Rows[0]["BildirimMetni"] = tBildirim_.secilenBildirimMetni;
+                        dsHeader.Tables[0].Rows[0]["GonderimTypeId"] = tBildirim_.secilenGonderimTypeId;
+                        dsHeader.Tables[0].Rows[0]["GonderimTarihi"] = tBildirim_.secilenGonderimTarihi;
+                        dsHeader.Tables[0].Rows[0]["GonderimSaati"] = tBildirim_.secilenGonderimSaati;
+                        if (tBildirim_.workType == "MESSAGESINGLE") dsHeader.Tables[0].Rows[0]["WorkTypeId"] = 1;
+                        if (tBildirim_.workType == "MESSAGEMULTI") dsHeader.Tables[0].Rows[0]["WorkTypeId"] = 2;
+
+                        dsHeader.Tables[0].AcceptChanges();
+
+                        tSave sv = new tSave();
+                        sv.tDataSave(tForm, dsHeader, dNHeader, dNHeader.Position);
+
+                        tBildirim_.headerTableIdValue = t.myInt32(dsHeader.Tables[0].Rows[0]["Id"].ToString());
+                    }
+                    else
+                    {
+                        tBildirim_.headerTableIdValue = Id;
+                    }
+                }
+            }
+        }
+        private void yeniBildirimPaketSatirlariOlustur(Form tForm, bildirimPaketi tBildirim_)
+        {
+            if (tBildirim_.headerTableIdValue == 0)
+            {
+                MessageBox.Show("Dikkat : Bildirim paketi Id bulunamadı...");
+                return;
+            }
+            string readTableIPCode = tBildirim_.readTableIPCode;
+            string tableIPCodeLines = tBildirim_.TableIPCodeLines;
+
+
+            DataSet dsData = null;
+            DataNavigator dNData = null;
+            /// Kaynak olarak okunacak tablo
+            t.Find_DataSet(tForm, ref dsData, ref dNData, readTableIPCode);
+
+            DataSet dsLines = null;
+            DataNavigator dNLines = null;
+            /// Bildirim lines tablosu
+            t.Find_DataSet(tForm, ref dsLines, ref dNLines, tableIPCodeLines);
+
+
+            bool onay = false;
+            if (t.IsNotNull(dsData))
+            {
+                foreach (DataRow row in dsData.Tables[0].Rows)
+                {
+                    try
+                    {
+                        if (tBildirim_.workType == "MESSAGEMULTI")
+                            onay = (bool)row["LKP_ONAY"];
+                        if (tBildirim_.workType == "MESSAGESINGLE")
+                            onay = true;
+                    }
+                    catch (Exception)
+                    {
+                        MessageBox.Show("Dikkat : LKP_ONAY  isimli onay fieldi bulunamadı...");
+                        break;
+                        //throw;
+                    }
+                    
+
+                    if (onay)
+                    {
+                        if (t.IsNotNull(tBildirim_.kaynakTalepIdFName))
+                            tBildirim_.kaynakTalepIdValue = (int)row[tBildirim_.kaynakTalepIdFName];
+
+                        if (t.IsNotNull(tBildirim_.kaynakCariIdFName))
+                            tBildirim_.kaynakCariIdValue = (int)row[tBildirim_.kaynakCariIdFName];
+
+                        if (t.IsNotNull(tBildirim_.kaynakTelefonNoFName))
+                            tBildirim_.kaynakTelefonNoValue = (string)row[tBildirim_.kaynakTelefonNoFName];
+
+                        if (t.IsNotNull(tBildirim_.kaynakAliciAdiFName))
+                            tBildirim_.kaynakAliciAdiValue = (string)row[tBildirim_.kaynakAliciAdiFName];
+
+                        setBildirimLines(tForm, dsLines, dNLines, tBildirim_);
+                    }
+                }
+            }
+        }
+        private void setBildirimLines(Form tForm, DataSet dsLines, DataNavigator dNLines, bildirimPaketi tBildirim_)
+        {
+            string tableIPCode = tBildirim_.TableIPCodeLines;
+
+            DataRow newRow = dsLines.Tables[0].NewRow();
+
+            using (tDefaultValue df = new tDefaultValue())
+            {
+                df.tDefaultValue_And_Validation
+                    (tForm,
+                     dsLines,
+                     newRow,
+                     tableIPCode,
+                     "tData_NewRecord");
+            }
+
+            newRow["MesajKodu"] = tBildirim_.secilenMesajKodu;
+            newRow["CrsBildirimBId"] = tBildirim_.headerTableIdValue;
+            newRow[tBildirim_.hedefTalepIdFName] = tBildirim_.kaynakTalepIdValue.ToString();
+            newRow[tBildirim_.hedefCariIdFName] = tBildirim_.kaynakCariIdValue.ToString();
+            newRow[tBildirim_.hedefTelefonNoFName] = tBildirim_.kaynakTelefonNoValue.ToString();
+            newRow[tBildirim_.hedefAliciAdiFName] = tBildirim_.kaynakAliciAdiValue.ToString();
+
+            dsLines.Tables[0].Rows.Add(newRow);
+
+            NavigatorButton btnL = dNLines.Buttons.Last;
+            dNLines.Buttons.DoClick(btnL);
+
+            tSave sv = new tSave();
+            sv.tDataSave(tForm, dsLines, dNLines, dNLines.Position);
+        }
+        private bool hazirlanmisBildirimVarmi(Form tForm, bildirimPaketi tBildirim_)
+        {
+            if (tBildirim_.headerTableIdValue == 0)
+            {
+                bool listeOnayi = listedeOnayliKisiVarmi(tForm, tBildirim_);
+
+                if (listeOnayi)
+                {
+                    yeniBildirimPaketBasligiOlustur(tForm, tBildirim_);
+                }
+
+                if (tBildirim_.headerTableIdValue == 0)
+                {
+                    MessageBox.Show("Dikkat : Hazırlanmış bildirim paketi bulunamadı...");
+                    return false;
+                }
+            }
+            string tableIPCodeLines = tBildirim_.TableIPCodeLines;
+
+            DataSet dsLines = null;
+            DataNavigator dNLines = null;
+            /// Bildirim lines tablosu
+            t.Find_DataSet(tForm, ref dsLines, ref dNLines, tableIPCodeLines);
+
+            bool onay = t.IsNotNull(dsLines);
+
+            if (onay == false)
+                MessageBox.Show("Dikkat : Henüz hazırlanmış bildirimler bulunmadı...");
+
+            return onay;
+        }
+
+        /// 
+        /// Bildirim sürecinin sonu
+        /// 
 
         public void btn_CheckButton_CheckedChanged(object sender, EventArgs e)
         {
@@ -1804,7 +2287,7 @@ namespace Tkn_Events
             v.tButtonHint.Clear();
             v.tButtonHint.tForm = tForm;
             v.tButtonHint.tableIPCode = TableIPCode;
-            v.tButtonHint.buttonType = getClickType(Button_Click_Type);
+            v.tButtonHint.buttonType = t.getClickType(Button_Click_Type);
             tEventsButton evb = new tEventsButton();
             evb.btnClick(v.tButtonHint);
 
@@ -7253,6 +7736,14 @@ namespace Tkn_Events
 
             v.con_PositionChange = true;
 
+            // =MaliDonemChanger:UST/MEB/MTS/TakipFormuAday||DonemTipiId||;
+            // =SubDetail_TableIPCode:UST / MEB / MtskAdayTakipSonuc.eSinav;
+            //
+            if (SubDetail_List.IndexOf("MaliDonemChanger") > -1)
+            {
+                string sil = "";
+                sil = t.Get_And_Clear(ref SubDetail_List, ";");
+            }
             while (SubDetail_List.IndexOf("SubDetail_TableIPCode:") > -1)
             {
                 SubDetail_TableIPCode = t.Get_And_Clear(ref SubDetail_List, ";");

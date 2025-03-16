@@ -237,6 +237,8 @@ namespace Tkn_Variable
         public static bool con_Images_Selecting;
         public static long con_Images_Length = 0;
 
+        public static bool con_CreatePopupContainer = false;
+
         public static bool con_SetFocus;
         public static string con_SetFocus_TableIPCode { get; set; }
         public static string con_SetFocus_FieldName { get; set; }
@@ -259,7 +261,7 @@ namespace Tkn_Variable
         public static WebCam_Capture.WebCamCapture webCamCapture1 = null;
 
         public static int sayac = 0;
-        public static bool ControlListView = false; //true;
+        public static bool ControlListView = false;
         public static string ControlList { get; set; }
 
         // *** DB Variables *** // 
@@ -1106,6 +1108,7 @@ namespace Tkn_Variable
             btExpanded = 72,
             btOnayEkle = 73,
             btOnayKaldir = 74,
+            btMesajGonder = 75,
 
             btYazici = 81,
             btRaporAgaci = 82,
@@ -1199,6 +1202,8 @@ namespace Tkn_Variable
         public static vMsFileUpdate tMsFileUpdate = new vMsFileUpdate();
         public static vMsDbUpdate tMsDbUpdate = new vMsDbUpdate();
 
+        public static bildirimPaketi tBildirim = new bildirimPaketi();
+        public static vSMSSettings tSMSSettings = new vSMSSettings();
 
         public static bool cefBrowserLoading = false;
         //public static CefSharp.WinForms.ChromiumWebBrowser cefBrowser_ = null;
@@ -1294,6 +1299,8 @@ namespace Tkn_Variable
 
 
     }
+
+
 
     public class searchForm
     {
@@ -2156,6 +2163,7 @@ namespace Tkn_Variable
 
     public class vNavigatorButton
     {
+        public Form tForm { get; set; }
         public Control navigatorPanel { get; set; }
         public string navigatorList { get; set; }
         public string TableIPCode { get; set; }
@@ -2486,6 +2494,99 @@ namespace Tkn_Variable
         }
     }
 
+
+    public class bildirimPaketi
+    {
+        public bildirimPaketi()
+        {
+            Clear();
+            ClearLines();
+        }
+        public string formName { get; set; }
+        public string TableIPCodeHeader { get; set; }
+        public string TableIPCodeLines { get; set; }
+        public string bildirimListesiFormCode { get; set; }
+        public string bildirimListesiHeader { get; set; }
+        public string bildirimListesiLines { get; set; }
+        public string readTableIPCode { get; set; }
+        public string workType { get; set; }
+        public int headerTableIdValue { get; set; }
+
+        public Int16 secilenKanalTypeId { get; set; }
+        public int secilenSablonId { get; set; }
+        public string secilenMesajKodu { get; set; }
+        public string secilenBildirimMetni { get; set; }
+        public Int16 secilenGonderimTypeId { get; set; }
+        public DateTime secilenGonderimTarihi { get; set; }
+        public string secilenGonderimSaati { get; set; }
+
+
+        public string hedefTalepIdFName { get; set; }
+        public string kaynakTalepIdFName { get; set; }
+        public string hedefCariIdFName { get; set; }
+        public string kaynakCariIdFName { get; set; }
+        public string hedefTelefonNoFName { get; set; }
+        public string kaynakTelefonNoFName { get; set; }
+        public string hedefAliciAdiFName { get; set; }
+        public string kaynakAliciAdiFName { get; set; }
+
+
+        public int kaynakTalepIdValue { get; set; }
+        public int kaynakCariIdValue { get; set; }
+        public string kaynakTelefonNoValue { get; set; }
+        public string kaynakAliciAdiValue { get; set; }
+
+        public void Clear()
+        {
+            formName = "";
+            TableIPCodeHeader = "";
+            TableIPCodeLines = "";
+            bildirimListesiFormCode = "";
+            bildirimListesiHeader = "";
+            bildirimListesiLines = "";
+            readTableIPCode = "";
+            workType = "";
+            headerTableIdValue = 0;
+
+            secilenKanalTypeId = 0;
+            secilenSablonId = 0;
+            secilenMesajKodu = "";
+            secilenBildirimMetni = "";
+            secilenGonderimTypeId = 0;
+            //secilenGonderimTarihi = ;
+            secilenGonderimSaati = "";
+        }
+
+        public void ClearLines()
+        {
+            hedefTalepIdFName = "";
+            kaynakTalepIdFName = "";
+            hedefCariIdFName = "";
+            kaynakCariIdFName = "";
+            hedefTelefonNoFName = "";
+            kaynakTelefonNoFName = "";
+            hedefAliciAdiFName = "";
+            kaynakAliciAdiFName = "";
+
+            kaynakTalepIdValue = 0;
+            kaynakCariIdValue = 0;
+            kaynakTelefonNoValue = "";
+            kaynakAliciAdiValue = "";
+        }
+
+    }
+
+    public class vSMSSettings
+    {
+        public int Id { get; set; }
+        public int FirmId { get; set; }
+        public bool IsActive { get; set; }
+        public Int16 ServisTypeId { get; set; }
+        public string KullaniciAdi { get; set; }
+        public string Sifre { get; set; }
+        public string BayiiKodu { get; set; }
+        public string Origin { get; set; }
+    }
 
 
     // ------------------------------------------------------------------

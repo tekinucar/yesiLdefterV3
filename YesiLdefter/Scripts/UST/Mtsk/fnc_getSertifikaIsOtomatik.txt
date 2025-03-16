@@ -18,6 +18,8 @@ BEGIN
       (@sertifikaId = 9056) or -- CE Manuel işareti varsa
       (@sertifikaId = 9060) or -- D Manuel işareti varsa
       (@sertifikaId = 9070) or -- E Manuel işareti varsa
+      (@sertifikaId = 9110) or -- H Otomobil Manuel işareti varsa
+      (@sertifikaId = 9112) or -- H Motosiklet Manuel işareti varsa
       (@sertifikaId = 9201))   -- 100 Ceza Manuel işareti varsa
       set @response = 0
 
@@ -30,6 +32,8 @@ BEGIN
        (@sertifikaId = 9057) or -- CE Otomatik işareti varsa
        (@sertifikaId = 9061) or -- D Otomatik işareti varsa
        (@sertifikaId = 9071) or -- E Otomatik işareti varsa
+       (@sertifikaId = 9111) or -- H Otomobil Otomatik işareti varsa
+       (@sertifikaId = 9113) or -- H Motosiklet Otomatik işareti varsa
        (@sertifikaId = 9202))   -- 100 Ceza Otomatik işareti varsa
        set @response = 1
 

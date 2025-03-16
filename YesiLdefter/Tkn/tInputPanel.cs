@@ -406,7 +406,7 @@ namespace Tkn_InputPanel
                 {
                     if (tPanelControl.ToString() != "DevExpress.XtraBars.Navigation.NavigationPane")
                     {
-                        string FormName = tForm.Name.ToString();
+                        string FormName = tForm?.Name.ToString();
                         dv.tDataLayoutView_Create(row_Table, ds_Fields, ds_Data,
                             (DevExpress.XtraDataLayout.DataLayoutControl)cntrl, 1, FormName);
                         //((DevExpress.XtraDataLayout.DataLayoutControl)cntrl).EndInit();

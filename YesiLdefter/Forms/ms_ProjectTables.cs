@@ -230,6 +230,9 @@ namespace YesiLdefter
             string vHasATrigger = "";
 
             v.active_DB.runDBaseNo = v.dBaseNo.UstadCrm;
+
+            v.EXE_ScriptsPath = getPathName();
+
             /// tables
             if (pageIndex == 1)
             {
@@ -241,7 +244,7 @@ namespace YesiLdefter
                     vHasATrigger = dsTables.Tables[0].Rows[dNTables.Position][fHasATrigger].ToString();
 
                     fileName = vTableName;
-                    if (vSchemaName != "dbo")
+                    if (vSchemaName != "dbo" && vSchemaName != "")
                         fileName = vSchemaName + "_" + vTableName;
 
                     // parentTable olan tablolar başka bir tablonun Lkp tablolarıdır
@@ -275,6 +278,30 @@ namespace YesiLdefter
                 }
             }
         }
+
+        private string getPathName()
+        {
+            string pathName = "";
+
+            using (FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog())
+            {
+                // İletişim kutusunun başlığını ayarlayın.
+                folderBrowserDialog.Description = "Dosyaların bulunduğu klasör seçin";
+
+                // Varsayılan klasörü ayarlayabilirsiniz (opsiyonel).
+                folderBrowserDialog.SelectedPath = v.EXE_PATH;//  @"C:\";
+
+                // Kullanıcı bir klasör seçerse işlemi onaylar.
+                if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
+                {
+                    // Seçilen klasörü alın ve ekranda gösterin.
+                    pathName = folderBrowserDialog.SelectedPath;
+                }
+            }
+            return pathName;
+        }
+
+
 
         private void allFileReadDbWrite()
         {
@@ -332,6 +359,8 @@ namespace YesiLdefter
                 DialogResult cevap = t.mySoru(soru);
                 if (DialogResult.Yes == cevap)
                 {
+                    v.EXE_ScriptsPath = getPathName();
+
                     int length = ds.Tables[0].Rows.Count;
                     for (int i = 0; i < length; i++)
                     {
@@ -353,7 +382,7 @@ namespace YesiLdefter
                         if (vParentTable == "")
                         {
                             fileName = vEntityName;
-                            if (vSchemaName != "dbo")
+                            if (vSchemaName != "dbo" && vSchemaName != "") 
                                 fileName = vSchemaName + "_" + vEntityName;
 
                             tFileReadAndWrite(ds, dN, fieldSqlScript, fileName);
@@ -1250,7 +1279,7 @@ namespace YesiLdefter
             int ftype = 0;
             int fmax_length = 0;
 
-            //
+            //int aaa = 0;
 
             int colCount = dsSource.Tables[0].Columns.Count;
             for (int i = 0; i < colCount; i++)
@@ -1266,38 +1295,10 @@ namespace YesiLdefter
                     type = dsSource.Tables[0].Rows[rowNo][fName].GetType().ToString();
                     value = dsSource.Tables[0].Rows[rowNo][fName].ToString();
 
-                    ftype = Convert.ToInt32(v.ds_MsTableFields.Tables[tableName].Rows[i]["user_type_id"].ToString());
-                    fmax_length = Convert.ToInt32(v.ds_MsTableFields.Tables[tableName].Rows[i]["max_length"].ToString());
-
-                    // adres verisinde görülebiliyor
-                    if (value.IndexOf("option") > -1) 
-                        value = "";
-                    //if (value.IndexOf("<option value=\"") > -1)
-                    //    value = value.Replace("<option value=\"", "");
-                    if (value.IndexOf("\">") > -1)
-                        value = value.Replace("\">", "");
-
-                    if (value.IndexOf("\"") > -1)
-                        value = value.Replace("\"", "");
-
-                    if (value.IndexOf("'") > -1)
-                        value = value.Replace("'", " ");
-
-                    //* text = (char)175, (varchar)167, (ntext)99, (text)35, (nchar)239, (nvarchar)231, (uniqueidentifier)36 //39 
-                    if ((ftype == 175) | (ftype == 167) | (ftype == 99) | (ftype == 35) | (ftype == 239) | (ftype == 231) | (ftype == 36))
-                    {
-                        // varchar(max), nvarchar(max) olunca -1 geliyor
-                        if (fmax_length == -1) fmax_length = 128000;
-                        if (ftype == 36) // GUID / uniqueidentifier
-                            fmax_length = 128000;
-                        if (ftype == 231) // nVarchar ise
-                            fmax_length = fmax_length / 2;
-
-                        if (value.Length > fmax_length)
-                            value = value.Substring(0, fmax_length - 1);
-
-                        value = t.Str_Check(value);
-                    }
+                    //if (type == "System.DateTime")
+                    //    aaa = 1;
+                    
+                    value = preparingValue(value, tableName, i);
 
                     if (type == "System.Int16") values += " , " + value;
                     if (type == "System.Int32") values += " , " + value;
@@ -1330,12 +1331,50 @@ namespace YesiLdefter
                 //System.DBNull
                 //System.Double
                 //System.Byte[]
-
             }
             values = values.Remove(0, 2);
             return values;
         }
 
+        private string preparingValue(string value, string tableName, int i)
+        {
+            int ftype = Convert.ToInt32(v.ds_MsTableFields.Tables[tableName].Rows[i]["user_type_id"].ToString());
+            int fmax_length = Convert.ToInt32(v.ds_MsTableFields.Tables[tableName].Rows[i]["max_length"].ToString());
+
+            // adres verisinde görülebiliyor
+            //if (value.IndexOf("<option value=\"") > -1)
+            //    value = value.Replace("<option value=\"", "");
+
+            if (value.IndexOf("option") > -1)
+                value = "";
+
+            if (value.IndexOf("\">") > -1)
+                value = value.Replace("\">", "");
+
+            if (value.IndexOf("\"") > -1)
+                value = value.Replace("\"", "");
+
+            if (value.IndexOf("'") > -1)
+                value = value.Replace("'", " ");
+
+            //* text = (char)175, (varchar)167, (ntext)99, (text)35, (nchar)239, (nvarchar)231, (uniqueidentifier)36 //39 
+            if ((ftype == 175) | (ftype == 167) | (ftype == 99) | (ftype == 35) | (ftype == 239) | (ftype == 231) | (ftype == 36))
+            {
+                // varchar(max), nvarchar(max) olunca -1 geliyor
+                if (fmax_length == -1) fmax_length = 128000;
+                if (ftype == 36) // GUID / uniqueidentifier
+                    fmax_length = 128000;
+                if (ftype == 231) // nVarchar ise
+                    fmax_length = fmax_length / 2;
+
+                if (value.Length > fmax_length)
+                    value = value.Substring(0, fmax_length);
+
+                value = t.Str_Check(value);
+            }
+
+            return value;
+        }
         private string preparingEditValues(DataSet dsSource, int rowNo, string alias, string tableName, string editWhereSql)
         {
             string type = "";
@@ -1346,8 +1385,8 @@ namespace YesiLdefter
             string editWhere = editWhereSql;
             int x = 0;
             int colCount = dsSource.Tables[0].Columns.Count;
-            int ftype = 0;
-            int fmax_length = 0;
+            //int ftype = 0;
+            //int fmax_length = 0;
 
             for (int i = 0; i < colCount; i++)
             {
@@ -1356,36 +1395,7 @@ namespace YesiLdefter
                 fieldName = dsSource.Tables[0].Columns[i].ColumnName;
                 //fieldName = fieldsNameList[i]; ikiside olur
 
-                ftype = Convert.ToInt32(v.ds_MsTableFields.Tables[tableName].Rows[i]["user_type_id"].ToString());
-                fmax_length = Convert.ToInt32(v.ds_MsTableFields.Tables[tableName].Rows[i]["max_length"].ToString());
-
-                // adres verisinde görülebiliyor
-                if (value.IndexOf("<option value=\"") > -1)
-                    value = value.Replace("<option value=\"", "");
-                if (value.IndexOf("\">") > -1)
-                    value = value.Replace("\">", "");
-
-                if (value.IndexOf("\"") > -1)
-                    value = value.Replace("\"", "");
-
-                if (value.IndexOf("'") > -1)
-                    value = value.Replace("'", " ");
-
-                //* text = (char)175, (varchar)167, (ntext)99, (text)35, (nchar)239, (nvarchar)231, (uniqueidentifier)36 //39 
-                if ((ftype == 175) | (ftype == 167) | (ftype == 99) | (ftype == 35) | (ftype == 239) | (ftype == 231) | (ftype == 36))
-                {
-                    // varchar(max), nvarchar(max) olunca -1 geliyor
-                    if (fmax_length == -1) fmax_length = 128000;
-                    if (ftype == 36) // GUID / uniqueidentifier
-                        fmax_length = 128000;
-                    if (ftype == 231) // nVarchar ise
-                        fmax_length = fmax_length / 2;
-
-                    if (value.Length > fmax_length)
-                        value = value.Substring(0, fmax_length - 1);
-
-                    value = t.Str_Check(value);
-                }
+                value = preparingValue(value, tableName, i);
 
                 // Where koşulunda var mı?
                 x = editWhere.IndexOf(":" + fieldName + "Value");
