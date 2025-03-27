@@ -66,7 +66,7 @@
             this.btn_WebCamResimCek = new DevExpress.XtraBars.BarButtonItem();
             this.btn_DosyadanAl = new DevExpress.XtraBars.BarButtonItem();
             this.btn_DosyayaKaydet = new DevExpress.XtraBars.BarButtonItem();
-            //this.btn_DatabaseKaydet = new DevExpress.XtraBars.BarButtonItem();
+            this.btn_DatabaseKaydet = new DevExpress.XtraBars.BarButtonItem();
             this.btn_FarkliKaydet = new DevExpress.XtraBars.BarButtonItem();
             this.btn_ResimSil = new DevExpress.XtraBars.BarButtonItem();
             this.barStaticItem1 = new DevExpress.XtraBars.BarStaticItem();
@@ -250,7 +250,7 @@
             this.btn_WebCamResimCek,
             this.btn_DosyadanAl,
             this.btn_DosyayaKaydet,
-            btn_DatabaseKaydet,
+            this.btn_DatabaseKaydet,
             this.btn_FarkliKaydet,
             this.btn_ResimSil,
             this.barStaticItem1,
@@ -416,12 +416,12 @@
             // 
             // btn_DatabaseKaydet
             // 
-            btn_DatabaseKaydet.Caption = "Veri Tabanına Kaydet";
-            btn_DatabaseKaydet.Id = 7;
-            btn_DatabaseKaydet.Name = "btn_DatabaseKaydet";
-            btn_DatabaseKaydet.RibbonStyle = DevExpress.XtraBars.Ribbon.RibbonItemStyles.Large;
-            btn_DatabaseKaydet.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btn_DatabaseKaydet_ItemClick);
-            btn_DatabaseKaydet.Visibility = DevExpress.XtraBars.BarItemVisibility.Always;
+            this.btn_DatabaseKaydet.Caption = "Veri Tabanına Kaydet";
+            this.btn_DatabaseKaydet.Id = 7;
+            this.btn_DatabaseKaydet.Name = "btn_DatabaseKaydet";
+            this.btn_DatabaseKaydet.RibbonStyle = DevExpress.XtraBars.Ribbon.RibbonItemStyles.Large;
+            this.btn_DatabaseKaydet.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btn_DatabaseKaydet_ItemClick);
+            //this.btn_DatabaseKaydet.Visibility = DevExpress.XtraBars.BarItemVisibility.Always;
             // 
             // btn_FarkliKaydet
             // 
@@ -998,7 +998,7 @@
             this.ribbonPageGroup1.ItemLinks.Add(this.btn_WebCamdenAl);
             this.ribbonPageGroup1.ItemLinks.Add(this.btn_WebCamResimCek);
             this.ribbonPageGroup1.ItemLinks.Add(this.btn_DosyadanAl,true);
-            this.ribbonPageGroup1.ItemLinks.Add(btn_DatabaseKaydet,true);
+            this.ribbonPageGroup1.ItemLinks.Add(this.btn_DatabaseKaydet,true);
             this.ribbonPageGroup1.ItemLinks.Add(this.btn_DosyayaKaydet, true);
             this.ribbonPageGroup1.ItemLinks.Add(this.btn_FarkliKaydet);
             this.ribbonPageGroup1.ItemLinks.Add(this.btn_ResimSil);
@@ -1601,7 +1601,7 @@
         private DevExpress.XtraBars.BarButtonItem btn_WebCamResimCek;
         private DevExpress.XtraBars.BarButtonItem btn_DosyadanAl;
         private DevExpress.XtraBars.BarButtonItem btn_DosyayaKaydet;
-        //private DevExpress.XtraBars.BarButtonItem btn_DatabaseKaydet;
+        private DevExpress.XtraBars.BarButtonItem btn_DatabaseKaydet;
         private DevExpress.XtraBars.BarButtonItem btn_FarkliKaydet;
         private DevExpress.XtraBars.BarButtonItem btn_ResimSil;
         private DevExpress.XtraBars.BarStaticItem barStaticItem1;

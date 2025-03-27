@@ -11,12 +11,13 @@ begin transaction
    TcNo                  Varchar(11)   null,
    DonemTipiId           Int           null,
    VeriKaynakId          Int           null, /* Veri transferi edildiği tablodaki Id . Sorun olduğunda bilginin nereden geldiğine referans olsun */
-
-   RaporReferansNo             nVarchar(50)   null,
+   
+   IsRaporReferansNo           Bit            null, /* SaglikRaporuSayisi 15 karekteri geçince 1, geçmezse 0 oluyor */
+   RaporReferansNo             nVarchar(50)   null, /* ekranlarda yok */
    SaglikRaprunuVerenKurum     nVarchar(200)  null,
    SaglikRaporuSonuc           nVarchar(30)   null,
    SaglikRaporuTarihi          Date           null,
-   SaglikRaporuSayisi          nVarchar(30)   null,
+   SaglikRaporuSayisi          nVarchar(30)   null, /* ekranda görünen bu, esasen 20 karekterden oluşunca referans no oluyor, onun yerine bunun sadece son 6 hanesini yazarlarsa no rapor no oluyor */
    OzurDurumuTipiId            SmallInt       null,
    OkutmanTalebi               Bit            null,
    TercumanTalebi              Bit            null,
@@ -62,6 +63,8 @@ AS BEGIN
     declare @OkutmanTalebi bit
     declare @TercumanTalebi bit
     declare @YabanciDilTipiId smallInt
+    declare @IsRaporReferansNo bit
+    declare @SaglikRaporuSayisi varchar(30)
 
     WHILE @@FETCH_STATUS = 0
     BEGIN
@@ -74,14 +77,27 @@ AS BEGIN
            ,@OkutmanTalebi = isnull(ins.OkutmanTalebi,0)
            ,@TercumanTalebi = isnull(ins.TercumanTalebi,0)
            ,@YabanciDilTipiId = isnull(ins.YabanciDilTipiId,0)
+           ,@IsRaporReferansNo = isnull(ins.IsRaporReferansNo,0)
+           ,@SaglikRaporuSayisi = isnull(ins.SaglikRaporuSayisi,'')
+
 		from inserted ins
     	where ins.Id = @saglikId
 		
+        if (LEN(@SaglikRaporuSayisi) > 15)
+            set @IsRaporReferansNo = 1
+        else set @IsRaporReferansNo = 0
+
+        Update dbo.MtskAdaySaglik set
+               IsRaporReferansNo = @IsRaporReferansNo
+        From dbo.MtskAdaySaglik as a
+        Where a.Id = @saglikId
+
         if (@VeriKaynakId > 0 and (@TalepId = 0 or @AdayId = 0))
         begin
             Update dbo.MtskAdaySaglik set
                 TalepId = t.Id  
                ,AdayId  = t.AdayId 
+               ,IsRaporReferansNo = @IsRaporReferansNo
             From dbo.MtskAdaySaglik as a,
                  dbo.MtskAdayTalep as t
             Where a.VeriKaynakId = t.VeriKaynakId				 
@@ -91,7 +107,6 @@ AS BEGIN
 			From dbo.MtskAdayTalep 
 			Where VeriKaynakId = @VeriKaynakId
         end
-
 		
         if (@DbUpdatesIsActive = 0)
         begin 
@@ -154,7 +169,6 @@ END -- create trigger
 
 /*CreateTriggerEnd*/
 
-ALTER TABLE dbo.MtskAdaySaglik ENABLE TRIGGER trg_MtskAdaySaglik
 
 
 /*CreateLkpTable*/

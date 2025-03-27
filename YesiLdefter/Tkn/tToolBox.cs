@@ -9455,6 +9455,18 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                     if (ret != null)
                         break;
                 }
+                //if (c.GetType().ToString() == "DevExpress.XtraEditors.SimpleButton")
+                //{
+                //    string stop_ = "beklebakalım";
+                //    string stop2_ = "";
+                //    string accessibleName_ = ((DevExpress.XtraEditors.SimpleButton)c).AccessibleName;
+
+                //    if (accessibleName_ == AccessibleName && Name == "simpleButton_ek5")
+                //    {
+                //        if (c.Name == "simpleButton_ek5")
+                //             stop2_ = "beklebakalım2";
+                //    }
+                //}
                 if (Control_(c, Name, AccessibleName, ControlType, i))
                 {
                     ret = c;
@@ -9693,7 +9705,8 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 if (c.Name == Name) sonuc = true;
             if (i == 2) if (c.AccessibleName == AccessibleName) sonuc = true;
             if (i == 3) if (controls == true) sonuc = true;
-            if (i == 4) if ((c.Name == Name) && (c.AccessibleName == AccessibleName)) sonuc = true;
+            if (i == 4) 
+                if ((c.Name == Name) && (c.AccessibleName == AccessibleName)) sonuc = true;
             if (i == 5)
                 if ((c.AccessibleName == AccessibleName) && (controls == true)) sonuc = true;
             if (i == 6) if ((c.Name == Name) && (controls == true)) sonuc = true;
@@ -10378,7 +10391,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
         public Image Find_Glyph(string glyphName)
         {
-            if (IsNotNull(v.ds_Icons) == false)
+            if ((IsNotNull(v.ds_Icons) == false) || (IsNotNull(glyphName) == false))
                 return null;
 
             //ImageName
@@ -10421,13 +10434,15 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 }
             }
 
-            byte[] img32 = (byte[])v.ds_Icons.Tables[0].Rows[i3]["GLYPH"];
-            if ((img32 != null) && (i3 > -1))
+            if (i3 > -1)
             {
-                MemoryStream ms = new MemoryStream(img32);
-                return Image.FromStream(ms);
+                byte[] img32 = (byte[])v.ds_Icons.Tables[0].Rows[i3]["GLYPH"];
+                if ((img32 != null) && (i3 > -1))
+                {
+                    MemoryStream ms = new MemoryStream(img32);
+                    return Image.FromStream(ms);
+                }
             }
-
             return null;
         }
 

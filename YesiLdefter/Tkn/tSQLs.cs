@@ -1057,7 +1057,7 @@ Select distinct
             from MS_GLYPH [3S_MSGLY]
             
             where 0 = 0
-            and   [3S_MSGLY].MAIN_GROUP_ID <> 20
+            --and   [3S_MSGLY].MAIN_GROUP_ID <> 20
             and   isnull([3S_MSGLY].GSIZE,'') <> 'DIR'
             order by [3S_MSGLY].[MAIN_GROUP_ID]  
             ";
@@ -2278,8 +2278,8 @@ INSERT INTO [dbo].[SYS_UPDATES]
             t.MyProperties_Set(ref myProp, "AutoInsert", AutoInsert);
             t.MyProperties_Set(ref myProp, "IsUseNewRefId", IsUseNewRefId.ToString());
             t.MyProperties_Set(ref myProp, "OrderBy", OrderBy);
-            t.MyProperties_Set(ref myProp, "JoinFields", join_Fields); // "LkpFields", Lkp_Fields);
-            t.MyProperties_Set(ref myProp, "JoinTables", join_Tables); // "LkpTables", Lkp_Tables);
+            //t.MyProperties_Set(ref myProp, "JoinFields", join_Fields); // "LkpFields", Lkp_Fields);
+            //t.MyProperties_Set(ref myProp, "JoinTables", join_Tables); // "LkpTables", Lkp_Tables);
             t.MyProperties_Set(ref myProp, "KeyFName", KeyFName);
             t.MyProperties_Set(ref myProp, "KeyIdValue", "-1");
             t.MyProperties_Set(ref myProp, "Kisitlama", Kisitlama);

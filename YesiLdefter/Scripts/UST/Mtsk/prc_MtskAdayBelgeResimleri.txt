@@ -32,12 +32,13 @@ AS BEGIN
   , 394 as LkpWidth
   , 512 as LkpHeight
   , 400 as LkpDpi
+  , 'jpg' as LkpFormat
 
   From MtskAday
   Where Id = @AdayId
 
   Union All
-  /*
+  
   Select 
     Id 
   , @TamAdiSoyadi as TamAdiSoyadi
@@ -47,18 +48,20 @@ AS BEGIN
   , 'MtskAdayTalep' as LkpTableName
   , 'BasvuruResim' as LkpFieldName
   , 'BasvuruResimSmall' as LkpSmallFieldName
+  , 'Id' as LkpMasterIdValue
   , 'Id' as LkpIdFieldName
   , BasvuruResim as LkpImage
   , BasvuruResimSmall as LkpSmallImage
-  , 800 as LkpWidth
-  , 600 as LkpHeight
+  , 350 as LkpWidth
+  , 450 as LkpHeight
   , 96  as LkpDpi 
+  , 'png' as LkpFormat
   
   From MtskAdayTalep
   Where Id = @TalepId
 
   Union All
-  */
+  
   Select 
     TalepId as Id
   , @TamAdiSoyadi as TamAdiSoyadi
@@ -75,6 +78,7 @@ AS BEGIN
   , 0 as LkpWidth
   , 0 as LkpHeight
   , 96  as LkpDpi 
+  , 'jpg' as LkpFormat
   
   From MtskAdayOgrenim
   Where TalepId = @TalepId
@@ -97,6 +101,7 @@ AS BEGIN
   , 0 as LkpWidth
   , 0 as LkpHeight
   , 96  as LkpDpi  
+  , 'jpg' as LkpFormat
   
   From MtskAdaySaglik
   Where TalepId = @TalepId
@@ -119,6 +124,7 @@ AS BEGIN
   , 0 as LkpWidth
   , 0 as LkpHeight
   , 96  as LkpDpi  
+  , 'jpg' as LkpFormat
   
   From MtskAdayAdliSicil
   Where TalepId = @TalepId
@@ -141,6 +147,7 @@ AS BEGIN
   , 472 as LkpWidth
   , 472 as LkpHeight
   , 400 as LkpDpi  
+  , 'jpg' as LkpFormat
   
   From MtskAdayImza
   Where TalepId = @TalepId
@@ -163,6 +170,7 @@ AS BEGIN
   , 0 as LkpWidth
   , 0 as LkpHeight
   , 96  as LkpDpi  
+  , 'jpg' as LkpFormat
   
   From MtskAdaySozlesme
   Where TalepId = @TalepId
@@ -186,10 +194,10 @@ AS BEGIN
   , 0 as LkpWidth
   , 0 as LkpHeight
   , 96  as LkpDpi  
+  , 'jpg' as LkpFormat
   
   From MtskAdaySozlesme
   Where TalepId = @TalepId
-
 
 END -- procedure
 

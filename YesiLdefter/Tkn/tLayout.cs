@@ -1699,7 +1699,9 @@ namespace Tkn_Layout
             int DockType = 0;
             int FrontBack = 0;
 
+            string Prop_View = string.Empty;
             string CmpName = string.Empty;
+            string tabHeaderShow = "FALSE";
             string layout_code = string.Empty;
             string ustItemType = string.Empty;
             string ustHesapRefId = string.Empty;
@@ -1716,7 +1718,19 @@ namespace Tkn_Layout
 
             FrontBack = t.myInt32(row["CMP_FRONT_BACK"].ToString());
             DockType = t.Set(row["CMP_DOCK"].ToString(), v.dock_Fill.ToString(), (int)0);
+            Prop_View = t.Set(row["PROP_VIEWS"].ToString(), "", "");
             CmpName = t.Set(row["CMP_NAME"].ToString(), "", "");
+                         
+            if (t.IsNotNull(Prop_View))
+            {
+                try
+                {
+                    tabHeaderShow = t.Set(t.Find_Properties_Value(Prop_View, "TABHEADER"), "FALSE", "");
+                }
+                catch (Exception)
+                {
+                }
+            }
 
             //
             // xtraTabControl1
@@ -1764,6 +1778,8 @@ namespace Tkn_Layout
             xtraTabControl1.Size = new System.Drawing.Size(v.Screen_Width, v.Screen_Height); //300, 300);
             xtraTabControl1.TabIndex = pos;
             xtraTabControl1.HeaderLocation = DevExpress.XtraTab.TabHeaderLocation.Left;
+            if (tabHeaderShow == "FALSE")
+                xtraTabControl1.ShowTabHeader = DevExpress.Utils.DefaultBoolean.False;
 
             //xtraTabControl1.TabPages.AddRange(new DevExpress.XtraTab.XtraTabPage[] {
             //xtraTabPage1,
@@ -1860,7 +1876,7 @@ namespace Tkn_Layout
             xtraTabPage1.Size = new System.Drawing.Size(v.Screen_Width, v.Screen_Height); //400, 200);
             xtraTabPage1.Padding = new System.Windows.Forms.Padding(v.Padding4);
             //xtraTabPage1.BackColor = System.Drawing.Color.BlueViolet;
-
+            
             //
             // InputPanel Create
             //

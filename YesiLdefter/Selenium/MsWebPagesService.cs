@@ -25,7 +25,6 @@ namespace YesiLdefter.Selenium
         tToolBox t = new tToolBox();
         tSQLs sql = new tSQLs();
 
-        //public bool readLoginPageControl(ref DataSet ds_LoginPageNodes, string aktifUrl, ref string loginPageUrl, ref string errorPageUrl)
         public bool readLoginPageControl(ref DataSet ds_LoginPageNodes, webForm f)
         {
             if (f.aktifUrl == "") return false;
@@ -207,34 +206,34 @@ namespace YesiLdefter.Selenium
 
         }
 
-        public void nodeValuesPreparing(Form tForm, List<MsWebNode> msWebNodes,  MsWebNode item, ref webNodeValue wnv, List<MsWebScrapingDbFields> msWebScrapingDbFields)
+        public void preparingNodeValues(MsWebNode item, ref webNodeValue wnv)
         {
-            //wnv.pageCode = aktifPageCode;
-            wnv.nodeId = item.NodeId;// Convert.ToInt32(row["NodeId"].ToString());
-            wnv.TagName = item.TagName;// row["TagName"].ToString();
-            wnv.AttId = item.AttId;// row["AttId"].ToString();
-            wnv.AttName = item.AttName;// row["AttName"].ToString();
-            wnv.AttClass = item.AttClass;// row["AttClass"].ToString();
-            wnv.AttType = item.AttType;// row["AttType"].ToString();
-            wnv.AttRole = item.AttRole;// row["AttRole"].ToString();
-            wnv.AttHRef = item.AttHRef;// row["AttHRef"].ToString();
-            wnv.AttSrc = item.AttSrc;// row["AttSrc"].ToString();
-            wnv.XPath = item.XPath;// row["XPath"].ToString();
-            wnv.InnerText = item.InnerText;// row["InnerText"].ToString();
-            wnv.OuterText = item.OuterText; // row["OuterText"].ToString();
-            wnv.InjectType = (v.tWebInjectType)item.InjectType;   // Convert.ToInt16(row["InjectType"].ToString());
-            wnv.InvokeMember = (v.tWebInvokeMember)item.InvokeMember;  //Convert.ToInt16(row["InvokeMember"].ToString());
-            wnv.DontSave = item.DontSave;// Convert.ToBoolean(row["DontSave"].ToString());
-            wnv.GetSave = item.GetSave;// Convert.ToBoolean(row["GetSave"].ToString());
-            wnv.writeValue = item.TestValue;// row["TestValue"].ToString();
-            wnv.EventsType = (v.tWebEventsType)item.EventsType;   //t.myInt16(row["EventsType"].ToString());
+            wnv.nodeId = item.NodeId;
+            wnv.TagName = item.TagName;
+            wnv.AttId = item.AttId;
+            wnv.AttName = item.AttName;
+            wnv.AttClass = item.AttClass;
+            wnv.AttType = item.AttType;
+            wnv.AttRole = item.AttRole;
+            wnv.AttHRef = item.AttHRef;
+            wnv.AttSrc = item.AttSrc;
+            wnv.XPath = item.XPath;
+            wnv.InnerText = item.InnerText;
+            wnv.OuterText = item.OuterText;
+            wnv.InjectType = (v.tWebInjectType)item.InjectType;
+            wnv.InvokeMember = (v.tWebInvokeMember)item.InvokeMember;
+            wnv.DontSave = item.DontSave;
+            wnv.GetSave = item.GetSave;
+            wnv.writeValue = item.TestValue;
+            wnv.EventsType = (v.tWebEventsType)item.EventsType;
             wnv.KrtOperandType = item.KrtOperandType;
-            wnv.CheckValue = item.CheckValue;
+            wnv.CheckOperandValue = item.CheckValue;
             wnv.CheckNodeId = item.CheckNodeId;
 
             if (wnv.writeValue == "BUGUN_YILAY")
+            {
                 wnv.writeValue = v.BUGUN_YILAY.ToString();
-
+            }
             if (wnv.writeValue == "MEBBIS_KODU")
             {
                 if (v.tUser.MebbisCode != "")
@@ -255,20 +254,14 @@ namespace YesiLdefter.Selenium
             {
                 wnv.writeValue = v.tMainFirm.FirmGIBeArsivFaturaPass;
             }
-
-            /// Başka bir NodeId nin database den gelen valuesini okuyacak
-            /// 
-            if (wnv.CheckNodeId > 0)
-            {
-                wnv.writeValue = getCheckNodeIdValue(tForm, msWebNodes, wnv.CheckNodeId, msWebScrapingDbFields);
-            }
         }
 
-        private string getCheckNodeIdValue(Form tForm, List<MsWebNode> msWebNodes, int checkNodeId, List<MsWebScrapingDbFields> msWebScrapingDbFields)
+        public async Task<string> getCheckNodeIdValue(List<MsWebNode> msWebNodes, int checkNodeId,  webForm f)
         {
             /// List<MsWebNode> msWebNodes  all Node list
             ///
             string value = "";
+            MsScrapingService msScraping = new MsScrapingService();
 
             foreach (MsWebNode item in msWebNodes)
             {
@@ -277,9 +270,21 @@ namespace YesiLdefter.Selenium
                 {
                     webNodeValue wnv = new webNodeValue();
 
-                    transferFromDatabaseToWeb(tForm, wnv, msWebScrapingDbFields);
+                    preparingNodeValues(item, ref wnv);
 
-                    value = wnv.writeValue;
+                    string AttType = wnv.AttType;
+                    string AttRole = wnv.AttRole;
+                    string AttHRef = wnv.AttHRef;
+                    string TagName = wnv.TagName.ToLower();
+                    string idName = "";
+                    if (wnv.AttId != "") idName = wnv.AttId;
+                    if ((wnv.AttId == "") && (wnv.AttName != "")) idName = wnv.AttName;
+
+                    if (f.browserType == v.tBrowserType.Selenium)
+                        await msScraping.getElementValues(f.wbSel, wnv, TagName, AttType, AttRole, idName, f);
+
+                    value = wnv.readValue;
+                    break;
                 }
             }
 
@@ -435,7 +440,6 @@ namespace YesiLdefter.Selenium
                 if (t.IsNotNull(ds_DbaseTable))
                     msPagesService.dbButtonClick(this, ds_DbaseTable.DataSetName, v.tButtonType.btKaydet);
             }
-
 
             */
         }
@@ -1553,7 +1557,15 @@ namespace YesiLdefter.Selenium
         {
             v.Kullaniciya_Mesaj_Var = workPageNodes.aktifPageCode;
 
-            if (f.autoSubmit)
+            bool IsMebbis = false;
+
+            if ((workPageNodes.aktifPageCode.IndexOf("MTSK") > -1) ||
+                (workPageNodes.aktifPageCode.IndexOf("SRC") > -1) ||
+                (workPageNodes.aktifPageCode.IndexOf("ISMAK") > -1))
+                IsMebbis = true;
+
+            //if (f.autoSubmit)
+            if (IsMebbis)
             {
                 if (//(workPageNodes.aktifPageCode != "MTSKADAYRESIM") &&
                     (workPageNodes.aktifPageCode != "MTSKADAYSOZLESME") &&
@@ -1580,7 +1592,11 @@ namespace YesiLdefter.Selenium
                         f.btn_FullPost1.Text = "Başvuru resmini gönder";
                     else f.btn_FullPost1.Text = f.btn_FullPost1.Tag.ToString();
                 }
-            
+
+
+                if (f.btn_FullSave != null)
+                    f.btn_FullSave.Visible = (f.autoSubmit == false);
+
             }
             else
             {
@@ -1831,7 +1847,20 @@ namespace YesiLdefter.Selenium
             f.analysisNodeId++;
         }
 
+        public bool driverControl(webForm f)
+        {
+            bool onay = true;
 
+            if (f.browserType == v.tBrowserType.Selenium)
+                if (f.wbSel == null) onay = false;
+
+            if (onay == false)
+            {
+                t.FlyoutMessage(f.tForm, "Uyarı", "Önce ana sayfaya giriş yapmanız gerekiyor...");
+                f.anErrorOccurred = true;
+            }
+            return onay;
+        }
 
     }
 }

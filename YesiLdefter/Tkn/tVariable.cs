@@ -1984,8 +1984,9 @@ namespace Tkn_Variable
         public bool GetSave { get; set; }
 
         public string KrtOperandType { get; set; }
-        public string CheckValue { get; set; }
+        public string CheckOperandValue { get; set; }
         public int CheckNodeId { get; set; }
+        public string CheckReadValue { get; set; }
 
         public DataSet ds { get; set; }
         public DataNavigator dN { get; set; }
@@ -2025,7 +2026,7 @@ namespace Tkn_Variable
             DontSave = false;
             GetSave = false;
             KrtOperandType = "";
-            CheckValue = "";
+            CheckOperandValue = "";
             CheckNodeId = 0;
 
             ds = null; // o anda işlem yapılan dataset 
@@ -2985,11 +2986,13 @@ namespace Tkn_Variable
             SPLIT = new SPLIT();
             EDITPANEL = new EDITPANEL();
             TLP = new TLP();
+            TABCONTROL = new TABCONTROL();
         }
         public DOCKPANEL DOCKPANEL { get; set; }
         public SPLIT SPLIT { get; set; }
         public EDITPANEL EDITPANEL { get; set; }
         public TLP TLP { get; set; }
+        public TABCONTROL TABCONTROL { get; set; }
     }
 
     public class PROP_VIEWS_GROUPS
@@ -3051,6 +3054,12 @@ namespace Tkn_Variable
         public string TLPR_SIZETYPE { get; set; }
         public string TLPR_SIZEVALUE { get; set; }
     }
+
+    public class TABCONTROL
+    {
+        public string TABHEADER { get; set; }
+    }
+
 
     #endregion
 

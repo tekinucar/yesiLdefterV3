@@ -15,6 +15,7 @@ using Tkn_TablesRead;
 using Tkn_ToolBox;
 using Tkn_Variable;
 using Tkn_Report;
+using DevExpress.XtraEditors;
 
 namespace Tkn_Menu
 {
@@ -1345,7 +1346,8 @@ namespace Tkn_Menu
 
             int itemCount = ds_Items.Tables[0].Rows.Count;
             int groupCount = mControl.Groups.Count;
-
+            int fontColor = 0;
+            int backColor = 0;
             int itemType = 0;
 
             string lineNo = string.Empty;
@@ -1354,6 +1356,7 @@ namespace Tkn_Menu
             string itemCaption = string.Empty;
             string shortcut_keys = string.Empty;
             string Prop_Navigator = string.Empty;
+            string glName = string.Empty;
 
             Int16 clickEvents = 0;
 
@@ -1399,6 +1402,10 @@ namespace Tkn_Menu
                 clickEvents = t.myInt16(ds_Items.Tables[0].Rows[i]["CLICK_EVENTS"].ToString());
                 Prop_Navigator = t.Set(ds_Items.Tables[0].Rows[i]["PROP_NAVIGATOR"].ToString(), "", "");
 
+                fontColor = t.Set(ds_Items.Tables[0].Rows[i]["CMP_FONT_COLOR"].ToString(), "", (int)0);
+                backColor = t.Set(ds_Items.Tables[0].Rows[i]["CMP_BACK_COLOR"].ToString(), "", (int)0);
+                glName = t.Set(ds_Items.Tables[0].Rows[i]["GYLPH_32"].ToString(), "", "");
+                
                 UstHesapRow = null;
                 ustHesapRefId = string.Empty;
                 ustHesapItemName = string.Empty;
@@ -1484,9 +1491,28 @@ namespace Tkn_Menu
                     tItem.ItemClick += new DevExpress.XtraEditors.TileItemClickEventHandler(evm.tTileItem_ItemClick);
 
                     tItem.Appearance.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-                    //tItem.Appearance.ForeColor = System.Drawing.Color.Crimson;
                     tItem.Appearance.Options.UseFont = true;
-                    //tItem.Appearance.Options.UseForeColor = true;
+
+                    if (backColor != 0)
+                    {
+                        tItem.Appearance.BackColor = Color.FromArgb(backColor);
+                        tItem.Appearance.Options.UseBackColor = true;
+                    }
+                    if (fontColor != 0)
+                    {
+                        tItem.Appearance.ForeColor = Color.FromArgb(fontColor);
+                        tItem.Appearance.Options.UseForeColor = true;
+                    }
+                    if (glName != "")
+                    {
+
+                        tileItemElement.ImageOptions.ImageAlignment = TileItemContentAlignment.BottomCenter;
+                        //tileItemElement.ImageOptions.ImageToTextAlignment = TileControlImageToTextAlignment.Bottom;
+                        tileItemElement.ImageOptions.Image = t.Find_Glyph(glName);
+                        //tileItemElement.ImageOptions.I
+                        //SvgImage = global::WindowsFormsApp1.Properties.Resources.bo_attention;
+                    }
+
 
                     if (t.IsNotNull(shortcut_keys))
                     {
@@ -2109,27 +2135,27 @@ namespace Tkn_Menu
             //
             if (dontReport == false)
             {
-                NavButton tItemReport = new DevExpress.XtraBars.Navigation.NavButton();
-                tItemReport.Appearance.Name = formName;
-                tItemReport.Name = "item_FREPORTS";
-                tItemReport.Caption = "Raporlar";
-                //tItemReport.Enabled = tenabled;
-                //tItemReport.Visible = tvisible;
-                //tItemReport.Tag = Prop_Navigator;
-                tItemReport.Alignment = NavButtonAlignment.Right;
-                tItemReport.ElementClick += new DevExpress.XtraBars.Navigation.NavElementClickEventHandler(evm.tNavButton_ElementClick);
-                tItemReport.Glyph = t.Find_Glyph("40_408_Delete_32x32"); //("40_401_Close_32x32");// ("40_418_Up_32x32");//("40_401_Close_32x32");
-                                                                         //tItemReport.Appearance.BackColor = v.colorNew;
-                tItemReport.AppearanceHovered.BackColor = v.colorExit;
-                //tItemEDI.AppearanceSelected.BackColor = v.colorSave;
-                //tItemEDI.Appearance.Options.UseBackColor = true;
-                tItemReport.AppearanceHovered.Options.UseBackColor = true;
-                tItemReport.AppearanceSelected.Options.UseBackColor = true;
+                //NavButton tItemReport = new DevExpress.XtraBars.Navigation.NavButton();
+                //tItemReport.Appearance.Name = formName;
+                //tItemReport.Name = "item_FREPORTS";
+                //tItemReport.Caption = "Raporlar";
+                ////tItemReport.Enabled = tenabled;
+                ////tItemReport.Visible = tvisible;
+                ////tItemReport.Tag = Prop_Navigator;
+                //tItemReport.Alignment = NavButtonAlignment.Right;
+                //tItemReport.ElementClick += new DevExpress.XtraBars.Navigation.NavElementClickEventHandler(evm.tNavButton_ElementClick);
+                //tItemReport.Glyph = t.Find_Glyph("40_408_Delete_32x32"); //("40_401_Close_32x32");// ("40_418_Up_32x32");//("40_401_Close_32x32");
+                //                                                         //tItemReport.Appearance.BackColor = v.colorNew;
+                //tItemReport.AppearanceHovered.BackColor = v.colorExit;
+                ////tItemEDI.AppearanceSelected.BackColor = v.colorSave;
+                ////tItemEDI.Appearance.Options.UseBackColor = true;
+                //tItemReport.AppearanceHovered.Options.UseBackColor = true;
+                //tItemReport.AppearanceSelected.Options.UseBackColor = true;
 
-                // Rapor formu açılınca hangi raporları select edeceği bilgisini taşıyan TableIPCode 
-                tItemReport.Tag = reportTableIPCode + "|TableIPCode|";
+                //// Rapor formu açılınca hangi raporları select edeceği bilgisini taşıyan TableIPCode 
+                //tItemReport.Tag = reportTableIPCode + "|TableIPCode|";
 
-                mControl.Buttons.Add(tItemReport);
+                //mControl.Buttons.Add(tItemReport);
             }
             #endregion Report            
 

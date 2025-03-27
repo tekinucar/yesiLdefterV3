@@ -2274,6 +2274,19 @@ namespace Tkn_DevColumn
             }
             #endregion
 
+            #region ColorEdit
+            if (tcolumn_type == "ColorEdit")
+            {
+                RepositoryItemColorEdit tEdit = new RepositoryItemColorEdit();
+                tEdit.Name = "Column_" + tFieldName;
+                tEdit.AccessibleDescription = tProp_Navigator;
+                tEdit.KeyDown += new System.Windows.Forms.KeyEventHandler(evg.myRepositoryItemEdit_KeyDown);
+                tEdit.StoreColorAsInteger = true;
+
+                Column.Properties.RowEdit = tEdit;
+            }
+            #endregion
+
             #region ComboBoxEdit
             if (tcolumn_type == "ComboBoxEdit")
             {
@@ -3917,7 +3930,8 @@ namespace Tkn_DevColumn
             if (vld_operator > 11)
             {
                 if ((tcolumn_type == "ButtonEdit") ||
-                    (tcolumn_type == "tSearchEdit"))
+                    (tcolumn_type == "tSearchEdit") ||
+                    (tcolumn_type == "tSearchEditOnly"))
                     ((DevExpress.XtraEditors.ButtonEdit)tEdit).BackColor = v.ColorValidation;
                 if (tcolumn_type == "CalcEdit")
                     ((DevExpress.XtraEditors.CalcEdit)tEdit).BackColor = v.ColorValidation;

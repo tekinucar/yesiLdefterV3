@@ -242,7 +242,7 @@ namespace YesiLdefter
                 if (cntrl != null)
                 {
                     ((DevExpress.XtraEditors.SimpleButton)cntrl).Click += new System.EventHandler(btn_DatabaseKaydet_ItemClick);
-                    ((DevExpress.XtraEditors.SimpleButton)cntrl).Image = t.Find_Glyph("KAYDET16");
+                    ((DevExpress.XtraEditors.SimpleButton)cntrl).Image = t.Find_Glyph("SAVE16");
                 }
             }
         }
@@ -389,7 +389,9 @@ namespace YesiLdefter
                 btn_TarayicidanAl.LargeGlyph = t.Find_Glyph(glName);
                 glName = "30_301_Open2_32x32";
                 btn_DosyadanAl.LargeGlyph = t.Find_Glyph(glName);
-                glName = "SAVE32";
+                glName = "30_341_Save_32x32";
+                btn_DatabaseKaydet.LargeGlyph = t.Find_Glyph(glName);
+                glName = "30_317_ExportToIMG_32x32";
                 btn_DosyayaKaydet.LargeGlyph = t.Find_Glyph(glName);
                 glName = "30_317_ExportToIMG_16x16";
                 btn_FarkliKaydet.Glyph = t.Find_Glyph(glName);

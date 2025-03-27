@@ -34,8 +34,8 @@ begin transaction
     CMP_FONT_NAME           VarChar(30)     NULL,
     CMP_FONT_SIZE           Numeric(6,3)    NULL,
     CMP_FONT_STYLE          SmallInt        NULL,
-    CMP_FONT_COLOR          Int             NULL,
-    CMP_BACK_COLOR          Int             NULL, 
+    CMP_FONT_COLOR          varchar(6)      NULL,
+    CMP_BACK_COLOR          varchar(6)      NULL, 
 	CMP_NAME                varchar(50)     NULL,
 
     GYLPH_16                VarChar(100)    NULL,

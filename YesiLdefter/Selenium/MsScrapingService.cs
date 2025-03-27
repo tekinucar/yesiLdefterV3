@@ -35,7 +35,10 @@ namespace YesiLdefter.Selenium
         /// 
         public async Task WebScrapingAsync(webNodeValue wnv, webForm f)
         {
+            msPagesService.driverControl(f);
+
             if (f.anErrorOccurred) return;
+            
             if ((f.browserType == v.tBrowserType.Selenium) && (f.wbSel.PageSource == null)) return;
             //if ((f.browserType == v.tBrowserType.CefSharp) && (f.wbCef == null)) return;
             if (wnv.TagName == null) return;
@@ -686,6 +689,7 @@ namespace YesiLdefter.Selenium
 
                                     if (wnv.GetSave)
                                     {
+                                        f.tableIPCodeIsSave = wnv.TableIPCode;
                                         msPagesService.dbButtonClick(f.tForm, wnv.ds.DataSetName, v.tButtonType.btKaydet);
                                     }
                                 }
@@ -1673,7 +1677,7 @@ namespace YesiLdefter.Selenium
         #endregion setElementValues
 
         #region getElementValues
-        private async Task<string> getElementValues(IWebDriver wb, webNodeValue wnv, string tagName, string attType, string attRole, string idName, webForm f)
+        public async Task<string> getElementValues(IWebDriver wb, webNodeValue wnv, string tagName, string attType, string attRole, string idName, webForm f)
         {
             //
             // Value alma/okuma işlemi 
@@ -1773,6 +1777,8 @@ namespace YesiLdefter.Selenium
                     if (element != null)
                     {
                         readValue = element.GetAttribute("checked");
+                        if (t.IsNotNull(readValue) == false) readValue = "False";
+                        if (readValue == "true") readValue = "True";
                     }
                 }
                 if (attRole == "GIBeArsivFaturaIndir")

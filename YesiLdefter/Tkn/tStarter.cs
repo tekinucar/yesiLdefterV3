@@ -192,6 +192,11 @@ namespace Tkn_Starter
             t.WaitFormOpen(v.mainForm, "Settings okunuyor...");
             t.read_Settings();
 
+
+            // 3S_MSGLY 
+            //t.WaitFormOpen(v.mainForm, "Images okunuyor...");
+            //t.SYS_Glyph_Read();
+
             //t.TestRead();
 
             v.SP_UserIN = true;

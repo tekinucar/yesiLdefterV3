@@ -366,7 +366,7 @@ namespace Tkn_CreateObject
                     /// Create_MyFindPanel_ için navigator butonlarını tekrar burada false yap
                     /// 
                     simpleButton.Name = nButton.buttonName; 
-                    simpleButton.Size = new System.Drawing.Size(nButton.width, height);
+                    simpleButton.Size = new System.Drawing.Size(nButton.width + 10, height);
                     simpleButton.Dock = nButton.dock; 
                     simpleButton.TabIndex = nButton.tabIndex;
                     simpleButton.TabStop = nButton.tabStop;
@@ -960,8 +960,9 @@ namespace Tkn_CreateObject
             Int16 width25 = 28; // w1
             //Int16 width35 = 35; // w2
             Int16 width70 = 70; // width
+            Int16 width80 = 80; // w3
             Int16 width90 = 90; // w3
-            //Int16 width120 = 120; // w4
+            Int16 width100 = 100; // w4
 
             string xTableIPCode = TableIPCode;
 
@@ -3982,11 +3983,19 @@ namespace Tkn_CreateObject
                 textEdit_Find.SelectionStart = 100;
 
 
-                if (v.tSearch.searchInputValue != "")
-                {
-                    textEdit_Find.Text = v.tSearch.searchInputValue;
-                    v.tSearch.searchInputValue = "";
-                }
+                /// Veri girişi ile arama bşalangıcı sırasındaki kullanıcının girdiği veriyi search ekranına taşımak tam istediğim gibi olmadı
+                /// bu nedenle burayı çözüm bulana kadar kapattım
+                /// Sorunlar nedir ?
+                /// veri girişi başlayınca otomatik search ekranına gidince kullanıcı alışamadı
+                /// form üzerinde veri varken tekrar search ekranını açınca haliyle searchInputValue dolu geldiği için sadece bu kayıt ekrana geliyor başaka bir kaydı aramak için
+                /// kullanıcı otomatik gelen veri silmek zorunda kalıyor. onun için bu metodda sorunlu
+
+
+                //if (v.tSearch.searchInputValue != "")
+                //{
+                //    textEdit_Find.Text = v.tSearch.searchInputValue;
+                //    v.tSearch.searchInputValue = "";
+                //}
 
 
                 //textEdit_Find.Properties.Appearance.BackColor = v.AppearanceFocusedColor;
