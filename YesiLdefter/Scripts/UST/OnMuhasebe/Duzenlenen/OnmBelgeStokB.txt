@@ -46,11 +46,11 @@ begin transaction
    --cari bilgisi
    -- 60
    CariTipiId         SmallInt      null, /* 1. Gerçek Kişi, 2. Özel Firma, 3. Kamu Kurumu */
+   TalepId            Int           null,
    CariId             Int           null,
    CariTcVkNo         nVarChar(11)  null,
    CariUnvan          nVarChar(100) null, /* cari hesabı yok ise */
-   CariAdi            nVarChar(50)  null,
-   CariSoyadi         nVarChar(50)  null,
+   CariAdiSoyadi      nVarChar(100) null,
 
    -- 70
    CariAdresi         nVarChar(200) null,
@@ -134,6 +134,8 @@ begin transaction
  create index X_OnmBelgeStokB06 on OnmBelgeStokB (TuruTipiId)
  create index X_OnmBelgeStokB011 on OnmBelgeStokB (BelgeTarihi)
  create index X_OnmBelgeStokB012 on OnmBelgeStokB (KayitTarihi)
+ create index X_OnmBelgeStokB013 on OnmBelgeStokB (TalepId)
+ create index X_OnmBelgeStokB014 on OnmBelgeStokB (CariId)
  
 commit transaction
 

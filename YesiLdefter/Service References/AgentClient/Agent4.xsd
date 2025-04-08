@@ -1,0 +1,533 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" elementFormDefault="qualified" targetNamespace="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="https://efatura.uyumsoft.com.tr/Services/Agent?xsd=xsd5" namespace="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" />
+  <xs:import schemaLocation="https://efatura.uyumsoft.com.tr/Services/Agent?xsd=xsd6" namespace="urn:oasis:names:specification:ubl:schema:xsd:QualifiedDatatypes-2" />
+  <xs:element name="UBLVersionID" type="tns:UBLVersionIDType" />
+  <xs:complexType name="UBLVersionIDType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q1="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q1:IdentifierType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="WebsiteURIType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q2="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q2:IdentifierType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="UUIDType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q3="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q3:IdentifierType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="URIType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q4="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q4:IdentifierType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="IDType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q5="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q5:IdentifierType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="CustomizationIDType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q6="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q6:IdentifierType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="LineIDType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q7="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q7:IdentifierType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="ReferenceIDType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q8="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q8:IdentifierType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="ProfileIDType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q9="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q9:IdentifierType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:element name="CustomizationID" type="tns:CustomizationIDType" />
+  <xs:element name="ProfileID" type="tns:ProfileIDType" />
+  <xs:element name="ID" type="tns:IDType" />
+  <xs:element name="CopyIndicator" type="tns:CopyIndicatorType" />
+  <xs:complexType name="CopyIndicatorType">
+    <xs:simpleContent>
+      <xs:extension base="xs:boolean" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:element name="UUID" type="tns:UUIDType" />
+  <xs:element name="IssueDate" type="tns:IssueDateType" />
+  <xs:complexType name="IssueDateType">
+    <xs:simpleContent>
+      <xs:extension base="xs:date" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:element name="IssueTime" type="tns:IssueTimeType" />
+  <xs:complexType name="IssueTimeType">
+    <xs:simpleContent>
+      <xs:extension base="xs:time" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:element name="InvoiceTypeCode" type="tns:InvoiceTypeCodeType" />
+  <xs:complexType name="InvoiceTypeCodeType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q10="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q10:CodeType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="DocumentTypeCodeType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q11="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q11:CodeType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="TaxTypeCodeType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q12="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q12:CodeType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="ItemClassificationCodeType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q13="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q13:CodeType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="ResponseCodeType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q14="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q14:CodeType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="ChannelCodeType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q15="urn:oasis:names:specification:ubl:schema:xsd:QualifiedDatatypes-2" base="q15:ChannelCodeType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="PaymentChannelCodeType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q16="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q16:CodeType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="PaymentMeansCodeType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q17="urn:oasis:names:specification:ubl:schema:xsd:QualifiedDatatypes-2" base="q17:PaymentMeansCodeType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="IdentificationCodeType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q18="urn:oasis:names:specification:ubl:schema:xsd:QualifiedDatatypes-2" base="q18:CountryIdentificationCodeType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:element name="Note" type="tns:NoteType" />
+  <xs:complexType name="NoteType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q19="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q19:TextType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="ChannelType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q20="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q20:TextType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="LineType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q21="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q21:TextType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="InstructionNoteType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q22="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q22:TextType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="DescriptionType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q23="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q23:TextType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="RegionType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q24="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q24:TextType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="AllowanceChargeReasonType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q25="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q25:TextType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="ValueType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q26="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q26:TextType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="DocumentTypeType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q27="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q27:TextType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="BuildingNumberType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q28="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q28:TextType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="NameSuffixType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q29="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q29:TextType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="DistrictType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q30="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q30:TextType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="ElectronicMailType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q31="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q31:TextType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="PaymentNoteType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q32="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q32:TextType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="PostalZoneType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q33="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q33:TextType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="TelephoneType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q34="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q34:TextType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="TitleType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q35="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q35:TextType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="TelefaxType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q36="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q36:TextType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="TaxExemptionReasonType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q37="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q37:TextType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="RoomType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q38="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q38:TextType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:element name="DocumentCurrencyCode" type="tns:DocumentCurrencyCodeType" />
+  <xs:complexType name="DocumentCurrencyCodeType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q39="urn:oasis:names:specification:ubl:schema:xsd:QualifiedDatatypes-2" base="q39:CurrencyCodeType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="PaymentAlternativeCurrencyCodeType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q40="urn:oasis:names:specification:ubl:schema:xsd:QualifiedDatatypes-2" base="q40:CurrencyCodeType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="PricingCurrencyCodeType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q41="urn:oasis:names:specification:ubl:schema:xsd:QualifiedDatatypes-2" base="q41:CurrencyCodeType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="TaxCurrencyCodeType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q42="urn:oasis:names:specification:ubl:schema:xsd:QualifiedDatatypes-2" base="q42:CurrencyCodeType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="PaymentCurrencyCodeType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q43="urn:oasis:names:specification:ubl:schema:xsd:QualifiedDatatypes-2" base="q43:CurrencyCodeType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="CurrencyCodeType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q44="urn:oasis:names:specification:ubl:schema:xsd:QualifiedDatatypes-2" base="q44:CurrencyCodeType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="TargetCurrencyCodeType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q45="urn:oasis:names:specification:ubl:schema:xsd:QualifiedDatatypes-2" base="q45:CurrencyCodeType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="SourceCurrencyCodeType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q46="urn:oasis:names:specification:ubl:schema:xsd:QualifiedDatatypes-2" base="q46:CurrencyCodeType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:element name="TaxCurrencyCode" type="tns:TaxCurrencyCodeType" />
+  <xs:element name="PricingCurrencyCode" type="tns:PricingCurrencyCodeType" />
+  <xs:element name="PaymentCurrencyCode" type="tns:PaymentCurrencyCodeType" />
+  <xs:element name="PaymentAlternativeCurrencyCode" type="tns:PaymentAlternativeCurrencyCodeType" />
+  <xs:element name="LineCountNumeric" type="tns:LineCountNumericType" />
+  <xs:complexType name="LineCountNumericType">
+    <xs:simpleContent>
+      <xs:extension base="xs:decimal" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:element name="StartDate" type="tns:StartDateType" />
+  <xs:complexType name="StartDateType">
+    <xs:simpleContent>
+      <xs:extension base="xs:date" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:element name="EndDate" type="tns:EndDateType" />
+  <xs:complexType name="EndDateType">
+    <xs:simpleContent>
+      <xs:extension base="xs:date" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:element name="DurationMeasure" type="tns:DurationMeasureType" />
+  <xs:complexType name="DurationMeasureType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q47="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q47:MeasureType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="BaseUnitMeasureType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q48="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q48:MeasureType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:element name="Description" type="tns:DescriptionType" />
+  <xs:element name="DocumentTypeCode" type="tns:DocumentTypeCodeType" />
+  <xs:element name="DocumentType" type="tns:DocumentTypeType" />
+  <xs:element name="URI" type="tns:URIType" />
+  <xs:element name="EmbeddedDocumentBinaryObject" type="tns:EmbeddedDocumentBinaryObjectType" />
+  <xs:complexType name="EmbeddedDocumentBinaryObjectType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q49="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q49:BinaryObjectType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:element name="WebsiteURI" type="tns:WebsiteURIType" />
+  <xs:element name="Name" type="tns:NameType" />
+  <xs:complexType name="NameType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q50="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q50:NameType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="StreetNameType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q51="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q51:NameType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="FamilyNameType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q52="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q52:NameType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="CityNameType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q53="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q53:NameType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="BrandNameType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q54="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q54:NameType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="FirstNameType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q55="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q55:NameType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="BlockNameType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q56="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q56:NameType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="BuildingNameType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q57="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q57:NameType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="CitySubdivisionNameType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q58="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q58:NameType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="MiddleNameType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q59="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q59:NameType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="ModelNameType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q60="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q60:NameType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:element name="Room" type="tns:RoomType" />
+  <xs:element name="StreetName" type="tns:StreetNameType" />
+  <xs:element name="BuildingName" type="tns:BuildingNameType" />
+  <xs:element name="BuildingNumber" type="tns:BuildingNumberType" />
+  <xs:element name="CitySubdivisionName" type="tns:CitySubdivisionNameType" />
+  <xs:element name="CityName" type="tns:CityNameType" />
+  <xs:element name="PostalZone" type="tns:PostalZoneType" />
+  <xs:element name="Region" type="tns:RegionType" />
+  <xs:element name="IdentificationCode" type="tns:IdentificationCodeType" />
+  <xs:element name="TaxTypeCode" type="tns:TaxTypeCodeType" />
+  <xs:element name="Telephone" type="tns:TelephoneType" />
+  <xs:element name="Telefax" type="tns:TelefaxType" />
+  <xs:element name="ElectronicMail" type="tns:ElectronicMailType" />
+  <xs:element name="ChannelCode" type="tns:ChannelCodeType" />
+  <xs:element name="Channel" type="tns:ChannelType" />
+  <xs:element name="Value" type="tns:ValueType" />
+  <xs:element name="FirstName" type="tns:FirstNameType" />
+  <xs:element name="FamilyName" type="tns:FamilyNameType" />
+  <xs:element name="Title" type="tns:TitleType" />
+  <xs:element name="MiddleName" type="tns:MiddleNameType" />
+  <xs:element name="NameSuffix" type="tns:NameSuffixType" />
+  <xs:element name="PaymentMeansCode" type="tns:PaymentMeansCodeType" />
+  <xs:element name="PaymentDueDate" type="tns:PaymentDueDateType" />
+  <xs:complexType name="PaymentDueDateType">
+    <xs:simpleContent>
+      <xs:extension base="xs:date" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:element name="PaymentChannelCode" type="tns:PaymentChannelCodeType" />
+  <xs:element name="InstructionNote" type="tns:InstructionNoteType" />
+  <xs:element name="CurrencyCode" type="tns:CurrencyCodeType" />
+  <xs:element name="PaymentNote" type="tns:PaymentNoteType" />
+  <xs:element name="PenaltySurchargePercent" type="tns:PenaltySurchargePercentType" />
+  <xs:complexType name="PenaltySurchargePercentType">
+    <xs:simpleContent>
+      <xs:extension base="xs:decimal" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:element name="Amount" type="tns:AmountType" />
+  <xs:complexType name="AmountType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q61="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q61:AmountType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="PayableAmountType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q62="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q62:AmountType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="BaseAmountType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q63="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q63:AmountType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="LineExtensionAmountType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q64="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q64:AmountType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="ChargeTotalAmountType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q65="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q65:AmountType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="PayableRoundingAmountType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q66="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q66:AmountType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="TransactionCurrencyTaxAmountType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q67="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q67:AmountType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="PriceAmountType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q68="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q68:AmountType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="TaxableAmountType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q69="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q69:AmountType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="TaxAmountType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q70="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q70:AmountType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="PerUnitAmountType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q71="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q71:AmountType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="TaxExclusiveAmountType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q72="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q72:AmountType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="TaxInclusiveAmountType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q73="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q73:AmountType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="AllowanceTotalAmountType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q74="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q74:AmountType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:element name="ChargeIndicator" type="tns:ChargeIndicatorType" />
+  <xs:complexType name="ChargeIndicatorType">
+    <xs:simpleContent>
+      <xs:extension base="xs:boolean" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:element name="AllowanceChargeReason" type="tns:AllowanceChargeReasonType" />
+  <xs:element name="MultiplierFactorNumeric" type="tns:MultiplierFactorNumericType" />
+  <xs:complexType name="MultiplierFactorNumericType">
+    <xs:simpleContent>
+      <xs:extension base="xs:decimal" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:element name="BaseAmount" type="tns:BaseAmountType" />
+  <xs:element name="SourceCurrencyCode" type="tns:SourceCurrencyCodeType" />
+  <xs:element name="TargetCurrencyCode" type="tns:TargetCurrencyCodeType" />
+  <xs:element name="CalculationRate" type="tns:CalculationRateType" />
+  <xs:complexType name="CalculationRateType">
+    <xs:simpleContent>
+      <xs:extension base="xs:decimal" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:element name="Date" type="tns:DateType" />
+  <xs:complexType name="DateType">
+    <xs:simpleContent>
+      <xs:extension base="xs:date" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:element name="TaxAmount" type="tns:TaxAmountType" />
+  <xs:element name="TaxableAmount" type="tns:TaxableAmountType" />
+  <xs:element name="CalculationSequenceNumeric" type="tns:CalculationSequenceNumericType" />
+  <xs:complexType name="CalculationSequenceNumericType">
+    <xs:simpleContent>
+      <xs:extension base="xs:decimal" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:element name="TransactionCurrencyTaxAmount" type="tns:TransactionCurrencyTaxAmountType" />
+  <xs:element name="Percent" type="tns:PercentType" />
+  <xs:complexType name="PercentType">
+    <xs:simpleContent>
+      <xs:extension base="xs:decimal" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:element name="BaseUnitMeasure" type="tns:BaseUnitMeasureType" />
+  <xs:element name="PerUnitAmount" type="tns:PerUnitAmountType" />
+  <xs:element name="TaxExemptionReason" type="tns:TaxExemptionReasonType" />
+  <xs:element name="LineExtensionAmount" type="tns:LineExtensionAmountType" />
+  <xs:element name="TaxExclusiveAmount" type="tns:TaxExclusiveAmountType" />
+  <xs:element name="TaxInclusiveAmount" type="tns:TaxInclusiveAmountType" />
+  <xs:element name="AllowanceTotalAmount" type="tns:AllowanceTotalAmountType" />
+  <xs:element name="ChargeTotalAmount" type="tns:ChargeTotalAmountType" />
+  <xs:element name="PayableRoundingAmount" type="tns:PayableRoundingAmountType" />
+  <xs:element name="PayableAmount" type="tns:PayableAmountType" />
+  <xs:element name="InvoicedQuantity" type="tns:InvoicedQuantityType" />
+  <xs:complexType name="InvoicedQuantityType">
+    <xs:simpleContent>
+      <xs:extension xmlns:q75="urn:un:unece:uncefact:data:specification:UnqualifiedDataTypesSchemaModule:2" base="q75:QuantityType" />
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:element name="BrandName" type="tns:BrandNameType" />
+  <xs:element name="ModelName" type="tns:ModelNameType" />
+  <xs:element name="ItemClassificationCode" type="tns:ItemClassificationCodeType" />
+  <xs:element name="PriceAmount" type="tns:PriceAmountType" />
+</xs:schema>

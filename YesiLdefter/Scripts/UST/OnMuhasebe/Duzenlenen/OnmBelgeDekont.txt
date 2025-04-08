@@ -108,7 +108,7 @@ CREATE TRIGGER [dbo].[trg_OnmBelgeDekont] on [dbo].[OnmBelgeDekont]
 AFTER INSERT, UPDATE
 AS BEGIN
 
-    declare cursor_BDekont cursor for select Id from Inserted
+    declare cursor_BDekont cursor local for select Id from Inserted
     declare @curId bigint
 
     declare @FirmId int
@@ -122,6 +122,7 @@ AS BEGIN
     declare @BHesapTipiId smallInt
     declare @AHesapTipiId smallInt
     declare @BelgeTutari numeric(22,8)
+	declare @MasrafTutari numeric(22,8)
     declare @_BelgeTutari numeric(22,8)
     declare @CariId int
     declare @SourceTypeId smallInt
@@ -154,7 +155,8 @@ AS BEGIN
         , @BelgeTarihi = ins.BelgeTarihi
 		, @BHesapTipiId = isnull(ins.BHesapTipiId,0)
 		, @AHesapTipiId = isnull(ins.AHesapTipiId,0)
-	    , @BelgeTutari = round(ins.BelgeTutari,2)
+	    , @BelgeTutari  = round(isnull(ins.BelgeTutari,0),2)
+		, @MasrafTutari = round(isnull(ins.MasrafTutari,0),2)
 		, @CariId = ins.CariId
 		, @SourceTypeId = ins.SourceTypeId
 		, @SourceId = ins.SourceId 
@@ -218,6 +220,7 @@ AS BEGIN
       Update dbo.OnmBelgeDekont set 
         IslemTipiId = @_IslemTipiId
       , BelgeDonemTipiId = convert(int, (@Yil + @Ay))
+      , ToplamTutar = @BelgeTutari + @MasrafTutari
       Where Id = @curId 
 
 	  FETCH NEXT FROM cursor_BDekont INTO @curId
@@ -228,6 +231,7 @@ AS BEGIN
 
 	--EXECUTE [dbo].[prc_OnmToplamBekleyenOdemeler] @FirmId
 	--EXECUTE [dbo].[prc_OnmToplamBekleyenGelirler] @FirmId
+
 
 END
 

@@ -308,11 +308,28 @@ namespace YesiLdefter
                     (v.SP_Firm_SectorTypeId == (Int16)v.msSectorType.TabimMtsk)))
                     autoOpenForm("UST/MEB/MTS/YHYasamDongusu", "");
                 //autoOpenForm("UST/MEB/MTS/YHBaslangic","");
+
+                /// şimdilik geçici burada. Daha sonra günde bir defa çalışacak şekilde ayarlamak gerekiyor
+                /// 
+                if (v.SP_Firm_SectorTypeId == (Int16)v.msSectorType.UstadMtsk)
+                {
+                    execute_prc_MtskGunlukTakipler();
+                }
             }
             else
             {
                 autoOpenForm("UST/PMS/HUB/MainWebMtsk", "ms_CefSharp");
             }
+        }
+
+        void execute_prc_MtskGunlukTakipler()
+        {
+            tSQLs sqls = new tSQLs();
+            DataSet ds = new DataSet();
+
+            string sql = sqls.Sql_prc_MtskGunlukTakipler();
+
+            t.SQL_Read_Execute(v.dBaseNo.Project, ds, ref sql, "prc_MtskGunlukTakipler", "");
         }
 
         void autoOpenForm(string FormCode, string FormName)

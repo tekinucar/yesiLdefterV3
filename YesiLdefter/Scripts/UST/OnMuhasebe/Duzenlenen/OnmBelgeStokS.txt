@@ -9,6 +9,7 @@ begin transaction
    ParentId            Int       not null, /* Default = 0 */
    FirmId              Int       not null,
    BelgeStokBId        Int           null, /* BelgeStokB.Id  : BelgeStokB başlık tablosu */
+   TalepId             Int           null,  
    CariId              Int           null, /* HesapCariId    : Cari Hesap kartı */
    StokId              Int           null, /* HesapStok.Id   : Stok veya Hizmet kartı */
    FinansId            Int           null, /* HesapFinans.Id : Varlık hesabı için */
@@ -27,6 +28,8 @@ begin transaction
       
    SatirNo             SmallInt      null,
    UrunAdi             nVarChar(50)  null,
+   GIPKodu             Varchar(8)    null, /* (Gelir İdaresi Paket Kodu), mal ve hizmetlerin vergisel sınıflandırılması için kullanılan 8 haneli bir koddur. */
+   GTIPKodu            Varchar(12)   null, /* (Gümrük Tarife İstatistik Pozisyonu) */
 
    --100
    Miktar              Numeric(22,8) null,     
@@ -37,9 +40,6 @@ begin transaction
    ParaTipiId          nVarChar(3)   null, /* belgenin para birimi */
    DovizYeriId         SmallInt      null,
    DovizKuru           Numeric(12,8) null,
-
-   -- Numeric(22,8)
-   -- 12,345,678,901,234.56789012
    
    --110
    dBirimFiyati        Numeric(22,8) null,
@@ -95,8 +95,8 @@ begin transaction
    ISKdvMatrahi        Numeric(22,8) null, /* ISToplamTutar + ISEkVergiTutari */
    ISKdvTutari         Numeric(22,8) null, /* ( Toplam tutarı / 100 ) x Kdv Oranı */     
    ISTevkifatTutari    Numeric(22,8) null, /* ( Kdv tutarı / 10 )  x Tevkifat Oranı */
-   ISHesaplananKdv     Numeric(22,8) null, /* Kdv Tutarı - Tevkifat Tutarı */  <ISKdvTutari> - <ISTevkifatTutari>
-   ISToplamTutarKdvli  Numeric(22,8) null, /* Toplam Tutar + Hesaplanan Kdv */ <ISKdvMatrahi> + <ISHesaplananKDV>
+   ISHesaplananKdv     Numeric(22,8) null, /* Kdv Tutarı - Tevkifat Tutarı   <ISKdvTutari> - <ISTevkifatTutari> */
+   ISToplamTutarKdvli  Numeric(22,8) null, /* Toplam Tutar + Hesaplanan Kdv  <ISKdvMatrahi> + <ISHesaplananKDV> */
          
    
    -- 310
@@ -114,6 +114,8 @@ begin transaction
 
  create index X_OnmBelgeStokS01 on OnmBelgeStokS (FirmId,BelgeStokBId,SatirNo)
  create index X_OnmBelgeStokS02 on OnmBelgeStokS (FirmId,IslemTarihi)
+ create index X_OnmBelgeStokS11 on OnmBelgeStokS (TalepId)
+ create index X_OnmBelgeStokS12 on OnmBelgeStokS (CariId)
 
  commit transaction
 
@@ -124,6 +126,10 @@ begin transaction
 
  
  /*
+   -- Numeric(22,8)
+   -- 12,345,678,901,234.56789012
+
+
  -------------------------------------------------------------------------
  
  1 : Normal kdv hesabı

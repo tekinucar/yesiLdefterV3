@@ -29,6 +29,8 @@ commit transaction
 
 SET IDENTITY_INSERT [Lkp].[OnmTevkifatTipi] ON
 
+DELETE [Lkp].[OnmTevkifatTipi]
+
 INSERT INTO [Lkp].[OnmTevkifatTipi] (Id, IsActive, TevkifatKodu, TevkifatAdi, TevkifatPayi, TevkifatPaydasi )
  VALUES 
   ( 0, 1, N'', N'Tanımsız', 0, 0 ),

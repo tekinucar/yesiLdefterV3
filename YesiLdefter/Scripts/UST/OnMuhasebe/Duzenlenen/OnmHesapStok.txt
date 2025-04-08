@@ -34,7 +34,9 @@ begin transaction
    BorcDovizYeriId     SmallInt      null,
    AlacakDovizYeriId   SmallInt      null,
    --
-   GIPTKoduId          Int           null, /* sistem bilmiyorum */
+   GIPKodu             Varchar(8)    null, /* (Gelir İdaresi Paket Kodu), mal ve hizmetlerin vergisel sınıflandırılması için kullanılan 8 haneli bir koddur. */
+   GTIPKodu            Varchar(12)   null, /* (Gümrük Tarife İstatistik Pozisyonu) */
+
    IhracatKategoriKodu nVarchar(20)  null, /* sistem bilmiyorum */
    IsTevkifat          Bit           null,
    TevkifatKodu        nVarchar(6)   null,
@@ -151,5 +153,16 @@ END -- create trigger
  create index X_IStokFaturaEkVergi01 on IStokFaturaEkVergi (FirmId,StokId)
  
  grant select, insert, update, delete on IStokFaturaEkVergi to public
+
+
+ /*
+
+GIP vs GTIP Farkı
+Özellik             GIP Kodu                          GTIP Kodu
+Kullanım Amacı	    e-Fatura, e-Arşiv Fatura          Gümrük beyanları, ithalat/ihracat
+Uzunluk	            8 haneli                          8-12 haneli (GTIP+Ek Kodlar)
+Yetkili Kurum	    Gelir İdaresi Başkanlığı (GIB)    Gümrük ve Ticaret Bakanlığı
+
+ */
 
 

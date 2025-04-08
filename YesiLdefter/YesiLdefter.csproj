@@ -882,7 +882,7 @@
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\Lkp_OnmParaTipi.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\Lkp_OnmStokBirimTipi.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\Lkp_OnmStokKategoriTipi.txt" />
-    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\Lkp_TevkifatTipi.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\Lkp_OnmTevkifatTipi.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\Lkp_UlkeTipi.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\Lkp_BelgeDonemTipi.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmBelgeDekont.txt" />

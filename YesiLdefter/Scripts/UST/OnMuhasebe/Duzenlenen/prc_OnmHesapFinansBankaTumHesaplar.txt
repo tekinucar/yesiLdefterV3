@@ -1,81 +1,7 @@
-﻿
-/*CreateProcedure*/
--- FirmId, UstGrupTipiId, AnaGrupTipiId, HesapKodu
+﻿/*CreateProcedure*/
 
-CREATE PROCEDURE [dbo].[prc_OnmHesapFinansMaliyetGrubuKontrolu](
- @FirmId int 
-,@UstGrupTipiId smallInt 
-,@AnaGrupTipiId smallInt 
-,@HesapKodu varchar(100)
-)  
-AS BEGIN  
-
-    Declare @id int;  
-    set @id = 0
-
-    select @id = Id
-    from [dbo].[OnmHesapFinans] as hf
-    Where hf.FirmId = @FirmId
-    and   hf.UstGrupTipiId = @UstGrupTipiId
-    and   hf.AnaGrupTipiId = @AnaGrupTipiId
-    and   hf.HesapKodu = @HesapKodu
-
-    if (@id = 0)
-    begin
-      INSERT INTO [dbo].[OnmHesapFinans]
-           ([ParentId]
-           ,[FirmId]
-           ,[IsActive]
-           ,[UstGrupTipiId]
-           ,[AnaGrupTipiId]
-           ,[AltGrupTipiId]
-           ,[AltCesitTipiId]
-           ,[HesapTipiId]
-           ,[HesapKodu]
-           ,[UstHesapKodu]
-           ,[HesapKisaAdi]
-           ,[HesapAdi]
-           ,[BAHesapTipiId]
-           ,[KdvOrani]
-           ,[IsKiralik]
-           )
-      Select 
-            0 --ParentId
-           ,@FirmId --FirmId
-           ,1 --IsActive
-           ,@UstGrupTipiId --UstGrupTipiId
-           ,AnaGrupTipiId
-           ,AltGrupTipiId
-           ,AltCesitTipiId
-           ,11 -- HesapTipiId  ??????
-           ,HesapKodu
-           ,UstHesapKodu
-           ,HesapAdi --HesapKisaAdi
-           ,HesapAdi
-           ,BAHesapTipiId
-           ,KdvOrani
-           ,IsKiralik
-      from Lkp.OnmHesapMaster
-      where 0 = 0
-      and UstGrupTipiId = 82
-      and AnaGrupTipiId = @AnaGrupTipiId
-      and HesapKodu = @HesapKodu
-      --and UstHesapKodu = @UstHesapKodu
-
-    end
-
-END
-
-/*CreateProcedureEnd*/
-
-
-
-
-/*CreateProcedure*/
-
-CREATE PROCEDURE [dbo].[prc_OnmHesapFinansBankaTumHesaplar]   
+CREATE PROCEDURE [dbo].[prc_OnmHesapFinansBankaTumHesaplar](@FirmId int)
 AS BEGIN
-  --(@firmId int) 
   --declare @firmId int = 14
   
  -- Bankalar
@@ -210,9 +136,7 @@ AS BEGIN
  and HBanka.UstGrupTipiId = 10
  and HBanka.AltGrupTipiId = 1024
 
-
-
-
 END -- procedure
 
 /*CreateProcedureEnd*/
+

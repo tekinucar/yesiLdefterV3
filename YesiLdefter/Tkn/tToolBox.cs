@@ -15322,6 +15322,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                     tableName = "MtskKurumOnayTipi";
                     return;
                 }
+                //if ((orjinalTableName.IndexOf("Mtsk") > -1) && (orjinalFieldName.IndexOf("DonemTipi") > -1))
                 if (orjinalFieldName.IndexOf("DonemTipi") > -1)
                 {
                     idFieldName = "Id";
@@ -15329,7 +15330,8 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                     tableName = "MtskDonemTipi";
                     return;
                 }
-                if (orjinalFieldName.IndexOf("GrupTipi") > -1)
+                //if ((orjinalTableName.IndexOf("Mtsk") > -1) && (orjinalFieldName.IndexOf("GrupTipi") > -1))
+                if ((orjinalFieldName.IndexOf("GrupTipi") > -1) && (orjinalFieldName.IndexOf("AltGrupTipi") == -1))
                 {
                     idFieldName = "Id";
                     fieldName = "GrupTipi";
@@ -15343,6 +15345,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                     tableName = "EduMtskDerslerSertifikaGrupTipi";
                     return;
                 }
+                //if ((orjinalTableName.IndexOf("Mtsk") > -1) && (orjinalFieldName.IndexOf("SubeTipi") > -1))
                 if (orjinalFieldName.IndexOf("SubeTipi") > -1)
                 {
                     idFieldName = "Id";

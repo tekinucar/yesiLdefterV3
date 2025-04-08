@@ -498,6 +498,11 @@ AS BEGIN
           Execute [dbo].[prc_MtskAdayTablesInsert] @TalepId  -- Data transferi sırasında oluşturuluyor zaten insert oluyor
           Execute [dbo].[prc_MtskAdayTakipTalepKaydiSingleSet] @TalepId
 	      Execute [dbo].[prc_MtskAdayTalepYasiniHesapla] @TalepId
+
+		  -- MtskAdayBelgeler tablosu
+		  Update MtskAdayBelgeler Set DonemTipiId = @yDonemTipiId
+		  Where TalepId = @TalepId
+
       end 	  
 
       FETCH NEXT FROM talepCursor_ INTO @TalepId

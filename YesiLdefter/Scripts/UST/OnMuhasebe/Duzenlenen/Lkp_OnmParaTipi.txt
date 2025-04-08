@@ -10,7 +10,7 @@ create table [Lkp].[OnmParaTipi]
    Id          Int Unique Not null,
    IsActive    Bit null,
    ParaKodu    nVarchar(3) null,
-   ParaAdi     nVarchar(20) null,
+   ParaAdi     nVarchar(30) null,
    ParaSimgesi nVarchar(3) null,
 
    constraint  pk_OnmParaTipi primary key (Id)
@@ -28,188 +28,174 @@ DELETE from Lkp.OnmParaTipi
 INSERT INTO [Lkp].[OnmParaTipi] (Id, IsActive, ParaKodu, ParaAdi )
  VALUES 
   ( 0,   1, N'',    N'Tanımsız' ),
-  ( 157, 1, N'TRY', N'Türk Lirası' ),
-  ( 49,  1, N'EUR', N'Euro' ),
-  ( 159, 1, N'USD', N'US Dolar' )
+  ( 158,   1, N'TRY',  N'Türk Lirası' ),
+  (  1,   0, N'AFN',  N'Afghani' ),
+  (  2,   0, N'DZD',  N'Algerian Dinar' ),
+  (  3,   0, N'ARS',  N'Argentine Peso' ),
+  (  4,   0, N'AWG',  N'Aruban Guilder' ),
+  (  5,   0, N'AUD',  N'Australian Dollar' ),
+  (  6,   0, N'AZM',  N'Azerbaijanian Manat' ),
+  (  7,   0, N'BSD',  N'Bahamian Dollar' ),
+  (  8,   0, N'BHD',  N'Bahraini Dinar' ),
+  (  9,   0, N'THB',  N'Baht' ),
+  ( 10,   0, N'PAB',  N'Balboa' ),
+  ( 11,   0, N'BBD',  N'Barbados Dollar' ),
+  ( 12,   0, N'BYR',  N'Belarussian Ruble' ),
+  ( 13,   0, N'BZD',  N'Belize Dollar' ),
+  ( 14,   0, N'BMD',  N'Bermudian Dollar' ),
+  ( 15,   0, N'VEB',  N'Bolivar' ),
+  ( 16,   0, N'BOB',  N'Boliviano' ),
+  ( 17,   0, N'BGN',  N'Bulgarian Lev' ),
+  ( 18,   0, N'BRL',  N'Brazilian Real' ),
+  ( 19,   0, N'BND',  N'Brunei Dollar' ),
+  ( 20,   0, N'BIF',  N'Burundi Franc' ),
+  ( 21,   0, N'CAD',  N'Canadian Dollar' ),
+  ( 22,   0, N'CVE',  N'Cape Verde Escudo' ),
+  ( 23,   0, N'KYD',  N'Cayman Islands Dollar' ),
+  ( 24,   0, N'GHC',  N'Cedi' ),
+  ( 25,   0, N'XAF',  N'CFA Franc' ),
+  ( 26,   0, N'XOF',  N'CFA Franc' ),
+  ( 27,   0, N'XPF',  N'CFP Franc' ),
+  ( 28,   0, N'CLP',  N'Chilean Peso' ),
+  ( 29,   0, N'COP',  N'Colombian Peso' ),
+  ( 30,   0, N'KMF',  N'Comoro Franc' ),
+  ( 31,   0, N'NIO',  N'Cordoba Oro' ),
+  ( 32,   0, N'CRC',  N'Costa Rican Colon' ),
+  ( 33,   0, N'CUP',  N'Cuban Peso' ),
+  ( 34,   0, N'CYP',  N'Cyprus Pound' ),
+  ( 35,   0, N'CZK',  N'Czech Koruna' ),
+  ( 36,   0, N'DKK',  N'Danish Krone' ),
+  ( 37,   0, N'GMD',  N'Dalasi' ),
+  ( 38,   0, N'MKD',  N'Denar' ),
+  ( 39,   0, N'AED',  N'Dirham' ),
+  ( 40,   0, N'DJF',  N'Djibouti Franc' ),
+  ( 41,   0, N'STD',  N'Dobra' ),
+  ( 42,   0, N'DOP',  N'Dominican Peso' ),
+  ( 43,   0, N'VND',  N'Dong' ),
+  ( 44,   0, N'AMD',  N'Dram' ),
+  ( 45,   0, N'XCD',  N'East Carribean Dollar' ),
+  ( 46,   0, N'EGP',  N'Egyptian Pound' ),
+  ( 47,   0, N'SVC',  N'El Salvador Colon' ),
+  ( 48,   0, N'ETB',  N'Ethopian Birr' ),
+  ( 49,   1, N'EUR',  N'Euro' ),
+  ( 50,   0, N'FKP',  N'Falkland Islands Pound' ),
+  ( 51,   0, N'FJD',  N'Fiji Dollar' ),
+  ( 52,   0, N'HUF',  N'Forint' ),
+  ( 53,   0, N'CDF',  N'Franc Congolais' ),
+  ( 54,   0, N'GIP',  N'Gibraltar Pound' ),
+  ( 55,   0, N'XAU',  N'Gold' ),
+  ( 56,   0, N'HTG',  N'Gourde' ),
+  ( 57,   0, N'PYG',  N'Guarani' ),
+  ( 58,   0, N'GNF',  N'Guinea Franc' ),
+  ( 59,   0, N'GYD',  N'Guyana Dollar' ),
+  ( 60,   0, N'HKD',  N'HKD' ),
+  ( 61,   0, N'UAH',  N'Hryvnia' ),
+  ( 62,   0, N'ISK',  N'Iceland Krona' ),
+  ( 63,   0, N'INR',  N'Indian Rupee' ),
+  ( 64,   0, N'IQD',  N'Iraqi Dinar' ),
+  ( 65,   0, N'IRR',  N'Iranian Rial' ),
+  ( 66,   0, N'JMD',  N'Jamaican Dollar' ),
+  ( 67,   0, N'JOD',  N'Jordanian Dinar' ),
+  ( 68,   0, N'KES',  N'Kenyan Shilling' ),
+  ( 69,   0, N'PGK',  N'Kina' ),
+  ( 70,   0, N'LAK',  N'Kip' ),
+  ( 71,   0, N'EEK',  N'Kroon' ),
+  ( 72,   0, N'HRK',  N'Kuna' ),
+  ( 73,   0, N'KWD',  N'Kuwaiti Dinar' ),
+  ( 74,   0, N'MWK',  N'Kwacha' ),
+  ( 75,   0, N'ZMK',  N'Kwacha' ),
+  ( 76,   0, N'AOA',  N'Kwanza' ),
+  ( 77,   0, N'MMK',  N'Kyat' ),
+  ( 78,   0, N'GEL',  N'Lari' ),
+  ( 79,   0, N'LVL',  N'Latvian Lats' ),
+  ( 80,   0, N'LBP',  N'Lebanese Pound' ),
+  ( 81,   0, N'ALL',  N'Lek' ),
+  ( 82,   0, N'HNL',  N'Lempira' ),
+  ( 83,   0, N'SLL',  N'Leone' ),
+  ( 84,   0, N'ROL',  N'Leu' ),
+  ( 85,   0, N'LRD',  N'Liberian Dollar' ),
+  ( 86,   0, N'LYD',  N'Libyan Dinar' ),
+  ( 87,   0, N'SZL',  N'Lilangeni' ),
+  ( 88,   0, N'LTL',  N'Lithuanian Litas' ),
+  ( 89,   0, N'LSL',  N'Loti' ),
+  ( 90,   0, N'MGF',  N'Malagasy Franc' ),
+  ( 91,   0, N'MYR',  N'Malaysian Ringgit' ),
+  ( 92,   0, N'MTL',  N'Maltese Lira' ),
+  ( 93,   0, N'TMM',  N'Manat' ),
+  ( 94,   0, N'MUR',  N'Mauritius Rupee' ),
+  ( 95,   0, N'MZM',  N'Metical' ),
+  ( 96,   0, N'MXN',  N'Mexican Peso' ),
+  ( 97,   0, N'MDL',  N'Moldovan Leu' ),
+  ( 98,   0, N'MAD',  N'Morrocan Dirham' ),
+  ( 99,   0, N'NGN',  N'Naira' ),
+  ( 100,   0, N'ERN',  N'Nakfa' ),
+  ( 101,   0, N'NAD',  N'Namibia Dollar' ),
+  ( 102,   0, N'NPR',  N'Nepalese Rupee' ),
+  ( 103,   0, N'ANG',  N'Netherlands Antillian Guilder' ),
+  ( 104,   0, N'YUM',  N'New Dinar' ),
+  ( 105,   0, N'ILS',  N'New Israeli Sheqel' ),
+  ( 106,   0, N'TWD',  N'New Taiwan Dollar' ),
+  ( 107,   0, N'NZD',  N'New Zealand Dollar' ),
+  ( 108,   0, N'KPW',  N'North Korean Won' ),
+  ( 109,   0, N'NOK',  N'Norwegian Krone' ),
+  ( 110,   0, N'BTN',  N'Ngultrum' ),
+  ( 111,   0, N'PEN',  N'Nuevo Sol' ),
+  ( 112,   0, N'MRU',  N'Ouguiya' ),
+  ( 113,   0, N'TOP',  N'Pa&amp;apos;anga' ),
+  ( 114,   0, N'PKR',  N'Pakistan Rupee' ),
+  ( 115,   0, N'XPD',  N'Palladium' ),
+  ( 116,   0, N'MOP',  N'Pataca' ),
+  ( 117,   0, N'UYU',  N'Peso Uruguayo' ),
+  ( 118,   0, N'PHP',  N'Philippine Peso' ),
+  ( 119,   0, N'XPT',  N'Platinum' ),
+  ( 120,   0, N'GBP',  N'Pound Sterling' ),
+  ( 121,   0, N'BWP',  N'Pula' ),
+  ( 122,   0, N'QAR',  N'Qatari Rial' ),
+  ( 123,   0, N'GTQ',  N'Quetzal' ),
+  ( 124,   0, N'ZAR',  N'Rand' ),
+  ( 125,   0, N'OMR',  N'Rial Omani' ),
+  ( 126,   0, N'KHR',  N'Riel' ),
+  ( 127,   0, N'MVR',  N'Rufiyaa' ),
+  ( 128,   0, N'RON',  N'Rumen Leyi' ),
+  ( 129,   0, N'IDR',  N'Rupiah' ),
+  ( 130,   0, N'RUB',  N'Russian Ruble' ),
+  ( 131,   0, N'RWF',  N'Rwanda Franc' ),
+  ( 132,   0, N'SAR',  N'Saudi Riyal' ),
+  ( 133,   0, N'XDR',  N'SDR' ),
+  ( 134,   0, N'SCR',  N'Seychelles Rupee' ),
+  ( 135,   0, N'XAG',  N'Silver' ),
+  ( 136,   0, N'SGD',  N'Singapore Dollar' ),
+  ( 137,   0, N'SKK',  N'Slovak Koruna' ),
+  ( 138,   0, N'SBD',  N'Solomon Islands Dollar' ),
+  ( 139,   0, N'SOS',  N'Somali Shilling' ),
+  ( 140,   0, N'SSP',  N'South Sudanese Pound' ),
+  ( 141,   0, N'LKR',  N'Sri Lanka Rupee' ),
+  ( 142,   0, N'KGS',  N'Som' ),
+  ( 143,   0, N'TJS',  N'Somoni' ),
+  ( 144,   0, N'SHP',  N'St. Helena Pound' ),
+  ( 145,   0, N'SDD',  N'Sudanese Dinar' ),
+  ( 146,   0, N'SRG',  N'Suriname Guilder' ),
+  ( 147,   0, N'SEK',  N'Swedish Krona' ),
+  ( 148,   0, N'CHF',  N'Swiss Franc' ),
+  ( 149,   0, N'SYP',  N'Syrian Pound' ),
+  ( 150,   0, N'BDT',  N'Taka' ),
+  ( 151,   0, N'WST',  N'Tala' ),
+  ( 152,   0, N'TZS',  N'Tanzanian Shilling' ),
+  ( 153,   0, N'KZT',  N'Tenge' ),
+  ( 154,   0, N'SIT',  N'Tolar' ),
+  ( 155,   0, N'TTD',  N'Trinidad and Tobago Dollar' ),
+  ( 156,   0, N'MNT',  N'Tugrik' ),
+  ( 157,   0, N'TND',  N'Tunisian Dinar' ),
+  ( 159,   0, N'UGX',  N'Uganda Shilling' ),
+  ( 160,   1, N'USD',  N'US Dollar' ),
+  ( 161,   0, N'UZS',  N'Uzbekistan Sum' ),
+  ( 162,   0, N'VUV',  N'Vatu' ),
+  ( 163,   0, N'KRW',  N'Won' ),
+  ( 164,   0, N'YER',  N'Yemeni Rial' ),
+  ( 165,   0, N'JPY',  N'Yen' ),
+  ( 166,   0, N'CNY',  N'Yuan Renminbi' ),
+  ( 167,   0, N'ZWD',  N'Zimbabwe Dollar' ),
+  ( 168,   0, N'PLN',  N'Zloty' )
 
 /*CreateDataEnd*/
 
-/*
-157<option value="TRY">Türk Lirası</option>
-49<option value="EUR">Euro</option>
-159<option value="USD">US Dollar</option>
-*/
-
-  /*
-
-1<option value="AFN">Afghani</option>
-2<option value="DZD">Algerian Dinar</option>
-3<option value="ARS">Argentine Peso</option>
-4<option value="AWG">Aruban Guilder</option>
-5<option value="AUD">Australian Dollar</option>
-6<option value="AZM">Azerbaijanian Manat</option>
-7<option value="BSD">Bahamian Dollar</option>
-8<option value="BHD">Bahraini Dinar</option>
-9<option value="THB">Baht</option>
-10<option value="PAB">Balboa</option>
-1<option value="BBD">Barbados Dollar</option>
-2<option value="BYR">Belarussian Ruble</option>
-3<option value="BZD">Belize Dollar</option>
-4<option value="BMD">Bermudian Dollar</option>
-5<option value="VEB">Bolivar</option>
-6<option value="BOB">Boliviano</option>
-7<option value="BGN">Bulgarian Lev</option>
-8<option value="BRL">Brazilian Real</option>
-9<option value="BND">Brunei Dollar</option>
-20<option value="BIF">Burundi Franc</option>
-1<option value="CAD">Canadian Dollar</option>
-2<option value="CVE">Cape Verde Escudo</option>
-3<option value="KYD">Cayman Islands Dollar</option>
-4<option value="GHC">Cedi</option>
-5<option value="XAF">CFA Franc</option>
-6<option value="XOF">CFA Franc</option>
-7<option value="XPF">CFP Franc</option>
-8<option value="CLP">Chilean Peso</option>
-9<option value="COP">Colombian Peso</option>
-30<option value="KMF">Comoro Franc</option>
-1<option value="NIO">Cordoba Oro</option>
-2<option value="CRC">Costa Rican Colon</option>
-3<option value="CUP">Cuban Peso</option>
-4<option value="CYP">Cyprus Pound</option>
-5<option value="CZK">Czech Koruna</option>
-6<option value="DKK">Danish Krone</option>
-7<option value="GMD">Dalasi</option>
-8<option value="MKD">Denar</option>
-9<option value="AED">Dirham</option>
-40<option value="DJF">Djibouti Franc</option>
-1<option value="STD">Dobra</option>
-2<option value="DOP">Dominican Peso</option>
-3<option value="VND">Dong</option>
-4<option value="AMD">Dram</option>
-5<option value="XCD">East Carribean Dollar</option>
-6<option value="EGP">Egyptian Pound</option>
-7<option value="SVC">El Salvador Colon</option>
-8<option value="ETB">Ethopian Birr</option>
-49<option value="EUR">Euro</option>
-50<option value="FKP">Falkland Islands Pound</option>
-1<option value="FJD">Fiji Dollar</option>
-2<option value="HUF">Forint</option>
-3<option value="CDF">Franc Congolais</option>
-4<option value="GIP">Gibraltar Pound</option>
-5<option value="XAU">Gold</option>
-6<option value="HTG">Gourde</option>
-7<option value="PYG">Guarani</option>
-8<option value="GNF">Guinea Franc</option>
-9<option value="GYD">Guyana Dollar</option>
-60<option value="HKD">HKD</option>
-1<option value="UAH">Hryvnia</option>
-2<option value="ISK">Iceland Krona</option>
-3<option value="INR">Indian Rupee</option>
-4<option value="IQD">Iraqi Dinar</option>
-5<option value="IRR">Iranian Rial</option>
-6<option value="JMD">Jamaican Dollar</option>
-7<option value="JOD">Jordanian Dinar</option>
-8<option value="KES">Kenyan Shilling</option>
-9<option value="PGK">Kina</option>
-70<option value="LAK">Kip</option>
-1<option value="EEK">Kroon</option>
-2<option value="HRK">Kuna</option>
-3<option value="KWD">Kuwaiti Dinar</option>
-4<option value="MWK">Kwacha</option>
-5<option value="ZMK">Kwacha</option>
-6<option value="AOA">Kwanza</option>
-7<option value="MMK">Kyat</option>
-8<option value="GEL">Lari</option>
-9<option value="LVL">Latvian Lats</option>
-80<option value="LBP">Lebanese Pound</option>
-1<option value="ALL">Lek</option>
-2<option value="HNL">Lempira</option>
-3<option value="SLL">Leone</option>
-4<option value="ROL">Leu</option>
-5<option value="LRD">Liberian Dollar</option>
-6<option value="LYD">Libyan Dinar</option>
-7<option value="SZL">Lilangeni</option>
-8<option value="LTL">Lithuanian Litas</option>
-9<option value="LSL">Loti</option>
-90<option value="MGF">Malagasy Franc</option>
-1<option value="MYR">Malaysian Ringgit</option>
-2<option value="MTL">Maltese Lira</option>
-3<option value="TMM">Manat</option>
-4<option value="MUR">Mauritius Rupee</option>
-5<option value="MZM">Metical</option>
-6<option value="MXN">Mexican Peso</option>
-7<option value="MDL">Moldovan Leu</option>
-8<option value="MAD">Morrocan Dirham</option>
-9<option value="NGN">Naira</option>
-100<option value="ERN">Nakfa</option>
-1<option value="NAD">Namibia Dollar</option>
-2<option value="NPR">Nepalese Rupee</option>
-3<option value="ANG">Netherlands Antillian Guilder</option>
-4<option value="YUM">New Dinar</option>
-5<option value="ILS">New Israeli Sheqel</option>
-6<option value="TWD">New Taiwan Dollar</option>
-7<option value="NZD">New Zealand Dollar</option>
-8<option value="KPW">North Korean Won</option>
-9<option value="NOK">Norwegian Krone</option>
-110<option value="BTN">Ngultrum</option>
-1<option value="PEN">Nuevo Sol</option>
-2<option value="MRO">Ouguiya</option>
-3<option value="TOP">Pa&amp;apos;anga</option>
-4<option value="PKR">Pakistan Rupee</option>
-5<option value="XPD">Palladium</option>
-6<option value="MOP">Pataca</option>
-7<option value="UYU">Peso Uruguayo</option>
-8<option value="PHP">Philippine Peso</option>
-9<option value="XPT">Platinum</option>
-120<option value="GBP">Pound Sterling</option>
-1<option value="BWP">Pula</option>
-2<option value="QAR">Qatari Rial</option>
-3<option value="GTQ">Quetzal</option>
-4<option value="ZAR">Rand</option>
-5<option value="OMR">Rial Omani</option>
-6<option value="KHR">Riel</option>
-7<option value="MVR">Rufiyaa</option>
-8<option value="RON">Rumen Leyi</option>
-9<option value="IDR">Rupiah</option>
-130<option value="RUB">Russian Ruble</option>
-1<option value="RWF">Rwanda Franc</option>
-2<option value="SAR">Saudi Riyal</option>
-3<option value="XDR">SDR</option>
-4<option value="SCR">Seychelles Rupee</option>
-5<option value="XAG">Silver</option>
-6<option value="SGD">Singapore Dollar</option>
-7<option value="SKK">Slovak Koruna</option>
-8<option value="SBD">Solomon Islands Dollar</option>
-9<option value="SOS">Somali Shilling</option>
-140<option value="LKR">Sri Lanka Rupee</option>
-1<option value="KGS">Som</option>
-2<option value="TJS">Somoni</option>
-3<option value="SHP">St. Helena Pound</option>
-4<option value="SDD">Sudanese Dinar</option>
-5<option value="SRG">Suriname Guilder</option>
-6<option value="SEK">Swedish Krona</option>
-7<option value="CHF">Swiss Franc</option>
-8<option value="SYP">Syrian Pound</option>
-9<option value="BDT">Taka</option>
-150<option value="WST">Tala</option>
-1<option value="TZS">Tanzanian Shilling</option>
-2<option value="KZT">Tenge</option>
-3<option value="SIT">Tolar</option>
-4<option value="TTD">Trinidad and Tobago Dollar</option>
-5<option value="MNT">Tugrik</option>
-6<option value="TND">Tunisian Dinar</option>
-157<option value="TRY">Türk Lirası</option>
-8<option value="UGX">Uganda Shilling</option>
-159<option value="USD">US Dolar</option>
-160<option value="UZS">Uzbekistan Sum</option>
-1<option value="VUV">Vatu</option>
-2<option value="KRW">Won</option>
-3<option value="YER">Yemeni Rial</option>
-4<option value="JPY">Yen</option>
-5<option value="CNY">Yuan Renminbi</option>
-6<option value="ZWD">Zimbabwe Dollar</option>
-7<option value="PLN">Zloty</option>
-
-
-
-  */

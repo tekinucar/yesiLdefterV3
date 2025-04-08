@@ -1691,7 +1691,19 @@ INSERT INTO [dbo].[SYS_UPDATES]
             sql += " union all " + v.ENTER;
         }
 
+        public string Sql_prc_MtskGunlukTakipler()
+        {
+            string sql = "";
 
+            sql = @"
+  DECLARE @FirmId int
+
+  Set @FirmId = :FIRM_ID
+
+  EXECUTE [dbo].[prc_MtskGunlukTakipler] @FirmId
+";
+            return sql;
+        }
         public string Sql_MsProjectTables(string tableName, Int16 sectorTypeId)
         {
             return @"
@@ -2182,6 +2194,9 @@ INSERT INTO [dbo].[SYS_UPDATES]
                     {
                         if (form_prp.IndexOf(TableIPCode) > -1)
                         {
+                            /// Form açarken "READ" value ile istenen kayıt açılıyor
+                            /// 42 Kart Aç
+                            /// 
                             Preparing_RefID_JSON(dsFields,
                                                  ref NewSQL, ref TargetValue, ref DataCopyCode,
                                                  TableIPCode, TableLabel, form_prp, UseNewRefId, Data_Read_Type);

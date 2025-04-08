@@ -28,7 +28,7 @@ commit transaction
 
 
 /*CreateData*/
-
+DELETE [Lkp].[OnmStokBirimTipi]
 INSERT INTO [Lkp].[OnmStokBirimTipi] (Id, IsActive, BirimKodu, BirimAdi )
  VALUES 
   ( 0, 1, N'',    N'Tanımsız' ),
@@ -78,6 +78,9 @@ INSERT INTO [Lkp].[OnmStokBirimTipi] (Id, IsActive, BirimKodu, BirimAdi )
   (44, 0, N'J39', N'mmBTU' ),
   (45, 0, N'G52', N'CM³' ),
   (46, 0, N'DZN', N'Düzine' ),
-  (47, 0, N'dm2', N'DMK' )
+  (47, 0, N'DMK', N'dm2' ),
+  (48, 0, N'DMT', N'dm' ),
+  (49, 0, N'HAR', N'ha' ),
+  (50, 0, N'LM', N'Metretül (LM)' )
 
 /*CreateDataEnd*/
