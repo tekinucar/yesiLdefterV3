@@ -4,10 +4,9 @@
 CREATE PROCEDURE [dbo].[prc_MtskGrupSubesiTeorikDersToplamList] (@FirmId int, @DonemTipiId int)  
 AS BEGIN
  
- /*
- declare @FirmId int = 11
- declare @DonemTipiId int = 202503
- */
+-- declare @FirmId int = 63
+-- declare @DonemTipiId int = 202503
+ 
  Select 
    MtskGrupSubesi.DonemTipiId
  , MtskGrupSubesi.GrupTipiId
@@ -32,8 +31,6 @@ AS BEGIN
 
  , count(teo.Id) as Lkp_VerilenDersSayisi
  
-
-
  from MtskGrupSubesi as [MtskGrupSubesi] with (nolock) 
    left outer join Lkp.MtskTeorikDersDerslikTipi as ders on (ders.Id > 0)
 
@@ -51,6 +48,7 @@ AS BEGIN
            MtskGrupSubesi.DonemTipiId = teo.DonemTipiId  
        and MtskGrupSubesi.GrupTipiId = teo.GrupTipiId  
        and MtskGrupSubesi.SubeTipiId = teo.SubeTipiId  
+       and ders.Id = teo.DerslikTipiId
    )
 
  where 0 = 0 
@@ -72,7 +70,7 @@ AS BEGIN
  , saat.IlkYardimDersSaati
  , saat.AracTeknigiDersSaati
  , saat.TrafikAdabiDersSaati 
-
+ , teo.DerslikTipiId
 
 END -- procedure
 

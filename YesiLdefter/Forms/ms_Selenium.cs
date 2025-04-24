@@ -137,15 +137,17 @@ namespace YesiLdefter
             msPagesService.preparingDataSets(this, dataNavigator_PositionChanged);
 
             // web sayfalarının adını gösteren viewControl
-            this.webTest = new WebBrowser();
+            
 
             string TableIPCode = "UST/PMS/MsWebNodes.Analysis_L01";
             t.Find_DataSet(this, ref this.ds_AnalysisNodes, ref this.dN_AnalysisNodes, TableIPCode);
 
             if (this.dN_AnalysisNodes != null)
+            {
                 this.dN_AnalysisNodes.PositionChanged += new System.EventHandler(dN_AnalysisNodes_PositionChanged);
-
-            this.webTest = (WebBrowser)t.Find_Control(this, "webTest");
+                this.webTest = new WebBrowser();
+                this.webTest = (WebBrowser)t.Find_Control(this, "webTest");
+            }
             
         }
 
@@ -415,7 +417,8 @@ namespace YesiLdefter
                     buttonAutoSaveControl.Appearance.ForeColor = v.AppearanceTextColor;
                 }
 
-                f.btn_FullSave.Visible = !f.autoSubmit;
+                if (f.btn_FullSave != null)
+                    f.btn_FullSave.Visible = !f.autoSubmit;
             }
 
             if (sender.GetType().ToString() == "DevExpress.XtraBars.Navigation.TileNavItem")
@@ -432,12 +435,17 @@ namespace YesiLdefter
             
             if (v.webDriver_ == null)// && (dN_MsWebPages.Position == 0)
                 onay = msPagesService.LoginOnayi(ds_MsWebPages, dN_MsWebPages);
-            
+
             //if ((onay) &&                        // onaylı olacak ve
             //    ((v.webDriver_ != null ||        // ( webDriver create edilmiş veya 
             //      dN_MsWebPages.Position == 0))) //   Login sayfası olacak ) 
             if (onay)
+            {
+                t.WaitFormOpen(this, "Google Chrome yükleniyor ...");
                 await seleniumLoginPageViev();
+                v.IsWaitOpen = false;
+                t.WaitFormClose();
+            }
         }
         
         #region Test buttons click

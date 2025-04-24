@@ -15,6 +15,7 @@ begin transaction
    IlkYardimDersSaati               smallInt     null,
    AracTeknigiDersSaati             smallInt     null,
    TrafikAdabiDersSaati             smallInt     null,
+   TeorikDersSaati                  smallInt     null,
 
   constraint pk_MtskSaatTeorik primary key (Id)
  )
@@ -49,7 +50,9 @@ commit transaction
            ,[TrafikVeCevreDersSaati]
            ,[IlkYardimDersSaati]
            ,[AracTeknigiDersSaati]
-           ,[TrafikAdabiDersSaati])
+           ,[TrafikAdabiDersSaati]
+           ,[TeorikDersSaati]            
+           )
      VALUES
            (@FirmId
            ,1  -- IsActive
@@ -58,6 +61,7 @@ commit transaction
            ,8  -- IlkYardimDersSaati
            ,6  -- AracTeknigiDersSaati
            ,4  -- TrafikAdabiDersSaati
+           ,34 -- TeorikDersSaati
 		   )
 
   /*CreateDataEnd*/

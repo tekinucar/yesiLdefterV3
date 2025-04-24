@@ -3,7 +3,7 @@
 CREATE PROCEDURE [dbo].[prc_MtskAdayTakipTalepKaydiSingleSet] (@TalepId int)  
 AS BEGIN
 
-  --declare @TalepId int
+    --declare @TalepId int
   --set @TalepId = 310
 
   -- Variables
@@ -33,6 +33,11 @@ AS BEGIN
   declare @ySubeTipiId smallint = 0
   declare @yBelgelerGeldi bit = 0
 
+  declare @ySistemUyarilari nvarchar(200)
+  declare @oldSistemUyarilari nvarchar(200)
+  declare @yeniSistemUyarisi nvarchar(200)
+  declare @grupSubeSil bit = 0
+
   set @GelecekAy = DATEADD(month, 1, getdate());
 	
   -- Bugün hangi dönem ?  tespit ediliyor
@@ -56,11 +61,10 @@ AS BEGIN
       ,@yGrupTipiId = isnull(ins.GrupTipiId,0)
       ,@ySubeTipiId = isnull(ins.SubeTipiId,0)
       ,@yBelgelerGeldi = isnull(ins.BelgelerGeldi,0)
+      ,@ySistemUyarilari = isnull(ins.SistemUyarilari,'')
   From  dbo.MtskAdayTalep as ins, dbo.MtskAday as aday
   Where ins.AdayId = aday.Id
   and   ins.Id = @TalepId
-     
-
 
   -- ----------------------------------------------------------------------------------
   -- Aday kayıt aşaması
@@ -96,6 +100,53 @@ AS BEGIN
   order by gt.Tarih desc
   
   set @deneyimSartiTipiId = [dbo].[fnc_getSertifikaDeneyimSarti] ( @TalepId )
+
+  -- [Lkp].[MtskAdayTakipDeneyimSartiTipi] 
+  -- 1, 'Deneyim şartı yok'
+  -- 2, 'Deneyim şartına uygun'
+  -- 3, 'Deneyim şartına uygun değil'
+  set @yeniSistemUyarisi = ''
+  if (@deneyimSartiTipiId = 3) 
+  begin
+      set @yeniSistemUyarisi = 'Deneyim şartı uygun değil'
+	  set @grupSubeSil = 1
+  end else
+  begin
+      if (CHARINDEX('Deneyim şartı uygun değil', @ySistemUyarilari) > 0) set @yeniSistemUyarisi = 'uyarıyıSil'
+	  set @grupSubeSil = 0
+  end
+
+  if (@yeniSistemUyarisi != '')
+  begin 
+    set @oldSistemUyarilari = @ySistemUyarilari
+    if (CHARINDEX('Deneyim şartı', @yeniSistemUyarisi) > 0)
+    begin
+	   -- @ySistemUyarilari boş değilse
+       if (CHARINDEX('Deneyim şartı', @ySistemUyarilari) = 0 and len(@ySistemUyarilari) > 0) set @ySistemUyarilari = @yeniSistemUyarisi + CHAR(13) + CHAR(10) + @ySistemUyarilari
+	   -- @ySistemUyarilari boş ise
+	   if (CHARINDEX('Deneyim şartı', @ySistemUyarilari) = 0 and len(@ySistemUyarilari) = 0) set @ySistemUyarilari = @yeniSistemUyarisi
+    end 
+    if (CHARINDEX('uyarıyıSil', @yeniSistemUyarisi) > 0)
+    begin
+       declare @i1 int = 0
+       declare @i2 int = 0
+       set @i1 = charindex('Deneyim şartı', @ySistemUyarilari) 
+       set @i2 = 26-- Deneyim şartı uygun değil
+       if (@i1 > 0)
+           set @ySistemUyarilari = trim(stuff(@ySistemUyarilari, @i1, @i2, ''))
+    end
+	if (@oldSistemUyarilari <> @ySistemUyarilari)
+    begin
+	    Update dbo.MtskAdayTalep set SistemUyarilari = @ySistemUyarilari
+        Where Id = @TalepId
+    end
+  end
+
+  if (@grupSubeSil = 1)
+  begin
+      Update dbo.MtskAdayTalep set GrupTipiId = 0, SubeTipiId = 0
+      Where Id = @TalepId
+  end
 
   -- ----------------------------------------------------------------------------------
   -- Teorik Dersler aşaması

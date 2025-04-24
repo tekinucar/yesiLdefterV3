@@ -1725,7 +1725,7 @@ namespace Tkn_Layout
             {
                 try
                 {
-                    tabHeaderShow = t.Set(t.Find_Properties_Value(Prop_View, "TABHEADER"), "FALSE", "");
+                    tabHeaderShow = t.Set(t.Find_Properties_Value(Prop_View, "TABHEADER"), "TRUE", "");
                 }
                 catch (Exception)
                 {
@@ -1777,6 +1777,7 @@ namespace Tkn_Layout
             xtraTabControl1.SelectedTabPageIndex = 0;
             xtraTabControl1.Size = new System.Drawing.Size(v.Screen_Width, v.Screen_Height); //300, 300);
             xtraTabControl1.TabIndex = pos;
+
             xtraTabControl1.HeaderLocation = DevExpress.XtraTab.TabHeaderLocation.Left;
             if (tabHeaderShow == "FALSE")
                 xtraTabControl1.ShowTabHeader = DevExpress.Utils.DefaultBoolean.False;
@@ -3134,10 +3135,25 @@ namespace Tkn_Layout
 
                 //Cef.Initialize(settings);
 
+                ChromiumWebBrowser webBrowser1 = null;
+
                 if (t.IsNotNull(TableIPCode) == false)
                     TableIPCode = "www.google.com";
+                try
+                {
+                    // bunu çalıştıramadım ama metod güzel onun için silmedim
+                    // CefSharp bileşenlerini kontrol et ve gerekirse indir
+                    // CefSharpInstaller.EnsureCefSharpComponents().Wait();
 
-                ChromiumWebBrowser webBrowser1 = new ChromiumWebBrowser(TableIPCode);
+                    webBrowser1 = new ChromiumWebBrowser(TableIPCode);
+                }
+                catch (Exception ex)
+                {
+                    
+                    t.X64filesUpdates();
+                    t.LaunchCommandLineApp();
+                    return;
+                }
 
                 Tkn_CefSharp.tCefSharp tCefSharp = new Tkn_CefSharp.tCefSharp();
                 

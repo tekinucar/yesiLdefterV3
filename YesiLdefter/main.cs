@@ -194,6 +194,15 @@ namespace YesiLdefter
                 //MessageBox.Show("2 : " + params_.ToString() + " ; " + v.tUser.UserId.ToString());
 
                 t.dbUpdatesChecked();
+
+            }
+
+            if ((v.SP_TabimParamsKurumTipi == "MTSK") ||
+                (v.SP_TabimParamsKurumTipi == "ISMAK") ||
+                (v.SP_TabimParamsKurumTipi == "SRC"))
+            {
+                //MessageBox.Show("TABIM");
+                t.TabimMebAdayCountWrite();
             }
 
             #endregion
@@ -224,8 +233,8 @@ namespace YesiLdefter
             #region appOpenSetDefaaultSkin
             WindowsFormsSettings.EnableFormSkins();
             //UserLookAndFeel.Default.SetSkinStyle("VS2010");
-            //UserLookAndFeel.Default.SetSkinStyle(SkinSvgPalette.Office2019Colorful.Forest);
-            //UserLookAndFeel.Default.SetSkinStyle(SkinStyle.Whiteprint);
+            UserLookAndFeel.Default.SetSkinStyle(SkinSvgPalette.Bezier.Grasshopper);
+            //UserLookAndFeel.Default.SetSkinStyle(SkinStyle.Sharp);//   Whiteprint);
             //UserLookAndFeel.Default.SetSkinStyle(SkinSvgPalette.Bezier.Grasshopper);
             UserLookAndFeel.Default.StyleChanged += Default_StyleChanged;
             #endregion

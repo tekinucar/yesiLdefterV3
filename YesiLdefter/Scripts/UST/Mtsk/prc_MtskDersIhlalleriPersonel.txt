@@ -348,11 +348,12 @@ AS BEGIN
 		     left outer join dbo.MtskUygulamaliDers as ud on ( 
                     td.DersTarihi = ud.DersTarihi 
                 and td.DersSaatiTipiId = ud.DersSaatiTipiId
+                and td.PersonelId = ud.PersonelId
              )
          Where 0 = 0
          and   td.DersTarihi >= @DersTarihiBasla
          and   td.DersTarihi <= @DersTarihiBitis
-		 and   ud.Id is not null
+         and   ud.Id is not null
 
 END -- procedure
 /*CreateProcedureEnd*/

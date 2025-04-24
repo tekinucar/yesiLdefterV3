@@ -1,0 +1,40 @@
+﻿begin transaction
+ create table UstadFirmsMebAday
+ (
+    Id              Int IDENTITY(1,1) not null,
+    FirmId          Int               null,
+	FirmGUID        uniqueidentifier  null,
+	DonemTipiId     int               null, 
+    Adet            int               null, 	
+
+   Constraint pk_UstadFirmsMebAday primary key (Id)
+ )
+
+ create index X_UstadFirmsMebAday_01 on UstadFirmsMebAday (FirmId)
+ create index X_UstadFirmsMebAday_02 on UstadFirmsMebAday (FirmGUID)
+
+ grant select, insert, update, delete on UstadFirmsMebAday to public
+
+commit transaction
+
+
+begin transaction
+ create table UstadFirmsMebAdaySertifika
+ (
+    Id                     Int IDENTITY(1,1) not null,
+    FirmId                 Int               null,
+	FirmGUID               uniqueidentifier  null,
+	DonemTipiId            int               null, 
+    MevcutSertifikaTipiId  smallint          null,
+    IstenenSertifikaTipiId smallint          null,
+    Adet                   int               null, 	
+
+   Constraint pk_UstadFirmsMebAdaySertifika primary key (Id)
+ )
+
+ create index X_UstadFirmsMebAdaySertifika_01 on UstadFirmsMebAdaySertifika (FirmId)
+ create index X_UstadFirmsMebAdaySertifika_02 on UstadFirmsMebAdaySertifika (FirmGUID)
+
+ grant select, insert, update, delete on UstadFirmsMebAdaySertifika to public
+
+commit transaction

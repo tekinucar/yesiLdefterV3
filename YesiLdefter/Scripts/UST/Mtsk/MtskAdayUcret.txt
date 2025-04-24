@@ -42,7 +42,8 @@ begin transaction
    OdemeTipiId             SmallInt      null, /* 1. Kredi Kartı, 2. Nakit, 3. Banka Havalesi, 4. Senet, 5. Açık Hesap */
    OdemeBaslamaTarihi      Date          null,
    OdemeCepTelefonu        nVarchar(15)  null,  
-   SinavUcretTipiId        SmallInt      null, /* 1. Biz yatıracağız,  2. Adayın kendisi yatıracak */   
+   ESinavUcretTipiId       SmallInt      null, /* e-sınav için 1. Biz yatıracağız,  2. Adayın kendisi yatıracak */   
+   USinavUcretTipiId       SmallInt      null, /* uyg-sınav için 1. Biz yatıracağız,  2. Adayın kendisi yatıracak */   
 
    -- 60 Mebbise bildirilecek ücretler
    MebbisSertifikaUcreti      Numeric(22,5) null,
@@ -111,8 +112,10 @@ AS BEGIN
     declare @VeriKaynakId int = 0
     declare @KontejanTipiId smallint
 	declare @IsKontejan bit = 0
-	declare @SinavUcretTipiId smallInt 
+	declare @ESinavUcretTipiId smallInt 
+	declare @USinavUcretTipiId smallInt 
 	declare @SertifikaUcreti numeric(22,5)
+    declare @KontejanIndirimTutari numeric(22,5)
 	declare @KontejanSonrasiUcret numeric(22,5)
     declare @AnlasilanUcret numeric(22,5)
     declare @TaksitlendirilecekUcret numeric (22,5)
@@ -125,8 +128,10 @@ AS BEGIN
            ,@AdayId = ins.AdayId
 		   ,@VeriKaynakId = ins.VeriKaynakId
            ,@KontejanTipiId = ins.KontejanTipiId 
-		   ,@SinavUcretTipiId = ins.SinavUcretTipiId
+		   ,@ESinavUcretTipiId = ins.ESinavUcretTipiId
+		   ,@USinavUcretTipiId = ins.USinavUcretTipiId
            ,@SertifikaUcreti = ins.SertifikaUcreti
+		   ,@KontejanIndirimTutari = ins.KontejanIndirimTutari
 	       ,@KontejanSonrasiUcret = ins.KontejanSonrasiUcret
            ,@AnlasilanUcret = ins.AnlasilanUcret
            ,@TaksitlendirilecekUcret = ins.TaksitlendirilecekUcret
@@ -158,17 +163,19 @@ AS BEGIN
             -- Takip
             Update MtskAdayTakip set
                 IsKontejan = @IsKontejan
-              , eSinavUcretTipiId = @SinavUcretTipiId 
-              , uSinavUcretTipiId = @SinavUcretTipiId 
+              , eSinavUcretTipiId = @ESinavUcretTipiId 
+              , uSinavUcretTipiId = @USinavUcretTipiId 
             Where TalepId = @TalepId
             and ( IsKontejan <> @IsKontejan 
-             or   eSinavUcretTipiId <> @SinavUcretTipiId )  
+             or   eSinavUcretTipiId <> @ESinavUcretTipiId
+             or   uSinavUcretTipiId <> @USinavUcretTipiId )  
 
             if ((@KontejanSonrasiUcret = 0) or
 			    (@AnlasilanUcret = 0) or
 				(@TaksitlendirilecekUcret = 0))
             begin
-                if (@KontejanSonrasiUcret = 0) Set @KontejanSonrasiUcret = @SertifikaUcreti  
+                if (@KontejanSonrasiUcret = 0 and @KontejanIndirimTutari = 0) Set @KontejanSonrasiUcret = @SertifikaUcreti  
+                if (@KontejanSonrasiUcret = 0 and @KontejanIndirimTutari > 0) Set @KontejanSonrasiUcret = @SertifikaUcreti - @KontejanIndirimTutari 
                 if (@AnlasilanUcret = 0) Set @AnlasilanUcret = @KontejanSonrasiUcret
                 if (@TaksitlendirilecekUcret = 0) Set @TaksitlendirilecekUcret = @AnlasilanUcret
 
@@ -300,26 +307,47 @@ INSERT INTO [Lkp].[MtskAdayUcretOdemeTipi] (Id, OdemeTipi, IsActive)
 
 
 -- ------------------------------------------------------- 
--- SinavUcretTipiId
+-- ESinavUcretTipiId
 -- ------------------------------------------------------- 
-IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdayUcretSinavUcretTipi')
-drop table [Lkp].[MtskAdayUcretSinavUcretTipi]
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdayUcretESinavUcretTipi')
+drop table [Lkp].[MtskAdayUcretESinavUcretTipi]
 
-create table [Lkp].[MtskAdayUcretSinavUcretTipi]
+create table [Lkp].[MtskAdayUcretESinavUcretTipi]
 (
    Id               Int Unique not null, 
-   SinavUcretTipi   nVarchar(50)   null,
+   ESinavUcretTipi  nVarchar(50)   null,
   
-   constraint  pk_MtskAdayUcretSinavUcretTipi primary key (Id)
+   constraint  pk_MtskAdayUcretESinavUcretTipi primary key (Id)
 )
 
-Delete from [Lkp].[MtskAdayUcretSinavUcretTipi]
-INSERT INTO [Lkp].[MtskAdayUcretSinavUcretTipi] (Id, SinavUcretTipi)
+Delete from [Lkp].[MtskAdayUcretESinavUcretTipi]
+INSERT INTO [Lkp].[MtskAdayUcretESinavUcretTipi] (Id, ESinavUcretTipi)
  VALUES 
   ( 0,    N'Tanımsız'),
   ( 1,    N'Biz yatıracağız'),
   ( 2,    N'Adayın kendisi yatıracak')
 
+
+-- ------------------------------------------------------- 
+-- USinavUcretTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdayUcretUSinavUcretTipi')
+drop table [Lkp].[MtskAdayUcretUSinavUcretTipi]
+
+create table [Lkp].[MtskAdayUcretUSinavUcretTipi]
+(
+   Id               Int Unique not null, 
+   USinavUcretTipi  nVarchar(50)   null,
+  
+   constraint  pk_MtskAdayUcretUSinavUcretTipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskAdayUcretUSinavUcretTipi]
+INSERT INTO [Lkp].[MtskAdayUcretUSinavUcretTipi] (Id, USinavUcretTipi)
+ VALUES 
+  ( 0,    N'Tanımsız'),
+  ( 1,    N'Biz yatıracağız'),
+  ( 2,    N'Adayın kendisi yatıracak')
 
 
 commit transaction

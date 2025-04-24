@@ -1572,25 +1572,39 @@ namespace YesiLdefter.Selenium
                     (workPageNodes.aktifPageCode != "MTSKADAYIMZA") &&
                     (workPageNodes.aktifPageCode != "SRCADAYRESIM")
                     )
-                    f.btn_FullPost1.Visible = true;
-                else f.btn_FullPost1.Visible = false;
-
+                {
+                    if (f.btn_FullPost1 != null) f.btn_FullPost1.Visible = true;
+                }
+                else
+                {
+                    if (f.btn_FullPost1 != null) f.btn_FullPost1.Visible = false;
+                }
                 if ((workPageNodes.aktifPageCode == "MTSKADAYRESIM") ||
                     (workPageNodes.aktifPageCode == "MTSKADAYSOZLESME") ||
                     (workPageNodes.aktifPageCode == "MTSKADAYIMZA") ||
-                    (workPageNodes.aktifPageCode == "SRCADAYRESIM") 
+                    (workPageNodes.aktifPageCode == "SRCADAYRESIM")
                     )
-                    f.btn_FullPost2.Visible = true;
-                else f.btn_FullPost2.Visible = false;
-            
-                if (f.btn_FullPost1.Visible)
+                {
+                    if (f.btn_FullPost2 != null) f.btn_FullPost2.Visible = true;
+                }
+                else
+                {
+                    if (f.btn_FullPost2 != null) f.btn_FullPost2.Visible = false;
+                }
+
+                if (f.btn_FullPost1 != null && f.btn_FullPost1.Visible)
                 {
                     if (f.btn_FullPost1.Tag == null)
                         f.btn_FullPost1.Tag = f.btn_FullPost1.Text;
 
                     if (workPageNodes.aktifPageCode == "MTSKADAYRESIM")
+                    {
                         f.btn_FullPost1.Text = "Başvuru resmini gönder";
-                    else f.btn_FullPost1.Text = f.btn_FullPost1.Tag.ToString();
+                    }
+                    else
+                    {
+                        f.btn_FullPost1.Text = f.btn_FullPost1.Tag.ToString();
+                    }
                 }
 
 

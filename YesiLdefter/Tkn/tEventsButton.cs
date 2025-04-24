@@ -114,7 +114,7 @@ namespace Tkn_Events
                 if (buttonHint.prop_ == null)
                     buttonHint.prop_ = prop_;
 
-                isFormOpen = CheckValue(tForm, prop_, tableIPCode);
+                isFormOpen = t.tWorkingCheck(tForm, prop_, tableIPCode);
 
                 if (isFormOpen) // form açılması için onaylandı ise
                 {
@@ -148,7 +148,7 @@ namespace Tkn_Events
                                 
                 foreach (PROP_NAVIGATOR item in propList_)
                 {
-                    isFormOpen = CheckValue(tForm, item, tableIPCode);
+                    isFormOpen = t.tWorkingCheck(tForm, item, tableIPCode);
 
                     // else satırı mı kontrol et
                     elseItem = (item.CHC_VALUE.ToString().IndexOf("ELSE") > -1);
@@ -969,6 +969,9 @@ namespace Tkn_Events
 
             NavigatorButton btnL = dN.Buttons.Last;
             dN.Buttons.DoClick(btnL);
+            // bu yeni eklendi
+            NavigatorButton btnN = dN.Buttons.Next;
+            dN.Buttons.DoClick(btnN);
 
             v.con_NewRecords = false;
 
@@ -1935,7 +1938,7 @@ namespace Tkn_Events
             //tToolBox t = new tToolBox();
             bool onay = false;
 
-            bool isChecked = CheckValue(tForm, prop_, tableIPCode);
+            bool isChecked = t.tWorkingCheck(tForm, prop_, tableIPCode);
 
             // form açılması için onaylandı ise
             if (isChecked)
@@ -1977,7 +1980,7 @@ namespace Tkn_Events
             {
                 if (prop_.BUTTONTYPE.ToString() == Convert.ToString((byte)v.tButtonType.btResimEditor))
                 {
-                    isChecked = CheckValue(tForm, prop_, tableIPCode);
+                    isChecked = t.tWorkingCheck(tForm, prop_, tableIPCode);
 
                     // form açılması için onaylandı ise
                     if (isChecked)
@@ -2345,12 +2348,12 @@ namespace Tkn_Events
             {
                 if (item.WORKTYPE.ToString() == "IBOX")
                 {
-                    InputBox(tForm, TableIPCode, item);
+                    InputBox(tForm, TableIPCode, item, null);
                 }
             }
         }
      
-        public bool InputBox(Form tForm, string TableIPCode, TABLEIPCODE_LIST item)
+        public bool InputBox(Form tForm, string TableIPCode, TABLEIPCODE_LIST item, DataRow sourceDataRow)
         {
             if (item.WORKTYPE.ToString() != "IBOX") return false;
 
@@ -2358,19 +2361,32 @@ namespace Tkn_Events
 
             vUserInputBox iBox = new vUserInputBox();
 
-            ///"TABLEIPCODE_LIST": [
-            ///{
-            ///  "CAPTION": "Miktar Sor",
-            ///  "TABLEIPCODE": "null",
-            ///  "TABLEALIAS": "null",
-            ///  "KEYFNAME": "MIKTAR",
-            ///  "RTABLEIPCODE": "null",
-            ///  "RKEYFNAME": "URUN_ADI",
-            ///  "MSETVALUE": "null",
-            ///  "WORKTYPE": "IBOX",
-            ///  "CONTROLNAME": "null",
-            ///  "DCCODE": "null"
-            ///}
+            //{
+            //"CAPTION": "Miktar Girin",
+            //"TABLEIPCODE": "null",
+            //"TABLEALIAS": "null",
+            //"KEYFNAME": "Miktar",
+            //"RTABLEIPCODE": "null",
+            //"RKEYFNAME": "UrunAdi",
+            //"MSETVALUE": "null",
+            //"WORKTYPE": "IBOX",
+            //"CONTROLNAME": "null",
+            //"DCCODE": "null",
+            //"BEFOREAFTER": "null",
+
+            /// TABLEIPCODE_LIST içinde ilk defa check kontrolü kullanılıyor, bu özellik başka bir yere eklenmedi henüz
+
+            //"CHC_IPCODE": "UST/OMS/HStok.AramaTumu_L01",
+            //"CHC_FNAME": "SatisMiktariniSorma",
+            //"CHC_VALUE": "0",
+            //"CHC_OPERAND": "="
+            //},
+
+            bool checked_ = t.tWorkingCheck(tForm, item, sourceDataRow);
+
+            /// kontrolden dolayı onay alamadı fakat yinede true dönmesi gerekiyor
+            if (checked_ == false) 
+                return true;
 
             bool onay = true;
             string target_FName = string.Empty;
@@ -2568,7 +2584,7 @@ namespace Tkn_Events
         }
 
 
-        private void tSetData_(List<TABLEIPCODE_LIST> TableIPCodeList,
+        public void tSetData_(List<TABLEIPCODE_LIST> TableIPCodeList,
             DataSet read_dsData,
             DataNavigator read_dN,
             DataSet target_dsData,
@@ -2663,166 +2679,6 @@ namespace Tkn_Events
 
         }
 
-        public bool CheckValue(Form tForm, PROP_NAVIGATOR prop_item, string mst_TableIPCode)
-        {
-            //tToolBox t = new tToolBox();
-
-            // formun açılması için default onay ver 
-            // chc_Value     şartı var ise ona göre yeniden değerlendir = form_open1
-            // chc_Value_SEC şartı var ise ona göre yeniden değerlendir = form_open2
-            bool form_open1 = true;
-            bool form_open2 = true;
-
-            string read_value = string.Empty;
-
-            // FIRST = SOURCE
-            string chc_IPCode = prop_item.CHC_IPCODE.ToString();
-            string chc_FName = prop_item.CHC_FNAME.ToString();
-            string chc_Value = prop_item.CHC_VALUE.ToString();
-            string chc_Operand = prop_item.CHC_OPERAND.ToString();
-
-            /// bu kısım sonradan eklendiği için gerekli oldu
-            /// önceki prop_item larda null geliyor
-            if (prop_item.CHC_IPCODE_SEC == null) prop_item.CHC_IPCODE_SEC = "";
-            if (prop_item.CHC_FNAME_SEC == null) prop_item.CHC_FNAME_SEC = "";
-            if (prop_item.CHC_VALUE_SEC == null) prop_item.CHC_VALUE_SEC = "";
-            if (prop_item.CHC_OPERAND_SEC == null) prop_item.CHC_OPERAND_SEC = "";
-
-            // SEC = SECOND or TARGET
-            string chc_IPCode_SEC = prop_item.CHC_IPCODE_SEC.ToString();
-            string chc_FName_SEC = prop_item.CHC_FNAME_SEC.ToString();
-            string chc_Value_SEC = prop_item.CHC_VALUE_SEC.ToString();
-            string chc_Operand_SEC = prop_item.CHC_OPERAND_SEC.ToString();
-
-            /// bu IPCode ler dragdrop sırasında oluşuyor
-
-            if (((chc_IPCode == "FIRST") || (chc_IPCode == "SOURCE")) &&
-                t.IsNotNull(v.con_DragDropSourceTableIPCode))
-                chc_IPCode = v.con_DragDropSourceTableIPCode;
-
-            if (((chc_IPCode_SEC == "SECOND") || (chc_IPCode_SEC == "TARGET")) &&
-                t.IsNotNull(v.con_DragDropTargetTableIPCode))
-                chc_IPCode_SEC = v.con_DragDropTargetTableIPCode;
-
-
-            #region Check işlemleri / First veya Soruce için şart varsa
-            if (t.IsNotNull(chc_IPCode) &&
-                t.IsNotNull(chc_FName) &&
-                t.IsNotNull(chc_Value))
-            {
-                // chc_xxxx ler ile bir fieldin value sine bakarak istedğimiz formu açabiliriz
-
-                // yani  CARI_TIPI = 5 veya CARI_TIPI = 6 veya CARI_TIPI = 10 için  XXXXform unu aç
-
-                // chc_FName  = CARI_TIPI   <<< 
-                // chc_Value  = 5, 6, 10    <<< şeklinde olabilir 
-
-                // value ile bize tek bir değer döner 
-                // bu nedenle chc_Value içinde sorgudan bize dönen value değeri varmı diye kontrol edilir
-                read_value = t.TableFieldValueGet(tForm, chc_IPCode, chc_FName);
-
-                #region // eğer boş ise
-                if (t.IsNotNull(read_value) == false)
-                {
-                    //tTabPage_FNLNVOL_FNLNVOL_BNL0123
-                    //FNLNVOL.FNLNVOL_BNL01|23   grid üzerindeki IPCode bu olunca chc_IPCode ile bulunamıyor
-
-                    /// chc_IPCode      = FNLNVOL.FNLNVOL_BNL01   
-                    /// mst_TableIPCode = FNLNVOL.FNLNVOL_BNL01|23
-
-                    if (mst_TableIPCode.LastIndexOf(chc_IPCode) > -1)
-                    {
-                        read_value = t.TableFieldValueGet(tForm, mst_TableIPCode, chc_FName);
-
-
-                        if (t.IsNotNull(read_value))
-                        {
-                            /// RTABLEIPCODE:FNLNVOL.FNLNVOL_BNL01
-                            /// RTABLEIPCODE:FNLNVOL.FNLNVOL_BNL01|23
-
-                            //t.Str_Replace(ref block, "RTABLEIPCODE:" + chc_IPCode, "RTABLEIPCODE:" + mst_TableIPCode);
-
-                            foreach (var item in prop_item.TABLEIPCODE_LIST)
-                            {
-                                if (item.RTABLEIPCODE.ToString() == chc_IPCode)
-                                    item.RTABLEIPCODE = mst_TableIPCode;
-                            }
-                        }
-
-                        //eğer boşluksa zaten herhangi bir işlem veri girii yok demektir
-                        if ((read_value == "") && (chc_Value.ToUpper() != "NULL"))
-                            read_value = "0";
-
-                    }
-
-                    if ((read_value == "") || (chc_Value.ToUpper() == "NULL"))
-                        read_value = "NULL";
-                }
-                #endregion boş ise
-
-                // eğer bir daha boş değer gelir ise
-                //if (t.IsNotNull(read_value) == false) read_value = "0";
-
-                if (read_value != "")
-                {
-                    if ((chc_Value.IndexOf(read_value) > -1) &&
-                        (t.IsNotNull(chc_Operand) == false))
-                    {
-                        // eğer buraya kadar geldiyse 
-                        // öndeki chc_xxxx kontrollerinden geçti,  
-                        // yani onayı hak etti demektir
-                        form_open1 = true;
-                    }
-
-                    if (t.IsNotNull(chc_Operand))
-                    {
-                        form_open1 = t.myOperandControl(read_value, chc_Value, chc_Operand);
-                    }
-                }
-            }
-            #endregion Check işlemleri1
-
-            #region ELSE kontrolü
-            if ((chc_Value.IndexOf("ELSE") > -1))
-            {
-                // önceki kontrollere henüz yakalanmamış
-                // ve else koşuluna sıra gelmişse
-                form_open1 = true;
-            }
-            #endregion 
-
-            #region Check işlemleri / Second veya Target için şart varsa
-            if (t.IsNotNull(chc_IPCode_SEC) &&
-                t.IsNotNull(chc_FName_SEC) &&
-                t.IsNotNull(chc_Value_SEC))
-            {
-                read_value = t.TableFieldValueGet(tForm, chc_IPCode_SEC, chc_FName_SEC);
-
-                if ((read_value == "") || (chc_Value_SEC.ToUpper() == "NULL"))
-                    read_value = "NULL";
-
-                if (read_value != "")
-                {
-                    if ((chc_Value_SEC.IndexOf(read_value) > -1) &&
-                        (t.IsNotNull(chc_Operand_SEC) == false))
-                    {
-                        // eğer buraya kadar geldiyse 
-                        // öndeki chc_xxxx kontrollerinden geçti,  
-                        // yani onayı hak etti demektir
-                        form_open2 = true;
-                    }
-
-                    if (t.IsNotNull(chc_Operand_SEC))
-                    {
-                        form_open2 = t.myOperandControl(read_value, chc_Value_SEC, chc_Operand_SEC);
-                    }
-                }
-
-            }
-            #endregion Check işlemleri2
-
-            return ((form_open1) && (form_open2));
-        }
 
         //private bool ekButtonIslemi(Form tForm, string tableIPCode, List<PROP_NAVIGATOR> propList_, v.tButtonType buttonType)
         #region extraIslem ler
@@ -2845,7 +2701,7 @@ namespace Tkn_Events
                 {
                     if (item.BUTTONTYPE.ToString() == Convert.ToString((byte)buttonType))
                     {
-                        isFormOpen = CheckValue(tForm, item, tableIPCode);
+                        isFormOpen = t.tWorkingCheck(tForm, item, tableIPCode);
 
                         // bu satır daha önce çalıştı mı ?
                         transactionRun = item.TransactionRun;
@@ -3169,7 +3025,7 @@ namespace Tkn_Events
                     
                     if (workType == "IBOX")
                     {
-                        InputBox(tForm, TABLEIPCODE, item);
+                        InputBox(tForm, TABLEIPCODE, item, null);
                     }
 
                     if (workType == "NUMBERDISPLAY")
@@ -3256,7 +3112,7 @@ namespace Tkn_Events
             string tabPageCode = string.Empty;
             string controlName = "TabPage";
 
-            bool isChecked = CheckValue(tForm, prop_, tableIPCode);
+            bool isChecked = t.tWorkingCheck(tForm, prop_, tableIPCode);
 
             // form açılması için onaylandı ise
             if (isChecked)
@@ -3390,7 +3246,7 @@ namespace Tkn_Events
             {
                 if (prop_.BUTTONTYPE.ToString() == Convert.ToString((byte)buttonType))
                 {
-                    isChecked = CheckValue(tForm, prop_, tableIPCode);
+                    isChecked = t.tWorkingCheck(tForm, prop_, tableIPCode);
 
                     // form açılması için onaylandı ise
                     if (isChecked)

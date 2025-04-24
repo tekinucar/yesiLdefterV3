@@ -322,6 +322,7 @@ namespace Tkn_Search
             Form tForm = buttonHint.tForm;
             string mainTableIPCode = buttonHint.tableIPCode; // esas atamanın yapılacağı tableIPCode
             string myProp = buttonHint.propNavigator;
+            string searchFieldName = buttonHint.columnFieldName;
             string searchValue = buttonHint.columnEditValue;
                     
             /// 1. nesne üzerinde daha önce set edilmiş value varsa onay verme yeniden arama süreci başlamasın
@@ -369,7 +370,7 @@ namespace Tkn_Search
                         {
                             /// Search ekranı açmadan veri tabanından kontrol ediliyor
                             /// 
-                            onay = getSearchValues(tForm, searchTableIPCode, myProp, searchValue, mainTableIPCode, item);
+                            onay = getSearchValues(tForm, searchTableIPCode, myProp, searchFieldName, searchValue, mainTableIPCode, item);
                             oncekiOnay = onay;
                             v.searchOnay = onay;
                         }
@@ -412,6 +413,7 @@ namespace Tkn_Search
         private bool getSearchValues(Form tForm,
             string searchTableIPCode,
             string myProp,
+            string searchFieldName,
             string searchValue,
             string targetTableIPCode,
             PROP_NAVIGATOR prop_)
@@ -445,17 +447,18 @@ namespace Tkn_Search
                         
             string TableName = dsMSTableIp.Tables[0].Rows[0]["LKP_TABLE_NAME"].ToString();
             string TableLabel = "[" + t.Set(dsMSTableIp.Tables[0].Rows[0]["TABLE_CODE"].ToString(), "", "") + "]";
-            string FindFName = dsMSTableIp.Tables[0].Rows[0]["FIND_FNAME"].ToString();
+            string FindFName = searchFieldName; // dsMSTableIp.Tables[0].Rows[0]["FIND_FNAME"].ToString();
             string schemasCode = dsMSTableIp.Tables[0].Rows[0]["LKP_SCHEMAS_CODE"].ToString();
             
             if (t.IsNotNull(schemasCode) == false) 
                 schemasCode = "dbo";
 
-            if (t.IsNotNull(FindFName) == false)
-            {
-                //MessageBox.Show("DİKKAT : ( " + searchTableIPCode + " ) için -Find FName- tanımı eksik ...");
-                return onay;
-            }
+            //if (t.IsNotNull(FindFName) == false)
+            //{
+            //    //MessageBox.Show("DİKKAT : ( " + searchTableIPCode + " ) için -Find FName- tanımı eksik ...");
+            //    return onay;
+            //}
+
 
             string whereSQL = preparinSearchSql(dsSearchTableIP, TableLabel, FindFName, searchValue);
 
@@ -498,7 +501,7 @@ namespace Tkn_Search
                 {
                     /// aranıp bulunan kayıt
                     /// 
-                    v.con_DataRow = ds_Query.Tables[0].Rows[0];
+                    v.con_SelectedSearchDataRow = ds_Query.Tables[0].Rows[0];
 
                     v.searchOnay = setSearchEngineValues(tForm, targetTableIPCode, null, prop_.TABLEIPCODE_LIST);
                     onay = v.searchOnay;
@@ -1006,7 +1009,7 @@ namespace Tkn_Search
                     {
                         try
                         {
-                            value = dsData.Tables[0].Rows[tDataNavigator.Position][targetFName].ToString(); // = v.con_DataRow[sourceFName];
+                            value = dsData.Tables[0].Rows[tDataNavigator.Position][targetFName].ToString(); 
                             fieldCount++;
                             if (t.IsNotNull(value))
                                 valueCount++;
@@ -1045,11 +1048,12 @@ namespace Tkn_Search
             t.WaitFormOpen(v.mainForm, "");
             t.WaitFormOpen(v.mainForm, "Atama işlemleri yapılıyor...");
 
-            if (v.con_DataRow != null)
+            if (v.con_SelectedSearchDataRow != null)
             {
                 #region SetValues işlemleri
                 /// Seçilen Row un değerleri okunur ve bekleyen dsData ya set edilir
 
+                bool checked_ = false;
                 string uT_FNAME = string.Empty;
                 string uR_FNAME = string.Empty;
 
@@ -1074,7 +1078,7 @@ namespace Tkn_Search
                         MSETVALUE = item.MSETVALUE.ToString();
                         try
                         {
-                            dsTarget.Tables[0].Rows[dNTarget.Position][targetFName] = v.con_DataRow[sourceFName];
+                            dsTarget.Tables[0].Rows[dNTarget.Position][targetFName] = v.con_SelectedSearchDataRow[sourceFName];
                             editing = true;
                         }
                         catch (Exception)
@@ -1093,10 +1097,19 @@ namespace Tkn_Search
                 {
                     foreach (var item in TableIPCodeList)
                     {
+                        checked_ = t.tWorkingCheck(tForm, item, v.con_SelectedSearchDataRow);
+
+                        /// kontrolden dolayı onay alamadı fakat yinede true dönmesi gerekiyor
+                        if (checked_ == false)
+                            continue;
+
                         targetFName = item.KEYFNAME.ToString();
                         sourceFName = item.RKEYFNAME.ToString();
                         MSETVALUE = item.MSETVALUE.ToString();
                         WORKTYPE = item.WORKTYPE.ToString();
+
+                        /// Arama moturu çalıştı ve kullanıcı istediği kaydı buldu
+                        /// bulduğu kaydın tamamını 
 
                         if (WORKTYPE == "READ")
                         {
@@ -1104,7 +1117,7 @@ namespace Tkn_Search
                             //onay = evb.readData_(tForm, item);
                             try
                             {
-                                readValue = v.con_DataRow[sourceFName].ToString();
+                                readValue = v.con_SelectedSearchDataRow[sourceFName].ToString();
                             }
                             catch (Exception)
                             {
@@ -1117,29 +1130,8 @@ namespace Tkn_Search
 
                             if (t.IsNotNull(readValue))
                             {
-                                /*
-                                //string targetTableIpCode = item.TABLEIPCODE;
-                                string myProp = dsTarget.Namespace.ToString();
-                                string TableLabel = t.MyProperties_Get(myProp, "TableLabel:");
-                                string KeyFName = t.MyProperties_Get(myProp, "KeyFName:"); 
-                                string IsUseNewRefId = t.MyProperties_Get(myProp, "IsUseNewRefId:");
-                                string KeyIdValue = t.MyProperties_Get(myProp, "KeyIdValue:");
-                                string SqlF = t.MyProperties_Get(myProp, "SqlFirst:");
-                                string SqlS = t.MyProperties_Get(myProp, "SqlSecond:");
-                                string SqlSOld = SqlS;
-                                string UseOldRefId = " and " + TableLabel + "." + KeyFName + " = " + KeyIdValue + " ";
-                                string UseReadRefId = " and " + TableLabel + "." + KeyFName + " = " + readValue + " ";
-                                                                
-                                t.Str_Replace(ref SqlS, UseOldRefId, UseReadRefId);
-                                t.Str_Replace(ref myProp, "SqlSecond:" + SqlSOld, "SqlSecond:" + SqlS);
-                                t.Str_Replace(ref myProp, "KeyIdValue:" + KeyIdValue, "KeyIdValue:" + readValue);
-                                */
-                                // subView var ise silelim
                                 t.tRemoveTabPagesForNewData(tForm);
-                                /*
-                                dsTarget.Namespace = myProp;
-                                onay = t.TableRefresh(tForm, dsTarget);
-                                */
+                                
                                 onay = t.TableRefreshNewValue(tForm, dsTarget, readValue);
 
                                 nextControl(tForm);
@@ -1148,17 +1140,26 @@ namespace Tkn_Search
                         }
                         if (WORKTYPE == "SETDATA")
                         {
-                            //dsData.Tables[0].Rows[tDataNavigator.Position][targetFName] = v.con_DataRow[sourceFName];
-                            try
+                            // normal atamalar
+                            if (t.IsNotNull(MSETVALUE) == false)
                             {
-                                readValue = v.con_DataRow[sourceFName].ToString();
+                                try
+                                {
+                                    readValue = v.con_SelectedSearchDataRow[sourceFName].ToString();
+                                }
+                                catch (Exception)
+                                {
+                                    readValue = "Err";
+                                    MessageBox.Show("DİKKAT : Source ( " + sourceFName + " )  fieldName sorunlu ... Target fieldName : " + targetFName);
+                                    //throw;
+                                }
                             }
-                            catch (Exception)
+                            else
                             {
-                                readValue = "Err";
-                                MessageBox.Show("DİKKAT : Source ( " + sourceFName + " )  fieldName sorunlu ... Target fieldName : " + targetFName);
-                                //throw;
+                                /// direk set edilmek istenen value : Örnek STK_GCS.Miktar = 1
+                                readValue = MSETVALUE;
                             }
+                            
                             try
                             {
                                 // readValue "" veya null olunca sorun oluyor
@@ -1177,11 +1178,12 @@ namespace Tkn_Search
                                 MessageBox.Show("DİKKAT : Target ( " + targetFName + " )  fieldName sorunlu ... Sourece fieldName : " + sourceFName);
                                 //throw;
                             }
+                            
                         }
                         if (WORKTYPE == "IBOX")
                         {
                             tEventsButton evb = new tEventsButton();
-                            evb.InputBox(tForm, TargetTableIPCode, item);
+                            evb.InputBox(tForm, TargetTableIPCode, item, v.con_SelectedSearchDataRow);
                         }
                     }
                 }
@@ -1198,7 +1200,7 @@ namespace Tkn_Search
                     try
                     {
                         // 
-                        dsTarget.Tables[0].Rows[dNTarget.Position][uT_FNAME] = v.con_DataRow[uR_FNAME];
+                        dsTarget.Tables[0].Rows[dNTarget.Position][uT_FNAME] = v.con_SelectedSearchDataRow[uR_FNAME];
                         //
                         onay = true;
                     }

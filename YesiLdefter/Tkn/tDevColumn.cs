@@ -4417,7 +4417,7 @@ namespace Tkn_DevColumn
             int fontColor = t.Set(row_Fields["CMP_FONT_COLOR"].ToString(), "", (int)0);
             int backColor = t.Set(row_Fields["CMP_BACK_COLOR"].ToString(), "", (int)0);
 
-            if (backColor != 0)
+            if (backColor != 0 && backColor != -1)
             {
                 if ((tcolumn_type == "ButtonEdit") || 
                     (tcolumn_type == "tSearchEdit") ||
@@ -4516,6 +4516,106 @@ namespace Tkn_DevColumn
                     ((DevExpress.XtraEditors.TimeSpanEdit)tEdit).Properties.Appearance.Options.UseBackColor = true;
                 }
             }
+            if (fontColor != 0 && fontColor != -1) 
+            {
+                if ((tcolumn_type == "ButtonEdit") ||
+                    (tcolumn_type == "tSearchEdit") ||
+                    (tcolumn_type == "tSearchEditOnly"))
+                {
+                    ((DevExpress.XtraEditors.ButtonEdit)tEdit).Properties.Appearance.ForeColor = Color.FromArgb(fontColor);
+                    ((DevExpress.XtraEditors.ButtonEdit)tEdit).Properties.Appearance.Options.UseForeColor = true;
+                }
+                if (tcolumn_type == "CalcEdit")
+                {
+                    ((DevExpress.XtraEditors.CalcEdit)tEdit).Properties.Appearance.ForeColor = Color.FromArgb(fontColor);
+                    ((DevExpress.XtraEditors.CalcEdit)tEdit).Properties.Appearance.Options.UseForeColor = true;
+                }
+                if (tcolumn_type == "CheckButton")
+                {
+                    ((DevExpress.XtraEditors.CheckButton)tEdit).Appearance.ForeColor = Color.FromArgb(fontColor);
+                    ((DevExpress.XtraEditors.CheckButton)tEdit).Appearance.Options.UseForeColor = true;
+                }
+                if (tcolumn_type == "CheckedComboBoxEdit")
+                {
+                    ((DevExpress.XtraEditors.CheckedComboBoxEdit)tEdit).Properties.Appearance.ForeColor = Color.FromArgb(fontColor);
+                    ((DevExpress.XtraEditors.CheckedComboBoxEdit)tEdit).Properties.Appearance.Options.UseForeColor = true;
+                }
+                if (tcolumn_type == "CheckEdit")
+                {
+                    ((DevExpress.XtraEditors.CheckEdit)tEdit).Properties.Appearance.ForeColor = Color.FromArgb(fontColor);
+                    ((DevExpress.XtraEditors.CheckEdit)tEdit).Properties.Appearance.Options.UseForeColor = true;
+                }
+                if (tcolumn_type == "CheckedListBoxControl")
+                {
+                    ((DevExpress.XtraEditors.CheckedListBoxControl)tEdit).Appearance.ForeColor = Color.FromArgb(fontColor);
+                    ((DevExpress.XtraEditors.CheckedListBoxControl)tEdit).Appearance.Options.UseForeColor = true;
+                }
+                if (tcolumn_type == "ComboBoxEdit")
+                {
+                    ((DevExpress.XtraEditors.ComboBoxEdit)tEdit).Properties.Appearance.ForeColor = Color.FromArgb(fontColor);
+                    ((DevExpress.XtraEditors.ComboBoxEdit)tEdit).Properties.Appearance.Options.UseForeColor = true;
+                }
+                if (tcolumn_type == "DateEdit")
+                {
+                    ((DevExpress.XtraEditors.DateEdit)tEdit).Properties.Appearance.ForeColor = Color.FromArgb(fontColor);
+                    ((DevExpress.XtraEditors.DateEdit)tEdit).Properties.Appearance.Options.UseForeColor = true;
+                }
+                if (tcolumn_type == "HyperLinkEdit")
+                {
+                    ((DevExpress.XtraEditors.HyperLinkEdit)tEdit).Properties.Appearance.ForeColor = Color.FromArgb(fontColor);
+                    ((DevExpress.XtraEditors.HyperLinkEdit)tEdit).Properties.Appearance.Options.UseForeColor = true;
+                }
+                if ((tcolumn_type == "ImageComboBoxEdit") ||
+                    (tcolumn_type == "tImageComboBoxEdit2Button") ||
+                    (tcolumn_type == "tImageComboBoxEditSEC") ||
+                    (tcolumn_type == "tImageComboBoxEditSubView")
+                    )
+                {
+                    ((DevExpress.XtraEditors.ImageComboBoxEdit)tEdit).Properties.Appearance.ForeColor = Color.FromArgb(fontColor);
+                    ((DevExpress.XtraEditors.ImageComboBoxEdit)tEdit).Properties.Appearance.Options.UseForeColor = true;
+                }
+                if (tcolumn_type == "LabelControl")
+                {
+                    ((DevExpress.XtraEditors.LabelControl)tEdit).Appearance.ForeColor = Color.FromArgb(fontColor);
+                    ((DevExpress.XtraEditors.LabelControl)tEdit).Appearance.Options.UseForeColor = true;
+                }
+                if (tcolumn_type == "ListBoxControl")
+                {
+                    ((DevExpress.XtraEditors.ListBoxControl)tEdit).Appearance.ForeColor = Color.FromArgb(fontColor);
+                    ((DevExpress.XtraEditors.ListBoxControl)tEdit).Appearance.Options.UseBackColor = true;
+                }
+                if (tcolumn_type == "LookUpEdit")
+                {
+                    ((DevExpress.XtraEditors.SearchLookUpEdit)tEdit).Properties.Appearance.ForeColor = Color.FromArgb(fontColor);
+                    ((DevExpress.XtraEditors.SearchLookUpEdit)tEdit).Properties.Appearance.Options.UseForeColor = true;
+                }
+                if (tcolumn_type == "MemoEdit")
+                {
+                    ((DevExpress.XtraEditors.MemoEdit)tEdit).Properties.Appearance.ForeColor = Color.FromArgb(fontColor);
+                    ((DevExpress.XtraEditors.MemoEdit)tEdit).Properties.Appearance.Options.UseForeColor = true;
+                }
+                if (tcolumn_type == "SpinEdit")
+                {
+                    ((DevExpress.XtraEditors.SpinEdit)tEdit).Properties.Appearance.ForeColor = Color.FromArgb(fontColor);
+                    ((DevExpress.XtraEditors.SpinEdit)tEdit).Properties.Appearance.Options.UseForeColor = true;
+                }
+                if (tcolumn_type == "TextEdit")
+                {
+                    ((DevExpress.XtraEditors.TextEdit)tEdit).Properties.Appearance.ForeColor = Color.FromArgb(fontColor);
+                    ((DevExpress.XtraEditors.TextEdit)tEdit).Properties.Appearance.Options.UseForeColor = true;
+                }
+                if (tcolumn_type == "TimeEdit")
+                {
+                    ((DevExpress.XtraEditors.TimeEdit)tEdit).Properties.Appearance.ForeColor = Color.FromArgb(fontColor);
+                    ((DevExpress.XtraEditors.TimeEdit)tEdit).Properties.Appearance.Options.UseForeColor = true;
+                }
+                if (tcolumn_type == "TimeSpanEdit")
+                {
+                    ((DevExpress.XtraEditors.TimeSpanEdit)tEdit).Properties.Appearance.ForeColor = Color.FromArgb(fontColor);
+                    ((DevExpress.XtraEditors.TimeSpanEdit)tEdit).Properties.Appearance.Options.UseForeColor = true;
+                }
+            }
+
             #endregion
         }
 

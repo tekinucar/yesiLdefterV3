@@ -739,7 +739,7 @@ INSERT INTO [Lkp].[OnmHesapMaster] (ParentId, FirmId, IsActive, UstGrupTipiId, A
 (0, @FirmId, 1, 82,   0,    0,  797, '81.13.16', '81.13',   0,  0, 'İşlem ücretleri', 0, 22, 3, 0 ),
 (0, @FirmId, 1, 82,   0,    0,  797, '81.13.18', '81.13',   0,  0, 'Kredi masrafları', 0, 22, 3, 0 ),
 (0, @FirmId, 1, 82,   0,    0,  797, '81.13.20', '81.13',   0,  0, 'Komisyon ücretleri', 0, 22, 3, 0 ),
-(0, @FirmId, 1, 82,   0,    0,  797, '81.13.22', '81.13',   0,  0, 'Para çekme', 0, 22, 3, 0 ),
+--(0, @FirmId, 1, 82,   0,    0,  797, '81.13.22', '81.13',   0,  0, 'Para çekme', 0, 22, 3, 0 ),
 (0, @FirmId, 1, 82,   0,    0,  797, '81.13.24', '81.13',   0,  0, 'Para transferi', 0, 22, 3, 0 ),
 (0, @FirmId, 1, 82,   0,    0,  797, '81.13.26', '81.13',   0,  0, 'Para yatırma', 0, 22, 3, 0 ),
 (0, @FirmId, 1, 82,   0,    0,  797, '81.13.28', '81.13',   0,  0, 'Pos komisyonu', 0, 22, 3, 0 ),
@@ -800,7 +800,7 @@ and UstGrupTipiId = 83
 INSERT INTO [Lkp].[OnmHesapMaster] (ParentId, FirmId, IsActive, UstGrupTipiId, AnaGrupTipiId, AltGrupTipiId, AltCesitTipiId, HesapKodu, UstHesapKodu, HesapAdi )
  VALUES 
 (0, @FirmId, 1, 83, 250, 0, 0, '250', '',   'Arazi ve Arsalar' ),
-(0, @FirmId, 1, 83, 251, 0, 0, '251', '',   'Yer Altı Ve Yer Üstü Düzenleri' ),
+(0, @FirmId, 1, 83, 251, 0, 0, '251', '',   'Yer Altı ve Yer Üstü Düzenleri' ),
 (0, @FirmId, 1, 83, 252, 0, 0, '252', '',   'Binalar' ),
 (0, @FirmId, 1, 83, 253, 0, 0, '253', '',   'Tesis, Makine Ve Cihazlar' ),
 (0, @FirmId, 1, 83, 254, 0, 0, '254', '',   'Taşıtlar' ),

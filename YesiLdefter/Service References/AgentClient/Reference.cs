@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace EInvoiceDemoProject.AgentClient {
+namespace YesiLdefter.AgentClient {
     
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
@@ -29,7 +29,7 @@ namespace EInvoiceDemoProject.AgentClient {
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IdentifierType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(InvoiceInfo))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(Response))]
-        EInvoiceDemoProject.AgentClient.CustomerInvoicesResponse GetInboxInvoices(EInvoiceDemoProject.AgentClient.InboxInvoiceQueryModel query);
+        YesiLdefter.AgentClient.CustomerInvoicesResponse GetInboxInvoices(YesiLdefter.AgentClient.InboxInvoiceQueryModel query);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IAgent/GetOutboxInvoices", ReplyAction="http://tempuri.org/IAgent/GetOutboxInvoicesResponse")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
@@ -45,7 +45,7 @@ namespace EInvoiceDemoProject.AgentClient {
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IdentifierType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(InvoiceInfo))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(Response))]
-        EInvoiceDemoProject.AgentClient.CustomerInvoicesResponse GetOutboxInvoices(EInvoiceDemoProject.AgentClient.InboxInvoiceQueryModel query);
+        YesiLdefter.AgentClient.CustomerInvoicesResponse GetOutboxInvoices(YesiLdefter.AgentClient.InboxInvoiceQueryModel query);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IAgent/SetInboxInvoicesTaken", ReplyAction="http://tempuri.org/IAgent/SetInboxInvoicesTakenResponse")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
@@ -61,7 +61,7 @@ namespace EInvoiceDemoProject.AgentClient {
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IdentifierType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(InvoiceInfo))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(Response))]
-        EInvoiceDemoProject.AgentClient.FlagResponse SetInboxInvoicesTaken(string[] invoices);
+        YesiLdefter.AgentClient.FlagResponse SetInboxInvoicesTaken(string[] invoices);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IAgent/SetOutboxInvoicesTaken", ReplyAction="http://tempuri.org/IAgent/SetOutboxInvoicesTakenResponse")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
@@ -77,7 +77,7 @@ namespace EInvoiceDemoProject.AgentClient {
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IdentifierType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(InvoiceInfo))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(Response))]
-        EInvoiceDemoProject.AgentClient.FlagResponse SetOutboxInvoicesTaken(string[] invoices);
+        YesiLdefter.AgentClient.FlagResponse SetOutboxInvoicesTaken(string[] invoices);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IAgent/GetCustomers", ReplyAction="http://tempuri.org/IAgent/GetCustomersResponse")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
@@ -93,7 +93,7 @@ namespace EInvoiceDemoProject.AgentClient {
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IdentifierType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(InvoiceInfo))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(Response))]
-        EInvoiceDemoProject.AgentClient.CustomerListResponse GetCustomers(EInvoiceDemoProject.AgentClient.PagedQueryContext query);
+        YesiLdefter.AgentClient.CustomerListResponse GetCustomers(YesiLdefter.AgentClient.PagedQueryContext query);
     }
     
     /// <remarks/>
@@ -13526,12 +13526,12 @@ namespace EInvoiceDemoProject.AgentClient {
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public interface IAgentChannel : EInvoiceDemoProject.AgentClient.IAgent, System.ServiceModel.IClientChannel {
+    public interface IAgentChannel : YesiLdefter.AgentClient.IAgent, System.ServiceModel.IClientChannel {
     }
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class AgentClient : System.ServiceModel.ClientBase<EInvoiceDemoProject.AgentClient.IAgent>, EInvoiceDemoProject.AgentClient.IAgent {
+    public partial class AgentClient : System.ServiceModel.ClientBase<YesiLdefter.AgentClient.IAgent>, YesiLdefter.AgentClient.IAgent {
         
         public AgentClient() {
         }
@@ -13552,23 +13552,23 @@ namespace EInvoiceDemoProject.AgentClient {
                 base(binding, remoteAddress) {
         }
         
-        public EInvoiceDemoProject.AgentClient.CustomerInvoicesResponse GetInboxInvoices(EInvoiceDemoProject.AgentClient.InboxInvoiceQueryModel query) {
+        public YesiLdefter.AgentClient.CustomerInvoicesResponse GetInboxInvoices(YesiLdefter.AgentClient.InboxInvoiceQueryModel query) {
             return base.Channel.GetInboxInvoices(query);
         }
         
-        public EInvoiceDemoProject.AgentClient.CustomerInvoicesResponse GetOutboxInvoices(EInvoiceDemoProject.AgentClient.InboxInvoiceQueryModel query) {
+        public YesiLdefter.AgentClient.CustomerInvoicesResponse GetOutboxInvoices(YesiLdefter.AgentClient.InboxInvoiceQueryModel query) {
             return base.Channel.GetOutboxInvoices(query);
         }
         
-        public EInvoiceDemoProject.AgentClient.FlagResponse SetInboxInvoicesTaken(string[] invoices) {
+        public YesiLdefter.AgentClient.FlagResponse SetInboxInvoicesTaken(string[] invoices) {
             return base.Channel.SetInboxInvoicesTaken(invoices);
         }
         
-        public EInvoiceDemoProject.AgentClient.FlagResponse SetOutboxInvoicesTaken(string[] invoices) {
+        public YesiLdefter.AgentClient.FlagResponse SetOutboxInvoicesTaken(string[] invoices) {
             return base.Channel.SetOutboxInvoicesTaken(invoices);
         }
         
-        public EInvoiceDemoProject.AgentClient.CustomerListResponse GetCustomers(EInvoiceDemoProject.AgentClient.PagedQueryContext query) {
+        public YesiLdefter.AgentClient.CustomerListResponse GetCustomers(YesiLdefter.AgentClient.PagedQueryContext query) {
             return base.Channel.GetCustomers(query);
         }
     }

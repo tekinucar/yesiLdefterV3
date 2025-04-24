@@ -1,0 +1,100 @@
+﻿
+/*CreateTable*/
+
+begin transaction
+
+ create table OnmHesapMaliyetTuru
+ (
+
+   Id                Int IDENTITY(1,1) NOT NULL, 
+   ParentId          Int       not null, /* default 0 */
+   FirmId            Int       not null,
+   IsActive          Bit       not null, /* default : 1 = active, 0 = not active */  
+   
+   UstGrupTipiId     SmallInt      null, /* 10    hazır değerler */ 
+   AnaGrupTipiId     SmallInt      null, /* 102   banka          */ 
+   AltGrupTipiId     Int           null, /* 1022  banka hesabı   */ 
+   AltCesitTipiId    Int           null, /* 10221 vadesiz        */ 
+   HesapTipiId       SmallInt      null, /* 11. Maliyet grubu, 12. Varlık hesabı, 13. Abone hesabı */   
+   
+   --30
+   ParaTipiId        nVarChar(3)   null,
+   BorcDovizYeriId   SmallInt      null,
+   AlacakDovizYeriId SmallInt      null,
+   
+   --70
+   IsBilancoHesap          bit  null, /* hesabın bağlı olduğu muhasebe hesap kodu ???  */ 
+   IsGelirGiderHesap       bit  null,
+   IsMaliyetAHesap         bit  null,
+   IsMaliyetBHesap         bit  null,
+   IsNazimHesap            bit  null,
+
+   BilancHesapKodu         nvarchar(50) null,
+   GelirGiderHesapKodu     nvarchar(50) null,
+   MaliyetAHesapKodu       nvarchar(50) null,
+   MaliyetBHesapKodu       nvarchar(50) null,
+   NazimHesapKodu          nvarchar(50) null,
+
+   --80, 81, ..., 90, 91
+   BAHesapTipiId           SmallInt      null, /* OnmBelgeDekont tablsundaki BHesapTipiId veya AHesapTipiId nin bağlantısı */
+   UruneYuklenmesiTipiId   SmallInt      null, 
+   UretimHacmiTipiId       SmallInt      null,
+   IsletmeFonksiyonuTipiId SmallInt      null,
+   PeriyodTipiId           SmallInt      null, /* dönem */
+   BelgeTipiId             SmallInt      null, /* e-devlet, fatura vb */
+   KaynakTipiId            SmallInt      null, /* 1. kağıt, 2. elektronik belge */
+   IsKkeg                  Bit           null, /* kanunen kabul edilmeyen gider */
+   IsOncekiTutar           Bit           null, /* bir maliyet belgesi işlenirken bir önceki tutarı oku */  
+   --OncekiTutar             Numeric(22,5) null,
+   KdvOrani                SmallInt      null,
+   OtoOdemeBankaHesapId    Int           null,
+
+
+   constraint		pk_OnmHesapMaliyetTuru primary key (Id)
+ )
+
+ create index X_OnmHesapMaliyetTuru01 on OnmHesapMaliyetTuru (FirmId)
+ create index X_OnmHesapMaliyetTuru02 on OnmHesapMaliyetTuru (UstGrupTipiId)
+
+ 
+ grant select, insert, update, delete on OnmHesapMaliyetTuru to public
+
+ commit transaction
+
+ /*CreateTableEnd*/
+
+
+
+-- ------------------------------------------------------- 
+-- UstGrupTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmHesapMaliyetTuruUstGrupTipi')
+drop table [Lkp].[OnmHesapMaliyetTuruUstGrupTipi]
+
+create table [Lkp].[OnmHesapMaliyetTuruUstGrupTipi]
+(
+   Id           Int Unique Not Null,
+   UstGrupTipi  nVarchar(50),
+   GrupTipiId   SmallInt Null,
+
+   constraint  pk_OnmHesapMaliyetTuruUstGrupTipi primary key (Id)
+)
+
+delete from [Lkp].[OnmHesapMaliyetTuruUstGrupTipi]
+INSERT INTO [Lkp].[OnmHesapMaliyetTuruUstGrupTipi] (Id, UstGrupTipi, GrupTipiId)
+ VALUES 
+  (0,    N"Tanımsız", 0),
+  (10,   N"Hazır Değerler", 1),
+  (15,   N"Stoklar", 1),
+  (25,   N"Maddi Duran Varlıklar", 1),
+  (7,    N"Maliyet Hesapları", 1),
+  (77,   N"Genel Yönetim Giderleri", 1),
+  (81,   N"Master için ana maliyet grubu",  1 ),
+  (82,   N"Master için maliyet hesapları",  1 ),
+  (83,   N"Varlık grupları",  1 ),
+  (84,   N"Abone grupları",  1 ),
+  (85,   N"Seçilen maliyet hesapları",  1 ),
+  (91,   N"Vergiler", 1),
+  (92,   N"SGK", 1),
+  (93,   N"Bağkur", 1),
+  (94,   N"Belediye", 1)

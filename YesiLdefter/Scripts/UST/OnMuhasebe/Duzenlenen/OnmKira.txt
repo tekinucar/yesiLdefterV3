@@ -90,8 +90,8 @@ delete from [Lkp].[OnmKiraVarlikTipi]
 INSERT INTO [Lkp].[OnmKiraVarlikTipi] (Id, VarlikTipi)
  VALUES 
   ( 0,    N"Tanımsız"),
-  ( 250,  N"Arazi Ve Arsalar"),
-  ( 251,  N"Yer Altı Ve Yer Üstü Düzenleri"),
+  ( 250,  N"Arazi ve Arsalar"),
+  ( 251,  N"Yer Altı ve Yer Üstü Düzenleri"),
   ( 252,  N"Binalar"),
   ( 253,  N"Tesis, Makine Ve Cihazlar"),
   ( 254,  N"Taşıtlar"),

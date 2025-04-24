@@ -760,8 +760,8 @@ namespace Tkn_Variable
         public static Boolean con_FormOpen = false;
         public static Boolean con_DefaultValuePreparing = false;
         public static Boolean con_CreateScriptPacket = false;
-
-        public static DataRow con_DataRow = null;
+                
+        public static DataRow con_SelectedSearchDataRow = null;
 
         public static Int16 con_FinansHesapTuru = 0;
         public static int con_FinansHesapID = 0;
@@ -898,11 +898,13 @@ namespace Tkn_Variable
 
         public static string sp_OpenFormState = "";
         public static string sp_activeSkinName = "";
-        public static string sp_SelectSkinName = "";
+        public static string sp_SelectSkinName = ""; 
         public static string sp_deactiveSkinName = "Blueprint";//"High Contrast White";
         //public static SkinSvgPalette sp_DeactiveSkinPalette = SkinSvgPalette.Bezier.HighContrastWhite;
         public static SkinStyle sp_DeactiveSkin = SkinStyle.Blueprint;
         public static SkinStyle sp_LocalDeactiveSkin = SkinStyle.GlassOceans;
+
+        //"iMaginary";//  SkinStyle.iMaginary;
 
         // firma bilgileri
         // 
@@ -2895,6 +2897,10 @@ namespace Tkn_Variable
         public string CONTROLNAME { get; set; }
         public string DCCODE { get; set; }
         public string BEFOREAFTER { get; set; }
+        public string CHC_IPCODE { get; set; } // FIRST 
+        public string CHC_FNAME { get; set; }
+        public string CHC_VALUE { get; set; }
+        public string CHC_OPERAND { get; set; }
     }
     //DCCODE { get; set; } // DC = DataCopy 
     #endregion

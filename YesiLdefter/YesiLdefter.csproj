@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\packages\CefSharp.Common.129.0.110\build\CefSharp.Common.props" Condition="Exists('..\packages\CefSharp.Common.129.0.110\build\CefSharp.Common.props')" />
-  <Import Project="..\packages\chromiumembeddedframework.runtime.win-x86.129.0.11\build\chromiumembeddedframework.runtime.win-x86.props" Condition="Exists('..\packages\chromiumembeddedframework.runtime.win-x86.129.0.11\build\chromiumembeddedframework.runtime.win-x86.props')" />
-  <Import Project="..\packages\chromiumembeddedframework.runtime.win-x64.129.0.11\build\chromiumembeddedframework.runtime.win-x64.props" Condition="Exists('..\packages\chromiumembeddedframework.runtime.win-x64.129.0.11\build\chromiumembeddedframework.runtime.win-x64.props')" />
+  <Import Project="..\packages\CefSharp.Common.135.0.170\build\CefSharp.Common.props" Condition="Exists('..\packages\CefSharp.Common.135.0.170\build\CefSharp.Common.props')" />
+  <Import Project="..\packages\chromiumembeddedframework.runtime.win-x86.135.0.17\build\chromiumembeddedframework.runtime.win-x86.props" Condition="Exists('..\packages\chromiumembeddedframework.runtime.win-x86.135.0.17\build\chromiumembeddedframework.runtime.win-x86.props')" />
+  <Import Project="..\packages\chromiumembeddedframework.runtime.win-x64.135.0.17\build\chromiumembeddedframework.runtime.win-x64.props" Condition="Exists('..\packages\chromiumembeddedframework.runtime.win-x64.135.0.17\build\chromiumembeddedframework.runtime.win-x64.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -67,12 +67,18 @@
     <ManifestKeyFile>YesiLdefter_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
-    <GenerateManifests>true</GenerateManifests>
+    <GenerateManifests>false</GenerateManifests>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <PropertyGroup />
+  <PropertyGroup>
+    <TargetZone>LocalIntranet</TargetZone>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="AForge, Version=2.2.5.0, Culture=neutral, PublicKeyToken=c1db6ff4eaa06aeb, processorArchitecture=MSIL">
       <HintPath>..\packages\AForge.2.2.5\lib\AForge.dll</HintPath>
@@ -86,14 +92,14 @@
     <Reference Include="Aspose.Words, Version=25.1.0.0, Culture=neutral, PublicKeyToken=716fcc553a201e56, processorArchitecture=MSIL">
       <HintPath>..\packages\Aspose.Words.25.1.0\lib\net462\Aspose.Words.dll</HintPath>
     </Reference>
-    <Reference Include="CefSharp, Version=129.0.110.0, Culture=neutral, PublicKeyToken=40c4b6fc221f4138, processorArchitecture=MSIL">
-      <HintPath>..\packages\CefSharp.Common.129.0.110\lib\net462\CefSharp.dll</HintPath>
+    <Reference Include="CefSharp, Version=135.0.170.0, Culture=neutral, PublicKeyToken=40c4b6fc221f4138, processorArchitecture=MSIL">
+      <HintPath>..\packages\CefSharp.Common.135.0.170\lib\net462\CefSharp.dll</HintPath>
     </Reference>
-    <Reference Include="CefSharp.Core, Version=129.0.110.0, Culture=neutral, PublicKeyToken=40c4b6fc221f4138, processorArchitecture=MSIL">
-      <HintPath>..\packages\CefSharp.Common.129.0.110\lib\net462\CefSharp.Core.dll</HintPath>
+    <Reference Include="CefSharp.Core, Version=135.0.170.0, Culture=neutral, PublicKeyToken=40c4b6fc221f4138, processorArchitecture=MSIL">
+      <HintPath>..\packages\CefSharp.Common.135.0.170\lib\net462\CefSharp.Core.dll</HintPath>
     </Reference>
-    <Reference Include="CefSharp.WinForms, Version=129.0.110.0, Culture=neutral, PublicKeyToken=40c4b6fc221f4138, processorArchitecture=MSIL">
-      <HintPath>..\packages\CefSharp.WinForms.129.0.110\lib\net462\CefSharp.WinForms.dll</HintPath>
+    <Reference Include="CefSharp.WinForms, Version=135.0.170.0, Culture=neutral, PublicKeyToken=40c4b6fc221f4138, processorArchitecture=MSIL">
+      <HintPath>..\packages\CefSharp.WinForms.135.0.170\lib\net462\CefSharp.WinForms.dll</HintPath>
     </Reference>
     <Reference Include="DevExpress.BonusSkins.v19.2, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
     <Reference Include="DevExpress.Data.v19.2, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
@@ -195,10 +201,11 @@
     <Reference Include="System.Numerics.Vectors, Version=4.1.5.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Numerics.Vectors.4.6.0\lib\net462\System.Numerics.Vectors.dll</HintPath>
     </Reference>
-    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=6.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.6.1.0\lib\net462\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=6.0.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.6.1.2\lib\net462\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
     </Reference>
     <Reference Include="System.Security" />
+    <Reference Include="System.ServiceModel" />
     <Reference Include="System.ServiceProcess" />
     <Reference Include="System.Transactions" />
     <Reference Include="System.Xml.Linq" />
@@ -229,6 +236,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CEFSharp\CEFHelper.cs" />
+    <Compile Include="CEFSharp\CefSharpInstaller.cs" />
     <Compile Include="Codes\CihazLogs.cs" />
     <Compile Include="Entities\MsWebNode.cs" />
     <Compile Include="Entities\MsWebPage.cs" />
@@ -441,6 +449,18 @@
     <Compile Include="Selenium\MsScrapingService.cs" />
     <Compile Include="Selenium\MsWebPagesService.cs" />
     <Compile Include="Selenium\SeleniumService.cs" />
+    <Compile Include="Service References\AgentClient\Reference.cs" />
+    <Compile Include="Service References\AgentClient\Reference1.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Compile>
+    <Compile Include="Service References\Uyumsoft\Reference.cs" />
+    <Compile Include="Service References\Uyumsoft\Reference1.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Compile>
     <Compile Include="tForms.cs" />
     <Compile Include="Tkn\tImageService.cs" />
     <Compile Include="Tkn\EventsMenu.cs" />
@@ -546,6 +566,7 @@
       <DesignTime>True</DesignTime>
     </Compile>
     <None Include="packages.config" />
+    <None Include="Properties\app.manifest" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -556,6 +577,92 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <None Include="Scripts\KaynakBelgeler\vergidairelerilistesi.pdf" />
+    <None Include="Service References\AgentClient\Agent.wsdl" />
+    <None Include="Service References\AgentClient\Agent.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\AgentClient\Agent1.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\AgentClient\Agent10.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\AgentClient\Agent2.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\AgentClient\Agent3.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\AgentClient\Agent4.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\AgentClient\Agent5.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\AgentClient\Agent6.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\AgentClient\Agent7.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\AgentClient\Agent8.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\AgentClient\Agent9.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\AgentClient\EInvoiceDemoProject.AgentClient.CustomerInvoicesResponse.datasource" />
+    <None Include="Service References\AgentClient\EInvoiceDemoProject.AgentClient.CustomerListResponse.datasource" />
+    <None Include="Service References\AgentClient\EInvoiceDemoProject.AgentClient.FlagResponse.datasource" />
+    <None Include="Service References\Uyumsoft\EInvoiceDemoProject.Uyumsoft.ByteArrayResponse.datasource" />
+    <None Include="Service References\Uyumsoft\EInvoiceDemoProject.Uyumsoft.CloneInvoiceServiceResponse.datasource" />
+    <None Include="Service References\Uyumsoft\EInvoiceDemoProject.Uyumsoft.DateResponse.datasource" />
+    <None Include="Service References\Uyumsoft\EInvoiceDemoProject.Uyumsoft.DocumentResponseStatusResponse.datasource" />
+    <None Include="Service References\Uyumsoft\EInvoiceDemoProject.Uyumsoft.FlagResponse.datasource" />
+    <None Include="Service References\Uyumsoft\EInvoiceDemoProject.Uyumsoft.InboxInvoiceListResponse.datasource" />
+    <None Include="Service References\Uyumsoft\EInvoiceDemoProject.Uyumsoft.InvoiceDataResponse.datasource" />
+    <None Include="Service References\Uyumsoft\EInvoiceDemoProject.Uyumsoft.InvoiceGtbInfoResponse.datasource" />
+    <None Include="Service References\Uyumsoft\EInvoiceDemoProject.Uyumsoft.InvoiceIdentitiesResponse.datasource" />
+    <None Include="Service References\Uyumsoft\EInvoiceDemoProject.Uyumsoft.InvoiceResponse.datasource" />
+    <None Include="Service References\Uyumsoft\EInvoiceDemoProject.Uyumsoft.InvoicesDataResponse.datasource" />
+    <None Include="Service References\Uyumsoft\EInvoiceDemoProject.Uyumsoft.InvoicesResponse.datasource" />
+    <None Include="Service References\Uyumsoft\EInvoiceDemoProject.Uyumsoft.InvoiceStatusResponse.datasource" />
+    <None Include="Service References\Uyumsoft\EInvoiceDemoProject.Uyumsoft.InvoiceStatusWithLogResponse.datasource" />
+    <None Include="Service References\Uyumsoft\EInvoiceDemoProject.Uyumsoft.InvoiceViewResponse.datasource" />
+    <None Include="Service References\Uyumsoft\EInvoiceDemoProject.Uyumsoft.OutboxInvoiceListResponse.datasource" />
+    <None Include="Service References\Uyumsoft\EInvoiceDemoProject.Uyumsoft.Response.datasource" />
+    <None Include="Service References\Uyumsoft\EInvoiceDemoProject.Uyumsoft.StringElementResponse.datasource" />
+    <None Include="Service References\Uyumsoft\EInvoiceDemoProject.Uyumsoft.SummaryReportResponse.datasource" />
+    <None Include="Service References\Uyumsoft\EInvoiceDemoProject.Uyumsoft.SystemUsersResponse.datasource" />
+    <None Include="Service References\Uyumsoft\EInvoiceDemoProject.Uyumsoft.UserAliassesResponse.datasource" />
+    <None Include="Service References\Uyumsoft\Integration.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\Uyumsoft\Integration1.wsdl" />
+    <None Include="Service References\Uyumsoft\Integration1.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\Uyumsoft\Integration2.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\Uyumsoft\Integration3.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\Uyumsoft\Integration4.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\Uyumsoft\Integration5.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\Uyumsoft\Integration6.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\Uyumsoft\Integration7.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\Uyumsoft\Integration8.xsd">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -891,9 +998,11 @@
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmBelgeStokS.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmHesapCari.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmHesapFinans.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmHesapMaliyetTuru.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmHesapStok.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmHesapStokFiyat.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmHesapStokImg.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmHesapVarlik.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmHesapVezne.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmKira.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmOdemePlani.txt" />
@@ -979,6 +1088,7 @@
     <Content Include="Scripts\UST\UstadCRM\prc_UstadUserFirmsListGet.txt" />
     <Content Include="Scripts\UST\UstadCRM\UstadComputers.txt" />
     <Content Include="Scripts\UST\UstadCRM\UstadFirms.txt" />
+    <Content Include="Scripts\UST\UstadCRM\UstadFirmsMebAday.txt" />
     <Content Include="Scripts\UST\UstadCRM\UstadFirmsUsers.txt" />
     <Content Include="Scripts\UST\UstadCRM\UstadUsers.txt" />
     <Content Include="Scripts\UST\Ustad\HP_COMPS.txt" />
@@ -1115,6 +1225,20 @@
     <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\VW_TYPES_LIST.txt" />
     <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\YARDIMCI_KODLAR.txt" />
     <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\_WorkList.txt" />
+    <Content Include="Service References\AgentClient\Agent.disco" />
+    <Content Include="Service References\AgentClient\configuration.svcinfo" />
+    <Content Include="Service References\AgentClient\configuration91.svcinfo" />
+    <Content Include="Service References\AgentClient\Reference.svcmap">
+      <Generator>WCF Proxy Generator</Generator>
+      <LastGenOutput>Reference1.cs</LastGenOutput>
+    </Content>
+    <Content Include="Service References\Uyumsoft\configuration.svcinfo" />
+    <Content Include="Service References\Uyumsoft\configuration91.svcinfo" />
+    <Content Include="Service References\Uyumsoft\Integration1.disco" />
+    <Content Include="Service References\Uyumsoft\Reference.svcmap">
+      <Generator>WCF Proxy Generator</Generator>
+      <LastGenOutput>Reference1.cs</LastGenOutput>
+    </Content>
     <Content Include="Treetog-I-Contacts.ico" />
     <Content Include="yesiLdefter.ico" />
   </ItemGroup>
@@ -1186,13 +1310,13 @@
     <Error Condition="!Exists('..\packages\Tesseract.5.2.0\build\Tesseract.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Tesseract.5.2.0\build\Tesseract.targets'))" />
     <Error Condition="!Exists('..\packages\Selenium.WebDriver.ChromeDriver.122.0.6261.11100\build\Selenium.WebDriver.ChromeDriver.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Selenium.WebDriver.ChromeDriver.122.0.6261.11100\build\Selenium.WebDriver.ChromeDriver.targets'))" />
     <Error Condition="!Exists('..\packages\Selenium.WebDriver.4.20.0\build\Selenium.WebDriver.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Selenium.WebDriver.4.20.0\build\Selenium.WebDriver.targets'))" />
-    <Error Condition="!Exists('..\packages\chromiumembeddedframework.runtime.win-x64.129.0.11\build\chromiumembeddedframework.runtime.win-x64.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\chromiumembeddedframework.runtime.win-x64.129.0.11\build\chromiumembeddedframework.runtime.win-x64.props'))" />
-    <Error Condition="!Exists('..\packages\chromiumembeddedframework.runtime.win-x86.129.0.11\build\chromiumembeddedframework.runtime.win-x86.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\chromiumembeddedframework.runtime.win-x86.129.0.11\build\chromiumembeddedframework.runtime.win-x86.props'))" />
-    <Error Condition="!Exists('..\packages\CefSharp.Common.129.0.110\build\CefSharp.Common.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\CefSharp.Common.129.0.110\build\CefSharp.Common.props'))" />
-    <Error Condition="!Exists('..\packages\CefSharp.Common.129.0.110\build\CefSharp.Common.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\CefSharp.Common.129.0.110\build\CefSharp.Common.targets'))" />
+    <Error Condition="!Exists('..\packages\chromiumembeddedframework.runtime.win-x64.135.0.17\build\chromiumembeddedframework.runtime.win-x64.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\chromiumembeddedframework.runtime.win-x64.135.0.17\build\chromiumembeddedframework.runtime.win-x64.props'))" />
+    <Error Condition="!Exists('..\packages\chromiumembeddedframework.runtime.win-x86.135.0.17\build\chromiumembeddedframework.runtime.win-x86.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\chromiumembeddedframework.runtime.win-x86.135.0.17\build\chromiumembeddedframework.runtime.win-x86.props'))" />
+    <Error Condition="!Exists('..\packages\CefSharp.Common.135.0.170\build\CefSharp.Common.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\CefSharp.Common.135.0.170\build\CefSharp.Common.props'))" />
+    <Error Condition="!Exists('..\packages\CefSharp.Common.135.0.170\build\CefSharp.Common.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\CefSharp.Common.135.0.170\build\CefSharp.Common.targets'))" />
   </Target>
   <Import Project="..\packages\Tesseract.5.2.0\build\Tesseract.targets" Condition="Exists('..\packages\Tesseract.5.2.0\build\Tesseract.targets')" />
   <Import Project="..\packages\Selenium.WebDriver.ChromeDriver.122.0.6261.11100\build\Selenium.WebDriver.ChromeDriver.targets" Condition="Exists('..\packages\Selenium.WebDriver.ChromeDriver.122.0.6261.11100\build\Selenium.WebDriver.ChromeDriver.targets')" />
   <Import Project="..\packages\Selenium.WebDriver.4.20.0\build\Selenium.WebDriver.targets" Condition="Exists('..\packages\Selenium.WebDriver.4.20.0\build\Selenium.WebDriver.targets')" />
-  <Import Project="..\packages\CefSharp.Common.129.0.110\build\CefSharp.Common.targets" Condition="Exists('..\packages\CefSharp.Common.129.0.110\build\CefSharp.Common.targets')" />
+  <Import Project="..\packages\CefSharp.Common.135.0.170\build\CefSharp.Common.targets" Condition="Exists('..\packages\CefSharp.Common.135.0.170\build\CefSharp.Common.targets')" />
 </Project>

@@ -304,3 +304,86 @@ Türleri : İrsaliye, Fatura, Sipariş, Bağlı Ek belgeler
 
 
 */
+
+
+
+-- ------------------------------------------------------- 
+-- ProfileIDType
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmBelgeStokBProfileIDType')
+drop table [Lkp].[OnmBelgeStokBProfileIDType]
+
+create table [Lkp].[OnmBelgeStokBProfileIDType]
+(
+   Id              Varchar(20) Unique Not Null,
+   IsActive        Bool                   null,
+   ProfileIDType   nVarchar(40)           null,
+
+   constraint  pk_OnmBelgeStokBProfileIDType primary key (Id)
+)
+
+INSERT INTO [Lkp].[OnmBelgeStokBProfileIDType] (Id, IsActive, ProfileIDType)
+ VALUES 
+  ('',                   1,   N'Tanımsız'),
+  ('TICARIFATURA',       1,   N'Ticari Fatura'),
+  ('TEMELFATURA',        1,   N'Temel Fatura'),
+  ('IHRACAT',            1,   N'İhracat'),
+  ('YOLCUBERABERFATURA', 1,   N'Yolcu Beraber Fatura')
+
+
+
+-- ------------------------------------------------------- 
+-- InvoiceTypeCode
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmBelgeStokBInvoiceTypeCode')
+drop table [Lkp].[OnmBelgeStokBInvoiceTypeCode]
+
+create table [Lkp].[OnmBelgeStokBInvoiceTypeCode]
+(
+   Id                Varchar(20) Unique Not Null,
+   IsActive          Bool                   null,
+   InvoiceTypeCode   nVarchar(40)           null,
+
+   constraint  pk_OnmBelgeStokBInvoiceTypeCode primary key (Id)
+)
+
+INSERT INTO [Lkp].[OnmBelgeStokBInvoiceTypeCode] (Id, IsActive,  InvoiceTypeCode)
+ VALUES 
+  ('',             1,   N'Tanımsız'),
+  ('SATIS',        1,   N'Satış'), 
+  ('IADE',         1,   N'İade'),
+  ('ISTISNA',      1,   N'İstisna'),
+  ('TEVKIFAT',     1,   N'Tevkifat'),
+  ('OZELMATRAH',   1,   N'Özel Matrah'), 
+  ('IHRACKAYITLI', 1,   N'İhraç Kayıtlı'),
+  ('SGK',          1,   N'SGK')
+
+
+
+-- ------------------------------------------------------- 
+-- AccountingCostType
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmBelgeStokBAccountingCostType')
+drop table [Lkp].[OnmBelgeStokBAccountingCostType]
+
+create table [Lkp].[OnmBelgeStokBAccountingCostType]
+(
+   Id                   Varchar(20) Unique Not Null,
+   IsActive             Bool                   null,
+   AccountingCostType   nVarchar(40)           null,
+
+   constraint  pk_OnmBelgeStokBAccountingCostType primary key (Id)
+)
+
+INSERT INTO [Lkp].[OnmBelgeStokBAccountingCostType] (Id, IsActive,  AccountingCostType)
+ VALUES 
+  ('',             1,   N'Tanımsız'),
+  ('SAGLIK_ECZ',   1,   N'Sağlık Eczane '), 
+  ('SAGLIK_HAS',   1,   N'Sağlık Hastahane'), 
+  ('SAGLIK_OPT',   1,   N'Sağlık Opt'), 
+  ('SAGLIK_MED',   1,   N'Sağlık Medikal'), 
+  ('ABONELIK',     1,   N'Abonelik'), 
+  ('MAL_HIZMET',   1,   N'Mal, Hizmet'), 
+  ('DIGER',        1,   N'Diğer')
+
+

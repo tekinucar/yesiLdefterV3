@@ -16,7 +16,7 @@ AS BEGIN
        SET GrupBitisTarihi = x.GrupBitisTarihi
    From dbo.MtskGrupSubesi as sube, (
          Select 
-		     td.FirmId
+             td.FirmId
            , td.DonemTipiId
            , td.GrupTipiId
            , td.SubeTipiId

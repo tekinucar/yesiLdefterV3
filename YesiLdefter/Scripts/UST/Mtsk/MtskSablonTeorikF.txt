@@ -28,7 +28,8 @@ begin transaction
    PersonelId              Varchar(20)   null, -- user
    EgitimTipiId            SmallInt      null, -- default  /* 1. Normal, 2. Telafi */
    /* maneul kısım */
-
+   IsLock                  Bit           null,
+   
    constraint		pk_MtskSablonTeorikF primary key (Id)
  )
   
@@ -39,6 +40,41 @@ begin transaction
 commit transaction
 
 /*CreateTableEnd*/
+
+
+/*CreateTrigger*/
+
+CREATE TRIGGER [dbo].[trg_MtskSablonTeorikFDeleteIsLock] on [dbo].[MtskSablonTeorikF]
+INSTEAD of DELETE
+AS BEGIN
+
+    declare fCursorDlt cursor local for select Id from deleted
+    declare @curId bigint
+
+    OPEN fCursorDlt
+
+    FETCH NEXT FROM fCursorDlt INTO @curId
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+      IF EXISTS (SELECT 1 FROM deleted WHERE isnull(IsLock,0) = 1 and Id = @curId)
+      BEGIN
+         PRINT 'Bu kayıt silinemez!'
+         RETURN
+      END
+
+      Delete from dbo.MtskTeorikDers  Where SablonTeorikFId = @curId and isnull(TDersIsUploaded,0) = 0
+      Delete from dbo.MtskSablonTeorikF Where Id = @curId
+
+      FETCH NEXT FROM fCursorDlt INTO @curId
+    END
+
+    CLOSE fCursorDlt
+    DEALLOCATE fCursorDlt
+
+END
+
+/*CreateTriggerEnd*/
 
 
 
@@ -157,47 +193,3 @@ commit transaction
 
 /*CreateLkpTableEnd*/
 
-/*
-
-   DonemTipiId             Int           null, -- sourec read 
-   GrupTipiId              SmallInt      null, -- sourec read 
-   SubeTipiId              SmallInt      null, -- sourec read 
-
-   BaslangicTarihi         Date          null, -- user 
-   DerslikTipiId           SmallInt      null, -- default  /* 1. Trafik ve Çevre Bilgisi, İlk Yardım, Araç Tekniği */
-   DerslikAdiTipiId        SmallInt      null, -- default  /* Derslik-1, -2 ... -10 */
-   DersSaatiTipiId         SmallInt      null, -- user     /* 07:00 - 07:50 ... */
-   SaatSayisi              SmallInt   <<       -- user 
-   PersonelId              Varchar(20)   null, -- user
-   EgitimTipiId            SmallInt      null, -- default  /* 1. Normal, 2. Telafi */
-
-
-create table MtskTeorikDers
- (
-   Id                   Int IDENTITY(1,1) not null, 
-   FirmId               Int       not null,
-   IsActive             Bit       not null, /* default : 1 = active, 0 = not active */  
-
-   DonemTipiId          Int           null, --sourec read 
-   GrupTipiId           SmallInt      null, --sourec read
-   SubeTipiId           SmallInt      null, --sourec read
-   
-   DerslikTipiId        SmallInt      null, -- default        /* 1. Trafik ve Çevre Bilgisi, İlk Yardım, Araç Tekniği */
-   DerslikAdiTipiId     SmallInt      null, --          /* Derslik-1, -2 ... -10 */
-   DersTarihi           Date          null, -- user
-   DersSaatiTipiId      SmallInt      null, -- user
-   PersonelId           Varchar(20)   null, -- user
-   EgitimTipiId         SmallInt      null, -- defalut  /* 1. Normal, 2. Telafi */
-
-   BaslamaSaati         Datetime      null, /* Calender and Scheduling için gerekli */
-   BitisSaati           Datetime      null, /* Calender and Scheduling için gerekli */
-   TDersIsUploaded      Bit           null,
-   SablonTeorikBId      Int           null, /* SablonTeorikBId ve DonemTipiId ile beraber bakıldığında hangi taslak formundan (MtskTaslakTeorikF) bilgi alındığı bulunur  */
-   SablonTeorikFId      Int           null,
-   
-   constraint		pk_MtskTeorikDers primary key (Id)
- )
- 
-
-
-*/

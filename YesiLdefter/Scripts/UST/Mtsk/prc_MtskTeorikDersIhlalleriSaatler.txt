@@ -197,7 +197,7 @@ AS BEGIN
            , PersonelId
            , DersTarihi
            , DersSaatiTipiId
-		   , InsertedId
+           , InsertedId
            , Tarih)  
          Select 
              td.FirmId
@@ -213,7 +213,9 @@ AS BEGIN
            , GETDATE()
          From dbo.MtskTeorikDers as td
              left outer join dbo.MtskDonemi as dnm on (
-	                dnm.GrupBaslamaTarihi > td.DersTarihi
+	                isnull(dnm.GrupBaslamaTarihi, convert(date,'01.01.2099',103)) > td.DersTarihi
+                and dnm.DonemTipiId = @DonemTipiId
+                and dnm.FirmId      = @FirmId
 		         )
          Where td.FirmId      = @FirmId
 		 and   td.DonemTipiId = @DonemTipiId

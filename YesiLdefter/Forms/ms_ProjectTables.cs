@@ -102,7 +102,11 @@ namespace YesiLdefter
         string buttonSourceTablesList = "SOURCE_TABLES";
         string buttonSingleTableTransfer = "SINGLE_TABLE_TRANSFER";
         string buttonSingleTableTransferContinue = "SINGLE_TABLE_TRANSFER_CONTINUE";
+        string buttonSingleTableTransferDateContinue = "SINGLE_TABLE_TRANSFER_DATE";
         string buttonTablesTransfer = "TABLES_TRANSFER";
+
+        string startTarih = "";
+        
         #endregion
         public ms_ProjectTables()
         {
@@ -214,6 +218,7 @@ namespace YesiLdefter
                 if (((DevExpress.XtraBars.Navigation.TileNavItem)sender).Name == buttonSourceTablesList) sourceTablesList((DevExpress.XtraBars.Navigation.TileNavItem)sender);
                 if (((DevExpress.XtraBars.Navigation.TileNavItem)sender).Name == buttonSingleTableTransfer) singleTableTransfer();
                 if (((DevExpress.XtraBars.Navigation.TileNavItem)sender).Name == buttonSingleTableTransferContinue) singleTableTransferContinue();
+                if (((DevExpress.XtraBars.Navigation.TileNavItem)sender).Name == buttonSingleTableTransferDateContinue) singleTableTransferDateContinue();
                 if (((DevExpress.XtraBars.Navigation.TileNavItem)sender).Name == buttonTablesTransfer) tablesTransfer();
             }
         }
@@ -966,7 +971,7 @@ namespace YesiLdefter
                 DialogResult cevap = t.mySoru(soru);
                 if (DialogResult.Yes == cevap)
                 {
-                    onay = preparingTableDataTransfer(dNDataTransfer.Position, false);
+                    onay = preparingTableDataTransfer(dNDataTransfer.Position, false, "", "", "");
 
                     if (onay)
                         t.FlyoutMessage(this, "[ " + about + " ]", "Data transferi gerçekleştirildi...");
@@ -989,7 +994,31 @@ namespace YesiLdefter
                 DialogResult cevap = t.mySoru(soru);
                 if (DialogResult.Yes == cevap)
                 {
-                    onay = preparingTableDataTransfer(dNDataTransfer.Position, true);
+                    onay = preparingTableDataTransfer(dNDataTransfer.Position, true, "/*LastIdControlSql*/", "/*LastIdControlSqlEnd*/", "");
+
+                    if (onay)
+                        t.FlyoutMessage(this, "[ " + about + " ]", "Data transferi gerçekleştirildi...");
+                }
+            }
+        }
+
+        private void singleTableTransferDateContinue()
+        {
+            if (t.IsNotNull(dsDataTransfer))
+            {
+                bool onay = true;
+
+                //v.active_DB.runDBaseNo = v.dBaseNo.aktrilacakDb;
+
+                string about = dsDataTransfer.Tables[0].Rows[dNDataTransfer.Position]["About"].ToString();
+
+                string soru = "[ " + about + " ] tablosundan, beliryeceğiniz tarihden başlayarak Data Transferi yapılacak, onaylıyor musunuz ?";
+                DialogResult cevap = t.mySoru(soru);
+                if (DialogResult.Yes == cevap)
+                {
+                    this.startTarih = t.getTarih(this.startTarih);
+
+                    onay = preparingTableDataTransfer(dNDataTransfer.Position, true, "/*StartDateSql*/", "/*StartDateSqlEnd*/", this.startTarih);
 
                     if (onay)
                         t.FlyoutMessage(this, "[ " + about + " ]", "Data transferi gerçekleştirildi...");
@@ -1002,7 +1031,7 @@ namespace YesiLdefter
 
         }
 
-        private bool preparingTableDataTransfer(int pos, bool continue_)
+        private bool preparingTableDataTransfer(int pos, bool continue_, string startContent, string endContent, string inputValue)
         {
             bool onay = false;
             string sAlias = string.Empty;
@@ -1055,10 +1084,27 @@ namespace YesiLdefter
             /// 
             if ((continue_) && (lastIdControlSql != ""))
             {
-                whereLastId = preparingGetLastId(tAlias, tTableName, lastIdControlSql);
+                int position = 0;
+                lastIdControlSql = t.getContent(lastIdControlSql, startContent, endContent, ref position);
 
-                if (whereLastId != "")
-                    sourceDataReadSql = sourceDataReadSql.Replace("--:WhereAnd", whereLastId);
+                if (startContent == "/*LastIdControlSql*/")
+                {
+                    whereLastId = preparingGetLastId(tAlias, tTableName, lastIdControlSql);
+
+                    if (whereLastId != "")
+                        sourceDataReadSql = sourceDataReadSql.Replace("--:WhereAnd", whereLastId);
+
+                }
+
+                if (startContent == "/*StartDateSql*/")
+                {
+                    if (inputValue == "")
+                        inputValue = "01.01.1990";
+
+                    lastIdControlSql = lastIdControlSql.Replace(":TARIH", inputValue);
+
+                    sourceDataReadSql = sourceDataReadSql.Replace("--:WhereAnd", lastIdControlSql);
+                }
             }
 
             /// Data transferi başlamadan önce 
@@ -1884,6 +1930,8 @@ namespace YesiLdefter
                 t.Find_Button_AddClick(this, menuName2, buttonSourceDBConnect, myNavElementClick);
                 t.Find_Button_AddClick(this, menuName2, buttonSourceTablesList, myNavElementClick);
                 t.Find_Button_AddClick(this, menuName2, buttonSingleTableTransfer, myNavElementClick);
+                t.Find_Button_AddClick(this, menuName2, buttonSingleTableTransferContinue, myNavElementClick);
+                t.Find_Button_AddClick(this, menuName2, buttonSingleTableTransferDateContinue, myNavElementClick);
                 t.Find_Button_AddClick(this, menuName2, buttonTablesTransfer, myNavElementClick);
                 #endregion create Tables, Proceduru, Function ve Veri aktarımı olan menu
 
@@ -1895,6 +1943,8 @@ namespace YesiLdefter
                 t.Find_Button_AddClick(this, menuName22, buttonSourceDBConnect, myNavElementClick);
                 t.Find_Button_AddClick(this, menuName22, buttonSourceTablesList, myNavElementClick);
                 t.Find_Button_AddClick(this, menuName22, buttonSingleTableTransfer, myNavElementClick);
+                t.Find_Button_AddClick(this, menuName22, buttonSingleTableTransferContinue, myNavElementClick);
+                t.Find_Button_AddClick(this, menuName22, buttonSingleTableTransferDateContinue, myNavElementClick);
                 t.Find_Button_AddClick(this, menuName22, buttonTablesTransfer, myNavElementClick);
                 #endregion Sadece Veri aktarımı olan menu
             }

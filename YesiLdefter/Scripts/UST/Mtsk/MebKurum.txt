@@ -125,6 +125,7 @@ AS BEGIN
            ,[BelgeTipiId]
            ,[KaynakTipiId]
            ,[IsKkeg]
+           ,[SahiplikTipiId]
            ,[JoinTableTypeId]
            ,[JoinId])
           VALUES
@@ -151,10 +152,11 @@ AS BEGIN
            ,0 -- UruneYuklenmesiTipiId, smallint,>
            ,0 -- UretimHacmiTipiId, smallint,>
            ,0 -- IsletmeFonksiyonuTipiId, smallint,>
-           ,0 -- PeriyodTipiId, smallint,>
+           ,31 -- PeriyodTipiId, smallint,>
            ,0 -- BelgeTipiId, smallint,>
            ,0 -- KaynakTipiId, smallint,>
            ,0 -- IsKkeg, bit,>
+           ,21 -- SahiplikTipiId 
            ,2101 --JoinTableTypeId
            ,@curId --JoinId 
            )

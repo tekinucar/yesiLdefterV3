@@ -56,8 +56,10 @@ AS BEGIN
     declare @ePersonelId varchar(20) = ''
     declare @eSaat varchar(20) = null
     declare @TcNoCalismaIzniNo varchar(20) = null
+    declare @TDersIsUploaded bit = 0
+    declare @SablonTeorikFId int = 0
 
-	declare @insId int = 0
+    declare @insId int = 0
     declare @mvcId int = 0
     declare @CakismaId int = 0
 
@@ -65,13 +67,15 @@ AS BEGIN
     BEGIN
     	
       Select
-	   @eFirmId = ins.FirmId
+       @eFirmId = ins.FirmId
       ,@eDonemTipiId = ins.DonemTipiId
       ,@eGrupTipiId = ins.GrupTipiId
       ,@eSubeTipiId = ins.SubeTipiId
       ,@eDersTarihi = ins.DersTarihi
       ,@eDersSaatiTipiId = ins.DersSaatiTipiId
       ,@ePersonelId = isnull(ins.PersonelId,'')
+      ,@TDersIsUploaded = isnull(ins.TDersIsUploaded,0)
+      ,@SablonTeorikFId = isnull(ins.SablonTeorikFId,0)
       ,@eSaat = isnull(saat.DersSaatiTipi,'00:00 - 00:00')
       From inserted ins
 	    left outer join Lkp.MtskTeorikDersDersSaatiTipi saat on (ins.DersSaatiTipiId = saat.Id)
@@ -91,19 +95,26 @@ AS BEGIN
         Where Id = @curId
       end
 	  
-	  if (@eDersSaatiTipiId > -1 and @eDersSaatiTipiId < 20)
-	  begin
-	      -- BaslangicSaat ve BitisSaat 
-	      update dbo.MtskTeorikDers set 
+      if (@eDersSaatiTipiId > -1 and @eDersSaatiTipiId < 20)
+      begin
+          -- BaslangicSaat ve BitisSaat 
+          update dbo.MtskTeorikDers set 
               BaslamaSaati = CONVERT(smalldatetime, CONVERT(varchar(10), @eDersTarihi) + ' ' + SUBSTRING(@eSaat,1,5))
             , BitisSaati   = CONVERT(smalldatetime, CONVERT(varchar(10), @eDersTarihi) + ' ' + SUBSTRING(@eSaat,9,5))
           Where Id = @curId
-	  end --
+      end --
 
-	  --Execute [dbo].[prc_MtskTeorikDersIhlalleri] @curId iptal
-	  Execute [dbo].[prc_MtskTeorikDersIhlalleriSaatler] @curId, 0, 0
+      if (@TDersIsUploaded = 1 and @SablonTeorikFId > 0)
+      begin 
+          Update dbo.MtskSablonTeorikF set IsLock = 1
+          Where Id = @SablonTeorikFId
+          and   isnull(IsLock,0) = 0
+      end
+
+      --Execute [dbo].[prc_MtskTeorikDersIhlalleri] @curId iptal
+      Execute [dbo].[prc_MtskTeorikDersIhlalleriSaatler] @curId, 0, 0
       Execute [dbo].[prc_MtskTeorikDersIhlalleriCakismalar] @curId
-	  Execute [dbo].[prc_MtskDersIhlalleriPersonel] @curId
+      Execute [dbo].[prc_MtskDersIhlalleriPersonel] @curId
 
 
       FETCH NEXT FROM myCursor INTO @curId
@@ -171,6 +182,40 @@ END
 
  /*CreateTriggerEnd*/
 
+
+/*CreateTrigger*/
+
+CREATE TRIGGER [dbo].[trg_MtskTeorikDersDeleteIsLock] on [dbo].[MtskTeorikDers]
+INSTEAD of DELETE
+AS BEGIN
+
+    declare isLockCursorDlt cursor local for select Id from deleted
+    declare @curId bigint
+
+    OPEN isLockCursorDlt
+
+    FETCH NEXT FROM isLockCursorDlt INTO @curId
+
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+	    IF EXISTS (SELECT 1 FROM deleted WHERE isnull(TDersIsUploaded,0) = 1 and Id = @curId)
+        BEGIN
+            PRINT 'Bu kayıt silinemez!'
+            RETURN
+        END
+
+        Delete from dbo.MtskTeorikDers  Where Id = @curId and isnull(TDersIsUploaded,0) = 0
+
+      FETCH NEXT FROM isLockCursorDlt INTO @curId
+    END
+
+    CLOSE isLockCursorDlt
+    DEALLOCATE isLockCursorDlt
+
+END
+
+ /*CreateTriggerEnd*/
 
 
 /*CreateLkpTable*/

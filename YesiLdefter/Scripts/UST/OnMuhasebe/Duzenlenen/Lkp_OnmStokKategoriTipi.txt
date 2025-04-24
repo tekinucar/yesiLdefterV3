@@ -28,7 +28,7 @@ commit transaction
 
 
 
-/*CreateData*/
+/*CreateData???? mtsk içi planlama nasıl olacak*/
 
 
 DELETE FROM [Lkp].[OnmStokKategoriTipi]

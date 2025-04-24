@@ -2640,9 +2640,9 @@ namespace Tkn_Events
         }
 
 
-            #endregion myGridView Events
+        #endregion myGridView Events
 
-            #region myGridControl
+        #region myGridControl
 
         public void myGridControl_DragLeave(object sender, EventArgs e)
         {

@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace EInvoiceDemoProject.Uyumsoft {
+namespace YesiLdefter.Uyumsoft {
     
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
@@ -31,7 +31,7 @@ namespace EInvoiceDemoProject.Uyumsoft {
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IndicatorType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IdentifierType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(EntityBase))]
-        EInvoiceDemoProject.Uyumsoft.DateResponse GetSystemDate();
+        YesiLdefter.Uyumsoft.DateResponse GetSystemDate();
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IIntegration/IsEInvoiceUser", ReplyAction="http://tempuri.org/IIntegration/IsEInvoiceUserResponse")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
@@ -49,7 +49,7 @@ namespace EInvoiceDemoProject.Uyumsoft {
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IndicatorType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IdentifierType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(EntityBase))]
-        EInvoiceDemoProject.Uyumsoft.FlagResponse IsEInvoiceUser(string vknTckn, string alias);
+        YesiLdefter.Uyumsoft.FlagResponse IsEInvoiceUser(string vknTckn, string alias);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IIntegration/GetEInvoiceUsers", ReplyAction="http://tempuri.org/IIntegration/GetEInvoiceUsersResponse")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
@@ -67,7 +67,7 @@ namespace EInvoiceDemoProject.Uyumsoft {
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IndicatorType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IdentifierType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(EntityBase))]
-        EInvoiceDemoProject.Uyumsoft.SystemUsersResponse GetEInvoiceUsers(EInvoiceDemoProject.Uyumsoft.PagedQueryContext pagination);
+        YesiLdefter.Uyumsoft.SystemUsersResponse GetEInvoiceUsers(YesiLdefter.Uyumsoft.PagedQueryContext pagination);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IIntegration/GetUserAliasses", ReplyAction="http://tempuri.org/IIntegration/GetUserAliassesResponse")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
@@ -85,7 +85,7 @@ namespace EInvoiceDemoProject.Uyumsoft {
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IndicatorType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IdentifierType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(EntityBase))]
-        EInvoiceDemoProject.Uyumsoft.UserAliassesResponse GetUserAliasses(string vknTckn);
+        YesiLdefter.Uyumsoft.UserAliassesResponse GetUserAliasses(string vknTckn);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IIntegration/SetXsltView", ReplyAction="http://tempuri.org/IIntegration/SetXsltViewResponse")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
@@ -103,7 +103,7 @@ namespace EInvoiceDemoProject.Uyumsoft {
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IndicatorType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IdentifierType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(EntityBase))]
-        EInvoiceDemoProject.Uyumsoft.FlagResponse SetXsltView(EInvoiceDemoProject.Uyumsoft.XsltViewType type, string fileContent);
+        YesiLdefter.Uyumsoft.FlagResponse SetXsltView(YesiLdefter.Uyumsoft.XsltViewType type, string fileContent);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IIntegration/GetXsltView", ReplyAction="http://tempuri.org/IIntegration/GetXsltViewResponse")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
@@ -121,7 +121,7 @@ namespace EInvoiceDemoProject.Uyumsoft {
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IndicatorType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IdentifierType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(EntityBase))]
-        EInvoiceDemoProject.Uyumsoft.StringElementResponse GetXsltView(EInvoiceDemoProject.Uyumsoft.XsltViewType type);
+        YesiLdefter.Uyumsoft.StringElementResponse GetXsltView(YesiLdefter.Uyumsoft.XsltViewType type);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IIntegration/ValidateInvoice", ReplyAction="http://tempuri.org/IIntegration/ValidateInvoiceResponse")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
@@ -139,7 +139,7 @@ namespace EInvoiceDemoProject.Uyumsoft {
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IndicatorType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IdentifierType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(EntityBase))]
-        EInvoiceDemoProject.Uyumsoft.FlagResponse ValidateInvoice(EInvoiceDemoProject.Uyumsoft.InvoiceType invoice);
+        YesiLdefter.Uyumsoft.FlagResponse ValidateInvoice(YesiLdefter.Uyumsoft.InvoiceType invoice);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IIntegration/GetInboxInvoices", ReplyAction="http://tempuri.org/IIntegration/GetInboxInvoicesResponse")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
@@ -157,7 +157,7 @@ namespace EInvoiceDemoProject.Uyumsoft {
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IndicatorType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IdentifierType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(EntityBase))]
-        EInvoiceDemoProject.Uyumsoft.InvoicesResponse GetInboxInvoices(EInvoiceDemoProject.Uyumsoft.InboxInvoiceQueryModel query);
+        YesiLdefter.Uyumsoft.InvoicesResponse GetInboxInvoices(YesiLdefter.Uyumsoft.InboxInvoiceQueryModel query);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IIntegration/GetInboxInvoiceList", ReplyAction="http://tempuri.org/IIntegration/GetInboxInvoiceListResponse")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
@@ -175,7 +175,7 @@ namespace EInvoiceDemoProject.Uyumsoft {
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IndicatorType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IdentifierType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(EntityBase))]
-        EInvoiceDemoProject.Uyumsoft.InboxInvoiceListResponse GetInboxInvoiceList(EInvoiceDemoProject.Uyumsoft.InboxInvoiceListQueryModel query);
+        YesiLdefter.Uyumsoft.InboxInvoiceListResponse GetInboxInvoiceList(YesiLdefter.Uyumsoft.InboxInvoiceListQueryModel query);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IIntegration/GetInboxInvoice", ReplyAction="http://tempuri.org/IIntegration/GetInboxInvoiceResponse")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
@@ -193,7 +193,7 @@ namespace EInvoiceDemoProject.Uyumsoft {
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IndicatorType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IdentifierType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(EntityBase))]
-        EInvoiceDemoProject.Uyumsoft.InvoiceResponse GetInboxInvoice(string invoiceId);
+        YesiLdefter.Uyumsoft.InvoiceResponse GetInboxInvoice(string invoiceId);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IIntegration/GetInboxInvoicesData", ReplyAction="http://tempuri.org/IIntegration/GetInboxInvoicesDataResponse")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
@@ -211,7 +211,7 @@ namespace EInvoiceDemoProject.Uyumsoft {
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IndicatorType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IdentifierType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(EntityBase))]
-        EInvoiceDemoProject.Uyumsoft.InvoicesDataResponse GetInboxInvoicesData(EInvoiceDemoProject.Uyumsoft.InboxInvoiceQueryModel query);
+        YesiLdefter.Uyumsoft.InvoicesDataResponse GetInboxInvoicesData(YesiLdefter.Uyumsoft.InboxInvoiceQueryModel query);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IIntegration/GetInboxInvoiceData", ReplyAction="http://tempuri.org/IIntegration/GetInboxInvoiceDataResponse")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
@@ -229,7 +229,7 @@ namespace EInvoiceDemoProject.Uyumsoft {
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IndicatorType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IdentifierType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(EntityBase))]
-        EInvoiceDemoProject.Uyumsoft.InvoiceDataResponse GetInboxInvoiceData(string invoiceId);
+        YesiLdefter.Uyumsoft.InvoiceDataResponse GetInboxInvoiceData(string invoiceId);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IIntegration/QueryInboxInvoiceStatus", ReplyAction="http://tempuri.org/IIntegration/QueryInboxInvoiceStatusResponse")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
@@ -247,7 +247,7 @@ namespace EInvoiceDemoProject.Uyumsoft {
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IndicatorType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IdentifierType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(EntityBase))]
-        EInvoiceDemoProject.Uyumsoft.InvoiceStatusResponse QueryInboxInvoiceStatus(string[] invoiceIds);
+        YesiLdefter.Uyumsoft.InvoiceStatusResponse QueryInboxInvoiceStatus(string[] invoiceIds);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IIntegration/SetInvoicesTaken", ReplyAction="http://tempuri.org/IIntegration/SetInvoicesTakenResponse")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
@@ -265,7 +265,7 @@ namespace EInvoiceDemoProject.Uyumsoft {
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IndicatorType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IdentifierType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(EntityBase))]
-        EInvoiceDemoProject.Uyumsoft.FlagResponse SetInvoicesTaken(string[] invoices);
+        YesiLdefter.Uyumsoft.FlagResponse SetInvoicesTaken(string[] invoices);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IIntegration/SendDocumentResponse", ReplyAction="http://tempuri.org/IIntegration/SendDocumentResponseResponse")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
@@ -283,7 +283,7 @@ namespace EInvoiceDemoProject.Uyumsoft {
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IndicatorType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IdentifierType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(EntityBase))]
-        EInvoiceDemoProject.Uyumsoft.FlagResponse SendDocumentResponse(EInvoiceDemoProject.Uyumsoft.DocumentResponseInfo[] responses);
+        YesiLdefter.Uyumsoft.FlagResponse SendDocumentResponse(YesiLdefter.Uyumsoft.DocumentResponseInfo[] responses);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IIntegration/QueryDocumentResponseStatus", ReplyAction="http://tempuri.org/IIntegration/QueryDocumentResponseStatusResponse")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
@@ -301,7 +301,7 @@ namespace EInvoiceDemoProject.Uyumsoft {
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IndicatorType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IdentifierType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(EntityBase))]
-        EInvoiceDemoProject.Uyumsoft.DocumentResponseStatusResponse QueryDocumentResponseStatus(string[] invoiceIds);
+        YesiLdefter.Uyumsoft.DocumentResponseStatusResponse QueryDocumentResponseStatus(string[] invoiceIds);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IIntegration/GetOutboxInvoices", ReplyAction="http://tempuri.org/IIntegration/GetOutboxInvoicesResponse")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
@@ -319,7 +319,7 @@ namespace EInvoiceDemoProject.Uyumsoft {
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IndicatorType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IdentifierType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(EntityBase))]
-        EInvoiceDemoProject.Uyumsoft.InvoicesResponse GetOutboxInvoices(EInvoiceDemoProject.Uyumsoft.InvoiceQueryModel query);
+        YesiLdefter.Uyumsoft.InvoicesResponse GetOutboxInvoices(YesiLdefter.Uyumsoft.InvoiceQueryModel query);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IIntegration/GetOutboxInvoiceList", ReplyAction="http://tempuri.org/IIntegration/GetOutboxInvoiceListResponse")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
@@ -337,7 +337,7 @@ namespace EInvoiceDemoProject.Uyumsoft {
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IndicatorType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IdentifierType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(EntityBase))]
-        EInvoiceDemoProject.Uyumsoft.OutboxInvoiceListResponse GetOutboxInvoiceList(EInvoiceDemoProject.Uyumsoft.OutboxInvoiceListQueryModel query);
+        YesiLdefter.Uyumsoft.OutboxInvoiceListResponse GetOutboxInvoiceList(YesiLdefter.Uyumsoft.OutboxInvoiceListQueryModel query);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IIntegration/GetOutboxInvoice", ReplyAction="http://tempuri.org/IIntegration/GetOutboxInvoiceResponse")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
@@ -355,7 +355,7 @@ namespace EInvoiceDemoProject.Uyumsoft {
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IndicatorType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IdentifierType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(EntityBase))]
-        EInvoiceDemoProject.Uyumsoft.InvoiceResponse GetOutboxInvoice(string invoiceId);
+        YesiLdefter.Uyumsoft.InvoiceResponse GetOutboxInvoice(string invoiceId);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IIntegration/GetOutboxInvoicesData", ReplyAction="http://tempuri.org/IIntegration/GetOutboxInvoicesDataResponse")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
@@ -373,7 +373,7 @@ namespace EInvoiceDemoProject.Uyumsoft {
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IndicatorType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IdentifierType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(EntityBase))]
-        EInvoiceDemoProject.Uyumsoft.InvoicesDataResponse GetOutboxInvoicesData(EInvoiceDemoProject.Uyumsoft.InvoiceQueryModel query);
+        YesiLdefter.Uyumsoft.InvoicesDataResponse GetOutboxInvoicesData(YesiLdefter.Uyumsoft.InvoiceQueryModel query);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IIntegration/GetOutboxInvoiceData", ReplyAction="http://tempuri.org/IIntegration/GetOutboxInvoiceDataResponse")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
@@ -391,7 +391,7 @@ namespace EInvoiceDemoProject.Uyumsoft {
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IndicatorType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IdentifierType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(EntityBase))]
-        EInvoiceDemoProject.Uyumsoft.InvoiceDataResponse GetOutboxInvoiceData(string invoiceId);
+        YesiLdefter.Uyumsoft.InvoiceDataResponse GetOutboxInvoiceData(string invoiceId);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IIntegration/QueryOutboxInvoiceStatus", ReplyAction="http://tempuri.org/IIntegration/QueryOutboxInvoiceStatusResponse")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
@@ -409,7 +409,7 @@ namespace EInvoiceDemoProject.Uyumsoft {
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IndicatorType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IdentifierType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(EntityBase))]
-        EInvoiceDemoProject.Uyumsoft.InvoiceStatusResponse QueryOutboxInvoiceStatus(string[] invoiceIds);
+        YesiLdefter.Uyumsoft.InvoiceStatusResponse QueryOutboxInvoiceStatus(string[] invoiceIds);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IIntegration/QueryInvoiceGtbResponses", ReplyAction="http://tempuri.org/IIntegration/QueryInvoiceGtbResponsesResponse")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
@@ -427,7 +427,7 @@ namespace EInvoiceDemoProject.Uyumsoft {
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IndicatorType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IdentifierType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(EntityBase))]
-        EInvoiceDemoProject.Uyumsoft.InvoiceGtbInfoResponse QueryInvoiceGtbResponses(string[] invoiceIds);
+        YesiLdefter.Uyumsoft.InvoiceGtbInfoResponse QueryInvoiceGtbResponses(string[] invoiceIds);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IIntegration/SaveAsDraft", ReplyAction="http://tempuri.org/IIntegration/SaveAsDraftResponse")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
@@ -445,7 +445,7 @@ namespace EInvoiceDemoProject.Uyumsoft {
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IndicatorType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IdentifierType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(EntityBase))]
-        EInvoiceDemoProject.Uyumsoft.InvoiceIdentitiesResponse SaveAsDraft(EInvoiceDemoProject.Uyumsoft.InvoiceInfo[] invoices);
+        YesiLdefter.Uyumsoft.InvoiceIdentitiesResponse SaveAsDraft(YesiLdefter.Uyumsoft.InvoiceInfo[] invoices);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IIntegration/SendInvoice", ReplyAction="http://tempuri.org/IIntegration/SendInvoiceResponse")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
@@ -463,7 +463,7 @@ namespace EInvoiceDemoProject.Uyumsoft {
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IndicatorType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IdentifierType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(EntityBase))]
-        EInvoiceDemoProject.Uyumsoft.InvoiceIdentitiesResponse SendInvoice(EInvoiceDemoProject.Uyumsoft.InvoiceInfo[] invoices);
+        YesiLdefter.Uyumsoft.InvoiceIdentitiesResponse SendInvoice(YesiLdefter.Uyumsoft.InvoiceInfo[] invoices);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IIntegration/CompressedSaveAsDraft", ReplyAction="http://tempuri.org/IIntegration/CompressedSaveAsDraftResponse")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
@@ -481,7 +481,7 @@ namespace EInvoiceDemoProject.Uyumsoft {
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IndicatorType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IdentifierType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(EntityBase))]
-        EInvoiceDemoProject.Uyumsoft.InvoiceIdentitiesResponse CompressedSaveAsDraft(EInvoiceDemoProject.Uyumsoft.BinaryRequestData data);
+        YesiLdefter.Uyumsoft.InvoiceIdentitiesResponse CompressedSaveAsDraft(YesiLdefter.Uyumsoft.BinaryRequestData data);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IIntegration/CompressedSendInvoice", ReplyAction="http://tempuri.org/IIntegration/CompressedSendInvoiceResponse")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
@@ -499,7 +499,7 @@ namespace EInvoiceDemoProject.Uyumsoft {
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IndicatorType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IdentifierType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(EntityBase))]
-        EInvoiceDemoProject.Uyumsoft.InvoiceIdentitiesResponse CompressedSendInvoice(EInvoiceDemoProject.Uyumsoft.BinaryRequestData data);
+        YesiLdefter.Uyumsoft.InvoiceIdentitiesResponse CompressedSendInvoice(YesiLdefter.Uyumsoft.BinaryRequestData data);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IIntegration/SendDraft", ReplyAction="http://tempuri.org/IIntegration/SendDraftResponse")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
@@ -517,7 +517,7 @@ namespace EInvoiceDemoProject.Uyumsoft {
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IndicatorType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IdentifierType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(EntityBase))]
-        EInvoiceDemoProject.Uyumsoft.FlagResponse SendDraft(string[] invoiceIds);
+        YesiLdefter.Uyumsoft.FlagResponse SendDraft(string[] invoiceIds);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IIntegration/CancelDraft", ReplyAction="http://tempuri.org/IIntegration/CancelDraftResponse")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
@@ -535,7 +535,7 @@ namespace EInvoiceDemoProject.Uyumsoft {
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IndicatorType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IdentifierType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(EntityBase))]
-        EInvoiceDemoProject.Uyumsoft.FlagResponse CancelDraft(string[] invoiceIds);
+        YesiLdefter.Uyumsoft.FlagResponse CancelDraft(string[] invoiceIds);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IIntegration/GetInboxInvoiceView", ReplyAction="http://tempuri.org/IIntegration/GetInboxInvoiceViewResponse")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
@@ -553,7 +553,7 @@ namespace EInvoiceDemoProject.Uyumsoft {
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IndicatorType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IdentifierType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(EntityBase))]
-        EInvoiceDemoProject.Uyumsoft.InvoiceViewResponse GetInboxInvoiceView(string invoiceId);
+        YesiLdefter.Uyumsoft.InvoiceViewResponse GetInboxInvoiceView(string invoiceId);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IIntegration/GetOutboxInvoiceView", ReplyAction="http://tempuri.org/IIntegration/GetOutboxInvoiceViewResponse")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
@@ -571,7 +571,7 @@ namespace EInvoiceDemoProject.Uyumsoft {
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IndicatorType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IdentifierType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(EntityBase))]
-        EInvoiceDemoProject.Uyumsoft.InvoiceViewResponse GetOutboxInvoiceView(string invoiceId);
+        YesiLdefter.Uyumsoft.InvoiceViewResponse GetOutboxInvoiceView(string invoiceId);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IIntegration/GetOutboxInvoiceResponseView", ReplyAction="http://tempuri.org/IIntegration/GetOutboxInvoiceResponseViewResponse")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
@@ -589,7 +589,7 @@ namespace EInvoiceDemoProject.Uyumsoft {
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IndicatorType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IdentifierType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(EntityBase))]
-        EInvoiceDemoProject.Uyumsoft.InvoiceViewResponse GetOutboxInvoiceResponseView(string invoiceId);
+        YesiLdefter.Uyumsoft.InvoiceViewResponse GetOutboxInvoiceResponseView(string invoiceId);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IIntegration/GetInboxInvoiceStatusWithLogs", ReplyAction="http://tempuri.org/IIntegration/GetInboxInvoiceStatusWithLogsResponse")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
@@ -607,7 +607,7 @@ namespace EInvoiceDemoProject.Uyumsoft {
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IndicatorType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IdentifierType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(EntityBase))]
-        EInvoiceDemoProject.Uyumsoft.InvoiceStatusWithLogResponse GetInboxInvoiceStatusWithLogs(string[] invoiceIds);
+        YesiLdefter.Uyumsoft.InvoiceStatusWithLogResponse GetInboxInvoiceStatusWithLogs(string[] invoiceIds);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IIntegration/GetOutboxInvoiceStatusWithLogs", ReplyAction="http://tempuri.org/IIntegration/GetOutboxInvoiceStatusWithLogsResponse")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
@@ -625,7 +625,7 @@ namespace EInvoiceDemoProject.Uyumsoft {
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IndicatorType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IdentifierType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(EntityBase))]
-        EInvoiceDemoProject.Uyumsoft.InvoiceStatusWithLogResponse GetOutboxInvoiceStatusWithLogs(string[] invoiceIds);
+        YesiLdefter.Uyumsoft.InvoiceStatusWithLogResponse GetOutboxInvoiceStatusWithLogs(string[] invoiceIds);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IIntegration/RetrySendInvoices", ReplyAction="http://tempuri.org/IIntegration/RetrySendInvoicesResponse")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
@@ -643,7 +643,7 @@ namespace EInvoiceDemoProject.Uyumsoft {
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IndicatorType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IdentifierType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(EntityBase))]
-        EInvoiceDemoProject.Uyumsoft.Response RetrySendInvoices(string[] invoiceIds);
+        YesiLdefter.Uyumsoft.Response RetrySendInvoices(string[] invoiceIds);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IIntegration/CloneInvoices", ReplyAction="http://tempuri.org/IIntegration/CloneInvoicesResponse")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
@@ -661,7 +661,7 @@ namespace EInvoiceDemoProject.Uyumsoft {
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IndicatorType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IdentifierType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(EntityBase))]
-        EInvoiceDemoProject.Uyumsoft.CloneInvoiceServiceResponse CloneInvoices(string[] invoiceIds);
+        YesiLdefter.Uyumsoft.CloneInvoiceServiceResponse CloneInvoices(string[] invoiceIds);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IIntegration/CancelEArchiveInvoice", ReplyAction="http://tempuri.org/IIntegration/CancelEArchiveInvoiceResponse")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
@@ -679,7 +679,7 @@ namespace EInvoiceDemoProject.Uyumsoft {
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IndicatorType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IdentifierType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(EntityBase))]
-        EInvoiceDemoProject.Uyumsoft.FlagResponse CancelEArchiveInvoice(EInvoiceDemoProject.Uyumsoft.EArchiveCancelInvoiceContext request);
+        YesiLdefter.Uyumsoft.FlagResponse CancelEArchiveInvoice(YesiLdefter.Uyumsoft.EArchiveCancelInvoiceContext request);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IIntegration/GetInboxInvoicePdf", ReplyAction="http://tempuri.org/IIntegration/GetInboxInvoicePdfResponse")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
@@ -697,7 +697,7 @@ namespace EInvoiceDemoProject.Uyumsoft {
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IndicatorType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IdentifierType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(EntityBase))]
-        EInvoiceDemoProject.Uyumsoft.InvoiceDataResponse GetInboxInvoicePdf(string invoiceId);
+        YesiLdefter.Uyumsoft.InvoiceDataResponse GetInboxInvoicePdf(string invoiceId);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IIntegration/GetOutboxInvoicePdf", ReplyAction="http://tempuri.org/IIntegration/GetOutboxInvoicePdfResponse")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
@@ -715,7 +715,7 @@ namespace EInvoiceDemoProject.Uyumsoft {
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IndicatorType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IdentifierType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(EntityBase))]
-        EInvoiceDemoProject.Uyumsoft.InvoiceDataResponse GetOutboxInvoicePdf(string invoiceId);
+        YesiLdefter.Uyumsoft.InvoiceDataResponse GetOutboxInvoicePdf(string invoiceId);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IIntegration/ChangeInvoiceArchiveStatus", ReplyAction="http://tempuri.org/IIntegration/ChangeInvoiceArchiveStatusResponse")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
@@ -733,7 +733,7 @@ namespace EInvoiceDemoProject.Uyumsoft {
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IndicatorType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IdentifierType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(EntityBase))]
-        EInvoiceDemoProject.Uyumsoft.FlagResponse ChangeInvoiceArchiveStatus(string[] invoiceIds, bool isInbox, bool isArchived);
+        YesiLdefter.Uyumsoft.FlagResponse ChangeInvoiceArchiveStatus(string[] invoiceIds, bool isInbox, bool isArchived);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IIntegration/GetSystemUsersCompressedList", ReplyAction="http://tempuri.org/IIntegration/GetSystemUsersCompressedListResponse")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
@@ -751,7 +751,7 @@ namespace EInvoiceDemoProject.Uyumsoft {
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IndicatorType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IdentifierType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(EntityBase))]
-        EInvoiceDemoProject.Uyumsoft.ByteArrayResponse GetSystemUsersCompressedList(EInvoiceDemoProject.Uyumsoft.AliasType type);
+        YesiLdefter.Uyumsoft.ByteArrayResponse GetSystemUsersCompressedList(YesiLdefter.Uyumsoft.AliasType type);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IIntegration/ImportExistingInvoice", ReplyAction="http://tempuri.org/IIntegration/ImportExistingInvoiceResponse")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
@@ -769,7 +769,7 @@ namespace EInvoiceDemoProject.Uyumsoft {
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IndicatorType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IdentifierType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(EntityBase))]
-        EInvoiceDemoProject.Uyumsoft.StringElementResponse ImportExistingInvoice(EInvoiceDemoProject.Uyumsoft.FileUploadRequest request);
+        YesiLdefter.Uyumsoft.StringElementResponse ImportExistingInvoice(YesiLdefter.Uyumsoft.FileUploadRequest request);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IIntegration/TestConnection", ReplyAction="http://tempuri.org/IIntegration/TestConnectionResponse")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
@@ -787,7 +787,7 @@ namespace EInvoiceDemoProject.Uyumsoft {
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IndicatorType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IdentifierType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(EntityBase))]
-        EInvoiceDemoProject.Uyumsoft.FlagResponse TestConnection();
+        YesiLdefter.Uyumsoft.FlagResponse TestConnection();
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IIntegration/GetSummaryReport", ReplyAction="http://tempuri.org/IIntegration/GetSummaryReportResponse")]
         [System.ServiceModel.XmlSerializerFormatAttribute(SupportFaults=true)]
@@ -805,7 +805,7 @@ namespace EInvoiceDemoProject.Uyumsoft {
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IndicatorType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(IdentifierType))]
         [System.ServiceModel.ServiceKnownTypeAttribute(typeof(EntityBase))]
-        EInvoiceDemoProject.Uyumsoft.SummaryReportResponse GetSummaryReport(System.DateTime startDate, System.DateTime endDate);
+        YesiLdefter.Uyumsoft.SummaryReportResponse GetSummaryReport(System.DateTime startDate, System.DateTime endDate);
     }
     
     /// <remarks/>
@@ -24375,12 +24375,12 @@ namespace EInvoiceDemoProject.Uyumsoft {
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public interface IIntegrationChannel : EInvoiceDemoProject.Uyumsoft.IIntegration, System.ServiceModel.IClientChannel {
+    public interface IIntegrationChannel : YesiLdefter.Uyumsoft.IIntegration, System.ServiceModel.IClientChannel {
     }
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class IntegrationClient : System.ServiceModel.ClientBase<EInvoiceDemoProject.Uyumsoft.IIntegration>, EInvoiceDemoProject.Uyumsoft.IIntegration {
+    public partial class IntegrationClient : System.ServiceModel.ClientBase<YesiLdefter.Uyumsoft.IIntegration>, YesiLdefter.Uyumsoft.IIntegration {
         
         public IntegrationClient() {
         }
@@ -24401,179 +24401,179 @@ namespace EInvoiceDemoProject.Uyumsoft {
                 base(binding, remoteAddress) {
         }
         
-        public EInvoiceDemoProject.Uyumsoft.DateResponse GetSystemDate() {
+        public YesiLdefter.Uyumsoft.DateResponse GetSystemDate() {
             return base.Channel.GetSystemDate();
         }
         
-        public EInvoiceDemoProject.Uyumsoft.FlagResponse IsEInvoiceUser(string vknTckn, string alias) {
+        public YesiLdefter.Uyumsoft.FlagResponse IsEInvoiceUser(string vknTckn, string alias) {
             return base.Channel.IsEInvoiceUser(vknTckn, alias);
         }
         
-        public EInvoiceDemoProject.Uyumsoft.SystemUsersResponse GetEInvoiceUsers(EInvoiceDemoProject.Uyumsoft.PagedQueryContext pagination) {
+        public YesiLdefter.Uyumsoft.SystemUsersResponse GetEInvoiceUsers(YesiLdefter.Uyumsoft.PagedQueryContext pagination) {
             return base.Channel.GetEInvoiceUsers(pagination);
         }
         
-        public EInvoiceDemoProject.Uyumsoft.UserAliassesResponse GetUserAliasses(string vknTckn) {
+        public YesiLdefter.Uyumsoft.UserAliassesResponse GetUserAliasses(string vknTckn) {
             return base.Channel.GetUserAliasses(vknTckn);
         }
         
-        public EInvoiceDemoProject.Uyumsoft.FlagResponse SetXsltView(EInvoiceDemoProject.Uyumsoft.XsltViewType type, string fileContent) {
+        public YesiLdefter.Uyumsoft.FlagResponse SetXsltView(YesiLdefter.Uyumsoft.XsltViewType type, string fileContent) {
             return base.Channel.SetXsltView(type, fileContent);
         }
         
-        public EInvoiceDemoProject.Uyumsoft.StringElementResponse GetXsltView(EInvoiceDemoProject.Uyumsoft.XsltViewType type) {
+        public YesiLdefter.Uyumsoft.StringElementResponse GetXsltView(YesiLdefter.Uyumsoft.XsltViewType type) {
             return base.Channel.GetXsltView(type);
         }
         
-        public EInvoiceDemoProject.Uyumsoft.FlagResponse ValidateInvoice(EInvoiceDemoProject.Uyumsoft.InvoiceType invoice) {
+        public YesiLdefter.Uyumsoft.FlagResponse ValidateInvoice(YesiLdefter.Uyumsoft.InvoiceType invoice) {
             return base.Channel.ValidateInvoice(invoice);
         }
         
-        public EInvoiceDemoProject.Uyumsoft.InvoicesResponse GetInboxInvoices(EInvoiceDemoProject.Uyumsoft.InboxInvoiceQueryModel query) {
+        public YesiLdefter.Uyumsoft.InvoicesResponse GetInboxInvoices(YesiLdefter.Uyumsoft.InboxInvoiceQueryModel query) {
             return base.Channel.GetInboxInvoices(query);
         }
         
-        public EInvoiceDemoProject.Uyumsoft.InboxInvoiceListResponse GetInboxInvoiceList(EInvoiceDemoProject.Uyumsoft.InboxInvoiceListQueryModel query) {
+        public YesiLdefter.Uyumsoft.InboxInvoiceListResponse GetInboxInvoiceList(YesiLdefter.Uyumsoft.InboxInvoiceListQueryModel query) {
             return base.Channel.GetInboxInvoiceList(query);
         }
         
-        public EInvoiceDemoProject.Uyumsoft.InvoiceResponse GetInboxInvoice(string invoiceId) {
+        public YesiLdefter.Uyumsoft.InvoiceResponse GetInboxInvoice(string invoiceId) {
             return base.Channel.GetInboxInvoice(invoiceId);
         }
         
-        public EInvoiceDemoProject.Uyumsoft.InvoicesDataResponse GetInboxInvoicesData(EInvoiceDemoProject.Uyumsoft.InboxInvoiceQueryModel query) {
+        public YesiLdefter.Uyumsoft.InvoicesDataResponse GetInboxInvoicesData(YesiLdefter.Uyumsoft.InboxInvoiceQueryModel query) {
             return base.Channel.GetInboxInvoicesData(query);
         }
         
-        public EInvoiceDemoProject.Uyumsoft.InvoiceDataResponse GetInboxInvoiceData(string invoiceId) {
+        public YesiLdefter.Uyumsoft.InvoiceDataResponse GetInboxInvoiceData(string invoiceId) {
             return base.Channel.GetInboxInvoiceData(invoiceId);
         }
         
-        public EInvoiceDemoProject.Uyumsoft.InvoiceStatusResponse QueryInboxInvoiceStatus(string[] invoiceIds) {
+        public YesiLdefter.Uyumsoft.InvoiceStatusResponse QueryInboxInvoiceStatus(string[] invoiceIds) {
             return base.Channel.QueryInboxInvoiceStatus(invoiceIds);
         }
         
-        public EInvoiceDemoProject.Uyumsoft.FlagResponse SetInvoicesTaken(string[] invoices) {
+        public YesiLdefter.Uyumsoft.FlagResponse SetInvoicesTaken(string[] invoices) {
             return base.Channel.SetInvoicesTaken(invoices);
         }
         
-        public EInvoiceDemoProject.Uyumsoft.FlagResponse SendDocumentResponse(EInvoiceDemoProject.Uyumsoft.DocumentResponseInfo[] responses) {
+        public YesiLdefter.Uyumsoft.FlagResponse SendDocumentResponse(YesiLdefter.Uyumsoft.DocumentResponseInfo[] responses) {
             return base.Channel.SendDocumentResponse(responses);
         }
         
-        public EInvoiceDemoProject.Uyumsoft.DocumentResponseStatusResponse QueryDocumentResponseStatus(string[] invoiceIds) {
+        public YesiLdefter.Uyumsoft.DocumentResponseStatusResponse QueryDocumentResponseStatus(string[] invoiceIds) {
             return base.Channel.QueryDocumentResponseStatus(invoiceIds);
         }
         
-        public EInvoiceDemoProject.Uyumsoft.InvoicesResponse GetOutboxInvoices(EInvoiceDemoProject.Uyumsoft.InvoiceQueryModel query) {
+        public YesiLdefter.Uyumsoft.InvoicesResponse GetOutboxInvoices(YesiLdefter.Uyumsoft.InvoiceQueryModel query) {
             return base.Channel.GetOutboxInvoices(query);
         }
         
-        public EInvoiceDemoProject.Uyumsoft.OutboxInvoiceListResponse GetOutboxInvoiceList(EInvoiceDemoProject.Uyumsoft.OutboxInvoiceListQueryModel query) {
+        public YesiLdefter.Uyumsoft.OutboxInvoiceListResponse GetOutboxInvoiceList(YesiLdefter.Uyumsoft.OutboxInvoiceListQueryModel query) {
             return base.Channel.GetOutboxInvoiceList(query);
         }
         
-        public EInvoiceDemoProject.Uyumsoft.InvoiceResponse GetOutboxInvoice(string invoiceId) {
+        public YesiLdefter.Uyumsoft.InvoiceResponse GetOutboxInvoice(string invoiceId) {
             return base.Channel.GetOutboxInvoice(invoiceId);
         }
         
-        public EInvoiceDemoProject.Uyumsoft.InvoicesDataResponse GetOutboxInvoicesData(EInvoiceDemoProject.Uyumsoft.InvoiceQueryModel query) {
+        public YesiLdefter.Uyumsoft.InvoicesDataResponse GetOutboxInvoicesData(YesiLdefter.Uyumsoft.InvoiceQueryModel query) {
             return base.Channel.GetOutboxInvoicesData(query);
         }
         
-        public EInvoiceDemoProject.Uyumsoft.InvoiceDataResponse GetOutboxInvoiceData(string invoiceId) {
+        public YesiLdefter.Uyumsoft.InvoiceDataResponse GetOutboxInvoiceData(string invoiceId) {
             return base.Channel.GetOutboxInvoiceData(invoiceId);
         }
         
-        public EInvoiceDemoProject.Uyumsoft.InvoiceStatusResponse QueryOutboxInvoiceStatus(string[] invoiceIds) {
+        public YesiLdefter.Uyumsoft.InvoiceStatusResponse QueryOutboxInvoiceStatus(string[] invoiceIds) {
             return base.Channel.QueryOutboxInvoiceStatus(invoiceIds);
         }
         
-        public EInvoiceDemoProject.Uyumsoft.InvoiceGtbInfoResponse QueryInvoiceGtbResponses(string[] invoiceIds) {
+        public YesiLdefter.Uyumsoft.InvoiceGtbInfoResponse QueryInvoiceGtbResponses(string[] invoiceIds) {
             return base.Channel.QueryInvoiceGtbResponses(invoiceIds);
         }
         
-        public EInvoiceDemoProject.Uyumsoft.InvoiceIdentitiesResponse SaveAsDraft(EInvoiceDemoProject.Uyumsoft.InvoiceInfo[] invoices) {
+        public YesiLdefter.Uyumsoft.InvoiceIdentitiesResponse SaveAsDraft(YesiLdefter.Uyumsoft.InvoiceInfo[] invoices) {
             return base.Channel.SaveAsDraft(invoices);
         }
         
-        public EInvoiceDemoProject.Uyumsoft.InvoiceIdentitiesResponse SendInvoice(EInvoiceDemoProject.Uyumsoft.InvoiceInfo[] invoices) {
+        public YesiLdefter.Uyumsoft.InvoiceIdentitiesResponse SendInvoice(YesiLdefter.Uyumsoft.InvoiceInfo[] invoices) {
             return base.Channel.SendInvoice(invoices);
         }
         
-        public EInvoiceDemoProject.Uyumsoft.InvoiceIdentitiesResponse CompressedSaveAsDraft(EInvoiceDemoProject.Uyumsoft.BinaryRequestData data) {
+        public YesiLdefter.Uyumsoft.InvoiceIdentitiesResponse CompressedSaveAsDraft(YesiLdefter.Uyumsoft.BinaryRequestData data) {
             return base.Channel.CompressedSaveAsDraft(data);
         }
         
-        public EInvoiceDemoProject.Uyumsoft.InvoiceIdentitiesResponse CompressedSendInvoice(EInvoiceDemoProject.Uyumsoft.BinaryRequestData data) {
+        public YesiLdefter.Uyumsoft.InvoiceIdentitiesResponse CompressedSendInvoice(YesiLdefter.Uyumsoft.BinaryRequestData data) {
             return base.Channel.CompressedSendInvoice(data);
         }
         
-        public EInvoiceDemoProject.Uyumsoft.FlagResponse SendDraft(string[] invoiceIds) {
+        public YesiLdefter.Uyumsoft.FlagResponse SendDraft(string[] invoiceIds) {
             return base.Channel.SendDraft(invoiceIds);
         }
         
-        public EInvoiceDemoProject.Uyumsoft.FlagResponse CancelDraft(string[] invoiceIds) {
+        public YesiLdefter.Uyumsoft.FlagResponse CancelDraft(string[] invoiceIds) {
             return base.Channel.CancelDraft(invoiceIds);
         }
         
-        public EInvoiceDemoProject.Uyumsoft.InvoiceViewResponse GetInboxInvoiceView(string invoiceId) {
+        public YesiLdefter.Uyumsoft.InvoiceViewResponse GetInboxInvoiceView(string invoiceId) {
             return base.Channel.GetInboxInvoiceView(invoiceId);
         }
         
-        public EInvoiceDemoProject.Uyumsoft.InvoiceViewResponse GetOutboxInvoiceView(string invoiceId) {
+        public YesiLdefter.Uyumsoft.InvoiceViewResponse GetOutboxInvoiceView(string invoiceId) {
             return base.Channel.GetOutboxInvoiceView(invoiceId);
         }
         
-        public EInvoiceDemoProject.Uyumsoft.InvoiceViewResponse GetOutboxInvoiceResponseView(string invoiceId) {
+        public YesiLdefter.Uyumsoft.InvoiceViewResponse GetOutboxInvoiceResponseView(string invoiceId) {
             return base.Channel.GetOutboxInvoiceResponseView(invoiceId);
         }
         
-        public EInvoiceDemoProject.Uyumsoft.InvoiceStatusWithLogResponse GetInboxInvoiceStatusWithLogs(string[] invoiceIds) {
+        public YesiLdefter.Uyumsoft.InvoiceStatusWithLogResponse GetInboxInvoiceStatusWithLogs(string[] invoiceIds) {
             return base.Channel.GetInboxInvoiceStatusWithLogs(invoiceIds);
         }
         
-        public EInvoiceDemoProject.Uyumsoft.InvoiceStatusWithLogResponse GetOutboxInvoiceStatusWithLogs(string[] invoiceIds) {
+        public YesiLdefter.Uyumsoft.InvoiceStatusWithLogResponse GetOutboxInvoiceStatusWithLogs(string[] invoiceIds) {
             return base.Channel.GetOutboxInvoiceStatusWithLogs(invoiceIds);
         }
         
-        public EInvoiceDemoProject.Uyumsoft.Response RetrySendInvoices(string[] invoiceIds) {
+        public YesiLdefter.Uyumsoft.Response RetrySendInvoices(string[] invoiceIds) {
             return base.Channel.RetrySendInvoices(invoiceIds);
         }
         
-        public EInvoiceDemoProject.Uyumsoft.CloneInvoiceServiceResponse CloneInvoices(string[] invoiceIds) {
+        public YesiLdefter.Uyumsoft.CloneInvoiceServiceResponse CloneInvoices(string[] invoiceIds) {
             return base.Channel.CloneInvoices(invoiceIds);
         }
         
-        public EInvoiceDemoProject.Uyumsoft.FlagResponse CancelEArchiveInvoice(EInvoiceDemoProject.Uyumsoft.EArchiveCancelInvoiceContext request) {
+        public YesiLdefter.Uyumsoft.FlagResponse CancelEArchiveInvoice(YesiLdefter.Uyumsoft.EArchiveCancelInvoiceContext request) {
             return base.Channel.CancelEArchiveInvoice(request);
         }
         
-        public EInvoiceDemoProject.Uyumsoft.InvoiceDataResponse GetInboxInvoicePdf(string invoiceId) {
+        public YesiLdefter.Uyumsoft.InvoiceDataResponse GetInboxInvoicePdf(string invoiceId) {
             return base.Channel.GetInboxInvoicePdf(invoiceId);
         }
         
-        public EInvoiceDemoProject.Uyumsoft.InvoiceDataResponse GetOutboxInvoicePdf(string invoiceId) {
+        public YesiLdefter.Uyumsoft.InvoiceDataResponse GetOutboxInvoicePdf(string invoiceId) {
             return base.Channel.GetOutboxInvoicePdf(invoiceId);
         }
         
-        public EInvoiceDemoProject.Uyumsoft.FlagResponse ChangeInvoiceArchiveStatus(string[] invoiceIds, bool isInbox, bool isArchived) {
+        public YesiLdefter.Uyumsoft.FlagResponse ChangeInvoiceArchiveStatus(string[] invoiceIds, bool isInbox, bool isArchived) {
             return base.Channel.ChangeInvoiceArchiveStatus(invoiceIds, isInbox, isArchived);
         }
         
-        public EInvoiceDemoProject.Uyumsoft.ByteArrayResponse GetSystemUsersCompressedList(EInvoiceDemoProject.Uyumsoft.AliasType type) {
+        public YesiLdefter.Uyumsoft.ByteArrayResponse GetSystemUsersCompressedList(YesiLdefter.Uyumsoft.AliasType type) {
             return base.Channel.GetSystemUsersCompressedList(type);
         }
         
-        public EInvoiceDemoProject.Uyumsoft.StringElementResponse ImportExistingInvoice(EInvoiceDemoProject.Uyumsoft.FileUploadRequest request) {
+        public YesiLdefter.Uyumsoft.StringElementResponse ImportExistingInvoice(YesiLdefter.Uyumsoft.FileUploadRequest request) {
             return base.Channel.ImportExistingInvoice(request);
         }
         
-        public EInvoiceDemoProject.Uyumsoft.FlagResponse TestConnection() {
+        public YesiLdefter.Uyumsoft.FlagResponse TestConnection() {
             return base.Channel.TestConnection();
         }
         
-        public EInvoiceDemoProject.Uyumsoft.SummaryReportResponse GetSummaryReport(System.DateTime startDate, System.DateTime endDate) {
+        public YesiLdefter.Uyumsoft.SummaryReportResponse GetSummaryReport(System.DateTime startDate, System.DateTime endDate) {
             return base.Channel.GetSummaryReport(startDate, endDate);
         }
     }

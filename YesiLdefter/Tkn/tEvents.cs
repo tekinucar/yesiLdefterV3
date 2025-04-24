@@ -32,7 +32,8 @@ namespace Tkn_Events
     public class tEvents : tBase
     {
         tToolBox t = new tToolBox();
-        
+        tSearch se = new tSearch();
+
         #region dataNavigator_PositionChanged, dataSet_Row
 
         #region dataNavigator
@@ -1079,28 +1080,47 @@ namespace Tkn_Events
 
         public void buttonEdit_Leave(object sender, EventArgs e)
         {
-
-            /* bura ne yapıyor bilemedim
-             * 
+            
             string func_name = string.Empty;
+            string tableIPCode = ((DevExpress.XtraEditors.ButtonEdit)sender).Properties.AccessibleName;
             string myProp = ((DevExpress.XtraEditors.ButtonEdit)sender).Properties.AccessibleDescription;
+            string fieldName = ((DevExpress.XtraEditors.ButtonEdit)sender).Name.ToString();
+            string editValue = "";
+            string keyValue = "-1";
+            if (fieldName != "")
+                fieldName = fieldName.Substring(7, fieldName.Length - 7); // = "Column_" + tFieldName;
 
             func_name = t.MyProperties_Get(myProp, "Type:");
 
-            if (func_name == v.SearchEngine)
+            if (func_name == "SearchEngine")//v.SearchEngine)
             {
-                if (((DevExpress.XtraEditors.ButtonEdit)sender).EditValue != null)
-                    v.con_Value_Old = ((DevExpress.XtraEditors.ButtonEdit)sender).EditValue.ToString();
+                Form tForm = t.Find_Form(sender);
 
-                if ((v.con_Value_New != v.con_Value_Old) &&
-                    (v.con_Value_New != "-1") &&
-                    (v.con_Value_New != ""))
+                keyValue = t.Find_TableIPCode_Value(tForm, tableIPCode, "");
+
+                if (((DevExpress.XtraEditors.ButtonEdit)sender).EditValue != null)
+                    editValue = ((DevExpress.XtraEditors.ButtonEdit)sender).EditValue.ToString();
+
+                //if ((v.con_Value_New != v.con_Value_Old) &&
+                //    (v.con_Value_New != "-1")) // &&      (v.con_Value_New != ""))
+                if (t.myInt32(keyValue) <= 0 && editValue != "")
                 {
-                    //MessageBox.Show("Search için çalışma yapılmış.. Burayı gözden geçir (buttonEdit_Leave)");
-                    //Search_Engines(sender, v.con_Value_Old, 2, "BEEP");
+                    v.tButtonHint.Clear();
+                    v.tButtonHint.tForm = tForm;   //tGridHint.tForm;
+                    v.tButtonHint.tableIPCode = tableIPCode; // tGridHint.tableIPCode;
+                    v.tButtonHint.propNavigator = myProp; // t.Set(tGridHint.columnPropNavigator, tGridHint.gridPropNavigator, "");
+                    v.tButtonHint.columnFieldName = fieldName;
+                    v.tButtonHint.columnOldValue = editValue; // tGridHint.columnOldValue;
+                    v.tButtonHint.columnEditValue = editValue; // tGridHint.columnEditValue;
+                    v.tButtonHint.parentObject = null; // tGridHint.parentObject;
+                    v.tButtonHint.sender = sender;// tGridHint.view;
+                    v.tButtonHint.senderType = sender.GetType().ToString();//  //tGridHint.viewType;
+                    v.tButtonHint.buttonType = v.tButtonType.btArama;//  tGridHint.buttonType;
+
+                    se.directSearch(v.tButtonHint);
                 }
             }
-            */
+            
         }
 
         public void buttonEdit_KeyDown(object sender, KeyEventArgs e)

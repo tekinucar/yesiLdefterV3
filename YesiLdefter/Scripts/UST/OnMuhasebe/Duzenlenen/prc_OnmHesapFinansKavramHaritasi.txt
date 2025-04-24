@@ -4,6 +4,7 @@
 CREATE PROCEDURE [dbo].[prc_OnmHesapFinansKavramHaritasi]   
 AS BEGIN
 
+
 Select x.* from (
 
 Select 
@@ -67,9 +68,34 @@ and   hs.IsActive = 1
 and   ps.IsActive = 1
 and   ps.AltGrupTipiId = 1024
 
+union all 
+
+Select 
+ sp.Id as RefId
+,bn.FirmId
+,    2 as FinanasTipiId 
+,'102' as FinansKodu
+,bn.Id as FinansId,     'Banka'        as FinansTipi1, bn.HesapKodu, bn.HesapKisaAdi as FinansAdi
+,sb.Id as SubeId,       'Şube'         as FinansTipi2, sb.HesapAdi + ', ' + sb.HesapKodu  as SubeAdi 
+,hs.Id as BankaHesapId, 'Banka hesabı' as FinansTipi3, hs.HesapAdi + '.' + hs.Numarasi as HesapNo, hs.KrediLimiti as KMHLimiti, hs.ParaTipiId
+,sp.Id as KartId,       'Sanal Pos'    as FinansTipi4, sp.HesapAdi + '.' + isnull(sp.Numarasi,'') as KartNo, null as KrediLimiti, null as HesapKesimGunu, sp.OdemeKacGunSonra
+
+from OnmHesapFinans as bn 
+  left outer join OnmHesapFinans as sb on ( bn.Id = sb.ParentId ) 
+  left outer join OnmHesapFinans as hs on ( sb.Id = hs.ParentId ) 
+  left outer join OnmHesapFinans as sp on ( hs.Id = sp.ParentId ) 
+
+where bn.AltGrupTipiId = 1020
+and   bn.IsActive = 1
+and   sb.IsActive = 1
+and   hs.IsActive = 1
+and   sp.IsActive = 1
+and   sp.AltGrupTipiId = 1025
+
 ) as x
 
 order by x.FinanasTipiId , x.HesapKodu,  x.FinansAdi, x.SubeAdi, x.HesapNo, x.KartNo
+
 
 END -- procedure
 

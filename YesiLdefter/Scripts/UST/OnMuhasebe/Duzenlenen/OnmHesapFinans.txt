@@ -82,9 +82,11 @@ begin transaction
    IsKiralik               Bit           null,
    KiralikGun              SmallInt      null,
    KiralikAy               SmallInt      null,
+   IsSatildi               Bit           null,
    MaliyetinKapsamTipiId   SmallInt      null,
 
-   --198,199
+   --197, 198,199
+   IsLock                  Bit           null, /* Kilit mekanizması */     
    JoinTableTypeId         SmallInt      null, /* ilgili table 1: OnmBelgeMaliyet,  */
    JoinId                  Int           null, /* ilgili table ref Id */
 
@@ -134,6 +136,7 @@ INSERT INTO [Lkp].[OnmHesapFinansBAHesapTipi] (Id, BAHesapTipi, GrupTipiId)
   ( 1022, N"Banka hesabı", 1), 
   ( 1023, N"Banka/Kredi kartı", 1), 
   ( 1024, N"POS", 1),
+  ( 1025, N"Sanal POS", 1),
 
   ( 770,  N"Genel yönetim giderleri", 1),
   ( 791,  N"İşçi ücret ve giderleri", 1),
@@ -419,7 +422,7 @@ INSERT INTO [Lkp].[OnmHesapFinansAnaGrupTipi] (Id, AnaGrupTipi, GrupTipiId)
   ( 102,  N"Banka", 1),
 
   ( 250,  N"Arazi Ve Arsalar", 1),
-  ( 251,  N"Yer Altı Ve Yer Üstü Düzenleri", 1),
+  ( 251,  N"Yer Altı ve Yer Üstü Düzenleri", 1),
   ( 252,  N"Binalar", 1),
   ( 253,  N"Tesis, Makine Ve Cihazlar", 1),
   ( 254,  N"Taşıtlar", 1),
@@ -434,21 +437,22 @@ INSERT INTO [Lkp].[OnmHesapFinansAnaGrupTipi] (Id, AnaGrupTipi, GrupTipiId)
 delete from [Lkp].[OnmHesapFinansAltGrupTipi]
 INSERT INTO [Lkp].[OnmHesapFinansAltGrupTipi] (Id, AltGrupTipi, AltGrupTipi2, GrupTipiId)
  VALUES 
-  (0,    N"Tanımsız", "",     0 ),
-  (100,  N"Nakit Kasası","Nakit",  1 ), 
-  (1020, N"Banka","",         1 ), 
-  (1021, N"Şube","",          1 ), 
-  (1022, N"Banka Hesabı","EFT",  1 ), 
+  (0,    N"Tanımsız", "",                0 ),
+  (100,  N"Nakit Kasası","Nakit",        1 ), 
+  (1020, N"Banka","",                    1 ), 
+  (1021, N"Şube","",                     1 ), 
+  (1022, N"Banka Hesabı","EFT",          1 ), 
   (1023, N"Banka Kartı","Kredi kartı",   1 ), 
   (1024, N"POS","Kredi kartı",           1 ),
-  (1029, N"Banka Listesi","", 1 ),
-  ( 860, N"Doğalgaz Sayacı (Bina)","", 3 ),
+  (1025, N"Sanal POS","Kredi kartı",     1 ),
+  (1029, N"Banka Listesi","",            1 ),
+  ( 860, N"Doğalgaz Sayacı (Bina)","",                   3 ),
   ( 861, N"Doğalgaz Sayacı (Tesis, Makine ve Cihaz)","", 3 ),
-  ( 862, N"Elektrik Sayacı (Bina)","", 3 ),
-  ( 863, N"Elektrik Sayacı (Taşıt)","", 3 ),
+  ( 862, N"Elektrik Sayacı (Bina)","",                   3 ),
+  ( 863, N"Elektrik Sayacı (Taşıt)","",                  3 ),
   ( 864, N"Elektrik Sayacı (Tesis, Makine ve Cihaz)","", 3 ),
-  ( 865, N"Su Sayacı (Bina)","", 3 ),
-  ( 866, N"Su Sayacı (Tesis, Makine ve Cihaz)","", 3 ),
+  ( 865, N"Su Sayacı (Bina)","",                         3 ),
+  ( 866, N"Su Sayacı (Tesis, Makine ve Cihaz)","",       3 ),
   ( 890, N"Diğer","", 3)
 
 delete from [Lkp].[OnmHesapFinansAltCesitTipi]
@@ -501,10 +505,9 @@ create table [Lkp].[OnmHesapFinansSahiplikTipi]
 delete from [Lkp].[OnmHesapFinansSahiplikTipi]
 INSERT INTO [Lkp].[OnmHesapFinansSahiplikTipi] (Id, SahiplikTipi, GrupTipiId)
  VALUES 
-  (0,    N"Tanımsız", 0),
   (11,   N"İşletmeye ait", 1),
   (12,   N"Ortağa ait", 1),
-  (21,   N"Kiralık", 2)
+  (21,   N"Üçüncü şahsa ait", 2)
 
 -- ------------------------------------------------------- 
 -- MaliyetinKapsamTipiId
@@ -567,7 +570,7 @@ AS BEGIN
 --   AnaGrupTipiId       SmallInt      null, /* 1022  banka hesabı */
 --   AltGrupTipiId       Int           null, /* 10221 vadesiz      */
 
-    declare cursorOnmHesapFinans cursor for select Id from Inserted
+    declare cursorOnmHesapFinans cursor local for select Id from Inserted
     declare @curId bigint
 
     declare @kacHane smallInt = 3 
@@ -649,7 +652,7 @@ AS BEGIN
         if (@eAltGrupTipiId = 1021)
             set @yHesapKisaAdi = @eParentHesapAdi1
         if (@eAltGrupTipiId = 1022)
-            set @yHesapKisaAdi = @eParentHesapAdi2
+            set @yHesapKisaAdi = @eParentHesapAdi2 -- Banka adı aktarılıyor
         if (@eAltGrupTipiId = 1023)
             set @yHesapKisaAdi = @eParentHesapAdi3
         if (@eAltGrupTipiId = 1024)
@@ -660,6 +663,7 @@ AS BEGIN
             (@eAltGrupTipiId = 1022) or -- banka hesabı
             (@eAltGrupTipiId = 1023) or -- banka kartı
             (@eAltGrupTipiId = 1024) or -- pos cihazı
+            (@eAltGrupTipiId = 1025) or -- sanal pos hesabı
             (@eAltGrupTipiId = 1029))   -- tüm banka
         begin
           set @yHesapKisaAdi = replace(@yHesapKisaAdi, 'TÜRKİYE', '');
@@ -676,7 +680,8 @@ AS BEGIN
         if (@eHesapTipiId = 0) and -- Maliyet Grubu değilse
           ((@eAltGrupTipiId = 1022) or -- banka hesabı
            (@eAltGrupTipiId = 1023) or -- banka kartı
-           (@eAltGrupTipiId = 1024))   -- pos cihazı
+           (@eAltGrupTipiId = 1024) or -- pos cihazı
+           (@eAltGrupTipiId = 1025))   -- sanal pos hesabı
         begin
           set @yHesapTipiId = 12 -- Varlık Tipi
         end
@@ -702,13 +707,15 @@ AS BEGIN
                 update OnmHesapFinans set 
                 HesapAdi = @yHesapAdi
                 where Id = @curId
-            end			
-            set @yHesapKisaAdi = @yHesapKisaAdi + '.' + @eParentHesapAdi1 + '.' +  RTRIM(LTRIM(@eParentHesapKodu1)) + '.' + @eNumarasi
+            end else set @yHesapAdi = @eHesapAdi
+
+            --                   BankaAdi       +  .  + SubeAdi           +  .  + SubeKod                          +   
+            set @yHesapKisaAdi = @yHesapKisaAdi + '.' + @eParentHesapAdi1 + '.' + RTRIM(LTRIM(@eParentHesapKodu1)) + '.' + @yHesapAdi + '***' + RIGHT(@eNumarasi, 4)
         end 
         -- banka kartı
         if (@eAltGrupTipiId = 1023)
         begin
-            set @yHesapKisaAdi = @yHesapKisaAdi + '.' + @eHesapAdi + '.' + @eNumarasi
+            set @yHesapKisaAdi = @yHesapKisaAdi + '.' + @eHesapAdi + '.****' + RIGHT(@eNumarasi,4)
             set @UstGrupTipiId_ = 85
             -- Kredi kartı hesap ekstresi
             Execute dbo.[prc_OnmHesapFinansMaliyetGrubuKontrolu] @eFirmId, @UstGrupTipiId_, @eAnaGrupTipiId, @eAltGrupTipiId, '81.13.30'       
@@ -1035,6 +1042,7 @@ AS BEGIN
     CLOSE cursorOnmHesapFinans
     DEALLOCATE cursorOnmHesapFinans
 
+
 END
 
 ALTER TABLE dbo.OnmHesapFinans ENABLE TRIGGER trg_OnmHesapFinans
@@ -1079,13 +1087,13 @@ INSERT INTO [dbo].[OnmHesapFinans] (ParentId, FirmId, IsActive, UstGrupTipiId, A
  (0, @FirmId, 1, 10, 100, 100,  '100.20',   'Dolar Kasası',  'Dolar Kasası',  null, 'USD'),
  (0, @FirmId, 1, 10, 100, 100,  '100.30',   'Euro Kasası',   'Euro Kasası',   null, 'EUR'),
 
- (0, @FirmId, 1, 10, 102, 1020, '102.1010', 'AKBANK',        'AKBANK T.A.Ş.',                     'http://www.akbank.com.tr', null),
- (0, @FirmId, 1, 10, 102, 1020, '102.1240', 'ZİRAAT',        'T.C. ZİRAAT BANKASI A.Ş.',          'http://www.ziraat.com.tr/', null),
- (0, @FirmId, 1, 10, 102, 1020, '102.1280', 'GARANTİ',       'TÜRKİYE GARANTİ BBVA BANKASI A.Ş.', 'https://www.garantibbva.com.tr', null),
- (0, @FirmId, 1, 10, 102, 1020, '102.1290', 'HALK',          'TÜRKİYE HALK BANKASI A.Ş.',         'http://www.halkbank.com.tr/', null),
- (0, @FirmId, 1, 10, 102, 1020, '102.1300', 'İŞ',            'TÜRKİYE İŞ BANKASI A.Ş.',           'http://www.isbank.com.tr', null),
- (0, @FirmId, 1, 10, 102, 1020, '102.1310', 'VAKIFLAR',      'TÜRKİYE VAKIFLAR BANKASI T.A.O.',   'http://www.vakifbank.com.tr', null),
- (0, @FirmId, 1, 10, 102, 1020, '102.1320', 'YAPI VE KREDİ', 'YAPI VE KREDİ BANKASI A.Ş.',        'http://www.ykb.com.tr', null)
+ (0, @FirmId, 0, 10, 102, 1020, '102.1010', 'AKBANK',        'AKBANK T.A.Ş.',                     'http://www.akbank.com.tr', null),
+ (0, @FirmId, 0, 10, 102, 1020, '102.1240', 'ZİRAAT',        'T.C. ZİRAAT BANKASI A.Ş.',          'http://www.ziraat.com.tr/', null),
+ (0, @FirmId, 0, 10, 102, 1020, '102.1280', 'GARANTİ',       'TÜRKİYE GARANTİ BBVA BANKASI A.Ş.', 'https://www.garantibbva.com.tr', null),
+ (0, @FirmId, 0, 10, 102, 1020, '102.1290', 'HALK',          'TÜRKİYE HALK BANKASI A.Ş.',         'http://www.halkbank.com.tr/', null),
+ (0, @FirmId, 0, 10, 102, 1020, '102.1300', 'İŞ',            'TÜRKİYE İŞ BANKASI A.Ş.',           'http://www.isbank.com.tr', null),
+ (0, @FirmId, 0, 10, 102, 1020, '102.1310', 'VAKIFLAR',      'TÜRKİYE VAKIFLAR BANKASI T.A.O.',   'http://www.vakifbank.com.tr', null),
+ (0, @FirmId, 0, 10, 102, 1020, '102.1320', 'YAPI VE KREDİ', 'YAPI VE KREDİ BANKASI A.Ş.',        'http://www.ykb.com.tr', null)
 
 
  /* Default masraf gruplarını insert et */
@@ -1096,6 +1104,7 @@ INSERT INTO [dbo].[OnmHesapFinans] (ParentId, FirmId, IsActive, UstGrupTipiId, A
 /* 
 --declare @FirmId int
 --set @FirmId = :FIRM_ID
+-- Maliyet grubu hesapları
 
     INSERT INTO [dbo].[OnmHesapFinans]
            ([ParentId]
@@ -1124,7 +1133,7 @@ INSERT INTO [dbo].[OnmHesapFinans] (ParentId, FirmId, IsActive, UstGrupTipiId, A
       ,[AnaGrupTipiId]
       ,[AltGrupTipiId]
       ,[AltCesitTipiId]
-      ,11 -- HesapTipiId  ??????
+      ,11 -- HesapTipiId = 11. Maliyet grubu, 12. Varlık hesabı, 13. Abone hesabı  
       ,[HesapKodu]
       ,[UstHesapKodu]
       ,[HesapAdi] --[HesapKisaAdi]

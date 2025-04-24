@@ -78,6 +78,31 @@ namespace Tkn_ToolBox
                 }
             }
         }
+
+        public void X64filesUpdates()
+        {
+            string lastMsFileUpdatesId = getMusteriFileUpdateIdList();
+
+            tSQLs sqls = new tSQLs();
+            DataSet ds = new DataSet();
+
+            /// FileUpdate olup olmadığı sorgusu ise MainManagerV3 / UstadManagerV3 
+            /// [dbo].[MsFileUpdates] üzerinden sorgulanıyor
+            /// 
+            string sql = sqls.Sql_MsFileUpdates_X64();
+
+            //if (SQL_Read_Execute(v.dBaseNo.Manager, ds, ref sql, "", "MsFileUpdates")) // test için kullan
+            if (SQL_Read_Execute(v.dBaseNo.publishManager, ds, ref sql, "", "MsFileUpdates")) // publish için kullan
+            {
+                //MessageBox.Show("fileUpdatesChecked - 2 " + sql);
+                if (IsNotNull(ds))
+                {
+                    //MessageBox.Show("fileUpdatesChecked - 3 ");
+                    runMsFileUpdates(ds);
+                }
+            }
+        }
+
         private string getMusteriFileUpdateIdList()
         {
             tSQLs sqls = new tSQLs();
@@ -2646,7 +2671,7 @@ namespace Tkn_ToolBox
         {
             bool sonuc = false;
 
-            v.con_DataRow = null;
+            v.con_SelectedSearchDataRow = null;
 
             DataSet ds = null;
             DataNavigator dN = null;
@@ -2670,13 +2695,13 @@ namespace Tkn_ToolBox
                         return sonuc;
                     }
                     
-                    v.con_DataRow = ds.Tables[0].Rows[dN.Position];
+                    v.con_SelectedSearchDataRow = ds.Tables[0].Rows[dN.Position];
                     v.searchOnay = true;
                     sonuc = true;
                 }
                 catch (Exception)
                 {
-                    v.con_DataRow = null;
+                    v.con_SelectedSearchDataRow = null;
                     sonuc = false;
                 }
                 #endregion
@@ -2709,8 +2734,6 @@ namespace Tkn_ToolBox
             string value = string.Empty;
 
             TableIPCode = TableIPCode.Trim();
-
-            v.con_DataRow = null;
 
             DataSet ds = Find_DataSet(tForm, "", TableIPCode, "");
             if (ds == null) return value;
@@ -3114,6 +3137,7 @@ namespace Tkn_ToolBox
 
             //string targetTableIpCode = item.TABLEIPCODE;
             string myProp = dsTarget.Namespace.ToString();
+            string TableIPCode = MyProperties_Get(myProp, "TableIPCode:");
             string TableLabel = MyProperties_Get(myProp, "TableLabel:");
             string KeyFName = MyProperties_Get(myProp, "KeyFName:");
             string IsUseNewRefId = MyProperties_Get(myProp, "IsUseNewRefId:");
@@ -3125,14 +3149,33 @@ namespace Tkn_ToolBox
             string UseReadRefId = " and " + TableLabel + "." + KeyFName + " = " + newValue + " ";
 
             Str_Replace(ref SqlS, UseOldRefId, UseReadRefId);
+
             Str_Replace(ref myProp, "SqlSecond:" + SqlSOld, "SqlSecond:" + SqlS);
             Str_Replace(ref myProp, "KeyIdValue:" + KeyIdValue, "KeyIdValue:" + newValue);
-
             dsTarget.Namespace = myProp;
-            onay = TableRefresh(tForm, dsTarget);
-
+            //onay = TableRefresh(tForm, dsTarget);
+            
+            if (IsNotNull(SqlS))
+            {
+                try
+                {
+                    Control cntrl = null;
+                    //cntrl = Find_Control_View(tForm, TableIPCode);
+                    onay = Data_Read_Execute(tForm, dsTarget, ref SqlS, "", cntrl);
+                    ViewControl_Enabled(tForm, TableIPCode, onay);
+                }
+                catch (Exception)
+                {
+                    onay = false;
+                    throw;
+                }
+            }
+            
             return onay;
         }
+
+
+
         #endregion TableRefresh
 
         #region TriggerOnOff
@@ -3279,9 +3322,25 @@ namespace Tkn_ToolBox
         {
             if (IsNotNull(dsData) == false) return false;
             if (position < 0) return false;
-
-            int colCount = dsData.Tables[0].Columns.Count;
-            DataRow row = dsData.Tables[0].Rows[position];
+            int colCount = 0;
+            DataRow row = null;
+            try
+            {
+                colCount = dsData.Tables[0].Columns.Count;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            try
+            {
+                row = dsData.Tables[0].Rows[position];
+            }
+            catch (Exception)
+            {
+                return false;
+            }       
+            
             string fieldName = "";
             string orjValue = "";
             string curValue = "";
@@ -3790,9 +3849,9 @@ namespace Tkn_ToolBox
             if (Header.IndexOf("DEFAULT") > -1) tHeader = "DEFAULT_VALUE";
             if (Header.IndexOf("KRITER") > -1) tHeader = "KRITERLER";
 
-            FullHeader1 = "/*" + tHeader + "*/" + v.ENTER;
-            FullHeader2 = "/*" + tLabel + "." + tHeader + "*/"+ v.ENTER;
-            FullHeader3 = "/*[" + tLabel + "]." + tHeader + "*/"+ v.ENTER;
+            FullHeader1 = "/*" + tHeader + "*/";// + v.ENTER;
+            FullHeader2 = "/*" + tLabel + "." + tHeader + "*/";// + v.ENTER;
+            FullHeader3 = "/*[" + tLabel + "]." + tHeader + "*/";// + v.ENTER;
 
             if (IsNotNull(WhereAnd))
             {
@@ -3802,7 +3861,7 @@ namespace Tkn_ToolBox
                 int i1 = Sql.IndexOf(FullHeader1, f1);
                 while ((i1 > f1) && (f1 > -1))
                 {
-                    Sql = Sql.Insert((i1 + FullHeader1.Length) - 2, v.ENTER + WhereAnd);
+                    Sql = Sql.Insert((i1 + FullHeader1.Length), v.ENTER + WhereAnd);
                     f1 = Sql.IndexOf(FullHeader1, i1 + FullHeader1.Length);
                     if (f1 > 0)
                     {
@@ -3817,7 +3876,7 @@ namespace Tkn_ToolBox
                 int i2 = Sql.IndexOf(FullHeader2, f2);
                 while ((i2 > f2) && (f2 > -1))
                 {
-                    Sql = Sql.Insert((i2 + FullHeader2.Length) - 2, v.ENTER + WhereAnd);
+                    Sql = Sql.Insert((i2 + FullHeader2.Length), v.ENTER + WhereAnd);
                     // bulduğunun haricinde başka bir tane daha var mı kontrol et
                     f2 = Sql.IndexOf(FullHeader2, i2 + FullHeader2.Length); 
                     if (f2 > 0)
@@ -3834,7 +3893,7 @@ namespace Tkn_ToolBox
                 int i3 = Sql.IndexOf(FullHeader3, f3);
                 while ((i3 > f3) && (f3 > -1))
                 {
-                    Sql = Sql.Insert((i3 + FullHeader3.Length) - 2, v.ENTER + WhereAnd);
+                    Sql = Sql.Insert((i3 + FullHeader3.Length), v.ENTER + WhereAnd);
                     f3 = Sql.IndexOf(FullHeader3, i3 + FullHeader3.Length);
                     if (f3 > 0)
                     {
@@ -6607,7 +6666,6 @@ namespace Tkn_ToolBox
 
             return propButtonType;
         }
-
         public v.tButtonType getClickType(int value)
         {
             if (value == 0) return v.tButtonType.btNone;
@@ -6706,6 +6764,53 @@ namespace Tkn_ToolBox
             }
             return pos;
         }
+
+        public string getContent(string masterStr, string startStr, string endStr, ref int position)
+        {
+            // start case /*LastIdControlSql*/
+            // end   case /*LastIdControlSqlEnd*/ 
+
+            string content = "";
+
+            int i1 = masterStr.IndexOf(startStr, position);
+            if (i1 == -1) return content;
+
+            i1 = i1 + startStr.Length + 1;
+
+            int i2 = masterStr.IndexOf(endStr, i1);
+
+            if (i2 > i1)
+            {
+                content = masterStr.Substring(i1, i2 - i1);
+                position = i2 + endStr.Length;
+            }
+
+            return content;
+        }
+
+        public string getTarih(string oldValue)
+        {
+            vUserInputBox iBox = new vUserInputBox();
+
+            iBox.Clear();
+            iBox.title = "Tarih";
+            iBox.promptText = "Tarih girin  :";
+            iBox.value = oldValue;
+            iBox.displayFormat = "";
+            iBox.fieldType = 40; // tarih : 40 veya 61
+
+            string userDate = "";
+
+            if (UserInpuBox(iBox) == DialogResult.OK)
+            {
+                userDate = iBox.value;
+            }
+
+            if (userDate == "") userDate = "01.01.1990";
+
+            return userDate;
+        }
+
 
         #region <myStart> Get
         public string myStart_Get(Form tForm)
@@ -9013,6 +9118,250 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
         #endregion  Create_PropertiesEdit_Model_JSON
 
         #region tCheckedValue
+        public bool tWorkingCheck(Form tForm, TABLEIPCODE_LIST item, DataRow sourceDataRow)
+        {
+            bool onay1 = true;
+            bool onay2 = true;
+
+            string read_value = string.Empty;
+
+            // FIRST = SOURCE
+            string chc_IPCode = "";
+            string chc_FName = "";
+            string chc_Value = "";
+            string chc_Operand = "";
+
+            // FIRST = SOURCE
+            if (item.CHC_IPCODE != null)
+                chc_IPCode = item.CHC_IPCODE.ToString();
+            if (item.CHC_FNAME != null)
+                chc_FName = item.CHC_FNAME.ToString();
+            if (item.CHC_VALUE != null)
+                chc_Value = item.CHC_VALUE.ToString();
+            if (item.CHC_OPERAND != null)
+                chc_Operand = item.CHC_OPERAND.ToString();
+
+            if (IsNotNull(chc_IPCode) &&
+                IsNotNull(chc_FName) &&
+                IsNotNull(chc_Value) &&
+                IsNotNull(chc_Operand))
+            {
+                /// arama moturndan geliyor
+                /// DataRow sourceDataRow
+
+
+                // value ile bize tek bir değer döner 
+                // bu nedenle chc_Value içinde sorgudan bize dönen value değeri varmı diye kontrol edilir
+                if (sourceDataRow == null)
+                    read_value = TableFieldValueGet(tForm, chc_IPCode, chc_FName);
+
+                if (sourceDataRow != null)
+                {
+                    try
+                    {
+                        read_value = sourceDataRow[chc_FName].ToString();
+                        if (read_value == "True") read_value = "1";
+                        if (read_value == "False") read_value = "0";
+                    }
+                    catch (Exception)
+                    {
+                        read_value = "";
+                        //
+                    }
+                }
+
+                //eğer boşluksa zaten herhangi bir işlem veri girii yok demektir
+                if ((read_value == "") && (chc_Value.ToUpper() != "NULL"))
+                    read_value = "0";
+                //if ((read_value == "") || (chc_Value.ToUpper() == "NULL"))
+                //    read_value = "NULL";
+
+                // eğer bir daha boş değer gelir ise
+                //if (t.IsNotNull(read_value) == false) read_value = "0";
+
+                if (read_value != "")
+                {
+                    if ((chc_Value.IndexOf(read_value) > -1) &&
+                        (IsNotNull(chc_Operand) == false))
+                    {
+                        // eğer buraya kadar geldiyse 
+                        // öndeki chc_xxxx kontrollerinden geçti,  
+                        // yani onayı hak etti demektir
+                        onay1 = true;
+                    }
+
+                    if (IsNotNull(chc_Operand))
+                    {
+                        onay1 = myOperandControl(read_value, chc_Value, chc_Operand);
+                    }
+                }
+            }
+
+
+            return ((onay1) && (onay2));
+        }
+
+        public bool tWorkingCheck(Form tForm, PROP_NAVIGATOR prop_item, string mst_TableIPCode)
+        {
+            //tToolBox t = new tToolBox();
+
+            // formun açılması için default onay ver 
+            // chc_Value     şartı var ise ona göre yeniden değerlendir = form_open1
+            // chc_Value_SEC şartı var ise ona göre yeniden değerlendir = form_open2
+            bool form_open1 = true;
+            bool form_open2 = true;
+
+            string read_value = string.Empty;
+
+            // FIRST = SOURCE
+            string chc_IPCode = prop_item.CHC_IPCODE.ToString();
+            string chc_FName = prop_item.CHC_FNAME.ToString();
+            string chc_Value = prop_item.CHC_VALUE.ToString();
+            string chc_Operand = prop_item.CHC_OPERAND.ToString();
+
+            /// bu kısım sonradan eklendiği için gerekli oldu
+            /// önceki prop_item larda null geliyor
+            if (prop_item.CHC_IPCODE_SEC == null) prop_item.CHC_IPCODE_SEC = "";
+            if (prop_item.CHC_FNAME_SEC == null) prop_item.CHC_FNAME_SEC = "";
+            if (prop_item.CHC_VALUE_SEC == null) prop_item.CHC_VALUE_SEC = "";
+            if (prop_item.CHC_OPERAND_SEC == null) prop_item.CHC_OPERAND_SEC = "";
+
+            // SEC = SECOND or TARGET
+            string chc_IPCode_SEC = prop_item.CHC_IPCODE_SEC.ToString();
+            string chc_FName_SEC = prop_item.CHC_FNAME_SEC.ToString();
+            string chc_Value_SEC = prop_item.CHC_VALUE_SEC.ToString();
+            string chc_Operand_SEC = prop_item.CHC_OPERAND_SEC.ToString();
+
+            /// bu IPCode ler dragdrop sırasında oluşuyor
+
+            if (((chc_IPCode == "FIRST") || (chc_IPCode == "SOURCE")) &&
+                IsNotNull(v.con_DragDropSourceTableIPCode))
+                chc_IPCode = v.con_DragDropSourceTableIPCode;
+
+            if (((chc_IPCode_SEC == "SECOND") || (chc_IPCode_SEC == "TARGET")) &&
+                IsNotNull(v.con_DragDropTargetTableIPCode))
+                chc_IPCode_SEC = v.con_DragDropTargetTableIPCode;
+
+
+            #region Check işlemleri / First veya Soruce için şart varsa
+            if (IsNotNull(chc_IPCode) &&
+                IsNotNull(chc_FName) &&
+                IsNotNull(chc_Value))
+            {
+                // chc_xxxx ler ile bir fieldin value sine bakarak istedğimiz formu açabiliriz
+
+                // yani  CARI_TIPI = 5 veya CARI_TIPI = 6 veya CARI_TIPI = 10 için  XXXXform unu aç
+
+                // chc_FName  = CARI_TIPI   <<< 
+                // chc_Value  = 5, 6, 10    <<< şeklinde olabilir 
+
+                // value ile bize tek bir değer döner 
+                // bu nedenle chc_Value içinde sorgudan bize dönen value değeri varmı diye kontrol edilir
+                read_value = TableFieldValueGet(tForm, chc_IPCode, chc_FName);
+
+                #region // eğer boş ise
+                if (IsNotNull(read_value) == false)
+                {
+                    //tTabPage_FNLNVOL_FNLNVOL_BNL0123
+                    //FNLNVOL.FNLNVOL_BNL01|23   grid üzerindeki IPCode bu olunca chc_IPCode ile bulunamıyor
+
+                    /// chc_IPCode      = FNLNVOL.FNLNVOL_BNL01   
+                    /// mst_TableIPCode = FNLNVOL.FNLNVOL_BNL01|23
+
+                    if (mst_TableIPCode.LastIndexOf(chc_IPCode) > -1)
+                    {
+                        read_value = TableFieldValueGet(tForm, mst_TableIPCode, chc_FName);
+
+
+                        if (IsNotNull(read_value))
+                        {
+                            /// RTABLEIPCODE:FNLNVOL.FNLNVOL_BNL01
+                            /// RTABLEIPCODE:FNLNVOL.FNLNVOL_BNL01|23
+
+                            //t.Str_Replace(ref block, "RTABLEIPCODE:" + chc_IPCode, "RTABLEIPCODE:" + mst_TableIPCode);
+
+                            foreach (var item in prop_item.TABLEIPCODE_LIST)
+                            {
+                                if (item.RTABLEIPCODE.ToString() == chc_IPCode)
+                                    item.RTABLEIPCODE = mst_TableIPCode;
+                            }
+                        }
+
+                        //eğer boşluksa zaten herhangi bir işlem veri girii yok demektir
+                        if ((read_value == "") && (chc_Value.ToUpper() != "NULL"))
+                            read_value = "0";
+
+                    }
+
+                    if ((read_value == "") || (chc_Value.ToUpper() == "NULL"))
+                        read_value = "NULL";
+                }
+                #endregion boş ise
+
+                // eğer bir daha boş değer gelir ise
+                //if (t.IsNotNull(read_value) == false) read_value = "0";
+
+                if (read_value != "")
+                {
+                    if ((chc_Value.IndexOf(read_value) > -1) &&
+                        (IsNotNull(chc_Operand) == false))
+                    {
+                        // eğer buraya kadar geldiyse 
+                        // öndeki chc_xxxx kontrollerinden geçti,  
+                        // yani onayı hak etti demektir
+                        form_open1 = true;
+                    }
+
+                    if (IsNotNull(chc_Operand))
+                    {
+                        form_open1 = myOperandControl(read_value, chc_Value, chc_Operand);
+                    }
+                }
+            }
+            #endregion Check işlemleri1
+
+            #region ELSE kontrolü
+            if ((chc_Value.IndexOf("ELSE") > -1))
+            {
+                // önceki kontrollere henüz yakalanmamış
+                // ve else koşuluna sıra gelmişse
+                form_open1 = true;
+            }
+            #endregion 
+
+            #region Check işlemleri / Second veya Target için şart varsa
+            if (IsNotNull(chc_IPCode_SEC) &&
+                IsNotNull(chc_FName_SEC) &&
+                IsNotNull(chc_Value_SEC))
+            {
+                read_value = TableFieldValueGet(tForm, chc_IPCode_SEC, chc_FName_SEC);
+
+                if ((read_value == "") || (chc_Value_SEC.ToUpper() == "NULL"))
+                    read_value = "NULL";
+
+                if (read_value != "")
+                {
+                    if ((chc_Value_SEC.IndexOf(read_value) > -1) &&
+                        (IsNotNull(chc_Operand_SEC) == false))
+                    {
+                        // eğer buraya kadar geldiyse 
+                        // öndeki chc_xxxx kontrollerinden geçti,  
+                        // yani onayı hak etti demektir
+                        form_open2 = true;
+                    }
+
+                    if (IsNotNull(chc_Operand_SEC))
+                    {
+                        form_open2 = myOperandControl(read_value, chc_Value_SEC, chc_Operand_SEC);
+                    }
+                }
+
+            }
+            #endregion Check işlemleri2
+
+            return ((form_open1) && (form_open2));
+        }
+
         public string tCheckedValue(DataRow row, string fieldName, string value)
         {
             DataSet ds = row.Table.DataSet;
@@ -11213,11 +11562,19 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
         public string Find_TableIPCode_Value(Form tForm, string TableIPCode, string FieldName)
         {
-            string tValue = string.Empty;
+            string tValue = "";
 
             DataSet dS = null;
             DataNavigator dN = null;
             Find_DataSet(tForm, ref dS, ref dN, TableIPCode);
+
+            /// FieldName gelmediyse KeyField okunacak
+            if (FieldName == "" && IsNotNull(dS))
+            {
+                string myProp_ = dS.Namespace.ToString();
+                FieldName = Set(MyProperties_Get(myProp_, "KeyFName:"),"", "");
+                if (FieldName == "") return tValue;
+            }
 
             if (IsNotNull(dS) &&
                 dN.Position > -1 &&
@@ -14620,6 +14977,39 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
         }
         #endregion Open Exe / Execute
 
+        #region Auto Close Exe / Execute
+        public void LaunchCommandLineApp()
+        {
+            // For the example
+            //const string ex1 = "C:\\";
+            //const string ex2 = "C:\\Dir";
+
+            // Use ProcessStartInfo class
+            ProcessStartInfo startInfo = new ProcessStartInfo();
+            startInfo.CreateNoWindow = false;
+            startInfo.UseShellExecute = false;
+            startInfo.FileName = v.tExeAbout.activeExeName;   //"dcm2jpg.exe";
+            startInfo.WindowStyle = ProcessWindowStyle.Hidden;
+            //startInfo.Arguments = "-f j -o \"" + ex1 + "\" -z 1.0 -s y " + ex2;
+            try
+            {
+                // Start the process with the info we specified.
+                // Call WaitForExit and then the using statement will close.
+                using (Process exeProcess = Process.Start(startInfo))
+                {
+                    v.SP_ApplicationExit = true;
+                    //exeProcess.WaitForExit();
+                    Application.Exit();
+                }
+            }
+            catch
+            {
+                // Log error.
+            }
+        }
+        #endregion Auto Close Exe / Execute
+
+
         #region Order
         public bool IsSearchControl(object sender)
         {
@@ -14667,7 +15057,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                             {
                                 /// Search Engine nin çalışıp çalışmayacağının kararı alınıyor
                                 /// 
-                                onay = evb.CheckValue(tForm, item, tableIPCode);
+                                onay = tWorkingCheck(tForm, item, tableIPCode);
                             }
                         }
                     }
@@ -15331,7 +15721,10 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                     return;
                 }
                 //if ((orjinalTableName.IndexOf("Mtsk") > -1) && (orjinalFieldName.IndexOf("GrupTipi") > -1))
-                if ((orjinalFieldName.IndexOf("GrupTipi") > -1) && (orjinalFieldName.IndexOf("AltGrupTipi") == -1))
+                if ((orjinalFieldName.IndexOf("GrupTipi") > -1) &&
+                    (orjinalFieldName.IndexOf("UstGrupTipi") == -1 &&
+                     orjinalFieldName.IndexOf("AnaGrupTipi") == -1 && 
+                     orjinalFieldName.IndexOf("AltGrupTipi") == -1))
                 {
                     idFieldName = "Id";
                     fieldName = "GrupTipi";
@@ -15975,6 +16368,61 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
 
         #endregion CompressFile
+
+        #region Tabim Meb Aday/Sertifika Count
+
+        public void TabimMebAdayCountWrite()
+        {
+            tSQLs Sqls = new tSQLs();
+            DataSet ds_QueryA = new DataSet();
+            DataSet ds_QueryAS = new DataSet();
+            string Sql = "";
+            string SqlCumlesi = "";
+            try
+            {
+                Sql = Sqls.Sql_TabimMebAdayCount();
+                SQL_Read_Execute(v.dBaseNo.Local, ds_QueryA, ref Sql, "FirmACount", "FirmACount");
+
+                if (IsNotNull(ds_QueryA))
+                {
+                    SqlCumlesi = "";
+                    int satir = ds_QueryA.Tables[0].Rows.Count;
+                    for (int i = 0; i < satir; i++)
+                    {
+                        SqlCumlesi += ds_QueryA.Tables[0].Rows[i]["SqlCumlesi"].ToString() + v.ENTER;
+                    }
+
+                    SQL_Read_Execute(v.dBaseNo.UstadCrm, ds_QueryA, ref SqlCumlesi, "FirmACount", "FirmACount");
+                }
+            }
+            catch (Exception)
+            {
+                //throw;
+            }
+            try
+            {
+                Sql = Sqls.Sql_TabimMebAdaySertifikaCount();
+                SQL_Read_Execute(v.dBaseNo.Local, ds_QueryAS, ref Sql, "FirmASCount", "FirmASCount");
+
+                if (IsNotNull(ds_QueryAS))
+                {
+                    SqlCumlesi = "";
+                    int satir = ds_QueryAS.Tables[0].Rows.Count;
+                    for (int i = 0; i < satir; i++)
+                    {
+                        SqlCumlesi += ds_QueryAS.Tables[0].Rows[i]["SqlCumlesi"].ToString() + v.ENTER;
+                    }
+
+                    SQL_Read_Execute(v.dBaseNo.UstadCrm, ds_QueryAS, ref SqlCumlesi, "FirmASCount", "FirmASCount");
+                }
+            }
+            catch (Exception)
+            {
+                //throw;
+            }
+        }
+
+        #endregion Tabim Meb Aday/Sertifika Count
     }
 
 

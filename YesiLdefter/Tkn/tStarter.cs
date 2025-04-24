@@ -194,8 +194,8 @@ namespace Tkn_Starter
 
 
             // 3S_MSGLY 
-            //t.WaitFormOpen(v.mainForm, "Images okunuyor...");
-            //t.SYS_Glyph_Read();
+            t.WaitFormOpen(v.mainForm, "Images okunuyor...");
+            t.SYS_Glyph_Read();
 
             //t.TestRead();
 

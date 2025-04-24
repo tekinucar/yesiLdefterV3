@@ -961,6 +961,345 @@ Select distinct
 
         #endregion System SQLs
 
+        #region Tabim Meb Aday/Sertifika Count
+        public string Sql_TabimMebAdayCount()
+        {
+            string sql = @"
+declare @FirmId varchar(10) 
+declare @FirmGUID varchar(50)
+
+set @FirmId = " + v.tMainFirm.FirmId.ToString() + @"
+set @FirmGUID = '" + v.tMainFirm.FirmGuid + @"'
+
+Select 
+--  @FirmId as FirmId, @FirmGUID as FirmGUID, x.DonemTipiId, count(x.Ulas) Adet 
+' if ( Select count(*) ADET from dbo.UstadFirmsMebAday where FirmId = ' + @FirmId + ' and DonemTipiId = ' + convert(varchar(6), x.DonemTipiId) + 
+' ) = 0 begin ' +
+'  Insert into dbo.UstadFirmsMebAday ( FirmId, FirmGUID, DonemTipiId, Adet ) values ( ' +
+   @FirmId + ',' + '''' + @FirmGUID + ''', ' + convert(varchar(6), x.DonemTipiId) + ', ' + convert(varchar(22), count(x.Ulas)) + ' ) ' + 
+'  end else begin ' + 
+'   Update dbo.UstadFirmsMebAday set ' + 
+'   Adet = ' + convert(varchar(22), count(x.Ulas)) + ' ' +
+'  where FirmId = ' + @FirmId +  
+'  and DonemTipiId = ' + convert(varchar(6), x.DonemTipiId) +
+'  and Adet <> ' + convert(varchar(22), count(x.Ulas)) +  
+' end  ' as SqlCumlesi
+
+From (
+   Select 
+   k.Ulas  
+  ,Convert(varchar(4), YEAR(g.[Baslama_Tarihi])) +
+   (case Convert(varchar(2), MONTH(g.[Baslama_Tarihi])) 
+   when 1 then '01'
+   when 2 then '02'
+   when 3 then '03'
+   when 4 then '04'
+   when 5 then '05'
+   when 6 then '06'
+   when 7 then '07'
+   when 8 then '08'
+   when 9 then '09'
+   when 10 then '10'
+   when 11 then '11'
+   when 12 then '12'
+   end) as DonemTipiId
+ ,(case k.Ser_Sinif
+   when 22 then 4 else 1 end  ) as TalepTipiId
+ ,(case k.Eski_Sur_Sinif 
+   when 0 then 0    -- 
+   when 1 then 2513 -- M 
+   when 2 then 2502 -- A1 
+   when 3 then 2503 -- A2
+   when 4 then 2514 -- A
+   when 5 then 2515 -- B1
+   when 6 then 2504 -- B
+   when 7 then 2518 -- BE
+   when 8 then 2516 -- C1
+   when 9 then 2519 -- C1E
+   when 10 then 2505 -- C
+   when 11 then 2520 -- CE
+   when 12 then 2517 -- D1
+   when 13 then 2521 -- D1E
+   when 14 then 2506 -- D
+   when 15 then 2522 -- DE
+   when 16 then 2509 -- G 
+   when 17 then 0 -- K
+   when 18 then 2507 -- E
+   when 19 then 2508 -- F
+   when 20 then 0 -- H(o)
+   when 21 then 0 -- H(m)
+   when 22 then 9200 -- 100 CEZA
+   when 23 then 0 -- OPERATÖRLÜK
+   when 24 then 0 -- R
+   when 25 then 2504 -- B OTOMATİK
+   when 26 then 2504 -- B ENGELLİ
+   when 27 then 0 -- D ÇEKİCİ
+   when 28 then 2502 -- A1 OTOMATİK
+   when 29 then 2502 -- A1 ENGELLİ
+   when 30 then 2503 -- A2 OTOMATİK 
+   when 31 then 2503 -- A2 ENGELLİ
+   when 32 then 2514 -- A OTOMATİK
+   when 33 then 2514 -- A ENGELLİ
+   else -1 
+   end ) as [MevcutSertifikaTipiId]
+
+ ,(case k.Ser_Sinif 
+   when 0 then 0    -- 
+   when 1 then 2513 -- M 
+   when 2 then 2502 -- A1 
+   when 3 then 2503 -- A2
+   when 4 then 2514 -- A
+   when 5 then 2515 -- B1
+   when 6 then 2504 -- B
+   when 7 then 2518 -- BE
+   when 8 then 2516 -- C1
+   when 9 then 2519 -- C1E
+   when 10 then 2505 -- C
+   when 11 then 2520 -- CE
+   when 12 then 2517 -- D1
+   when 13 then 2521 -- D1E
+   when 14 then 2506 -- D
+   when 15 then 2522 -- DE
+   when 16 then 2509 -- G 
+   when 17 then 0 -- K
+   when 18 then 2507 -- E
+   when 19 then 2508 -- F
+   when 20 then 0 -- H(o)
+   when 21 then 0 -- H(m)
+   when 22 then 9200 -- 100 CEZA
+   when 23 then 0 -- OPERATÖRLÜK
+   when 24 then 0 -- R
+   when 25 then 2504 -- B OTOMATİK
+   when 26 then 2504 -- B ENGELLİ
+   when 27 then 0 -- D ÇEKİCİ
+   when 28 then 2502 -- A1 OTOMATİK
+   when 29 then 2502 -- A1 ENGELLİ
+   when 30 then 2503 -- A2 OTOMATİK 
+   when 31 then 2503 -- A2 ENGELLİ
+   when 32 then 2514 -- A OTOMATİK
+   when 33 then 2514 -- A ENGELLİ
+   else -1 
+   end ) as [IstenenSertifikaTipiId]
+ ,(case 
+   when k.OTOMATIK_VITES = 0 then 0
+   when k.OTOMATIK_VITES = 1 then 1
+   when k.Ser_Sinif = 25 then 1
+   when k.Ser_Sinif = 28 then 1
+   when k.Ser_Sinif = 30 then 1
+   when k.Ser_Sinif = 32 then 1
+   end ) as [IsOtomatik]
+ ,(case 
+   when k.ENGELLI = 0 then 0
+   when k.ENGELLI = 1 then 1
+   when k.Ser_Sinif = 26 then 1
+   when k.Ser_Sinif = 29 then 1
+   when k.Ser_Sinif = 31 then 1
+   when k.Ser_Sinif = 33 then 1
+   end ) as [IsEngelli]
+
+From KURSIYER as k
+   left outer join [dbo].[GRUPTOP] as g on ( k.Grubu = g.Grup_Adi )
+Where 0 = 0
+and
+   Convert(varchar(4), YEAR(g.[Baslama_Tarihi])) +
+   (case Convert(varchar(2), MONTH(g.[Baslama_Tarihi])) 
+   when 1 then '01'
+   when 2 then '02'
+   when 3 then '03'
+   when 4 then '04'
+   when 5 then '05'
+   when 6 then '06'
+   when 7 then '07'
+   when 8 then '08'
+   when 9 then '09'
+   when 10 then '10'
+   when 11 then '11'
+   when 12 then '12'
+   end) >= 202401
+
+) as x
+
+group by x.DonemTipiId
+
+order by x.DonemTipiId
+ ";
+
+            return sql;
+        }
+        public string Sql_TabimMebAdaySertifikaCount()
+        {
+            string sql = @"
+declare @FirmId varchar(10) 
+declare @FirmGUID varchar(50)
+
+set @FirmId = " + v.tMainFirm.FirmId.ToString() + @"
+set @FirmGUID = '" + v.tMainFirm.FirmGuid + @"'
+
+Select 
+--  x.DonemTipiId, x.MevcutSertifikaTipiId, x.IstenenSertifikaTipiId, count(x.Ulas) Adet 
+
+' if ( Select count(*) ADET from dbo.UstadFirmsMebAdaySertifika where FirmId = ' + @FirmId + 
+' and DonemTipiId = ' + convert(varchar(6), x.DonemTipiId) + 
+' and MevcutSertifikaTipiId = '  + convert(varchar(6), x.MevcutSertifikaTipiId) + 
+' and IstenenSertifikaTipiId = '  + convert(varchar(6), x.IstenenSertifikaTipiId) + 
+' ) = 0 begin ' +
++ ' Insert into dbo.UstadFirmsMebAdaySertifika ( FirmId, FirmGUID, DonemTipiId, MevcutSertifikaTipiId, IstenenSertifikaTipiId, Adet ) values ( ' +
+@FirmId + ',' + '''' + @FirmGUID + ''', ' + convert(varchar(6), x.DonemTipiId) + ', ' + convert(varchar(6), x.MevcutSertifikaTipiId) + ', ' +  convert(varchar(6), x.IstenenSertifikaTipiId) + ', ' + convert(varchar(22), count(x.Ulas)) + ' ) ' + 
+' end else begin ' +
+' Update dbo.UstadFirmsMebAdaySertifika set ' +
+'   Adet = ' + convert(varchar(22), count(x.Ulas)) + ' ' +
+'  where FirmId = ' + @FirmId +  
+'  and DonemTipiId = ' + convert(varchar(6), x.DonemTipiId) +
+'  and MevcutSertifikaTipiId = '  + convert(varchar(6), x.MevcutSertifikaTipiId) + 
+'  and IstenenSertifikaTipiId = '  + convert(varchar(6), x.IstenenSertifikaTipiId) + 
+'  and Adet <> ' + convert(varchar(22), count(x.Ulas)) +  
+' end  ' as SqlCumlesi
+
+From (
+   Select 
+   k.Ulas  
+  ,Convert(varchar(4), YEAR(g.[Baslama_Tarihi])) +
+   (case Convert(varchar(2), MONTH(g.[Baslama_Tarihi])) 
+   when 1 then '01'
+   when 2 then '02'
+   when 3 then '03'
+   when 4 then '04'
+   when 5 then '05'
+   when 6 then '06'
+   when 7 then '07'
+   when 8 then '08'
+   when 9 then '09'
+   when 10 then '10'
+   when 11 then '11'
+   when 12 then '12'
+   end) as DonemTipiId
+ ,(case k.Ser_Sinif
+   when 22 then 4 else 1 end  ) as TalepTipiId
+ ,(case k.Eski_Sur_Sinif 
+   when 0 then 0    -- 
+   when 1 then 2513 -- M 
+   when 2 then 2502 -- A1 
+   when 3 then 2503 -- A2
+   when 4 then 2514 -- A
+   when 5 then 2515 -- B1
+   when 6 then 2504 -- B
+   when 7 then 2518 -- BE
+   when 8 then 2516 -- C1
+   when 9 then 2519 -- C1E
+   when 10 then 2505 -- C
+   when 11 then 2520 -- CE
+   when 12 then 2517 -- D1
+   when 13 then 2521 -- D1E
+   when 14 then 2506 -- D
+   when 15 then 2522 -- DE
+   when 16 then 2509 -- G 
+   when 17 then 0 -- K
+   when 18 then 2507 -- E
+   when 19 then 2508 -- F
+   when 20 then 0 -- H(o)
+   when 21 then 0 -- H(m)
+   when 22 then 9200 -- 100 CEZA
+   when 23 then 0 -- OPERATÖRLÜK
+   when 24 then 0 -- R
+   when 25 then 2504 -- B OTOMATİK
+   when 26 then 2504 -- B ENGELLİ
+   when 27 then 0 -- D ÇEKİCİ
+   when 28 then 2502 -- A1 OTOMATİK
+   when 29 then 2502 -- A1 ENGELLİ
+   when 30 then 2503 -- A2 OTOMATİK 
+   when 31 then 2503 -- A2 ENGELLİ
+   when 32 then 2514 -- A OTOMATİK
+   when 33 then 2514 -- A ENGELLİ
+   else -1 
+   end ) as [MevcutSertifikaTipiId]
+
+ ,(case k.Ser_Sinif 
+   when 0 then 0    -- 
+   when 1 then 2513 -- M 
+   when 2 then 2502 -- A1 
+   when 3 then 2503 -- A2
+   when 4 then 2514 -- A
+   when 5 then 2515 -- B1
+   when 6 then 2504 -- B
+   when 7 then 2518 -- BE
+   when 8 then 2516 -- C1
+   when 9 then 2519 -- C1E
+   when 10 then 2505 -- C
+   when 11 then 2520 -- CE
+   when 12 then 2517 -- D1
+   when 13 then 2521 -- D1E
+   when 14 then 2506 -- D
+   when 15 then 2522 -- DE
+   when 16 then 2509 -- G 
+   when 17 then 0 -- K
+   when 18 then 2507 -- E
+   when 19 then 2508 -- F
+   when 20 then 0 -- H(o)
+   when 21 then 0 -- H(m)
+   when 22 then 9200 -- 100 CEZA
+   when 23 then 0 -- OPERATÖRLÜK
+   when 24 then 0 -- R
+   when 25 then 2504 -- B OTOMATİK
+   when 26 then 2504 -- B ENGELLİ
+   when 27 then 0 -- D ÇEKİCİ
+   when 28 then 2502 -- A1 OTOMATİK
+   when 29 then 2502 -- A1 ENGELLİ
+   when 30 then 2503 -- A2 OTOMATİK 
+   when 31 then 2503 -- A2 ENGELLİ
+   when 32 then 2514 -- A OTOMATİK
+   when 33 then 2514 -- A ENGELLİ
+   else -1 
+   end ) as [IstenenSertifikaTipiId]
+ ,(case 
+   when k.OTOMATIK_VITES = 0 then 0
+   when k.OTOMATIK_VITES = 1 then 1
+   when k.Ser_Sinif = 25 then 1
+   when k.Ser_Sinif = 28 then 1
+   when k.Ser_Sinif = 30 then 1
+   when k.Ser_Sinif = 32 then 1
+   end ) as [IsOtomatik]
+ ,(case 
+   when k.ENGELLI = 0 then 0
+   when k.ENGELLI = 1 then 1
+   when k.Ser_Sinif = 26 then 1
+   when k.Ser_Sinif = 29 then 1
+   when k.Ser_Sinif = 31 then 1
+   when k.Ser_Sinif = 33 then 1
+   end ) as [IsEngelli]
+
+From KURSIYER as k
+   left outer join [dbo].[GRUPTOP] as g on ( k.Grubu = g.Grup_Adi )
+Where 0 = 0
+and
+   Convert(varchar(4), YEAR(g.[Baslama_Tarihi])) +
+   (case Convert(varchar(2), MONTH(g.[Baslama_Tarihi])) 
+   when 1 then '01'
+   when 2 then '02'
+   when 3 then '03'
+   when 4 then '04'
+   when 5 then '05'
+   when 6 then '06'
+   when 7 then '07'
+   when 8 then '08'
+   when 9 then '09'
+   when 10 then '10'
+   when 11 then '11'
+   when 12 then '12'
+   end) >= 202401
+
+) as x
+
+group by 
+  x.DonemTipiId
+, x.MevcutSertifikaTipiId
+, x.IstenenSertifikaTipiId
+
+order by x.DonemTipiId
+";
+            return sql;
+        }
+
+        #endregion Tabim Meb Aday/Sertifika Count
 
         #region ManagerServer Tables SQLs Preparing
 
@@ -1298,6 +1637,11 @@ INSERT INTO [dbo].[SYS_UPDATES]
             // read publishManager database
             return " Select * from dbo.MsFileUpdates Where Id > " + IdList + "  and IsActive = 1 order by RecordDate ";
         }
+        public string Sql_MsFileUpdates_X64()
+        {
+            // read publishManager database
+            return " Select * from dbo.MsFileUpdates Where FileName = 'x64'";
+        }
 
         public string getGecerliTarihSql()
         {
@@ -1343,14 +1687,15 @@ INSERT INTO [dbo].[SYS_UPDATES]
   + ' Where FirmId = @FIRM_ID '  
   + ' and GecerlilikTarihiId = @TarihId ' 
   + ' ) = 0 begin '
-  + ' Insert into [dbo].[MtskSaatTeorik] ( [FirmId],[IsActive],[GecerlilikTarihiId],[TrafikVeCevreDersSaati],[IlkYardimDersSaati],[AracTeknigiDersSaati],[TrafikAdabiDersSaati]) Values '
+  + ' Insert into [dbo].[MtskSaatTeorik] ( [FirmId],[IsActive],[GecerlilikTarihiId],[TrafikVeCevreDersSaati],[IlkYardimDersSaati],[AracTeknigiDersSaati],[TrafikAdabiDersSaati],[TeorikDersSaati]) Values '
   + ' ( @FIRM_ID, '
   + Convert(varchar(2), [IsActive]) + ', '
   + ' @TarihId, '
   + Convert(varchar(5), [TrafikVeCevreDersSaati]) + ', '
   + Convert(varchar(5), [IlkYardimDersSaati]) + ', '
   + Convert(varchar(5), [AracTeknigiDersSaati]) + ', '
-  + Convert(varchar(5), [TrafikAdabiDersSaati]) + ' ) end '
+  + Convert(varchar(5), [TrafikAdabiDersSaati]) + ', '
+  + Convert(varchar(5), [TeorikDersSaati]) + ' ) end '
   + ' else begin '
   + ' UPDATE [dbo].[MtskSaatTeorik] '
   + ' SET [IsActive] = ' + Convert(varchar(2), [IsActive]) 
@@ -1358,6 +1703,7 @@ INSERT INTO [dbo].[SYS_UPDATES]
   + ' ,[IlkYardimDersSaati] = ' + Convert(varchar(5), [IlkYardimDersSaati]) 
   + ' ,[AracTeknigiDersSaati] = ' + Convert(varchar(5), [AracTeknigiDersSaati]) 
   + ' ,[TrafikAdabiDersSaati] = ' + Convert(varchar(5), [TrafikAdabiDersSaati]) 
+  + ' ,[TeorikDersSaati] = ' + Convert(varchar(5), [TeorikDersSaati])
   + ' Where FirmId = @FIRM_ID '  
   + ' and GecerlilikTarihiId = @TarihId ' 
   + ' end '
@@ -3948,7 +4294,7 @@ INSERT INTO [dbo].[SYS_UPDATES]
                         //, FNo5.DonemTipi + ' : ' + FNo6.GrupTipi + ' : ' + FNo7.SubeTipi  as  Lkp_DonemTipiGrupTipiSubeTipi
 
                         if (((fieldName.IndexOf("DonemTipi") > -1) ||
-                             (fieldName.IndexOf("GrupTipi") > -1) ||
+                             (fieldName.IndexOf("MtskGrupTipi") > -1) ||
                              (fieldName.IndexOf("SubeTipi") > -1)))
                         {
 

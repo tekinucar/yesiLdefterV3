@@ -29,7 +29,7 @@ AS BEGIN
            ,[TDersIsUploaded]
 		   ,[SablonTeorikBId]
 		   ,[SablonTeorikFId]
-           ,[CakismaId]
+		   ,[OzelGunlerId]
 		   )
 
   Select  
@@ -49,7 +49,7 @@ AS BEGIN
      ,x.[TDersIsUploaded]
 	 ,x.[SablonTeorikBId] 
 	 ,x.[SablonTeorikFId]
-     ,x.[CakismaId] 
+     ,x.[OzelGunlerId] 
 
   from (
   Select 
@@ -100,7 +100,8 @@ AS BEGIN
   , 0 as TDersIsUploaded
   , s.SablonTeorikBId
   , f.Id as SablonTeorikFId
-  , 0    as CakismaId 
+  , 0    as OzelGunlerId 
+
   from MtskSablonTeorikS as s 
      left outer join MtskSablonTeorikB as b on ( s.SablonTeorikBId = b.Id )
      left outer join MtskSablonTeorikF as f on ( s.SablonTeorikBId = f.SablonTeorikBId )

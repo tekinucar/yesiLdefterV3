@@ -164,11 +164,24 @@ namespace Tkn_DataCopy
 
                 Source_TableIPCode = v.con_DragDropSourceTableIPCode;
                 t.Find_DataSet(tForm, ref ds_Source, ref dN_Source, Source_TableIPCode);
+
             }
             else
             {
                 //ds_Source = t.Find_DataSet(tForm, "", Source_TableIPCode, "");
                 t.Find_DataSet(tForm, ref ds_Source, ref dN_Source, Source_TableIPCode);
+
+            }
+
+            if (t.IsNotNull(ds_Target) == false)
+            {
+                MessageBox.Show("DİKKAT : " + Target_TableIPCode + "  hedef data bulunamadı...");
+                return false;
+            }
+            if (t.IsNotNull(ds_Source) == false)
+            {
+                MessageBox.Show("DİKKAT : " + Source_TableIPCode + "  kaynak data bulunamadı...");
+                return false;
             }
 
             if ((t.IsNotNull(source_checkfname)) &

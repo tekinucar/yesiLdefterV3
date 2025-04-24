@@ -58,6 +58,8 @@ BEGIN
 	  else set @deneyimSartiTipiId = 3 -- uygun değil
   end;
 
+  if (@yMevcutSertifikaTipiId = @yIstenenSertifikaTipiId)
+     set @deneyimSartiTipiId = 3
 
   if ((@deneyimSertifikaTipiId > 0) and (@isEnAz = 1) and (@yMevcutSertifikaTipiId > 0)) 
   begin

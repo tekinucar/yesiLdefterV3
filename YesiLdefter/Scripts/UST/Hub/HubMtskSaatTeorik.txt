@@ -15,6 +15,7 @@ begin transaction
    IlkYardimDersSaati               smallInt     null,
    AracTeknigiDersSaati             smallInt     null,
    TrafikAdabiDersSaati             smallInt     null,
+   TeorikDersSaati                  smallInt     null,
 
   constraint pk_HubMtskSaatTeorik primary key (Id)
  )
