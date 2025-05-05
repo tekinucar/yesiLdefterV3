@@ -23,6 +23,9 @@ begin transaction
    RaporTypeId         SmallInt          null, 
    RaporTarihi         Varchar(15)       null,
 
+   SourceTypeId        SmallInt          null, /* mesajın kaynak konusu :  ilgili table detay aşağıda   */
+   SourceId            Int               null, /* mesaja sebep olan kaynak tablonun Id si  : ilgili table ref Id */
+
   constraint pk_CrsBildirimS primary key (Id)
  )
 
@@ -216,6 +219,44 @@ INSERT INTO [Lkp].[CrsBildirimSRaporType] (Id, RaporType)
   ( 101, N'Hatalı Kullanıcı Adı yada şifresi '),
   ( 120, N'Özet Raporda; verilen dönem için atış bulunamadı'),
   ( 121, N'Detay Raporda; rapor bulunamadı yada  rapor henüz hazır değil')
+
+
+
+-- ------------------------------------------------------- 
+-- SourceTypeId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'CrsBildirimSSourceType')
+drop table [Lkp].[CrsBildirimSSourceType]
+
+create table [Lkp].[CrsBildirimSSourceType]
+(
+   Id                Int Unique not null, 
+   SourceType        nVarchar(50)   null,
+   
+   constraint  pk_CrsBildirimSSourceType primary key (Id)
+)
+
+Delete from [Lkp].[CrsBildirimSSourceType]
+INSERT INTO [Lkp].[CrsBildirimSSourceType] (Id, SourceType)
+ VALUES 
+  ( 0,        N''),
+  ( 21101,    N'Kursiyer belgeleri'),
+
+  ( 21111,    N'Teorik dersler'),
+  ( 21112,    N'e-Sınav'),
+  ( 21113,    N'Uygulamalı dersler'),
+  ( 21114,    N'Uygulamalı sınav'),
+  ( 21115,    N'Başarısız aday eğitim planı'),
+
+  ( 21121,    N'Sertifika ücreti'),
+  ( 21122,    N'e-Sınav ücreti'),
+  ( 21123,    N'Uygulama sınav ücreti'),
+  ( 21124,    N'Başarısız eğitim ücreti'),
+  ( 21125,    N'Telafi eğitim ücreti'),
+
+  ( 21131,    N'Doğum günü'),
+  ( 21132,    N'Özel gün kutlaması')
+
 
 
 commit transaction

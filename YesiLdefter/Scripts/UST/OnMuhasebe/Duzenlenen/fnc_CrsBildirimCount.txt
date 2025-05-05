@@ -1,0 +1,60 @@
+﻿/*CreateFunction*/
+
+CREATE FUNCTION [dbo].[fnc_CrsBildirimCount] (
+    @FirmId int
+  , @TalepId int
+  , @SourceTypeId smallInt
+  , @SourceId int
+  , @KanalTypeId smallInt 
+  , @StateTypeId smallInt
+)  
+RETURNS int
+AS   
+BEGIN 
+
+  declare @return int = 0
+/*
+  declare @FirmId int = 11
+  declare @TalepId int = 27
+  declare @SourceTypeId smallInt = 21122
+  declare @SourceId int = 1
+  declare @KanalTypeId smallInt = 0
+  declare @StateTypeId smallInt = 1
+*/  
+  -- Şimdilik 0 olsun hepsi dönsün. İleride zamanlarda ayrıntılı gerek olursa eklersin
+  -- @KanalTypeId
+  --  0, 'Tanımsız'
+  --  1, 'SMS'
+  --  2, 'WhatsApp'
+  --  3, 'e-Mail'
+  --  4, 'Mobil App'
+
+  -- SourceTypeId
+  -- 21101,    'Kursiyer belgeleri'
+  -- 21111,    'Teorik dersler'
+  -- 21112,    'e-Sınav'
+  -- 21113,    'Uygulamalı dersler'
+  -- 21114,    'Uygulamalı sınav'
+  -- 21115,    'Başarısız aday eğitim planı'
+  -- 21121,    'Sertifika ücreti'
+  -- 21122,    'e-Sınav ücreti'
+  -- 21123,    'Uygulama sınav ücreti'
+  -- 21124,    'Başarısız eğitim ücreti'
+  -- 21125,    'Telafi eğitim ücreti'
+  -- 21131,    'Doğum günü'
+  -- 21132,    'Özel gün kutlaması'
+
+  -- StateTypeId
+  -- 1, 'Hazır'
+  -- 2, 'Gönderildi'
+
+  Select @return = count(Id) from dbo.CrsBildirimS 
+  Where TalepId = @TalepId
+  and   SourceTypeId = @SourceTypeId
+  and   SourceId = @SourceId
+  and   StateTypeId = @StateTypeId
+
+  RETURN @return;  
+END;
+
+/*CreateFunctionEnd*/

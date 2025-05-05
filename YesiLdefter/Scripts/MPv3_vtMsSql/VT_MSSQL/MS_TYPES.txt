@@ -89,6 +89,7 @@ begin transaction
  insert into MS_TYPES values ( 1, 0, 'WEBNODE_INVOKE_MEMBER', 3, '', 'OnChangeDontDocComplate');
  insert into MS_TYPES values ( 1, 0, 'WEBNODE_INVOKE_MEMBER', 4, '', 'Submit');
  insert into MS_TYPES values ( 1, 0, 'WEBNODE_INVOKE_MEMBER', 5, '', 'AutoSubmit');
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_INVOKE_MEMBER', 6, '', 'Click & NewPage');
  
  
 

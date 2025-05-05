@@ -256,7 +256,7 @@ create table [Lkp].[MtskAdayTakipKayitTipi]
    KonuId           Int            null,
    KonuCaption      nVarchar(20)   null,
    ChartCaption     nVarchar(20)   null,
-   FormCaption      nVarchar(30)   null,
+   FormCaption      nVarchar(20)   null,
 
    constraint  pk_MtskAdayTakipKayitTipi primary key (Id)
 )
@@ -264,6 +264,7 @@ create table [Lkp].[MtskAdayTakipKayitTipi]
 Delete from [Lkp].[MtskAdayTakipKayitTipi]
 INSERT INTO [Lkp].[MtskAdayTakipKayitTipi] (Id, KayitTipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption)
  VALUES 
+  ( 0,    N'Tanımsız',                               1, 1120, 'Kayıt durumu', '', '' ),
   ( 1,    N'Ön kayıt',                               1, 1121, 'Kayıt durumu',  'Ön kayıt',     'Yeni aday kaydı' ),
   ( 2,    N'Kayıt aşamasında',                       1, 1122, 'Kayıt durumu',  'K.Aşamasında', 'Mebbise bağlan .' ),
   ( 3,    N'Kesin kayıt',                            1, 1123, 'Kayıt durumu',  'Kesin kay.', '' ),
@@ -676,7 +677,7 @@ create table [Lkp].[MtskAdayTakipeSinavDurumTipi]
    KonuGrupId       SmallInt       null,
    KonuId           Int            null,
    KonuCaption      nVarchar(20)   null,
-   ChartCaption     nVarchar(20)   null,
+   ChartCaption     nVarchar(30)   null,
    FormCaption      nVarchar(15)   null,
    
    constraint  pk_MtskAdayTakipeSinavDurumTipi primary key (Id)
@@ -685,13 +686,23 @@ create table [Lkp].[MtskAdayTakipeSinavDurumTipi]
 Delete from [Lkp].[MtskAdayTakipeSinavDurumTipi]
 INSERT INTO [Lkp].[MtskAdayTakipeSinavDurumTipi] (Id, eSinavDurumTipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption)--  , ChartCaption, FormCaption)
  VALUES 
-  ( 0,    N'Tanımsız',                    1, 2120, 'Sınav durumu', '', '' ),
-  ( 1,    N'e-Sınav için hazır değil',    1, 2121, 'Sınav durumu', 'Hazır değil', '' ),              -- default
-  ( 2,    N'e-Sınav başvurusu yapılacak', 1, 2122, 'Sınav durumu', 'Başvuru yapılacak', 'Mebbis' ),  -- TeorikDersTipiId tetikleyecek
-  ( 3,    N'e-Sınav başvurusu yapıldı',   1, 2123, 'Sınav durumu', 'Başvuru yapıldı', '' ),          -- kullanıcı tetikliyor, başvuru kontrolü ?
-  ( 4,    N'e-Sınav sonucu okunacak',     1, 2124, 'Sınav durumu', 'Sınav okunacak', 'Mebbis.' ),    -- sınav günü gelince bu ıd olmalı
-  ( 5,    N'e-Sınav sonucu okundu',       1, 2125, 'Sınav durumu', 'Sınav okundu', '' ),             -- kullanıcı okuttuktan sonra
-  ( 6,    N'Muaf',                        1, 2126, 'Sınav durumu', 'Muaf', '' )                      -- 
+  ( 0,    N'Tanımsız',                1, 2120, 'Sınav durumu', '', '' ),
+  ( 1,    N'Hazır değil',             1, 2121, 'Sınav durumu', 'Hazır değil', '' ),                 -- default
+  ( 2,    N'Başvuru yapılacak',       1, 2122, 'Sınav durumu', 'Başvuru yapılacak', 'Mebbis' ),     -- TeorikDersTipiId tetikleyecek
+  ( 3,    N'Belgesi hazırlanacak',    1, 2123, 'Sınav durumu', 'Belgesi hazırlanacak', 'Mebbis.' ), -- kullanıcı tetikliyor, başvuru kontrolü ?
+  ( 4,    N'Belgesi teslim edilecek', 1, 2124, 'Sınav durumu', 'Belgesi teslim edilecek', '' ),     -- sınav günü gelince bu ıd olmalı
+  ( 5,    N'Sınava girecek',          1, 2125, 'Sınav durumu', 'Sınava girecek', '' ),              -- kullanıcı okuttuktan sonra
+  ( 6,    N'Muaf',                    1, 2126, 'Sınav durumu', 'Muaf', '' )                         -- 
+
+
+/*
+  ( 1,    N'Hazır değil',         1, 2121, 'Sınav durumu', 'Hazır değil', '' ),              -- default
+  ( 2,    N'Başvurusu yapılacak', 1, 2122, 'Sınav durumu', 'Başvuru yapılacak', 'Mebbis' ),  -- TeorikDersTipiId tetikleyecek
+  ( 3,    N'Başvurusu yapıldı',   1, 2123, 'Sınav durumu', 'Başvuru yapıldı', '' ),          -- kullanıcı tetikliyor, başvuru kontrolü ?
+  ( 4,    N'Sonucu okunacak',     1, 2124, 'Sınav durumu', 'Sınav okunacak', 'Mebbis.' ),    -- sınav günü gelince bu ıd olmalı
+  ( 5,    N'Sonucu okundu',       1, 2125, 'Sınav durumu', 'Sınav okundu', '' ),             -- kullanıcı okuttuktan sonra
+  ( 6,    N'Muaf',                1, 2126, 'Sınav durumu', 'Muaf', '' )                      -- 
+*/
 
 
 -- ------------------------------------------------------- 

@@ -288,14 +288,23 @@ namespace YesiLdefter
                 //t.WaitFormOpen(v.mainForm, "Read : SysGlyph ...");
                 //t.SYS_Glyph_Read();
 
+
                 preparingMenus();
-                
+
                 /// Ustad Crm ve TabimMtsk değil ise DbUpdates çalışacak
                 /// TabimMtsk ya ait güncellemeler ise ms_TabimMtsk.cs içinde çalışıyor
                 /// 
                 if ((v.SP_Firm_SectorTypeId != (Int16)v.msSectorType.UstadCrm) && // Crm
-                    (v.SP_Firm_SectorTypeId != (Int16)v.msSectorType.TabimMtsk)) 
+                    (v.SP_Firm_SectorTypeId != (Int16)v.msSectorType.TabimMtsk))
+                {
                     t.dbUpdatesChecked();
+
+                    //t.WaitFormOpen(v.mainForm, "İl ve İlçe listesi okunuyor...");
+                    //t.SYS_IL_Read();
+                    //t.SYS_Ilce_Read();
+                    // Frmanın Il ve Ilçe adı atanıyor
+                    //t.preparing_FirmILAdi_IlceAdi();
+                }
 
                 setMainFormCaption();
             }
@@ -675,6 +684,8 @@ namespace YesiLdefter
             t.getUserLookAndFeelSkins();
 
             t.read_Settings();
+
+            t.preparing_FirmILAdi_IlceAdi();
 
             YolHaritasi();
         }

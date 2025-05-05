@@ -3144,6 +3144,7 @@ namespace Tkn_Layout
                     // bunu çalıştıramadım ama metod güzel onun için silmedim
                     // CefSharp bileşenlerini kontrol et ve gerekirse indir
                     // CefSharpInstaller.EnsureCefSharpComponents().Wait();
+                    //t.X64filesUpdates();
 
                     webBrowser1 = new ChromiumWebBrowser(TableIPCode);
                 }

@@ -195,7 +195,7 @@ namespace Tkn_Starter
 
             // 3S_MSGLY 
             t.WaitFormOpen(v.mainForm, "Images okunuyor...");
-            t.SYS_Glyph_Read();
+            //t.SYS_Glyph_Read();
 
             //t.TestRead();
 
@@ -420,7 +420,8 @@ namespace Tkn_Starter
                     + " , FirmGUID = '"+ v.tUser.UserFirmGUID + "' "
                     + " , LastDate = " + TarihSaat_Formati(Convert.ToDateTime(DateTime.Now)) // v.TARIH_SAAT
                     + " , OperatingSystem = '" + v.tComputer.OperatingSystem + "' "
-                    + " , ExeVersion = '" + v.tExeAbout.activeVersionNo.Substring(0, 8) + "' "
+                    //+ " , ExeVersion = '" + v.tExeAbout.activeVersionNo.Substring(0, 8) + "' "
+                    + " , ExeVersion = '20250501_standart' "
                     + " where ComputerId = " + v.tComputer.UstadCrmComputerId.ToString();
                     DataSet ds_ = new DataSet();
                     SQL_Read_Execute(v.dBaseNo.UstadCrm, ds_, ref tSql, "UstadComputers", "Update");

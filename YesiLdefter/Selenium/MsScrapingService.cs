@@ -98,7 +98,7 @@ namespace YesiLdefter.Selenium
 
             if (TagName == "input")
             {
-                if (AttType == "submit") // || (AttType == "file"))
+                if (AttType == "submit" || (AttType == "button"))
                     invokeMember = v.tWebInvokeMember.click;
             }
 
@@ -674,7 +674,7 @@ namespace YesiLdefter.Selenium
                         /// İşlem sonuçları sonunda kullanıcıya browser üzerinde verilen mesajlar
                         /// Örnek : Kayıt İşleminiz Başarı İle Gerçekleşti. veya diğer hata mesajları
                         /// 
-                        if (innerText != elementText)
+                        if (t.IsNotNull(innerText) && innerText != elementText)
                         {
                             t.FlyoutMessage(f.tForm, "Uyarı :", elementText);
                         }
@@ -1827,6 +1827,7 @@ namespace YesiLdefter.Selenium
                 return;
             }
             if (invokeMember == v.tWebInvokeMember.click) invoke = "click";
+            if (invokeMember == v.tWebInvokeMember.clickAndNewPage) invoke = "clickAndNewPage";
             if (invokeMember == v.tWebInvokeMember.submit) invoke = "submit";
             if ((invokeMember == v.tWebInvokeMember.onchange) &&
                 (writeValue != ""))
@@ -1845,6 +1846,13 @@ namespace YesiLdefter.Selenium
                     {
                         if (invoke == "click")
                             element.Click();
+                        if (invoke == "clickAndNewPage")
+                        {
+                            element.Click();
+
+                            // yeni sayfanı açılışı için clicklendi şimdi yeni sayfayı yakalama işlemi
+                            prepraringNewPage(wb, f);
+                        }
                         if (invoke == "submit")
                             element.Submit();
                         if (invoke == "onchange")
@@ -1863,9 +1871,15 @@ namespace YesiLdefter.Selenium
                 {
                     // src attribute'üne sahip bir node'u bul
                     IWebElement element = wb.FindElement(By.XPath("//img[@src='" + wnv.AttSrc + "']"));
-
+                                        
                     // Bulunan elementin src attribute'ünü yazdır
                     element.Click();
+                    
+                    if (invoke == "clickAndNewPage")
+                    {
+                        // yeni sayfanı açılışı için clicklendi şimdi yeni sayfayı yakalama işlemi
+                        prepraringNewPage(wb, f);
+                    }
                 }
             }
             catch (Exception exc2)
@@ -1878,6 +1892,35 @@ namespace YesiLdefter.Selenium
                     v.ENTER2 + inner);
             }
         }
+
+        private void prepraringNewPage(IWebDriver wb, webForm f)
+        {
+            System.Threading.Thread.Sleep(1000);
+            
+            /// şu andaki yeni açılan sekme aslında
+            string currentWindow = wb.CurrentWindowHandle;
+            f.seleniumMainPage = currentWindow;
+
+            var allWindows = wb.WindowHandles;
+
+            foreach (var window in allWindows)
+            {
+                if (window != f.seleniumMainPage)
+                {
+                    f.seleniumNewSubPage = window;
+                    f.seleniumActivePage = window;
+                    break;
+                }
+            }
+            wb.SwitchTo().Window(f.seleniumNewSubPage);
+
+            System.Threading.Thread.Sleep(1000);
+
+            /// Eski Pencereye Geri Dönmek istersen : eski pencereye geri dönmen gerekiyorsa, SwitchTo().Window(currentWindow) metodunu kullanarak ilk pencereye dönüş yapabilirsin.
+            ///
+            /// Eğer açılan yeni sayfa bir popup veya alert ise, driver.SwitchTo().Alert() metoduyla bu popup'a erişebilirsin.
+        }
+
         /*
         private async Task invokeMemberExec(ChromiumWebBrowser wb, webNodeValue wnv, v.tWebInvokeMember invokeMember, string writeValue, string idName, webForm f)
         {

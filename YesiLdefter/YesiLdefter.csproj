@@ -387,6 +387,12 @@
     <Compile Include="Forms\ms_Reports.Designer.cs">
       <DependentUpon>ms_Reports.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\ms_Search.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ms_Search.Designer.cs">
+      <DependentUpon>ms_Search.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\ms_Selenium.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -900,6 +906,7 @@
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\CrsBildirimB.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\CrsBildirimS.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\CrsSmsSettings.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\fnc_CrsBildirimCount.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\fnc_getIsDbUpdate.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\fnc_IsTatilGunumu.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmCalismaSaatleri.txt" />
@@ -1036,7 +1043,7 @@
     <Content Include="Scripts\UST\OnMuhasebe\IBelgeStokAdres.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\JoinTables.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\Lkp_CinsiyetTipi.txt" />
-    <Content Include="Scripts\UST\OnMuhasebe\LkpVergiDairesiTipi.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\Lkp_VergiDairesiTipi.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\MsFollow.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\OnmToplamBakiye.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\OnmToplamBekleyen.txt" />

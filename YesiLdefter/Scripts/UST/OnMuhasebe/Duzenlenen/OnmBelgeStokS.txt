@@ -172,7 +172,7 @@ create table [Lkp].[OnmBelgeStokSStokTipi]
    constraint  pk_OnmBelgeStokSStokTipi primary key (Id)
 )
 
-
+DELETE [Lkp].[OnmBelgeStokSStokTipi]
 INSERT INTO [Lkp].[OnmBelgeStokSStokTipi] (Id, StokTipi, GrupTipiId)
  VALUES 
   (0,    N'Tanımsız',    0),
@@ -180,7 +180,10 @@ INSERT INTO [Lkp].[OnmBelgeStokSStokTipi] (Id, StokTipi, GrupTipiId)
   (151,  N'151 Yarı Mamuller', 1),
   (153,  N'153 Ticari Mal',    1),
   (25,   N' 25 Maddi Duran Varlık', 1),
-  (600,  N'600 Verilen Hizmetler', 1),
+  (600,  N'600 Yurtiçi Satışlar', 1),
+  (601,  N'601 Yurtdışı Satışlar', 1),
+  (602,  N'602 Hizmet Gelirleri', 1),
+  (622,  N'622 Satılan Hizmet Hesabı', 1),
   --(750,  N'750 ArGe Malzemesi', 1), -- 750. Araştırma Ve Geliştirme
   (770,  N'770 Tüketim Malzemesi', 1) -- 770. Genel Yönetim Giderleri
   

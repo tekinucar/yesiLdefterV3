@@ -543,15 +543,7 @@ namespace Tkn_Events
                     v.con_GotoRecord_Position);
 
             }
-
-
-            //MessageBox.Show(((Form)sender).Name.ToString());
-
-            if (((Form)sender).Name.ToString().IndexOf("tSearchForm") > -1)
-            {
-                //mySearchValuePreparing(((Form)sender));
-            }
-
+            
             /// Yeni Süreç ----
             /// 
             v.SP_NewWorkType = "NEW";
@@ -562,6 +554,19 @@ namespace Tkn_Events
             vSW._03_WorkTD = v.tWorkTD.NewAndRef;
             vSW._04_WorkWhom = v.tWorkWhom.All;
             ev.tSubWork_(vSW);
+
+            if (t.IsNotNull(v.tSearch.searchInputValue))
+            {
+                Control cntrl = t.Find_Control(((Form)sender), "textEdit_Find_" + t.AntiStr_Dot(v.tSearch.SearchTableIPCode));
+
+                if (cntrl != null)
+                {
+                    ((DevExpress.XtraEditors.TextEdit)cntrl).EditValue = v.tSearch.searchInputValue;
+                    ((DevExpress.XtraEditors.TextEdit)cntrl).SelectionStart = v.tSearch.searchInputValue.Length + 1;
+                    //((DevExpress.XtraEditors.TextEdit)cntrl).Focus();
+                }
+            }
+
 
             //v.con_AutoNewRecords = false;
             /// end yeni süreç

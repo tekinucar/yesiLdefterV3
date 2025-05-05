@@ -25,7 +25,6 @@ begin transaction
 
    --20
    SinavUcreti           Numeric(22,5) null,
-   KayitSirasindaAlindi  Bit           null, /* sertifika ücreti ile birlikte alındı */
    TahsilEdildi          Bit           null, /* sonradan kursiyerden makbuzla tahsil edildi */
    DekontId              Int           null, /* tahsil dekont ıd */
    --30
@@ -34,6 +33,12 @@ begin transaction
    YatanToplamUcret      Numeric(22,5) null,
    UcretSayisi           SmallInt      null, 
    TestMerkeziBilgisi    Varchar(50)   null,
+   --40
+   IsGBelgesiHazir         Bit         null,
+   IsGBelgesiTeslimEdildi  Bit         null,
+   GBKimeTeslimEdildi      Varchar(50) null,
+   --50
+   LineTypeId              SmallInt    null, /* 1. Başvuru satırı, 2. sınav sonuç satırı */
 
    constraint		pk_MtskSinavETeorik primary key (Id)
  )
@@ -74,6 +79,7 @@ AS BEGIN
 	declare @yTeorikPuani int = 0
 	declare @yMebbisESinavTarihValue varchar(20) = ''
 	declare @SinavSonucTipiId smallInt = 0
+	declare @yLineTypeId smallInt = 0
 
     WHILE @@FETCH_STATUS = 0
     BEGIN
@@ -92,6 +98,7 @@ AS BEGIN
 		,@yTeorikPuani = isnull(ins.TeorikPuani, 0)
 		,@SinavSonucTipiId = isnull(ins.DurumuTipiId, 0)
 		,@yMebbisESinavTarihValue = isnull(ins.MebbisESinavTarihValue,'')
+        ,@yLineTypeId = isnull(ins.LineTypeId,0) 
 		from inserted ins
     	where ins.Id = @curId
 	
@@ -115,42 +122,6 @@ AS BEGIN
             Where TcNo = @yTcNo
             and   isnull(DonemTipiId,0) <= @SinavDonemTipiId
             order by DonemTipiId desc, Id desc
-
-		  -- demekki aday hiç kayıtlı değil 
-		  -- yani ilk defa MEBBİS in sınav sonuçları (uygulama) sayfasından okunuyor demek
-		  /*
-		  if (@yTalepId = 0)
-		  begin
-			  INSERT INTO [dbo].[MtskAdayTalep]
-                 ([FirmId]
-				 ,[AdayId]
-                 ,[IsActive]
-                 ,[TcNo]
-                 ,[TamAdiSoyadi]
-				 ,[DonemTipiId]
-                 ,[MebbisKurumOnayi]
-                 ,[KayitTipiId]
-                 ,[VeriKaynakTipiId]
-                 )
-              VALUES
-               (  @yFirmId --FirmId, int
-			    , @yAdayId
-                , 1        --IsActive, bit
-                , @yTcNo   --TcNo, varchar(11)
-                , @yTamAdiSoyadi --TamAdiSoyadi, nvarchar(100)
-				, 0        --DonemTipiId, int   << e-sınavda bu bilgi yok
-                , 1        --MebbisKurumOnayi, bit
-                , 2        --KayitTipiId     : Kesin kayıt 
-                , 3        --VeriKayitTipiId : Mebbis e-sınav listesi
-               )
-			  
-			  Select top 1 @yTalepId = talep.Id
-		      From MtskAdayTalep as talep
-		      Where talep.FirmId = @yFirmId
-		      and   talep.TcNo = @yTcNo 
-			  order by Id desc
-		  end -- @yTalepId = 0
-          */
 		end
 		
 		if (@yTeorikPuani >= 70) 
@@ -174,11 +145,13 @@ AS BEGIN
             Where tarihler.MebbisESinavTarihValue = @yMebbisESinavTarihValue
         end -- if (@yMebbisESinavTarihValue <> ''
 
+		-- Dört gün öncesi tarihindekileri say
 		Select @ySinavNo = (count(Id) + 1) From MtskSinavETeorik
 		Where IsActive = 1
 		and FirmId = @yFirmId
 		and TalepId = @yTalepId
-		and SinavTarihi < @ySinavTarihi
+        and LineTypeId = @yLineTypeId 
+		and SinavTarihi < DATEADD(DAY, -4, @ySinavTarihi)  
 
 		update MtskSinavETeorik set
            TalepId = @yTalepId
@@ -199,6 +172,7 @@ AS BEGIN
             Delete From MtskSinavETeorik
             Where SinavTarihi = @ySinavTarihi
             and   isnull(MebbisESinavTarihValue,'') = ''
+            and   LineTypeId = @yLineTypeId 
             and   Id <> @curId 
 		end
 
@@ -214,7 +188,6 @@ AS BEGIN
 	
     CLOSE eSinavCursor
     DEALLOCATE eSinavCursor   
-
 
 END -- trigger
 
@@ -305,6 +278,31 @@ INSERT INTO [Lkp].[MtskSinavETeorikUcretDurumuTipi] (Id, UcretDurumuTipi)
   ( 0,    N''),
   ( 1,    N'Sınav Ücreti Yatırılmış'),
   ( 2,    N'Sınav Ücreti Yatırılmamış')
+
+
+
+
+-- ------------------------------------------------------- 
+-- LineTypeId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskSinavETeorikLineType')
+drop table [Lkp].[MtskSinavETeorikLineType]
+
+create table [Lkp].[MtskSinavETeorikLineType]
+(
+   Id               Int Unique not null, 
+   LineType         nVarchar(30)   null
+   
+   constraint  pk_MtskSinavETeorikLineType primary key (Id)
+)
+
+Delete from [Lkp].[MtskSinavETeorikLineType]
+INSERT INTO [Lkp].[MtskSinavETeorikLineType] (Id, LineType)
+ VALUES 
+  ( 0,    N''),
+  ( 1,    N'Başvuru satırı'),
+  ( 2,    N'Sınav sonuç satırı')
+
 
 commit transaction
 

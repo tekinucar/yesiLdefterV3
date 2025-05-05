@@ -374,7 +374,7 @@ namespace Tkn_DevView
             tGridView.OptionsView.ColumnAutoWidth = false;
             tGridView.OptionsView.RowAutoHeight = true;
             //tGridView.OptionsBehavior.Editable = true;
-            tGridView.OptionsBehavior.AllowIncrementalSearch = true;
+            //tGridView.OptionsBehavior.AllowIncrementalSearch = true;
             tGridView.OptionsNavigation.EnterMoveNextColumn = true;
             tGridView.OptionsSelection.InvertSelection = (find == 0);
 
@@ -883,7 +883,7 @@ namespace Tkn_DevView
             tGridView.OptionsView.ColumnAutoWidth = false;
             tGridView.OptionsView.RowAutoHeight = true;
             //tGridView.OptionsBehavior.Editable = true;
-            tGridView.OptionsBehavior.AllowIncrementalSearch = true;
+            //tGridView.OptionsBehavior.AllowIncrementalSearch = true;
             tGridView.OptionsNavigation.EnterMoveNextColumn = true;
             tGridView.OptionsSelection.InvertSelection = (find == 0);
 
@@ -1050,7 +1050,7 @@ namespace Tkn_DevView
                     if (i > -1)
                         caption2 = caption.Substring(0, caption.IndexOf("<"));
 
-                    if (tGridView != null)
+                    if (tGridView != null && visible == "True")
                     {
                         GridBand Gband = new GridBand();
                         Gband.Caption = caption2;
@@ -1071,16 +1071,15 @@ namespace Tkn_DevView
                         tGridView.Bands.AddRange(new GridBand[] { Gband });
                     }
 
-                    if ((tVGridControl != null) && (visible == "True"))
+                    if (tVGridControl != null && visible == "True")
                     {
                         CategoryRow row = new CategoryRow(caption2);
                         row.Name = "CategoryRow_" + groupno;
                         row.Expanded = true;
-
                         tVGridControl.Rows.Add(row);
                     }
 
-                    if (tButtonPanel != null)
+                    if (tButtonPanel != null)// && visible == "True")
                     {
                         // burda değişiklik yaparsan  myMenuShortKeyClick i kontrol etmeyi unutma
                         //
@@ -3824,43 +3823,6 @@ MS_FIELDS                                          T03_MSFIELDS                 
             }
         }
 
-
-        private void Preparing_View__iptal_gerekkalmadi(string Prop_View,
-                     GridView tGridView,
-                     AdvBandedGridView tAdvBGridView,
-                     TreeList tTreeList,
-                     DevExpress.XtraGrid.Views.Tile.TileView tTileView)
-        {
-            string s1 = "=ROW_PROP_VIEWS:";
-            string s2 = (char)34 + "ALLPROP" + (char)34 + ": {";
-
-            if (Prop_View.IndexOf(s1) > -1)
-            {
-                if (tGridView != null)
-                    Preparing_View_OLD(Prop_View, tGridView, null, null, null);
-                if (tAdvBGridView != null)
-                    Preparing_View_OLD(Prop_View, null, tAdvBGridView, null, null);
-                if (tTreeList != null)
-                    Preparing_View_OLD(Prop_View, null, null, tTreeList, null);
-                if (tTileView != null)
-                    Preparing_View_OLD(Prop_View, null, null, null, tTileView);
-            }
-
-            if (Prop_View.IndexOf(s2) > -1)
-            {
-                /*
-                if (tGridView != null)
-                    Preparing_View_JSON(Prop_View, tGridView, null, null, null);
-                if (tAdvBGridView != null)
-                    Preparing_View_JSON(Prop_View, null, tAdvBGridView, null, null);
-                if (tTreeList != null)
-                    Preparing_View_JSON(Prop_View, null, null, tTreeList, null);
-                if (tTileView != null)
-                    Preparing_View_JSON(Prop_View, null, null, null, tTileView);
-                */
-            }
-        }
-
         private string Preparing_Mappings(PROP_VIEWS_IP prop_, SchedulerDataStorage storage, ref string schedulerViewType)
         {
             tToolBox t = new tToolBox();
@@ -4599,6 +4561,7 @@ MS_FIELDS                                          T03_MSFIELDS                 
 
             int fgroup_no = 0;
             int fgroup_line_no = 0;
+            bool groupVisible = false;
 
             tToolBox t = new tToolBox();
             tDevColumn col = new tDevColumn();
@@ -4611,6 +4574,8 @@ MS_FIELDS                                          T03_MSFIELDS                 
                 Row = dsFields.Tables[0].Rows[i];
 
                 tvisible = t.Set(Row["CMP_VISIBLE"].ToString(), Row["LKP_FVISIBLE"].ToString(), true);
+                fgroup_no = t.Set(Row["GROUP_NO"].ToString(), "", -1);
+                groupVisible = IsGroupVisible(dsFields, fgroup_no);
 
                 if (tvisible)
                 {
@@ -4715,7 +4680,7 @@ MS_FIELDS                                          T03_MSFIELDS                 
                     }
                     #endregion summary add
 
-                    if (tGridView != null)
+                    if (tGridView != null)// && groupVisible)
                     {
                         if (tGridView.Bands.Count > fgroup_no)
                             tGridView.Bands[fgroup_no].Columns.Add(column);  //Insert(tGrpLineNo, column); //Add(column);
@@ -4730,6 +4695,28 @@ MS_FIELDS                                          T03_MSFIELDS                 
                     tGridView.OptionsView.GroupFooterShowMode = GroupFooterShowMode.VisibleAlways;
                 }
             }
+        }
+        
+        private bool IsGroupVisible(DataSet dsFields, int groupNo)
+        {
+            tToolBox t = new tToolBox();
+            bool onay = true;
+
+            if (t.IsNotNull(dsFields) == false) return onay;
+            if (dsFields.Tables.Count == 1) return onay;
+
+            int length = dsFields.Tables[1].Rows.Count;
+            if (groupNo > length) return false;
+
+            for (int i = 0; i < length; i++)
+            {
+                if (t.myInt32(dsFields.Tables[1].Rows[i]["FGROUPNO"].ToString()) == groupNo)
+                {
+                    onay = (t.myInt32(dsFields.Tables[1].Rows[i]["FVISIBLE"].ToString()) == 1);
+                    break;
+                }
+            }
+            return onay;
         }
         #endregion BandedGridView Columns Create
 

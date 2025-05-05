@@ -6,12 +6,13 @@ using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
+
+using Tkn_Forms;
 using Tkn_InputPanel;
 using Tkn_TablesRead;
 using Tkn_ToolBox;
 using Tkn_Variable;
 using Tkn_Events;
-using Tkn_Forms;
 using Tkn_Layout;
 using Tkn_CreateObject;
 
@@ -45,7 +46,7 @@ namespace Tkn_Search
                 /// kullanıcı klavye ile veri girerken 
                 /// Search işlemi başlasın mı ?
                 /// 
-                if ((value.Length >= v.tSearch.searchStartCount) && (v.tSearch.IsRun == false))
+                if ((value.Length == v.tSearch.searchStartCount) && (v.tSearch.IsRun == false))
                 {
                     DevExpress.XtraEditors.Controls.ButtonPredefines button =
                         DevExpress.XtraEditors.Controls.ButtonPredefines.Search;
@@ -54,10 +55,9 @@ namespace Tkn_Search
                     /// 
                     buttonEdit_ButtonClick_(sender, button);
 
-                    if (v.tSearch.IsSearchFound) //(v.searchOnay)
+                    if (v.tSearch.IsSearchFound) 
                     {
                         ((DevExpress.XtraEditors.ButtonEdit)sender).Refresh();
-                        //v.searchOnay = false;
                         //System.Windows.Forms.SendKeys.Send("{ENTER}");
                     }
                     else
@@ -80,7 +80,7 @@ namespace Tkn_Search
             string myProp = ((DevExpress.XtraEditors.ButtonEdit)sender).Properties.AccessibleDescription;
             string editValue = "";
             string funcName = "";
-
+                        
             if (t.IsNotNull(myProp))
             {
                 v.tButtonType buttonType = v.tButtonType.btNone;
@@ -229,15 +229,17 @@ namespace Tkn_Search
 
                             if (propList_ != null)
                             {
+                                bool aramaCalisti = false;
                                 foreach (PROP_NAVIGATOR item in propList_)
                                 {
                                     if (item.BUTTONTYPE.ToString() != "null")
                                     {
                                         propButtonType = t.getClickType(Convert.ToInt32(item.BUTTONTYPE.ToString()));
                                     }
-                                    if (buttonType == propButtonType)
+                                    if (buttonType == propButtonType && aramaCalisti == false)
                                     {
                                         v.tSearch.IsRun = true;
+                                        aramaCalisti = true; // aynı döngüde bir daha çalışmasın : PROP_NAVIGATOR de düzenleme yapınca nedense arama bilgisi tekrarlanıyor : aslında Properties & Plus  in hatası
                                         onay = searchEngines(tForm, TableIPCode, v.tSearch.searchInputValue, item);
                                     }
                                 }
@@ -306,7 +308,7 @@ namespace Tkn_Search
 
             /// sadece SearchFormCode var ise 
             if (t.IsNotNull(SearchFormCode))
-                onay = searchEngineByFormCode(tForm, prop_, targetTableIPCode);
+                onay = searchEngineByFormCode(tForm, prop_, targetTableIPCode, SearchTableIPCode);
 
             return onay;
         }
@@ -364,15 +366,15 @@ namespace Tkn_Search
                             MessageBox.Show("DİKKAT : Arama listesi gerekli olan TableIPCode tanımlı değil ... (READ_TABLEIPCODE veya TARGET_TABLEIPCODE) ");
                             onay = false;
                             oncekiOnay = onay;
-                            v.searchOnay = onay;
                         }
                         else
                         {
                             /// Search ekranı açmadan veri tabanından kontrol ediliyor
                             /// 
+                            searchFieldName = getSearchFieldName(searchFieldName, item.TABLEIPCODE_LIST);
+
                             onay = getSearchValues(tForm, searchTableIPCode, myProp, searchFieldName, searchValue, mainTableIPCode, item);
                             oncekiOnay = onay;
-                            v.searchOnay = onay;
                         }
                     }
                     //return onay;
@@ -410,6 +412,58 @@ namespace Tkn_Search
 
         #region directSearch
 
+        private string getSearchFieldName(string searchFieldName, List<TABLEIPCODE_LIST> TableIPCodeList)
+        {
+            /// bu işlem neden ?
+            /// buraya kadar gelen searchFieldName aslında OnmBelgeStokB.CariTcVkNo set edilecek fieldName
+            /// bize aslında aramanın yapılacağı MtskAday.TcNo gerekiyor Where de kullanılacak fieldName gerekiyor
+            /// burada onu tespit ediyoruz
+
+            /*
+      {
+        "CAPTION": "CariTcVkNo",
+        "TABLEIPCODE": "null",
+        "TABLEALIAS": "null",
+        "KEYFNAME": "CariTcVkNoCariTcVkNo",
+        "RTABLEIPCODE": "[aday].TcNo",
+        "RKEYFNAME": "Lkp_TcNo",
+        "MSETVALUE": "null",
+        "WORKTYPE": "SETDATA",
+        "CONTROLNAME": "null",
+        "DCCODE": "null",
+        "BEFOREAFTER": "null",
+        "CHC_IPCODE3": "null",
+        "CHC_FNAME3": "null",
+        "CHC_VALUE3": "null",
+        "CHC_OPERAND3": "null"
+      },
+
+            */
+            tToolBox t = new tToolBox();
+
+            string findFieldName = searchFieldName;
+            string targetFName = "";
+            string sourceFName = "";
+            string sourceIPCode = "";
+
+            if (TableIPCodeList != null)
+            {
+                foreach (var item in TableIPCodeList)
+                {
+                    targetFName = item.KEYFNAME.ToString();
+                    sourceIPCode = item.RTABLEIPCODE.ToString();
+                    sourceFName = item.RKEYFNAME.ToString();
+                    if (searchFieldName == targetFName) // CariTcVkNo == CariTcVkNo
+                    {
+                        findFieldName = t.Set(sourceIPCode, sourceFName, searchFieldName); // [aday].TcNo, Lkp_TcNo, CariTcVkNo
+                        break;
+                    }
+                }
+            }
+
+            return findFieldName;
+        }
+
         private bool getSearchValues(Form tForm,
             string searchTableIPCode,
             string myProp,
@@ -431,12 +485,15 @@ namespace Tkn_Search
             tToolBox t = new tToolBox();
             tInputPanel ip = new tInputPanel();
 
-            DataSet dsSearchTableIP = ip.Create_DataSet(tForm, searchTableIPCode);
+            DataSet dsSearchTableIP = ip.Create_DataSet(tForm, searchTableIPCode, true);
 
             string myProp_ = dsSearchTableIP.Namespace.ToString();
             string tSql = t.Set(t.MyProperties_Get(myProp_, "SqlSecond:"),
                                 t.MyProperties_Get(myProp_, "SqlFirst:"), "");
-                        
+            string kisitlama = t.MyProperties_Get(myProp_, "Kisitlama:");
+
+            tSql = tSql.Replace(kisitlama, "");
+
             tTablesRead tr = new tTablesRead();
             DataSet dsMSTableIp = new DataSet();
 
@@ -452,14 +509,7 @@ namespace Tkn_Search
             
             if (t.IsNotNull(schemasCode) == false) 
                 schemasCode = "dbo";
-
-            //if (t.IsNotNull(FindFName) == false)
-            //{
-            //    //MessageBox.Show("DİKKAT : ( " + searchTableIPCode + " ) için -Find FName- tanımı eksik ...");
-            //    return onay;
-            //}
-
-
+                        
             string whereSQL = preparinSearchSql(dsSearchTableIP, TableLabel, FindFName, searchValue);
 
             //string tSql = "Select * from " + schemasCode + "." + TableName + " where 0 = 0 " + findValues;
@@ -468,9 +518,7 @@ namespace Tkn_Search
 
             DataSet ds_Query = new DataSet();
             t.SQL_Read_Execute(v.dBaseNo.Project, ds_Query, ref tSql, TableName, "searchVaule");
-
-            v.searchOnay = false;
-
+                        
             if (t.IsNotNull(ds_Query) == false)
             {
                 if (ds_Query.Tables[0].Rows.Count == 0)
@@ -488,8 +536,7 @@ namespace Tkn_Search
                         if (onay)
                         {
                             // yeni hesabı, arama isteği yapan targetTableIPCode ye gönder
-                            v.searchOnay = setSearchEngineValues(tForm, targetTableIPCode, null, prop_.TABLEIPCODE_LIST);
-                            onay = v.searchOnay;
+                            onay = setSearchEngineValues(tForm, targetTableIPCode, null, prop_.TABLEIPCODE_LIST);
                         }
                     }
                 }
@@ -503,22 +550,23 @@ namespace Tkn_Search
                     /// 
                     v.con_SelectedSearchDataRow = ds_Query.Tables[0].Rows[0];
 
-                    v.searchOnay = setSearchEngineValues(tForm, targetTableIPCode, null, prop_.TABLEIPCODE_LIST);
-                    onay = v.searchOnay;
+                    onay = setSearchEngineValues(tForm, targetTableIPCode, null, prop_.TABLEIPCODE_LIST);
                 }
 
                 if (ds_Query.Tables[0].Rows.Count > 1)
                 {
+                    //MessageBox.Show(tSql);
                     /// birden fazla arama sonucu dönüyorsa Search ekranını aç
                     /// 
-                    v.searchOnay = searchEngines(tForm, targetTableIPCode, searchValue, prop_);
-
-                    onay = v.searchOnay;
+                    t.AlertMessage("Arama sonucu", "Birden fazla kayıt bulundu lütfen listeden seçiniz...");
+                    onay = searchEngines(tForm, targetTableIPCode, searchValue, prop_);
                 }
 
             }
 
             ds_Query.Dispose();
+
+            v.searchOnay = onay;
             return onay;
         }
 
@@ -582,7 +630,6 @@ namespace Tkn_Search
 
                         if ((isIntValue > 0) && (isIntField))
                         {
-                            //whereSQL = " and " + tableLabel + "." + fName + " = " + searchValue + " ";
                             if (tableLabel != "")
                                  whereSQL = " and " + tableLabel + "." + fName + " = " + searchValue + " ";
                             else whereSQL = " and " + findFName + " = " + searchValue + " ";
@@ -761,10 +808,11 @@ namespace Tkn_Search
             /// Nihayi çalışır hali bu
             /// 
             Application.OpenForms[formName].ActiveControl = searchControl;
-                        
+
             //System.Windows.Forms.SendKeys.Send("{ENTER}");
-            
-            v.con_SearchValue = "";
+
+            v.tSearch.searchInputValue = "";
+            //v.con_SearchValue = "";
 
             #region
             /*   FormCollection için örnek
@@ -920,12 +968,24 @@ namespace Tkn_Search
             tSearchForm.Controls.Add(tabPane1);
             tSearchForm.Controls.Add(panelControl1);
 
+            if (t.IsNotNull(v.tSearch.searchInputValue))
+            {
+                Control cntrl = t.Find_Control(tSearchForm, "textEdit_Find_" + t.AntiStr_Dot(SearchTableIPCode));
+                
+                if (cntrl != null)
+                {
+                    ((DevExpress.XtraEditors.TextEdit)cntrl).EditValue = v.tSearch.searchInputValue;
+                    ((DevExpress.XtraEditors.TextEdit)cntrl).SelectionStart = v.tSearch.searchInputValue.Length + 1;
+                    ((DevExpress.XtraEditors.TextEdit)cntrl).Focus(); 
+                }
+            }
+
             #endregion Create tSearchForm 
 
             return tSearchForm;
         }
 
-        private bool searchEngineByFormCode(Form tForm, PROP_NAVIGATOR prop_, string TargetTableIPCode)
+        private bool searchEngineByFormCode(Form tForm, PROP_NAVIGATOR prop_, string TargetTableIPCode, string SearchTableIPCode)
         {
             tToolBox t = new tToolBox();
             //tInputPanel ip = new tInputPanel();
@@ -944,11 +1004,14 @@ namespace Tkn_Search
             if (width == 0) width = 800;
             if (height == 0) height = 600;
 
+            v.tSearch.SearchTableIPCode = SearchTableIPCode;
+
             /// New Form
             ///
             tEventsForm evf = new tEventsForm();
+            tForms fr = new tForms();
 
-            Form tSearchForm = new Form();
+            Form tSearchForm = fr.Get_Form("ms_Search");
 
             evf.myFormEventsAdd(tSearchForm);
             tSearchForm.Size = new Size(width, height);
@@ -1045,8 +1108,8 @@ namespace Tkn_Search
             bool onay = false;
 
             Application.DoEvents();
-            t.WaitFormOpen(v.mainForm, "");
-            t.WaitFormOpen(v.mainForm, "Atama işlemleri yapılıyor...");
+            //t.WaitFormOpen(v.mainForm, "");
+            //t.WaitFormOpen(v.mainForm, "Atama işlemleri yapılıyor...");
 
             if (v.con_SelectedSearchDataRow != null)
             {
@@ -1135,6 +1198,7 @@ namespace Tkn_Search
                                 onay = t.TableRefreshNewValue(tForm, dsTarget, readValue);
 
                                 nextControl(tForm);
+                                break;
                             }
 
                         }
@@ -1209,6 +1273,8 @@ namespace Tkn_Search
                         //
                         onay = false;
                     }
+
+                    v.con_SelectedSearchDataRow = null;
                 }
                 #endregion
 
@@ -1220,8 +1286,8 @@ namespace Tkn_Search
 
             }
 
-            v.IsWaitOpen = false;
-            t.WaitFormClose();
+            //v.IsWaitOpen = false;
+            //t.WaitFormClose();
             
             // True ise aranan bulundu
             v.tSearch.IsSearchFound = onay;
@@ -1309,7 +1375,7 @@ namespace Tkn_Search
 
             /// gelen Value ye uygun kayıtları arama motorunda listele
             /// 
-            ev.InData_RunSQL(tSearchForm, SearchTableIPCode, v.con_SearchValue, GetFieldList, TableIPCodeList);
+            ev.InData_RunSQL(tSearchForm, SearchTableIPCode, v.tSearch.searchInputValue, GetFieldList, TableIPCodeList);
 
         }
 
@@ -1351,8 +1417,6 @@ namespace Tkn_Search
                                         t.MyProperties_Get(myProp_, "SqlFirst:"), "");
                     
                     string whereSQL = preparinSearchSql(dsSearch, TableLabel, FindFName, searchValue);
-
-                    //string tSql = "Select * from " + schemasCode + "." + TableName + " where 0 = 0 " + findValues;
 
                     whereSQL =
                       " /*KISITLAMALAR|1|*/ " + v.ENTER 

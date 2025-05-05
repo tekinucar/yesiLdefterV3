@@ -626,7 +626,22 @@ namespace Tkn_DevColumn
                 /// MS_VARIABLES de var
                 if ((List_Name == lstname) && (image_id == -9)) // Sys_Types_T ise 
                 {
-                    Sys_Types_T_Read(dsTypesList, i, ItemBox_ICB, tEdit_ICB, null, null);
+                    Sys_Types_T_Read(dsTypesList, i, 
+                        ItemBox_ICB, 
+                        tEdit_ICB, 
+                        ItemBox_CB,
+                        tEdit_CB,
+                        ItemBox_RG,
+                        tEdit_RG,
+                        null, null);
+                    //RepositoryItemComboBox ItemBox_ICB,
+                    //DevExpress.XtraEditors.ImageComboBoxEdit tEdit_ICB,
+                    //RepositoryItemComboBox ItemBox_CB,
+                    //DevExpress.XtraEditors.ComboBoxEdit tEdit_CB,
+                    //RepositoryItemRadioGroup ItemBox_RG,
+                    //DevExpress.XtraEditors.RadioGroup tEdit_RG,
+                    //RepositoryItemCheckedComboBoxEdit ItemBox_CCmb,
+                    //CheckedComboBoxEdit tEdit_CCmb
                     break;
                 }
 
@@ -662,9 +677,14 @@ namespace Tkn_DevColumn
 
         private void Sys_Types_T_Read(DataSet ds, int pos,
                                       RepositoryItemComboBox ItemBox_ICB,
-                                      ImageComboBoxEdit tEdit_ICB,
+                                      DevExpress.XtraEditors.ImageComboBoxEdit tEdit_ICB,
+                                      RepositoryItemComboBox ItemBox_CB,
+                                      DevExpress.XtraEditors.ComboBoxEdit tEdit_CB,
+                                      RepositoryItemRadioGroup ItemBox_RG,
+                                      DevExpress.XtraEditors.RadioGroup tEdit_RG,
                                       RepositoryItemCheckedComboBoxEdit ItemBox_CCmb,
-                                      CheckedComboBoxEdit tEdit_CCmb)
+                                      CheckedComboBoxEdit tEdit_CCmb
+            )
         {
             tToolBox t = new tToolBox();
             string Sql = string.Empty;
@@ -684,10 +704,10 @@ namespace Tkn_DevColumn
             if (t.IsNotNull(where)) where = " where 0 = 0 " + where;
 
             Sql = " select "
-            + "   " + val_type_ + "  VALUE_TYPE "
-            + " , " + int_fname + "  VALUE_INT "
-            + " , " + str_fname + "  VALUE_STR "
-            + " , " + cap_fname + "  VALUE_CAPTION "
+            + "   " + val_type_ + " as VALUE_TYPE "
+            + " , " + int_fname + " as VALUE_INT "
+            + " , " + str_fname + " as VALUE_STR "
+            + " , " + cap_fname + " as VALUE_CAPTION "
             + " from " + tableName + "  "
             + where
             ;
@@ -706,8 +726,8 @@ namespace Tkn_DevColumn
             DataSet dsData = new DataSet();
 
             if ((Sql.IndexOf("[MSV3]") > -1) | (Sql.IndexOf("MSV3") > -1) | (dbName.IndexOf("Manager") > -1))
-                t.SQL_Read_Execute(v.dBaseNo.Manager, dsData, ref Sql, "LKP_TABLE_" + tableName, "");
-            else t.SQL_Read_Execute(v.dBaseNo.Project, dsData, ref Sql, "LKP_TABLE_" + tableName, "");
+                t.SQL_Read_Execute(v.dBaseNo.Manager, dsData, ref Sql, tableName, "");
+            else t.SQL_Read_Execute(v.dBaseNo.Project, dsData, ref Sql, tableName, "");
 
             string caption = string.Empty;
             string value = string.Empty;
@@ -729,9 +749,22 @@ namespace Tkn_DevColumn
                 if ((type == 3) || (type == 4))
                     value = dsData.Tables[0].Rows[i]["VALUE_STR"].ToString();
 
-                if ((ItemBox_ICB != null) || (tEdit_ICB != null) ||
-                    (ItemBox_CCmb != null) || (tEdit_CCmb != null))
-                    RepositoryItem_Add_(ItemBox_ICB, tEdit_ICB, null, null, null, null, ItemBox_CCmb, tEdit_CCmb, caption, value, type);
+                if ((ItemBox_ICB != null) || 
+                    (tEdit_ICB != null) ||
+                    (ItemBox_CB != null) ||
+                    (tEdit_CB != null) ||
+                    (ItemBox_CCmb != null) || 
+                    (tEdit_CCmb != null))
+                    RepositoryItem_Add_(
+                        ItemBox_ICB, 
+                        tEdit_ICB, 
+                        ItemBox_CB, 
+                        tEdit_CB,
+                        ItemBox_RG,
+                        tEdit_RG, 
+                        ItemBox_CCmb, 
+                        tEdit_CCmb, 
+                        caption, value, type);
             }
 
         }
@@ -946,7 +979,10 @@ namespace Tkn_DevColumn
 
                 if ((List_Name == lstname) && (image_id == -9)) // Sys_Types_T ise 
                 {
-                    Sys_Types_T_Read(dsTypesList, i, null, null, ItemBox, tEdit);
+                    Sys_Types_T_Read(dsTypesList, i, 
+                        null, null, null, null, null, null,
+                        ItemBox, 
+                        tEdit);
                     break;
                 }
 
@@ -1043,9 +1079,13 @@ namespace Tkn_DevColumn
         {
             tToolBox t = new tToolBox();
 
-            if ((tcmp_format_type == 1) &&
-                (t.IsNotNull(tdisplayformat) == false)) tdisplayformat = "n2";
-
+            if (tcmp_format_type == 1)
+            {
+                if (t.IsNotNull(tdisplayformat) == false)
+                    tdisplayformat = "#,###,###,##0.00;<<#,###,###,##0.00>>";
+                if (t.IsNotNull(teditformat) == false)
+                    teditformat = "#,###,###,##0.00;<<#,###,###,##0.00>>";
+            }
             #region displayformat
             if (t.IsNotNull(tdisplayformat))
             {
@@ -1066,7 +1106,6 @@ namespace Tkn_DevColumn
                     tEdit.Properties.DisplayFormat.FormatType = DevExpress.Utils.FormatType.Numeric;
                     tEdit.Properties.DisplayFormat.FormatString = tdisplayformat;
 
-                    if (teditformat == "") teditformat = "n8";
                     tEdit.Properties.EditFormat.FormatType = DevExpress.Utils.FormatType.Numeric;
                     tEdit.Properties.EditFormat.FormatString = teditformat;
 
@@ -1227,7 +1266,9 @@ namespace Tkn_DevColumn
                 //tEdit.KeyUp += new KeyEventHandler(ev.buttonEdit_KeyUp);
                 tEdit.KeyUp += new KeyEventHandler(evg.myRepositoryItemEdit_KeyUp);
 
-                tEdit.Leave += new EventHandler(ev.buttonEdit_Leave);
+                // çıkışta search çalışmasın artık
+                //tEdit.Leave += new EventHandler(ev.buttonEdit_Leave);
+
                 tEdit.ButtonClick += new
                      DevExpress.XtraEditors.Controls.ButtonPressedEventHandler(ev.buttonEdit_ButtonClick);
                 
@@ -1312,7 +1353,10 @@ namespace Tkn_DevColumn
 
                 //tEdit.
                 if (tExpressionType > 0)
-                    Column.Tag = "EXPRESSION";
+                {
+                    if (Column != null)  Column.Tag = "EXPRESSION";
+                    if (BandedColumn != null) BandedColumn.Tag = "EXPRESSION";
+                }
 
                 if (Column != null) Column.ColumnEdit = tEdit;
                 if (BandedColumn != null) BandedColumn.ColumnEdit = tEdit;
@@ -1380,7 +1424,10 @@ namespace Tkn_DevColumn
                 }
 
                 if (tExpressionType > 0)
-                    Column.Tag = "EXPRESSION";
+                {
+                    if (Column != null)  Column.Tag = "EXPRESSION";
+                    if (BandedColumn != null) BandedColumn.Tag = "EXPRESSION";
+                }
 
                 if (Column != null) Column.ColumnEdit = tEdit;
                 if (BandedColumn != null) BandedColumn.ColumnEdit = tEdit;
@@ -1429,7 +1476,10 @@ namespace Tkn_DevColumn
                 tEdit.KeyDown += new System.Windows.Forms.KeyEventHandler(evg.myRepositoryItemEdit_KeyDown);
 
                 if (tExpressionType > 0)
-                    Column.Tag = "EXPRESSION";
+                {
+                    if (Column != null)  Column.Tag = "EXPRESSION";
+                    if (BandedColumn != null) BandedColumn.Tag = "EXPRESSION";
+                }
 
                 if (Column != null) Column.ColumnEdit = tEdit;
                 if (BandedColumn != null) BandedColumn.ColumnEdit = tEdit;
@@ -1542,8 +1592,11 @@ namespace Tkn_DevColumn
                     // grid
                 }
 
-                if ((tExpressionType > 0) && (Column != null))
-                    Column.Tag = "EXPRESSION";
+                if (tExpressionType > 0)
+                {
+                    if (Column != null)  Column.Tag = "EXPRESSION";
+                    if (BandedColumn != null) BandedColumn.Tag = "EXPRESSION";
+                }
 
                 if (Column != null) Column.ColumnEdit = tEdit;
                 if (BandedColumn != null) BandedColumn.ColumnEdit = tEdit;
@@ -1597,9 +1650,12 @@ namespace Tkn_DevColumn
                 //tEdit.Tag = field_no;
 
                 searchLookUpTableFill(Row, tEdit, null);
-                                                                
+
                 if (tExpressionType > 0)
-                    Column.Tag = "EXPRESSION";
+                {
+                    if (Column != null)  Column.Tag = "EXPRESSION";
+                    if (BandedColumn != null) BandedColumn.Tag = "EXPRESSION";
+                }
 
                 if (Column != null) Column.ColumnEdit = tEdit;
                 if (BandedColumn != null) BandedColumn.ColumnEdit = tEdit;
@@ -1704,7 +1760,10 @@ namespace Tkn_DevColumn
                 tEdit.MaxValue = t.Set(Row["CMP_LEFT"].ToString(), "0", 0);
 
                 if (tExpressionType > 0)
-                    Column.Tag = "EXPRESSION";
+                {
+                    if (Column != null)  Column.Tag = "EXPRESSION";
+                    if (BandedColumn != null) BandedColumn.Tag = "EXPRESSION";
+                }
 
                 if (Column != null) Column.ColumnEdit = tEdit;
                 if (BandedColumn != null) BandedColumn.ColumnEdit = tEdit;
@@ -1747,8 +1806,11 @@ namespace Tkn_DevColumn
                 }
                 #endregion displayformat
 
-                if ((tExpressionType > 0) && (Column != null))
-                    Column.Tag = "EXPRESSION";
+                if (tExpressionType > 0)
+                {
+                    if (Column != null)  Column.Tag = "EXPRESSION";
+                    if (BandedColumn != null) BandedColumn.Tag = "EXPRESSION";
+                }
 
                 //tEdit.AllowFocused = false;
                 //tEdit
@@ -1815,7 +1877,10 @@ namespace Tkn_DevColumn
                 tEdit.KeyDown += new System.Windows.Forms.KeyEventHandler(evg.myRepositoryItemEdit_KeyDown);
 
                 if (tExpressionType > 0)
-                    Column.Tag = "EXPRESSION";
+                {
+                    if (Column != null)  Column.Tag = "EXPRESSION";
+                    if (BandedColumn != null) BandedColumn.Tag = "EXPRESSION";
+                }
 
                 if (Column != null) Column.ColumnEdit = tEdit;
                 if (BandedColumn != null) BandedColumn.ColumnEdit = tEdit;
@@ -6027,7 +6092,7 @@ namespace Tkn_DevColumn
                 }
 
                 tInputPanel ip = new tInputPanel();
-                v.con_ImagesMasterDataSet = ip.Create_DataSet(tForm, v.tResimEditor.imagesMasterTableIPCode);  //v.con_ImagesMasterTableIPCode);
+                v.con_ImagesMasterDataSet = ip.Create_DataSet(tForm, v.tResimEditor.imagesMasterTableIPCode, false);  //v.con_ImagesMasterTableIPCode);
             } 
             else
             {

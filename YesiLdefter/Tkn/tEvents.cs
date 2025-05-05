@@ -1069,6 +1069,8 @@ namespace Tkn_Events
 
         public void buttonEdit_EditValueChanged(object sender, EventArgs e)
         {
+            /// Burası otomatik aramayı başlatıyor ileride gerekebilir silme
+            /// 
 
             //if (t.IsSearchControl(sender))
             //{
@@ -1081,18 +1083,18 @@ namespace Tkn_Events
         public void buttonEdit_Leave(object sender, EventArgs e)
         {
             
-            string func_name = string.Empty;
             string tableIPCode = ((DevExpress.XtraEditors.ButtonEdit)sender).Properties.AccessibleName;
             string myProp = ((DevExpress.XtraEditors.ButtonEdit)sender).Properties.AccessibleDescription;
             string fieldName = ((DevExpress.XtraEditors.ButtonEdit)sender).Name.ToString();
             string editValue = "";
-            string keyValue = "-1";
+            string keyValue = "";
+            string searchEngine = t.MyProperties_Get(myProp, "Type:");
+            bool searchOnayi = t.IsSearchControl(sender);
+
             if (fieldName != "")
                 fieldName = fieldName.Substring(7, fieldName.Length - 7); // = "Column_" + tFieldName;
 
-            func_name = t.MyProperties_Get(myProp, "Type:");
-
-            if (func_name == "SearchEngine")//v.SearchEngine)
+            if (searchEngine == "SearchEngine" && searchOnayi)//v.SearchEngine)
             {
                 Form tForm = t.Find_Form(sender);
 
@@ -1101,8 +1103,6 @@ namespace Tkn_Events
                 if (((DevExpress.XtraEditors.ButtonEdit)sender).EditValue != null)
                     editValue = ((DevExpress.XtraEditors.ButtonEdit)sender).EditValue.ToString();
 
-                //if ((v.con_Value_New != v.con_Value_Old) &&
-                //    (v.con_Value_New != "-1")) // &&      (v.con_Value_New != ""))
                 if (t.myInt32(keyValue) <= 0 && editValue != "")
                 {
                     v.tButtonHint.Clear();
@@ -1913,16 +1913,21 @@ namespace Tkn_Events
             v.tBildirim.bildirimListesiLines = bildirimListesiLines;
             v.tBildirim.workType = workType;
             ///
-            /// readKeyFieldNames = "RKEYFNAME": "TalepId=Id;CariId=AdayId;TelefonNo=Lkp_CepTelefonu;AlicininAdiSoyadi=Lkp_TamAdiSoyadi;",
+            /// readKeyFieldNames = "RKEYFNAME": "TalepId=Id##CariId=AdayId##TelefonNo=Lkp_CepTelefonu##AliciAdiSoyadi=Lkp_AdayTamAdiSoyadi##SourceTypeId=21122##SourceId=eSinavNo##"
             ///
-            v.tBildirim.hedefTalepIdFName = t.Get_And_Clear(ref readKeyFieldNames, "=");     //  TalepId= 
-            v.tBildirim.kaynakTalepIdFName = t.Get_And_Clear(ref readKeyFieldNames, ";");    //  Id ye ulaşıyor 
-            v.tBildirim.hedefCariIdFName = t.Get_And_Clear(ref readKeyFieldNames, "=");      //  CariId= 
-            v.tBildirim.kaynakCariIdFName = t.Get_And_Clear(ref readKeyFieldNames, ";");     //  AdayId ye ulaşıyor
-            v.tBildirim.hedefTelefonNoFName = t.Get_And_Clear(ref readKeyFieldNames, "=");   //  TelefonNo= 
-            v.tBildirim.kaynakTelefonNoFName = t.Get_And_Clear(ref readKeyFieldNames, ";");  //  Lkp_CepTelefonu ye ulaşıyor
-            v.tBildirim.hedefAliciAdiFName = t.Get_And_Clear(ref readKeyFieldNames, "=");    //  AlicininAdiSoyadi= 
-            v.tBildirim.kaynakAliciAdiFName = t.Get_And_Clear(ref readKeyFieldNames, ";");   //  Lkp_TamAdiSoyadi ye ulaşıyor
+            v.tBildirim.hedefTalepIdFName = t.Get_And_Clear(ref readKeyFieldNames, "=");      //  TalepId= 
+            v.tBildirim.kaynakTalepIdFName = t.Get_And_Clear(ref readKeyFieldNames, "##");    //  Id ye ulaşıyor 
+            v.tBildirim.hedefCariIdFName = t.Get_And_Clear(ref readKeyFieldNames, "=");       //  CariId= 
+            v.tBildirim.kaynakCariIdFName = t.Get_And_Clear(ref readKeyFieldNames, "##");     //  AdayId ye ulaşıyor
+            v.tBildirim.hedefTelefonNoFName = t.Get_And_Clear(ref readKeyFieldNames, "=");    //  TelefonNo= 
+            v.tBildirim.kaynakTelefonNoFName = t.Get_And_Clear(ref readKeyFieldNames, "##");  //  Lkp_CepTelefonu ye ulaşıyor
+            v.tBildirim.hedefAliciAdiFName = t.Get_And_Clear(ref readKeyFieldNames, "=");     //  AlicininAdiSoyadi= 
+            v.tBildirim.kaynakAliciAdiFName = t.Get_And_Clear(ref readKeyFieldNames, "##");   //  Lkp_TamAdiSoyadi ye ulaşıyor
+            v.tBildirim.hedefSourceTypeIdFName = t.Get_And_Clear(ref readKeyFieldNames, "=");      //  SourceTypeId= ye ulaşıyor
+            v.tBildirim.kaynakSourceTypeIdValue = t.myInt16(t.Get_And_Clear(ref readKeyFieldNames, "##"));    //  21122 ye ulaşıyor
+            v.tBildirim.hedefSourceIdFName = t.Get_And_Clear(ref readKeyFieldNames, "=");          //  SourceId= ye ulaşıyor
+            v.tBildirim.kaynakSourceIdFName = t.Get_And_Clear(ref readKeyFieldNames, "##");         //  eSinavNo ya ulaşıyor
+
         }
         private void getBildirimMesajiAndView(string formName)
         {
@@ -2058,6 +2063,7 @@ namespace Tkn_Events
                         dsHeader.Tables[0].Rows[0]["GonderimTypeId"] = tBildirim_.secilenGonderimTypeId;
                         dsHeader.Tables[0].Rows[0]["GonderimTarihi"] = tBildirim_.secilenGonderimTarihi;
                         dsHeader.Tables[0].Rows[0]["GonderimSaati"] = tBildirim_.secilenGonderimSaati;
+
                         if (tBildirim_.workType == "MESSAGESINGLE") dsHeader.Tables[0].Rows[0]["WorkTypeId"] = 1;
                         if (tBildirim_.workType == "MESSAGEMULTI") dsHeader.Tables[0].Rows[0]["WorkTypeId"] = 2;
 
@@ -2131,6 +2137,13 @@ namespace Tkn_Events
                         if (t.IsNotNull(tBildirim_.kaynakAliciAdiFName))
                             tBildirim_.kaynakAliciAdiValue = (string)row[tBildirim_.kaynakAliciAdiFName];
 
+                        if (t.IsNotNull(tBildirim_.hedefSourceTypeIdFName))
+                            tBildirim_.kaynakSourceTypeIdValue = tBildirim_.kaynakSourceTypeIdValue;
+
+                        if (t.IsNotNull(tBildirim_.kaynakSourceIdFName))
+                            tBildirim_.kaynakSourceIdValue = t.myInt32(row[tBildirim_.kaynakSourceIdFName].ToString());
+
+
                         setBildirimLines(tForm, dsLines, dNLines, tBildirim_);
                     }
                 }
@@ -2158,6 +2171,8 @@ namespace Tkn_Events
             newRow[tBildirim_.hedefCariIdFName] = tBildirim_.kaynakCariIdValue.ToString();
             newRow[tBildirim_.hedefTelefonNoFName] = tBildirim_.kaynakTelefonNoValue.ToString();
             newRow[tBildirim_.hedefAliciAdiFName] = tBildirim_.kaynakAliciAdiValue.ToString();
+            newRow[tBildirim_.hedefSourceTypeIdFName] = t.myInt16(tBildirim_.kaynakSourceTypeIdValue.ToString());
+            newRow[tBildirim_.hedefSourceIdFName] = t.myInt32(tBildirim_.kaynakSourceIdValue.ToString());
 
             dsLines.Tables[0].Rows.Add(newRow);
 

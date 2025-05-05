@@ -250,7 +250,7 @@ namespace YesiLdefter
             if (t.IsNotNull(ds_MsWebPages) == false) return;
             if (dN_MsWebPages.Position == -1) return;
 
-            if (msPagesService.LoginOnayi(ds_MsWebPages, dN_MsWebPages))
+            if (msPagesService.LoginOnayi(ds_MsWebPages, dN_MsWebPages, f))
                 await cefSharpLoginPageViev();
         }
 

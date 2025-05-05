@@ -1582,6 +1582,7 @@ namespace YesiLdefter.Selenium
                 if ((workPageNodes.aktifPageCode == "MTSKADAYRESIM") ||
                     (workPageNodes.aktifPageCode == "MTSKADAYSOZLESME") ||
                     (workPageNodes.aktifPageCode == "MTSKADAYIMZA") ||
+                    (workPageNodes.aktifPageCode == "MTSKESINAVBELGESI") ||
                     (workPageNodes.aktifPageCode == "SRCADAYRESIM")
                     )
                 {
@@ -1735,12 +1736,16 @@ namespace YesiLdefter.Selenium
             checkedSiraliIslemVarmi(tForm, workPageNodes, msWebScrapingDbFields);
         }
 
-        public bool LoginOnayi(DataSet ds_MsWebPages, DataNavigator dN_MsWebPages)
+        public bool LoginOnayi(DataSet ds_MsWebPages, DataNavigator dN_MsWebPages, webForm f)
         {
             bool onay = false;
             string loginPage = ds_MsWebPages.Tables[0].Rows[dN_MsWebPages.Position]["LoginPage"].ToString();
-
-            if (loginPage == "True")
+            string pageUrl = ds_MsWebPages.Tables[0].Rows[dN_MsWebPages.Position]["PageUrl"].ToString();
+                        
+            /// f.loginPageUrl var ise giriş yapılmıştır
+            /// veya farklı bir giriş geldi ve giriş için onay isteyecekse
+            /// 
+            if (loginPage == "True" && (f.loginPageUrl != pageUrl || f.loginPageRun == false))
             {
                 string pageName = ds_MsWebPages.Tables[0].Rows[dN_MsWebPages.Position]["About"].ToString();
                 string soru = pageName + " giriş sayfasını açmak ister misiniz ?";

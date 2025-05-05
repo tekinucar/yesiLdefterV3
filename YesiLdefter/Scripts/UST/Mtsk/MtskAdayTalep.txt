@@ -620,7 +620,7 @@ drop table [Lkp].[MtskAdayTalepKayitTipi]
 create table [Lkp].[MtskAdayTalepKayitTipi]
 (
    Id               Int Unique not null, 
-   KayitTipi        nVarchar(40)   null,
+   KayitTipi        nVarchar(50)   null,
    ChartCaption     nVarchar(20)   null,
    FormCaption      nVarchar(15)   null,
 
@@ -630,7 +630,7 @@ create table [Lkp].[MtskAdayTalepKayitTipi]
 Delete from [Lkp].[MtskAdayTalepKayitTipi]
 INSERT INTO [Lkp].[MtskAdayTalepKayitTipi] (Id, KayitTipi, ChartCaption, FormCaption)
  VALUES 
-  ( 0,    N'', '', ''),
+  ( 0,    N'Tanımsız', '', ''),
   ( 1,    N'Ön kayıt',                      'Ön kayıt',     'Yeni Aday' ),
   ( 2,    N'Kayıt aşamasında',              'K.Aşamasında', 'Mebbis' ),
   ( 3,    N'Kesin kayıt',                   'Kesin kay.', '' ),

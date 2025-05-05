@@ -66,7 +66,7 @@ AS BEGIN
            ,@UcretTipiId
            ,talep.AdayId -- CariId
            ,3 -- TaksitTipiId : 3 = Tek Ödeme
-           ,takip.uSinavNo -- TaksitNo
+           ,takip.eSinavNo -- TaksitNo -- Gireceği sınav no
            ,getdate() -- VadeTarihi == Bu kayıt oluşurken sınavın hangi tarihte olacağı bilinmiyor
            ,@BorclandirmaUcreti -- TaksitTutari
            ,2    -- OdemeTipiId   Nakit
@@ -89,6 +89,7 @@ AS BEGIN
   Where talep.FirmId = @FirmId 
   and   takip.FirmId = @FirmId
   and   takip.eSinavDurumTipiId = 2
+  and   takip.eSinavUcretTipiId = 1
   and   odeme.Id is null
 
 

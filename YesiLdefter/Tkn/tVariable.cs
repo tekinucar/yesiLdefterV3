@@ -343,6 +343,8 @@ namespace Tkn_Variable
         public static DataSet ds_ExeUpdates = new DataSet();
         public static DataSet ds_LookUpTableList = new DataSet();
         public static DataSet ds_DonemTipiList = new DataSet();
+        public static DataSet ds_ILList = new DataSet();
+        public static DataSet ds_IlceList = new DataSet();
 
         public static List<string> tableList = new List<string>();
         public static List<string> tableIPCodeTableList = new List<string>();
@@ -1245,7 +1247,8 @@ namespace Tkn_Variable
             onchange,
             onchangeDontDocComplate,
             submit,
-            autoSubmit
+            autoSubmit,
+            clickAndNewPage
         };
 
         public enum tWebInjectType
@@ -1313,6 +1316,9 @@ namespace Tkn_Variable
         public bool IsRun { get; set; } // çalışıyor / çalışmıyor
         public bool AutoSearch { get; set; }
         public bool IsSearchFound { get; set; }
+
+        public string SearchTableIPCode { get; set; }
+
         public string searchEngine = "SearchEngine";
         public string searchNullText { get; set; }
         public string searchValue { get; set; }
@@ -1326,6 +1332,7 @@ namespace Tkn_Variable
             IsRun = false;
             AutoSearch = true;
             IsSearchFound = false;
+            SearchTableIPCode = "";
             searchNullText = "";
             searchValue = "";
             searchInputValue = "";
@@ -1384,6 +1391,7 @@ namespace Tkn_Variable
         public string talepOncesiUrl { get; set; }
         public string errorPageUrl { get; set; }
         public string loginPageUrl { get; set; }
+        public bool loginPageRun { get; set; }
         public string tableIPCodesInLoad { get; set; }
         public string tableIPCodeIsSave { get; set; }
         public string aktifUrl { get; set; }
@@ -1393,6 +1401,9 @@ namespace Tkn_Variable
         public bool loadWorking { get; set; }
         public bool anErrorOccurred { get; set; }
         public bool autoSubmit { get; set; }
+        public string seleniumMainPage { get; set; } // sitenin açıldığı ana sayfa
+        public string seleniumNewSubPage { get; set; }  // ana sayfadadn sonra başka sekme açılınca o yeni açılan sayfa : Örn E-Sınav sayfasında rapor al ile açılan sayfa
+        public string seleniumActivePage { get; set; }  // wb diye çalışan driver da şu anda aktif olan sayfayı işaret ediyor
 
         public Int16 talepPageLeft { get; set; }
         public Int16 talepPageTop { get; set; }
@@ -1420,12 +1431,16 @@ namespace Tkn_Variable
             talepEdilenUrl2 = "";
             talepOncesiUrl = "";
             errorPageUrl = "";
-            loginPageUrl = "";
+            //loginPageUrl = "";  açma
+            //loginPageRun = false;  açma
             tableIPCodesInLoad = "";
             tableIPCodeIsSave = "";
             aktifUrl = "";
             sessionIdAndToken = "";
             securityCode = "";
+            //seleniumMainPage = ""; açma
+            //seleniumNewSubPage = "";
+            //seleniumActivePage = ""; 
             pageRefreshWorking = false;
             loadWorking = false;
             anErrorOccurred = false;
@@ -1686,6 +1701,8 @@ namespace Tkn_Variable
         public string FirmGuid { get; set; }
         public string IlKodu { get; set; }
         public string IlceKodu { get; set; }
+        public string IlAdi { get; set; }
+        public string IlceAdi { get; set; }
         public string MenuCode { get; set; }
         public string MenuCodeOld { get; set; }
 
@@ -1708,6 +1725,10 @@ namespace Tkn_Variable
             FirmLongName = "";
             FirmShortName = "";
             FirmGuid = "";
+            IlKodu = "";
+            IlceKodu = "";
+            IlAdi = "";
+            IlceAdi = "";
             MenuCode = "";
             MenuCodeOld = "";
             SectorTypeId = 0;
@@ -2271,49 +2292,14 @@ namespace Tkn_Variable
 
     public class vTableAbout
     {
-        private int TablesCount_ = 0;
-        private int RecordCount_ = 0;
-        private int FieldsCount_ = 0;
-        private int GroupsCount_ = 0;
-        private int groupPanelCount_ = 0;
-        private int dLTabPageCount_ = 0;  // DataLayout
-        private int dWTabPageCount_ = 0;  // dataWizard 
-        public int TablesCount
-        {
-            get { return TablesCount_; }
-            set { TablesCount_ = value; }
-        }
-        public int RecordCount
-        {
-            get { return RecordCount_; }
-            set { RecordCount_ = value; }
-        }
-        public int FieldsCount
-        {
-            get { return FieldsCount_; }
-            set { FieldsCount_ = value; }
-        }
-        public int GroupsCount
-        {
-            get { return GroupsCount_; }
-            set { GroupsCount_ = value; }
-        }
-        public int groupPanelCount
-        {
-            get { return groupPanelCount_; }
-            set { groupPanelCount_ = value; }
-        }
-        public int dLTabPageCount
-        {
-            get { return dLTabPageCount_; }
-            set { dLTabPageCount_ = value; }
-        }
-        public int dWTabPageCount
-        {
-            get { return dWTabPageCount_; }
-            set { dWTabPageCount_ = value; }
-        }
-
+        public int TablesCount { get; set; }
+        public int RecordCount { get; set; }
+        public int FieldsCount { get; set; }
+        public int GroupsCount { get; set; }
+        public int groupPanelCount { get; set; } 
+        public int dLTabPageCount { get; set; }
+        public int dWTabPageCount { get; set; }
+        public bool IsKisitlama { get; set; }
     }
 
     public class vUserInputBox
@@ -2373,6 +2359,7 @@ namespace Tkn_Variable
         public string columnPropNavigator { get; set; }
         public string columnOldValue { get; set; }
         public string columnEditValue { get; set; }
+        public int editValueCount { get; set; }
         public string columnFieldName { get; set; }
         public string viewType { get; set; }
         public string parentObject { get; set; }
@@ -2391,6 +2378,7 @@ namespace Tkn_Variable
             columnPropNavigator = "";
             columnOldValue = "";
             columnEditValue = "";
+            editValueCount = 0;
             columnFieldName = "";
             viewType = "";
             parentObject = "";
@@ -2526,18 +2514,32 @@ namespace Tkn_Variable
 
         public string hedefTalepIdFName { get; set; }
         public string kaynakTalepIdFName { get; set; }
+        public int kaynakTalepIdValue { get; set; }
+
+
         public string hedefCariIdFName { get; set; }
         public string kaynakCariIdFName { get; set; }
+        public int kaynakCariIdValue { get; set; }
+
+
         public string hedefTelefonNoFName { get; set; }
         public string kaynakTelefonNoFName { get; set; }
+        public string kaynakTelefonNoValue { get; set; }
+
+
         public string hedefAliciAdiFName { get; set; }
         public string kaynakAliciAdiFName { get; set; }
-
-
-        public int kaynakTalepIdValue { get; set; }
-        public int kaynakCariIdValue { get; set; }
-        public string kaynakTelefonNoValue { get; set; }
         public string kaynakAliciAdiValue { get; set; }
+
+
+        public string hedefSourceTypeIdFName { get; set; }
+        //public string kaynekSourceTypeIdFName { get; set; } buna gerek yok
+        public Int16 kaynakSourceTypeIdValue { get; set; }
+
+
+        public string hedefSourceIdFName { get; set; }
+        public string kaynakSourceIdFName { get; set; }
+        public int kaynakSourceIdValue { get; set; }
 
         public void Clear()
         {
@@ -2564,17 +2566,26 @@ namespace Tkn_Variable
         {
             hedefTalepIdFName = "";
             kaynakTalepIdFName = "";
+            kaynakTalepIdValue = 0;
+
             hedefCariIdFName = "";
             kaynakCariIdFName = "";
+            kaynakCariIdValue = 0;
+
             hedefTelefonNoFName = "";
             kaynakTelefonNoFName = "";
+            kaynakTelefonNoValue = "";
+
             hedefAliciAdiFName = "";
             kaynakAliciAdiFName = "";
-
-            kaynakTalepIdValue = 0;
-            kaynakCariIdValue = 0;
-            kaynakTelefonNoValue = "";
             kaynakAliciAdiValue = "";
+
+            hedefSourceTypeIdFName = "";
+            kaynakSourceTypeIdValue = 0;
+
+            hedefSourceIdFName = "";
+            kaynakSourceIdFName = "";
+            kaynakSourceIdValue = 0;
         }
 
     }
@@ -2897,10 +2908,10 @@ namespace Tkn_Variable
         public string CONTROLNAME { get; set; }
         public string DCCODE { get; set; }
         public string BEFOREAFTER { get; set; }
-        public string CHC_IPCODE { get; set; } // FIRST 
-        public string CHC_FNAME { get; set; }
-        public string CHC_VALUE { get; set; }
-        public string CHC_OPERAND { get; set; }
+        public string CHC_IPCODE3 { get; set; } // FIRST 
+        public string CHC_FNAME3 { get; set; }
+        public string CHC_VALUE3 { get; set; }
+        public string CHC_OPERAND3 { get; set; }
     }
     //DCCODE { get; set; } // DC = DataCopy 
     #endregion

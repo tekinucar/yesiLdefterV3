@@ -244,6 +244,7 @@ create table [Lkp].[OnmBelgeStokBSebepTipi]
    constraint  pk_OnmBelgeStokBSebepTipi primary key (Id)
 )
 
+DELETE [Lkp].[OnmBelgeStokBSebepTipi]
 INSERT INTO [Lkp].[OnmBelgeStokBSebepTipi] (Id, SebepTipi, GrupTipiId)
  VALUES 
   (0,     N'Tanımsız', 0),
@@ -252,7 +253,9 @@ INSERT INTO [Lkp].[OnmBelgeStokBSebepTipi] (Id, SebepTipi, GrupTipiId)
   (1504,  N'Genel yön.için tüketim malz. alımı', 1),
   (1505,  N'Arge için mal alımı', 1),
   (25,    N'Maddi duran varlık alımı', 1),
-  (600,   N'Yurt içi satış', 1)
+  (600,   N'Yurtiçi satışlar', 1),
+  (601,   N'Yurtdışı satışlar', 1),
+  (602,   N'Hizmet gelirleri', 1)
 
 
 -- ------------------------------------------------------- 

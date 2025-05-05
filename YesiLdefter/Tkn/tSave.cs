@@ -815,7 +815,7 @@ namespace Tkn_Save
 
             if (t.IsNotNull(f.Key_Id_FieldName) == false)
             {
-                MessageBox.Show("DİKKAT : [ " + f.tableName + " ]  tablosunun  primary key fieldin Identity özelliği testpit edilemedi ..." + v.ENTER2 + "Tablonun primary key fieldinin Identity özelliğinin True olmasını sağlayın ...");
+                MessageBox.Show("DİKKAT : [ " + f.tableName + " ]  tablosunun primary key fieldin Identity özelliği testpit edilemedi ..." + v.ENTER2 + "Tablonun primary key fieldinin Identity özelliğinin True olmasını sağlayın ...");
                 f.sonuc = "DONTSAVE";
             }
 
@@ -923,7 +923,8 @@ namespace Tkn_Save
             /// bu field mevcut TableIPCode.DataSet üzerinde kullanılmamış anlamına geliyor
             /// onun için bu fieldi atla
             ///
-            if (f.isFieldFind == false) return;
+            if (f.isFieldFind == false) 
+                return;
 
             f.ftype = Convert.ToInt32(v.ds_MsTableFields.Tables[f.tableName].Rows[i]["user_type_id"].ToString());
             f.fIdentity = (Boolean)(v.ds_MsTableFields.Tables[f.tableName].Rows[i]["is_identity"]);
@@ -1014,7 +1015,7 @@ namespace Tkn_Save
 
                     f._setInsField = f.bos + f.fname + ", ";
                     f._setInsValue = f.fvalue + ", ";
-                    if (f.fVisible == "True")
+                    if ((f.fVisible == "True") || (f.fEnabled == "True"))
                         f._setEditField = " [" + f.fname + "] = " + f.fvalue + ", ";
                     f._setSelectControl = " and [" + f.fname + "] = " + f.fvalue + " ";
                 }
@@ -1028,7 +1029,7 @@ namespace Tkn_Save
                     if ((f.fvalue == "") || (f.fvalue == "null")) 
                     {
                         f._setInsValue = "null, ";
-                        if (f.fVisible == "True")
+                        if ((f.fVisible == "True") || (f.fEnabled == "True"))
                             f._setEditField = " [" + f.fname + "] = " + "null, ";
                         f._setSelectControl = " and [" + f.fname + "] = " + "null ";
                     }
@@ -1038,7 +1039,7 @@ namespace Tkn_Save
                             f.fvalue = f.fvalue.Substring(0, f.fmax_length - 1);
 
                         f._setInsValue = "'" + t.Str_Check(f.fvalue) + "', ";
-                        if (f.fVisible == "True")
+                        if ((f.fVisible == "True") || (f.fEnabled == "True"))
                             f._setEditField = " [" + f.fname + "] = " + "'" + t.Str_Check(f.fvalue) + "', ";
                         f._setSelectControl = " and [" + f.fname + "] = " + "'" + t.Str_Check(f.fvalue) + "' ";
                     }
@@ -1052,21 +1053,21 @@ namespace Tkn_Save
                     if ((f.fvalue == "False") || (f.fvalue == ""))
                     {
                         f._setInsValue = "0, ";
-                        if (f.fVisible == "True")
+                        if ((f.fVisible == "True") || (f.fEnabled == "True"))
                             f._setEditField = " [" + f.fname + "] = " + "0, ";
                         f._setSelectControl = " and [" + f.fname + "] = 0 ";
                     }
                     else if (f.fvalue == "True")
                     {
                         f._setInsValue = "1, ";
-                        if (f.fVisible == "True")
+                        if ((f.fVisible == "True") || (f.fEnabled == "True"))
                             f._setEditField = " [" + f.fname + "] = " + "1, ";
                         f._setSelectControl = " and [" + f.fname + "] = 1 ";
                     }
                     else
                     {
                         f._setInsValue = "null, ";
-                        if (f.fVisible == "True")
+                        if ((f.fVisible == "True") || (f.fEnabled == "True"))
                             f._setEditField = " [" + f.fname + "] = " + "0, ";
                         f._setSelectControl = "";
                     }
@@ -1083,14 +1084,14 @@ namespace Tkn_Save
                     if ((f.fvalue != "") && (f.fvalue.IndexOf("01.01.0001") == -1) && f.fvalue != "null")
                     {
                         f._setInsValue = t.TarihSaat_Formati(Convert.ToDateTime(f.fvalue)) + ", ";
-                        if (f.fVisible == "True")
+                        if ((f.fVisible == "True") || (f.fEnabled == "True"))
                             f._setEditField = " [" + f.fname + "] = " + t.TarihSaat_Formati(Convert.ToDateTime(f.fvalue)) + ", ";
                         f._setSelectControl = " and [" + f.fname + "] = " + t.TarihSaat_Formati(Convert.ToDateTime(f.fvalue)) + " ";
                     }
                     else
                     {
                         f._setInsValue = "null, ";
-                        if (f.fVisible == "True")
+                        if ((f.fVisible == "True") || (f.fEnabled == "True"))
                             f._setEditField = " [" + f.fname + "] = " + "null, ";
                         f._setSelectControl = " and [" + f.fname + "] = null ";
                     }
@@ -1103,14 +1104,14 @@ namespace Tkn_Save
                     if ((f.fvalue != "") && (f.fvalue.IndexOf("01.01.0001") == -1) && f.fvalue != "null")
                     {
                         f._setInsValue = t.Tarih_Formati(Convert.ToDateTime(f.fvalue)) + ", ";
-                        if (f.fVisible == "True")
+                        if ((f.fVisible == "True") || (f.fEnabled == "True"))
                             f._setEditField = " [" + f.fname + "] = " + t.Tarih_Formati(Convert.ToDateTime(f.fvalue)) + ", ";
                         f._setSelectControl = " and [" + f.fname + "] = " + t.Tarih_Formati(Convert.ToDateTime(f.fvalue)) + " ";
                     }
                     else
                     {
                         f._setInsValue = "null, ";
-                        if (f.fVisible == "True")
+                        if ((f.fVisible == "True") || (f.fEnabled == "True"))
                             f._setEditField = " [" + f.fname + "] = " + "null, ";
                         f._setSelectControl = " and [" + f.fname + "] = null ";
                     }
@@ -1125,14 +1126,14 @@ namespace Tkn_Save
                     if (f.fvalue != "")
                     {
                         f._setInsValue = "'" + t.Str_Check(f.fvalue) + "', ";
-                        if (f.fVisible == "True")
+                        if ((f.fVisible == "True") || (f.fEnabled == "True"))
                             f._setEditField = " [" + f.fname + "] = '" + t.Str_Check(f.fvalue) + "', ";
                         f._setSelectControl = " and [" + f.fname + "] = '" + t.Str_Check(f.fvalue) + "' ";
                     }
                     else
                     {
                         f._setInsValue = "null, ";
-                        if (f.fVisible == "True")
+                        if ((f.fVisible == "True") || (f.fEnabled == "True"))
                             f._setEditField = " [" + f.fname + "] = " + "null, ";
                         f._setSelectControl = " and [" + f.fname + "] = " + "null ";
                     }
@@ -1146,14 +1147,14 @@ namespace Tkn_Save
                     if ((f.fvalue != "") && (f.fvalue.IndexOf("01.01.0001") == -1) && f.fvalue != "null")
                     {
                         f._setInsValue = t.TarihSaat_Formati(Convert.ToDateTime(f.fvalue)) + ", ";
-                        if (f.fVisible == "True")
+                        if ((f.fVisible == "True") || (f.fEnabled == "True"))
                             f._setEditField = " [" + f.fname + "] = " + t.TarihSaat_Formati(Convert.ToDateTime(f.fvalue)) + ", ";
                         f._setSelectControl = " and [" + f.fname + "] = " + t.TarihSaat_Formati(Convert.ToDateTime(f.fvalue)) + " ";
                     }
                     else
                     {
                         f._setInsValue = "null, ";
-                        if (f.fVisible == "True")
+                        if ((f.fVisible == "True") || (f.fEnabled == "True"))
                             f._setEditField = " [" + f.fname + "] = " + "null, ";
                         f._setSelectControl = " and [" + f.fname + "] = " + "null ";
                     }
@@ -1202,7 +1203,7 @@ namespace Tkn_Save
                         //    f._setEditField = " [" + f.fname + "] = " + " @" + f.fname + " , ";
                         //ds.Tables[0].Rows[f.position][f.fname] = v.con_Images2;
 
-                        if (f.fVisible == "True")
+                        if ((f.fVisible == "True") || (f.fEnabled == "True"))
                         {
                             f._setInsField = f.bos + f.fname + ", ";
                             f._setInsValue = " @" + f.fname + ", ";
@@ -1224,7 +1225,7 @@ namespace Tkn_Save
                         //    f._setEditField = " [" + f.fname + "] = null , ";
                         //ds.Tables[0].Rows[f.position][f.fname] = null;
 
-                        if (f.fVisible == "True")
+                        if ((f.fVisible == "True") || (f.fEnabled == "True"))
                         {
                             f._setInsField = f.bos + f.fname + ", ";
                             f._setInsValue = " null, ";
@@ -1245,7 +1246,7 @@ namespace Tkn_Save
                         //    f._setEditField = " [" + f.fname + "] = null , ";
                         //ds.Tables[0].Rows[f.position][f.fname] = null;
 
-                        if (f.fVisible == "True")
+                        if ((f.fVisible == "True") || (f.fEnabled == "True"))
                         {
                             f._setInsField = f.bos + f.fname + ", ";
                             f._setInsValue = " null, ";

@@ -96,6 +96,8 @@ namespace YesiLdefter
         webWorkPageNodes workPageNodes_ = new webWorkPageNodes();
         webForm f = new webForm();
 
+        bool yuklendi = false;
+
         #endregion
 
         public ms_Selenium()
@@ -431,20 +433,19 @@ namespace YesiLdefter
             if (t.IsNotNull(ds_MsWebPages) == false) return;
             if (dN_MsWebPages.Position == -1) return;
 
-            bool onay = true;
-            
-            if (v.webDriver_ == null)// && (dN_MsWebPages.Position == 0)
-                onay = msPagesService.LoginOnayi(ds_MsWebPages, dN_MsWebPages);
+            /// burası 
 
-            //if ((onay) &&                        // onaylı olacak ve
-            //    ((v.webDriver_ != null ||        // ( webDriver create edilmiş veya 
-            //      dN_MsWebPages.Position == 0))) //   Login sayfası olacak ) 
+            bool onay = false;
+            if (v.webDriver_ == null)// && (dN_MsWebPages.Position == 0)
+                onay = msPagesService.LoginOnayi(ds_MsWebPages, dN_MsWebPages, f);
+
             if (onay)
             {
                 t.WaitFormOpen(this, "Google Chrome yükleniyor ...");
                 await seleniumLoginPageViev();
                 v.IsWaitOpen = false;
                 t.WaitFormClose();
+                this.yuklendi = true;
             }
         }
         
@@ -523,10 +524,13 @@ namespace YesiLdefter
         
         #endregion Test buttons click
 
-        private void dNScrapingPages_PositionChanged(object sender, EventArgs e)
+        private async void dNScrapingPages_PositionChanged(object sender, EventArgs e)
         {
             v.con_EditSaveControl = true;
             v.con_EditSaveCount = 0;
+
+            await subPageOpenControl(v.webDriver_, "");
+
             preparingMsWebNodesFields();
             preparingAktifPageLoad();
 
@@ -615,11 +619,9 @@ namespace YesiLdefter
             if (v.webDriver_ == null)
                 preparingWebMain();
 
-
-            await myPageViewClickAsync(v.webDriver_, this.msWebPage_);
+            f.loginPageRun = await myPageViewClickAsync(v.webDriver_, this.msWebPage_);
 
             //await myPageViewClickAsync(f.wbSel, this.msWebPage_);
-
         }
         private async Task seleniumAnalysis()
         {
@@ -1221,12 +1223,11 @@ namespace YesiLdefter
         #endregion Scraping functions
 
         #region subFunctions
-        private async Task myPageViewClickAsync(IWebDriver wb, List<MsWebPage> msWebPage)
+        private async Task<bool> myPageViewClickAsync(IWebDriver wb, List<MsWebPage> msWebPage)
         {
+            bool onay = false;
             if (msWebPage[0].Id > 0) 
             {
-                bool onay = false;
-
                 msPagesService.getPageUrls(f, msWebPage);
 
                 if (f.aktifUrl != f.talepEdilenUrl)
@@ -1241,11 +1242,20 @@ namespace YesiLdefter
                     onay = await loadPageUrl(wb, f.talepEdilenUrl);
                 }
             }
+            return onay;
         }
         private async Task<bool> loadPageUrl(IWebDriver wb, string url)
         {
             if (!string.IsNullOrEmpty(url))
             {
+                /// mevcutta yeni alt page açılmış ise
+                /// ve tekrar yeni sayfa okunacaksa tekra main page dön ve orada yeni url yi aç
+
+                if (f.loginPageUrl == url)
+                {
+                    if (f.loginPageRun) return true;
+                }
+
                 try
                 {
                     //wb.Url = url;
@@ -1259,12 +1269,18 @@ namespace YesiLdefter
                 }
                 catch (Exception)
                 {
+                    bool onay = await subPageOpenControl(wb, url); 
+                    if (onay) return true;
+
                     /// Kullanıcı manuel webBrowser kapatmış olabilir
                     /// kapatmışsa terar oluşturmasın
                     /// 
+                    f.loginPageRun = false;
                     v.webDriver_ = null;
                     wb = null;
+                    t.FlyoutMessage(this, "Uyarı", "Mevcut açık olan Google Chrome ulaşamıyorum, kapanmış olabilir. Yeniden giriş yapmak istiyorsanız tekrar giriş yapmayı deneyin.");
                     return false;
+
                     /*
                     preparingWebMain();
                     wb = v.webDriver_;
@@ -1286,6 +1302,37 @@ namespace YesiLdefter
                 MessageBox.Show("DİKKAT : Lütfen  - page url - yi girin...");
                 return false;
             }
+        }
+        private async Task<bool> subPageOpenControl(IWebDriver wb, string url)
+        {
+            /// sonradan açılan ikinci sayfa kapatılmış sa
+            try
+            {
+                if (t.IsNotNull(f.seleniumMainPage) &&
+                    t.IsNotNull(f.seleniumNewSubPage) &&
+                    t.IsNotNull(f.seleniumActivePage))
+                {
+                    if (f.seleniumNewSubPage == f.seleniumActivePage)
+                    {
+                        wb.SwitchTo().Window(f.seleniumMainPage);
+
+                        f.seleniumActivePage = f.seleniumMainPage;
+
+                        if (t.IsNotNull(url))
+                            wb.Navigate().GoToUrl(url);
+
+                        f.aktifUrl = wb.Url;
+
+                        openPageControlAsync(wb);
+                        return true;
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                //throw;
+            }
+            return false;
         }
         private async Task openPageControlAsync(IWebDriver wb)
         {

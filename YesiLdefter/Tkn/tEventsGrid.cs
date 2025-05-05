@@ -57,12 +57,14 @@ namespace Tkn_Events
                 vGridHint tGridHint = new vGridHint();
                 getGridHint_(sender, ref tGridHint);
                 commonGridClick(sender, e, tGridHint);
+                return;
             }
             #endregion KeyCode
         }
 
         public void myRepositoryItemEdit_KeyUp(object sender, KeyEventArgs e) //*** New Ok
         {
+            if (t.findDirectionKey(e)) return;
             #region KeyCode
             if (t.findAttendantKey(e))
             {
@@ -70,6 +72,26 @@ namespace Tkn_Events
                 vGridHint tGridHint = new vGridHint();
                 getGridHint_(sender, ref tGridHint);
                 commonGridClick(sender, e, tGridHint);
+                return;
+            }
+            if (sender.GetType().ToString() == "DevExpress.XtraEditors.ButtonEdit")
+            {
+                bool isSearchControl = t.IsSearchControl(sender);
+                if (isSearchControl)
+                {
+                    vGridHint tGridHint = new vGridHint();
+                    getGridHint_(sender, ref tGridHint);
+                    if ((tGridHint.editValueCount == v.tSearch.searchStartCount) && (v.tSearch.IsRun == false))
+                    {
+                        DevExpress.XtraEditors.Controls.ButtonPredefines button =
+                        DevExpress.XtraEditors.Controls.ButtonPredefines.Search;
+
+                        /// Serach işlemi başlıyor
+                        /// 
+                        se.buttonEdit_ButtonClick_(sender, button);
+                        v.tSearch.IsRun = false;
+                    }
+                } 
             }
             #endregion KeyCode
         }
@@ -122,6 +144,7 @@ namespace Tkn_Events
             string propNavigator = "";
             string buttonName = "";
             int searchEngine = -1;
+            bool searchOnayi = false;
 
             v.tButtonType buttonType = v.tButtonType.btNone;
 
@@ -129,6 +152,7 @@ namespace Tkn_Events
             v.tButtonHint.tForm = tGridHint.tForm;
             v.tButtonHint.tableIPCode = tGridHint.tableIPCode;
             v.tButtonHint.propNavigator = t.Set(tGridHint.columnPropNavigator, tGridHint.gridPropNavigator, "");
+            v.tButtonHint.columnFieldName = tGridHint.columnFieldName;
             v.tButtonHint.columnOldValue = tGridHint.columnOldValue;
             v.tButtonHint.columnEditValue = tGridHint.columnEditValue;
             v.tButtonHint.parentObject = tGridHint.parentObject;
@@ -197,26 +221,21 @@ namespace Tkn_Events
                 if (tGridHint.columnPropNavigator != "")
                     searchEngine = tGridHint.columnPropNavigator.IndexOf("SearchEngine");
 
-                if ((v.searchOnay == false) &&
-                    (searchEngine > -1) &&
-                    (v.con_Value_Old != v.con_Value_New))
-                {
-                    // searchformunu  açmadan önce value yi kontrol et 
-                    // kontrol sonucu olumsuz ise formu aç
-                    //if (se.directSearch(tGridHint.tForm, tGridHint.tableIPCode, tGridHint.columnPropNavigator, v.con_Value_Old) == false)
-                    if (se.directSearch(v.tButtonHint) == false)
-                    {
-                        e.Handled = false;
-                    }
-                }
+                //searchOnayi = t.IsSearchControl(sender);
 
-                // search bittikten sonra sahet Enter tuşuna basılıyor
-                // onun yüzünden buraya kadar geliyor
-                // artık sıfırlasın
-                //
-                if (v.searchOnay)
-                    v.searchOnay = false;
+                //if ((searchEngine > -1) && searchOnayi && tGridHint.columnEditValue != "" && tGridHint.columnEditValue != tGridHint.columnOldValue)
+                //{
+                //    // searchformunu  açmadan önce value yi kontrol et 
+                //    // kontrol sonucu olumsuz ise formu aç
+                //    //if (se.directSearch(tGridHint.tForm, tGridHint.tableIPCode, tGridHint.columnPropNavigator, v.con_Value_Old) == false)
 
+                //    //if (se.directSearch(v.tButtonHint) == false)
+                //    //{
+                //    //    e.Handled = false;
+                //    //}
+                //    e.Handled = false;
+                //}
+                                
                 // buttonType == v.tButtonType.btEnter gidip 
                 // başka bir type ile dönebilir
                 //
@@ -246,7 +265,7 @@ namespace Tkn_Events
                 v.tButtonHint.columnEditValue = tGridHint.columnEditValue;
                 v.tButtonHint.columnOldValue = tGridHint.columnOldValue;
                 v.con_Value_Old = tGridHint.columnOldValue;
-                v.con_SearchValue = tGridHint.columnEditValue;
+                v.tSearch.searchInputValue = tGridHint.columnEditValue;
 
                 v.tButtonHint.propNavigator = t.Set(tGridHint.columnPropNavigator, tGridHint.gridPropNavigator, "");
 
@@ -511,6 +530,7 @@ namespace Tkn_Events
                 tGridHint.columnEditValue = editValue.Trim();
             }
 
+            tGridHint.editValueCount = tGridHint.columnEditValue.Length;
         }
 
         public void getGridFormAndTableIPCode(object sender, ref vGridHint tGridHint)
@@ -1237,8 +1257,9 @@ namespace Tkn_Events
                     if (tGridHint.dataSet.Tables[0].Rows.Count > 0)
                     {
                         if (view.GetType().ToString() == "DevExpress.XtraGrid.Views.Grid.GridView")
-                         ((GridView)view).GridControl.BeginInvoke(new Action(delegate { ((GridView)view).ShowEditor(); }));
-
+                            ((GridView)view).GridControl.BeginInvoke(new Action(delegate { ((GridView)view).ShowEditor(); }));
+                        if (view.GetType().ToString() == "DevExpress.XtraGrid.Views.BandedGrid.AdvBandedGridView")
+                            ((AdvBandedGridView)view).GridControl.BeginInvoke(new Action(delegate { ((GridView)view).ShowEditor(); }));
                     }
                 }
             }
@@ -2083,7 +2104,6 @@ namespace Tkn_Events
 
         public void myGridView_CellValueChanging(object sender, DevExpress.XtraGrid.Views.Base.CellValueChangedEventArgs e)
         {
-
             if (e.Column.FieldName == "LKP_ONAY")
             {
                 //v.con_LkpOnayChange = true;
@@ -2116,10 +2136,7 @@ namespace Tkn_Events
                 #endregion Detail-SubDetail Table
 
             }
-
-
             //e.Column.UnboundExpression
-
         }
 
         public void myGridView_CellValueChanged(object sender, DevExpress.XtraGrid.Views.Base.CellValueChangedEventArgs e)
@@ -2139,7 +2156,7 @@ namespace Tkn_Events
                     getGridFormAndTableIPCode(sender, ref tGridHint);
 
                     t.work_EXPRESSION(tGridHint.tForm, tGridHint.tableIPCode, e.Column.FieldName, e.Value.ToString());
-                                        
+                    
                     // Eğer return olmaz ise alttaki fonksiyonlar çalışıyor
                     // bu nedenle return kaldırma
 

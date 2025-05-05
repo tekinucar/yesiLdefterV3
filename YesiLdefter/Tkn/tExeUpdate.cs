@@ -91,7 +91,8 @@ namespace Tkn_ExeUpdate
             using (FileStream inFile = fi.OpenRead())
             {
                 string currentFileName = fi.FullName;
-                string newFileName = fi.FullName.Remove(fi.FullName.IndexOf(fi.Extension), fi.Extension.Length) + ".exe";
+                //string newFileName = fi.FullName.Remove(fi.FullName.IndexOf(fi.Extension), fi.Extension.Length) + ".exe";
+                string newFileName = fi.FullName.Remove(fi.FullName.IndexOf(fi.Extension), fi.Extension.Length) + "." + fi.Extension;
 
                 using (FileStream deCompressedFile = File.Create(newFileName))
                 {

@@ -2025,7 +2025,7 @@ namespace Tkn_Events
                 //
                 Form tFormMaster = Application.OpenForms[tResimEditor.imagesSourceFormName];
                 tInputPanel ip = new tInputPanel();
-                v.con_ImagesMasterDataSet = ip.Create_DataSet(tFormMaster,  tResimEditor.imagesMasterTableIPCode);
+                v.con_ImagesMasterDataSet = ip.Create_DataSet(tFormMaster,  tResimEditor.imagesMasterTableIPCode, false);
             }
 
             /// Images ve datası için form var ise ve
@@ -2164,11 +2164,9 @@ namespace Tkn_Events
             /// 
             tSearch se = new tSearch();
 
-            v.searchOnay = false;
-            
-            v.searchOnay = se.searchEngines(tForm, tableIPCode, columnValue, prop_);
+            bool Onay = se.searchEngines(tForm, tableIPCode, columnValue, prop_);
 
-            return v.searchOnay;
+            return Onay;
         }
 
         private bool findListDataIslemi(Form tForm, string tableIPCode, PROP_NAVIGATOR prop_, string columnValue)
@@ -2177,11 +2175,9 @@ namespace Tkn_Events
             /// 
             tSearch se = new tSearch();
 
-            v.searchOnay = false;
+            bool Onay = se.findListDataEngines(tForm, tableIPCode, columnValue, prop_);
 
-            v.searchOnay = se.findListDataEngines(tForm, tableIPCode, columnValue, prop_);
-
-            return v.searchOnay;
+            return Onay;
         }
         public bool dataTransferi(Form tForm, string TableIPCode, PROP_NAVIGATOR prop_) // Run_TableIPCode
         {
@@ -2210,7 +2206,7 @@ namespace Tkn_Events
             {
 
                 tInputPanel ip = new tInputPanel();
-                DataSet dsRead = ip.Create_DataSet(tForm, readTableIPCode);
+                DataSet dsRead = ip.Create_DataSet(tForm, readTableIPCode, false);
                 DataNavigator dNRead = new DataNavigator();
                 
                 if (t.IsNotNull(dsRead))
@@ -2269,7 +2265,7 @@ namespace Tkn_Events
                 // onun için burada extra bir işlem yapmaya gerek kalmıyor
                 //
                 tInputPanel ip = new tInputPanel();
-                DataSet dsData = ip.Create_DataSet(tForm, tableIPCode);
+                DataSet dsData = ip.Create_DataSet(tForm, tableIPCode, false);
                 //DataNavigator dN = new DataNavigator();
                 if (dsData != null)
                 {
@@ -3493,7 +3489,7 @@ namespace Tkn_Events
                 {
                     /// Search Engine : kullanıcı arama yaptı ve uygun data bulunmadıysa
                     /// işlem yapmasın
-                    if (tGridHint.focusedRow == null)
+                    if (tGridHint.focusedRow == null && tGridHint.viewType == "GridView")
                     {
                         /// new Input Panel for Search Engine 
                         v.tSearch.searchOutputValue = ((DevExpress.XtraEditors.TextEdit)sender).EditValue.ToString();
@@ -3562,7 +3558,10 @@ namespace Tkn_Events
                         evg.gridSpeedKeys(tGridHint, e);
 
                     if (t.findReturnKey(e))
+                    {
+                        v.tSearch.searchInputValue = ((DevExpress.XtraEditors.TextEdit)sender).EditValue?.ToString();
                         evg.commonGridClick(sender, e, tGridHint);
+                    }
                 }
                 /// Esc ile çıkış
                 if (e.KeyCode == Keys.Escape)
@@ -3573,6 +3572,8 @@ namespace Tkn_Events
 
                 return;
             }
+
+            v.tSearch.searchInputValue = ((DevExpress.XtraEditors.TextEdit)sender).EditValue?.ToString();
         }
 
         public void textEdit_Find_Enter(object sender, EventArgs e)

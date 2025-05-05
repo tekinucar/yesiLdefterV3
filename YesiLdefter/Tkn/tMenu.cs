@@ -3381,7 +3381,7 @@ namespace Tkn_Menu
                     tInputPanel ip = new tInputPanel();
                     ip.Create_InputPanel(tForm, tPanelControl, Read_TableIPCode, 1, true);
 
-                    dsRead = ip.Create_DataSet(tForm, Read_TableIPCode);
+                    dsRead = ip.Create_DataSet(tForm, Read_TableIPCode, false);
 
                     menuControl.AccessibleName = Read_TableIPCode;
                     // Master-Detail FName
@@ -3578,7 +3578,7 @@ namespace Tkn_Menu
                     tInputPanel ip = new tInputPanel();
                     ip.Create_InputPanel(tForm, tPanelControl, Read_TableIPCode, 1, true);
 
-                    dsRead = ip.Create_DataSet(tForm, Read_TableIPCode);
+                    dsRead = ip.Create_DataSet(tForm, Read_TableIPCode, false);
 
                     menuControl.AccessibleName = Read_TableIPCode;
                     // Master-Detail FName

@@ -4125,7 +4125,7 @@ namespace Tkn_CreateObject
                 /// yani direk olarak aranacak kelimenin açılış sırasında yüklenmesi
                 /// 
 
-                if (t.IsNotNull(v.con_SearchValue))
+                if (t.IsNotNull(v.tSearch.searchInputValue))
                 {
                     if ((TableIPCode.IndexOf("3S_MSTBL") > -1) ||
                         (TableIPCode.IndexOf("3S_MSTBLIP") > -1)
@@ -4137,7 +4137,7 @@ namespace Tkn_CreateObject
                         string projectCode = "";
                         string TableCode = string.Empty;
                         string IPCode = string.Empty;
-                        t.TableIPCode_Get(v.con_SearchValue, ref softCode, ref projectCode, ref TableCode, ref IPCode);
+                        t.TableIPCode_Get(v.tSearch.searchInputValue, ref softCode, ref projectCode, ref TableCode, ref IPCode);
 
                         if (TableIPCode.IndexOf("3S_MSTBL") > -1)
                             textEdit_Find.Text = TableCode;

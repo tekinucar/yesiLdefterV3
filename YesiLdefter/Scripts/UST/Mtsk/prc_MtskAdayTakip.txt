@@ -24,12 +24,11 @@ AS BEGIN
   else set @GelecekDonemTipiId = convert(int, convert(varchar(5), YEAR(@GelecekAy)) + convert(varchar(3), MONTH(@GelecekAy)))
 
 
-
   -- -------------------------------------------------------------------
   -- IsActive
   -- -------------------------------------------------------------------
 
-   print 'IsActive'
+   --print 'IsActive'
    update MtskAdayTakip set
       IsActive = x.IsActive
    from MtskAdayTakip a, 
@@ -56,7 +55,7 @@ AS BEGIN
    -- 3,    'Sertifikası hazır'
    -- 4,    'Sertifikası teslim edildi'	
 
-   print 'Sertifika teslim edilmiş olanlar'
+   --print 'Sertifika teslim edilmiş olanlar'
    Update dbo.MtskAdayTakip set
        SertifikaDurumTipiId = x.SertifikaDurumTipiId 
    From dbo.MtskAdayTakip a, 
@@ -81,7 +80,7 @@ AS BEGIN
   -- 3,  'Gelecek ay'
   -- 4,  'İleriki dönemler'
   -- 5,  'Sertifikasını hak etmiş'
-   print 'ZamanlamaTipiId belirleniyor'
+   --print 'ZamanlamaTipiId belirleniyor'
    update MtskAdayTakip set
       ZamanlamaTipiId = x.ZamanlamaTipiId
    from MtskAdayTakip a, 
@@ -106,7 +105,7 @@ AS BEGIN
    -- BelgelerGeldi, BelgelerTarandi, BelgelerYuklendi
    -- -------------------------------------------------------------------
 
-   print 'Belgeler geldi mi?'
+   --print 'Belgeler geldi mi?'
    update MtskAdayTakip set
       BelgelerGeldi = x.BelgelerGeldi
    from MtskAdayTakip a, 
@@ -130,7 +129,7 @@ AS BEGIN
    and   a.BelgelerGeldi <> x.BelgelerGeldi
 
 
-   print 'Belgeler tarandı mı?'
+   --print 'Belgeler tarandı mı?'
    update MtskAdayTakip set
       BelgelerTarandi = x.BelgelerTarandi
    from MtskAdayTakip a, 
@@ -155,7 +154,7 @@ AS BEGIN
    and   a.BelgelerTarandi <> x.BelgelerTarandi
 
 
-   print 'Belgeler yüklendi mi?'
+   --print 'Belgeler yüklendi mi?'
    update MtskAdayTakip set
       BelgelerYuklendi = x.BelgelerYuklendi
    from MtskAdayTakip a, 
@@ -183,7 +182,7 @@ AS BEGIN
    -- -------------------------------------------------------------------
    -- TeorikDersTipiId
    -- -------------------------------------------------------------------
-   print 'Teorik derslerin başlama ve bitiş tarihleri'
+   --print 'Teorik derslerin başlama ve bitiş tarihleri'
    Update dbo.MtskAdayTakip set
        TeorikBaslamaTarihi = x.GrupBaslamaTarihi 
       ,TeorikBitisTarihi   = x.GrupBitisTarihi
@@ -195,7 +194,8 @@ AS BEGIN
         , gs.GrupBaslamaTarihi
         , gs.GrupBitisTarihi
         , (case  -- Sertifika talebi ve mevcut ehliyeti yok ise / değilse Muaf
-           when (talep.TalepTipiId = 1 and isnull(talep.MevcutSertifikaTipiId,0) = 0) then gs.TakipTipiId
+           when (talep.TalepTipiId = 1 and (isnull(gs.GrupBitisTarihi,gs.GrupBaslamaTarihi) > GETDATE()) and isnull(talep.MevcutSertifikaTipiId,0) = 0) then gs.TakipTipiId
+           when (talep.TalepTipiId = 1 and (isnull(gs.GrupBitisTarihi,gs.GrupBaslamaTarihi) <= GETDATE()) and isnull(talep.MevcutSertifikaTipiId,0) = 0) then 17 -- Teorik dersler tamamlandı
            else 6 end ) as TeorikDersTipiId      
       From MtskAdayTakip as takip
          , MtskAdayTalep as talep
@@ -208,12 +208,14 @@ AS BEGIN
    ) as x
    Where a.Id = x.TakipId
    and   a.TeorikBaslamaTarihi <> x.GrupBaslamaTarihi
+
+
    -- eSinavDurumTipiId = 
    -- e-Sınav için hazır değil 
    -- e-Sınav başvurusu yapılacak
    -- Muaf işareti
    --
-   print 'e-Sınav durumları'
+   --print 'e-Sınav durumları'
    Update dbo.MtskAdayTakip set
        eSinavDurumTipiId = x.eSinavDurumTipiId
    From dbo.MtskAdayTakip a, 
@@ -230,185 +232,11 @@ AS BEGIN
    Where a.Id = x.TakipId
    and   a.eSinavDurumTipiId <> x.eSinavDurumTipiId
 
-   /*
-
-      Select 
-          takip.Id as TakipId
-         ,takip.TalepId
-         ,count(eSinav.Id) + 1 
-      From MtskAdayTakip as takip
-          left outer join dbo.MtskSinavETeorik as eSinav on (takip.TalepId = eSinav.TalepId)
-      Where takip.eSinavDurumTipiId = 2 -- e-Sınav başvurusu yapılacak
-      Group by takip.Id, takip.TalepId 
-
-	  select * from MtskAdayTakip where TalepId = 3324
-
-   */
-    -- eSinavDurumTipiId
-    --   0 : ''
-    --   1 : e-Sınav için hazır değil
-    --   2 : e-Sınav başvurusu yapılacak
-    --   3 : e-Sınav başvurusu yapıldı
-    --   4 : e-Sınav sonucu okunacak
-    --   5 : e-Sınav sonucu okundu
-	--   6 : Muaf
-    -- eSinavSonrasiTipiId
-    --   1, Tekrar sınava girecek
-    --   2, Uygulama aşamasına geçti
-    --   3, Tüm e-Sınav hakkı bitti
-    --
-	-- eSinavMuracatTarihi 
-    --
-	-- UygulamaliDersTipiId
-    --   1, Uygulamalı dersler planlanacak
-	--   2, Uygulamalı dersler planlandı
-    --   3, Uygulamalı ders alıyor
-    --   4, Uygulamalı dersleri tamamladı
-
-
-    -- -----------------------------------------------------------------------
-    -- DİKKAT : Aynı kod prc_MtskAdayTakipTalepKaydiSingleSet içinde var	
-    -- -----------------------------------------------------------------------
-
-    print 'e-Sınav sonuçları'
-    update MtskAdayTakip set
-	  eSinavNo = x.SinavNoYeni
-    , eSinavDurumTipiId = x.eSinavDurumTipiId
-    , eSinavNoGirdigi = x.SinavNoGirdigi
-    , eSinavSonucTipiId = x.DurumuTipiId
-    , eSinavSonrasiTipiId = x.eSinavSonrasiTipiId
-    , eSinavMuracatTarihi = x.eSinavMuracatTarihi
-	, eSinavDetayId = x.sinavId
-	, eSinavBasariTarihi = x.SinavTarihi
-	, UygulamaliDersTipiId = x.UygulamaliDersTipiId
-    from MtskAdayTakip a, 
-    (
-	Select 
-	       eSinav.Id as sinavId
-	     , eSinav.FirmId
-         , eSinav.TalepId
-	     , eSinav.AdayId 
-	     , eSinav.SinavNo as SinavNoGirdigi
-         , eSinav.DurumuTipiId
-		 , convert(date, eSinav.SinavTarihi, 103) as SinavTarihi
-
-    -- eSinavDurumTipiId
-    --   0 : ''
-    --   1 : e-Sınav için hazır değil
-    --   2 : e-Sınav başvurusu yapılacak
-    --   3 : e-Sınav başvurusu yapıldı
-    --   4 : e-Sınav sonucu okunacak
-    --   5 : e-Sınav sonucu okundu
-	--   6 : Muaf
-
-	--   eSinav.DurumuTipi
-	--   1   Başarılı
-	--   2   Başarısız
-	--   3   Girmedi
-	--   4   Raporlu
-	--   5   İptal Edildi(Sınav Yasaklı)
-
-	     , case
-             when (eSinav.DurumuTipiId = 0 and convert(date, @bugun,103) <  convert(date, eSinav.SinavTarihi, 103)) then 3 -- e-Sınav başvurusu yapıldı
-             when (eSinav.DurumuTipiId = 0 and convert(date, @bugun,103) >= convert(date, eSinav.SinavTarihi, 103)) then 4 -- e-Sınav sonucu okunacak
-	         when (eSinav.DurumuTipiId = 1) then 5 -- e-Sınav sonucu okundu < sınav başarılıysa
-	         when (eSinav.DurumuTipiId > 1 and eSinav.SinavNo < 4) then 2 -- e-Sınav başvurusu yapılacak < 1,2,3 sınavlarda başarılı değilse 
-	         when (eSinav.DurumuTipiId > 1 and eSinav.SinavNo = 4) then 5 -- e-Sınav sonucu okundu       < 4. sınavda başarılı değilse
-           end as eSinavDurumTipiId
-	     , case
-	         when (eSinav.DurumuTipiId = 1) then 0 -- < sınav başarılıysa
-	         when (eSinav.DurumuTipiId > 1 and eSinav.SinavNo < 4) then (eSinav.SinavNo + 1) --  < 1,2,3 sınavlarda başarılı değilse
-	         when (eSinav.DurumuTipiId > 1 and eSinav.SinavNo = 4) then 0 --  < 4. sınavda başarılı değilse
-           end as SinavNoYeni
-         , case
-	         when (eSinav.DurumuTipiId = 1) then 2 -- Uygulama aşamasına geçti
-             when (eSinav.DurumuTipiId > 1) and (eSinav.SinavNo < 4 ) then 1  -- Tekrar sınava girecek
-             when (eSinav.DurumuTipiId > 1) and (eSinav.SinavNo >= 4 ) then 3 -- Tüm e-Sınav hakkı bitti
-           end as eSinavSonrasiTipiId
-         , case 
-	         when (eSinav.DurumuTipiId > 1) and (eSinav.SinavNo < 4 ) then (
-                  case when DAY(eSinav.SinavTarihi) >= 1 and DAY(eSinav.SinavTarihi) <= 15 then DATEADD(DAY, 16 - DAY(eSinav.SinavTarihi), eSinav.SinavTarihi)
-                  else DATEADD(DAY, 1, EOMONTH(eSinav.SinavTarihi)) end
-			 )
-             else null
-	       end as eSinavMuracatTarihi
-         , case
-	         when (eSinav.DurumuTipiId = 1 and talep.TalepTipiId <> 4) then 1   -- eSinav.Başarılı ise Uygulamalı dersler planlanacak, 100 ceza değilse
-             when (eSinav.DurumuTipiId <> 1) then 0   -- boşluk
-           end as UygulamaliDersTipiId
-
-         from dbo.MtskSinavETeorik as eSinav, dbo.MtskAdayTalep as talep,
-	     (     -- Adayların son sınavlarını buluyor
-	           Select TalepId, AdayId
-			   , max(convert(smallDatetime,SinavTarihi,103)) as SinavTarihi
-               from MtskSinavETeorik
-		       Where FirmId = @FirmId
-			   and IsActive = 1
-               group by TalepId, AdayId
-         ) as aday
-	     Where eSinav.TalepId = talep.Id
-		 and   eSinav.TalepId = aday.TalepId
-		 and   eSinav.AdayId = aday.AdayId
-	     and   convert(smallDatetime,eSinav.SinavTarihi,103) = aday.SinavTarihi
-    ) as x
-    Where a.FirmId  = x.FirmId
-    and   a.TalepId = x.TalepId
-	and   a.AdayId  = x.AdayId 
-    and (
-       isnull(a.eSinavDurumTipiId,0)   <> x.eSinavDurumTipiId
-    or isnull(a.eSinavSonucTipiId,0)   <> x.DurumuTipiId
-    or isnull(a.eSinavSonrasiTipiId,0) <> x.eSinavSonrasiTipiId
-	or isnull(a.eSinavDetayId,0)       <> x.sinavId
-    or a.eSinavMuracatTarihi           <> x.eSinavMuracatTarihi
-	or a.eSinavBasariTarihi            <> x.SinavTarihi
-	--or a.UygulamaliDersTipiId <> x.UygulamaliDersTipiId : bu değişir
-	)
-    	   
-    -- -----------------------------------------------------------------------
-    -- DİKKAT : Aynı kod prc_MtskAdayTakipTalepKaydiSingleSet içinde var	
-    -- -----------------------------------------------------------------------
-
-	-- ---------------------------------------------------
-    -- eSınavlar tamamen silinmiş olabilir
-	-- ---------------------------------------------------
-    print 'e-Sınav sonuçları silinmişse'
-	update MtskAdayTakip set
-      eSinavDurumTipiId = x.eSinavDurumTipiId
-    , eSinavNo = 1
-    , eSinavNoGirdigi = 0
-    , eSinavSonucTipiId = 0
-    , eSinavSonrasiTipiId = 0
-    , eSinavMuracatTarihi = null
-	, eSinavDetayId = 0
-	, eSinavBasariTarihi = null
-	, UygulamaliDersTipiId = 0
-    from MtskAdayTakip a, 
-    (
-		 Select takip.Id as TakipId
-        ,(case  
-          when takip.TeorikDersTipiId = 17 then 2 -- e-Sınav başvurusu yapılacak
-          else 1 end ) as eSinavDurumTipiId       -- e-Sınav için hazır değil
-		 from dbo.MtskAdayTakip as takip
-		     left outer join dbo.MtskSinavETeorik as sinav on ( 
-			          takip.TalepId = sinav.TalepId 
-			      and sinav.IsActive = 1 )
-         Where takip.FirmId = @FirmId
-         and   takip.eSinavDurumTipiId > 0  
-         and   takip.eSinavDurumTipiId <> 6 -- Muaf değilse
-
-		 Group by takip.Id
-		        , takip.TeorikDersTipiId
-		 Having COUNT(sinav.Id) = 0
-     ) as x
-	 Where a.Id = x.TakipId 
-     and ( a.eSinavDurumTipiId <> x.eSinavDurumTipiId
-        or a.eSinavSonucTipiId <> 0 )
-
 
     -- Tekrar sınava girecek için bekleme süresi bitince
     -- eSinavDurumTipiId = e-Sınav başvurusu yapılacak
 	-- eSinavSonrasiTipiId = boşluk  
-    print 'e-Sınav müracat tarihlerin tespiti'
+    --print 'e-Sınav müracat tarihlerin tespiti'
     update MtskAdayTakip set
       eSinavDurumTipiId = 2
 	, eSinavSonrasiTipiId = 0
@@ -421,7 +249,7 @@ AS BEGIN
 	
 
     -- Teorikten Muaf'sa Uygulamalı dersler planlanacak
-    print 'Uygulama dersleri planlanacak kişilerin tespiti'
+    --print 'Uygulama dersleri planlanacak kişilerin tespiti'
     update MtskAdayTakip set
        UygulamaliDersTipiId = 1 -- Uygulamalı dersler planlanacak
     from MtskAdayTakip as takip
@@ -466,7 +294,7 @@ AS BEGIN
    -- Id  EgitimTipiId
    -- 1   Normal Eğitim
    -- -----------------------------------------------------------------
-   print 'Uygulama derslerinin başlangıç ve bitiş tarihleri, derslerin toplamı'
+   --print 'Uygulama derslerinin başlangıç ve bitiş tarihleri, derslerin toplamı'
    Update dbo.MtskAdayTakip set
        UygulamaBaslamaTarihi = x.UygulamaBaslamaTarihi 
       ,UygulamaBitisTarihi   = x.UygulamaBitisTarihi
@@ -516,7 +344,7 @@ AS BEGIN
    or    a.AkanTrafikDersToplami  <> x.AkanTrafikDersToplami )
 
 
-   print '2. +4 uygulama derslerin başlangıç ve bitiş tarihleri, derslerin toplamı'
+   --print '2. +4 uygulama derslerin başlangıç ve bitiş tarihleri, derslerin toplamı'
    Update dbo.MtskAdayTakip set
        Arti4BaslamaTarihi = x.UygulamaBaslamaTarihi 
       ,Arti4BitisTarihi   = x.UygulamaBitisTarihi
@@ -562,7 +390,7 @@ AS BEGIN
    or    a.Arti4AkanTrafikDersToplami  <> x.AkanTrafikDersToplami )
 
 
-   print 'Başarısız aday eğitim derslerin başlangıç ve bitiş tarihleri, derslerin toplamı'
+   --print 'Başarısız aday eğitim derslerin başlangıç ve bitiş tarihleri, derslerin toplamı'
    Update dbo.MtskAdayTakip set
        BasarisizDersNo        = x.DersNo
       ,BasarisizBaslamaTarihi = x.DersTarihi
@@ -613,7 +441,7 @@ AS BEGIN
    -- -----------------------------------------------------------------
    -- IsUygulamaDersMebbis
    -- -----------------------------------------------------------------
-   print 'Uygulamalı dersler planlandı mı?, Mebbise yüklendi mi?'
+   --print 'Uygulamalı dersler planlandı mı?, Mebbise yüklendi mi?'
    Update dbo.MtskAdayTakip set
        IsUygulamaDersMebbis = x.IsUygulamaDersMebbis 
      , IsUygulamaliDersPlanli = x.IsUygulamaliDersPlanli
@@ -679,7 +507,7 @@ AS BEGIN
    -- -----------------------------------------------------------------
    -- IsArti4DersMebbis
    -- -----------------------------------------------------------------
-   print '2. +4 hak uygulamalı dersler planlandı mı?, Mebbise yüklendi mi?'
+   --print '2. +4 hak uygulamalı dersler planlandı mı?, Mebbise yüklendi mi?'
    Update dbo.MtskAdayTakip set
        IsArti4DersMebbis = x.IsArti4DersMebbis 
      , IsArti4DersPlanli = x.IsArti4DersPlanli
@@ -747,7 +575,7 @@ AS BEGIN
    -- -----------------------------------------------------------------
    -- IsBasarisizDersMebbis
    -- -----------------------------------------------------------------
-   print 'Başarısız aday dersleri planlandı mı?, Mebbise yüklendi mi?'
+   --print 'Başarısız aday dersleri planlandı mı?, Mebbise yüklendi mi?'
    Update dbo.MtskAdayTakip set
        IsBasarisizDersMebbis = x.IsBasarisizDersMebbis 
       ,IsBasarisizDersPlanli = x.IsBasarisizDersPlanli
@@ -821,7 +649,7 @@ AS BEGIN
    -- 3,    Uygulamalı dersler Mebbise aktarıldı
    -- 4,    Uygulamalı dersleri başladı 
    -- 5,    Uygulamalı dersleri tamamladı 
-   print 'Uygulamalı derslerin durumları nedir ?'
+   --print 'Uygulamalı derslerin durumları nedir ?'
    Update dbo.MtskAdayTakip set
        UygulamaliDersTipiId = x.UygulamaliDersTipiId
    From dbo.MtskAdayTakip a, 
@@ -849,7 +677,7 @@ AS BEGIN
    -- 3,   2. +4 hak dersleri Mebbise aktarıldı
    -- 4,   2. +4 hak dersleri başladı
    -- 5,   2. +4 hak dersleri tamamlandı
-   print '2. +4 hak uygulamalı derslerin durumları nedir ?'
+   --print '2. +4 hak uygulamalı derslerin durumları nedir ?'
    Update dbo.MtskAdayTakip set
        Arti4DersTipiId = x.Arti4DersTipiId
    From dbo.MtskAdayTakip a, 
@@ -878,7 +706,7 @@ AS BEGIN
    -- 5,  2 saat başarısız aday eğitimi tamamlandı
    -- 6,  Eğitime gerek yok (Sınava girmedi)
 
-   print 'Başarısız adayların uygulamalı derslerin durumları nedir ?'
+   --print 'Başarısız adayların uygulamalı derslerin durumları nedir ?'
    Update dbo.MtskAdayTakip set
        BasarisizDersTipiId = x.BasarisizDersTipiId
    From dbo.MtskAdayTakip a, 
@@ -899,7 +727,7 @@ AS BEGIN
    and   a.BasarisizDersTipiId <> x.BasarisizDersTipiId
 
 
-   print 'Planlanacak Egitiminlerin tespit : PlanlanacakEgitimTipiId '
+   --print 'Planlanacak Egitiminlerin tespit : PlanlanacakEgitimTipiId '
    -- UygulamaliDersTipiId : 1, 'Uygulamalı dersler planlanacak'
    -- Arti4DersTipiId      : 1, '2. +4 hak dersleri planlanacak'
    -- BasarisizDersTipiId  : 1, '2 saat başarısız aday eğitimi planlanacak'
@@ -940,7 +768,7 @@ AS BEGIN
    -- 5,    2 saat başarısız aday eğitimi tamamlandı
    -- 6,    Eğitime gerek yok (Sınava girmedi)
 
-   print 'Aday henüz uygulamalı sınav aşamasında değil'
+   --print 'Aday henüz uygulamalı sınav aşamasında değil'
    update MtskAdayTakip set
        uSinavDurumTipiId = 1 -- Henüz sınav aşamasında değil
    from MtskAdayTakip
@@ -952,7 +780,7 @@ AS BEGIN
 
 
    -- 2,  Uygulama sınav için usta öğretici onayı isteniyor
-   print 'Uygulamalı sınav için usta öğretici onay istenecek'
+   --print 'Uygulamalı sınav için usta öğretici onay istenecek'
    Update dbo.MtskAdayTakip set
        uSinavDurumTipiId = x.uSinavDurumTipiId
    From dbo.MtskAdayTakip a, 
@@ -974,7 +802,7 @@ AS BEGIN
    -- UstaOgreticiOnayTipiId   /* 1. Onay, 2. Sınav için hazır değil  */
    -- Kullanıcı onaylayınca
    --
-   print 'Usta öğreticinin aday hakkındaki kararı işleniyor'
+   --print 'Usta öğreticinin aday hakkındaki kararı işleniyor'
    Update dbo.MtskAdayTakip set
        uSinavDurumTipiId = x.uSinavDurumTipiId
    From dbo.MtskAdayTakip a, 
@@ -999,7 +827,7 @@ AS BEGIN
    -- Uygulama sınavı için mebbisden onay verildikten sonra
    -- Uygulama sınav randevusu planlanacak  aşamasına geçilecek
    --
-   print 'Uygulama sınavı için randevu planlama aşamasına geçenler'
+   --print 'Uygulama sınavı için randevu planlama aşamasına geçenler'
    update MtskAdayTakip set
        uSinavDurumTipiId = x.uSinavDurumTipiId 
    From MtskAdayTakip as a,
@@ -1018,7 +846,7 @@ AS BEGIN
 
    -- Randevusu planlaması yapıldıktan sonra Mebbise aktarılacak randevular
    --
-   print 'Randevu planlarının Mebbise aktarılacak aşamasına geçenler'
+   --print 'Randevu planlarının Mebbise aktarılacak aşamasına geçenler'
    update MtskAdayTakip set
        uSinavDurumTipiId = x.uSinavDurumTipiId
    From MtskAdayTakip as a,
@@ -1038,7 +866,7 @@ AS BEGIN
 
    -- Uygulama sınavına girecek 
    --
-   print 'Uygulama sınavına girecek aşamasına geçenler'
+   --print 'Uygulama sınavına girecek aşamasına geçenler'
    update MtskAdayTakip set
        uSinavDurumTipiId = x.uSinavDurumTipiId
    From MtskAdayTakip as a,
@@ -1092,7 +920,7 @@ AS BEGIN
   -- 5,    'Sertifikası İptal Edildi'
   -- 6,	 'Durumu Girilmemiş'
   
-    print 'Uygulamalı sınav sonuçları işleniyor '
+    --print 'Uygulamalı sınav sonuçları işleniyor '
     update MtskAdayTakip set
       uSinavNo = x.SinavNoYeni
     , uSinavDurumTipiId = x.uSinavDurumTipiId
@@ -1210,7 +1038,7 @@ AS BEGIN
    -- -----------------------------------------------------------------
 
    -- Grup açılış tarihini kontrol et
-   Print 'KayitTipiId için Grup açılış tarihini kontrol et'
+   --Print 'KayitTipiId için Grup açılış tarihini kontrol et'
    Update dbo.MtskAdayTalep set
       KayitTipiId = 3
    From dbo.MtskAdayTalep as a, 
@@ -1230,7 +1058,7 @@ AS BEGIN
    and isnull(a.KayitTipiId,0) < 3
    
    -- e-Sınav girişi varsa
-   Print 'KayitTipiId için e-Sınav girişi varsa'
+   --Print 'KayitTipiId için e-Sınav girişi varsa'
    Update dbo.MtskAdayTalep set
       KayitTipiId = 3
    From dbo.MtskAdayTalep as a, 
@@ -1246,7 +1074,7 @@ AS BEGIN
    and isnull(a.KayitTipiId,0) < 3
 
    -- Uygulamalı sınav girişi varsa
-   Print 'KayitTipiId için Uygulamalı sınav girişi varsa'
+   --Print 'KayitTipiId için Uygulamalı sınav girişi varsa'
    Update dbo.MtskAdayTalep set
       KayitTipiId = 3
    From dbo.MtskAdayTalep as a, 
@@ -1277,7 +1105,7 @@ AS BEGIN
 
 
    -- N'Tüm e-Sınav hakkı bitti' yse
-   Print 'KayitTipiId için Tüm e-Sınav hakkı bitti kontrolü'
+   --Print 'KayitTipiId için Tüm e-Sınav hakkı bitti kontrolü'
    Update dbo.MtskAdayTalep set KayitTipiId = x.KayitTipiId
    From dbo.MtskAdayTalep as a, 
    (
@@ -1293,7 +1121,7 @@ AS BEGIN
    and isnull(a.KayitTipiId,0) <> x.KayitTipiId
 
    -- N'Tüm uygulamalı sınav hakkı bitti' yse
-   Print 'KayitTipiId için Tüm uygulamalı sınav hakkı bitti kontrolü'
+   --Print 'KayitTipiId için Tüm uygulamalı sınav hakkı bitti kontrolü'
    Update dbo.MtskAdayTalep set KayitTipiId = x.KayitTipiId
    From dbo.MtskAdayTalep as a, 
    (
@@ -1309,7 +1137,7 @@ AS BEGIN
    and isnull(a.KayitTipiId,0) <> x.KayitTipiId
 
    -- N'2. +4 sınav hakkı bitti' yse
-   Print 'KayitTipiId için 2. +4 sınav hakkı bitti kontrolü'
+   --Print 'KayitTipiId için 2. +4 sınav hakkı bitti kontrolü'
    Update dbo.MtskAdayTalep set KayitTipiId = x.KayitTipiId
    From dbo.MtskAdayTalep as a, 
    (
@@ -1325,7 +1153,7 @@ AS BEGIN
    and isnull(a.KayitTipiId,0) <> x.KayitTipiId
 
    -- N'Sertifika aşamasına geçti' yse
-   Print 'KayitTipiId için Sertifika aşamasına geçti kontrolü'
+   --Print 'KayitTipiId için Sertifika aşamasına geçti kontrolü'
    Update dbo.MtskAdayTalep set KayitTipiId = x.KayitTipiId
    From dbo.MtskAdayTalep as a, 
    (
@@ -1345,7 +1173,7 @@ AS BEGIN
    -- Talep ve takip arasında KayitTipiId farkı varsa
    --
    -- -----------------------------------------------------------------
-   Print 'Talep ve takip arasında KayitTipiId farkı varsa'
+   --Print 'Talep ve takip arasında KayitTipiId farkı varsa'
    Update dbo.MtskAdayTakip set KayitTipiId = x.KayitTipiId
    From dbo.MtskAdayTakip as a, 
    (
@@ -1355,6 +1183,7 @@ AS BEGIN
        and takip.FirmId = @FirmId
        and talep.Id = takip.TalepId
        and talep.KayitTipiId <> takip.KayitTipiId
+
    ) as x
    Where a.FirmId = @FirmId
    and a.TalepId = x.TalepId
@@ -1368,7 +1197,7 @@ AS BEGIN
 
    -- Biyometrik
    -- Biyometrik tarandı 
-   Print 'Adayın biyometrik tarandı mı? kontrol ediliyor'
+   --Print 'Adayın biyometrik tarandı mı? kontrol ediliyor'
    Update dbo.MtskAdayBelgeler set BiyometrikTarandi = 1
    From dbo.MtskAdayBelgeler as a, 
    (
@@ -1385,7 +1214,7 @@ AS BEGIN
    and isnull(a.BiyometrikTarandi,0) = 0
 
    -- Talep biyometrik geldi
-   Print 'Adayın biyometrik geldi mi? kontrol ediliyor'
+   --Print 'Adayın biyometrik geldi mi? kontrol ediliyor'
    Update dbo.MtskAdayTalep set BiyometrikGeldi = 1
    From dbo.MtskAdayTalep as a, 
    (
@@ -1403,7 +1232,7 @@ AS BEGIN
 
    -- ÖğrenimBelgesi
    -- Belgeler tarandı 
-   Print 'Adayın öğrenim belgesi tarandı mı? kontrol ediliyor'
+   --Print 'Adayın öğrenim belgesi tarandı mı? kontrol ediliyor'
    Update dbo.MtskAdayBelgeler set OgrenimTarandi = 1
    From dbo.MtskAdayBelgeler as a, 
    (
@@ -1420,7 +1249,7 @@ AS BEGIN
    and isnull(a.OgrenimTarandi,0) = 0
 
    -- Talep belgeler geldi
-   Print 'Adayın öğrenim belgesi geldi mi? kontrol ediliyor'
+   --Print 'Adayın öğrenim belgesi geldi mi? kontrol ediliyor'
    Update dbo.MtskAdayTalep set OgrenimGeldi = 1
    From dbo.MtskAdayTalep as a, 
    (
@@ -1438,7 +1267,7 @@ AS BEGIN
 
    -- Sağlık Raporu
    -- Belgeler tarandı 
-   Print 'Adayın sağlık raporu tarandı mı? kontrol ediliyor'
+   --Print 'Adayın sağlık raporu tarandı mı? kontrol ediliyor'
    Update dbo.MtskAdayBelgeler set SaglikTarandi = 1
    From dbo.MtskAdayBelgeler as a, 
    (
@@ -1455,7 +1284,7 @@ AS BEGIN
    and isnull(a.SaglikTarandi,0) = 0
 
    -- Talep belgeler geldi
-   Print 'Adayın sağlık raporu geldi mi? kontrol ediliyor'
+   --Print 'Adayın sağlık raporu geldi mi? kontrol ediliyor'
    Update dbo.MtskAdayTalep set SaglikGeldi = 1
    From dbo.MtskAdayTalep as a, 
    (
@@ -1474,7 +1303,7 @@ AS BEGIN
 
    -- AdliSicil
    -- Belgeler tarandı 
-   Print 'Adayın adli sicil tarandı mı? kontrol ediliyor'
+   --Print 'Adayın adli sicil tarandı mı? kontrol ediliyor'
    Update dbo.MtskAdayBelgeler set AdliSicilTarandi = 1
    From dbo.MtskAdayBelgeler as a, 
    (
@@ -1491,7 +1320,7 @@ AS BEGIN
    and isnull(a.AdliSicilTarandi,0) = 0
 
    -- Talep belgeler geldi
-   Print 'Adayın adli sicil geldi mi? kontrol ediliyor'
+   --Print 'Adayın adli sicil geldi mi? kontrol ediliyor'
    Update dbo.MtskAdayTalep set AdliSicilGeldi = 1
    From dbo.MtskAdayTalep as a, 
    (
@@ -1510,7 +1339,7 @@ AS BEGIN
 
    -- İmza
    -- Belgeler tarandı 
-   Print 'Adayın imzası tarandı mı? kontrol ediliyor'
+   --Print 'Adayın imzası tarandı mı? kontrol ediliyor'
    Update dbo.MtskAdayBelgeler set ImzaTarandi = 1
    From dbo.MtskAdayBelgeler as a, 
    (
@@ -1527,7 +1356,7 @@ AS BEGIN
    and isnull(a.ImzaTarandi,0) = 0
 
    -- Talep belgeler geldi
-   Print 'Adayın imza alındı mı? kontrol ediliyor'
+   --Print 'Adayın imza alındı mı? kontrol ediliyor'
    Update dbo.MtskAdayTalep set ImzaAlindi = 1
    From dbo.MtskAdayTalep as a, 
    (
@@ -1545,7 +1374,7 @@ AS BEGIN
 
    -- Sözleşme1
    -- Belgeler tarandı 
-   Print 'Adayın sözleşme1 tarandı mı? kontrol ediliyor'
+   --Print 'Adayın sözleşme1 tarandı mı? kontrol ediliyor'
    Update dbo.MtskAdayBelgeler set Sozlesme1Tarandi = 1
    From dbo.MtskAdayBelgeler as a, 
    (
@@ -1562,7 +1391,7 @@ AS BEGIN
    and isnull(a.Sozlesme1Tarandi,0) = 0
 
    -- Talep belgeler geldi
-   Print 'Adayın sözleşme(1) yapıldı mı? kontrol ediliyor'
+   --Print 'Adayın sözleşme(1) yapıldı mı? kontrol ediliyor'
    Update dbo.MtskAdayTalep set SozlesmeYapildi = 1
    From dbo.MtskAdayTalep as a, 
    (
@@ -1580,7 +1409,7 @@ AS BEGIN
 
    -- Sözleşme2
    -- Belgeler tarandı 
-   Print 'Adayın sözleşme2 tarandı mı? kontrol ediliyor'
+   --Print 'Adayın sözleşme2 tarandı mı? kontrol ediliyor'
    Update dbo.MtskAdayBelgeler set Sozlesme2Tarandi = 1
    From dbo.MtskAdayBelgeler as a, 
    (
@@ -1597,7 +1426,7 @@ AS BEGIN
    and isnull(a.Sozlesme2Tarandi,0) = 0
 
    -- Talep belgeler geldi
-   Print 'Adayın sözleşme(2) yapıldı mı? kontrol ediliyor'
+   --Print 'Adayın sözleşme(2) yapıldı mı? kontrol ediliyor'
    Update dbo.MtskAdayTalep set SozlesmeYapildi = 1
    From dbo.MtskAdayTalep as a, 
    (
@@ -1614,7 +1443,7 @@ AS BEGIN
    and isnull(a.SozlesmeYapildi,0) = 0
 
    -- Adres alındı
-   Print 'Adayın adres alındı mı? kontrol ediliyor'
+   --Print 'Adayın adres alındı mı? kontrol ediliyor'
    Update dbo.MtskAdayTalep set AdresAlindi = 1
    From dbo.MtskAdayTalep as a, 
    (
@@ -1635,7 +1464,7 @@ AS BEGIN
    -- OzurDurumuTipiId, OkutmanTalebi, TercumanTalebi, YabanciDilTipiId 
    --
    -- -----------------------------------------------------------------
-   Print 'Adayın sağlık belgesi kontrol ediliyor'
+   --Print 'Adayın sağlık belgesi kontrol ediliyor'
    Update dbo.MtskAdayTakip set 
         OzurDurumuTipiId = x.OzurDurumuTipiId
 	  , OkutmanTalebi = x.OkutmanTalebi 

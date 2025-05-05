@@ -89,6 +89,7 @@ AS BEGIN
   Where talep.FirmId = @FirmId 
   and   takip.FirmId = @FirmId
   and   takip.uSinavDurumTipiId = 5
+  and   takip.uSinavUcretTipiId = 1
   and   odeme.Id is null
 
 

@@ -1425,6 +1425,14 @@ order by x.DonemTipiId
            */
         }
 
+        public string SQL_IL_LIST()
+        {
+            return @" Select * from Lkp.ILTipi order by IlAdiBUYUK ";
+        }
+        public string SQL_ILCE_LIST()
+        {
+            return @" Select * from Lkp.IlceTipi order by IlKodu ";
+        }
         public string SQL_MS_LAYOUT_LIST(string MasterCode, byte MasterItemType)
         {
             string myAnd = "";
@@ -2323,7 +2331,7 @@ INSERT INTO [dbo].[SYS_UPDATES]
             #region Not Read Data // Kısıtlama
 
             if ( //(Table_Type == 1) &&       // v.TableType.Table
-                 ((Data_Read_Type == 1) || (Data_Find == "2")) &&   // v.DataReadType.NotReadData veya List&Data ise 
+                 ((Data_Read_Type == 1) || (Data_Find == "2") || (vTA.IsKisitlama) ) &&   // v.DataReadType.NotReadData veya List&Data ise 
                  (t.IsNotNull(KeyFName)))  // KefFName biliniyorsa
             {
                 // tüm datanında okunmaması için geçiçi bir kısıtlama eklenmekte   

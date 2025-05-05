@@ -1062,7 +1062,7 @@ namespace Tkn_InputPanel
         #region Create_DataSet
 
         // İstenilen TableIPCode  ye ait sadece dsData kısmı oluşturuluyor
-        public DataSet Create_DataSet(Form tForm, string TableIPCode)
+        public DataSet Create_DataSet(Form tForm, string TableIPCode, bool IsKisitlama)
         {
             tToolBox t = new tToolBox();
             
@@ -1089,6 +1089,9 @@ namespace Tkn_InputPanel
 
             vTableAbout vTA = new vTableAbout();
             t.Table_About(vTA, ds_Fields);
+
+            /// Kıstlama yaparak tabloyu aç böylece içi dolu data gelmesin
+            vTA.IsKisitlama = IsKisitlama;
 
             tSQLs sql = new tSQLs();
             sql.Preparing_dsData(tForm, row_Table, ds_Fields, ref ds_Data, "", vTA);
