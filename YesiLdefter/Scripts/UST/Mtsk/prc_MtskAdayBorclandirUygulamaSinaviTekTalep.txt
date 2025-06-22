@@ -1,25 +1,25 @@
-﻿/*CreateProcedure*/
+﻿
+/*CreateProcedure*/
 
-CREATE PROCEDURE [dbo].[prc_MtskAdayBorclandirESinav] (@FirmId int)
+CREATE PROCEDURE [dbo].[prc_MtskAdayBorclandirUygulamaSinaviTekTalep] (@FirmId int, @TalepId int)
 AS BEGIN  
 
   --declare @FirmId Int  = 11
   declare @BugunDonemTipiId int = 0
   declare @BorclandirmaUcreti numeric(22,5)
-  declare @UcretTipiId Int  = 21111
+  declare @UcretTipiId Int  = 21112
 
    if (MONTH(getdate()) < 10)
        set @BugunDonemTipiId = convert(int, convert(varchar(5), YEAR(getdate())) + '0' + convert(varchar(3), MONTH(getdate())))
   else set @BugunDonemTipiId = convert(int, convert(varchar(5), YEAR(getdate())) + convert(varchar(3), MONTH(getdate())))
-  
-  -- e-Sınav ücreti
-  Select Top 1  @BorclandirmaUcreti = ucret.[ESinavUcreti]
+
+  -- Uygulama sınav ücreti
+  Select Top 1  @BorclandirmaUcreti = ucret.[UygulamaSinavUcreti]
   From [dbo].[MtskUcretSinav] as ucret,
        [dbo].[GecerlilikTarihi] as tarih
   Where ucret.FirmId = @FirmId
   and   ucret.IsActive = 1
   and   ucret.GecerlilikTarihiId = dbo.fnc_getGecerlilikTarihiId(@FirmId, 21103, getdate())
-  
 
   Insert into [dbo].[OnmOdemePlani]
            ([OdmemePlaniGUID]
@@ -54,7 +54,7 @@ AS BEGIN
            ,@UcretTipiId
            ,talep.AdayId -- CariId
            ,3 -- TaksitTipiId : 3 = Tek Ödeme
-           ,takip.eSinavNo -- TaksitNo -- Gireceği sınav no
+           ,takip.uSinavNo -- TaksitNo
            ,getdate() -- VadeTarihi == Bu kayıt oluşurken sınavın hangi tarihte olacağı bilinmiyor
            ,@BorclandirmaUcreti -- TaksitTutari
            ,2    -- OdemeTipiId   Nakit
@@ -71,15 +71,26 @@ AS BEGIN
        left outer join dbo.MtskAdayTalep as talep on ( takip.TalepId = talep.Id )
 	   left outer join dbo.OnmOdemePlani as odeme on ( odeme.FirmId = @FirmId
 	      and odeme.TalepId = takip.TalepId
-		  and odeme.TaksitNo = takip.eSinavNo
+		  and odeme.TaksitNo = takip.uSinavNo
           and odeme.UcretTipiId = @UcretTipiId
 	   )
   Where talep.FirmId = @FirmId 
   and   takip.FirmId = @FirmId
-  and ( takip.eSinavDurumTipiId >= 2 or takip.eSinavDurumTipiId <= 5 )
-  and   takip.eSinavUcretTipiId = 1
+  and   talep.Id = @TalepId
+  and   takip.TalepId = @TalepId
+  and ( takip.uSinavDurumTipiId = 5 or takip.uSinavDurumTipiId = 6 )
+  and   isnull(takip.uSinavUcretTipiId,0) <> 2 --  aday kendisi yatıracaksa yapmasın
   and   odeme.Id is null
+
+  --- Eğer biz yatıracağı işaretli değilse
+  Update dbo.MtskAdayTakip Set
+    uSinavUcretTipiId = 1
+  From dbo.MtskAdayTakip as takip
+  Where takip.FirmId = @FirmId
+  and   takip.TalepId = @TalepId
+  and   isnull(takip.uSinavUcretTipiId,0) = 0
 
 END -- procedure
 
 /*CreateProcedureEnd*/
+

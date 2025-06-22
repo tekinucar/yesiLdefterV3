@@ -1,6 +1,6 @@
 ﻿/*CreateProcedure*/
 
-CREATE PROCEDURE [dbo].[prc_MtskAdayBorclandirESinav] (@FirmId int)
+CREATE PROCEDURE [dbo].[prc_MtskAdayBorclandirESinavTekTalep] (@FirmId int, @TalepId int)
 AS BEGIN  
 
   --declare @FirmId Int  = 11
@@ -20,7 +20,6 @@ AS BEGIN
   and   ucret.IsActive = 1
   and   ucret.GecerlilikTarihiId = dbo.fnc_getGecerlilikTarihiId(@FirmId, 21103, getdate())
   
-
   Insert into [dbo].[OnmOdemePlani]
            ([OdmemePlaniGUID]
            ,[FirmId]
@@ -76,10 +75,21 @@ AS BEGIN
 	   )
   Where talep.FirmId = @FirmId 
   and   takip.FirmId = @FirmId
+  and   talep.Id = @TalepId
+  and   takip.TalepId = @TalepId
   and ( takip.eSinavDurumTipiId >= 2 or takip.eSinavDurumTipiId <= 5 )
-  and   takip.eSinavUcretTipiId = 1
+  and   isnull(takip.eSinavUcretTipiId,0) <> 2 -- kendisi yatıracaksa yapmasın
   and   odeme.Id is null
+
+  --- Eğer biz yatıracağı işaretli değilse
+  Update dbo.MtskAdayTakip Set
+    eSinavUcretTipiId = 1
+  From dbo.MtskAdayTakip as takip
+  Where takip.FirmId = @FirmId
+  and   takip.TalepId = @TalepId
+  and   isnull(takip.eSinavUcretTipiId,0) = 0
 
 END -- procedure
 
 /*CreateProcedureEnd*/
+

@@ -450,13 +450,40 @@ namespace YesiLdefter.Selenium
 
             t.WaitFormOpen(v.mainForm, "Kaynak veriler okunuyor...");
 
+            //string value = "";
+            //string text = "";
+
             SelectElement selectElement = new SelectElement(wb.FindElement(By.Id(idName)));
             if (selectElement == null) return;
             List<IWebElement> options = selectElement.Options.ToList();
 
-            tTable table = new tTable();
-            string value = "";
-            string text = "";
+            wnv.htmlTable = options;
+
+            #region
+            /*
+            // Dinamik bir tablo oluştur (liste içinde liste)
+            List<List<string>> dynamicTable_ = new List<List<string>>();
+
+            foreach (IWebElement item in options)
+            {
+                List<string> newRow = new List<string>();
+                value = item.GetAttribute("value");
+                text = item.Text;
+
+                newRow.Add(value);
+                newRow.Add(text);
+
+                // Satırı tabloya ekle
+                dynamicTable_.Add(newRow);
+            }
+            wnv.dynamicTable = dynamicTable_;
+            */
+            #endregion
+
+
+            #region
+            /*
+            tTable table = new tTable();  //değişti
             foreach (IWebElement item in options)
             {
                 tRow row = new tRow();
@@ -473,47 +500,13 @@ namespace YesiLdefter.Selenium
 
                 table.tRows.Add(row);
             }
-            wnv.tTable = table;
+            wnv.tTable = table; değişti
+            */
+            #endregion
 
             v.IsWaitOpen = false;
             t.WaitFormClose();
         }
-        /*
-        private void selectItemsRead(ChromiumWebBrowser wb, ref webNodeValue wnv, string idName)
-        {
-            MessageBox.Show("selectItemsRead KODLANACAK");
-            /*
-            t.WaitFormOpen(v.mainForm, "Kaynak veriler okunuyor...");
-            
-            SelectElement selectElement = new SelectElement(wb.FindElement(By.Id(idName)));
-            if (selectElement == null) return;
-            List<IWebElement> options = selectElement.Options.ToList();
-
-            tTable table = new tTable();
-            string value = "";
-            string text = "";
-            foreach (IWebElement item in options)
-            {
-                tRow row = new tRow();
-                value = item.GetAttribute("value");
-                text = item.Text;
-
-                tColumn column1 = new tColumn();
-                column1.value = value;
-                tColumn column2 = new tColumn();
-                column2.value = text;
-
-                row.tColumns.Add(column1);
-                row.tColumns.Add(column2);
-
-                table.tRows.Add(row);
-            }
-            wnv.tTable = table;
-            
-            v.IsWaitOpen = false;
-            t.WaitFormClose();
-            *+/
-        }*/
         #endregion selectItemsRead
 
         #region selectItemsGetValue
@@ -1126,7 +1119,8 @@ namespace YesiLdefter.Selenium
         private void getHtmlTable(IWebDriver wb, ref webNodeValue wnv, string idName)
         {
             // Mevcudu yok et, yeni hazırlanacak
-            wnv.tTable = null;
+            //wnv.tTable = null; // değişti
+            wnv.dynamicTable = null;
 
             if (t.IsNotNull(idName) == false)
             {
@@ -1150,6 +1144,19 @@ namespace YesiLdefter.Selenium
 
             IList<IWebElement> htmlRows = htmlTable.FindElements(By.TagName("tr"));
 
+            wnv.htmlTable = htmlRows;
+
+            /// bu metod htmlRows satırlanırını okurken kullanıcı yavaş olduğunu zannnediyor
+            /// onun yerine htmlRows satırlarını database yazarken okuyacak
+            /// yani okunan anında database yazılacak
+            
+            // Add table
+            //wnv.dynamicTable = preparingDynamicTable(htmlRows);
+
+
+
+            #region 
+            /*  burası iptal olacak  silinecek
             int rowCount = htmlRows.Count;
             int colCount = 0;
             int pos = 0;
@@ -1157,89 +1164,83 @@ namespace YesiLdefter.Selenium
             string value = "";
             string dtyHtml = "";
 
-            tTable _tTable = new tTable();
+            tTable _tTable = new tTable(); değişti
 
             for (int i = 1; i < rowCount; i++)
             {
                 IWebElement hRow = htmlRows[i];
 
-                //name = hRow.GetAttribute("name");
-                //if (name != null)
-                //{
-                //    if (name != "pages")
-                //    {
-                        tRow _tRow = new tRow();
+                tRow _tRow = new tRow();
 
-                        IList<IWebElement> htmlCols = hRow.FindElements(By.TagName("td"));
-                        colCount = htmlCols.Count;
+                IList<IWebElement> htmlCols = hRow.FindElements(By.TagName("td"));
+                colCount = htmlCols.Count;
 
-                        for (int i2 = 0; i2 < colCount; i2++)
+                for (int i2 = 0; i2 < colCount; i2++)
+                {
+                    value = "";
+
+                    IWebElement hCol = htmlCols[i2];
+
+                    // <input name="dgListele$ctl04$ab" id="dgListele_ctl04_chkOnayBekliyor" type="radio" checked="checked" value="chkOnayBekliyor">
+                    // <input name="dgListele$ctl04$ab" id="dgListele_ctl04_chkOnayDurum" type="radio" value="chkOnayDurum">
+                    dtyHtml = hCol.GetAttribute("innerHTML");
+
+                    if (dtyHtml.IndexOf("type=\"radio\"") > -1)
+                    {
+                        //hCol.Click();  get sırasında neden click yapmışım ?
+                    }
+
+                    if (hCol.Text != null)
+                    {
+                        value = hCol.Text.Trim();
+                    }
+                    else
+                    {
+                        // <img onmouseover="this.src="/images/toolimages/open_kucuk_a.gif";this.style.cursor="hand";" 
+                        // onmouseout="this.src="/images/toolimages/open_kucuk.gif";this.style.cursor="default";" 
+                        // onclick="fnIslemSec("99969564|01/08/2017|NMZVAN93C15010059");" 
+                        // src="/images/toolimages/open_kucuk.gif">
+
+                        pos = -1;
+                        dtyHtml = hCol.GetAttribute("outerHTML");
+                        pos = dtyHtml.IndexOf("onclick");
+
+                        // <td align="center" style="width: 30px;">
+                        // <a href="javascript:__doPostBack('dgIstekOnaylanan','Select$0')">
+                        // <img title="Aç" onmouseover="this.src='/images/toolimages/open_kucuk_a.gif';this.style.cursor='pointer';" onmouseout="this.src='/images/toolimages/open_kucuk.gif';this.style.cursor='default';" src="/images/toolimages/open_kucuk.gif">
+                        // </a></td>                        
+
+                        if (pos == -1) // 
+                            pos = dtyHtml.IndexOf("__doPostBack(");
+
+                        if (pos > -1)
                         {
-                            value = "";
+                            //   /images/toolimages/open_kucuk.gif
 
-                            IWebElement hCol = htmlCols[i2];
-
-                            // <input name="dgListele$ctl04$ab" id="dgListele_ctl04_chkOnayBekliyor" type="radio" checked="checked" value="chkOnayBekliyor">
-                            // <input name="dgListele$ctl04$ab" id="dgListele_ctl04_chkOnayDurum" type="radio" value="chkOnayDurum">
-                            dtyHtml = hCol.GetAttribute("innerHTML");
-
-                            if (dtyHtml.IndexOf("type=\"radio\"") > -1)
-                            {
-                                //hCol.Click();  get sırasında neden click yapmışım ?
-                            }
-
-                            if (hCol.Text != null)
-                            {
-                                value = hCol.Text.Trim();
-                            }
-                            else
-                            {
-                                // <img onmouseover="this.src="/images/toolimages/open_kucuk_a.gif";this.style.cursor="hand";" 
-                                // onmouseout="this.src="/images/toolimages/open_kucuk.gif";this.style.cursor="default";" 
-                                // onclick="fnIslemSec("99969564|01/08/2017|NMZVAN93C15010059");" 
-                                // src="/images/toolimages/open_kucuk.gif">
-
-                                pos = -1;
-                                dtyHtml = hCol.GetAttribute("outerHTML");
-                                pos = dtyHtml.IndexOf("onclick");
-
-                                // <td align="center" style="width: 30px;">
-                                // <a href="javascript:__doPostBack('dgIstekOnaylanan','Select$0')">
-                                // <img title="Aç" onmouseover="this.src='/images/toolimages/open_kucuk_a.gif';this.style.cursor='pointer';" onmouseout="this.src='/images/toolimages/open_kucuk.gif';this.style.cursor='default';" src="/images/toolimages/open_kucuk.gif">
-                                // </a></td>                        
-
-                                if (pos == -1) // 
-                                    pos = dtyHtml.IndexOf("__doPostBack(");
-
-                                if (pos > -1)
-                                {
-                                    //   /images/toolimages/open_kucuk.gif
-
-                                    //html = hCol.OuterHtml.Remove(0, hCol.OuterHtml.IndexOf(" src=") + 6);
-                                    //value = html.Remove(html.IndexOf(">") - 1);
-                                    value = dtyHtml.Remove(0, dtyHtml.IndexOf(" src=") + 6);
-                                    value = value.Remove(dtyHtml.IndexOf(">") - 1);
-                                }
-                                else value = "";
-                            }
-
-                            // Add column
-                            tColumn _tColumn = new tColumn();
-                            _tColumn.value = value;
-                            _tRow.tColumns.Add(_tColumn);
+                            //html = hCol.OuterHtml.Remove(0, hCol.OuterHtml.IndexOf(" src=") + 6);
+                            //value = html.Remove(html.IndexOf(">") - 1);
+                            value = dtyHtml.Remove(0, dtyHtml.IndexOf(" src=") + 6);
+                            value = value.Remove(dtyHtml.IndexOf(">") - 1);
                         }
+                        else value = "";
+                    }
 
-                        // Add row
-                        if (_tRow.tColumns.Count > 0)
-                        {
-                            if (_tRow.tColumns[0].value != "pages")
-                                _tTable.tRows.Add(_tRow);
-                        }
-                //    }
-                //}
+                    // Add column
+                    tColumn _tColumn = new tColumn();
+                    _tColumn.value = value;
+                    _tRow.tColumns.Add(_tColumn);
+                }
+
+                // Add row
+                if (_tRow.tColumns.Count > 0)
+                {
+                    if (_tRow.tColumns[0].value != "pages")
+                        _tTable.tRows.Add(_tRow);
+                }
             }
             // Add table
             wnv.tTable = _tTable;
+            */
 
             /*
                         // Grab the table
@@ -1258,12 +1259,45 @@ namespace YesiLdefter.Selenium
                             }
                         }
             */
+            #endregion
         }
         /*
         private void getHtmlTable(ChromiumWebBrowser wb, ref webNodeValue wnv, string idName)
         {
             MessageBox.Show("getHtmlTable kodlanacak");
         }*/
+
+        private List<List<string>> preparingDynamicTable(IList<IWebElement> htmlRows)
+        {
+            /// dinamik tablo oluştur
+            ///
+            List<List<string>> dynamicTable = new List<List<string>>();
+
+            int rowCount = htmlRows.Count;
+
+            // sıfırıncı satır tablonun başlığı oluyor
+            //for (int i = 0; i < rowCount; i++)
+            for (int i = 1; i < rowCount; i++)
+            {
+                IWebElement hRow = htmlRows[i];
+                
+                IList<IWebElement> htmlCols = hRow.FindElements(By.TagName("td"));
+                
+                /// satırı hazırla
+                List<string> newRow = msPagesService.preparingDynamicCol(htmlCols);
+
+                if (newRow.Count > 0)
+                {
+                    if (newRow[0] != "pages")
+                    {
+                        /// Satırı tabloya ekle
+                        dynamicTable.Add(newRow);
+                    }
+                }
+            }
+
+            return dynamicTable;
+        }
         #endregion getHtmlTable
 
         #region postHtmlTable
@@ -1273,7 +1307,10 @@ namespace YesiLdefter.Selenium
         {
             string _TableIPCode = wnv.TableIPCode;
             string _dbKeyFieldName = wnv.dbFieldName;
-            tTable _tTable = wnv.tTable;
+
+            //tTable _tTable = wnv.tTable; değişti
+            List<List<string>> _dynamicTable = wnv.dynamicTable;
+
 
             string _dbFieldName = "";
             string _dbValue = "";
@@ -1296,12 +1333,18 @@ namespace YesiLdefter.Selenium
                         wnv.keyValue = row[_dbKeyFieldName].ToString();
 
                         // TcNo haricindeki diğer colums/kolonlar okunuyor 
-                        foreach (tRow item in _tTable.tRows)
+                        foreach (List<string> item in _dynamicTable)
                         {
-                            _dbFieldName = item.tColumns[1].value;
+                            _dbFieldName = item[1].ToString();
                             _dbValue = row[_dbFieldName].ToString();
-                            item.tColumns[2].value = _dbValue;
+                            item[2] = _dbValue;
                         }
+                        //foreach (tRow item in _tTable.tRows)
+                        //{
+                        //    _dbFieldName = item.tColumns[1].value;
+                        //    _dbValue = row[_dbFieldName].ToString();
+                        //    item.tColumns[2].value = _dbValue;
+                        //}
 
                         // hazırlanan bilgiyi html tabloya post et
                         postHtmlTable_(wb, ref wnv, idName);
@@ -1358,7 +1401,9 @@ namespace YesiLdefter.Selenium
         {
             Int16 _keyColumnNo = wnv.tTableColNo;
             string _keyValue = wnv.keyValue;
-            tTable _tTable = wnv.tTable;
+
+            //tTable _tTable = wnv.tTable; // değişti
+            List<List<string>> _dynamicTable = wnv.dynamicTable;
 
             IWebElement htmlTable = wb.FindElement(By.Id(idName));
             //HtmlElement htmlTable = wb.Document.GetElementById(idName);
@@ -1397,7 +1442,7 @@ namespace YesiLdefter.Selenium
                         // anahtar değer dogru satırda ise ( TcNo == "xxx")
                         if (_keyValue == dtyValue)
                         {
-                            postColumsValue_(wb, htmlCols, _tTable);
+                            postColumsValue_(wb, htmlCols, _dynamicTable); // _tTable);
                             onay = true;
                             break;
                         }
@@ -1415,7 +1460,8 @@ namespace YesiLdefter.Selenium
 
         #region postColumsValue_
         /// onaylanmış html satırı ise db Table den okunan value html columns value ye atanır
-        private void postColumsValue_(IWebDriver wb, IList<IWebElement> htmlCols, tTable _tTable)
+        //private void postColumsValue_(IWebDriver wb, IList<IWebElement> htmlCols, tTable _tTable) // değişti
+        private void postColumsValue_(IWebDriver wb, IList<IWebElement> htmlCols, List<List<string>> _dynamicTable)
         {
             Int16 _colNo = 0;
             string _dbValue = "";
@@ -1427,11 +1473,11 @@ namespace YesiLdefter.Selenium
 
             int colCount = htmlCols.Count;
 
-            foreach (tRow _tRow in _tTable.tRows)
+            foreach (List<string> _tRow in _dynamicTable)
             {
                 // database den gelen veriler
-                _colNo = t.myInt16(_tRow.tColumns[0].value.ToString());
-                _dbValue = _tRow.tColumns[2].value;
+                _colNo = t.myInt16(_tRow[0].ToString());
+                _dbValue = _tRow[2].ToString();
 
                 // html üzerindeki tablonun colonları
                 for (int i2 = 0; i2 < colCount; i2++)
@@ -2107,7 +2153,24 @@ namespace YesiLdefter.Selenium
             DialogResult cevap = t.mySoru(soru);
             if (DialogResult.Yes == cevap)
             {
-                tTable table = new tTable();
+                // Dinamik bir tablo oluştur (liste içinde liste)
+                List<List<string>> dynamicTable_ = new List<List<string>>();
+                // Yeni bir satır oluştur
+                List<string> newRow = new List<string>();
+                newRow.Add("1"); // sahte Id value oluyor
+                newRow.Add(duzenlemeTarihi);
+                newRow.Add(faturaNo);
+                newRow.Add(faturaToplamTutar);
+                newRow.Add(wnv.readValue); // resim dosyasının adı);
+
+                // Satırı tabloya ekle
+                dynamicTable_.Add(newRow);
+
+                wnv.dynamicTable = dynamicTable_;
+
+                #region
+                /*
+                tTable table = new tTable(); değişti
                 tRow row = new tRow();
 
                 tColumn column0 = new tColumn();
@@ -2128,9 +2191,10 @@ namespace YesiLdefter.Selenium
                 row.tColumns.Add(column4);
                 table.tRows.Add(row);
 
-                wnv.tTable = table;
+                wnv.tTable = table; değişti
+                */
+                #endregion
             }
-
 
             /*
             var faturaNo = fatura.Element(faturaNamespace + "ID").Value;

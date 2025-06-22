@@ -4,6 +4,7 @@ CREATE FUNCTION [dbo].[fnc_getSertifikaKayitTipi]( @talepId int)
 RETURNS smallint
 AS   
 BEGIN 
+
   declare @response smallint
 
   --[Lkp].[MtskAdayTalepKayitTipi]
@@ -12,14 +13,14 @@ BEGIN
   -- 2,  'Kayıt aşamasında'
   -- 3,  'Kesin kayıt'
 
+  declare @yTalepTipiId smallInt = 0
   declare @yKayitTipiId smallInt = 0
-  declare @yMebbisKurumOnayi bit = null
   declare @yMebbisDurumTipiId smallInt = 0
   declare @yBelgelerGeldi bit = null
 
   Select 
-       @yKayitTipiId = isnull(ins.KayitTipiId,0)
-      ,@yMebbisKurumOnayi = isnull(ins.MebbisKurumOnayi,0)
+       @yTalepTipiId = isnull(ins.TalepTipiId,0)
+      ,@yKayitTipiId = isnull(ins.KayitTipiId,0)
       ,@yMebbisDurumTipiId = isnull(ins.MebbisDurumTipiId,0)
       ,@yBelgelerGeldi = isnull(ins.BelgelerGeldi,0)
   From MtskAdayTalep as ins
@@ -36,6 +37,25 @@ BEGIN
   if (@yKayitTipiId < 1 and @yMebbisDurumTipiId = 0) 
       set @yKayitTipiId = 2  -- 'Kayıt aşamasında'
 
+  -- Lkp.MtskAdayTalepMebbisDurumTipi
+  ---1,  '' 
+  -- 0,  'Kursa Başvuru Aşamasında' 
+  -- 1,  'Teorik Sınav Aşamasında' 
+  -- 2,  'Uygulama Sınav Aşamasında' 
+  -- 3,  'Teorik Sınav Hakkı Doldu' 
+  -- 4,  'Uygulama Sınav Hakkı Doldu' 
+  -- 5,  'Sertifika Almaya Hak Kazandı' 
+  -- 6,  'Sertifikası İptal Edildi' 
+  -- 7,  'e-Sınav Aşamasında' 
+  -- 8,  'e-Sınav Test Aşamasında'
+  -- 9,  'e-Sınavdan Başarısız Oldu' 
+  -- 10,  'e-Sınav Hakkı Doldu' 
+  -- 11,  'Kaydı Silindi' 
+  -- 12,  'Ceza Kaydı Var' 
+  -- 13,  'Teorik Dersten Muaf' 
+  -- 14,  'Adli Sicil Kaydı Uygun Olmadığından Dönem Kaydı Durdurulmuştur.' 
+  -- 22,  '2.Direksiyon Aşamasında' 
+   
   if (@yMebbisDurumTipiId = 1) or
      (@yMebbisDurumTipiId = 2) or
      (@yMebbisDurumTipiId = 7) or
@@ -45,9 +65,27 @@ BEGIN
      (@yMebbisDurumTipiId = 13) or 
      (@yMebbisDurumTipiId = 22) set @yKayitTipiId = 3 -- 'Kesin kayıt'
 
+  if (@yMebbisDurumTipiId = 3) or
+     (@yMebbisDurumTipiId = 10) set @yKayitTipiId = 5 -- 'Tüm e-Sınav hakkı bitti. Dosya yandı'
+
+  if (@yMebbisDurumTipiId = 4) and
+     (@yTalepTipiId = 1) set @yKayitTipiId = 6 -- 'Tüm uygulamalı sınav hakkı bitti'
+     
+  if (@yMebbisDurumTipiId = 5) set @yKayitTipiId = 4 -- 'Sertifika almaya hak kazandı'
+  
+  if (@yMebbisDurumTipiId = 4) and
+     (@yTalepTipiId = 2 or @yTalepTipiId = 3) set @yKayitTipiId = 7 -- '2. +4 sınav hakkı bitti. Dosya yandı'
+
+  if (@yMebbisDurumTipiId = 6) set @yKayitTipiId = 4 -- 'Sertifika almaya hak kazandı'
+
+  if (@yMebbisDurumTipiId = 11) or
+     (@yMebbisDurumTipiId = 14) set @yKayitTipiId = 8 -- 'Diğer sebeplerden dolayı dosya kapandı'
+
+
   set @response = @yKayitTipiId
 
   RETURN @response;
+
 END; -- function
 
 /*CreateFunctionEnd*/

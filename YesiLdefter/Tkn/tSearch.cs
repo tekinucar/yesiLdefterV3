@@ -77,10 +77,16 @@ namespace Tkn_Search
             bool onay = false;
             string TableIPCode = string.Empty;
             string senderType = sender.GetType().ToString();
-            string myProp = ((DevExpress.XtraEditors.ButtonEdit)sender).Properties.AccessibleDescription;
             string editValue = "";
             string funcName = "";
-                        
+            string myProp = "";
+            
+            if (senderType == "DevExpress.XtraEditors.ButtonEdit")
+                myProp = ((DevExpress.XtraEditors.ButtonEdit)sender).Properties.AccessibleDescription;
+            if (senderType == "DevExpress.XtraEditors.ImageComboBoxEdit")
+                myProp = ((DevExpress.XtraEditors.ImageComboBoxEdit)sender).Properties.AccessibleDescription;
+
+
             if (t.IsNotNull(myProp))
             {
                 v.tButtonType buttonType = v.tButtonType.btNone;
@@ -126,6 +132,9 @@ namespace Tkn_Search
                         /// atama yapılacak değer GET_FIELD_LIST={ içinden tespit edilmeli ama hangisi ?
                         /// aslında gerekte yok, çünkü gelen değer  editvalue  
                         v.con_Value_Old = string.Empty;
+
+                        buttonType = t.getClickType(myProp);
+
                     }
 
                     if (senderType == "DevExpress.XtraEditors.ButtonEdit")
@@ -1195,7 +1204,7 @@ namespace Tkn_Search
                             {
                                 t.tRemoveTabPagesForNewData(tForm);
                                 
-                                onay = t.TableRefreshNewValue(tForm, dsTarget, readValue);
+                                onay = t.TableRefreshNewValue(tForm, dsTarget, readValue, -1);
 
                                 nextControl(tForm);
                                 break;

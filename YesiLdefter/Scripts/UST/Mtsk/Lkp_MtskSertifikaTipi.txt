@@ -7,7 +7,7 @@ begin transaction
 -- ------------------------------------------------------- 
 create table [Lkp].[MtskSertifikaTipi]
 (
-   Id                  Int IDENTITY(-1,1) not null, 
+   Id                  Int IDENTITY(0,1) not null, 
    SertifikaTipi       nVarchar(50)   null,
    KSertifikaTipi      nVarchar(15)   null, /* küçük */
    IsActive            Bit            null,
@@ -21,7 +21,7 @@ set IDENTITY_INSERT [Lkp].[MtskSertifikaTipi] ON
 Delete from [Lkp].[MtskSertifikaTipi]
 INSERT INTO [Lkp].[MtskSertifikaTipi] (Id, SertifikaTipi, KSertifikaTipi, IsActive, SiraNo )
  VALUES 
-  ( -1,    N'',  '', 0, -1 ), 
+  ( 0,     N'',                     '',   0, 0 ), 
   ( 2502,  N'A1 Sınıfı Sertifika',  'A1', 0, 2 ), 
   ( 2503,  N'A2 Sınıfı Sertifika',  'A2', 0, 3 ), 
   ( 2504,  N'B Sınıfı Sertifika',   'B',  0, 6 ), 

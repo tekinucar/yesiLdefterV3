@@ -2,6 +2,7 @@
 
 CREATE PROCEDURE [dbo].[prc_MtskTeorikDersPlaniOlusturManuel] (@SablonTeorikFId int)  
 AS BEGIN
+
   --declare @SablonTeorikFId int = 1
 
   declare @FirmId int
@@ -48,6 +49,17 @@ AS BEGIN
   WHILE ( @Count <= @SaatSayisi )
   BEGIN
       --PRINT 'The counter value is = ' + CONVERT(VARCHAR,@Count) + '; ' + CONVERT(varchar,@DersSaatiTipiId)
+    if ( Select count(*) ADET from [dbo].[MtskTeorikDers]
+         where FirmId = @FirmId
+         and [DonemTipiId] = @DonemTipiId
+         and [GrupTipiId] = @GrupTipiId
+         and [SubeTipiId] = @SubeTipiId
+         and [DerslikTipiId] = @DerslikTipiId
+         and [DerslikAdiTipiId] = @DerslikAdiTipiId
+         and [DersTarihi] = [dbo].fnc_IsGununuBul(@BaslangicTarihi, 1, 0, @DersSaatiTipiId + 107)
+         and [DersSaatiTipiId] = @DersSaatiTipiId
+	) = 0 
+    begin
       Insert Into [dbo].[MtskTeorikDers]
            ([FirmId]
            ,[IsActive]
@@ -67,7 +79,7 @@ AS BEGIN
 		   ,[SablonTeorikFId]
 		   ,[OzelGunlerId]
 		   )
-    Values (@FirmId
+      Values (@FirmId
            ,1
            ,@DonemTipiId
            ,@GrupTipiId
@@ -85,7 +97,8 @@ AS BEGIN
            ,@SablonTeorikFId
 		   ,0    -- OzelGunlerId
            )
-	
+	end
+
 	set @Count = @Count + 1
 	set @DersSaatiTipiId = @DersSaatiTipiId + 1
 	if (@DersSaatiTipiId > 15) set @Count = 100

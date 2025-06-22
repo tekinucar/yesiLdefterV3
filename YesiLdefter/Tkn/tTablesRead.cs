@@ -50,20 +50,20 @@ namespace Tkn_TablesRead
 
             t.preparing_TableIPCodeFieldsList(TableIPCode);
 
-            DataTable dt = v.ds_TableIPCodeFields.Tables[TableIPCode];
-            if (dt == null) return;
-            ds.Tables.Add(dt.Copy());
-            dt.Dispose();
+            DataTable dTable = v.ds_TableIPCodeFields.Tables[TableIPCode];
+            if (dTable == null) return;
+            ds.Tables.Add(dTable.Copy());
+            dTable.Dispose();
 
             //tSql = sql.SQL_MS_GROUPS(TableIPCode);
             //t.SQL_Read_Execute(v.dBaseNo.Manager, ds, ref tSql, "GROUPS", function_name);
 
             t.preparing_TableIPCodeGroupsList(TableIPCode);
 
-            DataTable dtg = v.ds_TableIPCodeGroups.Tables[TableIPCode + "_GROUPS"];
-            if (dtg == null) return;
-            ds.Tables.Add(dtg.Copy());
-            dtg.Dispose();
+            DataTable dtGroup = v.ds_TableIPCodeGroups.Tables[TableIPCode + "_GROUPS"];
+            if (dtGroup == null) return;
+            ds.Tables.Add(dtGroup.Copy());
+            dtGroup.Dispose();
 
 
 

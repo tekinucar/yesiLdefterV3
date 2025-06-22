@@ -18,9 +18,9 @@ From MtskAdayTakip as takip
      left outer join dbo.MtskGrupSubesi as sube on ( takip.DonemTipiId = sube.DonemTipiId )     
      left outer join Lkp.MtskAdayTakipTeorikDersTipi as tip on ( takip.TeorikDersTipiId = tip.Id )
 Where takip.FirmId = @FirmId
-and   takip.DonemTipiId = @DonemTipiId
 and   takip.GrupTipiId  = sube.GrupTipiId
 and   takip.SubeTipiId  = sube.SubeTipiId 
+and ( takip.KayitTipiId = 2 or takip.KayitTipiId = 3 )
 
 Group by 
    tip.KonuId
@@ -98,7 +98,6 @@ From MtskAdayTakip as takip
      left outer join Lkp.MtskAdayTakipeSinavDurumTipi as tip on 
 	   ( takip.eSinavDurumTipiId = tip.Id )
 Where takip.FirmId = @FirmId
-and   takip.DonemTipiId = @DonemTipiId
 and   takip.GrupTipiId  > 0
 and   takip.SubeTipiId  > 0
 and ( takip.KayitTipiId = 2 or takip.KayitTipiId = 3 )
@@ -125,6 +124,7 @@ From MtskAdayTakip as takip
 	   ( takip.eSinavSonucTipiId = tip.Id )
 Where takip.FirmId = @FirmId
 and   takip.eSinavSonucTipiId > 0
+and ( takip.KayitTipiId = 2 or takip.KayitTipiId = 3 )
 
 Group by 
    tip.KonuId
@@ -147,6 +147,7 @@ From MtskAdayTakip as takip
 	   ( takip.eSinavSonrasiTipiId = tip.Id )
 Where takip.FirmId = @FirmId
 and   takip.eSinavSonrasiTipiId > 0
+and ( takip.KayitTipiId = 2 or takip.KayitTipiId = 3 )
 
 Group by 
    tip.KonuId
@@ -168,15 +169,13 @@ From MtskAdayTakip as takip
      left outer join Lkp.MtskAdayTakipeSinavUcretTipi as tip on 
 	   ( takip.eSinavUcretTipiId = tip.Id )
 Where takip.FirmId = @FirmId
+and ( takip.KayitTipiId = 2 or takip.KayitTipiId = 3 )
 
 Group by 
    tip.KonuId
  , tip.KonuCaption   
  , tip.eSinavUcretTipi
  , tip.FormCaption 
- 
-
-
 
 END -- procedure
 

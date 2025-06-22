@@ -304,6 +304,24 @@ namespace YesiLdefter
         }
         private void readTabSurucuIni()
         {
+            bool onay = t.readTABSURUCU_INI();
+
+            if (onay)
+            {
+                t.preparingLocalDbConnectionText();
+
+                setDbConnectionValues();
+
+                /// Database bağlantısını test et
+                /// 
+                onay = dbConnectionTest();
+
+                /// onay false ise program kapansın
+                /// 
+                v.SP_ApplicationExit = !onay;
+            }
+
+            /*
             var tabSurucuIni = new tIniFile("c:\\Windows\\TABSURUCU.INI");
             if (tabSurucuIni != null)
             {
@@ -330,6 +348,7 @@ namespace YesiLdefter
                 /// 
                 v.SP_ApplicationExit = !onay;
             }
+            */
         }
         private void setDbConnectionValues()
         {
@@ -344,43 +363,7 @@ namespace YesiLdefter
         }
         private bool writeTabSurucuIni()
         {
-            bool onay = true;
-
-            try
-            {
-                var YesiLdefterTabimIni = new tIniFile("YesiLdefterTabim.Ini");
-                if (YesiLdefterTabimIni != null)
-                {
-                    if (v.SP_TabimParamsKurumTipi == "MTSK")
-                    {
-                        YesiLdefterTabimIni.Write("SourceServerNameIP", v.active_DB.localServerName, "YesiLDefter");
-                        YesiLdefterTabimIni.Write("SourceDatabaseName", v.active_DB.localDBName, "YesiLDefter");
-                        YesiLdefterTabimIni.Write("SourceDbLoginName", v.active_DB.localUserName, "YesiLDefter");
-                        YesiLdefterTabimIni.Write("SourceDbPass", v.active_DB.localPsw, "YesiLDefter");
-                        YesiLdefterTabimIni.Write("SourceConnection", "true", "YesiLDefter");
-                    }
-                    if (v.SP_TabimParamsKurumTipi == "SRC")
-                    {
-                        YesiLdefterTabimIni.Write("SRCServerNameIP", v.active_DB.localServerName, "YesiLDefter");
-                        YesiLdefterTabimIni.Write("SRCDatabaseName", v.active_DB.localDBName, "YesiLDefter");
-                        YesiLdefterTabimIni.Write("SRCDbLoginName", v.active_DB.localUserName, "YesiLDefter");
-                        YesiLdefterTabimIni.Write("SRCDbPass", v.active_DB.localPsw, "YesiLDefter");
-                        YesiLdefterTabimIni.Write("SourceConnection", "true", "YesiLDefter");
-                    }
-                    if (v.SP_TabimParamsKurumTipi == "ISMAK")
-                    {
-                        MessageBox.Show("ISMAK writeTabSurucuIni bak");
-                    }
-                }
-            }
-            catch (Exception)
-            {
-                MessageBox.Show("DİKKAT : YesiLdefterTabim.Ini dosyasına kayıt işlemi gerçekleşmedi...");
-                onay = false;
-                //throw;
-            }
-
-            return onay;
+            return t.writeYesiLdefterTabimIni();
         }
         private bool dbConnectionTest()
         {

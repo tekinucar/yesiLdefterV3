@@ -4,8 +4,7 @@ CREATE PROCEDURE [dbo].[prc_MtskAdayTakipAdayKayitKonulari]
 AS BEGIN
 
 Select 
-   kurallar.* 
- , konular.KonuGrupId as Lkp_KonuGrupId
+   konular.KonuGrupId as Lkp_KonuGrupId
  , konular.KonuId as Lkp_KonuId
  , konular.KonuCaption as Lkp_KonuCaption  
  , konular.Lkp_KonuAciklama
@@ -108,19 +107,7 @@ Select
 
 From Lkp.MtskAdayTakipBelgelerTipi as tip
 
-union all
-
--- EgitimSureciTipi
-Select 
-   tip.KonuGrupId
- , tip.KonuId
- , tip.KonuCaption   
- , tip.EgitimSureciTipi as KonuAciklama
-
-From Lkp.MtskAdayTakipEgitimSureciTipi as tip 
-
 ) as konular 
- left outer join dbo.MtskAdayTakipKurallari as kurallar on ( konular.KonuGrupId = kurallar.KonuGrupId and konular.KonuId = kurallar.KonuId )
 
 
 END -- procedure

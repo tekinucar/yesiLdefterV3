@@ -11,27 +11,14 @@ AS BEGIN
    if (MONTH(getdate()) < 10)
        set @BugunDonemTipiId = convert(int, convert(varchar(5), YEAR(getdate())) + '0' + convert(varchar(3), MONTH(getdate())))
   else set @BugunDonemTipiId = convert(int, convert(varchar(5), YEAR(getdate())) + convert(varchar(3), MONTH(getdate())))
-  /*
-  -- e-Sınav ücreti
-  Select Top 1  @BorclandirmaUcreti = ucret.[ESinavUcreti]
-  From [dbo].[MtskUcretSinav] as ucret,
-       [dbo].[GecerlilikTarihi] as tarih
-  Where ucret.FirmId = @FirmId
-  and   ucret.IsActive = 1
-  and   ucret.GecerlilikTarihiId = tarih.Id
-  and   convert(date,tarih.Tarih,103) <= convert(date, GETDATE(), 103) 
-  order by tarih.Tarih desc
-  */
+
   -- Uygulama sınav ücreti
   Select Top 1  @BorclandirmaUcreti = ucret.[UygulamaSinavUcreti]
   From [dbo].[MtskUcretSinav] as ucret,
        [dbo].[GecerlilikTarihi] as tarih
   Where ucret.FirmId = @FirmId
   and   ucret.IsActive = 1
-  and   ucret.GecerlilikTarihiId = tarih.Id
-  and   convert(date,tarih.Tarih,103) <= convert(date, GETDATE(), 103) 
-  order by tarih.Tarih desc
-
+  and   ucret.GecerlilikTarihiId = dbo.fnc_getGecerlilikTarihiId(@FirmId, 21103, getdate())
 
   Insert into [dbo].[OnmOdemePlani]
            ([OdmemePlaniGUID]
@@ -88,42 +75,10 @@ AS BEGIN
 	   )
   Where talep.FirmId = @FirmId 
   and   takip.FirmId = @FirmId
-  and   takip.uSinavDurumTipiId = 5
+  and ( takip.uSinavDurumTipiId = 5 or takip.uSinavDurumTipiId = 6 )
   and   takip.uSinavUcretTipiId = 1
   and   odeme.Id is null
 
-
-/*
-  declare @UcretTipiId Int  = 21112
-  declare @TalepId int
-
-  -- Döngüye alınacak Select cümlesi
-  declare myCursor CURSOR local FOR 
-
-  Select TalepId From dbo.MtskAdayTakip
-  Where  uSinavDurumTipiId = 5
-  and    FirmId = @FirmId
-
-  OPEN myCursor; 
-  
-  FETCH NEXT FROM myCursor INTO @TalepId
-
-  print 'Uygulama sınavı için prc_MtskAdayBorclandir başladı'
-  
-  WHILE @@FETCH_STATUS = 0 
-  BEGIN -- İşlemler burada yapılır 
-  
-     PRINT '@TalepId: ' + CAST(@TalepId AS NVARCHAR) + ', @UcretTipiId: ' + CAST(@UcretTipiId AS NVARCHAR); 
-  
-	 Execute [dbo].[prc_MtskAdayBorclandir] @TalepId, @UcretTipiId 
-
-     FETCH NEXT FROM myCursor INTO @TalepId; 
-  END; 
-  
-  CLOSE myCursor;
-
-  print 'Uygulama sınavı için prc_MtskAdayBorclandir bitti'
-*/
 
 END -- procedure
 

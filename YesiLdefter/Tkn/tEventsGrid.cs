@@ -27,6 +27,8 @@ using Tkn_Registry;
 using Tkn_Search;
 using DevExpress.Utils.DragDrop;
 using System.ComponentModel;
+using DevExpress.XtraEditors.Controls;
+using DevExpress.XtraEditors.Repository;
 
 namespace Tkn_Events
 {
@@ -42,6 +44,44 @@ namespace Tkn_Events
         GridHitInfo gridHitInfo = null;
         TileViewHitInfo tileHitInfo = null;
 
+        public void myRepositoryLookUpEdit_EditValueChanged(object sender, EventArgs e)
+        {
+            var edit = sender as DevExpress.XtraEditors.BaseEdit;
+
+            if (edit != null)
+            {
+                object selectedValue = edit.EditValue;
+                //Console.WriteLine($"Yeni değer: {selectedValue}");
+
+                // Seçilen değere göre işlemler yapabilirsiniz
+                // Örneğin:
+                // if (selectedValue != null && selectedValue.ToString() == "1")
+                // {
+                //     // Belirli bir değer seçildiğinde yapılacaklar
+                // }
+                //MessageBox.Show("Seçim kaydedildi!");
+
+                vGridHint tGridHint = new vGridHint();
+                getGridHint_(sender, ref tGridHint);
+                System.Windows.Forms.KeyEventArgs key = new KeyEventArgs(Keys.None);
+                tGridHint.buttonType = v.tButtonType.btListeyeEkle;
+                v.dt_SearchLookUp = null;               
+                v.dt_SearchLookUp = (DataTable)((DevExpress.XtraEditors.SearchLookUpEdit)sender).Properties.DataSource;
+                
+                commonGridClick(sender, key, tGridHint);
+            }
+        }
+        public void myRepositoryLookUpEdit_CloseUp(object sender, DevExpress.XtraEditors.Controls.CloseUpEventArgs e)
+        {
+            //if (e.AcceptValue)
+            //{
+            //    //MessageBox.Show("Seçim kaydedildi!");
+            //}
+            //else
+            //{
+            //    //MessageBox.Show("Seçim iptal edildi.");
+            //}
+        }
 
         public void myRepositoryItemEdit_KeyPress(object sender, KeyPressEventArgs e)
         {
@@ -159,6 +199,7 @@ namespace Tkn_Events
             v.tButtonHint.sender = tGridHint.view;
             v.tButtonHint.senderType = tGridHint.viewType;
             v.tButtonHint.buttonType = tGridHint.buttonType;
+            v.tButtonHint.viewType = tGridHint.viewType;
 
             if (v.tButtonHint.buttonType == v.tButtonType.btNone)
             {
@@ -530,7 +571,45 @@ namespace Tkn_Events
                 tGridHint.columnEditValue = editValue.Trim();
             }
 
+            //RepositoryItemSearchLookUpEdit
+
+            if (sender.GetType().ToString() == "DevExpress.XtraEditors.SearchLookUpEdit")
+            {
+                if (((DevExpress.XtraEditors.SearchLookUpEdit)sender).Properties.AccessibleDescription != null)
+                    tGridHint.columnPropNavigator = ((DevExpress.XtraEditors.SearchLookUpEdit)sender).Properties.AccessibleDescription;
+
+                if (((DevExpress.XtraEditors.SearchLookUpEdit)sender).OldEditValue != null)
+                    oldValue = ((DevExpress.XtraEditors.SearchLookUpEdit)sender).OldEditValue.ToString();
+
+                if (((DevExpress.XtraEditors.SearchLookUpEdit)sender).EditValue != null)
+                    editValue = ((DevExpress.XtraEditors.SearchLookUpEdit)sender).EditValue.ToString();
+                
+                tGridHint.parentObject = ((DevExpress.XtraEditors.SearchLookUpEdit)sender).Parent.GetType().ToString();
+
+                tGridHint.columnOldValue = oldValue.Trim();
+                tGridHint.columnEditValue = editValue.Trim();
+            }
+            
             tGridHint.editValueCount = tGridHint.columnEditValue.Length;
+
+
+            /// SİLME güzel bir alternatif yolu
+            //// Sender'ı BaseEdit'e dönüştür
+            //var edit = sender as DevExpress.XtraEditors.BaseEdit;
+
+            //if (edit != null)
+            //{
+            //    object selectedValue = edit.EditValue;
+            //    Console.WriteLine($"Yeni değer: {selectedValue}");
+
+            //    // Seçilen değere göre işlemler yapabilirsiniz
+            //    // Örneğin:
+            //    // if (selectedValue != null && selectedValue.ToString() == "1")
+            //    // {
+            //    //     // Belirli bir değer seçildiğinde yapılacaklar
+            //    // }
+            //}
+
         }
 
         public void getGridFormAndTableIPCode(object sender, ref vGridHint tGridHint)
@@ -722,7 +801,50 @@ namespace Tkn_Events
                     }
                 }
             }
-                        
+
+            if (senderType == "DevExpress.XtraEditors.SearchLookUpEdit")
+            {
+                tGridHint.viewType = "SearchLookUpEdit";
+
+                /// Sebebini bilmiyorum EditValueChanged çalışırken Name boş geliyor
+                /// bu nedenle fieldName yi AccessibleDefaultActionDescription üzerinden taşımak zorunda kaldım
+                /// 
+                tGridHint.columnFieldName = ((DevExpress.XtraEditors.SearchLookUpEdit)sender).Name.ToString();
+                tGridHint.columnFieldName = ((DevExpress.XtraEditors.SearchLookUpEdit)sender).AccessibleDefaultActionDescription.ToString();
+
+
+                if (((DevExpress.XtraEditors.SearchLookUpEdit)sender).Parent != null)
+                {
+                    senderType = ((DevExpress.XtraEditors.SearchLookUpEdit)sender).Parent.GetType().ToString();
+
+                    Control parentControl = ((DevExpress.XtraEditors.SearchLookUpEdit)sender).Parent;
+
+                    // yer değişikliği
+                    if (parentControl.GetType().ToString() == "DevExpress.XtraGrid.GridControl")
+                    {
+                        sender = ((DevExpress.XtraGrid.GridControl)parentControl).MainView;
+                        senderType = sender.GetType().ToString();
+                    }
+                    else
+                    {
+                        tGridHint.tForm = ((DevExpress.XtraEditors.SearchLookUpEdit)sender).FindForm();
+                        tGridHint.tableIPCode = ((DevExpress.XtraEditors.SearchLookUpEdit)sender).AccessibleName;
+                        tGridHint.view = sender;
+                        tGridHint.columnFieldName = ((DevExpress.XtraEditors.SearchLookUpEdit)sender).Name.ToString();
+                        tGridHint.parentObject = ((DevExpress.XtraEditors.SearchLookUpEdit)sender).Parent.GetType().ToString();
+
+                        if (((DevExpress.XtraEditors.SearchLookUpEdit)sender).OldEditValue != null)
+                            oldValue = ((DevExpress.XtraEditors.SearchLookUpEdit)sender).OldEditValue.ToString();
+
+                        if (((DevExpress.XtraEditors.SearchLookUpEdit)sender).EditValue != null)
+                            editValue = ((DevExpress.XtraEditors.SearchLookUpEdit)sender).EditValue.ToString();
+
+                        //return;
+                    }
+                }
+
+            }
+
             if (senderType == "DevExpress.XtraEditors.TimeSpanEdit")
             {
                 tGridHint.viewType = "TimeSpanEdit";
@@ -846,7 +968,7 @@ namespace Tkn_Events
 
                     tGridHint.parentObject = senderType;
                     if (tGridHint.viewType == "")
-                        tGridHint.viewType = "GridView";
+                        tGridHint.viewType = "AdvBandedGridView";
                 }
                 else
                     MessageBox.Show("Dikkat : GridControl.AdvBandedGridView null geliyor : ");
@@ -2608,7 +2730,7 @@ namespace Tkn_Events
             e.EditedAppointment.LabelKey = 10;
 
             if (((DevExpress.XtraScheduler.SchedulerControl)sender).AccessibleName == null) return;
-            if (((DevExpress.XtraScheduler.SchedulerControl)sender).AccessibleDescription == null) return;
+            //if (((DevExpress.XtraScheduler.SchedulerControl)sender).AccessibleDescription == null) return;
             if (((DevExpress.XtraScheduler.SchedulerControl)sender).AccessibleDefaultActionDescription == null) return;
 
             string gun = e.EditedAppointment.Start.Date.ToString();
@@ -2622,9 +2744,11 @@ namespace Tkn_Events
 
             Form tForm = ((DevExpress.XtraScheduler.SchedulerControl)sender).FindForm();
             string tableIPCode = ((DevExpress.XtraScheduler.SchedulerControl)sender).AccessibleName;
-            string IdFieldName = ((DevExpress.XtraScheduler.SchedulerControl)sender).AccessibleDescription;
-            string startDateFieldName = ((DevExpress.XtraScheduler.SchedulerControl)sender).AccessibleDefaultActionDescription;
-            
+            //string IdFieldName = ((DevExpress.XtraScheduler.SchedulerControl)sender).AccessibleDescription;
+            //string startDateFieldName = ((DevExpress.XtraScheduler.SchedulerControl)sender).AccessibleDefaultActionDescription;
+            string value = ((DevExpress.XtraScheduler.SchedulerControl)sender).AccessibleDefaultActionDescription;
+            string IdFieldName = t.Get_And_Clear(ref value, "||");
+            string startDateFieldName = t.Get_And_Clear(ref value, "||");
             DataSet ds = null;
             DataNavigator dN = null;
             t.Find_DataSet(tForm, ref ds, ref dN, tableIPCode);

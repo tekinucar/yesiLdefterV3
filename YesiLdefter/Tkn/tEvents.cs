@@ -1041,6 +1041,8 @@ namespace Tkn_Events
         #region buttonEdit Events
         public void buttonEdit_ButtonClick(object sender, DevExpress.XtraEditors.Controls.ButtonPressedEventArgs e)
         {
+            if (e.Button.Kind == DevExpress.XtraEditors.Controls.ButtonPredefines.Combo) return;
+
             tSearch se = new tSearch();
             DevExpress.XtraEditors.Controls.ButtonPredefines button = e.Button.Kind;
             se.buttonEdit_ButtonClick_(sender, button);
@@ -1055,7 +1057,54 @@ namespace Tkn_Events
             }
             #endregion  Button[1] click ise
         }
-        
+        public void ImageComboBoxEdit_HizliOnayButtonClick(object sender, DevExpress.XtraEditors.Controls.ButtonPressedEventArgs e)
+        {
+            #region Button[1] click ise
+            if (e.Button.Index == 1)
+            {
+                string formName = ((DevExpress.XtraEditors.ImageComboBoxEdit)sender).Properties.AccessibleDescription.ToString();
+                string tableIPCode = ((DevExpress.XtraEditors.ImageComboBoxEdit)sender).Properties.AccessibleName?.ToString();
+                string fieldName = ((DevExpress.XtraEditors.ImageComboBoxEdit)sender).Name?.ToString();
+                fieldName = fieldName.Replace("tEdit_HizliOnay_", "");
+
+                string editValue = "";
+                if (((DevExpress.XtraEditors.ImageComboBoxEdit)sender).EditValue != null)
+                        editValue = ((DevExpress.XtraEditors.ImageComboBoxEdit)sender).EditValue.ToString();
+
+                //MessageBox.Show("aaaaa : " + tableIPCode + "  : " + editValue + " : ");
+                if (editValue != "")
+                {
+                    Form tForm = Application.OpenForms[formName];
+                    DataSet ds = null;
+                    DataNavigator dN = null;
+                    t.Find_DataSet(tForm, ref ds, ref dN, tableIPCode);
+                    if (t.IsNotNull(ds))
+                    {
+                        tSave sv = new tSave();
+                        v.con_OnayChange = false;
+                        bool onay = false;
+                        int i2 = ds.Tables[0].Rows.Count;
+                        for (int i = 0; i < i2; i++)
+                        {
+                            onay = (bool)ds.Tables[0].Rows[i]["LKP_ONAY"];
+                            if (onay)
+                            {
+                                ds.Tables[0].Rows[i][fieldName] = editValue;
+                                ds.Tables[0].AcceptChanges();
+                                dN.Position = i;
+                                Application.DoEvents();
+                                //NavigatorButton btnSave = dN.Buttons.EndEdit;
+                                //dN.Buttons.DoClick(btnSave);
+                                sv.tDataSave(tForm, ds, dN, dN.Position);
+                            }
+                        }
+                    }
+                }
+
+            }
+            #endregion  Button[1] click ise
+        }
+
         public void buttonEdit_Enter(object sender, EventArgs e)
         {
             /// Buranın amacı xxx.EditValue içindeki değerleri hafızaya alıyor,
@@ -1322,6 +1371,7 @@ namespace Tkn_Events
 
                 if (t.IsNotNull(SubDetail_List) == false)
                     SubDetail_List = subDetail_List_;
+                else SubDetail_List += subDetail_List_;
 
                 #region SubDetail_List
                 if (t.IsNotNull(SubDetail_List))
@@ -1926,8 +1976,16 @@ namespace Tkn_Events
             v.tBildirim.hedefSourceTypeIdFName = t.Get_And_Clear(ref readKeyFieldNames, "=");      //  SourceTypeId= ye ulaşıyor
             v.tBildirim.kaynakSourceTypeIdValue = t.myInt16(t.Get_And_Clear(ref readKeyFieldNames, "##"));    //  21122 ye ulaşıyor
             v.tBildirim.hedefSourceIdFName = t.Get_And_Clear(ref readKeyFieldNames, "=");          //  SourceId= ye ulaşıyor
-            v.tBildirim.kaynakSourceIdFName = t.Get_And_Clear(ref readKeyFieldNames, "##");         //  eSinavNo ya ulaşıyor
+            v.tBildirim.kaynakSourceIdFName = t.Get_And_Clear(ref readKeyFieldNames, "##");        //  eSinavNo ya ulaşıyor
 
+            v.tBildirim.hedefDinamik1FName = t.Get_And_Clear(ref readKeyFieldNames, "=");          //  <ESINAVUCRETI>=   ne ulaşıyor
+            v.tBildirim.kaynakDinamik1FName = t.Get_And_Clear(ref readKeyFieldNames, "##");        //  Lkp_TaksitTutari  ne ulaşıyor
+
+            v.tBildirim.hedefDinamik2FName = t.Get_And_Clear(ref readKeyFieldNames, "=");          //  <UYGSINAVUCRETI>= ne ulaşıyor
+            v.tBildirim.kaynakDinamik2FName = t.Get_And_Clear(ref readKeyFieldNames, "##");        //  Lkp_TaksitTutari  ne ulaşıyor
+
+            v.tBildirim.hedefDinamik3FName = t.Get_And_Clear(ref readKeyFieldNames, "=");          //  <?????>= ne ulaşıyor
+            v.tBildirim.kaynakDinamik3FName = t.Get_And_Clear(ref readKeyFieldNames, "##");        //  Lkp_????Tutari  ne ulaşıyor
         }
         private void getBildirimMesajiAndView(string formName)
         {
@@ -2143,6 +2201,14 @@ namespace Tkn_Events
                         if (t.IsNotNull(tBildirim_.kaynakSourceIdFName))
                             tBildirim_.kaynakSourceIdValue = t.myInt32(row[tBildirim_.kaynakSourceIdFName].ToString());
 
+                        if (t.IsNotNull(tBildirim_.kaynakDinamik1FName))
+                            tBildirim_.kaynakDinamik1Value = row[tBildirim_.kaynakDinamik1FName].ToString();
+
+                        if (t.IsNotNull(tBildirim_.kaynakDinamik2FName))
+                            tBildirim_.kaynakDinamik2Value = row[tBildirim_.kaynakDinamik2FName].ToString();
+
+                        if (t.IsNotNull(tBildirim_.kaynakDinamik3FName))
+                            tBildirim_.kaynakDinamik3Value = row[tBildirim_.kaynakDinamik3FName].ToString();
 
                         setBildirimLines(tForm, dsLines, dNLines, tBildirim_);
                     }
@@ -2152,6 +2218,7 @@ namespace Tkn_Events
         private void setBildirimLines(Form tForm, DataSet dsLines, DataNavigator dNLines, bildirimPaketi tBildirim_)
         {
             string tableIPCode = tBildirim_.TableIPCodeLines;
+            string value = "";
 
             DataRow newRow = dsLines.Tables[0].NewRow();
 
@@ -2173,6 +2240,38 @@ namespace Tkn_Events
             newRow[tBildirim_.hedefAliciAdiFName] = tBildirim_.kaynakAliciAdiValue.ToString();
             newRow[tBildirim_.hedefSourceTypeIdFName] = t.myInt16(tBildirim_.kaynakSourceTypeIdValue.ToString());
             newRow[tBildirim_.hedefSourceIdFName] = t.myInt32(tBildirim_.kaynakSourceIdValue.ToString());
+
+            /// <UYGSINAVUCRETI>   <<<--- 1350
+            if (t.IsNotNull(tBildirim_.kaynakDinamik1FName) && t.IsNotNull(tBildirim_.kaynakDinamik1Value))
+            {
+                value = tBildirim_.kaynakDinamik1Value.ToString();
+                if (value.Length > 6)
+                {
+                    value = value.Replace(",00000", "");
+                    value = value.Replace(".00000", "");
+                }
+                newRow[tBildirim_.hedefDinamik1FName] = value;
+            }
+            if (t.IsNotNull(tBildirim_.kaynakDinamik2FName) && t.IsNotNull(tBildirim_.kaynakDinamik2Value))
+            {
+                value = tBildirim_.kaynakDinamik2Value.ToString();
+                if (value.Length > 6)
+                {
+                    value = value.Replace(",00000", "");
+                    value = value.Replace(".00000", "");
+                }
+                newRow[tBildirim_.hedefDinamik2FName] = value;
+            }
+            if (t.IsNotNull(tBildirim_.kaynakDinamik3FName) && t.IsNotNull(tBildirim_.kaynakDinamik3Value))
+            {
+                value = tBildirim_.kaynakDinamik3Value.ToString();
+                if (value.Length > 6)
+                {
+                    value = value.Replace(",00000", "");
+                    value = value.Replace(".00000", "");
+                }
+                newRow[tBildirim_.hedefDinamik3FName] = value;
+            }
 
             dsLines.Tables[0].Rows.Add(newRow);
 
@@ -2965,10 +3064,17 @@ namespace Tkn_Events
 
             var myOldList = JsonConvert.DeserializeObject(OldBlock);
             var myNewList = JsonConvert.DeserializeObject(NewBlock);
-
-            s2 = myOldList.ToString();
-            s3 = myNewList.ToString();
-
+            try
+            {
+                s2 = myOldList.ToString();
+                s3 = myNewList.ToString();
+            }
+            catch (Exception)
+            {
+                s2 = "";
+                s3 = "";
+            }
+            
             if ((list) && (s2.Length > 6) && (s3.Length > 6))
             {
                 s2 = s2.Remove(0, 3);
@@ -3889,6 +3995,7 @@ namespace Tkn_Events
                         if (beforeAfter == v.tBeforeAfter.After)
                         {
                             if ((buttonType == v.tButtonType.btListele) ||
+                                (buttonType == v.tButtonType.btListeyeEkle ) ||
                                 (buttonType == v.tButtonType.btSilListe) ||
                                 (buttonType == v.tButtonType.btSilSatir) ||
                                 (buttonType == v.tButtonType.btSilBelge) ||
@@ -7864,8 +7971,8 @@ namespace Tkn_Events
 
             if (dsSubDetail_Data == null)
             {
-                v.Kullaniciya_Mesaj_Var =
-                    "DİKKAT : " + SubDetail_TableIPCode + " için DataSet tespit edilemedi...";
+                //v.Kullaniciya_Mesaj_Var =
+                //    "DİKKAT : " + SubDetail_TableIPCode + " için DataSet tespit edilemedi...";
                 return onay;
             }
 
@@ -7986,6 +8093,7 @@ namespace Tkn_Events
             bool IsChange = false;
             string satir = string.Empty;
             string new_And = string.Empty;
+            string newAnd_ = string.Empty;
             string read_mst_TableIPCode = string.Empty;
             string read_mst_FName = string.Empty;
             string read_sub_FName = string.Empty;
@@ -8171,10 +8279,32 @@ namespace Tkn_Events
 
                                 i_bgn = Sql.IndexOf(str_bgn);
 
+                                if (i_bgn == -1)
+                                {
+                                    if (read_field_type == "40")
+                                        str_bgn = " --and Convert(Date, " + read_sub_FName + ", 103)  >=";
+                                    if (read_field_type == "58")
+                                        str_bgn = " --and Convert(Datetime, " + read_sub_FName + ", 103)  >=";
+
+                                    i_bgn = Sql.IndexOf(str_bgn);
+                                }
+
                                 str_end = "   -- :D.SD.";// + read_RefId + ": -->=";
                                 i_end = Sql.IndexOf(str_end, i_bgn);
-                                
-                                new_And = " and " + t.Set_FieldName_Value_(System.Convert.ToInt16(read_field_type), read_sub_FName, Speed_Value, "and", ">=");
+
+                                /// önceki yapı
+                                /// new_And = " and " + t.Set_FieldName_Value_(System.Convert.ToInt16(read_field_type), read_sub_FName, Speed_Value, "and", ">=");
+
+                                newAnd_ = t.Set_FieldName_Value_(System.Convert.ToInt16(read_field_type), read_sub_FName, Speed_Value, "and", ">=");
+
+                                if (newAnd_.IndexOf("--") == -1)
+                                    new_And = " and " + newAnd_;
+                                else
+                                {
+                                    /// null veya boş değer geldiyse sorgudaki parametre iptal olsun
+                                    newAnd_ = newAnd_.Substring(2) + " = ???";//   -- :D.SD." + read_RefId + ": --" + v.ENTER;  gerek yok
+                                    new_And = " --and " + newAnd_;
+                                }
                             }
 
                             /// <= işlemleri
@@ -8188,10 +8318,32 @@ namespace Tkn_Events
 
                                 i_bgn = Sql.IndexOf(str_bgn);
 
+                                if (i_bgn == -1)
+                                {
+                                    if (read_field_type == "40")
+                                        str_bgn = " --and Convert(Date, " + read_sub_FName + ", 103)  <=";
+                                    if (read_field_type == "58")
+                                        str_bgn = " --and Convert(Datetime, " + read_sub_FName + ", 103)  <=";
+
+                                    i_bgn = Sql.IndexOf(str_bgn);
+                                }
+
                                 str_end = "   -- :D.SD.";// + read_RefId + ": --<=";
                                 i_end = Sql.IndexOf(str_end, i_bgn);
 
-                                new_And = " and " + t.Set_FieldName_Value_(System.Convert.ToInt16(read_field_type), read_sub_FName, Speed_Value, "and", "<=");
+                                /// önceki yapı
+                                /// new_And = " and " + t.Set_FieldName_Value_(System.Convert.ToInt16(read_field_type), read_sub_FName, Speed_Value, "and", "<=");
+
+                                newAnd_ = t.Set_FieldName_Value_(System.Convert.ToInt16(read_field_type), read_sub_FName, Speed_Value, "and", "<=");
+
+                                if (newAnd_.IndexOf("--") == -1)
+                                    new_And = " and " + newAnd_;
+                                else
+                                {
+                                    /// null veya boş değer geldiyse sorgudaki parametre iptal olsun
+                                    newAnd_ = newAnd_.Substring(2) + " = ???";//   -- :D.SD." + read_RefId + ": --" + v.ENTER;  gerek yok
+                                    new_And = " --and " + newAnd_;
+                                }
                             }
 
                             ///------
@@ -8212,10 +8364,32 @@ namespace Tkn_Events
 
                             i_bgn = Sql.IndexOf(str_bgn);
 
+                            if (i_bgn == -1)
+                            {
+                                if (read_field_type == "40")
+                                    str_bgn = " --and Convert(Date, " + read_sub_FName;
+                                if (read_field_type == "58")
+                                    str_bgn = " --and Convert(Datetime, " + read_sub_FName;
+
+                                i_bgn = Sql.IndexOf(str_bgn);
+                            }
+
                             str_end = "   -- :D.SD.";// + read_RefId + ": --";
                             i_end = Sql.IndexOf(str_end, i_bgn);
 
-                            new_And = " and " + t.Set_FieldName_Value_(System.Convert.ToInt16(read_field_type), read_sub_FName, Speed_Value, "and", OperandType);
+                            /// önceki yapı
+                            /// new_And = " and " + t.Set_FieldName_Value_(System.Convert.ToInt16(read_field_type), read_sub_FName, Speed_Value, "and", OperandType);
+
+                            newAnd_ = t.Set_FieldName_Value_(System.Convert.ToInt16(read_field_type), read_sub_FName, Speed_Value, "and", OperandType);
+
+                            if (newAnd_.IndexOf("--") == -1)
+                                new_And = " and " + newAnd_;
+                            else
+                            {
+                                /// null veya boş değer geldiyse sorgudaki parametre iptal olsun
+                                newAnd_ = newAnd_.Substring(2) + " = ???";//   -- :D.SD." + read_RefId + ": --" + v.ENTER;  gerek yok
+                                new_And = " --and " + newAnd_;
+                            }
                         }
 
                         // Stored Procedures için hazırlık burada

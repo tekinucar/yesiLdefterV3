@@ -12,7 +12,7 @@ Select * From sys.objects
 Where name like '%Mtsk%'
 and schema_id = 1
 and ( type_desc = 'USER_TABLE'
-   or type_desc = 'SQL_STORED_PROCEDUREx')
+   or type_desc = 'SQL_STORED_PROCEDURExxxxx')
 
 order by modify_date desc
 
@@ -735,3 +735,20 @@ BEGIN
 */
   set @say = @say + 1
 END 
+
+
+
+/*
+
+Full HD çözünürlük (1920x1080 piksel) ilk olarak 2006 yılında yaygınlaşmaya başladı.
+
+Önemli Gelişmeler:
+2005-2006: İlk ticari Full HD (1080p) televizyonlar piyasaya çıktı (örneğin, Sony, Sharp ve diğer markalar).
+
+2006: Blu-ray Disc formatıyla birlikte 1080p içerik yaygınlaştı.
+
+2007-2008: Full HD monitörler ve dizüstü bilgisayarlar daha erişilebilir hale geldi.
+
+Özellikle 2007-2008 dönemi, Full HD'nin hem TV'lerde hem de bilgisayar monitörlerinde standart haline gelmeye başladığı yıllardı.
+
+*/

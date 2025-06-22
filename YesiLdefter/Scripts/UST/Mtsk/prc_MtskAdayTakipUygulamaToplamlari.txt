@@ -4,7 +4,7 @@
 CREATE PROCEDURE [dbo].[prc_MtskAdayTakipUygulamaToplamlari] (@FirmId int, @DonemTipiId int)  
 AS BEGIN
 
---declare @FirmId int = 30
+ --declare @FirmId int = 30
 
 -- UygulamaliDersTipi
 Select 
@@ -19,6 +19,7 @@ From MtskAdayTakip as takip
 	   ( takip.UygulamaliDersTipiId = tip.Id )
 Where takip.FirmId = @FirmId
 and   takip.UygulamaliDersTipiId > 0 -- tanımsız
+and ( takip.KayitTipiId = 2 or takip.KayitTipiId = 3 )
 
 Group by 
    tip.KonuId
@@ -41,6 +42,7 @@ From MtskAdayTakip as takip
 	   ( takip.BasarisizDersTipiId = tip.Id )
 Where takip.FirmId = @FirmId
 and   takip.BasarisizDersTipiId > 0
+and ( takip.KayitTipiId = 2 or takip.KayitTipiId = 3 )
 
 Group by 
    tip.KonuId
@@ -63,14 +65,13 @@ From MtskAdayTakip as takip
 	   ( takip.Arti4DersTipiId = tip.Id )
 Where takip.FirmId = @FirmId
 and   takip.Arti4DersTipiId > 0
+and ( takip.KayitTipiId = 2 or takip.KayitTipiId = 3 )
 
 Group by 
    tip.KonuId
  , tip.KonuCaption   
  , tip.Arti4DersTipi
  , tip.FormCaption 
-
-
 
 END -- procedure
 

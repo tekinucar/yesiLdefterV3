@@ -4,11 +4,13 @@
 CREATE PROCEDURE [dbo].[prc_MtskGrupSubesiTeorikDersToplamList] (@FirmId int, @DonemTipiId int)  
 AS BEGIN
  
--- declare @FirmId int = 63
--- declare @DonemTipiId int = 202503
+ 
+ --declare @FirmId int = 11
+ --declare @DonemTipiId int = 202506
  
  Select 
-   MtskGrupSubesi.DonemTipiId
+   MtskGrupSubesi.Id
+ , MtskGrupSubesi.DonemTipiId
  , MtskGrupSubesi.GrupTipiId
  , MtskGrupSubesi.SubeTipiId
  , FNo6.GrupTipi + '.' + FNo7.SubeTipi as Lkp_GrupSubeTipi
@@ -58,7 +60,8 @@ AS BEGIN
  and MtskGrupSubesi.IsActive = 1 
 
  group by
-   MtskGrupSubesi.DonemTipiId
+   MtskGrupSubesi.Id
+ , MtskGrupSubesi.DonemTipiId
  , MtskGrupSubesi.GrupTipiId
  , MtskGrupSubesi.SubeTipiId
  , FNo6.GrupTipi 
@@ -71,6 +74,7 @@ AS BEGIN
  , saat.AracTeknigiDersSaati
  , saat.TrafikAdabiDersSaati 
  , teo.DerslikTipiId
+
 
 END -- procedure
 

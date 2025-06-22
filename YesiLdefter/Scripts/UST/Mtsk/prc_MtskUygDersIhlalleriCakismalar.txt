@@ -5,22 +5,14 @@
 CREATE PROCEDURE [dbo].[prc_MtskUygDersIhlalleriCakismalar] (@curId bigint)  
 AS BEGIN
 
-  --declare @curId int = 4343--test 710
-  declare @FirmId int
-  declare @DersDonemTipiId int = 0
-
-  Select 
-       @FirmId = ins.FirmId  
-	  ,@DersDonemTipiId = ins.DersDonemTipiId
-  From dbo.MtskUygulamaliDers as ins
-  Where ins.Id = @curId
+  --declare @FirmId int
+  --declare @TalepId int
   
   Delete dbo.MtskKIhlalUygulamaD
-  Where  FirmId = @FirmId
-  and    DersDonemTipiId = @DersDonemTipiId
+  Where  FirmId  = @FirmId
+  and    TalepId = @TalepId
   and    IhlalTipiId > 20
   and    IhlalTipiId < 30   
-  
 
   -- ---------------------------------------------------------------------
   -- Çakışmaların tespiti : 21, 22, 23, 24, 25, 29  idli ihlaller
@@ -34,6 +26,7 @@ AS BEGIN
          , EgitimYeriTipiId
          , EgitimAraciId
          , PersonelId  
+		 , TalepId
 
          , DersTarihi
          , DersSaatiTipiId
@@ -51,6 +44,7 @@ AS BEGIN
         , tespit.EgitimYeriTipiId
         , tespit.EgitimAraciId
         , tespit.PersonelId
+		, tespit.TalepId
 
         , tespit.DersTarihi
         , tespit.DersSaatiTipiId
@@ -76,6 +70,7 @@ AS BEGIN
         , td.EgitimYeriTipiId
         , td.EgitimAraciId
         , td.PersonelId 
+		, td.TalepId
 
         , td.DersTarihi 
         , td.DersSaatiTipiId
@@ -97,20 +92,21 @@ AS BEGIN
             )
         Where 0 = 0
         and   td.FirmId = mvc.FirmId
+        and   td.TalepId = @TalepId
         and   mvc.Id > 0
-        and   td.DersDonemTipiId = @DersDonemTipiId
 
         ) as tespit     
 
            left join dbo.MtskKIhlalUygulamaD as ihl on (
                  tespit.FirmId = ihl.FirmId 
-           and   tespit.DersDonemTipiId = ihl.DersDonemTipiId 
+           and   tespit.TalepId = ihl.TalepId
            and   tespit.IhlalTipiId = ihl.IhlalTipiId
            and   tespit.DersTarihi  = ihl.DersTarihi
            and   tespit.DersSaatiTipiId = ihl.DersSaatiTipiId
       )
       Where ihl.Id is null
 
+  /*
   -- Çift oluşan kayıtlardan birini sil 
   Delete From dbo.MtskKIhlalUygulamaD 
   Where Id in (
@@ -128,6 +124,7 @@ AS BEGIN
      and   ihl1.DersTarihi = ihl2.DersTarihi
      and   ihl1.DersSaatiTipiId = ihl2.DersSaatiTipiId
   )
+  */
 
 END -- procedure
 

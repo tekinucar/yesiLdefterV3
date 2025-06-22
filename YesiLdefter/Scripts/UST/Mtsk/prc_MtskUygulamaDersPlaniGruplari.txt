@@ -6,7 +6,7 @@ AS BEGIN
 -- DonemTipiId   : Dönem
 -- EgitimAraciId : Eğitim Aracı
 -- PersonelId    : Usta Öğretici
--- AdayId        : Aday
+-- TalepId       : Aday Talebi
 
 -- declare @DonemTipiId Int 
 -- set @DonemTipiId = 202411
@@ -15,7 +15,7 @@ AS BEGIN
      @DonemTipiId as DonemTipiId
    , '' as EgitimAraciId 
    , '' as PersonelId
-   , 0  AdayId 
+   , 0  TalepId 
    , 'Dönem' as Lkp_ElemanGrubu
    , donem.DonemTipi as Lkp_ElemanAdi
    , '' as Lkp_SertifikaTipi
@@ -28,14 +28,18 @@ AS BEGIN
      @DonemTipiId as DonemTipiId
    , x.EgitimAraciId 
    , '' as PersonelId 
-   , 0  as AdayId
+   , 0  as TalepId
    , (case x.EgitimYeriTipiId
 	  when 3 then 'Simülatör'
 	  else 'Eğitim Aracı' end) as Lkp_ElemanGrubu
    , x.EgitimAraciId as Lkp_ElemanAdi
    , '' as Lkp_SertifikaTipi
    from (
-     Select distinct [uygDers].EgitimAraciId, [uygDers].EgitimYeriTipiId
+     Select distinct [uygDers].EgitimAraciId
+	 , ( case [uygDers].EgitimYeriTipiId 
+	     when 1 then 1
+		 when 2 then 1
+		 when 3 then 3 end ) as EgitimYeriTipiId
      from MtskUygulamaliDers as [uygDers]
      Where [uygDers].DersDonemTipiId = @DonemTipiId
    ) as x
@@ -47,7 +51,7 @@ AS BEGIN
      @DonemTipiId as DonemTipiId
    , '' as EgitimAraciId 
    , x.PersonelId
-   , 0  AdayId 
+   , 0  TalepId 
    , 'Usta Eğitici' as Lkp_ElemanGrubu
    , x.TamAdiSoyadi as Lkp_ElemanAdi
    , '' as SertifikaTipi
@@ -64,12 +68,12 @@ AS BEGIN
      @DonemTipiId as DonemTipiId
    , '' as EgitimAraciId 
    , '' PersonelId
-   , x.AdayId 
+   , x.TalepId 
    , 'Aday' as Lkp_ElemanGrubu
    , x.TamAdiSoyadi as Lkp_ElemanAdi
    , x.SertifikaTipi as Lkp_SertifikaTipi
    from (
-     Select distinct [uygDers].AdayId, aday.TamAdiSoyadi, ser.SertifikaTipi
+     Select distinct [uygDers].TalepId, aday.TamAdiSoyadi, ser.SertifikaTipi
      from MtskUygulamaliDers as [uygDers]
 	   left outer join MtskAdayTalep as [talep] on (uygDers.TalepId = Talep.Id)
 	   left outer join MtskAday as [aday] on (uygDers.AdayId = aday.Id)

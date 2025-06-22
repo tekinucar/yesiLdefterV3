@@ -14,13 +14,14 @@ CREATE PROCEDURE [dbo].[prc_MtskUygulamaDersInsert] (
   )
 AS BEGIN
 
+  --print '  prc_MtskUygulamaDersInsert start'
   if ( Select count(Id) as Adet
        From dbo.MtskUygulamaliDers
        Where TalepId = @TalepId
        and   DersTarihi = @DersTarihi
        and   SaatSiraNo = @SaatSiraNo ) = 0
   begin
-
+     --print '    prc_MtskUygulamaDersInsert insert'
      INSERT INTO [dbo].[MtskUygulamaliDers]
            ([FirmId]
            ,[IsActive]
@@ -71,6 +72,7 @@ AS BEGIN
     
   end -- if
 
+  --print '  prc_MtskUygulamaDersInsert stop'
 
 END -- procedure 
 

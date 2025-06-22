@@ -20,6 +20,7 @@ begin transaction
    DersTarihi             Date          null,
    DersSaatiTipiId        SmallInt      null,
    DersHaftasiId          SmallInt      null,  /* yılın hangi haftasına denk geldi, bu sayede o haftadaki tüm dersler listeleniyor */  
+   DersHaftasi            Varchar(25)   null,  /* hafta başı / hafta sonu bilgisi */
 
    InsertedId             Int           null,  /* o an işlem yapılan satır MtskTeorikDers.Id */
    MevcutId               Int           null,  /* önceden kaydedilen satır MtskTeorikDers.Id */

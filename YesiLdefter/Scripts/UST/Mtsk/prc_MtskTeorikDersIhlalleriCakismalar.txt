@@ -1,25 +1,25 @@
 ﻿
 /*CreateProcedure*/
 
-CREATE PROCEDURE [dbo].[prc_MtskTeorikDersIhlalleriCakismalar] (@curId bigint)  
+CREATE PROCEDURE [dbo].[prc_MtskTeorikDersIhlalleriCakismalar] (@FirmId int, @DonemTipiId int)  
 AS BEGIN
 
   --declare @curId int = 576--test 710
-  declare @FirmId int
-  declare @DonemTipiId int = 0
+  --declare @FirmId int
+  --declare @DonemTipiId int = 0
 
-  Select 
-       @FirmId      = ins.FirmId  
-	  ,@DonemTipiId = ins.DonemTipiId
-  From dbo.MtskTeorikDers as ins
-  Where ins.Id = @curId
+  --Select 
+  --     @FirmId      = ins.FirmId  
+  --    ,@DonemTipiId = ins.DonemTipiId
+  --From dbo.MtskTeorikDers as ins
+  --Where ins.Id = @curId
   
   Delete dbo.MtskKIhlalTeorikD
   Where  FirmId = @FirmId
   and    DonemTipiId = @DonemTipiId
   and    IhlalTipiId > 20
   and    IhlalTipiId < 30   
-  
+ 
 
   -- ---------------------------------------------------------------------
   -- Çakışmaların tespiti : 21, 22, 23, 24, 25, 29  idli ihlaller
@@ -81,17 +81,21 @@ AS BEGIN
 
         From dbo.MtskTeorikDers as td 
             left outer join [dbo].[MtskTeorikDers] as mvc on (
-                td.FirmId = mvc.FirmId 
+                mvc.FirmId = @FirmId 
             and td.DersTarihi = mvc.DersTarihi
             and td.BaslamaSaati = mvc.BaslamaSaati
             and ( td.DerslikTipiId = mvc.DerslikTipiId 
-            or    td.PersonelId = mvc.PersonelId )
+            or    td.PersonelId = mvc.PersonelId 
+			or  ( td.DonemTipiId = mvc.DonemTipiId 
+			  and td.GrupTipiId = mvc.GrupTipiId
+			  and td.SubeTipiId = mvc.SubeTipiId )
+			)
             and td.Id != mvc.Id
             )
         Where 0 = 0
-        and   td.FirmId = mvc.FirmId
-        and   mvc.Id > 0
+        and   td.FirmId = @FirmId
         and   td.DonemTipiId = @DonemTipiId
+        and   mvc.Id > 0
 
         ) as tespit     
 
@@ -127,4 +131,5 @@ AS BEGIN
   )
 
 END -- procedure
+
 /*CreateProcedureEnd*/

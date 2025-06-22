@@ -237,8 +237,9 @@ namespace Tkn_Variable
         public static bool con_Images_Selecting;
         public static long con_Images_Length = 0;
 
+        public static bool con_ResimEditorRun = false;
         public static bool con_CreatePopupContainer = false;
-
+        public static bool con_NewFilesFound = false;
         public static bool con_SetFocus;
         public static string con_SetFocus_TableIPCode { get; set; }
         public static string con_SetFocus_FieldName { get; set; }
@@ -284,6 +285,8 @@ namespace Tkn_Variable
         public static string EXE_FastReportsPath = string.Empty;
         public static string EXE_DevExReportsPath = string.Empty;
         public static string EXE_ScriptsPath = string.Empty;
+        public static string EXE_Arguments = string.Empty;
+
         public static string sp_Sakla = string.Empty;
 
         public static string SP_TabimParamsKurumTipi = "";
@@ -345,6 +348,7 @@ namespace Tkn_Variable
         public static DataSet ds_DonemTipiList = new DataSet();
         public static DataSet ds_ILList = new DataSet();
         public static DataSet ds_IlceList = new DataSet();
+        public static DataTable dt_SearchLookUp = null;
 
         public static List<string> tableList = new List<string>();
         public static List<string> tableIPCodeTableList = new List<string>();
@@ -354,6 +358,8 @@ namespace Tkn_Variable
         public static List<string> msMenuItemsList = new List<string>();
         public static List<string> dataCopyList = new List<string>();
         public static List<string> dataCopyLinesList = new List<string>();
+        public static List<List<string>> dynamicTable = new List<List<string>>();
+
 
         public static DataSet ds_MsTableFields = new DataSet();
         public static DataSet ds_TableIPCodeTable = new DataSet();
@@ -1967,6 +1973,8 @@ namespace Tkn_Variable
 
         public List<HtmlElement> elements { get; set; }
 
+        public IList<OpenQA.Selenium.IWebElement> htmlTable { get; set; }
+
         public List<OpenQA.Selenium.IWebElement> elementsSelenium { get; set; }
 
         public int nodeId { get; set; }
@@ -1996,6 +2004,7 @@ namespace Tkn_Variable
         public string keyValue { get; set; } // set sırasında key (TcNo == "xxx") anahtarı olarak kullanılacak
 
         public tTable tTable { get; set; }
+        public List<List<string>> dynamicTable { get; set; }
         public Int16 tTableColNo {get; set; }
         public string TableIPCode { get; set; }
         public string dbFieldName { get; set; }
@@ -2040,6 +2049,7 @@ namespace Tkn_Variable
             writeValue = "";
             keyValue = "";
             tTable = null;
+            dynamicTable = null;
             tTableColNo = 0;
             TableIPCode = "";
             dbFieldName = "";
@@ -2051,6 +2061,7 @@ namespace Tkn_Variable
             KrtOperandType = "";
             CheckOperandValue = "";
             CheckNodeId = 0;
+            htmlTable = null;
 
             ds = null; // o anda işlem yapılan dataset 
             dN = null; //   ve datanavigator
@@ -2189,6 +2200,7 @@ namespace Tkn_Variable
     {
         public Form tForm { get; set; }
         public Control navigatorPanel { get; set; }
+        public DataSet ds_Fields { get; set; }
         public string navigatorList { get; set; }
         public string TableIPCode { get; set; }
         public string buttonName { get; set; }
@@ -2414,6 +2426,7 @@ namespace Tkn_Variable
         public string foreingFieldName_ { get; set; }
         public string parentFieldName_ { get; set; }
         public string parentObject { get; set; }
+        public string viewType { get; set; }
         public void Clear()
         {
             tForm = null;
@@ -2435,6 +2448,7 @@ namespace Tkn_Variable
             foreingFieldName_ = "";
             parentFieldName_ = "";
             parentObject = "";
+            viewType = "";
         }
     }
 
@@ -2541,6 +2555,21 @@ namespace Tkn_Variable
         public string kaynakSourceIdFName { get; set; }
         public int kaynakSourceIdValue { get; set; }
 
+
+        public string hedefDinamik1FName { get; set; }
+        public string kaynakDinamik1FName { get; set; }
+        public string kaynakDinamik1Value { get; set; }
+
+        public string hedefDinamik2FName { get; set; }
+        public string kaynakDinamik2FName { get; set; }
+        public string kaynakDinamik2Value { get; set; }
+
+
+        public string hedefDinamik3FName { get; set; }
+        public string kaynakDinamik3FName { get; set; }
+        public string kaynakDinamik3Value { get; set; }
+
+
         public void Clear()
         {
             formName = "";
@@ -2586,6 +2615,19 @@ namespace Tkn_Variable
             hedefSourceIdFName = "";
             kaynakSourceIdFName = "";
             kaynakSourceIdValue = 0;
+
+            hedefDinamik1FName = "";
+            kaynakDinamik1FName = "";
+            kaynakDinamik1Value = "";
+
+            hedefDinamik2FName = "";
+            kaynakDinamik2FName = "";
+            kaynakDinamik2Value = "";
+
+            hedefDinamik3FName = "";
+            kaynakDinamik3FName = "";
+            kaynakDinamik3Value = "";
+
         }
 
     }

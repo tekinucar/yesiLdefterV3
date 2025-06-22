@@ -1,5 +1,6 @@
 ﻿using DevExpress.Utils.DragDrop;
 using System;
+using System.Drawing;
 using System.Windows.Forms;
 using Tkn_Events;
 using Tkn_ToolBox;
@@ -12,6 +13,7 @@ namespace YesiLdefter
         public ms_Form()
         {
             InitializeComponent();
+
             //this.Load += new System.EventHandler(ev.myForm_Load);
             //this.Shown += new System.EventHandler(ev.myForm_Shown);
             this.Shown += new System.EventHandler(this.ms_Form_Shown);
@@ -20,7 +22,6 @@ namespace YesiLdefter
 
         private void ms_Form_Shown(object sender, EventArgs e)
         {
-            
             tToolBox t = new tToolBox();
             
             /// DragDrop viewler var mı kontrol et

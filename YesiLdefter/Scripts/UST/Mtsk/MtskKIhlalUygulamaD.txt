@@ -13,7 +13,8 @@ begin transaction
    IhlalTipiId            SmallInt      null,  /* detay aşağıda */
    EgitimYeriTipiId       SmallInt      null,  /* 1. Direksiyon Eğitim Alanı, 2. Akan Trafik, 3. Simülatör */
    DersSaatSayisi         SmallInt      null,  /* ya eksik saat yada fazla saat yazılacak */
-
+   OlmasiGerekenDersSaat  SmallInt      null,  /* Kaç saat verilemsi gereken saat */
+   
    EgitimAraciId          Varchar(30)   null,  /* eğitim aracı veya simulatör */
    PersonelId             Varchar(20)   null,  /* perspnel çakışması yada personelin ders saati dolunca */
    TalepId                Int           null,  /* talepId */ 
@@ -21,6 +22,7 @@ begin transaction
    DersTarihi             Date          null,
    DersSaatiTipiId        SmallInt      null,
    DersHaftasiId          SmallInt      null,  /* yılın hangi haftasına denk geldi, bu sayede o haftadaki tüm dersler listeleniyor */  
+   DersHaftasi            Varchar(25)   null,  /* hafta başı / hafta sonu bilgisi */
    EgitimTipiId           SmallInt      null, /* 1. Normal, 2. Telafi */
 
    InsertedId             Int           null,  /* o an işlem yapılan satır MtskUygulamaliDers.Id */
@@ -197,6 +199,11 @@ commit transaction
 --  sertifikaya bağlı aracın otomatiği yoksa talep kaydı sırasında otomatik seçeneğini işaretleyemez
 
 
+/*
+
+alter table MtskKIhlalUygulamaD add OlmasiGerekenDersSaat  SmallInt      null
+
+*/
 
 
 

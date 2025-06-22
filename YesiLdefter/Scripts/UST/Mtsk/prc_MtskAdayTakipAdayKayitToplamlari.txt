@@ -4,7 +4,7 @@ CREATE PROCEDURE [dbo].[prc_MtskAdayTakipAdayKayitToplamlari] (@FirmId int, @Don
 AS BEGIN
 
   -- Variables
-  --declare @FirmId int = 629
+  --declare @FirmId int = 11
   --declare @DonemTipiId int = 202501
   declare @sql nvarchar(max)
   declare @sqlDonemTipiVar nvarchar(max)
@@ -22,10 +22,7 @@ AS BEGIN
 
   Set @sql1 = '
   declare @FirmId int 
-  declare @DonemTipiId int 
-  Set @FirmId = ' + Convert(varchar(10),@FirmId) + '
-  Set @DonemTipiId = ' + Convert(varchar(10),@DonemTipiId) + '
-  ';  
+  Set @FirmId = ' + Convert(varchar(10),@FirmId) + ' ';  
 
   Set @sqlDonemTipiVar = ' 
 -- SertifikaTipi
@@ -37,10 +34,9 @@ Select
  , count(talep.Id) as AdaySayisi 
 
 From MtskAdayTalep as talep
-     left outer join Lkp.MtskSertifikaTipi as tip on 
-	   ( talep.IstenenSertifikaTipiId = tip.Id )
-Where FirmId = @FirmId
-and   DonemTipiId = @DonemTipiId
+     left outer join Lkp.MtskSertifikaTipi as tip on ( talep.IstenenSertifikaTipiId = tip.Id )
+Where talep.FirmId = @FirmId
+and   isnull(talep.KayitTipiId,0) <= 3
 
 Group by 
    tip.Id
@@ -58,10 +54,9 @@ Select
  , count(talep.Id) as AdaySayisi 
 
 From MtskAdayTalep as talep
-     left outer join Lkp.MtskAdayTakipTalepTipi as tip on 
-	   ( talep.TalepTipiId = tip.Id )
-Where FirmId = @FirmId
-and   DonemTipiId = @DonemTipiId
+     left outer join Lkp.MtskAdayTakipTalepTipi as tip on ( talep.TalepTipiId = tip.Id )
+Where talep.FirmId = @FirmId
+and   isnull(talep.KayitTipiId,0) <= 3
 
 Group by 
    tip.KonuId
@@ -80,10 +75,9 @@ Select
  , count(talep.Id) as AdaySayisi 
 
 From MtskAdayTalep as talep
-     left outer join Lkp.MtskAdayTakipKayitTipi as tip on 
-	   ( talep.KayitTipiId = tip.Id )
-Where FirmId = @FirmId
-and   DonemTipiId = @DonemTipiId
+     left outer join Lkp.MtskAdayTakipKayitTipi as tip on ( talep.KayitTipiId = tip.Id )
+Where talep.FirmId = @FirmId
+and   isnull(talep.KayitTipiId,0) <= 3
 
 Group by 
    tip.KonuId
@@ -104,10 +98,9 @@ Select
 From MtskAdayTakip as takip
      left outer join Lkp.MtskAdayTakipBelgelerTipi as tip on ( tip.KonuId = 1261 )
 
-Where FirmId = @FirmId
-and   DonemTipiId = @DonemTipiId
+Where takip.FirmId = @FirmId
 and   takip.BelgelerGeldi = 0 
-and  (takip.KayitTipiId = 2 or takip.KayitTipiId = 3 ) 
+and   isnull(takip.KayitTipiId,0) <= 3
 
 group by tip.KonuId 
        , tip.KonuCaption
@@ -127,10 +120,9 @@ Select
 From MtskAdayTakip as takip
      left outer join Lkp.MtskAdayTakipBelgelerTipi as tip on ( tip.KonuId = 1262 )
 
-Where FirmId = @FirmId
-and   DonemTipiId = @DonemTipiId
+Where takip.FirmId = @FirmId
 and   takip.BelgelerTarandi = 0 
-and  (takip.KayitTipiId = 2 or takip.KayitTipiId = 3 ) 
+and   isnull(takip.KayitTipiId,0) <= 3
 
 group by tip.KonuId 
        , tip.KonuCaption
@@ -150,10 +142,9 @@ Select
 From MtskAdayTakip as takip
      left outer join Lkp.MtskAdayTakipBelgelerTipi as tip on ( tip.KonuId = 1263 )
 
-Where FirmId = @FirmId
-and   DonemTipiId = @DonemTipiId
+Where takip.FirmId = @FirmId
 and   takip.BelgelerYuklendi = 0 
-and  (takip.KayitTipiId = 2 or takip.KayitTipiId = 3 ) 
+and   isnull(takip.KayitTipiId,0) <= 3
 
 group by tip.KonuId 
        , tip.KonuCaption
@@ -173,8 +164,8 @@ Select
 From MtskAdayTalep as talep
      left outer join Lkp.MtskAdayTakipMebbisOnayiTipi as tip on ( talep.MebbisKurumOnayi = tip.Id )
 
-Where FirmId = @FirmId
-and   DonemTipiId = @DonemTipiId
+Where talep.FirmId = @FirmId
+and   isnull(talep.KayitTipiId,0) <= 3
 
 group by tip.KonuId 
        , tip.KonuCaption
@@ -192,11 +183,10 @@ Select
  , count(takip.Id) as AdaySayisi 
  
 From MtskAdayTakip as takip
-     left outer join Lkp.MtskAdayTakipYasOnayiTipi as tip on 
-	   ( takip.YasOnayiTipiId = tip.Id )
-Where FirmId = @FirmId
-and   DonemTipiId = @DonemTipiId 
+     left outer join Lkp.MtskAdayTakipYasOnayiTipi as tip on ( takip.YasOnayiTipiId = tip.Id )
+Where takip.FirmId = @FirmId
 and   takip.YasOnayiTipiId = 5
+and   isnull(takip.KayitTipiId,0) <= 3
 
 Group by 
    tip.KonuId
@@ -218,12 +208,13 @@ Select
  , tip.FormCaption as Islem
  , count(saglik.Id) as AdaySayisi 
 
-From MtskAdaySaglik as saglik
-     left outer join Lkp.MtskAdayTakipOzelDurumuTipi as tip on 
-	   ( tip.Id = 1)
+From MtskAdaySaglik as saglik,
+     MtskAdayTalep as talep
+     left outer join Lkp.MtskAdayTakipOzelDurumuTipi as tip on ( tip.Id = 1)
 Where saglik.FirmId = @FirmId
-and   saglik.DonemTipiId = @DonemTipiId
 and   saglik.OzurDurumuTipiId > 1
+and   saglik.TalepId = talep.Id
+and   isnull(talep.KayitTipiId,0) <= 3
 
 Group by 
    tip.KonuId
@@ -241,12 +232,13 @@ Select
  , tip.FormCaption as Islem
  , count(saglik.Id) as AdaySayisi 
 
-From MtskAdaySaglik as saglik
-     left outer join Lkp.MtskAdayTakipOzelDurumuTipi as tip on 
-	   ( tip.Id = 2)
-Where FirmId = @FirmId
-and   DonemTipiId = @DonemTipiId
+From MtskAdaySaglik as saglik,
+     MtskAdayTalep as talep
+     left outer join Lkp.MtskAdayTakipOzelDurumuTipi as tip on ( tip.Id = 2)
+Where talep.FirmId = @FirmId
 and   saglik.OkutmanTalebi = 1
+and   saglik.TalepId = talep.Id
+and   isnull(talep.KayitTipiId,0) <= 3
 
 Group by 
    tip.KonuId
@@ -264,12 +256,13 @@ Select
  , tip.FormCaption as Islem
  , count(saglik.Id) as AdaySayisi 
 
-From MtskAdaySaglik as saglik
-     left outer join Lkp.MtskAdayTakipOzelDurumuTipi as tip on 
-	   ( tip.Id = 3)
-Where FirmId = @FirmId
-and   DonemTipiId = @DonemTipiId
+From MtskAdaySaglik as saglik,
+     MtskAdayTalep as talep
+     left outer join Lkp.MtskAdayTakipOzelDurumuTipi as tip on ( tip.Id = 3)
+Where talep.FirmId = @FirmId
 and   saglik.TercumanTalebi = 1
+and   saglik.TalepId = talep.Id
+and   isnull(talep.KayitTipiId,0) <= 3
 
 Group by 
    tip.KonuId
@@ -287,12 +280,13 @@ Select
  , tip.FormCaption as Islem
  , count(saglik.Id) as AdaySayisi 
 
-From MtskAdaySaglik as saglik
-     left outer join Lkp.MtskAdayTakipOzelDurumuTipi as tip on 
-	   ( tip.Id = 4)
-Where FirmId = @FirmId
-and   DonemTipiId = @DonemTipiId
+From MtskAdaySaglik as saglik,
+     MtskAdayTalep as talep
+     left outer join Lkp.MtskAdayTakipOzelDurumuTipi as tip on ( tip.Id = 4)
+Where talep.FirmId = @FirmId
 and   saglik.YabanciDilTipiId > 0
+and   saglik.TalepId = talep.Id
+and   isnull(talep.KayitTipiId,0) <= 3
 
 Group by 
    tip.KonuId
@@ -311,12 +305,11 @@ Select
  , count(talep.Id) as AdaySayisi 
 
 From dbo.MtskAdayTalep as talep, dbo.MtskAday as aday
-     left outer join Lkp.MtskAdayTakipOzelDurumuTipi as tip on 
-	   ( tip.Id = 5)
+     left outer join Lkp.MtskAdayTakipOzelDurumuTipi as tip on ( tip.Id = 5)
 Where talep.FirmId = @FirmId
-and   talep.DonemTipiId = @DonemTipiId
 and   talep.AdayId = aday.Id
 and   aday.UlkeTipiId <> 1000
+and   isnull(talep.KayitTipiId,0) <= 3
 
 Group by 
    tip.KonuId
@@ -335,11 +328,10 @@ Select
  , count(talep.Id) as AdaySayisi 
 
 From dbo.MtskAdayTalep as talep
-     left outer join Lkp.MtskAdayTakipOzelDurumuTipi as tip on 
-	   ( tip.Id = 6)
+     left outer join Lkp.MtskAdayTakipOzelDurumuTipi as tip on ( tip.Id = 6)
 Where talep.FirmId = @FirmId
-and   talep.DonemTipiId = @DonemTipiId
 and   talep.EtiketTipiId > 0
+and   isnull(talep.KayitTipiId,0) <= 3
 
 Group by 
    tip.KonuId
@@ -358,11 +350,10 @@ Select
  , count(takip.Id) as AdaySayisi 
 
 From dbo.MtskAdayTakip as takip
-     left outer join Lkp.MtskAdayTakipOzelDurumuTipi as tip on 
-	   ( tip.Id = 7)
+     left outer join Lkp.MtskAdayTakipOzelDurumuTipi as tip on ( tip.Id = 7)
 Where takip.FirmId = @FirmId
-and   takip.DonemTipiId = @DonemTipiId
 and   takip.IsKontejan = 1
+and   isnull(takip.KayitTipiId,0) <= 3
 
 Group by 
    tip.KonuId
@@ -384,12 +375,11 @@ Select
  , count(takip.Id) as AdaySayisi 
 
 From MtskAdayTakip as takip
-     left outer join Lkp.MtskAdayTakipYasOnayiTipi as tip on 
-	   ( takip.YasOnayiTipiId = tip.Id )
-Where FirmId = @FirmId
---and   DonemTipiId = @DonemTipiId : kontrol olmaması gerekiyor
+     left outer join Lkp.MtskAdayTakipYasOnayiTipi as tip on ( takip.YasOnayiTipiId = tip.Id )
+Where takip.FirmId = @FirmId
 and   takip.YasOnayiTipiId >= 1 -- Yaşı tutmuyor
 and   takip.YasOnayiTipiId <= 4 -- Doğum tarihi yok
+and   isnull(takip.KayitTipiId,0) <= 3
 
 Group by 
    tip.KonuId
@@ -410,9 +400,9 @@ Select
 From MtskAdayTakip as takip
      left outer join Lkp.MtskAdayTakipGrupSubeTipi as tip on ( tip.KonuId = 1141 )
 
-Where FirmId = @FirmId
--- and   DonemTipiId = @DonemTipiId : kontrol olmaması gerekiyor
-and   IsGrupSubeYok = 1
+Where takip.FirmId = @FirmId
+and   takip.IsGrupSubeYok = 1
+and   isnull(takip.KayitTipiId,0) <= 3
 
 group by tip.KonuId 
        , tip.KonuCaption
@@ -430,11 +420,10 @@ Select
  , count(takip.Id) as AdaySayisi 
 
 From MtskAdayTakip as takip
-     left outer join Lkp.MtskAdayTakipDeneyimSartiTipi as tip on 
-	   ( takip.DeneyimSartiTipiId = tip.Id )
-Where FirmId = @FirmId
---and   DonemTipiId = @DonemTipiId : kontrol olmaması gerekiyor
+     left outer join Lkp.MtskAdayTakipDeneyimSartiTipi as tip on ( takip.DeneyimSartiTipiId = tip.Id )
+Where takip.FirmId = @FirmId
 and   takip.DeneyimSartiTipiId = 3 -- Uygun değil
+and   isnull(takip.KayitTipiId,0) <= 3
 
 Group by 
    tip.KonuId
@@ -453,10 +442,9 @@ Select
  , count(takip.Id) as AdaySayisi 
 
 From MtskAdayTakip as takip
-     left outer join Lkp.MtskAdayTakipZamanlamaTipi as tip on 
-	   ( takip.ZamanlamaTipiId = tip.Id )
-Where FirmId = @FirmId
---and   DonemTipiId = @DonemTipiId
+     left outer join Lkp.MtskAdayTakipZamanlamaTipi as tip on ( takip.ZamanlamaTipiId = tip.Id )
+Where takip.FirmId = @FirmId
+and   isnull(takip.KayitTipiId,0) <= 3
 
 Group by 
    tip.KonuId
@@ -466,13 +454,8 @@ Group by
 
 '
 
-  if (@BugunDonemTipiId <= @DonemTipiId)
-  begin
-     Set @sql = @sql1 + @sqlDonemTipiVar + @sqlDonemTipiYok
-  end else
-  begin
-     Set @sql = @sql1 + @sqlDonemTipiVar 
-  end
+  Set @sql = @sql1 + @sqlDonemTipiVar + @sqlDonemTipiYok
+  
   
   --Select len(@sqlDonemTipiVar)
   --Select len(@sqlDonemTipiYok)
@@ -480,8 +463,6 @@ Group by
   
   --  print @sql
   EXEC sp_executesql @sql
-
-
 
 
 END -- procedure

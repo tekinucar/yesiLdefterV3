@@ -1,10 +1,10 @@
-﻿
-/*CreateProcedure*/
+﻿/*CreateProcedure*/
 
 CREATE PROCEDURE [dbo].[prc_MtskAdayTakip] (@FirmId int)  
 AS BEGIN
    
   -- DbUpdate aktif olsun ki trigger ve bu procedure birbirini tetiklmesin
+--print 'Execute [dbo].[prc_setIsDbUpdateActive] 13, 1'
   Execute [dbo].[prc_setIsDbUpdateActive] 13, 1
 
   -- Variables
@@ -28,18 +28,29 @@ AS BEGIN
   -- IsActive
   -- -------------------------------------------------------------------
 
-   --print 'IsActive'
+ --print 'IsActive'
    update MtskAdayTakip set
       IsActive = x.IsActive
+   ,  AracTipiId = x.AracTipiId
    from MtskAdayTakip a, 
    (
-       Select FirmId, Id as TalepId, IsActive
+       Select 
+         Id as TalepId
+       , FirmId
+       , IsActive
+       , ( case 
+	      when IsOtomatik = 1 and IsEngelli = 0 then 1
+          when IsOtomatik = 0 and IsEngelli = 1 then 2
+          when IsOtomatik = 1 and IsEngelli = 1 then 3
+          when Is125ccAlti = 1 then 4
+	      else 0 end) as AracTipiId 
 	   From MtskAdayTalep	   
 	   Where FirmId = @FirmId
    ) as x
    Where a.FirmId = x.FirmId
    and   a.TalepId = x.TalepId 
-   and   a.IsActive <> x.IsActive
+   and ( a.IsActive <> x.IsActive
+   or    isnull(a.AracTipiId,-1) <> x.AracTipiId )
 
 
   -- -----------------------------------------------------------------
@@ -55,7 +66,7 @@ AS BEGIN
    -- 3,    'Sertifikası hazır'
    -- 4,    'Sertifikası teslim edildi'	
 
-   --print 'Sertifika teslim edilmiş olanlar'
+ --print 'Sertifika teslim edilmiş olanlar'
    Update dbo.MtskAdayTakip set
        SertifikaDurumTipiId = x.SertifikaDurumTipiId 
    From dbo.MtskAdayTakip a, 
@@ -80,7 +91,7 @@ AS BEGIN
   -- 3,  'Gelecek ay'
   -- 4,  'İleriki dönemler'
   -- 5,  'Sertifikasını hak etmiş'
-   --print 'ZamanlamaTipiId belirleniyor'
+ --print 'ZamanlamaTipiId belirleniyor'
    update MtskAdayTakip set
       ZamanlamaTipiId = x.ZamanlamaTipiId
    from MtskAdayTakip a, 
@@ -90,7 +101,7 @@ AS BEGIN
                 when ( talep.DonemTipiId = @GelecekDonemTipiId and isnull(talep.KayitTipiId,0) < 3 ) then 3 -- gelecek dönem 
                 when ( talep.DonemTipiId > @GelecekDonemTipiId and isnull(talep.KayitTipiId,0) < 3 ) then 4 -- ileri dönem 
                 when ( talep.DonemTipiId < @BugunDonemTipiId and (isnull(talep.KayitTipiId,0) = 2 or isnull(talep.KayitTipiId,0) = 3)) then 1 -- devam eden  
-                when ( talep.DonemTipiId < @BugunDonemTipiId and isnull(talep.KayitTipiId,0) = 5 ) then 5 -- sertifikasını almış 
+                when ( talep.DonemTipiId < @BugunDonemTipiId and isnull(talep.KayitTipiId,0) = 4 ) then 5 -- sertifikasını almış 
            else 0 end ) as ZamanlamaTipiId
        From dbo.MtskAdayTalep as talep	   
           left outer join dbo.MtskAdaySertifika as sertifika on (talep.Id = sertifika.TalepId)
@@ -105,31 +116,31 @@ AS BEGIN
    -- BelgelerGeldi, BelgelerTarandi, BelgelerYuklendi
    -- -------------------------------------------------------------------
 
-   --print 'Belgeler geldi mi?'
+ --print 'Belgeler geldi mi?'
    update MtskAdayTakip set
       BelgelerGeldi = x.BelgelerGeldi
    from MtskAdayTakip a, 
    (
-       Select FirmId, Id as TalepId
+       Select talep.FirmId, talep.Id as TalepId
 	   , case 
 	     when ( --KimlikGeldi = 1 
-            BiyometrikGeldi = 1
+            talep.BiyometrikGeldi = 1
             --and BasvuruFotoCekildi = 1
-            and OgrenimGeldi = 1
-            and SaglikGeldi = 1
-            and AdliSicilGeldi = 1
-            and ImzaAlindi = 1
-            and SozlesmeYapildi = 1 
-            and AdresAlindi = 1) then 1 else 0 end as BelgelerGeldi
-	   From MtskAdayTalep	   
-	   Where FirmId = @FirmId
+            and talep.OgrenimGeldi = 1
+            and talep.SaglikGeldi = 1
+            and talep.AdliSicilGeldi = 1
+            and talep.ImzaAlindi = 1
+            and talep.SozlesmeYapildi = 1 
+            and talep.AdresAlindi = 1) then 1 else 0 end as BelgelerGeldi
+	   From MtskAdayTalep as talep	   
+	   Where talep.FirmId = @FirmId
    ) as x
    Where a.FirmId = x.FirmId
    and   a.TalepId = x.TalepId 
    and   a.BelgelerGeldi <> x.BelgelerGeldi
 
 
-   --print 'Belgeler tarandı mı?'
+ --print 'Belgeler tarandı mı?'
    update MtskAdayTakip set
       BelgelerTarandi = x.BelgelerTarandi
    from MtskAdayTakip a, 
@@ -154,7 +165,7 @@ AS BEGIN
    and   a.BelgelerTarandi <> x.BelgelerTarandi
 
 
-   --print 'Belgeler yüklendi mi?'
+ --print 'Belgeler yüklendi mi?'
    update MtskAdayTakip set
       BelgelerYuklendi = x.BelgelerYuklendi
    from MtskAdayTakip a, 
@@ -182,7 +193,7 @@ AS BEGIN
    -- -------------------------------------------------------------------
    -- TeorikDersTipiId
    -- -------------------------------------------------------------------
-   --print 'Teorik derslerin başlama ve bitiş tarihleri'
+ --print 'Teorik derslerin başlama ve bitiş tarihleri'
    Update dbo.MtskAdayTakip set
        TeorikBaslamaTarihi = x.GrupBaslamaTarihi 
       ,TeorikBitisTarihi   = x.GrupBitisTarihi
@@ -207,7 +218,22 @@ AS BEGIN
       and   takip.SubeTipiId  = gs.SubeTipiId
    ) as x
    Where a.Id = x.TakipId
-   and   a.TeorikBaslamaTarihi <> x.GrupBaslamaTarihi
+   and   ( a.TeorikBaslamaTarihi <> x.GrupBaslamaTarihi 
+      or   a.TeorikBaslamaTarihi is null )
+
+
+ --print 'TelafiDersTipiId bir nedenle null kaldıysa null olanları = 0 yap'
+   Update dbo.MtskAdayTakip set
+       TeorikDersTipiId = 0
+   From dbo.MtskAdayTakip a, 
+   (
+      Select 
+          takip.Id as TakipId
+      From MtskAdayTakip as takip
+      Where takip.FirmId =  @FirmId
+      and   takip.TeorikDersTipiId is null
+   ) as x
+   Where a.Id = x.TakipId
 
 
    -- eSinavDurumTipiId = 
@@ -215,7 +241,7 @@ AS BEGIN
    -- e-Sınav başvurusu yapılacak
    -- Muaf işareti
    --
-   --print 'e-Sınav durumları'
+ --print 'e-Sınav durumları'
    Update dbo.MtskAdayTakip set
        eSinavDurumTipiId = x.eSinavDurumTipiId
    From dbo.MtskAdayTakip a, 
@@ -228,6 +254,7 @@ AS BEGIN
           else 1 end ) as eSinavDurumTipiId       -- e-Sınav için hazır değil
       From MtskAdayTakip as takip
       Where takip.eSinavDurumTipiId = 0 -- Tanımsız ise
+      and ( takip.KayitTipiId = 2 or takip.KayitTipiId = 3 ) 
    ) as x
    Where a.Id = x.TakipId
    and   a.eSinavDurumTipiId <> x.eSinavDurumTipiId
@@ -236,12 +263,13 @@ AS BEGIN
     -- Tekrar sınava girecek için bekleme süresi bitince
     -- eSinavDurumTipiId = e-Sınav başvurusu yapılacak
 	-- eSinavSonrasiTipiId = boşluk  
-    --print 'e-Sınav müracat tarihlerin tespiti'
+  --print 'e-Sınav müracat tarihlerin tespiti'
     update MtskAdayTakip set
       eSinavDurumTipiId = 2
 	, eSinavSonrasiTipiId = 0
     from MtskAdayTakip
     Where FirmId = @FirmId
+    and ( KayitTipiId = 2 or KayitTipiId = 3 ) 
     and   eSinavDurumTipiId < 2   -- e-Sınav için hazır değil
 	and   eSinavSonrasiTipiId = 1 -- Tekrar sınava girecek
     and   eSinavNoGirdigi > 0
@@ -249,17 +277,18 @@ AS BEGIN
 	
 
     -- Teorikten Muaf'sa Uygulamalı dersler planlanacak
-    --print 'Uygulama dersleri planlanacak kişilerin tespiti'
+  --print 'Uygulama dersleri planlanacak kişilerin tespiti'
     update MtskAdayTakip set
        UygulamaliDersTipiId = 1 -- Uygulamalı dersler planlanacak
     from MtskAdayTakip as takip
     Where takip.FirmId = @FirmId
+    and ( takip.KayitTipiId = 2 or takip.KayitTipiId = 3 ) 
     and   takip.DonemTipiId > 0
     and   takip.GrupTipiId  > 0
     and   takip.SubeTipiId  > 0
-	and   takip.TalepTipiId in (1,2,3,5)  -- 100 Ceza ve özel teorik ders değilse
+	and   takip.TalepTipiId < 4           -- 100 Ceza ve özel teorik ders değilse
     and   takip.SertifikaDurumTipiId = 0  -- sertifika aşamasına geçmemiş
-	and   takip.UygulamaliDersTipiId = 0  -- Tanımsız
+	and   takip.UygulamaliDersTipiId = 0  -- Tanımsız ise
 	and ( takip.TeorikDersTipiId = 6    -- Muaf
        or takip.eSinavSonucTipiId = 1 ) -- Başarılı
 
@@ -276,7 +305,7 @@ AS BEGIN
    -- AkanTrafikDersToplami  SmallInt     null, /* prc_MtskUygulamaDersPlaniSaatleriGuncelle  içinde hesplanıyor */
    -- UygulamaliDersToplami  SmallInt     null, /* prc_MtskUygulamaDersPlaniSaatleriGuncelle  içinde hesplanıyor */
    -- UygulamaliDersTipiId   SmallInt     null,
-   -- IsUygulamaDersMebbis   Bit          null, /* Mebbise aktarılmadı, aktarrıldı */
+   -- IsUygulamaliDersMebbis   Bit          null, /* Mebbise aktarılmadı, aktarrıldı */
 
    -- Id  EgitimTipiId
    -- 1   Normal Eğitim
@@ -290,18 +319,94 @@ AS BEGIN
    -- 2   Akan Trafik
    -- 3   Simülatör
 
+   -- -------------------------------------------------------------------------------------------------------
+   -- Adayın kaç saat uygulama alacağı MtskSaatUygulama tablosundan çekilerek
+   -- xxxKredisi alanlarına işleniyor ve bu alanlar ile verilen xxxxToplami saatler kıyaslanarak süreç devam ediyor
+   -- -------------------------------------------------------------------------------------------------------
+ --print 'Adayın kaç saat uygulama alacağı MtskSaatUygulama tablosundan çekiliyor'
+   Update dbo.MtskAdayTakip set
+       UygulamaliDersKredisi = x.yeniUygulamaEgitimSaati
+     , Arti4DersKredisi = x.yeniArti4HakEgitimSaati
+     , TelafiDersKredisi = x.yeniTelafiEgitimSaati
+	 , BasarisizDersKredisi = x.yeniBasarisizEgitimSaati
+   From dbo.MtskAdayTakip a, 
+   (
+   Select 
+       talep.Id as TalepId
+     , ( case 
+	    when isnull(saatMevcut.UygulamaToplamSaat,0) > 0 and isnull(talep.IsMevcut2016Oncesi,0) = 1 then saatMevcut.UygulamaSaati2016Oncesi
+	    when isnull(saatMevcut.UygulamaToplamSaat,0) > 0 and isnull(talep.IsMevcut2016Oncesi,0) = 0 then saatMevcut.UygulamaToplamSaat
+	    when isnull(saatMevcut.UygulamaToplamSaat,0) = 0 and isnull(talep.IsMevcut2016Oncesi,0) = 1 then isnull(saatIstenen.UygulamaSaati2016Oncesi,0)
+	    when isnull(saatMevcut.UygulamaToplamSaat,0) = 0 and isnull(talep.IsMevcut2016Oncesi,0) = 0 then isnull(saatIstenen.UygulamaToplamSaat,0)
+		end) as yeniUygulamaEgitimSaati
+    , ( case 
+	    when isnull(saatMevcut.Arti4HakUygulamaSaati,0) > 0 and isnull(talep.IsMevcut2016Oncesi,0) = 1 then saatMevcut.UygulamaSaati2016Oncesi
+	    when isnull(saatMevcut.Arti4HakUygulamaSaati,0) > 0 and isnull(talep.IsMevcut2016Oncesi,0) = 0 then saatMevcut.Arti4HakUygulamaSaati
+	    when isnull(saatMevcut.Arti4HakUygulamaSaati,0) = 0 and isnull(talep.IsMevcut2016Oncesi,0) = 1 then isnull(saatIstenen.UygulamaSaati2016Oncesi,0)
+	    when isnull(saatMevcut.Arti4HakUygulamaSaati,0) = 0 and isnull(talep.IsMevcut2016Oncesi,0) = 0 then isnull(saatIstenen.Arti4HakUygulamaSaati,0)
+		end) as yeniArti4HakEgitimSaati
+    , ( case 
+	    when isnull(saatMevcut.TelafiEgitimSaati,0) > 0 then saatMevcut.TelafiEgitimSaati
+	    when isnull(saatMevcut.TelafiEgitimSaati,0) = 0 then isnull(saatIstenen.TelafiEgitimSaati,0)
+		end) as yeniTelafiEgitimSaati
+    , ( case 
+	    when isnull(saatMevcut.BasarisizEgitimSaati,0) > 0 then saatMevcut.BasarisizEgitimSaati
+	    when isnull(saatMevcut.TelafiEgitimSaati,0) = 0 then isnull(saatIstenen.BasarisizEgitimSaati,0)
+		end) as yeniBasarisizEgitimSaati
+    /*
+    , talep.TalepTipiId
+    , talep.MevcutSertifikaTipiId
+    , talep.IsMevcut2016Oncesi
+    , talep.IstenenSertifikaTipiId
+
+    , saatIstenen.Id as IstenenSaatId
+    , saatIstenen.UygulamaToplamSaat
+    , saatIstenen.Arti4HakUygulamaSaati
+    , saatIstenen.UygulamaSaati2016Oncesi
+	, saatIstenen.TelafiEgitimSaati
+	, saatIstenen.BasarisizEgitimSaati
+
+	, saatMevcut.Id as MevcutSaatId
+    , saatMevcut.UygulamaToplamSaat as MevcutUygulamaToplamSaat 
+    , saatMevcut.Arti4HakUygulamaSaati as MevcutArti4HakUygulamaSaati
+    , saatMevcut.UygulamaSaati2016Oncesi as MevcutUygulamaSaati2016Oncesi
+	, saatMevcut.TelafiEgitimSaati as MevcutTelafiEgitimSaati
+	, saatMevcut.BasarisizEgitimSaati as MevcutBasarisizEgitimSaati
+	*/
+   From dbo.MtskAdayTalep as talep
+       left outer join dbo.MtskSaatUygulama as saatIstenen on (
+	        talep.IstenenSertifikaTipiId = saatIstenen.IstenenSertifikaTipiId
+        and saatIstenen.MevcutSertifikaTipiId = 0 
+       )
+       left outer join dbo.MtskSaatUygulama as saatMevcut on (
+	        talep.IstenenSertifikaTipiId = saatMevcut.IstenenSertifikaTipiId
+        and talep.MevcutSertifikaTipiId  = saatMevcut.MevcutSertifikaTipiId
+       )
+   Where talep.FirmId = @FirmId  
+   and ( talep.KayitTipiId = 2 or talep.KayitTipiId = 3 ) 
+   -- and   talep.Id = @TalepId
+   and   saatIstenen.GecerlilikTarihiId = dbo.fnc_getGecerlilikTarihiId(talep.FirmId, 21102, talep.TalepKayitTarihi)
+   and   saatMevcut.GecerlilikTarihiId = dbo.fnc_getGecerlilikTarihiId(talep.FirmId, 21102, talep.TalepKayitTarihi)
+   ) as x
+   Where a.TalepId = x.TalepId
+   and ( isnull(a.UygulamaliDersKredisi,0) <> isnull(x.yeniUygulamaEgitimSaati,0)
+   or    isnull(a.Arti4DersKredisi,0)      <> isnull(x.yeniArti4HakEgitimSaati,0)
+   or    isnull(a.TelafiDersKredisi,0)     <> isnull(x.yeniTelafiEgitimSaati,0)
+   or    isnull(a.BasarisizDersKredisi,0)  <> isnull(x.yeniBasarisizEgitimSaati,0) )
+
+
    -- -----------------------------------------------------------------
    -- Id  EgitimTipiId
    -- 1   Normal Eğitim
    -- -----------------------------------------------------------------
-   --print 'Uygulama derslerinin başlangıç ve bitiş tarihleri, derslerin toplamı'
+ --print 'Uygulama derslerinin başlangıç ve bitiş tarihleri, derslerin toplamı'
    Update dbo.MtskAdayTakip set
-       UygulamaBaslamaTarihi = x.UygulamaBaslamaTarihi 
-      ,UygulamaBitisTarihi   = x.UygulamaBitisTarihi
-      ,SimulatorDersToplami = x.SimulatorDersToplami
+       UygulamaBaslamaTarihi  = x.UygulamaBaslamaTarihi 
+      ,UygulamaBitisTarihi    = x.UygulamaBitisTarihi
+      ,SimulatorDersToplami   = x.SimulatorDersToplami
       ,EgitimAlaniDersToplami = x.EgitimAlaniDersToplami
-	  ,AkanTrafikDersToplami = x.AkanTrafikDersToplami 
-      ,UygulamaliDersToplami = x.AkanTrafikDersToplami + x.EgitimAlaniDersToplami + x.SimulatorDersToplami 
+	  ,AkanTrafikDersToplami  = x.AkanTrafikDersToplami 
+      ,UygulamaliDersToplami  = x.AkanTrafikDersToplami + x.EgitimAlaniDersToplami + x.SimulatorDersToplami 
    From dbo.MtskAdayTakip a, 
    ( 
        Select y.TalepId
@@ -339,12 +444,12 @@ AS BEGIN
    Where a.TalepId = x.TalepId
    and ( a.UygulamaBaslamaTarihi  <> x.UygulamaBaslamaTarihi 
    or    a.UygulamaBitisTarihi    <> x.UygulamaBitisTarihi
-   or    a.SimulatorDersToplami   <> x.SimulatorDersToplami
-   or    a.EgitimAlaniDersToplami <> x.EgitimAlaniDersToplami
-   or    a.AkanTrafikDersToplami  <> x.AkanTrafikDersToplami )
+   or    isnull(a.SimulatorDersToplami,0)   <> isnull(x.SimulatorDersToplami,0)
+   or    isnull(a.EgitimAlaniDersToplami,0) <> isnull(x.EgitimAlaniDersToplami,0)
+   or    isnull(a.AkanTrafikDersToplami,0)  <> isnull(x.AkanTrafikDersToplami,0) 
+   or    isnull(a.UygulamaliDersToplami,0)  <> ( isnull(x.SimulatorDersToplami,0) + isnull(x.EgitimAlaniDersToplami,0) + isnull(x.AkanTrafikDersToplami,0)))
 
-
-   --print '2. +4 uygulama derslerin başlangıç ve bitiş tarihleri, derslerin toplamı'
+ --print '2. +4 uygulama derslerin başlangıç ve bitiş tarihleri, derslerin toplamı'
    Update dbo.MtskAdayTakip set
        Arti4BaslamaTarihi = x.UygulamaBaslamaTarihi 
       ,Arti4BitisTarihi   = x.UygulamaBitisTarihi
@@ -386,128 +491,141 @@ AS BEGIN
    Where a.TalepId = x.TalepId
    and ( a.Arti4BaslamaTarihi <> x.UygulamaBaslamaTarihi 
    or    a.Arti4BitisTarihi   <> x.UygulamaBitisTarihi
-   or    a.Arti4EgitimAlaniDersToplami <> x.EgitimAlaniDersToplami
-   or    a.Arti4AkanTrafikDersToplami  <> x.AkanTrafikDersToplami )
+   or    isnull(a.Arti4EgitimAlaniDersToplami,0) <> isnull(x.EgitimAlaniDersToplami,0)
+   or    isnull(a.Arti4AkanTrafikDersToplami,0)  <> isnull(x.AkanTrafikDersToplami,0)
+   or    isnull(a.Arti4DersToplami,0) <> (isnull(x.EgitimAlaniDersToplami,0) + isnull(x.AkanTrafikDersToplami,0))
+   )
 
-
-   --print 'Başarısız aday eğitim derslerin başlangıç ve bitiş tarihleri, derslerin toplamı'
+ --print 'Telafi eğitim derslerin başlangıç ve bitiş tarihleri, derslerin toplamı'
    Update dbo.MtskAdayTakip set
-       BasarisizDersNo        = x.DersNo
-      ,BasarisizBaslamaTarihi = x.DersTarihi
-      ,BasarisizBitisTarihi   = x.DersTarihi
-      ,BasarisizDersToplami   = x.BasarisizDersToplami 
+       TelafiDersNo        = x.DersSayisi
+      ,TelafiBaslamaTarihi = x.DersTarihi
+      ,TelafiBitisTarihi   = x.DersTarihi
+      ,TelafiDersToplami   = x.Saat 
    From dbo.MtskAdayTakip a, 
    (
-      Select 
-          z.TalepId
-        , z.DersNo
-        , z.DersTarihi
-        , count(uDers2.Id) as BasarisizDersToplami
-      From (
-         Select 
-             y.TalepId
-           , count(y.TalepId) as DersNo
-           , max(y.DersTarihi) as DersTarihi
-         from (
-            Select talep.Id as TalepId 
-                 , uDers.DersTarihi as DersTarihi
-            From dbo.MtskAdayTalep as talep
-               left outer join dbo.MtskUygulamaliDers as uDers on ( uDers.FirmId = @FirmId   
-               and   uDers.IsActive = 1
-               and   uDers.TalepId = talep.Id
-               and   uDers.AdayId = talep.AdayId
-               and   uDers.EgitimTipiId = 4 -- Başarısız Aday Eğitimi 
-               ) 
-            Where talep.FirmId = @FirmId   
-            and ( talep.KayitTipiId = 2 or talep.KayitTipiId = 3 )  
-            Group by
-                talep.Id 
-              , uDers.DersTarihi  
-            ) as y
-	     Where 0 = 0 -- y.
-		 Group by y.TalepId
-	  ) as z,  dbo.MtskUygulamaliDers as uDers2 
-      Where z.DersTarihi = uDers2.DersTarihi
-      Group by
-          z.TalepId
-        , z.DersTarihi
-        , z.DersNo
+     Select talep.Id as TalepId 
+          , uDers.DersTarihi as DersTarihi
+          , count(uDers.Id) as Saat
+          , ROW_NUMBER() OVER(ORDER BY uDers.DersTarihi ASC) AS DersSayisi
+     From dbo.MtskAdayTalep as talep
+          left outer join dbo.MtskUygulamaliDers as uDers on ( 
+                uDers.FirmId = @FirmId   
+          and   uDers.IsActive = 1
+          and   uDers.TalepId = talep.Id
+          and   uDers.AdayId = talep.AdayId
+          and   uDers.EgitimTipiId = 2 -- Telafi Eğitimi 
+          ) 
+     Where talep.FirmId = @FirmId   
+     and ( talep.KayitTipiId = 2 or talep.KayitTipiId = 3 )  
+     Group by
+           talep.Id 
+         , uDers.DersTarihi  
+   ) as x
+   Where a.TalepId = x.TalepId
+   and ( a.TelafiDersNo        <> x.DersSayisi
+	  or a.TelafiBaslamaTarihi <> x.DersTarihi
+      or isnull(a.TelafiDersToplami,0) <> isnull(x.Saat,0) )
+
+ --print 'Başarısız aday eğitim derslerin başlangıç ve bitiş tarihleri, derslerin toplamı'
+   Update dbo.MtskAdayTakip set
+       BasarisizDersNo        = x.DersSayisi
+      ,BasarisizBaslamaTarihi = x.DersTarihi
+      ,BasarisizBitisTarihi   = x.DersTarihi
+      ,BasarisizDersToplami   = x.Saat 
+   From dbo.MtskAdayTakip a, 
+   (
+      Select talep.Id as TalepId 
+          , uDers.DersTarihi as DersTarihi
+          , count(uDers.Id) as Saat
+          , ROW_NUMBER() OVER(ORDER BY uDers.DersTarihi ASC) AS DersSayisi
+     From dbo.MtskAdayTalep as talep
+          left outer join dbo.MtskUygulamaliDers as uDers on ( 
+                uDers.FirmId = @FirmId   
+          and   uDers.IsActive = 1
+          and   uDers.TalepId = talep.Id
+          and   uDers.AdayId = talep.AdayId
+          and   uDers.EgitimTipiId = 4 -- Başarısız Aday Eğitimi 
+          ) 
+     Where talep.FirmId = @FirmId   
+     and ( talep.KayitTipiId = 2 or talep.KayitTipiId = 3 )  
+     Group by
+           talep.Id 
+         , uDers.DersTarihi  
 	) as x
     Where a.TalepId = x.TalepId
-    and ( a.BasarisizDersNo        <> x.DersNo
+    and ( a.BasarisizDersNo        <> x.DersSayisi
 	   or a.BasarisizBaslamaTarihi <> x.DersTarihi
-       or a.BasarisizDersToplami   <> x.BasarisizDersToplami )
+       or isnull(a.BasarisizDersToplami,0) <> isnull(x.Saat,0) )
 
    -- -----------------------------------------------------------------
-   -- IsUygulamaDersMebbis
+   -- IsUygulamaliDersMebbis
    -- -----------------------------------------------------------------
-   --print 'Uygulamalı dersler planlandı mı?, Mebbise yüklendi mi?'
+ --print 'Uygulamalı dersler planlandı mı?, Mebbise yüklendi mi?'
    Update dbo.MtskAdayTakip set
-       IsUygulamaDersMebbis = x.IsUygulamaDersMebbis 
+       IsUygulamaliDersMebbis = x.IsUygulamaliDersMebbis 
      , IsUygulamaliDersPlanli = x.IsUygulamaliDersPlanli
    From dbo.MtskAdayTakip a, 
    (
       Select 
 	    u.TalepId 
-	  , (case when sum(u.UygulamaDersMebbisToplami) = max(u.UygulamaToplamSaat) then 1 else 0 end) as IsUygulamaDersMebbis
-	  , (case when sum(u.UygulamaliDersToplami) = max(u.UygulamaToplamSaat) then 1 else 0 end) as IsUygulamaliDersPlanli
+	  , (case when sum(u.UygulamaDersMebbisToplami) = u.UygulamaliDersKredisi then 1 else 0 end) as IsUygulamaliDersMebbis
+	  , (case when sum(u.UygulamaliDersToplami) = u.UygulamaliDersKredisi then 1 else 0 end) as IsUygulamaliDersPlanli
       From (
 	      -- Normal uygulama eğitimi : Başlama, bitiş ve toplam ders sayısı
-          Select talep.Id as TalepId 
+          Select takip.TalepId 
           , count(uDers.Id) as UygulamaliDersToplami
           , 0 as UygulamaDersMebbisToplami  
-		  , saat.UygulamaToplamSaat
-          From dbo.MtskAdayTalep as talep
-             left outer join dbo.MtskSaatUygulama as saat on ( talep.IstenenSertifikaTipiId = saat.IstenenSertifikaTipiId )
-		     left outer join dbo.MtskUygulamaliDers as uDers on (talep.Id = uDers.TalepId
+		  , takip.UygulamaliDersKredisi
+          From dbo.MtskAdayTakip as takip 
+		     left outer join dbo.MtskUygulamaliDers as uDers on (
+                        takip.TalepId = uDers.TalepId
 		          and   uDers.FirmId = @FirmId   
                   and   uDers.IsActive = 1
-                  and   uDers.AdayId = talep.AdayId
                   and   uDers.EgitimTipiId = 1     -- Normal eğitim
-				  and   uDers.DersSaatiTipiId > -1 -- tüm saatler planlanmış olsun
+                  and   uDers.DersSaatiTipiId >= 0 -- tüm saatler planlanmış olsun
+                  and   uDers.DersSaatiTipiId <= 15-- tüm saatler planlanmış olsun
           )
-          where talep.FirmId = @FirmId   
-          and ( talep.KayitTipiId = 2 or talep.KayitTipiId = 3 ) 
-		  and   saat.MevcutSertifikaTipiId = 0
-		  and   saat.IsActive = 1
+          where takip.FirmId = @FirmId   
+          and ( takip.KayitTipiId = 2 or takip.KayitTipiId = 3 ) 
           Group by
-              talep.Id 
-			 ,saat.UygulamaToplamSaat
+              takip.TalepId
+			 ,takip.UygulamaliDersKredisi
 
           union all 
 
-          Select talep.Id as TalepId 
+          Select takip.TalepId 
           , 0 as UygulamaliDersToplami
           , count(uDers.Id) as UygulamaDersMebbisToplami  
-		  , saat.UygulamaToplamSaat
-          From dbo.MtskAdayTalep as talep
-             left outer join dbo.MtskSaatUygulama as saat on ( talep.IstenenSertifikaTipiId = saat.IstenenSertifikaTipiId )
-		     left outer join dbo.MtskUygulamaliDers as uDers on (talep.Id = uDers.TalepId
+		  , takip.UygulamaliDersKredisi
+          From dbo.MtskAdayTakip as takip
+		     left outer join dbo.MtskUygulamaliDers as uDers on (
+                        takip.TalepId = uDers.TalepId
                   and   uDers.FirmId = @FirmId   
                   and   uDers.IsActive = 1
-                  and   uDers.AdayId = talep.AdayId
                   and   uDers.EgitimTipiId = 1     -- Normal eğitim
                   and   uDers.UDersIsUploaded = 1  -- Mebbise yüklenmiş
              ) 
-          where talep.FirmId = @FirmId   
-          and ( talep.KayitTipiId = 2 or talep.KayitTipiId = 3 ) 
-		  and   saat.MevcutSertifikaTipiId = 0
-		  and   saat.IsActive = 1
+          where takip.FirmId = @FirmId   
+          and ( takip.KayitTipiId = 2 or takip.KayitTipiId = 3 ) 
     	  Group by
-              talep.Id 
-             ,saat.UygulamaToplamSaat
+              takip.TalepId
+			 ,takip.UygulamaliDersKredisi
+
         ) as u
         Group by
               u.TalepId 
+           ,  u.UygulamaliDersKredisi
    ) as x
    Where a.TalepId = x.TalepId 
-   and ( a.IsUygulamaDersMebbis   <> x.IsUygulamaDersMebbis 
-     or  a.IsUygulamaliDersPlanli <> x.IsUygulamaliDersPlanli )
+   --and   a.PlanlanacakEgitimTipiId = 1 -- Normal uyg. eğitim
+   and ( isnull(a.IsUygulamaliDersMebbis,-1) <> x.IsUygulamaliDersMebbis 
+     or  isnull(a.IsUygulamaliDersPlanli,-1) <> x.IsUygulamaliDersPlanli )
 
    -- -----------------------------------------------------------------
    -- IsArti4DersMebbis
    -- -----------------------------------------------------------------
-   --print '2. +4 hak uygulamalı dersler planlandı mı?, Mebbise yüklendi mi?'
+ --print '2. +4 hak uygulamalı dersler planlandı mı?, Mebbise yüklendi mi?'
    Update dbo.MtskAdayTakip set
        IsArti4DersMebbis = x.IsArti4DersMebbis 
      , IsArti4DersPlanli = x.IsArti4DersPlanli
@@ -515,67 +633,124 @@ AS BEGIN
    (
       Select 
 	    u.TalepId 
-	  , (case when sum(u.Arti4DersDersMebbisToplami) = max(u.Arti4HakUygulamaSaati) then 1 else 0 end) as IsArti4DersMebbis
-	  , (case when sum(u.Arti4DersToplami) = max(u.Arti4HakUygulamaSaati) then 1 else 0 end) as IsArti4DersPlanli
+	  , (case when sum(u.Arti4DersMebbisToplami) = u.Arti4DersKredisi then 1 else 0 end) as IsArti4DersMebbis
+	  , (case when sum(u.Arti4DersToplami) = u.Arti4DersKredisi then 1 else 0 end) as IsArti4DersPlanli
       From (
 	      -- 2.+4 hak uygulama eğitimi : Başlama, bitiş ve toplam ders sayısı
-          Select talep.Id as TalepId 
+          Select takip.TalepId 
           , count(uDers.Id) as Arti4DersToplami
-          , 0 as Arti4DersDersMebbisToplami  
-		  , saat.Arti4HakUygulamaSaati
-          From dbo.MtskAdayTalep as talep
-             left outer join dbo.MtskSaatUygulama as saat on ( talep.IstenenSertifikaTipiId = saat.IstenenSertifikaTipiId )
-		     left outer join dbo.MtskUygulamaliDers as uDers on (talep.Id = uDers.TalepId
+          , 0 as Arti4DersMebbisToplami  
+		  , takip.Arti4DersKredisi
+          From dbo.MtskAdayTakip as takip 
+		     left outer join dbo.MtskUygulamaliDers as uDers on (
+                        takip.TalepId = uDers.TalepId
                   and   uDers.FirmId = @FirmId   
                   and   uDers.IsActive = 1
-                  and   uDers.AdayId = talep.AdayId
                   and   uDers.EgitimTipiId = 3     -- 2.Direksiyon Eğitimi
-				  and   uDers.DersSaatiTipiId > -1 -- tüm saatler planlanmış olsun
+                  and   uDers.DersSaatiTipiId >= 0 -- tüm saatler planlanmış olsun
+                  and   uDers.DersSaatiTipiId <= 15-- tüm saatler planlanmış olsun
 		          )
-          where talep.FirmId = @FirmId   
-          and ( talep.KayitTipiId = 2 or talep.KayitTipiId = 3 ) 
-		  and   saat.MevcutSertifikaTipiId = 0
-		  and   saat.IsActive = 1
+          where takip.FirmId = @FirmId   
+          and ( takip.KayitTipiId = 2 or takip.KayitTipiId = 3 ) 
           Group by
-              talep.Id 
-			 ,saat.Arti4HakUygulamaSaati
+              takip.TalepId 
+			 ,takip.Arti4DersKredisi
 
           union all 
 
-          Select talep.Id as TalepId 
+          Select takip.TalepId 
           , 0 as Arti4DersToplami
           , count(uDers.Id) as Arti4DersDersMebbisToplami  
-		  , saat.Arti4HakUygulamaSaati
-          From dbo.MtskAdayTalep as talep
-             left outer join dbo.MtskSaatUygulama as saat on ( talep.IstenenSertifikaTipiId = saat.IstenenSertifikaTipiId )
-		     left outer join dbo.MtskUygulamaliDers as uDers on (talep.Id = uDers.TalepId
+		  , takip.Arti4DersKredisi
+          From dbo.MtskAdayTakip as takip
+		     left outer join dbo.MtskUygulamaliDers as uDers on (
+                      takip.TalepId = uDers.TalepId
                 and   uDers.FirmId = @FirmId   
                 and   uDers.IsActive = 1
-                and   uDers.AdayId = talep.AdayId
                 and   uDers.EgitimTipiId = 3     -- 2.Direksiyon Eğitimi
                 and   uDers.UDersIsUploaded = 1  -- Mebbise yüklenmiş
     	        )
-          where talep.FirmId = @FirmId   
-          and ( talep.KayitTipiId = 2 or talep.KayitTipiId = 3 ) 
-		  and   saat.MevcutSertifikaTipiId = 0
-		  and   saat.IsActive = 1
+          where takip.FirmId = @FirmId   
+          and ( takip.KayitTipiId = 2 or takip.KayitTipiId = 3 ) 
           Group by
-              talep.Id 
-			 ,saat.Arti4HakUygulamaSaati
+              takip.TalepId 
+			 ,takip.Arti4DersKredisi
         ) as u
         Group by
             u.TalepId 
+          , u.Arti4DersKredisi
    ) as x
    Where a.TalepId = x.TalepId 
-   and ( a.IsArti4DersMebbis <> x.IsArti4DersMebbis 
-     or  a.IsArti4DersPlanli <> x.IsArti4DersPlanli )
+   and ( isnull(a.IsArti4DersMebbis,-1) <> x.IsArti4DersMebbis 
+     or  isnull(a.IsArti4DersPlanli,-1) <> x.IsArti4DersPlanli )
 
+   -- -----------------------------------------------------------------
+   -- IsTelafiDersMebbis
+   -- -----------------------------------------------------------------
+ --print 'Telafi dersleri planlandı mı?, Mebbise yüklendi mi?'
+   Update dbo.MtskAdayTakip set
+       IsTelafiDersMebbis = x.IsTelafiDersMebbis 
+      ,IsTelafiDersPlanli = x.IsTelafiDersPlanli
+   From dbo.MtskAdayTakip a, 
+   (
+        Select 
+	    u.TalepId 
+	  , (case when sum(u.TelafiDersMebbisToplami) = u.TelafiDersKredisi then 1 else 0 end) as IsTelafiDersMebbis
+	  , (case when sum(u.TelafiDersToplami) = u.TelafiDersKredisi then 1 else 0 end) as IsTelafiDersPlanli
+      From (
+	      -- Telafi eğitimi : Başlama, bitiş ve toplam ders sayısı
+          Select takip.TalepId 
+          , count(uDers.Id) as TelafiDersToplami
+          , 0 as TelafiDersMebbisToplami  
+		  , takip.TelafiDersKredisi
+          From dbo.MtskAdayTakip as takip 
+		     left outer join dbo.MtskUygulamaliDers as uDers on (
+                        takip.TalepId = uDers.TalepId
+                  and   uDers.FirmId = @FirmId   
+                  and   uDers.IsActive = 1
+                  and   uDers.EgitimTipiId = 2     -- Telafi Eğitimi
+                  and   uDers.DersSaatiTipiId >= 0 -- tüm saatler planlanmış olsun
+                  and   uDers.DersSaatiTipiId <= 15-- tüm saatler planlanmış olsun
+             )
+          where takip.FirmId = @FirmId   
+          and ( takip.KayitTipiId = 2 or takip.KayitTipiId = 3 ) 
+          Group by
+              takip.TalepId 
+			 ,takip.TelafiDersKredisi
 
+          union all 
+
+          Select takip.TalepId 
+          , 0 as TelafiDersToplami
+          , count(uDers.Id) as TelafiDersMebbisToplami  
+		  , takip.TelafiDersKredisi
+          From dbo.MtskAdayTakip as takip
+		     left outer join dbo.MtskUygulamaliDers as uDers on (
+                        takip.TalepId = uDers.TalepId
+                  and   uDers.FirmId = @FirmId   
+                  and   uDers.IsActive = 1
+                  and   uDers.EgitimTipiId = 2     -- Telafi Eğitimi
+                  and   uDers.UDersIsUploaded = 1  -- Mebbise yüklenmiş
+             )
+          where takip.FirmId = @FirmId   
+          and ( takip.KayitTipiId = 2 or takip.KayitTipiId = 3 ) 
+          Group by
+              takip.TalepId 
+			 ,takip.TelafiDersKredisi
+        ) as u
+        Group by
+            u.TalepId 
+          , u.TelafiDersKredisi
+   ) as x
+   Where a.TalepId = x.TalepId 
+   --and   a.PlanlanacakEgitimTipiId = 2 -- Telafi eğitimi
+   and ( isnull(a.IsTelafiDersMebbis,-1) <> x.IsTelafiDersMebbis 
+     or  isnull(a.IsTelafiDersPlanli,-1) <> x.IsTelafiDersPlanli )
 
    -- -----------------------------------------------------------------
    -- IsBasarisizDersMebbis
    -- -----------------------------------------------------------------
-   --print 'Başarısız aday dersleri planlandı mı?, Mebbise yüklendi mi?'
+ --print 'Başarısız aday dersleri planlandı mı?, Mebbise yüklendi mi?'
    Update dbo.MtskAdayTakip set
        IsBasarisizDersMebbis = x.IsBasarisizDersMebbis 
       ,IsBasarisizDersPlanli = x.IsBasarisizDersPlanli
@@ -583,61 +758,57 @@ AS BEGIN
    (
       Select 
 	    u.TalepId 
-	  , (case when sum(u.BasarisizDersMebbisToplami) = max(u.BasarisizEgitimSaati) then 1 else 0 end) as IsBasarisizDersMebbis
-	  , (case when sum(u.BasarisizDersToplami) = max(u.BasarisizEgitimSaati) then 1 else 0 end) as IsBasarisizDersPlanli
+	  , (case when sum(u.BasarisizDersMebbisToplami) = u.BasarisizDersKredisi then 1 else 0 end) as IsBasarisizDersMebbis
+	  , (case when sum(u.BasarisizDersToplami) = u.BasarisizDersKredisi then 1 else 0 end) as IsBasarisizDersPlanli
       From (
 	      -- Başarısız aday eğitimi : Başlama, bitiş ve toplam ders sayısı
-          Select talep.Id as TalepId 
+          Select takip.TalepId 
           , count(uDers.Id) as BasarisizDersToplami
           , 0 as BasarisizDersMebbisToplami  
-		  , saat.BasarisizEgitimSaati
-          From dbo.MtskAdayTalep as talep
-             left outer join dbo.MtskSaatUygulama as saat on ( talep.IstenenSertifikaTipiId = saat.IstenenSertifikaTipiId )
-		     left outer join dbo.MtskUygulamaliDers as uDers on (talep.Id = uDers.TalepId
+		  , takip.BasarisizDersKredisi
+          From dbo.MtskAdayTakip as takip 
+		     left outer join dbo.MtskUygulamaliDers as uDers on (
+                        takip.TalepId = uDers.TalepId
                   and   uDers.FirmId = @FirmId   
                   and   uDers.IsActive = 1
-                  and   uDers.AdayId = talep.AdayId
                   and   uDers.EgitimTipiId = 4     -- Başarısız Aday Eğitimi
-				  and   uDers.DersSaatiTipiId > -1 -- tüm saatler planlanmış olsun
+                  and   uDers.DersSaatiTipiId >= 0 -- tüm saatler planlanmış olsun
+                  and   uDers.DersSaatiTipiId <= 15-- tüm saatler planlanmış olsun
              )
-          where talep.FirmId = @FirmId   
-          and ( talep.KayitTipiId = 2 or talep.KayitTipiId = 3 ) 
-		  and   saat.MevcutSertifikaTipiId = 0
-		  and   saat.IsActive = 1
+          where takip.FirmId = @FirmId   
+          and ( takip.KayitTipiId = 2 or takip.KayitTipiId = 3 ) 
           Group by
-              talep.Id 
-			 ,saat.BasarisizEgitimSaati
+              takip.TalepId
+			 ,takip.BasarisizDersKredisi
 
           union all 
 
-          Select talep.Id as TalepId 
+          Select takip.TalepId 
           , 0 as BasarisizDersToplami
           , count(uDers.Id) as BasarisizDersMebbisToplami  
-		  , saat.BasarisizEgitimSaati
-          From dbo.MtskAdayTalep as talep
-             left outer join dbo.MtskSaatUygulama as saat on ( talep.IstenenSertifikaTipiId = saat.IstenenSertifikaTipiId )
-		     left outer join dbo.MtskUygulamaliDers as uDers on (talep.Id = uDers.TalepId
+		  , takip.BasarisizDersKredisi
+          From dbo.MtskAdayTakip as takip
+		     left outer join dbo.MtskUygulamaliDers as uDers on (
+                        takip.TalepId = uDers.TalepId
                   and   uDers.FirmId = @FirmId   
                   and   uDers.IsActive = 1
-                  and   uDers.AdayId = talep.AdayId
                   and   uDers.EgitimTipiId = 4     -- Başarısız Aday Eğitimi
                   and   uDers.UDersIsUploaded = 1  -- Mebbise yüklenmiş
              )
-          where talep.FirmId = @FirmId   
-          and ( talep.KayitTipiId = 2 or talep.KayitTipiId = 3 ) 
-		  and   saat.MevcutSertifikaTipiId = 0
-		  and   saat.IsActive = 1
+          where takip.FirmId = @FirmId   
+          and ( takip.KayitTipiId = 2 or takip.KayitTipiId = 3 ) 
           Group by
-              talep.Id 
-			 ,saat.BasarisizEgitimSaati
+              takip.TalepId
+			 ,takip.BasarisizDersKredisi
         ) as u
         Group by
             u.TalepId 
+          , u.BasarisizDersKredisi
    ) as x
    Where a.TalepId = x.TalepId 
-   and ( a.IsBasarisizDersMebbis <> x.IsBasarisizDersMebbis 
-     or  a.IsBasarisizDersPlanli <> x.IsBasarisizDersPlanli )
-
+   --and   a.PlanlanacakEgitimTipiId = 4 -- Başarısız aday eğitimi
+   and ( isnull(a.IsBasarisizDersMebbis,-1) <> x.IsBasarisizDersMebbis 
+     or  isnull(a.IsBasarisizDersPlanli,-1) <> x.IsBasarisizDersPlanli )
 
 
    -- -----------------------------------------------------------------
@@ -649,26 +820,29 @@ AS BEGIN
    -- 3,    Uygulamalı dersler Mebbise aktarıldı
    -- 4,    Uygulamalı dersleri başladı 
    -- 5,    Uygulamalı dersleri tamamladı 
-   --print 'Uygulamalı derslerin durumları nedir ?'
+   -- 6, 	Uyg. planı yok. Sınav aşamasına geçmiş
+ --print 'Uygulamalı derslerin durumları nedir ?'
    Update dbo.MtskAdayTakip set
        UygulamaliDersTipiId = x.UygulamaliDersTipiId
    From dbo.MtskAdayTakip a, 
    ( 
          Select takip.Id as TakipId
 		 , ( case
-			 when isnull(takip.UygulamaliDersTipiId,0) <= 5 and takip.IsUygulamaDersMebbis = 1 and takip.UygulamaBaslamaTarihi <= @bugun and takip.UygulamaBitisTarihi < @bugun then 5 -- Uygulamalı dersleri tamamladı
-			 when isnull(takip.UygulamaliDersTipiId,0) <= 4 and takip.IsUygulamaDersMebbis = 1 and takip.UygulamaBaslamaTarihi <= @bugun and takip.UygulamaBitisTarihi > @bugun then 4 -- Uygulamalı dersleri başladı
-			 when isnull(takip.UygulamaliDersTipiId,0) <= 3 and takip.IsUygulamaDersMebbis = 1 and takip.UygulamaBaslamaTarihi >  @bugun then 3 -- Uygulamalı dersler Mebbise aktarıldı, ders başlamadı
-		     when isnull(takip.UygulamaliDersTipiId,0) <= 1 and takip.IsUygulamaDersMebbis = 0 and takip.IsUygulamaliDersPlanli = 1 then 2 -- Uygulamalı dersler planlandı, Mebbise aktarılacak
-		     when isnull(takip.UygulamaliDersTipiId,0)  = 2 and takip.IsUygulamaDersMebbis = 0 and takip.IsUygulamaliDersPlanli = 0 then 1 -- Uygulamalı dersler planlanacak << yapılan dersler silinince oluşuyor
-             end ) as UygulamaliDersTipiId 
+			 when /*takip.IsUygulamaliDersMebbis = 1 and*/ takip.UygulamaBaslamaTarihi <= @bugun and takip.UygulamaBitisTarihi < @bugun then 5 -- Uygulamalı dersleri tamamladı
+			 when /*takip.IsUygulamaliDersMebbis = 1 and*/ takip.UygulamaBaslamaTarihi <= @bugun and takip.UygulamaBitisTarihi > @bugun then 4 -- Uygulamalı dersleri başladı
+			 when takip.IsUygulamaliDersMebbis = 1 and takip.UygulamaBaslamaTarihi >  @bugun then 3 -- Uygulamalı dersler Mebbise aktarıldı, ders başlamadı
+		     when takip.IsUygulamaliDersMebbis = 0 and takip.IsUygulamaliDersPlanli = 1 then 2 -- Uygulamalı dersler planlandı, Mebbise aktarılacak
+		     when takip.IsUygulamaliDersMebbis = 0 and takip.IsUygulamaliDersPlanli = 0 then 1 -- Uygulamalı dersler planlanacak << yapılan dersler silinince oluşuyor
+             else takip.UygulamaliDersTipiId end ) as UygulamaliDersTipiId 
          From MtskAdayTakip as takip
          Where takip.FirmId = @FirmId
+         and ( takip.KayitTipiId = 2 or takip.KayitTipiId = 3 ) 
+         and takip.TalepTipiId = 1
+		 and isnull(takip.UygulamaliDersTipiId,0) < 6
 		 --and   takip.IsUygulamaliDersPlanli = 1 -- Uygulamalı ders planı yapıldıysa
    ) as x
    Where a.Id = x.TakipId		 
-   and   a.UygulamaliDersTipiId <> x.UygulamaliDersTipiId
-
+   and   isnull(a.UygulamaliDersTipiId,-1) <> x.UygulamaliDersTipiId
 
    --Arti4DersTipiId
    -- 0,   Tanımsız
@@ -677,26 +851,57 @@ AS BEGIN
    -- 3,   2. +4 hak dersleri Mebbise aktarıldı
    -- 4,   2. +4 hak dersleri başladı
    -- 5,   2. +4 hak dersleri tamamlandı
-   --print '2. +4 hak uygulamalı derslerin durumları nedir ?'
+   -- 6,   2. +4 planı yok. Sınav aşamasına geçmiş
+ --print '2. +4 hak uygulamalı derslerin durumları nedir ?'
    Update dbo.MtskAdayTakip set
        Arti4DersTipiId = x.Arti4DersTipiId
    From dbo.MtskAdayTakip a, 
    ( 
          Select takip.Id as TakipId
 		 , ( case
-			 when isnull(takip.Arti4DersTipiId,0) <= 5 and takip.IsArti4DersMebbis = 1 and takip.Arti4BaslamaTarihi <= @bugun and takip.Arti4BitisTarihi < @bugun then 5 -- 2. +4 hak dersleri tamamlandı
-			 when isnull(takip.Arti4DersTipiId,0) <= 4 and takip.IsArti4DersMebbis = 1 and takip.Arti4BaslamaTarihi <= @bugun and takip.Arti4BitisTarihi > @bugun then 4 -- 2. +4 hak dersleri başladı
-			 when isnull(takip.Arti4DersTipiId,0) <= 3 and takip.IsArti4DersMebbis = 1 and takip.Arti4BaslamaTarihi >  @bugun then 3 -- 2. +4 hak dersleri Mebbise aktarıldı, dersler başlamadı
-		     when isnull(takip.Arti4DersTipiId,0) <= 1 and takip.IsArti4DersMebbis = 0 and takip.IsArti4DersPlanli = 1 then 2 -- 2. +4 hak dersleri planlandı, Mebbise aktarılacak
-		     when isnull(takip.Arti4DersTipiId,0)  = 2 and takip.IsArti4DersMebbis = 0 and takip.IsArti4DersPlanli = 0 then 1 -- 2. +4 hak dersleri planlanacak << dersler silince oluşuyor
-             end ) as Arti4DersTipiId 
+			 when /*takip.IsArti4DersMebbis = 1 and*/ takip.Arti4BaslamaTarihi <= @bugun and takip.Arti4BitisTarihi < @bugun then 5 -- 2. +4 hak dersleri tamamlandı
+			 when /*takip.IsArti4DersMebbis = 1 and*/ takip.Arti4BaslamaTarihi <= @bugun and takip.Arti4BitisTarihi > @bugun then 4 -- 2. +4 hak dersleri başladı
+			 when takip.IsArti4DersMebbis = 1 and takip.Arti4BaslamaTarihi >  @bugun then 3 -- 2. +4 hak dersleri Mebbise aktarıldı, dersler başlamadı
+		     when takip.IsArti4DersMebbis = 0 and takip.IsArti4DersPlanli = 1 then 2 -- 2. +4 hak dersleri planlandı, Mebbise aktarılacak
+		     when takip.IsArti4DersMebbis = 0 and takip.IsArti4DersPlanli = 0 then 1 -- 2. +4 hak dersleri planlanacak << dersler silince oluşuyor
+             else takip.Arti4DersTipiId end ) as Arti4DersTipiId 
          From MtskAdayTakip as takip
          Where takip.FirmId = @FirmId
+         and ( takip.TalepTipiId = 2 or takip.TalepTipiId = 3 )
+         and isnull(takip.Arti4DersTipiId,0) < 6
 		 --and   takip.IsArti4DersPlanli = 1 -- 2. +4 hak derslerin planı yapıldıysa
    ) as x
    Where a.Id = x.TakipId		 
-   and   a.Arti4DersTipiId <> x.Arti4DersTipiId
+   and   isnull(a.Arti4DersTipiId,-1) <> x.Arti4DersTipiId
 
+   -- TelafiDersTipiId
+   -- 0,  ''
+   -- 1,  2 saat telafi eğitimi planlanacak
+   -- 2,  2 saat telafi eğitimi planlandı, Mebbise aktarılacak
+   -- 3,  2 saat telafi eğitimi Mebbise aktarıldı
+   -- 4,  2 saat telafi eğitimi alıyor
+   -- 5,  2 saat telafi aday eğitimi tamamlandı
+ --print 'Telafi derslerin durumları nedir ?'
+   Update dbo.MtskAdayTakip set
+       TelafiDersTipiId = x.TelafiDersTipiId
+   From dbo.MtskAdayTakip a, 
+   ( 
+         Select takip.Id as TakipId
+		 , ( case
+			 when isnull(takip.TelafiDersTipiId,0) <= 5 and /*takip.IsTelafiDersMebbis = 1 and*/ takip.TelafiBaslamaTarihi < @bugun then 5 -- 2 saat başarısız aday eğitimi tamamlandı
+			 when isnull(takip.TelafiDersTipiId,0) <= 4 and /*takip.IsTelafiDersMebbis = 1 and*/ takip.TelafiBaslamaTarihi = @bugun then 4 -- 2 saat başarısız aday eğitimi alıyor
+			 when isnull(takip.TelafiDersTipiId,0) <= 3 and takip.IsTelafiDersMebbis = 1 and takip.TelafiBaslamaTarihi > @bugun then 3 -- 2 saat başarısız aday eğitimi Mebbise aktarıldı, dersler başlamadı
+		     when isnull(takip.TelafiDersTipiId,0) <= 1 and takip.IsTelafiDersMebbis = 0 and takip.IsTelafiDersPlanli = 1 then 2 -- 2 saat başarısız aday eğitimi planlandı, Mebbise aktarılacak
+		     when isnull(takip.TelafiDersTipiId,0)  = 2 and takip.IsTelafiDersMebbis = 0 and takip.IsTelafiDersPlanli = 0 then 1 -- 2 saat başarısız aday eğitimi planlanacak << dersler silince oluşuyor
+             else takip.TelafiDersTipiId end ) as TelafiDersTipiId 
+         From MtskAdayTakip as takip
+         Where takip.FirmId = @FirmId
+         and ( takip.KayitTipiId = 2 or takip.KayitTipiId = 3 ) 
+		 --and   takip.IsTelafiDersPlanli = 1 -- 2 saat başarısız aday eğitimi planı yapıldıysa
+   ) as x
+   Where a.Id = x.TakipId		 
+   and   isnull(a.TelafiDersTipiId,-1) <> x.TelafiDersTipiId
+   
    -- BasarisizDersTipiId
    -- 0,  ''
    -- 1,  2 saat başarısız aday eğitimi planlanacak
@@ -705,29 +910,30 @@ AS BEGIN
    -- 4,  2 saat başarısız aday eğitimi alıyor
    -- 5,  2 saat başarısız aday eğitimi tamamlandı
    -- 6,  Eğitime gerek yok (Sınava girmedi)
-
-   --print 'Başarısız adayların uygulamalı derslerin durumları nedir ?'
+ --print 'Başarısız adayların uygulamalı derslerin durumları nedir ?'
    Update dbo.MtskAdayTakip set
        BasarisizDersTipiId = x.BasarisizDersTipiId
    From dbo.MtskAdayTakip a, 
    ( 
          Select takip.Id as TakipId
 		 , ( case
-			 when isnull(takip.BasarisizDersTipiId,0) <= 5 and takip.IsBasarisizDersMebbis = 1 and takip.BasarisizBaslamaTarihi < @bugun then 5 -- 2 saat başarısız aday eğitimi tamamlandı
-			 when isnull(takip.BasarisizDersTipiId,0) <= 4 and takip.IsBasarisizDersMebbis = 1 and takip.BasarisizBaslamaTarihi = @bugun then 4 -- 2 saat başarısız aday eğitimi alıyor
+			 when isnull(takip.BasarisizDersTipiId,0) <= 5 and /*takip.IsBasarisizDersMebbis = 1 and*/ takip.BasarisizBaslamaTarihi < @bugun then 5 -- 2 saat başarısız aday eğitimi tamamlandı
+			 when isnull(takip.BasarisizDersTipiId,0) <= 4 and /*takip.IsBasarisizDersMebbis = 1 and*/ takip.BasarisizBaslamaTarihi = @bugun then 4 -- 2 saat başarısız aday eğitimi alıyor
 			 when isnull(takip.BasarisizDersTipiId,0) <= 3 and takip.IsBasarisizDersMebbis = 1 and takip.BasarisizBaslamaTarihi > @bugun then 3 -- 2 saat başarısız aday eğitimi Mebbise aktarıldı, dersler başlamadı
 		     when isnull(takip.BasarisizDersTipiId,0) <= 1 and takip.IsBasarisizDersMebbis = 0 and takip.IsBasarisizDersPlanli = 1 then 2 -- 2 saat başarısız aday eğitimi planlandı, Mebbise aktarılacak
 		     when isnull(takip.BasarisizDersTipiId,0)  = 2 and takip.IsBasarisizDersMebbis = 0 and takip.IsBasarisizDersPlanli = 0 then 1 -- 2 saat başarısız aday eğitimi planlanacak << dersler silince oluşuyor
-             end ) as BasarisizDersTipiId 
+             else takip.BasarisizDersTipiId end ) as BasarisizDersTipiId 
          From MtskAdayTakip as takip
          Where takip.FirmId = @FirmId
+         and ( takip.KayitTipiId = 2 or takip.KayitTipiId = 3 ) 
 		 --and   takip.IsBasarisizDersPlanli = 1 -- 2 saat başarısız aday eğitimi planı yapıldıysa
    ) as x
    Where a.Id = x.TakipId		 
-   and   a.BasarisizDersTipiId <> x.BasarisizDersTipiId
+   and   isnull(a.BasarisizDersTipiId,-1) <> x.BasarisizDersTipiId
 
 
-   --print 'Planlanacak Egitiminlerin tespit : PlanlanacakEgitimTipiId '
+
+ --print 'Planlanacak Egitiminlerin tespit : PlanlanacakEgitimTipiId '
    -- UygulamaliDersTipiId : 1, 'Uygulamalı dersler planlanacak'
    -- Arti4DersTipiId      : 1, '2. +4 hak dersleri planlanacak'
    -- BasarisizDersTipiId  : 1, '2 saat başarısız aday eğitimi planlanacak'
@@ -742,19 +948,23 @@ AS BEGIN
    (
          Select takip.Id as TakipId
 		 , ( case
-			 when isnull(takip.UygulamaliDersTipiId,0) = 1 then 1 
-			 when isnull(takip.Arti4DersTipiId,0) = 1      then 3 
 			 when isnull(takip.BasarisizDersTipiId,0) = 1  then 4 
-			 --when isnull(takip.UygulamaliDersTipiId,0) = 1 then 1 
+			 when isnull(takip.TelafiDersTipiId,0) = 1     then 2 
+			 when isnull(takip.Arti4DersTipiId,0) = 1      then 3 
+			 when isnull(takip.UygulamaliDersTipiId,0) = 1 then 1 
              else 0 
              end ) as PlanlanacakEgitimTipiId 
          From MtskAdayTakip as takip
          Where takip.FirmId = @FirmId
-         and ( takip.UygulamaliDersTipiId = 1
-           or  takip.Arti4DersTipiId = 1
-           or  takip.BasarisizDersTipiId = 1 )
+         and ( takip.TalepTipiId = 2 or takip.TalepTipiId = 3 )
+		 and   isnull(takip.PlanlanacakEgitimTipiId,0) = 0
+         and ( isnull(takip.UygulamaliDersTipiId,0) = 1
+           or  isnull(takip.TelafiDersTipiId,0) = 1
+           or  isnull(takip.Arti4DersTipiId,0) = 1
+           or  isnull(takip.BasarisizDersTipiId,0) = 1 )
    ) as x
    Where a.Id = x.TakipId		 
+   and   isnull(a.PlanlanacakEgitimTipiId,0) = 0
    and   isnull(a.PlanlanacakEgitimTipiId,0) <> x.PlanlanacakEgitimTipiId
 
 
@@ -762,25 +972,50 @@ AS BEGIN
    -- 5,    Uygulamalı dersleri tamamladı
    --
    -- Arti4DersTipiId
-   -- 4,    İkinci +4 için uygulamalı ders tamamlandı
+   -- 5,    İkinci +4 için uygulamalı ders tamamlandı
+   --
+   -- TelafiDersTipiId
+   -- 5,    2 saat telafi eğitimi tamamlandı
    --
    -- BasarisizDersTipiId
    -- 5,    2 saat başarısız aday eğitimi tamamlandı
    -- 6,    Eğitime gerek yok (Sınava girmedi)
 
-   --print 'Aday henüz uygulamalı sınav aşamasında değil'
+   -- uSinavDurumTipi
+   -- 0,    'Tanımsız'
+   -- 1,    'Henüz sınav aşamasında değil'
+   -- 2,    'Uyg. sınavı için usta öğretici onayı isteniyor'
+   -- 3,    'Uyg. sınavı için hazır değil'
+   -- 4,    'Uyg. sınavı için MEBBİS de onaylanacak'
+   -- 5,    'Uyg. sınav randevusu planlanacak'
+   -- 6,    'Uyg. sınav randevusu MEBBİSe aktarılacak'
+   -- 7,    'Uyg. sınavına girecek'
+   -- 8,    'Başarısız aday eğitimi alacak' 
+
+   -- uSinavaHazirmiTipi
+   -- 0,    'Sınava hazır mı ?'
+   -- 1,    'Evet - Sınava hazır'
+   -- 2,    'Hayır - Sınav için hazır değil'
+   -- 3,    'Takviye derslerle sınava hazır'
+
+ --print 'Aday uygulamalı sınava hazır ı'
+   update MtskAdayTakip set
+       uSinavaHazirmiTipiId = 0 -- Sınava hazır mı
+   from MtskAdayTakip
+   Where FirmId = @FirmId
+   and ( KayitTipiId = 2 or KayitTipiId = 3 ) 
+   and   isnull(uSinavaHazirmiTipiId,-1) = -1
+
+ --print 'Aday henüz uygulamalı sınav aşamasında değil'
    update MtskAdayTakip set
        uSinavDurumTipiId = 1 -- Henüz sınav aşamasında değil
    from MtskAdayTakip
    Where FirmId = @FirmId
-   and   uSinavDurumTipiId = 0
-   --and   UygulamaliDersTipiId <> 5 
-   --and   Arti4DersTipiId <> 4
-   --and   BasarisizDersTipiId < 5 
-
+   and ( KayitTipiId = 2 or KayitTipiId = 3 ) 
+   and   isnull(uSinavDurumTipiId,-1) = -1
 
    -- 2,  Uygulama sınav için usta öğretici onayı isteniyor
-   --print 'Uygulamalı sınav için usta öğretici onay istenecek'
+ --print 'Uygulamalı sınav için usta öğretici onay istenecek'
    Update dbo.MtskAdayTakip set
        uSinavDurumTipiId = x.uSinavDurumTipiId
    From dbo.MtskAdayTakip a, 
@@ -789,20 +1024,22 @@ AS BEGIN
 		 , ( case
 			 when takip.UygulamaliDersTipiId = 5 and takip.UygulamaBitisTarihi    < @bugun then 2  -- Uygulama sınav için usta öğretici onayı isteniyor 
 			 when takip.Arti4DersTipiId      = 5 and takip.Arti4BitisTarihi       < @bugun then 2  -- Uygulama sınav için usta öğretici onayı isteniyor
+			 when takip.TelafiDersTipiId     = 5 and takip.TelafiBaslamaTarihi    < @bugun then 2  -- Uygulama sınav için usta öğretici onayı isteniyor
 			 when takip.BasarisizDersTipiId  = 5 and takip.BasarisizBaslamaTarihi < @bugun then 2  -- Uygulama sınav için usta öğretici onayı isteniyor
              end ) as uSinavDurumTipiId 
          From MtskAdayTakip as takip
          Where takip.FirmId = @FirmId
+         and ( takip.KayitTipiId = 2 or takip.KayitTipiId = 3 ) 
 		 and   takip.uSinavDurumTipiId = 1 -- Henüz sınav aşamasında değil
    ) as x
    Where a.Id = x.TakipId		 
    and   a.uSinavDurumTipiId <> x.uSinavDurumTipiId
-   and   x.uSinavDurumTipiId = 2
-
+   and   a.uSinavDurumTipiId < 2
+ 	 
    -- UstaOgreticiOnayTipiId   /* 1. Onay, 2. Sınav için hazır değil  */
    -- Kullanıcı onaylayınca
    --
-   --print 'Usta öğreticinin aday hakkındaki kararı işleniyor'
+ --print 'Usta öğreticinin aday hakkındaki kararı işleniyor'
    Update dbo.MtskAdayTakip set
        uSinavDurumTipiId = x.uSinavDurumTipiId
    From dbo.MtskAdayTakip a, 
@@ -816,37 +1053,60 @@ AS BEGIN
              else takip.uSinavDurumTipiId end ) as uSinavDurumTipiId 
          From dbo.MtskAdayTakip as takip
          Where takip.FirmId = @FirmId
+         and ( takip.KayitTipiId = 2 or takip.KayitTipiId = 3 ) 
 		 and   takip.uSinavDurumTipiId > 1
+		 -- açma and   isnull(takip.IsUygSinavMebbisOnayi,0) = 0 
 		 and   takip.uSinavDurumTipiId < 5
    ) as x
    Where a.Id = x.TakipId		 
-   and   a.uSinavDurumTipiId <> isnull(x.uSinavDurumTipiId,0)
-   and   a.uSinavDurumTipiId > 1
-   and   a.uSinavDurumTipiId < 5   	  
+   and   isnull(a.uSinavDurumTipiId,0) <> isnull(x.uSinavDurumTipiId,0)
+   and   isnull(a.uSinavDurumTipiId,0) > 1
+   and   isnull(a.uSinavDurumTipiId,0) < 5  
    
+ 
    -- Uygulama sınavı için mebbisden onay verildikten sonra
    -- Uygulama sınav randevusu planlanacak  aşamasına geçilecek
    --
-   --print 'Uygulama sınavı için randevu planlama aşamasına geçenler'
+ --print 'Uygulama sınavı için randevu planlama aşamasına geçenler'
    update MtskAdayTakip set
        uSinavDurumTipiId = x.uSinavDurumTipiId 
+      ,IsRandevuPlanlandi = 0
+      ,IsRandevuMebbis = 0
+      ,RandevuTarihi = null
+      ,RandevuSaatTipiId = 0
+      ,RandevuEgitimAraciId = null
+      ,RandevuPersonelId = null
    From MtskAdayTakip as a,
    (
          Select takip.Id as TakipId  
             , 5 as uSinavDurumTipiId -- Uygulama sınav randevusu planlanacak
          From dbo.MtskAdayTakip as takip
          Where takip.FirmId = @FirmId
-         and   takip.IsUygSinavMebbisOnayi = 1 -- Uygulama sınavı için mebbisden onay verilince
-         and   takip.IsRandevuPlanlandi = 0    -- Randevu planlı değilse
+         and ( takip.KayitTipiId = 2 or takip.KayitTipiId = 3 ) 
+         and ( takip.uSinavaHazirmiTipiId = 1 or takip.uSinavaHazirmiTipiId = 3 )
+         -- Devreye alınca açılacak
+         --and   takip.IsUygSinavMebbisOnayi = 1 -- Uygulama sınavı için mebbisden onay verilince   ( geçici süre devre dışı )
+         -- açma and   takip.IsRandevuPlanlandi = 0    -- Randevu planlı değilse
          and   takip.uSinavDurumTipiId >= 2    -- Uygulama sınavı için usta öğretici onayı isteniyor
          and   takip.uSinavDurumTipiId <= 4    -- Uygulama sınavı için MEBBİS de onaylanacak
+
+         union all
+
+         Select takip.Id as TakipId  
+            , 5 as uSinavDurumTipiId -- Uygulama sınav randevusu planlanacak
+         From dbo.MtskAdayTakip as takip
+         Where takip.FirmId = @FirmId
+         and ( takip.KayitTipiId = 2 or takip.KayitTipiId = 3 ) 
+         and   takip.uSinavDurumTipiId = 8   -- Başarısız aday eğitimi alacak
+         and   takip.BasarisizDersTipiId = 5 -- 2 saat başarısız aday eğitimi tamamlandı
    ) as x
    Where a.Id = x.TakipId		 
-   and   a.uSinavDurumTipiId <> isnull(x.uSinavDurumTipiId,0)
+   and   isnull(a.uSinavDurumTipiId,0) <> isnull(x.uSinavDurumTipiId,0)
+
 
    -- Randevusu planlaması yapıldıktan sonra Mebbise aktarılacak randevular
    --
-   --print 'Randevu planlarının Mebbise aktarılacak aşamasına geçenler'
+ --print 'Randevu planlarının Mebbise aktarılacak aşamasına geçenler'
    update MtskAdayTakip set
        uSinavDurumTipiId = x.uSinavDurumTipiId
    From MtskAdayTakip as a,
@@ -855,18 +1115,20 @@ AS BEGIN
             , 6 as uSinavDurumTipiId -- Uygulama sınav randevusu MEBBİSe aktarılacak
          From dbo.MtskAdayTakip as takip
          Where takip.FirmId = @FirmId
-         and   takip.IsUygSinavMebbisOnayi = 1 -- Uygulama sınavı için mebbisden onay verilince
+         and ( takip.KayitTipiId = 2 or takip.KayitTipiId = 3 ) 
+         -- Devreye alınca açılacak
+		 --and   takip.IsUygSinavMebbisOnayi = 1 -- Uygulama sınavı için mebbisden onay verilince ( geçici süre devre dışı )
          and   takip.IsRandevuPlanlandi = 1    -- Randevu planlı ise
          and   takip.uSinavDurumTipiId >= 2    -- Uygulama sınavı için usta öğretici onayı isteniyor
          and   takip.uSinavDurumTipiId <= 5    -- Uygulama sınav randevusu planlanacak
    ) as x
    Where a.Id = x.TakipId		 
-   and   a.uSinavDurumTipiId <> isnull(x.uSinavDurumTipiId,0)
-   
+   and   isnull(a.uSinavDurumTipiId,0) <> isnull(x.uSinavDurumTipiId,0)
+
 
    -- Uygulama sınavına girecek 
    --
-   --print 'Uygulama sınavına girecek aşamasına geçenler'
+ --print 'Uygulama sınavına girecek aşamasına geçenler'
    update MtskAdayTakip set
        uSinavDurumTipiId = x.uSinavDurumTipiId
    From MtskAdayTakip as a,
@@ -875,162 +1137,18 @@ AS BEGIN
             , 7 as uSinavDurumTipiId -- Uygulama sınavına girecek
          From dbo.MtskAdayTakip as takip
          Where takip.FirmId = @FirmId
-         and   takip.IsUygSinavMebbisOnayi = 1 -- Uygulama sınavı için mebbisden onay verilince
+         and ( takip.KayitTipiId = 2 or takip.KayitTipiId = 3 ) 
+         -- Devreye alınca açılacak
+         --and   takip.IsUygSinavMebbisOnayi = 1 -- Uygulama sınavı için mebbisden onay verilince ( geçici süre devre dışı )
          and   takip.IsRandevuPlanlandi = 1    -- Randevu planlı ise
          and   takip.IsRandevuMebbis = 1       -- Randevu mebbise aktarıldı 
          and   takip.uSinavDurumTipiId >= 2    -- Uygulama sınavı için usta öğretici onayı isteniyor
          and   takip.uSinavDurumTipiId <= 6    -- Uygulama sınav randevusu MEBBİSe aktarılacak
    ) as x
    Where a.Id = x.TakipId		 
-   and   a.uSinavDurumTipiId <> isnull(x.uSinavDurumTipiId,0)
+   and   isnull(a.uSinavDurumTipiId,0) <> isnull(x.uSinavDurumTipiId,0)
 
 
-
-  -- -----------------------------------------------------------------
-  --
-  -- Uygulama sınav sonuclarını değerlendir
-  --
-  -- -----------------------------------------------------------------
-
-  -- MtskAdayTakipuSinavDurumTipi
-  -- 0,    'Tanımsız
-  -- 1,    'Henüz sınav aşamasında değil
-  -- 2,    'Uygulama sınavı için usta öğretici onayı isteniyor
-  -- 3,    'Uygulama sınavı için hazır değil
-  -- 4,    'Uygulama sınavı için MEBBİS de onaylanacak
-  -- 5,    'Uygulama sınav randevusu planlanacak
-  -- 6,    'Uygulama sınav randevusu MEBBİSe aktarılacak
-  -- 7,    'Uygulama sınavına girecek
-  -- 8,    'Uygulama sınav sonucu okunacak
-  -- 9,    'Uygulama sınav sonucu okundu
-
-  -- MtskSinavUygulamaPuanTipi
-  --  -2  Durumu Girilmemiş
-  --  -1  Girmedi
-  --   0	
-  --   1  Başarısız
-  -- 100  Başarılı
-
-  -- MtskSinavUygulama.DurumuTipiId
-  -- 0,    ''
-  -- 1,    'Uygulama Sınav Aşamasında'
-  -- 2,    '2.Direksiyon Aşamasında'
-  -- 3,    'Sertifika Almaya Hak Kazandı'
-  -- 4,    'Uygulama Sınav Hakkı Doldu'
-  -- 5,    'Sertifikası İptal Edildi'
-  -- 6,	 'Durumu Girilmemiş'
-  
-    --print 'Uygulamalı sınav sonuçları işleniyor '
-    update MtskAdayTakip set
-      uSinavNo = x.SinavNoYeni
-    , uSinavDurumTipiId = x.uSinavDurumTipiId
-    , uSinavNoGirdigi = x.SinavNoGirdigi
-    , uSinavSonucTipiId = x.uSinavSonucTipiId
-    , uSinavSonrasiTipiId = x.uSinavSonrasiTipiId
-	, uSinavDetayId = x.sinavId
-	, uSinavBasariTarihi = x.SinavTarihi --x.uSinavBasariTarihi
-	, BasarisizDersTipiId = x.BasarisizDersTipiId
-
-    from MtskAdayTakip a, 
-    (
-         Select 
-	       uSinav.Id as sinavId
-	     , uSinav.FirmId
-         , uSinav.TalepId
-	     , uSinav.AdayId 
-	     , uSinav.SinavNo as SinavNoGirdigi
-         , uSinav.DurumuTipiId
-		 , convert(date, uSinav.SinavTarihi, 103) as SinavTarihi
-
-	--   Id  MtskAdayTakipi.uSinavDurumTipi
-	--   0   Tanımsız
-	--   1   Henüz sınav aşamasında değil
-	--   2   Uygulama sınavı için usta öğretici onayı isteniyor
-	--   3   Uygulama sınavı için hazır değil
-	--   4   Uygulama sınavı için MEBBİS de onaylanacak
-	--   5   Uygulama sınav randevusu planlanacak
-	--   6   Uygulama sınav randevusu MEBBİSe aktarılacak
-	--   7   Uygulama sınavına girecek
-	--   8   Uygulama sınav sonucu okunacak
-	--   9   Uygulama sınav sonucu okundu
-	--   
-	--   Id  MtskSinavUygulama.DurumuTipi
-	--   0
-	--   1   Uygulama Sınav Aşamasında
-	--   2   2.Direksiyon Aşamasında
-	--   3   Sertifika Almaya Hak Kazandı
-	--   4   Uygulama Sınav Hakkı Doldu
-	--   5   Sertifikası İptal Edildi
-	--   6   Durumu Girilmemiş
-    -- 
-	--   Id  MtskSinavUygulama.PuanTipi
-	--   -2  Durumu Girilmemiş
-	--   -1  Girmedi
-	--   0   
-	--   1   Başarısız
-	--   100 Başarılı
-
-	     , ( case
-             when (uSinav.PuanTipiId = 0 and convert(date, @bugun,103) <  convert(date, uSinav.SinavTarihi, 103)) then 7 -- Uygulama sınavına girecek
-             when (uSinav.PuanTipiId = 0 and convert(date, @bugun,103) >= convert(date, uSinav.SinavTarihi, 103)) then 8 -- Uygulama sınav sonucu okunacak
-	         when (uSinav.PuanTipiId = 100) then 9 -- Uygulama sınav sonucu okundu < sınav başarılıysa
-	         when ((uSinav.PuanTipiId = 1 or uSinav.PuanTipiId = -1) and uSinav.SinavNo < 4) then 5 -- Uygulama sınav randevusu planlanacak < 1,2,3 sınavlarda başarılı değilse 
-	         when ((uSinav.PuanTipiId = 1 or uSinav.PuanTipiId = -1) and uSinav.SinavNo = 4) then 9 -- Uygulama sınav sonucu okundu         < 4. sınavda başarılı değilse
-             end ) as uSinavDurumTipiId
-	     , case
-	         when (uSinav.PuanTipiId = 100) then 0 -- < sınav başarılıysa
-	         when ((uSinav.PuanTipiId = 1 or uSinav.PuanTipiId = -1) and uSinav.SinavNo < 4) then (uSinav.SinavNo + 1) --  < 1,2,3 sınavlarda başarılı değilse
-	         when ((uSinav.PuanTipiId = 1 or uSinav.PuanTipiId = -1) and uSinav.SinavNo = 4) then 0 --  < 4. sınavda başarılı değilse
-           end as SinavNoYeni
-
-
-	     , ( case
-			 when uSinav.PuanTipiId = 100 then 1 -- Başarılı
-             when uSinav.PuanTipiId =   1 then 2 -- Başarısız
-             when uSinav.PuanTipiId =  -1 then 3 -- Girmedi 
-			 else 0 end ) as uSinavSonucTipiId
-         , ( case
-	         when (uSinav.PuanTipiId = 100) then 2    -- Sertifika aşamasına geçti
-             when (uSinav.PuanTipiId = 1) and (uSinav.SinavNo  < 4 ) then 1  -- Tekrar sınava girecek
-             when (uSinav.PuanTipiId = 1) and (uSinav.SinavNo >= 4 ) and (talep.TalepTipiId = 1)  then 3  -- sertifikaTalebi ve sınavdan başarısız ise   Tüm uygulamalı sınav hakkı bitti
-             when (uSinav.PuanTipiId = 1) and (uSinav.SinavNo >= 4 ) and (talep.TalepTipiId = 2 or talep.TalepTipiId = 3)  then 4  -- 2.+4 veya nakil 2.+4  ve sınavdan başarısız ise   2. +4 sınav hakkı bitti
-             end ) as uSinavSonrasiTipiId
-         --, ( case 
-	     --    when uSinav.PuanTipiId = 100 then uSinav.SinavTarihi 
-         --    else null end ) as uSinavBasariTarihi
-         , ( case
-	         when (uSinav.PuanTipiId = 100) then 0    -- tanımsız, başarısız eğitim planlanmayacak
-             when (uSinav.PuanTipiId = 1) and (uSinav.SinavNo  < 4 ) then 1  -- 2 saat başarısız aday eğitimi planlanacak
-             when (uSinav.PuanTipiId = 1) and (uSinav.SinavNo >= 4 ) and (talep.TalepTipiId = 1)  then 0  -- sertifikaTalebi ve sınavdan başarısız ise   Tüm uygulamalı sınav hakkı bittiği için Tanımsız, başarısız eğitim planlanmayacak
-             when (uSinav.PuanTipiId = 1) and (uSinav.SinavNo >= 4 ) and (talep.TalepTipiId = 2 or talep.TalepTipiId = 3)  then 0  -- 2.+4 veya nakil 2.+4  ve sınavdan başarısız ise 2. +4 sınav hakkı bittiği için Tanımsız, başarısız eğitim planlanmayacak
-             when (uSinav.PuanTipiId = -1) then 6 -- Girmedi için Eğitime gerek yok (Sınava girmedi)
-             end ) as BasarisizDersTipiId
-
-         from MtskSinavUygulama as uSinav, dbo.MtskAdayTalep as talep,
-	     (     -- Adayların son sınavlarını buluyor
-	           Select TalepId, AdayId
-			   , max(convert(smallDatetime,SinavTarihi,103)) as SinavTarihi
-               from MtskSinavUygulama
-		       Where FirmId = @FirmId
-			   and IsActive = 1
-               group by TalepId, AdayId
-         ) as aday
-	     Where uSinav.TalepId = talep.Id
-         and   uSinav.TalepId = aday.TalepId
-		 and   uSinav.AdayId = aday.AdayId
-	     and   convert(smallDatetime,uSinav.SinavTarihi,103) = aday.SinavTarihi
-    ) as x
-    Where a.FirmId  = x.FirmId
-    and   a.TalepId = x.TalepId
-	and   a.AdayId  = x.AdayId 
-    and (
-       isnull(a.uSinavNo,0)            <> x.SinavNoGirdigi
-    or isnull(a.uSinavDurumTipiId,0)   <> x.uSinavDurumTipiId
-    or isnull(a.uSinavSonucTipiId,0)   <> x.uSinavSonucTipiId
-    or isnull(a.uSinavSonrasiTipiId,0) <> x.uSinavSonrasiTipiId
-	or isnull(a.uSinavDetayId,0)       <> x.sinavId
-	or a.uSinavBasariTarihi  <> x.SinavTarihi )
-	
    -- -----------------------------------------------------------------
    --
    -- KayitTipiId değerlendir
@@ -1038,7 +1156,7 @@ AS BEGIN
    -- -----------------------------------------------------------------
 
    -- Grup açılış tarihini kontrol et
-   --Print 'KayitTipiId için Grup açılış tarihini kontrol et'
+ --print 'KayitTipiId için Grup açılış tarihini kontrol et'
    Update dbo.MtskAdayTalep set
       KayitTipiId = 3
    From dbo.MtskAdayTalep as a, 
@@ -1058,7 +1176,7 @@ AS BEGIN
    and isnull(a.KayitTipiId,0) < 3
    
    -- e-Sınav girişi varsa
-   --Print 'KayitTipiId için e-Sınav girişi varsa'
+ --print 'KayitTipiId için e-Sınav girişi varsa'
    Update dbo.MtskAdayTalep set
       KayitTipiId = 3
    From dbo.MtskAdayTalep as a, 
@@ -1074,7 +1192,7 @@ AS BEGIN
    and isnull(a.KayitTipiId,0) < 3
 
    -- Uygulamalı sınav girişi varsa
-   --Print 'KayitTipiId için Uygulamalı sınav girişi varsa'
+ --print 'KayitTipiId için Uygulamalı sınav girişi varsa'
    Update dbo.MtskAdayTalep set
       KayitTipiId = 3
    From dbo.MtskAdayTalep as a, 
@@ -1105,89 +1223,156 @@ AS BEGIN
 
 
    -- N'Tüm e-Sınav hakkı bitti' yse
-   --Print 'KayitTipiId için Tüm e-Sınav hakkı bitti kontrolü'
+ --print 'KayitTipiId için Tüm e-Sınav hakkı bitti kontrolü'
    Update dbo.MtskAdayTalep set KayitTipiId = x.KayitTipiId
    From dbo.MtskAdayTalep as a, 
    (
-       Select oldTakip.TalepId, 6 as KayitTipiId 
-       From dbo.MtskAdayTakip as oldTakip, dbo.MtskAdayTakip as newTakip
-       Where oldTakip.FirmId = @FirmId
-       and newTakip.Id = oldTakip.Id
-       and newTakip.eSinavSonrasiTipiId = 3  -- N'Tüm e-Sınav hakkı bitti'
-       and oldTakip.KayitTipiId <> 6 -- 'Tüm e-Sınav hakkı bitti. Dosya yandı' değilse 
+       Select talep.Id as TalepId, 5 as KayitTipiId 
+       From dbo.MtskAdayTalep as talep, 
+            dbo.MtskAdayTakip as takip
+       Where talep.FirmId = @FirmId
+       and ( talep.KayitTipiId = 2 or talep.KayitTipiId = 3 ) 
+       and talep.Id = takip.TalepId
+       and takip.eSinavSonrasiTipiId = 3  -- N'Tüm e-Sınav hakkı bitti'
+       and talep.KayitTipiId <> 5 -- 'Tüm e-Sınav hakkı bitti. Dosya yandı' değilse 
    ) as x
    Where a.FirmId = @FirmId
    and a.Id = x.TalepId
    and isnull(a.KayitTipiId,0) <> x.KayitTipiId
 
    -- N'Tüm uygulamalı sınav hakkı bitti' yse
-   --Print 'KayitTipiId için Tüm uygulamalı sınav hakkı bitti kontrolü'
+ --print 'KayitTipiId için Tüm uygulamalı sınav hakkı bitti kontrolü'
    Update dbo.MtskAdayTalep set KayitTipiId = x.KayitTipiId
    From dbo.MtskAdayTalep as a, 
    (
-       Select oldTakip.TalepId, 7 as KayitTipiId 
-       From dbo.MtskAdayTakip as oldTakip, dbo.MtskAdayTakip as newTakip
-       Where oldTakip.FirmId = @FirmId
-       and newTakip.Id = oldTakip.Id
-       and newTakip.uSinavSonrasiTipiId = 3  -- N'Tüm uygulamalı sınav hakkı bitti'
-       and oldTakip.KayitTipiId <> 7 -- 'Tüm uygulamalı sınav hakkı bitti' değilse 
+       Select talep.Id as TalepId, 6 as KayitTipiId 
+       From dbo.MtskAdayTalep as talep, 
+            dbo.MtskAdayTakip as takip
+       Where talep.FirmId = @FirmId
+       and ( talep.KayitTipiId = 2 or talep.KayitTipiId = 3 ) 
+       and talep.Id = takip.TalepId
+       and takip.uSinavSonrasiTipiId = 3  -- N'Tüm uygulamalı sınav hakkı bitti'
+       and talep.KayitTipiId <> 6 -- 'Tüm uygulamalı sınav hakkı bitti' değilse 
    ) as x
    Where a.FirmId = @FirmId
    and a.Id = x.TalepId
    and isnull(a.KayitTipiId,0) <> x.KayitTipiId
 
    -- N'2. +4 sınav hakkı bitti' yse
-   --Print 'KayitTipiId için 2. +4 sınav hakkı bitti kontrolü'
+ --print 'KayitTipiId için 2. +4 sınav hakkı bitti kontrolü'
    Update dbo.MtskAdayTalep set KayitTipiId = x.KayitTipiId
    From dbo.MtskAdayTalep as a, 
    (
-       Select oldTakip.TalepId, 8 as KayitTipiId 
-       From dbo.MtskAdayTakip as oldTakip, dbo.MtskAdayTakip as newTakip
-       Where oldTakip.FirmId = @FirmId
-       and newTakip.Id = oldTakip.Id
-       and newTakip.uSinavSonrasiTipiId = 4  -- N'2. +4 sınav hakkı bitti'
-       and oldTakip.KayitTipiId <> 8 -- '2. +4 sınav hakkı bitti. Dosya yandı' değilse 
+       Select talep.Id as TalepId, 7 as KayitTipiId 
+       From dbo.MtskAdayTalep as talep, 
+            dbo.MtskAdayTakip as takip
+       Where talep.FirmId = @FirmId
+       and ( talep.KayitTipiId = 2 or talep.KayitTipiId = 3 ) 
+       and talep.Id = takip.TalepId
+       and takip.uSinavSonrasiTipiId = 4  -- N'2. +4 sınav hakkı bitti'
+       and talep.KayitTipiId <> 7 -- '2. +4 sınav hakkı bitti. Dosya yandı' değilse 
    ) as x
    Where a.FirmId = @FirmId
    and a.Id = x.TalepId
    and isnull(a.KayitTipiId,0) <> x.KayitTipiId
 
    -- N'Sertifika aşamasına geçti' yse
-   --Print 'KayitTipiId için Sertifika aşamasına geçti kontrolü'
+ --print 'KayitTipiId için Sertifika aşamasına geçti kontrolü'
    Update dbo.MtskAdayTalep set KayitTipiId = x.KayitTipiId
    From dbo.MtskAdayTalep as a, 
    (
-       Select oldTakip.TalepId, 5 as KayitTipiId 
-       From dbo.MtskAdayTakip as oldTakip, dbo.MtskAdayTakip as newTakip
-       Where oldTakip.FirmId = @FirmId
-       and newTakip.Id = oldTakip.Id
-       and newTakip.uSinavSonrasiTipiId = 2  -- N'Sertifika aşamasına geçti'
-       and oldTakip.KayitTipiId <> 5 -- 'Sertifika almaya hak kazandı' değilse 
+       Select talep.Id as TalepId, 4 as KayitTipiId 
+       From dbo.MtskAdayTalep as talep, 
+            dbo.MtskAdayTakip as takip
+       Where talep.FirmId = @FirmId
+       and ( talep.KayitTipiId = 2 or talep.KayitTipiId = 3 ) 
+       and talep.Id = takip.TalepId
+       and takip.uSinavSonrasiTipiId = 2  -- N'Sertifika aşamasına geçti'
+       and talep.KayitTipiId <> 4 -- 'Sertifika almaya hak kazandı' değilse 
    ) as x
    Where a.FirmId = @FirmId
    and a.Id = x.TalepId
    and isnull(a.KayitTipiId,0) <> x.KayitTipiId
+
+
+ --print 'Sertifika bilgisi girilmişse, KayitTipiId değiştir'
+   Update dbo.MtskAdayTalep set KayitTipiId = x.yeniKayitTipiId
+   From dbo.MtskAdayTalep as a, 
+   (
+      Select 
+          talep.Id as TalepId
+        , talep.AdayId
+        , ser.SertifikaAlmayiHakKazandi
+        , talep.KayitTipiId
+        , (case when ser.SertifikaAlmayiHakKazandi = 1 and talep.KayitTipiId <> 4 then 4  -- henüz değişmemş ise
+		        when ser.SertifikaAlmayiHakKazandi = 0 and talep.KayitTipiId = 4  then 3  -- sertifikaAlmayiHakKazandi işaretini iptal edebilir
+		   else talep.KayitTipiId end ) as yeniKayitTipiId
+
+      From dbo.MtskAdayTalep as talep 
+           left outer join dbo.MtskAdaySertifika as ser on (talep.Id = ser.TalepId)
+      Where talep.FirmId = @FirmId
+      and ( talep.KayitTipiId = 2 or talep.KayitTipiId = 3 ) 
+      and   isnull(ser.SertifikaAlmayiHakKazandi,0) = 1
+      and   isnull(talep.KayitTipiId,0) <> 4 -- Sertifika almaya hak kazadı değil ise 
+   ) as x
+   Where a.FirmId = @FirmId
+   and   a.Id = x.TalepId
+   and   a.KayitTipiId <> x.yeniKayitTipiId   
 
    -- -----------------------------------------------------------------
    --
    -- Talep ve takip arasında KayitTipiId farkı varsa
    --
    -- -----------------------------------------------------------------
-   --Print 'Talep ve takip arasında KayitTipiId farkı varsa'
+ --print 'Talep ve takip arasında KayitTipiId farkı varsa'
    Update dbo.MtskAdayTakip set KayitTipiId = x.KayitTipiId
    From dbo.MtskAdayTakip as a, 
    (
        Select talep.Id as TalepId, talep.KayitTipiId 
-       From dbo.MtskAdayTalep as talep, dbo.MtskAdayTakip as takip
+       From dbo.MtskAdayTalep as talep, 
+            dbo.MtskAdayTakip as takip
        Where talep.FirmId = @FirmId
        and takip.FirmId = @FirmId
        and talep.Id = takip.TalepId
        and talep.KayitTipiId <> takip.KayitTipiId
-
    ) as x
    Where a.FirmId = @FirmId
    and a.TalepId = x.TalepId
    and a.KayitTipiId <> x.KayitTipiId
+
+
+   -- -----------------------------------------------------------------
+   -- KayıtTipiId 2 veya 3 dışına çıkmışsa 
+   -- -----------------------------------------------------------------
+ --print 'KayıtTipiId 2 veya 3 dışına çıkmışsa eSinavDurumTipiId ve uSinavDurumTipiId sıfırla'  
+   update MtskAdayTakip set
+       eSinavDurumTipiId = 0
+   from MtskAdayTakip a
+   Where a.FirmId  = @FirmId
+   and   a.KayitTipiId <> 2 
+   and   a.KayitTipiId <> 3 
+   and   a.eSinavDurumTipiId <> 0
+   and   a.eSinavDurumTipiId <> 6
+
+   update MtskAdayTakip set
+       UygulamaliDersTipiId = 0
+     , TelafiDersTipiId = 0
+     , BasarisizDersTipiId = 0
+     , Arti4DersTipiId = 0
+     , PlanlanacakEgitimTipiId = 0
+     , uSinavDurumTipiId = 0
+     , uSinavSonrasiTipiId = 0
+   from MtskAdayTakip a
+   Where a.FirmId  = @FirmId
+   and   a.KayitTipiId <> 2 
+   and   a.KayitTipiId <> 3 
+   and ( a.UygulamaliDersTipiId <> 0 
+     or  a.TelafiDersTipiId <> 0
+     or  a.BasarisizDersTipiId <> 0
+     or  a.Arti4DersTipiId <> 0
+     or  a.PlanlanacakEgitimTipiId <> 0
+     or  a.uSinavDurumTipiId <> 0
+     or  a.uSinavSonrasiTipiId <> 0)
 
    -- -----------------------------------------------------------------
    --
@@ -1197,7 +1382,7 @@ AS BEGIN
 
    -- Biyometrik
    -- Biyometrik tarandı 
-   --Print 'Adayın biyometrik tarandı mı? kontrol ediliyor'
+ --print 'Adayın biyometrik tarandı mı? kontrol ediliyor'
    Update dbo.MtskAdayBelgeler set BiyometrikTarandi = 1
    From dbo.MtskAdayBelgeler as a, 
    (
@@ -1214,7 +1399,7 @@ AS BEGIN
    and isnull(a.BiyometrikTarandi,0) = 0
 
    -- Talep biyometrik geldi
-   --Print 'Adayın biyometrik geldi mi? kontrol ediliyor'
+ --print 'Adayın biyometrik geldi mi? kontrol ediliyor'
    Update dbo.MtskAdayTalep set BiyometrikGeldi = 1
    From dbo.MtskAdayTalep as a, 
    (
@@ -1232,7 +1417,7 @@ AS BEGIN
 
    -- ÖğrenimBelgesi
    -- Belgeler tarandı 
-   --Print 'Adayın öğrenim belgesi tarandı mı? kontrol ediliyor'
+ --print 'Adayın öğrenim belgesi tarandı mı? kontrol ediliyor'
    Update dbo.MtskAdayBelgeler set OgrenimTarandi = 1
    From dbo.MtskAdayBelgeler as a, 
    (
@@ -1249,7 +1434,7 @@ AS BEGIN
    and isnull(a.OgrenimTarandi,0) = 0
 
    -- Talep belgeler geldi
-   --Print 'Adayın öğrenim belgesi geldi mi? kontrol ediliyor'
+ --print 'Adayın öğrenim belgesi geldi mi? kontrol ediliyor'
    Update dbo.MtskAdayTalep set OgrenimGeldi = 1
    From dbo.MtskAdayTalep as a, 
    (
@@ -1267,7 +1452,7 @@ AS BEGIN
 
    -- Sağlık Raporu
    -- Belgeler tarandı 
-   --Print 'Adayın sağlık raporu tarandı mı? kontrol ediliyor'
+ --print 'Adayın sağlık raporu tarandı mı? kontrol ediliyor'
    Update dbo.MtskAdayBelgeler set SaglikTarandi = 1
    From dbo.MtskAdayBelgeler as a, 
    (
@@ -1284,7 +1469,7 @@ AS BEGIN
    and isnull(a.SaglikTarandi,0) = 0
 
    -- Talep belgeler geldi
-   --Print 'Adayın sağlık raporu geldi mi? kontrol ediliyor'
+ --print 'Adayın sağlık raporu geldi mi? kontrol ediliyor'
    Update dbo.MtskAdayTalep set SaglikGeldi = 1
    From dbo.MtskAdayTalep as a, 
    (
@@ -1303,7 +1488,7 @@ AS BEGIN
 
    -- AdliSicil
    -- Belgeler tarandı 
-   --Print 'Adayın adli sicil tarandı mı? kontrol ediliyor'
+ --print 'Adayın adli sicil tarandı mı? kontrol ediliyor'
    Update dbo.MtskAdayBelgeler set AdliSicilTarandi = 1
    From dbo.MtskAdayBelgeler as a, 
    (
@@ -1320,7 +1505,7 @@ AS BEGIN
    and isnull(a.AdliSicilTarandi,0) = 0
 
    -- Talep belgeler geldi
-   --Print 'Adayın adli sicil geldi mi? kontrol ediliyor'
+ --print 'Adayın adli sicil geldi mi? kontrol ediliyor'
    Update dbo.MtskAdayTalep set AdliSicilGeldi = 1
    From dbo.MtskAdayTalep as a, 
    (
@@ -1339,7 +1524,7 @@ AS BEGIN
 
    -- İmza
    -- Belgeler tarandı 
-   --Print 'Adayın imzası tarandı mı? kontrol ediliyor'
+ --print 'Adayın imzası tarandı mı? kontrol ediliyor'
    Update dbo.MtskAdayBelgeler set ImzaTarandi = 1
    From dbo.MtskAdayBelgeler as a, 
    (
@@ -1356,7 +1541,7 @@ AS BEGIN
    and isnull(a.ImzaTarandi,0) = 0
 
    -- Talep belgeler geldi
-   --Print 'Adayın imza alındı mı? kontrol ediliyor'
+ --print 'Adayın imza alındı mı? kontrol ediliyor'
    Update dbo.MtskAdayTalep set ImzaAlindi = 1
    From dbo.MtskAdayTalep as a, 
    (
@@ -1374,7 +1559,7 @@ AS BEGIN
 
    -- Sözleşme1
    -- Belgeler tarandı 
-   --Print 'Adayın sözleşme1 tarandı mı? kontrol ediliyor'
+ --print 'Adayın sözleşme1 tarandı mı? kontrol ediliyor'
    Update dbo.MtskAdayBelgeler set Sozlesme1Tarandi = 1
    From dbo.MtskAdayBelgeler as a, 
    (
@@ -1391,7 +1576,7 @@ AS BEGIN
    and isnull(a.Sozlesme1Tarandi,0) = 0
 
    -- Talep belgeler geldi
-   --Print 'Adayın sözleşme(1) yapıldı mı? kontrol ediliyor'
+ --print 'Adayın sözleşme(1) yapıldı mı? kontrol ediliyor'
    Update dbo.MtskAdayTalep set SozlesmeYapildi = 1
    From dbo.MtskAdayTalep as a, 
    (
@@ -1409,7 +1594,7 @@ AS BEGIN
 
    -- Sözleşme2
    -- Belgeler tarandı 
-   --Print 'Adayın sözleşme2 tarandı mı? kontrol ediliyor'
+ --print 'Adayın sözleşme2 tarandı mı? kontrol ediliyor'
    Update dbo.MtskAdayBelgeler set Sozlesme2Tarandi = 1
    From dbo.MtskAdayBelgeler as a, 
    (
@@ -1426,7 +1611,7 @@ AS BEGIN
    and isnull(a.Sozlesme2Tarandi,0) = 0
 
    -- Talep belgeler geldi
-   --Print 'Adayın sözleşme(2) yapıldı mı? kontrol ediliyor'
+ --print 'Adayın sözleşme(2) yapıldı mı? kontrol ediliyor'
    Update dbo.MtskAdayTalep set SozlesmeYapildi = 1
    From dbo.MtskAdayTalep as a, 
    (
@@ -1443,7 +1628,7 @@ AS BEGIN
    and isnull(a.SozlesmeYapildi,0) = 0
 
    -- Adres alındı
-   --Print 'Adayın adres alındı mı? kontrol ediliyor'
+ --print 'Adayın adres alındı mı? kontrol ediliyor'
    Update dbo.MtskAdayTalep set AdresAlindi = 1
    From dbo.MtskAdayTalep as a, 
    (
@@ -1464,7 +1649,7 @@ AS BEGIN
    -- OzurDurumuTipiId, OkutmanTalebi, TercumanTalebi, YabanciDilTipiId 
    --
    -- -----------------------------------------------------------------
-   --Print 'Adayın sağlık belgesi kontrol ediliyor'
+ --print 'Adayın sağlık belgesi kontrol ediliyor'
    Update dbo.MtskAdayTakip set 
         OzurDurumuTipiId = x.OzurDurumuTipiId
 	  , OkutmanTalebi = x.OkutmanTalebi 
@@ -1495,6 +1680,34 @@ AS BEGIN
    or   a.YabanciDilTipiId <> x.YabanciDilTipiId  )
        
 
+   -- -----------------------------------------------------------------
+   --
+   -- IsKontejan, eSinavUcretTipiId, uSinavUcretTipiId
+   --
+   -- -----------------------------------------------------------------
+ --print 'Adayın sınav ücretini kim yatıracak kontrol ediliyor'
+   Update dbo.MtskAdayTakip set 
+        IsKontejan = x.IsKontejan
+      , eSinavUcretTipiId = x.ESinavUcretTipiId
+	  , uSinavUcretTipiId = x.USinavUcretTipiId 
+   From dbo.MtskAdayTakip as a, 
+   (
+       Select 
+	     kaynak.TalepId as TalepId
+       , ( case when kaynak.KontejanTipiId > 0 then 1 else 0 end) as IsKontejan
+	   , kaynak.ESinavUcretTipiId  
+	   , kaynak.USinavUcretTipiId  
+       From dbo.MtskAdayUcret as kaynak, dbo.MtskAdayTalep as talep
+       Where kaynak.FirmId = @FirmId
+       and talep.FirmId = @FirmId
+       and kaynak.TalepId = talep.Id
+   ) as x
+   Where a.FirmId = @FirmId
+   and   a.TalepId = x.TalepId
+   and ( a.IsKontejan <> x.IsKontejan
+   or    a.eSinavUcretTipiId <> x.ESinavUcretTipiId
+   or    a.uSinavUcretTipiId <> x.USinavUcretTipiId )
+
 
 
   -- -----------------------------------------------------------------
@@ -1519,76 +1732,8 @@ AS BEGIN
     -- 3,    'Tüm uygulamalı sınav hakkı bitti '
     -- 4,    '2.Uygulama (+4) sınav hakkı bitti'
 
-/*
-	-- SertifikaTipiId = 0. ''
-    -- sertifika aşamasına geçmemiş ise sertifika durumlarını sıfırla
-	update MtskAdayTakip set
-        SertifikaDurumTipiId = 0
-    from MtskAdayTakip
-    Where FirmId = @FirmId
-	and   uSinavSonrasiTipiId <> 2
 
-	-- uSinavSonrasiTipiId sertifika aşamsına geçince
-	--  1, 'Sertifikası hazırlanacak (Seri No verilecek)'  durumuna geç
-    update MtskAdayTakip set
-      SertifikaDurumTipiId = 1
-    from MtskAdayTakip
-    Where FirmId = @FirmId
-	and   uSinavSonrasiTipiId = 2
-	and   SertifikaDurumTipiId = 0
-
-	-- sertifika no veriliyor
-	-- sonra kullanıcı vazgeçerse tekrar durumu başa alıyor
-    update MtskAdayTakip set
-      SertifikaDurumTipiId = 1
-    from MtskAdayTakip as takip,  
-	     MtskAdaySertifika as sertifika
-    Where takip.FirmId = @FirmId
-	and   takip.uSinavSonrasiTipiId = 2
-	and   takip.SertifikaDurumTipiId > 1
-    and   sertifika.SertifikaNo is null
-	and   sertifika.DuzenlemeTarihi is null
-
-
-	-- sertifika No verilmiş ise 
-	-- 2,  'Sertifikası forma basılacak' durumuna geç 
-    update MtskAdayTakip set
-      SertifikaDurumTipiId = 2
-    from MtskAdayTakip as takip
-	   left outer join MtskAdaySertifika as sertifika on (takip.AdayId = sertifika.AdayId)
-    Where takip.FirmId = @FirmId
-	and   takip.uSinavSonrasiTipiId = 2
-	and   takip.SertifikaDurumTipiId = 1
-	and   isnull(sertifika.SertifikaNo,'') <> ''
-
-	-- sertifika baskısı yapılmış ise 
-	-- 3,  'Sertifikası hazır' durumuna geç 
-    update MtskAdayTakip set
-      SertifikaDurumTipiId = 3
-    from MtskAdayTakip as takip
-	   left outer join MtskAdaySertifika as sertifika on (takip.AdayId = sertifika.AdayId)
-    Where takip.FirmId = @FirmId
-	and   takip.uSinavSonrasiTipiId = 2
-	and   takip.SertifikaDurumTipiId = 2
-	and   isnull(sertifika.SertifikaNo,'') <> ''
-	and   isnull(sertifika.SertifikaBaskiAdedi,0) > 0
-	
-	-- sertifika teslim tarihi girilince 
-	-- 4,  'Sertifikası teslim edildi'
-    update MtskAdayTakip set
-      SertifikaDurumTipiId = 4
-	from MtskAdayTakip as takip
-	   left outer join MtskAdaySertifika as sertifika on (takip.AdayId = sertifika.AdayId)
-    Where takip.FirmId = @FirmId
-	and   sertifika.SertifikaTeslimEdildi = 1
-	--and   takip.uSinavSonrasiTipiId = 2
-	--and   takip.SertifikaDurumTipiId = 3
-	--and   isnull(sertifika.SertifikaNo,'') <> ''
-	--and   isnull(sertifika.SertifikaBaskiAdedi,0) > 0
-	--and   isnull(sertifika.SertifikaTeslimTarihi, convert(date, '01.01.1900',103)) > convert(date, '01.01.1990',103)
-  */
-
-
+--print 'Execute [dbo].[prc_setIsDbUpdateActive] 13, 0'
   Execute [dbo].[prc_setIsDbUpdateActive] 13, 0	
 
 

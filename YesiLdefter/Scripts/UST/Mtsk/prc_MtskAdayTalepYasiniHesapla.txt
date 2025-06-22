@@ -4,7 +4,7 @@
 CREATE PROCEDURE [dbo].[prc_MtskAdayTalepYasiniHesapla] (@TalepId int)  
 AS BEGIN
 
---  declare @TalepId int = 2510
+  --declare @TalepId int = 3471
 
   declare @yFirmId int = 0
   declare @AdayId int
@@ -89,6 +89,7 @@ AS BEGIN
   if (@yIsMuafiyetiVar = 1)
       set @YasSiniri = @YasSiniri - 2 
 
+  --print 'Yaş Sınırı'
   --print @YasSiniri
 
   -- Yas Onayi
@@ -116,10 +117,16 @@ AS BEGIN
           begin
              set @yasOnayiTipiId = 1 -- yaşı tutmuyor
 			 set @yeniSistemUyarisi = 'Yaşı tutmuyor.' + CHAR(13) + CHAR(10) + 'Kayıt olabileceği tarih ( ' + convert(varchar(10), @yasHazirTarihi, 103) + ' )'
-          end             
+          end
+          if (@Yasi >= 90)
+          begin
+             set @yasOnayiTipiId = 1 -- yaşı tutmuyor
+			 set @yeniSistemUyarisi = 'Yaşı tutmuyor.' + CHAR(13) + CHAR(10) + '90 yaşından büyük ( ' + convert(varchar(10), @yDogumTarihi, 103) + ' )'
+          end
+
           set @GunFarki = DATEDIFF(DAY, @yasHazirTarihi, @bugun)
           
-		  --print '  @GunFarki = ' + COnvert(varchar(4), @GunFarki)
+          --print '  @GunFarki = ' + COnvert(varchar(4), @GunFarki)
 
 		  if (@GunFarki >= 0 and @GunFarki <= 30)
           begin
@@ -127,7 +134,11 @@ AS BEGIN
 			  set @yeniSistemUyarisi = 'uyarıyıSil'
           end 
 		  if (@GunFarki > 30)
+          begin
               set @yasOnayiTipiId = 5 --  5, Yaşı tutuyor
+			  if (CHARINDEX('Yaşı tutmuyor', @ySistemUyarilari) > 0) 
+			      set @yeniSistemUyarisi = 'uyarıyıSil'
+          end
       end else
       begin
           set @yasOnayiTipiId = 6 -- yaş kontrolü yok
@@ -174,6 +185,12 @@ AS BEGIN
   if ((@yasOnayiTipiId = 0 or @yasOnayiTipiId = 2) and @yIsMuafiyetiVar = 1) 
       set @yasOnayiTipiId = 3 -- yaş muafiyeti var
 
+  --print '@yeniSistemUyarisi' 
+  --print @yeniSistemUyarisi
+
+  --print '@ySistemUyarilari'
+  --print @ySistemUyarilari
+
   if (@yeniSistemUyarisi != '')
   begin 
     if (CHARINDEX('Yaşı tutmuyor', @yeniSistemUyarisi) > 0)
@@ -210,6 +227,9 @@ AS BEGIN
        end
     end
 
+    --print '@oldSistemUyarilari'
+    --print @oldSistemUyarilari
+
 	if (@oldSistemUyarilari <> @ySistemUyarilari)
     begin
 	    Update dbo.MtskAdayTalep set SistemUyarilari = @ySistemUyarilari
@@ -232,14 +252,14 @@ AS BEGIN
         end
     end
   end  
-
+  
   -- Tespitleri kaydet
   Update MtskAdayTakip set
     SertifikaYasSiniri = @YasSiniri
   , YasOnayiTipiId = @yasOnayiTipiId
   , YasHazirTarihi = @yasHazirTarihi
   Where TalepId = @TalepId
-
+  
   print '    prc_MtskAdayTalepYasiniHesapla bitti'
 
 END -- procedure

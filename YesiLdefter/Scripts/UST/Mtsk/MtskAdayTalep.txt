@@ -133,7 +133,8 @@ AS BEGIN
   declare @eDonemTipiId int = 0 
   declare @eGrupTipiId smallInt = 0
   declare @eSubeTipiId smallInt = 0
-  
+  declare @eMebbisDurumTipiId smallInt = 0
+	
   declare @eMevcutSertifikaTipiId smallInt = 0
   declare @eIsMevcutOtomatik bit = 0
   declare @eIsMevcut125ccAlti bit = 0
@@ -174,6 +175,7 @@ AS BEGIN
   declare @yIstenenSertifikaTipiId smallInt = 0
   declare @yIsOtomatik bit = 0
   declare @yIs125ccAlti bit = 0
+  declare @yMebbisDurumTipiId smallInt = 0
   declare @yKayitTipiId smallInt = 0  
   declare @yVeriKaynakId int = 0
 
@@ -213,6 +215,7 @@ AS BEGIN
          ,@eIsOtomatik = isnull(dlt.IsOtomatik,0)
          ,@eIs125ccAlti = isnull(dlt.Is125ccAlti,0)
 
+         ,@eMebbisDurumTipiId = isnull(dlt.MebbisDurumTipiId,0)
          ,@eKayitTipiId = isnull(dlt.KayitTipiId,0)
 		 ,@eBelgelerGeldi = isnull(dlt.BelgelerGeldi,0)  
       From deleted dlt
@@ -248,6 +251,7 @@ AS BEGIN
          ,@yIstenenSertifikaTipiId = isnull(ins.IstenenSertifikaTipiId,0)
          ,@yIsOtomatik = isnull(ins.IsOtomatik,0)
          ,@yIs125ccAlti = ISNULL(ins.Is125ccAlti,0)
+         ,@yMebbisDurumTipiId = isnull(ins.MebbisDurumTipiId,0)
          ,@yKayitTipiId = isnull(ins.KayitTipiId,0)
 		 ,@yVeriKaynakId = isnull(ins.VeriKaynakId,0)
 
@@ -382,6 +386,9 @@ AS BEGIN
       if (@yKayitTipiId < 3)
 	      set @yKayitTipiId = [dbo].[fnc_getSertifikaKayitTipi]( @TalepId )
 	  
+	  if (@eMebbisDurumTipiId <> @yMebbisDurumTipiId)
+	      set @yKayitTipiId = [dbo].[fnc_getSertifikaKayitTipi]( @TalepId )
+
       if ((@yBiyometrikGeldi = 1) and
           --(@yBasvuruFotoCekildi = 1) and
           (@yOgrenimGeldi = 1) and
@@ -634,11 +641,19 @@ INSERT INTO [Lkp].[MtskAdayTalepKayitTipi] (Id, KayitTipi, ChartCaption, FormCap
   ( 1,    N'Ön kayıt',                      'Ön kayıt',     'Yeni Aday' ),
   ( 2,    N'Kayıt aşamasında',              'K.Aşamasında', 'Mebbis' ),
   ( 3,    N'Kesin kayıt',                   'Kesin kay.', '' ),
+  ( 4,    N'Sertifika almaya hak kazandı',  '', '' ),
+  ( 5,    N'Tüm e-Sınav hakkı bitti. Dosya yandı',  '', '' ),
+  ( 6,    N'Tüm uygulamalı sınav hakkı bitti',  '', '' ),
+  ( 7,    N'2. +4 sınav hakkı bitti. Dosya yandı',  '', '' ),
+  ( 8,    N'Diğer sebeplerden dolayı dosya kapandı',  '', '' )
+
+/*
   ( 5,    N'Sertifika almaya hak kazandı',  '', '' ),
   ( 6,    N'Tüm e-Sınav hakkı bitti. Dosya yandı',  '', '' ),
   ( 7,    N'Tüm uygulamalı sınav hakkı bitti',  '', '' ),
   ( 8,    N'2. +4 sınav hakkı bitti. Dosya yandı',  '', '' ),
   ( 9,    N'Diğer sebeplerden dolayı dosya kapandı',  '', '' )
+*/
 
 
 -- ------------------------------------------------------- 

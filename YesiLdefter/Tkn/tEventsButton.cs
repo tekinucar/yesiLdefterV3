@@ -326,7 +326,15 @@ namespace Tkn_Events
 
             if (buttonType == v.tButtonType.btListeyeEkle)  // (ButtonName == "ekle")  // 14
             {
-                onay = listeyeEkle(tForm, propList_, tableIPCode);
+                if (t.IsNotNull(buttonHint.viewType) == false)
+                    onay = listeyeEkle(tForm, propList_, tableIPCode);
+                
+                if (buttonHint.viewType == "SearchLookUpEdit")
+                {
+                    string columnFieldName = buttonHint.columnFieldName;
+                    string selectValue = buttonHint.columnEditValue;
+                    onay = listeyeEkle_SearchLookUpEdit(tForm, propList_, tableIPCode, v.tButtonType.btListeyeEkle, columnFieldName, selectValue);
+                }
 
                 return onay;
             }
@@ -473,7 +481,9 @@ namespace Tkn_Events
                     (buttonHint.senderType == "SchedulerControl") ||
                     (buttonHint.senderType == "Button") ||
                     (buttonHint.senderType == "Menu") ||
-                    (buttonHint.senderType == "DevExpress.XtraEditors.ButtonEdit"))
+                    (buttonHint.senderType == "DevExpress.XtraEditors.ButtonEdit") ||
+                    (buttonHint.senderType == "DevExpress.XtraEditors.ImageComboBoxEdit") 
+                    )
                 {
                     if ((prop_ != null) && (propListCount_ <= 1))
                     {
@@ -777,36 +787,223 @@ namespace Tkn_Events
             
             if (ds != null)
             {
-                t.TableRefresh(tForm, ds, tableIPCode);
-                //
-                t.ViewControl_Enabled(tForm, ds, tableIPCode);
-                // bu IPCode bağlı ExternalIPCode olabilir...
-                t.ViewControl_Enabled_ExtarnalIP(tForm, ds);
-                //
-                v.con_Listele_TableIPCode = "";
+                bool valueOnayi = t.checkedKeyFieldValueNegative(ds);
+
+                if (valueOnayi)
+                {
+                    t.TableRefresh(tForm, ds, tableIPCode);
+                    //
+                    t.ViewControl_Enabled(tForm, ds, tableIPCode);
+                    // bu IPCode bağlı ExternalIPCode olabilir...
+                    t.ViewControl_Enabled_ExtarnalIP(tForm, ds);
+                    //
+                    v.con_Listele_TableIPCode = "";
+                }
                 return onay;
             }
 
             return onay;
         }
 
-        private bool listeyeEkle(Form tForm, List<PROP_NAVIGATOR> propList_, string tableIPCode)//PROP_NAVIGATOR prop_)
+        private bool listeyeEkle(Form tForm, List<PROP_NAVIGATOR> propList_, string tableIPCode)
         {
             //tToolBox t = new tToolBox();
+            bool onay = false;
+            bool find_Lkp_Onay = t.Find_FieldName(tForm, tableIPCode, "LKP_ONAY");
+            bool find_Selected = false;
+
+            if (find_Lkp_Onay)
+            {
+                find_Selected = t.Find_Value_In_Field(tForm, tableIPCode, "LKP_ONAY", "True");
+
+                /// kullanıcı hiç bir seçim yapmamış fakat Listeye Ekle butonuna basmış
+                /// 
+                if (find_Selected == false)
+                {
+                    onay = listeyeEkle_(tForm, propList_, tableIPCode);
+                }
+                else
+                {
+                    /// kullanıcı listeden seçim yapmış ve Listeye Ekle butonuna basmış 
+                    /// 
+                    onay = siraylaListeyeEkle_(tForm, propList_, tableIPCode);
+                }
+            }
+            else
+            {
+                onay = listeyeEkle_(tForm, propList_, tableIPCode);
+            }
+
+            /// Burada sadece after işlemler çalışıyor
+            /// 
+            if (onay)
+            {
+                extraIslemVar(tForm, tableIPCode, v.tButtonType.btListeyeEkle, v.tBeforeAfter.After, propList_);
+
+                /// AUTO_REFRESH_IP üzerinde refresh varsa onlarda çalışsın
+                ev.Prop_RunTimeClick(tForm, null, tableIPCode, v.tButtonType.btListeyeEkle, v.tBeforeAfter.After);
+            }
+            return onay;
+        }//listeyeEkle
+
+        private bool listeyeEkle_(Form tForm, List<PROP_NAVIGATOR> propList_, string tableIPCode)
+        {
             bool onay = false;
 
             if (propList_ != null)
             {
-                // listeye eklede genelde 'RDC', 'Run DataCopy'  çalışıyor
+                /// Burada before işlemler çalışıyor
+                /// listeye eklede genelde 'RDC', 'Run DataCopy'  çalışıyor
                 onay = extraIslemVar(tForm, tableIPCode, v.tButtonType.btListeyeEkle, v.tBeforeAfter.Before, propList_);
 
-                if (onay)
-                    extraIslemVar(tForm, tableIPCode, v.tButtonType.btListeyeEkle, v.tBeforeAfter.After, propList_);
+                //if (onay)
+                //    extraIslemVar(tForm, tableIPCode, v.tButtonType.btListeyeEkle, v.tBeforeAfter.After, propList_);
             }
-            //else MessageBox.Show("Listeye Ekleme işi için gerekli olan bilgiler eksik...");
 
             return onay;
         }//listeyeEkle
+
+        private bool siraylaListeyeEkle_(Form tForm, List<PROP_NAVIGATOR> propList_, string tableIPCode)
+        {
+            bool onay = false;
+
+            DataSet ds = null;
+            DataNavigator dN = null;
+            t.Find_DataSet(tForm, ref ds, ref dN, tableIPCode);
+
+            if (t.IsNotNull(ds) != false)
+            {
+                string value = "";
+                int length = ds.Tables[0].Rows.Count;
+                for (int i = 0; i < length; i++)
+                {
+                    value = ds.Tables[0].Rows[i]["LKP_ONAY"].ToString();
+                    if (value.IndexOf("True") > -1)
+                    {
+                        dN.Position = i;
+                        Application.DoEvents();
+                        transactionRunChange(propList_, false);
+                        onay = listeyeEkle_(tForm, propList_, tableIPCode);
+                    }
+                }
+            }
+
+            return onay;
+        }
+
+        private void transactionRunChange(List<PROP_NAVIGATOR> propList_, bool value)
+        {
+            if (propList_ != null)
+            {
+                // buttonType uyguluğuna kontrol et
+                //
+                foreach (PROP_NAVIGATOR item in propList_)
+                {
+                        // bu satır daha önce çalıştı mı ?
+                        item.TransactionRun = value;
+                }
+            }
+        }
+
+
+        private bool listeyeEkle_SearchLookUpEdit(Form tForm, List<PROP_NAVIGATOR> propList_, string tableIPCode, v.tButtonType buttonType, string columnFieldName, string selectValue)
+        {
+            bool onay = true;// false;
+            bool transactionRun = false;
+            bool islemOnayi = false;
+            bool isFormOpen = true;
+            bool elseItem = false;
+
+            if (propList_ != null)
+            {
+                // buttonType uyguluğuna kontrol et
+                //
+                foreach (PROP_NAVIGATOR item in propList_)
+                {
+                    if (item.BUTTONTYPE.ToString() == Convert.ToString((byte)buttonType))
+                    {
+                        isFormOpen = t.tWorkingCheck(tForm, item, tableIPCode);
+
+                        // bu satır daha önce çalıştı mı ?
+                        transactionRun = item.TransactionRun;
+
+                        // else satırı mı kontrol et
+                        elseItem = (item.CHC_VALUE.ToString().IndexOf("ELSE") > -1);
+
+                        // form açılması için onaylandı ise
+                        // eğer daha önce çalışmamış ise çalışsın
+                        if ((isFormOpen) && (transactionRun == false))
+                        {
+                            List<TABLEIPCODE_LIST> item2 = item.TABLEIPCODE_LIST;
+
+                            // buttonType uygun olduğu için işlemi gerçekleştir 
+                            onay = listeyeEkle_SearchLookUpEdit_(tForm, tableIPCode, item2, columnFieldName, selectValue);
+
+                            // işem çalıştı onayı
+                            item.TransactionRun = islemOnayi;
+
+                            if (onay == false)
+                                break;
+                        }
+                    }
+                }
+            }
+                        
+            return onay;
+        }
+
+        private bool listeyeEkle_SearchLookUpEdit_(Form tForm, string targetTableIPCode, List<TABLEIPCODE_LIST> item, string columnFieldName, string selectValue)
+        {
+            bool onay = true;
+            string readFieldName = "";
+            string targetFieldName = "";
+
+            if (columnFieldName == "") return false;
+            /*
+            /// SearchLookUp içindeki dataTable
+            DataSet dsData_ = ((DataTable)v.dt_SearchLookUp).DataSet;
+            if (dsData_ == null) return false;
+
+            DataRow sourceRow = null;
+            int length = dsData_.Tables[0].Rows.Count;
+            for (int i = 0; i < length; i++)
+            {
+                if (dsData_.Tables[0].Rows[i][columnFieldName].ToString() == selectValue)
+                    sourceRow = dsData_.Tables[0].Rows[i];
+            }
+            */
+            DataRow foundRow = null;
+            int length = v.dt_SearchLookUp.Rows.Count;
+            for (int i = 0; i < length; i++)
+            {
+                if ((string)v.dt_SearchLookUp.Rows[i][columnFieldName] == selectValue)
+                {
+                    foundRow = v.dt_SearchLookUp.Rows[i];
+                    break; // Doğru satırı bulunca döngüyü sonlandır
+                }
+            } 
+
+            DataSet dsTarget = null;
+            DataNavigator dNTarget = null;
+
+            t.Find_DataSet(tForm, ref dsTarget, ref dNTarget, targetTableIPCode);
+
+            if (t.IsNotNull(dsTarget))
+            {
+                foreach (var item2 in item)
+                {
+                    readFieldName = item2.RKEYFNAME;
+                    targetFieldName = item2.KEYFNAME;
+
+                    if (t.IsNotNull(readFieldName) && t.IsNotNull(targetFieldName))
+                    {
+                        dsTarget.Tables[0].Rows[dNTarget.Position][targetFieldName] = foundRow[readFieldName];
+                    }
+                }
+            }
+            return onay;
+        }
+
 
         private bool listeHazirla(Form tForm, string tableIPCode, List<PROP_NAVIGATOR> propList_)//PROP_NAVIGATOR prop_)
         {
@@ -1328,9 +1525,13 @@ namespace Tkn_Events
             if (t.IsNotNull(targetTABLEIPCODE))
                 t.Find_DataSet(tForm, ref dsTarget, ref dNTarget, targetTABLEIPCODE);
 
-            if (t.IsNotNull(dsTarget))
+            if (readValue == "" && manuelSetValue != "")
+                readValue = manuelSetValue;
+
+            //if (t.IsNotNull(dsTarget))
+            if (dsTarget != null)
             {
-                onay = t.TableRefreshNewValue(tForm, dsTarget, readValue);
+                onay = t.TableRefreshNewValue(tForm, dsTarget, readValue, -1);
             }
 
             return onay;
@@ -1733,15 +1934,20 @@ namespace Tkn_Events
                     }
                     else
                     {
-                        //MessageBox.Show(viewCntrl.ToString());
-
                         if (viewCntrl.GetType().ToString() == "DevExpress.XtraGrid.GridControl")
                         {
-                            if (MessageBox.Show("Satır Sil ?", "Confirmation", MessageBoxButtons.YesNo) != DialogResult.Yes)
+                            if (MessageBox.Show("Satır sil ?", "Onay", MessageBoxButtons.YesNo) != DialogResult.Yes)
                                 return onaySil;
-                            GridView view = ((DevExpress.XtraGrid.GridControl)viewCntrl).MainView as GridView;
-                            view.DeleteRow(view.FocusedRowHandle);
 
+                            var xview = ((DevExpress.XtraGrid.GridControl)viewCntrl).MainView;
+
+                            if (xview.GetType().ToString() == "DevExpress.XtraGrid.Views.Card.CardView")
+                            {
+                                ((DevExpress.XtraGrid.Views.Card.CardView)xview).DeleteRow(((DevExpress.XtraGrid.Views.Card.CardView)xview).FocusedRowHandle);
+                            }
+
+                            GridView view = ((DevExpress.XtraGrid.GridControl)viewCntrl).MainView as GridView;
+                            view?.DeleteRow(view.FocusedRowHandle);
                         }
                     }
 
@@ -2280,7 +2486,7 @@ namespace Tkn_Events
 
                         if (item.MSETVALUE != "")
                         {
-                            mesaj = t.Set("İşlem başarıyla çalıştı ...", "", "");
+                            mesaj = t.Set(item.MSETVALUE, "İşlem başarıyla çalıştı...", "");
 
                             t.FlyoutMessage(tForm, "Bilgilendirme", mesaj + v.ENTER);
                         }
@@ -2857,10 +3063,16 @@ namespace Tkn_Events
                     {
                         if (t.IsNotNull(TABLEIPCODE))
                         {
-                            DataSet ds = t.Find_DataSet(tForm, "", TABLEIPCODE, "");
-
+                            DataSet ds = null; //t.Find_DataSet(tForm, "", TABLEIPCODE, "");
+                            DataNavigator dN = null;
+                            t.Find_DataSet(tForm, ref ds, ref dN, TABLEIPCODE);
+                            
                             if (ds != null)
                             {
+                                int pos = 0;
+                                if (dN != null && dN.Position > 0)
+                                    pos = dN.Position;
+
                                 /// sadece kendisi refresh olsun 
                                 /// kendisine bağlı olanlar refresh olmasın
                                 /// dataNavigator_PositionChanged( 
@@ -2869,6 +3081,11 @@ namespace Tkn_Events
 
                                 onay = t.TableRefresh(tForm, ds);//, TABLEIPCODE);
                                 islemOnayi = onay;
+                                // refreshin yapıldığı pos a dön
+                                if (pos > 0)
+                                {
+                                    dN.Position = pos;
+                                }
                             }
                         }
                     }
@@ -2883,8 +3100,11 @@ namespace Tkn_Events
 
                             if (ds != null)
                             {
-                                onay = ev.tSubDetail_Refresh(ds, dN);
-                                islemOnayi = onay;
+                                ev.tSubDetail_Refresh(ds, dN);
+                                /// Her zaman true dönmesi gerekiyor
+                                /// 
+                                onay = true;
+                                islemOnayi = onay; 
                             }
                         }
                     }
@@ -2898,6 +3118,12 @@ namespace Tkn_Events
                     if (workType == "NEW" || workType == "ADDDATA")
                     {
                         onay = newDataExecute(tForm, TABLEIPCODE, null, v.tButtonType.btNone, workType);
+
+                        if (v.con_OnaySave)
+                        {
+                            v.con_OnaySave = false;
+                            tForm.HelpButton = false;
+                        }
                         islemOnayi = onay;
                     }
 

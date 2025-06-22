@@ -107,19 +107,23 @@ AS BEGIN
  , ders.EgitimAraciId + '' : ''+ [personel].TamAdiSoyadi as Lkp_AracVePersonel
 
  , ( case
-     when ders.EgitimAraciId = @EgitimAraciId_  and ders.PersonelId = @PersonelId_ and ders.TalepId = @TalepId_ then 1  
-     when ders.EgitimAraciId = @SimulatorId_    and ders.PersonelId = @PersonelId_ and ders.TalepId = @TalepId_ then 2  
+     when ders.EgitimAraciId = @EgitimAraciId_  and ders.PersonelId = @PersonelId_ and ders.TalepId = @TalepId_ and ders.EgitimYeriTipiId = 1 then 1  
+     when ders.EgitimAraciId = @EgitimAraciId_  and ders.PersonelId = @PersonelId_ and ders.TalepId = @TalepId_ and ders.EgitimYeriTipiId = 2 then 2  
+     when ders.EgitimAraciId = @SimulatorId_    and ders.PersonelId = @PersonelId_ and ders.TalepId = @TalepId_ then 3  
 
-     when ders.EgitimAraciId = @EgitimAraciId_  and ders.PersonelId = @PersonelId_ and ders.TalepId <> @TalepId_ then 3  
-     when ders.EgitimAraciId = @SimulatorId_    and ders.PersonelId = @PersonelId_ and ders.TalepId <> @TalepId_ then 4  
+     when ders.EgitimAraciId = @EgitimAraciId_  and ders.PersonelId = @PersonelId_ and ders.TalepId <> @TalepId_ and ders.EgitimYeriTipiId = 1 then 4  
+     when ders.EgitimAraciId = @EgitimAraciId_  and ders.PersonelId = @PersonelId_ and ders.TalepId <> @TalepId_ and ders.EgitimYeriTipiId = 2 then 5  
+     when ders.EgitimAraciId = @SimulatorId_    and ders.PersonelId = @PersonelId_ and ders.TalepId <> @TalepId_ then 6  
 
-     when ders.EgitimAraciId = @EgitimAraciId_  and ders.PersonelId <> @PersonelId_ and ders.TalepId <> @TalepId_ then 5  
-     when ders.EgitimAraciId = @SimulatorId_    and ders.PersonelId <> @PersonelId_ and ders.TalepId <> @TalepId_ then 6  
+     when ders.EgitimAraciId = @EgitimAraciId_  and ders.PersonelId <> @PersonelId_ and ders.TalepId <> @TalepId_ and ders.EgitimYeriTipiId = 1 then 7  
+     when ders.EgitimAraciId = @EgitimAraciId_  and ders.PersonelId <> @PersonelId_ and ders.TalepId <> @TalepId_ and ders.EgitimYeriTipiId = 2 then 8  
+     when ders.EgitimAraciId = @SimulatorId_    and ders.PersonelId <> @PersonelId_ and ders.TalepId <> @TalepId_ then 9  
 
-     when ders.EgitimAraciId <> @EgitimAraciId_  and ders.PersonelId = @PersonelId_ and ders.TalepId <> @TalepId_ then 7  
-     when ders.EgitimAraciId <> @SimulatorId_    and ders.PersonelId = @PersonelId_ and ders.TalepId <> @TalepId_ then 8  
+     when ders.EgitimAraciId <> @EgitimAraciId_  and ders.PersonelId = @PersonelId_ and ders.TalepId <> @TalepId_ and ders.EgitimYeriTipiId = 1 then 10
+     when ders.EgitimAraciId <> @EgitimAraciId_  and ders.PersonelId = @PersonelId_ and ders.TalepId <> @TalepId_ and ders.EgitimYeriTipiId = 2 then 1  
+     when ders.EgitimAraciId <> @SimulatorId_    and ders.PersonelId = @PersonelId_ and ders.TalepId <> @TalepId_ then 2  
 
-	 else 9 end ) as Lkp_LabelTipiId 
+	 else 0 end ) as Lkp_LabelTipiId 
 '
 
  Set @sqlFrom = '

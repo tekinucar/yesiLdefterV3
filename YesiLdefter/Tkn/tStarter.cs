@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.NetworkInformation;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Tkn_ToolBox;
 using Tkn_UserFirms;
@@ -56,21 +57,12 @@ namespace Tkn_Starter
             System.IO.Directory.CreateDirectory(v.EXE_GIBDownloadPath);
             System.IO.Directory.CreateDirectory(v.EXE_GIBDownloadPath+"\\Temp\\");
 
-            // output : { 25.03.2019 22:59:22 }
-            DateTime dt = File.GetLastWriteTime(System.IO.Path.Combine(v.tExeAbout.activePath, v.tExeAbout.activeExeName));
-            string yil = dt.Year.ToString();
-            string ay = dt.Month.ToString();
-            string gun = dt.Day.ToString();
-            string saat = dt.Hour.ToString();
-            string dakk = dt.Minute.ToString();
-
-            if (ay.Length == 1) ay = "0" + ay;
-            if (gun.Length == 1) gun = "0" + gun;
-            if (saat.Length == 1) saat = "0" + saat;
-            if (dakk.Length == 1) dakk = "0" + dakk;
 
             // output = { 20190325_2259 }
-            v.tExeAbout.activeVersionNo = yil + ay + gun + "_" + saat + dakk;
+            // output : { 25.03.2019 22:59:22 }
+            DateTime dt = File.GetLastWriteTime(System.IO.Path.Combine(v.tExeAbout.activePath, v.tExeAbout.activeExeName));
+            // get : yyyymmdd_hhmm
+            v.tExeAbout.activeVersionNo = t.getDateTimeString(dt);
 
             //var versionInfo = FileVersionInfo.GetVersionInfo(v.tExeAbout.activePath +"\\"+ v.tExeAbout.activeExeName);
             //string version = versionInfo.FileVersion;
@@ -97,14 +89,22 @@ namespace Tkn_Starter
 
             //Version clrVersion = Environment.Version;
             //string appVersion = Application.ProductVersion;
-
+/*
             /// Computer hakkındaki verileri topla
             /// 
             t.WaitFormOpen(v.mainForm, "Bilgisayar hakkındaki bilgiler okunuyor...");
-            Get_MacAddress();
-            Get_ComputerAbout();
+            //Task task1 = new Task(() =>
+            //{
+                Get_MacAddress();
+            //});
+            //task1.Start();
+            //Task task2 = new Task(() =>
+            //{
+                Get_ComputerAbout();
+            //});
+            //task2.Start();
+*/
             
-
             t.WaitFormOpen(v.mainForm, "Database bağlantı bilgileri hazırlanıyor...");
             InitPreparingConnection();
 
@@ -206,38 +206,21 @@ namespace Tkn_Starter
         {
             #region appOpenSetDefaaultSkin
             v.sp_activeSkinName = "STARTER";
+            
             WindowsFormsSettings.EnableFormSkins();
+
             if (v.active_DB.mainManagerDbUses)
                 UserLookAndFeel.Default.SetSkinStyle(SkinStyle.Whiteprint);
             else
                 UserLookAndFeel.Default.SetSkinStyle(SkinSvgPalette.Office2019White.Default);//  Yale);
             v.sp_activeSkinName = "";
             #endregion
+            
         }
 
         #region Variable Set
 
-        void Get_MacAddress()
-        {
-            /// Read computer network ethernet mac address
-            /// 
-            try
-            {
-                String macAddr = NetworkInterface
-                .GetAllNetworkInterfaces()
-                .Where(nic => nic.NetworkInterfaceType == NetworkInterfaceType.Ethernet)
-                .Select(nic => nic.GetPhysicalAddress().ToString())
-                .FirstOrDefault();
-
-                v.tComputer.Network_MACAddress = macAddr;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Get MacAddress " + v.ENTER2 + ex.Message);
-                //throw;
-            }
-        }
-
+        
         void InitPreparingConnection() 
         {
             ///
@@ -421,7 +404,7 @@ namespace Tkn_Starter
                     + " , LastDate = " + TarihSaat_Formati(Convert.ToDateTime(DateTime.Now)) // v.TARIH_SAAT
                     + " , OperatingSystem = '" + v.tComputer.OperatingSystem + "' "
                     //+ " , ExeVersion = '" + v.tExeAbout.activeVersionNo.Substring(0, 8) + "' "
-                    + " , ExeVersion = '20250501_standart' "
+                    + " , ExeVersion = '20250604_standart' "
                     + " where ComputerId = " + v.tComputer.UstadCrmComputerId.ToString();
                     DataSet ds_ = new DataSet();
                     SQL_Read_Execute(v.dBaseNo.UstadCrm, ds_, ref tSql, "UstadComputers", "Update");
@@ -477,8 +460,6 @@ namespace Tkn_Starter
             v.Screen_Height = Screen.PrimaryScreen.Bounds.Height - (90 + v.Ribbon_Height);
             v.Primary_Screen_Width = Screen.PrimaryScreen.Bounds.Width;
             v.Primary_Screen_Height = Screen.PrimaryScreen.Bounds.Height - 50;
-            //v.Secondery_Screen_Width = Screen.
-            //v.Secondery_Screen_Height = 
         }
 
         #endregion Variable Set

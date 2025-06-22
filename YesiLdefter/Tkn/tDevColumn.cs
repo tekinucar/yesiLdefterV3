@@ -42,6 +42,10 @@ namespace Tkn_DevColumn
             }
             else List_Name = t.Set(Row["LIST_TYPES_NAME"].ToString(), "", "");
 
+            /// Bu işaretler varsa ciddiye alma, bu buton caption için kullanılan işaretler
+            if (List_Name.IndexOf("<") > -1 && List_Name.IndexOf(">") > -1)
+                List_Name = "";
+
             //if (t.IsNotNull(List_Name) && (tLookUpField == false))
             if (t.IsNotNull(List_Name) && (List_Name.IndexOf("=") == -1)) // IsActive = True  gibi koşullar varsa çalışmasın
                 tRepositoryItem_Fill(ItemBox, null, null, null, null, null, List_Name, default_value, tview_type);
@@ -66,6 +70,9 @@ namespace Tkn_DevColumn
             }
             else List_Name = t.Set(Row["LIST_TYPES_NAME"].ToString(), "", "");
 
+            /// Bu işaretler varsa ciddiye alma, bu buton caption için kullanılan işaretler
+            if (List_Name.IndexOf("<") > -1 && List_Name.IndexOf(">") > -1)
+                List_Name = "";
 
             //if (t.IsNotNull(List_Name) && (tLookUpField == false))
             if (t.IsNotNull(List_Name) && (List_Name.IndexOf("=") == -1)) // IsActive = True  gibi koşullar varsa çalışmasın
@@ -148,6 +155,7 @@ namespace Tkn_DevColumn
             string jKeyFName = t.Set(Row["FJOIN_KEY_FNAME"].ToString(), Row["LKP_FJOIN_KEY_FNAME"].ToString(), "");
             string jAlias = t.Set(Row["FJOIN_TABLE_ALIAS"].ToString(), Row["LKP_FJOIN_TABLE_ALIAS"].ToString(), "");
             string jCaptionFName = t.Set(Row["FJOIN_CAPTION_FNAME"].ToString(), Row["LKP_FJOIN_CAPTION_FNAME"].ToString(), "");
+            string jWhere = t.Set(Row["FJOIN_WHERE"].ToString(), Row["LKP_FJOIN_WHERE"].ToString(), "");
 
             if ((t.IsNotNull(jTableName) == false) ||
                 (t.IsNotNull(jKeyFName) == false) ||
@@ -157,7 +165,32 @@ namespace Tkn_DevColumn
                 return;
             }
 
-            LookUpTableRead_(dbaseType, jTableName);
+            string knt = jCaptionFName.ToUpper();
+            string jFields = "";
+            if (knt.IndexOf("DISTINCT") > -1 ||
+                knt.IndexOf("TOP ") > -1 ||
+                knt.IndexOf("||") > -1 ||
+                knt.IndexOf(",") > -1
+                )
+            {
+                /// <TOP 50 DISTINCT> SinavTarihi
+                /// 
+                jFields = jCaptionFName.Replace("<"," ");
+                jFields = jFields.Replace(">", " ");
+                jFields = jFields.Replace("||", ",");
+
+                if (!string.IsNullOrEmpty(jFields) && jFields.EndsWith(","))
+                {
+                    jFields = jFields.Substring(0, jFields.Length - 1);
+                }
+
+                int i1 = jCaptionFName.IndexOf("<");
+                int i2 = jCaptionFName.IndexOf(">");
+                int i3 = ( i2 - i1 ) + 1;
+                if (i1 > -1 && i2 > -1)
+                    jCaptionFName = jCaptionFName.Remove(i1, i3);
+            }
+            LookUpTableRead_(dbaseType, jTableName, jFields, jWhere);
             
             if (ItemBox_LookUpEdit != null)
             {
@@ -195,9 +228,11 @@ namespace Tkn_DevColumn
                     while (jCaptionFName.IndexOf("||") > -1)
                     {
                         fName = t.Get_And_Clear(ref jCaptionFName, "||");
-                        if (fName != "")
+                        fName = fName.Trim();
+
+                        if (fName != "" && fName != jKeyFName)
                         {
-                            column = tEdit_LookUpEdit.Properties.View.Columns.AddField(fName);
+                            column = ItemBox_LookUpEdit.View.Columns.AddField(fName);
                             column.Width = 200;
                             column.Visible = true;
                         }
@@ -229,7 +264,7 @@ namespace Tkn_DevColumn
             if (tEdit_LookUpEdit != null)
             {
                 tEdit_LookUpEdit.Properties.DataSource = v.ds_LookUpTableList.Tables[jTableName];
-                //tEdit_LookUpEdit.Properties.DisplayMember = jCaptionFName;
+                tEdit_LookUpEdit.Properties.DisplayMember = jCaptionFName;
                 tEdit_LookUpEdit.Properties.ValueMember = jKeyFName;
                 tEdit_LookUpEdit.Properties.ViewType = GridLookUpViewType.Default;
 
@@ -375,13 +410,13 @@ namespace Tkn_DevColumn
 
             t.LookUpFieldNameChecked(ref tableName, ref fieldName, ref idFieldName, type);             
 
-            LookUpTableRead_(dbaseType, tableName);
+            LookUpTableRead_(dbaseType, tableName, "", "");
             LookUpTableFill_(tableName, idFieldName, fieldName, groupListTypes, type,
                              ItemBox_ICB, tEdit_ICB, 
                              ItemBox_CB, tEdit_CB, 
                              ItemBox_RG, tEdit_RG);
         }
-        private void LookUpTableRead_(string dbaseType, string tableName)
+        private void LookUpTableRead_(string dbaseType, string tableName, string fields, string where)
         {
             /// bir dataset üzerine tüm Lkp tablolar bir defaya mahsus yükleniyor
             /// ve bu yükleme sadece o Lkp tablosuna ihtiyaç olduğunda dolduruluyor
@@ -389,15 +424,39 @@ namespace Tkn_DevColumn
 
             /// bu tablo ( [Lkp].[FinansHesapFinansTipi] ) da önce okundumu
             int i = v.ds_LookUpTableNames.IndexOf(tableName);
-
+            
             // okunmamış ise okuyalım
             if (i == -1)
             {
                 tToolBox t = new tToolBox();
 
-                v.ds_LookUpTableNames = v.ds_LookUpTableNames + tableName + "||";
+                /// tablo adında tarih ibaresi varsa her defasında okuması için listeye alma
+                if (tableName.ToUpper().IndexOf("TARIH") == -1 &&
+                    tableName.ToUpper().IndexOf("TARİH") == -1) 
+                    v.ds_LookUpTableNames = v.ds_LookUpTableNames + tableName + "||";
 
+              
+
+                if (tableName.ToUpper().IndexOf("TARIH") > -1 ||
+                    tableName.ToUpper().IndexOf("TARİH") > -1)
+                {
+                    if (v.ds_LookUpTableList.Tables.Contains(tableName))
+                    {
+                        v.ds_LookUpTableList.Tables.Remove(tableName);
+                    }
+                }
+                              
+                
                 string Sql = " Select * from [Lkp].[" + tableName + "]  ";
+                
+                if (tableName.ToUpper().IndexOf("DBO.") > -1)
+                    Sql = " Select * from " + tableName + "  ";
+
+                if (fields != "" && tableName.ToUpper().IndexOf("DBO.") == -1)
+                    Sql = " Select " + fields + " from [Lkp].[" + tableName + "]  ";
+                if (fields != "" && tableName.ToUpper().IndexOf("DBO.") > -1)
+                    Sql = " Select " + fields + " from " + tableName + "  ";
+
 
                 if (tableName == "HubBildirimSablonlari")
                     Sql = " Select * from [dbo].[HubBildirimSablonlari] where IsActive = 1 ";
@@ -418,7 +477,13 @@ namespace Tkn_DevColumn
                 if (tableName == "MtskSertifikaTipi")
                     Sql = " Select * from [Lkp].[" + tableName + "] order by SiraNo ";
 
-                //if (tableName == "MtskSertifikaTipi")
+
+                if (where != "")
+                {
+                    if (Sql.ToUpper().IndexOf("WHERE") == -1)
+                        Sql += " Where 0 = 0 " + where;
+                    else Sql += where;
+                }
 
                 v.dBaseNo dBaseNo = t.getDBaseNo(dbaseType);
 
@@ -569,85 +634,112 @@ namespace Tkn_DevColumn
             // tview_type 
             // 1 = Normal Liste
             // 2 = Kriterler için Tümü ibaresi eklenmiş
-
-            int i1 = dsTypesList.Tables[0].Rows.Count;
-            int i2 = 0;
-            for (int i = 0; i < i1; i++)
+            if (List_Name.ToUpper() != "BOOL")
             {
-                lstname = dsTypesList.Tables[0].Rows[i]["TYPES_NAME"].ToString();
-                //image_id = Convert.ToInt16(dsTypesList.Tables[0].Rows[i]["IMAGE_ID"].ToString());
-
-                image_id = -1;
-
-                /// sql.SQL_Types_List(ref SysTypesSql, ref MsTypesSql); hazırlarken image_id fieldi selectten çıkardım
-                /// 
-
-                ///if (dsTypesList.Tables[0].Rows[i]["IMAGE_ID"].ToString() != "")
-                ///    image_id = Convert.ToInt32(dsTypesList.Tables[0].Rows[i]["IMAGE_ID"].ToString());
-
-                if (dsTypesList.Tables[0].Rows[i]["VALUE_INT"].ToString() != "")
-                    image_id = Convert.ToInt32(dsTypesList.Tables[0].Rows[i]["VALUE_INT"].ToString());
-
-                onay = true;
-
-                if ((List_Name == lstname) && (image_id != -9)) // Sys_Types_T değil ise 
+                int i1 = dsTypesList.Tables[0].Rows.Count;
+                int i2 = 0;
+                for (int i = 0; i < i1; i++)
                 {
-                    type = Convert.ToInt16(dsTypesList.Tables[0].Rows[i]["VALUE_TYPE"].ToString());
+                    lstname = dsTypesList.Tables[0].Rows[i]["TYPES_NAME"].ToString();
+                    //image_id = Convert.ToInt16(dsTypesList.Tables[0].Rows[i]["IMAGE_ID"].ToString());
 
-                    if ((i2 == 0) && (tview_type == 2))
-                        RepositoryItem_Add_(
-                            ItemBox_ICB, tEdit_ICB,
-                            ItemBox_CB, tEdit_CB,
-                            ItemBox_RG, tEdit_RG,
-                            null, null, "Tümü", "-2", type);
+                    image_id = -1;
 
-                    caption = dsTypesList.Tables[0].Rows[i]["VALUE_CAPTION"].ToString();
+                    /// sql.SQL_Types_List(ref SysTypesSql, ref MsTypesSql); hazırlarken image_id fieldi selectten çıkardım
+                    /// 
 
-                    if ((i2 == 0) && (tview_type == 2) && caption == "") onay = false;
+                    ///if (dsTypesList.Tables[0].Rows[i]["IMAGE_ID"].ToString() != "")
+                    ///    image_id = Convert.ToInt32(dsTypesList.Tables[0].Rows[i]["IMAGE_ID"].ToString());
 
-                    if (onay)
+                    if (dsTypesList.Tables[0].Rows[i]["VALUE_INT"].ToString() != "")
+                        image_id = Convert.ToInt32(dsTypesList.Tables[0].Rows[i]["VALUE_INT"].ToString());
+
+                    onay = true;
+
+                    if ((List_Name == lstname) && (image_id != -9)) // Sys_Types_T değil ise 
                     {
-                        if ((type == 1) || (type == 2) || (type == 5))
-                            value = dsTypesList.Tables[0].Rows[i]["VALUE_INT"].ToString();
-                        if ((type == 3) || (type == 4))
-                            value = dsTypesList.Tables[0].Rows[i]["VALUE_STR"].ToString();
+                        type = Convert.ToInt16(dsTypesList.Tables[0].Rows[i]["VALUE_TYPE"].ToString());
 
-                        RepositoryItem_Add_(
-                            ItemBox_ICB, tEdit_ICB,
-                            ItemBox_CB, tEdit_CB,
-                            ItemBox_RG, tEdit_RG,
-                            null, null, caption, value, type);
+                        if ((i2 == 0) && (tview_type == 2))
+                            RepositoryItem_Add_(
+                                ItemBox_ICB, tEdit_ICB,
+                                ItemBox_CB, tEdit_CB,
+                                ItemBox_RG, tEdit_RG,
+                                null, null, "Tümü", "-2", type);
+
+                        caption = dsTypesList.Tables[0].Rows[i]["VALUE_CAPTION"].ToString();
+
+                        if ((i2 == 0) && (tview_type == 2) && caption == "") onay = false;
+
+                        if (onay)
+                        {
+                            if ((type == 1) || (type == 2) || (type == 5))
+                                value = dsTypesList.Tables[0].Rows[i]["VALUE_INT"].ToString();
+                            if ((type == 3) || (type == 4))
+                                value = dsTypesList.Tables[0].Rows[i]["VALUE_STR"].ToString();
+
+                            RepositoryItem_Add_(
+                                ItemBox_ICB, tEdit_ICB,
+                                ItemBox_CB, tEdit_CB,
+                                ItemBox_RG, tEdit_RG,
+                                null, null, caption, value, type);
+                        }
+
+                        i2++;
                     }
 
-                    i2++;
-                }
+                    /// SysTypesSql sql içinde
+                    /// MS_VARIABLES de var
+                    if ((List_Name == lstname) && (image_id == -9)) // Sys_Types_T ise 
+                    {
+                        Sys_Types_T_Read(dsTypesList, i,
+                            ItemBox_ICB,
+                            tEdit_ICB,
+                            ItemBox_CB,
+                            tEdit_CB,
+                            ItemBox_RG,
+                            tEdit_RG,
+                            null, null);
+                        //RepositoryItemComboBox ItemBox_ICB,
+                        //DevExpress.XtraEditors.ImageComboBoxEdit tEdit_ICB,
+                        //RepositoryItemComboBox ItemBox_CB,
+                        //DevExpress.XtraEditors.ComboBoxEdit tEdit_CB,
+                        //RepositoryItemRadioGroup ItemBox_RG,
+                        //DevExpress.XtraEditors.RadioGroup tEdit_RG,
+                        //RepositoryItemCheckedComboBoxEdit ItemBox_CCmb,
+                        //CheckedComboBoxEdit tEdit_CCmb
+                        break;
+                    }
 
-                /// SysTypesSql sql içinde
-                /// MS_VARIABLES de var
-                if ((List_Name == lstname) && (image_id == -9)) // Sys_Types_T ise 
-                {
-                    Sys_Types_T_Read(dsTypesList, i, 
-                        ItemBox_ICB, 
-                        tEdit_ICB, 
-                        ItemBox_CB,
-                        tEdit_CB,
-                        ItemBox_RG,
-                        tEdit_RG,
-                        null, null);
-                    //RepositoryItemComboBox ItemBox_ICB,
-                    //DevExpress.XtraEditors.ImageComboBoxEdit tEdit_ICB,
-                    //RepositoryItemComboBox ItemBox_CB,
-                    //DevExpress.XtraEditors.ComboBoxEdit tEdit_CB,
-                    //RepositoryItemRadioGroup ItemBox_RG,
-                    //DevExpress.XtraEditors.RadioGroup tEdit_RG,
-                    //RepositoryItemCheckedComboBoxEdit ItemBox_CCmb,
-                    //CheckedComboBoxEdit tEdit_CCmb
-                    break;
-                }
+                    if ((List_Name != lstname) && (i2 > 0)) break;
 
-                if ((List_Name != lstname) && (i2 > 0)) break;
-
-            } // for
+                } // for
+            }
+            else // BOOL ise
+            {
+                type = 3;
+                caption = "";
+                value = "";
+                RepositoryItem_Add_(
+                    ItemBox_ICB, tEdit_ICB,
+                    ItemBox_CB, tEdit_CB,
+                    ItemBox_RG, tEdit_RG,
+                    null, null, caption, value, type);
+                caption = "Onayla";
+                value = "True";
+                RepositoryItem_Add_(
+                    ItemBox_ICB, tEdit_ICB,
+                    ItemBox_CB, tEdit_CB,
+                    ItemBox_RG, tEdit_RG,
+                    null, null, caption, value, type);
+                caption = "Onaylama";
+                value = "False";
+                RepositoryItem_Add_(
+                    ItemBox_ICB, tEdit_ICB,
+                    ItemBox_CB, tEdit_CB,
+                    ItemBox_RG, tEdit_RG,
+                    null, null, caption, value, type);
+            }
 
             // SpeedKriterler için
             // default value var ise set ediliyor
@@ -1184,6 +1276,8 @@ namespace Tkn_DevColumn
             string tProp_Navigator = t.Set(Row["PROP_NAVIGATOR"].ToString(), "", "");
             string prop_ = tProp_Navigator.Replace((char)34, (char)39);
             string masterCheckFName = t.Set(Row["MASTER_CHECK_FNAME"].ToString(), "", "");
+            string listTypesName = t.Set(Row["LIST_TYPES_NAME"].ToString(), "", "");
+
             // masterCheckFName
             // bu fieldle bulunduğu satırdaki bir kolonu okuyor
             // bu sayede DataCopy için ayırt edici value oluyor
@@ -1271,7 +1365,20 @@ namespace Tkn_DevColumn
 
                 tEdit.ButtonClick += new
                      DevExpress.XtraEditors.Controls.ButtonPressedEventHandler(ev.buttonEdit_ButtonClick);
-                
+
+                /// -------------------------------------------
+                /// listTypesName  caption var buton için
+                /// -------------------------------------------
+
+                if (listTypesName != "")
+                {
+                    DevExpress.XtraEditors.Controls.EditorButton tBtn = new DevExpress.XtraEditors.Controls.EditorButton();
+                    tBtn.Kind = DevExpress.XtraEditors.Controls.ButtonPredefines.Glyph;
+                    tBtn.Caption = listTypesName;
+                    tBtn.Width = listTypesName.Length * 6;
+                    tEdit.Buttons.Add(tBtn);
+                }
+
                 // SİLME ÇALIŞIYOR
                 if ((tFieldName == "LKP_KOMUT") ||
                     (tFieldName == "LKP_LISTEYE_EKLE"))
@@ -1511,8 +1618,11 @@ namespace Tkn_DevColumn
                 tEdit.AccessibleName = TableIPCode;
                 //tEdit.Tag = field_no;
 
+                tProp_Navigator = "Type:" + v.ButtonEdit + ";" + tProp_Navigator;
+                tEdit.AccessibleDescription = tProp_Navigator;
+
                 RepositoryItemImageComboBox_Fill(tEdit, Row, "", 1); // Tumu = Hayır
-                
+
                 #region
                 /*
                 if (Row["LKP_TLKP_TYPE"] != null)
@@ -1551,17 +1661,37 @@ namespace Tkn_DevColumn
                 */
                 #endregion
 
+                if (listTypesName.IndexOf("<") > -1 && listTypesName.IndexOf(">") > -1)
+                {
+                    listTypesName = listTypesName.Replace("<", "");
+                    listTypesName = listTypesName.Replace(">", "");
+                }
+                else listTypesName = "";
+
                 if (tcolumn_type == "tImageComboBoxEdit2Button")
                 {
-                    DevExpress.XtraEditors.Controls.EditorButton tBtn =
-                    new DevExpress.XtraEditors.Controls.EditorButton();
 
-                    // Esas Master olan field name
-                    tBtn.Caption = Column.FieldName;
+                    if (listTypesName != "")
+                    {
+                        DevExpress.XtraEditors.Controls.EditorButton tBtn = new DevExpress.XtraEditors.Controls.EditorButton();
+                        tBtn.Kind = DevExpress.XtraEditors.Controls.ButtonPredefines.Glyph;
+                        tBtn.Caption = listTypesName;
+                        tBtn.Width = listTypesName.Length * 6;
+                        tEdit.Buttons.Add(tBtn);
 
-                    tEdit.Buttons.Add(tBtn);
-                    tEdit.ButtonClick += new
-                     DevExpress.XtraEditors.Controls.ButtonPressedEventHandler(ev.ImageComboBoxEdit_ButtonClick);
+                        tEdit.ButtonClick += new
+                             DevExpress.XtraEditors.Controls.ButtonPressedEventHandler(ev.buttonEdit_ButtonClick);
+                    }
+                    else
+                    {
+                        /// eski hali nasıl çalışıyor hatırlamıyorum
+                        DevExpress.XtraEditors.Controls.EditorButton tBtn = new DevExpress.XtraEditors.Controls.EditorButton();
+                        // Esas Master olan field name
+                        tBtn.Caption = Column.FieldName;
+                        tEdit.Buttons.Add(tBtn);
+                        tEdit.ButtonClick += new
+                         DevExpress.XtraEditors.Controls.ButtonPressedEventHandler(ev.ImageComboBoxEdit_ButtonClick);
+                    }
                 }
 
                 if (tcolumn_type == "tImageComboBoxEditSEC")
@@ -1645,9 +1775,14 @@ namespace Tkn_DevColumn
             {
                 RepositoryItemSearchLookUpEdit tEdit = new RepositoryItemSearchLookUpEdit();
                 tEdit.Name = "Column_" + tFieldName;
-                tEdit.KeyDown += new System.Windows.Forms.KeyEventHandler(evg.myRepositoryItemEdit_KeyDown);
+                /// Sebebini bilmiyorum EditValueChanged çalışırken Name boş geliyor
+                /// bu nedenle fieldName yi AccessibleDefaultActionDescription üzerinden taşımak zorunda kaldım
+                /// 
+                tEdit.AccessibleDefaultActionDescription = "Column_" + tFieldName;
+                //tEdit.KeyDown += new System.Windows.Forms.KeyEventHandler(evg.myRepositoryItemEdit_KeyDown);
+                tEdit.EditValueChanged += new System.EventHandler(evg.myRepositoryLookUpEdit_EditValueChanged);
                 tEdit.AccessibleName = TableIPCode;
-                //tEdit.Tag = field_no;
+                tEdit.AccessibleDescription = tProp_Navigator;
 
                 searchLookUpTableFill(Row, tEdit, null);
 
@@ -3218,10 +3353,15 @@ namespace Tkn_DevColumn
                 tEdit.Properties.AccessibleName = TableIPCode;
                 tEdit.EnterMoveNextControl = true;
                 //tEdit.Tag = field_no;
-                if (dsData != null)
-                    tEdit.DataBindings.Add(new Binding("EditValue", dsData.Tables[0], tFieldName));
-                if (tDLayout != null)
-                    tEdit.StyleController = tDLayout;
+
+                if ((tcolumn_type != "DateEdit_SpeedKriter_BAS") &&
+                    (tcolumn_type != "DateEdit_SpeedKriter_BIT"))
+                {
+                    if (dsData != null)
+                        tEdit.DataBindings.Add(new Binding("EditValue", dsData.Tables[0], tFieldName));
+                    if (tDLayout != null)
+                        tEdit.StyleController = tDLayout;
+                }
 
                 if (Column.ToString() == s)
                     ((LayoutControlItem)Column).Control = tEdit;
@@ -3261,9 +3401,11 @@ namespace Tkn_DevColumn
                 {
                     if (tcolumn_type == "DateEdit_SpeedKriter_BAS") tEdit.Name = tEdit.Name + "_BAS";
                     if (tcolumn_type == "DateEdit_SpeedKriter_BIT") tEdit.Name = tEdit.Name + "_BIT";
-
+                    
+                    tEdit.EditValue = null;
                     tEdit.EditValueChanged += new System.EventHandler(ev.tXtraEdit_EditValueChanged);
                     tEdit.EditValueChanging += new DevExpress.XtraEditors.Controls.ChangingEventHandler(ev.tXtraEdit_EditValueChanging);
+                    
                     //tEdit.Tag = tOperand_type;
 
                     string SubDetail_List =
@@ -3545,8 +3687,11 @@ namespace Tkn_DevColumn
 
                 tXtraEditors_Properties(row_Fields, tEdit, tcolumn_type, tview_type);
 
-                // IP_LIST ekranındaki memo lar için eklenedi
-                //if (row_Fields == null)
+                /// Memo için default
+                float font_size = 0;
+                if (row_Fields != null)
+                    font_size = t.Set(row_Fields["CMP_FONT_SIZE"].ToString(), "", (float)0);
+                if (font_size == 0)
                     ((DevExpress.XtraEditors.MemoEdit)tEdit).Properties.Appearance.Font = new Font(FontFamily.GenericMonospace, (float)9.25);
 
             }
@@ -6090,7 +6235,7 @@ namespace Tkn_DevColumn
                         return;
                     }
                 }
-
+                v.con_ResimEditorRun = true;
                 tInputPanel ip = new tInputPanel();
                 v.con_ImagesMasterDataSet = ip.Create_DataSet(tForm, v.tResimEditor.imagesMasterTableIPCode, false);  //v.con_ImagesMasterTableIPCode);
             } 

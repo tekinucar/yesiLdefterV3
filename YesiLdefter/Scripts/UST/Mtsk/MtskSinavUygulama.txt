@@ -75,10 +75,9 @@ AS BEGIN
 	declare @TalepTipiId smallInt = 0
 
     -- Veri Transferi başladımı
-    declare @DbUpdatesIsActive Bit = 0
-    set @DbUpdatesIsActive = [dbo].[fnc_getIsDbUpdate] (13)
-
-
+    --declare @DbUpdatesIsActive Bit = 0
+    --set @DbUpdatesIsActive = [dbo].[fnc_getIsDbUpdate] (13)
+	
     WHILE @@FETCH_STATUS = 0
     BEGIN
 	    set @ySinavNo = 0 
@@ -249,7 +248,7 @@ AS BEGIN
 		end -- @yDurumuTipiId <> 5
 				
 		
-		Update MtskSinavUygulama set
+		Update dbo.MtskSinavUygulama set
           TalepId = @yTalepId
 		, AdayId = @yAdayId
         , TcNo = @yTcNo 
@@ -262,27 +261,36 @@ AS BEGIN
 		, DurumuTipiId = @yDurumuTipiId
 		Where Id = @curId
 
+
+		/* SinavNo ayarlanıyor */
+        Update dbo.MtskSinavUygulama set 
+           SinavNo = x.yeniSinavNo
+        From dbo.MtskSinavUygulama as a,
+        (
+            Select sinav.Id 
+            , ROW_NUMBER() OVER(ORDER BY sinav.SinavTarihi) AS yeniSinavNo 
+            From dbo.MtskSinavUygulama as sinav
+            where sinav.FirmId = @yFirmId
+            and   sinav.IsActive = 1
+            and   sinav.TalepId = @yTalepId
+        ) as x
+        Where a.Id = x.Id
+        and   a.SinavNo <> x.yeniSinavNo
+
+
         -- Aday ken kayıt durumuna halen geçmemişse
 		Update dbo.MtskAdayTalep set KayitTipiId = 3
         Where Id = @yTalepId
         and   KayitTipiId < 3 -- Kesin Kayıt değilse ? kesin kayıt durumuna getir
 
-	--	EXECUTE [dbo].[prc_MtskAdaySertifika] @yFirmId, @yAdayId
+
+        Execute [dbo].[prc_MtskAdayTakipTalepKaydiSingleSet] @yTalepId
 
         FETCH NEXT FROM curSinavUyg INTO @curId
     END
 	
-    -- Veri transferi yapılmıyorsa 
-    -- diğer işlemleri yapmaya başlasın
-    if (@DbUpdatesIsActive = 0)
-    begin
-	    print 'talep veri transferi harici işler'
-        EXECUTE [dbo].[prc_MtskAdayTakip] @yFirmId
-    end
-
     CLOSE curSinavUyg
     DEALLOCATE curSinavUyg   
-
 
 END
 

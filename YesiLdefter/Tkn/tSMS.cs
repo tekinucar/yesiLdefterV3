@@ -143,13 +143,13 @@ namespace Tkn_SMS
 
                     /// test için kullanılıyor
                     //servisinCevabi = "ID:" + t.getNewFileGuidName;
-                    
+
                     /// esas çalışan servis
                     /// 
-                    servisinCevabi = sendSmsMessage(settings, telefonNo, bildirimMetni, gonderimType, gonderimTarihi, gonderimSaati);
-
-                    if (servisinCevabi != "")
+                    if (t.IsNotNull(bildirimMetni))
                     {
+                        servisinCevabi = sendSmsMessage(settings, telefonNo, bildirimMetni, gonderimType, gonderimTarihi, gonderimSaati);
+
                         dsLines.Tables[0].Rows[dNLines.Position]["StateTypeId"] = 2; // Gönderildi işareti
                         dsLines.Tables[0].Rows[dNLines.Position]["ServisinCevabi"] = servisinCevabi;
                         dsLines.Tables[0].Rows[dNLines.Position]["IsLock"] = 1; // Kilitle

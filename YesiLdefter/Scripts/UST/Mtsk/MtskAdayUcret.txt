@@ -16,7 +16,8 @@ begin transaction
    IsUcretli               Bit           null, /* 0 = Ücretsiz, 1 = Ücretli */
    IsUcretsiz              Bit           null, /* 0 = Ücretsiz, 1 = Ücretli */
    IsLock                  Bit           null,
-
+   IsOwes                  Bit           null, /* 0 = Borçsuz,  1 = Borçlu */
+   
    -- 20
    SertifikaUcreti         Numeric(22,5) null, /* il bazlı sertifika ücreti - readOnly */
    BirSaatOzelDersUcreti   Numeric(22,5) null, /* Özel ders için */
@@ -84,6 +85,7 @@ begin transaction
   create index X_MtskAdayUcret01 on MtskAdayUcret (TalepId)
   create index X_MtskAdayUcret02 on MtskAdayUcret (AdayId)
   create index X_MtskAdayUcret03 on MtskAdayUcret (DonemTipiId)
+  create index X_MtskAdayUcret04 on MtskAdayUcret (IsOwes)
 
 commit transaction
 

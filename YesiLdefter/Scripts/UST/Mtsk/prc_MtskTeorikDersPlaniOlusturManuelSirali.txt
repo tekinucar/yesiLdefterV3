@@ -1,0 +1,43 @@
+﻿
+/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_MtskTeorikDersPlaniOlusturManuelSirali] (@FirmId int, @DonemTipiId int, @GrupTipiId smallint, @SubeTipiId smallint, @DerslikTipiId smallint)  
+AS BEGIN
+/*   
+      declare @FirmId int = 11
+      declare @DonemTipiId int = 202507
+      declare @GrupTipiId smallint = 1
+      declare @SubeTipiId smallint = 1
+      declare @DerslikTipiId smallint = 1
+*/ 
+      declare @curId int  
+      declare myCursor CURSOR local
+      for 
+      Select Id
+      from dbo.MtskSablonTeorikF 
+      Where FirmId = @FirmId
+      and   DonemTipiId = @DonemTipiId
+      and   GrupTipiId = @GrupTipiId
+      and   SubeTipiId = @SubeTipiId
+      and   DerslikTipiId = @DerslikTipiId 
+
+      OPEN myCursor;
+  
+      FETCH NEXT
+      FROM myCursor
+      INTO @curId;
+	  
+      While @@FETCH_STATUS = 0
+      begin
+	      --print @curId
+		  EXECUTE [dbo].[prc_MtskTeorikDersPlaniOlusturManuel] @curId
+		  FETCH NEXT FROM myCursor INTO @curId;
+      end -- While
+
+      Close myCursor;
+      DealLocate myCursor;
+
+
+END -- procedure
+
+/*CreateProcedureEnd*/

@@ -58,7 +58,7 @@ namespace Tkn_ToolBox
         public void fileUpdatesChecked()
         {
             string lastMsFileUpdatesId = getMusteriFileUpdateIdList();
-
+            //MessageBox.Show("1: " + lastMsFileUpdatesId);
             tSQLs sqls = new tSQLs();
             DataSet ds = new DataSet();
 
@@ -66,7 +66,8 @@ namespace Tkn_ToolBox
             /// [dbo].[MsFileUpdates] üzerinden sorgulanıyor
             /// 
             string sql = sqls.Sql_MsFileUpdates(lastMsFileUpdatesId);
-           
+            //MessageBox.Show("2: " + sql);
+
             //if (SQL_Read_Execute(v.dBaseNo.Manager, ds, ref sql, "", "MsFileUpdates")) // test için kullan
             if (SQL_Read_Execute(v.dBaseNo.publishManager, ds, ref sql, "", "MsFileUpdates")) // publish için kullan
             {
@@ -74,6 +75,7 @@ namespace Tkn_ToolBox
                 if (IsNotNull(ds))
                 {
                     //MessageBox.Show("fileUpdatesChecked - 3 ");
+                    v.con_NewFilesFound = true;
                     runMsFileUpdates(ds);
                 }
             }
@@ -110,10 +112,12 @@ namespace Tkn_ToolBox
             string sql = "";
             string IdList = " 0 ";
             sql = sqls.Sql_FileUpdatesIdList();
-
+            
             v.dBaseNo dBaseNo = v.dBaseNo.Project;
             if (v.active_DB.localDbUses)
                 dBaseNo = v.dBaseNo.Local;
+
+            //MessageBox.Show(" 0 : >" + dBaseNo.ToString() + "<"+ v.ENTER + sql);
 
             bool onay = SQL_Read_Execute(dBaseNo, ds, ref sql, "", "FileUpdates");
 
@@ -159,111 +163,118 @@ namespace Tkn_ToolBox
                 {
                     onay = false;
 
-                    DosyaVarsaSil(v.tMsFileUpdate.pathName + "\\" + v.tMsFileUpdate.packetName);
+                    //DosyaVarsaSil(v.tMsFileUpdate.pathName + "\\" + v.tMsFileUpdate.packetName);
+                    onay = checkedFileOnPc(v.tMsFileUpdate.packetName);
 
-                    WaitFormOpen(Application.OpenForms[0], v.tMsFileUpdate.fileName + " klasörü indiriliyor...");
-
-                    onay = ftpDownload(v.tMsFileUpdate.pathName, v.tMsFileUpdate.packetName); // MsFileUpdates te indirilmesi istenen dosyalar 
-
-                    if (onay)
+                    if (onay == false)
                     {
-                        try
-                        {
-                            onay = false;
+                        WaitFormOpen(Application.OpenForms[0], v.tMsFileUpdate.fileName + " klasörü indiriliyor...");
 
-                            if (Directory.Exists(v.tMsFileUpdate.pathName + "\\" + v.tMsFileUpdate.fileName))
+                        onay = ftpDownload(v.tMsFileUpdate.pathName, v.tMsFileUpdate.packetName); // MsFileUpdates te indirilmesi istenen dosyalar 
+
+                        if (onay)
+                        {
+                            try
                             {
-                                // Klasörü ve içindeki her şeyi sil
-                                Directory.Delete(v.tMsFileUpdate.pathName + "\\" + v.tMsFileUpdate.fileName, true);
-                            }
+                                onay = false;
 
-                            if (Directory.Exists(v.tMsFileUpdate.pathName + "\\" + v.tMsFileUpdate.fileName) == false)
+                                if (Directory.Exists(v.tMsFileUpdate.pathName + "\\" + v.tMsFileUpdate.fileName))
+                                {
+                                    // Klasörü ve içindeki her şeyi sil
+                                    Directory.Delete(v.tMsFileUpdate.pathName + "\\" + v.tMsFileUpdate.fileName, true);
+                                }
+
+                                if (Directory.Exists(v.tMsFileUpdate.pathName + "\\" + v.tMsFileUpdate.fileName) == false)
+                                {
+                                    Directory.CreateDirectory(v.tMsFileUpdate.pathName + "\\" + v.tMsFileUpdate.fileName);
+                                }
+
+                                WaitFormOpen(Application.OpenForms[0], v.tMsFileUpdate.fileName + " ZIP dosyası açılıyor...");
+                                ZipFile.ExtractToDirectory(v.tMsFileUpdate.pathName + "\\" + v.tMsFileUpdate.packetName, v.tMsFileUpdate.pathName + "\\" + v.tMsFileUpdate.fileName + "\\");// + "\\" + v.tMsFileUpdate.fileName);
+                                onay = true;
+                                AlertMessage(v.tMsFileUpdate.fileName, "ZIP dosyası başarıyla açıldı.");
+                            }
+                            catch (FileNotFoundException)
                             {
-                                Directory.CreateDirectory(v.tMsFileUpdate.pathName + "\\" + v.tMsFileUpdate.fileName);
+                                MessageBox.Show("ZIP dosyası bulunamadı.");
                             }
-
-                            WaitFormOpen(Application.OpenForms[0], v.tMsFileUpdate.fileName + " ZIP dosyası açılıyor...");
-                            ZipFile.ExtractToDirectory(v.tMsFileUpdate.pathName + "\\" + v.tMsFileUpdate.packetName, v.tMsFileUpdate.pathName + "\\" + v.tMsFileUpdate.fileName + "\\");// + "\\" + v.tMsFileUpdate.fileName);
-                            onay = true;
-                            AlertMessage(v.tMsFileUpdate.fileName, "ZIP dosyası başarıyla açıldı.");
-                        }
-                        catch (FileNotFoundException)
-                        {
-                            MessageBox.Show("ZIP dosyası bulunamadı.");
-                        }
-                        //catch (InvalidDataException)
-                        //{
-                        //    MessageBox.Show("ZIP dosyası bozuk veya geçersiz.");
-                        //}
-                        catch (Exception ex)
-                        {
-                            MessageBox.Show("Hata oluştu: " + ex.Message);
+                            //catch (InvalidDataException)
+                            //{
+                            //    MessageBox.Show("ZIP dosyası bozuk veya geçersiz.");
+                            //}
+                            catch (Exception ex)
+                            {
+                                MessageBox.Show("Hata oluştu: " + ex.Message);
+                            }
                         }
                     }
                 }
                 else if (v.tMsFileUpdate.extension.ToUpper() == "PACKET")
                 {
-                    DosyaVarsaSil(v.tMsFileUpdate.pathName + "\\" + v.tMsFileUpdate.packetName);
+                    //DosyaVarsaSil(v.tMsFileUpdate.pathName + "\\" + v.tMsFileUpdate.packetName);
+                    onay = checkedFileOnPc(v.tMsFileUpdate.packetName);
 
-                    WaitFormOpen(Application.OpenForms[0], v.tMsFileUpdate.fileName + " dosya paketi indiriliyor...");
-
-                    onay = ftpDownload(v.tMsFileUpdate.pathName, v.tMsFileUpdate.packetName); // MsFileUpdates te indirilmesi istenen dosyalar 
-
-                    if (onay)
+                    if (onay == false)
                     {
-                        try
+                        WaitFormOpen(Application.OpenForms[0], v.tMsFileUpdate.fileName + " dosya paketi indiriliyor...");
+
+                        onay = ftpDownload(v.tMsFileUpdate.pathName, v.tMsFileUpdate.packetName); // MsFileUpdates te indirilmesi istenen dosyalar 
+
+                        if (onay)
                         {
-                            onay = false;
-
-                            //if (Directory.Exists(v.tMsFileUpdate.pathName + "\\" + v.tMsFileUpdate.fileName))
-                            //{
-                            //    // Klasörü ve içindeki her şeyi sil
-                            //    Directory.Delete(v.tMsFileUpdate.pathName + "\\" + v.tMsFileUpdate.fileName, true);
-                            //}
-
-                            //if (Directory.Exists(v.tMsFileUpdate.pathName + "\\" + v.tMsFileUpdate.fileName) == false)
-                            //{
-                            //    Directory.CreateDirectory(v.tMsFileUpdate.pathName + "\\" + v.tMsFileUpdate.fileName);
-                            //}
-
-                            WaitFormOpen(Application.OpenForms[0], v.tMsFileUpdate.fileName + " ZIP dosyası açılıyor...");
-                            //ZipFile.ExtractToDirectory(v.tMsFileUpdate.pathName + "\\" + v.tMsFileUpdate.packetName, v.tMsFileUpdate.pathName + "\\");
-                            string zipPath = v.tMsFileUpdate.pathName + "\\" + v.tMsFileUpdate.packetName;
-                            string extractPath = v.tMsFileUpdate.pathName;
-
-                            using (ZipArchive archive = ZipFile.Open(zipPath, ZipArchiveMode.Read))
+                            try
                             {
-                                foreach (ZipArchiveEntry entry in archive.Entries)
+                                onay = false;
+
+                                //if (Directory.Exists(v.tMsFileUpdate.pathName + "\\" + v.tMsFileUpdate.fileName))
+                                //{
+                                //    // Klasörü ve içindeki her şeyi sil
+                                //    Directory.Delete(v.tMsFileUpdate.pathName + "\\" + v.tMsFileUpdate.fileName, true);
+                                //}
+
+                                //if (Directory.Exists(v.tMsFileUpdate.pathName + "\\" + v.tMsFileUpdate.fileName) == false)
+                                //{
+                                //    Directory.CreateDirectory(v.tMsFileUpdate.pathName + "\\" + v.tMsFileUpdate.fileName);
+                                //}
+
+                                WaitFormOpen(Application.OpenForms[0], v.tMsFileUpdate.fileName + " ZIP dosyası açılıyor...");
+                                //ZipFile.ExtractToDirectory(v.tMsFileUpdate.pathName + "\\" + v.tMsFileUpdate.packetName, v.tMsFileUpdate.pathName + "\\");
+                                string zipPath = v.tMsFileUpdate.pathName + "\\" + v.tMsFileUpdate.packetName;
+                                string extractPath = v.tMsFileUpdate.pathName;
+
+                                using (ZipArchive archive = ZipFile.Open(zipPath, ZipArchiveMode.Read))
                                 {
-                                    string destinationPath = Path.Combine(extractPath, entry.FullName);
-
-                                    // Eğer dosya varsa, üzerine yazmak için önce kaldırabiliriz
-                                    if (File.Exists(destinationPath))
+                                    foreach (ZipArchiveEntry entry in archive.Entries)
                                     {
-                                        File.Delete(destinationPath);
+                                        string destinationPath = Path.Combine(extractPath, entry.FullName);
+
+                                        // Eğer dosya varsa, üzerine yazmak için önce kaldırabiliriz
+                                        if (File.Exists(destinationPath))
+                                        {
+                                            File.Delete(destinationPath);
+                                        }
+
+                                        entry.ExtractToFile(destinationPath, true); // 'true' değeri, üzerine yazmayı sağlar
                                     }
-
-                                    entry.ExtractToFile(destinationPath, true); // 'true' değeri, üzerine yazmayı sağlar
                                 }
-                            }
 
-                            onay = true;
-                            AlertMessage(v.tMsFileUpdate.fileName, "ZIP dosyası başarıyla açıldı.");
-                        }
-                        catch (FileNotFoundException)
-                        {
-                            MessageBox.Show("ZIP dosyası bulunamadı.");
-                        }
-                        //catch (InvalidDataException)
-                        //{
-                        //    MessageBox.Show("ZIP dosyası bozuk veya geçersiz.");
-                        //}
-                        catch (Exception ex)
-                        {
-                            MessageBox.Show("Hata oluştu: " + ex.Message);
+                                onay = true;
+                                AlertMessage(v.tMsFileUpdate.fileName, "ZIP dosyası başarıyla açıldı.");
+                            }
+                            catch (FileNotFoundException)
+                            {
+                                MessageBox.Show("ZIP dosyası bulunamadı.");
+                            }
+                            //catch (InvalidDataException)
+                            //{
+                            //    MessageBox.Show("ZIP dosyası bozuk veya geçersiz.");
+                            //}
+                            catch (Exception ex)
+                            {
+                                MessageBox.Show("Hata oluştu: " + ex.Message);
+                            }
                         }
                     }
-
                 }
                 else
                 {
@@ -404,11 +415,17 @@ namespace Tkn_ToolBox
         {
             // UstadMtsk ise
             if ((v.active_DB.localDbUses == false) &&
-                (v.SP_Firm_SectorTypeId == (Int16)v.msSectorType.UstadMtsk ))
-                dataUpdatesUstadMtsk();
+                (v.SP_Firm_SectorTypeId == (Int16)v.msSectorType.UstadMtsk))
+            {
+                Task task1 = new Task(() =>
+                {
+                    dataUpdatesUstadMtsk();
+                });
+                task1.Start();    
+            }
         }
 
-        public void dataUpdatesUstadMtsk()
+        public async Task dataUpdatesUstadMtsk()
         { 
             tSQLs sqls = new tSQLs();
             DataSet ds = new DataSet();
@@ -570,11 +587,7 @@ namespace Tkn_ToolBox
                 }
             }
 
-
         }
-
-
-
 
         public void dataUpdates_IPTAL()
         {
@@ -1693,7 +1706,7 @@ namespace Tkn_ToolBox
                     (SQL.IndexOf("3S_") == -1))
                      v.SQL = v.ENTER2 + SQL + v.SQL;
 
-                /// sql execute oluyor
+                // sql execute oluyor
                 //if (vt.DBaseType == v.dBaseType.MSSQL)
                 msSqlAdapter = new SqlDataAdapter(SQL, msSqlConn);
 
@@ -1713,7 +1726,6 @@ namespace Tkn_ToolBox
                 /// data dolduruluyor
                 if (vt.DBaseType == v.dBaseType.MSSQL)
                 {
-
                     if ((vt.TableCount == 0) && (vt.TableIPCode != ""))
                     {
                         msSqlAdapter.Fill(dsData, vt.TableName);
@@ -1749,9 +1761,11 @@ namespace Tkn_ToolBox
                     vt.TableName + " / " + vt.TableIPCode + " / " + vt.functionName +
                     " ] { " + v.ENTER2 + SQL + v.ENTER2 + " } " + v.SQL;
 
-                MessageBox.Show("HATALI SQL : " + v.ENTER2 + e.Message.ToString() +
-                    v.ENTER2 + vt.TableName + v.ENTER2 + SQL, "Data_Read_Execute");
+                //MessageBox.Show("HATALI SQL : " + v.ENTER2 + e.Message.ToString() +
+                //    v.ENTER2 + vt.TableName + v.ENTER2 + SQL, "Data_Read_Execute");
+                AlertMessage("Konu", vt.TableName + " / " + vt.TableIPCode);
             }
+
             #endregion 1.adım
 
             if (msSqlAdapter != null) msSqlAdapter.Dispose();
@@ -1817,7 +1831,12 @@ namespace Tkn_ToolBox
             #endregion NotExecute
 
             #region 2. adımda Tablonun Fields bilgileri geliyor
+            //Task task1 = new Task(() =>
+            //{
             preparingTableAndFields(tForm, dsData);
+            //});
+            //task1.Start();
+
             #endregion 2. adım
 
             if (Cursor.Current == Cursors.WaitCursor)
@@ -1858,8 +1877,10 @@ namespace Tkn_ToolBox
                             {
                                 DataTable dt = v.ds_TableIPCodeFields.Tables[vt.TableIPCode];
                                 if (dt != null)
+                                {
                                     dsData.Tables.Add(dt.Copy());
-                                dt.Dispose();
+                                    dt.Dispose();
+                                }
                             }
                         }
                     }
@@ -2402,6 +2423,7 @@ namespace Tkn_ToolBox
            + " , " + Alias + ".FJOIN_TABLE_ALIAS        LKP_FJOIN_TABLE_ALIAS " + v.ENTER
            + " , " + Alias + ".FJOIN_KEY_FNAME          LKP_FJOIN_KEY_FNAME " + v.ENTER
            + " , " + Alias + ".FJOIN_CAPTION_FNAME      LKP_FJOIN_CAPTION_FNAME " + v.ENTER
+           + " , " + Alias + ".FJOIN_WHERE              LKP_FJOIN_WHERE " + v.ENTER
            ;
 
             return s;
@@ -3119,21 +3141,26 @@ namespace Tkn_ToolBox
             //if (ds.Tables.Count == 0) return sonuc;
             //if (IsNotNull(ds) == false) return sonuc;
 
-            //string Sql = ds.Tables[0].Namespace.ToString();
-
             string myProp = ds.Namespace.ToString();
             string TableIPCode = Set(ds.DataSetName.ToString(), "", "");
 
+            DataNavigator dN = Find_DataNavigator(tForm, TableIPCode);
+            int pos = dN.Position;
+            /// valeu değişikliği sağlanıyor : -1 > 1234  oluyor
+            TableRefreshNewValue(tForm, ds, "Refresh", pos);
+
+            /// myProp u tekrar okunması gerekiyor sakın silme ( TableRefreshNewValue de değşime uğruyor)
+            myProp = ds.Namespace.ToString();
             string SqlFirst = MyProperties_Get(myProp, "SqlFirst:");
             string SqlSecond = MyProperties_Get(myProp, "SqlSecond:");
-
+            string KeyIdValue = MyProperties_Get(myProp, "KeyIdValue:");
             string Sql = Set(SqlSecond, SqlFirst, "");
 
             if (Sql.IndexOf("-99") > -1)
             {
                 tEvents ev = new tEvents();
                 
-                DataNavigator dN = Find_DataNavigator(tForm, TableIPCode);
+                //DataNavigator dN = Find_DataNavigator(tForm, TableIPCode);
                 ev.tSubDetail_Refresh(ds, dN);
                 return true;
             }
@@ -3146,12 +3173,13 @@ namespace Tkn_ToolBox
                     Control cntrl = null;
                     //cntrl = Find_Control_View(tForm, TableIPCode);
                     sonuc = Data_Read_Execute(tForm, ds, ref Sql, "", cntrl);
+                   
                     ViewControl_Enabled(tForm, TableIPCode, sonuc);
                 }
                 catch (Exception)
                 {
                     sonuc = false;
-                    throw;
+                    //throw;
                 }
                 #endregion
             }
@@ -3194,7 +3222,54 @@ namespace Tkn_ToolBox
             return onay;
         }
 
-        public bool TableRefreshNewValue(Form tForm, DataSet dsTarget, string newValue)
+        public bool checkedKeyFieldValueNegative(DataSet dsTarget)
+        {
+            bool onay = true;
+
+            string myProp = dsTarget.Namespace.ToString();
+            //string TableIPCode = MyProperties_Get(myProp, "TableIPCode:");
+            string TableLabel = MyProperties_Get(myProp, "TableLabel:");
+            string KeyFName = MyProperties_Get(myProp, "KeyFName:");
+            //string IsUseNewRefId = MyProperties_Get(myProp, "IsUseNewRefId:");
+            string KeyIdValue = MyProperties_Get(myProp, "KeyIdValue:");
+            //string SqlF = MyProperties_Get(myProp, "SqlFirst:");
+            string SqlS = MyProperties_Get(myProp, "SqlSecond:");
+
+            // -1 varmı kontrol edilecek
+            KeyIdValue = "-1";
+            string UseOldRefId = " and " + TableLabel + "." + KeyFName + " = " + KeyIdValue + " ";
+
+            if (SqlS.IndexOf(UseOldRefId) > -1)
+                onay = false;
+
+            return onay;
+        }
+
+        public void changeKeyFieldValue(DataSet dsTarget, string newValue)
+        {
+            string myProp = dsTarget.Namespace.ToString();
+            //string TableIPCode = MyProperties_Get(myProp, "TableIPCode:");
+            string TableLabel = MyProperties_Get(myProp, "TableLabel:");
+            string KeyFName = MyProperties_Get(myProp, "KeyFName:");
+            //string IsUseNewRefId = MyProperties_Get(myProp, "IsUseNewRefId:");
+            string KeyIdValue = MyProperties_Get(myProp, "KeyIdValue:");
+            //string SqlF = MyProperties_Get(myProp, "SqlFirst:");
+            string SqlS = MyProperties_Get(myProp, "SqlSecond:");
+            string SqlSOld = SqlS;
+
+            if (KeyIdValue == newValue) return;
+
+            string UseOldRefId = " and " + TableLabel + "." + KeyFName + " = " + KeyIdValue + " ";
+            string UseReadRefId = " and " + TableLabel + "." + KeyFName + " = " + newValue + " ";
+
+            Str_Replace(ref SqlS, UseOldRefId, UseReadRefId);
+
+            Str_Replace(ref myProp, "SqlSecond:" + SqlSOld, "SqlSecond:" + SqlS);
+            Str_Replace(ref myProp, "KeyIdValue:" + KeyIdValue, "KeyIdValue:" + newValue);
+            dsTarget.Namespace = myProp;
+        }
+
+        public bool TableRefreshNewValue(Form tForm, DataSet dsTarget, string newValue, int pos)
         {
             bool onay = true;
 
@@ -3208,6 +3283,24 @@ namespace Tkn_ToolBox
             string SqlF = MyProperties_Get(myProp, "SqlFirst:");
             string SqlS = MyProperties_Get(myProp, "SqlSecond:");
             string SqlSOld = SqlS;
+            bool run = true;
+
+            if (newValue == "Refresh" && KeyIdValue == "-1" && pos > -1)
+            {
+                // keyField varmı diye kontrol et
+                if (dsTarget.Tables[0].Columns.Contains(KeyFName))
+                {
+                    newValue = dsTarget.Tables[0].Rows[pos][KeyFName].ToString();
+                    if (newValue == "") newValue = "-1";
+                    // burada Execute çalışmasın, döndüğü yerde zaten çalışıyor boş yere 2 defa çalışmasın
+                    run = false;
+                }
+            }
+            if (newValue == "Refresh" && (KeyIdValue != "-1" || pos == -1))
+            {
+                return true;
+            }
+
             string UseOldRefId = " and " + TableLabel + "." + KeyFName + " = " + KeyIdValue + " ";
             string UseReadRefId = " and " + TableLabel + "." + KeyFName + " = " + newValue + " ";
 
@@ -3218,7 +3311,7 @@ namespace Tkn_ToolBox
             dsTarget.Namespace = myProp;
             //onay = TableRefresh(tForm, dsTarget);
             
-            if (IsNotNull(SqlS))
+            if (IsNotNull(SqlS) && (run))
             {
                 try
                 {
@@ -3230,7 +3323,7 @@ namespace Tkn_ToolBox
                 catch (Exception)
                 {
                     onay = false;
-                    throw;
+                    //throw;
                 }
             }
             
@@ -6152,15 +6245,18 @@ namespace Tkn_ToolBox
             //* time = 41
             if ((ftype == 40) || (ftype == 61))
             {
-                if ((fvalue == "") || (fvalue == "-1") || (fvalue == "0"))
-                    fvalue = DateTime.Now.Date.ToShortDateString();
+                //if ((fvalue == "") || (fvalue == "-1") || (fvalue == "0"))
+                //    fvalue = DateTime.Now.Date.ToShortDateString();
 
                 if ((fvalue == null) ||
                     (fvalue == "null") ||
                     (fvalue == "NewRecord") ||
-                    (fvalue == "0"))
+                    (fvalue == "0") ||
+                    (fvalue == "") /// yeni eklendi
+                    )
                 {
-                    MyStr = string.Empty;
+                    //MyStr = string.Empty;
+                    MyStr = "--Convert(Date, " + Field_Name;
                 }
                 else
                 {
@@ -6174,7 +6270,8 @@ namespace Tkn_ToolBox
                     }
                     if ((fvalue == "first") || (fvalue == "-99"))
                     {
-                        if ((v.active_DB.projectDBType == v.dBaseType.MSSQL) && (SetType == "and"))
+                        if ((v.active_DB.
+                            projectDBType == v.dBaseType.MSSQL) && (SetType == "and"))
                             MyStr = "Convert(Date, " + Field_Name + ", 103) " + Operand + "Convert(Date,'01.01.1900', 103) ";
 
                         if (SetType == "as") MyStr = "'01.01.1900'" + " as " + Field_Name;
@@ -6476,7 +6573,7 @@ namespace Tkn_ToolBox
                 string myprop = dsData.Namespace.ToString();
                 myprop = myprop.Replace(oldValue, newValue);
                 dsData.Namespace = myprop;
-                v.Kullaniciya_Mesaj_Var = "DataState : Update, Column Changed";
+                //v.Kullaniciya_Mesaj_Var = "DataState : Update, Column Changed";
             }
         }
         #endregion
@@ -6876,6 +6973,19 @@ namespace Tkn_ToolBox
             return userDate;
         }
 
+        public DataRow getDataRow(DataSet ds_Fields, string fieldName)
+        {
+            DataRow row = null;
+            for (int i = 0; i < ds_Fields.Tables[0].Rows.Count; i++)
+            {
+                if (ds_Fields.Tables[0].Rows[i]["LKP_FIELD_NAME"].ToString() == fieldName)
+                {
+                    row = ds_Fields.Tables[0].Rows[i];
+                    break;
+                }
+            }
+            return row;
+        }
 
         #region <myStart> Get
         public string myStart_Get(Form tForm)
@@ -8190,7 +8300,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
         #endregion MenuCodeChecked
 
         #region YilAy - Mali Dönem Read
-        public void DonemTipiYilAyRead()
+        public async Task DonemTipiYilAyRead()
         {
             if (v.tMainFirm.SectorTypeId == (Int16)v.msSectorType.UstadCrm) return;
             if (v.active_DB.localDbUses) return;
@@ -8204,11 +8314,16 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 (v.tMainFirm.SectorTypeId == (Int16)v.msSectorType.TabimMtsk) ||
                 (v.tMainFirm.SectorTypeId == (Int16)v.msSectorType.TabimSrc) ||
                 (v.tMainFirm.SectorTypeId == (Int16)v.msSectorType.TabimIsmak))
+            {
                 tableName = "MtskDonemTipi";
+                Sql = " Select top 100 * from [Lkp].[" + tableName + "] order by Id desc ";
+            }
             else
+            {
                 tableName = "BelgeDonemTipi";
-
-            Sql = " Select * from [Lkp].[" + tableName + "] order by Id desc ";
+                Sql = " Select * from [Lkp].[" + tableName + "] order by Id desc ";
+            }
+            
             v.dBaseNo dBaseNo = v.dBaseNo.Project;
             SQL_Read_Execute(dBaseNo, v.ds_DonemTipiList, ref Sql, tableName, "");
         }
@@ -8333,7 +8448,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
         #region SYS_Types_List
 
-        public void SYS_Types_Read()
+        public async Task SYS_Types_Read()
         {
             /// 1. işlem
             ///
@@ -8881,7 +8996,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
         }
 
-        public void Get_ComputerAbout()
+        public async Task Get_ComputerAbout()
         {
 
             ///Win32_Processor
@@ -8965,9 +9080,30 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
                 MOS.Dispose();
             }
-            catch (Exception e2)
+            catch (Exception)
             {
                 //MessageBox.Show("ManagementObjectSearcher (Win32_DiskDrive) :" + e2.Message);
+                //throw;
+            }
+        }
+
+        public async Task Get_MacAddress()
+        {
+            /// Read computer network ethernet mac address
+            /// 
+            try
+            {
+                String macAddr = NetworkInterface
+                .GetAllNetworkInterfaces()
+                .Where(nic => nic.NetworkInterfaceType == NetworkInterfaceType.Ethernet)
+                .Select(nic => nic.GetPhysicalAddress().ToString())
+                .FirstOrDefault();
+
+                v.tComputer.Network_MACAddress = macAddr;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Get MacAddress " + v.ENTER2 + ex.Message);
                 //throw;
             }
         }
@@ -9511,6 +9647,22 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             return value;
         }
         #endregion tCheckedValue
+
+        public string getDateTimeString(DateTime dt)
+        {
+            string yil = dt.Year.ToString();
+            string ay = dt.Month.ToString();
+            string gun = dt.Day.ToString();
+            string saat = dt.Hour.ToString();
+            string dakk = dt.Minute.ToString();
+
+            if (ay.Length == 1) ay = "0" + ay;
+            if (gun.Length == 1) gun = "0" + gun;
+            if (saat.Length == 1) saat = "0" + saat;
+            if (dakk.Length == 1) dakk = "0" + dakk;
+
+            return yil + ay + gun + "_" + saat + dakk;
+        }
 
         #endregion Diğer
 
@@ -11296,6 +11448,57 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             return fname;
         }
         
+        public bool Find_Value_In_Field(Form tForm, string tableIPCode, string fieldName, string findValue)
+        {
+            bool onay = false;
+
+            /// Buraya geldiysen tablonun üzerinde LKP_ONAY field var 
+            /// ve kullanıcı seçim yapmış mı yapmamış mı onu kontrol ediyoruz
+            /// 
+            DataSet ds = null;
+            DataNavigator dN = null;
+            Find_DataSet(tForm, ref ds, ref dN, tableIPCode);
+
+            if (IsNotNull(ds) != false)
+            {
+                string value = "";
+                int length = ds.Tables[0].Rows.Count;
+                for (int i = 0; i < length; i++)
+                {
+                    value = ds.Tables[0].Rows[i][fieldName].ToString();
+                    if (value.IndexOf(findValue) > -1)
+                    {
+                        onay = true;
+                        break;
+                    }
+                }
+            }
+            return onay;
+        }
+        public bool Find_FieldName(Form tForm, string tableIPCode, string findFieldName)
+        {
+            bool onay = false;
+
+            DataSet ds = null;
+            DataNavigator dN = null;
+            Find_DataSet(tForm, ref ds, ref dN, tableIPCode);
+
+            if (IsNotNull(ds) != false)
+            {
+                string columnName = "";
+                int length = ds.Tables[0].Columns.Count;
+                for (int i = 0; i < length; i++)
+                {
+                    columnName = ds.Tables[0].Columns[i].ColumnName;
+                    if (columnName.IndexOf(findFieldName) > -1)
+                    {
+                        onay = true;
+                        break;
+                    }
+                }
+            }
+            return onay;
+        }
         public bool Find_TableFields(Form tForm, DataSet dsData)
         {
             string myProp = dsData.Namespace;
@@ -11406,7 +11609,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
             if (ds == null) return;
             if (ds.Tables == null) return;
-            if (ds.Tables.Count <= 1) return;
+            if (ds.Tables.Count < 1) return;
 
             string tableName_ = "";
             if (v.active_DB.mainManagerDbUses) // tableFields + "2"
@@ -14096,8 +14299,9 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             {
                 string formType = Application.OpenForms[i].GetType().ToString();
                 //DevExpress.XtraWaitForm.AutoLayoutDemoWaitForm
-                if (formType.IndexOf("XtraWaitForm") == -1)
-                    Application.OpenForms[i].Dispose();
+                if (formType.IndexOf("XtraWaitForm") == -1 &&
+                    formType.IndexOf("AlertForm") == -1)
+                    Application.OpenForms[i]?.Dispose();
             }
         }
 
@@ -14106,7 +14310,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             if (Cursor.Current != Cursors.Default)
                 Cursor.Current = Cursors.Default;
 
-            if (Mesaj == "") Mesaj = "İşleminiz yapılıyor ...";
+            if (Mesaj == "") Mesaj = "İşlemler devam ediyor...";
 
             if (v.IsWaitOpen)
             {
@@ -14184,13 +14388,13 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
             //object skin = reg.getRegistryValue("userSkin");
             //object skinUser = reg.getRegistryValue("userSkin_" + v.tUser.UserId.ToString());
+            //if (skin != null)
+            //    UserLookAndFeel.Default.SetSkinStyle(skin.ToString());
+            //if (skinUser != null)
+            //    UserLookAndFeel.Default.SetSkinStyle(skinUser.ToString());
+
             skinUserFirm = reg.getRegistryValue("userSkin_" + v.tUser.UserId.ToString() + "_" + v.tMainFirm.FirmId.ToString());  //v.SP_FIRM_ID.ToString());
-            /*
-            if (skin != null)
-                UserLookAndFeel.Default.SetSkinStyle(skin.ToString());
-            if (skinUser != null)
-                UserLookAndFeel.Default.SetSkinStyle(skinUser.ToString());
-            */
+
             if (skinUserFirm != null)
             {
                 // okunan style yüklensin
@@ -14199,6 +14403,9 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 {
                     string paletteName = skinUserFirm.ToString();
                     string skinName = Get_And_Clear(ref paletteName, "||");
+
+                    DevExpress.LookAndFeel.UserLookAndFeel.Default.UseDefaultLookAndFeel = true;
+
                     UserLookAndFeel.Default.SetSkinStyle(skinName, paletteName);
                 }
                 else
@@ -15107,6 +15314,8 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             startInfo.FileName = v.tExeAbout.activeExeName;   //"dcm2jpg.exe";
             startInfo.WindowStyle = ProcessWindowStyle.Hidden;
             //startInfo.Arguments = "-f j -o \"" + ex1 + "\" -z 1.0 -s y " + ex2;
+            if (v.EXE_Arguments != "")
+                startInfo.Arguments = v.EXE_Arguments;
             try
             {
                 // Start the process with the info we specified.
@@ -15477,6 +15686,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
             int tableCount = 0;
             int rowCount = 0;
+            int colCount = 0;
             int groupCount = 0;
             int tGroupPanelCount = 0;
             int tDLTabPageCount = 0;
@@ -15489,6 +15699,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             if (tableCount > 0)
             {
                 rowCount = dsFields.Tables[0].Rows.Count;
+                colCount = dsFields.Tables[0].Columns.Count;
                 if (tableCount == 2)
                     groupCount = dsFields.Tables[1].Rows.Count;
 
@@ -15525,7 +15736,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             }// tableCount
 
             vTA.TablesCount = tableCount;
-            vTA.FieldsCount = rowCount;
+            vTA.FieldsCount = colCount;
             vTA.RecordCount = rowCount;
             vTA.GroupsCount = groupCount;
             vTA.groupPanelCount = tGroupPanelCount;
@@ -15960,7 +16171,8 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             /// ILCETipiId  >> ILCETipi
             ///
             fieldName = fieldName.Replace("Id", "");
-            tableName = tableName + fieldName;
+            if (tableName.IndexOf(fieldName) == -1)
+                tableName = tableName + fieldName;
 
             if ((fieldType == 167) || // varchar
                 (fieldType == 231))   // nvarchar
@@ -16096,6 +16308,27 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                     v.active_DB.projectServerName = v.SP_TabimParamsServerName;
                 }
 
+                /// YesiLdefterTabim.Ini var içeriği null geliyorsa
+                if (v.active_DB.localServerName == "" || v.active_DB.localServerName == "null")
+                {
+                    onay = readTABSURUCU_INI();
+                    if (onay)
+                    {
+                        v.active_DB.projectServerName = v.active_DB.localServerName;
+                        onay = writeYesiLdefterTabimIni();
+                        if (onay == false)
+                        {
+                            FlyoutMessage(null, "Local server name", "Gerekli olan MSSQL bağlantı bilgisi YesiLdefterTabim.Ini yazılamadı. Yinede program çalışmaz ise TABİM DESTEK MASASI ndan yardım isteyin...");
+                            Application.Exit();
+                        }
+                    }
+                    else
+                    {
+                        FlyoutMessage(null, "Local server name", "Gerekli olan MSSQL bağlantı bilgisine ulaşamadım. Programı yeniden çalıştırmayı deneyin. Yinede program çalışmaz ise TABİM DESTEK MASASI ndan yardım isteyin...");
+                        Application.Exit();
+                    }
+                }
+
                 // ini file içinde manuel false yapılmış olabilir
                 // yapılırsa sonuç ne olur bilmiyorum
                 v.active_DB.localDbUses = true;
@@ -16134,6 +16367,76 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
         }
         
+        public bool readTABSURUCU_INI()
+        {
+            bool onay = true;
+            var tabSurucuIni = new tIniFile("c:\\Windows\\TABSURUCU.INI");
+            if (tabSurucuIni != null)
+            {
+                v.active_DB.localServerName = tabSurucuIni.Read("cbServer_Text", "TfrmLoginDB");
+                v.active_DB.localUserName = tabSurucuIni.Read("edUsername_Text", "TfrmLoginDB");
+                v.active_DB.localPsw = tabSurucuIni.Read("edPassword_Text", "TfrmLoginDB");
+
+                if (v.active_DB.localUserName == "") v.active_DB.localUserName = "TABIM";
+                if (v.active_DB.localPsw == "") v.active_DB.localPsw = "312";
+                if (IsNotNull(v.active_DB.localDBName) == false) v.active_DB.localDBName = "Surucu07";
+
+                if (v.active_DB.localServerName == "")
+                    v.active_DB.localServerName = Find_ListAvailableMSSQLServers();
+            }
+            return onay;
+        }
+
+        public bool writeYesiLdefterTabimIni()
+        {
+            bool onay = true;
+
+            if ((IsNotNull(v.active_DB.localServerName) == false) ||
+                (IsNotNull(v.active_DB.localDBName) == false) ||
+                (IsNotNull(v.active_DB.localUserName) == false) ||
+                (IsNotNull(v.active_DB.localPsw) == false))
+            {
+                AlertMessage("YesiLdefterTabim.Ini", "Bağlantı bilgilerinde eksiklik mevcut olduğu için Ini dosyasına yazılamadı...");
+                return false;
+            }
+
+            try
+            {
+                var YesiLdefterTabimIni = new tIniFile("YesiLdefterTabim.Ini");
+                if (YesiLdefterTabimIni != null)
+                {
+                    if (v.SP_TabimParamsKurumTipi == "MTSK")
+                    {
+                        YesiLdefterTabimIni.Write("SourceServerNameIP", v.active_DB.localServerName, "YesiLDefter");
+                        YesiLdefterTabimIni.Write("SourceDatabaseName", v.active_DB.localDBName, "YesiLDefter");
+                        YesiLdefterTabimIni.Write("SourceDbLoginName", v.active_DB.localUserName, "YesiLDefter");
+                        YesiLdefterTabimIni.Write("SourceDbPass", v.active_DB.localPsw, "YesiLDefter");
+                        YesiLdefterTabimIni.Write("SourceConnection", "true", "YesiLDefter");
+                    }
+                    if (v.SP_TabimParamsKurumTipi == "SRC")
+                    {
+                        YesiLdefterTabimIni.Write("SRCServerNameIP", v.active_DB.localServerName, "YesiLDefter");
+                        YesiLdefterTabimIni.Write("SRCDatabaseName", v.active_DB.localDBName, "YesiLDefter");
+                        YesiLdefterTabimIni.Write("SRCDbLoginName", v.active_DB.localUserName, "YesiLDefter");
+                        YesiLdefterTabimIni.Write("SRCDbPass", v.active_DB.localPsw, "YesiLDefter");
+                        YesiLdefterTabimIni.Write("SourceConnection", "true", "YesiLDefter");
+                    }
+                    if (v.SP_TabimParamsKurumTipi == "ISMAK")
+                    {
+                        MessageBox.Show("ISMAK writeTabSurucuIni bak");
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("DİKKAT : YesiLdefterTabim.Ini dosyasına kayıt işlemi gerçekleşmedi...");
+                onay = false;
+                //throw;
+            }
+
+            return onay;
+        }
+
         public bool ftpDownload(string path, string fileName)
         {
             bool onay = false;

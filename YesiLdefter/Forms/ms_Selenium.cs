@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Threading;
+//using System.Threading;
 
 using DevExpress.XtraEditors;
 
@@ -433,6 +433,22 @@ namespace YesiLdefter
             if (t.IsNotNull(ds_MsWebPages) == false) return;
             if (dN_MsWebPages.Position == -1) return;
 
+            if (v.webDriver_ != null)
+            {
+                try
+                {
+                    int adet = v.webDriver_.WindowHandles.Count;
+                    var title = v.webDriver_.Title;
+                }
+                catch (Exception)
+                {
+                    t.AlertMessage("Uyarı", "Web tarayıcısı kapatılmış.");
+                    v.webDriver_ = null;
+                    f.loginPageUrl = "";
+                    f.loginPageRun = false;
+                }
+            }
+
             /// burası 
 
             bool onay = false;
@@ -555,7 +571,14 @@ namespace YesiLdefter
                     t.WaitFormOpen(this, "Web sayfası değiştiriliyor ...");
                     f.loadWorking = false;
                     f.pageRefreshWorking = true;
-                    await startNodes(this.msWebNodes_, this.workPageNodes_, v.tWebRequestType.post, v.tWebEventsType.load);
+                    try
+                    {
+                        await startNodes(this.msWebNodes_, this.workPageNodes_, v.tWebRequestType.post, v.tWebEventsType.load);
+                    }
+                    catch (Exception)
+                    {
+                        //
+                    }
                     f.loadWorking = true;
                     v.IsWaitOpen = false;
                     t.WaitFormClose();
@@ -949,7 +972,8 @@ namespace YesiLdefter
                 if (wnv.TagName == "table")
                 {
                     /// webe transfer edilecek tablonun field bilgilerini databaseden al
-                    if (wnv.tTable == null)
+                    //if (wnv.tTable == null) // değişti
+                    if (wnv.dynamicTable == null)
                     {
                        msPagesService.findRightDbTables(wnv, msWebScrapingDbFields_);
                     }
@@ -1019,7 +1043,8 @@ namespace YesiLdefter
                 if (wnv.TagName == "table")
                 {
                     /// okunan tabloyu db ye yaz
-                    if (wnv.tTable != null)
+                    //if (wnv.tTable != null) // değişti
+                    if (wnv.dynamicTable != null || wnv.htmlTable != null)
                     {
                         ////https://mebbis.meb.gov.tr/SKT/skt02006.aspx
                         //if (webMain.Url.ToString() == "https://mebbis.meb.gov.tr/SKT/skt02006.aspx")
@@ -1049,7 +1074,11 @@ namespace YesiLdefter
 
                         webNodeValue myTriggerTableWnv = wnv.Copy();
 
-                        onay = await msPagesService.transferFromWebTableToDatabase(this, myTriggerTableWnv, msWebNodes_, msWebScrapingDbFields_, aktifPageNodeItemsList_);
+                        if (myTriggerTableWnv.dynamicTable != null)
+                            onay = await msPagesService.transferFromWebTableToDatabase(this, myTriggerTableWnv, msWebNodes_, msWebScrapingDbFields_, aktifPageNodeItemsList_);
+
+                        if (myTriggerTableWnv.htmlTable != null)
+                            onay = await msPagesService.transferFromWebTableToDatabaseFast(this, myTriggerTableWnv, msWebNodes_, msWebScrapingDbFields_, aktifPageNodeItemsList_);
 
                         t.TableRefresh(this, myTriggerTableWnv.TableIPCode);
                     }
@@ -1058,21 +1087,31 @@ namespace YesiLdefter
                 if (wnv.TagName == "select")
                 {
                     /// okunan tabloyu db ye yaz
-                    if (wnv.tTable != null)
+                    if (wnv.dynamicTable != null)
                     {
-                        if (wnv.tTable.tRows.Count > 0)
+                        if (wnv.dynamicTable.Count > 0)
                         {
                             /// select node ye ait (value, text) listesinide ilgili tabloya yaz
                             msPagesService.transferFromWebSelectToDatabase(this, wnv, msWebScrapingDbFields_, aktifPageNodeItemsList_, f);
-                            //MessageBox.Show("İşlem tamamlandı...");
                         }
                     }
+                    if (wnv.htmlTable != null)
+                    {
+                        if (wnv.htmlTable.Count > 0)
+                        {
+                            /// select node ye ait (value, text) listesinide ilgili tabloya yaz
+                            msPagesService.transferFromWebSelectToDatabaseFast(this, wnv, msWebScrapingDbFields_, aktifPageNodeItemsList_, f);
+                        }
+                    }
+
+                    t.TableRefresh(this, wnv.TableIPCode);
                 }
 
                 if (wnv.AttRole == "GIBeArsivFaturaIndir")
                 {
                     /// okunan tabloyu db ye yaz
-                    if (wnv.tTable != null)
+                    //if (wnv.tTable != null) // değişti
+                    if (wnv.dynamicTable != null)
                     {
                         webNodeValue myTriggerTableWnv = wnv.Copy();
 
@@ -1235,7 +1274,12 @@ namespace YesiLdefter
                     if (t.IsNotNull(f.talepOncesiUrl))
                         onay = await loadPageUrl(wb, f.talepOncesiUrl);
                     else
-                        onay = await loadPageUrl(wb, f.talepEdilenUrl);
+                    {
+                        if (f.loginPageUrl != f.talepEdilenUrl && f.loginPageRun )
+                            onay = await loadPageUrl(wb, f.talepEdilenUrl);
+                        if (f.loginPageUrl == f.talepEdilenUrl && f.loginPageRun == false)
+                            onay = await loadPageUrl(wb, f.talepEdilenUrl);
+                    }
                 }
                 else
                 {
@@ -1359,8 +1403,9 @@ namespace YesiLdefter
                     ///
                     if ((f.talepOncesiUrl != f.aktifUrl) &&
                         (f.talepEdilenUrl != f.aktifUrl))
-                        await runLoginPage(wb);// v.webDriver_);
-                        
+                        loadPageUrl(wb, f.talepOncesiUrl);
+                    //await runLoginPage(wb);// v.webDriver_);
+                    
 
                     /// talep öncesi geldiyse sıra esas talep edilen url ye sıra geldi
                     ///

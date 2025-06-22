@@ -544,9 +544,9 @@ namespace YesiLdefter.Selenium
             string _TableIPCode = "";
             string _pageCode = wnv.pageCode;
             string _dbPageCode = "";
+            string value = "";
             Int16 _krtOperandType = 0;
             
-            tTable _tTable = new tTable();
 
             // sadece eşleştirme yapılacak anahtar fieldi tespit ediyor
             //foreach (DataRow row in ds_ScrapingDbConnectionList.Tables[0].Rows)
@@ -567,8 +567,49 @@ namespace YesiLdefter.Selenium
                 }
             }
 
+            // Dinamik bir tablo oluştur (liste içinde liste)
+            List<List<string>> dynamicTable_ = new List<List<string>>();
+            foreach (MsWebScrapingDbFields item in msWebScrapingFields)
+            {
+                _dbPageCode = item.WebScrapingPageCode; 
+                _krtOperandType = item.KrtOperandType; 
+                _TableIPCode = item.TableIPCode;  
+
+                if (_pageCode == _dbPageCode)
+                {
+                    // wnv.TableIPCode inin içeriği _krtOperandType == "10" sağlanınca bulunuyor 
+                    // harici zamanlarda boş
+                    if ((_TableIPCode == wnv.TableIPCode) &&
+                        (_krtOperandType != 10))
+                    {
+                        // database tablodan okunacak fieldler tespit ediliyor
+                        // Yeni bir satır oluştur
+                        List<string> newRow = new List<string>();
+
+                        // html table üzerindeki column no
+                        value = item.WebScrapingSetColumnNo.ToString(); 
+                        newRow.Add(value);
+
+                        // database table üzerindeki okunacak fieldName
+                        value = item.FieldName;
+                        newRow.Add(value);
+
+                        // o fieldin value değerini html table ye taşıma için kullanılacak şimdilik sadece boş olan column
+                        value = "";
+                        newRow.Add(value);
+
+                        // Satırı tabloya ekle
+                        dynamicTable_.Add(newRow);
+                    }
+                }
+            }
+            wnv.dynamicTable = dynamicTable_;
+
+            #region
+            /*
             // anahtar field dışındaki atama yapılacak diğer fieldleri tespit ediyor
-            //foreach (DataRow row in ds_ScrapingDbConnectionList.Tables[0].Rows)
+            tTable _tTable = new tTable(); // değişti
+
             foreach (MsWebScrapingDbFields item in msWebScrapingFields)
             {
                 _dbPageCode = item.WebScrapingPageCode;  //row["WebScrapingPageCode"].ToString();
@@ -606,6 +647,8 @@ namespace YesiLdefter.Selenium
             }
 
             wnv.tTable = _tTable;
+            */
+            #endregion
 
         }
         public void transferFromWebToDatabase(Form tForm, webNodeValue wnv, List<MsWebScrapingDbFields> msWebScrapingDbFields, List<webNodeItemsList> aktifPageNodeItemsList, webForm f)
@@ -741,20 +784,213 @@ namespace YesiLdefter.Selenium
             }
 
         }
+        public async Task<bool> transferFromWebTableToDatabase_OLD(Form tForm, webNodeValue wnv, List<MsWebNode> msWebNodes, List<MsWebScrapingDbFields> msWebScrapingDbFields, List<webNodeItemsList> aktifPageNodeItemsList)
+        {
+            bool onay = true;
+            //Application.DoEvents();
+
+            //if (wnv.tTable == null) // değişti
+            //    return onay;
+
+            //t.WaitFormOpen(tForm, "Alınan bilgiler veritabanına yazılıyor ...");
+
+            //tTable tb = wnv.tTable;
+            //if (tb.tRows.Count == 0) return onay;
+            //int myTriggerTableRowNo = 0;
+            //tRow myTriggerWmvTableRows = tb.tRows[myTriggerTableRowNo];
+
+            /////
+            ///// Tablo üzerinde bulunduğu satırdaki bilgilerin detayını göstermek için buton var mı ?
+            /////
+
+            ///// itemButton varsa uygula
+            /////
+            //bool myTriggerItemButton = findTableItemButton(msWebNodes, myTriggerWmvTableRows, myTriggerTableRowNo);
+
+            ///// itemButton yoksa 
+            ///// itemButton false ise burada kayıt işlemi yapılıyor
+            ///// 
+            //if ((myTriggerItemButton == false) && (myTriggerTableRowNo == 0))
+            //{
+            //    // itemButton olmadığı için table nin bütün row larını bir defada buradan kayıt işlemini gerçekleştir
+            //    //
+            //    int value = 0;
+            //    foreach (tRow row in tb.tRows)
+            //    {
+            //        // geçici çözüm burayı sil
+            //        value = t.myInt32(row.tColumns[0].value.ToString());
+
+            //        // kayitBaslangisId : bazı table data listesi çok büyük olabiliyor (sertifika alanların listesi gibi)
+            //        // kayitBaslangisId ile hangi kayıttan başlayabileceğine karar verebiliriz
+            //        // çünkü bazen liste daha bitmemişken herhangi bir sebeple işlem durmuş olabiliyor
+            //        // önceki kayıt edilmiş olanlar tekrar kayıt işlemiyle uğraşmasın diye istenen yerden kaydın başlanması 
+            //        // sağlanabiliyor
+
+            //        // şimdilik sıfırı her halükarda çalışsın
+            //        int kayitBaslangisId = 0; // burası yeniden düzenlemeli
+            //        //--
+
+            //        if (value >= kayitBaslangisId)
+            //        {
+            //            saveRowAsync(tForm, wnv, row, msWebScrapingDbFields, aktifPageNodeItemsList);
+
+            //            if (editKayitKontrolu())
+            //            {
+            //                onay = false;
+            //                break;
+            //            }
+            //        }
+            //    }
+            //}
+            //v.IsWaitOpen = false;
+            //t.WaitFormClose();
+            return onay;
+        }
+
+        public async Task<bool> transferFromWebTableToDatabaseFast(Form tForm, webNodeValue wnv, List<MsWebNode> msWebNodes, List<MsWebScrapingDbFields> msWebScrapingDbFields, List<webNodeItemsList> aktifPageNodeItemsList)
+        {
+            bool onay = true;
+            Application.DoEvents();
+
+            if (wnv.htmlTable == null)
+                return onay;
+
+            t.WaitFormOpen(tForm, "Alınan bilgiler veritabanına yazılıyor ...");
+
+            IList<OpenQA.Selenium.IWebElement> htmlRows = wnv.htmlTable;
+
+            int rowCount = htmlRows.Count;
+            int value = 0;
+            int kayitBaslangisId = 0;
+
+            // sıfırıncı satır tablonun başlığı oluyor
+            //for (int i = 0; i < rowCount; i++)
+            for (int i = 1; i < rowCount; i++)
+            {
+                OpenQA.Selenium.IWebElement hRow = htmlRows[i];
+
+                IList<OpenQA.Selenium.IWebElement> htmlCols = hRow.FindElements(OpenQA.Selenium.By.TagName("td"));
+
+                /// satırı hazırla
+                List<string> row = preparingDynamicCol(htmlCols);
+
+                if (row.Count > 0)
+                {
+                    if (row[0] != "pages")
+                    {
+                        value = t.myInt32(row[0].ToString());
+
+                        // kayitBaslangisId : bazı table data listesi çok büyük olabiliyor (sertifika alanların listesi gibi)
+                        // kayitBaslangisId ile hangi kayıttan başlayabileceğine karar verebiliriz
+                        // çünkü bazen liste daha bitmemişken herhangi bir sebeple işlem durmuş olabiliyor
+                        // önceki kayıt edilmiş olanlar tekrar kayıt işlemiyle uğraşmasın diye istenen yerden kaydın başlanması 
+                        // sağlanabiliyor
+
+                        // şimdilik sıfırı her halükarda çalışsın
+                        kayitBaslangisId = 0; // burası yeniden düzenlemeli
+
+                        if (value >= kayitBaslangisId)
+                        {
+                            saveRowAsync(tForm, wnv, row, msWebScrapingDbFields, aktifPageNodeItemsList);
+
+                            if (editKayitKontrolu())
+                            {
+                                onay = false;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            v.IsWaitOpen = false;
+            t.WaitFormClose();
+            return onay;
+        }
+        public List<string> preparingDynamicCol(IList<OpenQA.Selenium.IWebElement> htmlCols)
+        {
+            string value = "";
+            string dtyHtml = "";
+
+            int pos = 0;
+            int colCount = htmlCols.Count;
+
+            List<string> newRow = new List<string>();
+
+            for (int i2 = 0; i2 < colCount; i2++)
+            {
+                value = "";
+
+                OpenQA.Selenium.IWebElement hCol = htmlCols[i2];
+
+                // <input name="dgListele$ctl04$ab" id="dgListele_ctl04_chkOnayBekliyor" type="radio" checked="checked" value="chkOnayBekliyor">
+                // <input name="dgListele$ctl04$ab" id="dgListele_ctl04_chkOnayDurum" type="radio" value="chkOnayDurum">
+                dtyHtml = hCol.GetAttribute("innerHTML");
+
+                if (dtyHtml.IndexOf("type=\"radio\"") > -1)
+                {
+                    //hCol.Click();  get sırasında neden click yapmışım ?
+                }
+
+                if (hCol.Text != null)
+                {
+                    value = hCol.Text.Trim();
+                }
+                else
+                {
+                    // <img onmouseover="this.src="/images/toolimages/open_kucuk_a.gif";this.style.cursor="hand";" 
+                    // onmouseout="this.src="/images/toolimages/open_kucuk.gif";this.style.cursor="default";" 
+                    // onclick="fnIslemSec("99969564|01/08/2017|NMZVAN93C15010059");" 
+                    // src="/images/toolimages/open_kucuk.gif">
+
+                    pos = -1;
+                    dtyHtml = hCol.GetAttribute("outerHTML");
+                    pos = dtyHtml.IndexOf("onclick");
+
+                    // <td align="center" style="width: 30px;">
+                    // <a href="javascript:__doPostBack('dgIstekOnaylanan','Select$0')">
+                    // <img title="Aç" onmouseover="this.src='/images/toolimages/open_kucuk_a.gif';this.style.cursor='pointer';" onmouseout="this.src='/images/toolimages/open_kucuk.gif';this.style.cursor='default';" src="/images/toolimages/open_kucuk.gif">
+                    // </a></td>                        
+
+                    if (pos == -1) // 
+                        pos = dtyHtml.IndexOf("__doPostBack(");
+
+                    if (pos > -1)
+                    {
+                        //   /images/toolimages/open_kucuk.gif
+
+                        //html = hCol.OuterHtml.Remove(0, hCol.OuterHtml.IndexOf(" src=") + 6);
+                        //value = html.Remove(html.IndexOf(">") - 1);
+                        value = dtyHtml.Remove(0, dtyHtml.IndexOf(" src=") + 6);
+                        value = value.Remove(dtyHtml.IndexOf(">") - 1);
+                    }
+                    else value = "";
+                }
+
+                // Add column
+                newRow.Add(value);
+            }
+
+            return newRow;
+        }
+
         public async Task<bool> transferFromWebTableToDatabase(Form tForm, webNodeValue wnv, List<MsWebNode> msWebNodes, List<MsWebScrapingDbFields> msWebScrapingDbFields, List<webNodeItemsList> aktifPageNodeItemsList)
         {
             bool onay = true;
             Application.DoEvents();
 
-            if (wnv.tTable == null)
+            if (wnv.dynamicTable == null) 
                 return onay;
 
             t.WaitFormOpen(tForm, "Alınan bilgiler veritabanına yazılıyor ...");
 
-            tTable tb = wnv.tTable;
-            if (tb.tRows.Count == 0) return onay;
+            //tTable tb = wnv.tTable;
+            //if (tb.tRows.Count == 0) return onay;
+            List<List<string>> dynamicTable_ = wnv.dynamicTable;
+            if (dynamicTable_.Count == 0) return onay;
+
             int myTriggerTableRowNo = 0;
-            tRow myTriggerWmvTableRows = tb.tRows[myTriggerTableRowNo];
+            List<string> myTriggerWmvTableRows = dynamicTable_[myTriggerTableRowNo];  //tb.tRows[myTriggerTableRowNo];
 
             ///
             /// Tablo üzerinde bulunduğu satırdaki bilgilerin detayını göstermek için buton var mı ?
@@ -772,10 +1008,11 @@ namespace YesiLdefter.Selenium
                 // itemButton olmadığı için table nin bütün row larını bir defada buradan kayıt işlemini gerçekleştir
                 //
                 int value = 0;
-                foreach (tRow row in tb.tRows)
+                //foreach (tRow row in tb.tRows)
+                foreach (List<string> row in dynamicTable_)
                 {
                     // geçici çözüm burayı sil
-                    value = t.myInt32(row.tColumns[0].value.ToString());
+                    value = t.myInt32(row[0].ToString());
 
                     // kayitBaslangisId : bazı table data listesi çok büyük olabiliyor (sertifika alanların listesi gibi)
                     // kayitBaslangisId ile hangi kayıttan başlayabileceğine karar verebiliriz
@@ -803,23 +1040,21 @@ namespace YesiLdefter.Selenium
             t.WaitFormClose();
             return onay;
         }
+
+
         public void transferFromWebSelectToDatabase(Form tForm, webNodeValue wnv, List<MsWebScrapingDbFields> msWebScrapingDbFields, List<webNodeItemsList> aktifPageNodeItemsList, webForm f)
         {
-            //v.SQL = v.SQL + v.ENTER + myNokta + " transferFromWebSelectToDatabase";
-
             /// Web den okunan tabloyu dB ye aktarma işlemleri
             ///
 
             /// tabloyu ele al
             /// 
-            if (wnv.tTable == null) return;
-            tTable tb = wnv.tTable;
-            /// data yoksa geri dön
-            if (tb.tRows.Count <= 1) return;
+            if (wnv.dynamicTable == null) return;
+            List<List<string>> dynamicTable_ = wnv.dynamicTable;
+            if (dynamicTable_.Count == 0) return;
 
             int rowNo = 0;
             bool onay = false;
-
 
             string kacAdet = KullaniciyaSor(wnv.InnerText, wnv.OuterText, wnv.writeValue);
             int userCount = t.myInt32(kacAdet);
@@ -831,7 +1066,8 @@ namespace YesiLdefter.Selenium
 
             /// sırayla row ları ele al
             ///
-            foreach (tRow rows in tb.tRows)
+            //foreach (tRow rows in tb.tRows)
+            foreach (List<string> rows in dynamicTable_)
             {
                 // her zaman true olsun
                 onay = true;
@@ -849,6 +1085,71 @@ namespace YesiLdefter.Selenium
                 if (onay)
                 {
                     saveRowAsync(tForm, wnv, rows, msWebScrapingDbFields, aktifPageNodeItemsList);
+
+                    if (editKayitKontrolu()) break;
+                }
+                rowNo++;
+
+                if (rowNo >= userCount)
+                {
+                    MessageBox.Show(userCount.ToString() + " adet kayıt alındı...");
+                    break;
+                }
+            }
+        }
+
+        public void transferFromWebSelectToDatabaseFast(Form tForm, webNodeValue wnv, List<MsWebScrapingDbFields> msWebScrapingDbFields, List<webNodeItemsList> aktifPageNodeItemsList, webForm f)
+        {
+            /// Web den okunan tabloyu dB ye aktarma işlemleri
+            ///
+
+            /// tabloyu ele al
+            /// 
+            if (wnv.htmlTable == null) return;
+            IList<OpenQA.Selenium.IWebElement> htmlRows = wnv.htmlTable;
+            if (htmlRows.Count == 0) return;
+
+            int rowNo = 0;
+            bool onay = false;
+
+            string kacAdet = KullaniciyaSor(wnv.InnerText, wnv.OuterText, wnv.writeValue);
+            int userCount = t.myInt32(kacAdet);
+
+            /// tableIPCode tespit edildi ... save işlemi başlayacak olan DataSet belli oldu
+            ///
+            f.tableIPCodeIsSave = wnv.TableIPCode;
+
+            int rowCount = htmlRows.Count;
+            string value = "";
+            string text = "";
+
+            // sıfırıncı satır tablonun başlığı oluyor
+            for (int i = 0; i < rowCount; i++)
+            {
+                OpenQA.Selenium.IWebElement item = htmlRows[i];
+
+                List<string> newRow = new List<string>();
+                value = item.GetAttribute("value");
+                text = item.Text;
+                newRow.Add(value);
+                newRow.Add(text);
+                
+                // her zaman true olsun
+                onay = true;
+
+                /// 0 sıfırı atlamasının nedeni caption row
+                if (rowNo == 0)
+                {
+                    if (wnv.TagName == "table")
+                        onay = false;
+
+                    if (wnv.TagName == "select")
+                        onay = true;
+                }
+
+                if (onay)
+                {
+                    saveRowAsync(tForm, wnv, newRow, msWebScrapingDbFields, aktifPageNodeItemsList);
 
                     if (editKayitKontrolu()) break;
                 }
@@ -893,34 +1194,36 @@ namespace YesiLdefter.Selenium
             Int16 _dbColNo = 0;
             Control cntrl = null;
 
-            //if (wnv.tTable != null)
             _colNo = wnv.tTableColNo;
             
             DataRow findDbRow = null;
 
-            //foreach (DataRow row in ds_ScrapingDbConnectionList.Tables[0].Rows)
             foreach (MsWebScrapingDbFields item in msWebScrapingDbFields)
             {
-                _dbPageCode = item.WebScrapingPageCode;  //row["WebScrapingPageCode"].ToString();
+                _dbPageCode = item.WebScrapingPageCode;  
 
                 if (_pageCode == _dbPageCode)
                 {
                     if (select == v.tSelect.Get)
                     {
-                        _dbNodeId = item.WebScrapingGetNodeId;   //t.myInt32(row["WebScrapingGetNodeId"].ToString());
-                        _dbColNo = item.WebScrapingGetColumnNo;  //t.myInt16(row["WebScrapingGetColumnNo"].ToString());
+                        _dbNodeId = item.WebScrapingGetNodeId;   
+                        _dbColNo = item.WebScrapingGetColumnNo;  
 
                         /// table değil ve yine col no var ise okunan value (örnek : span) üzerinde <BR> ayrımı ile ayrılacak data var demektir
                         /// bu nedenle aşağıda  (_dbColNo == _colNo) koşulunu geçmesi için aşağıda atama yapılıyor
-                        if (wnv.tTable == null && _dbColNo > 0)
+                        if (wnv.dynamicTable == null && wnv.htmlTable == null && _dbColNo > 0)
                             _colNo = _dbColNo;
-                        if (wnv.tTable == null && _dbColNo == 0)
+                        if (wnv.dynamicTable == null && wnv.htmlTable == null && _dbColNo == 0)
                             _colNo = 0;
+                        //if (wnv.tTable == null && _dbColNo > 0) değişti
+                        //    _colNo = _dbColNo;
+                        //if (wnv.tTable == null && _dbColNo == 0) değişti
+                        //    _colNo = 0;
                     }
                     if (select == v.tSelect.Set)
                     {
-                        _dbNodeId = item.WebScrapingSetNodeId; //t.myInt32(row["WebScrapingSetNodeId"].ToString());
-                        _dbColNo = item.WebScrapingSetColumnNo;//t.myInt16(row["WebScrapingSetColumnNo"].ToString());
+                        _dbNodeId = item.WebScrapingSetNodeId; 
+                        _dbColNo = item.WebScrapingSetColumnNo;
                     }
 
                     if ((_dbPageCode == _pageCode) &&
@@ -928,7 +1231,7 @@ namespace YesiLdefter.Selenium
                         (_dbColNo == _colNo))
                     {
                         // yazılacak veya okunacak Table
-                        _TableIPCode = item.TableIPCode;  //row["TableIPCode"].ToString();
+                        _TableIPCode = item.TableIPCode;  
 
                         // böyle TableIPCode bulduk fakat form üzerinde böyle bir control var mı
                         // çünkü WebScrapingPageCode tanımı birden fazla InputPanel de kullanılabiliyor
@@ -939,9 +1242,9 @@ namespace YesiLdefter.Selenium
                         {
                             // yazılacak veya okunacak fieldName
                             wnv.TableIPCode = _TableIPCode; // iş bitimde DataSet Refresh için gerekli
-                            wnv.dbFieldName = item.FieldName;       //row["FIELD_NAME"].ToString();
-                            wnv.dbLookUpField = item.FLookUpField;  //Convert.ToBoolean(row["FLOOKUP_FIELD"].ToString());
-                            wnv.dbFieldType = item.FieldType;       //t.myInt16(row["FIELD_TYPE"].ToString());
+                            wnv.dbFieldName = item.FieldName;       
+                            wnv.dbLookUpField = item.FLookUpField;  
+                            wnv.dbFieldType = item.FieldType;       
                             wnv.dbColNo = _dbColNo;
 
                             DataSet ds = null;
@@ -1019,26 +1322,23 @@ namespace YesiLdefter.Selenium
             Int16 colNo = 0;
             Int16 dbColNo = 0;
 
-            if (wnv.tTable != null)
+            //if (wnv.tTable != null) // değişti
+            if (wnv.dynamicTable != null)
                 colNo = wnv.tTableColNo;
 
             DataRow findDbRow = null;
 
-            //foreach (DataRow row in ds_ScrapingDbConnectionList.Tables[0].Rows)
             foreach (MsWebScrapingDbFields item in msWebScrapingDbFields)
             {
                 if (select == v.tSelect.Get)
                 {
-                    //dbNode = Convert.ToInt32(row["WebScrapingGetNodeId"].ToString());
-                    dbColNo = item.WebScrapingGetColumnNo; //Convert.ToInt16(row["WebScrapingGetColumnNo"].ToString());
+                    dbColNo = item.WebScrapingGetColumnNo; 
                 }
                 if (select == v.tSelect.Set)
                 {
-                    //dbNode = Convert.ToInt32(row["WebScrapingSetNodeId"].ToString());
-                    dbColNo = item.WebScrapingSetColumnNo; //Convert.ToInt16(row["WebScrapingSetColumnNo"].ToString());
+                    dbColNo = item.WebScrapingSetColumnNo; 
                 }
 
-                //if ((row["WebScrapingPageCode"].ToString() == "SELECTNODEITEMS") &&
                 if ((item.WebScrapingPageCode == "SELECTNODEITEMS") &&
                     (dbColNo == colNo))
                 {
@@ -1071,23 +1371,6 @@ namespace YesiLdefter.Selenium
 
                         return findDbRow;
                     }
-
-                    /*
-                    if ((ds_DbaseTable == null) ||
-                        (ds_DbaseTable.DataSetName != TableIPCode))
-                    {
-                        ds_DbaseTable = null;
-                        dN_DbaseTable = null;
-                        t.Find_DataSet(this, ref ds_DbaseTable, ref dN_DbaseTable, TableIPCode);
-                    }
-
-                    if (t.IsNotNull(ds_DbaseTable))
-                    {
-                        findDbRow = ds_DbaseTable.Tables[0].Rows[dN_DbaseTable.Position];
-
-                        return findDbRow;
-                    }
-                    */
                 }
             }
 
@@ -1239,22 +1522,19 @@ namespace YesiLdefter.Selenium
             }
             return value;
         }
-        public bool findTableItemButton(List<MsWebNode> msWebNodes, tRow dataRow, int dataRowNo)
+        public bool findTableItemButton(List<MsWebNode> msWebNodes, List<string> dataRow, int dataRowNo)
         {
             // Tablo üzerinde bulunduğu satırdaki bilgilerin detayını göstermek için buton var mı ?
             // 
-            //v.SQL = v.SQL + v.ENTER + myNokta + " find tableItemButton RowNo : " + dataRowNo.ToString();
-
             bool onay = false;
             bool isActive = false;
             string value = "";
             string AttRole = "";
 
-            //foreach (DataRow nodeRow in ds_MsWebNodes.Tables[0].Rows)
             foreach (MsWebNode item in msWebNodes)
             {
-                isActive = item.IsActive; //(bool)nodeRow["IsActive"];
-                AttRole = item.AttRole; //nodeRow["AttRole"].ToString();
+                isActive = item.IsActive; 
+                AttRole = item.AttRole; 
 
                 if (AttRole == "ItemButton")
                 {
@@ -1263,12 +1543,12 @@ namespace YesiLdefter.Selenium
                     // 
 
                     // ds_ScrapingNodes üzerindeki value 
-                    value = item.AttSrc; //nodeRow["AttSrc"].ToString();
+                    value = item.AttSrc; 
 
-                    int i2 = dataRow.tColumns.Count;
+                    int i2 = dataRow.Count;
                     for (int i = 0; i < i2; i++)
                     {
-                        if (value == dataRow.tColumns[i].value)
+                        if (value == dataRow[i].ToString())
                         {
                             // burada ds_ScrapingNodes içindeki itemButton ait olan detay bilgisi gerekiyor
                             //
@@ -1290,7 +1570,7 @@ namespace YesiLdefter.Selenium
             return onay;
         }
 
-        private async Task<bool> saveRowAsync(Form tForm, webNodeValue wnv, tRow tableRows, List<MsWebScrapingDbFields> msWebScrapingDbFields, List<webNodeItemsList> aktifPageNodeItemsList)
+        private async Task<bool> saveRowAsync(Form tForm, webNodeValue wnv, List<string> tableRows, List<MsWebScrapingDbFields> msWebScrapingDbFields, List<webNodeItemsList> aktifPageNodeItemsList)
         {
             //v.SQL = v.SQL + v.ENTER + myNokta + " saveRow";
 
@@ -1309,7 +1589,8 @@ namespace YesiLdefter.Selenium
 
             #region wnv.table verilerini db ye aktaralım
 
-            foreach (tColumn column in tableRows.tColumns)
+            //foreach (tColumn column in tableRows.tColumns)
+            foreach (string column in tableRows)
             {
                 /// web üzerinden okunacak column noyu bildir
                 wnv.tTableColNo = colNo;
@@ -1319,12 +1600,12 @@ namespace YesiLdefter.Selenium
 
                 /// column üzerindeki bilgiler hangi db ye yazılacak tespit edelim
                 if (wnv.TagName == "table")
-                    dbRow = findRightRow(tForm, wnv, v.tSelect.Get, msWebScrapingDbFields);
+                    dbRow = findRightRow(tForm, wnv, v.tSelect.Get, msWebScrapingDbFields);//++
 
                 // burada select içindeki value ve text istenen bir tabloya yazılıcak
                 if ((wnv.TagName == "select") &&
                     (wnv.AttRole == "ItemTable")) // (wnv.EventsType == v.tWebEventsType.itemTable))
-                    dbRow = findRightRow(tForm, wnv, v.tSelect.Get, msWebScrapingDbFields);
+                    dbRow = findRightRow(tForm, wnv, v.tSelect.Get, msWebScrapingDbFields);//++
 
                 // burada select içindeki value ve text MsWebNodeItems tablosuna yazılacak
                 if ((wnv.TagName == "select") &&
@@ -1332,7 +1613,7 @@ namespace YesiLdefter.Selenium
                     dbRow = findRightRowForSelect(tForm, wnv, v.tSelect.Get, msWebScrapingDbFields);
 
                 if (wnv.AttRole == "GIBeArsivFaturaIndir")
-                    dbRow = findRightRow(tForm, wnv, v.tSelect.Get, msWebScrapingDbFields);
+                    dbRow = findRightRow(tForm, wnv, v.tSelect.Get, msWebScrapingDbFields);//++
 
                 /// yeni data satırı oluştur
                 /// tabloy aktarmaya başladığında ilk yeni row oluştursun
@@ -1347,7 +1628,7 @@ namespace YesiLdefter.Selenium
                 if (dbRow != null && wnv.AttRole == "GIBeArsivFaturaIndir")
                 {
                     /// value ler
-                    itemText = tableRows.tColumns[colNo + 1].value;
+                    itemText = tableRows[colNo + 1].ToString();
                     if (wnv.dbFieldName.IndexOf("Resim") == -1)
                     {
                         if (itemText != "")
@@ -1371,7 +1652,7 @@ namespace YesiLdefter.Selenium
                 if (dbRow != null && wnv.AttRole != "GIBeArsivFaturaIndir")
                 {
                     // select node için itemValue tespiti
-                    itemText = tableRows.tColumns[colNo].value;
+                    itemText = tableRows[colNo].ToString();
 
                     if (t.IsNotNull(wnv.dbFieldName))
                     {

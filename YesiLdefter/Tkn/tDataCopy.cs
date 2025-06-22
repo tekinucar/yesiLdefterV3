@@ -173,7 +173,8 @@ namespace Tkn_DataCopy
 
             }
 
-            if (t.IsNotNull(ds_Target) == false)
+            //if (t.IsNotNull(ds_Target) == false)
+            if (ds_Target == null)
             {
                 MessageBox.Show("DİKKAT : " + Target_TableIPCode + "  hedef data bulunamadı...");
                 return false;

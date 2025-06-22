@@ -9,6 +9,9 @@ begin transaction
    TalepId                 Int           null,
    AdayId                  Int           null,
    AdayTamAdiSoyadi        nVarchar(100) null,
+   MevcutSertifikaTipiId   SmallInt      null,
+   IstenenSertifikaTipiId  SmallInt      null,
+   IsMevcut2016Oncesi      Bit           null,
 
    -- 10
    Tarih                   Date          null,
@@ -22,6 +25,8 @@ begin transaction
    SimulatorDersSayisi     SmallInt      null,
    EgitimAlaniDersSayisi   SmallInt      null,
    AkanTrafikDersSayisi    SmallInt      null,    
+   TelafiDersSayisi        SmallInt      null,    
+   BasarisizDersSayisi     SmallInt      null,    
 
    -- 30
    PersonelId              Varchar(20)   null,
@@ -55,27 +60,109 @@ AS BEGIN
     OPEN myCursor
     FETCH NEXT FROM myCursor INTO @curId
 
-    declare @FirmId int
-    declare @TalepId int
-    declare @EgitimTipiId smallint
-	declare @IsPlanTamamlandi bit
+    declare @eMevcutSertifikaTipiId smallInt
+    declare @eIstenenSertifikaTipiId smallInt
+    declare @eIsMevcut2016Oncesi bit
+
+    declare @yFirmId int
+    declare @yTalepId int
+    declare @yEgitimTipiId smallint
+	declare @yIsPlanTamamlandi bit
+    declare @yMevcutSertifikaTipiId smallInt
+    declare @yIstenenSertifikaTipiId smallInt
+    declare @yIsMevcut2016Oncesi bit
+
+    declare @SimulatorSaati smallInt = 0
+    declare @EgitimAlaniSaati smallInt = 0
+    declare @AkanTrafikSaati smallInt = 0
+    declare @UygulamaToplamSaat smallInt = 0
+    declare @UygulamaSaati2016Oncesi smallInt = 0
+    declare @Arti4HakUygulamaSaati smallInt = 0
+    declare @BasarisizEgitimSaati smallInt = 0
+    declare @TelafiEgitimSaati smallInt = 0
+
+	declare @TarihId int = 0
+	Select top 1 @TarihId = Id from dbo.GecerlilikTarihi as trh
+    Where trh.KonuTipiId = 21102 -- Uygulama saatleri 
+	and trh.Tarih <= GETDATE()
+	order by trh.Tarih desc
 
     WHILE @@FETCH_STATUS = 0
     BEGIN
         Select 
-            @FirmId = FirmId
-           ,@TalepId = TalepId
-           ,@EgitimTipiId = EgitimTipiId
-           ,@IsPlanTamamlandi = IsPlanTamamlandi
+            @eMevcutSertifikaTipiId = MevcutSertifikaTipiId
+           ,@eIstenenSertifikaTipiId = IstenenSertifikaTipiId
+           ,@eIsMevcut2016Oncesi = IsMevcut2016Oncesi
+        From deleted
+        Where Id = @curId      
+
+        Select 
+            @yFirmId = FirmId
+           ,@yTalepId = TalepId
+           ,@yEgitimTipiId = EgitimTipiId
+           ,@yIsPlanTamamlandi = IsPlanTamamlandi
+           ,@yMevcutSertifikaTipiId = MevcutSertifikaTipiId
+           ,@yIstenenSertifikaTipiId = IstenenSertifikaTipiId
+           ,@yIsMevcut2016Oncesi = IsMevcut2016Oncesi
         From inserted
         Where Id = @curId      
 
-        if (@IsPlanTamamlandi = 1)
+        if (@yMevcutSertifikaTipiId <> @eMevcutSertifikaTipiId
+        or  @yIstenenSertifikaTipiId <> @eIstenenSertifikaTipiId   
+		or  @yIsMevcut2016Oncesi <> @eIsMevcut2016Oncesi )
+        begin
+            Select 
+                @SimulatorSaati = SimulatorSaati
+               ,@EgitimAlaniSaati = EgitimAlaniSaati
+               ,@AkanTrafikSaati = AkanTrafikSaati
+               ,@UygulamaToplamSaat = UygulamaToplamSaat
+               ,@UygulamaSaati2016Oncesi = UygulamaSaati2016Oncesi
+               ,@Arti4HakUygulamaSaati = Arti4HakUygulamaSaati
+               ,@BasarisizEgitimSaati = BasarisizEgitimSaati
+               ,@TelafiEgitimSaati = TelafiEgitimSaati
+            From dbo.MtskSaatUygulama as saat 
+            Where saat.IstenenSertifikaTipiId = @yIstenenSertifikaTipiId
+            and   saat.MevcutSertifikaTipiId = 0 
+            and   saat.FirmId = @yFirmId
+            and   saat.GecerlilikTarihiId = @TarihId
+
+            Select 
+                @SimulatorSaati = SimulatorSaati
+               ,@EgitimAlaniSaati = EgitimAlaniSaati
+               ,@AkanTrafikSaati = AkanTrafikSaati
+               ,@UygulamaToplamSaat = UygulamaToplamSaat
+               ,@UygulamaSaati2016Oncesi = UygulamaSaati2016Oncesi
+               ,@Arti4HakUygulamaSaati = Arti4HakUygulamaSaati
+               ,@BasarisizEgitimSaati = BasarisizEgitimSaati
+               ,@TelafiEgitimSaati = TelafiEgitimSaati
+            From dbo.MtskSaatUygulama as saat 
+            Where saat.IstenenSertifikaTipiId = @yIstenenSertifikaTipiId
+            and   saat.MevcutSertifikaTipiId = @yMevcutSertifikaTipiId 
+            and   saat.FirmId = @yFirmId
+            and   saat.GecerlilikTarihiId = @TarihId
+
+            if (@BasarisizEgitimSaati = 0) set @BasarisizEgitimSaati = 2
+            if (@TelafiEgitimSaati = 0) set @TelafiEgitimSaati = 2
+
+			if (@yIsMevcut2016Oncesi = 1)
+			   set @AkanTrafikSaati = @UygulamaSaati2016Oncesi
+
+            Update dbo.MtskSablonUygulamaM set 
+                 SimulatorDersSayisi = @SimulatorSaati
+               , EgitimAlaniDersSayisi = @EgitimAlaniSaati
+               , AkanTrafikDersSayisi = @AkanTrafikSaati
+               , TelafiDersSayisi = @TelafiEgitimSaati
+               , BasarisizDersSayisi = @BasarisizEgitimSaati
+            Where Id = @curId
+        end--
+
+
+        if (@yIsPlanTamamlandi = 1)
         begin 
             -- 0 ile 6 saat arası henüz yerleşmemiş saat var mı kontrol et             
             if ( Select count(Id) as Adet 
                  From dbo.MtskUygulamaliDers
-                 Where TalepId = @TalepId
+                 Where TalepId = @yTalepId
                  and   DersSaatiTipiId < 0
             ) = 0 
             begin
@@ -109,7 +196,7 @@ AS BEGIN
                     Where TalepId = @TalepId
                 end
 				*/
-                Execute dbo.prc_MtskAdayTakip @FirmId
+                Execute dbo.prc_MtskAdayTakip @yFirmId
 
             end else
             begin
@@ -125,9 +212,9 @@ AS BEGIN
     END
 	
     CLOSE myCursor
-    DEALLOCATE myCursor  
-END -- create trigger
+    DEALLOCATE myCursor   
 
+END -- create trigger
 
 /*CreateTriggerEnd*/
 
@@ -230,3 +317,13 @@ INSERT INTO Lkp.MtskSablonUygulamaMSaatSayisiTipi (Id, SaatSayisiTipi)
 
 
 /*CreateLkpTableEnd*/
+
+
+
+/*
+alter table MtskSablonUygulamaM add    MevcutSertifikaTipiId   SmallInt      null
+alter table MtskSablonUygulamaM add    IstenenSertifikaTipiId  SmallInt      null
+alter table MtskSablonUygulamaM add    IsMevcut2016Oncesi      Bit           null
+alter table MtskSablonUygulamaM add    TelafiDersSayisi        SmallInt      null    
+alter table MtskSablonUygulamaM add    BasarisizDersSayisi     SmallInt      null   
+*/

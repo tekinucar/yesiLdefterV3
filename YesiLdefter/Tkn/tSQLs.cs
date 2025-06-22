@@ -1883,8 +1883,7 @@ INSERT INTO [dbo].[SYS_UPDATES]
   + '      ,[MevcutSertifikaTipiId],[IstenenSertifikaTipiId] '
   + '      ,[SertifikaUcreti],[SertifikaUcreti2016Oncesi],[Arti24HakUcreti],[NakilArti24HakUcreti] '
   + '      ,[BirSaatUygDersUcreti],[BirSaatUygDersUcreti2016Oncesi],[BirSaatArti24DersUcreti],[BirSaatNakilArti24DersUcreti] '
-  + '      ,[BirSaatBasarisizDersUcreti],[BirSaatTelafiDersUcreti] '
-  + '      ,[BirSaatOzelDersUcretiAday],[BirSaatOzelDersUcretiHarici]) Values '
+  + ' ) Values '
   + ' ( @FIRM_ID, '
   + Convert(varchar(2), [IsActive]) + ', '
   + Convert(varchar(4), isnull([IlKodu],0)) + ', '
@@ -1899,11 +1898,8 @@ INSERT INTO [dbo].[SYS_UPDATES]
   + Convert(varchar(22), isnull([BirSaatUygDersUcreti],0)) + ', '
   + Convert(varchar(22), isnull([BirSaatUygDersUcreti2016Oncesi],0)) + ', '
   + Convert(varchar(22), isnull([BirSaatArti24DersUcreti],0)) + ', '
-  + Convert(varchar(22), isnull([BirSaatNakilArti24DersUcreti],0)) + ', '
-  + Convert(varchar(22), isnull([BirSaatBasarisizDersUcreti],0)) + ', '
-  + Convert(varchar(22), isnull([BirSaatTelafiDersUcreti],0)) + ', '
-  + Convert(varchar(22), isnull([BirSaatOzelDersUcretiAday],0)) + ', '
-  + Convert(varchar(22), isnull([BirSaatOzelDersUcretiHarici],0)) + ') end '
+  + Convert(varchar(22), isnull([BirSaatNakilArti24DersUcreti],0)) + ' '
+  + ') end '
   + ' else begin '
   + ' UPDATE [dbo].[MtskUcretUygulama] '
   + ' SET [IsActive] = ' + Convert(varchar(2), [IsActive])
@@ -1915,10 +1911,6 @@ INSERT INTO [dbo].[SYS_UPDATES]
   + ' ,[BirSaatUygDersUcreti2016Oncesi] = ' + Convert(varchar(22), isnull([BirSaatUygDersUcreti2016Oncesi],0)) 
   + ' ,[BirSaatArti24DersUcreti] = ' + Convert(varchar(22), isnull([BirSaatArti24DersUcreti],0)) 
   + ' ,[BirSaatNakilArti24DersUcreti] = ' + Convert(varchar(22), isnull([BirSaatNakilArti24DersUcreti],0)) 
-  + ' ,[BirSaatBasarisizDersUcreti] = ' + Convert(varchar(22), isnull([BirSaatBasarisizDersUcreti],0)) 
-  + ' ,[BirSaatTelafiDersUcreti] = ' + Convert(varchar(22), isnull([BirSaatTelafiDersUcreti],0)) 
-  + ' ,[BirSaatOzelDersUcretiAday] = ' + Convert(varchar(22), isnull([BirSaatOzelDersUcretiAday],0)) 
-  + ' ,[BirSaatOzelDersUcretiHarici] = ' + Convert(varchar(22), isnull([BirSaatOzelDersUcretiHarici],0)) 
   + ' Where FirmId = @FIRM_ID '  
   + ' and GecerlilikTarihiId = @TarihId ' 
   + ' and isnull([MevcutSertifikaTipiId],0) = ' + Convert(varchar(6),  isnull([MevcutSertifikaTipiId],0))
@@ -1929,6 +1921,24 @@ INSERT INTO [dbo].[SYS_UPDATES]
   and   IlKodu = :FIRM_ILKODU 
 
 ";
+
+
+/*
+  + '      --,[BirSaatBasarisizDersUcreti],[BirSaatTelafiDersUcreti] '
+  + '      --,[BirSaatOzelDersUcretiAday],[BirSaatOzelDersUcretiHarici] '
+
+  -- +', ' + Convert(varchar(22), isnull([BirSaatBasarisizDersUcreti], 0)) +', '
+  -- + Convert(varchar(22), isnull([BirSaatTelafiDersUcreti], 0)) +', '
+  -- + Convert(varchar(22), isnull([BirSaatOzelDersUcretiAday], 0)) +', '
+  -- + Convert(varchar(22), isnull([BirSaatOzelDersUcretiHarici], 0)) 
+
+  --+' ,[BirSaatBasarisizDersUcreti] = ' + Convert(varchar(22), isnull([BirSaatBasarisizDersUcreti], 0)) 
+  --+' ,[BirSaatTelafiDersUcreti] = ' + Convert(varchar(22), isnull([BirSaatTelafiDersUcreti], 0)) 
+  --+' ,[BirSaatOzelDersUcretiAday] = ' + Convert(varchar(22), isnull([BirSaatOzelDersUcretiAday], 0)) 
+  --+' ,[BirSaatOzelDersUcretiHarici] = ' + Convert(varchar(22), isnull([BirSaatOzelDersUcretiHarici], 0)) 
+*/
+
+
             return sql;
         }
 
@@ -2696,7 +2706,7 @@ INSERT INTO [dbo].[SYS_UPDATES]
             #endregion Know-how
 
             #region Read dsData
-
+            
             t.Data_Read_Execute(tForm, dsData, ref NewSQL, TableIPCode, null);
 
             if ((TargetValue == "NewRecord") ||
@@ -3334,6 +3344,8 @@ INSERT INTO [dbo].[SYS_UPDATES]
             string mst_FName = string.Empty;
             string mst_CheckFName = string.Empty;
             string mst_CheckValue = string.Empty;
+            string newAnd1_ = string.Empty;
+            string newAnd2_ = string.Empty;
 
             // TABLE_TYPE  
             // 1, 'Table'            // 2, 'View'            // 3, 'Stored Procedure'
@@ -3403,6 +3415,10 @@ INSERT INTO [dbo].[SYS_UPDATES]
             string setEnds = "";
             string paramEnds = "";
 
+            /// 
+            /// dsFields.Tables[0].DefaultView.ToTable();  iki defa okunmuş bu sorunu bulmak gerekiyor
+            /// 
+
             if (Table_Type == 3) // Stored Procedure ise
             {
                 dsFields.Tables[0].DefaultView.Sort = "KRT_LINE_NO";
@@ -3412,9 +3428,12 @@ INSERT INTO [dbo].[SYS_UPDATES]
                     krtLineNo = t.Set(Row["KRT_LINE_NO"].ToString(), "0", 0);
                     if (krtLineNo > 0)
                     {
-                        declareEnds = declareEnds + "/*declareEnd." + krtLineNo.ToString() + "*/" + v.ENTER;
-                        setEnds = setEnds + "/*setEnd." + krtLineNo.ToString() + "*/" + v.ENTER;
-                        paramEnds = paramEnds + "/*paramEnd." + krtLineNo.ToString() + "*/" + v.ENTER;
+                        if (declareEnds.IndexOf(krtLineNo.ToString() + "*/") == -1)
+                        {
+                            declareEnds = declareEnds + "/*declareEnd." + krtLineNo.ToString() + "*/" + v.ENTER;
+                            setEnds = setEnds + "/*setEnd." + krtLineNo.ToString() + "*/" + v.ENTER;
+                            paramEnds = paramEnds + "/*paramEnd." + krtLineNo.ToString() + "*/" + v.ENTER;
+                        }
                     }
                 }
 
@@ -3770,21 +3789,69 @@ INSERT INTO [dbo].[SYS_UPDATES]
                         // Double
                         if (toperand_type == 3)
                         {
+                            newAnd1_ = t.Set_FieldName_Value_(field_type, tkrt_table_alias + "." + fname, default_value, "and", ">=");
+                            newAnd2_ = t.Set_FieldName_Value_(field_type, tkrt_table_alias + "." + fname, default_value, "and", "<=");
+
+
+                            if (t.IsNotNull(newAnd1_) && newAnd1_.IndexOf("--") == -1)
+                            {
+                                Where_Lines =
+                                        Where_Lines +
+                                        " and " + newAnd1_ +
+                                        "   -- :D.SD." + RefId.ToString() + ": -->=" + v.ENTER;
+                            }
+                            else
+                            {
+                                Where_Lines =
+                                        Where_Lines +
+                                        " --and " + newAnd1_.Substring(2) +
+                                        ", 103)  >= ???   -- :D.SD." + RefId.ToString() + ": -->=" + v.ENTER;
+                            }
+
+                            if (t.IsNotNull(newAnd2_) && newAnd2_.IndexOf("--") == -1)
+                            {
+                                Where_Lines =
+                                        Where_Lines +
+                                        " and " + newAnd2_ +
+                                        "   -- :D.SD." + RefId.ToString() + ": --<=" + v.ENTER;
+                            }
+                            else
+                            {
+                                Where_Lines =
+                                        Where_Lines +
+                                        " --and " + newAnd2_.Substring(2) +
+                                        ", 103)  <= ???   -- :D.SD." + RefId.ToString() + ": --<=" + v.ENTER;
+                            }
+
+                            /* OLD
                             Where_Lines =
                                     Where_Lines +
                                     " and " + t.Set_FieldName_Value_(field_type, tkrt_table_alias + "." + fname, default_value, "and", ">=") +
                                     "   -- :D.SD." + RefId.ToString() + ": -->=" + v.ENTER +
                                     " and " + t.Set_FieldName_Value_(field_type, tkrt_table_alias + "." + fname, default_value, "and", "<=") +
                                     "   -- :D.SD." + RefId.ToString() + ": --<=" + v.ENTER;
+                            */
 
                         }
                         // Single
                         if (toperand_type == 4)
                         {
-                            Where_Lines =
-                                    Where_Lines +
-                                    " and " + t.Set_FieldName_Value_(field_type, tkrt_table_alias + "." + fname, default_value, "and", "=") +
-                                    "   -- :D.SD." + RefId.ToString() + ": --" + v.ENTER;
+                            newAnd1_ = t.Set_FieldName_Value_(field_type, tkrt_table_alias + "." + fname, default_value, "and", "=");
+
+                            if (t.IsNotNull(newAnd1_) && newAnd1_.IndexOf("--") == -1)
+                            {
+                                Where_Lines =
+                                        Where_Lines +
+                                        " and " + newAnd1_ +
+                                        "   -- :D.SD." + RefId.ToString() + ": --" + v.ENTER;
+                            }
+                            else
+                            {
+                                Where_Lines =
+                                        Where_Lines +
+                                        " --and " + newAnd1_.Substring(2) + 
+                                        " = ???   -- :D.SD." + RefId.ToString() + ": --" + v.ENTER;
+                            }
                         }
                         #endregion SpeedKriter
 
@@ -3974,17 +4041,26 @@ INSERT INTO [dbo].[SYS_UPDATES]
 
                                         if (krtLineNo == 0)
                                         {
+                                            /// find -1 geliyorsa IP Fields de KrtLineNo field i kontrol et, sıralmada sorun var
+                                            /// 
+
                                             find = Where_Lines.IndexOf("/*declareEnd*/");
-                                            Where_Lines = Where_Lines.Insert(find,
-                                                "declare @" + fname + " " + t.Get_FieldTypeName(Convert.ToInt16(field_type), "800") + v.ENTER);
 
-                                            find = Where_Lines.IndexOf("/*setEnd*/");
-                                            Where_Lines = Where_Lines.Insert(find,
-                                                "/*prm*/ set " + t.Set_FieldName_Value_(field_type, "@" + fname, MasterValue1, "@", toperand_type.ToString()) +
-                                                "   -- :D.SD." + RefId.ToString() + ": --" + v.ENTER);
+                                            if (find == -1)
+                                                MessageBox.Show("find -1 geliyorsa IP Fields de KrtLineNo field i kontrol et, sıralmada sorun var");
+                                            else
+                                            {
+                                                Where_Lines = Where_Lines.Insert(find,
+                                                    "declare @" + fname + " " + t.Get_FieldTypeName(Convert.ToInt16(field_type), "800") + v.ENTER);
 
-                                            find = Where_Lines.IndexOf("/*paramEnd*/");
-                                            Where_Lines = Where_Lines.Insert(find, virgul + " @" + fname + v.ENTER);
+                                                find = Where_Lines.IndexOf("/*setEnd*/");
+                                                Where_Lines = Where_Lines.Insert(find,
+                                                    "/*prm*/ set " + t.Set_FieldName_Value_(field_type, "@" + fname, MasterValue1, "@", toperand_type.ToString()) +
+                                                    "   -- :D.SD." + RefId.ToString() + ": --" + v.ENTER);
+
+                                                find = Where_Lines.IndexOf("/*paramEnd*/");
+                                                Where_Lines = Where_Lines.Insert(find, virgul + " @" + fname + v.ENTER);
+                                            }
                                         }
                                         if (krtLineNo > 0)
                                         {

@@ -29,6 +29,7 @@ UPDATE [dbo].[MtskAdayUcret]
       ,[VGTelafiEgitimUcreti] = x.VGTelafiEgitimUcreti
       ,[VGBasarisizEgitimUcreti] = x.VGBasarisizEgitimUcreti
       ,[VGUcretlerToplami] = x.VGToplamTutar
+      ,[IsOwes] = x.IsOwes 
 
  From [dbo].[MtskAdayUcret] as a, 
  (
@@ -50,6 +51,7 @@ UPDATE [dbo].[MtskAdayUcret]
 	 ,sum(VGTelafiEgitimUcreti) as VGTelafiEgitimUcreti
      
 	 ,sum(VGToplamTutar) as VGToplamTutar  
+     , (case when sum(ToplamTutar) > 0 then 1 else 0 end) as IsOwes
 
    From (
       Select 
@@ -140,6 +142,7 @@ UPDATE [dbo].[MtskAdayUcret]
  or    a.[VGTelafiEgitimUcreti] <> x.VGTelafiEgitimUcreti
  or    a.[VGBasarisizEgitimUcreti] <> x.VGBasarisizEgitimUcreti
  or    a.[VGUcretlerToplami] <> x.VGToplamTutar
+ or    isnull(a.IsOwes,0) <> x.IsOwes
  )
  
 

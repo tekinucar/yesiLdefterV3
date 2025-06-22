@@ -17,11 +17,15 @@ AS BEGIN
   declare @SimulatorDersSayisi smallInt
   declare @EgitimAlaniDersSayisi smallInt
   declare @AkanTrafikDersSayisi smallInt
+  declare @TelafiDersSayisi smallint
+  declare @BasarisizDersSayisi smallint
   declare @PersonelId varchar(50)
   declare @SimulatorId varchar(50)
   declare @EgitimAraciId varchar(50)
 
+  declare @mevcutToplamDersSayisi smallInt
   declare @toplamDersSayisi smallInt
+  declare @mevcutBugunDersSayisi_ smallInt
   declare @bugunDersSayisi smallInt
   declare @bugunDersSayisi_ smallInt
   declare @gunNo smallInt = 1
@@ -33,10 +37,18 @@ AS BEGIN
   declare @saatSiraNo_ smallInt
   declare @dersSaatiTipiId_ smallInt
 
+  declare @MevcutSertifikaTipiId smallInt
+  declare @IstenenSertifikaTipiId smallInt
+  declare @MtskSaatUygulamaSaati  smallInt 
+  
+  -- DbUpdate aktif olsun ki trigger ve bu procedure birbirini tetiklmesin
+--print 'Execute [dbo].[prc_setIsDbUpdateActive] 13, 1'
+  Execute [dbo].[prc_setIsDbUpdateActive] 13, 1
+--print 'prc_MtskUygulamaDersPlanHazirlaManuel start'
   Select
        @FirmId = FirmId
-      ,@TalepId = TalepId
-      ,@AdayId = AdayId
+      ,@TalepId = isnull(TalepId,0)
+      ,@AdayId = isnull(AdayId,0)
       ,@EgitimTarihi = EgitimTarihi
       ,@EgitimTipiId = EgitimTipiId
       ,@DersTercihiTipiId = DersTercihiTipiId
@@ -45,14 +57,25 @@ AS BEGIN
       ,@SimulatorDersSayisi = SimulatorDersSayisi
       ,@EgitimAlaniDersSayisi = EgitimAlaniDersSayisi
       ,@AkanTrafikDersSayisi = AkanTrafikDersSayisi
-      ,@PersonelId = PersonelId
+      ,@TelafiDersSayisi = TelafiDersSayisi
+      ,@BasarisizDersSayisi = BasarisizDersSayisi
+      ,@PersonelId = isnull(PersonelId,'')
       ,@SimulatorId = SimulatorId
-      ,@EgitimAraciId = EgitimAraciId
+      ,@EgitimAraciId = isnull(EgitimAraciId,'')
   From dbo.MtskSablonUygulamaM 
   Where Id = @Id
 
-  if (@TalepId <= 0) return;
+  if (@TalepId <= 0
+   or @AdayId <= 0
+   or @PersonelId = ''
+   or @EgitimAraciId = ''
+  ) return;
 
+  Select @mevcutToplamDersSayisi = count(Id) 
+  From  dbo.MtskUygulamaliDers
+  Where FirmId = @FirmId
+  and   TalepId = @TalepId
+  
   -- @EgitimTipiId
   -- 1, 'Normal Eğitim'
   -- 2, 'Telafi Eğitim(Ön Sınav )'
@@ -65,20 +88,31 @@ AS BEGIN
   -- 3, 'Akan Trafik'  
   
   --set @EgitimTipiId = 3 test için
+  --print '@EgitimTipiId'
+  --print @EgitimTipiId
 
-  if (@EgitimTipiId = 1 and @DersTercihiTipiId = 1) Set @toplamDersSayisi = @SimulatorDersSayisi + @AkanTrafikDersSayisi
-  if (@EgitimTipiId = 1 and @DersTercihiTipiId = 2) Set @toplamDersSayisi = @EgitimAlaniDersSayisi + @AkanTrafikDersSayisi
-  if (@EgitimTipiId = 1 and @DersTercihiTipiId = 3) Set @toplamDersSayisi = @AkanTrafikDersSayisi + 2
+  if (@EgitimTipiId = 1)
+  begin
+      if (@DersTercihiTipiId = 1) Set @toplamDersSayisi = @SimulatorDersSayisi + @AkanTrafikDersSayisi
+      if (@DersTercihiTipiId = 2) Set @toplamDersSayisi = @EgitimAlaniDersSayisi + @AkanTrafikDersSayisi
+      if (@DersTercihiTipiId = 3) Set @toplamDersSayisi = @AkanTrafikDersSayisi
+  end 
 
-  --if (@EgitimTipiId = 3 and @DersTercihiTipiId = 1) Set @dersSayisi = @SimulatorDersSayisi + @AkanTrafikDersSayisi
-  --if (@EgitimTipiId = 3 and @DersTercihiTipiId = 2) Set @dersSayisi = @EgitimAlaniDersSayisi + @AkanTrafikDersSayisi
-  --if (@EgitimTipiId = 3 and @DersTercihiTipiId = 3) Set @dersSayisi = @AkanTrafikDersSayisi + 2
+  -- 2.Direksiyon Eğitimi ise
   if (@EgitimTipiId = 3) Set @toplamDersSayisi = @AkanTrafikDersSayisi
-
-  if (@EgitimTipiId = 2) Set @toplamDersSayisi = 2
-  if (@EgitimTipiId = 4) Set @toplamDersSayisi = 2
-
+  -- Telafi Eğitim ise
+  if (@EgitimTipiId = 2) Set @toplamDersSayisi = @TelafiDersSayisi
+  -- Başarısız Aday Eğitimi ise
+  if (@EgitimTipiId = 4) Set @toplamDersSayisi = @BasarisizDersSayisi
+  
   if (@SaatSayisiTipiId = 0) Set @SaatSayisiTipiId = 2
+
+  --print '@toplamDersSayisi'
+  --print @toplamDersSayisi
+  --print '@mevcutToplamDersSayisi'
+  --print @mevcutToplamDersSayisi
+
+  set @toplamDersSayisi = @toplamDersSayisi - @mevcutToplamDersSayisi
 
   while (@toplamDersSayisi > 0)
   begin
@@ -88,23 +122,24 @@ AS BEGIN
 	  -- if (@EgitimTipiId = 1 and @gunNo = 1 and @DersTercihiTipiId <> 3) Set @bugunDersSayisi = 2 
 
 	  --  @EgitimTipiId = Telafi Eğitim veya Başarısız Aday Eğitimi
-	  if (@EgitimTipiId = 2) or (@EgitimTipiId = 4) Set @bugunDersSayisi = 2 
+	  if (@EgitimTipiId = 2) Set @bugunDersSayisi = 2 
+	  if (@EgitimTipiId = 4) Set @bugunDersSayisi = 2 
 
 	  if (@toplamDersSayisi < @bugunDersSayisi) Set @bugunDersSayisi = @toplamDersSayisi
 
-      print '@gunNo : ' + Convert(varchar(2) , @gunNo)
-	  print '@bugunDersSayisi : '  + Convert(varchar(2) , @bugunDersSayisi)
+      --print '@gunNo : ' + Convert(varchar(2) , @gunNo)
+	  --print '@bugunDersSayisi : '  + Convert(varchar(2) , @bugunDersSayisi)
 
-      --Id  @EgitimYeriTipiId
+      --Id  MtskUygulamaliDers.EgitimYeriTipiId
       -- 1  Direksiyon Eğitim Alanı
       -- 2  Akan Trafik
       -- 3  Simülatör  
       Set @EgitimYeriTipiId_ = 2 
-	  if (@EgitimTipiId = 1 and @DersTercihiTipiId = 1 and @gunNo = 1) Set @EgitimYeriTipiId_ = 3
-      if (@EgitimTipiId = 1 and @DersTercihiTipiId = 2 and @gunNo = 1) Set @EgitimYeriTipiId_ = 1
+	  if (@EgitimTipiId = 1 and @DersTercihiTipiId = 1 and @gunNo = 1 and @SimulatorDersSayisi > 0) Set @EgitimYeriTipiId_ = 3
+      if (@EgitimTipiId = 1 and @DersTercihiTipiId = 2 and @gunNo = 1 and @EgitimAlaniDersSayisi > 0) Set @EgitimYeriTipiId_ = 1
 
 	  Set @EgitimAraciId_ = @EgitimAraciId
-	  if (@EgitimTipiId = 1 and @DersTercihiTipiId = 1 and @gunNo = 1) Set @EgitimAraciId_ = @SimulatorId
+	  if (@EgitimTipiId = 1 and @DersTercihiTipiId = 1 and @gunNo = 1and @SimulatorDersSayisi > 0) Set @EgitimAraciId_ = @SimulatorId
 
       -- @IzinGunuTipiId
       -- 1, 'Personel izin tablosu geçerli'
@@ -120,9 +155,15 @@ AS BEGIN
 	  
 	  Set @DersTarihi_ = [dbo].fnc_IsGununuBul(@EgitimTarihi, @gunNo, @gunTipiId_, 107) --s.SaatTipiId)
 
-	  print '@DersTarihi_ = ' + convert(varchar(10),@DersTarihi_,103)
+	  --print '@DersTarihi_ = ' + convert(varchar(10),@DersTarihi_,103)
 
-	  Set @bugunDersSayisi_ = @bugunDersSayisi
+	  select @mevcutBugunDersSayisi_ = count(Id) 
+      From  dbo.MtskUygulamaliDers
+      Where FirmId = @FirmId
+      and   TalepId = @TalepId
+	  and   DersTarihi = @DersTarihi_
+
+	  Set @bugunDersSayisi_ = @bugunDersSayisi - @mevcutBugunDersSayisi_
 	  Set @saatSiraNo_ = 1
 	  
 	  if (@SaatSayisiTipiId = 2) Set @dersSaatiTipiId_ = -3
@@ -130,9 +171,9 @@ AS BEGIN
 	  
 	  while (@bugunDersSayisi_ > 0)
       begin
-          print '    @saatSiraNo_ : '  + Convert(varchar(2) , @saatSiraNo_)
-          print '    @@dersSaatiTipiId_ : '  + Convert(varchar(2) , @dersSaatiTipiId_)
-		  
+          --print '    @saatSiraNo_ : '  + Convert(varchar(2) , @saatSiraNo_)
+          --print '    @@dersSaatiTipiId_ : '  + Convert(varchar(2) , @dersSaatiTipiId_)
+		  --print '     prc_MtskUygulamaDersInsert çalıştı.'
           Execute [dbo].[prc_MtskUygulamaDersInsert]   
            @FirmId
           ,@TalepId
@@ -144,17 +185,22 @@ AS BEGIN
           ,@PersonelId
           ,@EgitimTipiId
           ,@saatSiraNo_
-		  
+
           Set @saatSiraNo_ += 1
           Set @dersSaatiTipiId_ += 1
           Set @bugunDersSayisi_ -= 1
+		  Set @toplamDersSayisi -= 1
       end -- while 2 
-	  
-	  Set @toplamDersSayisi = @toplamDersSayisi - @bugunDersSayisi 
+	  	  
 	  Set @gunNo += 1
   end -- While 1
 
+  --print 'prc_MtskUygulamaDersPlanHazirlaManuel stop'
+
   Execute dbo.prc_MtskAdayTakip @FirmId
+
+  --print 'Execute [dbo].[prc_setIsDbUpdateActive] 13, 0'
+  Execute [dbo].[prc_setIsDbUpdateActive] 13, 0	
 
 
 END -- procedure 

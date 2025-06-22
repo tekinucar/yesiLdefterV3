@@ -6,7 +6,7 @@ AS BEGIN
 -- DonemTipiId   : Dönem
 -- EgitimAraciId : Eğitim Aracı
 -- PersonelId    : Usta Öğretici
--- AdayId        : Aday
+-- TalepId        : Aday
 
    declare @DonemTipiId int
    declare @EgitimBaslangicTarihi date
@@ -28,7 +28,7 @@ AS BEGIN
    , null as DersTarihi
    , '' as EgitimAraciId 
    , '' as PersonelId
-   , 0  AdayId 
+   , 0  TalepId 
    , 'Dönem' as Lkp_ElemanGrubu
    , donem.DonemTipi as Lkp_ElemanAdi
    , '' as Lkp_SertifikaTipi
@@ -43,7 +43,7 @@ AS BEGIN
    , x.DersTarihi as DersTarihi
    , x.EgitimAraciId 
    , '' as PersonelId 
-   , 0  as AdayId
+   , 0  as TalepId
    , (case x.EgitimYeriTipiId
 	  when 3 then 'Simülatör'
 	  else 'Eğitim Aracı' end) as Lkp_ElemanGrubu
@@ -51,7 +51,12 @@ AS BEGIN
    , '' as Lkp_SertifikaTipi
    ,Convert(smallint, 0) as DersSaatiTipiId
    from (
-     Select distinct [uygDers].EgitimAraciId, [uygDers].EgitimYeriTipiId, [uygDers].DersTarihi
+     Select distinct [uygDers].EgitimAraciId
+	 , ( case [uygDers].EgitimYeriTipiId 
+	     when 1 then 1
+		 when 2 then 1
+		 when 3 then 3 end ) as EgitimYeriTipiId
+     , [uygDers].DersTarihi
      from MtskUygulamaliDers as [uygDers]
      Where [uygDers].DersTarihi >= @EgitimBaslangicTarihi
      and   [uygDers].DersTarihi <= @EgitimBitisTarihi
@@ -65,7 +70,7 @@ AS BEGIN
    , x.DersTarihi as DersTarihi
    , '' as EgitimAraciId 
    , x.PersonelId
-   , 0  AdayId 
+   , 0  TalepId 
    , 'Usta Eğitici' as Lkp_ElemanGrubu
    , x.TamAdiSoyadi as Lkp_ElemanAdi
    , '' as SertifikaTipi
@@ -85,13 +90,13 @@ AS BEGIN
    , x.DersTarihi as DersTarihi
    , '' as EgitimAraciId 
    , '' PersonelId
-   , x.AdayId 
+   , x.TalepId 
    , 'Kursiyer' as Lkp_ElemanGrubu
    , x.TamAdiSoyadi as Lkp_ElemanAdi
    , x.SertifikaTipi as Lkp_SertifikaTipi
    ,Convert(smallint, x.DersSaatiTipiId) as DersSaatiTipiId
    from (
-     Select distinct [uygDers].AdayId, aday.TamAdiSoyadi, ser.SertifikaTipi, [uygDers].DersTarihi, [uygDers].DersSaatiTipiId   
+     Select distinct [uygDers].TalepId, aday.TamAdiSoyadi, ser.SertifikaTipi, [uygDers].DersTarihi, [uygDers].DersSaatiTipiId   
      from MtskUygulamaliDers as [uygDers]
 	   left outer join MtskAday as [aday] on (uygDers.AdayId = aday.Id)
 	   left outer join MtskAdayTalep as [talep] on (uygDers.TalepId = talep.Id)

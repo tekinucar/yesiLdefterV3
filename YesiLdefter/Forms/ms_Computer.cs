@@ -52,9 +52,17 @@ namespace YesiLdefter
 
         void PreparingComputerValues()
         {
+            bool IsKart1 = true;
             TableIPCode = "UST/CRM/UstadComputers.Kart_F01";
-                      //  "UST/T01/SYSCOMP.SYSCOMP_F01"
             t.Find_DataSet(this, ref ds, ref dN, TableIPCode);
+
+            if (ds == null)
+            {
+                TableIPCode = "UST/CRM/UstadComputers.Kart_F02";
+                t.Find_DataSet(this, ref ds, ref dN, TableIPCode);
+                IsKart1 = false;
+            }
+
 
             if (t.IsNotNull(ds))
             {
@@ -78,7 +86,8 @@ namespace YesiLdefter
                     NavigatorButton btnEnd = dN.Buttons.EndEdit;
                     dN.Buttons.DoClick(btnEnd);
 
-                    this.Close();
+                    if (IsKart1)
+                        this.Close();
                 }
             }
         }

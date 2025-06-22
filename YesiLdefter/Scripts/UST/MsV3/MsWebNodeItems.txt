@@ -877,7 +877,7 @@ INSERT INTO [dbo].MsWebNodeItems (NodeId, PageCode, IsActive, ItemValue, ItemTex
 
 
 
-delete [dbo].MsWebNodeItems where NodeId = 272 and PageCode = 'MTSKILKDATADURUMU'
+delete [dbo].MsWebNodeItems where PageCode = 'MTSKILKDATADURUMU'
 
 INSERT INTO [dbo].MsWebNodeItems (NodeId, PageCode, IsActive, ItemValue, ItemText)
  VALUES 
@@ -977,7 +977,26 @@ INSERT INTO [dbo].MsWebNodeItems (NodeId, PageCode, IsActive, ItemValue, ItemTex
 ( 0, 'MTSKILKDATADURUMU', 1, '1', 'Normal Eğitim'),
 ( 0, 'MTSKILKDATADURUMU', 1, '2', 'Telafi Eğitim(Ön Sınav )'),
 ( 0, 'MTSKILKDATADURUMU', 1, '3', '2.Direksiyon Eğitimi'),
-( 0, 'MTSKILKDATADURUMU', 1, '4', 'Başarısız Aday Eğitimi')
+( 0, 'MTSKILKDATADURUMU', 1, '4', 'Başarısız Aday Eğitimi'),
+
+( 0, 'MTSKILKDATADURUMU', 1, '0',  'Kursa Başvuru Aşamasında' ),
+( 0, 'MTSKILKDATADURUMU', 1, '1',  'Teorik Sınav Aşamasında' ),
+( 0, 'MTSKILKDATADURUMU', 1, '2',  'Uygulama Sınav Aşamasında' ),
+( 0, 'MTSKILKDATADURUMU', 1, '3',  'Teorik Sınav Hakkı Doldu' ),
+( 0, 'MTSKILKDATADURUMU', 1, '4',  'Uygulama Sınav Hakkı Doldu' ),
+( 0, 'MTSKILKDATADURUMU', 1, '5',  'Sertifika Almaya Hak Kazandı' ),
+( 0, 'MTSKILKDATADURUMU', 1, '6',  'Sertifikası İptal Edildi' ),
+( 0, 'MTSKILKDATADURUMU', 1, '7',  'e-Sınav Aşamasında' ),
+( 0, 'MTSKILKDATADURUMU', 1, '8',  'e-Sınav Test Aşamasında' ),
+( 0, 'MTSKILKDATADURUMU', 1, '9',  'e-Sınavdan Başarısız Oldu' ),
+( 0, 'MTSKILKDATADURUMU', 1, '10',  'e-Sınav Hakkı Doldu' ),
+( 0, 'MTSKILKDATADURUMU', 1, '11',  'Kaydı Silindi' ),
+( 0, 'MTSKILKDATADURUMU', 1, '12',  'Ceza Kaydı Var' ),
+( 0, 'MTSKILKDATADURUMU', 1, '13',  'Teorik Dersten Muaf' ),
+( 0, 'MTSKILKDATADURUMU', 1, '14',  'Adli Sicil Kaydı Uygun Olmadığından Dönem Kaydı Durdurulmuştur.' ),
+( 0, 'MTSKILKDATADURUMU', 1, '22',  '2.Direksiyon Aşamasında' )
+
+
 
 
 delete [dbo].MsWebNodeItems where NodeId = 554 and PageCode = 'MTSKILKDATAADAYTCAL2'

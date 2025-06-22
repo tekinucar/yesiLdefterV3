@@ -1,0 +1,54 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table MtskGuzergah
+ (
+   Id                   Int IDENTITY(1,1) not null, 
+   FirmId               Int       not null,
+   IsActive             Bit       not null, /* default : 1 = active, 0 = not active */  
+
+   SiraTipiId           smallInt      null, /* A, B, C  şeklinde oluşuyor  */
+   GuzergahKisaAdi      nVarchar(30)  null,
+   GuzergahUzunAdi      nVarchar(200) null,
+
+   constraint		pk_MtskGuzergah primary key (Id)
+ )
+  
+ grant select, insert, update, delete on MtskGuzergah to public
+
+commit transaction
+
+/*CreateTableEnd*/
+
+
+/*CreateLkpTable*/
+
+begin transaction
+
+-- ------------------------------------------------------- 
+-- SiraTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskGuzergahSiraTipi')
+drop table [Lkp].[MtskGuzergahSiraTipi]
+
+create table [Lkp].[MtskGuzergahSiraTipi]
+(
+   Id        Int Unique Not null,
+   SiraTipi  Varchar(10)   null,
+
+   constraint  pk_MtskGuzergahSiraTipi primary key (Id)
+)
+
+delete [Lkp].[MtskGuzergahSiraTipi]
+INSERT INTO [Lkp].[MtskGuzergahSiraTipi] (Id, SiraTipi)
+ VALUES 
+  ( 0,  N''),
+  ( 1,  N'A'),
+  ( 2,  N'B'),
+  ( 3,  N'C')
+
+commit transaction
+
+/*CreateLkpTableEnd*/
+

@@ -32,7 +32,7 @@ namespace Tkn_CreateObject
         #region Create_Navigator
 
         public void Create_Navigator(Form tForm, Control tPanelControl,
-                                     DataRow row_Table, DataSet dsData,
+                                     DataRow row_Table, DataSet dsData, DataSet ds_Fields,
                                      string TableIPCode, string External_TableIPCode)
         {
             tToolBox t = new tToolBox();
@@ -215,6 +215,7 @@ namespace Tkn_CreateObject
             Create_Navigator_Buttons(tForm, 
                                      NavPanel,
                                      tDataNavigator,
+                                     ds_Fields,
                                      TableIPCode,
                                      External_TableIPCode,
                                      navigator,
@@ -401,16 +402,72 @@ namespace Tkn_CreateObject
                         simpleButton.AppearanceHovered.BackColor = nButton.backColor;
                         simpleButton.AppearanceHovered.Options.UseBackColor = true;
                     }
-                    nButton.navigatorPanel.Controls.Add(simpleButton);
+
                     Buttons_CaptionChange(simpleButton, nButton.navigatorList, nButton.buttonKey);
+
+                    /// + butonundan önce nButton.navigatorPanel.Controls.Add  eklenmesi gerekiyor
+                    if (nButton.tabIndex == 73)
+                        preparigHizliOnay(nButton, simpleButton);
+
+                    nButton.navigatorPanel.Controls.Add(simpleButton);
 
                     if (nButton.tabIndex == 75)
                         Create_PopupMenu_Add(nButton, simpleButton, ev);
-                    
+
+
                     return simpleButton;
                 }
+            
+                
+            
             }
             return null;
+        }
+
+        private void preparigHizliOnay(vNavigatorButton nButton, DevExpress.XtraEditors.SimpleButton simpleButton_)
+        {
+            /// Buraya gelmeden önce Buttons_CaptionChange uğradı 
+            /// + > <uSinavaHazirmiTipiId> şeklinde değişti
+            string caption = simpleButton_.Text;
+            if (caption.Trim() != "+")
+            {
+                /// şimdi tekrar görünmesi gerekene çeviriyoruz
+                simpleButton_.Text = "+ ";
+                /// çalışmamız gerek fieldi tespit ediyoruz
+                string tFieldName = caption.Replace("<", "");
+                tFieldName = tFieldName.Replace(">", "");
+                tFieldName = tFieldName.Trim();
+
+                ImageComboBoxEdit tEdit_HizliOnay = new DevExpress.XtraEditors.ImageComboBoxEdit();
+                tEdit_HizliOnay.AccessibleDescription = nButton.tForm.Name;
+                tEdit_HizliOnay.Name = "tEdit_HizliOnay_" + tFieldName;
+                tEdit_HizliOnay.Properties.AccessibleName = nButton.TableIPCode;
+                tEdit_HizliOnay.EnterMoveNextControl = true;
+                tEdit_HizliOnay.Dock = DockStyle.Left;
+                tEdit_HizliOnay.Width = 120;
+                //AddBildirimSablonlariList(tEdit_BildirimSablonlari, mesajKodu);
+                //tEdit_HizliOnay.EditValueChanged += new System.EventHandler(ev.tEdit_BildirimSablonlari_EditValueChanged);
+
+                DevExpress.XtraEditors.Controls.EditorButton tBtn = new DevExpress.XtraEditors.Controls.EditorButton();
+
+                tBtn.Caption = tFieldName;
+
+                tEdit_HizliOnay.Properties.Buttons.Add(tBtn);
+                tEvents ev = new tEvents();
+                tEdit_HizliOnay.ButtonClick += new
+                   DevExpress.XtraEditors.Controls.ButtonPressedEventHandler(ev.ImageComboBoxEdit_HizliOnayButtonClick);
+
+                tEdit_HizliOnay.Properties.Buttons[1].Kind = DevExpress.XtraEditors.Controls.ButtonPredefines.OK;
+
+                DataRow row_Fields = t.getDataRow(nButton.ds_Fields, tFieldName);
+                if (row_Fields != null)
+                {
+                    tDevColumn dc = new tDevColumn();
+                    dc.XtraEditorsImageComboBox_Fill(tEdit_HizliOnay, row_Fields, "", 0);
+                }
+
+                nButton.navigatorPanel.Controls.Add(tEdit_HizliOnay);
+            }
         }
 
         #region Bilidirim SMS, WhatsApp, e-Mail, Mobil App
@@ -948,13 +1005,17 @@ namespace Tkn_CreateObject
 
         }
 
-        private void Create_Navigator_Buttons(Form tForm, Control NavPanel, DataNavigator tDataNavigator,
-                                              string TableIPCode,
-                                              string External_TableIPCode,
-                                              string navigator,
-                                              string Prop_Navigator,
-                                              string Prop_Search,
-                                              int Data_Read_Type)
+        private void Create_Navigator_Buttons(
+            Form tForm, 
+            Control NavPanel, 
+            DataNavigator tDataNavigator,
+            DataSet ds_Fields,
+            string TableIPCode,
+            string External_TableIPCode,
+            string navigator,
+            string Prop_Navigator,
+            string Prop_Search,
+            int Data_Read_Type)
         {
             int i = -1;
             Int16 width25 = 28; // w1
@@ -974,6 +1035,7 @@ namespace Tkn_CreateObject
 
             vNavigatorButton nButton = new vNavigatorButton();
             nButton.tForm = tForm;
+            nButton.ds_Fields = ds_Fields;
             nButton.navigatorPanel = NavPanel;
             nButton.TableIPCode = TableIPCode;
             nButton.navigatorList = navigator;

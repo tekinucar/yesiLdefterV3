@@ -1,0 +1,34 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_MtskAdayTakipTalepKaydiSingleSetKontrolu] (@FirmId int)  
+AS BEGIN
+
+      Update [dbo].[DbUpdates] set IsActive = 1 Where MsDbUpdateId = -1 and UpdateTypeId = 13 and DBaseNoTypeId = 6
+
+      declare @talepId int
+      declare myCursor CURSOR local
+      for 
+      Select Id
+      from dbo.MtskAdayTalep 
+      Where FirmId = @FirmId
+
+      OPEN myCursor;
+  
+      FETCH NEXT
+      FROM myCursor
+      INTO @talepId;
+	  
+      While @@FETCH_STATUS = 0
+      begin
+	      Execute [dbo].[prc_MtskAdayTakipTalepKaydiSingleSet] @talepId
+		  FETCH NEXT FROM myCursor INTO @talepId;
+      end -- While
+
+      Close myCursor;
+      DealLocate myCursor;
+
+	  Update [dbo].[DbUpdates] set IsActive = 0 Where MsDbUpdateId = -1 and UpdateTypeId = 13 and DBaseNoTypeId = 6
+
+END --
+
+/*CreateProcedureEnd*/

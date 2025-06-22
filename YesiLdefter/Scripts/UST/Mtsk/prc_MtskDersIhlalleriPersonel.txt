@@ -1,31 +1,35 @@
 ﻿
 /*CreateProcedure*/
 
-CREATE PROCEDURE [dbo].[prc_MtskDersIhlalleriPersonel] (@curId bigint)  
+CREATE PROCEDURE [dbo].[prc_MtskDersIhlalleriPersonel] (@curId bigint, @FirmId int, @DonemTipiId int, @PersonelId varchar(30))  
 AS BEGIN
 
 --declare @curId int = 576--test 710
-  declare @FirmId int
-  declare @DonemTipiId int = 0
+--declare @FirmId int
+--declare @DonemTipiId int = 0
+--declare @PersonelId varchar(30)
   declare @DersTarihi date
   declare @DersTarihiBasla date
   declare @DersTarihiBitis date
 
-  Select 
-       @FirmId      = td.FirmId  
-	  ,@DonemTipiId = td.DonemTipiId
-	  ,@DersTarihi  = td.DersTarihi
+  Select @DersTarihi  = td.DersTarihi
+  --   , @FirmId = td.FirmId
+  --   , @DonemTipiId = td.DonemTipiId
+  --   , @PersonelId = td.PersonelId
   From dbo.MtskTeorikDers as td
   Where td.Id = @curId
-  
+
+  -- select @FirmId, @DonemTipiId, @PersonelId, @DersTarihi, @DersTarihiBasla, @DersTarihiBitis
+
   -- Kontrole 1 hafta öncesinden başla
-  -- 1 ay sonrasına kadar kontrol et
+  -- 15 gün sonrasına kadar kontrol et
   Set @DersTarihiBasla = DATEADD(dd, -7, @DersTarihi)
-  Set @DersTarihiBitis = DATEADD(dd, 30, @DersTarihi)
+  Set @DersTarihiBitis = DATEADD(dd, 15, @DersTarihi)
 
   Delete dbo.MtskKIhlalTeorikD
   Where  FirmId = @FirmId
-  and  ( DonemTipiId = @DonemTipiId or  isnull(DonemTipiId,0) = 0 )
+  and    DonemTipiId = @DonemTipiId
+  and    PersonelId = @PersonelId
   and    IhlalTipiId > 30
   and    IhlalTipiId < 40   
   
@@ -39,17 +43,21 @@ AS BEGIN
      -- Tespit et ve yaz  
      INSERT INTO [dbo].[MtskKIhlalTeorikD]
        ( FirmId
+       , DonemTipiId
        , IhlalTipiId
        , DersSaatSayisi
        , PersonelId
        , DersHaftasiId
+       , DersHaftasi
        , Tarih )
      Select   
          toplam.FirmId
+       , @DonemTipiId 
        , 31 as IhlalTipiId
        , sum(toplam.DersSaatSayisi) as DersSaatSayisi
        , toplam.PersonelId
 	   , toplam.DersHaftasiId
+       , [dbo].[fnc_getHaftaBasiSonu](toplam.DersYili, toplam.DersHaftasiId) 
        , GETDATE()
      from (
          -- Teorik dersler
@@ -57,15 +65,18 @@ AS BEGIN
              td.FirmId
            , td.PersonelId
            , DatePart(ww, td.DersTarihi) as DersHaftasiId
+		   , Year(td.DersTarihi) as DersYili
            , count(td.Id) as DersSaatSayisi
          From dbo.MtskTeorikDers as td 
          Where 0 = 0
          and   td.DersTarihi >= @DersTarihiBasla
          and   td.DersTarihi <= @DersTarihiBitis
+         and   td.PersonelId = @PersonelId 
          group by
              td.FirmId
            , td.PersonelId
            , DatePart(ww, td.DersTarihi)
+		   , Year(td.DersTarihi)
 
          union all
 
@@ -74,15 +85,18 @@ AS BEGIN
              ud.FirmId
            , ud.PersonelId
            , DatePart(ww, ud.DersTarihi) as DersHaftasiId
+		   , Year(ud.DersTarihi) as DersYili
            , count(ud.Id) as DersSaatSayisi
          From dbo.MtskUygulamaliDers as ud 
          Where 0 = 0
          and   ud.DersTarihi >= @DersTarihiBasla
          and   ud.DersTarihi <= @DersTarihiBitis
+         and   ud.PersonelId = @PersonelId
          group by
              ud.FirmId
            , ud.PersonelId
            , DatePart(ww, ud.DersTarihi)
+           , Year(ud.DersTarihi)
       ) as toplam
 	       left outer join dbo.MtskPersoneli as personel on (
               toplam.PersonelId = personel.TcNoCalismaIzniNo or 
@@ -92,6 +106,7 @@ AS BEGIN
          toplam.FirmId
        , toplam.PersonelId
        , toplam.DersHaftasiId
+       , toplam.DersYili
 	   , personel.HaftalikDersSayisi
       Having sum(toplam.DersSaatSayisi) > personel.HaftalikDersSayisi 
 
@@ -105,8 +120,8 @@ AS BEGIN
       INSERT INTO dbo.MtskKIhlalTeorikD
        ( FirmId
        , DonemTipiId
-       , GrupTipiId
-       , SubeTipiId
+       --, GrupTipiId
+       --, SubeTipiId
        , IhlalTipiId
        , DerslikTipiId
        , DersTarihi
@@ -117,9 +132,10 @@ AS BEGIN
 
       Select 
 	       dersler.FirmId
-         , dersler.DonemTipiId
-         , dersler.GrupTipiId
-         , dersler.SubeTipiId
+         , @DonemTipiId
+         --, dersler.DonemTipiId
+         --, dersler.GrupTipiId
+         --, dersler.SubeTipiId
 	     , ( case when (dersler.DersSaatiTipiId = 100 and gun.IsActive = 0) then 32
 	              when (dersler.DersSaatiTipiId < 100 and gun.IsActive = 0) then 33 
 				  end ) as IhlalTipiId
@@ -146,7 +162,8 @@ AS BEGIN
          Where 0 = 0
          and   td.DersTarihi >= @DersTarihiBasla
          and   td.DersTarihi <= @DersTarihiBitis
-	 
+         and   td.PersonelId = @PersonelId	 
+
          union all  
 
          -- Teorik dersler
@@ -166,6 +183,7 @@ AS BEGIN
          Where 0 = 0
          and   td.DersTarihi >= @DersTarihiBasla
          and   td.DersTarihi <= @DersTarihiBitis
+         and   td.PersonelId = @PersonelId
 
          union all  
 
@@ -185,7 +203,8 @@ AS BEGIN
          Where 0 = 0
          and   ud.DersTarihi >= @DersTarihiBasla
          and   ud.DersTarihi <= @DersTarihiBitis
-	 
+         and   ud.PersonelId = @PersonelId	 
+
          union all  
 
          -- Uygulamalı dersler
@@ -204,7 +223,7 @@ AS BEGIN
          Where 0 = 0
          and   ud.DersTarihi >= @DersTarihiBasla
          and   ud.DersTarihi <= @DersTarihiBitis
-
+         and   ud.PersonelId = @PersonelId
       ) as dersler
 	       left outer join dbo.OnmCalismaSaatleri as gun on (
                       substring(dersler.PersonelId,1,11) = gun.TcVkNo 
@@ -254,7 +273,7 @@ AS BEGIN
          , dersler.GrupTipiId
          , dersler.SubeTipiId
 	     , ( case when (dersler.DersTarihi < personel.CalismaIzniBaslamaTarihi ) then 34
-	              when (dersler.DersTarihi > personel.CalismaIzniBitisTarihi ) then 35 
+	              when (dersler.DersTarihi >  DATEADD(DAY,-1,personel.CalismaIzniBitisTarihi) ) then 35 
 				  end ) as IhlalTipiId
          , dersler.DerslikTipiId
 	     , dersler.DersTarihi
@@ -279,6 +298,7 @@ AS BEGIN
          Where 0 = 0
          and   td.DersTarihi >= @DersTarihiBasla
          and   td.DersTarihi <= @DersTarihiBitis
+         and   td.PersonelId = @PersonelId
 
          union all  
 
@@ -298,14 +318,14 @@ AS BEGIN
          Where 0 = 0
          and   ud.DersTarihi >= @DersTarihiBasla
          and   ud.DersTarihi <= @DersTarihiBitis
-
+         and   ud.PersonelId = @PersonelId
       ) as dersler
 	       left outer join dbo.MtskPersoneli as personel on (
               dersler.PersonelId = personel.TcNoCalismaIzniNo or 
               dersler.PersonelId = personel.TcNo_CalismaIzniNo )
       Where 0 = 0
 	  and dersler.DersTarihi < personel.CalismaIzniBaslamaTarihi 
-	  or  dersler.DersTarihi > personel.CalismaIzniBitisTarihi 
+	  or  dersler.DersTarihi > DATEADD(DAY,-1,personel.CalismaIzniBitisTarihi) 
 
 
   -- ---------------------------------------------------------------------
@@ -315,13 +335,15 @@ AS BEGIN
   Delete dbo.MtskKIhlalTeorikD
   Where  FirmId = @FirmId
   and    IhlalTipiId = 36
+  and    DonemTipiId = @DonemTipiId
+  and    PersonelId = @PersonelId
 
       -- Tespit et ve yaz  
       INSERT INTO dbo.MtskKIhlalTeorikD
        ( FirmId
        , DonemTipiId
-       , GrupTipiId
-       , SubeTipiId
+       --, GrupTipiId
+       --, SubeTipiId
        , IhlalTipiId
        , DerslikTipiId
        , DersTarihi
@@ -333,9 +355,10 @@ AS BEGIN
          -- Teorik dersler
          Select 
              td.FirmId
-           , td.DonemTipiId
-           , td.GrupTipiId
-           , td.SubeTipiId
+           , @DonemTipiId
+           --, td.DonemTipiId
+           --, td.GrupTipiId
+           --, td.SubeTipiId
 		   , 36 as IhlalTipiId
            , td.DerslikTipiId
            , td.DersTarihi 
@@ -346,13 +369,17 @@ AS BEGIN
 		   , GETDATE()
 		 From dbo.MtskTeorikDers as td 
 		     left outer join dbo.MtskUygulamaliDers as ud on ( 
-                    td.DersTarihi = ud.DersTarihi 
+                    ud.FirmId = @FirmId
+                and td.DersTarihi = ud.DersTarihi 
                 and td.DersSaatiTipiId = ud.DersSaatiTipiId
                 and td.PersonelId = ud.PersonelId
+                and td.PersonelId = @PersonelId
              )
          Where 0 = 0
+         and   td.FirmId = @FirmId 
          and   td.DersTarihi >= @DersTarihiBasla
          and   td.DersTarihi <= @DersTarihiBitis
+         and   td.PersonelId = @PersonelId
          and   ud.Id is not null
 
 END -- procedure

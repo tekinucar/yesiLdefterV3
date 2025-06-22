@@ -60,6 +60,10 @@ namespace Tkn_Save
                         return onay;
                     }
 
+                    /// yeni imagelistbox daki button üzerindeki save tetiklemesi için eklendi
+                    /// 
+                    //dsData.Tables[0].AcceptChanges();  YEMİYOR
+
                     // DataLayout nesnesi olunca bulundğu texttedeki değişiklikleri algılamıyordu
                     // bu nedenle cursor ün buluduğu nesneden exit yapması sağlandı.
 
@@ -657,6 +661,9 @@ namespace Tkn_Save
                 }
 
                 v.con_Refresh = Record_SQL_RUN(ds, vt, State, Position, ref Sonuc_Cumle, TriggerSQL);
+
+                if (v.con_Refresh)
+                    t.changeKeyFieldValue(ds, id_value);
             }
             #endregion
             //------------------------------------------------------------------------------------------------------ 

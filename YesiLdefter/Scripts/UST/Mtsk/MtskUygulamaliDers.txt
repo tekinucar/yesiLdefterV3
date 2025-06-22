@@ -33,6 +33,7 @@ begin transaction
    SablonUygulamaFId    Int           null, /* MtskSablonUygulamaF.Id = Hangi plan formu ile hazırlandı, hazırlanırken seçilen araç, usta öğreticiler ve adayların Id leri */ 
    SaatSiraNo           SmallInt      null, /* adayın 1. saati, 2. saati, 3. saati, 4. saati  bilgisi */
    OzelGunlerId         Int           null, /* OnmOzelGunler.Id */
+   DersHaftasiId        SmallInt      null, /* yılın hangi haftasına denk geldi, bu sayede o haftadaki tüm dersler listeleniyor */  
    
    constraint		pk_MtskUygulamaliDers primary key (Id)
  )
@@ -81,6 +82,10 @@ AS BEGIN
     declare @TcNoCalismaIzniNo varchar(20) = null
     declare @yBaslamaSaatiChechked varchar(20) 
 	
+    -- prc_MtskUygulamaDersPlanHazirlaManuel başladımı
+    declare @DbUpdatesIsActive Bit = 0
+    set @DbUpdatesIsActive = [dbo].[fnc_getIsDbUpdate] (0)
+
     WHILE @@FETCH_STATUS = 0
     BEGIN
         Select 
@@ -114,7 +119,6 @@ AS BEGIN
         From inserted ins
             left outer join Lkp.MtskUygulamaliDersDersSaatiTipi saat on (ins.DersSaatiTipiId = saat.Id)
         Where ins.Id = @curId
-
 
         if (@yTalepId = 0 and @yAdayId = 0 and @yAdayTcNo <> '')
         begin
@@ -197,6 +201,7 @@ AS BEGIN
               , BaslamaSaati = CONVERT(smalldatetime, CONVERT(varchar(10), @yDersTarihi) + ' ' + SUBSTRING(@ySaat,1,5))
               , BitisSaati   = CONVERT(smalldatetime, CONVERT(varchar(10), @yDersTarihi) + ' ' + SUBSTRING(@ySaat,9,5))
 			  , DersDonemTipiId = @DersDonemTipiId
+              , DersHaftasiId = DatePart(ww, @yDersTarihi)
             Where Id = @curId
 
         end else 
@@ -211,6 +216,7 @@ AS BEGIN
                 BaslamaSaati = CONVERT(smalldatetime, CONVERT(varchar(10), @yDersTarihi) + ' ' + SUBSTRING(@ySaat,1,5))
               , BitisSaati   = CONVERT(smalldatetime, CONVERT(varchar(10), @yDersTarihi) + ' ' + SUBSTRING(@ySaat,9,5))
 			  , DersDonemTipiId = @DersDonemTipiId
+              , DersHaftasiId = DatePart(ww, @yDersTarihi)
             Where Id = @curId
 		end
 		
@@ -264,6 +270,7 @@ AS BEGIN
                       , DersSaatiTipiId = @yDersSaatiTipiId
                       , BaslamaSaati = CONVERT(smalldatetime, CONVERT(varchar(10), @yDersTarihi) + ' ' + SUBSTRING(@ySaat,1,5))
                       , BitisSaati   = CONVERT(smalldatetime, CONVERT(varchar(10), @yDersTarihi) + ' ' + SUBSTRING(@ySaat,9,5))
+                      , DersHaftasiId = DatePart(ww, @yDersTarihi)
                     Where TalepId = @yTalepId
                     and   DersTarihi = @eDersTarihi
                     and   SaatSiraNo = @SaatSiraNo_
@@ -271,18 +278,42 @@ AS BEGIN
                 Set @SaatSiraNo_ += 1
             end -- while
 		end -- if (@ySaatSiraNo = 1) 
-	
-	
-	    Execute [dbo].[prc_MtskUygDersIhlalleriSaatler] @curId, 0, 0
-        Execute [dbo].[prc_MtskUygDersIhlalleriCakismalar] @curId
-	    Execute [dbo].[prc_MtskDersIhlalleriPersonel] @curId
+	    /*
+		-- çift kayıt var ise silinmesi gerekiyor
+        if ( select count(*)  from dbo.MtskUygulamaliDers
+             where FirmId = @yFirmId
+             and   TalepId = @yTalepId
+             and   AdayId = @yAdayId
+             and   DersTarihi = @yDersTarihi
+             and   DersSaatiTipiId = @yDersSaatiTipiId
+        ) > 1
+        begin
+             Delete dbo.MtskUygulamaliDers
+             where FirmId = @yFirmId
+             and   TalepId = @yTalepId
+             and   AdayId = @yAdayId
+             and   DersTarihi = @yDersTarihi
+             and   DersSaatiTipiId = @yDersSaatiTipiId
+             and   Id <> @curId 
+        end
+        */	
+        Execute [dbo].[prc_MtskUygDersIhlalleriSaatler] @yFirmId, @yTalepId
+        Execute [dbo].[prc_MtskUygDersIhlalleriCakismalar] @yFirmId, @yTalepId
+	    Execute [dbo].[prc_MtskDersIhlalleriPersonel] @curId, @yFirmId, @yDonemTipiId, @yPersonelId
 
         FETCH NEXT FROM myCursor INTO @curId
     END
 
+    -- prc_MtskUygulamaDersPlanHazirlaManuel çalışmıyorsa
+    -- diğer işlemler için prc_MtskAdayTakip çalışsın
+    if (@DbUpdatesIsActive = 0)
+    begin
+	    print 'prc_MtskUygulamaDersPlanHazirlaManuel harici işler'
+        EXECUTE [dbo].[prc_MtskAdayTakip] @yFirmId
+    end
+
     CLOSE myCursor
     DEALLOCATE myCursor   
-
 
 END -- create trigger
 
@@ -291,37 +322,22 @@ END -- create trigger
 
 /*CreateTrigger*/
 
-CREATE TRIGGER [dbo].[trg_MtskUygulamaDersDelete] on [dbo].[MtskUygulamaliDers]
+CREATE TRIGGER [dbo].[trg_MtskUygulamaliDersDelete] on [dbo].[MtskUygulamaliDers]
 AFTER DELETE
 AS BEGIN
 
     declare uygCursorDlt cursor local for select Id from deleted
 	declare @curId bigint
-	declare @FirmId int
-	declare @DersDonemTipiId int
 
 	OPEN uygCursorDlt
     FETCH NEXT FROM uygCursorDlt INTO @curId
 
-	set @FirmId = 0
-	set @DersDonemTipiId = 0
-
     WHILE @@FETCH_STATUS = 0
     BEGIN
-        Select   
-		    @FirmId = FirmId
-          , @DersDonemTipiId = DersDonemTipiId 
-		From deleted
-		Where Id = @curId
 
 	    Delete From dbo.MtskKIhlalUygulamaD 
 		Where InsertedId = @curId 
 		or    MevcutId   = @curId
-
-        Execute [dbo].[prc_MtskUygDersIhlalleriSaatler] @curId, @FirmId, @DersDonemTipiId
-        -- çakışmaları düzeltemiyor çünkü InsertedId li kayıt silinmiş oluyor
-	    -- Execute [dbo].[prc_MtskTeorikDersIhlalleriCakismalar] @curId
-        Execute [dbo].[prc_MtskDersIhlalleriPersonel] @curId
 
       FETCH NEXT FROM uygCursorDlt INTO @curId
     END
@@ -332,6 +348,62 @@ AS BEGIN
 END
 
 /*CreateTriggerEnd*/
+
+/*CreateTrigger*/
+
+CREATE TRIGGER [dbo].[trg_MtskUygulamaliDersDeleteIsLock] on [dbo].[MtskUygulamaliDers]
+INSTEAD of DELETE
+AS BEGIN
+
+    declare isLockCursorDlt cursor local for select Id from deleted
+    declare @curId bigint
+
+	declare @FirmId int
+    declare @DonemTipiId int
+	declare @TalepId int
+	declare @PersonelId varchar(30)
+
+    OPEN isLockCursorDlt
+
+    FETCH NEXT FROM isLockCursorDlt INTO @curId
+	   
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+	    IF EXISTS (SELECT 1 FROM deleted WHERE isnull(UDersIsUploaded,0) = 1 and Id = @curId)
+        BEGIN
+            PRINT 'Bu kayıt silinemez!'
+            RETURN
+        END
+		
+        Select @FirmId = FirmId
+		, @DonemTipiId = DersDonemTipiId
+		, @TalepId = TalepId
+        , @PersonelId = PersonelId
+		from dbo.MtskUygulamaliDers Where Id = @curId
+		
+        Delete from dbo.MtskUygulamaliDers  Where Id = @curId and isnull(UDersIsUploaded,0) = 0
+
+	    Execute [dbo].[prc_MtskUygDersIhlalleriSaatler] @FirmId, @TalepId
+        Execute [dbo].[prc_MtskUygDersIhlalleriCakismalar] @FirmId, @TalepId
+		Execute [dbo].[prc_MtskDersIhlalleriPersonel] @curId, @FirmId, @DonemTipiId, @PersonelId
+
+      FETCH NEXT FROM isLockCursorDlt INTO @curId
+    END
+
+    CLOSE isLockCursorDlt
+    DEALLOCATE isLockCursorDlt
+
+END
+
+/*CreateTriggerEnd*/
+
+/*
+        Execute [dbo].[prc_MtskUygDersIhlalleriSaatler] @curId, @FirmId, @DersDonemTipiId
+        -- çakışmaları düzeltemiyor çünkü InsertedId li kayıt silinmiş oluyor
+	    -- Execute [dbo].[prc_MtskTeorikDersIhlalleriCakismalar] @curId
+        Execute [dbo].[prc_MtskDersIhlalleriPersonel] @curId
+*/
+
 
 
 /*CreateLkpTable*/

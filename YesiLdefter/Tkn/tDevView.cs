@@ -3390,11 +3390,11 @@ MS_FIELDS                                          T03_MSFIELDS                 
             SchedulerButtonAdd(TableIPCode, "1", "Gündem", tButtonPanel);
             SchedulerButtonAdd(TableIPCode, "2", "Gün", tButtonPanel);
             SchedulerButtonAdd(TableIPCode, "3", "Tam Hafta", tButtonPanel);
-            SchedulerButtonAdd(TableIPCode, "4", "Gantt", tButtonPanel);
+            //SchedulerButtonAdd(TableIPCode, "4", "Gantt", tButtonPanel);
             SchedulerButtonAdd(TableIPCode, "5", "Ay", tButtonPanel);
             SchedulerButtonAdd(TableIPCode, "6", "Zaman Çizelgesi", tButtonPanel);
-            SchedulerButtonAdd(TableIPCode, "7", "Hafta", tButtonPanel);
-            SchedulerButtonAdd(TableIPCode, "8", "Çalışma Haftası", tButtonPanel);
+            //SchedulerButtonAdd(TableIPCode, "7", "Hafta", tButtonPanel);
+            //SchedulerButtonAdd(TableIPCode, "8", "Çalışma Haftası", tButtonPanel);
             //SchedulerWeekCounterAdd(TableIPCode, "9", "Hafta Sayısı", tButtonPanel);
         }
         private void SchedulerButtonAdd(string TableIPCode, string groupno, string caption,
@@ -3568,8 +3568,13 @@ MS_FIELDS                                          T03_MSFIELDS                 
                 tSchedulerControl.Start = Convert.ToDateTime(dsData.Tables[0].Rows[0][startDateFieldName].ToString());
 
             tSchedulerControl.DataStorage = storage;
-            tSchedulerControl.AccessibleDescription = storage.Appointments.Mappings.AppointmentId.ToString();
-            tSchedulerControl.AccessibleDefaultActionDescription = storage.Appointments.Mappings.Start.ToString();
+            /// tSchedulerControl.AccessibleDescription  <<< üzerinde zaten bazı bilgiler yüklenmiş
+            ///
+            //tSchedulerControl.AccessibleDescription = storage.Appointments.Mappings.AppointmentId.ToString();
+            //tSchedulerControl.AccessibleDefaultActionDescription = storage.Appointments.Mappings.Start.ToString();
+            tSchedulerControl.AccessibleDefaultActionDescription =
+                storage.Appointments.Mappings.AppointmentId.ToString() + "||" +
+                storage.Appointments.Mappings.Start.ToString() + "||";
             //SchedulerViewType.Agenda
             //SchedulerViewType.Day
             //SchedulerViewType.FullWeek
@@ -3582,7 +3587,7 @@ MS_FIELDS                                          T03_MSFIELDS                 
             //tSchedulerControl.AgendaView
             //tSchedulerControl.DayView.VisibleTime = true;
             //tSchedulerControl.FullWeekView.VisibleTime =    
- 
+
             tSchedulerControl.MonthView.DateTimeScrollbarVisible = true;
             tSchedulerControl.TimelineView.DateTimeScrollbarVisible = true;
             tSchedulerControl.WeekView.DateTimeScrollbarVisible = true;

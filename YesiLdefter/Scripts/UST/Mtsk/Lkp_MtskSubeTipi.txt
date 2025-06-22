@@ -15,7 +15,7 @@ create table [Lkp].[MtskSubeTipi]
 
 INSERT INTO [Lkp].[MtskSubeTipi] (Id, SubeTipi)
  VALUES 
-( 0,  '' ),
+( 0,  '0.Tanımsız' ),
 ( 1,  'A Şubesi' ),
 ( 2,  'B Şubesi' ),
 ( 3,  'C Şubesi' ),

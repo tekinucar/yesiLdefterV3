@@ -26,6 +26,10 @@ begin transaction
    SourceTypeId        SmallInt          null, /* mesajın kaynak konusu :  ilgili table detay aşağıda   */
    SourceId            Int               null, /* mesaja sebep olan kaynak tablonun Id si  : ilgili table ref Id */
 
+   Dinamik1Value       nVarchar(100)     null,
+   Dinamik2Value       nVarchar(100)     null,
+   Dinamik3Value       nVarchar(100)     null,
+
   constraint pk_CrsBildirimS primary key (Id)
  )
 
@@ -94,7 +98,7 @@ AS BEGIN
 			if (charindex(@search, @BildirimMetni) > 0) 
             begin
                 Select @value = TamAdiSoyadi
-                From MtskAday 
+                From dbo.MtskAday 
                 Where Id = @CariId
 				Set @BildirimMetni = REPLACE(@BildirimMetni, @search, @value)
             end
@@ -121,7 +125,7 @@ AS BEGIN
                       ,@ImzaAlindi = t.[ImzaAlindi]
                       ,@SozlesmeYapildi = t.[SozlesmeYapildi]
                       ,@AdresAlindi = t.[AdresAlindi]
-                From [dbo].[MtskAdayTalep] as t
+                From dbo.MtskAdayTalep as t
                 Where Id = @TalepId
 
 			    Set @value = '';
@@ -134,6 +138,32 @@ AS BEGIN
                 --if (@SozlesmeYapildi = 0) set @value = @value + ', ' + 'Sözleşme'
 				if (@AdresAlindi = 0)     set @value = @value + ', ' + 'Adres beyanı'
                 if (@value <> '') set @value = Substring(@value, 2, 200)
+
+				Set @BildirimMetni = REPLACE(@BildirimMetni, @search, @value)
+            end
+
+			set @search = '<ESINAV.Ucreti>';
+			if (charindex(@search, @BildirimMetni) > 0) 
+            begin
+                Select @value = Convert(varchar(50), Sum(TaksitTutari)) 
+                From dbo.OnmOdemePlani
+                Where TalepId = @TalepId
+                and   CariId = @CariId
+                and   UcretTipiId = 21111
+                and   IsPaid = 0
+
+				Set @BildirimMetni = REPLACE(@BildirimMetni, @search, @value)
+            end
+
+			set @search = '<USINAV.Ucreti>';
+			if (charindex(@search, @BildirimMetni) > 0) 
+            begin
+                Select @value = Convert(varchar(50), Sum(TaksitTutari)) 
+                From dbo.OnmOdemePlani
+                Where TalepId = @TalepId
+                and   CariId = @CariId
+                and   UcretTipiId = 21112
+                and   IsPaid = 0
 
 				Set @BildirimMetni = REPLACE(@BildirimMetni, @search, @value)
             end
@@ -241,21 +271,29 @@ INSERT INTO [Lkp].[CrsBildirimSSourceType] (Id, SourceType)
  VALUES 
   ( 0,        N''),
   ( 21101,    N'Kursiyer belgeleri'),
-
+  ( 21110,    N'------------------'),
   ( 21111,    N'Teorik dersler'),
-  ( 21112,    N'e-Sınav'),
+  ( 21112,    N'e-Sınav bildirimi'),
   ( 21113,    N'Uygulamalı dersler'),
-  ( 21114,    N'Uygulamalı sınav'),
-  ( 21115,    N'Başarısız aday eğitim planı'),
+  ( 21114,    N'+4 hak uyg. dersleri'),
+  ( 21115,    N'Telafi eğitim dersleri'),
+  ( 21116,    N'Başarısız aday eğitim dersleri'),
+  ( 21117,    N'Uygulamalı sınav bildirimi'),
 
+  ( 21120,    N'------------------'),
   ( 21121,    N'Sertifika ücreti'),
   ( 21122,    N'e-Sınav ücreti'),
   ( 21123,    N'Uygulama sınav ücreti'),
-  ( 21124,    N'Başarısız eğitim ücreti'),
   ( 21125,    N'Telafi eğitim ücreti'),
+  ( 21126,    N'Başarısız eğitim ücreti'),
+  
+  ( 21130,    N'------------------'),
+  ( 21131,    N'e-Sınav sonucu'),
+  ( 21132,    N'Uygulamalı sınav sonucu'),
 
-  ( 21131,    N'Doğum günü'),
-  ( 21132,    N'Özel gün kutlaması')
+  ( 21140,    N'------------------'),
+  ( 21141,    N'Doğum günü'),
+  ( 21142,    N'Özel gün kutlaması')
 
 
 
@@ -264,3 +302,10 @@ commit transaction
 /*CreateLkpTableEnd*/
 
 
+/*
+
+  alter table CrsBildirimS add Dinamik1Value       nVarchar(100)     null
+  alter table CrsBildirimS add Dinamik2Value       nVarchar(100)     null
+  alter table CrsBildirimS add Dinamik3Value       nVarchar(100)     null
+
+*/

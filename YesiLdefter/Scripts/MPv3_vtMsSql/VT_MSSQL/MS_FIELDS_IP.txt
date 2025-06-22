@@ -19,7 +19,7 @@ begin transaction
 	DEFAULT_SETUP   VarChar(50)    NULL,
 
     /* companent */
-    LIST_TYPES_NAME VarChar(50)   NULL, 
+    LIST_TYPES_NAME VarChar(100)  NULL, 
 	CMP_COLUMN_TYPE VarChar(30)   NULL,
 	CMP_WIDTH		SmallInt      NULL,
 	CMP_HEIGHT		SmallInt      NULL,

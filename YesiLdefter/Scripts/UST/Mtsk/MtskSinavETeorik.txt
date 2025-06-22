@@ -70,6 +70,7 @@ AS BEGIN
 	declare @yAdayId int = 0
 	declare @yTcNo varchar(11)
 	declare @yTamAdiSoyadi nVarchar(100)
+	declare @yAdayDonemTipiId int = 0
 	declare @SinavDonemTipiId int = 0
 	declare @ySinavNo int = 0
 	declare @ySinavTarihSaat varchar(20) = ''
@@ -93,6 +94,7 @@ AS BEGIN
         ,@yAdayId = isnull(ins.AdayId,0)
 		,@yTcNo = isnull(ins.TcNo,'')
 		,@yTamAdiSoyadi = isnull(ins.TamAdiSoyadi,'')
+        ,@yAdayDonemTipiId = isnull(ins.AdayDonemTipiId,0)
 		,@ySinavNo = isnull(ins.SinavNo,0)
 		,@ySinavTarihSaat = isnull(ins.SinavTarihSaat, '0')
 		,@yTeorikPuani = isnull(ins.TeorikPuani, 0)
@@ -113,17 +115,34 @@ AS BEGIN
 		if (MONTH(@ySinavTarihi) < 10)
                set @SinavDonemTipiId = convert(int, convert(varchar(5), YEAR(@ySinavTarihi)) + '0' + convert(varchar(3), MONTH(@ySinavTarihi)))
           else set @SinavDonemTipiId = convert(int, convert(varchar(5), YEAR(@ySinavTarihi)) + convert(varchar(3), MONTH(@ySinavTarihi)))
-		
-		
+
+        if (@SinavDonemTipiId = 0)
+        begin
+            if (MONTH(@ySinavTarihSaat) < 10)
+                   set @SinavDonemTipiId = convert(int, convert(varchar(5), YEAR(@ySinavTarihSaat)) + '0' + convert(varchar(3), MONTH(@ySinavTarihSaat)))
+              else set @SinavDonemTipiId = convert(int, convert(varchar(5), YEAR(@ySinavTarihSaat)) + convert(varchar(3), MONTH(@ySinavTarihSaat)))
+        end 
+
 		if (@yTalepId = 0 and @yAdayId = 0 and @yTcNo <> '')
 		begin
             -- Talepleri kontrol et
-            Select top 1 @yAdayId = AdayId, @yTalepId = Id From MtskAdayTalep
+            Select top 1 @yAdayId = AdayId, @yTalepId = Id, @yAdayDonemTipiId = DonemTipiId 
+            From dbo.MtskAdayTalep
             Where TcNo = @yTcNo
             and   isnull(DonemTipiId,0) <= @SinavDonemTipiId
             order by DonemTipiId desc, Id desc
 		end
 		
+		if (@yAdayDonemTipiId = 0 and @yTcNo <> '')
+		begin
+            -- Talepleri kontrol et
+            Select top 1 @yAdayId = AdayId, @yTalepId = Id, @yAdayDonemTipiId = DonemTipiId 
+            From dbo.MtskAdayTalep
+            Where TcNo = @yTcNo
+            and   isnull(DonemTipiId,0) <= @SinavDonemTipiId
+            order by DonemTipiId desc, Id desc
+		end
+
 		if (@yTeorikPuani >= 70) 
 		   set @SinavSonucTipiId = 1 -- Başarılı
 		
@@ -151,11 +170,12 @@ AS BEGIN
 		and FirmId = @yFirmId
 		and TalepId = @yTalepId
         and LineTypeId = @yLineTypeId 
-		and SinavTarihi < DATEADD(DAY, -4, @ySinavTarihi)  
+		and SinavTarihi < DATEADD(DAY, -1, @ySinavTarihi)  
 
 		update MtskSinavETeorik set
            TalepId = @yTalepId
          , AdayId = @yAdayId
+		 , AdayDonemTipiId = @yAdayDonemTipiId
 		 , SinavDonemTipiId = @SinavDonemTipiId
 		 , SinavNo = @ySinavNo
 		 , SinavTarihSaat = @ySinavTarihSaat
@@ -167,25 +187,57 @@ AS BEGIN
 	    -- İlk aldığımız datalarda tarihsaat yok
 		-- sonrada tekrar mebbisten sınavsonuçaları okutulursa bu seferde aynı bilgi bu sefer tarihsaatli okunduğu için
 		-- çift kayıt oluşuyor. Bu nedenle önceki saat bilgisi olmayan yani ilk datada okunan silinmesi gerekiyor
-		if (@yMebbisESinavTarihValue <> '')
-		begin
-            Delete From MtskSinavETeorik
-            Where SinavTarihi = @ySinavTarihi
-            and   isnull(MebbisESinavTarihValue,'') = ''
-            and   LineTypeId = @yLineTypeId 
-            and   Id <> @curId 
-		end
+        if ( select count(*)  from dbo.MtskSinavETeorik  
+             where SinavTarihi = @ySinavTarihi
+             and   LineTypeId = 2
+             and   TalepId = @yTalepId
+        ) > 1
+        begin
+             Delete From MtskSinavETeorik
+             Where SinavTarihi = @ySinavTarihi
+             and   isnull(MebbisESinavTarihValue,'') = ''
+             and   LineTypeId = @yLineTypeId 
+             and   TalepId = @yTalepId
+        end
+
+		/* hatalı işlenmiş sınav tarihi varsa onları tespit edince sil */
+        /* bu hata ilk data aktarıımı sırasında oluşyor */ 
+		if (@yAdayId > 0)
+        begin
+            delete dbo.MtskSinavETeorik 
+            From dbo.MtskSinavETeorik as sinav,
+                 dbo.MtskAdayTalep as talep  
+            where sinav.TalepId = talep.Id
+            and   sinav.SinavDonemTipiId < talep.DonemTipiId 
+            and   sinav.AdayId = @yAdayId
+        end
+
+		/* SinavNo ayarlanıyor */
+        Update dbo.MtskSinavETeorik set 
+           SinavNo = x.yeniSinavNo
+        From dbo.MtskSinavETeorik as a,
+        (
+            Select sinav.Id 
+            , ROW_NUMBER() OVER(ORDER BY sinav.SinavTarihi) AS yeniSinavNo 
+            From dbo.MtskSinavETeorik as sinav
+            where sinav.FirmId = @yFirmId
+            and   sinav.IsActive = 1
+            and   sinav.LineTypeId = 2 -- sınav sonucu
+            and   sinav.TalepId = @yTalepId
+        ) as x
+        Where a.Id = x.Id
+        and   a.SinavNo <> x.yeniSinavNo
 
         -- Aday ken kayıt durumuna halen geçmemişse
 		Update dbo.MtskAdayTalep set KayitTipiId = 3
         Where Id = @yTalepId
         and   KayitTipiId < 3 -- Kesin Kayıt değilse ? kesin kayıt durumuna getir
 
-		Execute [dbo].[prc_MtskAdayTakipTalepKaydiSingleSet] @yTalepId
+        Execute [dbo].[prc_MtskAdayTakipTalepKaydiSingleSet] @yTalepId
 
         FETCH NEXT FROM eSinavCursor INTO @curId
     END
-	
+
     CLOSE eSinavCursor
     DEALLOCATE eSinavCursor   
 
@@ -213,7 +265,9 @@ AS BEGIN
 	    From deleted dlt
 	    Where dlt.Id = @curId
 	  
-	    Execute [dbo].[prc_MtskAdayTakipTalepKaydiSingleSet] @TalepId
+        --Execute [dbo].[prc_MtskAdayTakipTalepKaydiSingleSet] @TalepId
+        Execute [dbo].[prc_MtskAdayTakipESinavSet] @TalepId
+
         FETCH NEXT FROM eSinavCursorDlt INTO @curId
     END
 

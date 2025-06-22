@@ -45,7 +45,7 @@ Delete from [Lkp].[GecerlilikTarihiKonuTipi]
 INSERT INTO [Lkp].[GecerlilikTarihiKonuTipi] (Id, KonuTipi, GrupTipiId)
  VALUES 
   ( 0,      N'',0),
-  ( 21101,  N'Teodrik saatler', 211),
+  ( 21101,  N'Teorik saatler', 211),
   ( 21102,  N'Uygulama saatleri', 211),
   ( 21103,  N'Sınav ücreti', 211),
   ( 21104,  N'Sertifika/ders ücreti', 211)

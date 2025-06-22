@@ -9,7 +9,15 @@ BEGIN
   declare @FirmId int = 11
   declare @KonuTipiId int = 21101 -- teorik ders saati tarihi
   declare @Tarih date = getdate()
+
+Id      KonuTipi
+21101   Teorik saatler
+21102   Uygulama saatleri
+21103   Sınav ücreti
+21104   Teodrik ders ücreti
+21105  Uygulama ders ücreti
   */
+
   Select top 1 @responseId = gtarih.Id 
   From GecerlilikTarihi as gtarih 
   Where gtarih.FirmId = @FirmId

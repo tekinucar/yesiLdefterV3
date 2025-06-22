@@ -41,7 +41,7 @@ begin transaction
     CMP_FORMAT_TYPE     SmallInt        NULL,  
     CMP_DISPLAY_FORMAT  VarChar(50) 	NULL,
 	CMP_EDIT_FORMAT     VarChar(50) 	NULL,
-    LIST_TYPES_NAME     VarChar(50) 	NULL, 
+    LIST_TYPES_NAME     VarChar(100) 	NULL, 
 
     /* veri kontrolü  */
     VALIDATION_OPERATOR     SmallInt      NULL,

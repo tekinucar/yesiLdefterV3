@@ -25,6 +25,7 @@ begin transaction
    SablonTeorikBId      Int           null, /* SablonTeorikBId ve DonemTipiId ile beraber bakıldığında hangi taslak formundan (MtskTaslakTeorikF) bilgi alındığı bulunur  */
    SablonTeorikFId      Int           null,
    OzelGunlerId         Int           null, /* OnmOzelGunler.Id */
+   DersHaftasiId        SmallInt      null, /* yılın hangi haftasına denk geldi, bu sayede o haftadaki tüm dersler listeleniyor */  
 
    constraint		pk_MtskTeorikDers primary key (Id)
  )
@@ -59,15 +60,14 @@ AS BEGIN
     declare @TDersIsUploaded bit = 0
     declare @SablonTeorikFId int = 0
 
-    declare @insId int = 0
+	declare @insId int = 0
     declare @mvcId int = 0
-    declare @CakismaId int = 0
 
     WHILE @@FETCH_STATUS = 0
     BEGIN
     	
       Select
-       @eFirmId = ins.FirmId
+	   @eFirmId = ins.FirmId
       ,@eDonemTipiId = ins.DonemTipiId
       ,@eGrupTipiId = ins.GrupTipiId
       ,@eSubeTipiId = ins.SubeTipiId
@@ -95,14 +95,15 @@ AS BEGIN
         Where Id = @curId
       end
 	  
-      if (@eDersSaatiTipiId > -1 and @eDersSaatiTipiId < 20)
-      begin
-          -- BaslangicSaat ve BitisSaat 
-          update dbo.MtskTeorikDers set 
+	  if (@eDersSaatiTipiId > -1 and @eDersSaatiTipiId < 20)
+	  begin
+	      -- BaslangicSaat ve BitisSaat 
+	      update dbo.MtskTeorikDers set 
               BaslamaSaati = CONVERT(smalldatetime, CONVERT(varchar(10), @eDersTarihi) + ' ' + SUBSTRING(@eSaat,1,5))
             , BitisSaati   = CONVERT(smalldatetime, CONVERT(varchar(10), @eDersTarihi) + ' ' + SUBSTRING(@eSaat,9,5))
+            , DersHaftasiId = DatePart(ww, @eDersTarihi)
           Where Id = @curId
-      end --
+	  end --
 
       if (@TDersIsUploaded = 1 and @SablonTeorikFId > 0)
       begin 
@@ -111,11 +112,9 @@ AS BEGIN
           and   isnull(IsLock,0) = 0
       end
 
-      --Execute [dbo].[prc_MtskTeorikDersIhlalleri] @curId iptal
-      Execute [dbo].[prc_MtskTeorikDersIhlalleriSaatler] @curId, 0, 0
-      Execute [dbo].[prc_MtskTeorikDersIhlalleriCakismalar] @curId
-      Execute [dbo].[prc_MtskDersIhlalleriPersonel] @curId
-
+	  Execute [dbo].[prc_MtskTeorikDersIhlalleriSaatler] @eFirmId, @eDonemTipiId
+      Execute [dbo].[prc_MtskTeorikDersIhlalleriCakismalar] @eFirmId, @eDonemTipiId
+	  Execute [dbo].[prc_MtskDersIhlalleriPersonel] @curId, @eFirmId, @eDonemTipiId, @ePersonelId
 
       FETCH NEXT FROM myCursor INTO @curId
     END
@@ -131,7 +130,7 @@ END -- create trigger
 /*CreateTriggerEnd*/
 
 
- /*CreateTrigger*/
+/*CreateTrigger*/
 
 CREATE TRIGGER [dbo].[trg_MtskTeorikDersDelete] on [dbo].[MtskTeorikDers]
 AFTER DELETE
@@ -139,41 +138,19 @@ AS BEGIN
 
     declare teoCursorDlt cursor local for select Id from deleted
 	declare @curId bigint
-	declare @FirmId int
-	declare @DonemTipiId int
-    declare @GrupTipiId smallInt = 0
-    declare @SubeTipiId smallInt = 0
 
 	OPEN teoCursorDlt
     FETCH NEXT FROM teoCursorDlt INTO @curId
 
-	set @FirmId = 0
-	set @DonemTipiId = 0
-
     WHILE @@FETCH_STATUS = 0
     BEGIN
-        Select   
-		    @FirmId = FirmId
-          , @DonemTipiId = DonemTipiId 
-          , @GrupTipiId  = GrupTipiId
-          , @SubeTipiId  = SubeTipiId
-		From deleted
-		Where Id = @curId
 
 	    Delete From dbo.MtskKIhlalTeorikD 
 		Where InsertedId = @curId 
 		or    MevcutId   = @curId
 
-        Execute [dbo].[prc_MtskTeorikDersIhlalleriSaatler] @curId, @FirmId, @DonemTipiId
-        -- çakışmaları düzeltemiyor çünkü InsertedId li kayıt silinmiş oluyor
-	    -- Execute [dbo].[prc_MtskTeorikDersIhlalleriCakismalar] @curId
-        Execute [dbo].[prc_MtskDersIhlalleriPersonel] @curId
-
       FETCH NEXT FROM teoCursorDlt INTO @curId
     END
-
-    Execute [dbo].[prc_MtskGrupSubesiTeorikDersToplami] @FirmId, @DonemTipiId, @GrupTipiId, @SubeTipiId
-    Execute [dbo].[prc_MtskGrupSubesiTakipSet] @FirmId, @DonemTipiId, @GrupTipiId, @SubeTipiId
 
     CLOSE teoCursorDlt
     DEALLOCATE teoCursorDlt
@@ -192,11 +169,16 @@ AS BEGIN
     declare isLockCursorDlt cursor local for select Id from deleted
     declare @curId bigint
 
+	declare @FirmId int
+	declare @DonemTipiId int
+	declare @GrupTipiId int
+	declare @SubeTipiId int
+	declare @PersonelId varchar(30)
+
     OPEN isLockCursorDlt
 
     FETCH NEXT FROM isLockCursorDlt INTO @curId
-
-
+	   
     WHILE @@FETCH_STATUS = 0
     BEGIN
 	    IF EXISTS (SELECT 1 FROM deleted WHERE isnull(TDersIsUploaded,0) = 1 and Id = @curId)
@@ -205,10 +187,24 @@ AS BEGIN
             RETURN
         END
 
+        Select @FirmId = FirmId
+		, @DonemTipiId = DonemTipiId 
+		, @GrupTipiId = GrupTipiId 
+		, @SubeTipiId = SubeTipiId 
+        , @PersonelId = PersonelId
+		from dbo.MtskTeorikDers Where Id = @curId
+
         Delete from dbo.MtskTeorikDers  Where Id = @curId and isnull(TDersIsUploaded,0) = 0
+
+	    Execute [dbo].[prc_MtskTeorikDersIhlalleriSaatler] @FirmId, @DonemTipiId
+        Execute [dbo].[prc_MtskTeorikDersIhlalleriCakismalar] @FirmId, @DonemTipiId
+		Execute [dbo].[prc_MtskDersIhlalleriPersonel] @curId, @FirmId, @DonemTipiId, @PersonelId
 
       FETCH NEXT FROM isLockCursorDlt INTO @curId
     END
+
+    Execute [dbo].[prc_MtskGrupSubesiTeorikDersToplami] @FirmId, @DonemTipiId, @GrupTipiId, @SubeTipiId
+    Execute [dbo].[prc_MtskGrupSubesiTakipSet] @FirmId, @DonemTipiId, @GrupTipiId, @SubeTipiId
 
     CLOSE isLockCursorDlt
     DEALLOCATE isLockCursorDlt

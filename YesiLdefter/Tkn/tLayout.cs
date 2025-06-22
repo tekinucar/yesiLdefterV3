@@ -456,6 +456,7 @@ namespace Tkn_Layout
                                 ustItemName = UstHesapRow["CMP_NAME"].ToString();
 
                             DockPanel UstPanel = manager.Panels[ustItemName];
+                            UstPanel.Hide();
 
                             if (tabbed == "Split")
                             {
@@ -471,7 +472,7 @@ namespace Tkn_Layout
                             }
                             if (tabbed == "Tab")
                             {
-                                // Not : İki panelen tab olamsı için Dock tiplerininde aynı olması gerekiyor
+                                // Not : İki panelen tab olması için Dock tiplerininde aynı olması gerekiyor
                                 if (panelCount == 2)
                                     tDockPanel = UstPanel.AddPanel();
 
@@ -480,8 +481,6 @@ namespace Tkn_Layout
                                     tDockPanel = UstPanel.ParentPanel.AddPanel();
                                     UstPanel.ParentPanel.Tabbed = true;
                                 }
-
-                                //tDockPanel.DockAsTab(UstPanel, i);
                             }
                         }
                         #endregion
@@ -497,6 +496,7 @@ namespace Tkn_Layout
                         tDockPanel.Visibility = DockVisibility.Visible;
                         tDockPanel.TabIndex = i;
                         tDockPanel.Options.ShowCloseButton = false;
+                        
 
                         if (DockType == v.dock_Bottom) tDockPanel.Dock = DockingStyle.Bottom;
                         if (DockType == v.dock_Fill) tDockPanel.Dock = DockingStyle.Fill;
@@ -3059,6 +3059,7 @@ namespace Tkn_Layout
         private void lCefWebBrowser_Preparing(Form tForm, Control subView, DataSet ds_Layout, DataRow row, int pos)
         {
             if (v.SP_Debug) return;
+            if (v.con_NewFilesFound) return; /// ftpden yeni dosyalar indirildi
 
             tToolBox t = new tToolBox();
 
@@ -3115,25 +3116,10 @@ namespace Tkn_Layout
                 if (t.IsNotNull(UstHesapRow["CMP_NAME"].ToString()))
                     ustItemName = UstHesapRow["CMP_NAME"].ToString();
 
-                /*
-                ChromiumWebBrowser webBrowser1 = CEFHelper.CreateBrowser;
-                webBrowser1.Dock = DockStyle.Fill;
-                webBrowser1.Name = "CefSharpBrowser";
-                webBrowser1.LoadUrl("https://ustadyazilim.com/");
-                */
-
                 string cefPath = "CEF_" + DateTime.Now.Ticks.ToString();
                 //string rootPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + Application.StartupPath;
                 string rootPath = v.EXE_PATH;
                 string newPath = rootPath + "\\" + cefPath;
-
-                //System.IO.Directory.CreateDirectory(newPath);
-
-                //CefSettings settings = new CefSettings();
-                //settings.IgnoreCertificateErrors = true;
-                //settings.RootCachePath = newPath;
-
-                //Cef.Initialize(settings);
 
                 ChromiumWebBrowser webBrowser1 = null;
 
@@ -3145,14 +3131,18 @@ namespace Tkn_Layout
                     // CefSharp bileşenlerini kontrol et ve gerekirse indir
                     // CefSharpInstaller.EnsureCefSharpComponents().Wait();
                     //t.X64filesUpdates();
-
+                    
+                    /// DİKKAT : Cef ile Selenium karıştırma iki birbirinden farklı
+                    /// 
                     webBrowser1 = new ChromiumWebBrowser(TableIPCode);
+
+                    // DPI uyumluluğu için
+                    webBrowser1.BrowserSettings.WindowlessFrameRate = 60;
                 }
                 catch (Exception ex)
                 {
-                    
-                    t.X64filesUpdates();
-                    t.LaunchCommandLineApp();
+                    //t.X64filesUpdates();
+                    //t.LaunchCommandLineApp();
                     return;
                 }
 
@@ -3176,45 +3166,7 @@ namespace Tkn_Layout
                 var bitness = Environment.Is64BitProcess ? "x64" : "x86";
                 var environment = String.Format("Environment: {0}", bitness);
 #endif
-
                 lParentControlAdd(tForm, webBrowser1, ustItemName, ustItemType, row);
-                
-                
-                /*
-                DevExpress.XtraEditors.PanelControl panelControl1 = new DevExpress.XtraEditors.PanelControl();
-                ((System.ComponentModel.ISupportInitialize)(panelControl1)).BeginInit();
-                panelControl1.SuspendLayout();
-                //
-                // panelControl1
-                // 
-                panelControl1.Location = new System.Drawing.Point(0, 0);
-                panelControl1.Name = "CefSharpBrowser";
-                    //v.lyt_Name + t.Str_Replace(ref layout_code, ".", "_");  //RefId.ToString();
-                //if (t.IsNotNull(CmpName))
-                //    panelControl1.Name = CmpName;   WebMain atanıyor
-                panelControl1.Padding = new System.Windows.Forms.Padding(2);
-                panelControl1.Size = new System.Drawing.Size(200, 40);
-                panelControl1.TabIndex = 0;
-
-                // paneli içine yeni create edilen editin Dock ayarlanıyor
-                if (panelControl1.Controls.Count > 0)
-                    panelControl1.Controls[0].Dock = DockStyle.Fill;
-
-                if (DockType == v.dock_Bottom) panelControl1.Dock = System.Windows.Forms.DockStyle.Bottom;
-                if (DockType == v.dock_Fill) panelControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-                if (DockType == v.dock_Left) panelControl1.Dock = System.Windows.Forms.DockStyle.Left;
-                if (DockType == v.dock_Right) panelControl1.Dock = System.Windows.Forms.DockStyle.Right;
-                if (DockType == v.dock_Top) panelControl1.Dock = System.Windows.Forms.DockStyle.Top;
-
-                t.myControl_Size_And_Location(panelControl1, width, height, left, top);
-
-                ((System.ComponentModel.ISupportInitialize)(panelControl1)).EndInit();
-                panelControl1.ResumeLayout(false);
-                lParentControlAdd(tForm, panelControl1, ustItemName, ustItemType, row);
-
-                panelControl1.SendToBack();
-                */
-                
             }
 
             #endregion
@@ -4574,7 +4526,9 @@ namespace Tkn_Layout
 
 
             if (manager != null)
+            {
                 return manager;
+            }
             else return null;
 
             //t his.components = new System.ComponentModel.Container();

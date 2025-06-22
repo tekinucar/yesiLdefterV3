@@ -6,6 +6,7 @@ using DevExpress.XtraVerticalGrid;
 using DevExpress.XtraVerticalGrid.Rows;
 using System;
 using System.Data;
+using System.Threading;
 using System.Windows.Forms;
 using Tkn_CreateObject;
 using Tkn_DefaultValue;
@@ -91,6 +92,16 @@ namespace Tkn_InputPanel
             DataSet ds_Fields = new DataSet();
 
             tTablesRead tr = new tTablesRead();
+
+            if (v.con_ResimEditorRun)
+            {
+                /// Resim Editörünü arka arkaya açarken ds_Fields tablosunu çift okuyor bu nedenle datalar çift geliyor
+                /// Nedeni bilinmiyor
+                /// tr.MS_Fields_IP_Read buraya gitmeden önce biraz bekletme ile sorun çözüldü
+                /// 
+                Thread.Sleep(500);
+                v.con_ResimEditorRun = false;
+            }
 
             tr.MS_Tables_IP_Read(ds_Table, TableIPCode);
             tr.MS_Fields_IP_Read(ds_Fields, TableIPCode);
@@ -198,7 +209,6 @@ namespace Tkn_InputPanel
             //t.Takipci(function_name, "", '{');
 
             #region Tanımlar
-
             DataSet ds_Data = new DataSet();
             DataRow row_Table = ds_Table.Tables[0].Rows[0];
 
@@ -250,7 +260,8 @@ namespace Tkn_InputPanel
                 }
                 else
                 {
-                    MessageBox.Show("DİKKAT : " + External_TableIPCode + " için DataControl tespit edilemedi ...", function_name + "(External TableIPCode)");
+                    //MessageBox.Show("DİKKAT : " + External_TableIPCode + " için DataControl tespit edilemedi ...", function_name + "(External TableIPCode)");
+                    t.AlertMessage("External_TableIPCode bağlantısı", External_TableIPCode + " için data bulunamadı...");
                 }
             }
 
@@ -283,12 +294,12 @@ namespace Tkn_InputPanel
 
             if (tPanelControl.ToString() != "DevExpress.XtraBars.Navigation.NavigationPane")
             {
-                co.Create_Navigator(tForm, tPanelControl, row_Table, ds_Data,
+                co.Create_Navigator(tForm, tPanelControl, row_Table, ds_Data, ds_Fields,
                                     TableIPCode + MultiPageID, External_TableIPCode);
             }
             else
             {
-                co.Create_Navigator(tForm, tPanelControl.Parent, row_Table, ds_Data,
+                co.Create_Navigator(tForm, tPanelControl.Parent, row_Table, ds_Data, ds_Fields,
                                     TableIPCode + MultiPageID, External_TableIPCode);
             }
 

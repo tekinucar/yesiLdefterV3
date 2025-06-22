@@ -5,8 +5,10 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.IO.Compression;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Tkn_Events;
 using Tkn_Ftp;
@@ -69,13 +71,10 @@ namespace YesiLdefter
         }
         private void mainForm_Shown(object sender, EventArgs e)
         {
-            //v.Kullaniciya_Mesaj_Var = "YolHaritasi";
-            //timer_Mesaj_Suresini_Bitir.Interval = 500;
-            //v.timer_Kullaniciya_Mesaj_Var_.Start();
+            this.PerformLayout();
         }
         public main(string[] args)
         {
-
             preparinDefaultValues();
 
             #region Read Parameters
@@ -86,14 +85,14 @@ namespace YesiLdefter
                 {
                     if (arg != "")
                     {
-                        //MessageBox.Show("param:" + arg);
+                        v.EXE_Arguments += " " + arg; 
+
                         if (arg.IndexOf("CEF") > -1)
                         {
                             // CefSharp ın çalışmasını durdur, çalışmasın.
                             // Aynı Exe birden fazla aynı anda çalışınca CefSharp hata veriyor
                             v.SP_Debug = true;
                         }
-
                         if (arg.IndexOf("UserId=") > -1)
                         {
                             v.tUser.UserId = t.myInt32(arg.Replace("UserId=", ""));
@@ -107,22 +106,20 @@ namespace YesiLdefter
                         if (arg.IndexOf("ServerName=") > -1)
                         {
                             v.SP_TabimParamsServerName = arg.Replace("ServerName=", "");
-
                         }
                     }
                 }
             }
 
             //v.SP_Debug = true;
+            //MessageBox.Show(v.EXE_Arguments);
 
             /// params giriş TESTi için 
-            // KÖREN FirmGUID : 0fe40e88-bccf-4f58-9531-7e39c47a1385
-
             //params_ = true;
-            //v.tUser.UserId = 56;// 12; 
-            //v.SP_TabimParamsKurumTipi = "SRC";// "MTSK";
+            //v.tUser.UserId = 60;// 12; 
+            //v.SP_TabimParamsKurumTipi = "MTSK"; //"SRC";// 
             //v.SP_TabimParamsServerName = "LAPTOP-ACER1\\SQLEXPRESS";
-            //MessageBox.Show(params_.ToString() + " : " + v.tUser.UserId.ToString() + " : " + v.SP_TabimParamsKurumTipi + " : " + v.SP_TabimParamsServerName);
+            ////MessageBox.Show(params_.ToString() + " : " + v.tUser.UserId.ToString() + " : " + v.SP_TabimParamsKurumTipi + " : " + v.SP_TabimParamsServerName);
 
             #endregion
 
@@ -130,6 +127,21 @@ namespace YesiLdefter
 
             // formun kendisi
             InitializeComponent();
+
+            /// Computer hakkındaki verileri topla
+            /// 
+            t.WaitFormOpen(v.mainForm, "Bilgisayar hakkındaki bilgiler okunuyor...");
+            //Task task1 = new Task(() =>
+            //{
+               t.Get_MacAddress();
+            //});
+            //task1.Start();
+            //Task task2 = new Task(() =>
+            //{
+               t.Get_ComputerAbout();
+            //});
+            //task2.Start();
+
 
             // ana ekranının hazırlanması
             // yani menuler burada hazırlanıyor
@@ -232,19 +244,15 @@ namespace YesiLdefter
 
             #region appOpenSetDefaaultSkin
             WindowsFormsSettings.EnableFormSkins();
-            //UserLookAndFeel.Default.SetSkinStyle("VS2010");
+            
             UserLookAndFeel.Default.SetSkinStyle(SkinSvgPalette.Bezier.Grasshopper);
             //UserLookAndFeel.Default.SetSkinStyle(SkinStyle.Sharp);//   Whiteprint);
-            //UserLookAndFeel.Default.SetSkinStyle(SkinSvgPalette.Bezier.Grasshopper);
+
             UserLookAndFeel.Default.StyleChanged += Default_StyleChanged;
             #endregion
 
             v.mainForm = this;
             v.Wait_Caption = v.Wait_Caption.PadRight(100);
-            //v.Wait_Desc_ProgramYukleniyor = v.Wait_Desc_ProgramYukleniyor.PadRight(100);
-            //v.Wait_Desc_ProgramYukDevam = v.Wait_Desc_ProgramYukDevam.PadRight(100);
-            //v.Wait_Desc_DBBaglanti = v.Wait_Desc_DBBaglanti.PadRight(100);
-            //SplashScreenManager.ShowForm(this, typeof(DevExpress.XtraWaitForm.AutoLayoutDemoWaitForm), true, true, false);
 
             chechkedPaths();
             
@@ -280,15 +288,24 @@ namespace YesiLdefter
                 }
                 
                 t.WaitFormOpen(v.mainForm, "SysTypes tanımları okunuyor...");
-                t.SYS_Types_Read();
+                Task task1 = new Task(() =>
+                {
+                    t.SYS_Types_Read();
+                });
+                task1.Start();
 
                 t.WaitFormOpen(v.mainForm, "Dönem listesi okunuyor...");
-                t.DonemTipiYilAyRead();
+                Task task2 = new Task(() =>
+                {
+                    t.DonemTipiYilAyRead();
+                });
+                task2.Start();
+
 
                 //t.WaitFormOpen(v.mainForm, "Read : SysGlyph ...");
                 //t.SYS_Glyph_Read();
 
-
+                t.WaitFormOpen(v.mainForm, "Menü hazırlanıyor...");
                 preparingMenus();
 
                 /// Ustad Crm ve TabimMtsk değil ise DbUpdates çalışacak
@@ -297,50 +314,28 @@ namespace YesiLdefter
                 if ((v.SP_Firm_SectorTypeId != (Int16)v.msSectorType.UstadCrm) && // Crm
                     (v.SP_Firm_SectorTypeId != (Int16)v.msSectorType.TabimMtsk))
                 {
-                    t.dbUpdatesChecked();
+                    Task task3 = new Task(() =>
+                    {
+                        t.dbUpdatesChecked();
+                    });
+                    task3.Start();
 
-                    //t.WaitFormOpen(v.mainForm, "İl ve İlçe listesi okunuyor...");
-                    //t.SYS_IL_Read();
-                    //t.SYS_Ilce_Read();
-                    // Frmanın Il ve Ilçe adı atanıyor
-                    //t.preparing_FirmILAdi_IlceAdi();
+                    if (v.SP_TabimParamsKurumTipi == "")
+                    {
+                        t.WaitFormOpen(v.mainForm, "İl ve İlçe listesi okunuyor...");
+                        t.SYS_IL_Read();
+                        t.SYS_Ilce_Read();
+                        // Frmanın Il ve Ilçe adı atanıyor
+                        t.preparing_FirmILAdi_IlceAdi();
+                        t.WaitFormOpen(v.mainForm, "......");
+                    }
                 }
 
                 setMainFormCaption();
             }
         }
 
-        void YolHaritasi()
-        {
-            bool onay = t.getSettingsBoolValue((Int16)v.settings.BaslangictaYapilmasiGerekenlerMenu);
-
-            if (onay)
-            {
-                // Ön Muhasebe için başlangıç işlemleri
-                //if (v.SP_Firm_SectorTypeId == (Int16)v.msSectorType.OnMuhasebe)
-                //    autoOpenForm("UST/OMS/FNS/MALIISLEM","");
-
-                //autoOpenForm("UST/OMS/AYR/YHBaslangic");
-                if ((v.SP_TabimParamsKurumTipi == "") &&
-                    ((v.SP_Firm_SectorTypeId == (Int16)v.msSectorType.UstadMtsk) ||
-                    (v.SP_Firm_SectorTypeId == (Int16)v.msSectorType.TabimMtsk)))
-                    autoOpenForm("UST/MEB/MTS/YHYasamDongusu", "");
-                //autoOpenForm("UST/MEB/MTS/YHBaslangic","");
-
-                /// şimdilik geçici burada. Daha sonra günde bir defa çalışacak şekilde ayarlamak gerekiyor
-                /// 
-                if (v.SP_Firm_SectorTypeId == (Int16)v.msSectorType.UstadMtsk)
-                {
-                    execute_prc_MtskGunlukTakipler();
-                }
-            }
-            else
-            {
-                autoOpenForm("UST/PMS/HUB/MainWebMtsk", "ms_CefSharp");
-            }
-        }
-
-        void execute_prc_MtskGunlukTakipler()
+        async Task execute_prc_MtskGunlukTakipler()
         {
             tSQLs sqls = new tSQLs();
             DataSet ds = new DataSet();
@@ -348,6 +343,7 @@ namespace YesiLdefter
             string sql = sqls.Sql_prc_MtskGunlukTakipler();
 
             t.SQL_Read_Execute(v.dBaseNo.Project, ds, ref sql, "prc_MtskGunlukTakipler", "");
+            t.AlertMessage("Mesaj","Günlük başlangıç işlemler tamamlandı.");
         }
 
         void autoOpenForm(string FormCode, string FormName)
@@ -367,8 +363,13 @@ namespace YesiLdefter
 
         void setMainFormCaption()
         {
-            // ---
-            this.Text = "YeşiL defter   Ver : " +
+            string verNo = "1.0";
+
+            if (v.SP_TabimParamsKurumTipi == "")
+                verNo = "2.0";
+            else verNo = "1.0";
+
+            this.Text = "YeşiL defter  " + verNo + ",   Sürüm : " +
                 v.tExeAbout.activeVersionNo.Substring(2, 6) + "." +
                 v.tExeAbout.activeVersionNo.Substring(9, 4) +
                 "    [ " + v.tMainFirm.FirmId.ToString() + " : " + v.tMainFirm.FirmShortName + " ] ";
@@ -436,6 +437,43 @@ namespace YesiLdefter
             }
         }
 
+        #endregion
+
+        #region YolHaritasi
+        void YolHaritasi()
+        {
+            bool onay = t.getSettingsBoolValue((Int16)v.settings.BaslangictaYapilmasiGerekenlerMenu);
+
+            if (onay)
+            {
+                // Ön Muhasebe için başlangıç işlemleri
+                //if (v.SP_Firm_SectorTypeId == (Int16)v.msSectorType.OnMuhasebe)
+                //    autoOpenForm("UST/OMS/FNS/MALIISLEM","");
+
+                //autoOpenForm("UST/OMS/AYR/YHBaslangic");
+                if ((v.SP_TabimParamsKurumTipi == "") &&
+                    ((v.SP_Firm_SectorTypeId == (Int16)v.msSectorType.UstadMtsk) ||
+                    (v.SP_Firm_SectorTypeId == (Int16)v.msSectorType.TabimMtsk)))
+                    autoOpenForm("UST/MEB/MTS/YHYasamDongusu", "");
+                //autoOpenForm("UST/MEB/MTS/YHBaslangic","");
+
+
+                ///// şimdilik geçici burada. Daha sonra günde bir defa çalışacak şekilde ayarlamak gerekiyor
+                ///// 
+                if (v.SP_Firm_SectorTypeId == (Int16)v.msSectorType.UstadMtsk)
+                {
+                    Task task1 = new Task(() =>
+                    {
+                        execute_prc_MtskGunlukTakipler();
+                    });
+                    task1.Start();
+                }
+            }
+            else
+            {
+                autoOpenForm("UST/PMS/HUB/MainWebMtsk", "ms_CefSharp");
+            }
+        }
         #endregion
 
         #region preparingMenus
@@ -957,6 +995,12 @@ namespace YesiLdefter
                 else e.Cancel = true; // Main formun kapanmasını engeller
             }
         }
+
+        private void main_DpiChangedAfterParent(object sender, EventArgs e)
+        {
+            MessageBox.Show("aaaaa");
+        }
+
 
         #endregion Events
 

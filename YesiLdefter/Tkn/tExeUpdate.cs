@@ -38,19 +38,23 @@ namespace Tkn_ExeUpdate
         public bool RunExeUpdate()
         {
             bool onay = false;
-            //
+            /// Son kullanıcı ise indir
             if (v.SP_tUserType == v.tUserType.EndUser)
                 onay = t.ftpDownload(v.tExeAbout.activePath, v.tExeAbout.ftpPacketName); // EndUser için exe indiriyor
+            /// Tester ise indir
             if (v.SP_tUserType == v.tUserType.TesterUser)
                 onay = t.ftpTesterDownload(v.tExeAbout.activePath, v.tExeAbout.ftpPacketName);
-            //
+            
+            /// inen dosyayı aç
             if (onay)
                 onay = ExtractFile(v.tExeAbout.activePath, v.tExeAbout.ftpPacketName);
 
-            // activeFileName   = v.tExeAbout.activeExeName
-            // extension        = 
-            // oldVersionNo     = v.tExeAbout.activeVersionNo
-            // packetName       = v.tExeAbout.ftpPacketName
+            /// activeFileName   = v.tExeAbout.activeExeName
+            /// extension        = 
+            /// oldVersionNo     = v.tExeAbout.activeVersionNo
+            /// packetName       = v.tExeAbout.ftpPacketName
+            
+            /// mevcut ve yeni dosyaların isimlerini değiştir
             if (onay)
                 onay = fileNameChange(v.tExeAbout.activePath, v.tExeAbout.activeExeName, "exe", v.tExeAbout.activeVersionNo, v.tExeAbout.ftpPacketName);
 
@@ -73,7 +77,7 @@ namespace Tkn_ExeUpdate
             foreach (FileInfo fi in di.GetFiles())
             {
                 //for specific file 
-                if (fi.ToString() ==  packetName)//v.tExeAbout.ftpPacketName)
+                if (fi.ToString() ==  packetName)
                 {
                     onay = Extract(fi);
                     break;
@@ -92,7 +96,10 @@ namespace Tkn_ExeUpdate
             {
                 string currentFileName = fi.FullName;
                 //string newFileName = fi.FullName.Remove(fi.FullName.IndexOf(fi.Extension), fi.Extension.Length) + ".exe";
-                string newFileName = fi.FullName.Remove(fi.FullName.IndexOf(fi.Extension), fi.Extension.Length) + "." + fi.Extension;
+                string newFileName = fi.FullName;
+
+                if (newFileName.IndexOf("YesiLdefter_") > -1)
+                    newFileName = newFileName.Replace(".gz", ".exe");
 
                 using (FileStream deCompressedFile = File.Create(newFileName))
                 {
@@ -118,7 +125,6 @@ namespace Tkn_ExeUpdate
             // extension        = 
             // oldVersionNo     = v.tExeAbout.activeVersionNo
             // packetName       = v.tExeAbout.ftpPacketName
-
 
             try
             {

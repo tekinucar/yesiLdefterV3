@@ -4,6 +4,7 @@ using System.Windows.Forms;
 using Tkn_ToolBox;
 using Tkn_Variable;
 using Tkn_ExeUpdate;
+using System.Drawing;
 
 namespace Tkn_Events
 {
@@ -499,6 +500,24 @@ namespace Tkn_Events
 
                 v.con_FormAfterCreateView = false;
             }
+
+            Screen screen = Screen.FromControl((Form)sender);
+            //string ekran = "";
+            //ekran  = $"Bulunduğu Ekran: {screen.DeviceName}" + v.ENTER;
+            //ekran += $"Çözünürlük: {screen.Bounds.Width}x{screen.Bounds.Height}" + v.ENTER;
+            //ekran += $"Konum: X={screen.Bounds.X}, Y={screen.Bounds.Y}" + v.ENTER;
+            //MessageBox.Show(ekran);
+
+            if ((screen.Bounds.Width < 1920) ||
+                (screen.Bounds.Height < 1080))
+            {
+                if (((Form)sender).Tag != null && ((Form)sender).Tag != "DIALOG")
+                {
+                    ((Form)sender).AutoScroll = true;
+                    ((Form)sender).AutoScrollMinSize = new Size(1820, 990); // Minimum scroll boyutu
+                }
+            }
+
 
             //if (v.con_AutoNewRecords)
             //{

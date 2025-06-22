@@ -1,23 +1,24 @@
 ﻿/*CreateProcedure*/
 
-CREATE PROCEDURE [dbo].[prc_MtskTeorikDersIhlalleriSaatler] (@curId bigint, @deleteFirmId int, @deleteDonemTipiId int)  
+CREATE PROCEDURE [dbo].[prc_MtskTeorikDersIhlalleriSaatler] (@FirmId int, @DonemTipiId int)  
 AS BEGIN
 
-  --declare @curId int = 710--576--test
-  declare @FirmId int
-  declare @DonemTipiId int = 0
+  --declare @FirmId int
+  --declare @DonemTipiId int = 0
   declare @EnKucuk smallInt = 2
   declare @EnBuyuk smallInt = 6
+  declare @IlkTarih date 
 
-  Select 
-       @FirmId      = ins.FirmId  
-	  ,@DonemTipiId = ins.DonemTipiId
+  Select top 1 @IlkTarih = ins.DersTarihi
+  --     @FirmId      = ins.FirmId  
+  --    ,@DonemTipiId = ins.DonemTipiId
   From dbo.MtskTeorikDers as ins
-  Where ins.Id = @curId
+  Where ins.FirmId = @FirmId
+  and   ins.DonemTipiId = @DonemTipiId
+  order by ins.DersTarihi
 
-  -- Bu @delete... değerlerleri  
-  if (@deleteFirmId > 0) set @FirmId = @deleteFirmId
-  if (@deleteDonemTipiId > 0) set @DonemTipiId = @deleteDonemTipiId
+  if (@IlkTarih is null)
+      set @IlkTarih = getdate()
 
   Delete MtskKIhlalTeorikD
   Where  FirmId = @FirmId
@@ -93,7 +94,7 @@ AS BEGIN
       ,@DersSayisiAdb = saat.[TrafikAdabiDersSaati]
   FROM dbo.MtskSaatTeorik as saat
        left outer join GecerlilikTarihi as trh on (saat.GecerlilikTarihiId = trh.Id )
-  Where trh.Tarih <= GETDATE()
+  Where trh.Id = dbo.fnc_getGecerlilikTarihiId(@FirmId, 21101, @IlkTarih)
     
   
       -- Tespit et ve yaz  
@@ -197,7 +198,7 @@ AS BEGIN
            , PersonelId
            , DersTarihi
            , DersSaatiTipiId
-           , InsertedId
+		   , InsertedId
            , Tarih)  
          Select 
              td.FirmId
@@ -223,4 +224,6 @@ AS BEGIN
          and   td.GrupTipiId  = dnm.GrupTipiId
 
 END -- procedure
+
+
 /*CreateProcedureEnd*/
