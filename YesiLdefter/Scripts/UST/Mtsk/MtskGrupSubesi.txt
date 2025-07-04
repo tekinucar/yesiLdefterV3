@@ -172,6 +172,49 @@ END
 /*CreateTriggerEnd*/
 
 
+/*CreateTrigger*/
+
+CREATE TRIGGER [dbo].[trg_MtskGrupSubesiDeleteIsLock] on [dbo].[MtskGrupSubesi]
+INSTEAD of DELETE
+AS BEGIN
+
+    declare isLockCursorDlt cursor local for select Id from deleted
+    declare @curId bigint
+
+    OPEN isLockCursorDlt
+
+    FETCH NEXT FROM isLockCursorDlt INTO @curId
+	   
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        if ( Select COUNT(t.Id) as Adet from deleted as d
+             left join dbo.MtskAdayTalep as t on ( d.DonemTipiId = t.DonemTipiId 
+                and d.GrupTipiId = t.GrupTipiId  
+                and d.SubeTipiId = t.SubeTipiId )
+        ) > 0 
+        begin
+            PRINT 'Bu kayıt silinemez!'
+            RETURN
+        end
+	    IF EXISTS (SELECT 1 FROM deleted WHERE isnull(GrupTipiId,0) = 1 and isnull(SubeTipiId,0) = 1 and Id = @curId)
+        BEGIN
+            PRINT 'Bu kayıt silinemez!'
+            RETURN
+        END
+
+        Delete from dbo.MtskGrupSubesi Where Id = @curId
+
+      FETCH NEXT FROM isLockCursorDlt INTO @curId
+    END
+
+    CLOSE isLockCursorDlt
+    DEALLOCATE isLockCursorDlt
+
+END
+
+ /*CreateTriggerEnd*/
+
+
 /*CreateLkpTable*/
 
 begin transaction

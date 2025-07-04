@@ -33,6 +33,12 @@ AS BEGIN
   From MtskSablonTeorikF
   Where Id = @SablonTeorikFId
 
+  -- Mevcudu sil yeniden oluştursun
+  Delete From dbo.MtskTeorikDers
+  Where TDersIsUploaded = 0
+  and   SablonTeorikBId = -2
+  and   SablonTeorikFId = @SablonTeorikFId
+
   if (@DerslikAdiTipiId = 0)
   begin
     Select @DerslikAdiTipiId = DerslikAdiTipiId from MtskDerslik Where DerslikTipiId = @DerslikTipiId

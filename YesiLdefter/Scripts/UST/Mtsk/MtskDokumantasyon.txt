@@ -43,7 +43,7 @@
    0,    Tanımsız
    1,    Yaşı tutmuyor
    2,    Yaşını doldurdu
-   3,    Muhafiyetle onaylı
+   3,    Muafiyetle onaylı
    4,    Doğum tarihi yok, belirsiz
    5,    Yaşı tutuyor
    6,    Yaş kontrolü yok

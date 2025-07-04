@@ -497,7 +497,6 @@ namespace Tkn_Events
                         }
                     }
                     
-                    
                     if (propListCount_ > 1)
                         onay = openControlForm_(tForm, tableIPCode, propList_, buttonType);
 
@@ -801,7 +800,6 @@ namespace Tkn_Events
                 }
                 return onay;
             }
-
             return onay;
         }
 
@@ -1379,8 +1377,10 @@ namespace Tkn_Events
             /// şimdi basılan butonun kaydını
             if (onay)
             {
-                v.Kullaniciya_Mesaj_Var = "Kayıt işlemi başladı ...";
-                v.timer_Kullaniciya_Mesaj_Var_.Enabled = true;
+                /// Kayıt öncesi Id value yi oku
+                /// 
+                v.tTableKeyFieldValue.Clear();
+                t.TableKeyFieldValue(tForm, tableIPCode, "before");
 
                 tSave sv = new tSave();
                 onay = sv.tDataSave(tForm, tableIPCode);
@@ -1390,6 +1390,9 @@ namespace Tkn_Events
                     // 
                     v.con_SubWork_Refresh = true;
                     tForm.HelpButton = true;
+
+                    /// Kayıt sonrası Id value yi oku
+                    t.TableKeyFieldValue(tForm, tableIPCode, "after");
                 }
                 //
                 if (v.formLastActiveControl != null)
@@ -3073,6 +3076,11 @@ namespace Tkn_Events
                                 if (dN != null && dN.Position > 0)
                                     pos = dN.Position;
 
+                                /// Refresh öncesi Id value yi oku
+                                /// 
+                                v.tTableKeyFieldValue.Clear();
+                                t.TableKeyFieldValue(tForm, TABLEIPCODE, "before");
+                                
                                 /// sadece kendisi refresh olsun 
                                 /// kendisine bağlı olanlar refresh olmasın
                                 /// dataNavigator_PositionChanged( 
@@ -3081,11 +3089,15 @@ namespace Tkn_Events
 
                                 onay = t.TableRefresh(tForm, ds);//, TABLEIPCODE);
                                 islemOnayi = onay;
+
                                 // refreshin yapıldığı pos a dön
                                 if (pos > 0)
                                 {
                                     dN.Position = pos;
                                 }
+
+                                /// Refresh den sonraki Id value yi oku
+                                t.TableKeyFieldValue(tForm, TABLEIPCODE, "after");
                             }
                         }
                     }

@@ -456,7 +456,6 @@ namespace Tkn_Events
         {
             //MessageBox.Show("myForm_Load");
             //Application.OpenForms[0].Text = Application.OpenForms[0].Text + ";Load";
-
         }
 
         public void myForm_Shown(object sender, EventArgs e)
@@ -560,7 +559,6 @@ namespace Tkn_Events
                     v.con_GotoRecord_FName,
                     v.con_GotoRecord_Value,
                     v.con_GotoRecord_Position);
-
             }
             
             /// Yeni Süreç ----

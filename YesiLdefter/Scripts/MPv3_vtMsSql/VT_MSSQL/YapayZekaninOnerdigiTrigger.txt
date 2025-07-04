@@ -1,0 +1,139 @@
+﻿
+
+CREATE TRIGGER [dbo].[trg_MtskSinavUygulama_Opt] 
+ON [dbo].[MtskSinavUygulama]
+AFTER INSERT, UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    BEGIN TRY
+        -- Sınav Donem Tipi ve Sinav No güncellemesi
+        WITH InsertedData AS (
+            SELECT 
+                ins.Id,
+                ins.FirmId,
+                ISNULL(ins.TalepId, 0) AS TalepId,
+                ISNULL(ins.AdayId, 0) AS AdayId,
+                ISNULL(ins.TcNo, '') AS TcNo,
+                ISNULL(ins.TamAdiSoyadi, '') AS TamAdiSoyadi,
+                ISNULL(ins.AdayDonemTipiId, 0) AS AdayDonemTipiId,
+                ins.SinavTarihi,
+                ISNULL(ins.PuanTipiId, 0) AS PuanTipiId,
+                ISNULL(ins.DurumuTipiId, 0) AS DurumuTipiId,
+                ISNULL(ins.SinavDurumu, '') AS SinavDurumu,
+                ISNULL(ins.SinavSonucYorumu, '') AS SinavSonucYorumu
+            FROM inserted AS ins
+        ),
+        DonemTipiHesaplama AS (
+            SELECT *,
+                CAST(FORMAT(SinavTarihi, 'yyyyMM') AS int) AS SinavDonemTipiId
+            FROM InsertedData
+        ),
+        AdayBilgisi AS (
+            SELECT 
+                Id,
+                TcNo,
+                TamAdiSoyadi,
+                DonemTipiId
+            FROM dbo.MtskAdayTalep
+        ),
+        SinavSayilari AS (
+            SELECT 
+                s.FirmId, s.AdayId, COUNT(*) AS SinavSayisi
+            FROM dbo.MtskSinavUygulama s
+            WHERE s.IsActive = 1
+            GROUP BY s.FirmId, s.AdayId
+        )
+
+        UPDATE u SET
+            u.TalepId = COALESCE(u.TalepId, aday.Id),  <<<<<
+            u.AdayId = COALESCE(u.AdayId, aday.AdayId),  <<<<<
+            u.TcNo = COALESCE(u.TcNo, m.TcNo),
+            u.TamAdiSoyadi = COALESCE(u.TamAdiSoyadi, m.TamAdiSoyadi),
+            u.AdayDonemTipiId = COALESCE(u.AdayDonemTipiId, m.DonemTipiId),
+            u.SinavDonemTipiId = d.SinavDonemTipiId,
+            u.PuanTipiId = CASE 
+                            WHEN CHARINDEX('Başarılı', d.SinavSonucYorumu) > 0 THEN 100
+                            WHEN CHARINDEX('Başarısız', d.SinavSonucYorumu) > 0 THEN 1
+                            WHEN CHARINDEX('Girmedi', d.SinavDurumu) > 0 THEN -1
+                            ELSE d.PuanTipiId END,
+            u.DurumuTipiId = CASE 
+                            WHEN u.PuanTipiId = 100 THEN 3
+                            ELSE u.DurumuTipiId END
+        FROM dbo.MtskSinavUygulama u
+        INNER JOIN DonemTipiHesaplama d ON u.Id = d.Id
+        LEFT JOIN (
+            SELECT 
+                at.Id, at.TcNo, a.TamAdiSoyadi, at.DonemTipiId, at.AdayId
+            FROM dbo.MtskAdayTalep at
+            LEFT JOIN dbo.MtskAday a ON a.Id = at.AdayId AND a.FirmId = at.FirmId
+        ) m ON d.TalepId = m.Id
+
+        -- SinavNo değerlerini sırala
+        UPDATE s SET 
+            s.SinavNo = sira.yeniSinavNo
+        FROM dbo.MtskSinavUygulama s
+        INNER JOIN (
+            SELECT Id, ROW_NUMBER() OVER(PARTITION BY TalepId ORDER BY SinavTarihi) AS yeniSinavNo
+            FROM dbo.MtskSinavUygulama
+            WHERE IsActive = 1
+        ) sira ON s.Id = sira.Id
+        WHERE s.SinavNo <> sira.yeniSinavNo
+
+        -- Aday kesin kayıt yapılmadıysa güncelle
+        UPDATE t SET KayitTipiId = 3
+        FROM dbo.MtskAdayTalep t
+        INNER JOIN inserted i ON t.Id = i.TalepId
+        WHERE t.KayitTipiId < 3
+
+        -- Takip kaydı oluştur
+        EXEC dbo.prc_MtskAdayTakipTalepKaydiSingleSet @yTalepId = NULL -- Gerekirse parametre alınabilir
+    END TRY
+    BEGIN CATCH
+        DECLARE @Err NVARCHAR(MAX) = ERROR_MESSAGE();
+        -- Hatalar loglanabilir
+        PRINT 'Trigger Error: ' + @Err;
+    END CATCH
+END
+
+
+
+inserted
+   ↓
+InsertedData  →  Temizlenmiş geçici tablo
+   ↓
+DonemTipiHesaplama  →  Donem kodu eklenmiş geçici tablo
+   ↓
+UPDATE → Bu tabloyu kullanarak esas tabloyu günceller
+
+
+
+
+Akış Mantığı
+Şöyle düşün:
+
+InsertedData → inserted içeriğini alır, gerekli ISNULL işlemleriyle temizler.
+
+DonemTipiHesaplama → InsertedData'yı kullanarak her satıra SinavDonemTipiId hesaplar.
+
+UPDATE → sadece DonemTipiHesaplama’yı referans alarak ilerliyor.
+
+Yani InsertedData doğrudan değil ama dolaylı olarak zincirin ilk halkası gibi görev yapıyor.
+
+
+
+
+yukarıda hazırlanan InsertedData daha Update cümlesinde nasıl kullanılıyor. 
+Update cümlesinde InsertedData göremiyorum bu nedelede anlamıyorum
+
+
+Haklısın Tekin, çok yerinde bir gözlem. 👀 InsertedData CTE'si tanımlanmış 
+ama doğrudan UPDATE ifadesinde ismiyle görünmüyorsa bu kafa karışıklığı yaratabilir.
+
+Ancak şunu unutma: CTE’ler (Common Table Expressions), 
+başka CTE’ler ya da ana sorgu tarafından kullanılmak üzere geçici veri kümeleri oluşturur. 
+Eğer InsertedData kullanılarak başka bir CTE tanımlandıysa (örneğin DonemTipiHesaplama), 
+ve UPDATE ifadesi sadece DonemTipiHesaplama’yı kullanıyorsa, 
+aslında InsertedData dolaylı olarak kullanılmış olur.
+

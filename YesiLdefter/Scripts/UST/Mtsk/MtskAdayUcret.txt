@@ -114,13 +114,16 @@ AS BEGIN
     declare @VeriKaynakId int = 0
     declare @KontejanTipiId smallint
 	declare @IsKontejan bit = 0
+	declare @PesinatTutari numeric(22,5)
+	declare @TaksitSayisiTipiId smallInt
 	declare @ESinavUcretTipiId smallInt 
 	declare @USinavUcretTipiId smallInt 
 	declare @SertifikaUcreti numeric(22,5)
-    declare @KontejanIndirimTutari numeric(22,5)
 	declare @KontejanSonrasiUcret numeric(22,5)
     declare @AnlasilanUcret numeric(22,5)
     declare @TaksitlendirilecekUcret numeric (22,5)
+	declare @ESinavUcreti numeric(22,5)
+	declare @UygulamaSinavUcreti numeric(22,5)
     declare @MebbisSertifikaUcreti numeric(22,5)
 
     WHILE @@FETCH_STATUS = 0
@@ -128,17 +131,19 @@ AS BEGIN
         select 
             @TalepId = ins.TalepId
            ,@AdayId = ins.AdayId
-		   ,@VeriKaynakId = ins.VeriKaynakId
-           ,@KontejanTipiId = ins.KontejanTipiId 
-		   ,@ESinavUcretTipiId = ins.ESinavUcretTipiId
-		   ,@USinavUcretTipiId = ins.USinavUcretTipiId
-           ,@SertifikaUcreti = ins.SertifikaUcreti
-		   ,@KontejanIndirimTutari = ins.KontejanIndirimTutari
-	       ,@KontejanSonrasiUcret = ins.KontejanSonrasiUcret
-           ,@AnlasilanUcret = ins.AnlasilanUcret
-           ,@TaksitlendirilecekUcret = ins.TaksitlendirilecekUcret
-           ,@MebbisSertifikaUcreti = ins.MebbisSertifikaUcreti
-
+		   ,@VeriKaynakId = isnull(ins.VeriKaynakId,0)
+           ,@KontejanTipiId = isnull(ins.KontejanTipiId,0)
+		   ,@PesinatTutari = isnull(ins.PesinatTutari,0)
+		   ,@TaksitSayisiTipiId = isnull(ins.TaksitSayisiTipiId,0)
+		   ,@ESinavUcretTipiId = isnull(ins.ESinavUcretTipiId,0)
+		   ,@USinavUcretTipiId = isnull(ins.USinavUcretTipiId,0)
+           ,@SertifikaUcreti = isnull(ins.SertifikaUcreti,0)
+	       ,@KontejanSonrasiUcret = isnull(ins.KontejanSonrasiUcret,0)
+           ,@AnlasilanUcret = isnull(ins.AnlasilanUcret,0)
+           ,@TaksitlendirilecekUcret = isnull(ins.TaksitlendirilecekUcret,0)
+           ,@ESinavUcreti = isnull(ins.ESinavUcreti,0)
+           ,@UygulamaSinavUcreti = isnull(ins.UygulamaSinavUcreti,0)
+           ,@MebbisSertifikaUcreti = isnull(ins.MebbisSertifikaUcreti,0)
 		from inserted ins
     	where ins.Id = @curId
 
@@ -162,6 +167,20 @@ AS BEGIN
         if (@DbUpdatesIsActive = 0)
         begin 
             if (@KontejanTipiId > 0) set @IsKontejan = 1 else set @IsKontejan = 0
+
+            if (@ESinavUcreti > 0 and  @ESinavUcretTipiId <> 1)
+			begin
+			    set @ESinavUcretTipiId = 1
+				Update dbo.MtskAdayUcret Set ESinavUcretTipiId = @ESinavUcretTipiId
+                Where Id = @curId 
+            end 
+            if (@UygulamaSinavUcreti > 0 and  @USinavUcretTipiId <> 1)
+			begin
+			    set @USinavUcretTipiId = 1
+				Update dbo.MtskAdayUcret Set USinavUcretTipiId = @USinavUcretTipiId
+                Where Id = @curId 
+            end 
+
             -- Takip
             Update MtskAdayTakip set
                 IsKontejan = @IsKontejan
@@ -176,8 +195,7 @@ AS BEGIN
 			    (@AnlasilanUcret = 0) or
 				(@TaksitlendirilecekUcret = 0))
             begin
-                if (@KontejanSonrasiUcret = 0 and @KontejanIndirimTutari = 0) Set @KontejanSonrasiUcret = @SertifikaUcreti  
-                if (@KontejanSonrasiUcret = 0 and @KontejanIndirimTutari > 0) Set @KontejanSonrasiUcret = @SertifikaUcreti - @KontejanIndirimTutari 
+                if (@KontejanSonrasiUcret = 0) Set @KontejanSonrasiUcret = @SertifikaUcreti  
                 if (@AnlasilanUcret = 0) Set @AnlasilanUcret = @KontejanSonrasiUcret
                 if (@TaksitlendirilecekUcret = 0) Set @TaksitlendirilecekUcret = @AnlasilanUcret
 
@@ -188,6 +206,21 @@ AS BEGIN
                 Where Id = @curId 
             end -- @KontejanSonrasi
 
+            if (@AnlasilanUcret > 0 and @AnlasilanUcret = @PesinatTutari and @TaksitSayisiTipiId <> 100) 
+            begin
+                set @TaksitSayisiTipiId = 100 -- peşin olsun
+
+                Update dbo.MtskAdayUcret Set TaksitSayisiTipiId = @TaksitSayisiTipiId
+                Where Id = @curId 
+            end
+            if (@AnlasilanUcret > 0 and @AnlasilanUcret <> @PesinatTutari and @TaksitSayisiTipiId = 100) 
+            begin
+                set @PesinatTutari = @AnlasilanUcret -- peşinat ile anlaşma ücrti aynı olsun
+
+                Update dbo.MtskAdayUcret Set PesinatTutari = @PesinatTutari
+                Where Id = @curId 
+            end
+
         end	-- if (@DbUpdatesIsActive = 0)	
 
         -- Data transferi oldu fakat daha önce bu talep için boş kayıt oluşturulmuş ise onu sil
@@ -197,7 +230,6 @@ AS BEGIN
             Where TalepId = @TalepId
             and   isnull(VeriKaynakId,0) = 0
         end
-
 
         FETCH NEXT FROM ucretCursor INTO @curId
     END -- While

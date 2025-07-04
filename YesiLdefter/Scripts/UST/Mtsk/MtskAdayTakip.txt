@@ -11,7 +11,6 @@ begin transaction
    DonemTipiId           Int           null,
    GrupTipiId            SmallInt      null,
    SubeTipiId            SmallInt      null,
-   AsamaTipiId           SmallInt      null, /* Şu anda aday hangi aşamada */
    
    -- MtskAdayTalep trigger içinden prc_MtskAdayTakipSingleSet çağırılıyor
    -- 10 kayıt aşaması
@@ -142,6 +141,12 @@ begin transaction
    SertifikaTarihi         Date         null,
    DosyaYakti              Bit          null, -- false/true
    
+   -- 300
+   Asama1TipiId            SmallInt     null, /* Şu anda aday hangi aşamada */
+   Asama1DetayTipiId       SmallInt     null, /* Şu anda aday hangi aşamada */
+   Asama2TipiId            SmallInt     null, /* Şu anda aday hangi aşamada */
+   Asama2DetayTipiId       SmallInt     null, /* Şu anda aday hangi aşamada */
+
    constraint		pk_MtskAdayTakip primary key (Id)
  )
   
@@ -381,7 +386,7 @@ INSERT INTO [Lkp].[MtskAdayTakipYasOnayiTipi] (Id, YasOnayiTipi, KonuGrupId, Kon
   ( 0,    N'Tanımsız',                      1, 1210, 'Yaş onayı', '', ''),
   ( 1,    N'Yaşı tutmuyor',                 1, 1211, 'Yaş onayı', '', ''),
   ( 2,    N'Yaş için bekleme süresi dolan', 1, 1212, 'Yaş onayı', '', ''),
-  ( 3,    N'Muhafiyetle onaylı',            1, 1213, 'Yaş onayı', '', ''),
+  ( 3,    N'Muafiyetle onaylı',             1, 1213, 'Yaş onayı', '', ''),
   ( 4,    N'Doğum tarihi yok, belirsiz',    1, 1214, 'Yaş onayı', '', ''),
   ( 5,    N'Yaşı tutuyor',                  1, 1215, 'Yaş onayı', '', ''),
   ( 6,    N'Yaş kontrolü yok',              1, 1216, 'Yaş onayı', '', '')
@@ -981,7 +986,9 @@ INSERT INTO [Lkp].[MtskAdayTakipuSinavDurumTipi] (Id, uSinavDurumTipi, KonuGrupI
   ( 5,    N'Uyg. sınav randevusu planlanacak',               5, 5145, 'Sınav durumu', 'Randevu planlanacak', 'Planlama' ),
   ( 6,    N'Uyg. sınav randevusu MEBBİSe aktarılacak',       5, 5146, 'Sınav durumu', 'Randevu mebbise aktar', 'Mebbis.' ),
   ( 7,    N'Uyg. sınavına girecek',                          5, 5147, 'Sınav durumu', 'Sınava girecek', '' ),
-  ( 8,    N'Başarısız aday eğitimi alacak',                  5, 5148, 'Sınav durumu', '', '' )
+  ( 8,    N'Başarısız aday eğitimi alacak',                  5, 5148, 'Sınav durumu', '', '' ),
+  ( 9,    N'Başarılı, Sertifika aşamasına geçti',            5, 5149, 'Sınav durumu', '', '' ),
+  (10,    N'Uyg. sınav hakkı doldu',                         5, 5150, 'Sınav durumu', '', '' )
 
 
 -- ------------------------------------------------------- 
@@ -1101,7 +1108,217 @@ INSERT INTO [Lkp].[MtskAdayTakipSertifikaDurumTipi] (Id, SertifikaDurumTipi, Kon
   ( 4,    N'Sertifikası teslim edildi',                    6, 6114, 'Sertifika işlemleri', 'Sert. teslim edildi', '' )
 
 
+
+
+
+-- ------------------------------------------------------- 
+--
+-- Asama1TipiId
+--
+-- ------------------------------------------------------- 
+
+
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdayTakipAsama1Tipi')
+drop table [Lkp].[MtskAdayTakipAsama1Tipi]
+
+create table [Lkp].[MtskAdayTakipAsama1Tipi]
+(
+   Id                 Int Unique not null, 
+   Asama1Tipi         nVarchar(50)   null,
+   KonuGrupId         SmallInt       null,
+   KonuId             Int            null,
+   KonuCaption        nVarchar(20)   null,
+   ChartCaption       nVarchar(20)   null,
+   FormCaption        nVarchar(15)   null,
+   
+   constraint  pk_MtskAdayTakipAsama1Tipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskAdayTakipAsama1Tipi]
+INSERT INTO [Lkp].[MtskAdayTakipAsama1Tipi] (Id, Asama1Tipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption)
+ VALUES 
+  (   0,    N'',                                     9, 9000, 'Aşama işlemleri',  '', '' ), 
+  ( 100,    N'Kayıt aşaması',                        9, 9100, 'Aşama işlemleri',  '', '' ), 
+  ( 200,    N'Teorik ders aşaması',                  9, 9200, 'Aşama işlemleri',  '', '' ), 
+  ( 300,    N'E-Sınav durum aşaması',                9, 9300, 'Aşama işlemleri',  '', '' ), 
+  ( 400,    N'E-Sınav sonrası aşaması',              9, 9400, 'Aşama işlemleri',  '', '' ), 
+  ( 510,    N'Uygulamalı dersler aşaması',           9, 9510, 'Aşama işlemleri',  '', '' ), 
+  ( 520,    N'Telafi dersler aşaması',               9, 9520, 'Aşama işlemleri',  '', '' ), 
+  ( 530,    N'2. +4 hak dersleri aşaması',           9, 9530, 'Aşama işlemleri',  '', '' ), 
+  ( 540,    N'Başarısız dersler aşaması',            9, 9540, 'Aşama işlemleri',  '', '' ), 
+  ( 600,    N'Uygulamalı sınav aşaması',             9, 9600, 'Aşama işlemleri',  '', '' ), 
+  ( 700,    N'Uygulamalı sınav sonrası aşaması',     9, 9700, 'Aşama işlemleri',  '', '' ) 
+
+
+-- ------------------------------------------------------- 
+--
+-- Asama2TipiId
+--
+-- ------------------------------------------------------- 
+
+
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdayTakipAsama2Tipi')
+drop table [Lkp].[MtskAdayTakipAsama2Tipi]
+
+create table [Lkp].[MtskAdayTakipAsama2Tipi]
+(
+   Id                 Int Unique not null, 
+   Asama2Tipi         nVarchar(50)   null,
+   KonuGrupId         SmallInt       null,
+   KonuId             Int            null,
+   KonuCaption        nVarchar(20)   null,
+   ChartCaption       nVarchar(20)   null,
+   FormCaption        nVarchar(15)   null,
+   
+   constraint  pk_MtskAdayTakipAsama2Tipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskAdayTakipAsama2Tipi]
+INSERT INTO [Lkp].[MtskAdayTakipAsama2Tipi] (Id, Asama2Tipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption)
+ VALUES 
+  (   0,    N'',                                     9, 9000, 'Aşama işlemleri',  '', '' ), 
+  ( 100,    N'Kayıt aşaması',                        9, 9100, 'Aşama işlemleri',  '', '' ), 
+  ( 200,    N'Teorik ders aşaması',                  9, 9200, 'Aşama işlemleri',  '', '' ), 
+  ( 300,    N'E-Sınav durum aşaması',                9, 9300, 'Aşama işlemleri',  '', '' ), 
+  ( 400,    N'E-Sınav sonrası aşaması',              9, 9400, 'Aşama işlemleri',  '', '' ), 
+  ( 510,    N'Uygulamalı dersler aşaması',           9, 9510, 'Aşama işlemleri',  '', '' ), 
+  ( 520,    N'Telafi dersler aşaması',               9, 9520, 'Aşama işlemleri',  '', '' ), 
+  ( 530,    N'2. +4 hak dersleri aşaması',           9, 9530, 'Aşama işlemleri',  '', '' ), 
+  ( 540,    N'Başarısız dersler aşaması',            9, 9540, 'Aşama işlemleri',  '', '' ), 
+  ( 600,    N'Uygulamalı sınav aşaması',             9, 9600, 'Aşama işlemleri',  '', '' ), 
+  ( 700,    N'Uygulamalı sınav sonrası aşaması',     9, 9700, 'Aşama işlemleri',  '', '' ) 
+
+
+-- ------------------------------------------------------- 
+--
+-- Asama1DetayTipiId
+--
+-- ------------------------------------------------------- 
+
+
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdayTakipAsama1DetayTipi')
+drop table [Lkp].[MtskAdayTakipAsama1DetayTipi]
+
+create table [Lkp].[MtskAdayTakipAsama1DetayTipi]
+(
+   Id                 Int Unique not null, 
+   Asama1DetayTipi    nVarchar(60)   null,
+   KonuGrupId         SmallInt       null,
+   KonuId             Int            null,
+   KonuCaption        nVarchar(20)   null,
+   ChartCaption       nVarchar(20)   null,
+   FormCaption        nVarchar(15)   null,
+   
+   constraint  pk_MtskAdayTakipAsama1DetayTipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskAdayTakipAsama1DetayTipi]
+INSERT INTO [Lkp].[MtskAdayTakipAsama1DetayTipi] (Id, Asama1DetayTipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption)
+ VALUES 
+  ( 100,    N'',                            9, 9100, 'Aşama işlemleri',  '', '' ), 
+  ( 101,    N'Belgeleri eksik',             9, 9101, 'Aşama detayları',  '', '' ), 
+  ( 102,    N'Belgeleri taranacak',         9, 9102, 'Aşama detayları',  '', '' ), 
+  ( 103,    N'Belgeleri yüklenecek',        9, 9103, 'Aşama detayları',  '', '' ), 
+  ( 104,    N'Belge işlemleri tamamlandı',  9, 9104, 'Aşama detayları',  '', '' ), 
+
+  ( 215,    N'Teorik dersler başlamadı',    9, 9215, 'Aşama detayları',  '', '' ), 
+  ( 216,    N'Teorik dersler başladı',      9, 9216, 'Aşama detayları',  '', '' ), 
+  ( 217,    N'Teorik dersler tamamlandı',   9, 9217, 'Aşama detayları',  '', '' ), 
+
+  ( 300,    N'',                             9, 9300, 'Aşama detayları',  '', '' ), 
+  ( 301,    N'Hazır değil',                  9, 9301, 'Aşama detayları',  '', '' ), 
+  ( 302,    N'Başvuru yapılacak',            9, 9302, 'Aşama detayları',  '', '' ), 
+  ( 303,    N'Belgesi hazırlanacak',         9, 9303, 'Aşama detayları',  '', '' ), 
+  ( 304,    N'Belgesi teslim edilecek',      9, 9304, 'Aşama detayları',  '', '' ), 
+  ( 305,    N'Sınava girecek',               9, 9305, 'Aşama detayları',  '', '' ), 
+  ( 306,    N'Muaf',                         9, 9306, 'Aşama detayları',  '', '' ), 
+
+  ( 510,    N'',                                                  9, 9510, 'Aşama detayları',  '', '' ), 
+  ( 511,    N'Uyg. dersler planlanacak',                          9, 9511, 'Aşama detayları',  '', '' ), 
+  ( 512,    N'Uyg. dersler planlandı, Mebbise aktarılacak',       9, 9512, 'Aşama detayları',  '', '' ), 
+  ( 513,    N'Uyg. dersler Mebbise aktarıldı, dersler başlamadı', 9, 9513, 'Aşama detayları',  '', '' ), 
+  ( 514,    N'Uyg. dersleri başladı, devam ediyor',               9, 9514, 'Aşama detayları',  '', '' ), 
+  ( 515,    N'Uyg. dersleri tamamladı',                           9, 9515, 'Aşama detayları',  '', '' ), 
+  ( 516,    N'Uyg. planı yok. Sınav aşamasına geçmiş',            9, 9516, 'Aşama detayları',  '', '' ), 
+
+  ( 520,    N'',                                                          9, 9520, 'Aşama detayları',  '', '' ), 
+  ( 521,    N'2 saat telafi eğitimi planlanacak',                         9, 9521, 'Aşama detayları',  '', '' ), 
+  ( 522,    N'2 saat telafi aday eğitimi planlandı, Mebbise aktarılacak', 9, 9522, 'Aşama detayları',  '', '' ), 
+  ( 523,    N'2 saat telafi aday eğitimi Mebbise aktarıldı, başlamadı',   9, 9523, 'Aşama detayları',  '', '' ), 
+  ( 524,    N'2 saat telafi aday eğitimi alıyor',                         9, 9524, 'Aşama detayları',  '', '' ), 
+  ( 525,    N'2 saat telafi aday eğitimi tamamlandı',                     9, 9525, 'Aşama detayları',  '', '' ), 
+
+  ( 530,    N'',                                                       9, 9530, 'Aşama detayları',  '', '' ), 
+  ( 531,    N'2. +4 hak dersleri planlanacak',                         9, 9531, 'Aşama detayları',  '', '' ), 
+  ( 532,    N'2. +4 hak dersleri planlandı, Mebbise aktarılacak',      9, 9532, 'Aşama detayları',  '', '' ), 
+  ( 533,    N'2. +4 hak dersleri Mebbise aktarıldı, derler başlamadı', 9, 9533, 'Aşama detayları',  '', '' ), 
+  ( 534,    N'2. +4 hak dersleri başladı, devam ediyor',               9, 9534, 'Aşama detayları',  '', '' ), 
+  ( 535,    N'2. +4 hak dersleri tamamlandı',                          9, 9535, 'Aşama detayları',  '', '' ), 
+  ( 536,    N'2. +4 hak planı yok. Sınav aşamasına geçmiş',            9, 9536, 'Aşama detayları',  '', '' ), 
+
+  ( 540,    N'',                                                             9, 9540, 'Aşama detayları',  '', '' ), 
+  ( 541,    N'2 saat başarısız aday eğitimi planlanacak',                    9, 9541, 'Aşama detayları',  '', '' ), 
+  ( 542,    N'2 saat başarısız aday eğitimi planlandı, Mebbise aktarılacak', 9, 9542, 'Aşama detayları',  '', '' ), 
+  ( 543,    N'2 saat başarısız aday eğitimi Mebbise aktarıldı, başlamadı',   9, 9543, 'Aşama detayları',  '', '' ), 
+  ( 544,    N'2 saat başarısız aday eğitimi alıyor',                         9, 9544, 'Aşama detayları',  '', '' ), 
+  ( 545,    N'2 saat başarısız aday eğitimi tamamlandı',                     9, 9545, 'Aşama detayları',  '', '' ), 
+  ( 546,    N'Eğitime gerek yok (Sınava girmedi)',                           9, 9546, 'Aşama detayları',  '', '' ), 
+
+  ( 600,    N'',                                               9, 9600, 'Aşama detayları',  '', '' ), 
+  ( 601,    N'Henüz sınav aşamasında değil',                   9, 9601, 'Aşama detayları',  '', '' ), 
+  ( 602,    N'Uyg. sınavı için usta öğretici onayı isteniyor', 9, 9602, 'Aşama detayları',  '', '' ), 
+  ( 603,    N'Uyg. sınavı için hazır değil',                   9, 9603, 'Aşama detayları',  '', '' ), 
+  ( 604,    N'Uyg. sınavı için MEBBİS de onaylanacak',         9, 9604, 'Aşama detayları',  '', '' ), 
+  ( 605,    N'Uyg. sınav randevusu planlanacak',               9, 9605, 'Aşama detayları',  '', '' ), 
+  ( 606,    N'Uyg. sınav randevusu MEBBİSe aktarılacak',       9, 9606, 'Aşama detayları',  '', '' ), 
+  ( 607,    N'Uyg. sınavına girecek',                          9, 9607, 'Aşama detayları',  '', '' ), 
+  ( 608,    N'Başarısız aday eğitimi alacak',                  9, 9608, 'Aşama detayları',  '', '' ), 
+  ( 609,    N'Başarılı, Sertifika aşamasına geçti',            9, 9609, 'Aşama detayları',  '', '' ), 
+  ( 610,    N'Uyg. sınav hakkı doldu',                         9, 9610, 'Aşama detayları',  '', '' ) 
+
+
+
+-- ------------------------------------------------------- 
+--
+-- Asama2DetayTipiId
+--
+-- ------------------------------------------------------- 
+
+
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdayTakipAsama2DetayTipi')
+drop table [Lkp].[MtskAdayTakipAsama2DetayTipi]
+
+create table [Lkp].[MtskAdayTakipAsama2DetayTipi]
+(
+   Id                 Int Unique not null, 
+   Asama2DetayTipi    nVarchar(60)   null,
+   KonuGrupId         SmallInt       null,
+   KonuId             Int            null,
+   KonuCaption        nVarchar(20)   null,
+   ChartCaption       nVarchar(20)   null,
+   FormCaption        nVarchar(15)   null,
+   
+   constraint  pk_MtskAdayTakipAsama2DetayTipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskAdayTakipAsama2DetayTipi]
+INSERT INTO [Lkp].[MtskAdayTakipAsama2DetayTipi] (Id, Asama2DetayTipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption)
+ VALUES 
+  ( 400,    N'',                             9, 9400, 'Aşama detayları',  '', '' ), 
+  ( 401,    N'Tekrar sınava girecek',        9, 9401, 'Aşama detayları',  '', '' ), 
+  ( 402,    N'Uygulama aşamasına geçti',     9, 9402, 'Aşama detayları',  '', '' ), 
+  ( 403,    N'Tüm e-Sınav hakkı bitti',      9, 9403, 'Aşama detayları',  '', '' ), 
+
+  ( 700,    N'',                                 9, 9700, 'Aşama detayları',  '', '' ), 
+  ( 701,    N'Sınava tekrar girecek',            9, 9701, 'Aşama detayları',  '', '' ), 
+  ( 702,    N'Sertifika aşamasına geçti',        9, 9702, 'Aşama detayları',  '', '' ), 
+  ( 703,    N'Tüm uygulamalı sınav hakkı bitti', 9, 9703, 'Aşama detayları',  '', '' ), 
+  ( 704,    N'2. +4 sınav hakkı bitti',          9, 9704, 'Aşama detayları',  '', '' ) 
+
+
 commit transaction
+
+
 
 /*CreateLkpTableEnd*/
 
@@ -1141,35 +1358,32 @@ AS BEGIN
 
     WHILE @@FETCH_STATUS = 0
     BEGIN
-	
-        select 
-		    @euSinavaHazirmiTipiId = isnull(dlt.uSinavaHazirmiTipiId,0)
-           ,@euSinavDurumTipiId = isnull(dlt.uSinavDurumTipiId,0)
-           ,@eIsUygSinavMebbisOnayi = isnull(dlt.IsUygSinavMebbisOnayi,0)
-           ,@eIsRandevuPlanlandi = isnull(dlt.IsRandevuPlanlandi,0)
-           ,@eIsRandevuMebbis = isnull(dlt.IsRandevuMebbis,0)
-
-		from deleted dlt
-    	where dlt.Id = @takipId
-
-        select 
-            @FirmId  = ins.FirmId
-           ,@TalepId = ins.TalepId
-           ,@AdayId = ins.AdayId
-		   ,@yuSinavaHazirmiTipiId = isnull(ins.uSinavaHazirmiTipiId,0)
-           ,@yuSinavDurumTipiId = isnull(ins.uSinavDurumTipiId,0)
-           ,@yIsUygSinavMebbisOnayi = isnull(ins.IsUygSinavMebbisOnayi,0)
-           ,@yIsRandevuPlanlandi = isnull(ins.IsRandevuPlanlandi,0)
-           ,@yIsRandevuMebbis = isnull(ins.IsRandevuMebbis,0)
-
-		from inserted ins
-    	where ins.Id = @takipId
-		
-		
         if (@DbUpdatesIsActive = 0)
         begin 
+		    
+            select 
+                @euSinavaHazirmiTipiId = isnull(dlt.uSinavaHazirmiTipiId,0)
+               ,@euSinavDurumTipiId = isnull(dlt.uSinavDurumTipiId,0)
+               ,@eIsUygSinavMebbisOnayi = isnull(dlt.IsUygSinavMebbisOnayi,0)
+               ,@eIsRandevuPlanlandi = isnull(dlt.IsRandevuPlanlandi,0)
+               ,@eIsRandevuMebbis = isnull(dlt.IsRandevuMebbis,0)
+            from deleted dlt
+            where dlt.Id = @takipId
+			
+            select 
+                @FirmId  = ins.FirmId
+               ,@TalepId = ins.TalepId
+               ,@AdayId = ins.AdayId
+               ,@yuSinavaHazirmiTipiId = isnull(ins.uSinavaHazirmiTipiId,0)
+               ,@yuSinavDurumTipiId = isnull(ins.uSinavDurumTipiId,0)
+               ,@yIsUygSinavMebbisOnayi = isnull(ins.IsUygSinavMebbisOnayi,0)
+               ,@yIsRandevuPlanlandi = isnull(ins.IsRandevuPlanlandi,0)
+               ,@yIsRandevuMebbis = isnull(ins.IsRandevuMebbis,0)
+            from inserted ins
+            where ins.Id = @takipId
+
             if (@euSinavaHazirmiTipiId = 2 and  -- eski kayıt hazır değilse
-			    @yuSinavaHazirmiTipiId = 1 )    -- yeni kayıt hazır ise
+                @yuSinavaHazirmiTipiId = 1 )    -- yeni kayıt hazır ise
             begin 
                 -- 2 > 1 olamaz
 				-- 2 > 3 olabilir
@@ -1191,23 +1405,23 @@ AS BEGIN
                 Where TalepId = @TalepId
             end
 
-			if ((@euSinavaHazirmiTipiId <> @yuSinavaHazirmiTipiId) or
+            /* sakın bir daha açma müthiş derecede yavaşlıyor
+
+            if ((@euSinavaHazirmiTipiId <> @yuSinavaHazirmiTipiId) or
 			    (@euSinavDurumTipiId <> @yuSinavDurumTipiId) or
                 (@eIsUygSinavMebbisOnayi <> @yIsUygSinavMebbisOnayi) or
                 (@eIsRandevuPlanlandi <> @yIsRandevuPlanlandi) or
                 (@eIsRandevuMebbis <> @yIsRandevuMebbis)
                )
 			    exec dbo.prc_MtskAdayTakip @FirmId
-
+            */
         end	-- 	@DbUpdatesIsActive = 0
-
-
+		
         FETCH NEXT FROM takipCursor INTO @takipId
     END -- While
 
     CLOSE takipCursor
     DEALLOCATE takipCursor   
-
 
 END -- create trigger
 

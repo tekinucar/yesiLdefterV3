@@ -112,50 +112,14 @@ AS BEGIN
           Where TcNo = @yTcNo
           and   isnull(DonemTipiId,0) <= @SinavDonemTipiId
           order by DonemTipiId desc, Id desc
-		  
-		  /*
-		  -- demekki aday hiç kayıtlı değil 
-		  -- yani ilk defa MEBBİS in sınav sonuçları (uygulama) sayfasından okunuyor demek
-		  if (@yTalepId = 0)
-		  begin
-              INSERT INTO [dbo].[MtskAdayTalep]
-                 ([FirmId]
-				 ,[AdayId]
-                 ,[IsActive]
-                 ,[TcNo]
-                 ,[TamAdiSoyadi]
-				 ,[DonemTipiId]
-                 ,[MebbisKurumOnayi]
-                 ,[KayitTipiId]
-                 ,[VeriKaynakTipiId]
-                 )
-              VALUES
-               (  @yFirmId --FirmId, int
-                , @yAdayId --AdayId 
-                , 1        --IsActive, bit
-                , @yTcNo   --TcNo, varchar(11)
-                , @yTamAdiSoyadi --TamAdiSoyadi, nvarchar(100)
-				, @AdayDonemTipiId --DonemTipiId, int
-                , 1        --MebbisKurumOnayi, bit
-                , 2        --KayitTipiId
-                , 4        --KaynakKayitTipiId 
-               ) 
-
-			  Select top 1 @yTalepId = talep.Id, @yAdayId = talep.AdayId
-		      From MtskAdayTalep as talep
-		      Where talep.FirmId = @yFirmId
-		      and   talep.TcNo = @yTcNo 
-			  order by Id desc
-
-		  end -- @yTalepId = 0
-		  */
 		end
 
-
-		Select @TalepTipiId = talep.TalepTipiId
+		Select @TalepTipiId = isnull(talep.TalepTipiId,0)
 		From dbo.MtskAdayTalep as talep
 		Where talep.Id = @yTalepId
-			   
+
+        if (@TalepTipiId = 0) set @TalepTipiId = 1
+					   
         -- daha önce kayıtlı ise TcNo sunu bul 			
 		if (@yAdayId > 0) and (@yTcNo = '' or @yTamAdiSoyadi = '' or @AdayDonemTipiId = 0)
 		begin
@@ -216,9 +180,11 @@ AS BEGIN
 		    -- Normal eğitimlerin başarısız sınav sonuçları
 		    if (@TalepTipiId = 1 and @ySinavNo < 4 and @yEgitimTipiId = 1)
             begin
-                if ((@yPuanTipiId = 1) or -- başarısız
-		            (@yPuanTipiId = -1)) -- girmedi
-                    set @yDurumuTipiId = 1         --  Uygulama Sınav Aşamasında
+                if ((@yPuanTipiId = 0) or   -- ''
+                    (@yPuanTipiId = 1) or   -- başarısız
+                    (@yPuanTipiId = -1) or  -- girmedi
+                    (@yPuanTipiId = -2))    -- durumu girilmemiş
+                     set @yDurumuTipiId = 1 --  Uygulama Sınav Aşamasında
             end
 
 		    -- Normal Uygulama derslerinin son sınavı
@@ -262,7 +228,7 @@ AS BEGIN
 		Where Id = @curId
 
 
-		/* SinavNo ayarlanıyor */
+        /* SinavNo ayarlanıyor */
         Update dbo.MtskSinavUygulama set 
            SinavNo = x.yeniSinavNo
         From dbo.MtskSinavUygulama as a,
@@ -277,7 +243,6 @@ AS BEGIN
         Where a.Id = x.Id
         and   a.SinavNo <> x.yeniSinavNo
 
-
         -- Aday ken kayıt durumuna halen geçmemişse
 		Update dbo.MtskAdayTalep set KayitTipiId = 3
         Where Id = @yTalepId
@@ -291,6 +256,7 @@ AS BEGIN
 	
     CLOSE curSinavUyg
     DEALLOCATE curSinavUyg   
+
 
 END
 

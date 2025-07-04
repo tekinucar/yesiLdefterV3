@@ -1212,6 +1212,8 @@ namespace Tkn_Variable
         public static vMsFileUpdate tMsFileUpdate = new vMsFileUpdate();
         public static vMsDbUpdate tMsDbUpdate = new vMsDbUpdate();
 
+        public static vTableKeyFieldValue tTableKeyFieldValue = new vTableKeyFieldValue();
+
         public static bildirimPaketi tBildirim = new bildirimPaketi();
         public static vSMSSettings tSMSSettings = new vSMSSettings();
 
@@ -1632,6 +1634,28 @@ namespace Tkn_Variable
             fieldNotNull = false;
             about = "";
             sqlScript = "";
+        }
+    }
+
+    public class vTableKeyFieldValue
+    {
+        public vTableKeyFieldValue()
+        {
+            Clear();
+        }
+        public DataSet ds { get; set; }
+        public DataNavigator dN { get; set; }
+        public string keyFieldName { get; set; }
+        public int beforeKeyValue { get; set; }
+        public int afterKeyValue { get; set; }
+
+        public void Clear()
+        {
+            ds = null;
+            dN = null;
+            keyFieldName = "";
+            beforeKeyValue = 0;
+            afterKeyValue = 0;
         }
     }
 

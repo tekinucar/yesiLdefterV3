@@ -146,12 +146,6 @@ namespace Tkn_Save
 
                 vTable vt = new vTable();
 
-                v.Kullaniciya_Mesaj_Var = "Kayıt işlemi gerçekleşiyor...";
-                v.timer_Kullaniciya_Mesaj_Var_.Enabled = true;
-
-                //t.WaitFormOpen(tForm, v.Kullaniciya_Mesaj_Var);
-                //v.SP_OpenApplication = true;
-
                 //if (dsData.HasChanges())
                 //if (dsData.Tables[0].Namespace != "NewRecord")
                 if (dsData.Tables[0].CaseSensitive == false)
@@ -165,6 +159,7 @@ namespace Tkn_Save
                     /// Insert veya Update Script oluşturuluyor ve uygulanıyor
                     /// 
                     v.Kullaniciya_Mesaj_Var = MyRecord(dsData, vt, pos, (byte)v.Save.KAYDET);
+                    //v.timer_Kullaniciya_Mesaj_Var_.Enabled = true;
                 }
 
                 // ilk defa defalt değerler doldurulduğunda buraya geldiğinde hemen insert gerçekleşmemesi için
@@ -177,7 +172,6 @@ namespace Tkn_Save
                     dsData.Tables[0].CaseSensitive = false;
 
                 // Kayıttan SONRA yapması gerekenler var sie
-                //if (myProp.IndexOf("Prop_Runtime:True") > 0)
                 if (vt.RunTime)
                 {
                     tEvents ev = new tEvents();
@@ -186,9 +180,6 @@ namespace Tkn_Save
                     /// kayıttan sonra olması gereken refreshler
                     ev.Prop_RunTimeClick(tForm, null, vt.TableIPCode, v.tButtonType.btListele, v.tBeforeAfter.After); 
                 }
-                                
-                //t.WaitFormClose();
-                //v.SP_OpenApplication = false;
             }
         }
 
@@ -662,7 +653,8 @@ namespace Tkn_Save
 
                 v.con_Refresh = Record_SQL_RUN(ds, vt, State, Position, ref Sonuc_Cumle, TriggerSQL);
 
-                if (v.con_Refresh)
+                // edit işleminden sonra myProp kontrol ediliyor -1 ise değiştiriliyor
+                if (v.con_Refresh && id_value != "")
                     t.changeKeyFieldValue(ds, id_value);
             }
             #endregion
@@ -1812,28 +1804,9 @@ namespace Tkn_Save
                         v.con_GotoRecord_Value = rec_id;
                         v.con_GotoRecord_Position = -1;
 
-                        if (ds.Namespace != null)
-                        {
-                            string myProp = ds.Namespace.ToString();
-                            if (t.IsNotNull(myProp))
-                            {
-                                string TableLabel = t.MyProperties_Get(myProp, "TableLabel:");
-                                t.Alias_Control(ref TableLabel);
-                                string oldValue = "and " + TableLabel + Key_Id_FieldName + " = 0";
-                                string newValue = "and " + TableLabel + Key_Id_FieldName + " = " + rec_id;
-
-                                string SqlS = "=SqlSecond:" + t.MyProperties_Get(myProp, "SqlSecond:");
-                                string Sql_OldS = SqlS;
-                                t.Str_Replace(ref SqlS, oldValue, newValue);
-
-                                //string NewValue = "=KeyIDValue:" + rec_id + ";";
-                                //t.Str_Replace(ref myProp, oldValue, newValue);
-                                t.Str_Replace(ref myProp, Sql_OldS, SqlS);
-
-                                ds.Namespace = myProp;
-                            }
-                        }
-
+                        // insert ile olusan yeni Id value myProp üzerine set ediliyor
+                        t.changeKeyFieldValue(ds, rec_id);
+                        
                         // insert cümlesi burada çalıştırıldığı için talep edene sadece işlemin gerçekleştiğine dair mesaj gitmekte
                         SQL = v.DBRec_Insert;
                         sonuc = true;

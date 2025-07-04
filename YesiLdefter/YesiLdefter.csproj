@@ -468,6 +468,7 @@
       <DependentUpon>Reference.svcmap</DependentUpon>
     </Compile>
     <Compile Include="tForms.cs" />
+    <Compile Include="Tkn\tImageHelper.cs" />
     <Compile Include="Tkn\tImageService.cs" />
     <Compile Include="Tkn\EventsMenu.cs" />
     <Compile Include="Tkn\tCefSharp.cs" />
@@ -744,6 +745,7 @@
     <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\VW_MS_TABLES_IP_OBJ.txt" />
     <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\VW_SYS_WORKSM.txt" />
     <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\VW_TYPES_LIST.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\YapayZekaninOnerdigiTrigger.txt" />
     <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\YARDIMCI_KODLAR.txt" />
     <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\YatayKolon SQL.txt" />
     <Content Include="Scripts\SEK\InfazKurumu\CihazHesap.txt" />
@@ -828,6 +830,8 @@
     <Content Include="Scripts\UST\Mtsk\BildirimSMS.txt" />
     <Content Include="Scripts\UST\Mtsk\DbUpdates.txt" />
     <Content Include="Scripts\UST\Mtsk\FileUpdates.txt" />
+    <Content Include="Scripts\UST\Mtsk\fnc_getDonemTipiId.txt" />
+    <Content Include="Scripts\UST\Mtsk\fnc_getEUSinavNo.txt" />
     <Content Include="Scripts\UST\Mtsk\fnc_getGecerlilikTarihiId.txt" />
     <Content Include="Scripts\UST\Mtsk\fnc_getSertifikaDeneyimSarti.txt" />
     <Content Include="Scripts\UST\Mtsk\fnc_getSertifikaId.txt" />
@@ -882,6 +886,7 @@
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayBorclariniHesapla.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayBorcunuHesapla.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTablesInsertKontrolu.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakip.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakipDataDogrulamaList.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakipESinavSet.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakipESinavToplamlari.txt" />
@@ -918,6 +923,10 @@
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\CrsSmsSettings.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\fnc_CrsBildirimCount.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\fnc_getIsDbUpdate.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\fnc_getSettingsBool.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\fnc_getSettingsInt.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\fnc_getSettingsNumeric.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\fnc_getSettingsText.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\fnc_IsTatilGunumu.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmCalismaSaatleri.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskSaatTeorik.txt" />
@@ -941,7 +950,7 @@
     <Content Include="Scripts\UST\Mtsk\MtskUcretTeorik.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskUcretUygulama.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskUygulamaliDers.txt" />
-    <Content Include="Scripts\UST\Mtsk\MtskUygulamaliDersAdayi.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskUygulamaliDersAdayi_IPTAL.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_BildirimSMS.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MonthName.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayBelgeler.txt" />
@@ -949,7 +958,7 @@
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdaySertifika.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdaySil.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTablesInsert.txt" />
-    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakip.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakip_OLD.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakipAdayKayitKonulari.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakipAdayKayitToplamlari.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakipTalepKaydiMultiSet.txt" />
@@ -978,7 +987,7 @@
     <Content Include="Scripts\UST\Mtsk\prc_MtskUygulamaDersPlaniGruplariBugun.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskUygulamaDersPlaniOlustur.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskUygulamaDersPlaniSaatleriGuncelle_IPTAL.txt" />
-    <Content Include="Scripts\UST\Mtsk\Settings.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\Settings.txt" />
     <Content Include="Scripts\UST\Mtsk\TempTabimBankalar.txt" />
     <Content Include="Scripts\UST\Mtsk\TempTabimHesaplar.txt" />
     <Content Include="Scripts\UST\Mtsk\trg_ORNEK.txt" />
@@ -1068,7 +1077,7 @@
     <Content Include="Scripts\UST\OnMuhasebe\prc_OnmBelgeDekontTbmGelirHesaplari.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\prc_OnmBelgeDekontTbmGiderHesaplari.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\prc_OnmBelgeDekontTbmPersonelHesaplari.txt" />
-    <Content Include="Scripts\UST\OnMuhasebe\prc_OnmOdemePlaniOlustur_OLD.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\prc_OnmOdemePlaniOlustur.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\prc_OnmToplamBekleyenGelirler.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\prc_OnmToplamBekleyenOdemeler.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\trg_BelgeStokS.txt" />

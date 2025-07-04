@@ -1,0 +1,84 @@
+﻿/*CreateFunction*/
+
+CREATE FUNCTION dbo.fnc_getEUSinavNo(@TalepId int, @SinavNoTipi varchar(20)) 
+RETURNS INT
+AS
+BEGIN
+  -- YeniESinavNo
+  -- GirdigiESinavNo
+  -- YeniUSinavNo
+  -- GirdigiUSinavNo
+
+  if (@SinavNoTipi = 'YeniESinavNo')   
+  begin
+      declare @YeniESinavNo int
+
+      select top 1 @YeniESinavNo =
+      ( case when isnull(s.Id,0) = 0 then 1 -- ilk sinav 
+             when isnull(s.DurumuTipiId,0) > 1 and isnull(s.SinavNo,0) < 4  then s.SinavNo + 1
+             when isnull(s.DurumuTipiId,0) > 1 and isnull(s.SinavNo,0) = 4  then 0
+             when isnull(s.DurumuTipiId,0) = 1 then 0 end ) -- bir daha sınava girmeyecek
+      from dbo.MtskAdayTalep as t -- >> isnull(s.Id,0) yakalamak için var
+	  left join dbo.MtskSinavETeorik as s on ( t.Id = s.TalepId and s.LineTypeId = 2 )
+      where t.Id = @TalepId
+      order by s.SinavNo desc
+	  return @YeniESinavNo;
+  end
+
+  if (@SinavNoTipi = 'YeniUSinavNo')   
+  begin
+      declare @YeniUSinavNo int
+      select top 1 @YeniUSinavNo =
+      ( case when  isnull(s.Id,0) = 0 then 1 -- ilk sinav 
+             when (isnull(s.PuanTipiId,0) = 1 or isnull(s.PuanTipiId,0) = -1) and isnull(s.SinavNo,0) < 4 then s.SinavNo + 1
+             when (isnull(s.PuanTipiId,0) = 1 or isnull(s.PuanTipiId,0) = -1) and isnull(s.SinavNo,0) = 4 then 0
+             when (isnull(s.PuanTipiId,0) = 0 or isnull(s.PuanTipiId,0) = -2) then s.SinavNo -- sınav sonucu girilmemiş 
+             when  isnull(s.PuanTipiId,0) = 100 then 0 end ) -- bir daha sınava girmeyecek 
+     from dbo.MtskAdayTalep as t 
+	 left join dbo.MtskSinavUygulama as s  on ( t.Id = s.TalepId )
+     where t.Id = @TalepId
+     order by s.SinavNo desc
+     return @YeniUSinavNo;
+  end
+
+  if (@SinavNoTipi = 'GirdigiESinavNo')   
+  begin
+      declare @GirdigiESinavNo int
+
+      select top 1 @GirdigiESinavNo =
+      ( case when isnull(s.Id,0) = 0 then 0 -- girmedi
+             when isnull(s.DurumuTipiId,0) > 1 and isnull(s.SinavNo,0) < 4  then s.SinavNo
+             when isnull(s.DurumuTipiId,0) > 1 and isnull(s.SinavNo,0) = 4  then 4
+             when isnull(s.DurumuTipiId,0) = 1 then s.SinavNo end ) 
+      from dbo.MtskAdayTalep as t
+	  left join dbo.MtskSinavETeorik as s on ( t.Id = s.TalepId and s.LineTypeId = 2 )
+      where t.Id = @TalepId
+      order by s.SinavNo desc
+
+	  return @GirdigiESinavNo;
+  end
+
+  if (@SinavNoTipi = 'GirdigiUSinavNo')   
+  begin
+      declare @GirdigiUSinavNo int
+
+      select top 1 @GirdigiUSinavNo =
+      ( case when  isnull(s.Id,0) = 0 then 0 -- girmedi
+             when (isnull(s.PuanTipiId,0) = 1 or isnull(s.PuanTipiId,0) = -1) and isnull(s.SinavNo,0) < 4 then s.SinavNo
+             when (isnull(s.PuanTipiId,0) = 1 or isnull(s.PuanTipiId,0) = -1) and isnull(s.SinavNo,0) = 4 then 4
+             when (isnull(s.PuanTipiId,0) = 0 or isnull(s.PuanTipiId,0) = -2) then s.SinavNo - 1 -- sınav sonucu girilmemiş
+             when  isnull(s.PuanTipiId,0) = 100 then s.SinavNo end ) 
+      from dbo.MtskAdayTalep as t
+	  left join dbo.MtskSinavUygulama as s on ( t.Id = s.TalepId )
+      where t.Id = @TalepId
+      order by s.SinavNo desc
+
+	  return @GirdigiUSinavNo;
+  end
+
+  return -1;
+END -- 
+
+
+/*CreateFunctionEnd*/
+

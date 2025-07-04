@@ -2797,9 +2797,10 @@ namespace Tkn_ToolBox
         #endregion TableRowGet
 
         #region TableFieldValueGet
-        public string TableKeyFieldValue(Form tForm, string TableIPCode)
+        public int TableKeyFieldValue(Form tForm, string TableIPCode, string workType)
         {
             string value = string.Empty;
+            string keyFieldName = "";
 
             TableIPCode = TableIPCode.Trim();
 
@@ -2809,10 +2810,26 @@ namespace Tkn_ToolBox
             string myProp = ds.Namespace.ToString();
             if (IsNotNull(myProp))
             {
-                string KeyFName = MyProperties_Get(myProp, "KeyFName:");
-                value = ds.Tables[0].Rows[dN.Position][KeyFName].ToString();
+                keyFieldName = MyProperties_Get(myProp, "KeyFName:");
+                if (IsNotNull(ds))
+                    value = ds.Tables[0].Rows[dN.Position][keyFieldName].ToString();
             }
-            return value;
+            if (workType == "before")
+            {
+                v.tTableKeyFieldValue.ds = ds;
+                v.tTableKeyFieldValue.dN = dN;
+                v.tTableKeyFieldValue.keyFieldName = keyFieldName;
+                v.tTableKeyFieldValue.beforeKeyValue = myInt32(value);
+            }
+            if (workType == "after")
+            {
+                v.tTableKeyFieldValue.afterKeyValue = myInt32(value);
+
+                checkedTableKeyValue();
+            }
+            if (workType == "") { } // workType boş ise sadece okunan value gönderiliyor
+
+            return myInt32(value);
         }
         public string TableFieldValueGet(Form tForm, string TableIPCode, string FieldName)
         {
@@ -2845,6 +2862,39 @@ namespace Tkn_ToolBox
 
             return value;
         }
+
+        public void checkedTableKeyValue()
+        {
+            /// table refresh olduktan sonra
+            /// dn.Position set ediliyor
+            /// bazen pos doğru olsada keyValue aynı olmuyor
+            /// bunun nedeni yeni kayıt yapılıyor position en son satırda, sonra refresh oluyor. 
+            /// refresh olduğunda order by yüzünden position ve value konumları birbirini tutmuyor
+            /// yani position hatalı konuma düşüyor çünkü keyvalue başka positiona taşındı
+            /// biz şimdi bu keyvalue şimdi hangi positionda onu bulacağız
+            /// 
+
+            /// Eğer refresh öncesi value ile refresh sonrası value aynı ise positionda değişme yok demektir
+            /// herhangi bir işleme gerek yoktur
+            /// 
+            v.tTableKeyFieldValue.beforeKeyValue = 0;
+            if (v.tTableKeyFieldValue.beforeKeyValue ==
+                   v.tTableKeyFieldValue.afterKeyValue) return;
+
+            int length = v.tTableKeyFieldValue.ds.Tables[0].Rows.Count;
+            int pos = 0;
+            int readValue = -1;
+            for (int i = 0; i < length; i++)
+            {
+                readValue = myInt32(v.tTableKeyFieldValue.ds.Tables[0].Rows[i][v.tTableKeyFieldValue.keyFieldName].ToString());
+                if (readValue == v.tTableKeyFieldValue.afterKeyValue) break;
+                pos++;
+            }
+
+            v.tTableKeyFieldValue.dN.Position = pos;
+
+        }
+        
         #endregion TableFieldValueGet
 
         #region preparingLocalDbConnectionText
@@ -3303,6 +3353,33 @@ namespace Tkn_ToolBox
 
             string UseOldRefId = " and " + TableLabel + "." + KeyFName + " = " + KeyIdValue + " ";
             string UseReadRefId = " and " + TableLabel + "." + KeyFName + " = " + newValue + " ";
+
+            /// Listeden  Kart açtığınızde KeyIdValue = -1 fakat SqlS içinde ise okuduğu kartın gerçek değeri var örn : and [MtskAday2].Id = 3318
+            /// UseOldRefId ise '  and [MtskAday2].Id = -1  ' şeklinde
+            /// Yeni gelen newValueyi set edemiyoruz
+            /// bunu çözelim
+            if (SqlS.IndexOf(UseOldRefId) == -1)
+            {
+                if (dsTarget.Tables[0].Columns.Contains(KeyFName))
+                {
+                    /// KeyIdValue = -1  zaten bu değeri taşıyor onun için gerçekteki value değerini okuyalım
+                    /// 
+                    if (pos == -1)
+                    {
+                        DataNavigator dN = Find_DataNavigator(tForm, TableIPCode);
+                        if (dN != null) pos = dN.Position;
+                    }
+                    if (pos > -1)
+                    {
+                        KeyIdValue = dsTarget.Tables[0].Rows[pos][KeyFName].ToString();
+                        if (KeyIdValue == "") KeyIdValue = "-1";
+                        /// yeniden hazırlayalım
+                        UseOldRefId = " and " + TableLabel + "." + KeyFName + " = " + KeyIdValue + " ";
+                        if (SqlS.IndexOf(UseOldRefId) == -1)
+                            UseOldRefId = " and " + TableLabel + "." + KeyFName + " = " + KeyIdValue;
+                    }
+                }
+            }
 
             Str_Replace(ref SqlS, UseOldRefId, UseReadRefId);
 

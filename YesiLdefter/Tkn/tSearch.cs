@@ -163,8 +163,11 @@ namespace Tkn_Search
 
                         if (buttonType == v.tButtonType.btArama)
                         {
-                            if (((DevExpress.XtraEditors.ButtonEdit)sender).EditValue != null)
-                                v.tSearch.searchInputValue = ((DevExpress.XtraEditors.ButtonEdit)sender).EditValue.ToString();
+                            //if (((DevExpress.XtraEditors.ButtonEdit)sender).EditValue != null)
+                            //    v.tSearch.searchInputValue = ((DevExpress.XtraEditors.ButtonEdit)sender).EditValue.ToString();
+                            /// Arama ekranı boş açılsın
+                            ///
+                            v.tSearch.searchInputValue = "";
                         }
                     }
                 }
@@ -793,7 +796,7 @@ namespace Tkn_Search
             t.DialogForm_View(tSearchForm, FormWindowState.Normal);
                         
             /// set Values 
-            /// 
+            /// >>>> SeachEngine sonucunda seçilen Id yi oku <<<<<<
             
             if (v.searchSet)
                 onay = setSearchEngineValues(tForm, targetTableIPCode, null, prop_.TABLEIPCODE_LIST);

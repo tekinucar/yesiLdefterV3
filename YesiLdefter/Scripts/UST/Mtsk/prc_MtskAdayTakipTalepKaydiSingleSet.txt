@@ -3,19 +3,10 @@
 CREATE PROCEDURE [dbo].[prc_MtskAdayTakipTalepKaydiSingleSet] (@TalepId int)  
 AS BEGIN
 
-  --declare @TalepId int
-  --set @TalepId = 310
-
+  --declare @TalepId int = 310
   --print 'prc_MtskAdayTakipTalepKaydiSingleSet  start'
-  --print '    TalepId : ' + convert(varchar(20),@TalepId) 
 
-  -- Variables
-  declare @GelecekAy Datetime
-  declare @BugunDonemTipiId int = 0
-  declare @GelecekDonemTipiId int = 0
-  declare @bugun smalldatetime = getdate()
-
-  declare @zamanlamaTipiId int = 0
+  declare @Enter varchar(4) = CHAR(13) + CHAR(10)
   declare @isGrupSubeYok bit = 0
   declare @YasSiniri smallint = 0
   declare @yasOnayiTipiId smallint = 0
@@ -25,10 +16,9 @@ AS BEGIN
 
   -- MtskAdayTalep
   declare @yFirmId Int 
+  declare @yAdayId int
   declare @yTalepTipiId SmallInt 
   declare @yKayitTipiId SmallInt 
-  declare @yMebbisKurumOnayi Bit 
-  declare @yMebbisDurumTipiId SmallInt
   declare @yMevcutSertifikaTipiId smallInt = 0
   declare @yIstenenSertifikaTipiId smallInt = 0
   declare @yDonemTipiId int = 0
@@ -36,28 +26,26 @@ AS BEGIN
   declare @ySubeTipiId smallint = 0
   declare @yBelgelerGeldi bit = 0
 
+  declare @yTcNo varchar(11)
+  declare @yKimlikSeriNo varchar(10)
+  declare @yAdi nvarchar(50)
+  declare @ySoyadi nvarchar(50)
+  declare @yBabaAdi nvarchar(50)
+  declare @yAnneAdi nvarchar(50)
+  declare @yCepTelefonu varchar(15)
+  --declare @yCepTelefonu2 varchar(15)
+
   declare @ySistemUyarilari nvarchar(200)
   declare @oldSistemUyarilari nvarchar(200)
-  declare @yeniSistemUyarisi nvarchar(200)
+  declare @mesaj nvarchar(200)
   declare @grupSubeSil bit = 0
 
-  set @GelecekAy = DATEADD(month, 1, getdate());
-	
-  -- Bugün hangi dönem ?  tespit ediliyor
-  if (MONTH(getdate()) < 10)
-       set @BugunDonemTipiId = convert(int, convert(varchar(5), YEAR(getdate())) + '0' + convert(varchar(3), MONTH(getdate())))
-  else set @BugunDonemTipiId = convert(int, convert(varchar(5), YEAR(getdate())) + convert(varchar(3), MONTH(getdate())))
-
-  if (MONTH(@GelecekAy) < 10)
-       set @GelecekDonemTipiId = convert(int, convert(varchar(5), YEAR(@GelecekAy)) + '0' + convert(varchar(3), MONTH(@GelecekAy)))
-  else set @GelecekDonemTipiId = convert(int, convert(varchar(5), YEAR(@GelecekAy)) + convert(varchar(3), MONTH(@GelecekAy)))
 
   Select 
        @yFirmId = ins.FirmId
+      ,@yAdayId = ins.AdayId
       ,@yTalepTipiId = isnull(ins.TalepTipiId,0)
       ,@yKayitTipiId = isnull(ins.KayitTipiId,0)
-      ,@yMebbisKurumOnayi = isnull(ins.MebbisKurumOnayi,0)
-      ,@yMebbisDurumTipiId = isnull(ins.MebbisDurumTipiId,0)
 	  ,@yMevcutSertifikaTipiId = isnull(ins.MevcutSertifikaTipiId,0)
       ,@yIstenenSertifikaTipiId = isnull(ins.IstenenSertifikaTipiId,0)
       ,@yDonemTipiId = isnull(ins.DonemTipiId,0)
@@ -65,9 +53,21 @@ AS BEGIN
       ,@ySubeTipiId = isnull(ins.SubeTipiId,0)
       ,@yBelgelerGeldi = isnull(ins.BelgelerGeldi,0)
       ,@ySistemUyarilari = isnull(ins.SistemUyarilari,'')
-  From  dbo.MtskAdayTalep as ins, dbo.MtskAday as aday
-  Where ins.AdayId = aday.Id
-  and   ins.Id = @TalepId
+  From  dbo.MtskAdayTalep as ins
+  Where ins.Id = @TalepId
+
+  Select 
+    @yTcNo = TcNo
+  , @yKimlikSeriNo = KimlikSeriNo
+  , @yAdi = Adi
+  , @ySoyadi = Soyadi
+  , @yBabaAdi = BabaAdi
+  , @yAnneAdi = AnneAdi
+  , @yCepTelefonu = CepTelefonu
+  From dbo.MtskAday
+  Where Id = @yAdayId  
+
+  Set @oldSistemUyarilari = @ySistemUyarilari
 
   -- ----------------------------------------------------------------------------------
   -- Aday kayıt aşaması
@@ -75,17 +75,6 @@ AS BEGIN
   Select @sertifikaTeslimEdildi = isnull(sertifika.SertifikaTeslimEdildi,0)
   From dbo.MtskAdaySertifika as sertifika
   Where sertifika.TalepId = @TalepId
-
-  -- ZamanlamaTipiId 
-  -- Aktif eğitim süreci devam edenler için geçerli
-  -- eğitimi bitenleri -1 yapacağız
-  if (@yDonemTipiId = @BugunDonemTipiId) set @zamanlamaTipiId = 2
-  if (@yDonemTipiId = @GelecekDonemTipiId) set @zamanlamaTipiId = 3
-  if (@yDonemTipiId > @GelecekDonemTipiId) set @zamanlamaTipiId = 4
-  if (@yDonemTipiId = 0) set @zamanlamaTipiId = 0
-  if (@yDonemTipiId < @BugunDonemTipiId and @sertifikaTeslimEdildi = 0) set @zamanlamaTipiId = 1
-  if (@yDonemTipiId < @BugunDonemTipiId and @sertifikaTeslimEdildi = 1) set @zamanlamaTipiId = 5
-  -- 
 
   -- IsGrupSubeYok 
   if (@yGrupTipiId = 0 or @ySubeTipiId = 0)
@@ -96,53 +85,112 @@ AS BEGIN
   declare @deneyimSertifikaTipiId smallInt = 0
 
   Select top 1 @isEnAz = isnull(saat.IsEnAz,0), @deneyimSertifikaTipiId = isnull(saat.DeneyimSertifikaTipiId,0) 
-  From MtskSaatUygulama as saat
-       left outer join GecerlilikTarihi as gt on ( saat.GecerlilikTarihiId = gt.Id )
+  From dbo.MtskSaatUygulama as saat
+       left outer join dbo.GecerlilikTarihi as gt on ( saat.GecerlilikTarihiId = gt.Id )
   Where saat.IstenenSertifikaTipiId = @yIstenenSertifikaTipiId
   and   gt.KonuTipiId = 21102 -- Uygulama saatleri
   order by gt.Tarih desc
   
-  set @deneyimSartiTipiId = [dbo].[fnc_getSertifikaDeneyimSarti] ( @TalepId )
-
   -- [Lkp].[MtskAdayTakipDeneyimSartiTipi] 
   -- 1, 'Deneyim şartı yok'
   -- 2, 'Deneyim şartına uygun'
   -- 3, 'Deneyim şartına uygun değil'
-  set @yeniSistemUyarisi = ''
-  if (@deneyimSartiTipiId = 3) 
+  set @deneyimSartiTipiId = [dbo].[fnc_getSertifikaDeneyimSarti] ( @TalepId )
+
+  set @mesaj = 'Deneyim şartı uygun değil' + @Enter;
+  if (@deneyimSartiTipiId = 3)
   begin
-      set @yeniSistemUyarisi = 'Deneyim şartı uygun değil'
 	  set @grupSubeSil = 1
+      if (CHARINDEX(@mesaj, @ySistemUyarilari) = 0) set @ySistemUyarilari = @ySistemUyarilari + @mesaj;
   end else
   begin
-      if (CHARINDEX('Deneyim şartı uygun değil', @ySistemUyarilari) > 0) set @yeniSistemUyarisi = 'uyarıyıSil'
 	  set @grupSubeSil = 0
+      if (CHARINDEX(@mesaj, @ySistemUyarilari) > 0) set @ySistemUyarilari = REPLACE(@ySistemUyarilari, @mesaj, '') 
   end
 
-  if (@yeniSistemUyarisi != '')
-  begin 
-    set @oldSistemUyarilari = @ySistemUyarilari
-    if (CHARINDEX('Deneyim şartı', @yeniSistemUyarisi) > 0)
-    begin
-	   -- @ySistemUyarilari boş değilse
-       if (CHARINDEX('Deneyim şartı', @ySistemUyarilari) = 0 and len(@ySistemUyarilari) > 0) set @ySistemUyarilari = @yeniSistemUyarisi + CHAR(13) + CHAR(10) + @ySistemUyarilari
-	   -- @ySistemUyarilari boş ise
-	   if (CHARINDEX('Deneyim şartı', @ySistemUyarilari) = 0 and len(@ySistemUyarilari) = 0) set @ySistemUyarilari = @yeniSistemUyarisi
-    end 
-    if (CHARINDEX('uyarıyıSil', @yeniSistemUyarisi) > 0)
-    begin
-       declare @i1 int = 0
-       declare @i2 int = 0
-       set @i1 = charindex('Deneyim şartı', @ySistemUyarilari) 
-       set @i2 = 26-- Deneyim şartı uygun değil
-       if (@i1 > 0)
-           set @ySistemUyarilari = trim(stuff(@ySistemUyarilari, @i1, @i2, ''))
-    end
-	if (@oldSistemUyarilari <> @ySistemUyarilari)
-    begin
-	    Update dbo.MtskAdayTalep set SistemUyarilari = @ySistemUyarilari
-        Where Id = @TalepId
-    end
+  set @mesaj = 'Hatalı TC No' + @Enter;
+  if (@yTcNo LIKE '%[^0-9]%')
+  begin
+      if (CHARINDEX(@mesaj, @ySistemUyarilari) = 0) set @ySistemUyarilari = @ySistemUyarilari + @mesaj;
+  end else
+  begin
+      if (CHARINDEX(@mesaj, @ySistemUyarilari) > 0) set @ySistemUyarilari = REPLACE(@ySistemUyarilari, @mesaj, '') 
+  end
+
+  set @mesaj = 'Kimlik seri no yok' + @Enter;
+  if (len(@yKimlikSeriNo) = 0)
+  begin
+      if (CHARINDEX(@mesaj, @ySistemUyarilari) = 0) set @ySistemUyarilari = @ySistemUyarilari + @mesaj;
+  end else
+  begin
+      if (CHARINDEX(@mesaj, @ySistemUyarilari) > 0) set @ySistemUyarilari = REPLACE(@ySistemUyarilari, @mesaj, '') 
+  end
+
+  set @mesaj = 'Sorunlu ad' + @Enter;
+  if (@yAdi LIKE '%[^A-Z]%')
+  begin
+      if (CHARINDEX(@mesaj, @ySistemUyarilari) = 0) set @ySistemUyarilari = @ySistemUyarilari + @mesaj;
+  end else
+  begin
+      if (CHARINDEX(@mesaj, @ySistemUyarilari) > 0) set @ySistemUyarilari = REPLACE(@ySistemUyarilari, @mesaj, '') 
+  end
+
+  set @mesaj = 'Sorunlu soyadı' + @Enter;
+  if (@ySoyadi LIKE '%[^A-Z]%')
+  begin
+      if (CHARINDEX(@mesaj, @ySistemUyarilari) = 0) set @ySistemUyarilari = @ySistemUyarilari + @mesaj;
+  end else
+  begin
+      if (CHARINDEX(@mesaj, @ySistemUyarilari) > 0) set @ySistemUyarilari = REPLACE(@ySistemUyarilari, @mesaj, '') 
+  end
+
+  set @mesaj = 'Sorunlu baba adı' + @Enter;
+  if (@yBabaAdi LIKE '%[^A-Z]%')
+  begin
+      if (CHARINDEX(@mesaj, @ySistemUyarilari) = 0) set @ySistemUyarilari = @ySistemUyarilari + @mesaj;
+  end else
+  begin
+      if (CHARINDEX(@mesaj, @ySistemUyarilari) > 0) set @ySistemUyarilari = REPLACE(@ySistemUyarilari, @mesaj, '') 
+  end
+
+  set @mesaj = 'Sorunlu anne adı' + @Enter;
+  if (@yAnneAdi LIKE '%[^A-Z]%')
+  begin
+      if (CHARINDEX(@mesaj, @ySistemUyarilari) = 0) set @ySistemUyarilari = @ySistemUyarilari + @mesaj;
+  end else
+  begin
+      if (CHARINDEX(@mesaj, @ySistemUyarilari) > 0) set @ySistemUyarilari = REPLACE(@ySistemUyarilari, @mesaj, '') 
+  end
+
+  -- 1️ Boşlukları kaldır
+  set @yCepTelefonu = REPLACE(@yCepTelefonu, ' ', '');
+  -- 2️ Sadece rakamları ayıkla
+  set @yCepTelefonu = REPLACE(@yCepTelefonu, '-', ''); -- varsa tireleri de temizle
+  set @yCepTelefonu = REPLACE(@yCepTelefonu, '(', '');
+  set @yCepTelefonu = REPLACE(@yCepTelefonu, ')', '');
+
+  set @mesaj = 'Sorunlu telefon no' + @Enter;
+  if (@yCepTelefonu LIKE '%[^0-9]%')
+  begin
+      if (CHARINDEX(@mesaj, @ySistemUyarilari) = 0) set @ySistemUyarilari = @ySistemUyarilari + @mesaj;
+  end else
+  begin
+      if (CHARINDEX(@mesaj, @ySistemUyarilari) > 0) set @ySistemUyarilari = REPLACE(@ySistemUyarilari, @mesaj, '') 
+  end
+
+  set @mesaj = 'Eksik telefon no' + @Enter;
+  if (Len(@yCepTelefonu) <> 10)
+  begin
+      if (CHARINDEX(@mesaj, @ySistemUyarilari) = 0) set @ySistemUyarilari = @ySistemUyarilari + @mesaj;
+  end else
+  begin
+      if (CHARINDEX(@mesaj, @ySistemUyarilari) > 0) set @ySistemUyarilari = REPLACE(@ySistemUyarilari, @mesaj, '') 
+  end
+
+  if (@oldSistemUyarilari <> @ySistemUyarilari)
+  begin
+      Update dbo.MtskAdayTalep set SistemUyarilari = @ySistemUyarilari
+      Where Id = @TalepId
   end
 
   if (@grupSubeSil = 1)
@@ -151,450 +199,31 @@ AS BEGIN
       Where Id = @TalepId
   end
 
-  -- ----------------------------------------------------------------------------------
-  -- Teorik Dersler aşaması
-  -- TeorikBaslamaTarihi    
-  -- ToerikBitisTarihi      
-  -- TeorikDersTipiId       
-  -- ----------------------------------------------------------------------------------
-
-  declare @TeorikBaslamaTarihi date   
-  declare @TeorikBitisTarihi date
-  declare @TeorikDersTakipTipi smallInt 
-  
-  Select 
-      @TeorikBaslamaTarihi = gs.GrupBaslamaTarihi
-    , @TeorikBitisTarihi   = gs.GrupBitisTarihi
-    , @TeorikDersTakipTipi = gs.TakipTipiId
-  From MtskGrupSubesi as gs
-  Where gs.FirmId      = @yFirmId
-  and   gs.DonemTipiId = @yDonemTipiId
-  and   gs.GrupTipiId  = @yGrupTipiId
-  and   gs.SubeTipiId  = @ySubeTipiId
-
-  -- Mevcut ehliyeti var ise
-  -- Talep tipi Sertifika değil ise
-  if (@yMevcutSertifikaTipiId > 0) or
-     (@yTalepTipiId <> 1)
-  begin
-      set @TeorikBaslamaTarihi = null
-      set @TeorikBitisTarihi   = null
-      set @TeorikDersTakipTipi = 6 -- Muaf işareti
-  end
-
-  if (@yMevcutSertifikaTipiId = 0) or
-     (@yTalepTipiId = 1)
-  begin
-      if (isnull( @TeorikBitisTarihi, @TeorikBaslamaTarihi) < getdate())  
-          set @TeorikDersTakipTipi = 17 -- Teorik dersler tamamlandı
-  end
-
   -- Tespitleri kaydet
   Update MtskAdayTakip set
-     -- Kayıt takibi
        TalepTipiId            = @yTalepTipiId  
      , DonemTipiId            = @yDonemTipiId
      , GrupTipiId             = @yGrupTipiId
      , SubeTipiId             = @ySubeTipiId
      , KayitTipiId            = @yKayitTipiId
-     , ZamanlamaTipiId        = @zamanlamaTipiId
      , IsGrupSubeYok          = @isGrupSubeYok
-     , MebbisKurumOnayi       = @yMebbisKurumOnayi
-     , MebbisDurumTipiId      = @yMebbisDurumTipiId
      , DeneyimSartiTipiId     = @deneyimSartiTipiId
      , IsDeneyimEnAz          = @isEnAz
      , DeneyimSertifikaTipiId = @deneyimSertifikaTipiId
 	 , BelgelerGeldi          = @yBelgelerGeldi
-	 -- Teorik ders takibi
-     , TeorikBaslamaTarihi = @TeorikBaslamaTarihi
-     , TeorikBitisTarihi   = @TeorikBitisTarihi  
-     , TeorikDersTipiId    = @TeorikDersTakipTipi 
   Where TalepId = @TalepId
-
-
-
-  -- -------------------------------------------------------------------------
-  -- eSinav sonuçları
-  -- -------------------------------------------------------------------------
-  -- -----------------------------------------------------------------------
-  --- Hangi sınava girilecek onu tespit et
-  -- -----------------------------------------------------------------------
-  
-  declare @YeniESinavNo int
-  declare @GirdigiESinavNo int
-
-  select top 1 @YeniESinavNo =
-  ( case when isnull(eSinavSonuc.Id,0) = 0 then 1 -- ilk sinav 
-         when isnull(eSinavSonuc.DurumuTipiId,0) > 1 and isnull(eSinavSonuc.SinavNo,0) < 4  then eSinavSonuc.SinavNo + 1
-         when isnull(eSinavSonuc.DurumuTipiId,0) > 1 and isnull(eSinavSonuc.SinavNo,0) = 4  then 0
-         when isnull(eSinavSonuc.DurumuTipiId,0) = 1 then 0
-         end ) 
-  from dbo.MtskAdayTakip as takip 
-       left outer join MtskSinavETeorik as eSinavSonuc on ( takip.TalepId = eSinavSonuc.TalepId and eSinavSonuc.LineTypeId = 2 )
-  where takip.TalepId = @TalepId
-  order by eSinavSonuc.SinavNo desc
-  
-  select top 1 @GirdigiESinavNo =
-  ( case when isnull(eSinavSonuc.Id,0) = 0 then 0 -- girmedi
-         when isnull(eSinavSonuc.DurumuTipiId,0) > 1 and isnull(eSinavSonuc.SinavNo,0) < 4  then eSinavSonuc.SinavNo
-         when isnull(eSinavSonuc.DurumuTipiId,0) > 1 and isnull(eSinavSonuc.SinavNo,0) = 4  then 4
-         when isnull(eSinavSonuc.DurumuTipiId,0) = 1 then eSinavSonuc.SinavNo
-         end ) 
-  from dbo.MtskAdayTakip as takip 
-       left outer join MtskSinavETeorik as eSinavSonuc on ( takip.TalepId = eSinavSonuc.TalepId and eSinavSonuc.LineTypeId = 2 )
-  where takip.TalepId = @TalepId
-  order by eSinavSonuc.SinavNo desc
-
-  -- MtskAdayTakip.eSinavDurumTipiId
-  -- 0,    'Tanımsız'
-  -- 1,    'Hazır değil'
-  -- 2,    'Başvuru yapılacak'
-  -- 3,    'Belgesi hazırlanacak'
-  -- 4,    'Belgesi teslim edilecek'
-  -- 5,    'Sınava girecek'
-  -- 6,    'Muaf'  
-
-  -- MtskSinavEteorik.DurumuTipi 
-  -- 1   Başarılı
-  -- 2   Başarısız
-  -- 3   Girmedi
-  -- 4   Raporlu
-  -- 5   İptal Edildi(Sınav Yasaklı)
-
-  -- MtskAdayTakip.eSinavSonrasiTipiId
-  -- 1,  Tekrar sınava girecek
-  -- 2,  Uygulama aşamasına geçti
-  -- 3,  Tüm e-Sınav hakkı bitti
-
-  update MtskAdayTakip set
-	  eSinavNo = x.yeniGirecegiSinavNo
-    , eSinavDurumTipiId = x.yenieSinavDurumTipiId    
-    , eSinavMuracatTarihi = x.yenieSinavMuracatTarihi
-	, IseSinavBTeslimEdildi = x.yeniIseSinavBTeslimEdildi
-    , eSinavNoGirdigi = x.yenieSinavNoGirdigi
-    , eSinavSonucTipiId = x.yenieSinavSonucTipiId
-    , eSinavSonrasiTipiId = x.yenieSinavSonrasiTipiId
-	, eSinavDetayId = x.yenieSinavDetayId
-	, eSinavBasariTarihi = x.yenieSinavBasariTarihi
-	, UygulamaliDersTipiId = x.yeniUygulamaliDersTipiId
-
-  from MtskAdayTakip a, 
-  (
-
-  Select 
-    takip.FirmId
-  , takip.TalepId
-  , takip.AdayId
-    -- Başvuru sonuçları
-  , isnull(eSinavBasvu.SinavNo, 1) as BasvuruSinavNo
-  , isnull(eSinavBasvu.DurumuTipiId, 0) as BasvuruDurumuTipiId
-  , ( case when takip.eSinavDurumTipiId = 6 then 'muaf'
-           when isnull(eSinavBasvu.Id,0) = 0 then 'basvuru yok'
-           when isnull(eSinavBasvu.Id,0) > 0 and isnull(eSinavBasvu.IsGBelgesiHazir,0) = 0 and isnull(eSinavBasvu.IsGBelgesiTeslimEdildi,0) = 0  then 'basvuru yapıldı'
-           when isnull(eSinavBasvu.Id,0) > 0 and isnull(eSinavBasvu.IsGBelgesiTeslimEdildi,0) = 1  then 'başvuru belgesi teslim edildi'
-           when isnull(eSinavBasvu.Id,0) > 0 and isnull(eSinavBasvu.IsGBelgesiHazir,0) = 1         then 'başvuru belgesi hazır'
-           end ) as BasvuruKaydi
-    -- Sınav sonuu
-  , isnull(eSinavSonuc.SinavNo, 1) as SonucSinavNo
-  , ( case when isnull(eSinavSonuc.Id,0) = 0 then 'sonuc yok'
-           when isnull(eSinavSonuc.Id,0) > 0 then 'sonuc var' 
-           end ) as SonucKaydi
-  , isnull(eSinavSonuc.DurumuTipiId, 0) as SonucDurumuTipiId
-  , ( case when isnull(eSinavSonuc.DurumuTipiId,0) = 0 then 'Sınav sonuc okunmadı'
-           when eSinavSonuc.DurumuTipiId = 1 then 'Başarılı'
-           when eSinavSonuc.DurumuTipiId = 2 then 'Başarısız'
-           when eSinavSonuc.DurumuTipiId = 3 then 'Girmedi'
-           when eSinavSonuc.DurumuTipiId = 4 then 'Raporlu'
-           when eSinavSonuc.DurumuTipiId = 5 then 'İptal edildi'
-           end ) as SonucDurumTipi 
-   -- nihayi kararlar
-   /*
-   -- 110
-   eSinavNo               SmallInt     null, /* gireceği sınav no */
-   eSinavDurumTipiId      SmallInt     null,
-   eSinavMuracatTarihi    Date         null, /* Müracat Tarihi */
-   eSinavUcretTipiId      SmallInt     null, /* kendisi yatıracak, biz yatıracağız */
-   IseSinavBTeslimEdildi  Bit          null, /* e-Sınav belgesi kursiyere teslim edildi veya edilmedi */
-   */
-  , ( case when isnull(eSinavSonuc.Id,0) = 0 then @YeniESinavNo -- yeni sinav 
-           when isnull(eSinavSonuc.DurumuTipiId,0) > 1 and isnull(eSinavSonuc.SinavNo,0) < 4  then eSinavSonuc.SinavNo + 1
-           when isnull(eSinavSonuc.DurumuTipiId,0) > 1 and isnull(eSinavSonuc.SinavNo,0) = 4  then 0
-           when isnull(eSinavSonuc.DurumuTipiId,0) = 1 then 0
-           end ) as yeniGirecegiSinavNo -- >> eSinavNo
-
-  , ( case when takip.eSinavDurumTipiId = 1 then 1 --'e-Sınav için hazır değil'
-           when takip.eSinavDurumTipiId = 6 then 6 --'muaf' 
-
-		   when @YeniESinavNo > 0 and isnull(takip.eSinavDurumTipiId,0) != 1 and isnull(takip.eSinavDurumTipiId,0) != 6 and isnull(eSinavBasvu.Id,0) = 0 and isnull(eSinavSonuc.Id,0) = 0 then 2 --'e-Sınav başvurusu yapılacak' 
-           when isnull(eSinavSonuc.Id,0) > 0 and isnull(eSinavSonuc.DurumuTipiId,0) = 1 then 0 -- 'tanımsız'
-           when isnull(eSinavBasvu.Id,0) > 0 and isnull(eSinavBasvu.IsGBelgesiHazir,0) = 0 and isnull(eSinavBasvu.IsGBelgesiTeslimEdildi,0) = 0  then 3 -- 'e-Sınav belgesi hazırlanacak'
-           when isnull(eSinavBasvu.Id,0) > 0 and isnull(eSinavBasvu.IsGBelgesiHazir,0) = 1 and isnull(eSinavBasvu.IsGBelgesiTeslimEdildi,0) = 0  then 4 -- 'e-Sınav belgesi teslim edilecek'
-           when isnull(eSinavBasvu.Id,0) > 0 and isnull(eSinavBasvu.IsGBelgesiHazir,0) = 1 and isnull(eSinavBasvu.IsGBelgesiTeslimEdildi,0) = 1  then 5 -- 'e-Sınava girecek'
-           when isnull(eSinavSonuc.Id,0) > 0 and isnull(eSinavSonuc.DurumuTipiId,0) > 1 and (isnull(eSinavSonuc.SinavNo,0) < 4 ) then 2 -- 'e-Sınav başvurusu yapılacak'
-           when isnull(eSinavSonuc.Id,0) > 0 and isnull(eSinavSonuc.DurumuTipiId,0) > 1 and (isnull(eSinavSonuc.SinavNo,0) = 4 ) then 0 -- 'tanımsız' sınav hakkı bitti
-           end ) as yenieSinavDurumTipiId
-
-  , ( case when (isnull(eSinavSonuc.DurumuTipiId,0) > 1) and (isnull(eSinavSonuc.SinavNo,0) < 4 ) then (
-      case when DAY(eSinavSonuc.SinavTarihi) >= 1 and DAY(eSinavSonuc.SinavTarihi) <= 15 then 
-                DATEADD(DAY, 16 - DAY(eSinavSonuc.SinavTarihi), eSinavSonuc.SinavTarihi)
-                else DATEADD(DAY, 1, EOMONTH(eSinavSonuc.SinavTarihi)) end )
-           else null end ) as yenieSinavMuracatTarihi
-
-  , ( case when isnull(eSinavBasvu.Id,0) > 0 and isnull(eSinavBasvu.IsGBelgesiTeslimEdildi,0) = 1 and isnull(eSinavSonuc.Id,0) = 0 then 1 -- 'başvuru belgesi teslim edildi'
-           else 0 end ) as yeniIseSinavBTeslimEdildi
-   /*
-   -- 120
-   eSinavNoGirdigi        SmallInt     null,  
-   eSinavSonucTipiId      SmallInt     null, /* Başarılı, Başarısız, Girmedi */
-   eSinavSonrasiTipiId    SmallInt     null, 
-   eSinavDetayId          Int          null, /* en son hangi sınavsa onun id si. sınav1 ise sınav1 in id si, 2 ise 2 nin id si, 3, 4 ... */
-   eSinavBasariTarihi     Date         null,
-   */
-  , ( case when isnull(eSinavSonuc.Id,0) > 0 then isnull(eSinavSonuc.SinavNo,0) end ) as yenieSinavNoGirdigi
-  , ( case when isnull(eSinavSonuc.Id,0) > 0 then isnull(eSinavSonuc.DurumuTipiId,0) end ) as yenieSinavSonucTipiId
-  , ( case when (eSinavSonuc.DurumuTipiId = 1) then 2 -- Uygulama aşamasına geçti
-           when (eSinavSonuc.DurumuTipiId > 1) and (eSinavSonuc.SinavNo < 4 ) then 1  -- Tekrar sınava girecek
-           when (eSinavSonuc.DurumuTipiId > 1) and (eSinavSonuc.SinavNo >= 4 ) then 3 -- Tüm e-Sınav hakkı bitti
-           end ) as yenieSinavSonrasiTipiId
-  , ( case when isnull(eSinavSonuc.Id,0) > 0 then eSinavSonuc.Id end ) as yenieSinavDetayId
-  , ( case when isnull(eSinavSonuc.Id,0) > 0 then eSinavSonuc.SinavTarihi end ) as yenieSinavBasariTarihi
-  , ( case when (eSinavSonuc.DurumuTipiId = 1 and takip.TalepTipiId <> 4) then 1   -- eSinav.Başarılı ise Uygulamalı dersler planlanacak, 100 ceza değilse
-           when (eSinavSonuc.DurumuTipiId <> 1) then 0   -- boşluk
-           end ) as yeniUygulamaliDersTipiId
-
-  from dbo.MtskAdayTakip as takip 
-     left outer join MtskSinavETeorik as eSinavSonuc on ( takip.TalepId = eSinavSonuc.TalepId and eSinavSonuc.LineTypeId = 2 and eSinavSonuc.SinavNo = @GirdigiESinavNo )
-     left outer join MtskSinavETeorik as eSinavBasvu on ( takip.TalepId = eSinavBasvu.TalepId and eSinavBasvu.LineTypeId = 1 and eSinavBasvu.SinavNo = @YeniESinavNo )
-  where takip.TalepId = @TalepId
-  and ( takip.KayitTipiId = 2 or takip.KayitTipiId = 3 )
-  ) as x
-    Where a.FirmId  = x.FirmId
-    and   a.TalepId = x.TalepId
-    and   a.AdayId  = x.AdayId 
-    and (
-	   isnull(eSinavNo,0)              <> x.yeniGirecegiSinavNo
-    or isnull(eSinavDurumTipiId,0)     <> x.yenieSinavDurumTipiId    
-    or isnull(a.eSinavSonucTipiId,0)   <> x.yenieSinavSonucTipiId
-    or isnull(a.eSinavSonrasiTipiId,0) <> x.yenieSinavSonrasiTipiId
-	or isnull(a.eSinavDetayId,0)       <> x.yenieSinavDetayId
-    or a.eSinavMuracatTarihi           <> x.yenieSinavMuracatTarihi
-	or a.eSinavBasariTarihi            <> x.yenieSinavBasariTarihi
-	--or a.UygulamaliDersTipiId <> x.UygulamaliDersTipiId : bu değişir
-	)
-	   
-  -- -------------------------------------------------------------------------
-  -- uSinav sonuçları
-  -- -------------------------------------------------------------------------
-  -- -----------------------------------------------------------------------
-  --- Hangi sınava girilecek onu tespit et
-  -- -----------------------------------------------------------------------
-  declare @YeniUSinavNo int
-  declare @GirdigiUSinavNo int
-
-  select top 1 @YeniUSinavNo =
-  ( case when isnull(uSinavSonuc.Id,0) = 0 then 1 -- ilk sinav 
-         when (isnull(uSinavSonuc.PuanTipiId,0) = 1 or isnull(uSinavSonuc.PuanTipiId,0) = -1) and isnull(uSinavSonuc.SinavNo,0) < 4 then uSinavSonuc.SinavNo + 1
-         when (isnull(uSinavSonuc.PuanTipiId,0) = 1 or isnull(uSinavSonuc.PuanTipiId,0) = -1) and isnull(uSinavSonuc.SinavNo,0) = 4 then 0
-         when  isnull(uSinavSonuc.PuanTipiId,0) = 100 then 0
-         end ) 
-  from dbo.MtskAdayTakip as takip 
-       left outer join MtskSinavUygulama as uSinavSonuc on ( takip.TalepId = uSinavSonuc.TalepId )
-  where takip.TalepId = @TalepId
-  order by uSinavSonuc.SinavNo desc
-  
-  select top 1 @GirdigiUSinavNo =
-  ( case when isnull(uSinavSonuc.Id,0) = 0 then 0 -- girmedi
-         when (isnull(uSinavSonuc.PuanTipiId,0) = 1 or isnull(uSinavSonuc.PuanTipiId,0) = -1) and isnull(uSinavSonuc.SinavNo,0) < 4 then uSinavSonuc.SinavNo
-         when (isnull(uSinavSonuc.PuanTipiId,0) = 1 or isnull(uSinavSonuc.PuanTipiId,0) = -1) and isnull(uSinavSonuc.SinavNo,0) = 4 then 4
-         when  isnull(uSinavSonuc.PuanTipiId,0) = 100 then uSinavSonuc.SinavNo
-         end ) 
-  from dbo.MtskAdayTakip as takip 
-       left outer join MtskSinavUygulama as uSinavSonuc on ( takip.TalepId = uSinavSonuc.TalepId )
-  where takip.TalepId = @TalepId
-  order by uSinavSonuc.SinavNo desc
-
-  --print @YeniUSinavNo
-  --print @GirdigiUSinavNo
-
-  update MtskAdayTakip set
-	  uSinavNo = x.yeniGirecegiSinavNo
-    , uSinavDurumTipiId = x.yeniuSinavDurumTipiId    
-    , uSinavNoGirdigi = x.yeniuSinavNoGirdigi
-    , uSinavSonucTipiId = x.yeniuSinavSonucTipiId
-    , uSinavSonrasiTipiId = x.yeniuSinavSonrasiTipiId
-	, uSinavDetayId = x.yeniuSinavDetayId
-	, uSinavBasariTarihi = x.yeniuSinavBasariTarihi
-	, PlanlanacakEgitimTipiId = x.yeniPlanlanacakEgitimTipiId
-    , BasarisizDersTipiId = x.yeniBasarisizDersTipiId
-  from MtskAdayTakip a, 
-  (
-
-  Select 
-    takip.FirmId
-  , takip.TalepId
-  , takip.AdayId
-  -- Sınav sonuu
-  , isnull(uSinavSonuc.SinavNo, 1) as SonucSinavNo
-  , ( case when isnull(uSinavSonuc.Id,0) = 0 then 'sonuc yok'
-           when isnull(uSinavSonuc.Id,0) > 0 then 'sonuc var' 
-           end ) as SonucKaydi
-  , isnull(uSinavSonuc.PuanTipiId, 0) as SonucDurumuTipiId
-  , ( case when isnull(uSinavSonuc.PuanTipiId,0) = 0 then 'Sınav sonuc okunmadı'
-           when uSinavSonuc.PuanTipiId = 100 then 'Başarılı'
-           when uSinavSonuc.PuanTipiId = 1 then 'Başarısız'
-           when uSinavSonuc.PuanTipiId = -1 then 'Girmedi'
-           when uSinavSonuc.PuanTipiId = -2 then 'Durumu girilmemmiş'
-           end ) as SonucDurumTipi 
-   -- nihayi kararlar
-   /*
-   -- 250 
-   uSinavNo                SmallInt     null,
-   uSinavDurumTipiId       SmallInt     null,
-   uSinavRandevuTarihi     Date         null,
-   uSinavUcretTipiId       SmallInt     null, /* kendisi yatıracak, biz yatıracağız */
-   IsuSinavBTeslimEdildi   Bit          null, /* uygulama sınav belgesi kursiyere teslim edildi veya edilmedi */
-   */
-  , ( case when  isnull(uSinavSonuc.Id,0) = 0 then @YeniUSinavNo -- yeni sinav 
-           when (isnull(uSinavSonuc.PuanTipiId,0) = 1 or isnull(uSinavSonuc.PuanTipiId,0) = -1) and isnull(uSinavSonuc.SinavNo,0) < 4  then uSinavSonuc.SinavNo + 1
-           when (isnull(uSinavSonuc.PuanTipiId,0) = 1 or isnull(uSinavSonuc.PuanTipiId,0) = -1) and isnull(uSinavSonuc.SinavNo,0) = 4  then 0
-           when  isnull(uSinavSonuc.PuanTipiId,0) = 100 then 0
-           end ) as yeniGirecegiSinavNo -- >> uSinavNo
-  -- Lkp.MtskAdayTakipuSinavDurumTipiId
-  -- 0,  'Tanımsız'
-  -- 1,  'Henüz sınav aşamasında değil'
-  -- 2,  'Uyg. sınavı için usta öğretici onayı isteniyor'
-  -- 3,  'Uyg. sınavı için hazır değil'
-  -- 4,  'Uyg. sınavı için MEBBİS de onaylanacak'
-  -- 5,  'Uyg. sınav randevusu planlanacak'
-  -- 6,  'Uyg. sınav randevusu MEBBİSe aktarılacak'
-  -- 7,  'Uyg. sınavına girecek'
-  -- 8,  'Başarısız aday eğitimi alacak'
-  , takip.uSinavDurumTipiId
-  , ( case when takip.uSinavDurumTipiId = 1 then 1 --'Henüz sınav aşamasında değil'
-		   when @YeniUSinavNo > 0 and isnull(takip.uSinavDurumTipiId,0) != 1 and isnull(uSinavRande.Id,0) = 0 and isnull(uSinavSonuc.Id,0) = 0 then 5 --'Uyg. sınav randevusu planlanacak' 
-           when isnull(uSinavSonuc.Id,0) > 0 and isnull(uSinavSonuc.PuanTipiId,0) = 100 then 0 -- 'Başarılı'       : 'Tanımsız'
-           when isnull(uSinavSonuc.Id,0) > 0 and isnull(uSinavSonuc.PuanTipiId,0) =  1  and isnull(uSinavSonuc.SinavNo,0) < 4 then 8 -- 'Başarısız'      : 'Başarısız aday eğitimi alacak'
-           when isnull(uSinavSonuc.Id,0) > 0 and isnull(uSinavSonuc.PuanTipiId,0) = -1  and isnull(uSinavSonuc.SinavNo,0) < 4 then 5 -- 'Sınava girmedi' : 'Uyg. sınav randevusu planlanacak'
-           when isnull(uSinavSonuc.Id,0) > 0 and isnull(uSinavSonuc.PuanTipiId,0) =  1  and isnull(uSinavSonuc.SinavNo,0) = 4 then 0 -- 'Başarısız'      : sınav hakkın bittiği için tanımsız
-           when isnull(uSinavSonuc.Id,0) > 0 and isnull(uSinavSonuc.PuanTipiId,0) = -1  and isnull(uSinavSonuc.SinavNo,0) = 4 then 0 -- 'Sınava girmedi' : sınav hakkın bittiği için tanımsız
-           when isnull(uSinavSonuc.Id,0) = 0 and isnull(uSinavRande.Id,0) > 0 and isnull(uSinavRande.IsMebbisUploaded,0) = 1 then 7 -- 'Uyg. sınavına girecek'
-    end ) as yeniuSinavDurumTipiId
-   /*
-   -- 260
-   uSinavNoGirdigi         SmallInt     null,  
-   uSinavSonucTipiId       SmallInt     null, /* Başarılı, Başarısız, Girmedi */
-   uSinavSonrasiTipiId     SmallInt     null, 
-   uSinavDetayId           Int          null, /* en son hangi sınavsa onun id si. sınav1 ise sınav1 in id si, 2 ise 2 nin id si, 3, 4 ... */
-   uSinavBasariTarihi      Date         null,
-   */
-  , ( case when isnull(uSinavSonuc.Id,0) > 0 then isnull(uSinavSonuc.SinavNo,0) end ) as yeniuSinavNoGirdigi
-
-  , ( case when isnull(uSinavSonuc.Id,0) > 0 and isnull(uSinavSonuc.PuanTipiId,0) = 100 then 1
-           when isnull(uSinavSonuc.Id,0) > 0 and isnull(uSinavSonuc.PuanTipiId,0) = 1   then 2
-           when isnull(uSinavSonuc.Id,0) > 0 and isnull(uSinavSonuc.PuanTipiId,0) = -1  then 3
-      end ) as yeniuSinavSonucTipiId
-
-  , ( case when isnull(uSinavSonuc.Id,0) > 0 and (isnull(uSinavSonuc.PuanTipiId,0) = 100) then 2 -- Sertifika aşamasına geçti
-           when isnull(uSinavSonuc.Id,0) > 0 and (isnull(uSinavSonuc.PuanTipiId,0) =  1) and (uSinavSonuc.SinavNo  < 4) then 1 -- başarısız, Tekrar sınava girecek
-           when isnull(uSinavSonuc.Id,0) > 0 and (isnull(uSinavSonuc.PuanTipiId,0) = -1) and (uSinavSonuc.SinavNo  < 4) then 1 -- sınava girmedi, Tekrar sınava girecek
-		   -- başarısız
-           when isnull(uSinavSonuc.Id,0) > 0 and (isnull(uSinavSonuc.PuanTipiId,0) =  1) and (uSinavSonuc.SinavNo >= 4) and (takip.TalepTipiId = 1) then 3 -- Tüm uygulamalı sınav hakkı bitti
-           when isnull(uSinavSonuc.Id,0) > 0 and (isnull(uSinavSonuc.PuanTipiId,0) =  1) and (uSinavSonuc.SinavNo >= 4) and (takip.TalepTipiId = 2) then 4 -- 2. +4 sınav hakkı bitti
-           when isnull(uSinavSonuc.Id,0) > 0 and (isnull(uSinavSonuc.PuanTipiId,0) =  1) and (uSinavSonuc.SinavNo >= 4) and (takip.TalepTipiId = 3) then 4 -- 2. +4 sınav hakkı bitti
-		   -- sınava girmedi
-           when isnull(uSinavSonuc.Id,0) > 0 and (isnull(uSinavSonuc.PuanTipiId,0) = -1) and (uSinavSonuc.SinavNo >= 4) and (takip.TalepTipiId = 1) then 3 -- Tüm uygulamalı sınav hakkı bitti
-           when isnull(uSinavSonuc.Id,0) > 0 and (isnull(uSinavSonuc.PuanTipiId,0) = -1) and (uSinavSonuc.SinavNo >= 4) and (takip.TalepTipiId = 2) then 4 -- 2. +4 sınav hakkı bitti
-           when isnull(uSinavSonuc.Id,0) > 0 and (isnull(uSinavSonuc.PuanTipiId,0) = -1) and (uSinavSonuc.SinavNo >= 4) and (takip.TalepTipiId = 3) then 4 -- 2. +4 sınav hakkı bitti
-           end ) as yeniuSinavSonrasiTipiId
- 
-  , ( case when isnull(uSinavSonuc.Id,0) > 0 then uSinavSonuc.Id end ) as yeniuSinavDetayId
-  , ( case when isnull(uSinavSonuc.Id,0) > 0 then uSinavSonuc.SinavTarihi end ) as yeniuSinavBasariTarihi
-
-  , ( case when isnull(uSinavSonuc.Id,0) > 0 and (isnull(uSinavSonuc.PuanTipiId,0) =  1) and (uSinavSonuc.SinavNo  < 4) then 4 -- başarısız, Başarısız Aday Eğitimi
-           when isnull(uSinavSonuc.Id,0) > 0 and (isnull(uSinavSonuc.PuanTipiId,0) = -1) and (uSinavSonuc.SinavNo  < 4) then 0 -- sınava girmedi, direk randevuya
-           when isnull(uSinavSonuc.Id,0) > 0 and (isnull(uSinavSonuc.PuanTipiId,0) =  1) and (uSinavSonuc.SinavNo >= 4) then 0 -- başarısız, hakları bittiği için
-           when isnull(uSinavSonuc.Id,0) > 0 and (isnull(uSinavSonuc.PuanTipiId,0) = -1) and (uSinavSonuc.SinavNo >= 4) then 0 -- sınava girmedi, hakları bittiği için
-		   else takip.PlanlanacakEgitimTipiId
-		   end ) as yeniPlanlanacakEgitimTipiId
-
-  , ( case when isnull(uSinavSonuc.Id,0) > 0 and (isnull(uSinavSonuc.PuanTipiId,0) =  1) and (uSinavSonuc.SinavNo  < 4) and (isnull(takip.BasarisizDersTipiId,0) = 0) then 1 -- başarısız, 2 saat Başarısız aday eğitimi planlanacak
-           when isnull(uSinavSonuc.Id,0) > 0 and (isnull(uSinavSonuc.PuanTipiId,0) = -1) and (uSinavSonuc.SinavNo  < 4) and (isnull(takip.BasarisizDersTipiId,0) = 0) then 6 -- sınava girmedi, Eğitime gerek sınava girmedi
-           else takip.BasarisizDersTipiId end ) as yeniBasarisizDersTipiId
-
-  from dbo.MtskAdayTakip as takip 
-     left outer join MtskSinavUygulama as uSinavSonuc on ( takip.TalepId = uSinavSonuc.TalepId and uSinavSonuc.SinavNo = @GirdigiUSinavNo )
-     left outer join MtskSinavRandevu  as uSinavRande on ( takip.TalepId = uSinavRande.TalepId and uSinavRande.SinavNo = @YeniUSinavNo )
-  where takip.TalepId = @TalepId
-  and ( takip.KayitTipiId = 2 or takip.KayitTipiId = 3 )
-
-  ) as x
-    Where a.FirmId  = x.FirmId
-    and   a.TalepId = x.TalepId
-    and   a.AdayId  = x.AdayId 
-    and (
-	   isnull(a.uSinavNo,0)            <> x.yeniGirecegiSinavNo
-    or isnull(a.uSinavDurumTipiId,0)   <> x.yeniuSinavDurumTipiId    
-    or isnull(a.uSinavSonucTipiId,0)   <> x.yeniuSinavSonucTipiId
-    or isnull(a.uSinavSonrasiTipiId,0) <> x.yeniuSinavSonrasiTipiId
-	or isnull(a.uSinavDetayId,0)       <> x.yeniuSinavDetayId
-	or a.uSinavBasariTarihi            <> x.yeniuSinavBasariTarihi
-	or isnull(a.BasarisizDersTipiId,0) <> x.yeniBasarisizDersTipiId
-	or isnull(a.PlanlanacakEgitimTipiId,0) <> x.yeniPlanlanacakEgitimTipiId
-	)
-
-  
-  declare @SonUSinavNo int = 0
-  select top 1 @SonUSinavNo = isnull(uSinavSonuc.SinavNo,1)
-  from dbo.MtskAdayTakip as takip 
-       left outer join MtskSinavUygulama as uSinavSonuc on ( takip.TalepId = uSinavSonuc.TalepId )
-  where takip.TalepId = @TalepId
-  order by uSinavSonuc.SinavNo desc
-
-  --print 'Sınavdan kalmış ve tekrar sınava girecekse'
-  update MtskAdayTakip set
-       IsRandevuPlanlandi = 0
-      ,IsRandevuMebbis = 0
-      ,RandevuTarihi = null
-      ,RandevuSaatTipiId = 0
-      ,RandevuEgitimAraciId = null
-      ,RandevuPersonelId = null
-  From MtskAdayTakip as takip
-  where takip.TalepId = @TalepId
-  and   takip.uSinavSonucTipiId > 1 -- Başarısız ve sınava girmediyse
-  and   takip.uSinavSonrasiTipiId = 1 
-  and   isnull(takip.RandevuEgitimAraciId,'') <> ''
-  and   isnull(takip.RandevuPersonelId,'') <> ''
-  and ( takip.KayitTipiId = 2 or takip.KayitTipiId = 3 )
-
-
-  update MtskAdayTakip set
-       IsRandevuPlanlandi = x.yeniIsRandevuPlanlandi
-      ,IsRandevuMebbis = x.yeniIsRandevuMebbis
-      ,RandevuTarihi = x.yeniRandevuTarihi
-      ,RandevuSaatTipiId = x.yeniRandevuSaatTipiId
-      ,RandevuEgitimAraciId = x.yeniRandevuEgitimAraciId
-      ,RandevuPersonelId = x.yeniRandevuPersonelId
-  from MtskAdayTakip a, 
-  (
-  Select top 1
-       takip.Id as TakipId
-      ,1 as yeniIsRandevuPlanlandi
-      ,randevu.IsMebbisUploaded as yeniIsRandevuMebbis 
-      ,randevu.Tarih as yeniRandevuTarihi
-      ,randevu.SaatTipiId as yeniRandevuSaatTipiId
-      ,randevu.EgitimAraciId as yeniRandevuEgitimAraciId
-      ,randevu.PersonelId1 as yeniRandevuPersonelId
-	  ,randevu.SinavNo as yeniSinavNo
-  from dbo.MtskAdayTakip as takip 
-       left outer join MtskSinavRandevu as randevu on ( takip.TalepId = randevu.TalepId )
-  where takip.TalepId = @TalepId
-  and isnull(randevu.SinavNo,0) > @SonUSinavNo
-  and isnull(randevu.Id,0) > 0  
-  and ( takip.KayitTipiId = 2 or takip.KayitTipiId = 3 )
-
-  order by randevu.SinavNo desc
-  ) as x
-  Where a.Id = x.TakipId
+  and (
+       TalepTipiId            <> @yTalepTipiId  
+    or DonemTipiId            <> @yDonemTipiId
+    or GrupTipiId             <> @yGrupTipiId
+    or SubeTipiId             <> @ySubeTipiId
+    or KayitTipiId            <> @yKayitTipiId
+    or IsGrupSubeYok          <> @isGrupSubeYok
+    or DeneyimSartiTipiId     <> @deneyimSartiTipiId
+    or IsDeneyimEnAz          <> @isEnAz
+    or DeneyimSertifikaTipiId <> @deneyimSertifikaTipiId
+    or BelgelerGeldi          <> @yBelgelerGeldi
+  )
 
   --print 'prc_MtskAdayTakipTalepKaydiSingleSet  end'
 

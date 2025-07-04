@@ -23,9 +23,14 @@ using Tkn_DevColumn;
 using Tkn_Events;
 using Tkn_ToolBox;
 using Tkn_Variable;
+using Tkn_DevExpImageHelper;
+
 using System.Drawing;
 using System.Threading.Tasks;
+using DevExpress.Utils;
 using DevExpress.Utils.DragDrop;
+using DevExpress.Utils.Controls;
+using DevExpress.Utils.Drawing;
 
 namespace Tkn_DevView
 {
@@ -175,6 +180,26 @@ namespace Tkn_DevView
                      new System.Drawing.Font("Tahoma", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(1)));
 
                 tVGridControl.ScrollVisibility = DevExpress.XtraVerticalGrid.ScrollVisibility.Auto;
+                tVGridControl.OptionsView.AllowHtmlText = true;
+                tVGridControl.HtmlImages = tImageHelper.GetGlyphs();
+
+                /* renk caption başlığı için örnek kod
+                 * 
+    // Enable HTML Text Formatting and populate the image collection with glyphs.
+    vGridControl.OptionsView.AllowHtmlText = true;
+    vGridControl.HtmlImages = ImageHelper.GetGlyphs();
+
+    // Assign the HypertextLabel editor to the Name row.
+    BaseRow row = vGridControl.GetRowByFieldName("Name");
+    row.Properties.RowEdit = new RepositoryItemHypertextLabel();
+
+    //Enumerate records in the row, and update cell values.
+    for(int i = 0; i < vGridControl.RecordCount; i++) {
+        string value = (string)vGridControl.GetCellValue(row, i);
+        vGridControl.SetCellValue(row, i, "<Image=" + value[0] + ">" + value);
+    }
+
+                */
 
                 tVGridControl.Enter += new System.EventHandler(evg.myVGridControl_Enter);
                 tVGridControl.Leave += new System.EventHandler(evg.myVGridControl_Leave);

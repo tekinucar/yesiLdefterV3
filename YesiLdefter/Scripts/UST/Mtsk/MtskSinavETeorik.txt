@@ -76,7 +76,9 @@ AS BEGIN
 	declare @ySinavTarihSaat varchar(20) = ''
 	declare @xSinavTarihSaat varchar(20) = ''
 	declare @ySinavTarihi date = null
-	declare @ySinavSaati time = null
+	declare @ySinavTarihi2 varchar(10)
+	declare @ySinavSaati varchar(10) = ''
+	declare @xSinavSaati varchar(10) = ''
 	declare @yTeorikPuani int = 0
 	declare @yMebbisESinavTarihValue varchar(20) = ''
 	declare @SinavSonucTipiId smallInt = 0
@@ -86,7 +88,7 @@ AS BEGIN
     BEGIN
 	    set @ySinavNo = 0 
 	    set @ySinavTarihi = null
-	    set @ySinavSaati = null
+	    set @ySinavSaati = ''
 				
         select 
          @yFirmId = ins.FirmId
@@ -97,20 +99,43 @@ AS BEGIN
         ,@yAdayDonemTipiId = isnull(ins.AdayDonemTipiId,0)
 		,@ySinavNo = isnull(ins.SinavNo,0)
 		,@ySinavTarihSaat = isnull(ins.SinavTarihSaat, '0')
+        ,@ySinavTarihi = ins.SinavTarihi 
+        ,@ySinavSaati = isnull(ins.SinavSaati,'')
 		,@yTeorikPuani = isnull(ins.TeorikPuani, 0)
 		,@SinavSonucTipiId = isnull(ins.DurumuTipiId, 0)
 		,@yMebbisESinavTarihValue = isnull(ins.MebbisESinavTarihValue,'')
         ,@yLineTypeId = isnull(ins.LineTypeId,0) 
 		from inserted ins
     	where ins.Id = @curId
-	
-        if (@ySinavTarihSaat <> '0')
+
+		set @xSinavSaati = Convert(varchar(10), Convert(time, @xSinavTarihSaat, 104))
+			    
+		-- @xSinavSaati ile @ySinavTarihSaat üzerindeki saat boyutuna bakarak manuel mi yoksa mebbisden mi alındığı belli oluyor
+		-- @ySinavTarihSaat insert veya update olmuşsa @ySinavTarihi ve @ySinavSaati buna göre değiştiriliyor
+		-- Kullnıcı @ySinavTarihi ve @ySinavSaati manuel girmişse @ySinavTarihSaat ona göre ayarlanıyor
+
+        -- LEN(@xSinavSaati) > 5 olması bu bilginin mebbisden girildiğini işaret ediyor
+		if (@ySinavTarihSaat <> '0' and LEN(@xSinavSaati) > 5) 
 		begin
 		  set @xSinavTarihSaat = replace(@ySinavTarihSaat, '/E-Sınav', '') 
 		  set @ySinavTarihi = convert(date, @xSinavTarihSaat, 103)
 		  set @ySinavSaati = convert(time, @xSinavTarihSaat, 103)
 		end
 
+       -- aa.gg.yyyy formatına dönüyor
+	   -- böylece try_cast da doğruysa sonuç dönüyor değilse null dönüyor
+	   set @ySinavTarihi2 = convert(varchar(10), @ySinavTarihi, 102 )
+
+       -- LEN(@ySinavSaati) = 5 olması bilginin kullanıcı tarafından manuel girldiğini anlatıyor
+	   if (LEN(@ySinavSaati) = 5) and
+	      (TRY_CAST(@ySinavSaati as TIME) is not null) and  
+          (TRY_CAST(@ySinavTarihi2 as datetime) is not null) 
+	       Set @ySinavTarihSaat = FORMAT(
+		           TRY_CAST(
+                   TRY_CAST(@ySinavTarihi2 AS VARCHAR(10)) + ' ' + 
+                   TRY_CAST(@ySinavSaati AS VARCHAR(5)) AS datetime),
+				   'dd.MM.yyyy HH:mm', 'tr-TR')
+				   
 		-- Sınavın hangi dönemde yapıldığı tespit ediliyor
 		if (MONTH(@ySinavTarihi) < 10)
                set @SinavDonemTipiId = convert(int, convert(varchar(5), YEAR(@ySinavTarihi)) + '0' + convert(varchar(3), MONTH(@ySinavTarihi)))
@@ -143,15 +168,17 @@ AS BEGIN
             order by DonemTipiId desc, Id desc
 		end
 
-		if (@yTeorikPuani >= 70) 
+		if (@yTeorikPuani >= 70 and @yTeorikPuani <= 100) 
 		   set @SinavSonucTipiId = 1 -- Başarılı
 		
-		if ((@yTeorikPuani > 0) and (@yTeorikPuani < 70)) 
+		if (@yTeorikPuani > 0 and @yTeorikPuani < 70) 
 		   set @SinavSonucTipiId = 2 -- Başarısız
 		
-		-- Sınav tarihinden 7 gün geçtiği halde okunmamışsa girmedi yap
-		--if ((@yTeorikPuani = 0) and (@ySinavTarihi < (GETDATE() - 7))) 
-		--   set @SinavSonucTipiId = 3 -- Girmedi
+		if (@yTeorikPuani < 0 or @yTeorikPuani > 100) 
+		   set @SinavSonucTipiId = 0 -- Tanımsız
+
+		if (@yTeorikPuani = 0 and @SinavSonucTipiId < 3)
+		   set @SinavSonucTipiId = 0 -- Tanımsız
 
         if (@yMebbisESinavTarihValue <> '')-- and (@ySinavTarihSaat = '' or @ySinavTarihSaat = '0'))        
         begin 
@@ -170,7 +197,7 @@ AS BEGIN
 		and FirmId = @yFirmId
 		and TalepId = @yTalepId
         and LineTypeId = @yLineTypeId 
-		and SinavTarihi < DATEADD(DAY, -1, @ySinavTarihi)  
+		and SinavTarihi < @ySinavTarihi  
 
 		update MtskSinavETeorik set
            TalepId = @yTalepId
@@ -232,11 +259,11 @@ AS BEGIN
 		Update dbo.MtskAdayTalep set KayitTipiId = 3
         Where Id = @yTalepId
         and   KayitTipiId < 3 -- Kesin Kayıt değilse ? kesin kayıt durumuna getir
-
-        Execute [dbo].[prc_MtskAdayTakipTalepKaydiSingleSet] @yTalepId
-
+		
         FETCH NEXT FROM eSinavCursor INTO @curId
     END
+
+	Execute [dbo].[prc_MtskAdayTakipTalepKaydiSingleSet] @yTalepId
 
     CLOSE eSinavCursor
     DEALLOCATE eSinavCursor   
@@ -265,7 +292,7 @@ AS BEGIN
 	    From deleted dlt
 	    Where dlt.Id = @curId
 	  
-        --Execute [dbo].[prc_MtskAdayTakipTalepKaydiSingleSet] @TalepId
+        Execute [dbo].[prc_MtskAdayTakipTalepKaydiSingleSet] @TalepId
         Execute [dbo].[prc_MtskAdayTakipESinavSet] @TalepId
 
         FETCH NEXT FROM eSinavCursorDlt INTO @curId

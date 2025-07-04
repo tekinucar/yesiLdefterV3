@@ -571,6 +571,25 @@ namespace Tkn_Events
                 tGridHint.columnEditValue = editValue.Trim();
             }
 
+            if (sender.GetType().ToString() == "DevExpress.XtraEditors.TimeEdit")
+            {
+                if (((DevExpress.XtraEditors.TimeEdit)sender).Properties.AccessibleDescription != null)
+                    tGridHint.columnPropNavigator = ((DevExpress.XtraEditors.TimeEdit)sender).Properties.AccessibleDescription;
+
+
+                if (((DevExpress.XtraEditors.TimeEdit)sender).OldEditValue != null)
+                    oldValue = ((DevExpress.XtraEditors.TimeEdit)sender).OldEditValue.ToString();
+
+                if (((DevExpress.XtraEditors.TimeEdit)sender).EditValue != null)
+                    editValue = ((DevExpress.XtraEditors.TimeEdit)sender).EditValue.ToString();
+
+                tGridHint.parentObject = ((DevExpress.XtraEditors.TimeEdit)sender).Parent.GetType().ToString();
+
+                tGridHint.columnOldValue = oldValue.Trim();
+                tGridHint.columnEditValue = editValue.Trim();
+            }
+
+
             //RepositoryItemSearchLookUpEdit
 
             if (sender.GetType().ToString() == "DevExpress.XtraEditors.SearchLookUpEdit")
@@ -843,6 +862,39 @@ namespace Tkn_Events
                     }
                 }
 
+            }
+
+            if (senderType == "DevExpress.XtraEditors.TimeEdit")
+            {
+                tGridHint.viewType = "TimeEdit";
+
+                if (((DevExpress.XtraEditors.TimeEdit)sender).Parent != null)
+                {
+                    senderType = ((DevExpress.XtraEditors.TimeEdit)sender).Parent.GetType().ToString();
+
+                    Control parentControl = ((DevExpress.XtraEditors.TimeEdit)sender).Parent;
+
+                    // yer değişikliği
+                    if (parentControl.GetType().ToString() == "DevExpress.XtraGrid.GridControl")
+                    {
+                        sender = ((DevExpress.XtraGrid.GridControl)parentControl).MainView;
+                        senderType = sender.GetType().ToString();
+                    }
+                    else
+                    {
+                        tGridHint.tForm = ((DevExpress.XtraEditors.TimeEdit)sender).FindForm();
+                        tGridHint.tableIPCode = ((DevExpress.XtraEditors.TimeEdit)sender).AccessibleName;
+                        tGridHint.view = sender;
+                        tGridHint.columnFieldName = ((DevExpress.XtraEditors.TimeEdit)sender).Name.ToString();
+                        tGridHint.parentObject = ((DevExpress.XtraEditors.TimeEdit)sender).Parent.GetType().ToString();
+
+                        if (((DevExpress.XtraEditors.TimeEdit)sender).OldEditValue != null)
+                            oldValue = ((DevExpress.XtraEditors.TimeEdit)sender).OldEditValue.ToString();
+
+                        if (((DevExpress.XtraEditors.TimeEdit)sender).EditValue != null)
+                            editValue = ((DevExpress.XtraEditors.TimeEdit)sender).EditValue.ToString();
+                    }
+                }
             }
 
             if (senderType == "DevExpress.XtraEditors.TimeSpanEdit")
@@ -1237,7 +1289,7 @@ namespace Tkn_Events
 
             // tablonun key fieldinden value getiriyor
             //
-            string keyValue = t.TableKeyFieldValue(tGridHint.tForm, tGridHint.tableIPCode);
+            string keyValue = t.TableKeyFieldValue(tGridHint.tForm, tGridHint.tableIPCode, "").ToString();
 
             //object ob = null;
             //DevExpress.XtraDataLayout.DataLayoutControl
@@ -2112,7 +2164,8 @@ namespace Tkn_Events
                          (view != null))
                     {
                         tGridHint.currentColumn = view.FocusedColumn;
-                        view.FocusedColumn = GetNextFocusableColumn(tGridHint);
+                        var res = GetNextFocusableColumn(tGridHint);
+                        view.FocusedColumn = res;
                         gridShowEditor(tGridHint);
                         e.Handled = true;
                     }

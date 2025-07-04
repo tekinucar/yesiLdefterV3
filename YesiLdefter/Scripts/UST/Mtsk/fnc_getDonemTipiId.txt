@@ -1,0 +1,20 @@
+﻿/*CreateFunction*/
+
+CREATE FUNCTION fnc_getDonemTipiId (@DonemAdi varchar(30))
+RETURNS INT
+AS
+BEGIN
+    DECLARE @Bugun SMALLDATETIME = GETDATE();
+    DECLARE @GelecekAy SMALLDATETIME = DATEADD(MONTH, 1, @Bugun);
+
+    DECLARE @BugunDonemTipiId INT = YEAR(@Bugun) * 100 + MONTH(@Bugun);
+    DECLARE @GelecekDonemTipiId INT = YEAR(@GelecekAy) * 100 + MONTH(@GelecekAy);
+
+    if (@DonemAdi = 'BUGUN') Return @BugunDonemTipiId
+    if (@DonemAdi = 'BUGÜN') Return @BugunDonemTipiId
+	if (@DonemAdi = 'GELECEK') Return @GelecekDonemTipiId
+
+	Return @BugunDonemTipiId
+END
+
+/*CreateFunctionEnd*/

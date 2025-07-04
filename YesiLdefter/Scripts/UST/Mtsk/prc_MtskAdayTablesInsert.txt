@@ -32,6 +32,7 @@ AS BEGIN
   Where ins.Id = @TalepId
      
   if (@yTalepTipiId = 1) or  -- yeni sertifika 
+     (@yTalepTipiId = 3) or  -- Nakil 2. +4 hak 
      (@yTalepTipiId = 4)     -- 100 ceza
   begin
       set @onayBelgeler = 1
@@ -179,7 +180,7 @@ AS BEGIN
      INSERT INTO dbo.MtskAdayTakip
            (FirmId, TalepId, AdayId,
             DonemTipiId, GrupTipiId, SubeTipiId,
-            AsamaTipiId, TalepTipiId, KayitTipiId, ZamanlamaTipiId,
+            TalepTipiId, KayitTipiId, ZamanlamaTipiId,
             IsGrupSubeYok, IsActive,
             MebbisKurumOnayi, MebbisDurumTipiId,
             SertifikaYasSiniri, YasOnayiTipiId, YasHazirTarihi,
@@ -215,11 +216,13 @@ AS BEGIN
             uSinavNo, uSinavDurumTipiId, uSinavUcretTipiId, IsuSinavBTeslimEdildi,
             uSinavNoGirdigi, uSinavSonucTipiId, uSinavSonrasiTipiId, uSinavDetayId, uSinavBasariTarihi,
 
-            SertifikaDurumTipiId, SertifikaTarihi, DosyaYakti)
+            SertifikaDurumTipiId, SertifikaTarihi, DosyaYakti,
+			Asama1TipiId, Asama1DetayTipiId, Asama2TipiId, Asama2DetayTipiId
+			)
      VALUES
            (@yFirmId,  @TalepId, @yAdayId,  
 		    @yDonemTipiId, @yGrupTipiId, @ySubeTipiId, 
-            0,  @yTalepTipiId,  0,  0,  -- AsamaTipiId, TalepTipiId, KayitTipiId, ZamanlamaTipiId,
+            @yTalepTipiId,  0,  0,  -- AsamaTipiId, TalepTipiId, KayitTipiId, ZamanlamaTipiId,
             0,  0,              -- IsGrupSubeYok, IsActive,
             0,  0,              -- MebbisKurumOnayi, MebbisDurumTipiId,
             0,  0,  null,       -- SertifikaYasSiniri, YasOnayiTipiId, YasHazirTarihi,
@@ -255,7 +258,8 @@ AS BEGIN
             0,  0,  0,  0,      -- uSinavNo, uSinavDurumTipiId, uSinavUcretTipiId, IsuSinavBTeslimEdildi,
             0,  0,  0,  0, null,-- uSinavNoGirdigi, uSinavSonucTipiId, uSinavSonrasiTipiId, uSinavDetayId, uSinavBasariTarihi,
 
-            0,  null,  0        -- SertifikaDurumTipiId, SertifikaTarihi, DosyaYakti
+            0,  null,  0,       -- SertifikaDurumTipiId, SertifikaTarihi, DosyaYakti
+			0,  0,  0, 0        -- Asama1TipiId, Asama1DetayTipiId, Asama2TipiId, Asama2DetayTipiId  
 			)       
      print ' create : [MtskAdayTakip]'
 

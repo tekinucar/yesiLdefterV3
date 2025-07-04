@@ -328,7 +328,7 @@ INSERT INTO [Lkp].[MtskAdayTakipYasOnayiTipi] (Id, YasOnayiTipi, KonuGrupId, Kon
   --( 0,    N'Yaşı tutuyor',                  1, 1210, 'Yaş onayı', '', ''),
   ( 1,    N'Yaşı tutmuyor',                 1, 1211, 'Yaş onayı', '', ''),
   ( 2,    N'Yaş için bekleme süresi doldu', 1, 1212, 'Yaş onayı', '', ''),
-  ( 3,    N'Muhafiyetle onaylı',            1, 1213, 'Yaş onayı', '', ''),
+  ( 3,    N'Muafiyetle onaylı',             1, 1213, 'Yaş onayı', '', ''),
   ( 4,    N'Doğum tarihi yok, belirsiz',    1, 1214, 'Yaş onayı', '', '')
 
 

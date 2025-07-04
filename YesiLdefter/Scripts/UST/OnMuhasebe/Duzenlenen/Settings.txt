@@ -98,6 +98,28 @@ commit transaction
 /* SettingGroupNo  : henüz nasıl gruplayacağım belli değil */
 /* SettingNo       : her setting row için bizim tarafımızdan belirlenen tekil bir ID  */
 
+/* SettingGroupNo  : 
+1000 Baslangic
+1010 Kayıt
+1020 Donemler
+1030 TeorikDersler
+1040 e_SinavBasvurusu
+1050 e_Sinav
+1060 TumUygulamaliDersler
+1070 UygulamaliDersler
+1080 Arti4Dersler
+1090 TelafiDersler
+1110 BasarisizDersler
+1120 Randevu
+1130 UygulamaliSinav
+1140 Sertifika
+2010 OnMuhasebe
+
+3010 Sms
+3020 EMail
+
+
+*/
 
 
 Declare @FirmId Int 
@@ -112,7 +134,7 @@ INSERT INTO [dbo].[Settings]
            ,null -- PcName
            ,null -- NetworkMacAddress
            ,null -- UserId
-           ,null -- SettingGroupNo
+           ,1000 -- SettingGroupNo
            ,101  -- SettingNo   
            ,'Başlangıçta yapılması gerekerenler menüsü'   -- About
            ,1    -- DefaultTypeId /* DefaultBool seçildi */ 
@@ -122,6 +144,31 @@ INSERT INTO [dbo].[Settings]
            ,null -- DefaultInt   
            )
 
+
+INSERT INTO [dbo].[Settings]
+           ([IsActive], [SettingTypeId], [FirmId], [PcName], [NetworkMacAddress], [UserId], [SettingGroupNo], [SettingNo], [About], [DefaultTypeId], [DefaultBool], [DefaultNumeric], [DefaultText], [DefaultInt])
+     VALUES
+           (1    --IsActive
+           ,1    --SettingTypeId
+           ,@FirmId
+           ,null -- PcName
+           ,null -- NetworkMacAddress
+           ,null -- UserId
+           ,1130 -- SettingGroupNo
+           ,101  -- SettingNo   
+           ,'Uygulamalı sınav için -Aday sınav için hazır mı ?- sorusu devrede mi ?'   -- About
+           ,1    -- DefaultTypeId /* DefaultBool seçildi */ 
+           ,0    -- DefaultBool  /*  0 : Sorma,  1 : Sor  */
+           ,null -- DefaultNumeric
+           ,null -- DefaultText
+           ,null -- DefaultInt   
+           )
+
+
+  Update s Set SettingGroupNo = 1000
+  From [dbo].[Settings] as s
+  Where SettingGroupNo is null
+  and   SettingNo = 101
 
 /*CreateDataEnd*/
 

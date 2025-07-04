@@ -34,7 +34,7 @@ AS BEGIN
   -- 0,  'Yaşı tutuyor'
   -- 1,  'Yaşı tutmuyor'
   -- 2,  'Yaş için bekleme süresi doldu'
-  -- 3,  'Muhafiyetle onaylı'
+  -- 3,  'Muafiyetle onaylı'
   -- 4,  'Doğum tarihi yok, belirsiz'
   -- 5,  'Yaş kontrolü yok'
 

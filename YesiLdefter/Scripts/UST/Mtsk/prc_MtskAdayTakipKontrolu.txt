@@ -3,6 +3,7 @@
 CREATE PROCEDURE [dbo].[prc_MtskAdayTakipKontrolu] (@FirmId int)  
 AS BEGIN
 
+
      -- -------------------------------------------------------------------------------
      -- Eksik dbo.MtskAdayTalep > dbo.MtskAdayTakip  satırı varsa tamamla
      -- -------------------------------------------------------------------------------
@@ -11,7 +12,7 @@ AS BEGIN
      INSERT INTO dbo.MtskAdayTakip
            (FirmId, TalepId, AdayId,
             DonemTipiId, GrupTipiId, SubeTipiId,
-            AsamaTipiId, TalepTipiId, KayitTipiId, ZamanlamaTipiId,
+            TalepTipiId, KayitTipiId, ZamanlamaTipiId,
             IsGrupSubeYok, IsActive,
             MebbisKurumOnayi, MebbisDurumTipiId,
             SertifikaYasSiniri, YasOnayiTipiId, YasHazirTarihi,
@@ -44,15 +45,17 @@ AS BEGIN
 			IsRandevuPlanlandi,  IsRandevuMebbis, RandevuTarihi,
             RandevuSaatTipiId, RandevuEgitimAraciId, RandevuPersonelId, 
 
-            uSinavNo, uSinavDurumTipiId, uSinavRandevuTarihi, uSinavUcretTipiId, IsuSinavBTeslimEdildi,
+            uSinavNo, uSinavDurumTipiId, uSinavUcretTipiId, IsuSinavBTeslimEdildi,
             uSinavNoGirdigi, uSinavSonucTipiId, uSinavSonrasiTipiId, uSinavDetayId, uSinavBasariTarihi,
 
-            SertifikaDurumTipiId, SertifikaTarihi, DosyaYakti)
+            SertifikaDurumTipiId, SertifikaTarihi, DosyaYakti,
+			Asama1TipiId, Asama1DetayTipiId, Asama2TipiId, Asama2DetayTipiId
+			)
 
      Select 
             talep.FirmId,  talep.Id, talep.AdayId,  
 		    talep.DonemTipiId, talep.GrupTipiId, talep.SubeTipiId, 
-            0,  talep.TalepTipiId,  0,  0,  -- AsamaTipiId, TalepTipiId, KayitTipiId, ZamanlamaTipiId,
+            talep.TalepTipiId,  0,  0,  -- AsamaTipiId, TalepTipiId, KayitTipiId, ZamanlamaTipiId,
             0,  0,              -- IsGrupSubeYok, IsActive,
             0,  0,              -- MebbisKurumOnayi, MebbisDurumTipiId,
             0,  0,  null,       -- SertifikaYasSiniri, YasOnayiTipiId, YasHazirTarihi,
@@ -85,18 +88,20 @@ AS BEGIN
 			0,  0,    null,     -- IsRandevuPlanlandi,  IsRandevuMebbis, RandevuTarihi,
             0,  null, null,     -- RandevuSaatTipiId, RandevuEgitimAraciId, RandevuPersonelId, 
 
-            0,  0, null, 0,  0, -- uSinavNo, uSinavDurumTipiId, uSinavRandevuTarihi, uSinavUcretTipiId, IsuSinavBTeslimEdildi,
+            0,  0,  0,  0,      -- uSinavNo, uSinavDurumTipiId, uSinavUcretTipiId, IsuSinavBTeslimEdildi,
             0,  0,  0,  0, null,-- uSinavNoGirdigi, uSinavSonucTipiId, uSinavSonrasiTipiId, uSinavDetayId, uSinavBasariTarihi,
 
-            0,  null,  0        -- SertifikaDurumTipiId, SertifikaTarihi, DosyaYakti
+            0,  null,  0,       -- SertifikaDurumTipiId, SertifikaTarihi, DosyaYakti
+			0,  0,  0, 0        -- Asama1TipiId, Asama1DetayTipiId, Asama2TipiId, Asama2DetayTipiId  
+
   FROM [dbo].[MtskAdayTalep] as talep
       left outer join [dbo].[MtskAdayTakip] as takip on ( talep.Id = takip.TalepId )
   Where takip.Id is null
 
-
   Execute  [dbo].[prc_MtskAdayTakipTalepKaydiSingleSetKontrolu] @FirmId
 
-  Execute  [dbo].[prc_MtskAdayTakip] @FirmId
+  Execute  [dbo].[prc_MtskAdayTakip] @FirmId, 0, 0, 'MtskAdayTakipFull'
+
 
 END --
 
