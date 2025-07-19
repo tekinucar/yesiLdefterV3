@@ -304,7 +304,9 @@ INSERT INTO [Lkp].[OnmBelgeMaliyetBelgeTipi] (Id, BelgeTipi, GrupTipiId)
   (7,   N'Tevsiki Zaruri Olmayan', 1),
   (8,   N'Yapay Belge', 1),
   (21,  N'Muhasebe Dekontu', 1),
-  (22,  N'Hesap Extresi', 1)
+  (22,  N'Hesap Ekstresi', 1),
+  (23,  N'Sigorta poliçesi', 1),
+  (99,  N'Belgesiz', 1)
 
 
 -- ------------------------------------------------------- 

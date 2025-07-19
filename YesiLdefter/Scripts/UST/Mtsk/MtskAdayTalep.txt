@@ -645,7 +645,9 @@ INSERT INTO [Lkp].[MtskAdayTalepKayitTipi] (Id, KayitTipi, ChartCaption, FormCap
   ( 5,    N'Tüm e-Sınav hakkı bitti. Dosya yandı',  '', '' ),
   ( 6,    N'Tüm uygulamalı sınav hakkı bitti',  '', '' ),
   ( 7,    N'2. +4 sınav hakkı bitti. Dosya yandı',  '', '' ),
-  ( 8,    N'Diğer sebeplerden dolayı dosya kapandı',  '', '' )
+  ( 8,    N'Diğer sebeplerden dolayı dosya kapandı',  '', '' ),
+  ( 9,    N'24 ayda kapanmamış dosya, otomatik kapatıldı',  '', '' )
+
 
 /*
   ( 5,    N'Sertifika almaya hak kazandı',  '', '' ),

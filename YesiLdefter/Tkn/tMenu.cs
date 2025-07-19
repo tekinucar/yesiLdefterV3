@@ -1576,6 +1576,7 @@ namespace Tkn_Menu
             string ustHesapItemName = string.Empty;
             string ustItemName = string.Empty;
             string CmpName = string.Empty;
+            string menuName = "";
 
             Boolean tenabled = false;
             Boolean tvisible = false;
@@ -1605,6 +1606,8 @@ namespace Tkn_Menu
 
             mControl.Enter += new System.EventHandler(evm.tTileNavPane_Enter);
             mControl.Leave += new System.EventHandler(evm.tTileNavPane_Leave);
+            mControl.SelectedElementChanged += new TileNavPaneElementEventHandler(evm.tileNavPane_SelectedElementChanged);
+            menuName = mControl.Name?.ToString();
 
             for (int i = 0; i < itemCount; i++)
             {
@@ -1758,7 +1761,10 @@ namespace Tkn_Menu
                     tItem.Visible = tvisible;
                     if (t.IsNotNull(Prop_Navigator))
                         tItem.Tag = Prop_Navigator + "|Prop_Navigator|";
-                    
+                    if (t.IsNotNull(menuName))
+                        tItem.Tag += menuName + "|MenuName|";
+
+
                     //tItem.
                     //tItem.Appearance.BackColor = v.colorNew;
                     //tItem.AppearanceHovered.BackColor = v.colorFocus;
@@ -1929,9 +1935,10 @@ namespace Tkn_Menu
 
                             tItem.Enabled = tenabled;
                             tItem.Visible = tvisible;
-                            //tItem.Tag = Prop_Navigator;
                             if (t.IsNotNull(Prop_Navigator))
                                 tItem.Tag = Prop_Navigator + "|Prop_Navigator|";
+                            if (t.IsNotNull(menuName))
+                                tItem.Tag += menuName + "|MenuName|";
 
                             tItem.Appearance.BackColor = v.colorNew;
                             tItem.AppearanceHovered.BackColor = v.colorFocus;
@@ -2103,7 +2110,8 @@ namespace Tkn_Menu
                 }
                 #endregion Mali Dönem
 
-
+                //tileNavItemSettings.Appearance.Options.UseBackColor = true;
+                //tileNavItemSettings.Appearance.BackColor = Color.LightBlue;
             }
 
             #region Rapor
@@ -3064,6 +3072,7 @@ namespace Tkn_Menu
                 ustItemName = string.Empty;
 
                 // AccordionDinamik ilk satır,  dsRead tablosu hazırlanıyor
+                // UST/OMS/HVezneFinans.Hesap_L02
                 if (itemType == 110)
                 {
                     if (tForm != null)

@@ -174,29 +174,7 @@ AS BEGIN
                     ,IsSaatleriDuzenle = 0
                 Where Id = @curId
 
-                -- Id EgitimTipi
-                -- 1  Normal Eğitim
-                -- 2  Telafi Eğitim(Ön Sınav )
-                -- 3  2.Direksiyon Eğitimi
-                -- 4  Başarısız Aday Eğitimi
-                /*
-				if (@EgitimTipiId = 1) 
-                begin
-                    Update dbo.MtskAdayTakip set IsUygulamaliDersPlanli = 1
-                    Where TalepId = @TalepId
-                end
-                if (@EgitimTipiId = 3) 
-                begin
-                    Update dbo.MtskAdayTakip set IsArti4DersPlanli = 1
-                    Where TalepId = @TalepId
-                end
-                if (@EgitimTipiId = 4) 
-                begin
-                    Update dbo.MtskAdayTakip set IsBasarisizDersPlanli = 1
-                    Where TalepId = @TalepId
-                end
-				*/
-                Execute dbo.prc_MtskAdayTakip @yFirmId
+                Execute dbo.prc_MtskAdayTakip @yFirmId, @yTalepId, 0, 'MtskAdayTakipUygDers'
 
             end else
             begin

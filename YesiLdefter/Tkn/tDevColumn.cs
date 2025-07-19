@@ -387,6 +387,8 @@ namespace Tkn_DevColumn
             string groupTables = Row["LKP_LIST_TYPES_NAME"].ToString();
             string groupListTypes = Row["LIST_TYPES_NAME"].ToString();
             Int16 type = Convert.ToInt16(Row["LKP_FIELD_TYPE"].ToString());
+            bool tableNameChecked = true;
+
 
             if (t.IsNotNull(Row["KRT_CAPTION"].ToString()))
                 fieldName = Row["KRT_CAPTION"].ToString();
@@ -406,9 +408,12 @@ namespace Tkn_DevColumn
                 tableName = t.Get_And_Clear(ref groupTables, "||");
                 idFieldName = t.Get_And_Clear(ref groupTables, "||");
                 fieldName = t.Get_And_Clear(ref groupTables, "||");
+
+                tableNameChecked = false;
             }
 
-            t.LookUpFieldNameChecked(ref tableName, ref fieldName, ref idFieldName, type);             
+            if (tableNameChecked)
+                t.LookUpFieldNameChecked(ref tableName, ref fieldName, ref idFieldName, type);             
 
             LookUpTableRead_(dbaseType, tableName, "", "");
             LookUpTableFill_(tableName, idFieldName, fieldName, groupListTypes, type,

@@ -874,6 +874,7 @@ BEGIN
   --print LEN(@Sql)
 
   if (@Kim = 'MtskAdayTakipFull'
+  or  @Kim = 'MtskAdayTakipKayit'
   or  @Kim = 'MtskAdayTakipESinav'
   )
   begin
@@ -2307,9 +2308,12 @@ BEGIN
 
   Set @Sql = '
 --@Header
+--@Donemler
+
   ;WITH KayitTipi AS (
     Select t.TalepId as TalepId
     , ( case
+         when t.KayitTipiId < 4 and (@BugunDonemTipiId - t.DonemTipiId) > 200 and t.DonemTipiId > 0 then 9 -- 24 ayda kapanmamış dosya
          when t.KayitTipiId = 8 then 8 -- Manuel dosya kapanmışsa hiç elleme 
 	     when t.uSinavSonrasiTipiId = 4 then 7 -- 2.+4 hakkı bitti
 	     when t.uSinavSonrasiTipiId = 3 then 6 -- uyg  hakkı bitti
@@ -2340,6 +2344,7 @@ BEGIN
   ';
 
   Set @Sql = REPLACE(@Sql, '--@Header', @SqlHeader)
+  Set @Sql = REPLACE(@Sql, '--@Donemler', @SqlDonemler)
 
   if (@TalepId > 0) 
       Set @Sql = REPLACE(@Sql, '--and @TalepId', 'and @TalepId')
@@ -2370,6 +2375,9 @@ BEGIN
   300 | 400  |  E-Sınav durum aşaması,         | E-Sınav sonuç aşaması
   500 |      |  Uygulamalı dersler aşamasında  |  
   600 | 700  |  Uygulamalı sınav aşaması,      | Uygulamalı sınav sonuç aşaması
+  810 |      |  Sertifika alanlar              |
+  820 |      |  Dosya yakanlar                 |
+  830 |      |  Arşiv                          |
   */
 
   Set @Sql = '
@@ -2378,17 +2386,24 @@ BEGIN
     Select t.TalepId as TalepId
     -- Aşamalar 
     , ( case
+        when t.KayitTipiId = 8 or t.KayitTipiId = 9 then 830
+        when t.KayitTipiId >= 5 and t.KayitTipiId <= 7 then 820
+        when t.KayitTipiId = 4 then 810
         when t.uSinavDurumTipiId > 1 then 600
         when t.TalepTipiId = 1 and t.BasarisizDersTipiId > 0 then 540
         when ( t.TalepTipiId = 2 or t.TalepTipiId = 3) and t.Arti4DersTipiId > 0 then 530
         when t.TalepTipiId < 4 and t.TelafiDersTipiId > 0 then 520
         when t.TalepTipiId = 1 and t.UygulamaliDersTipiId > 0 then 510
         when ( t.TalepTipiId = 1 or t.TalepTipiId = 4) and t.eSinavSonucTipiId > 0 and eSinavSonrasiTipiId > 0 then 300
-        when ( t.TalepTipiId = 1 or t.TalepTipiId = 4) and t.TeorikDersTipiId > 14 then 200
+        when ( t.TalepTipiId = 1 or t.TalepTipiId = 4) and isnull(t.eSinavSonucTipiId,0) = 0 and isnull(eSinavSonrasiTipiId,0) = 0 and t.TeorikDersTipiId = 17 then 300
+        when ( t.TalepTipiId = 1 or t.TalepTipiId = 4) and t.TeorikDersTipiId > 14 and t.TeorikDersTipiId < 17 then 200
         when t.KayitTipiId < 4 then 100 -- Sertifika almamış ise 
         else 0 end 
       ) as yeniAsama1TipiId
     , ( case 
+        when t.KayitTipiId = 8 or t.KayitTipiId = 9 then 0
+        when t.KayitTipiId >= 5 and t.KayitTipiId <= 7 then 0
+        when t.KayitTipiId = 4 then 0
         when t.uSinavSonrasiTipiId > 0 then 700
         when t.TalepTipiId = 1 and t.BasarisizDersTipiId > 0 then 0
         when ( t.TalepTipiId = 2 or t.TalepTipiId = 3) and t.Arti4DersTipiId > 0 then 0
@@ -2474,6 +2489,7 @@ BEGIN
   Execute [dbo].[prc_setIsDbUpdateActive] 13, 0	
   print ''
   print 'prc_MtskAdayTakip end'
+
 
 
 END --

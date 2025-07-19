@@ -161,6 +161,16 @@ namespace Tkn_Search
                             (funcName == v.ButtonEdit))
                             buttonType = v.tButtonType.btYeniKart;
 
+                        if ((button == DevExpress.XtraEditors.Controls.ButtonPredefines.OK) &&
+                            (funcName == v.ButtonEdit) &&
+                            (buttonType == v.tButtonType.btListeyeEkle)
+                            )
+                        {
+
+                        }
+
+
+
                         if (buttonType == v.tButtonType.btArama)
                         {
                             //if (((DevExpress.XtraEditors.ButtonEdit)sender).EditValue != null)
@@ -327,6 +337,9 @@ namespace Tkn_Search
 
         public bool directSearch(vButtonHint buttonHint)
         {
+
+            if (v.tSearch.IsSearchFound) return true;
+
             tToolBox t = new tToolBox();
             tEventsButton evb = new tEventsButton();
             //tEvents ev = new tEvents();
@@ -533,7 +546,7 @@ namespace Tkn_Search
                         
             if (t.IsNotNull(ds_Query) == false)
             {
-                if (ds_Query.Tables[0].Rows.Count == 0)
+                if (ds_Query.Tables.Count > 0 && ds_Query.Tables[0].Rows?.Count == 0)
                 {
                     //MessageBox.Show("yeni kart açalım...");
 
@@ -1128,6 +1141,8 @@ namespace Tkn_Search
                 #region SetValues işlemleri
                 /// Seçilen Row un değerleri okunur ve bekleyen dsData ya set edilir
 
+                v.tSearch.IsSearchFound = true;
+
                 bool checked_ = false;
                 string uT_FNAME = string.Empty;
                 string uR_FNAME = string.Empty;
@@ -1261,6 +1276,15 @@ namespace Tkn_Search
                             tEventsButton evb = new tEventsButton();
                             evb.InputBox(tForm, TargetTableIPCode, item, v.con_SelectedSearchDataRow);
                         }
+                        if (WORKTYPE == "SETFOCUS")
+                        {
+                            string TableIPCode = t.Set(item.TABLEIPCODE.ToString(), "", "");
+                            string SetFocus_FieldName = t.Set(item.KEYFNAME.ToString(), "", "");
+                            if (t.IsNotNull(TableIPCode) && t.IsNotNull(SetFocus_FieldName))
+                            {
+                                t.tFormActiveControl(tForm, TableIPCode, "Column_", SetFocus_FieldName);
+                            }
+                        }
                     }
                 }
                 #endregion
@@ -1295,14 +1319,13 @@ namespace Tkn_Search
                 ev.viewControlFocusedValue(tForm, TargetTableIPCode);
 
                 #endregion SetValues işlemleri
-
             }
 
             //v.IsWaitOpen = false;
             //t.WaitFormClose();
             
             // True ise aranan bulundu
-            v.tSearch.IsSearchFound = onay;
+            //v.tSearch.IsSearchFound = onay;
             v.tSearch.IsRun = false;
             return onay;
         }

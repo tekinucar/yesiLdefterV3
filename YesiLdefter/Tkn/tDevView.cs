@@ -4499,11 +4499,11 @@ MS_FIELDS                                          T03_MSFIELDS                 
                         tsum = true;
 
                         if (tsummary == 1) tSumdisplayformat = "Avr {0}";
-                        if (tsummary == 2) tSumdisplayformat = "Adet {0:n}";
+                        if (tsummary == 2) tSumdisplayformat = "Adet {0:n0}";
                         if (tsummary == 3) tSumdisplayformat = "{0}";
                         if (tsummary == 4) tSumdisplayformat = "Min {0}";
                         if (tsummary == 5) tSumdisplayformat = "Max {0}";
-                        if (tsummary == 6) tSumdisplayformat = "{0:n2}";
+                        if (tsummary == 6) tSumdisplayformat = "{0:n0}";
 
                         var SummaryType = DevExpress.Data.SummaryItemType.None;
 
@@ -4666,11 +4666,11 @@ MS_FIELDS                                          T03_MSFIELDS                 
                             if (t.IsNotNull(tSumdisplayformat) == false)
                             {
                                 if (tsummary == 1) tSumdisplayformat = "Avr {0}";
-                                if (tsummary == 2) tSumdisplayformat = "Adet {0}";
+                                if (tsummary == 2) tSumdisplayformat = "Adet {0:n0}";
                                 if (tsummary == 3) tSumdisplayformat = "{0}";
                                 if (tsummary == 4) tSumdisplayformat = "Min {0}";
                                 if (tsummary == 5) tSumdisplayformat = "Max {0}";
-                                if (tsummary == 6) tSumdisplayformat = "{0}";
+                                if (tsummary == 6) tSumdisplayformat = "{0:n0}";
                             }
 
                             var SummaryType = DevExpress.Data.SummaryItemType.None;
@@ -4723,6 +4723,7 @@ MS_FIELDS                                          T03_MSFIELDS                 
                     tGridView.OptionsBehavior.AutoUpdateTotalSummary = true;
                     tGridView.OptionsView.ShowFooter = true;
                     tGridView.OptionsView.GroupFooterShowMode = GroupFooterShowMode.VisibleAlways;
+
                 }
             }
         }

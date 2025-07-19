@@ -4,6 +4,7 @@ using DevExpress.XtraGrid;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -1046,6 +1047,21 @@ namespace Tkn_Events
             }
         }
 
+        //TileNavPaneElementEventHandler
+        // DevExpress.XtraBars.Navigation.NavElementEventArgs
+        public void tTileNavPane_SelectedElementChanged(object sender, DevExpress.XtraBars.Navigation.NavElementEventArgs e)
+        {
+         
+            
+            //foreach (TileNavItem item in tileNavPane1.MainButton.Elements)
+            //{
+            //    item.Appearance.BackColor = Color.Transparent;
+            //    item.Appearance.ForeColor = Color.Black;
+            //}
+            
+            e.Element.Appearance.BackColor = Color.SteelBlue;
+            e.Element.Appearance.ForeColor = Color.White;
+        }
         public void tNavButton_ElementClick(object sender, DevExpress.XtraBars.Navigation.NavElementEventArgs e)
         {
             #region Tanımlar 
@@ -1054,6 +1070,7 @@ namespace Tkn_Events
             string ButtonName = string.Empty;
             string myFormLoadValue = string.Empty;
             string formName = string.Empty;
+            string menuName = "";
             string values = "";
             #endregion Tanımlar
 
@@ -1083,10 +1100,12 @@ namespace Tkn_Events
                             myFormLoadValue = t.Get_And_Clear(ref values, "|Prop_Navigator|");
                         if (values.IndexOf("|TableIPCode|") > -1)
                             TableIPCode = t.Get_And_Clear(ref values, "|TableIPCode|");
+                        if (values.IndexOf("|MenuName|") > -1)
+                            menuName = t.Get_And_Clear(ref values, "|MenuName|");
                     }
 
                     // Belge Türü Seçiniz  << butonu
-                    Control mControl = t.findControlMenu(tForm, "DevExpress.XtraBars.Navigation.TileNavPane");
+                    Control mControl = t.findControlMenu(tForm, "DevExpress.XtraBars.Navigation.TileNavPane", menuName);
 
                     shortcutButtonSet((DevExpress.XtraBars.Navigation.TileNavPane)mControl,
                                      ((DevExpress.XtraBars.Navigation.TileNavSubItem)sender).Caption, ButtonName, myFormLoadValue);
@@ -1094,6 +1113,7 @@ namespace Tkn_Events
                     commonMenuClick(tForm, ButtonName, TableIPCode, myFormLoadValue);
                 }
             }
+
 
             if (sender.GetType().ToString() == "DevExpress.XtraBars.Navigation.TileNavItem")
             {
@@ -1143,11 +1163,6 @@ namespace Tkn_Events
 
                     Form tForm = Application.OpenForms[formName];
 
-                    //  Form tForm = ((DevExpress.XtraBars.Navigation.TileNavElement)sender).TileNavPane.FindForm();
-
-                    //if (((DevExpress.XtraBars.Navigation.NavButton)sender).Tag != null)
-                    //    myFormLoadValue = ((DevExpress.XtraBars.Navigation.NavButton)sender).Tag.ToString();
-
                     if (((DevExpress.XtraBars.Navigation.NavButton)sender).Tag != null)
                     {
                         values = ((DevExpress.XtraBars.Navigation.NavButton)sender).Tag.ToString();
@@ -1157,6 +1172,23 @@ namespace Tkn_Events
                             myFormLoadValue = t.Get_And_Clear(ref values, "|Prop_Navigator|");
                         if (values.IndexOf("|TableIPCode|") > -1)
                             TableIPCode = t.Get_And_Clear(ref values, "|TableIPCode|"); //reportTableIPCode
+                        if (values.IndexOf("|MenuName|") > -1)
+                            menuName = t.Get_And_Clear(ref values, "|MenuName|");
+                    }
+                                        
+                    Control mControl = t.findControlMenu(tForm, "DevExpress.XtraBars.Navigation.TileNavPane", menuName);
+                    if (mControl != null)
+                    {
+                        foreach (var item in ((DevExpress.XtraBars.Navigation.TileNavPane)mControl).Buttons)
+                        {
+                            if (item.GetType().ToString() == "DevExpress.XtraBars.Navigation.NavButton")
+                            {
+                               ((DevExpress.XtraBars.Navigation.NavButton)item).Appearance.BackColor = ((DevExpress.XtraBars.Navigation.NavButton)item).Appearance.BackColor2;
+                               ((DevExpress.XtraBars.Navigation.NavButton)item).Appearance.ForeColor = ((DevExpress.XtraBars.Navigation.NavButton)item).AppearanceSelected.ForeColor;
+                            }
+                        }
+                        e.Element.Appearance.BackColor = Color.SteelBlue;
+                        e.Element.Appearance.ForeColor = Color.White;
                     }
 
                     // Belge Türü Seçiniz  << butonu

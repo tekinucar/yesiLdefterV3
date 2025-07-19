@@ -1848,7 +1848,7 @@ namespace YesiLdefter.Selenium
             //if (f.autoSubmit)
             if (IsMebbis)
             {
-                if (//(workPageNodes.aktifPageCode != "MTSKADAYRESIM") &&
+                if ((workPageNodes.aktifPageCode != "MTSKADAYRESIM") &&
                     (workPageNodes.aktifPageCode != "MTSKADAYSOZLESME") &&
                     (workPageNodes.aktifPageCode != "MTSKADAYIMZA") &&
                     (workPageNodes.aktifPageCode != "SRCADAYRESIM")
@@ -1879,14 +1879,14 @@ namespace YesiLdefter.Selenium
                     if (f.btn_FullPost1.Tag == null)
                         f.btn_FullPost1.Tag = f.btn_FullPost1.Text;
 
-                    if (workPageNodes.aktifPageCode == "MTSKADAYRESIM")
-                    {
-                        f.btn_FullPost1.Text = "Başvuru resmini gönder";
-                    }
-                    else
-                    {
-                        f.btn_FullPost1.Text = f.btn_FullPost1.Tag.ToString();
-                    }
+                    //if (workPageNodes.aktifPageCode == "MTSKADAYRESIM")
+                    //{
+                    //    f.btn_FullPost1.Text = "Başvuru resmini gönder";
+                    //}
+                    //else
+                    //{
+                    //    f.btn_FullPost1.Text = f.btn_FullPost1.Tag.ToString();
+                    //}
                 }
 
 

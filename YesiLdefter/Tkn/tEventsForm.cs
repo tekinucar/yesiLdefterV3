@@ -151,7 +151,7 @@ namespace Tkn_Events
             #endregion
 
             // öncelikli olan tileControl menü var mı ?
-            Control cntrl = t.findControlMenu(tForm, "DevExpress.XtraEditors.TileControl");
+            Control cntrl = t.findControlMenu(tForm, "DevExpress.XtraEditors.TileControl", "");
 
             // diğer menü tipleri
             if (cntrl == null)

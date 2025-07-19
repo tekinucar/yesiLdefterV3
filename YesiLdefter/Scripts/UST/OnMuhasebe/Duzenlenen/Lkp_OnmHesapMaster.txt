@@ -226,7 +226,9 @@ INSERT INTO [Lkp].[OnmHesapMasterBelgeTipi] (Id, BelgeTipi, GrupTipiId)
   (7,   N'Tevsiki Zaruri Olmayan', 1),
   (8,   N'Yapay Belge', 1),
   (21,  N'Muhasebe Dekontu', 1),
-  (22,  N'Hesap Ekstresi', 1)
+  (22,  N'Hesap Ekstresi', 1),
+  (23,  N'Sigorta poliçesi', 1),
+  (99,  N'Belgesiz', 1)
 
 -- ------------------------------------------------------- 
 -- KaynakTipiId
@@ -710,7 +712,7 @@ and UstGrupTipiId = 82
 
 INSERT INTO [Lkp].[OnmHesapMaster] (ParentId, FirmId, IsActive, UstGrupTipiId, AnaGrupTipiId, AltGrupTipiId, BAHesapTipiId, HesapKodu, UstHesapKodu, KdvOrani, IsKiralik, HesapAdi , PeriyodTipiId, BelgeTipiId, KaynakTipiId, MaliyetinKapsamTipiId )
  VALUES 
-(0, @FirmId, 1, 82, 252,    0,  793, '81.11.10', '81.11',  20,  0, 'Bina bakım hizmetleri (Aidat)', 0, 1, 4, 0 ),
+(0, @FirmId, 1, 82, 252,    0,  793, '81.11.10', '81.11',  20,  0, 'Bina bakım hizmetleri (Aidat)', 0, 8, 4, 0 ),
 (0, @FirmId, 1, 82, 252,    0,  793, '81.11.12', '81.11',  20,  0, 'Bina tamir hizmetleri', 0, 1, 4, 0 ),
 (0, @FirmId, 1, 82, 252,    0,  793, '81.11.14', '81.11',  20,  0, 'Dekorasyon', 0, 1, 4, 0 ),
 (0, @FirmId, 1, 82, 253,    0,  793, '81.11.20', '81.11',  20,  0, 'Tesis, Makine Ve Cihaz bakım hizmetleri', 0, 1, 4, 0 ),

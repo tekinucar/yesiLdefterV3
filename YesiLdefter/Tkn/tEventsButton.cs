@@ -2896,7 +2896,7 @@ namespace Tkn_Events
             bool islemOnayi = false;
             bool isFormOpen = true;
             bool elseItem = false;
-            //bool elseOncesiCalisti = false;
+            bool elseOncesiCalisti = false;
 
             if (propList_ != null)
             {
@@ -2913,13 +2913,13 @@ namespace Tkn_Events
 
                         // else satırı mı kontrol et
                         elseItem = (item.CHC_VALUE.ToString().IndexOf("ELSE") > -1);
-                        //if (elseItem) // else satırına geldik
-                        //{
-                        //    elseOncesiCalisti = elseOncesiniKontrolEt(propList_, buttonType);
-                        //    if ((elseOncesiCalisti) && // elseden öncede çalıştı
-                        //        (isFormOpen))          // else satırının çalışması için onay da aldı
-                        //        isFormOpen = false;    // fakat else den önce çalıştığı için else satırının onayı iptal, çalışmasın
-                        //}
+                        if (elseItem) // else satırına geldik
+                        {
+                            elseOncesiCalisti = elseOncesiniKontrolEt(propList_, buttonType);
+                            if ((elseOncesiCalisti) && // elseden öncede çalıştı
+                                (isFormOpen))          // else satırının çalışması için onay da aldı
+                                isFormOpen = false;    // fakat else den önce çalıştığı için else satırının onayı iptal, çalışmasın
+                        }
 
                         // form açılması için onaylandı ise
                         // eğer daha önce çalışmamış ise çalışsın

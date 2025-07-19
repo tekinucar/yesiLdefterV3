@@ -10412,7 +10412,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             return Find_Control(tForm, Tag, "TAG", ControlType);
         }
 
-        public Control findControlMenu(Form tForm, string menuType)
+        public Control findControlMenu(Form tForm, string menuType, string menuName)
         {
             Control cntrl = new Control();
 
@@ -10421,7 +10421,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
             // Öncelik
             string[] controls = new string[] { menuType };
-            cntrl = Find_Control(tForm, "", "", controls);
+            cntrl = Find_Control(tForm, menuName, "", controls);
             if (cntrl != null)
             {
                 return cntrl;
@@ -12763,6 +12763,23 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             }
             else n = "null";
             return n;
+        }
+
+        public string Formatli_TarihSaat_yyyyMMdd_hhmm()
+        {
+            //13.07.2025 13:33:58
+            string tarih_ = DateTime.Now.ToString();
+            tarih_ = tarih_.Replace(".", "");
+            tarih_ = tarih_.Replace(" ", "_");
+            tarih_ = tarih_.Replace(":", "");
+            //13072025_133358
+            string gun_ = tarih_.Substring(0, 2);
+            string ay_ = tarih_.Substring(2, 2);
+            string yil_ = tarih_.Substring(4, 4);
+            string saat_ = tarih_.Substring(8, 5);
+            tarih_ = yil_ + ay_ + gun_ + saat_;
+
+            return tarih_;
         }
 
         #endregion
@@ -16164,9 +16181,9 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 }
             //}
 
-            if (fieldName.IndexOf("UlkeTipiIds") > -1)
+            if (fieldName.IndexOf("UlkeKodu") > -1)
             {
-                idFieldName = "UlkeKodu";
+                idFieldName = "Id";
                 fieldName = "UlkeKodu";
                 tableName = "UlkeTipi";
                 return;

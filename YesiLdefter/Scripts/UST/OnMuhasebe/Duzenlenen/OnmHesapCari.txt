@@ -132,8 +132,8 @@ Delete from [Lkp].[OnmHesapCariMuhasebeTipi]
 INSERT INTO [Lkp].[OnmHesapCariMuhasebeTipi] (Id, MuhasebeTipi, GrupTipiId)
  VALUES 
   (0, N'Tanımsız',    0),
-  (120, N'Alıcılar',  1),
-  (320, N'Satıcılar', 1)
+  (120, N'Alıcılar (Ürün/Hizmet satıyoruz)',  1),
+  (320, N'Satıcılar (Ürün/Hizmet alıyoruz)',  1)
 
 commit transaction
 

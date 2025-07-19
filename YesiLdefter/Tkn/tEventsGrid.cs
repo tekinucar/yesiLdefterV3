@@ -1157,6 +1157,7 @@ namespace Tkn_Events
             ///nButton.buttonName = "simpleButton_hesap_ac";
             ///nButton.buttonName = "simpleButton_belge_ac";
 
+            
             button = t.Find_Control(tForm, "simpleButton_sihirbaz_devam", tableIPCode, controls);
             if (button != null)buttonType = v.tButtonType.btSihirbazDevam;
 

@@ -97,7 +97,7 @@ create table [Lkp].[OnmOdemePlaniUcretTipi]
 Delete from [Lkp].[OnmOdemePlaniUcretTipi]
 INSERT INTO [Lkp].[OnmOdemePlaniUcretTipi] (Id, UcretTipi)
  VALUES 
-  ( 0,        N''),
+  ( 0,        N'Lütfen ücret tipini seçiniz...'),
   ( 21101,    N'Sertifika'),
   ( 21102,    N'2.+4 hak'),
   ( 21103,    N'Nakil 2.+4 hak'),
@@ -107,7 +107,9 @@ INSERT INTO [Lkp].[OnmOdemePlaniUcretTipi] (Id, UcretTipi)
   ( 21111,    N'e-Sınav ücreti'),
   ( 21112,    N'Uygulama sınav ücreti'),
   ( 21113,    N'Başarısız eğitim ücreti'),
-  ( 21114,    N'Telafi eğitim ücreti')
+  ( 21114,    N'Telafi eğitim ücreti'),
+  ( 21115,    N'Diğer ücretler')
+
 
   
 -- ------------------------------------------------------- 

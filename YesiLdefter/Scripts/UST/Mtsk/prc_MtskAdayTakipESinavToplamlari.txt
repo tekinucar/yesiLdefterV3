@@ -20,7 +20,9 @@ From MtskAdayTakip as takip
 Where takip.FirmId = @FirmId
 and   takip.GrupTipiId  = sube.GrupTipiId
 and   takip.SubeTipiId  = sube.SubeTipiId 
-and ( takip.KayitTipiId = 2 or takip.KayitTipiId = 3 )
+and   takip.KayitTipiId < 4
+and   takip.TeorikDersTipiId > 14
+and   takip.Asama1TipiId <= 300
 
 Group by 
    tip.KonuId
@@ -42,66 +44,17 @@ From MtskAdayTakip as takip
      left outer join Lkp.MtskAdayTakipeSinavDurumTipi as tip on 
 	   ( takip.eSinavDurumTipiId = tip.Id )
 Where takip.FirmId = @FirmId
-and   takip.DonemTipiId > 0
-and   takip.GrupTipiId  > 0
+--and   takip.DonemTipiId > 0
+--and   takip.GrupTipiId  > 0
 and   takip.SubeTipiId  > 0
-and ( takip.KayitTipiId = 2 or takip.KayitTipiId = 3 )
-and   takip.eSinavDurumTipiId < 5  -- 5,    'e-Sınav sonucu okundu'
-
-Group by 
-   tip.KonuId
- , tip.KonuCaption   
- , tip.eSinavDurumTipi
- , tip.FormCaption 
-
-union all
-
--- eSinavDurumTipi  
--- 5,    'e-Sınav sonucu okundu'
-Select 
-   tip.KonuId
- , tip.KonuCaption   
- , tip.eSinavDurumTipi as KonuAciklama
- , tip.FormCaption as Islem
- , count(takip.Id) as AdaySayisi 
-
-From dbo.MtskSinavETeorik as sinav
-     left outer join dbo.MtskAdayTakip as takip on ( takip.TalepId = sinav.TalepId )     
-     left outer join Lkp.MtskAdayTakipeSinavDurumTipi as tip on ( takip.eSinavDurumTipiId = tip.Id )
-Where takip.FirmId = @FirmId
-and   takip.DonemTipiId > 0
-and   takip.GrupTipiId  > 0
-and   takip.SubeTipiId  > 0
-and ( takip.KayitTipiId = 2 or takip.KayitTipiId = 3 )
---and   takip.eSinavDurumTipiId = 5 
-and   sinav.SinavDonemTipiId = @DonemTipiId
-and   sinav.DurumuTipiId > 0 -- 1,'Başarılı', 2,'Başarısız', 3,'Girmedi', 4,'Raporlu', 5, 'İptal Edildi(Sınav Yasaklı)'
-
-Group by 
-   tip.KonuId
- , tip.KonuCaption   
- , tip.eSinavDurumTipi
- , tip.FormCaption 
-
-union all
-
--- eSinavDurumTipi  
--- 6,    'Muaf'
-Select 
-   tip.KonuId
- , tip.KonuCaption   
- , tip.eSinavDurumTipi as KonuAciklama
- , tip.FormCaption as Islem
- , count(takip.Id) as AdaySayisi 
-
-From MtskAdayTakip as takip
-     left outer join Lkp.MtskAdayTakipeSinavDurumTipi as tip on 
-	   ( takip.eSinavDurumTipiId = tip.Id )
-Where takip.FirmId = @FirmId
-and   takip.GrupTipiId  > 0
-and   takip.SubeTipiId  > 0
-and ( takip.KayitTipiId = 2 or takip.KayitTipiId = 3 )
-and   takip.eSinavDurumTipiId = 6 
+and   takip.KayitTipiId < 4
+and ((takip.eSinavDurumTipiId = 1 and takip.Asama1TipiId <= 200 ) 
+  or (takip.eSinavDurumTipiId = 2 and takip.Asama1TipiId  = 300 )   
+  or (takip.eSinavDurumTipiId = 3 and takip.Asama1TipiId  = 300 )   
+  or (takip.eSinavDurumTipiId = 4 and takip.Asama1TipiId <= 300 )   
+  or (takip.eSinavDurumTipiId = 5 and takip.Asama1TipiId  = 300 )   
+  or (takip.eSinavDurumTipiId = 6 and takip.Asama1TipiId <= 800 )   
+)
 
 Group by 
    tip.KonuId
@@ -124,8 +77,10 @@ From MtskAdayTakip as takip
 	   ( takip.eSinavSonucTipiId = tip.Id )
 Where takip.FirmId = @FirmId
 and   takip.eSinavSonucTipiId > 0
-and ( takip.KayitTipiId = 2 or takip.KayitTipiId = 3 )
-
+and   takip.KayitTipiId < 4
+and (( takip.eSinavSonucTipiId > 1 and takip.Asama1TipiId = 300)
+  or ( takip.eSinavSonucTipiId = 1 and takip.Asama1TipiId >= 510 and takip.Asama1TipiId <= 540)
+  )
 Group by 
    tip.KonuId
  , tip.KonuCaption   
@@ -147,14 +102,16 @@ From MtskAdayTakip as takip
 	   ( takip.eSinavSonrasiTipiId = tip.Id )
 Where takip.FirmId = @FirmId
 and   takip.eSinavSonrasiTipiId > 0
-and ( takip.KayitTipiId = 2 or takip.KayitTipiId = 3 )
-
+and   takip.KayitTipiId < 4
+and (( takip.eSinavSonrasiTipiId <> 2 and takip.Asama1TipiId = 300)
+  or ( takip.eSinavSonrasiTipiId = 2 and takip.Asama1TipiId >= 510 and takip.Asama1TipiId <= 540)
+  )
 Group by 
    tip.KonuId
  , tip.KonuCaption   
  , tip.eSinavSonrasiTipi
  , tip.FormCaption 
-
+/*
 union all
 
 -- eSinavUcretTipi
@@ -176,6 +133,7 @@ Group by
  , tip.KonuCaption   
  , tip.eSinavUcretTipi
  , tip.FormCaption 
+*/
 
 END -- procedure
 

@@ -8272,7 +8272,7 @@ namespace Tkn_Events
                             if (Speed_FName.IndexOf("_BAS") > -1)
                             {
                                 str_bgn = " and " + read_sub_FName + "  >=";
-                                if (read_field_type == "40") 
+                                if (read_field_type == "40" || read_field_type == "61")
                                     str_bgn = " and Convert(Date, " + read_sub_FName + ", 103)  >=";
                                 if (read_field_type == "58")
                                     str_bgn = " and Convert(Datetime, " + read_sub_FName + ", 103)  >=";
@@ -8281,13 +8281,15 @@ namespace Tkn_Events
 
                                 if (i_bgn == -1)
                                 {
-                                    if (read_field_type == "40")
+                                    if (read_field_type == "40" || read_field_type == "61") 
                                         str_bgn = " --and Convert(Date, " + read_sub_FName + ", 103)  >=";
                                     if (read_field_type == "58")
                                         str_bgn = " --and Convert(Datetime, " + read_sub_FName + ", 103)  >=";
 
                                     i_bgn = Sql.IndexOf(str_bgn);
                                 }
+                                //--and Convert(Date, [BDekont].KayitTarihi, 103)  >= ???   -- :D.SD.43663: -->=
+                                //--and Convert(Date, [BDekont].KayitTarihi, 103)  <= ???   -- :D.SD.43663: --<=
 
                                 str_end = "   -- :D.SD.";// + read_RefId + ": -->=";
                                 i_end = Sql.IndexOf(str_end, i_bgn);
@@ -8311,8 +8313,8 @@ namespace Tkn_Events
                             if (Speed_FName.IndexOf("_BIT") > -1)
                             {
                                 str_bgn = " and " + read_sub_FName + "  <=";
-                                if (read_field_type == "40") 
-                                   str_bgn = " and Convert(Date, " + read_sub_FName + ", 103)  <=";
+                                if (read_field_type == "40" || read_field_type == "61")
+                                    str_bgn = " and Convert(Date, " + read_sub_FName + ", 103)  <=";
                                 if (read_field_type == "58")
                                     str_bgn = " and Convert(Datetime, " + read_sub_FName + ", 103)  <=";
 
@@ -8320,7 +8322,7 @@ namespace Tkn_Events
 
                                 if (i_bgn == -1)
                                 {
-                                    if (read_field_type == "40")
+                                    if (read_field_type == "40" || read_field_type == "61")
                                         str_bgn = " --and Convert(Date, " + read_sub_FName + ", 103)  <=";
                                     if (read_field_type == "58")
                                         str_bgn = " --and Convert(Datetime, " + read_sub_FName + ", 103)  <=";
@@ -8357,7 +8359,7 @@ namespace Tkn_Events
                             /// and Convert(Datetime, [AJLNTLK].REC_DATE, 103)  =  Convert(Datetime, '25.12.2016', 103)     -- :D.SD.2809: --
 
                             str_bgn = " and " + read_sub_FName;
-                            if (read_field_type == "40")
+                            if (read_field_type == "40" || read_field_type == "61")
                                 str_bgn = " and Convert(Date, " + read_sub_FName;
                             if (read_field_type == "58")
                                 str_bgn = " and Convert(Datetime, " + read_sub_FName;
@@ -8366,7 +8368,7 @@ namespace Tkn_Events
 
                             if (i_bgn == -1)
                             {
-                                if (read_field_type == "40")
+                                if (read_field_type == "40" || read_field_type == "61")
                                     str_bgn = " --and Convert(Date, " + read_sub_FName;
                                 if (read_field_type == "58")
                                     str_bgn = " --and Convert(Datetime, " + read_sub_FName;

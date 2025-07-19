@@ -40,6 +40,17 @@ namespace Tkn_Report
             string reportName = dsMsReports.Tables[0].Rows[dNMsReports.Position]["ReportName"].ToString();
             string reportCaption = dsMsReports.Tables[0].Rows[dNMsReports.Position]["ReportCaption"].ToString();
 
+            string reportCode2 = reportCode;
+            string reportCaption2 = reportCaption;
+            reportCode = reportCode.Replace(".", "_");
+            reportCaption = "_" + reportCaption.Replace(" ", "_") + "_";
+
+            //13.07.2025 13:33:58
+            //20250713_1333 
+            string tarih_ = t.Formatli_TarihSaat_yyyyMMdd_hhmm();
+
+
+
             // load the report from a stream contained in the "ReportStream" datacolumn
             byte[] reportBytes = null;
 
@@ -52,12 +63,10 @@ namespace Tkn_Report
                 //
             }
 
-            t.Str_Replace(ref reportCode, ".", "_");
+            //if (t.IsNotNull(reportName) == false)
+            //    reportName = reportCode;
 
-            if (t.IsNotNull(reportName) == false)
-                reportName = reportCode;
-
-            string reportFileName = v.EXE_FastReportsPath + reportName + ".frx";
+            string reportFileName = v.EXE_FastReportsPath + reportCode + reportCaption + tarih_ + ".frx";
 
             if (!File.Exists(@"" + reportFileName) && (reportBytes == null || reportBytes?.Length == 0))
             {

@@ -6,6 +6,12 @@ AS BEGIN
 --declare @dekontId int
 --set @dekontId = 15
 
+  /* gelen dekontId daha öşlenmiş mi kontrl et, eğer işlenmişse geri dön  */
+  declare @adet int = 0
+  Select @adet = count(Id) from dbo.OnmOdemePlani 
+  Where BelgeDekontId = @dekontId 
+  if (@adet > 0) return
+
   declare @BelgeTarihi datetime
   declare @AHesapTipiId int 
   declare @BelgeTutari numeric(22,5)

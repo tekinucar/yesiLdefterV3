@@ -349,6 +349,8 @@ namespace Tkn_Variable
         public static DataSet ds_ILList = new DataSet();
         public static DataSet ds_IlceList = new DataSet();
         public static DataTable dt_SearchLookUp = null;
+        public static DataSet dsMsReports = null;
+        public static DataNavigator dNMsReports = null;
 
         public static List<string> tableList = new List<string>();
         public static List<string> tableIPCodeTableList = new List<string>();

@@ -30,8 +30,8 @@ namespace YesiLdefter
         tReportDevEx raporDevEx = new tReportDevEx();
         tReportFast raporFast = new tReportFast();
 
-        private DataSet dsMsReports = null;
-        private DataNavigator dNMsReports = null;
+        //private DataSet dsMsReports = null;
+        //private DataNavigator dNMsReports = null;
         private DevExpress.XtraPrinting.Preview.DocumentViewer documentViewerDevEx = null;
         private FastReport.Preview.PreviewControl documentViewerFast = null;
 
@@ -63,6 +63,9 @@ namespace YesiLdefter
             this.Shown += new System.EventHandler(this.ms_Reports_Shown);
             
             this.KeyPreview = true;
+
+            v.dsMsReports = null;
+            v.dNMsReports = null;
         }
 
         private void ms_Reports_Shown(object sender, EventArgs e)
@@ -199,9 +202,9 @@ namespace YesiLdefter
 
                         if (tableName.IndexOf("MsReports") > -1)
                         {
-                            dsMsReports = ((DataTable)tDataTable).DataSet;
-                            dNMsReports = dN;
-                            dNMsReports.PositionChanged += new System.EventHandler(dNMsReports_PositionChanged);
+                            v.dsMsReports = ((DataTable)tDataTable).DataSet;
+                            v.dNMsReports = dN;
+                            v.dNMsReports.PositionChanged += new System.EventHandler(dNMsReports_PositionChanged);
                         }
                         else
                         {
@@ -245,14 +248,14 @@ namespace YesiLdefter
                 return;
             }
             
-            if (t.IsNotNull(dsMsReports))
+            if (t.IsNotNull(v.dsMsReports))
             { 
-                desingerType = Convert.ToInt16(dsMsReports.Tables[0].Rows[dNMsReports.Position]["DesignerTypeId"].ToString());
+                desingerType = Convert.ToInt16(v.dsMsReports.Tables[0].Rows[v.dNMsReports.Position]["DesignerTypeId"].ToString());
 
                 if (desingerType == (Int16)v.ReportDesignerTool.DevExpress)
-                    raporDevEx.ReportDocumentViewer(this, dsMsReports, dNMsReports, sourceFormCodeAndName, ref documentViewerDevEx);
+                    raporDevEx.ReportDocumentViewer(this, v.dsMsReports, v.dNMsReports, sourceFormCodeAndName, ref documentViewerDevEx);
                 else
-                    raporFast.ReportDocumentViewer(this, dsMsReports, dNMsReports, dataSetList, sourceFormCodeAndName, ref documentViewerFast);
+                    raporFast.ReportDocumentViewer(this, v.dsMsReports, v.dNMsReports, dataSetList, sourceFormCodeAndName, ref documentViewerFast);
 
             }
             /*
@@ -356,11 +359,11 @@ namespace YesiLdefter
             // return the report name in the e.FileName
             string reportCode = "NoReportCode";
 
-            int pos = t.getDataNavigatorPosition(dNMsReports, true);
+            int pos = t.getDataNavigatorPosition(v.dNMsReports, true);
 
             if (pos > -1)
             {
-                reportCode = dsMsReports.Tables[0].Rows[pos]["ReportCode"].ToString();
+                reportCode = v.dsMsReports.Tables[0].Rows[pos]["ReportCode"].ToString();
                 e.FileName = reportCode + ".frx";
             }
         }
@@ -374,30 +377,40 @@ namespace YesiLdefter
         }
         private void SaveFastReport(Report report)
         {
-            if (t.IsNotNull(dsMsReports))
+            if (t.IsNotNull(v.dsMsReports))
             {
                 bool onay = false;
-                int pos = t.getDataNavigatorPosition(dNMsReports, true);
+                int pos = t.getDataNavigatorPosition(v.dNMsReports, true);
                 if (pos == -1) return;
 
-                string reportCode = dsMsReports.Tables[0].Rows[pos]["ReportCode"].ToString();
-                string reportCaption = dsMsReports.Tables[0].Rows[pos]["ReportCaption"].ToString();
+                string reportCode = v.dsMsReports.Tables[0].Rows[pos]["ReportCode"].ToString();
+                string reportCaption = v.dsMsReports.Tables[0].Rows[pos]["ReportCaption"].ToString();
+                string reportCode2 = reportCode;
+                string reportCaption2 = reportCaption;
+
+                reportCode = reportCode.Replace(".", "_");
+                reportCaption = "_" + reportCaption.Replace(" ", "_") + "_";
+
+                //13.07.2025 13:33:58
+                //20250713_1333 
+                string tarih_ = t.Formatli_TarihSaat_yyyyMMdd_hhmm();
 
                 try
                 {
-                    report.Save(v.EXE_FastReportsPath + reportCode + ".frx");
+                    report.Save(v.EXE_FastReportsPath + reportCode + reportCaption + tarih_ + ".frx");
                     onay = true;
                 }
                 catch (Exception)
                 {
                     //throw;
                 }
-
+                
                 if (onay)
                 {
-                    string soru = " Rapor Kodu : " + reportCode + v.ENTER
-                                + " Rapor Adı  : " + reportCaption + v.ENTER2
-                                + reportCode + ".frx isimle dosyaya kayıt edildi. " + v.ENTER2
+                    string soru = " Rapor Kodu : " + reportCode2 + v.ENTER
+                                + " Rapor Adı  : " + reportCaption2 + v.ENTER2
+                                + " Hazırlanan rapor fiziki olarak aşağıda belirtilen klasörede kayıt edildi. " + v.ENTER2 
+                                + v.EXE_FastReportsPath + reportCode + reportCaption + tarih_ + ".frx" + v.ENTER2
                                 + " Bu rapor dosyası database'de kayıt edilecek, onaylıyor musunuz ?";
 
                     DialogResult cevap = t.mySoru(soru);
@@ -410,8 +423,8 @@ namespace YesiLdefter
                             {
                                 report.Save(stream);
 
-                                dsMsReports.Tables[0].Rows[pos]["ReportTemp"] = stream.ToArray();
-                                dsMsReports.Tables[0].AcceptChanges();
+                                v.dsMsReports.Tables[0].Rows[pos]["ReportTemp"] = stream.ToArray();
+                                v.dsMsReports.Tables[0].AcceptChanges();
 
                                 v.con_Images = stream.ToArray();
                                 v.con_Images_FieldName = "ReportTemp";
@@ -419,7 +432,7 @@ namespace YesiLdefter
                                 if (v.con_Images != null)
                                 {
                                     tSave sv = new tSave();
-                                    sv.tDataSave(this, dsMsReports, dNMsReports, pos);
+                                    sv.tDataSave(this, v.dsMsReports, v.dNMsReports, pos);
                                 }
                                 else
                                 {

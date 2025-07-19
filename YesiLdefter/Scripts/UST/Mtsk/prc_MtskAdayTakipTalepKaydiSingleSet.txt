@@ -126,8 +126,8 @@ AS BEGIN
       if (CHARINDEX(@mesaj, @ySistemUyarilari) > 0) set @ySistemUyarilari = REPLACE(@ySistemUyarilari, @mesaj, '') 
   end
 
-  set @mesaj = 'Sorunlu ad' + @Enter;
-  if (@yAdi LIKE '%[^A-Z]%')
+  set @mesaj = 'Hatalı ad' + @Enter;
+  if (@yAdi LIKE '%[^A-Z ]%')
   begin
       if (CHARINDEX(@mesaj, @ySistemUyarilari) = 0) set @ySistemUyarilari = @ySistemUyarilari + @mesaj;
   end else
@@ -135,8 +135,8 @@ AS BEGIN
       if (CHARINDEX(@mesaj, @ySistemUyarilari) > 0) set @ySistemUyarilari = REPLACE(@ySistemUyarilari, @mesaj, '') 
   end
 
-  set @mesaj = 'Sorunlu soyadı' + @Enter;
-  if (@ySoyadi LIKE '%[^A-Z]%')
+  set @mesaj = 'Hatalı soyadı' + @Enter;
+  if (@ySoyadi LIKE '%[^A-Z ]%')
   begin
       if (CHARINDEX(@mesaj, @ySistemUyarilari) = 0) set @ySistemUyarilari = @ySistemUyarilari + @mesaj;
   end else
@@ -144,8 +144,8 @@ AS BEGIN
       if (CHARINDEX(@mesaj, @ySistemUyarilari) > 0) set @ySistemUyarilari = REPLACE(@ySistemUyarilari, @mesaj, '') 
   end
 
-  set @mesaj = 'Sorunlu baba adı' + @Enter;
-  if (@yBabaAdi LIKE '%[^A-Z]%')
+  set @mesaj = 'Hatalı baba adı' + @Enter;
+  if (@yBabaAdi LIKE '%[^A-Z ]%')
   begin
       if (CHARINDEX(@mesaj, @ySistemUyarilari) = 0) set @ySistemUyarilari = @ySistemUyarilari + @mesaj;
   end else
@@ -153,8 +153,8 @@ AS BEGIN
       if (CHARINDEX(@mesaj, @ySistemUyarilari) > 0) set @ySistemUyarilari = REPLACE(@ySistemUyarilari, @mesaj, '') 
   end
 
-  set @mesaj = 'Sorunlu anne adı' + @Enter;
-  if (@yAnneAdi LIKE '%[^A-Z]%')
+  set @mesaj = 'Hatalı anne adı' + @Enter;
+  if (@yAnneAdi LIKE '%[^A-Z ]%')
   begin
       if (CHARINDEX(@mesaj, @ySistemUyarilari) = 0) set @ySistemUyarilari = @ySistemUyarilari + @mesaj;
   end else
@@ -169,7 +169,7 @@ AS BEGIN
   set @yCepTelefonu = REPLACE(@yCepTelefonu, '(', '');
   set @yCepTelefonu = REPLACE(@yCepTelefonu, ')', '');
 
-  set @mesaj = 'Sorunlu telefon no' + @Enter;
+  set @mesaj = 'Hatalı telefon no' + @Enter;
   if (@yCepTelefonu LIKE '%[^0-9]%')
   begin
       if (CHARINDEX(@mesaj, @ySistemUyarilari) = 0) set @ySistemUyarilari = @ySistemUyarilari + @mesaj;
@@ -178,7 +178,7 @@ AS BEGIN
       if (CHARINDEX(@mesaj, @ySistemUyarilari) > 0) set @ySistemUyarilari = REPLACE(@ySistemUyarilari, @mesaj, '') 
   end
 
-  set @mesaj = 'Eksik telefon no' + @Enter;
+  set @mesaj = 'Eksik/Fazla telefon no' + @Enter;
   if (Len(@yCepTelefonu) <> 10)
   begin
       if (CHARINDEX(@mesaj, @ySistemUyarilari) = 0) set @ySistemUyarilari = @ySistemUyarilari + @mesaj;

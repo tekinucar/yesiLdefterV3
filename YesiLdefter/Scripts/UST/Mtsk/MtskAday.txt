@@ -76,10 +76,17 @@ AS BEGIN
 
     declare @eAdi varchar(50) = null
     declare @eSoyadi varchar(50) = null
+    declare @eBabaAdi varchar(50) = null
+    declare @eAnneAdi varchar(50) = null
+    declare @eCepTelefonu varchar(15) = null
 	declare @eDogumTarihi Date = null
 
     declare @yAdi varchar(50) = null
     declare @ySoyadi varchar(50) = null
+    declare @yBabaAdi varchar(50) = null
+    declare @yAnneAdi varchar(50) = null
+    declare @yCepTelefonu varchar(15) = null
+
     declare @yDogumTarihi Date = null
 	declare @yUlkeTipiId smallInt 
 	declare @AdayGUID uniqueidentifier
@@ -101,6 +108,9 @@ AS BEGIN
            ,@eTamAdi = isnull(dlt.TamAdiSoyadi,'')
            ,@eAdi = isnull(dlt.Adi,'')
            ,@eSoyadi = isnull(dlt.Soyadi,'')
+           ,@eBabaAdi = isnull(dlt.BabaAdi,'')
+           ,@eAnneAdi = isnull(dlt.AnneAdi,'')
+           ,@eCepTelefonu = isnull(dlt.CepTelefonu,'')
            ,@eDogumTarihi = dlt.DogumTarihi 
         From deleted dlt
         Where dlt.Id = @adayId
@@ -112,6 +122,9 @@ AS BEGIN
            ,@yTamAdi = isnull(ins.TamAdiSoyadi, '')
            ,@yAdi = isnull(ins.Adi,'')
            ,@ySoyadi = isnull(ins.Soyadi,'')
+           ,@yBabaAdi = isnull(ins.BabaAdi,'')
+           ,@yAnneAdi = isnull(ins.AnneAdi,'')
+           ,@yCepTelefonu = isnull(ins.CepTelefonu,'')
            ,@yDogumTarihi = ins.DogumTarihi
 		   ,@yUlkeTipiId = isnull(ins.UlkeTipiId,-1)
 		   ,@AdayGUID = ins.AdayGUID
@@ -155,28 +168,28 @@ AS BEGIN
             Where Id = @adayId
         end
 
-
     	set @newTamAdi = @yAdi + ' ' +  @ySoyadi
 
-        --if ((UPPER(@newTamAdi) <> UPPER(@eTamAdi)) or 
-		--    (UPPER(@newTamAdi) <> UPPER(@yTamAdi)) or 
-        --    (@eAdi <> @yAdi) or
-        --    (@eSoyadi <> @ySoyadi) or
-        --    (@eTamAdi = '') or
-        --    (@yTamAdi = '') 
-        --         )  
-        --begin
-    	    update MtskAday set 
+   	    update MtskAday set 
             TamAdiSoyadi = RTRIM(LTRIM(@newTamAdi))
-            where Id = @adayId 
-    	--end
+        where Id = @adayId
+        and isnull(TamAdiSoyadi,'') <> @newTamAdi
 
 		-- Doğum tarihi değişirse 
 		-- her talep için yeniden doğum tarihi hesaplansın
         if (@DbUpdatesIsActive = 0)
         begin
-            if (@eDogumTarihi <> @yDogumTarihi or @eDogumTarihi is null or @yDogumTarihi is null)
+            if (@eDogumTarihi <> @yDogumTarihi 
+            or  @eDogumTarihi is null 
+            or  @yDogumTarihi is null
+            or  @eAdi <> @yAdi 
+            or  @eSoyadi <> @ySoyadi
+            or  @eBabaAdi <> @yBabaAdi 
+            or  @eAnneAdi <> @yAnneAdi 
+            or  @eCepTelefonu <> @yCepTelefonu)  
             begin
+                --print 'talep update olacak'
+				-- böyle sistem uyarısı için kontroller çalışacak 
                 Update MtskAdayTalep set FirmId = @yFirmId
                 Where AdayId = @adayId
             end
