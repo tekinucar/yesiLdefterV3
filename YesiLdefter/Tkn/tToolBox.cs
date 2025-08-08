@@ -3310,6 +3310,16 @@ namespace Tkn_ToolBox
             if (KeyIdValue == newValue) return;
 
             string UseOldRefId = " and " + TableLabel + "." + KeyFName + " = " + KeyIdValue + " ";
+
+            //and [BStokB.Id] = -1
+            //and BStokB.Id = -1
+            if (SqlS.IndexOf(UseOldRefId) == -1)
+            {
+                TableLabel = TableLabel.Replace("[", "");
+                TableLabel = TableLabel.Replace("]", "");
+                UseOldRefId = " and " + TableLabel + "." + KeyFName + " = " + KeyIdValue + " ";
+            }
+
             string UseReadRefId = " and " + TableLabel + "." + KeyFName + " = " + newValue + " ";
 
             Str_Replace(ref SqlS, UseOldRefId, UseReadRefId);
@@ -3515,9 +3525,19 @@ namespace Tkn_ToolBox
             //table.Namespace = "UstadErrorTable";
             DataTable dataTable = ds.Tables[0];
 
+
+            var settings = new JsonSerializerSettings
+            {
+                Error = (sender, args) =>
+                {
+                    // Hataları loglamak istersen buraya yazabilirsin
+                    args.ErrorContext.Handled = true;
+                }
+            };
+
             // DataTable ile okunan datayı model class a atayalım 
             string json = JsonConvert.SerializeObject(dataTable, Formatting.Indented);
-            List<T> packet = JsonConvert.DeserializeObject<List<T>>(json);
+            List<T> packet = JsonConvert.DeserializeObject<List<T>>(json, settings);
 
             return packet;
         }
@@ -4762,6 +4782,13 @@ namespace Tkn_ToolBox
         }
 
 
+        public string sifirlaTamamla(decimal value, int length)
+        {
+            int intValue = (int)value;
+            string paddedValue = intValue.ToString().PadLeft(length, '0');
+            return paddedValue;
+        }
+
         #region TurkceKarakterDuzenle
         public string TurkceKarakterDuzenle(string metin)
         {
@@ -5346,6 +5373,27 @@ namespace Tkn_ToolBox
 
         #region myOperandControl
 
+        public v.tCharacterType GetCharacterType(string input)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+                return v.tCharacterType.Empty;
+
+            // rakam kontrolü
+            bool hasDigit = input.Any(char.IsDigit);
+            // string kontrolü
+            bool hasLetter = input.Any(char.IsLetter);
+
+            if (hasDigit && hasLetter)
+                return v.tCharacterType.Mixed; // karışık
+            else if (hasDigit)
+                return v.tCharacterType.OnlyDigit; // sadece rakam
+            else if (hasLetter)
+                return v.tCharacterType.OnlyLetter; // sadece string
+            else
+                return v.tCharacterType.Mixed; // Diğer karakter türleri varsa (örnek: !@#)
+        }
+
+
         public bool myOperandControl(string Value1, string Value2, string OperandType)
         {
             bool onay = false;
@@ -5374,7 +5422,16 @@ namespace Tkn_ToolBox
 
             if (OperandType == "=")
             {
-                if (Value1 == Value2) onay = true;
+                v.tCharacterType isRakam1 = GetCharacterType(Value1);
+                v.tCharacterType isRakam2 = GetCharacterType(Value2);
+
+                if (isRakam1 == v.tCharacterType.OnlyDigit &&
+                    isRakam2 == v.tCharacterType.OnlyDigit)
+                {
+                    if (myDouble(Value1) == myDouble(Value2)) onay = true;
+                }
+                else
+                    if (Value1 == Value2) onay = true;
             }
 
             if (OperandType == "<=")
@@ -6333,7 +6390,7 @@ namespace Tkn_ToolBox
                     )
                 {
                     //MyStr = string.Empty;
-                    MyStr = "--Convert(Date, " + Field_Name;
+                    MyStr = "Convert(Date, " + Field_Name + ", 103) " + " <> " + " Convert(Date, '01.01.1900', 103)";
                 }
                 else
                 {
@@ -15093,12 +15150,21 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
             string read_value = "";
 
+            string displayFormat = string.Empty;
+            int ftype = 0;
+
             #region Check 1 işlemleri 
             if (//t.IsNotNull(chc_IPCode) &&
                 (IsNotNull(chc_FName)) &&
                 (IsNotNull(chc_Value)))
             {
+                ftype = Find_Field_Type_Id(dsData, chc_FName, ref displayFormat);
+
                 read_value = dsData.Tables[0].Rows[pos][chc_FName].ToString();
+
+                if ((ftype == 56) | (ftype == 48) | (ftype == 127) | (ftype == 52) |
+                    (ftype == 60) | (ftype == 62) | (ftype == 59) | (ftype == 106) | (ftype == 108) && read_value == "")
+                    read_value = "0";
 
                 if (read_value != "")
                 {
@@ -15124,8 +15190,13 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 (IsNotNull(chc_FName_SEC)) &&
                 (IsNotNull(chc_Value_SEC)))
             {
+                ftype = Find_Field_Type_Id(dsData, chc_FName_SEC, ref displayFormat);
 
                 read_value = dsData.Tables[0].Rows[pos][chc_FName_SEC].ToString();
+
+                if ((ftype == 56) | (ftype == 48) | (ftype == 127) | (ftype == 52) |
+                    (ftype == 60) | (ftype == 62) | (ftype == 59) | (ftype == 106) | (ftype == 108) && read_value == "")
+                    read_value = "0";
 
                 if (read_value != "")
                 {

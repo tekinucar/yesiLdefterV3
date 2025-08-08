@@ -226,6 +226,9 @@ namespace Tkn_InputPanel
             if (t.IsNotNull(External_TableIPCode) == false)
             {
                 //v.Kullaniciya_Mesaj_Var = "Data Read : " + TableIPCode;
+                //string bbb = "";
+                //if (TableIPCode == "UST/MEB/MtskTeorikDers.TeoPlanlamaManuelSonucu")
+                //    bbb = "aaa";
 
                 tSQLs sql = new tSQLs();
                 sql.Preparing_dsData(tForm, row_Table, ds_Fields, ref ds_Data, MultiPageID, vTA);

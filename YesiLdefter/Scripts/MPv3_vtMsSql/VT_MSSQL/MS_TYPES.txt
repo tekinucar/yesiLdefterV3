@@ -196,6 +196,9 @@ begin transaction
  insert into MS_TYPES values ( 3, 0, 'CMP_TYPE', 61, 'tImageComboBoxEdit2Button', 'tImageComboBoxEdit2Button');
  insert into MS_TYPES values ( 3, 0, 'CMP_TYPE', 62, 'tImageComboBoxEditSEC',     'tImageComboBoxEditSEC');
  insert into MS_TYPES values ( 3, 0, 'CMP_TYPE', 63, 'tImageComboBoxEditSubView', 'tImageComboBoxEditSubView');
+ insert into MS_TYPES values ( 3, 0, 'CMP_TYPE', 64, 'tImageComboBoxEditSDetail', 'tImageComboBoxEditSDetail'); -- henüz yazýlmadý
+ insert into MS_TYPES values ( 3, 0, 'CMP_TYPE', 65, 'tComboBoxEditSubDetail',    'tComboBoxEditSubDetail'); 
+ 
 
  insert into MS_TYPES values ( 3, 0, 'CMP_TYPE', 71, 'TextColumn',               'TextColumn');
  insert into MS_TYPES values ( 3, 0, 'CMP_TYPE', 72, 'DescriptionColumn',        'DescriptionColumn');

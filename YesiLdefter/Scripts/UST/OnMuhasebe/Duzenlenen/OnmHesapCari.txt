@@ -23,6 +23,8 @@ begin transaction
    CepTelefonu         nVarchar(15)  null,
    CepTelefonu2        nVarchar(15)  null,
    Eposta              nVarchar(98)  null,
+   EFaturaAliasName    nVarchar(30)  null,
+   EFExtraInformation  nVarchar(30)  null, /* EF : e-Fatura */
 
    FirmaTipiId         SmallInt      null, /* 1. Ltd, 2. Anonim, 3. Şahıs */ 
    KategoriTipiId      Int           null,

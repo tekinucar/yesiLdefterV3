@@ -503,27 +503,30 @@ AS BEGIN
           end
 
           Execute [dbo].[prc_MtskAdayTablesInsert] @TalepId  -- Data transferi sırasında oluşturuluyor zaten insert oluyor
-          Execute [dbo].[prc_MtskAdayTakipTalepKaydiSingleSet] @TalepId
 	      Execute [dbo].[prc_MtskAdayTalepYasiniHesapla] @TalepId
+
+          -- Veri transferi yapılmıyorsa 
+          if (@DbUpdatesIsActive = 0)
+          begin
+              Execute [dbo].[prc_MtskAdayTakipTalepKaydiSingleSet] @TalepId
+              EXECUTE [dbo].[prc_MtskAdayTakip] @yFirmId, @TalepId, 0, 'MtskAdayTakipKayit'
+          end
 
 		  -- MtskAdayBelgeler tablosu
 		  Update MtskAdayBelgeler Set DonemTipiId = @yDonemTipiId
 		  Where TalepId = @TalepId
+		  and isnull(DonemTipiId,0) <> @yDonemTipiId
 
       end 	  
+
+
+      --- Execute [dbo].[prc_MtskAdayTakipTalepKaydiMultiSet] @yFirmId 
+
 
       FETCH NEXT FROM talepCursor_ INTO @TalepId
       print '  talep while end'
   END -- While
 
-  -- Veri transferi yapılmıyorsa 
-  -- diğer işlemleri yapmaya başlasın
-  if (@DbUpdatesIsActive = 0)
-  begin
-	  print 'talep veri transferi harici işler'
-      --Execute [dbo].[prc_MtskAdayTakipTalepKaydiMultiSet] @yFirmId 
-      EXECUTE [dbo].[prc_MtskAdayTakip] @yFirmId
-  end
 
   CLOSE talepCursor_
   DEALLOCATE talepCursor_   

@@ -12,9 +12,10 @@ AS BEGIN
   declare @SubeTipiId  smallint = 0
   
   -- Bugün hangi dönem ?  tespit ediliyor
-  if (MONTH(getdate()) < 10)
-       set @BugunDonemTipiId = convert(int, convert(varchar(5), YEAR(getdate())) + '0' + convert(varchar(3), MONTH(getdate())))
-  else set @BugunDonemTipiId = convert(int, convert(varchar(5), YEAR(getdate())) + convert(varchar(3), MONTH(getdate())))
+  --if (MONTH(getdate()) < 10)
+  --     set @BugunDonemTipiId = convert(int, convert(varchar(5), YEAR(getdate())) + '0' + convert(varchar(3), MONTH(getdate())))
+  --else set @BugunDonemTipiId = convert(int, convert(varchar(5), YEAR(getdate())) + convert(varchar(3), MONTH(getdate())))
+  set @BugunDonemTipiId = dbo.fnc_getDonemTipiId('BUGUN');
 
   -- Döngüye alınacak Select cümlesi
   declare myCursor CURSOR local FOR 
@@ -27,8 +28,10 @@ AS BEGIN
   FETCH NEXT FROM myCursor INTO @DonemTipiId, @GrupTipiId, @SubeTipiId
 
   print 'prc_MtskGunlukTakipler başladı'
+  print @BugunDonemTipiId
 
   -- Bir defa çalışacak olanlar
+  Execute [dbo].[prc_MtskAdayTakip] @FirmId, 0, 0, 'MtskAdayTakipFull'
   Execute [dbo].[prc_MtskDonemKontrolu] @FirmId
   Execute [dbo].[prc_MtskDonemAdaySayilariSet] @FirmId --- Gün içinde birden fazla kursiyer kaydına bağlı olması gerekiyor 
   Execute [dbo].[prc_MtskAdayBorclariniHesapla] @FirmId
@@ -47,6 +50,7 @@ AS BEGIN
   CLOSE myCursor;
 
   print 'prc_MtskGunlukTakipler bitti'
+
 
 END -- procedure
 

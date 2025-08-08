@@ -40,6 +40,7 @@ AS BEGIN
   declare @IskontoOrani            Numeric(12,8) 
   declare @PesinatTutari           Numeric(22,5)  
   declare @TaksitSayisiTipiId      SmallInt      /* 0.Peşin, 1 Ay, 2 Ay, 3 Ay .... */
+  declare @TaksitTipiId            SmallInt      /* 1.Peşinat, 2.Taksit, 3.Tek Ödeme, 4.İade nedeniyle oluşan borç,5.Borcun tamamı */ 
   declare @TaksitlendirilecekUcret Numeric(22,5) /* AnlasilanUcret - PesinatTutari */
 
   declare @ESinavUcretTipiId       SmallInt 
@@ -95,7 +96,14 @@ AS BEGIN
 
   -- Eğer peşin seçilmişse
   if (@TaksitSayisiTipiId = 100) 
-      set @TaksitSayisiTipiId = 0
+  begin 
+      set @PesinatTutari = @AnlasilanUcret
+	  set @TaksitlendirilecekUcret = 0
+	  set @TaksitTipiId = 3 -- Tek ödeme
+  end
+
+  if (@PesinatTutari > 0 and @PesinatTutari < @AnlasilanUcret)
+      set @TaksitTipiId = 1 -- Peşinat
 
   -- ucret tipleri belirleniyor
   if (@TalepTipiId = 1) set @UcretTipiId = 21101
@@ -113,7 +121,8 @@ AS BEGIN
   and UcretTipiId >= 21101
   and UcretTipiId <= 21105
 
-  if (@PesinatTutari > 0)
+  -- Peşinat veya peşin ödeme ise
+  if (@PesinatTutari > 0 or @TaksitSayisiTipiId = 100)
   begin
     INSERT INTO [dbo].[OnmOdemePlani]
            ([FirmId]
@@ -144,7 +153,7 @@ AS BEGIN
            ,@TalepTipiId
            ,@UcretTipiId   
            ,@AdayId
-           ,1 --TaksitTipiId
+           ,@TaksitTipiId --TaksitTipiId
            ,0
            ,@TalepKayitTarihi -- VadeTarihi
            ,@PesinatTutari 
@@ -159,7 +168,7 @@ AS BEGIN
            ,0)
   end -- @PesinatTutari > 0
 
-  if (@TaksitSayisiTipiId <= 0) set @TaksitSayisiTipiId = 1
+  if (@TaksitSayisiTipiId = 100) set @TaksitSayisiTipiId = 0
 
   set @parcalancakUcret = @TaksitlendirilecekUcret
 
@@ -168,11 +177,14 @@ AS BEGIN
 	 
   -- Aylık ücret hesaplanıyor
   -- 
-  set @aylikUcret = @parcalancakUcret / @TaksitSayisiTipiId
+  if (@TaksitSayisiTipiId > 0 and
+      @TaksitSayisiTipiId < 100 and
+	  @parcalancakUcret > 0)
+      set @aylikUcret = @parcalancakUcret / @TaksitSayisiTipiId
 
   -- Yeni Ödeme Planını oluştur
   --
-  while (@sayac <= @TaksitSayisiTipiId)
+  while (@sayac <= @TaksitSayisiTipiId and @aylikUcret > 0)
   begin
     INSERT INTO [dbo].[OnmOdemePlani]
            ([FirmId]
@@ -337,9 +349,7 @@ AS BEGIN
 
   end -- @UygulamaSinavUcreti > 0
 
-
   Execute dbo.prc_MtskAdayBorcunuHesapla @FirmId, @TalepId
-
 
   -- Bunu kapatma veya silme. 
   -- Bu sonuca kodun içinde kontrol ediliyor

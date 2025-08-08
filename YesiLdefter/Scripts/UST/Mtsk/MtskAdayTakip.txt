@@ -1363,6 +1363,15 @@ AS BEGIN
     declare @eIsRandevuPlanlandi bit
     declare @eIsRandevuMebbis bit
 
+	declare @yeSinavNo smallint
+	declare @yuSinavNo smallint
+    declare @eeSinavPlanTarihi date
+    declare @yeSinavPlanTarihi date
+    declare @euSinavPlanTarihi date
+    declare @yuSinavPlanTarihi date
+    declare @sinavListesiId int
+    declare @sinavTarihiId int
+
     WHILE @@FETCH_STATUS = 0
     BEGIN
         if (@DbUpdatesIsActive = 0)
@@ -1374,6 +1383,8 @@ AS BEGIN
                ,@eIsUygSinavMebbisOnayi = isnull(dlt.IsUygSinavMebbisOnayi,0)
                ,@eIsRandevuPlanlandi = isnull(dlt.IsRandevuPlanlandi,0)
                ,@eIsRandevuMebbis = isnull(dlt.IsRandevuMebbis,0)
+               ,@eeSinavPlanTarihi = dlt.eSinavPlanTarihi
+               ,@euSinavPlanTarihi = dlt.uSinavPlanTarihi
             from deleted dlt
             where dlt.Id = @takipId
 			
@@ -1386,6 +1397,10 @@ AS BEGIN
                ,@yIsUygSinavMebbisOnayi = isnull(ins.IsUygSinavMebbisOnayi,0)
                ,@yIsRandevuPlanlandi = isnull(ins.IsRandevuPlanlandi,0)
                ,@yIsRandevuMebbis = isnull(ins.IsRandevuMebbis,0)
+			   ,@yeSinavNo = isnull(ins.eSinavNo,0)
+               ,@yeSinavPlanTarihi = ins.eSinavPlanTarihi
+			   ,@yuSinavNo = isnull(ins.uSinavNo,0)
+               ,@yuSinavPlanTarihi = ins.uSinavPlanTarihi
             from inserted ins
             where ins.Id = @takipId
 
@@ -1412,6 +1427,157 @@ AS BEGIN
                 Where TalepId = @TalepId
             end
 
+			/* e-SinavPlanTarihi kontrolü, sınav listesi yoksa sınav listesi oluştur  */
+			
+			if (CONVERT(date, @yeSinavPlanTarihi, 103) >= CONVERT(date, GETDATE(), 103))
+            begin
+                Set @sinavListesiId = 0 
+			    Select @sinavListesiId = ISNULL(Id,0) From dbo.MtskSinavListesi
+				Where FirmId = @FirmId
+				and   TalepId = @TalepId
+				and   SinavTipiId = 11 -- e-Sınav
+				and   convert(date,SinavTarihi,103) = convert(date,@yeSinavPlanTarihi,103)
+
+				if (@sinavListesiId = 0 and @yeSinavNo > 0)
+				begin
+                    -- SınavTarihini kontrol et
+					Set @sinavTarihiId = 0
+                    Select @sinavTarihiId = isnull(Id,0) from dbo.MtskSinavTarihi
+                    Where FirmId = @FirmId
+                    and   SinavTipiId = 11 -- e-Sınav
+                    and   convert(date,SinavTarihi,103) = convert(date,@yeSinavPlanTarihi,103)
+
+                    -- SınavTarihi yoksa oluştur
+                    if (@sinavTarihiId = 0) 
+                    begin
+                        INSERT INTO dbo.MtskSinavTarihi
+                        ( FirmId
+                        , IsActive
+                        , SinavTipiId
+                        , SinavTarihi
+                        , AracSayisi
+                        , UstaOgreticiSayisi
+                        , AdaySayisi
+                        , BasariliAdaySayisi
+                        , BasarisizAdaySayisi)
+                        VALUES
+                        ( @FirmId
+                        , 1  --IsActive
+                        , 11 --SinavTipiId
+                        , @yeSinavPlanTarihi --SinavTarihi
+                        , 0 ,0 ,0 ,0, 0)
+						-- yeni oluşan Id yi al
+                        Select @sinavTarihiId = MAX(Id) from [dbo].[MtskSinavTarihi]
+                    end
+
+                    if (@sinavTarihiId > 0)
+                    begin
+                        -- Sınav listesine ekle
+                        INSERT INTO dbo.MtskSinavListesi
+                        ( FirmId 
+                        , IsActive 
+                        , SinavTipiId 
+                        , SinavNo 
+                        , SinavTarihi 
+                        , TalepId 
+                        , AdayId )
+                        VALUES
+                        ( @FirmId
+                        , 1  --IsActive
+                        , 11 -- SinavTipiId
+                        , @yeSinavNo
+                        , @yeSinavPlanTarihi
+                        , @TalepId
+                        , @AdayId)
+                        end -- if (@sinavTarihiId > 0)
+                end -- if (@sinavListesiId = 0 and @yeSinavNo > 0)
+
+            end -- if (CONVERT(date, @yeSinavPlanTarihi end
+
+			/* u-SinavPlanTarihi kontrolü, sınav listesi yoksa sınav listesi oluştur  */
+			
+			if (CONVERT(date, @yuSinavPlanTarihi, 103) >= CONVERT(date, GETDATE(), 103))
+            begin
+                Set @sinavListesiId = 0 
+			    Select @sinavListesiId = ISNULL(Id,0) From dbo.MtskSinavListesi
+				Where FirmId = @FirmId
+				and   TalepId = @TalepId
+				and   SinavTipiId = 12 -- u-Sınav
+				and   convert(date,SinavTarihi,103) = convert(date,@yuSinavPlanTarihi,103)
+
+				if (@sinavListesiId = 0 and @yuSinavNo > 0)
+				begin
+                    -- SınavTarihini kontrol et
+					Set @sinavTarihiId = 0
+                    Select @sinavTarihiId = isnull(Id,0) from dbo.MtskSinavTarihi
+                    Where FirmId = @FirmId
+                    and   SinavTipiId = 12 -- u-Sınav
+                    and   convert(date,SinavTarihi,103) = convert(date,@yuSinavPlanTarihi,103)
+
+                    -- SınavTarihi yoksa oluştur
+                    if (@sinavTarihiId = 0) 
+                    begin
+                        INSERT INTO dbo.MtskSinavTarihi
+                        ( FirmId
+                        , IsActive
+                        , SinavTipiId
+                        , SinavTarihi
+                        , AracSayisi
+                        , UstaOgreticiSayisi
+                        , AdaySayisi
+                        , BasariliAdaySayisi
+                        , BasarisizAdaySayisi)
+                        VALUES
+                        ( @FirmId
+                        , 1  --IsActive
+                        , 12 --SinavTipiId
+                        , @yuSinavPlanTarihi --SinavTarihi
+                        , 0 ,0 ,0 ,0, 0)
+						-- yeni oluşan Id yi al
+                        Select @sinavTarihiId = MAX(Id) from [dbo].[MtskSinavTarihi]
+                    end
+
+                    if (@sinavTarihiId > 0)
+                    begin
+                        -- Sınav listesine ekle
+                        INSERT INTO dbo.MtskSinavListesi
+                        ( FirmId 
+                        , IsActive 
+                        , SinavTipiId 
+                        , SinavNo 
+                        , SinavTarihi 
+                        , TalepId 
+                        , AdayId )
+                        VALUES
+                        ( @FirmId
+                        , 1  --IsActive
+                        , 12 -- SinavTipiId
+                        , @yuSinavNo
+                        , @yuSinavPlanTarihi
+                        , @TalepId
+                        , @AdayId)
+                        end -- if (@sinavTarihiId > 0)
+                end -- if (@sinavListesiId = 0 and @yuSinavNo > 0)
+
+            end -- if (CONVERT(date, @yuSinavPlanTarihi end
+
+            /* eSinavPlanTarihi değişmiş olabilir */
+            Delete From dbo.MtskSinavListesi
+            Where FirmId = @FirmId
+            and   TalepId = @TalepId
+            and   SinavNo = @yeSinavNo
+            and   SinavTarihi =  @eeSinavPlanTarihi
+            and   SinavTarihi <> @yeSinavPlanTarihi
+
+            /* uSinavPlanTarihi değişmiş olabilir */
+            Delete From dbo.MtskSinavListesi
+            Where FirmId = @FirmId
+            and   TalepId = @TalepId
+            and   SinavNo = @yuSinavNo
+            and   SinavTarihi =  @euSinavPlanTarihi
+            and   SinavTarihi <> @yuSinavPlanTarihi
+			
+
             /* sakın bir daha açma müthiş derecede yavaşlıyor
 
             if ((@euSinavaHazirmiTipiId <> @yuSinavaHazirmiTipiId) or
@@ -1429,6 +1595,7 @@ AS BEGIN
 
     CLOSE takipCursor
     DEALLOCATE takipCursor   
+
 
 END -- create trigger
 

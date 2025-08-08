@@ -4,7 +4,7 @@ CREATE PROCEDURE [dbo].[prc_MtskAdayTakipTalepKaydiSingleSet] (@TalepId int)
 AS BEGIN
 
   --declare @TalepId int = 310
-  --print 'prc_MtskAdayTakipTalepKaydiSingleSet  start'
+  print 'prc_MtskAdayTakipTalepKaydiSingleSet  start'
 
   declare @Enter varchar(4) = CHAR(13) + CHAR(10)
   declare @isGrupSubeYok bit = 0
@@ -39,8 +39,7 @@ AS BEGIN
   declare @oldSistemUyarilari nvarchar(200)
   declare @mesaj nvarchar(200)
   declare @grupSubeSil bit = 0
-
-
+ 
   Select 
        @yFirmId = ins.FirmId
       ,@yAdayId = ins.AdayId
@@ -110,6 +109,15 @@ AS BEGIN
 
   set @mesaj = 'Hatalı TC No' + @Enter;
   if (@yTcNo LIKE '%[^0-9]%')
+  begin
+      if (CHARINDEX(@mesaj, @ySistemUyarilari) = 0) set @ySistemUyarilari = @ySistemUyarilari + @mesaj;
+  end else
+  begin
+      if (CHARINDEX(@mesaj, @ySistemUyarilari) > 0) set @ySistemUyarilari = REPLACE(@ySistemUyarilari, @mesaj, '') 
+  end
+
+  set @mesaj = 'Eksik/Fazla TC No' + @Enter;
+  if (LEN(@yTcNo) <> 11)
   begin
       if (CHARINDEX(@mesaj, @ySistemUyarilari) = 0) set @ySistemUyarilari = @ySistemUyarilari + @mesaj;
   end else
@@ -225,7 +233,8 @@ AS BEGIN
     or BelgelerGeldi          <> @yBelgelerGeldi
   )
 
-  --print 'prc_MtskAdayTakipTalepKaydiSingleSet  end'
+  print 'prc_MtskAdayTakipTalepKaydiSingleSet  end'
+
 
 END -- procedure
 

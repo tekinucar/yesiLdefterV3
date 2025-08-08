@@ -31,6 +31,51 @@ commit transaction
 
 /*CreateTrigger*/
 
+CREATE TRIGGER [dbo].[trg_MtskDonemi] on [dbo].[MtskDonemi]
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    DECLARE cursorMtskDonemi cursor local for select Id from Inserted
+    DECLARE @curId bigint
+
+    OPEN cursorMtskDonemi
+
+    FETCH NEXT FROM cursorMtskDonemi INTO @curId
+
+    declare @FirmId Int = 0
+    declare @DonemTipiId int = 0
+    declare @GrupTipiId int = 0
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+       Select @FirmId = ins.FirmId
+         , @DonemTipiId = DonemTipiId
+         , @GrupTipiId  = GrupTipiId
+       From inserted as ins
+       Where Id = @curId
+
+       if ( Select count(Id) ADET from dbo.MtskGrupSubesi 
+            where FirmId = @FirmId
+            and DonemTipiId = @DonemTipiId 
+			and GrupTipiId = @GrupTipiId ) = 0 
+       begin
+           insert into dbo.MtskGrupSubesi 
+		   (ParentId, FirmId, IsActive, DonemTipiId, GrupTipiId, SubeTipiId, KurumOnayTipiId) values (0, @FirmId, 1, @DonemTipiId, @GrupTipiId, 0, 0 )  
+       end
+
+      FETCH NEXT FROM cursorMtskDonemi INTO @curId
+    END -- While
+
+    CLOSE cursorMtskDonemi
+    DEALLOCATE cursorMtskDonemi   
+
+END -- create trigger
+
+/*CreateTriggerEnd*/
+
+
+/*CreateTrigger*/
+
 CREATE TRIGGER [dbo].[trg_MtskDonemiDeleteIsLock] on [dbo].[MtskDonemi]
 INSTEAD of DELETE
 AS BEGIN

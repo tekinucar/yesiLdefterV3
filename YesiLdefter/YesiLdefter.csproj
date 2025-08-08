@@ -204,6 +204,7 @@
     <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=6.0.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.6.1.2\lib\net462\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
     </Reference>
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Security" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.ServiceProcess" />
@@ -238,6 +239,11 @@
     <Compile Include="CEFSharp\CEFHelper.cs" />
     <Compile Include="CEFSharp\CefSharpInstaller.cs" />
     <Compile Include="Codes\CihazLogs.cs" />
+    <Compile Include="Connected Services\ServiceReferenceUyumTest\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Compile>
     <Compile Include="Entities\MsWebNode.cs" />
     <Compile Include="Entities\MsWebPage.cs" />
     <Compile Include="Entities\MsWebScrapingDbFields.cs" />
@@ -284,6 +290,12 @@
     </Compile>
     <Compile Include="Forms\ms_DestekServiceTool.Designer.cs">
       <DependentUpon>ms_DestekServiceTool.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ms_EFatura.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ms_EFatura.Designer.cs">
+      <DependentUpon>ms_EFatura.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\ms_FastReport.cs">
       <SubType>Form</SubType>
@@ -455,18 +467,6 @@
     <Compile Include="Selenium\MsScrapingService.cs" />
     <Compile Include="Selenium\MsWebPagesService.cs" />
     <Compile Include="Selenium\SeleniumService.cs" />
-    <Compile Include="Service References\AgentClient\Reference.cs" />
-    <Compile Include="Service References\AgentClient\Reference1.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </Compile>
-    <Compile Include="Service References\Uyumsoft\Reference.cs" />
-    <Compile Include="Service References\Uyumsoft\Reference1.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </Compile>
     <Compile Include="tForms.cs" />
     <Compile Include="Tkn\tImageHelper.cs" />
     <Compile Include="Tkn\tImageService.cs" />
@@ -490,6 +490,7 @@
     <Compile Include="Tkn\tFtp.cs" />
     <Compile Include="Tkn\tIniFile.cs" />
     <Compile Include="Tkn\tInputPanel.cs" />
+    <Compile Include="Tkn\tInvoiceTasks.cs" />
     <Compile Include="Tkn\tLayout.cs" />
     <Compile Include="Tkn\tManagement.cs" />
     <Compile Include="Tkn\tMenu.cs" />
@@ -507,8 +508,10 @@
     <Compile Include="Tkn\tToolBox.cs" />
     <Compile Include="Tkn\tUserFirms.cs" />
     <Compile Include="Tkn\tVariable.cs" />
+    <Compile Include="Tkn\tVariableStokHL.cs" />
     <Compile Include="Tkn\tXMLRead.cs" />
     <Compile Include="tMainForm.cs" />
+    <Compile Include="Uyumsoft\tEFaturaUyum.cs" />
     <EmbeddedResource Include="Forms\BrowserForm.resx">
       <DependentUpon>BrowserForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -572,6 +575,121 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <None Include="Connected Services\ServiceReferenceUyumTest\BasicIntegration.wsdl" />
+    <None Include="Connected Services\ServiceReferenceUyumTest\BasicIntegration.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\BasicIntegration1.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\BasicIntegration2.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\BasicIntegration3.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\BasicIntegration4.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\BasicIntegration5.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\BasicIntegration6.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\BasicIntegration7.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\BasicIntegration8.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.ByteArrayResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.CloneInvoiceServiceResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.DateResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.DocumentResponseStatusResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.EnvelopeResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.FlagResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.InboxInvoiceListResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.InvoiceDataResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.InvoiceGtbInfoResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.InvoiceIdentitiesResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.InvoiceResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.InvoicesDataResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.InvoicesResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.InvoiceStatusResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.InvoiceStatusWithLogResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.InvoiceViewResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.OutboxInvoiceListResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.Response.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.ResponseOfListOfCustomerCreditInfo.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.ResponseOfMerkezBilgiSorguSonuc.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.ResponseOfOutboxInvoiceListItem.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.ResponseOfWhoAmIInfo.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.StringElementResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.StringResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.SummaryReportResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.SystemUsersResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.TokenResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.UserAliassesResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.UserVerificationInfoResult.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
     <None Include="packages.config" />
     <None Include="Properties\app.manifest" />
     <None Include="Properties\Settings.settings">
@@ -584,98 +702,20 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <None Include="Scripts\KaynakBelgeler\vergidairelerilistesi.pdf" />
-    <None Include="Service References\AgentClient\Agent.wsdl" />
-    <None Include="Service References\AgentClient\Agent.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\AgentClient\Agent1.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\AgentClient\Agent10.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\AgentClient\Agent2.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\AgentClient\Agent3.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\AgentClient\Agent4.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\AgentClient\Agent5.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\AgentClient\Agent6.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\AgentClient\Agent7.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\AgentClient\Agent8.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\AgentClient\Agent9.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\AgentClient\EInvoiceDemoProject.AgentClient.CustomerInvoicesResponse.datasource" />
-    <None Include="Service References\AgentClient\EInvoiceDemoProject.AgentClient.CustomerListResponse.datasource" />
-    <None Include="Service References\AgentClient\EInvoiceDemoProject.AgentClient.FlagResponse.datasource" />
-    <None Include="Service References\Uyumsoft\EInvoiceDemoProject.Uyumsoft.ByteArrayResponse.datasource" />
-    <None Include="Service References\Uyumsoft\EInvoiceDemoProject.Uyumsoft.CloneInvoiceServiceResponse.datasource" />
-    <None Include="Service References\Uyumsoft\EInvoiceDemoProject.Uyumsoft.DateResponse.datasource" />
-    <None Include="Service References\Uyumsoft\EInvoiceDemoProject.Uyumsoft.DocumentResponseStatusResponse.datasource" />
-    <None Include="Service References\Uyumsoft\EInvoiceDemoProject.Uyumsoft.FlagResponse.datasource" />
-    <None Include="Service References\Uyumsoft\EInvoiceDemoProject.Uyumsoft.InboxInvoiceListResponse.datasource" />
-    <None Include="Service References\Uyumsoft\EInvoiceDemoProject.Uyumsoft.InvoiceDataResponse.datasource" />
-    <None Include="Service References\Uyumsoft\EInvoiceDemoProject.Uyumsoft.InvoiceGtbInfoResponse.datasource" />
-    <None Include="Service References\Uyumsoft\EInvoiceDemoProject.Uyumsoft.InvoiceIdentitiesResponse.datasource" />
-    <None Include="Service References\Uyumsoft\EInvoiceDemoProject.Uyumsoft.InvoiceResponse.datasource" />
-    <None Include="Service References\Uyumsoft\EInvoiceDemoProject.Uyumsoft.InvoicesDataResponse.datasource" />
-    <None Include="Service References\Uyumsoft\EInvoiceDemoProject.Uyumsoft.InvoicesResponse.datasource" />
-    <None Include="Service References\Uyumsoft\EInvoiceDemoProject.Uyumsoft.InvoiceStatusResponse.datasource" />
-    <None Include="Service References\Uyumsoft\EInvoiceDemoProject.Uyumsoft.InvoiceStatusWithLogResponse.datasource" />
-    <None Include="Service References\Uyumsoft\EInvoiceDemoProject.Uyumsoft.InvoiceViewResponse.datasource" />
-    <None Include="Service References\Uyumsoft\EInvoiceDemoProject.Uyumsoft.OutboxInvoiceListResponse.datasource" />
-    <None Include="Service References\Uyumsoft\EInvoiceDemoProject.Uyumsoft.Response.datasource" />
-    <None Include="Service References\Uyumsoft\EInvoiceDemoProject.Uyumsoft.StringElementResponse.datasource" />
-    <None Include="Service References\Uyumsoft\EInvoiceDemoProject.Uyumsoft.SummaryReportResponse.datasource" />
-    <None Include="Service References\Uyumsoft\EInvoiceDemoProject.Uyumsoft.SystemUsersResponse.datasource" />
-    <None Include="Service References\Uyumsoft\EInvoiceDemoProject.Uyumsoft.UserAliassesResponse.datasource" />
-    <None Include="Service References\Uyumsoft\Integration.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\Uyumsoft\Integration1.wsdl" />
-    <None Include="Service References\Uyumsoft\Integration1.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\Uyumsoft\Integration2.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\Uyumsoft\Integration3.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\Uyumsoft\Integration4.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\Uyumsoft\Integration5.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\Uyumsoft\Integration6.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\Uyumsoft\Integration7.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\Uyumsoft\Integration8.xsd">
-      <SubType>Designer</SubType>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Connected Services\ServiceReferenceUyumTest\BasicIntegration.disco" />
+    <None Include="Connected Services\ServiceReferenceUyumTest\configuration91.svcinfo" />
+    <None Include="Connected Services\ServiceReferenceUyumTest\configuration.svcinfo" />
+    <None Include="Connected Services\ServiceReferenceUyumTest\Reference.svcmap">
+      <Generator>WCF Proxy Generator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
     <Content Include="ILLink\ILLink.Descriptors.LibraryBuild.xml" />
+    <Resource Include="Resources\XSLTFile.xslt" />
     <Content Include="Scripts\2019VtMsSql\AJ_LINEDOC.txt" />
     <Content Include="Scripts\2019VtMsSql\AJ_LINETALK.txt" />
     <Content Include="Scripts\2019VtMsSql\FN_LINEVOL.txt" />
@@ -877,6 +917,7 @@
     <Content Include="Scripts\UST\Mtsk\MtskKurumAltProgramlari.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskPersoneli.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskSablonUygulamaM.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskSinavListesi.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayBiyometrikResmi.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayBorclandir.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayBorclandirESinav.txt" />
@@ -987,11 +1028,15 @@
     <Content Include="Scripts\UST\Mtsk\prc_MtskUygulamaDersPlaniGruplariBugun.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskUygulamaDersPlaniOlustur.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskUygulamaDersPlaniSaatleriGuncelle_IPTAL.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmEFaturaSettings.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmBelgeDekontOzetler.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmBelgeStokS_SatirlariniTopla.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmHesapBakiyesiHesapla.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\Settings.txt" />
     <Content Include="Scripts\UST\Mtsk\TempTabimBankalar.txt" />
     <Content Include="Scripts\UST\Mtsk\TempTabimHesaplar.txt" />
     <Content Include="Scripts\UST\Mtsk\trg_ORNEK.txt" />
-    <Content Include="Scripts\UST\OnMuhasebe\CariAdres.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmCariAdres.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\CariBanka.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\CariHesap_trg.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\CariIletisim.txt" />
@@ -1064,7 +1109,7 @@
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\Lkp_CinsiyetTipi.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\Lkp_VergiDairesiTipi.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\MsFollow.txt" />
-    <Content Include="Scripts\UST\OnMuhasebe\OnmToplamBakiye.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmHesapBakiyesi.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\OnmToplamBekleyen.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\OnmToplamGerceklesen.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\OnmToplamKdv.txt" />
@@ -1073,7 +1118,7 @@
     <Content Include="Scripts\UST\OnMuhasebe\prc_ComputeBelgeStokSEkVergi.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\prc_GetStokFiyati.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\prc_MsFollow.txt" />
-    <Content Include="Scripts\UST\OnMuhasebe\prc_OnmBelgeDekontOzetler.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\prc_OnmBelgeDekontOzetler_OLD.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\prc_OnmBelgeDekontTbmGelirHesaplari.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\prc_OnmBelgeDekontTbmGiderHesaplari.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\prc_OnmBelgeDekontTbmPersonelHesaplari.txt" />
@@ -1251,26 +1296,10 @@
     <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\VW_TYPES_LIST.txt" />
     <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\YARDIMCI_KODLAR.txt" />
     <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\_WorkList.txt" />
-    <Content Include="Service References\AgentClient\Agent.disco" />
-    <Content Include="Service References\AgentClient\configuration.svcinfo" />
-    <Content Include="Service References\AgentClient\configuration91.svcinfo" />
-    <Content Include="Service References\AgentClient\Reference.svcmap">
-      <Generator>WCF Proxy Generator</Generator>
-      <LastGenOutput>Reference1.cs</LastGenOutput>
-    </Content>
-    <Content Include="Service References\Uyumsoft\configuration.svcinfo" />
-    <Content Include="Service References\Uyumsoft\configuration91.svcinfo" />
-    <Content Include="Service References\Uyumsoft\Integration1.disco" />
-    <Content Include="Service References\Uyumsoft\Reference.svcmap">
-      <Generator>WCF Proxy Generator</Generator>
-      <LastGenOutput>Reference1.cs</LastGenOutput>
-    </Content>
     <Content Include="Treetog-I-Contacts.ico" />
     <Content Include="yesiLdefter.ico" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Resources\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.6.1">
       <Visible>False</Visible>
@@ -1327,6 +1356,12 @@
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="..\..\..\..\FastReport.Net\FastReport.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services\" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadataStorage Include="Connected Services\ServiceReferenceUyumTest\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

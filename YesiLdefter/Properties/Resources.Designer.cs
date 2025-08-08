@@ -19,7 +19,7 @@ namespace YesiLdefter.Properties {
     // sınıfı tarafından otomatik olarak oluşturuldu.
     // Üye eklemek veya kaldırmak için .ResX dosyanızı düzenleyin ve sonra da ResGen
     // komutunu /str seçeneğiyle yeniden çalıştırın veya VS projenizi yeniden oluşturun.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -57,6 +57,25 @@ namespace YesiLdefter.Properties {
             }
             set {
                 resourceCulture = value;
+            }
+        }
+        
+        /// <summary>
+        ///    benzeri yerelleştirilmiş bir dize arar.
+        /// </summary>
+        internal static string String1 {
+            get {
+                return ResourceManager.GetString("String1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+        ///&lt;xsl:stylesheet version=&quot;2.0&quot; xmlns:xsl=&quot;http://www.w3.org/1999/XSL/Transform&quot; xmlns:cac=&quot;urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2&quot; xmlns:cbc=&quot;urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2&quot; xmlns:ccts=&quot;urn:un:unece:uncefact:documentation:2&quot; xmlns:clm54217=&quot;urn:un:unece:uncefact:codelist:specification:54217:2001&quot; xmlns:clm5639=&quot;urn:un:unece:uncefact:codelist:specification:5639:1988&quot; xmlns:clm66411=&quot;urn:un:unece:unc [dizenin kalan bölümü kesildi]&quot;; benzeri yerelleştirilmiş bir dize arar.
+        /// </summary>
+        internal static string XSLTFile {
+            get {
+                return ResourceManager.GetString("XSLTFile", resourceCulture);
             }
         }
     }

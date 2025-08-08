@@ -69,11 +69,11 @@ AS BEGIN
     declare @eIsActive bit = null
     declare @yIsActive bit = null
 
-    declare @yTcNo varchar(11) = null
     declare @yTamAdi varchar(100) = null
     declare @eTamAdi varchar(100) = null
     declare @newTamAdi varchar(100) = null
 
+    declare @eTcNo varchar(11) = null
     declare @eAdi varchar(50) = null
     declare @eSoyadi varchar(50) = null
     declare @eBabaAdi varchar(50) = null
@@ -81,6 +81,7 @@ AS BEGIN
     declare @eCepTelefonu varchar(15) = null
 	declare @eDogumTarihi Date = null
 
+    declare @yTcNo varchar(11) = null
     declare @yAdi varchar(50) = null
     declare @ySoyadi varchar(50) = null
     declare @yBabaAdi varchar(50) = null
@@ -98,12 +99,15 @@ AS BEGIN
     --and   u.UpdateTypeId = 13
     --and   u.DBaseNoTypeId = 6
 
+    --print 'trg_MtskAday start'
+
     WHILE @@FETCH_STATUS = 0
     BEGIN
         set @newTamAdi = ''
 
         Select 
-            @eAdayId = isnull(dlt.Id,0)
+            @eTcNo = isnull(dlt.TcNo,'')
+           ,@eAdayId = isnull(dlt.Id,0)
            ,@eIsActive = isnull(dlt.IsActive,0)
            ,@eTamAdi = isnull(dlt.TamAdiSoyadi,'')
            ,@eAdi = isnull(dlt.Adi,'')
@@ -179,7 +183,8 @@ AS BEGIN
 		-- her talep için yeniden doğum tarihi hesaplansın
         if (@DbUpdatesIsActive = 0)
         begin
-            if (@eDogumTarihi <> @yDogumTarihi 
+            if (@eTcNo <> @yTcNo
+            or  @eDogumTarihi <> @yDogumTarihi 
             or  @eDogumTarihi is null 
             or  @yDogumTarihi is null
             or  @eAdi <> @yAdi 
@@ -190,13 +195,11 @@ AS BEGIN
             begin
                 --print 'talep update olacak'
 				-- böyle sistem uyarısı için kontroller çalışacak 
+				-- prc_MtskAdayTakipTalepKaydiSingleSet da bu sayede çalışıyor
+				-- eğer çalışmıyorsa  or satırlarında eksiklik var demektir
                 Update MtskAdayTalep set FirmId = @yFirmId
                 Where AdayId = @adayId
             end
-
-            -- trg_MtskAdayTalep üzerinden tetikleniyor   
-            -- IstedigiSertifikaTipiId ye göre kontrollerin yapılması gerekiyor
-            -- Exec prc_MtskAdayTakipTalepKaydiSingleSet
         end 		
 
         FETCH NEXT FROM adayCursor INTO @adayId
@@ -208,8 +211,11 @@ AS BEGIN
 	   EXECUTE dbo.prc_MtskDonemAdaySayilariSet @yFirmId
     end
 
+    --print 'trg_MtskAday end'
+
     CLOSE adayCursor
     DEALLOCATE adayCursor   
+
 
 END -- create trigger
 

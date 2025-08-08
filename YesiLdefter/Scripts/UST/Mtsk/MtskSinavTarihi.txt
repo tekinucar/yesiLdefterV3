@@ -43,11 +43,12 @@ AFTER INSERT,UPDATE
 AS 
 BEGIN
 
-    DECLARE myCursor cursor local for select Id from Inserted 
-    DECLARE @curId bigint
+    declare myCursor cursor local for select Id from Inserted 
+    declare @curId bigint
 
     OPEN myCursor
 
+	declare @ySinavTipiId smallInt
     declare @SinavDonemTipiId int
 	declare @ySinavTarihSaat varchar(20)
 	declare @ySinavTarihi  date
@@ -61,35 +62,38 @@ BEGIN
     WHILE @@FETCH_STATUS = 0
     BEGIN
 
-    select 
-		  @ySinavTarihSaat = isnull(ins.SinavTarihSaat,'')
-		, @ySinavTarihi = isnull(ins.SinavTarihi, CONVERT(date, getdate(),103))
-        , @yMebbisESinavTarihValue = isnull(ins.MebbisESinavTarihValue, '')
-		, @yMebbisRandevuTarihValue = isnull(ins.MebbisRandevuTarihValue, '')
-		, @yMebbisUSinavTarihValue = isnull(ins.MebbisUSinavTarihValue, '')
-		from inserted ins
-   	where ins.Id = @curId
+        select 
+            @ySinavTipiId = isnull(ins.SinavTipiId,0)
+		  , @ySinavTarihSaat = isnull(ins.SinavTarihSaat,'')
+		  , @ySinavTarihi = isnull(ins.SinavTarihi, CONVERT(date, getdate(),103))
+          , @yMebbisESinavTarihValue = isnull(ins.MebbisESinavTarihValue, '')
+          , @yMebbisRandevuTarihValue = isnull(ins.MebbisRandevuTarihValue, '')
+          , @yMebbisUSinavTarihValue = isnull(ins.MebbisUSinavTarihValue, '')
+        from inserted ins
+        where ins.Id = @curId
 		
-    -- E Sınav
-    if (@ySinavTarihSaat <> '0')
-	begin
-        set @ySinavTarihSaat = replace(@ySinavTarihSaat, '/E-Sınav', '') 
-        set @ySinavTarihi = convert(date, @ySinavTarihSaat, 103)
-        set @ySinavSaati = convert(time, @ySinavTarihSaat, 103)
-    end
-				
-    --	<option value="12020134-05/12/2021">05/12/2021</option>
-    if ((@yMebbisRandevuTarihValue <> '') and
-        (@yMebbisRandevuTarihValue <> '-1'))
-    begin
-        set @ySinavTarihi = CONVERT(date, substring(@yMebbisRandevuTarihValue, CHARINDEX('-', @yMebbisRandevuTarihValue) + 1, 10), 103)
-    end 
-
-		-- <option value="12020134?05/12/2021">05/12/2021</option>
-		if ((@yMebbisUSinavTarihValue <> '') and
-		    (@yMebbisUSinavTarihValue <> '-1'))
+        -- E Sınav
+        if (@ySinavTarihSaat <> '0' and @ySinavTipiId = 1)
         begin
-		       set @ySinavTarihi = CONVERT(date, substring(@yMebbisUSinavTarihValue, CHARINDEX('?', @yMebbisUSinavTarihValue) + 1, 10), 103)
+            set @ySinavTarihSaat = replace(@ySinavTarihSaat, '/E-Sınav', '') 
+            set @ySinavTarihi = convert(date, @ySinavTarihSaat, 103)
+            set @ySinavSaati = convert(time, @ySinavTarihSaat, 103)
+        end
+				
+        -- <option value='12020134-05/12/2021'>05/12/2021</option>
+        if (@ySinavTipiId < 10 and 
+		    @yMebbisRandevuTarihValue <> '' and
+            @yMebbisRandevuTarihValue <> '-1')
+        begin
+            set @ySinavTarihi = CONVERT(date, substring(@yMebbisRandevuTarihValue, CHARINDEX('-', @yMebbisRandevuTarihValue) + 1, 10), 103)
+        end 
+
+        -- <option value='12020134?05/12/2021'>05/12/2021</option>
+        if (@ySinavTipiId < 10 and
+            @yMebbisUSinavTarihValue <> '' and
+            @yMebbisUSinavTarihValue <> '-1')
+        begin
+            set @ySinavTarihi = CONVERT(date, substring(@yMebbisUSinavTarihValue, CHARINDEX('?', @yMebbisUSinavTarihValue) + 1, 10), 103)
         end 
 
         if (MONTH(@ySinavTarihi) < 10)
@@ -97,10 +101,13 @@ BEGIN
         else set @SinavDonemTipiId = convert(int, convert(varchar(5), YEAR(@ySinavTarihi)) + convert(varchar(3), MONTH(@ySinavTarihi)))
 		
         Update MtskSinavTarihi set
-          SinavTarihi = @ySinavTarihi
-        , SinavSaati = @ySinavSaati 
-        , SinavDonemTipiId = @SinavDonemTipiId 
+            SinavTarihi = @ySinavTarihi
+          , SinavSaati = @ySinavSaati 
+          , SinavDonemTipiId = @SinavDonemTipiId 
 		Where Id = @curId
+        --and ( SinavTarihi <> @ySinavTarihi
+        --or    SinavSaati <> @ySinavSaati         
+        --or    SinavDonemTipiId = @SinavDonemTipiId )   
 
 		if (@yMebbisRandevuTarihValue = '-1') or (@yMebbisUSinavTarihValue = '-1')
 		begin
@@ -138,7 +145,7 @@ drop table [Lkp].[MtskSinavTarihiSinavTipi]
 create table [Lkp].[MtskSinavTarihiSinavTipi]
 (
    Id               Int Unique not null, 
-   SinavTipi        nVarchar(10)   null
+   SinavTipi        nVarchar(20)   null
    
    constraint  pk_MtskSinavTarihiSinavTipi primary key (Id)
 )
@@ -148,7 +155,9 @@ INSERT INTO [Lkp].[MtskSinavTarihiSinavTipi] (Id, SinavTipi)
  VALUES 
   ( 0,    N''),
   ( 1,    N'e-Sınav'),
-  ( 2,    N'Uygulama')
+  ( 2,    N'Uygulama'),
+  ( 11,   N'e-Sınav (manuel)'),
+  ( 12,   N'Uygulama (manuel)')
 
 
 commit transaction

@@ -55,7 +55,9 @@ AS BEGIN
            ,talep.AdayId -- CariId
            ,3 -- TaksitTipiId : 3 = Tek Ödeme
            ,takip.uSinavNo -- TaksitNo
-           ,getdate() -- VadeTarihi == Bu kayıt oluşurken sınavın hangi tarihte olacağı bilinmiyor
+           ,(case 
+		       when isnull(takip.uSinavPlanTarihi,getdate()) > getdate() then takip.uSinavPlanTarihi
+			   else getdate() end )  -- VadeTarihi == Bu kayıt oluşurken sınavın hangi tarihte olacağı bilinmiyor
            ,@BorclandirmaUcreti -- TaksitTutari
            ,2    -- OdemeTipiId   Nakit
            ,0    -- IsPaid

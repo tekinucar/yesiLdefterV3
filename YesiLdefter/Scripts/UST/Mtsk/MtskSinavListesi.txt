@@ -1,0 +1,180 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table MtskSinavListesi
+ (
+   
+   Id                       Int IDENTITY(1,1) not null, 
+   FirmId                   Int       not null,
+   IsActive                 Bit       not null, /* default : 1 = active, 0 = not active */  
+   -- 10
+   SinavTipiId              SmallInt      null,
+   SinavDonemTipiId         Int           null,
+   SinavNo                  SmallInt      null,
+   SinavTarihi              Date          null,
+   
+   -- 20
+   TalepId                  Int           null,
+   AdayId                   Int           null,
+   
+   constraint		pk_MtskSinavListesi primary key (Id)
+ )
+  
+ grant select, insert, update, delete on MtskSinavListesi to public
+
+ create index X_MtskSinavListesi01 on MtskSinavListesi (SinavDonemTipiId desc, SinavTarihi desc)
+ 
+commit transaction
+
+/*CreateTableEnd*/
+
+
+/*CreateTrigger*/
+
+CREATE TRIGGER [dbo].[trg_MtskSinavListesi] on [dbo].[MtskSinavListesi] 
+AFTER INSERT,UPDATE
+AS 
+BEGIN
+
+    declare myCursor cursor local for select Id from Inserted 
+    declare @curId bigint
+
+    OPEN myCursor
+
+	declare @ySinavTipiId smallInt
+    declare @SinavDonemTipiId int
+    declare @ySinavNo smallInt
+	declare @ySinavTarihi  date
+    declare @yTalepId int
+
+    FETCH NEXT FROM myCursor INTO @curId
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+
+        select 
+            @ySinavTipiId = isnull(ins.SinavTipiId,0)
+          , @ySinavNo = isnull(ins.SinavNo,0) 
+		  , @ySinavTarihi = isnull(ins.SinavTarihi, CONVERT(date, getdate(),103))
+		  , @yTalepId = isnull(ins.TalepId,0)
+        from inserted ins
+        where ins.Id = @curId
+		
+        if (MONTH(@ySinavTarihi) < 10)
+             set @SinavDonemTipiId = convert(int, convert(varchar(5), YEAR(@ySinavTarihi)) + '0' + convert(varchar(3), MONTH(@ySinavTarihi)))
+        else set @SinavDonemTipiId = convert(int, convert(varchar(5), YEAR(@ySinavTarihi)) + convert(varchar(3), MONTH(@ySinavTarihi)))
+		
+        Update MtskSinavListesi set
+            SinavDonemTipiId = @SinavDonemTipiId 
+		Where Id = @curId
+
+        if (@yTalepId > 0)
+        begin		
+		    if (@ySinavTipiId = 11)
+            begin
+                Update dbo.MtskAdayTakip Set 
+			        eSinavPlanTarihi = @ySinavTarihi
+                Where TalepId = @yTalepId 
+            end
+		    if (@ySinavTipiId = 12)
+            begin
+                Update dbo.MtskAdayTakip Set 
+			        uSinavPlanTarihi = @ySinavTarihi
+                Where TalepId = @yTalepId 
+            end
+        end		
+		
+		FETCH NEXT FROM myCursor INTO @curId
+    END
+
+    CLOSE myCursor
+    DEALLOCATE myCursor  
+
+END
+
+/*CreateTriggerEnd*/
+
+
+
+/*CreateTrigger*/
+
+CREATE TRIGGER [dbo].[trg_MtskSinavListesiDelete] on [dbo].[MtskSinavListesi]
+AFTER DELETE
+AS BEGIN
+
+    declare cursorDlt cursor local for select Id from deleted
+	declare @curId bigint
+
+	OPEN cursorDlt
+    FETCH NEXT FROM cursorDlt INTO @curId
+
+    declare @TalepId int
+	declare @SinavTipiId smallInt
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+	    Select @TalepId = dlt.TalepId
+		, @SinavTipiId = dlt.SinavTipiId
+	    From deleted dlt
+	    Where dlt.Id = @curId
+	  
+        if (@TalepId > 0)
+        begin		
+		    if (@SinavTipiId = 11)
+            begin
+                Update dbo.MtskAdayTakip Set 
+			        eSinavPlanTarihi = null
+                Where TalepId = @TalepId 
+            end
+		    if (@SinavTipiId = 12)
+            begin
+                Update dbo.MtskAdayTakip Set 
+			        uSinavPlanTarihi = null
+                Where TalepId = @TalepId 
+            end
+        end	
+
+        FETCH NEXT FROM cursorDlt INTO @curId
+    END
+
+    CLOSE cursorDlt
+    DEALLOCATE cursorDlt
+
+END
+
+/*CreateTriggerEnd*/
+
+
+
+
+/*CreateLkpTable*/
+
+begin transaction
+
+-- ------------------------------------------------------- 
+-- SinavTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskSinavListesiSinavTipi')
+drop table [Lkp].[MtskSinavListesiSinavTipi]
+
+create table [Lkp].[MtskSinavListesiSinavTipi]
+(
+   Id               Int Unique not null, 
+   SinavTipi        nVarchar(20)   null
+   
+   constraint  pk_MtskSinavListesiSinavTipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskSinavListesiSinavTipi]
+INSERT INTO [Lkp].[MtskSinavListesiSinavTipi] (Id, SinavTipi)
+ VALUES 
+  ( 0,    N''),
+  ( 11,   N'e-Sınav (manuel)'),
+  ( 12,   N'Uygulama (manuel)')
+
+
+commit transaction
+
+/*CreateLkpTableEnd*/
+

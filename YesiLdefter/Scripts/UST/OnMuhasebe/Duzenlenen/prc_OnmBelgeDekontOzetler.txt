@@ -1,0 +1,502 @@
+﻿
+/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_OnmBelgeDekontOzetler]  (@FirmId int, @BaslangicTarihi datetime, @BitisTarihi datetime)  
+AS BEGIN
+
+  --declare @FirmId int = 11
+  --declare @BaslangicTarihi datetime = convert(date, '01.01.2025', 103)
+  --declare @BitisTarihi datetime = convert(date, '31.12.2025', 103)
+
+  select 
+    2 as TipiId 
+  , 'Tahsilat' as Lkp_Tipi
+  , 201 as Lkp_OzetGrupId
+  , 'Finans hesapları' as Lkp_OzetGrubuAdi
+  , convert(varchar(12),tip.Id) as Lkp_HesapTipiId
+  , tip.BHesapTipi as Lkp_HesapAdi
+  , sum(BDekont.BelgeTutari) as BelgeTutari
+ 
+  from dbo.OnmBelgeDekont as BDekont
+      left outer join Lkp.OnmBelgeDekontBHesapTipi as tip on ( BDekont.BHesapTipiId = tip.Id )
+  Where BDekont.FirmId = @FirmId
+  and   BDekont.IsActive = 1
+  and   BDekont.TipiId = 2 -- Tahsilat
+  and   BDekont.AHesapTipiId >= 21101
+  and   BDekont.AHesapTipiId <= 21199
+   /*[BDekont].DEFAULT_VALUE*/ 
+  and   convert(date, BDekont.BelgeTarihi, 103) >= convert(date, @BaslangicTarihi, 103)
+  and   convert(date, BDekont.BelgeTarihi, 103) <= convert(date, @BitisTarihi, 103)
+
+  group by 
+    tip.Id 
+  , tip.BHesapTipi
+
+  union all 
+
+  select 
+    2 as TipiId 
+  , 'Tahsilat' as Lkp_Tipi
+  , 201 as Lkp_OzetGrupId
+  , 'Finans hesapları' as Lkp_OzetGrubuAdi
+  , '' as Lkp_HesapTipiId
+  , 'Toplam' as Lkp_HesapAdi
+  , sum(BDekont.BelgeTutari) as BelgeTutari
+ 
+  from dbo.OnmBelgeDekont as BDekont
+      left outer join Lkp.OnmBelgeDekontBHesapTipi as tip on ( BDekont.BHesapTipiId = tip.Id )
+  Where BDekont.FirmId = @FirmId
+  and   BDekont.IsActive = 1
+  and   BDekont.TipiId = 2 -- Tahsilat
+  and   BDekont.AHesapTipiId >= 21101
+  and   BDekont.AHesapTipiId <= 21199
+   /*[BDekont].DEFAULT_VALUE*/ 
+  and   convert(date, BDekont.BelgeTarihi, 103) >= convert(date, @BaslangicTarihi, 103)
+  and   convert(date, BDekont.BelgeTarihi, 103) <= convert(date, @BitisTarihi, 103)
+
+  union all 
+
+  select 
+    2 as TipiId 
+  , 'Tahsilat' as Lkp_Tipi
+  , null as Lkp_OzetGrupId
+  , '' as Lkp_OzetGrubuAdi
+  , '' as Lkp_HesapTipiId
+  , '' as Lkp_HesapAdi
+  , null as BelgeTutari
+
+  union all
+  
+  select 
+    2 as TipiId 
+  , 'Tahsilat' as Lkp_Tipi
+  , 202 as Lkp_OzetGrupId
+  , 'Sertifika tipleri' as Lkp_OzetGrubuAdi
+  , convert(varchar(12),t.IstenenSertifikaTipiId) as Lkp_HesapTipiId
+  , tip.SertifikaTipi as Lkp_SertifikaTipi
+  , sum(BDekont.BelgeTutari) as BelgeTutari
+ 
+  from dbo.OnmBelgeDekont as BDekont
+      left outer join dbo.MtskAdayTalep as t on ( BDekont.TalepId = t.Id )
+      left outer join Lkp.MtskSertifikaTipi as tip on ( t.IstenenSertifikaTipiId = tip.Id )
+  Where BDekont.FirmId = @FirmId
+  and   BDekont.IsActive = 1
+  and   BDekont.TipiId = 2 -- Tahsilat
+  and   t.Id is not null
+  /*[BDekont].DEFAULT_VALUE*/ 
+  and   convert(date, BDekont.BelgeTarihi, 103) >= convert(date, @BaslangicTarihi, 103)
+  and   convert(date, BDekont.BelgeTarihi, 103) <= convert(date, @BitisTarihi, 103)
+
+  group by 
+    t.IstenenSertifikaTipiId 
+  , tip.SertifikaTipi 
+  , tip.SiraNo
+
+  union all
+  
+  select 
+    2 as TipiId 
+  , 'Tahsilat' as Lkp_Tipi
+  , 202 as Lkp_OzetGrupId
+  , 'Sertifika tipleri' as Lkp_OzetGrubuAdi
+  , '' as Lkp_HesapTipiId
+  , 'Toplam' as Lkp_SertifikaTipi
+  , sum(BDekont.BelgeTutari) as BelgeTutari
+ 
+  from dbo.OnmBelgeDekont as BDekont
+      left outer join dbo.MtskAdayTalep as t on ( BDekont.TalepId = t.Id )
+      left outer join Lkp.MtskSertifikaTipi as tip on ( t.IstenenSertifikaTipiId = tip.Id )
+  Where BDekont.FirmId = @FirmId
+  and   BDekont.IsActive = 1
+  and   BDekont.TipiId = 2 -- Tahsilat
+  and   t.Id is not null
+  /*[BDekont].DEFAULT_VALUE*/ 
+  and   convert(date, BDekont.BelgeTarihi, 103) >= convert(date, @BaslangicTarihi, 103)
+  and   convert(date, BDekont.BelgeTarihi, 103) <= convert(date, @BitisTarihi, 103)
+
+  union all 
+
+  select 
+    2 as TipiId 
+  , 'Tahsilat' as Lkp_Tipi
+  , null as Lkp_OzetGrupId
+  , '' as Lkp_OzetGrubuAdi
+  , '' as Lkp_HesapTipiId
+  , '' as Lkp_HesapAdi
+  , null as BelgeTutari
+
+  union all
+
+  select 
+    2 as TipiId 
+  , 'Tahsilat' as Lkp_Tipi
+  , 203 as Lkp_OzetGrupId
+  , 'Talep tipleri' as Lkp_OzetGrubuAdi
+  , convert(varchar(12),t.TalepTipiId) as Lkp_HesapTipiId
+  , tip.TalepTipi as Lkp_TalepTipi
+  , sum(BDekont.BelgeTutari) as BelgeTutari
+ 
+  from dbo.OnmBelgeDekont as BDekont 
+      left outer join dbo.MtskAdayTalep as t on ( BDekont.TalepId = t.Id )
+      left outer join Lkp.MtskAdayTalepTalepTipi as tip on ( t.TalepTipiId = tip.Id )
+  Where BDekont.FirmId = @FirmId
+  and   BDekont.IsActive = 1
+  and   BDekont.TipiId = 2 -- Tahsilat
+  and   t.Id is not null
+   /*[BDekont].DEFAULT_VALUE*/ 
+  and   convert(date, BDekont.BelgeTarihi, 103) >= convert(date, @BaslangicTarihi, 103)
+  and   convert(date, BDekont.BelgeTarihi, 103) <= convert(date, @BitisTarihi, 103)
+
+  group by 
+    t.TalepTipiId 
+  , tip.TalepTipi 
+  , tip.Id
+
+  union all
+
+  select 
+    2 as TipiId 
+  , 'Tahsilat' as Lkp_Tipi
+  , 203 as Lkp_OzetGrupId
+  , 'Talep tipleri' as Lkp_OzetGrubuAdi
+  , '' as Lkp_HesapTipiId
+  , 'Toplam' as Lkp_TalepTipi
+  , sum(BDekont.BelgeTutari) as BelgeTutari
+ 
+  from dbo.OnmBelgeDekont as BDekont 
+      left outer join dbo.MtskAdayTalep as t on ( BDekont.TalepId = t.Id )
+      left outer join Lkp.MtskAdayTalepTalepTipi as tip on ( t.TalepTipiId = tip.Id )
+  Where BDekont.FirmId = @FirmId
+  and   BDekont.IsActive = 1
+  and   BDekont.TipiId = 2 -- Tahsilat
+  and   t.Id is not null
+   /*[BDekont].DEFAULT_VALUE*/ 
+  and   convert(date, BDekont.BelgeTarihi, 103) >= convert(date, @BaslangicTarihi, 103)
+  and   convert(date, BDekont.BelgeTarihi, 103) <= convert(date, @BitisTarihi, 103)
+
+  union all 
+
+  select 
+    2 as TipiId 
+  , 'Tahsilat' as Lkp_Tipi
+  , null as Lkp_OzetGrupId
+  , '' as Lkp_OzetGrubuAdi
+  , '' as Lkp_HesapTipiId
+  , '' as Lkp_HesapAdi
+  , null as BelgeTutari
+
+  union all
+  
+  select 
+    2 as TipiId 
+  , 'Tahsilat' as Lkp_Tipi
+  , 204 as Lkp_OzetGrupId
+  , 'Ücret tipleri' as Lkp_OzetGrubuAdi
+  , convert(varchar(12),tip.Id) as Lkp_HesapTipiId
+  , tip.AHesapTipi as Lkp_UcretTipi
+  , sum(BDekont.BelgeTutari) as BelgeTutari
+ 
+  from dbo.OnmBelgeDekont as BDekont
+     left outer join dbo.MtskAdayTalep as t on ( BDekont.TalepId = t.Id )
+     left outer join Lkp.OnmBelgeDekontAHesapTipi as tip on ( BDekont.AHesapTipiId = tip.Id )
+  Where BDekont.FirmId = @FirmId
+  and   BDekont.IsActive = 1
+  and   BDekont.TipiId = 2 -- Tahsilat
+  and   t.Id is not null
+  /*[BDekont].DEFAULT_VALUE*/ 
+  and   convert(date, BDekont.BelgeTarihi, 103) >= convert(date, @BaslangicTarihi, 103)
+  and   convert(date, BDekont.BelgeTarihi, 103) <= convert(date, @BitisTarihi, 103)
+
+  group by 
+    tip.Id 
+  , tip.AHesapTipi
+
+  union all
+  
+  select 
+    2 as TipiId 
+  , 'Tahsilat' as Lkp_Tipi
+  , 204 as Lkp_OzetGrupId
+  , 'Ücret tipleri' as Lkp_OzetGrubuAdi
+  , '' as Lkp_HesapTipiId
+  , 'Toplam' as Lkp_UcretTipi
+  , sum(BDekont.BelgeTutari) as BelgeTutari
+ 
+  from dbo.OnmBelgeDekont as BDekont
+     left outer join dbo.MtskAdayTalep as t on ( BDekont.TalepId = t.Id )
+     left outer join Lkp.OnmBelgeDekontAHesapTipi as tip on ( BDekont.AHesapTipiId = tip.Id )
+  Where BDekont.FirmId = @FirmId
+  and   BDekont.IsActive = 1
+  and   BDekont.TipiId = 2 -- Tahsilat
+  and   t.Id is not null
+  /*[BDekont].DEFAULT_VALUE*/ 
+  and   convert(date, BDekont.BelgeTarihi, 103) >= convert(date, @BaslangicTarihi, 103)
+  and   convert(date, BDekont.BelgeTarihi, 103) <= convert(date, @BitisTarihi, 103)
+
+  union all 
+
+  select 
+    2 as TipiId 
+  , 'Tahsilat' as Lkp_Tipi
+  , null as Lkp_OzetGrupId
+  , '' as Lkp_OzetGrubuAdi
+  , '' as Lkp_HesapTipiId
+  , '' as Lkp_HesapAdi
+  , null as BelgeTutari
+
+  -- Tediyeler
+
+  union all
+
+  select 
+    3 as TipiId 
+  , 'Ödeme' as Lkp_Tipi
+  , 301 as Lkp_OzetGrupId
+  , 'Finans hesapları' as Lkp_OzetGrubuAdi
+  , convert(varchar(12),tip.Id) as Lkp_HesapTipiId
+  , tip.AHesapTipi as Lkp_AHFinansAdi
+  , sum(BDekont.BelgeTutari) as BelgeTutari
+
+  from dbo.OnmBelgeDekont as BDekont
+      left outer join Lkp.OnmBelgeDekontAHesapTipi as tip on ( BDekont.AHesapTipiId = tip.Id )
+  Where BDekont.FirmId = @FirmId
+  and   BDekont.IsActive = 1
+  and   BDekont.TipiId = 3 -- Tediye
+  and   BDekont.BHesapTipiId not in (100, 1022, 1023, 1024) -- finanslar arası hereketler olmasın
+  /*[BDekont].DEFAULT_VALUE*/ 
+  and   convert(date, BDekont.BelgeTarihi, 103) >= convert(date, @BaslangicTarihi, 103)
+  and   convert(date, BDekont.BelgeTarihi, 103) <= convert(date, @BitisTarihi, 103)
+
+  group by 
+    tip.Id 
+  , tip.AHesapTipi
+
+  union all
+
+  select 
+    3 as TipiId 
+  , 'Ödeme' as Lkp_Tipi
+  , 301 as Lkp_OzetGrupId
+  , 'Finans hesapları' as Lkp_OzetGrubuAdi
+  , '' as Lkp_HesapTipiId
+  , 'Toplam' as Lkp_AHFinansAdi
+  , sum(BDekont.BelgeTutari) as BelgeTutari
+
+  from dbo.OnmBelgeDekont as BDekont
+      left outer join Lkp.OnmBelgeDekontAHesapTipi as tip on ( BDekont.AHesapTipiId = tip.Id )
+  Where BDekont.FirmId = @FirmId
+  and   BDekont.IsActive = 1
+  and   BDekont.TipiId = 3 -- Tediye
+  and   BDekont.BHesapTipiId not in (100, 1022, 1023, 1024) -- finanslar arası hereketler olmasın
+  /*[BDekont].DEFAULT_VALUE*/ 
+  and   convert(date, BDekont.BelgeTarihi, 103) >= convert(date, @BaslangicTarihi, 103)
+  and   convert(date, BDekont.BelgeTarihi, 103) <= convert(date, @BitisTarihi, 103)
+
+  union all 
+
+  select 
+    3 as TipiId 
+  , 'Ödeme' as Lkp_Tipi
+  , null as Lkp_OzetGrupId
+  , '' as Lkp_OzetGrubuAdi
+  , '' as Lkp_HesapTipiId
+  , '' as Lkp_HesapAdi
+  , null as BelgeTutari
+
+  union all
+
+  select 
+    3 as TipiId 
+  , 'Ödeme' as Lkp_Tipi
+  , 302 as Lkp_OzetGrupId
+  , 'İşlem tipi' as Lkp_OzetGrubuAdi
+  , tip.IslemKodu as Lkp_HesapTipiId
+  , tip.IslemAdi as Lkp_IslemAdi
+  , sum(BDekont.BelgeTutari) as BelgeTutari
+
+  from dbo.OnmBelgeDekont as BDekont
+      left outer join Lkp.OnmBelgeDekontIslemTipi as tip on ( BDekont. IslemTipiId = tip.IslemKodu )
+  Where BDekont.FirmId = @FirmId
+  and   BDekont.IsActive = 1
+  and   BDekont.TipiId = 3 -- Tediye
+  and   BDekont.BHesapTipiId not in (100, 1022, 1023, 1024) -- finanslar arası hereketler olmasın
+  /*[BDekont].DEFAULT_VALUE*/ 
+  and   convert(date, BDekont.BelgeTarihi, 103) >= convert(date, @BaslangicTarihi, 103)
+  and   convert(date, BDekont.BelgeTarihi, 103) <= convert(date, @BitisTarihi, 103)
+
+  group by 
+    tip.IslemKodu 
+  , tip.IslemAdi
+
+  union all
+
+  select 
+    3 as TipiId 
+  , 'Ödeme' as Lkp_Tipi
+  , 302 as Lkp_OzetGrupId
+  , 'İşlem tipi' as Lkp_OzetGrubuAdi
+  , '' as Lkp_HesapTipiId
+  , 'Toplam' as Lkp_IslemAdi
+  , sum(BDekont.BelgeTutari) as BelgeTutari
+
+  from dbo.OnmBelgeDekont as BDekont
+      left outer join Lkp.OnmBelgeDekontIslemTipi as tip on ( BDekont. IslemTipiId = tip.IslemKodu )
+  Where BDekont.FirmId = @FirmId
+  and   BDekont.IsActive = 1
+  and   BDekont.TipiId = 3 -- Tediye
+  and   BDekont.BHesapTipiId not in (100, 1022, 1023, 1024) -- finanslar arası hereketler olmasın
+  /*[BDekont].DEFAULT_VALUE*/ 
+  and   convert(date, BDekont.BelgeTarihi, 103) >= convert(date, @BaslangicTarihi, 103)
+  and   convert(date, BDekont.BelgeTarihi, 103) <= convert(date, @BitisTarihi, 103)
+
+  union all 
+
+  select 
+    3 as TipiId 
+  , 'Ödeme' as Lkp_Tipi
+  , null as Lkp_OzetGrupId
+  , '' as Lkp_OzetGrubuAdi
+  , '' as Lkp_HesapTipiId
+  , '' as Lkp_HesapAdi
+  , null as BelgeTutari
+
+  union all
+
+  select 
+    3 as TipiId 
+  , 'Ödeme' as Lkp_Tipi
+  , 303 as Lkp_OzetGrupId
+  , 'Maliyet ana grubu' as Lkp_OzetGrubuAdi
+  , convert(varchar(12),tip.Id) as Lkp_HesapTipiId
+  , ( case    
+      when BDekont.BHesapTipiId >= 21101 and BDekont.BHesapTipiId <= 21199 then tip.BHesapTipi + ' iadesi' else
+      tip.BHesapTipi end) as Lkp_BHFinansAdi
+  , sum(BDekont.BelgeTutari) as BelgeTutari
+
+  from dbo.OnmBelgeDekont as BDekont
+      left outer join Lkp.OnmBelgeDekontBHesapTipi as tip on ( BDekont.BHesapTipiId = tip.Id )
+  Where BDekont.FirmId = @FirmId
+  and   BDekont.IsActive = 1
+  and   BDekont.TipiId = 3 -- Tediye
+  and   BDekont.BHesapTipiId not in (100, 1022, 1023, 1024) 
+  /*[BDekont].DEFAULT_VALUE*/ 
+  and   convert(date, BDekont.BelgeTarihi, 103) >= convert(date, @BaslangicTarihi, 103)
+  and   convert(date, BDekont.BelgeTarihi, 103) <= convert(date, @BitisTarihi, 103)
+
+  group by 
+    tip.Id 
+  , tip.BHesapTipi
+  , BDekont.BHesapTipiId
+
+  union all
+
+  select 
+    3 as TipiId 
+  , 'Ödeme' as Lkp_Tipi
+  , 303 as Lkp_OzetGrupId
+  , 'Maliyet ana grubu' as Lkp_OzetGrubuAdi
+  , '' as Lkp_HesapTipiId
+  , 'Toplam' as Lkp_BHFinansAdi
+  , sum(BDekont.BelgeTutari) as BelgeTutari
+
+  from dbo.OnmBelgeDekont as BDekont
+      left outer join Lkp.OnmBelgeDekontBHesapTipi as tip on ( BDekont.BHesapTipiId = tip.Id )
+  Where BDekont.FirmId = @FirmId
+  and   BDekont.IsActive = 1
+  and   BDekont.TipiId = 3 -- Tediye
+  and   BDekont.BHesapTipiId not in (100, 1022, 1023, 1024) 
+  /*[BDekont].DEFAULT_VALUE*/ 
+  and   convert(date, BDekont.BelgeTarihi, 103) >= convert(date, @BaslangicTarihi, 103)
+  and   convert(date, BDekont.BelgeTarihi, 103) <= convert(date, @BitisTarihi, 103)
+
+  union all 
+
+  select 
+    3 as TipiId 
+  , 'Ödeme' as Lkp_Tipi
+  , null as Lkp_OzetGrupId
+  , '' as Lkp_OzetGrubuAdi
+  , '' as Lkp_HesapTipiId
+  , '' as Lkp_HesapAdi
+  , null as BelgeTutari
+
+  union all
+
+  select 
+    3 as TipiId 
+  , 'Ödeme' as Lkp_Tipi
+  , 304 as Lkp_OzetGrupId
+  , 'Maliyet konusu' as Lkp_OzetGrubuAdi
+  , convert(varchar(12),tip.Id) as Lkp_HesapTipiId
+  , (Case 
+     When BDekont.SourceTypeId = 1 then HMaliyet.HesapAdi  -- BMaliyet + HMaliyet
+     When isnull(Iade.Id,0) > 0    then tip.BHesapTipi + ' iadesi'               
+     When isnull(HCari.Id,0) > 0   then HCari.TamAdiSoyadi -- Cariye ödeme
+     end ) as Lkp_MaliyetTuru
+  , sum(BDekont.BelgeTutari) as BelgeTutari
+
+  from dbo.OnmBelgeDekont as BDekont
+      left outer join dbo.OnmBelgeMaliyet as BMaliyet on ( BDekont.SourceTypeId = 1 and BDekont.SourceId = BMaliyet.Id )
+      left outer join dbo.OnmHesapFinans  as HMaliyet on ( BMaliyet.MaliyetId = HMaliyet.Id )
+      left outer join dbo.OnmHesapCari    as HCari    on ( BDekont.BHesapTipiId = 320 and BDekont.BorcluId = HCari.Id ) 
+      left outer join dbo.OnmBelgeDekont  as Iade     on ( BDekont.Id = Iade.Id and BDekont.BHesapTipiId >= 21100 and BDekont.BHesapTipiId < 21199  )
+      left outer join Lkp.OnmBelgeDekontBHesapTipi as tip on ( BDekont.BHesapTipiId = tip.Id )
+	
+  Where BDekont.FirmId = @FirmId
+  and   BDekont.IsActive = 1
+  and   BDekont.TipiId = 3 -- Tediye
+  and   BDekont.BHesapTipiId not in (100, 1022, 1023, 1024) 
+  /*[BDekont].DEFAULT_VALUE*/ 
+  and   convert(date, BDekont.BelgeTarihi, 103) >= convert(date, @BaslangicTarihi, 103)
+  and   convert(date, BDekont.BelgeTarihi, 103) <= convert(date, @BitisTarihi, 103)
+
+  group by
+      BDekont.SourceTypeId
+    , HMaliyet.HesapAdi
+    , HCari.TamAdiSoyadi
+    , Iade.Id
+    , HCari.Id
+    , tip.Id
+    , tip.BHesapTipi
+
+  union all
+
+  select 
+    3 as TipiId 
+  , 'Ödeme' as Lkp_Tipi
+  , 304 as Lkp_OzetGrupId
+  , 'Maliyet konusu' as Lkp_OzetGrubuAdi
+  , '' as Lkp_HesapTipiId
+  , 'Toplam' as Lkp_MaliyetTuru
+  , sum(BDekont.BelgeTutari) as BelgeTutari
+
+  from dbo.OnmBelgeDekont as BDekont
+      left outer join dbo.OnmBelgeMaliyet as BMaliyet on ( BDekont.SourceTypeId = 1 and BDekont.SourceId = BMaliyet.Id )
+      left outer join dbo.OnmHesapFinans  as HMaliyet on ( BMaliyet.MaliyetId = HMaliyet.Id )
+      left outer join dbo.OnmHesapCari    as HCari    on ( BDekont.BHesapTipiId = 320 and BDekont.BorcluId = HCari.Id ) 
+      left outer join dbo.OnmBelgeDekont  as Iade     on ( BDekont.Id = Iade.Id and BDekont.BHesapTipiId >= 21100 and BDekont.BHesapTipiId < 21199  )
+      left outer join Lkp.OnmBelgeDekontBHesapTipi as tip on ( BDekont.BHesapTipiId = tip.Id )
+	
+  Where BDekont.FirmId = @FirmId
+  and   BDekont.IsActive = 1
+  and   BDekont.TipiId = 3 -- Tediye
+  and   BDekont.BHesapTipiId not in (100, 1022, 1023, 1024) 
+  /*[BDekont].DEFAULT_VALUE*/ 
+  and   convert(date, BDekont.BelgeTarihi, 103) >= convert(date, @BaslangicTarihi, 103)
+  and   convert(date, BDekont.BelgeTarihi, 103) <= convert(date, @BitisTarihi, 103)
+
+  union all 
+
+  select 
+    3 as TipiId 
+  , 'Ödeme' as Lkp_Tipi
+  , null as Lkp_OzetGrupId
+  , '' as Lkp_OzetGrubuAdi
+  , '' as Lkp_HesapTipiId
+  , '' as Lkp_HesapAdi
+  , null as BelgeTutari
+
+
+END -- procedure
+
+/*CreateProcedureEnd*/

@@ -123,12 +123,11 @@ namespace Tkn_Events
                     getGridHint_(sender, ref tGridHint);
                     if ((tGridHint.editValueCount == v.tSearch.searchStartCount) && (v.tSearch.IsRun == false))
                     {
-                        DevExpress.XtraEditors.Controls.ButtonPredefines button =
-                        DevExpress.XtraEditors.Controls.ButtonPredefines.Search;
-
                         /// Serach işlemi başlıyor
                         /// 
-                        se.buttonEdit_ButtonClick_(sender, button);
+                        DevExpress.XtraEditors.Controls.ButtonPredefines button = DevExpress.XtraEditors.Controls.ButtonPredefines.Search;
+                        //se.buttonEdit_ButtonClick_(sender, button);
+                        ev.preparing_ButtonHint(sender, button);
                         v.tSearch.IsRun = false;
                     }
                 } 
@@ -254,6 +253,20 @@ namespace Tkn_Events
                     (buttonType == v.tButtonType.btSecCik))
                 {
                     return onay;
+                }
+
+                if ((tGridHint.parentObject == "DevExpress.XtraGrid.GridControl") &&
+                    (buttonType == v.tButtonType.btNone) &&
+                    (getIsLastColumn(tGridHint))
+                    )
+                {
+                    bool IsLatRow = getIsLastRow(tGridHint);
+
+                    if (IsLatRow)
+                        buttonType = v.tButtonType.btKaydetYeni;
+                    else buttonType = v.tButtonType.btKaydet;
+
+                    v.tButtonHint.buttonType = buttonType;
                 }
 
                 v.con_Value_Old = tGridHint.columnOldValue;
@@ -1462,6 +1475,38 @@ namespace Tkn_Events
             return onay;
         }
         
+        private bool getIsLastRow(vGridHint tGridHint)
+        {
+            bool onay = false;
+            GridView view = getGridView(tGridHint);
+            onay = view.IsLastRow;
+            return onay;
+        }
+        private bool getIsLastColumn(vGridHint tGridHint)
+        {
+            bool onay = false;
+            GridView view = getGridView(tGridHint);
+
+            tGridHint.currentColumn = view.FocusedColumn;
+
+            if (view != null)
+            {
+                int ind = 0;
+
+                if (tGridHint.currentColumn == null)
+                    ind = -1;
+                else
+                    ind = view.VisibleColumns.IndexOf(tGridHint.currentColumn);
+
+                /// VisibleColumns field listesi 0 dan başlıyor 
+                if ((ind + 1) == view.VisibleColumns.Count)
+                {
+                    onay = true;
+                }
+            }
+            return onay;
+        }
+
         public DevExpress.XtraGrid.Columns.GridColumn GetNextFocusableColumn(vGridHint tGridHint)
         {
             GridView view = getGridView(tGridHint);
@@ -1487,13 +1532,14 @@ namespace Tkn_Events
                     //v.formLastActiveControl = null;
 
                     //MessageBox.Show("last");
-
+                    tGridHint.isLastRow = true;
                 }
                 else
                 {
                     // sonraki satır/row a geç
                     //
                     //MessageBox.Show("move");
+                    tGridHint.isLastRow = false;
                     view.MoveNext();
                 }
                 ind = 0;
@@ -2160,7 +2206,7 @@ namespace Tkn_Events
                     #region Editable column focusble
                     if (//((e.KeyCode == Keys.Tab) |
                          (e.KeyCode == Keys.Enter) &&
-                         (e.Handled == false) &&
+                         //(e.Handled == false) &&
                          (onay == false) &&
                          (view != null))
                     {
@@ -2725,7 +2771,7 @@ namespace Tkn_Events
                 // bunun yerine manuel yaptım 
                 myGridDataNavigatorPositionSet(grid, t.myInt32(v.con_GridMouseValue));
 
-                //myDragDrop_RUN_(tForm, Prop_RunTime);
+                myDragDrop_RUN_(tForm, Prop_RunTime);
 
                 grid.Invalidate();
 

@@ -10,7 +10,7 @@ begin transaction
    IlAdi              nVarchar(30)  null, 
    IlceAdi            nVarchar(50)  null,
    VergiDairesiKodu   nVarchar(5) Unique  null,  -- SaymanlikKodu
-   VergiDairesiAdi    nVarchar(100) null,
+   VergiDairesiAdi    nVarchar(60)  null,
 
    constraint		pk_VergiDairesi primary key (Id)
  )

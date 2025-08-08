@@ -439,7 +439,7 @@ namespace Tkn_DevView
             //tGridView.LostFocus += new System.EventHandler(evg.myGridView_LostFocus);
             //tGridView.GridControl.Enter : bak
             //tGridView.GridControl.Leave : bak 
-
+            /*
             tGridView.Appearance.FocusedCell.BackColor = v.colorNew;
             tGridView.Appearance.FocusedCell.Options.UseBackColor = true;
             tGridView.Appearance.FocusedRow.BackColor = v.colorNavigator;
@@ -450,7 +450,7 @@ namespace Tkn_DevView
             tGridView.Appearance.FocusedCell.Options.UseBorderColor = true;
             tGridView.Appearance.FocusedRow.BorderColor = v.colorExit;
             tGridView.Appearance.FocusedRow.Options.UseBorderColor = true;
-
+            */
             tGridView.BorderStyle = DevExpress.XtraEditors.Controls.BorderStyles.NoBorder;
 
             string Prop_View = t.Set(row_Table["PROP_VIEWS"].ToString(), "", "");
@@ -944,7 +944,7 @@ namespace Tkn_DevView
             //tGridView.LostFocus += new System.EventHandler(evg.myGridView_LostFocus);
             //tGridView.GridControl.Enter : bak
             //tGridView.GridControl.Leave : bak 
-
+            /*
             tGridView.Appearance.FocusedCell.BackColor = v.colorNew;
             tGridView.Appearance.FocusedCell.Options.UseBackColor = true;
             tGridView.Appearance.FocusedRow.BackColor = v.colorNavigator;
@@ -954,7 +954,7 @@ namespace Tkn_DevView
             tGridView.Appearance.FocusedCell.Options.UseBorderColor = true;
             tGridView.Appearance.FocusedRow.BorderColor = v.colorExit;
             tGridView.Appearance.FocusedRow.Options.UseBorderColor = true;
-
+            */
             tGridView.BorderStyle = DevExpress.XtraEditors.Controls.BorderStyles.NoBorder;
 
 
@@ -4862,10 +4862,12 @@ MS_FIELDS                                          T03_MSFIELDS                 
                     {
                         try
                         {
-                            tVGridControl.Rows["CategoryRow_" + fgroup_no.ToString()].ChildRows.Add(column);
+                            if (tVGridControl.Rows.Count >= fgroup_no) 
+                                tVGridControl.Rows["CategoryRow_" + fgroup_no.ToString()].ChildRows.Add(column);
                         }
-                        catch (Exception)
+                        catch (Exception ex)
                         {
+                            //
                         }
                     }
 

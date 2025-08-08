@@ -81,7 +81,9 @@ begin transaction
 
    VergiVeFonlar      Numeric(22,5) null,    
    MasrafMiktari      Numeric(22,5) null,    
-   
+   OdenenTutar        Numeric(22,5) null,    
+   KalanTutar         Numeric(22,5) null,    
+
    -- 110 Döviz bilgileri 
    ParaTipiId1        nVarChar(3)   null,
    DovizYeriId1       SmallInt      null,

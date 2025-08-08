@@ -847,7 +847,7 @@ namespace Tkn_Variable
 
         public static Color AppearanceTextColor = Color.DarkGreen;  //MediumSeaGreen;
         public static Color AppearanceFocusedTextColor = Color.Black;
-        public static Color AppearanceItemCaptionColor1 = Color.CornflowerBlue; // System.Drawing.Color.Cornsilk;
+        public static Color AppearanceItemCaptionColor1 = Color.Red;//   Color.CornflowerBlue; // System.Drawing.Color.Cornsilk;
         public static Color AppearanceItemCaptionColor2 = Color.Coral; // System.Drawing.Color.FloralWhite;
 
 
@@ -1219,6 +1219,8 @@ namespace Tkn_Variable
         public static bildirimPaketi tBildirim = new bildirimPaketi();
         public static vSMSSettings tSMSSettings = new vSMSSettings();
 
+        public static vInvoiceUser tInvoiceUser = new vInvoiceUser();
+
         public static bool cefBrowserLoading = false;
         //public static CefSharp.WinForms.ChromiumWebBrowser cefBrowser_ = null;
         //public static CefSharp.WinForms.Host.ChromiumHostControl cefHostControl_ = null;
@@ -1295,6 +1297,14 @@ namespace Tkn_Variable
             setImageDPI,
             setImageQuality,
             transferFromDatabaseToWeb
+        }
+
+        public enum tCharacterType
+        {
+            OnlyDigit,
+            OnlyLetter,
+            Mixed,
+            Empty
         }
 
 
@@ -2403,6 +2413,9 @@ namespace Tkn_Variable
         public string parentObject { get; set; }
         public v.tButtonType buttonType { get; set; }
         public object focusedRow { get; set; }
+        public bool isLastColumn { get; set; }
+        public bool isLastRow { get; set; }
+
         public void Clear()
         {
             tForm = null;
@@ -2422,6 +2435,8 @@ namespace Tkn_Variable
             parentObject = "";
             buttonType = 0;
             focusedRow = null;
+            isLastColumn = false;
+            isLastRow = false;
         }
 
     }
@@ -2453,6 +2468,7 @@ namespace Tkn_Variable
         public string parentFieldName_ { get; set; }
         public string parentObject { get; set; }
         public string viewType { get; set; }
+
         public void Clear()
         {
             tForm = null;
@@ -2668,6 +2684,31 @@ namespace Tkn_Variable
         public string Sifre { get; set; }
         public string BayiiKodu { get; set; }
         public string Origin { get; set; }
+    }
+
+    public class vInvoiceUser
+    {
+        public bool UseTestEnvironment { get; set; }
+        public bool LoggingEnabled { get; set; }
+        public string WebServiceTestUsername { get; set; }
+        public string WebServiceTestPassword { get; set; }
+        public string WebServiceTestUri { get; set; }
+        public string WebServiceLiveUsername { get; set; }
+        public string WebServiceLivePassword { get; set; }
+        public string WebServiceLiveUri { get; set; }
+
+
+        public void Clear()
+        {
+            UseTestEnvironment = true;
+            LoggingEnabled = false;
+            WebServiceTestUsername = "Uyumsoft";
+            WebServiceTestPassword = "Uyumsoft";
+            WebServiceTestUri = "http://efatura-test.uyumsoft.com.tr/Services/BasicIntegration";
+            WebServiceLiveUsername = "";
+            WebServiceLivePassword = "";
+            WebServiceLiveUri = "";
+        }
     }
 
 

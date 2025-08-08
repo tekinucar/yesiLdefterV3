@@ -1043,10 +1043,208 @@ namespace Tkn_Events
         {
             if (e.Button.Kind == DevExpress.XtraEditors.Controls.ButtonPredefines.Combo) return;
 
-            tSearch se = new tSearch();
-            DevExpress.XtraEditors.Controls.ButtonPredefines button = e.Button.Kind;
-            se.buttonEdit_ButtonClick_(sender, button);
+            /*
+            if (e.Button.Kind == DevExpress.XtraEditors.Controls.ButtonPredefines.Search)
+            {
+                //tSearch se = new tSearch();
+                DevExpress.XtraEditors.Controls.ButtonPredefines button = e.Button.Kind;
+                se.buttonEdit_ButtonClick_(sender, button);
+            }
+            if (e.Button.Kind == DevExpress.XtraEditors.Controls.ButtonPredefines.Glyph)
+            {
+            }
+            */
+            preparing_ButtonHint(sender, e.Button.Kind);
         }
+
+        //public void preparing_ButtonHint(object sender, DevExpress.XtraEditors.Controls.ButtonPressedEventArgs e, DevExpress.XtraEditors.Controls.ButtonPredefines button)
+        public void preparing_ButtonHint(object sender, DevExpress.XtraEditors.Controls.ButtonPredefines button)
+        {
+            bool onay = false;
+            string TableIPCode = string.Empty;
+            string senderType = sender.GetType().ToString();
+            string editValue = "";
+            string funcName = "";
+            string myProp = "";
+            string fieldName = "";
+
+            if (senderType == "DevExpress.XtraEditors.ButtonEdit")
+            {
+                myProp = ((DevExpress.XtraEditors.ButtonEdit)sender).Properties.AccessibleDescription;
+                fieldName = ((DevExpress.XtraEditors.ButtonEdit)sender).Properties.Name?.ToString();
+            }
+            if (senderType == "DevExpress.XtraEditors.ImageComboBoxEdit")
+            {
+                myProp = ((DevExpress.XtraEditors.ImageComboBoxEdit)sender).Properties.AccessibleDescription;
+                fieldName = ((DevExpress.XtraEditors.ImageComboBoxEdit)sender).Properties.Name?.ToString();
+            }
+            //Column_LKP_LISTEYE_EKLE
+            fieldName = fieldName.Replace("Column_", "");
+
+            if (t.IsNotNull(myProp))
+            {
+                v.tButtonType buttonType = v.tButtonType.btNone;
+
+                #region Find Form
+                Form tForm = null;
+
+                if (senderType == "DevExpress.XtraEditors.ImageComboBoxEdit")
+                {
+                    TableIPCode = ((DevExpress.XtraEditors.ImageComboBoxEdit)sender).Properties.AccessibleName;
+                    tForm = ((DevExpress.XtraEditors.ImageComboBoxEdit)sender).FindForm();
+                }
+
+                if (senderType == "DevExpress.XtraEditors.ButtonEdit")
+                {
+                    TableIPCode = ((DevExpress.XtraEditors.ButtonEdit)sender).Properties.AccessibleName;
+                    tForm = ((DevExpress.XtraEditors.ButtonEdit)sender).FindForm();
+                }
+
+                if (senderType == "DevExpress.XtraEditors.SimpleButton")
+                {
+                    TableIPCode = ((DevExpress.XtraEditors.SimpleButton)sender).AccessibleName;
+                    tForm = ((DevExpress.XtraEditors.SimpleButton)sender).FindForm();
+                }
+
+                #endregion
+
+                //Type: SearchEngine;[
+                //   {
+                //     "CAPTION": "Search",
+                //     "BUTTONTYPE": "58",
+                //     "TABLEIPCODE_LIST": [
+
+                myProp = myProp.Replace((char)34, (char)39);
+
+                funcName = t.MyProperties_Get(myProp, "Type:");
+
+                #region Search_Engines and Buttons
+                if ((funcName == v.tSearch.searchEngine) || (funcName == v.ButtonEdit))
+                {
+                    if (senderType == "DevExpress.XtraEditors.ImageComboBoxEdit")
+                    {
+                        /// atama yapılacak değer GET_FIELD_LIST={ içinden tespit edilmeli ama hangisi ?
+                        /// aslında gerekte yok, çünkü gelen değer  editvalue  
+                        v.con_Value_Old = string.Empty;
+
+                        buttonType = t.getClickType(myProp);
+                    }
+
+                    if (senderType == "DevExpress.XtraEditors.ButtonEdit")
+                    {
+                        //v.con_Value_Old = "";
+                        //v.con_SearchValue = "";
+
+                        buttonType = t.getClickType(myProp);
+
+                        if (button == DevExpress.XtraEditors.Controls.ButtonPredefines.Search)
+                        {
+                            if (funcName == v.tSearch.searchEngine)
+                                buttonType = v.tButtonType.btArama;
+
+                            if (funcName == v.ButtonEdit)
+                                buttonType = v.tButtonType.btGoster;
+                        }
+
+                        if ((button == DevExpress.XtraEditors.Controls.ButtonPredefines.Ellipsis) &&
+                            (funcName == v.ButtonEdit))
+                            buttonType = v.tButtonType.btKartAc;
+
+                        if ((button == DevExpress.XtraEditors.Controls.ButtonPredefines.Plus) &&
+                            (funcName == v.ButtonEdit))
+                            buttonType = v.tButtonType.btYeniKart;
+
+                        if ((button == DevExpress.XtraEditors.Controls.ButtonPredefines.OK) &&
+                            (funcName == v.ButtonEdit) &&
+                            (buttonType == v.tButtonType.btListeyeEkle)
+                            )
+                        {
+
+                        }
+
+
+                        if (buttonType == v.tButtonType.btArama)
+                        {
+                            //if (((DevExpress.XtraEditors.ButtonEdit)sender).EditValue != null)
+                            //    v.tSearch.searchInputValue = ((DevExpress.XtraEditors.ButtonEdit)sender).EditValue.ToString();
+                            /// Arama ekranı boş açılsın
+                            ///
+                            v.tSearch.searchInputValue = "";
+                        }
+                    }
+                }
+                #endregion Search_Engines
+
+                #region Properties & Plus 
+                if ((funcName == v.Properties) ||
+                    (funcName == v.PropertiesPlus))
+                {
+                    string TableName = t.MyProperties_Get(myProp, "TableName:");
+                    string FieldName = t.MyProperties_Get(myProp, "FieldName:");
+                    string Width = t.MyProperties_Get(myProp, "Width:");
+
+                    string thisValue = ((DevExpress.XtraEditors.ButtonEdit)sender).EditValue.ToString();
+
+                    tCreateObject co = new tCreateObject();
+
+                    string NewValue = thisValue;
+
+                    if (funcName == v.Properties)
+                        NewValue = co.Create_PropertiesEdit_JSON(TableName, FieldName, Width, thisValue);
+
+                    if (funcName == v.PropertiesPlus)
+                        NewValue = co.Create_PropertiesPlusEdit_JSON(TableName, FieldName, Width, thisValue);
+
+                    ((DevExpress.XtraEditors.ButtonEdit)sender).EditValue = NewValue;
+                }
+                #endregion Properties & Plus 
+
+                #region PropertiesNav
+                if (funcName == v.PropertiesNav)
+                {
+                    string thisValue = ((DevExpress.XtraEditors.ButtonEdit)sender).EditValue.ToString();
+
+                    tCreateObject co = new tCreateObject();
+
+                    string NewValue = thisValue;
+
+                    NewValue = co.Create_PropertiesNavEdit(thisValue);
+
+                    ((DevExpress.XtraEditors.ButtonEdit)sender).EditValue = NewValue;
+                }
+                #endregion PropertiesNav 
+
+                if (buttonType != v.tButtonType.btNone)
+                {
+                    v.tButtonHint.Clear();
+                    v.tButtonHint.tForm = tForm;
+                    v.tButtonHint.tableIPCode = TableIPCode;
+                    v.tButtonHint.columnFieldName = fieldName;
+                    v.tButtonHint.propNavigator = myProp;
+                    v.tButtonHint.buttonType = buttonType;
+                    v.tButtonHint.columnEditValue = editValue;
+                    v.tButtonHint.senderType = sender.GetType().ToString();
+                    v.tButtonHint.checkedValue = editValue;
+
+                    if (buttonType != v.tButtonType.btArama)
+                    {
+                        tEventsButton evb = new tEventsButton();
+                        evb.btnClick(v.tButtonHint);
+                    }
+
+                    if (buttonType == v.tButtonType.btArama)
+                    {
+                        // btArama / search işlemi başlasın
+                        if (myProp != "")
+                        {
+                            tSearch se = new tSearch();
+                            se.search_ButtonClick(sender, v.tButtonHint);
+                        }
+                    }
+                }
+            }
+        }
+
         public void ImageComboBoxEdit_ButtonClick(object sender, DevExpress.XtraEditors.Controls.ButtonPressedEventArgs e)
         {
             #region Button[1] click ise
@@ -1300,6 +1498,7 @@ namespace Tkn_Events
             t.Find_DataSet(tForm, ref ds, ref dN, mst_TableIPCode);
 
             if (mst_TableIPCode == null) return;
+            if (ds == null) return;
 
             string fname = "";
             string newValue = "";
@@ -8446,26 +8645,46 @@ namespace Tkn_Events
 
                         if (i_bgn == -1)
                         {
-                            str_bgn = " -- and " + read_sub_FName + Operand;
+                            str_bgn = " --and " + read_sub_FName + Operand;
                             i_bgn = Sql.IndexOf(str_bgn);
                         }
 
                         if (i_bgn == -1)
                         {
                             // and Convert(Date, [SYSOTV].TARIH, 103)  = Convert(Datetime,'01.01.1900', 103)    -- :D.SD.5839: --
-                            str_bgn = " and Convert(Date, " + read_sub_FName;
+                            str_bgn = "--and Convert(Date, " + read_sub_FName + ", 103) " + Operand;
+                            i_bgn = Sql.IndexOf(str_bgn);
+                        }
+                        if (i_bgn == -1)
+                        {
+                            // and Convert(Date, [SYSOTV].TARIH, 103)  = Convert(Datetime,'01.01.1900', 103)    -- :D.SD.5839: --
+                            str_bgn = " and Convert(Date, " + read_sub_FName + ", 103) " + Operand;
+                            i_bgn = Sql.IndexOf(str_bgn);
+                        }
+
+                        if (i_bgn == -1)
+                        {
+                            // and Convert(Datetime, [SYSOTV].TARIH, 103)  = Convert(Datetime,'01.01.1900', 103)    -- :D.SD.5839: --
+                            str_bgn = "--and Convert(Datetime, " + read_sub_FName + ", 103) " + Operand;
                             i_bgn = Sql.IndexOf(str_bgn);
                         }
                         if (i_bgn == -1)
                         {
                             // and Convert(Datetime, [SYSOTV].TARIH, 103)  = Convert(Datetime,'01.01.1900', 103)    -- :D.SD.5839: --
-                            str_bgn = " and Convert(Datetime, " + read_sub_FName;
+                            str_bgn = " and Convert(Datetime, " + read_sub_FName + ", 103) " + Operand;
+                            i_bgn = Sql.IndexOf(str_bgn);
+                        }
+
+                        if (i_bgn == -1)
+                        {
+                            // and Convert(Datetime, [SYSOTV].TARIH, 103)  = Convert(Datetime,'01.01.1900', 103)    -- :D.SD.5839: --
+                            str_bgn = "--and Convert(SmallDatetime, " + read_sub_FName + ", 103) " + Operand;
                             i_bgn = Sql.IndexOf(str_bgn);
                         }
                         if (i_bgn == -1)
                         {
                             // and Convert(Datetime, [SYSOTV].TARIH, 103)  = Convert(Datetime,'01.01.1900', 103)    -- :D.SD.5839: --
-                            str_bgn = " and Convert(SmallDatetime, " + read_sub_FName;
+                            str_bgn = " and Convert(SmallDatetime, " + read_sub_FName + ", 103) " + Operand;
                             i_bgn = Sql.IndexOf(str_bgn);
                         }
 
@@ -8492,21 +8711,26 @@ namespace Tkn_Events
                             read_mst_value = "-1";
                         }
 
+                        if ((read_field_type == "40" || read_field_type == "58" || read_field_type == "61") &&
+                            (read_mst_value == "")) 
+                            read_mst_value = "01.01.1900";
+
                         if (read_mst_FName == ":DONEM_YILAY")
                         {
                             read_mst_value = v.DONEMTIPI_YILAY.ToString();
                         }
 
-                        if (read_mst_value != "-98")
+                        if (read_mst_value != "-98" && read_mst_value != "")
                         {
                             new_And = " and " + t.Set_FieldName_Value_(System.Convert.ToInt16(read_field_type), read_sub_FName, read_mst_value, "and", OperandType);
                             buldu = 8;
                         }
 
                         // satırı geçici iptal etmek için
-                        if (read_mst_value == "-98")
+                        if ((read_mst_value == "-98" || read_mst_value == "") &&
+                            (default_type != 31)) // MasterDetail değilse 
                         {
-                            new_And = " -- and " + t.Set_FieldName_Value_(System.Convert.ToInt16(read_field_type), read_sub_FName, read_mst_value, "and", OperandType);
+                            new_And = " --and " + t.Set_FieldName_Value_(System.Convert.ToInt16(read_field_type), read_sub_FName, read_mst_value, "and", OperandType);
                             buldu = 8;
                         }
                     }
@@ -8757,6 +8981,10 @@ namespace Tkn_Events
                                 //f_end = Sql.IndexOf(str_end, i_end + 2);// new_And.Length);
                                 //int f_bgn_test = Sql.IndexOf(str_bgn, i_bgn + 2);
                                 //int f_end_test = Sql.IndexOf(str_end, f_bgn_test + 2);
+
+                                if (Sql.IndexOf("--" + str_bgn.TrimStart() , i_bgn - 5) > -1)
+                                    i_bgn = Sql.IndexOf("--" + str_bgn.TrimStart(), i_bgn) + 10;
+
                                 f_bgn = Sql.IndexOf(str_bgn, i_bgn + 2);
                                 f_end = Sql.IndexOf(str_end, f_bgn + 2);
                                 if (f_bgn == -1) f_end = -1;

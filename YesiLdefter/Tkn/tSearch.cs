@@ -48,12 +48,13 @@ namespace Tkn_Search
                 /// 
                 if ((value.Length == v.tSearch.searchStartCount) && (v.tSearch.IsRun == false))
                 {
-                    DevExpress.XtraEditors.Controls.ButtonPredefines button =
-                        DevExpress.XtraEditors.Controls.ButtonPredefines.Search;
+                    DevExpress.XtraEditors.Controls.ButtonPredefines button = DevExpress.XtraEditors.Controls.ButtonPredefines.Search;
 
                     /// Serach işlemi başlıyor
                     /// 
-                    buttonEdit_ButtonClick_(sender, button);
+                    //buttonEdit_ButtonClick_(sender, button);
+                    tEvents ev = new tEvents();
+                    ev.preparing_ButtonHint(sender, button);
 
                     if (v.tSearch.IsSearchFound) 
                     {
@@ -65,6 +66,49 @@ namespace Tkn_Search
                         // 
                     }
                     v.tSearch.IsRun = false;
+                }
+            }
+        }
+
+        public void search_ButtonClick(object sender, vButtonHint buttonHint)
+        {
+            string myProp = buttonHint.propNavigator;
+
+            if (myProp != "")
+            {
+                tToolBox t = new tToolBox();
+
+                PROP_NAVIGATOR prop_ = null;
+                List<PROP_NAVIGATOR> propList_ = null;
+
+                Form tForm = buttonHint.tForm;
+                string TableIPCode = buttonHint.tableIPCode;
+                bool onay = false;
+
+                v.tButtonType buttonType = buttonHint.buttonType;
+                v.tButtonType propButtonType = v.tButtonType.btNone;
+
+                t.readProNavigator(myProp, ref prop_, ref propList_);
+
+                if (propList_ != null)
+                {
+                    bool aramaCalisti = false;
+                    foreach (PROP_NAVIGATOR item in propList_)
+                    {
+                        if (item.BUTTONTYPE.ToString() != "null")
+                        {
+                            propButtonType = t.getClickType(Convert.ToInt32(item.BUTTONTYPE.ToString()));
+                        }
+                        if (buttonType == propButtonType && aramaCalisti == false)
+                        {
+                            v.tSearch.IsRun = true;
+                            aramaCalisti = true; // aynı döngüde bir daha çalışmasın : PROP_NAVIGATOR de düzenleme yapınca nedense arama bilgisi tekrarlanıyor : aslında Properties & Plus  in hatası
+                            onay = searchEngines(tForm, TableIPCode, v.tSearch.searchInputValue, item);
+                        }
+                    }
+
+                    if (onay == false)
+                        setSearchOutputValue(sender);
                 }
             }
         }

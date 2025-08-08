@@ -1283,6 +1283,13 @@ namespace Tkn_DevColumn
             string masterCheckFName = t.Set(Row["MASTER_CHECK_FNAME"].ToString(), "", "");
             string listTypesName = t.Set(Row["LIST_TYPES_NAME"].ToString(), "", "");
 
+            if (listTypesName.IndexOf("<") > -1 && listTypesName.IndexOf(">") > -1)
+            {
+                listTypesName = listTypesName.Replace("<", "");
+                listTypesName = listTypesName.Replace(">", "");
+            }
+            else listTypesName = "";
+
             // masterCheckFName
             // bu fieldle bulunduğu satırdaki bir kolonu okuyor
             // bu sayede DataCopy için ayırt edici value oluyor
@@ -1666,12 +1673,7 @@ namespace Tkn_DevColumn
                 */
                 #endregion
 
-                if (listTypesName.IndexOf("<") > -1 && listTypesName.IndexOf(">") > -1)
-                {
-                    listTypesName = listTypesName.Replace("<", "");
-                    listTypesName = listTypesName.Replace(">", "");
-                }
-                else listTypesName = "";
+                
 
                 if (tcolumn_type == "tImageComboBoxEdit2Button")
                 {
@@ -3408,6 +3410,10 @@ namespace Tkn_DevColumn
                     if (tcolumn_type == "DateEdit_SpeedKriter_BIT") tEdit.Name = tEdit.Name + "_BIT";
                     
                     tEdit.EditValue = null;
+
+                    if (t.IsNotNull(default_value))
+                        tEdit.EditValue = default_value;
+
                     tEdit.EditValueChanged += new System.EventHandler(ev.tXtraEdit_EditValueChanged);
                     tEdit.EditValueChanging += new DevExpress.XtraEditors.Controls.ChangingEventHandler(ev.tXtraEdit_EditValueChanging);
                     

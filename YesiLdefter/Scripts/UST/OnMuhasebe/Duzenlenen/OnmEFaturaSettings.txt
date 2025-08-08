@@ -1,0 +1,77 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table OnmEFaturaSettings
+ (
+
+   Id                  Int IDENTITY(1,1)  Not null, 
+   FirmId              Int                    null,
+
+   -- 10 
+   Unvan               nVarchar(100)          null, /* e-fatura üzerinde ki ünvan */ 
+   VergiKimlikNo       varchar(15)            null,
+   VergiDairesiKodu    nVarchar(5)            null,  -- SaymanlikKodu
+   VergiDairesiAdi     nVarchar(100)          null,
+
+   -- 20 : Fatura gonderici bilgileri
+   UlkeKodu            nVarchar(5)            null,                 
+   UlkeAdi             nVarchar(25)           null,                 
+
+   IlKodu              varchar(3)             null,
+   IlAdi               nVarchar(25)           null,                 
+
+   IlceKodu            varchar(5)             null,
+   IlceAdi             nVarchar(30)           null,                 
+
+   MahalleKoyKodu      varchar(10)            null,
+   Mahalle             nVarchar(100)          null,
+
+   CaddeSokakKodu      varchar(10)            null,
+   CaddeSokak          nVarchar(100)          null,
+
+   DisKapiNoKodu       varchar(10)            null,
+   DisKapiNo           nVarchar(50)           null,
+
+   IcKapiNoKodu        varchar(25)            null,
+   IcKapiNo            nVarchar(30)           null,
+
+   eFEntegratorId      Int                    null, /* 1. UyumSoft, 2. ?  */
+   
+   
+   
+   AliciAlias ???? mahire sor
+
+
+
+   constraint		pk_OnmEFaturaSettings primary key (Id)
+ )
+
+ create index X_OnmEFaturaSettings01 on OnmEFaturaSettings (FirmId)
+
+ commit transaction
+
+/*CreateTableEnd*/
+
+
+eFEntegratorId için tablo hazırladığında
+
+IsActive
+EntegratorAdi
+HizmetTipiId   /* : 1. e-Fatura/e-Arşiv, 2. ....   */
+KullaniciAdi
+KullaniciSifresi
+WebServiceUrlCanli
+WebServiceUrlTest
+
+EntegratorDestekHattiTel1
+EntegratorDestekWhatsApp
+EntegratorDestekUrl
+
+AraciDestekHattiTel1
+AraciDesteWhatsApp
+AraciDestekUrl
+
+
+
+

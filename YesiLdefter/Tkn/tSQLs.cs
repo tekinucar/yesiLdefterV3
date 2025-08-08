@@ -2528,6 +2528,11 @@ INSERT INTO [dbo].[SYS_UPDATES]
                 #region // Where_IP_Add add
                 if (t.IsNotNull(Where_IP_Add))
                 {
+                    /// "and BStokB.Id = -1" > " and BStokB.Id = -1 "  
+                    /// şeklinde değiştirmezsek  changeKeyFieldValue çalışmıyor, bulamıyor
+                    /// 
+                    Where_IP_Add = " " + Where_IP_Add + " ";
+
                     NewSQL = t.SQLWhereAdd(NewSQL, TableLabel, Where_IP_Add + v.ENTER, "DEFAULT");
                 }
                 #endregion // Where_IP_Add add
@@ -3528,7 +3533,9 @@ INSERT INTO [dbo].[SYS_UPDATES]
 
                 if ((tLkpMemoryField) ||    // LKP_ MemoryField  ise
                     (toperand_type == 2) || // Odd Single 
-                    (toperand_type == 3))   // SpeedKriter ise
+                    (toperand_type == 3) || // SpeedDouble
+                    (toperand_type == 4)    // SpeedSingle
+                    )   // SpeedKriter ise
                 {
                     // Tespit edilen Default Type Göre -------------------
                     ///'DEFAULT_TYPE'
@@ -3564,6 +3571,9 @@ INSERT INTO [dbo].[SYS_UPDATES]
                             s = t.Set(Row["DEFAULT_SP"].ToString(), Row["LKP_DEFAULT_SP"].ToString(), "0");
                             if (s != "0")
                                 default_value = dv.tSP_Value_Load(s);
+
+                            if (toperand_type == 2)
+                                MasterValue1 = default_value;
                         }
 
                         if (default_type == 5) // Var SETUP_VALUE
@@ -3738,6 +3748,10 @@ INSERT INTO [dbo].[SYS_UPDATES]
                     #endregion About_Detail_SubDetail
 
                     #region Where_Lines
+
+                    //string bbb = "";
+                    //if (TableIPCode == "UST/MEB/MtskTeorikDers.TeoPlanlamaManuelSonucu"  && mainFName == "DersTarihi")
+                    //    bbb = "aaa";
 
                     //  and  a.GCB_ID = xxx  --Detail_SubDetail:MasterTableIPCode||MasterKeyFName;--
 

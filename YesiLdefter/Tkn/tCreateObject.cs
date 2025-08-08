@@ -145,6 +145,11 @@ namespace Tkn_CreateObject
 
                     preparingMaliDonemChanger(dsData, tDataNavigator, t);
                 }
+            
+                if (dsData.Tables.Count == 0)
+                {
+                    MessageBox.Show("DİKKAT : Create_Navigator sırasında dsData.Tables.Count == 0 geliyor. Bu nedenle DataSet e ulaşamazsın. Muhakkak tablo oluşturulmalı...");
+                }
             }
 
             //tDataNavigator.TextStringFormat = "Kayıt {0}, {1}";

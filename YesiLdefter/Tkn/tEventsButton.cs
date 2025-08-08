@@ -327,7 +327,7 @@ namespace Tkn_Events
             if (buttonType == v.tButtonType.btListeyeEkle)  // (ButtonName == "ekle")  // 14
             {
                 if (t.IsNotNull(buttonHint.viewType) == false)
-                    onay = listeyeEkle(tForm, propList_, tableIPCode);
+                    onay = listeyeEkle(tForm, propList_, buttonHint.tableIPCode, buttonHint.columnFieldName);
                 
                 if (buttonHint.viewType == "SearchLookUpEdit")
                 {
@@ -803,12 +803,16 @@ namespace Tkn_Events
             return onay;
         }
 
-        private bool listeyeEkle(Form tForm, List<PROP_NAVIGATOR> propList_, string tableIPCode)
+        private bool listeyeEkle(Form tForm, List<PROP_NAVIGATOR> propList_, string tableIPCode, string columnFieldName)
         {
             //tToolBox t = new tToolBox();
             bool onay = false;
             bool find_Lkp_Onay = t.Find_FieldName(tForm, tableIPCode, "LKP_ONAY");
             bool find_Selected = false;
+
+            // Aynı listede hem LKP_ONAY var hemde LKP_LISTEYE_EKLE varsa
+            if (columnFieldName != "LKP_ONAY")
+                find_Lkp_Onay = false;
 
             if (find_Lkp_Onay)
             {

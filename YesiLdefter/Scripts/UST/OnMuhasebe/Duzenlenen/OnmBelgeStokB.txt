@@ -7,121 +7,150 @@ begin transaction
  (
 
    Id                 Int IDENTITY(1,1) NOT NULL, 
-   ParentId           Int       not null, /* default 0 */
-   FirmId             Int       not null,
-   IsActive           Bit       not null, /* default : 1 = active, 0 = not active */ 
-   IsPaid             Bit       not null, /* default : 0 = ödenmedi,  1 = Ödendi */  
-   IsCommit           Bit       not null, /* default : 0 = Muh. işlenmedi, 1 = Muh. İşlendi */  
-   IsLock             Bit           null, /* default : 0 = Açık, 1 = Kilitli  */
+   ParentId           Int         not null, /* default 0 */
+   FirmId             Int         not null,
+   IsActive           Bit         not null, /* default : 1 = active, 0 = not active */ 
+   IsPaid             Bit         not null, /* default : 0 = ödenmedi,  1 = Ödendi */  
+   IsCommit           Bit         not null, /* default : 0 = Muh. işlenmedi, 1 = Muh. İşlendi */  
+   IsLock             Bit             null, /* default : 0 = Açık, 1 = Kilitli  */
 
    -- belge tip bilgileri
    -- 10
-   GCTipiId           SmallInt      null, /* 0 = etkisiz, 1 = Giriş Hareketi, 2 = Çıkış Hareketi */
-   BelgeTipiId        SmallInt      null, /*   */
-   KaynakTipiId       SmallInt      null, /* 1. kağıt, 2. elektronik belge */
-   SebepTipiId        SmallInt      null, /*   */
-   TuruTipiId         SmallInt      null, /* 1. Sipariş, 2. İrsaliye, 3. Fatura   */
+   GCTipiId           SmallInt        null, /* 0 = etkisiz, 1 = Giriş Hareketi, 2 = Çıkış Hareketi */
+   BelgeTipiId        SmallInt        null, /* Yeşildefter kontrolü için gerekli  */
+   TuruTipiId         SmallInt        null, /* 1. Sipariş, 2. İrsaliye, 3. Fatura   */
+   MuhasebeTipiId     SmallInt        null, /* 25. Maddi duran varlık alımı, 601. Yurtdışı satışlar vb... */
+   
+    -- 20
+   FProfiliTipiId     SmallInt          null, /* TICARI, TEMEL, IHRACAT, YOLCUBERABERFAT */ 
+   FaturaTipiId       SmallInt          null, /* e-Fatura/e-Arşiv için gerekli : TICARIFATURA, ... */
+   IlaveFaturaTipiId  SmallInt          null, /* e-Fatura/e-Arşiv için gerekli : SAGLIK_ECZ, ...   */
+   GIBUUID            Varchar(40)       null, /* GIB in oluştuduğu UUID :  **UUID**, evrensel bir standart (RFC 4122) ve tamamen teknik bir kimlik. Detayalr için aşağıya bak */
+   GIBEttn            nVarChar(50)      null, /* ETTN (Elektronik Takip ve Teyit Numarası), e-faturaların benzersiz kimliğidir. Türkiye'de e-fatura sistemi kapsamında kullanılan bu numara, her e-faturaya özel olarak üretilir ve faturayı takip etmeyi, doğrulamayı ve denetimi sağlar. Entegratör üretir */
+   GTBKodu            nVarChar(25)      null, /* **GTB Kodu** ise GİB'in kendi iç sistemlerinde kullandığı, insanların da görebileceği bir referans numarası. Detaylar için aşağıya bak  */
+   GIBInvoiceScenario VarChar(25)       null, /* eArchive, ... */  
 
+   /* "Faturanızın UUID'si parmak izi gibi benzersizken, GTB Kodu pasaport numarası gibi resmi ama değiştirilebilir bir etikettir." */  
+
+   -- 30
+   GonderimTipiId     SmallInt        null, /* 1. elektronik belge, 2. kağıt  */   -- KaynakTipiId
+   InternetSiteId     Int             null, /* e-fatura üzerinde satış hangi site üzerinden yapıldığı bildiriliyor : firmanın satış yaptığı internet siteleri tablosu henüz yok */
+   OdemeTipiId        SmallInt        null, /* KREDIKARTI/BANKAKARTI, ...   */
+   OdemeTipiAciklama  nVarchar(30)    null, /* Ödeme tipi diğer seçildiğinde doldurulamsı zorunlu alan  */ 
+   OdemeAraciTipiId   SmallInt        null, /* Firmanın kullandığı ödeme aracısı olarak kullandığı Aracılar : BKM EXPRESS, ... tablosu henüz yok */
+   OdemeTarihi        Datetime        null, /* ödemenin alındığı tarih */
+
+   /* 40 olabilir
+   FaturaDurum ?
+   IsFaturaYeni
+   IsFaturaOnayla
+   IsFaturaRed
+   FaturaRedSahibi ?
+   */
 
    --fatura bilgileri
-   -- 20 Belge Hakkında
-   BelgeTarihi        Date          null,
-   BelgeSaati         VarChar(8)    null,
-   BelgeSeri          nVarChar(5)   null,
-   BelgeNo            nVarChar(50)  null,
-   -- 30
-   GIBEttn            nVarChar(50)  null,
-   GIBFaturaTipiId    SmallInt      null,
+   -- 50 Belge Hakkında
+   BelgeTarihi        Datetime          null,
+   BelgeSaati         VarChar(8)        null,
+   BelgeSeri          nVarChar(5)       null,
+   BelgeNo            nVarChar(50)      null,
    
-   -- 40
+   -- 60
    VadeGun            SmallInt      null,  
    SonOdemeTarihi     Date          null, 
    GecerlilikTarihi   Date          null, /* sigortanın son tarihi */
-   Aciklama           nVarChar(100) null,
-   -- 50
+   FaturaNotu         nVarchar(200)   null, /* e-fatura */ /*---Aciklama           nVarChar(100) null, iptal */
+
+   -- 70
    ParaTipiId         nVarChar(3)   null, /* belgenin para birimi */
    DovizYeriId        SmallInt      null,
    DovizKuru          Numeric(12,5) null,
 
-   --cari bilgisi
-   -- 60
-   CariTipiId         SmallInt      null, /* 1. Gerçek Kişi, 2. Özel Firma, 3. Kamu Kurumu */
-   TalepId            Int           null,
-   CariId             Int           null,
-   CariTcVkNo         nVarChar(11)  null,
-   CariUnvan          nVarChar(100) null, /* cari hesabı yok ise */
-   CariAdiSoyadi      nVarChar(100) null,
 
-   -- 70
-   CariAdresi         nVarChar(200) null,
-   CariIlce           nVarChar(20)  null,
-   CariIl             nVarChar(20)  null,
-   CariTelefonu       nVarChar(15)  null,
-   CariVergiDairesi   nVarChar(50)  null,
-   VergiDairesiTipiId nVarChar(5)   null,
-   FaturaAdresId      Int           null,
-   TeslimatAdresId    Int           null,
+   --
+   -- cari bilgisi : Üün/Hizmet alan cari
+   --
+   -- 80
+   CariTipiId            SmallInt      null, /* 1. Gerçek Kişi, 2. Özel Firma, 3. Kamu Kurumu */
+   TalepId               Int           null,
+   CariId                Int           null,
+   CariUnvan             nVarChar(200) null, /* cari hesabı yok ise */
+   CariTcVkNo            nVarChar(11)  null,
+   CariVergiDairesiKodu  Varchar(5)    null,  -- SaymanlikKodu
+   CariVergiDairesiAdi   nVarchar(60)  null,
+   CariTelefonu          VarChar(15)   null, /* cari telefonu */
+   CariEMail             VarChar(50)   null, /* cari e-mail */
+   CariEFaturaAliasName  nVarchar(30)  null, 
+   --CariExtraInformation  nVarchar(30)  null, /*  e-Fatura üzerinde böyle bir bölüm var */
 
+   -- 90 : fatura üzerinde görünecek
+   CariUlkeAdi           nVarchar(25)  null,                 
+   CariIl                nVarchar(20)  null,
+   CariIlce              nVarchar(20)  null,
+   CariMahalleKoy        nVarchar(50)  null,
+   CariCaddeSokak        nVarchar(50)  null,
+   CariDisKapiNo         nVarchar(10)  null,
+   CariIcKapiNo          nVarchar(20)  null,
+
+   --
+   -- Ödemeyi yapacak cari : Ürün/hizmeti alan kurum farklı, ödemeyi yapan kurum farklı oluyor : Örnek : xxxx fakültei mal aldı,  yyyy saymanlığı ödeyecek
+   -- 110 
+   OdeyecekCariId        Int          null, /* saymanlık carid Id */
+   OdeyecekAdresId       Int          null, /* saymanlık adresi */
+   TeslimatAdresId       Int          null, -- satın alan farklı, ödeyecek farklı, bir de teslim yeri farklı ise kulanılacak
+   KargoCariId           Int          null, /* Kargo şirketi */
+   GonderimTarihi        Datetime     null, /* kargoya verildiği tarih */
+   
+
+   -- 110 irsaliye için detail tablosu hazırlanacak
    --sipariş bilgisi
    --irsaliye bilgisi
    --ökc bilgisi
-   --alıcı bilgileri
-   --alıcı adresi
    --
 
-   -- 90
+   -- 130 loglama için kullan
    KayitTarihi        Datetime      null, 
 
    -- Satırlar
-   -- 100 
-   IOKdvliToplamTutar Numeric(22,8)  null, /* BURASI SATIRLARDAKİ TUTARLAR */
-   IskontoOrani       Numeric(12,8)  null,
-   IskontoTutari      Numeric(22,8)  null,
-   ISEkVergiTutari    Numeric(22,8)  null,
-   ISKdvliToplamTutar Numeric(22,8)  null,
-   
-   ISKdv1Matrahi      Numeric(22,8)  null,
-   ISKdv2Matrahi      Numeric(22,8)  null,
-   ISKdv3Matrahi      Numeric(22,8)  null,
-   ISKdv0Matrahi      Numeric(22,8)  null,
-   
-   -- FA : Fatura Altı
-   -- 110
-   FA1IskontoOrani    Numeric(12,8)  null,
-   FA2IskontoOrani    Numeric(12,8)  null,
-   FA3IskontoOrani    Numeric(12,8)  null,
-   FA4IskontoOrani    Numeric(12,8)  null,
-   -- 120
-   FA1IskontoTutari   Numeric(22,8)  null,
-   FA2IskontoTutari   Numeric(22,8)  null,
-   FA3IskontoTutari   Numeric(22,8)  null,
-   FA4IskontoTutari   Numeric(22,8)  null,
-   -- 130
-   FAIskontoOrani     Numeric(12,8)  null,
-   FAIskontoTutari    Numeric(22,8)  null,    
-   dFAIskontoTutari   Numeric(22,8)  null,   
-   KdvsizToplam       Numeric(22,8)  null, /* KdvMatrahiToplam  olmaz, kdv%0 olan satırlarda olabilir */
-   dKdvsizToplam      Numeric(22,8)  null,
-   
-   -- FA sonraki Matrah ve Tutarlar
-   -- 140
-   NoKdv              Bit            null, /* 1 ise kdv uygulaması yok */
-   Kdv1Matrahi        Numeric(22,8)  null,
-   Kdv1Tutari         Numeric(22,8)  null,
-   Kdv2Matrahi        Numeric(22,8)  null,
-   Kdv2Tutari         Numeric(22,8)  null,
-   Kdv3Matrahi        Numeric(22,8)  null,
-   Kdv3Tutari         Numeric(22,8)  null,
-   Kdv0Matrahi        Numeric(22,8)  null,
-   -- 150
-   ToplamKdvMatrahi   Numeric(22,8)  null, /* Toplam Matrah %1,8,18 olan satırların toplamı */
-   ToplamKdvTutari    Numeric(22,8)  null, /* Toplam Kdv Tutarı */
-   -- 160
-   TevkifatTutari     Numeric(22,8)  null, /*  (( kdv_tutarı / 10 payda ) X 7 pay )       tutarı */
-   HesaplananKdv      Numeric(22,8)  null, /* KdvTutariToplam - TevkifatTutari */
-   -- 170
-   GenelToplam        Numeric(22,8)  null,
-   dGenelToplam       Numeric(22,8)  null,
+   -- 200 
+
+   -- Normal Satır Toplamları = VergisizTutar + EkVergi + ÖTV + Normal KDV hesapları
+   --
+   FsIOVergisizToplamTutar      Numeric(22,5) null, /* LineExtensionAmount   : İskonto öncesi  Birim fiyat x miktar : vergisiz */
+   FsIskontoTutariToplam        Numeric(22,5) null, /* AllowanceTotalAmount  : İskontolar toplamı */
+   FsISVergisizToplamTutar      Numeric(22,5) null, /* TaxExclusiveAmount    : İskonto sonrası Birim fiyat x miktar : vergisiz */
+   FsEkVergiTutari              Numeric(22,5) null, /* = sum(IBelgeStokSEkVergi.HesaplananVergi)  */
+   FsOtvTutari                  Numeric(22,5) null, /* OtvBirimTutari varsa ? ( OTVBirimTutari x Miktar )  : ( ( ISBirimFiyati x %OTVOrani ) x Miktar )     */
+   -- 210
+   FsKdv1Matrahi                Numeric(22,5) null, 
+   FsKdv1Orani                  Numeric(4,2)  null,   
+   FsKdv1Tutari                 Numeric(22,5) null, 
+   -- 220
+   FsKdv2Matrahi                Numeric(22,5) null, 
+   FsKdv2Orani                  Numeric(4,2)  null,   
+   FsKdv2Tutari                 Numeric(22,5) null, 
+   -- 230
+   FsKdv3Matrahi                Numeric(22,5) null, 
+   FsKdv3Orani                  Numeric(4,2)  null,   
+   FsKdv3Tutari                 Numeric(22,5) null, 
+   -- 240
+   FsKdvToplami                 Numeric(22,5) null,  
+   FsKdv0Matrahi                Numeric(22,5) null, 
+
+   -- 250
+   FsToplamTutarNormalKdvli     Numeric(22,5) null, /* ISKdvMatrahi + ISKdvTutari */
+   FsStopajTutari               Numeric(22,5) null, /* ISVergisizToplamTutar * %StopajOrani */
+   FsToplamTutarNormalKdvliNet  Numeric(22,5) null, /* ( ISKdvMatrahi + ISKdvTutari) - ISStopajTutari */
+
+   -- 260
+   -- Tevkifatlı Satır Toplamları = KdvTutari - TevkifatTutarı
+   FsTevkifatTutariAliciyaAit   Numeric(22,5) null, /* ( ISKdvTutari / Tevkifat Paydası )  x Tevkifat Payı  veya (( TevPayı / TevPaydası ) * ISKdvTutari   */
+   FsHesaplananKdvSaticiyaAit   Numeric(22,5) null, /*   ISKdvTutari - ISTevkifatTutariAliciyaAit  */
+   FsToplamTutarTevkifatKdvli   Numeric(22,5) null, /*   ISKdvMatrahi + ISHesaplananKdvSaticiyaAit  */
+
+   -- 270
+   FsVergilerDahilToplamTutar   Numeric(22,5) null, /*  ya FSToplamTutarNormalKdvliNet yada FSToplamTutarTevkifatKdvli  atanacak  */
+   FsYuvarlamaTutari            Numeric(22,5) null, /*  FsVergilerDahilToplamTutar #.?? küsüratlı sonuç olursa yuavarmak için kullanın düzeltme tutarı :  // YUVARLAMA (Ör: 8968.49 TL → 8968.00 TL) Value = -0.49m  */
 
    constraint		pk_OnmBelgeStokB primary key (Id)
  )
@@ -129,9 +158,8 @@ begin transaction
  create index X_OnmBelgeStokB01 on OnmBelgeStokB (FirmId)
  create index X_OnmBelgeStokB02 on OnmBelgeStokB (GCTipiId)
  create index X_OnmBelgeStokB03 on OnmBelgeStokB (BelgeTipiId)
- create index X_OnmBelgeStokB04 on OnmBelgeStokB (KaynakTipiId)
- create index X_OnmBelgeStokB05 on OnmBelgeStokB (SebepTipiId)
- create index X_OnmBelgeStokB06 on OnmBelgeStokB (TuruTipiId)
+ 
+
  create index X_OnmBelgeStokB011 on OnmBelgeStokB (BelgeTarihi)
  create index X_OnmBelgeStokB012 on OnmBelgeStokB (KayitTarihi)
  create index X_OnmBelgeStokB013 on OnmBelgeStokB (TalepId)
@@ -141,6 +169,52 @@ commit transaction
 
 /*CreateTableEnd*/
 
+
+
+/*CreateTrigger*/
+
+CREATE TRIGGER [dbo].[trg_OnmBelgeStokB] on [dbo].[OnmBelgeStokB] 
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    DECLARE myCursor cursor local for select Id from Inserted
+    DECLARE @curId bigint
+
+    OPEN myCursor
+    FETCH NEXT FROM myCursor INTO @curId
+
+    declare @BelgeTipiId smallInt
+	declare @FaturaTipiId smallInt 
+	declare @GIBInvoiceScenario varchar(30)
+
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+	  Select 
+          @BelgeTipiId = ins.BelgeTipiId
+         ,@FaturaTipiId = ins.FaturaTipiId
+	     ,@GIBInvoiceScenario = ins.GIBInvoiceScenario
+	  From inserted as ins
+	  Where ins.Id = @curId
+
+	  -- sırayla diğer çeşitleride ekle
+	  if (@GIBInvoiceScenario = 'eArchive' and @FaturaTipiId = 1) -- 1. SATIS
+	      Set @BelgeTipiId = 25 -- e-Fatura (Satış)
+
+      Update dbo.OnmBelgeStokB set
+	      BelgeTipiId = @BelgeTipiId
+	  Where Id = @curId
+	  And ISNULL(BelgeTipiId,0) <> @BelgeTipiId
+
+      FETCH NEXT FROM myCursor INTO @curId
+    END
+
+    CLOSE myCursor
+    DEALLOCATE myCursor   
+
+END -- create trigger
+
+/*CreateTriggerEnd*/
 
 
 /*CreateLkpTable*/
@@ -169,8 +243,6 @@ INSERT INTO [Lkp].[OnmBelgeStokBGCTipi] (Id, GCTipi, GrupTipiId)
   (2,   N'Stok Çıkış', 1),
   (3,   N'Stok Sayım', 1)
 
-  
-
 -- ------------------------------------------------------- 
 -- BelgeTipiId
 -- ------------------------------------------------------- 
@@ -192,70 +264,21 @@ INSERT INTO [Lkp].[OnmBelgeStokBBelgeTipi] (Id, BelgeTipi, GrupTipiId)
   (0,   N'Tanımsız', 0),
   (11,   N'Alınan sipariş', 1),
   (12,   N'Alım irsaliyesi', 1),
-  (13,   N'Alım faturası', 1),
-  (14,   N'Alım İADE faturası', 1),
-  (15,   N'Alım İSKONTO faturası', 1),
-  
+  (13,   N'Alım faturası', 1), -- Aldığı kağıt fatura
+  (14,   N'e-Fatura (Alış)', 1), -- Aldığı e-Fatura
+  (15,   N'e-Arşiv (Alış)', 1), -- Aldığı e-Arşiv
+  (16,   N'Alım İADE faturası', 1),
+  (17,   N'Alım İSKONTO faturası', 1),
+
   (21,   N'Verilen sipariş', 1),
   (22,   N'Satış irsaliyesi', 1),
-  (23,   N'Satış faturası', 1),
-  (24,   N'Satış İADE faturası', 1),
-  (25,   N'Satış İSKONTO faturası', 1),
+  (23,   N'Satış faturası', 1), -- kağıt fatura kullanan olursa
+  (24,   N'e-Fatura (Satış)', 1), 
+  (25,   N'e-Arşiv (Satış)', 1), 
+  (26,   N'Satış İADE faturası', 1),
+  (27,   N'Satış İSKONTO faturası', 1),
 
   (33,   N'Parkende satış', 1)
-
--- ------------------------------------------------------- 
--- KaynakTipiId
--- ------------------------------------------------------- 
-IF EXISTS (Select * From sys.objects WHERE name = 'OnmBelgeStokBKaynakTipi')
-drop table [Lkp].[OnmBelgeStokBKaynakTipi]
-
-create table [Lkp].[OnmBelgeStokBKaynakTipi]
-(
-   Id           Int Unique Not Null,
-   KaynakTipi   nVarchar(50),
-   GrupTipiId   SmallInt Null,
-
-   constraint  pk_OnmBelgeStokBKaynakTipi primary key (Id)
-)
-
-
-INSERT INTO [Lkp].[OnmBelgeStokBKaynakTipi] (Id, KaynakTipi, GrupTipiId)
- VALUES 
-  (0,   N'Tanımsız', 0),
-  (1,   N'e-devlet', 1),
-  (2,   N'e-posta', 1),
-  (3,   N'Kağıt', 1),
-  (5,   N'Fax', 1),
-  (7,   N'Diğer', 1)
-
--- ------------------------------------------------------- 
--- BelgeStokBSebepTipi
--- ------------------------------------------------------- 
-IF EXISTS (Select * From sys.objects WHERE name = 'OnmBelgeStokBSebepTipi')
-drop table [Lkp].[OnmBelgeStokBSebepTipi]
-
-create table [Lkp].[OnmBelgeStokBSebepTipi]
-(
-   Id           Int Unique Not Null,
-   SebepTipi    nVarchar(50),
-   GrupTipiId   SmallInt Null,
-
-   constraint  pk_OnmBelgeStokBSebepTipi primary key (Id)
-)
-
-DELETE [Lkp].[OnmBelgeStokBSebepTipi]
-INSERT INTO [Lkp].[OnmBelgeStokBSebepTipi] (Id, SebepTipi, GrupTipiId)
- VALUES 
-  (0,     N'Tanımsız', 0),
-  (153,   N'Ticari mal alımları', 1),
-  (1501,  N'Üretimi için alımlar', 1),
-  (1504,  N'Genel yön.için tüketim malz. alımı', 1),
-  (1505,  N'Arge için mal alımı', 1),
-  (25,    N'Maddi duran varlık alımı', 1),
-  (600,   N'Yurtiçi satışlar', 1),
-  (601,   N'Yurtdışı satışlar', 1),
-  (602,   N'Hizmet gelirleri', 1)
 
 
 -- ------------------------------------------------------- 
@@ -281,6 +304,164 @@ INSERT INTO [Lkp].[OnmBelgeStokBTuruTipi] (Id, TuruTipi, GrupTipiId)
   (3,     N'Fatura', 1)
 
 
+-- ------------------------------------------------------- 
+-- BelgeStokBMuhasebeTipi
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmBelgeStokBMuhasebeTipi')
+drop table [Lkp].[OnmBelgeStokBMuhasebeTipi]
+
+create table [Lkp].[OnmBelgeStokBMuhasebeTipi]
+(
+   Id              Int Unique Not Null,
+   MuhasebeTipi    nVarchar(50),
+   GrupTipiId      SmallInt Null,
+
+   constraint  pk_OnmBelgeStokBMuhasebeTipi primary key (Id)
+)
+
+DELETE FROM [Lkp].[OnmBelgeStokBMuhasebeTipi]
+INSERT INTO [Lkp].[OnmBelgeStokBMuhasebeTipi] (Id, MuhasebeTipi, GrupTipiId)
+ VALUES 
+  (0,     N'Tanımsız', 0),
+  (153,   N'Ticari mal alımları', 1),
+  (1501,  N'Üretimi için alımlar', 1),
+  (1504,  N'Genel yön.için tüketim malz. alımı', 1),
+  (1505,  N'Arge için mal alımı', 1),
+  (25,    N'Maddi duran varlık alımı', 1),
+  (600,   N'Yurtiçi satışlar', 1),
+  (601,   N'Yurtdışı satışlar', 1),
+  (602,   N'Hizmet gelirleri', 1)
+
+
+
+
+-- ------------------------------------------------------- 
+-- FProfiliTipiId      /* TICARI, TEMEL, IHRACAT, YOLCUBERABERFAT */ 
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmBelgeStokBFProfiliTipi')
+drop table [Lkp].[OnmBelgeStokBFProfiliTipi]
+
+create table [Lkp].[OnmBelgeStokBFProfiliTipi]
+(
+   Id            Int Unique Not Null,
+   FProfiliTipi  nVarchar(20),
+
+   constraint  pk_OnmBelgeStokBFProfiliTipi primary key (Id)
+)
+
+DELETE FROM [Lkp].[OnmBelgeStokBFProfiliTipi]
+INSERT INTO [Lkp].[OnmBelgeStokBFProfiliTipi] (Id, FProfiliTipi)
+ VALUES 
+  (0,   N'Tanımsız'),
+  (1,   N'TICARIFATURA'),
+  (2,   N'TEMELFATURA'),
+  (3,   N'IHRACAT'),
+  (4,   N'YOLCUBERABERFATURA')
+
+-- ------------------------------------------------------- 
+-- FaturaTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmBelgeStokBFaturaTipi')
+drop table [Lkp].[OnmBelgeStokBFaturaTipi]
+
+create table [Lkp].[OnmBelgeStokBFaturaTipi]
+(
+   Id           Int Unique Not Null,
+   FaturaTipi   nVarchar(20),
+
+   constraint  pk_OnmBelgeStokBFaturaTipi primary key (Id)
+)
+
+DELETE FROM [Lkp].[OnmBelgeStokBFaturaTipi]
+INSERT INTO [Lkp].[OnmBelgeStokBFaturaTipi] (Id, FaturaTipi)
+ VALUES 
+  (0,   N'Tanımsız'),
+  (1,   N'SATIS'),
+  (2,   N'IADE'),
+  (3,   N'ISTISNA'),
+  (4,   N'TEVKIFAT'),
+  (5,   N'OZELMATRAH'),
+  (6,   N'IHRACKAYITLI'),
+  (7,   N'SGK')
+
+
+-- ------------------------------------------------------- 
+-- IlaveFaturaTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmBelgeStokBIlaveFaturaTipi')
+drop table [Lkp].[OnmBelgeStokBIlaveFaturaTipi]
+
+create table [Lkp].[OnmBelgeStokBIlaveFaturaTipi]
+(
+   Id                Int Unique Not Null,
+   IlaveFaturaTipi   nVarchar(20),
+
+   constraint  pk_OnmBelgeStokBIlaveFaturaTipi primary key (Id)
+)
+
+DELETE FROM [Lkp].[OnmBelgeStokBIlaveFaturaTipi]
+INSERT INTO [Lkp].[OnmBelgeStokBIlaveFaturaTipi] (Id, IlaveFaturaTipi)
+ VALUES 
+  (0,   N'Tanımsız'),
+  (1,   N'SAGLIK_ECZ'),
+  (2,   N'SAGLIK_HAS'),
+  (3,   N'SAGLIK_OPT'),
+  (4,   N'SAGLIK_MED'),
+  (5,   N'ABONELIK'),
+  (6,   N'MAL_HIZMET'),
+  (7,   N'DIGER')
+
+
+-- ------------------------------------------------------- 
+-- GonderimTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmBelgeStokBGonderimTipi')
+drop table [Lkp].[OnmBelgeStokBGonderimTipi]
+
+create table [Lkp].[OnmBelgeStokBGonderimTipi]
+(
+   Id            Int Unique Not Null,
+   GonderimTipi  nVarchar(20),
+
+   constraint  pk_OnmBelgeStokBGonderimTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[OnmBelgeStokBGonderimTipi] (Id, GonderimTipi)
+ VALUES 
+  (0,   N'Tanımsız'),
+  (1,   N'Elektronik'),
+  (2,   N'Kağıt')
+
+-- ------------------------------------------------------- 
+-- OdemeTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmBelgeStokBOdemeTipi')
+drop table [Lkp].[OnmBelgeStokBOdemeTipi]
+
+create table [Lkp].[OnmBelgeStokBOdemeTipi]
+(
+   Id          Int Unique Not Null,
+   OdemeTipi   nVarchar(30),
+
+   constraint  pk_OnmBelgeStokBOdemeTipi primary key (Id)
+)
+
+DELETE FROM [Lkp].[OnmBelgeStokBOdemeTipi]
+INSERT INTO [Lkp].[OnmBelgeStokBOdemeTipi] (Id, OdemeTipi)
+ VALUES 
+  (0,   N'Tanımsız'),
+  (1,   N'KREDIKARTI/BANKAKARTI'),
+  (2,   N'EFT/HAVALE'),
+  (3,   N'KAPIDAODEME'),
+  (4,   N'ODEMEARACISI'),
+  (5,   N'DIGER - ')
+
+
+
+
+
+
+
 commit transaction
 
 /*CreateLkpTable*/
@@ -298,7 +479,6 @@ Türleri : İrsaliye, Fatura, Sipariş, Bağlı Ek belgeler
 
    BelgeTipiId        SmallInt      null, /*   */
    KaynakTipiId       SmallInt      null, /* 1. kağıt, 2. elektronik belge */
-   SebepTipiId        SmallInt      null, /*   */
 
    BelgeTarihi        Date          null,
    BelgeSaati         VarChar(8)    null,
@@ -309,84 +489,54 @@ Türleri : İrsaliye, Fatura, Sipariş, Bağlı Ek belgeler
 */
 
 
+/* 
 
--- ------------------------------------------------------- 
--- ProfileIDType
--- ------------------------------------------------------- 
-IF EXISTS (Select * From sys.objects WHERE name = 'OnmBelgeStokBProfileIDType')
-drop table [Lkp].[OnmBelgeStokBProfileIDType]
+"Faturanızın UUID'si parmak izi gibi benzersizken, GTB Kodu pasaport numarası gibi resmi ama değiştirilebilir bir etikettir."
 
-create table [Lkp].[OnmBelgeStokBProfileIDType]
-(
-   Id              Varchar(20) Unique Not Null,
-   IsActive        Bool                   null,
-   ProfileIDType   nVarchar(40)           null,
+1. GTB Kodu Nedir?
+-------------------------
+Resmi Adı: GİB Takip Numarası (Gelir İdaresi Takip Belge No).
 
-   constraint  pk_OnmBelgeStokBProfileIDType primary key (Id)
-)
+Yapısı:
+21 haneli sayısal bir koddur.
+Örnek: 836000000000001234567.
 
-INSERT INTO [Lkp].[OnmBelgeStokBProfileIDType] (Id, IsActive, ProfileIDType)
- VALUES 
-  ('',                   1,   N'Tanımsız'),
-  ('TICARIFATURA',       1,   N'Ticari Fatura'),
-  ('TEMELFATURA',        1,   N'Temel Fatura'),
-  ('IHRACAT',            1,   N'İhracat'),
-  ('YOLCUBERABERFATURA', 1,   N'Yolcu Beraber Fatura')
+Ne Zaman Oluşur?
+Fatura GİB sistemine ilk kez gönderildiğinde otomatik atanır (taslak haldeyken bile).
 
+Amaç:
+Faturanın GİB'deki işlem sürecini takip etmek (onay, red, düzeltme).
+"Faturam GİB'de hangi aşamada?" sorusunun yanıtıdır.
 
+2. UUID Nedir?
+-------------------------
+Resmi Adı: Evrensel Benzersiz Tanımlayıcı (Universally Unique Identifier).
 
--- ------------------------------------------------------- 
--- InvoiceTypeCode
--- ------------------------------------------------------- 
-IF EXISTS (Select * From sys.objects WHERE name = 'OnmBelgeStokBInvoiceTypeCode')
-drop table [Lkp].[OnmBelgeStokBInvoiceTypeCode]
+Yapısı:
+32 harf/rakam + 4 tire (toplam 36 karakter).
+Örnek: c9a2b3d4-5e6f-7890-1234-567890abcdef.
 
-create table [Lkp].[OnmBelgeStokBInvoiceTypeCode]
-(
-   Id                Varchar(20) Unique Not Null,
-   IsActive          Bool                   null,
-   InvoiceTypeCode   nVarchar(40)           null,
+Ne Zaman Oluşur?
+Fatura GİB tarafından onaylandıktan sonra oluşur.
 
-   constraint  pk_OnmBelgeStokBInvoiceTypeCode primary key (Id)
-)
-
-INSERT INTO [Lkp].[OnmBelgeStokBInvoiceTypeCode] (Id, IsActive,  InvoiceTypeCode)
- VALUES 
-  ('',             1,   N'Tanımsız'),
-  ('SATIS',        1,   N'Satış'), 
-  ('IADE',         1,   N'İade'),
-  ('ISTISNA',      1,   N'İstisna'),
-  ('TEVKIFAT',     1,   N'Tevkifat'),
-  ('OZELMATRAH',   1,   N'Özel Matrah'), 
-  ('IHRACKAYITLI', 1,   N'İhraç Kayıtlı'),
-  ('SGK',          1,   N'SGK')
+Amaç:
+Onaylı faturanın dünya çapında tekil kimliği olarak hizmet eder.
+Faturanın hukuki kanıtı ve kalıcı referansıdır.
 
 
+"Neden İkisi de Var?" Sorusunun Cevabı
+---------------------------------------------------
+GTB Kodu: Faturanın GİB'deki "yolculuğunu" izlemek için (örn: "Onay bekliyor", "Reddedildi").
 
--- ------------------------------------------------------- 
--- AccountingCostType
--- ------------------------------------------------------- 
-IF EXISTS (Select * From sys.objects WHERE name = 'OnmBelgeStokBAccountingCostType')
-drop table [Lkp].[OnmBelgeStokBAccountingCostType]
+UUID: Onaylanmış faturanın "pasaport numarası" gibi kalıcı kimliği olarak kullanılır.
 
-create table [Lkp].[OnmBelgeStokBAccountingCostType]
-(
-   Id                   Varchar(20) Unique Not Null,
-   IsActive             Bool                   null,
-   AccountingCostType   nVarchar(40)           null,
 
-   constraint  pk_OnmBelgeStokBAccountingCostType primary key (Id)
-)
+Adım 1: Faturayı gönderirsiniz → GTB Kodu: 836000000000001234567 (GİB "işleme aldı").
+Adım 2: GİB faturayı onaylar → UUID: c9a2b3d4-5e6f-7890-1234-567890abcdef atanır.
+Adım 3: Faturada düzeltme yaparsanız → Yeni GTB Kodu oluşur (örn: 836000000000005555555), ancak UUID aynı kalır.
 
-INSERT INTO [Lkp].[OnmBelgeStokBAccountingCostType] (Id, IsActive,  AccountingCostType)
- VALUES 
-  ('',             1,   N'Tanımsız'),
-  ('SAGLIK_ECZ',   1,   N'Sağlık Eczane '), 
-  ('SAGLIK_HAS',   1,   N'Sağlık Hastahane'), 
-  ('SAGLIK_OPT',   1,   N'Sağlık Opt'), 
-  ('SAGLIK_MED',   1,   N'Sağlık Medikal'), 
-  ('ABONELIK',     1,   N'Abonelik'), 
-  ('MAL_HIZMET',   1,   N'Mal, Hizmet'), 
-  ('DIGER',        1,   N'Diğer')
+GTB Kodu "süreç takip numarası", UUID ise "faturanın kalıcı kimlik kartı" dır. Karıştırmayın! 😊
+
+*/
 
 

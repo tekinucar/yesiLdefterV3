@@ -46,8 +46,9 @@ begin transaction
    -- Belgenin Parasal değerleri
    -- 100 Islem Bilgileri
    BelgeTutari        Numeric(22,5) null,
-   --BorcTutari         Numeric(22,5) null,
-   --AlacakTutari       Numeric(22,5) null,
+   BorcTutari         Numeric(22,5) null,
+   AlacakTutari       Numeric(22,5) null,
+   IptalTutari        Numeric(22,5) null,
 
    -- 110 ödeme masrafları
    MasrafAHesapTipiId SmallInt      null,
@@ -108,10 +109,6 @@ CREATE TRIGGER [dbo].[trg_OnmBelgeDekont] on [dbo].[OnmBelgeDekont]
 AFTER INSERT, UPDATE
 AS BEGIN
 
-    
-    yenisi henüz gelmedi **************
-    
-    
     declare cursor_BDekont cursor local for select Id from Inserted
     declare @curId bigint
 
@@ -125,9 +122,16 @@ AS BEGIN
     declare @BelgeTarihi datetime
     declare @BHesapTipiId smallInt
     declare @AHesapTipiId smallInt
-    declare @BelgeTutari numeric(22,8)
-	declare @MasrafTutari numeric(22,8)
-    declare @_BelgeTutari numeric(22,8)
+    declare @kontrolBelgeTutari numeric(22,5)
+    declare @eBelgeTutari numeric(22,5)
+
+    declare @BelgeTutari numeric(22,5)
+    declare @BorcTutari numeric(22,5)
+    declare @AlacakTutari numeric(22,5)
+    declare @IptalTutari numeric(22,5)
+
+	declare @MasrafTutari numeric(22,5)
+    declare @_BelgeTutari numeric(22,5)
     declare @CariId int
     declare @SourceTypeId smallInt
     declare @SourceId int
@@ -138,15 +142,26 @@ AS BEGIN
     declare @OnmOdemePlaniId int
     declare @OnmOdemePlaniTaksitTutari numeric(22,8)
     declare @makbuzCount int
+	declare @Yil_ int
 
     OPEN cursor_BDekont
 
     FETCH NEXT FROM cursor_BDekont INTO @curId
 
+    -- Id   TipiId
+    -- 0    Tanımsız
+    -- 1    Açılış
+    -- 2    Tahsilat
+    -- 3    Tediye
+    -- 4    Mahsup
+    -- 5    Kapanış
+
+
     WHILE @@FETCH_STATUS = 0
     BEGIN
       select 
 	      @eIsIptal = isnull(dlt.IsIptal,0)
+	    , @eBelgeTutari  = round(isnull(dlt.BelgeTutari,0),2)
       from deleted dlt 
       where dlt.Id = @curId
 
@@ -167,6 +182,30 @@ AS BEGIN
       from Inserted ins
       where ins.Id = @curId
 	  
+	  set @Yil_ = YEAR(@BelgeTarihi)
+
+      -- Tahsilat ise
+      if (@TipiId = 2 and @IsActive = 1)
+      begin
+          Set @BorcTutari = @BelgeTutari
+          Set @AlacakTutari = 0
+          Set @IptalTutari = 0
+      end
+      -- Tediye ise
+      if (@TipiId = 3 and @IsActive = 1)
+      begin
+          Set @BorcTutari = 0
+          Set @AlacakTutari = @BelgeTutari
+          Set @IptalTutari = 0
+      end
+      -- iptal edilen ise
+      if (@IsActive = 0)
+      begin
+          Set @BorcTutari = 0
+          Set @AlacakTutari = 0
+          Set @IptalTutari = @BelgeTutari
+      end
+
 	  set @_IslemTipiId = CONVERT(varchar(5), @BHesapTipiId) + '.' + CONVERT(varchar(5), @AHesapTipiId)
 
 	  set @_BelgeTutari = @BelgeTutari
@@ -194,7 +233,21 @@ AS BEGIN
 	     (@IsActive = 1) and 
 	     (@IsIptal = 0)  
       begin
-	      EXECUTE [dbo].[prc_OnmOdemePlaniTahsilatiIsle] @curId
+	      set @kontrolBelgeTutari = 0
+          Select @kontrolBelgeTutari = isnull(sum(TaksitTutari),0) from dbo.OnmOdemePlani
+		  Where BelgeDekontId = @curId
+
+		  /* tahsilat tutarı ödeme planı işlenmiş mi ?
+		     işlendikten sonrada tahsilat tutarı değiştirilirse müdehale et
+		  */
+		  if (@kontrolBelgeTutari > 0 and @kontrolBelgeTutari <> @BelgeTutari)
+          begin
+		      Update dbo.OnmBelgeDekont set
+              BelgeTutari = @kontrolBelgeTutari
+			  Where Id = @curId
+          end
+		  if (@kontrolBelgeTutari = 0)
+              EXECUTE [dbo].[prc_OnmOdemePlaniTahsilatiIsle] @curId
       end 
       
 	  if (@TipiId = 2) and -- Tahsilat
@@ -217,6 +270,31 @@ AS BEGIN
           Where Id = @curId 
 	  end
 
+	  -- Maliyet dekontları ödenince
+	  if (@SourceTypeId = 1)
+      begin  
+          ;With MaliyetKalani as (
+           Select 
+               max(dekont.SourceId) as SourceId
+             , max(maliyet.BelgeTutari) as MaliyetTutari
+             , sum(dekont.BelgeTutari) as OdenenTutar
+             , max(maliyet.BelgeTutari) - sum(dekont.BelgeTutari) as KalanTutar
+             , (case when (max(maliyet.BelgeTutari) - isnull(sum(dekont.BelgeTutari),0)) <= 0 then 1 else 0 end ) as IsPaid
+           From dbo.OnmBelgeDekont as dekont
+               left outer join dbo.OnmBelgeMaliyet as maliyet on ( dekont.SourceId = maliyet.Id )
+           Where dekont.SourceTypeId = 1
+           and   dekont.SourceId = @SourceId
+           ) -- with
+           Update m set 
+               OdenenTutar = x.OdenenTutar
+             , KalanTutar = x.KalanTutar
+             , IsPaid = x.IsPaid
+           From dbo.OnmBelgeMaliyet as m
+           JOIN MaliyetKalani x ON ( m.Id = x.SourceId )
+           Where isnull(m.OdenenTutar,0) <> x.OdenenTutar
+           or    isnull(m.KalanTutar,0) <> x.KalanTutar 
+	  end -- Maliyet dekontu ise
+
       set @Yil = convert(varchar(4), YEAR(@BelgeTarihi))
       set @Ay = convert(varchar(2), MONTH(@BelgeTarihi)) 		
 	  if (len(@Ay) = 1) set @Ay = '0' + @Ay
@@ -225,6 +303,9 @@ AS BEGIN
         IslemTipiId = @_IslemTipiId
       , BelgeDonemTipiId = convert(int, (@Yil + @Ay))
       , ToplamTutar = @BelgeTutari + @MasrafTutari
+      , BorcTutari = @BorcTutari
+      , AlacakTutari = @AlacakTutari
+      , IptalTutari = @IptalTutari
       Where Id = @curId 
 
 	  FETCH NEXT FROM cursor_BDekont INTO @curId
@@ -233,9 +314,10 @@ AS BEGIN
     CLOSE cursor_BDekont
     DEALLOCATE cursor_BDekont
 
+    EXECUTE [dbo].[prc_OnmHesapBakiyesiHesapla] @FirmId, @Yil_
+
 	--EXECUTE [dbo].[prc_OnmToplamBekleyenOdemeler] @FirmId
 	--EXECUTE [dbo].[prc_OnmToplamBekleyenGelirler] @FirmId
-
 
 END
 
@@ -257,6 +339,7 @@ AS BEGIN
 	declare @TipiId smallInt
 	declare @IslemTipiId varchar(10)
 	declare @_IslemTipiId varchar(10)
+    declare @BelgeTarihi datetime    
 	declare @BHesapTipiId smallInt
 	declare @AHesapTipiId smallInt
 	declare @BelgeTutari numeric(22,8)
@@ -265,6 +348,7 @@ AS BEGIN
 	declare @SourceTypeId smallInt
 	declare @SourceId int
 	declare @IadeId int
+	declare @Yil_ int
 
 	OPEN cursor_BDekontDlt
 
@@ -277,6 +361,8 @@ AS BEGIN
 	    , @IsActive = dlt.IsActive
 	    , @TipiId = dlt.TipiId
 	    , @IslemTipiId = dlt.IslemTipiId
+
+        , @BelgeTarihi = dlt.BelgeTarihi
 		, @BHesapTipiId = isnull(dlt.BHesapTipiId,0)
 		, @AHesapTipiId = isnull(dlt.AHesapTipiId,0)
 	    , @BelgeTutari = round(dlt.BelgeTutari,2)
@@ -287,6 +373,8 @@ AS BEGIN
       from deleted dlt
       where dlt.Id = @curId
 	  
+	  set @Yil_ = YEAR(@BelgeTarihi)
+
 	  if (@TipiId = 3) and -- Tediye    
 	     (@IadeId > 0) -- kendisi iade dekontu ise
       begin
@@ -300,10 +388,26 @@ AS BEGIN
 	  if (@TipiId = 3) and -- Tediye    
 	     (@SourceTypeId = 1) -- OnmBelgeMaliyet tablosu
       begin
-          Update dbo.OnmBelgeMaliyet set
-			IsPaid = 0  -- ödenmedi işareti
-          , BelgeDekontId = 0  -- OnmBelgeDekont.Id
-          Where Id = @SourceId
+          ;With MaliyetKalani as (
+           Select 
+               max(dekont.SourceId) as SourceId
+             , max(maliyet.BelgeTutari) as MaliyetTutari
+             , sum(dekont.BelgeTutari) as OdenenTutar
+             , max(maliyet.BelgeTutari) - sum(dekont.BelgeTutari) as KalanTutar
+             , (case when (max(maliyet.BelgeTutari) - isnull(sum(dekont.BelgeTutari),0)) <= 0 then 1 else 0 end ) as IsPaid
+           From dbo.OnmBelgeDekont as dekont
+               left outer join dbo.OnmBelgeMaliyet as maliyet on ( dekont.SourceId = maliyet.Id )
+           Where dekont.SourceTypeId = 1
+           and   dekont.SourceId = @SourceId
+           ) -- with
+           Update m set 
+               OdenenTutar = x.OdenenTutar
+             , KalanTutar = x.KalanTutar
+             , IsPaid = x.IsPaid
+           From dbo.OnmBelgeMaliyet as m
+           JOIN MaliyetKalani x ON ( m.Id = x.SourceId )
+           Where isnull(m.OdenenTutar,0) <> x.OdenenTutar
+           or    isnull(m.KalanTutar,0) <> x.KalanTutar 
 	  end
 
 	  if (@TipiId = 2) and -- Tahsilat
@@ -318,8 +422,10 @@ AS BEGIN
     CLOSE cursor_BDekontDlt
     DEALLOCATE cursor_BDekontDlt
 
+    EXECUTE [dbo].[prc_OnmHesapBakiyesiHesapla] @FirmId, @Yil_
 	--EXECUTE [dbo].[prc_OnmToplamBekleyenOdemeler] @FirmId
 	--EXECUTE [dbo].[prc_OnmToplamBekleyenGelirler] @FirmId
+
 
 END
 

@@ -1,0 +1,383 @@
+
+/*CreateTable*/
+
+begin transaction
+
+ create table OnmCariAdres
+ (
+   Id                    Int IDENTITY(1,1) not null, 
+   FirmId                Int       not null,
+   TalepId               Int       not null, 
+   CariId                Int       not null, 
+   TcNo                  Varchar(11)   null,
+   DonemTipiId           Int           null,
+
+   -- 10
+   SozluAdresBeyani      nVarchar(250) null,
+   AliciTcNo             Varchar(11)   null,
+   AliciAdi              nVarchar(50)  null,
+   AliciSoyadi           nVarchar(50)  null,
+
+   -- 20
+   UlkeKodu              nVarchar(5)   null,                 
+   UlkeAdi               nVarchar(25)  null,                 
+   -- 30
+   IlKodu                varchar(3)    null,
+   Il                    nVarchar(15)  null,
+   IlceKodu              varchar(5)    null,
+   Ilce                  nVarchar(20)  null,
+   -- 40 
+   MahalleKoyKodu        varchar(10)   null,
+   MahalleKoy            nVarchar(50)  null,
+   CaddeSokakKodu        varchar(10)   null,
+   CaddeSokak            nVarchar(50)  null,
+   DisKapiNoKodu         varchar(10)   null,
+   DisKapiNo             nVarchar(10)  null,
+   IcKapiNoKodu          varchar(25)   null,
+   IcKapiNo              nVarchar(20)  null,
+
+   -- 50
+   AdresKodu             varchar(20)   null,
+   /* MahalleKoy(50) + CaddeSokak(50) + DisKapi(30) + IcKapi(20) + Ilce(20) + Il(15) + Ulke(30) = 215 > 230  */
+   TamAdres              nVarchar(230) null,   
+   /* MahalleKoy(50) + CaddeSokak(50) + DisKapi(30) + IcKapi(20) = 150 > 160  */
+   YarimAdres            nVarchar(160) null, 
+
+   -- 60
+   AdresIsUploaded       Bit           null,
+   VeriKaynakTypeId      SmallInt      null, /* 201 : UstadMtsk veya diðerleri  */
+   VeriKaynakId          Int           null, /* Veri transferi edildiði tablodaki Id . Sorun olduðunda bilginin nereden geldiðine referans olsun */
+
+   constraint		pk_OnmCariAdres primary key (Id)
+ )
+  
+ grant select, insert, update, delete on OnmCariAdres to public
+
+  create index X_OnmCariAdres01 on OnmCariAdres (TalepId)
+  create index X_OnmCariAdres02 on OnmCariAdres (CariId)
+  create index X_OnmCariAdres03 on OnmCariAdres (TcNo)
+  create index X_OnmCariAdres04 on OnmCariAdres (DonemTipiId)
+  create index X_OnmCariAdres05 on OnmCariAdres (IlKodu, IlceKodu)
+
+commit transaction
+
+/*CreateTableEnd*/
+
+/*
+   VergiDairesiKodu     nVarchar(5)    null,  -- SaymanlikKodu
+   VergiDairesiAdi      nVarchar(100)  null,
+   VergiKimlikNo        varchar(15)    null,
+*/
+
+
+
+
+/*CreateTrigger*/
+
+CREATE TRIGGER [dbo].[trg_OnmCariAdres] on [dbo].[OnmCariAdres]
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    DECLARE adresCursor cursor local for select Id from Inserted
+    DECLARE @adresId bigint
+
+    OPEN adresCursor
+    FETCH NEXT FROM adresCursor INTO @adresId
+
+    declare @eSozluAdresBeyani nVarchar(250) = null
+    declare @ySozluAdresBeyani nVarchar(250) = null
+    declare @eAdresKodu varchar(20) = null
+    declare @yAdresKodu varchar(20) = null
+    
+    declare @durum bit
+    declare @TalepId int 
+	declare @CariId int
+    declare @VeriKaynakTypeId smallInt 
+	declare @VeriKaynakId int
+
+    select @VeriKaynakTypeId = isnull(ins.VeriKaynakTypeId,0)
+	from inserted ins
+    where ins.Id = @adresId
+
+    -- Veri Transferi baþladýmý
+    declare @DbUpdatesIsActive Bit = 0
+
+    -- SectorTypeId
+    if (@VeriKaynakTypeId > 200 and @VeriKaynakTypeId < 300)
+    begin
+        set @DbUpdatesIsActive = [dbo].[fnc_getIsDbUpdate] (13)
+    end
+
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+
+        select 
+            @eSozluAdresBeyani = isnull(dlt.SozluAdresBeyani, '')
+           ,@eAdresKodu = isnull(dlt.AdresKodu, '') 
+    	from deleted dlt
+    	where dlt.Id = @adresId
+			   
+        select 
+            @TalepId = isnull(ins.TalepId,0)
+           ,@ySozluAdresBeyani = isnull(ins.SozluAdresBeyani, '')
+           ,@yAdresKodu = isnull(ins.AdresKodu, '')
+           ,@CariId = isnull(ins.CariId,0)
+           ,@VeriKaynakTypeId = isnull(ins.VeriKaynakTypeId,0)
+		   ,@VeriKaynakId = isnull(ins.VeriKaynakId,0)
+		from inserted ins
+    	where ins.Id = @adresId
+
+        if (@VeriKaynakTypeId = 201 and @DbUpdatesIsActive = 0) -- Üstad Mtsk ise
+        begin
+            if (@VeriKaynakId > 0 and (@TalepId = 0 or @CariId = 0))
+            begin
+                Update dbo.OnmCariAdres set
+                    TalepId = t.Id  
+                   ,CariId  = t.AdayId 
+                From dbo.OnmCariAdres as a,
+                     dbo.MtskAdayTalep as t
+                Where a.VeriKaynakId = t.VeriKaynakId				 
+                and   a.Id = @adresId
+
+			    Select @TalepId = Id, @CariId = AdayId 
+			    From dbo.MtskAdayTalep 
+			    Where VeriKaynakId = @VeriKaynakId
+            end		     	   	
+
+            if (@eSozluAdresBeyani <> @ySozluAdresBeyani) 
+            begin
+                if (@ySozluAdresBeyani <> '') set @durum = 1
+                if (@ySozluAdresBeyani = '') set @durum = 0
+
+                update dbo.MtskAdayTalep set
+                    AdresAlindi = @durum
+                Where Id = @TalepId
+                and isnull(AdresAlindi,0) <> @durum
+            end
+
+            if (@eAdresKodu <> @yAdresKodu) 
+            begin
+                if (@yAdresKodu) <> '' set @durum = 1
+                if (@yAdresKodu) = '' set @durum = 0
+
+                update dbo.MtskAdayBelgeler set
+                    AdresKodlandi = @durum
+                Where TalepId = @TalepId
+                and  isnull(AdresKodlandi,0) <> @durum
+           end
+
+           -- Data transferi oldu fakat daha önce bu talep için boþ kayýt oluþturulmuþ ise onu sil
+           if (@VeriKaynakId > 0)
+           begin
+		       Delete From dbo.OnmCariAdres
+               Where TalepId = @TalepId
+               and   isnull(VeriKaynakId,0) = 0
+           end
+
+        end -- 201 -- Üstad Mtsk ise
+
+        FETCH NEXT FROM adresCursor INTO @adresId
+    END -- While
+
+    CLOSE adresCursor
+    DEALLOCATE adresCursor   
+
+END -- create trigger
+
+
+/*CreateTriggerEnd*/
+
+
+
+/*CreateLkpTable*/
+
+begin transaction
+
+-- ------------------------------------------------------- 
+-- AdresTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[OnmCariAdresAdresTipi]
+(
+   Id          Int Unique Not Null,
+   AdresTipi   nVarchar(50)   null,
+   GrupTipiId  SmallInt       null,
+   
+   constraint  pk_OnmCariAdresAdresTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[OnmCariAdresAdresTipi] (Id, AdresTipi, GrupTipiId)
+ VALUES 
+  (0, N'Tanýmsýz',    0),
+  (1, N'Fatura adresi',   1),
+  (2, N'Teslimat adresi',   1),
+  (3, N'Ev adresi',   1),
+  (4, N'Ýþ adresi',   1),
+  (5, N'Ödeme adresi',   1)
+
+-- ------------------------------------------------------- 
+-- CaddeSokakTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[OnmCariAdresCaddeSokakTipi]
+(
+   Id          Int Unique Not Null,
+   CaddeSokakTipi  nVarchar(20)   null,
+   
+   constraint  pk_OnmCariAdresCaddeSokakTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[OnmCariAdresCaddeSokakTipi] (Id, CaddeSokakTipi)
+ VALUES 
+  (0, N' Cadde mi? Sokak mý?'),
+  (1, N'Cadde'),
+  (2, N'Sokak')
+
+
+commit transaction
+
+/*CreateLkpTableEnd*/
+
+
+
+
+
+
+
+
+
+/*
+
+begin transaction
+
+ create table CariAdres 
+ (
+  Id           Int  IDENTITY(1,1) not null, 
+  FirmId       Int  not null,
+  CariId       Int  not null,
+  IsActive     Bit  not null, /* default : 1 = active, 0 = not active */  
+  AdresTipiId  SmallInt not null, /* 1 = ev, 2. iþ, 3. fatura, 4. Teslimat vb... */
+
+  Ulke           nVarchar(25) null,
+  Il             nVarchar(15) null,
+  Ilce           nVarchar(20) null,      
+  MahalleKoy     nVarchar(50) null,
+  CaddeSokak     nVarchar(50) null,
+  CaddeSokakTipiId  SmallInt  null, /* 1. Cadde, 2. Sokak */
+  DisKapi        nVarchar(30) null,
+  IcKapi         nVarchar(20) null,
+  PostaKutusu    nVarchar(6)  null,
+
+  /* MahalleKoy(50) + CaddeSokak(50) + DisKapi(30) + IcKapi(20) + Ilce(20) + Il(15) + Ulke(30) = 215 > 200  */
+  TamAdres       nVarchar(200) null,   
+  
+  /* MahalleKoy(50) + CaddeSokak(50) + DisKapi(30) + IcKapi(20) = 150 > 120  */
+  YarimAdres     nVarchar(120) null, 
+  
+  UlkeTipiIds    nVarchar(25) null,  /* UlkeTipiIds : s iþaretiyle ülke Id yerine ulke adýyla kaydedilecek  */
+  IlTipiId       Varchar(3)  null,
+  IlceTipiId     Varchar(5)  null,
+  MahalleKoyKodu Varchar(10) null,
+  CaddeSokakKodu Varchar(10) null,
+  DisKapiKodu    Varchar(10) null,
+  IcKapiKodu     Varchar(10) null,
+  AdresOnayKodu  Varchar(20) null,
+
+  constraint pk_CariAdres primary key (Id)
+ )
+
+ create index X_CariAdres01 on CariAdres (FirmId)
+ create index X_CariAdres02 on CariAdres (CariId)
+ create index X_CariAdres03 on CariAdres (UlkeTipiId)
+ create index X_CariAdres04 on CariAdres (IlTipiId,IlceTipiId)
+
+ grant select, insert, update, delete on CariAdres to public
+*/
+
+
+
+/*
+
+
+USE [Mtsk00000011]
+GO
+
+INSERT INTO [dbo].[OnmCariAdres]
+           ([FirmId]
+           ,[TalepId]
+           ,[CariId]
+           ,[TcNo]
+           ,[DonemTipiId]
+           ,[SozluAdresBeyani]
+           ,[AliciTcNo]
+           ,[AliciAdi]
+           ,[AliciSoyadi]
+           ,[UlkeKodu]
+           ,[UlkeAdi]
+           ,[IlKodu]
+           ,[Il]
+           ,[IlceKodu]
+           ,[Ilce]
+           ,[MahalleKoyKodu]
+           ,[MahalleKoy]
+           ,[CaddeSokakKodu]
+           ,[CaddeSokak]
+           ,[DisKapiNoKodu]
+           ,[DisKapiNo]
+           ,[IcKapiNoKodu]
+           ,[IcKapiNo]
+
+           ,[AdresKodu]
+           ,[TamAdres]
+           ,[YarimAdres]
+
+           ,[AdresIsUploaded]
+           ,[VeriKaynakTypeId]
+           ,[VeriKaynakId])
+
+SELECT [FirmId]
+      ,[TalepId]
+      ,[AdayId]
+      ,[TcNo]
+      ,[DonemTipiId]
+      ,[SozluAdresBeyani]
+      ,[AliciTcNo]
+      ,[AliciAdi]
+      ,[AliciSoyadi]
+
+      ,'TR'
+	  ,'Türkiye'
+
+      ,[IlKodu]
+      ,[Il]
+
+      ,[IlceKodu]
+      ,[Ilce]
+
+      ,[MahalleKoyKodu]
+      ,[MahalleKoy]
+
+      ,[CaddeSokakKodu]
+      ,[CaddeSokak]
+
+      ,[DisKapiNoKodu]
+      ,[DisKapiNo]
+
+      ,[IcKapiNoKodu]
+      ,[IcKapiNo]
+
+      ,[AdresKodu]
+      ,[TamAdres]
+      ,[YarimAdres]
+
+      ,[AdresIsUploaded]
+	  ,201 -- VeriKaynakTypeId
+      ,[VeriKaynakId]
+
+  FROM [dbo].[MtskAdayAdres]
+
+GO
+
+
+
+
+*/

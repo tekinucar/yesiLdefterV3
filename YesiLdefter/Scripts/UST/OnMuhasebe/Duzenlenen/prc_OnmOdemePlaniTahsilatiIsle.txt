@@ -97,6 +97,7 @@ AS BEGIN
        --print @KalanTutar
    end -- While
 
+
 END -- prc_
 
 /*CreateProcedureEnd*/
