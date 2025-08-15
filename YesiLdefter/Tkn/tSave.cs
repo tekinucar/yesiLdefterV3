@@ -656,6 +656,9 @@ namespace Tkn_Save
                 // edit işleminden sonra myProp kontrol ediliyor -1 ise değiştiriliyor
                 if (v.con_Refresh && id_value != "")
                     t.changeKeyFieldValue(ds, id_value);
+
+                if (v.con_Refresh)
+                    t.AlertMessage("Kayıt Tamamlandı", "Kayıt başarılı bir şekilde yapıldı ...");
             }
             #endregion
             //------------------------------------------------------------------------------------------------------ 

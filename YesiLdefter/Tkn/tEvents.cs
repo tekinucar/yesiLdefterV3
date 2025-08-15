@@ -8556,16 +8556,28 @@ namespace Tkn_Events
                         {
                             /// read_field_type = 58
                             /// and Convert(Datetime, [AJLNTLK].REC_DATE, 103)  =  Convert(Datetime, '25.12.2016', 103)     -- :D.SD.2809: --
+                            
+                            /// and Convert(Date, isnull([MtskAdayTakip].uSinavPlanTarihi,getdate()), 103)  <>  Convert(Date, '01.01.1900', 103)   -- :D.SD.59384: --
 
                             str_bgn = " and " + read_sub_FName;
                             if (read_field_type == "40" || read_field_type == "61")
-                                str_bgn = " and Convert(Date, " + read_sub_FName;
+                                str_bgn = " and Convert(Date, isnull(" + read_sub_FName ;
                             if (read_field_type == "58")
-                                str_bgn = " and Convert(Datetime, " + read_sub_FName;
+                                str_bgn = " and Convert(Datetime, isnull(" + read_sub_FName;
 
                             i_bgn = Sql.IndexOf(str_bgn);
 
                             if (i_bgn == -1)
+                            {
+                                if (read_field_type == "40" || read_field_type == "61")
+                                    str_bgn = " and Convert(Date, " + read_sub_FName;
+                                if (read_field_type == "58")
+                                    str_bgn = " and Convert(Datetime, " + read_sub_FName;
+
+                                i_bgn = Sql.IndexOf(str_bgn);
+                            }
+
+                            if (i_bgn == -1) 
                             {
                                 if (read_field_type == "40" || read_field_type == "61")
                                     str_bgn = " --and Convert(Date, " + read_sub_FName;
@@ -8574,6 +8586,18 @@ namespace Tkn_Events
 
                                 i_bgn = Sql.IndexOf(str_bgn);
                             }
+
+                            if (i_bgn == -1)
+                            {
+                                if (read_field_type == "40" || read_field_type == "61")
+                                    str_bgn = " --and Convert(Date, isnull(" + read_sub_FName;
+                                if (read_field_type == "58")
+                                    str_bgn = " --and Convert(Datetime, isnull(" + read_sub_FName;
+
+                                i_bgn = Sql.IndexOf(str_bgn);
+                            }
+
+
 
                             str_end = "   -- :D.SD.";// + read_RefId + ": --";
                             i_end = Sql.IndexOf(str_end, i_bgn);

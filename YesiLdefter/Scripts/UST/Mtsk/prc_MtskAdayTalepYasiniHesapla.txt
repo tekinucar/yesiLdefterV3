@@ -5,7 +5,7 @@ CREATE PROCEDURE [dbo].[prc_MtskAdayTalepYasiniHesapla] (@TalepId int)
 AS BEGIN
 
   --declare @TalepId int = 3471
-
+  declare @enter varchar(10) = CHAR(13) + CHAR(10)
   declare @yFirmId int = 0
   declare @AdayId int
   declare @yTalepTipiId smallint = 0
@@ -22,13 +22,14 @@ AS BEGIN
   declare @ySistemUyarilari nvarchar(200)
   declare @oldSistemUyarilari nvarchar(200)
   
+  declare @dogumYili int = 0
   declare @YasSiniri smallint = 0
   declare @yasOnayiTipiId smallint = 0
   declare @yasHazirTarihi date = null
   declare @yeniSistemUyarisi nvarchar(200)
   declare @grupSubeSil bit = 0
   
-  print '    prc_MtskAdayTalepYasiniHesapla başladı'
+  --print '    prc_MtskAdayTalepYasiniHesapla başladı'
 
   -- [Lkp].[MtskAdayTakipYasOnayiTipi]
   -- 0,  'Yaşı tutuyor'
@@ -112,16 +113,23 @@ AS BEGIN
 		  set @dogumdanBirGunSonrasi = DATEADD(DAY, 1, @yDogumTarihi)
           set @yasHazirTarihi = DATEADD(YEAR, @YasSiniri, @dogumdanBirGunSonrasi) 
           set @AyFarki = DATEDIFF(MONTH, @yasHazirTarihi, @bugun) 
+		  
+          --print 'YEAR(@yDogumTarihi)'
+          --print YEAR(@yDogumTarihi)
+          --print 'YEAR(@yDogumTarihi)-'
 
           if (@bugun < @yasHazirTarihi)
           begin
              set @yasOnayiTipiId = 1 -- yaşı tutmuyor
-			 set @yeniSistemUyarisi = 'Yaşı tutmuyor.' + CHAR(13) + CHAR(10) + 'Kayıt olabileceği tarih ( ' + convert(varchar(10), @yasHazirTarihi, 103) + ' )'
+			 set @yeniSistemUyarisi = 'Yaşı tutmuyor.' + @enter + 'Kayıt olabileceği tarih (' + convert(varchar(10), @yasHazirTarihi, 103) + ')' + @enter
           end
-          if (@Yasi >= 90)
+          
+		  set @dogumYili = YEAR(@yDogumTarihi);
+
+		  if (@Yasi >= 90 or @dogumYili < 1930)
           begin
              set @yasOnayiTipiId = 1 -- yaşı tutmuyor
-			 set @yeniSistemUyarisi = 'Yaşı tutmuyor.' + CHAR(13) + CHAR(10) + '90 yaşından büyük ( ' + convert(varchar(10), @yDogumTarihi, 103) + ' )'
+			 set @yeniSistemUyarisi = 'Yaşı tutmuyor.' + @enter + '90 yaşından büyük (' + convert(varchar(10), @yDogumTarihi, 103) + ')' + @enter
           end
 
           set @GunFarki = DATEDIFF(DAY, @yasHazirTarihi, @bugun)
@@ -223,7 +231,7 @@ AS BEGIN
 		   set @i1 = charindex('Yaşı tutmuyor', @ySistemUyarilari) 
 		   set @i2 = charindex(')', @ySistemUyarilari, @i1)
 		   if (@i1 > 1) set @i1 = @i1 - 1
-	       set @ySistemUyarilari = trim(stuff(@ySistemUyarilari, @i1, @i2, '')) 
+	       set @ySistemUyarilari = trim(stuff(@ySistemUyarilari, @i1, @i2 + len(@enter), '')) 
        end
     end
 
@@ -260,7 +268,7 @@ AS BEGIN
   , YasHazirTarihi = @yasHazirTarihi
   Where TalepId = @TalepId
   
-  print '    prc_MtskAdayTalepYasiniHesapla bitti'
+  --print '    prc_MtskAdayTalepYasiniHesapla bitti'
 
 END -- procedure
 

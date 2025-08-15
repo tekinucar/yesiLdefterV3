@@ -53,6 +53,7 @@ namespace Tkn_DataCopy
             string target_checkfname = t.Set(ds_DC.Tables[0].Rows[0]["TARGET_CHECK_FNAME"].ToString(), "", "");
             string target_checkvalue = t.Set(ds_DC.Tables[0].Rows[0]["TARGET_CHECK_VALUE"].ToString(), "", "");
             string target_operandType = t.Set(ds_DC.Tables[0].Rows[0]["TARGET_OPERAND_TYPE"].ToString(), "", "");
+            bool final_Row_Delete = t.Set(ds_DC.Tables[0].Rows[0]["FINAL_ROW_DELETE"].ToString(), "", (bool)false);
             bool sourceOnay = true;
             bool targetOnay = true;
             string read_value = "";
@@ -301,7 +302,7 @@ namespace Tkn_DataCopy
 
             #region İşbitiminde 
 
-            if ((event_type == 1) && (onay))
+            if ((event_type == 1 || final_Row_Delete == true) && (onay))
             {
                 // tdataNavigator_PositionChanged pas geçsin
                 v.con_Cancel = true;

@@ -2003,7 +2003,7 @@ namespace Tkn_Menu
                 if ((t.IsNotNull(itemName) == false) &&
                     (itemType == 211))
                 {
-                    
+                    /*
                     NavButton tItemBack = new DevExpress.XtraBars.Navigation.NavButton();
                     NavButton tItemNext = new DevExpress.XtraBars.Navigation.NavButton();
 
@@ -2107,6 +2107,7 @@ namespace Tkn_Menu
                     mControl.Buttons.Add(tItemBack);
                     mControl.Buttons.Add(tItem);
                     mControl.Buttons.Add(tItemNext);
+                    */
                 }
                 #endregion Mali Dönem
 

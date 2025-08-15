@@ -51,6 +51,7 @@ BEGIN
 	declare @ySinavTipiId smallInt
     declare @SinavDonemTipiId int
 	declare @ySinavTarihSaat varchar(20)
+	declare @eSinavTarihi  date
 	declare @ySinavTarihi  date
 	declare @ySinavSaati time
 	declare @yMebbisESinavTarihValue varchar(20)
@@ -61,6 +62,10 @@ BEGIN
 
     WHILE @@FETCH_STATUS = 0
     BEGIN
+        select 
+		    @eSinavTarihi = isnull(dlt.SinavTarihi, CONVERT(date, getdate(),103))
+        from deleted dlt
+        where dlt.Id = @curId
 
         select 
             @ySinavTipiId = isnull(ins.SinavTipiId,0)
@@ -115,17 +120,79 @@ BEGIN
 		  Where Id = @curId
         end 
 
+        if (@ySinavTipiId > 10 and 
+            convert(date, isnull(@eSinavTarihi, getdate()), 103) <>  
+            convert(date, isnull(@ySinavTarihi, getdate()), 103) )
+        begin
+            Update dbo.MtskSinavListesi set SinavTarihi = @ySinavTarihi 
+            Where SinavTipiId = @ySinavTipiId
+            and SinavTarihi = @eSinavTarihi
+        end -- if
+			   
         FETCH NEXT FROM myCursor INTO @curId
     END
 
     CLOSE myCursor
     DEALLOCATE myCursor  
 
+
 END
 
 /*CreateTriggerEnd*/
 
-ALTER TABLE [dbo].[MtskSinavTarihi] ENABLE TRIGGER [trg_MtskSinavTarihi]
+/*CreateTrigger*/
+
+CREATE TRIGGER [dbo].[trg_MtskSinavTarihiDelete] on [dbo].[MtskSinavTarihi]
+AFTER DELETE
+AS BEGIN
+
+    declare cursorDlt cursor local for select Id from deleted
+	declare @curId bigint
+
+	OPEN cursorDlt
+    FETCH NEXT FROM cursorDlt INTO @curId
+
+    declare @FirmId int 
+    declare @SinavTarihi date
+	declare @SinavTipiId smallInt
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+	    Select @FirmId = dlt.FirmId
+		, @SinavTarihi = isnull(dlt.SinavTarihi, convert(date, '01.01.1900', 103))
+		, @SinavTipiId = dlt.SinavTipiId
+	    From deleted dlt
+	    Where dlt.Id = @curId
+	  
+        if (@SinavTipiId = 11)
+        begin
+            Update dbo.MtskAdayTakip Set 
+                eSinavPlanTarihi = null
+            Where eSinavPlanTarihi = @SinavTarihi 
+            and   FirmId = @FirmId
+        end
+        if (@SinavTipiId = 12)
+        begin
+            Update dbo.MtskAdayTakip Set 
+                uSinavPlanTarihi = null
+            Where uSinavPlanTarihi = @SinavTarihi
+            and   FirmId = @FirmId
+        end
+
+		Delete From dbo.MtskSinavListesi
+        Where  FirmId = @FirmId
+        and    SinavTipiId = @SinavTipiId                
+        and    SinavTarihi = @SinavTarihi
+		
+        FETCH NEXT FROM cursorDlt INTO @curId
+    END
+
+    CLOSE cursorDlt
+    DEALLOCATE cursorDlt
+
+END
+
+/*CreateTriggerEnd*/
 
 
 

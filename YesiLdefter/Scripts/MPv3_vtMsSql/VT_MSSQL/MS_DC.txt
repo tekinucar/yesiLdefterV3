@@ -13,6 +13,7 @@ begin transaction
     EVENT_TYPE          SmallInt       NULL,
     QUESTION            VarChar(100)   NULL,
     FINAL_MESSAGE       VarChar(100)   NULL,
+    FINAL_ROW_DELETE    Bit            NULL,
     WORK_TYPE           SmallInt       NULL,   
     DISPLAY_TYPE        SmallInt       NULL,
     TARGET_TABLE_CODE   VarChar(50)    NULL, 

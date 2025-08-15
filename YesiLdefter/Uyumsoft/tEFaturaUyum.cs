@@ -1059,7 +1059,7 @@ namespace Tkn_EFaturaUyum
 
             if (tahsilEdilecekKdvTutari < 0) tahsilEdilecekKdvTutari = 0;
 
-            int addCount = 1;
+            int addCount = 0;
             TaxSubtotalType[] taxSubtotal = new TaxSubtotalType[count];
 
             if (taxSubtotalType_Kdv1 != null)

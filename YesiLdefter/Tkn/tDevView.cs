@@ -1478,8 +1478,7 @@ MS_FIELDS                                          T03_MSFIELDS                 
                 tGridView.Name = "tGridView_" + RefId.ToString();
                 tGridView.OptionsBehavior.AutoPopulateColumns = false;
                 tGridView.OptionsView.ShowCardCaption = false;// true;
-                //tGridView.OptionsView.cap
-                tGridView.OptionsView.ShowCardExpandButton = true;
+                tGridView.OptionsView.ShowCardExpandButton = false;// true;
                 tGridView.OptionsView.ShowQuickCustomizeButton = false;
                 tGridView.OptionsView.AnimationType = GridAnimationType.AnimateFocusedItem;
                 tGridView.OptionsFilter.AllowFilterEditor = false;
@@ -4126,12 +4125,14 @@ MS_FIELDS                                          T03_MSFIELDS                 
                     // "{LKP_FNS_TIPI}"; yemiyor
                     // "{3}"; field no  şeklinde çalışyor
                     tCardView.CardCaptionFormat = "{" + GROUPFNAME1 + "}";
+                    tCardView.OptionsView.ShowCardCaption = true;
                 }
 
                 if ((GROUPFNAME2 != "") && (GROUPFNAME2 != "null"))
                 {
                     // "{1}, {3}"   şeklindede çaılşyor
                     tCardView.CardCaptionFormat = "{" + GROUPFNAME1 + "} {" + GROUPFNAME2 + "}";
+                    tCardView.OptionsView.ShowCardCaption = true;
                 }
 
             }

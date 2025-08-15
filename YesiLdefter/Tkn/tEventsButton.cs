@@ -477,6 +477,7 @@ namespace Tkn_Events
                 (buttonType == v.tButtonType.btBelgeAc))
             {
                 if ((buttonHint.senderType == "GridView") ||
+                    (buttonHint.senderType == "AdvBandedGridView") ||
                     (buttonHint.senderType == "TreeList") ||
                     (buttonHint.senderType == "SchedulerControl") ||
                     (buttonHint.senderType == "Button") ||

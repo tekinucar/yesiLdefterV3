@@ -3337,6 +3337,8 @@ namespace Tkn_ToolBox
             string myProp = dsTarget.Namespace.ToString();
             string TableIPCode = MyProperties_Get(myProp, "TableIPCode:");
             string TableLabel = MyProperties_Get(myProp, "TableLabel:");
+            string TableLabel2 = TableLabel.Replace("[", "");
+            TableLabel2 = TableLabel2.Replace("]", ""); // [xxx] parentezleri temizle xxx kalsın
             string KeyFName = MyProperties_Get(myProp, "KeyFName:");
             string IsUseNewRefId = MyProperties_Get(myProp, "IsUseNewRefId:");
             string KeyIdValue = MyProperties_Get(myProp, "KeyIdValue:");
@@ -3362,7 +3364,13 @@ namespace Tkn_ToolBox
             }
 
             string UseOldRefId = " and " + TableLabel + "." + KeyFName + " = " + KeyIdValue + " ";
+            string UseOldRefId2 = " and " + TableLabel2 + "." + KeyFName + " = " + KeyIdValue + " ";
             string UseReadRefId = " and " + TableLabel + "." + KeyFName + " = " + newValue + " ";
+
+
+            /// [MtskAday2].Id = -1 yok fakat   MtskAday2.Id = -1  varsa
+            if (SqlS.IndexOf(UseOldRefId) == -1 && SqlS.IndexOf(UseOldRefId2) > -1)
+                UseOldRefId = UseOldRefId2;
 
             /// Listeden  Kart açtığınızde KeyIdValue = -1 fakat SqlS içinde ise okuduğu kartın gerçek değeri var örn : and [MtskAday2].Id = 3318
             /// UseOldRefId ise '  and [MtskAday2].Id = -1  ' şeklinde
@@ -3390,7 +3398,7 @@ namespace Tkn_ToolBox
                     }
                 }
             }
-
+                        
             Str_Replace(ref SqlS, UseOldRefId, UseReadRefId);
 
             Str_Replace(ref myProp, "SqlSecond:" + SqlSOld, "SqlSecond:" + SqlS);
@@ -6390,7 +6398,7 @@ namespace Tkn_ToolBox
                     )
                 {
                     //MyStr = string.Empty;
-                    MyStr = "Convert(Date, " + Field_Name + ", 103) " + " <> " + " Convert(Date, '01.01.1900', 103)";
+                    MyStr = "Convert(Date, isnull(" + Field_Name + ",getdate()), 103) " + " <> " + " Convert(Date, '01.01.1900', 103)";
                 }
                 else
                 {
