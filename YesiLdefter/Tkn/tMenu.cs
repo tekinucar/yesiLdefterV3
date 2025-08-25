@@ -2,7 +2,9 @@
 using DevExpress.XtraBars;
 using DevExpress.XtraBars.Navigation;
 using DevExpress.XtraBars.Ribbon;
+using DevExpress.XtraEditors;
 using DevExpress.XtraNavBar;
+using DevExpress.XtraToolbox;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -11,11 +13,10 @@ using System.IO;
 using System.Windows.Forms;
 using Tkn_Events;
 using Tkn_InputPanel;
+using Tkn_Report;
 using Tkn_TablesRead;
 using Tkn_ToolBox;
 using Tkn_Variable;
-using Tkn_Report;
-using DevExpress.XtraEditors;
 
 namespace Tkn_Menu
 {
@@ -1637,479 +1638,487 @@ namespace Tkn_Menu
                         tvisible = false;
                 }
 
-
-                #region Category veya group
-                // yeni Category/Group oluşturma
-                if ((t.IsNotNull(itemName) == false) &&
-                    ((itemType == 201) || (itemType == 203)))
+                if (tvisible)
                 {
-                    TileNavCategory pGroup = new TileNavCategory();
-                    pGroup.Name = "item_" + refid;
-                    pGroup.Caption = itemCaption;
-                    pGroup.TileText = itemCaption;
-                    pGroup.Tile.Text = itemCaption;
-                    pGroup.Visible = tvisible;
-
-                    if ((DockType == v.dock_None) | (DockType == v.dock_Left))
-                        pGroup.Alignment = NavButtonAlignment.Left;
-                    if (DockType == v.dock_Right)
-                        pGroup.Alignment = NavButtonAlignment.Right;
-
-                    //if (clickEvents > 0)
-                    pGroup.ElementClick += new DevExpress.XtraBars.Navigation.NavElementClickEventHandler(evm.tNavButton_ElementClick);
-
-                    #region Image set
-                    if (!DBNull.Value.Equals(ds_Items.Tables[0].Rows[i]["LKP_GLYPH16"]))
+                    #region Category veya group
+                    // yeni Category/Group oluşturma
+                    if ((t.IsNotNull(itemName) == false) &&
+                        ((itemType == 201) || (itemType == 203)))
                     {
-                        byte[] img16 = (byte[])ds_Items.Tables[0].Rows[i]["LKP_GLYPH16"];
-                        if (img16 != null)
+                        TileNavCategory pGroup = new TileNavCategory();
+                        pGroup.Name = "item_" + refid;
+                        pGroup.Caption = itemCaption;
+                        pGroup.TileText = itemCaption;
+                        pGroup.Tile.Text = itemCaption;
+                        pGroup.Visible = tvisible;
+
+                        if ((DockType == v.dock_None) | (DockType == v.dock_Left))
+                            pGroup.Alignment = NavButtonAlignment.Left;
+                        if (DockType == v.dock_Right)
+                            pGroup.Alignment = NavButtonAlignment.Right;
+
+                        //if (clickEvents > 0)
+                        pGroup.ElementClick += new DevExpress.XtraBars.Navigation.NavElementClickEventHandler(evm.tNavButton_ElementClick);
+
+                        #region Image set
+                        if (!DBNull.Value.Equals(ds_Items.Tables[0].Rows[i]["LKP_GLYPH16"]))
                         {
-                            MemoryStream ms = new MemoryStream(img16);
-                            pGroup.Glyph = Image.FromStream(ms);
-                            ms.Dispose();
+                            byte[] img16 = (byte[])ds_Items.Tables[0].Rows[i]["LKP_GLYPH16"];
+                            if (img16 != null)
+                            {
+                                MemoryStream ms = new MemoryStream(img16);
+                                pGroup.Glyph = Image.FromStream(ms);
+                                ms.Dispose();
+                            }
                         }
-                    }
 
-                    if (!DBNull.Value.Equals(ds_Items.Tables[0].Rows[i]["LKP_GLYPH32"]))
-                    {
-                        byte[] img32 = (byte[])ds_Items.Tables[0].Rows[i]["LKP_GLYPH32"];
-                        if (img32 != null)
+                        if (!DBNull.Value.Equals(ds_Items.Tables[0].Rows[i]["LKP_GLYPH32"]))
                         {
-                            MemoryStream ms = new MemoryStream(img32);
-                            pGroup.Glyph = Image.FromStream(ms);
-                            ms.Dispose();
+                            byte[] img32 = (byte[])ds_Items.Tables[0].Rows[i]["LKP_GLYPH32"];
+                            if (img32 != null)
+                            {
+                                MemoryStream ms = new MemoryStream(img32);
+                                pGroup.Glyph = Image.FromStream(ms);
+                                ms.Dispose();
+                            }
                         }
-                    }
-                    #endregion Image set
+                        #endregion Image set
 
-                    // Not : Category nin altına sadece TileNavItem eklene bilmekte
+                        // Not : Category nin altına sadece TileNavItem eklene bilmekte
 
-                    //mControl.Categories.Add(pGroup);
-                    if (itemType == 201)
-                    {
-                        pGroup.Tile.AppearanceItem.Normal.BackColor = Color.Red;
-                        pGroup.Tile.AppearanceItem.Hovered.BackColor = Color.Green;
-                        // Customize tile colors in different states.
-                        pGroup.OptionsDropDown.AppearanceItem.Normal.BackColor = Color.Coral;
-                        pGroup.OptionsDropDown.AppearanceItem.Hovered.BackColor = Color.LightCoral;
-                        // Customize the group caption color.
-                        pGroup.OptionsDropDown.AppearanceGroupText.ForeColor = Color.Purple;
-
-                        mControl.Categories.Add(pGroup);
-
-                        if (tFirstItemCategory == null)
-                            tFirstItemCategory = pGroup;
-
-                    }
-                    else mControl.Buttons.Add(pGroup);
-
-                    //tileNavPane1.Categories.AddRange(new TileNavCategory[] { cat1, cat2 });
-
-
-                }
-                #endregion Category / group
-
-                #region Button 
-
-                // Button
-                if ((t.IsNotNull(itemName) == false) &&
-                    (itemType == 205))
-                {
-                    itemName = "item_" + refid;
-                    if (clickEvents > 0)
-                        Preparing_ButtonName(clickEvents, ref itemName);
-
-                    NavButton tItem = new DevExpress.XtraBars.Navigation.NavButton();
-
-                    tItem.Appearance.Name = formName;
-                    tItem.Name = itemName;
-                    if (t.IsNotNull(CmpName))
-                    {
-                        if (CmpName == "IsMain")
+                        //mControl.Categories.Add(pGroup);
+                        if (itemType == 201)
                         {
-                            tItem.IsMain = true;
+                            pGroup.Tile.AppearanceItem.Normal.BackColor = Color.Red;
+                            pGroup.Tile.AppearanceItem.Hovered.BackColor = Color.Green;
+                            // Customize tile colors in different states.
+                            pGroup.OptionsDropDown.AppearanceItem.Normal.BackColor = Color.Coral;
+                            pGroup.OptionsDropDown.AppearanceItem.Hovered.BackColor = Color.LightCoral;
+                            // Customize the group caption color.
+                            pGroup.OptionsDropDown.AppearanceGroupText.ForeColor = Color.Purple;
+
+                            mControl.Categories.Add(pGroup);
+
+                            if (tFirstItemCategory == null)
+                                tFirstItemCategory = pGroup;
+
                         }
-                        else tItem.Name = CmpName;
+                        else mControl.Buttons.Add(pGroup);
+
+                        //tileNavPane1.Categories.AddRange(new TileNavCategory[] { cat1, cat2 });
+
+
                     }
-                    tItem.Caption = itemCaption;
-                    
-                    // itemCaption = Belge Türü Seçin
-                    if (t.IsNotNull(shortcut_keys))
+                    #endregion Category / group
+
+                    #region Button 
+
+                    // Button
+                    if ((t.IsNotNull(itemName) == false) &&
+                        (itemType == 205))
                     {
+                        itemName = "item_" + refid;
+                        if (clickEvents > 0)
+                            Preparing_ButtonName(clickEvents, ref itemName);
 
-                        if ((shortcut_keys == "SHORTCUT_BUTTON") |
-                            (shortcut_keys == "SHORTCUT"))
+                        NavButton tItem = new DevExpress.XtraBars.Navigation.NavButton();
+
+                        tItem.Appearance.Name = formName;
+                        tItem.Name = itemName;
+                        if (t.IsNotNull(CmpName))
                         {
-                            itemName = "item_SHORTCUT_" + refid;
+                            if (CmpName == "IsMain")
+                            {
+                                tItem.IsMain = true;
+                            }
+                            else tItem.Name = CmpName;
+                        }
+                        tItem.Caption = itemCaption;
 
-                            // event bağlansın
-                            if (clickEvents == 0)
-                                clickEvents = 99;
+                        // itemCaption = Belge Türü Seçin
+                        if (t.IsNotNull(shortcut_keys))
+                        {
+
+                            if ((shortcut_keys == "SHORTCUT_BUTTON") |
+                                (shortcut_keys == "SHORTCUT"))
+                            {
+                                itemName = "item_SHORTCUT_" + refid;
+
+                                // event bağlansın
+                                if (clickEvents == 0)
+                                    clickEvents = 99;
+                                else
+                                    Preparing_ButtonName(clickEvents, ref itemName);
+
+                                tItem.Name = itemName;
+                            }
                             else
-                                Preparing_ButtonName(clickEvents, ref itemName);
+                                tItem.Caption = itemCaption + "   : " + shortcut_keys;
 
-                            tItem.Name = itemName;
+                            //tItem.Caption = itemCaption + "   <i>" + shortcut_keys + "</i>";
+                            //tItem.  AllowHtmlText = DefaultBoolean.True;
                         }
-                        else
-                            tItem.Caption = itemCaption + "   : " + shortcut_keys;
 
-                        //tItem.Caption = itemCaption + "   <i>" + shortcut_keys + "</i>";
-                        //tItem.  AllowHtmlText = DefaultBoolean.True;
-                    }
-
-                    tItem.Enabled = tenabled;
-                    tItem.Visible = tvisible;
-                    if (t.IsNotNull(Prop_Navigator))
-                        tItem.Tag = Prop_Navigator + "|Prop_Navigator|";
-                    if (t.IsNotNull(menuName))
-                        tItem.Tag += menuName + "|MenuName|";
+                        tItem.Enabled = tenabled;
+                        tItem.Visible = tvisible;
+                        if (t.IsNotNull(Prop_Navigator))
+                            tItem.Tag = Prop_Navigator + "|Prop_Navigator|";
+                        if (t.IsNotNull(menuName))
+                            tItem.Tag += menuName + "|MenuName|";
 
 
-                    //tItem.
-                    //tItem.Appearance.BackColor = v.colorNew;
-                    //tItem.AppearanceHovered.BackColor = v.colorFocus;
-                    //tItem.AppearanceHovered.ForeColor = v.AppearanceFocusedTextColor;
-                    //tItem.AppearanceSelected.BackColor = v.colorSave;
-                    //tItem.Appearance.Options.UseBackColor = true;
-                    //tItem.AppearanceHovered.Options.UseBackColor = true;
-                    //tItem.AppearanceHovered.Options.UseForeColor = true;
-                    //tItem.AppearanceSelected.Options.UseBackColor = true;
+                        //tItem.
+                        //tItem.Appearance.BackColor = v.colorNew;
+                        //tItem.AppearanceHovered.BackColor = v.colorFocus;
+                        //tItem.AppearanceHovered.ForeColor = v.AppearanceFocusedTextColor;
+                        //tItem.AppearanceSelected.BackColor = v.colorSave;
+                        //tItem.Appearance.Options.UseBackColor = true;
+                        //tItem.AppearanceHovered.Options.UseBackColor = true;
+                        //tItem.AppearanceHovered.Options.UseForeColor = true;
+                        //tItem.AppearanceSelected.Options.UseBackColor = true;
 
 
-                    if ((DockType == v.dock_None) | (DockType == v.dock_Left))
-                        tItem.Alignment = NavButtonAlignment.Left;
-                    if (DockType == v.dock_Right)
-                        tItem.Alignment = NavButtonAlignment.Right;
+                        if ((DockType == v.dock_None) | (DockType == v.dock_Left))
+                            tItem.Alignment = NavButtonAlignment.Left;
+                        if (DockType == v.dock_Right)
+                            tItem.Alignment = NavButtonAlignment.Right;
 
-                    if (clickEvents > 0)
-                    {
-                        tItem.ElementClick += new DevExpress.XtraBars.Navigation.NavElementClickEventHandler(evm.tNavButton_ElementClick);
-                    }
-
-                    #region Image set
-                    if (!DBNull.Value.Equals(ds_Items.Tables[0].Rows[i]["LKP_GLYPH16"]))
-                    {
-                        byte[] img16 = (byte[])ds_Items.Tables[0].Rows[i]["LKP_GLYPH16"];
-                        if (img16 != null)
+                        if (clickEvents > 0)
                         {
-                            MemoryStream ms = new MemoryStream(img16);
-                            tItem.Glyph = Image.FromStream(ms);
-                            ms.Dispose();
+                            tItem.ElementClick += new DevExpress.XtraBars.Navigation.NavElementClickEventHandler(evm.tNavButton_ElementClick);
                         }
-                    }
 
-                    if (!DBNull.Value.Equals(ds_Items.Tables[0].Rows[i]["LKP_GLYPH32"]))
-                    {
-                        byte[] img32 = (byte[])ds_Items.Tables[0].Rows[i]["LKP_GLYPH32"];
-                        if (img32 != null)
+                        #region Image set
+                        if (!DBNull.Value.Equals(ds_Items.Tables[0].Rows[i]["LKP_GLYPH16"]))
                         {
-                            MemoryStream ms = new MemoryStream(img32);
-                            tItem.Glyph = Image.FromStream(ms);
-                            ms.Dispose();
-                        }
-                    }
-                    #endregion Image set
-
-                    mControl.Buttons.Add(tItem);
-                }
-                #endregion Button
-
-                #region // TileNavItem
-                if ((t.IsNotNull(itemName) == false) &&
-                    (itemType == 206))
-                {
-                    // TileNavItem mın üst hesabı Category olmalı
-                    // eğer TileNavItem mında alt hesaplarını oluşturacaksan 
-                    itemName = "item_" + refid;
-                    if (clickEvents > 0)
-                        Preparing_ButtonName(clickEvents, ref itemName);
-
-                    UstHesapRow = UstHesap_Get(ds_Items, i);
-
-                    if (UstHesapRow != null)
-                    {
-                        ustItemType = t.myInt32(UstHesapRow["ITEM_TYPE"].ToString());
-                        ustHesapRefId = UstHesapRow["REF_ID"].ToString();
-                        ustHesapItemName = UstHesapRow["ITEM_NAME"].ToString();
-
-                        if (t.IsNotNull(ustHesapItemName)) ustItemName = ustHesapItemName;
-                        else ustItemName = "item_" + ustHesapRefId;
-
-                        // Category or Group
-                        if ((ustItemType == 201) || (ustItemType == 203))
-                        {
-                            TileNavItem tItem = new TileNavItem();
-
-                            tItem.Appearance.Name = formName;
-                            tItem.Name = itemName;
-                            if (t.IsNotNull(CmpName))
-                                tItem.Name = CmpName;
-                            tItem.Caption = itemCaption;
-                            tItem.Tile.Text = itemCaption;
-                            if (t.IsNotNull(shortcut_keys))
-                                tItem.Tile.Text = itemCaption + "   <i>" + shortcut_keys + "</i>";
-                            tItem.Tile.AllowHtmlText = DefaultBoolean.True;
-
-                            tItem.Enabled = tenabled;
-                            tItem.Visible = tvisible;
-                            //tItem.Tag = Prop_Navigator;
-                            if (t.IsNotNull(Prop_Navigator))
-                                tItem.Tag = Prop_Navigator + "|Prop_Navigator|";
-
-                            tItem.Appearance.BackColor = v.colorNew;
-                            tItem.AppearanceHovered.BackColor = v.colorFocus;
-                            //tItem.AppearanceSelected.BackColor = v.colorSave;
-                            tItem.Appearance.Options.UseBackColor = true;
-                            tItem.AppearanceHovered.Options.UseBackColor = true;
-                            tItem.AppearanceSelected.Options.UseBackColor = true;
-
-                            if (clickEvents > 0)
+                            byte[] img16 = (byte[])ds_Items.Tables[0].Rows[i]["LKP_GLYPH16"];
+                            if (img16 != null)
                             {
-                                tItem.ElementClick += new DevExpress.XtraBars.Navigation.NavElementClickEventHandler(evm.tNavButton_ElementClick);
+                                MemoryStream ms = new MemoryStream(img16);
+                                tItem.Glyph = Image.FromStream(ms);
+                                ms.Dispose();
                             }
+                        }
 
-                            #region Image set
-                            if (!DBNull.Value.Equals(ds_Items.Tables[0].Rows[i]["LKP_GLYPH16"]))
+                        if (!DBNull.Value.Equals(ds_Items.Tables[0].Rows[i]["LKP_GLYPH32"]))
+                        {
+                            byte[] img32 = (byte[])ds_Items.Tables[0].Rows[i]["LKP_GLYPH32"];
+                            if (img32 != null)
                             {
-                                byte[] img16 = (byte[])ds_Items.Tables[0].Rows[i]["LKP_GLYPH16"];
-                                if (img16 != null)
+                                MemoryStream ms = new MemoryStream(img32);
+                                tItem.Glyph = Image.FromStream(ms);
+                                ms.Dispose();
+                            }
+                        }
+                        #endregion Image set
+
+                        mControl.Buttons.Add(tItem);
+                    }
+                    #endregion Button
+
+                    #region // TileNavItem
+                    if ((t.IsNotNull(itemName) == false) &&
+                        (itemType == 206))
+                    {
+                        // TileNavItem mın üst hesabı Category olmalı
+                        // eğer TileNavItem mında alt hesaplarını oluşturacaksan 
+                        itemName = "item_" + refid;
+                        if (clickEvents > 0)
+                            Preparing_ButtonName(clickEvents, ref itemName);
+
+                        UstHesapRow = UstHesap_Get(ds_Items, i);
+
+                        if (UstHesapRow != null)
+                        {
+                            ustItemType = t.myInt32(UstHesapRow["ITEM_TYPE"].ToString());
+                            ustHesapRefId = UstHesapRow["REF_ID"].ToString();
+                            ustHesapItemName = UstHesapRow["ITEM_NAME"].ToString();
+
+                            if (t.IsNotNull(ustHesapItemName)) ustItemName = ustHesapItemName;
+                            else ustItemName = "item_" + ustHesapRefId;
+
+                            // Category or Group
+                            if ((ustItemType == 201) || (ustItemType == 203))
+                            {
+                                TileNavItem tItem = new TileNavItem();
+
+                                tItem.Appearance.Name = formName;
+                                tItem.Name = itemName;
+                                if (t.IsNotNull(CmpName))
+                                    tItem.Name = CmpName;
+                                tItem.Caption = itemCaption;
+                                tItem.Tile.Text = itemCaption;
+                                if (t.IsNotNull(shortcut_keys))
+                                    tItem.Tile.Text = itemCaption + "   <i>" + shortcut_keys + "</i>";
+                                tItem.Tile.AllowHtmlText = DefaultBoolean.True;
+
+                                tItem.Enabled = tenabled;
+                                tItem.Visible = tvisible;
+                                //tItem.Tag = Prop_Navigator;
+                                if (t.IsNotNull(Prop_Navigator))
+                                    tItem.Tag = Prop_Navigator + "|Prop_Navigator|";
+
+                                tItem.Appearance.BackColor = v.colorNew;
+                                tItem.AppearanceHovered.BackColor = v.colorFocus;
+                                //tItem.AppearanceSelected.BackColor = v.colorSave;
+                                tItem.Appearance.Options.UseBackColor = true;
+                                tItem.AppearanceHovered.Options.UseBackColor = true;
+                                tItem.AppearanceSelected.Options.UseBackColor = true;
+
+                                tItem.Appearance.Font = new System.Drawing.Font("Tahoma", 12.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+                                tItem.Appearance.Options.UseFont = true;
+
+                                if (clickEvents > 0)
                                 {
-                                    MemoryStream ms = new MemoryStream(img16);
-                                    tItem.Glyph = Image.FromStream(ms);
-                                    ms.Dispose();
+                                    tItem.ElementClick += new DevExpress.XtraBars.Navigation.NavElementClickEventHandler(evm.tNavButton_ElementClick);
+                                }
+
+                                #region Image set
+                                if (!DBNull.Value.Equals(ds_Items.Tables[0].Rows[i]["LKP_GLYPH16"]))
+                                {
+                                    byte[] img16 = (byte[])ds_Items.Tables[0].Rows[i]["LKP_GLYPH16"];
+                                    if (img16 != null)
+                                    {
+                                        MemoryStream ms = new MemoryStream(img16);
+                                        tItem.Glyph = Image.FromStream(ms);
+                                        ms.Dispose();
+                                    }
+                                }
+
+                                if (!DBNull.Value.Equals(ds_Items.Tables[0].Rows[i]["LKP_GLYPH32"]))
+                                {
+                                    byte[] img32 = (byte[])ds_Items.Tables[0].Rows[i]["LKP_GLYPH32"];
+                                    if (img32 != null)
+                                    {
+                                        MemoryStream ms = new MemoryStream(img32);
+                                        tItem.Glyph = Image.FromStream(ms);
+                                        ms.Dispose();
+                                    }
+                                }
+                                #endregion Image set
+
+                                if (ustItemType == 203)
+                                {
+                                    int i3 = mControl.Buttons.Count;
+                                    for (int i2 = 0; i2 < i3; i2++)
+                                    {
+                                        if (mControl.Buttons[i2].Element.Name.ToString() == ustItemName)
+                                        {
+                                            ((TileNavCategory)mControl.Buttons[i2].Element).Items.Add(tItem);
+                                            break;
+                                        }
+                                    }
+                                }
+                                if (ustItemType == 201)
+                                {
+                                    int i3 = mControl.Categories.Count;
+                                    for (int i2 = 0; i2 < i3; i2++)
+                                    {
+                                        if (mControl.Categories[i2].Name.ToString() == ustItemName)
+                                        {
+                                            ((TileNavCategory)mControl.Categories[i2]).Items.Add(tItem);
+                                            break;
+                                        }
+                                    }
                                 }
                             }
 
-                            if (!DBNull.Value.Equals(ds_Items.Tables[0].Rows[i]["LKP_GLYPH32"]))
+                            // TileNavItem ise
+                            if (ustItemType == 206)
                             {
-                                byte[] img32 = (byte[])ds_Items.Tables[0].Rows[i]["LKP_GLYPH32"];
-                                if (img32 != null)
-                                {
-                                    MemoryStream ms = new MemoryStream(img32);
-                                    tItem.Glyph = Image.FromStream(ms);
-                                    ms.Dispose();
-                                }
-                            }
-                            #endregion Image set
+                                TileNavSubItem tItem = new TileNavSubItem();
 
-                            if (ustItemType == 203)
-                            {
+                                tItem.Appearance.Name = formName;
+                                tItem.Name = itemName;
+                                if (t.IsNotNull(CmpName))
+                                    tItem.Name = CmpName;
+                                tItem.Caption = itemCaption;
+                                tItem.Tile.Text = itemCaption;
+                                if (t.IsNotNull(shortcut_keys))
+                                    tItem.Tile.Text = itemCaption + "   <i>" + shortcut_keys + "</i>";
+                                tItem.Tile.AllowHtmlText = DefaultBoolean.True;
+
+                                tItem.Enabled = tenabled;
+                                tItem.Visible = tvisible;
+                                if (t.IsNotNull(Prop_Navigator))
+                                    tItem.Tag = Prop_Navigator + "|Prop_Navigator|";
+                                if (t.IsNotNull(menuName))
+                                    tItem.Tag += menuName + "|MenuName|";
+
+                                tItem.Appearance.BackColor = v.colorNew;
+                                tItem.AppearanceHovered.BackColor = v.colorFocus;
+                                //tItem.AppearanceSelected.BackColor = v.colorSave;
+                                tItem.Appearance.Options.UseBackColor = true;
+                                tItem.AppearanceHovered.Options.UseBackColor = true;
+                                tItem.AppearanceSelected.Options.UseBackColor = true;
+
+                                tItem.Appearance.Font = new System.Drawing.Font("Tahoma", 18.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+                                tItem.Appearance.Options.UseFont = true;
+
+                                if (clickEvents > 0)
+                                {
+                                    tItem.ElementClick += new DevExpress.XtraBars.Navigation.NavElementClickEventHandler(evm.tNavButton_ElementClick);
+                                }
+
+                                #region Image set
+                                if (!DBNull.Value.Equals(ds_Items.Tables[0].Rows[i]["LKP_GLYPH16"]))
+                                {
+                                    byte[] img16 = (byte[])ds_Items.Tables[0].Rows[i]["LKP_GLYPH16"];
+                                    if (img16 != null)
+                                    {
+                                        MemoryStream ms = new MemoryStream(img16);
+                                        tItem.Glyph = Image.FromStream(ms);
+                                        ms.Dispose();
+                                    }
+                                }
+
+                                if (!DBNull.Value.Equals(ds_Items.Tables[0].Rows[i]["LKP_GLYPH32"]))
+                                {
+                                    byte[] img32 = (byte[])ds_Items.Tables[0].Rows[i]["LKP_GLYPH32"];
+                                    if (img32 != null)
+                                    {
+                                        MemoryStream ms = new MemoryStream(img32);
+                                        tItem.Glyph = Image.FromStream(ms);
+                                        ms.Dispose();
+                                    }
+                                }
+                                #endregion Image set
+
+
                                 int i3 = mControl.Buttons.Count;
                                 for (int i2 = 0; i2 < i3; i2++)
                                 {
-                                    if (mControl.Buttons[i2].Element.Name.ToString() == ustItemName)
+                                    if (mControl.Buttons[i2].Element.GetType().ToString() == "DevExpress.XtraBars.Navigation.TileNavCategory")
                                     {
-                                        ((TileNavCategory)mControl.Buttons[i2].Element).Items.Add(tItem);
-                                        break;
-                                    }
-                                }
-                            }
-                            if (ustItemType == 201)
-                            {
-                                int i3 = mControl.Categories.Count;
-                                for (int i2 = 0; i2 < i3; i2++)
-                                {
-                                    if (mControl.Categories[i2].Name.ToString() == ustItemName)
-                                    {
-                                        ((TileNavCategory)mControl.Categories[i2]).Items.Add(tItem);
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-
-                        // TileNavItem ise
-                        if (ustItemType == 206)
-                        {
-                            TileNavSubItem tItem = new TileNavSubItem();
-
-                            tItem.Appearance.Name = formName;
-                            tItem.Name = itemName;
-                            if (t.IsNotNull(CmpName))
-                                tItem.Name = CmpName;
-                            tItem.Caption = itemCaption;
-                            tItem.Tile.Text = itemCaption;
-                            if (t.IsNotNull(shortcut_keys))
-                                tItem.Tile.Text = itemCaption + "   <i>" + shortcut_keys + "</i>";
-                            tItem.Tile.AllowHtmlText = DefaultBoolean.True;
-
-                            tItem.Enabled = tenabled;
-                            tItem.Visible = tvisible;
-                            if (t.IsNotNull(Prop_Navigator))
-                                tItem.Tag = Prop_Navigator + "|Prop_Navigator|";
-                            if (t.IsNotNull(menuName))
-                                tItem.Tag += menuName + "|MenuName|";
-
-                            tItem.Appearance.BackColor = v.colorNew;
-                            tItem.AppearanceHovered.BackColor = v.colorFocus;
-                            //tItem.AppearanceSelected.BackColor = v.colorSave;
-                            tItem.Appearance.Options.UseBackColor = true;
-                            tItem.AppearanceHovered.Options.UseBackColor = true;
-                            tItem.AppearanceSelected.Options.UseBackColor = true;
-
-                            if (clickEvents > 0)
-                            {
-                                tItem.ElementClick += new DevExpress.XtraBars.Navigation.NavElementClickEventHandler(evm.tNavButton_ElementClick);
-                            }
-
-                            #region Image set
-                            if (!DBNull.Value.Equals(ds_Items.Tables[0].Rows[i]["LKP_GLYPH16"]))
-                            {
-                                byte[] img16 = (byte[])ds_Items.Tables[0].Rows[i]["LKP_GLYPH16"];
-                                if (img16 != null)
-                                {
-                                    MemoryStream ms = new MemoryStream(img16);
-                                    tItem.Glyph = Image.FromStream(ms);
-                                    ms.Dispose();
-                                }
-                            }
-
-                            if (!DBNull.Value.Equals(ds_Items.Tables[0].Rows[i]["LKP_GLYPH32"]))
-                            {
-                                byte[] img32 = (byte[])ds_Items.Tables[0].Rows[i]["LKP_GLYPH32"];
-                                if (img32 != null)
-                                {
-                                    MemoryStream ms = new MemoryStream(img32);
-                                    tItem.Glyph = Image.FromStream(ms);
-                                    ms.Dispose();
-                                }
-                            }
-                            #endregion Image set
-
-
-                            int i3 = mControl.Buttons.Count;
-                            for (int i2 = 0; i2 < i3; i2++)
-                            {
-                                if (mControl.Buttons[i2].Element.GetType().ToString() == "DevExpress.XtraBars.Navigation.TileNavCategory") 
-                                {
-                                    int i5 = ((TileNavCategory)mControl.Buttons[i2].Element).Items.Count;
-                                    for (int i4 = 0; i4 < i5; i4++)
-                                    {
-                                        //if (mControl.Buttons[i2].Element.Name.ToString() == ustItemName)
-                                        if (((TileNavCategory)mControl.Buttons[i2].Element).Items[i4].Name.ToString() == ustItemName)
+                                        int i5 = ((TileNavCategory)mControl.Buttons[i2].Element).Items.Count;
+                                        for (int i4 = 0; i4 < i5; i4++)
                                         {
-                                            ((TileNavCategory)mControl.Buttons[i2].Element).Items[i4].SubItems.Add(tItem);
-                                            break;
+                                            //if (mControl.Buttons[i2].Element.Name.ToString() == ustItemName)
+                                            if (((TileNavCategory)mControl.Buttons[i2].Element).Items[i4].Name.ToString() == ustItemName)
+                                            {
+                                                ((TileNavCategory)mControl.Buttons[i2].Element).Items[i4].SubItems.Add(tItem);
+                                                break;
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
                     }
-                }
-                #endregion / TileNavItem
+                    #endregion / TileNavItem
 
-                #region // Mali Dönem - YilAy
-                if ((t.IsNotNull(itemName) == false) &&
-                    (itemType == 211))
-                {
-                    /*
-                    NavButton tItemBack = new DevExpress.XtraBars.Navigation.NavButton();
-                    NavButton tItemNext = new DevExpress.XtraBars.Navigation.NavButton();
-
-                    //mControl.Name
-
-                    itemName = "item_";
-                    Preparing_ButtonName(21, ref itemName);
-                    tItemBack.Name = itemName;
-                    tItemBack.Caption = "<";
-                    tItemBack.Appearance.Name = formName;
-                    tItemBack.Tag = mControl.Name + "|ControlName|";
-
-                    itemName = "item_";
-                    Preparing_ButtonName(22, ref itemName);
-                    tItemNext.Name = itemName;
-                    tItemNext.Caption = ">";
-                    tItemNext.Appearance.Name = formName;
-                    tItemNext.Tag = mControl.Name + "|ControlName|";
-
-                    tItemBack.ElementClick += new DevExpress.XtraBars.Navigation.NavElementClickEventHandler(evm.tNavButton_ElementClick);
-                    tItemNext.ElementClick += new DevExpress.XtraBars.Navigation.NavElementClickEventHandler(evm.tNavButton_ElementClick);
-
-                    //itemName = "item_" + refid;
-                    //if (clickEvents > 0)
-                    //    Preparing_ButtonName(clickEvents, ref itemName);
-
-                    // ilk defa çalıştı ve henüz atama yapılmamış ise 
-                    if (v.DONEMTIPI_YILAY == 0)
-                        v.DONEMTIPI_YILAY = v.BUGUN_YILAY;
-
-                    NavButton tItem = new DevExpress.XtraBars.Navigation.NavButton();
-
-                    tItem.Appearance.Name = formName;
-                    //tItem.Name = itemName;
-                    tItem.Name = "item_YILAY";
-                    tItem.Caption = evm.getYilAyCaption(v.DONEMTIPI_YILAY);
-
-                    evm.changeColorYILAY(mControl, 0, tItem);
-                    
-                    // itemCaption = Belge Türü Seçin
-                    if (t.IsNotNull(shortcut_keys))
+                    #region // Mali Dönem - YilAy
+                    if ((t.IsNotNull(itemName) == false) &&
+                        (itemType == 211))
                     {
+                        /*
+                        NavButton tItemBack = new DevExpress.XtraBars.Navigation.NavButton();
+                        NavButton tItemNext = new DevExpress.XtraBars.Navigation.NavButton();
 
-                        if ((shortcut_keys == "SHORTCUT_BUTTON") |
-                            (shortcut_keys == "SHORTCUT"))
+                        //mControl.Name
+
+                        itemName = "item_";
+                        Preparing_ButtonName(21, ref itemName);
+                        tItemBack.Name = itemName;
+                        tItemBack.Caption = "<";
+                        tItemBack.Appearance.Name = formName;
+                        tItemBack.Tag = mControl.Name + "|ControlName|";
+
+                        itemName = "item_";
+                        Preparing_ButtonName(22, ref itemName);
+                        tItemNext.Name = itemName;
+                        tItemNext.Caption = ">";
+                        tItemNext.Appearance.Name = formName;
+                        tItemNext.Tag = mControl.Name + "|ControlName|";
+
+                        tItemBack.ElementClick += new DevExpress.XtraBars.Navigation.NavElementClickEventHandler(evm.tNavButton_ElementClick);
+                        tItemNext.ElementClick += new DevExpress.XtraBars.Navigation.NavElementClickEventHandler(evm.tNavButton_ElementClick);
+
+                        //itemName = "item_" + refid;
+                        //if (clickEvents > 0)
+                        //    Preparing_ButtonName(clickEvents, ref itemName);
+
+                        // ilk defa çalıştı ve henüz atama yapılmamış ise 
+                        if (v.DONEMTIPI_YILAY == 0)
+                            v.DONEMTIPI_YILAY = v.BUGUN_YILAY;
+
+                        NavButton tItem = new DevExpress.XtraBars.Navigation.NavButton();
+
+                        tItem.Appearance.Name = formName;
+                        //tItem.Name = itemName;
+                        tItem.Name = "item_YILAY";
+                        tItem.Caption = evm.getYilAyCaption(v.DONEMTIPI_YILAY);
+
+                        evm.changeColorYILAY(mControl, 0, tItem);
+
+                        // itemCaption = Belge Türü Seçin
+                        if (t.IsNotNull(shortcut_keys))
                         {
-                            itemName = "item_SHORTCUT_" + refid;
 
-                            // event bağlansın
-                            if (clickEvents == 0)
-                                clickEvents = 99;
+                            if ((shortcut_keys == "SHORTCUT_BUTTON") |
+                                (shortcut_keys == "SHORTCUT"))
+                            {
+                                itemName = "item_SHORTCUT_" + refid;
+
+                                // event bağlansın
+                                if (clickEvents == 0)
+                                    clickEvents = 99;
+                                else
+                                    Preparing_ButtonName(clickEvents, ref itemName);
+
+                                tItem.Name = itemName;
+                            }
                             else
-                                Preparing_ButtonName(clickEvents, ref itemName);
+                                tItem.Caption = itemCaption + "   : " + shortcut_keys;
 
-                            tItem.Name = itemName;
+                            //tItem.Caption = itemCaption + "   <i>" + shortcut_keys + "</i>";
+                            //tItem.  AllowHtmlText = DefaultBoolean.True;
                         }
-                        else
-                            tItem.Caption = itemCaption + "   : " + shortcut_keys;
 
-                        //tItem.Caption = itemCaption + "   <i>" + shortcut_keys + "</i>";
-                        //tItem.  AllowHtmlText = DefaultBoolean.True;
-                    }
+                        tItem.Enabled = tenabled;
+                        tItem.Visible = tvisible;
+                        if (t.IsNotNull(Prop_Navigator))
+                            tItem.Tag = Prop_Navigator + "|Prop_Navigator|";
 
-                    tItem.Enabled = tenabled;
-                    tItem.Visible = tvisible;
-                    if (t.IsNotNull(Prop_Navigator))
-                        tItem.Tag = Prop_Navigator + "|Prop_Navigator|";
+                        if ((DockType == v.dock_None) | (DockType == v.dock_Left))
+                            tItem.Alignment = NavButtonAlignment.Left;
+                        if (DockType == v.dock_Right)
+                            tItem.Alignment = NavButtonAlignment.Right;
 
-                    if ((DockType == v.dock_None) | (DockType == v.dock_Left))
-                        tItem.Alignment = NavButtonAlignment.Left;
-                    if (DockType == v.dock_Right)
-                        tItem.Alignment = NavButtonAlignment.Right;
+                        if (clickEvents > 0)
+                            tItem.ElementClick += new DevExpress.XtraBars.Navigation.NavElementClickEventHandler(evm.tNavButton_ElementClick);
 
-                    if (clickEvents > 0)
-                        tItem.ElementClick += new DevExpress.XtraBars.Navigation.NavElementClickEventHandler(evm.tNavButton_ElementClick);
-
-                    #region Image set
-                    if (!DBNull.Value.Equals(ds_Items.Tables[0].Rows[i]["LKP_GLYPH16"]))
-                    {
-                        byte[] img16 = (byte[])ds_Items.Tables[0].Rows[i]["LKP_GLYPH16"];
-                        if (img16 != null)
+                        #region Image set
+                        if (!DBNull.Value.Equals(ds_Items.Tables[0].Rows[i]["LKP_GLYPH16"]))
                         {
-                            MemoryStream ms = new MemoryStream(img16);
-                            tItem.Glyph = Image.FromStream(ms);
-                            ms.Dispose();
+                            byte[] img16 = (byte[])ds_Items.Tables[0].Rows[i]["LKP_GLYPH16"];
+                            if (img16 != null)
+                            {
+                                MemoryStream ms = new MemoryStream(img16);
+                                tItem.Glyph = Image.FromStream(ms);
+                                ms.Dispose();
+                            }
                         }
-                    }
 
-                    if (!DBNull.Value.Equals(ds_Items.Tables[0].Rows[i]["LKP_GLYPH32"]))
-                    {
-                        byte[] img32 = (byte[])ds_Items.Tables[0].Rows[i]["LKP_GLYPH32"];
-                        if (img32 != null)
+                        if (!DBNull.Value.Equals(ds_Items.Tables[0].Rows[i]["LKP_GLYPH32"]))
                         {
-                            MemoryStream ms = new MemoryStream(img32);
-                            tItem.Glyph = Image.FromStream(ms);
-                            ms.Dispose();
+                            byte[] img32 = (byte[])ds_Items.Tables[0].Rows[i]["LKP_GLYPH32"];
+                            if (img32 != null)
+                            {
+                                MemoryStream ms = new MemoryStream(img32);
+                                tItem.Glyph = Image.FromStream(ms);
+                                ms.Dispose();
+                            }
                         }
-                    }
-                    #endregion Image set
+                        #endregion Image set
 
-                    mControl.Buttons.Add(tItemBack);
-                    mControl.Buttons.Add(tItem);
-                    mControl.Buttons.Add(tItemNext);
-                    */
+                        mControl.Buttons.Add(tItemBack);
+                        mControl.Buttons.Add(tItem);
+                        mControl.Buttons.Add(tItemNext);
+                        */
+                    }
+                    #endregion Mali Dönem
                 }
-                #endregion Mali Dönem
 
                 //tileNavItemSettings.Appearance.Options.UseBackColor = true;
                 //tileNavItemSettings.Appearance.BackColor = Color.LightBlue;
@@ -2777,13 +2786,17 @@ namespace Tkn_Menu
             Boolean tvisible = false;
             DataRow UstHesapRow = null;
 
-            // Groups detail items
             foreach (DevExpress.XtraToolbox.ToolboxGroup pGroup in mControl.Groups)
             {
                 pGroup.Items.Clear();
             }
 
-            mControl.Groups.Clear();
+            //if (mControl.Groups.Count > 1)
+            //    mControl.Groups.Clear();
+
+            while (mControl.Groups.Count > 0)
+                mControl.Groups.RemoveAt(0);
+
 
             for (int i = 0; i < itemCount; i++)
             {
@@ -2894,6 +2907,9 @@ namespace Tkn_Menu
                     //if (group_count == 1) pGroup
 
                     group_count++;
+
+                    //if (mControl.Groups == null)
+
                     mControl.Groups.Add(pGroup);
                 }
                 #endregion group

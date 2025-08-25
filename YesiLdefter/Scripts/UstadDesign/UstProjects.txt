@@ -1,0 +1,21 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table dbo.UstProjects
+ (
+    Id              Int IDENTITY(1,1)     not null,
+    ProjectName     NVARCHAR(100) NOT NULL,
+    ProjectCode     CHAR(3) NOT NULL,
+    FullCode AS     ProjectCode PERSISTED
+
+	Constraint PK_UstProjects primary key (Id)
+ )
+
+ create index X_UstProjects01 on dbo.UstProjects (ProjectCode)
+
+ grant select, insert, update, delete on dbo.UstProjects to public
+
+commit transaction
+
+/*CreateTableEnd*/

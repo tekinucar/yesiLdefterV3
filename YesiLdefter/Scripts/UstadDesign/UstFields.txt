@@ -1,0 +1,59 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table UstFields
+ (
+        Id                 Int IDENTITY(1,1) not null,
+        TableId            Int               not null,
+
+        ProjectCode        nVarChar(3)       null,
+        ModuleCode         nVarChar(3)       null,
+        ClassCode          nVarChar(3)       null,
+        TableCode          nVarChar(50)      null, /* Aslında table alias dır */
+        FullTableCode      nVarChar(70)      null, /* ProjectCode + '-' + ModuleCode + '-' + TableAlias */ 
+
+        FieldNo            SmallInt          null,
+        FieldName          VarChar(50)       null,
+        FieldTypeId        SmallInt          null,
+        FieldLength        VarChar(6)        null,
+
+        Caption            nVarChar(50)      null, 
+        Hint               nVarChar(100)     null, /* PlaceholderText için kullanabilirsin */
+                
+        IsAutoInc          Bit               null,
+        IsNotNull          Bit               null,
+        IsLookUp           Bit               null, /* Lkp.TableNameFieldName ( isimdeki Id si yok )  */
+        IsPicture          Bit               null,
+        IsTrigger          Bit               null,
+        IsMemory           Bit               null,
+        IsJoinTableField   Bit               null,
+        
+        GroupNo            SmallInt          null,
+        GroupLineNo        SmallInt          null,
+
+        ComponentTypeId    SmallInt          null,
+        DisplayFormat      VarChar(50)       null, /* Örnek : 'dd/MM/yyyy' gibi */
+        EditFormat         VarChar(50)       null, /* Örnek : 'dd/MM/yyyy' gibi */
+
+        IsLookUpTable      Bit               null, /* Diğer tablolarda ortak kullanılacak tablolar (DonemTipiId, UlkeTipiId, IlTipiId vb..) Heryerde LookUp fieldin yetmediği detaylı bir liste gerekiyorsa SecilmisPersonelListesi gibi */
+        LockUpTableIPCode  VarChar(50)       null, /* LockUpTableIPCode : eski ListTypeName yerine kullanılır. */
+
+        IsDependentField   Bit               null, /* (Aynı tabloda kendisinin bağlı olduğu fieldName : Örnek : Kendisi <IlceKodu> bağlı olduğu dependantFieldName <ILKodu> isimli diğer field  ) */
+        PropDependent      VarChar(Max)      null, /* bağlı olduğu field nedir, hangi tableIPCode ile liste okuyacak gibi bilgiler oluşacak, class hazır değil */
+        
+        IsExpression       Bit               null,
+        PropExpression     VarChar(Max)      null,
+
+	Constraint pk_UstFields primary key (Id)
+ )
+
+ create index X_UstFields01 on UstFields (TableCode, FieldNo)
+
+ grant select, insert, update, delete on UstFields to public
+
+
+commit transaction
+
+/*CreateTableEnd*/
+

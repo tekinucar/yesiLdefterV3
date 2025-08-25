@@ -1,0 +1,171 @@
+﻿
+/*CREATE SCHEMA [Lkp] */
+
+/*CreateTable*/
+
+begin transaction
+
+ create table dbo.UstTables
+ (
+        Id                 Int IDENTITY(1,1) not null,
+        DbTypeId		   SmallInt          not null, /*  */
+
+        ProjectCode        nVarChar(3)       null,
+        ModuleCode         nVarChar(3)       null,
+        ClassCode          nVarChar(3)       null,
+        FullTableCode      nVarChar(70)      null, /* ProjectCode + '-' + ModuleCode + '-' + TableCode  veya  ProjectCode + '-' + ModuleCode + '-' + TableAlias */
+
+        SchemaName         VarChar(3)        null, /* boş bırakılırsa dbo kullanılır */       
+        TableName          VarChar(50)       null,
+        TableCode          VarChar(50)       null, /* Aslında table alias dır */
+        KefFieldName       VarChar(30)       null,
+        LockFieldName      VarChar(30)       null,
+        Caption            nVarChar(100)     null,   
+        StoredProcudeName  VarChar(100)      null,
+        
+        WorkTypeId         SmallInt          null, 
+        SelectSql          VarChar(Max)      null,
+        PropJoinTables     VarChar(Max)      null,
+
+	Constraint pk_UstTables primary key (Id)
+ )
+
+ create index X_UstTables01 on dbo.UstTables (FullTableCode)
+
+ grant select, insert, update, delete on UstTables to public
+
+
+commit transaction
+
+/*CreateTableEnd*/
+
+
+/*CreateTrigger*/
+
+/*CreateTriggerEnd*/
+
+
+/*CreateLkpTable*/
+
+begin transaction
+
+-- ------------------------------------------------------- 
+-- DbTypeId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'UstTablesDbType')
+drop table [Lkp].[UstTablesWorkType]
+
+create table [Lkp].[UstTablesDbType]
+(
+   Id               Int Unique not null, 
+   DbType           nVarchar(20)   null
+
+   constraint  pk_UstTablesDbType primary key (Id)
+)
+
+Delete from [Lkp].[UstTablesDbType]
+INSERT INTO [Lkp].[UstTablesDbType] (Id, DbType)
+ VALUES 
+  ( 0,    N'Seçiniz'),
+  ( 1,    N'Master'),
+  ( 2,    N'UstadDesign'),
+  ( 3,    N'UstadCrm'),
+  ( 4,    N'Project'),
+  ( 5,    N'Local'),
+  ( 6,    N'NewDatabase'),
+  ( 7,    N'UstadDesignLive'),
+  ( 8,    N'AktrilacakDb')
+
+
+-- ------------------------------------------------------- 
+-- WorkTypeId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'UstTablesWorkType')
+drop table [Lkp].[UstTablesWorkType]
+
+create table [Lkp].[UstTablesWorkType]
+(
+   Id               Int Unique not null, 
+   WorkType         nVarchar(20)   null
+
+   constraint  pk_UstTablesWorkType primary key (Id)
+)
+
+Delete from [Lkp].[UstTablesWorkType]
+INSERT INTO [Lkp].[UstTablesWorkType] (Id, WorkType)
+ VALUES 
+  ( 0,    N'Seçiniz'),
+  ( 1,    N'Table'),
+  ( 2,    N'View'),
+  ( 3,    N'Stored Procedure'),
+  ( 4,    N'Function'),
+  ( 5,    N'Trigger'),
+  ( 6,    N'Select')
+
+
+commit transaction
+
+/*CreateLkpTableEnd*/
+
+
+
+/*
+create table [Lkp].[UpTablesProjectCode]
+(
+   Id                  Int            Unique not null, 
+   ProjectCode         VarChar(5)     Unique not null, 
+   ProjectName         nVarchar(50)   null,
+
+   constraint  pk_UpTablesProjectCode primary key (Id)
+)
+
+Delete from [Lkp].[UpTablesProjectCode]
+INSERT INTO [Lkp].[UpTablesProjectCode] (Id, ProjectCode, ProjectName)
+ VALUES 
+  ( 110, N'OMS', N'Ön Muhasebe'),
+  ( 120, N'RSM', N'Resmi Muhasebe'),
+  ( 130, N'IK',  N'İnsan Kaynakları'),
+  ( 210, N'MEB', N'Milli Eğitim Bakanlığı'),
+  ( 490, N'UST', N'Ustad Project Managment Studio')
+
+
+
+
+create table [Lkp].[UpTablesModulCode]
+(
+   Id                  Int            Unique not null, 
+   ProjectCode         VarChar(5)     not null,
+   ModulCode           VarChar(5)     not null, 
+   ModulName           nVarchar(50)   null,
+
+   constraint  pk_UpTablesModulCode primary key (Id)
+)
+
+Delete from [Lkp].[UpTablesModulCode]
+INSERT INTO [Lkp].[UpTablesModulCode] (Id, ProjectCode, ModulCode, ModulName)
+ VALUES 
+  ( 11001, N'OMS', N'AYR', N'Ayarlar'),
+  ( 11002, N'OMS', N'CAR', N'Cari'),
+  ( 11003, N'OMS', N'IDA', N'İdari İşler'),
+  ( 11004, N'OMS', N'FNS', N'Mali İşler'),
+  ( 11005, N'OMS', N'STA', N'Satın Alma'),
+  ( 11006, N'OMS', N'STS', N'Satış'),
+  ( 11007, N'OMS', N'STK', N'Stok'), 
+
+  ( 12001, N'RSM', N'AYR', N'Ayarlar'),
+  
+  ( 21001, N'MEB', N'MTS', N'Mtsk'),
+  ( 21002, N'MEB', N'OKL', N'Okul'),
+  ( 21003, N'MEB', N'SRC', N'Src'),
+  ( 21004, N'MEB', N'YDL', N'Yabancı Dil'),
+  ( 21005, N'MEB', N'ISM', N'İşMak')
+
+
+
+
+        
+
+
+
+commit transaction
+*/

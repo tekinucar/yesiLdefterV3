@@ -42,6 +42,12 @@ begin transaction
    KdvUygulanmaz       Bit           null,
    TevkifatUygulanmaz  Bit           null,
    EkVergiUygulanmaz   Bit           null,
+
+   BankaHesapKodu      nVarchar(30)  null, /* Banka hesap kodu */
+   BankaAdi            nVarchar(50)  null,
+   BankaSubeAdi        nVarchar(50)  null,
+   BankaHesapNo        nVarchar(50)  null,
+   BankaIbanNo         nVarchar(50)  null,
    
    constraint  pk_OnmHesapCari primary key (Id)
  )
@@ -62,6 +68,17 @@ begin transaction
 
  /*CreateTableEnd*/
 
+ /*
+ 
+ alter table OnmHesapCari add   BankaHesapKodu      nVarchar(30)  null
+ alter table OnmHesapCari add   BankaAdi            nVarchar(50)  null
+ alter table OnmHesapCari add   BankaSubeAdi        nVarchar(50)  null
+ alter table OnmHesapCari add   BankaHesapNo        nVarchar(50)  null
+ alter table OnmHesapCari add   BankaIbanNo         nVarchar(50)  null
+ 
+ */
+ 
+ 
  /*CreateLkpTable*/
 
  begin transaction

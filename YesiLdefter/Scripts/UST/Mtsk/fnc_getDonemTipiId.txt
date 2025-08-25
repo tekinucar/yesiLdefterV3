@@ -14,6 +14,13 @@ BEGIN
     if (@DonemAdi = 'BUGÜN') Return @BugunDonemTipiId
 	if (@DonemAdi = 'GELECEK') Return @GelecekDonemTipiId
 
+	if TRY_CONVERT(date, @DonemAdi) IS NOT NULL
+    begin
+	    set @Bugun = TRY_CONVERT(date, @DonemAdi); 
+        set @BugunDonemTipiId = YEAR(@Bugun) * 100 + MONTH(@Bugun);
+        Return @BugunDonemTipiId
+	end
+
 	Return @BugunDonemTipiId
 END
 

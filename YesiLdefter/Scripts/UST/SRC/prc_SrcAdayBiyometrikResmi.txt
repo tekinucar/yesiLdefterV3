@@ -1,0 +1,40 @@
+﻿/*CreateProcedure*/
+
+
+CREATE PROCEDURE [dbo].[prc_SrcAdayBiyometrikResmi] (@AdayId int)  
+AS BEGIN
+   
+--declare @DonemTipiId Int = 202101
+  declare @TamAdiSoyadi nvarchar(100)
+  declare @TcNo varchar(11)
+
+  Select  
+    @AdayId = aday.Id
+  , @TamAdiSoyadi = aday.TamAdiSoyadi
+  , @TcNo = aday.TcNo
+  From dbo.SrcAday as aday
+  Where aday.Id = @AdayId 
+
+  Select 
+    Id as Id
+  , TamAdiSoyadi, TcNo
+  , 'Biyometrik' as LkpImageType
+  , 'Biyometrik' as LkpBelgeAdi
+  , 'SrcAday' as LkpTableName
+  , 'BiyometrikResim' as LkpFieldName
+  , 'BiyometrikResimSmall' as LkpSmallFieldName
+  , 'Id' as LkpMasterIdValue
+  , 'Id' as LkpIdFieldName
+  , BiyometrikResim as LkpImage
+  , BiyometrikResimSmall as LkpSmallImage
+  , 394 as LkpWidth
+  , 512 as LkpHeight
+  , 400 as LkpDpi
+
+  From dbo.SrcAday
+  Where Id = @AdayId
+
+END -- procedure
+
+
+/*CreateProcedureEnd*/

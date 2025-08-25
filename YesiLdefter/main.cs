@@ -457,6 +457,10 @@ namespace YesiLdefter
                     autoOpenForm("UST/MEB/MTS/YHYasamDongusu", "");
                 //autoOpenForm("UST/MEB/MTS/YHBaslangic","");
 
+                if ((v.SP_TabimParamsKurumTipi == "") &&
+                    ((v.SP_Firm_SectorTypeId == (Int16)v.msSectorType.UstadSrc) ||
+                    (v.SP_Firm_SectorTypeId == (Int16)v.msSectorType.TabimSrc)))
+                    autoOpenForm("UST/MEB/SRC/YHSrcYasamDongusu", "");
 
                 ///// şimdilik geçici burada. Daha sonra günde bir defa çalışacak şekilde ayarlamak gerekiyor
                 ///// 

@@ -800,16 +800,19 @@
     <Content Include="Scripts\SEK\InfazKurumu\prc_EylemPlani.txt" />
     <Content Include="Scripts\SEK\InfazKurumu\prc_SayimIcmali.txt" />
     <Content Include="Scripts\SEK\InfazKurumu\tablolar.txt" />
-    <Content Include="Scripts\upms\00_createDatabas.txt" />
-    <Content Include="Scripts\upms\LkpUpTablesIPPlatforms.txt" />
-    <Content Include="Scripts\upms\UpFields.txt" />
-    <Content Include="Scripts\upms\UpFieldsIP.txt" />
-    <Content Include="Scripts\upms\UpGroupsOfFields.txt" />
-    <Content Include="Scripts\upms\UpGroupsOfFieldsIP.txt" />
-    <Content Include="Scripts\upms\UpModuls.txt" />
-    <Content Include="Scripts\upms\UpProjects.txt" />
-    <Content Include="Scripts\upms\UpTables.txt" />
-    <Content Include="Scripts\upms\UpTablesIP.txt" />
+    <Content Include="Scripts\UstadDesign\00_createDatabas.txt" />
+    <Content Include="Scripts\UstadDesign\sp_FindTypeIdColumns.txt" />
+    <Content Include="Scripts\UstadDesign\sp_GenerateTableScript.txt" />
+    <Content Include="Scripts\UstadDesign\sp_GenerateLookupScript.txt" />
+    <Content Include="Scripts\UstadDesign\UstFieldsIP.txt" />
+    <Content Include="Scripts\UstadDesign\UstFields.txt" />
+    <Content Include="Scripts\UstadDesign\UpGroupsOfFields.txt" />
+    <Content Include="Scripts\UstadDesign\UpGroupsOfFieldsIP.txt" />
+    <Content Include="Scripts\UstadDesign\UstClasses.txt" />
+    <Content Include="Scripts\UstadDesign\UstModuls.txt" />
+    <Content Include="Scripts\UstadDesign\UstProjects.txt" />
+    <Content Include="Scripts\UstadDesign\UstTables.txt" />
+    <Content Include="Scripts\UstadDesign\UstTablesIP.txt" />
     <Content Include="Scripts\UST\Hub\HubGecerlilikTarihi.txt" />
     <Content Include="Scripts\UST\Hub\HubMtskSaatTeorik.txt" />
     <Content Include="Scripts\UST\Hub\HubMtskSaatUygulama.txt" />
@@ -955,7 +958,7 @@
     <Content Include="Scripts\UST\Mtsk\prc_MtskUygulamaDersInsert.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskUygulamaDersPlanHazirlaManuel.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskUygulamaDersPlaniListele.txt" />
-    <Content Include="Scripts\UST\Mtsk\prc_MtskUygulamaliDersBorclandir.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskUygulamaDersBorclandir.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_setIsDbUpdateActive.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayNoVer.txt" />
     <Content Include="Scripts\UST\Mtsk\fnc_getHaftaBasiSonu.txt" />
@@ -1029,9 +1032,15 @@
     <Content Include="Scripts\UST\Mtsk\prc_MtskUygulamaDersPlaniOlustur.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskUygulamaDersPlaniSaatleriGuncelle_IPTAL.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmEFaturaSettings.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmMaasBilgisi.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmMaasEkGelirler.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmMaasEkKesintiler.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmMaasHesaplari.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmBelgeDekontOzetler.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmBelgeStokS_SatirlariniTopla.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmHesapBakiyesiHesapla.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmMaasHesaplari.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmMaasHesaplariKayit.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\Settings.txt" />
     <Content Include="Scripts\UST\Mtsk\TempTabimBankalar.txt" />
     <Content Include="Scripts\UST\Mtsk\TempTabimHesaplar.txt" />
@@ -1134,6 +1143,22 @@
     <Content Include="Scripts\UST\OnMuhasebe\trg_IBelgeStokAdres.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\trg_Yeni.txt" />
     <Content Include="Scripts\UST\ResmiMuhasebe\HesapPlani.txt" />
+    <Content Include="Scripts\UST\SRC\DbUpdates.txt" />
+    <Content Include="Scripts\UST\SRC\Lkp_SrcGrupTipi.txt" />
+    <Content Include="Scripts\UST\SRC\Lkp_MtskSertifikaTipi.txt" />
+    <Content Include="Scripts\UST\SRC\Lkp_SrcSubeTipi.txt" />
+    <Content Include="Scripts\UST\SRC\Lkp_SrcDonemTipi.txt" />
+    <Content Include="Scripts\UST\SRC\Lkp_SrcSertifikaTipi.txt" />
+    <Content Include="Scripts\UST\SRC\SrcUcretUygulama.txt" />
+    <Content Include="Scripts\UST\SRC\SrcAdayUcret.txt" />
+    <Content Include="Scripts\UST\SRC\SrcAdayBelgeler.txt" />
+    <Content Include="Scripts\UST\SRC\SrcGrupSubesi.txt" />
+    <Content Include="Scripts\UST\SRC\SrcDonemi.txt" />
+    <Content Include="Scripts\UST\SRC\prc_SrcAdayBiyometrikResmi.txt" />
+    <Content Include="Scripts\UST\SRC\prc_SrcAdayBelgeResimleri.txt" />
+    <Content Include="Scripts\UST\SRC\SrcAdayTakip.txt" />
+    <Content Include="Scripts\UST\SRC\SrcAdayTalep.txt" />
+    <Content Include="Scripts\UST\SRC\SrcAday.txt" />
     <Content Include="Scripts\UST\TabimMtsk\prc_KursiyerSinavDurumu.txt" />
     <Content Include="Scripts\UST\TabimMtsk\SinavTar_Update.txt" />
     <Content Include="Scripts\UST\TabimMtsk\KursiyerFatura.txt" />
@@ -1299,7 +1324,9 @@
     <Content Include="Treetog-I-Contacts.ico" />
     <Content Include="yesiLdefter.ico" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="UIDesignV4\" />
+  </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.6.1">
       <Visible>False</Visible>
@@ -1308,7 +1335,7 @@
     </BootstrapperPackage>
     <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
       <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1 </ProductName>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>

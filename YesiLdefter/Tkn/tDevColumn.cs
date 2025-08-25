@@ -462,7 +462,8 @@ namespace Tkn_DevColumn
                 if (fields != "" && tableName.ToUpper().IndexOf("DBO.") > -1)
                     Sql = " Select " + fields + " from " + tableName + "  ";
 
-
+                if (tableName == "SrcDonemTipi")
+                    Sql = " Select * from [Lkp].[SrcDonemTipi] order by Id desc ";
                 if (tableName == "HubBildirimSablonlari")
                     Sql = " Select * from [dbo].[HubBildirimSablonlari] where IsActive = 1 ";
                 if (tableName.IndexOf("SectorType") > -1)

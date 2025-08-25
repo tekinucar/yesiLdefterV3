@@ -1,0 +1,55 @@
+﻿  
+  /*CreateTable*/ 
+  
+  begin transaction 
+  
+  create table dbo.OnmMaasEkKesintiler 
+  ( 
+    Id                 Int IDENTITY(1,1) not null, 
+    FirmId             Int               not null, 
+    IsActive           Bit               null, 
+
+    SiraNo             SmallInt          null, /* Sıra No */
+    EkKesintiTipiAdi   nVarChar(50)      null, /* Ek Kesinti Tipi Adı */  
+    KesintiTipiId      SmallInt          null, /* Ek Kesinti Tipi Id si : 0. Kullanıcı kesecek, 1. Her ay kesilecek, 2. Çalışma günü kadar kesilecek */
+    KesintiTutari      Numeric(22,5)     null, /* Ek Kesinti Tutarı : 1. de KesintiTutarin tamamı, 2. Çalışma Günü x KesintiTutari */
+    IsLock             Bit               null, /* Bu Kesinti hesabı OnmMaasHesaplari satırlarında kullanıldıysa kilitle */
+
+    Constraint pk_OnmMaasEkKesintiler primary key (Id) 
+  ) 
+  
+  create index X_OnmMaasEkKesintiler_01 on dbo.OnmMaasEkKesintiler (FirmId, SiraNo) 
+  
+  grant select, insert, update, delete on dbo.OnmMaasEkKesintiler to public 
+  
+  commit transaction 
+  
+  /*CreateTableEnd*/ 
+  
+
+  /*CreateLkpTable*/ 
+
+  -- ------------------------------------------------------- 
+  -- KesintiTipiId
+  -- ------------------------------------------------------- 
+  IF EXISTS (SELECT * FROM sys.objects WHERE name = 'OnmMaasEkKesintilerKesintiTipi') 
+  DROP TABLE [Lkp].[OnmMaasEkKesintilerKesintiTipi] 
+  
+  CREATE TABLE [Lkp].[OnmMaasEkKesintilerKesintiTipi] 
+  ( 
+   Id               INT UNIQUE NOT NULL, 
+   KesintiTipi   NVARCHAR(50)   NULL, 
+   
+   CONSTRAINT pk_OnmMaasEkKesintilerKesintiTipi PRIMARY KEY (Id) 
+  ) 
+  
+  DELETE FROM [Lkp].[OnmMaasEkKesintilerKesintiTipi] 
+  INSERT INTO [Lkp].[OnmMaasEkKesintilerKesintiTipi] (Id, KesintiTipi) 
+  VALUES 
+    (0, N'Tanımsız'), 
+    (1, N'Kullanıcı kesecek'), 
+    (2, N'Her ay kesilecek')--, 
+    --(3, N'Çalışma günü kadar kesilecek')
+
+
+  /*CreateLkpTableEnd*/ 

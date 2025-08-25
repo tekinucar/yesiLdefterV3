@@ -8451,14 +8451,19 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             string Sql = "";
 
             TableRemove(v.ds_DonemTipiList);
-
+            
             if ((v.tMainFirm.SectorTypeId == (Int16)v.msSectorType.UstadMtsk) ||
                 (v.tMainFirm.SectorTypeId == (Int16)v.msSectorType.TabimMtsk) ||
                 (v.tMainFirm.SectorTypeId == (Int16)v.msSectorType.TabimSrc) ||
                 (v.tMainFirm.SectorTypeId == (Int16)v.msSectorType.TabimIsmak))
             {
                 tableName = "MtskDonemTipi";
-                Sql = " Select top 100 * from [Lkp].[" + tableName + "] order by Id desc ";
+                Sql = " Select * from [Lkp].[" + tableName + "] order by Id desc ";
+            }
+            else if (v.tMainFirm.SectorTypeId == (Int16)v.msSectorType.UstadSrc)
+            {
+                tableName = "SrcDonemTipi";
+                Sql = " Select * from [Lkp].[" + tableName + "] order by Id desc ";
             }
             else
             {
@@ -16201,8 +16206,8 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             string orjinalTableName = tableName;
             string orjinalFieldName = fieldName;
 
-            //if (orjinalTableName.ToUpper().IndexOf("MTSK") > -1)
-            //{
+            if (v.tMainFirm.SectorTypeId == (Int16)v.msSectorType.UstadMtsk)
+            { 
                 if (orjinalFieldName.IndexOf("KurumOnay") > -1)
                 {
                     idFieldName = "Id";
@@ -16258,7 +16263,57 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                     tableName = "MebBransTipi";
                     return;
                 }
-            //}
+            }
+
+            if (v.tMainFirm.SectorTypeId == (Int16)v.msSectorType.UstadSrc)
+            {
+                if (orjinalFieldName.IndexOf("MevcutEhliyetTipi") > -1)
+                {
+                    idFieldName = "Id";
+                    fieldName = "SertifikaTipi";
+                    tableName = "MtskSertifikaTipi";
+                    return;
+                }
+
+                if (orjinalFieldName.IndexOf("SertifikaTipi") > -1)
+                {
+                    idFieldName = "Id";
+                    fieldName = "SertifikaTipi";
+                    tableName = "SrcSertifikaTipi";
+                    return;
+                }
+
+                if (orjinalFieldName.IndexOf("DonemTipi") > -1)
+                {
+                    idFieldName = "Id";
+                    fieldName = "DonemTipi";
+                    tableName = "SrcDonemTipi";
+                    return;
+                }
+                if ((orjinalFieldName.IndexOf("GrupTipi") > -1) &&
+                    (orjinalFieldName.IndexOf("UstGrupTipi") == -1 &&
+                     orjinalFieldName.IndexOf("AnaGrupTipi") == -1 &&
+                     orjinalFieldName.IndexOf("AltGrupTipi") == -1))
+                {
+                    idFieldName = "Id";
+                    fieldName = "GrupTipi";
+                    tableName = "SrcGrupTipi";
+                    return;
+                }
+                if (orjinalFieldName.IndexOf("SubeTipi") > -1)
+                {
+                    idFieldName = "Id";
+                    fieldName = "SubeTipi";
+                    tableName = "SrcSubeTipi";
+                    return;
+                }
+
+
+
+
+
+            }
+
 
             if (fieldName.IndexOf("UlkeKodu") > -1)
             {

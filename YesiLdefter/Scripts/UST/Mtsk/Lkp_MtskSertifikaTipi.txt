@@ -2,6 +2,9 @@
 
 begin transaction
 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskSertifikaTipi')
+drop table [Lkp].[MtskSertifikaTipi]
+
 -- ------------------------------------------------------- 
 -- SertifikaTipiId
 -- ------------------------------------------------------- 

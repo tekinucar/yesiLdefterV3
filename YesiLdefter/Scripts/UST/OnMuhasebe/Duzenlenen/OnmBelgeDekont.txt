@@ -507,8 +507,7 @@ INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, A
  ( '100.100',   'Kasalar arası virman' , 100,  100  ), 
  ( '100.120',   'Cariden nakit tahsilat' , 100,  120  ), 
  ( '100.131',   'Ortaklardan alınan nakit' , 100,  131  ), 
- ( '100.135',   'Personelden alınan nakit' , 100,  135  ), 
- ( '100.196',   'Personele ödenen nakit avans' , 100,  196  ), 
+ --( '100.135',   'Personelden alınan nakit' , 100,  135  ), /* 335. Personele Borçlar / 135. Personelden Alacaklar  */
  ( '100.320',   'Cariden nakit tahsilat' , 100,  320  ), 
  ( '100.600',   'Satışlardan nakit tahsilat' , 100,  600  ), 
  ( '100.602',   'Verilen hizmetlerden nakit tahsilat' , 100,  602  ), 
@@ -538,7 +537,7 @@ INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, A
  ( '1022.100',   'Kasadan banka hesabına yatırılan' , 1022,  100  ), 
  ( '1022.120',   'Cariden gelen havale/Eft' , 1022,  120  ), 
  ( '1022.131',   'Ortaklardan gelen havale/Eft' , 1022,  131  ), 
- ( '1022.135',   'Personelden gelen havale/Eft' , 1022,  135  ), 
+ --( '1022.135',   'Personelden gelen havale/Eft' , 1022,  135  ),  /* 335. Personele Borçlar / 135. Personelden Alacaklar  */
  ( '1022.300',   'Banka kredisi girişi' , 1022,  300  ), 
  ( '1022.320',   'Cariden gelen havale/Eft' , 1022,  320  ), 
  ( '1022.602',   'Verilen hizmet için banka hesabına yatırılan' , 1022,  602  ), 
@@ -568,9 +567,10 @@ INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, A
 
  ( '1023.100',   'Kredi kartı borcunu kasadan ödeme' , 1023,  100  ), 
  ( '1023.1022',  'Kredi kartı borcunu banka hesabından ödeme' , 1023,  1022  ), 
+
  ( '1024.120',   'Cariden banka/kredi kartı ile tahsilat' , 1024,  120  ), 
  ( '1024.131',   'Ortağın banka/kredi kartından çekilen ' , 1024,  131  ), 
- ( '1024.135',   'Personelin banka/kredi kartından çekilen' , 1024,  135  ), 
+ ( '1024.135',   'Personelin banka/kredi kartından çekilen' , 1024,  135  ), /* 335. Personele Borçlar / 135. Personelden Alacaklar  */
  ( '1024.320',   'Cariden banka/kredi kartı ile tahsilat' , 1024,  320  ), 
  ( '1024.600',   'Kesilen fatura için banka/kredi kartı tahsilat' , 1024,  600  ), 
  ( '1024.601',   'Yurtdışı satışlar için çekilen banka/kredi kartı tahsilat' , 1024,  601  ), 
@@ -599,9 +599,9 @@ INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, A
 
  ( '120.100',  'Cari hesaba ödenen nakit' , 120,  100  ), 
  ( '131.100',  'Ortaklara verilen nakit ' , 131,  100  ), 
- ( '135.100',  'Personele verilen nakit' , 135,  100  ), 
+ --( '135.100',  'Personele verilen nakit' , 135,  100  ), /* 335. Personele Borçlar / 135. Personelden Alacaklar  */
  ( '153.100',  'Stok alımı için ödenen nakit' , 153,  100  ), 
- ( '196.100',  'Personel avansı olarak verilen nakit' , 196,  100  ), 
+ ( '196.100',  'Personele verilen nakit avans' , 196,  100  ), 
  ( '300.100',  'Banka kredisi için nakit ödeme' , 300,  100  ), 
  ( '320.100',  'Cari hesaba ödenen nakit' , 320,  100  ), 
  ( '770.100',  'Genel yönetim giderleri için nakit ödeme' , 770,  100  ), 
@@ -625,11 +625,11 @@ INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, A
  ( '21115.100',    N'Diğer ücretler, nakit iadesi' , 21115,  100  ), 
 
 
- ( '120.1022',  'Cari hesabına gönderilen havale/Eft' , 120,  1022  ), 
+ ( '120.1022',  'Cari hesaba gönderilen havale/Eft' , 120,  1022  ), 
  ( '131.1022',  'Ortaklara banka hesabından havale/Eft' , 131,  1022  ), 
- ( '135.1022',  'Personel banka hesabından havale/Eft' , 135,  1022  ), 
+ --( '135.1022',  'Personele banka hesabından havale/Eft' , 135,  1022  ), /* 335. Personele Borçlar / 135. Personelden Alacaklar  */
  ( '153.1022',  'Stok alımı için banka hesabında havale/Eft' , 153,  1022  ), 
- ( '196.1022',  'Personel avansları için banka hesabından havale/Eft' , 196,  1022  ), 
+ ( '196.1022',  'Personele banka hesabından havale/Eft avans' , 196,  1022  ),  
  ( '300.1022',  'Banka kredisi için banka hesabından ödeme' , 300,  1022  ), 
  ( '320.1022',  'Cari hesabına havale/Eft' , 320,  1022  ), 
  ( '770.1022',  'Genel yönetim giderleri için banka hesabından havale/Eft' , 770,  1022  ), 
@@ -659,7 +659,7 @@ INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, A
 
  ( '120.1023',  'Cari hesaba kredi kartı ile ödeme' , 120,  1023  ), 
  ( '131.1023',  'Ortakların kredi kartı ile yaptığı harcama' , 131,  1023  ), 
- ( '135.1023',  'Personelin kredi kartı ile yaptığı harcama' , 135,  1023  ), 
+ --( '135.1023',  'Personelin kredi kartı ile yaptığı harcama' , 135,  1023  ), /* 335. Personele Borçlar / 135. Personelden Alacaklar  */
  ( '153.1023',  'Stok alımı için kredi kartıyla ödeme' , 153,  1023  ), 
  ( '320.1023',  'Cari hesaba kredi kartı ile ödeme' , 320,  1023  ), 
  ( '770.1023',  'Genel yönetim giderleri için kredi kartıyla ödeme' , 770,  1023  ), 

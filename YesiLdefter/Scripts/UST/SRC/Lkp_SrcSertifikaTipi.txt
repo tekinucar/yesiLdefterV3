@@ -1,0 +1,119 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+IF EXISTS (Select * From sys.objects WHERE name = 'SrcSertifikaTipi')
+drop table [Lkp].[SrcSertifikaTipi]
+
+-- ------------------------------------------------------- 
+-- SertifikaTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[SrcSertifikaTipi]
+(
+   Id                  Int IDENTITY(0,1) not null, 
+   SertifikaTipi       nVarchar(100)  null,
+   KSertifikaTipi      nVarchar(15)   null, /* küçük */
+   IsActive            Bit            null,
+   SiraNo              SmallInt       null,
+   MebbisKodu          Varchar(10)    null, /* mebbis kodu : 15001 den sonraki satırlar için gerekli */  
+   
+   constraint  pk_SrcSertifikaTipi primary key (Id)
+)
+
+set IDENTITY_INSERT [Lkp].[SrcSertifikaTipi] ON
+
+Delete from [Lkp].[SrcSertifikaTipi]
+INSERT INTO [Lkp].[SrcSertifikaTipi] (Id, SertifikaTipi, KSertifikaTipi, IsActive, SiraNo, MebbisKodu )
+ VALUES 
+  (    0, N'', '',  0, 0, '' ), 
+  (14380, N'SRC1 Uluslararası Yolcu Taşımacılığı',             'SRC1', 1, 1, '14380' ),
+  (14381, N'SRC2 Yurtiçi Yolcu Taşımacılığı',                  'SRC2', 1, 2, '14381' ),
+  (14382, N'SRC3 Uluslararası Yük ve Eşya Taşımacılığı',       'SRC3', 1, 3, '14382' ),
+  (14383, N'SRC4 Yurtiçi Yük ve Eşya Taşımacılığı',            'SRC4', 1, 4, '14383' ),
+  (14384, N'SRC5 Tehlikeli Madde Taşımacılığı (ADR Belgesi)',  'SRC5', 1, 5, '' ),
+
+  (14385, N'SRC6 Hızla bozulan ürünlerin taşınması (ATP)',         'SRC6', 0, 6, '' ),
+  
+  (13610, N'ODY1 Uluslararası yolcu taşımacılığı orta düzey yöneticisi',       'ODY1', 0, 11, '' ),
+  (13611, N'ODY2 Yurtiçi yolcu taşımacılığı orta düzey yöneticisi',            'ODY2', 0, 12, '' ),
+  (13612, N'ODY3 Uluslararası yük ve eşya taşımacılığı orta düzey yöneticisi', 'ODY3', 0, 13, '' ),
+  (13613, N'ODY4 Yurtiçi yük ve eşya taşımacılığı orta düzey yöneticisi',      'ODY4', 0, 14, '' ),
+
+  (13606, N'ÜDY1 Uluslararası yolcu taşımacılığı üst düzey yöneticisi',        'ÜDY1', 0, 21, '' ),
+  (13607, N'ÜDY2 Yurtiçi yolcu taşımacılığı üst düzey yöneticisi',             'ÜDY2', 0, 22, '' ),
+  (13608, N'ÜDY3 Uluslararası yük ve eşya taşımacılığı üst düzey yöneticisi',  'ÜDY3', 0, 23, '' ),
+  (13609, N'ÜDY4 Yurtiçi yük ve eşya taşımacılığı üst düzey yöneticisi',       'ÜDY4', 0, 24, '' ),
+
+  /* -- Bu satırdan sonrası dbo.SrcDonemi tablosundaki SertifikaTipiId ler için eklendi  */
+
+  (15001, N'SRC 1-2-3-4',       'SRC 1-2-3-4', 1, 101, '10001' ),
+  (15002, N'SRC 1-2',           'SRC 1-2', 1, 102, '' ),
+  (15003, N'SRC 3-4',           'SRC 3-4', 1, 103, '' ),
+  (15004, N'SRC 2-4',           'SRC 2-4', 1, 104, '' ),
+  (15005, N'SRC 1',             'SRC 1',   1, 105, '' ),
+  (15006, N'SRC 2',             'SRC 2',   1, 106, '' ),
+  (15007, N'SRC 3',             'SRC 3',   1, 107, '' ),
+  (15008, N'SRC 4',             'SRC 4',   1, 108, '' ),
+
+  (15021, N'SRC 5',             'SRC 5', 1, 121, '' ),
+
+  (15031, N'SRC 6',             'SRC 6', 0, 131, '' ),
+
+  (15041, N'ODY 1-2-3-4',       'ODY 1-2-3-4', 0, 141, '' ),
+  (15042, N'ODY 1-2',           'ODY 1-2', 0, 142, '' ),
+  (15043, N'ODY 3-4',           'ODY 3-4', 0, 143, '' ),
+  (15044, N'ODY 1',             'ODY 1',   0, 144, '' ),
+  (15045, N'ODY 2',             'ODY 2',   0, 145, '' ),
+  (15046, N'ODY 3',             'ODY 3',   0, 146, '' ),
+  (15047, N'ODY 4',             'ODY 4',   0, 147, '' ),
+
+  (15061, N'ÜDY 1-2-3-4',       'ÜDY 1-2-3-4', 0, 161, '' ),
+  (15062, N'ÜDY 1-2',           'ÜDY 1-2', 0, 162, '' ),
+  (15063, N'ÜDY 3-4',           'ÜDY 3-4', 0, 163, '' ),
+  (15064, N'ÜDY 1',             'ÜDY 1',   0, 164, '' ),
+  (15065, N'ÜDY 2',             'ÜDY 2',   0, 165, '' ),
+  (15066, N'ÜDY 3',             'ÜDY 3',   0, 166, '' ),
+  (15067, N'ÜDY 4',             'ÜDY 4',   0, 167, '' )
+
+set IDENTITY_INSERT [Lkp].[SrcSertifikaTipi] OFF
+
+commit transaction
+
+/*CreateTableEnd*/
+
+
+/* AI nin halüsinasyonları
+
+  (14380, N'SRC1 Yurt içi ticari araç (yük taşımacılığı)',    'SRC1', 0, 1 ),
+  (14381, N'SRC2 Yurt içi ticari araç (yolcu taşımacılığı)',  'SRC2', 0, 2 ),
+  (14382, N'SRC3 Yurt dışı ticari araç (yük taşımacılığı)',   'SRC3', 0, 3 ),
+  (14383, N'SRC4 Yurt dışı ticari araç (yolcu taşımacılığı)', 'SRC4', 0, 4 ),
+  (14384, N'SRC5 Tehlikeli madde taşımacılığı (ADR)',         'SRC5', 0, 5 ),
+
+  (13610, N'ODY1 Yurt İçi Otobüs Direksiyon Yetkisi',            'ODY1', 0, 11 ),
+  (13611, N'ODY2 Uluslararası Otobüs Direksiyon Yetkisi',        'ODY2', 0, 12 ),
+  (13612, N'ODY3 Yurt İçi Troleybüs Direksiyon Yetkisi',         'ODY3', 0, 13 ),
+  (13613, N'ODY4 Uluslararası Troleybüs Direksiyon Yetkisi',     'ODY4', 0, 14 ),
+
+  (13606, N'ÜDY1 Yurt İçi Yük Taşıma Üst Düzey Yeterlilik',      'ÜDY1', 0, 21 ),
+  (13607, N'ÜDY2 Uluslararası Yük Taşıma Üst Düzey Yeterlilik',  'ÜDY2', 0, 22 ),
+  (13608, N'ÜDY3 Tehlikeli Madde Taşıma Üst Düzey Yeterlilik',   'ÜDY3', 0, 23 ),
+  (13609, N'ÜDY4 Özel Yük Taşıma Üst Düzey Yeterlilik',          'ÜDY4', 0, 24 )
+*/
+
+
+
+/*
+
+
+
+
+
+*/
+
+/*
+
+
+
+
+*/

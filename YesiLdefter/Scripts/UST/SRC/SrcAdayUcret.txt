@@ -1,0 +1,389 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table SrcAdayUcret
+ (
+   Id                    Int IDENTITY(1,1) not null, 
+   FirmId                Int       not null,
+   TalepId               Int       not null, 
+   AdayId                Int       not null, 
+   DonemTipiId           Int           null,
+   TalepTipiId           SmallInt      null, /* = SrcAdayTalep.TalepTipi */
+
+   -- 10
+   /* Ücretlendirme bilgileri */
+   IsUcretli               Bit           null, /* 0 = Ücretsiz, 1 = Ücretli */
+   IsUcretsiz              Bit           null, /* 0 = Ücretsiz, 1 = Ücretli */
+   IsLock                  Bit           null,
+   IsOwes                  Bit           null, /* 0 = Borçsuz,  1 = Borçlu */
+   
+   -- 20
+   SertifikaUcreti         Numeric(22,5) null, /* il bazlı sertifika ücreti - readOnly */
+   BirSaatOzelDersUcreti   Numeric(22,5) null, /* Özel ders için */
+   AlacagiOzelDersSayisi   SmallInt      null, /* Özel ders için */
+   KontejanTipiId          SmallInt      null, /* şehit, gazi vb...  */
+   KontejanIndirimOrani    Numeric(12,8) null, /* %25 indirim dersek : %75 aday öder, %25 kurs indirim yapmış olur */
+   KontejanIndirimTutari   Numeric(22,5) null,
+   KontejanSonrasiUcret    Numeric(22,5) null,
+   
+   -- 30
+   AnlasilanUcret          Numeric(22,5) null,
+   IskontoOrani            Numeric(12,8) null,
+   IskontoTutari           Numeric(22,5) null,
+   PesinatTutari           Numeric(22,5) null, 
+   TaksitSayisiTipiId      SmallInt      null, /* 0.Peşin, 1 Ay, 2 Ay, 3 Ay .... */
+   TaksitlendirilecekUcret Numeric(22,5) null, /* AnlasilanUcret - PesinatTutari */
+   -- 40
+   ESinavUcreti            Numeric(22,5) null,
+   UygulamaSinavUcreti     Numeric(22,5) null,
+   SertifikaVeSinavUcreti  Numeric(22,5) null, /* AnlasilanUcret + ESinavUcreti + UygulamaSinavUcreti */
+   IsSinavUcretiTaksitli   Bit           null, /* Taksitlendirirken sinav ücretlerini birleştir */
+   -- 50
+   OdemeTipiId             SmallInt      null, /* 1. Kredi Kartı, 2. Nakit, 3. Banka Havalesi, 4. Senet, 5. Açık Hesap */
+   OdemeBaslamaTarihi      Date          null,
+   OdemeCepTelefonu        nVarchar(15)  null,  
+   ESinavUcretTipiId       SmallInt      null, /* e-sınav için 1. Biz yatıracağız,  2. Adayın kendisi yatıracak */   
+   USinavUcretTipiId       SmallInt      null, /* uyg-sınav için 1. Biz yatıracağız,  2. Adayın kendisi yatıracak */   
+
+   -- 60 Mebbise bildirilecek ücretler
+   MebbisSertifikaUcreti      Numeric(22,5) null,
+   MebbisTeoDersSaati         SmallInt      null, 
+   Mebbis1SaatTeoDersUcreti   Numeric(22,5) null, 
+   MebbisUygDersSaati         SmallInt       null, 
+   Mebbis1SaatUygDersUcreti   Numeric(22,5) null, 
+      
+
+   -- 70 Mevcut borçlar
+   BorcSertifikaUcreti        Numeric(22,5) null,
+   BorcESinavUcreti           Numeric(22,5) null,
+   BorcUygulamaSinavUcreti    Numeric(22,5) null,
+   BorcTelafiEgitimUcreti     Numeric(22,5) null,
+   BorcBasarisizEgitimUcreti  Numeric(22,5) null,
+   BorcDigerUcretler          Numeric(22,5) null,
+   BorcUcretlerToplami        Numeric(22,5) null,
+
+   -- 80 Vadesi geçmiş olan borçlar
+   VGSertifikaUcreti          Numeric(22,5) null,
+   VGESinavUcreti             Numeric(22,5) null,
+   VGUygulamaSinavUcreti      Numeric(22,5) null,
+   VGTelafiEgitimUcreti       Numeric(22,5) null,
+   VGBasarisizEgitimUcreti    Numeric(22,5) null,
+   VGDigerUcretler            Numeric(22,5) null,
+   VGUcretlerToplami          Numeric(22,5) null,
+
+   -- 90
+   PersonelId              Int           null,
+   TeklifTarihi            Datetime      null,
+   VeriKaynakId            Int           null, /* Veri transferi edildiği tablodaki Id . Sorun olduğunda bilginin nereden geldiğine referans olsun */
+
+   constraint		pk_SrcAdayUcret primary key (Id)
+ )
+  
+ grant select, insert, update, delete on SrcAdayUcret to public
+
+  create index X_SrcAdayUcret01 on SrcAdayUcret (TalepId)
+  create index X_SrcAdayUcret02 on SrcAdayUcret (AdayId)
+  create index X_SrcAdayUcret03 on SrcAdayUcret (DonemTipiId)
+  create index X_SrcAdayUcret04 on SrcAdayUcret (IsOwes)
+
+commit transaction
+
+/*CreateTableEnd*/
+
+
+/*CreateTrigger*/
+
+CREATE TRIGGER dbo.trg_SrcAdayUcret on dbo.SrcAdayUcret
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    DECLARE ucretCursor cursor local for select Id from Inserted
+    DECLARE @curId bigint
+
+    OPEN ucretCursor
+    FETCH NEXT FROM ucretCursor INTO @curId
+
+    -- Veri Transferi başladımı
+    declare @DbUpdatesIsActive Bit = 0
+    set @DbUpdatesIsActive = [dbo].[fnc_getIsDbUpdate] (13)
+
+    declare @TalepId int = 0
+    declare @AdayId int = 0
+    declare @FirmId int = 0
+    declare @VeriKaynakId int = 0
+    declare @KontejanTipiId smallint
+	declare @IsKontejan bit = 0
+	declare @PesinatTutari numeric(22,5)
+	declare @TaksitSayisiTipiId smallInt
+	declare @ESinavUcretTipiId smallInt 
+	declare @USinavUcretTipiId smallInt 
+	declare @SertifikaUcreti numeric(22,5)
+	declare @KontejanSonrasiUcret numeric(22,5)
+    declare @AnlasilanUcret numeric(22,5)
+    declare @TaksitlendirilecekUcret numeric (22,5)
+	declare @ESinavUcreti numeric(22,5)
+	declare @UygulamaSinavUcreti numeric(22,5)
+    declare @MebbisSertifikaUcreti numeric(22,5)
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        select 
+            @TalepId = ins.TalepId
+           ,@AdayId = ins.AdayId
+		   ,@VeriKaynakId = isnull(ins.VeriKaynakId,0)
+           ,@KontejanTipiId = isnull(ins.KontejanTipiId,0)
+		   ,@PesinatTutari = isnull(ins.PesinatTutari,0)
+		   ,@TaksitSayisiTipiId = isnull(ins.TaksitSayisiTipiId,0)
+		   ,@ESinavUcretTipiId = isnull(ins.ESinavUcretTipiId,0)
+		   ,@USinavUcretTipiId = isnull(ins.USinavUcretTipiId,0)
+           ,@SertifikaUcreti = isnull(ins.SertifikaUcreti,0)
+	       ,@KontejanSonrasiUcret = isnull(ins.KontejanSonrasiUcret,0)
+           ,@AnlasilanUcret = isnull(ins.AnlasilanUcret,0)
+           ,@TaksitlendirilecekUcret = isnull(ins.TaksitlendirilecekUcret,0)
+           ,@ESinavUcreti = isnull(ins.ESinavUcreti,0)
+           ,@UygulamaSinavUcreti = isnull(ins.UygulamaSinavUcreti,0)
+           ,@MebbisSertifikaUcreti = isnull(ins.MebbisSertifikaUcreti,0)
+		from inserted ins
+    	where ins.Id = @curId
+
+        if (@VeriKaynakId > 0 and (@TalepId = 0 or @AdayId = 0))
+        begin
+            Update dbo.SrcAdayUcret set
+                TalepId = t.Id  
+              , AdayId  = t.AdayId 
+			  , DonemTipiId = t.DonemTipiId
+              , TalepTipiId = t.TalepTipiId  
+            From dbo.SrcAdayUcret as a,
+                 dbo.SrcAdayTalep as t
+            Where a.VeriKaynakId = t.VeriKaynakId				 
+            and   a.Id = @curId
+
+            Select @TalepId = Id, @AdayId = AdayId 
+            From dbo.SrcAdayTalep 
+            Where VeriKaynakId = @VeriKaynakId
+        end
+
+        if (@DbUpdatesIsActive = 0)
+        begin 
+            if (@KontejanTipiId > 0) set @IsKontejan = 1 else set @IsKontejan = 0
+
+            if (@ESinavUcreti > 0 and  @ESinavUcretTipiId <> 1)
+			begin
+			    set @ESinavUcretTipiId = 1
+				Update dbo.SrcAdayUcret Set ESinavUcretTipiId = @ESinavUcretTipiId
+                Where Id = @curId 
+            end 
+            if (@UygulamaSinavUcreti > 0 and  @USinavUcretTipiId <> 1)
+			begin
+			    set @USinavUcretTipiId = 1
+				Update dbo.SrcAdayUcret Set USinavUcretTipiId = @USinavUcretTipiId
+                Where Id = @curId 
+            end 
+
+            -- Takip
+            Update SrcAdayTakip set
+                IsKontejan = @IsKontejan
+              , eSinavUcretTipiId = @ESinavUcretTipiId 
+              , uSinavUcretTipiId = @USinavUcretTipiId 
+            Where TalepId = @TalepId
+            and ( IsKontejan <> @IsKontejan 
+             or   eSinavUcretTipiId <> @ESinavUcretTipiId
+             or   uSinavUcretTipiId <> @USinavUcretTipiId )  
+
+            if ((@KontejanSonrasiUcret = 0) or
+			    (@AnlasilanUcret = 0) or
+				(@TaksitlendirilecekUcret = 0))
+            begin
+                if (@KontejanSonrasiUcret = 0) Set @KontejanSonrasiUcret = @SertifikaUcreti  
+                if (@AnlasilanUcret = 0) Set @AnlasilanUcret = @KontejanSonrasiUcret
+                if (@TaksitlendirilecekUcret = 0) Set @TaksitlendirilecekUcret = @AnlasilanUcret
+
+                Update dbo.SrcAdayUcret Set
+                     KontejanSonrasiUcret = @KontejanSonrasiUcret
+                    ,AnlasilanUcret = @AnlasilanUcret
+                    ,TaksitlendirilecekUcret = @TaksitlendirilecekUcret
+                Where Id = @curId 
+            end -- @KontejanSonrasi
+
+            if (@AnlasilanUcret > 0 and @AnlasilanUcret = @PesinatTutari and @TaksitSayisiTipiId <> 100) 
+            begin
+                set @TaksitSayisiTipiId = 100 -- peşin olsun
+
+                Update dbo.SrcAdayUcret Set TaksitSayisiTipiId = @TaksitSayisiTipiId
+                Where Id = @curId 
+            end
+            if (@AnlasilanUcret > 0 and @AnlasilanUcret <> @PesinatTutari and @TaksitSayisiTipiId = 100) 
+            begin
+                set @PesinatTutari = @AnlasilanUcret -- peşinat ile anlaşma ücrti aynı olsun
+
+                Update dbo.SrcAdayUcret Set PesinatTutari = @PesinatTutari
+                Where Id = @curId 
+            end
+
+        end	-- if (@DbUpdatesIsActive = 0)	
+
+        -- Data transferi oldu fakat daha önce bu talep için boş kayıt oluşturulmuş ise onu sil
+        if (@VeriKaynakId > 0)
+        begin
+		    Delete From dbo.SrcAdayUcret
+            Where TalepId = @TalepId
+            and   isnull(VeriKaynakId,0) = 0
+        end
+
+        FETCH NEXT FROM ucretCursor INTO @curId
+    END -- While
+
+    CLOSE ucretCursor
+    DEALLOCATE ucretCursor   
+
+END -- create trigger
+
+
+/*CreateTriggerEnd*/
+
+
+
+/*CreateLkpTable*/
+
+begin transaction
+
+
+-- ------------------------------------------------------- 
+-- TalepTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'SrcAdayUcretTalepTipi')
+drop table [Lkp].[SrcAdayUcretTalepTipi]
+
+create table [Lkp].[SrcAdayUcretTalepTipi]
+(
+   Id               Int Unique not null, 
+   TalepTipi        nVarchar(50)   null,
+   IsActive         Bit            null,
+   
+   constraint  pk_SrcAdayUcretTalepTipi primary key (Id)
+)
+
+Delete from [Lkp].[SrcAdayUcretTalepTipi]
+INSERT INTO [Lkp].[SrcAdayUcretTalepTipi] (Id, TalepTipi, IsActive)
+ VALUES 
+  ( 0,    N'Seçiniz', 1),
+  ( 1,    N'SRC Sertifikası',  1),
+  ( 2,    N'SRC5 Sertifikası', 1),
+  ( 3,    N'SRC6 Sertifikası', 1),
+  ( 4,    N'ODY Sertifikası',  1),
+  ( 5,    N'ÜDY Sertifikası',  1)
+
+
+-- ------------------------------------------------------- 
+-- TaksitSayisiTipiId
+-- ------------------------------------------------------- 
+
+--IF EXISTS (SELECT * FROM sys.objects WHERE name = '')
+
+IF EXISTS (Select * From sys.objects WHERE name = 'SrcAdayUcretTaksitSayisiTipi')
+drop table [Lkp].[SrcAdayUcretTaksitSayisiTipi]
+
+create table [Lkp].[SrcAdayUcretTaksitSayisiTipi]
+(
+   Id               Int Unique not null, 
+   TaksitSayisiTipi nVarchar(20)   null,
+   IsActive         Bit            null,
+   
+   constraint  pk_SrcAdayUcretTaksitSayisiTipi primary key (Id)
+)
+
+Delete from [Lkp].[SrcAdayUcretTaksitSayisiTipi]
+INSERT INTO [Lkp].[SrcAdayUcretTaksitSayisiTipi] (Id, TaksitSayisiTipi, IsActive)
+ VALUES 
+  ( 0,    N'Seçiniz', 1),
+  (100,   N'Peşin', 1),
+  ( 1,    N'1 Ay', 1),
+  ( 2,    N'2 Ay', 1),
+  ( 3,    N'3 Ay', 1),
+  ( 4,    N'4 Ay', 1),
+  ( 5,    N'5 Ay', 1),
+  ( 6,    N'6 Ay', 1),
+  ( 7,    N'7 Ay', 1),
+  ( 8,    N'8 Ay', 1),
+  ( 9,    N'9 Ay', 1),
+  (10,    N'10 Ay', 1),
+  (11,    N'11 Ay', 1),
+  (12,    N'12 Ay', 1)
+
+
+-- ------------------------------------------------------- 
+-- OdemeTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'SrcAdayUcretOdemeTipi')
+drop table [Lkp].[SrcAdayUcretOdemeTipi]
+
+create table [Lkp].[SrcAdayUcretOdemeTipi]
+(
+   Id               Int Unique not null, 
+   OdemeTipi        nVarchar(20)   null,
+   IsActive         Bit            null,
+   
+   constraint  pk_SrcAdayUcretOdemeTipi primary key (Id)
+)
+
+Delete from [Lkp].[SrcAdayUcretOdemeTipi]
+INSERT INTO [Lkp].[SrcAdayUcretOdemeTipi] (Id, OdemeTipi, IsActive)
+ VALUES 
+  (-1,    N'', 1),
+  ( 0,    N'Seçiniz', 1),
+  ( 1,    N'Kredi Kartı', 1),
+  ( 2,    N'Nakit', 1),
+  ( 3,    N'Banka Havalesi', 1),
+  ( 4,    N'Senet', 1),
+  ( 5,    N'Açık Hesap', 1)
+
+
+-- ------------------------------------------------------- 
+-- ESinavUcretTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'SrcAdayUcretESinavUcretTipi')
+drop table [Lkp].[SrcAdayUcretESinavUcretTipi]
+
+create table [Lkp].[SrcAdayUcretESinavUcretTipi]
+(
+   Id               Int Unique not null, 
+   ESinavUcretTipi  nVarchar(50)   null,
+  
+   constraint  pk_SrcAdayUcretESinavUcretTipi primary key (Id)
+)
+
+Delete from [Lkp].[SrcAdayUcretESinavUcretTipi]
+INSERT INTO [Lkp].[SrcAdayUcretESinavUcretTipi] (Id, ESinavUcretTipi)
+ VALUES 
+  ( 0,    N'Tanımsız'),
+  ( 1,    N'Biz yatıracağız'),
+  ( 2,    N'Adayın kendisi yatıracak')
+
+
+-- ------------------------------------------------------- 
+-- USinavUcretTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'SrcAdayUcretUSinavUcretTipi')
+drop table [Lkp].[SrcAdayUcretUSinavUcretTipi]
+
+create table [Lkp].[SrcAdayUcretUSinavUcretTipi]
+(
+   Id               Int Unique not null, 
+   USinavUcretTipi  nVarchar(50)   null,
+  
+   constraint  pk_SrcAdayUcretUSinavUcretTipi primary key (Id)
+)
+
+Delete from [Lkp].[SrcAdayUcretUSinavUcretTipi]
+INSERT INTO [Lkp].[SrcAdayUcretUSinavUcretTipi] (Id, USinavUcretTipi)
+ VALUES 
+  ( 0,    N'Tanımsız'),
+  ( 1,    N'Biz yatıracağız'),
+  ( 2,    N'Adayın kendisi yatıracak')
+
+
+commit transaction
+
+/*CreateLkpTableEnd*/
+

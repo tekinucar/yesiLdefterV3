@@ -1,0 +1,106 @@
+﻿  
+  /*CreateTable*/ 
+  
+  begin transaction 
+  
+  create table dbo.OnmMaasHesaplari 
+  ( 
+    Id                 Int IDENTITY(1,1) not null, 
+    FirmId             Int               not null, 
+    CariId             Int               null, /* CariId : Personel Id si */
+
+    HazirlamaTarihi    Date              null, /* Bordronun Hazırlandığı Tarih */
+    DonemTipiId        Int               null, /* Maaş Dönemi */
+    IslemTarihi        DateTime          null, /* İşlem Tarihi */  
+    IslemTipiId        SmallInt          null, /* İşlem Türü : 1: Maaş, 2: Ek Gelir, 3: Ek Kesinti, 4. Verilen Avans Dekontu, 5. Avans Tahsil Dekontu, 6. Maaştan Avans kesiniti   */
+
+    EkGelirId          Int               null, /* OnmMaasEkGelirler.Id  */
+    EkKesintiId        Int               null, /* OnmMaasEkKesintiler.Id  */
+    DekontId           Int               null, /* DekontId : İşlem ile ilgili dekontun Id si */
+
+    IslemAciklamasi    nVarchar(100)     null, /* bu satırda yapılan işlemin açıklaması */
+    BorcTutari         Numeric(22,5)     null, /* Personelin Borçlandığı işlem tutarı  */
+    AlacakTutari       Numeric(22,5)     null, /* Personelin Alacaklı olduğu işlem tutarı  */
+
+    IsLock             Bit               null, /* Maaş ödenince OnmMaasHesaplariIslemTipi = HeaderLine kilitle */
+    IsError            Bit               null,           
+    KayitTarihSaat     Datetime          null,  
+
+    Constraint pk_OnmMaasHesaplari primary key (Id) 
+  ) 
+  
+  create index X_OnmMaasHesaplari_01 on dbo.OnmMaasHesaplari (FirmId, CariId, DonemTipiId) 
+  
+  grant select, insert, update, delete on dbo.OnmMaasHesaplari to public 
+  
+  commit transaction 
+  
+  /*CreateTableEnd*/ 
+
+
+  /*CreateLkpTable*/
+
+  -- ------------------------------------------------------- 
+  -- IslemTipiId
+  -- ------------------------------------------------------- 
+  IF EXISTS (SELECT * FROM sys.objects WHERE name = 'OnmMaasHesaplariIslemTipi') 
+  DROP TABLE [Lkp].[OnmMaasHesaplariIslemTipi] 
+  
+  CREATE TABLE [Lkp].[OnmMaasHesaplariIslemTipi] 
+  ( 
+   Id               INT UNIQUE NOT NULL, 
+   IslemTipi        NVARCHAR(50)   NULL, 
+   
+   CONSTRAINT pk_OnmMaasHesaplariIslemTipi PRIMARY KEY (Id) 
+  ) 
+  
+  DELETE FROM [Lkp].[OnmMaasHesaplariIslemTipi] 
+  INSERT INTO [Lkp].[OnmMaasHesaplariIslemTipi] (Id, IslemTipi) 
+  VALUES 
+    (0, N'Tanımsız'), 
+    (10, N'HeaderLine'), /* Ekranda temel veri giriş satırı */ 
+
+    (11, N'Maaş'), 
+    (12, N'Teorik ders ücreti'), 
+    (13, N'Uygulamalı ders ücreti'), 
+    (14, N'Ek gelir'), 
+    (15, N'Ek Kesinti'), 
+
+    (21, N'Verilen avans dekontu'), 
+    --(22, N'Avans tahsil dekontu'), 
+    --(23, N'Maaştan avans kesinti'),
+
+    (31, N'Toplamlar'),
+    (32, N'Ödenecek tutar'),
+    (33, N'Genel toplam'),
+    (34, N'Net ödenen tutar'),
+    (35, N'Devreden fark tutar')  /* Devreden fark tutar : Net ödenen tutar ile Genel toplam arasındaki fark, eğer varsa */
+
+
+
+  /*CreateLkpTableEnd*/
+
+/*
+
+    OnmMaasHesaplari
+    --------------------------------------------
+    Açıklamalar        . Borç      . Alacak    .
+    --------------------------------------------
+    maas               .           .   10,000  .  
+    teo. ders ucreti   .           .    2,500  .
+    uyg. ders ucreti   .           .    1,500  .
+	ek gelirler        .           .    1,000  .  
+	ek kesinti         .       500 .           .
+	verilen avans      .       250 .           .
+	kesilen avans      .           .      250  .  <<< şimdilik yok
+    --------------------------------------------
+    Toplam             :       750 .   15,250  .           
+	Ödenecek           :    14,500 .           .
+	Genel Toplam       :    15,250 .   15,250  .
+    --------------------------------------------
+
+
+
+
+
+*/
