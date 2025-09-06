@@ -1608,7 +1608,7 @@ namespace YesiLdefter.Selenium
                             
                             string base64Verisi = Convert.ToBase64String(File.ReadAllBytes(writeValue));
                             // Doğru base64 biçimi:
-                            ((IJavaScriptExecutor)wb).ExecuteScript("arguments[0].src = 'data:image/png;base64,' + arguments[1];", element, base64Verisi);
+                            ((IJavaScriptExecutor)wb).ExecuteScript("arguments[0].src = 'data:image/jpeg;base64,' + arguments[1];", element, base64Verisi);
 
                             //MessageBox.Show(writeValue);
                         } else if (tagName == "input" && attRole == "ImageData")
@@ -1617,7 +1617,7 @@ namespace YesiLdefter.Selenium
                             /// 
                             string base64Verisi = Convert.ToBase64String(File.ReadAllBytes(writeValue));
                             // Doğru base64 biçimi:
-                            ((IJavaScriptExecutor)wb).ExecuteScript("arguments[0].value = 'data:image/png;base64,' + arguments[1];", element, base64Verisi);
+                            ((IJavaScriptExecutor)wb).ExecuteScript("arguments[0].value = 'data:image/jpeg;base64,' + arguments[1];", element, base64Verisi);
                         }
                         else
                         {

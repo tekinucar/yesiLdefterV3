@@ -1860,13 +1860,17 @@ namespace YesiLdefter.Selenium
                 {
                     if (f.btn_FullPost1 != null) f.btn_FullPost1.Visible = false;
                 }
-                if ((workPageNodes.aktifPageCode == "MTSKADAYRESIM") ||
-                    (workPageNodes.aktifPageCode == "MTSKADAYSOZLESME") ||
+                if ((workPageNodes.aktifPageCode == "MTSKADAYSOZLESME") ||
                     (workPageNodes.aktifPageCode == "MTSKADAYIMZA") ||
                     (workPageNodes.aktifPageCode == "MTSKESINAVBELGESI") ||
                     (workPageNodes.aktifPageCode == "SRCADAYRESIM")
                     )
                 {
+                    if (f.btn_FullPost2 != null) f.btn_FullPost2.Visible = true;
+                }
+                else if (workPageNodes.aktifPageCode == "MTSKADAYRESIM")
+                {
+                    if (f.btn_FullPost1 != null) f.btn_FullPost1.Visible = true;
                     if (f.btn_FullPost2 != null) f.btn_FullPost2.Visible = true;
                 }
                 else
@@ -1879,14 +1883,14 @@ namespace YesiLdefter.Selenium
                     if (f.btn_FullPost1.Tag == null)
                         f.btn_FullPost1.Tag = f.btn_FullPost1.Text;
 
-                    //if (workPageNodes.aktifPageCode == "MTSKADAYRESIM")
-                    //{
-                    //    f.btn_FullPost1.Text = "Başvuru resmini gönder";
-                    //}
-                    //else
-                    //{
-                    //    f.btn_FullPost1.Text = f.btn_FullPost1.Tag.ToString();
-                    //}
+                    if (workPageNodes.aktifPageCode == "MTSKADAYRESIM")
+                    {
+                        f.btn_FullPost1.Text = "Başvuru resmini gönder";
+                    }
+                    else
+                    {
+                        f.btn_FullPost1.Text = f.btn_FullPost1.Tag.ToString();
+                    }
                 }
 
 
@@ -2055,6 +2059,7 @@ namespace YesiLdefter.Selenium
             f.talepOncesiUrl = msWebPage[0].BeforePageUrl;
             f.talepPageLeft = msWebPage[0].PageLeft;
             f.talepPageTop = msWebPage[0].PageTop;
+            f.isLoginPage = msWebPage[0].LoginPage;
         }
 
         public void preparingMsWebLoginPage(webForm f, DataSet ds_LoginPageNodes, List<MsWebNode> msWebLoginNodes)

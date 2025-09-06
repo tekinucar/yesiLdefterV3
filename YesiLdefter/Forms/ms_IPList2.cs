@@ -720,6 +720,7 @@ namespace YesiLdefter
             scripts.SourceDBaseName = databaseName;
             scripts.SchemaName = schemaName;
             scripts.SourceTableName = tableName;
+            scripts.TableIPCode = "";
             scripts.Where = string.Format(" TABLE_CODE = '{0}' ", tableCode);
             scripts.IdentityInsertOnOff = false;
 

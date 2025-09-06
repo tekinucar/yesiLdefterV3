@@ -1,10 +1,11 @@
-﻿using System;
+﻿using OpenQA.Selenium;
+using OpenQA.Selenium.Support.UI;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using OpenQA.Selenium.Support.UI;
-using OpenQA.Selenium;
 
 namespace YesiLdefter.Selenium.Helpers
 {
@@ -40,6 +41,15 @@ namespace YesiLdefter.Selenium.Helpers
                     //WebDriver.Close();
                     //WebDriver.Quit();
                     _driver = null;
+                }
+
+                foreach (var process in Process.GetProcessesByName("chromedriver"))
+                {
+                    try { process.Kill(); } catch { }
+                }
+                foreach (var process in Process.GetProcessesByName("chrome"))
+                {
+                    try { process.Kill(); } catch { }
                 }
             }
             catch (Exception) { _driver = null; }

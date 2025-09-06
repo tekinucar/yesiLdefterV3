@@ -54,7 +54,16 @@ begin transaction
    Mebbis1SaatUygDersUcreti   Numeric(22,5) null, 
       
 
-   -- 70 Mevcut borçlar
+   -- 70 Tüm alacaklar
+   AlacakSertifikaUcreti        Numeric(22,5) null,
+   AlacakESinavUcreti           Numeric(22,5) null,
+   AlacakUygulamaSinavUcreti    Numeric(22,5) null,
+   AlacakTelafiEgitimUcreti     Numeric(22,5) null,
+   AlacakBasarisizEgitimUcreti  Numeric(22,5) null,
+   AlacakDigerUcretler          Numeric(22,5) null,
+   AlacakUcretlerToplami        Numeric(22,5) null,
+
+   -- 80 Mevcut borçlar
    BorcSertifikaUcreti        Numeric(22,5) null,
    BorcESinavUcreti           Numeric(22,5) null,
    BorcUygulamaSinavUcreti    Numeric(22,5) null,
@@ -63,7 +72,7 @@ begin transaction
    BorcDigerUcretler          Numeric(22,5) null,
    BorcUcretlerToplami        Numeric(22,5) null,
 
-   -- 80 Vadesi geçmiş olan borçlar
+   -- 90 Vadesi geçmiş olan borçlar
    VGSertifikaUcreti          Numeric(22,5) null,
    VGESinavUcreti             Numeric(22,5) null,
    VGUygulamaSinavUcreti      Numeric(22,5) null,
@@ -72,7 +81,10 @@ begin transaction
    VGDigerUcretler            Numeric(22,5) null,
    VGUcretlerToplami          Numeric(22,5) null,
 
-   -- 90
+   -- 100
+   TahsilEdilenUcretler      Numeric(22,5) null,
+
+   -- 110
    PersonelId              Int           null,
    TeklifTarihi            Datetime      null,
    VeriKaynakId            Int           null, /* Veri transferi edildiği tablodaki Id . Sorun olduğunda bilginin nereden geldiğine referans olsun */
@@ -388,3 +400,19 @@ commit transaction
 
 /*CreateLkpTableEnd*/
 
+
+
+/*
+
+   -- 70 Tüm alacaklar
+ALTER TABLE  MtskAdayUcret ADD   AlacakSertifikaUcreti        Numeric(22,5) null;
+ALTER TABLE  MtskAdayUcret ADD   AlacakESinavUcreti           Numeric(22,5) null;
+ALTER TABLE  MtskAdayUcret ADD   AlacakUygulamaSinavUcreti    Numeric(22,5) null
+ALTER TABLE  MtskAdayUcret ADD   AlacakTelafiEgitimUcreti     Numeric(22,5) null
+ALTER TABLE  MtskAdayUcret ADD   AlacakBasarisizEgitimUcreti  Numeric(22,5) null
+ALTER TABLE  MtskAdayUcret ADD   AlacakDigerUcretler          Numeric(22,5) null
+ALTER TABLE  MtskAdayUcret ADD   AlacakUcretlerToplami        Numeric(22,5) null
+ALTER TABLE  MtskAdayUcret ADD   TahsilEdilenUcretler         Numeric(22,5) null
+
+
+*/

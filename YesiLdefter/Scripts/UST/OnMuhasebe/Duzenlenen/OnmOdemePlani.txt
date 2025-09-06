@@ -65,7 +65,7 @@ create table [Lkp].[OnmOdemePlaniTalepTipi]
 (
    Id                Int Unique not null, 
    TalepTipi         nVarchar(50)   null,
-   
+      
    constraint  pk_OnmOdemePlaniTalepTipi primary key (Id)
 )
 
@@ -77,8 +77,10 @@ INSERT INTO [Lkp].[OnmOdemePlaniTalepTipi] (Id, TalepTipi)
   ( 2,    N'2.+4 hak'),
   ( 3,    N'Nakil 2.+4 hak'),
   ( 4,    N'100 Ceza'),
-  ( 5,    N'Özel direksiyon dersi (Aday değil)')
-  --( 6,    N'Özel teorik ders')
+  ( 5,    N'Özel direksiyon dersi (Aday değil)'),
+
+  ( 11,    N'Src Sertifika'),
+  ( 12,    N'Src5 Sertifika')
 
 
 -- ------------------------------------------------------- 
@@ -99,17 +101,24 @@ Delete from [Lkp].[OnmOdemePlaniUcretTipi]
 INSERT INTO [Lkp].[OnmOdemePlaniUcretTipi] (Id, UcretTipi)
  VALUES 
   ( 0,        N'Lütfen ücret tipini seçiniz...'),
+  -- Mtsk
   ( 21101,    N'Sertifika'),
   ( 21102,    N'2.+4 hak'),
   ( 21103,    N'Nakil 2.+4 hak'),
   ( 21104,    N'100 Ceza'),
   ( 21105,    N'Özel direksiyon ders (Aday değil)'),
-  --( 21106,    N'Özel teorik ders'),
   ( 21111,    N'e-Sınav ücreti'),
   ( 21112,    N'Uygulama sınav ücreti'),
   ( 21113,    N'Başarısız eğitim ücreti'),
   ( 21114,    N'Telafi eğitim ücreti'),
-  ( 21115,    N'Diğer ücretler')
+  ( 21115,    N'Diğer ücretler'),
+
+  -- Src
+  ( 23101,    N'Src Sertifika'),
+  ( 23102,    N'Src5 Sertifika'),
+  ( 23111,    N'e-Sınav ücreti'),
+  ( 23112,    N'Uygulama sınav ücreti')
+
 
 
   
@@ -186,11 +195,15 @@ INSERT INTO [Lkp].[OnmOdemePlaniSourceType] (Id, SourceType)
   ( 0,     N''),
   ( 1,     N'OnmOdemePlani - Kendisi'),
   ( 2,     N'OnmBelgeDekont'),
+  -- Mtsk
   ( 2100,  N'Mtsk Modülü - Kullanıcı girişi'),
   ( 2101,  N'Mtsk Modülü - Otomatik, kullanıcı onaylı'),
   ( 2103,  N'Mtsk Veri Transferi - Giderler'),
   ( 2104,  N'Mtsk Veri Transferi - CariAlt'),
-  ( 2105,  N'Mtsk Veri Transferi - Kurharc')
+  ( 2105,  N'Mtsk Veri Transferi - Kurharc'),
+  -- Src
+  ( 2300,  N'Src Modülü - Kullanıcı girişi'),
+  ( 2301,  N'Src Modülü - Otomatik, kullanıcı onaylı')
 
 commit transaction
 
@@ -212,6 +225,7 @@ AS BEGIN
     declare @FirmId int = 0
     declare @TalepId int = 0
 	declare @AdayId int
+    declare @UcretTipiId smallInt
 	declare @VeriKaynakId int
 	declare @SourceTypeId smallint
 
@@ -226,6 +240,7 @@ AS BEGIN
             @FirmId = isnull(ins.FirmId,0)
            ,@TalepId = isnull(ins.TalepId,0)
            ,@AdayId = isnull(ins.CariId,0)
+           ,@UcretTipiId = isnull(ins.UcretTipiId,0)
 		   ,@VeriKaynakId = ins.VeriKaynakId
            ,@SourceTypeId = ins.SourceTypeId
         From inserted ins
@@ -233,38 +248,89 @@ AS BEGIN
      	
         if (@VeriKaynakId > 0 and (@TalepId = 0 or @AdayId = 0) and @SourceTypeId > 2000)
         begin
-            Update dbo.OnmOdemePlani set
-                TalepId = t.Id  
-               ,CariId  = t.AdayId 
-            From dbo.OnmOdemePlani as a,
-                 dbo.MtskAdayTalep as t
-            Where a.VeriKaynakId = t.VeriKaynakId				 
-            and   a.Id = @curId
+            -- Mtsk ise
+            if (@UcretTipiId > 21100 and @UcretTipiId < 21200)
+            begin
+                Update dbo.OnmOdemePlani set
+                    TalepId = t.Id  
+                   ,CariId  = t.AdayId 
+                From dbo.OnmOdemePlani as a,
+                     dbo.MtskAdayTalep as t
+                Where a.VeriKaynakId = t.VeriKaynakId				 
+                and   a.Id = @curId
 
-            Select @TalepId = Id, @AdayId = AdayId 
-            From dbo.MtskAdayTalep 
-            Where VeriKaynakId = @VeriKaynakId
+                Select @TalepId = Id, @AdayId = AdayId 
+                From dbo.MtskAdayTalep 
+                Where VeriKaynakId = @VeriKaynakId
+            end
+            -- Src ise
+            if (@UcretTipiId > 22100 and @UcretTipiId < 22200)
+            begin
+                Update dbo.OnmOdemePlani set
+                    TalepId = t.Id  
+                   ,CariId  = t.AdayId 
+                From dbo.OnmOdemePlani as a,
+                     dbo.SrcAdayTalep as t
+                Where a.VeriKaynakId = t.VeriKaynakId				 
+                and   a.Id = @curId
+
+                Select @TalepId = Id, @AdayId = AdayId 
+                From dbo.SrcAdayTalep 
+                Where VeriKaynakId = @VeriKaynakId
+            end
+
+
         end		
 
 		-- Tahsil edilmiş bir taksit var ise MtskAdayUcret tablosunu kilitle
-        if (
-            select count(Id) as Adet from OnmOdemePlani
-            where IsPaid = 1
-            and   TalepId = @TalepId
+
+        -- Mtsk ise
+        if (@UcretTipiId > 21100 and @UcretTipiId < 21200)
+        begin
+            if (
+                select count(Id) as Adet from OnmOdemePlani
+                where IsPaid = 1
+                and   TalepId = @TalepId
             ) > 0 
-        begin
-            Update MtskAdayUcret set IsLock = 1
-            Where TalepId = @TalepId
-        end else 
-        begin
-            Update MtskAdayUcret set IsLock = 0
-            Where TalepId = @TalepId
-        end
+            begin
+                Update MtskAdayUcret set IsLock = 1
+                Where TalepId = @TalepId
+            end else 
+            begin
+                Update MtskAdayUcret set IsLock = 0
+                Where TalepId = @TalepId
+            end
 	
-	    if (@DbUpdatesIsActive = 0)
-        begin  
-           Execute [dbo].[prc_MtskAdayBorcunuHesapla] @FirmId, @TalepId
-        end
+	        if (@DbUpdatesIsActive = 0)
+            begin  
+                Execute [dbo].[prc_MtskAdayBorcunuHesapla] @FirmId, @TalepId
+            end
+        end -- Mtsk
+
+
+        -- Src ise
+        if (@UcretTipiId > 22100 and @UcretTipiId < 22200)
+        begin
+            if (
+                select count(Id) as Adet from OnmOdemePlani
+                where IsPaid = 1
+                and   TalepId = @TalepId
+            ) > 0 
+            begin
+                Update SrcAdayUcret set IsLock = 1
+                Where TalepId = @TalepId
+            end else 
+            begin
+                Update SrcAdayUcret set IsLock = 0
+                Where TalepId = @TalepId
+            end
+	
+	        if (@DbUpdatesIsActive = 0)
+            begin  
+                Execute [dbo].[prc_SrcAdayBorcunuHesapla] @FirmId, @TalepId
+            end
+        end -- Mtsk
+
 
 
       FETCH NEXT FROM odmPlaniCursor_ INTO @curId
@@ -293,6 +359,7 @@ AS BEGIN
 
 	declare @FirmId int
     declare @TalepId int = 0
+    declare @UcretTipiId smallInt
 	declare @ItemTypeId smallInt
 	
 
@@ -302,10 +369,20 @@ AS BEGIN
             @FirmId = dlt.FirmId
            ,@TalepId = dlt.TalepId
            ,@ItemTypeId = dlt.UcretTipiId
+           ,@UcretTipiId = dlt.UcretTipiId
         From deleted dlt
         Where dlt.Id = @curId
 
-		Execute [dbo].[prc_MtskAdayBorcunuHesapla] @FirmId, @TalepId
+        -- Mtsk ise
+        if (@UcretTipiId > 21100 and @UcretTipiId < 21200)
+        begin
+		    Execute [dbo].[prc_MtskAdayBorcunuHesapla] @FirmId, @TalepId
+        end
+        -- Src ise
+        if (@UcretTipiId > 22100 and @UcretTipiId < 22200)
+        begin
+		    Execute [dbo].[prc_SrcAdayBorcunuHesapla] @FirmId, @TalepId
+        end
 
       FETCH NEXT FROM odmPlaniCursor_ INTO @curId
     END

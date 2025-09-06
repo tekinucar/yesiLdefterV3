@@ -1,40 +1,35 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+﻿using DevExpress.Utils;
 //using System.Threading;
 
 using DevExpress.XtraEditors;
-
-using Tkn_CookieReader;
-using Tkn_Events;
-using Tkn_Save;
-using Tkn_ToolBox;
-using Tkn_Variable;
-
-using YesiLdefter.Selenium.Helpers;
-using YesiLdefter.Selenium;
-using YesiLdefter.Entities;
-
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
-
-using Tesseract;
-using System.Net;
 using Spire.Additions.Chrome;
-
-
-using Tkn_UserFirms;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
-using Tkn_ExeUpdate;
 using System.IO.Compression;
+using System.Linq;
+using System.Net;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using Tesseract;
+using Tkn_CookieReader;
+using Tkn_Events;
+using Tkn_ExeUpdate;
+using Tkn_Save;
+using Tkn_ToolBox;
+using Tkn_UserFirms;
+using Tkn_Variable;
+using YesiLdefter.Entities;
+using YesiLdefter.Selenium;
+using YesiLdefter.Selenium.Helpers;
 
 namespace YesiLdefter
 {
@@ -428,6 +423,8 @@ namespace YesiLdefter
                 //if (((DevExpress.XtraBars.Navigation.TileNavItem)sender).Name == buttonInsertPaketOlustur) InsertPaketOlustur();
             }
         }
+
+
         public async void myTileView_ItemClick(object sender, DevExpress.XtraGrid.Views.Tile.TileViewItemClickEventArgs e)
         {
             if (t.IsNotNull(ds_MsWebPages) == false) return;
@@ -642,7 +639,7 @@ namespace YesiLdefter
             if (v.webDriver_ == null)
                 preparingWebMain();
 
-            f.loginPageRun = await myPageViewClickAsync(v.webDriver_, this.msWebPage_);
+            await myPageViewClickAsync(v.webDriver_, this.msWebPage_);
 
             //await myPageViewClickAsync(f.wbSel, this.msWebPage_);
         }
@@ -1262,12 +1259,32 @@ namespace YesiLdefter
         #endregion Scraping functions
 
         #region subFunctions
+        private bool IsDriverAlive(IWebDriver wb)
+        {
+            try
+            {
+                var _ = wb.WindowHandles;
+                return true;
+            }
+            catch { return false; }
+        }
+
         private async Task<bool> myPageViewClickAsync(IWebDriver wb, List<MsWebPage> msWebPage)
         {
+            bool driverAlive = IsDriverAlive(wb);
+
+            if (driverAlive == false)
+            {
+                preparingWebMain();
+            }
+
             bool onay = false;
             if (msWebPage[0].Id > 0) 
             {
+
                 msPagesService.getPageUrls(f, msWebPage);
+
+                if (f.loginPageUrl == f.talepEdilenUrl && f.loginPageRun) return true;
 
                 if (f.aktifUrl != f.talepEdilenUrl)
                 {
@@ -1277,8 +1294,12 @@ namespace YesiLdefter
                     {
                         if (f.loginPageUrl != f.talepEdilenUrl && f.loginPageRun )
                             onay = await loadPageUrl(wb, f.talepEdilenUrl);
+
                         if (f.loginPageUrl == f.talepEdilenUrl && f.loginPageRun == false)
+                        {
                             onay = await loadPageUrl(wb, f.talepEdilenUrl);
+                            f.loginPageRun = onay;
+                        }
                     }
                 }
                 else

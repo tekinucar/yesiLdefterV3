@@ -404,7 +404,7 @@ namespace Tkn_Starter
                     + " , LastDate = " + TarihSaat_Formati(Convert.ToDateTime(DateTime.Now)) // v.TARIH_SAAT
                     + " , OperatingSystem = '" + v.tComputer.OperatingSystem + "' "
                     //+ " , ExeVersion = '" + v.tExeAbout.activeVersionNo.Substring(0, 8) + "' "
-                    + " , ExeVersion = '20250604_standart' "
+                    + " , ExeVersion = '20250905_standart' "
                     + " where ComputerId = " + v.tComputer.UstadCrmComputerId.ToString();
                     DataSet ds_ = new DataSet();
                     SQL_Read_Execute(v.dBaseNo.UstadCrm, ds_, ref tSql, "UstadComputers", "Update");

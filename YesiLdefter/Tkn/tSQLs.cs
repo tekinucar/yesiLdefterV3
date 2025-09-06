@@ -3408,6 +3408,9 @@ INSERT INTO [dbo].[SYS_UPDATES]
 
             prop_jointable = t.Set(row["PROP_JOINTABLE"].ToString(), row["LKP_PROP_JOINTABLE"].ToString(), "");
 
+            string j1 = t.Set(row["PROP_JOINTABLE"].ToString(), "", "");
+            string j2 = t.Set(row["LKP_PROP_JOINTABLE"].ToString(), "", "");
+
             if (t.IsNotNull(prop_jointable))
             {
                 Preparing_JoinTable_JSON(prop_jointable, tLabel, ref joinTables, ref joinFields);

@@ -1411,6 +1411,7 @@ namespace Tkn_Variable
         public string talepOncesiUrl { get; set; }
         public string errorPageUrl { get; set; }
         public string loginPageUrl { get; set; }
+        public bool isLoginPage { get; set; }
         public bool loginPageRun { get; set; }
         public string tableIPCodesInLoad { get; set; }
         public string tableIPCodeIsSave { get; set; }

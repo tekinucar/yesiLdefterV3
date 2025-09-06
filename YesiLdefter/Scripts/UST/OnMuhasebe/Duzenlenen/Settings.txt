@@ -124,6 +124,29 @@ commit transaction
 
 Declare @FirmId Int 
 Set @FirmId = :FIRM_ID
+Declare @SectorTypeId SmallInt
+Set @SectorTypeId = :SectorTypeId 
+
+
+INSERT INTO [dbo].[Settings]
+           ([IsActive], [SettingTypeId], [FirmId], [PcName], [NetworkMacAddress], [UserId], [SettingGroupNo], [SettingNo], [About], [DefaultTypeId], [DefaultBool], [DefaultNumeric], [DefaultText], [DefaultInt])
+     VALUES
+           (1    --IsActive
+           ,1    --SettingTypeId
+           ,@FirmId
+           ,null -- PcName
+           ,null -- NetworkMacAddress
+           ,null -- UserId
+           ,1000 -- SettingGroupNo
+           ,100  -- SettingNo   
+           ,'Sektör tipi nedir ?'   -- About
+           ,4    -- DefaultTypeId /* DefaultInt seçildi */ 
+           ,null -- DefaultBool  
+           ,null -- DefaultNumeric
+           ,null -- DefaultText
+           ,@SectorTypeId  -- DefaultInt   : 201 - UstadMtsk, 202 - UstadIsmak, 203 - UstadSrc
+           )
+
 
 INSERT INTO [dbo].[Settings]
            ([IsActive], [SettingTypeId], [FirmId], [PcName], [NetworkMacAddress], [UserId], [SettingGroupNo], [SettingNo], [About], [DefaultTypeId], [DefaultBool], [DefaultNumeric], [DefaultText], [DefaultInt])

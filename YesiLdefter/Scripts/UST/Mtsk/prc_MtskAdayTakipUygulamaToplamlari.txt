@@ -7,7 +7,7 @@ AS BEGIN
 --declare @FirmId int = 11
 
    declare @bugunDonemTipiId int 
-   set @bugunDonemTipiId = dbo.fnc_getDonemTipiId('BUGUN');
+   set @bugunDonemTipiId = dbo.fnc_getDonemTipiId('BUGUN', null);
 
 -- uSinavDurumTipi < 9
 Select 

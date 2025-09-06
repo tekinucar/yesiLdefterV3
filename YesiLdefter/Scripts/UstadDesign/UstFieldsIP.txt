@@ -17,8 +17,9 @@ begin transaction
         Hint                      nVarChar(100)     null, /* PlaceholderText için kullanabilirsin */
         GroupNo                   SmallInt          null,
         GroupLineNo               SmallInt          null,
+        ListTypeName              VarChar(100)      null, /* eski LIST_TYPES_NAME  */ 
 
-        ComponentTypeId           SmallInt          null,
+        ComponentTypeId           VarChar(30)       null,
         CompVisible               Bit               null, /* CompVisible : ComponentVisible = true ise, bu field formda gösterilir. */
         CompEnabled               Bit               null, /* CompEnabled : ComponentEnabled = true ise, bu field formda aktif olur. */
         CompWidth                 SmallInt          null, /* default 100px */
@@ -85,8 +86,6 @@ begin transaction
         WebScrapingGetColumnNo    SmallInt          null,
         WebScrapingSetNodeId      SmallInt          null,
         WebScrapingSetColumnNo    SmallInt          null,
-
-        
 
 	Constraint pk_UstFieldsIP primary key (Id)
  )

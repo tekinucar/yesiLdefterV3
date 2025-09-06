@@ -514,25 +514,32 @@ INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, A
  ( '100.1022',  'Banka hesabından çekilen nakit' , 100,  1022  ), 
  ( '100.1023',  'Kredi kartından çekilen nakit avans' , 100,  1023  ), 
 
- --( '100.2110',  'Mtsk sertifika ücreti, nakit tahsilat ' , 100,  2110  ), 
- --( '100.2111',  'Mtsk teorik sınav ücreti, nakit tahsilat' , 100,  2111  ), 
- --( '100.2112',  'Mtsk uygulama sınav ücreti, nakit tahsilat' , 100,  2112  ), 
- --( '100.2113',  'Mtsk özel teorik ders ücreti, nakit tahsilat' , 100,  2113  ), 
- --( '100.2114',  'Mtsk özel uygulama ders ücreti, nakit tahsilat' , 100,  2114  ), 
- --
- -- OnmOdemePlani.UcretTipiId
+ -- OnmOdemePlani.UcretTipiId  Nakit Tahsilat
  --
  ( '100.21101',    N'Sertifika ücreti, nakit tahsilat ' , 100,  21101  ), 
  ( '100.21102',    N'2.+4 hak ücreti, nakit tahsilat ' , 100,  21102  ), 
  ( '100.21103',    N'Nakil 2.+4 hak ücreti, nakit tahsilat ' , 100,  21103  ), 
  ( '100.21104',    N'100 Ceza ücreti, nakit tahsilat ' , 100,  21104  ), 
  ( '100.21105',    N'Özel direksiyon ders ücreti, nakit tahsilat ' , 100,  21105  ), 
- ( '100.21106',    N'Özel teorik ders ücreti, nakit tahsilat ' , 100,  21106  ), 
  ( '100.21111',    N'e-Sınav ücreti, nakit tahsilat ' , 100,  21111  ), 
  ( '100.21112',    N'Uygulama sınav ücreti, nakit tahsilat ' , 100,  21112  ), 
  ( '100.21113',    N'Başarısız eğitim ücreti, nakit tahsilat ' , 100,  21113  ), 
  ( '100.21114',    N'Telafi eğitim ücreti, nakit tahsilat ' , 100,  21114  ), 
  ( '100.21115',    N'Diğer ücretler, nakit tahsilat ' , 100,  21115  ), 
+
+ ( '100.23101',    N'Src 1234 ücreti, nakit tahsilat ' , 100,  23101  ), 
+ ( '100.23102',    N'Src 5 ücreti, nakit tahsilat ' , 100,  23102  ), 
+ ( '100.23103',    N'Src 6 ücreti, nakit tahsilat ' , 100,  23103  ), 
+ ( '100.23104',    N'ODY 1234 ücreti, nakit tahsilat ' , 100,  23104  ), 
+ ( '100.23105',    N'ÜDY 1234 ücreti, nakit tahsilat ' , 100,  23105  ), 
+ ( '100.23111',    N'e-Sınav ücreti, nakit tahsilat ' , 100,  23111  ), 
+ ( '100.23112',    N'Uygulama sınav ücreti, nakit tahsilat ' , 100,  23112  ), 
+ ( '100.23113',    N'Başarısız eğitim ücreti, nakit tahsilat ' , 100,  23113  ), 
+ ( '100.23114',    N'Telafi eğitim ücreti, nakit tahsilat ' , 100,  23114  ), 
+ ( '100.23115',    N'Diğer ücretler, nakit tahsilat ' , 100,  23115  ), 
+
+
+
 
  ( '1022.100',   'Kasadan banka hesabına yatırılan' , 1022,  100  ), 
  ( '1022.120',   'Cariden gelen havale/Eft' , 1022,  120  ), 
@@ -545,25 +552,30 @@ INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, A
  ( '1022.1023',  'Kredi kartından çekilen nakit avans' , 1022,  1023  ), 
  ( '1022.1024',  'POS hesabından banka hesabına geçen' , 1022,  1024  ), 
  
- --( '1022.2110',  'Mtsk sertifika ücreti, banka hesabına yatan' , 1022,  2110  ), 
- --( '1022.2111',  'Mtsk teorik sınav ücreti, banka hesabına yatan' , 1022,  2111  ), 
- --( '1022.2112',  'Mtsk uygulama sınav ücreti, banka hesabına yatan' , 1022,  2112  ), 
- --( '1022.2113',  'Mtsk özel teorik ders ücreti, banka hesabına yatan' , 1022,  2113  ), 
- --( '1022.2114',  'Mtsk özel uygulama ders ücreti, banka hesabına ya' , 1022,  2114  ), 
- --
- -- OnmOdemePlani.UcretTipiId
+ -- OnmOdemePlani.UcretTipiId  Banka Hesabına Yatan
  --
  ( '1022.21101',    N'Sertifika ücreti, banka hesabına yatan' , 1022,  21101  ), 
  ( '1022.21102',    N'2.+4 hak ücreti, banka hesabına yatan' , 1022,  21102  ), 
  ( '1022.21103',    N'Nakil 2.+4 hak ücreti, banka hesabına yatan' , 1022,  21103  ), 
  ( '1022.21104',    N'100 Ceza ücreti, banka hesabına yatan' , 1022,  21104  ), 
  ( '1022.21105',    N'Özel direksiyon ders ücreti, banka hesabına yatan' , 1022,  21105  ), 
- ( '1022.21106',    N'Özel teorik ders ücreti, banka hesabına yatan' , 1022,  21106  ), 
  ( '1022.21111',    N'e-Sınav ücreti, banka hesabına yatan' , 1022,  21111  ), 
  ( '1022.21112',    N'Uygulama sınav ücreti, banka hesabına yatan' , 1022,  21112  ), 
  ( '1022.21113',    N'Başarısız eğitim ücreti, banka hesabına yatan' , 1022,  21113  ), 
  ( '1022.21114',    N'Telafi eğitim ücreti, banka hesabına yatan' , 1022,  21114  ), 
  ( '1022.21115',    N'Diğer ücretler, banka hesabına yatan' , 1022,  21115  ), 
+
+ ( '1022.23101',    N'Src 1234 ücreti, banka hesabına yatan' , 1022,  23101  ), 
+ ( '1022.23102',    N'Src 5 ücreti, banka hesabına yatan' , 1022,  23102  ), 
+ ( '1022.23103',    N'Src 6 ücreti, banka hesabına yatan' , 1022,  23103  ), 
+ ( '1022.23104',    N'ODY 1234 ücreti, banka hesabına yatan' , 1022,  23104  ), 
+ ( '1022.23105',    N'ÜDY 1234 ücreti, banka hesabına yatan' , 1022,  23105  ), 
+ ( '1022.23111',    N'e-Sınav ücreti, banka hesabına yatan' , 1022,  23111  ), 
+ ( '1022.23112',    N'Uygulama sınav ücreti, banka hesabına yatan' , 1022,  21112  ), 
+ ( '1022.23113',    N'Başarısız eğitim ücreti, banka hesabına yatan' , 1022,  23113  ), 
+ ( '1022.23114',    N'Telafi eğitim ücreti, banka hesabına yatan' , 1022,  23114  ), 
+ ( '1022.23115',    N'Diğer ücretler, banka hesabına yatan' , 1022,  23115  ), 
+
 
  ( '1023.100',   'Kredi kartı borcunu kasadan ödeme' , 1023,  100  ), 
  ( '1023.1022',  'Kredi kartı borcunu banka hesabından ödeme' , 1023,  1022  ), 
@@ -576,27 +588,87 @@ INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, A
  ( '1024.601',   'Yurtdışı satışlar için çekilen banka/kredi kartı tahsilat' , 1024,  601  ), 
  ( '1024.602',   'Verilen hizmetler için çekilen banka/kredi kartı tahsilat' , 1024,  602  ), 
 
- --( '1024.2110',  'Mtsk sertifika ücreti, POS ile tahsilat' , 1024,  2110  ), 
- --( '1024.2111',  'Mtsk teorik sınav ücreti, POS ile tahsilat' , 1024,  2111  ), 
- --( '1024.2112',  'Mtsk uygulama sınav ücreti, POS ile tahsilat' , 1024,  2112  ), 
- --( '1024.2113',  'Mtsk özel teorik ders ücreti, POS ile tahsilat' , 1024,  2113  ), 
- --( '1024.2114',  'Mtsk özel uygulama ders ücreti, POS ile tahsilat' , 1024,  2114  ), 
- --
- -- OnmOdemePlani.UcretTipiId
+ -- OnmOdemePlani.UcretTipiId  POS Cihazı ile tahsilatlar
  --
  ( '1024.21101',    N'Sertifika ücreti, POS ile tahsilat' , 1024,  21101  ), 
  ( '1024.21102',    N'2.+4 hak ücreti, POS ile tahsilat' , 1024,  21102  ), 
  ( '1024.21103',    N'Nakil 2.+4 hak ücreti, POS ile tahsilat' , 1024,  21103  ), 
  ( '1024.21104',    N'100 Ceza ücreti, POS ile tahsilat' , 1024,  21104  ), 
  ( '1024.21105',    N'Özel direksiyon ders ücreti, POS ile tahsilat' , 1024,  21105  ), 
- ( '1024.21106',    N'Özel teorik ders ücreti, POS ile tahsilat' , 1024,  21106  ), 
  ( '1024.21111',    N'e-Sınav ücreti, POS ile tahsilat' , 1024,  21111  ), 
  ( '1024.21112',    N'Uygulama sınav ücreti, POS ile tahsilat' , 1024,  21112  ), 
  ( '1024.21113',    N'Başarısız eğitim ücreti, POS ile tahsilat' , 1024,  21113  ), 
  ( '1024.21114',    N'Telafi eğitim ücreti, POS ile tahsilat' , 1024,  21114  ), 
  ( '1024.21115',    N'Diğer ücretler, POS ile tahsilat' , 1024,  21115  ), 
 
+ ( '1024.23101',    N'Src 1234 ücreti, POS ile tahsilat' , 1024,  23101  ), 
+ ( '1024.23102',    N'Src 5 ücreti, POS ile tahsilat' , 1024,  23102  ), 
+ ( '1024.23103',    N'Src 6 ücreti, POS ile tahsilat' , 1024,  23103  ), 
+ ( '1024.23104',    N'ODY 1234 ücreti, POS ile tahsilat' , 1024,  23104  ), 
+ ( '1024.23105',    N'ÜDY 1234 ücreti, POS ile tahsilat' , 1024,  23105  ), 
+ ( '1024.23111',    N'e-Sınav ücreti, POS ile tahsilat' , 1024,  23111  ), 
+ ( '1024.23112',    N'Uygulama sınav ücreti, POS ile tahsilat' , 1024,  23112  ), 
+ ( '1024.23113',    N'Başarısız eğitim ücreti, POS ile tahsilat' , 1024,  23113  ), 
+ ( '1024.23114',    N'Telafi eğitim ücreti, POS ile tahsilat' , 1024,  23114  ), 
+ ( '1024.23115',    N'Diğer ücretler, POS ile tahsilat' , 1024,  23115  ), 
 
+
+ -- OnmOdemePlani.UcretTipiId SANAL POS ile tahsilatlar
+ --
+ ( '1025.21101',    N'Sertifika ücreti, Sanal POS ile tahsilat' , 1025,  21101  ), 
+ ( '1025.21102',    N'2.+4 hak ücreti, Sanal POS ile tahsilat' , 1025,  21102  ), 
+ ( '1025.21103',    N'Nakil 2.+4 hak ücreti, Sanal POS ile tahsilat' , 1025,  21103  ), 
+ ( '1025.21104',    N'100 Ceza ücreti, Sanal POS ile tahsilat' , 1025,  21104  ), 
+ ( '1025.21105',    N'Özel direksiyon ders ücreti, Sanal POS ile tahsilat' , 1025,  21105  ), 
+ ( '1025.21111',    N'e-Sınav ücreti, Sanal POS ile tahsilat' , 1025,  21111  ), 
+ ( '1025.21112',    N'Uygulama sınav ücreti, Sanal POS ile tahsilat' , 1025,  21112  ), 
+ ( '1025.21113',    N'Başarısız eğitim ücreti, Sanal POS ile tahsilat' , 1025,  21113  ), 
+ ( '1025.21114',    N'Telafi eğitim ücreti, Sanal POS ile tahsilat' , 1025,  21114  ), 
+ ( '1025.21115',    N'Diğer ücretler, Sanal POS ile tahsilat' , 1025,  21115  ), 
+
+ ( '1025.23101',    N'Src 1234 ücreti, Sanal POS ile tahsilat' , 1025,  23101  ), 
+ ( '1025.23102',    N'Src 5 ücreti, Sanal POS ile tahsilat' , 1025,  23102  ), 
+ ( '1025.23103',    N'Src 6 ücreti, Sanal POS ile tahsilat' , 1025,  23103  ), 
+ ( '1025.23104',    N'ODY 1234 ücreti, Sanal POS ile tahsilat' , 1025,  23104  ), 
+ ( '1025.23105',    N'ÜDY 1234 ücreti, Sanal POS ile tahsilat' , 1025,  23105  ), 
+ ( '1025.23111',    N'e-Sınav ücreti, Sanal POS ile tahsilat' , 1025,  23111  ), 
+ ( '1025.23112',    N'Uygulama sınav ücreti, Sanal POS ile tahsilat' , 1025,  23112  ), 
+ ( '1025.23113',    N'Başarısız eğitim ücreti, Sanal POS ile tahsilat' , 1025,  23113  ), 
+ ( '1025.23114',    N'Telafi eğitim ücreti, Sanal POS ile tahsilat' , 1025,  23114  ), 
+ ( '1025.23115',    N'Diğer ücretler, Sanal POS ile tahsilat' , 1025,  23115  ), 
+  
+ 
+ -- OnmOdemePlani.UcretTipiId CARİ POS ile tahsilatlar
+ --
+ ( '1026.21101',    N'Sertifika ücreti, Cari POS ile tahsilat' , 1025,  21101  ), 
+ ( '1026.21102',    N'2.+4 hak ücreti, Cari POS ile tahsilat' , 1025,  21102  ), 
+ ( '1026.21103',    N'Nakil 2.+4 hak ücreti, Cari POS ile tahsilat' , 1025,  21103  ), 
+ ( '1026.21104',    N'100 Ceza ücreti, Cari POS ile tahsilat' , 1025,  21104  ), 
+ ( '1026.21105',    N'Özel direksiyon ders ücreti, Cari POS ile tahsilat' , 1025,  21105  ), 
+ ( '1026.21111',    N'e-Sınav ücreti, Cari POS ile tahsilat' , 1025,  21111  ), 
+ ( '1026.21112',    N'Uygulama sınav ücreti, Cari POS ile tahsilat' , 1025,  21112  ), 
+ ( '1026.21113',    N'Başarısız eğitim ücreti, Cari POS ile tahsilat' , 1025,  21113  ), 
+ ( '1026.21114',    N'Telafi eğitim ücreti, Cari POS ile tahsilat' , 1025,  21114  ), 
+ ( '1026.21115',    N'Diğer ücretler, Cari POS ile tahsilat' , 1025,  21115  ), 
+
+ ( '1026.23101',    N'Src 1234 ücreti, Cari POS ile tahsilat' , 1025,  23101  ), 
+ ( '1026.23102',    N'Src 5 ücreti, Cari POS ile tahsilat' , 1025,  23102  ), 
+ ( '1026.23103',    N'Src 6 ücreti, Cari POS ile tahsilat' , 1025,  23103  ), 
+ ( '1026.23104',    N'ODY 1234 ücreti, Cari POS ile tahsilat' , 1025,  23104  ), 
+ ( '1026.23105',    N'ÜDY 1234 ücreti, Cari POS ile tahsilat' , 1025,  23105  ), 
+ ( '1026.23111',    N'e-Sınav ücreti, Cari POS ile tahsilat' , 1025,  23111  ), 
+ ( '1026.23112',    N'Uygulama sınav ücreti, Cari POS ile tahsilat' , 1025,  23112  ), 
+ ( '1026.23113',    N'Başarısız eğitim ücreti, Cari POS ile tahsilat' , 1025,  23113  ), 
+ ( '1026.23114',    N'Telafi eğitim ücreti, Cari POS ile tahsilat' , 1025,  23114  ), 
+ ( '1026.23115',    N'Diğer ücretler, Cari POS ile tahsilat' , 1025,  23115  ), 
+
+
+
+ -- --------------------------------------------------
+ -- Tediye/Ödeme işlemleri
+ -- --------------------------------------------------
+ 
+ 
  ( '120.100',  'Cari hesaba ödenen nakit' , 120,  100  ), 
  ( '131.100',  'Ortaklara verilen nakit ' , 131,  100  ), 
  --( '135.100',  'Personele verilen nakit' , 135,  100  ), /* 335. Personele Borçlar / 135. Personelden Alacaklar  */
@@ -606,10 +678,6 @@ INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, A
  ( '320.100',  'Cari hesaba ödenen nakit' , 320,  100  ), 
  ( '770.100',  'Genel yönetim giderleri için nakit ödeme' , 770,  100  ), 
 
- --( '2110.100',  'Mtsk sertifika ücreti, nakit iadesi' , 2110,  100  ), 
- --( '2113.100',  'Mtsk özel teorik ders ücreti, nakit iadesi' , 2113,  100  ), 
- --( '2114.100',  'Mtsk özel uygulama ders ücreti, nakit iadesi' , 2114,  100  ), 
- --
  -- OnmOdemePlani.UcretTipiId
  --
  ( '21101.100',    N'Sertifika ücreti, nakit iadesi' , 21101,  100  ), 
@@ -617,12 +685,22 @@ INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, A
  ( '21103.100',    N'Nakil 2.+4 hak ücreti, nakit iadesi' , 21103,  100  ), 
  ( '21104.100',    N'100 Ceza ücreti, nakit iadesi' , 21104,  100  ), 
  ( '21105.100',    N'Özel direksiyon ders ücreti, nakit iadesi' , 21105,  100  ), 
- ( '21106.100',    N'Özel teorik ders ücreti, nakit iadesi' , 21106,  100  ), 
  ( '21111.100',    N'e-Sınav ücreti, nakit iadesi' , 21111,  100  ), 
  ( '21112.100',    N'Uygulama sınav ücreti, nakit iadesi' , 21112,  100  ), 
  ( '21113.100',    N'Başarısız eğitim ücreti, nakit iadesi' , 21113,  100  ), 
  ( '21114.100',    N'Telafi eğitim ücreti, nakit iadesi' , 21114,  100  ), 
  ( '21115.100',    N'Diğer ücretler, nakit iadesi' , 21115,  100  ), 
+
+ ( '23101.100',    N'Src 1234 ücreti, nakit iadesi' , 23101,  100  ), 
+ ( '23102.100',    N'Src 5 ücreti, nakit iadesi' , 23102,  100  ), 
+ ( '23103.100',    N'Src 6 ücreti, nakit iadesi' , 23103,  100  ), 
+ ( '23104.100',    N'ODY 1234 ücreti, nakit iadesi' , 23104,  100  ), 
+ ( '23105.100',    N'ÜDY 1234 ücreti, nakit iadesi' , 23105,  100  ), 
+ ( '23111.100',    N'e-Sınav ücreti, nakit iadesi' , 23111,  100  ), 
+ ( '23112.100',    N'Uygulama sınav ücreti, nakit iadesi' , 23112,  100  ), 
+ ( '23113.100',    N'Başarısız eğitim ücreti, nakit iadesi' , 23113,  100  ), 
+ ( '23114.100',    N'Telafi eğitim ücreti, nakit iadesi' , 23114,  100  ), 
+ ( '23115.100',    N'Diğer ücretler, nakit iadesi' , 23115,  100  ), 
 
 
  ( '120.1022',  'Cari hesaba gönderilen havale/Eft' , 120,  1022  ), 
@@ -633,28 +711,32 @@ INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, A
  ( '300.1022',  'Banka kredisi için banka hesabından ödeme' , 300,  1022  ), 
  ( '320.1022',  'Cari hesabına havale/Eft' , 320,  1022  ), 
  ( '770.1022',  'Genel yönetim giderleri için banka hesabından havale/Eft' , 770,  1022  ), 
+ ( '780.1022',  'Finansman giderleri için banka hesabından çekilen' , 780,  1022  ), 
 
- --( '2110.1022',  'Mtsk sertifika ücreti, banka hesabından iade' , 2110,  1022  ), 
- --( '2111.1022',  'Mtsk teorik sınav ücreti, banka hesabından iade' , 2111,  1022  ), 
- --( '2112.1022',  'Mtsk uygulama sınav ücreti, banka hesabından iade' , 2112,  1022  ), 
- --( '2113.1022',  'Mtsk özel teorik ders ücreti, banka hesabından iade' , 2113,  1022  ), 
- --( '2114.1022',  'Mtsk özel uygulama ders ücreti, banka hesabından iade' , 2114,  1022  ), 
- --( '2111.100',  'Mtsk teorik sınav ücreti, nakit iadesi' , 2111,  100  ), 
- --( '2112.100',  'Mtsk uygulama sınav ücreti, nakit iadesi' , 2112,  100  ), 
- --
- -- OnmOdemePlani.UcretTipiId
+ -- OnmOdemePlani.UcretTipiId  Banka Hesabından Havale/Eft ile iade
  --
  ( '21101.1022',    N'Sertifika ücreti, banka hesabından iade' , 21101,  1022  ), 
  ( '21102.1022',    N'2.+4 hak ücreti, banka hesabından iade' , 21102,  1022  ), 
  ( '21103.1022',    N'Nakil 2.+4 hak ücreti, banka hesabından iade' , 21103,  1022  ), 
  ( '21104.1022',    N'100 Ceza ücreti, banka hesabından iade' , 21104,  1022  ), 
  ( '21105.1022',    N'Özel direksiyon ders ücreti, banka hesabından iade' , 21105,  1022  ), 
- ( '21106.1022',    N'Özel teorik ders ücreti, banka hesabından iade' , 21106,  1022  ), 
  ( '21111.1022',    N'e-Sınav ücreti, banka hesabından iade' , 21111,  1022  ), 
  ( '21112.1022',    N'Uygulama sınav ücreti, banka hesabından iade' , 21112,  1022  ), 
  ( '21113.1022',    N'Başarısız eğitim ücreti, banka hesabından iade' , 21113,  1022  ), 
  ( '21114.1022',    N'Telafi eğitim ücreti, banka hesabından iade' , 21114,  1022  ), 
  ( '21115.1022',    N'Diğer ücretler, banka hesabından iade' , 21115,  1022  ), 
+
+ 
+ ( '23101.1022',    N'Src 1234 ücreti, banka hesabından iade' , 23101,  1022  ), 
+ ( '23102.1022',    N'Src 5 ücreti, banka hesabından iade' , 23102,  1022  ), 
+ ( '23103.1022',    N'Src 6 ücreti, banka hesabından iade' , 23103,  1022  ), 
+ ( '23104.1022',    N'ODY 1234 ücreti, banka hesabından iade' , 23104,  1022  ), 
+ ( '23105.1022',    N'ÜDY 1234 ücreti, banka hesabından iade' , 23105,  1022  ), 
+ ( '23111.1022',    N'e-Sınav ücreti, banka hesabından iade' , 23111,  1022  ), 
+ ( '23112.1022',    N'Uygulama sınav ücreti, banka hesabından iade' , 23112,  1022  ), 
+ ( '23113.1022',    N'Başarısız eğitim ücreti, banka hesabından iade' , 23113,  1022  ), 
+ ( '23114.1022',    N'Telafi eğitim ücreti, banka hesabından iade' , 23114,  1022  ), 
+ ( '23115.1022',    N'Diğer ücretler, banka hesabından iade' , 23115,  1022  ), 
 
 
  ( '120.1023',  'Cari hesaba kredi kartı ile ödeme' , 120,  1023  ), 
@@ -666,7 +748,64 @@ INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, A
  ( '791.100',   'İşçi ücret ve giderleri için nakit ödeme' , 791,  100  ), 
  ( '793.1023',  'Dışarıdan sağlanan hizmetler için kredi kartıyla ödeme' , 793,  1023  ), 
  ( '793.100',   'Dışarıdan sağlanan hizmetler için nakit ödeme' , 793,  100  ), 
- ( '793.1022',  'Dışarıdan sağlanan hizmetler için banka hesabından havale/Eft' , 793,  1022  ) 
+ ( '793.1022',  'Dışarıdan sağlanan hizmetler için banka hesabından havale/Eft' , 793,  1022  ), 
+
+
+ -- OnmOdemePlani.UcretTipiId  POS Cihazından iade
+ --
+ ( '21101.1024',    N'Sertifika ücreti, POS dan iade' , 21101,  1024  ), 
+ ( '21102.1024',    N'2.+4 hak ücreti, POS dan iade' , 21102,  1024  ), 
+ ( '21103.1024',    N'Nakil 2.+4 hak ücreti, POS dan iade' , 21103,  1024  ), 
+ ( '21104.1024',    N'100 Ceza ücreti, POS dan iade' , 21104,  1024  ), 
+ ( '21105.1024',    N'Özel direksiyon ders ücreti, POS dan iade' , 21105,  1024  ), 
+ ( '21111.1024',    N'e-Sınav ücreti, POS dan iade' , 21111,  1024  ), 
+ ( '21112.1024',    N'Uygulama sınav ücreti, POS dan iade' , 21112,  1024  ), 
+ ( '21113.1024',    N'Başarısız eğitim ücreti, POS dan iade' , 21113,  1024  ), 
+ ( '21114.1024',    N'Telafi eğitim ücreti, POS dan iade' , 21114,  1024  ), 
+ ( '21115.1024',    N'Diğer ücretler, POS dan iade' , 21115,  1024  ), 
+
+ 
+ ( '23101.1024',    N'Src 1234 ücreti, POS dan iade' , 23101,  1024  ), 
+ ( '23102.1024',    N'Src 5 ücreti, POS dan iade' , 23102,  1024  ), 
+ ( '23103.1024',    N'Src 6 ücreti, POS dan iade' , 23103,  1024  ), 
+ ( '23104.1024',    N'ODY 1234 ücreti, POS dan iade' , 23104,  1024  ), 
+ ( '23105.1024',    N'ÜDY 1234 ücreti, POS dan iade' , 23105,  1024  ), 
+ ( '23111.1024',    N'e-Sınav ücreti, POS dan iade' , 23111,  1024  ), 
+ ( '23112.1024',    N'Uygulama sınav ücreti, POS dan iade' , 23112,  1024  ), 
+ ( '23113.1024',    N'Başarısız eğitim ücreti, POS dan iade' , 23113,  1024  ), 
+ ( '23114.1024',    N'Telafi eğitim ücreti, POS dan iade' , 23114,  1024  ), 
+ ( '23115.1024',    N'Diğer ücretler, POS dan iade' , 23115,  1024  ), 
+
+
+
+ -- OnmOdemePlani.UcretTipiId  Sanal POS Hesabından iade
+ --
+ ( '21101.1025',    N'Sertifika ücreti, Sanal POS dan iade' , 21101,  1025  ), 
+ ( '21102.1025',    N'2.+4 hak ücreti, Sanal POS dan iade' , 21102,  1025  ), 
+ ( '21103.1025',    N'Nakil 2.+4 hak ücreti, Sanal POS dan iade' , 21103,  1025  ), 
+ ( '21104.1025',    N'100 Ceza ücreti, Sanal POS dan iade' , 21104,  1025  ), 
+ ( '21105.1025',    N'Özel direksiyon ders ücreti, Sanal POS dan iade' , 21105,  1025  ), 
+ ( '21111.1025',    N'e-Sınav ücreti, Sanal POS dan iade' , 21111,  1025  ), 
+ ( '21112.1025',    N'Uygulama sınav ücreti, Sanal POS dan iade' , 21112,  1025  ), 
+ ( '21113.1025',    N'Başarısız eğitim ücreti, Sanal POS dan iade' , 21113,  1025  ), 
+ ( '21114.1025',    N'Telafi eğitim ücreti, Sanal POS dan iade' , 21114,  1025  ), 
+ ( '21115.1025',    N'Diğer ücretler, Sanal POS dan iade' , 21115,  1025  ), 
+
+ 
+ ( '23101.1025',    N'Src 1234 ücreti, Sanal POS dan iade' , 23101,  1025  ), 
+ ( '23102.1025',    N'Src 5 ücreti, Sanal POS dan iade' , 23102,  1025  ), 
+ ( '23103.1025',    N'Src 6 ücreti, Sanal POS dan iade' , 23103,  1025  ), 
+ ( '23104.1025',    N'ODY 1234 ücreti, Sanal POS dan iade' , 23104,  1025  ), 
+ ( '23105.1025',    N'ÜDY 1234 ücreti, Sanal POS dan iade' , 23105,  1025  ), 
+ ( '23111.1025',    N'e-Sınav ücreti, Sanal POS dan iade' , 23111,  1025  ), 
+ ( '23112.1025',    N'Uygulama sınav ücreti, Sanal POS dan iade' , 23112,  1025  ), 
+ ( '23113.1025',    N'Başarısız eğitim ücreti, Sanal POS dan iade' , 23113,  1025  ), 
+ ( '23114.1025',    N'Telafi eğitim ücreti, Sanal POS dan iade' , 23114,  1025  ), 
+ ( '23115.1025',    N'Diğer ücretler, Sanal POS dan iade' , 23115,  1025  ) 
+
+
+
+
 
 -- ------------------------------------------------------- 
 -- BHesapTipiId
@@ -692,6 +831,8 @@ INSERT INTO [Lkp].[OnmBelgeDekontBHesapTipi] (Id, BHesapTipi, GrupTipiId)
   ( 1022, N'Banka hesabı', 1), 
   ( 1023, N'Banka/Kredi kartı', 1), 
   ( 1024, N'POS', 1),
+  ( 1025, N'Sanal POS', 1),
+  ( 1026, N'Cari POS', 1),
 
   ( 120,  N'Alıcılar', 1),
   ( 131,  N'Ortaklar', 1),
@@ -707,10 +848,10 @@ INSERT INTO [Lkp].[OnmBelgeDekontBHesapTipi] (Id, BHesapTipi, GrupTipiId)
   ( 602,  N'Verilen hizmetler', 1),
 
   ( 770,  N'Genel yönetim giderleri', 1),
+  ( 780,  N'Finansman giderleri', 1),
   ( 791,  N'İşçi ücret ve giderleri', 1),
   ( 793,  N'Dışarıdan sağlanan fayda ve hizmetler', 1),
   ( 795,  N'Vergi, resim ve harçlar', 1),
-  ( 797,  N'Finansman giderleri', 1),
 
   --( 901,   N'SGK giderleri', 1),
   --( 902,   N'SGK işci payı giderleri', 1),
@@ -718,12 +859,6 @@ INSERT INTO [Lkp].[OnmBelgeDekontBHesapTipi] (Id, BHesapTipi, GrupTipiId)
   --( 911,   N'Bağkur giderleri', 1),
   --( 921,   N'Belediye harçları', 1),
 
-  --( 2110,  N'Mtsk sertifika ücreti', 1),  
-  --( 2111,  N'Mtsk teorik sınav ücreti', 1),
-  --( 2112,  N'Mtsk uygulama sınav ücreti', 1),
-  --( 2113,  N'Mtsk özel teorik ders ücreti', 1),
-  --( 2114,  N'Mtsk özel uygulama ders ücreti', 1)
-  --
   -- OnmOdemePlani.UcretTipiId
   --
   ( 21101,    N'Sertifika', 1),
@@ -731,13 +866,22 @@ INSERT INTO [Lkp].[OnmBelgeDekontBHesapTipi] (Id, BHesapTipi, GrupTipiId)
   ( 21103,    N'Nakil 2.+4 hak', 1),
   ( 21104,    N'100 Ceza', 1),
   ( 21105,    N'Özel direksiyon ders (Aday değil)', 1),
-  ( 21106,    N'Özel teorik ders', 1),
   ( 21111,    N'e-Sınav ücreti', 1),
   ( 21112,    N'Uygulama sınav ücreti', 1),
   ( 21113,    N'Başarısız eğitim ücreti', 1),
   ( 21114,    N'Telafi eğitim ücreti', 1),
-  ( 21115,    N'Diğer ücretler', 1)
+  ( 21115,    N'Diğer ücretler', 1),
 
+  ( 23101,    N'Src 1234', 1),
+  ( 23102,    N'Src 5', 1),
+  ( 23103,    N'Src 6', 1),
+  ( 23104,    N'ODY 1234', 1),
+  ( 23105,    N'ÜDY 1234', 1),
+  ( 23111,    N'e-Sınav ücreti', 1),
+  ( 23112,    N'Uygulama sınav ücreti', 1),
+  ( 23113,    N'Başarısız eğitim ücreti', 1),
+  ( 23114,    N'Telafi eğitim ücreti', 1),
+  ( 23115,    N'Diğer ücretler', 1)
 
 
   
@@ -765,6 +909,8 @@ INSERT INTO [Lkp].[OnmBelgeDekontAHesapTipi] (Id, AHesapTipi, GrupTipiId)
   ( 1022, N'Banka hesabı', 1), 
   ( 1023, N'Banka/Kredi kartı', 1), 
   ( 1024, N'POS', 1),
+  ( 1025, N'Sanal POS', 1),
+  ( 1026, N'Cari POS', 1),
 
   ( 120,  N'Alıcılar', 1),
   ( 131,  N'Ortaklar', 1),
@@ -780,10 +926,10 @@ INSERT INTO [Lkp].[OnmBelgeDekontAHesapTipi] (Id, AHesapTipi, GrupTipiId)
   ( 602,  N'Verilen hizmetler', 1),
 
   ( 770,  N'Genel yönetim giderleri', 1),
+  ( 780,  N'Finansman giderleri', 1),
   ( 791,  N'İşçi ücret ve giderleri', 1),
   ( 793,  N'Dışarıdan sağlanan fayda ve hizmetler', 1),
   ( 795,  N'Vergi, resim ve harçlar', 1),
-  ( 797,  N'Finansman giderleri', 1),
 
   --( 901,   N'SGK giderleri', 1),
   --( 902,   N'SGK işci payı giderleri', 1),
@@ -791,12 +937,6 @@ INSERT INTO [Lkp].[OnmBelgeDekontAHesapTipi] (Id, AHesapTipi, GrupTipiId)
   --( 911,   N'Bağkur giderleri', 1),
   --( 921,   N'Belediye harçları', 1),
 
-  --( 2110,  N'Mtsk sertifika ücreti', 1),  
-  --( 2111,  N'Mtsk teorik sınav ücreti', 1),
-  --( 2112,  N'Mtsk uygulama sınav ücreti', 1),
-  --( 2113,  N'Mtsk özel teorik ders ücreti', 1),
-  --( 2114,  N'Mtsk özel uygulama ders ücreti', 1)
-  --
   -- OnmOdemePlani.UcretTipiId
   --
   ( 21101,    N'Sertifika', 1),
@@ -804,12 +944,23 @@ INSERT INTO [Lkp].[OnmBelgeDekontAHesapTipi] (Id, AHesapTipi, GrupTipiId)
   ( 21103,    N'Nakil 2.+4 hak', 1),
   ( 21104,    N'100 Ceza', 1),
   ( 21105,    N'Özel direksiyon ders (Aday değil)', 1),
-  ( 21106,    N'Özel teorik ders', 1),
   ( 21111,    N'e-Sınav ücreti', 1),
   ( 21112,    N'Uygulama sınav ücreti', 1),
   ( 21113,    N'Başarısız eğitim ücreti', 1),
   ( 21114,    N'Telafi eğitim ücreti', 1),
-  ( 21115,    N'Diğer ücretler', 1)
+  ( 21115,    N'Diğer ücretler', 1),
+
+  ( 23101,    N'Src 1234', 1),
+  ( 23102,    N'Src 5', 1),
+  ( 23103,    N'Src 6', 1),
+  ( 23104,    N'ODY 1234', 1),
+  ( 23105,    N'ÜDY 1234', 1),
+  ( 23111,    N'e-Sınav ücreti', 1),
+  ( 23112,    N'Uygulama sınav ücreti', 1),
+  ( 23113,    N'Başarısız eğitim ücreti', 1),
+  ( 23114,    N'Telafi eğitim ücreti', 1),
+  ( 23115,    N'Diğer ücretler', 1)
+
 
 
 -- ------------------------------------------------------- 

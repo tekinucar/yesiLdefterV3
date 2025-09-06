@@ -55,7 +55,7 @@ AS BEGIN
   , 350 as LkpWidth
   , 450 as LkpHeight
   , 96  as LkpDpi 
-  , 'png' as LkpFormat
+  , 'jpg' as LkpFormat
   
   From MtskAdayTalep
   Where Id = @TalepId

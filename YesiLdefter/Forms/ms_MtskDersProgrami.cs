@@ -1781,6 +1781,7 @@ namespace YesiLdefter
             scripts.SourceDBaseName = databaseName;
             scripts.SchemaName = schemaName;
             scripts.SourceTableName = tableName;
+            scripts.TableIPCode = "";
             scripts.Where = " 0 = 0 ";
             scripts.IdentityInsertOnOff = true;
 

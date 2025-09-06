@@ -365,12 +365,15 @@ AS BEGIN
 		    set @yHesapKisaAdi = @eParentHesapAdi3
         if (@eAltGrupTipiId = 1024)
 		    set @yHesapKisaAdi = @eParentHesapAdi3
+        if (@eAltGrupTipiId = 1025)
+		    set @yHesapKisaAdi = @eParentHesapAdi3
 
 		if ((@eAltGrupTipiId = 1020) or -- seçilen banka, 
 		    (@eAltGrupTipiId = 1021) or -- şube
 			(@eAltGrupTipiId = 1022) or -- banka hesabı
 			(@eAltGrupTipiId = 1023) or -- banka kartı
 			(@eAltGrupTipiId = 1024) or -- pos cihazı
+			(@eAltGrupTipiId = 1025) or -- sanal pos
 		    (@eAltGrupTipiId = 1029))   -- tüm banka
 		begin
 		  set @yHesapKisaAdi = replace(@yHesapKisaAdi, 'TÜRKİYE', '');
@@ -403,6 +406,9 @@ AS BEGIN
         -- pos cihazı
         if (@eAltGrupTipiId = 1024)
 		    set @yHesapKisaAdi = @yHesapKisaAdi + '.pos.' + @eHesapAdi + '.' + @eNumarasi
+        -- sanal pos
+        if (@eAltGrupTipiId = 1025)
+		    set @yHesapKisaAdi = @yHesapKisaAdi + '.Spos.' + @eHesapAdi + '.' + @eNumarasi
       end
 	  	  	   
 	  if ((@eHesapKisaAdi <> @yHesapKisaAdi) and
@@ -624,6 +630,44 @@ INSERT INTO [Lkp].[OnmHesapMaster] (ParentId, FirmId, IsActive, UstGrupTipiId, A
 (0, @FirmId, 1, 7, 703, 0, 0, '799', '79',    'Üretim Maliyet Hesabı' )
 
 
+/*
+790 – 799 arası hesaplar Tekdüzen Hesap Planı’nda yansıtma hesaplarıdır.
+Bunların amacı:
+7’li gider hesaplarında (710, 720, 730, 740, 750, 760, 770, 780 …) dönem boyunca kaydedilen giderleri,
+6’lı hesaplara (620 Satılan Mamuller Maliyeti, 632 Genel Yönetim Giderleri, 660 Kısa Vadeli Borçlanma Giderleri, 780 Finansman Giderleri vs.) aktarmaktır.
+
+tüm 790 lı hesapların birebir 7’li gider hesaplarında (710, 720, 730, 740, 750, 760, 770, 780) hangisine karşılık geliyor. 790 larda gördüğüm detayı 710 ile 780 arasında göremiyorum
+
+Evet, 790’lı yansıtma hesaplarının birebir karşılığı 7’li gider hesaplarıdır.
+Ama dediğiniz gibi, Tekdüzen Hesap Planı’nda 7’li gider hesapları daha toplu (710, 720, 730, 740, 750, 760, 770, 780) iken, 790’lı yansıtma hesapları daha detaylı olarak açılmıştır.
+
+7’li Gider Hesapları ve 79’lu Yansıtma Hesapları Karşılaştırması
+
+7’li Gider Hesapları                        79’lu Yansıtma Hesapları                             Açıklama
+710 Direkt İlk Madde ve Malzeme Giderleri   790 İlk Madde ve Malzeme Giderleri Yansıtma          Üretimde kullanılan direkt malzeme giderlerinin yansıtılması
+720 Direkt İşçilik Giderleri                791 İşçi Ücret ve Giderleri Yansıtma                 Direkt işçilik giderlerinin yansıtılması
+
+730 Genel Üretim Giderleri                  792 Memur Ücret ve Giderleri Yansıtma                730’un alt kırılımı gibi çalışıyor. 730 tek hesap iken, 792–796 arasında detaylandırılarak yansıtılıyor.
+                                            793 Dışarıdan Sağlanan Fayda ve Hizmetler Yansıtma
+                                            794 Çeşitli Giderler Yansıtma
+                                            795 Vergi, Resim ve Harçlar Yansıtma
+                                            796 Amortisman ve Tükenme Payları Yansıtma	
+740 Hizmet Üretim Maliyeti                  (Ayrıca 79’lu özel bir hesap yok, genelde 798 Gider Çeşitleri Yansıtma veya 799 Üretim Maliyeti Yansıtma ile bağlanır) :>  Hizmet üretimi yapan işletmeler için
+750 Araştırma ve Geliştirme Giderleri       798 Gider Çeşitleri Yansıtma (genelde kullanılır)    Ar-Ge giderlerinin yansıtılması
+760 Pazarlama, Satış ve Dağıtım Giderleri   798 Gider Çeşitleri Yansıtma                         Pazarlama giderleri için
+770 Genel Yönetim Giderleri                 798 Gider Çeşitleri Yansıtma                         Yönetim giderleri için
+780 Finansman Giderleri                     797 Finansman Giderleri Yansıtma                     Faiz, banka masrafı, kur farkı vb. finansman giderleri
+
+
+Yani:
+
+710 → 790
+720 → 791
+730 → 792–796 (detaylı ayrışıyor)
+740, 750, 760, 770 → 798
+780 → 797
+*/
+
 
 
 /*
@@ -735,18 +779,18 @@ INSERT INTO [Lkp].[OnmHesapMaster] (ParentId, FirmId, IsActive, UstGrupTipiId, A
 (0, @FirmId, 1, 82,   0,    0,  770, '81.12.92', '81.12',  20,  0, 'Genel gider', 0, 1, 4, 0 ), -- sonrada eklendi
 
 
-(0, @FirmId, 1, 82,   0,    0,  797, '81.13.10', '81.13',   0,  0, 'Banka hesap ve kart ücretleri', 0, 22, 3, 0 ),
-(0, @FirmId, 1, 82,   0,    0,  797, '81.13.12', '81.13',   0,  0, 'Çek/Senet masrafları', 0, 22, 3, 0 ),
-(0, @FirmId, 1, 82,   0,    0,  797, '81.13.14', '81.13',   0,  0, 'Faiz', 0, 22, 3, 0 ),
-(0, @FirmId, 1, 82,   0,    0,  797, '81.13.16', '81.13',   0,  0, 'İşlem ücretleri', 0, 22, 3, 0 ),
-(0, @FirmId, 1, 82,   0,    0,  797, '81.13.18', '81.13',   0,  0, 'Kredi masrafları', 0, 22, 3, 0 ),
-(0, @FirmId, 1, 82,   0,    0,  797, '81.13.20', '81.13',   0,  0, 'Komisyon ücretleri', 0, 22, 3, 0 ),
---(0, @FirmId, 1, 82,   0,    0,  797, '81.13.22', '81.13',   0,  0, 'Para çekme', 0, 22, 3, 0 ),
-(0, @FirmId, 1, 82,   0,    0,  797, '81.13.24', '81.13',   0,  0, 'Para transferi', 0, 22, 3, 0 ),
-(0, @FirmId, 1, 82,   0,    0,  797, '81.13.26', '81.13',   0,  0, 'Para yatırma', 0, 22, 3, 0 ),
-(0, @FirmId, 1, 82,   0,    0,  797, '81.13.28', '81.13',   0,  0, 'Pos komisyonu', 0, 22, 3, 0 ),
+(0, @FirmId, 1, 82,   0,    0,  780, '81.13.10', '81.13',   0,  0, 'Banka hesap ve kart ücretleri', 0, 22, 3, 0 ),
+(0, @FirmId, 1, 82,   0,    0,  780, '81.13.12', '81.13',   0,  0, 'Çek/Senet masrafları', 0, 22, 3, 0 ),
+(0, @FirmId, 1, 82,   0,    0,  780, '81.13.14', '81.13',   0,  0, 'Faiz', 0, 22, 3, 0 ),
+(0, @FirmId, 1, 82,   0,    0,  780, '81.13.16', '81.13',   0,  0, 'İşlem ücretleri', 0, 22, 3, 0 ),
+(0, @FirmId, 1, 82,   0,    0,  780, '81.13.18', '81.13',   0,  0, 'Kredi masrafları', 0, 22, 3, 0 ),
+(0, @FirmId, 1, 82,   0,    0,  780, '81.13.20', '81.13',   0,  0, 'Komisyon ücretleri', 0, 22, 3, 0 ),
+(0, @FirmId, 0, 82,   0,    0,  780, '81.13.22', '81.13',   0,  0, 'Para çekme komisyonu', 0, 22, 3, 0 ),
+(0, @FirmId, 0, 82,   0,    0,  780, '81.13.24', '81.13',   0,  0, 'Para transferi', 0, 22, 3, 0 ),
+(0, @FirmId, 0, 82,   0,    0,  780, '81.13.26', '81.13',   0,  0, 'Para yatırma', 0, 22, 3, 0 ),
+(0, @FirmId, 1, 82,   0,    0,  780, '81.13.28', '81.13',   0,  0, 'Pos komisyonu', 0, 22, 3, 0 ),
 (0, @FirmId, 1, 82, 102, 1023, 1023, '81.13.30', '81.13',   0,  0, 'Kredi Kartı Hesap Ekstresi', 0, 22, 3, 0 ),
-(0, @FirmId, 1, 82, 102, 1022,  797, '81.13.32', '81.13',   0,  0, 'KMH-Faiz Tahsilatı', 0, 22, 3, 0 ),
+(0, @FirmId, 1, 82, 102, 1022,  780, '81.13.32', '81.13',   0,  0, 'KMH-Faiz Tahsilatı', 0, 22, 3, 0 ),
 
 (0, @FirmId, 1, 82, 250,    0,  770, '81.14.10', '81.14',   0,  1, 'Kira (Arazi ve Arsa)', 31, 8, 4, 2 ),
 (0, @FirmId, 1, 82, 251,    0,  770, '81.14.20', '81.14',   0,  1, 'Kira (Yer Altı ve Yer Üstü Düzenler)', 31, 8, 4, 2 ),

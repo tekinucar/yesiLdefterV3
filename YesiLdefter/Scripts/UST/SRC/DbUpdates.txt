@@ -33,13 +33,38 @@ commit transaction
 
 /*CreateTableEnd*/
 
+/* SectorTypeId
+            None = 0,
+            OnMuhasebe = 1,
+            MaliMusavir = 2,
+            ResmiMuhasebe = 3,
+            Bordro = 4,
+            UstadCrm = 5,
+            UstadMtsk = 201,
+            UstadIsmak = 202,
+            UstadSrc = 203,
+            TabimMtsk = 211,
+            TabimIsmak = 212,
+            TabimSrc = 213,
+*/
+/* DBaseNoTypeId
+            None = 0,
+            Master = 1, 
+            Manager = 2,
+            UstadCrm = 3, 
+            Project = 4,
+            Local = 5,
+            NewDatabase = 6,
+            publishManager = 7,
+            aktrilacakDb = 8,
+/*
 
 /*CreateData*/
 
 if ( Select count(*) ADET from [dbo].[DbUpdates] 
      where [MsDbUpdateId] = -1
      and   [UpdateTypeId] = 13 
-     and   [DBaseNoTypeId] = 6
+     and   [DBaseNoTypeId] = 
 ) = 0 
 begin
 INSERT INTO [dbo].[DbUpdates]
@@ -74,4 +99,7 @@ INSERT INTO [dbo].[DbUpdates]
            , null -- SqlScript, varchar(max)
 		   )
 end
+
+
+
 /*CreateDataEnd*/

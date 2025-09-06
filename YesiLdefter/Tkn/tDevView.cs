@@ -471,7 +471,7 @@ namespace Tkn_DevView
             }
 
             tGridView.OptionsView.GroupDrawMode = GroupDrawMode.Office2003;
-            tGridView.OptionsBehavior.AutoExpandAllGroups = true;
+            //tGridView.OptionsBehavior.AutoExpandAllGroups = true;
 
             if (tGridView.OptionsView.NewItemRowPosition.ToString() == "Top")
             {
@@ -4007,6 +4007,10 @@ MS_FIELDS                                          T03_MSFIELDS                 
                 if ((GROUPFNAME3 != "") && (GROUPFNAME3 != "null"))
                     tGridView.Columns[GROUPFNAME3].GroupIndex = 2;
                 //if ( == "TRUE") tGridView.OptionsView. = true;
+
+                if (COLLEXP == "EXPAND") tGridView.OptionsBehavior.AutoExpandAllGroups = true;
+                if (COLLEXP == "COLLAPSE") tGridView.OptionsBehavior.AutoExpandAllGroups = false;
+
             }
             #endregion GridView
 

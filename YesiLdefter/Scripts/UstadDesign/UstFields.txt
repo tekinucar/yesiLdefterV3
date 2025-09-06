@@ -27,14 +27,14 @@ begin transaction
         IsPicture          Bit               null,
         IsTrigger          Bit               null,
         IsMemory           Bit               null,
-        IsJoinTableField   Bit               null,
         
         GroupNo            SmallInt          null,
         GroupLineNo        SmallInt          null,
 
-        ComponentTypeId    SmallInt          null,
+        ComponentTypeId    VarChar(30)       null,
         DisplayFormat      VarChar(50)       null, /* Örnek : 'dd/MM/yyyy' gibi */
         EditFormat         VarChar(50)       null, /* Örnek : 'dd/MM/yyyy' gibi */
+        ListTypeName       VarChar(100)      null, /* eski LIST_TYPES_NAME  */ 
 
         IsLookUpTable      Bit               null, /* Diğer tablolarda ortak kullanılacak tablolar (DonemTipiId, UlkeTipiId, IlTipiId vb..) Heryerde LookUp fieldin yetmediği detaylı bir liste gerekiyorsa SecilmisPersonelListesi gibi */
         LockUpTableIPCode  VarChar(50)       null, /* LockUpTableIPCode : eski ListTypeName yerine kullanılır. */
@@ -44,6 +44,10 @@ begin transaction
         
         IsExpression       Bit               null,
         PropExpression     VarChar(Max)      null,
+
+        IsJoinFields       Bit               null, 
+        SectorTypeId       SmallInt          null, /* Muhasebe tablolarında gerekli oluyor :   */ 
+        PropJoinTable      VarChar(Max)      null, /* Case Field ve  Add Where  eklemeyi unutma */
 
 	Constraint pk_UstFields primary key (Id)
  )

@@ -1190,6 +1190,7 @@ namespace Tkn_ToolBox
             {
                 vTable vt = new vTable();
                 preparing_vTable(null, myProp, vt, dsQuery.Tables.Count);
+                vt.TableName = tableName;
                 vt.IdentityInsertOnOff = identityInsertOnOff;
 
                 tSave sv = new tSave();
@@ -3985,6 +3986,7 @@ namespace Tkn_ToolBox
             Str_Replace(ref Sql, ":USERGUID", v.tUser.UserGUID);
             Str_Replace(ref Sql, ":UserGUID", v.tUser.UserGUID);
             Str_Replace(ref Sql, ":SectorTypeId", v.SP_Firm_SectorTypeId.ToString());
+            Str_Replace(ref Sql, ":SECTORTYPEID", v.SP_Firm_SectorTypeId.ToString());
 
 
             Str_Replace(ref Sql, ":DONEM_YILAY", v.DONEMTIPI_YILAY.ToString());
@@ -11762,6 +11764,12 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             if (v.active_DB.mainManagerDbUses) // tableFields + "2"
                 tableName_ = ds.DataSetName; // TapleIPCode
             else tableName_ = f.TableIPCode; //  f.tableName;   // normal tableName
+
+            if (tableName_ == "NewDataSet" && ds.Namespace != null)
+            {
+                string myProp = ds.Namespace.ToString();
+                tableName_ = MyProperties_Get(myProp, "TableName:");
+            }
 
             int j = ds.Tables[tableName_].Rows.Count;
                        

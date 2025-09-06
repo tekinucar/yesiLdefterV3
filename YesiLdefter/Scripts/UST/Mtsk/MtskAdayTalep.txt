@@ -95,6 +95,11 @@ begin transaction
    AdresAlindi             Bit            null,
    BelgelerGeldi           Bit            null,
          
+   -- 110
+   IsDosyaKapandi          Bit            null, /* Dosya kapandı ise 1, açık ise 0 */
+   DosyaKapanmaNedeni      nVarchar(50)   null,
+   DosyaKapanmaTarihi      Datetime       null,
+
    constraint		pk_MtskAdayTalep primary key (Id)
  )
   
@@ -144,6 +149,7 @@ AS BEGIN
   declare @eKayitTipiId smallInt = 0  
 
   declare @eBelgelerGeldi bit = 0
+  declare @eIsDosyaKapandi bit = 0
  
   -- yeni datalar
   declare @yAdayId int = 0
@@ -189,6 +195,7 @@ AS BEGIN
   declare @ySozlesmeYapildi bit = null
   declare @yAdresAlindi bit = null
   declare @yBelgelerGeldi bit = 0
+  declare @yIsDosyaKapandi bit = 0
 
   -- Veri Transferi başladımı
   declare @DbUpdatesIsActive Bit = 0
@@ -218,6 +225,7 @@ AS BEGIN
          ,@eMebbisDurumTipiId = isnull(dlt.MebbisDurumTipiId,0)
          ,@eKayitTipiId = isnull(dlt.KayitTipiId,0)
 		 ,@eBelgelerGeldi = isnull(dlt.BelgelerGeldi,0)  
+         ,@eIsDosyaKapandi = isnull(dlt.IsDosyaKapandi,0)
       From deleted dlt
       Where dlt.Id = @TalepId
 
@@ -265,7 +273,7 @@ AS BEGIN
          ,@ySozlesmeYapildi = isnull(ins.SozlesmeYapildi,0)
          ,@yAdresAlindi = isnull(ins.AdresAlindi,0)
          ,@yBelgelerGeldi = isnull(ins.BelgelerGeldi,0)
-
+         ,@yIsDosyaKapandi = isnull(ins.IsDosyaKapandi,0)
       From inserted as ins
       Where ins.Id = @TalepId
 
@@ -502,6 +510,16 @@ AS BEGIN
                   )
           end
 
+          if (@eIsDosyaKapandi <> @yIsDosyaKapandi)
+          begin 
+              if (@yIsDosyaKapandi = 1)
+              begin
+                  Update MtskAdayTalep Set KayitTipiId = 8
+                  , DosyaKapanmaTarihi = GETDATE()
+                  Where Id = @TalepId
+              end
+          end
+
           Execute [dbo].[prc_MtskAdayTablesInsert] @TalepId  -- Data transferi sırasında oluşturuluyor zaten insert oluyor
 	      Execute [dbo].[prc_MtskAdayTalepYasiniHesapla] @TalepId
 
@@ -519,14 +537,11 @@ AS BEGIN
 
       end 	  
 
-
       --- Execute [dbo].[prc_MtskAdayTakipTalepKaydiMultiSet] @yFirmId 
-
 
       FETCH NEXT FROM talepCursor_ INTO @TalepId
       print '  talep while end'
   END -- While
-
 
   CLOSE talepCursor_
   DEALLOCATE talepCursor_   

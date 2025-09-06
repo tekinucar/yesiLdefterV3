@@ -69,8 +69,8 @@ BEGIN
   Set @SqlDonemler = 
     N' declare @BugunDonemTipiId int = 0 ' + @Enter 
   + N' declare @GelecekDonemTipiId int = 0 ' + @Enter 
-  + N' set @BugunDonemTipiId = dbo.fnc_getDonemTipiId(''BUGUN'') ' + @Enter 
-  + N' set @GelecekDonemTipiId = dbo.fnc_getDonemTipiId(''GELECEK'') ' + @Enter;
+  + N' set @BugunDonemTipiId = dbo.fnc_getDonemTipiId(''BUGUN'', null) ' + @Enter 
+  + N' set @GelecekDonemTipiId = dbo.fnc_getDonemTipiId(''GELECEK'', null) ' + @Enter;
 
   --declare @bugun smalldatetime = getdate()
   set @SqlBugun = ' declare @bugun smalldatetime = getdate() ' + @Enter;
@@ -2305,6 +2305,7 @@ BEGIN
   -- -----------------------------------------------------------------
   -- MtskAdayTakip.KayitTipiId
   -- -----------------------------------------------------------------
+  -- when t.KayitTipiId < 4 and (@BugunDonemTipiId - t.DonemTipiId) > 200 and t.DonemTipiId > 0 then 9 -- 24 ayda kapanmamış dosya
 
   Set @Sql = '
 --@Header
@@ -2313,12 +2314,15 @@ BEGIN
   ;WITH KayitTipi AS (
     Select t.TalepId as TalepId
     , ( case
-         when t.KayitTipiId < 4 and (@BugunDonemTipiId - t.DonemTipiId) > 200 and t.DonemTipiId > 0 then 9 -- 24 ayda kapanmamış dosya
+         when t.KayitTipiId < 4 
+         and  t.DonemTipiId > 0 
+         and  convert(int,SUBSTRING(CONVERT(char(6),@BugunDonemTipiId),1,4)) - 
+              convert(int,SUBSTRING(CONVERT(char(6),t.DonemTipiId),1,4)) > 2 then 9 -- 2 yıl : 24 ayda kapanmamış dosya
          when t.KayitTipiId = 8 then 8 -- Manuel dosya kapanmışsa hiç elleme 
 	     when t.uSinavSonrasiTipiId = 4 then 7 -- 2.+4 hakkı bitti
 	     when t.uSinavSonrasiTipiId = 3 then 6 -- uyg  hakkı bitti
 	     when t.eSinavSonrasiTipiId = 3 then 5 -- e-sınav hakkı bitti
-		 when ( t.uSinavSonrasiTipiId = 2 or isnull(s.SertifikaAlmayiHakKazandi,0) = 1 )   then 4 -- sertifika hakkı
+		 when ( t.uSinavSonrasiTipiId = 2 or isnull(s.SertifikaAlmayiHakKazandi,0) = 1 ) then 4 -- sertifika hakkı
 		 when ( t.uSinavDurumTipiId > 1 
 		 or     t.UygulamaliDersTipiId > 0 
 		 or     t.eSinavSonrasiTipiId > 1

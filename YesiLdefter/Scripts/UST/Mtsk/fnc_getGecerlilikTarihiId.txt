@@ -23,7 +23,7 @@ Id      KonuTipi
   Where gtarih.FirmId = @FirmId
   and   gtarih.KonuTipiId = @KonuTipiId
   and   gtarih.Tarih <= @Tarih
-  order by Tarih desc  olması gerekiyor
+  order by Tarih desc  -- olması gerekiyor
   --order by Tarih --desc  ???? hatırlamadım
 
   RETURN @responseId;

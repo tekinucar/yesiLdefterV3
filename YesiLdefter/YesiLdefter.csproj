@@ -968,6 +968,7 @@
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\fnc_CrsBildirimCount.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\fnc_getIsDbUpdate.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\fnc_getSettingsBool.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\fnc_getSectorTypeId.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\fnc_getSettingsInt.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\fnc_getSettingsNumeric.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\fnc_getSettingsText.txt" />
@@ -1149,6 +1150,8 @@
     <Content Include="Scripts\UST\SRC\Lkp_SrcSubeTipi.txt" />
     <Content Include="Scripts\UST\SRC\Lkp_SrcDonemTipi.txt" />
     <Content Include="Scripts\UST\SRC\Lkp_SrcSertifikaTipi.txt" />
+    <Content Include="Scripts\UST\SRC\SrcPersoneli.txt" />
+    <Content Include="Scripts\UST\SRC\prc_SrcAdayBorcunuHesapla.txt" />
     <Content Include="Scripts\UST\SRC\SrcUcretUygulama.txt" />
     <Content Include="Scripts\UST\SRC\SrcAdayUcret.txt" />
     <Content Include="Scripts\UST\SRC\SrcAdayBelgeler.txt" />

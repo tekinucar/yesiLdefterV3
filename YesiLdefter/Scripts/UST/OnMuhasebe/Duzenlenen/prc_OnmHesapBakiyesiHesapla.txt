@@ -1,6 +1,6 @@
 ﻿/*CreateProcedure*/
 
-ALTER PROCEDURE [dbo].[prc_OnmHesapBakiyesiHesapla]  (@FirmId int, @Yil int)  
+CREATE PROCEDURE [dbo].[prc_OnmHesapBakiyesiHesapla]  (@FirmId int, @Yil int)  
 AS BEGIN
 
   --declare @FirmdId int = 11

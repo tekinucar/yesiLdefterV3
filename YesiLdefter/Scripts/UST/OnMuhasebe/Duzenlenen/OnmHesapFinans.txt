@@ -137,6 +137,7 @@ INSERT INTO [Lkp].[OnmHesapFinansBAHesapTipi] (Id, BAHesapTipi, GrupTipiId)
   ( 1023, N"Banka/Kredi kartı", 1), 
   ( 1024, N"POS", 1),
   ( 1025, N"Sanal POS", 1),
+  ( 1026, N"Cari POS", 1),
 
   ( 770,  N"Genel yönetim giderleri", 1),
   ( 791,  N"İşçi ücret ve giderleri", 1),
@@ -447,6 +448,7 @@ INSERT INTO [Lkp].[OnmHesapFinansAltGrupTipi] (Id, AltGrupTipi, AltGrupTipi2, Gr
   (1023, N"Banka Kartı","Kredi kartı",   1 ), 
   (1024, N"POS","Kredi kartı",           1 ),
   (1025, N"Sanal POS","Kredi kartı",     1 ),
+  (1026, N"Cari POS","Kredi kartı",     1 ),
   (1029, N"Banka Listesi","",            1 ),
   ( 860, N"Doğalgaz Sayacı (Bina)","",                   3 ),
   ( 861, N"Doğalgaz Sayacı (Tesis, Makine ve Cihaz)","", 3 ),
@@ -683,7 +685,8 @@ AS BEGIN
           ((@eAltGrupTipiId = 1022) or -- banka hesabı
            (@eAltGrupTipiId = 1023) or -- banka kartı
            (@eAltGrupTipiId = 1024) or -- pos cihazı
-           (@eAltGrupTipiId = 1025))   -- sanal pos hesabı
+           (@eAltGrupTipiId = 1025) or -- sanal pos hesabı
+           (@eAltGrupTipiId = 1026))   -- cari pos hesabı
         begin
           set @yHesapTipiId = 12 -- Varlık Tipi
         end
@@ -736,6 +739,21 @@ AS BEGIN
                 where Id = @curId
             end			
         end 	  
+	    -- sanal pos
+        if (@eAltGrupTipiId = 1025) and (@eHesapAdi <> 'pos') and (@eHesapAdi <> 'Spos') and (@eHesapAdi <> 'NULL') and (@eHesapAdi <> 'SanalPos')
+            set @yHesapKisaAdi = @yHesapKisaAdi + '.Spos.' + @eHesapAdi + '.' + @eNumarasi
+        if (@eAltGrupTipiId = 1025) and ((@eHesapAdi = 'pos') or (@eHesapAdi = 'Spos') or (@eHesapAdi = 'NULL') or (@eHesapAdi = 'SanalPos'))
+        begin 
+            set @yHesapKisaAdi = @yHesapKisaAdi + '.Spos.' + @eNumarasi
+            if ((@eHesapAdi = 'Spos') or (@eHesapAdi = 'NULL') or (@eHesapAdi = 'SanalPos'))
+            begin
+			    set @yHesapAdi = 'SanalPos'
+                update OnmHesapFinans set 
+                HesapAdi = @yHesapAdi
+                where Id = @curId
+            end			
+        end 	  
+
         if (@yHesapKisaAdi <> @eHesapKisaAdi)
         begin
           update OnmHesapFinans set 
@@ -1097,64 +1115,9 @@ INSERT INTO [dbo].[OnmHesapFinans] (ParentId, FirmId, IsActive, UstGrupTipiId, A
  (0, @FirmId, 0, 10, 102, 1020, '102.1310', 'VAKIFLAR',      'TÜRKİYE VAKIFLAR BANKASI T.A.O.',   'http://www.vakifbank.com.tr', null),
  (0, @FirmId, 0, 10, 102, 1020, '102.1320', 'YAPI VE KREDİ', 'YAPI VE KREDİ BANKASI A.Ş.',        'http://www.ykb.com.tr', null)
 
-
  /* Default masraf gruplarını insert et */
-
  /* bu iptal oldu aynı işlemi yapan prc_OnmHesapFinansDefaultMaliyetGrublari oluşturuldu */
  /* henüz tetiklenecek yer bulunamadı */
-
-/* 
---declare @FirmId int
---set @FirmId = :FIRM_ID
--- Maliyet grubu hesapları
-
-    INSERT INTO [dbo].[OnmHesapFinans]
-           ([ParentId]
-           ,[FirmId]
-           ,[IsActive]
-           ,[UstGrupTipiId]
-           ,[AnaGrupTipiId]
-           ,[AltGrupTipiId]
-           ,[AltCesitTipiId]
-           ,[HesapTipiId]
-           ,[HesapKodu]
-           ,[UstHesapKodu]
-           ,[HesapKisaAdi]
-           ,[HesapAdi]
-           ,[BAHesapTipiId]
-           ,[PeriyodTipiId]
-           ,[BelgeTipiId]
-           ,[KaynakTipiId]
-           ,[KdvOrani]
-           ,[IsKiralik]
-           )
-    SELECT [ParentId]
-      ,@FirmId
-      ,[IsActive]
-      ,85 --[UstGrupTipiId]
-      ,[AnaGrupTipiId]
-      ,[AltGrupTipiId]
-      ,[AltCesitTipiId]
-      ,11 -- HesapTipiId = 11. Maliyet grubu, 12. Varlık hesabı, 13. Abone hesabı  
-      ,[HesapKodu]
-      ,[UstHesapKodu]
-      ,[HesapAdi] --[HesapKisaAdi]
-      ,[HesapAdi]
-      ,[BAHesapTipiId]
-      ,[PeriyodTipiId]
-      ,[BelgeTipiId]
-      ,[KaynakTipiId]
-      ,[KdvOrani]
-      ,[IsKiralik]
-
-  FROM [Lkp].[OnmHesapMaster]
-  Where HesapKodu in (
-   '81.12.10','81.12.20','81.12.30','81.12.40','81.12.50','81.12.60','81.12.70','81.12.90','81.12.92' -- Diğerleri
-  --,'81.13.10','81.13.12','81.13.14','81.13.16','81.13.18','81.13.20','81.13.22','81.13.24','81.13.26','81.13.28','81.13.30','81.13.32' -- Finansman giderleri
-  ,'81.17.10','81.17.20','81.17.30','81.17.40' -- Ücretler
-  ,'81.18.10','81.18.20','81.18.30','81.18.40' -- Yeme/İçme
-  )
-*/
 
 commit transaction
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -51,6 +52,35 @@ namespace YesiLdefter.Selenium.Helpers
                     driver.Manage().Window.Maximize();
                     break;
                 case DriverToUse.Chrome:
+
+                    var driverVersion = new WebDriverManager.DriverConfigs.Impl.ChromeConfig()
+                                .GetMatchingBrowserVersion();
+                    var driverPath = $"./Chrome/{driverVersion}/X64/";
+
+                    new WebDriverManager.DriverManager()
+                        .SetUpDriver(new WebDriverManager.DriverConfigs.Impl.ChromeConfig(),
+                                     WebDriverManager.Helpers.VersionResolveStrategy.MatchingBrowser);
+
+                    var chromeDriverService = ChromeDriverService.CreateDefaultService(driverPath);
+                    chromeDriverService.HideCommandPromptWindow = true;
+
+                    var chromeOptions = new ChromeOptions();
+                    chromeOptions.AddArgument("--disable-gpu");
+                    chromeOptions.AddArgument("--no-sandbox");
+                    chromeOptions.AddArgument("--remote-debugging-port=9222"); // data:, sorunu azaltır
+
+                    // Temiz profil kullan (önceki oturumun artıkları sorun yaratmasın)
+                    chromeOptions.AddArgument("--user-data-dir=" + Path.Combine(Path.GetTempPath(), "SeleniumProfile_" + Guid.NewGuid()));
+
+                    // İndirme ayarları
+                    string downloadDirectory = v.EXE_TempPath;
+                    chromeOptions.AddUserProfilePreference("download.default_directory", downloadDirectory);
+                    chromeOptions.AddUserProfilePreference("download.prompt_for_download", false);
+                    chromeOptions.AddUserProfilePreference("directory_upgrade", true);
+
+                    driver = new ChromeDriver(chromeDriverService, chromeOptions);
+
+                    /*
                     /// ChromeDriver'ı otomatik olarak ayarla
                     //new WebDriverManager.DriverManager().SetUpDriver(new ChromeConfig());
                     new WebDriverManager.DriverManager().SetUpDriver(new ChromeConfig(), VersionResolveStrategy.MatchingBrowser);
@@ -72,9 +102,10 @@ namespace YesiLdefter.Selenium.Helpers
                     chromeOptions.AddUserProfilePreference("download.default_directory", downloadDirectory);
                     chromeOptions.AddUserProfilePreference("download.prompt_for_download", false);
                     chromeOptions.AddUserProfilePreference("directory_upgrade", true);
+                    chromeOptions.AddArgument("--remote-debugging-port=9222");
 
                     driver = new ChromeDriver(chromeDriverService, chromeOptions);
-
+                    */
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

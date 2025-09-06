@@ -27,6 +27,16 @@ AS BEGIN
    , hFinans.IBANNumarasi
    , hFinans.ParaTipiId
    , altGrupTipi.AltGrupTipi as Lkp_AltGrupTipi
+
+ , ( case hFinans.AltGrupTipiId 
+     when 100 then ''NAKİT''
+     when 1022 then ''EFT/HAVALE''
+     when 1023 then ''KREDİ KARTI''
+     when 1024 then ''KREDİ KARTI''
+     when 1025 then ''KREDİ KARTI''
+     when 1026 then ''KREDİ KARTI''
+     else CONVERT(varchar(10), hFinans.AltGrupTipiId) end ) as Lkp_MusteriDili   
+
    from OnmVezneKullanici as kullanici
       left outer join OnmHesapVezne  as vezne   on ( kullanici.VezneId = vezne.Id ) 
       left outer join OnmVezneFinans as vFinans on ( vezne.Id = vFinans.VezneId )
@@ -41,7 +51,7 @@ AS BEGIN
     if (@DekontTipiId = 2)
        set @WhereAnd = ' and   hFinans.AltGrupTipiId <> 1023 ' -- banka kartları olmasın yani tahsilat araçları listelensin
     if (@DekontTipiId = 3)
-       set @WhereAnd = ' and   hFinans.AltGrupTipiId <> 1024 ' -- pos cih. olmasın yani ödeme araçları listelensin
+       set @WhereAnd = ' and   hFinans.AltGrupTipiId not in ( 1024, 1025, 1026 ) ' -- pos cih. olmasın yani ödeme araçları listelensin
     if (@UserId > 0) 
        set @WhereAnd += ' and   kullanici.UserId = ' + convert(varchar(20), @UserId)  
 

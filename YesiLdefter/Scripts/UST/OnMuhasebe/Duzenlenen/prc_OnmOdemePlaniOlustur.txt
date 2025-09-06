@@ -1,21 +1,52 @@
 ﻿/*CreateProcedure*/
 
-CREATE PROCEDURE [dbo].[prc_OnmOdemePlaniOlustur] (@TalepId int)  
+CREATE PROCEDURE [dbo].[prc_OnmOdemePlaniOlustur] (@FirmId int, @TalepId int)  
 AS BEGIN
 
-  --declare @TalepId int = 200 
+  --declare @TalepId Int = 200 
+  --declare @FirmId  Int = 11
 
   declare @IslemSonucu nvarchar(100) = ''
   declare @TahsilatAdedi int = 0
-    
-  Select @TahsilatAdedi = count(Id)
-  From [dbo].[OnmOdemePlani]
-  Where TalepId = @TalepId
-  and UcretTipiId >= 21101
-  and UcretTipiId <= 21105
-  and   (IsPaid = 1      -- ödendi
-    or BelgeDekontId > 0 -- tahsilat dekontu var ise
-	or BelgeStokBId > 0) -- fatura kesilmişse
+  declare @SectorTypeId smallint = 0 -- 201. Mtsk, 202. İşmak, 203. Src
+
+  Set @SectorTypeId = dbo.fnc_getSectorTypeId(@FirmId)
+
+  if (@SectorTypeId = 201)    
+  begin
+      Select @TahsilatAdedi = count(Id)
+      From [dbo].[OnmOdemePlani]
+      Where TalepId = @TalepId
+      and UcretTipiId >= 21101
+      and UcretTipiId <= 21199
+      and   (IsPaid = 1      -- ödendi
+      or BelgeDekontId > 0 -- tahsilat dekontu var ise
+	  or BelgeStokBId > 0) -- fatura kesilmişse
+  end -- if
+
+  if (@SectorTypeId = 202)    
+  begin
+      Select @TahsilatAdedi = count(Id)
+      From [dbo].[OnmOdemePlani]
+      Where TalepId = @TalepId
+      and UcretTipiId >= 22101
+      and UcretTipiId <= 22199
+      and   (IsPaid = 1      -- ödendi
+      or BelgeDekontId > 0 -- tahsilat dekontu var ise
+	  or BelgeStokBId > 0) -- fatura kesilmişse
+  end -- if
+
+  if (@SectorTypeId = 203)    
+  begin
+      Select @TahsilatAdedi = count(Id)
+      From [dbo].[OnmOdemePlani]
+      Where TalepId = @TalepId
+      and UcretTipiId >= 23101
+      and UcretTipiId <= 23199
+      and   (IsPaid = 1      -- ödendi
+      or BelgeDekontId > 0 -- tahsilat dekontu var ise
+	  or BelgeStokBId > 0) -- fatura kesilmişse
+  end -- if
 
   if (@TahsilatAdedi > 0) 
   begin
@@ -23,7 +54,6 @@ AS BEGIN
      return @IslemSonucu
   end
 
-  declare @FirmId                  Int
   declare @TalepTipiId             Int
   declare @AdayId                  Int
   declare @DonemTipiId             Int
@@ -58,11 +88,17 @@ AS BEGIN
   declare @aylikUcret              Numeric(22,5)
   declare @sayac                   Int = 1
   declare @UcretTipiId             Int = 0
+  declare @eSinavUcretTipiId_      Int = 0
+  declare @uSinavUcretTipiId_      Int = 0
+  declare @BasUcretTipiId          Int = 0
+  declare @BitUcretTipiId          Int = 0
 
-  Select
+  if (@SectorTypeId = 201)
+  begin
+
+      Select
        @FirmId = u.[FirmId]  
       ,@TalepTipiId = u.[TalepTipiId]
-      ---,@TalepId = u.[TalepId] > input value
       ,@AdayId = u.[AdayId]
       ,@DonemTipiId = u.[DonemTipiId]
 
@@ -90,9 +126,55 @@ AS BEGIN
       ,@OdemeBaslamaTarihi = isnull(u.[OdemeBaslamaTarihi], DATEADD(MM, 1, t.[TalepKayitTarihi]))
 	  ,@TalepKayitTarihi = t.[TalepKayitTarihi]
 
-  From MtskAdayUcret as u, MtskAdayTalep as t
-  Where u.TalepId = t.Id
-  and   u.TalepId = @TalepId
+      From MtskAdayUcret as u, MtskAdayTalep as t
+      Where u.TalepId = t.Id
+      and   u.TalepId = @TalepId
+  end -- if Mtsk
+
+  /*
+  if (@SectorTypeId = 202)
+  begin
+  end -- if İşmak
+  */
+
+  if (@SectorTypeId = 203)
+  begin
+      Select
+       @FirmId = u.[FirmId]  
+      ,@TalepTipiId = u.[TalepTipiId]
+      ,@AdayId = u.[AdayId]
+      ,@DonemTipiId = u.[DonemTipiId]
+
+      ,@SertifikaUcreti = u.[SertifikaUcreti]
+      ,@BirSaatOzelDersUcreti = u.[BirSaatOzelDersUcreti]
+      ,@AlacagiOzelDersSayisi = u.[AlacagiOzelDersSayisi]
+      ,@KontejanTipiId = u.[KontejanTipiId]
+      ,@KontejanIndirimOrani = u.[KontejanIndirimOrani]
+      ,@KontejanIndirimTutari = u.[KontejanIndirimTutari]
+      ,@KontejanSonrasiUcret = u.[KontejanSonrasiUcret]
+
+      ,@AnlasilanUcret = u.[AnlasilanUcret]
+      ,@IskontoOrani = u.[IskontoOrani]
+      ,@PesinatTutari = u.[PesinatTutari]
+      ,@TaksitSayisiTipiId = u.[TaksitSayisiTipiId]
+      ,@TaksitlendirilecekUcret = u.[TaksitlendirilecekUcret]
+
+      ,@ESinavUcretTipiId = u.[ESinavUcretTipiId]
+      ,@ESinavUcreti = u.[ESinavUcreti]
+      ,@USinavUcretTipiId = u.[USinavUcretTipiId]
+      ,@UygulamaSinavUcreti = u.[UygulamaSinavUcreti]
+      ,@SertifikaVeSinavUcreti = u.[SertifikaVeSinavUcreti]
+      ,@IsSinavUcretiTaksitli = u.[IsSinavUcretiTaksitli]
+      ,@OdemeTipiId = u.[OdemeTipiId] 
+      ,@OdemeBaslamaTarihi = isnull(u.[OdemeBaslamaTarihi], DATEADD(MM, 1, t.[TalepKayitTarihi]))
+	  ,@TalepKayitTarihi = t.[TalepKayitTarihi]
+
+      From SrcAdayUcret as u, SrcAdayTalep as t
+      Where u.TalepId = t.Id
+      and   u.TalepId = @TalepId
+  end -- if Src
+
+
 
   -- Eğer peşin seçilmişse
   if (@TaksitSayisiTipiId = 100) 
@@ -105,21 +187,74 @@ AS BEGIN
   if (@PesinatTutari > 0 and @PesinatTutari < @AnlasilanUcret)
       set @TaksitTipiId = 1 -- Peşinat
 
+/*
+  [Lkp].[OnmOdemePlaniUcretTipi] 
+  -- Mtsk
+  ( 21101,    N'Sertifika'),
+  ( 21102,    N'2.+4 hak'),
+  ( 21103,    N'Nakil 2.+4 hak'),
+  ( 21104,    N'100 Ceza'),
+  ( 21105,    N'Özel direksiyon ders (Aday değil)'),
+  ( 21111,    N'e-Sınav ücreti'),
+  ( 21112,    N'Uygulama sınav ücreti'),
+  ( 21113,    N'Başarısız eğitim ücreti'),
+  ( 21114,    N'Telafi eğitim ücreti'),
+  ( 21115,    N'Diğer ücretler'),
+  -- Src
+  ( 23101,    N'Src Sertifika'),
+  ( 23102,    N'Src5 Sertifika'),
+  ( 23111,    N'e-Sınav ücreti'),
+  ( 23112,    N'Uygulama sınav ücreti')
+*/
+
+
   -- ucret tipleri belirleniyor
-  if (@TalepTipiId = 1) set @UcretTipiId = 21101
-  if (@TalepTipiId = 2) set @UcretTipiId = 21102
-  if (@TalepTipiId = 3) set @UcretTipiId = 21103
-  if (@TalepTipiId = 4) set @UcretTipiId = 21104
-  if (@TalepTipiId = 5) set @UcretTipiId = 21105
-  if (@TalepTipiId = 6) set @UcretTipiId = 21106
+  if (@SectorTypeId = 201) -- Mtsk
+  begin       
+      if (@TalepTipiId = 1) set @UcretTipiId = 21101
+      if (@TalepTipiId = 2) set @UcretTipiId = 21102
+      if (@TalepTipiId = 3) set @UcretTipiId = 21103
+      if (@TalepTipiId = 4) set @UcretTipiId = 21104
+      if (@TalepTipiId = 5) set @UcretTipiId = 21105
+
+      Set @eSinavUcretTipiId_ = 21111
+      Set @uSinavUcretTipiId_ = 21112
+
+      Set @BasUcretTipiId = 21101
+      Set @BitUcretTipiId = 21105
+  end -- Mtsk
+
+  if (@SectorTypeId = 202) -- İşmak
+  begin	   
+      if (@TalepTipiId = 1) set @UcretTipiId = 22101
+
+      Set @BasUcretTipiId = 22101
+      Set @BitUcretTipiId = 22101
+  end -- İşmak
+
+  if (@SectorTypeId = 203) -- Src
+  begin       
+      if (@TalepTipiId = 1) set @UcretTipiId = 23101 -- Src1,2,3,4 Sertifika
+      if (@TalepTipiId = 2) set @UcretTipiId = 23102 -- Src5 Sertifika
+      if (@TalepTipiId = 3) set @UcretTipiId = 23103 -- Src6 Sertifika
+      if (@TalepTipiId = 4) set @UcretTipiId = 23104 -- Ody1,2,3,4 Sertifika
+      if (@TalepTipiId = 5) set @UcretTipiId = 23105 -- Üdy1,2,3,4 Sertifika
+
+      Set @eSinavUcretTipiId_ = 23111
+      Set @uSinavUcretTipiId_ = 23112
+
+      Set @BasUcretTipiId = 23101
+      Set @BitUcretTipiId = 23105
+  end -- Src
+
 
   -- Mevcut Odeme Planını sil
   --
   Delete
   From [dbo].[OnmOdemePlani]
   Where TalepId = @TalepId
-  and UcretTipiId >= 21101
-  and UcretTipiId <= 21105
+  and UcretTipiId >= @BasUcretTipiId
+  and UcretTipiId <= @BitUcretTipiId
 
   -- Peşinat veya peşin ödeme ise
   if (@PesinatTutari > 0 or @TaksitSayisiTipiId = 100)
@@ -242,7 +377,7 @@ AS BEGIN
       and [TalepId] = @TalepId 
       and [TalepTipiId] = @TalepTipiId 
       and [TaksitNo] = 1 -- eğer ücretini kayıt sırasında alacaksa sadece birinci sınav ücreti otomatik oluşsun
-      and [UcretTipiId] = 21111 -- e-sinav ücreti
+      and [UcretTipiId] = @eSinavUcretTipiId_ -- e-sinav ücreti
       and [VadeTarihi] =  @TalepKayitTarihi  
       ) = 0 
       begin 
@@ -273,7 +408,7 @@ AS BEGIN
            ,@DonemTipiId
            ,@TalepId
            ,@TalepTipiId
-           ,21111 -- @UcretTipiId   e-sinav ücreti
+           ,@eSinavUcretTipiId_ -- @UcretTipiId   e-sinav ücreti
            ,@AdayId
            ,3 --TaksitTipiId
            ,1
@@ -299,7 +434,7 @@ AS BEGIN
       and [TalepId] = @TalepId 
       and [TalepTipiId] = @TalepTipiId 
       and [TaksitNo] = 1 -- eğer ücretini kayıt sırasında alacaksa sadece birinci sınav ücreti otomatik oluşsun
-      and [UcretTipiId] = 21112 -- uygulama sinav ücreti
+      and [UcretTipiId] = @uSinavUcretTipiId_ -- uygulama sinav ücreti
       and [VadeTarihi] =  @TalepKayitTarihi  
       ) = 0 
       begin 
@@ -330,7 +465,7 @@ AS BEGIN
            ,@DonemTipiId
            ,@TalepId
            ,@TalepTipiId
-           ,21112 -- @UcretTipiId   uygulama sinav ücreti
+           ,@uSinavUcretTipiId_ -- @UcretTipiId   uygulama sinav ücreti
            ,@AdayId
            ,3 --TaksitTipiId
            ,1
@@ -349,7 +484,7 @@ AS BEGIN
 
   end -- @UygulamaSinavUcreti > 0
 
-  Execute dbo.prc_MtskAdayBorcunuHesapla @FirmId, @TalepId
+  Execute dbo.prc_SrcAdayBorcunuHesapla @FirmId, @TalepId
 
   -- Bunu kapatma veya silme. 
   -- Bu sonuca kodun içinde kontrol ediliyor
