@@ -1209,6 +1209,18 @@ namespace Tkn_CreateObject
             nButton.events = true;
             createNavigatorButton(nButton);
 
+            nButton.buttonName = "simpleButton_rapor";
+            nButton.buttonText = "Yazdır...";
+            nButton.dock = DockStyle.Left;
+            nButton.tabIndex = 82;
+            nButton.tabStop = false;
+            nButton.imageName = "30_338_Printer_16x16";
+            nButton.width = width70;
+            nButton.events = true;
+            createNavigatorButton(nButton);
+
+
+
             #endregion
 
             //--------------
@@ -5143,7 +5155,7 @@ namespace Tkn_CreateObject
             DataRow row_Table = ds_Table.Tables[0].Rows[0] as DataRow;
 
             if (rowCount == v.tRowCount.SingleRow)
-                dv.tVGrid_Create(row_Table, ds_Fields, dsData, (DevExpress.XtraVerticalGrid.VGridControl)cntrl);
+                dv.tVGrid_Create(row_Table, ds_Fields, dsData, (DevExpress.XtraVerticalGrid.VGridControl)cntrl, 1);
 
             if (rowCount == v.tRowCount.MultiRows)
             {

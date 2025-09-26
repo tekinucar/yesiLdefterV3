@@ -26,22 +26,38 @@ begin transaction
    MevcutSertifikaTipiId  Int            null,
    IstenenSertifikaTipiId Int            null,
 
-   -- 21
    /* Sertifika Ücretleri */  
+   -- 21 -- Mebbis için ücretler
    SertifikaUcreti                      Numeric(22,5) null,  
    SertifikaUcreti2016Oncesi            Numeric(22,5) null,  
    Arti24HakUcreti                      Numeric(22,5) null,  
    NakilArti24HakUcreti                 Numeric(22,5) null,  
 
+   -- 31 -- Mebbis için ücretler
+   SertifikaUcretiReel                  Numeric(22,5) null,  
+   SertifikaUcreti2016Reel              Numeric(22,5) null,  
+   Arti24HakUcretiReel                  Numeric(22,5) null,  
+   NakilArti24HakUcretiReel             Numeric(22,5) null,  
+
+
    /* Uygulama Saat Ücretleri */  
-   -- 31
+   -- 41 -- Mebbis için ücretler
    BirSaatUygDersUcreti                 Numeric(22,5) null,  
    BirSaatUygDersUcreti2016Oncesi       Numeric(22,5) null, 
    BirSaatArti24DersUcreti              Numeric(22,5) null,  
    BirSaatNakilArti24DersUcreti         Numeric(22,5) null,  
    BirSaatBasarisizDersUcreti           Numeric(22,5) null,  
    BirSaatTelafiDersUcreti              Numeric(22,5) null,  
+   
+   -- 51 -- Reel ücretler
+   BirSaatUygDersUcretiReel             Numeric(22,5) null,  
+   BirSaatUygDersUcreti2016Reel         Numeric(22,5) null, 
+   BirSaatArti24DersUcretiReel          Numeric(22,5) null,  
+   BirSaatNakilArti24DersUcretiReel     Numeric(22,5) null,  
+   BirSaatBasarisizDersUcretiReel       Numeric(22,5) null,  
+   BirSaatTelafiDersUcretiReel          Numeric(22,5) null,  
 
+   -- 61 -- Özel Ders Ücretleri
    BirSaatOzelDersUcretiAday            Numeric(22,5) null,  
    BirSaatOzelDersUcretiHarici          Numeric(22,5) null,  
 

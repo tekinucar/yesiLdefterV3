@@ -27,6 +27,9 @@ namespace YesiLdefter
     public partial class ms_Reports : Form
     {
         tToolBox t = new tToolBox();
+        tInputPanel ip = new tInputPanel();
+        tEvents ev = new tEvents();
+
         tReportDevEx raporDevEx = new tReportDevEx();
         tReportFast raporFast = new tReportFast();
 
@@ -36,6 +39,7 @@ namespace YesiLdefter
         private FastReport.Preview.PreviewControl documentViewerFast = null;
 
         string sourceFormCodeAndName = "";
+        int readReportPosition = -2;
 
         Control cntrlReportNames = null;
         string controlNames = "controlReportNameList";
@@ -166,13 +170,13 @@ namespace YesiLdefter
             t.Find_Button_AddClick(this, menuName, buttonRaporYazdir, myNavElementClick);
             t.Find_Button_AddClick(this, menuName, buttonRaporOnizleme, myNavElementClick);
 
-            preparingDataSets();
+            preparingDataSetList();
 
             //preparingFirmAboutDataSets();
 
         }
 
-        private void preparingDataSets()
+        private void preparingDataSetList()
         {
             #region DataNavigator Listesi Hazırlanıyor
 
@@ -186,6 +190,7 @@ namespace YesiLdefter
             DataNavigator dN = null;
             object tDataTable = null;
             string tableName = "";
+            string myProp = "";
 
             foreach (string value in list)
             {
@@ -198,7 +203,8 @@ namespace YesiLdefter
                     {
                         tDataTable = dN.DataSource;
 
-                        tableName = ((DataTable)tDataTable).TableName;
+                        myProp = ((DataTable)tDataTable).Namespace.ToString();
+                        tableName = t.MyProperties_Get(myProp, "TableName:");
 
                         if (tableName.IndexOf("MsReports") > -1)
                         {
@@ -247,16 +253,26 @@ namespace YesiLdefter
                 v.con_Cancel = false;
                 return;
             }
-            
+
+            if (this.readReportPosition != -2 && this.readReportPosition == v.dNMsReports.Position) return;
+
             if (t.IsNotNull(v.dsMsReports))
             { 
                 desingerType = Convert.ToInt16(v.dsMsReports.Tables[0].Rows[v.dNMsReports.Position]["DesignerTypeId"].ToString());
 
                 if (desingerType == (Int16)v.ReportDesignerTool.DevExpress)
+                {
                     raporDevEx.ReportDocumentViewer(this, v.dsMsReports, v.dNMsReports, sourceFormCodeAndName, ref documentViewerDevEx);
+                }
                 else
+                {
+                    preparingReportKritersAndData(this, v.dsMsReports, v.dNMsReports);
+                    preparingDataSetList();
                     raporFast.ReportDocumentViewer(this, v.dsMsReports, v.dNMsReports, dataSetList, sourceFormCodeAndName, ref documentViewerFast);
+                }
 
+                /// en son okuduğun rapor pos u hafızaya al 
+                this.readReportPosition = v.dNMsReports.Position;
             }
             /*
             t.WaitFormOpen("Rapor hazırlanıyor ...");
@@ -345,6 +361,10 @@ namespace YesiLdefter
             if (documentViewerDevEx != null)
                 if (documentViewerDevEx.DocumentSource != null)
                     ((XtraReport)documentViewerDevEx.DocumentSource).ShowRibbonPreview();
+
+            //if (documentViewerFast != null)
+            //    if (documentViewerFast.Report != null)
+            //        documentViewerFast.PrintPreview();
         }
         private void WireupDesignerEvents()
         {
@@ -449,6 +469,105 @@ namespace YesiLdefter
                             //throw;
                         }
                     }
+                }
+            }
+        }
+    
+        private void preparingReportKritersAndData(Form tForm, DataSet dsMsReports, DataNavigator dNMsReports)
+        {
+            string reportCode = dsMsReports.Tables[0].Rows[dNMsReports.Position]["ReportCode"].ToString();
+            string reportName = dsMsReports.Tables[0].Rows[dNMsReports.Position]["ReportName"].ToString();
+            string reportCaption = dsMsReports.Tables[0].Rows[dNMsReports.Position]["ReportCaption"].ToString();
+            string tableIPCode = dsMsReports.Tables[0].Rows[dNMsReports.Position]["TableIPCode"].ToString();
+            string tableIPCode2 = dsMsReports.Tables[0].Rows[dNMsReports.Position]["TableIPCode2"].ToString();
+
+            if (t.IsNotNull(tableIPCode))
+            {
+                crateReportKriters(tForm, tableIPCode, tableIPCode2);
+                /// Form üzerindeki DataSet ler tespit ediliyor
+                preparingDataSetList();
+            }
+        }
+    
+        private void crateReportKriters(Form tForm, string tableIPCode, string tableIPCode2)
+        {
+            tableIPCode = tableIPCode.Trim();
+            tableIPCode2 = tableIPCode2.Trim();
+
+            string TabControlName = "";
+            string ReadValue = "";
+
+            //if (ViewType == "TabPage") TabControlName = "tabControl_SUBVIEW";
+            //if (ViewType == "TabPage2") TabControlName = "tabControl_SUBVIEW2";
+
+            Control cntrl = null;
+            Control cntrl2 = null;
+            string[] controls = new string[] {
+                    "DevExpress.XtraTab.XtraTabPage",
+                    "DevExpress.XtraBars.Navigation.NavigationPage",
+                    "DevExpress.XtraBars.Navigation.TabNavigationPage",
+                    "DevExpress.XtraBars.Ribbon.BackstageViewClientControl"
+                };
+
+
+            TabControlName = "tabControl_SUBVIEW";
+            ReadValue = "Kriterler";
+
+            ev.CreateOrSelect_Page(this, TabControlName, "", tableIPCode, ReadValue, "", true);
+            cntrl = t.Find_Control(this, "tTabPage_" + t.AntiStr_Dot(tableIPCode + ReadValue), "", controls);
+
+            ip.Create_InputPanel(tForm, cntrl, tableIPCode, v.IPdataType_Kriterler, false);
+
+
+            TabControlName = "tabControl_SUBVIEW2";
+            ReadValue = "Data";
+            
+            ev.CreateOrSelect_Page(this, TabControlName, "", tableIPCode, ReadValue, "", true);
+            cntrl2 = t.Find_Control(this, "tTabPage_" + t.AntiStr_Dot(tableIPCode + ReadValue), "", controls);
+
+            ip.Create_InputPanel(tForm, cntrl2, tableIPCode, v.IPdataType_DataView, false);
+
+            /// ikinci tableIPCode varsa
+            if (t.IsNotNull(tableIPCode2))
+            {
+                TabControlName = "tabControl_SUBVIEW2";
+                ReadValue = "Data";
+
+                ev.CreateOrSelect_Page(this, TabControlName, "", tableIPCode2, ReadValue, "", true);
+                cntrl2 = t.Find_Control(this, "tTabPage_" + t.AntiStr_Dot(tableIPCode2 + ReadValue), "", controls);
+
+                ip.Create_InputPanel(tForm, cntrl2, tableIPCode2, v.IPdataType_DataView, false);
+            }
+
+
+            string[] controls2 = new string[] { "DevExpress.XtraEditors.SimpleButton" };
+            Control c = t.Find_Control(tForm, "simpleButton_Kriter_Listele", tableIPCode, controls2);
+            if (c != null)
+            {
+                if (((DevExpress.XtraEditors.SimpleButton)c).Tag == null)
+                {
+                    ((DevExpress.XtraEditors.SimpleButton)c).Tag = tableIPCode;
+                    ((DevExpress.XtraEditors.SimpleButton)c).Click += new System.EventHandler(this.btn_RaporKriterListele_Click);
+                }
+            }
+        }
+
+        public void btn_RaporKriterListele_Click(object sender, EventArgs e)
+        {
+            /// Form üzerindeki DataSet ler tespit ediliyor
+            preparingDataSetList();
+
+            if (t.IsNotNull(v.dsMsReports))
+            {
+                desingerType = Convert.ToInt16(v.dsMsReports.Tables[0].Rows[v.dNMsReports.Position]["DesignerTypeId"].ToString());
+
+                if (desingerType == (Int16)v.ReportDesignerTool.DevExpress)
+                {
+                    raporDevEx.ReportDocumentViewer(this, v.dsMsReports, v.dNMsReports, sourceFormCodeAndName, ref documentViewerDevEx);
+                }
+                else
+                {
+                    raporFast.ReportDocumentViewer(this, v.dsMsReports, v.dNMsReports, dataSetList, sourceFormCodeAndName, ref documentViewerFast);
                 }
             }
         }

@@ -469,6 +469,8 @@ namespace Tkn_Save
             string TriggerSQL = string.Empty;
 
             string Table_Name = vt.TableName;
+            string IP_Code = vt.IPCode;
+
             string Key_Id_FieldName = vt.KeyId_FName;
             
             bool identityInsertOnOff = vt.IdentityInsertOnOff;
@@ -492,7 +494,7 @@ namespace Tkn_Save
 
             try
             {
-                id_value = ds.Tables[Table_Name].Rows[Position][0].ToString();
+                id_value = ds.Tables[IP_Code].Rows[Position][0].ToString();
             }
             catch
             {
@@ -534,7 +536,7 @@ namespace Tkn_Save
                 j = ds.Tables[0].Rows.Count;
                 for (int i = 0; i < j; i++)
                 {
-                    id_value = ds.Tables[Table_Name].Rows[i][0].ToString();
+                    id_value = ds.Tables[IP_Code].Rows[i][0].ToString();
                     if (id_value == "")
                         State = "dsInsert";
                     else State = "dsEdit";
@@ -876,6 +878,7 @@ namespace Tkn_Save
         {
             f.SchemasCode = vt.SchemasCode;
             f.tableName = vt.TableName;
+            f.IPCode = vt.IPCode;
             //f.Key_Id_FieldName = vt.KeyId_FName;
             f.identityInsertOnOff = vt.IdentityInsertOnOff;
             f.myProp = ds.Namespace.ToString();
@@ -1732,7 +1735,8 @@ namespace Tkn_Save
         {
             v.SaveOnay = false;
             Boolean sonuc = false;
-            string Table_Name = vt.TableName;
+            //string Table_Name = vt.TableName;
+            string Table_Name = vt.IPCode;
             string Key_Id_FieldName = vt.KeyId_FName;
 
             tToolBox t = new tToolBox();

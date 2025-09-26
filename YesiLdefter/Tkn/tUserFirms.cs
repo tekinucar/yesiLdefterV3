@@ -95,7 +95,7 @@ namespace Tkn_UserFirms
                         
                         // Kullanıcı çalışacağı firmayı sececek
                         //
-                        SelectFirm(tForm, ref dsUserFirmList, ref dNUserFirmList);
+                        SelectFirm(tForm, ref dsUserFirmList, ref dNUserFirmList, firmList_TableIPCode);
                     }
                 }
             }
@@ -154,7 +154,7 @@ namespace Tkn_UserFirms
             return onay;
         }
 
-        void SelectFirm(Form tForm, ref DataSet dsUserFirmList, ref DataNavigator dNUserFirmList)
+        void SelectFirm(Form tForm, ref DataSet dsUserFirmList, ref DataNavigator dNUserFirmList, string firmList_TableIPCode)
         {
             /// evet geldik zurnanın zırt dediği yere
             /// 
@@ -175,7 +175,7 @@ namespace Tkn_UserFirms
             DataSet ds_Query = new DataSet();
             string Sql = Sqls.Sql_prcUstadUserFirmsList() + v.tUser.UserId.ToString();
 
-            t.SQL_Read_Execute(v.dBaseNo.UstadCrm, ds_Query, ref Sql, "UserFirmList", "FirmList");
+            t.SQL_Read_Execute(v.dBaseNo.UstadCrm, ds_Query, ref Sql, firmList_TableIPCode, "FirmList");
 
             if (t.IsNotNull(ds_Query))
             {

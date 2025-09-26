@@ -911,7 +911,7 @@ namespace Tkn_Layout
                 orientation = t.Set(t.MyProperties_Get(Prop_View, "SC_ORIENTATION:"), "", "");
                 fixedPanel = t.Set(t.MyProperties_Get(Prop_View, "SC_FIXED:"), "", "");
                 isSplitterFixed = t.Set(t.MyProperties_Get(Prop_View, "SC_ISSPLITTERFIXED:"), "false", "");
-                distance = t.Set(t.MyProperties_Get(Prop_View, "SC_DISTANCE:"), "200", "");
+                distance = t.Set(t.MyProperties_Get(Prop_View, "SC_DISTANCE:"), "250", "");
             }
 
             if (Prop_View.IndexOf(s2) > -1)
@@ -919,10 +919,11 @@ namespace Tkn_Layout
                 orientation = t.Set(t.Find_Properties_Value(Prop_View, "SC_ORIENTATION"), "", "");
                 fixedPanel = t.Set(t.Find_Properties_Value(Prop_View, "SC_FIXED"), "", "");
                 isSplitterFixed = t.Set(t.Find_Properties_Value(Prop_View, "SC_ISSPLITTERFIXED"), "false", "");
-                distance = t.Set(t.Find_Properties_Value(Prop_View, "SC_DISTANCE"), "200", "");
+                distance = t.Set(t.Find_Properties_Value(Prop_View, "SC_DISTANCE"), "250", "");
             }
 
-            if ((distance == "0") || (distance == "") || (distance == "null")) distance = "200";
+            /// kriterlerin default genişliği
+            if ((distance == "0") || (distance == "") || (distance == "null")) distance = "250";
 
             TableIPCode_Panel1 = t.Set(row["TABLEIPCODE"].ToString(), "", "");
             TableIPCode_Panel2 = t.Set(row["TABLEIPCODE2"].ToString(), "", "");

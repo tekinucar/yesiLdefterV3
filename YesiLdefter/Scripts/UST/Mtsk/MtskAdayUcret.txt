@@ -60,6 +60,7 @@ begin transaction
    AlacakUygulamaSinavUcreti    Numeric(22,5) null,
    AlacakTelafiEgitimUcreti     Numeric(22,5) null,
    AlacakBasarisizEgitimUcreti  Numeric(22,5) null,
+   AlacakUygBasarisizUcreti     Numeric(22,5) null,
    AlacakDigerUcretler          Numeric(22,5) null,
    AlacakUcretlerToplami        Numeric(22,5) null,
 
@@ -69,6 +70,7 @@ begin transaction
    BorcUygulamaSinavUcreti    Numeric(22,5) null,
    BorcTelafiEgitimUcreti     Numeric(22,5) null,
    BorcBasarisizEgitimUcreti  Numeric(22,5) null,
+   BorcUygBasarisizUcreti     Numeric(22,5) null,
    BorcDigerUcretler          Numeric(22,5) null,
    BorcUcretlerToplami        Numeric(22,5) null,
 
@@ -78,11 +80,13 @@ begin transaction
    VGUygulamaSinavUcreti      Numeric(22,5) null,
    VGTelafiEgitimUcreti       Numeric(22,5) null,
    VGBasarisizEgitimUcreti    Numeric(22,5) null,
+   VGUygBasarisizUcreti       Numeric(22,5) null,
    VGDigerUcretler            Numeric(22,5) null,
    VGUcretlerToplami          Numeric(22,5) null,
 
    -- 100
    TahsilEdilenUcretler      Numeric(22,5) null,
+   IadeEdilenUcretler        Numeric(22,5) null,
 
    -- 110
    PersonelId              Int           null,
@@ -185,23 +189,24 @@ AS BEGIN
 			    set @ESinavUcretTipiId = 1
 				Update dbo.MtskAdayUcret Set ESinavUcretTipiId = @ESinavUcretTipiId
                 Where Id = @curId 
+
+                Update MtskAdayTakip Set eSinavUcretTipiId = @ESinavUcretTipiId 
+                Where TalepId = @TalepId
             end 
             if (@UygulamaSinavUcreti > 0 and  @USinavUcretTipiId <> 1)
 			begin
 			    set @USinavUcretTipiId = 1
 				Update dbo.MtskAdayUcret Set USinavUcretTipiId = @USinavUcretTipiId
                 Where Id = @curId 
+
+                Update MtskAdayTakip Set uSinavUcretTipiId = @USinavUcretTipiId 
+                Where TalepId = @TalepId
             end 
 
             -- Takip
-            Update MtskAdayTakip set
-                IsKontejan = @IsKontejan
-              , eSinavUcretTipiId = @ESinavUcretTipiId 
-              , uSinavUcretTipiId = @USinavUcretTipiId 
+            Update MtskAdayTakip Set IsKontejan = @IsKontejan
             Where TalepId = @TalepId
-            and ( IsKontejan <> @IsKontejan 
-             or   eSinavUcretTipiId <> @ESinavUcretTipiId
-             or   uSinavUcretTipiId <> @USinavUcretTipiId )  
+            and ( IsKontejan <> @IsKontejan )  
 
             if ((@KontejanSonrasiUcret = 0) or
 			    (@AnlasilanUcret = 0) or
@@ -231,6 +236,19 @@ AS BEGIN
 
                 Update dbo.MtskAdayUcret Set PesinatTutari = @PesinatTutari
                 Where Id = @curId 
+            end
+
+            if (@AnlasilanUcret > 0)
+            begin  
+                Update dbo.MtskAdayUcret set IsUcretli = 1, IsUcretsiz = 0
+                From dbo.MtskAdayUcret as a
+                Where a.Id = @curId
+            end 
+            if (@AnlasilanUcret <= 0)
+            begin  
+                Update dbo.MtskAdayUcret set IsUcretli = 0, IsUcretsiz = 1
+                From dbo.MtskAdayUcret as a
+                Where a.Id = @curId
             end
 
         end	-- if (@DbUpdatesIsActive = 0)	
@@ -414,5 +432,9 @@ ALTER TABLE  MtskAdayUcret ADD   AlacakDigerUcretler          Numeric(22,5) null
 ALTER TABLE  MtskAdayUcret ADD   AlacakUcretlerToplami        Numeric(22,5) null
 ALTER TABLE  MtskAdayUcret ADD   TahsilEdilenUcretler         Numeric(22,5) null
 
+
+alter table MtskAdayUcret add   AlacakUygBasarisizUcreti     Numeric(22,5) null
+alter table MtskAdayUcret add   BorcUygBasarisizUcreti     Numeric(22,5) null
+alter table MtskAdayUcret add   VGUygBasarisizUcreti     Numeric(22,5) null
 
 */

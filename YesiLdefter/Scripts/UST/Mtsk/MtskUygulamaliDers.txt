@@ -308,8 +308,7 @@ AS BEGIN
     -- diğer işlemler için prc_MtskAdayTakip çalışsın
     if (@DbUpdatesIsActive = 0)
     begin
-	    print 'prc_MtskUygulamaDersPlanHazirlaManuel harici işler'
-        EXECUTE [dbo].[prc_MtskAdayTakip] @yFirmId
+        EXECUTE [dbo].[prc_MtskAdayTakip] @yFirmId, @yTalepId, 0, 'MtskAdayTakipFull'--'MtskAdayTakipUygDers' 
     end
 
     CLOSE myCursor
@@ -367,6 +366,10 @@ AS BEGIN
 
     FETCH NEXT FROM isLockCursorDlt INTO @curId
 	   
+    -- Veri Transferi başladımı
+    declare @DbUpdatesIsActive Bit = 0
+    set @DbUpdatesIsActive = [dbo].[fnc_getIsDbUpdate] (0)
+
     WHILE @@FETCH_STATUS = 0
     BEGIN
 	    IF EXISTS (SELECT 1 FROM deleted WHERE isnull(UDersIsUploaded,0) = 1 and Id = @curId)
@@ -389,6 +392,11 @@ AS BEGIN
 
       FETCH NEXT FROM isLockCursorDlt INTO @curId
     END
+	
+    if (@DbUpdatesIsActive = 0)
+    begin
+        EXECUTE [dbo].[prc_MtskAdayTakip] @FirmId, @TalepId, 0, 'MtskAdayTakipFull'--'MtskAdayTakipUygDers' 
+    end
 
     CLOSE isLockCursorDlt
     DEALLOCATE isLockCursorDlt

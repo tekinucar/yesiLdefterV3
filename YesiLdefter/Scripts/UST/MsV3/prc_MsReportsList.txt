@@ -3,12 +3,23 @@
 CREATE PROCEDURE [dbo].[prc_MsReportsList] (@ReportCode varchar(50))  
 AS BEGIN
 
- --declare @ReportCode varchar(50)
- --set @ReportCode = ''--'DNM'
+   /*
+   declare @ReportCode varchar(50)
+   declare @IlCode varchar(5)
+   declare @IlceCode varchar(5)
+   declare @FirmDbName varchar(50)
+   
+   set @ReportCode = 'DNM.TALP.FRM'
+   set @IlCode = '6'
+   set @IlceCode = '1231' --'1745'
+   set @FirmDbName = 'TbmMtsk00000030'
+   */
+
    if (@ReportCode = 'null') 
        set @ReportCode = ''
-       
-
+   if (@FirmDbName = 'null')
+       set @FirmDbName = 'NOT'
+  
  ;WITH CTE
      AS  (
  
@@ -29,27 +40,93 @@ AS BEGIN
         Join MsReports as mr ON ( c.Cte_Code = mr.ParentCode )
   ) 
 Select distinct
-       mr.[Id]
-      ,mr.[IsActive]
-      ,mr.[LineNumber]
-      ,isnull(mr.[DesignerTypeId],0) as DesignerTypeId
-      ,mr.[ReportCode]
-      ,mr.[ParentCode]
-      ,mr.[ReportName]
-      ,mr.[About]
-      ,mr.[TableIPCode]
-      ,mr.[RecordTypeId]
-      ,mr.[ReportTypeId]
-      ,mr.[PrivateTypeId]
-      ,mr.[SoftwareCode]
-      ,mr.[ProjectCode]
-      ,mr.[ModulCode]
-      ,mr.[ReportTemp]
+  tr.[Id]
+, tr.[IsActive]
+, tr.[LineNumber]
+
+, isnull(tr.[DesignerTypeId],0) as DesignerTypeId
+
+, (case when firma.FirmaDbName <> '' then firma.[ReportCode]
+        when ilce.IlceKodu <> '' then ilce.[ReportCode]
+		when il.IlKodu <> '' then il.[ReportCode]
+		else tr.[ReportCode] end ) as [ReportCode]
+
+, tr.[ParentCode]
+
+, (case when firma.FirmaDbName <> '' then tr.ReportCaption + ' (' + firma.ReportCaption + ') '
+        when ilce.IlceKodu <> '' then tr.ReportCaption + ' (' + ilce.ReportCaption + ') '
+		when il.IlKodu <> '' then tr.ReportCaption + ' (' + il.ReportCaption + ') '
+		else tr.ReportCaption end ) as [ReportCaption]
+
+, tr.[About]
+, tr.[ReportCode]
+, tr.[ReportName]
+, tr.[DesignerTypeId] 
+, tr.[RecordTypeId]
+, tr.[ReportTypeId]
+, tr.[PrivateTypeId]
+
+, (case when firma.FirmaDbName <> '' then firma.[ReportHeader]
+        when ilce.IlceKodu <> '' then ilce.[ReportHeader]
+		when il.IlKodu <> '' then il.[ReportHeader]
+		else tr.[ReportHeader] end ) as [ReportHeader]
+
+, (case when firma.FirmaDbName <> '' then firma.[PageHeader]
+        when ilce.IlceKodu <> '' then ilce.[PageHeader]
+		when il.IlKodu <> '' then il.[PageHeader]
+		else tr.[PageHeader] end ) as [PageHeader]
+
+, (case when firma.FirmaDbName <> '' then firma.[ReportSummary]
+        when ilce.IlceKodu <> '' then ilce.[ReportSummary]
+		when il.IlKodu <> '' then il.[ReportSummary]
+		else tr.[ReportSummary] end ) as [ReportSummary]
+
+, (case when firma.FirmaDbName <> '' then firma.[PageSummary]
+        when ilce.IlceKodu <> '' then ilce.[PageSummary]
+		when il.IlKodu <> '' then il.[PageSummary]
+		else tr.[PageSummary] end ) as [PageSummary]
+
+, tr.[SoftwareCode]
+, tr.[ProjectCode]
+, tr.[ModulCode]
+
+, (case when firma.FirmaDbName <> '' then firma.[ReportTemp]
+        when ilce.IlceKodu <> '' then ilce.[ReportTemp]
+		when il.IlKodu <> '' then il.[ReportTemp]
+		else tr.[ReportTemp] end ) as [ReportTemp]
+
+, il.Id as Lkp_IlId
+, il.ReportCaption as Lkp_ILReportCaption
+, il.ReportHeader  as Lkp_ILReportHeader
+, il.PageHeader    as Lkp_ILPageHeader
+, il.ReportSummary as Lkp_ILReportSummary  
+, il.PageSummary   as Lkp_ILPageSummary 
+
+, ilce.Id as Lkp_ILCEId
+, ilce.ReportCaption as Lkp_ILCEReportCaption
+, ilce.ReportHeader  as Lkp_ILCEReportHeader
+, ilce.PageHeader    as Lkp_ILCEPageHeader
+, ilce.ReportSummary as Lkp_ILCEReportSummary  
+, ilce.PageSummary   as Lkp_ILCEPageSummary 
+
+, firma.Id as Lkp_FirmaAId
+, firma.ReportCaption as Lkp_FirmaReportCaption
+, firma.ReportHeader  as Lkp_FirmaReportHeader
+, firma.PageHeader    as Lkp_FirmaPageHeader
+, firma.ReportSummary as Lkp_FirmaReportSummary  
+, firma.PageSummary   as Lkp_FirmaPageSummary 
 
 From CTE as c
-   left outer join MsReports as mr on ( c.Cte_Code = mr.ReportCode )
+   left outer join MsReports as tr    on ( c.Cte_Code = tr.ReportCode )
+   left outer join MsReports as il    on ( tr.ReportCode = il.ParentCode    and  il.RecordTypeId = 3    and  il.IlKodu = @IlCode )
+   left outer join MsReports as ilce  on ( tr.ReportCode = ilce.ParentCode  and  ilce.RecordTypeId = 4  and  ilce.IlceKodu = @IlceCode )
+   left outer join MsReports as firma on ( tr.ReportCode = firma.ParentCode and  firma.RecordTypeId = 5 and  firma.FirmaDbName = @FirmDbName )
 
-where mr.ReportCode <> @ReportCode
+where tr.ReportCode <> @ReportCode
+and   tr.RecordTypeId < 3
+and   tr.IsActive = 1
+
+order by tr.[ReportCode]
 
 END -- prc_
 

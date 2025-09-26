@@ -224,6 +224,7 @@ namespace Tkn_DefaultValue
             string myProp = string.Empty;
             string TableIPCode = string.Empty;
             string MultiPageID = string.Empty;
+            string focusValue = "";
             #endregion
 
             // Kim = "btn_Navigotor_HVG_Click"
@@ -330,7 +331,8 @@ namespace Tkn_DefaultValue
             ///'DEFAULT_TYPE', 33, '', '3Master=Detail Column');
             ///'DEFAULT_TYPE', 41, '', 'Line No'); -- 32 > 41
 
-            if ((default_type == 21) || // DEFAULT_TYPE', 21, '', 'Source TableIPCode READ'
+            if ((default_type == 20) || // DEFAULT_TYPE', 20, '', 'Source TableIPCode READ Only Begin'
+                (default_type == 21) || // DEFAULT_TYPE', 21, '', 'Source TableIPCode READ'
                 (default_type == 31))   // DEFAULT_TYPE', 31, '', 'Master=Detail'
             {
                 string master_TableIPCode = t.Set(Field_Row["MASTER_TABLEIPCODE"].ToString(), "", "");// Field_Row["LKP_MASTER_TABLEIPCODE"].ToString(), "");
@@ -394,7 +396,12 @@ namespace Tkn_DefaultValue
 
                             try
                             {
-                                focus_row[fname] = value;
+                                // default_type == 20 ve data boş ise
+                                // veya
+                                // default_type != 20 değilse atama yap
+                                focusValue = focus_row[fname].ToString();
+                                if ((default_type == 20 && focusValue == "") || (default_type != 20))  // 
+                                     focus_row[fname] = value;
                             }
                             catch (Exception e)
                             {

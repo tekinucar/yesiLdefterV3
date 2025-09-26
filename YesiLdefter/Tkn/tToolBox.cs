@@ -1729,11 +1729,28 @@ namespace Tkn_ToolBox
                 {
                     if ((vt.TableCount == 0) && (vt.TableIPCode != ""))
                     {
-                        msSqlAdapter.Fill(dsData, vt.TableName);
-                        string name = vt.TableIPCode.Replace(".", "_");
+                        string softwareCode = "";
+                        string projectCode = "";
+                        string TableCode = "";
+                        string IPCode = "";
+                        TableIPCode_Get(vt.TableIPCode, ref softwareCode, ref projectCode, ref TableCode, ref IPCode);
+
+                        //msSqlAdapter.Fill(dsData, vt.TableName);
+                        msSqlAdapter.Fill(dsData, IPCode);
+
+                        //dsData.Tables[0].TableName = name;
                         //dsData.Tables[0].TableName = name;
                     }
-                    else msSqlAdapter.Fill(dsData, vt.TableName);
+                    else if ((vt.TableCount == 2) && (vt.IPCode != ""))
+                    {
+                        msSqlAdapter.Fill(dsData, vt.IPCode);
+                    }
+                    else
+                    {
+                        string name = vt.TableName;//.Replace(".", "_");
+                        msSqlAdapter.Fill(dsData, name);
+                    } 
+                        
 
                 }
 
@@ -3191,9 +3208,14 @@ namespace Tkn_ToolBox
             if (ds == null) return false;
             //if (ds.Tables.Count == 0) return sonuc;
             //if (IsNotNull(ds) == false) return sonuc;
+            string softwareCode = "";
+            string projectCode = "";
+            string TableCode = "";
+            string IPCode = "";
 
             string myProp = ds.Namespace.ToString();
             string TableIPCode = Set(ds.DataSetName.ToString(), "", "");
+            TableIPCode_Get(TableIPCode, ref softwareCode, ref projectCode, ref TableCode, ref IPCode);
 
             DataNavigator dN = Find_DataNavigator(tForm, TableIPCode);
             int pos = dN.Position;
@@ -3223,7 +3245,7 @@ namespace Tkn_ToolBox
                 {
                     Control cntrl = null;
                     //cntrl = Find_Control_View(tForm, TableIPCode);
-                    sonuc = Data_Read_Execute(tForm, ds, ref Sql, "", cntrl);
+                    sonuc = Data_Read_Execute(tForm, ds, ref Sql, IPCode, cntrl);
                    
                     ViewControl_Enabled(tForm, TableIPCode, sonuc);
                 }
@@ -6797,6 +6819,53 @@ namespace Tkn_ToolBox
         #endregion tSqlParam_Replace
 
         #region Kriter_Ekle
+
+        public void tKriter_Clear(ref string aSQL)
+        {
+            string kriterBegin = "/*KRITERLER*/";
+            string kriterEnd = "/*KRITERLER_END*/";
+
+            int i1 = aSQL.IndexOf(kriterBegin);
+            int i2 = aSQL.IndexOf(kriterEnd);
+
+            if (i1 == -1)
+            {
+                MessageBox.Show("DİKKAT : SQL içinde /*KRITERLER*/ başlangıç etiketi bulunamadı.  ");
+                return;
+            }
+
+            //if ((i1 > -1) && (i2 > -1))
+            while (i1 > -1) 
+            {
+                int start = i1 + kriterBegin.Length + 1;
+                int uzunluk = i2 - start;
+                aSQL = aSQL.Remove(start, uzunluk);
+
+                i2 = aSQL.IndexOf(kriterEnd, start); // silinme işleminden dolayı konumlar değişti, tekrar bulmak gerekiyor
+                i1 = aSQL.IndexOf(kriterBegin, i2 + 1);
+                i2 = aSQL.IndexOf(kriterEnd, i1 + 1);
+            }
+
+        }
+        public void tKriter_Add(ref string aSQL, string Where_Add)
+        {
+            string kriterBegin = "/*KRITERLER*/";
+            string kriterEnd = "/*KRITERLER_END*/";
+
+            int i1 = aSQL.IndexOf(kriterBegin); 
+            int i2 = aSQL.IndexOf(kriterEnd);
+
+            //if (i1 > -1)
+            while (i1 > -1)
+            {
+                i1 = i1 + kriterBegin.Length;
+                aSQL = aSQL.Insert(i1, Where_Add);
+
+                i2 = aSQL.IndexOf(kriterEnd, i1);
+                i1 = aSQL.IndexOf(kriterBegin, i2 + 1);
+            }
+        }
+
         public void tKriter_Ekle(ref string aSQL, string alias, string Where_Add)
         {
             // and [VRSNL_10].{bugun} =   CONVERT(SMALLDATETIME, '06.08.2015 00:00:00', 101)  
@@ -7033,6 +7102,7 @@ namespace Tkn_ToolBox
             if (value == 75) return v.tButtonType.btMesajGonder;
 
             if (value == 81) return v.tButtonType.btYazici;
+            if (value == 82) return v.tButtonType.btRapor;
 
             if (value == 91) return v.tButtonType.btEk1;
             if (value == 92) return v.tButtonType.btEk2;
@@ -16255,6 +16325,13 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                     idFieldName = "Id";
                     fieldName = "SubeTipi";
                     tableName = "MtskSubeTipi";
+                    return;
+                }
+                if (orjinalFieldName.IndexOf("MevcutSertifikaTipi") > -1)
+                {
+                    idFieldName = "Id";
+                    fieldName = "KSertifikaTipi";
+                    tableName = "MtskSertifikaTipi";
                     return;
                 }
                 if (orjinalFieldName.IndexOf("SertifikaTipi") > -1)

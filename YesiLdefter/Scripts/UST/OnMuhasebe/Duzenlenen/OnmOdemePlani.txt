@@ -112,6 +112,7 @@ INSERT INTO [Lkp].[OnmOdemePlaniUcretTipi] (Id, UcretTipi)
   ( 21113,    N'Başarısız eğitim ücreti'),
   ( 21114,    N'Telafi eğitim ücreti'),
   ( 21115,    N'Diğer ücretler'),
+  ( 21116,    N'Uyg+Başarısız ücretler'),
 
   -- Src
   ( 23101,    N'Src Sertifika'),
@@ -144,7 +145,9 @@ INSERT INTO [Lkp].[OnmOdemePlaniTaksitTipi] (Id, TaksitTipi)
   ( 2,    N'Taksit'),
   ( 3,    N'Tek Ödeme'),
   ( 4,    N'İade nedeniyle oluşan borç'),
-  ( 5,    N'Borcun tamamı')
+  ( 5,    N'Borcun tamamı'),
+  (99,    N'İPTAL')
+
     
 
 -- ------------------------------------------------------- 
@@ -264,7 +267,7 @@ AS BEGIN
                 Where VeriKaynakId = @VeriKaynakId
             end
             -- Src ise
-            if (@UcretTipiId > 22100 and @UcretTipiId < 22200)
+            if (@UcretTipiId > 23100 and @UcretTipiId < 23200)
             begin
                 Update dbo.OnmOdemePlani set
                     TalepId = t.Id  
@@ -305,11 +308,19 @@ AS BEGIN
             begin  
                 Execute [dbo].[prc_MtskAdayBorcunuHesapla] @FirmId, @TalepId
             end
+
+            Update dbo.MtskAdayTakip Set uSinavUcretTipiId = 1
+            From dbo.OnmOdemePlani as odeme
+                left outer join dbo.MtskAdayTakip as takip on ( odeme.TalepId = takip.TalepId )
+            where odeme.UcretTipiId in (21112, 21113) -- uyg sinav ücreti veya başarısız aday eğitimi ise
+            and   isnull(takip.uSinavUcretTipiId,0) = 0
+            --and   odeme.Id = @curId
+
         end -- Mtsk
 
 
         -- Src ise
-        if (@UcretTipiId > 22100 and @UcretTipiId < 22200)
+        if (@UcretTipiId > 23100 and @UcretTipiId < 23200)
         begin
             if (
                 select count(Id) as Adet from OnmOdemePlani
@@ -379,7 +390,7 @@ AS BEGIN
 		    Execute [dbo].[prc_MtskAdayBorcunuHesapla] @FirmId, @TalepId
         end
         -- Src ise
-        if (@UcretTipiId > 22100 and @UcretTipiId < 22200)
+        if (@UcretTipiId > 23100 and @UcretTipiId < 23200)
         begin
 		    Execute [dbo].[prc_SrcAdayBorcunuHesapla] @FirmId, @TalepId
         end

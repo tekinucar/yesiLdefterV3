@@ -1758,7 +1758,7 @@ MS_FIELDS                                          T03_MSFIELDS                 
         #region tVGridControl Create Base
 
         public void tVGrid_Create(DataRow row_Table, DataSet dsFields, DataSet dsData,
-            DevExpress.XtraVerticalGrid.VGridControl tVGridControl)
+            DevExpress.XtraVerticalGrid.VGridControl tVGridControl, byte viewType)
         {
             tToolBox t = new tToolBox();
             tEventsGrid evg = new tEventsGrid();
@@ -1781,7 +1781,7 @@ MS_FIELDS                                          T03_MSFIELDS                 
             GridBands_Add(null, tVGridControl, null, dsFields, TableIPCode);
 
             // VGridControl in Column ları ekleniyor  
-            tVGridControl_Columns_Create(dsFields, tVGridControl);
+            tVGridControl_Columns_Create(dsFields, tVGridControl, viewType);
 
             #endregion VGridControl ve Columns İşlemleri
 
@@ -4008,8 +4008,9 @@ MS_FIELDS                                          T03_MSFIELDS                 
                     tGridView.Columns[GROUPFNAME3].GroupIndex = 2;
                 //if ( == "TRUE") tGridView.OptionsView. = true;
 
-                if (COLLEXP == "EXPAND") tGridView.OptionsBehavior.AutoExpandAllGroups = true;
+                //if (COLLEXP == "EXPAND") tGridView.OptionsBehavior.AutoExpandAllGroups = true;
                 if (COLLEXP == "COLLAPSE") tGridView.OptionsBehavior.AutoExpandAllGroups = false;
+                else tGridView.OptionsBehavior.AutoExpandAllGroups = true;
 
             }
             #endregion GridView
@@ -4804,7 +4805,7 @@ MS_FIELDS                                          T03_MSFIELDS                 
         #endregion TreeList Columns Create
 
         #region VGridControl Columns Create
-        public void tVGridControl_Columns_Create(DataSet dsFields, VGridControl tVGridControl)
+        public void tVGridControl_Columns_Create(DataSet dsFields, VGridControl tVGridControl, byte tview_type)
         {
 
             string tfield_name = string.Empty;
@@ -4900,7 +4901,7 @@ MS_FIELDS                                          T03_MSFIELDS                 
                         tVGridControl.Rows.Add(column);
                     }
 
-                    dc.VGrid_ColumnEdit(Row, column, tcolumn_type);
+                    dc.VGrid_ColumnEdit(Row, column, tcolumn_type, tview_type);
 
                     i++;
                 }

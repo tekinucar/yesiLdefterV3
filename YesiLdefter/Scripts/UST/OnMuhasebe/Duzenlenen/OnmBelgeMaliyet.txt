@@ -80,7 +80,9 @@ begin transaction
    MinOdemeTutari     Numeric(22,5) null,
 
    VergiVeFonlar      Numeric(22,5) null,    
-   MasrafMiktari      Numeric(22,5) null,    
+   MasrafMiktari      Numeric(22,5) null,
+   SayacEndeksi       Numeric(22,5) null,
+   TuketimTipiId      SmallInt      null,
    OdenenTutar        Numeric(22,5) null,    
    KalanTutar         Numeric(22,5) null,    
 
@@ -266,7 +268,7 @@ AS BEGIN
     CLOSE cursor_belgeMaliyetDlt
     DEALLOCATE cursor_belgeMaliyetDlt
 
-	EXECUTE [dbo].[prc_OnmToplamBekleyenOdemeler] @FirmId 
+	--EXECUTE [dbo].[prc_OnmToplamBekleyenOdemeler] @FirmId 
 
 END
 
@@ -310,6 +312,30 @@ INSERT INTO [Lkp].[OnmBelgeMaliyetBelgeTipi] (Id, BelgeTipi, GrupTipiId)
   (23,  N'Sigorta poliçesi', 1),
   (99,  N'Belgesiz', 1)
 
+-- ------------------------------------------------------- 
+-- TuketimTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmBelgeMaliyetTuketimTipi')
+drop table [Lkp].[OnmBelgeMaliyetTuketimTipi]
+
+create table [Lkp].[OnmBelgeMaliyetTuketimTipi]
+(
+   Id           Int Unique Not Null,
+   TuketimTipi  nVarchar(50),
+   GrupTipiId   SmallInt Null,
+
+   constraint  pk_OnmBelgeMaliyetTuketimTipi primary key (Id)
+)
+
+delete from [Lkp].[OnmBelgeMaliyetTuketimTipi]
+INSERT INTO [Lkp].[OnmBelgeMaliyetTuketimTipi] (Id, TuketimTipi, GrupTipiId)
+ VALUES 
+  (0,   N'Tanımsız', 0),
+  (1,   N'Benzin', 1), 
+  (2,   N'Mazot', 1),
+  (3,   N'Lpg', 1),
+  (4,   N'Elektrik', 1),
+  (5,   N'Diğer', 1)
 
 -- ------------------------------------------------------- 
 -- KaynakTipiId

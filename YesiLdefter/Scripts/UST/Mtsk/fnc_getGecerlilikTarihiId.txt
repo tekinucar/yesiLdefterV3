@@ -14,8 +14,8 @@ Id      KonuTipi
 21101   Teorik saatler
 21102   Uygulama saatleri
 21103   Sınav ücreti
-21104   Teodrik ders ücreti
-21105  Uygulama ders ücreti
+21104   Teodrik ders ücreti ve Uygulama ders ücreti için aynı olacak
+21105   Uygulama ders ücreti  <<< kullanma
   */
 
   Select top 1 @responseId = gtarih.Id 

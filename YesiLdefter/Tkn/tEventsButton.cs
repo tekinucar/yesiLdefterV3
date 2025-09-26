@@ -1869,7 +1869,7 @@ namespace Tkn_Events
 
                 if (t.IsNotNull(vt.TableName) && t.IsNotNull(vt.KeyId_FName) && (IsLock == false))
                 {
-                    string RefId = dsData.Tables[vt.TableName].Rows[pos][vt.KeyId_FName].ToString();
+                    string RefId = dsData.Tables[vt.IPCode].Rows[pos][vt.KeyId_FName].ToString();
 
                     if (t.IsNotNull(RefId))
                     {
@@ -1960,7 +1960,7 @@ namespace Tkn_Events
                     }
 
                     // hiç satır kalmadıysa
-                    if (dsData.Tables[vt.TableName].Rows.Count == 0)
+                    if (dsData.Tables[vt.IPCode].Rows.Count == 0)
                     {
                         v.SP_NewWorkType = "DeleteNEW";
                         newData(tForm, tableIPCode);
@@ -2552,15 +2552,21 @@ namespace Tkn_Events
             return true;
         }
 
-        private void InputBox(Form tForm, string TableIPCode, PROP_NAVIGATOR prop_)
+        private bool InputBox(Form tForm, string TableIPCode, PROP_NAVIGATOR prop_)
         {
+            bool onay = false;
             foreach (TABLEIPCODE_LIST item in prop_.TABLEIPCODE_LIST)
             {
                 if (item.WORKTYPE.ToString() == "IBOX")
                 {
-                    InputBox(tForm, TableIPCode, item, null);
+                    onay = InputBox(tForm, TableIPCode, item, null);
+                    if (onay == false)
+                    {
+                        break;
+                    }
                 }
             }
+            return onay;
         }
      
         public bool InputBox(Form tForm, string TableIPCode, TABLEIPCODE_LIST item, DataRow sourceDataRow)
@@ -2600,13 +2606,17 @@ namespace Tkn_Events
 
             bool onay = true;
             string target_FName = string.Empty;
+            string read_TableIPCode = string.Empty;
             string read_FName = string.Empty;
             string read_Caption = string.Empty;
             string inputbox_Message = string.Empty;
             string inputbox_Default1 = string.Empty;
             string input_Value = string.Empty;
+            string displayFormat = string.Empty;
+            int ftype = 0;
 
             target_FName = item.KEYFNAME.ToString();
+            read_TableIPCode = item.RTABLEIPCODE.ToString();
             read_FName = item.RKEYFNAME.ToString();
             inputbox_Message = item.CAPTION.ToString();
             inputbox_Default1 = item.MSETVALUE.ToString();
@@ -2614,12 +2624,27 @@ namespace Tkn_Events
             int pos = -1;
             DataSet dS = null;
             DataNavigator dN = null;
-            t.Find_DataSet(tForm, ref dS, ref dN, TableIPCode);
+            
+            if (t.IsNotNull(read_TableIPCode))
+                t.Find_DataSet(tForm, ref dS, ref dN, read_TableIPCode);
+            else
+                t.Find_DataSet(tForm, ref dS, ref dN, TableIPCode);
 
             if (dN != null) pos = dN.Position;
                         
-            string displayFormat = string.Empty;
-            int ftype = t.Find_Field_Type_Id(dS, target_FName, ref displayFormat);
+                        
+            displayFormat = string.Empty;
+
+            // Tutar sorulacak ise
+            if (t.IsNotNull(read_TableIPCode) && t.IsNotNull(read_FName))
+            {
+                ftype = t.Find_Field_Type_Id(dS, read_FName, ref displayFormat);
+                target_FName = read_FName;
+            }
+            else ftype = t.Find_Field_Type_Id(dS, target_FName, ref displayFormat);
+
+
+
 
             input_Value = "";
             if (t.IsNotNull(inputbox_Default1))
@@ -2631,14 +2656,24 @@ namespace Tkn_Events
             // örnek : 
             // EKMEK için           << display fieldName << RKEYFNAME
             // Lütfen Miktar girin  << inputbox_message
+            // read_TableIPCode dolu ise o tablodan bir tutar okunacak ve kullanıcıya bu tutar sorulacak ( Tutar Sor )
+
             #region
 
             if (pos > -1)
             {
                 if (t.IsNotNull(target_FName))
                     input_Value = dS.Tables[0].Rows[pos][target_FName].ToString();
-                if (t.IsNotNull(read_FName))
+
+                if (t.IsNotNull(read_TableIPCode) == false && t.IsNotNull(read_FName))
                     read_Caption = dS.Tables[0].Rows[pos][read_FName].ToString();
+
+                // Tutar sorulacak
+                if (t.IsNotNull(read_TableIPCode) && t.IsNotNull(read_FName))
+                {
+                    //read_Caption = inputbox_Message;
+                    input_Value = dS.Tables[0].Rows[pos][read_FName].ToString();
+                }
             }
 
             if (t.IsNotNull(input_Value) == false)
@@ -2668,6 +2703,7 @@ namespace Tkn_Events
                     }
                 case DialogResult.Cancel:
                     {
+                        input_Value = "";
                         onay = false;
                         break;
                     }
@@ -3264,7 +3300,11 @@ namespace Tkn_Events
                     
                     if (workType == "IBOX")
                     {
-                        InputBox(tForm, TABLEIPCODE, item, null);
+                        onay = InputBox(tForm, TABLEIPCODE, item, null);
+                        if (onay == false)
+                        {
+                            break;
+                        }
                     }
 
                     if (workType == "NUMBERDISPLAY")

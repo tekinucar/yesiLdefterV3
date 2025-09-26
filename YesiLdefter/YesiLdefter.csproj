@@ -514,6 +514,7 @@
     <Compile Include="Uyumsoft\tEFaturaUyum.cs" />
     <EmbeddedResource Include="Forms\BrowserForm.resx">
       <DependentUpon>BrowserForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\ms_CefSharp_OLD.resx">
       <DependentUpon>ms_CefSharp_OLD.cs</DependentUpon>
@@ -891,6 +892,8 @@
     <Content Include="Scripts\UST\Mtsk\Lkp_MtskSertifikaTipi.txt" />
     <Content Include="Scripts\UST\Mtsk\Lkp_MtskSubeTipi.txt" />
     <Content Include="Scripts\UST\Mtsk\Lkp_MtskTalepTipi.txt" />
+    <Content Include="Scripts\UST\Mtsk\MebKurumEkBilgiler.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskAdayUcretMebbis.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskGuzergah.txt" />
     <Content Include="Scripts\UST\Mtsk\MebIlce.txt" />
     <Content Include="Scripts\UST\Mtsk\MebKurum.txt" />
@@ -928,6 +931,7 @@
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayBorclandirUygulamaSinavi.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayBorclandirUygulamaSinaviTekTalep.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayBorclariniHesapla.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayBorclariniIPTALEt.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayBorcunuHesapla.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTablesInsertKontrolu.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakip.txt" />
@@ -955,6 +959,7 @@
     <Content Include="Scripts\UST\Mtsk\prc_MtskTeorikDersPlaniOlusturManuelSirali.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskUygDersIhlalleriCakismalar.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskUygDersIhlalleriSaatler.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskUygDersIhlalleriSaatler_OLD.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskUygulamaDersInsert.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskUygulamaDersPlanHazirlaManuel.txt" />
     <Content Include="Scripts\UST\Mtsk\prc_MtskUygulamaDersPlaniListele.txt" />
@@ -973,6 +978,8 @@
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\fnc_getSettingsNumeric.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\fnc_getSettingsText.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\fnc_IsTatilGunumu.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmBankaKredisiB.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmBankaKredisiS.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmCalismaSaatleri.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskSaatTeorik.txt" />
     <Content Include="Scripts\UST\Mtsk\MtskSaatUygulama.txt" />
@@ -1038,6 +1045,8 @@
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmMaasEkKesintiler.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmMaasHesaplari.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmBelgeDekontOzetler.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmBelgeDekontRaporOzeti.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmBelgeDekontTransferIslemi.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmBelgeStokS_SatirlariniTopla.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmHesapBakiyesiHesapla.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmMaasHesaplari.txt" />
@@ -1132,7 +1141,7 @@
     <Content Include="Scripts\UST\OnMuhasebe\prc_OnmBelgeDekontTbmGelirHesaplari.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\prc_OnmBelgeDekontTbmGiderHesaplari.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\prc_OnmBelgeDekontTbmPersonelHesaplari.txt" />
-    <Content Include="Scripts\UST\OnMuhasebe\prc_OnmOdemePlaniOlustur.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\prc_OnmOdemePlaniOlustur_OLD.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\prc_OnmToplamBekleyenGelirler.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\prc_OnmToplamBekleyenOdemeler.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\trg_BelgeStokS.txt" />
@@ -1150,6 +1159,10 @@
     <Content Include="Scripts\UST\SRC\Lkp_SrcSubeTipi.txt" />
     <Content Include="Scripts\UST\SRC\Lkp_SrcDonemTipi.txt" />
     <Content Include="Scripts\UST\SRC\Lkp_SrcSertifikaTipi.txt" />
+    <Content Include="Scripts\UST\SRC\prc_SrcAdayBorclariniHesapla.txt" />
+    <Content Include="Scripts\UST\SRC\SrcAdayAdliSicil.txt" />
+    <Content Include="Scripts\UST\SRC\SrcAdayOgrenim.txt" />
+    <Content Include="Scripts\UST\SRC\SrcAdaySaglik.txt" />
     <Content Include="Scripts\UST\SRC\SrcPersoneli.txt" />
     <Content Include="Scripts\UST\SRC\prc_SrcAdayBorcunuHesapla.txt" />
     <Content Include="Scripts\UST\SRC\SrcUcretUygulama.txt" />

@@ -1,0 +1,128 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table SrcAdayAdliSicil
+ (
+   Id                    Int IDENTITY(1,1) not null, 
+   FirmId                Int       not null,
+   TalepId               Int       not null, 
+   AdayId                Int       not null, 
+   TcNo                  Varchar(11)   null,
+   DonemTipiId           Int           null,
+   VeriKaynakId          Int           null, /* Veri transferi edildiği tablodaki Id . Sorun olduğunda bilginin nereden geldiğine referans olsun */
+
+   SavcilikBelgesiVerenKurum   nVarchar(200)  null,
+   SavcilikBelgesiTarihi       Date           null,
+   SavcilikBelgesiSayisi       nVarchar(30)   null,
+   SavcilikBelgesiResim        VarBinary(max) null,
+   SavcilikBelgesiResimSmall   VarBinary(max) null,
+
+   constraint		pk_SrcAdayAdliSicil primary key (Id)
+ )
+  
+ grant select, insert, update, delete on SrcAdayAdliSicil to public
+
+  create index X_SrcAdayAdliSicil01 on SrcAdayAdliSicil (TalepId)
+  create index X_SrcAdayAdliSicil02 on SrcAdayAdliSicil (AdayId)
+  create index X_SrcAdayAdliSicil03 on SrcAdayAdliSicil (TcNo)
+  create index X_SrcAdayAdliSicil04 on SrcAdayAdliSicil (DonemTipiId)
+
+commit transaction
+
+/*CreateTableEnd*/
+
+/*CreateTrigger*/
+
+CREATE TRIGGER dbo.trg_SrcAdayAdliSicil on dbo.SrcAdayAdliSicil
+AFTER INSERT, UPDATE
+AS BEGIN
+
+DECLARE sicilCursor cursor local for select Id from inserted
+    DECLARE @sicilId bigint
+
+    OPEN sicilCursor
+    FETCH NEXT FROM sicilCursor INTO @sicilId
+
+    -- Veri Transferi başladımı
+    declare @DbUpdatesIsActive Bit = 0
+    set @DbUpdatesIsActive =  dbo]. fnc_getIsDbUpdate] (13)
+
+    declare @TalepId int = 0
+	declare @AdayId int
+	declare @VeriKaynakId int
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+	    
+        select 
+            @TalepId = ins.TalepId
+           ,@AdayId = ins.AdayId
+		   ,@VeriKaynakId = ins.VeriKaynakId
+		from inserted ins
+    	where ins.Id = @sicilId
+
+        if (@VeriKaynakId > 0 and (@TalepId = 0 or @AdayId = 0))
+        begin
+            Update dbo.SrcAdayAdliSicil set
+                TalepId = t.Id  
+               ,AdayId  = t.AdayId 
+            From dbo.SrcAdayAdliSicil as a,
+                 dbo.SrcAdayTalep as t
+            Where a.VeriKaynakId = t.VeriKaynakId				 
+            and   a.Id = @sicilId
+
+			Select @TalepId = Id, @AdayId = AdayId 
+			From dbo.SrcAdayTalep 
+			Where VeriKaynakId = @VeriKaynakId
+        end
+
+		-- SrcAdayTalep tablosunu işaretle
+        if (@DbUpdatesIsActive = 0)
+        begin
+            Update SrcAdayTalep set
+                AdliSicilGeldi = x.Sonuc
+            From SrcAdayTalep a, 
+            (
+              Select count(Id) as Sonuc
+              From SrcAdayAdliSicil
+              Where 0 = 0
+              and SavcilikBelgesiResim is not null
+              and TalepId = @TalepId
+            ) as x
+            Where a.Id = @TalepId
+        end --
+		
+		Update SrcAdayBelgeler set
+        AdliSicilTarandi = x.Sonuc
+        From SrcAdayBelgeler a, 
+        (
+            Select count(Id) as Sonuc
+            From SrcAdayAdliSicil
+            Where 0 = 0
+            and SavcilikBelgesiResim is not null
+            and TalepId = @TalepId
+        ) as x
+        Where a.TalepId = @TalepId
+		
+        -- Data transferi oldu fakat daha önce bu talep için boş kayıt oluşturulmuş ise onu sil
+        if (@VeriKaynakId > 0)
+        begin
+		    Delete From dbo.SrcAdayAdliSicil
+            Where TalepId = @TalepId
+            and   isnull(VeriKaynakId,0) = 0
+        end
+
+        FETCH NEXT FROM sicilCursor INTO @sicilId
+    END -- While
+
+    CLOSE sicilCursor
+    DEALLOCATE sicilCursor   
+   
+
+END -- create trigger
+
+/*CreateTriggerEnd*/
+
+ALTER TABLE dbo.SrcAdayAdliSicil ENABLE TRIGGER trg_SrcAdayAdliSicil
+

@@ -1,8 +1,6 @@
-﻿
-/*CreateProcedure*/
+﻿/*CreateProcedure*/
 
-
-CREATE PROCEDURE [dbo].[prc_MtskUygDersIhlalleriCakismalar] (@curId bigint)  
+CREATE PROCEDURE [dbo].[prc_MtskUygDersIhlalleriCakismalar] (@FirmId int, @TalepId int)  
 AS BEGIN
 
   --declare @FirmId int
@@ -130,3 +128,4 @@ END -- procedure
 
 
 /*CreateProcedureEnd*/
+

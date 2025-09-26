@@ -24,7 +24,9 @@ begin transaction
     ReportHeader    nVarchar(100)     null,
     PageHeader      nVarchar(100)     null,     
     ReportSummary   nVarchar(100)     null,
-    PageSummary     nVarchar(100)     null,     
+    PageSummary     nVarchar(100)     null,
+    TableIPCode     VarChar(100)      null,
+    TableIPCode2    VarChar(100)      null,
 
     -- 40 
     IlKodu          varChar(3)        null,
@@ -173,10 +175,15 @@ INSERT INTO [dbo].[MsReports]
            ([IsActive],[LineNumber],[ReportCode],[ParentCode],[ReportCaption]                    ,[About], [ReportName],[RecordTypeId],[ReportTypeId],[PrivateTypeId],[SoftwareCode],[ProjectCode],[ModulCode],[ReportTemp])
      VALUES
            ( 1        , 0         , 'KRM'       , ''         , 'Kurum işlemleri'                 , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
-           ( 1        , 0         , 'MLI'       , ''         , 'Mali işlemler'                   , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'OMS'       , ''         , 'Ön muhasebe'                     , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
            ( 1        , 0         , 'DNM'       , ''         , 'Dönem işlemler'                  , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
            ( 1        , 0         , 'IDA'       , ''         , 'İdari işlemler'                  , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
            ( 1        , 0         , 'RPR'       , ''         , 'Rapor işlemleri'                 , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+
+           ( 1        , 0         , 'OMS.DKNT'  , 'OMS'      , 'Tahsilat/Ödeme dekontları'       , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'OMS.MLYT'  , 'OMS'      , 'Maliyet belgeleri'               , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+
+
 
            ( 1        , 0         , 'KRM.PERS'  , 'KRM'      , 'Personel raporları'              , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
            ( 1        , 0         , 'KRM.ARAC'  , 'KRM'      , 'Taşıt raporları'                 , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),

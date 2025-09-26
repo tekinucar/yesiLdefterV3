@@ -424,13 +424,13 @@ INSERT INTO [Lkp].[OnmHesapFinansAnaGrupTipi] (Id, AnaGrupTipi, GrupTipiId)
   ( 100,  N"Kasa", 1),
   ( 102,  N"Banka", 1),
 
-  ( 250,  N"Arazi Ve Arsalar", 1),
-  ( 251,  N"Yer Altı ve Yer Üstü Düzenleri", 1),
+  ( 250,  N"Arazi ve arsalar", 1),
+  ( 251,  N"Yer altı ve yer üstü düzenleri", 1),
   ( 252,  N"Binalar", 1),
-  ( 253,  N"Tesis, Makine Ve Cihazlar", 1),
+  ( 253,  N"Tesis, makine ve cihazlar", 1),
   ( 254,  N"Taşıtlar", 1),
   ( 255,  N"Demirbaşlar", 1),
-  ( 256,  N"Diğer Maddi Duran Varlıklar", 1),
+  ( 256,  N"Diğer maddi duran varlıklar", 1),
   ( 259,  N"Abonelikler", 1),
 
   ( 702,  N"Maliyet Hesapları (7/A Seçeneği)", 1),
@@ -570,6 +570,7 @@ commit transaction
 CREATE TRIGGER [dbo].[trg_OnmHesapFinans] on [dbo].[OnmHesapFinans] 
 AFTER INSERT, UPDATE
 AS BEGIN
+
 --   UstGrupTipiId       SmallInt      null, /* 102   banka        */
 --   AnaGrupTipiId       SmallInt      null, /* 1022  banka hesabı */
 --   AltGrupTipiId       Int           null, /* 10221 vadesiz      */
@@ -685,8 +686,7 @@ AS BEGIN
           ((@eAltGrupTipiId = 1022) or -- banka hesabı
            (@eAltGrupTipiId = 1023) or -- banka kartı
            (@eAltGrupTipiId = 1024) or -- pos cihazı
-           (@eAltGrupTipiId = 1025) or -- sanal pos hesabı
-           (@eAltGrupTipiId = 1026))   -- cari pos hesabı
+           (@eAltGrupTipiId = 1025))   -- sanal pos hesabı
         begin
           set @yHesapTipiId = 12 -- Varlık Tipi
         end
@@ -739,21 +739,6 @@ AS BEGIN
                 where Id = @curId
             end			
         end 	  
-	    -- sanal pos
-        if (@eAltGrupTipiId = 1025) and (@eHesapAdi <> 'pos') and (@eHesapAdi <> 'Spos') and (@eHesapAdi <> 'NULL') and (@eHesapAdi <> 'SanalPos')
-            set @yHesapKisaAdi = @yHesapKisaAdi + '.Spos.' + @eHesapAdi + '.' + @eNumarasi
-        if (@eAltGrupTipiId = 1025) and ((@eHesapAdi = 'pos') or (@eHesapAdi = 'Spos') or (@eHesapAdi = 'NULL') or (@eHesapAdi = 'SanalPos'))
-        begin 
-            set @yHesapKisaAdi = @yHesapKisaAdi + '.Spos.' + @eNumarasi
-            if ((@eHesapAdi = 'Spos') or (@eHesapAdi = 'NULL') or (@eHesapAdi = 'SanalPos'))
-            begin
-			    set @yHesapAdi = 'SanalPos'
-                update OnmHesapFinans set 
-                HesapAdi = @yHesapAdi
-                where Id = @curId
-            end			
-        end 	  
-
         if (@yHesapKisaAdi <> @eHesapKisaAdi)
         begin
           update OnmHesapFinans set 
@@ -948,7 +933,7 @@ AS BEGIN
             where Id = @curId
         end
       end -- 83, 84
-
+      /*
       if ((@eUstHesapKodu = '81.21') or
           (@eUstHesapKodu = '81.22') or
           (@eUstHesapKodu = '81.23') or
@@ -1016,7 +1001,7 @@ AS BEGIN
            (0, @eFirmId, 1, 84, Convert(int, @eUstHesapKodu), 0, 0, null, @eUstHesapKodu, @yHesapKisaAdi, @yHesapKisaAdi)
         end
       end -- if 81..
-	  
+	  */
       -- Abone kaydı ise
       if (@eUstGrupTipiId = 84)
       begin
@@ -1186,5 +1171,25 @@ taksitli ödemeler
 
 
 
+
+*/
+
+
+/*
+    12345678901234567890123456789012345678901234567890 
+
+250 Arazi ve arsalar (satış)
+251 Yer altı ve yer üstü düzenleri
+252 Binalar
+253 Tesis, makine ve cihazlar
+254 Taşıtlar
+255 Demirbaşlar
+256 Diğer maddi duran varlıklar
+641 Bağlı ortaklıklardan temettü gelirleri (Yatırım fonu veya hisse senedi kârı)
+642 Faiz gelirleri (Tahvil/bono faiz kuponları, mevduat faizleri)
+643 Komisyon gelirleri
+--649 Diğer olağan gelir ve kârlar
+679 Diğer olağandışı gelir ve kârlar
+770 Genel yönetim giderleri (İadeler, iade girişi) 
 
 */

@@ -183,6 +183,15 @@ AS BEGIN
 		-- her talep için yeniden doğum tarihi hesaplansın
         if (@DbUpdatesIsActive = 0)
         begin
+            -- TcNo update : MtskAday ile MtskAdayTalep deki TcNo lar eşit olmalı
+            Update dbo.MtskAdayTalep Set TcNo = aday.TcNo
+            From dbo.MtskAdayTalep as talep
+                left outer join dbo.MtskAday as aday on ( aday.Id = talep.AdayId )
+            Where 0 = 0
+            and isnull(aday.TcNo,'') <> isnull(talep.TcNo,'')
+            and aday.Id = @adayId
+
+
             if (@eTcNo <> @yTcNo
             or  @eDogumTarihi <> @yDogumTarihi 
             or  @eDogumTarihi is null 

@@ -32,7 +32,8 @@ begin transaction
    AHesapTipiId       SmallInt      null,
    AlacakliId         Int           null,
    
-   
+   FinansTipiId       SmallInt      null, /* 100 Kasa, 1022 Banka, 1023 Kredi Kartı, 1024 POS, 1025 Sanal POS, 1026 Cari POS */
+
    MaliyetId          Int           null,
    VarlikId           Int           null,
    AboneId            Int           null,
@@ -78,6 +79,15 @@ begin transaction
    SourceId           Int           null, /* ilgili table ref Id */
    IadeId             Int           null, /* iade kaynağı kendisidir. Yani tahsil ettiği dekonta bağlı olarak tediye dekontu oluşturuluyor. Iadeye sebep olan tahsilatın Id si */
    IsIptal            Bit           null, /* kullanıcı tarafından İPTAL edilen kayıt */
+
+
+   /* IsTransfer ve IkizId  finans hesapları arası para transferleri sırasında kullanılmaktadır   
+      kullanıcı bir dekont kayıt eder, bu kaydın FinansTipiId, BorcTutari ve AlacakTutari alanları zıt olacak şekilde ters kaydı oluşturulur.
+      Böylece bir hesap için Borç görünürken diğer hesap için Alacak görünür veya Alacak ise Borç görünür.
+   */
+   IsTransfer         Bit           null, /* default : 0 = normal, 1 = transfer */
+   IkizNo             TinyInt       null, /* transfer ise ikiz no : 0 ise transfer değil, 1 ise ikiz kaydın master olanı, 2 ise ikiz kayıt (yani sonradan üretilen kayıt ) */ 
+   IkizId             Int           null, /* transfer ise ikiz kaydın Id si */
 
    constraint		pk_OnmBelgeDekont primary key (Id)
  )
@@ -144,6 +154,10 @@ AS BEGIN
     declare @makbuzCount int
 	declare @Yil_ int
 
+    declare @IsTransfer bit
+    declare @IkizNo smallInt
+    declare @IkizId int = -1
+
     OPEN cursor_BDekont
 
     FETCH NEXT FROM cursor_BDekont INTO @curId
@@ -179,6 +193,10 @@ AS BEGIN
 		, @CariId = ins.CariId
 		, @SourceTypeId = ins.SourceTypeId
 		, @SourceId = ins.SourceId 
+        , @IsTransfer = isnull(ins.IsTransfer,0)
+        , @IkizNo = isnull(ins.IkizNo,0)
+        , @IkizId = isnull(ins.IkizId,0)
+
       from Inserted ins
       where ins.Id = @curId
 	  
@@ -187,16 +205,38 @@ AS BEGIN
       -- Tahsilat ise
       if (@TipiId = 2 and @IsActive = 1)
       begin
-          Set @BorcTutari = @BelgeTutari
-          Set @AlacakTutari = 0
-          Set @IptalTutari = 0
+          -- Normal dekontlar veya ikizlerden 1. incisi ise
+          if (@IsTransfer = 0 or @IkizNo = 1) 
+          begin
+              Set @BorcTutari = @BelgeTutari
+              Set @AlacakTutari = 0
+              Set @IptalTutari = 0
+          end
+          -- ikizlerden 2. incisi ise
+          if (@IkizNo = 2) 
+          begin
+              Set @BorcTutari = 0
+              Set @AlacakTutari = @BelgeTutari
+              Set @IptalTutari = 0
+          end
       end
       -- Tediye ise
       if (@TipiId = 3 and @IsActive = 1)
       begin
-          Set @BorcTutari = 0
-          Set @AlacakTutari = @BelgeTutari
-          Set @IptalTutari = 0
+          -- Normal dekontlar veya ikizlerden 1. incisi ise
+          if (@IsTransfer = 0 or @IkizNo = 1) 
+          begin
+              Set @BorcTutari = 0
+              Set @AlacakTutari = @BelgeTutari
+              Set @IptalTutari = 0
+          end
+          -- ikizlerden 2. incisi ise
+          if (@IkizNo = 2) 
+          begin
+              Set @BorcTutari = @BelgeTutari
+              Set @AlacakTutari = 0
+              Set @IptalTutari = 0
+          end
       end
       -- iptal edilen ise
       if (@IsActive = 0)
@@ -261,7 +301,6 @@ AS BEGIN
       end 
 
 	  -- Kullanıcı iptali pasif hale getirmeye çalışırsa
-
 	  if (@eIsIptal = 1) and (@IsIptal = 0)
 	  begin
           Update dbo.OnmBelgeDekont set 
@@ -269,6 +308,15 @@ AS BEGIN
             , IsIptal = 1  
           Where Id = @curId 
 	  end
+
+	  -- Banka kredisi ödenince
+	  if (@SourceTypeId = 3)
+      begin  
+          -- sadace FirmId update olsun böyleye ödenen, kalan tutarlar hesaplansı
+          Update dbo.OnmBankaKredisiS set
+              FirmId = @FirmId      
+          Where Id = @SourceId
+      end
 
 	  -- Maliyet dekontları ödenince
 	  if (@SourceTypeId = 1)
@@ -293,6 +341,22 @@ AS BEGIN
            JOIN MaliyetKalani x ON ( m.Id = x.SourceId )
            Where isnull(m.OdenenTutar,0) <> x.OdenenTutar
            or    isnull(m.KalanTutar,0) <> x.KalanTutar 
+
+           ;With MaliyetAciklamasi as (
+            Select dekont.Id
+                  ,dekont.Aciklama  as DekontAciklamasi
+                 ,maliyet.Aciklama as MaliyetAciklamasi 
+            From  dbo.OnmBelgeDekont as dekont
+                left outer join  dbo.OnmBelgeMaliyet as maliyet on ( dekont.SourceId = maliyet.Id )
+            Where dekont.SourceTypeId = 1
+            and   maliyet.Aciklama is not null
+            and   isnull(dekont.Aciklama, '') = ''
+           ) -- with
+           Update m set 
+               Aciklama = x.MaliyetAciklamasi
+           From dbo.OnmBelgeDekont as m
+           JOIN MaliyetAciklamasi x ON ( m.Id = x.Id )
+
 	  end -- Maliyet dekontu ise
 
       set @Yil = convert(varchar(4), YEAR(@BelgeTarihi))
@@ -306,7 +370,28 @@ AS BEGIN
       , BorcTutari = @BorcTutari
       , AlacakTutari = @AlacakTutari
       , IptalTutari = @IptalTutari
+      , FinansTipiId = 
+        (case 
+            -- Para transferi olmayan satırlar ise              
+            when @BHesapTipiId in (100, 1022, 1023, 1024, 1025, 1026) and @AHesapTipiId not in (100, 1022, 1023, 1024, 1025, 1026) then @BHesapTipiId
+            when @AHesapTipiId in (100, 1022, 1023, 1024, 1025, 1026) and @BHesapTipiId not in (100, 1022, 1023, 1024, 1025, 1026) then @AHesapTipiId
+
+            -- para transfer satırı, 1. inci satır ve Tahsilat fişi ise
+            when @BHesapTipiId in (100, 1022, 1023, 1024, 1025, 1026) and isnull(@IkizNo,0) <= 1 and @TipiId = 2 then @BHesapTipiId
+            -- para transfer satırı, 1. inci satır ve Tediye fişi ise
+            when @AHesapTipiId in (100, 1022, 1023, 1024, 1025, 1026) and isnull(@IkizNo,0) <= 1 and @TipiId = 3 then @AHesapTipiId
+
+            -- para transfer satırı, 2. inci satır ve Tahsilat fişi ise
+            when @BHesapTipiId in (100, 1022, 1023, 1024, 1025, 1026) and isnull(@IkizNo,0) = 2 and @TipiId = 2 then @AHesapTipiId
+            -- para transfer satırı, 2. inci satır ve Tediye fişi ise
+            when @AHesapTipiId in (100, 1022, 1023, 1024, 1025, 1026) and isnull(@IkizNo,0) = 2 and @TipiId = 3 then @BHesapTipiId
+         end ) 
+
       Where Id = @curId 
+
+      if (@BHesapTipiId in (100, 1022, 1023, 1024, 1025, 1026) and 
+          @AHesapTipiId in (100, 1022, 1023, 1024, 1025, 1026))
+          Execute dbo.prc_OnmBelgeDekontTransferIslemi @curId 
 
 	  FETCH NEXT FROM cursor_BDekont INTO @curId
     END
@@ -315,9 +400,6 @@ AS BEGIN
     DEALLOCATE cursor_BDekont
 
     EXECUTE [dbo].[prc_OnmHesapBakiyesiHesapla] @FirmId, @Yil_
-
-	--EXECUTE [dbo].[prc_OnmToplamBekleyenOdemeler] @FirmId
-	--EXECUTE [dbo].[prc_OnmToplamBekleyenGelirler] @FirmId
 
 END
 
@@ -349,6 +431,7 @@ AS BEGIN
 	declare @SourceId int
 	declare @IadeId int
 	declare @Yil_ int
+    declare @IkizId int = -1
 
 	OPEN cursor_BDekontDlt
 
@@ -370,6 +453,8 @@ AS BEGIN
 		, @SourceTypeId = dlt.SourceTypeId
 		, @SourceId = dlt.SourceId
 		, @IadeId = isnull(dlt.IadeId,0)
+        , @IkizId = isnull(dlt.IkizId,0)
+
       from deleted dlt
       where dlt.Id = @curId
 	  
@@ -385,20 +470,29 @@ AS BEGIN
           and   IsPaid = 0 
       end
 
+	  -- Banka kredisi ödemesi silince
+	  if (@SourceTypeId = 3)
+      begin  
+          -- sadace FirmId update olsun böyleye ödenen, kalan tutarlar hesaplansı
+          Update dbo.OnmBankaKredisiS set
+              FirmId = @FirmId      
+          Where Id = @SourceId
+      end
+
 	  if (@TipiId = 3) and -- Tediye    
 	     (@SourceTypeId = 1) -- OnmBelgeMaliyet tablosu
       begin
           ;With MaliyetKalani as (
            Select 
-               max(dekont.SourceId) as SourceId
+               max(maliyet.Id) as SourceId
              , max(maliyet.BelgeTutari) as MaliyetTutari
-             , sum(dekont.BelgeTutari) as OdenenTutar
-             , max(maliyet.BelgeTutari) - sum(dekont.BelgeTutari) as KalanTutar
-             , (case when (max(maliyet.BelgeTutari) - isnull(sum(dekont.BelgeTutari),0)) <= 0 then 1 else 0 end ) as IsPaid
-           From dbo.OnmBelgeDekont as dekont
-               left outer join dbo.OnmBelgeMaliyet as maliyet on ( dekont.SourceId = maliyet.Id )
-           Where dekont.SourceTypeId = 1
-           and   dekont.SourceId = @SourceId
+             , sum(isnull(dekont.BelgeTutari,0)) as OdenenTutar
+             , max(maliyet.BelgeTutari) - sum(isnull(dekont.BelgeTutari,0)) as KalanTutar
+             , (case when (max(maliyet.BelgeTutari) - sum(isnull(dekont.BelgeTutari,0))) <= 0 then 1 else 0 end ) as IsPaid
+           From dbo.OnmBelgeMaliyet as maliyet
+               left outer join dbo.OnmBelgeDekont as dekont on ( dekont.SourceId = maliyet.Id and dekont.SourceTypeId = 1)
+           Where 0 = 0
+           and   maliyet.Id = @SourceId
            ) -- with
            Update m set 
                OdenenTutar = x.OdenenTutar
@@ -407,8 +501,15 @@ AS BEGIN
            From dbo.OnmBelgeMaliyet as m
            JOIN MaliyetKalani x ON ( m.Id = x.SourceId )
            Where isnull(m.OdenenTutar,0) <> x.OdenenTutar
-           or    isnull(m.KalanTutar,0) <> x.KalanTutar 
+           or    isnull(m.KalanTutar,0) <> x.KalanTutar  
 	  end
+
+      -- Para Transferi için oluşturulmuş ikiz kaydı varsa onuda sil 
+      if (@IkizId > 0)
+      begin
+          Delete From dbo.OnmBelgeDekont
+          Where Id = @IkizId 
+      end 
 
 	  if (@TipiId = 2) and -- Tahsilat
 	     (@AHesapTipiId >= 21100) -- Mtskİşlemleri
@@ -423,9 +524,6 @@ AS BEGIN
     DEALLOCATE cursor_BDekontDlt
 
     EXECUTE [dbo].[prc_OnmHesapBakiyesiHesapla] @FirmId, @Yil_
-	--EXECUTE [dbo].[prc_OnmToplamBekleyenOdemeler] @FirmId
-	--EXECUTE [dbo].[prc_OnmToplamBekleyenGelirler] @FirmId
-
 
 END
 
@@ -503,7 +601,9 @@ create table [Lkp].[OnmBelgeDekontIslemTipi]
 delete from [Lkp].[OnmBelgeDekontIslemTipi]
 INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, AlacakHesapId)
  VALUES 
-
+ 
+ -- Nakit girişleri
+ --
  ( '100.100',   'Kasalar arası virman' , 100,  100  ), 
  ( '100.120',   'Cariden nakit tahsilat' , 100,  120  ), 
  ( '100.131',   'Ortaklardan alınan nakit' , 100,  131  ), 
@@ -526,6 +626,7 @@ INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, A
  ( '100.21113',    N'Başarısız eğitim ücreti, nakit tahsilat ' , 100,  21113  ), 
  ( '100.21114',    N'Telafi eğitim ücreti, nakit tahsilat ' , 100,  21114  ), 
  ( '100.21115',    N'Diğer ücretler, nakit tahsilat ' , 100,  21115  ), 
+ ( '100.21116',    N'Uyg+Başarısız ücretler, nakit tahsilat ' , 100,  21116  ), 
 
  ( '100.23101',    N'Src 1234 ücreti, nakit tahsilat ' , 100,  23101  ), 
  ( '100.23102',    N'Src 5 ücreti, nakit tahsilat ' , 100,  23102  ), 
@@ -539,13 +640,14 @@ INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, A
  ( '100.23115',    N'Diğer ücretler, nakit tahsilat ' , 100,  23115  ), 
 
 
-
-
+ -- Banka girişleri
+ --
  ( '1022.100',   'Kasadan banka hesabına yatırılan' , 1022,  100  ), 
  ( '1022.120',   'Cariden gelen havale/Eft' , 1022,  120  ), 
  ( '1022.131',   'Ortaklardan gelen havale/Eft' , 1022,  131  ), 
  --( '1022.135',   'Personelden gelen havale/Eft' , 1022,  135  ),  /* 335. Personele Borçlar / 135. Personelden Alacaklar  */
- ( '1022.300',   'Banka kredisi girişi' , 1022,  300  ), 
+ ( '1022.300',   'Banka kredisi girişi kv.' , 1022,  300  ), 
+ ( '1022.400',   'Banka kredisi girişi uv.' , 1022,  400  ), 
  ( '1022.320',   'Cariden gelen havale/Eft' , 1022,  320  ), 
  ( '1022.602',   'Verilen hizmet için banka hesabına yatırılan' , 1022,  602  ), 
  ( '1022.1022',  'Banka hesapları arası havale' , 1022,  1022  ), 
@@ -564,6 +666,7 @@ INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, A
  ( '1022.21113',    N'Başarısız eğitim ücreti, banka hesabına yatan' , 1022,  21113  ), 
  ( '1022.21114',    N'Telafi eğitim ücreti, banka hesabına yatan' , 1022,  21114  ), 
  ( '1022.21115',    N'Diğer ücretler, banka hesabına yatan' , 1022,  21115  ), 
+ ( '1022.21116',    N'Uyg+Başarısız ücretler, banka hesabına yatan' , 1022,  21116  ), 
 
  ( '1022.23101',    N'Src 1234 ücreti, banka hesabına yatan' , 1022,  23101  ), 
  ( '1022.23102',    N'Src 5 ücreti, banka hesabına yatan' , 1022,  23102  ), 
@@ -576,10 +679,13 @@ INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, A
  ( '1022.23114',    N'Telafi eğitim ücreti, banka hesabına yatan' , 1022,  23114  ), 
  ( '1022.23115',    N'Diğer ücretler, banka hesabına yatan' , 1022,  23115  ), 
 
-
+ -- Kredi kartına girişler/yatanlar
+ --
  ( '1023.100',   'Kredi kartı borcunu kasadan ödeme' , 1023,  100  ), 
  ( '1023.1022',  'Kredi kartı borcunu banka hesabından ödeme' , 1023,  1022  ), 
 
+ -- POS Cihazı ile girişler, tahsilatlar
+ --
  ( '1024.120',   'Cariden banka/kredi kartı ile tahsilat' , 1024,  120  ), 
  ( '1024.131',   'Ortağın banka/kredi kartından çekilen ' , 1024,  131  ), 
  ( '1024.135',   'Personelin banka/kredi kartından çekilen' , 1024,  135  ), /* 335. Personele Borçlar / 135. Personelden Alacaklar  */
@@ -600,6 +706,7 @@ INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, A
  ( '1024.21113',    N'Başarısız eğitim ücreti, POS ile tahsilat' , 1024,  21113  ), 
  ( '1024.21114',    N'Telafi eğitim ücreti, POS ile tahsilat' , 1024,  21114  ), 
  ( '1024.21115',    N'Diğer ücretler, POS ile tahsilat' , 1024,  21115  ), 
+ ( '1024.21116',    N'UYg+Başarısız ücretler, POS ile tahsilat' , 1024,  21116  ), 
 
  ( '1024.23101',    N'Src 1234 ücreti, POS ile tahsilat' , 1024,  23101  ), 
  ( '1024.23102',    N'Src 5 ücreti, POS ile tahsilat' , 1024,  23102  ), 
@@ -625,6 +732,7 @@ INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, A
  ( '1025.21113',    N'Başarısız eğitim ücreti, Sanal POS ile tahsilat' , 1025,  21113  ), 
  ( '1025.21114',    N'Telafi eğitim ücreti, Sanal POS ile tahsilat' , 1025,  21114  ), 
  ( '1025.21115',    N'Diğer ücretler, Sanal POS ile tahsilat' , 1025,  21115  ), 
+ ( '1025.21116',    N'Uyg+Başarısız ücretler, Sanal POS ile tahsilat' , 1025,  21116  ), 
 
  ( '1025.23101',    N'Src 1234 ücreti, Sanal POS ile tahsilat' , 1025,  23101  ), 
  ( '1025.23102',    N'Src 5 ücreti, Sanal POS ile tahsilat' , 1025,  23102  ), 
@@ -650,6 +758,7 @@ INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, A
  ( '1026.21113',    N'Başarısız eğitim ücreti, Cari POS ile tahsilat' , 1025,  21113  ), 
  ( '1026.21114',    N'Telafi eğitim ücreti, Cari POS ile tahsilat' , 1025,  21114  ), 
  ( '1026.21115',    N'Diğer ücretler, Cari POS ile tahsilat' , 1025,  21115  ), 
+ ( '1026.21116',    N'Uyg+Başarısız ücretler, Cari POS ile tahsilat' , 1025,  21116  ), 
 
  ( '1026.23101',    N'Src 1234 ücreti, Cari POS ile tahsilat' , 1025,  23101  ), 
  ( '1026.23102',    N'Src 5 ücreti, Cari POS ile tahsilat' , 1025,  23102  ), 
@@ -674,7 +783,8 @@ INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, A
  --( '135.100',  'Personele verilen nakit' , 135,  100  ), /* 335. Personele Borçlar / 135. Personelden Alacaklar  */
  ( '153.100',  'Stok alımı için ödenen nakit' , 153,  100  ), 
  ( '196.100',  'Personele verilen nakit avans' , 196,  100  ), 
- ( '300.100',  'Banka kredisi için nakit ödeme' , 300,  100  ), 
+ ( '300.100',  'Banka kredisi için nakit ödeme kv.' , 300,  100  ), 
+ ( '400.100',  'Banka kredisi için nakit ödeme uv.' , 400,  100  ), 
  ( '320.100',  'Cari hesaba ödenen nakit' , 320,  100  ), 
  ( '770.100',  'Genel yönetim giderleri için nakit ödeme' , 770,  100  ), 
 
@@ -690,6 +800,7 @@ INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, A
  ( '21113.100',    N'Başarısız eğitim ücreti, nakit iadesi' , 21113,  100  ), 
  ( '21114.100',    N'Telafi eğitim ücreti, nakit iadesi' , 21114,  100  ), 
  ( '21115.100',    N'Diğer ücretler, nakit iadesi' , 21115,  100  ), 
+ ( '21116.100',    N'Uyg+Başarısız ücretler, nakit iadesi' , 21116,  100  ), 
 
  ( '23101.100',    N'Src 1234 ücreti, nakit iadesi' , 23101,  100  ), 
  ( '23102.100',    N'Src 5 ücreti, nakit iadesi' , 23102,  100  ), 
@@ -708,7 +819,8 @@ INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, A
  --( '135.1022',  'Personele banka hesabından havale/Eft' , 135,  1022  ), /* 335. Personele Borçlar / 135. Personelden Alacaklar  */
  ( '153.1022',  'Stok alımı için banka hesabında havale/Eft' , 153,  1022  ), 
  ( '196.1022',  'Personele banka hesabından havale/Eft avans' , 196,  1022  ),  
- ( '300.1022',  'Banka kredisi için banka hesabından ödeme' , 300,  1022  ), 
+ ( '300.1022',  'Banka kredisi için banka hesabından ödeme kv.' , 300,  1022  ), 
+ ( '400.1022',  'Banka kredisi için banka hesabından ödeme uv.' , 400,  1022  ), 
  ( '320.1022',  'Cari hesabına havale/Eft' , 320,  1022  ), 
  ( '770.1022',  'Genel yönetim giderleri için banka hesabından havale/Eft' , 770,  1022  ), 
  ( '780.1022',  'Finansman giderleri için banka hesabından çekilen' , 780,  1022  ), 
@@ -725,6 +837,7 @@ INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, A
  ( '21113.1022',    N'Başarısız eğitim ücreti, banka hesabından iade' , 21113,  1022  ), 
  ( '21114.1022',    N'Telafi eğitim ücreti, banka hesabından iade' , 21114,  1022  ), 
  ( '21115.1022',    N'Diğer ücretler, banka hesabından iade' , 21115,  1022  ), 
+ ( '21116.1022',    N'Uyg+Başarısız ücretler, banka hesabından iade' , 21116,  1022  ), 
 
  
  ( '23101.1022',    N'Src 1234 ücreti, banka hesabından iade' , 23101,  1022  ), 
@@ -746,6 +859,7 @@ INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, A
  ( '320.1023',  'Cari hesaba kredi kartı ile ödeme' , 320,  1023  ), 
  ( '770.1023',  'Genel yönetim giderleri için kredi kartıyla ödeme' , 770,  1023  ), 
  ( '791.100',   'İşçi ücret ve giderleri için nakit ödeme' , 791,  100  ), 
+ ( '791.1022',  'İşçi ücret ve giderleri için banka hesabından havale/Eft' , 791,  1022  ), 
  ( '793.1023',  'Dışarıdan sağlanan hizmetler için kredi kartıyla ödeme' , 793,  1023  ), 
  ( '793.100',   'Dışarıdan sağlanan hizmetler için nakit ödeme' , 793,  100  ), 
  ( '793.1022',  'Dışarıdan sağlanan hizmetler için banka hesabından havale/Eft' , 793,  1022  ), 
@@ -763,6 +877,7 @@ INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, A
  ( '21113.1024',    N'Başarısız eğitim ücreti, POS dan iade' , 21113,  1024  ), 
  ( '21114.1024',    N'Telafi eğitim ücreti, POS dan iade' , 21114,  1024  ), 
  ( '21115.1024',    N'Diğer ücretler, POS dan iade' , 21115,  1024  ), 
+ ( '21116.1024',    N'Uyg+Başarısız ücretler, POS dan iade' , 21116,  1024  ), 
 
  
  ( '23101.1024',    N'Src 1234 ücreti, POS dan iade' , 23101,  1024  ), 
@@ -790,6 +905,7 @@ INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, A
  ( '21113.1025',    N'Başarısız eğitim ücreti, Sanal POS dan iade' , 21113,  1025  ), 
  ( '21114.1025',    N'Telafi eğitim ücreti, Sanal POS dan iade' , 21114,  1025  ), 
  ( '21115.1025',    N'Diğer ücretler, Sanal POS dan iade' , 21115,  1025  ), 
+ ( '21116.1025',    N'Uyg+Başarısız ücretler, Sanal POS dan iade' , 21116,  1025  ), 
 
  
  ( '23101.1025',    N'Src 1234 ücreti, Sanal POS dan iade' , 23101,  1025  ), 
@@ -840,7 +956,8 @@ INSERT INTO [Lkp].[OnmBelgeDekontBHesapTipi] (Id, BHesapTipi, GrupTipiId)
   ( 196,  N'Personel avansları', 1),
   ( 320,  N'Satıcılar', 1),
 
-  ( 300,  N'Banka kredileri', 1),
+  ( 300,  N'Banka kredileri (Kısa vadeli)', 1),
+  ( 400,  N'Banka kredileri (Uzun vadeli)', 1),
 
   ( 153,  N'Stok alımı', 1),
   ( 600,  N'Yurtiçi satışlar', 1),
@@ -871,6 +988,7 @@ INSERT INTO [Lkp].[OnmBelgeDekontBHesapTipi] (Id, BHesapTipi, GrupTipiId)
   ( 21113,    N'Başarısız eğitim ücreti', 1),
   ( 21114,    N'Telafi eğitim ücreti', 1),
   ( 21115,    N'Diğer ücretler', 1),
+  ( 21116,    N'Uyg+Başarısız ücreti', 1),
 
   ( 23101,    N'Src 1234', 1),
   ( 23102,    N'Src 5', 1),
@@ -918,7 +1036,8 @@ INSERT INTO [Lkp].[OnmBelgeDekontAHesapTipi] (Id, AHesapTipi, GrupTipiId)
   ( 196,  N'Personel avansları', 1),
   ( 320,  N'Satıcılar', 1),
 
-  ( 300,  N'Banka kredileri', 1),
+  ( 300,  N'Banka kredileri (Kısa vadeli)', 1),
+  ( 400,  N'Banka kredileri (Uzun vadeli)', 1),
 
   ( 153,  N'Stok alımı', 1),
   ( 600,  N'Yurtiçi satışlar', 1),
@@ -949,6 +1068,7 @@ INSERT INTO [Lkp].[OnmBelgeDekontAHesapTipi] (Id, AHesapTipi, GrupTipiId)
   ( 21113,    N'Başarısız eğitim ücreti', 1),
   ( 21114,    N'Telafi eğitim ücreti', 1),
   ( 21115,    N'Diğer ücretler', 1),
+  ( 21116,    N'Uyg+Başarısız ücreti', 1),
 
   ( 23101,    N'Src 1234', 1),
   ( 23102,    N'Src 5', 1),
@@ -961,6 +1081,33 @@ INSERT INTO [Lkp].[OnmBelgeDekontAHesapTipi] (Id, AHesapTipi, GrupTipiId)
   ( 23114,    N'Telafi eğitim ücreti', 1),
   ( 23115,    N'Diğer ücretler', 1)
 
+
+
+-- ------------------------------------------------------- 
+-- FinansTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmBelgeDekontFinansTipi')
+drop table [Lkp].[OnmBelgeDekontFinansTipi]
+
+create table [Lkp].[OnmBelgeDekontFinansTipi]
+(
+   Id           Int Unique Not Null,
+   FinansTipi   nVarchar(50),
+   GrupTipiId   SmallInt Null,
+
+   constraint  pk_OnmBelgeDekontFinansTipi primary key (Id)
+)
+
+delete from [Lkp].[OnmBelgeDekontFinansTipi]
+INSERT INTO [Lkp].[OnmBelgeDekontFinansTipi] (Id, FinansTipi, GrupTipiId)
+ VALUES 
+  ( 0,    N'Tanımsız', 1),
+  ( 100,  N'Kasa', 1),
+  ( 1022, N'Banka hesabı', 1), 
+  ( 1023, N'Banka/Kredi kartı', 1), 
+  ( 1024, N'POS', 1),
+  ( 1025, N'Sanal POS', 1),
+  ( 1026, N'Cari POS', 1)
 
 
 -- ------------------------------------------------------- 
@@ -982,18 +1129,14 @@ INSERT INTO [Lkp].[OnmBelgeDekontSourceType] (Id, SourceType)
  VALUES 
   ( 0,   N'Tanımsız'),
 
---  ( 1,   N'OnmBelgeMaliyet'),
---  ( 2,   N'OnmOdemePlani'),
-  ( 1,   N'OnmBelgeDekont - Kendisi'), -- kaynak kendisi
-  ( 2,   N'OnmBelgeMaliyet'),
-  ( 3,   N'OnmOdemePlani'),
+  ( 1,   N'OnmBelgeMaliyet'),
+  ( 2,   N'OnmBelgeDekont - Kendisi'), -- kaynak kendisi
+  ( 3,   N'OnmBankaKredisiS'),
 
-  ( 201, N'UstadMtsk'),
-  ( 202, N'UstadIsmak'),
-  ( 203, N'UstadSrc'),
-  ( 211, N'TabimMtsk'),
-  ( 212, N'TabimIsmak'),
-  ( 213, N'TabimSrc'),
+  ( 201, N'UstadMtsk.OnmOdemePlani'),
+  ( 202, N'UstadIsmak.OnmOdemePlani'),
+  ( 203, N'UstadSrc.OnmOdemePlani'),
+
   ( 2103,  N'Mtsk Veri Transferi - Giderler'),
   ( 2104,  N'Mtsk Veri Transferi - CariAlt'),
   ( 2105,  N'Mtsk Veri Transferi - Kurharc')

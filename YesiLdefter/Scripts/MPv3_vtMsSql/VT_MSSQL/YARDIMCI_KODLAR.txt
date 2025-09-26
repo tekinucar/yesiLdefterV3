@@ -6,6 +6,14 @@
 --exec sys.sp_addsrvrolemember TABIM, 'sysadmin'
 
 
+-- data transferini başlatmak için
+      Update [dbo].[DbUpdates] set IsActive = 1 Where MsDbUpdateId = -1 and UpdateTypeId = 13 and DBaseNoTypeId = 6
+
+-- data transferini kapatmak için
+      Update [dbo].[DbUpdates] set IsActive = 0 Where MsDbUpdateId = -1 and UpdateTypeId = 13 and DBaseNoTypeId = 6
+
+
+
 /*  Sistemden tabloları sorgulamalar */
 
 Select * From sys.objects

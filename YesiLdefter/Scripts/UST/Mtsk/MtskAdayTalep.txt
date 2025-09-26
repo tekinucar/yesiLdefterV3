@@ -80,7 +80,7 @@ begin transaction
    KullaniciUyarilari      nVarchar(200)  null,
    SistemUyarilari         nVarchar(200)  null,
    EtiketTipiId            SmallInt       null,
-   VeriKaynakTipiId        SmallInt       null, /* 1. Kullanıcı Manuel, 2. Mebbis Dönem Aday Onaylama, 3. Mebbis Uygulama Sınav Listesi, 4. Mebbis Aday Durum Bilgileri, 5. Tabim veritabanı  */
+   VeriKaynakTipiId        SmallInt       null, /* 1. Kullanıcı Manuel, 2. Mebbis Dönem Aday Onaylama, 3. Mebbis Uygulama Sınav Listesi, 4. Mebbis Aday Durum Bilgileri, 11. Tabim veritabanı  */
    VeriKaynakId            Int            null, /* Veri transferi edildiği tablodaki Id . Sorun olduğunda bilginin nereden geldiğine referans olsun */
 
    -- 90
@@ -380,6 +380,7 @@ AS BEGIN
 		  --if (@yMevcutSertifikaTipiId <> 9200) -- 100 Ceza
 		  set @yIsMevcutOtomatik = [dbo].[fnc_getSertifikaIsOtomatik](@yMevcutSertifikaTipiId)
 	      set @yMevcutSertifikaTipiId = [dbo].[fnc_getSertifikaId](@yMevcutSertifikaTipiId)
+          set @eMevcutSertifikaTipiId = 0 -- fark oluşsunda update çalışsın
       end
       if (@yIstenenSertifikaTipiId > 9000)
       begin
@@ -387,6 +388,7 @@ AS BEGIN
 		  --if (@yIstenenSertifikaTipiId <> 9200) -- 100 Ceza
           set @yIsOtomatik = [dbo].[fnc_getSertifikaIsOtomatik](@yIstenenSertifikaTipiId)
 	      set @yIstenenSertifikaTipiId = [dbo].[fnc_getSertifikaId](@yIstenenSertifikaTipiId)
+          set @eIstenenSertifikaTipiId = 0 -- fark oluşsunda update çalışsın
       end
 
       -- Yeni kayıt ise kontrol et
@@ -510,14 +512,18 @@ AS BEGIN
                   )
           end
 
-          if (@eIsDosyaKapandi <> @yIsDosyaKapandi)
+          if (@yIsDosyaKapandi = 1 and @yKayitTipiId <> 8)
           begin 
-              if (@yIsDosyaKapandi = 1)
-              begin
-                  Update MtskAdayTalep Set KayitTipiId = 8
-                  , DosyaKapanmaTarihi = GETDATE()
-                  Where Id = @TalepId
-              end
+              Update MtskAdayTalep Set KayitTipiId = 8
+                , DosyaKapanmaTarihi = GETDATE()
+              Where Id = @TalepId
+          end
+
+          if (@yIsDosyaKapandi = 0 and @yKayitTipiId = 8)
+          begin 
+              Update MtskAdayTalep Set KayitTipiId = 3
+                , DosyaKapanmaTarihi = GETDATE()
+              Where Id = @TalepId
           end
 
           Execute [dbo].[prc_MtskAdayTablesInsert] @TalepId  -- Data transferi sırasında oluşturuluyor zaten insert oluyor
@@ -572,16 +578,17 @@ AS BEGIN
 
     WHILE @@FETCH_STATUS = 0
     BEGIN
-	  Delete from MtskAdayAdliSicil  Where TalepId = @curId
-	  Delete from MtskAdayAdres      Where TalepId = @curId
-	  Delete from MtskAdayBelgeler   Where TalepId = @curId
-	  Delete from MtskAdayImza       Where TalepId = @curId
-	  Delete from MtskAdayOgrenim    Where TalepId = @curId
-	  Delete from MtskAdaySaglik     Where TalepId = @curId
-	  Delete from MtskAdaySertifika  Where TalepId = @curId
-	  Delete from MtskAdaySozlesme   Where TalepId = @curId
-	  Delete from MtskAdayTakip      Where TalepId = @curId
-	  Delete from MtskAdayUcret      Where TalepId = @curId
+	  Delete from MtskAdayAdliSicil   Where TalepId = @curId
+	  Delete from MtskAdayAdres       Where TalepId = @curId
+	  Delete from MtskAdayBelgeler    Where TalepId = @curId
+	  Delete from MtskAdayImza        Where TalepId = @curId
+	  Delete from MtskAdayOgrenim     Where TalepId = @curId
+	  Delete from MtskAdaySaglik      Where TalepId = @curId
+	  Delete from MtskAdaySertifika   Where TalepId = @curId
+	  Delete from MtskAdaySozlesme    Where TalepId = @curId
+	  Delete from MtskAdayTakip       Where TalepId = @curId
+	  Delete from MtskAdayUcret       Where TalepId = @curId
+	  Delete from MtskAdayUcretMebbis Where TalepId = @curId
 
       FETCH NEXT FROM talepCursorDlt INTO @curId
     END

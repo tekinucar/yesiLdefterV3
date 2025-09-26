@@ -138,21 +138,21 @@ AS BEGIN
        where TalepId = @TalepId 
      ) = 0 
   begin 
-       Insert into [dbo].[MtskAdayUcret]
-           ([FirmId],[TalepId],[AdayId],[DonemTipiId],[TalepTipiId]
-           ,[IsUcretli],[IsUcretsiz],[IsLock],[IsOwes]
-           ,[SertifikaUcreti]
-           ,[BirSaatOzelDersUcreti],[AlacagiOzelDersSayisi]
-           ,[KontejanTipiId],[KontejanIndirimOrani],[KontejanIndirimTutari],[KontejanSonrasiUcret]
-           ,[AnlasilanUcret],[IskontoOrani],[PesinatTutari]
-           ,[TaksitSayisiTipiId],[TaksitlendirilecekUcret]
-           ,[ESinavUcreti],[UygulamaSinavUcreti]
-           ,[SertifikaVeSinavUcreti],[IsSinavUcretiTaksitli]
-           ,[OdemeTipiId],[OdemeBaslamaTarihi],[OdemeCepTelefonu],[ESinavUcretTipiId],[USinavUcretTipiId]
-           ,[MebbisSertifikaUcreti],[MebbisTeoDersSaati],[Mebbis1SaatTeoDersUcreti],[MebbisUygDersSaati],[Mebbis1SaatUygDersUcreti]
-           ,[BorcSertifikaUcreti],[BorcESinavUcreti],[BorcUygulamaSinavUcreti],[BorcTelafiEgitimUcreti],[BorcBasarisizEgitimUcreti],[BorcDigerUcretler],[BorcUcretlerToplami]
-           ,[VGSertifikaUcreti],[VGESinavUcreti],[VGUygulamaSinavUcreti],[VGTelafiEgitimUcreti],[VGBasarisizEgitimUcreti],[VGDigerUcretler],[VGUcretlerToplami]
-           ,[PersonelId],[TeklifTarihi],[VeriKaynakId])
+       Insert into  dbo.MtskAdayUcret
+           ( FirmId, TalepId, AdayId, DonemTipiId, TalepTipiId
+           , IsUcretli, IsUcretsiz, IsLock, IsOwes
+           , SertifikaUcreti
+           , BirSaatOzelDersUcreti, AlacagiOzelDersSayisi
+           , KontejanTipiId, KontejanIndirimOrani, KontejanIndirimTutari, KontejanSonrasiUcret
+           , AnlasilanUcret, IskontoOrani, PesinatTutari
+           , TaksitSayisiTipiId, TaksitlendirilecekUcret
+           , ESinavUcreti, UygulamaSinavUcreti
+           , SertifikaVeSinavUcreti, IsSinavUcretiTaksitli
+           , OdemeTipiId, OdemeBaslamaTarihi, OdemeCepTelefonu, ESinavUcretTipiId, USinavUcretTipiId
+           , MebbisSertifikaUcreti, MebbisTeoDersSaati, Mebbis1SaatTeoDersUcreti, MebbisUygDersSaati, Mebbis1SaatUygDersUcreti
+           , BorcSertifikaUcreti, BorcESinavUcreti, BorcUygulamaSinavUcreti, BorcTelafiEgitimUcreti, BorcBasarisizEgitimUcreti, BorcDigerUcretler, BorcUcretlerToplami
+           , VGSertifikaUcreti, VGESinavUcreti, VGUygulamaSinavUcreti, VGTelafiEgitimUcreti, VGBasarisizEgitimUcreti, VGDigerUcretler, VGUcretlerToplami
+           , PersonelId, TeklifTarihi, VeriKaynakId)
 			VALUES (@yFirmId, @TalepId, @yAdayId, @yDonemTipiId, @yTalepTipiId
 			, 0, 0, 0, 0 -- IsUcretli
 			, 0    -- SertifikaUcreti
@@ -168,10 +168,49 @@ AS BEGIN
 			, 0, 0, 0, 0, 0, 0, 0 -- VGSer..
 			, 0, null, 0    -- Perso..
 			)
-       print ' create : [MtskAdayUcret]'
+       print ' create :  MtskAdayUcret'
   end
 
 			   
+  -- MtskAdayUcretMebbis Insert
+  if ( Select count(*) ADET from dbo.MtskAdayUcretMebbis
+       where TalepId = @TalepId 
+     ) = 0 
+  begin 
+      insert into  dbo.MtskAdayUcretMebbis
+           ( FirmId, TalepId, AdayId, DonemTipiId, TalepTipiId
+           , IsUcretli, IsUcretsiz, IsLock, VeriKaynakId
+           , SertifikaUcreti
+           , KontejanTipiId, KontejanIndirimOrani, KontejanIndirimTutari, KontejanSonrasiUcret
+           , AnlasilanUcret, PesinatTutari, TaksitSayisiTipiId
+           , TeoDersSaati, BirSaatTeoDersUcreti, UygDersSaati, BirSaatUygDersUcreti
+           , ESinavUcreti, UygulamaSinavUcreti, BasarisizlikEgitimUcreti, ArtiDortHakUcreti
+           , TaksitTarihi1, TaksitTutari1
+           , TaksitTarihi2, TaksitTutari2
+           , TaksitTarihi3, TaksitTutari3
+           , TaksitTarihi4, TaksitTutari4
+           , TaksitTarihi5, TaksitTutari5
+           , TaksitTarihi6, TaksitTutari6)
+     values
+           ( @yFirmId, @TalepId, @yAdayId, @yDonemTipiId, @yTalepTipiId
+           , 0,  0,  0,  0 -- IsUcretli,IsUcretsiz,IsLock, VeriKaynakId
+           , 0 -- SertifikaUcreti
+           , 0,  0,  0,  0 -- KontejanTipiId,KontejanIndirimOrani,KontejanIndirimTutari,KontejanSonrasiUcret
+           , 0,  0,  0     -- AnlasilanUcret,PesinatTutari,TaksitSayisiTipiId
+           , 0,  0,  0,  0 -- TeoDersSaati,BirSaatTeoDersUcreti,UygDersSaati,BirSaatUygDersUcreti
+           , 0,  0,  0,  0 -- ESinavUcreti,UygulamaSinavUcreti,BasarisizlikEgitimUcreti,ArtiDortHakUcreti
+           , null,  0      -- TaksitTarihi1,TaksitTutari1,
+           , null,  0      -- TaksitTarihi2,TaksitTutari2, 
+           , null,  0      -- TaksitTarihi3,TaksitTutari3,
+           , null,  0      -- TaksitTarihi4,TaksitTutari4,
+           , null,  0      -- TaksitTarihi5,TaksitTutari5,
+           , null,  0      -- TaksitTarihi6,TaksitTutari6
+           )
+       print ' create : [MtskAdayUcretMebbis]'
+  end
+
+
+
   -- MtskAdayTakip Insert
   if ( Select count(*) ADET from dbo.[MtskAdayTakip] 
        where TalepId = @TalepId 

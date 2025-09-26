@@ -160,6 +160,7 @@ namespace YesiLdefter
             */
             if (v.webDriver_ == null)
             {
+                f.loginPageRun = false;
                 SeleniumHelper.ResetDriver();
                 v.webDriver_ = SeleniumHelper.WebDriver;
                 preparingWebDriverChangeSize(v.webDriver_);
@@ -1275,7 +1276,10 @@ namespace YesiLdefter
 
             if (driverAlive == false)
             {
+                
+                v.webDriver_ = null;
                 preparingWebMain();
+                wb = v.webDriver_;
             }
 
             bool onay = false;
@@ -1419,10 +1423,17 @@ namespace YesiLdefter
                 ///
                 if (t.IsNotNull(f.talepOncesiUrl))
                 {
-                    /// aktif url ne talep edilen ne de talep öncesi url değil ise 
-                    /// talepOncesiUrl yi çağır
-                    ///
+                    if (f.aktifUrl == "https://mebbis.meb.gov.tr/default.aspx?NoSession?sc") return;
                     if ((f.talepOncesiUrl != f.aktifUrl) &&
+                        (f.talepEdilenUrl != f.aktifUrl) &&
+                        (f.aktifUrl == f.loginPageUrl)) 
+                        return;
+
+
+                        /// aktif url ne talep edilen ne de talep öncesi url değil ise 
+                        /// talepOncesiUrl yi çağır
+                        ///
+                        if ((f.talepOncesiUrl != f.aktifUrl) &&
                         (f.talepEdilenUrl != f.aktifUrl))
                         loadPageUrl(wb, f.talepOncesiUrl);
                     //await runLoginPage(wb);// v.webDriver_);

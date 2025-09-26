@@ -1,0 +1,40 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table MebKurumEkBilgiler
+ (
+
+   Id                  Int IDENTITY(1,1) NOT NULL, 
+   ParentId            Int       not null, /* default 0 */
+   FirmId              Int       not null,
+   FirmGUID            uniqueidentifier null,
+
+   -- 10
+   KurumMuduru         nvarchar(100) NULL,
+
+
+   -- 30
+   BankaAdi            nvarchar(50) NULL,
+   BankaSubesi         nvarchar(50) NULL,
+   BankaHesapNo        nvarchar(30) NULL,
+   BankaIBAN           nvarchar(30) NULL,
+
+   -- 50
+   IlceMilliEgitimMudurlugu      nvarchar(100) NULL,
+   IlceMilliEgitimMudTlf         nvarchar(15) NULL,
+
+
+   -- 70
+   IcraMahkemeAdi       nvarchar(100) NULL,
+
+  constraint pk_MebKurumEkBilgiler primary key (Id)
+ )
+
+ grant select, insert, update, delete on MebKurumEkBilgiler to public
+
+commit transaction
+
+/*CreateTableEnd*/
+
+

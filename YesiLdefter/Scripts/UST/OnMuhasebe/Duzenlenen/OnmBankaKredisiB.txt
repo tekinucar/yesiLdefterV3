@@ -1,0 +1,186 @@
+﻿
+/*CreateTable*/
+
+begin transaction
+
+ create table OnmBankaKredisiB
+ (
+
+   Id                 Int IDENTITY(1,1) NOT NULL, 
+   ParentId           Int         not null, /* default 0 */
+   FirmId             Int         not null,
+   IsActive           Bit         not null, /* default : 1 = active, 0 = not active */ 
+   IsPaid             Bit         not null, /* default : 0 = ödenmedi,  1 = Ödendi */  
+   IsCommit           Bit         not null, /* default : 0 = Muh. işlenmedi, 1 = Muh. İşlendi */  
+   IsLock             Bit             null, /* default : 0 = Açık, 1 = Kilitli  */
+   -- 10
+   BankaId 	               Int            null,
+   BankaHesapId            Int            null,
+   VarlikId                Int            null,
+   -- 20
+   KrediAciklamasi         NVarChar(250)  null,
+   KrediTipiId			   SmallInt       null,
+   KrediCekimTarihi        Date           null,
+   KrediBaslamaTarihi      Date           null,
+   -- 30
+   CekilenKrediTutari      Numeric(22,5)  null,
+   HesabaGecenKrediTutari  Numeric(22,5)  null,
+   KrediTaksitSayisi       SmallInt       null,
+   KrediTaksitTutari       Numeric(22,5)  null,
+   KrediFaizOrani          Numeric(10,5)  null,
+   -- 40
+   OdenecekToplamTutar     Numeric(22,5)  null, 
+   OdenenKrediTutari       Numeric(22,5)  null,
+   KalanKrediTutari        Numeric(22,5)  null,
+   OdenenTaksitSayisi      SmallInt       null,
+   KalanTaksitSayisi       SmallInt       null,
+   -- 50 
+   BAHesapTipiId           SmallInt       null,  
+
+   constraint		pk_OnmBankaKredisiB primary key (Id)
+ )
+
+ create index X_OnmBankaKredisiB01 on OnmBankaKredisiB (FirmId)
+
+ 
+commit transaction
+
+/*CreateTableEnd*/
+
+
+/*CreateTrigger*/
+
+CREATE TRIGGER [dbo].[trg_OnmBankaKredisiB] on [dbo].[OnmBankaKredisiB] 
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    DECLARE myCursor cursor local for select Id from Inserted
+    DECLARE @curId bigint
+
+    OPEN myCursor
+    FETCH NEXT FROM myCursor INTO @curId
+
+    declare @IsActive Bit
+    declare @IsPaid Bit
+    declare @IsCommit Bit
+    declare @IsLock Bit
+    declare @KrediTaksitSayisi SmallInt
+    declare @BAHesapTipiId SmallInt
+    declare @newBAHesapTipiId SmallInt
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+	  Select 
+           @KrediTaksitSayisi = isnull(ins.KrediTaksitSayisi,0)
+         , @BAHesapTipiId = isnull(ins.BAHesapTipiId,0)
+	  From inserted as ins
+	  Where ins.Id = @curId
+
+      if (@KrediTaksitSayisi <= 12) Set @newBAHesapTipiId = 300
+      if (@KrediTaksitSayisi  > 12) Set @newBAHesapTipiId = 400
+      
+
+      if (@BAHesapTipiId <> @newBAHesapTipiId)
+      begin
+          Update dbo.OnmBankaKredisiB set BAHesapTipiId = @newBAHesapTipiId
+          Where Id = @curId
+      end
+
+      FETCH NEXT FROM myCursor INTO @curId
+    END
+
+    CLOSE myCursor
+    DEALLOCATE myCursor   
+
+END -- create trigger
+
+/*CreateTriggerEnd*/
+
+
+
+
+
+
+
+/*
+BAHesapTipiId nin kulanım nedeni
+--  ( 300,  N'Banka kredileri (Kısa vadeli)', 1),
+--  ( 400,  N'Banka kredileri (Uzun vadeli)', 1),
+
+Banka kredisi 12 takside kadar - 300 - hesap kodu
+12 taksitten fazlası - 400 -  hesap kodu kulanılacak
+Trigger üzerinde bu kullanılacak BAHesapTipiId belirlenecek
+
+OnmBelgeDekont üzerinde 
+
+Örnek Kredi Ödeme Planı ve Muhasebe Kayıtları
+Kredi Bilgileri
+
+Kredi Tutarı: 1.000.000 TL
+Vade: 5 ay
+Faiz Oranı: %2 aylık
+Ödemeler: eşit taksitli (anapara + faiz)
+
+Ödeme Planı Tablosu
+Ay	Ana Para (TL)	Faiz (TL)	Toplam Ödeme (TL)	Kalan Ana Para (TL)
+1   200.000         20.000      220.000             800.000
+2   200.000         16.000      216.000             600.000
+3   200.000         12.000      212.000             400.000
+4   200.000         8.000       208.000             200.000
+5   200.000         4.000       204.000             0
+
+Toplam  
+  1.000.000         60.000    1.060.000
+
+Muhasebe Kayıt Şablonu
+
+1. Kredi Kullanıldığı Gün (Bankadan nakit girişi)
+102 Bankalar              1.000.000
+    300 Banka Kredileri            1.000.000
+
+
+1. Taksit Ödemesi (220.000 TL)
+
+Ana para: 200.000
+
+Faiz: 20.000
+
+300 Banka Kredileri           200.000
+780 Finansman Giderleri        20.000
+    102 Bankalar                          220.000
+
+
+2. Taksit Ödemesi (216.000 TL)
+
+Ana para: 200.000
+
+Faiz: 16.000
+
+300 Banka Kredileri           200.000
+780 Finansman Giderleri        16.000
+    102 Bankalar                          216.000
+
+(Aynı mantıkla 5. taksite kadar devam eder.)
+
+
+
+Notlar
+
+Eğer kredi uzun vadeli alınmışsa:
+Kullanıldığı gün 400 Banka Kredileri hesabına kaydedilir.
+1 yıl içinde ödenecek kısımları dönem sonunda 300 Banka Kredileri hesabına aktarılır.
+Eğer banka BSMV ve KKDF tahsil ediyorsa, faizle birlikte gider yazılır:
+
+780 Finansman Giderleri     (faiz + BSMV + KKDF)
+
+Faiz için ödenen vergiler ayrı gösterilmek istenirse 770 veya 780 altında alt kırılımlar açılabilir.
+
+
+Ben kredi 
+300 ile başlamışsa 300 işlemlere devam edeceğim
+400 ile başlamışsa 400 işlemlere devam edeceğim
+
+Aslında 400 ile başlamışsa ilk bir yıl 300 e aktarılması lazım ama ben buna hiç girmiyorum.
+
+*/
+

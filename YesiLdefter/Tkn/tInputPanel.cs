@@ -446,7 +446,7 @@ namespace Tkn_InputPanel
                 if ((ViewType == v.obj_vw_VGridSingle) ||
                     (ViewType == v.obj_vw_VGridMulti))
                 {
-                    dv.tVGrid_Create(row_Table, ds_Fields, ds_Data, (DevExpress.XtraVerticalGrid.VGridControl)cntrl);
+                    dv.tVGrid_Create(row_Table, ds_Fields, ds_Data, (DevExpress.XtraVerticalGrid.VGridControl)cntrl, 1);
                     //((DevExpress.XtraVerticalGrid.VGridControl)cntrl).EndInit();
                 }
 
@@ -574,8 +574,8 @@ namespace Tkn_InputPanel
                 int w = tPanelControl.Width;
 
                 ((VGridControl)cntrl).Width = w;
-                ((VGridControl)cntrl).RowHeaderWidth = (w / 10) * 4;
-                ((VGridControl)cntrl).RecordWidth = (w / 10) * 6;
+                ((VGridControl)cntrl).RowHeaderWidth = 100; // (w / 3);
+                ((VGridControl)cntrl).RecordWidth = 125;// w - ((VGridControl)cntrl).RowHeaderWidth;
 
                 tPanelControl.Controls.Add(cntrl);
             }
@@ -625,7 +625,10 @@ namespace Tkn_InputPanel
             byte toperand_type = 0;
             Boolean tkriter_like = false;
 
-            foreach (DataRow Row in dsFields.Tables[0].Rows)
+            dsFields.Tables[0].DefaultView.Sort = "KRT_LINE_NO";
+            DataTable dt = dsFields.Tables[0].DefaultView.ToTable();
+
+            foreach (DataRow Row in dt.Rows)
             {
                 fname = t.Set(Row["KRT_CAPTION"].ToString(), Row["LKP_FIELD_NAME"].ToString(), "null");
                 tcaption = t.Set(Row["FCAPTION"].ToString(), Row["LKP_FCAPTION"].ToString(), fname);
@@ -640,6 +643,8 @@ namespace Tkn_InputPanel
                 tdefault2 = t.Set(Row["KRT_DEFAULT2"].ToString(), "", "");
                 tkrt_alias = t.Set(Row["KRT_ALIAS"].ToString(), "", "");
                 tkrt_table_alias = t.Set(Row["KRT_TABLE_ALIAS"].ToString(), "", "");
+
+                if (tdefault1 != "0" && tdefault2 == "0") tdefault2 = "";
 
                 // Eğer özellikle başka bir ailas belitilmişse bu alias kullanılacak
                 if (t.IsNotNull(tkrt_table_alias))
@@ -658,28 +663,34 @@ namespace Tkn_InputPanel
                     EditorRow rowA1 = new EditorRow("bas_" + fname);
                     rowA1.Properties.Caption = "Başlangıç";
                     rowA1.Properties.FieldName = tfieldname;
-                    rowA1.Properties.CustomizationCaption = tkrt_alias;
+                    rowA1.Properties.CustomizationCaption = tTableLabel;//tkrt_alias;
                     rowA1.Tag = tfieldtype;
+                    rowA1.Enabled = true;
 
                     EditorRow rowA2 = new EditorRow("bit_" + fname);
                     rowA2.Properties.Caption = "Bitiş";
                     rowA2.Properties.FieldName = tfieldname;
-                    rowA2.Properties.CustomizationCaption = tkrt_alias;
+                    rowA2.Properties.CustomizationCaption = tTableLabel;//tkrt_alias;
                     rowA2.Tag = tfieldtype;
+                    rowA2.Enabled = true;
 
                     EditorRow rowB1 = new EditorRow("bas_sorgu_" + fname);
                     rowB1.Properties.Caption = "Başlangıç Sorgu";
                     EditorRow rowB2 = new EditorRow("bit_sorgu_" + fname);
                     rowB2.Properties.Caption = "Bitiş Sorgu";
 
-                    dc.VGrid_ColumnEdit(Row, rowA1, tcolumn_type);
-                    dc.VGrid_ColumnEdit(Row, rowA2, tcolumn_type);
+                    dc.VGrid_ColumnEdit(Row, rowA1, tcolumn_type, 2);
+                    dc.VGrid_ColumnEdit(Row, rowA2, tcolumn_type, 2);
 
                     // default değerler dolduruluyor
                     if (tcolumn_type == "DateEdit")
                     {
                         if (t.IsNotNull(tdefault1))
                             rowA1.Properties.Value = df.tSP_Value_Load(tdefault1);
+
+                        if (t.IsNotNull(tdefault1) && t.IsNotNull(tdefault2) == false)
+                            rowA2.Properties.Value = df.tSP_Value_Load(tdefault1);
+
                         if (t.IsNotNull(tdefault2))
                             rowA2.Properties.Value = df.tSP_Value_Load(tdefault2);
                     }
@@ -710,7 +721,7 @@ namespace Tkn_InputPanel
                     EditorRow rowB1 = new EditorRow("bas_sorgu_" + fname);
                     rowB1.Properties.Caption = "Sorgu";
 
-                    dc.VGrid_ColumnEdit(Row, rowA1, tcolumn_type);
+                    dc.VGrid_ColumnEdit(Row, rowA1, tcolumn_type, 2);
 
                     // default değerler dolduruluyor
                     if (tcolumn_type == "DateEdit")
@@ -746,6 +757,11 @@ namespace Tkn_InputPanel
             } // foreach
 
             tVGrid.CollapseAllRows();
+            // İlk satırı al
+            BaseRow firstRow = tVGrid.Rows[0];
+            // Sadece ilk satırı aç
+            if (firstRow != null)
+                firstRow.Expanded = true;
 
             t.Takipci(function_name, "", '}');
         }

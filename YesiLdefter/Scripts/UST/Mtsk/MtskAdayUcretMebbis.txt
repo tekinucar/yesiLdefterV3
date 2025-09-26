@@ -1,0 +1,269 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table MtskAdayUcretMebbis
+ (
+   Id                    Int IDENTITY(1,1) not null, 
+   FirmId                Int       not null,
+   TalepId               Int       not null, 
+   AdayId                Int       not null, 
+   DonemTipiId           Int           null,
+   TalepTipiId           SmallInt      null, /* = MtskAdayTalep.TalepTipi */
+
+   -- 10
+   /* Ücretlendirme bilgileri */
+   IsUcretli               Bit           null, /* 0 = Ücretsiz, 1 = Ücretli */
+   IsUcretsiz              Bit           null, /* 0 = Ücretsiz, 1 = Ücretli */
+   IsLock                  Bit           null,
+   VeriKaynakId            Int           null, /* Veri transferi edildiği tablodaki Id . Sorun olduğunda bilginin nereden geldiğine referans olsun */
+   
+
+   -- 20 Kontejan bilgileri
+   SertifikaUcreti         Numeric(22,5)   null,
+   KontejanTipiId          SmallInt      null, /* şehit, gazi vb...  */
+   KontejanIndirimOrani    Numeric(12,8) null, /* %25 indirim dersek : %75 aday öder, %25 kurs indirim yapmış olur */
+   KontejanIndirimTutari   Numeric(22,5) null,
+   KontejanSonrasiUcret    Numeric(22,5) null,
+
+   -- 60 Mebbise bildirilecek ücretler
+
+   AnlasilanUcret             Numeric(22,5)   null,
+   IskontoOrani               Numeric(12,8)   null,
+   IskontoTutari              Numeric(22,5)   null,
+   PesinatTutari              Numeric(22,5)   null, 
+   TaksitSayisiTipiId         SmallInt        null, /* 0.Peşin, 1 Ay, 2 Ay, 3 Ay .... */
+   TaksitlendirilecekUcret    Numeric(22,5)   null, /* AnlasilanUcret - PesinatTutari */
+
+   -- 70
+   TeoDersSaati               SmallInt        null, 
+   BirSaatTeoDersUcreti       Numeric(22,5)   null, 
+   UygDersSaati               SmallInt        null, 
+   BirSaatUygDersUcreti       Numeric(22,5)   null, 
+
+   -- 80
+   ESinavUcreti               Numeric(22,5)   null,
+   UygulamaSinavUcreti        Numeric(22,5)   null,
+   BasarisizlikEgitimUcreti   Numeric(22,5)   null, 
+   ArtiDortHakUcreti          Numeric(22,5)   null,
+
+   -- 100
+   TaksitTarihi1              Date            null,
+   TaksitTutari1              Numeric(22,5)   null,
+
+   TaksitTarihi2              Date            null,
+   TaksitTutari2              Numeric(22,5)   null,
+
+   TaksitTarihi3              Date            null, 
+   TaksitTutari3              Numeric(22,5)   null,
+
+   TaksitTarihi4              Date            null,
+   TaksitTutari4              Numeric(22,5)   null,
+
+   TaksitTarihi5              Date            null,
+   TaksitTutari5              Numeric(22,5)   null,
+
+   TaksitTarihi6              Date            null,
+   TaksitTutari6              Numeric(22,5)   null,
+
+
+   constraint		pk_MtskAdayUcretMebbis primary key (Id)
+ )
+  
+ grant select, insert, update, delete on MtskAdayUcretMebbis to public
+
+  create index X_MtskAdayUcretMebbis01 on MtskAdayUcretMebbis (TalepId)
+  create index X_MtskAdayUcretMebbis02 on MtskAdayUcretMebbis (AdayId)
+  create index X_MtskAdayUcretMebbis03 on MtskAdayUcretMebbis (DonemTipiId)
+
+commit transaction
+
+/*CreateTableEnd*/
+
+
+/*CreateTrigger*/
+
+CREATE TRIGGER dbo.trg_MtskAdayUcretMebbis on dbo.MtskAdayUcretMebbis
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    DECLARE ucretCursor cursor local for select Id from Inserted
+    DECLARE @curId bigint
+
+    OPEN ucretCursor
+    FETCH NEXT FROM ucretCursor INTO @curId
+
+    -- Veri Transferi başladımı
+    declare @DbUpdatesIsActive Bit = 0
+    set @DbUpdatesIsActive =  dbo]. fnc_getIsDbUpdate] (13)
+
+    declare @TalepId int = 0
+    declare @AdayId int = 0
+    declare @FirmId int = 0
+    declare @VeriKaynakId int = 0
+    declare @KontejanTipiId smallint
+	declare @IsKontejan bit = 0
+	declare @PesinatTutari numeric(22,5)
+	declare @TaksitSayisiTipiId smallInt
+	declare @ESinavUcretTipiId smallInt 
+	declare @USinavUcretTipiId smallInt 
+	declare @SertifikaUcreti numeric(22,5)
+    declare @KontejanIndirimOrani numeric(12,8)
+    declare @KontejanIndirimTutari numeric(22,5)
+	declare @KontejanSonrasiUcret numeric(22,5)
+    declare @AnlasilanUcret numeric(22,5)
+    declare @TaksitlendirilecekUcret numeric (22,5)
+	declare @ESinavUcreti numeric(22,5)
+	declare @UygulamaSinavUcreti numeric(22,5)
+    declare @MebbisSertifikaUcreti numeric(22,5)
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        select 
+            @TalepId = ins.TalepId
+           ,@AdayId = ins.AdayId
+		   ,@VeriKaynakId = isnull(ins.VeriKaynakId,0)
+
+           ,@SertifikaUcreti = isnull(ins.SertifikaUcreti,0)
+		   ,@PesinatTutari = isnull(ins.PesinatTutari,0)
+		   ,@TaksitSayisiTipiId = isnull(ins.TaksitSayisiTipiId,0)
+
+           ,@KontejanIndirimOrani = isnull(ins.KontejanIndirimOrani,0)
+           ,@KontejanIndirimTutari = isnull(ins.KontejanIndirimTutari,0)
+	       ,@KontejanSonrasiUcret = isnull(ins.KontejanSonrasiUcret,0)
+           ,@AnlasilanUcret = isnull(ins.AnlasilanUcret,0)
+
+           ,@ESinavUcreti = isnull(ins.ESinavUcreti,0)
+           ,@UygulamaSinavUcreti = isnull(ins.UygulamaSinavUcreti,0)
+
+		from inserted ins
+    	where ins.Id = @curId
+
+        if (@VeriKaynakId > 0 and (@TalepId = 0 or @AdayId = 0))
+        begin
+            Update dbo.MtskAdayUcretMebbis set
+                TalepId = t.Id  
+              , AdayId  = t.AdayId 
+			  , DonemTipiId = t.DonemTipiId
+              , TalepTipiId = t.TalepTipiId  
+            From dbo.MtskAdayUcretMebbis as a,
+                 dbo.MtskAdayTalep as t
+            Where a.VeriKaynakId = t.VeriKaynakId				 
+            and   a.Id = @curId
+
+            Select @TalepId = Id, @AdayId = AdayId 
+            From dbo.MtskAdayTalep 
+            Where VeriKaynakId = @VeriKaynakId
+        end
+
+        if (@DbUpdatesIsActive = 0)
+        begin 
+            if (@AnlasilanUcret > 0)
+            begin  
+                Update dbo.MtskAdayUcretMebbis set IsUcretli = 1, IsUcretsiz = 0
+                From dbo.MtskAdayUcretMebbis as a
+                Where a.Id = @curId
+            end 
+            if (@AnlasilanUcret <= 0)
+            begin  
+                Update dbo.MtskAdayUcretMebbis set IsUcretli = 0, IsUcretsiz = 1
+                From dbo.MtskAdayUcretMebbis as a
+                Where a.Id = @curId
+            end 
+
+        end	-- if (@DbUpdatesIsActive = 0)	
+
+        -- Data transferi oldu fakat daha önce bu talep için boş kayıt oluşturulmuş ise onu sil
+        if (@VeriKaynakId > 0)
+        begin
+		    Delete From dbo.MtskAdayUcretMebbis
+            Where TalepId = @TalepId
+            and   isnull(VeriKaynakId,0) = 0
+        end
+
+        FETCH NEXT FROM ucretCursor INTO @curId
+    END -- While
+
+    CLOSE ucretCursor
+    DEALLOCATE ucretCursor   
+
+END -- create trigger
+
+
+/*CreateTriggerEnd*/
+
+
+
+/*CreateLkpTable*/
+
+begin transaction
+
+
+-- ------------------------------------------------------- 
+-- TalepTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdayUcretMebbisTalepTipi')
+drop table  Lkp]. MtskAdayUcretMebbisTalepTipi]
+
+create table  Lkp]. MtskAdayUcretMebbisTalepTipi]
+(
+   Id               Int Unique not null, 
+   TalepTipi        nVarchar(50)   null,
+   IsActive         Bit            null,
+   
+   constraint  pk_MtskAdayUcretMebbisTalepTipi primary key (Id)
+)
+
+Delete from  Lkp]. MtskAdayUcretMebbisTalepTipi]
+INSERT INTO  Lkp]. MtskAdayUcretMebbisTalepTipi] (Id, TalepTipi, IsActive)
+ VALUES 
+  ( 0,    N'Seçiniz', 1),
+  ( 1,    N'Sertifika', 1),
+  ( 2,    N'2.+4 hak ', 1),
+  ( 3,    N'Nakil 2.+4 hak', 1),
+  ( 4,    N'100 Ceza', 1)
+
+
+-- ------------------------------------------------------- 
+-- TaksitSayisiTipiId
+-- ------------------------------------------------------- 
+
+--IF EXISTS (SELECT * FROM sys.objects WHERE name = '')
+
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdayUcretMebbisTaksitSayisiTipi')
+drop table  Lkp]. MtskAdayUcretMebbisTaksitSayisiTipi]
+
+create table  Lkp]. MtskAdayUcretMebbisTaksitSayisiTipi]
+(
+   Id               Int Unique not null, 
+   TaksitSayisiTipi nVarchar(20)   null,
+   IsActive         Bit            null,
+   
+   constraint  pk_MtskAdayUcretMebbisTaksitSayisiTipi primary key (Id)
+)
+
+Delete from  Lkp]. MtskAdayUcretMebbisTaksitSayisiTipi]
+INSERT INTO  Lkp]. MtskAdayUcretMebbisTaksitSayisiTipi] (Id, TaksitSayisiTipi, IsActive)
+ VALUES 
+  ( 0,    N'Seçiniz', 1),
+  (100,   N'Peşin', 1),
+  ( 1,    N'1 Ay', 1),
+  ( 2,    N'2 Ay', 1),
+  ( 3,    N'3 Ay', 1),
+  ( 4,    N'4 Ay', 1),
+  ( 5,    N'5 Ay', 1),
+  ( 6,    N'6 Ay', 1),
+  ( 7,    N'7 Ay', 1),
+  ( 8,    N'8 Ay', 1),
+  ( 9,    N'9 Ay', 1),
+  (10,    N'10 Ay', 1),
+  (11,    N'11 Ay', 1),
+  (12,    N'12 Ay', 1)
+
+
+commit transaction
+
+/*CreateLkpTableEnd*/
+
+
+

@@ -14,6 +14,7 @@ AS BEGIN
    -- 21113   Başarısız eğitim ücreti
    -- 21114   Telafi eğitim ücreti
    -- 21115   Diğer ücretler 
+   -- 21116   Uyg+Başarısız ücreti
 
 UPDATE [dbo].[MtskAdayUcret]
 
@@ -22,6 +23,7 @@ UPDATE [dbo].[MtskAdayUcret]
       ,[AlacakUygulamaSinavUcreti] = x.AlacakUygulamaSinavUcreti
       ,[AlacakTelafiEgitimUcreti] = x.AlacakTelafiEgitimUcreti
       ,[AlacakBasarisizEgitimUcreti] = x.AlacakBasarisizEgitimUcreti
+      ,[AlacakUygBasarisizUcreti] = x.AlacakUygBasarisizUcreti
       ,[AlacakDigerUcretler] = x.AlacakDigerUcretler
       ,[AlacakUcretlerToplami] = x.AlacakToplamTutar
    
@@ -30,6 +32,7 @@ UPDATE [dbo].[MtskAdayUcret]
       ,[BorcUygulamaSinavUcreti] = x.BorcUygulamaSinavUcreti
       ,[BorcTelafiEgitimUcreti] = x.BorcTelafiEgitimUcreti
       ,[BorcBasarisizEgitimUcreti] = x.BorcBasarisizEgitimUcreti
+      ,[BorcUygBasarisizUcreti] = x.BorcUygBasarisizUcreti
       ,[BorcDigerUcretler] = x.BorcDigerUcretler
       ,[BorcUcretlerToplami] = x.BorcToplamTutar
 
@@ -38,10 +41,13 @@ UPDATE [dbo].[MtskAdayUcret]
       ,[VGUygulamaSinavUcreti] = x.VGUygulamaSinavUcreti
       ,[VGTelafiEgitimUcreti] = x.VGTelafiEgitimUcreti
       ,[VGBasarisizEgitimUcreti] = x.VGBasarisizEgitimUcreti
+      ,[VGUygBasarisizUcreti] = x.VGUygBasarisizUcreti
       ,[VGDigerUcretler] = x.VGDigerUcretler
       ,[VGUcretlerToplami] = x.VGToplamTutar
 
       ,[TahsilEdilenUcretler] = x.TahsilEdilenUcretler 
+      ,[IadeEdilenUcretler] = x.IadeEdilenUcretler  
+
       ,[IsOwes] = x.IsOwes 
 
  From [dbo].[MtskAdayUcret] as a, 
@@ -54,6 +60,7 @@ UPDATE [dbo].[MtskAdayUcret]
 	 ,sum(AlacakESinavUcreti) as AlacakESinavUcreti
 	 ,sum(AlacakUgulamaSinavUcreti) as AlacakUygulamaSinavUcreti
 	 ,sum(AlacakBasarisizEgitimUcreti) as AlacakBasarisizEgitimUcreti
+	 ,sum(AlacakUygBasarisizUcreti) as AlacakUygBasarisizUcreti
 	 ,sum(AlacakTelafiEgitimUcreti) as AlacakTelafiEgitimUcreti
      ,sum(AlacakDigerUcretler) as AlacakDigerUcretler     
      ,sum(AlacakToplamTutar) as AlacakToplamTutar  
@@ -62,6 +69,7 @@ UPDATE [dbo].[MtskAdayUcret]
 	 ,sum(BorcESinavUcreti) as BorcESinavUcreti
 	 ,sum(BorcUgulamaSinavUcreti) as BorcUygulamaSinavUcreti
 	 ,sum(BorcBasarisizEgitimUcreti) as BorcBasarisizEgitimUcreti
+	 ,sum(BorcUygBasarisizUcreti) as BorcUygBasarisizUcreti
 	 ,sum(BorcTelafiEgitimUcreti) as BorcTelafiEgitimUcreti
      ,sum(BorcDigerUcretler) as BorcDigerUcretler
      ,sum(BorcToplamTutar) as BorcToplamTutar  
@@ -70,11 +78,14 @@ UPDATE [dbo].[MtskAdayUcret]
 	 ,sum(VGESinavUcreti) as VGESinavUcreti
 	 ,sum(VGUgulamaSinavUcreti) as VGUygulamaSinavUcreti
 	 ,sum(VGBasarisizEgitimUcreti) as VGBasarisizEgitimUcreti
+	 ,sum(VGUygBasarisizUcreti) as VGUygBasarisizUcreti
 	 ,sum(VGTelafiEgitimUcreti) as VGTelafiEgitimUcreti
 	 ,sum(VGDigerUcretler) as VGDigerUcretler
      ,sum(VGToplamTutar) as VGToplamTutar 
      
      ,sum(TahsilEdilenUcretler) as TahsilEdilenUcretler
+     ,sum(IadeEdilenUcretler) as IadeEdilenUcretler
+
      , (case when sum(BorcToplamTutar) > 0 then 1 else 0 end) as IsOwes
 
    From (
@@ -90,6 +101,7 @@ UPDATE [dbo].[MtskAdayUcret]
          ,(case when UcretTipiId = 21113 then sum(TaksitTutari) else 0	end	 )  as AlacakBasarisizEgitimUcreti
          ,(case when UcretTipiId = 21114 then sum(TaksitTutari) else 0	end	 )  as AlacakTelafiEgitimUcreti
          ,(case when UcretTipiId = 21115 then sum(TaksitTutari) else 0	end	 )  as AlacakDigerUcretler
+         ,(case when UcretTipiId = 21116 then sum(TaksitTutari) else 0	end	 )  as AlacakUygBasarisizUcreti
          ,sum(TaksitTutari) as AlacakToplamTutar  
 
          ,0 as BorcSertifikaUcreti
@@ -98,6 +110,7 @@ UPDATE [dbo].[MtskAdayUcret]
          ,0 as BorcBasarisizEgitimUcreti
          ,0 as BorcTelafiEgitimUcreti
          ,0 as BorcDigerUcretler
+         ,0 as BorcUygBasarisizUcreti
          ,0 as BorcToplamTutar  
 
          ,0 as VGSertifikaUcreti
@@ -106,9 +119,11 @@ UPDATE [dbo].[MtskAdayUcret]
          ,0 as VGBasarisizEgitimUcreti
          ,0 as VGTelafiEgitimUcreti
          ,0 as VGDigerUcretler
+         ,0 as VGUygBasarisizUcreti
          ,0 as VGToplamTutar  
 
          ,0 as TahsilEdilenUcretler
+         ,0 as IadeEdilenUcretler
 
       From dbo.OnmOdemePlani as odemePlani
       Where FirmId = @FirmId
@@ -135,6 +150,7 @@ UPDATE [dbo].[MtskAdayUcret]
          ,0 as AlacakBasarisizEgitimUcreti
          ,0 as AlacakTelafiEgitimUcreti
          ,0 as AlacakDigerUcretler
+         ,0 as AlacakUygBasarisizUcreti
          ,0 as AlacakToplamTutar  
 
          ,(case when UcretTipiId >= 21101 and  UcretTipiId <= 21105 then sum(TaksitTutari) else 0	end	 )  as BorcSertifikaUcreti
@@ -143,6 +159,7 @@ UPDATE [dbo].[MtskAdayUcret]
          ,(case when UcretTipiId = 21113 then sum(TaksitTutari) else 0	end	 )  as BorcBasarisizEgitimUcreti
          ,(case when UcretTipiId = 21114 then sum(TaksitTutari) else 0	end	 )  as BorcTelafiEgitimUcreti
          ,(case when UcretTipiId = 21115 then sum(TaksitTutari) else 0	end	 )  as BorcDigerUcretler
+         ,(case when UcretTipiId = 21116 then sum(TaksitTutari) else 0	end	 )  as BorcUygBasarisizUcreti
          ,sum(TaksitTutari) as BorcToplamTutar  
 
          ,0 as VGSertifikaUcreti
@@ -151,9 +168,11 @@ UPDATE [dbo].[MtskAdayUcret]
          ,0 as VGBasarisizEgitimUcreti
          ,0 as VGTelafiEgitimUcreti
          ,0 as VGDigerUcretler
+         ,0 as VGUygBasarisizUcreti
          ,0 as VGToplamTutar  
 
          ,0 as TahsilEdilenUcretler
+         ,0 as IadeEdilenUcretler
 
       From dbo.OnmOdemePlani as odemePlani
       Where FirmId = @FirmId
@@ -180,6 +199,7 @@ UPDATE [dbo].[MtskAdayUcret]
          ,0 as AlacakBasarisizEgitimUcreti
          ,0 as AlacakTelafiEgitimUcreti
          ,0 as AlacakDigerUcretler
+         ,0 as AlacakUygBasarisizUcreti
          ,0 as AlacakToplamTutar  
 
          ,0 as BorcSertifikaUcreti
@@ -188,6 +208,7 @@ UPDATE [dbo].[MtskAdayUcret]
          ,0 as BorcBasarisizEgitimUcreti
          ,0 as BorcTelafiEgitimUcreti
          ,0 as BorcDigerUcretler
+         ,0 as BorcUygBasarisizUcreti
          ,0 as BorcToplamTutar  
 
          ,(case when UcretTipiId >= 21101 and  UcretTipiId <= 21105 then sum(TaksitTutari) else 0	end	 )  as VGSertifikaUcreti
@@ -196,9 +217,11 @@ UPDATE [dbo].[MtskAdayUcret]
          ,(case when UcretTipiId = 21113 then sum(TaksitTutari) else 0	end	 )  as VGBasarisizEgitimUcreti
          ,(case when UcretTipiId = 21114 then sum(TaksitTutari) else 0	end	 )  as VGTelafiEgitimUcreti
          ,(case when UcretTipiId = 21115 then sum(TaksitTutari) else 0	end	 )  as VGDigerUcretler
-         ,sum(TaksitTutari) as VGToplamTutar  
+         ,(case when UcretTipiId = 21116 then sum(TaksitTutari) else 0	end	 )  as VGUygBasarisizUcreti
+         ,sum(TaksitTutari) as VGToplamTutar   
 
          ,0 as TahsilEdilenUcretler
+         ,0 as IadeEdilenUcretler
 
       From dbo.OnmOdemePlani as odemePlani
       Where FirmId = @FirmId
@@ -227,6 +250,7 @@ UPDATE [dbo].[MtskAdayUcret]
          ,0 as AlacakBasarisizEgitimUcreti
          ,0 as AlacakTelafiEgitimUcreti
          ,0 as AlacakDigerUcretler
+         ,0 as AlacakUygBasarisizUcreti
          ,0 as AlacakToplamTutar  
 
          ,0 as BorcSertifikaUcreti
@@ -235,6 +259,7 @@ UPDATE [dbo].[MtskAdayUcret]
          ,0 as BorcBasarisizEgitimUcreti
          ,0 as BorcTelafiEgitimUcreti
          ,0 as BorcDigerUcretler
+         ,0 as BorcUygBasarisizUcreti
          ,0 as BorcToplamTutar  
 
          ,0 as VGSertifikaUcreti
@@ -243,9 +268,11 @@ UPDATE [dbo].[MtskAdayUcret]
          ,0 as VGBasarisizEgitimUcreti
          ,0 as VGTelafiEgitimUcreti
          ,0 as VGDigerUcretler
+         ,0 as VGUygBasarisizUcreti
          ,0 as VGToplamTutar  
 
          ,sum(TaksitTutari) as TahsilEdilenUcretler
+         ,0 as IadeEdilenUcretler
 
       From dbo.OnmOdemePlani as odemePlani
       Where FirmId = @FirmId
@@ -258,6 +285,56 @@ UPDATE [dbo].[MtskAdayUcret]
          ,CariId
          ,UcretTipiId 
 
+      union all
+
+      -- İade edilenler
+      Select 
+          FirmId
+         ,TalepId
+         ,CariId
+         ,0 as UcretTipiId 
+
+         ,0 as AlacakSertifikaUcreti
+         ,0 as AlacakESinavUcreti
+         ,0 as AlacakUgulamaSinavUcreti
+         ,0 as AlacakBasarisizEgitimUcreti
+         ,0 as AlacakTelafiEgitimUcreti
+         ,0 as AlacakDigerUcretler
+         ,0 as AlacakUygBasarisizUcreti
+         ,0 as AlacakToplamTutar  
+
+         ,0 as BorcSertifikaUcreti
+         ,0 as BorcESinavUcreti
+         ,0 as BorcUgulamaSinavUcreti
+         ,0 as BorcBasarisizEgitimUcreti
+         ,0 as BorcTelafiEgitimUcreti
+         ,0 as BorcDigerUcretler
+         ,0 as BorcUygBasarisizUcreti
+         ,0 as BorcToplamTutar  
+
+         ,0 as VGSertifikaUcreti
+         ,0 as VGESinavUcreti
+         ,0 as VGUgulamaSinavUcreti
+         ,0 as VGBasarisizEgitimUcreti
+         ,0 as VGTelafiEgitimUcreti
+         ,0 as VGDigerUcretler
+         ,0 as VGUygBasarisizUcreti
+         ,0 as VGToplamTutar  
+
+         ,0 as TahsilEdilenUcretler
+         ,sum(BelgeTutari) as IadeEdilenUcretler
+
+      From dbo.OnmBelgeDekont as dekont
+      Where FirmId = @FirmId
+      and IsActive = 1
+      and BHesapTipiId > 21100
+      and AHesapTipiId in (100,1022,1023,1024,1025,1026)
+
+      group by
+          FirmId
+         ,TalepId
+         ,CariId
+      
       union all
 
       /* OnmOdemePlani tablosunda veri yok ise  */
@@ -273,6 +350,7 @@ UPDATE [dbo].[MtskAdayUcret]
          ,0 as AlacakBasarisizEgitimUcreti
          ,0 as AlacakTelafiEgitimUcreti
          ,0 as AlacakDigerUcretler
+         ,0 as AlacakUygBasarisizUcreti
          ,0 as AlacakToplamTutar  
 
          ,0 as BorcSertifikaUcreti
@@ -281,6 +359,7 @@ UPDATE [dbo].[MtskAdayUcret]
          ,0 as BorcBasarisizEgitimUcreti
          ,0 as BorcTelafiEgitimUcreti
          ,0 as BorcDigerUcretler
+         ,0 as BorcUygBasarisizUcreti
          ,0 as BorcToplamTutar  
 
          ,0 as VGSertifikaUcreti
@@ -289,9 +368,11 @@ UPDATE [dbo].[MtskAdayUcret]
          ,0 as VGBasarisizEgitimUcreti
          ,0 as VGTelafiEgitimUcreti
          ,0 as VGDigerUcretler
-         ,0 as VGToplamTutar  
+         ,0 as VGUygBasarisizUcreti
+         ,0 as VGToplamTutar 
 
          ,0 as TahsilEdilenUcretler
+         ,0 as IadeEdilenUcretler
 
       From dbo.MtskAdayTalep as talep 
       left join dbo.OnmOdemePlani as odemePlani on (talep.Id = odemePlani.TalepId  )
@@ -316,6 +397,7 @@ UPDATE [dbo].[MtskAdayUcret]
  or    isnull(a.[AlacakTelafiEgitimUcreti],-1) <> x.AlacakTelafiEgitimUcreti
  or    isnull(a.[AlacakBasarisizEgitimUcreti],-1) <> x.AlacakBasarisizEgitimUcreti
  or    isnull(a.[AlacakDigerUcretler],-1) <> x.AlacakDigerUcretler
+ or    isnull(a.[AlacakUygBasarisizUcreti],-1) <> x.AlacakUygBasarisizUcreti
  or    isnull(a.[AlacakUcretlerToplami],-1) <> x.AlacakToplamTutar
 
  or    isnull(a.[BorcSertifikaUcreti],-1) <> x.BorcSertifikaUcreti
@@ -324,6 +406,7 @@ UPDATE [dbo].[MtskAdayUcret]
  or    isnull(a.[BorcTelafiEgitimUcreti],-1) <> x.BorcTelafiEgitimUcreti
  or    isnull(a.[BorcBasarisizEgitimUcreti],-1) <> x.BorcBasarisizEgitimUcreti
  or    isnull(a.[BorcDigerUcretler],-1) <> x.BorcDigerUcretler
+ or    isnull(a.[BorcUygBasarisizUcreti],-1) <> x.BorcUygBasarisizUcreti
  or    isnull(a.[BorcUcretlerToplami],-1) <> x.BorcToplamTutar
 
  or    isnull(a.[VGSertifikaUcreti],-1) <> x.VGSertifikaUcreti
@@ -332,8 +415,10 @@ UPDATE [dbo].[MtskAdayUcret]
  or    isnull(a.[VGTelafiEgitimUcreti],-1) <> x.VGTelafiEgitimUcreti
  or    isnull(a.[VGBasarisizEgitimUcreti],-1) <> x.VGBasarisizEgitimUcreti
  or    isnull(a.[VGDigerUcretler],-1) <> x.VGDigerUcretler
+ or    isnull(a.[VGUygBasarisizUcreti],-1) <> x.VGUygBasarisizUcreti
  or    isnull(a.[VGUcretlerToplami],-1) <> x.VGToplamTutar
  or    isnull(a.[TahsilEdilenUcretler],-1) <> x.TahsilEdilenUcretler
+ or    isnull(a.[IadeEdilenUcretler],-1) <> x.IadeEdilenUcretler
  or    isnull(a.IsOwes,0) <> x.IsOwes
  )
  

@@ -1,4 +1,5 @@
-﻿using DevExpress.XtraBars.Ribbon;
+﻿using DevExpress.Xpo.DB;
+using DevExpress.XtraBars.Ribbon;
 using DevExpress.XtraDataLayout;
 using DevExpress.XtraEditors;
 using DevExpress.XtraGrid;
@@ -6,6 +7,7 @@ using DevExpress.XtraGrid.Views.BandedGrid;
 using DevExpress.XtraGrid.Views.Grid;
 using DevExpress.XtraGrid.Views.WinExplorer;
 using DevExpress.XtraVerticalGrid;
+using Microsoft.JScript;
 using Newtonsoft.Json;
 using Spire.Doc.Documents;
 using System;
@@ -13,6 +15,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Threading;
 using System.Windows.Forms;
 using Tkn_CreateObject;
 using Tkn_DataCopy;
@@ -24,6 +27,7 @@ using Tkn_Save;
 using Tkn_Search;
 using Tkn_SMS;
 using Tkn_SQLs;
+using Tkn_TablesRead;
 using Tkn_ToolBox;
 using Tkn_Variable;
 
@@ -462,7 +466,7 @@ namespace Tkn_Events
                     // ilk bulduğu type gönderir
                     if (item.BUTTONTYPE.ToString() != "null")
                     {
-                        return propButtonType = t.getClickType(Convert.ToInt32(item.BUTTONTYPE.ToString()));
+                        return propButtonType = t.getClickType(System.Convert.ToInt32(item.BUTTONTYPE.ToString()));
                     }
                 }
             }
@@ -556,7 +560,7 @@ namespace Tkn_Events
             string values = buttonName.Remove(0, i1);
             try
             {
-                value = Convert.ToInt32(values);
+                value = System.Convert.ToInt32(values);
                 value = value - 1000;
             }
             catch (Exception)
@@ -2269,7 +2273,7 @@ namespace Tkn_Events
                 tBildirim_.secilenGonderimTypeId = t.myInt16(((RadioGroup)tEdit_BildirimSecenekleri).EditValue.ToString());
 
                 Control tEdit_BidirimTarihi = t.Find_Control(tForm, "tEdit_BidirimTarihi");
-                tBildirim_.secilenGonderimTarihi = Convert.ToDateTime(((DateEdit)tEdit_BidirimTarihi).EditValue.ToString());
+                tBildirim_.secilenGonderimTarihi = System.Convert.ToDateTime(((DateEdit)tEdit_BidirimTarihi).EditValue.ToString());
 
                 Control tEdit_BildirimSaati = t.Find_Control(tForm, "tEdit_BildirimSaati");
                 tBildirim_.secilenGonderimSaati = ((TimeEdit)tEdit_BildirimSaati).EditValue.ToString();
@@ -4229,7 +4233,7 @@ namespace Tkn_Events
                 /// 
                 //MessageBox.Show("Alo : ButtonType kontrol etmen gerekiyor");
 
-                if (item.BUTTONTYPE.ToString() == Convert.ToString((byte)buttonType)) //Button_Type.ToString())
+                if (item.BUTTONTYPE.ToString() == System.Convert.ToString((byte)buttonType)) //Button_Type.ToString())
                 {
                     foreach (var item2 in item.TABLEIPCODE_LIST2)
                     {
@@ -4445,7 +4449,7 @@ namespace Tkn_Events
             if (tbutton == "&Temizle")
             {
                 VGrid.FocusPrev();
-                Kriterleri_Temizle(VGrid);
+                Kriterleri_Temizle(VGrid, TableIPCode);
             }
             #endregion Temizle
 
@@ -4618,10 +4622,15 @@ namespace Tkn_Events
             t.Takipci(function_name, "", '{');
 
             #region Tanımlar
-            t.tSqlSecond_Clear(ref dsData);
+            //t.tSqlSecond_Clear(ref dsData);
             string myProp = dsData.Namespace.ToString();
             string alias = t.MyProperties_Get(myProp, "=TableLabel:");
-            string aSQL = t.MyProperties_Get(myProp, "=SqlFirst:");
+            
+            //string aSQL = t.MyProperties_Get(myProp, "=SqlFirst:");
+            string SqlFirst = t.MyProperties_Get(myProp, "SqlFirst:");
+            string SqlSecond = t.MyProperties_Get(myProp, "SqlSecond:");
+            string aSQL = t.Set(SqlSecond, SqlFirst, "");
+
             string fullname = string.Empty;
             string fname = string.Empty;
             string fvalue = string.Empty;
@@ -4745,22 +4754,26 @@ namespace Tkn_Events
                             tmpkriter = tmpkriter + " and " + fullname + " like '%" + fvalue2 + "%' " + v.ENTER;
                         else if (foperand == "%")
                             tmpkriter = tmpkriter + " and " + fullname + " like '" + fvalue2 + "%' " + v.ENTER;
-                        else if (foperand != string.Empty)
+                        else if (foperand != string.Empty && ffieldtype != 40 && ffieldtype != 58 && ffieldtype != 61)
                             tmpkriter = tmpkriter + " and " + fullname + " " + foperand + " " + fvalue + v.ENTER;
-
+                        else if (foperand != string.Empty && (ffieldtype == 40 || ffieldtype == 58 || ffieldtype == 61))
+                            tmpkriter = tmpkriter + " and convert(date, " + fullname + ", 103) " + foperand + " " + fvalue + v.ENTER;
                         // ------
 
                         if (t.IsNotNull(tmpkriter))
                         {
-                            if (t.IsNotNull(tkrt_alias))
-                            {
-                                aSQL = t.SQLWhereAdd(aSQL, tkrt_alias, tmpkriter, "KRITER");
-                            }
-                            else
-                            {
-                                fkriter = fkriter + tmpkriter;
-                            }
+                            //if (t.IsNotNull(tkrt_alias))
+                            //{
+                            //    aSQL = t.SQLWhereAdd(aSQL, tkrt_alias, tmpkriter, "KRITER");
+                            //}
+                            //else
+                            //{
+                            //    fkriter = fkriter + tmpkriter;
+                            //}
 
+                            /// vgrid üzerinde oluşan kriterleri topla
+                            /// 
+                            fkriter = fkriter + tmpkriter;
                             tmpkriter = string.Empty;
                         }
 
@@ -4780,10 +4793,17 @@ namespace Tkn_Events
 
             if ((t.IsNotNull(fkriter)) || (t.IsNotNull(Where_Add)))
             {
+                //if (t.IsNotNull(fkriter))
+                //    t.tKriter_Ekle(ref aSQL, alias, fkriter);
+                //if (t.IsNotNull(Where_Add))
+                //    t.tKriter_Ekle(ref aSQL, alias, Where_Add);
+
+                t.tKriter_Clear(ref aSQL);
+
                 if (t.IsNotNull(fkriter))
-                    t.tKriter_Ekle(ref aSQL, alias, fkriter);
+                    t.tKriter_Add(ref aSQL, fkriter);
                 if (t.IsNotNull(Where_Add))
-                    t.tKriter_Ekle(ref aSQL, alias, Where_Add);
+                    t.tKriter_Add(ref aSQL, Where_Add);
             }
 
             aSQL = t.kisitlamalarClear(aSQL);
@@ -4826,7 +4846,7 @@ namespace Tkn_Events
             return sonuc;
         }
 
-        private void Kriterleri_Temizle(VGridControl VGrid)
+        private void Kriterleri_Temizle(VGridControl VGrid, string TableIPCode)
         {
 
             string function_name = "Kriterleri_Temizle";
@@ -4836,6 +4856,18 @@ namespace Tkn_Events
             int t1 = VGrid.Rows.Count;
             int t2 = 0;
             string fname = string.Empty;
+            string fname2 = string.Empty;
+
+
+            DataSet ds_Fields = new DataSet();
+
+            tDefaultValue df = new tDefaultValue();
+            tTablesRead tr = new tTablesRead();
+            tr.MS_Fields_IP_Read(ds_Fields, TableIPCode);
+
+            string tdefault1 = "";
+            string tdefault2 = "";
+            string tcolumn_type = "";
 
             for (int i1 = 0; i1 < t1; i1++)
             {
@@ -4848,6 +4880,11 @@ namespace Tkn_Events
                 for (int i2 = 0; i2 < t2; i2++)
                 {
                     fname = VGrid.Rows[i1].ChildRows[i2].Properties.FieldName.ToString();
+                    tcolumn_type = VGrid.Rows[i1].ChildRows[i2].Tag?.ToString();
+
+                    fname2 = t.Alias_Clear(fname);
+
+                    getDefaultValuesType(ds_Fields, fname2, ref tdefault1, ref tdefault2);
 
                     if ((fname.IndexOf("bas_sorgu_") == -1) &&
                         (fname.IndexOf("bit_sorgu_") == -1))
@@ -4861,6 +4898,18 @@ namespace Tkn_Events
 
                             if (i2 == 1)
                                 VGrid.Rows[i1].ChildRows[i2 + 2].Properties.Value = ((short)(v.EsitVeKucuk));
+                            
+                            if (tcolumn_type == "DateEdit" || tcolumn_type == "40" || tcolumn_type == "58" || tcolumn_type == "61")
+                            {
+                                if (t.IsNotNull(tdefault1) && i2 == 0)
+                                    VGrid.Rows[i1].ChildRows[i2].Properties.Value = df.tSP_Value_Load(tdefault1);
+
+                                if (t.IsNotNull(tdefault1) && t.IsNotNull(tdefault2) == false && i2 == 1)
+                                    VGrid.Rows[i1].ChildRows[i2].Properties.Value = df.tSP_Value_Load(tdefault1);
+
+                                if (t.IsNotNull(tdefault2) && i2 == 1)
+                                    VGrid.Rows[i1].ChildRows[i2].Properties.Value = df.tSP_Value_Load(tdefault2);
+                            }
                         }
 
                         if (t2 == 2) // odd ise
@@ -4870,6 +4919,12 @@ namespace Tkn_Events
 
                             if (VGrid.Rows[i1].ChildRows[i2 + 1].Properties.RowEdit.Name.ToString() == "ODD_NOTLIKE")
                                 VGrid.Rows[i1].ChildRows[i2 + 1].Properties.Value = ((short)(v.Esit));
+
+                            if (tcolumn_type == "DateEdit" || tcolumn_type == "40" || tcolumn_type == "58" || tcolumn_type == "61")
+                            {
+                                if (t.IsNotNull(tdefault1) && i2 == 0)
+                                    VGrid.Rows[i1].ChildRows[i2].Properties.Value = df.tSP_Value_Load(tdefault1);
+                            }
                         }
                     }
 
@@ -4877,6 +4932,25 @@ namespace Tkn_Events
             }
 
             t.Takipci(function_name, "", '}');
+        }
+
+        private void getDefaultValuesType(DataSet dsFields, string fieldName, ref string tdefault1, ref string tdefault2)
+        {
+            string fname = "";
+            tdefault1 = "";
+            tdefault2 = "";
+
+            foreach (DataRow Row in dsFields.Tables[0].Rows)
+            {
+                fname = t.Set(Row["KRT_CAPTION"].ToString(), Row["LKP_FIELD_NAME"].ToString(), "null");
+                if (fieldName == fname)
+                {
+                    tdefault1 = t.Set(Row["KRT_DEFAULT1"].ToString(), "", "");
+                    tdefault2 = t.Set(Row["KRT_DEFAULT2"].ToString(), "", "");
+                    if (tdefault1 != "0" && tdefault2 == "0") tdefault2 = "";
+                    break;
+                }
+            }
         }
 
         #endregion  Kriter Buttons Click <<

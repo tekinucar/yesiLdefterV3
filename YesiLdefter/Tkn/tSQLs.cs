@@ -2470,24 +2470,29 @@ INSERT INTO [dbo].[SYS_UPDATES]
             if (Table_Type == 1)  // v.TableType.Table
             {
                 //if (masterFields == "")
-                masterFields = TableLabel + ".* " + v.ENTER;
+                if (TableIPCode.ToUpper().IndexOf("RAPOR") == -1)
+                    masterFields = TableLabel + ".* " + v.ENTER;
+                else
+                    masterFields = getTableFieldsList(dsFields, TableLabel);
 
                 NewSQL =
-                     " Select " + masterFields + //TableLabel + ".* " + v.ENTER +
-                       join_Fields + v.ENTER +
-                       Lkp_Memory_Fields +
-                     " from " + SchemasDot + TableName + " as " + TableLabel + " with (nolock) " + v.ENTER +
-                       join_Tables + v.ENTER +
-                     " where 0 = 0 " + v.ENTER +
-                     " /*" + TableLabel + ".DEFAULT_VALUE*/" + v.ENTER +
-                       REF_CALL + // iptal kontrolü ( false = normal kayıt,  true = iptal edilmiş kayıt  )
-                       Block_Field +
-                       ForeingID +
-                     //RefID_Target +
-                     //Kisitlama +
-                     //Where_IP_Add +
-                     //Where_Lines +
-                     " /*" + TableLabel + ".KRITERLER*/ " + v.ENTER;
+                    " Select " + masterFields + //TableLabel + ".* " + v.ENTER +
+                    join_Fields + v.ENTER +
+                    Lkp_Memory_Fields +
+                    " from " + SchemasDot + TableName + " as " + TableLabel + " with (nolock) " + v.ENTER +
+                    join_Tables + v.ENTER +
+                    " where 0 = 0 " + v.ENTER +
+                    " /*" + TableLabel + ".DEFAULT_VALUE*/" + v.ENTER +
+                    //REF_CALL + // iptal kontrolü ( false = normal kayıt,  true = iptal edilmiş kayıt  )
+                    //Block_Field +
+                    //ForeingID +
+                    //RefID_Target +
+                    //Kisitlama +
+                    //Where_IP_Add +
+                    //Where_Lines +
+                    //" /*" + TableLabel + ".KRITERLER*/ " + v.ENTER;
+                    " /*KRITERLER*/ " + v.ENTER +
+                    " /*KRITERLER_END*/ " + v.ENTER;
             }
             #endregion Table
 
@@ -2723,6 +2728,46 @@ INSERT INTO [dbo].[SYS_UPDATES]
 
             #endregion Read dsData
 
+        }
+
+        private string getTableFieldsList(DataSet dsFields, string tableLabel)
+        {
+            string fields = "";
+            int ftype = 0;
+            if (dsFields.Tables.Count > 0)
+            {
+                dsFields.Tables[0].DefaultView.Sort = "FIELD_NO";
+                DataTable dt = dsFields.Tables[0].DefaultView.ToTable();
+
+                foreach (DataRow row in dt.Rows)
+                {
+                    ftype = Convert.ToInt32(row["LKP_FIELD_TYPE"].ToString());
+
+                    if (row["LKP_FIELD_NAME"].ToString().ToUpper().IndexOf("LKP_") == -1)
+                    {
+                        if (ftype == 40 || ftype == 58 || ftype == 61)
+                        {
+                            if (fields == "")
+                                fields = " convert(date," + tableLabel + "." + row["LKP_FIELD_NAME"].ToString() + ",103) as " + row["LKP_FIELD_NAME"].ToString() + v.ENTER;
+                            else fields += ", convert(date, " + tableLabel + "." + row["LKP_FIELD_NAME"].ToString() + ",103) as " + row["LKP_FIELD_NAME"].ToString() + v.ENTER;
+                        }
+                        if ((ftype == 56) | (ftype == 48) | (ftype == 127) | (ftype == 52) | (ftype == 60) | (ftype == 62) | (ftype == 59) | (ftype == 108))
+                        {
+                            if (fields == "")
+                                fields = " isnull(" + tableLabel + "." + row["LKP_FIELD_NAME"].ToString() + ",0) as " + row["LKP_FIELD_NAME"].ToString() + v.ENTER;
+                            else fields += ", isnull(" + tableLabel + "." + row["LKP_FIELD_NAME"].ToString() + ",0) as " + row["LKP_FIELD_NAME"].ToString() + v.ENTER;
+                        }
+                        else
+                        {
+                            if (fields == "")
+                                fields = tableLabel + "." + row["LKP_FIELD_NAME"].ToString() + v.ENTER;
+                            else fields += ", " + tableLabel + "." + row["LKP_FIELD_NAME"].ToString() + v.ENTER;
+                        }
+                    }
+                }
+            }
+            
+            return fields;
         }
 
         #region RefID Preparing

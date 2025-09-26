@@ -26,6 +26,8 @@ BEGIN
   From MtskAdayTalep as ins
   Where ins.Id = @talepId
 
+  if (@yKayitTipiId > 3) Return @yKayitTipiId;
+
   -- sonra karar verirsin      
   -- if (@yMebbisDurumTipiId = 0) 
   --    set @yKayitTipiId = 2 -- 'Kayıt aşamasında'

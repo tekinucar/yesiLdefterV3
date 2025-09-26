@@ -1123,7 +1123,7 @@ namespace Tkn_Variable
             btMesajGonder = 75,
 
             btYazici = 81,
-            btRaporAgaci = 82,
+            btRapor = 82,
             btEk1 = 91,
             btEk2 = 92,
             btEk3 = 93,
@@ -1486,6 +1486,7 @@ namespace Tkn_Variable
         public string State { get; set; }
         public string SchemasCode { get; set; } //vt.SchemasCode;
         public string tableName { get; set; } //vt.TableName;
+        public string IPCode { get; set; }
         public string Key_Id_FieldName { get; set; } //= vt.KeyId_FName;
         public string sonuc { get; set; }
         public string MyInsert { get; set; }
@@ -1542,6 +1543,7 @@ namespace Tkn_Variable
             State = "";
             SchemasCode = "";// vt.SchemasCode;
             tableName = "";// vt.TableName;
+            IPCode = ""; // vt.IPCode;
             Key_Id_FieldName = "";// = vt.KeyId_FName;
             sonuc = "";
             MyInsert = "";

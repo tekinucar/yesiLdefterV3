@@ -76,10 +76,10 @@ BEGIN
   set @SqlBugun = ' declare @bugun smalldatetime = getdate() ' + @Enter;
 
   --declare @settingsAdayHazirMi bit 
-  --set @settingsAdayHazirMi = dbo.fnc_getSettingsBool(11, 1130, 101)
+  --set @settingsAdayHazirMi = dbo.fnc_getSettingsBool(@FirmId, 1130, 101)
   Set @SqlSettings = 
     N' declare @settingsAdayHazirMi bit ' + @Enter 
-  + N' set @settingsAdayHazirMi = dbo.fnc_getSettingsBool(11, 1130, 101) ' + @Enter
+  + N' set @settingsAdayHazirMi = dbo.fnc_getSettingsBool(@FirmId, 1130, 101) ' + @Enter
 
   -- -----------------------------------------------------------------
   -- Kayıt - Adayın durumu hakkında bilgi toplama aşaması
@@ -198,15 +198,15 @@ BEGIN
     )
   ) -- with
   Update a set 
-    a.IsActive = t.IsActive,
-    a.AracTipiId = t.yeniAracTipiId,
-    a.OzurDurumuTipiId = t.OzurDurumuTipiId,
-    a.OkutmanTalebi = t.OkutmanTalebi,
-    a.TercumanTalebi = t.TercumanTalebi,
-    a.YabanciDilTipiId = t.YabanciDilTipiId,
-    a.IsKontejan = t.IsKontejan,
-    a.ESinavUcretTipiId = t.ESinavUcretTipiId, 
-    a.USinavUcretTipiId = t.USinavUcretTipiId
+     a.IsActive = t.IsActive
+    ,a.AracTipiId = t.yeniAracTipiId
+    ,a.OzurDurumuTipiId = t.OzurDurumuTipiId
+    ,a.OkutmanTalebi = t.OkutmanTalebi
+    ,a.TercumanTalebi = t.TercumanTalebi
+    ,a.YabanciDilTipiId = t.YabanciDilTipiId
+    ,a.IsKontejan = t.IsKontejan
+    --,a.ESinavUcretTipiId = t.ESinavUcretTipiId 
+    --,a.USinavUcretTipiId = t.USinavUcretTipiId
   from MtskAdayTakip as a
   JOIN TalepAracTipleriSaglikDurumuUcretTipi t on ( a.FirmId = t.FirmId and a.TalepId = t.TalepId )
   ';
@@ -2314,6 +2314,7 @@ BEGIN
   ;WITH KayitTipi AS (
     Select t.TalepId as TalepId
     , ( case
+         when t.KayitTipiId > 3 then t.KayitTipiId -- aşamasını bulmui, kayıt tipini değiştirme
          when t.KayitTipiId < 4 
          and  t.DonemTipiId > 0 
          and  convert(int,SUBSTRING(CONVERT(char(6),@BugunDonemTipiId),1,4)) - 

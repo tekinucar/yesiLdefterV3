@@ -1,0 +1,137 @@
+﻿
+/*CreateTable*/
+
+begin transaction
+
+ create table OnmBankaKredisiS
+ (
+
+   Id                  Int IDENTITY(1,1) NOT NULL, 
+   FirmId              Int        not null,
+   BankaKredisiBId     Int            null, /* BelgeStokB.Id  : BelgeStokB başlık tablosu */
+   IsActive            Bit        not null, /* default : 1 = active, 0 = not active */  
+   IsPaid              Bit        not null, /* default : 0 = ödenmedi, 1 = ödendi */  
+   IsCommit            Bit        not null, /* default : 0 = muh. işlenmedi, 1 = muh. İşlendi */  
+   IsLock              Bit            null, /* default : 0 = Açık, 1 = Kilitli  */
+   -- 10
+   TaksitNo            SmallInt       null,
+   VadeTarihi          Date           null,
+   TaksitTutari        Numeric(22,5)  null,
+   GecikmeFaizi        Numeric(22,5)  null,
+   OdenenTutar         Numeric(22,5)  null,    
+   KalanTutar          Numeric(22,5)  null,    
+   -- 30
+   KayitTarihi         DateTime       null, 
+   BelgeDekontId       Int            null, /* OnmBelgeDekont.Id = Ödeme yapan belge ıd */  
+
+   constraint		pk_OnmBankaKredisiS primary key (Id)
+ )
+
+ create index X_OnmBankaKredisiS01 on OnmBankaKredisiS (FirmId,BankaKredisiBId)
+ create index X_OnmBankaKredisiS02 on OnmBankaKredisiS (VadeTarihi)
+
+ commit transaction
+
+/*CreateTableEnd*/
+
+
+/*CreateTrigger*/
+
+CREATE TRIGGER [dbo].[trg_OnmBankaKredisiS] on [dbo].[OnmBankaKredisiS] 
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    DECLARE myCursor cursor local for select Id from Inserted
+    DECLARE @curId bigint
+
+    OPEN myCursor
+    FETCH NEXT FROM myCursor INTO @curId
+        
+    declare @FirmId int 
+    declare @IsActive Bit
+    declare @IsPaid Bit
+    declare @IsCommit Bit
+    declare @IsLock Bit
+
+    declare @TaksitTutari Numeric(22,5) 
+    declare @GecikmeFaizi Numeric(22,5) 
+    declare @OdenenTutar Numeric(22,5) 
+    declare @KalanTutar Numeric(22,5) 
+
+    declare @HesaplananIsPaid Bit 
+    declare @HesaplananIsLock Bit
+    declare @HesaplananKalanTutar Numeric(22,5) 
+    declare @HesaplananGecikmeFaizi Numeric(22,5) 
+    declare @BDekontBelgeTutari Numeric(22,5) 
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        Select 
+          @FirmId = isnull(ins.FirmId,0)
+        , @IsPaid = isnull(ins.IsPaid,0)
+        , @IsLock = ISNULL(ins.IsLock,0)
+
+        , @TaksitTutari = isnull(ins.TaksitTutari,0)
+        , @GecikmeFaizi = isnull(ins.GecikmeFaizi,0)
+        , @OdenenTutar = isnull(ins.OdenenTutar,0)
+        , @KalanTutar = isnull(ins.KalanTutar,0)  
+	    From inserted as ins
+	    Where ins.Id = @curId
+
+        Set @HesaplananIsPaid = 0 
+        Set @HesaplananIsLock = 0
+        Set @BDekontBelgeTutari = 0
+
+        Select @BDekontBelgeTutari = sum(isnull(BelgeTutari,0))
+        From dbo.OnmBelgeDekont
+        Where FirmId = @FirmId
+        and   isnull(IsActive,0) = 1
+        and   isnull(SourceTypeId,0) = 3   -- OnmBankaKredisiS 
+        and   isnull(SourceId,0) = @curId
+
+        if (@BDekontBelgeTutari is null) Set @BDekontBelgeTutari = 0
+
+        -- fazla ödenen para GecikmeFaizeine yazılacak
+        Set @HesaplananGecikmeFaizi = 0
+        if (@TaksitTutari < @BDekontBelgeTutari)
+            Set @HesaplananGecikmeFaizi = @BDekontBelgeTutari - @TaksitTutari
+
+        -- Kalan tutarı hesapla
+        Set @HesaplananKalanTutar = ( @TaksitTutari + @HesaplananGecikmeFaizi ) - @BDekontBelgeTutari
+
+        -- herhangi bir ödeme varsa kilitle
+        if (@BDekontBelgeTutari > 0) Set @HesaplananIsLock = 1 
+        -- hiç ödeeme yoksa 
+        if (@BDekontBelgeTutari = 0) Set @HesaplananIsLock = 0 
+
+        -- kalan borcu yoksa IsPaid durumunu Odendi yap
+        if (@HesaplananKalanTutar = 0) Set @HesaplananIsPaid = 1
+        -- kalan borcu varsa IsPaid durumunu Odenmedi yap
+        if (@HesaplananKalanTutar > 0) Set @HesaplananIsPaid = 0
+
+        -- tutarlarda farklılık varsa update et
+        if (@GecikmeFaizi <> @HesaplananGecikmeFaizi or
+            @OdenenTutar <> @BDekontBelgeTutari or
+            @KalanTutar <> @HesaplananKalanTutar or 
+            @IsLock <> @HesaplananIsLock or
+            @IsPaid <> @HesaplananIsPaid
+        )
+        begin
+            Update dbo.OnmBankaKredisiS Set
+                IsLock = @HesaplananIsLock
+              , IsPaid = @HesaplananIsPaid
+              , GecikmeFaizi = @HesaplananGecikmeFaizi 
+              , OdenenTutar = @BDekontBelgeTutari 
+              , KalanTutar = @HesaplananKalanTutar
+            Where Id = @curId
+        end
+
+        FETCH NEXT FROM myCursor INTO @curId
+    END
+
+    CLOSE myCursor
+    DEALLOCATE myCursor   
+
+END -- create trigger
+
+/*CreateTriggerEnd*/

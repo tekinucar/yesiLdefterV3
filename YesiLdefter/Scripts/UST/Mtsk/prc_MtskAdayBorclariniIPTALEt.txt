@@ -1,0 +1,76 @@
+﻿
+/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_MtskAdayBorclariniIPTALEt] (@FirmId int, @TalepId int)  
+AS BEGIN
+
+    --declare @FirmId int = 11
+    --declare @TalepId int = 3521
+    declare @ToplamTutar Numeric(22,5)
+    declare @IadeTutari Numeric(22,5)
+    declare @SP_Message nVarchar(250)
+    declare @SP_Message1 nVarchar(150)
+    declare @SP_Message2 nVarchar(150)
+    declare @enter varchar(10) = CHAR(13) + CHAR(10)
+
+    Select @ToplamTutar = sum(TaksitTutari) from dbo.OnmOdemePlani
+    Where FirmId = @FirmId
+    and   TalepId = @TalepId
+    and   IsActive = 1
+    and   IsPaid = 0 -- Tahsil edilmemiş
+
+    if (@ToplamTutar is null)
+        Set @ToplamTutar = 0
+
+    Select @IadeTutari = sum(BelgeTutari) from dbo.OnmBelgeDekont
+    Where FirmId = @FirmId
+    and   TalepId = @TalepId
+    and   BHesapTipiId > 21100 -- MtskUcretTipleri
+    and   BHesapTipiId < 22120
+    and   AHesapTipiId in (100, 1022, 1023, 1024, 1025, 1026) -- finans hesapları ise
+
+    if (@IadeTutari is null)
+        Set @IadeTutari = 0
+
+    if (@IadeTutari > 0)
+        Set @SP_Message1 = FORMAT(@IadeTutari, 'N2', 'tr-TR') + ' TL  tutarındaki ücret İADE edilmiştir ...'
+
+    if (@ToplamTutar > 0)
+    begin
+        Update  dbo.OnmOdemePlani Set
+            IsActive = 0
+          , TaksitTipiId = 99
+        Where FirmId = @FirmId
+        and   TalepId = @TalepId
+        and   IsPaid = 0 -- Tahsil edilmemiş
+    
+        Set @SP_Message2 = FORMAT(@ToplamTutar, 'N2', 'tr-TR') + ' TL  tutarındaki ücret İPTAL edilmiştir ...'
+
+        -- Select @SP_Message 
+    end 
+
+    if (@ToplamTutar = 0)
+    begin
+        Set @SP_Message = 'DİKKAT :  İPTAL edilecek herhangi bir borçlandırma bulunamadı...'
+        -- Select @SP_Message 
+    end 
+
+    if (@IadeTutari > 0)  
+        Set @SP_Message = @SP_Message1 
+
+    if (@SP_Message <> '' and @ToplamTutar > 0)
+        Set @SP_Message = @SP_Message + @enter + @SP_Message2
+
+    Update dbo.MtskAdayTalep Set 
+        SistemUyarilari = 'Bilgilendirme : ' + @enter + @SP_Message
+    Where FirmId = @FirmId
+    and   Id = @TalepId
+
+    Execute dbo.prc_MtskAdayBorcunuHesapla @FirmId, @TalepId
+    
+    --return @SP_Message
+
+END --
+
+/*CreateProcedureEnd*/
+

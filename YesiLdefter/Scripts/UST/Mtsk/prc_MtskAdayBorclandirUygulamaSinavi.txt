@@ -1,19 +1,19 @@
 ﻿/*CreateProcedure*/
 
-CREATE PROCEDURE [dbo].[prc_MtskAdayBorclandirUygulamaSinavi] (@FirmId int)
+CREATE PROCEDURE [dbo].[prc_MtskAdayBorclandirUygulamaSinavi] (@FirmId int, @UcretTipiId int)
 AS BEGIN  
 
   --declare @FirmId Int  = 11
+  --declare @UcretTipiId Int  = 21112  --- u-sınav 
+  --declare @UcretTipiId Int  = 21113  --- u-sınav + başarasız ücreti
   declare @BugunDonemTipiId int = 0
-  declare @BorclandirmaUcreti numeric(22,5)
-  declare @UcretTipiId Int  = 21112
+  declare @UygSinavUcreti numeric(22,5)
+  declare @Id int = dbo.fnc_getGecerlilikTarihiId(@FirmId, 21104, getdate())
 
-   if (MONTH(getdate()) < 10)
-       set @BugunDonemTipiId = convert(int, convert(varchar(5), YEAR(getdate())) + '0' + convert(varchar(3), MONTH(getdate())))
-  else set @BugunDonemTipiId = convert(int, convert(varchar(5), YEAR(getdate())) + convert(varchar(3), MONTH(getdate())))
+  set @BugunDonemTipiId = dbo.fnc_getDonemTipiId('BUGUN',null);
 
   -- Uygulama sınav ücreti
-  Select Top 1  @BorclandirmaUcreti = ucret.[UygulamaSinavUcreti]
+  Select Top 1  @UygSinavUcreti = ucret.[UygulamaSinavUcreti]
   From [dbo].[MtskUcretSinav] as ucret,
        [dbo].[GecerlilikTarihi] as tarih
   Where ucret.FirmId = @FirmId
@@ -54,10 +54,22 @@ AS BEGIN
            ,talep.AdayId -- CariId
            ,3 -- TaksitTipiId : 3 = Tek Ödeme
            ,takip.uSinavNo -- TaksitNo
+
            ,(case 
 		       when isnull(takip.uSinavPlanTarihi,getdate()) > getdate() then takip.uSinavPlanTarihi
 			   else getdate() end )  -- VadeTarihi == Bu kayıt oluşurken sınavın hangi tarihte olacağı bilinmiyor
-           ,@BorclandirmaUcreti -- TaksitTutari
+
+           ,(case  
+               -- sadece uyg sınav ücreti
+               when @UcretTipiId = 21112 then @UygSinavUcreti 
+               -- başarısız aday Ücreti
+               when @UcretTipiId = 21113 and isnull(uygUcreti.BirSaatBasarisizDersUcretiReel,0) > 0 then (isnull(uygUcreti.BirSaatBasarisizDersUcretiReel,0) * 2)  -- reel ücret x 2 saat
+               when @UcretTipiId = 21113 and isnull(uygUcreti.BirSaatBasarisizDersUcretiReel,0) = 0 then (isnull(uygUcreti.BirSaatBasarisizDersUcreti,0) * 2) -- Mebbis ücreti x 2 saat
+               -- başarısız aday + sinavÜcreti
+               when @UcretTipiId = 21116 and isnull(uygUcreti.BirSaatBasarisizDersUcretiReel,0) > 0 then (isnull(uygUcreti.BirSaatBasarisizDersUcretiReel,0) * 2) + @UygSinavUcreti  -- reel ücret x 2 saat
+               when @UcretTipiId = 21116 and isnull(uygUcreti.BirSaatBasarisizDersUcretiReel,0) = 0 then (isnull(uygUcreti.BirSaatBasarisizDersUcreti,0) * 2) + @UygSinavUcreti  -- Mebbis ücreti x 2 saat
+               end )
+
            ,2    -- OdemeTipiId   Nakit
            ,0    -- IsPaid
            ,null -- TahsilTarihi
@@ -75,12 +87,15 @@ AS BEGIN
 		  and odeme.TaksitNo = takip.uSinavNo
           and odeme.UcretTipiId = @UcretTipiId
 	   )
+       left outer join dbo.MtskUcretUygulama as uygUcreti on ( 
+              talep.MevcutSertifikaTipiId = uygUcreti.MevcutSertifikaTipiId
+          and talep.IstenenSertifikaTipiId = uygUcreti.IstenenSertifikaTipiId 
+       )
   Where talep.FirmId = @FirmId 
   and   takip.FirmId = @FirmId
-  and ( takip.uSinavDurumTipiId = 5 or takip.uSinavDurumTipiId = 6 )
+  and ( takip.uSinavDurumTipiId = 5 or takip.uSinavDurumTipiId = 6 or takip.uSinavDurumTipiId = 8)
   and   takip.uSinavUcretTipiId = 1
   and   odeme.Id is null
-
 
 END -- procedure
 

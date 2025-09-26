@@ -1513,14 +1513,41 @@ namespace YesiLdefter.Selenium
                 }
             }
 
-            // bir eşleşmezse bulmaz ise gelen value dönsün
-            // böylece bazı WebNodeItems lar saklanmaya gerek kalmadı
             if (value == "" && findText != "")
             {
-                MessageBox.Show("DİKKAT : MsWebNodeItems tablosunda aranan text in valuesi tespit edilemedi ..." + v.ENTER2 + wnv.AttName + " = " + findText);
-                value = findText;
+                value = clearValue(findText);
             }
+
+            // bir eşleşmezse bulmaz ise gelen value dönsün
+            // böylece bazı WebNodeItems lar saklanmaya gerek kalmadı
+            //if (value == "" && findText != "")
+            //{
+            //    MessageBox.Show("DİKKAT : MsWebNodeItems tablosunda aranan text in valuesi tespit edilemedi ..." + v.ENTER2 + wnv.AttName + " = " + findText);
+            //    value = findText;
+            //}
             return value;
+        }
+
+        private string clearValue(string value)
+        {
+            string newValue = value;
+
+            if (value.IndexOf("Manuel") > -1)
+            {
+                value = value.Replace("Manuel", "");
+                value = value.Replace("(", "");
+                value = value.Replace(")", "");
+                newValue = value.Trim();
+            }
+            if (value.IndexOf("Otomatik") > -1)
+            {
+                value = value.Replace("Otomatik", "");
+                value = value.Replace("(", "");
+                value = value.Replace(")", "");
+                newValue = value.Trim();
+            }
+
+            return newValue;
         }
         public bool findTableItemButton(List<MsWebNode> msWebNodes, List<string> dataRow, int dataRowNo)
         {

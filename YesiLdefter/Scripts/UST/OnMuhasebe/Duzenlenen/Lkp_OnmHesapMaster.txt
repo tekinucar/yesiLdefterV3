@@ -98,6 +98,19 @@ INSERT INTO [Lkp].[OnmHesapMasterBAHesapTipi] (Id, BAHesapTipi, GrupTipiId)
   ( 1023, N'Banka/Kredi kartı', 1), 
   ( 1024, N'POS', 1),
 
+  ( 250,  N'Arazi ve arsalar', 1),
+  ( 251,  N'Yer altı ve yer üstü düzenleri', 1),
+  ( 252,  N'Binalar', 1),
+  ( 253,  N'Tesis, makine ve cihazlar', 1),
+  ( 254,  N'Taşıtlar', 1),
+  ( 255,  N'Demirbaş', 1),
+  ( 256,  N'Diğer maddi duran varlıklar', 1),
+  ( 641,  N'Bağlı ortaklıklardan temettü gelirleri', 1),
+  ( 642,  N'Faiz gelirleri', 1),
+  ( 643,  N'Komisyon gelirleri', 1),
+  ( 649,  N'Diğer olağan gelir ve kârlar', 1),
+  ( 679,  N'Diğer olağandışı gelir ve kârlar', 1),
+
   ( 770,  N'Genel yönetim giderleri', 1),
   ( 791,  N'İşçi ücret ve giderleri', 1),
   ( 793,  N'Dışarıdan sağlanan fayda ve hizmetler', 1),
@@ -272,8 +285,6 @@ INSERT INTO [Lkp].[OnmHesapMasterMaliyetinKapsamTipi] (Id, MaliyetinKapsamTipi)
   (0,   N'Tüm varlıklar için'),
   (1,   N'Sahip olduğumuz varlıklar için'), 
   (2,   N'Kiralık olan varlıklar için')
-
-
 
 
 
@@ -453,6 +464,7 @@ begin transaction
 -- OnmHesapFinans, Aboneler için           : 84,   0,     0, 0 
 -- Master tablosundan kullanmak için seçilen 
 -- OnmHesapFinans, Maliyet Grupları        : 85, ???, ?????, 0, + HesapKodu, UstHesapKodu  
+-- OnmHesapFinans, F.D.Gelir Grupları      : 86, ???, ?????, 0, + HesapKodu, UstHesapKodu  : Faliyet Dışı Gelir
 
 
 
@@ -675,6 +687,8 @@ UstGrupTipiId = 81  : Ana gider grupları
 UstGrupTipiId = 82  : Gider çeşitleri
 UstGrupTipiId = 83  : Varlık grupları
 UstGrupTipiId = 84  : Abone grupları
+UstGrupTipiId = 85  : Maliyet/Gider hesapları
+UstGrupTipiId = 86  : Faliyet dışı gelir hesapları
 
 bağlantılar
 -- ------------------------------------------------------------------
@@ -686,10 +700,10 @@ Where hesapKodu = ustHesapKodu
 Varlık/Abone listesi
 
 Where 
-    82.AnaGrupTipiId = 83.AnaGrupTipiId
+    82.AnaGrupTipiId = 83.AnaGrupTipiId   <<<< varlıklar
     82.AltGrupTipiId = 83.AltGrupTipiId
 or
-    82.AnaGrupTipiId = 84.AnaGrupTipiId
+    82.AnaGrupTipiId = 84.AnaGrupTipiId   <<<< aboneler
     82.AltGrupTipiId = 84.AltGrupTipiId
 
 
@@ -705,6 +719,29 @@ Abone tanımlama  : 84 kaydı
 set UstGrupTipiId = 84
 set AnaGrupTipiId = y
 set AltGrupTipiId = z
+
+
+Faliyet dışı gelir tanımlama  : 86 kaydı
+-- ------------------------------------------------------------------
+set UstGrupTipiId = 86
+set AnaGrupTipiId = y  in ( 250, 251, 252, 253, 254, 255, 256, 641, 642, 643, 649, 679, 770 ) )
+set AltGrupTipiId = z
+
+F.D. Gelirler için AnaGrupTipiId detayı : ?
+-- ------------------------------------------------------------------
+250 Arazi ve arsalar (satış veya kira)
+251 Yer altı ve yer üstü düzenleri (satış veya kira)
+252 Binalar (satış veya kira)
+253 Tesis, makine ve cihazlar (satış veya kira)
+254 Taşıtlar (satış veya kira)
+255 Demirbaşlar (satış veya kira)
+256 Diğer maddi duran varlıklar (satış veya kira)
+641 Bağlı ortaklıklardan temettü gelirleri (Yatırım fonu veya hisse senedi kârı)
+642 Faiz gelirleri (Tahvil/bono faiz kuponları, mevduat faizleri)
+643 Komisyon gelirleri
+649 Diğer olağan gelir ve kârlar
+679 Diğer olağandışı gelir ve kârlar
+770 Genel yönetim giderleri (İadeler, iade girişi) 
 
 */
 
@@ -777,6 +814,9 @@ INSERT INTO [Lkp].[OnmHesapMaster] (ParentId, FirmId, IsActive, UstGrupTipiId, A
 (0, @FirmId, 1, 82, 254,    0,  770, '81.12.82', '81.12',  20,  0, 'Otoyol ve Köprü Geçiş Ücreti', 0, 22, 3, 0 ),
 (0, @FirmId, 1, 82,   0,    0,  770, '81.12.90', '81.12',  20,  0, 'Kanunen kabul edilmeyen gider', 0, 1, 4, 0 ), -- sonrada eklendi
 (0, @FirmId, 1, 82,   0,    0,  770, '81.12.92', '81.12',  20,  0, 'Genel gider', 0, 1, 4, 0 ), -- sonrada eklendi
+(0, @FirmId, 1, 82,   0,    0,  770, '81.12.94', '81.12',  20,  0, 'Satın alma işlemi', 0, 1, 4, 0 ), -- sonrada eklendi
+(0, @FirmId, 1, 82,   0,    0,  770, '81.12.95', '81.12',  20,  0, 'e-Sınav ücreti (MEB)', 0, 1, 4, 0 ), -- sonrada eklendi : MEB hesaplarına yatırılan ücretler
+(0, @FirmId, 1, 82,   0,    0,  770, '81.12.96', '81.12',  20,  0, 'Uygulama sınav ücreti (MEB) ', 0, 1, 4, 0 ), -- sonrada eklendi : MEB hesaplarına yatırılan ücretler
 
 
 (0, @FirmId, 1, 82,   0,    0,  780, '81.13.10', '81.13',   0,  0, 'Banka hesap ve kart ücretleri', 0, 22, 3, 0 ),
@@ -889,6 +929,36 @@ INSERT INTO [Lkp].[OnmHesapMaster] (ParentId, FirmId, IsActive, UstGrupTipiId, A
 (0, @FirmId, 1, 84, 253, 866,   0, '81.16.50.66', '81.16.50',  31, 1, 2, 20,  'Su Sayacı (Tesis, Makine ve Cihaz)' ),
 (0, @FirmId, 1, 84, 256, 890,   0, '81.16.50.90', '81.16.50',  31, 1, 2, 20,  'Diğer Abonelikler' )
 
+
+
+-- ------------------------------------------------------------------
+--  Faliyet dışı gelirler listesi
+--  UstGrupTipiId
+--  (86,  N'Faliyet dışı gelirler listesi',  1 )
+--  DİKKAT : Şimdilik AltGrupTipiId ve AlCesitTipiId çeşidi yok
+-- ------------------------------------------------------------------
+--declare @FirmId int
+set @FirmId = 0
+
+DELETE [Lkp].[OnmHesapMaster] 
+Where FirmId = 0 
+and UstGrupTipiId = 86
+
+INSERT INTO [Lkp].[OnmHesapMaster] (ParentId, FirmId, IsActive, UstGrupTipiId, AnaGrupTipiId, AltGrupTipiId, AltCesitTipiId, BAHesapTipiId, HesapKodu, UstHesapKodu, PeriyodTipiId, BelgeTipiId, KaynakTipiId, KdvOrani, HesapAdi )
+ VALUES 
+(0, @FirmId, 1, 86, 250,   0,   0, 250, '250', '',  0, 8, 8, 20,  'Arazi ve arsalar (satış veya kira)' ),
+(0, @FirmId, 1, 86, 251,   0,   0, 251, '251', '',  0, 8, 8, 20,  'Yer altı ve yer üstü düzenleri (satış veya kira)' ),
+(0, @FirmId, 1, 86, 252,   0,   0, 252, '252', '',  0, 8, 8, 20,  'Binalar (satış veya kira)' ),
+(0, @FirmId, 1, 86, 253,   0,   0, 253, '253', '',  0, 8, 8, 20,  'Tesis, makine ve cihazlar (satış veya kira)' ),
+(0, @FirmId, 1, 86, 254,   0,   0, 254, '254', '',  0, 8, 8, 20,  'Taşıtlar (satış veya kira)' ),
+(0, @FirmId, 1, 86, 255,   0,   0, 255, '255', '',  0, 8, 8, 20,  'Demirbaşlar (satış veya kira)' ),
+(0, @FirmId, 1, 86, 256,   0,   0, 256, '256', '',  0, 8, 8, 20,  'Diğer maddi duran varlıklar (satış veya kira)' ),
+(0, @FirmId, 1, 86, 641,   0,   0, 641, '641', '',  0, 8, 8, 20,  'Bağlı ortaklıklardan temettü gelirleri (Yatırım fonu veya hisse senedi kârı)' ),
+(0, @FirmId, 1, 86, 642,   0,   0, 642, '642', '',  0, 8, 8, 20,  'Faiz gelirleri (Tahvil/bono faiz kuponları, mevduat faizleri)' ),
+(0, @FirmId, 1, 86, 643,   0,   0, 643, '643', '',  0, 8, 8, 20,  'Komisyon gelirleri' ),
+(0, @FirmId, 1, 86, 649,   0,   0, 649, '649', '',  0, 8, 8, 20,  'Diğer olağan gelir ve kârlar' ),
+(0, @FirmId, 1, 86, 679,   0,   0, 679, '679', '',  0, 8, 8, 20,  'Diğer olağandışı gelir ve kârlar' ),
+(0, @FirmId, 1, 86, 770,   0,   0, 770, '770', '',  0, 8, 8, 20,  'Genel yönetim giderleri (İadeler, iade girişi)' )
 
 
 commit transaction

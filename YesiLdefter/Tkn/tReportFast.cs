@@ -49,8 +49,6 @@ namespace Tkn_Report
             //20250713_1333 
             string tarih_ = t.Formatli_TarihSaat_yyyyMMdd_hhmm();
 
-
-
             // load the report from a stream contained in the "ReportStream" datacolumn
             byte[] reportBytes = null;
 
@@ -66,7 +64,8 @@ namespace Tkn_Report
             //if (t.IsNotNull(reportName) == false)
             //    reportName = reportCode;
 
-            string reportFileName = v.EXE_FastReportsPath + reportCode + reportCaption + tarih_ + ".frx";
+            //string reportFileName = v.EXE_FastReportsPath + reportCode + reportCaption + tarih_ + ".frx";
+            string reportFileName = v.EXE_FastReportsPath + reportCode + reportCaption + ".frx";
 
             if (!File.Exists(@"" + reportFileName) && (reportBytes == null || reportBytes?.Length == 0))
             {
@@ -310,7 +309,13 @@ namespace Tkn_Report
             DataNavigator dN = null;
             object tDataTable = null;
             string tableName = "";
+            string tableIPCode = "";
 
+            string softwareCode = "";
+            string projectCode = "";
+            string TableCode = "";
+            string IPCode = "";
+            
             Control cntrl = new Control();
             string[] controls = new string[] { "DevExpress.XtraEditors.DataNavigator" };
             foreach (string value in dataSetList)
@@ -322,9 +327,13 @@ namespace Tkn_Report
                     if (dN.DataSource != null)
                     {
                         tDataTable = dN.DataSource;
-                        tableName = ((DataTable)tDataTable).TableName;
-                        dsData = ((DataTable)tDataTable).DataSet;
                         
+                        tableIPCode = dN.AccessibleName?.ToString();
+                        t.TableIPCode_Get(tableIPCode, ref softwareCode, ref projectCode, ref TableCode, ref IPCode);
+                        tableName = IPCode;
+
+                        dsData = ((DataTable)tDataTable).DataSet;
+                       
                         FReport.RegisterData(dsData);
                         FReport.GetDataSource(tableName).Enabled = true;
                     }

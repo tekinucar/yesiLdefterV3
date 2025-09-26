@@ -1,0 +1,202 @@
+﻿
+/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_OnmBelgeDekontTransferIslemi]  (@dekontId int)  
+AS BEGIN
+
+  declare @BHesapTipiId int
+  declare @AHesapTipiId int
+  declare @IsTransfer bit
+  declare @IkizNo smallInt
+  declare @IkizId int = -1
+  declare @YeniIkizId int = 0
+
+  Select 
+     @BHesapTipiId = isnull(BHesapTipiId,0)
+    ,@AHesapTipiId = isnull(AHesapTipiId,0)
+    ,@IsTransfer = isnull(IsTransfer,0)
+    ,@IkizNo = isnull(IkizNo,0)
+    ,@IkizId = isnull(IkizId,0)
+  From dbo.OnmBelgeDekont
+  Where Id = @dekontId
+  and   BHesapTipiId in (100, 1022, 1023, 1024, 1025, 1026)
+  and   AHesapTipiId in (100, 1022, 1023, 1024, 1025, 1026)
+
+  -- Select 'Finans hesapları arasında transfer işlemi yok geri dön'
+  if (@IkizId = -1) return; 
+  
+  print '@IkizId 1'
+  print @IkizId
+ 
+  -- yinede kontrol et manuel update edilmiş olabilir
+  if (@IkizId <= 0)
+  begin
+    Select @IkizId = Id
+    From dbo.OnmBelgeDekont
+    Where IkizId = @dekontId
+  end
+
+  print '@IkizId 2'
+  print @IkizId
+
+  -- ikizId yi Update et
+  if (@IkizId > 0)
+  begin
+      print 'Transfer Update işlemi'
+      print @dekontId
+
+      UPDATE a SET  
+        ParentId = b.ParentId
+      , FirmId = b.FirmId
+      , IsActive = b.IsActive
+      , IsCommit = b.IsCommit
+      , TipiId = b.TipiId
+      , IslemTipiId = b.IslemTipiId
+      , BelgeTarihi = b.BelgeTarihi
+      , BelgeSeri = b.BelgeSeri
+      , BelgeNo = b.BelgeNo
+      , BelgeDonemTipiId = b.BelgeDonemTipiId
+      , BHesapTipiId = b.BHesapTipiId
+      , BorcluId = b.BorcluId
+      , AHesapTipiId = b.AHesapTipiId
+      , AlacakliId = b.AlacakliId
+
+      , BelgeTutari = b.BelgeTutari
+      , ToplamTutar = b.ToplamTutar
+      , AlacakTutari = b.BorcTutari
+      , BorcTutari = b.AlacakTutari
+
+      , ParaTipiId1 = b.ParaTipiId1
+      , DovizYeriId1 = b.DovizYeriId1
+      , DovizKuru1 = b.DovizKuru1
+      , DovizTutari1 = b.DovizTutari1
+      , ParaTipiId2 = b.ParaTipiId2
+      , DovizYeriId2 = b.DovizYeriId2
+      , DovizKuru2 = b.DovizKuru2
+      , DovizTutari2 = b.DovizTutari2
+      , Aciklama = b.Aciklama 
+      , KayitTarihi = b.KayitTarihi
+      , SourceTypeId = b.SourceTypeId
+      , SourceId = b.SourceId
+      , IsIptal = b.IsIptal
+
+      From dbo.OnmBelgeDekont as a,
+           dbo.OnmBelgeDekont as b
+      Where b.IkizId = a.Id
+      and   b.Id = @dekontId
+
+      Update dbo.OnmBelgeDekont Set 
+           IsTransfer = 1
+         , IkizId = @IkizId
+      Where Id = @dekontId
+
+  end -- if (@IkizId > 0)
+
+  -- ikizNo = 1 ve ikiz satır yok ise ikiz kaydını oluştur
+  if (@IkizNo <= 1 and @IkizId = 0)
+  begin
+      print 'Transfer Insert işlemi'
+      print @dekontId
+
+      INSERT INTO  dbo.OnmBelgeDekont
+           ( ParentId 
+           , FirmId 
+           , IsActive 
+           , IsCommit 
+           , TipiId 
+           , IslemTipiId 
+           , BelgeTarihi 
+           , BelgeSeri 
+           , BelgeNo 
+           , BelgeDonemTipiId 
+           , BHesapTipiId 
+           , BorcluId 
+           , AHesapTipiId 
+           , AlacakliId 
+
+           , BelgeTutari 
+           , ToplamTutar 
+           , ParaTipiId1 
+           , DovizYeriId1 
+           , DovizKuru1 
+           , DovizTutari1 
+           , ParaTipiId2 
+           , DovizYeriId2 
+           , DovizKuru2 
+           , DovizTutari2 
+
+           , Aciklama 
+           , KayitTarihi 
+           , SourceTypeId 
+           , SourceId 
+           , IsTransfer 
+           , IkizNo 
+           , IkizId 
+           , FinansTipiId 
+           , BorcTutari
+           , AlacakTutari )
+
+      Select 
+             ParentId
+           , FirmId
+           , IsActive
+           , IsCommit
+           , TipiId
+           , IslemTipiId
+           , BelgeTarihi
+           , BelgeSeri 
+           , BelgeNo
+           , BelgeDonemTipiId 
+           , BHesapTipiId
+           , BorcluId
+           , AHesapTipiId
+           , AlacakliId
+
+           , BelgeTutari
+           , ToplamTutar 
+           , ParaTipiId1 
+           , DovizYeriId1 
+           , DovizKuru1 
+           , DovizTutari1 
+           , ParaTipiId2 
+           , DovizYeriId2 
+           , DovizKuru2 
+           , DovizTutari2 
+
+           , Aciklama
+           , KayitTarihi
+           , SourceTypeId
+           , SourceId 
+           , 1 as IsTransfer
+           , 2 as IkizNo
+           , @dekontId as IkizId
+           , (case 
+            -- para transfer satırı, 2. inci satır ve Tahsilat fişi ise
+            when BHesapTipiId in (100, 1022, 1023, 1024, 1025, 1026) and TipiId = 2 then AHesapTipiId -- isnull(IkizNo,0) = 2 and
+            -- para transfer satırı, 2. inci satır ve Tediye fişi ise
+            when AHesapTipiId in (100, 1022, 1023, 1024, 1025, 1026) and TipiId = 3 then BHesapTipiId -- isnull(IkizNo,0) = 2 and
+            end ) as FinansTipiId 
+
+           , AlacakTutari as BorcTutari
+           , BorcTutari as AlacakTutari
+
+      From dbo.OnmBelgeDekont
+      Where Id = @dekontId
+
+      Select @YeniIkizId = SCOPE_IDENTITY()
+
+      -- İkizleri birbirne bağla, kim kimin ikizi belli olsun
+      -- IkizNo = 1 kullanıcı oluşturuyor
+      -- IkizNo = 2 yukarıda insert ediliyor
+      Update dbo.OnmBelgeDekont Set 
+           IsTransfer = 1
+         , IkizNo = 1
+         , IkizId = @YeniIkizId
+      Where Id = @dekontId
+
+  end -- if (@IkizNo = 1 and @IkizId = 0)
+
+
+END -- procedure
+
+/*CreateProcedureEnd*/

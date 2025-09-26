@@ -1,0 +1,236 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table SrcAdaySaglik
+ (
+   Id                    Int IDENTITY(1,1) not null, 
+   FirmId                Int       not null,
+   TalepId               Int       not null, 
+   AdayId                Int       not null, 
+   TcNo                  Varchar(11)   null,
+   DonemTipiId           Int           null,
+   VeriKaynakId          Int           null, /* Veri transferi edildiği tablodaki Id . Sorun olduğunda bilginin nereden geldiğine referans olsun */
+   
+   IsRaporReferansNo           Bit            null, /* SaglikRaporuSayisi 15 karekteri geçince 1, geçmezse 0 oluyor */
+   RaporReferansNo             nVarchar(50)   null, /* ekranlarda yok */
+   SaglikRaprunuVerenKurum     nVarchar(200)  null,
+   SaglikRaporuSonuc           nVarchar(30)   null,
+   SaglikRaporuTarihi          Date           null,
+   SaglikRaporuSayisi          nVarchar(30)   null, /* ekranda görünen bu, esasen 20 karekterden oluşunca referans no oluyor, onun yerine bunun sadece son 6 hanesini yazarlarsa no rapor no oluyor */
+   OzurDurumuTipiId            SmallInt       null,
+   OkutmanTalebi               Bit            null,
+   TercumanTalebi              Bit            null,
+   YabanciDilTipiId            SmallInt       null,
+   SaglikRaporuResim           VarBinary(max) null,
+   SaglikRaporuResimSmall      VarBinary(max) null,
+
+   constraint		pk_SrcAdaySaglik primary key (Id)
+ )
+  
+ grant select, insert, update, delete on SrcAdaySaglik to public
+
+  create index X_SrcAdaySaglik01 on SrcAdaySaglik (TalepId)
+  create index X_SrcAdaySaglik02 on SrcAdaySaglik (AdayId)
+  create index X_SrcAdaySaglik03 on SrcAdaySaglik (TcNo)
+  create index X_SrcAdaySaglik04 on SrcAdaySaglik (DonemTipiId)
+
+commit transaction
+
+/*CreateTableEnd*/
+
+
+/*CreateTrigger*/
+
+CREATE TRIGGER  dbo]. trg_SrcAdaySaglik] on  dbo]. SrcAdaySaglik]
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    DECLARE saglikCursor cursor local for select Id from Inserted
+    DECLARE @saglikId bigint
+
+    OPEN saglikCursor
+    FETCH NEXT FROM saglikCursor INTO @saglikId
+
+    -- Veri Transferi başladımı
+    declare @DbUpdatesIsActive Bit = 0
+    set @DbUpdatesIsActive =  dbo]. fnc_getIsDbUpdate] (13)
+
+    Declare @TalepId int = 0
+	declare @AdayId int
+	declare @VeriKaynakId int
+	declare @OzurDurumuTipiId smallInt = 0
+    declare @OkutmanTalebi bit
+    declare @TercumanTalebi bit
+    declare @YabanciDilTipiId smallInt
+    declare @IsRaporReferansNo bit
+    declare @SaglikRaporuSayisi varchar(30)
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+
+        select 
+            @TalepId = ins.TalepId
+           ,@AdayId = ins.AdayId
+		   ,@VeriKaynakId = ins.VeriKaynakId
+		   ,@OzurDurumuTipiId = isnull(ins.OzurDurumuTipiId,0)
+           ,@OkutmanTalebi = isnull(ins.OkutmanTalebi,0)
+           ,@TercumanTalebi = isnull(ins.TercumanTalebi,0)
+           ,@YabanciDilTipiId = isnull(ins.YabanciDilTipiId,0)
+           ,@IsRaporReferansNo = isnull(ins.IsRaporReferansNo,0)
+           ,@SaglikRaporuSayisi = isnull(ins.SaglikRaporuSayisi,'')
+
+		from inserted ins
+    	where ins.Id = @saglikId
+		
+        if (LEN(@SaglikRaporuSayisi) > 15)
+            set @IsRaporReferansNo = 1
+        else set @IsRaporReferansNo = 0
+
+        Update dbo.SrcAdaySaglik set
+               IsRaporReferansNo = @IsRaporReferansNo
+        From dbo.SrcAdaySaglik as a
+        Where a.Id = @saglikId
+
+        if (@VeriKaynakId > 0 and (@TalepId = 0 or @AdayId = 0))
+        begin
+            Update dbo.SrcAdaySaglik set
+                TalepId = t.Id  
+               ,AdayId  = t.AdayId 
+               ,IsRaporReferansNo = @IsRaporReferansNo
+            From dbo.SrcAdaySaglik as a,
+                 dbo.SrcAdayTalep as t
+            Where a.VeriKaynakId = t.VeriKaynakId				 
+            and   a.Id = @saglikId
+
+			Select @TalepId = Id, @AdayId = AdayId 
+			From dbo.SrcAdayTalep 
+			Where VeriKaynakId = @VeriKaynakId
+        end
+		
+        if (@DbUpdatesIsActive = 0)
+        begin 
+            -- Takip
+            Update SrcAdayTakip set
+                OzurDurumuTipiId = @OzurDurumuTipiId
+              , OkutmanTalebi = @OkutmanTalebi 
+              , TercumanTalebi = @TercumanTalebi  
+              , YabanciDilTipiId = @YabanciDilTipiId
+            Where TalepId = @TalepId
+
+            -- Talep tablosunu işaretle
+            Update SrcAdayTalep set
+                SaglikGeldi = x.Sonuc
+            From SrcAdayTalep a, 
+            (
+               Select count(Id) as Sonuc
+               From SrcAdaySaglik
+               Where 0 = 0
+               and ( SaglikRaporuResim is not null 
+			   or Len(isnull(RaporReferansNo,'')) > 0
+			   )
+               and TalepId = @TalepId
+            ) as x
+            Where a.Id = @TalepId
+        end		
+
+		-- SrcAdayBelgeler tablosunu işaretle
+		Update SrcAdayBelgeler set
+        SaglikTarandi = x.Sonuc
+        From SrcAdayBelgeler a, 
+        (
+            Select count(Id) as Sonuc
+            From SrcAdaySaglik
+            Where 0 = 0
+            and (
+			   SaglikRaporuResim is not null 
+			or Len(isnull(RaporReferansNo,'')) > 0
+			)
+            and TalepId = @TalepId
+        ) as x
+        Where a.TalepId = @TalepId
+
+        -- Data transferi oldu fakat daha önce bu talep için boş kayıt oluşturulmuş ise onu sil
+        if (@VeriKaynakId > 0)
+        begin
+		    Delete From dbo.SrcAdaySaglik
+            Where TalepId = @TalepId
+            and   isnull(VeriKaynakId,0) = 0
+        end
+		
+        FETCH NEXT FROM saglikCursor INTO @saglikId
+    END -- While
+
+    CLOSE saglikCursor
+    DEALLOCATE saglikCursor   
+
+
+END -- create trigger
+
+/*CreateTriggerEnd*/
+
+
+
+/*CreateLkpTable*/
+
+begin transaction
+
+-- ------------------------------------------------------- 
+-- OzurDurumuTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'SrcAdaySaglikOzurDurumuTipi')
+drop table  Lkp]. SrcAdaySaglikOzurDurumuTipi]
+
+create table  Lkp]. SrcAdaySaglikOzurDurumuTipi]
+(
+   Id               Int Unique Not    null,
+   OzurDurumuTipi   nVarchar(60)   null
+
+   constraint  pk_SrcAdaySaglikOzurDurumuTipi primary key (Id)
+)
+
+Delete from  Lkp]. SrcAdaySaglikOzurDurumuTipi]
+INSERT INTO  Lkp]. SrcAdaySaglikOzurDurumuTipi] (Id, OzurDurumuTipi)
+ VALUES 
+  ( -1, N'--Seçiniz--'),
+  (  1, N'Engeli Yok'),
+  (100, N'Ortopedik Engelli (Ellerini ve/veya Kollarını Kullanamıyor)'),
+  (110, N'Ortopedik Engelli (Yürüyemiyor)'),
+  (120, N'İşitme, Dil veya Konuşma Engelli'),
+  (140, N'Görme Engelli (Bir Gözü Görmüyor)'),
+  (150, N'Görme Engelli (Büyüteç Yardımı İle Görebiliyor)'),
+  (160, N'Süreğen hastalığı var.')
+
+
+
+-- ------------------------------------------------------- 
+-- YabanciDilTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'SrcAdaySaglikYabanciDilTipi')
+drop table  Lkp]. SrcAdaySaglikYabanciDilTipi]
+
+create table  Lkp]. SrcAdaySaglikYabanciDilTipi]
+(
+   Id               Int Unique Not    null,
+   YabanciDilTipi   nVarchar(60)   null
+
+   constraint  pk_SrcAdaySaglikYabanciDilTipi primary key (Id)
+)
+
+Delete from  Lkp]. SrcAdaySaglikYabanciDilTipi]
+INSERT INTO  Lkp]. SrcAdaySaglikYabanciDilTipi] (Id, YabanciDilTipi)
+ VALUES 
+  ( -1, N'Yabancı Dil Seçiniz'),
+  (  1, N'Arapça'),
+  (  2, N'Çince'),
+  (  3, N'İngilizce'),
+  (  4, N'Almanca'),
+  (  5, N'Fransızca'),
+  (  6, N'Farsça'),
+  (  7, N'Rusça')
+
+
+
+commit transaction
+
+/*CreateLkpTableEnd*/

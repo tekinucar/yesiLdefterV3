@@ -1,7 +1,6 @@
-﻿
-/*CreateProcedure*/
+﻿/*CreateProcedure*/
 
-CREATE PROCEDURE [dbo].[prc_MtskUygDersIhlalleriSaatler] (@FirmId int, @TalepId int)  
+CREATE PROCEDURE [dbo].[prc_MtskUygDersIhlalleriSaatler] (@curId bigint, @deleteFirmId int, @deleteDonemTipiId int)  
 AS BEGIN
 
   --declare @FirmId int
@@ -245,7 +244,7 @@ AS BEGIN
   and   talep.DonemTipiId = dnm.DonemTipiId
   and   talep.GrupTipiId  = dnm.GrupTipiId
 
+
 END -- procedure 
 
 /*CreateProcedureEnd*/
-

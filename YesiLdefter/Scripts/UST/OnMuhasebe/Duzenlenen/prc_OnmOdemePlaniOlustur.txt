@@ -3,10 +3,7 @@
 CREATE PROCEDURE [dbo].[prc_OnmOdemePlaniOlustur] (@FirmId int, @TalepId int)  
 AS BEGIN
 
-  --declare @TalepId Int = 200 
-  --declare @FirmId  Int = 11
-
-  declare @IslemSonucu nvarchar(100) = ''
+  declare @SP_Message nvarchar(100) = ''
   declare @TahsilatAdedi int = 0
   declare @SectorTypeId smallint = 0 -- 201. Mtsk, 202. İşmak, 203. Src
 
@@ -50,8 +47,9 @@ AS BEGIN
 
   if (@TahsilatAdedi > 0) 
   begin
-     set @IslemSonucu = 'DİKKAT : Tahsilat işlemi veya fatura kesildiği için işlem yapılamıyor...'
-     return @IslemSonucu
+     set @SP_Message = 'DİKKAT : Tahsilat işlemi veya fatura kesildiği için işlem yapılamıyor...'
+     Select @SP_Message as SP_Message
+     return; 
   end
 
   declare @TalepTipiId             Int
@@ -200,6 +198,7 @@ AS BEGIN
   ( 21113,    N'Başarısız eğitim ücreti'),
   ( 21114,    N'Telafi eğitim ücreti'),
   ( 21115,    N'Diğer ücretler'),
+  ( 21116,    N'Uyg+Başarısız ücretler'),
   -- Src
   ( 23101,    N'Src Sertifika'),
   ( 23102,    N'Src5 Sertifika'),
@@ -255,6 +254,7 @@ AS BEGIN
   Where TalepId = @TalepId
   and UcretTipiId >= @BasUcretTipiId
   and UcretTipiId <= @BitUcretTipiId
+  and isnull(IsPaid,0) = 0
 
   -- Peşinat veya peşin ödeme ise
   if (@PesinatTutari > 0 or @TaksitSayisiTipiId = 100)
@@ -371,7 +371,6 @@ AS BEGIN
   if (@ESinavUcretTipiId = 1) and -- Biz yatıracağız
      (@ESinavUcreti > 0)
   begin
-
       if ( Select count(*) ADET from [dbo].[OnmOdemePlani] where 0 = 0 
       and [FirmId] = @FirmId 
       and [TalepId] = @TalepId 
@@ -484,11 +483,18 @@ AS BEGIN
 
   end -- @UygulamaSinavUcreti > 0
 
-  Execute dbo.prc_SrcAdayBorcunuHesapla @FirmId, @TalepId
+  if (@SectorTypeId = 201)
+     Execute dbo.prc_MtskAdayBorcunuHesapla @FirmId, @TalepId
+
+  if (@SectorTypeId = 202)
+     Execute dbo.prc_IsmakAdayBorcunuHesapla @FirmId, @TalepId
+
+  if (@SectorTypeId = 203)
+     Execute dbo.prc_SrcAdayBorcunuHesapla @FirmId, @TalepId
 
   -- Bunu kapatma veya silme. 
   -- Bu sonuca kodun içinde kontrol ediliyor
-  Select @IslemSonucu as IslemSonucu
+  Select @SP_Message as SP_Message
 
 END -- procedure
 

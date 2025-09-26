@@ -2157,7 +2157,7 @@ namespace Tkn_DevColumn
 
         #region VGrid_ColumnEdit
 
-        public void VGrid_ColumnEdit(DataRow Row, EditorRow Column, string tcolumn_type)
+        public void VGrid_ColumnEdit(DataRow Row, EditorRow Column, string tcolumn_type, byte tview_type)
         {
             tToolBox t = new tToolBox();
 
@@ -2211,7 +2211,7 @@ namespace Tkn_DevColumn
             }
 
             if (t.IsNotNull(s))
-                VGrid_ColumnEdit_(Row, Column, s, tProp_Navigator, 1); // Tumu = hayır
+                VGrid_ColumnEdit_(Row, Column, s, tProp_Navigator, tview_type); // Tumu = hayır
         }
 
         public void VGrid_ColumnEdit_(DataRow Row, EditorRow Column, string myProp, string tProp_Navigator, byte tview_type)
@@ -2801,7 +2801,10 @@ namespace Tkn_DevColumn
 
                 font_size = t.Set(Row["CMP_FONT_SIZE"].ToString(), "", (float)0);
                 font_style = t.Set(Row["CMP_FONT_STYLE"].ToString(), "", (Int16)0);
-                tenabled = t.Set(Row["CMP_ENABLED"].ToString(), Row["LKP_FENABLED"].ToString(), true);
+                
+                if (tview_type == 1) // Data
+                    tenabled = t.Set(Row["CMP_ENABLED"].ToString(), Row["LKP_FENABLED"].ToString(), true);
+
                 vld_operator = t.Set(Row["VALIDATION_OPERATOR"].ToString(), Row["LKP_VALIDATION_OPERATOR"].ToString(), (int)150);
 
                 int fontColor = t.Set(Row["CMP_FONT_COLOR"].ToString(), "", (int)0);
