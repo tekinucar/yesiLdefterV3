@@ -1,0 +1,120 @@
+begin transaction
+
+ create table MS_FIELDS_IP
+ (
+	REF_ID			Int IDENTITY(1,1) 	NOT NULL,
+    TABLE_CODE		VarChar(100)		NOT NULL, 
+	IP_CODE			VarChar(100)		NOT NULL,
+	FIELD_NO		SmallInt            NOT NULL,
+	FCAPTION        VarChar(50) 	    NULL, 
+	FHINT           VarChar(100)        NULL,
+        
+    /* default */
+    DEFAULT_TYPE    SmallInt       NULL, /* Insert sýrasýnda > 0=default Yok, 1=default var */  
+    DEFAULT_TYPE2   SmallInt       NULL,   
+    DEFAULT_NUMERIC Numeric(26,8)  NULL,
+	DEFAULT_TEXT    VarChar(100)   NULL,
+    DEFAULT_INT     Int            NULL,
+	DEFAULT_SP      Int            NULL,
+	DEFAULT_SETUP   VarChar(50)    NULL,
+
+    /* companent */
+    LIST_TYPES_NAME VarChar(100)  NULL, 
+	CMP_COLUMN_TYPE VarChar(30)   NULL,
+	CMP_WIDTH		SmallInt      NULL,
+	CMP_HEIGHT		SmallInt      NULL,
+	CMP_TOP		 	SmallInt      NULL,
+	CMP_LEFT		SmallInt      NULL,
+	CMP_READONLY    Bit	          NULL,
+	CMP_ENABLED     Bit	          NULL,
+	CMP_VISIBLE     Bit	          NULL,
+        
+    CMP_SORT_TYPE       SmallInt      NULL,
+    CMP_SUMMARY_TYPE    SmallInt      NULL,
+    CMP_FORMAT_TYPE     SmallInt      NULL,  
+	CMP_DISPLAY_FORMAT  VarChar(50)   NULL,
+    CMP_EDIT_FORMAT     VarChar(50)   NULL,
+    CMP_FONT_NAME       VarChar(30)   NULL,
+    CMP_FONT_SIZE       Numeric(6,3)  NULL,
+	CMP_FONT_STYLE      SmallInt      NULL,
+	CMP_FONT_COLOR      Int           NULL,
+	CMP_BACK_COLOR      Int           NULL,
+
+    /* veri kontrolü  */
+    VALIDATION_OPERATOR   SmallInt      NULL,
+    VALIDATION_VALUE1     VarChar(50)   NULL,
+    VALIDATION_VALUE2     VarChar(50)   NULL,
+    VALIDATION_ERRORTEXT  VarChar(100)  NULL,
+    VALIDATION_ERRORTYPE  SmallInt      NULL,
+    VALIDATION_INSERT     Bit           NULL,
+                 
+
+    /* Master Table Baðlantýsý */
+    MASTER_TABLEIPCODE    VarChar(100)   NULL,
+    MASTER_KEY_FNAME      VarChar(30)    NULL,
+    MASTER_CHECK_FNAME    VarChar(30)    NULL,
+    MASTER_CHECK_VALUE    VarChar(30)    NULL,
+    SEARCH_TABLEIPCODE    VarChar(50)    NULL,
+    PROP_NAVIGATOR        VarChar(max)   NULL,       
+
+    /* Gruplama */
+	GROUP_NO       SmallInt  NULL,
+	GROUP_LINE_NO  SmallInt  NULL,
+
+	/* Kriter - Filtreleme */
+    KRT_LINE_NO      SmallInt      NULL,
+	KRT_CAPTION      VarChar(50)   NULL, /* KRÝTER FIELDNAME  */
+	KRT_OPERAND_TYPE SmallInt      NULL,
+	KRT_LIKE         Bit           NULL,
+	KRT_DEFAULT1     Int           NULL,
+	KRT_DEFAULT2     Int           NULL,
+    KRT_ALIAS        Varchar(20)   NULL,
+    KRT_TABLE_ALIAS  Varchar(20)   NULL,             
+
+    /* Move   */
+    MOVE_ITEM_TYPE     SmallInt    NULL, /* 1 Column, 2 Group, 3 TabPage */
+    MOVE_ITEM_NAME     VarChar(30) NULL,
+    MOVE_TYPE          SmallInt    NULL, /* 1 Inside  2 Outside */
+    MOVE_LOCATION      SmallInt    NULL, /* 1 After   2 Before  */
+    MOVE_LAYOUT_TYPE   SmallInt    NULL, /* 1 Horizontal  2 Vertical */
+    
+    /* Join Table baðlantýsý */
+    FJOIN_TYPE          SmallInt      NULL, /* 0=Yok, 1=Left, 2=Right, 3=inner */
+    FJOIN_TABLE_NAME    VarChar(50)   NULL,
+    FJOIN_TABLE_ALIAS   VarChar(30)   NULL,
+    FJOIN_KEY_FNAME     VarChar(30)   NULL,
+    FJOIN_CAPTION_FNAME varchar(30)   NULL,
+    FJOIN_WHERE         VarChar(200)  NULL,
+       
+    /* Hesap - Calculator, Expression Evaluator Field */
+    EXPRESSION_TYPE   SmallInt      NULL, /* 0=None, 1=Hesaplarý Çalýþtýr */ 
+    PROP_EXPRESSION   VarChar(4000) NULL,              
+	
+	/* XML dosyaya transfer edilecek xml fieldname */
+    XML_FIELD_NAME    VarChar(30)   NULL,
+
+    /* Web Scraping iþlemleri için */
+    WebScrapingPageCode       varchar(50)  null,
+    WebScrapingGetNodeId      SmallInt     null,
+    WebScrapingGetColumnNo    SmallInt     null,
+    WebScrapingSetNodeId      SmallInt     null,
+    WebScrapingSetColumnNo    SmallInt     null,
+
+    SOFTWARE_CODE   varchar(20)     NULL,
+    PROJECT_CODE    varchar(20)     NULL,
+	
+	Constraint PK_MS_FIELDS_IP primary key (REF_ID)
+ )
+
+ create index X_MS_FIELDS_IP1 on MS_FIELDS_IP (TABLE_CODE, IP_CODE, FIELD_NO)
+
+
+ grant select, insert, update, delete on MS_FIELDS_IP to public
+
+
+commit transaction
+ 
+
+-- EXEC sp_RENAME 'MS_FIELDS_IP.EXPRESSION', 'PROP_EXPRESSION', 'COLUMN'
+ 
+-- ALTER TABLE MS_FIELDS_IP ALTER COLUMN PROP_EXPRESSION VARCHAR(4000) NULL

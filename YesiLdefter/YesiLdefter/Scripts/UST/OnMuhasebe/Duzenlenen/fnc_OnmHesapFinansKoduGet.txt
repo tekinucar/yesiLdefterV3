@@ -1,0 +1,104 @@
+﻿/*CreateFunction*/
+
+CREATE FUNCTION [dbo].[fnc_OnmHesapFinansKoduGet](
+ @FirmId int 
+,@UstGrupTipiId smallInt 
+,@AnaGrupTipiId smallInt 
+,@kacHane smallInt 
+,@curId bigint
+)  
+RETURNS varchar(50)   
+AS 
+BEGIN  
+    Declare @ret varchar(50);  
+	Declare @xCount int
+
+    if ((@kacHane = null) or (@kacHane = 0))
+	    set @kacHane = 10
+
+    set @xCount = @kacHane
+
+    select @ret = replicate('0', @xCount - len(count(hf.Id)) ) + convert(varchar(10), count(hf.Id)) 
+    from [dbo].[OnmHesapFinans] as hf
+    Where hf.FirmId = @FirmId
+    and   hf.UstGrupTipiId = @UstGrupTipiId
+    and   hf.AnaGrupTipiId = @AnaGrupTipiId
+	and   hf.Id <= @curId;
+
+    IF (@ret IS NULL) 
+        SET @ret = '000';  
+
+    RETURN @ret;  
+END
+
+/*CreateFunctionEnd*/
+
+
+/*CreateFunction*/
+
+CREATE FUNCTION [dbo].[fnc_OnmHesapFinansGetId](
+ @FirmId int 
+,@UstGrupTipiId smallInt 
+,@AnaGrupTipiId smallInt 
+,@HesapKodu varchar(100)
+)  
+RETURNS int
+AS 
+BEGIN  
+    Declare @ret int;  
+    set @ret = 0
+
+    select @ret = Id
+    from [dbo].[OnmHesapFinans] as hf
+    Where hf.FirmId = @FirmId
+    and   hf.UstGrupTipiId = @UstGrupTipiId
+    and   hf.AnaGrupTipiId = @AnaGrupTipiId
+    and   hf.HesapKodu = @HesapKodu
+
+    if (@ret = 0)
+    begin
+      INSERT INTO [dbo].[OnmHesapFinans]
+           ([ParentId]
+           ,[FirmId]
+           ,[IsActive]
+           ,[UstGrupTipiId]
+           ,[AnaGrupTipiId]
+           ,[AltGrupTipiId]
+           ,[AltCesitTipiId]
+           ,[HesapTipiId]
+           ,[HesapKodu]
+           ,[UstHesapKodu]
+           ,[HesapKisaAdi]
+           ,[HesapAdi]
+           ,[BAHesapTipiId]
+           ,[KdvOrani]
+           )
+      Select 
+            0 --ParentId
+           ,@FirmId --FirmId
+           ,1 --IsActive
+           ,@UstGrupTipiId_ --UstGrupTipiId
+           ,AnaGrupTipiId
+           ,AltGrupTipiId
+           ,AltCesitTipiId
+           ,11 -- HesapTipiId  ??????
+           ,HesapKodu
+           ,UstHesapKodu
+           ,HesapAdi --HesapKisaAdi
+           ,HesapAdi
+           ,BAHesapTipiId
+           ,KdvOrani
+      from Lkp.OnmHesapMaster
+      where 0 = 0
+      and UstGrupTipiId = 82
+      and AnaGrupTipiId = @AnaGrupTipiId
+      and HesapKodu = @HesapKodu
+      --and UstHesapKodu = @UstHesapKodu
+
+    end
+
+    RETURN @ret;  
+END
+
+/*CreateFunctionEnd*/
+

@@ -1,0 +1,115 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_MtskAdayTakipAdayKayitKonulari] 
+AS BEGIN
+
+Select 
+   konular.KonuGrupId as Lkp_KonuGrupId
+ , konular.KonuId as Lkp_KonuId
+ , konular.KonuCaption as Lkp_KonuCaption  
+ , konular.Lkp_KonuAciklama
+
+from (
+
+-- TalepTipi
+Select 
+   tip.KonuGrupId
+ , tip.KonuId
+ , tip.KonuCaption
+ , tip.TalepTipi as Lkp_KonuAciklama
+
+From Lkp.MtskAdayTakipTalepTipi as tip 
+ 
+union all
+
+-- KayitTipi = 1, 2, 3 
+Select 
+   tip.KonuGrupId
+ , tip.KonuId
+ , tip.KonuCaption
+ , tip.KayitTipi as KonuAciklama
+
+From Lkp.MtskAdayTakipKayitTipi as tip 
+
+union all
+
+-- ZamanlamaTipi
+Select 
+   tip.KonuGrupId
+ , tip.KonuId
+ , tip.KonuCaption   
+ , tip.ZamanlamaTipi as KonuAciklama
+
+From Lkp.MtskAdayTakipZamanlamaTipi as tip 
+
+union all
+
+-- IsGrupSubeYok
+Select 
+   tip.KonuGrupId
+ , tip.KonuId
+ , tip.KonuCaption
+ , tip.GrupSubeTipi as KonuAciklama
+
+From Lkp.MtskAdayTakipGrupSubeTipi as tip 
+
+union all
+
+-- MebbisKurumOnayi yok
+Select 
+   tip.KonuGrupId
+ , tip.KonuId
+ , tip.KonuCaption
+ , tip.MebbisOnayiTipi as KonuAciklama
+
+From Lkp.MtskAdayTakipMebbisOnayiTipi as tip 
+
+union all
+/*
+-- MebbisDurumTipi
+Select 
+   tip.KonuGrupId
+ , tip.KonuId
+ , tip.KonuCaption
+ , tip.MebbisDurumTipi as KonuAciklama
+
+From Lkp.MtskAdayTakipMebbisDurumTipi as tip
+union all
+*/
+-- YasOnayiTipi
+Select 
+   tip.KonuGrupId
+ , tip.KonuId
+ , tip.KonuCaption   
+ , tip.YasOnayiTipi as KonuAciklama
+
+From Lkp.MtskAdayTakipYasOnayiTipi as tip 
+
+union all
+
+-- OzurDurumTipi
+Select 
+   tip.KonuGrupId
+ , tip.KonuId
+ , tip.KonuCaption   
+ , tip.OzurDurumuTipi as KonuAciklama
+
+From Lkp.MtskAdayTakipOzurDurumuTipi as tip 
+
+union all
+
+-- Belgeleri eksik olanlar
+Select 
+   tip.KonuGrupId
+ , tip.KonuId
+ , tip.KonuCaption
+ , tip.BelgelerTipi as KonuAciklama
+
+From Lkp.MtskAdayTakipBelgelerTipi as tip
+
+) as konular 
+
+
+END -- procedure
+
+/*CreateProcedureEnd*/

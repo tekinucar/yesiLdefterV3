@@ -1,0 +1,142 @@
+﻿
+
+begin transaction
+
+ create table HP_VEZNE
+ (
+   ID               Int IDENTITY(1,1) NOT NULL, 
+   FIRM_ID          Int               NULL,
+   ISACTIVE         SmallInt          NULL, /* 0. Pasif 1. Aktif */
+   LINE_NO          Int               NULL,
+   TBOX_TD          SmallInt          NULL, /* 1. Tahsilat Noktası/Vezne No, 2. Tahsilat/Ödeme Araçları Listesi (HP_FINANS), 3. personel listesi (HP_CARI) */    
+   FNS_TIPI         SmallInt          NULL, 
+   HP_VEZNE_ID      Int               NULL, /* a.ID = b.HP_VEZNE_ID ? açıklama aşağıda       */   
+   HP_FINANS_ID     Int               NULL, /* HP_FINANS tablosu  */   
+   HP_CARI_ID       Int               NULL, /* HP_CARI tablosu */   
+   HP_COMP_ID       Int               NULL, /* SYS_COMPS tablosu / Bilgisayar */
+   VEZNE_ADI        VarChar(100)      NULL, /* Vezne Adı */
+         
+   constraint		PK_HP_VEZNE primary key (ID)
+ )
+ -- mysql_add 
+
+ create index X_HP_VEZNE01 on HP_VEZNE (FIRM_ID, TBOX_TD, LINE_NO);
+ 
+ grant select, insert, update, delete on HP_VEZNE to public
+
+commit transaction
+
+
+
+/*
+
+ LEFT JOIN           
+   HP_VEZNE_ID   : Vezne Adı         
+   HP_FINANS_ID  : Kasa      
+   HP_FINANS_ID  : Banka Araçları      
+   HP_CARI_ID    : Kullanıcı      
+   HP_COMP_ID    : Bilgisayar   
+
+ 'VZN_TBOX_TD');
+    2, '', 'Vezne' );
+    3, '', 'Veznedeki Kasalar' );
+    4, '', 'Veznedeki Banka Araçları' );
+    5, '', 'Veznedeki Diğer Araçlar' );
+    6, '', 'Bilgisayara Ait Vezneler' );
+    7, '', 'Kullanıcıya Ait Vezneler' );   
+   
+   11, '', 'Tahsilat Araçları' );
+   12, '', 'Ödeme Araçları' );
+   13, '', 'Tüm Tah+Ödm Araçları' );
+
+   
+
+
+ 'FNS_HESAP');
+    10, '', 'Nakit Kasası' 
+    20, '', 'Banka' 
+    21, '', 'Şube' 
+    22, '', 'Banka Hesabı' 
+    23, '', 'Kredi Kartı' 
+    24, '', 'POS' 
+    26, '', 'Banka Kredisi' 
+	???
+    28, '', 'Taksit' 
+    29, '', 'Ek İşlemler' ); -- Finans İşlemleri sırasında veznenin yapabileceği Ek İşlemler (Cari Hesaba Yaz, Hesap Parçala, vb..); 
+
+
+
+	
+FIELD_NO FIELD_NAME                     FIELD_TYPE FIELD_LENGTH
+-------- ------------------------------ ---------- ------------
+1        ID                             56         4
+2        FIRM_ID                        56         4
+4        ISACTIVE                       52         2
+5        LINE_NO                        56         4
+6        TBOX_TD                        52         2
+8        HP_VEZNE_ID                    56         4
+9        HP_FINANS_ID                   56         4
+10       HP_CARI_ID                     56         4
+12       VEZNE_ADI                      167        200
+21       LKP_VEZNE_ID                   56         4
+22       LKP_VEZNE_ADI                  167        200
+31       LKP_FINANS_ID                  56         4
+33       LKP_FINANS_TIPI                52         2
+32       LKP_FINANS_ADI                 167        200
+34       LKP_FINANS_PARA_ID             56         4
+41       LKP_CARI_ID                    56         4
+42       LKP_CARI_ADI                   167        200
+7        FNS_TIPI                       52         2
+11       HP_COMP_ID                     56         4
+51       LKP_COMP_ID                    56         4
+52       LKP_COMP_ADI                   167        50	
+	
+	
+*/	
+	
+	
+	
+	
+	
+
+
+/* 
+
+yapının çalışması
+
+Amaç : 
+
+Birinci hamle a, b, c Veznelerini oluşturmak
+
+@VezneID = ID, TBOX_TD = 1, HP_HAKKINDA = 'a Veznesi'
+
+İkinci hamle bu veznelerde hangi finans hesapları kullanılacak onları belirlemek
+
+ID, TBOX_TD = 2, HP_VEZNE_ID = @VezneID, HP_FINANS_ID = xValue, HP_CARI_ID = 0
+
+Üçüncü hamle personel hangi vezneleri kullanabilecek 
+
+ID, TBOX_TD = 3, HP_VEZNE_ID = @VezneID, HP_FINANS_ID = 0, HP_CARI_ID = xValue
+
+
+Böylece 
+
+Firmadaki vezneler 
+ ( Select * from HP_VEZNE a Where a.FIRM_ID = x  and a.TBOX_TD = 1 ) olanlar
+
+Şubedeki vezneler
+ ( Select * from HP_VEZNE a Where a.FIRM_ID = x  and a.SHOP_ID = y  and a.TBOX_TD = 1 )
+
+Veznelerin kullandığı finans hesapları
+
+ ( Select * from HP_VEZNE a 
+   Where a.FIRM_ID = x  
+   and   a.SHOP_ID = y  
+   and   a.TBOX_TD = 2 
+   and   a.HP_VEZNE_ID = @VezneID
+   )
+
+
+
+
+*/

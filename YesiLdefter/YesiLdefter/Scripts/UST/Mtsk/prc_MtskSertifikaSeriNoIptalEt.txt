@@ -1,0 +1,42 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_MtskSertifikaSeriNoIptalEt] (@FirmId int, @DuzenlemeTarihi date)  
+AS BEGIN
+
+   --declare @FirmId int = 2
+   --declare @DuzenlemeTarihi date 
+   --set @DuzenlemeTarihi = convert(date, '06.02.2022', 103)
+   declare @MinSertifikaNo int
+
+   -- Mininmum Sertifika Noyu bul
+   Select @MinSertifikaNo = min(convert(int,SertifikaNo)) 
+   From dbo.MtskAdaySertifika
+   Where FirmId = @FirmId
+   and   DuzenlemeTarihi = @DuzenlemeTarihi
+   and   SertifikaSeri <> ''
+
+   --print @MinSertifikaNo
+   
+   ALTER TABLE [dbo].[MtskAdaySertifika] DISABLE TRIGGER [trg_MtskAdaySertifika]
+
+   -- Verilen serino ları iptal et
+   update dbo.MtskAdaySertifika  set
+       SertifikaSeri = null
+     , SertifikaNo = null
+     , DuzenlemeTarihi = null
+   Where FirmId = @FirmId
+   and   DuzenlemeTarihi = @DuzenlemeTarihi
+   and   SertifikaSeri <> ''
+      
+   ALTER TABLE [dbo].[MtskAdaySertifika] ENABLE TRIGGER [trg_MtskAdaySertifika]
+
+   -- Minimum no'yu tekrar set et 
+   update dbo.MtskSertifikaSeriNo set
+      SertifikaNo = Convert(varchar(20), @MinSertifikaNo)
+   Where FirmId = @FirmId
+
+   EXECUTE [dbo].[prc_MtskAdayTakip] @FirmId
+
+END -- procedure
+
+/*CreateProcedureEnd*/

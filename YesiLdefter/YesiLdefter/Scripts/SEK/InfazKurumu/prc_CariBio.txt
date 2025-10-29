@@ -1,0 +1,61 @@
+﻿USE [u7093888_Ustad01]
+GO
+
+/****** Object:  StoredProcedure [dbo].[prc_CariBio]    Script Date: 07.10.2020 15:48:21 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+--CREATE PROCEDURE [dbo].[prc_CariBio] (@FirmId int, @CariId int, @BioTipiId smallint, @BioIndex smallint, @BioPrint nvarchar(max))  
+CREATE PROCEDURE [dbo].[prc_CariBio] (@FirmId int, @CariId int, @BioTipiId smallint, @BioIndex smallint, @BioPrint nvarchar(max))  
+AS BEGIN 
+   
+/*
+declare @FirmId int = 9
+declare @CariId int = 21
+declare @BioTipiId smallint = 1
+declare @BioIndex smallint = 0
+*/
+
+if ( Select count(Id) Adet
+     From [dbo].[CariBio]
+     Where [FirmId] = @FirmId
+     and   [CariId] = @CariId
+     and   [BioTipiId] = @BioTipiId
+     and   [BioIndex] = @BioIndex ) = 0 
+begin
+  --print 'insert'
+  INSERT INTO [dbo].[CariBio]
+           ([FirmId]
+           ,[IsActive]
+           ,[CariId]
+           ,[BioTipiId]
+           ,[BioIndex]
+           ,[BioPrint]
+		   ,[BioDate])
+     VALUES
+           (@FirmId
+           ,1
+           ,@CariId
+           ,@BioTipiId
+           ,@BioIndex
+           ,@BioPrint
+		   ,GETDATE())
+end else
+begin
+  --print 'update'
+  UPDATE [dbo].[CariBio]
+   SET [BioPrint] = @BioPrint, [BioDate] = GETDATE()
+  Where [FirmId] = @FirmId
+  and   [CariId] = @CariId
+  and   [BioTipiId] = @BioTipiId
+  and   [BioIndex] = @BioIndex 
+end
+
+END
+GO
+
+

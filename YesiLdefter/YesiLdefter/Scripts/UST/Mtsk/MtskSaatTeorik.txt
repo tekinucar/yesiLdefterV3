@@ -1,0 +1,67 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table MtskSaatTeorik
+ (
+
+   Id                     Int IDENTITY(1,1) NOT NULL, 
+   FirmId                 Int       not null,
+   IsActive               Bit       not null, /* default : 1 = active, 0 = not active */  
+   GecerlilikTarihiId     Int       not null,
+
+   /* Saatler */  
+   TrafikVeCevreDersSaati           smallInt     null,
+   IlkYardimDersSaati               smallInt     null,
+   AracTeknigiDersSaati             smallInt     null,
+   TrafikAdabiDersSaati             smallInt     null,
+   TeorikDersSaati                  smallInt     null,
+
+  constraint pk_MtskSaatTeorik primary key (Id)
+ )
+
+ create index X_MtskSaatTeorik01 on MtskSaatTeorik (GecerlilikTarihiId)
+ 
+ grant select, insert, update, delete on MtskSaatTeorik to public
+
+commit transaction
+
+/*CreateTableEnd*/
+
+
+  /*CreateData*/
+
+  Declare @FirmId Int 
+  Set @FirmId = :FIRM_ID
+
+  declare @GecerlilikTarihiId int = 0
+
+  Select top 1 @GecerlilikTarihiId = Id
+  From dbo.GecerlilikTarihi 
+  Where FirmId = @FirmId
+  and   KonuTipiId = 21101 -- Teorik ders saatleri
+  order by Tarih desc
+
+
+  INSERT INTO [dbo].[MtskSaatTeorik]
+           ([FirmId]
+           ,[IsActive]
+           ,[GecerlilikTarihiId]
+           ,[TrafikVeCevreDersSaati]
+           ,[IlkYardimDersSaati]
+           ,[AracTeknigiDersSaati]
+           ,[TrafikAdabiDersSaati]
+           ,[TeorikDersSaati]            
+           )
+     VALUES
+           (@FirmId
+           ,1  -- IsActive
+           ,@GecerlilikTarihiId
+           ,16 -- TrafikVeCevreDersSaati
+           ,8  -- IlkYardimDersSaati
+           ,6  -- AracTeknigiDersSaati
+           ,4  -- TrafikAdabiDersSaati
+           ,34 -- TeorikDersSaati
+		   )
+
+  /*CreateDataEnd*/

@@ -1,0 +1,208 @@
+﻿
+
+ create table HesapPlani
+ (
+
+   Id                Int IDENTITY(1,1) NOT NULL, 
+   ParentId          Int       not null, /* default 0 */
+   FirmId            Int       not null,
+   IsActive          Bit       not null, /* default : 1 = active, 0 = not active */  
+
+   --...TipiId
+   UstGrupTipiId  : 1,2,3,4,5
+   AnaGrupTipiId  : 1,2,3,4,5,6,7,8,9
+   AltGrupTipiId  : 1,2,3,5
+   AltCesitTipiId : 3,5
+
+
+   HesapTipiId       SmallInt      null, /* 102   banka        */
+   CesitTipiId       SmallInt      null, /* 1022  banka hesabı */
+   CalismaTipiId     Int           null, /* 10221 vadesiz      */
+
+
+   constraint		pk_HesapPlani primary key (Id)
+ )
+
+ create index X_HesapPlani01 on HesapPlani (FirmId)
+ create index X_HesapPlani02 on HesapPlani ()
+
+ 
+ grant select, insert, update, delete on HesapPlani to public
+
+
+
+/*   
+...TipiId
+UstGrup  : 1,2,3,4,5
+AnaGrup  : 1,2,3,4,5,6,7,8,9
+AltGrup  : 1,2,3,5
+AltCesit : 3,5
+
+-- --------------------------------
+-- UstGrup
+-- --------------------------------
+1 Bilanço (1,2,3,4,5)
+2 Gelir Tablosu ( 6 )
+3 Maliyet ( 7 )
+4 Nazım Hesaplar ( 9 )
+5 Düzenleyeci Hesaplar ( - )
+*/
+
+-- ------------------------------------------------------- 
+-- UstGrupTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[HesapPlaniUstGrupTipi]
+(
+   Id           Int Unique Not Null,
+   UstGrupTipi  nVarchar(50),
+   GrupTipiId   SmallInt Null,
+
+   constraint  pk_HesapPlaniUstGrupTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[HesapPlaniUstGrupTipi] (Id, UstGrupTipi, GrupTipiId)
+ VALUES 
+  (0,   N'Tanımsız', 0),
+  (1,   N'Bilanço (1,2,3,4,5)', 1),
+  (2,   N'Gelir Tablosu ( 6 )', 1),
+  (3,   N'Maliyet ( 7 )', 1),
+  (4,   N'Nazım Hesaplar ( 9 )', 1),
+  (5,   N'Düzenleyeci Hesaplar ( - )', 1)
+
+/*
+-- --------------------------------
+-- AnaGrup
+-- --------------------------------
+
+1  Dönen Varlıklar
+2  Duran Varlıklar
+3  Kısa Vadeli Yabancı Kaynaklar
+4  Uzun Vadeli Yabancı Kaynaklar
+5  Öz Kaynaklar
+6  Gelir Tablosu Hesapları
+7  Maliyet Hesapları 
+8  Serbest Hesaplar
+9  Nazım Hesaplar
+*/
+
+-- ------------------------------------------------------- 
+-- AnaGrupTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[HesapPlaniAnaGrupTipi]
+(
+   Id           Int Unique Not Null,
+   AnaGrupTipi  nVarchar(50),
+   GrupTipiId   SmallInt Null,
+
+   constraint  pk_HesapPlaniAnaGrupTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[HesapPlaniAnaGrupTipi] (Id, AnaGrupTipi, GrupTipiId)
+ VALUES 
+  (0,   N'Tanımsız', 0),
+  (1,   N'Dönen Varlıklar', 1),
+  (2,   N'Duran Varlıklar', 1),
+  (3,   N'Kısa Vadeli Yabancı Kaynaklar', 1),
+  (4,   N'Uzun Vadeli Yabancı Kaynaklar', 1),
+  (5,   N'Öz Kaynaklar', 1),
+  (6,   N'Gelir Tablosu Hesapları', 1),
+  (7,   N'Maliyet Hesapları', 1),
+  (8,   N'Serbest Hesaplar', 1),
+  (9,   N'Nazım Hesaplar', 1)
+
+
+/*
+-- --------------------------------
+-- AltGrup
+-- --------------------------------
+-- 1. Bilançonun
+11 Aktifler, Varlıklar (1,2)
+13 Pasifler, Kaynaklar (3,4,5)
+
+-- 2. Gelir Tablosunun 
+21 Gelirleri
+22 Giderleri
+
+-- 3. Maliyetin Seçenekleri
+31 7/A Seçeneği
+32 7/B Seçeneği
+
+-- 5. Düzenleyici Hesapların Seçenekleri
+51 Aktif Düzenleyici Hesaplar (1,2)   : Varlıklar
+53 Pasif Düzenleyici Hesaplar (3,4,5) : Kaynaklar
+*/
+
+-- ------------------------------------------------------- 
+-- AltGrupTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[HesapPlaniAltGrupTipi]
+(
+   Id           Int Unique Not Null,
+   AltGrupTipi  nVarchar(50),
+   GrupTipiId   SmallInt Null,
+
+   constraint  pk_HesapPlaniAltGrupTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[HesapPlaniAltGrupTipi] (Id, AltGrupTipi, GrupTipiId)
+ VALUES 
+  (0,   N'Tanımsız', 0),
+  -- 1. Bilançonun
+  (11,   N'Aktifler, Varlıklar (1,2)', 1),
+  (13,   N'Pasifler, Kaynaklar (3,4,5)', 1),
+  -- 2. Gelir Tablosunun 
+  (21,   N'Gelirler', 1),
+  (22,   N'Giderler', 1),
+  -- 3. Maliyetin Seçenekleri
+  (31,   N'7/A Seçeneği', 1),
+  (32,   N'7/B Seçeneği', 1),
+  -- 5. Düzenleyici Hesapların Seçenekleri
+  (51,   N'Aktif Düzenleyici Hesaplar (1,2)   : Varlıklar', 1),
+  (52,   N'Pasif Düzenleyici Hesaplar (3,4,5) : Kaynaklar', 1)
+
+
+/*
+-- --------------------------------
+-- AltCesit
+-- --------------------------------
+
+311   Maliyet hesapları
+312   Yansıtma hesapları
+313   Fark hesapları
+321   Gider çeşit hesapaları
+
+511   Dönen Varlıklar Düzenleyici Hesaplar 
+512   Duran Varlıklar Düzenleyici Hesaplar 
+533   Kısa Vadeli Yabancı Kaynaklar Düzenleyici Hesaplar 
+534   Uzun Vadeli Yabancı Kaynaklar Düzenleyici Hesaplar 
+535   Öz Kaynaklar Düzenleyici Hesaplar 
+*/
+-- ------------------------------------------------------- 
+-- AltCesitTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[HesapPlaniAltcesitTipi]
+(
+   Id           Int Unique Not Null,
+   AltCesitTipi nVarchar(50),
+   GrupTipiId   SmallInt Null,
+
+   constraint  pk_HesapPlaniAltCesitTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[HesapPlaniAltCesitTipi] (Id, AltCesitTipi, GrupTipiId)
+ VALUES 
+  (0,     N'Tanımsız', 0),
+  (311,   N'Maliyet hesapları', 1),
+  (312,   N'Yansıtma hesapları', 1),
+  (313,   N'Fark hesapları', 1),
+  (321,   N'Gider çeşit hesapaları', 1),
+
+  (511,   N'Dönen Varlıklar Düzenleyici Hesaplar', 1),
+  (512,   N'Duran Varlıklar Düzenleyici Hesaplar', 1),
+  (533,   N'Kısa Vadeli Yabancı Kaynaklar Düzenleyici Hesaplar', 1),
+  (534,   N'Uzun Vadeli Yabancı Kaynaklar Düzenleyici Hesaplar', 1),
+  (535,   N'Öz Kaynaklar Düzenleyici Hesaplar', 1)
+
+
+
+

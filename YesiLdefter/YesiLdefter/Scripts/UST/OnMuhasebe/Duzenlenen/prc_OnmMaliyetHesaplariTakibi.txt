@@ -1,0 +1,237 @@
+﻿CREATE PROCEDURE [dbo].[prc_OnmMaliyetHesaplariTakibi] (@FirmId int,  @MaliyetTipi varchar(50), @BelgeDonemTipiId int)  
+AS BEGIN 
+
+/*  
+  Declare @FirmId int  
+  Declare @MaliyetTipi varchar(50)
+  Declare @BelgeDonemTipiId int
+  set @FirmId = 2
+  set @MaliyetTipi = 'Abone'
+  set @BelgeDonemTipiId = 202406
+*/
+  Declare @Sql nvarchar(max)
+  Declare @Where nvarchar(max)
+  Declare @Orderby nvarchar(1000)
+
+  Set @Sql = '
+
+Select 
+  Maliyet.Id
+
+, Maliyet.UstGrupTipiId
+, Maliyet.AnaGrupTipiId
+, Maliyet.AltGrupTipiId
+, Maliyet.AltCesitTipiId
+, Maliyet.BAHesapTipiId
+, Maliyet.HesapTipiId
+, Maliyet.UstHesapKodu
+, Maliyet.HesapKodu
+, Maliyet.BelgeTipiId
+, Maliyet.KaynakTipiId
+
+, Maliyet.Id as Lkp_MaliyetId
+, isnull(Varlik.Id,0) as Lkp_VarlikId
+, isnull(Abone.Id,0) as Lkp_AboneId
+, (CASE  
+     WHEN (ISNULL(Varlik.Id,0) = 0 and ISNULL(Abone.Id,0) = 0) THEN Maliyet.Id
+     WHEN (ISNULL(Varlik.Id,0) > 0) THEN Varlik.Id
+     WHEN (ISNULL(Abone.Id,0)  > 0) THEN Abone.Id
+   ELSE -1 END) as Lkp_VarlikAboneId
+
+, Maliyet.HesapAdi as Lkp_MaliyetAdi
+
+, (CASE  
+     WHEN  (ISNULL(Varlik.Id,0) > 0) THEN Varlik.HesapKisaAdi
+     WHEN  (ISNULL(Abone.Id,0)  > 0) THEN Abone.HesapAdi
+   ELSE '''' END) as Lkp_VarlikAboneAdi
+
+, Varlik.HesapKisaAdi as Lkp_VarlikAdi
+, Abone.HesapAdi as Lkp_AboneAdi
+, Abone.Numarasi as Lkp_AboneNumarasi
+
+, (CASE  
+     WHEN ((ISNULL(Varlik.Id,0) = 0 and ISNULL(Abone.Id,0) = 0) or ISNULL(Varlik.KdvOrani,0) = 0) THEN Maliyet.KdvOrani
+     WHEN  (ISNULL(Varlik.Id,0) > 0 and ISNULL(Abone.KdvOrani,0) = 0) THEN Varlik.KdvOrani
+     WHEN  (ISNULL(Abone.Id,0)  > 0) THEN Abone.KdvOrani
+   ELSE Maliyet.KdvOrani END) as Lkp_KdvOrani
+
+, (CASE  
+     WHEN ((ISNULL(Varlik.Id,0) = 0 and ISNULL(Abone.Id,0) = 0) or ISNULL(Varlik.BelgeTipiId,0) = 0) THEN Maliyet.BelgeTipiId
+     WHEN (ISNULL(Varlik.Id,0) > 0 and ISNULL(Abone.BelgeTipiId,0) = 0) THEN Varlik.BelgeTipiId
+     WHEN (ISNULL(Abone.Id,0)  > 0) THEN Abone.BelgeTipiId
+   ELSE -1 END) as Lkp_BelgeTipiId
+
+, (CASE  
+     WHEN ((ISNULL(Varlik.Id,0) = 0 and ISNULL(Abone.Id,0) = 0) or ISNULL(Varlik.KaynakTipiId,0) = 0) THEN Maliyet.KaynakTipiId
+     WHEN (ISNULL(Varlik.Id,0) > 0 and ISNULL(Abone.KaynakTipiId,0) = 0) THEN Varlik.KaynakTipiId
+     WHEN (ISNULL(Abone.Id,0)  > 0) THEN Abone.KaynakTipiId
+   ELSE -1 END) as Lkp_KaynakTipiId
+
+, (CASE  
+     WHEN (ISNULL(Varlik.Id,0) = 0 and ISNULL(Abone.Id,0) = 0) THEN Maliyet.IsKiralik
+     WHEN (ISNULL(Varlik.Id,0) > 0) THEN Varlik.IsKiralik
+     WHEN (ISNULL(Abone.Id,0)  > 0) THEN Abone.IsKiralik
+   ELSE -1 END) as Lkp_IsKiralik
+
+, (CASE  
+     WHEN (ISNULL(Varlik.Id,0) = 0 and ISNULL(Abone.Id,0) = 0) THEN Maliyet.PeriyodTipiId
+     WHEN (ISNULL(Varlik.Id,0) > 0) THEN Varlik.PeriyodTipiId
+     WHEN (ISNULL(Abone.Id,0)  > 0) THEN Abone.PeriyodTipiId
+   ELSE -1 END) as Lkp_PeriyodTipiId
+
+, (CASE  
+     WHEN (ISNULL(Varlik.Id,0) = 0 and ISNULL(Abone.Id,0) = 0) THEN Maliyet.KiralikGun
+     WHEN (ISNULL(Varlik.Id,0) > 0) THEN Varlik.KiralikGun
+     WHEN (ISNULL(Abone.Id,0)  > 0) THEN Abone.KiralikGun
+   ELSE -1 END) as Lkp_KiralikGun
+
+, (CASE  
+     WHEN (ISNULL(Varlik.Id,0) = 0 and ISNULL(Abone.Id,0) = 0) THEN Maliyet.KiralikAy
+     WHEN (ISNULL(Varlik.Id,0) > 0) THEN Varlik.KiralikAy
+     WHEN (ISNULL(Abone.Id,0)  > 0) THEN Abone.KiralikAy
+   ELSE -1 END) as Lkp_KiralikAy
+
+-- her satırıda LKP_LISTEYE_EKLE görünmesi için yapıldı
+, (CASE  
+     WHEN (ISNULL(Varlik.Id,0) = 0 and ISNULL(Abone.Id,0) = 0) THEN 100000 + Maliyet.Id
+     WHEN (ISNULL(Varlik.Id,0) > 0) THEN (200000 + Maliyet.Id) + Varlik.Id
+     WHEN (ISNULL(Abone.Id,0)  > 0) THEN (300000 + Maliyet.Id) + Abone.Id 
+   ELSE -1 END) as LKP_LISTEYE_EKLE 
+
+, MaliyetBelgesi.Id as Lkp_MaliyetBelgesiId
+, MaliyetBelgesi.IsActive as Lkp_MaliyetBelgesiIsActive
+, MaliyetBelgesi.IsPaid as Lkp_MaliyetBelgesiIsPaid
+, MaliyetBelgesi.BelgeTarihi as Lkp_MaliyetBelgesiTarihi
+, MaliyetBelgesi.BelgeNo as Lkp_MaliyetBelgesiBelgeNo
+, MaliyetBelgesi.SonOdemeTarihi as Lkp_MaliyetBelgesiSonOdemeTarihi
+, MaliyetBelgesi.BelgeTutari as Lkp_MaliyetBelgesiBelgeTutari
+
+, OdemeBelgesi.Id as Lkp_OdemeBelgesiId
+, OdemeBelgesi.IsActive as Lkp_OdemeBelgesiIsActive
+, OdemeBelgesi.BelgeTarihi as Lkp_OdemeBelgesiTarihi
+, OdemeBelgesi.BelgeNo as Lkp_OdemeBelgesiBelgeNo
+, OdemeBelgesi.BelgeTutari as Lkp_OdemeBelgesiBelgeTutari
+, OdemeBelgesi.MasrafTutari as Lkp_OdemeBelgesiMasrafTutari
+, OdemeBelgesi.ToplamTutar as Lkp_OdemeBelgesiToplamTutar
+
+From dbo.OnmHesapFinans as Maliyet
+
+  left outer join dbo.OnmHesapFinans as Varlik on ( 
+        Maliyet.AnaGrupTipiId = Varlik.AnaGrupTipiId  
+    and Maliyet.AltGrupTipiId = Varlik.AltGrupTipiId
+    and Varlik.FirmId > 0
+    and Varlik.HesapTipiId = 12 -- Varlık
+)
+  left outer join dbo.OnmHesapFinans as Abone on ( 
+        Maliyet.AnaGrupTipiId = Abone.AnaGrupTipiId  
+    and Maliyet.AltGrupTipiId = Abone.AltGrupTipiId
+    and Abone.FirmId > 0
+    and Abone.HesapTipiId = 13 -- Abone
+)
+  left outer join dbo.OnmBelgeMaliyet as MaliyetBelgesi on (
+        isnull(Maliyet.Id, 0) = isnull(MaliyetBelgesi.MaliyetId, 0)
+	and isnull(Varlik.Id, 0) = isnull(MaliyetBelgesi.VarlikId, 0)
+	and isnull(Abone.Id, 0) = isnull(MaliyetBelgesi.AboneId, 0)
+    and MaliyetBelgesi.BelgeDonemTipiId = ' + convert(varchar(10), @BelgeDonemTipiId) + '
+)
+  left outer join dbo.OnmBelgeDekont as OdemeBelgesi on (
+          isnull(MaliyetBelgesi.BelgeDekontId, 0) = isnull(OdemeBelgesi.Id, 0) 
+)
+
+Where Maliyet.FirmId = ' + convert(varchar(20),  @FirmId) + '
+and   Maliyet.IsActive = 1
+and   Maliyet.HesapTipiId = 11
+-- Sadece kiralık olanları kira maliyetiyle birlikte gösterir veya kiralık olmayan diğer maliyetler
+and ( ( Maliyet.UstHesapKodu = ''81.14'' and ( isnull(Maliyet.IsKiralik,0) = isnull(Varlik.IsKiralik,0) ) ) 
+  or  ( Maliyet.UstHesapKodu <> ''81.14'' ) ) 
+'
+
+  set @Where = ''
+  
+  if (CHARINDEX('Abone', @MaliyetTipi) > 0)
+      set @Where = ' and Abone.UstGrupTipiId = 84 ' 
+
+  if (CHARINDEX('Varlık', @MaliyetTipi) > 0)
+      set @Where = ' and Varlik.UstGrupTipiId = 83 ' 
+
+  if (CHARINDEX('Genel yönetim', @MaliyetTipi) > 0)
+      set @Where = ' and Maliyet.BAHesapTipiId = 770 ' 
+
+  if (CHARINDEX('Dışarıdan sağlanan', @MaliyetTipi) > 0)
+      set @Where = ' and Maliyet.BAHesapTipiId = 793 ' 
+
+  if (CHARINDEX('Kredi kartı', @MaliyetTipi) > 0)
+      set @Where = ' and Maliyet.UstHesapKodu = ''81.13'' ' 
+
+  if (CHARINDEX('Aylık Kira', @MaliyetTipi) > 0)
+      set @Where = ' and Maliyet.UstHesapKodu = ''81.14'' and Varlik.IsKiralik = 1 and Varlik.PeriyodTipiId = 31 and Varlik.UstGrupTipiId = 83 ' 
+
+  if (CHARINDEX('Sigorta', @MaliyetTipi) > 0)
+      set @Where = ' and Maliyet.UstHesapKodu = ''81.15'' ' 
+
+  if (CHARINDEX('Otomatik ödeme', @MaliyetTipi) > 0)
+      set @Where = ' and  (Varlik.OtoOdemeBankaHesapId > 0 or Abone.OtoOdemeBankaHesapId > 0) ' 
+
+  -- aylık ödemelerin tüm listesi
+  if (CHARINDEX('Aylık ödeme', @MaliyetTipi) > 0)  
+      set @Where = ' and ( Abone.PeriyodTipiId = 31 or ( Varlik.PeriyodTipiId = 31 and Varlik.IsKiralik = 1  and Maliyet.UstHesapKodu = ''81.14'' )) ' 
+  -- faturası gelmeyenler
+  if (CHARINDEX('Faturası gelmeyen', @MaliyetTipi) > 0)  
+      set @Where = ' and ( Abone.Id > 0 and MaliyetBelgesi.Id is null ) ' 
+  -- ödenmemiş kiralar
+  if (CHARINDEX('Ödenmemiş kiralar', @MaliyetTipi) > 0)  
+      set @Where = ' and ( Varlik.PeriyodTipiId = 31 and Varlik.IsKiralik = 1  and Maliyet.UstHesapKodu = ''81.14'' and OdemeBelgesi.Id is null ) ' 
+  -- henüz ödenmemiş faturalar
+  if (CHARINDEX('Henüz ödenmemiş faturalar', @MaliyetTipi) > 0)  
+      set @Where = ' and ( MaliyetBelgesi.Id > 0 and OdemeBelgesi.Id is null ) ' 
+  -- Gecikmeye düşen ödemeler
+  if (CHARINDEX('Gecikme', @MaliyetTipi) > 0)  
+      set @Where = ' and ( MaliyetBelgesi.Id > 0 and convert(date, MaliyetBelgesi.SonOdemeTarihi, 103) < convert(date, GETDATE(),103) and OdemeBelgesi.Id is null ) ' 
+
+  --if (CHARINDEX('', @MaliyetTipi) > 0)  
+  --    set @Where = '  ' 
+  --if (CHARINDEX('', @MaliyetTipi) > 0)  
+  --    set @Where = '  ' 
+   
+  set @Orderby = ' Order by Maliyet.HesapAdi, Varlik.HesapAdi, Abone.HesapAdi '
+
+  set @Sql = @Sql + @Where + @Orderby 
+
+  Exec sp_executesql @Sql
+
+END
+
+END
+
+
+/*
+--and Abone.UstGrupTipiId = 84 -- abonelikler
+--and Varlik.UstGrupTipiId = 83 -- varlıklar
+--and Maliyet.BAHesapTipiId = 770 -- Genel yönetim giderleri
+--and Maliyet.BAHesapTipiId = 793 -- Dışarıdan sağlanan fayda ve hizmetler
+--and Maliyet.UstHesapKodu = '81.13' -- kredi kartı extresi
+--and Maliyet.UstHesapKodu = '81.14' and Varlik.IsKiralik = 1 and Varlik.PeriyodTipiId = 31 and Varlik.UstGrupTipiId = 83 -- aylık kiralıklar
+--and Maliyet.UstHesapKodu = '81.15' -- sigortalar
+--and  (Varlik.OtoOdemeBankaHesapId > 0 or Abone.OtoOdemeBankaHesapId > 0) -- Otomatik ödemede olan hesaplar
+*/
+
+/*
+Select * from OnmHesapFinans
+where 0 = 0
+--and UstGrupTipiId = 83 -- varlıklar
+--and UstGrupTipiId = 84 -- abonelikler
+--and IsKiralik = 1 and PeriyodTipiId = 31 and UstGrupTipiId = 83 -- aylık kiralıklar
+*/
+/*
+Select * from OnmHesapFinans
+where 0 = 0
+and UstGrupTipiId = 83 -- varlıklar
+
+Select * from OnmHesapFinans
+where 0 = 0
+--and UstGrupTipiId = 83 -- varlıklar
+--and UstGrupTipiId = 84 -- abonelikler
+--and IsKiralik = 1 and PeriyodTipiId = 31 and UstGrupTipiId = 83 -- aylık kiralıklar
+--and BAHesapTipiId = 770 
+*/
+

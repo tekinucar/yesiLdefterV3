@@ -1,0 +1,160 @@
+﻿/*
+kullanıcının/ bilgisayarın
+--------------------------
+2=vezneleri
+3=kasaları
+4=bankalar
+5=diğer araçlar
+-------------
+11=tahsilat araçları
+12=ödeme araçları
+13=tüm araçları
+--------------- ekle
+default kasası
+default pos
+default kredi-kartı
+*/
+
+
+
+CREATE PROCEDURE [dbo].[prc_VEZNE_ITEMS] 
+  ( @firmId  int,
+    @tboxTd  smallint,
+    @vezneId int,
+    @cariId  int,
+    @compId  int )  
+AS BEGIN 
+  
+  /*
+  VZN_TBOX_TD
+    2, Vezne
+    3, Veznedeki Kasalar
+    4, Veznedeki Banka Araçları
+    5, Veznedeki Diğer Araçlar
+    6, Bilgisayara Ait Vezneler
+    7, Kullanıcıya Ait Vezneler
+   11, Tahsilat Araçları
+   12, Ödeme Araçları
+   13, Tüm Tah+Ödm Araçları
+  */
+
+  /*
+  declare @firmId  int
+  declare @tboxTd  smallint
+  declare @vezneId int 
+  declare @cariId  int 
+  declare @compId  int
+  set @firmId = 3
+  set @tboxTd = 11
+  set @vezneId = 1 
+  set @cariId = 1
+  set @compId = 0
+  */
+  
+  declare @tboxTdS  varchar(30) 
+  declare @fnsTipi  varchar(30) 
+  declare @cumle    varchar(2000)
+  declare @whereAdd varchar(500) 
+  
+  -- 3 = kasalar, 
+  -- 4 = banka hesapları+pos+kredikartı,
+  -- 5 = diğer araçlar
+  set @tboxTdS = '3,4,5' 
+    
+  -- Tahsilat araçları
+  if (@tboxTd = 11) 
+    set @fnsTipi = '0,10,22,24'
+  
+  -- Ödeme araçları
+  if (@tboxTd = 12) 
+    set @fnsTipi = '0,10,22,23'
+  
+  -- Tahsilat+Ödeme araçları
+  if (@tboxTd = 13)
+  begin 
+    set @tboxTdS = '2,3,4,5' 
+    set @fnsTipi = '0,10,22,23,24'
+  end
+
+  -- Sadece Vezneler
+  if (@tboxTd = 2) 
+  begin
+    set @tboxTdS = '2' 
+    set @fnsTipi = '0'
+  end
+ 
+  -- user - kullanıcını vezneleri isteniyorsa
+  if (@cariId > 0)
+     set @whereAdd = 
+     ' Select HP_VEZNE_ID from HP_VEZNE
+       where ISACTIVE = 1 
+       and   HP_CARI_ID = ' + convert(varchar(20), @cariId)
+ 
+  -- comp - bilgisayarın vezneleri isteniyorsa
+  if (@compId > 0)
+     set @whereAdd = 
+     ' Select HP_VEZNE_ID from HP_VEZNE
+       where ISACTIVE = 1 
+       and   HP_COMP_ID = ' + convert(varchar(20), @compId)
+ 
+  -- vezneId varsa 
+  if (@vezneId > 0)
+     set @whereAdd = @whereAdd +
+     ' and   HP_VEZNE_ID = ' + convert(varchar(20), @vezneId)
+    
+ 
+ set @cumle = '
+  SELECT 
+    [HPVZN].[ID]
+  , [HPVZN].[FIRM_ID]
+  , [HPVZN].[ISACTIVE]
+  , [HPVZN].[LINE_NO]
+  , [HPVZN].[TBOX_TD]
+  , [HPVZN].[FNS_TIPI]
+  , [HPVZN].[HP_VEZNE_ID]
+  , [HPVZN].[HP_FINANS_ID]
+  , [HPVZN].[HP_CARI_ID]
+  , [HPVZN].[HP_COMP_ID]
+  , [HPVZN].[VEZNE_ADI]
+  , [VZN].ID                        LKP_VEZNE_ID
+  , [VZN].VEZNE_ADI                 LKP_VEZNE_ADI
+  , [HPFNS].ID                      LKP_FINANS_ID
+  , [HPFNS].FNS_TIPI                LKP_FINANS_TIPI
+  , [HPFNS].HP_TAMADI               LKP_FINANS_ADI
+  , [HPFNS].PARA_ID                 LKP_FINANS_PARA_ID
+  , [HPUSERS].SYS_ID                LKP_CARI_ID
+  , [HPUSERS].USER_FULLNAME         LKP_CARI_ADI
+  , [HPCOMPS].SYS_ID                LKP_COMP_ID
+  , [HPCOMPS].SYSTEM_NAME           LKP_COMP_ADI
+
+  from HP_VEZNE [HPVZN]
+    left outer join HP_VEZNE  [VZN]     on ( [HPVZN].HP_VEZNE_ID  = [VZN].ID  ) 
+    left outer join HP_FINANS [HPFNS]   on ( [HPVZN].HP_FINANS_ID = [HPFNS].ID  ) 
+    left outer join HP_USERS  [HPUSERS] on ( [HPVZN].HP_CARI_ID   = [HPUSERS].SYS_ID  ) 
+    left outer join HP_COMPS  [HPCOMPS] on ( [HPVZN].HP_COMP_ID   = [HPCOMPS].SYS_ID  ) 
+
+  where 0 = 0 
+  -- firmalar
+  and   [HPVZN].FIRM_ID = ' + convert(varchar(30), @firmId) + ' 
+  -- vezne kayıtlı elemanlar
+  and   [HPVZN].TBOX_TD  in ( ' + @tboxTdS + ' ) 
+  -- finans türleri
+  and   [HPVZN].FNS_TIPI in ( ' + @fnsTipi + ' ) 
+  -- kimin veznesi isteniyorsa
+  and   [HPVZN].HP_VEZNE_ID in ( ' + @whereAdd + ' )
+
+  ORDER BY  [VZN].LINE_NO, [VZN].VEZNE_ADI, [HPFNS].FNS_TIPI, [HPVZN].LINE_NO, [HPFNS].HP_TAMADI
+  '; 
+
+  
+  execute ( @cumle )
+ 
+ 
+
+END;
+
+
+
+  
+ 
+ 

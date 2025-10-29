@@ -1,0 +1,326 @@
+﻿-- ---------------------------------------------------------------
+-- EduMtskSoruKitabiDetayi 
+-- ---------------------------------------------------------------
+
+begin transaction
+
+ create table EduMtskSoruKitabiDetayi
+ (
+    Id                   Int IDENTITY(1,1) not null,
+    IsActive             Bit               null,
+    KitapNo              SmallInt          not null,
+    SoruId               Int               null,
+    SiraNo               SmallInt          null,  
+    
+   Constraint pk_EduMtskSoruKitabiDetayi primary key (Id)
+ )
+
+ create index X_EduMtskSoruKitabiDetayi_01 on EduMtskSoruKitabiDetayi (KitapNo)
+
+ grant select, insert, update, delete on EduMtskSoruKitabiDetayi to public
+
+commit transaction
+
+
+CREATE trigger [dbo].[trg_EduMtskSoruKitabiDetayi] on [dbo].[EduMtskSoruKitabiDetayi]
+after insert, update
+as begin
+
+    declare cursor_EduMtskSoruKitabiDetayi cursor for select Id from Inserted
+    declare @curId bigint
+
+    OPEN cursor_EduMtskSoruKitabiDetayi
+
+    FETCH NEXT FROM cursor_EduMtskSoruKitabiDetayi INTO @curId
+	
+	declare @yKitapNo smallint = 0
+	declare @yDersTipiId smallint = 0
+	declare @DersTipiId_ smallint = 0
+	declare @ySoruId int = 0
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+		Select @yKitapNo = ins.KitapNo
+    	From Inserted ins
+    	Where ins.Id = @curId
+
+    	FETCH NEXT FROM cursor_EduMtskSoruKitabiDetayi INTO @curId
+    end -- While
+
+    Update EduMtskSoruKitabi set
+        SoruSayisi = x.Adet 
+    From EduMtskSoruKitabi as a,
+    (
+       Select KitapNo, count(Id) Adet from EduMtskSoruKitabiDetayi 
+       Where KitapNo = @yKitapNo
+       Group by KitapNo
+    ) as x
+     Where a.KitapNo = x.KitapNo
+
+    CLOSE cursor_EduMtskSoruKitabiDetayi
+    DEALLOCATE cursor_EduMtskSoruKitabiDetayi  
+	
+end -- trigger
+
+
+
+
+/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_EduMtskSoruKitabiDetayiOlustur] (@KitapNo int)  
+AS BEGIN
+
+  --declare @KitapNo int = 203
+
+  delete from EduMtskSoruKitabiDetayi 
+  where KitapNo = @KitapNo
+ 
+  -- 1	Trafik ve Çevre Dersi
+  INSERT INTO [dbo].[EduMtskSoruKitabiDetayi]
+           ([IsActive]
+           ,[KitapNo]
+           ,[SoruId]
+           ,[SiraNo])
+  Select TOP 23
+       [IsActive]
+      ,@KitapNo as KitapNo
+	  ,Id as [SoruId] 
+      ,0 as SiraNo
+  From [dbo].[EduMtskSorular]
+  where DersTipiId = 1
+  and   IsActive = 1
+  ORDER BY NEWID()
+
+
+  -- 2	İlkyardım Dersi
+  INSERT INTO [dbo].[EduMtskSoruKitabiDetayi]
+           ([IsActive]
+           ,[KitapNo]
+           ,[SoruId]
+           ,[SiraNo])
+  Select TOP 12
+       [IsActive]
+      ,@KitapNo as KitapNo
+	  ,Id as [SoruId] 
+      ,0 as SiraNo
+  From [dbo].[EduMtskSorular]
+  where DersTipiId = 2
+  and   IsActive = 1
+  ORDER BY NEWID()
+
+  -- 3	Araç Tekniği Dersi
+  INSERT INTO [dbo].[EduMtskSoruKitabiDetayi]
+           ([IsActive]
+           ,[KitapNo]
+           ,[SoruId]
+           ,[SiraNo])
+  Select TOP 9
+       [IsActive]
+      ,@KitapNo as KitapNo
+	  ,Id as [SoruId] 
+      ,0 as SiraNo
+  From [dbo].[EduMtskSorular]
+  where DersTipiId = 3
+  and   IsActive = 1
+  ORDER BY NEWID()
+
+  -- 5	Trafik Adabı Dersi
+  INSERT INTO [dbo].[EduMtskSoruKitabiDetayi]
+           ([IsActive]
+           ,[KitapNo]
+           ,[SoruId]
+           ,[SiraNo])
+  Select TOP 6
+       [IsActive]
+      ,@KitapNo as KitapNo
+	  ,Id as [SoruId] 
+      ,0 as SiraNo
+  From [dbo].[EduMtskSorular]
+  where DersTipiId = 5
+  and   IsActive = 1
+  ORDER BY NEWID()
+
+
+  Update EduMtskSoruKitabi set
+    SoruSayisi = x.Adet 
+  From EduMtskSoruKitabi as a,
+  (
+     Select KitapNo, count(Id) Adet from EduMtskSoruKitabiDetayi 
+     Where KitapNo = @kitapNo
+     Group by KitapNo
+  ) as x
+  Where a.KitapNo = x.KitapNo
+
+
+END -- procedure
+
+/*CreateProcedureEnd*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* **** iptal ***** */
+
+CREATE PROCEDURE [dbo].[prc_EduMtskSoruKitabiDetayiOlustur1] ( @kitapNo int )  
+AS BEGIN
+
+  --declare @kitapNo int
+  declare @dersTipiId int
+  declare @sinavSoruSayisi int
+  declare @konuId int
+  declare @konuAdet int
+
+  declare @count int
+  declare @limit int 
+  set @count = 1
+
+  IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'#listKonular') AND type in (N'U'))
+    DROP TABLE #listKonular
+
+  Select 
+    ROW_NUMBER() OVER(ORDER BY d.DersTipiId, k.Id ASC) AS Row
+  , d.DersTipiId 
+  , d.SinavSoruSayisi 
+  , k.Id as KonuId  
+  , isnull(k.SinavSoruSayisi,0) as KonuSinavSoruSayisi
+  Into #listKonular
+  From EduMtskDersler as d
+  left outer join EduMtskKonular as k on ( d.DersTipiId = k.DersTipiId and d.SertifikaGrupTipiId = k.SertifikaGrupTipiId )
+  Where d.IsActive = 1 
+  Order by d.DersTipiId
+
+  Select @limit = COUNT(Row) FROM #listKonular
+  
+  While @count <= @limit
+  Begin
+      Select 
+         @dersTipiId = DersTipiId
+       , @sinavSoruSayisi = SinavSoruSayisi
+       , @konuId = KonuId
+       , @konuadet = KonuSinavSoruSayisi
+      From #listKonular Where Row=@count
+      /*
+      print 
+        convert(varchar(5), @kitapNo) + ', ' +  
+        convert(varchar(5), @dersTipiId) + ', ' +  
+        convert(varchar(5), @sinavSoruSayisi) + ', ' +  
+        convert(varchar(5), @konuId) + ', ' +  
+        convert(varchar(5), @konuadet) + ', '   
+      */
+   
+      EXECUTE [dbo].[prc_EduMtskSoruKitabiDetayiOlustur2] 
+          @kitapNo
+        , @dersTipiId
+        , @konuId
+        , @konuadet
+
+      Set @count = @count + 1
+  End -- While
+
+
+  Update EduMtskSoruKitabi set
+    SoruSayisi = x.Adet 
+  From EduMtskSoruKitabi as a,
+  (
+     Select KitapNo, count(Id) Adet from EduMtskSoruKitabiDetayi 
+     Where KitapNo = @kitapNo
+     Group by KitapNo
+  ) as x
+  Where a.KitapNo = x.KitapNo
+
+
+
+
+END -- Procedure
+
+
+CREATE PROCEDURE [dbo].[prc_EduMtskSoruKitabiDetayiOlustur2] ( 
+     @kitapNo int 
+    ,@dersTipiId int
+    ,@konuId int
+    ,@adet int
+  )  
+AS BEGIN
+  declare @cumle varchar(1000)
+  declare @and varchar(100)
+/*
+  declare @kitapNo int
+  declare @dersTipiId int
+  declare @konuId int
+  declare @adet int
+
+  set @kitapNo = 1
+  set @dersTipiId = 1
+  set @konuId = 92
+  set @adet = 3
+*/
+
+  -- SertifikaGrupTipiId
+  -- 1, 'A,A1,A2,M'
+  -- 2, 'B,C,D,E'
+  -- 3, 'F,G'
+
+
+  -- DersTipiId
+  --  1, 'Trafik ve Çevre Dersi'
+  --  2, 'İlkyardım Dersi'
+  --  3, 'Araç Tekniği Dersi'
+  --  5, 'Trafik Adabı Dersi'
+  
+  set @and = ' 0 = 0 ';
+  if ((@kitapNo > 100 and @kitapNo < 200) and ( @dersTipiId = 1 or @dersTipiId = 3)) set @and = ' s.SertifikaGrupTipiId = 1 ';
+  if ((@kitapNo > 200 and @kitapNo < 300) and ( @dersTipiId = 1 or @dersTipiId = 3)) set @and = ' s.SertifikaGrupTipiId = 2 '; 
+  if ((@kitapNo > 300 and @kitapNo < 400) and ( @dersTipiId = 1 or @dersTipiId = 3)) set @and = ' s.SertifikaGrupTipiId = 3 '; 
+
+  set @cumle = '
+  INSERT INTO [dbo].[EduMtskSoruKitabiDetayi]
+           ([EduMtskSorularId]
+		   ,[IsActive]
+           ,[KitapNo]
+           ,[DersTipiId]
+           ,[EduMtskKonularId]
+           )
+    Select top ' + CONVERT(varchar(3), @adet) + ' x.* From ( 
+    Select top 100 percent s.Id as SoruId
+      ,1 as IsActive
+      ,'+CONVERT(varchar(3), @kitapNo)+' as KitapNo
+      ,'+CONVERT(varchar(2), @dersTipiId)+' as DersTipiId 
+      ,'+CONVERT(varchar(5), @konuId)+' as KonuId
+    From EduMtskSorular as s
+    Where ' + @and + '
+	and   s.DersTipiId = ' + CONVERT(varchar(2), @dersTipiId) + '
+    and   s.EduMtskKonularId = ' + CONVERT(varchar(5), @konuId) + '
+    and   s.Id not in 
+    (
+      Select EduMtskSorularId 
+      From EduMtskSoruKitabiDetayi as k
+      Where k.KitapNo <= ' + CONVERT(varchar(3), @kitapNo) + '
+      and   k.DersTipiId = ' + CONVERT(varchar(2), @dersTipiId) + '
+      and   k.EduMtskKonularId = ' + CONVERT(varchar(5), @konuId) + '
+    )
+    order by NEWID()
+  ) as x
+'
+  --execute(@cumle)
+
+  Exec sp_executesql @cumle
+
+
+
+END -- procedure
+
+/* ****** ptalin sonu ************* */
+

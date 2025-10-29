@@ -1,0 +1,181 @@
+﻿
+USE [GREEN]
+GO
+
+/****** Object:  Trigger [dbo].[trg_FN_LINEVOL]    Script Date: 07/30/2017 16:03:04 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TRIGGER [dbo].[trg_FN_LINEVOL] on [dbo].[FN_LINEVOL] 
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    declare @i_TAHSIL_TUTARI numeric(22,5) = 0
+    declare @d_TAHSIL_TUTARI numeric(22,5) = 0
+
+    DECLARE InsertCursor_FN_LINEVOL cursor for select ID from Inserted
+    DECLARE @curId bigint
+
+    OPEN InsertCursor_FN_LINEVOL
+
+    FETCH NEXT FROM InsertCursor_FN_LINEVOL INTO @curId
+    
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+	    set @i_TAHSIL_TUTARI = 0
+        set @d_TAHSIL_TUTARI = 0
+
+
+		select 
+    	 @i_TAHSIL_TUTARI  = ins.TAHSIL_TUTARI
+    	from Inserted ins
+    	where ins.ID = @curId
+    
+        select 
+    	 @d_TAHSIL_TUTARI  = dlt.TAHSIL_TUTARI
+    	from Deleted dlt
+    	where dlt.ID = @curId
+		
+	    EXEC dbo.prc_FN_LINEVOL_CALC @curId 
+
+		if (@i_TAHSIL_TUTARI <> @d_TAHSIL_TUTARI) 
+		   EXEC dbo.prc_FN_LINEVOL_TKST @curId
+
+    	FETCH NEXT FROM InsertCursor_FN_LINEVOL INTO @curId
+    END
+
+    CLOSE InsertCursor_FN_LINEVOL
+    DEALLOCATE InsertCursor_FN_LINEVOL   
+
+END
+
+GO
+
+
+
+
+
+/**** iptal ****/
+
+
+CREATE TRIGGER [dbo].[trg_FN_LINEVOL] on [dbo].[FN_LINEVOL] 
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    DECLARE InsertCursor_FN_LINEVOL cursor for select ID from Inserted
+    DECLARE @curId bigint
+
+    OPEN InsertCursor_FN_LINEVOL
+
+    FETCH NEXT FROM InsertCursor_FN_LINEVOL INTO @curId
+
+    declare @i_BHESAP_TD SmallInt = 0
+    declare @i_BHESAP_ID Int = 0
+    declare @i_AHESAP_TD SmallInt = 0
+    declare @i_AHESAP_ID Int = 0
+    declare @i_CARI_TD   SmallInt = 0
+    declare @i_CARI_ID   Int = 0
+
+	declare @i_ISLEM_TUTARI numeric(22,5) = 0
+    declare @i_MASRAF_TUTARI numeric(22,5) = 0
+    declare @i_TOPLAM_TUTARI numeric(22,5) = 0
+	declare @i_KDV_ORANI numeric(5,2) = 0
+
+    
+	declare @d_BHESAP_TD SmallInt = 0
+    declare @d_BHESAP_ID Int = 0
+    declare @d_AHESAP_TD SmallInt = 0
+    declare @d_AHESAP_ID Int = 0
+    declare @d_CARI_TD   SmallInt = 0
+    declare @d_CARI_ID   Int = 0
+
+	declare @d_ISLEM_TUTARI numeric(22,5) = 0
+    declare @d_MASRAF_TUTARI numeric(22,5) = 0
+    declare @d_TOPLAM_TUTARI numeric(22,5) = 0
+	declare @d_KDV_ORANI numeric(5,2) = 0
+    
+
+
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        set @i_BHESAP_TD = 0
+        set @i_BHESAP_ID = 0
+        set @i_AHESAP_TD = 0
+        set @i_AHESAP_ID = 0
+        set @i_CARI_TD   = 0
+        set @i_CARI_ID   = 0
+
+	    set @i_ISLEM_TUTARI = 0
+        set @i_MASRAF_TUTARI = 0
+        set @i_TOPLAM_TUTARI = 0
+		set @i_KDV_ORANI = 0
+        
+		set @d_BHESAP_TD = 0
+        set @d_BHESAP_ID = 0
+        set @d_AHESAP_TD = 0
+        set @d_AHESAP_ID = 0
+        set @d_CARI_TD   = 0
+        set @d_CARI_ID   = 0
+	
+		set @d_ISLEM_TUTARI = 0
+        set @d_MASRAF_TUTARI = 0
+        set @d_dTOPLAM_TUTARI = 0
+		set @d_dKDV_ORANI = 0
+        
+        select 
+    	 @i_BHESAP_TD = ins.BHESAP_TD
+        ,@i_BHESAP_ID = ins.BHESAP_ID
+        ,@i_AHESAP_TD = ins.AHESAP_TD
+        ,@i_AHESAP_ID = ins.AHESAP_ID
+        ,@i_CARI_TD   = ins.CARI_TD
+        ,@i_CARI_ID   = ins.CARI_ID
+        ,@i_ISLEM_TUTARI  = ins.ISLEM_TUTARI
+    	,@i_MASRAF_TUTARI = ins.MASRAF_TUTARI
+    	,@i_TOPLAM_TUTARI = ins.TOPLAM_TUTARI
+		,@i_KDV_ORANI = ins.KDV_ORANI
+    	from Inserted ins
+    	where ins.ID = @curId
+    
+        select 
+    	 @d_BHESAP_TD = dlt.BHESAP_TD
+        ,@d_BHESAP_ID = dlt.BHESAP_ID
+        ,@d_AHESAP_TD = dlt.AHESAP_TD
+        ,@d_AHESAP_ID = dlt.AHESAP_ID
+        ,@d_CARI_TD   = dlt.CARI_TD
+        ,@d_CARI_ID   = dlt.CARI_ID
+        ,@d_ISLEM_TUTARI  = dlt.ISLEM_TUTARI
+    	,@d_MASRAF_TUTARI = dlt.MASRAF_TUTARI
+    	,@d_TOPLAM_TUTARI = dlt.TOPLAM_TUTARI
+		,@d_KDV_ORANI     = dlt.KDV_ORANI
+    	from Deleted dlt
+    	where dlt.ID = @curId
+     	
+     	   	
+    	if ((@i_BHESAP_TD <> @d_BHESAP_TD) or
+            (@i_BHESAP_ID <> @d_BHESAP_ID) or
+            (@i_AHESAP_TD <> @d_AHESAP_TD) or
+            (@i_AHESAP_ID <> @d_AHESAP_ID) or
+            (@i_CARI_TD   <> @d_CARI_TD) or
+            (@i_CARI_ID   <> @d_CARI_ID) or
+            (@i_ISLEM_TUTARI  <> @d_ISLEM_TUTARI) or  
+    	    (@i_MASRAF_TUTARI <> @d_MASRAF_TUTARI) or 
+    	    (@i_TOPLAM_TUTARI <> @d_TOPLAM_TUTARI) or
+			(@i_KDV_ORANI     <> @d_KDV_ORANI)) 
+    	begin
+    	  EXEC dbo.prc_FN_LINEVOL_CALC @curId 
+    	end        
+
+    	FETCH NEXT FROM InsertCursor_FN_LINEVOL INTO @curId
+    END
+
+    CLOSE InsertCursor_FN_LINEVOL
+    DEALLOCATE InsertCursor_FN_LINEVOL   
+        
+
+END
+
+*/

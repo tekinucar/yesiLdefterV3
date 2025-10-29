@@ -1,0 +1,135 @@
+﻿
+CREATE TRIGGER [Lkp].[trg_OnmHesapMaster] on [Lkp].[OnmHesapMaster] 
+AFTER INSERT, UPDATE
+AS BEGIN
+    --   UstGrupTipiId       SmallInt      null, /* 102   banka        */
+    --   AnaGrupTipiId       SmallInt      null, /* 1022  banka hesabı */
+    --   AltGrupTipiId       Int           null, /* 10221 vadesiz      */
+
+    declare cursor_OnmHesapMaster cursor for select Id from Inserted
+    declare @curId bigint
+
+	declare @kacHane smallInt = 3 
+	declare @eId Int = 0
+    declare @eFirmId Int = 0
+    declare @eUstGrupTipiId smallInt = 0
+    declare @eAnaGrupTipiId smallInt = 0
+    declare @eAltGrupTipiId Int = 0
+    declare @eHesapKisaAdi varchar(100) = null
+    declare @eHesapAdi varchar(150) = null
+	declare @eHesapKodu varchar(50) = null
+	declare @eUstHesapKodu varchar(50) = null
+	declare @eNumarasi varchar(50) = null
+
+	declare @eParentHesapAdi1 varchar(150) = null
+	declare @eParentHesapKodu1 varchar(50) = null
+    declare @eParentHesapAdi2 varchar(150) = null
+	declare @eParentHesapAdi3 varchar(150) = null
+
+    declare @yUstGrupTipiId smallInt = 0
+	declare @yHesapKisaAdi varchar(100) = null
+	declare @yHesapKodu varchar(50) = null
+	
+
+    OPEN cursor_OnmHesapMaster
+
+    FETCH NEXT FROM cursor_OnmHesapMaster INTO @curId
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+	  set @yHesapKisaAdi = ''
+	  set @yHesapKodu = ''
+
+      select 
+	     @eFirmId = isnull(ins.FirmId,0)  
+    	,@eUstGrupTipiId = isnull(ins.UstGrupTipiId,0)  
+		,@eAnaGrupTipiId = isnull(ins.AnaGrupTipiId,0) 
+		,@eAltGrupTipiId = isnull(ins.AltGrupTipiId,0) 
+		,@eHesapKisaAdi = isnull(ins.HesapKisaAdi,'NULL')
+		,@eHesapAdi = isnull(ins.HesapAdi,'NULL')
+		,@eHesapKodu = isnull(ins.HesapKodu,'NULL')
+    	,@eUstHesapKodu = isnull(ins.UstHesapKodu,'NULL')
+    	--,@eNumarasi = isnull(ins.Numarasi,'')
+		,@eParentHesapAdi1 = isnull(fh1.HesapAdi, '')
+		,@eParentHesapKodu1 = isnull(fh1.HesapKodu, '')
+		,@eParentHesapAdi2 = isnull(fh2.HesapAdi, '') 
+		,@eParentHesapAdi3 = isnull(fh3.HesapAdi, '') 
+
+      from Inserted ins
+	    left outer join Lkp.OnmHesapMaster fh1 on ( ins.ParentId = fh1.Id )
+		left outer join Lkp.OnmHesapMaster fh2 on ( fh1.ParentId = fh2.Id )
+		left outer join Lkp.OnmHesapMaster fh3 on ( fh2.ParentId = fh3.Id )
+	  where ins.Id = @curId
+	  
+	  if (@eAnaGrupTipiId = 102)  
+	  begin
+	    set @yHesapKisaAdi = @eHesapAdi
+	    
+		if (@eAltGrupTipiId = 1021)
+		    set @yHesapKisaAdi = @eParentHesapAdi1
+		if (@eAltGrupTipiId = 1022)
+		    set @yHesapKisaAdi = @eParentHesapAdi2
+        if (@eAltGrupTipiId = 1023)
+		    set @yHesapKisaAdi = @eParentHesapAdi3
+        if (@eAltGrupTipiId = 1024)
+		    set @yHesapKisaAdi = @eParentHesapAdi3
+
+		if ((@eAltGrupTipiId = 1020) or -- seçilen banka, 
+		    (@eAltGrupTipiId = 1021) or -- şube
+			(@eAltGrupTipiId = 1022) or -- banka hesabı
+			(@eAltGrupTipiId = 1023) or -- banka kartı
+			(@eAltGrupTipiId = 1024) or -- pos cihazı
+		    (@eAltGrupTipiId = 1029))   -- tüm banka
+		begin
+		  set @yHesapKisaAdi = replace(@yHesapKisaAdi, 'TÜRKİYE', '');
+	      set @yHesapKisaAdi = replace(@yHesapKisaAdi, 'T.A.Ş.', '');
+	      set @yHesapKisaAdi = replace(@yHesapKisaAdi, 'T.A.O.', '');
+	      set @yHesapKisaAdi = replace(@yHesapKisaAdi, 'A.Ş.', '');
+	      set @yHesapKisaAdi = replace(@yHesapKisaAdi, 'T.C.', '');
+		  set @yHesapKisaAdi = replace(@yHesapKisaAdi, ' BANKALARI', '');
+	      set @yHesapKisaAdi = replace(@yHesapKisaAdi, ' BANKASI', '');
+	      set @yHesapKisaAdi = replace(@yHesapKisaAdi, ' BANK', '');
+		  set @yHesapKisaAdi = replace(@yHesapKisaAdi, ' BBVA', '');
+        end
+
+        if (@yHesapKisaAdi <> '')
+        begin
+	      --set @yHesapKisaAdi = Ltrim(@yHesapKisaAdi)
+	      --set @yHesapKisaAdi = Rtrim(@yHesapKisaAdi)
+		  set @yHesapKisaAdi = RTRIM(LTRIM(@yHesapKisaAdi))
+        end   
+
+		-- banka şubesi
+		if (@eAltGrupTipiId = 1021)
+		    set @yHesapKisaAdi = @yHesapKisaAdi + '.' + @eHesapAdi
+        -- banka hesabi
+        if (@eAltGrupTipiId = 1022)
+		    set @yHesapKisaAdi = @yHesapKisaAdi + '.' + @eParentHesapAdi1 + '.' +  RTRIM(LTRIM(@eParentHesapKodu1)) + '.' + @eNumarasi
+        -- banka kartı
+        if (@eAltGrupTipiId = 1023)
+		    set @yHesapKisaAdi = @yHesapKisaAdi + '.' + @eHesapAdi + '.' + @eNumarasi
+        -- pos cihazı
+        if (@eAltGrupTipiId = 1024)
+		    set @yHesapKisaAdi = @yHesapKisaAdi + '.pos.' + @eHesapAdi + '.' + @eNumarasi
+      end
+	  	  	   
+	  if ((@eHesapKisaAdi <> @yHesapKisaAdi) and
+	      (@yHesapKisaAdi <> '')) 
+	  begin
+	    update Lkp.OnmHesapMaster set 
+	           HesapKisaAdi = substring(@yHesapKisaAdi,1,100)
+        where Id = @curId
+      end
+
+      FETCH NEXT FROM cursor_OnmHesapMaster INTO @curId
+    END
+
+    CLOSE cursor_OnmHesapMaster
+    DEALLOCATE cursor_OnmHesapMaster
+END
+GO
+
+ALTER TABLE [Lkp].[OnmHesapMaster] ENABLE TRIGGER [trg_OnmHesapMaster]
+GO
+
+

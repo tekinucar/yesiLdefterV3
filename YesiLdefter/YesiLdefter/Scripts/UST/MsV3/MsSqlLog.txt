@@ -1,0 +1,16 @@
+﻿begin transaction
+ create table MsSqlLog
+ (
+    Id              Int IDENTITY(1,1) not null,
+    RecDate         smalldatetime     null, 
+    ParamType       varchar(20)       null,
+    SqlText         nvarchar(max)     null,
+
+   Constraint pk_MsSqlLog primary key (Id)
+ )
+
+ create index X_MsSqlLog_01 on MsSqlLog (RecDate)
+ 
+ grant select, insert, update, delete on MsSqlLog to public
+
+commit transaction

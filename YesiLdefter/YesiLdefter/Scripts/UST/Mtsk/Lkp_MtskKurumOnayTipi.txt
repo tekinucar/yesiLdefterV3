@@ -1,0 +1,24 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+-- ------------------------------------------------------- 
+-- OnayTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[MtskKurumOnayTipi]
+(
+   Id               Int Unique Not null,
+   OnayTipi         nVarchar(30)   null,
+
+   constraint  pk_MtskKurumOnayTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[MtskKurumOnayTipi] (Id, OnayTipi)
+ VALUES 
+  (-1,     N''),
+  ( 0,     N'Onay Bekliyor'),
+  ( 1,     N'Onaylı')
+
+commit transaction
+
+/*CreateTableEnd*/

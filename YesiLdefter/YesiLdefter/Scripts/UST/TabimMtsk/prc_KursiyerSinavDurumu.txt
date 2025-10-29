@@ -1,0 +1,205 @@
+﻿CREATE PROCEDURE [dbo].[prc_KursiyerSinavDurumu] ( @kid int )  
+AS BEGIN
+  
+  declare @kursTipi varchar(10)
+  declare @dbName varchar(20)
+
+  set @kursTipi = 'MTSK'
+  Select @dbName = DB_NAME()
+  if (CHARINDEX('SRC', @dbName) > 0) set @kursTipi = 'SRC' 
+  if (CHARINDEX('ISMAK', @dbName) > 0) set @kursTipi = 'ISMAK'
+  
+  --print @dbName
+  --print @kursTipi
+
+  -- declare @kid int 
+  -- set @kid = 26375
+
+  declare @bugun datetime 
+  declare @Teo_SinavHak_Sayisi int
+  declare @Drk_SinavHak_Sayisi int
+
+  declare @IKINCI_4HAK int
+  declare @TEO_ADET int
+  declare @DRK_ADET int
+  declare @TEO_SONUCU int
+  declare @DRK_SONUCU int
+  
+  set @Teo_SinavHak_Sayisi = 4
+  set @Drk_SinavHak_Sayisi = 4
+  set @bugun = getdate() 
+  
+  select  
+     @IKINCI_4HAK = k.IKINCI_4HAK 
+   , @TEO_ADET = max(TEO_ROW) 
+   , @DRK_ADET = max(DRK_ROW) 
+   , @TEO_SONUCU = max(LKP_TEO_SONUCU) 
+   , @DRK_SONUCU = max(LKP_DRK_SONUCU) 
+   from ( 
+
+      Select  
+         b.UlasKursiyer  
+      , isnull(tsn.TEO_ROW,0) TEO_ROW 
+      , isnull(dsn.DRK_ROW,0) DRK_ROW 
+      , isnull(t_snc.teo_sonucu,0) + isnull(t_SRC.teo_SRC,0) as LKP_TEO_SONUCU -- + SRC_EgitimdenMuaf_Field 
+    --, isnull(t_snc.teo_sonucu,0) as LKP_TEO_SONUCU 
+      , isnull(d_snc.drk_sonucu,0) as LKP_DRK_SONUCU 
+
+      from 
+      (  /* sinav sayısına göre sırano üretiliyor */ 
+         select distinct(a.ROW) SIRA, @kid  UlasKursiyer 
+         from (  
+             select ROW_NUMBER() OVER(ORDER BY isnull(sn.Tarih,@bugun)) AS ROW 
+             from sinavnot sn 
+             where sn.UlasKursiyer = @kid  
+             and (sn.Not1 >= 0 or sn.Not2 >= 0 or sn.Not3 >= 0) 
+
+             union all 
+
+             select ROW_NUMBER() OVER(ORDER BY isnull(sn.Tarih1,@bugun)) AS ROW  
+             from sinavnot sn 
+             where sn.UlasKursiyer = @kid  
+             and (sn.Not4 >= 0) 
+         ) a  
+      ) b  
+      
+      --// hak sayısı
+     left outer join  
+     ( /* teorik hak sayısı */ 
+       select  
+         ROW_NUMBER() OVER(ORDER BY isnull(sn.Tarih,@bugun)) AS TEO_ROW  
+       , isnull(convert(datetime, convert(varchar(10), sn.[Tarih], 103), 103), @bugun) Tarih 
+       from sinavnot sn 
+       where sn.UlasKursiyer = @kid  
+       and (sn.Not1 <> 113)  -- raporlu değil ise
+       and (sn.Not1 >= 0 or sn.Not2 >= 0 or sn.Not3 >= 0) 
+     ) tsn on ( b.SIRA = tsn.TEO_ROW )  
+
+     left outer join 
+     ( /* direksiyon hak sayısı  */ 
+       select  
+         ROW_NUMBER() OVER(ORDER BY isnull(sn.Tarih1,@bugun)) AS DRK_ROW  
+       , sn.[Ulas]  [UlasDrk]  
+       , isnull(sn.[Tarih1],@bugun) Tarih1 
+       from sinavnot sn  
+       where sn.UlasKursiyer = @kid  
+       and (sn.Not4 <> 113)  -- raporlu değil ise
+       and (sn.Not4 > 0) 
+     ) dsn on ( b.SIRA = dsn.DRK_ROW )  
+      
+     left outer join 
+     ( /* teorik notların sonucu */ 
+       Select  
+         sn.UlasKursiyer 
+       , isnull(convert(datetime, convert(varchar(10), sn.[Tarih], 103), 103), @bugun) Tarih 
+       , (case isnull(max(sn.Not1),0)  
+          when 111 then 1 
+          when 113 then 0 
+          when 0 then 0  
+          else 1 end) 
+       + (case isnull(max(sn.Not2),0)  
+          when 111 then 1 
+          when 113 then 0 
+          when 0 then 0  
+          else 1 end) 
+       + (case isnull(max(sn.Not3),0)  
+          when 111 then 1  
+          when 113 then 0 
+          when 0 then 0  
+          else 1 end) teo_sonucu 
+       from sinavnot sn  
+       where 0 = 0 
+       and sn.Not1 > 69 
+       and isnull(convert(datetime, sn.[Tarih], 103), @bugun) <= getdate() + 100   
+       and sn.UlasKursiyer = @kid  
+       group by sn.UlasKursiyer, sn.Tarih  
+     ) t_snc  on ( tsn.Tarih = t_snc.Tarih ) 
+
+     left outer join  
+     ( /* direksiyon notu sonucu  */ 
+       Select 
+         sn.UlasKursiyer  
+       , isnull(sn.Tarih1,@bugun) Tarih1 
+       , (case isnull(max(sn.Not4),0)  
+          when 111 then 1 
+          when 113 then 0 
+          when 0 then 0 
+          else 1 end) drk_sonucu  
+       from sinavnot sn 
+       where 0 = 0 
+       and sn.Not4 > 69 
+       and sn.UlasKursiyer = @kid  
+       group by sn.UlasKursiyer, sn.Tarih1 
+     ) d_snc  on ( dsn.Tarih1 = d_snc.Tarih1 ) 
+
+     -- SRC_EgitimdenMuaf_join
+     left outer join 
+     ( /* SRC teorik muaffiyeti */ 
+       Select  k.Ulas, isnull(k.Kayit_Tar, @bugun) Tarih 
+       , (case isnull(k.DIREKSIYON,0) when 1 then 3 else 0 end) teo_SRC 
+       from KURSIYER k  
+       where k.Ulas = @kid  
+     ) t_SRC on ( t_SRC.Ulas = b.UlasKursiyer ) 
+
+   ) x, KURSIYER k 
+   where k.Ulas = @kid 
+   and   x.UlasKursiyer = k.Ulas 
+
+   group by x.UlasKursiyer, k.IKINCI_4HAK 
+
+   /*
+   // UlasKursiyer TEO_ADET             DRK_ADET             TEO_SONUCU  DRK_SONUCU
+   // ------------ -------------------- -------------------- ----------- -----------
+   // 2715         5                    0                    2           0
+
+   // KURSIYER.Sinavdurumu
+   // 0 = Teorik sinavına girecek
+   // 1 = Direksiyon sinavına girecek
+   // 2 = Sertifika aldı
+   // 3 = Tüm hakları yandı
+   */
+
+   declare @SnvDrm varchar(1) 
+   set @SnvDrm = '0'
+
+   if ((@kursTipi = 'SRC') and (@TEO_SONUCU = 6)) set @TEO_SONUCU = 3
+
+   if (@IKINCI_4HAK > 0) set @Drk_SinavHak_Sayisi = 8
+
+   if (@TEO_SONUCU = 3) 
+        set @SnvDrm = '1' -- 1 = Direksiyon sinavına girecek
+   else set @SnvDrm = '0' -- 0 = Teorik sinavına girecek
+
+   if (@TEO_SONUCU = 3) and (@DRK_SONUCU = 0) 
+       set @SnvDrm = '1'  -- 1 = Direksiyon sinavına girecek
+
+   if (@TEO_SONUCU = 3) and (@DRK_SONUCU = 1) 
+      set @SnvDrm = '2'   -- 2 = Sertifika aldı
+
+   -- // Teorik sinav hak sayısı eski yönetmelikte 5
+   -- //                         yeni yönetmelikte 4
+   if (@TEO_SONUCU < 3) and
+      (@TEO_ADET >= @Teo_SinavHak_Sayisi) set @SnvDrm = '3'
+
+   -- // Uygulama sinav hak sayısı eski yönetmelikte 5
+   -- //                           yeni yönetmelikte 8 ( ikinci  +4 ile )
+   if (@DRK_ADET >= @Drk_SinavHak_Sayisi) 
+   begin
+       if (@TEO_SONUCU = 3) and (@DRK_SONUCU = 1) 
+            set @SnvDrm = '2' -- 2 = Sertifika aldı
+       else set @SnvDrm = '3' -- 3 = Tüm hakları yandı
+   end
+
+   --- FİNAL 
+   Update KURSIYER set 
+   Sinavdurumu =  + @SnvDrm
+   where Ulas = @kid
+
+END
+
+
+
+
+
+
+ 

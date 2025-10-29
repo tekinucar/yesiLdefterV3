@@ -1,0 +1,129 @@
+﻿
+/*CreateFunction*/
+
+CREATE FUNCTION [dbo].[fnc_GetWhereMasterDetailText]( @TableIPCode varchar(100) )  
+RETURNS varchar(max)
+AS   
+BEGIN
+
+  --declare @TableIPCode varchar(100)
+  --set @TableIPCode = 'UST/OMS/BDekont.BankaHesapIslemleri_L01'
+
+  declare @enter varchar(10) = CHAR(13) + CHAR(10) --' \r\n '
+  declare @MasterDetail1 varchar(MAX)
+  declare @MasterDetail2 varchar(MAX)
+  declare @packet varchar(MAX)
+
+  declare @TableTypeId smallInt
+  declare @SoftwareCode varchar(20)
+  declare @ProjectCode varchar(20)
+  declare @ShemasCode varchar(5)
+  declare @TableCode varchar(50)
+  declare @TableName varchar(50)
+  declare @IPCode varchar(50)
+
+  Select
+    @TableTypeId = a.TABLE_TYPE
+  , @SoftwareCode = b.SOFTWARE_CODE
+  , @ProjectCode = b.PROJECT_CODE
+  , @ShemasCode = isnull(b.SCHEMAS_CODE,'dbo')
+  , @TableCode = b.TABLE_CODE
+  , @TableName = b.TABLE_NAME
+  , @IPCode = a.IP_CODE
+  From MS_TABLES_IP as a, MS_TABLES as b
+  Where 0 = 0
+  and a.TABLE_CODE = b.TABLE_CODE
+  and a.TABLEIPCODE = @TableIPCode
+
+  -- -----------------------------------------------------------
+  -- TableTypeId = 1 ( Table ise ) 
+  -- -----------------------------------------------------------
+  if (@TableTypeId = 1)
+  begin 
+      -- if ((ftype == 175) | (ftype == 167) | (ftype == 99)  | (ftype == 35) | (ftype == 239) | (ftype == 231) | (ftype == 36)) = null
+      -- if ((ftype == 56)  | (ftype == 48)  | (ftype == 127) | (ftype == 52) | ftype == 60)   | (ftype == 62)  | (ftype == 59) | (ftype == 108))
+      -- if ((ftype == 58) || (ftype == 40) || (ftype == 61))
+
+       -- -------------------------------------------------------
+       -- Tablonun Master-Detail işaretli fieldler
+       -- and [3S_MSFLDIP].IP_CODE = 'null'    -- :D.SD.182: --
+       -- and [3S_MSFLDIP].TABLE_CODE = 'null'    -- :D.SD.181: --
+       -- -------------------------------------------------------
+       set @MasterDetail1 = ''
+	   Select @MasterDetail1 = COALESCE( @MasterDetail1 + 
+           ' and ' + x.FIELD_NAME + ' = ' + x.FIELD_VALUE + x.FIELD_REFID + @enter, 
+		   '' )
+		   --' and ' + x.FIELD_NAME + ' = ' + x.FIELD_VALUE + x.FIELD_REFID + @enter ) 
+       From (
+             Select a.TABLE_CODE
+                 , FIELD_NAME =
+                   case b.FIELD_TYPE  
+                     -- date türü fieldler ise
+		             when  40 then 'Convert(Date, ' + '[' + a.TABLE_CODE + '].' + b.FIELD_NAME + ', 103)'   
+		             when  58 then 'Convert(Date, ' + '[' + a.TABLE_CODE + '].' + b.FIELD_NAME + ', 103)'   
+		             when  61 then 'Convert(Date, ' + '[' + a.TABLE_CODE + '].' + b.FIELD_NAME + ', 103)'   
+                     else '[' + a.TABLE_CODE + '].' + b.FIELD_NAME 
+                   end
+         	     , FIELD_VALUE = [dbo].[fnc_GetFieldTypeFirstValue]( b.FIELD_TYPE )
+	             , '    -- :D.SD.' + convert(varchar, a.REF_ID) + ': --' as FIELD_REFID 
+	         From MS_FIELDS_IP as a, MS_FIELDS as b
+             Where 0 = 0
+             and a.FIELD_NO = b.FIELD_NO
+             and a.TABLE_CODE = b.TABLE_CODE
+             and a.SOFTWARE_CODE = @SoftwareCode 
+             and a.PROJECT_CODE = @ProjectCode 
+             and a.TABLE_CODE = @TableCode
+             and a.IP_CODE = @IPCode
+             and ( a.DEFAULT_TYPE = 31 or a.KRT_OPERAND_TYPE = 4 ) -- Master-Detail = 31, Speed (Single) = 4
+            ) x
+
+       -- -------------------------------------------------------
+       -- and Convert(Date, [BDekont].BelgeTarihi, 103)  >=  Convert(Date, '1.10.2022 ', 103)     -- :D.SD.43424: -->=
+       -- and Convert(Date, [BDekont].BelgeTarihi, 103)  <=  Convert(Date, '1.10.2022 ', 103)     -- :D.SD.43424: --<=
+	   -- -------------------------------------------------------
+       set @MasterDetail2 = ''
+	   Select @MasterDetail2 = COALESCE( @MasterDetail2 + 
+           ' and ' + x.FIELD_NAME + ' >= ' + x.FIELD_VALUE + x.FIELD_REFID + '>=' + @enter + 
+		   ' and ' + x.FIELD_NAME + ' <= ' + x.FIELD_VALUE + x.FIELD_REFID + '<=' + @enter,
+		   '' )
+       From (
+             Select a.TABLE_CODE
+                 , FIELD_NAME =
+                   case b.FIELD_TYPE  
+                     -- date türü fieldler ise
+		             when  40 then 'Convert(Date, ' + '[' + a.TABLE_CODE + '].' + b.FIELD_NAME + ', 103)'   
+		             when  58 then 'Convert(Date, ' + '[' + a.TABLE_CODE + '].' + b.FIELD_NAME + ', 103)'   
+		             when  61 then 'Convert(Date, ' + '[' + a.TABLE_CODE + '].' + b.FIELD_NAME + ', 103)'   
+                     else '[' + a.TABLE_CODE + '].' + b.FIELD_NAME 
+                   end
+         	     , FIELD_VALUE = [dbo].[fnc_GetFieldTypeFirstValue]( b.FIELD_TYPE )
+	             , '    -- :D.SD.' + convert(varchar, a.REF_ID) + ': --' as FIELD_REFID 
+	         From MS_FIELDS_IP as a, MS_FIELDS as b
+             Where 0 = 0
+             and a.FIELD_NO = b.FIELD_NO
+             and a.TABLE_CODE = b.TABLE_CODE
+             and a.SOFTWARE_CODE = @SoftwareCode 
+             and a.PROJECT_CODE = @ProjectCode 
+             and a.TABLE_CODE = @TableCode
+             and a.IP_CODE = @IPCode
+             and a.KRT_OPERAND_TYPE = 3 -- Speed Double 
+            ) x
+       
+  end -- if (@TableTypeId = 1)
+
+  set @packet = ''
+  if (@MasterDetail1 <> '') set @packet = @packet + @MasterDetail1
+  if (@MasterDetail2 <> '') set @packet = @packet + @MasterDetail2
+
+  --print @MasterDetail1
+  --print @MasterDetail2
+  --print @packet
+
+  return @packet
+
+END --
+
+/*CreateFunctionEnd*/
+
+ 
+

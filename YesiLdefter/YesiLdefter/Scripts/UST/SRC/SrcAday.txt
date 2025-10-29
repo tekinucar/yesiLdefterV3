@@ -1,0 +1,237 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table SrcAday
+ (
+   Id                    Int IDENTITY(1,1) not null, /* Id = AdayId */
+   AdayGUID              uniqueidentifier null,
+   FirmId                Int          not null,
+   IsActive              Bit          not null, 
+   IlkKayitTarihi        Date             null, 
+   UlkeTipiId            SmallInt         null,
+
+   -- 20
+   TcNo                  Varchar(11)      null, 
+   KimlikSeriNo          Varchar(10)      null, 
+   TamAdiSoyadi          nVarchar(100)    null, 
+   Adi                   nVarchar(50)     null,
+   Soyadi                nVarchar(50)     null,
+   DogumTarihi           Date             null,
+   BabaAdi               nVarchar(50)     null,
+   AnneAdi               nVarchar(50)     null,
+   CinsiyetTipiId        SmallInt         null,
+   CepTelefonu           Varchar(15)      null,
+   CepTelefonu2          Varchar(15)      null,
+   Eposta                Varchar(98)      null, 
+   -- 40
+   SMSGonder               Bit            null,
+   EpostaGonder            Bit            null,
+   WhatsAppGonder          Bit            null,
+   
+   -- 50
+   MevcutEhliyetTipiId            SmallInt        null,
+   MevcutEhliyetVerilisTarihi     Date            null, 
+   MevcutEhlSonGecerlilikTarihi   Date            null,
+   MevcutEhliyetNo                nVarchar(30)    null,
+   IsMevcutEhlOtomatik            Bit             null, /* 0 = Manuel vites, 1 = Otomatik vites */
+   IsMevcutEhl2016Oncesi          Bit             null, 
+   
+   -- 60
+   KullaniciUyarilari    nVarchar(200)  null,
+
+   -- 90
+   BiyometrikResim         VarBinary(max) null,
+   BiyometrikResimSmall    VarBinary(max) null,
+      
+   constraint		pk_SrcAday primary key (Id)
+ )
+  
+ grant select, insert, update, delete on SrcAday to public
+
+  create index X_SrcAday01 on SrcAday (TcNo)
+  create index X_SrcAday02 on SrcAday (TamAdiSoyadi)
+
+commit transaction
+
+/*CreateTableEnd*/
+
+/*CreateTrigger*/
+
+CREATE TRIGGER [dbo].[trg_SrcAday] on [dbo].[SrcAday]
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    declare adayCursor cursor local for select Id from Inserted
+    declare @adayId bigint
+
+    OPEN adayCursor
+    FETCH NEXT FROM adayCursor INTO @adayId --@curId
+
+    -- Veri Transferi başladımı
+    declare @DbUpdatesIsActive Bit = 0
+    set @DbUpdatesIsActive = [dbo].[fnc_getIsDbUpdate] (13)
+
+    declare @yAdayId int = 0
+    declare @eAdayId int = 0
+    declare @yFirmId int = 0
+    declare @eIsActive bit = null
+    declare @yIsActive bit = null
+
+    declare @yTamAdi varchar(100) = null
+    declare @eTamAdi varchar(100) = null
+    declare @newTamAdi varchar(100) = null
+
+    declare @eTcNo varchar(11) = null
+    declare @eAdi varchar(50) = null
+    declare @eSoyadi varchar(50) = null
+    declare @eBabaAdi varchar(50) = null
+    declare @eAnneAdi varchar(50) = null
+    declare @eCepTelefonu varchar(15) = null
+	declare @eDogumTarihi Date = null
+
+    declare @yTcNo varchar(11) = null
+    declare @yAdi varchar(50) = null
+    declare @ySoyadi varchar(50) = null
+    declare @yBabaAdi varchar(50) = null
+    declare @yAnneAdi varchar(50) = null
+    declare @yCepTelefonu varchar(15) = null
+
+    declare @yDogumTarihi Date = null
+	declare @yUlkeTipiId smallInt 
+	declare @AdayGUID uniqueidentifier
+
+	-- Veri Transferi başladımı
+    --Select @DbUpdatesIsActive = u.IsActive
+    --from [dbo].[DbUpdates] as u
+    --Where u.MsDbUpdateId = -1
+    --and   u.UpdateTypeId = 13
+    --and   u.DBaseNoTypeId = 6
+
+    --print 'trg_SrcAday start'
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        set @newTamAdi = ''
+
+        Select 
+            @eTcNo = isnull(dlt.TcNo,'')
+           ,@eAdayId = isnull(dlt.Id,0)
+           ,@eIsActive = isnull(dlt.IsActive,0)
+           ,@eTamAdi = isnull(dlt.TamAdiSoyadi,'')
+           ,@eAdi = isnull(dlt.Adi,'')
+           ,@eSoyadi = isnull(dlt.Soyadi,'')
+           ,@eBabaAdi = isnull(dlt.BabaAdi,'')
+           ,@eAnneAdi = isnull(dlt.AnneAdi,'')
+           ,@eCepTelefonu = isnull(dlt.CepTelefonu,'')
+           ,@eDogumTarihi = dlt.DogumTarihi 
+        From deleted dlt
+        Where dlt.Id = @adayId
+				
+        Select 
+            @yFirmId = ins.FirmId
+           ,@yIsActive = isnull(ins.IsActive,0)
+           ,@yTcNo = isnull(ins.TcNo,'')
+           ,@yTamAdi = isnull(ins.TamAdiSoyadi, '')
+           ,@yAdi = isnull(ins.Adi,'')
+           ,@ySoyadi = isnull(ins.Soyadi,'')
+           ,@yBabaAdi = isnull(ins.BabaAdi,'')
+           ,@yAnneAdi = isnull(ins.AnneAdi,'')
+           ,@yCepTelefonu = isnull(ins.CepTelefonu,'')
+           ,@yDogumTarihi = ins.DogumTarihi
+		   ,@yUlkeTipiId = isnull(ins.UlkeTipiId,-1)
+		   ,@AdayGUID = ins.AdayGUID
+        From inserted ins
+        Where ins.Id = @adayId
+     			
+        -- TamAdiSoyadi var ise Adi ve Soyadi tespit ediliyor 
+        if ((@yTamAdi <> '') and
+            (@yAdi = '') and
+            (@ySoyadi = ''))
+        begin
+            declare @i1 int = 0
+            declare @i2 int = 0
+
+            set @i1 = CHARINDEX(' ', @yTamAdi, 0)
+            set @i2 = CHARINDEX(' ', @yTamAdi, @i1+1)
+
+            if (@i2 > 0) set @i1 = @i2
+
+            set @yAdi = SUBSTRING(@yTamAdi, 0, @i1)
+            set @ySoyadi = SUBSTRING(@yTamAdi, @i1+1, 100)
+            set @eTamAdi = ''
+
+            Update SrcAday set 
+             Adi = RTRIM(LTRIM(@yAdi))
+            ,Soyadi = RTRIM(LTRIM(@ySoyadi))
+            Where Id = @adayId
+        end
+		
+        if (@yUlkeTipiId = -1 or @yUlkeTipiId = 0)
+        begin 
+            Update SrcAday set 
+			    UlkeTipiId = (case when SUBSTRING(@yTcNo,1,1) <> '9' then 1000 else 0 end)
+            Where Id = @adayId
+        end 
+
+        if (@AdayGUID is null)
+        begin         
+            Update SrcAday set 
+			    AdayGUID = NEWID()
+            Where Id = @adayId
+        end
+
+    	set @newTamAdi = @yAdi + ' ' +  @ySoyadi
+
+   	    update SrcAday set 
+            TamAdiSoyadi = RTRIM(LTRIM(@newTamAdi))
+        where Id = @adayId
+        and isnull(TamAdiSoyadi,'') <> @newTamAdi
+
+		-- Doğum tarihi değişirse 
+		-- her talep için yeniden doğum tarihi hesaplansın
+        if (@DbUpdatesIsActive = 0)
+        begin
+            if (@eTcNo <> @yTcNo
+            or  @eDogumTarihi <> @yDogumTarihi 
+            or  @eDogumTarihi is null 
+            or  @yDogumTarihi is null
+            or  @eAdi <> @yAdi 
+            or  @eSoyadi <> @ySoyadi
+            or  @eBabaAdi <> @yBabaAdi 
+            or  @eAnneAdi <> @yAnneAdi 
+            or  @eCepTelefonu <> @yCepTelefonu)  
+            begin
+                --print 'talep update olacak'
+				-- böyle sistem uyarısı için kontroller çalışacak 
+				-- prc_SrcAdayTakipTalepKaydiSingleSet da bu sayede çalışıyor
+				-- eğer çalışmıyorsa  or satırlarında eksiklik var demektir
+                Update SrcAdayTalep set FirmId = @yFirmId
+                Where AdayId = @adayId
+            end
+        end 		
+
+        FETCH NEXT FROM adayCursor INTO @adayId
+    END -- While
+
+	-- Veri transferi yapılmıyorsa 
+	if (@DbUpdatesIsActive = 0)
+	begin
+	    print 'exec trg_SrcAday'
+	 --  EXECUTE dbo.prc_MtskDonemAdaySayilariSet @yFirmId
+    end
+
+    --print 'trg_SrcAday end'
+
+    CLOSE adayCursor
+    DEALLOCATE adayCursor   
+
+
+END -- create trigger
+
+
+/*CreateTriggerEnd*/
+
+
+
+

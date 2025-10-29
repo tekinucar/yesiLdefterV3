@@ -1,0 +1,184 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_MtskUygulamaDersPlaniOlustur] (@SablonUygulamaFId int)  
+AS BEGIN
+
+  declare @FirmId int
+
+  Select @FirmId = [FirmId]
+  From [dbo].[MtskSablonUygulamaF]
+  Where Id = @SablonUygulamaFId
+
+  INSERT INTO [dbo].[MtskUygulamaliDers]
+           ([FirmId]
+           ,[IsActive]
+           ,[DonemTipiId]
+           ,[GrupTipiId]
+           ,[SubeTipiId]
+           ,[AdayNo]
+           ,[AdayId]
+           ,[AdayTcNo]
+           ,[EgitimYeriTipiId]
+           ,[EgitimAraciId]
+           ,[DersTarihi]
+           ,[DersSaatiTipiId]
+           ,[PersonelId]
+           ,[EgitimTipiId]
+           ,[BaslamaSaati]
+           ,[BitisSaati]
+           ,[UDersIsUploaded]
+		   ,[SablonUygulamaFId] )
+  Select
+            x.[FirmId]
+           ,x.[IsActive]
+           ,x.[DonemTipiId]
+           ,x.[GrupTipiId]
+           ,x.[SubeTipiId]
+           ,x.[AdayNo]
+           ,x.[AdayId]
+           ,x.[AdayTcNo]
+           ,x.[EgitimYeriTipiId]
+           ,x.[EgitimAraciId]
+           ,x.[DersTarihi]
+           ,x.[DersSaatiTipiId]
+           ,x.[PersonelId]
+           ,x.[EgitimTipiId]
+           ,x.[BaslamaSaati]
+           ,x.[BitisSaati]
+           ,x.[UDersIsUploaded]
+		   ,x.[SablonUygulamaFId]
+  From (
+    Select 
+      @FirmId as FirmId
+    , 1 as IsActive
+    , f.DonemTipiId 
+    , null as GrupTipiId
+    , null as SubeTipiId
+    , s.AdayTipiId as AdayNo
+
+    , (Case s.AdayTipiId 
+       When 1 then f.Aday1Id
+       When 2 then f.Aday2Id
+       When 3 then f.Aday3Id
+       When 4 then f.Aday4Id
+       When 5 then f.Aday5Id
+       When 6 then f.Aday6Id
+       When 7 then f.Aday7Id
+       When 8 then f.Aday8Id
+       else 0 end) as AdayId
+    
+    , null as AdayTcNo
+
+    , (Case s.AracTipiId 
+       When 1 then 3 -- Simülatör
+       When 2 then 2 -- AkanTrafik
+       else 0 end) as EgitimYeriTipiId
+
+    , (Case s.AracTipiId 
+       When 1 then sim.SicilNumarasi  
+       When 2 then arac.PlakaNumarasi 
+       else '' end) as EgitimAraciId
+
+    , [dbo].fnc_IsGununuBul(f.BaslangicTarihi, s.GunId, b.GunTipiId, s.SaatTipiId) as DersTarihi
+
+    , (Case s.SaatTipiId 
+       When 107 then 0 -- 07:00 - 07:50
+       When 108 then 1 -- 08:00 - 08:50
+       When 109 then 2 -- 09:00 - 09:50
+       When 110 then 3 -- 10:00 - 10:50  
+       When 111 then 4 -- 11:00 - 11:50
+       When 112 then 5 -- 12:00 - 12:50
+       When 113 then 6 -- 13:00 - 13:50
+       When 114 then 7 -- 14:00 - 14:50
+       When 115 then 8 -- 15:00 - 15:50
+       When 116 then 9 -- 16:00 - 16:50
+       When 117 then 10 -- 17:00 - 17:50
+       When 118 then 11 -- 18:00 - 18:50
+       When 119 then 12 -- 19:00 - 19:50
+       When 120 then 13 -- 20:00 - 20:50
+       When 121 then 14 -- 21:00 - 21:50
+       When 122 then 15 -- 22:00 - 22:50
+       else -1 end) as DersSaatiTipiId
+
+    , (Case s.OgreticiTipiId 
+       When 1 then f.Ogretici1Id
+       When 2 then f.Ogretici2Id
+       else '' end) as PersonelId
+
+    , 1 as EgitimTipiId -- Normal Eğitim
+    , null as BaslamaSaati
+    , null as BitisSaati
+    , 0 as UDersIsUploaded
+    , @SablonUygulamaFId as SablonUygulamaFId
+
+    from MtskSablonUygulamaF as f 
+       left outer join MtskSablonUygulamaB as b on ( f.SablonUygulamaBId = b.Id )
+       left outer join MtskSablonUygulamaS as s on ( f.SablonUygulamaBId = s.SablonUygulamaBId )
+       left outer join MtskSimulator as sim on ( f.SimulatorId = sim.Id )
+       left outer join MtskEgitimAraci as arac on ( f.AracId = arac.Id )  
+    where f.Id = @SablonUygulamaFId
+  ) as x 
+    /* bu kontrolün sayesinde tekrar kayıtlar engelleniyor  */
+    left outer join MtskUygulamaliDers as u on 
+      (
+           x.DersTarihi = u.DersTarihi
+       and x.DersSaatiTipiId = u.DersSaatiTipiId
+       and x.PersonelId = u.PersonelId 
+       and x.EgitimAraciId = u.EgitimAraciId
+      )
+  Where 0 = 0
+  and x.AdayId > 0
+  and u.Id is null
+
+
+  Update MtskAdayTakip set
+    SimulatorDersToplami = x.SimulatorAdet
+  , AkanTrafikDersToplami = x.AkanTrafikAdet
+  , UygulamaliDersToplami = x.UygulamaAdet
+  From MtskAdayTakip a, 
+  (
+   Select t.AdayId 
+      , sum(t.SimulatorAdet) as SimulatorAdet
+	  , sum(t.AkanTrafikAdet) as AkanTrafikAdet
+	  , sum(t.UygulamaAdet) as UygulamaAdet
+   from (
+      Select u.AdayId
+	  , count(u.Id) as SimulatorAdet 
+	  , 0 as AkanTrafikAdet 
+	  , 0 as UygulamaAdet
+      From MtskUygulamaliDers as u
+      Where u.SablonUygulamaFId = @SablonUygulamaFId
+	  and u.EgitimYeriTipiId = 3
+      group by u.AdayId
+
+	  union all
+
+      Select u.AdayId
+	  , 0 as SimulatorAdet 
+	  , count(u.Id) as AkanTrafikAdet 
+	  , 0 as UygulamaAdet
+      From MtskUygulamaliDers as u
+      Where u.SablonUygulamaFId = @SablonUygulamaFId
+	  and u.EgitimYeriTipiId = 2
+      group by u.AdayId
+
+	  union all
+
+      Select u.AdayId
+	  , 0 as SimulatorAdet 
+	  , 0 as AkanTrafikAdet 
+	  , count(u.Id) as UygulamaAdet 
+      From MtskUygulamaliDers as u
+      Where u.SablonUygulamaFId = @SablonUygulamaFId
+	  group by u.AdayId
+
+	  ) as t
+	  group by t.AdayId 
+  ) x
+  Where a.AdayId = x.AdayId
+
+  EXECUTE dbo.prc_MtskAdayTakip @FirmId
+
+END -- procedure
+
+/*CreateProcedureEnd*/

@@ -1,0 +1,1413 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\CefSharp.Common.135.0.170\build\CefSharp.Common.props" Condition="Exists('..\packages\CefSharp.Common.135.0.170\build\CefSharp.Common.props')" />
+  <Import Project="..\packages\chromiumembeddedframework.runtime.win-x86.135.0.17\build\chromiumembeddedframework.runtime.win-x86.props" Condition="Exists('..\packages\chromiumembeddedframework.runtime.win-x86.135.0.17\build\chromiumembeddedframework.runtime.win-x86.props')" />
+  <Import Project="..\packages\chromiumembeddedframework.runtime.win-x64.135.0.17\build\chromiumembeddedframework.runtime.win-x64.props" Condition="Exists('..\packages\chromiumembeddedframework.runtime.win-x64.135.0.17\build\chromiumembeddedframework.runtime.win-x64.props')" />
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{DF15BF56-DA45-47BE-A21B-280B0C32C7E7}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>YesiLdefter</RootNamespace>
+    <AssemblyName>YesiLdefter</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <TargetFrameworkProfile />
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>true</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>0.0.0.0</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>yesiLdefter.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignManifests>false</SignManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestCertificateThumbprint>49398E87D9989223456F29A1A85124CC38F229C6</ManifestCertificateThumbprint>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestKeyFile>YesiLdefter_TemporaryKey.pfx</ManifestKeyFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <GenerateManifests>false</GenerateManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>false</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup />
+  <PropertyGroup>
+    <TargetZone>LocalIntranet</TargetZone>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="AForge, Version=2.2.5.0, Culture=neutral, PublicKeyToken=c1db6ff4eaa06aeb, processorArchitecture=MSIL">
+      <HintPath>..\packages\AForge.2.2.5\lib\AForge.dll</HintPath>
+    </Reference>
+    <Reference Include="AForge.Video, Version=2.2.5.0, Culture=neutral, PublicKeyToken=cbfb6e07d173c401, processorArchitecture=MSIL">
+      <HintPath>..\packages\AForge.Video.2.2.5\lib\AForge.Video.dll</HintPath>
+    </Reference>
+    <Reference Include="AForge.Video.DirectShow, Version=2.2.5.0, Culture=neutral, PublicKeyToken=61ea4348d43881b7, processorArchitecture=MSIL">
+      <HintPath>..\packages\AForge.Video.DirectShow.2.2.5\lib\AForge.Video.DirectShow.dll</HintPath>
+    </Reference>
+    <Reference Include="Aspose.Words, Version=25.1.0.0, Culture=neutral, PublicKeyToken=716fcc553a201e56, processorArchitecture=MSIL">
+      <HintPath>..\packages\Aspose.Words.25.1.0\lib\net462\Aspose.Words.dll</HintPath>
+    </Reference>
+    <Reference Include="CefSharp, Version=135.0.170.0, Culture=neutral, PublicKeyToken=40c4b6fc221f4138, processorArchitecture=MSIL">
+      <HintPath>..\packages\CefSharp.Common.135.0.170\lib\net462\CefSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="CefSharp.Core, Version=135.0.170.0, Culture=neutral, PublicKeyToken=40c4b6fc221f4138, processorArchitecture=MSIL">
+      <HintPath>..\packages\CefSharp.Common.135.0.170\lib\net462\CefSharp.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="CefSharp.WinForms, Version=135.0.170.0, Culture=neutral, PublicKeyToken=40c4b6fc221f4138, processorArchitecture=MSIL">
+      <HintPath>..\packages\CefSharp.WinForms.135.0.170\lib\net462\CefSharp.WinForms.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.BonusSkins.v19.2, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.Data.v19.2, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.Printing.v19.2.Core, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.Sparkline.v19.2.Core, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.Utils.v19.2, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.Utils.v19.2.UI, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraBars.v19.2, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraCharts.v19.2.UI, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraEditors.v19.2, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraGantt.v19.2, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraGauges.v19.2.Core, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraGauges.v19.2.Presets, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraGauges.v19.2.Win, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraGrid.v19.2, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraLayout.v19.2, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraMap.v19.2, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraNavBar.v19.2, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.Charts.v19.2.Core, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraCharts.v19.2, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.CodeParser.v19.2, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraPdfViewer.v19.2, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraPrinting.v19.2, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraReports.v19.2, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraReports.v19.2.CodeCompletion, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraReports.v19.2.Extensions, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraReports.v19.2.Service, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraReports.v19.2.Web, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraScheduler.v19.2, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraScheduler.v19.2.Core, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraScheduler.v19.2.Extensions, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraScheduler.v19.2.GoogleCalendar, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraScheduler.v19.2.Reporting, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraScheduler.v19.2.Reporting.Extensions, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraTreeList.v19.2, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraVerticalGrid.v19.2, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraWizard.v19.2, Version=19.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="FastReport">
+      <HintPath>..\..\..\..\FastReport.Net\FastReport.dll</HintPath>
+    </Reference>
+    <Reference Include="Google.Protobuf, Version=3.6.1.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604, processorArchitecture=MSIL">
+      <HintPath>..\packages\Google.Protobuf.3.6.1\lib\net45\Google.Protobuf.dll</HintPath>
+    </Reference>
+    <Reference Include="HarfBuzzSharp, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
+      <HintPath>..\packages\HarfBuzzSharp.8.3.0.1\lib\net462\HarfBuzzSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="HtmlAgilityPack, Version=1.11.33.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
+      <HintPath>..\packages\HtmlAgilityPack.1.11.33\lib\Net45\HtmlAgilityPack.dll</HintPath>
+    </Reference>
+    <Reference Include="ICSharpCode.SharpZipLib, Version=1.4.2.13, Culture=neutral, PublicKeyToken=1b03e6acf1164f73, processorArchitecture=MSIL">
+      <HintPath>..\packages\SharpZipLib.1.4.2\lib\netstandard2.0\ICSharpCode.SharpZipLib.dll</HintPath>
+    </Reference>
+    <Reference Include="Interop.WIA, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+      <HintPath>..\packages\Scanner\Interop.WIA.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.JScript" />
+    <Reference Include="Microsoft.Net.Http.Headers, Version=2.2.8.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Net.Http.Headers.2.2.8\lib\netstandard2.0\Microsoft.Net.Http.Headers.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Win32.Registry, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Win32.Registry.5.0.0\lib\net461\Microsoft.Win32.Registry.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="OpenPop, Version=2.0.6.1120, Culture=neutral, PublicKeyToken=6bdb97f144b7efc8, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\OpenPop.NET.2.0.6.1120\lib\net40\OpenPop.dll</HintPath>
+    </Reference>
+    <Reference Include="Spire.Doc, Version=13.1.4.0, Culture=neutral, PublicKeyToken=663f351905198cb3, processorArchitecture=MSIL">
+      <HintPath>..\packages\Spire.Doc.13.1.4\lib\net48\Spire.Doc.dll</HintPath>
+    </Reference>
+    <Reference Include="Spire.Pdf, Version=11.1.5.0, Culture=neutral, PublicKeyToken=663f351905198cb3, processorArchitecture=MSIL">
+      <HintPath>..\packages\Spire.PDF.11.1.5\lib\net48\Spire.Pdf.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Buffers, Version=4.0.4.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Buffers.4.6.0\lib\net462\System.Buffers.dll</HintPath>
+    </Reference>
+    <Reference Include="System.ComponentModel" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Configuration.Install" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.Linq" />
+    <Reference Include="System.Data.OracleClient" />
+    <Reference Include="System.DirectoryServices" />
+    <Reference Include="System.Drawing.Design" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
+    <Reference Include="System.Management" />
+    <Reference Include="System.Memory, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Memory.4.6.0\lib\net462\System.Memory.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Numerics.Vectors, Version=4.1.5.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Numerics.Vectors.4.6.0\lib\net462\System.Numerics.Vectors.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=6.0.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.6.1.2\lib\net462\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.ServiceProcess" />
+    <Reference Include="System.Transactions" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Tesseract, Version=5.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Tesseract.5.2.0\lib\net48\Tesseract.dll</HintPath>
+    </Reference>
+    <Reference Include="webcam_capture">
+      <HintPath>..\packages\WebCam\webcam_capture.dll</HintPath>
+    </Reference>
+    <Reference Include="WebDriver, Version=4.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Selenium.WebDriver.4.20.0\lib\netstandard2.0\WebDriver.dll</HintPath>
+    </Reference>
+    <Reference Include="WebDriver.Support, Version=4.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Selenium.Support.4.18.1\lib\netstandard2.0\WebDriver.Support.dll</HintPath>
+    </Reference>
+    <Reference Include="WebDriverManager, Version=2.17.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\WebDriverManager.2.17.2\lib\net472\WebDriverManager.dll</HintPath>
+    </Reference>
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CEFSharp\CEFHelper.cs" />
+    <Compile Include="CEFSharp\CefSharpInstaller.cs" />
+    <Compile Include="Codes\CihazLogs.cs" />
+    <Compile Include="Connected Services\ServiceReferenceUyumTest\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Compile>
+    <Compile Include="Entities\MsWebNode.cs" />
+    <Compile Include="Entities\MsWebPage.cs" />
+    <Compile Include="Entities\MsWebScrapingDbFields.cs" />
+    <Compile Include="Forms\BrowserForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\BrowserForm.Designer.cs">
+      <DependentUpon>BrowserForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ControlExtensions.cs" />
+    <Compile Include="Forms\Controls\ControlExtensions.cs" />
+    <Compile Include="Forms\ms_Bildirimler.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ms_Bildirimler.Designer.cs">
+      <DependentUpon>ms_Bildirimler.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ms_CefSharp.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ms_CefSharp.Designer.cs">
+      <DependentUpon>ms_CefSharp.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ms_CefSharp_OLD.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ms_CefSharp_OLD.Designer.cs">
+      <DependentUpon>ms_CefSharp_OLD.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ms_Computer.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ms_Computer.Designer.cs">
+      <DependentUpon>ms_Computer.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ms_DBList.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ms_DBList.Designer.cs">
+      <DependentUpon>ms_DBList.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ms_DestekServiceTool.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ms_DestekServiceTool.Designer.cs">
+      <DependentUpon>ms_DestekServiceTool.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ms_EFatura.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ms_EFatura.Designer.cs">
+      <DependentUpon>ms_EFatura.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ms_FastReport.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ms_FastReport.Designer.cs">
+      <DependentUpon>ms_FastReport.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ms_FileUpdates.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ms_FileUpdates.Designer.cs">
+      <DependentUpon>ms_FileUpdates.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ms_Firms.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ms_Firms.Designer.cs">
+      <DependentUpon>ms_Firms.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ms_Form.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ms_Form.Designer.cs">
+      <DependentUpon>ms_Form.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ms_IPList.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ms_IPList.Designer.cs">
+      <DependentUpon>ms_IPList.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ms_IPList2.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ms_IPList2.Designer.cs">
+      <DependentUpon>ms_IPList2.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ms_Layout.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ms_Layout.Designer.cs">
+      <DependentUpon>ms_Layout.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ms_Layout2.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ms_Layout2.Designer.cs">
+      <DependentUpon>ms_Layout2.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ms_Menu.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ms_Menu.Designer.cs">
+      <DependentUpon>ms_Menu.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ms_Menu2.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ms_Menu2.Designer.cs">
+      <DependentUpon>ms_Menu2.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ms_MtskDersProgrami.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ms_MtskDersProgrami.Designer.cs">
+      <DependentUpon>ms_MtskDersProgrami.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ms_MtskSinavRandevu.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ms_MtskSinavRandevu.Designer.cs">
+      <DependentUpon>ms_MtskSinavRandevu.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ms_Pictures.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ms_Pictures.Designer.cs">
+      <DependentUpon>ms_Pictures.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ms_ProjectTables.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ms_ProjectTables.Designer.cs">
+      <DependentUpon>ms_ProjectTables.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ms_ProjeDef.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ms_ProjeDef.Designer.cs">
+      <DependentUpon>ms_ProjeDef.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ms_ReportDesign.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ms_ReportDesign.Designer.cs">
+      <DependentUpon>ms_ReportDesign.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ms_Reports.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ms_Reports.Designer.cs">
+      <DependentUpon>ms_Reports.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ms_Search.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ms_Search.Designer.cs">
+      <DependentUpon>ms_Search.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ms_Selenium.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ms_Selenium.Designer.cs">
+      <DependentUpon>ms_Selenium.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ms_TabimMtsk.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ms_TabimMtsk.Designer.cs">
+      <DependentUpon>ms_TabimMtsk.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ms_User.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ms_User.Designer.cs">
+      <DependentUpon>ms_User.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ms_UserFirmList.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ms_UserFirmList.Designer.cs">
+      <DependentUpon>ms_UserFirmList.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ms_Webbrowser.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ms_Webbrowser.Designer.cs">
+      <DependentUpon>ms_Webbrowser.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\SekCevHukumluList.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\SekCevHukumluList.designer.cs">
+      <DependentUpon>SekCevHukumluList.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\SEK\SekCevHukumlu.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\SEK\SekCevHukumlu.Designer.cs">
+      <DependentUpon>SekCevHukumlu.cs</DependentUpon>
+    </Compile>
+    <Compile Include="main.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="main.Designer.cs">
+      <DependentUpon>main.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ms_Iskonto.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ms_Iskonto.Designer.cs">
+      <DependentUpon>ms_Iskonto.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Selenium\Helpers\DriverFactory.cs" />
+    <Compile Include="Selenium\Helpers\SeleniumHelper.cs" />
+    <Compile Include="Selenium\Helpers\WebDriverExtensions.cs" />
+    <Compile Include="Selenium\MsScrapingService.cs" />
+    <Compile Include="Selenium\MsWebPagesService.cs" />
+    <Compile Include="Selenium\SeleniumService.cs" />
+    <Compile Include="tForms.cs" />
+    <Compile Include="Tkn\tImageHelper.cs" />
+    <Compile Include="Tkn\tImageService.cs" />
+    <Compile Include="Tkn\EventsMenu.cs" />
+    <Compile Include="Tkn\tCefSharp.cs" />
+    <Compile Include="Tkn\tCookieReader.cs" />
+    <Compile Include="Tkn\tCreateDatabase.cs" />
+    <Compile Include="Tkn\tEventsButton.cs" />
+    <Compile Include="Tkn\tBase.cs" />
+    <Compile Include="Tkn\tCreateObject.cs" />
+    <Compile Include="Tkn\tDataCopy.cs" />
+    <Compile Include="Tkn\tDefaultValue.cs" />
+    <Compile Include="Tkn\tDevColumn.cs" />
+    <Compile Include="Tkn\tDevView.cs" />
+    <Compile Include="Tkn\tEMail.cs" />
+    <Compile Include="Tkn\tEvents.cs" />
+    <Compile Include="Tkn\tEventsForm.cs" />
+    <Compile Include="Tkn\tEventsGrid.cs" />
+    <Compile Include="Tkn\tExeUpdate.cs" />
+    <Compile Include="Tkn\tFilesManager.cs" />
+    <Compile Include="Tkn\tFtp.cs" />
+    <Compile Include="Tkn\tIniFile.cs" />
+    <Compile Include="Tkn\tInputPanel.cs" />
+    <Compile Include="Tkn\tInvoiceTasks.cs" />
+    <Compile Include="Tkn\tLayout.cs" />
+    <Compile Include="Tkn\tManagement.cs" />
+    <Compile Include="Tkn\tMenu.cs" />
+    <Compile Include="Tkn\tRegistry.cs" />
+    <Compile Include="Tkn\tReportDevEx.cs" />
+    <Compile Include="Tkn\tReportFast.cs" />
+    <Compile Include="Tkn\tSave.cs" />
+    <Compile Include="Tkn\tScraping.cs" />
+    <Compile Include="Tkn\tSearch.cs" />
+    <Compile Include="Tkn\tSMS.cs" />
+    <Compile Include="Tkn\tSQLs.cs" />
+    <Compile Include="Tkn\tStarter.cs" />
+    <Compile Include="Tkn\tSubViews.cs" />
+    <Compile Include="Tkn\tTablesRead.cs" />
+    <Compile Include="Tkn\tToolBox.cs" />
+    <Compile Include="Tkn\tUserFirms.cs" />
+    <Compile Include="Tkn\tVariable.cs" />
+    <Compile Include="Tkn\tVariableStokHL.cs" />
+    <Compile Include="Tkn\tXMLRead.cs" />
+    <Compile Include="tMainForm.cs" />
+    <Compile Include="Uyumsoft\tEFaturaUyum.cs" />
+    <EmbeddedResource Include="Forms\BrowserForm.resx">
+      <DependentUpon>BrowserForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ms_CefSharp_OLD.resx">
+      <DependentUpon>ms_CefSharp_OLD.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ms_Computer.resx">
+      <DependentUpon>ms_Computer.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ms_DBList.resx">
+      <DependentUpon>ms_DBList.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ms_FastReport.resx">
+      <DependentUpon>ms_FastReport.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ms_Form.resx">
+      <DependentUpon>ms_Form.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ms_IPList.resx">
+      <DependentUpon>ms_IPList.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ms_Iskonto.resx">
+      <DependentUpon>ms_Iskonto.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ms_Layout.resx">
+      <DependentUpon>ms_Layout.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ms_Menu.resx">
+      <DependentUpon>ms_Menu.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ms_Pictures.resx">
+      <DependentUpon>ms_Pictures.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ms_ProjeDef.resx">
+      <DependentUpon>ms_ProjeDef.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ms_User.resx">
+      <DependentUpon>ms_User.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ms_Webbrowser.resx">
+      <DependentUpon>ms_Webbrowser.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\SekCevHukumluList.resx">
+      <DependentUpon>SekCevHukumluList.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\SEK\SekCevHukumlu.resx">
+      <DependentUpon>SekCevHukumlu.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="main.resx">
+      <DependentUpon>main.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\licenses.licx" />
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <None Include="Connected Services\ServiceReferenceUyumTest\BasicIntegration.wsdl" />
+    <None Include="Connected Services\ServiceReferenceUyumTest\BasicIntegration.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\BasicIntegration1.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\BasicIntegration2.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\BasicIntegration3.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\BasicIntegration4.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\BasicIntegration5.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\BasicIntegration6.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\BasicIntegration7.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\BasicIntegration8.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.ByteArrayResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.CloneInvoiceServiceResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.DateResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.DocumentResponseStatusResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.EnvelopeResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.FlagResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.InboxInvoiceListResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.InvoiceDataResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.InvoiceGtbInfoResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.InvoiceIdentitiesResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.InvoiceResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.InvoicesDataResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.InvoicesResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.InvoiceStatusResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.InvoiceStatusWithLogResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.InvoiceViewResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.OutboxInvoiceListResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.Response.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.ResponseOfListOfCustomerCreditInfo.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.ResponseOfMerkezBilgiSorguSonuc.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.ResponseOfOutboxInvoiceListItem.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.ResponseOfWhoAmIInfo.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.StringElementResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.StringResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.SummaryReportResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.SystemUsersResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.TokenResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.UserAliassesResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceReferenceUyumTest\YesiLdefter.ServiceReferenceUyumTest.UserVerificationInfoResult.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="packages.config" />
+    <None Include="Properties\app.manifest" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <None Include="Scripts\KaynakBelgeler\vergidairelerilistesi.pdf" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Connected Services\ServiceReferenceUyumTest\BasicIntegration.disco" />
+    <None Include="Connected Services\ServiceReferenceUyumTest\configuration91.svcinfo" />
+    <None Include="Connected Services\ServiceReferenceUyumTest\configuration.svcinfo" />
+    <None Include="Connected Services\ServiceReferenceUyumTest\Reference.svcmap">
+      <Generator>WCF Proxy Generator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
+    <Content Include="ILLink\ILLink.Descriptors.LibraryBuild.xml" />
+    <Resource Include="Resources\XSLTFile.xslt" />
+    <Content Include="Scripts\2019VtMsSql\AJ_LINEDOC.txt" />
+    <Content Include="Scripts\2019VtMsSql\AJ_LINETALK.txt" />
+    <Content Include="Scripts\2019VtMsSql\FN_LINEVOL.txt" />
+    <Content Include="Scripts\2019VtMsSql\FN_LINEVOL_BA.txt" />
+    <Content Include="Scripts\2019VtMsSql\HP_ADRES.txt" />
+    <Content Include="Scripts\2019VtMsSql\HP_CARI.txt" />
+    <Content Include="Scripts\2019VtMsSql\HP_COMPS.txt" />
+    <Content Include="Scripts\2019VtMsSql\HP_FINANS.txt" />
+    <Content Include="Scripts\2019VtMsSql\HP_ILETISIM.txt" />
+    <Content Include="Scripts\2019VtMsSql\HP_URUN.txt" />
+    <Content Include="Scripts\2019VtMsSql\HP_USERS.txt" />
+    <Content Include="Scripts\2019VtMsSql\HP_VEZNE.txt" />
+    <Content Include="Scripts\2019VtMsSql\MS_VARIABLES.txt" />
+    <Content Include="Scripts\2019VtMsSql\prc_AJ_LINEDOC.txt" />
+    <Content Include="Scripts\2019VtMsSql\prc_CLIENT_LIST.txt" />
+    <Content Include="Scripts\2019VtMsSql\prc_FIRM_IN_USERS.txt" />
+    <Content Include="Scripts\2019VtMsSql\prc_STK_FIYAT_GET.txt" />
+    <Content Include="Scripts\2019VtMsSql\prc_STK_GCS_CALC.txt" />
+    <Content Include="Scripts\2019VtMsSql\prc_SYS_VARIABLES.txt" />
+    <Content Include="Scripts\2019VtMsSql\prc_SYS_VARIABLES_FULL.txt" />
+    <Content Include="Scripts\2019VtMsSql\prc_VEZNE_ITEMS.txt" />
+    <Content Include="Scripts\2019VtMsSql\STK_FIYAT.txt" />
+    <Content Include="Scripts\2019VtMsSql\STK_GCB.txt" />
+    <Content Include="Scripts\2019VtMsSql\STK_GCS.txt" />
+    <Content Include="Scripts\2019VtMsSql\SYS_TYPES_H.txt" />
+    <Content Include="Scripts\2019VtMsSql\SYS_TYPES_L.txt" />
+    <Content Include="Scripts\2019VtMsSql\SYS_TYPES_T.txt" />
+    <Content Include="Scripts\2019VtMsSql\SYS_VARIABLES.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\01_Ekran_Kopyalama_SQLi.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\MS_DBCONN.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\MS_DC.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\MS_DC_LINE.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\MS_FIELDS.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\MS_FIELDS_IP.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\MS_GLYPH.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\MS_GROUPS.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\MS_ITEMS.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\MS_LAYOUT.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\MS_LAYOUT_VIEW.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\MS_PROPERTIES.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\MS_REPORTS.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\MS_TABLES.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\MS_TABLES_IP.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\MS_TABLES_TS.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\MS_TEMP_FILE.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\MS_TEMP_LINES.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\MS_TEMP_PROCESS.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\MS_TYPES.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\MS_VARIABLES.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\SEKTORLER - Kopya 2.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\SEKTORLER - Kopya.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\SYS_TYPES_H.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\SYS_TYPES_L.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\SYS_TYPES_T.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\SYS_UPDATES.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\SYS_VARIABLES.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\SYS_WORKSD.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\SYS_WORKSM.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\trg_MS_ITEMS.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\trg_MS_LAYOUT.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\trg_MS_TABLES_IP.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\VW_CLIENT_LIST.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\VW_MS_ITEMS_TABLEIPCODES.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\VW_MS_LAYOUT_TABLEIPCODES.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\VW_MS_TABLES_IP_COUNT.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\VW_MS_TABLES_IP_JOINS.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\VW_MS_TABLES_IP_OBJ.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\VW_SYS_WORKSM.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\VW_TYPES_LIST.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\YapayZekaninOnerdigiTrigger.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\YARDIMCI_KODLAR.txt" />
+    <Content Include="Scripts\MPv3_vtMsSql\VT_MSSQL\YatayKolon SQL.txt" />
+    <Content Include="Scripts\SEK\InfazKurumu\CihazHesap.txt" />
+    <Content Include="Scripts\SEK\InfazKurumu\prc_CariBio.txt" />
+    <Content Include="Scripts\SEK\InfazKurumu\prc_CariHesap.txt" />
+    <Content Include="Scripts\SEK\InfazKurumu\prc_CihazEmir.txt" />
+    <Content Include="Scripts\SEK\InfazKurumu\prc_CihazKaydiSet.txt" />
+    <Content Include="Scripts\SEK\InfazKurumu\prc_CihazLogGet.txt" />
+    <Content Include="Scripts\SEK\InfazKurumu\prc_CihazLogSet.txt" />
+    <Content Include="Scripts\SEK\InfazKurumu\prc_CihazTestUser.txt" />
+    <Content Include="Scripts\SEK\InfazKurumu\prc_EylemIcmali.txt" />
+    <Content Include="Scripts\SEK\InfazKurumu\prc_EylemPlani.txt" />
+    <Content Include="Scripts\SEK\InfazKurumu\prc_SayimIcmali.txt" />
+    <Content Include="Scripts\SEK\InfazKurumu\tablolar.txt" />
+    <Content Include="Scripts\UstadDesign\00_createDatabas.txt" />
+    <Content Include="Scripts\UstadDesign\sp_FindTypeIdColumns.txt" />
+    <Content Include="Scripts\UstadDesign\sp_GenerateTableScript.txt" />
+    <Content Include="Scripts\UstadDesign\sp_GenerateLookupScript.txt" />
+    <Content Include="Scripts\UstadDesign\UstFieldsIP.txt" />
+    <Content Include="Scripts\UstadDesign\UstFields.txt" />
+    <Content Include="Scripts\UstadDesign\UpGroupsOfFields.txt" />
+    <Content Include="Scripts\UstadDesign\UpGroupsOfFieldsIP.txt" />
+    <Content Include="Scripts\UstadDesign\UstClasses.txt" />
+    <Content Include="Scripts\UstadDesign\UstModuls.txt" />
+    <Content Include="Scripts\UstadDesign\UstProjects.txt" />
+    <Content Include="Scripts\UstadDesign\UstTables.txt" />
+    <Content Include="Scripts\UstadDesign\UstTablesIP.txt" />
+    <Content Include="Scripts\UST\Hub\HubGecerlilikTarihi.txt" />
+    <Content Include="Scripts\UST\Hub\HubMtskSaatTeorik.txt" />
+    <Content Include="Scripts\UST\Hub\HubMtskSaatUygulama.txt" />
+    <Content Include="Scripts\UST\Hub\HubMtskUcretSinav.txt" />
+    <Content Include="Scripts\UST\Hub\HubMtskUcretTeorik.txt" />
+    <Content Include="Scripts\UST\Hub\HubMtskUcretUygulama.txt" />
+    <Content Include="Scripts\UST\MsV3\CrossSettings.txt" />
+    <Content Include="Scripts\UST\MsV3\EduMtskDenemeSinavi.txt" />
+    <Content Include="Scripts\UST\MsV3\EduMtskDenemeSinavSonuc.txt" />
+    <Content Include="Scripts\UST\MsV3\EduMtskDersler.txt" />
+    <Content Include="Scripts\UST\MsV3\EduMtskKonular.txt" />
+    <Content Include="Scripts\UST\MsV3\EduMtskSoruKitabi.txt" />
+    <Content Include="Scripts\UST\MsV3\EduMtskSoruKitabiDetayi.txt" />
+    <Content Include="Scripts\UST\MsV3\EduMtskSorular.txt" />
+    <Content Include="Scripts\UST\MsV3\EduMtskYonetmelik.txt" />
+    <Content Include="Scripts\UST\MsV3\Egitim2.txt" />
+    <Content Include="Scripts\UST\MsV3\fnc_GetFieldTypeFirstValue.txt" />
+    <Content Include="Scripts\UST\MsV3\fnc_GetFieldTypeName.txt" />
+    <Content Include="Scripts\UST\MsV3\fnc_GetJoinTableText.txt" />
+    <Content Include="Scripts\UST\MsV3\fnc_GetModelFieldType.txt" />
+    <Content Include="Scripts\UST\MsV3\fnc_GetWhereMasterDetailText.txt" />
+    <Content Include="Scripts\UST\MsV3\Lkp_MsSectorType.txt" />
+    <Content Include="Scripts\UST\MsV3\MsCommercial.txt" />
+    <Content Include="Scripts\UST\MsV3\MsDbUpdates.txt" />
+    <Content Include="Scripts\UST\MsV3\MsExeUpdates.txt" />
+    <Content Include="Scripts\UST\MsV3\MsFileUpdates.txt" />
+    <Content Include="Scripts\UST\MsV3\MsProjectFunctions.txt" />
+    <Content Include="Scripts\UST\MsV3\MsProjectProcedures.txt" />
+    <Content Include="Scripts\UST\MsV3\MsProjectTables.txt" />
+    <Content Include="Scripts\UST\MsV3\MsEducations.txt" />
+    <Content Include="Scripts\UST\MsV3\MsReports.txt" />
+    <Content Include="Scripts\UST\MsV3\MsSoftware.txt" />
+    <Content Include="Scripts\UST\MsV3\MsSqlLog.txt" />
+    <Content Include="Scripts\UST\MsV3\MsTables.txt" />
+    <Content Include="Scripts\UST\MsV3\MsTablesIP.txt" />
+    <Content Include="Scripts\UST\MsV3\MsSpeedUserGuid.txt" />
+    <Content Include="Scripts\UST\MsV3\MsWebNodeItems.txt" />
+    <Content Include="Scripts\UST\MsV3\MsWebNodes.txt" />
+    <Content Include="Scripts\UST\MsV3\MsWebPages.txt" />
+    <Content Include="Scripts\UST\MsV3\prc_DatabaseCreateList.txt" />
+    <Content Include="Scripts\UST\MsV3\prc_EduMtskSoruKitabiDetayiSiraNo.txt" />
+    <Content Include="Scripts\UST\MsV3\prc_EduMtskSoruKitabiSayfasiOlustur.txt" />
+    <Content Include="Scripts\UST\MsV3\prc_EduMtskSoruResimleri.txt" />
+    <Content Include="Scripts\UST\MsV3\prc_EduMtskYonetmelikDetailList.txt" />
+    <Content Include="Scripts\UST\MsV3\prc_EduMtskYonetmelikTreeList.txt" />
+    <Content Include="Scripts\UST\MsV3\prc_FieldList.txt" />
+    <Content Include="Scripts\UST\MsV3\prc_GetTableIPCodeSql.txt" />
+    <Content Include="Scripts\UST\MsV3\prc_GetTableModel.txt" />
+    <Content Include="Scripts\UST\MsV3\prc_MsDataCopyLineList.txt" />
+    <Content Include="Scripts\UST\MsV3\prc_MsProjectFunctionsList.txt" />
+    <Content Include="Scripts\UST\MsV3\prc_MsProjectProceduresList.txt" />
+    <Content Include="Scripts\UST\MsV3\prc_MsProjectTablesList.txt" />
+    <Content Include="Scripts\UST\MsV3\prc_MsReportsList.txt" />
+    <Content Include="Scripts\UST\MsV3\prc_TablesList.txt" />
+    <Content Include="Scripts\UST\MsV3\prc_UsesTableIPCode.txt" />
+    <Content Include="Scripts\UST\MsV3\tempEduUsersList.txt" />
+    <Content Include="Scripts\UST\Hub\HubBildirimSablonlari.txt" />
+    <Content Include="Scripts\UST\Mtsk\BildirimSMS.txt" />
+    <Content Include="Scripts\UST\Mtsk\DbUpdates.txt" />
+    <Content Include="Scripts\UST\Mtsk\FileUpdates.txt" />
+    <Content Include="Scripts\UST\Mtsk\fnc_getDonemTipiId.txt" />
+    <Content Include="Scripts\UST\Mtsk\fnc_getEUSinavNo.txt" />
+    <Content Include="Scripts\UST\Mtsk\fnc_getGecerlilikTarihiId.txt" />
+    <Content Include="Scripts\UST\Mtsk\fnc_getSertifikaDeneyimSarti.txt" />
+    <Content Include="Scripts\UST\Mtsk\fnc_getSertifikaId.txt" />
+    <Content Include="Scripts\UST\Mtsk\fnc_getSertifikaIsOtomatik.txt" />
+    <Content Include="Scripts\UST\Mtsk\fnc_getSertifikaKayitTipi.txt" />
+    <Content Include="Scripts\UST\Mtsk\fnc_IsGununuBul.txt" />
+    <Content Include="Scripts\UST\Mtsk\fnc_MtskDonemDersBasBitTarihiniBul.txt" />
+    <Content Include="Scripts\UST\Mtsk\fnc_MtskSMSMesajiniHazirla.txt" />
+    <Content Include="Scripts\UST\Mtsk\GecerlilikTarihi.txt" />
+    <Content Include="Scripts\UST\Mtsk\Lkp_MebBransTipi.txt" />
+    <Content Include="Scripts\UST\Mtsk\Lkp_MtskDonemTipi.txt" />
+    <Content Include="Scripts\UST\Mtsk\Lkp_MtskGrupTipi.txt" />
+    <Content Include="Scripts\UST\Mtsk\Lkp_MtskKurumOnayTipi.txt" />
+    <Content Include="Scripts\UST\Mtsk\Lkp_MtskSertifikaTipi.txt" />
+    <Content Include="Scripts\UST\Mtsk\Lkp_MtskSubeTipi.txt" />
+    <Content Include="Scripts\UST\Mtsk\Lkp_MtskTalepTipi.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskGuzergah.txt" />
+    <Content Include="Scripts\UST\Mtsk\MebIlce.txt" />
+    <Content Include="Scripts\UST\Mtsk\MebKurum.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskAday - Kopyala.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskAday.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskAdayAdliSicil.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskAdayAdres.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskAdayBelgeler.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskAdayImza.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskAdayOgrenim.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskAdaySaglik.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskAdaySertifika.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskAdaySozlesme.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskAdayTakip - Kopyala.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskAdayTakip.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskAdayTalep.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskAdayUcret.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskDerslik.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskDokumantasyon.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskDonemi.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskEgitimAraci.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskGrupSubesi.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskKIhlalAday.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskKIhlalTalep.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskKIhlalTeorikD.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskKIhlalUygulamaD.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskKurumAltProgramlari.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskPersoneli.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskSablonUygulamaM.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskSinavListesi.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayBiyometrikResmi.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayBorclandir.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayBorclandirESinav.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayBorclandirESinavTekTalep.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayBorclandirUygulamaSinavi.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayBorclandirUygulamaSinaviTekTalep.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayBorclariniHesapla.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayBorcunuHesapla.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTablesInsertKontrolu.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakip.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakipDataDogrulamaList.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakipESinavSet.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakipESinavToplamlari.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakipKontrolu.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakipKonulari.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakipTalepKaydiSingleSetKontrolu.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakipTeorikDersSet.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakipUygulamaSinavToplamlari.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakipUygulamaToplamlari.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTalepForTablesInsert.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTalepMebbisDonemKayitListesi.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskDersIhlalleriPersonel.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskDonemAdaySayilariSet.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskGrupSubesiTakipSet.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskGrupSubesiTeorikDersToplami.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskGunlukTakipler.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskTeorikDersIhlalleriSaatlerKontrolu.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskTeorikDersIhlalleri_IPTAL.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskTeorikDersIhlalleriCakismalar.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskTeorikDersIhlalleriSaatler.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskTeorikDersOzelGunleriEkle.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskTeorikDersPlaniOlusturManuelSirali.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskUygDersIhlalleriCakismalar.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskUygDersIhlalleriSaatler.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskUygulamaDersInsert.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskUygulamaDersPlanHazirlaManuel.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskUygulamaDersPlaniListele.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskUygulamaDersBorclandir.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_setIsDbUpdateActive.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayNoVer.txt" />
+    <Content Include="Scripts\UST\Mtsk\fnc_getHaftaBasiSonu.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\CrsBildirimB.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\CrsBildirimS.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\CrsSmsSettings.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\fnc_CrsBildirimCount.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\fnc_getIsDbUpdate.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\fnc_getSettingsBool.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\fnc_getSectorTypeId.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\fnc_getSettingsInt.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\fnc_getSettingsNumeric.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\fnc_getSettingsText.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\fnc_IsTatilGunumu.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmCalismaSaatleri.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskSaatTeorik.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskSaatUygulama.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskSablonSMS.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskSablonTeorikB.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskSablonTeorikF.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskSablonTeorikS.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskSablonUygulamaB.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskSablonUygulamaF.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskSablonUygulamaS.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskSertifikaSaatleri.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskSertifikaSeriNo.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskSimulator.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskSinavETeorik.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskSinavRandevu.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskSinavTarihi.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskSinavUygulama.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskTeorikDers.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskUcretSinav.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskUcretTeorik.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskUcretUygulama.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskUygulamaliDers.txt" />
+    <Content Include="Scripts\UST\Mtsk\MtskUygulamaliDersAdayi_IPTAL.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_BildirimSMS.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MonthName.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayBelgeler.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayBelgeResimleri.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdaySertifika.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdaySil.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTablesInsert.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakip_OLD.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakipAdayKayitKonulari.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakipAdayKayitToplamlari.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakipTalepKaydiMultiSet.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakipTalepKaydiSingleSet.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakipUygSinavKatilabilirOnayi_IPTAL.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTakipUygSinavMebbisRandevuAktar_IPTAL.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTalepSertifika24HakKaydi.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskAdayTalepYasiniHesapla.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskDonemKontrolu.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskGrupSubesiTeorikDersToplamList.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskSertifikaSeriNoIptalEt.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskSertifikaSeriNoUret.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskSertifikaUcreti.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskTeorikDersPlaniCakisma_GEREK_KALMADI.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskTeorikDersPlaniCakismaManuel_GEREK_KALMADI.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskTeorikDersPlaniElemanaOzel.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskTeorikDersPlaniElemanaOzel_OLD.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskTeorikDersPlaniGruplari.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskTeorikDersPlaniOlustur.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskTeorikDersPlaniOlusturManuel.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskUygulamaDersPlaniAracVePersonel.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskUygulamaDersPlaniCakisma_GEREK_KALMADI.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskUygulamaDersPlaniCakismaAdedi_GEREK_KALMADI.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskUygulamaDersPlaniElemanaOzel.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskUygulamaDersPlaniGruplari.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskUygulamaDersPlaniGruplariBugun.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskUygulamaDersPlaniOlustur.txt" />
+    <Content Include="Scripts\UST\Mtsk\prc_MtskUygulamaDersPlaniSaatleriGuncelle_IPTAL.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmEFaturaSettings.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmMaasBilgisi.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmMaasEkGelirler.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmMaasEkKesintiler.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmMaasHesaplari.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmBelgeDekontOzetler.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmBelgeStokS_SatirlariniTopla.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmHesapBakiyesiHesapla.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmMaasHesaplari.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmMaasHesaplariKayit.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\Settings.txt" />
+    <Content Include="Scripts\UST\Mtsk\TempTabimBankalar.txt" />
+    <Content Include="Scripts\UST\Mtsk\TempTabimHesaplar.txt" />
+    <Content Include="Scripts\UST\Mtsk\trg_ORNEK.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmCariAdres.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\CariBanka.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\CariHesap_trg.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\CariIletisim.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\CariIO.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\dataVergiKodlari.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\dokumanFatura.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\dokumanKategoriler.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\dokumanMuhasebe.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\dokumanMuhasebeBelgeTanimi.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\dokumanSektorler.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\dokumanStoklar.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\dokumanYevmiyeDefteri.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\DbUpdates.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\FileUpdates.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\fnc_OnmHesapFinansKoduGet.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\Lkp_ILCETipi.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\Lkp_ILTipi.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\Lkp_OnmKdvOraniTipi.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\Lkp_OnmFaturaEkVergiTipi.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\Lkp_OnmHesapMaster.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\Lkp_OnmParaTipi.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\Lkp_OnmStokBirimTipi.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\Lkp_OnmStokKategoriTipi.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\Lkp_OnmTevkifatTipi.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\Lkp_UlkeTipi.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\Lkp_BelgeDonemTipi.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmBelgeDekont.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmBelgeMaliyet.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmBelgeStokB.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmBelgeStokS.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmHesapCari.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmHesapFinans.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmHesapMaliyetTuru.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmHesapStok.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmHesapStokFiyat.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmHesapStokImg.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmHesapVarlik.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmHesapVezne.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmKira.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmOdemePlani.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmOzelGunler.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmSigorta.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmVezneFinans.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmVezneKullanici.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_KullaniciFinansHesaplariGet.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmBelgeStokBHesapla.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmHesapFinansBankaTumHesaplar.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmHesapFinansDefaultMaliyetGruplari.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmHesapFinansKavramHaritasi.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmHesapFinansMaliyetGrubuKontrolu.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmMaliyetHesaplariTakibi.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmOdemePlaniIadeIsle.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmOdemePlaniOlustur.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmOdemePlaniTahsilatiIptalEt.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmOdemePlaniTahsilatiIsle.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmOzelGunlerInsert.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\FinansIslemi.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\GIB_BirimSeti.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\GIB_FaturaCesitleri.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\GIB_FaturaEkVergiler.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\GIB_ParaTipleri.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\GIB_Sehirler.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\GIB_TevkifatMaddeleri.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\GIB_Ulke.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\HesapFinans_MSTABLES_Insert.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\HesapNesne.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\HesapNesne_MSTABLES_Insert.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\IBelgeStokAdres.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\JoinTables.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\Lkp_CinsiyetTipi.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\Lkp_VergiDairesiTipi.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\MsFollow.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmHesapBakiyesi.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\OnmToplamBekleyen.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\OnmToplamGerceklesen.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\OnmToplamKdv.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\OnmToplamSonuc.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\prc_ComputeBelgeStokB.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\prc_ComputeBelgeStokSEkVergi.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\prc_GetStokFiyati.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\prc_MsFollow.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\prc_OnmBelgeDekontOzetler_OLD.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\prc_OnmBelgeDekontTbmGelirHesaplari.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\prc_OnmBelgeDekontTbmGiderHesaplari.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\prc_OnmBelgeDekontTbmPersonelHesaplari.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\prc_OnmOdemePlaniOlustur.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\prc_OnmToplamBekleyenGelirler.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\prc_OnmToplamBekleyenOdemeler.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\trg_BelgeStokS.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\trg_BelgeStokSDelete.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\trg_CariAdres.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\trg_HesapCari.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\trg_HesapFinans.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\trg_HesapMaster.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\trg_IBelgeStokAdres.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\trg_Yeni.txt" />
+    <Content Include="Scripts\UST\ResmiMuhasebe\HesapPlani.txt" />
+    <Content Include="Scripts\UST\SRC\DbUpdates.txt" />
+    <Content Include="Scripts\UST\SRC\Lkp_SrcGrupTipi.txt" />
+    <Content Include="Scripts\UST\SRC\Lkp_MtskSertifikaTipi.txt" />
+    <Content Include="Scripts\UST\SRC\Lkp_SrcSubeTipi.txt" />
+    <Content Include="Scripts\UST\SRC\Lkp_SrcDonemTipi.txt" />
+    <Content Include="Scripts\UST\SRC\Lkp_SrcSertifikaTipi.txt" />
+    <Content Include="Scripts\UST\SRC\SrcPersoneli.txt" />
+    <Content Include="Scripts\UST\SRC\prc_SrcAdayBorcunuHesapla.txt" />
+    <Content Include="Scripts\UST\SRC\SrcUcretUygulama.txt" />
+    <Content Include="Scripts\UST\SRC\SrcAdayUcret.txt" />
+    <Content Include="Scripts\UST\SRC\SrcAdayBelgeler.txt" />
+    <Content Include="Scripts\UST\SRC\SrcGrupSubesi.txt" />
+    <Content Include="Scripts\UST\SRC\SrcDonemi.txt" />
+    <Content Include="Scripts\UST\SRC\prc_SrcAdayBiyometrikResmi.txt" />
+    <Content Include="Scripts\UST\SRC\prc_SrcAdayBelgeResimleri.txt" />
+    <Content Include="Scripts\UST\SRC\SrcAdayTakip.txt" />
+    <Content Include="Scripts\UST\SRC\SrcAdayTalep.txt" />
+    <Content Include="Scripts\UST\SRC\SrcAday.txt" />
+    <Content Include="Scripts\UST\TabimMtsk\prc_KursiyerSinavDurumu.txt" />
+    <Content Include="Scripts\UST\TabimMtsk\SinavTar_Update.txt" />
+    <Content Include="Scripts\UST\TabimMtsk\KursiyerFatura.txt" />
+    <Content Include="Scripts\UST\TabimMtsk\trg_DERSPRG_PLAN.txt" />
+    <Content Include="Scripts\UST\TabimMtsk\trg_sinavnot.txt" />
+    <Content Include="Scripts\UST\TabimMtsk\trg_users.txt" />
+    <Content Include="Scripts\UST\UstadCRM\AspNetRoleClaims.txt" />
+    <Content Include="Scripts\UST\UstadCRM\AspNetRoles.txt" />
+    <Content Include="Scripts\UST\UstadCRM\AspNetUserChanges.txt" />
+    <Content Include="Scripts\UST\UstadCRM\AspNetUserClaims.txt" />
+    <Content Include="Scripts\UST\UstadCRM\AspNetUserLogins.txt" />
+    <Content Include="Scripts\UST\UstadCRM\AspNetUserRoles.txt" />
+    <Content Include="Scripts\UST\UstadCRM\AspNetUsers.txt" />
+    <Content Include="Scripts\UST\UstadCRM\AspNetUserTokens.txt" />
+    <Content Include="Scripts\UST\UstadCRM\Edi_Dosyalari.txt" />
+    <Content Include="Scripts\UST\UstadCRM\EduMtskUserSertifikasi.txt" />
+    <Content Include="Scripts\UST\UstadCRM\EduUsers.txt" />
+    <Content Include="Scripts\UST\UstadCRM\EduUserTokens.txt" />
+    <Content Include="Scripts\UST\UstadCRM\LkpDistrictType.txt" />
+    <Content Include="Scripts\UST\UstadCRM\LkpCityType.txt" />
+    <Content Include="Scripts\UST\UstadCRM\MtskVeriAktarimi.txt" />
+    <Content Include="Scripts\UST\UstadCRM\prc_FirmUsers.txt" />
+    <Content Include="Scripts\UST\UstadCRM\prc_UstadUserFirmsListGet.txt" />
+    <Content Include="Scripts\UST\UstadCRM\UstadComputers.txt" />
+    <Content Include="Scripts\UST\UstadCRM\UstadFirms.txt" />
+    <Content Include="Scripts\UST\UstadCRM\UstadFirmsMebAday.txt" />
+    <Content Include="Scripts\UST\UstadCRM\UstadFirmsUsers.txt" />
+    <Content Include="Scripts\UST\UstadCRM\UstadUsers.txt" />
+    <Content Include="Scripts\UST\Ustad\HP_COMPS.txt" />
+    <Content Include="Scripts\UST\Ustad\HP_FIRMS.txt" />
+    <Content Include="Scripts\UST\Ustad\HP_USERS.txt" />
+    <Content Include="Scripts\UST\Ustad\MS_VARIABLES.txt" />
+    <Content Include="Scripts\UST\Ustad\prc_SYS_VARIABLES_FULL.txt" />
+    <Content Include="Scripts\UST\Ustad\SYS_TYPES_L.txt" />
+    <Content Include="Scripts\UST\Ustad\SYS_TYPES_T.txt" />
+    <Content Include="Scripts\UST\Ustad\SYS_VARIABLES.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\ADRESLER_20160101_1.Txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\AJ_LINEDOC.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\AJ_LINELCI.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\AJ_LINETALK.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\BAZI TRANSFERLER.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\finans_kullanımı.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\FN_LINEVOL.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\giderler.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\HP_ADRES.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\HP_CARI.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\HP_CARI_KK.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\HP_FINANS.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\HP_FINANS_GIDER_TURLERI_INS.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\HP_FIN_TBOX.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\HP_FIRM.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\HP_IL.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\HP_ILCE.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\HP_ILETISIM.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\HP_URUN.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\HP_VERGI.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\HP_VEZNE.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\K2_A_HAREKETLER_1.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\K2_A_HAREKETLER_2.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\MS_VARIABLE_INSERT.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\prc_CLIENT_LIST.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\prc_FN_LINEVOL_CALC.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\prc_FN_LINEVOL_FULLHESAP.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\prc_FN_LINEVOL_TKST.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\prc_STK_FIYAT_CALC.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\prc_STK_GCS_CALC.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\sekreterya.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\STK_FIYAT.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\STK_GCB - Kopya.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\STK_GCB.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\STK_GCS.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\SYS_OTV.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\SYS_TYPES_H.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\SYS_TYPES_L _INS.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\SYS_TYPES_L.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\SYS_TYPES_T.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\SYS_TYPES_U.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\SYS_VARIABLES.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\trg_AJ_LINEDOC.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\trg_FN_LINEVOL.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\trg_HP_FINANS.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\trg_STK_FIYAT.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\trg_STK_GCS.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\trg_SYS_FIRMS.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\trg_SYS_OTV.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\VW_AJ_LINEDOC.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\VW_AJ_LINEDOC_VADE.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\VW_BANK_LIST.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\VW_CLIENT_LIST.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\VW_CLIENT_VALUE.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\VW_FINANS_ARACLARI.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\VW_FIRM_LIST.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\VW_HP_ADRES.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\VW_HP_ILETISIM.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\VW_SYS_MASTERTF.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\VW_TBOX_FINANS_ID.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\VW_TBOX_LIST.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\VW_TYPES_LIST.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\_WorkList.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\ADRESLER_20160101_1.Txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\AJ_LINEDOC.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\AJ_LINELCI.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\AJ_LINETALK.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\BAZI TRANSFERLER.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\finans_kullanımı.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\FN_LINEVOL.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\giderler.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\HP_ADRES.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\HP_CARI.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\HP_CARI_KK.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\HP_FINANS.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\HP_FINANS_GIDER_TURLERI_INS.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\HP_FIN_TBOX.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\HP_FIRM.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\HP_IL.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\HP_ILCE.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\HP_ILETISIM.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\HP_URUN.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\HP_VERGI.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\HP_VEZNE.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\K2_A_HAREKETLER_1.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\K2_A_HAREKETLER_2.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\MS_VARIABLE_INSERT.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\prc_FN_LINEVOL_CALC.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\prc_FN_LINEVOL_FULLHESAP.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\prc_FN_LINEVOL_TKST.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\prc_STK_FIYAT_CALC.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\prc_STK_GCS_CALC.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\sekreterya.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\SEKTORLER_GRUPLU.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\STK_FIYAT.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\STK_GCB - Kopya.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\STK_GCB.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\STK_GCS.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\SYS_OTV.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\SYS_TYPES_H.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\SYS_TYPES_L _INS.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\SYS_TYPES_L.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\SYS_TYPES_T.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\SYS_TYPES_U.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\SYS_VARIABLES.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\trg_AJ_LINEDOC.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\trg_FN_LINEVOL.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\trg_HP_FINANS.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\trg_STK_FIYAT.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\trg_STK_GCS.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\trg_SYS_OTV.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\VW_AJ_LINEDOC.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\VW_AJ_LINEDOC_VADE.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\VW_BANK_LIST.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\VW_CLIENT_LIST.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\VW_CLIENT_VALUE.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\VW_FINANS_ARACLARI.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\VW_FIRM_LIST.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\VW_HP_ADRES.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\VW_HP_ILETISIM.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\VW_SYS_MASTERTF.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\VW_TBOX_FINANS_ID.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\VW_TBOX_LIST.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\VW_TYPES_LIST.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\YARDIMCI_KODLAR.txt" />
+    <Content Include="Scripts\yesiL_vtMsSql\VT_mySQL\_WorkList.txt" />
+    <Content Include="Treetog-I-Contacts.ico" />
+    <Content Include="yesiLdefter.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="UIDesignV4\" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.6.1">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.6.1 %28x86 ve x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <PublishFile Include="Scripts\MPv3_vtMsSql\VT_MSSQL\MsWebPages.txt">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Exclude</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="Scripts\UST\OnMuhasebe\BelgeStokS.txt">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Exclude</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="Scripts\UST\OnMuhasebe\LkpILCETipi.txt">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Exclude</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="Scripts\UST\OnMuhasebe\LkpTevkifatTipi.txt">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Exclude</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+  </ItemGroup>
+  <ItemGroup>
+    <Analyzer Include="..\..\..\..\FastReport.Net\FastReport.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services\" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadataStorage Include="Connected Services\ServiceReferenceUyumTest\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>Bu proje bu bilgisayarda olmayan NuGet paketlerine başvuru yapıyor. Bunları indirmek için NuGet Paket Geri Yükleme'yi kullanın. Daha fazla bilgi için, bkz. http://go.microsoft.com/fwlink/?LinkID=322105. Eksik dosya: {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\Tesseract.5.2.0\build\Tesseract.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Tesseract.5.2.0\build\Tesseract.targets'))" />
+    <Error Condition="!Exists('..\packages\Selenium.WebDriver.ChromeDriver.122.0.6261.11100\build\Selenium.WebDriver.ChromeDriver.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Selenium.WebDriver.ChromeDriver.122.0.6261.11100\build\Selenium.WebDriver.ChromeDriver.targets'))" />
+    <Error Condition="!Exists('..\packages\Selenium.WebDriver.4.20.0\build\Selenium.WebDriver.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Selenium.WebDriver.4.20.0\build\Selenium.WebDriver.targets'))" />
+    <Error Condition="!Exists('..\packages\chromiumembeddedframework.runtime.win-x64.135.0.17\build\chromiumembeddedframework.runtime.win-x64.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\chromiumembeddedframework.runtime.win-x64.135.0.17\build\chromiumembeddedframework.runtime.win-x64.props'))" />
+    <Error Condition="!Exists('..\packages\chromiumembeddedframework.runtime.win-x86.135.0.17\build\chromiumembeddedframework.runtime.win-x86.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\chromiumembeddedframework.runtime.win-x86.135.0.17\build\chromiumembeddedframework.runtime.win-x86.props'))" />
+    <Error Condition="!Exists('..\packages\CefSharp.Common.135.0.170\build\CefSharp.Common.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\CefSharp.Common.135.0.170\build\CefSharp.Common.props'))" />
+    <Error Condition="!Exists('..\packages\CefSharp.Common.135.0.170\build\CefSharp.Common.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\CefSharp.Common.135.0.170\build\CefSharp.Common.targets'))" />
+  </Target>
+  <Import Project="..\packages\Tesseract.5.2.0\build\Tesseract.targets" Condition="Exists('..\packages\Tesseract.5.2.0\build\Tesseract.targets')" />
+  <Import Project="..\packages\Selenium.WebDriver.ChromeDriver.122.0.6261.11100\build\Selenium.WebDriver.ChromeDriver.targets" Condition="Exists('..\packages\Selenium.WebDriver.ChromeDriver.122.0.6261.11100\build\Selenium.WebDriver.ChromeDriver.targets')" />
+  <Import Project="..\packages\Selenium.WebDriver.4.20.0\build\Selenium.WebDriver.targets" Condition="Exists('..\packages\Selenium.WebDriver.4.20.0\build\Selenium.WebDriver.targets')" />
+  <Import Project="..\packages\CefSharp.Common.135.0.170\build\CefSharp.Common.targets" Condition="Exists('..\packages\CefSharp.Common.135.0.170\build\CefSharp.Common.targets')" />
+</Project>

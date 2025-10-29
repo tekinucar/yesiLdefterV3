@@ -1,0 +1,69 @@
+﻿/*CreateTable*/
+-- ------------------------------------------------------- 
+-- TevkifatTipi
+-- ------------------------------------------------------- 
+
+begin transaction
+
+create table [Lkp].[OnmTevkifatTipi]
+(
+   Id                  Int IDENTITY(1,1) NOT NULL, 
+   IsActive            Bit null,
+   TevkifatKodu        nVarchar(10)  null,
+   TevkifatAdi         nVarchar(200) null,
+   TevkifatPayi        Numeric(3)    null, /* 2, 1 - 9, %90,  */
+   TevkifatPaydasi     Numeric(3)    null, /* 3, 10,    100   */
+   TevkifatOrani       nVarChar(4)   null, /* 2/3 , 2/10 ... 9/10 veya %90 gibi açıklamalar taşır  */
+   
+   constraint  pk_OnmTevkifatTipi primary key (Id)
+)
+
+ grant select, insert, update, delete on [Lkp].[OnmTevkifatTipi] to public
+
+commit transaction
+
+/*CreateTableEnd*/
+
+
+/*CreateData*/
+
+SET IDENTITY_INSERT [Lkp].[OnmTevkifatTipi] ON
+
+DELETE [Lkp].[OnmTevkifatTipi]
+
+INSERT INTO [Lkp].[OnmTevkifatTipi] (Id, IsActive, TevkifatKodu, TevkifatAdi, TevkifatPayi, TevkifatPaydasi )
+ VALUES 
+  ( 0, 1, N'', N'Tanımsız', 0, 0 ),
+  ( 1, 1, N'601', N'601 - 3/10 Yapım işleri ile bu işlerle birlikte ifa edilen mühendislik', 3, 10 ),
+  ( 2, 1, N'602', N'602 - Etüt, plan-proje, danışmanlık, denetim vb', 5, 10 ),
+  ( 3, 1, N'603', N'603 - Makine, teçhizat, demirbaş ve taşitlara ait tadil, bakım, onarım', 6, 10 ),
+  ( 4, 1, N'604', N'604 - Yemek servis hizmeti', 90, 100 ),
+  ( 5, 1, N'605', N'605 - Organizasyon hizmeti', 2, 3 ),
+  ( 6, 1, N'606', N'606 - İşgücü temin hizmetleri', 3, 10 ),
+  ( 7, 1, N'607', N'607 - Özel güvenlik hizmeti', 5, 10 ),
+  ( 8, 1, N'608', N'608 - Yapı denetim hizmetleri', 3, 10 ),
+  ( 9, 1, N'609', N'609 - Fason olarak yaptirilan tekstil ve konfeksiyon işleri, çanta ve ayakkabı dikim işleri ve bu işlere aracılık hizmetleri', 3, 10 ),
+  (10, 1, N'610', N'610 - Turistik mağazalara verilen müşteri bulma/ götürme hizmetleri', 3, 10 ),
+  (11, 1, N'611', N'611 - Spor kulüplerinin yayın, reklam ve isim hakkı gelirlerine konu işlemleri', 3, 10 ),
+  (12, 1, N'612', N'612 - Temizlik hizmeti', 3, 10 ),
+  (13, 1, N'613', N'613 - Çevre ve bahçe bakım hizmetleri', 3, 10 ),
+  (14, 1, N'614', N'614 - Servis taşımacılığı', 3, 10 ),
+  (15, 1, N'615', N'615 - Her türlü baskı ve basim hizmetleri', 3, 10 ),
+  (16, 1, N'616', N'616 - 5018 sayili kanuna ekli cetvellerdeki idare,kurum ve kuruşlara yapılan diğer hizmetler', 3, 10 ),
+  (17, 1, N'617-Ex', N'617 - (01.04.2020 Öncesi) Hurda metalden elde edilen külçe teslimleri', 3, 10 ),
+  (18, 1, N'617',    N'617 - Hurda metalden elde edilen külçe teslimleri', 3, 10 ),
+  (19, 1, N'618-Ex', N'618 - (01.04.2020 Öncesi) Hurda metalden elde edilenler dışındaki bakir, çinko ve alüminyum külçe teslimleri', 3, 10 ),
+  (20, 1, N'618',    N'618 - Hurda metalden elde edilenler dışındaki bakir, çinko ve alüminyum külçe teslimleri', 3, 10 ),
+  (21, 1, N'619-Ex', N'619 - (01.04.2020 Öncesi) Bakir, çinko ve alüminyum ürünlerinin teslimi', 3, 10 ),
+  (22, 1, N'619',    N'619 - Bakir, çinko ve alüminyum ürünlerinin teslimi', 3, 10 ),
+  (23, 1, N'620-Ex', N'620 - (01.04.2020 Öncesi) istisnadan vazgeçenlerin hurda ve atık teslimi', 3, 10 ),
+  (24, 1, N'620',    N'620 - istisnadan vazgeçenlerin hurda ve atık teslimi', 3, 10 ),
+  (25, 1, N'621', N'621 - Metal, plastik, lastik, kauçuk, kâğit ve cam hurda ve atıklardan elde edilen hammadde teslimi', 3, 10 ),
+  (26, 1, N'622', N'622 - Pamuk, tiftik, yün ve yapaği ile ham post ve deri teslimleri', 3, 10 ),
+  (27, 1, N'623', N'623 - Ağaç ve orman ürünleri teslimi', 3, 10 ),
+  (28, 1, N'650', N'650 - Diğer', 3, 10 )
+
+SET IDENTITY_INSERT [Lkp].[OnmTevkifatTipi] OFF
+
+/*CreateDataEnd*/
+

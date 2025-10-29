@@ -1,0 +1,105 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table dbo.DbUpdates
+ (
+    Id              Int IDENTITY(1,1) not null,
+    IsActive        Bit               not null,
+    MsDbUpdateId    Int               not null,
+    UpdateDate      Datetime          not null,
+    UpdateTypeId    SmallInt          not null,
+
+    SectorTypeId    SmallInt          not null,
+    DBaseNoTypeId   smallInt          null, 
+    SchemaName      VarChar(5)        null, 
+    TableName       VarChar(100)      null,
+    FieldName       VarChar(50)       null,
+    FieldTypeId     smallInt          null,
+    FieldLength     VarChar(6)        null, 
+    FieldNotNull    bit               null,
+
+    About           nVarChar(100)     null,
+    SqlScript       varchar(MAX)      null,
+
+   Constraint pk_DbUpdates primary key (Id)
+ )
+
+ create index X_DbUpdates_01 on DbUpdates (UpdateDate)
+
+ grant select, insert, update, delete on DbUpdates to public
+
+commit transaction
+
+/*CreateTableEnd*/
+
+/* SectorTypeId
+            None = 0,
+            OnMuhasebe = 1,
+            MaliMusavir = 2,
+            ResmiMuhasebe = 3,
+            Bordro = 4,
+            UstadCrm = 5,
+            UstadMtsk = 201,
+            UstadIsmak = 202,
+            UstadSrc = 203,
+            TabimMtsk = 211,
+            TabimIsmak = 212,
+            TabimSrc = 213,
+*/
+/* DBaseNoTypeId
+            None = 0,
+            Master = 1, 
+            Manager = 2,
+            UstadCrm = 3, 
+            Project = 4,
+            Local = 5,
+            NewDatabase = 6,
+            publishManager = 7,
+            aktrilacakDb = 8,
+/*
+
+/*CreateData*/
+
+if ( Select count(*) ADET from [dbo].[DbUpdates] 
+     where [MsDbUpdateId] = -1
+     and   [UpdateTypeId] = 13 
+     and   [DBaseNoTypeId] = 
+) = 0 
+begin
+INSERT INTO [dbo].[DbUpdates]
+           ([IsActive]
+           ,[MsDbUpdateId]
+           ,[UpdateDate]
+           ,[UpdateTypeId]
+           ,[SectorTypeId]
+           ,[DBaseNoTypeId]
+           ,[SchemaName]
+           ,[TableName]
+           ,[FieldName]
+           ,[FieldTypeId]
+           ,[FieldLength]
+           ,[FieldNotNull]
+           ,[About]
+           ,[SqlScript])
+     VALUES
+           ( 0    -- IsActive, bit  1 : veri transferi yapılıyor, 0 = yapılmıyor 
+           ,-1    -- MsDbUpdateId, NewDatabase
+           , convert(datetime, '01.01.2023',103) -- UpdateDate, datetime
+           , 13   -- UpdateTypeId, Data transfer işlemi
+           , 0    -- SectorTypeId, smallint 
+           , 6    -- DBaseNoTypeId, NewDatabase
+           , null -- SchemaName, varchar(5)
+           , null -- TableName, varchar(100)
+           , null -- FieldName, varchar(50)
+           , null -- FieldTypeId, smallint
+           , null -- FieldLength, varchar(6)
+           , null -- FieldNotNull, bit
+           , 'Veri transferinin yapılması ' -- About, nvarchar(100)
+           , null -- SqlScript, varchar(max)
+		   )
+end
+
+
+
+/*CreateDataEnd*/

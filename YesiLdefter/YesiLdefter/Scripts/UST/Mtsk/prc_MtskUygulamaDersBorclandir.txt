@@ -1,0 +1,203 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_MtskUygulamaDersBorclandir] (@UygulmadiDersId int)  
+AS BEGIN
+
+
+  --declare @UygulmadiDersId int = 1695
+  declare @FirmId int = 0 --629
+  declare @OdemePlanId int = 0
+  declare @EgitimTipiId int = 0
+  declare @UcretTipiId int = 0
+  declare @TalepId int = 0
+  declare @AdayId int = 0
+  declare @TalepTipiId smallint = 0
+  declare @MevcutSertifikaTipiId smallInt = 0
+  declare @IstenenSertifikaTipiId smallInt = 0
+  declare @DersTarihi date
+  declare @DersSayisi int = 0
+  declare @BirSaatDersUcreti Numeric(22,5) = 0
+  declare @ToplaDersUcreti Numeric(22,5) = 0
+
+  -- Uyg. derse bağlı ödeme planı var mı? 
+  Select @OdemePlanId = Id 
+  From dbo.OnmOdemePlani
+  Where MultiSourceId like '%' + convert(varchar(20), @UygulmadiDersId) + '%'
+
+  if (@OdemePlanId > 0)
+  begin   
+      Select 'Daha önce borçlandırma yapılmıştır. ID : ' + Convert(varchar(20),@OdemePlanId)  as IslemSonucu
+      return
+  end 
+
+   
+  -- Borçlandırma için gerekli olan bazı bilgileri toparla 
+  Select 
+    @FirmId = uDers.FirmId
+  , @TalepId = uDers.TalepId
+  , @AdayId = uDers.AdayId
+  , @EgitimTipiId = uDers.EgitimTipiId
+  , @DersTarihi = uDers.DersTarihi
+  , @TalepTipiId = talep.TalepTipiId
+  , @MevcutSertifikaTipiId = isnull(talep.MevcutSertifikaTipiId,0)
+  , @IstenenSertifikaTipiId = isnull(talep.IstenenSertifikaTipiId,0)
+  From dbo.MtskUygulamaliDers as uDers,
+       dbo.MtskAdayTalep as talep 
+  Where uDers.Id = @UygulmadiDersId 
+  and   uDers.TalepId = talep.Id
+
+  -- Bazen -1 geliyor
+  if @MevcutSertifikaTipiId = -1 set @MevcutSertifikaTipiId = 0
+
+  -- Kaç saat ders planlanmış ?
+  Select @DersSayisi = count(Id)
+  From dbo.MtskUygulamaliDers as uDers
+  Where uDers.DersTarihi = @DersTarihi
+  and   uDers.TalepId = @TalepId
+  
+  -- OnmOdemePlani.MultiSourecId için gerekli olan bağlantı ıd leri hazırlanıyor
+  declare @Kolonlar varchar(MAX) 
+  --Select @Kolonlar = COALESCE( @Kolonlar + ',' + QUOTENAME(x.UygDersId,''), QUOTENAME(x.UygDersId,'') ) 
+  select @Kolonlar = coalesce ( @Kolonlar,'')  +  QUOTENAME( x.UygDersId ) + ' ' 
+  From ( 
+         Select Id as UygDersId
+         From dbo.MtskUygulamaliDers as uDers
+         Where uDers.DersTarihi = @DersTarihi
+         and   uDers.TalepId = @TalepId
+  ) x
+
+  -- Id      UcretTipi
+  -- 21113   Başarısız eğitim ücreti
+  -- 21114   Telafi eğitim ücreti
+  -- Ders ücretini tespi et  
+  
+  if (@EgitimTipiId = 2) -- Ders tealfi ise
+  begin
+      set @UcretTipiId = 21114
+      Select @BirSaatDersUcreti = isnull(BirSaatTelafiDersUcreti,0)
+      From dbo.MtskUcretUygulama
+      Where FirmId = @FirmId
+      and   GecerlilikTarihiId = dbo.fnc_getGecerlilikTarihiId(@FirmId, 21104, @DersTarihi)
+      and   MevcutSertifikaTipiId = @MevcutSertifikaTipiId
+      and   IstenenSertifikaTipiId = @IstenenSertifikaTipiId
+
+      if (@MevcutSertifikaTipiId > 0 and @BirSaatDersUcreti = 0)
+      begin
+          Select @BirSaatDersUcreti = isnull(BirSaatTelafiDersUcreti,0)
+          From dbo.MtskUcretUygulama
+          Where FirmId = @FirmId
+          and   GecerlilikTarihiId = dbo.fnc_getGecerlilikTarihiId(@FirmId, 21104, @DersTarihi)
+          and   MevcutSertifikaTipiId = 0
+          and   IstenenSertifikaTipiId = @IstenenSertifikaTipiId
+      end
+  end  
+
+  if (@EgitimTipiId = 4) -- Ders Başarısız aday eğitimi ise
+  begin
+      set @UcretTipiId = 21113
+      Select @BirSaatDersUcreti = isnull(BirSaatBasarisizDersUcreti,0)
+      From dbo.MtskUcretUygulama
+      Where FirmId = @FirmId
+      --and   GecerlilikTarihiId = dbo.fnc_getGecerlilikTarihiId(@FirmId, 21104, @DersTarihi)
+      and   MevcutSertifikaTipiId = @MevcutSertifikaTipiId
+      and   IstenenSertifikaTipiId = @IstenenSertifikaTipiId
+
+      if (@MevcutSertifikaTipiId > 0 and @BirSaatDersUcreti = 0)
+      begin
+          Select @BirSaatDersUcreti = isnull(BirSaatBasarisizDersUcreti,0)
+          From dbo.MtskUcretUygulama
+          Where FirmId = @FirmId
+          --and   GecerlilikTarihiId = dbo.fnc_getGecerlilikTarihiId(@FirmId, 21104, @DersTarihi)
+          and   MevcutSertifikaTipiId = 0
+          and   IstenenSertifikaTipiId = @IstenenSertifikaTipiId
+      end
+  end  
+
+  -- toplanan bilgiler
+  /*
+  Select @FirmId, @OdemePlanId, @TalepId, @EgitimTipiId 
+       , @MevcutSertifikaTipiId, @IstenenSertifikaTipiId
+       , @DersTarihi, @DersSayisi, @Kolonlar
+       , @BirSaatDersUcreti
+       , dbo.fnc_getGecerlilikTarihiId(@FirmId, 21104, @DersTarihi)
+  */
+  /*
+  Select * 
+  From dbo.MtskUygulamaliDers as uDers
+  Where uDers.DersTarihi in (
+      Select DersTarihi 
+      From dbo.MtskUygulamaliDers 
+      Where FirmId = @FirmId
+      and   Id = @UygulmadiDersId
+  )
+  Order by uDers.DersSaatiTipiId
+  */
+
+  -- Şartlar uygun ise OnmOdemePlani satırını oluştur
+  -- Telafi veya Başarısız Aday Eğitim için borçlandırma işlemini gerçekleştir
+  --
+  if (@FirmId > 0
+  and @OdemePlanId = 0
+  and @TalepId > 0
+  and @AdayId > 0
+  and ( @EgitimTipiId = 2 or @EgitimTipiId = 4 )
+  )
+  begin
+      set @ToplaDersUcreti = @BirSaatDersUcreti * @DersSayisi
+
+      INSERT INTO [dbo].[OnmOdemePlani]
+           ([OdmemePlaniGUID]
+           ,[FirmId]
+           ,[IsActive]
+           ,[DonemTipiId]
+           ,[TalepId]
+           ,[TalepTipiId]
+           ,[UcretTipiId]
+           ,[CariId]
+           ,[TaksitTipiId]
+           ,[TaksitNo]
+           ,[VadeTarihi]
+           ,[TaksitTutari]
+           ,[OdemeTipiId]
+           ,[IsPaid]
+           ,[TahsilTarihi]
+           ,[YedekTaksitTutari]
+           ,[BelgeDekontId]
+           ,[PatchBelgeDekontId]
+           ,[BelgeStokBId]
+           ,[SourceTypeId]
+           ,[SourceId]
+           ,[VeriKaynakId]
+           ,[MultiSourceId])
+      VALUES
+           (NEWID()
+           ,@FirmId
+           ,1 --IsActive
+           ,0 --DonemTipiId
+           ,@TalepId
+           ,@TalepTipiId
+           ,@UcretTipiId 
+           ,@AdayId --CariId
+           ,3 --TaksitTipiId
+           ,1 --TaksitNo
+           ,@DersTarihi --VadeTarihi
+           ,@ToplaDersUcreti --TaksitTutari
+           ,2 --OdemeTipiId nakit
+           ,0 --IsPaid
+           ,null --TahsilTarihi
+           ,0    --YedekTaksitTutari
+           ,0    --BelgeDekontId
+           ,0    --PatchBelgeDekontId
+           ,0    --BelgeStokBId
+           ,2102 --SourceTypeId
+           ,0    --SourceId
+           ,0    --VeriKaynakId
+           ,SUBSTRING(@Kolonlar,1,100) --MultiSourceId
+           )
+  end -- if 
+
+  Select '' as IslemSonucu
+
+END -- procedure
+
+/*CreateProcedureEnd*/

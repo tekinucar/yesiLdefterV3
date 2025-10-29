@@ -1,0 +1,599 @@
+﻿USE [GREEN]
+GO
+
+/****** Object:  StoredProcedure [dbo].[prc_FN_LINEVOL_CALC]    Script Date: 07/30/2017 19:30:48 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+CREATE PROCEDURE [dbo].[prc_FN_LINEVOL_CALC] 
+	@Id Integer
+AS BEGIN
+
+    --declare @Id integer = 1
+    
+    -- fiş tipi
+    declare @_LINE_TD Int = 0 
+    declare @_LINE_TD1 Int = 0 
+    declare @_LINE_TD2 Int = 0 
+    
+    declare @_ODEME_TD     SmallInt = 0
+    declare @_VADE_TARIHI  Date 
+    declare @_VADE_YIL     SmallInt = 0
+    declare @_VADE_AY      SmallInt = 0
+    declare @_VADE_GUN     SmallInt = 0
+    declare @_ISLEM_TARIHI Date
+    declare @_ISLEM_YIL    SmallInt = 0
+    declare @_ISLEM_AY     SmallInt = 0
+    declare @_ISLEM_GUN    SmallInt = 0
+    declare @_ISLEM_SAAT   VarChar(5)
+    
+    declare @_HESAP_TD  SmallInt = 0
+    declare @_HESAP_ID  Int = 0
+    declare @_BHESAP_TD SmallInt = 0
+    declare @_BHESAP_ID Int = 0
+    declare @_AHESAP_TD SmallInt = 0
+    declare @_AHESAP_ID Int = 0
+    declare @_CARI_TD   SmallInt = 0
+    declare @_CARI_ID   Int = 0
+        
+    declare @_ISLEM_TUTARI  numeric(22,5) = 0
+    declare @_MASRAF_TUTARI numeric(22,5) = 0
+    declare @_TOPLAM_TUTARI numeric(22,5) = 0
+    declare @_KDV_ORANI numeric(22,5) = 0
+    declare @_KDV_TUTARI numeric(22,5) = 0
+    declare @_KDVSIZ_TUTAR numeric(22,5) = 0
+   
+    declare @_FNLV_B int = 0
+    declare @_FNLV_A int = 0
+
+    -- read
+    Select 
+     @_ODEME_TD = isnull(ins.[ODEME_TD],0)
+    ,@_VADE_TARIHI = ins.[VADE_TARIHI]
+    ,@_VADE_YIL = ins.[VADE_YIL]
+    ,@_VADE_AY = ins.[VADE_AY]
+    ,@_VADE_GUN = ins.[VADE_GUN]
+    --,@_ISLEM_TARIHI = isnull(ins.[ISLEM_TARIHI], convert(date, getdate(), 104))
+    ,@_ISLEM_TARIHI = ins.[ISLEM_TARIHI]
+    ,@_ISLEM_YIL = ins.[ISLEM_YIL]
+    ,@_ISLEM_AY = ins.[ISLEM_AY]
+    ,@_ISLEM_GUN = ins.[ISLEM_GUN]
+    --,@_ISLEM_SAAT = isnull(ins.[ISLEM_SAAT], convert(varchar(5), getdate(),108))
+	,@_ISLEM_SAAT = ins.[ISLEM_SAAT]
+       	
+	,@_ISLEM_TUTARI = ins.[ISLEM_TUTARI]
+   	,@_MASRAF_TUTARI = ins.[MASRAF_TUTARI]
+   	,@_KDV_ORANI = ins.[KDV_ORANI] 
+   	,@_BHESAP_TD = ins.[BHESAP_TD]
+   	,@_BHESAP_ID = isnull(ins.[BHESAP_ID],0)
+   	,@_AHESAP_TD = ins.[AHESAP_TD]
+   	,@_AHESAP_ID = isnull(ins.[AHESAP_ID],0)
+    ,@_CARI_TD = ins.[CARI_TD]   	 	   	
+   	,@_CARI_ID = ins.[CARI_ID]   	
+   	 
+   	from [dbo].[FN_LINEVOL] ins
+   	where ins.ID = @Id
+
+    
+    -- Cari
+    if ((@_CARI_ID > 0) and (@_BHESAP_ID = 0)) 
+    begin
+      set @_BHESAP_TD  = @_CARI_TD
+   	  set @_BHESAP_ID  = @_CARI_ID
+   	  set @_LINE_TD1   = @_CARI_TD
+    end
+    
+    -- Cari
+    if ((@_CARI_ID > 0) and (@_AHESAP_ID = 0)) 
+    begin
+      set @_AHESAP_TD  = @_CARI_TD
+      set @_AHESAP_ID  = @_CARI_ID
+      set @_LINE_TD2   = @_CARI_TD
+    end
+
+    
+    -- BA tablosunun borc satırı okunuyor
+    Select @_FNLV_B = isnull(ins_b.ID,0)
+   	from [dbo].[FN_LINEVOL_BA] ins_b
+   	where ins_b.[HESAP_BA] = 'B'
+   	and  ins_b.[PARENT_ID] = @Id
+
+    -- BA tablosunun alacak satırı okunuyor
+    Select @_FNLV_A = isnull(ins_b.ID,0)
+   	from [dbo].[FN_LINEVOL_BA] ins_b
+   	where ins_b.[HESAP_BA] = 'A'
+   	and  ins_b.[PARENT_ID] = @Id
+
+    -- BA tablsunun borc satırı insert ediliyor
+    if (@_FNLV_B = 0)
+    begin
+      INSERT INTO [dbo].[FN_LINEVOL_BA]
+           ([PARENT_ID]
+           ,[HESAP_BA]
+           ,[HESAP_TD]
+           ,[HESAP_ID]
+           ,[BORC_TUTARI]
+           ,[ALACAK_TUTARI])
+      VALUES
+           (@Id
+           ,'B'         -- HESAP_BA
+           ,@_BHESAP_TD -- HESAP_TD
+           ,@_BHESAP_ID -- HESAP_ID
+           ,@_ISLEM_TUTARI -- BORC_TUTARI
+           ,0              -- ALACAK_TUTARI
+           )    
+    end
+    -- BA tablsunun alacak satırı insert ediliyor 
+    if (@_FNLV_A = 0)
+    begin
+      INSERT INTO [dbo].[FN_LINEVOL_BA]
+           ([PARENT_ID]
+           ,[HESAP_BA]
+           ,[HESAP_TD]
+           ,[HESAP_ID]
+           ,[BORC_TUTARI]
+           ,[ALACAK_TUTARI])
+      VALUES
+           (@Id
+           ,'A'         -- HESAP_BA
+           ,@_AHESAP_TD -- HESAP_TD
+           ,@_AHESAP_ID -- HESAP_ID
+           ,0              -- BORC_TUTARI
+           ,@_ISLEM_TUTARI -- ALACAK_TUTARI
+           )
+    end 
+    -- BA tablsunun borc satırı update ediliyor
+    if (@_FNLV_B > 0)
+    begin
+      UPDATE [dbo].[FN_LINEVOL_BA]
+      SET [HESAP_TD] = @_BHESAP_TD 
+         ,[HESAP_ID] = @_BHESAP_ID 
+         ,[BORC_TUTARI] = @_ISLEM_TUTARI 
+         ,[ALACAK_TUTARI] = 0
+      WHERE ID = @_FNLV_B 
+    end
+    -- BA tablsunun alacak satırı update ediliyor 
+    if (@_FNLV_A > 0)
+    begin
+      UPDATE [dbo].[FN_LINEVOL_BA]
+      SET [HESAP_TD] = @_AHESAP_TD 
+         ,[HESAP_ID] = @_AHESAP_ID 
+         ,[BORC_TUTARI] = 0
+         ,[ALACAK_TUTARI] = @_ISLEM_TUTARI 
+      WHERE ID = @_FNLV_A 
+    end
+
+    -- Tarih düzenlemeleri
+   	
+   	set @_VADE_YIL = YEAR(@_VADE_TARIHI)
+   	set @_VADE_AY = MONTH(@_VADE_TARIHI)
+   	set @_VADE_GUN = DAY(@_VADE_TARIHI)
+   	
+   	set @_ISLEM_YIL = YEAR(@_ISLEM_TARIHI)
+   	set @_ISLEM_AY = MONTH(@_ISLEM_TARIHI)
+   	set @_ISLEM_GUN = DAY(@_ISLEM_TARIHI)
+   	   	
+   	-- fiş tipini belirleme
+   	set @_LINE_TD1 = @_BHESAP_TD
+    set @_LINE_TD2 = @_AHESAP_TD
+    set @_LINE_TD = CONVERT(int, 
+	               (CONVERT(varchar(2), @_LINE_TD1) + 
+	                CONVERT(varchar(2), @_LINE_TD2)))  
+	
+    -- 0 = ödenmedi, 
+    -- 1 = tahsil edildi, 
+    -- 2 = ödendi, 
+    -- 3 = hesaplar arası para transferi
+    -- 4 = virman
+	-- 5 = tahakkuk 
+   	-- 8 = geçersiz
+   	-- 9 = iptal
+   	   	
+   	set @_ODEME_TD = 0   	
+   	
+   	if ((@_BHESAP_TD = 10) or -- kasa
+        (@_BHESAP_TD = 22) or -- hesap
+        (@_BHESAP_TD = 23) or -- k.kartı
+        (@_BHESAP_TD = 24))   -- pos
+         set @_ODEME_TD = 1 -- tahsilat gerçekleşti
+    
+    if ((@_AHESAP_TD = 10) or -- kasa
+        (@_AHESAP_TD = 22) or -- hesap
+        (@_AHESAP_TD = 23) or -- k.kartı
+        (@_AHESAP_TD = 24))   -- pos
+         set @_ODEME_TD = 2 -- ödeme gerçekleşti
+    
+    
+    if ((@_BHESAP_TD = 10) or -- kasa
+        (@_BHESAP_TD = 22) or -- hesap
+        --(@_BHESAP_TD = 23) or -- kk
+        (@_BHESAP_TD = 24)) and -- pos
+       ((@_AHESAP_TD = 10) or -- kasa
+        (@_AHESAP_TD = 22) or -- hesap
+        (@_AHESAP_TD = 23))   -- kk
+        --(@_AHESAP_TD = 24)    -- pos
+         set @_ODEME_TD = 3 -- hesaplar arası transfer
+    
+    -- 22 24 postan hesaba geçen
+    -- 23 10 kasadan kk borcu ödeme
+    -- 23 22 b.hesabından kk borcu ödeme  
+    -- 23 23 k.kartı ile başka bir k.kartı borcunu ödeme
+    
+    if ((@_BHESAP_TD = 22) and (@_AHESAP_TD = 24)) set @_ODEME_TD = 1 -- tahsilat
+    if ((@_BHESAP_TD = 23) and (@_AHESAP_TD = 10)) set @_ODEME_TD = 2 -- ödeme
+    if ((@_BHESAP_TD = 23) and (@_AHESAP_TD = 22)) set @_ODEME_TD = 2 -- ödeme
+    if ((@_BHESAP_TD = 23) and (@_AHESAP_TD = 23)) set @_ODEME_TD = 2 -- ödeme
+    
+    -- 10 10 kasalar arası virman
+    -- 22 22 banka hesaplar arası virman
+    
+    if ((@_BHESAP_TD = 10) and (@_AHESAP_TD = 10)) set @_ODEME_TD = 4 -- virman
+    if ((@_BHESAP_TD = 22) and (@_AHESAP_TD = 22)) set @_ODEME_TD = 4 -- virman
+    
+    -- geçersiz işlemler
+    if ((@_BHESAP_TD = @_AHESAP_TD) and
+        (@_BHESAP_ID = @_AHESAP_ID)) 
+    begin    
+      set @_ODEME_TD = 8 -- geçersiz fiş       
+      set @_LINE_TD = 8888 -- geçersiz fiş
+    end
+    
+    -- hesaplamalar 
+    set @_TOPLAM_TUTARI = 0
+    set @_KDV_TUTARI    = 0
+    set @_KDVSIZ_TUTAR  = 0
+    
+    set @_TOPLAM_TUTARI = @_ISLEM_TUTARI + @_MASRAF_TUTARI   
+       	
+    if (@_KDV_ORANI > 0)
+    begin
+      -- kdv oranı var ise
+      set @_KDVSIZ_TUTAR = @_ISLEM_TUTARI / ((@_KDV_ORANI / 100) + 1)
+      set @_KDV_TUTARI = @_ISLEM_TUTARI - @_KDVSIZ_TUTAR
+    end         	
+    
+   	-- şu anda insert veya update olan yani kürsörün üzerinde olduğu 
+    -- esas kayıt tekrar update oluyor  
+    update [dbo].[FN_LINEVOL] set 
+   	     [LINE_TD]       = @_LINE_TD
+   	    ,[ODEME_TD]      = @_ODEME_TD
+   	    
+   	    ,[TOPLAM_TUTARI] = @_TOPLAM_TUTARI
+        ,[KDV_TUTARI]    = @_KDV_TUTARI 
+        ,[KDVSIZ_TUTAR]  = @_KDVSIZ_TUTAR 
+        
+        ,[VADE_YIL]      = @_VADE_YIL
+        ,[VADE_AY]       = @_VADE_AY
+        ,[VADE_GUN]      = @_VADE_GUN
+        ,[ISLEM_TARIHI]  = @_ISLEM_TARIHI 
+        ,[ISLEM_YIL]     = @_ISLEM_YIL
+        ,[ISLEM_AY]      = @_ISLEM_AY
+        ,[ISLEM_GUN]     = @_ISLEM_GUN
+        ,[ISLEM_SAAT]    = @_ISLEM_SAAT 
+         
+    where ID = @Id   
+    
+   	
+
+    
+ END
+
+
+GO
+
+
+
+
+
+declare @i int = 1
+declare @c int = 0
+
+set @c = (Select COUNT(*) from FN_LINEVOL)
+
+if @c > 0 
+   while (@i <= @c)
+   begin
+     print @i
+   
+     set @i = @i + 1
+   end
+
+
+
+
+yedek *************
+
+
+USE [GREEN]
+GO
+/****** Object:  StoredProcedure [dbo].[prc_FN_LINEVOL_CALC]    Script Date: 08/11/2017 14:50:38 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+ALTER PROCEDURE [dbo].[prc_FN_LINEVOL_CALC] 
+	@Id Integer
+AS BEGIN
+
+    --declare @Id integer = 1
+    
+    -- fiş tipi
+    declare @_LINE_TD Int = 0 
+    declare @_LINE_TD1 Int = 0 
+    declare @_LINE_TD2 Int = 0 
+    
+    declare @_ODEME_TD     SmallInt = 0
+    declare @_VADE_TARIHI  Date 
+    declare @_VADE_YIL     SmallInt = 0
+    declare @_VADE_AY      SmallInt = 0
+    declare @_VADE_GUN     SmallInt = 0
+    declare @_ISLEM_TARIHI Date
+    declare @_ISLEM_YIL    SmallInt = 0
+    declare @_ISLEM_AY     SmallInt = 0
+    declare @_ISLEM_GUN    SmallInt = 0
+    declare @_ISLEM_SAAT   VarChar(5)
+    
+    declare @_HESAP_TD  SmallInt = 0
+    declare @_HESAP_ID  Int = 0
+    declare @_BHESAP_TD SmallInt = 0
+    declare @_BHESAP_ID Int = 0
+    declare @_AHESAP_TD SmallInt = 0
+    declare @_AHESAP_ID Int = 0
+    declare @_CARI_TD   SmallInt = 0
+    declare @_CARI_ID   Int = 0
+        
+    declare @_ISLEM_TUTARI  numeric(22,5) = 0
+    declare @_MASRAF_TUTARI numeric(22,5) = 0
+    declare @_TOPLAM_TUTARI numeric(22,5) = 0
+    declare @_KDV_ORANI numeric(22,5) = 0
+    declare @_KDV_TUTARI numeric(22,5) = 0
+    declare @_KDVSIZ_TUTAR numeric(22,5) = 0
+   
+    declare @_FNLV_B int = 0
+    declare @_FNLV_A int = 0
+
+    -- read
+    Select 
+     @_ODEME_TD = isnull(ins.[ODEME_TD],0)
+    ,@_VADE_TARIHI = ins.[VADE_TARIHI]
+    ,@_VADE_YIL = ins.[VADE_YIL]
+    ,@_VADE_AY = ins.[VADE_AY]
+    ,@_VADE_GUN = ins.[VADE_GUN]
+    --,@_ISLEM_TARIHI = isnull(ins.[ISLEM_TARIHI], convert(date, getdate(), 104))
+    ,@_ISLEM_TARIHI = ins.[ISLEM_TARIHI]
+    ,@_ISLEM_YIL = ins.[ISLEM_YIL]
+    ,@_ISLEM_AY = ins.[ISLEM_AY]
+    ,@_ISLEM_GUN = ins.[ISLEM_GUN]
+    --,@_ISLEM_SAAT = isnull(ins.[ISLEM_SAAT], convert(varchar(5), getdate(),108))
+	,@_ISLEM_SAAT = ins.[ISLEM_SAAT]
+       	
+	,@_ISLEM_TUTARI = ins.[ISLEM_TUTARI]
+   	,@_MASRAF_TUTARI = ins.[MASRAF_TUTARI]
+   	,@_KDV_ORANI = ins.[KDV_ORANI] 
+   	,@_BHESAP_TD = ins.[BHESAP_TD]
+   	,@_BHESAP_ID = isnull(ins.[BHESAP_ID],0)
+   	,@_AHESAP_TD = ins.[AHESAP_TD]
+   	,@_AHESAP_ID = isnull(ins.[AHESAP_ID],0)
+    ,@_CARI_TD = ins.[CARI_TD]   	 	   	
+   	,@_CARI_ID = ins.[CARI_ID]   	
+   	 
+   	from [dbo].[FN_LINEVOL] ins
+   	where ins.ID = @Id
+
+    
+    -- Cari
+    if ((@_CARI_ID > 0) and (@_BHESAP_ID = 0)) 
+    begin
+      set @_BHESAP_TD  = @_CARI_TD
+   	  set @_BHESAP_ID  = @_CARI_ID
+   	  set @_LINE_TD1   = @_CARI_TD
+    end
+    
+    -- Cari
+    if ((@_CARI_ID > 0) and (@_AHESAP_ID = 0)) 
+    begin
+      set @_AHESAP_TD  = @_CARI_TD
+      set @_AHESAP_ID  = @_CARI_ID
+      set @_LINE_TD2   = @_CARI_TD
+    end
+
+    
+    -- BA tablosunun borc satırı okunuyor
+    Select @_FNLV_B = isnull(ins_b.ID,0)
+   	from [dbo].[FN_LINEVOL_BA] ins_b
+   	where ins_b.[HESAP_BA] = 'B'
+   	and  ins_b.[PARENT_ID] = @Id
+
+    -- BA tablosunun alacak satırı okunuyor
+    Select @_FNLV_A = isnull(ins_b.ID,0)
+   	from [dbo].[FN_LINEVOL_BA] ins_b
+   	where ins_b.[HESAP_BA] = 'A'
+   	and  ins_b.[PARENT_ID] = @Id
+
+    -- BA tablsunun borc satırı insert ediliyor
+    if (@_FNLV_B = 0)
+    begin
+      INSERT INTO [dbo].[FN_LINEVOL_BA]
+           ([PARENT_ID]
+           ,[HESAP_BA]
+           ,[HESAP_TD]
+           ,[HESAP_ID]
+           ,[BORC_TUTARI]
+           ,[ALACAK_TUTARI])
+      VALUES
+           (@Id
+           ,'B'         -- HESAP_BA
+           ,@_BHESAP_TD -- HESAP_TD
+           ,@_BHESAP_ID -- HESAP_ID
+           ,@_ISLEM_TUTARI -- BORC_TUTARI
+           ,0              -- ALACAK_TUTARI
+           )    
+    end
+    -- BA tablsunun alacak satırı insert ediliyor 
+    if (@_FNLV_A = 0)
+    begin
+      INSERT INTO [dbo].[FN_LINEVOL_BA]
+           ([PARENT_ID]
+           ,[HESAP_BA]
+           ,[HESAP_TD]
+           ,[HESAP_ID]
+           ,[BORC_TUTARI]
+           ,[ALACAK_TUTARI])
+      VALUES
+           (@Id
+           ,'A'         -- HESAP_BA
+           ,@_AHESAP_TD -- HESAP_TD
+           ,@_AHESAP_ID -- HESAP_ID
+           ,0              -- BORC_TUTARI
+           ,@_ISLEM_TUTARI -- ALACAK_TUTARI
+           )
+    end 
+    -- BA tablsunun borc satırı update ediliyor
+    if (@_FNLV_B > 0)
+    begin
+      UPDATE [dbo].[FN_LINEVOL_BA]
+      SET [HESAP_TD] = @_BHESAP_TD 
+         ,[HESAP_ID] = @_BHESAP_ID 
+         ,[BORC_TUTARI] = @_ISLEM_TUTARI 
+         ,[ALACAK_TUTARI] = 0
+      WHERE ID = @_FNLV_B 
+    end
+    -- BA tablsunun alacak satırı update ediliyor 
+    if (@_FNLV_A > 0)
+    begin
+      UPDATE [dbo].[FN_LINEVOL_BA]
+      SET [HESAP_TD] = @_AHESAP_TD 
+         ,[HESAP_ID] = @_AHESAP_ID 
+         ,[BORC_TUTARI] = 0
+         ,[ALACAK_TUTARI] = @_ISLEM_TUTARI 
+      WHERE ID = @_FNLV_A 
+    end
+
+    -- Tarih düzenlemeleri
+   	
+   	set @_VADE_YIL = YEAR(@_VADE_TARIHI)
+   	set @_VADE_AY = MONTH(@_VADE_TARIHI)
+   	set @_VADE_GUN = DAY(@_VADE_TARIHI)
+   	
+   	set @_ISLEM_YIL = YEAR(@_ISLEM_TARIHI)
+   	set @_ISLEM_AY = MONTH(@_ISLEM_TARIHI)
+   	set @_ISLEM_GUN = DAY(@_ISLEM_TARIHI)
+   	   	
+   	-- fiş tipini belirleme
+   	set @_LINE_TD1 = @_BHESAP_TD
+    set @_LINE_TD2 = @_AHESAP_TD
+    set @_LINE_TD = CONVERT(int, 
+	               (CONVERT(varchar(2), @_LINE_TD1) + 
+	                CONVERT(varchar(2), @_LINE_TD2)))  
+	
+    -- 0 = ödenmedi, 
+    -- 1 = tahsil edildi, 
+    -- 2 = ödendi, 
+    -- 3 = hesaplar arası para transferi
+    -- 4 = virman
+   	-- 8 = geçersiz
+   	-- 9 = iptal
+   	   	
+   	set @_ODEME_TD = 0   	
+   	
+   	if ((@_BHESAP_TD = 10) or -- kasa
+        (@_BHESAP_TD = 22) or -- hesap
+        (@_BHESAP_TD = 23) or -- k.kartı
+        (@_BHESAP_TD = 24))   -- pos
+         set @_ODEME_TD = 1 -- tahsilat gerçekleşti
+    
+    if ((@_AHESAP_TD = 10) or -- kasa
+        (@_AHESAP_TD = 22) or -- hesap
+        (@_AHESAP_TD = 23) or -- k.kartı
+        (@_AHESAP_TD = 24))   -- pos
+         set @_ODEME_TD = 2 -- ödeme gerçekleşti
+    
+    
+    if ((@_BHESAP_TD = 10) or -- kasa
+        (@_BHESAP_TD = 22) or -- hesap
+        --(@_BHESAP_TD = 23) or -- kk
+        (@_BHESAP_TD = 24)) and -- pos
+       ((@_AHESAP_TD = 10) or -- kasa
+        (@_AHESAP_TD = 22) or -- hesap
+        (@_AHESAP_TD = 23))   -- kk
+        --(@_AHESAP_TD = 24)    -- pos
+         set @_ODEME_TD = 3 -- hesaplar arası transfer
+    
+    -- 22 24 postan hesaba geçen
+    -- 23 10 kasadan kk borcu ödeme
+    -- 23 22 b.hesabından kk borcu ödeme  
+    -- 23 23 k.kartı ile başka bir k.kartı borcunu ödeme
+    
+    if ((@_BHESAP_TD = 22) and (@_AHESAP_TD = 24)) set @_ODEME_TD = 1 -- tahsilat
+    if ((@_BHESAP_TD = 23) and (@_AHESAP_TD = 10)) set @_ODEME_TD = 2 -- ödeme
+    if ((@_BHESAP_TD = 23) and (@_AHESAP_TD = 22)) set @_ODEME_TD = 2 -- ödeme
+    if ((@_BHESAP_TD = 23) and (@_AHESAP_TD = 23)) set @_ODEME_TD = 2 -- ödeme
+    
+    -- 10 10 kasalar arası virman
+    -- 22 22 banka hesaplar arası virman
+    
+    if ((@_BHESAP_TD = 10) and (@_AHESAP_TD = 10)) set @_ODEME_TD = 4 -- virman
+    if ((@_BHESAP_TD = 22) and (@_AHESAP_TD = 22)) set @_ODEME_TD = 4 -- virman
+    
+    -- geçersiz işlemler
+    if ((@_BHESAP_TD = @_AHESAP_TD) and
+        (@_BHESAP_ID = @_AHESAP_ID)) 
+    begin    
+      set @_ODEME_TD = 8 -- geçersiz fiş       
+      set @_LINE_TD = 8888 -- geçersiz fiş
+    end
+    
+    -- hesaplamalar 
+    set @_TOPLAM_TUTARI = 0
+    set @_KDV_TUTARI    = 0
+    set @_KDVSIZ_TUTAR  = 0
+    
+    set @_TOPLAM_TUTARI = @_ISLEM_TUTARI + @_MASRAF_TUTARI   
+       	
+    if (@_KDV_ORANI > 0)
+    begin
+      -- kdv oranı var ise
+      set @_KDVSIZ_TUTAR = @_ISLEM_TUTARI / ((@_KDV_ORANI / 100) + 1)
+      set @_KDV_TUTARI = @_ISLEM_TUTARI - @_KDVSIZ_TUTAR
+    end         	
+    
+   	-- şu anda insert veya update olan yani kürsörün üzerinde olduğu 
+    -- esas kayıt tekrar update oluyor  
+    update [dbo].[FN_LINEVOL] set 
+   	     [LINE_TD]       = @_LINE_TD
+   	    ,[ODEME_TD]      = @_ODEME_TD
+   	    
+   	    ,[TOPLAM_TUTARI] = @_TOPLAM_TUTARI
+        ,[KDV_TUTARI]    = @_KDV_TUTARI 
+        ,[KDVSIZ_TUTAR]  = @_KDVSIZ_TUTAR 
+        
+        ,[VADE_YIL]      = @_VADE_YIL
+        ,[VADE_AY]       = @_VADE_AY
+        ,[VADE_GUN]      = @_VADE_GUN
+        ,[ISLEM_TARIHI]  = @_ISLEM_TARIHI 
+        ,[ISLEM_YIL]     = @_ISLEM_YIL
+        ,[ISLEM_AY]      = @_ISLEM_AY
+        ,[ISLEM_GUN]     = @_ISLEM_GUN
+        ,[ISLEM_SAAT]    = @_ISLEM_SAAT 
+         
+    where ID = @Id   
+    
+   	
+
+    
+ END
+
+
+
+
+
+
+

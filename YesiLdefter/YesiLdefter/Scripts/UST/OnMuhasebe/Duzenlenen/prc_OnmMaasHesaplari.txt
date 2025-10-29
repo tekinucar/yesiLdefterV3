@@ -1,0 +1,486 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE dbo.prc_OnmMaasHesaplari
+(  
+  @FirmId int, 
+  @CariId int, 
+  @DonemTipiId int
+)
+AS BEGIN
+  /*
+  declare @FirmId int = 11
+  declare @CariId int = 1
+  declare @DonemTipiId int = 202508
+  */
+  declare @HazirlamaTarihi datetime
+  declare @IslemTarihi datetime
+  declare @IslemTipiId smallInt
+  declare @EkGelirId int
+  declare @EkKesintiId int
+  declare @DekontId int 
+  declare @IslemAciklamasi nvarchar(100)
+  declare @BorcTutari numeric(22,5)
+  declare @AlacakTutari numeric(22,5)
+  declare @IsError bit
+
+  declare @DonemTipiId_ varchar(10) = convert(varchar(10), @DonemTipiId)
+  declare @Yil varchar(4) = substring(@DonemTipiId_, 1, 4)
+  declare @Ay varchar(2)  = substring(@DonemTipiId_, 5, 2)
+  declare @Gun varchar(2) = '01'
+  
+  --print @Gun + '.' + @Ay + '.' + @Yil
+
+  declare @MaasBilgisiId int = 0
+  declare @IsEmekli bit
+  declare @MaasTipiId smallInt
+  declare @MaasTutari numeric(22,5)
+  declare @TeorikDersUcreti numeric(22,5)
+  declare @UygulamaliDersUcreti numeric(22,5)
+   
+  -- ----------------------------------------------------
+  -- Kişinin DonemTipiId ye HeaderLine satırını oku 
+  -- ----------------------------------------------------
+  SELECT Top 1
+       @HazirlamaTarihi = [HazirlamaTarihi]
+  FROM [dbo].[OnmMaasHesaplari]
+  Where IslemTipiId = 10 -- HeaderLine
+  and   FirmId = @FirmId
+  and   CariId = @CariId
+  and   DonemTipiId = @DonemTipiId
+
+  -- ----------------------------------------
+  -- Maaş bilgisini oku  
+  -- ----------------------------------------
+  SELECT TOP 1
+       @MaasBilgisiId = Id
+      ,@IsEmekli = [IsEmekli]
+      ,@MaasTipiId = [MaasTipiId]
+      ,@MaasTutari = [MaasTutari]
+      ,@TeorikDersUcreti = [TeorikDersUcreti]
+      ,@UygulamaliDersUcreti = [UygulamaliDersUcreti]
+  From dbo.OnmMaasBilgisi
+  Where IsActive = 1
+  and   FirmId = @FirmId
+  and   CariId = @CariId
+  and   GecerlilikTarihi <= CONVERT(date, @Gun + '.' + @Ay + '.' + @Yil, 103)
+  order by GecerlilikTarihi desc
+  
+  -- ----------------------------------------
+  -- TeorikDers sayısını bul  
+  -- ----------------------------------------
+  declare @TeorikDersSayisi int = 0
+  Select @TeorikDersSayisi = count(td.Id)
+  From dbo.OnmHesapCari as c
+     left outer join dbo.MtskPersoneli as p on ( c.TcVkNo = p.TcVkNo and p.IsActive = 1 )
+     left outer join dbo.MtskTeorikDers as td on ( p.TcNoCalismaIzniNo = td.PersonelId and td.DonemTipiId = @DonemTipiId)
+  Where 0 = 0 
+  and   c.FirmId = @FirmId
+  and   c.Id = @CariId
+
+  -- ----------------------------------------
+  -- UygulamaliDers sayısını bul  
+  -- ----------------------------------------
+  declare @UygulamaliDersSayisi int = 0
+  Select @UygulamaliDersSayisi = count(ud.Id)
+  From dbo.OnmHesapCari as c
+     left outer join dbo.MtskPersoneli as p on ( c.TcVkNo = p.TcVkNo and p.IsActive = 1 )
+     left outer join dbo.MtskUygulamaliDers as ud on ( p.TcNoCalismaIzniNo = ud.PersonelId and ud.DonemTipiId = @DonemTipiId)
+  Where 0 = 0 
+  and   c.FirmId = @FirmId
+  and   c.Id = @CariId
+  
+  --Select @TeorikDersSayisi, @UygulamaliDersSayisi
+
+  if (@MaasBilgisiId > 0)
+  begin
+      -- ----------------------------------------
+      -- Maaş veya Maaş+DersUcreti ise 
+      -- ----------------------------------------
+      if (@MaasTipiId = 1 or @MaasTipiId = 3)
+      begin
+        
+        --Set @FirmId		
+        --Set @CariId
+        --Set @HazirlamaTarihi
+        --Set @DonemTipiId
+        Set @IslemTarihi = GETDATE()
+        Set @IslemTipiId = 11;
+        Set @EkGelirId = 0
+        Set @EkKesintiId = 0;
+        Set @DekontId = 0;
+        Set @IslemAciklamasi = 'Maaş';
+        Set @BorcTutari = 0; 
+        Set @AlacakTutari = @MaasTutari;
+        Set @IsError = 0
+		
+        EXEC [dbo].[prc_OnmMaasHesaplariKayit]
+		@FirmId,
+		@CariId,
+		@HazirlamaTarihi,
+		@DonemTipiId,
+		@IslemTarihi,
+		@IslemTipiId,
+		@EkGelirId,
+		@EkKesintiId,
+		@DekontId,
+		@IslemAciklamasi,
+		@BorcTutari,
+		@AlacakTutari,
+		@IsError
+		
+      end -- if (@MaasTipiId = 1
+
+      -- ----------------------------------------
+      -- DersÜcreti veya Maaş+DersUcreti ise 
+      -- ----------------------------------------
+      if (@MaasTipiId = 2 or @MaasTipiId = 3)
+      begin 
+	      --Select @TeorikDersSayisi, @UygulamaliDersSayisi
+          if (@TeorikDersSayisi > 0)
+          begin
+              Set @IslemTarihi = GETDATE()
+              Set @IslemTipiId = 12;
+              Set @EkGelirId = 0
+              Set @EkKesintiId = 0;
+              Set @DekontId = 0;
+              Set @IslemAciklamasi = Convert(varchar(5), @TeorikDersSayisi) + ' saat ders ücreti';
+              Set @BorcTutari = 0; 
+              Set @AlacakTutari = @TeorikDersUcreti * @TeorikDersSayisi;
+              Set @IsError = 0
+
+              EXEC [dbo].[prc_OnmMaasHesaplariKayit]
+		      @FirmId,
+		      @CariId,
+		      @HazirlamaTarihi,
+		      @DonemTipiId,
+		      @IslemTarihi,
+		      @IslemTipiId,
+		      @EkGelirId,
+		      @EkKesintiId,
+		      @DekontId,
+		      @IslemAciklamasi,
+		      @BorcTutari,
+		      @AlacakTutari,
+		      @IsError
+          end -- if (@TeorikDersSayisi > 0)
+
+          if (@UygulamaliDersSayisi > 0)
+          begin
+              Set @IslemTarihi = GETDATE()
+              Set @IslemTipiId = 13;
+              Set @EkGelirId = 0
+              Set @EkKesintiId = 0;
+              Set @DekontId = 0;
+              Set @IslemAciklamasi = Convert(varchar(5), @UygulamaliDersSayisi) + ' saat ders ücreti';
+              Set @BorcTutari = 0; 
+              Set @AlacakTutari = @UygulamaliDersUcreti * @UygulamaliDersSayisi;
+              Set @IsError = 0
+
+              EXEC [dbo].[prc_OnmMaasHesaplariKayit]
+		      @FirmId,
+		      @CariId,
+		      @HazirlamaTarihi,
+		      @DonemTipiId,
+		      @IslemTarihi,
+		      @IslemTipiId,
+		      @EkGelirId,
+		      @EkKesintiId,
+		      @DekontId,
+		      @IslemAciklamasi,
+		      @BorcTutari,
+		      @AlacakTutari,
+		      @IsError
+          end -- if (@UygulamaliDersSayisi > 0)
+
+      end -- if (@MaasTipiId = 2
+  end -- if (@MaasBilgisiId > 0)
+
+  -- ----------------------------------------
+  -- Her ay verilecek ek gelir var mı? 
+  -- ----------------------------------------
+  declare @EkId int = 0 
+  declare @EkGelirTipiAdi varchar(100)
+  declare @GelirTutari numeric(22,5)
+ 
+  DECLARE curGelirId CURSOR FOR
+  Select Id
+  From [dbo].[OnmMaasEkGelirler]
+  Where IsActive = 1
+  and   GelirTipiId = 2 -- Her ay verilecek
+  and   FirmId = @FirmId
+  order by SiraNo  
+ 
+  OPEN curGelirId;  
+  FETCH NEXT FROM curGelirId INTO @EkId
+  WHILE @@FETCH_STATUS = 0  
+  BEGIN  
+      Select 
+          @EkGelirTipiAdi = [EkGelirTipiAdi]
+         ,@GelirTutari = [GelirTutari]
+      From [dbo].[OnmMaasEkGelirler]
+      Where Id = @EkId
+
+      Set @IslemTarihi = GETDATE()
+      Set @IslemTipiId = 14; -- Ek gelir
+      Set @EkGelirId = @EkId;
+      Set @EkKesintiId = 0;
+      Set @DekontId = 0;
+      Set @IslemAciklamasi = @EkGelirTipiAdi;
+      Set @BorcTutari = 0; 
+      Set @AlacakTutari = @GelirTutari;
+      Set @IsError = 0
+		
+      EXEC [dbo].[prc_OnmMaasHesaplariKayit]
+		@FirmId,
+		@CariId,
+		@HazirlamaTarihi,
+		@DonemTipiId,
+		@IslemTarihi,
+		@IslemTipiId,
+		@EkGelirId,
+		@EkKesintiId,
+		@DekontId,
+		@IslemAciklamasi,
+		@BorcTutari,
+		@AlacakTutari,
+		@IsError
+          
+      FETCH NEXT FROM curGelirId INTO @EkId
+  END;  
+
+  CLOSE curGelirId;  
+  DEALLOCATE curGelirId;  
+  
+  -- ----------------------------------------
+  -- Her ay kesilecek ek kesinti var mı? 
+  -- ----------------------------------------
+  declare @EkKesintiTipiAdi varchar(100)
+  declare @KesintiTutari numeric(22,5)
+ 
+  DECLARE curKesintiId CURSOR FOR
+  Select Id
+  From [dbo].[OnmMaasEkKesintiler]
+  Where IsActive = 1
+  and   KesintiTipiId = 2 -- Her ay kesilecek
+  and   FirmId = @FirmId
+  order by SiraNo  
+ 
+  OPEN curKesintiId;  
+  FETCH NEXT FROM curKesintiId INTO @EkId
+  WHILE @@FETCH_STATUS = 0  
+  BEGIN  
+      Select 
+          @EkKesintiTipiAdi = [EkKesintiTipiAdi]
+         ,@KesintiTutari = [KesintiTutari]
+      From [dbo].[OnmMaasEkKesintiler]
+      Where Id = @EkId
+
+      Set @IslemTarihi = GETDATE()
+      Set @IslemTipiId = 15; -- Ek kesintiler
+      Set @EkGelirId = 0;
+      Set @EkKesintiId = @EkId;
+      Set @DekontId = 0;
+      Set @IslemAciklamasi = @EkKesintiTipiAdi;
+      Set @BorcTutari = @KesintiTutari; 
+      Set @AlacakTutari = 0;
+      Set @IsError = 0
+		
+      EXEC [dbo].[prc_OnmMaasHesaplariKayit]
+		@FirmId,
+		@CariId,
+		@HazirlamaTarihi,
+		@DonemTipiId,
+		@IslemTarihi,
+		@IslemTipiId,
+		@EkGelirId,
+		@EkKesintiId,
+		@DekontId,
+		@IslemAciklamasi,
+		@BorcTutari,
+		@AlacakTutari,
+		@IsError
+          
+      FETCH NEXT FROM curKesintiId INTO @EkId
+  END;  
+
+  CLOSE curKesintiId;  
+  DEALLOCATE curKesintiId;  
+
+  -- ----------------------------------------
+  -- Personel avans dekontu var mı ?
+  -- ----------------------------------------
+  declare @DkntId int = 0
+  declare @BelgeTarihi datetime
+  declare @AvansTutari numeric(22,5)
+
+  DECLARE curDekontId CURSOR FOR
+  Select Id
+  From [dbo].[OnmBelgeDekont]
+  Where IsActive = 1  
+  and   FirmId = @FirmID
+  and   CariId = @CariId
+  and   BelgeDonemTipiId = @DonemTipiId
+  and   BHesapTipiId = 196
+
+  OPEN curDekontId;  
+  FETCH NEXT FROM curDekontId INTO @DkntId
+  WHILE @@FETCH_STATUS = 0  
+  BEGIN  
+      Select 
+           @BelgeTarihi = [BelgeTarihi]
+          ,@AvansTutari = [BelgeTutari]
+      From [dbo].[OnmBelgeDekont]
+      Where Id = @DkntId  
+
+      Set @IslemTarihi = GETDATE()
+      Set @IslemTipiId = 21; -- Avvanslar
+      Set @EkGelirId = 0;
+      Set @EkKesintiId = 0;
+      Set @DekontId = @DkntId;
+      Set @IslemAciklamasi = CONVERT(varchar(10), @BelgeTarihi, 104) + ' tarihli avans ';
+      Set @BorcTutari = @AvansTutari; 
+      Set @AlacakTutari = 0;
+      Set @IsError = 0
+		
+      EXEC [dbo].[prc_OnmMaasHesaplariKayit]
+		@FirmId,
+		@CariId,
+		@HazirlamaTarihi,
+		@DonemTipiId,
+		@IslemTarihi,
+		@IslemTipiId,
+		@EkGelirId,
+		@EkKesintiId,
+		@DekontId,
+		@IslemAciklamasi,
+		@BorcTutari,
+		@AlacakTutari,
+		@IsError
+          
+      FETCH NEXT FROM curDekontId INTO @DkntId
+  END;  
+
+  CLOSE curDekontId;  
+  DEALLOCATE curDekontId;  
+
+  -- ----------------------------------------
+  -- 31 . Toplamlar
+  -- ----------------------------------------
+
+  declare @BorcToplami numeric(22,5)
+  declare @AlacakToplami numeric(22,5)
+
+  Select
+      @BorcToplami = sum([BorcTutari])
+     ,@AlacakToplami = sum([AlacakTutari])
+  From [dbo].[OnmMaasHesaplari]
+  Where FirmId = @FirmId
+  and   CariId = @CariId
+  and   DonemTipiId = @DonemTipiId
+  and   IslemTipiId < 30 -- Toplam haric
+
+  --Select @BorcToplami, @AlacakToplami
+
+  if (@BorcToplami > 0 or @AlacakToplami > 0)
+  begin
+      Set @IslemTipiId = 31;
+      Set @EkGelirId = 0
+      Set @EkKesintiId = 0;
+      Set @DekontId = 0;
+      Set @IslemAciklamasi = 'Toplamlar';
+      Set @BorcTutari = @BorcToplami; 
+      Set @AlacakTutari = @AlacakToplami;
+      Set @IsError = 0
+
+      EXEC [dbo].[prc_OnmMaasHesaplariKayit]
+		      @FirmId,
+		      @CariId,
+		      @HazirlamaTarihi,
+		      @DonemTipiId,
+		      @IslemTarihi,
+		      @IslemTipiId,
+		      @EkGelirId,
+		      @EkKesintiId,
+		      @DekontId,
+		      @IslemAciklamasi,
+		      @BorcTutari,
+		      @AlacakTutari,
+		      @IsError
+  end; -- if (@BorcToplami > 0 or @AlacakToplami > 0)
+
+  -- ----------------------------------------
+  -- 32 . Ödenecek tutar
+  -- ----------------------------------------
+  declare @OdenecekTutar numeric(22,5)
+  Set @OdenecekTutar = @AlacakToplami - @BorcToplami /* Gelirler - Kesintiler  */
+
+  if (@OdenecekTutar <> 0)
+  begin
+      Set @IslemTipiId = 32;
+      Set @EkGelirId = 0
+      Set @EkKesintiId = 0;
+      Set @DekontId = 0;
+      Set @IslemAciklamasi = 'Ödenecek maaş';
+      Set @BorcTutari = @OdenecekTutar; 
+      Set @AlacakTutari = 0;
+      Set @IsError = 0
+
+      EXEC [dbo].[prc_OnmMaasHesaplariKayit]
+		      @FirmId,
+		      @CariId,
+		      @HazirlamaTarihi,
+		      @DonemTipiId,
+		      @IslemTarihi,
+		      @IslemTipiId,
+		      @EkGelirId,
+		      @EkKesintiId,
+		      @DekontId,
+		      @IslemAciklamasi,
+		      @BorcTutari,
+		      @AlacakTutari,
+		      @IsError
+  end; -- if (@OdenecekTutar <> 0)
+
+  -- ----------------------------------------
+  -- 33 . Genel Toplam
+  -- ----------------------------------------
+  Select
+      @BorcToplami = sum([BorcTutari])
+     ,@AlacakToplami = sum([AlacakTutari])
+  From [dbo].[OnmMaasHesaplari]
+  Where FirmId = @FirmId
+  and   CariId = @CariId
+  and   DonemTipiId = @DonemTipiId
+  and   IslemTipiId in ( 31, 32 ) -- Toplamlar, Ödenecek tutar
+
+  if (@BorcToplami > 0 or @AlacakToplami > 0)
+  begin
+      Set @IslemTipiId = 33;
+      Set @EkGelirId = 0
+      Set @EkKesintiId = 0;
+      Set @DekontId = 0;
+      Set @IslemAciklamasi = 'Genel toplam';
+      Set @BorcTutari = @BorcToplami; 
+      Set @AlacakTutari = @AlacakToplami;
+      Set @IsError = 0
+
+      EXEC [dbo].[prc_OnmMaasHesaplariKayit]
+		      @FirmId,
+		      @CariId,
+		      @HazirlamaTarihi,
+		      @DonemTipiId,
+		      @IslemTarihi,
+		      @IslemTipiId,
+		      @EkGelirId,
+		      @EkKesintiId,
+		      @DekontId,
+		      @IslemAciklamasi,
+		      @BorcTutari,
+		      @AlacakTutari,
+		      @IsError
+  end; -- if (@BorcToplami > 0 or @AlacakToplami > 0)
+
+END -- procedure
+
+ /*CreateProcedureEnd*/
+

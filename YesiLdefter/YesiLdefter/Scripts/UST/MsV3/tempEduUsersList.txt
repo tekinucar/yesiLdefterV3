@@ -1,0 +1,48 @@
+﻿
+begin transaction
+
+ create table tempEduUsersList
+ (
+   Id                      Int IDENTITY(1,1) not null,
+   TcNo                    varchar  (11)  null,
+   Firstname               nvarchar (100) null,
+   Surname                 nvarchar (100) null,
+   NameSurname             nvarchar (100) null,
+   UserName                nvarchar (50)  null,
+   Email                   nvarchar (100) null,
+   PhoneNumber             nvarchar (10)  null,
+   FirmDbName              nvarchar (100) null,
+   FirmId                  Int            null,
+   MtskAdayId              Int            null,
+   MevcutSertifikaTipiId   SmallInt       null,
+   IstenenSertifikaTipiId  SmallInt       null,
+   SertifikaGrupTipiId     SmallInt       null,
+
+   Constraint pk_tempEduUsersList primary key (Id)
+ )
+
+ create index X_tempEduUsersList_01 on tempEduUsersList (FirmId)
+
+ grant select, insert, update, delete on tempEduUsersList to public
+
+commit transaction
+
+
+Select 
+ a.TcNo
+,a.Adi
+,a.Soyadi
+,null
+,a.Soyadi -- username
+,a.Eposta
+,a.CepTelefonu
+,null -- FirmDbName
+--,:FIRMID
+,a.Id -- AdayId
+,a.MevcutSertifikaTipiId
+,a.IstenenSertifikaTipiId
+,null -- 
+
+From MtskAday as a
+Where a.IsActive = 1
+and a.KayitTipiId = 3

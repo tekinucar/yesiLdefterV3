@@ -1,0 +1,29 @@
+﻿/*CreateFunction*/
+
+CREATE FUNCTION [dbo].[fnc_getHaftaBasiSonu](@Yil int, @HaftaNo int)  
+RETURNS varchar(50)
+AS   
+BEGIN 
+  declare @responseId varchar(50)
+
+  -- Yılın ilk gününü al
+  DECLARE @IlkGun DATE = DATEFROMPARTS(@Yil, 1, 1);
+
+  -- İlk haftanın Pazartesi'sini bul
+  DECLARE @IlkPazartesi DATE = DATEADD(DAY, (9 - DATEPART(WEEKDAY, @IlkGun) + @@DATEFIRST) % 7, @IlkGun);
+
+  -- Hedef haftanın Pazartesi'si ve Pazar'ı
+  DECLARE @BaslangicTarihi DATE = DATEADD(WEEK, @HaftaNo - 2, @IlkPazartesi);
+  DECLARE @BitisTarihi DATE = DATEADD(DAY, 6, @BaslangicTarihi);
+  /*
+  SELECT 
+    @BaslangicTarihi AS HaftaBaslangicTarihi,
+    @BitisTarihi AS HaftaBitisTarihi,
+	Convert(varchar(10), @BaslangicTarihi, 104) + ' / ' + Convert(varchar(10),@BitisTarihi,104)
+  */
+  set @responseId = Convert(varchar(10), @BaslangicTarihi, 104) + ' / ' + Convert(varchar(10),@BitisTarihi,104)
+
+  RETURN @responseId;
+END; -- function
+
+/*CreateFunctionEnd*/

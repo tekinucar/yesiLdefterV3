@@ -1,0 +1,823 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table OnmBelgeStokS
+ (
+
+   Id                  Int IDENTITY(1,1) NOT NULL, 
+   ParentId            Int       not null, /* Default = 0 */
+   FirmId              Int       not null,
+   BelgeStokBId        Int           null, /* BelgeStokB.Id  : BelgeStokB başlık tablosu */
+
+   -- 10
+   TalepId             Int           null,  
+   CariId              Int           null, /* HesapCariId    : Cari Hesap kartı */
+   StokId              Int           null, /* HesapStok.Id   : Stok veya Hizmet kartı */
+   VarlikId            Int           null, /* HesapFinans.Id : Varlık hesabı için */
+   
+   -- 20 belge tip bilgileri
+   GCTipiId            SmallInt      null, /* 0 = etkisiz, 1 = Giriş Hareketi, 2 = Çıkış Hareketi */
+   BelgeTipiId         SmallInt      null, /*   */
+   MuhasebeTipiId      SmallInt      null, /*   */
+   TuruTipiId          SmallInt      null, /* 1. Sipariş, 2. İrsaliye, 3. Fatura   */
+   
+   -- 30
+   IslemTarihi         DateTime      null,
+
+   -- 40   
+   SatirNo             SmallInt      null,
+   UrunKodu            VarChar(30)   null,
+   UrunAdi             nVarChar(50)  null,
+   Marka               nVarChar(30)  null,
+   Model               nVarChar(30)  null,
+   Aciklama            nVarChar(50)  null,
+   SatirNotu           nVarChar(50)  null,
+
+   -- 50
+   GIPKodu             Varchar(12)   null, /* (Gelir İdaresi Paket Kodu), mal ve hizmetlerin vergisel sınıflandırılması için kullanılan 8 haneli bir koddur. */
+   GTIPKodu            Varchar(12)   null, /* (Gümrük Tarife İstatistik Pozisyonu) */
+   UreticiUrunKodu     VarChar(30)   null,
+   SaticiUrunKodu      VarChar(30)   null,
+   AliciUrunKodu       VarChar(30)   null,
+
+   -- 60
+   Miktar              Numeric(22,5) null,     
+   GCMiktar            Numeric(22,5) null,
+   BirimTipiId         nVarChar(3)   null,
+
+   -- 70   /* Programda Expression da OTV ye göre iskonto hesaplaması yapılmadı */ 
+   OTVKodu             Varchar(10)   null,
+   OTVOrani            Numeric(6,2)  null, /* Miktar x otvOrani   : otombillerde oran üzerinden hesaplanıyor*/
+   OTVBirimTutari      Numeric(22,5) null, /* Miktar x otvTutari  : akaryakıtta litre başına sabir ücret alınıyor */ 
+
+   -- 80
+   /* 
+   -- **Normal**   (standart kdv hesaplanıyor) 
+   -- **İstisna**  (koşullu sıfır KDV): İhracat gibi aslında KDV'ye tabi ama kanunla istisna kapsamına alınanlar. "İhracat İstisnası" diye belirtmeli. 
+   -- **Muafiyet** (daima sıfır KDV): Küçük çiftçi, serbest hekim gibi vergi dışı kalanlar. Açıklamada "KDV Muaflığı" yazmalı.  
+   */
+   KdvTipiId           SmallInt      null, /* 1. Normal kdv hesabı, 2. İstisna, 3. Muaf */
+   KdvOrani            Numeric(4,2)  null,
+   MuafiyetKodu        Varchar(10)   null, 
+   IstisnaKodu         Varchar(10)   null, 
+   IstisnaOrani        Numeric(4,2)  null,
+
+   -- 90
+   ParaTipiId          nVarChar(3)   null, /* belgenin para birimi */
+   DovizYeriId         SmallInt      null,
+   DovizKuru           Numeric(12,8) null,
+   
+   -- 110
+   dBirimFiyati             Numeric(22,5) null, /* birim fiyatı : 100 tl */
+   dBirimOTVliTutari        Numeric(22,5) null, /* birim ötvli fiyatı : 100 x %50 = 150 tl */ 
+   dBirimOTVKdvliFiyati     Numeric(22,5) null, /* birim ötv + kdvli fiyatı : 100 x %50 x %20 = 180 tl */ 
+
+   dToplamTutar             Numeric(22,5) null, /* birim fiyatı x miktar = 100 x 10 adet = 1000 tl */
+   dToplamOTVliTutari       Numeric(22,5) null, /* (birim fiyatı x miktar) x %50 => (100 x 10 adet) x %50 => 1500 tl */
+   dToplamOTVKdvliTutar     Numeric(22,5) null, /* ((birim fiyatı x miktar) x %50 ) x %20 => ((100 x 10 adet) x %50 ) x %20 = 1800 tl */
+
+   dOvtTutari               Numeric(22,5) null, /* 500 tl */   
+   dKdvTutari               Numeric(22,5) null, /* 300 tl */   
+
+   -- 120
+   BirimFiyati             Numeric(22,5) null, /* birim fiyatı : 100 tl */
+   BirimOTVliTutari        Numeric(22,5) null, /* birim ötvli fiyatı : 100 x %50 = 150 tl */ 
+   BirimOTVKdvliFiyati     Numeric(22,5) null, /* birim ötv + kdvli fiyatı : 100 x %50 x %20 = 180 tl */ 
+
+   ToplamTutar             Numeric(22,5) null, /* birim fiyatı x miktar = 100 x 10 adet = 1000 tl */
+   ToplamOTVliTutari       Numeric(22,5) null, /* (birim fiyatı x miktar) x %50 => (100 x 10 adet) x %50 => 1500 tl */
+   ToplamOTVKdvliTutar     Numeric(22,5) null, /* ((birim fiyatı x miktar) x %50 ) x %20 => ((100 x 10 adet) x %50 ) x %20 = 1800 tl */
+
+   OvtTutari               Numeric(22,5) null, /* 500 tl */   
+   KdvTutari               Numeric(22,5) null, /* 300 tl */   
+   
+   -- 130   
+   IskontoOrani1           Numeric(12,8) null, 
+   IskontoOrani2           Numeric(12,8) null,
+   IskontoOrani3           Numeric(12,8) null,
+   IskontoOrani4           Numeric(12,8) null,
+   IskontoOraniToplam      Numeric(12,8) null,
+   
+   -- 140
+   IskontoTutari1          Numeric(22,5) null,
+   IskontoTutari2          Numeric(22,5) null,
+   IskontoTutari3          Numeric(22,5) null,
+   IskontoTutari4          Numeric(22,5) null,
+   IskontoTutariToplam     Numeric(22,5) null,
+
+   -- 150
+   IskontoAciklamasi1      varchar(15)   null, /* Kampanya kuponu */
+   IskontoAciklamasi2      varchar(15)   null, /* Satır indirimi vb */
+   IskontoAciklamasi3      varchar(15)   null,
+   IskontoAciklamasi4      varchar(15)   null,
+
+
+   /* Arti ücretlerde kdv var mı ? yok mu ? bilmiyorum : henüz hesaplamalara eklenmdi */
+   -- 160 
+   ArtiUcretOrani1         Numeric(12,8) null,
+   ArtiUcretOrani2         Numeric(12,8) null,
+   ArtiUcretOrani3         Numeric(12,8) null,
+   -- 170
+   ArtiUcret1              Numeric(22,5) null,
+   ArtiUcret2              Numeric(22,5) null,
+   ArtiUcret3              Numeric(22,5) null,
+   -- 180
+   ArtiUcretAciklamasi1    varchar(15)   null, /* Ek hizmet ücreti */
+   ArtiUcretAciklamasi2    varchar(15)   null, /* Özel paketleme */
+   ArtiUcretAciklamasi3    varchar(15)   null, /* Cezai ücret */
+
+   -- 190
+   TevkifatKodu            nVarchar(6)   null, /* Devletin Tevkikat Listesi */
+   TevkifatPayi            Numeric(3)    null, /* 2, 1 - 9, %90,  */
+   TevkifatPaydasi         Numeric(3)    null, /* 3, 10,    100   */
+   TevkifatOrani           nVarChar(4)   null, /* 2/3 , 2/10 ... 9/10 veya %90 gibi açıklamalar taşır  */
+   
+   -- 200
+   StopajKodu              nVarchar(6)   null, /* Devletin Stopaj Listesi */
+   StopajAciklamasi        nVarchar(30)  null, /* Devletin Stopaj Listesi */
+   StopajOrani             Numeric(4,2)  null, /* listeden de gelebilir, kullanıca girebilmeli */
+   
+
+   -- IS  : Iskonto Sonrası
+   -- 210 : Döviz cinsinden hesaplar	
+   dISBirimFiyati          Numeric(22,5) null,  /* birim fiyatı : 100 tl */
+   dISBirimFiyatiOtvli     Numeric(22,5) null,  /* ( birim fiyatı + ( birim fiyatı x %OtvOrani ) )  veya ( birim fiyatı + OtvBirimTutari )  */  
+   dISBirimFiyatiOtvKdvli  Numeric(22,5) null,  /* ISBirimFiyatiOtvli + (( ISBirimFiyatiOtvli / 100 ) x %KdvOranı ) */
+
+   -- 220
+   dISVergisizToplamTutar       Numeric(22,5) null, /* Birim fiyat x miktar : vergisiz */
+   dISEkVergiTutari             Numeric(22,5) null, /* = sum(IBelgeStokSEkVergi.HesaplananVergi)  */
+   dISOtvTutari                 Numeric(22,5) null, /* OtvBirimTutari varsa ? ( OTVBirimTutari x Miktar )  : ( ( ISBirimFiyati x %OTVOrani ) x Miktar )     */
+   dISKdvMatrahi                Numeric(22,5) null, /* ISToplamTutar + ISEkVergiTutari + ISOtvTutari */
+   dISKdvTutari                 Numeric(22,5) null, /* ( ISKdvMatrahi / 100 ) x Kdv Oranı */     
+   dISToplamTutarNormalKdvli    Numeric(22,5) null, /*   ISKdvMatrahi + ISKdvTutari */
+   dISStopajTutari              Numeric(22,5) null, /* ISVergisizToplamTutar * %StopajOrani */
+   dISToplamTutarNormalKdvliNet Numeric(22,5) null, /* ISToplamTutarNormalKdvli - ISStopajTutari */
+
+   -- 230
+   dISTevkifatTutariAliciyaAit  Numeric(22,5) null, /* ( ISKdvTutari / 10 )  x Tevkifat Oranı */
+   dSHesaplananKdvSaticiyaAit   Numeric(22,5) null, /*   ISKdvTutari - ISTevkifatTutari  */
+   dISToplamTutarTevkifatKdvli  Numeric(22,5) null, /*   ISKdvMatrahi + ISHesaplananKdv  */
+   
+
+   -- IS  : Iskonto Sonrası
+   -- 260 : TL cinsinden
+   ISBirimFiyati                Numeric(22,5) null,  /* birim fiyatı : 100 tl */
+   ISBirimFiyatiOtvli           Numeric(22,5) null,  /* ( birim fiyatı + ( birim fiyatı x %OtvOrani ) )  veya ( birim fiyatı + OtvBirimTutari )  */  
+   ISBirimFiyatiOtvKdvli        Numeric(22,5) null,  /* ISBirimFiyatiOtvli + (( ISBirimFiyatiOtvli / 100 ) x %KdvOranı ) */
+
+   -- 270 : Normal Satır Hesabı = VergisizTutar + EkVergi + ÖTV + Normal KDV hesapları
+   --
+   ISVergisizToplamTutar        Numeric(22,5) null, /* Birim fiyat x miktar : vergisiz */
+   ISEkVergiTutari              Numeric(22,5) null, /* = sum(IBelgeStokSEkVergi.HesaplananVergi)  */
+   ISOtvTutari                  Numeric(22,5) null, /* OtvBirimTutari varsa ? ( OTVBirimTutari x Miktar )  : ( ( ISBirimFiyati x %OTVOrani ) x Miktar )     */
+   ISKdvMatrahi                 Numeric(22,5) null, /* ISVergisizToplamTutar + ISEkVergiTutari + ISOtvTutari */
+   ISKdvTutari                  Numeric(22,5) null, /* ( ISKdvMatrahi / 100 ) x Kdv Oranı */     
+   ISToplamTutarNormalKdvli     Numeric(22,5) null, /*   ISKdvMatrahi + ISKdvTutari */
+   ISStopajTutari               Numeric(22,5) null, /* ISVergisizToplamTutar * %StopajOrani */
+   ISToplamTutarNormalKdvliNet  Numeric(22,5) null, /* ISToplamTutarNormalKdvli - ISStopajTutari */
+
+   -- 280 : Tevkifatlı Satır Hesabı = KdvTutari - TevkifatTutarı
+   ISTevkifatTutariAliciyaAit   Numeric(22,5) null, /* ( ISKdvTutari / Tevkifat Paydası )  x Tevkifat Payı  veya (( TevPayı / TevPaydası ) * ISKdvTutari   */
+   ISHesaplananKdvSaticiyaAit   Numeric(22,5) null, /*   ISKdvTutari - ISTevkifatTutariAliciyaAit  */
+   ISToplamTutarTevkifatKdvli   Numeric(22,5) null, /*   ISKdvMatrahi + ISHesaplananKdvSaticiyaAit  */
+   
+   -- 290 
+   dISVergilerDahilToplamTutar  Numeric(22,5) null, /*  ya ISToplamTutarNormalKdvli yada ISToplamTutarTevkifatKdvli  atanacak  */
+   ISVergilerDahilToplamTutar   Numeric(22,5) null, /*  ya ISToplamTutarNormalKdvli yada ISToplamTutarTevkifatKdvli  atanacak  */
+
+   -- 300
+   MaxIskontoOrani         Numeric(12,8) null, /* Fiyat tablosundan geliyor */ 
+   KayitTarihi             DateTime      null, 
+
+   constraint		pk_OnmBelgeStokS primary key (Id)
+ )
+
+ create index X_OnmBelgeStokS01 on OnmBelgeStokS (FirmId,BelgeStokBId,SatirNo)
+ create index X_OnmBelgeStokS02 on OnmBelgeStokS (FirmId,IslemTarihi)
+ create index X_OnmBelgeStokS11 on OnmBelgeStokS (TalepId)
+ create index X_OnmBelgeStokS12 on OnmBelgeStokS (CariId)
+
+ commit transaction
+
+/*CreateTableEnd*/
+ 
+
+
+/*CreateTrigger*/
+
+CREATE TRIGGER [dbo].[trg_OnmBelgeStokS] on [dbo].[OnmBelgeStokS] 
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    DECLARE myCursor cursor local for select Id from Inserted
+    DECLARE @curId bigint
+
+    OPEN myCursor
+    FETCH NEXT FROM myCursor INTO @curId
+
+	declare @BelgeStokBId int 
+
+	declare @ISToplamTutarNormalKdvliNet numeric(22,5) 
+	declare @ISToplamTutarTevkifatKdvli numeric(22,5)
+	declare @ISVergilerDahilToplamTutar numeric(22,5)
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+	  Select 
+       @BelgeStokBId = ins.BelgeStokBId
+      ,@ISToplamTutarNormalKdvliNet = ins.ISToplamTutarNormalKdvliNet
+      ,@ISToplamTutarTevkifatKdvli = ins.ISToplamTutarTevkifatKdvli
+
+	  From inserted as ins
+	  Where ins.Id = @curId
+
+	  Set @ISVergilerDahilToplamTutar = @ISToplamTutarNormalKdvliNet
+	  if (@ISToplamTutarTevkifatKdvli > 0)
+	      Set @ISVergilerDahilToplamTutar = @ISToplamTutarTevkifatKdvli
+
+      Update dbo.OnmBelgeStokS set
+	      ISVergilerDahilToplamTutar = @ISVergilerDahilToplamTutar
+	  Where Id = @curId
+	  And ISNULL(ISVergilerDahilToplamTutar,0) <> @ISVergilerDahilToplamTutar  
+
+      FETCH NEXT FROM myCursor INTO @curId
+    END
+
+    Execute [dbo].[prc_OnmBelgeStokS_SatirlariniTopla] @BelgeStokBId
+
+    CLOSE myCursor
+    DEALLOCATE myCursor   
+
+END -- create trigger
+
+/*CreateTriggerEnd*/
+
+
+
+ /*
+
+
+ */
+ 
+ /*
+   -- Numeric(22,8)
+   -- 12,345,678,901,234.56789012
+
+
+ -------------------------------------------------------------------------
+ 
+ 1 : Normal kdv hesabı
+ 2 : Tevkifatlı kdv hesabı 
+ 
+ Tevkifat : 
+ Para konusunda kesintiler anlamına gelir. 
+ Vergi konusunda, vergiler üzerinde bölüşme/kesinti yapma anlamına gelir.
+
+ -------------------------------------------------------------------------
+                    :  1   :  2 
+ -------------------------------------------------------------------------
+ birim fiyatı       : 40   : 40
+ miktar             : 5    : 5
+ toplam tutar       : 200  : 200
+ kdv oranı          : 18   : 18
+ kdv tutarı         : 36   : 36
+ tevkifat payı      : 0    : 3/10
+ hesaplanan kdv     : 36   : 36 - ((36/10) * 3) > 36 - 10,8 > = 25,2
+ kdvli toplam tutar : 236  : 225.2
+ -------------------------------------------------------------------------
+ */
+
+/*CreateLkpTable*/
+
+begin transaction
+
+-- ------------------------------------------------------- 
+-- MuhasebeTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmBelgeStokSMuhasebeTipi')
+drop table [Lkp].[OnmBelgeStokSMuhasebeTipi]
+
+create table [Lkp].[OnmBelgeStokSMuhasebeTipi]
+(
+   Id              Int Unique Not Null,
+   MuhasebeTipi    nVarchar(50)   null,
+   GrupTipiId      SmallInt       null,
+   
+   constraint  pk_OnmBelgeStokSMuhasebeTipi primary key (Id)
+)
+
+DELETE [Lkp].[OnmBelgeStokSMuhasebeTipi]
+INSERT INTO [Lkp].[OnmBelgeStokSMuhasebeTipi] (Id, MuhasebeTipi, GrupTipiId)
+ VALUES 
+  (0,    N'Tanımsız',    0),
+  (150,  N'150 İlk Madde Malzeme',  1),
+  (151,  N'151 Yarı Mamuller', 1),
+  (153,  N'153 Ticari Mal',    1),
+  (25,   N' 25 Maddi Duran Varlık', 1),
+  (600,  N'600 Yurtiçi Satışlar', 1),
+  (601,  N'601 Yurtdışı Satışlar', 1),
+  (602,  N'602 Hizmet Gelirleri', 1),
+  (622,  N'622 Satılan Hizmet Hesabı', 1),
+  --(750,  N'750 ArGe Malzemesi', 1), -- 750. Araştırma Ve Geliştirme
+  (770,  N'770 Tüketim Malzemesi', 1) -- 770. Genel Yönetim Giderleri
+  
+
+
+-- ------------------------------------------------------- 
+-- KdvTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmBelgeStokSKdvTipi')
+drop table [Lkp].[OnmBelgeStokSKdvTipi]
+
+create table [Lkp].[OnmBelgeStokSKdvTipi]
+(
+   Id          Int Unique Not Null,
+   KdvTipi     nVarchar(20)   null
+   
+   constraint  pk_OnmBelgeStokSKdvTipi primary key (Id)
+)
+
+DELETE [Lkp].[OnmBelgeStokSKdvTipi]
+INSERT INTO [Lkp].[OnmBelgeStokSKdvTipi] (Id, KdvTipi)
+ VALUES 
+  (0,    N'Tanımsız'),
+  (1,    N'Normal'),
+  (2,    N'İstisna'),
+  (3,    N'Muafiyet')
+
+
+commit transaction   
+
+/*CreateLkpTableEnd*/
+
+
+
+
+ create table IBelgeStokSEkVergi
+ (
+
+   Id                   Int IDENTITY(1,1) NOT NULL, 
+   FirmId               Int       not null,
+   BelgeStokBId         Int           null, /* BelgeStokB.Id  : BelgeStokB başlık tablosu */
+   BelgeStokSId         Int           null, /* BelgeStokS.Id  : BelgeStokS satır  tablosu */
+   StokId               Int           null, /* HesapStok.Id   : Stok veya Hizmet kartı */
+   FaturaEkVergiKodu    nVarchar(10)  null, /* IStokFaturaEkVergi üzerinde stok için tanımlı olan ek vergi kodu */
+   MatrahTutari         Numeric(22,8) null, /* vergi matrah olan meblağ */
+   MatrahTutariKdvli    Numeric(22,8) null, /* vergi matrah olan meblağ */
+   EkVergiOrani         Numeric(12,8) null, /* tanımlı tablodan okunacak */
+   EkVergiTutari        Numeric(22,8) null, /*  ""  */
+   HesaplananVergi      Numeric(22,8) null, /* hesaplanarak ortaya çıkan vergi tutarı */
+   
+
+   constraint		pk_IBelgeStokSEkVergi primary key (Id)
+ )
+
+ create index X_IBelgeStokSEkVergi01 on IBelgeStokSEkVergi (FirmId,BelgeStokBId,BelgeStokSId)
+
+
+
+ /*
+
+ Hmm, kullanıcı fatura yazılımı geliştirirken KDV istisnası, muafiyeti ve vergi türlerine göre fatura satırı düzeni nasıl olmalı diye soruyor. Önceki soruda zaten KDV istisna türlerini ve vergi çeşitlerini detaylıca açıklamıştım, şimdi bunları yazılımsal uygulama perspektifinden cevaplamam gerekiyor.  
+Kullanıcının profesyonel olduğu belli - vergi muhasebesi ve yazılım entegrasyonu konusunda teknik detay istiyor. Özellikle "muhakkak uygulamam gereken" vurgusundan yasal zorunlulukları kaçırmaktan endişe ettiğini anlıyorum.  
+Şu kritik noktaları öne çıkarmalıyım:  
+1) **Veri modeli tasarımı**: Her fatura satırı için KDV tipi (normal/istisna/muaf), vergi kodu ve oran alanları zorunlu olmalı. Muafiyet durumunda bile oranın 0 olarak işaretlenmesi gerektiğini vurgulamalıyım.  
+2) **Dinamik vergi hesaplama**: KDV hesaplama mantığında ÖTV'li ürünlerde matrah farkını unutmamalıyım - önce ÖTV eklenmeli sonra KDV hesaplanmalı.  
+3) **Yasal açıklama zorunluluğu**: İstisna/muaf satırlarda otomatik kanun maddesi açıklaması üretmek şart. Mesela "GVK 17/4-e" kodu girilince açıklama alanına otomatik "Sağlık Hizmeti İstisnası" yazılmalı.  
+4) **e-Fatura uyumu**: GİB'in şemasındaki zorunlu alanları (vergicinin.net'teki örnek XML'ler) tam desteklemeli.  
+En çok karıştırılan nokta muafiyet-istisna ayrımı:  
+- **Muafiyet** (daima sıfır KDV): Küçük çiftçi, serbest hekim gibi vergi dışı kalanlar. Açıklamada "KDV Muaflığı" yazmalı.  
+- **İstisna** (koşullu sıfır KDV): İhracat gibi aslında KDV'ye tabi ama kanunla istisna kapsamına alınanlar. "İhracat İstisnası" diye belirtmeli.  
+Yazılımda validation kuralları koymak şart:  
+- KDV oranı >0 ama istisna kodu seçilmişse hata vermeli  
+- Muafiyet seçilmiş ama açıklama alanı boşsa uyarı vermeli  
+- ÖTV tutarı girilmiş ama mal tipi "ÖTV'li ürün" olarak işaretlenmemişse hata  
+Örnek JSON yapısı göstermek iyi olur - geliştiricilerin en çok ihtiyaç duyduğu kısım burası. Vergi kodlarını GİB kılavuzundaki numaralarla eşleştirmeyi unutmamalıyım (ÖTV: 0074, ihracat istisnası: 309).  
+Son olarak test senaryoları önermeliyim: Karışık fatura (hem normal KDV hem istisna hem muaf satırlar), ÖTV+KDV etkileşimi, ihracat faturası gibi edge case'ler. Çünkü vergi denetimlerinde en çok bu tür faturalarda sorun çıkıyor.
+
+ *************
+
+ Her fatura satırı (InvoiceLine) şu alanları mutlaka içermeli:
+ 
+ interface InvoiceLine {
+  productCode: string;       // Mal/hizmet kodu (ETSYM, GTIP vb.)
+  description: string;       // Açıklama (İstisna/muafiyet nedeni dahil)
+  quantity: number;
+  unitPrice: number;
+  taxExemptionReason?: string; // İstisna/muafiyet kodu (Örn: "309" = İhracat)
+  taxExemptionCode?: string;   // GİB tarafından belirlenen kod (Vergi Türü Kod Listesi)
+  vatRate: number;           // %0, %1, %8, %18
+  vatWithholdingRate?: number; // KDV tevkifat oranı (Örn: %50)
+  specialConsumptionTax?: number; // ÖTV tutarı (KDV matrahına EKLENİR)
+  isVATExempt: boolean;      // Muafiyet durumu (KDV'den tamamen muaf mı?)
+}
+
+*****************
+
+
+a) KDV İstisnası/Muafiyeti Ayrımı:
+
+Durum           KDV Oranı   Açıklama Zorunluluğu	e-Fatura Kod Örneği
+------------------------------------------------------------------------
+Tam İstisna     %0          Evet                    309 (İhracat)
+Kısmi İstisna   %1/%8       Evet                    107 (Basılı Kitap)
+Muafiyet        %0          Evet                    801 (Küçük Çiftçi)
+ 
+
+*******************
+
+b) Vergi Türleri Entegrasyonu:
+
+ÖTV Uygulanan Satırlar:
+
+// ÖTV hesaplama örneği:
+const specialConsumptionTax = unitPrice * OTV_RATE;
+const vatBase = (unitPrice + specialConsumptionTax) * quantity;
+const vatAmount = vatBase * vatRate / 100;
+
+
+KDV Tevkifatı:
+
+// Tevkifatlı satır örneği:
+const vatAmount = baseAmount * 0.18; // %18 KDV
+const vatWithheld = vatAmount * 0.50; // %50 tevkifat
+// Ödenecek KDV = 18% - 50% = 9%
+
+
+*******************
+
+e-Fatura Uyumu için XML Yapısı
+
+GİB şemasına uygun satır seviyesinde vergi bilgisi
+(/Invoice/InvoiceLines/InvoiceLine/AllowanceCharge):
+
+
+<InvoiceLine>
+  ...
+  <TaxTotal>
+    <TaxSubtotal>
+      <TaxableAmount>1000.00</TaxableAmount>
+      <TaxAmount>180.00</TaxAmount>
+      <TaxCategory>
+        <TaxScheme>
+          <Name>KDV</Name>
+          <TaxTypeCode>0015</TaxTypeCode> <!-- KDV Vergi Türü Kodu -->
+        </TaxScheme>
+        <Percent>18</Percent>
+        <!-- İSTİSNA/MUAFİYET DURUMU -->
+        <TaxExemptionReason>İhracat</TaxExemptionReason>
+        <TaxExemptionReasonCode>309</TaxExemptionReasonCode>
+      </TaxCategory>
+    </TaxSubtotal>
+  </TaxTotal>
+</InvoiceLine>
+
+
+***********************
+
+4. Zorunlu Validasyon Kuralları
+Kural 1: vatRate=0 ise taxExemptionReasonCode zorunlu.
+
+Kural 2: isVATExempt=true ise taxExemptionReasonCode="801" (Muafiyet) ve description'da açıklama.
+
+Kural 3: ÖTV varsa specialConsumptionTax >0 ve KDV matrahına eklenmeli.
+
+Kural 4: Tüm satırlar için Vergi Türü Kodu (TaxTypeCode) GİB listesinden seçilmeli.
+
+
+***********************
+
+5. Örnek Senaryolar
+
+Senaryo 1: İhracat (Tam İstisna)
+
+Mal: Pamuklu Kumaş | Miktar: 100 mt | Birim Fiyat: 50 TL
+▶ Vergi: 
+  - KDV Oranı: %0 
+  - İstisna Kodu: 309 
+  - Açıklama: "İhracat İstisnası - GİB Kodu: 309"
+
+
+Senaryo 2: KDV Tevkifatlı Hizmet
+
+Hizmet: Danışmanlık | Tutar: 10.000 TL
+▶ Vergi:
+  - KDV Oranı: %18 
+  - Tevkifat Oranı: %50 
+  - Net KDV: 900 TL (10.000 * 18% * 50%)
+
+
+Senaryo 3: ÖTV + KDV
+
+Mal: Benzin | Miktar: 1000 lt | Birim Fiyat: 20 TL
+▶ Vergi:
+  - ÖTV: 6 TL/lt → 6.000 TL 
+  - KDV Matrahı: (20 + 6) * 1000 = 26.000 TL
+  - KDV (%18): 4.680 TL
+
+************************
+
+6. Kritik Test Adımları
+
+Karışık Fatura Testi: Aynı faturada KDV'li, istisnalı ve muaf satırlar.
+
+e-Fatura Geçerleme: Üretilen XML'in GİB Validasyon Aracı ile testi.
+
+Sınır Değerler: 0 KDV oranı + istisna kodu olmaması → Hata vermeli.
+
+Yuvarlama Hataları: Vergi tutarlarında kuruş hatalarına izin verilmemeli.
+
+
+***********************
+
+ÖTV (Özel Tüketim Vergisi) Uygulanan Fatura Satırı Örneği
+Senaryo: Benzin satışı (ÖTV'ye tabi ürün)
+Detaylar:
+
+Mal: Kurşunsuz Benzin 95 Oktan
+
+Miktar: 1,000 litre
+
+Birim Fiyat (ÖTV öncesi): 20 TL/litre
+
+ÖTV Oranı: 6.50 TL/litre (sabit tutar)
+
+KDV Oranı: %18
+
+
+Hesaplama Adımları:
+ÖTV Tutarı Hesaplama:
+
+ÖTV = Miktar × ÖTV Birim Tutarı  
+     = 1,000 L × 6.50 TL  
+     = 6,500 TL 
+
+KDV Matrahı Hesaplama:
+
+KDV Matrahı = (Birim Fiyat + ÖTV) × Miktar  
+            = (20 TL + 6.50 TL) × 1,000  
+            = 26.50 TL × 1,000  
+            = 26,500 TL  
+
+KDV Tutarı Hesaplama:
+
+KDV = KDV Matrahı × %18  
+     = 26,500 TL × 0.18  
+     = 4,770 TL
+
+
+
+ÖTV'ye Tabi Diğer Ürünler için Örnekler:
+-------------------------------------------------------------
+Ürün            ÖTV Birim Tutarı	Hesaplama Mantığı
+-------------------------------------------------------------
+Cep Telefonu    %20 (ad-valorem)    (Birim Fiyat × %20)
+Alkol           100 TL/litre        Sabit tutar × Miktar
+Lüks Araç       %220                (Birim Fiyat × %220)
+
+***********************************************************************
+
+TEVKIFAT Konusu
+
+Tevkifatın "istisna" veya "muafiyet" kategorisinde olmadığını özellikle vurgulamalıyım çünkü bu karıştırılan bir nokta. 
+Vergi mevzuatı açısından bakarsak: İstisna/muafiyet KDV'yi tamamen kaldırırken, tevkifat sadece yükümlülüğün kısmen veya tamamen başkasına devri. 
+
+Dikkat edilmesi gereken bir nokta: Tevkifat oranlarının dinamik olması. Yazılımda mutlaka güncel oran tablosu bulunmalı. 
+
+Tevkifat (Vergi Kesintisi), faturada KDV'nin kısmen veya tamamen alıcı tarafından ödenip satıcı yerine vergi dairesine beyan edilmesidir. 
+İstisna veya muafiyet değil, verginin tahsil yöntemi değişikliğidir. İşte kritik detaylar:
+
+1. Tevkifatın Temel Mantığı
+
+Normal KDV: Satıcı KDV'yi tahsil eder → Kendi vergi dairesine öder.
+
+Tevkifatlı KDV:
+
+Satıcı KDV'yi tahsil eder → Alıcı bu KDV'nin bir kısmını/tamamını keser → Doğrudan kendi vergi dairesine öder.
+
+Örnek: 1.000 TL'lik hizmette %18 KDV (180 TL) oluştu. Alıcı, %50 tevkifat uygularsa:
+
+- Satıcıya ödenen: 1.000 TL + (180 TL * %50) = 1.000 TL + 90 TL  
+- Alıcının vergi dairesine ödediği: 90 TL
+
+2. Tevkifat vs İstisna/Muafiyet
+----------------------------------------------------------------------------
+Özellik         Tevkifat                             İstisna/Muafiyet
+----------------------------------------------------------------------------
+Vergi Yükü      Vergi oluşur, ödeyen değişir         Vergi oluşmaz
+Fatura Satırı   KDV oranı > %0                       KDV oranı = %0
+Hukuki Nitelik  Tahsilat mekanizması                 Vergiden bağışıklık
+----------------------------------------------------------------------------
+e-Fatura Kodu   TaxTypeCode=0015 + WithholdingRate   TaxExemptionReasonCode (ör: 309)
+
+3. Fatura Satırında Nasıl Gösterilir?
+
+a) Hesaplama Formülü
+
+const baseAmount = 1000; // Matrah
+const vatRate = 0.18;    // %18 KDV
+const withholdingRate = 0.50; // %50 tevkifat
+
+const grossVat = baseAmount * vatRate; // 180 TL
+const withheldVat = grossVat * withholdingRate; // 90 TL (alıcı ödeyecek)
+const payableToSeller = baseAmount + (grossVat - withheldVat); // Satıcıya ödenecek: 1.090 TL
+
+b) Fatura Görünümü
+
+Mal/Hizmet    Matrah      KDV Oranı     KDV Tutarı  Tevkifat Oranı  Kesilen KDV    Satıcıya Ödenecek
+------------------------------------------------------------------------------------------------------
+Danışmanlık   1.000 TL    %18           180 TL      %50             90 TL          1.090 TL
+
+
+
+
+5. Tevkifatın Uygulandığı Sektörler (Örnekler)
+
+Sektör        Tevkifat Oranı    Yasal Dayanak
+------------------------------------------------------------------
+İnşaat        %50 (2024)        GİB Genel Tebliğ No: 333
+Yazılım       %50               VUK 41/1-e
+Temizlik      %100              KDVK Geçici Madde 10
+Danışmanlık   %50               KDVK Geçici Madde 13
+
+
+
+6. Yazılımınızda Zorunlu Adımlar
+
+Tevkifat Oranı Kontrolü:
+
+if (withholdingRate > 0) {
+  // KDV oranı %0 ise HATA vermeli (tevkifat KDV'siz olamaz)
+}
+
+
+e-Fatura Validasyonu:
+
+TaxTypeCode="0015" (KDV) olan satırlarda <WithholdingTaxRate> tagı zorunlu
+
+
+Muhasebe Kaydı:
+
+Satıcı : Brüt KDV'yi gelir, Kesilen KDV'yi gider yazar.
+Alıcı  : Kestiği KDV'yi vergi dairesine öder.
+
+Kritik Uyarı:
+
+❗ Tevkifat oranları kanunla değişir → Yazılımınızda güncel oran tablosu bulunmalı.
+
+
+7. İstisna/Muafiyet ile Karıştırılmaması Gerekenler
+
+<!-- TEVKİFATLI satırda İSTİSNA kodu KULLANILAMAZ! -->
+<TaxExemptionReasonCode>309</TaxExemptionReasonCode> <!-- İhracat istisnası -->
+<WithholdingTaxRate>50.0</WithholdingTaxRate> <!-- Çelişki! -->
+
+Doğrusu:
+Tevkifat uygulanan satırlarda TaxExemptionReasonCode ASLA kullanılmaz.
+
+****************************************************************************
+
+Fatura satırlarında KDV, ÖTV, Muafiyet, İstisna ve Tevkifat dışında uygulanabilecek diğer vergi/damat işlemleri şunlardır:
+
+
+1. Damga Vergisi
+Nerelerde Uygulanır?:
+
+Sözleşmeli hizmetler (avukatlık, danışmanlık, kiralama)
+
+Teminat mektupları, tahkimnameler
+
+Fatura Satırına Etkisi:
+
+Fatura toplamına eklenir (satır bazında değil, fatura genelinde).
+
+Oran: %0.948 (2024 itibariyle).
+
+
+2. Borsa Tescil Ücreti
+Nerelerde Uygulanır?:
+
+Borsada işlem gören emtialar (pamuk, buğday, altın vb.).
+
+Hesaplama: İşlem tutarı üzerinden %0.1 - %0.02 arası.
+
+Satır Bazında Gösterim:
+
+Emtia               Miktar  Fiyat   Tutar        Borsa Ücreti (%0.1)
+------------------------------------------------------------------------
+Pamuk (1. sınıf)    100 kg  50 TL   5.000 TL     5 TL
+
+
+
+
+3. Gümrük Vergisi ve Fonlar (İthalat Faturalarında)
+
+Uygulanma Yeri:
+İthal edilen malların gümrüklenmesi sırasında faturaya eklenir.
+
+Türleri:
+
+Vergi/Fon             Açıklama
+----------------------------------------------------
+Gümrük Vergisi        Mal cinsine göre (%0-50 arası)
+İthalat KDV'si        (Gümrük Bedeli + Vergi) x %18
+İlave Gümrük Vergisi  Ek koruma önlemi (ör. %25)
+
+
+4. Özel İletişim Vergisi (ÖİV)
+Nerelerde Uygulanır?:
+
+Cep telefonu, internet, yayın hizmetleri.
+
+Oran: %7.5 (fatura satırına doğrudan yansıtılır).
+
+const baseAmount = 100; // Hizmet bedeli
+const oivRate = 0.075; // %7.5
+const oivAmount = baseAmount * oivRate; // 7.5 TL
+
+
+5. Çevre Katkı Payı
+Nerelerde Uygulanır?:
+
+Plastik poşetler, elektronik atık zorunluluğu olan ürünler.
+
+Satır Bazında Gösterim:
+
+Mal             Miktar   Birim Fiyat    Tutar    Çevre Katkı Payı
+Plastik Poşet   100 ad   0.50 TL        50 TL    30 TL (0.30 TL/ad)
+
+
+6. Şans Oyunları Vergisi
+Uygulama:
+
+Loto, iddia, kumarhane hizmetlerinde %10 oranında.
+
+Fatura Satırı:
+
+Hizmet: Spor Toto Oynanması | Tutar: 100 TL 
+▶ Vergi: 
+  - Şans Oyunları Vergisi (%10): 10 TL 
+  - KDV (%18): 19.80 TL [(100 TL + 10 TL) x %18]
+
+
+7. Diğer Nadir Durumlar
+
+TRT Payı:
+  Elektrik faturalarında %2 oranında.
+
+Enerji Fonu:
+  Benzin/LPG tüketiminde litre başına sabit tutar.
+
+Konaklama Vergisi:
+  Otellerde gece başına 10-50 TL (belediye uygulaması).
+
+-----------------------------------------------------
+
+
+Yazılımınız İçin Kritik Tasarım Önerileri:
+
+1. Esnek Vergi Modülü:
+
+interface InvoiceLine {
+  taxes: {
+    code: string;    // Vergi tür kodu (ÖTV:0075, Gümrük:0071)
+    name: string;    // "Damga Vergisi"
+    rate: number;    // Oran (0.00948)
+    amount: number;  // Hesaplanan tutar
+    isInclusive: boolean; // Matraha dahil mi?
+  }[];
+}
+
+2. Vergi Türü Kod Listesi Entegrasyonu:
+
+  GİB'nin resmi vergi kodu listesini dinamik olarak yükleyin.
+
+
+Özel Durumlar İçin Genişletilebilirlik:
+
+
+<!-- Örnek: Çevre Katkı Payı -->
+<cac:AllowanceCharge>
+  <cbc:ChargeIndicator>true</cbc:ChargeIndicator>
+  <cbc:Amount>30.00</cbc:Amount>
+  <cbc:TaxTypeCode>8001</cbc:TaxTypeCode> <!-- Özel Kod -->
+  <cbc:TaxCategory>CEVRE_KATKI</cbc:TaxCategory>
+</cac:AllowanceCharge>
+
+ 
+ ----------------------------------------
+ Özetle:
+ ----------------------------------------
+ 
+ Ana Vergiler: KDV, ÖTV, İstisna, Muafiyet, Tevkifat (yazılımınızın çekirdeği bunları kusursuz yönetmeli).
+
+✅ Diğerleri: Damga Vergisi, Gümrük Vergisi, ÖİV vb. nadir durumlar için esnek alanlar tasarlayın.
+
+⚠️ Kanun Değişiklikleri: TRT payı, enerji fonu gibi kalemler sık değişir → Güncel mevzuat API'si entegre edin.
+
+📊 Test Senaryosu: Plastik poşet (çevre katkı payı) + ithal ürün (gümrük) içeren karma bir fatura oluşturarak test edin.
+ 
+ 
+ */

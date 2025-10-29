@@ -1,0 +1,58 @@
+﻿USE [u7093888_Ustad01]
+GO
+
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+CREATE TRIGGER [dbo].[trg_BelgeStokSDelete] on [dbo].[BelgeStokS] 
+FOR DELETE
+AS BEGIN
+
+    declare cursor_BelgeStokS cursor for select Id from deleted
+    declare @curId bigint
+
+    declare @FirmId Integer
+	declare @BelgeStokBId Integer
+	declare @StokId Integer
+	
+	OPEN cursor_BelgeStokS
+
+    FETCH NEXT FROM cursor_BelgeStokS INTO @curId
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+      select 
+         @FirmId = del.FirmId
+		,@BelgeStokBId = isnull(del.BelgeStokBId,0)  
+        ,@StokId = del.StokId
+      from deleted del
+      where del.Id = @curId
+
+	  -- Ek Vergisiz hesapla	
+      EXECUTE [dbo].[prc_ComputeBelgeStokB] @BelgeStokBId
+	  -- Ek vergileri hesapla
+	  EXECUTE [dbo].[prc_ComputeBelgeStokSEkVergi] 
+	                 @FirmId
+					,@BelgeStokBId
+					,@curId
+					,@StokId
+      -- Ek vergileri dahil et
+	  EXECUTE [dbo].[prc_ComputeBelgeStokB] @BelgeStokBId
+
+      FETCH NEXT FROM cursor_BelgeStokS INTO @curId
+    END
+
+    CLOSE cursor_BelgeStokS
+    DEALLOCATE cursor_BelgeStokS
+
+END
+GO
+
+ALTER TABLE [dbo].[BelgeStokS] ENABLE TRIGGER [trg_BelgeStokSDelete]
+GO
+
+

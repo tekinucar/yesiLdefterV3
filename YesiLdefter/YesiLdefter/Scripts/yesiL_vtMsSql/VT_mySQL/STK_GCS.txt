@@ -1,0 +1,458 @@
+﻿
+
+begin transaction 
+
+create table STK_GCS
+(
+	ID 					Int IDENTITY(1,1)  	NOT NULL, /* AutoInc */
+	FIRM_ID             Int                 NULL,
+    SHOP_ID             Int                 NULL,
+
+	KILIT				Bit 				NULL, /* 0 = Edit için açık,  1 = Kilitli, Edit yapılamaz */ /* GC_TURU_TIP   eski adı,    */ 
+	GCB_ID				Int 		 		NULL, /* Başlık Tablosunun ID si = STK_GCB */
+	CARI_ID				Int 		 		NULL,
+
+	ISLEM_TARIHI        Date                NULL, 
+	ISLEM_SAAT			VarChar(8)          NULL,
+
+	VADE_GUN            SmallInt            NULL,
+	VADE_TARIHI			Date                NULL,
+	PARA_TURU 			Int		 			NULL, /* 0- TL  0 > Dolar, Mark */
+	DOVIZ_KURU 			Numeric(12,5)		NULL,
+
+	GC_TURU				Int					NULL, /* GİRİŞ ÇIKIŞ TÜRÜ = 5050 ' KÜÇÜK OLANLAR GİRİŞ, 5050'DEN BÜYÜK OLANLAR ÇIKIŞ HAREKETLERİ */
+	SATIS_TIPI			SmallInt			NULL, /* NULL ve 0 = Normal,  2 = Ürün GC Kontrollü, 4 = FIFO, 6 = LIFO, 12 = DEMIR_BAGLANTISI  vb .... */   
+	SATIR_NO			SmallInt			NULL,
+		
+	MODUL_ID			SmallInt			NULL, /* STK_MODUL_ID, HIZ_MODUL_ID,,,, */
+ 	URUN_ID				Int 	 	 		NULL,
+	URUN_ADI			VarChar(50)			NULL,
+	REFERANS			VarChar(30)			NULL,
+
+	TALEP_MIKTAR 		Numeric(15,5)		NULL,
+	MIKTAR				Numeric(15,5) 		NULL, /* TÜM PARASAL HESAPLAR -- MİKTAR -- İLE HESAPLANIYOR */
+	GC_MIKTAR			Numeric(15,5)		NULL, /* FİZİKİ  GİRİŞ ve ÇIKIŞ İŞLEMLERİ  -- GC_MIKTAR -- İLE HESAPLANIYOR */
+	IPT_MIKTAR			Numeric(15,5) 		NULL,
+
+	BIRIM				VarChar(10)			NULL,
+	BIRIM_NO			SmallInt			NULL,
+	KDV					Numeric(4,2) 		NULL,
+	KDV_VARMI			Bit					NULL, /* 0- KDV Uygulaması Yok, 1- KDV Uygulaması Var   */
+
+	GIRIS_GCS_ID		Int					NULL, /* Çıkış sırasında dolduruluyor, giriş satırını refarans doldurulur */	
+	ALIS_TARIHI			Date                NULL,
+	ALIS_FIYATI			Numeric(22,5)		NULL,
+	ALIS_FIYATI_KDVLI	Numeric(22,5)		NULL,
+	SATIS_FIYATI		Numeric(22,5)		NULL,
+	SATIS_FIYATI_KDVLI	Numeric(22,5)		NULL,
+	AS_FARK_TUTARI      Numeric(22,5)		NULL,
+
+	CESIT1_ID 			Int 				NULL, /* Renk, Beden, Kumaş gibi çeşit farkları için */
+	CESIT2_ID 			Int 				NULL, /* Renk, Beden, Kumaş gibi çeşit farkları için */
+	CESIT3_ID 			Int 				NULL, /* Renk, Beden, Kumaş gibi çeşit farkları için */
+
+	CESIT1_TUTARI_TL	Numeric(22,5) 		NULL, /* seçilen çeşidin fiyat farkı (kdv dahil) var ise   */
+	CESIT2_TUTARI_TL	Numeric(22,5) 		NULL, /* ( fiyat farkı_1 + 2 + 3 * miktar ) * iskonto oranı seklindeki çıkan  */
+	CESIT3_TUTARI_TL	Numeric(22,5) 		NULL, /* sonuç  CESIT_FIYAT_FARKI  na yazılır  */
+	CESIT_FIYAT_FARKI 	Numeric(22,5) 		NULL, /* toplam fiyat farkı */
+		 
+	/* İSKONTO ÖNCESİ */
+	ISO_BIR_TUT_TL		Numeric(22,5) 		NULL, /* İSKONTO ÖNCESİ BİRİM TUTARI  TL */
+	ISO_TOP_TUT_TL		Numeric(22,5) 		NULL, /* İSKONTO ÖNCESİ TOPLAM TUTARI TL */   
+	ISO_TOP_TUT_KDVLI	Numeric(22,5) 		NULL, /* İSKONTO ÖNCESİ TOPLAM TUTARI KDVLI  */   
+	ISO_BIR_TUT_DVZ		Numeric(22,5)		NULL, /* İSKONTO ÖNCESİ BİRİM TUTARI  DÖVİZ  */		
+	ISO_TOP_TUT_DVZ		Numeric(22,5)		NULL, /* İSKONTO ÖNCESİ TOPLAM TUTARI DÖVİZ  */		
+    
+	MAX_ISKONTO			Numeric(12,8)		NULL,
+	ISKONTO_SEKLI		SmallInt			NULL, /* 0 = Yüzde, 1 = Tutar, ... */		
+
+	ISKONTO_ORANI		Numeric(12,8)		NULL,
+	ISK1_ORANI			Numeric(12,8)		NULL,
+	ISK2_ORANI			Numeric(12,8)		NULL,
+	ISK3_ORANI			Numeric(12,8)		NULL,
+
+	ISKONTO_TUTARI		Numeric(22,8)		NULL,
+	ISK1_TUTARI			Numeric(22,8)		NULL,
+	ISK2_TUTARI			Numeric(22,8)		NULL,
+	ISK3_TUTARI			Numeric(22,8)		NULL,
+
+	ISK_KADEME_ORANI    Numeric(22,8)		NULL, /* İSKONTO TUTARI KADEMELER ORAN  TOPLAMI ( ISK1_ORANI  + ISK2_ORANI  + ISK3_ORANI )  */		
+	ISK_KADEME_TUTARI	Numeric(22,8)		NULL, /* İSKONTO TUTARI KADEMELER TUTAR TOPLAMI ( ISK1_TUTARI + ISK2_TUTARI + ISK3_TUTARI ) */		
+
+	/* İSKONTO SONRASI */
+	BIR_TUTARI_TL		Numeric(22,5)		NULL, /* İSKONTO SONRASI BİRİM TUTARI TL */
+	TOP_TUTARI_TL		Numeric(22,5)		NULL, /* İSKONTO SONRASI TOPLAM TUTARI TL */
+	BIR_TUTARI_DVZ		Numeric(22,5)		NULL, /* İSKONTO SONRASI BİRİM TUTARI DÖVİZ */		
+	TOP_TUTARI_DVZ		Numeric(22,5)		NULL, /* İSKONTO SONRASI TOPLAM TUTARI DÖVİZ */		
+		
+    VERGI1_ID           Int                 NULL,
+	VERGI1_TUTARI		Numeric(22,5)		NULL, 
+    VERGI1_TOPLAMI		Numeric(22,5)		NULL,
+	VERGI1_IN_FIYAT     Numeric(2)          NULL, /* 0 = Fiyatın İÇİNDE, 1 = Fiyata Ekle  */  
+    
+    VERGI2_ID           Int                 NULL,
+    VERGI2_TUTARI		Numeric(22,5)		NULL, 
+    VERGI2_TOPLAMI		Numeric(22,5)		NULL,
+    VERGI2_IN_FIYAT     Numeric(2)          NULL, /* 0 = Fiyatın İÇİNDE, 1 = Fiyata Ekle  */  
+    
+	VERGI3_ID           Int                 NULL,
+    VERGI3_TUTARI		Numeric(22,5)		NULL, 
+    VERGI3_TOPLAMI		Numeric(22,5)		NULL,
+    VERGI3_IN_FIYAT     Numeric(2)          NULL, /* 0 = Fiyatın İÇİNDE, 1 = Fiyata Ekle  */  
+    
+	VERGI_TOPLAMI		Numeric(22,5)		NULL,
+	
+	KDV_MATRAHI			Numeric(22,5)		NULL, /* % 1,8,18 matrahı */
+	KDV_TUTARI			Numeric(22,5)		NULL, /* % 1,8,18 tutarı */
+	TEVKIFAT_PAY        Numeric(3)		    NULL, /* 1 - 9 */
+	TEVKIFAT_PAYDA      Numeric(3)          NULL, /* 10 */  
+	TEVKIF_KDV_TUTARI	Numeric(22,5)		NULL, /*  (( kdv_tutarı / 10 payda ) X 7 pay )       tutarı */
+	TEVKIF_DAHIL_TOPLAM Numeric(22,5)		NULL, /*  kdv_matrahı + kdv_tutarı = kdv dahil toplam  */
+
+	BIR_TUT_KDVLI_TL	Numeric(22,5)		NULL, /* KDVLI BİRİM TUTARI - İSKONTO SONRASI */
+	TOP_TUT_KDVLI_TL	Numeric(22,5)		NULL, /* KDVLI TOPLAM TUTAR - İSK. SONRASI */
+	BIR_TUT_KDVLI_DVZ	Numeric(22,5)		NULL, /* KDVLI BİRİM TUTARI - İSKONTO SONRASI - DVZ */
+	TOP_TUT_KDVLI_DVZ	Numeric(22,5)		NULL, /* KDVLI TOPLAM TUTAR - İSK. SONRASI - DVZ */
+	
+	BIR_VRGLI_KDVLI_TL	Numeric(22,5)		NULL, /* VRG + KDVLI BİRİM TUTARI - İSKONTO SONRASI */
+	TOP_VRGLI_KDVLI_TL	Numeric(22,5)		NULL, /* VRG + KDVLI TOPLAM TUTAR - İSK. SONRASI */
+	BIR_VRGLI_KDVLI_DVZ	Numeric(22,5)		NULL, /* VRG + KDVLI BİRİM TUTARI - İSKONTO SONRASI */
+	TOP_VRGLI_KDVLI_DVZ	Numeric(22,5)		NULL, /* VRG + KDVLI TOPLAM TUTAR - İSK. SONRASI */
+	
+	GIRIS_YERI_ID		Int					NULL,
+	CIKIS_YERI_ID		Int					NULL, /* Satışı Yapan Yer, Araç */
+	BOLUM_ID			Int					NULL,
+	ODAMASA_ID			Int					NULL,
+
+	SIP_ALAN_PER_ID		Int					NULL,
+	SIP_ALIS_SAAT		VarChar(8)			NULL,
+	TES_EDEN_PER_ID	    Int                 NULL,
+	TES_EDIL_SAAT		VarChar(8)			NULL,
+
+	SON_DURUMU          SmallInt            NULL, /* 99.İPTAL,   */
+    RAPOR_ADEDI			SmallInt			NULL, /* BASILAN RAPOR SAYISI */
+	DONEM_ID			Int					NULL,
+	PARENT_TD           SmallInt            NULL,
+	PARENT_ID           Int                 NULL,
+	
+ 	constraint PK_STK_GCS primary key (ID)
+)
+
+ create index X_STK_GCS00 on STK_GCS (FIRM_ID, GCB_ID)
+ create index X_STK_GCS01 on STK_GCS (FIRM_ID, GC_TURU)
+ create index X_STK_GCS03 on STK_GCS (FIRM_ID, DONEM_ID)
+ create index X_STK_GCS06 on STK_GCS (FIRM_ID, CIKIS_YERI_ID)
+ create index X_STK_GCS07 on STK_GCS (FIRM_ID, GIRIS_YERI_ID)
+ create index X_STK_GCS08 on STK_GCS (FIRM_ID, MODUL_ID, URUN_ID, ALIS_TARIHI)
+ create index X_STK_GCS09 on STK_GCS (FIRM_ID, CARI_ID, DONEM_ID)
+  
+
+ grant select, insert, update, delete on STK_GCS to public
+
+commit transaction
+
+/*
+
+ALTER TABLE STK_GCS ALTER COLUMN KDV_MATRAHI numeric(22,5) NULL
+ALTER TABLE STK_GCS ALTER COLUMN KDV_TUTARI numeric(22,5) NULL
+
+
+    ALTER TABLE STK_GCS ALTER COLUMN ISKONTO_ORANI		Numeric(12,8)		NULL
+	ALTER TABLE STK_GCS ALTER COLUMN ISK1_ORANI			Numeric(12,8)		NULL
+	ALTER TABLE STK_GCS ALTER COLUMN ISK2_ORANI			Numeric(12,8)		NULL
+	ALTER TABLE STK_GCS ALTER COLUMN ISK3_ORANI			Numeric(12,8)		NULL
+
+	ALTER TABLE STK_GCS ALTER COLUMN ISKONTO_TUTARI		Numeric(22,8)		NULL
+	ALTER TABLE STK_GCS ALTER COLUMN ISK1_TUTARI			Numeric(22,8)		NULL
+	ALTER TABLE STK_GCS ALTER COLUMN ISK2_TUTARI			Numeric(22,8)		NULL
+	ALTER TABLE STK_GCS ALTER COLUMN ISK3_TUTARI			Numeric(22,8)		NULL
+
+	ALTER TABLE STK_GCS ALTER COLUMN ISK_TUTARI_TL		Numeric(22,8)		NULL
+	ALTER TABLE STK_GCS ALTER COLUMN ISK_TUTARI_DVZ		Numeric(22,8)		NULL
+
+	ALTER TABLE STK_GCS ADD ISO_TOP_TUT_KDVLI	Numeric(22,5) 		NULL
+
+	ISK_KADEME_ORANI    Numeric(22,8)
+	ISK_KADEME_TUTARI    Numeric(22,8)
+
+	EXEC sp_RENAME 'STK_GCS.ISK_TUTARI_TL' , 'ISK_KADEME_ORANI', 'COLUMN'
+	EXEC sp_RENAME 'STK_GCS.ISK_TUTARI_DVZ' , 'ISK_KADEME_TUTARI', 'COLUMN'
+
+
+	ALTER TABLE STK_GCS ADD TEVKIFAT_PAY        Numeric(3)		    NULL /* 1 - 9 */
+	ALTER TABLE STK_GCS ADD TEVKIFAT_PAYDA      Numeric(3)          NULL /* 10 */  
+	ALTER TABLE STK_GCS ADD TEVKIF_KDV_TUTARI	Numeric(22,5)		NULL /*  (( kdv_tutarı / 10 payda ) X 7 pay )       tutarı */
+	ALTER TABLE STK_GCS ADD TEVKIF_DAHIL_TOPLAM Numeric(22,5)		NULL /*  kdv_matrahı + kdv_tutarı = kdv dahil toplam  */
+	
+	ALTER TABLE STK_GCS ADD VERGI1_TUTARI Numeric(22,5)		NULL
+
+*/
+
+
+
+/*  TRANSFER
+
+ -- set IDENTITY_INSERT STK_GCS on
+
+INSERT INTO [GREEN].[dbo].[STK_GCS]
+           ([ID]
+           ,[FIRM_ID]
+           ,[SHOP_ID]
+           ,[KILIT]
+           ,[GCB_ID]
+           ,[CARI_ID]
+           
+           ,[ISLEM_TARIHI]
+           ,[ISLEM_SAAT]
+           ,[VADE_GUN]
+           ,[VADE_TARIHI]
+           ,[PARA_TURU]
+           ,[DOVIZ_KURU]
+           
+           ,[GC_TURU]
+           ,[SATIS_TIPI]
+           ,[SATIR_NO]
+           ,[MODUL_ID]
+           ,[URUN_ID]
+           ,[URUN_ADI]
+           ,[REFERANS]
+           
+           ,[TALEP_MIKTAR]
+           ,[MIKTAR]
+           ,[GC_MIKTAR]
+           ,[IPT_MIKTAR]
+           ,[BIRIM]
+           ,[BIRIM_NO]
+           ,[KDV]
+           ,[KDV_VARMI]
+           
+           ,[GIRIS_GCS_ID]
+           ,[ALIS_TARIHI]
+           ,[ALIS_FIYATI]
+           ,[ALIS_FIYATI_KDVLI]
+           ,[SATIS_FIYATI]
+           ,[SATIS_FIYATI_KDVLI]
+           ,[AS_FARK_TUTARI]
+           
+           ,[CESIT1_ID]
+           ,[CESIT2_ID]
+           ,[CESIT3_ID]
+           ,[CESIT1_TUTARI_TL]
+           ,[CESIT2_TUTARI_TL]
+           ,[CESIT3_TUTARI_TL]
+           ,[CESIT_FIYAT_FARKI]
+           
+           ,[ISO_BIR_TUT_TL]
+           ,[ISO_TOP_TUT_TL]
+		   ,[ISO_TOP_TUT_KDVLI]
+           ,[ISO_BIR_TUT_DVZ]
+           ,[ISO_TOP_TUT_DVZ]
+           
+           ,[MAX_ISKONTO]
+           ,[ISKONTO_SEKLI]
+           ,[ISKONTO_ORANI]
+           ,[ISK1_ORANI]
+           ,[ISK2_ORANI]
+           ,[ISK3_ORANI]
+           ,[ISKONTO_TUTARI]
+           ,[ISK1_TUTARI]
+           ,[ISK2_TUTARI]
+           ,[ISK3_TUTARI]
+		   ,[ISK_KADEME_ORANI]
+           ,[ISK_KADEME_TUTARI]
+   
+           ,[BIR_TUTARI_TL]
+           ,[TOP_TUTARI_TL]
+           ,[BIR_TUTARI_DVZ]
+           ,[TOP_TUTARI_DVZ]
+           
+		   ,[VERGI1_ID]
+		   ,[VERGI1_TUTARI]
+           ,[VERGI1_TOPLAMI]
+		   ,[VERGI1_IN_FIYAT]            
+           ,[VERGI2_ID]
+           ,[VERGI2_TUTARI]
+           ,[VERGI2_TOPLAMI]
+           ,[VERGI2_IN_FIYAT]
+		   ,[VERGI3_ID]
+           ,[VERGI3_TUTARI]
+           ,[VERGI3_TOPLAMI]
+           ,[VERGI3_IN_FIYAT]
+		   ,[VERGI_TOPLAMI]
+           
+           ,[KDV_MATRAHI]
+           ,[KDV_TUTARI]
+           ,[TEVKIFAT_PAY]       /* 1 - 9 */
+           ,[TEVKIFAT_PAYDA]     /* 10 */  
+           ,[TEVKIF_KDV_TUTARI]   /*  (( kdv_tutarı / 10 payda ) X 7 pay )       tutarı */
+           ,[TEVKIF_DAHIL_TOPLAM] /*  kdv_matrahı + kdv_tutarı = kdv dahil toplam  */
+           
+           ,[BIR_TUT_KDVLI_TL]
+           ,[TOP_TUT_KDVLI_TL]
+           ,[BIR_TUT_KDVLI_DVZ]
+           ,[TOP_TUT_KDVLI_DVZ]
+           ,[BIR_VRGLI_KDVLI_TL]
+           ,[TOP_VRGLI_KDVLI_TL]
+           ,[BIR_VRGLI_KDVLI_DVZ]
+           ,[TOP_VRGLI_KDVLI_DVZ]
+           
+           ,[GIRIS_YERI_ID]
+           ,[CIKIS_YERI_ID]
+           ,[BOLUM_ID]
+           ,[ODAMASA_ID]
+           
+		   ,[SIP_ALAN_PER_ID]
+           ,[SIP_ALIS_SAAT]
+           ,[TES_EDEN_PER_ID]
+           ,[TES_EDIL_SAAT]
+           
+		   ,[SON_DURUMU]
+           ,[RAPOR_ADEDI]
+           ,[DONEM_ID]
+		   ,[PARENT_TD]
+           ,[PARENT_ID]
+           )
+     
+
+
+SELECT 
+       [GCS_ID]
+      ,0
+      ,[SUBE_ID]       
+      ,0
+      ,[GCB_ID]
+      ,[CARI_ID]
+      
+      ,CONVERT(DATE,[HAREKET_TARIHI], 103)
+      ,[SAAT]
+      ,[VADE]
+      ,[VADE_TARIHI]
+      ,[PARA_TURU]
+      ,[DOVIZ_KURU]
+      
+      ,[GC_TURU]
+      ,0
+      ,[SATIR_NO]
+      ,[MODUL_ID]
+      ,[URUN_ID]
+      ,[URUN_ADI]
+      ,[REFERANS]
+      
+      ,[TALEP_ADEDI]
+      ,[MIKTAR]
+      ,[GC_MIKTAR]
+      ,0
+      ,[BIRIM]
+      ,[BIRIM_NO]
+      ,[KDV]
+      ,[KDV_VARMI]
+      
+      ,[GRS_GCS_ID]
+      ,[ALIS_TARIHI]
+      ,[ALIS_FIYATI]
+      ,[ALIS_FIYATI_KDVLI]
+      ,[SATIS_FIYATI]
+      ,[SATIS_FIYATI_KDVLI]
+      ,0
+      
+      ,[CESIT1_ID]
+      ,[CESIT2_ID]
+      ,[CESIT3_ID]
+      ,[CESIT1_TUT_TL]
+      ,[CESIT2_TUT_TL]
+      ,[CESIT3_TUT_TL]
+      ,[CESIT_FIYAT_FARKI]
+      
+      ,[ISO_BIR_TUT_TL]
+      ,[ISO_TOP_TUT_TL]
+	  ,[ISO_TOP_TUT_TL] * ( 1 + ([KDV]/100))
+      ,[ISO_BIR_TUT_DVZ]
+      ,[ISO_TOP_TUT_DVZ]
+      
+      ,[MAX_ISKONTO]
+      ,[ISKONTO_SEKLI]
+      ,[ISKONTO_ORANI]
+      ,[ISK1_ORANI]
+      ,[ISK2_ORANI]
+      ,[ISK3_ORANI]
+      ,[ISKONTO_TUTARI]
+      ,[ISK1_TUTARI]
+      ,[ISK2_TUTARI]
+      ,[ISK3_TUTARI]
+      ,0
+      ,0
+      
+      ,[BIR_TUT_TL]
+      ,[TOP_TUT_TL]
+      ,[BIR_TUT_DVZ]
+      ,[TOP_TUT_DVZ]
+      
+	  ,null -- vergiler
+      ,null
+      ,null
+      ,null
+      ,null -- v2
+      ,null
+      ,null
+	  ,null
+	  ,null -- v3
+	  ,null
+	  ,null
+      ,null
+	  ,null -- vt
+
+	  ,[TOP_TUT_TL] -- KDV MATRAHI
+      ,[KDV_TUT_TL]
+      ,null     /* 1 - 9 */
+      ,null     /* 10 */  
+      ,null     /*  (( kdv_tutarı / 10 payda ) X 7 pay )       tutarı */
+      ,null     /*  kdv_matrahı + kdv_tutarı = kdv dahil toplam  */
+      
+      
+      ,0 -- BIR_TUT_KDVLI_TL
+      ,0
+      ,0
+      ,0
+      ,0
+      ,0
+      ,0
+      ,0
+
+      ,[GIRIS_YERI_ID]
+      ,[CIKIS_YERI_ID]
+      ,[BOLUM_ID]
+      ,[ODAMASA_ID]
+
+      ,[SIP_ALAN_PER]
+      ,[SIP_ALIS_SAAT]
+      ,[TES_EDEN_PER]
+      ,[TES_EDIL_SAAT]
+      
+	  ,null
+      ,[IS_EMRI_YAZISI]
+      ,[DONEM_ID]
+      ,null
+      ,null
+      
+/*
+  FROM [K2CEVIANKARA].[dbo].[K2_STK_GCS]
+  WHERE GC_TURU <> 5056
+  AND GC_TURU < 5099
+  AND GC_TURU > 0
+  ORDER BY GCB_ID  
+*/  
+   
+ /*   
+  FROM [K2CEVIANKARA].[dbo].[K2_STK_GCS]
+  WHERE GC_TURU = 5056
+  AND HAREKET_TARIHI > '2011.02.21'
+  ORDER BY GCB_ID  
+*/     
+
+ -- set IDENTITY_INSERT STK_GCS off
+
+
+TRANSFER  */
+
+
+	

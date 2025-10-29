@@ -1,0 +1,21 @@
+﻿/*CreateFunction*/
+
+CREATE FUNCTION [dbo].[fnc_getSettingsText]( @FirmId int, @settingGroupNo smallint, @settingNo smallint )
+RETURNS Varchar(500)
+AS   
+BEGIN 
+  /* Bu functionda dbo.Setting tablosundaki Varchar(xxx) olan öndeğeler sorgulanıyor, cevaplanıyor */
+  declare @retValue varchar(500)
+
+  Select @retValue = DefaultNumeric
+  From [dbo].[Settings] as s
+  Where FirmId = @FirmId
+  and   SettingGroupNo = @settingGroupNo
+  and   SettingNo = @settingNo
+
+  -- Text value dönüyor
+  RETURN @retValue;
+END; -- function
+
+/*CreateFunctionEnd*/
+

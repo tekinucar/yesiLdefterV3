@@ -1,0 +1,334 @@
+---------------------------------------------------------------------
+-- Kursiyer kayıtları
+---------------------------------------------------------------------
+
+	Talep nedir ?
+
+	Talep tipleri
+
+   1,    Sertifika
+   2,    2.+4 hak 
+   3,    Nakil 2.+4 hak
+   4,    100 Ceza'
+   5,    Özel direksiyon dersi
+
+
+	Kayıt tipleri
+
+   1,    Ön kayıt
+   2,    Kayıt aşamasında
+   3,    Kesin kayıt
+
+	Zamanlama ne demek?
+
+   0,  Belirsiz
+   1,  Geçmiş dönem devam eden
+   2,  Bu dönem
+   3,  Gelecek ay
+   4,  İleriki dönemler
+   5,  Sertifikasını hak etmiş
+
+	Grup Sube Tipi
+
+   1,  Grup veya şubesi belli olmayan adaylar
+
+
+	Mebbis Onayi Tipi
+
+   0,  Onaysız
+   1,  Onaylandı
+
+	Yaş Onayi Tipi
+
+   0,    Tanımsız
+   1,    Yaşı tutmuyor
+   2,    Yaşını doldurdu
+   3,    Muafiyetle onaylı
+   4,    Doğum tarihi yok, belirsiz
+   5,    Yaşı tutuyor
+   6,    Yaş kontrolü yok
+
+
+	Deneyim Şarti Tipi
+
+   1,    Şart yok
+   2,    Uygu
+   3,    Uygun değil
+
+
+	Özür Durumu Tipi
+
+  100, Ortopedik Engelli (Ellerini ve/veya Kollarını Kullanamıyor)
+  110, Ortopedik Engelli (Yürüyemiyor)
+  120, İşitme, Dil veya Konuşma Engelli'
+  140, Görme Engelli (Bir Gözü Görmüyor)'
+  150, Görme Engelli (Büyüteç Yardımı İle Görebiliyor)
+  160, Süreğen hastalığı var.
+
+	Yabanci Dil Tipi
+
+   1, Arapça
+   2, Çince
+   3, İngilizce
+   4, Almanca
+   5, Fransızca
+   6, Farsça
+   7, Rusca
+
+
+	Özel Durumu Tipi
+
+    1, Özür durumu
+    2, Okutman talebi
+    3, Tercüman talebi
+    4, Yabancı dil
+    5, Yabancı uyruklar
+    6, Etiketli kursiyerler
+    7, Kontejan
+
+
+	Belgeler Tipi
+
+   1,  Belgeleri eksik olanlar
+   2,  Belgeleri taranmayan
+   3,  Belgeleri Mebbise yüklenmeyen
+
+
+
+---------------------------------------------------------------------
+-- Dönem, grup ve şube işlemleri
+---------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+---------------------------------------------------------------------
+-- Teorik dersler ve e-sınavlar
+---------------------------------------------------------------------
+
+	Teorik Ders Tipi
+
+   0,  Tanımsız
+   1,  Teorik ders planı yok
+   2,  Teorik ders planı eksik
+   3,  Teorik ders planı mevcut
+   6,  Muaf
+   11, Grup başlangıç tarihi belli değil
+   12, Teorik dersler planlanacak
+   13, Teorik dersler planlandı, Mebbise aktarılacak
+   14, Teorik dersler Mebbise aktarıldı
+   15, Teorik dersler başlamadı
+   16, Teorik dersler başladı
+   17, Teorik dersler tamamlandı
+
+	eSinav Durum Tipi
+
+   0,    Tanımsız
+   1,    e-Sınav için hazır değil
+   2,    e-Sınav başvurusu yapılacak
+   3,    e-Sınav başvurusu yapıldı
+   4,    e-Sınav sonucu okunacak
+   5,    e-Sınav sonucu okundu
+   6,    Muaf
+
+
+	eSinav Sonuc Tipi
+
+   0,    Tanımsız
+   1,    Başarılı
+   2,    Başarısız
+   3,    Girmedi
+   4,    Raporlu
+   5,    İptal Edildi(Sınav Yasaklı)
+
+
+
+	eSinav Sonrasi Tipi
+
+   0,    Tanımsız
+   1,    Tekrar sınava girecek
+   2,    Uygulama aşamasına geçti
+   3,    Tüm e-Sınav hakkı bitti
+
+
+	eSinav Ücret Tipi
+
+   1,    Biz yatıracağız
+   2,    Adayın kendisi yatıracak
+
+
+
+
+
+
+
+
+
+
+---------------------------------------------------------------------
+-- Uygulamalı ders programları
+---------------------------------------------------------------------
+
+	Uygulamali Ders Tipi
+
+   0,    Tanımsız
+   1,    Uygulamalı dersler planlanacak
+   2,    Uygulamalı dersler planlandı, Mebbise aktarılacak
+   3,    Uygulamalı dersler Mebbise aktarıldı, dersler başlamadı
+   4,    Uygulamalı dersleri başladı
+   5,    Uygulamalı dersleri tamamladı
+
+
+	Basarisiz Ders Tipi
+
+   0,    Tanımsız
+   1,    2 saat başarısız aday eğitimi planlanacak
+   2,    2 saat başarısız aday eğitimi planlandı, Mebbise aktarılacak
+   3,    2 saat başarısız aday eğitimi Mebbise aktarıldı, başlamadı
+   4,    2 saat başarısız aday eğitimi alıyor
+   5,    2 saat başarısız aday eğitimi tamamlandı
+   6,    Eğitime gerek yok (Sınava girmedi)
+
+
+	Arti4 Ders Tipi
+
+   0,    Tanımsız
+   1,    2. +4 hak dersleri planlanacak
+   2,    2. +4 hak dersleri planlandı, Mebbise aktarılacak
+   3,    2. +4 hak dersleri Mebbise aktarıldı, derler başlamadı
+   4,    2. +4 hak dersleri başladı
+   5,    2. +4 hak dersleri tamamlandı
+
+
+	Planlanacak Egitim Tipi
+
+   1, Normal Eğitim
+   2, Telafi Eğitim(Ön Sınav )
+   3, 2.Direksiyon Eğitimi
+   4, Başarısız Aday Eğitimi
+
+
+
+---------------------------------------------------------------------
+-- Uygulamalı sınav işlemleri
+---------------------------------------------------------------------
+
+	uSinav Durum Tipi
+
+  ( 1,    Henüz sınav aşamasında değil
+  ( 2,    Uygulama sınavı için usta öğretici onayı isteniyor
+  ( 3,    Uygulama sınavı için hazır değil
+  ( 4,    Uygulama sınavı için MEBBİS de onaylanacak
+  ( 5,    Uygulama sınav randevusu planlanacak
+  ( 6,    Uygulama sınav randevusu MEBBİSe aktarılacak
+  ( 7,    Uygulama sınavına girecek
+  ( 8,    Uygulama sınav sonucu okunacak
+  ( 9,    Uygulama sınav sonucu okundu
+
+
+
+
+
+
+
+
+
+
+
+
+---------------------------------------------------------------------
+-- Sertifika işlemleri
+---------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Yapılması gereken işler
+-----------------------------------------------------------------------------------
+Madde 1 :
+
+Tabim ehliyet adresine küçük bir mesaj ve link ile yeni sayfaya yönlendirme.
+
+Yeni sayfada bulunması gerekenler.
+
+Eski programın güncellemesine son veridiği,
+onu yerine yeni YesiLdefter Mtsk ile yola devam edileceğine dair bir yazı.
+
+Yeni programın özelliklerini temel özellikleri
+
+Talep formu oluşturma işlemi
+
+Yeni fiyat politikası hakkında yazı
+
+
+
+Madde 2 :
+
+Mtsk Platformu :
+
+2.1. Yapay zeka : x Asistan
+    1. Mtsk nın ne iş yaptığını anlatan bir yazı (Yeni personeller için) 
+	2. Programın ne yaptığını, nasıl çalıştığı hakkında bilgi
+	3. Programın kullanımı, eğitimi
+	4. Yönetmelikler
+
+2.2. Eğitim videoları nasıl hazırlarız.
+
+2.3. Acil duyuru sistemi
+
+
+
+
+Madde 3 : 
+Şenol :
+	Data aktarım işleri
+	Raporlar
+
+
+Madde 4 :
+	Linux server yönetimi, yedekleme, 
+
+
+Madde 5 : 
+	Tekin in devam etmesi gereken konuları
+	Uyg. ders ihlalleri
+	Ön muhasebenin açılması
+	Sınav ücretlerinin oluşturulması, takibi
+	Kursiyer tahsilatları
+	Sertifika aşaması sayfaları
+	Temel yetkilendirme
+	SMS
+	E-Fatura
+	Sanal-POS
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

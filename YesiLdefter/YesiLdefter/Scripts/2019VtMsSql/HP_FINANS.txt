@@ -1,0 +1,97 @@
+﻿
+begin transaction
+
+ create table HP_FINANS
+ (
+   ID               Int IDENTITY(1,1) NOT NULL, 
+   FIRM_ID          Int               NULL,
+   SHOP_ID          Int               NULL,
+   ISACTIVE         SmallInt          NULL,
+   FNS_TIPI         SmallInt          NULL,    /* 101. KASA, 201. BANKA, 211. POS,  221. KK,  301. Ç/S .. */
+   HP_TIPI          SmallInt          NULL,    /* Modül içi Hesap Çeşitleri */
+
+   HP_KODU          VarChar(50)       NULL,
+   HP_TAMADI        VarChar(200)      NULL,
+   HP_ADI           VarChar(100)      NULL,
+   HP_REFERANS      VarChar(100)      NULL,
+   HP_HAKKINDA      VarChar(250)      NULL,
+
+   /*BANKA*/
+   HP_NUMARA        VarChar(50)       NULL,    
+   HP_IBAN          VarChar(50)       NULL,
+
+   YETKILI_TAMADI       VarChar(100)      NULL,      
+   YETKILI_PERSONEL_ID  Int               NULL,          
+
+   /* TELEFONlar için HP_ILTEISIM tablosuna bak */
+
+   GSM_TELEFON1     VarChar(20)       NULL,
+   GSM_TELEFON2     VarChar(20)       NULL,
+   GSM_TELEFON3     VarChar(20)       NULL,
+   TELEFON1         VarChar(20)       NULL,
+   TELEFON2         VarChar(20)       NULL,
+   TELEFON3         VarChar(20)       NULL,
+   FAX              VarChar(20)       NULL,
+   EMAIL1           VarChar(50)       NULL,
+   EMAIL2           VarChar(50)       NULL,
+
+   /* PARA */
+   PARA_ID              SmallInt          NULL,    /* 1. TL, 2. ENG ... */ 
+   B_DOVIZ_YERI_ID      Int               NULL,    /* B_DOVIZ_YERI_ID ,   DEBT_EXCHANGE_PLACE_ID     */
+   A_DOVIZ_YERI_ID      Int               NULL,    /* A_DOVIZ_YERI_ID ,   CLAIMS_EXCHANGE_PLACE_ID   */
+
+   KDV_ORANI            SmallInt          NULL, /* 0, 1, 8, 18 */
+   DAMGA_ORANI          Numeric(6,2)      NULL,
+   VERGI_TD             Int               NULL, /* VERGİ KODLARINI aşağıdaki adresten alıncak */
+   VERGI_ORANI          Numeric(6,2)      NULL,
+
+   HESAP_KESIM_GUNU     Int               NULL,
+   ODEME_KAC_GUN_SONRA  Int               NULL,
+   SON_ODEME_GUNU       Int               NULL,
+   MASRAF_YERI_TD       SmallInt          NULL,
+   MASRAF_PERIYODU_TD   SmallInt          NULL,
+   
+   OZELLIK1_TD     	    Int               NULL, /* 1. Otomatik ödemesi var  */
+   PARENT_TD  	        SmallInt          NULL,
+   PARENT_ID  	        Int               NULL,
+      
+   constraint		PK_HP_FINANS primary key (ID)
+ )
+ -- mysql_add
+ 
+ create index X_HP_FINANS1 on HP_FINANS (FIRM_ID);
+ create index X_HP_FINANS2 on HP_FINANS (FIRM_ID,PARENT_ID);
+ create index X_HP_FINANS3 on HP_FINANS (FIRM_ID,HP_KODU);
+ create index X_HP_FINANS4 on HP_FINANS (FIRM_ID,HP_TAMADI);
+ create index X_HP_FINANS5 on HP_FINANS (FIRM_ID,HP_ADI);
+ create index X_HP_FINANS6 on HP_FINANS (FIRM_ID,MASRAF_YERI_TD);
+ create index X_HP_FINANS7 on HP_FINANS (FIRM_ID,MASRAF_PERIYODU_TD);
+
+ grant select, insert, update, delete on HP_FINANS to public
+
+commit transaction
+
+
+
+/*
+http://www.gib.gov.tr/yardim-ve-kaynaklar/yararli-bilgiler/vergi-turu-kodlari
+*/
+
+/*
+
+Masraf yeri :  
+Faaliyet içi belgeli (fatura/fiş) 
+Faaliyet içi belgeli (e-fatura) 
+Faaliyet içi belgesiz 
+Faaliyet dışı belgeli (fatura/fiş) 
+Faaliyet dışı belgeli (e-fatura) 
+Faaliyet dışı belgesiz 
+
+Masraf periyodu :  
+Günlük giderler 
+Haftalık giderler
+Aylık giderler  
+Düzensiz giderler
+
+*/
+

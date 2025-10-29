@@ -1,0 +1,49 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_MtskAdayTakipTeorikDersSet] (@FirmId int, @DonemTipiId int, @GrupTipiId smallInt, @SubeTipiId smallInt)  
+AS BEGIN  
+  /*
+  declare @FirmId int = 30
+  declare @DonemTipiId int = 202408
+  declare @GrupTipiId smallint = 1
+  declare @SubeTipiId smallint = 1
+  */
+
+  --- Teorik derslerle ilgili bir değişiklik olduğunda 
+  --- MtskAdayTakip tablosuna yansıtmak gerekiyor
+
+  print '   prc_MtskAdayTakipTeorikDersSet başladı'
+
+  Update dbo.MtskAdayTakip Set
+      TeorikBaslamaTarihi = ders.GrupBaslamaTarihi
+    , TeorikBitisTarihi   = ders.GrupBitisTarihi
+    , TeorikDersTipiId    = ders.TakipTipiId
+  From dbo.MtskAdayTakip as tkp,
+  (
+     Select 
+	     gs.FirmId
+       , gs.DonemTipiId
+       , gs.GrupTipiId
+       , gs.SubeTipiId
+       , gs.GrupBaslamaTarihi
+       , gs.GrupBitisTarihi
+       , gs.TakipTipiId
+     From MtskGrupSubesi as gs
+     Where gs.FirmId      = @FirmId
+     and   gs.DonemTipiId = @DonemTipiId
+     and   gs.GrupTipiId  = @GrupTipiId
+     and   gs.SubeTipiId  = @SubeTipiId 
+  ) as ders
+  Where tkp.TeorikDersTipiId <> 6 -- Muaf değilse 
+  and   tkp.FirmId      = ders.FirmId
+  and   tkp.DonemTipiId = ders.DonemTipiId
+  and   tkp.GrupTipiId  = ders.GrupTipiId
+  and   tkp.SubeTipiId  = ders.SubeTipiId
+
+  print '   prc_MtskAdayTakipTeorikDersSet bitti'
+
+
+END -- procedure
+
+/*CreateProcedureEnd*/
+

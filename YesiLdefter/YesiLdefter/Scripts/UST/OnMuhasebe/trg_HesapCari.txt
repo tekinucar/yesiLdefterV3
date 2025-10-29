@@ -1,0 +1,103 @@
+﻿SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+
+CREATE TRIGGER [dbo].[trg_HesapCari] on [dbo].[HesapCari] 
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    DECLARE myCursor cursor for select Id from Inserted
+    DECLARE @curId bigint
+
+    OPEN myCursor
+
+    FETCH NEXT FROM myCursor INTO @curId
+
+    declare @yAdi varchar(50) = null
+    declare @ySoyAdi varchar(50) = null
+    declare @yGobekAdi varchar(50) = null
+    
+	declare @yCariKisaAdi varchar(50) = null
+    declare @yUnvani1 varchar(100) = null
+    declare @yUnvani2 varchar(100) = null
+    
+	declare @yTamAdi varchar(200) = null
+    declare @eTamAdi varchar(200) = null
+    
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        set @yAdi = ''
+        set @ySoyadi = ''
+        set @yTamAdi = ''
+        set @yGobekAdi = ''
+	  	set @yCariKisaAdi = ''
+		set @yUnvani1 = ''
+        set @yUnvani2 = ''
+    	set @eTamAdi = ''
+        
+        select 
+    	   @eTamAdi = isnull(dlt.TamAdi,'')
+    	from deleted dlt
+    	where dlt.Id = @curId
+			   
+        select 
+    	   @yAdi = isnull(ins.Adi,'')
+    	  ,@ySoyadi = isnull(ins.Soyadi,'')
+    	  ,@yGobekAdi = isnull(ins.GobekAdi,'')
+		  ,@yCariKisaAdi = isnull(ins.CariKisaAdi,'')
+    	  ,@yUnvani1 = isnull(ins.Unvani1,'')
+		  ,@yUnvani2 = isnull(ins.Unvani2,'')
+		from inserted ins
+    	where ins.Id = @curId
+     	   	
+    	set @yTamAdi = @yAdi + ' ' +  @ySoyadi
+    	  
+        if @yGobekAdi <> '' 
+		   set @ytamadi = @yAdi + ' ' + @yGobekAdi + ' ' +  @ySoyadi
+
+        if ((@yAdi = '') and (@ySoyadi = '') and
+		    (@yUnvani1 <> ''))
+		begin
+			set @yTamAdi = @yUnvani1 + ' ' + @yUnvani2
+
+			if (@yCariKisaAdi = '')
+			begin
+			  declare @i1 int = 0
+			  set @i1 = CHARINDEX(' ', @yUnvani1, 0)
+			  set @yCariKisaAdi = SUBSTRING(@yUnvani1, 0, @i1)
+            end
+		end
+
+        --print @yTamAdi + ' : ' + @eTamAdi
+
+    	--if (@yTamAdi <> @eTamAdi)
+    	if (@yCariKisaAdi = '')
+		begin
+    	    update HesapCari set 
+            TamAdi = LTRIM(RTRIM(@yTamAdi))
+            where Id = @curId 
+    	end
+		else begin
+		    update HesapCari set 
+             TamAdi = LTRIM(RTRIM(@yTamAdi))
+            ,CariKisaAdi = LTRIM(RTRIM(@yCariKisaAdi))
+			where Id = @curId 
+		end
+    	
+    	FETCH NEXT FROM myCursor INTO @curId
+    END
+
+    CLOSE myCursor
+    DEALLOCATE myCursor   
+        
+
+END
+GO
+
+ALTER TABLE [dbo].[HesapCari] ENABLE TRIGGER [trg_HesapCari]
+GO

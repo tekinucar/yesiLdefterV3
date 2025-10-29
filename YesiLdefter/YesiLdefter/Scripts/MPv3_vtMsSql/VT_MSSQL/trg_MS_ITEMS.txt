@@ -1,0 +1,107 @@
+﻿USE [MSV3DFTRBLT]
+GO
+
+/****** Object:  Trigger [dbo].[trg_MS_TABLES_IP]    Script Date: 23.11.2019 13:43:56 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+
+CREATE TRIGGER [dbo].[trg_MS_ITEMS] on [dbo].[MS_ITEMS] 
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    DECLARE InsertCursor_MS_ITEMS cursor for select REF_ID from Inserted
+    DECLARE @curId bigint
+
+    OPEN InsertCursor_MS_ITEMS
+
+    FETCH NEXT FROM InsertCursor_MS_ITEMS INTO @curId
+
+    declare @ySoftCode varchar(20) = null
+    declare @yProjectCode varchar(20) = null
+	declare @yModulCode varchar(100) = null
+    declare @yMenuCode varchar(20) = null
+
+    declare @eSoftCode varchar(20) = null
+    declare @eProjectCode varchar(20) = null
+	declare @eModulCode varchar(100) = null
+    declare @eMenuCode varchar(200) = null
+
+    declare @MasterCode varchar(100) = null
+    declare @ItemType smallInt 
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+	    set @ySoftCode = ''
+		set @yProjectCode = '' 
+        set @yModulCode = ''
+        set @yMenuCode = ''
+        
+		set @eSoftCode = ''
+		set @eProjectCode = '' 
+        set @eModulCode = ''
+        set @eMenuCode = ''
+        
+		set @MasterCode = ''
+        set @ItemType = 0
+
+        select 
+          @ySoftCode = ins.SOFTWARE_CODE
+		 ,@yProjectCode = ins.PROJECT_CODE
+         ,@yModulCode = ins.MODUL_CODE
+		 ,@yMenuCode = ins.MENU_CODE
+         ,@ItemType = ins.ITEM_TYPE 
+		from inserted ins
+        where ins.REF_ID = @curId
+     	
+     	select 
+          @eSoftCode = dlt.SOFTWARE_CODE
+         ,@eProjectCode = dlt.PROJECT_CODE
+         ,@eModulCode = dlt.MODUL_CODE
+		 ,@eMenuCode = dlt.MENU_CODE
+        from  deleted dlt
+        where dlt.REF_ID = @curId
+     	   	
+    	if ((@ySoftCode <> @eSoftCode) or 
+    	    (@yProjectCode <> @eProjectCode) or 
+			(@yModulCode <> @eModulCode) or
+			(@yMenuCode <> @eMenuCode)
+			)   
+    	begin
+    	  --  UST/OMS/FNS/AMENU 
+		  set @MasterCode = @ySoftCode + '/' + @yProjectCode + '/' + @yModulCode + '/' +  @yMenuCode
+    	  
+		  -- edit olan satırı düzenle 
+    	  update MS_ITEMS set MASTER_CODE = @MasterCode
+          where REF_ID = @curId 
+    	  
+		  -- diğerlerini düzenle
+		  update MS_ITEMS set MASTER_CODE = @MasterCode
+          where REF_ID <> @curId 
+          and SOFTWARE_CODE = @eSoftCode
+          and PROJECT_CODE = @eProjectCode
+          and MODUL_CODE = @eModulCode
+		  and MENU_CODE = @eMenuCode 
+    	  
+
+    	end        
+
+    	FETCH NEXT FROM InsertCursor_MS_ITEMS INTO @curId
+    END
+
+    CLOSE InsertCursor_MS_ITEMS
+    DEALLOCATE InsertCursor_MS_ITEMS   
+        
+
+END
+
+
+
+
+
+

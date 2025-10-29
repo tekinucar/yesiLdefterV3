@@ -1,0 +1,54 @@
+﻿USE [MainManagerV3]
+GO
+
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_EduMtskYonetmelikTreeList] (@_XID int)  
+AS BEGIN
+
+--declare @_XID int
+--set @_XID = 11
+
+;WITH CTE
+     AS  (
+         Select emy.Id, emy.Id U_Id
+         From EduMtskYonetmelik as emy
+         Where emy.ParentId = @_XID
+
+         Union all
+
+         Select emy.Id, emy.Id U_Id
+         From EduMtskYonetmelik as emy
+         Where emy.Id = @_XID
+
+		 Union all
+
+		 Select c.U_Id, emy.Id 
+         From CTE as c
+            Join EduMtskYonetmelik as emy ON C.U_Id = emy.ParentId
+     )
+  Select distinct 
+       emy.Id 
+      ,emy.[ParentId]
+      ,emy.[KonuTipiId]
+	  ,emy.[IsActive]
+	  ,emy.[SiraNo]
+      ,emy.[Konu]
+      ,emyKonuTipi.[KonuTipi] as Lkp_KonuTipi
+
+  from CTE as c
+    left outer join EduMtskYonetmelik as emy on ( c.U_Id = emy.Id )
+    left outer join Lkp.EduMtskYonetmelikKonuTipi as emyKonuTipi on ( emy.KonuTipiId = emyKonuTipi.Id )
+
+END -- procedure
+
+/*CreateProcedureEnd*/
+GO
+
+

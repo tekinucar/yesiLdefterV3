@@ -1,0 +1,81 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_OnmToplamBekleyenGelirler] (@firmId int)  
+AS BEGIN
+
+  --declare @firmId int
+  --set @firmId = 21
+
+  UPDATE [dbo].[OnmToplamBekleyen]
+   SET 
+      -- [FirmId] = 
+      --,[ItemCode] = <ItemCode, varchar(30),>
+      --,[ParentItemCode] = <ParentItemCode, varchar(30),>
+      --,[UstGrupTipiId] = <UstGrupTipiId, smallint,>
+      --,[AnaGrupTipiId] = <AnaGrupTipiId, smallint,>
+      --,[AltGrupTipiId] = 
+      --,[AltCesitTipiId] = <AltCesitTipiId, smallint,>
+      --,[TableTypeId] = <TableTypeId, smallint,>
+      --,[ItemId] = <ItemId, int,>
+       [ToplamVadesiGecen] = y.VadesiGecen
+      ,[ToplamBugun] = y.Bugun
+      ,[Toplam7Gun] = y.Hafta1
+      ,[Toplam2Hafta] = y.Hafta2
+      ,[ToplamAySonu] = y.AySonu
+      ,[Toplam1Ay] = y.AySonu1
+      ,[Toplam2Ay] = y.AySonu2
+      ,[Toplam3Ay] = y.AySonu3
+      ,[Toplam1Yil] = y.YilSonu
+      ,[ToplamTamami] = y.Tamami
+	  
+ From [dbo].[OnmToplamBekleyen] as a
+  inner join (
+    Select 
+      x.FirmId 
+    , x.UcretTipiId 
+    , sum(x.VadesiGecen) as VadesiGecen
+    , sum(x.Bugun) as Bugun
+    , sum(x.Hafta1) as Hafta1
+    , sum(x.Hafta2) as Hafta2
+    , sum(x.AySonu) as AySonu
+    , sum(x.AySonu1) as AySonu1
+    , sum(x.AySonu2) as AySonu2
+    , sum(x.AySonu3) as AySonu3
+    , sum(x.YilSonu1) as YilSonu
+	, sum(x.Tamami) as Tamami
+    from (
+       Select 
+           odmPlani.FirmId
+		 , odmPlani.UcretTipiId
+		 , case when odmPlani.VadeTarihi <  tarih.Bugun    then odmPlani.TaksitTutari else 0 end as VadesiGecen
+         , case when odmPlani.VadeTarihi =  tarih.Bugun    then odmPlani.TaksitTutari else 0 end as Bugun
+         , case when odmPlani.VadeTarihi >= tarih.Bugun    and  odmPlani.VadeTarihi < tarih.Hafta1  then odmPlani.TaksitTutari else 0 end as Hafta1
+         , case when odmPlani.VadeTarihi >= tarih.Hafta1   and  odmPlani.VadeTarihi < tarih.Hafta2  then odmPlani.TaksitTutari else 0 end as Hafta2
+         , case when odmPlani.VadeTarihi <  tarih.AySonu0  then odmPlani.TaksitTutari else 0 end as AySonu
+         , case when odmPlani.VadeTarihi >= tarih.AySonu0  and  odmPlani.VadeTarihi < tarih.AySonu1 then odmPlani.TaksitTutari else 0 end as AySonu1
+         , case when odmPlani.VadeTarihi >= tarih.AySonu1  and  odmPlani.VadeTarihi < tarih.AySonu2 then odmPlani.TaksitTutari else 0 end as AySonu2
+         , case when odmPlani.VadeTarihi >= tarih.AySonu2  and  odmPlani.VadeTarihi < tarih.AySonu3 then odmPlani.TaksitTutari else 0 end as AySonu3
+		 , case when odmPlani.VadeTarihi <  tarih.YilSonu1 then odmPlani.TaksitTutari else 0 end as YilSonu1
+         , odmPlani.TaksitTutari as Tamami
+
+       From OnmOdemePlani as odmPlani
+	   , ( Select 
+               convert(date, GETDATE(), 103) as Bugun
+             , convert(date, DATEADD(dd,  7, GETDATE())) as Hafta1 -- 7 gün sonrası
+             , convert(date, DATEADD(dd, 14, GETDATE())) as Hafta2 -- 2 hafta sonrası
+             , DATEADD(dd, - (DAY(DATEADD(mm, 1, GETDATE()))-1), DATEADD(mm, 1, convert(date, GETDATE(), 103)))  as AySonu0 -- gelecek ay başı
+             , DATEADD(dd, - (DAY(DATEADD(mm, 1, GETDATE()))-1), DATEADD(mm, 2, convert(date, GETDATE(), 103)))  as AySonu1 -- 1. ay
+             , DATEADD(dd, - (DAY(DATEADD(mm, 1, GETDATE()))-1), DATEADD(mm, 3, convert(date, GETDATE(), 103)))  as AySonu2 -- 2. ay
+             , DATEADD(dd, - (DAY(DATEADD(mm, 1, GETDATE()))-1), DATEADD(mm, 4, convert(date, GETDATE(), 103)))  as AySonu3 -- 3. ay
+             , DATEADD(dd, - (DAY(DATEADD(mm, 1, GETDATE()))-1), DATEADD(mm,13, convert(date, GETDATE(), 103))) as YilSonu1 -- 1 yil sonu
+	     ) as tarih 
+       Where odmPlani.FirmId = @firmId
+     --and   odmPlani.IsPaid = 0    
+	 ) as x
+       group by x.FirmId, x.UcretTipiId  
+  ) as y on ( a.AltGrupTipiId = y.UcretTipiId )
+  Where a.FirmId = y.FirmId	   
+
+END -- procedure
+
+/*CreateProcedureEnd*/

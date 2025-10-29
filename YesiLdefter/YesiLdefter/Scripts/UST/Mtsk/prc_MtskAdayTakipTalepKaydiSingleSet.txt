@@ -1,0 +1,241 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_MtskAdayTakipTalepKaydiSingleSet] (@TalepId int)  
+AS BEGIN
+
+  --declare @TalepId int = 310
+  print 'prc_MtskAdayTakipTalepKaydiSingleSet  start'
+
+  declare @Enter varchar(4) = CHAR(13) + CHAR(10)
+  declare @isGrupSubeYok bit = 0
+  declare @YasSiniri smallint = 0
+  declare @yasOnayiTipiId smallint = 0
+  declare @yasHazirTarihi date = null
+  declare @deneyimSartiTipiId smallInt = 0
+  declare @sertifikaTeslimEdildi bit = 0
+
+  -- MtskAdayTalep
+  declare @yFirmId Int 
+  declare @yAdayId int
+  declare @yTalepTipiId SmallInt 
+  declare @yKayitTipiId SmallInt 
+  declare @yMevcutSertifikaTipiId smallInt = 0
+  declare @yIstenenSertifikaTipiId smallInt = 0
+  declare @yDonemTipiId int = 0
+  declare @yGrupTipiId smallint = 0
+  declare @ySubeTipiId smallint = 0
+  declare @yBelgelerGeldi bit = 0
+
+  declare @yTcNo varchar(11)
+  declare @yKimlikSeriNo varchar(10)
+  declare @yAdi nvarchar(50)
+  declare @ySoyadi nvarchar(50)
+  declare @yBabaAdi nvarchar(50)
+  declare @yAnneAdi nvarchar(50)
+  declare @yCepTelefonu varchar(15)
+  --declare @yCepTelefonu2 varchar(15)
+
+  declare @ySistemUyarilari nvarchar(200)
+  declare @oldSistemUyarilari nvarchar(200)
+  declare @mesaj nvarchar(200)
+  declare @grupSubeSil bit = 0
+ 
+  Select 
+       @yFirmId = ins.FirmId
+      ,@yAdayId = ins.AdayId
+      ,@yTalepTipiId = isnull(ins.TalepTipiId,0)
+      ,@yKayitTipiId = isnull(ins.KayitTipiId,0)
+	  ,@yMevcutSertifikaTipiId = isnull(ins.MevcutSertifikaTipiId,0)
+      ,@yIstenenSertifikaTipiId = isnull(ins.IstenenSertifikaTipiId,0)
+      ,@yDonemTipiId = isnull(ins.DonemTipiId,0)
+      ,@yGrupTipiId = isnull(ins.GrupTipiId,0)
+      ,@ySubeTipiId = isnull(ins.SubeTipiId,0)
+      ,@yBelgelerGeldi = isnull(ins.BelgelerGeldi,0)
+      ,@ySistemUyarilari = isnull(ins.SistemUyarilari,'')
+  From  dbo.MtskAdayTalep as ins
+  Where ins.Id = @TalepId
+
+  Select 
+    @yTcNo = TcNo
+  , @yKimlikSeriNo = KimlikSeriNo
+  , @yAdi = Adi
+  , @ySoyadi = Soyadi
+  , @yBabaAdi = BabaAdi
+  , @yAnneAdi = AnneAdi
+  , @yCepTelefonu = CepTelefonu
+  From dbo.MtskAday
+  Where Id = @yAdayId  
+
+  Set @oldSistemUyarilari = @ySistemUyarilari
+
+  -- ----------------------------------------------------------------------------------
+  -- Aday kayıt aşaması
+  -- ----------------------------------------------------------------------------------
+  Select @sertifikaTeslimEdildi = isnull(sertifika.SertifikaTeslimEdildi,0)
+  From dbo.MtskAdaySertifika as sertifika
+  Where sertifika.TalepId = @TalepId
+
+  -- IsGrupSubeYok 
+  if (@yGrupTipiId = 0 or @ySubeTipiId = 0)
+      set @isGrupSubeYok = 1
+  
+  -- DeneyimSartiTipiId
+  declare @isEnAz bit
+  declare @deneyimSertifikaTipiId smallInt = 0
+
+  Select top 1 @isEnAz = isnull(saat.IsEnAz,0), @deneyimSertifikaTipiId = isnull(saat.DeneyimSertifikaTipiId,0) 
+  From dbo.MtskSaatUygulama as saat
+       left outer join dbo.GecerlilikTarihi as gt on ( saat.GecerlilikTarihiId = gt.Id )
+  Where saat.IstenenSertifikaTipiId = @yIstenenSertifikaTipiId
+  and   gt.KonuTipiId = 21102 -- Uygulama saatleri
+  order by gt.Tarih desc
+  
+  -- [Lkp].[MtskAdayTakipDeneyimSartiTipi] 
+  -- 1, 'Deneyim şartı yok'
+  -- 2, 'Deneyim şartına uygun'
+  -- 3, 'Deneyim şartına uygun değil'
+  set @deneyimSartiTipiId = [dbo].[fnc_getSertifikaDeneyimSarti] ( @TalepId )
+
+  set @mesaj = 'Deneyim şartı uygun değil' + @Enter;
+  if (@deneyimSartiTipiId = 3)
+  begin
+	  set @grupSubeSil = 1
+      if (CHARINDEX(@mesaj, @ySistemUyarilari) = 0) set @ySistemUyarilari = @ySistemUyarilari + @mesaj;
+  end else
+  begin
+	  set @grupSubeSil = 0
+      if (CHARINDEX(@mesaj, @ySistemUyarilari) > 0) set @ySistemUyarilari = REPLACE(@ySistemUyarilari, @mesaj, '') 
+  end
+
+  set @mesaj = 'Hatalı TC No' + @Enter;
+  if (@yTcNo LIKE '%[^0-9]%')
+  begin
+      if (CHARINDEX(@mesaj, @ySistemUyarilari) = 0) set @ySistemUyarilari = @ySistemUyarilari + @mesaj;
+  end else
+  begin
+      if (CHARINDEX(@mesaj, @ySistemUyarilari) > 0) set @ySistemUyarilari = REPLACE(@ySistemUyarilari, @mesaj, '') 
+  end
+
+  set @mesaj = 'Eksik/Fazla TC No' + @Enter;
+  if (LEN(@yTcNo) <> 11)
+  begin
+      if (CHARINDEX(@mesaj, @ySistemUyarilari) = 0) set @ySistemUyarilari = @ySistemUyarilari + @mesaj;
+  end else
+  begin
+      if (CHARINDEX(@mesaj, @ySistemUyarilari) > 0) set @ySistemUyarilari = REPLACE(@ySistemUyarilari, @mesaj, '') 
+  end
+
+  set @mesaj = 'Kimlik seri no yok' + @Enter;
+  if (len(@yKimlikSeriNo) = 0)
+  begin
+      if (CHARINDEX(@mesaj, @ySistemUyarilari) = 0) set @ySistemUyarilari = @ySistemUyarilari + @mesaj;
+  end else
+  begin
+      if (CHARINDEX(@mesaj, @ySistemUyarilari) > 0) set @ySistemUyarilari = REPLACE(@ySistemUyarilari, @mesaj, '') 
+  end
+
+  set @mesaj = 'Hatalı ad' + @Enter;
+  if (@yAdi LIKE '%[^A-Z ]%')
+  begin
+      if (CHARINDEX(@mesaj, @ySistemUyarilari) = 0) set @ySistemUyarilari = @ySistemUyarilari + @mesaj;
+  end else
+  begin
+      if (CHARINDEX(@mesaj, @ySistemUyarilari) > 0) set @ySistemUyarilari = REPLACE(@ySistemUyarilari, @mesaj, '') 
+  end
+
+  set @mesaj = 'Hatalı soyadı' + @Enter;
+  if (@ySoyadi LIKE '%[^A-Z ]%')
+  begin
+      if (CHARINDEX(@mesaj, @ySistemUyarilari) = 0) set @ySistemUyarilari = @ySistemUyarilari + @mesaj;
+  end else
+  begin
+      if (CHARINDEX(@mesaj, @ySistemUyarilari) > 0) set @ySistemUyarilari = REPLACE(@ySistemUyarilari, @mesaj, '') 
+  end
+
+  set @mesaj = 'Hatalı baba adı' + @Enter;
+  if (@yBabaAdi LIKE '%[^A-Z ]%')
+  begin
+      if (CHARINDEX(@mesaj, @ySistemUyarilari) = 0) set @ySistemUyarilari = @ySistemUyarilari + @mesaj;
+  end else
+  begin
+      if (CHARINDEX(@mesaj, @ySistemUyarilari) > 0) set @ySistemUyarilari = REPLACE(@ySistemUyarilari, @mesaj, '') 
+  end
+
+  set @mesaj = 'Hatalı anne adı' + @Enter;
+  if (@yAnneAdi LIKE '%[^A-Z ]%')
+  begin
+      if (CHARINDEX(@mesaj, @ySistemUyarilari) = 0) set @ySistemUyarilari = @ySistemUyarilari + @mesaj;
+  end else
+  begin
+      if (CHARINDEX(@mesaj, @ySistemUyarilari) > 0) set @ySistemUyarilari = REPLACE(@ySistemUyarilari, @mesaj, '') 
+  end
+
+  -- 1️ Boşlukları kaldır
+  set @yCepTelefonu = REPLACE(@yCepTelefonu, ' ', '');
+  -- 2️ Sadece rakamları ayıkla
+  set @yCepTelefonu = REPLACE(@yCepTelefonu, '-', ''); -- varsa tireleri de temizle
+  set @yCepTelefonu = REPLACE(@yCepTelefonu, '(', '');
+  set @yCepTelefonu = REPLACE(@yCepTelefonu, ')', '');
+
+  set @mesaj = 'Hatalı telefon no' + @Enter;
+  if (@yCepTelefonu LIKE '%[^0-9]%')
+  begin
+      if (CHARINDEX(@mesaj, @ySistemUyarilari) = 0) set @ySistemUyarilari = @ySistemUyarilari + @mesaj;
+  end else
+  begin
+      if (CHARINDEX(@mesaj, @ySistemUyarilari) > 0) set @ySistemUyarilari = REPLACE(@ySistemUyarilari, @mesaj, '') 
+  end
+
+  set @mesaj = 'Eksik/Fazla telefon no' + @Enter;
+  if (Len(@yCepTelefonu) <> 10)
+  begin
+      if (CHARINDEX(@mesaj, @ySistemUyarilari) = 0) set @ySistemUyarilari = @ySistemUyarilari + @mesaj;
+  end else
+  begin
+      if (CHARINDEX(@mesaj, @ySistemUyarilari) > 0) set @ySistemUyarilari = REPLACE(@ySistemUyarilari, @mesaj, '') 
+  end
+
+  if (@oldSistemUyarilari <> @ySistemUyarilari)
+  begin
+      Update dbo.MtskAdayTalep set SistemUyarilari = @ySistemUyarilari
+      Where Id = @TalepId
+  end
+
+  if (@grupSubeSil = 1)
+  begin
+      Update dbo.MtskAdayTalep set GrupTipiId = 0, SubeTipiId = 0
+      Where Id = @TalepId
+  end
+
+  -- Tespitleri kaydet
+  Update MtskAdayTakip set
+       TalepTipiId            = @yTalepTipiId  
+     , DonemTipiId            = @yDonemTipiId
+     , GrupTipiId             = @yGrupTipiId
+     , SubeTipiId             = @ySubeTipiId
+     , KayitTipiId            = @yKayitTipiId
+     , IsGrupSubeYok          = @isGrupSubeYok
+     , DeneyimSartiTipiId     = @deneyimSartiTipiId
+     , IsDeneyimEnAz          = @isEnAz
+     , DeneyimSertifikaTipiId = @deneyimSertifikaTipiId
+	 , BelgelerGeldi          = @yBelgelerGeldi
+  Where TalepId = @TalepId
+  and (
+       TalepTipiId            <> @yTalepTipiId  
+    or DonemTipiId            <> @yDonemTipiId
+    or GrupTipiId             <> @yGrupTipiId
+    or SubeTipiId             <> @ySubeTipiId
+    or KayitTipiId            <> @yKayitTipiId
+    or IsGrupSubeYok          <> @isGrupSubeYok
+    or DeneyimSartiTipiId     <> @deneyimSartiTipiId
+    or IsDeneyimEnAz          <> @isEnAz
+    or DeneyimSertifikaTipiId <> @deneyimSertifikaTipiId
+    or BelgelerGeldi          <> @yBelgelerGeldi
+  )
+
+  print 'prc_MtskAdayTakipTalepKaydiSingleSet  end'
+
+
+END -- procedure
+
+/*CreateProcedureEnd*/

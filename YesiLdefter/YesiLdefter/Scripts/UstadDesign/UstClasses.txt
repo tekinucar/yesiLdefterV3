@@ -1,0 +1,22 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table dbo.UstClasses
+ (
+    Id              Int IDENTITY(1,1)     not null,
+    ModuleId        Int NOT NULL FOREIGN KEY REFERENCES dbo.UstModules(Id),
+    ClassName       NVARCHAR(100)  NOT NULL,
+    ClassCode       CHAR(3)        NOT NULL,
+    FullCode        NVARCHAR(12)   NULL,
+
+	Constraint PK_UstClasses primary key (Id)
+ )
+
+ create index X_UstClasses01 on dbo.UstClasses (ClassCode)
+
+ grant select, insert, update, delete on dbo.UstClasses to public
+
+commit transaction
+
+/*CreateTableEnd*/

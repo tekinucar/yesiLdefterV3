@@ -1,0 +1,80 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_MtskAdayNoVer] (@FirmId int, @DonemTipiId int, @GrupTipiId int, @SubeTipiId int, @AdayNoVer bit, @AdayNoSil bit)  
+AS BEGIN
+
+      /*
+      declare @FirmId int = 11--629 
+      declare @DonemTipiId int = 202507
+      declare @GrupTipiId int = 2
+      declare @SubeTipiId int = 1
+      declare @AdayNoVer bit = 1
+      declare @AdayNoSil bit = 0 
+	  */
+      declare @curId int = 0
+	  
+      declare @say int = 1   
+      declare @Id int = 0   
+	  declare @AdayNoLast int
+	  declare @eAdayNo int
+
+      ALTER TABLE [dbo].[MtskAdayTalep] DISABLE TRIGGER [trg_MtskAdayTalep] 
+
+      Select top 1 @Id = Id, @AdayNoLast = AdayNo
+      From dbo.MtskAdayTalep as [MtskAdayTalep]
+      Where [MtskAdayTalep].FirmId = @FirmId
+      order by [MtskAdayTalep].AdayNo desc
+      --print @AdayNoLast
+      --print '-----------------'
+
+      declare myCursor CURSOR local
+      for 
+      Select talep.Id
+      from dbo.MtskAdayTalep as talep 
+	      left outer join dbo.MtskAday as aday on (talep.AdayId = aday.Id)  
+      Where talep.FirmId = @FirmId
+      and   talep.DonemTipiId = @DonemTipiId
+      and   talep.GrupTipiId = @GrupTipiId
+      and   talep.SubeTipiId = @SubeTipiId
+      order by aday.TamAdiSoyadi   
+
+      OPEN myCursor;
+  
+      FETCH NEXT
+      FROM myCursor
+      INTO @curId;
+	  
+      While @@FETCH_STATUS = 0
+      begin
+          print @curId
+		  --print @AdayNoLast + @say
+          if (@AdayNoVer = 1 and @AdayNoSil = 0) 
+          begin  
+             Select @eAdayNo = isnull(AdayNo,0) From dbo.MtskAdayTalep 
+             Where Id = @curId
+
+			 if (@eAdayNo = 0)
+             begin
+                 Update dbo.MtskAdayTalep set AdayNo = @AdayNoLast + @say
+                 Where Id = @curId
+                 set @say = @say + 1
+             end
+          end -- if (@AdayNoVer = 1) 
+
+          if (@AdayNoVer = 0 and @AdayNoSil = 1) 
+          begin  
+              Update dbo.MtskAdayTalep set AdayNo = 0
+              Where Id = @curId
+          end -- if (@AdayNoVer = 0) 
+		  
+		  FETCH NEXT FROM myCursor INTO @curId;
+      end -- While
+
+      Close myCursor;
+      DealLocate myCursor;
+
+      ALTER TABLE [dbo].[MtskAdayTalep] ENABLE TRIGGER [trg_MtskAdayTalep] 
+
+END --
+
+/*CreateProcedureEnd*/

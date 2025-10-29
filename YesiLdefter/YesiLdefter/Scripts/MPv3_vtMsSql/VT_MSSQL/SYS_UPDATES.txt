@@ -1,0 +1,22 @@
+﻿
+begin transaction
+
+ create table SYS_UPDATES
+ (
+    ID           Int IDENTITY(1,1)  NOT NULL,
+    ISACTIVE     smallint      NULL,
+    REC_DATE     datetime      NULL,
+    EXE_NAME     varchar(30)   NULL,
+    UPDATE_TD    smallint      NULL,
+    UPDATE_NO    int           NULL,
+    VERSION_NO   varchar(20)   NULL,
+    PACKET_NAME  varchar(50)   NULL,
+    ABOUT        varchar(100)  NULL,
+
+	Constraint PK_SYS_UPDATES primary key (ID)
+ )
+
+ grant select, insert, update, delete on SYS_UPDATES to public
+
+commit transaction
+

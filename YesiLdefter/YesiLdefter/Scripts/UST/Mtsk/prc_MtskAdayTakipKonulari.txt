@@ -1,0 +1,335 @@
+﻿
+/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_MtskAdayTakipKonulari] (@KonuId int)
+AS BEGIN
+
+-- ---------------------------------------------------
+-- Aday kayıt konuları 
+-- ---------------------------------------------------
+
+Select * from (
+-- MtskAdayTakipTalepTipi
+Select 
+   tip.KonuGrupId
+ , tip.KonuId
+ , tip.KonuCaption
+ , tip.TalepTipi as KonuAciklama
+ , tip.Id as TakipKonuId
+
+From Lkp.MtskAdayTakipTalepTipi as tip 
+ 
+union all
+
+-- MtskAdayTakipKayitTipi 
+Select 
+   tip.KonuGrupId
+ , tip.KonuId
+ , tip.KonuCaption
+ , tip.KayitTipi as KonuAciklama
+ , tip.Id as TakipKonuId
+
+From Lkp.MtskAdayTakipKayitTipi as tip 
+
+union all
+
+-- MtskAdayTakipZamanlamaTipi
+Select 
+   tip.KonuGrupId
+ , tip.KonuId
+ , tip.KonuCaption   
+ , tip.ZamanlamaTipi as KonuAciklama
+ , tip.Id as TakipKonuId
+
+From Lkp.MtskAdayTakipZamanlamaTipi as tip 
+
+union all
+
+-- MtskAdayTakipGrupSubeTipi
+Select 
+   tip.KonuGrupId
+ , tip.KonuId
+ , tip.KonuCaption
+ , tip.GrupSubeTipi as KonuAciklama
+ , tip.Id as TakipKonuId
+
+From Lkp.MtskAdayTakipGrupSubeTipi as tip 
+
+union all
+
+-- MtskAdayTakipMebbisOnayiTipi
+Select 
+   tip.KonuGrupId
+ , tip.KonuId
+ , tip.KonuCaption
+ , tip.MebbisOnayiTipi as KonuAciklama
+ , tip.Id as TakipKonuId
+
+From Lkp.MtskAdayTakipMebbisOnayiTipi as tip 
+
+union all
+
+-- MtskAdayTakipYasOnayiTipi
+Select 
+   tip.KonuGrupId
+ , tip.KonuId
+ , tip.KonuCaption   
+ , tip.YasOnayiTipi as KonuAciklama
+ , tip.Id as TakipKonuId
+
+From Lkp.MtskAdayTakipYasOnayiTipi as tip 
+
+union all
+
+-- DeneyimSartiTipi
+Select 
+   tip.KonuGrupId
+ , tip.KonuId
+ , tip.KonuCaption   
+ , tip.DeneyimSartiTipi as KonuAciklama
+ , tip.Id as TakipKonuId
+
+From Lkp.MtskAdayTakipDeneyimSartiTipi as tip 
+
+union all
+
+-- MtskAdayTakipOzurDurumuTipi
+Select 
+   tip.KonuGrupId
+ , tip.KonuId
+ , tip.KonuCaption   
+ , tip.OzurDurumuTipi as KonuAciklama
+ , tip.Id as TakipKonuId
+
+From Lkp.MtskAdayTakipOzurDurumuTipi as tip 
+
+union all
+
+-- MtskAdayTakipBelgelerTipi
+Select 
+   tip.KonuGrupId
+ , tip.KonuId
+ , tip.KonuCaption
+ , tip.BelgelerTipi as KonuAciklama
+ , tip.Id as TakipKonuId
+
+From Lkp.MtskAdayTakipBelgelerTipi as tip
+
+union all
+
+-- MtskAdayTakipYabanciDilTipi
+Select 
+   tip.KonuGrupId
+ , tip.KonuId
+ , tip.KonuCaption
+ , tip.YabanciDilTipi as KonuAciklama
+ , tip.Id as TakipKonuId
+
+From Lkp.MtskAdayTakipYabanciDilTipi as tip
+
+union all
+
+-- OzelDurumuTipiId
+Select 
+   tip.KonuGrupId
+ , tip.KonuId
+ , tip.KonuCaption
+ , tip.OzelDurumuTipi as KonuAciklama
+ , tip.Id as TakipKonuId
+
+From Lkp.MtskAdayTakipOzelDurumuTipi as tip
+
+union all
+
+-- MtskAdayTakipBorcDurumuTipi
+Select 
+   tip.KonuGrupId
+ , tip.KonuId
+ , tip.KonuCaption
+ , tip.BorcDurumuTipi as KonuAciklama
+ , tip.Id as TakipKonuId
+
+From Lkp.MtskAdayTakipBorcDurumuTipi as tip
+
+union all
+
+-- ---------------------------------------------------
+-- Teorik Ders ve e-Sınavlar kayıt konuları 
+-- ---------------------------------------------------
+
+-- MtskAdayTakipTeorikDersTipi
+Select 
+   tip.KonuGrupId
+ , tip.KonuId
+ , tip.KonuCaption
+ , tip.TeorikDersTipi as KonuAciklama
+ , tip.Id as TakipKonuId
+
+From Lkp.MtskAdayTakipTeorikDersTipi as tip
+
+union all
+
+-- MtskAdayTakipeSinavDurumTipi
+Select 
+   tip.KonuGrupId
+ , tip.KonuId
+ , tip.KonuCaption
+ , tip.eSinavDurumTipi as KonuAciklama
+ , tip.Id as TakipKonuId
+
+From Lkp.MtskAdayTakipeSinavDurumTipi as tip
+
+union all
+
+-- MtskAdayTakipeSinavSonucTipi
+Select 
+   tip.KonuGrupId
+ , tip.KonuId
+ , tip.KonuCaption
+ , tip.eSinavSonucTipi as KonuAciklama
+ , tip.Id as TakipKonuId
+
+From Lkp.MtskAdayTakipeSinavSonucTipi as tip
+
+union all
+
+-- MtskAdayTakipeSinavSonrasiTipi
+Select 
+   tip.KonuGrupId
+ , tip.KonuId
+ , tip.KonuCaption
+ , tip.eSinavSonrasiTipi as KonuAciklama
+ , tip.Id as TakipKonuId
+
+From Lkp.MtskAdayTakipeSinavSonrasiTipi as tip
+
+union all
+
+-- MtskAdayTakipeSinavUcretTipi
+Select 
+   tip.KonuGrupId
+ , tip.KonuId
+ , tip.KonuCaption
+ , tip.eSinavUcretTipi as KonuAciklama
+ , tip.Id as TakipKonuId
+
+From Lkp.MtskAdayTakipeSinavUcretTipi as tip
+
+union all
+
+-- ---------------------------------------------------
+-- Uygulamalı Dersler ve Uygulamalı Sınavlar kayıt konuları 
+-- ---------------------------------------------------
+
+-- MtskAdayTakipUygulamaliDersTipi
+Select 
+   tip.KonuGrupId
+ , tip.KonuId
+ , tip.KonuCaption
+ , tip.UygulamaliDersTipi as KonuAciklama
+ , tip.Id as TakipKonuId
+
+From Lkp.MtskAdayTakipUygulamaliDersTipi as tip
+
+union all
+
+-- MtskAdayTakipBasarisizDersTipi
+Select 
+   tip.KonuGrupId
+ , tip.KonuId
+ , tip.KonuCaption
+ , tip.BasarisizDersTipi as KonuAciklama
+ , tip.Id as TakipKonuId
+
+From Lkp.MtskAdayTakipBasarisizDersTipi as tip
+
+union all
+
+-- MtskAdayTakipArti4DersTipi
+Select 
+   tip.KonuGrupId
+ , tip.KonuId
+ , tip.KonuCaption
+ , tip.Arti4DersTipi as KonuAciklama
+ , tip.Id as TakipKonuId
+
+From Lkp.MtskAdayTakipArti4DersTipi as tip
+
+union all
+
+-- MtskAdayTakipuSinavDurumTipi 
+Select 
+   tip.KonuGrupId
+ , tip.KonuId
+ , tip.KonuCaption
+ , tip.uSinavDurumTipi as KonuAciklama
+ , tip.Id as TakipKonuId
+
+From Lkp.MtskAdayTakipuSinavDurumTipi as tip
+
+union all
+
+-- MtskAdayTakipuSinavaHazirmiTipi
+Select 
+   tip.KonuGrupId
+ , tip.KonuId
+ , tip.KonuCaption
+ , tip.uSinavaHazirmiTipi as KonuAciklama
+ , tip.Id as TakipKonuId
+
+From Lkp.MtskAdayTakipuSinavaHazirmiTipi as tip
+
+union all
+
+-- MtskAdayTakipuSinavSonucTipi
+Select 
+   tip.KonuGrupId
+ , tip.KonuId
+ , tip.KonuCaption
+ , tip.uSinavSonucTipi as KonuAciklama
+ , tip.Id as TakipKonuId
+
+From Lkp.MtskAdayTakipuSinavSonucTipi as tip
+
+union all
+
+-- MtskAdayTakipuSinavSonrasiTipi
+Select 
+   tip.KonuGrupId
+ , tip.KonuId
+ , tip.KonuCaption
+ , tip.uSinavSonrasiTipi as KonuAciklama
+ , tip.Id as TakipKonuId
+
+From Lkp.MtskAdayTakipuSinavSonrasiTipi as tip
+
+union all
+
+-- MtskAdayTakipuSinavUcretTipi
+Select 
+   tip.KonuGrupId
+ , tip.KonuId
+ , tip.KonuCaption
+ , tip.uSinavUcretTipi as KonuAciklama
+ , tip.Id as TakipKonuId
+
+From Lkp.MtskAdayTakipuSinavUcretTipi as tip
+
+union all
+
+-- MtskAdayTakipSertifikaDurumTipi
+Select 
+   tip.KonuGrupId
+ , tip.KonuId
+ , tip.KonuCaption
+ , tip.SertifikaDurumTipi as KonuAciklama
+ , tip.Id as TakipKonuId
+
+From Lkp.MtskAdayTakipSertifikaDurumTipi as tip
+
+) as konular
+Where konular.KonuId = @KonuId
+
+END -- procedure
+
+/*CreateProcedureEnd*/

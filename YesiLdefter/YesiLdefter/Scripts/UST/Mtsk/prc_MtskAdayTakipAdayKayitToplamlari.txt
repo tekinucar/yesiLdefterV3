@@ -1,0 +1,483 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_MtskAdayTakipAdayKayitToplamlari] (@FirmId int, @DonemTipiId int)  
+AS BEGIN
+
+  -- Variables
+  --declare @FirmId int = 11
+  declare @sql1 nvarchar(200)
+  declare @sql nvarchar(max)
+
+
+  Set @sql1 = '
+  declare @FirmId int 
+  Set @FirmId = ' + Convert(varchar(10),@FirmId) + ' ';  
+
+  Set @sql = @sql1 +
+  ' 
+-- SertifikaTipi
+Select 
+   tip.Id as KonuId
+ , ''Serftikalar'' as KonuCaption   
+ , tip.SertifikaTipi as KonuAciklama
+ , '''' as Islem
+ , count(talep.Id) as AdaySayisi 
+
+From dbo.MtskAdayTalep as talep
+     left outer join dbo.MtskAdayTakip as takip on ( talep.Id = takip.TalepId )
+     left outer join Lkp.MtskSertifikaTipi as tip on ( talep.IstenenSertifikaTipiId = tip.Id )
+Where talep.FirmId = @FirmId
+and   isnull(takip.KayitTipiId,0) < 4
+and   takip.Asama1TipiId < 800
+
+Group by 
+   tip.Id
+ , tip.SertifikaTipi
+ , tip.SiraNo 
+
+union all
+
+-- TalepTipi
+Select 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.TalepTipi as KonuAciklama
+ , tip.FormCaption as Islem
+ , count(talep.Id) as AdaySayisi 
+
+From dbo.MtskAdayTalep as talep
+     left outer join dbo.MtskAdayTakip as takip on ( talep.Id = takip.TalepId )
+     left outer join Lkp.MtskAdayTakipTalepTipi as tip on ( isnull(talep.TalepTipiId,0) = tip.Id )
+Where talep.FirmId = @FirmId
+and   isnull(talep.KayitTipiId,0) < 4
+and   takip.Asama1TipiId < 800
+
+Group by 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.TalepTipi
+ , tip.FormCaption 
+ 
+union all
+
+-- KayitTipi = 1, 2, 3 
+Select 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.KayitTipi as KonuAciklama
+ , tip.FormCaption as Islem
+ , count(talep.Id) as AdaySayisi 
+
+From dbo.MtskAdayTalep as talep
+     left outer join dbo.MtskAdayTakip as takip on ( talep.Id = takip.TalepId )
+     left outer join Lkp.MtskAdayTakipKayitTipi as tip on ( talep.KayitTipiId = tip.Id )
+Where talep.FirmId = @FirmId
+and   isnull(talep.KayitTipiId,0) <= 3
+and   takip.Asama1TipiId < 800
+
+Group by 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.KayitTipi
+ , tip.FormCaption 
+
+union all
+
+-- Belgeleri eksik olanlar
+Select 
+   tip.KonuId 
+ , tip.KonuCaption
+ , tip.BelgelerTipi as KonuAciklama
+ , tip.FormCaption as Islem
+ , count(takip.Id) as AdaySayisi 
+
+From dbo.MtskAdayTakip as takip
+     left outer join Lkp.MtskAdayTakipBelgelerTipi as tip on ( tip.KonuId = 1261 )
+
+Where takip.FirmId = @FirmId
+and   takip.BelgelerGeldi = 0 
+and   isnull(takip.KayitTipiId,0) <= 3
+and   takip.Asama1TipiId < 800
+
+group by tip.KonuId 
+       , tip.KonuCaption
+       , tip.BelgelerTipi
+	   , tip.FormCaption
+
+union all
+
+-- Belgeleri taranmayanlar
+Select 
+   tip.KonuId 
+ , tip.KonuCaption
+ , tip.BelgelerTipi as KonuAciklama
+ , tip.FormCaption as Islem
+ , count(takip.Id) as AdaySayisi 
+
+From dbo.MtskAdayTakip as takip
+     left outer join Lkp.MtskAdayTakipBelgelerTipi as tip on ( tip.KonuId = 1262 )
+
+Where takip.FirmId = @FirmId
+and   takip.BelgelerTarandi = 0 
+and   isnull(takip.KayitTipiId,0) <= 3
+and   takip.Asama1TipiId < 800
+
+group by tip.KonuId 
+       , tip.KonuCaption
+       , tip.BelgelerTipi
+	   , tip.FormCaption
+
+union all
+
+-- Belgeleri yüklenmeyenler
+Select 
+   tip.KonuId 
+ , tip.KonuCaption
+ , tip.BelgelerTipi as KonuAciklama
+ , tip.FormCaption as Islem
+ , count(takip.Id) as AdaySayisi 
+
+From dbo.MtskAdayTakip as takip
+     left outer join Lkp.MtskAdayTakipBelgelerTipi as tip on ( tip.KonuId = 1263 )
+
+Where takip.FirmId = @FirmId
+and   takip.BelgelerYuklendi = 0 
+and   isnull(takip.KayitTipiId,0) <= 3
+and   takip.Asama1TipiId < 800
+
+group by tip.KonuId 
+       , tip.KonuCaption
+       , tip.BelgelerTipi
+	   , tip.FormCaption
+
+union all
+/*
+-- MebbisKurumOnayi yok
+Select 
+   tip.KonuId 
+ , tip.KonuCaption
+ , tip.MebbisOnayiTipi as KonuAciklama
+ , tip.FormCaption as Islem
+ , count(talep.Id) as AdaySayisi 
+
+From dbo.MtskAdayTalep as talep
+     left outer join dbo.MtskAdayTakip as takip on ( talep.Id = takip.TalepId )
+     left outer join Lkp.MtskAdayTakipMebbisOnayiTipi as tip on ( talep.MebbisKurumOnayi = tip.Id )
+
+Where talep.FirmId = @FirmId
+and   isnull(talep.KayitTipiId,0) <= 3
+and   takip.Asama1TipiId < 800
+
+group by tip.KonuId 
+       , tip.KonuCaption
+       , tip.MebbisOnayiTipi
+	   , tip.FormCaption
+
+union all 
+*/
+-- ---------------------------------------------------------------------------------
+-- DİKKAT : Özel durumdakilerin toplam sayıları için ayrı ayrı sql ile hesaplanıyor
+-- ---------------------------------------------------------------------------------
+
+-- OzelDurumuTipi -- özürlü sayısı
+Select 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.OzelDurumuTipi as KonuAciklama
+ , tip.FormCaption as Islem
+ , count(saglik.Id) as AdaySayisi 
+
+From MtskAdaySaglik as saglik
+     left outer join dbo.MtskAdayTalep as talep on ( saglik.TalepId = talep.Id )
+     left outer join dbo.MtskAdayTakip as takip on ( talep.Id = takip.TalepId )
+     left outer join Lkp.MtskAdayTakipOzelDurumuTipi as tip on ( tip.Id = 1)
+Where saglik.FirmId = @FirmId
+and   saglik.OzurDurumuTipiId > 1
+and   saglik.TalepId = talep.Id
+and   isnull(talep.KayitTipiId,0) <= 3
+and   takip.Asama1TipiId < 800
+
+Group by 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.OzelDurumuTipi
+ , tip.FormCaption
+
+union all
+
+-- OzelDurumuTipi -- okutmanlı sayısı
+Select 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.OzelDurumuTipi as KonuAciklama
+ , tip.FormCaption as Islem
+ , count(saglik.Id) as AdaySayisi 
+
+From MtskAdaySaglik as saglik
+     left outer join dbo.MtskAdayTalep as talep on ( saglik.TalepId = talep.Id )
+     left outer join dbo.MtskAdayTakip as takip on ( talep.Id = takip.TalepId )
+     left outer join Lkp.MtskAdayTakipOzelDurumuTipi as tip on ( tip.Id = 2)
+Where talep.FirmId = @FirmId
+and   saglik.OkutmanTalebi = 1
+and   saglik.TalepId = talep.Id
+and   isnull(talep.KayitTipiId,0) <= 3
+and   takip.Asama1TipiId < 800
+
+Group by 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.OzelDurumuTipi
+ , tip.FormCaption
+
+union all
+
+-- OzelDurumuTipi -- TercumanTalebi sayısı
+Select 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.OzelDurumuTipi as KonuAciklama
+ , tip.FormCaption as Islem
+ , count(saglik.Id) as AdaySayisi 
+
+From MtskAdaySaglik as saglik
+     left outer join dbo.MtskAdayTalep as talep on ( saglik.TalepId = talep.Id )
+     left outer join dbo.MtskAdayTakip as takip on ( talep.Id = takip.TalepId )
+     left outer join Lkp.MtskAdayTakipOzelDurumuTipi as tip on ( tip.Id = 3)
+Where talep.FirmId = @FirmId
+and   saglik.TercumanTalebi = 1
+and   saglik.TalepId = talep.Id
+and   isnull(talep.KayitTipiId,0) <= 3
+and   takip.Asama1TipiId < 800
+
+Group by 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.OzelDurumuTipi
+ , tip.FormCaption
+
+union all
+
+-- OzelDurumuTipi -- YabanciDilTipiId sayısı
+Select 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.OzelDurumuTipi as KonuAciklama
+ , tip.FormCaption as Islem
+ , count(saglik.Id) as AdaySayisi 
+
+From MtskAdaySaglik as saglik
+     left outer join dbo.MtskAdayTalep as talep on ( saglik.TalepId = talep.Id )
+     left outer join dbo.MtskAdayTakip as takip on ( talep.Id = takip.TalepId )
+     left outer join Lkp.MtskAdayTakipOzelDurumuTipi as tip on ( tip.Id = 4)
+Where talep.FirmId = @FirmId
+and   saglik.YabanciDilTipiId > 0
+and   saglik.TalepId = talep.Id
+and   isnull(talep.KayitTipiId,0) <= 3
+and   takip.Asama1TipiId < 800
+
+Group by 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.OzelDurumuTipi
+ , tip.FormCaption
+
+union all
+
+-- OzelDurumuTipi -- Yabanci uyruklar sayısı
+Select 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.OzelDurumuTipi as KonuAciklama
+ , tip.FormCaption as Islem
+ , count(talep.Id) as AdaySayisi 
+
+From dbo.MtskAdayTalep as talep 
+     left outer join dbo.MtskAday as aday on ( talep.AdayId = aday.Id )
+     left outer join dbo.MtskAdayTakip as takip on ( talep.Id = takip.TalepId )
+     left outer join Lkp.MtskAdayTakipOzelDurumuTipi as tip on ( tip.Id = 5)
+Where talep.FirmId = @FirmId
+and   aday.UlkeTipiId <> 1000
+and   isnull(talep.KayitTipiId,0) <= 3
+and   takip.Asama1TipiId < 800
+
+Group by 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.OzelDurumuTipi
+ , tip.FormCaption
+
+union all
+
+-- OzelDurumuTipi -- Etiketli sayısı
+Select 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.OzelDurumuTipi as KonuAciklama
+ , tip.FormCaption as Islem
+ , count(talep.Id) as AdaySayisi 
+
+From dbo.MtskAdayTalep as talep
+     left outer join dbo.MtskAdayTakip as takip on ( talep.Id = takip.TalepId )
+     left outer join Lkp.MtskAdayTakipOzelDurumuTipi as tip on ( tip.Id = 6)
+Where talep.FirmId = @FirmId
+and   talep.EtiketTipiId > 0
+and   isnull(talep.KayitTipiId,0) <= 3
+and   takip.Asama1TipiId < 800
+
+Group by 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.OzelDurumuTipi
+ , tip.FormCaption
+
+union all
+
+-- OzelDurumuTipi -- Kontejanlı sayısı
+Select 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.OzelDurumuTipi as KonuAciklama
+ , tip.FormCaption as Islem
+ , count(takip.Id) as AdaySayisi 
+
+From dbo.MtskAdayTakip as takip
+     left outer join Lkp.MtskAdayTakipOzelDurumuTipi as tip on ( tip.Id = 7)
+Where takip.FirmId = @FirmId
+and   takip.IsKontejan = 1
+and   isnull(takip.KayitTipiId,0) <= 3
+and   takip.Asama1TipiId < 800
+
+Group by 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.OzelDurumuTipi
+ , tip.FormCaption
+
+union all
+
+-- YasOnayiTipi
+Select 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.YasOnayiTipi as KonuAciklama
+ , tip.FormCaption as Islem
+ , count(takip.Id) as AdaySayisi 
+
+From dbo.MtskAdayTakip as takip
+     left outer join Lkp.MtskAdayTakipYasOnayiTipi as tip on ( takip.YasOnayiTipiId = tip.Id )
+Where takip.FirmId = @FirmId
+and   takip.YasOnayiTipiId >= 1 -- Yaşı tutmuyor
+--and   takip.YasOnayiTipiId <= 4 -- Doğum tarihi yok
+and   takip.YasOnayiTipiId <= 5 -- yaşı tutuyor
+and   isnull(takip.KayitTipiId,0) <= 3
+and   takip.Asama1TipiId < 800
+
+Group by 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.YasOnayiTipi
+ , tip.FormCaption 
+
+union all
+/*
+-- YasOnayiTipi
+Select 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.YasOnayiTipi as KonuAciklama
+ , tip.FormCaption as Islem
+ , count(takip.Id) as AdaySayisi 
+ 
+From dbo.MtskAdayTakip as takip
+     left outer join Lkp.MtskAdayTakipYasOnayiTipi as tip on ( takip.YasOnayiTipiId = tip.Id )
+Where takip.FirmId = @FirmId
+and   takip.YasOnayiTipiId = 5
+and   isnull(takip.KayitTipiId,0) <= 3
+and   takip.Asama1TipiId < 800
+
+Group by 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.YasOnayiTipi
+ , tip.FormCaption 
+
+union all
+*/
+
+
+
+-- IsGrupSubeYok
+Select 
+   tip.KonuId 
+ , tip.KonuCaption
+ , tip.GrupSubeTipi as KonuAciklama
+ , tip.FormCaption as Islem
+ , count(takip.Id) as AdaySayisi 
+
+From dbo.MtskAdayTakip as takip
+     left outer join Lkp.MtskAdayTakipGrupSubeTipi as tip on ( tip.KonuId = 1141 )
+
+Where takip.FirmId = @FirmId
+and   takip.IsGrupSubeYok = 1
+and   isnull(takip.KayitTipiId,0) <= 3
+and   takip.Asama1TipiId < 800
+
+group by tip.KonuId 
+       , tip.KonuCaption
+       , tip.GrupSubeTipi
+	   , tip.FormCaption
+
+union all
+
+-- DeneyimSartiTipi
+Select 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.DeneyimSartiTipi as KonuAciklama
+ , tip.FormCaption as Islem
+ , count(takip.Id) as AdaySayisi 
+
+From dbo.MtskAdayTakip as takip
+     left outer join Lkp.MtskAdayTakipDeneyimSartiTipi as tip on ( takip.DeneyimSartiTipiId = tip.Id )
+Where takip.FirmId = @FirmId
+and   takip.DeneyimSartiTipiId = 3 -- Uygun değil
+and   isnull(takip.KayitTipiId,0) <= 3
+and   takip.Asama1TipiId < 800
+
+Group by 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.DeneyimSartiTipi
+ , tip.FormCaption 
+
+union all
+
+-- ZamanlamaTipi
+Select 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.ZamanlamaTipi as KonuAciklama
+ , tip.FormCaption as Islem
+ , count(takip.Id) as AdaySayisi 
+
+From dbo.MtskAdayTakip as takip
+     left outer join Lkp.MtskAdayTakipZamanlamaTipi as tip on ( takip.ZamanlamaTipiId = tip.Id )
+Where takip.FirmId = @FirmId
+and   isnull(takip.KayitTipiId,0) <= 3
+and   takip.Asama1TipiId < 800
+
+Group by 
+   tip.KonuId
+ , tip.KonuCaption   
+ , tip.ZamanlamaTipi
+ , tip.FormCaption 
+
+'
+  --Select len(@sql)
+  --print @sql
+  EXEC sp_executesql @sql
+
+
+END -- procedure
+
+/*CreateProcedureEnd*/

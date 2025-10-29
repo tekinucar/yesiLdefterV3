@@ -1,0 +1,53 @@
+﻿USE [u7093888_Ustad01]
+GO
+
+/****** Object:  StoredProcedure [dbo].[prc_CihazTestUser]    Script Date: 07.10.2020 15:50:58 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+CREATE PROCEDURE [dbo].[prc_CihazTestUser] (@FirmId int, @MachineNumber int, @CariId int, @UserName nvarchar(100), @BioIndex smallint, @BioPrint nvarchar(max))  
+--ALTER PROCEDURE [dbo].[prc_CihazTestUser] (@FirmId int, @MachineNumber int, @CariId int, @UserName nvarchar(100), @BioIndex smallint, @BioPrint nvarchar(max))  
+AS BEGIN 
+
+if ( Select count(Id) Adet
+     From [dbo].[CihazTestUser]
+     Where [FirmId] = @FirmId
+	 and   [MachineNumber] = @MachineNumber
+     and   [CariId] = @CariId
+     and   [BioIndex] = @BioIndex ) = 0 
+begin
+  --print 'insert'
+  INSERT INTO [dbo].[CihazTestUser]
+           ([FirmId]
+           ,[MachineNumber]
+           ,[CariId]
+           ,[UserName]
+           ,[BioIndex]
+           ,[BioPrint])
+     VALUES
+           (@FirmId
+           ,@MachineNumber
+           ,@CariId
+           ,@UserName
+           ,@BioIndex
+           ,@BioPrint)
+end else
+begin
+  --print 'update'
+UPDATE [dbo].[CihazTestUser]
+   SET [UserName] = @UserName
+      ,[BioPrint] = @BioPrint
+  Where [FirmId] = @FirmId
+  and   [MachineNumber] = @MachineNumber
+  and   [CariId] = @CariId
+  and   [BioIndex] = @BioIndex 
+end
+
+END
+GO
+
+

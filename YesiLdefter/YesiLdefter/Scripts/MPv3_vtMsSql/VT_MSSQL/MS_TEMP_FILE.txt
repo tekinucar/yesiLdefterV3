@@ -1,0 +1,26 @@
+
+begin transaction
+ create table MS_TEMP_FILE
+ (
+        REF_ID              Int IDENTITY(1,1) NOT NULL,
+        MODUL_CODE          VarChar(10)    NULL,   -- modül 
+        WFILE_CODE          VarChar(30)    NULL,   -- MS_TEMP_FILE = MS_WORK_CODE (Master-Detail)
+        WFILE_NAME          VarChar(100)   NULL,   -- Dosyanýn/Ýþin Adý
+        OPEN_PART_ID        Int            NULL,   -- iþ dosyasýný açan bölüm
+        RESPONSIBLE_PART_ID Int            NULL,   -- iþi yapacak olan sorumlu bölüm
+        SOURCE_TABLE_NAME   VarChar(50)    NULL,   -- 
+        SORUCE_TABLEIPCODE  VarChar(100)   NULL,   --
+        SOURCE_KEY_FNAME    VarChar(50)    NULL,   --
+
+    Constraint PK_MS_TEMP_FILE primary key (REF_ID)
+ )
+
+ create index X_MS_TEMP_FILE1 on MS_TEMP_FILE ( WFILE_CODE )
+ 
+ grant select, insert, update, delete on MS_TEMP_FILE to public
+
+commit transaction
+
+
+
+

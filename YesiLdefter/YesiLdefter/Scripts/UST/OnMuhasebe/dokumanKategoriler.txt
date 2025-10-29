@@ -1,0 +1,567 @@
+﻿
+Aksiyonlar
+	Hızlı satışlar
+	
+
+
+Aksiyonlar
+	Kategoriler
+		Ürünler - Filtreler
+			Fiyatları
+			Satış birimi 
+			Alış birimi
+			Satış miktarını sor (hızlı satış için)
+
+
+
+Piyasadaki tüm ürünleri gruplamak oldukça geniş bir kapsam gerektirir, ancak ana kategoriler halinde sınıflandırabiliriz. İşte genel bir sınıflandırma:
+
+Gıda ve İçecek
+	Taze gıdalar (meyve, sebze, et)
+	Paketli gıdalar (makarna, konserve)
+	İçecekler (kahve, çay, meyve suyu)
+	Atıştırmalıklar
+Giyim ve Aksesuarlar
+	Kadın, erkek ve çocuk giyim
+	Ayakkabılar
+	Çantalar ve cüzdanlar
+	Takı ve saatler
+Elektronik ve Teknoloji
+	Akıllı telefonlar ve aksesuarları
+	Bilgisayarlar ve tabletler
+		Bilgisayarlar
+		Masaüstü Bilgisayarlar
+			Oyun bilgisayarları
+			İş istasyonları
+			All-in-One (Hepsi Bir Arada) bilgisayarlar
+			Mini PC’ler
+		Dizüstü Bilgisayarlar
+			Ultrabook’lar
+			Oyun dizüstü bilgisayarları
+			İş dizüstü bilgisayarları
+			2’si 1 arada (dönüştürülebilir) dizüstü bilgisayarlar
+		Sunucular ve Veri Depolama
+			Rack sunucular
+			Tower sunucular
+			NAS (Ağa Bağlı Depolama) cihazları
+			Veri merkezleri için sunucular
+		Tabletler
+		İş ve Profesyonel Kullanım Tabletleri
+			Apple iPad Pro
+			Microsoft Surface Pro
+			Samsung Galaxy Tab S serisi
+		Eğitim ve Eğlence Tabletleri
+			Apple iPad
+			Samsung Galaxy Tab A serisi
+			Amazon Fire tabletler
+		Çocuk Tabletleri
+			Amazon Fire Kids Edition
+			Samsung Galaxy Tab Kids
+			Lenovo Tab M serisi çocuk tabletleri
+		Grafik ve Tasarım Tabletleri
+			Wacom Cintiq
+			Huion Kamvas
+			XP-Pen Artist Pro
+	Ev elektroniği (televizyonlar, ses sistemleri)
+	Giyilebilir teknoloji (akıllı saatler, fitness bileklikleri)
+Ev ve Yaşam
+	Mobilya ve dekorasyon
+	Mutfak gereçleri
+	Temizlik ürünleri
+	Bahçe ve dış mekan ürünleri
+Kişisel Bakım ve Sağlık
+	Cilt bakımı ve kozmetik ürünleri
+	Saç bakım ürünleri
+	Vitaminler ve takviyeler
+	Medikal ürünler
+Spor ve Outdoor
+	Spor kıyafetleri ve ayakkabıları
+	Spor ekipmanları (ağırlıklar, yoga matları)
+	Kamp ve doğa sporları malzemeleri
+	Bisiklet ve aksesuarları
+Bebek ve Çocuk Ürünleri
+	Bebek kıyafetleri ve ayakkabıları
+	Oyuncaklar
+	Bebek bakım ürünleri
+	Eğitim materyalleri
+Evcil Hayvan Ürünleri
+	Mama ve atıştırmalıklar
+	Oyuncaklar ve aksesuarlar
+	Bakım ürünleri
+	Evcil hayvan mobilyaları
+Ofis ve Kırtasiye Ürünleri
+	Ofis mobilyaları
+	Kırtasiye malzemeleri
+	Elektronik ofis ekipmanları
+	Temizlik ve hijyen ürünleri
+Otomotiv ve Aksesuarlar
+	Araç içi aksesuarlar
+	Yedek parçalar
+	Lastikler ve jantlar
+	Bakım ve temizlik ürünleri
+İnşaat ve Yapı Malzemeleri
+	Beton ve çimento
+	İnşaat demiri ve çelik
+	İzolasyon malzemeleri
+	Boya ve kaplama ürünleri
+
+
+
+
+Üretim amacıyla kullanılan ürünler genellikle endüstriyel ürünler olarak adlandırılır ve çeşitli kategorilere ayrılabilir. İşte bazı ana kategoriler:
+
+Hammaddeler
+	Metaller (çelik, alüminyum, bakır)
+	Plastik ve polimerler
+	Kimyasallar ve bileşikler
+	Ahşap ve kağıt ürünleri
+Makine ve Ekipmanlar
+	Üretim makineleri (CNC makineleri, presler)
+	Taşıma ve kaldırma ekipmanları (forkliftler, vinçler)
+	Paketleme makineleri
+	Otomasyon sistemleri
+Elektrik ve Elektronik Ürünler
+	Elektrik motorları ve jeneratörler
+	Kontrol panelleri ve dağıtım sistemleri
+	Sensörler ve aktüatörler
+	Endüstriyel bilgisayarlar ve kontrol sistemleri
+Yedek Parçalar ve Aksesuarlar
+	Rulmanlar ve contalar
+	Bağlantı elemanları (civatalar, somunlar)
+	Filtreler ve pompalar
+	Kayışlar ve zincirler
+İş Güvenliği ve Koruma Ekipmanları
+	Kişisel koruyucu ekipmanlar (baretler, eldivenler)
+	Yangın söndürme sistemleri
+	Güvenlik işaretleri ve bariyerler
+	Havalandırma ve filtrasyon sistemleri
+Yarı Mamul Ürünler
+	Levhalar ve plakalar
+	Borular ve profiller
+	Tel ve kablolar
+	Kumaş ve tekstil ürünleri
+Laboratuvar ve Test Ekipmanları
+	Ölçüm cihazları (kaliperler, mikrometreler)
+	Test makineleri (çekme test cihazları, sertlik ölçerler)
+	Kimyasal analiz cihazları
+	Kalibrasyon ekipmanları
+
+
+
+
+Ofisler için ürünler çeşitli kategorilere ayrılabilir. İşte bazı ana kategoriler:
+
+Ofis Mobilyaları
+	Çalışma masaları
+	Ofis sandalyeleri
+	Depolama çözümleri (dolaplar, raflar)
+	Toplantı masaları ve sandalyeleri
+Kırtasiye ve Ofis Malzemeleri
+	Kalemler, defterler, dosyalar
+	Zımba, delgeç, makas
+	Post-it ve not kağıtları
+	Kartvizitlikler ve evrak rafları
+Elektronik ve Teknoloji Ürünleri
+	Bilgisayarlar ve aksesuarları
+	Yazıcılar ve tarayıcılar
+	Telefonlar ve faks makineleri
+	Projeksiyon cihazları ve ekranlar
+Ofis Dekorasyon Ürünleri
+	Duvar süsleri ve tablolar
+	Bitkiler ve saksılar
+	Aydınlatma çözümleri (masa lambaları, tavan lambaları)
+	Halılar ve perde
+Temizlik ve Hijyen Ürünleri
+	Temizlik malzemeleri (deterjanlar, temizlik bezleri)
+	Çöp kovaları ve geri dönüşüm kutuları
+	El dezenfektanları ve sabunlar
+	Hava temizleyiciler
+Mutfak ve İkram Ürünleri
+	Kahve makineleri ve su ısıtıcıları
+	Bardaklar, tabaklar ve çatal-bıçak takımları
+	Atıştırmalıklar ve içecekler
+	Buzdolapları ve mikrodalga fırınlar
+
+
+Gıda ve içecek ürünlerini daha spesifik kategorilere ayırabiliriz. İşte bazı ana kategoriler:
+
+Gıda Ürünleri
+	Taze Gıdalar
+		Meyve ve sebzeler
+		Et ve deniz ürünleri
+		Süt ve süt ürünleri
+		Yumurta
+	Kuru Gıdalar
+		Bakliyat (fasulye, mercimek)
+		Tahıllar (pirinç, buğday)
+		Kuruyemişler ve kuru meyveler
+		Makarna ve erişte
+	Paketli Gıdalar
+		Konserve gıdalar
+		Hazır yemekler
+		Atıştırmalıklar (cips, kraker)
+		Tatlılar ve çikolatalar
+	Unlu Mamuller
+		Ekmek ve ekmek çeşitleri
+		Pasta ve kekler
+		Bisküvi ve kurabiyeler
+		Poğaça ve börekler
+	Dondurulmuş Gıdalar
+		Dondurulmuş sebzeler ve meyveler
+		Dondurulmuş et ve deniz ürünleri
+		Dondurulmuş hazır yemekler
+		Dondurma ve tatlılar
+
+İçecekler
+	Alkolsüz İçecekler
+		Su ve maden suyu
+		Meyve suları
+		Gazlı içecekler
+		Enerji ve spor içecekleri
+	Sıcak İçecekler
+		Çay ve bitki çayları
+		Kahve ve kahve çeşitleri
+		Sıcak çikolata
+		Sıcak meyve içecekleri
+	Alkollü İçecekler
+		Bira
+		Şarap
+		Likör ve sert içkiler
+		Kokteyl karışımları
+
+
+
+
+Kara, hava ve deniz taşıtlarını çeşitli kategorilere ayırabiliriz. İşte bazı ana kategoriler:
+
+Kara Taşıtları
+	Binek Araçlar
+		Otomobiller
+		SUV’lar
+		Minivanlar
+	Ticari Araçlar
+		Kamyonlar
+		Kamyonetler
+		Otobüsler
+	İki Tekerlekli Araçlar
+		Motosikletler
+		Scooterlar
+		Bisikletler
+	Ağır İş Makineleri
+		Ekskavatörler
+		Dozerler
+		Forkliftler
+Hava Taşıtları
+	Yolcu Uçakları
+		Dar gövdeli uçaklar
+		Geniş gövdeli uçaklar
+		Bölgesel jetler
+		Özel ve İş Jetleri
+		Hafif jetler
+		Orta boy jetler
+		Büyük jetler
+	Helikopterler
+		Sivil helikopterler
+		Askeri helikopterler
+		Kurtarma helikopterleri
+	Diğer Hava Araçları
+		Planörler
+		Balonlar
+		Dronlar
+Deniz Taşıtları
+	Yolcu Gemileri
+		Kruvaziyer gemileri
+		Feribotlar
+		Yat ve tekneler
+	Yük Gemileri
+		Konteyner gemileri
+		Tankerler
+		Kuru yük gemileri
+	Balıkçı Gemileri
+		Trol gemileri
+		Ağ gemileri
+		Balık işleme gemileri
+	Askeri Gemiler
+		Savaş gemileri
+		Denizaltılar
+		Hava taşıyıcıları
+
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+Piyasada ücret karşılığı verilen hizmetler oldukça çeşitlidir ve birçok sektörde farklı kategorilere ayrılabilir. İşte bazı ana hizmet kategorileri:
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Sağlık ve Bakım Hizmetleri
+	Hastane ve klinik hizmetleri
+	Diş hekimliği hizmetleri
+	Fizik tedavi ve rehabilitasyon
+	Evde bakım hizmetleri
+Eğitim ve Danışmanlık Hizmetleri
+	Okul ve üniversite eğitimi
+	Özel ders ve kurslar
+	Mesleki eğitim ve sertifikasyon programları
+	İş ve kariyer danışmanlığı
+Finans ve Sigorta Hizmetleri
+	Bankacılık hizmetleri
+	Yatırım danışmanlığı
+	Sigorta hizmetleri
+	Muhasebe ve vergi danışmanlığı
+Ulaşım ve Lojistik Hizmetleri
+	Taksi ve araç kiralama
+	Kargo ve nakliye hizmetleri
+	Lojistik ve depolama
+	Hava, kara ve deniz taşımacılığı
+Bilgi Teknolojileri ve Telekomünikasyon Hizmetleri
+	Yazılım geliştirme ve bakım
+	IT destek ve danışmanlık
+	İnternet ve telekomünikasyon hizmetleri
+	Veri analizi ve siber güvenlik
+İnşaat ve Gayrimenkul Hizmetleri
+	İnşaat ve renovasyon
+	Emlak danışmanlığı
+	Mimar ve mühendislik hizmetleri
+	Peyzaj ve bahçe düzenleme
+Eğlence ve Rekreasyon Hizmetleri
+	Sinema ve tiyatro
+	Spor salonları ve fitness merkezleri
+	Turizm ve seyahat acenteleri
+	Etkinlik ve organizasyon planlama
+Kişisel Hizmetler
+	Kuaför ve güzellik salonları
+	Temizlik hizmetleri
+	Kuru temizleme ve çamaşırhane
+	Özel şoför ve güvenlik hizmetleri
+
+
+
+
+
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+Türkiye’deki sektörler genel olarak şu kategorilere ayrılabilir:
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+1.  Tarım ve Hayvancılık: Bu sektör, tarım ürünleri, hayvancılık ve ormancılık faaliyetlerini içerir.
+2.  Sanayi: Otomotiv, kimya, çelik, tekstil ve hazır giyim gibi alt sektörleri kapsar.
+3.  Enerji: Elektrik üretimi, petrol ve gaz, yenilenebilir enerji kaynakları gibi alanları içerir.
+4.  İnşaat ve Mühendislik: İnşaat projeleri, altyapı çalışmaları ve mühendislik hizmetleri bu kategoride yer alır.
+5.  Teknoloji ve Telekomünikasyon: Yazılım geliştirme, bilgi teknolojileri, telekomünikasyon hizmetleri gibi alanları kapsar.
+6.  Finansal Hizmetler: Bankacılık, sigortacılık, bireysel emeklilik ve varlık yönetimi gibi hizmetleri içerir.
+7.  Sağlık ve İlaç: Hastaneler, sağlık hizmetleri, ilaç üretimi ve biyoteknoloji bu sektörde yer alır.
+8.  Turizm: Seyahat, konaklama, sağlık turizmi ve eğlence hizmetlerini kapsar.
+9.  Taşımacılık ve Lojistik: Kara, hava, deniz ve demiryolu taşımacılığı ile lojistik hizmetleri bu kategoride yer alır.
+10. Perakende ve Tüketici Ürünleri: Gıda, giyim, elektronik ve diğer tüketici ürünlerinin satışı bu sektöre dahildir.
+11. Eğitim: 
+
+
+
+
+Eğitim sektörü çeşitli alt kategorilere ayrılabilir. İşte bazı ana kategoriler:
+
+	Okul Öncesi Eğitim: Anaokulları ve kreşler gibi erken çocukluk eğitimi kurumları.
+	İlköğretim: İlkokul ve ortaokul düzeyindeki eğitim kurumları.
+	Ortaöğretim: Liseler ve meslek liseleri gibi ortaöğretim kurumları.
+	Yükseköğretim: Üniversiteler, yüksekokullar ve meslek yüksekokulları.
+	Yetişkin Eğitimi: Halk eğitim merkezleri, yetişkinler için kurslar ve sertifika programları.
+	Özel Eğitim: Özel gereksinimli bireyler için eğitim hizmetleri.
+	Dil Eğitimi: Yabancı dil kursları ve dil okulları.
+	Mesleki Eğitim: Meslek edindirme kursları ve teknik eğitim programları.
+	Uzaktan Eğitim: Online eğitim platformları ve uzaktan eğitim programları.
+	Özel Ders ve Etüt Merkezleri: Bireysel veya grup dersleri sunan özel eğitim merkezleri.
+
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+Özel ders ve kursları çeşitli kategorilere ayırabiliriz. İşte bazı ana kategoriler:
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Akademik Dersler
+	Matematik
+		İlkokul matematik
+		Ortaokul matematik
+		Lise matematik (TYT, AYT)
+		Üniversite matematik (Calculus, Diferansiyel Denklemler)
+	Fen Bilimleri
+		Fizik
+		Kimya
+		Biyoloji
+	Dil Dersleri
+		İngilizce
+		Almanca
+		Fransızca
+		İspanyolca
+		Türkçe (yabancılar için)
+	Sosyal Bilimler
+		Tarih
+		Coğrafya
+		Felsefe
+		Sosyoloji
+	Sınav Hazırlık Kursları
+		Yurtiçi Sınavlar
+			LGS (Liselere Geçiş Sistemi)
+			TYT (Temel Yeterlilik Testi)
+			AYT (Alan Yeterlilik Testi)
+			KPSS (Kamu Personeli Seçme Sınavı)
+		Yurtdışı Sınavlar
+			TOEFL
+			IELTS
+			SAT
+			GRE
+			GMAT
+		Sanat ve Hobi Kursları
+			Müzik
+			Gitar
+			Piyano
+			Keman
+			Şan dersleri
+		Görsel Sanatlar
+			Resim
+			Heykel
+			Fotoğrafçılık
+			Grafik tasarım
+		Performans Sanatları
+			Tiyatro
+			Dans (bale, modern dans, halk dansları)
+			Diksiyon ve hitabet
+		Spor ve Fitness Kursları
+			Bireysel Sporlar
+			Yüzme
+			Tenis
+			Yoga
+			Pilates
+		Takım Sporları
+			Futbol
+			Basketbol
+			Voleybol
+		Mesleki ve Teknik Eğitim
+			Bilgisayar ve Teknoloji
+			Yazılım geliştirme
+			Web tasarımı
+			Grafik tasarım
+			Veri analizi
+		İş ve Yönetim
+			İşletme yönetimi
+			Pazarlama
+			Finans
+			İnsan kaynakları
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+Mesleki eğitim ve sertifikasyon programlarını çeşitli kategorilere ayırabiliriz. İşte bazı ana kategoriler:
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Teknik ve Endüstriyel Eğitim
+Makine ve Metal Teknolojileri
+CNC Operatörlüğü
+Kaynakçılık
+Makine Bakım ve Onarım
+Elektrik ve Elektronik Teknolojileri
+Elektrik Tesisatçılığı
+Elektronik Teknikerliği
+Otomasyon Sistemleri
+İnşaat Teknolojileri
+İnşaat Teknikerliği
+Tesisat Teknolojisi
+Yapı Denetimi
+Sağlık ve Bakım Eğitimleri
+Sağlık Hizmetleri
+Hemşirelik
+Ebe ve Hemşire Yardımcılığı
+Tıbbi Sekreterlik
+Bakım ve Rehabilitasyon
+Yaşlı Bakımı
+Fizik Tedavi Yardımcılığı
+Engelli Bakımı
+Bilişim ve Teknoloji Eğitimleri
+Yazılım ve Programlama
+Web Geliştirme
+Mobil Uygulama Geliştirme
+Veri Tabanı Yönetimi
+Ağ ve Sistem Yönetimi
+Ağ Yönetimi
+Sistem Yönetimi
+Siber Güvenlik
+İş ve Yönetim Eğitimleri
+İşletme ve Yönetim
+İşletme Yönetimi
+İnsan Kaynakları Yönetimi
+Proje Yönetimi
+Pazarlama ve Satış
+Dijital Pazarlama
+Satış Teknikleri
+Müşteri İlişkileri Yönetimi
+Sanat ve Tasarım Eğitimleri
+Görsel Sanatlar
+Grafik Tasarım
+Fotoğrafçılık
+Moda Tasarımı
+Performans Sanatları
+Tiyatro
+Müzik
+Dans
+Turizm ve Hizmet Eğitimleri
+Turizm ve Otelcilik
+Turizm Rehberliği
+Otel Yönetimi
+Aşçılık
+Kişisel Hizmetler
+Kuaförlük
+Güzellik ve Bakım
+Masaj Terapisi
+
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+Ehliyet almak için eğitim gerektiren kursları çeşitli kategorilere ayırabiliriz. İşte bazı ana kategoriler:
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+Motosiklet Ehliyetleri
+M Sınıfı
+Motorlu bisiklet (moped) kullanımı için
+16 yaş ve üzeri
+A1 Sınıfı
+125 cc’ye kadar motosikletler için
+16 yaş ve üzeri
+A2 Sınıfı
+35 kW’a kadar motosikletler için
+18 yaş ve üzeri
+A Sınıfı
+Tüm motosikletler için
+24 yaş ve üzeri veya 2 yıllık A2 deneyimi
+Otomobil ve Hafif Araç Ehliyetleri
+B Sınıfı
+Otomobil ve kamyonetler için
+18 yaş ve üzeri
+B1 Sınıfı
+4 tekerlekli motosikletler (quad) için
+16 yaş ve üzeri
+BE Sınıfı
+Römorklu araçlar için
+18 yaş ve üzeri
+Ağır Vasıta Ehliyetleri
+C1 Sınıfı
+7.5 tona kadar kamyonlar için
+18 yaş ve üzeri
+C Sınıfı
+7.5 tonun üzerindeki kamyonlar için
+21 yaş ve üzeri
+CE Sınıfı
+Römorklu kamyonlar için
+21 yaş ve üzeri
+Otobüs ve Minibüs Ehliyetleri
+D1 Sınıfı
+16 kişiye kadar minibüsler için
+21 yaş ve üzeri
+D Sınıfı
+Otobüsler için
+24 yaş ve üzeri
+DE Sınıfı
+Römorklu otobüsler için
+24 yaş ve üzeri
+Özel Amaçlı Ehliyetler
+F Sınıfı
+Traktörler için
+18 yaş ve üzeri
+G Sınıfı
+İş makineleri için
+18 yaş ve üzeri

@@ -1,0 +1,44 @@
+
+
+/*  PROJE DATABASE ÝÇÝNE CREATE EDÝLECEK */ 
+
+CREATE VIEW [dbo].[VW_TYPES_LIST]  
+AS
+ (
+  
+  /* VALUE_TYPE = 1 : SmallInt, 2 : Int32, 3 : String, 4 : Byte   */
+
+  
+    -- SYS_TYPES_L  
+            
+  select DISTINCT TYPES_NAME, VALUE_TYPE, 'TYPES_CAPTION' CAPTION_FNAME, 'TYPES_VALUE_INT' WHERE_FNAME1, 'TYPES_NAME' WHERE_FNAME2, 'SYS_TYPES_L' TABLE_NAME
+  from SYS_TYPES_H 
+  where ( VALUE_TYPE = 1 or VALUE_TYPE = 2 ) 
+  --and TYPES_NAME = @type_name
+
+  union all 
+
+  select DISTINCT TYPES_NAME, VALUE_TYPE, 'TYPES_CAPTION' CAPTION_FNAME, 'TYPES_VALUE_STR' WHERE_FNAME1, 'TYPES_NAME' WHERE_FNAME2, 'SYS_TYPES_L' TABLE_NAME
+  from SYS_TYPES_H 
+  where ( VALUE_TYPE = 3 or VALUE_TYPE = 4 ) 
+  --and TYPES_NAME = @type_name
+
+  union all -- TABLOLAR  
+
+  select TABLE_NAME, VALUE_TYPE, CAPTION_FNAME, INT_FNAME WHERE_FNAME1, '' WHERE_FNAME2, TABLE_NAME
+  from SYS_TYPES_T 
+  where ( VALUE_TYPE = 1 or  VALUE_TYPE = 2 ) 
+  --and TABLE_NAME = @type_name
+
+  union all 
+
+  select TABLE_NAME, VALUE_TYPE, CAPTION_FNAME, STR_FNAME WHERE_FNAME1, '' WHERE_FNAME2, TABLE_NAME
+  from SYS_TYPES_T 
+  where ( VALUE_TYPE = 3 or  VALUE_TYPE = 4 ) 
+  --and TABLE_NAME = @type_name
+
+
+ )
+
+
+

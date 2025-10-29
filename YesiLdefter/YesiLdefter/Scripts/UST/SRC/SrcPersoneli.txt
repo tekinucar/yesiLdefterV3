@@ -1,0 +1,844 @@
+/*CreateTable*/
+
+begin transaction
+
+ create table SrcPersoneli
+ (
+   Id                   Int IDENTITY(1,1) not null, 
+   FirmId               Int       not null,
+   IsActive             Bit       not null, /* default : 1 = active, 0 = not active */  
+
+   --11
+   CalismaIzniKayitNo       Varchar(7)    null,
+   TcVkNo                   Varchar(11)   null,
+   TamAdiSoyadi             nVarchar(70)  null, 
+   Adi                      nVarchar(30)  null,
+   Soyadi					nVarchar(30)  null,
+   DogumTarihi              Date          null,
+   CinsiyetTipiId           SmallInt      null,           
+   Eposta                   nVarchar(100) null,
+   CepTelefonu              nVarchar(15)  null,
+   
+   --31
+   OgrenimBilgisi           nVarchar(250) null,
+   MezuniyetBelgeCinsi      nVarchar(20)  null,
+   MezuniyetTarihi          Date          null,
+   MezuniyetBelgeTarihi     Date          null,
+   MezuniyetBelgeSayisi     nVarchar(20)  null,
+   
+   --41
+   Aciklama                 nVarchar(250) null,
+   GoreviTipiId             SmallInt      null,
+   StatusuTipiId            SmallInt      null,
+   Brans1TipiId             SmallInt      null,
+   Brans2TipiId             SmallInt      null,
+   Brans3TipiId             SmallInt      null,
+   Brans4TipiId             SmallInt      null,
+   
+
+   --51   
+   DersUcreti               Numeric(22,8) null,
+   DersUcretiKurus          Numeric(5)    null,
+   AylikNetUcreti           Numeric(22,8) null,
+   AylikNetUcretiKurus      Numeric(5)    null,
+   AylikBrutUcreti          Numeric(22,8) null,
+   AylikBrutUcretiKurus     Numeric(5)    null,
+   MaasKarsiligiDersSayisi  SmallInt      null,
+   DersUcretiKarsiligiDersSayisi  SmallInt      null,
+   HaftalikDersSayisi       SmallInt      null,
+   
+   --71
+   CalismaIzniBaslamaTarihi Date          null,
+   CalismaIzniBitisTarihi   Date          null,
+   
+   OncekiGorevdenAyrilmaSebebi    nVarchar(50)  null,
+   EnSonCalistigiKurumAdi         nVarchar(250) null,
+   
+   --81
+   SuAnkiDurumu                   nVarchar(20)  null,
+   GorevdenAyrilmaAciklama        nVarchar(50)  null,
+   DersGirecegiProgramlar         nVarchar(200) null,
+   CezaBilgileri                  SmallInt      null, /* ? */
+   DisplinCezaBilgileri           SmallInt      null, /* ? */
+   GeciciTedbirKarariBilgileri    SmallInt      null, /* ? */	
+   --91
+   TcNoCalismaIzniNo              Varchar(20)    null, /* 185148231144666809   : şeklinde */ 
+   TcNo_CalismaIzniNo             Varchar(20)    null, /* 18514823114-4666809  : şeklinde */ 
+   BiyometrikResim                VarBinary(max) null,
+   BiyometrikResimSmall           VarBinary(max) null,
+
+   constraint  pk_SrcPersoneli primary key (Id)
+ )
+
+ create index X_SrcPersoneli01 on SrcPersoneli (TamAdiSoyadi)
+ create index X_SrcPersoneli02 on SrcPersoneli (TcVkNo)
+  
+ grant select, insert, update, delete on SrcPersoneli to public
+
+commit transaction
+
+/*CreateTableEnd*/
+
+
+/*CreateTrigger*/
+
+CREATE TRIGGER [dbo].[trg_SrcPersoneli] on [dbo].[SrcPersoneli]
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    DECLARE cursorSrcPersoneli cursor local for select Id from Inserted
+    DECLARE @curId bigint
+
+    OPEN cursorSrcPersoneli
+
+    FETCH NEXT FROM cursorSrcPersoneli INTO @curId
+
+    declare @yFirmId Int = 0
+	declare @yTamAdi varchar(100) = null
+    declare @eTamAdi varchar(100) = null
+    declare @newTamAdi varchar(100) = null
+    declare @yAdi varchar(50) = null
+    declare @ySoyadi varchar(50) = null
+    declare @yEposta nvarchar(100) = null
+	declare @yCepTelefonu nvarchar(15) = null
+	declare @CariId int = 0
+
+	declare @eTcVkNo varchar(11) = null
+	declare @eCalismaIzniKayitNo varchar(7) = null
+	declare @yTcVkNo varchar(11) = null
+	declare @yCalismaIzniKayitNo varchar(7) = null
+    declare @yMaasKarsiligiDersSayisi smallint
+	declare @yDersUcretiKarsiligiDersSayisi smallInt
+
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        set @eTamAdi = ''
+        set @newTamAdi = ''
+		set @yTcVkNo = ''
+		set @yCalismaIzniKayitNo = ''
+
+        select 
+    	   @eTcVkNo = isnull(dlt.TcVkNo,'')
+          ,@eCalismaIzniKayitNo = isnull(dlt.CalismaIzniKayitNo, '')
+		  ,@eTamAdi = isnull(dlt.TamAdiSoyadi,'')
+    	from deleted dlt
+    	where dlt.Id = @curId
+			   
+        select 
+		   @yFirmId = ins.FirmId
+		  ,@yTcVkNo = isnull(ins.TcVkNo,'')
+          ,@yCalismaIzniKayitNo = isnull(ins.CalismaIzniKayitNo, '')
+		  ,@yTamAdi = isnull(ins.TamAdiSoyadi, '')
+    	  ,@yAdi = isnull(ins.Adi,'')
+    	  ,@ySoyadi = isnull(ins.SoyAdi,'')
+          ,@yMaasKarsiligiDersSayisi = isnull(ins.MaasKarsiligiDersSayisi,0) 
+          ,@yDersUcretiKarsiligiDersSayisi = isnull(ins.DersUcretiKarsiligiDersSayisi,0)
+		from inserted ins
+    	where ins.Id = @curId
+     	   	
+		-- TamAdiSoyadi var ise Adi ve Soyadi tespit ediliyor 
+        if ((@yTamAdi <> '') and
+            (@yAdi = '') and
+            (@ySoyadi = ''))
+        begin
+            declare @i1 int = 0
+            declare @i2 int = 0
+
+            set @i1 = CHARINDEX(' ', @yTamAdi, 0)
+            set @i2 = CHARINDEX(' ', @yTamAdi, @i1+1)
+
+            if (@i2 > 0) set @i1 = @i2
+
+            set @yAdi = SUBSTRING(@yTamAdi, 0, @i1)
+            set @ySoyadi = SUBSTRING(@yTamAdi, @i1+1, 100)
+            set @eTamAdi = ''
+
+			update SrcPersoneli set 
+              Adi = RTRIM(LTRIM(@yAdi))
+			 ,Soyadi = RTRIM(LTRIM(@ySoyadi))
+            where Id = @curId
+        end
+        
+    	set @newTamAdi = @yAdi + ' ' +  @ySoyadi
+    	
+        if ((@newTamAdi <> @eTamAdi) or 
+            (@eTamAdi = '') or
+            (@yTamAdi = '') or 
+			(@eTcVkNo <> @yTcVkNo) or
+			(@eCalismaIzniKayitNo <> @yCalismaIzniKayitNo)
+			)  
+    	begin
+    	    update SrcPersoneli set 
+             TamAdiSoyadi = RTRIM(LTRIM(@newTamAdi))
+            ,TcNoCalismaIzniNo = RTRIM(LTRIM(@yTcVkNo + @yCalismaIzniKayitNo))
+            ,TcNo_CalismaIzniNo = RTRIM(LTRIM(@yTcVkNo + '-' + @yCalismaIzniKayitNo))
+			where Id = @curId 
+    	end
+         
+	    if (LEN(@yTcVkNo) = 11)
+	    begin
+		    set @CariId = 0
+
+	        Select @CariId = ISNULL(Id,0) From dbo.OnmHesapCari
+	        Where TcVkNo = @yTcVkNo
+	        and   CalismaTipiId = 19 -- personel ise
+
+            if (@CariId = 0)
+	        begin
+			    --print @yTcVkNo
+                INSERT INTO [dbo].[OnmHesapCari]
+                ([ParentId],[FirmId],[IsActive]
+                ,[CariTipiId],[CalismaTipiId]
+                ,[TcVkNo]
+                ,[TamAdiSoyadi]
+                ,[Adi]
+                ,[Soyadi]
+                ,[CepTelefonu],[Eposta]
+                ,[ParaTipiId]
+                ) VALUES (   
+				 0, @yFirmId, 1
+                ,1 ,19
+                ,@yTcVkNo
+                ,RTRIM(LTRIM(@newTamAdi))
+                ,@yAdi
+                ,@ySoyadi
+	            ,@yCepTelefonu, @yEposta
+                ,'TRY' )
+	        end else
+	        begin
+			    --print @yTcVkNo + ' : ' + convert(varchar(10), @CariId)
+                UPDATE [dbo].[OnmHesapCari]
+                SET [FirmId] = @yFirmId
+                ,[TcVkNo] = @yTcVkNo
+                ,[TamAdiSoyadi] = RTRIM(LTRIM(@newTamAdi))
+                ,[Adi] = @yAdi
+                ,[Soyadi] = @ySoyadi
+                ,[CepTelefonu] = @yCepTelefonu
+                ,[Eposta] = @yEposta
+                WHERE Id = @CariId
+	        end
+ 	    end -- if (LEN(@yTcVkNo) = 11)
+          
+        update dbo.SrcPersoneli set 
+          HaftalikDersSayisi = @yMaasKarsiligiDersSayisi + @yDersUcretiKarsiligiDersSayisi
+        where Id = @curId 
+
+      FETCH NEXT FROM cursorSrcPersoneli INTO @curId
+    END -- While
+
+    CLOSE cursorSrcPersoneli
+    DEALLOCATE cursorSrcPersoneli   
+
+END -- create trigger
+
+/*CreateTriggerEnd*/
+
+
+
+/*CreateLkpTable*/
+
+-- ------------------------------------------------------- 
+-- CinsiyetTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'CinsiyetTipi')
+drop table [Lkp].[CinsiyetTipi]
+
+create table [Lkp].[CinsiyetTipi]
+(
+   Id           Int Unique Not Null,
+   CinsiyetTipi nVarchar(20)   null,
+   
+   constraint  pk_CinsiyetTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[CinsiyetTipi] (Id, CinsiyetTipi)
+ VALUES 
+  (0, N''),
+  (1, N'Erkek'),
+  (2, N'Kadın')
+
+-- ------------------------------------------------------- 
+-- GoreviTipi
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'SrcPersoneliGoreviTipi')
+drop table [Lkp].[SrcPersoneliGoreviTipi]
+
+create table [Lkp].[SrcPersoneliGoreviTipi]
+(
+   Id               Int Unique Not null,
+   GoreviTipi       nVarchar(50)   null,
+   GrupTipiId       SmallInt       null,
+
+   constraint  pk_SrcPersoneliGoreviTipi primary key (Id)
+)
+
+delete [Lkp].[SrcPersoneliGoreviTipi]
+
+INSERT INTO [Lkp].[SrcPersoneliGoreviTipi] (Id, GoreviTipi, GrupTipiId)
+ VALUES 
+  ( 0,    N'', 1 ),
+  ( 65,   N'Acil Tıp Teknisyenliği', 1 ), 
+  ( 64,   N'Alan/Bölüm Şefi', 1 ), 
+  ( 34,   N'Aşcı', 1 ), 
+  ( 58,   N'Aşcı Yardımcısı', 1 ), 
+  ( 62,   N'Ayniyat Saymanı', 1 ), 
+  ( 66,   N'Bahçıvan', 1 ), 
+  ( 59,   N'Bekçi', 1 ), 
+  ( 54,   N'Belletici', 1 ), 
+  ( 30,   N'Bölüm Başkanı', 1 ), 
+  ( 51,   N'Dil ve Konuşma Bozuklukları Pataloğu', 1 ), 
+  ( 50,   N'Dil ve Konuşma Bozuklukları Terapisti', 1 ), 
+  ( 49,   N'Dil ve Konuşma Bozuklukları Uzmanı', 1 ), 
+  ( 42,   N'Doktor', 1 ), 
+  ( 26,   N'Fen Laboratuarı Öğretmeni', 1 ), 
+  ( 29,   N'Fizyoterapist', 1 ), 
+  ( 1,    N'Genel Müdür', 1 ), 
+  ( 2,    N'Genel Müdür Yardımcısı', 1 ), 
+  ( 67,   N'Gıda Mühendisi', 1 ), 
+  ( 36,   N'Güvenlik Görevlisi', 1 ), 
+  ( 38,   N'Halkla İlişkiler', 1 ), 
+  ( 43,   N'Hemşire', 1 ), 
+  ( 32,   N'Hizmetli', 1 ), 
+  ( 40,   N'Hostes', 1 ), 
+  ( 68,   N'İdareci Memur', 1 ), 
+  ( 57,   N'İnsan Kaynakları Müdürü', 1 ), 
+  ( 63,   N'İş Güvenliği Uzmanı', 1 ), 
+  ( 56,   N'Kaloriferci', 1 ), 
+  ( 6,    N'Koordinatör Rehber Öğretmen', 1 ), 
+  ( 3,    N'Kurum Müdürü', 1 ), 
+  ( 31,   N'Memur', 1 ), 
+  ( 35,   N'Muhasebeci', 1 ), 
+  ( 21,   N'Müdür Başyardımcısı', 1 ), 
+  ( 5,    N'Müdür Yardımcısı', 1 ), 
+  ( 48,   N'Odyoloji ve Konuşma Bozuklukları Uzmanı', 1 ), 
+  ( 46,   N'Odyometris', 1 ), 
+  ( 11,   N'Öğretmen', 1 ), 
+  ( 53,   N'Ölçme ve Değ. Servisi Elemanı', 1 ), 
+  ( 7,    N'Ölçme ve Değ. Servisi Yöneticisi', 1 ), 
+  ( 23,   N'Ölçme ve Değ. Uzmanı', 1 ), 
+  ( 37,   N'Pist Sorumlusu', 1 ), 
+  ( 27,   N'Psikolog', 1 ), 
+  ( 9,    N'Rehber Öğretmen', 1 ), 
+  ( 8,    N'Reh.Ölçme ve Değ. Servisi Yöneticisi', 1 ), 
+  ( 39,   N'Sekreter', 1 ), 
+  ( 41,   N'Sosyal Hizmet Uzmanı', 1 ), 
+  ( 33,   N'Şoför', 1 ), 
+  ( 55,   N'Teknik Personel', 1 ), 
+  ( 4,    N'Türk Müdür Başyardımcısı', 1 ), 
+  ( 17,   N'Usta Öğretici', 1 ), 
+  ( 15,   N'Uzman Öğretici', 1 ), 
+  ( 61,   N'Yönetici Memur', 1 ), 
+  ( 10,   N'Zümre Başkanı', 1 )
+
+-- ------------------------------------------------------- 
+-- StatusuTipi
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'SrcPersoneliStatusuTipi')
+drop table [Lkp].[SrcPersoneliStatusuTipi]
+
+create table [Lkp].[SrcPersoneliStatusuTipi]
+(
+   Id               Int Unique Not null,
+   StatusuTipi      nVarchar(50)   null,
+   GrupTipiId       SmallInt       null,
+
+   constraint  pk_SrcPersoneliStatusuTipi primary key (Id)
+)
+
+delete [Lkp].[SrcPersoneliStatusuTipi] 
+
+INSERT INTO [Lkp].[SrcPersoneliStatusuTipi] (Id, StatusuTipi, GrupTipiId)
+ VALUES 
+  ( -1,   N'', 1),
+  (  0,   N'Ders Ücretli Eğitim Personeli', 1 ), 
+  (  2,   N'Diğer Personel', 1 ), 
+  (  1,   N'Kadrolu', 1 ), 
+  (  3,   N'Kısmi Süreli Çalıştırılacak Personel', 1 ),
+  (  4,   N'Asıl Görevli Aylık Ücretli Eğitim Personeli', 1)
+
+
+
+-- ------------------------------------------------------- 
+-- Brans1Tipi
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'SrcPersoneliBrans1Tipi')
+drop table [Lkp].[SrcPersoneliBrans1Tipi]
+
+create table [Lkp].[SrcPersoneliBrans1Tipi]
+(
+   Id               Int Unique Not null,
+   Brans1Tipi       nVarchar(50)   null,
+   GrupTipiId       SmallInt       null,
+
+   constraint  pk_SrcPersoneliBrans1Tipi primary key (Id)
+)
+
+delete [Lkp].[SrcPersoneliBrans1Tipi] 
+
+INSERT INTO [Lkp].[SrcPersoneliBrans1Tipi] (Id, Brans1Tipi, GrupTipiId)
+ VALUES 
+  (  0,     N'', 1 ), 
+  ( 1246,   N'Direksiyon Eğitimi', 1 ), 
+  ( 1803,   N'Motor ve Araç Tekniği', 1 ),
+  ( 4878,   N'Trafik ve Çevre Bilgisi', 1 ), 
+  ( 9988,   N'İlkyardım Bilgisi', 1 ), 
+  ( 10000,  N'Trafik ve İlk Yardım', 1 )
+
+-- ------------------------------------------------------- 
+-- Brans2Tipi
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'SrcPersoneliBrans2Tipi')
+drop table [Lkp].[SrcPersoneliBrans2Tipi]
+
+create table [Lkp].[SrcPersoneliBrans2Tipi]
+(
+   Id               Int Unique Not null,
+   Brans2Tipi       nVarchar(50)   null,
+   GrupTipiId       SmallInt       null,
+
+   constraint  pk_SrcPersoneliBrans2Tipi primary key (Id)
+)
+
+delete [Lkp].[SrcPersoneliBrans2Tipi] 
+
+INSERT INTO [Lkp].[SrcPersoneliBrans2Tipi] (Id, Brans2Tipi, GrupTipiId)
+ VALUES 
+  (  0,     N'', 1 ), 
+  ( 1246,   N'Direksiyon Eğitimi', 1 ), 
+  ( 1803,   N'Motor ve Araç Tekniği', 1 ),
+  ( 4878,   N'Trafik ve Çevre Bilgisi', 1 ), 
+  ( 9988,   N'İlkyardım Bilgisi', 1 ), 
+  ( 10000,  N'Trafik ve İlk Yardım', 1 )
+
+
+-- ------------------------------------------------------- 
+-- Brans3Tipi
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'SrcPersoneliBrans3Tipi')
+drop table [Lkp].[SrcPersoneliBrans3Tipi]
+
+create table [Lkp].[SrcPersoneliBrans3Tipi]
+(
+   Id               Int Unique Not null,
+   Brans3Tipi       nVarchar(50)   null,
+   GrupTipiId       SmallInt       null,
+
+   constraint  pk_SrcPersoneliBrans3Tipi primary key (Id)
+)
+
+delete [Lkp].[SrcPersoneliBrans3Tipi] 
+
+INSERT INTO [Lkp].[SrcPersoneliBrans3Tipi] (Id, Brans3Tipi, GrupTipiId)
+ VALUES 
+  (  0,     N'', 1 ), 
+  ( 1246,   N'Direksiyon Eğitimi', 1 ), 
+  ( 1803,   N'Motor ve Araç Tekniği', 1 ),
+  ( 4878,   N'Trafik ve Çevre Bilgisi', 1 ), 
+  ( 9988,   N'İlkyardım Bilgisi', 1 ), 
+  ( 10000,  N'Trafik ve İlk Yardım', 1 )
+
+
+
+-- ------------------------------------------------------- 
+-- Brans4Tipi
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'SrcPersoneliBrans4Tipi')
+drop table [Lkp].[SrcPersoneliBrans4Tipi]
+
+create table [Lkp].[SrcPersoneliBrans4Tipi]
+(
+   Id               Int Unique Not null,
+   Brans4Tipi       nVarchar(50)   null,
+   GrupTipiId       SmallInt       null,
+
+   constraint  pk_SrcPersoneliBrans4Tipi primary key (Id)
+)
+
+delete [Lkp].[SrcPersoneliBrans4Tipi] 
+
+INSERT INTO [Lkp].[SrcPersoneliBrans4Tipi] (Id, Brans4Tipi, GrupTipiId)
+ VALUES 
+  (  0,     N'', 1 ), 
+  ( 1246,   N'Direksiyon Eğitimi', 1 ), 
+  ( 1803,   N'Motor ve Araç Tekniği', 1 ),
+  ( 4878,   N'Trafik ve Çevre Bilgisi', 1 ), 
+  ( 9988,   N'İlkyardım Bilgisi', 1 ), 
+  ( 10000,  N'Trafik ve İlk Yardım', 1 )
+
+
+
+/*CreateLkpTableEnd*/
+
+
+/*
+
+    <option value="-1"> </option>
+	<option value="7200">Acil Sağlık Hizmetleri</option>
+	<option value="7028">Adalet</option>
+	<option value="2196">Ağaç İşleri</option>
+	<option value="2208">Ağaç İşleri 1</option>
+	<option value="2246">Almanca</option>
+	<option value="10019">Almanca Drama</option>
+	<option value="9989">Alt Özel Sınıf Öğretmenliği</option>
+	<option value="2250">Alt Yapı</option>
+	<option value="5002">Anestezi ve Reanimasyon</option>
+	<option value="1528">Arapça</option>
+	<option value="2422">Astronomi</option>
+	<option value="4599">Ayakkabıcılık</option>
+	<option value="4825">Ayakkabıcılık 1</option>
+	<option value="4898">Bale</option>
+	<option value="10008">Basketbol</option>
+	<option value="2265">Beden Eğitimi</option>
+	<option value="2792">Bes/Gıda Tek.Ev Y.ve Bes.</option>
+	<option value="2299">Bes/Gıda Tek.Ev Y.ve Bes.</option>
+	<option value="2284">Besin Teknolojisi</option>
+	<option value="4806">Beslenme ve Ev Yonetimi</option>
+	<option value="9975">Bilgi Teknolojileri</option>
+	<option value="1139">Bilgisayar</option>
+	<option value="1138">Bilgisayar İşletmenliği</option>
+	<option value="9987">Bilgisayar Okuryazarlığı</option>
+	<option value="1140">Bilgisayar Öğretmenliği</option>
+	<option value="1119">Bilgisayar Programcısı</option>
+	<option value="1142">Bilgisayarlı Muhasebe</option>
+	<option value="1120">Bilişim Teknolojileri</option>
+	<option value="9980">Biyoloji</option>
+	<option value="4760">Biyoloji(Alm)/Fen B.(Alm)</option>
+	<option value="1123">Biyoloji/Fen Bilgisi</option>
+	<option value="4756">Biyoloji(Fra)/Fen B.(Fra)</option>
+	<option value="4741">Biyoloji(İng)/Fen B.(İng)</option>
+	<option value="10027">Buz Pateni</option>
+	<option value="4918">Büro Yönetimi ve Sekreterlik</option>
+	<option value="10012">Cam Tasarım</option>
+	<option value="1314">Cilt Bakımı Makyaj</option>
+	<option value="1161">Ciltleme ve Serigrafi</option>
+	<option value="10004">Cimnastik</option>
+	<option value="1206">Coğrafya</option>
+	<option value="9981">Coğrafya</option>
+	<option value="1207">Coğrafya/Milli Coğrafya</option>
+	<option value="10001">Çağdaş Türk Lehçeleri ve Edebiyatları</option>
+	<option value="8500">Çevre ve Bilim</option>
+	<option value="1157">Çiçek Örgü Dokuma</option>
+	<option value="4881">Çince</option>
+	<option value="1176">Çinicilik ve Seramik</option>
+	<option value="10053">Çocuk Gelişimcisi</option>
+	<option value="1180">Çocuk Gelişimi ve Bakımı</option>
+	<option value="4443">Çocuk Gelişimi ve Eğit. </option>
+	<option value="10014">Dans</option>
+	<option value="1264">Dekoratif Ürünleri</option>
+	<option value="1230">Denizcilik</option>
+	<option value="1226">Deri Hazır Giyim</option>
+	<option value="10069">Diksiyon</option>
+	<option value="9991">Dil ve Konuşma Bozuklukları Uzmanı</option>
+	<option value="9993">Dil ve Konuşma Pataloğu</option>
+	<option value="9992">Dil ve Konuşma Terapisti</option>
+	<option value="1245">Din Kül.ve Ahlak Bilgisi</option>
+	<option value="1246">Direksiyon Eğitimi</option>
+	<option value="2930">Diş Protez</option>
+	<option value="2300">Dizgi</option>
+	<option value="10030">Doktor</option>
+	<option value="1231">Drama</option>
+	<option value="1298">Eğitim Araçları</option>
+	<option value="9995">Eğitim Odyoloğu</option>
+	<option value="10043">Eğlence Hizmetleri</option>
+	<option value="10048">Ekoloji Öğretmenliği</option>
+	<option value="9994">Ekonomi</option>
+	<option value="2315">El Sanatları Çiçek</option>
+	<option value="1334">Elektrik</option>
+	<option value="10047">Elektrik-Elektronik Teknolojisi</option>
+	<option value="1333">Elektronik</option>
+	<option value="4909">Emlakçılık</option>
+	<option value="1352">Endüstriyel Boya Dekoras.</option>
+	<option value="4405">Endüstriyel Elektrik</option>
+	<option value="1367">Endüstriyel Elektronik</option>
+	<option value="10036">Endüstriyel Otomasyon</option>
+	<option value="10052">Ergoterapist</option>
+	<option value="1368">Ermenice</option>
+	<option value="10062">Eskrim</option>
+	<option value="2559">Ev Ekonomisi ve Beslenme</option>
+	<option value="2506">Ev Yönetimi Bes.Grubu</option>
+	<option value="2227">Ev Yönetimi ve Beslenme</option>
+	<option value="2231">Ev Yönetimi ve Beslenme 1</option>
+	<option value="10032">Farsça</option>
+	<option value="9982">Felsefe</option>
+	<option value="1371">Felsefe Grubu</option>
+	<option value="9996">Felsefe Grubu(Rehber Öğretmenlik Görevi Yürütecektir)</option>
+	<option value="1386">Fen Bilgisi</option>
+	<option value="4672">Fen Bilgisi ( Alm )</option>
+	<option value="4668">Fen Bilgisi ( Fra )</option>
+	<option value="4653">Fen Bilgisi ( İng )</option>
+	<option value="10063">Fen Bilimleri</option>
+	<option value="1388">Fen ve Teknoloji</option>
+	<option value="1390">Fizik</option>
+	<option value="4703">Fizik (Alm)/Fen Bil.(Alm)</option>
+	<option value="4691">Fizik (Fra)/Fen Bil.(Fra)</option>
+	<option value="4687">Fizik(İng)/Fen Bil.(İng)</option>
+	<option value="5000">Fizyoterapist</option>
+	<option value="4902">Folklör</option>
+	<option value="1402">Fotoğraf ve Klişe</option>
+	<option value="1417">Fransızca</option>
+	<option value="1418">Fransızca (1-5.Sınıflar)</option>
+	<option value="10015">Futbol</option>
+	<option value="4600">Gazetecilik</option>
+	<option value="2460">Geleneksel Türk El Sanatları</option>
+	<option value="1421">Gemi Elekt. ve Haberleşme</option>
+	<option value="2895">Gemi İnşaa</option>
+	<option value="1436">Gemi Makineleri</option>
+	<option value="1440">Gemicilik</option>
+	<option value="10044">Gıda Teknolojisi</option>
+	<option value="10022">Girişimcilik</option>
+	<option value="10011">Gitar</option>
+	<option value="1474">Giyim ve Ev Aksesuarları</option>
+	<option value="2418">Giyim 1</option>
+	<option value="1455">Giyim-Hazır Giyim</option>
+	<option value="2334">Giyim-Hazır Giyim</option>
+	<option value="2647">Görme Engelliler Sın.Öğr.</option>
+	<option value="1926">Görsel Sanatlar/Resim</option>
+	<option value="9977">Grafik</option>
+	<option value="1489">Güverte</option>
+	<option value="1493">Güverte Avlama</option>
+	<option value="10056">Güzellik ve Saç Bakım Hizmetleri</option>
+	<option value="2494">Halıcılık Kursu</option>
+	<option value="2822">Halk Oyunları</option>
+	<option value="4900">Halkla İlişkiler</option>
+	<option value="1505">Harita Kadastro</option>
+	<option value="5001">Hemşirelik</option>
+	<option value="3000">Heykelcilik</option>
+	<option value="10031">Hızlı Okuma</option>
+	<option value="2773">Hollandaca</option>
+	<option value="4901">Hosteslik</option>
+	<option value="10003">Hukuk</option>
+	<option value="9974">İbranice</option>
+	<option value="1348">İç Mimar Dekorasyon</option>
+	<option value="4897">İHL.Arapça Meslek Dersi</option>
+	<option value="4913">İki Boyutlu Sanat Atölye</option>
+	<option value="1608">İktisat</option>
+	<option value="10050">İlköğretim Matematik</option>
+	<option value="2475">İlköğretim Müf. Yard.</option>
+	<option selected="selected" value="9988">İlkyardım Bilgisi</option>
+	<option value="1524">İngilizce</option>
+	<option value="1523">İngilizce (1-5.Sınıflar)</option>
+	<option value="10065">İnşaat Mühendisliği</option>
+	<option value="1539">İplik</option>
+	<option value="1529">İspanyolca</option>
+	<option value="1609">İstatistik</option>
+	<option value="1562">İş Eğitimi ( Tarım )</option>
+	<option value="1577">İş Eğitimi ( Ticaret )</option>
+	<option value="1543">İş Eğitimi (Ev Ekonomisi)</option>
+	<option value="1558">İş Eğit.(İş ve Tek. Eğit)</option>
+	<option value="1581">İş Makineleri</option>
+	<option value="10035">İşaret Dili</option>
+	<option value="2651">İşitme Engelliler Sınıfı Öğretmeni</option>
+	<option value="1596">İşletme </option>
+	<option value="1525">İtalyanca</option>
+	<option value="4903">İtalyanca-Latince</option>
+	<option value="4882">Japonca</option>
+	<option value="1612">Kalıpçılık</option>
+	<option value="4584">Kamu Yönetimi</option>
+	<option value="10010">Kayak</option>
+	<option value="10006">Keman</option>
+	<option value="2628">Kimya</option>
+	<option value="10054">Kimya / Kimya Teknolojisi</option>
+	<option value="4737">Kimya (Alm)/Fen Bil.(Alm)</option>
+	<option value="4722">Kimya (Fra)/Fen Bil.(Fra)</option>
+	<option value="4718">Kimya (İng)/Fen Bil.(İng)</option>
+	<option value="10024">Kimya Mühendisliği</option>
+	<option value="1627">Kimya/Fen Bilgisi</option>
+	<option value="2788">Klasik Ciltcilik</option>
+	<option value="10040">Korece</option>
+	<option value="1631">Kuaförlük</option>
+	<option value="1646">Kuaförlük 1</option>
+	<option value="10033">Kuran-ı Kerim</option>
+	<option value="2544">Kurs Öğretmenliği</option>
+	<option value="1647">Kürtçe</option>
+	<option value="1650">Kütüphanecilik</option>
+	<option value="10042">Laboratuvar Hizmetleri</option>
+	<option value="9973">Latince </option>
+	<option value="1665">Liman İşletmeciliği</option>
+	<option value="10023">Lojistik</option>
+	<option value="2349">Maden</option>
+	<option value="2926">Mahalli İdareler Grubu</option>
+	<option value="1684">Makine</option>
+	<option value="1699">Makine Ressamlığı</option>
+	<option value="2055">Makine Teknik Resmi</option>
+	<option value="10055">Makine Teknolojisi / Makine ve Tasarım Teknolojisi</option>
+	<option value="1690">Maliye</option>
+	<option value="9972">Masa Tenisi</option>
+	<option value="1700">Matbaa</option>
+	<option value="2353">Matematik</option>
+	<option value="4649">Matematik ( Alm )</option>
+	<option value="4634">Matematik ( Fra )</option>
+	<option value="4615">Matematik ( İng )</option>
+	<option value="1715">Matematik 1</option>
+	<option value="7064">Mekatronik</option>
+	<option value="8888">Merkez Personeli</option>
+	<option value="9979">Meslek Dersleri</option>
+	<option value="2525">Metal İşleri</option>
+	<option value="1734">Metal İşleri 1</option>
+	<option value="1749">Metoroloji</option>
+	<option value="1753">Mikroteknoloji</option>
+	<option value="2931">Milli Güvenlik</option>
+	<option value="1772">Mobilya Dekorasyon</option>
+	<option value="2582">Mobilya Dekorasyon 1</option>
+	<option value="1787">Model</option>
+	<option value="10038">Model Hava Araçları</option>
+	<option value="4906">Modern Dans</option>
+	<option value="1791">Motor</option>
+	<option value="1803">Motor ve Araç Tekniği</option>
+	<option value="10058">Motorlu Araçlar Teknolojisi</option>
+	<option value="1768">M.Tarih M.Coğ.Vat.Bilgisi</option>
+	<option value="1819">Muhasebe</option>
+	<option value="1818">Muhasebe Grubu</option>
+	<option value="1822">Müzik</option>
+	<option value="1837">Nakış</option>
+	<option value="2441">Nakış 1</option>
+	<option value="10051">Odyolog</option>
+	<option value="10028">Odyoloji</option>
+	<option value="9990">Odyoloji ve Konuşma Bozuklukları Uzmanı</option>
+	<option value="4904">Odyometri</option>
+	<option value="1856">Ofset</option>
+	<option value="10037">Okçuluk</option>
+	<option value="4439">Okul Öncesi</option>
+	<option value="2857">Okul Öncesi Öğr.Çoc.Gel.</option>
+	<option value="10009">Orientiring</option>
+	<option value="2437">Otelcilik ve Turizm</option>
+	<option value="10025">Otobüs Kaptanlığı</option>
+	<option value="2819">Otomatik Kumanda</option>
+	<option value="1860">Öğretmenlik Mes.Bil.Ders.</option>
+	<option value="9997">Ölçme ve Değerlendirme Uzmanı (Rehber Öğretmenlik Görevi Yürütecektir.)</option>
+	<option value="4916">Özel Destek Eğitim Rehber Öğretmeni</option>
+	<option value="10002">Özel Eğitim Alanı</option>
+	<option value="4844">Özel Eğitim Kursu</option>
+	<option value="2563">Özel Eğitim Öğretmenliği</option>
+	<option value="9998">Pazarlama ve Perakende</option>
+	<option value="10005">Perküsyon</option>
+	<option value="10060">Piyano</option>
+	<option value="10057">Plastik Sanatlar</option>
+	<option value="10013">Pop Orkestra</option>
+	<option value="2369">Psikolog</option>
+	<option value="2368">Psikoloji</option>
+	<option value="2838">Radyo Televizyon</option>
+	<option value="2212">Rehber</option>
+	<option value="1894">Rehber Öğretmenliği</option>
+	<option value="10026">Rehberlik</option>
+	<option value="1895">Rehberlik ve Ölçme Değ. Ser.</option>
+	<option value="4795">Rekreasyon Uzmanı</option>
+	<option value="1906">Resim</option>
+	<option value="1925">Resim İş / Resim</option>
+	<option value="1910">Resim 1</option>
+	<option value="4794">Resim-Grafik</option>
+	<option value="9983">Resim-iş</option>
+	<option value="2372">Restorasyon</option>
+	<option value="1526">Rumca</option>
+	<option value="1527">Rusça</option>
+	<option value="1945">Sağlık Bilgisi</option>
+	<option value="1944">Sağlık Mes. Lis. Mes.Der.</option>
+	<option value="7115">Sağlık/Sağlık Hizmetleri</option>
+	<option value="10018">Salsa</option>
+	<option value="1958">Sanat</option>
+	<option value="1959">Sanat Tarihi</option>
+	<option value="9976">Satranç</option>
+	<option value="1963">Sekreterlik Grubu</option>
+	<option value="1978">Seramik</option>
+	<option value="1982">Seramik Sanatı</option>
+	<option value="2403">Sınıf Öğretmenliği</option>
+	<option value="10039">Sivil Havacılık</option>
+	<option value="2510">Sosyal Bilgiler</option>
+	<option value="10059">Sosyal Hizmet Uzmanı</option>
+	<option value="9986">Sosyoloji</option>
+	<option value="4907">Spikerlik ve Sunuculuk</option>
+	<option value="10016">Step-Aerobik</option>
+	<option value="1841">Stilistik-Modelistik</option>
+	<option value="2017">Su Ürünleri</option>
+	<option value="2804">Sus Bitkileri ve Seracılk</option>
+	<option value="2021">Süsleme Taşçılığı</option>
+	<option value="7080">Tarım Tek./Tarım Makineleri</option>
+	<option value="2035">Tarih</option>
+	<option value="2036">Tarih/Milli Tarih</option>
+	<option value="2667">Tasarım</option>
+	<option value="10046">Tasarım Teknolojileri</option>
+	<option value="10061">Tehlikeli Madde Güvenlik Danışmanı</option>
+	<option value="2040">Teknik Resim</option>
+	<option value="4915">Teknoloji ve Tasarım</option>
+	<option value="1279">Tekstil Dokuma</option>
+	<option value="2456">Tekstil İplik</option>
+	<option value="2074">Tekstil Kalite Kontrol</option>
+	<option value="1875">Tekstil Örme</option>
+	<option value="2666">Tekstil Tasarim</option>
+	<option value="2089">Telekominikasyon</option>
+	<option value="2093">Terzilik</option>
+	<option value="2842">Tesisat Teknolojisi</option>
+	<option value="1997">Tesisat Teknolojisi</option>
+	<option value="2105">Tesviye</option>
+	<option value="4424">Tesviye 1</option>
+	<option value="7100">Tıbbi Laboratuvar</option>
+	<option value="4910">Tıbbi Sekreterlik</option>
+	<option value="4565">Ticaret Grubu</option>
+	<option value="4393">Ticaret Lis. Meslek Der.</option>
+	<option value="2124">Tipo Baskı</option>
+	<option value="2391">Tipo Baskı 1</option>
+	<option value="2824">Tiyatro</option>
+	<option value="4908">Toplum Önünde Söz Söyleme</option>
+	<option value="4877">Trafik Eğitimi</option>
+	<option value="4878">Trafik ve Çevre Bilgisi</option>
+	<option value="10000">Trafik ve İlk Yardım</option>
+	<option value="2139">Trikotaj</option>
+	<option value="4810">Turizm ve Otelcilik Grubu</option>
+	<option value="9985">Türk Dili</option>
+	<option value="9984">Türk Dili Ve Edebiyatı</option>
+	<option value="2823">Türk Halk Oyunları</option>
+	<option value="2143">Türkçe</option>
+	<option value="1998">Türkçe</option>
+	<option value="2907">Uçak Bakımı</option>
+	<option value="4905">Uçuş</option>
+	<option value="9999">Ulaştırma Hizmetleri</option>
+	<option value="10064">Uluslararası İlişkiler</option>
+	<option value="2162">Uygulamalı Resim</option>
+	<option value="4914">Üç Boyutlu Sanat Atölye</option>
+	<option value="2158">Üst Yapı</option>
+	<option value="10017">Vals</option>
+	<option value="4899">Vatandaşlık Bilgisi</option>
+	<option value="10007">Viyolonsel</option>
+	<option value="2301">Voleybol</option>
+	<option value="2177">Yapı</option>
+	<option value="2181">Yapı Ressamlığı</option>
+	<option value="2387">Yapı Teknik Resmi</option>
+	<option value="10034">Yelkenci</option>
+	<option value="10041">Yenilenebilir Enerji Teknolojileri</option>
+	<option value="7300">Yiyecek İçecek Hizmetleri</option>
+	<option value="10045">Yoga</option>
+	<option value="10021">Yönetim Bilimi</option>
+	<option value="10020">Yönetişim</option>
+	<option value="4911">Yüzme</option>
+	<option value="10029">Zeka Oyunları</option>
+	<option value="2632">Zihinsel Engelliler Sın.Öğr.</option>
+
+
+
+*/
+
+
+/*   görev 
+
+	<option value="-1"> </option>
+	<option value="64">Alan/Bölüm Şefi</option>
+	<option value="51">Dil ve Konuşma Bozuklukları Pataloğu</option>
+	<option value="50">Dil ve Konuşma Bozuklukları Terapisti</option>
+	<option value="49">Dil ve Konuşma Bozuklukları Uzmanı</option>
+	<option value="29">Fizyoterapist</option>
+	<option value="1">Genel Müdür</option>
+	<option value="2">Genel Müdür Yardımcısı</option>
+	<option value="72">Koordinatör Müdür</option>
+	<option value="3">Kurum Müdürü</option>
+	<option value="21">Müdür Başyardımcısı</option>
+	<option value="5">Müdür Yardımcısı</option>
+	<option value="48">Odyoloji ve Konuşma Bozuklukları Uzmanı</option>
+	<option value="11">Öğretmen</option>
+	<option value="27">Psikolog</option>
+	<option value="9">Rehber Öğretmen</option>
+	<option value="41">Sosyal Hizmet Uzmanı</option>
+	<option value="4">Türk Müdür Başyardımcısı</option>
+	<option selected="selected" value="17">Usta Öğretici</option>
+	<option value="15">Uzman Öğretici</option>
+
+*/

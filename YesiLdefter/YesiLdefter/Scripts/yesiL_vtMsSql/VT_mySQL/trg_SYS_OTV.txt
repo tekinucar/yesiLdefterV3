@@ -1,0 +1,59 @@
+﻿USE [GREEN]
+GO
+
+
+CREATE TRIGGER [dbo].[trg_SYS_OTV] on [dbo].[SYS_OTV] 
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    DECLARE InsertCursor_SYS_OTV cursor for select ID from Inserted
+    DECLARE @curId bigint
+
+    OPEN InsertCursor_SYS_OTV
+
+    FETCH NEXT FROM InsertCursor_SYS_OTV INTO @curId
+
+    declare @yGTIP_TAMNO varchar(30) = null
+    declare @yGTIP_NO varchar(20) = null
+    declare @yALT_NO varchar(9) = null
+        
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+       set @yGTIP_NO = ''
+       set @yALT_NO = ''
+       --set @eGTIP_NO = ''
+       --set @eALT_NO = ''
+        
+	   select 
+		  @yGTIP_NO = isnull([GTIP_NO],convert(VarChar(max),[ID]))
+         ,@yALT_NO = isnull([ALT_NO],'')
+       from SYS_OTV ins
+       where ins.ID = @curId
+     	
+		
+       if (@yALT_NO = '') 
+            set  @yGTIP_TAMNO = @yGTIP_NO
+       if (@yALT_NO <> '') 
+            set  @yGTIP_TAMNO = @yGTIP_NO + '_' + @yALT_NO
+    	
+   	   update SYS_OTV set 
+       [GTIP_TAMNO] = @yGTIP_TAMNO
+       where ID = @curId 
+    	
+
+       FETCH NEXT FROM InsertCursor_SYS_OTV INTO @curId
+    END
+
+    CLOSE InsertCursor_SYS_OTV
+    DEALLOCATE InsertCursor_SYS_OTV   
+
+END
+
+
+
+
+
+
+GO
+
+

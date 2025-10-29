@@ -1,0 +1,77 @@
+
+/* TABLO HAKKINDA AÇIKLAMA                     */
+/* PROJEDE KULLANILACAK ÖNDEÐERLER TABLOSU     */
+/* ESAS KODLAR MS_VARIABLES TABLOSUNDA TANIMLI */
+/* HER PROJE KULLANICI FÝRMA ÝÇÝN AYRI AYRI TANIMLANMASI GEREKÝYOR */
+/* HER FÝRMANIN ALTINDA BÝRDE CLIENT (ÝSTEMCÝLER ÝÇÝN) AYRI AYRI ATAMALAR YAPILABÝLÝR */
+/* CLIENT / ÝSTEMCÝ = 1. FIRM, 2. SHOP, 3. BOLUM, 4. DEPARTMAN, 5. PERSONEL, 6. BÝLGÝSAYAR  */
+/* BU ÖNDEÐERLER MODUL MODUL BÝRBÝRÝNDEN AYRILMAKTA  */
+  
+
+begin transaction
+
+ create table SYS_VARIABLES
+ (
+    ID                  Int IDENTITY(1,1) NOT NULL,
+    FIRM_ID             Int                   NULL, /* HANGÝ FÝRMA ÝÇÝN ÖNDEÐERLER */
+    ISACTIVE            SmallInt              NULL,
+    
+    /* variable için master-detail baðlantý ( MS_VARIABLES <-> SYS_VARIABLES )  */
+    MODUL_CODE          VarChar(20)           NULL,  /* Modul kodlarý    */ 
+    VARIABLE_CODE       VarChar(50)           NULL,  /* MS_VARIABLES de tanýmlý olan esas VARIABLE kodlar, bu kodlar projeye gerektikce eklenmekte  */
+    
+    CLIENT_TYPE         SmallInt              NULL, /* 1. FIRM, 2. SHOP, 3. BOLUM, 4. DEPARTMAN, 5. PERSONEL, 6. BÝLGÝSAYAR   */
+    CLIENT_ID           Int                   NULL, /* CLIENT_TYPE ye ait ID  */
+    CLIENT_VALUE        VarChar(1000)         NULL,  /* müþterinin atadýðý default valuesi */
+    
+    Constraint PK_SYS_VARIABLES primary key (ID)
+ )
+ -- mysql_add
+ 
+ create index X_SYS_VARIABLES01 on SYS_VARIABLES (FIRM_ID, MODUL_CODE, VARIABLE_CODE);
+ create index X_SYS_VARIABLES02 on SYS_VARIABLES (FIRM_ID, MODUL_CODE, CLIENT_TYPE);
+
+ grant select, insert, update, delete on SYS_VARIABLES to public
+
+commit transaction
+
+
+
+
+/*  
+
+ÖNDEÐERLERDE ÝSTEMCÝ/CLIENT TÝPLERÝ
+
+ LOCAL - 1. FIRM, 2. SHOP, 3. PART, 4.DEPARTMAN  
+ USER  - 5. PERSONEL
+ COMP  - 6. BÝLGÝSAYAR 
+
+ÖDEÐERLERDE ÖNCELÝK SIRASI 
+
+1. COMP   önce bilgisayar için tanýmlama var mý ?
+2. USER   kullanýcý/personel için tanýmlama var mý ?
+3. PART   bölüm için var mý ?
+4. SHOP   þube için var mý ?
+5. FIRM   firma için var mý ?
+
+bir iþlem için default value veya 
+tanýmlý hesap var mý diye sorgu çekildiðinde
+ 
+yukarýdaki sýraya göre bulduðu value yi getirir
+
+veya hiç tanýmlý bir öndeðer olmaya bilir 
+
+
+SELECT [MSVR].[VARIABLE_CODE]
+      ,[MSVR].[VARIABLE_CAPTION]
+      ,[SYVR].*  
+  FROM [MSV3DFTR].[dbo].[MS_VARIABLES] [MSVR]
+   left outer join [GREEN].[dbo].[SYS_VARIABLES] [SYVR] on ( [MSVR].[VARIABLE_CODE] = [SYVR].[VARIABLE_CODE] )
+  where [MSVR].ACTIVE = 1
+  
+  order by [MSVR].LINE_NO
+*/
+
+
+
+

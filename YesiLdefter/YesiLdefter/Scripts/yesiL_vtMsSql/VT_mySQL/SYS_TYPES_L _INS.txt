@@ -1,0 +1,1559 @@
+
+/* VALUE_TYPE = 1 : SmallInt, 2 : Int32, 3 : String, 4 : Byte   5 : Numeric */
+
+ --- DELETE FROM SYS_TYPES_L WHERE  TYPES_NAME = 'NKT_FISTIPI'
+
+BEGIN TRANSACTION
+
+ DELETE SYS_TYPES_L
+ DELETE SYS_TYPES_H
+
+ insert into SYS_TYPES_H values( 0, 1, 2,    'MASRAF_VADE_TD')
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'MASRAF_VADE_TD',   0, '', '' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'MASRAF_VADE_TD',   1, '', 'Vadesi geçmiþ ödemeler' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'MASRAF_VADE_TD',   2, '', 'Bugün ki ödemeler ' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'MASRAF_VADE_TD',   3, '', 'Yarýn ki ödemeler' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'MASRAF_VADE_TD',   4, '', 'Bu haftaki Ödemeler' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'MASRAF_VADE_TD',   5, '', 'Gelecek hafta ki ödemeler' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'MASRAF_VADE_TD',   6, '', 'Ay sonunu kadar olan ödemeler' )
+
+ 
+
+ insert into SYS_TYPES_H values( 0, 1, 1,    'MASRAF_YERI_TD')
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'MASRAF_YERI_TD',   0, '', '' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'MASRAF_YERI_TD',   1, '', 'Faaliyet içi belgeli (fatura/fiþ)' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'MASRAF_YERI_TD',   2, '', 'Faaliyet içi belgeli (e-fatura)' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'MASRAF_YERI_TD',   3, '', 'Faaliyet içi belgesiz' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'MASRAF_YERI_TD',   4, '', 'Faaliyet dýþý belgeli (fatura/fiþ)' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'MASRAF_YERI_TD',   5, '', 'Faaliyet dýþý belgeli (e-fatura)' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'MASRAF_YERI_TD',   6, '', 'Faaliyet dýþý belgesiz' )
+
+
+ insert into SYS_TYPES_H values( 0, 1, 1,    'MASRAF_PERIYODU_TD')
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'MASRAF_PERIYODU_TD',   1, '', 'Günlük giderler' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'MASRAF_PERIYODU_TD',   2, '', 'Haftalýk giderler' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'MASRAF_PERIYODU_TD',   3, '', 'Aylýk giderler' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'MASRAF_PERIYODU_TD',   9, '', 'Düzensiz giderler' )
+
+ insert into SYS_TYPES_H values( 0, 1, 1,    'EVRAK_LINE_TD')
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'EVRAK_LINE_TD',   1, '', 'Gelen Evrak' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'EVRAK_LINE_TD',   2, '', 'Giden Evrak' )
+ 
+ insert into SYS_TYPES_H values( 0, 1, 1,    'EVRAK_TD')
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'EVRAK_TD',   72, '', 'Giderler' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'EVRAK_TD',  601, '', 'Alýþ faturasý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'EVRAK_TD',  602, '', 'Alýþ irsaliyesi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'EVRAK_TD',  603, '', 'Ürün Giriþ Formu' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'EVRAK_TD',   23, '', 'Kredi kartý extresi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'EVRAK_TD',   91, '', 'Muhasebeden gelen ödeme evraklarý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'EVRAK_TD',   92, '', 'Muhasebeden gelen resmi evraklar' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'EVRAK_TD',   93, '', 'Kurumlardan gelen yazýlar' )
+ 
+ insert into SYS_TYPES_H values( 0, 1, 1,    'EVRAK_SONUC_TD')
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'EVRAK_SONUC_TD',   0, '', 'Yeni' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'EVRAK_SONUC_TD',   1, '', 'Bekliyor' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'EVRAK_SONUC_TD',   2, '', 'Gereði Yapýldý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'EVRAK_SONUC_TD',   9, '', 'Konuyu Kapat' )
+ 
+ 
+ insert into SYS_TYPES_H values( 0, 1, 1,    'EVRAK_ILETISIM_TD')
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'EVRAK_ILETISIM_TD',   1, '', 'Posta' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'EVRAK_ILETISIM_TD',   2, '', 'Kargo' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'EVRAK_ILETISIM_TD',   3, '', 'e-mail' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'EVRAK_ILETISIM_TD',   4, '', 'Sms' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'EVRAK_ILETISIM_TD',   5, '', 'Fax' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'EVRAK_ILETISIM_TD',   6, '', 'Elden evrak' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'EVRAK_ILETISIM_TD',   7, '', 'Telefonla' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'EVRAK_ILETISIM_TD',  99, '', 'Diðer' )
+ 
+ 
+ 
+ insert into SYS_TYPES_H values( 0, 1, 1,    'FNS_ARAC_TD')
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_ARAC_TD',   10, '', '1  Nakit' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_ARAC_TD',   23, '', '2  Kredi Kartý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_ARAC_TD',   24, '', '3  POS' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_ARAC_TD',   22, '', '4  Hesaba Havale/EFT' )
+ 
+ insert into SYS_TYPES_H values( 0, 1, 2,    'FNS_OZELLIK1_TD')
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'FNS_OZELLIK1_TD',   1, '', 'Otomatik Ödemesi Var' )
+ 
+  
+ insert into SYS_TYPES_H values( 0, 1, 1,    'FNS_HESAP')
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_HESAP',   10, '', 'Nakit Kasasý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_HESAP',   20, '', 'Banka' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_HESAP',   21, '', 'Þube' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_HESAP',   22, '', 'Banka Hesabý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_HESAP',   23, '', 'Kredi Kartý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_HESAP',   24, '', 'POS' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_HESAP',   26, '', 'Banka Kredisi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_HESAP',   28, '', 'Taksit' ) -- alacak/müþteri borcu taksidi
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_HESAP',   29, '', 'Ek Ýþlemler' ) -- Finans Ýþlemleri sýrasýnda veznenin yapabileceði Ek Ýþlemler (Cari Hesaba Yaz, Hesap Parçala, vb..) 
+
+
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_HESAP',   41, '', 'Alýnan Çek' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_HESAP',   42, '', 'Verilen Çek' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_HESAP',   43, '', 'Alýnan Senet' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_HESAP',   44, '', 'Verilen Senet' )
+  
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_HESAP',   46, '', 'Cari Hesaba Yaz' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_HESAP',   47, '', 'Hesabý Parçala' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_HESAP',   48, '', 'Taksit Oluþtur' )
+ 
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_HESAP',   50, '', 'Cari' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_HESAP',   60, '', 'Stok' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_HESAP',   61, '', 'Fatura Tahsilatý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_HESAP',   62, '', 'Fatura Ödeme' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_HESAP',   63, '', 'Perakende Satýþ Tahsilatý' )
+   
+
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_HESAP',   71, '', 'Gelir' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_HESAP',   72, '', 'Gider' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_HESAP',   73, '', 'Resmi Muhasebe' )
+
+ 
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_HESAP',   710, '', 'Gelir Ýþlem Tipi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_HESAP',   720, '', 'Gider Ýþlem Tipi' )
+ -- insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_HESAP',   730, '', 'Vergi Hesap Türleri' )
+
+
+ insert into SYS_TYPES_H values( 0, 1, 2,    'FNS_HESAP_INT')
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'FNS_HESAP_INT',   10, '', 'Nakit Kasasý' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'FNS_HESAP_INT',   20, '', 'Banka' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'FNS_HESAP_INT',   21, '', 'Þube' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'FNS_HESAP_INT',   22, '', 'Banka Hesabý' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'FNS_HESAP_INT',   23, '', 'Kredi Kartý' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'FNS_HESAP_INT',   24, '', 'POS' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'FNS_HESAP_INT',   26, '', 'Banka Kredisi' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'FNS_HESAP_INT',   41, '', 'Alýnan Çek' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'FNS_HESAP_INT',   42, '', 'Verilen Çek' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'FNS_HESAP_INT',   43, '', 'Alýnan Senet' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'FNS_HESAP_INT',   44, '', 'Verilen Senet' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'FNS_HESAP_INT',   46, '', 'Cari Hesaba Yaz' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'FNS_HESAP_INT',   47, '', 'Hesabý Parçala' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'FNS_HESAP_INT',   48, '', 'Taksit Oluþtur' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'FNS_HESAP_INT',   50, '', 'Cari' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'FNS_HESAP_INT',   60, '', 'Stok' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'FNS_HESAP_INT',   61, '', 'Fatura Tahsilatý' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'FNS_HESAP_INT',   62, '', 'Fatura Ödeme' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'FNS_HESAP_INT',   63, '', 'Perakende Satýþ Tahsilatý' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'FNS_HESAP_INT',   71, '', 'Gelir' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'FNS_HESAP_INT',   72, '', 'Gider' )
+ 
+
+ 
+ -- gelir hesap türleri
+ -- Nereden tahsil edilecek
+ 
+ insert into SYS_TYPES_H values( 0, 1, 1,    'FNS_NERDEN')
+ 
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_NERDEN',   50, '', 'Cariden alýnan' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_NERDEN',   61, '', 'Kesilen faturanýn tahsilatý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_NERDEN',   63, '', 'Perakende satýþýn tahsilatý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_NERDEN',   71, '', 'Gelir hesaplarýndan' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_NERDEN',   22, '', 'Banka hesabýndan çekilen' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_NERDEN',   24, '', 'POS hesabýndan geçen' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_NERDEN',   10, '', 'Diðer kasadan gelen, virman' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_NERDEN',   41, '', 'Alýnan çek tahsilatý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_NERDEN',   43, '', 'Alýnan senet tahsilatý' )
+ 
+ 
+ -- gider hesap türleri
+ -- Nereye ödenecek
+ 
+ insert into SYS_TYPES_H values( 0, 1, 1,    'FNS_NEREYE')
+ 
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_NEREYE',   72, '', 'Giderlere' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_NEREYE',   50, '', 'Cariye ödeme' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_NEREYE',   22, '', 'Banka hesabýna yatýrýlan' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_NEREYE',   10, '', 'Diðer kasalara verilen' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_NEREYE',   23, '', 'Kredi kartý borcu ödemesi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_NEREYE',   26, '', 'Kredi taksidi ödemesi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_NEREYE',   42, '', 'Verilen çekin ödemesi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_NEREYE',   44, '', 'Verilen senedin ödemesi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_NEREYE',   62, '', 'Mal alým faturasý ödemesi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_NEREYE',  591, '', 'Personele' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_NEREYE',  531, '', 'Kamu kurumuna (vergi vb..) ' )
+
+
+  
+
+ insert into SYS_TYPES_H values( 0, 1, 1, 'CARI_TIPI')
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'CARI_TIPI',   511, '', 'Gerçek Kiþi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'CARI_TIPI',   521, '', 'Özel Firma' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'CARI_TIPI',   531, '', 'Kamu Kurumu' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'CARI_TIPI',   541, '', 'Bayii' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'CARI_TIPI',   551, '', 'Tedarikci' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'CARI_TIPI',   561, '', 'Hizmet Aldýðýmýz Özel Firma' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'CARI_TIPI',   571, '', 'Hizmet Aldýðýmýz Resmi Kurum' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'CARI_TIPI',   591, '', 'Personel' )
+
+ insert into SYS_TYPES_H values( 0, 1, 1, 'CARI_TIPI_INT')
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'CARI_TIPI_INT',   511, '', 'Gerçek Kiþi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'CARI_TIPI_INT',   521, '', 'Özel Firma' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'CARI_TIPI_INT',   531, '', 'Kamu Kurumu' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'CARI_TIPI_INT',   541, '', 'Bayii' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'CARI_TIPI_INT',   551, '', 'Tedarikci' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'CARI_TIPI_INT',   561, '', 'Hizmet Aldýðýmýz Özel Firma' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'CARI_TIPI_INT',   571, '', 'Hizmet Aldýðýmýz Resmi Kurum' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'CARI_TIPI_INT',   591, '', 'Personel' )
+
+
+ insert into SYS_TYPES_H values( 0, 1, 1, 'CLIENT_TD')
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'CLIENT_TD',   1, '', 'Firma' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'CLIENT_TD',   2, '', 'Þube' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'CLIENT_TD',   3, '', 'Bölüm' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'CLIENT_TD',   4, '', 'Departman' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'CLIENT_TD',   5, '', 'Kullanýcý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'CLIENT_TD',   6, '', 'Bilgisayar' )
+ 
+ insert into SYS_TYPES_H values( 0, 1, 2, 'CLIENT_TD2')
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'CLIENT_TD2',   1, '', 'Firma' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'CLIENT_TD2',   2, '', 'Þube' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'CLIENT_TD2',   3, '', 'Bölüm' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'CLIENT_TD2',   4, '', 'Departman' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'CLIENT_TD2',   5, '', 'Kullanýcý' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'CLIENT_TD2',   6, '', 'Bilgisayar' )
+ 
+
+ /*
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'CARI_TIPI',   911, '', 'Firma' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'CARI_TIPI',   921, '', 'Þube' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'CARI_TIPI',   931, '', 'Departman' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'CARI_TIPI',   941, '', 'Fabrika' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'CARI_TIPI',   951, '', 'Depo' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'CARI_TIPI',   981, '', 'Bilgisayar' )
+ */
+ 
+
+ insert into SYS_TYPES_H values( 0, 1, 1, 'PARA_TURU')
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'PARA_TURU',   0, '', 'TL' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'PARA_TURU',   11, '', '$' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'PARA_TURU',   12, '', '€' )
+ 
+ insert into SYS_TYPES_H values( 0, 1, 2, 'PARA_TURU2')
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'PARA_TURU2',   0, '', 'TL' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'PARA_TURU2',   11, '', '$' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'PARA_TURU2',   12, '', '€' )
+ 
+
+ insert into SYS_TYPES_H values( 0, 1, 3, 'BANKA')
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'BANKA',   0, '', '' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'BANKA',   0, 'ZÝRAAT BANKASI', 'ZÝRAAT BANKASI' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'BANKA',   0, 'HALK BANKASI', 'HALK BANKASI' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'BANKA',   0, 'ÝÞ BANKASI', 'ÝÞ BANKASI' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'BANKA',   0, 'GARANTÝ BANKASI', 'GARANTÝ BANKASI' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'BANKA',   0, 'YAPI KREDÝ BANKASI', 'YAPI KREDÝ BANKASI' )
+ 
+
+ insert into SYS_TYPES_H values( 0, 1, 2, 'BANKA_HESAP_TD')
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'BANKA_HESAP_TD',    0, '', 'Tanýmsýz' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'BANKA_HESAP_TD',    1, '', 'Bireysel - Vadesiz' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'BANKA_HESAP_TD',    2, '', 'Bireysel - Vadeli' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'BANKA_HESAP_TD',    3, '', 'Bireysel - e-Vadeli' )
+
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'BANKA_HESAP_TD',   11, '', 'Ticari - Vadesiz' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'BANKA_HESAP_TD',   12, '', 'Ticari - Vadeli' )
+ 
+ insert into SYS_TYPES_H values( 0, 1, 2, 'BANKA_KART_TD')
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'BANKA_KART_TD',    0, '', 'Tanýmsýz' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'BANKA_KART_TD',    1, '', 'Hesap Kartý' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'BANKA_KART_TD',    2, '', 'Kredi Kartý' )
+
+
+ insert into SYS_TYPES_H values( 0, 1, 2, 'KASA_HESAP_TD')
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'KASA_HESAP_TD',   0, '', 'Nakit' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'KASA_HESAP_TD',   1, '', 'Para Kart' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'KASA_HESAP_TD',   2, '', 'Sanal' )
+
+ 
+ insert into SYS_TYPES_H values( 0, 1, 1, 'FNS_TBOX_TD')
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_TBOX_TD',   1, '', 'Vezne' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_TBOX_TD',   2, '', 'Tahsilat/Ödeme Aracý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_TBOX_TD',   3, '', 'Personel' )
+
+ 
+ insert into SYS_TYPES_H values( 0, 1, 1, 'FNS_HESAP_TD')
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_HESAP_TD',   10, '', 'Nakit Ýþlemleri' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_HESAP_TD',   22, '', 'Banka Hesabý Hareketleri' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_HESAP_TD',   23, '', 'Kredi Kartý Hareketleri' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_HESAP_TD',   24, '', 'POS Hareketler' )
+
+
+/* ************* */
+
+ /*
+ insert into SYS_TYPES_H values( 0, 1, 1, 'TAHSIL_TIPI')
+
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'TAHSIL_TIPI',   0, '', '' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'TAHSIL_TIPI',   1, '', 'Ýlkokul' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'TAHSIL_TIPI',   2, '', 'Ortaokul' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'TAHSIL_TIPI',   3, '', 'Lise' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'TAHSIL_TIPI',   4, '', 'YüksekOkul' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'TAHSIL_TIPI',   5, '', 'Üniversite' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'TAHSIL_TIPI',   5, '', 'Meslek - Teknik Lise' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'TAHSIL_TIPI',   6, '', 'Ýköðretim' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'TAHSIL_TIPI',   7, '', 'Y.Lisans' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'TAHSIL_TIPI',   8, '', 'Doktora' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'TAHSIL_TIPI',   9, '', 'Yetiþkin 2.Kademe' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'TAHSIL_TIPI',   10, '', 'Denklik/Öðr.Bel.Noter Tastikli' )
+ */
+
+ /* buradaki Id ler ve caption lar Mebbisde olanlardýr. */ 
+ --- DELETE FROM SYS_TYPES_L WHERE  TYPES_NAME = 'TAHSIL_TIPI'
+ insert into SYS_TYPES_H values( 0, 3, 'TAHSIL_TIPI', '')
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'TAHSIL_TIPI',   0, '0', '' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'TAHSIL_TIPI',   1, '1', 'II. Kademe Okur Yazarlýk Belgesi' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'TAHSIL_TIPI',   2, '2', 'Ýlkokul Diploma' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'TAHSIL_TIPI',   3, '3', 'Ýlköðretim Diploma' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'TAHSIL_TIPI',   4, '4', 'Ýlköðretim Tasdikname' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'TAHSIL_TIPI',   5, '5', 'Açýk Ýlköðretim Öðrenci Belgesi' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'TAHSIL_TIPI',   6, '6', 'Ortaokul Diploma' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'TAHSIL_TIPI',   7, '7', 'Ortaokul Tasdikname' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'TAHSIL_TIPI',   8, '8', 'Lise Diploma' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'TAHSIL_TIPI',   9, '9', 'Lise Tasdikname' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'TAHSIL_TIPI',   10, '10', 'Lise Öðrenci Belgesi' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'TAHSIL_TIPI',   11, '11', 'Üniversite Öðrenci Belgesi' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'TAHSIL_TIPI',   12, '12', 'Üniversite Diploma' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'TAHSIL_TIPI',   13, '13', 'Üniversite Geçici Mezuniyet Belgesi' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'TAHSIL_TIPI',   14, '14', 'Denklik - Öðrenim Belgesinin Noter Tasdikli Türkçe Tercümesi' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'TAHSIL_TIPI',   15, '15', 'Yüksek Lisans Belgesi' )
+
+ --- DELETE FROM SYS_TYPES_L WHERE  TYPES_NAME = 'TABIM_YABANCI_DIL_TIPI'
+ insert into SYS_TYPES_H values( 1, 3, 'TABIM_YABANCI_DIL_TIPI','')
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'TABIM_YABANCI_DIL_TIPI',   0, '', '' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'TABIM_YABANCI_DIL_TIPI', 101, '', 'Okutman ve/veya Yazman Ýhtiyacý Var' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'TABIM_YABANCI_DIL_TIPI',   1, '', 'Arapça' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'TABIM_YABANCI_DIL_TIPI',   2, '', 'Çince' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'TABIM_YABANCI_DIL_TIPI',   3, '', 'Ýngilizce' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'TABIM_YABANCI_DIL_TIPI',   4, '', 'Almanca' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'TABIM_YABANCI_DIL_TIPI',   5, '', 'Fransýzca' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'TABIM_YABANCI_DIL_TIPI',   6, '', 'Farsca' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'TABIM_YABANCI_DIL_TIPI',   7, '', 'Rusca' )
+
+
+ -- DELETE FROM SYS_TYPES_L WHERE  TYPES_NAME = 'TABIM_OZURLU_DURUM_TIPI'
+ insert into SYS_TYPES_H values( 1, 3, 'TABIM_OZURLU_DURUM_TIPI', '')
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'TABIM_OZURLU_DURUM_TIPI',   0, '0', '' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'TABIM_OZURLU_DURUM_TIPI',   1, '1', 'Bedensel Özrüm Yoktur' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'TABIM_OZURLU_DURUM_TIPI',   2, '2', 'Ortopedik Özürlüyüm. (El. - kol. kulla.)' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'TABIM_OZURLU_DURUM_TIPI',   3, '3', 'Ortopedik Özürlüyüm. (Yürüyemiyorum.)' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'TABIM_OZURLU_DURUM_TIPI',   4, '4', 'Ýþitme, Dil veya Konuþma Özürlüyüm.' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'TABIM_OZURLU_DURUM_TIPI',   5, '5', 'Görme Özürlüyüm. (Her iki göz. görmüyor.)' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'TABIM_OZURLU_DURUM_TIPI',   6, '6', 'Görme Özürlüyüm. (Bir gözüm görmüyor.)' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'TABIM_OZURLU_DURUM_TIPI',   7, '7', 'Görme Özürlüyüm. (Büyüteç yar. ile göre.)' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'TABIM_OZURLU_DURUM_TIPI',   8, '8', 'Süreðen hastalýðým var.' )
+
+
+ -- DELETE FROM SYS_TYPES_L WHERE  TYPES_NAME = 'TABIM_GRUP_TIPI'
+ insert into SYS_TYPES_H values( 1, 2, 'TABIM_GRUP_TIPI', '')
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'TABIM_GRUP_TIPI',   0, '0', '' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'TABIM_GRUP_TIPI',   1, '1', 'Grup 1' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'TABIM_GRUP_TIPI',   2, '2', 'Grup 2' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'TABIM_GRUP_TIPI',   3, '3', 'Grup 3' )
+ 
+ -- DELETE FROM SYS_TYPES_L WHERE  TYPES_NAME = 'TABIM_SUBE_TIPI'
+ insert into SYS_TYPES_H values( 1, 2, 'TABIM_SUBE_TIPI', '')
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'TABIM_SUBE_TIPI',   0, '0', '' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'TABIM_SUBE_TIPI',   1, '0', 'A' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'TABIM_SUBE_TIPI',   2, '0', 'B' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'TABIM_SUBE_TIPI',   3, '0', 'C' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'TABIM_SUBE_TIPI',   4, '0', 'D' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'TABIM_SUBE_TIPI',   5, '0', 'E' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'TABIM_SUBE_TIPI',   6, '0', 'F' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'TABIM_SUBE_TIPI',   7, '0', 'G' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'TABIM_SUBE_TIPI',   8, '0', 'H' )
+
+
+ insert into SYS_TYPES_H values( 0, 1, 1, 'MESLEK_TIPI')
+
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'MESLEK_TIPI',   0, '', '' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'MESLEK_TIPI',   1, '', 'Devlet Memuru' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'MESLEK_TIPI',   2, '', 'Özel Sektör Memuru' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'MESLEK_TIPI',   3, '', 'Ýþçi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'MESLEK_TIPI',   4, '', 'Tüccar' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'MESLEK_TIPI',   5, '', 'Serbest Meslek' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'MESLEK_TIPI',   6, '', 'Öðretim Görevlisi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'MESLEK_TIPI',   7, '', 'Öðretmen' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'MESLEK_TIPI',   8, '', 'Üniversite Öðrencisi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'MESLEK_TIPI',   9, '', 'Lise Öðrencisi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'MESLEK_TIPI',   10, '', 'Avukat' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'MESLEK_TIPI',   11, '', 'Hakim/Savcý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'MESLEK_TIPI',   12, '', 'Týp Doktoru' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'MESLEK_TIPI',   13, '', 'Diþ Doktoru' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'MESLEK_TIPI',   14, '', 'Eczacý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'MESLEK_TIPI',   15, '', 'Hemþire' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'MESLEK_TIPI',   16, '', 'Mühendis' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'MESLEK_TIPI',   17, '', 'Parlementer' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'MESLEK_TIPI',   18, '', 'Gazeteci' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'MESLEK_TIPI',   19, '', 'Sanatçý' ) 
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'MESLEK_TIPI',   20, '', 'Yazar' ) 
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'MESLEK_TIPI',   21, '', 'Seyyar Satýcý' ) 
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'MESLEK_TIPI',   22, '', 'Hostes/Manken' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'MESLEK_TIPI',   23, '', 'Ev Hanýmý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'MESLEK_TIPI',   24, '', 'Ýþsiz' )  
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'MESLEK_TIPI',   25, '', 'Emekli' ) 
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'MESLEK_TIPI',   26, '', 'Ücretli' ) 
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'MESLEK_TIPI',   27, '', 'Baðýmsýz' ) 
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'MESLEK_TIPI',   28, '', 'Kamu' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'MESLEK_TIPI',   29, '', 'Ýsteðe Baðlý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'MESLEK_TIPI',   30, '', 'Tarým' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'MESLEK_TIPI',   31, '', 'Çalýþmýyor' )
+
+
+ insert into SYS_TYPES_H values( 0, 1, 1, 'ADRES_TIPI')
+
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ADRES_TIPI',   0, '', 'EV' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ADRES_TIPI',   0, '', 'ÝÞ' )
+ 
+ insert into SYS_TYPES_H values( 0, 1, 1, 'MEDENI_HALI')
+
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'MEDENI_HALI',   0, '', '' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'MEDENI_HALI',   1, '', 'Evli' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'MEDENI_HALI',   2, '', 'Bekar' )
+ 
+ insert into SYS_TYPES_H values( 0, 1, 1, 'CINSIYET')
+
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'CINSIYET',   0, '', '' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'CINSIYET',   1, '', 'Erkek' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'CINSIYET',   2, '', 'Kadýn' )
+
+ insert into SYS_TYPES_H values( 0, 1, 1, 'KAN_GRUBU')
+
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'KAN_GRUBU',   0, '', 'Bilinmiyor' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'KAN_GRUBU',   1, '', 'A RH +' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'KAN_GRUBU',   2, '', 'A RH -' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'KAN_GRUBU',   3, '', 'B RH +' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'KAN_GRUBU',   4, '', 'B RH -' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'KAN_GRUBU',   5, '', 'AB RH +' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'KAN_GRUBU',   6, '', 'AB RH -' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'KAN_GRUBU',   7, '', '0 RH +' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'KAN_GRUBU',   8, '', '0 RH -' )
+
+
+ insert into SYS_TYPES_H values( 0, 1, 1, 'FNS_IO_TD')
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_IO_TD',   0, '', '' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_IO_TD',   1, '', 'Tahsilat' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_IO_TD',   2, '', 'Ödeme' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_IO_TD',   3, '', 'Bekleyen Tahsilat' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_IO_TD',   4, '', 'Bekleyen Ödeme' )
+
+ insert into SYS_TYPES_H values( 0, 1, 1, 'FNS_IOGC_TD')
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_IOGC_TD',   0, '', '' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_IOGC_TD',   1, '', 'Giriþ' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FNS_IOGC_TD',   2, '', 'Çýkýþ' )
+ 
+
+ insert into SYS_TYPES_H values( 0, 1, 1, 'GECERLI')
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'GECERLI',   0, '', 'Geçerli' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'GECERLI',   1, '', 'Geçersiz' )
+
+
+ /*
+ 'FNS_HESAP',   20, '', 'Banka' )---------- 20
+ 'FNS_HESAP',   21, '', 'Þube' )----------- 21
+ 'FNS_HESAP',   22, '', 'Hesap' )---------- 22
+ 'FNS_HESAP',   23, '', 'Banka Kartý' )---- 23
+ 'FNS_HESAP',   24, '', 'POS' )------------ 24
+ 'FNS_HESAP',   26, '', 'Kredi' )---------- 26
+ 'FNS_HESAP',   28, '', 'Taksit' )--------- 28
+ */
+
+ insert into SYS_TYPES_H values( 0, 1, 2, 'LINE_TD')
+
+ -- 10 kasa 
+ -- 22 banka hesabý 
+ -- 23 kredi kartý
+ -- 24 pos tahsilat
+ -- 26 banka kredisi
+ -- 28 müþteri taksidi 
+ -- 71 gelir hesaplarý
+ -- 72 gider hesaplarý
+
+ -- 10.kasa
+ -- bb/aa
+ -- 10 10 kasalar arasý virman 
+ -- 10 22 bankadan çekilen
+ -- 10 23 kk çekilen nakit avans   
+ -- 10 28 müþ. taksit tahsilatý
+ -- 10 50 cariden nakit tahsilatý
+ -- 10 71 gelir hes. nakit tahsilatý
+ 
+ -- 22 10 bankaya yatýrýlan
+ -- 23 10 kk borcu ödemesi
+ -- 26 10 ödenen banka kredisi
+ -- 50 10 cariye ödeme
+ -- 59 10 personele ödeme
+ -- 72 10 gider hes ödemesi
+ 
+ -- 22.banka hesabý
+ -- bb/aa
+ -- 22 10 v
+ -- 22 22 b.hesaplar arasý virman
+ -- 22 23 kk çekilen nakit avans
+ -- 22 24 postan hesaba aktarýlan
+ -- 22 26 çekilen banka kredisi
+ -- 22 28 b.hesabýna yatan taksit
+ -- 22 50 gelen havale
+ -- 22 71 gelir hesabýndan yatan
+ 
+ -- 10 22 v
+ -- 23 22 kk borcu ödemesi
+ -- 26 22 ödenen banka kredisi
+ -- 50 22 gönderilen havale
+ -- 59 22 personele ödeme
+ -- 72 22 b.hesabýndan gider ödeme
+ 
+ -- 23.kredi kartý
+ -- bb/aa
+ -- 23 10 v
+ -- 23 22 v
+ -- 23 23 kk ile baþka bir kk borcu ödemesi
+ -- 26 23 banka kredisi ödeme
+ -- 50 23 cariye kk ile ödeme
+ -- 59 23 personele ödeme
+ -- 72 23 kk.dan gider hes. ödeme
+
+ -- 24.pos cihazý
+ -- bb/aa
+ -- 24 50 cariden kk ile tahsilat
+ -- 24 28 müþ. taksit tahsilatý
+
+ 
+ -- 26.banka kredi taksitleri
+ -- bb/aa
+ -- 22 26 v - çekilen banka kredisi
+ -- 26 0      ödenmemiþ banka kredisi 
+ -- 26 10 v - ödenen banka kredisi nakit
+ -- 26 22 v - ödenen banka kredisi banka hesabýndan
+ -- 26 23 v - banka kredisi ödeme
+ 
+ -- 28.müþ.taksitleri
+ -- bb/aa
+ -- 28 50  taksit - alacak taksidi - tahsil edilmemiþ taksit
+ -- 10 28  v - müþ. taksit tahsilatý 
+ -- 22 28  v - b.hesabýna yatan taksit
+ -- 24 28  v - müþ. taksit tahsilatý
+ 
+ 
+  
+
+ -- Nakit iþlemler
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'LINE_TD',   0, '', '' )
+  
+ -- 10.kasa
+ -- bb/aa
+ -- 10 10 kasalar arasý virman 
+ -- 10 22 bankadan çekilen
+ -- 10 23 kk çekilen nakit avans   
+ -- 10 28 müþ. taksit tahsilatý
+ -- 10 50 cariden nakit tahsilatý
+ -- 10 71 gelir hes. nakit tahsilatý
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'LINE_TD',   1010, '', 'Kasalar Arasý Virman' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'LINE_TD',   1022, '', 'Bankadan Çekilen Nakit' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'LINE_TD',   1023, '', 'Kredi K. Çekilen Nakit' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'LINE_TD',   1028, '', 'Taksit Tahsilatý' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'LINE_TD',   1050, '', 'Cariden Nakit Tahsilatý' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'LINE_TD',   1071, '', 'Gelir Hes. Nakit Tahsilatý' )
+ 
+ -- 22 10 bankaya yatýrýlan
+ -- 23 10 kk borcu ödemesi
+ -- 26 10 ödenen banka kredisi
+ -- 50 10 cariye ödeme
+ -- 59 10 personele ödeme
+ -- 72 10 gider hes ödemesi
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'LINE_TD',   2210, '', 'Bankya Yatýrýlan Nakit' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'LINE_TD',   2310, '', 'Kredi K. Borcu Ödemesi' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'LINE_TD',   2610, '', 'Banka Kredi Ödemesi' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'LINE_TD',   5010, '', 'Cariye Ödenen Nakit' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'LINE_TD',   5910, '', 'Personele Ödenen Nakit' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'LINE_TD',   7210, '', 'Gider Hes. Nakit Ödeme' )
+ 
+ -- 22.banka hesabý
+ -- bb/aa
+ -- 22 10 v
+ -- 22 22 b.hesaplar arasý virman
+ -- 22 23 kk çekilen nakit avans
+ -- 22 24 postan hesaba aktarýlan
+ -- 22 26 çekilen banka kredisi
+ -- 22 28 b.hesabýna yatan taksit
+ -- 22 50 gelen havale
+ -- 22 71 gelir hesabýndan yatan
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'LINE_TD',   2222, '', 'Banka Hesaplar Arasý Virman' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'LINE_TD',   2223, '', 'Kredi K. Çekilen Nakit Avansý' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'LINE_TD',   2224, '', 'POS tan Banka Hesabýna Aktarýlan' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'LINE_TD',   2226, '', 'Çekilen Banka Kredisi' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'LINE_TD',   2228, '', 'Banka Hesabýna Yatan Taksit' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'LINE_TD',   2250, '', 'Cariden Gelen Havale/EFT' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'LINE_TD',   2271, '', 'Gelir Hes. Banka Hes. Yatan' )
+ 
+ -- 10 22 v
+ -- 23 22 kk borcu ödemesi
+ -- 26 22 ödenen banka kredisi
+ -- 50 22 gönderilen havale
+ -- 59 22 personele ödenen
+ -- 72 22 b.hesabýndan gider ödeme
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'LINE_TD',   2322, '', 'Kredi K. Borcu Ödemesi' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'LINE_TD',   2622, '', 'Banka Hes.dan Banka Kredi Ödemesi' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'LINE_TD',   5022, '', 'Cariye Gönderilen Havale/EFT' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'LINE_TD',   5922, '', 'Personele Yapýlan Havale' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'LINE_TD',   7222, '', 'Banka Hesabýndan Gider Ödemesi' )
+ 
+ -- 23.kredi kartý
+ -- bb/aa
+ -- 23 10 v
+ -- 23 22 v
+ -- 23 23 kk ile baþka bir kk borcu ödemesi
+ -- 26 23 banka kredisi ödeme
+ -- 50 23 cariye kk ile ödeme
+ -- 59 23 personele ödeme
+ -- 72 23 kk.dan gider hes. ödeme
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'LINE_TD',   2323, '', 'Kredi K.ile baþka Kredi K. Borcu Ödemesi' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'LINE_TD',   2623, '', 'Kredi K.ile Banka Kredi Ödemesi' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'LINE_TD',   5023, '', 'Kredi K.ile Cariye Ödeme' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'LINE_TD',   5923, '', 'Kredi K.ile Personele Ödeme' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'LINE_TD',   7223, '', 'Kredi K.ile Gider Ödeme' )
+
+ -- 24.pos cihazý
+ -- bb/aa
+ -- 24 50 cariden kk ile tahsilat
+ -- 24 28 müþ. taksit tahsilatý
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'LINE_TD',   2450, '', 'Pos dan Cari Kredi K. Tahsilatý' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'LINE_TD',   2428, '', 'Pos dan Müþ. Taksit Tahsilatý' )
+
+ -- 26.banka kredi taksitleri
+ -- bb/aa
+ -- 22 26 v - çekilen banka kredisi
+ -- 26 0      ödenmemiþ banka kredisi 
+ -- 26 10 v - ödenen banka kredisi nakit
+ -- 26 22 v - ödenen banka kredisi banka hesabýndan
+ -- 26 23 v - banka kredisi ödeme
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'LINE_TD',   260, '', 'Banka Kredisi Taksidi' )
+ 
+ -- 28.müþ.taksitleri
+ -- bb/aa
+ -- 28 50  taksit - alacak taksidi - tahsil edilmemiþ taksit - vadeli alacak
+ -- 10 28  v - müþ. taksit tahsilatý 
+ -- 22 28  v - b.hesabýna yatan taksit
+ -- 24 28  v - müþ. taksit tahsilatý
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'LINE_TD',   2850, '', 'Müþ.Taksidi' )
+ 
+
+
+ --insert into SYS_TYPES_L values( 0, 1, 2, 0, 'LINE_TD',   0, '', '' )
+ 
+    -- ODEME_TD
+    -- 0 = ödenmedi, 
+    -- 1 = tahsil edildi, 
+    -- 2 = ödendi, 
+    -- 3 = hesaplar arasý para transferi
+    -- 4 = virman
+	-- 5 = tahakkuk
+   	-- 8 = geçersiz
+   	-- 9 = iptal
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ODEME_TD',   0, '', '' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ODEME_TD',   1, '', 'Tahsilat' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ODEME_TD',   2, '', 'Ödeme' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ODEME_TD',   3, '', 'Transfer' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ODEME_TD',   4, '', 'Virman' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ODEME_TD',   5, '', 'Tahakkuk' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ODEME_TD',   8, '', 'Geçersiz' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ODEME_TD',   9, '', 'ÝPTAL' )
+ --insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ODEME_TD',   0, '', '' )
+ --insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ODEME_TD',   0, '', '' )
+ --insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ODEME_TD',   0, '', '' )
+
+
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'PERSONEL_GELIR_TD',   0, '', '' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'PERSONEL_GELIR_TD',   5902, '', 'Maaþ Tahakkuku' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'PERSONEL_GELIR_TD',   5904, '', 'Fazla Mesai Tahakuku' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'PERSONEL_GELIR_TD',   5906, '', 'Çift Maaþ Tahakkuku' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'PERSONEL_GELIR_TD',   5908, '', 'Prim Tahakkuku' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'PERSONEL_GELIR_TD',   5910, '', 'Ýkramiye Tahakkuku' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'PERSONEL_GELIR_TD',   5912, '', 'Ek Gelir Tahakkuku' )
+ 
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'PERSONEL_GIDER_TD',   0, '', '' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'PERSONEL_GIDER_TD',   5941, '', 'Vergi Kesintisi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'PERSONEL_GIDER_TD',   5943, '', 'SGK Kesintisi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'PERSONEL_GIDER_TD',   5945, '', 'Diðer Yasal Kesintiler' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'PERSONEL_GIDER_TD',   5947, '', 'Avans Kesintisi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'PERSONEL_GIDER_TD',   5949, '', 'Toplu Avans Kesintisi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'PERSONEL_GIDER_TD',   5951, '', 'Ýþletme Zararý Kesintisi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'PERSONEL_GIDER_TD',   5953, '', 'Ceza Kesintisi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'PERSONEL_GIDER_TD',   5989, '', 'NET MAAÞ' )
+ 
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'PERSONEL_FNS_TD',     0, '', '' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'PERSONEL_FNS_TD',     5947, '', 'Avans' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'PERSONEL_FNS_TD',     5949, '', 'Toplu Avans' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'PERSONEL_FNS_TD',     5989, '', 'NET MAAÞ' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'PERSONEL_FNS_TD',     5991, '', 'Ýþ Avansý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'PERSONEL_FNS_TD',     5993, '', 'Ýþ Avansý ÝADESÝ' )
+ 
+
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'PERSONEL_GELGID_TD',   0, '', '' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'PERSONEL_GELGID_TD',   5902, '', 'Maaþ Tahakkuku' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'PERSONEL_GELGID_TD',   5904, '', 'Fazla Mesai Tahakuku' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'PERSONEL_GELGID_TD',   5906, '', 'Çift Maaþ Tahakkuku' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'PERSONEL_GELGID_TD',   5908, '', 'Prim Tahakkuku' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'PERSONEL_GELGID_TD',   5910, '', 'Ýkramiye Tahakkuku' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'PERSONEL_GELGID_TD',   5912, '', 'Ek Gelir Tahakkuku' )
+ 
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'PERSONEL_GELGID_TD',   5941, '', 'Vergi Kesintisi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'PERSONEL_GELGID_TD',   5943, '', 'SGK Kesintisi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'PERSONEL_GELGID_TD',   5945, '', 'Diðer Yasal Kesintiler' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'PERSONEL_GELGID_TD',   5947, '', 'Avans Kesintisi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'PERSONEL_GELGID_TD',   5949, '', 'Toplu Avans Kesintisi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'PERSONEL_GELGID_TD',   5951, '', 'Ýþletme Zararý Kesintisi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'PERSONEL_GELGID_TD',   5953, '', 'Ceza Kesintisi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'PERSONEL_GELGID_TD',   5989, '', 'NET MAAÞ' )
+ 
+
+
+
+ 
+ 
+
+ 
+
+ insert into SYS_TYPES_H values( 0, 1, 2, 'ISLEM_VERGISI')
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'ISLEM_VERGISI',   0, '', 'yok' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'ISLEM_VERGISI',   1, '', 'ÖTV' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'ISLEM_VERGISI',   2, '', 'ÖÝV' )
+ 
+
+
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'NKT_FISTIPI',   0, '', '' )
+  
+ insert into SYS_TYPES_H values( 0, 1, 1, 'KDV_ORANI')
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'KDV_ORANI',   0, '', '0' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'KDV_ORANI',   1, '', '1' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'KDV_ORANI',   8, '', '8' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'KDV_ORANI',  18, '', '18' )
+ 
+
+
+
+ /* Tüm Görüþme / Ziyaret Seçenekleri  */
+ insert into SYS_TYPES_H values( 0, 1, 1,    'AJ_ISLEMF_TD')
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_ISLEMF_TD',   11, '', 'Aradý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_ISLEMF_TD',   12, '', 'Aradý, Mesajý Var' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_ISLEMF_TD',   21, '', 'Ziyaretci Geldi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_ISLEMF_TD',   15, '', 'Aradýk' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_ISLEMF_TD',   16, '', 'Ara, Ýlet' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_ISLEMF_TD',   17, '', 'Telefon Baðla' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_ISLEMF_TD',   22, '', 'Ziyarete Gidildi' )
+ 
+ /* Sekreterya için Görüþme / Ziyaret Seçenekleri */
+ insert into SYS_TYPES_H values( 0, 1, 1,    'AJ_ISLEMS_TD')
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_ISLEMS_TD',   11, '', 'Aradý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_ISLEMS_TD',   12, '', 'Aradý, Mesajý Var' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_ISLEMS_TD',   21, '', 'Ziyaretci Geldi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_ISLEMS_TD',   22, '', 'Ziyarete Gidildi' )
+ 
+ /* Personel için Görüþme / Ziyaret Seçenekleri */
+ insert into SYS_TYPES_H values( 0, 1, 1,    'AJ_ISLEMP_TD')
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_ISLEMP_TD',   15, '', 'Aradýk' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_ISLEMP_TD',   16, '', 'Ara, Ýlet' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_ISLEMP_TD',   17, '', 'Telefon Baðla' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_ISLEMP_TD',   21, '', 'Ziyaretci Geldi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_ISLEMP_TD',   22, '', 'Ziyarete Gidildi' )
+ 
+
+
+ /*  11, '', 'Aradý'  -- Cevaplarý */
+ insert into SYS_TYPES_H values( 0, 1, 1,    'AJ_NEOLDU11_TD')
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDU11_TD',   111, '', 'Ýlgiliye Aktarýldý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDU11_TD',   112, '', 'Geri Dönüþ Bekliyor' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDU11_TD',   113, '', 'Kendisi arayacak' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDU11_TD',   114, '', '30 dk. içinde kendisi arayacak' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDU11_TD',   115, '', '1 saat sonra kendisi arayacak' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDU11_TD',   116, '', '2 saat sonra kendisi arayacak' )
+ 
+ /*  12, '', 'Aradý, Mesajý Var'  -- Cevaplarý */
+ insert into SYS_TYPES_H values( 0, 1, 1,    'AJ_NEOLDU12_TD')
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDU12_TD',   121, '', 'Mesaj Ýletildi' )
+ 
+ /*  21, '', 'Ziyaretci Geldi'  -- Cevaplarý */
+ insert into SYS_TYPES_H values( 0, 1, 1,    'AJ_NEOLDU21_TD')
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDU21_TD',   211, '', 'Ziyaret Gerçekleþti' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDU21_TD',   212, '', 'Ziyaret Gerçekleþmedi' )
+
+
+ /*  15, '', 'Aradýk'  -- Cevaplarý */
+ insert into SYS_TYPES_H values( 0, 1, 1,    'AJ_NEOLDU15_TD')
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDU15_TD',   151, '', 'Görüþme Gerçekleþti' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDU15_TD',   152, '', 'Ýlgiliye Ulaþýlamadý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDU15_TD',   153, '', 'Mesaj Býrakýldý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDU15_TD',   190, '', 'Tekrar Aranacak' )
+  
+ /*  16, '', 'Ara, Ýlet'  -- Cevaplarý */
+ insert into SYS_TYPES_H values( 0, 1, 1,    'AJ_NEOLDU16_TD')
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDU16_TD',   161, '', 'Mesaj Ýletildi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDU16_TD',   161, '', 'Mesaj Ýletilmedi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDU16_TD',   163, '', 'Baþkasýna Mesaj Býrakýldý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDU16_TD',   190, '', 'Tekrar Aranacak' )
+ 
+ /*  17, '', 'Telefon baðla'  -- Cevaplarý */
+ insert into SYS_TYPES_H values( 0, 1, 1,    'AJ_NEOLDU17_TD')
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDU17_TD',   171, '', 'Görüþme Saðlandý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDU17_TD',   172, '', 'Görüþme Saðlanamadý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDU17_TD',   173, '', 'Mesaj Býrakýldý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDU17_TD',   190, '', 'Tekrar Aranacak' )
+ 
+ /*  22, '', 'Ziyarete Gidildi'  -- Cevaplarý */
+ insert into SYS_TYPES_H values( 0, 1, 1,    'AJ_NEOLDU22_TD')
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDU22_TD',   221, '', 'Ziyaret Gerçekleþti' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDU22_TD',   222, '', 'Ziyaret Gerçekleþmedi' )
+
+
+ 
+
+ /* Ýþlemlere ait Tüm Cevaplar */
+ insert into SYS_TYPES_H values( 0, 1, 1,    'AJ_NEOLDUF_TD')
+
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUF_TD',   911, '', '--- Aradý ---' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUF_TD',   111, '', 'Ýlgiliye Aktarýldý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUF_TD',   112, '', 'Geri Dönüþ Bekliyor' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUF_TD',   113, '', 'Kendisi arayacak' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUF_TD',   114, '', '30 dk. içinde kendisi arayacak' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUF_TD',   115, '', '1 saat sonra kendisi arayacak' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUF_TD',   116, '', '2 saat sonra kendisi arayacak' )
+ 
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUF_TD',   912, '', '--- Aradý, Mesajý Var ---' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUF_TD',   121, '', 'Mesaj Ýletildi (Bölüme/Personele)' )
+ 
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUF_TD',   915, '', '--- Aradýk ---' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUF_TD',   151, '', 'Görüþme Gerçekleþti' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUF_TD',   152, '', 'Ýlgiliye Ulaþýlamadý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUF_TD',   153, '', 'Mesaj Býrakýldý' )
+ 
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUF_TD',   916, '', '--- Ara, Ýlet ---' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUF_TD',   161, '', 'Mesaj Ýletildi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUF_TD',   161, '', 'Mesaj Ýletilmedi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUF_TD',   163, '', 'Baþkasýna Mesaj Býrakýldý' )
+ 
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUF_TD',   917, '', '--- Telefon Baðla ---' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUF_TD',   171, '', 'Görüþme Saðlandý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUF_TD',   172, '', 'Görüþme Saðlanamadý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUF_TD',   173, '', 'Mesaj Býrakýldý' )
+ 
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUF_TD',   921, '', '--- Ziyaretci Geldi --' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUF_TD',   211, '', 'Ziyaret Gerçekleþti (Gelen)' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUF_TD',   212, '', 'Ziyaret Gerçekleþmedi (Gelen)' )
+  
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUF_TD',   922, '', '--- Ziyarete Gidildi ---' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUF_TD',   221, '', 'Ziyaret Gerçekleþti (Gidilen)' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUF_TD',   222, '', 'Ziyaret Gerçekleþmedi (Gidilen)' )
+ 
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUF_TD',   919, '', '---' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUF_TD',   190, '', 'Tekrar Aranacak' )
+ 
+
+ /* Sekreterya Ýþlemlerine ait Tüm Cevaplar */
+ insert into SYS_TYPES_H values( 0, 1, 1,    'AJ_NEOLDUS_TD')
+ 
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUS_TD',   911, '', '--- Aradý ---' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUS_TD',   111, '', 'Ýlgiliye Aktarýldý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUS_TD',   112, '', 'Geri Dönüþ Bekliyor' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUS_TD',   113, '', 'Kendisi arayacak' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUS_TD',   114, '', '30 dk. içinde kendisi arayacak' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUS_TD',   115, '', '1 saat sonra kendisi arayacak' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUS_TD',   116, '', '2 saat sonra kendisi arayacak' )
+ 
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUS_TD',   912, '', '--- Aradý, Mesajý Var ---' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUS_TD',   121, '', 'Mesaj Ýletildi (Bölüme/Personele)' )
+ 
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUS_TD',   921, '', '--- Ziyaretci Geldi ---' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUS_TD',   211, '', 'Ziyaret Gerçekleþti (Gelen)' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUS_TD',   212, '', 'Ziyaret Gerçekleþmedi (Gelen)' )
+  
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUS_TD',   922, '', '--- Ziyarete Gidildi ---' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUS_TD',   221, '', 'Ziyaret Gerçekleþti (Gidilen)' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUS_TD',   222, '', 'Ziyaret Gerçekleþmedi (Gidilen)' )
+ 
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUS_TD',   919, '', '---' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUS_TD',   190, '', 'Tekrar Aranacak' )
+ 
+ /* Personel Ýþlemlerine ait Tüm Cevaplar */
+  
+ insert into SYS_TYPES_H values( 0, 1, 1,    'AJ_NEOLDUP_TD')
+
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUP_TD',   915, '', '--- Aradýk ---' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUP_TD',   151, '', 'Görüþme Gerçekleþti' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUP_TD',   152, '', 'Ýlgiliye Ulaþýlamadý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUP_TD',   153, '', 'Mesaj Býrakýldý' )
+ 
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUP_TD',   916, '', '--- Ara, Ýlet ---' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUP_TD',   161, '', 'Mesaj Ýletildi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUP_TD',   161, '', 'Mesaj Ýletilmedi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUP_TD',   163, '', 'Baþkasýna Mesaj Býrakýldý' )
+ 
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUP_TD',   917, '', '--- Telefon Baðla ---' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUP_TD',   171, '', 'Görüþme Saðlandý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUP_TD',   172, '', 'Görüþme Saðlanamadý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUP_TD',   173, '', 'Mesaj Býrakýldý' )
+ 
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUP_TD',   921, '', '--- Ziyaretci Geldi ---' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUP_TD',   211, '', 'Ziyaret Gerçekleþti (Gelen)' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUP_TD',   212, '', 'Ziyaret Gerçekleþmedi (Gelen)' )
+  
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUP_TD',   922, '', '--- Ziyarete Gidildi ---' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUP_TD',   221, '', 'Ziyaret Gerçekleþti (Gidilen)' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUP_TD',   222, '', 'Ziyaret Gerçekleþmedi (Gidilen)' )
+ 
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUP_TD',   919, '', '---' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_NEOLDUP_TD',   190, '', 'Tekrar Aranacak' )
+
+
+
+
+ /*
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_ISLEMF_TD',   31, '', 'Gelen Evrak' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_ISLEMF_TD',   32, '', 'Giden Evrak' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_ISLEMF_TD',   41, '', 'Gelen Kargo' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_ISLEMF_TD',   42, '', 'Giden Kargo' )
+ */
+
+ insert into SYS_TYPES_H values( 0, 1, 2,    'AJ_ARAMA_TALEP_TD')
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'AJ_ARAMA_TALEP_TD',   0, '', '' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'AJ_ARAMA_TALEP_TD',   1, '', 'Servis Ýstiyor' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'AJ_ARAMA_TALEP_TD',   2, '', 'Destek Ýstiyor' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'AJ_ARAMA_TALEP_TD',   3, '', 'Bilgi Ýstiyor' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'AJ_ARAMA_TALEP_TD',   4, '', 'Teklif Ýstiyor (Alýcý)' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'AJ_ARAMA_TALEP_TD',   5, '', 'Görüþmek Ýstiyor' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'AJ_ARAMA_TALEP_TD',   6, '', 'Randevu Ýstiyor' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'AJ_ARAMA_TALEP_TD',   7, '', 'Teklifi Var (Satýcý)' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'AJ_ARAMA_TALEP_TD',   8, '', 'Özel Görüþme' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'AJ_ARAMA_TALEP_TD',   9, '', 'Þikayeti Var' )
+ 
+
+ insert into SYS_TYPES_H values( 0, 1, 1,    'AJ_IS_GOREN_TD')
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_IS_GOREN_TD',   0, '', 'Yeni' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_IS_GOREN_TD',   1, '', 'Gördü' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_IS_GOREN_TD',   2, '', 'Ýþ baþladý, devam ediyor' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_IS_GOREN_TD',   3, '', 'Tamamlandý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_IS_GOREN_TD',   4, '', 'Beklemeye alýndý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_IS_GOREN_TD',   5, '', 'Sonuç sýkýntýlý kapatýldý' )
+ 
+ insert into SYS_TYPES_H values( 0, 1, 1,    'AJ_TALEP_HIZI_TD')
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_TALEP_HIZI_TD',   0, '', 'Normal' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_TALEP_HIZI_TD',   1, '', 'Acil' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_TALEP_HIZI_TD',   2, '', 'Çok Acil' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_TALEP_HIZI_TD',   3, '', 'Kriz' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_TALEP_HIZI_TD',   4, '', 'Gizli' )
+ 
+ insert into SYS_TYPES_H values( 0, 1, 1,    'AJ_ARAYAN_RUH_HALI_TD')
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_ARAYAN_RUH_HALI_TD',   0, '', 'Normal' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_ARAYAN_RUH_HALI_TD',   1, '', 'Kýzgýn' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_ARAYAN_RUH_HALI_TD',   2, '', 'Telaþlý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_ARAYAN_RUH_HALI_TD',   3, '', 'Üzgün' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_ARAYAN_RUH_HALI_TD',   4, '', 'Titiz' )
+ 
+ 
+ insert into SYS_TYPES_H values( 0, 1, 1,    'AJ_ARSIV_TD')
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_ARSIV_TD',   0, '', 'Açýk' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_ARSIV_TD',   1, '', 'Kapalý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_ARSIV_TD',   9, '', 'iptal' )
+ 
+ insert into SYS_TYPES_H values( 0, 1, 1,    'AJ_AMIR_TD')
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_AMIR_TD',   0, '', 'Yeni' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_AMIR_TD',   1, '', 'Gördü' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_AMIR_TD',   2, '', 'Onay' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AJ_AMIR_TD',   3, '', 'RED' )
+
+
+ /*  AVUKAT **************** */
+
+
+ insert into SYS_TYPES_H values( 0, 1, 1, 'ICRA_DOSYA_TURU')
+
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_DOSYA_TURU',    0, '', '' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_DOSYA_TURU',   35, '', 'Esas Dosyasý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_DOSYA_TURU',    1, '', 'Talimat Dosyasý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_DOSYA_TURU',   73, '', 'Izale-i Suyu Dosyasý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_DOSYA_TURU',   36, '', 'Ýflas Dosyasý' )
+
+ insert into SYS_TYPES_H values( 0, 1, 1, 'ICRA_TAKIP_TURU')
+
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_TURU',   0, '', '' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_TURU',   1, '', 'Ýlamlý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_TURU',   2, '', 'Ýlamsýz' )
+
+ insert into SYS_TYPES_H values( 0, 1, 1, 'ICRA_TAKIP_YOLU_ILAMLI')
+
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_YOLU_ILAMLI',    0, '', '' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_YOLU_ILAMLI',   10, '', 'Ýlamlarýn Ýcrasý, Para ve Teminattan Baþka Borçlar Hakkýndaki Ýlamlarýn Ýcrasý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_YOLU_ILAMLI',   11, '', 'Ýlamlarýn Ýcrasý, Para ve Teminat Verilmesi Hakkýndaki Ýlamlarýn Ýcrasý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_YOLU_ILAMLI',   12, '', 'Diðer' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_YOLU_ILAMLI',   13, '', 'Rehnin Paraya Çevrilmesi Yolu ile Takip' )
+
+ insert into SYS_TYPES_H values( 0, 1, 1, 'ICRA_TAKIP_YOLU_ILAMSIZ')
+
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_YOLU_ILAMSIZ',    0, '', '' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_YOLU_ILAMSIZ',   20, '', 'Genel Haciz Yoluyla Takip' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_YOLU_ILAMSIZ',   21, '', 'Ýflas Yoluyla Takip' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_YOLU_ILAMSIZ',   22, '', 'Rehnin Paraya Çevrilmesi Yolu Ýle Takip' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_YOLU_ILAMSIZ',   23, '', 'Kambiyo Senetlerine Mahsus Haciz Yolu' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_YOLU_ILAMSIZ',   24, '', 'Kiralanan Gayrimenkullerin Ýlamsýz Tahliyesi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_YOLU_ILAMSIZ',   25, '', 'Diðer' )
+
+
+ insert into SYS_TYPES_H values( 0, 1, 1, 'ICRA_TAKIP_YOLU_TAM')
+
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_YOLU_TAM',    0, '', '' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_YOLU_TAM',   10, '', 'Ýlamlarýn Ýcrasý, Para ve Teminattan Baþka Borçlar Hakkýndaki Ýlamlarýn Ýcrasý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_YOLU_TAM',   11, '', 'Ýlamlarýn Ýcrasý, Para ve Teminat Verilmesi Hakkýndaki Ýlamlarýn Ýcrasý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_YOLU_TAM',   12, '', 'Diðer' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_YOLU_TAM',   13, '', 'Rehnin Paraya Çevrilmesi Yolu ile Takip' )
+
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_YOLU_TAM',   20, '', 'Genel Haciz Yoluyla Takip' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_YOLU_TAM',   21, '', 'Ýflas Yoluyla Takip' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_YOLU_TAM',   22, '', 'Rehnin Paraya Çevrilmesi Yolu Ýle Takip' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_YOLU_TAM',   23, '', 'Kambiyo Senetlerine Mahsus Haciz Yolu' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_YOLU_TAM',   24, '', 'Kiralanan Gayrimenkullerin Ýlamsýz Tahliyesi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_YOLU_TAM',   25, '', 'Diðer' )
+
+-- *********************************************************
+
+ insert into SYS_TYPES_H values( 0, 1, 1, 'ICRA_TAKIP_SEKLI1')
+
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI1',      0, '', '' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI1',   1000, '', 'Ilamli / ParaylaOlculemeyen / ( ÖRNEK: 2 ) Taþýnýrýn Teslimine Veya Taþýnmazýn Tahliye Ve Teslimine Dair Ýcra Emri' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI1',   1001, '', 'Ilamli / ParaylaOlculemeyen / ( ÖRNEK: 3 ) Çocuk Teslimi Veya Çocukla Þahsi Münasebet Tesisine Dair Ýcra Emri' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI1',   1100, '', 'Ilamli / ParaylaOlculen / ( ÖRNEK: 4-5 ) Para Borcuna Veya Teminat Verilmesine Veya Bir Ýþin Yapýlmasý Veya Yapýlmamasýna , Ýrtifak Hakkýnýn Kaldýrýlmasýna Veya Yükletilmesine Dair Ýcra Emri' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI1',   1101, '', 'Ilamli / ParaylaOlculen / ( ÖRNEK: 6 ) Ýpoteðin Paraya Çevrilmesi  Yolu Ýle Takip Taleplerinde Ýcra Emri' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI1',   1200, '', 'Ilamli / Diger / Ýhtiyati Haciz' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI1',   1201, '', 'Ilamli / Diger / Ýhtiyati Tedbir' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI1',   1202, '', 'Ilamli / Diger / Ortaklýðýn Giderilmesi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI1',   1203, '', 'Ilamli / Diger / Hapis Hakký' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI1',   1204, '', 'Ilamli / Diger / ÝÝK. 153. Mad. Gereðince Ýpotek Kaydýnýn Terkini' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI1',   1205, '', 'Ilamli / Diger / Aciz Belgesi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI1',   1206, '', 'Ilamli / Diger / Rehin Açýðý Belgesi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI1',   1207, '', 'Ilamli / Diger / Ýlam Gereði Satýþ' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI1',   1300, '', 'Ilamli / RehninParayaCevrilmesi / ( Örnek: 44 ) Taþýnýr Rehninin Paraya Çevrilmesi Yolu Ýle Ýlamlý Takiplerde Ýcra Emri' )
+
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI1',   2000, '', 'Ilamsiz / GenelHacizYolu / ( ÖRNEK: 7 ) Ýlamsýz Takiplerde Ödeme Emri' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI1',   2100, '', 'Ilamsiz / IflasYolu / ( ÖRNEK: 11 ) Ýflas Yolu Ýle Adi Takip Taleplerinde Ödeme Emri' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI1',   2101, '', 'Ilamsiz / IflasYolu / ( ÖRNEK: 12 ) Kambiyo Senetlerine ( Çek, Poliçe Ve Emre Muharrer Senet ) Mahsus Ýflas Yolu Ýle Takip Taleplerinde Ödeme Emri' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI1',   2200, '', 'Ilamsiz / RehninParayaCevrilmesi / ( ÖRNEK: 9 ) Ýpoteðin Paraya Çevrilmesi Yolu Ýle Takip Taleplerinde Ödeme Emri' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI1',   2201, '', 'Ilamsiz / RehninParayaCevrilmesi / ( ÖRNEK: 8 ) Taþýnýr Rehninin Paraya Çevrilmesi Yoluyla Takip Taleplerinde Ödeme Emri' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI1',   2300, '', 'Ilamsiz / KambiyoSenetleri / ( ÖRNEK: 10 ) Kambiyo Senetleri ( Çek, Poliçe Ve Emre Muharrer Senet )  Üzerine Haciz Yolu Ýle Yapýlacak  Takip Taleplerinde Ödeme Emri' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI1',   2400, '', 'Ilamsiz / KiralananGayrimenkullerinTahliyesi / ( ÖRNEK: 14 ) Yazýlý Sözleþme Ýle Kiralanan Taþýnmazýn Kira Süresi Bittiði Ahvalde Tahliye Emri' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI1',   2401, '', 'Ilamsiz / KiralananGayrimenkullerinTahliyesi / ( ÖRNEK: 13 ) Adi Kiraya Ve Hasýlat Kiralarýna Ait Takip Taleplerinde Ödeme Emri' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI1',   2500, '', 'Ilamsiz / Diger / Ýhtiyati Haciz' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI1',   2501, '', 'Ilamsiz / Diger / Ýhtiyati Tedbir' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI1',   2502, '', 'Ilamsiz / Diger / Hapis Hakký' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI1',   2503, '', 'Ilamsiz / Diger / ÝÝK. 153. Mad. Gereðince Ýpotek Kaydýnýn Terkini' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI1',   2504, '', 'Ilamsiz / Diger / Aciz Belgesi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI1',   2505, '', 'Ilamsiz / Diger / Rehin Açýðý Belgesi' )
+
+-- *********************************************************
+
+ insert into SYS_TYPES_H values( 0, 1, 1, 'ICRA_TAKIP_SEKLI2')
+
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI2',      0, '', '' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI2',   1000, '', '( ÖRNEK: 2 ) Taþýnýrýn Teslimine Veya Taþýnmazýn Tahliye Ve Teslimine Dair Ýcra Emri' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI2',   1001, '', '( ÖRNEK: 3 ) Çocuk Teslimi Veya Çocukla Þahsi Münasebet Tesisine Dair Ýcra Emri' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI2',   1100, '', '( ÖRNEK: 4-5 ) Para Borcuna Veya Teminat Verilmesine Veya Bir Ýþin Yapýlmasý Veya Yapýlmamasýna , Ýrtifak Hakkýnýn Kaldýrýlmasýna Veya Yükletilmesine Dair Ýcra Emri' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI2',   1101, '', '( ÖRNEK: 6 ) Ýpoteðin Paraya Çevrilmesi  Yolu Ýle Takip Taleplerinde Ýcra Emri' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI2',   1200, '', 'Ýhtiyati Haciz' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI2',   1201, '', 'Ýhtiyati Tedbir' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI2',   1202, '', 'Ortaklýðýn Giderilmesi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI2',   1203, '', 'Hapis Hakký' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI2',   1204, '', 'ÝÝK. 153. Mad. Gereðince Ýpotek Kaydýnýn Terkini' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI2',   1205, '', 'Aciz Belgesi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI2',   1206, '', 'Rehin Açýðý Belgesi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI2',   1207, '', 'Ýlam Gereði Satýþ' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI2',   1300, '', '( Örnek: 44 ) Taþýnýr Rehninin Paraya Çevrilmesi Yolu Ýle Ýlamlý Takiplerde Ýcra Emri' )
+
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI2',   2000, '', '( ÖRNEK: 7 ) Ýlamsýz Takiplerde Ödeme Emri' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI2',   2100, '', '( ÖRNEK: 11 ) Ýflas Yolu Ýle Adi Takip Taleplerinde Ödeme Emri' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI2',   2101, '', '( ÖRNEK: 12 ) Kambiyo Senetlerine ( Çek, Poliçe Ve Emre Muharrer Senet ) Mahsus Ýflas Yolu Ýle Takip Taleplerinde Ödeme Emri' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI2',   2200, '', '( ÖRNEK: 9 ) Ýpoteðin Paraya Çevrilmesi Yolu Ýle Takip Taleplerinde Ödeme Emri' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI2',   2201, '', '( ÖRNEK: 8 ) Taþýnýr Rehninin Paraya Çevrilmesi Yoluyla Takip Taleplerinde Ödeme Emri' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI2',   2301, '', '( ÖRNEK: 10 ) Kambiyo Senetleri ( Çek, Poliçe Ve Emre Muharrer Senet )  Üzerine Haciz Yolu Ýle Yapýlacak  Takip Taleplerinde Ödeme Emri' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI2',   2400, '', '( ÖRNEK: 14 ) Yazýlý Sözleþme Ýle Kiralanan Taþýnmazýn Kira Süresi Bittiði Ahvalde Tahliye Emri' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI2',   2401, '', '( ÖRNEK: 13 ) Adi Kiraya Ve Hasýlat Kiralarýna Ait Takip Taleplerinde Ödeme Emri' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI2',   2500, '', 'Ýhtiyati Haciz' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI2',   2501, '', 'Ýhtiyati Tedbir' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI2',   2502, '', 'Hapis Hakký' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI2',   2503, '', 'ÝÝK. 153. Mad. Gereðince Ýpotek Kaydýnýn Terkini' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI2',   2504, '', 'Aciz Belgesi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI2',   2505, '', 'Rehin Açýðý Belgesi' )
+
+ insert into SYS_TYPES_H values( 0, 1, 1, 'ICRA_TAKIP_SEKLI3')
+
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI3',      0, '', '' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI3',   1000, '', '2   Menkul Teslimi veya Gayrimenkul Tahliye ve Teslimi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI3',   1001, '', '3   Çocuk Teslimi veya Çocukla Kiþisel Ýliþki' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI3',   1100, '', '4-5 Ýlamlý Ýcra Emri' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI3',   1101, '', '6   Ýpoteðin Paraya Çevrilmesi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI3',   2000, '', '7   Ýlamsýz Takipler' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI3',   2011, '', '    Senede Baðlý Adi Alacak' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI3',   2012, '', '    Ticari Alacak' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI3',   2013, '', '    Banka Alacaðý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI3',   2014, '', '    Kira Alacaðý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI3',   2015, '', '    Diðer Alacak' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI3',   2016, '', '    Aski Alacaðý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI3',   2017, '', '    Telekom Alacaðý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI3',   2018, '', '    Genel' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI3',   2201, '', '8   Menkul Rehninin Paraya Çevrilemsi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI3',   2200, '', '9   Ýpoteðin Paraya Çevrilmesi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI3',   2301, '', '10  Kambiyo Senetleriyle Ýcra Takibi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI3',   2100, '', '11  Ýflas Yolu ile Adli Takip' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI3',   2101, '', '12  Kambiyo Senetleriyle Ýflas Takibi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI3',   2401, '', '13  Adi Kira ve Hasýlat Kirasý (51)' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI3',   2402, '', '    Adi Kira ve Hasýlat Kirasý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_TAKIP_SEKLI3',   2400, '', '14  Ýlamsýz Tahliye' )
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+
+-- *********************************************************
+
+ insert into SYS_TYPES_H values( 0, 1, 1, 'ICRA_MAHÝYET_KODU')
+
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_MAHÝYET_KODU',    0,  '', '' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_MAHÝYET_KODU', 1007,  '', 'Telefon (Sabit) - Örnek 7' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_MAHÝYET_KODU', 1107,  '', 'Cocuk Teslimi - Örnek 7' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_MAHÝYET_KODU', 1207,  '', 'Tük. Hakem Heyeti - Örnek 7' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_MAHÝYET_KODU', 1307,  '', 'Belgesiz - Örnek 7' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_MAHÝYET_KODU', 1407,  '', 'Sözleþme/Protokol - Örnek 7' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_MAHÝYET_KODU', 2007,  '', 'Telefon (Cep) - Örnek 7' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_MAHÝYET_KODU', 3007,  '', 'Ýnternet/Tv - Örnek 7' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_MAHÝYET_KODU', 4007,  '', 'Su - Örnek 7' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_MAHÝYET_KODU', 5007,  '', 'Elektrik - Örnek 7' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_MAHÝYET_KODU', 6007,  '', 'Doðal Gaz - Örnek 7' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_MAHÝYET_KODU', 7007,  '', 'Kredi Kartý - Örnek 7' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_MAHÝYET_KODU', 8008,  '', 'Kredi Sözleþmesi - Örnek 7' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_MAHÝYET_KODU', 9009,  '', 'Nafaka - Örnek 7' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_MAHÝYET_KODU', 1045,  '', 'Nafaka - Örnek 4-5' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_MAHÝYET_KODU', 2045,  '', 'Cocuk Teslimi - Örnek 4-5' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_MAHÝYET_KODU', 3045,  '', 'Tük. Hakem Heyeti - Örnek 4-5' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_MAHÝYET_KODU', 4045,  '', 'Para Alacaðý - Örnek 4-5' )
+
+
+ insert into SYS_TYPES_H values( 0, 1, 1, 'ICRA_DOSYA_DURUMU')
+
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_DOSYA_DURUMU',    0, '', 'Derdest' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_DOSYA_DURUMU',    1, '', 'Ýnfaz' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_DOSYA_DURUMU',    2, '', 'Atýl' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_DOSYA_DURUMU',    3, '', 'Ýade' )
+
+
+ insert into SYS_TYPES_H values( 0, 1, 1, 'AVK_TARAF_TIPI')
+
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AVK_TARAF_TIPI',   0, '', '' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AVK_TARAF_TIPI',   1, '', 'Alacaklý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AVK_TARAF_TIPI',   2, '', 'Borçlu/Müflis' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AVK_TARAF_TIPI',   3, '', 'Aracý Kiþi/Kurum' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AVK_TARAF_TIPI',   4, '', 'Diðer Haciz/Rehin Alacaklýsý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AVK_TARAF_TIPI',   5, '', 'Diðer Haciz/Rehin Borçlusu' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AVK_TARAF_TIPI',   6, '', 'Haciz Sahibi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AVK_TARAF_TIPI',   7, '', 'Hissedar' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AVK_TARAF_TIPI',   8, '', 'Ýflas Ýdare Memuru' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AVK_TARAF_TIPI',   9, '', 'Ýhale Katýlýmcýsý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AVK_TARAF_TIPI',  10, '', 'Ýpotek Sahibi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AVK_TARAF_TIPI',  11, '', 'Ýstihkak Ýddiasý Sahibi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AVK_TARAF_TIPI',  12, '', 'Ýþgalci' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AVK_TARAF_TIPI',  13, '', 'Kayyým' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AVK_TARAF_TIPI',  14, '', 'Kiracý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AVK_TARAF_TIPI',  15, '', 'Muris' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AVK_TARAF_TIPI',  16, '', 'Mükellefiyet Sahibi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AVK_TARAF_TIPI',  17, '', 'Mümessil' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AVK_TARAF_TIPI',  18, '', 'Rehin Sahibi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AVK_TARAF_TIPI',  19, '', 'Tedbir Koyduran' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AVK_TARAF_TIPI',  20, '', 'Tereke Sorumlusu' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AVK_TARAF_TIPI',  21, '', 'Üçüncü Þahýs' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AVK_TARAF_TIPI',  22, '', 'Vasi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'AVK_TARAF_TIPI',  23, '', 'Yed-i Emin' )
+
+ 
+ 
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'ICRA_ALACAK_KALEM_ILAM',      0, '',     '' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'ICRA_ALACAK_KALEM_ILAM',   7168, '7168', 'Asýl Alacak' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'ICRA_ALACAK_KALEM_ILAM',   7183, '7183', 'Geçmiþ Gün Faizi' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'ICRA_ALACAK_KALEM_ILAM',   7184, '7184', 'Gecikme Zammý' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'ICRA_ALACAK_KALEM_ILAM',   7173, '7173', 'ihtiyati haciz masrafý' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'ICRA_ALACAK_KALEM_ILAM',   6668, '6668', 'Avukatlýk Ücreti' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'ICRA_ALACAK_KALEM_ILAM',   8714, '8714', 'Yargý giderleri' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'ICRA_ALACAK_KALEM_ILAM',   8707, '8707', 'Vekalet ücreti' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'ICRA_ALACAK_KALEM_ILAM',   8733, '8733', 'HARÇ' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'ICRA_ALACAK_KALEM_ILAM',      3,    '3', 'Peþin Harç' )
+ --- ÝCRA << DESTEK <<<  ALACAK TÝPLERÝ
+
+
+
+ 
+ insert into SYS_TYPES_H values( 0, 1, 3, 'ICRA_ALACAK_KALEM_KOD')
+
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'ICRA_ALACAK_KALEM_KOD',      0, '',     '' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'ICRA_ALACAK_KALEM_KOD',   6913, '6913', 'Kira Alacaðý' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'ICRA_ALACAK_KALEM_KOD',   7168, '7168', 'Asýl Alacak' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'ICRA_ALACAK_KALEM_KOD',   7169, '7169', 'Protesto masrafý' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'ICRA_ALACAK_KALEM_KOD',   7174, '7174', 'Komisyon' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'ICRA_ALACAK_KALEM_KOD',   7176, '7176', 'Çek Tazminatý' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'ICRA_ALACAK_KALEM_KOD',   7177, '7177', 'BSMV' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'ICRA_ALACAK_KALEM_KOD',   7179, '7179', 'KKDF' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'ICRA_ALACAK_KALEM_KOD',   7180, '7180', 'KDV' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'ICRA_ALACAK_KALEM_KOD',   7183, '7183', 'Geçmiþ Gün Faizi' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'ICRA_ALACAK_KALEM_KOD',   7184, '7184', 'Gecikme Zammý' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'ICRA_ALACAK_KALEM_KOD',   7173, '7173', 'ihtiyati haciz masrafý' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'ICRA_ALACAK_KALEM_KOD',   9728, '9728', 'Masraf' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'ICRA_ALACAK_KALEM_KOD',   8192, '8192', 'Elektirik borcu' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'ICRA_ALACAK_KALEM_KOD',   6666, '6666', 'Haftasonu Tazminatý' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'ICRA_ALACAK_KALEM_KOD',   6668, '6668', 'Avukatlýk Ücreti' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'ICRA_ALACAK_KALEM_KOD',   7937, '7937', 'Yeni alacak kalemi' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'ICRA_ALACAK_KALEM_KOD',   8707, '8707', 'Vekalet ücreti' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'ICRA_ALACAK_KALEM_KOD',   8714, '8714', 'Yargý giderleri' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'ICRA_ALACAK_KALEM_KOD',   8733, '8733', 'HARÇ' )
+
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'ICRA_ALACAK_KALEM_KOD',   1, '1', 'Rehin Asýl Alacaðý' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'ICRA_ALACAK_KALEM_KOD',   4, '4', 'Rehin Faiz Alacaðý' ) 
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'ICRA_ALACAK_KALEM_KOD',   7, '7', 'Rehin Masraf Alacaðý' )
+
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'ICRA_ALACAK_KALEM_KOD',   2, '2', 'Kontrat Asýl Alacaðý' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'ICRA_ALACAK_KALEM_KOD',   8, '8', 'Kontrat Masraf Alacaðý' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'ICRA_ALACAK_KALEM_KOD',   9, '9', 'Kontrat Faiz Alacaðý' )
+
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'ICRA_ALACAK_KALEM_KOD',   7170, '7170', 'Diðer Masraf' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'ICRA_ALACAK_KALEM_KOD',   7171, '7171', 'Diðer Faiz' ) 
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'ICRA_ALACAK_KALEM_KOD',   3, '3', 'Diðer Asýl Alacaðý' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'ICRA_ALACAK_KALEM_KOD',   5, '5', 'Diðer Masraf Alacaðý' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'ICRA_ALACAK_KALEM_KOD',   6, '6', 'Diðer Faiz Alacaðý' )
+
+ insert into SYS_TYPES_H values( 0, 1, 3, 'AVK_PRBRM')
+
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'AVK_PRBRM',    0, '', '' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'AVK_PRBRM',    0, 'PRBRMTL', 'TL - Türk Lirasý' ) 
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'AVK_PRBRM',    0, 'PRBRMUSD', 'USD - Amerikan Dolarý' ) 
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'AVK_PRBRM',    0, 'PRBRMEUR', 'EUR - Euro' ) 
+
+
+ insert into SYS_TYPES_H values( 0, 1, 3, 'ICRA_HARC')
+
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'ICRA_HARC',    0, '', '' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'ICRA_HARC',    1, '1', 'Baþvurma Harcý' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'ICRA_HARC',    2, '2', 'Vekalet Suret Harcý' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'ICRA_HARC',    3, '3', 'Peþin Harç' )
+
+
+ insert into SYS_TYPES_H values( 0, 1, 1, 'ICRA_DAYANAK')
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_DAYANAK',    0, '', '' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_DAYANAK',    1, '', 'Çek' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_DAYANAK',    2, '', 'Senet' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_DAYANAK',    3, '', 'Poliçe' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_DAYANAK',    4, '', 'Kontrat' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_DAYANAK',    5, '', 'Diðer' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_DAYANAK',    6, '', 'Ýlam' )
+
+ insert into SYS_TYPES_H values( 0, 1, 1, 'ICRA_SUREBIRIMI')
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_SUREBIRIMI',    0, '', '' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_SUREBIRIMI',    1, 'SRBRM00001', 'Gün' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_SUREBIRIMI',    2, 'SRBRM00002', 'Ay' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'ICRA_SUREBIRIMI',    3, 'SRBRM00003', 'Yýl' )
+
+ insert into SYS_TYPES_H values( 0, 1, 3, 'ICRA_ILAMKURUMTIP')
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'ICRA_ILAMKURUMTIP',    0, '', '' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'ICRA_ILAMKURUMTIP',    1, 'ILKRM00001', 'Mahkeme' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'ICRA_ILAMKURUMTIP',    2, 'ILKRM00002', 'Noter' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'ICRA_ILAMKURUMTIP',    3, 'ILKRM00003', 'Hakem Kararý' )
+ insert into SYS_TYPES_L values( 0, 1, 3, 0, 'ICRA_ILAMKURUMTIP',    4, 'ILKRM00004', 'Diðer' )
+ 
+ 
+
+
+ insert into SYS_TYPES_H values( 0, 1, 2, 'STK_SATIS')
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'STK_SATIS',    6051, '', 'Satýþ Faturasý : SFT' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'STK_SATIS',    6052, '', 'Mal Satýþý : MLC' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'STK_SATIS',    6053, '', 'Ýrsaliye ile Mal Çýkýþý : IRC' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'STK_SATIS',    6055, '', 'Alýnan Sipariþ : ASP' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'STK_SATIS',    6056, '', 'Perakende Satýþ : PRK' )
+ insert into SYS_TYPES_L values( 0, 1, 2, 0, 'STK_SATIS',    6057, '', 'Sözleþmeli Satýþ : TKS' )
+
+ insert into SYS_TYPES_H values( 0, 1, 1, 'STK_GIRIS_VEZNE')
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'STK_GIRIS_VEZNE',   0, '', '' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'STK_GIRIS_VEZNE',   511, '', 'Ödeme Yapýlmadý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'STK_GIRIS_VEZNE',   512, '', 'Ödeme Yapýldý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'STK_GIRIS_VEZNE',   513, '', 'Kýsmi Ödeme Yapýldý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'STK_GIRIS_VEZNE',   514, '', 'Ödeme Yapýlmayacak' )
+
+ insert into SYS_TYPES_H values( 0, 1, 1, 'STK_CIKIS_VEZNE')
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'STK_CIKIS_VEZNE',   0, '', '' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'STK_CIKIS_VEZNE',   521, '', 'Tahsilatý Yapýlmadý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'STK_CIKIS_VEZNE',   522, '', 'Tahsilatý Yapýldý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'STK_CIKIS_VEZNE',   523, '', 'Kýsmi Tahsilat Yapýldý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'STK_CIKIS_VEZNE',   524, '', 'Tahsilat Yapýlmayacak' )
+
+ insert into SYS_TYPES_H values( 0, 1, 1, 'STK_GIRIS_DEPO')
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'STK_GIRIS_DEPO',   0, '', '' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'STK_GIRIS_DEPO',   531, '', 'Giriþ Yapýlacak' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'STK_GIRIS_DEPO',   532, '', 'Teslim Alýnmadý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'STK_GIRIS_DEPO',   533, '', 'Tamamý Teslim Alýndý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'STK_GIRIS_DEPO',   534, '', 'Eksik Teslim Alýndý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'STK_GIRIS_DEPO',   535, '', 'Ürün Giriþi Yapýlmayacak' )
+ 
+ insert into SYS_TYPES_H values( 0, 1, 1, 'STK_CIKIS_DEPO')
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'STK_CIKIS_DEPO',   0, '', '' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'STK_CIKIS_DEPO',   541, '', 'Çýkýþ Yapýlacak' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'STK_CIKIS_DEPO',   542, '', 'Teslimat Yapýlmadý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'STK_CIKIS_DEPO',   543, '', 'Tamamý Teslim Edildi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'STK_CIKIS_DEPO',   544, '', 'Eksik Teslimat Yapýldý' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'STK_CIKIS_DEPO',   545, '', 'Ürün Çýkýþý Yapýlmayacak' )
+
+
+ insert into SYS_TYPES_H values( 0, 1, 1, 'STK_BIRIM')
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'STK_BIRIM',    1, '', '1. Birim' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'STK_BIRIM',    2, '', '2. Birim' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'STK_BIRIM',    3, '', '3. Birim' )
+
+
+ insert into SYS_TYPES_H values( 0, 1, 1, 'FIYAT_CESIT_TD')
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FIYAT_CESIT_TD',    0, '', 'none' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'FIYAT_CESIT_TD',    1, '', 'Normal Satýþ Fiyatý' )
+ 
+ insert into SYS_TYPES_H values( 0, 1, 1, 'KDV_DH')
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'KDV_DH',    0, '', 'Kdv Hariç' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'KDV_DH',    1, '', 'Kdv Dahil' )
+ --insert into SYS_TYPES_L values( 0, 1, 1, 0, 'KDV_DH',    9, '', 'Kdv Uygulama' )
+
+ 
+ insert into SYS_TYPES_H values( 0, 1, 1, 'GUN_TD')
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'GUN_TD',    0, '', 'Her gün geçerli' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'GUN_TD',    1, '', 'Hafta içi geçerli' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'GUN_TD',    2, '', 'Cumartesi geçerli' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'GUN_TD',    3, '', 'Pazar geçerli' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'GUN_TD',    4, '', 'C.tesi,Pazar geçerli' )
+ 
+ insert into SYS_TYPES_H values( 0, 1, 1, 'YUVARLAMA_SEKLI')
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'YUVARLAMA_SEKLI',    0, '', 'Yuvarlama Yok' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'YUVARLAMA_SEKLI',    1, '', 'Orantýlý Yuvarla (%50)' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'YUVARLAMA_SEKLI',    2, '', 'Aþaðýya Yuvarla' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'YUVARLAMA_SEKLI',    3, '', 'Yukarýya Yuvarla' )
+
+
+ insert into SYS_TYPES_H values( 0, 1, 1, 'YUVARLAMA_ORANI')
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'YUVARLAMA_ORANI',    1, '', '1' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'YUVARLAMA_ORANI',    2, '', '10' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'YUVARLAMA_ORANI',    3, '', '100' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'YUVARLAMA_ORANI',    4, '', '1,000' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'YUVARLAMA_ORANI',   51, '', '5' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'YUVARLAMA_ORANI',   52, '', '50' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'YUVARLAMA_ORANI',   53, '', '500' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'YUVARLAMA_ORANI',   54, '', '5000' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'YUVARLAMA_ORANI',   21, '', '2.5' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'YUVARLAMA_ORANI',   22, '', '25' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'YUVARLAMA_ORANI',   23, '', '250' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'YUVARLAMA_ORANI',   24, '', '2500' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'YUVARLAMA_ORANI',  100, '', '1.00' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'YUVARLAMA_ORANI',  110, '', '1.10' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'YUVARLAMA_ORANI',  125, '', '1.25' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'YUVARLAMA_ORANI',  150, '', '1.50' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'YUVARLAMA_ORANI', 1010, '', '1.010' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'YUVARLAMA_ORANI', 1025, '', '1.025' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'YUVARLAMA_ORANI', 1050, '', '1.050' )
+ 
+ 
+
+
+ insert into SYS_TYPES_H values( 0, 1, 1, 'VERGI_TD')
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'VERGI_TD',    0, '', '' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'VERGI_TD',   70, '', 'Özel Tüketim Vergisi' )
+ insert into SYS_TYPES_L values( 0, 1, 1, 0, 'VERGI_TD', 9015, '', 'Kdv Tevkifatý' ) /* 9015  KATMA DEÐER VERGÝSÝ TEVKÝFATI */
+
+ insert into SYS_TYPES_H values( 0, 1, 5, 'VR_UYGULAMA_TD')
+ insert into SYS_TYPES_L values( 0, 1, 5, 0, 'VR_UYGULAMA_TD',    0, '', 'Vergi Fiyata Dahil' )
+ insert into SYS_TYPES_L values( 0, 1, 5, 0, 'VR_UYGULAMA_TD',    1, '', 'Vergiyi Fiyata Ekle' )
+
+
+
+ /*
+
+0071	PETROL VE DOÐALGAZ ÜRÜNLERÝNE ÝLÝÞKÝN ÖZEL TÜKETÝM VERGÝSÝ
+0073	KOLALI GAZOZ, ALKOLLÜ ÝÇEÇEKLER VE TÜTÜN MAMÜLLERÝNE ÝLÝÞKÝN ÖZEL TÜKETÝM VERGÝSÝ
+0074	DAYANIKLI TÜKETÝM VE DÝÐER MALLARA ÝLÝÞKÝN ÖZEL TÜKETÝM VERGÝSÝ
+0075	ALKOLLÜ ÝÇEÇEKLERE ÝLÝÞKÝN ÖZEL TÜKETÝM VERGÝSÝ
+0076	TÜTÜN MAMÜLLERÝNE ÝLÝÞKÝN ÖZEL TÜKETÝM VERGÝSÝ
+0077	KOLALI GAZOZLARA ÝLÝÞKÝN ÖZEL TÜKETÝM VERGÝSÝ
+4072	MOTORLU TAÞIT ARAÇLARINA ÝLÝÞKÝN ÖZEL TÜKETÝM VERGÝSÝ (TESCÝLE TABÝ OLMAYANLAR)
+9077	MOTORLU TAÞIT ARAÇLARINA ÝLÝÞKÝN ÖZEL TÜKETÝM VERGÝSÝ (TESCÝLE TABÝ OLANLAR)
+
+ */
+
+
+
+-- insert into SYS_TYPES_H values( 0, 1, 2, 'STK_')
+-- insert into SYS_TYPES_L values( 0, 1, 2, 0, 'STK_',    0, '', '' )
+
+
+
+
+ COMMIT TRANSACTION
+
+-- delete from SYS_TYPES_L where TYPES_NAME = ''
+
+-- insert into SYS_TYPES_H values( 0, 1, 1, '_TD')
+-- insert into SYS_TYPES_L values( 0, 1, 1, 0, '_TD',   0, '', '' )
+
+
+ delete  SYS_TYPES_H where TYPES_NAME = 'VERGI_TD'
+ delete  SYS_TYPES_L where TYPES_NAME = 'VERGI_TD'
+
+ insert into K2_A_HAREKETLER values ( 5011, 'STOK',    'Alým Faturasý : AFT');
+ insert into K2_A_HAREKETLER values ( 5012, 'STOK',    'Mal Giriþi : MLG');
+ insert into K2_A_HAREKETLER values ( 5013, 'STOK',    'Ýrsaliye ile Mal Giriþi : IRG');
+ insert into K2_A_HAREKETLER values ( 5045, 'STOK',    'Verilen Sipariþ : VSP');
+
+ insert into K2_A_HAREKETLER values ( 5021, 'STOK',    'Açýlýþ Fiþi : ACG');
+ insert into K2_A_HAREKETLER values ( 5022, 'STOK',    'Fason Giriþ : FSG');
+ insert into K2_A_HAREKETLER values ( 5023, 'STOK',    'Devir Giriþi : DVG');
+ insert into K2_A_HAREKETLER values ( 5024, 'STOK',    'Sayým Farký Giriþi : SFG');
+ insert into K2_A_HAREKETLER values ( 5025, 'STOK',    'Ýmalattan Giriþ : IMG');
+ insert into K2_A_HAREKETLER values ( 5027, 'STOK',    'Konsinye Giriþ : KNG');
+ insert into K2_A_HAREKETLER values ( 5029, 'STOK',    'Diðer Giriþler : DIG');
+
+ insert into K2_A_HAREKETLER values ( 5031, 'STOK',    'Ýade Faturasý-Satýþ Ýadesi : IFG');
+ insert into K2_A_HAREKETLER values ( 5032, 'STOK',    '(Mal Çýkýþý) ndan Ýade Giriþi : MCI');
+ insert into K2_A_HAREKETLER values ( 5033, 'STOK',    'Konsinye Çýkýþtan Ýade Giriþi : KCI');
+ insert into K2_A_HAREKETLER values ( 5034, 'STOK',    'Fason Çýkýþtan Ýade Giriþi : FCI');
+ insert into K2_A_HAREKETLER values ( 5035, 'STOK',    'Diðer Çýkýþtan Ýade Giriþi : DCI');
+ insert into K2_A_HAREKETLER values ( 5036, 'STOK',    'Perakende Satýþtan Ýade Giriþi : PRI');
+
+
+ insert into K2_A_HAREKETLER values ( 5051, 'STOK',    'Satýþ Faturasý : SFT');
+ insert into K2_A_HAREKETLER values ( 5052, 'STOK',    'Mal Satýþý : MLC');
+ insert into K2_A_HAREKETLER values ( 5053, 'STOK',    'Ýrsaliye ile Mal Çýkýþý : IRC');
+ insert into K2_A_HAREKETLER values ( 5055, 'STOK',    'Alýnan Sipariþ : ASP');
+ insert into K2_A_HAREKETLER values ( 5056, 'STOK',    'Perakende Satýþ : PRK');
+ insert into K2_A_HAREKETLER values ( 5057, 'STOK',    'Sözleþmeli Satýþ : TKS');
+
+ insert into K2_A_HAREKETLER values ( 5061, 'STOK',    'Kapanýþ Fiþi : KPC');
+ insert into K2_A_HAREKETLER values ( 5062, 'STOK',    'Fason Çýkýþ : FSC');
+ insert into K2_A_HAREKETLER values ( 5063, 'STOK',    'Dahili Kullaným : DHK');
+ insert into K2_A_HAREKETLER values ( 5064, 'STOK',    'Sayým Farký Çýkýþý : SFC');
+ insert into K2_A_HAREKETLER values ( 5065, 'STOK',    'Üretime Çýkýþ : URC');
+ insert into K2_A_HAREKETLER values ( 5066, 'STOK',    'Fire Çýkýþ : FRC');
+ insert into K2_A_HAREKETLER values ( 5067, 'STOK',    'Konsinye Çýkýþ : KNC');
+ insert into K2_A_HAREKETLER values ( 5069, 'STOK',    'Diðer Çýkýþlar : DIC');
+
+ insert into K2_A_HAREKETLER values ( 5071, 'STOK',    'Ýade Faturasý-Alým Ýadesi : IFC');
+ insert into K2_A_HAREKETLER values ( 5072, 'STOK',    '(Mal Giriþi) nden Ýade Çýkýþý : MGI');
+ insert into K2_A_HAREKETLER values ( 5073, 'STOK',    'Konsinye Giriþten Ýade Çýkýþý : KGI');
+ insert into K2_A_HAREKETLER values ( 5074, 'STOK',    'Fason Giriþten Ýade Çýkýþý : FGI');
+ insert into K2_A_HAREKETLER values ( 5075, 'STOK',    'Diðer Giriþten Ýade Çýkýþý : DGI');
+
+ insert into K2_A_HAREKETLER values ( 5091, 'STOK',    'Rezerv : REZ');
+ insert into K2_A_HAREKETLER values ( 5099, 'STOK',    'Depo Transferi : DPT');
+
+ insert into K2_A_HAREKETLER values ( 5101, 'STOK',    'Fiyat Güncelleme : FYG');
+ insert into K2_A_HAREKETLER values ( 5102, 'STOK',    'Teklif Formu : TKL');
+ insert into K2_A_HAREKETLER values ( 5103, 'STOK',    'Talep Formu : TLP');
+
+ insert into K2_A_HAREKETLER values (511, 'STOK-Vezne St.Alma',  'Ödeme Yapýlmadý');
+ insert into K2_A_HAREKETLER values (512, 'STOK-Vezne St.Alma',  'Ödeme Yapýldý');
+ insert into K2_A_HAREKETLER values (513, 'STOK-Vezne St.Alma',  'Kýsmi Ödeme Yapýldý');
+ insert into K2_A_HAREKETLER values (514, 'STOK-Vezne St.Alma',  'Ödeme Yapýlmayacak');
+ insert into K2_A_HAREKETLER values (515, 'STOK-Vezne St.Alma',  'Ödeme Nakit Yapýlacak');
+ insert into K2_A_HAREKETLER values (516, 'STOK-Vezne St.Alma',  'Ödeme Kredi Kartý ile Yapýlacak');
+ insert into K2_A_HAREKETLER values (517, 'STOK-Vezne St.Alma',  'Ödeme Çek ile Yapýlacak');
+ insert into K2_A_HAREKETLER values (518, 'STOK-Vezne St.Alma',  'Ödeme Senet ile Yapýlacak');
+  
+ insert into K2_A_HAREKETLER values (521, 'STOK-Vezne Satýþ',    'Tahsilatý Yapýlmadý');
+ insert into K2_A_HAREKETLER values (522, 'STOK-Vezne Satýþ',    'Tahsilatý Yapýldý');
+ insert into K2_A_HAREKETLER values (523, 'STOK-Vezne Satýþ',    'Kýsmi Tahsilat Yapýldý');
+ insert into K2_A_HAREKETLER values (524, 'STOK-Vezne Satýþ',    'Tahsilat Yapýlmayacak');
+ insert into K2_A_HAREKETLER values (525, 'STOK-Vezne Satýþ',    'Tahsilat Nakit Yapýlacak');
+ insert into K2_A_HAREKETLER values (526, 'STOK-Vezne Satýþ',    'Tahsilat Kredi Kartý ile Yapýlacak');
+ insert into K2_A_HAREKETLER values (527, 'STOK-Vezne Satýþ',    'Tahsilat Çek ile Yapýlacak');
+ insert into K2_A_HAREKETLER values (528, 'STOK-Vezne Satýþ',    'Tahsilat Senet ile Yapýlacak');
+
+
+ insert into K2_A_HAREKETLER values (531, 'STOK-Depo Giriþ',     'Giriþ Yapýlacak');
+ insert into K2_A_HAREKETLER values (532, 'STOK-Depo Giriþ',     'Teslim Alýnmadý');
+ insert into K2_A_HAREKETLER values (533, 'STOK-Depo Giriþ',     'Tamamý Teslim Alýndý');
+ insert into K2_A_HAREKETLER values (534, 'STOK-Depo Giriþ',     'Eksik Teslim Alýndý');
+ insert into K2_A_HAREKETLER values (535, 'STOK-Depo Giriþ',     'Ürün Giriþi Yapýlmayacak');
+
+ insert into K2_A_HAREKETLER values (541, 'STOK-Depo Çýkýþ',     'Çýkýþ Yapýlacak');
+ insert into K2_A_HAREKETLER values (542, 'STOK-Depo Çýkýþ',     'Teslimat Yapýlmadý');
+ insert into K2_A_HAREKETLER values (543, 'STOK-Depo Çýkýþ',     'Tamamý Teslim Edildi');
+ insert into K2_A_HAREKETLER values (544, 'STOK-Depo Çýkýþ',     'Eksik Teslimat Yapýldý');
+ insert into K2_A_HAREKETLER values (545, 'STOK-Depo Çýkýþ',     'Ürün Çýkýþý Yapýlmayacak');
+
+ 
+
+
+*/
+
+
+/*
+
+Giderler
+-------------
+Akaryakýt
+Biliþim
+Çek-Senet
+Diðer
+Döviz Al/Sat
+Eðitim
+Eðlence/Hobi
+Elektronik
+Emeklilik Borcu
+Ev
+Dekorasyon
+Faiz
+Giyim/Aksesuar
+Komisyon
+Kart Ödemesi
+Kart Tutar Aktarým
+Kira Ödemesi
+Kiþisel Hizmet
+Kredi
+Kurum Ödemesi
+Maaþ
+Market
+Nakit Avans
+Para Çekme
+Para Transferi
+Para Yatýrma
+Saðlýk/Bakým
+Seyahat
+Sigorta
+Þans Oyunu
+Telekomünikasyon
+Turizm/Konaklama
+Ulaþým
+Vergi
+Yatýrým
+Yeme/Ýçme
+
+
+Gelirler
+-----------
+Birikim
+Çek-Senet
+Diðer
+Döviz Al/Sat
+Emeklilik Maaþý
+Faiz
+Komisyon
+Hisse Al/Sat
+Kira Geliri
+Maaþ
+
+
+
+*/

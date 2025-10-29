@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ReferenceGroup xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" ID="8a101c0a-917c-4913-adfa-f1bac1551403" xmlns="urn:schemas-microsoft-com:xml-wcfservicemap">
+  <ClientOptions>
+    <GenerateAsynchronousMethods>false</GenerateAsynchronousMethods>
+    <GenerateTaskBasedAsynchronousMethod>true</GenerateTaskBasedAsynchronousMethod>
+    <EnableDataBinding>true</EnableDataBinding>
+    <ExcludedTypes />
+    <ImportXmlTypes>false</ImportXmlTypes>
+    <GenerateInternalTypes>false</GenerateInternalTypes>
+    <GenerateMessageContracts>false</GenerateMessageContracts>
+    <NamespaceMappings />
+    <CollectionMappings />
+    <GenerateSerializableTypes>true</GenerateSerializableTypes>
+    <Serializer>Auto</Serializer>
+    <UseSerializerForFaults>true</UseSerializerForFaults>
+    <ReferenceAllAssemblies>true</ReferenceAllAssemblies>
+    <ReferencedAssemblies />
+    <ReferencedDataContractTypes />
+    <ServiceContractMappings />
+  </ClientOptions>
+  <MetadataSources>
+    <MetadataSource Address="http://efatura.uyumsoft.com.tr/Services/BasicIntegration" Protocol="http" SourceId="1" />
+  </MetadataSources>
+  <Metadata>
+    <MetadataFile FileName="BasicIntegration.wsdl" MetadataType="Wsdl" ID="3f9ed195-27fa-4a8e-986a-e5da81485a49" SourceId="1" SourceUrl="http://efatura.uyumsoft.com.tr/Services/BasicIntegration?wsdl" />
+    <MetadataFile FileName="BasicIntegration.xsd" MetadataType="Schema" ID="d360fdb4-8b5c-4bd7-a476-b1be7e6bf3a2" SourceId="1" SourceUrl="http://efatura.uyumsoft.com.tr/Services/BasicIntegration?xsd=xsd4" />
+    <MetadataFile FileName="BasicIntegration1.xsd" MetadataType="Schema" ID="d1d2fdc4-a20b-4345-9937-3919509a3d1c" SourceId="1" SourceUrl="http://efatura.uyumsoft.com.tr/Services/BasicIntegration?xsd=xsd5" />
+    <MetadataFile FileName="BasicIntegration.disco" MetadataType="Disco" ID="2831aecd-3524-4b7a-8554-8d3b31369ca4" SourceId="1" SourceUrl="http://efatura.uyumsoft.com.tr/Services/BasicIntegration?disco" />
+    <MetadataFile FileName="BasicIntegration2.xsd" MetadataType="Schema" ID="90461142-f159-417f-9a1a-1c9115f17324" SourceId="1" SourceUrl="http://efatura.uyumsoft.com.tr/Services/BasicIntegration?xsd=xsd7" />
+    <MetadataFile FileName="BasicIntegration3.xsd" MetadataType="Schema" ID="d3b56fc2-b811-45c7-aff8-fa19046a4904" SourceId="1" SourceUrl="http://efatura.uyumsoft.com.tr/Services/BasicIntegration?xsd=xsd0" />
+    <MetadataFile FileName="BasicIntegration4.xsd" MetadataType="Schema" ID="1f5e5c07-2505-43da-8fe0-b472e2bfde35" SourceId="1" SourceUrl="http://efatura.uyumsoft.com.tr/Services/BasicIntegration?xsd=xsd1" />
+    <MetadataFile FileName="BasicIntegration5.xsd" MetadataType="Schema" ID="b26b328e-938c-442d-852a-626d0cbf95a6" SourceId="1" SourceUrl="http://efatura.uyumsoft.com.tr/Services/BasicIntegration?xsd=xsd2" />
+    <MetadataFile FileName="BasicIntegration6.xsd" MetadataType="Schema" ID="f649bcff-ef5b-4259-8d08-d599f2e4105d" SourceId="1" SourceUrl="http://efatura.uyumsoft.com.tr/Services/BasicIntegration?xsd=xsd3" />
+    <MetadataFile FileName="BasicIntegration7.xsd" MetadataType="Schema" ID="6769bd62-7b19-4011-8045-78a1ab92110a" SourceId="1" SourceUrl="http://efatura.uyumsoft.com.tr/Services/BasicIntegration?xsd=xsd8" />
+    <MetadataFile FileName="BasicIntegration8.xsd" MetadataType="Schema" ID="29661a23-4960-4c0a-9a38-bc5d7d221180" SourceId="1" SourceUrl="http://efatura.uyumsoft.com.tr/Services/BasicIntegration?xsd=xsd6" />
+  </Metadata>
+  <Extensions>
+    <ExtensionFile FileName="configuration91.svcinfo" Name="configuration91.svcinfo" />
+    <ExtensionFile FileName="configuration.svcinfo" Name="configuration.svcinfo" />
+  </Extensions>
+</ReferenceGroup>

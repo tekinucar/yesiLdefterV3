@@ -1,0 +1,172 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table MtskAdayOgrenim
+ (
+   Id                    Int IDENTITY(1,1) not null, 
+   FirmId                Int       not null,
+   TalepId               Int       not null, 
+   AdayId                Int       not null, 
+   TcNo                  Varchar(11)   null,
+   DonemTipiId           Int           null,
+   VeriKaynakId          Int           null, /* Veri transferi edildiği tablodaki Id . Sorun olduğunda bilginin nereden geldiğine referans olsun */
+
+   OgrenimBelgesiniVerenKurum  nVarchar(200)  null,
+   OgrenimBelgesiTipiId        SmallInt       null,
+   OgrenimBelgesiTarihi        Date           null,
+   OgrenimBelgesiSayisi        nVarchar(20)   null,
+   OgrenimBelgesiResim         VarBinary(max) null,
+   OgrenimBelgesiResimSmall    VarBinary(max) null,
+
+   constraint		pk_MtskAdayOgrenim primary key (Id)
+ )
+  
+ grant select, insert, update, delete on MtskAdayOgrenim to public
+
+  create index X_MtskAdayOgrenim01 on MtskAdayOgrenim (TalepId)
+  create index X_MtskAdayOgrenim02 on MtskAdayOgrenim (AdayId)
+  create index X_MtskAdayOgrenim03 on MtskAdayOgrenim (TcNo)
+  create index X_MtskAdayOgrenim04 on MtskAdayOgrenim (DonemTipiId)
+
+commit transaction
+
+/*CreateTableEnd*/
+
+/*CreateTrigger*/
+
+CREATE TRIGGER dbo.trg_MtskAdayOgrenim on dbo.MtskAdayOgrenim
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    DECLARE ogrenimCursor cursor local for select Id from Inserted
+    DECLARE @ogrenimId bigint
+
+    OPEN ogrenimCursor
+    FETCH NEXT FROM ogrenimCursor INTO @ogrenimId
+
+    -- Veri Transferi başladımı
+    declare @DbUpdatesIsActive Bit = 0
+    set @DbUpdatesIsActive = [dbo].[fnc_getIsDbUpdate] (13)
+
+    Declare @TalepId int = 0
+	declare @AdayId int
+	declare @VeriKaynakId int
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+
+        select 
+            @TalepId = ins.TalepId
+           ,@AdayId = ins.AdayId
+		   ,@VeriKaynakId = isnull(ins.VeriKaynakId,0)
+		from inserted ins
+    	where ins.Id = @ogrenimId
+
+        if (@VeriKaynakId > 0 and (@TalepId = 0 or @AdayId = 0))
+        begin
+            Update dbo.MtskAdayOgrenim set
+                TalepId = t.Id  
+               ,AdayId  = t.AdayId 
+            From dbo.MtskAdayOgrenim as a,
+                 dbo.MtskAdayTalep as t
+            Where a.VeriKaynakId = t.VeriKaynakId				 
+            and   a.Id = @ogrenimId
+
+			Select @TalepId = Id, @AdayId = AdayId 
+			From dbo.MtskAdayTalep 
+			Where VeriKaynakId = @VeriKaynakId
+        end
+
+		-- MtskAdayTalep tablosunu işaretle
+        if (@DbUpdatesIsActive = 0)
+        begin
+            Update MtskAdayTalep set
+                OgrenimGeldi = x.Sonuc
+            From MtskAdayTalep a, 
+            (
+               Select count(Id) as Sonuc
+               From MtskAdayOgrenim
+               Where OgrenimBelgesiResim is not null
+               and TalepId = @TalepId
+            ) as x
+            Where a.Id = @TalepId
+        end
+
+		-- MtskAdayBelgeler tablosunu işaretle
+		Update MtskAdayBelgeler set
+        OgrenimTarandi = x.Sonuc
+        From MtskAdayBelgeler a, 
+        (
+            Select count(Id) as Sonuc
+            From MtskAdayOgrenim
+            Where 0 = 0
+            and OgrenimBelgesiResim is not null
+            and TalepId = @TalepId
+        ) as x
+        Where a.TalepId = @TalepId
+
+        -- Data transferi oldu fakat daha önce bu talep için boş kayıt oluşturulmuş ise onu sil
+        if (@VeriKaynakId > 0)
+        begin
+		    Delete From dbo.MtskAdayOgrenim 
+            Where TalepId = @TalepId
+            and   isnull(VeriKaynakId,0) = 0
+        end
+
+        FETCH NEXT FROM ogrenimCursor INTO @ogrenimId
+    END -- While
+
+    CLOSE ogrenimCursor
+    DEALLOCATE ogrenimCursor   
+
+
+END -- create trigger
+
+ALTER TABLE dbo.MtskAdayOgrenim ENABLE TRIGGER trg_MtskAdayOgrenim
+
+/*CreateTriggerEnd*/
+
+
+/*CreateLkpTable*/
+
+begin transaction
+
+-- ------------------------------------------------------- 
+-- OgrenimBelgesiTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdayOgrenimOgrenimBelgesiTipi')
+drop table [Lkp].[MtskAdayOgrenimOgrenimBelgesiTipi]
+
+create table [Lkp].[MtskAdayOgrenimOgrenimBelgesiTipi]
+(
+   Id               Int Unique Not    null,
+   OgrenimBelgesiTipi  nVarchar(60)   null
+
+   constraint  pk_MtskAdayOgrenimOgrenimBelgesiTipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskAdayOgrenimOgrenimBelgesiTipi]
+INSERT INTO [Lkp].[MtskAdayOgrenimOgrenimBelgesiTipi] (Id, OgrenimBelgesiTipi)
+ VALUES 
+  ( -1, N''),
+  (  0, N'Tanımsız'),
+  (  1, N'II. Kademe Okur Yazarlık Belgesi'),
+  (  2, N'İlkokul Diploma'),
+  (  3, N'İlköğretim Diploma'),
+  (  4, N'İlköğretim Tasdikname'),
+  (  5, N'Açık İlköğretim Öğrenci Belgesi'),
+  (  6, N'Ortaokul Diploma'),
+  (  7, N'Ortaokul Tasdikname'),
+  (  8, N'Lise Diploma'),
+  (  9, N'Lise Tasdikname'),
+  ( 10, N'Lise Öğrenci Belgesi'),
+  ( 11, N'Üniversite Öğrenci Belgesi'),
+  ( 12, N'Üniversite Diploma'),
+  ( 13, N'Üniversite Geçici Mezuniyet Belgesi'),
+  ( 14, N'Denklik/Öğrenim Belgesinin Noter Tasdikli Türkçe Tercümesi')
+
+commit transaction
+
+/*CreateLkpTableEnd*/
+

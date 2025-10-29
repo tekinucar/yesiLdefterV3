@@ -1,0 +1,46 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[sp_FindTypeIdColumns]
+(
+    @TableName SYSNAME
+)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @ObjectId INT;
+
+    -- Tablo id'sini al
+    SELECT @ObjectId = object_id
+    FROM sys.tables
+    WHERE name = @TableName;
+
+    IF @ObjectId IS NULL
+    BEGIN
+        PRINT 'Tablo bulunamadı: ' + @TableName;
+        RETURN;
+    END
+
+    DECLARE @ColName SYSNAME;
+
+    DECLARE cur CURSOR FOR
+        SELECT c.name
+        FROM sys.columns c
+        WHERE c.object_id = @ObjectId
+          AND ( c.name LIKE '%TypeId%' or c.name LIKE '%TipiId%' );
+
+    OPEN cur;
+
+    FETCH NEXT FROM cur INTO @ColName;
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        PRINT '  -- LookUp Field: ' + @ColName;
+		Execute sp_GenerateLookupScript @TableName, @ColName
+        FETCH NEXT FROM cur INTO @ColName;
+    END;
+
+    CLOSE cur;
+    DEALLOCATE cur;
+END
+
+/*CreateProcedureEnd*/

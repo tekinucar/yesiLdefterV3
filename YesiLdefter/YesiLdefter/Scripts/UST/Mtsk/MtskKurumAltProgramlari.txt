@@ -1,0 +1,102 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table MtskKurumAltProgramlari
+ (
+
+   Id                  Int IDENTITY(1,1) NOT NULL, 
+   FirmId              Int       not null,
+
+   EhliyetSinifi          nVarchar(50)  null,
+   RuhsatAlmaTarihi       Date          null,
+   PrograminKapanmaTarihi Date          null,
+   Durumu                 nVarchar(10)  null,
+
+   constraint pk_MtskKurumAltProgramlari primary key (Id)
+ )
+ 
+ grant select, insert, update, delete on MtskKurumAltProgramlari to public
+
+commit transaction
+
+/*CreateTableEnd*/
+
+
+/*CreateTrigger*/
+
+CREATE TRIGGER [dbo].[trg_MtskKurumAltProgramlari] on [dbo].[MtskKurumAltProgramlari] 
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    DECLARE myCursor cursor for select Id from Inserted
+    DECLARE @curId bigint
+
+    OPEN myCursor
+
+    FETCH NEXT FROM myCursor INTO @curId
+   
+    declare @EhliyetSinifi          nVarchar(50)
+    declare @RuhsatAlmaTarihi       Date
+    declare @PrograminKapanmaTarihi Date
+    declare @Durumu                 nVarchar(10)
+    declare @SertifikaId int
+    declare @IsActive bit
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+
+      Select
+          @EhliyetSinifi = upper(EhliyetSinifi)
+         ,@RuhsatAlmaTarihi = RuhsatAlmaTarihi
+         ,@PrograminKapanmaTarihi = PrograminKapanmaTarihi
+         ,@Durumu = upper(Durumu)
+      From inserted ins
+	    Where ins.Id = @curId
+
+      set @SertifikaId = 0
+      set @IsActive = 0
+
+      if (@EhliyetSinifi = 'A2 SINIFI SERTİFİKA') begin set @IsActive = 1 set @SertifikaId = 2503 end 
+      if (@EhliyetSinifi = 'B SINIFI SERTİFİKA') begin set @IsActive = 1 set @SertifikaId = 2504 end 
+      if (@EhliyetSinifi = 'C SINIFI SERTİFİKA') begin set @IsActive = 1 set @SertifikaId = 2505 end 
+      if (@EhliyetSinifi = 'D SINIFI SERTİFİKA') begin set @IsActive = 1 set @SertifikaId = 2506 end 
+      if (@EhliyetSinifi = 'E SINIFI SERTİFİKA') begin set @IsActive = 1 set @SertifikaId = 2507 end 
+      if (@EhliyetSinifi = 'F SINIFI SERTİFİKA') begin set @IsActive = 1 set @SertifikaId = 2508 end 
+      if (@EhliyetSinifi = 'G SINIFI SERTİFİKA') begin set @IsActive = 1 set @SertifikaId = 2509 end 
+      if (@EhliyetSinifi = 'H SINIFI (OTOMOBİL)') begin set @IsActive = 1 set @SertifikaId = 2510 end 
+      if (@EhliyetSinifi = 'H SINIFI (MOTOSİKLET)') begin set @IsActive = 1 set @SertifikaId = 2511 end 
+      if (@EhliyetSinifi = 'RÖMORK SINIFI SERTİFİKA') begin set @IsActive = 1 set @SertifikaId = 2512 end 
+      if (@EhliyetSinifi = 'M SINIFI SERTİFİKA') begin set @IsActive = 1 set @SertifikaId = 2513 end 
+      if (@EhliyetSinifi = 'A SINIFI SERTİFİKA') begin set @IsActive = 1 set @SertifikaId = 2514 end 
+      if (@EhliyetSinifi = 'B1 SINIFI SERTİFİKA') begin set @IsActive = 1 set @SertifikaId = 2515 end 
+      if (@EhliyetSinifi = 'C1 SINIFI SERTİFİKA') begin set @IsActive = 1 set @SertifikaId = 2516 end 
+      if (@EhliyetSinifi = 'D1 SINIFI SERTİFİKA') begin set @IsActive = 1 set @SertifikaId = 2517 end 
+      if (@EhliyetSinifi = 'BE SINIFI SERTİFİKA') begin set @IsActive = 1 set @SertifikaId = 2518 end 
+      if (@EhliyetSinifi = 'C1E SINIFI SERTİFİKA') begin set @IsActive = 1 set @SertifikaId = 2519 end 
+      if (@EhliyetSinifi = 'CE SINIFI SERTİFİKA') begin set @IsActive = 1 set @SertifikaId = 2520 end 
+      if (@EhliyetSinifi = 'D1E SINIFI SERTİFİKA') begin set @IsActive = 1 set @SertifikaId = 2521 end 
+      if (@EhliyetSinifi = 'DE SINIFI SERTİFİKA') begin set @IsActive = 1 set @SertifikaId = 2522 end 
+      
+      if (@Durumu <> 'AÇIK') set @IsActive = 0
+      
+      UPDATE [Lkp].[MtskSertifikaTipi]
+      SET [IsActive] = @IsActive
+      WHERE Id = @SertifikaId
+
+      if (@EhliyetSinifi = 'A1 SINIFI SERTİFİKA') 
+	  begin 
+        UPDATE [Lkp].[MtskSertifikaTipi]
+        SET [IsActive] = 1
+        WHERE Id in (2502, 9022)
+	  end 
+    	
+      FETCH NEXT FROM myCursor INTO @curId
+    END
+
+    CLOSE myCursor
+    DEALLOCATE myCursor   
+
+END
+
+/*CreateTriggerEnd*/

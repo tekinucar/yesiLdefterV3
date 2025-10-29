@@ -1,0 +1,66 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_OnmOdemePlaniIadeIsle] (@dekontId int)
+AS BEGIN
+  --declare @dekontId int
+  --set @dekontId = 15
+
+  declare @iadeTutari numeric(22,5)
+  declare @talepId int -- = SourceId
+  declare @tahsilatDekontId int
+
+   -- iade dekontunu getir
+   -- iadeye sebep olan tahsilat dekontunu bul 
+   select  
+     @tahsilatDekontId = ins.IadeId
+   , @iadeTutari = round(ins.BelgeTutari,2) -- Iade Tutarı
+   from OnmBelgeDekont as ins
+   where ins.Id = @dekontId
+
+   -- Tahsilat dekontu ile kapatılan borcun kaynağını bul
+   select @talepId = SourceId  
+   from OnmBelgeDekont 
+   where Id = @tahsilatDekontId
+
+  -- bu dekontla daha önce OnmOdemePlani tablosunda iade satırları oluşturumamış ise
+  if (Select count(Id) as Adet from OnmOdemePlani
+      Where SourceTypeId = 2 
+	  and   SourceId = @dekontId 
+     ) = 0
+  begin
+      -- OnmBelgeDekont ile OnmOdemePlani nda bir veya birden fazla tahsil edilmiştir.
+	  -- Bu tahsil dekonutuna bağlı olarak iade dekontu oluşturuluyor 
+	  -- OnmBelgeDekont.IadeId = OnmBelgeDekont.Id : IadeDekontu = TahsilDekontu
+	  -- İade dekontu oluşturulunca Tahsil dekontu ile hangi ödemeler kapatılmış olsada
+	  -- OnmOdemePlani tablosunda yeni bir adet iade tutarı kadar borç satırı oluşturuluyor. 
+	  -- İşaretleri ise
+	  -- OnmOdemePlani.TaksitTipiId = 4
+	  -- OnmOdemePlani.SourceTypeId = 2
+	  -- OnmOdemePlani.SourceId = OnmBelgeDekont.Id (iade dekontunun Id si)
+	  
+      Insert into dbo.OnmOdemePlani
+          (  FirmId, IsActive, DonemTipiId, TalepId, TalepTipiId, UcretTipiId, CariId, TaksitTipiId
+           , TaksitNo, VadeTarihi 
+           , TaksitTutari, IsPaid
+           , SourceTypeId, SourceId )
+           -- Tahsilat ile kapatılan borçların listesini bulduk
+           -- Tahsilat ile birden fazla borç satırı kapatılış olabilir
+           Select top 1 
+             FirmId,        1, DonemTipiId, TalepId, TalepTipiId, UcretTipiId, CariId, 4 -- iade işareti
+           , TaksitNo,  VadeTarihi
+		   , @iadeTutari
+           , 0  -- IsPaid
+           , 2  -- SourceTypeId
+           , @dekontId -- SourceId 
+           from OnmOdemePlani
+           where TalepId = @talepId
+           and   BelgeDekontId = @tahsilatDekontId
+           order by VadeTarihi
+
+   end -- if
+
+
+END -- prc_
+
+
+/*CreateProcedureEnd*/

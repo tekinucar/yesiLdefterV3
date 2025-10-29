@@ -1,0 +1,30 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_MtskAdayTablesInsertKontrolu] (@FirmId int)  
+AS BEGIN
+
+      declare @talepId int
+      declare myCursor CURSOR local
+      for 
+      Select Id
+      from dbo.MtskAdayTalep 
+      Where FirmId = @FirmId
+
+      OPEN myCursor;
+  
+      FETCH NEXT
+      FROM myCursor
+      INTO @talepId;
+	  
+      While @@FETCH_STATUS = 0
+      begin
+	      Execute [dbo].[prc_MtskAdayTablesInsert] @talepId
+		  FETCH NEXT FROM myCursor INTO @talepId;
+      end -- While
+
+      Close myCursor;
+      DealLocate myCursor;
+
+END --
+
+/*CreateProcedureEnd*/

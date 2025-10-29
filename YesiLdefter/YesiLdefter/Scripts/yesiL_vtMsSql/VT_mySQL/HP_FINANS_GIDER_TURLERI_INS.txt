@@ -1,0 +1,109 @@
+﻿/*
+INSERT INTO [dbo].[HP_FINANS]
+           ([FNS_TIPI]     -- smallint
+           ,[HP_TIPI]      -- smallint
+           ,[HP_KODU]      -- varchar(50)
+           ,[HP_TAMADI]    -- varchar(200)
+           ,[KDV_ORANI]    -- smallint
+           ,[DAMGA_ORANI]  -- numeric(6,2) 
+           ,[VERGI_TD]     -- int
+           ,[VERGI_ORANI]) -- numeric(6,2)
+*/
+   
+INSERT INTO [dbo].[HP_FINANS] ([FNS_TIPI],[HP_TIPI],[HP_KODU],[HP_TAMADI],[KDV_ORANI],[DAMGA_ORANI],[VERGI_TD],[VERGI_ORANI]) VALUES ( 29, 0, '', 'Çek Al', 0, null, null, null)
+INSERT INTO [dbo].[HP_FINANS] ([FNS_TIPI],[HP_TIPI],[HP_KODU],[HP_TAMADI],[KDV_ORANI],[DAMGA_ORANI],[VERGI_TD],[VERGI_ORANI]) VALUES ( 29, 0, '', 'Çek Ver', 0, null, null, null)
+INSERT INTO [dbo].[HP_FINANS] ([FNS_TIPI],[HP_TIPI],[HP_KODU],[HP_TAMADI],[KDV_ORANI],[DAMGA_ORANI],[VERGI_TD],[VERGI_ORANI]) VALUES ( 29, 0, '', 'Senet Al', 0, null, null, null)
+INSERT INTO [dbo].[HP_FINANS] ([FNS_TIPI],[HP_TIPI],[HP_KODU],[HP_TAMADI],[KDV_ORANI],[DAMGA_ORANI],[VERGI_TD],[VERGI_ORANI]) VALUES ( 29, 0, '', 'Senet Ver', 0, null, null, null)
+
+INSERT INTO [dbo].[HP_FINANS] ([FNS_TIPI],[HP_TIPI],[HP_KODU],[HP_TAMADI],[KDV_ORANI],[DAMGA_ORANI],[VERGI_TD],[VERGI_ORANI]) VALUES ( 29, 0, '', 'Cari Hesaba Yaz', 0, null, null, null)
+INSERT INTO [dbo].[HP_FINANS] ([FNS_TIPI],[HP_TIPI],[HP_KODU],[HP_TAMADI],[KDV_ORANI],[DAMGA_ORANI],[VERGI_TD],[VERGI_ORANI]) VALUES ( 29, 0, '', 'Hesap Parçala', 0, null, null, null)
+INSERT INTO [dbo].[HP_FINANS] ([FNS_TIPI],[HP_TIPI],[HP_KODU],[HP_TAMADI],[KDV_ORANI],[DAMGA_ORANI],[VERGI_TD],[VERGI_ORANI]) VALUES ( 29, 0, '', 'Taksit Oluştur', 0, null, null, null)
+   
+   
+     
+INSERT INTO [dbo].[HP_FINANS] ([FNS_TIPI],[HP_TIPI],[HP_KODU],[HP_TAMADI],[KDV_ORANI],[DAMGA_ORANI],[VERGI_TD],[VERGI_ORANI]) VALUES ( 720, 10010, '', 'Akaryakıt', 0, null, null, null)
+INSERT INTO [dbo].[HP_FINANS] ([FNS_TIPI],[HP_TIPI],[HP_KODU],[HP_TAMADI],[KDV_ORANI],[DAMGA_ORANI],[VERGI_TD],[VERGI_ORANI]) VALUES ( 720, 10020, '', 'Bilişim', 0, null, null, null)
+INSERT INTO [dbo].[HP_FINANS] ([FNS_TIPI],[HP_TIPI],[HP_KODU],[HP_TAMADI],[KDV_ORANI],[DAMGA_ORANI],[VERGI_TD],[VERGI_ORANI]) VALUES ( 720, 10030, '', 'Çek-Senet', 0, null, null, null)
+INSERT INTO [dbo].[HP_FINANS] ([FNS_TIPI],[HP_TIPI],[HP_KODU],[HP_TAMADI],[KDV_ORANI],[DAMGA_ORANI],[VERGI_TD],[VERGI_ORANI]) VALUES ( 720, 10040, '', 'Diğer', 0, null, null, null)
+INSERT INTO [dbo].[HP_FINANS] ([FNS_TIPI],[HP_TIPI],[HP_KODU],[HP_TAMADI],[KDV_ORANI],[DAMGA_ORANI],[VERGI_TD],[VERGI_ORANI]) VALUES ( 720, 10050, '', 'Döviz Al/Sat', 0, null, null, null)
+           
+INSERT INTO [dbo].[HP_FINANS] ([FNS_TIPI],[HP_TIPI],[HP_KODU],[HP_TAMADI],[KDV_ORANI],[DAMGA_ORANI],[VERGI_TD],[VERGI_ORANI]) VALUES ( 720, 10060, '', 'Eğitim', 0, null, null, null)
+INSERT INTO [dbo].[HP_FINANS] ([FNS_TIPI],[HP_TIPI],[HP_KODU],[HP_TAMADI],[KDV_ORANI],[DAMGA_ORANI],[VERGI_TD],[VERGI_ORANI]) VALUES ( 720, 10070, '', 'Elektirik', 0, null, null, null)
+INSERT INTO [dbo].[HP_FINANS] ([FNS_TIPI],[HP_TIPI],[HP_KODU],[HP_TAMADI],[KDV_ORANI],[DAMGA_ORANI],[VERGI_TD],[VERGI_ORANI]) VALUES ( 720, 10080, '', 'Elektronik', 0, null, null, null)
+INSERT INTO [dbo].[HP_FINANS] ([FNS_TIPI],[HP_TIPI],[HP_KODU],[HP_TAMADI],[KDV_ORANI],[DAMGA_ORANI],[VERGI_TD],[VERGI_ORANI]) VALUES ( 720, 10090, '', 'Ev', 0, null, null, null)
+INSERT INTO [dbo].[HP_FINANS] ([FNS_TIPI],[HP_TIPI],[HP_KODU],[HP_TAMADI],[KDV_ORANI],[DAMGA_ORANI],[VERGI_TD],[VERGI_ORANI]) VALUES ( 720, 10100, '', 'Dekorasyon', 0, null, null, null)
+
+INSERT INTO [dbo].[HP_FINANS] ([FNS_TIPI],[HP_TIPI],[HP_KODU],[HP_TAMADI],[KDV_ORANI],[DAMGA_ORANI],[VERGI_TD],[VERGI_ORANI]) VALUES ( 720, 10110, '', 'Faiz', 0, null, null, null)
+INSERT INTO [dbo].[HP_FINANS] ([FNS_TIPI],[HP_TIPI],[HP_KODU],[HP_TAMADI],[KDV_ORANI],[DAMGA_ORANI],[VERGI_TD],[VERGI_ORANI]) VALUES ( 720, 10210, '', 'Kargo Ödemesi', 0, null, null, null)
+INSERT INTO [dbo].[HP_FINANS] ([FNS_TIPI],[HP_TIPI],[HP_KODU],[HP_TAMADI],[KDV_ORANI],[DAMGA_ORANI],[VERGI_TD],[VERGI_ORANI]) VALUES ( 720, 10220, '', 'Kart Ödemesi', 0, null, null, null)
+INSERT INTO [dbo].[HP_FINANS] ([FNS_TIPI],[HP_TIPI],[HP_KODU],[HP_TAMADI],[KDV_ORANI],[DAMGA_ORANI],[VERGI_TD],[VERGI_ORANI]) VALUES ( 720, 10230, '', 'Kira Ödemesi', 0, null, null, null)
+INSERT INTO [dbo].[HP_FINANS] ([FNS_TIPI],[HP_TIPI],[HP_KODU],[HP_TAMADI],[KDV_ORANI],[DAMGA_ORANI],[VERGI_TD],[VERGI_ORANI]) VALUES ( 720, 10240, '', 'Kişisel Hizmet', 0, null, null, null)
+
+INSERT INTO [dbo].[HP_FINANS] ([FNS_TIPI],[HP_TIPI],[HP_KODU],[HP_TAMADI],[KDV_ORANI],[DAMGA_ORANI],[VERGI_TD],[VERGI_ORANI]) VALUES ( 720, 10250, '', 'Kredi', 0, null, null, null)
+INSERT INTO [dbo].[HP_FINANS] ([FNS_TIPI],[HP_TIPI],[HP_KODU],[HP_TAMADI],[KDV_ORANI],[DAMGA_ORANI],[VERGI_TD],[VERGI_ORANI]) VALUES ( 720, 10260, '', 'Kurum Ödemesi', 0, null, null, null)
+INSERT INTO [dbo].[HP_FINANS] ([FNS_TIPI],[HP_TIPI],[HP_KODU],[HP_TAMADI],[KDV_ORANI],[DAMGA_ORANI],[VERGI_TD],[VERGI_ORANI]) VALUES ( 720, 10270, '', 'Komisyon', 0, null, null, null)
+INSERT INTO [dbo].[HP_FINANS] ([FNS_TIPI],[HP_TIPI],[HP_KODU],[HP_TAMADI],[KDV_ORANI],[DAMGA_ORANI],[VERGI_TD],[VERGI_ORANI]) VALUES ( 720, 10310, '', 'Maaş', 0, null, null, null)
+INSERT INTO [dbo].[HP_FINANS] ([FNS_TIPI],[HP_TIPI],[HP_KODU],[HP_TAMADI],[KDV_ORANI],[DAMGA_ORANI],[VERGI_TD],[VERGI_ORANI]) VALUES ( 720, 10320, '', 'Maaş-Avansı', 0, null, null, null)
+
+INSERT INTO [dbo].[HP_FINANS] ([FNS_TIPI],[HP_TIPI],[HP_KODU],[HP_TAMADI],[KDV_ORANI],[DAMGA_ORANI],[VERGI_TD],[VERGI_ORANI]) VALUES ( 720, 10330, '', 'Market', 0, null, null, null)
+INSERT INTO [dbo].[HP_FINANS] ([FNS_TIPI],[HP_TIPI],[HP_KODU],[HP_TAMADI],[KDV_ORANI],[DAMGA_ORANI],[VERGI_TD],[VERGI_ORANI]) VALUES ( 720, 10340, '', 'Muhasebe', 0, null, null, null)
+INSERT INTO [dbo].[HP_FINANS] ([FNS_TIPI],[HP_TIPI],[HP_KODU],[HP_TAMADI],[KDV_ORANI],[DAMGA_ORANI],[VERGI_TD],[VERGI_ORANI]) VALUES ( 720, 10410, '', 'Seyahat', 0, null, null, null)
+INSERT INTO [dbo].[HP_FINANS] ([FNS_TIPI],[HP_TIPI],[HP_KODU],[HP_TAMADI],[KDV_ORANI],[DAMGA_ORANI],[VERGI_TD],[VERGI_ORANI]) VALUES ( 720, 10420, '', 'Sigorta', 0, null, null, null)
+INSERT INTO [dbo].[HP_FINANS] ([FNS_TIPI],[HP_TIPI],[HP_KODU],[HP_TAMADI],[KDV_ORANI],[DAMGA_ORANI],[VERGI_TD],[VERGI_ORANI]) VALUES ( 720, 10430, '', 'Telekomünikasyon', 0, null, null, null)
+
+INSERT INTO [dbo].[HP_FINANS] ([FNS_TIPI],[HP_TIPI],[HP_KODU],[HP_TAMADI],[KDV_ORANI],[DAMGA_ORANI],[VERGI_TD],[VERGI_ORANI]) VALUES ( 720, 10440, '', 'Turizm/Konaklama', 0, null, null, null)
+INSERT INTO [dbo].[HP_FINANS] ([FNS_TIPI],[HP_TIPI],[HP_KODU],[HP_TAMADI],[KDV_ORANI],[DAMGA_ORANI],[VERGI_TD],[VERGI_ORANI]) VALUES ( 720, 10450, '', 'Ulaşım', 0, null, null, null)
+INSERT INTO [dbo].[HP_FINANS] ([FNS_TIPI],[HP_TIPI],[HP_KODU],[HP_TAMADI],[KDV_ORANI],[DAMGA_ORANI],[VERGI_TD],[VERGI_ORANI]) VALUES ( 720, 10460, '', 'Vergi', 0, null, null, null)
+INSERT INTO [dbo].[HP_FINANS] ([FNS_TIPI],[HP_TIPI],[HP_KODU],[HP_TAMADI],[KDV_ORANI],[DAMGA_ORANI],[VERGI_TD],[VERGI_ORANI]) VALUES ( 720, 10470, '', 'Yatırım', 0, null, null, null)
+INSERT INTO [dbo].[HP_FINANS] ([FNS_TIPI],[HP_TIPI],[HP_KODU],[HP_TAMADI],[KDV_ORANI],[DAMGA_ORANI],[VERGI_TD],[VERGI_ORANI]) VALUES ( 720, 10480, '', 'Yeme/İçme', 0, null, null, null)
+
+/*
+INSERT INTO [dbo].[HP_FINANS] ([FNS_TIPI],[HP_TIPI],[HP_KODU],[HP_TAMADI],[KDV_ORANI],[DAMGA_ORANI],[VERGI_TD],[VERGI_ORANI]) VALUES ( 720, 0, '', '', 0, null, null, null)
+INSERT INTO [dbo].[HP_FINANS] ([FNS_TIPI],[HP_TIPI],[HP_KODU],[HP_TAMADI],[KDV_ORANI],[DAMGA_ORANI],[VERGI_TD],[VERGI_ORANI]) VALUES ( 720, 0, '', '', 0, null, null, null)
+INSERT INTO [dbo].[HP_FINANS] ([FNS_TIPI],[HP_TIPI],[HP_KODU],[HP_TAMADI],[KDV_ORANI],[DAMGA_ORANI],[VERGI_TD],[VERGI_ORANI]) VALUES ( 720, 0, '', '', 0, null, null, null)
+INSERT INTO [dbo].[HP_FINANS] ([FNS_TIPI],[HP_TIPI],[HP_KODU],[HP_TAMADI],[KDV_ORANI],[DAMGA_ORANI],[VERGI_TD],[VERGI_ORANI]) VALUES ( 720, 0, '', '', 0, null, null, null)
+INSERT INTO [dbo].[HP_FINANS] ([FNS_TIPI],[HP_TIPI],[HP_KODU],[HP_TAMADI],[KDV_ORANI],[DAMGA_ORANI],[VERGI_TD],[VERGI_ORANI]) VALUES ( 720, 0, '', '', 0, null, null, null)
+
+INSERT INTO [dbo].[HP_FINANS] ([FNS_TIPI],[HP_TIPI],[HP_KODU],[HP_TAMADI],[KDV_ORANI],[DAMGA_ORANI],[VERGI_TD],[VERGI_ORANI]) VALUES ( 720, 0, '', '', 0, null, null, null)
+INSERT INTO [dbo].[HP_FINANS] ([FNS_TIPI],[HP_TIPI],[HP_KODU],[HP_TAMADI],[KDV_ORANI],[DAMGA_ORANI],[VERGI_TD],[VERGI_ORANI]) VALUES ( 720, 0, '', '', 0, null, null, null)
+*/
+
+/*
+Akaryakıt
+Bilişim
+Çek-Senet
+Diğer
+Döviz Al/Sat
+Eğitim
+Eğlence/Hobi
+Elektronik
+Emeklilik Borcu
+Ev
+Dekorasyon
+Faiz
+Giyim/Aksesuar
+Komisyon
+Kart Ödemesi
+Kart Tutar Aktarım
+Kira Ödemesi
+Kişisel Hizmet
+Kredi
+Kurum Ödemesi
+Maaş
+Market
+Nakit Avans
+Para Çekme
+Para Transferi
+Para Yatırma
+Sağlık/Bakım
+Seyahat
+Sigorta
+Şans Oyunu
+Telekomünikasyon
+Turizm/Konaklama
+Ulaşım
+Vergi    >>>> daha sonra 730 lu hesaplarda detaylı olabilir     
+Yatırım
+Yeme/İçme
+
+*/

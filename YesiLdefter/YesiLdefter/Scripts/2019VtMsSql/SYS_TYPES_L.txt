@@ -1,0 +1,30 @@
+
+begin transaction
+
+ create table SYS_TYPES_L
+ (
+        ID                      Int IDENTITY(1,1) NOT NULL,
+        ISACTIVE                SmallInt          NULL,
+        VALUE_TYPE              SmallInt          NULL,  
+        IMAGE_ID                SmallInt          NULL,
+        TYPES_NAME              VarChar(30)       NULL,
+        TYPES_VALUE_INT         Int               NULL,
+        TYPES_VALUE_STR         VarChar(30)       NULL,          
+        TYPES_CAPTION           VarChar(100)      NULL,
+
+   Constraint PK_SYS_TYPES_L primary key (ID)
+   
+ )
+ -- mysql_add
+ 
+ create index X_SYS_TYPES_L1 on SYS_TYPES_L (TYPES_NAME);
+ 
+ grant select, insert, update, delete on SYS_TYPES_L to public
+
+commit transaction
+
+
+/* VALUE_TYPE = 1 : SmallInt, 2 : Int32, 3 : String, 4 : Byte   */
+
+
+

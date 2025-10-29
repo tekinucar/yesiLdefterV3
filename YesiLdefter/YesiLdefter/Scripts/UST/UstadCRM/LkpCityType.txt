@@ -1,0 +1,116 @@
+﻿/*CreateTable*/
+-- ------------------------------------------------------- 
+-- ILTipi
+-- ------------------------------------------------------- 
+
+begin transaction
+
+create table [Lkp].[CityType]
+(
+   Id             Int Unique Not null,
+   IlKodu         Varchar(3)     null, /* önünde sıfır olmayan il kodu : 1, 2, 3 .. */
+   IlKoduSifirli  Varchar(3)     null, /* önünde sıfır olan    il kodu : 01, 02, 03 .. */
+   IlGIBKodu      nVarchar(15)   null, /* GİB il kodu */
+   IlAdiBUYUK     nVarchar(15)   null, /* büyük harfler ile */
+   IlAdiKucuk     nVarchar(15)   null, /* küçük harfler ile */
+
+   constraint  pk_CityType primary key (Id)
+)
+
+ grant select, insert, update, delete on [Lkp].[CityType] to public
+
+commit transaction
+
+/*CreateTableEnd*/
+
+
+/*CreateData*/
+
+INSERT INTO [Lkp].[CityType] (Id, IlKodu, IlKoduSifirli, IlGIBKodu, IlAdiBUYUK )
+ VALUES 
+  (  0, '0',  '0',  '', N'İl Seçin...' ),
+  (  1, '1',  '01', 'Adana', N'ADANA' ),
+  (  2, '2',  '02', 'Adıyaman', N'ADIYAMAN' ),
+  (  3, '3',  '03', 'Afyon', N'AFYONKARAHİSAR' ),
+  (  4, '4',  '04', 'Ağrı', N'AĞRI' ),
+  ( 68, '68', '68', 'Aksaray', N'AKSARAY' ),
+  (  5, '5',  '05', 'Amasya', N'AMASYA' ),
+  (  6, '6',  '06', 'Ankara', N'ANKARA' ),
+  (  7, '7',  '07', 'Antalya', N'ANTALYA' ),
+  ( 75, '75', '75', 'Ardahan', N'ARDAHAN' ),
+  (  8, '8',  '08', 'Artvİn', N'ARTVİN' ),
+  (  9, '9',  '09', 'Aydin', N'AYDIN' ),
+  ( 10, '10', '10', 'Balıkesir', N'BALIKESİR' ),
+  ( 74, '74', '74', 'Bartın', N'BARTIN' ),
+  ( 72, '72', '72', 'Batman', N'BATMAN' ),
+  ( 69, '69', '69', 'Bayburt', N'BAYBURT' ),
+  ( 11, '11', '11', 'Bilecik', N'BİLECİK' ),
+  ( 12, '12', '12', 'Bingöl', N'BİNGÖL' ),
+  ( 13, '13', '13', 'Bitlis', N'BİTLİS' ),
+  ( 14, '14', '14', 'Bolu', N'BOLU' ),
+  ( 15, '15', '15', 'Burdur', N'BURDUR' ),
+  ( 16, '16', '16', 'Bursa', N'BURSA' ),
+  ( 17, '17', '17', 'Çanakkale', N'ÇANAKKALE' ),
+  ( 18, '18', '18', 'Çankırı', N'ÇANKIRI' ),
+  ( 19, '19', '19', 'Çorum', N'ÇORUM' ),
+  ( 20, '20', '20', 'Denizli', N'DENİZLİ' ),
+  ( 21, '21', '21', 'Diyarbakır', N'DİYARBAKIR' ),
+  ( 81, '81', '81', 'Düzce', N'DÜZCE' ),
+  ( 22, '22', '22', 'Edirne', N'EDİRNE' ),
+  ( 23, '23', '23', 'Elazığ', N'ELAZIĞ' ),
+  ( 24, '24', '24', 'Erzincan', N'ERZİNCAN' ),
+  ( 25, '25', '25', 'Erzurum', N'ERZURUM' ),
+  ( 26, '26', '26', 'Eskişehir', N'ESKİŞEHİR' ),
+  ( 27, '27', '27', 'Gaziantep', N'GAZİANTEP' ),
+  ( 28, '28', '28', 'Giresun', N'GİRESUN' ),
+  ( 29, '29', '29', 'Gümüşhane', N'GÜMÜŞHANE' ),
+  ( 30, '30', '30', 'Hakkari', N'HAKKARİ' ),
+  ( 31, '31', '31', 'Hatay', N'HATAY' ),
+  ( 76, '76', '76', 'Iğdır', N'IĞDIR' ),
+  ( 32, '32', '32', 'Isparta', N'ISPARTA' ),
+  ( 34, '34', '34', 'İstanbul', N'İSTANBUL' ),
+  ( 35, '35', '35', 'İzmir', N'İZMİR' ),
+  ( 46, '46', '46', 'K.maraş', N'KAHRAMANMARAŞ' ),
+  ( 78, '78', '78', 'Karabük', N'KARABÜK' ),
+  ( 70, '70', '70', 'Karaman', N'KARAMAN' ),
+  ( 36, '36', '36', 'Kars', N'KARS' ),
+  ( 37, '37', '37', 'Kastamonu', N'KASTAMONU' ),
+  ( 38, '38', '38', 'Kayseri', N'KAYSERİ' ),
+  ( 71, '71', '71', 'Kırıkkale', N'KIRIKKALE' ),
+  ( 39, '39', '39', 'Kırklareli', N'KIRKLARELİ' ),
+  ( 40, '40', '40', 'Kırşehir', N'KIRŞEHİR' ),
+  ( 79, '79', '79', 'Kilis', N'KİLİS' ),
+  ( 41, '41', '41', 'Kocaeli', N'KOCAELİ' ),
+  ( 42, '42', '42', 'Konya', N'KONYA' ),
+  ( 43, '43', '43', 'Kütahya', N'KÜTAHYA' ),
+  ( 44, '44', '44', 'Malatya', N'MALATYA' ),
+  ( 45, '45', '45', 'Manisa', N'MANİSA' ),
+  ( 47, '47', '47', 'Mardİn', N'MARDİN' ),
+  ( 33, '33', '33', 'Mersin', N'MERSİN' ),
+  ( 48, '48', '48', 'Muğla', N'MUĞLA' ),
+  ( 49, '49', '49', 'Muş', N'MUŞ' ),
+  ( 50, '50', '50', 'Nevşehir', N'NEVŞEHİR' ),
+  ( 51, '51', '51', 'Niğde', N'NİĞDE' ),
+  ( 52, '52', '52', 'Ordu', N'ORDU' ),
+  ( 80, '80', '80', 'Osmaniye', N'OSMANİYE' ),
+  ( 53, '53', '53', 'Rize', N'RİZE' ),
+  ( 54, '54', '54', 'Sakarya', N'SAKARYA' ),
+  ( 55, '55', '55', 'Samsun', N'SAMSUN' ),
+  ( 56, '56', '56', 'Siirt', N'SİİRT' ),
+  ( 57, '57', '57', 'Sinop', N'SİNOP' ),
+  ( 58, '58', '58', 'Sivas', N'SİVAS' ),
+  ( 63, '63', '63', 'Ş.urfa', N'ŞANLIURFA' ),
+  ( 73, '73', '73', 'Şırnak', N'ŞIRNAK' ),
+  ( 59, '59', '59', 'Tekİrdağ', N'TEKİRDAĞ' ),
+  ( 60, '60', '60', 'Tokat', N'TOKAT' ),
+  ( 61, '61', '61', 'Trabzon', N'TRABZON' ),
+  ( 62, '62', '62', 'Tunceli', N'TUNCELİ' ),
+  ( 64, '64', '64', 'Uşak', N'UŞAK' ),
+  ( 65, '65', '65', 'Van', N'VAN' ),
+  ( 77, '77', '77', 'Yalova', N'YALOVA' ),
+  ( 66, '66', '66', 'Yozgat', N'YOZGAT' ),
+  ( 67, '67', '67', 'Zonguldak', N'ZONGULDAK' )
+
+
+    /*CreateDataEnd*/
+

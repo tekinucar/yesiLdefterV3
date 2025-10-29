@@ -1,0 +1,275 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table OnmHesapCari
+ (
+
+   Id                  Int IDENTITY(1,1) NOT NULL, /* Id  DİĞER TABLOLARDA CARI_ID OLUYOR  */
+   ParentId            Int       not null, /* default 0 */
+   FirmId              Int       not null,
+   IsActive            Bit       not null, /* default : 1 = active, 0 = not active */  
+   CariTipiId          SmallInt      null, /* 1. Gerçek Kişi, 2. Özel Firma, 3. Kamu Kurumu */
+   CalismaTipiId       SmallInt      null, 
+
+   TcVkNo              Varchar(11)   null,
+   TamAdiSoyadi        nVarchar(200) null,
+   CariHesapKodu       nVarchar(50)  null,
+   CariKisaAdi         nVarchar(50)  null, /* nick Name, Kısa Adı */
+   Adi                 nVarchar(50)  null,
+   Soyadi              nVarchar(50)  null,
+   Unvani1             nVarchar(98)  null,
+   Unvani2             nVarchar(98)  null,
+   CepTelefonu         nVarchar(15)  null,
+   CepTelefonu2        nVarchar(15)  null,
+   Eposta              nVarchar(98)  null,
+   EFaturaAliasName    nVarchar(30)  null,
+   EFExtraInformation  nVarchar(30)  null, /* EF : e-Fatura */
+
+   FirmaTipiId         SmallInt      null, /* 1. Ltd, 2. Anonim, 3. Şahıs */ 
+   KategoriTipiId      Int           null,
+   SektorTipiId        Int           null,
+   CalisanSayisiTipiId SmallInt      null,
+   MuhasebeTipiId      SmallInt      null, /* 120. Alıcılar, 320. Satıcılar vb */
+
+   VergiNo             nVarchar(10)  null,
+   VergiDairesiTipiId  nVarChar(5)   null, 
+   
+   ParaTipiId          nVarChar(3)   null,
+   BorcDovizYeriId     SmallInt      null,
+   AlacakDovizYeriId   SmallInt      null,
+      
+   KdvUygulanmaz       Bit           null,
+   TevkifatUygulanmaz  Bit           null,
+   EkVergiUygulanmaz   Bit           null,
+
+   BankaHesapKodu      nVarchar(30)  null, /* Banka hesap kodu */
+   BankaAdi            nVarchar(50)  null,
+   BankaSubeAdi        nVarchar(50)  null,
+   BankaHesapNo        nVarchar(50)  null,
+   BankaIbanNo         nVarchar(50)  null,
+   
+   constraint  pk_OnmHesapCari primary key (Id)
+ )
+
+ create index X_OnmHesapCari01 on OnmHesapCari (FirmId)
+ create index X_OnmHesapCari02 on OnmHesapCari (CariTipiId)
+ create index X_OnmHesapCari03 on OnmHesapCari (CalismaTipiId)
+ create index X_OnmHesapCari04 on OnmHesapCari (TcVkNo)
+ create index X_OnmHesapCari05 on OnmHesapCari (TamAdiSoyadi)
+ create index X_OnmHesapCari06 on OnmHesapCari (FirmaTipiId)
+ create index X_OnmHesapCari07 on OnmHesapCari (KategoriTipiId)
+ create index X_OnmHesapCari08 on OnmHesapCari (SektorTipiId)
+ create index X_OnmHesapCari09 on OnmHesapCari (CalisanSayisiTipiId)
+
+ grant select, insert, update, delete on OnmHesapCari to public
+
+ commit transaction
+
+ /*CreateTableEnd*/
+
+ /*
+ 
+ alter table OnmHesapCari add   BankaHesapKodu      nVarchar(30)  null
+ alter table OnmHesapCari add   BankaAdi            nVarchar(50)  null
+ alter table OnmHesapCari add   BankaSubeAdi        nVarchar(50)  null
+ alter table OnmHesapCari add   BankaHesapNo        nVarchar(50)  null
+ alter table OnmHesapCari add   BankaIbanNo         nVarchar(50)  null
+ 
+ */
+ 
+ 
+ /*CreateLkpTable*/
+
+ begin transaction
+
+-- ------------------------------------------------------- 
+-- CariTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmHesapCariCariTipi')
+drop table [Lkp].[OnmHesapCariCariTipi]
+
+create table [Lkp].[OnmHesapCariCariTipi]
+(
+   Id          Int Unique Not Null,
+   CariTipi    nVarchar(50)   null,
+   GrupTipiId  SmallInt       null,
+   
+   constraint  pk_OnmHesapCariCariTipi primary key (Id)
+)
+
+Delete from [Lkp].[OnmHesapCariCariTipi]
+INSERT INTO [Lkp].[OnmHesapCariCariTipi] (Id, CariTipi, GrupTipiId)
+ VALUES 
+  (0, N'Tanımsız',    0),
+  (1, N'Gerçek kişi',    1),
+  (2, N'Tüzel kişi (Özel firma, dernek vb)',  1),
+  (3, N'Kamu kurumları', 1)
+  --,(4, N'CariPersoneli', 1)
+  
+-- ------------------------------------------------------- 
+-- CalismaTipiId 
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmHesapCariCalismaTipi')
+drop table [Lkp].[OnmHesapCariCalismaTipi]
+
+create table [Lkp].[OnmHesapCariCalismaTipi]
+(
+   Id           Int        Not Null,
+   CalismaTipi  nVarchar(50)   null,
+   GrupTipiId   SmallInt       null,
+   IsMaster     Bit            null
+)
+
+Delete from [Lkp].[OnmHesapCariCalismaTipi]
+INSERT INTO [Lkp].[OnmHesapCariCalismaTipi] (Id, CalismaTipi, GrupTipiId, IsMaster)
+ VALUES 
+  (11, N'Müşteri',   1, 1),
+  (12, N'Tedarikci', 1, 1),
+  (13, N'Bayi',      1, 1),
+  (19, N'Personel',  1, 1),
+  (21, N'Personel',  121, 1),
+  (22, N'Hükümlü',   121, 1)
+
+
+-- ------------------------------------------------------- 
+-- MuhasebeTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmHesapCariMuhasebeTipi')
+drop table [Lkp].[OnmHesapCariMuhasebeTipi]
+
+create table [Lkp].[OnmHesapCariMuhasebeTipi]
+(
+   Id            Int Unique Not Null,
+   MuhasebeTipi  nVarchar(50)   null,
+   GrupTipiId    SmallInt       null,
+   
+   constraint  pk_OnmHesapCariMuhasebeTipi primary key (Id)
+)
+
+Delete from [Lkp].[OnmHesapCariMuhasebeTipi]
+INSERT INTO [Lkp].[OnmHesapCariMuhasebeTipi] (Id, MuhasebeTipi, GrupTipiId)
+ VALUES 
+  (0, N'Tanımsız',    0),
+  (120, N'Alıcılar (Ürün/Hizmet satıyoruz)',  1),
+  (320, N'Satıcılar (Ürün/Hizmet alıyoruz)',  1)
+
+commit transaction
+
+/*CreateLkpTableEnd*/
+
+  
+/*CreateTrigger*/
+
+CREATE TRIGGER [dbo].[trg_OnmHesapCari] on [dbo].[OnmHesapCari] 
+AFTER INSERT, UPDATE
+AS BEGIN
+    DECLARE cursorOnmHCari cursor local for select Id from Inserted
+    DECLARE @curId bigint
+
+    OPEN cursorOnmHCari
+
+    FETCH NEXT FROM cursorOnmHCari INTO @curId
+
+    declare @yFirmId int = 0
+    declare @yAdi nvarchar(50) = null
+    declare @ySoyadi nvarchar(50) = null
+    
+	declare @yCariKisaAdi nvarchar(50) = null
+    declare @yUnvani1 nvarchar(100) = null
+    declare @yUnvani2 nvarchar(100) = null
+    
+	declare @yTamAdiSoyadi nvarchar(200) = null
+    declare @eTamAdiSoyadi nvarchar(200) = null
+    
+	declare @yCalismaTipiId smallInt = 0
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        set @yAdi = ''
+        set @ySoyadi = ''
+        set @yTamAdiSoyadi = ''
+        set @yCariKisaAdi = ''
+		set @yUnvani1 = ''
+        set @yUnvani2 = ''
+    	set @eTamAdiSoyadi = ''
+        
+        select 
+    	   @eTamAdiSoyadi = isnull(dlt.TamAdiSoyadi,'')
+    	from deleted dlt
+    	where dlt.Id = @curId
+
+        select 
+           @yFirmId = isnull(ins.FirmId,0)
+    	  ,@yAdi = isnull(ins.Adi,'')
+    	  ,@ySoyadi = isnull(ins.Soyadi,'')
+		  ,@yCariKisaAdi = isnull(ins.CariKisaAdi,'')
+    	  ,@yUnvani1 = isnull(ins.Unvani1,'')
+		  ,@yUnvani2 = isnull(ins.Unvani2,'')
+          ,@yCalismaTipiId = isnull(ins.CalismaTipiId,0)
+		from inserted ins
+    	where ins.Id = @curId
+     	   	
+    	set @yTamAdiSoyadi = @yAdi + ' ' +  @ySoyadi
+
+        if ((@yAdi = '') and (@ySoyadi = '') and (@yUnvani1 <> ''))
+		begin
+			set @yTamAdiSoyadi = @yUnvani1 + ' ' + @yUnvani2
+
+			if (@yCariKisaAdi = '')
+			begin
+			  declare @i1 int = 0
+			  set @i1 = CHARINDEX(' ', @yUnvani1, 0)
+			  set @yCariKisaAdi = SUBSTRING(@yUnvani1, 0, @i1)
+            end
+		end
+
+    	if (@yCariKisaAdi = '')
+		begin
+    	    update OnmHesapCari set 
+            TamAdiSoyadi = LTRIM(RTRIM(@yTamAdiSoyadi))
+            where Id = @curId 
+    	end
+		else begin
+		    update OnmHesapCari set 
+             TamAdiSoyadi = LTRIM(RTRIM(@yTamAdiSoyadi))
+            ,CariKisaAdi = LTRIM(RTRIM(@yCariKisaAdi))
+			where Id = @curId 
+		end
+    	
+		if (@yCalismaTipiId = 19) -- Personel hesabı ise
+        begin 
+            INSERT INTO [dbo].[OnmCalismaSaatleri]
+                ( [FirmId]
+                , [IsActive]
+                , [GunTipiId]
+                , [SaatTipiId]
+                , [TcVkNo])
+            Select 
+                  cari.FirmId
+                , 1 -- default her gün çalışyor işaretlensin
+                , gun.Id
+                , 100 -- tam gün işareti
+                , cari.TcVkNo
+            From Lkp.OnmCalismaSaatleriGunTipi as gun 
+                left outer join dbo.OnmHesapCari as cari on ( cari.CalismaTipiId = 19 )
+                left outer join OnmCalismaSaatleri as CSaat on ( cari.TcVkNo = CSaat.TcVkNo 
+                           and  CSaat.SaatTipiId = 100 
+                           and gun.Id = CSaat.GunTipiId )
+            Where CSaat.Id is null
+            and   cari.Id = @curId
+
+        end -- if (@yCalismaTipiId = 19)
+
+    	FETCH NEXT FROM cursorOnmHCari INTO @curId
+    END
+
+    CLOSE cursorOnmHCari
+    DEALLOCATE cursorOnmHCari   
+
+END
+
+ALTER TABLE [dbo].[OnmHesapCari] ENABLE TRIGGER [trg_OnmHesapCari]
+
+
+/*CreateTriggerEnd*/

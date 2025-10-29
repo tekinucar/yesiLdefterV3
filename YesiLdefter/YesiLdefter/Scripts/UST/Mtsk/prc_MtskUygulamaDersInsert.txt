@@ -1,0 +1,81 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_MtskUygulamaDersInsert] (  
+   @FirmId int
+  ,@TalepId int
+  ,@AdayId int
+  ,@EgitimYeriTipiId smallint
+  ,@EgitimAraciId varchar(30)
+  ,@DersTarihi date
+  ,@DersSaatiTipiId smallint
+  ,@PersonelId varchar(30)
+  ,@EgitimTipiId smallint
+  ,@SaatSiraNo smallint
+  )
+AS BEGIN
+
+  --print '  prc_MtskUygulamaDersInsert start'
+  if ( Select count(Id) as Adet
+       From dbo.MtskUygulamaliDers
+       Where TalepId = @TalepId
+       and   DersTarihi = @DersTarihi
+       and   SaatSiraNo = @SaatSiraNo ) = 0
+  begin
+     --print '    prc_MtskUygulamaDersInsert insert'
+     INSERT INTO [dbo].[MtskUygulamaliDers]
+           ([FirmId]
+           ,[IsActive]
+           --,[DonemTipiId]
+           --,[GrupTipiId]
+           --,[SubeTipiId]
+           ,[TalepId]
+           --,[AdayNo]
+           ,[AdayId]
+           --,[AdayTcNo]
+           --,[AdayAdiSoyadi]
+           ,[EgitimYeriTipiId]
+           ,[EgitimAraciId]
+           ,[DersTarihi]
+           ,[DersSaatiTipiId]
+           --,[PersonelAdiSoyadi]
+           ,[PersonelId]
+           ,[EgitimTipiId]
+           --,[BaslamaSaati]
+           --,[BitisSaati]
+           ,[UDersIsUploaded]
+           ,[SablonUygulamaFId]
+           ,[SaatSiraNo])
+     VALUES
+           (@FirmId
+           ,1 -- IsActive
+           --,DonemTipiId
+           --,GrupTipiId
+           --,SubeTipiId
+           ,@TalepId
+           --,AdayNo
+           ,@AdayId
+           --,AdayTcNo
+           --,AdayAdiSoyadi
+           ,@EgitimYeriTipiId
+           ,@EgitimAraciId
+           ,@DersTarihi
+           ,@DersSaatiTipiId
+           --,PersonelAdiSoyadi
+           ,@PersonelId
+           ,@EgitimTipiId
+           --,BaslamaSaati
+           --,BitisSaati
+           ,0 -- UDersIsUploaded
+           ,0 -- SablonUygulamaFId
+           ,@SaatSiraNo
+		   )
+    
+  end -- if
+
+  --print '  prc_MtskUygulamaDersInsert stop'
+
+END -- procedure 
+
+/*CreateProcedureEnd*/
+
+

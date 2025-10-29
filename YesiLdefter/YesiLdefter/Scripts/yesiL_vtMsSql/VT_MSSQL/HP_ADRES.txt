@@ -1,0 +1,42 @@
+
+begin transaction
+
+ create table HP_ADRES
+ (
+   ID                     Int             IDENTITY(1,1) NOT NULL,
+   FIRM_ID                Int             null, 
+   SHOP_ID                Int             null, 
+   TABLE_ID               smallint        null, /* 1.HP_CARI, 2. */
+   TABLE_REF_ID           Int             null, /* tablosunun Ref Id si */
+   REC_DATE               SmallDatetime   NULL,  
+   REC_USER               Int             NULL,
+
+   ADRES_DURUMU           SmallInt        null,  /* 0=Geçerli 1=Geçersiz */
+   ADRES_TURU             VarChar(10)     null,
+   IL                     VarChar(50)     null,
+   ILCE                   VarChar(50)     null,
+   MAHKOY                 VarChar(50)     null,
+   CADSOK                 VarChar(150)    null,
+   DISKAPI                VarChar(30)     null,
+   ICKAPI                 VarChar(30)     null,
+   POSTA_KODU             VarChar(30)     null,
+   TAM_ADRES              VarChar(300)    null,
+   ACIKLAMA               VarChar(300)    null,
+   IL_KODU                VarChar(10)     null,
+   ILCE_KODU              VarChar(10)     null,
+   MAHKOY_KODU            VarChar(10)     null,
+   CADSOK_KODU            VarChar(20)     null,
+   DISKAPI_KODU           VarChar(20)     null,
+   ICKAPI_KODU            VarChar(20)     null,
+   OLDCARI_ID             Int             null,
+
+   constraint PK_HP_ADRES primary key (ID)
+ )
+
+ create index X_HP_ADRES_01 on HP_ADRES (FIRM_ID, SHOP_ID, TABLE_ID, TABLE_REF_ID)
+
+ grant select, insert, update, delete on HP_ADRES to public
+
+commit transaction
+
+-- ALTER TABLE HP_ADRES ADD OLDCARI_ID             Int             null

@@ -1,0 +1,106 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_EduMtskSoruKitabiSayfasiOlustur] (@KitapNo int)  
+AS BEGIN
+
+  --declare @KitapNo int = 203
+
+  delete from EduMtskSoruKitabiSayfasi 
+  where KitapNo = @KitapNo
+ 
+  -- 1	Trafik ve Çevre Dersi
+  INSERT INTO [dbo].[EduMtskSoruKitabiSayfasi]
+           ([IsActive]
+           ,[KitapNo]
+           ,[DersTipiId]
+           ,[EduMtskKonularId]
+           ,[EduMtskSorularId]
+           ,[SiraNo])
+  Select TOP 23
+       [IsActive]
+      ,@KitapNo as KitapNo
+	  ,[DersTipiId]
+      ,[EduMtskKonularId]
+	  ,Id as [EduMtskSorularId] 
+      ,0 as SiraNo
+  From [dbo].[EduMtskSorular]
+  where DersTipiId = 1
+  and   IsActive = 1
+  ORDER BY NEWID()
+
+
+  -- 2	İlkyardım Dersi
+  INSERT INTO [dbo].[EduMtskSoruKitabiSayfasi]
+           ([IsActive]
+           ,[KitapNo]
+           ,[DersTipiId]
+           ,[EduMtskKonularId]
+           ,[EduMtskSorularId]
+           ,[SiraNo])
+  Select TOP 12
+       [IsActive]
+      ,@KitapNo as KitapNo
+	  ,[DersTipiId]
+      ,[EduMtskKonularId]
+	  ,Id as [EduMtskSorularId] 
+      ,0 as SiraNo
+  From [dbo].[EduMtskSorular]
+  where DersTipiId = 2
+  and   IsActive = 1
+  ORDER BY NEWID()
+
+  -- 3	Araç Tekniği Dersi
+  INSERT INTO [dbo].[EduMtskSoruKitabiSayfasi]
+           ([IsActive]
+           ,[KitapNo]
+           ,[DersTipiId]
+           ,[EduMtskKonularId]
+           ,[EduMtskSorularId]
+           ,[SiraNo])
+  Select TOP 9
+       [IsActive]
+      ,@KitapNo as KitapNo
+	  ,[DersTipiId]
+      ,[EduMtskKonularId]
+	  ,Id as [EduMtskSorularId] 
+      ,0 as SiraNo
+  From [dbo].[EduMtskSorular]
+  where DersTipiId = 3
+  and   IsActive = 1
+  ORDER BY NEWID()
+
+  -- 5	Trafik Adabı Dersi
+  INSERT INTO [dbo].[EduMtskSoruKitabiSayfasi]
+           ([IsActive]
+           ,[KitapNo]
+           ,[DersTipiId]
+           ,[EduMtskKonularId]
+           ,[EduMtskSorularId]
+           ,[SiraNo])
+  Select TOP 6
+       [IsActive]
+      ,@KitapNo as KitapNo
+	  ,[DersTipiId]
+      ,[EduMtskKonularId]
+	  ,Id as [EduMtskSorularId] 
+      ,0 as SiraNo
+  From [dbo].[EduMtskSorular]
+  where DersTipiId = 5
+  and   IsActive = 1
+  ORDER BY NEWID()
+
+
+  Update EduMtskSoruKitabi set
+    SoruSayisi = x.Adet 
+  From EduMtskSoruKitabi as a,
+  (
+     Select KitapNo, count(Id) Adet from EduMtskSoruKitabiSayfasi 
+     Where KitapNo = @kitapNo
+     Group by KitapNo
+  ) as x
+  Where a.KitapNo = x.KitapNo
+
+
+END -- procedure
+
+/*CreateProcedureEnd*/

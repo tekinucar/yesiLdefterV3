@@ -1,0 +1,210 @@
+﻿USE [UstadCRM]
+GO
+
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+begin transaction
+ create table UstadUsers
+ (
+    UserId          Int IDENTITY(1,1) NOT NULL,
+	IsActive        Bit               NOT NULL,
+
+    UserGUID        varchar(50)   null, 11
+	UserFullName    nVarchar(100) null, 2
+	UserFirstName   nVarchar(50)  null,3
+	UserLastName    nVarchar(50)  null,4
+	UserTcNo        varchar(11)   null,5
+	UserMobileNo    varchar(11)   null,6
+	UserEMail       varchar(50)   null,7
+	FirmGUID        varchar(50)   null,8
+    About           nVarchar(250) null,9
+	UserKey         nVarchar(50)  null,21
+	JobTypeId       SmallInt      null,2
+	DbTypeId        SmallInt      null,3
+    RecordDate      SmallDatetime null,31
+        
+    MebbisCode      nVarchar(30)  null,
+    MebbisPass      nVarchar(30)  null, 
+    
+
+   Constraint pk_UstadUsers primary key (UserId)
+ )
+
+ create index X_UstadUsers_01 on UstadUsers (FirmGUID)
+ create index X_UstadUsers_02 on UstadUsers (UserMobileNo)
+ create index X_UstadUsers_03 on UstadUsers (UserEMail)
+ 
+ grant select, insert, update, delete on UstadUsers to public
+
+commit transaction
+
+
+
+
+CREATE TRIGGER [dbo].[trg_UstadUsers] ON [dbo].[UstadUsers]
+AFTER INSERT, UPDATE
+AS BEGIN
+
+
+    declare cursor_UstadUsers cursor for select UserId from Inserted
+    declare @curId bigint
+
+    OPEN cursor_UstadUsers
+
+    FETCH NEXT FROM cursor_UstadUsers INTO @curId
+
+	declare @UserGUID        varchar(255)
+	declare @UserFullName    nVarchar(100)
+	declare @UserFirstName   nVarchar(50)
+	declare @UserLastName    nVarchar(50)
+	declare @FirmGUID        varchar(255)
+	/*
+	declare @UserTcNo        varchar(11)
+	declare @UserMobileNo    varchar(11)
+	declare @UserEMail       varchar(50)
+    declare @About           nVarchar(250)
+	declare @UserKey         nVarchar(50)
+	declare @JobTypeId       SmallInt
+	*/
+	declare @RecordDate      SmallDatetime
+	
+    While @@FETCH_STATUS = 0
+    begin
+        select 
+	      @UserGUID = isnull(ins.UserGUID,'')
+		, @UserFullName = isnull(ins.UserFullName,'')
+	    , @UserFirstName = isnull(ins.UserFirstName,'')
+	    , @UserLastName = isnull(ins.UserLastName,'')
+		, @FirmGUID = isnull(ins.FirmGUID, '')
+        --UserTcNo
+        --UserMobileNo
+        --UserEMail
+        --FirmGUID
+        --About
+        --UserKey
+        --JobTypeId
+        , @RecordDate = ins.RecordDate
+		from inserted ins
+    	where ins.UserId = @curId
+
+		-- TamAdiSoyadi var ise Adi ve SoyAdi tespit ediliyor 
+        if ((@UserFullName <> '') and
+            (@UserFirstName = '') and
+            (@UserLastName = ''))
+        begin
+            declare @i1 int = 0
+            declare @i2 int = 0
+
+            set @i1 = CHARINDEX(' ', @UserFullName, 0)
+            set @i2 = CHARINDEX(' ', @UserFullName, @i1+1)
+
+            if (@i2 > 0) set @i1 = @i2
+
+            set @UserFirstName = SUBSTRING(@UserFullName, 0, @i1)
+            set @UserLastName = SUBSTRING(@UserFullName, @i1+1, 100)
+
+			update UstadUsers set 
+              UserFirstName = RTRIM(LTRIM(@UserFirstName))
+			 ,UserLastName = RTRIM(LTRIM(@UserLastName))
+            where UserId = @curId
+        end
+
+        if ((@UserFullName = '') and
+            (@UserFirstName <> '') and
+            (@UserLastName <> ''))
+        begin
+			update UstadUsers set 
+              UserFullName = RTRIM(LTRIM(@UserFirstName)) + ' ' + RTRIM(LTRIM(@UserLastName))
+            where UserId = @curId
+        end
+        
+        if ((@UserGUID = '') or 
+		    (@UserGUID is null))
+    	begin
+		  set @UserGUID = NEWID()
+    	  update UstadUsers set 
+          UserGUID = @UserGUID
+          where UserId = @curId
+    	end 
+
+		if (@RecordDate is null)
+		begin
+			update UstadUsers set 
+			RecordDate = GETDATE()
+            where UserId = @curId
+		end
+
+		/* FirmGUID */
+		if (@FirmGUID <> '')
+		begin
+		  -- Firms ve Users bağlantısı varmı kontrol edelim
+		  -- ufu : UstadFirmsUsers
+		  declare @ufuFirmGUID varchar(255)
+		  set @ufuFirmGUID = ''
+		  
+		  Select @ufuFirmGUID = @FirmGUID from dbo.UstadFirmsUsers
+		  Where FirmGUID = @FirmGUID
+		  and   UserId = @curId
+		  
+		  -- firma ve user arasında bağlantı yok, bağlantı kaydı oluşturalım
+		  if (@ufuFirmGUID = '')
+		  begin
+              INSERT INTO [dbo].[UstadFirmsUsers]
+                ([IsActive],[FirmId],[FirmGUID],[UserId],[UserGUID])
+              VALUES
+                (1
+                ,0                   --FirmId
+                ,'' + @FirmGUID + '' --FirmGUID
+                ,@curId              --UserId
+                ,'' + @UserGUID + '' --UserGUID		    
+				) 
+		  end
+		  
+		end
+
+    	FETCH NEXT FROM cursor_UstadUsers INTO @curId
+    end -- While
+
+    CLOSE cursor_UstadUsers
+    DEALLOCATE cursor_UstadUsers   
+
+END -- trigger
+
+alter table [dbo].[UstadUsers] ENABLE TRIGGER [trg_UstadUsers]
+
+
+/* üstad kullanıcıları için database hakları */  
+-- ------------------------------------------------------- 
+-- DbTypeId
+-- ------------------------------------------------------- 
+create table [Lkp].[UstadUsersDbType]
+(
+   Id               Int Unique not null, 
+   DbType           nVarchar(100)   null,
+   
+   constraint  pk_UstadUsersDbType primary key (Id)
+)
+
+Delete from [Lkp].[UstadUsersDbType]
+INSERT INTO [Lkp].[UstadUsersDbType] (Id, DbType)
+ VALUES 
+  ( 0,    N''),
+  ( 11,   N'Ustad Admin'),
+  ( 12,   N'Ustad İdari'),
+  ( 13,   N'Ustad Muhasebe'),
+  ( 21,   N'Ustad Yazılım Personeli'),
+  ( 22,   N'Ustad Test Personeli'),
+  ( 23,   N'Ustad Satış Personeli - Ustad CRM ve Abone database'),
+  ( 24,   N'Ustad Destek Personeli - Ustad CRM ve Abone database'),
+  ( 51,   N'Son kullanıcı - rol1'),
+  ( 52,   N'Son kullanıcı - rol2'),
+  ( 53,   N'Son kullanıcı - rol3'),
+  ( 54,   N'Son kullanıcı - rol4'),
+  ( 55,   N'Son kullanıcı - rol5'),
+
+

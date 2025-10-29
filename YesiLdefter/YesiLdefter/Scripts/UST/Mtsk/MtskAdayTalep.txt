@@ -1,0 +1,836 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table MtskAdayTalep
+ (
+   Id                    Int IDENTITY(1,1) not null, /* Id = AdayTalepId */
+   TalepGUID             uniqueidentifier  null,
+   FirmId                Int       not null,
+   AdayId                Int       not null,
+   IsActive              Bit       not null, 
+   TalepKayitTarihi      Date          null, 
+   ParentId              Int           null, /* 2.+4 hakkın bağlı olduğu sertifika talep Id si */
+   AdayNo                Int           null,
+
+   -- 20
+   /* buradaki kimlik bilgileri sadece ilk data transferinde dolduruluyor */
+   TcNo                  Varchar(11)   null, 
+   KimlikSeriNo          Varchar(10)   null, 
+   TamAdiSoyadi          nVarchar(100) null, 
+   Adi                   nVarchar(50)  null,
+   Soyadi                nVarchar(50)  null,
+   DogumTarihi           Date          null,
+   BabaAdi               nVarchar(50)  null,
+   AnneAdi               nVarchar(50)  null,
+   CinsiyetTipiId        SmallInt      null, /* SİLİNEBİLİR */ 
+   CepTelefonu           Varchar(15)   null,
+   Eposta                Varchar(98)   null, 
+   /* buradaki kimlik bilgileri sadece ilk data transferinde dolduruluyor SON */
+
+   -- 30
+   /* Talep bilgileri */
+   TalepTipiId             SmallInt      null,
+   -- 31
+   MevcutSertifikaTipiId   SmallInt      null,
+   MevcutSurucuBelgeTarihi Date          null, 
+   MevcutSurucuBelgeNo     nVarchar(30)  null,
+   IsMevcutOtomatik        Bit           null, /* 0 = Manuel vites, 1 = Otomatik vites */
+   IsMevcut2016Oncesi      Bit           null, 
+   IsMevcut125ccAlti       Bit           null,
+   -- 41
+   IstenenSertifikaTipiId  SmallInt      null,
+   IsOtomatik              Bit           null, /* 0 = Manuel vites, 1 = Otomatik vites */
+   IsEngelli               Bit           null, /* 0 = yok, 1 = var */
+   Is125ccAlti             Bit           null,
+
+   -- 50
+   -- Ders veya yaş için muafiyeti var
+   IsMuafiyetiVar          Bit           null, /* 0 = yok, 1 = var */  
+   MuafiyetAciklmasi       nVarchar(50)  null, 
+
+   Ceza100BelgeTarihi      Date          null,
+   Ceza100BelgeNo          nVarchar(50)  null, 
+   
+   OzelDersSaatSayisi      SmallInt      null, /* hem teo için hem uygulama için geçerli */
+   BirSaatOzelDersUcreti   Numeric(22,5) null, /* hem teo için hem uygulama için geçerli */ 
+   OzelDersUcretToplami    Numeric(22,5) null, /* hem teo için hem uygulama için geçerli */ 
+
+   UygulamaPersonelId      Int           null, /* aday direk bir personeli isteyebilir   */
+   UygPersCinsiyetTipiId   SmallInt      null, /* aday personelin cinsiyetini belirtebilir */
+
+   -- 60
+   /* Dönem bilgileri */
+   /* mebbisden Nakil için kayıt olduğu dönem bilgisi isteyebilir */ 
+   DonemTipiId             Int           null,
+   GrupTipiId              SmallInt      null,
+   SubeTipiId              SmallInt      null,
+      
+   -- 70
+   MebbisKurumOnayi        Bit           null, /* 0-Onaysız, 1-Onaylandı */		
+   MebbisDurumTipiId       SmallInt      null,
+   MebbisDurumOkundu       Bit           null,
+   KayitTipiId             SmallInt      null, /* 1.'Ön kayıt', 2.'Kayıt aşamasında', 3.'Kesin kayıt' ... */
+
+   /* Dönem bilgileri SON */
+
+   -- 80
+   BasvuruResim            VarBinary(max) null,
+   BasvuruResimSmall       VarBinary(max) null,
+   KullaniciUyarilari      nVarchar(200)  null,
+   SistemUyarilari         nVarchar(200)  null,
+   EtiketTipiId            SmallInt       null,
+   VeriKaynakTipiId        SmallInt       null, /* 1. Kullanıcı Manuel, 2. Mebbis Dönem Aday Onaylama, 3. Mebbis Uygulama Sınav Listesi, 4. Mebbis Aday Durum Bilgileri, 5. Tabim veritabanı  */
+   VeriKaynakId            Int            null, /* Veri transferi edildiği tablodaki Id . Sorun olduğunda bilginin nereden geldiğine referans olsun */
+
+   -- 90
+   KimlikGeldi             Bit            null,
+   BiyometrikGeldi         Bit            null,
+   BasvuruFotoCekildi      Bit            null,  
+   OgrenimGeldi            Bit            null,
+   SaglikGeldi             Bit            null,
+   AdliSicilGeldi          Bit            null,
+   ImzaAlindi              Bit            null,
+   SozlesmeYapildi         Bit            null,
+   AdresAlindi             Bit            null,
+   BelgelerGeldi           Bit            null,
+         
+   -- 110
+   IsDosyaKapandi          Bit            null, /* Dosya kapandı ise 1, açık ise 0 */
+   DosyaKapanmaNedeni      nVarchar(50)   null,
+   DosyaKapanmaTarihi      Datetime       null,
+
+   constraint		pk_MtskAdayTalep primary key (Id)
+ )
+  
+ grant select, insert, update, delete on MtskAdayTalep to public
+
+  create index X_MtskAdayTalep01 on MtskAdayTalep (TcNo)
+  create index X_MtskAdayTalep02 on MtskAdayTalep (TamAdiSoyadi)
+  create index X_MtskAdayTalep03 on MtskAdayTalep (AdayId)
+  create index X_MtskAdayTalep04 on MtskAdayTalep (DonemTipiId,GrupTipiId,SubeTipiId)
+
+commit transaction
+
+/*CreateTableEnd*/
+
+
+/*CreateTrigger*/
+
+CREATE TRIGGER [dbo].[trg_MtskAdayTalep] on [dbo].[MtskAdayTalep]
+AFTER INSERT, UPDATE
+AS BEGIN
+
+  print 'talep trigger start'
+
+  declare talepCursor_ cursor local for select Id from Inserted
+  declare @TalepId bigint
+
+  OPEN talepCursor_
+
+  FETCH NEXT FROM talepCursor_ INTO @TalepId
+
+  -- eski datalar
+  declare @eAdayId int = 0
+  declare @eIsActive bit = 0
+  declare @eTalepTipiId smallInt = 0
+  declare @eTamAdiSoyadi nvarchar(100) = ''
+  declare @eDonemTipiId int = 0 
+  declare @eGrupTipiId smallInt = 0
+  declare @eSubeTipiId smallInt = 0
+  declare @eMebbisDurumTipiId smallInt = 0
+	
+  declare @eMevcutSertifikaTipiId smallInt = 0
+  declare @eIsMevcutOtomatik bit = 0
+  declare @eIsMevcut125ccAlti bit = 0
+  declare @eIstenenSertifikaTipiId smallInt = 0
+  declare @eIsOtomatik bit = 0
+  declare @eIs125ccAlti bit = 0
+  declare @eKayitTipiId smallInt = 0  
+
+  declare @eBelgelerGeldi bit = 0
+  declare @eIsDosyaKapandi bit = 0
+ 
+  -- yeni datalar
+  declare @yAdayId int = 0
+  declare @yIsActive bit = 0
+  declare @yTalepTipiId smallInt = 0
+  declare @yDonemTipiId int = 0 
+  declare @yGrupTipiId smallInt = 0
+  declare @ySubeTipiId smallInt = 0
+   
+  declare @yTalepGUID uniqueidentifier
+  declare @yFirmId int = 0
+  declare @yParentId int = 0
+  declare @yTcNo varchar(11) = ''
+  declare @yKimlikSeriNo varchar(10) = ''
+  declare @yTamAdiSoyadi nvarchar(100) = ''
+  declare @yAdi nvarchar(50) = ''
+  declare @ySoyadi nvarchar(50) = ''
+  declare @yDogumTarihi date
+  declare @yBabaAdi nvarchar(50) = ''
+  declare @yAnneAdi nvarchar(50) = ''
+  declare @yCinsiyetTipiId smallInt = 0
+  declare @yCepTelefonu nvarchar(15) = ''
+  declare @yEposta nvarchar(100) = ''
+  declare @yTalepKayitTarihi date
+
+  declare @yMevcutSertifikaTipiId smallInt = 0
+  declare @yIsMevcutOtomatik bit = 0
+  declare @yIsMevcut125ccAlti bit = 0
+  declare @yIstenenSertifikaTipiId smallInt = 0
+  declare @yIsOtomatik bit = 0
+  declare @yIs125ccAlti bit = 0
+  declare @yMebbisDurumTipiId smallInt = 0
+  declare @yKayitTipiId smallInt = 0  
+  declare @yVeriKaynakId int = 0
+
+  declare @yKimlikGeldi bit = null
+  declare @yBiyometrikGeldi bit = null
+  declare @yBasvuruFotoCekildi bit = null  
+  declare @yOgrenimGeldi bit = null
+  declare @ySaglikGeldi bit = null
+  declare @yAdliSicilGeldi bit = null
+  declare @yImzaAlindi bit = null
+  declare @ySozlesmeYapildi bit = null
+  declare @yAdresAlindi bit = null
+  declare @yBelgelerGeldi bit = 0
+  declare @yIsDosyaKapandi bit = 0
+
+  -- Veri Transferi başladımı
+  declare @DbUpdatesIsActive Bit = 0
+  set @DbUpdatesIsActive = [dbo].[fnc_getIsDbUpdate] (0)
+
+  WHILE @@FETCH_STATUS = 0
+  BEGIN
+      print '  talep while begin '
+	  print '    TalepId : ' + Convert(varchar(10), @TalepId)
+
+      Select 
+          @eAdayId = isnull(dlt.AdayId,0)
+         ,@eIsActive = isnull(dlt.IsActive,0)
+         ,@eTalepTipiId = isnull(dlt.TalepTipiId,0)
+         ,@eTamAdiSoyadi = isnull(dlt.TamAdiSoyadi,'')
+         ,@eDonemTipiId = isnull(dlt.DonemTipiId,0) 
+         ,@eGrupTipiId = isnull(dlt.GrupTipiId,0)
+         ,@eSubeTipiId = isnull(dlt.SubeTipiId,0)
+
+         ,@eMevcutSertifikaTipiId = isnull(dlt.MevcutSertifikaTipiId,0)
+		 ,@eIsMevcutOtomatik = isnull(dlt.IsMevcutOtomatik,0)
+         ,@eIsMevcut125ccAlti = isnull(dlt.IsMevcut125ccAlti,0)
+         ,@eIstenenSertifikaTipiId = isnull(dlt.IstenenSertifikaTipiId,0)
+         ,@eIsOtomatik = isnull(dlt.IsOtomatik,0)
+         ,@eIs125ccAlti = isnull(dlt.Is125ccAlti,0)
+
+         ,@eMebbisDurumTipiId = isnull(dlt.MebbisDurumTipiId,0)
+         ,@eKayitTipiId = isnull(dlt.KayitTipiId,0)
+		 ,@eBelgelerGeldi = isnull(dlt.BelgelerGeldi,0)  
+         ,@eIsDosyaKapandi = isnull(dlt.IsDosyaKapandi,0)
+      From deleted dlt
+      Where dlt.Id = @TalepId
+
+      Select 
+          @yTalepGUID = ins.TalepGUID
+         ,@yAdayId = isnull(ins.AdayId,0)
+         ,@yIsActive = isnull(ins.IsActive,0)
+         ,@yTalepTipiId = isnull(ins.TalepTipiId,0)
+         ,@yDonemTipiId = isnull(ins.DonemTipiId,0) 
+         ,@yGrupTipiId = isnull(ins.GrupTipiId,0)
+         ,@ySubeTipiId = isnull(ins.SubeTipiId,0)
+      --
+         ,@yFirmId = isnull(ins.FirmId,0)
+         ,@yParentId = isnull(ins.ParentId,0)
+         ,@yTcNo = isnull(ins.TcNo,'')
+         ,@yKimlikSeriNo = isnull(ins.KimlikSeriNo, '')
+         ,@yTamAdiSoyadi = isnull(ins.TamAdiSoyadi,'')
+         ,@yAdi = isnull(ins.Adi,'')
+         ,@ySoyadi = isnull(ins.Soyadi,'')
+		 ,@yDogumTarihi = ins.DogumTarihi
+		 ,@yBabaAdi = isnull(ins.BabaAdi,'')
+		 ,@yAnneAdi = isnull(ins.AnneAdi,'')
+		 ,@yCinsiyetTipiId = isnull(ins.CinsiyetTipiId,0)
+		 ,@yCepTelefonu = isnull(ins.CepTelefonu,'')
+		 ,@yEposta = isnull(ins.Eposta,'')
+		 ,@yTalepKayitTarihi = ins.TalepKayitTarihi
+
+         ,@yMevcutSertifikaTipiId = isnull(ins.MevcutSertifikaTipiId,0)
+		 ,@yIsMevcutOtomatik = isnull(ins.IsMevcutOtomatik,0)
+         ,@yIsMevcut125ccAlti = isnull(ins.IsMevcut125ccAlti,0)
+         ,@yIstenenSertifikaTipiId = isnull(ins.IstenenSertifikaTipiId,0)
+         ,@yIsOtomatik = isnull(ins.IsOtomatik,0)
+         ,@yIs125ccAlti = ISNULL(ins.Is125ccAlti,0)
+         ,@yMebbisDurumTipiId = isnull(ins.MebbisDurumTipiId,0)
+         ,@yKayitTipiId = isnull(ins.KayitTipiId,0)
+		 ,@yVeriKaynakId = isnull(ins.VeriKaynakId,0)
+
+         ,@yKimlikGeldi = isnull(ins.KimlikGeldi,0)
+         ,@yBiyometrikGeldi = isnull(ins.BiyometrikGeldi,0)
+         ,@yBasvuruFotoCekildi = isnull(ins.BasvuruFotoCekildi,0)
+         ,@yOgrenimGeldi = isnull(ins.OgrenimGeldi,0)
+         ,@ySaglikGeldi = isnull(ins.SaglikGeldi,0)
+         ,@yAdliSicilGeldi = isnull(ins.AdliSicilGeldi,0)
+         ,@yImzaAlindi = isnull(ins.ImzaAlindi,0)
+         ,@ySozlesmeYapildi = isnull(ins.SozlesmeYapildi,0)
+         ,@yAdresAlindi = isnull(ins.AdresAlindi,0)
+         ,@yBelgelerGeldi = isnull(ins.BelgelerGeldi,0)
+         ,@yIsDosyaKapandi = isnull(ins.IsDosyaKapandi,0)
+      From inserted as ins
+      Where ins.Id = @TalepId
+
+      -- TamAdiSoyadi var ise Adi ve Soyadi tespit ediliyor 
+      if ((@yTamAdiSoyadi <> '') and (@yAdi = '') and (@ySoyadi = ''))
+      begin
+          declare @i1 int = 0
+          declare @i2 int = 0
+
+          set @i1 = CHARINDEX(' ', @yTamAdiSoyadi, 0) -- birinci boşluğu bul
+          set @i2 = CHARINDEX(' ', @yTamAdiSoyadi, @i1+1) -- ikinci boşluğu bul
+		  -- ikinci boşluk varsa göbek adı vardır,
+		  -- ikinci boşluktan sonrası soyadı dır
+          if (@i2 > 0) set @i1 = @i2 
+
+          set @yAdi = SUBSTRING(@yTamAdiSoyadi, 0, @i1)
+          set @ySoyadi = SUBSTRING(@yTamAdiSoyadi, @i1+1, 100)
+          set @eTamAdiSoyadi = ''
+          Update MtskAdayTalep set Adi = RTRIM(LTRIM(@yAdi)), Soyadi = RTRIM(LTRIM(@ySoyadi))
+          Where Id = @TalepId
+      end -- if @yTamAdi
+
+	  declare @newTamAdi nvarchar(100)
+	  set @newTamAdi = @yAdi + ' ' +  @ySoyadi
+	  
+      declare @mevcutAdayId int = 0
+      Select @mevcutAdayId = isnull(Id, 0) from MtskAday 
+      Where TcNo = @yTcNo
+
+	  if (@mevcutAdayId > 0 and @yAdayId = 0)
+      begin	  
+	      set @yAdayId = @mevcutAdayId
+		  
+		  -- Baştan Data transferi yap denince AdayId sıfırlanıyor
+		  Update dbo.MtskAdayTalep Set AdayId = @yAdayId
+		  Where Id = @TalepId
+      end
+
+	  -- Data transferlerinde oluşuyor
+	  if ((@yIstenenSertifikaTipiId >= 9200) and -- 100 Ceza
+	      (@yTalepTipiId <> 4))                  -- Talep 100 Ceza değilse 
+      begin
+		  Update dbo.MtskAdayTalep Set TalepTipiId = 4
+		  Where Id = @TalepId
+      end
+
+	  --print @yAdayId
+      --print @yVeriKaynakId 
+	  --print @DbUpdatesIsActive
+	  
+	  -- Tekrar data transferi olursa @DbUpdatesIsActive = 1
+      if ((@yAdayId > 0) and (@yVeriKaynakId > 0) and @DbUpdatesIsActive = 1) 
+      begin
+	      Print '   * Data transfer update'
+          UPDATE [dbo].[MtskAday] SET 
+		       [IlkKayitTarihi] = @yTalepKayitTarihi   
+              ,[TcNo] = @yTcNo
+              ,[KimlikSeriNo] = @yKimlikSeriNo
+              ,[TamAdiSoyadi] = @newTamAdi
+              ,[Adi] = @yAdi
+              ,[Soyadi] = @ySoyadi
+              ,[DogumTarihi] = @yDogumTarihi
+              ,[BabaAdi] = @yBabaAdi
+              ,[AnneAdi] = @yAnneAdi
+              ,[CinsiyetTipiId] = @yCinsiyetTipiId
+              ,[CepTelefonu] = @yCepTelefonu
+              ,[Eposta] = @yEposta
+          WHERE Id = @yAdayId
+		  Print '   * Data transfer update end'
+      end -- if
+
+      -- MtskAday tablosu burada olmak zorunda : AdayId tespit ediliyor
+      if (@yAdayId = 0 and @yTcNo <> '' and @mevcutAdayId = 0) --@DbUpdatesIsActive = 1)
+      begin
+          if (@mevcutAdayId = 0)
+          begin
+              Print '   * Data transfer insert'
+              INSERT INTO [dbo].[MtskAday] 
+			  (  [AdayGUID],  [FirmId], [IsActive],  [TcNo], [KimlikSeriNo], [TamAdiSoyadi], [Adi], [Soyadi],  [DogumTarihi], [BabaAdi], [AnneAdi], [CinsiyetTipiId], [CepTelefonu], [Eposta], [IlkKayitTarihi] ) VALUES
+              (  NEWID(),    @yFirmId,   1,         @yTcNo, @yKimlikSeriNo,  @newTamAdi,    @yAdi, @ySoyadi,  @yDogumTarihi, @yBabaAdi, @yAnneAdi, @yCinsiyetTipiId, @yCepTelefonu, @yEposta, @yTalepKayitTarihi  )
+              -- Yeni @mevcutAdayId ye kavuştuk
+              Select @yAdayId = Id from MtskAday
+              Where TcNo = @yTcNo
+              Print '   * Data transfer insert end'
+          end
+      end -- if @yAdayId = 0
+
+	  if ((@yAdayId > 0) and (@yTcNo = ''))
+	  begin
+          Select @yTcNo = isnull(TcNo, '') from MtskAday 
+          Where Id = @yAdayId
+
+		  if (@yTcNo <> '')
+		  begin
+		      Update MtskAdayTalep set TcNo = @yTcNo
+			  Where Id = @TalepId
+		  end
+	  end
+
+      if (@yMevcutSertifikaTipiId < 0) set @yMevcutSertifikaTipiId = 0
+      if (@yMevcutSertifikaTipiId > 9000)
+      begin
+	      if (@yMevcutSertifikaTipiId = 9022) set @yIsMevcut125ccAlti = 1 -- A1 125 cc altı
+		  --if (@yMevcutSertifikaTipiId <> 9200) -- 100 Ceza
+		  set @yIsMevcutOtomatik = [dbo].[fnc_getSertifikaIsOtomatik](@yMevcutSertifikaTipiId)
+	      set @yMevcutSertifikaTipiId = [dbo].[fnc_getSertifikaId](@yMevcutSertifikaTipiId)
+      end
+      if (@yIstenenSertifikaTipiId > 9000)
+      begin
+	      if (@yIstenenSertifikaTipiId = 9022) set @yIs125ccAlti = 1 -- A1 125 cc altı
+		  --if (@yIstenenSertifikaTipiId <> 9200) -- 100 Ceza
+          set @yIsOtomatik = [dbo].[fnc_getSertifikaIsOtomatik](@yIstenenSertifikaTipiId)
+	      set @yIstenenSertifikaTipiId = [dbo].[fnc_getSertifikaId](@yIstenenSertifikaTipiId)
+      end
+
+      -- Yeni kayıt ise kontrol et
+      -- Diğer aşamalara geçmişse dokunma
+      if (@yKayitTipiId < 3)
+	      set @yKayitTipiId = [dbo].[fnc_getSertifikaKayitTipi]( @TalepId )
+	  
+	  if (@eMebbisDurumTipiId <> @yMebbisDurumTipiId)
+	      set @yKayitTipiId = [dbo].[fnc_getSertifikaKayitTipi]( @TalepId )
+
+      if ((@yBiyometrikGeldi = 1) and
+          --(@yBasvuruFotoCekildi = 1) and
+          (@yOgrenimGeldi = 1) and
+          (@yAdliSicilGeldi = 1) and
+          (@ySaglikGeldi = 1) and
+          (@yImzaAlindi = 1) and
+          (@ySozlesmeYapildi = 1) and
+          (@yAdresAlindi = 1)) 
+           set @yBelgelerGeldi = 1
+      else set @yBelgelerGeldi = 0
+
+	  -- @yAdayId   : ilk mebbisden kayıt alındığında adayId = 0, MtskAday yeni kayıt oluşturuluyor ve adayId belli oluyor
+      -- @yIsActive : kayıtTipiId ye göre IsActive değişiyor
+      -- @newTamAdi : ad veya soyad değişebiliyor
+      -- @yMevcutSertifikaTipiId or
+      -- @yIsMevcutOtomatik or
+      -- @yIstenenSertifikaTipiId or
+      -- @yIsOtomatik or 
+      -- @yIs125ccAlti : ( xx Manuel veya xx Otomatik ) şeklinde kayıt edilebiliyor 
+	  
+	  if ((@eAdayId <> @yAdayId) or 
+          (@eIsActive <> @yIsActive) or
+	      (@eTamAdiSoyadi <> @newTamAdi) or
+		  (@eMevcutSertifikaTipiId <> @yMevcutSertifikaTipiId) or
+		  (@eIsMevcutOtomatik <> @yIsMevcutOtomatik) or
+		  (@eIstenenSertifikaTipiId <> @yIstenenSertifikaTipiId) or
+		  (@eIsOtomatik <> @yIsOtomatik) or
+		  (@eIs125ccAlti <> @yIs125ccAlti) or
+		  (@eBelgelerGeldi <> @yBelgelerGeldi) or
+		  (@eKayitTipiId <> @yKayitTipiId)
+		  )
+      begin
+          Update MtskAdayTalep Set
+              AdayId = @yAdayId
+             ,IsActive = @yIsActive  
+	         ,TamAdiSoyadi = @newTamAdi
+		     ,MevcutSertifikaTipiId = @yMevcutSertifikaTipiId
+		     ,IsMevcutOtomatik = @yIsMevcutOtomatik
+		     ,IstenenSertifikaTipiId = @yIstenenSertifikaTipiId
+		     ,IsOtomatik = @yIsOtomatik
+		     ,Is125ccAlti = @yIs125ccAlti
+             ,BelgelerGeldi = @yBelgelerGeldi
+             ,KayitTipiId = @yKayitTipiId
+          Where Id = @TalepId		  
+      end
+	  
+      -- 2. +4 hak için sertifika bilgilerini kopyala 
+      if (@yTalepTipiId = 2) and (@yParentId = 0)
+      begin
+          Execute [dbo].[prc_MtskAdayTalepSertifika24HakKaydi] @TalepId
+      end
+	  
+      if (@yTalepGUID is null)
+      begin
+          Update MtskAdayTalep Set TalepGUID = NEWID()
+          Where Id = @TalepId
+      end
+
+      if (@DbUpdatesIsActive = 0)
+      begin 
+          if ( Select Count(Id) as ADET
+               From [dbo].[MtskDonemi]
+               Where DonemTipiId = @yDonemTipiId
+               and   GrupTipiId = @yGrupTipiId ) = 0 
+               and @yGrupTipiId > 1
+          begin
+              INSERT INTO [dbo].[MtskDonemi]
+                   ([ParentId]
+                   ,[FirmId]
+                   ,[IsActive]
+                   ,[DonemTipiId]
+                   ,[GrupTipiId]
+                   ,[KurumOnayTipiId])
+              VALUES
+                   (0 --ParentId
+                   ,@yFirmId
+                   ,1 --IsActive
+                   ,@yDonemTipiId
+                   ,@yGrupTipiId
+                   ,0 -- KurumOnayTipiId
+				   )
+          end
+
+          if ( Select Count(Id) as ADET
+               From [dbo].[MtskGrupSubesi]
+               Where DonemTipiId = @yDonemTipiId
+               and   GrupTipiId = @yGrupTipiId 
+               and   SubeTipiId = @ySubeTipiId ) = 0 
+               and   @yGrupTipiId > 0
+               and   @ySubeTipiId > 0
+          begin
+              INSERT INTO [dbo].[MtskGrupSubesi]
+                  ([ParentId]
+                  ,[FirmId]
+                  ,[IsActive]
+                  ,[DonemTipiId]
+                  ,[GrupTipiId]
+                  ,[SubeTipiId]
+                  ,[KurumOnayTipiId]
+                  ,[TDersIsUploaded]
+                  )
+              VALUES
+                  (0 --ParentId
+                  ,@yFirmId
+                  ,1 --IsActive
+                  ,@yDonemTipiId
+                  ,@yGrupTipiId
+                  ,@ySubeTipiId
+                  ,0 --KurumOnayTipiId
+                  ,0 --TDersIsUploaded
+                  )
+          end
+
+          if (@eIsDosyaKapandi <> @yIsDosyaKapandi)
+          begin 
+              if (@yIsDosyaKapandi = 1)
+              begin
+                  Update MtskAdayTalep Set KayitTipiId = 8
+                  , DosyaKapanmaTarihi = GETDATE()
+                  Where Id = @TalepId
+              end
+          end
+
+          Execute [dbo].[prc_MtskAdayTablesInsert] @TalepId  -- Data transferi sırasında oluşturuluyor zaten insert oluyor
+	      Execute [dbo].[prc_MtskAdayTalepYasiniHesapla] @TalepId
+
+          -- Veri transferi yapılmıyorsa 
+          if (@DbUpdatesIsActive = 0)
+          begin
+              Execute [dbo].[prc_MtskAdayTakipTalepKaydiSingleSet] @TalepId
+              EXECUTE [dbo].[prc_MtskAdayTakip] @yFirmId, @TalepId, 0, 'MtskAdayTakipKayit'
+          end
+
+		  -- MtskAdayBelgeler tablosu
+		  Update MtskAdayBelgeler Set DonemTipiId = @yDonemTipiId
+		  Where TalepId = @TalepId
+		  and isnull(DonemTipiId,0) <> @yDonemTipiId
+
+      end 	  
+
+      --- Execute [dbo].[prc_MtskAdayTakipTalepKaydiMultiSet] @yFirmId 
+
+      FETCH NEXT FROM talepCursor_ INTO @TalepId
+      print '  talep while end'
+  END -- While
+
+  CLOSE talepCursor_
+  DEALLOCATE talepCursor_   
+
+  print 'talep trigger End'
+
+
+END -- create trigger
+
+/*CreateTriggerEnd*/
+
+
+
+
+
+ /*CreateTrigger*/
+
+CREATE TRIGGER [dbo].[trg_MtskAdayTalepDelete] on [dbo].[MtskAdayTalep]
+AFTER DELETE
+AS BEGIN
+
+    declare talepCursorDlt cursor local for select Id from deleted
+	declare @curId bigint
+
+	OPEN talepCursorDlt
+
+    FETCH NEXT FROM talepCursorDlt INTO @curId
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+	  Delete from MtskAdayAdliSicil  Where TalepId = @curId
+	  Delete from MtskAdayAdres      Where TalepId = @curId
+	  Delete from MtskAdayBelgeler   Where TalepId = @curId
+	  Delete from MtskAdayImza       Where TalepId = @curId
+	  Delete from MtskAdayOgrenim    Where TalepId = @curId
+	  Delete from MtskAdaySaglik     Where TalepId = @curId
+	  Delete from MtskAdaySertifika  Where TalepId = @curId
+	  Delete from MtskAdaySozlesme   Where TalepId = @curId
+	  Delete from MtskAdayTakip      Where TalepId = @curId
+	  Delete from MtskAdayUcret      Where TalepId = @curId
+
+      FETCH NEXT FROM talepCursorDlt INTO @curId
+    END
+
+    CLOSE talepCursorDlt
+    DEALLOCATE talepCursorDlt
+
+END
+
+ /*CreateTriggerEnd*/
+
+
+
+
+/*CreateLkpTable*/
+
+begin transaction
+
+-- TalepTipiId
+-- KayitTipiId
+-- MebbisDurumTipiId
+-- VeriKaynakTipiId
+
+-- MevcutSertifikaTipiId ve
+-- IsteneSertifikaTipiId için
+-- [Lkp].[MtskSertifikaTipi]  tablosuna bak
+
+-- ------------------------------------------------------- 
+-- TalepTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdayTalepTalepTipi')
+drop table [Lkp].[MtskAdayTalepTalepTipi]
+
+create table [Lkp].[MtskAdayTalepTalepTipi]
+(
+   Id               Int Unique not null, 
+   TalepTipi        nVarchar(50)   null,
+   IsActive         Bit            null,
+   
+   constraint  pk_MtskAdayTalepTalepTipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskAdayTalepTalepTipi]
+INSERT INTO [Lkp].[MtskAdayTalepTalepTipi] (Id, TalepTipi, IsActive)
+ VALUES 
+  ( 0,    N'Seçiniz', 1),
+  ( 1,    N'Sertifika', 1),
+  ( 2,    N'2.+4 hak ', 1),
+  ( 3,    N'Nakil 2.+4 hak', 1),
+  ( 4,    N'100 Ceza', 1),
+  ( 5,    N'Özel direksiyon ders (Aday değil)', 1)
+  --( 6,    N'Özel teorik ders', 1)
+
+
+-- ------------------------------------------------------- 
+-- KayitTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdayTalepKayitTipi')
+drop table [Lkp].[MtskAdayTalepKayitTipi]
+
+create table [Lkp].[MtskAdayTalepKayitTipi]
+(
+   Id               Int Unique not null, 
+   KayitTipi        nVarchar(50)   null,
+   ChartCaption     nVarchar(20)   null,
+   FormCaption      nVarchar(15)   null,
+
+   constraint  pk_MtskAdayTalepKayitTipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskAdayTalepKayitTipi]
+INSERT INTO [Lkp].[MtskAdayTalepKayitTipi] (Id, KayitTipi, ChartCaption, FormCaption)
+ VALUES 
+  ( 0,    N'Tanımsız', '', ''),
+  ( 1,    N'Ön kayıt',                      'Ön kayıt',     'Yeni Aday' ),
+  ( 2,    N'Kayıt aşamasında',              'K.Aşamasında', 'Mebbis' ),
+  ( 3,    N'Kesin kayıt',                   'Kesin kay.', '' ),
+  ( 4,    N'Sertifika almaya hak kazandı',  '', '' ),
+  ( 5,    N'Tüm e-Sınav hakkı bitti. Dosya yandı',  '', '' ),
+  ( 6,    N'Tüm uygulamalı sınav hakkı bitti',  '', '' ),
+  ( 7,    N'2. +4 sınav hakkı bitti. Dosya yandı',  '', '' ),
+  ( 8,    N'Diğer sebeplerden dolayı dosya kapandı',  '', '' ),
+  ( 9,    N'24 ayda kapanmamış dosya, otomatik kapatıldı',  '', '' )
+
+
+/*
+  ( 5,    N'Sertifika almaya hak kazandı',  '', '' ),
+  ( 6,    N'Tüm e-Sınav hakkı bitti. Dosya yandı',  '', '' ),
+  ( 7,    N'Tüm uygulamalı sınav hakkı bitti',  '', '' ),
+  ( 8,    N'2. +4 sınav hakkı bitti. Dosya yandı',  '', '' ),
+  ( 9,    N'Diğer sebeplerden dolayı dosya kapandı',  '', '' )
+*/
+
+
+-- ------------------------------------------------------- 
+-- MebbisDurumTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdayTalepMebbisDurumTipi')
+drop table [Lkp].[MtskAdayTalepMebbisDurumTipi]
+
+create table [Lkp].[MtskAdayTalepMebbisDurumTipi]
+(
+   Id                Int Unique not null, 
+   MebbisDurumTipi   nVarchar(70)   null
+   
+   constraint  pk_MtskAdayTalepMebbisDurumTipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskAdayTalepMebbisDurumTipi]
+INSERT INTO [Lkp].[MtskAdayTalepMebbisDurumTipi] (Id, MebbisDurumTipi)
+ VALUES 
+  (-1,  N'' ),
+  ( 0,  N'Kursa Başvuru Aşamasında' ),
+  ( 1,  N'Teorik Sınav Aşamasında' ),
+  ( 2,  N'Uygulama Sınav Aşamasında' ),
+  ( 3,  N'Teorik Sınav Hakkı Doldu' ),
+  ( 4,  N'Uygulama Sınav Hakkı Doldu' ),
+  ( 5,  N'Sertifika Almaya Hak Kazandı' ),
+  ( 6,  N'Sertifikası İptal Edildi' ),
+  ( 7,  N'e-Sınav Aşamasında' ),
+  ( 8,  N'e-Sınav Test Aşamasında' ),
+  ( 9,  N'e-Sınavdan Başarısız Oldu' ),
+  ( 10,  N'e-Sınav Hakkı Doldu' ),
+  ( 11,  N'Kaydı Silindi' ),
+  ( 12,  N'Ceza Kaydı Var' ),
+  ( 13,  N'Teorik Dersten Muaf' ),
+  ( 14,  N'Adli Sicil Kaydı Uygun Olmadığından Dönem Kaydı Durdurulmuştur.' ),
+  ( 22,  N'2.Direksiyon Aşamasında' )
+
+
+-- ------------------------------------------------------- 
+-- VeriKaynakTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdayTalepVeriKaynakTipi')
+drop table [Lkp].[MtskAdayTalepVeriKaynakTipi]
+
+create table [Lkp].[MtskAdayTalepVeriKaynakTipi]
+(
+   Id                Int Unique not null, 
+   VeriKaynakTipi   nVarchar(50)   null
+   
+   constraint  pk_MtskAdayTalepVeriKaynakTipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskAdayTalepVeriKaynakTipi]
+INSERT INTO [Lkp].[MtskAdayTalepVeriKaynakTipi] (Id, VeriKaynakTipi)
+ VALUES 
+  ( 0,  N'' ),
+  ( 1,  N'Kullanıcı girişi, kaydı' ),
+  ( 2,  N'Mebbis dönem aday onaylama listesi' ),
+  ( 3,  N'Mebbis e-sınav listesi' ),
+  ( 4,  N'Mebbis uygulama sınav listesi' ),
+  ( 5,  N'Mebbis aday durum bilgileri' ),
+  ( 6,  N'2.+4 hak için veri aktarımı' ), --- ??? hatırlamadım
+  ( 11, N'Veri aktarımı' )
+
+
+commit transaction
+
+/*CreateLkpTableEnd*/
+
+
+
+
+/*
+-- ------------------------------------------------------- 
+-- EtiketTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskSaatUygulamaEtiketTipi')
+drop table [Lkp].[MtskSaatUygulamaEtiketTipi]
+
+create table [Lkp].[MtskSaatUygulamaEtiketTipi]
+(
+   Id               Int Unique not null, 
+   EtiketTipi       nVarchar(50)   null,
+   GrupTipiId       SmallInt       null,
+   
+   constraint  pk_MtskSaatUygulamaEtiketTipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskSaatUygulamaEtiketTipi]
+INSERT INTO [Lkp].[MtskSaatUygulamaetiketTipi] (Id, EtiketTipi, GrupTipiId)
+ VALUES 
+  ( 0,    N'Normal',0),
+  ( 125,  N'A1 125 CC altı', 0)
+
+
+  */
+
+
+  /*
+-- ------------------------------------------------------- 
+-- MesajTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskAdayTalepMesajTipi')
+drop table [Lkp].[MtskAdayTalepMesajTipi]
+
+create table [Lkp].[MtskAdayTalepMesajTipi]
+(
+   Id                Int Unique not null, 
+   MesajTipi         nVarchar(50)   null
+   
+   constraint  pk_MtskAdayTalepMesajTipi primary key (Id)
+)
+
+Delete from [Lkp].[MtskAdayTalepMesajTipi]
+INSERT INTO [Lkp].[MtskAdayTalepMesajTipi] (Id, MesajTipi)
+ VALUES 
+  ( 0,  N'' ),
+  ( 1,  N'Gerekli Belgeler' ),
+  ( 2,  N'Eksik Belgeler' )
+*/
+
+/*
+
+           ,[KimlikSeriNo]
+           ,[IlkKayitTarihi]
+           ,[DogumTarihi]
+           ,[BabaAdi]
+           ,[AnneAdi]
+           ,[CinsiyetTipiId]
+           ,[CepTelefonu]
+           ,[CepTelefonu2]
+           ,[Eposta]
+           ,[MesajTipiId]
+           ,[SMSGonder]
+           ,[EpostaGonder]
+           ,[WhatsAppGonder]
+           ,[KullaniciUyarilari]
+           ,[BiyometrikResim]
+           ,[BiyometrikResimSmall])
+
+           ,<IlkKayitTarihi, date,>
+           ,<KimlikSeriNo, varchar(10),>
+           ,<DogumTarihi, date,>
+           ,<BabaAdi, nvarchar(50),>
+           ,<AnneAdi, nvarchar(50),>
+           ,<CinsiyetTipiId, smallint,>
+           ,<CepTelefonu, varchar(15),>
+           ,<CepTelefonu2, varchar(15),>
+           ,<Eposta, varchar(98),>
+           ,<MesajTipiId, smallint,>
+           ,<SMSGonder, bit,>
+           ,<EpostaGonder, bit,>
+           ,<WhatsAppGonder, bit,>
+           ,<KullaniciUyarilari, nvarchar(200),>
+           ,<BiyometrikResim, varbinary(max),>
+           ,<BiyometrikResimSmall, varbinary(max),>)
+
+
+
+*/

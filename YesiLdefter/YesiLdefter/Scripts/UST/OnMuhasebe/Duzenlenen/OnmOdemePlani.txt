@@ -1,0 +1,401 @@
+﻿
+/*CreateTable*/
+
+begin transaction
+
+ create table OnmOdemePlani
+ (
+   Id                  Int IDENTITY(1,1) not null, 
+   OdmemePlaniGUID     uniqueidentifier  null,
+   FirmId              Int       not null,
+   IsActive            Bit       not null, /* default : 1 = active, 0 = not active */ 
+   DonemTipiId         Int           null, /* borcun oluştuğu YılAy ? neden kullanıldım, gereksizse sil */
+   TalepId             Int           null, /* = MtskAdayTalep.Id */
+   TalepTipiId         SmallInt      null, /* = MtskAdayTalep.TalepTipi */
+   UcretTipiId         Int           null, /* = Ücret tipleri */
+   CariId              Int           null, /* = MtskAdayTalep.AdayId    */
+   -- 20
+   TaksitTipiId        SmallInt      null,  /* 1. Peşinat, 2. Taksit, 3. Tek Borç  */
+   TaksitNo            Numeric(3)    null, 
+   VadeTarihi          Date          null,
+   TaksitTutari        Numeric(22,5) null, 
+   OdemeTipiId         SmallInt      null, /* 1. Kredi Kartı, 2. Nakit, 3. Banka Havalesi, 4. Senet, 5. Açık Hesap */
+   IsPaid              Bit       not null, /* default : 0 = ödenmedi,  1 = Ödendi */  
+   TahsilTarihi        DateTime      null,
+   -- 30
+   YedekTaksitTutari   Numeric(22,5) null, /* taksit tutarı eksik tahsil edildiği zaman ( YedekTaksitTutari = TaksitTutari, TaksitTutari = EksikTahsilTutarı ) şeklinde işleniyor */
+   BelgeDekontId       Int           null, /* OnmBelgeDekont.Id */
+   PatchBelgeDekontId  Int           null, /* eksik tahsil edildiğinde yeni oluşturulan satıra hangi BelgeDekontId den dolayı oluşturulduğunun işareti */
+                                           /* ? bu Id sayesinde hangi tahsilat makbuzu yüzünden (eksik tahsilat) oluştuğu bulunuyor, yani sebep olan OnmBelgeDekont.Id  */
+   BelgeStokBId        Int           null, /* Fatura için : BelgeStokB.Id  : BelgeStokB başlık tablosu */
+   -- 40
+   SourceTypeId        SmallInt      null, /* 0. manuel giriş, 1. Tabim Transfer */      
+   SourceId            Int           null, /* Tabim CariAlt.Ulas */
+   VeriKaynakId        Int           null, /* Veri transferi edildiği tablodaki KURSIYER.Ulas. Sorun olduğunda bilginin nereden geldiğine referans olsun */
+   MultiSourceId       varchar(100)  null,
+   
+   constraint		pk_OnmOdemePlani primary key (Id)
+ )
+  
+ grant select, insert, update, delete on OnmOdemePlani to public
+
+  create index X_OnmOdemePlani01 on OnmOdemePlani (TalepId)
+  create index X_OnmOdemePlani02 on OnmOdemePlani (TalepTipiId)
+  create index X_OnmOdemePlani03 on OnmOdemePlani (UcretTipiId)
+  create index X_OnmOdemePlani04 on OnmOdemePlani (CariId)
+  create index X_OnmOdemePlani05 on OnmOdemePlani (VadeTarihi)
+  create index X_OnmOdemePlani06 on OnmOdemePlani (TahsilTarihi)
+  create index X_OnmOdemePlani07 on OnmOdemePlani (DonemTipiId)
+ 
+commit transaction
+
+/*CreateTableEnd*/
+
+/*CreateLkpTable*/
+
+begin transaction
+
+-- ------------------------------------------------------- 
+-- TalepTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmOdemePlaniTalepTipi')
+drop table [Lkp].[OnmOdemePlaniTalepTipi]
+
+create table [Lkp].[OnmOdemePlaniTalepTipi]
+(
+   Id                Int Unique not null, 
+   TalepTipi         nVarchar(50)   null,
+      
+   constraint  pk_OnmOdemePlaniTalepTipi primary key (Id)
+)
+
+Delete from [Lkp].[OnmOdemePlaniTalepTipi]
+INSERT INTO [Lkp].[OnmOdemePlaniTalepTipi] (Id, TalepTipi)
+ VALUES 
+  ( 0,    N''),
+  ( 1,    N'Sertifika'),
+  ( 2,    N'2.+4 hak'),
+  ( 3,    N'Nakil 2.+4 hak'),
+  ( 4,    N'100 Ceza'),
+  ( 5,    N'Özel direksiyon dersi (Aday değil)'),
+
+  ( 11,    N'Src Sertifika'),
+  ( 12,    N'Src5 Sertifika')
+
+
+-- ------------------------------------------------------- 
+-- UcretTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmOdemePlaniUcretTipi')
+drop table [Lkp].[OnmOdemePlaniUcretTipi]
+
+create table [Lkp].[OnmOdemePlaniUcretTipi]
+(
+   Id                Int Unique not null, 
+   UcretTipi         nVarchar(50)   null,
+   
+   constraint  pk_OnmOdemePlaniUcretTipi primary key (Id)
+)
+
+Delete from [Lkp].[OnmOdemePlaniUcretTipi]
+INSERT INTO [Lkp].[OnmOdemePlaniUcretTipi] (Id, UcretTipi)
+ VALUES 
+  ( 0,        N'Lütfen ücret tipini seçiniz...'),
+  -- Mtsk
+  ( 21101,    N'Sertifika'),
+  ( 21102,    N'2.+4 hak'),
+  ( 21103,    N'Nakil 2.+4 hak'),
+  ( 21104,    N'100 Ceza'),
+  ( 21105,    N'Özel direksiyon ders (Aday değil)'),
+  ( 21111,    N'e-Sınav ücreti'),
+  ( 21112,    N'Uygulama sınav ücreti'),
+  ( 21113,    N'Başarısız eğitim ücreti'),
+  ( 21114,    N'Telafi eğitim ücreti'),
+  ( 21115,    N'Diğer ücretler'),
+
+  -- Src
+  ( 23101,    N'Src Sertifika'),
+  ( 23102,    N'Src5 Sertifika'),
+  ( 23111,    N'e-Sınav ücreti'),
+  ( 23112,    N'Uygulama sınav ücreti')
+
+
+
+  
+-- ------------------------------------------------------- 
+-- TaksitTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmOdemePlaniTaksitTipi')
+drop table [Lkp].[OnmOdemePlaniTaksitTipi]
+
+create table [Lkp].[OnmOdemePlaniTaksitTipi]
+(
+   Id               Int Unique not null, 
+   TaksitTipi       nVarchar(50)   null,
+   
+   constraint  pk_OnmOdemePlaniTaksitTipi primary key (Id)
+)
+
+Delete from [Lkp].[OnmOdemePlaniTaksitTipi]
+INSERT INTO [Lkp].[OnmOdemePlaniTaksitTipi] (Id, TaksitTipi)
+ VALUES 
+  ( 0,    N''),
+  ( 1,    N'Peşinat'),
+  ( 2,    N'Taksit'),
+  ( 3,    N'Tek Ödeme'),
+  ( 4,    N'İade nedeniyle oluşan borç'),
+  ( 5,    N'Borcun tamamı')
+    
+
+-- ------------------------------------------------------- 
+-- OdemeTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmOdemePlaniOdemeTipi')
+drop table [Lkp].[OnmOdemePlaniOdemeTipi]
+
+create table [Lkp].[OnmOdemePlaniOdemeTipi]
+(
+   Id               Int Unique not null, 
+   OdemeTipi        nVarchar(20)   null,
+   IsActive         Bit            null,
+   
+   constraint  pk_OnmOdemePlaniOdemeTipi primary key (Id)
+)
+
+Delete from [Lkp].[OnmOdemePlaniOdemeTipi]
+INSERT INTO [Lkp].[OnmOdemePlaniOdemeTipi] (Id, OdemeTipi, IsActive)
+ VALUES 
+  (-1,    N'', 1),
+  ( 0,    N'Seçiniz', 1),
+  ( 1,    N'Kredi Kartı', 1),
+  ( 2,    N'Nakit', 1),
+  ( 3,    N'Banka Havalesi', 1),
+  ( 4,    N'Senet', 1),
+  ( 5,    N'Açık Hesap', 1)
+
+
+
+-- ------------------------------------------------------- 
+-- SourceTypeId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmOdemePlaniSourceType')
+drop table [Lkp].[OnmOdemePlaniSourceType]
+
+create table [Lkp].[OnmOdemePlaniSourceType]
+(
+   Id               Int Unique not null, 
+   SourceType       nVarchar(50)   null,
+   
+   constraint  pk_OnmOdemePlaniSourceType primary key (Id)
+)
+
+Delete from [Lkp].[OnmOdemePlaniSourceType]
+INSERT INTO [Lkp].[OnmOdemePlaniSourceType] (Id, SourceType)
+ VALUES 
+  ( 0,     N''),
+  ( 1,     N'OnmOdemePlani - Kendisi'),
+  ( 2,     N'OnmBelgeDekont'),
+  -- Mtsk
+  ( 2100,  N'Mtsk Modülü - Kullanıcı girişi'),
+  ( 2101,  N'Mtsk Modülü - Otomatik, kullanıcı onaylı'),
+  ( 2103,  N'Mtsk Veri Transferi - Giderler'),
+  ( 2104,  N'Mtsk Veri Transferi - CariAlt'),
+  ( 2105,  N'Mtsk Veri Transferi - Kurharc'),
+  -- Src
+  ( 2300,  N'Src Modülü - Kullanıcı girişi'),
+  ( 2301,  N'Src Modülü - Otomatik, kullanıcı onaylı')
+
+commit transaction
+
+/*CreateLkpTableEnd*/
+
+
+/*CreateTrigger*/
+
+CREATE TRIGGER [dbo].[trg_OnmOdemePlani] on [dbo].[OnmOdemePlani]
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    declare odmPlaniCursor_ cursor local for select Id from Inserted
+    declare @curId bigint
+
+    OPEN odmPlaniCursor_
+    FETCH NEXT FROM odmPlaniCursor_ INTO @curId
+
+    declare @FirmId int = 0
+    declare @TalepId int = 0
+	declare @AdayId int
+    declare @UcretTipiId smallInt
+	declare @VeriKaynakId int
+	declare @SourceTypeId smallint
+
+
+    -- Veri Transferi başladımı
+    declare @DbUpdatesIsActive Bit = 0
+    set @DbUpdatesIsActive = [dbo].[fnc_getIsDbUpdate] (0)
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        Select 
+            @FirmId = isnull(ins.FirmId,0)
+           ,@TalepId = isnull(ins.TalepId,0)
+           ,@AdayId = isnull(ins.CariId,0)
+           ,@UcretTipiId = isnull(ins.UcretTipiId,0)
+		   ,@VeriKaynakId = ins.VeriKaynakId
+           ,@SourceTypeId = ins.SourceTypeId
+        From inserted ins
+        Where ins.Id = @curId
+     	
+        if (@VeriKaynakId > 0 and (@TalepId = 0 or @AdayId = 0) and @SourceTypeId > 2000)
+        begin
+            -- Mtsk ise
+            if (@UcretTipiId > 21100 and @UcretTipiId < 21200)
+            begin
+                Update dbo.OnmOdemePlani set
+                    TalepId = t.Id  
+                   ,CariId  = t.AdayId 
+                From dbo.OnmOdemePlani as a,
+                     dbo.MtskAdayTalep as t
+                Where a.VeriKaynakId = t.VeriKaynakId				 
+                and   a.Id = @curId
+
+                Select @TalepId = Id, @AdayId = AdayId 
+                From dbo.MtskAdayTalep 
+                Where VeriKaynakId = @VeriKaynakId
+            end
+            -- Src ise
+            if (@UcretTipiId > 22100 and @UcretTipiId < 22200)
+            begin
+                Update dbo.OnmOdemePlani set
+                    TalepId = t.Id  
+                   ,CariId  = t.AdayId 
+                From dbo.OnmOdemePlani as a,
+                     dbo.SrcAdayTalep as t
+                Where a.VeriKaynakId = t.VeriKaynakId				 
+                and   a.Id = @curId
+
+                Select @TalepId = Id, @AdayId = AdayId 
+                From dbo.SrcAdayTalep 
+                Where VeriKaynakId = @VeriKaynakId
+            end
+
+
+        end		
+
+		-- Tahsil edilmiş bir taksit var ise MtskAdayUcret tablosunu kilitle
+
+        -- Mtsk ise
+        if (@UcretTipiId > 21100 and @UcretTipiId < 21200)
+        begin
+            if (
+                select count(Id) as Adet from OnmOdemePlani
+                where IsPaid = 1
+                and   TalepId = @TalepId
+            ) > 0 
+            begin
+                Update MtskAdayUcret set IsLock = 1
+                Where TalepId = @TalepId
+            end else 
+            begin
+                Update MtskAdayUcret set IsLock = 0
+                Where TalepId = @TalepId
+            end
+	
+	        if (@DbUpdatesIsActive = 0)
+            begin  
+                Execute [dbo].[prc_MtskAdayBorcunuHesapla] @FirmId, @TalepId
+            end
+        end -- Mtsk
+
+
+        -- Src ise
+        if (@UcretTipiId > 22100 and @UcretTipiId < 22200)
+        begin
+            if (
+                select count(Id) as Adet from OnmOdemePlani
+                where IsPaid = 1
+                and   TalepId = @TalepId
+            ) > 0 
+            begin
+                Update SrcAdayUcret set IsLock = 1
+                Where TalepId = @TalepId
+            end else 
+            begin
+                Update SrcAdayUcret set IsLock = 0
+                Where TalepId = @TalepId
+            end
+	
+	        if (@DbUpdatesIsActive = 0)
+            begin  
+                Execute [dbo].[prc_SrcAdayBorcunuHesapla] @FirmId, @TalepId
+            end
+        end -- Mtsk
+
+
+
+      FETCH NEXT FROM odmPlaniCursor_ INTO @curId
+    END -- While
+
+    CLOSE odmPlaniCursor_
+    DEALLOCATE odmPlaniCursor_   
+
+END -- create trigger
+
+
+/*CreateTriggerEnd*/
+
+
+/*CreateTrigger*/
+
+CREATE TRIGGER [dbo].[trg_OnmOdemePlaniDelete] on [dbo].[OnmOdemePlani]
+FOR DELETE
+AS BEGIN
+
+    declare odmPlaniCursor_ cursor local for select Id from deleted
+    declare @curId bigint
+
+	OPEN odmPlaniCursor_
+    FETCH NEXT FROM odmPlaniCursor_ INTO @curId
+
+	declare @FirmId int
+    declare @TalepId int = 0
+    declare @UcretTipiId smallInt
+	declare @ItemTypeId smallInt
+	
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        Select 
+            @FirmId = dlt.FirmId
+           ,@TalepId = dlt.TalepId
+           ,@ItemTypeId = dlt.UcretTipiId
+           ,@UcretTipiId = dlt.UcretTipiId
+        From deleted dlt
+        Where dlt.Id = @curId
+
+        -- Mtsk ise
+        if (@UcretTipiId > 21100 and @UcretTipiId < 21200)
+        begin
+		    Execute [dbo].[prc_MtskAdayBorcunuHesapla] @FirmId, @TalepId
+        end
+        -- Src ise
+        if (@UcretTipiId > 22100 and @UcretTipiId < 22200)
+        begin
+		    Execute [dbo].[prc_SrcAdayBorcunuHesapla] @FirmId, @TalepId
+        end
+
+      FETCH NEXT FROM odmPlaniCursor_ INTO @curId
+    END
+
+    CLOSE odmPlaniCursor_
+    DEALLOCATE odmPlaniCursor_
+
+    --EXECUTE [dbo].[prc_OnmToplamBekleyenGelirler] @FirmId
+
+
+END
+
+/*CreateTriggerEnd*/
+
+
+

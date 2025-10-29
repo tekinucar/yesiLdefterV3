@@ -1,0 +1,631 @@
+﻿//---------------------------------------------------------------------------------------------
+//  Stok için ana konular
+//---------------------------------------------------------------------------------------------
+
+1. Stok çeşitleri (stok/ürün hesap planı)
+
+   Bu stok kartları/hesapları HesapStok tablosunda
+   15. Stoklar
+   150. İlk Madde Malzeme
+   151. Yarı Mamuller
+   153. Ticari Mallar
+   25. Maddi Duran Varlıklar 
+
+
+2. Maliyet için kullanılacak hesap türleri 
+   2.1. Üretime dayalı maliyet kaydı  (150,151,152)
+   2.2. Alım-satıma dayalı ticari mallar kaydı (153)
+
+3. Kayıt yöntemi 
+   3.1 Alım - Satış
+   3.1.1 Alım, Alım İadesi, Alım İskontosu
+   3.1.2 Satış, Satış İadesi, Satış İskontosu
+   
+   3.2 Alım - Satış Siparişleri
+   3.2.1 Verilen sipariş Ön ödemeleri, akreditif ve giderleri, teslim alma işlemi
+   3.2.2 Alınan  sipariş Ön tahsilatları, ??? giderleri, teslim etme işlemi
+   
+   3.3 Diğer stoklar ve değer düşüklükleri
+
+
+4. Stok envanter yöntemleri
+   4.1. Aralıklı/sayım envanteri
+   4.2. Sürekli envanter
+
+5. Stok değerleme yöntemleri (maliyet hesaplamaları için gerekli)
+   5.1. FİFO
+   5.2. LİFO (V.U.K. uygulanmaz)
+   5.3. Gerçek parti/has/özel maliyet yön.
+   5.4. Ortalama maliyet yön
+   5.4.1. Ağırlıklı/tartılı ortalama maliyet yön.
+   5.4.2. Hareketli ortalama maliyet yön.
+   5.4.3. Basit/Standart maliyet yön. (yanlış sonuçlar verdiği için uygulamada kullanılmamaktadır)
+
+
+6. Satış Fiyatları
+7. Satın Alma işlemleri, teklif alma
+8. Verilen Teklifler 
+
+//---------------------------------------------------------------------------------------------
+//  Belge Yapısı - 
+//---------------------------------------------------------------------------------------------
+
+Amaç    : Alım / Satış belgeleri
+Türleri : İrsaliye, Fatura, Sipariş, Bağlı Ek belgeler
+
+
+1. Stok Belgesinin kendisi
+2. Ek Belgeler
+2.1. BelgeMaliyet tablosuna aktarılan stok belgesinin özeti
+2.2. BelgeMakbuz lar, ödemeler, tahsilatlar, çekler
+2.3. Taşıma, nakliye, hammaliye bedeli belgeleri
+2.4. Taşıma sigorta belgesi ve ödemesi
+2.5. Komisyon belgesi ve ödemesi
+2.6. Gümrük ve ithalat vergisi belge ve ödemeleri
+2.7. Akreditif ve akreditif giderleri (ithalat sırasında) belge ve ödemeleri
+2.8. Fatura Adresi
+2.9. Teslimat Adresi
+
+
+///
+/// Alım belgesi çeşitleri
+///
+
+Alım, Alım İadesi, Alım İskontosu
+
+Alım kodu, Açıklaması   
+153        Ticari mal alımları
+1501       Üretimi için alımlar
+1504       Genel yön.için tüketim malz. alımı
+1505       Arge için mal alımı
+25         Maddi duran varlık alımı
+
+
+/// 
+/// Stok hesap planı grupları
+///
+
+150. İlk Madde Malzeme
+151. Yarı Mamuller
+153. Ticari Mallar
+
+150. İlk Madde ve Malzeme Hesabı
+150.01 Hammadde
+150.02 İlk madde
+150.03 Yardımcı madde
+150.04 İşletme tüketim malzemesi
+150.04.01. Kırtasiye Malzemesi
+150.04.02. Temizlik Malzemesi
+150.04.03. Yakacak Malzemesi
+150.04.04. Ambalaj Malzemesi
+150.04.05. Yiyecek Malzemesi
+150.05 Arge malzemesi
+
+Bu varlıklar HesapFinans tablosunda tanımlanmakta
+25. Maddi Duran Varlıklar 
+250. Arazi Ve Arsalar
+251. Yer Altı Ve Yer Üstü Düzenleri
+252. Binalar
+253. Tesis, Makine Ve Cihazlar
+254. Taşıtlar
+255. Demirbaşlar
+256. Diğer Maddi Duran Varlıklar
+
+
+150. İlk Madde Malzeme : Açıklaması
+
+    1 Nolu M.S.U.G.T’de 150 İlk Madde ve Malzeme hesabının niteliği şöyle açıklanmaktadır;
+	”Üretimde veya diğer faaliyetlerde kullanılmak üzere işletmede bulundurulan hammadde, yardımcı madde, işletme malzemesi ve diğer malzemelerin izlendiği hesaptır.
+	İşleyişi: Satın alındıkları ya da üretildikleri maliyet bedeli ile bu hesabın borcuna, üretime verildiğinde, tüketildiğinde, satıldığında veya devredildiğinde ise hesabın alacağına kaydedilir.”
+	150 İlk Madde ve Malzeme hesabının kapsamında hangi tür stokların yer aldığı ve bunların tanımı şöyle verilebilir;
+	“Hammadde: İlk defa üzerinde değişim işlemleri uygulanan ve üretilen şeyin bünyesini oluşturan maddeler(kumaş üretiminde pamuk gibi)
+	İlk madde: Üzerinde değişim işlemleri uygulanan ve üretilen şeyin bünyesini oluşturmamakla birlikte üretilmesine katkıda bulunan maddeler (kumaş üretiminde iplik gibi)
+	Yardımcı madde: Üretilen şeyin bünyesini oluşturmamakla birlikte, üretilmesine katkıda bulunan maddeler, (kumaş üretiminde boya gibi)
+	İşletme malzemesi: Mal ve hizmet üretim faaliyeti sırasında tüketilen maddeler(bakım işinde kullanılan yağ gibi)
+	Ambalaj malzemesi: Ürünün muhafaza edilmesi ve müşteriye ulaştırılması için bir defa kullanılan ve alıcıdan geri alınması söz konusu olmayan maddeler.(peynir üretiminde teneke gibi)
+	Diğer maddeler: İşletme çalışmaları sırasında tüketilen, yukarıda sayılanlar dışındaki maddeler (kırtasiye, ampul, sabun gibi)”
+
+
+
+
+
+
+
+
+///
+///  Stok tabloları
+///
+
+shp : stok hesap planı
+shg : stok hesap grupları
+sbb : stok belgesi başlığı
+sbs : stok belgesi satırları
+sfy : stok fiyat tablosu 
+skm : stok kampanya yapısı
+smk : stok miktar tablosu - çeşitlerini tespit et
+sen : stok envanter tablosu - 2 türü var
+sdg : stok değerleme/maliyet tablosu - 4 türü var
+smh : stok muhasebe kaydı, her fatura için bir kayıt oluşacak, muhasebe ye yansıması extra olacak
+seb : faturalar için ek belge bağlantı tablosu
+
+
+sdg : yapısı
+
+1. giriş : tek satır
+2. çıkış : n satır
+3. kalan : n satır
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+///
+///  Stok işlemlerinde kullanılan hesaplar
+///
+
+15. Stoklar
+150. İlk Madde Malzeme
+151. Yarı Mamuller
+152. Mamuller
+153. Ticari Mallar
+157. Diğer Stoklar
+158. Stok Değer Düşüklüğü Karşılığı(-)
+159. Verilen Sipariş Avansları
+
+12. Ticari Alacaklar
+120. Alıcılar
+121. Alacak Senetleri
+122. Alacak Senetleri Reeskontu(-)
+124. Kazanılmamış Finansal Kiralama Faiz Gelirleri(-)
+126. Verilen Depozito Ve Teminatlar
+127. Diğer Ticari Alacaklar
+128. Şüpheli Ticari Alacaklar
+129. Şüpheli Ticari Alacaklar Karşılığı(-)
+
+32. Ticari Borçlar
+320. Satıcılar
+321. Borç Senetleri
+322. Borç Senetleri Reeskontu(-)
+326. Alınan Depozito Ve Teminatlar
+329. Diğer Ticari Borçlar
+
+19. Diğer Dönen Varlıklar
+190. Devreden Kdv
+191. İndirilecek Kdv
+192. Diğer Kdv
+193. Peşin Ödenen Vergiler Ve Fonlar
+195. İş Avansları
+196. Personel Avansları
+197. Sayım Ve Tesellüm Noksanları
+198. Diğer Çeşitli Dönen Varlıklar
+199. Diğer Dönen Varlıklar Karşılığı(-)
+
+39. Diğer Kısa Vadeli Yabancı Kaynaklar
+391. Hesaplanan Kdv
+392. Diğer Kdv
+
+60. Brüt Satışlar
+600. Yurt İçi Satışlar   <<< Satıştan elde edilen gelir (A)
+601. Yurt Dışı Satışlar
+602. Diğer Gelirler
+61. Satış İndirimleri(-)
+610. Satıştan İadeler(-)  <<< Müşterinin işletmeye iadesi (B)
+611. Satış İndirimleri(-) <<< İşletmenin müşteriye yaptığı indirim (B)
+612. Diğer İndirimler(-)
+
+62. Satışların Maliyeti(-)
+620. Satılan Mamuller Maliyeti(-) <<< Dönem sonu sayım sonrası kaydedilir (aralıklı envanter)
+621. Satılan Ticari Mallar Maliyeti(-)
+622. Satılan Hizmet Maliyeti(-)
+
+
+76. Pazarlama Satış Ve Dağıtım Giderleri
+760. Pazarlama Satış Ve Dağıtım Giderleri  <<< İşletmenin satılan mal ile ilgili üstlendiği gider (B)
+761. Pazarlama Satış Ve Dağıtım Giderleri Yansıtma Hesabı
+762. Pazarlama Satış Ve Dağıtım Giderleri Fark Hesabı
+
+///
+/// Üretim işletmelerinde Maliyet Muhasebesi hesapları
+///
+
+150. İlk Madde Malzeme
+151. Yarı Mamuller
+152. Mamuller
+
+
+Ticari alım konusu olduğunda
+--------------------------------------------------------------
+153. Ticari Mallar
+
+Satışa hazır olmayan veya satış değeri düşük olan malların takibi için
+--------------------------------------------------------------
+157. Diğer Stoklar
+158. Stok Değer Düşüklüğü Karşılığı(-)
+
+* Artıklar
+* Kusurlu mal
+* Hatalı mal
+* Iskarta mal
+* Yoldaki mal (depoya girmemiş mal)
+* Değeri düşen mal (belli bir oranda değer kaybı)
+
+Ticari Mal alımı için verilen siparişe istinaden yapılan ön ödemelerin takibi için
+--------------------------------------------------------------
+159. Verilen Sipariş Avansları
+
+  
+* Ön ödeme 
+* ileride teslim alınacak stok kalemleri
+* İthal mallar için bankada açtrılan akreditif ve akreditif giderleri
+  
+  Bu ödemeler 159 (B) na yazılır
+
+  Sipariş konusu mal teslim alındığında 159 (A) hale getirilir.
+
+
+
+
+Ticari satış konusu olduğunda
+--------------------------------------------------------------
+60. Brüt Satışlar
+600. Yurt İçi Satışlar    <<< Satıştan elde edilen gelir (A)
+601. Yurt Dışı Satışlar
+61. Satış İndirimleri(-)
+610. Satıştan İadeler(-)  <<< Müşterinin işletmeye iadesi (B)
+611. Satış İndirimleri(-) <<< İşletmenin müşteriye yaptığı indirim (B)
+612. Diğer İndirimler(-)
+62. Satışların Maliyeti(-)
+620. Satılan Mamuller Maliyeti(-)
+621. Satılan Ticari Mallar Maliyeti(-)
+622. Satılan Hizmet Maliyeti(-)
+623. Diğer Satışların Maliyeti(-)
+
+760. Pazarlama Satış Ve Dağıtım Giderleri  <<< İşletmenin satılan mal ile ilgili üstlendiği gider (B)
+
+
+///
+/// VUK : Vergi Usul Kanuna göre stoklar maliyet bedeli ölçüsüyle kaydedilir
+///
+
+Maliyet Bedeli unsurları : ?
+1. Satın alma bedeli (kdv hariç)
+2. Taşıma, nakliye, hammaliye bedeli
+3. Taşıma sırasındaki sigorta giderleri
+4. Komisyon giderleri
+5. Kur ve vade farkları
+6. Gümrük ve ithalat vergisi
+7. Akreditif ve akreditif giderleri (ithalat sırasında)
+
+Bu giderler 153 ün borcuna kaydedilir.
+
+///
+///  Stok Değerleme Konusu
+///
+
+1. Aralıklı envanter yöntemi
+2. Sürekli envanter yöntemi  
+
+   
+1. Aralıklı envanter yöntemi (sayıma dayalı)
+   Mal çeşidi çok, küçük hacimli birimler, satış fiyatları düşük olan mallar için kullanılan yöntem.
+   Belli aralıklarla sayım yapılır
+   Dönem sonu sayımı yapılmadan  ticari malların maliyeti belirlenmez ( ay, 3 ay, yıl )
+
+2. Sürekli envanter yöntemi  (devamlı, aralıksız)
+   Mal çeşidi az, büyük hacimli birimler, satış fiyatları yüksek olan mallar için kullanılan yöntem. 
+   Her an ticari mal sayımı yapılabilir. (gayrimenkul, oto galeri, beyaz eşya vb)
+   Her satıştan sonra satılan ticari malların maliyeti yapılabilir
+
+
+1. Aralıklı envanterdeki maliyet hesapları
+
+B       153 Ticari Mallar               A
+------------------------------------------
++ Dönem başı stoklar | - Alış İadeleri
++ Mal Alışları       | - Alış İskontoları
++ Alış Giderleri     | 
+
+
+1. Satılan Ticari Mal Maliyeti : (153 Ticari Mal hesabının Borç kalanı) - (Dönem Sonu Stok)
+2. Net Alış Maliyeti           : (Mal Alışı + Alış Gideri) - (Alış İade + Alış İskonto) 
+
+
+------
+Tamamı kredili (versiye) olmak üzere mal alış kaydı
+                                B      A
+------------------------------------------
+153 Ticari Mal               |  x   |
+191 İndirilecek Kdv          |  y   | 
+       320 Satıcılar         |      | x+y 
+
+------
+Satın alınan malın nakliyesi 
+                                B      A
+------------------------------------------
+153 Ticari Mal               |  a   |
+191 İndirilecek Kdv          |  b   | 
+       100 Kasa              |      | a+b 
+
+-----
+Daha önce veresiye almış olduğu malın bir 
+kısmını iade etmiştir
+                                B      A
+------------------------------------------
+320 Satıcılar                | c+d  |  
+       153 Ticari Mal        |      |  c  
+       391 Hesaplanan Kdv    |      |  d
+
+-----
+Satıcı firma iskonto yapmıştır 
+                                B      A
+------------------------------------------
+320 Satıcılar                | e+f  |  
+       153 Ticari Mal        |      |  e  
+       391 Hesaplanan Kdv    |      |  f
+
+------------------------------------------
+------------------------------------------
+
+2. Sürekli envanterdeki maliyet hesapları
+
+B       153 Ticari Mallar               A
+------------------------------------------
++ Dönem başı stoklar | - Alış İadeleri
++ Mal Alışları       | - Alış İskontoları
++ Alış Giderleri     |                      
+  - - - - - - - - - -|- - - - - - - - - - -   <<<-------------------------
+  Satış İade         |Satılan Ticari Mallar   <<< Aralıklı ve sürekli env. 
+  Maliyeti           |Maliyeti                <<< arasındaki farklar  
+
+Satış kayıtları iki yönlüdür
+a.Satışın gelir kaydı
+                               B      A
+------------------------------------------
+120 Alıcılar                 | x+y  |
+       600 Yurtiçi Satışlar  |      |  x 
+       391 Hesaplanan Kdv    |      |  y
+
+b.Satışın maliyet yönü
+                               B      A
+------------------------------------------
+621 Satılan Ticari Mal       | x    |
+    Maliyeti                 |      |  
+       153 Ticari Mal        |      |  x 
+
+
+600. Yurt İçi Satışlar    : Mal Satış Geliri (A)
+610. Satıştan İadeler(-)  : Müşterinin işletmeye iadesi (B)
+611. Satış İndirimleri(-) : İşletmenin müşteriye yaptığı indirim (B)
+
+* Örnek
+* İşletme maliyeti x tl olan ticari malı tamamı kredili (versiye) 
+  olmak üzere y + kdv tl ye satmıştır.
+
+Satışın gelir kaydı             B      A
+------------------------------------------
+120 Alıcılar                 | y+k  |
+       600 Yurtiçi Satışlar  |      |  y 
+       391 Hesaplanan Kdv    |      |  k
+
+Satışın maliyet kaydı           B      A
+------------------------------------------
+621 Satılan Ticari Mal       |  x   |
+    Maliyeti                 |      |  
+       153 Ticari Mal        |      |  x 
+
+* Müşteri satışın yarısını iade edince
+
+Satışın iptal kaydı             B      A
+------------------------------------------
+610 Satıştan İadeler         |  y   |
+191 İndirilecek Kdv          |  k   |   
+       120 Alıcılar          |      | y+k 
+
+Satış maliyetinin iptal kaydı   B      A
+------------------------------------------
+153 Ticari Mal               |  x   |   
+    621 Satılan Ticari       |      |  x
+        Mal Maliyeti         |      |  
+
+
+
+///
+///  Satışa hazır olmayan veya satış değeri düşük olan malların takibi için
+///  ----------------------------------------------------------------------
+///  157. Diğer Stoklar
+///
+
+* Örnek
+* İşletmenin 4000 tl maliyetli ticari mallarında piyasa fiyarına oranla 
+  %40 değer düşüklüğü tespit edildiyse
+
+Değeri düşen malın kaydı        B      A
+------------------------------------------
+157 Diğer Stoklar            | 4000 |
+       153 Ticari Mal        |      | 4000
+
+Karşılık ayrılması kaydı        B      A
+------------------------------------------
+654 Karşılık Giderleri       | 1600 |
+       158 Stok Değer Düş.   |      | 1600
+       Karşılığı             |      |
+
+* İşletme değeri düşen 18000 tl maliyetli ticari mallarına
+  9000 tl karşılık ayırmış durumdadır. Bu mallar 6000 tl ye
+  satılmıştır.
+
+1. Adım                         B      A
+------------------------------------------
+157 Diğer Stoklar            |18000|
+       153 Ticari Mal        |     |18000
+
+2. Adım                         B      A
+------------------------------------------
+654 Karşılık Giderleri       | 9000|
+    158 Stok Değer Düş.Karşı.|     | 9000
+
+3. Adım Satışın gelir kaydı     B      A
+------------------------------------------
+120 Alıcılar                 | 6000|
+    600 Yurtiçi Satışlar     |     | 6000
+
+4. Adım                         B      A
+------------------------------------------
+158 Stok Değer Düş.Karşı.    | 9000|
+621 Satılan Tic.Mal.Maliyeti | 9000| 
+      157 Diğer Stoklar      |     |18000
+
+
+
+
+///
+///  Fatura Hakknda :
+///
+
+Tüketicilere ayıplı mal ve hizmet satan kişilere karşı hak aramada, fatura delil olarak kullanılabilir. 
+Faturaya itiraz süresi 7 gündür. Bu süre içinde itiraz edilmezse faturanın içeriği kabul etmiş sayılır. 
+Faturaları Gelir Vergisi Kanunu’na (GVK) göre 5 yıl, Türk Ticaret Kanunu’na göre 10 yıl saklama zorunluluğu vardır.
+
+VUK’un 232. maddesine göre fatura düzenleme zorunluluğu; 
+birinci ve ikinci sınıf tüccarlar ile kazancı basit usulde tespit edilen ve 
+defter tutmak mecburiyetinde olan çiftçiler, 
+aşağıdaki işletmelere fatura vermek ve bu işletmelerden fatura istemek zorundadırlar.
+Bunlar:
+- Birinci ve ikinci sınıf tüccarlar( şirketler, şahıs işletmeleri),
+- Serbest meslek erbabı(avukatlar, doktorlar, muhasebeciler vb),
+- Kazançları basit usulde tespit olunan tüccarlar (ayakkabı tamircisi, berber)
+- Defter tutmak mecburiyetinde olan çiftçiler,
+- Vergiden muaf esnaf (pazarcılar, seyyar satıcılar).
+
+Fatura düzenleme zorunluluğu: 
+Fatura, malın teslimi ve hizmetin yapıldığı tarihten itibaren azami 7 gün içinde düzenlenir. 
+Bu süre içerisinde düzenlenmeyen faturalar hiç düzenlenmemiş sayılır. 
+Ay sonlarına rastlayan satışlarda en geç ayın son günü fatura düzenlenmelidir. Sonraki aya geçiş yapılamaz. 
+Satışların toptan veya perakende yapılması, fatura düzenlemede önemli bir unsurdur. 
+Eğer satış tüketiciye değil, malı satacak olan başka bir işletmeye yapıldıysa bu ticaret toptan ticarettir. 
+Fatura düzenlemek, mal ve hizmeti satanın göreviyken; mal ve hizmeti satın alan alıcı da fatura istemek ve almakla görevlidir.
+
+Fatura Yerine Geçen Vesikalar: 
+Fatura düzenlenmesinin zorunlu olmadığı bir kısım alım satım ve hizmet işlerinde 
+mükellefler kayıtlarını fatura yerine geçen vesikalarla tevsik etmek zorundadırlar. 
+V.U.K.'daki düzenlemelere göre, 
+fatura yerine geçen vesikalar, perakende satış vesikaları, gider pusulası ve 
+müstahsil makbuzu olarak sıralanmıştır.
+
+
+
+
+Satın Alma ve Tedarik
+
+1. Satın alma öncesi 
+   -ön şartların tespiti gerekmekte
+2. Satın alma süreci 
+   -karar veririken 
+3. Satın alma sonrası
+
+İyi bir satın alma için diğer birimlerin düzgün bir alt yapıya sahip olması gerek.
+-Kontrat bölümü
+-Üretim planlama ve kontrol
+-Malzeme planlama ve kontrol (depo yönetimi, stok envanteri)
+-Mühendislik
+-Üretim
+-Kalite
+-Proje yönetimi
+-Tasarım bölümü
+-İnsan kaynakları
+
+
+---------------------
+
+---------------------
+
+///
+///  e-Devlet : 3 Başlık
+///
+
+e-Defter
+----------------------------
+  e-Defter uygulaması
+  e-Elektronik muhasebe fişi
+  Saklama ve imzalama
+
+e-Fatura (Kapalı sistem) 
+----------------------------
+  e-Fatura uygulaması
+  e-İrsaliye
+
+  fatura kesende firmada alacak firmada aynı sistemede
+
+
+  
+e-Arşiv (Açık sistem)
+----------------------------
+  e-Arşiv faturası
+  e-SMM
+  e-Müstahsil makbuzu
+  e-Dekont
+  e-Gider pusulası
+  e-Bilet
+  e-Sigorta komisyon gider belgesi
+  e-Sigorta poliçesi
+  e-Döviz alım satım belgesi
+
+  iki firmada sistemde olmasına gerekmez
+
+
+///
+///  e-Fatura ile e-Arşiv Fatura arasındaki fark
+///
+
+Temel fark 
+e-Fatura kapalı sistemdir
+e-Arşiv Fatura açık sistemdir
+
+e-Fatura süreci :
+  Fatura alıcısına GİB üzerinden iletilir
+  Tüm fatura detayları GİBe gönderilir
+  Firmadan firmaya
+
+  Gönderici Firma > XML dosya > Entegratör > GİB > Entegratör > XML dosya > Alıcı Firma
+
+e-Arşiv fatura süreci :
+  Faturalar kağıt ortamda veya e-mail (pdf) ile alıcısına iletilir
+  GİB e sadece faturanın özet bilgileri XML olarak gönderilir
+  Firmadan firmaya veya gerçek kişiye
+
+  Gönderici Firma > XML dosya > Entegratör > Aylık özet XML rapor  > GİB
+                                           > Kağıt veya e-mailler pdf fatura > Alıcı Firma veya Gerçek kişi
+
+
+///
+///  e-Fatura ile e-Arşiv Fatura arasındaki benzerlikler
+///
+
+
+
+///
+///  e-Fatura ve e-Arşiv Fatura üzerinde e-İrsaliye konusu
+///
+
+
+///
+///  e-Fatura ve e-Arşiv Fatura kullanmayan firmların yani e-Dönüşüme girmeyen firmaların
+///  kullanması gereken GİB Portalından e-Arşiv Fatura kesilmesi
+///
+
+
+///
+///  e-İrsaliye konusu
+///
+
+
+

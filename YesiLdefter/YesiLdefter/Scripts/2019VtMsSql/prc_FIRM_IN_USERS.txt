@@ -1,0 +1,36 @@
+
+
+CREATE PROCEDURE prc_FIRM_IN_USERS(@firmGuid varchar(50))  
+AS BEGIN 
+ 
+;WITH CTE AS (
+            
+  Select u.ID, u.ID _USER_ID, f.ID _FIRM_ID from SYS_USERS u
+    left outer join SYS_FIRMS f on  u.USER_FIRM_GUID = f.FIRM_GUID 
+  where u.ISACTIVE = 1
+   
+  union all
+		
+  Select C._FIRM_ID, c._USER_ID, M.ID 
+  from CTE C
+     join SYS_FIRMS M ON C._FIRM_ID = M.PARENT_ID 
+ )
+
+ Select [SYSUSER].*, f.FIRM_NAME
+ From CTE c
+   left outer join SYS_FIRMS f on ( c._FIRM_ID = f.ID )
+   left outer join SYS_USERS [SYSUSER] on ( c._USER_ID = [SYSUSER].ID )
+ Where 0 = 0
+      
+ /*[SYSUSER].DEFAULT_VALUE*/
+ /*[SYSUSER].KRITERLER*/
+ and f.FIRM_GUID = @firmGuid
+ 
+-- where f.FIRM_GUID = "046C4C69-EE2A-43C3-8E69-FF8A29F40844"
+-- where f.FIRM_GUID = "539240C7-3A75-48B7-ACA0-5834ED385232"
+     
+ order by  SYSUSER.USER_FULLNAME 
+
+END;
+
+

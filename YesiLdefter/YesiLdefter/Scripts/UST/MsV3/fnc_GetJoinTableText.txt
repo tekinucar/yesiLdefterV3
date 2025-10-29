@@ -1,0 +1,333 @@
+﻿
+/*CreateFunction*/
+
+CREATE FUNCTION [dbo].[fnc_GetJoinTableText](
+  @TableCode varchar(50) 
+, @istenenKisim int
+, @Json varchar(max)
+)  
+RETURNS varchar(max)
+AS   
+BEGIN
+    -- istenenKisim 
+    -- 1 = left outer join  kısmı
+    -- 2 = select fields listesi
+
+    if (@Json is null) return '';
+
+    --declare @TableCode varchar(50) = '3S_MSFLDIP'
+    --declare @istenenKisim int = 1
+    --declare @Json varchar(max)
+	--set @Json = ''
+
+    declare @enter varchar(10) = CHAR(13) + CHAR(10)
+    declare @pos1 int = 0
+    declare @pos2 int = 0
+    declare @pos3 int = 0
+    declare @pos4 int = 0
+	declare @pos5 int = 0
+    declare @tableCount varchar(max) 
+    declare @fieldCount varchar(max) 
+    declare @caseCount int = 0
+    declare @whenCount int = 0
+
+    declare @whenLine varchar(200)
+    declare @key varchar(50)
+    declare @key_ varchar(50)
+    declare @keyCount int = 0
+
+    declare @JTable NVARCHAR(max)
+    declare @JWhere NVARCHAR(max)
+    declare @JStnFields NVARCHAR(max)
+    declare @JCaseFields NVARCHAR(max)
+
+    -- Gelen Json önce 4 parçaya ayıralım 
+    SELECT 
+      @JTable = J_TABLE
+    , @JWhere = J_WHERE
+    , @JStnFields = J_STN_FIELDS
+    , @JCaseFields = J_CASE_FIELDS
+    FROM OPENJSON(@json)
+    WITH (
+      J_TABLE NVARCHAR(max)       AS JSON, 
+      J_WHERE NVARCHAR(max)       AS JSON, 
+      J_STN_FIELDS NVARCHAR(max)  AS JSON, 
+      J_CASE_FIELDS NVARCHAR(max) AS JSON  
+    )
+
+  if (@istenenKisim = 1)
+  begin
+      declare @fJoinTables varchar(max) 
+	  declare @fJoinFields varchar(max) 
+      -- --------------------------------------
+      -- preparing Left/Right Outer Join
+      -- --------------------------------------
+
+      -- ------------------------------------------------------------------
+      -- Hazırlanacak çıktı
+	  -- ------------------------------------------------------------------  
+      --    left outer join MS_FIELDS as [MSFIELDS] on ( <#MSFIELDS#> ) 
+      -- ------------------------------------------------------------------  
+	  set @fJoinTables = ''
+	  Select 
+          @fJoinTables = COALESCE( @fJoinTables +
+          CASE JType  
+            WHEN 'LEFT'  THEN '    left outer join '  + JTableName + ' as [' + JTableAlias + '] on (<#' + JTableAlias + '#>) '  
+            WHEN 'RIGHT' THEN '    right outer join ' + JTableName + ' as [' + JTableAlias + '] on (<#' + JTableAlias + '#>) '  
+            ELSE '?'
+          END,
+          '') + @enter
+      From OPENJSON(@JTable)
+      With (
+            JFormat     varchar(10) '$.J_FORMAT',
+            JType       varchar(10) '$.J_TYPE',
+            JTableName  varchar(50) '$.J_TABLE_NAME',
+            JTableAlias varchar(50) '$.J_TABLE_ALIAS'
+            ) as JTables
+
+      
+      -- --------------------------------------
+      -- preparing Where Join Fields 
+      -- --------------------------------------
+
+      -- -----------------------------------------------------------------------
+      -- Hazırlanacak çıktı
+      -- -----------------------------------------------------------------------
+      -- <#MSFIELDS# [3S_MSFLDIP].TABLE_CODE = [MSFIELDS].TABLE_CODE #>
+      -- <#MSFIELDS# [3S_MSFLDIP].FIELD_NO = [MSFIELDS].FIELD_NO #>
+      -- <#MSFIELDS# [3S_MSFLDIP].SOFTWARE_CODE = [MSFIELDS].SOFTWARE_CODE #>
+      -- <#MSFIELDS# [3S_MSFLDIP].PROJECT_CODE = [MSFIELDS].PROJECT_CODE #>
+      -- -----------------------------------------------------------------------
+
+      set @fJoinFields = ''
+      Select -- WhereFull
+          @fJoinFields = COALESCE(@fJoinFields + 
+          ' <#' + JoinTableAlias + '# ' +
+          (
+            case WhereFull.JsonWhereAdd 
+            when 'null' then WhereFull.WhereFields
+            else WhereFull.WhereFields + '  ' + WhereFull.JsonWhereAdd end
+          ) + ' #>', '') + @enter
+      From (
+               Select 
+               case FieldValue
+               when 'null' then -- FieldValue yok ise
+               (
+                  case MasterTableAlias 
+                  when 'null' then '[' + @TableCode + ']'
+	              else MasterTableAlias
+                  end + '.' + MasterFName + ' = [' + JoinTableAlias + '].' + JoinFName  
+               )
+               else -- FieldValue var ise
+               (
+                  case MasterFName -- MasterFieldName yok ise JoinField = value
+	              when 'null' then '['+ JoinTableAlias + '].' + JoinFName + ' = ' + FieldValue
+	              else -- MasterField var ise
+	              ( 
+                     case MasterTableAlias 
+                     when 'null' then '[' + @TableCode + ']' -- MasterTableAlias yok ise
+                     else MasterTableAlias -- MasterTableAlias var ise
+                     end 
+                  ) + '.' + MasterFName + ' = ' + FieldValue 
+	              end -- FieldValue var ise
+               ) end as WhereFields
+	         , WhereAdd as JsonWhereAdd 
+             , JoinTableAlias
+             From OPENJSON(@JWhere)
+             With (
+                     MasterTableAlias varchar(20) '$.M_TABLE_ALIAS',
+	                 MasterFName      varchar(50) '$.MT_FNAME',
+	                 JoinTableAlias   varchar(50) '$.J_TABLE_ALIAS',
+	                 JoinFName        varchar(50) '$.J_FNAME',
+	                 FieldValue       varchar(50) '$.FVALUE',
+	                 WhereAdd         varchar(50) '$.WHERE_ADD'
+                  )
+          ) as WhereFull 
+      
+      --print @fJoinTables
+	  --print @fJoinFields
+
+      -- ------------------------------------------------
+      -- Birleştirme işlemi
+      -- ------------------------------------------------
+
+      set @tableCount = LEN(@fJoinTables)
+      set @fieldCount = LEN(@fJoinFields)
+      set @pos1 = charindex('<#', @fJoinTables, @pos1)
+
+      while (@pos1 > 0)
+      begin
+          set @pos1 = charindex('<#', @fJoinTables, @pos1) + 2
+          set @pos2 = charindex('#>', @fJoinTables, @pos1)
+          set @key = SUBSTRING(@fJoinTables, @pos1, @pos2 - @pos1) + '#'
+          set @key_ = SUBSTRING(@fJoinTables, @pos1, @pos2 - @pos1) 
+          set @keyCount = LEN(@key)
+          --print @key
+          set @pos3 = charindex('<#' + @key, @fJoinFields, @pos3) 
+          set @pos4 = 0
+		  set @pos5 = 0
+          if (@key = '#') set @pos3 = 0
+          while (@pos3) > 0
+          begin
+              set @pos3 = charindex('<#' + @key, @fJoinFields, @pos3) + @keyCount 
+              set @pos4 = charindex('#>', @fJoinFields, @pos3)
+              set @whenLine = substring(@fJoinFields, @pos3 + 2, (@pos4 - @pos3) - 2)
+              --print @pos3
+              --print @pos4
+              --print @whenLine
+              if (@pos5 = 0)
+			       --set @fJoinTables = stuff(@fJoinTables, charindex('<#' + @key_ + '#>', @fJoinTables, 0), 0, @enter + '        ' + @whenLine )
+			       set @fJoinTables = stuff(@fJoinTables, charindex('<#' + @key_ + '#>', @fJoinTables, 0), 0, @whenLine )
+              else set @fJoinTables = stuff(@fJoinTables, charindex('<#' + @key_ + '#>', @fJoinTables, 0), 0, @enter + '    and ' + @whenLine )
+			  set @pos2 = @pos2 + LEN(@whenLine)
+              set @pos3 = charindex('<#' + @key, @fJoinFields, @pos4+2)
+			  set @pos5 = @pos5 + 1
+          end --while (@pos3) > 0
+          set @fJoinTables = REPLACE(@fJoinTables, '<#' + @key_ + '#>', '')
+          set @pos1 = charindex('<#', @fJoinTables, @pos2)
+      end --while (@pos1 > 0)
+      
+	  -- sonuç
+	  --print @fJoinTables
+      return @fJoinTables
+  end -- if (@istenenKisim = 1)
+
+  if (@istenenKisim = 2)
+  begin
+      declare @fStnSelectFields varchar(max) 
+      declare @fCaseSelectFields varchar(max) 
+
+      -- --------------------------------------
+      -- preparing Select standart fields 
+      -- --------------------------------------
+      set @fStnSelectFields = ' -- JoinTables standart output fields ' + @enter
+      Select  
+          @fStnSelectFields = COALESCE( @fStnSelectFields +
+          ' , [' + JTableAlias + '].' + JFieldName + ' as ' + JFinalFieldName + ' ' + @enter,
+          ' , [' + JTableAlias + '].' + JFieldName + ' as ' + JFinalFieldName + ' '+ @enter )
+      From OPENJSON(@JStnFields)
+      With (
+             JTableAlias     varchar(50) '$.J_TABLE_ALIAS',
+             JFieldName      varchar(50) '$.J_FNAME',
+             JFinalFieldName varchar(50) '$.FNL_FNAME'
+           ) as JStnFiedls
+
+      --print @fStnSelectFields
+
+      -- --------------------------------------
+      -- preparing Select case fields 
+      -- --------------------------------------
+
+      declare @case varchar(8000)
+      declare @when varchar(8000)
+   
+      set @fCaseSelectFields = ' -- JoinTables case output fields ' + @enter
+      
+	  set @case = ''
+      Select --ms.* 
+          @case = COALESCE( @case + 
+           ' , ( case [' + @TableCode + '].' + ms.JCaseForFName + ' <#' +  ms.JCaseForFName + '#> ' + ' else ''?'' end ) as ' + ms.JFinalFieldName + @enter,
+		   '' )		
+      from (
+          Select distinct(JCaseForFName) as JCaseForFName, JFinalFieldName
+          From OPENJSON(@JCaseFields)
+          With (
+	            JCaseForFName   varchar(50) '$.CASE_FOR_FNAME',
+	            JWhereValue     varchar(50) '$.WHERE_VALUE',
+	            JThenAlias      varchar(50) '$.THEN_ALIAS',
+	            JThenFName      varchar(50) '$.THEN_FNAME',
+	            JFinalFieldName varchar(50) '$.FINAL_FNAME'
+               )
+      ) as ms  
+
+      --print @case
+      -- -------------------------------------------------------------------------------------
+	  -- , ( case [BDekont].JoinTableTypeId <#JoinTableTypeId#>  else '?' end ) as Lkp_CariAdi		
+      -- -------------------------------------------------------------------------------------
+	  
+	  Select
+          @when = COALESCE( @when +
+           ' <#'+JCaseForFName+'# When ' + JWhereValue + ' Then ' + JThenAlias + '.' + JThenFName + ' #>' + @enter,
+           ' <#'+JCaseForFName+'# When ' + JWhereValue + ' Then ' + JThenAlias + '.' + JThenFName + ' #>' + @enter )
+      From
+      OPENJSON(@JCaseFields)
+      With (
+	        JCaseForFName   varchar(50) '$.CASE_FOR_FNAME',
+	        JWhereValue     varchar(50) '$.WHERE_VALUE',
+	        JThenAlias      varchar(50) '$.THEN_ALIAS',
+	        JThenFName      varchar(50) '$.THEN_FNAME',
+	        JFinalFieldName varchar(50) '$.FINAL_FNAME'
+      ) as detail
+
+      --print @when
+      -- -------------------------------------------------------------------------------------
+	  -- <#JoinTableTypeId# When 0 Then HCari.TamAdiSoyadi #>
+      -- <#JoinTableTypeId# When 1 Then HCari.TamAdiSoyadi #>
+      -- <#JoinTableTypeId# When 2100 Then Aday.TamAdiSoyadi #>
+	  -- -------------------------------------------------------------------------------------
+	  
+	  -- ------------------------------------------------
+	  -- @case ve @when alanları birleştirilerek
+	  --
+	  --  , ( case [BDekont].JoinTableTypeId  
+	  --      When 0 Then HCari.TamAdiSoyadi  
+	  --      When 1 Then HCari.TamAdiSoyadi  
+	  --      When 2100 Then Aday.TamAdiSoyadi   
+	  --      else '?' end ) as Lkp_CariAdi
+	  --
+	  -- şeklinde bir field elde ediliyor
+	  -- ------------------------------------------------
+
+      -- ------------------------------------------------
+      -- Birleştirme işlemi
+      -- ------------------------------------------------
+
+      set @caseCount = Len(@case)
+      set @whenCount = Len(@when)
+      set @pos1 = charindex('<#', @case, @pos1)
+
+      while (@pos1 > 0)
+      begin
+          set @pos1 = charindex('<#', @case, @pos1) + 2
+          set @pos2 = charindex('#>', @case, @pos1)
+          set @key = SUBSTRING(@case, @pos1, @pos2 - @pos1) + '#'
+          set @key_ = SUBSTRING(@case, @pos1, @pos2 - @pos1) 
+          set @keyCount = LEN(@key)
+          --print @key
+          set @pos3 = charindex('<#' + @key, @when, @pos3) 
+          set @pos4 = 0
+          if (@key = '#') set @pos3 = 0
+          while (@pos3) > 0
+          begin
+              set @pos3 = charindex('<#' + @key, @when, @pos3) + @keyCount 
+              set @pos4 = charindex('#>', @when, @pos3)
+              set @whenLine = substring(@when, @pos3 + 2, (@pos4 - @pos3) - 2)
+              --print @pos3
+              --print @pos4
+              --print @whenLine
+              set @case = stuff(@case, charindex('<#' + @key_ + '#>', @case, 0), 0, @whenLine)
+              set @pos2 = @pos2 + LEN(@whenLine)
+              set @pos3 = charindex('<#' + @key, @when, @pos4+2)
+          end --while (@pos3) > 0
+          set @case = REPLACE(@case, '<#' + @key_ + '#>', '')
+          set @pos1 = charindex('<#', @case, @pos2)
+      end --while (@pos1 > 0)
+
+	  if (@case is not null)
+      begin
+	     set @fCaseSelectFields = @fCaseSelectFields + @case
+
+		 set @fStnSelectFields = @fStnSelectFields + @fCaseSelectFields
+         --print @fCaseSelectFields
+	  end
+
+	  return @fStnSelectFields 
+   
+  end -- if (@istenenKisim = 2)
+
+  return ''
+
+END --
+
+/*CreateFunctionEnd*/
+

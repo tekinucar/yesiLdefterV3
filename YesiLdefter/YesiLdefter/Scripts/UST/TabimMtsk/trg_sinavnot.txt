@@ -1,0 +1,192 @@
+﻿
+CREATE TRIGGER [dbo].[trg_sinavnot] on [dbo].[sinavnot] 
+AFTER INSERT, UPDATE
+AS BEGIN
+
+   declare @eUlasKursiyer int
+   declare @yUlasKursiyer int
+   declare @yTarih smallDatetime
+   declare @yTarih1 datetime 
+   declare @yTcNo varchar(11)
+   declare @yAdiSoyadi varchar(100)
+   declare @ySinavTarihSaat varchar(20)
+   declare @ySinavPuani int
+   declare @ySinavSonucTipiId int
+   declare @yAdayDonemTipiId int
+   declare @yMebbisSinavTarihValue varchar(20)
+   declare @yNot1 int
+   declare @yNot2 int
+   declare @yNot3 int
+   declare @yNot4 int
+
+   declare @eTarih smallDatetime
+   declare @eTarih1 datetime 
+
+   declare @yNOT4DURUM varchar(20)
+   declare @eSinav bit
+   declare @uygSinav bit
+   declare @OldSinavNotUlas int
+   declare @NewSinavNotUlas int
+   declare @SinavLisUlas int
+   declare @UlasKursiyer int
+   declare @yEski_Sur_Sinif int
+
+   --DECLARE @curId bigint 
+   --SET @curId = 51914
+   
+   DECLARE sinavnotCursor cursor for select Ulas from Inserted
+   DECLARE @curId bigint
+
+   OPEN sinavnotCursor
+   FETCH NEXT FROM sinavnotCursor INTO @curId
+
+   WHILE @@FETCH_STATUS = 0
+   BEGIN 
+       set @yUlasKursiyer = 0
+       set @eSinav = 0
+       set @uygSinav = 0 
+       set @OldSinavNotUlas = 0
+       set @NewSinavNotUlas = 0
+       set @SinavLisUlas = 0
+
+       set @yTarih = convert(datetime,'01.01.1990',103)
+       set @yTarih1 = convert(datetime,'01.01.1990',103) 
+
+       select 
+         @yUlasKursiyer = isnull(ins.UlasKursiyer,0)
+        ,@yTarih = isnull(ins.Tarih, convert(datetime,'01.01.1990',103))
+        ,@yTarih1 = isnull(ins.Tarih1, convert(datetime,'01.01.1990',103)) 
+        ,@yTcNo = isnull(ins.TcNo,'')
+        ,@yAdiSoyadi = isnull(ins.AdiSoyadi,'')
+        ,@ySinavTarihSaat = isnull(ins.SinavTarihSaat, '0')
+        ,@yNot1 = ins.Not1
+        ,@yNot2 = ins.Not2
+        ,@yNot3 = ins.Not3
+        ,@yNot4 = ins.Not4
+        ,@yNOT4DURUM = isnull(ins.NOT4DURUM, '')
+        ,@yAdayDonemTipiId = isnull(ins.AdayDonemTipiId,0)
+        ,@yMebbisSinavTarihValue = isnull(ins.MebbisSinavTarihValue,'')
+       from inserted ins
+       --from sinavnot as ins
+       where ins.Ulas = @curId
+
+       set @eTarih = convert(datetime,'01.01.1990',103)
+       set @eTarih1 = convert(datetime,'01.01.1990',103) 
+
+       select 
+         @eTarih = isnull(dlt.Tarih, convert(datetime,'01.01.1990',103))
+        ,@eTarih1 = isnull(dlt.Tarih1, convert(datetime,'01.01.1990',103)) 
+       from deleted dlt
+       where dlt.Ulas = @curId
+
+       if (convert(datetime, @yTarih, 103) > convert(datetime, '01.01.1990', 103)) set @eSinav = 1
+       if (convert(datetime, @yTarih1, 103) > convert(datetime, '01.01.1990', 103)) set @uygSinav = 1
+
+       if ((@yUlasKursiyer = 0) and (@yTcNo <> ''))
+       begin
+          Select top 1 @eUlasKursiyer = isnull(Ulas,0)
+		  , @yEski_Sur_Sinif = isnull(Eski_Sur_Sinif, 0)
+		  From KURSIYER
+          Where C_kimlik = @yTcNo
+          order by Ulas desc
+
+		  set @yUlasKursiyer = @eUlasKursiyer
+
+          if (@eUlasKursiyer > 0) and (@eSinav = 1)
+          begin
+              Update sinavnot set 
+                UlasKursiyer = @eUlasKursiyer
+              , Not2 = @yNot1
+              , Not3 = @yNot1
+              Where Ulas = @curId
+          end 
+          if (@eUlasKursiyer > 0) and (@uygSinav = 1)
+          begin
+          -- 0   : Not girilmedi
+          -- 1   : Başarısız 
+          -- 2   : Sınava girmeyenler
+          -- 3   : Kendi İsteğiyle Sınava Girmedi
+          -- 4   : Sınav Harcı Yatırmadı
+          -- 100 : Başarılı
+          -- 113 : Raporlu
+             if (@yNOT4DURUM = 'Başarılı') set @yNot4 = 100
+             if (@yNOT4DURUM = 'Başarısız') set @yNot4 = 1
+			 
+			 if (@yNot1 = 0) set @yNot1 = null
+			 if (@yEski_Sur_Sinif > 0) set @yNot1 = 111
+			 
+             Update sinavnot set 
+               UlasKursiyer = @eUlasKursiyer
+             , Not1 = @yNot1
+             , Not2 = @yNot1
+             , Not3 = @yNot1
+             , Not4 = @yNot4 
+             Where Ulas = @curId
+          end 
+       end
+
+	   if (@eSinav = 1)
+	   begin
+           Delete from sinavnot 
+           Where convert(datetime, convert(varchar(10), Tarih, 103), 103) = convert(datetime, convert(varchar(10), @yTarih, 103), 103)
+           and   UlasKursiyer = @yUlasKursiyer
+           and   Ulas < @curId
+       end
+
+	   if (@uygSinav = 1)
+	   begin
+           Delete from sinavnot 
+           Where convert(datetime, Tarih1, 103) = convert(datetime, @yTarih1, 103)
+           and   UlasKursiyer = @yUlasKursiyer
+           and   Ulas < @curId
+	   end
+
+       --if (@yUlasKursiyer > 0) set @UlasKursiyer = @yUlasKursiyer
+       --if (@eUlasKursiyer > 0) set @UlasKursiyer = @eUlasKursiyer
+
+       -- E-Sınav ise
+       if (@eSinav = 1)
+       begin
+            /* E-Sınav için SinavLis tablosunda kayıt var mı kontrol et, yoksa SinavLis tablosuna ekle */
+            select @SinavLisUlas = isnull(Ulas,0) from SinavLis
+            Where UlasKursiyer = @yUlasKursiyer
+            and   extype = 'ET'
+            and   Convert(datetime, Tarih, 103) = convert(datetime, convert(varchar(10), @yTarih, 103), 103)
+
+            if ((@SinavLisUlas = 0) and (convert(datetime, @eTarih, 103) = convert(datetime, '01.01.1990', 103)))
+            begin
+                INSERT INTO [dbo].[SinavLis]
+                       ([UlasKursiyer],[Tarih],[Sira],[extype],[Plaka_id],[Sinav_sira_no])
+                VALUES (@yUlasKursiyer ,convert(datetime, convert(varchar(10), @yTarih, 103), 103), 0, 'ET', 0, 0)
+            end
+       end
+
+       -- Uygulama Sınavı ise
+       if (@uygSinav = 1)
+       begin
+           /* Uygulama Sınav için SinavLis tablosunda kayıt var mı kontrol et, yoksa SinavLis tablosuna ekle */
+           select @SinavLisUlas = isnull(Ulas,0) from SinavLis
+           Where UlasKursiyer = @yUlasKursiyer
+           and   extype = 'YD'
+           and   Tarih = convert(datetime, convert(varchar(10), @yTarih1, 103), 103)
+
+           if ((@SinavLisUlas = 0) and (convert(datetime, @eTarih1, 103) = convert(datetime, '01.01.1990', 103)))
+           begin
+               INSERT INTO [dbo].[SinavLis]
+                      ([UlasKursiyer],[Tarih],[Sira],[extype],[Plaka_id],[Sinav_sira_no])
+               VALUES (@yUlasKursiyer ,convert(datetime, convert(varchar(10), @yTarih1, 103), 103), 0, 'YD', 0, 0)
+           end
+       end
+
+       Execute [dbo].[prc_KursiyerSinavDurumu] @yUlasKursiyer
+       
+       FETCH NEXT FROM sinavnotCursor INTO @curId
+   END
+
+   CLOSE sinavnotCursor
+   DEALLOCATE sinavnotCursor   
+
+END -- trigger
+
+ALTER TABLE [dbo].[sinavnot] ENABLE TRIGGER [trg_sinavnot]
+

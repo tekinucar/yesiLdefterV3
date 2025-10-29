@@ -1,0 +1,394 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_MtskTeorikDersIhlalleri] (@curId int)  
+AS BEGIN
+
+  --declare @curId int = 355
+  declare @CakismaSayisi smallInt = 0
+
+  declare @DonemTipiId int = 0
+  declare @GrupTipiId smallInt = 0
+  declare @SubeTipiId smallInt = 0
+  declare @DerslikTipiId smallInt = 0
+
+  declare @FirmId int
+  declare @DersTarihi date
+  declare @DersSaatiTipiId smallInt = 0
+  declare @PersonelId varchar(20)
+  declare @IhlalSayisi int = 0
+  declare @EnKucuk smallInt = 2
+  declare @EnBuyuk smallInt = 6
+   
+  -- ---------------------------------------------------------------------
+  -- Mevcut kaydı oku
+  -- ---------------------------------------------------------------------
+  Select 
+       @FirmId          = ins.FirmId  
+	  ,@DonemTipiId     = ins.DonemTipiId
+      ,@GrupTipiId      = ins.GrupTipiId
+      ,@SubeTipiId      = ins.SubeTipiId
+	  ,@PersonelId      = ins.PersonelId
+      ,@DersTarihi      = ins.DersTarihi
+      ,@DersSaatiTipiId = ins.DersSaatiTipiId
+  From [dbo].[MtskTeorikDers] as ins 
+  Where ins.Id = @curId
+
+  -- ---------------------------------------------------------------------
+  -- Çakışmaların tespiti : 21, 22, 23, 24, 25, 29  idli ihlaller
+  -- ---------------------------------------------------------------------
+      Delete MtskKIhlalTeorikD
+      Where IhlalTipiId in (21,22,23,24,25,29)
+	  and ( InsertedId = @curId 
+      or    MevcutId = @curId )
+
+      INSERT INTO [dbo].[MtskKIhlalTeorikD]
+           (FirmId
+           ,DonemTipiId
+           ,GrupTipiId
+           ,SubeTipiId
+           ,IhlalTipiId
+           ,InsertedId
+           ,MevcutId
+           ,Tarih)
+      Select  
+          tespit.FirmId  
+        , tespit.DonemTipiId
+        , tespit.GrupTipiId
+        , tespit.SubeTipiId
+        , tespit.IhlalTipiId 
+        , tespit.InsertedId
+        , tespit.MevcutId
+        , GetDate()
+      From (
+        Select 
+          ins.FirmId  
+        , ins.DonemTipiId
+        , ins.GrupTipiId
+        , ins.SubeTipiId
+        , ( case 
+            when  ins.DerslikAdiTipiId =  mvc.DerslikAdiTipiId and ins.PersonelId =  mvc.PersonelId then 23 -- Hem derslik hemde personel çakışması var
+            when  ins.DerslikAdiTipiId =  mvc.DerslikAdiTipiId and ins.PersonelId <> mvc.PersonelId then 21 -- Derslik çakışması var
+            when  ins.DerslikAdiTipiId <> mvc.DerslikAdiTipiId and ins.PersonelId =  mvc.PersonelId then 22 -- Personel çakışması var 
+            when ( ins.DonemTipiId     =  mvc.DonemTipiId 
+               and ins.GrupTipiId      =  mvc.GrupTipiId 
+               and ins.SubeTipiId      =  mvc.SubeTipiId 
+               and ins.DerslikTipiId   <> mvc.DerslikTipiId ) then 24 -- Farklı bir dersle çakışması var
+            when  ins.DerslikTipiId    =  mvc.DerslikTipiId then 25 -- Çift kayıt çakışması var            else 0 end) as IhlalTipiId 
+            else 29 end) as IhlalTipiId
+        , ins.Id as InsertedId
+        , isnull(mvc.Id,0) as MevcutId
+
+        From [dbo].[MtskTeorikDers] as ins 
+            left outer join [dbo].[MtskTeorikDers] as mvc on (
+                ins.FirmId = mvc.FirmId 
+            and ins.DersTarihi = mvc.DersTarihi
+            and ins.BaslamaSaati = mvc.BaslamaSaati
+            and ( ins.DerslikAdiTipiId = mvc.DerslikAdiTipiId 
+            or    ins.PersonelId = mvc.PersonelId )
+            and ins.Id != mvc.Id
+            )
+        Where 0 = 0
+        and   ins.FirmId = mvc.FirmId
+        and   ins.Id = @curId
+        and   mvc.Id > 0
+        ) as tespit
+           left join MtskKIhlalTeorikD as ihl on (
+                 tespit.FirmId      = ihl.FirmId 
+           and   tespit.DonemTipiId = ihl.DonemTipiId 
+           and   tespit.GrupTipiId  = ihl.GrupTipiId 
+           and   tespit.SubeTipiId  = ihl.SubeTipiId
+           and   tespit.IhlalTipiId = ihl.IhlalTipiId
+           and   tespit.InsertedId  = ihl.InsertedId
+           and   tespit.MevcutId    = ihl.MevcutId
+      )
+      Where ihl.Id is null
+
+  -- ---------------------------------------------------------------------
+  -- Günlük ders sayılarının tespiti : 11, 12 idli ihlaller
+  -- ---------------------------------------------------------------------
+  /*
+  Id DerslikTipi
+  1 Trafik ve Çevre Dersi
+  2 İlkyardım Dersi
+  3 Araç Tekniği Dersi
+  5 Trafik Adabı Dersi
+  */
+      Delete MtskKIhlalTeorikD
+      Where  IhlalTipiId in (11,12)
+	  --and    DersTarihi    = @DersTarihi 
+      and    DonemTipiId   = @DonemTipiId
+      and    GrupTipiId    = @GrupTipiId
+      and    SubeTipiId    = @SubeTipiId
+
+      -- Tespit et ve yaz  
+      INSERT INTO [dbo].[MtskKIhlalTeorikD]
+           (FirmId
+           ,DonemTipiId
+           ,GrupTipiId
+           ,SubeTipiId
+           ,IhlalTipiId
+           ,DerslikTipiId
+           ,DersSaatSayisi
+           ,DersTarihi
+           ,Tarih)
+      Select  
+          tespit.FirmId  
+        , tespit.DonemTipiId
+        , tespit.GrupTipiId
+        , tespit.SubeTipiId
+        , tespit.IhlalTipiId 
+        , tespit.DerslikTipiId
+		, tespit.DersSaatSayisi 
+        , tespit.DersTarihi 
+        , GetDate()
+      From (
+         Select 
+		     ins.FirmId
+           , ins.DonemTipiId
+           , ins.GrupTipiId
+           , ins.SubeTipiId
+           , ( case 
+               when count(ins.Id) < @EnKucuk then 11
+               when count(ins.Id) > @EnBuyuk then 12
+               else 0 end ) as IhlalTipiId
+           , count(ins.Id) as DersSaatSayisi
+           , ins.DerslikTipiId
+		   , ins.DersTarihi
+         From [dbo].[MtskTeorikDers] as ins 
+         Where 0 = 0
+         --and   ins.DersTarihi  = @DersTarihi
+         and   ins.DonemTipiId = @DonemTipiId
+         and   ins.GrupTipiId  = @GrupTipiId
+         and   ins.SubeTipiId  = @SubeTipiId
+         group by
+             ins.FirmId
+           , ins.DonemTipiId
+           , ins.GrupTipiId
+           , ins.SubeTipiId
+           , ins.DerslikTipiId
+		   , ins.DersTarihi
+         HAVING count(ins.Id) < @EnKucuk or count(ins.Id) > @EnBuyuk
+
+        ) as tespit
+           left join MtskKIhlalTeorikD as ihl on (
+                 tespit.FirmId        = ihl.FirmId 
+           and   tespit.DonemTipiId   = ihl.DonemTipiId 
+           and   tespit.GrupTipiId    = ihl.GrupTipiId 
+           and   tespit.SubeTipiId    = ihl.SubeTipiId
+           and   tespit.IhlalTipiId   = ihl.IhlalTipiId
+           and   tespit.DerslikTipiId = ihl.DerslikTipiId  
+           and   tespit.DersTarihi    = ihl.DersTarihi             
+		   )
+       Where ihl.Id is null
+
+
+  -- ---------------------------------------------------------------------
+  -- Grup bazlı ders sayılarının tespiti : 13, 14 idli ihlaller
+  -- ---------------------------------------------------------------------
+  /*
+  Id DerslikTipi
+  1 Trafik ve Çevre Dersi
+  2 İlkyardım Dersi
+  3 Araç Tekniği Dersi
+  5 Trafik Adabı Dersi
+  */
+  declare @DersSayisiTrf smallInt = 0
+  declare @DersSayisiIlk smallInt = 0
+  declare @DersSayisiTek smallInt = 0
+  declare @DersSayisiAdb smallInt = 0
+
+  
+  -- ---------------------------------------------------------------------
+  -- Teorik ders sayıları
+  -- ---------------------------------------------------------------------
+  SELECT TOP 1
+       @DersSayisiTrf = saat.[TrafikVeCevreDersSaati]
+      ,@DersSayisiIlk = saat.[IlkYardimDersSaati]
+      ,@DersSayisiTek = saat.[AracTeknigiDersSaati]
+      ,@DersSayisiAdb = saat.[TrafikAdabiDersSaati]
+  FROM dbo.MtskSaatTeorik as saat
+       left outer join GecerlilikTarihi as trh on (saat.GecerlilikTarihiId = trh.Id )
+  Where trh.Tarih < @DersTarihi
+
+      Delete MtskKIhlalTeorikD
+      Where  IhlalTipiId in (13,14)
+      and    DonemTipiId   = @DonemTipiId
+      --and    GrupTipiId    = @GrupTipiId
+      --and    SubeTipiId    = @SubeTipiId
+
+      -- Tespit et ve yaz  
+      INSERT INTO [dbo].[MtskKIhlalTeorikD]
+           (FirmId
+           ,DonemTipiId
+           ,GrupTipiId
+           ,SubeTipiId
+           ,IhlalTipiId
+           ,DersSaatSayisi
+           ,DerslikTipiId
+           ,Tarih)
+      Select  
+          tespit.FirmId  
+        , tespit.DonemTipiId
+        , tespit.GrupTipiId
+        , tespit.SubeTipiId
+        , tespit.IhlalTipiId 
+        , tespit.DersSaatSayisi
+        , tespit.DerslikTipiId
+        , GetDate()
+      From (
+         Select 
+		     ins.FirmId
+           , ins.DonemTipiId
+           , ins.GrupTipiId
+           , ins.SubeTipiId
+           , ( case 
+               when ins.DerslikTipiId = 1 and count(ins.Id) < @DersSayisiTrf then 13
+               when ins.DerslikTipiId = 1 and count(ins.Id) > @DersSayisiTrf then 14
+               when ins.DerslikTipiId = 2 and count(ins.Id) < @DersSayisiIlk then 13
+               when ins.DerslikTipiId = 2 and count(ins.Id) > @DersSayisiIlk then 14
+               when ins.DerslikTipiId = 3 and count(ins.Id) < @DersSayisiTek then 13
+               when ins.DerslikTipiId = 3 and count(ins.Id) > @DersSayisiTek then 14
+               when ins.DerslikTipiId = 5 and count(ins.Id) < @DersSayisiAdb then 13
+               when ins.DerslikTipiId = 5 and count(ins.Id) > @DersSayisiAdb then 14
+               else 0 end ) as IhlalTipiId
+           , count(ins.Id) as DersSaatSayisi
+           , ins.DerslikTipiId
+
+         From [dbo].[MtskTeorikDers] as ins 
+         Where 0 = 0
+         and   ins.DonemTipiId = @DonemTipiId
+         --and   ins.GrupTipiId  = @GrupTipiId
+         --and   ins.SubeTipiId  = @SubeTipiId
+         group by
+             ins.FirmId
+           , ins.DonemTipiId
+           , ins.GrupTipiId
+           , ins.SubeTipiId
+           , ins.DerslikTipiId
+         HAVING 
+           ( ins.DerslikTipiId = 1 and count(ins.Id) < @DersSayisiTrf ) or
+           ( ins.DerslikTipiId = 1 and count(ins.Id) > @DersSayisiTrf ) or
+           ( ins.DerslikTipiId = 2 and count(ins.Id) < @DersSayisiIlk ) or
+           ( ins.DerslikTipiId = 2 and count(ins.Id) > @DersSayisiIlk ) or
+           ( ins.DerslikTipiId = 3 and count(ins.Id) < @DersSayisiTek ) or
+           ( ins.DerslikTipiId = 3 and count(ins.Id) > @DersSayisiTek ) or
+           ( ins.DerslikTipiId = 5 and count(ins.Id) < @DersSayisiAdb ) or
+           ( ins.DerslikTipiId = 5 and count(ins.Id) > @DersSayisiAdb )
+        ) as tespit
+           left join MtskKIhlalTeorikD as ihl on (
+                 tespit.FirmId        = ihl.FirmId 
+           and   tespit.DonemTipiId   = ihl.DonemTipiId 
+           and   tespit.GrupTipiId    = ihl.GrupTipiId 
+           and   tespit.SubeTipiId    = ihl.SubeTipiId
+           and   tespit.IhlalTipiId   = ihl.IhlalTipiId
+           and   tespit.DerslikTipiId = ihl.DerslikTipiId  
+		   )
+       Where ihl.Id is null
+
+  -- ---------------------------------------------------------------------
+  -- Personelin ders sayılarının tespiti : 31 idli ihlaller
+  -- ---------------------------------------------------------------------
+
+  declare @MaasKarsiligiDersSayisi int 
+  declare @DersUcretiKarsiligiDersSayisi int 
+
+  Select @MaasKarsiligiDersSayisi = MaasKarsiligiDersSayisi
+        ,@DersUcretiKarsiligiDersSayisi = DersUcretiKarsiligiDersSayisi
+  From dbo.MtskPersoneli
+  Where TcNoCalismaIzniNo = @PersonelId
+  or    TcNo_CalismaIzniNo = @PersonelId
+
+  if (@MaasKarsiligiDersSayisi < @DersUcretiKarsiligiDersSayisi)
+      set @MaasKarsiligiDersSayisi = @DersUcretiKarsiligiDersSayisi  
+
+      Delete MtskKIhlalTeorikD
+      Where  IhlalTipiId = 31
+      and    FirmId      = @FirmId 
+	  and    DonemTipiId = @DonemTipiId
+      and    PersonelId  = @PersonelId
+
+      -- Tespit et ve yaz  
+      INSERT INTO [dbo].[MtskKIhlalTeorikD]
+           (FirmId
+           ,IhlalTipiId
+           ,DersSaatSayisi
+           ,PersonelId
+           ,Tarih)
+      Select 
+             ins.FirmId
+           , ( case 
+               when count(ins.Id) > @MaasKarsiligiDersSayisi then 31
+               else 0 end ) as IhlalTipiId
+           , count(ins.Id) as DersSaatSayisi
+           , ins.PersonelId
+           , GetDate()
+
+         From [dbo].[MtskTeorikDers] as ins 
+         Where 0 = 0
+         and   ins.PersonelId = @PersonelId
+         and   DatePart(ww, ins.DersTarihi) = DatePart(ww, @DersTarihi)
+         group by
+             ins.FirmId
+           , ins.PersonelId
+         HAVING count(ins.Id) > @MaasKarsiligiDersSayisi 
+
+
+  -- ---------------------------------------------------------------------
+  -- Personelin uygulama dersi mevcut : 35 idli ihlal
+  -- ---------------------------------------------------------------------
+
+  Declare @UygulamaDersId int = 0
+
+  Select @UygulamaDersId = isnull([Id],0)
+  From [dbo].[MtskUygulamaliDers]
+  Where 0 = 0
+  and [FirmId] = @FirmId
+  and [IsActive] = 1
+  and [DersTarihi] = @DersTarihi
+  and [DersSaatiTipiId] = @DersSaatiTipiId
+  and [PersonelId] = @PersonelId
+
+      -- silme işi tam doğru olmadı
+      Delete MtskKIhlalTeorikD
+      Where  IhlalTipiId = 35
+      and    FirmId      = @FirmId 
+	  and    InsertedId  = @curId
+	  --and    DonemTipiId = @DonemTipiId
+      --and    PersonelId  = @PersonelId
+	  --and    MevcutId    = @UygulamaDersId
+      --and    DersTarihi  = @DersTarihi     
+      --and    DersSaatiTipiId = @DersSaatiTipiId
+
+
+	  if (@UygulamaDersId > 0)
+      begin
+          -- Tespit et ve yaz  
+          INSERT INTO [dbo].[MtskKIhlalTeorikD]
+           ( FirmId
+           , DonemTipiId 
+           , GrupTipiId
+           , SubeTipiId
+           , IhlalTipiId
+           , PersonelId
+           , DersTarihi  
+           , InsertedId
+           , MevcutId
+           , Tarih)
+          Select 
+             @FirmId
+           , @DonemTipiId
+           , @GrupTipiId
+           , @SubeTipiId
+           , 35 as IhlalTipiId
+           , @PersonelId
+		   , @DersTarihi
+           , @curId
+           , @UygulamaDersId
+           , GetDate()
+      end -- @UygulamaDersId > 0  
+        
+
+
+
+END -- procedure
+/*CreateProcedureEnd*/

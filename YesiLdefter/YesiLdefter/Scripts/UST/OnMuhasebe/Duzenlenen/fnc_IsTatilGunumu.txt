@@ -1,0 +1,77 @@
+﻿/*CreateFunction*/
+
+CREATE FUNCTION [dbo].[fnc_IsTatilGunumu](
+ @islemTarihi date
+,@saatTipiId smallInt
+)  
+RETURNS bit
+AS   
+BEGIN  
+
+  
+  declare @return bit
+  Set @return = 0 -- default tatil değil işareti verildi
+
+  -- işlem yapılcak tarih tatil günlerine denk geliyormu ?
+  --//
+  --declare @islemTarihi date
+  --Set @islemTarihi = Convert(date, '06.11.2025',103)
+  --declare @saatTipiId smallInt
+  --Set @saatTipiId = 113  
+  --//
+
+  declare @Id int
+  declare @OzelGunTipiId smallInt 
+  declare @IsArefeGunu bit
+  declare @BaslamaTarihi date
+  declare @BitisTarihi date
+  declare @BaslaSaatTipiId smallInt
+  declare @yil int
+  declare @ay  int
+  declare @gun int
+  declare @IsTatil bit
+
+  set @yil = YEAR(@islemTarihi)
+  set @ay  = MONTH(@islemTarihi)
+  set @gun = DAY(@islemTarihi)
+  
+  -- Tatil varmı kontrol et 
+  Select
+      @Id = Id
+     ,@OzelGunTipiId = OzelGunTipiId
+     ,@IsArefeGunu = IsArefeGunu
+     ,@BaslaSaatTipiId = BaslaSaatTipiId
+     ,@BaslamaTarihi = BaslamaTarihi
+	 ,@BitisTarihi = BitisTarihi
+  From OnmOzelGunler
+  Where ( Gun = @gun and Ay = @ay and OzelGunTipiId = 1 )
+  or    ( OzelGunTipiId = 3 and BaslamaTarihi <= @islemTarihi and BitisTarihi >= @islemTarihi ) 
+
+  Set @IsTatil = 0
+  -- Tatil var ise 
+  if (@BaslamaTarihi is not null)
+  begin
+      --print 'Bayrama denk geldi'
+	  --     tatilin 1. günü veya arefe günü ise ( arefe var ise tatilin başlangıç tarihidir ) 
+	  -- and tatilin başladığı saatinide geçen bir istek var ise
+	  if ((@BaslamaTarihi = @islemTarihi) and 
+	      (@BaslaSaatTipiId <= @saatTipiId)) 
+	      Set @return = 1 -- 'tatil başladı'
+
+	  -- 1. günden veya arefenden sonraki gün
+	  -- bayram bitmedi ise 
+	  if (@BaslamaTarihi < @islemTarihi) and 
+	     (@BitisTarihi >= @islemTarihi)
+         Set @return = 1 -- 'tatil başladı'
+  end
+
+  if (@Id > 0) and (@OzelGunTipiId = 1)
+      Set @return = 1 -- 'resmi tatil'
+
+  --print @return
+
+  RETURN @return;  
+END;
+
+/*CreateFunctionEnd*/
+

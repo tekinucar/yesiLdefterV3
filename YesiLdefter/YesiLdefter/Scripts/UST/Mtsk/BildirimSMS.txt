@@ -1,0 +1,85 @@
+﻿
+/*CreateTable*/
+
+begin transaction
+
+ create table BildirimSMS
+ (
+
+   Id                  Int IDENTITY(1,1) NOT NULL, 
+   FirmId              Int         not null,
+   IsActive            Bit         not null, /* default : 1 = active, 0 = not active */  
+   KaynakTipiId        SmallInt        null,
+   KaynakRefId         Int             null, 
+   MesajTipiId         SmallInt        null,
+   HazirlamaTarihi     SmallDateTime   null,
+   PlanlananTarih      SmallDateTime   null,
+   GonderimTarihi      SmallDateTime   null,
+   IsGonderildi        Bit             null,
+   CepTelefonu         nVarchar(15)    null,
+   Mesaj               nVarchar(160)   null,
+   --sonuclar eklenecek 
+
+  constraint pk_BildirimSMS primary key (Id)
+ )
+
+ create index X_BildirimSMS01 on BildirimSMS (KaynakTipiId, KaynakRefId)
+ create index X_BildirimSMS02 on BildirimSMS (HazirlamaTarihi)
+ create index X_BildirimSMS03 on BildirimSMS (GonderimTarihi)
+
+ grant select, insert, update, delete on BildirimSMS to public
+
+commit transaction
+
+/*CreateTableEnd*/
+
+/*CreateLkpTable*/
+
+-- ------------------------------------------------------- 
+-- KaynakTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'BildirimSMSKaynakTipi')
+drop table [Lkp].[BildirimSMSKaynakTipi]
+
+create table Lkp.BildirimSMSKaynakTipi
+(
+   Id           Int Unique Not Null,
+   KaynakTipi   nVarchar(50)   null,
+   GrupTipiId   SmallInt       null,
+   
+   constraint  pk_BildirimSMSKaynakTipi primary key (Id)
+)
+
+INSERT INTO Lkp.BildirimSMSKaynakTipi (Id, KaynakTipi, GrupTipiId)
+ VALUES 
+  (0, N'', 0),
+  (111, N'MtskAday',  0),
+  --(112, N'', 1), borçlar , MtskSinavETeorik, MtskSinavRandevu, MtskSinavUygulama, MtskTeorikDers, MtskUygulamaliDers, 
+  --(113, N'', 1),
+  (131, N'MtskPersoneli', 0)
+
+
+-- ------------------------------------------------------- 
+-- MesajTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'BildirimSMSMesajTipi')
+drop table [Lkp].[BildirimSMSMesajTipi]
+
+create table [Lkp].[BildirimSMSMesajTipi]
+(
+   Id                Int Unique not null, 
+   MesajTipi         nVarchar(50)   null
+   
+   constraint  pk_BildirimSMSMesajTipi primary key (Id)
+)
+
+Delete from [Lkp].[BildirimSMSMesajTipi]
+INSERT INTO [Lkp].[BildirimSMSMesajTipi] (Id, MesajTipi)
+ VALUES 
+  ( 0,  N'' ),
+  ( 1,  N'Aday için Gerekli Belgeler' ),
+  ( 2,  N'Aday için Eksik Belgeler' )
+
+
+/*CreateLkpTableEnd*/
+

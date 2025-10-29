@@ -1,0 +1,128 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_MtskTeorikDersPlaniOlustur] (@SablonTeorikFId int)  
+AS BEGIN
+  --declare @SablonTeorikFId int = 1
+  declare @FirmId int
+  declare @BaslangicTarihi date
+    
+  Select 
+    @FirmId = FirmId
+  , @BaslangicTarihi = isnull(BaslangicTarihi, getdate())
+  From [dbo].[MtskSablonTeorikF]
+  Where Id = @SablonTeorikFId
+
+  Insert Into [dbo].[MtskTeorikDers]
+           ([FirmId]
+           ,[IsActive]
+           ,[DonemTipiId]
+           ,[GrupTipiId]
+           ,[SubeTipiId]
+           ,[DerslikTipiId]
+           ,[DerslikAdiTipiId]
+           ,[DersTarihi]
+           ,[DersSaatiTipiId]
+           ,[PersonelId]
+           ,[EgitimTipiId]
+           ,[BaslamaSaati]
+           ,[BitisSaati]
+           ,[TDersIsUploaded]
+		   ,[SablonTeorikBId]
+		   ,[SablonTeorikFId]
+		   ,[OzelGunlerId]
+		   )
+
+  Select  
+      x.[FirmId]
+     ,x.[IsActive]
+     ,x.[DonemTipiId]
+     ,x.[GrupTipiId]
+     ,x.[SubeTipiId]
+     ,x.[DerslikTipiId]
+     ,x.[DerslikAdiTipiId]
+     ,x.[DersTarihi]
+     ,x.[DersSaatiTipiId]
+     ,x.[PersonelId]
+     ,x.[EgitimTipiId]
+     ,x.[BaslamaSaati]
+     ,x.[BitisSaati]
+     ,x.[TDersIsUploaded]
+	 ,x.[SablonTeorikBId] 
+	 ,x.[SablonTeorikFId]
+     ,x.[OzelGunlerId] 
+
+  from (
+  Select 
+    @FirmId as FirmId
+  , 1 as IsActive
+  , f.DonemTipiId
+  , f.GrupTipiId
+  , f.SubeTipiId
+  , s.DerslikTipiId
+  , (case s.DerslikTipiId
+    when 1 then (Select DerslikAdiTipiId from MtskDerslik Where DerslikTipiId = 1) 
+    when 2 then (Select DerslikAdiTipiId from MtskDerslik Where DerslikTipiId = 2) 
+    when 3 then (Select DerslikAdiTipiId from MtskDerslik Where DerslikTipiId = 3) 
+    when 5 then (Select DerslikAdiTipiId from MtskDerslik Where DerslikTipiId = 1) 
+    else -1 end) as DerslikAdiTipiId
+  
+  , [dbo].fnc_IsGununuBul(@BaslangicTarihi, s.GunId, b.GunTipiId, s.SaatTipiId) as DersTarihi
+
+  , (Case s.SaatTipiId 
+     When 107 then 0 -- 07:00 - 07:50
+     When 108 then 1 -- 08:00 - 08:50
+     When 109 then 2 -- 09:00 - 09:50
+     When 110 then 3 -- 10:00 - 10:50 
+     When 111 then 4 -- 11:00 - 11:50
+     When 112 then 5 -- 12:00 - 12:50
+     When 113 then 6 -- 13:00 - 13:50
+     When 114 then 7 -- 14:00 - 14:50
+     When 115 then 8 -- 15:00 - 15:50
+     When 116 then 9 -- 16:00 - 16:50
+     When 117 then 10 -- 17:00 - 17:50
+     When 118 then 11 -- 18:00 - 18:50
+     When 119 then 12 -- 19:00 - 19:50
+     When 120 then 13 -- 20:00 - 20:50
+     When 121 then 14 -- 21:00 - 21:50
+     When 122 then 15 -- 22:00 - 22:50
+     Else -1 End) as DersSaatiTipiId
+	 
+  , (Case s.DerslikTipiId 
+     When 1 then f.TrafikOgreticiId
+     When 2 then f.IlkYardimOgreticiId
+     When 3 then f.AracTeknigiOgreticiId
+     When 5 then f.TrafikAdabiOgreticiId
+     Else '' End) as PersonelId
+	
+  , s.EgitimTipiId
+  , null as BaslamaSaati
+  , null as BitisSaati
+  , 0 as TDersIsUploaded
+  , s.SablonTeorikBId
+  , f.Id as SablonTeorikFId
+  , 0    as OzelGunlerId 
+
+  from MtskSablonTeorikS as s 
+     left outer join MtskSablonTeorikB as b on ( s.SablonTeorikBId = b.Id )
+     left outer join MtskSablonTeorikF as f on ( s.SablonTeorikBId = f.SablonTeorikBId )
+	 left outer join MtskDerslik as d on ( s.DerslikTipiId = d.DerslikTipiId )
+   Where s.IsActive = 1
+   and f.Id = @SablonTeorikFId
+   ) as x
+      /* bu kontrolün sayesinde tekrar kayıtlar engelleniyor  */
+      left outer join MtskTeorikDers as u on 
+      (
+           x.DersTarihi = u.DersTarihi
+       and x.DersSaatiTipiId = u.DersSaatiTipiId
+       and x.DonemTipiId = u.DonemTipiId
+       and x.GrupTipiId = u.GrupTipiId
+       and x.SubeTipiId = u.SubeTipiId
+      )
+   Where 0 = 0
+   and x.PersonelId <> ''
+   and u.Id is null
+   Order by x.DersTarihi, x.DersSaatiTipiId
+
+END -- procedure
+
+/*CreateProcedureEnd*/

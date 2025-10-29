@@ -1,0 +1,33 @@
+﻿/* While / WHILE / WHILE @@FETCH_STATUS  :  MSSQL ÖRNEĞİ */
+
+/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_MtskTeorikDersIhlalleriSaatlerKontrolu] (@FirmId int)  
+AS BEGIN
+
+      declare @donemTipiId int
+      declare myCursor CURSOR local
+      for 
+      Select DonemTipiId
+      from dbo.MtskDonemi 
+      Where FirmId = @FirmId
+
+      OPEN myCursor;
+  
+      FETCH NEXT
+      FROM myCursor
+      INTO @donemTipiId;
+	  
+      While @@FETCH_STATUS = 0
+      begin
+	      Execute [dbo].[prc_MtskTeorikDersIhlalleriSaatler] 0, @FirmId, @donemTipiId
+		  FETCH NEXT FROM myCursor INTO @donemTipiId;
+      end -- While
+
+      Close myCursor;
+      DealLocate myCursor;
+
+END --
+
+/*CreateProcedureEnd*/
+

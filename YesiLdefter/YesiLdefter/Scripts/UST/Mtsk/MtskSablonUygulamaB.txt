@@ -1,0 +1,144 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table MtskSablonUygulamaB
+ (
+   Id                      Int IDENTITY(1,1) not null, 
+   IsActive                Bit           not null, /* default : 1 = active, 0 = not active */  
+   SablonAdi               nVarChar(100) null,
+   GunTipiId               SmallInt      null,
+   ToplamIsGunuSayisi      SmallInt      null, 
+   SaatTipiId              SmallInt      null,
+   MevcutSertifikaTipiId   SmallInt      null,
+   IstenenSertifikaTipiId  SmallInt      null,   
+   ToplamDersSaati         SmallInt      null,
+   AracTipiId              SmallInt      null, /* simulatör var unutma */
+   OgreticiTipiId          SmallInt      null,
+   AdayTipiId              SmallInt      null,
+   GundeMaxSaat            SmallInt      null,
+   HaftadaMaxSaat          SmallInt      null,
+
+   constraint		pk_MtskSablonUygulamaB primary key (Id)
+ )
+  
+ grant select, insert, update, delete on MtskSablonUygulamaB to public
+
+commit transaction
+
+/*CreateTableEnd*/
+
+/*CreateLkpTable*/
+
+begin transaction
+
+-- ------------------------------------------------------- 
+-- GunTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskSablonUygulamaBGunTipi')
+drop table [Lkp].[MtskSablonUygulamaBGunTipi]
+
+create table Lkp.MtskSablonUygulamaBGunTipi
+(
+   Id          Int Unique Not Null,
+   GunTipi     nVarchar(30)   null
+   
+   constraint  pk_MtskSablonUygulamaBGunTipi primary key (Id)
+)
+
+INSERT INTO Lkp.MtskSablonUygulamaBGunTipi (Id, GunTipi)
+ VALUES 
+  ( 0, N'Tanımsız'),
+  ( 1, N'5 iş günü, 2 gün izin'),
+  ( 2, N'6 iş günü, 1 gün izin')
+
+
+-- ------------------------------------------------------- 
+-- SaatTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskSablonUygulamaBSaatTipi')
+drop table [Lkp].[MtskSablonUygulamaBSaatTipi]
+
+create table Lkp.MtskSablonUygulamaBSaatTipi
+(
+   Id          Int Unique Not Null,
+   SaatTipi    nVarchar(20)   null
+   
+   constraint  pk_MtskSablonUygulamaBSaatTipi primary key (Id)
+)
+
+INSERT INTO Lkp.MtskSablonUygulamaBSaatTipi (Id, SaatTipi)
+ VALUES 
+  ( 0, N'Tanımsız'),
+  ( 1, N'Tek saat'),
+  ( 2, N'7-8,.. çift saat'),
+  ( 3, N'8-9,.. çift saat')
+
+-- ------------------------------------------------------- 
+-- AracTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskSablonUygulamaBAracTipi')
+drop table [Lkp].[MtskSablonUygulamaBAracTipi]
+
+create table Lkp.MtskSablonUygulamaBAracTipi
+(
+   Id          Int Unique Not Null,
+   AracTipi    nVarchar(20)   null
+   
+   constraint  pk_MtskSablonUygulamaBAracTipi primary key (Id)
+)
+
+INSERT INTO Lkp.MtskSablonUygulamaBAracTipi (Id, AracTipi)
+ VALUES 
+  ( 0, N'Tanımsız'),
+  ( 1, N'Simülatör + Araç'),
+  ( 2, N'Sadece Araç')
+
+
+-- ------------------------------------------------------- 
+-- OgreticiTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskSablonUygulamaBOgreticiTipi')
+drop table [Lkp].[MtskSablonUygulamaBOgreticiTipi]
+
+create table Lkp.MtskSablonUygulamaBOgreticiTipi
+(
+   Id           Int Unique Not Null,
+   OgreticiTipi nVarchar(20)   null
+   
+   constraint  pk_MtskSablonUygulamaBOgreticiTipi primary key (Id)
+)
+
+INSERT INTO Lkp.MtskSablonUygulamaBOgreticiTipi (Id, OgreticiTipi)
+ VALUES 
+  ( 0, N'Tanımsız'),
+  ( 1, N'1 Öğretici Usta'),
+  ( 2, N'2 Öğretici Usta')
+
+
+-- ------------------------------------------------------- 
+-- AdayTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskSablonUygulamaBAdayTipi')
+drop table [Lkp].[MtskSablonUygulamaBAdayTipi]
+
+create table Lkp.MtskSablonUygulamaBAdayTipi
+(
+   Id          Int Unique Not Null,
+   AdayTipi    nVarchar(20)   null
+   
+   constraint  pk_MtskSablonUygulamaBAdayTipi primary key (Id)
+)
+
+INSERT INTO Lkp.MtskSablonUygulamaBAdayTipi (Id, AdayTipi)
+ VALUES 
+  ( 0, N'Tanımsız'),
+  ( 4, N'4 Aday'),
+  ( 5, N'5 Aday'),
+  ( 6, N'6 Aday'),
+  ( 7, N'7 Aday'),
+  ( 8, N'8 Aday')
+
+commit transaction
+
+/*CreateLkpTableEnd*/

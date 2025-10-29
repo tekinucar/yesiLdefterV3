@@ -1,0 +1,1333 @@
+
+begin transaction
+
+ create table MS_TYPES
+ (
+        REF_ID            Int IDENTITY(1,1) NOT NULL,
+        VALUE_TYPE        SmallInt      NULL,
+        IMAGE_ID          SmallInt      NULL,
+        TYPES_NAME        VarChar(30)   NULL,
+        TYPES_VALUE_INT   Int           NULL,
+        TYPES_VALUE_STR   VarChar(30)   NULL,          
+        TYPES_CAPTION     VarChar(100)  NULL,
+
+   Constraint PK_MS_TYPES primary key (REF_ID)
+ )
+
+ create index X_MS_TYPES1 on MS_TYPES (TYPES_NAME)
+ 
+ grant select, insert, update, delete on MS_TYPES to public
+
+commit transaction
+
+/*  ***** DEFAULT INSERT LIST ***** */ 
+
+/* ****** VALUE_TYPE ********************************************** */                                     
+/* -1 : SmallInt, -2 : Int32, -3 : String, -4 : Byte,  5 : TinyInt  */
+/* **************************************************************** */
+
+
+begin transaction
+
+ DELETE MS_TYPES WHERE TYPES_NAME <> 'PRJ_MODUL' 
+ DELETE MS_TYPES WHERE TYPES_NAME = '???' 
+
+ DELETE MS_TYPES WHERE TYPES_NAME = 'WEBNODE_EVENTS_TYPE'
+ 
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_EVENTS_TYPE', 0,   '', 'none');
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_EVENTS_TYPE', 1,   '', 'Load');
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_EVENTS_TYPE', 2,   '', 'DisplayNone');
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_EVENTS_TYPE', 3,   '', 'PageRefresh');
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_EVENTS_TYPE', 142, '', 'buttonAlwaysSet');
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_EVENTS_TYPE', 143, '', 'Button3:Get1');
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_EVENTS_TYPE', 144, '', 'Button4:Get2');
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_EVENTS_TYPE', 145, '', 'Button5:Set1');
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_EVENTS_TYPE', 146, '', 'Button6:Set2');
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_EVENTS_TYPE', 147, '', 'Button7:Save');
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_EVENTS_TYPE', 148, '', 'tableField');
+ /*
+ 
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_EVENTS_TYPE', 141, '', 'Button1');
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_EVENTS_TYPE', 142, '', 'Button2');
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_EVENTS_TYPE', 143, '', 'Button3');
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_EVENTS_TYPE', 144, '', 'Button4');
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_EVENTS_TYPE', 145, '', 'Button5');
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_EVENTS_TYPE', 146, '', 'tableField');
+ */
+
+
+
+ 
+ DELETE MS_TYPES WHERE TYPES_NAME = 'WEBNODE_ATT_ROLE'
+ 
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_ATT_ROLE',  0, '', '');
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_ATT_ROLE', 11, '', 'ItemTable');
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_ATT_ROLE', 12, '', 'ItemButton');
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_ATT_ROLE', 13, '', 'SetCaption');
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_ATT_ROLE', 14, '', 'GetCaption');
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_ATT_ROLE', 15, '', 'Button');
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_ATT_ROLE', 16, '', 'ImageData');
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_ATT_ROLE', 17, '', 'SecurityImage');
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_ATT_ROLE', 18, '', 'SecurityAgain');
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_ATT_ROLE', 19, '', 'InputBox');
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_ATT_ROLE', 20, '', 'Success');
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_ATT_ROLE', 30, '', 'GIBeArsivFaturaIndir');
+
+
+
+ DELETE MS_TYPES WHERE TYPES_NAME = 'WEBNODE_VALUE_TYPE'
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_VALUE_TYPE', 0, '', 'none');
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_VALUE_TYPE', 1, '', 'AlwaysSet');
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_VALUE_TYPE', 2, '', 'Get');
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_VALUE_TYPE', 3, '', 'Set');
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_VALUE_TYPE', 4, '', 'Get&Set');
+
+ DELETE MS_TYPES WHERE TYPES_NAME = 'WEBNODE_INVOKE_MEMBER'
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_INVOKE_MEMBER', 0, '', 'none');
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_INVOKE_MEMBER', 1, '', 'Click');
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_INVOKE_MEMBER', 2, '', 'OnChange');
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_INVOKE_MEMBER', 3, '', 'OnChangeDontDocComplate');
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_INVOKE_MEMBER', 4, '', 'Submit');
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_INVOKE_MEMBER', 5, '', 'AutoSubmit');
+ insert into MS_TYPES values ( 1, 0, 'WEBNODE_INVOKE_MEMBER', 6, '', 'Click & NewPage');
+ 
+ 
+
+ insert into MS_TYPES values ( 1, 0, 'BOOL',    1, '', 'True');
+ insert into MS_TYPES values ( 1, 0, 'BOOL',    0, '', 'False');
+
+ insert into MS_TYPES values ( 3, 0, 'BOOLSTR', null, 'NULL',  'null');
+ insert into MS_TYPES values ( 3, 0, 'BOOLSTR',    1, 'TRUE',  'True');
+ insert into MS_TYPES values ( 3, 0, 'BOOLSTR',    0, 'FALSE', 'False');
+
+ insert into MS_TYPES values ( 4, 0, 'BOOLBIT',    1, 'true', 'True');
+ insert into MS_TYPES values ( 4, 0, 'BOOLBIT',    0, 'false', 'False');
+ 
+ insert into MS_TYPES values ( 4, 0, 'BOOLBIT_AK',    1, 'true', 'Açýk');
+ insert into MS_TYPES values ( 4, 0, 'BOOLBIT_AK',    0, 'false', 'Kapalý');
+
+ insert into MS_TYPES values ( 4, 0, 'BOOLBIT_EH',    1, 'true', 'Evet');
+ insert into MS_TYPES values ( 4, 0, 'BOOLBIT_EH',    0, 'false', 'Hayýr');
+
+ insert into MS_TYPES values ( 3, 0, 'EH',    1, 'E', 'Evet');
+ insert into MS_TYPES values ( 3, 0, 'EH',    0, 'H', 'Hayýr');
+ 
+ insert into MS_TYPES values ( 1, 0, 'FIELD_TYPE',  56, '', 'Int');
+ insert into MS_TYPES values ( 1, 0, 'FIELD_TYPE',  52, '', 'SmallInt');
+ insert into MS_TYPES values ( 1, 0, 'FIELD_TYPE', 127, '', 'Bigint');
+ insert into MS_TYPES values ( 1, 0, 'FIELD_TYPE', 104, '', 'Bit');
+ insert into MS_TYPES values ( 1, 0, 'FIELD_TYPE', 108, '', 'Numeric');
+ insert into MS_TYPES values ( 1, 0, 'FIELD_TYPE',  62, '', 'Float');
+ insert into MS_TYPES values ( 1, 0, 'FIELD_TYPE',  59, '', 'Real');
+ insert into MS_TYPES values ( 1, 0, 'FIELD_TYPE',  60, '', 'Money');
+ insert into MS_TYPES values ( 1, 0, 'FIELD_TYPE',  48, '', 'Tinyint');
+ insert into MS_TYPES values ( 1, 0, 'FIELD_TYPE',  58, '', 'Smalldatetime');
+ insert into MS_TYPES values ( 1, 0, 'FIELD_TYPE',  61, '', 'Datetime');
+ insert into MS_TYPES values ( 1, 0, 'FIELD_TYPE',  40, '', 'Date');
+ insert into MS_TYPES values ( 1, 0, 'FIELD_TYPE',  41, '', 'Time');
+ insert into MS_TYPES values ( 1, 0, 'FIELD_TYPE', 167, '', 'Varchar');
+ insert into MS_TYPES values ( 1, 0, 'FIELD_TYPE', 231, '', 'nVarchar');
+ insert into MS_TYPES values ( 1, 0, 'FIELD_TYPE', 175, '', 'Char');
+ insert into MS_TYPES values ( 1, 0, 'FIELD_TYPE',  35, '', 'Text');
+ insert into MS_TYPES values ( 1, 0, 'FIELD_TYPE',  99, '', 'Ntext');
+ insert into MS_TYPES values ( 1, 0, 'FIELD_TYPE',  34, '', 'Image');
+ insert into MS_TYPES values ( 1, 0, 'FIELD_TYPE', 173, '', 'Binary');
+ insert into MS_TYPES values ( 1, 0, 'FIELD_TYPE', 165, '', 'Varbinary');
+
+ 
+ insert into MS_TYPES values ( 1, 0, 'MAIN_OBJECT',  11, '', 'MainForm');
+ insert into MS_TYPES values ( 1, 0, 'MAIN_OBJECT',  21, '', 'Form');
+ insert into MS_TYPES values ( 1, 0, 'MAIN_OBJECT',  31, '', 'MdiChild');
+ insert into MS_TYPES values ( 1, 0, 'MAIN_OBJECT',  41, '', 'Dialog');
+ insert into MS_TYPES values ( 1, 0, 'MAIN_OBJECT',  51, '', 'ControlPanel');
+ insert into MS_TYPES values ( 1, 0, 'MAIN_OBJECT',  61, '', 'InputPanel');
+
+ 
+ insert into MS_TYPES values ( 1, 0, 'FIND_TYPE', 0, '', 'none');
+ insert into MS_TYPES values ( 1, 0, 'FIND_TYPE', 1, '', 'Standart');
+ insert into MS_TYPES values ( 1, 0, 'FIND_TYPE', 2, '', 'List & Data');
+
+ insert into MS_TYPES values ( 1, 0, 'VGRID_ROW_TYPE', 1, '', 'CategoryRow');
+ insert into MS_TYPES values ( 1, 0, 'VGRID_ROW_TYPE', 2, '', 'EditRow');
+
+ -- DELETE MS_TYPES WHERE TYPES_NAME = 'CMP_TYPE'
+ insert into MS_TYPES values ( 3, 0, 'CMP_TYPE',  0, '',                       '');
+ insert into MS_TYPES values ( 3, 0, 'CMP_TYPE',  1, 'ButtonEdit',             'ButtonEdit');
+ insert into MS_TYPES values ( 3, 0, 'CMP_TYPE',  2, 'CalcEdit',               'CalcEdit');
+ insert into MS_TYPES values ( 3, 0, 'CMP_TYPE',  3, 'CheckButton',            'CheckButton');
+ insert into MS_TYPES values ( 3, 0, 'CMP_TYPE',  4, 'CheckedComboBoxEdit',    'CheckedComboBoxEdit');
+ insert into MS_TYPES values ( 3, 0, 'CMP_TYPE',  5, 'CheckEdit',              'CheckEdit');
+ insert into MS_TYPES values ( 3, 0, 'CMP_TYPE',  6, 'CheckedListBoxControl',  'CheckedListBoxControl');
+ insert into MS_TYPES values ( 3, 0, 'CMP_TYPE',  7, 'ColorEdit',              'ColorEdit');
+ insert into MS_TYPES values ( 3, 0, 'CMP_TYPE',  8, 'ComboBoxEdit',           'ComboBoxEdit');
+ insert into MS_TYPES values ( 3, 0, 'CMP_TYPE',  9, 'DateEdit',               'DateEdit');
+ insert into MS_TYPES values ( 3, 0, 'CMP_TYPE', 10, 'HyperLinkEdit',          'HyperLinkEdit');
+ insert into MS_TYPES values ( 3, 0, 'CMP_TYPE', 11, 'ImageComboBoxEdit',      'ImageComboBoxEdit');
+ insert into MS_TYPES values ( 3, 0, 'CMP_TYPE', 12, 'ImageEdit',              'ImageEdit');
+ insert into MS_TYPES values ( 3, 0, 'CMP_TYPE', 13, 'ImageListBoxControl',    'ImageListBoxControl');
+ insert into MS_TYPES values ( 3, 0, 'CMP_TYPE', 14, 'LabelControl',           'LabelControl');
+ insert into MS_TYPES values ( 3, 0, 'CMP_TYPE', 15, 'ListBoxControl',         'ListBoxControl');
+ insert into MS_TYPES values ( 3, 0, 'CMP_TYPE', 16, 'LookUpEdit',             'LookUpEdit');
+ insert into MS_TYPES values ( 3, 0, 'CMP_TYPE', 17, 'MemoEdit',               'MemoEdit');
+ insert into MS_TYPES values ( 3, 0, 'CMP_TYPE', 18, 'MemoExEdit',             'MemoExEdit');
+ insert into MS_TYPES values ( 3, 0, 'CMP_TYPE', 19, 'MRUEdit',                'MRUEdit');
+ insert into MS_TYPES values ( 3, 0, 'CMP_TYPE', 20, 'PictureEdit',            'PictureEdit');
+ insert into MS_TYPES values ( 3, 0, 'CMP_TYPE', 21, 'PopupContainerControl',  'PopupContainerControl');
+ insert into MS_TYPES values ( 3, 0, 'CMP_TYPE', 22, 'PopupContainerEdit',     'PopupContainerEdit');
+ insert into MS_TYPES values ( 3, 0, 'CMP_TYPE', 23, 'RadioGroup',             'RadioGroup');
+ insert into MS_TYPES values ( 3, 0, 'CMP_TYPE', 24, 'RangeTrackBarControl',   'RangeTrackBarControl');
+ insert into MS_TYPES values ( 3, 0, 'CMP_TYPE', 25, 'SearchEdit',             'SearchEdit');
+ insert into MS_TYPES values ( 3, 0, 'CMP_TYPE', 26, 'SpinEdit',               'SpinEdit');
+ insert into MS_TYPES values ( 3, 0, 'CMP_TYPE', 27, 'TextEdit',               'TextEdit');
+ insert into MS_TYPES values ( 3, 0, 'CMP_TYPE', 28, 'TimeEdit',               'TimeEdit');
+ insert into MS_TYPES values ( 3, 0, 'CMP_TYPE', 29, 'TimeSpanEdit',           'TimeSpanEdit');
+ insert into MS_TYPES values ( 3, 0, 'CMP_TYPE', 30, 'TrackBarControl',        'TrackBarControl');
+ insert into MS_TYPES values ( 3, 0, 'CMP_TYPE', 31, 'TextEditNotUpper',       'TextEditNotUpper');
+
+
+ insert into MS_TYPES values ( 3, 0, 'CMP_TYPE', 50, '---',                      '---------------------------');
+ insert into MS_TYPES values ( 3, 0, 'CMP_TYPE', 51, 'tPropertiesEdit',           'tPropertiesEdit');
+ insert into MS_TYPES values ( 3, 0, 'CMP_TYPE', 52, 'tPropertiesPlusEdit',       'tPropertiesPlusEdit');
+ insert into MS_TYPES values ( 3, 0, 'CMP_TYPE', 53, 'tPropertiesNavEdit',        'tPropertiesNavEdit');
+ insert into MS_TYPES values ( 3, 0, 'CMP_TYPE', 54, 'tSearchEdit',               'tSearchEdit');
+ insert into MS_TYPES values ( 3, 0, 'CMP_TYPE', 55, 'tSearchEditOnly',           'tSearchEditOnly');
+ insert into MS_TYPES values ( 3, 0, 'CMP_TYPE', 56, 'tButtonEdit2Button',        'tButtonEdit2Button');
+
+ insert into MS_TYPES values ( 3, 0, 'CMP_TYPE', 61, 'tImageComboBoxEdit2Button', 'tImageComboBoxEdit2Button');
+ insert into MS_TYPES values ( 3, 0, 'CMP_TYPE', 62, 'tImageComboBoxEditSEC',     'tImageComboBoxEditSEC');
+ insert into MS_TYPES values ( 3, 0, 'CMP_TYPE', 63, 'tImageComboBoxEditSubView', 'tImageComboBoxEditSubView');
+ insert into MS_TYPES values ( 3, 0, 'CMP_TYPE', 64, 'tImageComboBoxEditSDetail', 'tImageComboBoxEditSDetail'); -- henüz yazýlmadý
+ insert into MS_TYPES values ( 3, 0, 'CMP_TYPE', 65, 'tComboBoxEditSubDetail',    'tComboBoxEditSubDetail'); 
+ 
+
+ insert into MS_TYPES values ( 3, 0, 'CMP_TYPE', 71, 'TextColumn',               'TextColumn');
+ insert into MS_TYPES values ( 3, 0, 'CMP_TYPE', 72, 'DescriptionColumn',        'DescriptionColumn');
+ insert into MS_TYPES values ( 3, 0, 'CMP_TYPE', 73, 'GroupColumn',              'GroupColumn');
+ insert into MS_TYPES values ( 3, 0, 'CMP_TYPE', 74, 'CheckBoxColumn',           'CheckBoxColumn');
+ insert into MS_TYPES values ( 3, 0, 'CMP_TYPE', 75, 'HtmlEditor',               'HtmlEditor');
+ insert into MS_TYPES values ( 3, 0, 'CMP_TYPE', 76, 'HtmlTextAndImage',         'HtmlTextAndImage');
+ insert into MS_TYPES values ( 3, 0, 'CMP_TYPE', 77, 'HtmlRadioTextAndImage',    'HtmlRadioTextAndImage');
+
+  
+
+ insert into MS_TYPES values ( 1, 0, 'TABLE_TYPE',  1, '', 'Table');
+ insert into MS_TYPES values ( 1, 0, 'TABLE_TYPE',  2, '', 'View');
+ insert into MS_TYPES values ( 1, 0, 'TABLE_TYPE',  3, '', 'Stored Procedure');
+ insert into MS_TYPES values ( 1, 0, 'TABLE_TYPE',  4, '', 'Function');
+ insert into MS_TYPES values ( 1, 0, 'TABLE_TYPE',  5, '', 'Trigger');
+ insert into MS_TYPES values ( 1, 0, 'TABLE_TYPE',  6, '', 'Select');
+ 
+ 
+ insert into MS_TYPES values ( 1, 0, 'IP_VIEW_TYPE',  1, '', 'Data View');
+ insert into MS_TYPES values ( 1, 0, 'IP_VIEW_TYPE',  2, '', 'Kriter View');
+ insert into MS_TYPES values ( 1, 0, 'IP_VIEW_TYPE',  3, '', 'Kategori View');
+ insert into MS_TYPES values ( 1, 0, 'IP_VIEW_TYPE',  4, '', 'HGS View');
+
+ 
+ insert into MS_TYPES values ( 1, 0, 'DATA_READ_TYPE',  0, '', 'none');
+ insert into MS_TYPES values ( 1, 0, 'DATA_READ_TYPE',  1, '', 'Not Read Data');
+ insert into MS_TYPES values ( 1, 0, 'DATA_READ_TYPE',  2, '', 'Read RefID');
+ insert into MS_TYPES values ( 1, 0, 'DATA_READ_TYPE',  3, '', 'Detail Table');
+ insert into MS_TYPES values ( 1, 0, 'DATA_READ_TYPE',  4, '', 'SubDetail Table');
+ insert into MS_TYPES values ( 1, 0, 'DATA_READ_TYPE',  5, '', 'Data Collection');  /* veri toplama */
+ insert into MS_TYPES values ( 1, 0, 'DATA_READ_TYPE',  6, '', 'Read SubView');
+ insert into MS_TYPES values ( 1, 0, 'DATA_READ_TYPE',  7, '', 'Dont Save');
+
+ DELETE MS_TYPES WHERE TYPES_NAME = 'SUBVIEW_TYPE'
+ --insert into MS_TYPES values ( 3, 0, 'SUBVIEW_TYPE',  1, 'Form',         'Form');
+ --insert into MS_TYPES values ( 3, 0, 'SUBVIEW_TYPE',  2, 'TabPage',      'TabPage');
+ --insert into MS_TYPES values ( 3, 0, 'SUBVIEW_TYPE',  3, 'MultiTabPage', 'MultiTabPage');
+ --insert into MS_TYPES values ( 3, 0, 'SUBVIEW_TYPE',  4, 'BackStage',    'BackStage');
+ --insert into MS_TYPES values ( 3, 0, 'SUBVIEW_TYPE',  5, 'GroupControl', 'GroupControl');
+ --insert into MS_TYPES values ( 3, 0, 'SUBVIEW_TYPE',  6, 'PanelControl', 'PanelControl');
+ insert into MS_TYPES values ( 3, 0, 'SUBVIEW_TYPE',  1, 'TabPage',       'TabPage');
+ insert into MS_TYPES values ( 3, 0, 'SUBVIEW_TYPE',  2, 'TabPage2',      'TabPage2');
+ insert into MS_TYPES values ( 3, 0, 'SUBVIEW_TYPE',  3, 'TabPage3',      'TabPage3');
+ 
+ insert into MS_TYPES values ( 3, 0, 'SUBVIEW_EVENT',  1, 'PositionChanged', 'PositionChanged');
+ insert into MS_TYPES values ( 3, 0, 'SUBVIEW_EVENT',  2, 'ButtonClick',     'ButtonClick');
+
+ --DELETE MS_TYPES WHERE TYPES_NAME = 'DB_TYPE'
+ insert into MS_TYPES values ( 1, 0, 'DB_TYPE',  0, '', 'none');
+ insert into MS_TYPES values ( 1, 0, 'DB_TYPE',  1, '', 'master');
+ insert into MS_TYPES values ( 1, 0, 'DB_TYPE',  2, '', 'ManagerServer');
+ insert into MS_TYPES values ( 1, 0, 'DB_TYPE',  3, '', 'UstadCRM');
+ insert into MS_TYPES values ( 1, 0, 'DB_TYPE',  4, '', 'Project'); 
+ insert into MS_TYPES values ( 1, 0, 'DB_TYPE',  5, '', 'Local');
+ --insert into MS_TYPES values ( 1, 0, 'DB_TYPE',  6, '', 'NewDatabase');
+ insert into MS_TYPES values ( 1, 0, 'DB_TYPE',  7, '', 'PublishManager');
+ insert into MS_TYPES values ( 1, 0, 'DB_TYPE',  8, '', 'SourceDB(Aktarýlacak)');
+
+
+ --DELETE MS_TYPES WHERE TYPES_NAME = 'DEFAULT_TYPE'
+ insert into MS_TYPES values ( 1, 0, 'DEFAULT_TYPE',  0, '', '');
+ insert into MS_TYPES values ( 1, 0, 'DEFAULT_TYPE',  1, '', 'Var (Integer)');
+ insert into MS_TYPES values ( 1, 0, 'DEFAULT_TYPE',  2, '', 'Var (Numeric)');
+ insert into MS_TYPES values ( 1, 0, 'DEFAULT_TYPE',  3, '', 'Var (Text)');
+ insert into MS_TYPES values ( 1, 0, 'DEFAULT_TYPE',  4, '', 'Var (SP)');
+ insert into MS_TYPES values ( 1, 0, 'DEFAULT_TYPE',  5, '', 'Var (Setup/Value)');
+ insert into MS_TYPES values ( 1, 0, 'DEFAULT_TYPE',  6, '', 'Var (Setup/Caption)');
+ 
+ insert into MS_TYPES values ( 1, 0, 'DEFAULT_TYPE', 21, '', 'Source TableIPCode READ'); 
+ insert into MS_TYPES values ( 1, 0, 'DEFAULT_TYPE', 22, '', 'Source ParentControl.TagValue READ');   -- Viewin içinde bulunduðu control ün tag ýndaki value
+ insert into MS_TYPES values ( 1, 0, 'DEFAULT_TYPE', 23, '', 'Source ParentControl.TagCaption READ'); -- Viewin içinde bulunduðu control ün tag ýndaki caption
+ insert into MS_TYPES values ( 1, 0, 'DEFAULT_TYPE', 24, '', 'Source ParentControl.TagType READ');    -- Viewin içinde bulunduðu control ün tag ýndaki td/tip value
+ 
+ insert into MS_TYPES values ( 1, 0, 'DEFAULT_TYPE', 31, '', 'Master=Detail');
+ insert into MS_TYPES values ( 1, 0, 'DEFAULT_TYPE', 32, '', 'Master=Detail Multi');
+ insert into MS_TYPES values ( 1, 0, 'DEFAULT_TYPE', 33, '', 'Master=Detail Column');
+ insert into MS_TYPES values ( 1, 0, 'DEFAULT_TYPE', 41, '', 'Line No'); -- 32 > 41
+ insert into MS_TYPES values ( 1, 0, 'DEFAULT_TYPE', 42, '', 'MaliDonem Changer'); 
+ insert into MS_TYPES values ( 1, 0, 'DEFAULT_TYPE', 51, '', 'Kriter READ (Even.Bas)'); 
+ insert into MS_TYPES values ( 1, 0, 'DEFAULT_TYPE', 52, '', 'Kriter READ (Even.Bit)'); 
+ insert into MS_TYPES values ( 1, 0, 'DEFAULT_TYPE', 53, '', 'Kriter READ (Odd)'); 
+
+
+ insert into MS_TYPES values ( 1, 0, 'REPTOOL_TYPE',  0, '', 'none');
+ insert into MS_TYPES values ( 1, 0, 'REPTOOL_TYPE',  1, '', 'DexExpress');
+ insert into MS_TYPES values ( 1, 0, 'REPTOOL_TYPE',  2, '', 'FastReport');
+
+
+ insert into MS_TYPES values ( 1, 0, 'VALIDATION',   0, '', '');
+ insert into MS_TYPES values ( 1, 0, 'VALIDATION',  11, '', 'NotProvider_Yok');
+ insert into MS_TYPES values ( 1, 0, 'VALIDATION',  12, '', 'AnyOf_HerhangiBirisi');
+ insert into MS_TYPES values ( 1, 0, 'VALIDATION',  13, '', 'BeginsWith_IleBaslayan');
+ insert into MS_TYPES values ( 1, 0, 'VALIDATION',  14, '', 'Between_Arasýnda');
+ insert into MS_TYPES values ( 1, 0, 'VALIDATION',  15, '', 'Contains_Iceriyor');
+ insert into MS_TYPES values ( 1, 0, 'VALIDATION',  16, '', 'EndsWith_IleBiter');
+ insert into MS_TYPES values ( 1, 0, 'VALIDATION',  17, '', 'Equals_Esittir');
+ insert into MS_TYPES values ( 1, 0, 'VALIDATION',  18, '', 'Greater_Büyük');
+ insert into MS_TYPES values ( 1, 0, 'VALIDATION',  19, '', 'GreaterOrEqual_BüyükYadaEsit');
+ insert into MS_TYPES values ( 1, 0, 'VALIDATION',  20, '', 'IsBlank_BosMu');
+ insert into MS_TYPES values ( 1, 0, 'VALIDATION',  21, '', 'IsNotBlank_BosDegil');
+ insert into MS_TYPES values ( 1, 0, 'VALIDATION',  22, '', 'Less_DahaAz');
+ insert into MS_TYPES values ( 1, 0, 'VALIDATION',  23, '', 'LessOrEqual_AzYadaEsit');
+ insert into MS_TYPES values ( 1, 0, 'VALIDATION',  24, '', 'Like_Gibi ');
+ insert into MS_TYPES values ( 1, 0, 'VALIDATION',  25, '', 'None_Hicbiri');
+ insert into MS_TYPES values ( 1, 0, 'VALIDATION',  26, '', 'NotAnyOf_HerhangiBiriDegil');
+ insert into MS_TYPES values ( 1, 0, 'VALIDATION',  27, '', 'NotBetween_ArasýndaDegil');
+ insert into MS_TYPES values ( 1, 0, 'VALIDATION',  28, '', 'NotContains_IceriyorDeðil');
+ insert into MS_TYPES values ( 1, 0, 'VALIDATION',  29, '', 'NotEquals_EþitDegilse');
+ insert into MS_TYPES values ( 1, 0, 'VALIDATION',  30, '', 'NotLike_GibiDegil');
+ insert into MS_TYPES values ( 1, 0, 'VALIDATION',  31, '', 'IsBlankDelete_BoþiseSil');
+
+ insert into MS_TYPES values ( 1, 0, 'DC_TROW_TYPE',  0, '', 'none');
+ insert into MS_TYPES values ( 1, 0, 'DC_TROW_TYPE',  1, '', 'Single Row');
+ insert into MS_TYPES values ( 1, 0, 'DC_TROW_TYPE',  2, '', 'Multi Rows');
+ insert into MS_TYPES values ( 1, 0, 'DC_TROW_TYPE',  3, '', 'Selected Rows');
+
+ insert into MS_TYPES values ( 1, 0, 'DC_WORK_TYPE',  0, '', 'none');
+ insert into MS_TYPES values ( 1, 0, 'DC_WORK_TYPE',  1, '', 'Önce atamalarý yap, sonra Kayýt yapma');
+ insert into MS_TYPES values ( 1, 0, 'DC_WORK_TYPE',  2, '', 'Önce atamalarý yap, sonra Kaydet');
+ insert into MS_TYPES values ( 1, 0, 'DC_WORK_TYPE',  3, '', 'Satýr Düzenle, Row.Update()');
+ insert into MS_TYPES values ( 1, 0, 'DC_WORK_TYPE',  4, '', 'Satýr sil, Row.Delete()');
+ insert into MS_TYPES values ( 1, 0, 'DC_WORK_TYPE',  5, '', 'DragDrop ile, Form.New(),Row.New()');
+
+ insert into MS_TYPES values ( 1, 0, 'DC_DISPLAY_TYPE',  0, '', 'none');
+ insert into MS_TYPES values ( 1, 0, 'DC_DISPLAY_TYPE',  1, '', 'Not display');
+ insert into MS_TYPES values ( 1, 0, 'DC_DISPLAY_TYPE',  2, '', 'Animation');
+ insert into MS_TYPES values ( 1, 0, 'DC_DISPLAY_TYPE',  3, '', 'Log list');
+ insert into MS_TYPES values ( 1, 0, 'DC_DISPLAY_TYPE',  4, '', 'Grid View');
+
+ insert into MS_TYPES values ( 1, 0, 'DC_SOURCE_TYPE',  0, '', 'none');
+ insert into MS_TYPES values ( 1, 0, 'DC_SOURCE_TYPE',  1, '', 'Source TableIPCode READ');
+ insert into MS_TYPES values ( 1, 0, 'DC_SOURCE_TYPE',  2, '', 'Default1 value READ');
+ insert into MS_TYPES values ( 1, 0, 'DC_SOURCE_TYPE',  3, '', 'InputBox READ');
+ insert into MS_TYPES values ( 1, 0, 'DC_SOURCE_TYPE',  4, '', 'Line No');
+
+ insert into MS_TYPES values ( 3, 0, 'J_FORMAT',  0, '',         'none');
+ insert into MS_TYPES values ( 3, 0, 'J_FORMAT',  1, 'STANDART', 'Standart Field');
+ insert into MS_TYPES values ( 3, 0, 'J_FORMAT',  2, 'CASE',     'Case Field');
+
+
+ insert into MS_TYPES values ( 3, 0, 'J_TYPE',  0, '',      'none');
+ insert into MS_TYPES values ( 3, 0, 'J_TYPE',  1, 'LEFT',  'Left Outer Join');
+ insert into MS_TYPES values ( 3, 0, 'J_TYPE',  2, 'RIGHT', 'Right Outer Join');
+ insert into MS_TYPES values ( 3, 0, 'J_TYPE',  3, 'INNER', 'Inner Join');
+
+ insert into MS_TYPES values ( 1, 0, 'J_TYPE1',  0, '', 'none');
+ insert into MS_TYPES values ( 1, 0, 'J_TYPE1',  1, '', 'Left Outer Join');
+ insert into MS_TYPES values ( 1, 0, 'J_TYPE1',  2, '', 'Right Outer Join');
+ insert into MS_TYPES values ( 1, 0, 'J_TYPE1',  3, '', 'Inner Join');
+
+
+ insert into MS_TYPES values ( 3, 0, 'GROUP_FIXED',  0, '',      'none');
+ insert into MS_TYPES values ( 3, 0, 'GROUP_FIXED',  0, 'LEFT',  'Left Fixed');
+ insert into MS_TYPES values ( 3, 0, 'GROUP_FIXED',  0, 'RIGHT', 'Right Fixed');
+
+
+ --insert into MS_TYPES values ( 3, 0, 'CLICK_TYPE',  0, '',          'none');
+ --insert into MS_TYPES values ( 3, 0, 'CLICK_TYPE',  0, 'OPENFORM',  'OpenForm');
+ --insert into MS_TYPES values ( 3, 0, 'CLICK_TYPE',  0, 'NEWFORM',   'NewForm');
+
+
+ --DELETE MS_TYPES WHERE TYPES_NAME = 'VIEW_OBJ'
+ insert into MS_TYPES values ( 1, 0, 'VIEW_OBJ',    0, '', 'none');
+ insert into MS_TYPES values ( 1, 0, 'VIEW_OBJ', 1010, '', 'GridView');
+ insert into MS_TYPES values ( 1, 0, 'VIEW_OBJ', 1020, '', 'BandedGridView');
+ insert into MS_TYPES values ( 1, 0, 'VIEW_OBJ', 1030, '', 'AdvBandedGridView');
+ insert into MS_TYPES values ( 1, 0, 'VIEW_OBJ', 1040, '', 'GridLayoutView');
+ insert into MS_TYPES values ( 1, 0, 'VIEW_OBJ', 1050, '', 'WinExplorerView');
+ insert into MS_TYPES values ( 1, 0, 'VIEW_OBJ', 1060, '', 'TileView');
+ insert into MS_TYPES values ( 1, 0, 'VIEW_OBJ', 1070, '', 'CardView');
+ insert into MS_TYPES values ( 1, 0, 'VIEW_OBJ', 2010, '', 'VGridSingle');
+ insert into MS_TYPES values ( 1, 0, 'VIEW_OBJ', 2012, '', 'VGridMulti');
+ insert into MS_TYPES values ( 1, 0, 'VIEW_OBJ', 2020, '', 'TreeView');
+ insert into MS_TYPES values ( 1, 0, 'VIEW_OBJ', 2030, '', 'PivotGrid');
+ insert into MS_TYPES values ( 1, 0, 'VIEW_OBJ', 3010, '', 'DataLayoutView');
+ insert into MS_TYPES values ( 1, 0, 'VIEW_OBJ', 3020, '', 'CalenderAndScheduler');
+ insert into MS_TYPES values ( 1, 0, 'VIEW_OBJ', 3030, '', 'Charts');
+ insert into MS_TYPES values ( 1, 0, 'VIEW_OBJ', 4010, '', 'WizardControl');
+ insert into MS_TYPES values ( 1, 0, 'VIEW_OBJ', 5010, '', 'HtmlEditorsView');
+ insert into MS_TYPES values ( 1, 0, 'VIEW_OBJ', 5020, '', 'HtmlEditorsMultiView');
+
+
+
+ insert into MS_TYPES values ( 3, 0, 'JOB_TYPE',  0,  '',      'none');
+ insert into MS_TYPES values ( 3, 0, 'JOB_TYPE',  0,  'DC',    'DataCopy');
+ insert into MS_TYPES values ( 3, 0, 'JOB_TYPE',  0, 'RPN',    'Run Prop Navigator');
+
+ insert into MS_TYPES values ( 3, 0, 'JOB_END',   0, '',      'none');
+ insert into MS_TYPES values ( 3, 0, 'JOB_END',   0, 'DRD',   'Drop Row Delete');
+
+ insert into MS_TYPES values ( 3, 0, 'PRJ_PAKET',  0, '',    'none');
+ insert into MS_TYPES values ( 3, 0, 'PRJ_PAKET',  0, 'MAX', 'Max Paket');
+ insert into MS_TYPES values ( 3, 0, 'PRJ_PAKET',  0, 'STN', 'Standart');
+ insert into MS_TYPES values ( 3, 0, 'PRJ_PAKET',  0, 'MIN', 'Min Paket');
+
+ insert into MS_TYPES values ( 1, 0, 'VALUE_TYPE',  0, '',    'none');
+ insert into MS_TYPES values ( 1, 0, 'VALUE_TYPE',  1, '',    'SmallInt');
+ insert into MS_TYPES values ( 1, 0, 'VALUE_TYPE',  2, '',    'Int32');
+ insert into MS_TYPES values ( 1, 0, 'VALUE_TYPE',  3, '',    'String');
+ insert into MS_TYPES values ( 1, 0, 'VALUE_TYPE',  4, '',    'Byte');
+
+
+ insert into MS_TYPES values ( 1, 0, 'LOOKUP_TYPE',  0, '',    '');
+ insert into MS_TYPES values ( 1, 0, 'LOOKUP_TYPE',  1, '',    'Proje Sabitleri');
+ insert into MS_TYPES values ( 1, 0, 'LOOKUP_TYPE',  2, '',    'Kullanýcýya Ait Sabitleri');
+ insert into MS_TYPES values ( 1, 0, 'LOOKUP_TYPE',  3, '',    'Table LoopUp Baðlantýlarý');
+
+
+ insert into MS_TYPES values ( 1, 0, 'GROUP_TYPES',  1, '',    'GroupPanel');
+ insert into MS_TYPES values ( 1, 0, 'GROUP_TYPES',  2, '',    'DataLayoutTabPage');
+ insert into MS_TYPES values ( 1, 0, 'GROUP_TYPES',  3, '',    'WelcomeWizard');
+ insert into MS_TYPES values ( 1, 0, 'GROUP_TYPES',  4, '',    'WizardPage');
+ insert into MS_TYPES values ( 1, 0, 'GROUP_TYPES',  5, '',    'CompletionWizard');
+ insert into MS_TYPES values ( 1, 0, 'GROUP_TYPES',  6, '',    'TabPages');
+
+
+ insert into MS_TYPES values ( 1, 0, 'MOVE_ITEM_TYPE',      0, '', '');
+ insert into MS_TYPES values ( 1, 0, 'MOVE_ITEM_TYPE',      1, '', 'Column');
+ insert into MS_TYPES values ( 1, 0, 'MOVE_ITEM_TYPE',      2, '', 'Group');
+ insert into MS_TYPES values ( 1, 0, 'MOVE_ITEM_TYPE',      3, '', 'TabPage');
+ insert into MS_TYPES values ( 1, 0, 'MOVE_ITEM_TYPE',      4, '', 'EmptySpacesItem');
+ insert into MS_TYPES values ( 1, 0, 'MOVE_ITEM_TYPE',      5, '', 'Label');
+ insert into MS_TYPES values ( 1, 0, 'MOVE_ITEM_TYPE',      6, '', 'Separator');
+ insert into MS_TYPES values ( 1, 0, 'MOVE_ITEM_TYPE',      7, '', 'Splitter');
+
+ insert into MS_TYPES values ( 1, 0, 'MOVE_TYPE',           0, '', '');
+ insert into MS_TYPES values ( 1, 0, 'MOVE_TYPE',           1, '', 'Inside');
+ insert into MS_TYPES values ( 1, 0, 'MOVE_TYPE',           2, '', 'Outside');
+
+ insert into MS_TYPES values ( 1, 0, 'MOVE_LOCATION',       0, '', '');
+ insert into MS_TYPES values ( 1, 0, 'MOVE_LOCATION',       1, '', 'After');
+ insert into MS_TYPES values ( 1, 0, 'MOVE_LOCATION',       2, '', 'Before');
+
+ insert into MS_TYPES values ( 1, 0, 'MOVE_LAYOUT_TYPE',    0, '', '');
+ insert into MS_TYPES values ( 1, 0, 'MOVE_LAYOUT_TYPE',    1, '', 'Horizontal');
+ insert into MS_TYPES values ( 1, 0, 'MOVE_LAYOUT_TYPE',    2, '', 'Vertical');
+
+ insert into MS_TYPES values ( 1, 0, 'KRT_OPERAND_TYPE',    0, '', '');
+ insert into MS_TYPES values ( 1, 0, 'KRT_OPERAND_TYPE',    1, '', 'Even (Double)');
+ insert into MS_TYPES values ( 1, 0, 'KRT_OPERAND_TYPE',    2, '', 'Odd  (Single)');
+ insert into MS_TYPES values ( 1, 0, 'KRT_OPERAND_TYPE',    3, '', 'Speed (Double)');
+ insert into MS_TYPES values ( 1, 0, 'KRT_OPERAND_TYPE',    4, '', 'Speed (Single)');
+ insert into MS_TYPES values ( 1, 0, 'KRT_OPERAND_TYPE',    5, '', 'On/Off');
+ insert into MS_TYPES values ( 1, 0, 'KRT_OPERAND_TYPE',    6, '', 'EditValueChanged');
+ insert into MS_TYPES values ( 1, 0, 'KRT_OPERAND_TYPE',    9, '', 'Visible=False');
+
+ insert into MS_TYPES values ( 1, 0, 'KRT_OPERAND_TYPE',   10, '', '==');
+ insert into MS_TYPES values ( 1, 0, 'KRT_OPERAND_TYPE',   11, '', '>=');
+ insert into MS_TYPES values ( 1, 0, 'KRT_OPERAND_TYPE',   12, '', '>');
+ insert into MS_TYPES values ( 1, 0, 'KRT_OPERAND_TYPE',   13, '', '<=');
+ insert into MS_TYPES values ( 1, 0, 'KRT_OPERAND_TYPE',   14, '', '<');
+ insert into MS_TYPES values ( 1, 0, 'KRT_OPERAND_TYPE',   15, '', '<>');
+ insert into MS_TYPES values ( 1, 0, 'KRT_OPERAND_TYPE',   16, '', 'Benzerleri (%abc%)');
+ insert into MS_TYPES values ( 1, 0, 'KRT_OPERAND_TYPE',   17, '', 'Benzerleri (abc%)');
+ insert into MS_TYPES values ( 1, 0, 'KRT_OPERAND_TYPE',   21, '', 'Source Value Field');
+
+ insert into MS_TYPES values ( 1, 0, 'KRT_EVEN_START',   1, '', '>=');
+ insert into MS_TYPES values ( 1, 0, 'KRT_EVEN_START',   2, '', '>');
+ insert into MS_TYPES values ( 1, 0, 'KRT_EVEN_START',   3, '', '=');
+
+ insert into MS_TYPES values ( 1, 0, 'KRT_EVEN_STOP',    4, '', '<=');
+ insert into MS_TYPES values ( 1, 0, 'KRT_EVEN_STOP',    5, '', '<');
+ insert into MS_TYPES values ( 1, 0, 'KRT_EVEN_STOP',    3, '', '=');
+
+ insert into MS_TYPES values ( 1, 0, 'KRT_ODD_LIKE',     6, '', 'Benzerleri (%abc%)');
+ insert into MS_TYPES values ( 1, 0, 'KRT_ODD_LIKE',     7, '', 'Benzerleri (abc%)');
+ insert into MS_TYPES values ( 1, 0, 'KRT_ODD_LIKE',     1, '', '>=');
+ insert into MS_TYPES values ( 1, 0, 'KRT_ODD_LIKE',     2, '', '>');
+ insert into MS_TYPES values ( 1, 0, 'KRT_ODD_LIKE',     3, '', '=');
+ insert into MS_TYPES values ( 1, 0, 'KRT_ODD_LIKE',     4, '', '<=');
+ insert into MS_TYPES values ( 1, 0, 'KRT_ODD_LIKE',     5, '', '<');
+ --insert into MS_TYPES values ( 1, 0, 'KRT_ODD_LIKE',    18, '', 'içinde');
+
+ insert into MS_TYPES values ( 1, 0, 'KRT_ODD_NOTLIKE',  1, '', '>=');
+ insert into MS_TYPES values ( 1, 0, 'KRT_ODD_NOTLIKE',  2, '', '>');
+ insert into MS_TYPES values ( 1, 0, 'KRT_ODD_NOTLIKE',  3, '', '=');
+ insert into MS_TYPES values ( 1, 0, 'KRT_ODD_NOTLIKE',  4, '', '<=');
+ insert into MS_TYPES values ( 1, 0, 'KRT_ODD_NOTLIKE',  5, '', '<');
+ insert into MS_TYPES values ( 1, 0, 'KRT_ODD_NOTLIKE',  8, '', '<>');
+ --insert into MS_TYPES values ( 1, 0, 'KRT_ODD_NOTLIKE', 18, '', 'in');
+
+
+ --DELETE MS_TYPES WHERE TYPES_NAME = 'KRT_ODD_NOTLIKE_STR'
+ insert into MS_TYPES values ( 3, 0, 'KRT_ODD_NOTLIKE_STR',  0, '', '');
+ insert into MS_TYPES values ( 3, 0, 'KRT_ODD_NOTLIKE_STR',  1, '>=', '>=');
+ insert into MS_TYPES values ( 3, 0, 'KRT_ODD_NOTLIKE_STR',  2, '>',  '>');
+ insert into MS_TYPES values ( 3, 0, 'KRT_ODD_NOTLIKE_STR',  3, '=',  '=');
+ insert into MS_TYPES values ( 3, 0, 'KRT_ODD_NOTLIKE_STR',  4, '<=', '<=');
+ insert into MS_TYPES values ( 3, 0, 'KRT_ODD_NOTLIKE_STR',  5, '<',  '<');
+ insert into MS_TYPES values ( 3, 0, 'KRT_ODD_NOTLIKE_STR',  8, '<>', '<>');
+ insert into MS_TYPES values ( 3, 0, 'KRT_ODD_NOTLIKE_STR', 18, 'in', 'in');
+ insert into MS_TYPES values ( 3, 0, 'KRT_ODD_NOTLIKE_STR', 21, 'Authorize', 'Authorize');
+
+
+
+ insert into MS_TYPES values ( 1, 0, 'ITEM_TYPE',  1, '', 'Form');
+ insert into MS_TYPES values ( 1, 0, 'ITEM_TYPE',  2, '', 'User Control');
+ 
+ --DELETE MS_TYPES WHERE TYPES_NAME = 'LAYOUT'
+ insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14100, 'menu',             'Menu');
+ insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14000, 'h0',               '---------------------------');
+ insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14110, 'dockPanel',        'dockPanel');
+ insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14120, 'tableLayoutPanel', 'tableLayoutPanel');
+ insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14130, 'splitContainer',   'splitContainer');
+ insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14140, 'groupControl',     'groupControl');
+ insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14150, 'panelControl',     'panelControl');
+ 
+ insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14000, 'h2',                '---------------------------');
+ insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14160, 'tabPane',           'TabPane');
+ insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14161, 'tabNavigationPage', '-tabNavigationPage');
+
+ insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14000, 'h3',                '---------------------------');
+ insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14170, 'navigationPane',    'NavigationPane');
+ insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14171, 'navigationPage',    '-navigationPage');
+      
+ insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14000, 'h4',                          '---------------------------');
+ insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14180, 'backstageViewControl',        'BackstageViewControl');
+ insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14181, 'backstageViewTabItem',        '-backstageViewTabItem');
+ insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14182, 'backstageViewButtonItem',     '-backstageViewButtonItem');
+ insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14183, 'backstageViewItemSeparator',  '-backstageViewItemSeparator');
+ insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14184, 'childBackstageView',          '-childBackstageView');
+ 
+ insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14000, 'h5',           '---------------------------');
+ insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14190, 'tabControl',   'TabControl');
+ insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14191, 'tabPage',      '-tabPage');
+ 
+ insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14000, 'h6',                 '---------------------------');
+ insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14200, 'documentManager',    'documentManager');
+ insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14201, 'tabbedView',         '-tabbedView');
+ insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14202, 'widgetView',         '-widgetView');
+ insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14203, 'nativeMdiView',      '-nativeMdiView');
+ insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14204, 'windowsUIView',      '-windowsUIView');
+ 
+  
+ insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14000, 'h7',             '---------------------------');
+ insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14310, 'webBrowser',      'webBrowser');
+ insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14312, 'cefWebBrowser',   'cefWebBrowser');
+ insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14320, 'headerPanel',     'headerPanel');
+ insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14330, 'editPanel',       'editPanel');
+ insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14340, 'labelControl',    'labelControl');
+ insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14350, 'documentViewerFast', 'documentViewerFast');
+ insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14352, 'documentViewerDev',  'documentViewerDev');
+ insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14400, 'dataWizard',      'dataWizard');
+ insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14411, 'barcodeControl1', 'barcodeControl1');
+ insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14412, 'componentControl','componentControl');
+ insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14413, 'simpleButton',    'simpleButton');
+ insert into MS_TYPES values ( 3,  0, 'LAYOUT',   14421, 'digitalGauge',    'digitalGauge');
+
+
+ insert into MS_TYPES values ( 3,  0, 'LYT_DP_TABBED', 0, '',        'none');
+ insert into MS_TYPES values ( 3,  0, 'LYT_DP_TABBED', 1, 'Tab',     'Tabbed');
+ insert into MS_TYPES values ( 3,  0, 'LYT_DP_TABBED', 2, 'Split',   'Split');
+ 
+ insert into MS_TYPES values ( 3,  0, 'LYT_ORIENTATION', 0, '',            'none');
+ insert into MS_TYPES values ( 3,  0, 'LYT_ORIENTATION', 0, 'Vertical',    'Vertical');
+ insert into MS_TYPES values ( 3,  0, 'LYT_ORIENTATION', 0, 'Horizontal',  'Horizontal');
+ 
+ insert into MS_TYPES values ( 3,  0, 'LYT_SC_FIXEDPANEL', 0, '',          'none');
+ insert into MS_TYPES values ( 3,  0, 'LYT_SC_FIXEDPANEL', 0, 'Panel1',    'Panel1');
+ insert into MS_TYPES values ( 3,  0, 'LYT_SC_FIXEDPANEL', 0, 'Panel2',    'Panel2');
+ 
+ insert into MS_TYPES values ( 3,  0, 'TLP_BORDER', 0, '',              'none');
+ insert into MS_TYPES values ( 3,  0, 'TLP_BORDER', 0, 'Single',        'Single');
+ insert into MS_TYPES values ( 3,  0, 'TLP_BORDER', 0, 'Inset',         'Inset');
+ insert into MS_TYPES values ( 3,  0, 'TLP_BORDER', 0, 'InsetDouble',   'InsetDouble');
+ insert into MS_TYPES values ( 3,  0, 'TLP_BORDER', 0, 'Outset',        'Outset');
+ insert into MS_TYPES values ( 3,  0, 'TLP_BORDER', 0, 'OutsetDouble',  'OutsetDouble');
+ insert into MS_TYPES values ( 3,  0, 'TLP_BORDER', 0, 'OutsetPartial', 'OutsetPartial');
+ 
+ insert into MS_TYPES values ( 3,  0, 'TLP_SIZE', 0, '',              'none');
+ insert into MS_TYPES values ( 3,  0, 'TLP_SIZE', 0, 'Absolute',      'Absolute(pxl)');
+ insert into MS_TYPES values ( 3,  0, 'TLP_SIZE', 0, 'AutoSize',      'AutoSize');
+ insert into MS_TYPES values ( 3,  0, 'TLP_SIZE', 0, 'Percent',       'Percent(%)');
+ 
+
+ --insert into MS_TYPES values ( 1, 0, 'ITEM_TYPE2',  3, '', 'Menu');
+ --insert into MS_TYPES values ( 1, 0, 'ITEM_TYPE2',  3, '', '???');
+
+ insert into MS_TYPES values ( 1, 0, 'MENU_TYPE',  101, '', 'BarManager');
+ insert into MS_TYPES values ( 1, 0, 'MENU_TYPE',  102, '', 'RibbonControl');
+ insert into MS_TYPES values ( 1, 0, 'MENU_TYPE',  103, '', 'NavBarControl');
+ insert into MS_TYPES values ( 1, 0, 'MENU_TYPE',  104, '', 'TileBar');
+ insert into MS_TYPES values ( 1, 0, 'MENU_TYPE',  105, '', 'TileControl');
+ insert into MS_TYPES values ( 1, 0, 'MENU_TYPE',  106, '', 'TileNavPane');
+ insert into MS_TYPES values ( 1, 0, 'MENU_TYPE',  107, '', 'NavigationPane');
+ insert into MS_TYPES values ( 1, 0, 'MENU_TYPE',  108, '', 'AccordionControl');
+ insert into MS_TYPES values ( 1, 0, 'MENU_TYPE',  109, '', 'ToolBoxControl');
+ insert into MS_TYPES values ( 1, 0, 'MENU_TYPE',  110, '', 'AccordionDinamik');
+ insert into MS_TYPES values ( 1, 0, 'MENU_TYPE',  111, '', 'StickyNavbar');
+ insert into MS_TYPES values ( 1, 0, 'MENU_TYPE',  121, '', 'PopupMenu');
+ 
+ insert into MS_TYPES values ( 1, 0, 'MENU_ITEM',  201, '', 'Category');
+ insert into MS_TYPES values ( 1, 0, 'MENU_ITEM',  202, '', 'Page/ToolBar');
+ insert into MS_TYPES values ( 1, 0, 'MENU_ITEM',  203, '', 'Group');
+ insert into MS_TYPES values ( 1, 0, 'MENU_ITEM',  204, '', 'SubMenu');
+ insert into MS_TYPES values ( 1, 0, 'MENU_ITEM',  205, '', 'Button');
+ insert into MS_TYPES values ( 1, 0, 'MENU_ITEM',  206, '', 'NavBarItem');
+ insert into MS_TYPES values ( 1, 0, 'MENU_ITEM',  211, '', 'Mali Dönem');
+
+
+ insert into MS_TYPES values ( 1, 0, 'DOCK_TYPE',  0, '', 'None');
+ insert into MS_TYPES values ( 1, 0, 'DOCK_TYPE',  1, '', 'Left');
+ insert into MS_TYPES values ( 1, 0, 'DOCK_TYPE',  2, '', 'Right');
+ insert into MS_TYPES values ( 1, 0, 'DOCK_TYPE',  3, '', 'Top');
+ insert into MS_TYPES values ( 1, 0, 'DOCK_TYPE',  4, '', 'Bottom');
+ insert into MS_TYPES values ( 1, 0, 'DOCK_TYPE',  5, '', 'Fill');
+
+ insert into MS_TYPES values ( 1, 0, 'FONT_STYLE',  0, '', 'None');
+ insert into MS_TYPES values ( 1, 0, 'FONT_STYLE',  1, '', 'Bold');
+ insert into MS_TYPES values ( 1, 0, 'FONT_STYLE',  2, '', 'Italic');
+ insert into MS_TYPES values ( 1, 0, 'FONT_STYLE',  3, '', 'Regular');
+ insert into MS_TYPES values ( 1, 0, 'FONT_STYLE',  4, '', 'Strikeout');
+ insert into MS_TYPES values ( 1, 0, 'FONT_STYLE',  5, '', 'Underline');
+
+
+--DELETE MS_TYPES WHERE TYPES_NAME = 'CLICK_EVENTS'
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS',    0, '', 'None');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS',    1, '', 'FEXIT');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS',    2, '', 'FSAVE');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS',    3, '', 'FSAVENEW');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS',    4, '', 'FSAVEXIT');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS',    5, '', 'FNEW_IP');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS',    6, '', 'FOPEN_IP');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS',    7, '', 'APPEXIT');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS',    8, '', 'REPORTVIEW');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS',    9, '', 'SMS_SEND');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS',   10, '', 'SMS_SETUP');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS',   11, '', 'TBOX_MAIN');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS',   12, '', 'TBOX_GROUP');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS',   13, '', 'FOPEN_SUBVIEW');
+ 
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1020, '', '---------------------');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1012, '', 'SeçÇýk');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1013, '', 'ListeyeEkle');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1014, '', 'ListeHazirla');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1015, '', 'Listele');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1020, '', '---------------------');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1021, '', 'Kaydet Yeni');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1022, '', 'Kaydet'); 
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1023, '', 'Kaydet Devam');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1024, '', 'Kaydet Çýk');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1031, '', 'Yeni Kart (Form)');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1032, '', 'Yeni Hesap (Form)');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1033, '', 'Yeni Belge (Form)');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1034, '', 'Yeni Alt Hesap (Form)');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1036, '', 'Yeni Kart (Satýr)');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1037, '', 'Yeni Hesap (Satýr)');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1038, '', 'Yeni Belge (Satýr)');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1039, '', 'Yeni Alt Hesap (Satýr)');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1041, '', 'Göster');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1042, '', 'Kartý Aç');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1043, '', 'Hesabý Aç');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1044, '', 'Belgeyi Aç');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1045, '', 'Resim Editörü');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1046, '', 'Rapor Dizayný');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1051, '', 'Sil (Satýr)');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1052, '', 'Sil (Kart)');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1053, '', 'Sil (Hesap)');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1054, '', 'Sil (Belge)');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1055, '', 'Sil (Liste)');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1060, '', '---------------------');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1061, '', 'En Sona');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1062, '', 'Sonraki Syf');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1063, '', 'Sonraki');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1064, '', 'Kayýt Adedi');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1065, '', 'Önceki');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1066, '', 'Önceki Syf');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1067, '', 'En Baþa');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1068, '', 'SihirbazDevam');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1069, '', 'SihirbazGeri');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1070, '', '---------------------');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1071, '', 'Grup Aç/Kapa'); -- 71,72
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1073, '', 'Onay Ekle/Kaldýr'); -- 73,74
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1075, '', 'Mesaj Gönder');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1081, '', 'Yazýcý');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1090, '', '---------------------');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1091, '', 'Ek Button 1');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1092, '', 'Ek Button 2');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1093, '', 'Ek Button 3');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1094, '', 'Ek Button 4');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1095, '', 'Ek Button 5');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1096, '', 'Ek Button 6');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1097, '', 'Ek Button 7');
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1101, '', 'Check Button 1'); --checkButton_ek1
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1111, '', 'DragDown Button 1'); --dragDownButton_ek1
+
+
+
+
+
+
+ insert into MS_TYPES values ( 1, 0, 'LINE_TYPE',  0, '', 'None');
+ insert into MS_TYPES values ( 1, 0, 'LINE_TYPE',  1, '', 'Serial Work');
+ insert into MS_TYPES values ( 1, 0, 'LINE_TYPE',  2, '', 'Free Time');
+
+ insert into MS_TYPES values ( 1, 0, 'APPROVAL_ESTATE',  0, '', 'None');
+ insert into MS_TYPES values ( 1, 0, 'APPROVAL_ESTATE',  1, '', 'Onay Ýstemez');
+ insert into MS_TYPES values ( 1, 0, 'APPROVAL_ESTATE',  2, '', 'Onay Ýster');
+
+ insert into MS_TYPES values ( 1, 0, 'APPROVAL_TYPE',  0, '', 'None');
+ insert into MS_TYPES values ( 1, 0, 'APPROVAL_TYPE',  1, '', 'Sýralý Onay');
+ insert into MS_TYPES values ( 1, 0, 'APPROVAL_TYPE',  2, '', 'Eþ Zamanlý Onay');
+
+
+ insert into MS_TYPES values ( 2, 0, 'CONNECT',     0, '', 'Baðlantý Yok');
+ insert into MS_TYPES values ( 2, 0, 'CONNECT',     1, '', 'Baðlandý');
+
+ insert into MS_TYPES values ( 2, 0, 'ARTIEKSI2',     0, '', '-');
+ insert into MS_TYPES values ( 2, 0, 'ARTIEKSI2',     1, '', '+');
+
+
+ insert into MS_TYPES values ( 2, 0, 'DATE_TIME',    0, '',                       '');
+ insert into MS_TYPES values ( 2, 0, 'DATE_TIME', 1001, 'DONEM_BASI_TARIH',       'Dönem Baþý Tarihi');
+ insert into MS_TYPES values ( 2, 0, 'DATE_TIME', 1002, 'DONEM_BITIS_TARIH',      'Dönem Bitiþ Tarihi');
+ insert into MS_TYPES values ( 2, 0, 'DATE_TIME', 1003, 'BUGUN_TARIH',            'Bugün');
+ insert into MS_TYPES values ( 2, 0, 'DATE_TIME', 1004, 'BU_HAFTA_BASI_TARIH',    'Bu Hafta Baþýnýn Tarihi');
+ insert into MS_TYPES values ( 2, 0, 'DATE_TIME', 1005, 'BU_HAFTA_SONU_TARIH',    'Bu Hafta Sonunun Tarihi');
+ insert into MS_TYPES values ( 2, 0, 'DATE_TIME', 1006, 'BU_AY_BASI_TARIH',       'Bu Ay Baþý Tarihi');
+ insert into MS_TYPES values ( 2, 0, 'DATE_TIME', 1007, 'BU_AY_SONU_TARIH',       'BU Ay Sonu Tarihi');
+ insert into MS_TYPES values ( 2, 0, 'DATE_TIME', 1008, 'BIR_HAFTA_ONCEKI_TARIH', 'Bir Hafta Önceki Tarih');
+ insert into MS_TYPES values ( 2, 0, 'DATE_TIME', 1009, 'IKI_HAFTA_ONCEKI_TARIH', 'Ýki Hafta Önceki Tarih');
+ insert into MS_TYPES values ( 2, 0, 'DATE_TIME', 1010, 'ON_GUN_ONCEKI_TARIH',    'On Gün Önceki Tarih');
+ insert into MS_TYPES values ( 2, 0, 'DATE_TIME', 1011, 'GECEN_AY_BUGUN',         'Geçen Ay Bugün');
+ insert into MS_TYPES values ( 2, 0, 'DATE_TIME', 1012, 'GELECEK_AY_BUGUN',       'Gelecek Ay Bugün');
+ insert into MS_TYPES values ( 2, 0, 'DATE_TIME', 1013, 'GECEN_YIL_BUGUN',        'Geçen Yýl Bugün');
+ insert into MS_TYPES values ( 2, 0, 'DATE_TIME', 1014, 'GELECEK_YIL_BUGUN',      'Gelecek Yýl Bugün');
+ insert into MS_TYPES values ( 2, 0, 'DATE_TIME', 1021, 'BUGUN_GUN',              'Bugünün Sadece Günü, GG');
+ insert into MS_TYPES values ( 2, 0, 'DATE_TIME', 1022, 'BUGUN_AY',               'Bugünün Sadece Ayý,  AA');
+ insert into MS_TYPES values ( 2, 0, 'DATE_TIME', 1023, 'BUGUN_YIL',              'Bugünün Sadece Yýlý, YY');
+ insert into MS_TYPES values ( 2, 0, 'DATE_TIME', 1201, 'TARIH_SAAT',             'Tarih ve Saat');
+ insert into MS_TYPES values ( 2, 0, 'DATE_TIME', 1202, 'SAAT_KISA',              'Saat (ss:dd)');
+ insert into MS_TYPES values ( 2, 0, 'DATE_TIME', 1203, 'SAAT_UZUN',              'Saat (ss:dd:ss)');
+ insert into MS_TYPES values ( 2, 0, 'DATE_TIME', 1204, 'SAAT_UZUN2',             'Saat (ss:dd:ss mmm)');
+ insert into MS_TYPES values ( 2, 0, 'DATE_TIME', 1205, 'BUGUN_YILAY',            'YýlAy, (YYYYAA)');
+
+ -- eskiden MS_VARIABLES idi þimdi DEFAULT_SETUP oldu
+ insert into MS_TYPES values ( 2, 0, 'DEFAULT_SETUP',    0, '',                   '');
+ insert into MS_TYPES values ( 2, 0, 'DEFAULT_SETUP', 2001, 'FIRM_ID',            'Firma Id');
+ insert into MS_TYPES values ( 2, 0, 'DEFAULT_SETUP', 2003, 'COMP_ID',            'Computer Id');
+ insert into MS_TYPES values ( 2, 0, 'DEFAULT_SETUP', 2005, 'USER_ID',            'User Id');
+
+ insert into MS_TYPES values ( 3, 0, 'DEFAULT_SETUP2',    0, '',                          '');
+ insert into MS_TYPES values ( 3, 0, 'DEFAULT_SETUP2', 2001, 'DEF_HP_FIRM_ID',            'Firma Id');
+ insert into MS_TYPES values ( 3, 0, 'DEFAULT_SETUP2', 2002, 'DEF_HP_FIRM_GUID',          'Firma Guid');
+ insert into MS_TYPES values ( 3, 0, 'DEFAULT_SETUP2', 2005, 'DEF_HP_USER_ID',            'User Id');
+ insert into MS_TYPES values ( 3, 0, 'DEFAULT_SETUP2', 2006, 'DEF_HP_USER_GUID',          'User Guid');
+ insert into MS_TYPES values ( 3, 0, 'DEFAULT_SETUP2', 2007, 'DEF_HP_USER_FIRM_GUID',     'User Firm Guid');
+ insert into MS_TYPES values ( 3, 0, 'DEFAULT_SETUP2', 2008, 'DEF_SECTOR_TYPE_ID',        'SectorTypeId');
+
+ insert into MS_TYPES values ( 3, 0, 'DEFAULT_SETUP2', 2101, 'DEF_FNS_KASA_TL_ID',        'DEF_FNS_KASA_TL_ID');
+ insert into MS_TYPES values ( 3, 0, 'DEFAULT_SETUP2', 2102, 'DEF_FNS_KASA_USA_ID',       'DEF_FNS_KASA_USA_ID');
+ insert into MS_TYPES values ( 3, 0, 'DEFAULT_SETUP2', 2103, 'DEF_FNS_KASA_EURO_ID',      'DEF_FNS_KASA_EURO_ID');
+ insert into MS_TYPES values ( 3, 0, 'DEFAULT_SETUP2', 2121, 'DEF_FNS_BANKA_HES_ID',      'DEF_FNS_BANKA_HES_ID');
+ insert into MS_TYPES values ( 3, 0, 'DEFAULT_SETUP2', 2122, 'DEF_FNS_BANKA_POS_ID',      'DEF_FNS_BANKA_POS_ID');
+ insert into MS_TYPES values ( 3, 0, 'DEFAULT_SETUP2', 2123, 'DEF_FNS_BANKA_KK_ID',       'DEF_FNS_BANKA_KK_ID');
+ 
+
+
+ --insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   22, '', 'Kaydet');
+ --insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   23, '', 'Kaydet Yeni');
+ --insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   24, '', 'Kaydet Çýk');
+ --insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   25, '', 'Kaydet Sonraki');
+ --insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   52, '', 'Yeni Hesap (Form)');
+ --insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   53, '', 'Yeni Hesap');
+ --insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   54, '', 'Yeni Alt Hesap');
+ --insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   50, '', 'Hesap Aç/Oku');
+ --insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   51, '', 'Kartý Aç');
+-- insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   26, '', 'Sil (Satýr)');
+-- insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   27, '', 'Sil (Fiþ)');
+ -- gerek kalmadý
+ --insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   55, '', 'Formülleri Hesapla');
+ --insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   56, '', 'Data Transferi');
+ --insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   57, '', 'Input Box');
+ --insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   58, '', 'Arama');
+
+
+ 
+ 
+
+--DELETE MS_TYPES WHERE TYPES_NAME = 'NAVIGATOR'
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   11, '', 'Çýkýþ');
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   12, '', 'SeçÇýk');
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   13, '', 'ListeyeEkle');
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   14, '', 'ListeHazirla');
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   15, '', 'Listele');
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   20, '', '---------------------');
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   21, '', 'Kaydet Yeni');
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   22, '', 'Kaydet'); 
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   23, '', 'Kaydet Devam');
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   24, '', 'Kaydet Çýk');
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   31, '', 'Yeni Kart (Form)');
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   32, '', 'Yeni Hesap (Form)');
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   33, '', 'Yeni Belge (Form)');
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   34, '', 'Yeni Alt Hesap (Form)');
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   36, '', 'Yeni Kart (Satýr)');
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   37, '', 'Yeni Hesap (Satýr)');
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   38, '', 'Yeni Belge (Satýr)');
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   39, '', 'Yeni Alt Hesap (Satýr)');
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   41, '', 'Göster');
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   42, '', 'Kartý Aç');
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   43, '', 'Hesabý Aç');
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   44, '', 'Belgeyi Aç');
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   45, '', 'Resim Editörü');
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   46, '', 'Rapor Dizayný');
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   51, '', 'Sil (Satýr)');
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   52, '', 'Sil (Kart)');
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   53, '', 'Sil (Hesap)');
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   54, '', 'Sil (Belge)');
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   55, '', 'Sil (Liste)');
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   60, '', '---------------------');
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   61, '', 'En Sona');
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   62, '', 'Sonraki Syf');
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   63, '', 'Sonraki');
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   64, '', 'Kayýt Adedi');
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   65, '', 'Önceki');
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   66, '', 'Önceki Syf');
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   67, '', 'En Baþa');
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   68, '', 'SihirbazDevam');
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   69, '', 'SihirbazGeri');
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   70, '', '---------------------');
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   71, '', 'Grup Aç/Kapa'); -- 71,72
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   73, '', 'Onay Ekle/Kaldýr'); -- 73, 74
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   75, '', 'Mesaj Gönder');
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   81, '', 'Yazýcý');
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   90, '', '---------------------');
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   91, '', 'Ek Button 1');
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   92, '', 'Ek Button 2');
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   93, '', 'Ek Button 3');
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   94, '', 'Ek Button 4');
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   95, '', 'Ek Button 5');
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   96, '', 'Ek Button 6');
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   97, '', 'Ek Button 7');
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',  101, '', 'Check Button 1'); --checkButton_ek1
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',  111, '', 'DragDown Button 1'); --dragDownButton_ek1
+ 
+
+--DELETE MS_TYPES WHERE TYPES_NAME = 'NAVIGATOR2'
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',    0,  '0', '---------------------');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   12, '12', '12 Seç Çýk');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   13, '13', '13 Listeye Ekle');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   14, '14', '14 Liste Hazirla');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   15, '15', '15 Listele');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   21, '21', '21 Kaydet Yeni');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   22, '22', '22 Kaydet');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   31, '31', '31 Yeni Kart (Form)');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   32, '32', '32 Yeni Hesap (Form)');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   33, '33', '33 Yeni Belge (Form)');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   34, '34', '34 Yeni Alt Hesap (Form)');
+
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   36, '36', '36 Yeni Kart (Satýr)');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   37, '37', '37 Yeni Hesap (Satýr)');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   38, '38', '38 Yeni Belge (Satýr)');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   39, '39', '39 Yeni Alt Hesap (Satýr)');
+
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   41, '41', '41 Göster');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   42, '42', '42 Kartý Aç');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   43, '43', '43 Hesabý Aç');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   44, '44', '44 Belgeyi Aç');
+
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   45, '45', '45 Resim Editörü');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   46, '46', '46 Rapor Dizayný');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   51, '51', '51 Sil (Satýr)');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   52, '52', '52 Sil (Kart)');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   53, '53', '53 Sil (Hesap)');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   54, '54', '54 Sil (Belge)');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   55, '55', '55 Sil (Liste)');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   63, '63', '63 Sonraki');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   65, '65', '65 Önceki');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   75, '75', '75 Mesaj Gönder');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   91, '91', '91 Ek Button 1');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   92, '92', '92 Ek Button 2');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   93, '93', '93 Ek Button 3');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   94, '94', '94 Ek Button 4');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   95, '95', '95 Ek Button 5');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   96, '96', '96 Ek Button 6');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   97, '97', '97 Ek Button 7');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',  101, '101', '101 Check Button 1'); --checkButton_ek1
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',  111, '111', '111 DragDown Button 1'); --dragDownButton_ek1
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',  121, '121', '121 Arama');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',  122, '122', '122 Formülleri Hesapla');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',  123, '123', '123 Data Transferi');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',  124, '124', '124 Input Box');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',  125, '125', '125 SubView Open');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',  126, '126', '126 Extra Ýþlem Çalýþtýr');
+   
+/*
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   26, '26', '26 Sil (Satýr)');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   27, '27', '27 Sil (Fiþ)');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   50, '50', '50 Hesap Aç/Oku');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   51, '51', '51 Kartý Aç');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   52, '52', '52 Yeni Hesap (Form)');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   53, '53', '53 Yeni Hesap');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   54, '54', '54 Yeni Alt Hesap');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   55, '55', '55 Formülleri Hesapla');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   56, '56', '56 Data Transferi');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   57, '57', '57 Input Box');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   58, '58', '58 Arama');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   59, '59', '59 SubView Open');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   91, '91', 'Ek Button 1');
+ insert into MS_TYPES values ( 3,  0, 'NAVIGATOR2',   92, '92', 'Ek Button 2');
+*/
+ 
+ insert into MS_TYPES values ( 3,  0, 'FORMTYPE',      0,  '',       'none');
+ insert into MS_TYPES values ( 3,  0, 'FORMTYPE',      0,  'CHILD',  'ChildForm');
+ insert into MS_TYPES values ( 3,  0, 'FORMTYPE',      0,  'NORMAL', 'NormalForm');
+ insert into MS_TYPES values ( 3,  0, 'FORMTYPE',      0,  'DIALOG', 'DialogForm');
+
+ insert into MS_TYPES values ( 3,  0, 'FORMSTATE',     0,  '',       'none');
+ insert into MS_TYPES values ( 3,  0, 'FORMSTATE',     0,  'NORMAL', 'Normal');
+ insert into MS_TYPES values ( 3,  0, 'FORMSTATE',     0,  'MAX',    'Max');
+ insert into MS_TYPES values ( 3,  0, 'FORMSTATE',     0,  'MIN',    'Min');
+
+ --DELETE MS_TYPES WHERE TYPES_NAME = 'WORKTYPE'
+ insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  '',           'none');
+ insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'REFRESH',    'Refresh Data');
+ insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'SUBREFRESH', 'Sub Data Refresh');
+ insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'READ',       'Read Data');
+ insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'NEW',        'New Data');
+ insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'ADDDATA',    'Add New Data');
+ insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'GOTO',       'Goto Record');
+ insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'SVIEW',      'Sub View');
+ insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'SVIEWVALUE', 'Sub View Value');
+ insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'CREATEVIEW', 'Create View');
+ insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'SAVEDATA',   'Save Data');
+ insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'SAVEALLDATA','Save All Data');
+ insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'SETDATA',    'Set Data');
+ insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'SETFOCUS',   'Set Focus');
+ insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'RDC',        'Run DataCopy');
+ insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'RPRC',       'Run StoredProcedure');
+ insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'RFORMUL',    'Run Formul');
+ insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'OPENFORM',   'Open Form');
+ insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'NEWOPENFORM','New Open Form');
+ insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'CLOSEFORM',  'Close Form');
+ insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'CLOSESVIEW', 'Close SubViews Panels');
+ insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'IBOX',       'Input Box');
+ insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'NUMBERDISPLAY', 'Number Display');
+ insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'CLEARDATA',  'Clear Data');
+ insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'MESSAGESHOW','Message Show');
+ insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'QUESTION',   'Question / Soru');
+ insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'USERLOGIN',  'User Login');
+ insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'USERCREATE', 'User Create');
+ insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'PASSRESET',  'Password Reset');
+ insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'PASSUPDATE', 'Password Update');
+ insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'MESSAGESINGLE', 'Single Message');
+ insert into MS_TYPES values ( 3,  0, 'WORKTYPE',      0,  'MESSAGEMULTI',  'Multi Message');
+
+
+
+--DELETE MS_TYPES WHERE TYPES_NAME = 'Scheduler'
+ insert into MS_TYPES values ( 3,  0, 'Scheduler',   1, 'Agenda',   'Agenda');
+ insert into MS_TYPES values ( 3,  0, 'Scheduler',   2, 'Day',      'Day');
+ insert into MS_TYPES values ( 3,  0, 'Scheduler',   3, 'FullWeek', 'FullWeek');
+ insert into MS_TYPES values ( 3,  0, 'Scheduler',   4, 'Gantt',    'Gantt');
+ insert into MS_TYPES values ( 3,  0, 'Scheduler',   5, 'Month',    'Month');
+ insert into MS_TYPES values ( 3,  0, 'Scheduler',   6, 'Timeline', 'Timeline');
+ insert into MS_TYPES values ( 3,  0, 'Scheduler',   7, 'Week',     'Week');
+ insert into MS_TYPES values ( 3,  0, 'Scheduler',   8, 'WorkWeek', 'WorkWeek');
+
+
+ 
+ insert into MS_TYPES values ( 3,  0, 'BEFOREAFTER',   0, '',       'none');
+ insert into MS_TYPES values ( 3,  0, 'BEFOREAFTER',   1, 'AFTER',  'After');
+ insert into MS_TYPES values ( 3,  0, 'BEFOREAFTER',   2, 'BEFORE', 'Before');
+
+ insert into MS_TYPES values ( 3,  0, 'MOVEFOCUS',   0, '',       'none');
+ insert into MS_TYPES values ( 3,  0, 'MOVEFOCUS',   1, 'ACROSS', 'AcrossThenDown');
+ insert into MS_TYPES values ( 3,  0, 'MOVEFOCUS',   2, 'DOWN',   'DownThenAcross');
+
+
+ insert into MS_TYPES values ( 3,  0, 'EXP_TYPE',      0,  '',            'none');
+ insert into MS_TYPES values ( 3,  0, 'EXP_TYPE',      0,  'SETDATA',     'Set Data');
+ insert into MS_TYPES values ( 3,  0, 'EXP_TYPE',      0,  'COMP',        'Compute');
+ insert into MS_TYPES values ( 3,  0, 'EXP_TYPE',      0,  'DATEADDDAYS', 'DateAddDays');
+ insert into MS_TYPES values ( 3,  0, 'EXP_TYPE',      0,  'DATESUBTRACT','DateSubTract');  /* Today.Subtract(oldDate) */
+
+
+ insert into MS_TYPES values ( 1,  0, 'PARAMS',        0,  '', 'Yok');
+ insert into MS_TYPES values ( 1,  0, 'PARAMS',        1,  '', 'Kýsýtlý Parametre');
+ insert into MS_TYPES values ( 1,  0, 'PARAMS',        2,  '', 'Tam Parametre');
+
+
+ insert into MS_TYPES values ( 3,  0, 'NEWROWPOSITION',      0,  '',        'none');
+ insert into MS_TYPES values ( 3,  0, 'NEWROWPOSITION',      0,  'TOP',     'Top');
+ insert into MS_TYPES values ( 3,  0, 'NEWROWPOSITION',      0,  'BOTTOM',  'Bottom');
+
+
+ insert into MS_TYPES values ( 1,  0, 'SUMMARY',     0,  '',       'none');
+ insert into MS_TYPES values ( 1,  0, 'SUMMARY',     1,  '',       'Average');
+ insert into MS_TYPES values ( 1,  0, 'SUMMARY',     2,  '',       'Count');
+ insert into MS_TYPES values ( 1,  0, 'SUMMARY',     3,  '',       'Custom');
+ insert into MS_TYPES values ( 1,  0, 'SUMMARY',     4,  '',       'Max');
+ insert into MS_TYPES values ( 1,  0, 'SUMMARY',     5,  '',       'Min');
+ insert into MS_TYPES values ( 1,  0, 'SUMMARY',     6,  '',       'Sum');
+
+
+ insert into MS_TYPES values ( 1,  0, 'SORT',        0,  '',       'none');
+ insert into MS_TYPES values ( 1,  0, 'SORT',        1,  '',       'Ascending  (A..Z)');
+ insert into MS_TYPES values ( 1,  0, 'SORT',        2,  '',       'Descending (Z..A)');
+
+ insert into MS_TYPES values ( 1,  0, 'FORMATTYPE', -1,  '',       'not');
+ insert into MS_TYPES values ( 1,  0, 'FORMATTYPE',  0,  '',       'none');
+ insert into MS_TYPES values ( 1,  0, 'FORMATTYPE',  1,  '',       'Numeric');
+ insert into MS_TYPES values ( 1,  0, 'FORMATTYPE',  2,  '',       'DateTime');
+ insert into MS_TYPES values ( 1,  0, 'FORMATTYPE',  3,  '',       'Custom');
+
+ insert into MS_TYPES values ( 1, 0, 'DB_TYPES',  0, '', 'none');
+ insert into MS_TYPES values ( 1, 0, 'DB_TYPES',  1, '', 'MS-SQL');
+ insert into MS_TYPES values ( 1, 0, 'DB_TYPES',  2, '', 'MySQL');
+ 
+ insert into MS_TYPES values ( 1, 0, 'DT_READ_TYPES',  0, '', 'Table Read');
+ insert into MS_TYPES values ( 1, 0, 'DT_READ_TYPES',  1, '', 'SQL Read');
+ 
+ insert into MS_TYPES values ( 1, 0, 'DT_SCRIPT_TYPES',  0, '', 'Insert Script');
+ insert into MS_TYPES values ( 1, 0, 'DT_SCRIPT_TYPES',  1, '', 'Update Script');
+ 
+ insert into MS_TYPES values ( 1, 0, 'DT_LINE_COUNT',  0, '', 'Tek tek');
+ insert into MS_TYPES values ( 1, 0, 'DT_LINE_COUNT',  1, '', '10 ar');
+ insert into MS_TYPES values ( 1, 0, 'DT_LINE_COUNT',  2, '', '50 þer');
+ insert into MS_TYPES values ( 1, 0, 'DT_LINE_COUNT',  3, '', '100 er');
+ insert into MS_TYPES values ( 1, 0, 'DT_LINE_COUNT',  4, '', '1000 er');
+ insert into MS_TYPES values ( 1, 0, 'DT_LINE_COUNT',  5, '', 'Hepsini bir defa da');
+
+ 
+ insert into MS_TYPES values ( 1, 0, 'CLIENT_TYPE',  0, '', 'none');
+ insert into MS_TYPES values ( 1, 0, 'CLIENT_TYPE',  1, '', 'Firma');
+ insert into MS_TYPES values ( 1, 0, 'CLIENT_TYPE',  2, '', 'Þube');
+ insert into MS_TYPES values ( 1, 0, 'CLIENT_TYPE',  3, '', 'Bölüm');
+ insert into MS_TYPES values ( 1, 0, 'CLIENT_TYPE',  4, '', 'Departman');
+ insert into MS_TYPES values ( 1, 0, 'CLIENT_TYPE',  5, '', 'Personel');
+ insert into MS_TYPES values ( 1, 0, 'CLIENT_TYPE',  6, '', 'Bilgisayar');
+ 
+ insert into MS_TYPES values ( 1, 0, 'CMP_FRONT_BACK',  0, '', 'none');
+ insert into MS_TYPES values ( 1, 0, 'CMP_FRONT_BACK',  1, '', 'BringToFront');
+ insert into MS_TYPES values ( 1, 0, 'CMP_FRONT_BACK',  2, '', 'SendToBack');
+
+
+ --DELETE MS_TYPES WHERE TYPES_NAME = 'FORMATSTRING'
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  '',                           'none');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'Number1-------------------', 'Number1--------------------');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  '#,###,##0.00;<<#,###,##0.00>>',  '#,###,##0.00;<<#,###,##0.00>>');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,    '###,##0.00;<<###,##0.00>>',      '###,##0.00;<<###,##0.00>>');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,     '##,##0.00;<<##,##0.00>>',        '##,##0.00;<<##,##0.00>>');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,      '#,##0.00;<<#,##0.00>>',          '#,##0.00;<<#,##0.00>>');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,        '##0.00;<<##0.00>>',              '##0.00;<<##0.00>>');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,         '#0.00;<<#0.00>>',                '#0.00;<<#0.00>>');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,          '0.00;<<0.00>>',                  '0.00;<<0.00>>');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'Date----------------------', 'Date-----------------------');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'dd.MM.yyyy',                 'dd.MM.yyyy');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'dd.MM.yy',                   'dd.MM.yy');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'dd MMMM yyyy dddd',          'dd MMMM yyyy dddd');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'dd MMMM yyyy',               'dd MMMM yyyy');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'dd MMMM yyyy dddd HH:mm',    'dd MMMM yyyy dddd HH:mm');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'dd MMMM yyyy HH:mm',         'dd MMMM yyyy HH:mm');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'dd MMMM yyyy dddd HH:mm:ss', 'dd MMMM yyyy dddd HH:mm:ss');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'dd MMMM yyyy HH:mm:ss',      'dd MMMM yyyy HH:mm:ss');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'dd.MM.yyyy HH:mm',           'dd.MM.yyyy HH:mm');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'dd.MM.yy HH:mm',             'dd.MM.yy HH:mm');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'yyyy-MM-dd HH:mm',           'yyyy-MM-dd HH:mm');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'dd.MM.yyyy HH:mm:ss',        'dd.MM.yyyy HH:mm:ss');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'dd.MM.yy HH:mm:ss',          'dd.MM.yy HH:mm:ss');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'yyyy-MM-dd HH:mm:ss',        'yyyy-MM-dd HH:mm:ss');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'dd MMMM',                    'dd MMMM');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'HH:mm',                      'HH:mm');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'HH:mm:ss',                   'HH:mm:ss');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'DateCustom----------------', 'DateCustom-----------------');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'd',                          'd');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'dd',                         'dd');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'ddd',                        'ddd');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'dddd',                       'dddd');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'g',                          'g');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'hh',                         'hh');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'H',                          'H');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'HH',                         'HH');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'm',                          'm');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'mm',                         'mm');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'M',                          'M');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'MM',                         'MM');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'MMM',                        'MMM');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'MMMM',                       'MMMM');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  's',                          's');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'ss',                         'ss');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  't',                          't');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'tt',                         'tt');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'y',                          'y');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'yy',                         'yy');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'yyyy',                       'yyyy');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  ':',                          ':');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  '/',                          '/');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'Number--------------------', 'Number---------------------');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  '#.00',                       '#.00');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  '#,#',                        '#,#');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  '0.E+0.0',                    '0.E+0.0');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  '0.e+0.0',                    '0.e+0.0');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'n',                          'n');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'n1',                         'n1');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'n2',                         'n2');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'e',                          'e');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'e1',                         'e1');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'f',                          'f');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'f1',                         'f1');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'Percent-------------------', 'Percent--------------------');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  '0.00%',                      '0.00%');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  '0%',                         '0%');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'Currency------------------', 'Currency-------------------');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  '$0.00',                      '$0.00');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  '$0',                         '$0');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'c',                          'c');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'c1',                         'c1');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'c2',                         'c2');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'Special-------------------', 'Special--------------------');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  '(###) ### - ####',           '(###) ### - ####');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  '### - ## - ####',            '### - ## - ####');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'Custum--------------------', 'Custum---------------------');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  '#',                          '#');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  '.',                          '.');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  ',',                          ',');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  '%',                          '%');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  '*',                          '*');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'Web Display --------------', 'Web Dislplay -------------');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'part-title',                 'part-title');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'part-subTitle',              'part-subTitle');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'part-content',               'part-content');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'part-button',                'part-button');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'part-image',                 'part-image');
+
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'part-title-doc',             'part-title-doc');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'part-subTitle-doc',          'part-subTitle-doc');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'part-content-doc',           'part-content-doc');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'part-button-doc',            'part-button-doc');
+ insert into MS_TYPES values ( 3,  0, 'FORMATSTRING',  0,  'part-image-doc',             'part-image-doc');
+
+
+ insert into MS_TYPES values ( 3, 0, 'NAVBAR_VIEW', 0, 'Default', 'Default');
+ insert into MS_TYPES values ( 3, 0, 'NAVBAR_VIEW', 0, 'BaseView', 'BaseView');
+ insert into MS_TYPES values ( 3, 0, 'NAVBAR_VIEW', 0, 'FlatView', 'FlatView');
+ insert into MS_TYPES values ( 3, 0, 'NAVBAR_VIEW', 0, 'Office1View', 'Office1View');
+ insert into MS_TYPES values ( 3, 0, 'NAVBAR_VIEW', 0, 'Office2View', 'Office2View');
+ insert into MS_TYPES values ( 3, 0, 'NAVBAR_VIEW', 0, 'Office3View', 'Office3View');
+ insert into MS_TYPES values ( 3, 0, 'NAVBAR_VIEW', 0, 'VSToolBoxView', 'VSToolBoxView');
+ insert into MS_TYPES values ( 3, 0, 'NAVBAR_VIEW', 0, 'AdvExplorerBarView', 'AdvExplorerBarView');
+ insert into MS_TYPES values ( 3, 0, 'NAVBAR_VIEW', 0, 'ExplorerBarView', 'ExplorerBarView');
+ insert into MS_TYPES values ( 3, 0, 'NAVBAR_VIEW', 0, 'UltraFlatExplorerBarView', 'UltraFlatExplorerBarView');
+ insert into MS_TYPES values ( 3, 0, 'NAVBAR_VIEW', 0, 'SkinExplorerBarView', 'SkinExplorerBarView');
+ insert into MS_TYPES values ( 3, 0, 'NAVBAR_VIEW', 0, 'XP1View', 'XP1View');
+ insert into MS_TYPES values ( 3, 0, 'NAVBAR_VIEW', 0, 'XP2View', 'XP2View');
+ insert into MS_TYPES values ( 3, 0, 'NAVBAR_VIEW', 0, 'XPExplorerBarView', 'XPExplorerBarView');
+ insert into MS_TYPES values ( 3, 0, 'NAVBAR_VIEW', 0, 'NavigationPane', 'NavigationPane');
+ insert into MS_TYPES values ( 3, 0, 'NAVBAR_VIEW', 0, 'SkinNavigationPane', 'SkinNavigationPane');
+
+ //---sil
+ insert into MS_TYPES values ( 3, 0, 'SOFTWARE_CODE',    0, '', '');
+ insert into MS_TYPES values ( 3, 0, 'SOFTWARE_CODE',    1, 'UST', 'Üstad');
+ insert into MS_TYPES values ( 3, 0, 'SOFTWARE_CODE',    2, 'EDS', 'Edison');
+ insert into MS_TYPES values ( 3, 0, 'SOFTWARE_CODE',   11, 'SEC', 'Sektörel Çözümler');
+
+ -- 
+ insert into MS_TYPES values ( 3, 0, 'PROJECT_CODE',     0, '', '');
+ insert into MS_TYPES values ( 3, 0, 'PROJECT_CODE',     0, '', '');
+ //----sil
+
+
+
+
+ --DELETE MS_TYPES WHERE TYPES_NAME = 'TbmMtskSertifika'
+ insert into MS_TYPES values ( 2, 0, 'TbmMtskSertifika',    0, '', N'' );
+ insert into MS_TYPES values ( 2, 0, 'TbmMtskSertifika', 2514, '', N'A');
+ insert into MS_TYPES values ( 2, 0, 'TbmMtskSertifika', 2502, '', N'A1');
+ insert into MS_TYPES values ( 2, 0, 'TbmMtskSertifika', 2503, '', N'A2');
+  
+ insert into MS_TYPES values ( 2, 0, 'TbmMtskSertifika', 2504, '', N'B');
+ insert into MS_TYPES values ( 2, 0, 'TbmMtskSertifika', 2518, '', N'BE');
+ insert into MS_TYPES values ( 2, 0, 'TbmMtskSertifika', 2515, '', N'B1');
+ insert into MS_TYPES values ( 2, 0, 'TbmMtskSertifika', 2505, '', N'C');
+ insert into MS_TYPES values ( 2, 0, 'TbmMtskSertifika', 2520, '', N'CE');
+ insert into MS_TYPES values ( 2, 0, 'TbmMtskSertifika', 2516, '', N'C1');
+ insert into MS_TYPES values ( 2, 0, 'TbmMtskSertifika', 2519, '', N'C1E');
+ insert into MS_TYPES values ( 2, 0, 'TbmMtskSertifika', 2506, '', N'D');
+ insert into MS_TYPES values ( 2, 0, 'TbmMtskSertifika', 2522, '', N'DE');
+ insert into MS_TYPES values ( 2, 0, 'TbmMtskSertifika', 2517, '', N'D1');
+ insert into MS_TYPES values ( 2, 0, 'TbmMtskSertifika', 2521, '', N'D1E');
+ insert into MS_TYPES values ( 2, 0, 'TbmMtskSertifika', 2507, '', N'E');
+
+ insert into MS_TYPES values ( 2, 0, 'TbmMtskSertifika', 2508, '', N'F');
+ insert into MS_TYPES values ( 2, 0, 'TbmMtskSertifika', 2509, '', N'G');
+ insert into MS_TYPES values ( 2, 0, 'TbmMtskSertifika', 2510, '', N'H (Otomobil)');
+ insert into MS_TYPES values ( 2, 0, 'TbmMtskSertifika', 2511, '', N'H (Motosiklet)');
+ insert into MS_TYPES values ( 2, 0, 'TbmMtskSertifika', 2513, '', N'M');
+ insert into MS_TYPES values ( 2, 0, 'TbmMtskSertifika', 2512, '', N'RÖMORK');
+
+  --DELETE MS_TYPES WHERE TYPES_NAME = 'TbmSrcSertifika'
+ insert into MS_TYPES values ( 2, 0, 'TbmSrcSertifika',    0, '', N'' );
+ insert into MS_TYPES values ( 2, 0, 'TbmSrcSertifika', 14380, '', N'SRC1');
+ insert into MS_TYPES values ( 2, 0, 'TbmSrcSertifika', 14381, '', N'SRC2');
+ insert into MS_TYPES values ( 2, 0, 'TbmSrcSertifika', 14382, '', N'SRC3');
+ insert into MS_TYPES values ( 2, 0, 'TbmSrcSertifika', 14383, '', N'SRC4');
+
+ insert into MS_TYPES values ( 2, 0, 'TbmSrcSertifika', 13610, '', N'ODY1');
+ insert into MS_TYPES values ( 2, 0, 'TbmSrcSertifika', 13611, '', N'ODY2');
+ insert into MS_TYPES values ( 2, 0, 'TbmSrcSertifika', 13612, '', N'ODY3');
+ insert into MS_TYPES values ( 2, 0, 'TbmSrcSertifika', 13613, '', N'ODY4');
+
+ insert into MS_TYPES values ( 2, 0, 'TbmSrcSertifika', 13606, '', N'ÜDY1');
+ insert into MS_TYPES values ( 2, 0, 'TbmSrcSertifika', 13607, '', N'ÜDY2');
+ insert into MS_TYPES values ( 2, 0, 'TbmSrcSertifika', 13607, '', N'ÜDY3');
+ insert into MS_TYPES values ( 2, 0, 'TbmSrcSertifika', 13608, '', N'ÜDY4');
+
+ --DELETE MS_TYPES WHERE TYPES_NAME = 'Saat6'
+ insert into MS_TYPES values ( 1, 0, 'Saat6',   2, '', N'2 Saat' );
+ insert into MS_TYPES values ( 1, 0, 'Saat6',   3, '', N'3 Saat' );
+ insert into MS_TYPES values ( 1, 0, 'Saat6',   4, '', N'4 Saat' );
+ insert into MS_TYPES values ( 1, 0, 'Saat6',   5, '', N'5 Saat' );
+ insert into MS_TYPES values ( 1, 0, 'Saat6',   6, '', N'6 Saat' );
+
+
+/*
+SRC1 : 111 - 14380
+SRC2 : 112 - 14381
+SRC3 : 113 - 14382
+SRC4 : 114 - 14383
+ODY1 : 121 - 13610
+ODY2 : 122 - 13611
+ODY3 : 123 - 13612
+ODY4 : 124 - 13613
+ÜDY1 : 131 - 13606
+ÜDY2 : 132 - 13607
+ÜDY3 : 133 - 13608
+ÜDY4 : 134 - 13609
+*/
+
+commit transaction
+
+
+/*
+                   CODE          HEADCODE 
+SOFTW_CODE         UST           NULL
+PROJECT_CODE       ONM           UST
+MODUL_CODE         FNS           UST.ONM 
+TABLE_CODE         CAR           UST.ONM.FNS
+TABLEIP_CODE       CAR.L01       UST.ONM.FNS.CAR
+FIELD_CODE
+FIELDIP_CODE
+
+UST
+UST ONM
+UST.ONM 
+
+
+ delete MS_TYPES where TYPES_NAME = 'PRJ_MODUL'   
+ insert into MS_TYPES values ( 3, 0, 'PRJ_MODUL',    0, '',    '');
+ insert into MS_TYPES values ( 3, 0, 'PRJ_MODUL',   10, 'MSV', 'MS System');
+ insert into MS_TYPES values ( 3, 0, 'PRJ_MODUL',  100, 'SYS', 'System');
+ insert into MS_TYPES values ( 3, 0, 'PRJ_MODUL',  110, 'SEC', 'Securty');
+ insert into MS_TYPES values ( 3, 0, 'PRJ_MODUL',  120, 'ORT', 'Ortak');
+ insert into MS_TYPES values ( 3, 0, 'PRJ_MODUL',  130, 'AYR', 'Ayarlar');
+ insert into MS_TYPES values ( 3, 0, 'PRJ_MODUL',  140, 'PER', 'Personel');
+
+ insert into MS_TYPES values ( 3, 0, 'PRJ_MODUL',  200, 'ONM', 'Ön Muhasebe');
+ insert into MS_TYPES values ( 3, 0, 'PRJ_MODUL',  210, 'AJN', 'Ajanda');
+ insert into MS_TYPES values ( 3, 0, 'PRJ_MODUL',  220, 'FNS', 'Finans');
+ insert into MS_TYPES values ( 3, 0, 'PRJ_MODUL',  230, 'VZN', 'Vezne'); 
+ insert into MS_TYPES values ( 3, 0, 'PRJ_MODUL',  240, 'CRI', 'Cari');
+ insert into MS_TYPES values ( 3, 0, 'PRJ_MODUL',  250, 'STA', 'Satýn Alma');
+ insert into MS_TYPES values ( 3, 0, 'PRJ_MODUL',  260, 'STS', 'Satýþ');
+
+ insert into MS_TYPES values ( 3, 0, 'PRJ_MODUL',  810, 'AVU', 'Avukat');
+ insert into MS_TYPES values ( 3, 0, 'PRJ_MODUL',  820, 'BGD', 'Baðlantý');
+
+
+ -- PARENT_TD için TABLO NUMARALARI 
+ -- PARENT ÝLE BÝRBÝRENE BAÐLANACAK TABLOLARA BURADA ID VERILECEK 
+
+ insert into MS_TYPES values ( 2, 0, 'PRJ_TABLE',  21010, '', 'AJ_LINEDOC');
+ insert into MS_TYPES values ( 2, 0, 'PRJ_TABLE',  23010, '', 'FN_LINEVOL');
+ insert into MS_TYPES values ( 2, 0, 'PRJ_TABLE',  22010, '', 'HP_FINANS');
+
+*/
+
+
+
+
+/*
+
+ delete MS_TYPES where TYPES_NAME = 'PRJ_MODUL'   
+ insert into MS_TYPES values ( 3, 0, 'PRJ_MODUL',  0, '',    '');
+ insert into MS_TYPES values ( 3, 0, 'PRJ_MODUL',  0, 'SYS', 'System');
+ insert into MS_TYPES values ( 3, 0, 'PRJ_MODUL',  0, 'SEC', 'Securty');
+ insert into MS_TYPES values ( 3, 0, 'PRJ_MODUL',  0, 'ORT', 'Ortak');
+ insert into MS_TYPES values ( 3, 0, 'PRJ_MODUL',  0, 'PER', 'Personel');
+ insert into MS_TYPES values ( 3, 0, 'PRJ_MODUL',  0, 'VRD', 'Vardiya');
+ insert into MS_TYPES values ( 3, 0, 'PRJ_MODUL',  0, 'FNS', 'Finans');
+ insert into MS_TYPES values ( 3, 0, 'PRJ_MODUL',  0, 'CAR', 'Cari');
+ insert into MS_TYPES values ( 3, 0, 'PRJ_MODUL',  0, 'LGO', 'Logo');
+ insert into MS_TYPES values ( 3, 0, 'PRJ_MODUL',  0, 'IV1', 'IyziV1');
+ insert into MS_TYPES values ( 3, 0, 'PRJ_MODUL',  0, 'TES', 'TEST');
+
+
+ delete MS_TYPES where TYPES_NAME = 'PRJ_MODUL'   
+ insert into MS_TYPES values ( 3, 0, 'PRJ_MODUL',  0, '',    '');
+ insert into MS_TYPES values ( 3, 0, 'PRJ_MODUL',  0, 'SYS', 'System');
+ insert into MS_TYPES values ( 3, 0, 'PRJ_MODUL',  0, 'MEG', 'Mtsk Eðitim');
+ insert into MS_TYPES values ( 3, 0, 'PRJ_MODUL',  0, 'MFN', 'Mtsk Finans');
+ insert into MS_TYPES values ( 3, 0, 'PRJ_MODUL',  0, 'MKR', 'Mtsk Kartlar');
+ insert into MS_TYPES values ( 3, 0, 'PRJ_MODUL',  0, 'MK2', 'Mtsk Kursi./Pers.Kartlar');
+ insert into MS_TYPES values ( 3, 0, 'PRJ_MODUL',  0, 'MDP', 'Mtsk Ders Planý');
+
+ insert into MS_TYPES values ( 3, 0, 'PRJ_MODUL',  0, 'MTN', 'Mtsk Tanýmlar');
+ insert into MS_TYPES values ( 3, 0, 'PRJ_MODUL',  0, 'TES', 'TEST');
+
+
+ delete MS_TYPES where TYPES_NAME = 'PRJ_MODUL'   
+ insert into MS_TYPES values ( 3, 0, 'PRJ_MODUL',  0, '',    '');
+ insert into MS_TYPES values ( 3, 0, 'PRJ_MODUL',  0, 'SYS', 'System');
+ insert into MS_TYPES values ( 3, 0, 'PRJ_MODUL',  0, 'NKL', 'Nakliye');
+
+*/
+
+
+/*
+
+ delete MS_TYPES where TYPES_NAME = 'PRJ_SEKTOR'   
+ insert into MS_TYPES values ( 2, 0, 'PRJ_SEKTOR',  0, '',    '');
+ insert into MS_TYPES values ( 2, 0, 'PRJ_SEKTOR',  0, '',    '');
+ insert into MS_TYPES values ( 2, 0, 'PRJ_SEKTOR',  0, '',    '');
+ insert into MS_TYPES values ( 2, 0, 'PRJ_SEKTOR',  0, '',    '');
+
+
+*/
+
+
+ 
+

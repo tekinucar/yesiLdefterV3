@@ -1,0 +1,283 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table MtskGrupSubesi
+ (
+   Id                   Int IDENTITY(1,1) not null, 
+   ParentId             Int       not null, /* default 0 */
+   FirmId               Int       not null,
+   IsActive             Bit       not null, /* default : 1 = active, 0 = not active */  
+
+   DonemTipiId          Int           null,
+   GrupTipiId           SmallInt      null,
+   SubeTipiId           SmallInt      null,
+   GrupVeSube           varchar(20)   null, 
+   GrupBaslamaTarihi    Date          null,
+   GrupBitisTarihi      Date          null,
+   SubeAdaySayisi       SmallInt      null,
+   KurumOnayTipiId      SmallInt      null,  /* 0. Onay bekliyor, 1-Onaylandı  tablo = [Lkp].[MtskKurumOnayTipi]   */		
+   KapasiteTipiId       SmallInt      null,  /* şubenin doluluk durumu hakkında */ 
+
+   TakipTipiId            SmallInt      null,
+   TrafikDersSayisi       SmallInt      null, /* Trafik ve Çevre Dersi */   
+   IlkYardimDersSayisi    SmallInt      null, /* İlkyardım Dersi */   
+   AracTeknigiDersSayisi  SmallInt      null, /* Araç Tekniği Dersi */   
+   AdapDersSayisi         SmallInt      null, /* Trafik Adabı Dersi */   
+   ToplamDersSayisi       SmallInt      null,   
+   TDersIsUploaded        Bit           null, /* Teorik derslerin tamamı Mebbise yüklenince 1 oluyor */
+      
+   constraint		pk_MtskGrupSubesi primary key (Id)
+ )
+  
+ grant select, insert, update, delete on MtskGrupSubesi to public
+
+commit transaction
+
+/*CreateTableEnd*/
+
+
+
+/*CreateTrigger*/
+
+CREATE TRIGGER [dbo].[trg_MtskGrupSubesi] on [dbo].[MtskGrupSubesi] 
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    DECLARE mgSubesiCursor cursor local for select Id from Inserted
+    DECLARE @curId bigint
+
+    OPEN mgSubesiCursor
+    FETCH NEXT FROM mgSubesiCursor INTO @curId
+   
+    declare @MtskDonemiId int 
+    declare @FirmId int
+    declare @DonemTipiId int
+    declare @GrupTipiId smallint
+    declare @SubeTipiId smallint
+    declare @GrupBaslamaTarihi date
+    declare @KurumOnayTipiId smallint
+    declare @LkpMtskDonemiId int
+
+	declare @DonemGrupBaslamaTarihi date
+    declare @eGrupTipiId smallint
+    declare @eSubeTipiId smallint
+    declare @GrupAdi varchar(10)
+    declare @SubeAdi varchar(10)
+    declare @GrupVeSube varchar(20)
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+
+      Select
+         @eGrupTipiId  = isnull(GrupTipiId,0)
+        ,@eSubeTipiId  = isnull(SubeTipiId,0)
+      From deleted dlt
+	  Where dlt.Id = @curId
+
+      Select
+         @FirmId = FirmId
+        ,@DonemTipiId = isnull(DonemTipiId,0)
+        ,@GrupTipiId  = isnull(GrupTipiId,0)
+        ,@SubeTipiId  = isnull(SubeTipiId,0)
+        ,@GrupVeSube  = GrupVeSube
+        ,@GrupBaslamaTarihi = GrupBaslamaTarihi
+        ,@KurumOnayTipiId = KurumOnayTipiId
+      From inserted ins
+	  Where ins.Id = @curId
+
+      set @MtskDonemiId = 0
+      set @LkpMtskDonemiId = 0
+
+      -- MtskDonemi tablosunda gerekli olan satır mevcut mu ?
+      Select @MtskDonemiId = isnull(Id, 0)
+	       , @DonemGrupBaslamaTarihi = GrupBaslamaTarihi
+      From dbo.MtskDonemi
+      Where FirmId = @FirmId
+      and DonemTipiId = @DonemTipiId
+      and GrupTipiId = @GrupTipiId
+
+      -- Sube belli olduktan sonra SubeTipiId = 0 olanlanlar silinsin
+      if (@DonemTipiId > 0) and  
+         (@GrupTipiId > 0) and 
+         (@SubeTipiId > 0)
+      begin
+         Delete From dbo.MtskGrupSubesi
+         Where FirmId = @FirmId
+         and DonemTipiId = @DonemTipiId
+         and GrupTipiId = @GrupTipiId
+         and SubeTipiId <= 0
+      end
+      
+	  if ((@GrupBaslamaTarihi is null) and 
+	      (@DonemGrupBaslamaTarihi is not null))
+      begin
+          Update dbo.MtskGrupSubesi Set
+              GrupBaslamaTarihi = @DonemGrupBaslamaTarihi
+          Where Id = @curId
+      end
+
+      if (@GrupTipiId <> @eGrupTipiId or @SubeTipiId <> @eSubeTipiId or @GrupVeSube is null)
+      begin
+          Select @GrupAdi = GrupTipi From Lkp.MtskGrupTipi Where Id = @GrupTipiId 
+          Select @SubeAdi = SubeTipi From Lkp.MtskSubeTipi Where Id = @SubeTipiId 
+          Update dbo.MtskGrupSubesi Set
+              GrupVeSube = @GrupAdi + ' ' + @SubeAdi
+          Where Id = @curId
+      end
+
+      if (@MtskDonemiId = 0)
+      begin
+         INSERT INTO [dbo].[MtskDonemi]
+           ([ParentId]
+           ,[FirmId]
+           ,[IsActive]
+           ,[DonemTipiId]
+           ,[GrupTipiId]
+           ,[GrupBaslamaTarihi]
+           ,[GrupSubeSayisi]
+           ,[DonemAdaySayisi]
+           ,[TeorikDersSayisi]
+           ,[UygulamaDersSayisi]
+           ,[KurumOnayTipiId]
+           ,[GrupAdaySayisi])
+         VALUES
+           (0
+           ,@FirmId
+           ,1
+           ,@DonemTipiId
+           ,@GrupTipiId
+           ,@GrupBaslamaTarihi
+           ,0 --GrupSubeSayisi
+           ,0 --DonemAdaySayisi
+           ,0 --TeorikDersSayisi
+           ,0 --UygulamaDersSayisi
+           ,@KurumOnayTipiId
+           ,0 --GrupAdaySayisi
+           )
+      end
+
+	  Execute [dbo].[prc_MtskGrupSubesiTeorikDersToplami] @FirmId, @DonemTipiId, @GrupTipiId, @SubeTipiId
+	  Execute [dbo].[prc_MtskGrupSubesiTakipSet] @FirmId, @DonemTipiId, @GrupTipiId, @SubeTipiId
+	  Execute [dbo].[prc_MtskAdayTakipTeorikDersSet] @FirmId, @DonemTipiId, @GrupTipiId, @SubeTipiId
+
+      FETCH NEXT FROM mgSubesiCursor INTO @curId
+    END
+
+    CLOSE mgSubesiCursor
+    DEALLOCATE mgSubesiCursor   
+
+END
+
+/*CreateTriggerEnd*/
+
+
+/*CreateTrigger*/
+
+CREATE TRIGGER [dbo].[trg_MtskGrupSubesiDeleteIsLock] on [dbo].[MtskGrupSubesi]
+INSTEAD of DELETE
+AS BEGIN
+
+    declare isLockCursorDlt cursor local for select Id from deleted
+    declare @curId bigint
+
+    OPEN isLockCursorDlt
+
+    FETCH NEXT FROM isLockCursorDlt INTO @curId
+	   
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        if ( Select COUNT(t.Id) as Adet from deleted as d
+             left join dbo.MtskAdayTalep as t on ( d.DonemTipiId = t.DonemTipiId 
+                and d.GrupTipiId = t.GrupTipiId  
+                and d.SubeTipiId = t.SubeTipiId )
+        ) > 0 
+        begin
+            PRINT 'Bu kayıt silinemez!'
+            RETURN
+        end
+	    IF EXISTS (SELECT 1 FROM deleted WHERE isnull(GrupTipiId,0) = 1 and isnull(SubeTipiId,0) = 1 and Id = @curId)
+        BEGIN
+            PRINT 'Bu kayıt silinemez!'
+            RETURN
+        END
+
+        Delete from dbo.MtskGrupSubesi Where Id = @curId
+
+      FETCH NEXT FROM isLockCursorDlt INTO @curId
+    END
+
+    CLOSE isLockCursorDlt
+    DEALLOCATE isLockCursorDlt
+
+END
+
+ /*CreateTriggerEnd*/
+
+
+/*CreateLkpTable*/
+
+begin transaction
+
+-- ------------------------------------------------------- 
+-- TakipTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskGrupSubesiTakipTipi')
+drop table [Lkp].[MtskGrupSubesiTakipTipi]
+
+create table Lkp.MtskGrupSubesiTakipTipi
+(
+   Id          Int Unique Not Null,
+   TakipTipi   nVarchar(50)   null
+   
+   constraint  pk_MtskGrupSubesiTakipTipi primary key (Id)
+)
+
+DELETE Lkp.MtskGrupSubesiTakipTipi
+INSERT INTO Lkp.MtskGrupSubesiTakipTipi (Id, TakipTipi)
+ VALUES 
+  ( 0,  N'Tanımsız'),
+  ( 1,  N'Teorik ders planı yok'),
+  ( 2,  N'Teorik ders planı eksik'),
+  ( 3,  N'Teorik ders planı mevcut'),
+
+  ( 11, N'Grup başlangıç tarihi belli değil'),
+  ( 12, N'Teorik dersler planlanacak'),
+  ( 13, N'Teorik dersler planlandı, Mebbise aktarılacak'),
+  ( 14, N'Teorik dersler Mebbise aktarıldı'),
+  ( 15, N'Teorik dersler başlamadı'),
+  ( 16, N'Teorik dersler başladı'),
+  ( 17, N'Teorik dersler tamamlandı')
+
+-- ------------------------------------------------------- 
+-- KapasiteTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskGrupSubesiKapasiteTipi')
+drop table [Lkp].[MtskGrupSubesiKapasiteTipi]
+
+create table Lkp.MtskGrupSubesiKapasiteTipi
+(
+   Id                 Int Unique Not Null,
+   KapasiteTipi       nVarchar(50)   null
+   
+   constraint  pk_MtskGrupSubesiKapasiteTipi primary key (Id)
+)
+
+DELETE Lkp.MtskGrupSubesiKapasiteTipi
+INSERT INTO Lkp.MtskGrupSubesiKapasiteTipi (Id, KapasiteTipi)
+ VALUES 
+  ( -6,  N''),
+  ( -5,  N'Son 5 aday'),
+  ( -4,  N'Son 4 aday'),
+  ( -3,  N'Son 3 aday'),
+  ( -2,  N'Son 2 aday'),
+  ( -1,  N'Son 1 aday'),
+  (  0,  N'Kapasite tam dolu'),
+  (  1,  N'Sorun : Kapasite fazlası var')
+
+
+
+commit transaction
+
+/*CreateLkpTableEnd*/
+

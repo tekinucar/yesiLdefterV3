@@ -1,0 +1,974 @@
+﻿
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+/*CreateTable*/
+
+begin transaction
+
+ create table [Lkp].[OnmHesapMaster]
+ (
+
+   Id                Int IDENTITY(1,1) NOT NULL, 
+   ParentId          Int       not null, /* default 0 */
+   FirmId            Int       not null,
+   IsActive          Bit       not null, /* default : 1 = active, 0 = not active */  
+   
+   UstGrupTipiId     SmallInt      null, /* 10    hazır değerler */ 
+   AnaGrupTipiId     SmallInt      null, /* 102   banka          */ 
+   AltGrupTipiId     Int           null, /* 1022  banka hesabı   */ 
+   AltCesitTipiId    Int           null, /* 10221 vadesiz        */ 
+   
+   --10
+   HesapKodu         nVarchar(50)  null,
+   UstHesapKodu      nVarchar(50)  null,
+   HesapKisaAdi      nVarchar(100) null, /* nick Name, Kısa Adı */
+   HesapAdi          nVarchar(150) null, /* kullanıcının girdiği isim */
+   WebAdresi         nVarchar(50)  null,
+
+   --70
+   IsBilancoHesap          bit  null, /* hesabın bağlı olduğu muhasebe hesap kodu ???  */ 
+   IsGelirGiderHesap       bit  null,
+   IsMaliyetAHesap         bit  null,
+   IsMaliyetBHesap         bit  null,
+   IsNazimHesap            bit  null,
+
+   BilancHesapKodu         nvarchar(50) null,
+   GelirGiderHesapKodu     nvarchar(50) null,
+   MaliyetAHesapKodu       nvarchar(50) null,
+   MaliyetBHesapKodu       nvarchar(50) null,
+   NazimHesapKodu          nvarchar(50) null,
+
+   --80
+   BAHesapTipiId           SmallInt  null, /* OnmBelgeDekont tablsundaki BHesapTipiId veya AHesapTipiId nin bağlantısı */
+   UruneYuklenmesiTipiId   SmallInt  null, 
+   UretimHacmiTipiId       SmallInt  null,
+   IsletmeFonksiyonuTipiId SmallInt  null,
+   PeriyodTipiId           SmallInt  null, /* dönem */
+   BelgeTipiId             SmallInt  null, /* e-devlet, fatura vb */
+   KaynakTipiId            SmallInt  null, /* 1. kağıt, 2. elektronik belge */
+   IsKkeg                  Bit       null, /* kanunen kabul edilmeyen gider */
+   IsOncekiTutar           Bit       null, /* bir maliyet belgesi işlenirken bir önceki tutarı oku */  
+   OncekiTutar             Numeric(22,5)  null,
+   ParaTipiId              nVarChar(3)    null,
+   KdvOrani                SmallInt  null,
+   IsKiralik               Bit       null,
+   MaliyetinKapsamTipiId   SmallInt  null,
+
+    constraint		pk_OnmHesapMaster primary key (Id)
+ )
+
+ create index X_OnmHesapMaster01 on [Lkp].[OnmHesapMaster] (FirmId)
+ create index X_OnmHesapMaster02 on [Lkp].[OnmHesapMaster] (UstGrupTipiId)
+  
+ grant select, insert, update, delete on [Lkp].[OnmHesapMaster] to public
+
+ commit transaction
+
+ /*CreateTableEnd*/
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+
+/*CreateLkpTable*/
+
+begin transaction
+
+-- ------------------------------------------------------- 
+-- BAHesapTipiId   /* OnmBelgeDekont tablsundaki BHesapTipiId veya AHesapTipiId nin bağlantısı */
+-- ------------------------------------------------------- 
+create table [Lkp].[OnmHesapMasterBAHesapTipi]
+(
+   Id             Int Unique Not Null,
+   BAHesapTipi    nVarchar(50),
+   GrupTipiId     SmallInt Null,
+
+   constraint  pk_OnmHesapMasterBAHesapTipi primary key (Id)
+)
+
+delete from [Lkp].[OnmHesapMasterBAHesapTipi]
+INSERT INTO [Lkp].[OnmHesapMasterBAHesapTipi] (Id, BAHesapTipi, GrupTipiId)
+ VALUES 
+  ( 0,    N'Tanımsız', 1),
+  ( 100,  N'Kasa', 1),
+  ( 1022, N'Banka hesabı', 1), 
+  ( 1023, N'Banka/Kredi kartı', 1), 
+  ( 1024, N'POS', 1),
+
+  ( 770,  N'Genel yönetim giderleri', 1),
+  ( 791,  N'İşçi ücret ve giderleri', 1),
+  ( 793,  N'Dışarıdan sağlanan fayda ve hizmetler', 1),
+  ( 795,  N'Vergi, resim ve harçlar', 1),
+  ( 797,  N'Finansman giderleri', 1),
+
+  ( 901,   N'SGK giderleri', 1),
+  ( 902,   N'SGK işci payı giderleri', 1),
+  ( 903,   N'SGK işveren payı giderleri', 1),
+  ( 911,   N'Bağkur giderleri', 1),
+  ( 921,   N'Belediye harçları', 1)
+
+-- ------------------------------------------------------- 
+-- UruneYuklenmesiTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[OnmHesapMasterUruneYuklenmesiTipi]
+(
+   Id                     Int Unique Not Null,
+   UruneYuklenmesiTipi    nVarchar(50),
+   GrupTipiId             SmallInt Null,
+
+   constraint  pk_OnmHesapMasterUruneYuklenmesiTipi primary key (Id)
+)
+
+delete from [Lkp].[OnmHesapMasterUruneYuklenmesiTipi]
+INSERT INTO [Lkp].[OnmHesapMasterUruneYuklenmesiTipi] (Id, UruneYuklenmesiTipi, GrupTipiId)
+ VALUES 
+  (0,   N'Tanımsız', 0),
+  (1,   N'Direkt Giderler', 1),
+  (2,   N'Endirekt Giderler', 1)
+
+
+-- ------------------------------------------------------- 
+-- UretimHacmiTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[OnmHesapMasterUretimHacmiTipi]
+(
+   Id                     Int Unique Not Null,
+   UretimHacmiTipi        nVarchar(50),
+   GrupTipiId             SmallInt Null,
+
+   constraint  pk_OnmHesapMasterUretimHacmiTipi primary key (Id)
+)
+
+delete from [Lkp].[OnmHesapMasterUretimHacmiTipi]
+INSERT INTO [Lkp].[OnmHesapMasterUretimHacmiTipi] (Id, UretimHacmiTipi, GrupTipiId)
+ VALUES 
+  (0,   N'Tanımsız', 0),
+  (1,   N'Sabit Giderler', 1),
+  (2,   N'Değişken Giderler', 1),
+  (3,   N'Karma Giderler', 1)
+
+-- ------------------------------------------------------- 
+-- IsletmeFonksiyonuTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[OnmHesapMasterIsletmeFonksiyonuTipi]
+(
+   Id                     Int Unique Not Null,
+   IsletmeFonksiyonuTipi  nVarchar(50),
+   GrupTipiId             SmallInt Null,
+
+   constraint  pk_OnmHesapMasterIsletmeFonksiyonuTipi primary key (Id)
+)
+
+delete from [Lkp].[OnmHesapMasterIsletmeFonksiyonuTipi]
+INSERT INTO [Lkp].[OnmHesapMasterIsletmeFonksiyonuTipi] (Id, IsletmeFonksiyonuTipi, GrupTipiId)
+ VALUES 
+  (0,   N'Tanımsız', 0),
+  (1,   N'Tedarik (Satın Alma)', 1),
+  (2,   N'Üretim', 1),
+  (3,   N'Araştırma, Geliştirme', 1),
+  (4,   N'Pazarlama, Satış ve Dağıtım', 1),
+  (5,   N'Genel Yönetim', 1),
+  (6,   N'Finansman', 1)
+
+-- ------------------------------------------------------- 
+-- PeriyodTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[OnmHesapMasterPeriyodTipi]
+(
+   Id           Int Unique Not Null,
+   PeriyodTipi  nVarchar(20),
+   GrupTipiId   SmallInt Null,
+
+   constraint  pk_OnmHesapMasterPeriyodTipi primary key (Id)
+)
+
+delete from [Lkp].[OnmHesapMasterPeriyodTipi]
+INSERT INTO [Lkp].[OnmHesapMasterPeriyodTipi] (Id, PeriyodTipi, GrupTipiId)
+ VALUES 
+  (0,   N'Tanımsız', 0),
+  (11,   N'Günlük', 1),
+  (21,   N'Haftalık', 1),
+  (22,   N'2 Haftalık', 1),
+  (31,   N'Aylık', 1),
+  (32,   N'2 Aylık', 1),
+  (33,   N'3 Aylık', 1),
+  (34,   N'4 Aylık', 1),
+  (35,   N'6 Aylık', 1),
+  (41,   N'Yıllık', 1),
+  (42,   N'2 Yıllık', 1),
+  (99,   N'Zamansız', 1)
+
+-- ------------------------------------------------------- 
+-- BelgeTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[OnmHesapMasterBelgeTipi]
+(
+   Id           Int Unique Not Null,
+   BelgeTipi    nVarchar(50),
+   GrupTipiId   SmallInt Null,
+
+   constraint  pk_OnmHesapMasterBelgeTipi primary key (Id)
+)
+
+delete from [Lkp].[OnmHesapMasterBelgeTipi]
+INSERT INTO [Lkp].[OnmHesapMasterBelgeTipi] (Id, BelgeTipi, GrupTipiId)
+ VALUES 
+  (0,   N'Tanımsız', 0),
+  (1,   N'Fatura', 1),
+  (2,   N'ÖKC Fişi', 1),
+  (3,   N'Perakende Satış Belgesi', 1),
+  (4,   N'Gider Pusulası', 1),
+  (5,   N'Müstahsil Makbuzu', 1),
+  (6,   N'Serbest Meslek Makbuzu', 1),
+  (7,   N'Tevsiki Zaruri Olmayan', 1),
+  (8,   N'Yapay Belge', 1),
+  (21,  N'Muhasebe Dekontu', 1),
+  (22,  N'Hesap Ekstresi', 1),
+  (23,  N'Sigorta poliçesi', 1),
+  (99,  N'Belgesiz', 1)
+
+-- ------------------------------------------------------- 
+-- KaynakTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[OnmHesapMasterKaynakTipi]
+(
+   Id           Int Unique Not Null,
+   KaynakTipi   nVarchar(50),
+   GrupTipiId   SmallInt Null,
+
+   constraint  pk_OnmHesapMasterKaynakTipi primary key (Id)
+)
+
+delete from [Lkp].[OnmHesapMasterKaynakTipi]
+INSERT INTO [Lkp].[OnmHesapMasterKaynakTipi] (Id, KaynakTipi, GrupTipiId)
+ VALUES 
+  (0,   N'Tanımsız', 0),
+  (1,   N'e-devlet', 1), 
+  (2,   N'e-fatura', 1),
+  (3,   N'e-belge', 1),
+  (4,   N'Kağıt', 1),
+  (5,   N'Sms', 1),
+  (6,   N'Fax', 1),
+  (7,   N'Telefon', 1),
+  (8,   N'Diğer', 1)
+
+-- ------------------------------------------------------- 
+-- MaliyetinKapsamTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[OnmHesapMasterMaliyetinKapsamTipi]
+(
+   Id                    Int Unique Not Null,
+   MaliyetinKapsamTipi   nVarchar(50),
+
+   constraint  pk_OnmHesapMasterMaliyetinKapsamTipi primary key (Id)
+)
+
+delete from [Lkp].[OnmHesapMasterMaliyetinKapsamTipi]
+INSERT INTO [Lkp].[OnmHesapMasterMaliyetinKapsamTipi] (Id, MaliyetinKapsamTipi)
+ VALUES 
+  (0,   N'Tüm varlıklar için'),
+  (1,   N'Sahip olduğumuz varlıklar için'), 
+  (2,   N'Kiralık olan varlıklar için')
+
+
+
+
+
+
+commit transaction
+
+/*CreateLkpTableEnd*/
+
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+
+/*CreateTrigger*/
+
+
+CREATE TRIGGER [Lkp].[trg_OnmHesapMaster] on [Lkp].[OnmHesapMaster] 
+AFTER INSERT, UPDATE
+AS BEGIN
+    --   UstGrupTipiId       SmallInt      null, /* 102   banka        */
+    --   AnaGrupTipiId       SmallInt      null, /* 1022  banka hesabı */
+    --   AltGrupTipiId       Int           null, /* 10221 vadesiz      */
+
+    declare cursor_OnmHesapMaster cursor for select Id from Inserted
+    declare @curId bigint
+
+	declare @kacHane smallInt = 3 
+	declare @eId Int = 0
+    declare @eFirmId Int = 0
+    declare @eUstGrupTipiId smallInt = 0
+    declare @eAnaGrupTipiId smallInt = 0
+    declare @eAltGrupTipiId Int = 0
+    declare @eHesapKisaAdi varchar(100) = null
+    declare @eHesapAdi varchar(150) = null
+	declare @eHesapKodu varchar(50) = null
+	declare @eUstHesapKodu varchar(50) = null
+	declare @eNumarasi varchar(50) = null
+
+	declare @eParentHesapAdi1 varchar(150) = null
+	declare @eParentHesapKodu1 varchar(50) = null
+    declare @eParentHesapAdi2 varchar(150) = null
+	declare @eParentHesapAdi3 varchar(150) = null
+
+    declare @yUstGrupTipiId smallInt = 0
+	declare @yHesapKisaAdi varchar(100) = null
+	declare @yHesapKodu varchar(50) = null
+	
+
+    OPEN cursor_OnmHesapMaster
+
+    FETCH NEXT FROM cursor_OnmHesapMaster INTO @curId
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+	  set @yHesapKisaAdi = ''
+	  set @yHesapKodu = ''
+
+      select 
+	     @eFirmId = isnull(ins.FirmId,0)  
+    	,@eUstGrupTipiId = isnull(ins.UstGrupTipiId,0)  
+		,@eAnaGrupTipiId = isnull(ins.AnaGrupTipiId,0) 
+		,@eAltGrupTipiId = isnull(ins.AltGrupTipiId,0) 
+		,@eHesapKisaAdi = isnull(ins.HesapKisaAdi,'NULL')
+		,@eHesapAdi = isnull(ins.HesapAdi,'NULL')
+		,@eHesapKodu = isnull(ins.HesapKodu,'NULL')
+    	,@eUstHesapKodu = isnull(ins.UstHesapKodu,'NULL')
+    	--,@eNumarasi = isnull(ins.Numarasi,'')
+		,@eParentHesapAdi1 = isnull(fh1.HesapAdi, '')
+		,@eParentHesapKodu1 = isnull(fh1.HesapKodu, '')
+		,@eParentHesapAdi2 = isnull(fh2.HesapAdi, '') 
+		,@eParentHesapAdi3 = isnull(fh3.HesapAdi, '') 
+
+      from Inserted ins
+	    left outer join Lkp.OnmHesapMaster fh1 on ( ins.ParentId = fh1.Id )
+		left outer join Lkp.OnmHesapMaster fh2 on ( fh1.ParentId = fh2.Id )
+		left outer join Lkp.OnmHesapMaster fh3 on ( fh2.ParentId = fh3.Id )
+	  where ins.Id = @curId
+	  
+	  if (@eAnaGrupTipiId = 102)  
+	  begin
+	    set @yHesapKisaAdi = @eHesapAdi
+	    
+		if (@eAltGrupTipiId = 1021)
+		    set @yHesapKisaAdi = @eParentHesapAdi1
+		if (@eAltGrupTipiId = 1022)
+		    set @yHesapKisaAdi = @eParentHesapAdi2
+        if (@eAltGrupTipiId = 1023)
+		    set @yHesapKisaAdi = @eParentHesapAdi3
+        if (@eAltGrupTipiId = 1024)
+		    set @yHesapKisaAdi = @eParentHesapAdi3
+        if (@eAltGrupTipiId = 1025)
+		    set @yHesapKisaAdi = @eParentHesapAdi3
+
+		if ((@eAltGrupTipiId = 1020) or -- seçilen banka, 
+		    (@eAltGrupTipiId = 1021) or -- şube
+			(@eAltGrupTipiId = 1022) or -- banka hesabı
+			(@eAltGrupTipiId = 1023) or -- banka kartı
+			(@eAltGrupTipiId = 1024) or -- pos cihazı
+			(@eAltGrupTipiId = 1025) or -- sanal pos
+		    (@eAltGrupTipiId = 1029))   -- tüm banka
+		begin
+		  set @yHesapKisaAdi = replace(@yHesapKisaAdi, 'TÜRKİYE', '');
+	      set @yHesapKisaAdi = replace(@yHesapKisaAdi, 'T.A.Ş.', '');
+	      set @yHesapKisaAdi = replace(@yHesapKisaAdi, 'T.A.O.', '');
+	      set @yHesapKisaAdi = replace(@yHesapKisaAdi, 'A.Ş.', '');
+	      set @yHesapKisaAdi = replace(@yHesapKisaAdi, 'T.C.', '');
+		  set @yHesapKisaAdi = replace(@yHesapKisaAdi, ' BANKALARI', '');
+	      set @yHesapKisaAdi = replace(@yHesapKisaAdi, ' BANKASI', '');
+	      set @yHesapKisaAdi = replace(@yHesapKisaAdi, ' BANK', '');
+		  set @yHesapKisaAdi = replace(@yHesapKisaAdi, ' BBVA', '');
+        end
+
+        if (@yHesapKisaAdi <> '')
+        begin
+	      --set @yHesapKisaAdi = Ltrim(@yHesapKisaAdi)
+	      --set @yHesapKisaAdi = Rtrim(@yHesapKisaAdi)
+		  set @yHesapKisaAdi = RTRIM(LTRIM(@yHesapKisaAdi))
+        end   
+
+		-- banka şubesi
+		if (@eAltGrupTipiId = 1021)
+		    set @yHesapKisaAdi = @yHesapKisaAdi + '.' + @eHesapAdi
+        -- banka hesabi
+        if (@eAltGrupTipiId = 1022)
+		    set @yHesapKisaAdi = @yHesapKisaAdi + '.' + @eParentHesapAdi1 + '.' +  RTRIM(LTRIM(@eParentHesapKodu1)) + '.' + @eNumarasi
+        -- banka kartı
+        if (@eAltGrupTipiId = 1023)
+		    set @yHesapKisaAdi = @yHesapKisaAdi + '.' + @eHesapAdi + '.' + @eNumarasi
+        -- pos cihazı
+        if (@eAltGrupTipiId = 1024)
+		    set @yHesapKisaAdi = @yHesapKisaAdi + '.pos.' + @eHesapAdi + '.' + @eNumarasi
+        -- sanal pos
+        if (@eAltGrupTipiId = 1025)
+		    set @yHesapKisaAdi = @yHesapKisaAdi + '.Spos.' + @eHesapAdi + '.' + @eNumarasi
+      end
+	  	  	   
+	  if ((@eHesapKisaAdi <> @yHesapKisaAdi) and
+	      (@yHesapKisaAdi <> '')) 
+	  begin
+	    update Lkp.OnmHesapMaster set 
+	           HesapKisaAdi = substring(@yHesapKisaAdi,1,100)
+        where Id = @curId
+      end
+
+      FETCH NEXT FROM cursor_OnmHesapMaster INTO @curId
+    END
+
+    CLOSE cursor_OnmHesapMaster
+    DEALLOCATE cursor_OnmHesapMaster
+END
+
+ALTER TABLE [Lkp].[OnmHesapMaster] ENABLE TRIGGER [trg_OnmHesapMaster]
+
+/*CreateTriggerEnd*/
+
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+
+/*CreateData*/
+
+begin transaction 
+
+
+-- Temel Tanımlama Kayıtları
+--                                         : UstGrupTipiId, AnaGrupTipiId, AltGrupTipiId, AltCesitTipiId   
+-- Master Banka Listesi                    : 10, 102,  1029, 0
+-- Master Maliyetler için                  :  7, 702,     0, 0  ( 7/A Seçeneği )-702
+-- Master Maliyetler için                  :  7, 703,     0, 0  ( 7/B Seçeneği )-703
+
+-- Master ana maliyet grupları             : 81,   0,     0, 0  ( Ön muhasebe için üst maliyet grupları )
+-- Master gider grupları                   : 82,   0,     0, 0
+-- OnmHesapFinans, Varlıklar için          : 83,   0,     0, 0
+-- OnmHesapFinans, Aboneler için           : 84,   0,     0, 0 
+-- Master tablosundan kullanmak için seçilen 
+-- OnmHesapFinans, Maliyet Grupları        : 85, ???, ?????, 0, + HesapKodu, UstHesapKodu  
+
+
+
+-- ------------------------------------------------------------------
+-- Bankalar Inserts
+-- ------------------------------------------------------------------
+
+declare @FirmId int
+set @FirmId = 0
+
+DELETE [Lkp].[OnmHesapMaster] 
+Where FirmId = 0
+and UstGrupTipiId = 10
+and AnaGrupTipiId = 102
+and AltGrupTipiId = 1029
+
+INSERT INTO [Lkp].[OnmHesapMaster] (ParentId, FirmId, IsActive, UstGrupTipiId, AnaGrupTipiId, AltGrupTipiId, HesapKodu, UstHesapKodu, HesapAdi, WebAdresi )
+ VALUES 
+(0, @FirmId, 1, 10, 102, 1029, '102.1000', '',    'Mevduat Bankaları', '' ),
+(0, @FirmId, 1, 10, 102, 1029, '102.2000', '',    'Kalkınma ve Yatırım Bankaları',  '' ),
+(0, @FirmId, 1, 10, 102, 1029, '102.3000', '',    'Katılım Bankaları',  '' ),
+
+(0, @FirmId, 1, 10, 102, 1029, '102.1010', '102.1000',    'AKBANK T.A.Ş.',  'http://www.akbank.com.tr' ),	
+(0, @FirmId, 1, 10, 102, 1029, '102.1020', '102.1000',    'ALTERNATİFBANK A.Ş.',  'http://www.abank.com.tr' ),	
+(0, @FirmId, 1, 10, 102, 1029, '102.1030', '102.1000',    'ANADOLUBANK A.Ş.',  'http://www.anadolubank.com.tr' ),	
+(0, @FirmId, 1, 10, 102, 1029, '102.1040', '102.1000',    'ARAP TÜRK BANKASI A.Ş.',  'http://www.arabturkbank.com' ),	
+(0, @FirmId, 1, 10, 102, 1029, '102.1050', '102.1000',    'BANK MELLAT',  'http://www.mellatbank.com' ),
+(0, @FirmId, 1, 10, 102, 1029, '102.1060', '102.1000',    'BANK OF CHINA TURKEY A.Ş.',  'http://www.bankofchina.com.tr' ),
+(0, @FirmId, 1, 10, 102, 1029, '102.1070', '102.1000',    'BURGAN BANK A.Ş.',  'http://www.burgan.com.tr' ),
+(0, @FirmId, 1, 10, 102, 1029, '102.1080', '102.1000',    'CITIBANK A.Ş.',  'http://www.citibank.com.tr' ),
+(0, @FirmId, 1, 10, 102, 1029, '102.1090', '102.1000',    'DENİZBANK A.Ş.',  'http://www.denizbank.com' ),
+(0, @FirmId, 1, 10, 102, 1029, '102.1100', '102.1000',    'DEUTSCHE BANK A.Ş.',  'http://www.deutschebank.com.tr' ),
+(0, @FirmId, 1, 10, 102, 1029, '102.1110', '102.1000',    'FİBABANKA A.Ş.',  'http://www.fibabanka.com.tr' ),
+(0, @FirmId, 1, 10, 102, 1029, '102.1120', '102.1000',    'HABİB BANK LİMİTED',  'http://www.habibbank.com.tr' ),	
+(0, @FirmId, 1, 10, 102, 1029, '102.1130', '102.1000',    'HSBC BANK A.Ş.',  'http://www.hsbc.com.tr' ),
+(0, @FirmId, 1, 10, 102, 1029, '102.1140', '102.1000',    'ICBC TURKEY BANK A.Ş.',  'http://www.tekstilbank.com.tr' ),
+(0, @FirmId, 1, 10, 102, 1029, '102.1150', '102.1000',    'ING BANK A.Ş.',  'http://www.ingbank.com.tr' ),
+(0, @FirmId, 1, 10, 102, 1029, '102.1160', '102.1000',    'INTESA SANPAOLO S.P.A.',  'http://www.intesasanpaolo.com' ),
+(0, @FirmId, 1, 10, 102, 1029, '102.1170', '102.1000',    'JP MORGAN CHASE BANK NATIONAL ASSOCIATION',  'http://www.jpmorganchase.com/pages/...' ),
+(0, @FirmId, 1, 10, 102, 1029, '102.1180', '102.1000',    'MUFG BANK TURKEY A.Ş.',  'http://www.tu.bk.mufg.jp/index-tr.h...' ),
+(0, @FirmId, 1, 10, 102, 1029, '102.1190', '102.1000',    'ODEA BANK A.Ş.',  'http://www.odeabank.com.tr' ),
+(0, @FirmId, 1, 10, 102, 1029, '102.1200', '102.1000',    'QNB FİNANSBANK A.Ş.',  'http://www.qnbfinansbank.com.tr' ),
+(0, @FirmId, 1, 10, 102, 1029, '102.1210', '102.1000',    'RABOBANK A.Ş.',  'http://www.rabobank.com.tr/' ),
+(0, @FirmId, 1, 10, 102, 1029, '102.1220', '102.1000',    'SOCIETE GENERALE S.A.',  'http://www.societegenerale.com.tr' ),
+(0, @FirmId, 1, 10, 102, 1029, '102.1230', '102.1000',    'ŞEKERBANK T.A.Ş.',  'http://www.sekerbank.com.tr' ),
+(0, @FirmId, 1, 10, 102, 1029, '102.1240', '102.1000',    'T.C. ZİRAAT BANKASI A.Ş.',  'http://www.ziraat.com.tr/' ),
+(0, @FirmId, 1, 10, 102, 1029, '102.1250', '102.1000',    'TURKISH BANK A.Ş.',  'http://www.turkishbank.com' ),
+(0, @FirmId, 1, 10, 102, 1029, '102.1260', '102.1000',    'TURKLAND BANK A.Ş.',  'http://www.turklandbank.com' ),
+(0, @FirmId, 1, 10, 102, 1029, '102.1270', '102.1000',    'TÜRK EKONOMİ BANKASI A.Ş.',  'http://www.teb.com.tr' ),	
+(0, @FirmId, 1, 10, 102, 1029, '102.1280', '102.1000',    'TÜRKİYE GARANTİ BBVA BANKASI A.Ş.',  'https://www.garantibbva.com.tr' ),
+(0, @FirmId, 1, 10, 102, 1029, '102.1290', '102.1000',    'TÜRKİYE HALK BANKASI A.Ş.',  'http://www.halkbank.com.tr/' ),
+(0, @FirmId, 1, 10, 102, 1029, '102.1300', '102.1000',    'TÜRKİYE İŞ BANKASI A.Ş.',  'http://www.isbank.com.tr' ),
+(0, @FirmId, 1, 10, 102, 1029, '102.1310', '102.1000',    'TÜRKİYE VAKIFLAR BANKASI T.A.O.',  'http://www.vakifbank.com.tr' ),
+(0, @FirmId, 1, 10, 102, 1029, '102.1320', '102.1000',    'YAPI VE KREDİ BANKASI A.Ş.',  'http://www.ykb.com.tr' ),
+
+(0, @FirmId, 1, 10, 102, 1029, '102.2010', '102.2000',    'AKTİF YATIRIM BANKASI A.Ş.',  'http://www.aktifbank.com.tr/' ),
+(0, @FirmId, 1, 10, 102, 1029, '102.2020', '102.2000',    'BANKPOZİTİF KREDİ VE KALKINMA BANKASI A.Ş.',  'http://www.bankpozitif.com.tr/' ),
+(0, @FirmId, 1, 10, 102, 1029, '102.2030', '102.2000',    'DİLER YATIRIM BANKASI A.Ş.',  'http://www.dilerbank.com.tr/' ),
+(0, @FirmId, 1, 10, 102, 1029, '102.2040', '102.2000',    'GSD YATIRIM BANKASI A.Ş.',  'http://www.gsdbank.com.tr' ),
+(0, @FirmId, 1, 10, 102, 1029, '102.2050', '102.2000',    'İLLER BANKASI A.Ş.',  'http://www.ilbank.gov.tr' ),
+(0, @FirmId, 1, 10, 102, 1029, '102.2060', '102.2000',    'İSTANBUL TAKAS VE SAKLAMA BANKASI A.Ş.',  'http://www.takasbank.com.tr' ),
+(0, @FirmId, 1, 10, 102, 1029, '102.2070', '102.2000',    'MERRILL LYNCH YATIRIM BANK A.Ş.',  'http://www.ml.com.tr' ),
+(0, @FirmId, 1, 10, 102, 1029, '102.2080', '102.2000',    'NUROL YATIRIM BANKASI A.Ş.',  'http://www.nurolbank.com.tr' ),
+(0, @FirmId, 1, 10, 102, 1029, '102.2090', '102.2000',    'PASHA YATIRIM BANKASI A.Ş.',  'https://www.pashabank.com.tr/' ),	
+(0, @FirmId, 1, 10, 102, 1029, '102.2100', '102.2000',    'STANDARD CHARTERED YATIRIM BANKASI TÜRK A.Ş.',  'http://www.standardchartered.com.tr' ),
+(0, @FirmId, 1, 10, 102, 1029, '102.2110', '102.2000',    'TÜRKİYE İHRACAT KREDİ BANKASI A.Ş.',  'http://www.eximbank.gov.tr' ),
+(0, @FirmId, 1, 10, 102, 1029, '102.2120', '102.2000',    'TÜRKİYE KALKINMA VE YATIRIM BANKASI A.Ş.',  'http://www.kalkinma.com.tr' ),
+(0, @FirmId, 1, 10, 102, 1029, '102.2130', '102.2000',    'TÜRKİYE SINAİ KALKINMA BANKASI A.Ş.',  'http://www.tskb.com.tr' ),
+
+(0, @FirmId, 1, 10, 102, 1029, '102.3010', '102.3000',    'ALBARAKA TÜRK KATILIM BANKASI A.Ş.',  'http://www.albarakaturk.com.tr/' ),
+(0, @FirmId, 1, 10, 102, 1029, '102.3020', '102.3000',    'KUVEYT TÜRK KATILIM BANKASI A.Ş.',  'http://www.kuveytturk.com.tr' ),
+(0, @FirmId, 1, 10, 102, 1029, '102.3030', '102.3000',    'TÜRKİYE EMLAK KATILIM BANKASI A.Ş.',  'http://www.emlakbank.com.tr/' ),	
+(0, @FirmId, 1, 10, 102, 1029, '102.3040', '102.3000',    'TÜRKİYE FİNANS KATILIM BANKASI A.Ş.',  'http://www.turkiyefinans.com.tr' ),
+(0, @FirmId, 1, 10, 102, 1029, '102.3050', '102.3000',    'VAKIF KATILIM BANKASI A.Ş.',  'http://www.vakifkatilim.com.tr/' ),
+(0, @FirmId, 1, 10, 102, 1029, '102.3060', '102.3000',    'ZİRAAT KATILIM BANKASI A.Ş.',  'http://www.ziraatkatilim.com.tr/' )
+
+
+-- ------------------------------------------------------------------
+-- Default Kasa Hesapları Inserts
+-- ------------------------------------------------------------------
+--declare @FirmId int
+set @FirmId = 0
+
+DELETE [Lkp].[OnmHesapMaster] 
+Where FirmId = 0 
+and UstGrupTipiId = 10
+and AnaGrupTipiId = 100
+and AltGrupTipiId = 100
+
+INSERT INTO [Lkp].[OnmHesapMaster] (ParentId, FirmId, IsActive, UstGrupTipiId, AnaGrupTipiId, AltGrupTipiId, AltCesitTipiId, HesapKodu, HesapAdi, ParaTipiId )
+ VALUES 
+ (0, @FirmId, 1, 10, 100, 100, 0, '100.10', 'TL Kasası', 'TRY'),
+ (0, @FirmId, 1, 10, 100, 100, 0, '100.20', 'Dolar Kasası', 'USD'),
+ (0, @FirmId, 1, 10, 100, 100, 0, '100.30', 'Euro Kasası', 'EUR')
+
+
+
+-- ------------------------------------------------------------------
+-- Maliyet hesapları Inserts
+-- ------------------------------------------------------------------
+--declare @FirmId int
+set @FirmId = 0
+
+DELETE [Lkp].[OnmHesapMaster] 
+Where FirmId = 0
+and UstGrupTipiId = 7
+and ( AnaGrupTipiId = 702 or AnaGrupTipiId = 703 )
+
+--  Maliyetler için Ust ve Ana Gruplar ( 7/A ve 7/B seçeneği )
+--  AnaGrupTipiId
+--  (702,  N'Maliyet Hesapları (7/A Seçeneği)', 1),
+--  (703,  N'Maliyet Hesapları (7/B Seçeneği)', 1),
+
+INSERT INTO [Lkp].[OnmHesapMaster] (ParentId, FirmId, IsActive, UstGrupTipiId, AnaGrupTipiId, AltGrupTipiId, AltCesitTipiId, HesapKodu, UstHesapKodu, HesapAdi )
+ VALUES 
+(0, @FirmId, 1, 7, 702, 0, 0, '70', '7',    'Maliyet Muhasebesi Bağlantı Hesapları' ),
+(0, @FirmId, 1, 7, 702, 0, 0, '71', '7',    'Direkt İlk Madde Ve Malzeme Giderleri' ),
+(0, @FirmId, 1, 7, 702, 0, 0, '72', '7',    'Direkt İşçilik Giderleri' ),
+(0, @FirmId, 1, 7, 702, 0, 0, '73', '7',    'Genel Üretim Giderleri' ),
+(0, @FirmId, 1, 7, 702, 0, 0, '74', '7',    'Hizmet Üretim Maliyeti' ),
+(0, @FirmId, 1, 7, 702, 0, 0, '75', '7',    'Araştırma Ve Geliştirme Giderleri' ),
+(0, @FirmId, 1, 7, 702, 0, 0, '76', '7',    'Pazarlama Satış Ve Dağıtım Giderleri' ),
+(0, @FirmId, 1, 7, 702, 0, 0, '77', '7',    'Genel Yönetim Giderleri' ),
+(0, @FirmId, 1, 7, 702, 0, 0, '78', '7',    'Finansman Giderleri' ),
+
+(0, @FirmId, 1, 7, 702, 0, 0, '700', '70',    'Maliyet Muhasebesi Bağlantı Hesabı' ),
+(0, @FirmId, 1, 7, 702, 0, 0, '701', '70',    'Maliyet Muhasebesi Yansıtma Hesabı' ),
+
+(0, @FirmId, 1, 7, 702, 0, 0, '710', '71',    'Direkt İlk Madde Ve Malzeme Giderleri Hesabı' ),
+(0, @FirmId, 1, 7, 702, 0, 0, '711', '71',    'Direkt İlk Madde Ve Malzeme Yansıtma Hesabı' ),
+(0, @FirmId, 1, 7, 702, 0, 0, '712', '71',    'Direkt İlk Madde Ve Malzeme Fiyat Farkı' ),
+(0, @FirmId, 1, 7, 702, 0, 0, '713', '71',    'Direkt İlk Madde Ve Malzeme Miktar Farkı' ),
+
+(0, @FirmId, 1, 7, 702, 0, 0, '720', '72',    'Direkt İşçilik Giderleri' ),
+(0, @FirmId, 1, 7, 702, 0, 0, '721', '72',    'Direkt İşçilik Giderleri Yansıtma Hesabı' ),
+(0, @FirmId, 1, 7, 702, 0, 0, '722', '72',    'Direkt İşçilik Ücret Farkları' ),
+(0, @FirmId, 1, 7, 702, 0, 0, '723', '72',    'Direkt İşçilik Süre Farkları' ),
+
+(0, @FirmId, 1, 7, 702, 0, 0, '730', '73',    'Genel Üretim Giderleri' ),
+(0, @FirmId, 1, 7, 702, 0, 0, '731', '73',    'Genel Üretim Giderleri Yansıtma Hesabı' ),
+(0, @FirmId, 1, 7, 702, 0, 0, '732', '73',    'Genel Üretim Giderleri Bütçe Farkları' ),
+(0, @FirmId, 1, 7, 702, 0, 0, '733', '73',    'Genel Üretim Giderleri Verimlilik Giderleri' ),
+(0, @FirmId, 1, 7, 702, 0, 0, '734', '73',    'Genel Üretim Giderleri Kapasite Farkları' ),
+
+(0, @FirmId, 1, 7, 702, 0, 0, '740', '74',    'Hizmet Üretim Maliyeti' ),
+(0, @FirmId, 1, 7, 702, 0, 0, '741', '74',    'Hizmet Üretim Maliyeti Yansıtma Hesabı' ),
+(0, @FirmId, 1, 7, 702, 0, 0, '742', '74',    'Hizmet Üretim Maliyeti Fark Hesapları' ),
+
+(0, @FirmId, 1, 7, 702, 0, 0, '750', '75',    'Araştırma Ve Geliştirme Giderleri' ),
+(0, @FirmId, 1, 7, 702, 0, 0, '751', '75',    'Araştırma Ve Geliştirme Giderleri Yansıtma Hesabı' ),
+(0, @FirmId, 1, 7, 702, 0, 0, '752', '75',    'Araştırma Ve Geliştirme Gider Farkları' ),
+
+(0, @FirmId, 1, 7, 702, 0, 0, '760', '76',    'Pazarlama Satış Ve Dağıtım Giderleri' ),
+(0, @FirmId, 1, 7, 702, 0, 0, '761', '76',    'Pazarlama Satış Ve Dağıtım Giderleri Yansıtma Hesabı' ),
+(0, @FirmId, 1, 7, 702, 0, 0, '762', '76',    'Pazarlama Satış Ve Dağıtım Giderleri Fark Hesabı' ),
+
+(0, @FirmId, 1, 7, 702, 0, 0, '770', '77',    'Genel Yönetim Giderleri' ),
+(0, @FirmId, 1, 7, 702, 0, 0, '771', '77',    'Genel Yönetim Giderleri Yansıtma Hesabı' ),
+(0, @FirmId, 1, 7, 702, 0, 0, '772', '77',    'Genel Yönetim Gider Farkları Hesabı' ),
+
+(0, @FirmId, 1, 7, 702, 0, 0, '780', '78',    'Finansman Giderleri' ),
+(0, @FirmId, 1, 7, 702, 0, 0, '781', '78',    'Finansman Giderleri Yansıtma Hesabı' ),
+(0, @FirmId, 1, 7, 702, 0, 0, '782', '78',    'Finansman Giderleri Fark Hesabı' ),
+
+(0, @FirmId, 1, 7, 703, 0, 0, '79',  '7',     '7/B Seçeneği Maliyet Hesapları' ),
+(0, @FirmId, 1, 7, 703, 0, 0, '790', '79',    'İlk Madde Ve Malzeme Giderleri' ),
+(0, @FirmId, 1, 7, 703, 0, 0, '791', '79',    'İşçi Ücret Ve Giderleri' ),
+(0, @FirmId, 1, 7, 703, 0, 0, '792', '79',    'Memur Ücret Ve Giderleri' ),
+(0, @FirmId, 1, 7, 703, 0, 0, '793', '79',    'Dışarıdan Sağlanan Fayda Ve Hizmetler' ),
+(0, @FirmId, 1, 7, 703, 0, 0, '794', '79',    'Çeşitli Giderler' ),
+(0, @FirmId, 1, 7, 703, 0, 0, '795', '79',    'Vergi, Resim Ve Harçlar' ),
+(0, @FirmId, 1, 7, 703, 0, 0, '796', '79',    'Amortisman Ve Tükenme Payları' ),
+(0, @FirmId, 1, 7, 703, 0, 0, '797', '79',    'Finansman Giderleri' ),
+(0, @FirmId, 1, 7, 703, 0, 0, '798', '79',    'Gider Çeşitleri Yansıtma Hesabı' ),
+(0, @FirmId, 1, 7, 703, 0, 0, '799', '79',    'Üretim Maliyet Hesabı' )
+
+
+/*
+790 – 799 arası hesaplar Tekdüzen Hesap Planı’nda yansıtma hesaplarıdır.
+Bunların amacı:
+7’li gider hesaplarında (710, 720, 730, 740, 750, 760, 770, 780 …) dönem boyunca kaydedilen giderleri,
+6’lı hesaplara (620 Satılan Mamuller Maliyeti, 632 Genel Yönetim Giderleri, 660 Kısa Vadeli Borçlanma Giderleri, 780 Finansman Giderleri vs.) aktarmaktır.
+
+tüm 790 lı hesapların birebir 7’li gider hesaplarında (710, 720, 730, 740, 750, 760, 770, 780) hangisine karşılık geliyor. 790 larda gördüğüm detayı 710 ile 780 arasında göremiyorum
+
+Evet, 790’lı yansıtma hesaplarının birebir karşılığı 7’li gider hesaplarıdır.
+Ama dediğiniz gibi, Tekdüzen Hesap Planı’nda 7’li gider hesapları daha toplu (710, 720, 730, 740, 750, 760, 770, 780) iken, 790’lı yansıtma hesapları daha detaylı olarak açılmıştır.
+
+7’li Gider Hesapları ve 79’lu Yansıtma Hesapları Karşılaştırması
+
+7’li Gider Hesapları                        79’lu Yansıtma Hesapları                             Açıklama
+710 Direkt İlk Madde ve Malzeme Giderleri   790 İlk Madde ve Malzeme Giderleri Yansıtma          Üretimde kullanılan direkt malzeme giderlerinin yansıtılması
+720 Direkt İşçilik Giderleri                791 İşçi Ücret ve Giderleri Yansıtma                 Direkt işçilik giderlerinin yansıtılması
+
+730 Genel Üretim Giderleri                  792 Memur Ücret ve Giderleri Yansıtma                730’un alt kırılımı gibi çalışıyor. 730 tek hesap iken, 792–796 arasında detaylandırılarak yansıtılıyor.
+                                            793 Dışarıdan Sağlanan Fayda ve Hizmetler Yansıtma
+                                            794 Çeşitli Giderler Yansıtma
+                                            795 Vergi, Resim ve Harçlar Yansıtma
+                                            796 Amortisman ve Tükenme Payları Yansıtma	
+740 Hizmet Üretim Maliyeti                  (Ayrıca 79’lu özel bir hesap yok, genelde 798 Gider Çeşitleri Yansıtma veya 799 Üretim Maliyeti Yansıtma ile bağlanır) :>  Hizmet üretimi yapan işletmeler için
+750 Araştırma ve Geliştirme Giderleri       798 Gider Çeşitleri Yansıtma (genelde kullanılır)    Ar-Ge giderlerinin yansıtılması
+760 Pazarlama, Satış ve Dağıtım Giderleri   798 Gider Çeşitleri Yansıtma                         Pazarlama giderleri için
+770 Genel Yönetim Giderleri                 798 Gider Çeşitleri Yansıtma                         Yönetim giderleri için
+780 Finansman Giderleri                     797 Finansman Giderleri Yansıtma                     Faiz, banka masrafı, kur farkı vb. finansman giderleri
+
+
+Yani:
+
+710 → 790
+720 → 791
+730 → 792–796 (detaylı ayrışıyor)
+740, 750, 760, 770 → 798
+780 → 797
+*/
+
+
+
+/*
+UstGrupTipiId = 81  : Ana gider grupları
+UstGrupTipiId = 82  : Gider çeşitleri
+UstGrupTipiId = 83  : Varlık grupları
+UstGrupTipiId = 84  : Abone grupları
+
+bağlantılar
+-- ------------------------------------------------------------------
+Ana gider grupları ile Gider çeşitleri listesi
+
+Where hesapKodu = ustHesapKodu
+
+-- ------------------------------------------------------------------
+Varlık/Abone listesi
+
+Where 
+    82.AnaGrupTipiId = 83.AnaGrupTipiId
+    82.AltGrupTipiId = 83.AltGrupTipiId
+or
+    82.AnaGrupTipiId = 84.AnaGrupTipiId
+    82.AltGrupTipiId = 84.AltGrupTipiId
+
+
+
+Varlık tanımlama : 83 kaydı 
+-- ------------------------------------------------------------------
+set UstGrupTipiId = 83
+set AnaGrupTipiId = y
+set AltGrupTipiId = 0
+
+Abone tanımlama  : 84 kaydı
+-- ------------------------------------------------------------------
+set UstGrupTipiId = 84
+set AnaGrupTipiId = y
+set AltGrupTipiId = z
+
+*/
+
+-- ------------------------------------------------------------------
+--  Gider Grupları
+--  -----------------------------------------------------------------
+--  Inserts
+--  UstGrupTipiId
+--  (81,  N'Ön muhasebe ana gider grupları',  1 ),
+-- ------------------------------------------------------------------
+--declare @FirmId int
+set @FirmId = 0
+
+DELETE [Lkp].[OnmHesapMaster] 
+Where FirmId = 0
+and UstGrupTipiId = 81
+
+
+INSERT INTO [Lkp].[OnmHesapMaster] (ParentId, FirmId, IsActive, UstGrupTipiId, AnaGrupTipiId, AltGrupTipiId, AltCesitTipiId, HesapKodu, UstHesapKodu, HesapAdi )
+ VALUES 
+(0, @FirmId, 1, 81, 0, 0, 0, '81.11', '',    'Alınan Hizmetler' ),
+(0, @FirmId, 1, 81, 0, 0, 0, '81.12', '',    'Diğerleri' ),
+(0, @FirmId, 1, 81, 0, 0, 0, '81.13', '',    'Finansman Giderleri' ),
+(0, @FirmId, 1, 81, 0, 0, 0, '81.14', '',    'Kiralar' ),
+(0, @FirmId, 1, 81, 0, 0, 0, '81.15', '',    'Sigortalar' ),
+(0, @FirmId, 1, 81, 0, 0, 0, '81.16', '',    'Tüketim Faturaları' ),
+(0, @FirmId, 1, 81, 0, 0, 0, '81.17', '',    'Ücretler' ),
+(0, @FirmId, 1, 81, 0, 0, 0, '81.18', '',    'Yeme/İçme' ),
+(0, @FirmId, 1, 81, 0, 0, 0, '81.21', '',    'Vergiler, harçlar' ),
+(0, @FirmId, 1, 81, 0, 0, 0, '81.22', '',    'SGK' ),
+(0, @FirmId, 1, 81, 0, 0, 0, '81.23', '',    'Bağkur' ),
+(0, @FirmId, 1, 81, 0, 0, 0, '81.24', '',    'Belediye' )
+
+
+
+
+-- ------------------------------------------------------------------
+--  Inserts
+--  UstGrupTipiId
+--  (82,  N'Ön muhasebe gider grupları',  1 )
+-- ------------------------------------------------------------------
+--declare @FirmId int
+set @FirmId = 0
+
+DELETE [Lkp].[OnmHesapMaster] 
+Where FirmId = 0
+and UstGrupTipiId = 82
+
+
+INSERT INTO [Lkp].[OnmHesapMaster] (ParentId, FirmId, IsActive, UstGrupTipiId, AnaGrupTipiId, AltGrupTipiId, BAHesapTipiId, HesapKodu, UstHesapKodu, KdvOrani, IsKiralik, HesapAdi , PeriyodTipiId, BelgeTipiId, KaynakTipiId, MaliyetinKapsamTipiId )
+ VALUES 
+(0, @FirmId, 1, 82, 252,    0,  793, '81.11.10', '81.11',  20,  0, 'Bina bakım hizmetleri (Aidat)', 0, 8, 4, 0 ),
+(0, @FirmId, 1, 82, 252,    0,  793, '81.11.12', '81.11',  20,  0, 'Bina tamir hizmetleri', 0, 1, 4, 0 ),
+(0, @FirmId, 1, 82, 252,    0,  793, '81.11.14', '81.11',  20,  0, 'Dekorasyon', 0, 1, 4, 0 ),
+(0, @FirmId, 1, 82, 253,    0,  793, '81.11.20', '81.11',  20,  0, 'Tesis, Makine Ve Cihaz bakım hizmetleri', 0, 1, 4, 0 ),
+(0, @FirmId, 1, 82, 253,    0,  793, '81.11.22', '81.11',  20,  0, 'Tesis, Makine Ve Cihaz tamir hizmetleri', 0, 1, 4, 0 ),
+(0, @FirmId, 1, 82, 254,    0,  793, '81.11.30', '81.11',  20,  0, 'Taşıt bakım hizmetleri', 0, 1, 4, 0 ),
+(0, @FirmId, 1, 82, 254,    0,  793, '81.11.32', '81.11',  20,  0, 'Taşıt tamir hizmetleri', 0, 1, 4, 0 ),
+(0, @FirmId, 1, 82, 255,    0,  793, '81.11.40', '81.11',  20,  0, 'Demirbaş bakım hizmetleri', 0, 1, 4, 0 ),
+(0, @FirmId, 1, 82, 255,    0,  793, '81.11.42', '81.11',  20,  0, 'Demirbaş tamir hizmetleri', 0, 1, 4, 0 ),
+
+(0, @FirmId, 1, 82,   0,    0,  793, '81.12.10', '81.12',  20,  0, 'Bilişim', 0, 1, 4, 0 ),
+(0, @FirmId, 1, 82,   0,    0,  793, '81.12.20', '81.12',  20,  0, 'Baskı ve Matbu', 0, 1, 4, 0 ),
+(0, @FirmId, 1, 82,   0,    0,  793, '81.12.30', '81.12',  20,  0, 'Eğitim', 0, 1, 4, 0 ),
+(0, @FirmId, 1, 82,   0,    0,  770, '81.12.40', '81.12',  20,  0, 'Giyim/Aksesuar', 0, 1, 4, 0 ),
+(0, @FirmId, 1, 82,   0,    0,  770, '81.12.50', '81.12',  20,  0, 'Kırtasiye', 0, 1, 4, 0 ),
+(0, @FirmId, 1, 82,   0,    0,  770, '81.12.60', '81.12',  20,  0, 'Konaklama', 0, 1, 4, 0 ),
+(0, @FirmId, 1, 82,   0,    0,  770, '81.12.70', '81.12',  20,  0, 'Sağlık ve Bakım', 0, 1, 4, 0 ),
+(0, @FirmId, 1, 82,   0,    0,  770, '81.12.80', '81.12',  20,  0, 'Seyahat ( Şehirler arası )', 0, 1, 4, 0 ),
+(0, @FirmId, 1, 82, 254,    0,  770, '81.12.82', '81.12',  20,  0, 'Otoyol ve Köprü Geçiş Ücreti', 0, 22, 3, 0 ),
+(0, @FirmId, 1, 82,   0,    0,  770, '81.12.90', '81.12',  20,  0, 'Kanunen kabul edilmeyen gider', 0, 1, 4, 0 ), -- sonrada eklendi
+(0, @FirmId, 1, 82,   0,    0,  770, '81.12.92', '81.12',  20,  0, 'Genel gider', 0, 1, 4, 0 ), -- sonrada eklendi
+
+
+(0, @FirmId, 1, 82,   0,    0,  780, '81.13.10', '81.13',   0,  0, 'Banka hesap ve kart ücretleri', 0, 22, 3, 0 ),
+(0, @FirmId, 1, 82,   0,    0,  780, '81.13.12', '81.13',   0,  0, 'Çek/Senet masrafları', 0, 22, 3, 0 ),
+(0, @FirmId, 1, 82,   0,    0,  780, '81.13.14', '81.13',   0,  0, 'Faiz', 0, 22, 3, 0 ),
+(0, @FirmId, 1, 82,   0,    0,  780, '81.13.16', '81.13',   0,  0, 'İşlem ücretleri', 0, 22, 3, 0 ),
+(0, @FirmId, 1, 82,   0,    0,  780, '81.13.18', '81.13',   0,  0, 'Kredi masrafları', 0, 22, 3, 0 ),
+(0, @FirmId, 1, 82,   0,    0,  780, '81.13.20', '81.13',   0,  0, 'Komisyon ücretleri', 0, 22, 3, 0 ),
+(0, @FirmId, 0, 82,   0,    0,  780, '81.13.22', '81.13',   0,  0, 'Para çekme komisyonu', 0, 22, 3, 0 ),
+(0, @FirmId, 0, 82,   0,    0,  780, '81.13.24', '81.13',   0,  0, 'Para transferi', 0, 22, 3, 0 ),
+(0, @FirmId, 0, 82,   0,    0,  780, '81.13.26', '81.13',   0,  0, 'Para yatırma', 0, 22, 3, 0 ),
+(0, @FirmId, 1, 82,   0,    0,  780, '81.13.28', '81.13',   0,  0, 'Pos komisyonu', 0, 22, 3, 0 ),
+(0, @FirmId, 1, 82, 102, 1023, 1023, '81.13.30', '81.13',   0,  0, 'Kredi Kartı Hesap Ekstresi', 0, 22, 3, 0 ),
+(0, @FirmId, 1, 82, 102, 1022,  780, '81.13.32', '81.13',   0,  0, 'KMH-Faiz Tahsilatı', 0, 22, 3, 0 ),
+
+(0, @FirmId, 1, 82, 250,    0,  770, '81.14.10', '81.14',   0,  1, 'Kira (Arazi ve Arsa)', 31, 8, 4, 2 ),
+(0, @FirmId, 1, 82, 251,    0,  770, '81.14.20', '81.14',   0,  1, 'Kira (Yer Altı ve Yer Üstü Düzenler)', 31, 8, 4, 2 ),
+(0, @FirmId, 1, 82, 252,    0,  770, '81.14.30', '81.14',   0,  1, 'Kira (Bina, Depo)', 31, 8, 4, 2 ),
+(0, @FirmId, 1, 82, 253,    0,  770, '81.14.40', '81.14',   0,  1, 'Kira (Tesis, Makine ve Cihaz)', 31, 1, 4, 2 ),
+(0, @FirmId, 1, 82, 254,    0,  770, '81.14.50', '81.14',   0,  1, 'Kira (Taşıt)', 31, 1, 4, 2 ),
+
+(0, @FirmId, 1, 82, 250,    0,  770, '81.15.10', '81.15',  20,  0, 'Sigorta (Arazi ve Arsa)', 41, 1, 4, 1 ),
+(0, @FirmId, 1, 82, 251,    0,  770, '81.15.20', '81.15',  20,  0, 'Sigorta (Yer Altı ve Yer Üstü Düzenler)', 41, 1, 4, 1 ),
+(0, @FirmId, 1, 82, 252,    0,  770, '81.15.30', '81.15',  20,  0, 'Sigorta (Bina, Depo)', 41, 1, 4, 1 ),
+(0, @FirmId, 1, 82, 253,    0,  770, '81.15.40', '81.15',  20,  0, 'Sigorta (Tesis, Makine ve Cihaz)', 41, 1, 4, 1 ),
+(0, @FirmId, 1, 82, 254,    0,  770, '81.15.50', '81.15',  20,  0, 'Sigorta (Taşıt - Zorunlu Trafik)', 41, 1, 4, 1 ),
+(0, @FirmId, 1, 82, 254,    0,  770, '81.15.60', '81.15',  20,  0, 'Sigorta (Taşıt - Kasko)', 41, 1, 4, 1 ),
+
+(0, @FirmId, 1, 82, 252,    0,  770, '81.16.10', '81.16',  20,  0, 'Akaryakıt (Bina)', 0, 1, 4, 0 ),
+(0, @FirmId, 1, 82, 254,    0,  770, '81.16.12', '81.16',  20,  0, 'Akaryakıt (Taşıt)', 0, 1, 4, 0 ),
+(0, @FirmId, 1, 82, 253,    0,  770, '81.16.14', '81.16',  20,  0, 'Akaryakıt (Tesis, Makine ve Cihaz)', 0, 1, 4, 0 ),
+(0, @FirmId, 1, 82, 252,  860,  770, '81.16.20', '81.16',  20,  0, 'Doğalgaz Sayacı (Bina)', 31, 1, 4, 0 ),
+(0, @FirmId, 1, 82, 253,  861,  770, '81.16.22', '81.16',  20,  0, 'Doğalgaz Sayacı (Tesis, Makine ve Cihaz)', 31, 1, 4, 0 ),
+(0, @FirmId, 1, 82, 252,  862,  770, '81.16.30', '81.16',  20,  0, 'Elektrik Sayacı (Bina)', 31, 1, 4, 0 ),
+(0, @FirmId, 1, 82, 254,  863,  770, '81.16.32', '81.16',  20,  0, 'Elektrik Sayacı (Taşıt)', 31, 1, 4, 0 ),
+(0, @FirmId, 1, 82, 253,  864,  770, '81.16.34', '81.16',  20,  0, 'Elektrik Sayacı (Tesis, Makine ve Cihaz)', 31, 1, 4, 0 ),
+(0, @FirmId, 1, 82, 252,  865,  770, '81.16.40', '81.16',  20,  0, 'Su Sayacı (Bina)', 31, 1, 4, 0 ),
+(0, @FirmId, 1, 82, 253,  866,  770, '81.16.42', '81.16',  20,  0, 'Su Sayacı (Tesis, Makine ve Cihaz)', 31, 1, 4, 0 ),
+(0, @FirmId, 1, 82, 259,    0,  770, '81.16.50', '81.16',  20,  0, 'Telekom', 31, 1, 3, 0 ), --Telekomünikasyon  
+
+(0, @FirmId, 1, 82,   0,    0,  791, '81.17.10', '81.17',   0,  0, 'İşçi Ücretleri', 31, 8, 3, 0 ),
+(0, @FirmId, 1, 82,   0,    0,  791, '81.17.20', '81.17',   0,  0, 'Memur Ücretleri', 31, 8, 3, 0 ),
+(0, @FirmId, 1, 82,   0,    0,  791, '81.17.30', '81.17',   0,  0, 'Primler', 0, 8, 3, 0 ),
+(0, @FirmId, 1, 82,   0,    0,  791, '81.17.40', '81.17',   0,  0, 'Ortaklar', 0, 8, 3, 0 ),
+
+(0, @FirmId, 1, 82,   0,    0,  770, '81.18.10', '81.18',  20,  0, 'Market', 0, 3, 4, 0 ),
+(0, @FirmId, 1, 82,   0,    0,  770, '81.18.20', '81.18',  20,  0, 'Restoran', 0, 3, 4, 0 ),
+(0, @FirmId, 1, 82,   0,    0,  770, '81.18.30', '81.18',  20,  0, 'Yemek Kartı', 0, 1, 4, 0 ),
+(0, @FirmId, 1, 82,   0,    0,  770, '81.18.40', '81.18',  20,  0, 'İkram', 0, 3, 4, 0 ),
+
+(0, @FirmId, 1, 82, 254,    0,  770, '81.21.50', '81.21',   0,  0, 'Vergi (Taşıt - MTV)', 35, 22, 3, 1 )
+
+
+
+-- ------------------------------------------------------------------
+-- Maddi Duran Varlıklar Grubu Inserts
+-- ------------------------------------------------------------------
+--declare @FirmId int
+set @FirmId = 0
+
+DELETE [Lkp].[OnmHesapMaster] 
+Where FirmId = 0
+and UstGrupTipiId = 83
+
+--  Varlıklar için Ust Grup Hesapları
+
+INSERT INTO [Lkp].[OnmHesapMaster] (ParentId, FirmId, IsActive, UstGrupTipiId, AnaGrupTipiId, AltGrupTipiId, AltCesitTipiId, HesapKodu, UstHesapKodu, HesapAdi )
+ VALUES 
+(0, @FirmId, 1, 83, 250, 0, 0, '250', '',   'Arazi ve Arsalar' ),
+(0, @FirmId, 1, 83, 251, 0, 0, '251', '',   'Yer Altı ve Yer Üstü Düzenleri' ),
+(0, @FirmId, 1, 83, 252, 0, 0, '252', '',   'Binalar' ),
+(0, @FirmId, 1, 83, 253, 0, 0, '253', '',   'Tesis, Makine Ve Cihazlar' ),
+(0, @FirmId, 1, 83, 254, 0, 0, '254', '',   'Taşıtlar' ),
+(0, @FirmId, 1, 83, 255, 0, 0, '255', '',   'Demirbaşlar' ),
+(0, @FirmId, 1, 83, 256, 0, 0, '256', '',   'Diğer Maddi Duran Varlıklar' ),
+(0, @FirmId, 1, 83, 259, 0, 0, '259', '',   'Abonelikler' )
+
+
+-- ------------------------------------------------------------------
+--  Abone grup listesi
+--  UstGrupTipiId
+--  (84,  N'Abone grup listesi',  1 )
+-- DİKKAT : 259 larda abone tipleri AlCesitTipiId lerde takip ediliyor
+--          diğerlerinde yani varlık tipleri AltGrupTipiId ile taki ediliyor
+-- ------------------------------------------------------------------
+--declare @FirmId int
+set @FirmId = 0
+
+DELETE [Lkp].[OnmHesapMaster] 
+Where FirmId = 0 
+and UstGrupTipiId = 84
+
+INSERT INTO [Lkp].[OnmHesapMaster] (ParentId, FirmId, IsActive, UstGrupTipiId, AnaGrupTipiId, AltGrupTipiId, AltCesitTipiId, HesapKodu, UstHesapKodu, PeriyodTipiId, BelgeTipiId, KaynakTipiId, KdvOrani, HesapAdi )
+ VALUES 
+(0, @FirmId, 1, 84, 259,   0, 810, '81.16.50.10', '81.16.50',  31, 1, 2, 20,  'TürkTelekom Ev/İş Telefonu' ),
+(0, @FirmId, 1, 84, 259,   0, 812, '81.16.50.12', '81.16.50',  31, 1, 2, 20,  'TürkTelekom Cep' ),
+(0, @FirmId, 1, 84, 259,   0, 814, '81.16.50.14', '81.16.50',  31, 1, 2, 20,  'TTNET İnternet' ),
+(0, @FirmId, 1, 84, 259,   0, 820, '81.16.50.20', '81.16.50',  31, 1, 2, 20,  'Turkcell Cep' ),
+(0, @FirmId, 1, 84, 259,   0, 822, '81.16.50.22', '81.16.50',  31, 1, 2, 20,  'Turkcell İnternet' ),
+(0, @FirmId, 1, 84, 259,   0, 830, '81.16.50.30', '81.16.50',  31, 1, 2, 20,  'Vodafone Cep' ),
+(0, @FirmId, 1, 84, 259,   0, 832, '81.16.50.32', '81.16.50',  31, 1, 2, 20,  'Vodafone İnternet' ),
+(0, @FirmId, 1, 84, 259,   0, 840, '81.16.50.40', '81.16.50',  31, 1, 2, 20,  'Ptt Cell' ),
+(0, @FirmId, 1, 84, 259,   0, 842, '81.16.50.42', '81.16.50',  31, 1, 2, 20,  'Türksat' ),
+(0, @FirmId, 1, 84, 252, 860,   0, '81.16.50.60', '81.16.50',  31, 1, 2, 20,  'Doğalgaz Sayacı (Bina)' ),
+(0, @FirmId, 1, 84, 253, 861,   0, '81.16.50.61', '81.16.50',  31, 1, 2, 20,  'Doğalgaz Sayacı (Tesis, Makine ve Cihaz)' ),
+(0, @FirmId, 1, 84, 252, 862,   0, '81.16.50.62', '81.16.50',  31, 1, 2, 20,  'Elektrik Sayacı (Bina)' ),
+(0, @FirmId, 1, 84, 254, 863,   0, '81.16.50.63', '81.16.50',  31, 1, 2, 20,  'Elektrik Sayacı (Taşıt)' ),
+(0, @FirmId, 1, 84, 253, 864,   0, '81.16.50.64', '81.16.50',  31, 1, 2, 20,  'Elektrik Sayacı (Tesis, Makine ve Cihaz)' ),
+(0, @FirmId, 1, 84, 252, 865,   0, '81.16.50.65', '81.16.50',  31, 1, 2, 20,  'Su Sayacı (Bina)' ),
+(0, @FirmId, 1, 84, 253, 866,   0, '81.16.50.66', '81.16.50',  31, 1, 2, 20,  'Su Sayacı (Tesis, Makine ve Cihaz)' ),
+(0, @FirmId, 1, 84, 256, 890,   0, '81.16.50.90', '81.16.50',  31, 1, 2, 20,  'Diğer Abonelikler' )
+
+
+
+commit transaction
+
+/*CreateDataEnd*/
+
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+
+
+ /*
+ Giderlerin Çeşitlerine Göre Sınıflandırılması  (7/B Seçeneğinin kendisi)
+ Giderlerin Ürünlere Yüklenmesine Göre Sınıflandırılması
+ Giderlerin Üretim (Etkinlik) Hacmi ile İlişkisine Göre Sınıflandırılması
+ Giderlerin İşletme Fonksiyonlarına Göre Sınıflandırılması
+   UruneYuklenmesiTipiId   SmallInt  null, 
+   UretimHacmiTipiId       SmallInt  null,
+   IsletmeFonksiyonuTipiId SmallInt  null,
+ */
+
+
+/* * * * * * * * * * * * * *
+
+7/A hesapları fonksiyon esasına göre sınıflandırılmış
+7/B hesapları çeşit esasına göre sınıflandırılmış
+
+7/A da kendi içinde iki gruba ayrılıyor
+
+Üretime dayalı giderler
+--  Mal üretimi yapanlar
+71. Direkt İlk Madde Ve Malzeme Giderleri
+72. Direkt İşçilik Giderleri
+73. Genel Üretim Giderleri
+--  Hizmet üretimi yapanlar
+74. Hizmet Üretim Maliyeti
+
+Üretime dayalı olmayan giderler
+75. Araştırma Ve Geliştirme Giderleri
+76. Pazarlama Satış Ve Dağıtım Giderleri
+77. Genel Yönetim Giderleri
+78. Finansman Giderleri
+
+
+Bir işletmenin
+7/B, 79  Gider Çeşitleri ' ni kullanabilmesi için
+
+xxxx yılı ( bir önceki yılın )
+
+Aktif Toplamı        = ?  veya
+Net Satışlar Toplamı = ?  
+
+nın altında kalan işletmeler 
+
+xxxx+1 yılı için 7/B Maliyet Hesaplarını (79) kullanabilir
+
+Aksi durumda 7/A yı kullanmak zorundadır.
+
+Çalışma şekli :
+
+Gider hesaplarında hareket oluştuğunda gider hesabı borç çalışır, karşı hesap alacaklı çalışır.
+
+Dönem sonunda hesaplar kapatılarak 798 yansıtma hesabına aktarılacak,
+
+798 hesabıda ilgi gelir - gider tablolarına yansıtılacak ve kapatılacak
+
+
+
+drop table [Lkp].[OnmHesapMasterBAHesapTipi]
+drop table [Lkp].[OnmHesapMasterUruneYuklenmesiTipi]
+drop table [Lkp].[OnmHesapMasterUretimHacmiTipi]
+drop table [Lkp].[OnmHesapMasterIsletmeFonksiyonuTipi]
+drop table [Lkp].[OnmHesapMasterPeriyodTipi]
+drop table [Lkp].[OnmHesapMasterBelgeTipi]
+drop table [Lkp].[OnmHesapMasterKaynakTipi]
+
+
+*/
+
+
+

@@ -1,0 +1,154 @@
+﻿CREATE TRIGGER [dbo].[trg_DERSPRG_PLAN] on [dbo].[DERSPRG_PLAN] 
+AFTER INSERT, UPDATE
+AS BEGIN
+
+declare @yTarih smalldatetime
+declare @yBas_Saat varchar(8)
+declare @yBit_Saat varchar(8) 
+declare @yGrup_Ulas int
+declare @yKursiyer_Ulas int 
+declare @yPersonel_Ulas int
+declare @yDers_Ulas smallint
+declare @yDerslik smallint
+declare @yPlaka_Ulas smallint
+declare @yEgitim_Turu smallint
+declare @yMebbis bit
+declare @yProg_Tipi smallint 
+declare @yDersAdi  varchar(25)
+declare @yDerslikAdi  varchar(10)
+declare @yAracPlakasi varchar(15)
+declare @yDersYeri varchar(15)
+declare @yDersTarihi varchar(10) 
+declare @ySaat varchar(13)
+declare @yPersonel varchar(50) 
+declare @yEgitimTuru varchar(25) 
+declare @update bit 
+
+   DECLARE dplanCursor cursor for select ULAS from Inserted
+   DECLARE @curId bigint
+
+   OPEN dplanCursor
+   FETCH NEXT FROM dplanCursor INTO @curId
+
+   WHILE @@FETCH_STATUS = 0
+   BEGIN 
+      set @update = 0
+      SELECT 
+       @yTarih = [TARIH]
+      ,@yBas_Saat = isnull([BAS_SAAT],'')
+      ,@yBit_Saat = isnull([BIT_SAAT],'')
+      ,@yGrup_Ulas = isnull([GRUP_ULAS],0)
+      ,@yKursiyer_Ulas = isnull([KURSIYER_ULAS],0)
+      ,@yPersonel_Ulas = isnull([PERSONEL_ULAS],0)
+      ,@yDers_Ulas = isnull([DERS_ULAS],0)
+      ,@yDerslik = isnull([DERSLIK],0)
+      ,@yPlaka_Ulas = isnull([PLAKA_ULAS],0)
+      ,@yEgitim_Turu = isnull([EGITIM_TURU],0)
+      ,@yMebbis = isnull([MEBBIS],0)
+      ,@yProg_Tipi = isnull([PROG_TIPI],0)
+      ,@yDersAdi = isnull([DersAdi],'')
+      ,@yDerslikAdi = isnull([DerslikAdi],'')
+      ,@yAracPlakasi = isnull([AracPlakasi],'')
+      ,@yDersYeri = isnull([DersYeri],'')
+      ,@yDersTarihi = isnull([DersTarihi],'')
+      ,@ySaat = isnull([Saat],'')
+      ,@yPersonel = isnull([Personel],'')
+      ,@yEgitimTuru = isnull([EgitimTuru],'')
+      --from inserted 
+      from [dbo].[DERSPRG_PLAN]
+      where ULAS = @curId
+
+      if (@yDers_Ulas = 0) and (@yDersAdi <> '') 
+      begin
+         if (@yDersAdi = 'Trafik ve Çevre Dersi') set @yDers_Ulas = 1
+         if (@yDersAdi = 'İlkyardım Dersi') set @yDers_Ulas = 2
+         if (@yDersAdi = 'Araç Tekniği Dersi') set @yDers_Ulas = 3
+         if (@yDersAdi = 'Trafik Adabı Dersi') set @yDers_Ulas = 4
+         set @update = 1   
+      end
+	  if (@yDerslik = 0) and (@yDerslikAdi <> '') 
+      begin
+	     if (@yDerslikAdi = 'Derslik 1') set @yDerslik = 1
+	     if (@yDerslikAdi = 'Derslik 2') set @yDerslik = 2
+	     if (@yDerslikAdi = 'Derslik 3') set @yDerslik = 3
+         set @update = 1   
+      end
+      if (@yPlaka_Ulas = 0) and (@yAracPlakasi <> '')
+      begin
+         Select @yPlaka_Ulas = plk.plkorder
+         from Plaka plk 
+         where plk.Plaka = @yAracPlakasi
+         set @update = 1   
+      end
+	  if (@yDers_Ulas = 0) and (@yDersYeri <> '')
+      begin 	  
+      -- 11 Uygulama (EP)
+      -- 12 Simülatör  
+      -- 13 Uygulama (AT) 
+         if (@yDersYeri = 'Direksiyon Eğitim Alanı') set @yDers_Ulas = 11
+         if (@yDersYeri = 'Simulatör') set @yDers_Ulas = 12
+         if (@yDersYeri = 'Akan Trafik') set @yDers_Ulas = 13
+         set @update = 1   
+      end
+	  if (@yEgitim_Turu = 0)
+      begin
+         if (@yEgitimTuru = '') set @yEgitim_Turu = 0  
+         if (@yEgitimTuru = 'Normal Eğitim') set @yEgitim_Turu = 0  
+         if (@yEgitimTuru = 'Telafi Eğitim(Ön Sınav )') set @yEgitim_Turu = 1  
+         if (@yEgitimTuru = '2.Direksiyon Eğitimi') set @yEgitim_Turu = 2  
+         if (@yEgitimTuru = 'Başarısız Aday Eğitimi') set @yEgitim_Turu = 3  
+      end
+      if (@yPersonel_Ulas = 0) and (@yPersonel <> '')
+      begin
+	     Select top 1 @yPersonel_Ulas = Ulas
+         from [dbo].[PERSONEL]
+         where AD + ' ' + SOY = @yPersonel
+         order by Ulas desc
+      end
+
+      -- Teorik ders
+	  if (@update = 1) and (@yDers_Ulas >= 1) and (@yDers_Ulas <= 4)
+      begin
+          Update [dbo].[DERSPRG_PLAN] set
+            TARIH = Convert(smalldatetime, DersTarihi, 103)
+          , BAS_SAAT = Substring(Saat, 1, 5) + ':00'  -- 22:00 - 22:50
+          , BIT_SAAT = Substring(Saat, 9, 5) + ':00'  
+		  , KURSIYER_ULAS = 0
+          , PERSONEL_ULAS = @yPersonel_Ulas
+          , DERS_ULAS = @yDers_Ulas
+          , DERSLIK = @yDerslik 
+          , PLAKA_ULAS = 0
+          , EGITIM_TURU = @yEgitim_Turu
+          , MEBBIS = 1
+          , PROG_TIPI = 0
+          where ULAS = @curId 
+      end 
+      -- Uygulama dersi
+	  if (@update = 1) and (@yDers_Ulas >= 11) and (@yDers_Ulas <= 13)
+      begin
+          Update [dbo].[DERSPRG_PLAN] set
+            TARIH = Convert(smalldatetime, DersTarihi, 103)
+          , BAS_SAAT = Substring(Saat, 1, 5) + ':00'  -- 22:00 - 22:50
+          , BIT_SAAT = Substring(Saat, 9, 5) + ':00'  
+		  , GRUP_ULAS = 0
+          , PERSONEL_ULAS = @yPersonel_Ulas
+          , DERS_ULAS = @yDers_Ulas
+          , DERSLIK = 0
+          , PLAKA_ULAS = @yPlaka_Ulas
+          , EGITIM_TURU = @yEgitim_Turu
+          , MEBBIS = 1
+          , PROG_TIPI = 0
+          where ULAS = @curId 
+      end 
+
+
+      FETCH NEXT FROM dplanCursor INTO @curId
+   END
+
+   CLOSE dplanCursor
+   DEALLOCATE dplanCursor   
+   
+END -- trigger
+
+ALTER TABLE [dbo].[DERSPRG_PLAN] ENABLE TRIGGER [trg_DERSPRG_PLAN]
+

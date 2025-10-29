@@ -1,0 +1,66 @@
+
+hp larýnýn kullaným þekilleri
+
+Kime göre 
+------------------
+Þube
+bilgisayar
+kullanýcý
+
+
+genel parametreler
+-----------------------
+
+
+bilgisayar parametreleri
+-----------------------
+Þube Id : (bilgisayarýn hangi þubede çalýþtýðý)
+Finans HP Kullaným önceliði : Þube/Bilgisayar/Kullanýcý
+
+
+
+Kullanýcý parametreleri
+-----------------------
+
+
+
+Kullanýcý Id : prg giriþ sýrasýnda alýnan deðer
+
+
+
+
+
+tablo yapýsý
+
+id
+onay
+vezne_tipi = /1.Þube/2.Departman/3.Bilgisayar/4.Kullanýcý
+vezne_id   = þube_ýd or bilgisayar_ýd or kullanýcý_ýd
+
+
+detail tablosu
+
+id
+vezne_tipi 
+vezne_id 
+hp_tipi = 1.kasa, 2.banka, 3.pos, 4.kk
+hp_id
+
+
+LS_VEZNE
+----------------------
+ID
+MASTER   BIT (TRUE ise master kayýt, FALSE ise detail kayýt )
+AKTIF
+CARI_TIPI
+CARI_ID
+FNS_TIPI
+FNS_ID
+FNS_SIRA_NO  /* KASA VEYA BANKAYI SIRALI ALABÝLÝR */
+
+
+
+
+
+
+

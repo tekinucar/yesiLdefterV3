@@ -1,0 +1,93 @@
+﻿
+begin transaction
+
+ create table MsCommercial
+ (
+    Id               Int IDENTITY(1,1) not null,
+    IsActive         Bit               not null,
+	ProjectTypeId    SmallInt          not null, 
+	PageTypeId       SmallInt          not null,
+
+	PartNo           SmallInt          null,
+	PartTitle        nVarChar(100)     null,
+	PartSubTitle     nVarChar(250)     null,
+	PartHtmlContent  nVarChar(2000)    null,
+	PartButton       nVarChar(50)      null,
+
+   Constraint pk_MsCommercial primary key (Id)
+ )
+
+ create index X_MsCommercial_01 on MsCommercial (ProjectTypeId, PageTypeId)
+
+ grant select, insert, update, delete on MsCommercial to public
+
+commit transaction
+
+
+
+begin transaction
+
+-- ------------------------------------------------------- 
+-- ProjectTypeId
+-- ------------------------------------------------------- 
+
+IF EXISTS (Select * From sys.objects WHERE name = 'MsCommercialProjectType')
+drop table [Lkp].[MsCommercialProjectType]
+
+create table [Lkp].[MsCommercialProjectType]
+(
+   Id               Int Unique not null, 
+   ProjectType      Varchar(30)    null
+   
+   constraint  pk_MsCommercialProjectType primary key (Id)
+)
+
+Delete from [Lkp].[MsCommercialProjectType]
+INSERT INTO [Lkp].[MsCommercialProjectType] (Id, ProjectType)
+ VALUES 
+  ( 0,     N'none'),
+  ( 1,     N'Commercial'),
+  ( 2,     N'Education')
+
+
+-- ------------------------------------------------------- 
+-- PageTypeId 
+-- ------------------------------------------------------- 
+
+IF EXISTS (Select * From sys.objects WHERE name = 'MsCommercialPageType')
+drop table [Lkp].[MsCommercialPageType]
+
+create table [Lkp].[MsCommercialPageType]
+(
+   Id          Int Unique not null, 
+   PageType    Varchar(30)    null
+   
+   constraint  pk_MsCommercialPageType primary key (Id)
+)
+
+Delete from [Lkp].[MsCommercialPageType]
+INSERT INTO [Lkp].[MsCommercialPageType] (Id, PageType)
+ VALUES 
+  ( 0,     N'none'),
+  ( 101,     N'Commercial-AnaSayfa'),
+  ( 102,     N'Commercial-Mtsk'),
+  ( 103,     N'Commercial-Eğimler'),
+  ( 104,     N'Commercial-Destek'),
+  ( 105,     N'Commercial-Abonelik'),
+  ( 106,     N'Commercial-İletişim'),
+  ( 107,     N'Commercial-ÖnMuhasebe'),
+
+  ( 201,    N'Education-İletişim'),
+  ( 210,    N'Education-Ana Sayfa'),
+  ( 211,    N'Education-Ehliyet Hakkında'),
+  ( 212,    N'Education-Sürücü Kursları'),
+  ( 213,    N'Education-Ehliyet Dersleri'),
+  ( 214,    N'Education-Soru-Cevaplar'),
+  ( 215,    N'Education-E-Sınav'),
+  ( 216,    N'Education-Tanımlar'),
+  ( 217,    N'Education-Mtsk Yönetmelikleri')
+
+
+
+
+commit transaction 

@@ -1,0 +1,72 @@
+﻿
+/*CreateFunction*/
+
+CREATE FUNCTION [dbo].[fnc_MtskDonemDersBasBitTarihiniBul](
+ @DonemTipi Int
+,@IsTeorik bit
+,@IsUygulama bit
+,@IsBaslangic bit
+,@IsBitis bit
+)  
+RETURNS date
+AS   
+BEGIN  
+
+  /*
+  declare @DonemTipi Int
+  declare @IsTeorik bit
+  declare @IsUygulama bit
+  declare @IsBaslangic bit
+  declare @IsBitis bit
+
+  set @DonemTipi = 202105
+  set @IsTeorik = 0 
+  set @IsUygulama = 1
+  set @IsBaslangic = 1
+  set @IsBitis = 0
+  */ 
+
+  declare @ret date
+  declare @basTar date
+  declare @bitTar date
+
+  -- Teorik Ders Programı ise
+  if (@IsTeorik = 1) 
+  begin
+    Select 
+      @basTar = isnull(min([MtskTeorikDers].DersTarihi), getdate())
+    , @bitTar = isnull(max([MtskTeorikDers].DersTarihi), getdate())  
+	from MtskTeorikDers [MtskTeorikDers]
+    Where [MtskTeorikDers].DonemTipiId = @DonemTipi --202101 
+  end
+  
+  -- Uygulama Ders Programı ise
+  if (@IsUygulama = 1) 
+  begin
+    Select 
+      @basTar = isnull(min([MtskUygulamaliDers].DersTarihi), getdate())
+    , @bitTar = isnull(max([MtskUygulamaliDers].DersTarihi), getdate())  
+	from MtskUygulamaliDers [MtskUygulamaliDers]
+    Where SablonUygulamaFId in (
+      Select Id from MtskSablonUygulamaF
+      Where 0 = 0
+      and [MtskUygulamaliDers].DonemTipiId = @DonemTipi --202101 
+      )  
+  end
+  
+  if (@IsBaslangic = 1) set @ret = @basTar
+  if (@IsBitis = 1) set @ret = @bitTar
+  
+  /*
+  print @DonemTipi
+  print @IsTeorik
+  print @IsUygulama
+  print @basTar
+  print @bitTar
+  print @ret
+  */
+
+  RETURN @ret;  
+END;
+
+/*CreateFunctionEnd*/

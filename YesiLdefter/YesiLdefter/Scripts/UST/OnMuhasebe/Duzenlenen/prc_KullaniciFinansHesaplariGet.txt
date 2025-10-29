@@ -1,0 +1,63 @@
+﻿CREATE PROCEDURE [dbo].[prc_KullaniciFinansHesaplariGet] (@FirmId int, @UserId int, @DekontTipiId int)  
+AS BEGIN 
+
+   --declare @UserId int
+   --declare @DekontTipiId int
+   /*
+   Id  Tipi
+   0   Tüm hesaplar 
+   2   Tahsilat
+   3   Tediye
+   */
+   declare @selectFields nvarchar(max)
+   declare @WhereAnd nvarchar(800)
+
+   -- Kullanıcının finans hesapları
+   set @selectFields = '
+   Select 
+     hFinans.Id
+   , hFinans.Id as Lkp_FinansId
+   , hFinans.FirmId
+   , vezne.VezneAdi as Lkp_VezneAdi
+   , hFinans.AltGrupTipiId
+   , hFinans.HesapKodu
+   , hFinans.HesapKisaAdi
+   , hFinans.HesapAdi
+   , hFinans.Numarasi
+   , hFinans.IBANNumarasi
+   , hFinans.ParaTipiId
+   , altGrupTipi.AltGrupTipi as Lkp_AltGrupTipi
+
+ , ( case hFinans.AltGrupTipiId 
+     when 100 then ''NAKİT''
+     when 1022 then ''EFT/HAVALE''
+     when 1023 then ''KREDİ KARTI''
+     when 1024 then ''KREDİ KARTI''
+     when 1025 then ''KREDİ KARTI''
+     when 1026 then ''KREDİ KARTI''
+     else CONVERT(varchar(10), hFinans.AltGrupTipiId) end ) as Lkp_MusteriDili   
+
+   from OnmVezneKullanici as kullanici
+      left outer join OnmHesapVezne  as vezne   on ( kullanici.VezneId = vezne.Id ) 
+      left outer join OnmVezneFinans as vFinans on ( vezne.Id = vFinans.VezneId )
+      left outer join OnmHesapFinans as hFinans on ( vFinans.FinansId = hFinans.Id )
+      left outer join Lkp.OnmHesapFinansAltGrupTipi as altGrupTipi on ( hFinans.AltGrupTipiId = altGrupTipi.Id )
+   where kullanici.IsActive = 1
+   and   vezne.IsActive = 1
+   and   vFinans.IsActive = 1
+   and   hFinans.IsActive = 1
+'
+    set @WhereAnd = ''
+    if (@DekontTipiId = 2)
+       set @WhereAnd = ' and   hFinans.AltGrupTipiId <> 1023 ' -- banka kartları olmasın yani tahsilat araçları listelensin
+    if (@DekontTipiId = 3)
+       set @WhereAnd = ' and   hFinans.AltGrupTipiId not in ( 1024, 1025, 1026 ) ' -- pos cih. olmasın yani ödeme araçları listelensin
+    if (@UserId > 0) 
+       set @WhereAnd += ' and   kullanici.UserId = ' + convert(varchar(20), @UserId)  
+
+    if (@WhereAnd <> '')
+       set  @selectFields = @selectFields + @WhereAnd
+
+    Exec sp_executesql @selectFields
+
+END

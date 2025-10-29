@@ -1,0 +1,10 @@
+﻿EXEC sp_RENAME 'AspNetUsers.TamAdiSoyadi' , 'NameSurname', 'COLUMN'
+EXEC sp_RENAME 'AspNetUsers.Adi' , 'Firstname', 'COLUMN'
+EXEC sp_RENAME 'AspNetUsers.Soyadi' , 'Surname', 'COLUMN'
+
+
+ALTER TABLE AspNetUsers ADD Password nVarchar(100) NULL
+ALTER TABLE AspNetUsers ADD PasswordConfirm nVarchar(100) NULL
+
+ALTER TABLE AspNetUsers ADD RefreshToken nVarchar(256) NULL
+ALTER TABLE AspNetUsers ADD RefreshTokenEndDate SmallDatetime NULL

@@ -1,0 +1,54 @@
+/*CreateTable*/
+
+begin transaction
+
+ create table MtskSimulator
+ (
+   Id                   Int IDENTITY(1,1) not null, 
+   ParentId             Int       not null, /* default 0 */
+   FirmId               Int       not null,
+   IsActive             Bit       not null, /* default : 1 = active, 0 = not active */  
+
+   SicilNumarasi        nVarchar(20)  null,
+   AlimTarihi           Date          null,
+   HizmetDurumuTipiId   SmallInt      null, /* BA�LANGI� --Se�iniz--, 1-Hizmette, 2-Hizmet D���*/
+   KurumOnayTipiId      SmallInt      null, /* BA�LANGI� --Se�iniz--, 1-Onay Bekliyor, 2-Onayland� */		
+
+   constraint		pk_MtskSimulator primary key (Id)
+ )
+  
+ grant select, insert, update, delete on MtskSimulator to public
+
+commit transaction
+
+/*CreateTableEnd*/
+
+
+/*CreateLkpTable*/
+
+begin transaction
+
+-- ------------------------------------------------------- 
+-- HizmetDurumuTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskSimulatorHizmetDurumuTipi')
+drop table [Lkp].[MtskSimulatorHizmetDurumuTipi]
+
+create table [Lkp].[MtskSimulatorHizmetDurumuTipi]
+(
+   Id               Int Unique Not null,
+   HizmetDurumuTipi nVarchar(50)   null,
+   GrupTipiId       SmallInt       null,
+
+   constraint  pk_MtskSimulatorHizmetDurumuTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[MtskSimulatorHizmetDurumuTipi] (Id, HizmetDurumuTipi, GrupTipiId)
+ VALUES 
+  ( 0,     N'', 1),
+  ( 1,     N'Hizmette', 1),
+  ( 2,     N'Hizmet Dışı', 1)
+
+commit transaction
+
+/*CreateLkpTableEnd*/

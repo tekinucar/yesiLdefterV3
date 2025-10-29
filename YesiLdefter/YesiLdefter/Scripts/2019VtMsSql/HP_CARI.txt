@@ -1,0 +1,91 @@
+﻿
+begin transaction
+
+ create table HP_CARI
+ (
+
+   ID                Int IDENTITY(1,1) NOT NULL, /* ID  DİĞER TABLOLARDA CARI_ID OLUYOR  */
+   PARENT_ID  	     Int               NULL,
+   FIRM_ID           Int               NULL,
+   REC_DATE          SmallDatetime     NULL,
+   REC_USER          Int               NULL,
+   ISACTIVE          SmallInt          NULL,    /* 0. AKTİF, 1. ARŞİV, 2. ÇIKIŞ, 3. ADAY, 4.DEMO,   9. SİL VB.... */ 
+   CARI_TD           SmallInt          NULL,    /* 1. MÜŞTERİ, 2. TEDARİKCİ, 3. BAYİİ */ 
+   CARI_TIPI         SmallInt          NULL,    /* 11.Gerçek Kişi, 21.Özel Kurum, 31.Devlet Kurumu, 91.Personel,     */
+   -- RESIM             VarBinary(MAX)    NULL,
+
+   CARI_KODU         VarChar(50)       NULL,
+   TAMADI            VarChar(200)      NULL,    /* KURUM ADI */
+   ADI               VarChar(100)      NULL,
+   SOYADI            VarChar(100)      NULL,
+   ISYERI_UNVANI1    VarChar(100)      NULL,
+   ISYERI_UNVANI2    VarChar(100)      NULL,
+   ILCE_KODU         VarChar(10)       NULL,
+   IL_KODU           VarChar(10)       NULL,
+   ILCE              VarChar(50)       NULL,
+   IL                VarChar(50)       NULL,
+   REFERANS          VarChar(100)      NULL,  
+   HAKKINDA          VarChar(250)     NULL,
+
+   /* KİŞİYE AİT NUMARALARI */  
+   TC_NO               VarChar(11)       NULL,
+   BABA_ADI            VarChar(50)       NULL,	 
+   ANA_ADI             VarChar(50)       NULL,	 
+   ONCEKI_SOYADI       VarChar(50)       NULL,	 
+   DOGUM_TARIHI        Date              NULL,
+   DOGUM_YERI          VarChar(50)       NULL,	 
+   CINSIYET_TD         SmallInt          NULL, 
+   MEDENIYET_TD        SmallInt          NULL, 
+
+   /* TİCARİ KURUM NUMARALARI */  
+   VERGI_NO            VarChar(30)       NULL,
+   VERGI_DAIRESI       VarChar(50)       NULL,	
+   TICARET_SICIL_NO    VarChar(30)       NULL,
+   TICARET_SICIL_YER   VarChar(50)       NULL,	
+   SGK_SICIL_NO        VarChar(30)       NULL,  
+   HARCTAN_MUAF        VarChar(1)        NULL, 
+   KURULUS_TARIHI      Date              NULL,
+   KURUM_KODU          VarChar(30)       NULL,
+
+   /* meslek */
+   OGRENIM_ID        SmallInt          NULL,
+   UNVAN_ID          SmallInt          NULL,
+   MESLEK_ID         SmallInt          NULL,
+
+   /* İşletmenin */   
+   SEKTOR_TD         Int               NULL,    
+   FALIYET_KONUSU_TD Int               NULL,   
+
+   /* ozel işaretler */
+   OZEL_KOD1_ID      Int               NULL,
+   OZEL_KOD2_ID      Int               NULL,
+   OZEL_KOD3_ID      Int               NULL,
+   
+
+   /* PARA */
+   PARA_ID           SmallInt          NULL,    /* 1. TL, 2. ENG ... */ 
+   B_DOVIZ_YERI_ID   Int               NULL,    /* B_DOVIZ_YERI_ID ,   DEBT_EXCHANGE_PLACE_ID     */
+   A_DOVIZ_YERI_ID   Int               NULL,    /* A_DOVIZ_YERI_ID ,   CLAIMS_EXCHANGE_PLACE_ID   */
+
+   /* KİŞİLERİN CİHAZLAR ÜZERİNDEKİ IDLERİ */
+   FACE_ID           Int               NULL,
+   FINGER_ID         Int               NULL,
+   KIMLIK_KART_NO    VarChar(30)       NULL,
+   SEND_SMS          SmallInt          NULL,
+   SEND_EMAIL        SmallInt          NULL,
+   OLD_CARI_ID       Int               NULL,
+   
+   constraint		PK_HP_CARI primary key (ID)
+ )
+ -- mysql_add
+ 
+ create index X_HP_CARI01 on HP_CARI (FIRM_ID, ID);
+ create index X_HP_CARI02 on HP_CARI (FIRM_ID, CARI_TD, CARI_TIPI);
+ create index X_HP_CARI03 on HP_CARI (FIRM_ID, TAMADI);
+ create index X_HP_CARI04 on HP_CARI (FIRM_ID, TC_NO);
+
+ grant select, insert, update, delete on HP_CARI to public
+
+commit transaction
+
+

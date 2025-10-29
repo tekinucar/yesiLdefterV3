@@ -1,0 +1,182 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_MtskAdayBorclandir] (@TalepId int, @UcretTipiId int)  
+AS BEGIN
+
+
+  --declare @TalepId int = 3324
+  --declare @UcretTipiId smallInt  = 21112
+
+  declare @BugunDonemTipiId int = 0
+  declare @FirmId int = 0 
+  declare @AdayId int = 0
+  declare @TalepTipiId smallInt = 0
+
+  declare @SinavId Int = 0
+  declare @SinavNo smallInt = 0
+  declare @DurumTipiId smallInt = 0
+  declare @TeorikPuani smallInt = 0
+  declare @PuanTipiId smallInt = 0
+  declare @OdemePlaniId int = 0
+  declare @IsYeniBorc bit = 0
+  declare @BorclandirmaUcreti numeric(22,5)
+  
+
+  if (MONTH(getdate()) < 10)
+       set @BugunDonemTipiId = convert(int, convert(varchar(5), YEAR(getdate())) + '0' + convert(varchar(3), MONTH(getdate())))
+  else set @BugunDonemTipiId = convert(int, convert(varchar(5), YEAR(getdate())) + convert(varchar(3), MONTH(getdate())))
+  
+  Select 
+      @FirmId = FirmId
+     ,@AdayId = AdayId
+     ,@TalepTipiId = TalepTipiId
+  From dbo.MtskAdayTalep
+  Where Id = @TalepId
+
+  -- MtskSinavETeorikDurumuTipi
+  -- Id DurumuTipi
+  -- 0  
+  -- 1   Başarılı
+  -- 2   Başarısız
+  -- 3   Girmedi
+  -- 4   Raporlu
+  -- 5   İptal Edildi(Sınav Yasaklı)
+
+  -- MtskSinavUygulamaDurumuTipi
+  -- Id  DurumuTipi
+  -- 0
+  -- 1   Uygulama Sınav Aşamasında
+  -- 2   2.Direksiyon Aşamasında
+  -- 3   Sertifika Almaya Hak Kazandı
+  -- 4   Uygulama Sınav Hakkı Doldu
+  -- 5   Sertifikası İptal Edildi
+  -- 6   Durumu Girilmemiş
+
+  -- MtskSinavUygulamaPuanTipi
+  -- Id  PuanTipi
+  -- -2  Durumu Girilmemiş
+  -- -1  Girmedi
+  -- 0   
+  -- 1   Başarısız
+  -- 100 Başarılı
+
+
+  -- 21111, 'e-Sınav ücreti
+  -- 21112, 'Uygulama sınav ücreti
+  -- 21113, 'Başarısız eğitim ücreti
+  -- 21114, 'Telafi eğitim ücreti
+
+  -- En sonuncu e-Sınavı oku
+  if (@UcretTipiId = 21111)
+  begin
+      Select top 1 @SinavNo = isnull([SinavNo],0), @DurumTipiId = isnull([DurumuTipiId],0), @TeorikPuani = isnull([TeorikPuani],0)
+      From [dbo].[MtskSinavETeorik]
+      where TalepId = @TalepId
+      order by SinavTarihi desc
+
+      Select Top 1  @BorclandirmaUcreti = ucret.[ESinavUcreti]
+      From [dbo].[MtskUcretSinav] as ucret,
+           [dbo].[GecerlilikTarihi] as tarih
+	  Where ucret.FirmId = @FirmId
+      and   ucret.IsActive = 1
+      and   ucret.GecerlilikTarihiId = tarih.Id
+	  and   convert(date,tarih.Tarih,103) <= convert(date, GETDATE(), 103) 
+	  order by tarih.Tarih desc
+  end
+  -- En sonuncu Uygulama Sınavını oku
+  if (@UcretTipiId = 21112)
+  begin
+      Select top 1 @SinavNo = isnull([SinavNo],0), @DurumTipiId = isnull([DurumuTipiId],0), @PuanTipiId = isnull([PuanTipiId],0)
+      From [dbo].[MtskSinavUygulama]
+      where TalepId = @TalepId
+      order by SinavTarihi desc
+
+      Select Top 1  @BorclandirmaUcreti = ucret.[UygulamaSinavUcreti]
+      From [dbo].[MtskUcretSinav] as ucret,
+           [dbo].[GecerlilikTarihi] as tarih
+	  Where ucret.FirmId = @FirmId
+      and   ucret.IsActive = 1
+      and   ucret.GecerlilikTarihiId = tarih.Id
+	  and   convert(date,tarih.Tarih,103) <= convert(date, GETDATE(), 103) 
+	  order by tarih.Tarih desc
+  end
+
+  if (@SinavNo > 0) Set @SinavNo = @SinavNo + 1
+  if (@SinavNo = 0) Set @SinavNo = 1
+
+  Select @OdemePlaniId = Id
+  From dbo.OnmOdemePlani 
+  Where TalepId = @TalepId
+  and   UcretTipiId = @UcretTipiId
+  and   TaksitNo = @SinavNo
+
+  -- Select @SinavNo, @TeorikPuani, @PuanTipiId, @DurumTipiId, @OdemePlaniId
+  
+  --  e-Sınav için OdemePlanı yok ise borc oluştur   
+  if (@OdemePlaniId = 0) Set @IsYeniBorc = 1
+
+  -- Sinav sayısı 4 geçince borçlandırma
+  if (@SinavNo > 4) Set @IsYeniBorc = 0
+
+  if (@IsYeniBorc = 1)
+  begin
+      if ( Select count(Id) as Adet From [dbo].[OnmOdemePlani]
+	       Where FirmId = @FirmId
+           and   TalepId = @TalepId
+           and   UcretTipiId = @UcretTipiId
+           and   TaksitNo = @SinavNo
+	  ) = 0
+	  begin
+	      Insert into [dbo].[OnmOdemePlani]
+           ([OdmemePlaniGUID]
+           ,[FirmId]
+           ,[IsActive]
+           ,[DonemTipiId]
+           ,[TalepId]
+           ,[TalepTipiId]
+           ,[UcretTipiId]
+           ,[CariId]
+           ,[TaksitTipiId]
+           ,[TaksitNo]
+           ,[VadeTarihi]
+           ,[TaksitTutari]
+           ,[OdemeTipiId]
+           ,[IsPaid]
+           ,[TahsilTarihi]
+           ,[YedekTaksitTutari]
+           ,[BelgeDekontId]
+           ,[PatchBelgeDekontId]
+           ,[BelgeStokBId]
+           ,[SourceTypeId]
+           ,[SourceId]
+           ,[VeriKaynakId])
+          Values
+           (NEWID()
+           ,@FirmId
+           ,1 --IsActive
+           ,@BugunDonemTipiId -- DonemTipiId
+           ,@TalepId
+           ,@TalepTipiId -- TalepTipiId
+           ,@UcretTipiId
+           ,@AdayId -- CariId
+           ,3 -- TaksitTipiId : 3 = Tek Ödeme
+           ,@SinavNo -- TaksitNo
+           ,getdate() -- VadeTarihi == Bu kayıt oluşurken sınavın hangi tarihte olacağı bilinmiyor
+           ,@BorclandirmaUcreti -- TaksitTutari
+           ,2    -- OdemeTipiId   Nakit
+           ,0    -- IsPaid
+           ,null -- TahsilTarihi
+           ,null -- YedekTaksitTutari
+           ,null -- BelgeDekontId
+           ,null -- PatchBelgeDekontId
+           ,null -- BelgeStokBId
+           ,2101 -- SourceTypeId -- Mtsk Modülü - Otomatik, kullanıcı onaylı
+           ,null -- SourceId
+           ,null -- VeriKaynakId
+		   )
+       end -- if Adet = 0
+  end 
+
+END -- procedure
+
+/*CreateProcedureEnd*/

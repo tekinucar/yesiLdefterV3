@@ -1,0 +1,198 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table Settings
+ (
+    Id                Int IDENTITY(1,1)  NOT NULL,
+    IsActive          bit           NULL,
+    SettingTypeId     SmallInt      NULL, /* 1. firma bazlı, 2. bilgisayar bazlı, 3. kullanıcı bazlı  */
+
+    FirmId            Int           NULL,
+    PcName            varchar(50)   NULL,
+    NetworkMacAddress varchar(30)   NULL,
+    UserId            Int           NULL,
+    
+    SettingGroupNo    SmallInt      NULL, 
+    SettingNo         SmallInt      NULL,  
+    About             varchar(100)  NULL, /* ayar hakkında açıklama  */
+
+    DefaultTypeId     SmallInt      NULL,
+    DefaultBool       Bit           NULL,
+    DefaultNumeric    Numeric(26,8) NULL,
+    DefaultText       nVarChar(200) NULL,
+    DefaultInt        Int           NULL,
+
+	Constraint pk_Settings primary key (Id)
+ )
+
+ grant select, insert, update, delete on Settings to public
+
+commit transaction
+
+/*CreateTableEnd*/
+
+
+/*CreateLkpTable*/
+
+begin transaction
+
+
+-- ------------------------------------------------------- 
+-- SettingTypeId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'SettingsSettingType')
+drop table [Lkp].[SettingsSettingType]
+
+create table [Lkp].[SettingsSettingType]
+(
+   Id            Int Unique Not Null,
+   SettingType   nVarchar(50),
+
+   constraint  pk_SettingsSettingType primary key (Id)
+)
+
+delete from [Lkp].[SettingsSettingType]
+INSERT INTO [Lkp].[SettingsSettingType] (Id, SettingType)
+ VALUES 
+  (0,   N'Tanımsız'),
+  (1,   N'Firma'),
+  (2,   N'Bilgisayar'),
+  (3,   N'Kullanıcı')
+
+
+-- ------------------------------------------------------- 
+-- DefaultTypeId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'SettingsDefaultType')
+drop table [Lkp].[SettingsDefaultType]
+
+create table [Lkp].[SettingsDefaultType]
+(
+   Id           Int Unique Not Null,
+   DefaultType  nVarchar(50),
+
+   constraint  pk_SettingsDefaultType primary key (Id)
+)
+
+delete from [Lkp].[SettingsDefaultType]
+INSERT INTO [Lkp].[SettingsDefaultType] (Id, DefaultType)
+ VALUES 
+  (0,   N'Tanımsız'),
+  (1,   N'Bool'),
+  (2,   N'Integer'),
+  (3,   N'Numeric'),
+  (4,   N'Text')
+
+
+
+commit transaction
+
+/*CreateLkpTableEnd*/
+
+
+
+/*CreateData*/
+
+/* SettingTypeId : 1. firma bazlı, 2. bilgisayar bazlı, 3. kullanıcı bazlı  */
+/* SettingGroupNo  : henüz nasıl gruplayacağım belli değil */
+/* SettingNo       : her setting row için bizim tarafımızdan belirlenen tekil bir ID  */
+
+/* SettingGroupNo  : 
+1000 Baslangic
+1010 Kayıt
+1020 Donemler
+1030 TeorikDersler
+1040 e_SinavBasvurusu
+1050 e_Sinav
+1060 TumUygulamaliDersler
+1070 UygulamaliDersler
+1080 Arti4Dersler
+1090 TelafiDersler
+1110 BasarisizDersler
+1120 Randevu
+1130 UygulamaliSinav
+1140 Sertifika
+2010 OnMuhasebe
+
+3010 Sms
+3020 EMail
+
+
+*/
+
+
+Declare @FirmId Int 
+Set @FirmId = :FIRM_ID
+Declare @SectorTypeId SmallInt
+Set @SectorTypeId = :SectorTypeId 
+
+
+INSERT INTO [dbo].[Settings]
+           ([IsActive], [SettingTypeId], [FirmId], [PcName], [NetworkMacAddress], [UserId], [SettingGroupNo], [SettingNo], [About], [DefaultTypeId], [DefaultBool], [DefaultNumeric], [DefaultText], [DefaultInt])
+     VALUES
+           (1    --IsActive
+           ,1    --SettingTypeId
+           ,@FirmId
+           ,null -- PcName
+           ,null -- NetworkMacAddress
+           ,null -- UserId
+           ,1000 -- SettingGroupNo
+           ,100  -- SettingNo   
+           ,'Sektör tipi nedir ?'   -- About
+           ,4    -- DefaultTypeId /* DefaultInt seçildi */ 
+           ,null -- DefaultBool  
+           ,null -- DefaultNumeric
+           ,null -- DefaultText
+           ,@SectorTypeId  -- DefaultInt   : 201 - UstadMtsk, 202 - UstadIsmak, 203 - UstadSrc
+           )
+
+
+INSERT INTO [dbo].[Settings]
+           ([IsActive], [SettingTypeId], [FirmId], [PcName], [NetworkMacAddress], [UserId], [SettingGroupNo], [SettingNo], [About], [DefaultTypeId], [DefaultBool], [DefaultNumeric], [DefaultText], [DefaultInt])
+     VALUES
+           (1    --IsActive
+           ,1    --SettingTypeId
+           ,@FirmId
+           ,null -- PcName
+           ,null -- NetworkMacAddress
+           ,null -- UserId
+           ,1000 -- SettingGroupNo
+           ,101  -- SettingNo   
+           ,'Başlangıçta yapılması gerekerenler menüsü'   -- About
+           ,1    -- DefaultTypeId /* DefaultBool seçildi */ 
+           ,1    -- DefaultBool  /*  0 : Gösterme,  1 : Göster  */
+           ,null -- DefaultNumeric
+           ,null -- DefaultText
+           ,null -- DefaultInt   
+           )
+
+
+INSERT INTO [dbo].[Settings]
+           ([IsActive], [SettingTypeId], [FirmId], [PcName], [NetworkMacAddress], [UserId], [SettingGroupNo], [SettingNo], [About], [DefaultTypeId], [DefaultBool], [DefaultNumeric], [DefaultText], [DefaultInt])
+     VALUES
+           (1    --IsActive
+           ,1    --SettingTypeId
+           ,@FirmId
+           ,null -- PcName
+           ,null -- NetworkMacAddress
+           ,null -- UserId
+           ,1130 -- SettingGroupNo
+           ,101  -- SettingNo   
+           ,'Uygulamalı sınav için -Aday sınav için hazır mı ?- sorusu devrede mi ?'   -- About
+           ,1    -- DefaultTypeId /* DefaultBool seçildi */ 
+           ,0    -- DefaultBool  /*  0 : Sorma,  1 : Sor  */
+           ,null -- DefaultNumeric
+           ,null -- DefaultText
+           ,null -- DefaultInt   
+           )
+
+
+  Update s Set SettingGroupNo = 1000
+  From [dbo].[Settings] as s
+  Where SettingGroupNo is null
+  and   SettingNo = 101
+
+/*CreateDataEnd*/
+
+

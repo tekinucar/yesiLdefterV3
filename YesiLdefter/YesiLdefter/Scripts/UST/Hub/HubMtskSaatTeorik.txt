@@ -1,0 +1,29 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table HubMtskSaatTeorik
+ (
+
+   Id                     Int IDENTITY(1,1) NOT NULL, 
+   FirmId                 Int       not null,
+   IsActive               Bit       not null, /* default : 1 = active, 0 = not active */  
+   GecerlilikTarihiId     Int       not null,
+
+   /* Saatler */  
+   TrafikVeCevreDersSaati           smallInt     null,
+   IlkYardimDersSaati               smallInt     null,
+   AracTeknigiDersSaati             smallInt     null,
+   TrafikAdabiDersSaati             smallInt     null,
+   TeorikDersSaati                  smallInt     null,
+
+  constraint pk_HubMtskSaatTeorik primary key (Id)
+ )
+
+ create index X_HubMtskSaatTeorik01 on HubMtskSaatTeorik (GecerlilikTarihiId)
+ 
+ grant select, insert, update, delete on HubMtskSaatTeorik to public
+
+commit transaction
+
+/*CreateTableEnd*/

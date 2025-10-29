@@ -1,0 +1,173 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_SrcAdayBorcunuHesapla] (@FirmId int, @TalepId int)  
+AS BEGIN
+
+   -- Id      OnmOdemePlani.UcretTipi
+   -- 23101   Src1,2,3,4 Sertifika
+   -- 23102   Src5 Sertifika
+
+   -- 23111   e-Sınav ücreti
+   -- 23112   Uygulama sınav ücreti
+
+UPDATE [dbo].[SrcAdayUcret]
+
+   SET [BorcSertifikaUcreti] = x.SertifikaUcreti
+      ,[BorcESinavUcreti] = x.ESinavUcreti
+      ,[BorcUygulamaSinavUcreti] = x.UygulamaSinavUcreti
+      ,[BorcTelafiEgitimUcreti] = x.TelafiEgitimUcreti
+      ,[BorcBasarisizEgitimUcreti] = x.BasarisizEgitimUcreti
+      ,[BorcUcretlerToplami] = x.ToplamTutar
+
+      ,[VGSertifikaUcreti] = x.VGSertifikaUcreti
+      ,[VGESinavUcreti] = x.VGESinavUcreti
+      ,[VGUygulamaSinavUcreti] = x.VGUygulamaSinavUcreti
+      ,[VGTelafiEgitimUcreti] = x.VGTelafiEgitimUcreti
+      ,[VGBasarisizEgitimUcreti] = x.VGBasarisizEgitimUcreti
+      ,[VGUcretlerToplami] = x.VGToplamTutar
+      ,[IsOwes] = x.IsOwes 
+
+ From [dbo].[SrcAdayUcret] as a, 
+ (
+   Select 
+      FirmId
+     ,TalepId
+     ,CariId
+	 ,sum(SertifikaUcreti) as SertifikaUcreti
+	 ,sum(ESinavUcreti) as ESinavUcreti
+	 ,sum(UgulamaSinavUcreti) as UygulamaSinavUcreti
+	 ,sum(TelafiEgitimUcreti) as TelafiEgitimUcreti
+	 ,sum(BasarisizEgitimUcreti) as BasarisizEgitimUcreti
+     ,sum(ToplamTutar) as ToplamTutar  
+
+	 ,sum(VGSertifikaUcreti) as VGSertifikaUcreti
+	 ,sum(VGESinavUcreti) as VGESinavUcreti
+	 ,sum(VGUgulamaSinavUcreti) as VGUygulamaSinavUcreti
+	 ,sum(VGTelafiEgitimUcreti) as VGTelafiEgitimUcreti
+	 ,sum(VGBasarisizEgitimUcreti) as VGBasarisizEgitimUcreti
+	 ,sum(VGToplamTutar) as VGToplamTutar  
+     , (case when sum(ToplamTutar) > 0 then 1 else 0 end) as IsOwes
+
+   From (
+      Select 
+          FirmId
+         ,TalepId
+         ,CariId
+         ,UcretTipiId 
+
+         ,(case when UcretTipiId >= 23101 and  UcretTipiId <= 23105 then sum(TaksitTutari) else 0	end	 )  as SertifikaUcreti
+         ,(case when UcretTipiId = 23111 then sum(TaksitTutari) else 0	end	 )  as ESinavUcreti
+         ,(case when UcretTipiId = 23112 then sum(TaksitTutari) else 0	end	 )  as UgulamaSinavUcreti
+         ,(case when UcretTipiId = 23113 then sum(TaksitTutari) else 0	end	 )  as BasarisizEgitimUcreti
+         ,(case when UcretTipiId = 23114 then sum(TaksitTutari) else 0	end	 )  as TelafiEgitimUcreti
+
+         ,sum(TaksitTutari) as ToplamTutar  
+
+         ,0 as VGSertifikaUcreti
+         ,0 as VGESinavUcreti
+         ,0 as VGUgulamaSinavUcreti
+         ,0 as VGBasarisizEgitimUcreti
+         ,0 as VGTelafiEgitimUcreti
+         ,0 as VGToplamTutar  
+
+      From dbo.OnmOdemePlani as odemePlani
+      Where FirmId = @FirmId
+      --- ---------------------  
+      and TalepId = @TalepId
+      --- ---------------------  
+      and IsActive = 1
+      and IsPaid = 0
+      group by
+          FirmId
+         ,TalepId
+         ,CariId
+         ,UcretTipiId 
+
+      union
+
+      Select 
+          FirmId
+         ,TalepId
+         ,CariId
+         ,UcretTipiId 
+
+         ,0 as SertifikaUcreti
+         ,0 as ESinavUcreti
+         ,0 as UgulamaSinavUcreti
+         ,0 as BasarisizEgitimUcreti
+         ,0 as TelafiEgitimUcreti
+         ,0 as ToplamTutar  
+
+         ,(case when UcretTipiId >= 23101 and  UcretTipiId <= 23105 then sum(TaksitTutari) else 0	end	 )  as VGSertifikaUcreti
+         ,(case when UcretTipiId = 23111 then sum(TaksitTutari) else 0	end	 )  as VGESinavUcreti
+         ,(case when UcretTipiId = 23112 then sum(TaksitTutari) else 0	end	 )  as VGUgulamaSinavUcreti
+         ,(case when UcretTipiId = 23113 then sum(TaksitTutari) else 0	end	 )  as VGBasarisizEgitimUcreti
+         ,(case when UcretTipiId = 23114 then sum(TaksitTutari) else 0	end	 )  as VGTelafiEgitimUcreti
+         ,sum(TaksitTutari) as VGToplamTutar  
+      From dbo.OnmOdemePlani as odemePlani
+      Where FirmId = @FirmId
+      --- ---------------------  
+      and TalepId = @TalepId
+      --- ---------------------  
+      and IsActive = 1
+      and IsPaid = 0
+      and VadeTarihi <= GETDATE()
+      group by
+          FirmId
+         ,TalepId
+         ,CariId
+         ,UcretTipiId 
+
+   ) as y
+   Group by 
+      FirmId
+     ,TalepId
+     ,CariId
+
+ ) as x
+ 
+ WHERE a.[FirmId] = x.FirmId
+ and   a.[TalepId] = x.TalepId
+ and   a.[AdayId] = x.CariId
+ and   (
+       a.[BorcSertifikaUcreti] <> x.SertifikaUcreti
+ or    a.[BorcESinavUcreti] <> x.ESinavUcreti
+ or    a.[BorcUygulamaSinavUcreti] <> x.UygulamaSinavUcreti
+ or    a.[BorcTelafiEgitimUcreti] <> x.TelafiEgitimUcreti
+ or    a.[BorcBasarisizEgitimUcreti] <> x.BasarisizEgitimUcreti
+ or    a.[BorcUcretlerToplami] <> x.ToplamTutar
+
+ or    a.[VGSertifikaUcreti] <> x.VGSertifikaUcreti
+ or    a.[VGESinavUcreti] <> x.VGESinavUcreti
+ or    a.[VGUygulamaSinavUcreti] <> x.VGUygulamaSinavUcreti
+ or    a.[VGTelafiEgitimUcreti] <> x.VGTelafiEgitimUcreti
+ or    a.[VGBasarisizEgitimUcreti] <> x.VGBasarisizEgitimUcreti
+ or    a.[VGUcretlerToplami] <> x.VGToplamTutar
+ or    isnull(a.IsOwes,0) <> x.IsOwes
+ )
+ 
+
+  Update dbo.SrcAdayTakip Set BorcDurumuTipiId = x.BorcDurumuTipiId
+  From dbo.SrcAdayTakip a,  
+  ( Select TalepId
+    , ( case when VGUcretlerToplami > 0 then 1
+             when BorcUcretlerToplami > 0 then 2 
+             when BorcUcretlerToplami = 0 then 0 end ) as BorcDurumuTipiId 
+     From dbo.SrcAdayUcret
+     Where FirmId = @FirmId
+     and   TalepId = @TalepId
+  ) as x
+  Where a.TalepId = x.TalepId
+  and   a.FirmId = @FirmId
+  --- ---------------------  
+  and   a.TalepId = @TalepId
+  --- ---------------------  
+
+ END --
+
+/*CreateProcedureEnd*/
+
+
+
+
+

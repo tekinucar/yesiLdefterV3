@@ -1,0 +1,43 @@
+
+begin transaction
+
+ create table HP_ILETISIM
+ (
+   ID                     Int             IDENTITY(1,1) NOT NULL,
+   FIRM_ID                Int             null, 
+   SHOP_ID                Int             null, 
+   TABLE_ID               smallint        null, /* 1.HP_CARI, 2. */
+   TABLE_REF_ID           Int             null, /* tablosunun Ref Id si */
+   REC_DATE               SmallDatetime   null,  
+   REC_USER               Int             null,
+
+   ILETISIM_DURUMU        SmallInt        null,  /* 0=Geçerli 1=Geçersiz */
+   EV_TELEFONU            VarChar(20)     null, 
+   IS_TELEFONU            VarChar(20)     null, 
+   GSM_TELEFONU1          VarChar(20)     null, 
+   GSM_TELEFONU2          VarChar(20)     null, 
+   ESININ_GSM_TELEFONU    VarChar(20)     null, 
+   FAX                    VarChar(20)     null, 
+   E_MAIL1                VarChar(50)     null, 
+   E_MAIL2                VarChar(50)     null, 
+   WEB_ADRESI             VarChar(200)    null, 
+   ACIKLAMA               VarChar(300)    null,
+   OLDCARI_ID             Int             null,
+
+   constraint PK_HP_ILETISIM primary key (ID)
+ )
+
+ create index X_HP_ILETISIM_01 on HP_ILETISIM (FIRM_ID, SHOP_ID, TABLE_ID, TABLE_REF_ID)
+
+ grant select, insert, update, delete on HP_ILETISIM to public
+
+commit transaction
+
+
+-- ALTER TABLE HP_ILETISIM ADD OLDCARI_ID             Int             null
+
+
+
+  
+  
+

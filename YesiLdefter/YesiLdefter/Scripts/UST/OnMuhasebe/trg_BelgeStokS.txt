@@ -1,0 +1,73 @@
+﻿USE [u7093888_Ustad01]
+GO
+
+
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+
+CREATE TRIGGER [dbo].[trg_BelgeStokS] on [dbo].[BelgeStokS] 
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    DECLARE myCursor cursor for select Id from Inserted
+    DECLARE @curId bigint
+
+    OPEN myCursor
+
+    FETCH NEXT FROM myCursor INTO @curId
+        
+    declare @FirmId Integer
+	declare @BelgeStokBId Integer
+	declare @StokId Integer
+	declare @countEkVergi Integer
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+      select 
+	     @FirmId = ins.FirmId
+		,@BelgeStokBId = isnull(ins.BelgeStokBId,0)  
+        ,@StokId = ins.StokId
+		,@countEkVergi = count(EkVergi.Id)
+
+      from Inserted ins
+	    left outer join [dbo].[IStokFaturaEkVergi] as ekVergi on 
+          (ekVergi.IsActive = 1
+	       and ins.FirmId = ekVergi.FirmId
+	       and ins.StokId = ekVergi.StokId )
+	  where ins.Id = @curId
+	  group by
+	   ins.FirmId
+      ,ins.BelgeStokBId
+      ,ins.StokId
+
+    	
+      -- Ek Vergisiz hesapla	
+      EXECUTE [dbo].[prc_ComputeBelgeStokB] @BelgeStokBId
+	  -- Ek vergileri hesapla
+	  EXECUTE [dbo].[prc_ComputeBelgeStokSEkVergi] 
+	                 @FirmId
+					,@BelgeStokBId
+					,@curId
+					,@StokId
+      -- Ek vergileri dahil et
+	  EXECUTE [dbo].[prc_ComputeBelgeStokB] @BelgeStokBId
+
+	  FETCH NEXT FROM myCursor INTO @curId
+    END
+
+    CLOSE myCursor
+    DEALLOCATE myCursor   
+ 
+        
+
+END
+GO
+
+ALTER TABLE [dbo].[BelgeStokS] ENABLE TRIGGER [trg_BelgeStokS]
+GO

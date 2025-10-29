@@ -1,0 +1,25 @@
+
+begin transaction
+
+ create table MS_LAYOUT_VIEW
+ (
+        REF_ID            Int IDENTITY(1,1) NOT NULL,
+        PROJE_ID          Int           NULL,
+        SET_ID            Int           NULL,
+        TABLEIPCODE       VarChar(50)   NULL,
+        LAYOUT_NAME       VarChar(50)   NULL,                 
+        LAYOUT_TYPE       SmallInt      NULL,
+
+   Constraint PK_MS_LAYOUT_VIEW primary key (REF_ID)
+ )
+
+ create index X_MS_LAYOUT_VIEW1 on MS_LAYOUT_VIEW (TABLEIPCODE)
+ 
+ grant select, insert, update, delete on MS_LAYOUT_VIEW to public
+
+commit transaction
+
+
+/* LAYOUT_TYPE = 0: NONE, 1 : DEFAULT, ...., 9 : CANCEL   */
+
+

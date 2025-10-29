@@ -1,0 +1,379 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_MtskAdayBorcunuHesapla] (@FirmId int, @TalepId int)  
+AS BEGIN
+
+   -- Id      OnmOdemePlani.UcretTipi
+   -- 21101   Sertifika
+   -- 21102   2.+4 hak
+   -- 21103   Nakil 2.+4 hak
+   -- 21104   100 Ceza
+   -- 21105   Özel direksiyon ders (Aday değil)
+   -- 21111   e-Sınav ücreti
+   -- 21112   Uygulama sınav ücreti
+   -- 21113   Başarısız eğitim ücreti
+   -- 21114   Telafi eğitim ücreti
+   -- 21115   Diğer ücretler 
+
+UPDATE [dbo].[MtskAdayUcret]
+
+   SET [AlacakSertifikaUcreti] = x.AlacakSertifikaUcreti
+      ,[AlacakESinavUcreti] = x.AlacakESinavUcreti
+      ,[AlacakUygulamaSinavUcreti] = x.AlacakUygulamaSinavUcreti
+      ,[AlacakTelafiEgitimUcreti] = x.AlacakTelafiEgitimUcreti
+      ,[AlacakBasarisizEgitimUcreti] = x.AlacakBasarisizEgitimUcreti
+      ,[AlacakDigerUcretler] = x.AlacakDigerUcretler
+      ,[AlacakUcretlerToplami] = x.AlacakToplamTutar
+   
+      ,[BorcSertifikaUcreti] = x.BorcSertifikaUcreti
+      ,[BorcESinavUcreti] = x.BorcESinavUcreti
+      ,[BorcUygulamaSinavUcreti] = x.BorcUygulamaSinavUcreti
+      ,[BorcTelafiEgitimUcreti] = x.BorcTelafiEgitimUcreti
+      ,[BorcBasarisizEgitimUcreti] = x.BorcBasarisizEgitimUcreti
+      ,[BorcDigerUcretler] = x.BorcDigerUcretler
+      ,[BorcUcretlerToplami] = x.BorcToplamTutar
+
+      ,[VGSertifikaUcreti] = x.VGSertifikaUcreti
+      ,[VGESinavUcreti] = x.VGESinavUcreti
+      ,[VGUygulamaSinavUcreti] = x.VGUygulamaSinavUcreti
+      ,[VGTelafiEgitimUcreti] = x.VGTelafiEgitimUcreti
+      ,[VGBasarisizEgitimUcreti] = x.VGBasarisizEgitimUcreti
+      ,[VGDigerUcretler] = x.VGDigerUcretler
+      ,[VGUcretlerToplami] = x.VGToplamTutar
+
+      ,[TahsilEdilenUcretler] = x.TahsilEdilenUcretler 
+      ,[IsOwes] = x.IsOwes 
+
+ From [dbo].[MtskAdayUcret] as a, 
+ (
+   Select 
+      FirmId
+     ,TalepId
+     ,CariId
+	 ,sum(AlacakSertifikaUcreti) as AlacakSertifikaUcreti
+	 ,sum(AlacakESinavUcreti) as AlacakESinavUcreti
+	 ,sum(AlacakUgulamaSinavUcreti) as AlacakUygulamaSinavUcreti
+	 ,sum(AlacakBasarisizEgitimUcreti) as AlacakBasarisizEgitimUcreti
+	 ,sum(AlacakTelafiEgitimUcreti) as AlacakTelafiEgitimUcreti
+     ,sum(AlacakDigerUcretler) as AlacakDigerUcretler     
+     ,sum(AlacakToplamTutar) as AlacakToplamTutar  
+
+	 ,sum(BorcSertifikaUcreti) as BorcSertifikaUcreti
+	 ,sum(BorcESinavUcreti) as BorcESinavUcreti
+	 ,sum(BorcUgulamaSinavUcreti) as BorcUygulamaSinavUcreti
+	 ,sum(BorcBasarisizEgitimUcreti) as BorcBasarisizEgitimUcreti
+	 ,sum(BorcTelafiEgitimUcreti) as BorcTelafiEgitimUcreti
+     ,sum(BorcDigerUcretler) as BorcDigerUcretler
+     ,sum(BorcToplamTutar) as BorcToplamTutar  
+
+	 ,sum(VGSertifikaUcreti) as VGSertifikaUcreti
+	 ,sum(VGESinavUcreti) as VGESinavUcreti
+	 ,sum(VGUgulamaSinavUcreti) as VGUygulamaSinavUcreti
+	 ,sum(VGBasarisizEgitimUcreti) as VGBasarisizEgitimUcreti
+	 ,sum(VGTelafiEgitimUcreti) as VGTelafiEgitimUcreti
+	 ,sum(VGDigerUcretler) as VGDigerUcretler
+     ,sum(VGToplamTutar) as VGToplamTutar 
+     
+     ,sum(TahsilEdilenUcretler) as TahsilEdilenUcretler
+     , (case when sum(BorcToplamTutar) > 0 then 1 else 0 end) as IsOwes
+
+   From (
+      Select 
+          FirmId
+         ,TalepId
+         ,CariId
+         ,UcretTipiId 
+
+         ,(case when UcretTipiId >= 21101 and  UcretTipiId <= 21105 then sum(TaksitTutari) else 0	end	 )  as AlacakSertifikaUcreti
+         ,(case when UcretTipiId = 21111 then sum(TaksitTutari) else 0	end	 )  as AlacakESinavUcreti
+         ,(case when UcretTipiId = 21112 then sum(TaksitTutari) else 0	end	 )  as AlacakUgulamaSinavUcreti
+         ,(case when UcretTipiId = 21113 then sum(TaksitTutari) else 0	end	 )  as AlacakBasarisizEgitimUcreti
+         ,(case when UcretTipiId = 21114 then sum(TaksitTutari) else 0	end	 )  as AlacakTelafiEgitimUcreti
+         ,(case when UcretTipiId = 21115 then sum(TaksitTutari) else 0	end	 )  as AlacakDigerUcretler
+         ,sum(TaksitTutari) as AlacakToplamTutar  
+
+         ,0 as BorcSertifikaUcreti
+         ,0 as BorcESinavUcreti
+         ,0 as BorcUgulamaSinavUcreti
+         ,0 as BorcBasarisizEgitimUcreti
+         ,0 as BorcTelafiEgitimUcreti
+         ,0 as BorcDigerUcretler
+         ,0 as BorcToplamTutar  
+
+         ,0 as VGSertifikaUcreti
+         ,0 as VGESinavUcreti
+         ,0 as VGUgulamaSinavUcreti
+         ,0 as VGBasarisizEgitimUcreti
+         ,0 as VGTelafiEgitimUcreti
+         ,0 as VGDigerUcretler
+         ,0 as VGToplamTutar  
+
+         ,0 as TahsilEdilenUcretler
+         
+      From dbo.OnmOdemePlani as odemePlani
+      Where FirmId = @FirmId
+      --- ---------------------  
+      and TalepId = @TalepId
+      --- ---------------------  
+      and IsActive = 1
+      --and IsPaid = 0 << AÇMA SAKIN
+
+      group by
+          FirmId
+         ,TalepId
+         ,CariId
+         ,UcretTipiId 
+
+      union
+
+      Select 
+          FirmId
+         ,TalepId
+         ,CariId
+         ,UcretTipiId 
+
+         ,0 as AlacakSertifikaUcreti
+         ,0 as AlacakESinavUcreti
+         ,0 as AlacakUgulamaSinavUcreti
+         ,0 as AlacakBasarisizEgitimUcreti
+         ,0 as AlacakTelafiEgitimUcreti
+         ,0 as AlacakDigerUcretler
+         ,0 as AlacakToplamTutar  
+
+         ,(case when UcretTipiId >= 21101 and  UcretTipiId <= 21105 then sum(TaksitTutari) else 0	end	 )  as BorcSertifikaUcreti
+         ,(case when UcretTipiId = 21111 then sum(TaksitTutari) else 0	end	 )  as BorcESinavUcreti
+         ,(case when UcretTipiId = 21112 then sum(TaksitTutari) else 0	end	 )  as BorcUgulamaSinavUcreti
+         ,(case when UcretTipiId = 21113 then sum(TaksitTutari) else 0	end	 )  as BorcBasarisizEgitimUcreti
+         ,(case when UcretTipiId = 21114 then sum(TaksitTutari) else 0	end	 )  as BorcTelafiEgitimUcreti
+         ,(case when UcretTipiId = 21115 then sum(TaksitTutari) else 0	end	 )  as BorcDigerUcretler
+         ,sum(TaksitTutari) as BorcToplamTutar  
+
+         ,0 as VGSertifikaUcreti
+         ,0 as VGESinavUcreti
+         ,0 as VGUgulamaSinavUcreti
+         ,0 as VGBasarisizEgitimUcreti
+         ,0 as VGTelafiEgitimUcreti
+         ,0 as VGDigerUcretler
+         ,0 as VGToplamTutar  
+
+         ,0 as TahsilEdilenUcretler
+
+      From dbo.OnmOdemePlani as odemePlani
+      Where FirmId = @FirmId
+      --- ---------------------  
+      and TalepId = @TalepId
+      --- ---------------------  
+      and IsActive = 1
+      and IsPaid = 0
+
+      group by
+          FirmId
+         ,TalepId
+         ,CariId
+         ,UcretTipiId 
+
+      union
+
+      Select 
+          FirmId
+         ,TalepId
+         ,CariId
+         ,UcretTipiId 
+
+         ,0 as AlacakSertifikaUcreti
+         ,0 as AlacakESinavUcreti
+         ,0 as AlacakUgulamaSinavUcreti
+         ,0 as AlacakBasarisizEgitimUcreti
+         ,0 as AlacakTelafiEgitimUcreti
+         ,0 as AlacakDigerUcretler
+         ,0 as AlacakToplamTutar  
+
+         ,0 as BorcSertifikaUcreti
+         ,0 as BorcESinavUcreti
+         ,0 as BorcUgulamaSinavUcreti
+         ,0 as BorcBasarisizEgitimUcreti
+         ,0 as BorcTelafiEgitimUcreti
+         ,0 as BorcDigerUcretler
+         ,0 as BorcToplamTutar  
+
+         ,(case when UcretTipiId >= 21101 and  UcretTipiId <= 21105 then sum(TaksitTutari) else 0	end	 )  as VGSertifikaUcreti
+         ,(case when UcretTipiId = 21111 then sum(TaksitTutari) else 0	end	 )  as VGESinavUcreti
+         ,(case when UcretTipiId = 21112 then sum(TaksitTutari) else 0	end	 )  as VGUgulamaSinavUcreti
+         ,(case when UcretTipiId = 21113 then sum(TaksitTutari) else 0	end	 )  as VGBasarisizEgitimUcreti
+         ,(case when UcretTipiId = 21114 then sum(TaksitTutari) else 0	end	 )  as VGTelafiEgitimUcreti
+         ,(case when UcretTipiId = 21115 then sum(TaksitTutari) else 0	end	 )  as VGDigerUcretler
+         ,sum(TaksitTutari) as VGToplamTutar  
+
+         ,0 as TahsilEdilenUcretler
+         
+      From dbo.OnmOdemePlani as odemePlani
+      Where FirmId = @FirmId
+      --- ---------------------  
+      and TalepId = @TalepId
+      --- ---------------------  
+      and IsActive = 1
+      and IsPaid = 0
+      and VadeTarihi <= GETDATE()
+
+      group by
+          FirmId
+         ,TalepId
+         ,CariId
+         ,UcretTipiId 
+
+      union
+
+      -- Tahsil edilenler
+      Select 
+          FirmId
+         ,TalepId
+         ,CariId
+         ,UcretTipiId 
+
+         ,0 as AlacakSertifikaUcreti
+         ,0 as AlacakESinavUcreti
+         ,0 as AlacakUgulamaSinavUcreti
+         ,0 as AlacakBasarisizEgitimUcreti
+         ,0 as AlacakTelafiEgitimUcreti
+         ,0 as AlacakDigerUcretler
+         ,0 as AlacakToplamTutar  
+
+         ,0 as BorcSertifikaUcreti
+         ,0 as BorcESinavUcreti
+         ,0 as BorcUgulamaSinavUcreti
+         ,0 as BorcBasarisizEgitimUcreti
+         ,0 as BorcTelafiEgitimUcreti
+         ,0 as BorcDigerUcretler
+         ,0 as BorcToplamTutar  
+
+         ,0 as VGSertifikaUcreti
+         ,0 as VGESinavUcreti
+         ,0 as VGUgulamaSinavUcreti
+         ,0 as VGBasarisizEgitimUcreti
+         ,0 as VGTelafiEgitimUcreti
+         ,0 as VGDigerUcretler
+         ,0 as VGToplamTutar  
+
+         ,sum(TaksitTutari) as TahsilEdilenUcretler
+
+      From dbo.OnmOdemePlani as odemePlani
+      Where FirmId = @FirmId
+      --- ---------------------  
+      and TalepId = @TalepId
+      --- ---------------------  
+      and IsActive = 1
+      and IsPaid = 1
+
+      group by
+          FirmId
+         ,TalepId
+         ,CariId
+         ,UcretTipiId 
+
+      union all
+
+      /* OnmOdemePlani tablosunda veri yok ise  */
+      Select 
+          talep.FirmId
+         ,talep.Id as TalepId
+         ,talep.AdayId CariId
+         ,0 as UcretTipiId 
+
+         ,0 as AlacakSertifikaUcreti
+         ,0 as AlacakESinavUcreti
+         ,0 as AlacakUgulamaSinavUcreti
+         ,0 as AlacakBasarisizEgitimUcreti
+         ,0 as AlacakTelafiEgitimUcreti
+         ,0 as AlacakDigerUcretler
+         ,0 as AlacakToplamTutar  
+
+         ,0 as BorcSertifikaUcreti
+         ,0 as BorcESinavUcreti
+         ,0 as BorcUgulamaSinavUcreti
+         ,0 as BorcBasarisizEgitimUcreti
+         ,0 as BorcTelafiEgitimUcreti
+         ,0 as BorcDigerUcretler
+         ,0 as BorcToplamTutar  
+
+         ,0 as VGSertifikaUcreti
+         ,0 as VGESinavUcreti
+         ,0 as VGUgulamaSinavUcreti
+         ,0 as VGBasarisizEgitimUcreti
+         ,0 as VGTelafiEgitimUcreti
+         ,0 as VGDigerUcretler
+         ,0 as VGToplamTutar  
+
+         ,0 as TahsilEdilenUcretler
+         
+      From dbo.MtskAdayTalep as talep 
+      left join dbo.OnmOdemePlani as odemePlani on (talep.Id = odemePlani.TalepId  )
+      Where talep.FirmId = @FirmId
+      --- ---------------------  
+      and talep.Id = @TalepId
+      --- ---------------------  
+      and odemePlani.Id is null
+
+   ) as y
+   Group by 
+      FirmId
+     ,TalepId
+     ,CariId
+
+ ) as x
+ 
+ WHERE a.[FirmId] = x.FirmId
+ and   a.[TalepId] = x.TalepId
+ and   a.[AdayId] = x.CariId
+ and   (
+       isnull(a.[AlacakSertifikaUcreti],-1) <> x.AlacakSertifikaUcreti
+ or    isnull(a.[AlacakESinavUcreti],-1) <> x.AlacakESinavUcreti
+ or    isnull(a.[AlacakUygulamaSinavUcreti],-1) <> x.AlacakUygulamaSinavUcreti
+ or    isnull(a.[AlacakTelafiEgitimUcreti],-1) <> x.AlacakTelafiEgitimUcreti
+ or    isnull(a.[AlacakBasarisizEgitimUcreti],-1) <> x.AlacakBasarisizEgitimUcreti
+ or    isnull(a.[AlacakDigerUcretler],-1) <> x.AlacakDigerUcretler
+ or    isnull(a.[AlacakUcretlerToplami],-1) <> x.AlacakToplamTutar
+
+ or    isnull(a.[BorcSertifikaUcreti],-1) <> x.BorcSertifikaUcreti
+ or    isnull(a.[BorcESinavUcreti],-1) <> x.BorcESinavUcreti
+ or    isnull(a.[BorcUygulamaSinavUcreti],-1) <> x.BorcUygulamaSinavUcreti
+ or    isnull(a.[BorcTelafiEgitimUcreti],-1) <> x.BorcTelafiEgitimUcreti
+ or    isnull(a.[BorcBasarisizEgitimUcreti],-1) <> x.BorcBasarisizEgitimUcreti
+ or    isnull(a.[BorcDigerUcretler],-1) <> x.BorcDigerUcretler
+ or    isnull(a.[BorcUcretlerToplami],-1) <> x.BorcToplamTutar
+
+ or    isnull(a.[VGSertifikaUcreti],-1) <> x.VGSertifikaUcreti
+ or    isnull(a.[VGESinavUcreti],-1) <> x.VGESinavUcreti
+ or    isnull(a.[VGUygulamaSinavUcreti],-1) <> x.VGUygulamaSinavUcreti
+ or    isnull(a.[VGTelafiEgitimUcreti],-1) <> x.VGTelafiEgitimUcreti
+ or    isnull(a.[VGBasarisizEgitimUcreti],-1) <> x.VGBasarisizEgitimUcreti
+ or    isnull(a.[VGDigerUcretler],-1) <> x.VGDigerUcretler
+ or    isnull(a.[VGUcretlerToplami],-1) <> x.VGToplamTutar
+ or    isnull(a.[TahsilEdilenUcretler],-1) <> x.TahsilEdilenUcretler
+ or    isnull(a.IsOwes,0) <> x.IsOwes
+ )
+ 
+
+  Update dbo.MtskAdayTakip Set BorcDurumuTipiId = x.BorcDurumuTipiId
+  From dbo.MtskAdayTakip a,  
+  ( Select TalepId
+    , ( case when VGUcretlerToplami > 0 then 1
+             when BorcUcretlerToplami > 0 then 2 
+             when BorcUcretlerToplami = 0 then 0 end ) as BorcDurumuTipiId 
+     From dbo.MtskAdayUcret
+     Where FirmId = @FirmId
+     and   TalepId = @TalepId
+  ) as x
+  Where a.TalepId = x.TalepId
+  and   a.FirmId = @FirmId
+  --- ---------------------  
+  and   a.TalepId = @TalepId
+  --- ---------------------  
+
+END --
+
+/*CreateProcedureEnd*/
+
+
+
+
+

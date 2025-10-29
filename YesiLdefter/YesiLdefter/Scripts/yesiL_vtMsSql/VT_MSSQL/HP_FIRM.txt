@@ -1,0 +1,310 @@
+
+begin transaction
+
+ create table HP_FIRM
+ (
+   ID                    Int IDENTITY(1,1) 	NOT NULL, 
+   REC_DATE              SmallDatetime           NULL, 
+   ACTIVE_GUID		 VarChar(50)             NULL, /* FÝRMANIN AKTÝF KONTROLU, 0 = pasif, 1 = aktif, 2 = demo */
+   FIRM_GUID             VarChar(50)             NULL,
+
+   FIRM_ID               Int                     NULL, /* Þube için  kaydet, þubenin baðlý olduðu firma */
+   SHOP_ID               Int                     NULL, /* Bölüm için kaydet, bölümün baðlý olduðu þube */
+   PART_ID               Int                     NULL, /* Departman için kaydet, departmanýn baðlý olduðu bölüm */   
+   PARENT_ID             Int                     NULL, /* ÜST HESAP ID */ 
+
+   HP_TD                SmallInt                NULL, /* 1=Firm-a, 2=Shop/Þube, 3=Part/Bölüm, 4=Departman  */ 
+   HP_CODE	        VarChar(50)             NULL, 
+   HP_NAME              VarChar(100)            NULL,
+   FIRM_TD              Int                     NULL, /* Firma Tipleri */  
+   OLD_ID               Int                     NULL,   
+       	   
+   constraint		PK_HP_FIRM primary key (ID)
+ )
+
+ create index X_HP_FIRM1 on HP_FIRM (ACTIVE)
+ create index X_HP_FIRM2 on HP_FIRM (HP_CODE)
+ create index X_HP_FIRM3 on HP_FIRM (HP_NAME)
+ create index X_HP_FIRM4 on HP_FIRM (FIRM_GUID)
+
+ grant select, insert, update, delete on HP_FIRM to public
+
+commit transaction
+
+/*
+   FIRM_TD              Int                     NULL, /* Firma Tipleri */  
+
+   1000 Eðitim Kurumlarý
+   
+   1110 Özel Okul
+   111001 Anaokul
+   111002 Ýlköðretim
+   111003 Lise
+   111004 Meslek Lisesi
+   111020 Üniversite
+
+   1120 Muhtelif Kurs 
+   112001 Ýngilizce
+   112002 Bilgisayar
+   112003 ....
+
+   1130 Araç Kullaným Sertikalarý
+   113001 MTSK
+   113002 SRC
+   113003 ISMAK
+
+   1140 Diðer Eðitimler Kurumlarý
+   114001 Etüt Eðitimi
+   114002 Özel Öðretim
+   114003 Özel Yurt
+   114004 Rehabilitasyon
+
+*/
+
+begin transaction
+ /* DESTEK */
+ create table HP_FIRM_BRACKET
+ (
+   ID                    Int IDENTITY(1,1) 	 NOT NULL, 
+   REC_DATE              SmallDatetime           NULL, 
+   ACTIVE_GUID		 VarChar(50)             NULL, /* FÝRMANIN AKTÝF KONTROLU */
+   FIRM_GUID             VarChar(50)             NULL,
+   BRACKET_SGUID         VarChar(50)             NULL, /* DESTEK BAÞLANGIC TARÝHÝ */
+   BRACKET_EGUID         VarChar(50)             NULL, /* DESTEK BÝTÝÞ TARÝHÝ */
+  
+   constraint		PK_HP_FIRM_BRACKET primary key (ID)
+ )
+ create index X_HP_FIRM_BRACKET1 on HP_FIRM_BRACKET (FIRM_GUID)
+
+ grant select, insert, update, delete on HP_FIRM_BRACKET to public
+
+commit transaction
+         
+
+
+
+
+//occupant
+
+begin transaction
+ /* KULLANICI */
+ create table HP_FIRM_OCCUPANT
+ (
+   ID                   Int IDENTITY(1,1) 	NOT NULL, 
+   REC_DATE             SmallDatetime           NULL, 
+   ACTIVE_GUID		VarChar(50)             NULL, /* FÝRMANIN AKTÝF KONTROLU */
+   FIRM_GUID            VarChar(50)             NULL,
+
+   OCCUPANT_TCGUID       VarChar(50)             NULL, /* KULLANICI TC */
+   OCCUPANT_FNGUID       VarChar(50)             NULL, /* KULLANICI ADI */
+   OCCUPANT_SNGUID       VarChar(50)             NULL, /* KULLANICI SOYADI */
+   OCCUPANT_FNGUID       VarChar(50)             NULL, /* KULLANICI TAMADI */
+
+   OCCUPANT_CDGUID       VarChar(50)             NULL, /* KULLANICI KODU */
+   OCCUPANT_PSGUID       VarChar(50)             NULL, /* KULLANICI PASSWORD */
+   OCCUPANT_MTGUID       VarChar(50)             NULL, /* KULLANICI CEP TEL NO */
+   OCCUPANT_EMGUID       VarChar(50)             NULL, /* KULLANICI E-MAIL */
+     
+   constraint		PK_HP_FIRM_OCCUPANT primary key (ID)
+ )
+ create index X_HP_FIRM_OCCUPANT1 on HP_FIRM_OCCUPANT (FIRM_GUID)
+
+ grant select, insert, update, delete on HP_FIRM_OCCUPANT to public
+
+commit transaction
+
+
+//device
+
+begin transaction
+ /* CÝHAZ, BÝLGÝSAYAR */
+ create table HP_FIRM_DEVICE
+ (
+   ID                    Int IDENTITY(1,1) 	 NOT NULL, 
+   REC_DATE              SmallDatetime           NULL, 
+
+   ACTIVE_GUID	 	 VarChar(50)             NULL, /* FÝRMANIN AKTÝF KONTROLU */
+   FIRM_GUID             VarChar(50)             NULL,
+   OCCUPANT_NGUID        VarChar(50)             NULL, /* CÝHAZI GENELDE KULLANAN KULLANICI veya BÖLÜM ADI - BÝLGÝ AMAÇLI */
+
+   DEVICE_CPU_GUID       VarChar(50)             NULL, /* CPU ID */ 
+   DEVICE_BIOS_GUID      VarChar(50)             NULL, /* BIOS ID */ 
+   DEVICE_BASE_GUID      VarChar(50)             NULL, /* BASE ID */ 
+   DEVICE_VIDEO_GUID     VarChar(50)             NULL, /* VIDEO KARTI */ 
+   DEVICE_MAC_GUID       VarChar(50)             NULL, /* MAC ADRESÝ */ 
+   DEVICE_DISK_GUID      VarChar(50)             NULL, /* DISK SERI NO */ 
+   DEVICE_NAME_GUID      VarChar(50)             NULL, /* BILGISAYAR ADI */
+   DEVICE_OSV_GUID       VarChar(50)             NULL, /* OS VERSION */ 
+   DEVICE_FULL_GUID      VarChar(500)            NULL, /* CÝHAZ KODU { cpuId()-biosId()-baseId()-videoId()-macId()-diskId() }  */
+     
+   constraint		PK_HP_FIRM_OCCUPANT primary key (ID)
+ )
+ create index X_HP_FIRM_OCCUPANT1 on HP_FIRM_OCCUPANT (FIRM_GUID)
+
+ grant select, insert, update, delete on HP_FIRM_OCCUPANT to public
+
+commit transaction
+
+/*
+                        "CPU >> " + cpuId() 
+                    + "\nBIOS >> " + biosId() 
+                    + "\nBASE >> " + baseId() 
+                    + "\nVIDEO >> " + videoId() 
+                    + "\nMAC >> " + macId()
+                    + "\nDISK >> " + diskId()
+                    + "\nNAME >> " + Environment.MachineName
+                    + "\nOSVERSION >> " + Environment.OSVersion
+*/                    
+
+
+
+
+
+
+
+/*   firma  */
+
+INSERT INTO [GREEN].[dbo].[HP_FIRM]
+           ([ACTIVE]
+           ,[FIRM_GUID]
+           ,[FIRM_ID]
+           ,[SHOP_ID]
+           ,[PART_ID]
+           ,[PARENT_ID]
+           ,[HP_TD]
+           ,[HP_CODE]
+           ,[HP_NAME]
+           ,[OLD_ID])
+     
+     SELECT 
+       1 /* active */
+      ,null /* guid */
+      , 0   /* firm id */
+      , 0   /* shop id */
+      , 0   /* part id */
+      , 0   /* parent id */
+      , 1   /* td = 1 firma */
+      , a.[FIRM_CODE]  /* hp code */
+      , a.[FIRM_NAME]
+      , a.[REF_ID] /* old id */
+      
+  FROM [IYZIV2].[dbo].[VT_FIRM] a
+   
+  where [FIRM_NAME] is not null
+  
+ 
+
+
+
+/*  þube  */
+
+INSERT INTO [GREEN].[dbo].[HP_FIRM]
+           ([ACTIVE]
+           ,[FIRM_GUID]
+           ,[FIRM_ID]
+           ,[SHOP_ID]
+           ,[PART_ID]
+           ,[PARENT_ID]
+           ,[HP_TD]
+           ,[HP_CODE]
+           ,[HP_NAME]
+           ,[OLD_ID])
+     
+     SELECT 
+       1 /* active */
+      ,null /* guid */
+      , hf.ID   /* firm id */
+      , 0   /* shop id */
+      , 0   /* part id */
+      , hf.ID   /* parent id */
+      , 2   /* td = 2 þube */
+      , a.[SHOP_CODE]  /* hp code */
+      , a.[SHOP_NAME]
+      , a.[REF_ID] /* old id */
+      
+  FROM [IYZIV2].[dbo].[VT_SHOP] a
+    left outer join [GREEN].[dbo].[HP_FIRM] hf on ( a.FIRM_ID = hf.OLD_ID )
+  where [SHOP_NAME] is not null
+
+
+
+/*  BÖLÜM  */
+
+
+
+INSERT INTO [GREEN].[dbo].[HP_FIRM]
+           ([ACTIVE]
+           ,[FIRM_GUID]
+           ,[FIRM_ID]
+           ,[SHOP_ID]
+           ,[PART_ID]
+           ,[PARENT_ID]
+           ,[HP_TD]
+           ,[HP_CODE]
+           ,[HP_NAME]
+           ,[OLD_ID])
+     
+     SELECT 
+       1 /* active */
+      ,null /* guid */
+      , hf.ID   /* firm id */
+      , sh.ID   /* shop id */
+      , 0   /* part id */
+      , sh.ID  /* parent id */
+      , 3   /* td = 3 BÖLÜM */
+      , a.[PART_CODE]  /* hp code */
+      , a.[PART_NAME] 
+      , a.[REF_ID] /* old id */
+
+  FROM [IYZIV2].[dbo].[VT_PART] a 
+    left outer join [GREEN].[dbo].[HP_FIRM] hf on ( a.FIRM_ID = hf.OLD_ID AND hf.HP_TD=1)
+    left outer join [GREEN].[dbo].[HP_FIRM] sh on ( a.SHOP_ID = sh.OLD_ID and sh.HP_TD=2)
+    
+    ORDER BY a.SHOP_ID, a.PART_CODE   
+    
+
+
+
+
+
+Bilgi teknolojilerinde, CRM  
+Customer Relationship Management  
+yani Müþteri Ýliþkileri Yönetimi,  
+Conceptual Reference Model,  
+Compensating Resource Manager ve  
+Clean Room Model  
+ 
+anlamýna gelir. 
+  
+  
+  
+X. URUN HESAP PLANI 
+  
+1.   Müþteri Firma Tanýmlarý (Merkez-Þube þeklinde) CARI 
+1.1. CARININ Kullandýðý URUN ler, Lisanslar  
+1.2. CARININ URUN DESTEK Sözleþmeleri, Süreleri 
+1.3. CARI deki kullanýcýlar 
+1.4. CARI deki bilgisayarlar 
+  
+X. CARI PAZARLAMA ve SATIÞ SÝSTEMÝ 
+  
+X. CARI KURULUM ve EÐÝTÝM SÝSTEM 
+  
+X. CARI DESTEK SÝSTEMÝ 
+  
+X. CARI ISTEK TALEP SÝSTEMÝ 
+  
+X. CARI MESLEKÝ PAYLAÞIM SÝSTEMÝ/PORTAL 
+  
+  
+X. URUN RUNTIME TAKÝP/ÝZLEME SÝSTEM  
+  
+X. URUN WEB YAYIN SÝSTEMÝ 
+  
+X. URUN SOSYAL MEDYA TAKÝBÝ ???? 
+  
+X. PYS KULLANICILARI
+
+
+
+ 

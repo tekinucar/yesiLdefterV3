@@ -1,0 +1,156 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table UstFieldsIP
+ (
+        Id                        Int IDENTITY(1,1) not null,
+        TableId                   Int               not null,
+        TableIPId                 Int               not null,
+        FieldId                   Int               not null, /* FieldId : UstFields tablosunda tanımlı olan Id ile arasındaki ilişkiyi kurar. */
+
+        FullTableCode             nVarChar(70)      null, /* ProjectCode + '-' + ModuleCode + '-' + TableAlias */
+        IPCode                    nVarChar(50)      null, /* UstFields.IPCode tablosu  */
+
+        FieldNo                   SmallInt          null,
+        Caption                   nVarChar(50)      null, /* extra caption gerekirse burayı kullanabilirsin */
+        Hint                      nVarChar(100)     null, /* PlaceholderText için kullanabilirsin */
+        GroupNo                   SmallInt          null,
+        GroupLineNo               SmallInt          null,
+        ListTypeName              VarChar(100)      null, /* eski LIST_TYPES_NAME  */ 
+
+        ComponentTypeId           VarChar(30)       null,
+        CompVisible               Bit               null, /* CompVisible : ComponentVisible = true ise, bu field formda gösterilir. */
+        CompEnabled               Bit               null, /* CompEnabled : ComponentEnabled = true ise, bu field formda aktif olur. */
+        CompWidth                 SmallInt          null, /* default 100px */
+        CompColumnNo              SmallInt          null, /* aslında DataLayout için kullanılır, 1,2,3, column no */ 
+        CompRowNo                 SmallInt          null, /* aslında DataLayout için kullanılır, 1,2,3, row no */ 
+        CompColumnSpan            SmallInt          null, /* aslında DataLayout için kullanılır, 1,2 column span için */ 
+        CompCaptionAlign          SmallInt          null, /* 0. Left, 1. Top, 2. Visible not */
+        CompFontSize              SmallInt          null, /* FontSize için kullanılır, default 10px */  
+        CompFontStyle             SmallInt          null, /* FontStyle için kullanılır */  
+        CompFontColor             Int               null, /* FontColor için kullanılır, default 0 */
+        CompBackColor             Int               null, /* BackColor için kullanılır, default 0 */
+        DisplayFormat             VarChar(30)       null, /* Örnek : 'dd/MM/yyyy' gibi */
+        EditFormat                VarChar(30)       null, /* Örnek : 'dd/MM/yyyy' gibi */
+        SummaryTypeId             SmallInt          null, /* 0. Toplam, 1. Ortalama, 2. Min, 3. Max, 4. Count */
+        SummaryFormat             VarChar(30)       null, /* Örnek : 'dd/MM/yyyy' gibi, Summa için kullanılır */
+
+        DefaultTypeId             SmallInt          null,
+        Default2TypeId            SmallInt          null,
+        DefaultNumeric            Numeric(26,8)     null,
+        DefaultText               nVarchar(100)     null,
+        DefaultInt                Int               null,
+        DefaultSPTypeId           SmallInt          null,
+        DefaultSetupTypeId        Varchar(30)       null,
+        MasterTableIPCode         nVarChar(150)     null, /* MasterTableIPCode : UstTablesIP tablosunda tanımlı olan MasterTableIPCode ile arasındaki ilişkiyi kurar. */
+        MasterFieldName           VarChar(50)       null, /* MasterTableIPCode tablosundaki FieldName ile arasındaki ilişkiyi kurar. */
+
+        IsLookUpTable             Bit               null, /* Diğer tablolarda ortak kullanılacak tablolar (DonemTipiId, UlkeTipiId, IlTipiId vb..) Heryerde LookUp fieldin yetmediği detaylı bir liste gerekiyorsa SecilmisPersonelListesi gibi */
+        LockUpTableIPCode         nVarChar(50)      null, /* LockUpTableIPCode : eski ListTypeName yerine kullanılır. */
+        IsDependentField          Bit               null, /* (Aynı tabloda kendisinin bağlı olduğu fieldName : Örnek : Kendisi <IlceKodu> bağlı olduğu dependantFieldName <ILKodu> isimli diğer field  ) */
+        PropDependent             VarChar(Max)      null, /* bağlı olduğu field nedir, hangi tableIPCode ile liste okuyacak gibi bilgiler oluşacak, class hazır değil */
+        IsSearchField             Bit               null, /* SearchField : SearchField = true ise, bu field arama alanı olarak kullanılabilir. */
+        SearcTableIPCode          nVarChar(50)      null, /* SearcTableIPCode : Sadece TableIPCode varsa */
+        SearcFormIPCode           nVarChar(50)      null, /* SearcFormIPCode  : FormCode varsa */
+        IsDataCopyCode            Bit               null, /* UseDataCopyCode : DataCopyCode kullanılsın mı? */
+        DataCopyCode              nVarChar(100)     null, /* Kullanılacak DataCopyCode */
+        PropNavigatorWorks        VarChar(Max)      null, /* PropNavigator ise PropNavigatorWorks oldu */
+        XMLFieldName              VarChar(50)       null, /* XMLFieldName : XML dosyasında kullanılacak field name */
+
+        ValidationTypeId          SmallInt          null, 
+        ValidationValue1          nVarChar(100)     null, /* ValidationValue1 : Örnek : 0, 1, 2, 3, 4, 5 gibi */
+        ValidationValue2          nVarChar(100)     null, 
+        ValidationErrorText       nVarChar(100)     null, /* ValidationErrorText : Örnek : 'Bu alan boş bırakılamaz' gibi */
+        ValidationInsertControl   Bit               null, /* ValidationInsertControl : Insert sırasında bu field value ye göre kontrol et, varsa Update uygula */
+
+        KriterLineNo              SmallInt          null, 
+        KriterCaption             nVarChar(50)      null, /* KriterCaption : Örnek : 'Başlangıç Tarihi' gibi */
+        KriterOperantTypeId       SmallInt          null, 
+        KriterValue1              nVarChar(100)     null, /* KriterValue1 : Örnek : '01.01.2023' gibi */
+        KriterValue2              nVarChar(100)     null, /* KriterValue2 : Örnek : '31.12.2023' gibi */
+        KriterAlias               nVarChar(50)      null, /* KriterAlias : Örnek : 'Tarih' gibi */
+        KrterTableAlias           nVarChar(50)      null, /* KriterTableAlias : Örnek : 'UstFieldsIP' gibi */
+        KriterFieldName           VarChar(50)       null, /* KriterFieldName : Örnek : 'Tarih' gibi */
+        KriterFieldTypeId         SmallInt          null, /* KriterFieldTypeId : Örnek : 1. DateTime, 2. String, 3. Int, 4. Decimal gibi */
+
+        MoveItemTypeId            SmallInt          null, 
+        MoveItemName              VarChar(50)       null, /* MoveItemName : Örnek : 'Tarih' gibi */
+        MoveTypeId                SmallInt          null, 
+        MoveLocationTypeId        SmallInt          null, 
+        MoveLayoutTypeId          SmallInt          null, 
+
+        /* Web Scraping işlemleri için */
+        WebScrapingPageCode       Varchar(50)       null,
+        WebScrapingGetNodeId      SmallInt          null,
+        WebScrapingGetColumnNo    SmallInt          null,
+        WebScrapingSetNodeId      SmallInt          null,
+        WebScrapingSetColumnNo    SmallInt          null,
+
+	Constraint pk_UstFieldsIP primary key (Id)
+ )
+
+ create index X_UstFieldsIP01 on UstFieldsIP (FullTableCode, IPCode, FieldNo)
+
+ grant select, insert, update, delete on UstFields to public
+
+
+commit transaction
+
+/*CreateTableEnd*/
+
+
+-- ComponentTypeId
+-- DisplayFormat
+-- SummaryTypeId
+-- DefaultTypeId
+-- DefaultSPTypeId
+-- DefaultSetupTypeId
+-- ValidationTypeId
+-- KriterOperantTypeId
+-- MoveItemTypeId
+-- MoveTypeId
+-- MoveLocationTypeId
+-- MoveLayoutTypeId
+-- -------------------------------------------------------
+
+/*CreateLkpTable*/
+
+begin transaction
+
+-- ------------------------------------------------------- 
+-- ComponentTypeId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'UstFieldsIPComponentType')
+drop table [Lkp].[UstFieldsIPComponentType]
+
+create table [Lkp].[UstFieldsIPComponentType]
+(
+   Id              Int Unique not null, 
+   ComponentType   nVarchar(50)   null,
+
+   constraint  pk_UstFieldsIPComponentType primary key (Id)
+)
+
+Delete from [Lkp].[UstFieldsIPComponentType]
+Insert Into [Lkp].[UstFieldsIPComponentType] (Id, ComponentType)
+ Values 
+  ( 0,    N'Seçiniz'),
+  ( 1,    N'Table'),
+  ( 2,    N'View'),
+  ( 3,    N'Stored Procedure'),
+  ( 4,    N'Function'),
+  ( 5,    N'Trigger'),
+  ( 6,    N'Select')
+
+
+
+
+commit transaction
+
+/*CreateLkpTableEnd*/
+
+-- -------------------------------------------------------
+
+
+

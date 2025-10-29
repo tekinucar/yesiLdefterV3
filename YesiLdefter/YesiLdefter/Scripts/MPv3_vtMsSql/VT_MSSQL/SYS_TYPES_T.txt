@@ -1,0 +1,73 @@
+
+begin transaction
+
+ create table SYS_TYPES_T
+ (
+        REF_ID            Int IDENTITY(1,1) NOT NULL,
+        /* VALUE_TYPE = -1 : SmallInt, -2 : Int32, -3 : String, -4 : Byte   */
+        VALUE_TYPE        SmallInt          NULL,  
+        TYPES_NAME        VarChar(30)       NULL,
+        TABLE_NAME        VarChar(30)       NULL,
+        INT_FNAME         VarChar(30)       NULL,
+        STR_FNAME         VarChar(30)       NULL,
+        CAPTION_FNAME     VarChar(30)       NULL,
+        WHERE_SQL         VarChar(250)      NULL,
+        ORDER_BY          VarChar(250)      NULL,
+        TABLE_SQL         VarChar(4000)     NULL,
+
+   Constraint PK_SYS_TYPES_T primary key (REF_ID)
+
+ )
+
+ create index X_SYS_TYPES_T1 on SYS_TYPES_T (TABLE_NAME)
+ 
+ grant select, insert, update, delete on SYS_TYPES_T to public
+
+commit transaction
+
+
+
+
+
+-- ALTER TABLE SYS_TYPES_T ADD ORDER_BY          VarChar(250)      NULL
+-- ALTER TABLE SYS_TYPES_T ALTER COLUMN WHERE_SQL VARCHAR(250) NULL
+
+
+BEGIN TRANSACTION 
+
+ DELETE SYS_TYPES_T  
+
+ insert into SYS_TYPES_T values( 2, 'VT_FIRM', 'VT_FIRM', 'REF_ID', null, 'FIRM_NAME', null, null )
+ insert into SYS_TYPES_T values( 2, 'FINANSMANGIDERI', 'HesapFinans', 'Id', null, 'HesapAdi', 'and UstGrupTipiId = 84 and UstHesapKodu = "7030" and  FirmId = :FIRM_ID ', '' )
+
+
+COMMIT TRANSACTION 
+
+
+/*
+bu kaydýn diðer fieldlerin içeriði
+
+SYS_TYPES_T.VALUE_TYPE = 2
+SYS_TYPES_T.TYPES_NAME = 'MtskGrupSubeYeni'
+SYS_TYPES_T.TABLE_NAME = ''
+SYS_TYPES_T.INT_FNAME  = ''
+SYS_TYPES_T.STR_FNAME  = ''
+SYS_TYPES_T.CAPTION_FNAME = ''
+SYS_TYPES_T.WHERE_SQL = ''
+SYS_TYPES_T.TABLE_SQL = aþaðýdaki update
+
+
+update SYS_TYPES_T set TABLE_SQL = 
+'Select distinct donem.DonemTipiId as VALUE_INT 
+  ,2 as VALUE_TYPE
+  ,'''' as VALUE_STR 
+  ,tip.DonemTipi as VALUE_CAPTION
+From MtskGrupSubesi as donem
+  Left outer join Lkp.MtskDonemTipi as tip on ( donem.DonemTipiId = tip.Id )
+Where donem.IsActive = 1
+and donem.DonemTipiId >= :BUGUN_YILAY '
+Where REF_ID = 2022
+
+
+
+*/

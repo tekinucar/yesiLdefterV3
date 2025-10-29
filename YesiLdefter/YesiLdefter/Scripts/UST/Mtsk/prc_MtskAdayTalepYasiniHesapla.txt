@@ -1,0 +1,275 @@
+﻿
+/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_MtskAdayTalepYasiniHesapla] (@TalepId int)  
+AS BEGIN
+
+  --declare @TalepId int = 3471
+  declare @enter varchar(10) = CHAR(13) + CHAR(10)
+  declare @yFirmId int = 0
+  declare @AdayId int
+  declare @yTalepTipiId smallint = 0
+  declare @yDogumTarihi date 
+  declare @dogumdanBirGunSonrasi date
+  declare @yMevcutSurucuBelgeTarihi date
+  declare @yMevcutSertifikaTipiId smallInt = 0
+  declare @yIstenenSertifikaTipiId smallint = 0
+  declare @yDonemTipiId int = 0
+  declare @yGrupTipiId smallint = 0
+  declare @ySubeTipiId int = 0
+
+  declare @yIsMuafiyetiVar bit = 0
+  declare @ySistemUyarilari nvarchar(200)
+  declare @oldSistemUyarilari nvarchar(200)
+  
+  declare @dogumYili int = 0
+  declare @YasSiniri smallint = 0
+  declare @yasOnayiTipiId smallint = 0
+  declare @yasHazirTarihi date = null
+  declare @yeniSistemUyarisi nvarchar(200)
+  declare @grupSubeSil bit = 0
+  
+  --print '    prc_MtskAdayTalepYasiniHesapla başladı'
+
+  -- [Lkp].[MtskAdayTakipYasOnayiTipi]
+  -- 0,  'Yaşı tutuyor'
+  -- 1,  'Yaşı tutmuyor'
+  -- 2,  'Yaş için bekleme süresi doldu'
+  -- 3,  'Muafiyetle onaylı'
+  -- 4,  'Doğum tarihi yok, belirsiz'
+  -- 5,  'Yaş kontrolü yok'
+
+  Select 
+    @yDogumTarihi = aday.DogumTarihi
+   ,@yFirmId = ins.FirmId
+   ,@yTalepTipiId = isnull(ins.TalepTipiId,0)
+   ,@yMevcutSurucuBelgeTarihi = isnull(ins.MevcutSurucuBelgeTarihi, getdate())
+   ,@yMevcutSertifikaTipiId = isnull(ins.MevcutSertifikaTipiId,0)
+   ,@yIstenenSertifikaTipiId = isnull(ins.IstenenSertifikaTipiId,0)
+   ,@yDonemTipiId = isnull(ins.DonemTipiId,0) 
+   ,@yGrupTipiId = isnull(ins.GrupTipiId,0)
+   ,@ySubeTipiId = isnull(ins.SubeTipiId,0)
+   ,@yIsMuafiyetiVar = isnull(ins.IsMuafiyetiVar,0)	
+   ,@ySistemUyarilari = isnull(ins.SistemUyarilari, '')
+  From  MtskAdayTalep as ins, MtskAday as aday
+  Where ins.AdayId = aday.Id
+  and ins.Id = @TalepId
+
+  -- Talep tipi
+  if (@yTalepTipiId = 4 or -- 100 ceza ise
+      @yTalepTipiId = 5 or -- özel uygulama ise
+      @yTalepTipiId = 6)   -- özel test ise
+	  set @yIstenenSertifikaTipiId = @yMevcutSertifikaTipiId
+
+  Select top 1 @YasSiniri = isnull(saat.YasSiniri,0)
+  From MtskSaatUygulama as saat
+       left outer join GecerlilikTarihi as gt on ( saat.GecerlilikTarihiId = gt.Id )
+  Where saat.IstenenSertifikaTipiId = @yIstenenSertifikaTipiId
+  and   gt.KonuTipiId = 21102 -- Uygulama saatleri
+  order by gt.Tarih desc
+
+  -- A2 > A için hazırlandı
+  declare @farkIcinYasSiniri smallint = 0
+  declare @deneyimEnAzYilFarki smallint = 0
+
+  if (@yMevcutSertifikaTipiId > 0 and @yIstenenSertifikaTipiId > 0)
+  begin
+      Select top 1 @farkIcinYasSiniri = isnull(saat.YasSiniri,0), @deneyimEnAzYilFarki = isnull(saat.DeneyimEnAzYilFarki,0)
+      From MtskSaatUygulama as saat
+          left outer join GecerlilikTarihi as gt on ( saat.GecerlilikTarihiId = gt.Id )
+      Where saat.IstenenSertifikaTipiId = @yIstenenSertifikaTipiId
+      and   saat.MevcutSertifikaTipiId  = @yMevcutSertifikaTipiId
+      and   gt.KonuTipiId = 21102 -- Uygulama saatleri
+      order by gt.Tarih desc
+
+      -- Örnek : A2 > A : yaş sınırı 24 den 20 ye iniyor
+      if  (@farkIcinYasSiniri > 0) set @YasSiniri = @farkIcinYasSiniri 
+  end
+
+  -- Yaş için muhafiyeti var ise 2 yıl daha sınırı aşağıya çek
+  if (@yIsMuafiyetiVar = 1)
+      set @YasSiniri = @YasSiniri - 2 
+
+  --print 'Yaş Sınırı'
+  --print @YasSiniri
+
+  -- Yas Onayi
+  if (@yDogumTarihi is not null)
+  begin
+      --declare @yDogumTarihi date = convert(date, '29.05.2003', 103)
+	  set @yasOnayiTipiId = 0 -- yaşı tutuyor
+	  set @yasHazirTarihi = null
+
+      declare @bugun date = convert(date,GETDATE(),103)
+      declare @Yasi int = 0
+      declare @YilFarki int = 0
+      declare @AyFarki int = 0
+	  declare @GunFarki int = 0
+
+      if (@YasSiniri > 0)
+      begin
+          set @Yasi = DATEDIFF(YEAR, @yDogumTarihi, @bugun) 
+          set @YilFarki = @Yasi - @YasSiniri 
+		  set @dogumdanBirGunSonrasi = DATEADD(DAY, 1, @yDogumTarihi)
+          set @yasHazirTarihi = DATEADD(YEAR, @YasSiniri, @dogumdanBirGunSonrasi) 
+          set @AyFarki = DATEDIFF(MONTH, @yasHazirTarihi, @bugun) 
+		  
+          --print 'YEAR(@yDogumTarihi)'
+          --print YEAR(@yDogumTarihi)
+          --print 'YEAR(@yDogumTarihi)-'
+
+          if (@bugun < @yasHazirTarihi)
+          begin
+             set @yasOnayiTipiId = 1 -- yaşı tutmuyor
+			 set @yeniSistemUyarisi = 'Yaşı tutmuyor.' + @enter + 'Kayıt olabileceği tarih (' + convert(varchar(10), @yasHazirTarihi, 103) + ')' + @enter
+          end
+          
+		  set @dogumYili = YEAR(@yDogumTarihi);
+
+		  if (@Yasi >= 90 or @dogumYili < 1930)
+          begin
+             set @yasOnayiTipiId = 1 -- yaşı tutmuyor
+			 set @yeniSistemUyarisi = 'Yaşı tutmuyor.' + @enter + '90 yaşından büyük (' + convert(varchar(10), @yDogumTarihi, 103) + ')' + @enter
+          end
+
+          set @GunFarki = DATEDIFF(DAY, @yasHazirTarihi, @bugun)
+          
+          --print '  @GunFarki = ' + COnvert(varchar(4), @GunFarki)
+
+		  if (@GunFarki >= 0 and @GunFarki <= 30)
+          begin
+              set @yasOnayiTipiId = 2 --  2, Yaşını doldurdu
+			  set @yeniSistemUyarisi = 'uyarıyıSil'
+          end 
+		  if (@GunFarki > 30)
+          begin
+              set @yasOnayiTipiId = 5 --  5, Yaşı tutuyor
+			  if (CHARINDEX('Yaşı tutmuyor', @ySistemUyarilari) > 0) 
+			      set @yeniSistemUyarisi = 'uyarıyıSil'
+          end
+      end else
+      begin
+          set @yasOnayiTipiId = 6 -- yaş kontrolü yok
+          set @yasHazirTarihi = null 
+      end
+
+      -- A2 > A : en az deniyim farkı varsa o kontrol edilecek
+      if (@deneyimEnAzYilFarki > 0)  
+      begin
+          -- deneyim yılını bul  
+          declare @deneyimGunu smallInt = 0  
+	      set @deneyimGunu = DATEDIFF(DAY, @yMevcutSurucuBelgeTarihi, @bugun) 
+
+          --print '  @yMevcutSurucuBelgeTarihi = ' + Convert(varchar(10), @yMevcutSurucuBelgeTarihi, 103)
+          --print '  @deneyimEnAzYilFarki * 365 = ' + Convert(varchar(2),@deneyimEnAzYilFarki)
+          --print '  @deneyimGunu = ' + Convert(varchar(2),@deneyimGunu)     
+
+		  -- deneyim şartı varsa
+          if (((@deneyimEnAzYilFarki * 365) < @deneyimGunu) and @yMevcutSurucuBelgeTarihi < @bugun)          
+          begin
+              --print '  uygun'
+              -- 2, 'Deneyim şartına uygun'
+              Update MtskAdayTakip set
+                  DeneyimSartiTipiId = 2
+              Where TalepId = @TalepId
+			  and DeneyimSartiTipiId <> 2 
+          end else
+          begin
+              --print '  uygun değil'
+              -- 3, 'Deneyim şartına uygun değil'
+              Update MtskAdayTakip set
+                  DeneyimSartiTipiId = 3
+              Where TalepId = @TalepId
+			  and DeneyimSartiTipiId <> 3 
+          end --
+      end -- A2 > A
+
+  end else  
+  begin
+      set @yasOnayiTipiId = 4 -- belirsiz
+  end
+
+  -- (  yaşı tutuyor     veya yaşını doldurmuş ise) ve   Muhafiyeti var ise
+  if ((@yasOnayiTipiId = 0 or @yasOnayiTipiId = 2) and @yIsMuafiyetiVar = 1) 
+      set @yasOnayiTipiId = 3 -- yaş muafiyeti var
+
+  --print '@yeniSistemUyarisi' 
+  --print @yeniSistemUyarisi
+
+  --print '@ySistemUyarilari'
+  --print @ySistemUyarilari
+
+  if (@yeniSistemUyarisi != '')
+  begin 
+    if (CHARINDEX('Yaşı tutmuyor', @yeniSistemUyarisi) > 0)
+    begin
+       set @oldSistemUyarilari = @ySistemUyarilari
+       set @grupSubeSil = 1 -- grup ve sube yi sil
+
+       -- tarih değişimiş olabilir
+	   if (CHARINDEX('Yaşı tutmuyor', @ySistemUyarilari) > 0)
+       begin
+           declare @i1 int = 0
+           declare @i2 int = 0
+		   set @i1 = charindex('Yaşı tutmuyor', @ySistemUyarilari) 
+		   set @i2 = charindex(')', @ySistemUyarilari, @i1)
+		   if (@i1 > 1) set @i1 = @i1 - 1
+	       set @ySistemUyarilari = stuff(@ySistemUyarilari, @i1, @i2, '') 
+       end
+
+	   -- @ySistemUyarilari boş değilse
+       if (CHARINDEX('Yaşı tutmuyor', @ySistemUyarilari) = 0 and len(@ySistemUyarilari) > 0) set @ySistemUyarilari = @ySistemUyarilari + CHAR(13) + CHAR(10) + @yeniSistemUyarisi
+	   -- @ySistemUyarilari boş ise
+	   if (CHARINDEX('Yaşı tutmuyor', @ySistemUyarilari) = 0 and len(@ySistemUyarilari) = 0) set @ySistemUyarilari = @yeniSistemUyarisi
+    end
+    if (CHARINDEX('uyarıyıSil', @yeniSistemUyarisi) > 0)
+    begin
+       set @oldSistemUyarilari = @ySistemUyarilari
+       set @grupSubeSil = 0 -- artık silmesin
+       if (CHARINDEX('Yaşı tutmuyor', @ySistemUyarilari) > 0)
+       begin  	   
+		   set @i1 = charindex('Yaşı tutmuyor', @ySistemUyarilari) 
+		   set @i2 = charindex(')', @ySistemUyarilari, @i1)
+		   if (@i1 > 1) set @i1 = @i1 - 1
+	       set @ySistemUyarilari = trim(stuff(@ySistemUyarilari, @i1, @i2 + len(@enter), '')) 
+       end
+    end
+
+    --print '@oldSistemUyarilari'
+    --print @oldSistemUyarilari
+
+	if (@oldSistemUyarilari <> @ySistemUyarilari)
+    begin
+	    Update dbo.MtskAdayTalep set SistemUyarilari = @ySistemUyarilari
+        Where Id = @TalepId
+    end
+
+    if (@grupSubeSil = 1)
+    begin
+        declare @donemAcilisTarih date	    
+        Select @donemAcilisTarih = GrupBaslamaTarihi
+        From dbo.MtskDonemi
+        Where FirmId = @yFirmId 
+        and   DonemTipiId = @yDonemTipiId
+        and   GrupTipiId = @yGrupTipiId
+
+        if ((@donemAcilisTarih is null) or @donemAcilisTarih < @yasHazirTarihi)
+        begin
+            Update dbo.MtskAdayTalep set GrupTipiId = 0, SubeTipiId = 0
+            Where Id = @TalepId
+        end
+    end
+  end  
+  
+  -- Tespitleri kaydet
+  Update MtskAdayTakip set
+    SertifikaYasSiniri = @YasSiniri
+  , YasOnayiTipiId = @yasOnayiTipiId
+  , YasHazirTarihi = @yasHazirTarihi
+  Where TalepId = @TalepId
+  
+  --print '    prc_MtskAdayTalepYasiniHesapla bitti'
+
+END -- procedure
+
+/*CreateProcedureEnd*/

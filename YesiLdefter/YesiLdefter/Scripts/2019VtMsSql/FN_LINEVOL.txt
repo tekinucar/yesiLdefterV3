@@ -1,0 +1,122 @@
+
+/*
+ODEME_TD
+    -- 0 = ödenmedi, 
+    -- 1 = tahsil edildi, 
+    -- 2 = ödendi, 
+    -- 3 = hesaplar arasý para transferi
+    -- 4 = virman
+   	-- 8 = geçersiz
+   	-- 9 = iptal
+*/
+
+
+begin transaction
+
+ create table FN_LINEVOL
+ (
+   ID		             Int IDENTITY(1,1) NOT NULL,
+   FIRM_ID               Int               NULL,
+   LINE_TD               Int               NULL,    /* LINE_TD ismiyle  SYS_TYPES_L de */
+   ODEME_TD              Smallint          NULL,    /* liste yukarýda */
+      
+   TAKSIT_TD             Int               NULL,    /* taksidin oluþma nedeni, carinin talep sebepleri, iþletmenin verdiði hizmete göre deðiþmekte */
+   TAKSIT_PARENT_ID      Int               NULL,    /* taksidin oluþmasýna sebep olan Fiþin ýdsi */
+   TUTAR_TD              SmallInt          NULL,    /* Tutar Tipi : 1 = Peþinat 2 = Taksit, 10 = Nakit, 22 = Banka Havalesi, 23 = Kredi Kartý , 24 = Pos */  
+   SIRA_NO               SmallInt          NULL,    /* TAKSÝT SIRA NO GÝBÝ */
+   
+   VADE_TARIHI           Date              NULL, 
+   VADE_YIL              Smallint          NULL,
+   VADE_AY               Smallint          NULL, 
+   VADE_GUN              Smallint          NULL, 
+
+   ISLEM_TARIHI          Date              NULL, 
+   ISLEM_YIL             Smallint          NULL, 
+   ISLEM_AY              Smallint          NULL, 
+   ISLEM_GUN             Smallint          NULL, 
+   ISLEM_SAAT            VarChar(5)        NULL,
+   
+   /* BORÇLU - GÝRÝÞ YAPAN */
+   BHESAP_TD             Smallint          NULL,    /*  10 = Nakit, 22 = Banka Havalesi, 23 = Kredi Kartý , 24 = Pos, X = .... */          
+   BHESAP_ID             int               NULL,
+
+   /* ALACAKLI - ÇIKIÞ YAPAN */
+   AHESAP_TD             Smallint          NULL,    /*  10 = Nakit, 22 = Banka Havalesi, 23 = Kredi Kartý , 24 = Pos, X = .... */          
+   AHESAP_ID             int               NULL,
+
+   /* cari hesap planý ýd */
+   CARI_TD               Smallint          NULL,    /* 1 = MÜÞTERÝ, 2 = BAYÝÝ, 3 = TEDARÝKCÝ, 4 = ,  11 = personel */
+   CARI_ID               int               NULL,
+   
+   /* tutarlar */
+   ISLEM_TUTARI          Numeric(22,5)     NULL,
+   MASRAF_TUTARI         Numeric(22,5)     NULL,    /* ödeme sýrasýnda yapýlan masraf */
+   TOPLAM_TUTARI         Numeric(22,5)     NULL,    /* AlacakTutarý + MasrafTutarý */
+   KDV_ORANI             Numeric(5,2)      NULL,
+   KDV_TUTARI            Numeric(22,5)     NULL,
+   KDVSIZ_TUTAR          Numeric(22,5)     NULL,
+   TAHSIL_TUTARI         Numeric(22,5)     NULL,    /* taksitlerde bekleyen borç için ne kadar tahsil ediliði ?, eksik veya fazla için iþlem yapýlcak */  
+   TEMP1_TUTARI          Numeric(22,5)     NULL,    /* TEMP1_TUTARI = ISLEM_TUTARI, ISLEM_TUTARI = TAHSIL_TUTARI */
+   TEMP2_TUTARI          Numeric(22,5)     NULL,
+   TEMP_ID               Int               NULL,    /* Taksitli Ýþlemlerde : fazla veya eksik parayý daðýtmaya baþlandýðý ýd */ 
+   PARA_ID               Int               NULL, 
+   DOVIZ_TUTARI          Numeric(22,5)     NULL,
+   DOVIZ_KURU            Numeric(22,5)     NULL,
+   DOVIZ_YERI_ID         Int               NULL,
+
+   BELGE_TARIHI          Date              NULL,    /* Senet veya çekin veya baþka bir belgenin vade tarihi */ 
+   BELGE_NO              varchar(20)       NULL,    
+   ACIKLAMA              varchar(100)      NULL,
+
+   PARENT_TD             Int               NULL, /* baðlatý tablosu = 10 = FN_LINEVOL gibi*/
+   PARENT_ID             Int               NULL, /* FN_LINEVOL.ID  gibi */  
+   
+   constraint PK_FN_LINEVOL primary key (ID)
+
+   , CONSTRAINT FK_FN_LINEVOL_HP_CARI FOREIGN KEY (CARI_ID) 
+     REFERENCES HP_CARI (ID)
+   
+ )
+ -- mysql_add
+ 
+
+ create index X_FN_LINEVOL01 on FN_LINEVOL (FIRM_ID, VADE_TARIHI);
+ create index X_FN_LINEVOL02 on FN_LINEVOL (FIRM_ID, ISLEM_TARIHI);
+ create index X_FN_LINEVOL03 on FN_LINEVOL (FIRM_ID, LINE_TD);
+ create index X_FN_LINEVOL05 on FN_LINEVOL (FIRM_ID, CARI_TD, CARI_ID, TAKSIT_TD, TAKSIT_PARENT_ID);
+
+  grant select, insert, update, delete on FN_LINEVOL to public
+
+commit transaction
+
+
+
+
+/*
+
+müþteri borçlarýnýn ve banka kredilerinin 
+fiþ baþlýðý bilgisi .... tablosunda 
+taksitlerde bu tabloda belirtilen verilere bakarak hazýrlanmakta
+
+
+müþteri taksidi için
+---------------------------------------------------------
+TAKSIT_TD        =  taksidin oluþma nedeni, carinin talep sebepleri, iþletmenin verdiði hizmete göre deðiþmekte 
+TAKSIT_PARENT_ID =  taksidi oluþturan baþlýðýn id si,   taksidin oluþmasýna sebep olan Fiþin ýd de baþlýkta saklý 
+BHESAP_TD        = 10,22,24
+AHESAP_TD        = 28
+CARI_TD          = 50
+
+banka kredisi için
+---------------------------------------------------------
+TAKSIT_TD        =  22 = banka hesabý iþareti  
+TAKSIT_PARENT_ID =  banka kredi baþlýðý 
+BHESAP_TD        = 26
+AHESAP_TD        = 10,22,23
+CARI_TD          = null
+ 
+
+
+*/
+
+

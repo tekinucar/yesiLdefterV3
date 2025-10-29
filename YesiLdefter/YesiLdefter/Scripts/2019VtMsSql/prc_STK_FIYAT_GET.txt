@@ -1,0 +1,83 @@
+﻿
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[prc_STK_FIYAT_GET]') AND type in (N'P', N'PC'))
+DROP PROCEDURE [dbo].[prc_STK_FIYAT_GET]
+GO
+
+
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+CREATE PROCEDURE [dbo].[prc_STK_FIYAT_GET] 
+  ( @_URUN_ID         Integer,
+    @_BIRIM_NO        SmallInt,
+    @_ISLEM_TARIHI    Date,
+    @_ISLEM_SAAT      varchar(8) ) 
+AS BEGIN
+
+      -- stk fiyatları için 
+    declare @_fyt_TODAY       Int = 0
+    declare @_fyt_GUN_ID_A    Int = 0
+    declare @_fyt_GUN_ID_B    Int = 0
+
+    if (@_BIRIM_NO = 0) or (@_BIRIM_NO is null) 
+	    set @_BIRIM_NO = 1
+          
+    if ((@_ISLEM_TARIHI < CONVERT(DATE, '01.01.1900', 104)) or (@_ISLEM_TARIHI is null))
+	      set @_ISLEM_TARIHI = CONVERT(DATE, GETDATE(), 104)
+          
+    if ((@_ISLEM_SAAT = '') or (@_ISLEM_SAAT is null)) 
+        set @_ISLEM_SAAT = '00:01'
+
+    set @_fyt_TODAY = DATEPART(weekday,@_ISLEM_TARIHI)	
+      
+    -- işlem hafta içi ise
+    if ((@_fyt_TODAY >= 2) and (@_fyt_TODAY <= 6))
+    begin
+      set @_fyt_GUN_ID_A = 0
+      set @_fyt_GUN_ID_B = 1
+    end 
+
+    -- işlem c.tesi ise
+    if (@_fyt_TODAY = 7)
+    begin
+      set @_fyt_GUN_ID_A = 2
+      set @_fyt_GUN_ID_B = 4
+    end 
+    
+    -- işlem pazar ise
+    if (@_fyt_TODAY = 1)
+    begin
+      set @_fyt_GUN_ID_A = 3
+      set @_fyt_GUN_ID_B = 4
+    end 
+
+    -- sonuç SQL
+      
+    Select Top 1 fyt.* From STK_FIYAT fyt
+    where fyt.URUN_ID = @_URUN_ID
+    and   fyt.BIRIM_NO = @_BIRIM_NO
+    and   fyt.GECERLI_BAS_TARIH <= @_ISLEM_TARIHI
+    and   isnull(fyt.GECERLI_BAS_SAAT, '00:01') <= @_ISLEM_SAAT
+    and   isnull(fyt.GECERLI_BIT_TARIH,convert(date,getdate(), 103)) >= @_ISLEM_TARIHI
+    and   isnull(fyt.GECERLI_BIT_SAAT, '23:59') >= @_ISLEM_SAAT
+    and  (isnull(fyt.GUN_TD, -1) = -1 or
+          isnull(fyt.GUN_TD, -1) = @_fyt_GUN_ID_A or
+          isnull(fyt.GUN_TD, -1) = @_fyt_GUN_ID_B  )
+  
+    order by  fyt.GECERLI_BAS_TARIH desc
+             ,fyt.GECERLI_BAS_SAAT desc
+      ,isnull(fyt.GUN_TD,-1) desc 
+        
+
+
+END;
+
+
+GO
+
+

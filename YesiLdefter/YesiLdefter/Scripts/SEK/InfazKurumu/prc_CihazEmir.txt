@@ -1,0 +1,44 @@
+﻿USE [u7093888_Ustad01]
+GO
+
+/****** Object:  StoredProcedure [dbo].[prc_CihazEmir]    Script Date: 07.10.2020 15:49:06 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+CREATE PROCEDURE [dbo].[prc_CihazEmir] (@Id int, @FirmId int, @TalepTipiId smallint)  
+--ALTER PROCEDURE [dbo].[prc_CihazEmir] (@Id int, @FirmId int, @TalepTipiId smallint)  
+AS BEGIN 
+
+
+
+
+if (@Id = 0)
+begin
+  INSERT INTO [dbo].[CihazEmri]
+           ([FirmId]
+           ,[IsRun]
+           ,[TalepTipiId]
+           ,[TarihSaat]
+		   ,[RunTarihSaat])
+     VALUES
+           (@FirmId
+           ,0
+           ,@TalepTipiId
+           ,getdate()
+		   ,null)
+end else
+begin 
+  UPDATE [dbo].[CihazEmri]
+   SET [IsRun] = 1
+      ,[RunTarihSaat] = getdate()
+ WHERE Id = @Id
+end
+
+END
+GO
+
+

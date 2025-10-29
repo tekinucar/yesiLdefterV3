@@ -1,0 +1,115 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[sp_GenerateTableScript]
+(
+    @SchemaName VARCHAR(3),
+    @TableName VARCHAR(100)
+)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+	DECLARE @Enter varchar(4) = CHAR(13) + CHAR(10)
+	DECLARE @Script NVARCHAR(MAX);
+
+
+    print '  ' + @Enter 
+    print '  /*CreateTable*/ ' + @Enter
+    print '  ' + @Enter
+    print '  begin transaction ' + @Enter
+    print '  ' + @Enter
+    print '  create table ' + @SchemaName + '.' + @TableName + ' ' + @Enter
+    print '  ( ' + @Enter
+    print '    Id                 Int IDENTITY(1,1) not null, ' + @Enter
+    print '    FirmId             Int               not null, ' + @Enter
+    print '    IsActive           Bit               null, ' + @Enter
+    print '  ' + @Enter
+    print '  ' + @Enter
+    print '  ' + @Enter
+    print '    Constraint pk_' + @TableName + ' primary key (Id) ' + @Enter
+    print '  ) ' + @Enter
+    print '  ' + @Enter
+    print '  create index X_' + @TableName + '_01 on ' + @SchemaName + '.' + @TableName + ' (FirmId, ???) ' + @Enter
+    print '  ' + @Enter
+    print '  grant select, insert, update, delete on ' + @SchemaName + '.' + @TableName + ' to public ' + @Enter
+    print '  ' + @Enter
+    print '  commit transaction ' + @Enter
+    print '  ' + @Enter
+    print '  /*CreateTableEnd*/ ' + @Enter
+    print '  ' + @Enter
+    print '  ' + @Enter
+    print '  /*CreateTrigger*/' + @Enter
+    print '  ' + @Enter
+    print '  ' + @Enter
+    print '  /*CreateTriggerEnd*/' + @Enter
+    print '  ' + @Enter
+    print '  ' + @Enter
+    print '  ' + @Enter
+    print '  /*CreateLkpTable*/' + @Enter
+    print '  ' + @Enter
+    print '  ' + @Enter
+    print '  /*CreateLkpTableEnd*/' + @Enter
+    print '  ' + @Enter
+    print '  ' + @Enter
+    print '  ' + @Enter
+    print '  /*CreateData*/' + @Enter
+    print '  ' + @Enter
+    print '  ' + @Enter
+    print '  /*CreateDataEnd*/' + @Enter
+    print '  ' + @Enter
+
+
+
+
+	   
+
+    set @Script = '  ' + @Enter 
+    set @Script = @Script + '  /*CreateTable*/ ' + @Enter
+    set @Script = @Script + '  ' + @Enter
+    set @Script = @Script + '  begin transaction ' + @Enter
+    set @Script = @Script + '  ' + @Enter
+    set @Script = @Script + '  create table ' + @SchemaName + '.' + @TableName + ' ' + @Enter
+    set @Script = @Script + '  ( ' + @Enter
+    set @Script = @Script + '    Id                 Int IDENTITY(1,1) not null, ' + @Enter
+    set @Script = @Script + '    FirmId             Int               not null, ' + @Enter
+    set @Script = @Script + '    IsActive           Bit               null, ' + @Enter
+    set @Script = @Script + '  ' + @Enter
+    set @Script = @Script + '  ' + @Enter
+    set @Script = @Script + '  ' + @Enter
+    set @Script = @Script + '    Constraint pk_' + @TableName + ' primary key (Id) ' + @Enter
+    set @Script = @Script + '  ) ' + @Enter
+    set @Script = @Script + '  ' + @Enter
+    set @Script = @Script + '  create index X_' + @TableName + '_01 on ' + @SchemaName + '.' + @TableName + ' (FirmId, ???) ' + @Enter
+    set @Script = @Script + '  ' + @Enter
+    set @Script = @Script + '  grant select, insert, update, delete on ' + @SchemaName + '.' + @TableName + ' to public ' + @Enter
+    set @Script = @Script + '  ' + @Enter
+    set @Script = @Script + '  commit transaction ' + @Enter
+    set @Script = @Script + '  ' + @Enter
+    set @Script = @Script + '  /*CreateTableEnd*/ ' + @Enter
+    set @Script = @Script + '  ' + @Enter 
+    set @Script = @Script + '  ' + @Enter 
+    set @Script = @Script + '  /*CreateTriggerEnd*/' + @Enter
+    set @Script = @Script + '  ' + @Enter
+    set @Script = @Script + '  ' + @Enter
+    set @Script = @Script + '  ' + @Enter
+    set @Script = @Script + '  /*CreateLkpTable*/' + @Enter
+    set @Script = @Script + '  ' + @Enter
+    set @Script = @Script + '  ' + @Enter
+    set @Script = @Script + '  /*CreateLkpTableEnd*/' + @Enter
+    set @Script = @Script + '  ' + @Enter
+    set @Script = @Script + '  ' + @Enter
+    set @Script = @Script + '  ' + @Enter
+    set @Script = @Script + '  /*CreateData*/' + @Enter
+    set @Script = @Script + '  ' + @Enter
+    set @Script = @Script + '  ' + @Enter
+    set @Script = @Script + '  /*CreateDataEnd*/' + @Enter
+    set @Script = @Script + '  ' + @Enter
+	   
+
+
+    -- Script'i geri döndür
+    SELECT @Script AS GeneratedScript;
+    
+END
+
+/*CreateProcedureEnd*/

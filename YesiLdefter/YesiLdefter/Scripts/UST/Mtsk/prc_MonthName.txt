@@ -1,0 +1,21 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_MonthName] (@Id int, @MonthName nvarchar(15) output)  
+AS BEGIN
+   
+   if (@Id = 1)  set @MonthName = 'Ocak'
+   if (@Id = 2)  set @MonthName = 'Şubat'
+   if (@Id = 3)  set @MonthName = 'Mart'
+   if (@Id = 4)  set @MonthName = 'Nisan'
+   if (@Id = 5)  set @MonthName = 'Mayıs'
+   if (@Id = 6)  set @MonthName = 'Haziran'
+   if (@Id = 7)  set @MonthName = 'Temmuz'
+   if (@Id = 8)  set @MonthName = 'Ağustos'
+   if (@Id = 9)  set @MonthName = 'Eylül'
+   if (@Id = 10) set @MonthName = 'Ekim'
+   if (@Id = 11) set @MonthName = 'Kasım'
+   if (@Id = 12) set @MonthName = 'Aralık'
+
+END -- procedure
+
+/*CreateProcedureEnd*/

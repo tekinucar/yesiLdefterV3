@@ -1,0 +1,71 @@
+﻿
+
+begin transaction
+
+create table HP_URUN
+(
+  ID                  Int IDENTITY(1,1) NOT NULL,
+  FIRM_ID             Int                 NULL,
+  ISACTIVE            SmallInt            NULL, 
+  URUN_KODU           VarChar(50)         NULL,
+  URUN_ADI            VarChar(100)        NOT NULL,
+  URUN_GRUP_ID        Int                 NULL,
+  URUN_TIPI_TD        SmallInt            NULL,
+  ALIS_MESAJI         VarChar(100)        NULL,
+  SATIS_MESAJI        VarChar(100)        NULL,
+  ACIKLAMA            VarChar(255)        NULL,
+  
+  ALIS_KDV            SmallInt            NULL,
+  SATIS_KDV           SmallInt            NULL,
+  VERGI_TURU1_ID      Int                 NULL, /* Parent table > HP_VERGI.ID */ 
+  VERGI_TURU2_ID      Int                 NULL,
+  VERGI_TURU3_ID      Int                 NULL,
+  
+  BIRIM_1             VarChar(10)         NULL,
+  BIRIM_2             VarChar(10)         NULL,
+  BIRIM_3             VarChar(10)         NULL,
+  BIRIM_2_CARPANI     Numeric(12,5)       NULL,
+  BIRIM_3_CARPANI     Numeric(12,5)       NULL,
+  
+  KUSURAT_SAYISI_1    SmallInt            NULL, /* 0 ile 5 arası */
+  KUSURAT_SAYISI_2    SmallInt            NULL, /* 0 ile 5 arası */
+  KUSURAT_SAYISI_3    SmallInt            NULL, /* 0 ile 5 arası */
+  
+  /* manuel doldurulmuyor */ 
+  ALIS_BIRIMI         VarChar(10)         NULL, /* Bu alanlar triger tarafında ALIS_BIRIMI_ID ye bakarak BIRIM_1, _2 veya _3 ten value alıyor */
+  SATIS_BIRIMI        VarChar(10)         NULL, /* daha sonra aramalarda, listelerde extra işlem yapılmasına gerek kalmadan buradan veri okunuyor  */
+  ALIS_BIRIM_NO       SmallInt            NULL,
+  SATIS_BIRIM_NO      SmallInt            NULL,
+  
+  BARKOD1             VarChar(20)         NULL,  -- 1. BIRIM_1
+  BARKOD2             VarChar(20)         NULL,  -- 2. BIRIM_2
+  BARKOD3             VarChar(20)         NULL,  -- 3. BIRIM_3
+
+  PARA_TURU           SmallInt            NULL, /* 0- TL  0 > Dolar, Mark */
+  B_DOVIZ_YERI_ID     SmallInt            NULL,
+  A_DOVIZ_YERI_ID     SmallInt            NULL,
+    
+  FIYAT_POLITIKASI_TD SmallInt            NULL,
+  URUN_IZLEME_TD      SmallInt            NULL, /* buraya zamanla özellil ıd ekleyebilirsin : x. serilot takibi var, x. hızlı mal kabulü var */
+  URUN_CALISMA_TD     SmallInt            NULL, /* 0 AL-SAT, 1. ÜRET-SAT  ... */
+  SATIS_DURUMU        SmallInt            NULL, /* 0- Normal, 1-Satışı Yok 2- Geçiçi Süreyle Yok, 3. Satısı Bitecek   */
+
+  OLD_REF_ID          Int                 NULL, 
+
+  constraint PK_HP_URUN primary key (ID)
+)
+ -- mysql_add
+ 
+ create     index X_HP_URUN01 on HP_URUN (FIRM_ID);
+ create     index X_HP_URUN02 on HP_URUN (URUN_KODU);
+ create     index X_HP_URUN03 on HP_URUN (URUN_ADI);
+ create     index X_HP_URUN04 on HP_URUN (URUN_GRUP_ID);
+ create     index X_HP_URUN05 on HP_URUN (BARKOD1);
+ create     index X_HP_URUN06 on HP_URUN (BARKOD2);
+ create     index X_HP_URUN07 on HP_URUN (BARKOD3);
+ 
+ grant select, insert, update, delete on HP_URUN to public
+
+commit transaction
+
+

@@ -1,0 +1,85 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_MtskUygulamaDersPlaniSaatleriGuncelle] (@SablonUygulamaFId int)  
+AS BEGIN
+
+  declare @FirmId int
+  declare @DonemTipiId int
+
+  Select 
+    @FirmId = [FirmId]
+  , @DonemTipiId = [DonemTipiId]
+  From [dbo].[MtskSablonUygulamaF]
+  Where Id = @SablonUygulamaFId
+  
+
+  -- ders planı olmayanları sıfırla
+  -- ders planı silme işleminden dolayı
+  Update MtskAdayTakip set
+    SimulatorDersToplami = 0
+  , AkanTrafikDersToplami = 0
+  , UygulamaliDersToplami = 0
+  From MtskAdayTakip a, 
+  (
+     Select Id from MtskAday 
+     Where DonemTipiId = @DonemTipiId
+     and Id not in (
+        Select distinct u.AdayId
+        From MtskUygulamaliDers as u
+        Where u.DonemTipiId = @DonemTipiId )
+  ) x
+  Where a.Id = x.Id
+  
+  -- Donem içindeki tüm adaylar update oluyor
+  Update MtskAdayTakip set
+    SimulatorDersToplami = x.SimulatorAdet
+  , AkanTrafikDersToplami = x.AkanTrafikAdet
+  , UygulamaliDersToplami = x.UygulamaAdet
+  From MtskAdayTakip a, 
+  (
+   Select t.AdayId 
+      , sum(t.SimulatorAdet) as SimulatorAdet
+	  , sum(t.AkanTrafikAdet) as AkanTrafikAdet
+	  , sum(t.UygulamaAdet) as UygulamaAdet
+   from (
+      Select u.AdayId
+	  , count(u.Id) as SimulatorAdet 
+	  , 0 as AkanTrafikAdet 
+	  , 0 as UygulamaAdet
+      From MtskUygulamaliDers as u
+      Where u.DonemTipiId = @DonemTipiId
+	  and   u.EgitimYeriTipiId = 3
+      group by u.AdayId
+
+	  union all
+
+      Select u.AdayId
+	  , 0 as SimulatorAdet 
+	  , count(u.Id) as AkanTrafikAdet 
+	  , 0 as UygulamaAdet
+      From MtskUygulamaliDers as u
+      Where u.DonemTipiId = @DonemTipiId
+	  and   u.EgitimYeriTipiId = 2
+      group by u.AdayId
+
+	  union all
+
+      Select u.AdayId
+	  , 0 as SimulatorAdet 
+	  , 0 as AkanTrafikAdet 
+	  , count(u.Id) as UygulamaAdet 
+      From MtskUygulamaliDers as u
+      Where u.DonemTipiId = @DonemTipiId
+	  group by u.AdayId
+
+	  ) as t
+	  group by t.AdayId 
+  ) x
+  Where a.AdayId = x.AdayId
+
+
+  EXECUTE [dbo].[prc_MtskAdayTakip]
+
+END -- procedure
+
+/*CreateProcedureEnd*/

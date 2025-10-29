@@ -1,0 +1,272 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_MtskAdayTablesInsert] (@TalepId int)  
+AS BEGIN
+
+  declare @yFirmId int = 0
+  declare @yAdayId int = 0 
+  declare @yTalepTipiId smallInt = 0
+  declare @yDonemTipiId int = 0
+  declare @yGrupTipiId smallInt = 0
+  declare @ySubeTipiId smallInt = 0
+  declare @yTcNo varchar(11) = ''
+
+  declare @onayBelgeler bit = 0
+  declare @onayAdliSicil bit = 0
+  declare @onayAdres bit = 0
+  declare @onayImza bit = 0
+  declare @onayOgrenim bit = 0
+  declare @onaySaglik bit = 0
+  declare @onaySertifika bit = 0
+  declare @onaySozlesme bit = 0
+  
+  Select 
+       @yFirmId = ins.FirmId
+      ,@yAdayId = isnull(ins.AdayId, 0) 
+      ,@yTcNo = isnull(ins.TcNo,'')
+      ,@yTalepTipiId = isnull(ins.TalepTipiId, 0)
+      ,@yDonemTipiId = isnull(ins.DonemTipiId,0)
+      ,@yGrupTipiId = isnull(ins.GrupTipiId,0)
+      ,@ySubeTipiId = isnull(ins.SubeTipiId,0)
+  From MtskAdayTalep as ins
+  Where ins.Id = @TalepId
+     
+  if (@yTalepTipiId = 1) or  -- yeni sertifika 
+     (@yTalepTipiId = 3) or  -- Nakil 2. +4 hak 
+     (@yTalepTipiId = 4)     -- 100 ceza
+  begin
+      set @onayBelgeler = 1
+      set @onayAdliSicil = 1
+      set @onayAdres = 1
+      set @onayImza = 1
+      set @onayOgrenim = 1
+      set @onaySaglik = 1
+      set @onaySertifika = 1
+      set @onaySozlesme = 1
+  end 
+  
+  
+  -- MtskAdayBelgeler Insert
+  if ( Select count(*) ADET from dbo.MtskAdayBelgeler 
+       where TalepId = @TalepId 
+     ) = 0 and (@onayBelgeler = 1)
+  begin 
+       insert into dbo.MtskAdayBelgeler (
+              FirmId , TalepId , AdayId , TcNo , DonemTipiId 
+            , BiyometrikTarandi  , BasvuruFotoTarandi  , OgrenimTarandi  , SaglikTarandi  , AdliSicilTarandi  , ImzaTarandi  , Sozlesme1Tarandi  , Sozlesme2Tarandi  , AdresKodlandi , BelgelerTarandi  , AdayKaydiYapildi 
+            , BiyometrikYuklendi , BasvuruFotoYuklendi , OgrenimYuklendi , SaglikYuklendi , AdliSicilYuklendi , ImzaYuklendi , Sozlesme1Yuklendi , Sozlesme2Yuklendi , AdresYuklendi , BelgelerYuklendi 
+            , IsSertifikaUcreti  , SertifikaUcretiIsPaid , IsUcretsiz , IsFatura ) values
+            ( @yFirmId, @TalepId, @yAdayId, @yTcNo,  @yDonemTipiId,
+                0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+                0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+                0,  0,  0,  0 ) 
+       print ' create : [MtskAdayBelgeler]'
+  end -- MtskAdayBelgeler
+        
+  -- MtskAdayAdliSicil Insert
+  if ( Select count(*) ADET from dbo.MtskAdayAdliSicil
+       where TalepId = @TalepId 
+     ) = 0 and (@onayAdliSicil = 1)
+  begin 
+       Insert into [dbo].[MtskAdayAdliSicil]
+           (FirmId, TalepId, AdayId) VALUES (@yFirmId, @TalepId, @yAdayId ) 
+       print ' create : [MtskAdayAdliSicil]'
+  end
+
+  -- MtskAdayAdres Insert
+  if ( Select count(*) ADET from dbo.MtskAdayAdres
+       where TalepId = @TalepId 
+     ) = 0 and (@onayAdres = 1) 
+  begin 
+       Insert into [dbo].[MtskAdayAdres]
+            (FirmId, TalepId, AdayId) VALUES (@yFirmId, @TalepId, @yAdayId )  
+       print ' create : [MtskAdayAdres]'
+  end
+
+  -- MtskAdayImza Insert
+  if ( Select count(*) ADET from dbo.MtskAdayImza
+       where TalepId = @TalepId 
+     ) = 0 and (@onayImza = 1) 
+  begin 
+       Insert into [dbo].[MtskAdayImza]
+            (FirmId, TalepId, AdayId) VALUES (@yFirmId, @TalepId, @yAdayId ) 
+       print ' create : [MtskAdayImza]'
+  end
+
+  -- MtskAdayOgrenim Insert
+  if ( Select count(*) ADET from dbo.MtskAdayOgrenim
+       where TalepId = @TalepId 
+     ) = 0 and (@onayOgrenim = 1) 
+  begin 
+       Insert into [dbo].[MtskAdayOgrenim]
+            (FirmId, TalepId, AdayId) VALUES (@yFirmId, @TalepId, @yAdayId )   
+       print ' create : [MtskAdayOgrenim]'
+  end
+
+  -- MtskAdaySaglik Insert
+  if ( Select count(*) ADET from dbo.MtskAdaySaglik
+       where TalepId = @TalepId 
+     ) = 0 and (@onaySaglik = 1) 
+  begin 
+       Insert into [dbo].[MtskAdaySaglik]
+            (FirmId, TalepId, AdayId) VALUES (@yFirmId, @TalepId, @yAdayId )   
+       print ' create : [MtskAdaySaglik]'
+  end
+
+  -- MtskAdaySertifika Insert
+  if ( Select count(*) ADET from dbo.MtskAdaySertifika
+       where TalepId = @TalepId 
+     ) = 0 and (@onaySertifika = 1) 
+  begin 
+       Insert into [dbo].[MtskAdaySertifika]
+            (FirmId, TalepId, AdayId) VALUES (@yFirmId, @TalepId, @yAdayId ) 
+       print ' create : [MtskAdaySertifika]'
+  end
+
+  -- MtskAdaySozlesme Insert
+  if ( Select count(*) ADET from [dbo].[MtskAdaySozlesme]
+       where TalepId = @TalepId 
+     ) = 0 and (@onaySozlesme = 1) 
+  begin 
+       Insert into [dbo].[MtskAdaySozlesme]
+            ([FirmId],[TalepId],[AdayId]) VALUES (@yFirmId, @TalepId, @yAdayId) 
+       print ' create : [MtskAdaySozlesme]'
+  end
+
+  -- MtskAdayUcret Insert
+  if ( Select count(*) ADET from [dbo].[MtskAdayUcret]
+       where TalepId = @TalepId 
+     ) = 0 
+  begin 
+       Insert into [dbo].[MtskAdayUcret]
+           ([FirmId],[TalepId],[AdayId],[DonemTipiId],[TalepTipiId]
+           ,[IsUcretli],[IsUcretsiz],[IsLock],[IsOwes]
+           ,[SertifikaUcreti]
+           ,[BirSaatOzelDersUcreti],[AlacagiOzelDersSayisi]
+           ,[KontejanTipiId],[KontejanIndirimOrani],[KontejanIndirimTutari],[KontejanSonrasiUcret]
+           ,[AnlasilanUcret],[IskontoOrani],[PesinatTutari]
+           ,[TaksitSayisiTipiId],[TaksitlendirilecekUcret]
+           ,[ESinavUcreti],[UygulamaSinavUcreti]
+           ,[SertifikaVeSinavUcreti],[IsSinavUcretiTaksitli]
+           ,[OdemeTipiId],[OdemeBaslamaTarihi],[OdemeCepTelefonu],[ESinavUcretTipiId],[USinavUcretTipiId]
+           ,[MebbisSertifikaUcreti],[MebbisTeoDersSaati],[Mebbis1SaatTeoDersUcreti],[MebbisUygDersSaati],[Mebbis1SaatUygDersUcreti]
+           ,[BorcSertifikaUcreti],[BorcESinavUcreti],[BorcUygulamaSinavUcreti],[BorcTelafiEgitimUcreti],[BorcBasarisizEgitimUcreti],[BorcDigerUcretler],[BorcUcretlerToplami]
+           ,[VGSertifikaUcreti],[VGESinavUcreti],[VGUygulamaSinavUcreti],[VGTelafiEgitimUcreti],[VGBasarisizEgitimUcreti],[VGDigerUcretler],[VGUcretlerToplami]
+           ,[PersonelId],[TeklifTarihi],[VeriKaynakId])
+			VALUES (@yFirmId, @TalepId, @yAdayId, @yDonemTipiId, @yTalepTipiId
+			, 0, 0, 0, 0 -- IsUcretli
+			, 0    -- SertifikaUcreti
+			, 0, 0 -- BirSaat..
+			, 0, 0, 0, 0 -- Kont..
+			, 0, 0, 0    -- Anlas..
+			, 0, 0       -- Taksi..
+			, 0, 0       -- ESina..
+			, 0, 0       -- Serti..
+			, 0, null,'', 0, 0    -- Odeme..
+			, 0, 0, 0, 0, 0       -- Mebbi..
+			, 0, 0, 0, 0, 0, 0, 0 -- BorcS..
+			, 0, 0, 0, 0, 0, 0, 0 -- VGSer..
+			, 0, null, 0    -- Perso..
+			)
+       print ' create : [MtskAdayUcret]'
+  end
+
+			   
+  -- MtskAdayTakip Insert
+  if ( Select count(*) ADET from dbo.[MtskAdayTakip] 
+       where TalepId = @TalepId 
+     ) = 0 
+  begin 
+     INSERT INTO dbo.MtskAdayTakip
+           (FirmId, TalepId, AdayId,
+            DonemTipiId, GrupTipiId, SubeTipiId,
+            TalepTipiId, KayitTipiId, ZamanlamaTipiId,
+            IsGrupSubeYok, IsActive,
+            MebbisKurumOnayi, MebbisDurumTipiId,
+            SertifikaYasSiniri, YasOnayiTipiId, YasHazirTarihi,
+            DeneyimSartiTipiId, IsDeneyimEnAz, DeneyimSertifikaTipiId,
+            OzurDurumuTipiId, OkutmanTalebi, TercumanTalebi, YabanciDilTipiId, IsKontejan, AracTipiId,
+            BelgelerGeldi, BelgelerTarandi, BelgelerYuklendi, BorcDurumuTipiId,
+
+            TeorikBaslamaTarihi, TeorikBitisTarihi, TeorikDersTipiId, 
+
+            eSinavNo, eSinavDurumTipiId, eSinavMuracatTarihi, eSinavUcretTipiId, IseSinavBTeslimEdildi, 
+            eSinavNoGirdigi, eSinavSonucTipiId, eSinavSonrasiTipiId, eSinavDetayId, eSinavBasariTarihi,
+
+            UygulamaliDersKredisi, Arti4DersKredisi, TelafiDersKredisi, BasarisizDersKredisi,
+
+            IsUygulamaliDersPlanli, UygulamaBaslamaTarihi, UygulamaBitisTarihi,
+		    SimulatorDersToplami, EgitimAlaniDersToplami, AkanTrafikDersToplami, UygulamaliDersToplami,
+            UygulamaliDersTipiId, IsUygulamaliDersMebbis,
+
+            IsTelafiDersPlanli, TelafiDersNo, TelafiBaslamaTarihi, TelafiBitisTarihi,
+            TelafiDersToplami, TelafiDersTipiId, IsTelafiDersMebbis,
+
+            IsBasarisizDersPlanli, BasarisizDersNo, BasarisizBaslamaTarihi, BasarisizBitisTarihi,
+            BasarisizDersToplami, BasarisizDersTipiId, IsBasarisizDersMebbis,
+
+            IsArti4DersPlanli, Arti4BaslamaTarihi, Arti4BitisTarihi,
+		    Arti4EgitimAlaniDersToplami, Arti4AkanTrafikDersToplami, Arti4DersToplami,
+            Arti4DersTipiId, IsArti4DersMebbis,
+
+			PlanlanacakEgitimTipiId, uSinavaHazirmiTipiId, IsUygSinavMebbisOnayi, 
+			IsRandevuPlanlandi,  IsRandevuMebbis, RandevuTarihi,
+            RandevuSaatTipiId, RandevuEgitimAraciId, RandevuPersonelId, 
+
+            uSinavNo, uSinavDurumTipiId, uSinavUcretTipiId, IsuSinavBTeslimEdildi,
+            uSinavNoGirdigi, uSinavSonucTipiId, uSinavSonrasiTipiId, uSinavDetayId, uSinavBasariTarihi,
+
+            SertifikaDurumTipiId, SertifikaTarihi, DosyaYakti,
+			Asama1TipiId, Asama1DetayTipiId, Asama2TipiId, Asama2DetayTipiId
+			)
+     VALUES
+           (@yFirmId,  @TalepId, @yAdayId,  
+		    @yDonemTipiId, @yGrupTipiId, @ySubeTipiId, 
+            @yTalepTipiId,  0,  0,  -- AsamaTipiId, TalepTipiId, KayitTipiId, ZamanlamaTipiId,
+            0,  0,              -- IsGrupSubeYok, IsActive,
+            0,  0,              -- MebbisKurumOnayi, MebbisDurumTipiId,
+            0,  0,  null,       -- SertifikaYasSiniri, YasOnayiTipiId, YasHazirTarihi,
+            0,  0,  0,          -- DeneyimSartiTipiId, IsDeneyimEnAz, DeneyimSertifikaTipiId,
+            0,  0,  0,  0, 0, 0,-- OzurDurumuTipiId, OkutmanTalebi, TercumanTalebi, YabanciDilTipiId, IsKontejan, AracTipiId,
+            0,  0,  0,  0,      -- BelgelerGeldi, BelgelerTarandi, BelgelerYuklendi, BorcDurumuTipiId, 
+            
+            null, null,  0,     -- TeorikBaslamaTarihi, TeorikBitisTarihi, TeorikDersTipiId,
+
+            0,  0, null, 0,  0, -- eSinavNo, eSinavDurumTipiId, eSinavMuracatTarihi, eSinavUcretTipiId, IseSinavBTeslimEdildi, 
+            0,  0,  0,  0, null,-- eSinavNoGirdigi, eSinavSonucTipiId, eSinavSonrasiTipiId, eSinavDetayId, eSinavBasariTarihi,
+
+            0,  0,  0,  0,      -- UygulamaliDersKredisi, Arti4DersKredisi, TelafiDersKredisi, BasarisizDersKredisi,
+            
+            0,  null, null,     -- IsUygulamaliDersPlanli, UygulamaBaslamaTarihi, UygulamaBitisTarihi, 
+            0,  0,  0,  0,      -- SimulatorDersToplami, EgitimAlaniDersToplami, AkanTrafikDersToplami, UygulamaliDersToplami
+            0,  0,              -- UygulamaliDersTipiId, IsUygulamaliDersMebbis,
+
+            0,  0,  null, null, -- IsTelafiDersPlanli, TelafiDersNo, TelafiBaslamaTarihi, TelafiBitisTarihi, 
+            0,  0,  0,          -- TelafiDersToplami, TelafiDersTipiId, IsTelafiDersMebbis,
+
+            0,  0,  null, null, -- IsBasarisizDersPlanli, BasarisizDersNo, BasarisizBaslamaTarihi, BasarisizBitisTarihi, 
+            0,  0,  0,          -- BasarisizDersToplami, BasarisizDersTipiId, IsBasarisizDersMebbis,
+
+            0,  null, null,     -- IsArti4DersPlanli, Arti4BaslamaTarihi, Arti4BitisTarihi, 
+            0,  0,  0,          -- Arti4EgitimAlaniDersToplami, Arti4AkanTrafikDersToplami, Arti4DersToplami, 
+            0,  0,              -- Arti4DersTipiId, IsArti4DersMebbis,
+
+			0,  0,  0,          -- PlanlanacakEgitimTipiId, uSinavaHazirmiTipiId, IsUygSinavMebbisOnayi, 
+			0,  0,    null,     -- IsRandevuPlanlandi,  IsRandevuMebbis, RandevuTarihi,
+            0,  null, null,     -- RandevuSaatTipiId, RandevuEgitimAraciId, RandevuPersonelId, 
+
+            0,  0,  0,  0,      -- uSinavNo, uSinavDurumTipiId, uSinavUcretTipiId, IsuSinavBTeslimEdildi,
+            0,  0,  0,  0, null,-- uSinavNoGirdigi, uSinavSonucTipiId, uSinavSonrasiTipiId, uSinavDetayId, uSinavBasariTarihi,
+
+            0,  null,  0,       -- SertifikaDurumTipiId, SertifikaTarihi, DosyaYakti
+			0,  0,  0, 0        -- Asama1TipiId, Asama1DetayTipiId, Asama2TipiId, Asama2DetayTipiId  
+			)       
+     print ' create : [MtskAdayTakip]'
+
+  end -- MtskAdayTakip
+
+
+END -- procedure
+
+/*CreateProcedureEnd*/
+

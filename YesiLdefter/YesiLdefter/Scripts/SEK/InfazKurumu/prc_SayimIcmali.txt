@@ -1,0 +1,65 @@
+﻿USE [u7093888_Ustad01]
+GO
+
+/****** Object:  StoredProcedure [dbo].[prc_SayimIcmali]    Script Date: 07.10.2020 15:52:03 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[prc_SayimIcmali] (@yFirmId int, @icmalBasTarih Date, @icmalBitTarih Date)  
+AS BEGIN 
+
+  --print 'SayimIcmali hazırlanıyor'
+
+  UPDATE [dbo].[SayimIcmali]
+  SET [SayimaKatilan] = toplam.SayimaKatilan
+     ,[SayimDisi] = toplam.SayimDisi
+     ,[SayimaKatilmayan] = toplam.SayimaKatilmayan
+  from [dbo].[SayimIcmali] SI,
+  (
+     Select x.SayimIcmaliId
+     , sum(x.SayimaKatilan) SayimaKatilan 
+     , sum(x.SayimDisi) SayimDisi 
+     , sum(x.SayimaKatilmayan) SayimaKatilmayan 
+     from ( 
+	    Select 
+          distinct CariId 
+	    , SayimIcmaliId
+	    , 1 SayimaKatilan 
+        , 0 SayimDisi 
+        , 0 SayimaKatilmayan 
+        From [dbo].[CihazKaydi]
+        Where IsActive = 1
+        and FirmId = @yFirmId
+        and SayimIcmaliId > 0
+        and ZamanlamaTipiId = 2
+        and convert(date, TarihSaat) >= convert(date, @icmalBasTarih)
+		and convert(date, TarihSaat) <= convert(date, @icmalBitTarih)
+
+	    union all 
+
+        Select 
+          distinct CariId 
+	    , SayimIcmaliId
+	    , 0 SayimaKatilan 
+        , 1 SayimDisi 
+        , 0 SayimaKatilmayan 
+        From [dbo].[CihazKaydi]
+        Where IsActive = 1
+        and FirmId = @yFirmId
+        and SayimIcmaliId > 0
+        and ZamanlamaTipiId <> 2
+        and convert(date, TarihSaat) >= convert(date, @icmalBasTarih)
+		and convert(date, TarihSaat) <= convert(date, @icmalBitTarih)
+        ) x
+        group by x.SayimIcmaliId
+  ) toplam
+  where SI.Id = toplam.SayimIcmaliId
+
+END
+
+GO
+
+

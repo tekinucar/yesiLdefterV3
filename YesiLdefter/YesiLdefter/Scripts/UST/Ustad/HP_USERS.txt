@@ -1,0 +1,31 @@
+
+
+begin transaction
+
+ create table HP_USERS
+ (
+    ID                         Int IDENTITY(1,1) NOT NULL, 
+    SYS_ID                     Int               NULL,  
+	USER_FIRM_GUID             VarChar(50)       NULL,
+	ISACTIVE                   SmallInt          NULL,  -- PASSIVE, ACTIVE, DONT_ACTIVE
+    USER_GUID                  VarChar(50)       NULL,  -- 
+    USER_FULLNAME              VarChar(100)      NULL, 
+    USER_FIRSTNAME             VarChar(50)       NULL,
+    USER_LASTNAME              VarChar(50)       NULL,
+    USER_EMAIL                 VarChar(100)      NULL,
+	USER_KEY                   VarChar(50)       NULL,
+	REC_DATE                   Date              NULL,
+	
+   constraint		PK_HP_USERS primary key (ID)
+ )
+ -- mysql_add
+ 
+ create index X_HP_USERS00 on HP_USERS (SYS_ID);
+ create index X_HP_USERS01 on HP_USERS (USER_FULLNAME);
+ create index X_HP_USERS02 on HP_USERS (USER_EMAIL);
+ create index X_HP_USERS03 on HP_USERS (USER_GUID);
+  
+ grant select, insert, update, delete on HP_USERS to public
+
+commit transaction
+

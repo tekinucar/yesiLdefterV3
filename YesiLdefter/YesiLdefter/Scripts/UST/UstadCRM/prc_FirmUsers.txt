@@ -1,0 +1,63 @@
+﻿USE [UstadCRM]
+GO
+
+CREATE PROCEDURE [dbo].[prc_firmUsers] (@firmGuid varchar(50),@userGuid varchar(50))  
+AS BEGIN 
+  -- Firmanın kullanıcıları
+
+  --declare @firmGuid varchar(50) = '4fae3a7e-8fe8-4fb8-867c-69045ed28341'
+  --declare @userGuid varchar(50) = ''--'8EB08CA3-5A6C-40B9-9BC4-8BFD28E5E4FA' 
+  
+  declare @cumle nvarchar(max)
+  declare @andFirmGuid1 nvarchar(300) = ''
+  declare @andFirmGuid2 nvarchar(300) = ''
+  declare @andUserGuid nvarchar(300) = ''
+
+  --print '1:'+@firmGuid + ';' + @userGuid
+  if ((@firmGuid = '-99') or (@firmGuid = 'null')) set @firmGuid = ''
+  if ((@userGuid = '-99') or (@userGuid = 'null')) set @userGuid = ''
+  --print '2:'+@firmGuid + ';'+@userGuid
+
+  -- bu şart eklenince bir firma için kullanıcılar listelenir
+  if (@firmGuid <> '')
+  begin
+    set @andFirmGuid1 = 'and u.FirmGUID = ' + '''' + @firmGuid + ''''
+	set @andFirmGuid2 = 'and m.FirmGUID = ' + '''' + @firmGuid + ''''
+  end
+  -- bu şart eklenince sadece bir kullanıcı için sonuç verir
+  if (@userGuid <> '')
+     set @andUserGuid = 'and u.UserGUID = ' + '''' + @userGuid + ''''
+
+  set @cumle = '
+ ;WITH CTE AS (
+  Select u.UserId, 
+         u.UserId as _USER_ID, 
+         f.FirmId as _FIRM_ID 
+  from UstadUsers as u
+    left outer join UstadFirms f on  ( u.FirmGUID = f.FirmGUID )
+  where u.IsActive = 1
+  ' + @andFirmGuid1 + '
+  ' + @andUserGuid  + '
+  union all
+		
+  Select c._FIRM_ID, c._USER_ID, M.FirmId 
+  from CTE as c
+     join UstadFirms as m ON c._FIRM_ID = m.ParentFirmId
+  where m.IsActive = 1
+  --' + @andFirmGuid2 + '
+ )
+ Select [User].*, 
+        [Firm].FirmId as LKP_FIRM_ID, 
+		[Firm].FirmShortName as LKP_FIRM_NAME, 
+		[Firm].FirmGUID as LKP_FIRM_GUID
+ From CTE c
+   left outer join UstadFirms [Firm] on ( c._FIRM_ID = [Firm].FirmId )
+   left outer join UstadUsers [User] on ( c._USER_ID = [User].UserId )
+ Where 0 = 0
+    
+ order by  [User].UserFullName ' 
+
+ Exec sp_executesql @cumle
+
+END
+

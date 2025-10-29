@@ -1,0 +1,61 @@
+﻿ 
+  /*CreateTable*/ 
+  
+  begin transaction 
+  
+  create table dbo.OnmMaasBilgisi 
+  ( 
+    Id                    Int IDENTITY(1,1) not null, 
+    FirmId                Int               not null, 
+    IsActive              Bit               null, 
+    CariId                Int               null, /* CariId : Personel Id si */
+    MaasOdemeGunu         SmallInt          null, /* Maaş Ödeme Günü */
+    GecerlilikTarihi      DateTime          null, /* GecerlilikTarihi : Maaşın geçerli olduğu tarih */
+	GecerlilikDonemTipiId Int               null,
+
+    IsEmekli              Bit               null, /* Emekli mi? */
+    MaasTipiId            SmallInt          null, /* 1. Maaş Karşılığı, 2. Ders ücreti karşılığı, 3. Maaş + ders ücreti karşılığı  */
+
+    MaasTutari            Numeric(22,5)     null, /* Maaş Tutarı */
+    TeorikDersUcreti      Numeric(22,5)     null, /* Teorik Ders Ücreti Tutarı */
+    UygulamaliDersUcreti  Numeric(22,5)     null, /* Uygulamalı Ders Ücreti Tutarı */
+    KullaniciUyarilari    nVarchar(100)     null, /* Kullanıcı Uyarıları : Personel maaşı ile ilgili kullanıcıya gösterilecek uyarılar */      
+
+    Constraint pk_OnmMaasBilgisi primary key (Id) 
+  ) 
+  
+  create index X_OnmMaasBilgisi_01 on dbo.OnmMaasBilgisi (FirmId, CariId, GecerlilikTarihi) 
+  
+  grant select, insert, update, delete on dbo.OnmMaasBilgisi to public 
+  
+  commit transaction 
+  
+  /*CreateTableEnd*/ 
+  
+ 
+ /*CreateLkpTable*/
+
+  -- ------------------------------------------------------- 
+  -- MaasTipiId
+  -- ------------------------------------------------------- 
+  IF EXISTS (SELECT * FROM sys.objects WHERE name = 'OnmMaasBilgisiMaasTipi') 
+  DROP TABLE [Lkp].[OnmMaasBilgisiMaasTipi] 
+  
+  CREATE TABLE [Lkp].[OnmMaasBilgisiMaasTipi] 
+  ( 
+   Id               INT UNIQUE NOT NULL, 
+   MaasTipi         NVARCHAR(50)   NULL, 
+   
+   CONSTRAINT pk_OnmMaasBilgisiMaasTipi PRIMARY KEY (Id) 
+  ) 
+  
+  DELETE FROM [Lkp].[OnmMaasBilgisiMaasTipi] 
+  INSERT INTO [Lkp].[OnmMaasBilgisiMaasTipi] (Id, MaasTipi) 
+  VALUES 
+    (0, N'Tanımsız'), 
+    (1, N'Maaş karşılığı'), 
+    (2, N'Ders ücreti karşılığı'), 
+    (3, N'Maaş + ders ücreti karşılığı')
+
+ /*CreateLkpTableEnd*/
+

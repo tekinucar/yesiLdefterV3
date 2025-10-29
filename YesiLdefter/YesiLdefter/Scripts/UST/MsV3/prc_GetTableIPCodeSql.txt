@@ -1,0 +1,343 @@
+﻿USE [MSV3DFTRBLT]
+GO
+
+/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_GetTableIPCodeSql]( @RefId int, @TableIPCode varchar(100) )  
+AS BEGIN  
+  --declare @TableIPCode varchar(100)
+  --set @TableIPCode = 'UST/MEB/MtskSertifikaUcreti.prcSertifikaUcreti_F02'
+  --'UST/T01/3S_MSFLDIP.3S_MSFLDIP_01'
+  --'UST/MEB/MtskSertifikaUcreti.prcSertifikaUcreti_F02'
+  --'UST/OMS/BDekont.BankaHesapIslemleri_L01'
+  --'UST/OMS/BMaliyet.Dogalgaz_F01'
+  --'UST/OMS/HMaliyet.Maliyet_L05'
+
+  declare @enter varchar(10) = CHAR(13) + CHAR(10) --' \r\n '
+  declare @newSql varchar(8000)
+  declare @newSelect varchar(4000)
+  declare @newLeftJoin varchar(4000)
+  declare @newWhere  varchar(4000)
+  declare @Columns varchar(MAX) 
+  declare @LkpColumns varchar(MAX) 
+  declare @MasterDetail varchar(MAX)
+  declare @JoinFields varchar(MAX)
+  declare @JoinTables varchar(MAX)
+  
+  declare @TableTypeId smallInt
+  declare @SoftwareCode varchar(20)
+  declare @ProjectCode varchar(20)
+  declare @ShemasCode varchar(5)
+  declare @TableCode varchar(50)
+  declare @TableName varchar(50)
+  declare @IPCode varchar(50)
+  declare @IPWhereSql varchar(250)
+  declare @IPOrderBy varchar(250)
+  declare @SProcedureName varchar(50)
+
+  declare @PropJoin varchar(8000) 
+
+  Select
+    @TableTypeId = a.TABLE_TYPE
+  , @SoftwareCode = b.SOFTWARE_CODE
+  , @ProjectCode = b.PROJECT_CODE
+  , @ShemasCode = isnull(b.SCHEMAS_CODE,'dbo')
+  , @TableCode = b.TABLE_CODE
+  , @TableName = b.TABLE_NAME
+  , @IPCode = a.IP_CODE
+  , @IPWhereSql = a.IP_WHERE_SQL
+  , @IPOrderBy = a.IP_ORDER_BY
+  , @SProcedureName = a.MASTER_TABLE_NAME
+  , @PropJoin = b.PROP_JOINTABLE
+  From MS_TABLES_IP as a, MS_TABLES as b
+  Where 0 = 0
+  and a.TABLE_CODE = b.TABLE_CODE
+  and a.TABLEIPCODE = @TableIPCode
+
+  -- -----------------------------------------------------------
+  -- TableTypeId = 1 ( Table ise ) 
+  -- -----------------------------------------------------------
+  if (@TableTypeId = 1)
+  begin 
+       -- -------------------------------------------------------
+       -- Tablonun normal fieldlerini hazırla
+       -- -------------------------------------------------------
+       Select @Columns = COALESCE( @Columns + ' ,' + 
+          ' [' + TABLE_CODE + '].[' + FIELD_NAME + ']' + @enter, 
+        '   [' + TABLE_CODE + '].[' + FIELD_NAME + ']' + @enter ) 
+       From (
+             Select a.TABLE_CODE, b.FIELD_NAME
+             From MS_FIELDS_IP as a, MS_FIELDS as b
+             Where 0 = 0
+             and a.FIELD_NO = b.FIELD_NO
+             and a.TABLE_CODE = b.TABLE_CODE
+             and a.SOFTWARE_CODE = @SoftwareCode 
+             and a.PROJECT_CODE = @ProjectCode 
+             and a.TABLE_CODE = @TableCode
+             and a.IP_CODE = @IPCode
+             and ( a.CMP_VISIBLE = 1 or a.DEFAULT_TYPE > 0 or a.DEFAULT_TYPE2 > 0 )
+			 and SUBSTRING(b.FIELD_NAME, 1,3) <> 'LKP'
+            ) x
+
+       -- -------------------------------------------------------
+	   -- Tablonun LookUp işaretli fieldleri
+       -- -------------------------------------------------------
+	   Select @LkpColumns = COALESCE( @LkpColumns + ' ,' + 
+           ' [FNo' + FIELD_NO + '].[' + FIELD_NAME + '] as Lkp_' + LKP_FIELD_NAME + @enter, 
+         ' , [FNo' + FIELD_NO + '].[' + FIELD_NAME + '] as Lkp_' + LKP_FIELD_NAME + @enter ) 
+       From (
+             Select a.TABLE_CODE 
+			 , convert(varchar, a.FIELD_NO) as FIELD_NO
+			 , FIELD_NAME = 
+               case b.FIELD_NAME  
+                  when 'KdvOrani' then 'KdvOrani'  
+                  when 'ParaTipiId' then 'ParaAdi'  
+				  when 'MevcutSertifikaTipiId' then 'SertifikaTipi'
+				  when 'IstenenSertifikaTipiId' then 'SertifikaTipi'
+                  when 'T' then ''  
+                  when 'S' then ''  
+                  else replace(FIELD_NAME, 'Id', '') end 
+			 , LKP_FIELD_NAME =  
+               case b.FIELD_NAME  
+                  when 'KdvOrani' then 'KdvOrani'  
+                  when 'ParaTipiId' then 'ParaAdi'  
+                  else replace(FIELD_NAME, 'Id', '') end 
+
+             From MS_FIELDS_IP as a, MS_FIELDS as b
+             Where 0 = 0
+             and a.FIELD_NO = b.FIELD_NO
+             and a.TABLE_CODE = b.TABLE_CODE
+             and a.SOFTWARE_CODE = @SoftwareCode 
+             and a.PROJECT_CODE = @ProjectCode 
+             and a.TABLE_CODE = @TableCode
+             and a.IP_CODE = @IPCode
+             and b.FLOOKUP_FIELD = 1
+             and a.CMP_VISIBLE = 1
+            ) x
+
+       -- -----------------------------------------------------------
+       -- Tabloda LookUp işaretli field var ise onların bağlantıları
+       -- -----------------------------------------------------------
+       set @newLeftJoin = ''
+	   Select @newLeftJoin = COALESCE( @newLeftJoin +  
+          '    left outer join Lkp.' + _TableName + FIELD_NAME + ' as FNo' + FIELD_NO + ' on ( ' + TABLE_CODE + '.' + FIELD_NAME_ID + ' = FNo' + FIELD_NO + '.' + JOIN_FIELD_NAME + ' )' + @enter, 
+          '' ) 
+       From (
+             Select 
+			   a.TABLE_CODE  
+             , convert(varchar, a.FIELD_NO) as FIELD_NO
+			 , FIELD_NAME =
+               case b.FIELD_NAME  
+                  when 'KdvOrani' then ''  
+                  when 'ParaTipiId' then '' 
+				  when 'CinsiyetTipiId' then ''
+				  when 'MevcutSertifikaTipiId' then ''
+				  when 'IstenenSertifikaTipiId' then ''
+				  when 'DonemTipiId' then ''
+				  when 'GrupTipiId' then ''
+				  when 'SubeTipiId' then ''
+                  when 'T' then ''  
+                  when 'S' then ''  
+                  else replace(b.FIELD_NAME, 'Id', '') end
+			 , FIELD_NAME_ID = 
+               case b.FIELD_NAME  
+                  when 'KdvOrani' then 'KdvOrani'  
+                  when 'T' then ''  
+                  when 'S' then ''  
+                  else b.FIELD_NAME end			 
+			 , JOIN_FIELD_NAME = 
+               case b.FIELD_NAME  
+                  when 'KdvOrani' then 'KdvOrani'  
+                  when 'ParaTipiId' then 'ParaKodu'  
+				  when 'T' then ''  
+                  when 'S' then ''  
+                  else 'Id' end 
+             , _TableName =  
+               case b.FIELD_NAME  
+                  when 'KdvOrani' then 'OnmKdvOraniTipi'  
+                  when 'ParaTipiId' then 'OnmParaTipi'  
+				  when 'CinsiyetTipiId' then 'CinsiyetTipi'
+				  when 'MevcutSertifikaTipiId' then 'MtskSertifikaTipi'
+				  when 'IstenenSertifikaTipiId' then 'MtskSertifikaTipi'
+				  when 'DonemTipiId' then 'MtskDonemTipi'
+				  when 'GrupTipiId' then 'MtskGrupTipi'
+				  when 'SubeTipiId' then 'MtskSubeTipi'
+                  when 'T' then ''  
+                  when 'S' then ''  
+                  else c.TABLE_NAME  
+               end
+			 From MS_FIELDS_IP as a, MS_FIELDS as b, MS_TABLES as c
+             Where 0 = 0
+             and a.FIELD_NO = b.FIELD_NO
+             and a.TABLE_CODE = b.TABLE_CODE
+             and a.SOFTWARE_CODE = @SoftwareCode 
+             and a.PROJECT_CODE = @ProjectCode 
+             and a.TABLE_CODE = @TableCode
+             and a.IP_CODE = @IPCode
+             and b.FLOOKUP_FIELD = 1
+             and a.CMP_VISIBLE = 1
+             and c.SOFTWARE_CODE = @SoftwareCode 
+             and c.PROJECT_CODE = @ProjectCode 
+             and c.TABLE_CODE = @TableCode
+           ) x
+
+       -- -------------------------------------------------------
+       -- Tablonun Master-Detail işaretli fieldler
+       -- and [3S_MSFLDIP].IP_CODE = 'null'    -- :D.SD.182: --
+       -- and [3S_MSFLDIP].TABLE_CODE = 'null'    -- :D.SD.181: --
+       -- -------------------------------------------------------
+       set @MasterDetail = dbo.fnc_GetWhereMasterDetailText( @TableIPCode )
+	   	
+       -- ------------------------------------------------------
+       -- PropJoin ile Join tablolarını oluştur
+	   -- ------------------------------------------------------
+	   if (@PropJoin is not null)
+	   begin
+           set @JoinFields = dbo.fnc_GetJoinTableText( @TableCode, 2, @PropJoin )
+           set @JoinTables = dbo.fnc_GetJoinTableText( @TableCode, 1, @PropJoin )
+	   end
+       
+	   --print @JoinTables
+	   --print @JoinFields
+
+	   -- ------------------------------------------------------
+	   -- Hazırlanan bilgileri toparlama işlemleri
+	   -- ------------------------------------------------------
+	   if (@Columns is null) set @Columns = '' 
+       if (@LkpColumns is null) set @LkpColumns = '' else set @LkpColumns = ' -- LookUp fields' + @enter + @LkpColumns
+       if (@newLeftJoin is null) set @newLeftJoin = ''
+       if (@IPWhereSql is null) set @IPWhereSql = '' else set @IPWhereSql = ' ' + @IPWhereSql
+       if (@IPOrderBy is null) set @IPOrderBy = '' else set @IPOrderBy = ' ' + @IPOrderBy
+	   if (@MasterDetail is null) set @MasterDetail = ''
+	   if (@JoinFields is null) set @JoinFields = ''
+	   if (@JoinTables is null) set @JoinTables = ''
+	   if (@IPOrderBy <> '') set @IPOrderBy = ' Order by ' + @IPOrderBy
+
+       set @newSelect = 
+           ' Select ' + @enter 
+           + @Columns 
+           + @JoinFields
+	       + @LkpColumns 
+           + ' From [' + @ShemasCode + '].[' + @TableName + '] as [' + @TableCode + ']' + @enter
+	       + @JoinTables
+       
+	   -- /*[HMaliyet].DEFAULT_VALUE*/
+	   set @newWhere = ' Where 0 = 0 ' + @enter + ' /*[' + @TableCode + '].DEFAULT_VALUE*/ ' 
+
+       if (@newSelect <> '')    set @newSelect = @newSelect + @enter 
+	   if (@newLeftJoin <> '')  set @newLeftJoin = @newLeftJoin + @enter 
+	   if (@newWhere <> '')     set @newWhere = @newWhere + @enter 
+       if (@IPWhereSql <> '')   set @IPWhereSql = @IPWhereSql + @enter 
+       --if (@MasterDetail <> '') set @MasterDetail = @MasterDetail + @enter 
+       --if (@IPOrderBy <> '')    set @IPOrderBy = @IPOrderBy + @enter
+	   
+       set @newSql = 
+           @newSelect + 
+	       @newLeftJoin + 
+	       @newWhere + 
+           @IPWhereSql +
+           @MasterDetail + 
+           @IPOrderBy + @enter
+
+  end -- if (@TableTypeId = 1)
+
+  -- -----------------------------------------------------------
+  -- TableTypeId = 3 ( Stored Procedure ise ) 
+  -- -----------------------------------------------------------
+  if (@TableTypeId = 3)
+  begin 
+       declare @declares varchar(max)
+	   declare @sets varchar(max)
+	   declare @parameters varchar(max)
+    
+       -- declare @FirmId int
+       -- declare @Yil int
+       -- declare @MevcutSertifikaTipiId int
+       -- declare @IstenenSertifikaTipiId int
+       -- /*declareEnd*/
+       -- /*prm*/ set @FirmId = 21   -- :D.SD.30707: --
+       -- /*prm*/ set @Yil = 2022   -- :D.SD.30708: --
+       -- /*prm*/ set @MevcutSertifikaTipiId = -99   -- :D.SD.30711: --
+       -- /*prm*/ set @IstenenSertifikaTipiId = -99   -- :D.SD.30712: --
+       -- /*setEnd*/
+       -- EXEC [dbo].[prc_MtskSertifikaUcreti]
+       --     @FirmId
+       --  ,  @Yil
+       --  ,  @MevcutSertifikaTipiId
+       --  ,  @IstenenSertifikaTipiId
+       -- /*paramEnd*/
+
+	   set @declares = ''
+	   set @sets = ''
+	   --set @parameters = ''
+	
+	   Select 
+	        @declares = COALESCE( @declares + 
+          ' declare @' + FIELD_NAME + ' ' + dbo.fnc_GetFieldTypeName(FIELD_TYPE) + @enter, 
+          '' ) 
+          , @sets = COALESCE( @sets + 
+          ' /*prm*/ set @' + FIELD_NAME + ' = ' + dbo.fnc_GetFieldTypeFirstValue(FIELD_TYPE) + '   -- :D.SD.' + REF_ID + ': --' + @enter, 
+          '' )
+          , @parameters = COALESCE( @parameters + 
+          ' ,  @' + FIELD_NAME + @enter, 
+          '    @' + FIELD_NAME + @enter )
+	   From (
+             Select a.TABLE_CODE, b.FIELD_NAME, b.FIELD_TYPE, a.KRT_LINE_NO, convert(varchar(10), a.REF_ID) as REF_ID
+             From MS_FIELDS_IP as a, MS_FIELDS as b
+             Where 0 = 0
+             and a.FIELD_NO = b.FIELD_NO
+             and a.TABLE_CODE = b.TABLE_CODE
+             and a.SOFTWARE_CODE = @SoftwareCode 
+             and a.PROJECT_CODE = @ProjectCode 
+             and a.TABLE_CODE = @TableCode
+             and a.IP_CODE = @IPCode
+             and ( a.KRT_OPERAND_TYPE > 0 or a.DEFAULT_TYPE = 31 )
+            ) x
+       order by x.KRT_LINE_NO
+	
+	   if (@declares <> '')       set @declares = @declares + ' /*declareEnd*/ '+ @enter
+       if (@sets <> '')           set @sets = @sets + ' /*setEnd*/' + @enter
+	   if (@SProcedureName <> '') set @SProcedureName = ' EXEC ' + @SProcedureName + @enter
+       if (@parameters <> '')     set @parameters = @parameters + ' /*paramEnd*/' + @enter
+
+	   set @newSql = 
+	       @declares +
+		   @sets + 
+		   @SProcedureName + 
+		   @parameters
+
+       /*
+	   print @declares
+	   print @sets
+	   print @SProcedureName
+	   print @parameters
+	   */
+  end -- if (@TableTypeId = 3)
+
+  -- ---------------------------------------------------------
+  -- Hazırlana select sql cümlesini veri tabanına yazalım
+  -- ---------------------------------------------------------
+  --print @SoftwareCode 
+  --print @ProjectCode 
+  --print @TableCode
+  --print @IPCode
+  --print @TableTypeId
+  --print @PropJoin
+  --print @newSelect
+  --print @newLeftJoin
+  --print @newWhere
+  --print @IPWhereSql
+  --print @MasterDetail
+  --print @IPOrderBy
+  --print @newSql
+
+  if (@TableTypeId = 1) or (@TableTypeId = 3)
+  begin 
+      Update dbo.MS_TABLES_IP set 
+      IP_SELECT_SQL = @newSql
+      Where REF_ID = @RefId
+  end
+  
+END --
+
+/*CreateProcedureEnd*/

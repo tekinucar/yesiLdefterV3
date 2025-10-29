@@ -1,0 +1,104 @@
+﻿
+begin transaction
+ create table UstadFirmsUsers
+ (
+    Id              Int IDENTITY(1,1) not null,
+	IsActive        Bit               null,
+    FirmId          Int               null,
+	FirmGUID        varchar(255)      null,
+    UserId          Int               null,
+    UserGUID        varchar(255)      null
+
+    Constraint pk_UstadFirmsUsers primary key (Id)
+ )
+
+  create index X_UstadFirmsUsers_01 on UstadFirmsUsers (FirmId)
+  create index X_UstadFirmsUsers_02 on UstadFirmsUsers (FirmGUID)
+  create index X_UstadFirmsUsers_03 on UstadFirmsUsers (UserId)
+  create index X_UstadFirmsUsers_04 on UstadFirmsUsers (UserGUID)
+   
+ grant select, insert, update, delete on UstadFirmsUsers to public
+
+commit transaction
+
+
+
+CREATE TRIGGER [dbo].[trg_UstadFirmsUsers] on [dbo].[UstadFirmsUsers]
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    DECLARE ufuCursor cursor for select Id from Inserted
+    DECLARE @curId bigint
+
+    OPEN ufuCursor
+
+    FETCH NEXT FROM ufuCursor INTO @curId
+
+    declare @UserId int 
+    declare @FirmId int
+    declare @UserGUID Varchar(255)
+    declare @FirmGUID Varchar(255)
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+
+        Select
+         @FirmId = isnull(ins.[FirmId],0)
+        ,@FirmGUID = isnull(ins.[FirmGUID],'')
+        ,@UserId = isnull(ins.[UserId],0)
+        ,@UserGUID = isnull(ins.[UserGUID],'')
+        From inserted ins
+		where ins.Id = @curId
+
+        -- FirmGUID belli değilse veya değişmiş olabilir
+		if (@FirmId > 0)
+        begin
+		  Select @FirmGUID = FirmGUID from dbo.UstadFirms 
+		  Where FirmId = @FirmId 
+
+          update dbo.UstadFirmsUsers set
+            FirmGUID = '' + @FirmGUID + ''
+          Where Id = @curId
+        end
+
+        -- FirmId belli değilse       	   	
+        if ((@FirmId = 0) and (@FirmGUID <> ''))
+        begin
+		  Select @FirmId = FirmId from dbo.UstadFirms 
+		  Where FirmGUID = '' + @FirmGUID + ''
+
+          update dbo.UstadFirmsUsers set
+            FirmId = @FirmId
+          Where Id = @curId
+        end
+
+        -- UserGUID belli değilse 
+		if ((@UserId > 0) and (@UserGUID = ''))
+        begin
+		  Select @UserGUID = FirmGUID from dbo.UstadUsers
+		  Where UserId = @UserId 
+
+          update dbo.UstadFirmsUsers set
+            UserGUID = '' + @UserGUID + ''
+          Where Id = @curId
+        end
+
+        -- UserId belli değilse       	   	
+        if ((@UserId = 0) and (@UserGUID <> ''))
+        begin
+		  Select @UserId = UserId from dbo.UstadUsers 
+		  Where UserGUID = '' + @UserGUID + ''
+
+          update dbo.UstadFirmsUsers set
+            UserId = @UserId
+          Where Id = @curId
+        end
+			   		 
+      FETCH NEXT FROM ufuCursor INTO @curId
+    END -- While
+
+    CLOSE ufuCursor
+    DEALLOCATE ufuCursor   
+
+END -- create trigger
+

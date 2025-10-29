@@ -1,0 +1,52 @@
+﻿USE [u7093888_Ustad01]
+GO
+
+/****** Object:  StoredProcedure [dbo].[prc_CihazLogSet]    Script Date: 07.10.2020 15:50:43 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+CREATE PROCEDURE [dbo].[prc_CihazLogSet] (@FirmId int, @CihazId int, @EylemPlaniId int, @IsDelete smallint)  
+--ALTER PROCEDURE [dbo].[prc_CihazLogSet] (@FirmId int, @CihazId int, @EylemPlaniId int, @IsDelete smallint)  
+AS BEGIN 
+   
+if ( Select count(Id) Adet
+     From [dbo].[CihazLog]
+     Where [FirmId] = @FirmId
+     and   [CihazId] = @CihazId
+     and   [EylemPlaniId] = @EylemPlaniId ) = 0 
+begin
+  --print 'insert'
+
+ INSERT Into [dbo].[CihazLog]
+           ([FirmId]
+           ,[CihazId]
+           ,[EylemPlaniId]
+           ,[TarihSaat]
+           ,[IsDelete])
+     Values
+           (@FirmId
+           ,@CihazId
+           ,@EylemPlaniId
+           ,getdate()
+           ,0)
+
+end else
+begin
+
+  --print 'update'
+ UPDATE [dbo].[CihazLog]
+   Set [IsDelete] = @IsDelete
+ Where [FirmId] = @FirmId
+     and   [CihazId] = @CihazId
+     and   [EylemPlaniId] = @EylemPlaniId
+
+end
+
+END
+GO
+
+

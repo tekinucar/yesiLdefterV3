@@ -1,0 +1,150 @@
+/*
+Evrak hakkýnda 
+
++Kayýt Tarihi / Saat / Kullanýcý 
++Geliþ Tarihi / Saat  
++Belge tarihi, nosu 
++Aciklama :  
++fatura, gider, kk extre 
+
+Irsaliye/Fatura/e-fatura/yazarkasa fiþi/belgesiz 
+faaliyet dahilinde/faaliyet dýþý 
+Posta yoluyla/e-mail/sms/elden evrak 
+
++Gider Hesap Kodu 
++Gönderen Firma/kurum/kiþi  adý, þehir 
++Ödeme Baþ. tarihi
++Son Ödeme tarihi 
++Minimum ödeme tutarý 
++Maximum ödeme tutarý 
+Ýþlem Sonucu : 0.yeni, 1.beklemede, 2. tamamlandý, 9.iptal   
+
+*/
+
+
+begin transaction
+ create table AJ_LINEDOC
+ (
+        ID                  Int IDENTITY(1,1) NOT NULL,
+        FIRM_ID             Int               NULL,
+        SHOP_ID             Int               NULL,
+        REC_DATE            SmallDatetime     NULL, 
+        REC_USER_ID         Int               NULL,
+        ARSIV_TD            SmallInt          NULL, /* 0. Açýk, 1. Kapandý,  99. ÝPTAL */ 
+
+		GELGIT_TARIH        Date              NULL,
+		GELGIT_SAAT         VarChar(5)        NULL,
+		
+		LINE_TD             SmallInt          NULL, /* 1. gelen evrak, 2. gön. evrak */   
+		EVRAK_TD            SmallInt          NULL, /* Evrak cinsi */
+		HESAP_ID            Int               NULL, /* Gider için FINANS_ID, Faturalar için CARI_ID, KK Ekstesi için KK ID/FINANS_ID */
+      
+		BELGE_TARIHI        Date              NULL,
+		BELGE_NO            VarChar(20)       NULL, 
+		MASRAF_YERI_TD      SmallInt          NULL,
+		EVRAK_ILETISIM_TD   SmallInt          NULL,
+        ACIKLAMA            varchar(200)      NULL,   
+				
+		TARAF_FIRMA         VarChar(100)      NULL,
+        TARAF_KISI          VarChar(100)      NULL,
+        TARAF_ILETISIM      VarChar(100)      NULL,
+        TARAF_ADRES         VarChar(200)      NULL,
+        
+		ODEME_BAS_TARIH     Date              NULL,
+		SON_ODEME_TARIH     Date              NULL,
+		MIN_ODEME_TUTARI    Numeric(22,5)     NULL,
+		MAX_ODEME_TUTARI    Numeric(22,5)     NULL,
+        SONUC_TD            SmallInt          NULL, /* 0.yeni, 1.beklemede, 2. tamamlandý, 9.iptal */
+
+		PARENT_TD           Int               NULL, /* baðlatý tablosu = 10 = FN_LINEVOL gibi*/
+		PARENT_ID           Int               NULL, /* FN_LINEVOL.ID  gibi */  
+		
+   Constraint PK_AJ_LINEDOC primary key (ID)
+ )
+
+ create index X_AJ_LINEDOC1 on AJ_LINEDOC (FIRM_ID, SHOP_ID, REC_DATE)
+ 
+ grant select, insert, update, delete on AJ_LINEDOC to public
+
+commit transaction
+
+
+--ALTER TABLE AJ_LINEDOC ADD   PARENT_TD             Int               NULL
+--ALTER TABLE AJ_LINEDOC ADD   PARENT_ID             Int               NULL
+
+
+/*
+
+UNUTMA : YENÝ FÝELD EKLENDÝÐÝNDE  ---VW_AJ_LINEDOC ---  viewde eklenecek
+
+
+
+MASRAF_YERI_TD
+   1, 'Faaliyet içi belgeli (fatura/fiþ)' 
+   2, 'Faaliyet içi belgeli (e-fatura)' 
+   3, 'Faaliyet içi belgesiz' 
+   4, 'Faaliyet dýþý belgeli (fatura/fiþ)' 
+   5, 'Faaliyet dýþý belgeli (e-fatura)' 
+   6, 'Faaliyet dýþý belgesiz' 
+
+EVRAK_ILETISIM_TD
+Posta yoluyla/e-mail/sms/fax/elden evrak 
+
+
+
+
+EVRAK_TD
+
+ 72.Giderler 
+ 60.Satýn alma belgeleri 
+ 23.Kredi kartý ekstreleri 
+ 73.Muhasebeden gelen ödeme evraklarý 
+ 91.Muhasebeden gelen ödemesiz evraklar 
+ 92.Kurumlardan gelen evraklar 
+
+
+ 601.Alýþ Faturasý
+ 602.Alýþ Ýrsaliyesi
+ 603.e-Fatura 
+
+
+*/
+
+
+
+
+        EVRAK_TD          SmallInt          NULL, /* Evrak cinsi */
+        HP_GIDER_ID       Int               NULL, /* Gider HP baðlantýsý */             
+
+        HESAP_KESIM_TRH   Date              NULL,
+        SON_ODEME_TRH     Date              NULL,
+        HESAP_TUTARI      Numeric(22,5)     NULL,
+        MIN_ODEME_TUTARI  Numeric(22,5)     NULL,
+        
+        KURUM_ADI         VarChar(100)      NULL,
+        TEBLIG_TRH        Date              NULL,  
+        RESMI_TRH         Date              NULL,
+        RESMI_NO          VarChar(50)       NULL,    
+        KONU              VarChar(100)      NULL,
+
+        EVRAK_TESLIMI_TD  SmallInt          NULL, /* 0. none, 1.Evrak Sekreteryada, 2.Evrak Teslim Edildi */ 
+        EVRAK_TESLIM_KISI VarChar(50)       NULL, /* evraðý teslim alan kiþi, kargo, kurum */
+        EVRAK_TESLIM_CARI_ID Int            NULL, /* cari Id si */
+
+		ILGILI_BOLUM_ID     Int             NULL,
+		ILGILI_PERSONEL_ID  Int             NULL,           
+
+
+
+/*
+ 
+ISLEM_TD
+
+1. arayan, 
+2. aranan, 
+3. geldi, 
+4. gidildi, 
+S
+
+*/
+

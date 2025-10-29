@@ -1,0 +1,53 @@
+﻿
+begin transaction
+
+ create table CariBanka 
+ (
+  Id           Int  IDENTITY(1,1) not null, 
+  FirmId       Int  not null,
+  CariId       Int  not null,
+  IsActive     Bit  not null, /* default : 1 = active, 0 = not active */  
+  HesapTipiId  SmallInt not null, /* 1.Banka Hesabı, 2.Kredi Kartı, 3.? */
+
+  BankaKodu      nVarchar(10) null,
+  BankaAdi       nVarchar(50) null,
+  SubeAdi        nVarchar(50) null,
+  SubeKodu       nVarchar(10) null,
+  HesapNo        nVarchar(20) null,
+  Iban           nVarchar(35) null,
+  KartNo         nVarchar(20) null,
+  HesapCariAdi   nVarchar(50) null,
+  SonTarih       nVarchar(5)  null,
+  CheckId        nVarchar(5)  null,
+  ParaTipiId     nVarchar(3)  null,
+  Aciklama       nVarchar(50) null,
+  
+  constraint pk_CariBanka primary key (Id)
+ )
+
+ create index X_CariBanka01 on CariBanka (FirmId)
+ create index X_CariBanka02 on CariBanka (CariId)
+
+ grant select, insert, update, delete on CariBanka to public
+
+
+-- ------------------------------------------------------- 
+-- HesapTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[CariBankaHesapTipi]
+(
+   Id          Int Unique Not Null,
+   HesapTipi   nVarchar(50)   null,
+   GrupTipiId  SmallInt       null,
+   
+   constraint  pk_CariBankaHesapTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[CariBankaHesapTipi] (Id, HesapTipi, GrupTipiId)
+ VALUES 
+  (0, N'Tanımsız',     0),
+  (1, N'Banka Hesabı', 1),
+  (2, N'Kredi Kartı',  1)
+
+
+commit transaction

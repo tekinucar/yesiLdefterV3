@@ -1,0 +1,120 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_MtskAdayBelgeler] (@FirmId int)  
+AS BEGIN
+
+        Update MtskAdayBelgeler set
+        BiyometrikTarandi = x.Sonuc
+        From MtskAdayBelgeler a, 
+        (
+            Select Id as AdayId, count(Id) as Sonuc
+            From MtskAday
+            Where BiyometrikResim is not null
+            and   FirmId = @FirmId
+            Group by Id
+        ) as x
+        Where a.AdayId = x.AdayId
+        and   a.FirmId = @FirmId
+  
+
+        Update MtskAdayBelgeler set
+        OgrenimTarandi = x.Sonuc
+        From MtskAdayBelgeler a, 
+        (
+            Select AdayId, count(Id) as Sonuc
+            From MtskAdayOgrenim
+            Where OgrenimBelgesiResim is not null
+            and   FirmId = @FirmId
+            Group by AdayId
+        ) as x
+        Where a.AdayId = x.AdayId
+        and   a.FirmId = @FirmId
+
+
+        Update MtskAdayBelgeler set
+        SaglikTarandi = x.Sonuc
+        From MtskAdayBelgeler a, 
+        (
+            Select AdayId, count(Id) as Sonuc
+            From MtskAdaySaglik
+            Where (
+		   SaglikRaporuResim is not null 
+		or Len(isnull(RaporReferansNo,'')) > 0
+		)
+            and FirmId = @FirmId
+            Group by AdayId
+        ) as x
+        Where a.AdayId = x.AdayId
+        and   a.FirmId = @FirmId
+
+
+        Update MtskAdayBelgeler set
+        AdliSicilTarandi = x.Sonuc
+        From MtskAdayBelgeler a, 
+        (
+            Select AdayId, count(Id) as Sonuc
+            From MtskAdayAdliSicil
+            Where SavcilikBelgesiResim is not null
+            and   FirmId = @FirmId
+            Group by AdayId
+        ) as x
+        Where a.AdayId = x.AdayId
+        and   a.FirmId = @FirmId  
+
+
+        Update MtskAdayBelgeler set
+        ImzaTarandi = x.Sonuc
+        From MtskAdayBelgeler a, 
+        (
+            Select AdayId, count(Id) as Sonuc
+            From MtskAdayImza
+            Where ImzaResim is not null
+            and   FirmId = @FirmId
+            Group by AdayId
+        ) as x
+        Where a.AdayId = x.AdayId
+        and   a.FirmId = @FirmId
+
+
+        Update MtskAdayBelgeler set
+        Sozlesme1Tarandi = x.Sonuc
+        From MtskAdayBelgeler a, 
+        (
+            Select AdayId, count(Id) as Sonuc
+            From MtskAdaySozlesme
+            Where Sozlesme1Resim is not null
+            and   FirmId = @FirmId
+            Group by AdayId
+        ) as x
+        Where a.AdayId = x.AdayId
+        and   a.FirmId = @FirmId
+        
+
+        Update MtskAdayBelgeler set
+        Sozlesme2Tarandi = x.Sonuc
+        From MtskAdayBelgeler a, 
+        (
+            Select AdayId, count(Id) as Sonuc
+            From MtskAdaySozlesme
+            Where Sozlesme2Resim is not null
+            and   FirmId = @FirmId
+            Group by AdayId
+        ) as x
+        Where a.AdayId = x.AdayId
+        and   a.FirmId = @FirmId
+
+        Update MtskAdayBelgeler set
+        BelgelerTarandi = 1
+        Where FirmId = @FirmId
+        and   BiyometrikTarandi = 1
+        and   OgrenimTarandi = 1
+        and   SaglikTarandi = 1
+        and   AdliSicilTarandi = 1
+        and   ImzaTarandi = 1
+        and   Sozlesme1Tarandi = 1
+        and   Sozlesme2Tarandi = 1
+        and   BelgelerTarandi = 0
+
+END -- procedure
+
+/*CreateProcedureEnd*/

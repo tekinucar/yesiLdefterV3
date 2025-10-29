@@ -1,0 +1,50 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table OnmHesapBakiyesi
+ (
+    Id                  Int IDENTITY(1,1) not null,
+    FirmId              Int                   null,
+    Yil                 SmallInt              null,
+    
+
+    HesapTipiId         SmallInt              null, /* 1. Finans hesapları, 2. Cari hesaplar */
+    HesapFinansId       Int                   null,
+    HesapCariId         Int                   null,
+    AcilisTutari        Numeric(22,5)         null, 
+
+    BorcIslemSayisi     Int                   null, 
+    BorcToplami         Numeric(22,5)         null, 
+    AlacakIslemSayisi   Int                   null, 
+    AlacakToplami       Numeric(22,5)         null, 
+
+    BorcBakiyesi        Numeric(22,5)         null, 
+    AlacakBakiyesi      Numeric(22,5)         null, 
+    BakiyeTipi          Varchar(1)            null, /* B veya A  */ 
+    Bakiye              Numeric(22,5)         null, /* tek kolonda görünen  */ 
+
+    /* cari hesaplar için : Vadesi Geçen */
+    VGBorcBakiyesi      Numeric(22,5)         null, 
+    VGAlacakBakiyesi    Numeric(22,5)         null, 
+
+    BorcIptalSayisi     Int                   null, 
+    BorcIptalToplami    Numeric(22,5)         null, 
+    
+    AlacakIptalSayisi   Int                   null, 
+    AlacakIptalToplami  Numeric(22,5)         null, 
+
+    KapanisTutari       Numeric(22,5)         null, 
+
+   Constraint pk_OnmHesapBakiyesi primary key (Id)
+ )
+
+ create index X_OnmHesapBakiyesi_01 on OnmHesapBakiyesi (FirmId, Yil, HesapFinansId)
+ create index X_OnmHesapBakiyesi_02 on OnmHesapBakiyesi (FirmId, Yil, HesapCariId)
+
+ grant select, insert, update, delete on OnmHesapBakiyesi to public
+
+commit transaction
+
+/*CreateTableEnd*/
+

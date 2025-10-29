@@ -1,0 +1,44 @@
+
+ARAÞTIRMA-GELÝÞTÝRME GÝDERLERÝ 
+DEÐÝÞKEN GÝDERLER 
+DÝREKT GÝDERLER 
+ENDÝREKT GÝDERLER 
+FÝNANSMAN GÝDERLERÝ 
+GENEL YÖNETÝM GÝDERLERÝ
+ 
+GÝDERLERÝN ÇEÞÝTLERÝNE GÖRE SINIFLANDIRILMASI 
+GÝDERLERÝN ÝÞLETME FONKSÝYONLARINA GÖRE SINIFLANDIRILMASI 
+GÝDERLERÝN ÜRETÝM (ETKÝNLÝK) HACMÝ ÝLE ÝLÝÞKÝSÝNE GÖRE SINIFLANDIRILMASI 
+
+GÝDERLERÝN ÜRÜNLERE YÜKLENMESÝNE GÖRE SINIFLANDIRILMASI 
+KARMA GÝDERLER 
+PAZARLAMA-SATIÞ-DAÐITIM GÝDERLERÝ 
+SABÝT GÝDERLER 
+TEDARÝK (SATIN ALMA) GÝDERLERÝ 
+ÜRETÝM GÝDERLERÝ
+
+
+
+Gider Kavramý
+
+Kazanç elde etmek için yapýlan varlýk tüketimine gider denir. 
+Bir harcamanýn gider sayýlabilmesi için iki þart vardýr; 
+
+birincisi tüketilen varlýðýn iþletme faaliyetlerini gerçekleþtirmek amacýyla yapýlmýþ olmasý, 
+diðeri tüketilen varlýðýn belli bir dönem içinde tüketilmiþ olmasý gerekliliðidir. 
+Giderler belli kategorilere ayrýlmaktadýr. 
+Bunlara göz atalým ;
+
+Direkt Giderler
+Bir mal veya hizmetin üretiminde maliyete doðrudan yüklenebilen, bunun için bir daðýtým anahtarýnýn kullanýlmasýna gerek olmayan giderlere direkt (doðrudan) gider denir.
+
+Endirekt Giderler
+Bir mal veya hizmetin üretiminde maliyete doðrudan yüklenemeyen, bunun için bir daðýtým anahtarýnýn kullanýlmasýna gerek olan giderlere endirekt (dolaylý) gider denir.
+
+Sabit Giderler
+Belli bir zaman dilimi içerisinde üretimin artmasýndan ya da azalmasýndan etkilenmeyip ayný kalan giderlere sabit gider denir.
+
+Deðiþken Giderler
+Ýþletmede yapýlan üretimin artmasý ya da azalmasýyla farklýlýk gösteren giderlere deðiþken giderler denir.
+
+

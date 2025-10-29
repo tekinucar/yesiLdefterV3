@@ -1,0 +1,328 @@
+
+ 
+ CREATE PROCEDURE [dbo].[prc_FN_LINEVOL_FULLHESAP]
+        @BaslamaTarihi date, 
+        @BitisTarihi date,
+        @PersonelID int,
+        @VezneNO int,
+        @HesapTD int
+ AS BEGIN
+
+ 
+ /*
+ declare   @BaslamaTarihi date
+ declare   @BitisTarihi date
+ declare   @PersonelID int
+ declare   @VezneNO int
+ declare   @HesapTD int
+ 
+ set  @BaslamaTarihi = CONVERT(date, '01.02.2017', 103)
+ set  @BitisTarihi = CONVERT(date, '11.02.2017', 103) 
+ set  @HesapTD = 0 
+ set  @PersonelID = 0--118706
+ set  @VezneNO = 1   
+ */
+ 
+ declare @Tarih varchar(500)
+ declare @Vezne varchar(1000)
+ declare @Personel varchar(100)
+ declare @Vezne_NO varchar(100)
+ 
+ declare @cumle varchar(max)
+ declare @cumle_UST varchar(2000)
+ declare @cumle_ALT varchar(2000)
+ declare @union_all varchar(15)
+ declare @Nakit varchar(4000)
+ declare @BankaHesabi varchar(4000)
+ declare @KrediKarti varchar(4000)
+ declare @POS varchar(4000)
+ declare @Virman varchar(4000)
+ 
+ 
+ set @union_all = ' UNION ALL '
+  
+ -- TARÝH BEGIN --
+ 
+ set @Tarih = ''  
+ 
+ if (@BaslamaTarihi is not null)
+    set @Tarih =  
+    '  set @BasTarih = Convert(date, ' + char(39) + CONVERT(varchar(10),@BaslamaTarihi, 103) + char(39) + ', 103) '
+ 
+ if (@BaslamaTarihi is null)
+    set @Tarih =  
+    '  set @BasTarih = Convert(date, ' + char(39) + '01.01.1900' + char(39) + ', 103) '
+ 
+ if (@BitisTarihi is not null)
+    set @Tarih = @Tarih +  
+    '  set @BitTarih = Convert(date, ' + char(39) + CONVERT(varchar(10),@BitisTarihi, 103) + char(39) + ', 103) '
+
+ if (@BitisTarihi is null)
+    set @Tarih = @Tarih + 
+    '  set @BitTarih = Convert(date, ' + char(39) + '01.01.2999' + char(39) + ', 103) '
+ 
+ -- TARIH END --
+ 
+  -- VEZNE BEGIN -- 
+  -- personelin vezne listesindeki hesaplar  
+  set @Personel = ''
+  set @Vezne_NO = ''
+  
+  if (@PersonelID is null) set @PersonelID = 0
+  if (@VezneNO is null) set @VezneNO = 0   
+  
+  if (@PersonelID > 0)
+      set @Personel = '        and   A.[HP_CARI_ID] = ' + convert(varchar(30), @PersonelID)
+  if (@VezneNO > 0)
+      set @Vezne_NO = '        and   A.[TBOX_NO] = ' + convert (varchar(30), @VezneNO)
+
+  set @Vezne =     
+  '   and ( -- personel ve vezne 
+      [FNLNVOL].BHESAP_ID in (
+        select B.HP_FINANS_ID 
+        from [dbo].[HP_FIN_TBOX] A
+          right outer join [dbo].[HP_FIN_TBOX] B on 
+          ( A.TBOX_NO = b.TBOX_NO and b.TBOX_TD = 2 )  
+        where A.[ACTIVE_TD] = 1 
+		and   A.[TBOX_TD] = 3
+        and   B.[ACTIVE_TD] = 1
+' + @Personel + '
+' + @Vezne_NO + '
+        ) or
+      [FNLNVOL].AHESAP_ID in (
+        select B.HP_FINANS_ID 
+        from [dbo].[HP_FIN_TBOX] A
+          right outer join [dbo].[HP_FIN_TBOX] B on 
+          ( A.TBOX_NO = b.TBOX_NO and b.TBOX_TD = 2 )  
+        where A.[ACTIVE_TD] = 1 
+		and   A.[TBOX_TD] = 3
+        and   B.[ACTIVE_TD] = 1
+' + @Personel + '
+' + @Vezne_NO + '
+        )
+       ) 
+     '
+   
+  -- eðer personel var ise personelin sadece yetkili olduðu hesaplar gelecek
+  -- eðer vezne no belirtilmiþse sadece o vezneye ait hesaplar gelecek
+   
+  -- Eðer ikiside sýfýr ise listede kýsýtlama yok
+  if ((@PersonelID = 0) and (@VezneNO = 0))
+      set @Vezne = '' 
+ 
+ -- VEZNE END -- 
+ 
+  -- HesapTD seçenekleri BEGIN ---
+  if (@HesapTD is null)  set  @HesapTD = 0
+  
+  -- 10 = Sadece Nakitler
+  -- 22 = Sadece Banka Hesaplarý
+  -- 23 = Sadece Kredi Kartlarý
+  -- 24 = Sadece POS Tahsilarý
+  -- 0  = Hepsi birlikte
+ 
+  -- HesapTD END --
+   
+  set @cumle_UST = 
+  '   
+    declare @BasTarih date 
+    declare @BitTarih date 
+  '
+  + @Tarih +
+  '
+    Select [FNLNVOL].*
+    , [HCR].TAMADI            LKP_CARI_ADI
+    , [HCR].CARI_TIPI         LKP_CARI_TIPI
+    , [B_HPFNS].HP_TAMADI     LKP_BORCLU_HP
+    , [A_HPFNS].HP_TAMADI     LKP_ALACAKLI_HP
+    , [HPVEZNE].HP_TAMADI     LKP_VEZNE_HP
+    , convert(int,isnull([FINTBOX].TBOX_NO,0))  LKP_VEZNE_NO   
+
+    from ( '
+   
+  set @cumle_ALT = 
+  ' ) [FNLNVOL] 
+    left outer join HP_CARI [HCR] on ( [FNLNVOL].CARI_ID = [HCR].ID  ) 
+    left outer join HP_FINANS [B_HPFNS] on ( [FNLNVOL].BHESAP_ID = [B_HPFNS].ID  ) 
+    left outer join HP_FINANS [A_HPFNS] on ( [FNLNVOL].AHESAP_ID = [A_HPFNS].ID  ) 
+    left outer join HP_FINANS [HPVEZNE] on ( [FNLNVOL].LKP_VEZNE_HESAP_ID = [HPVEZNE].ID  ) 
+    left outer join HP_FIN_TBOX [FINTBOX] on ( [FNLNVOL].LKP_VEZNE_HESAP_ID = [FINTBOX].HP_FINANS_ID ) '
+ 
+  set @Nakit =   
+  '   -- NAKÝTLER 
+     Select [FNLNVOL].* 
+     , ( CASE [FNLNVOL].IOKS10_TD 
+         WHEN 1 THEN [FNLNVOL].ISLEM_TUTARI ELSE 0 END )  LKP_BORC_TUTARI
+     , ( CASE [FNLNVOL].IOKS10_TD 
+         WHEN 2 THEN [FNLNVOL].ISLEM_TUTARI ELSE 0 END )  LKP_ALACAK_TUTARI
+     , ( CASE [FNLNVOL].IOKS10_TD 
+         WHEN 1 THEN [FNLNVOL].BHESAP_TD 
+         WHEN 2 THEN [FNLNVOL].AHESAP_TD 
+         ELSE 0 END )  LKP_VEZNE_HESAP_TD
+     , ( CASE [FNLNVOL].IOKS10_TD 
+         WHEN 1 THEN [FNLNVOL].BHESAP_ID 
+         WHEN 2 THEN [FNLNVOL].AHESAP_ID 
+         ELSE 0 END )  LKP_VEZNE_HESAP_ID
+     
+     from FN_LINEVOL [FNLNVOL]
+     where [FNLNVOL].IOKS10_TD > 0
+     and Convert(Date, [FNLNVOL].ISLEM_TRHS, 103)  >=  @BasTarih
+     and Convert(Date, [FNLNVOL].ISLEM_TRHS, 103)  <=  @BitTarih
+  '
+  + @Vezne 
+ 
+  set @BankaHesabi = 
+  '  -- BANKA HESAPLARI
+     Select [FNLNVOL].* 
+     , ( CASE [FNLNVOL].IOBH22_TD 
+         WHEN 1 THEN [FNLNVOL].ISLEM_TUTARI ELSE 0 END )  LKP_BORC_TUTARI
+     , ( CASE [FNLNVOL].IOBH22_TD 
+         WHEN 2 THEN [FNLNVOL].ISLEM_TUTARI ELSE 0 END )  LKP_ALACAK_TUTARI
+     , ( CASE [FNLNVOL].IOBH22_TD 
+         WHEN 1 THEN [FNLNVOL].BHESAP_TD 
+         WHEN 2 THEN [FNLNVOL].AHESAP_TD 
+         ELSE 0 END )  LKP_VEZNE_HESAP_TD
+     , ( CASE [FNLNVOL].IOBH22_TD 
+         WHEN 1 THEN [FNLNVOL].BHESAP_ID 
+         WHEN 2 THEN [FNLNVOL].AHESAP_ID 
+         ELSE 0 END )  LKP_VEZNE_HESAP_ID
+
+     from FN_LINEVOL [FNLNVOL]
+     where [FNLNVOL].IOBH22_TD > 0
+     and Convert(Date, [FNLNVOL].ISLEM_TRHS, 103)  >=  @BasTarih
+     and Convert(Date, [FNLNVOL].ISLEM_TRHS, 103)  <=  @BitTarih
+  '
+  + @Vezne 
+  
+  set @KrediKarti =
+  '  -- KREDÝ KARTLARI
+     Select [FNLNVOL].* 
+     , ( CASE [FNLNVOL].IOKK23_TD 
+         WHEN 1 THEN [FNLNVOL].ISLEM_TUTARI ELSE 0 END )  LKP_BORC_TUTARI
+     , ( CASE [FNLNVOL].IOKK23_TD 
+         WHEN 2 THEN [FNLNVOL].ISLEM_TUTARI ELSE 0 END )  LKP_ALACAK_TUTARI
+     , ( CASE [FNLNVOL].IOKK23_TD 
+         WHEN 1 THEN [FNLNVOL].BHESAP_TD 
+         WHEN 2 THEN [FNLNVOL].AHESAP_TD 
+         ELSE 0 END )  LKP_VEZNE_HESAP_TD
+     , ( CASE [FNLNVOL].IOKK23_TD 
+         WHEN 1 THEN [FNLNVOL].BHESAP_ID 
+         WHEN 2 THEN [FNLNVOL].AHESAP_ID 
+         ELSE 0 END )  LKP_VEZNE_HESAP_ID
+
+     from FN_LINEVOL [FNLNVOL]
+     where [FNLNVOL].IOKK23_TD > 0
+     and Convert(Date, [FNLNVOL].ISLEM_TRHS, 103)  >=  @BasTarih
+     and Convert(Date, [FNLNVOL].ISLEM_TRHS, 103)  <=  @BitTarih
+  '
+  + @Vezne 
+  
+  set @POS = 
+  '  -- POS  
+     Select [FNLNVOL].* 
+     , ( CASE [FNLNVOL].IOPS24_TD 
+         WHEN 1 THEN [FNLNVOL].ISLEM_TUTARI ELSE 0 END )  LKP_BORC_TUTARI
+     , ( CASE [FNLNVOL].IOPS24_TD 
+         WHEN 2 THEN [FNLNVOL].ISLEM_TUTARI ELSE 0 END )  LKP_ALACAK_TUTARI
+     , ( CASE [FNLNVOL].IOPS24_TD 
+         WHEN 1 THEN [FNLNVOL].BHESAP_TD 
+         WHEN 2 THEN [FNLNVOL].AHESAP_TD 
+         ELSE 0 END )  LKP_VEZNE_HESAP_TD
+     , ( CASE [FNLNVOL].IOPS24_TD 
+         WHEN 1 THEN [FNLNVOL].BHESAP_ID 
+         WHEN 2 THEN [FNLNVOL].AHESAP_ID 
+         ELSE 0 END )  LKP_VEZNE_HESAP_ID
+
+     from FN_LINEVOL [FNLNVOL]
+     where 0 = 0 
+     and [FNLNVOL].IOPS24_TD > 0
+     and Convert(Date, [FNLNVOL].ISLEM_TRHS, 103)  >=  @BasTarih
+     and Convert(Date, [FNLNVOL].ISLEM_TRHS, 103)  <=  @BitTarih
+  '
+  + @Vezne 
+  
+  -- virmanlarý þimdilik kullanma 
+  set @Virman = 
+  '  -- virman hesaplar
+     Select [FNLNVOL].* 
+     , ( CASE [FNLNVOL].IOVR00_TD 
+         WHEN 1 THEN [FNLNVOL].ISLEM_TUTARI ELSE 0 END )  LKP_BORC_TUTARI
+     , ( CASE [FNLNVOL].IOVR00_TD 
+         WHEN 2 THEN [FNLNVOL].ISLEM_TUTARI ELSE 0 END )  LKP_ALACAK_TUTARI
+     , ( CASE [FNLNVOL].IOVR00_TD 
+         WHEN 1 THEN [FNLNVOL].BHESAP_TD 
+         WHEN 2 THEN [FNLNVOL].AHESAP_TD 
+         ELSE 0 END )  LKP_VEZNE_HESAP_TD
+     , ( CASE [FNLNVOL].IOVR00_TD 
+         WHEN 1 THEN [FNLNVOL].BHESAP_ID 
+         WHEN 2 THEN [FNLNVOL].AHESAP_ID 
+         ELSE 0 END )  LKP_VEZNE_HESAP_ID
+     
+     from FN_LINEVOL [FNLNVOL]
+     where [FNLNVOL].IOVR00_TD > 0
+     and Convert(Date, [FNLNVOL].ISLEM_TRHS, 103)  >=  @BasTarih
+     and Convert(Date, [FNLNVOL].ISLEM_TRHS, 103)  <=  @BitTarih
+  '
+  + @Vezne 
+   
+  if ((@HesapTD <> 0) and (@HesapTD <> 10)) set @Nakit = null
+  if ((@HesapTD <> 0) and (@HesapTD <> 22)) set @BankaHesabi = null
+  if ((@HesapTD <> 0) and (@HesapTD <> 23)) set @KrediKarti = null
+  if ((@HesapTD <> 0) and (@HesapTD <> 24)) set @POS = null
+   
+  -- En sonunda birleþtirme iþlemleri 
+  
+  if (@HesapTD = 0)
+  begin
+    set @cumle = 
+        @cumle_UST 
+      + @Nakit + @union_all
+      + @BankaHesabi + @union_all
+      + @KrediKarti + @union_all
+      + @POS
+      + @cumle_ALT
+  end 
+ 
+  if (@HesapTD = 10)
+  begin
+    set @cumle = 
+        @cumle_UST 
+      + @Nakit 
+      + @cumle_ALT
+  end 
+
+  if (@HesapTD = 22)
+  begin
+    set @cumle = 
+        @cumle_UST 
+      + @BankaHesabi 
+      + @cumle_ALT
+  end 
+
+  if (@HesapTD = 23)
+  begin
+    set @cumle = 
+        @cumle_UST 
+      + @KrediKarti 
+      + @cumle_ALT
+  end 
+
+  if (@HesapTD = 24)
+  begin
+    set @cumle = 
+        @cumle_UST 
+      + @POS
+      + @cumle_ALT
+  end 
+
+  -- SON 
+   
+  -- print @cumle
+   
+  execute (@cumle)
+
+END -- son
+
+
+
+

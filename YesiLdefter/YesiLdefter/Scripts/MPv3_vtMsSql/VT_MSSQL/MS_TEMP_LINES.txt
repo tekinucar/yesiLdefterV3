@@ -1,0 +1,24 @@
+
+begin transaction
+
+ create table MS_TEMP_LINES
+ (
+        REF_ID              Int IDENTITY(1,1) NOT NULL,
+        WFILE_CODE           VarChar(30)    NULL,   -- MS_TEMP_FILE = MS_WORK_CODE (Master-Detail)
+        LINE_SORT_NO        SmallInt       NULL,   -- Ýþ Listesi Sýra No
+        LINE_CODE           VarChar(30)    NULL,   -- iþ listesinin kodu
+        LINE_NAME           VarChar(100)   NULL,   -- iþ listesinin adý
+        LINE_TYPE           SmallInt       NULL,   -- (SIRALI ÝÞ LÝSTESÝ, SERBEST ZAMANLI ÝÞ LÝSTESÝ)
+
+    Constraint PK_MS_TEMP_LINES primary key (REF_ID)
+ )
+
+ create index X_MS_TEMP_LINES1 on MS_TEMP_LINES ( WFILE_CODE, LINE_CODE )
+ 
+ grant select, insert, update, delete on MS_TEMP_LINES to public
+
+commit transaction
+
+
+
+

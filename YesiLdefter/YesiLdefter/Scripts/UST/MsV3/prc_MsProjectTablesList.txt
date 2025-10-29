@@ -1,0 +1,44 @@
+﻿
+CREATE PROCEDURE [dbo].[prc_MsProjectTablesList] ( 
+    @managerDbName varchar(100) 
+   ,@workDbName varchar(100) 
+  )  
+AS BEGIN
+ /*
+ declare @managerDbName varchar(100) 
+ declare @workDbName varchar(100) 
+ set @managerDbName = 'MSV3DFTRBLT'
+ set @workDbName = 'u7093888_Ustad01'
+ */
+ 
+ declare @cumle varchar(2000) 
+
+ set @cumle = 
+  '  select project.*
+   , sch.name as Lkp_SchemaName
+   , a.name as Lkp_TableName
+   , ''{workDb}'' as Lkp_DatabaseName
+   from [{workDb}].sys.tables as a 
+      left outer join [{workDb}].sys.schemas as sch on ( a.schema_id = sch.schema_id ) 
+      left outer join [{managerDb}].dbo.MsProjectTables project on ( a.name = project.TableName )
+   order by a.name '
+
+  set @cumle = REPLACE(@cumle, '{workDb}', @workDbName) 
+  set @cumle = REPLACE(@cumle, '{managerDb}', @managerDbName) 
+
+  if ((@managerDbName = '') or
+      (@managerDbName = 'null') or
+      (@workDBName = '') or
+      (@workDBName = 'null'))
+  begin
+    set @cumle = '
+    select 
+      ''sch.name'' as Lkp_SchemaName
+    , ''tableName'' as Lkp_TableName 
+	, ''databaseName'' as Lkp_DatabaseName '
+  end
+  
+  execute(@cumle)  
+
+END -- procedure
+

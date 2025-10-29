@@ -1,0 +1,57 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table HubGecerlilikTarihi
+ (
+
+   Id                     Int IDENTITY(1,1) NOT NULL, 
+   FirmId                 Int       not null,
+   IsActive               Bit       not null, /* default : 1 = active, 0 = not active */  
+   KonuTipiId             SmallInt  not null,
+   Tarih                  Date      not null,
+
+  constraint pk_HubGecerlilikTarihi primary key (Id)
+ )
+
+ create index X_HubGecerlilikTarihi01 on HubGecerlilikTarihi (KonuTipiId, Tarih)
+ 
+ grant select, insert, update, delete on HubGecerlilikTarihi to public
+
+commit transaction
+
+/*CreateTableEnd*/
+
+/*CreateLkpTable*/
+
+begin transaction
+
+-- ------------------------------------------------------- 
+-- KonuTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'HubGecerlilikTarihiKonuTipi')
+drop table [Lkp].[HubGecerlilikTarihiKonuTipi]
+
+create table [Lkp].[HubGecerlilikTarihiKonuTipi]
+(
+   Id               Int Unique not null, 
+   KonuTipi         nVarchar(50)   null,
+   GrupTipiId       SmallInt       null,
+   
+   constraint  pk_HubGecerlilikTarihiKonuTipi primary key (Id)
+)
+
+Delete from [Lkp].[HubGecerlilikTarihiKonuTipi]
+INSERT INTO [Lkp].[HubGecerlilikTarihiKonuTipi] (Id, KonuTipi, GrupTipiId)
+ VALUES 
+  ( 0,      N'',0),
+  ( 21101,  N'Teorik saatler', 211),
+  ( 21102,  N'Uygulama saatleri', 211),
+  ( 21103,  N'Sınav ücreti', 211),
+  ( 21104,  N'Sertifika/ders ücreti', 211)
+  
+commit transaction
+
+  /*CreateLkpTableEnd*/
+
+

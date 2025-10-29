@@ -1,0 +1,31 @@
+
+
+begin transaction
+
+ create table HP_CARI_KK 
+ (
+   ID                    int             IDENTITY(1,1) NOT NULL, 
+   FIRM_ID               int             NULL,
+   SHOP_ID               Int             NULL,
+   AKTIF                 bit             null default((1)),
+   CARI_ID               Int             NULL,
+   BANKA                 VarChar(30)     NULL,
+   KART_ADI              VarChar(30)     NULL,
+   KART_SAHIBI           VarChar(50)     NULL,
+   KART_NO               VarChar(30)     NULL,
+   GVN_KODU              VarChar(10)     NULL,
+   SONAY                 SmallInt        NULL, 
+   SONYIL                Int             NULL,  /* son iki haneli */
+   KP_TD                 SmallInt        NULL, /* 1. Kredi Kartý, 2. Para Kartý */
+   MV_TD                 SmallInt        NULL, /* 1. Master,      2. Visa */ 
+   ACIKLAMA              VarChar(200)    NULL, /* Kullanýcý Hatýrlatma Notu Girsin */
+
+   constraint PK_HP_CARI_KK primary key (ID)
+ )
+
+ create index X_HP_CARI_KK1 on HP_CARI_KK (FIRM_ID, SHOP_ID, CARI_ID)
+
+ grant select, insert, update, delete on HP_CARI_KK to public
+
+commit transaction
+

@@ -1,0 +1,64 @@
+﻿/*CreatTable*/ 
+-- ------------------------------------------------------- 
+-- FaturaEkVergiTipi
+-- ------------------------------------------------------- 
+begin transaction
+
+create table [Lkp].[OnmFaturaEkVergiTipi]
+(
+   Id           Int IDENTITY(1,1) NOT NULL, 
+   IsActive     Bit null,
+   FaturaEkVergiKodu nVarchar(10)  null,
+   FaturaEkVergiAdi  nVarchar(50)  null,
+   VergiOrani        Numeric(12,8) null,
+   VergiTutari       Numeric(22,8) null,
+
+   constraint  pk_OnmFaturaEkVergiTipi primary key (Id)
+)
+
+ grant select, insert, update, delete on [Lkp].[OnmFaturaEkVergiTipi] to public
+
+commit transaction
+
+/*CreatTableEnd*/
+
+
+/*CreatData*/
+
+SET IDENTITY_INSERT [Lkp].[OnmFaturaEkVergiTipi] ON
+
+INSERT INTO [Lkp].[OnmFaturaEkVergiTipi] (Id, IsActive, FaturaEkVergiKodu, FaturaEkVergiAdi, VergiOrani )
+ VALUES 
+  ( 0, 1, N'', N'Tanımsız', 0 ),
+  ( 1, 0, N'V0021', N'BANKA MUAMELELERİ VER.', 0 ),
+  ( 2, 1, N'V0061', N'KKDF KESİNTİ', 0 ),
+  ( 3, 1, N'V0071', N'ÖTV 1. LİSTE', 20 ),
+  ( 4, 1, N'V0073', N'ÖTV 3. LİSTE', 30 ),
+  ( 5, 1, N'V0074', N'ÖTV 4. LİSTE', 40 ),
+  ( 6, 1, N'V0075', N'ÖTV 3A LİSTE', 32 ),
+  ( 7, 1, N'V0076', N'ÖTV 3B LİSTE', 34 ),
+  ( 8, 1, N'V0077', N'ÖTV 3C LİSTE', 36 ),
+  ( 9, 0, N'V1047', N'DAMGA V', 0 ),
+  (10, 0, N'V1048', N'5035SKDAMGAV', 0 ),
+  (11, 0, N'V4080', N'Ö.İLETİŞİM V', 0 ),
+  (12, 0, N'V4081', N'5035ÖZİLETV.', 0 ),
+  (13, 0, N'V9015', N'KDV TEVKİFAT', 0 ),
+  (14, 0, N'V9021', N'4961BANKASMV', 0 ),
+  (15, 1, N'V9077', N'ÖTV 2.LİSTE', 20 ),
+  (16, 0, N'V8001', N'BORSA TES.ÜC.', 0 ),
+  (17, 0, N'V8002', N'ENERJİ FONU', 0 ),
+  (18, 0, N'V4071', N'ELK.HAVAGAZ.TÜK.VER.', 0 ),
+  (19, 0, N'V8004', N'TRT PAYI', 0 ),
+  (20, 0, N'V8005', N'ELK.TÜK.VER.', 0 ),
+  (21, 0, N'V8006', N'TK KULLANIM', 0 ),
+  (22, 0, N'V8007', N'TK RUHSAT', 0 ),
+  (23, 0, N'V8008', N'ÇEV. TEM .VER.', 0 ),
+  (24, 1, N'V0003', N'GV. STOPAJI', 0 ),
+  (25, 1, N'V0011', N'KV. STOPAJI', 0 ),
+  (26, 1, N'V9040', N'MERA FONU', 0 ),
+  (27, 0, N'V4171', N'ÖTV TEVKİFAT', 0 ),
+  (28, 0, N'V9944', N'BEL.ÖD.HAL RÜSUM', 0 )
+
+  SET IDENTITY_INSERT [Lkp].[OnmFaturaEkVergiTipi] OFF
+
+  /*CreatDataEnd*/

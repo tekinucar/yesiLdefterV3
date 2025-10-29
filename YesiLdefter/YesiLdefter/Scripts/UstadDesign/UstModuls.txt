@@ -1,0 +1,22 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table dbo.UstModules
+ (
+    Id              Int IDENTITY(1,1)     not null,
+    ProjectId       Int NOT NULL FOREIGN KEY REFERENCES dbo.UstProjects(Id),
+    ModuleName      NVARCHAR(100)  NOT NULL,
+    ModuleCode      CHAR(3)        NOT NULL,
+    FullCode        NVARCHAR(10)   NULL,
+
+	Constraint PK_UstModules primary key (Id)
+ )
+
+ create index X_UstModeles01 on dbo.UstModules (ModuleCode)
+
+ grant select, insert, update, delete on dbo.UstModules to public
+
+commit transaction
+
+/*CreateTableEnd*/

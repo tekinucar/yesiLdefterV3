@@ -1,0 +1,73 @@
+﻿USE [u7093888_Ustad01]
+GO
+
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+create procedure [dbo].[prc_GetStokFiyati] 
+  ( @FirmId Integer,
+    @StokId Integer,
+    @BirimTipiId varchar(3),
+	@IslemTarihi date,
+	@IslemSaati  varchar(8) )
+as begin
+  declare @gunNo Int = 0
+  declare @gunNoA Int = 0
+  declare @gunNoB Int = 0
+
+  if ((@IslemTarihi < CONVERT(DATE, '01.01.1900', 104)) or (@IslemTarihi is null))
+     set @IslemTarihi = CONVERT(DATE, GETDATE(), 104)
+          
+  if ((@IslemSaati = '') or (@IslemSaati is null)) 
+     set @IslemSaati = '00:01'
+
+  set @gunNo = DATEPART(weekday,@IslemTarihi)	
+
+  -- işlem hafta içi ise : ptesi, salı, çarş, perş, cuma
+  if ((@gunNo >= 2) and (@gunNo <= 6))
+  begin
+    set @gunNoA = 0
+    set @gunNoB = 1
+  end 
+
+  -- işlem c.tesi ise
+  if (@gunNo = 7)
+  begin
+    set @gunNoA = 2
+    set @gunNoB = 4
+  end 
+    
+  -- işlem pazar ise
+  if (@gunNo = 1)
+  begin
+    set @gunNoA = 3
+    set @gunNoB = 4
+  end 
+
+  -- sonuç SQL
+      
+  Select Top 1 fyt.* From [dbo].[OnmHesapStokFiyat] fyt
+  where fyt.FirmId = @FirmId
+  and   fyt.IsActive = 1
+  and   fyt.StokId = @StokId
+  and   fyt.BirimTipiId = @BirimTipiId
+  and   fyt.BaslamaTarihi <= @IslemTarihi
+  and   isnull(fyt.BaslamaSaati, '00:01') <= @IslemSaati
+  and   isnull(fyt.BitisTarihi, convert(date,getdate(), 104)) >= convert(date, @IslemTarihi, 104)
+  and   isnull(fyt.BitisSaati, '23:59') >= @IslemSaati
+  and   (isnull(fyt.GecerliGunTipiId, -1) = -1 or
+         isnull(fyt.GecerliGunTipiId, -1) = @gunNoA or
+		 isnull(fyt.GecerliGunTipiId, -1) = @gunNoB)
+
+  order by fyt.BaslamaTarihi desc, 
+           isnull(fyt.BaslamaSaati, '00:01') desc,
+		   isnull(fyt.GecerliGunTipiId, -1)
+
+
+end -- as begin 
+
+
+GO

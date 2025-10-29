@@ -1,0 +1,33 @@
+<select id="gen__1247" class="csc-combobox">
+<option value=" "> </option>
+
+<option value="V0021">BANKA MUAMELELERİ VER.</option>
+<option value="V0061">KKDF KESİNTİ</option>
+<option value="V0071">ÖTV 1. LİSTE</option>
+<option value="V0073">ÖTV 3. LİSTE</option>
+<option value="V0074">ÖTV 4. LİSTE</option>
+<option value="V0075">ÖTV 3A LİSTE</option>
+<option value="V0076">ÖTV 3B LİSTE</option>
+<option value="V0077">ÖTV 3C LİSTE</option>
+<option value="V1047">DAMGA V</option>
+<option value="V1048">5035SKDAMGAV</option>
+<option value="V4080">Ö.İLETİŞİM V</option>
+<option value="V4081">5035ÖZİLETV.</option>
+<option value="V9015">KDV TEVKİFAT</option>
+<option value="V9021">4961BANKASMV</option>
+<option value="V9077">ÖTV 2.LİSTE</option>
+<option value="V8001">BORSA TES.ÜC.</option>
+<option value="V8002">ENERJİ FONU</option>
+<option value="V4071">ELK.HAVAGAZ.TÜK.VER.</option>
+<option value="V8004">TRT PAYI</option>
+<option value="V8005">ELK.TÜK.VER.</option>
+<option value="V8006">TK KULLANIM</option>
+<option value="V8007">TK RUHSAT</option>
+<option value="V8008">ÇEV. TEM .VER.</option>
+<option value="V0003">GV. STOPAJI</option>
+<option value="V0011">KV. STOPAJI</option>
+<option value="V9040">MERA FONU</option>
+<option value="V4171">ÖTV TEVKİFAT</option>
+<option value="V9944">BEL.ÖD.HAL RÜSUM</option>
+
+</select>

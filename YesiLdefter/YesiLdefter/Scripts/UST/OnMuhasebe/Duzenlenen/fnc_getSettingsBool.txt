@@ -1,0 +1,21 @@
+﻿/*CreateFunction*/
+
+CREATE FUNCTION [dbo].[fnc_getSettingsBool]( @FirmId int, @settingGroupNo smallint, @settingNo smallint )
+RETURNS Bit
+AS   
+BEGIN 
+  /* Bu functionda dbo.Setting tablosundaki Bit olan öndeğeler sorgulanıyor, cevaplanıyor */
+  declare @retValue bit = 0
+
+  Select @retValue = DefaultBool
+  From [dbo].[Settings] as s
+  Where FirmId = @FirmId
+  and   SettingGroupNo = @settingGroupNo
+  and   SettingNo = @settingNo
+
+  -- True yada False dönüyor
+  RETURN @retValue;
+END; -- function
+
+/*CreateFunctionEnd*/
+

@@ -1,0 +1,54 @@
+
+
+CREATE VIEW [dbo].[VW_BANK_LIST]  
+AS
+ (
+
+  Select [HPBNK].* from (
+  /* Banka Þube List */
+  Select 
+    s.ID        LKP_REF_ID  
+  , s.ID        LKP_BANKSUBE_ID
+  , b.ID        LKP_BANK_ID  
+  , s.FNS_TIPI  LKP_FNS_TIPI
+  , b.HP_TAMADI LKP_BANK_NAME   
+  , s.HP_TAMADI LKP_BANKSHOP_NAME 
+  , ''          LKP_HESAP_NAME
+  , b.HP_TAMADI + '.' + s.HP_TAMADI  LKP_FULL_NAME  
+
+  FROM HP_FINANS s
+     left outer join HP_FINANS b on ( s.PARENT_ID = b.ID )
+
+  WHERE s.[FNS_TIPI] = 21
+  --AND s.[FIRM_ID] = 
+  
+  UNION ALL
+  
+  /* Banka / Þube / HesapNo */
+  /* Banka / Þube / POS No */
+  /* Banka / Þube / Kart No */
+  /* Banka / Þube / Kredi Adý */
+  
+  Select 
+    h.ID        LKP_REF_ID
+  , s.ID        LKP_BANKSUBE_ID
+  , b.ID        LKP_BANK_ID  
+  , h.FNS_TIPI  LKP_FNS_TIPI
+  , b.HP_TAMADI LKP_BANK_NAME   
+  , isnull(b.HP_ADI, b.HP_TAMADI) + '.' + s.HP_TAMADI  LKP_BANKSHOP_NAME 
+  , h.HP_TAMADI LKP_HESAP_NAME   
+  , isnull(b.HP_ADI, b.HP_TAMADI) + '.' + isnull(h.HP_ADI, h.HP_TAMADI)  LKP_FULL_NAME  
+
+  FROM HP_FINANS h 
+     left outer join HP_FINANS s on ( h.PARENT_ID = s.ID )
+     left outer join HP_FINANS b on ( s.PARENT_ID = b.ID )
+
+  WHERE s.[FNS_TIPI] = 21
+  --AND s.[FIRM_ID] = 
+  
+  ) [HPBNK]
+  
+)
+
+GO
+

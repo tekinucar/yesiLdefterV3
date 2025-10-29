@@ -1,0 +1,144 @@
+﻿/*CreateTable*/
+
+-- ÖnMuhasebe, Aday Takip captions table
+
+begin transaction
+
+ create table MsFollow
+ (
+    Id              Int IDENTITY(1,1) not null,
+    FirmId          Int                   null, 
+    IsActive        Bit               not null,
+	SectorTypeId    SmallInt          not null,
+    FollowTypeId    SmallInt              null,
+	ItemTypeId      SmallInt              null, 
+	ItemCode        Varchar(30)           null,
+	ParentItemCode  Varchar(30)           null,
+	ItemId          SmallInt              null,
+    ItemCaption     Varchar(100)          null,
+    ItemValue       Numeric(22,8)         null,
+
+   Constraint pk_MsFollow primary key (Id)
+ )
+
+ create index X_MsFollow_01 on MsFollow (SectorTypeId, ItemCode, ParentItemCode)
+
+ grant select, insert, update, delete on MsFollow to public
+
+commit transaction
+
+/*CreateTableEnd*/
+
+/*CreateLkpTable*/
+
+begin transaction
+
+-- ------------------------------------------------------- 
+-- FollowTypeId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MsFollowFollowType')
+drop table [Lkp].[MsFollowFollowType]
+
+create table [Lkp].[MsFollowFollowType]
+(
+   Id                Int Unique not null, 
+   FollowType        nVarchar(30)   null
+   
+   constraint  pk_MsFollowFollowType primary key (Id)
+)
+
+Delete from [Lkp].[MsFollowFollowType]
+INSERT INTO [Lkp].[MsFollowFollowType] (Id, FollowType)
+ VALUES 
+  (    0,  N'' ),
+  ( 2011,  N'Mtsk ÖnMuhasebe' ),
+  ( 2012,  N'Mtsk Aday' )
+
+-- ------------------------------------------------------- 
+-- ItemTypeId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MsFollowItemType')
+drop table [Lkp].[MsFollowItemType]
+
+create table [Lkp].[MsFollowItemType]
+(
+   Id                Int Unique not null, 
+   ItemType          nVarchar(20)   null
+   
+   constraint  pk_MsFollowItemType primary key (Id)
+)
+
+Delete from [Lkp].[MsFollowItemType]
+INSERT INTO [Lkp].[MsFollowItemType] (Id, ItemType)
+ VALUES 
+  (  0,  N'' ),
+  (  1,  N'Header' ),
+  (  2,  N'Group' ),
+  (  3,  N'Item' )
+
+commit transaction
+
+/*CreateLkpTableEnd*/
+
+
+
+/*CreateData*/
+
+/*
+           (1     --IsActive
+           ,201  --SectorTypeId
+           ,2011 --TypeId
+           ,1    --ItemTypeId 
+           ,''   --ItemCode, varchar(30)
+           ,''   --ParentItemCode, varchar(30)
+           ,''   --ItemCaption, varchar(100) 
+*/
+
+declare @firmId int = 0
+set @firmId = :FIRM_ID
+
+Delete from [dbo].[MsFollow]
+Where FirmId = @firmId
+
+-- Headers
+--
+INSERT INTO [dbo].[MsFollow] ([FirmId], [IsActive], [SectorTypeId], [FollowTypeId], [ItemTypeId], [ItemCode], [ParentItemCode], [ItemCaption]) VALUES (@firmId, 1, 201, 2011, 1, '10', '', 'Özet' )
+
+INSERT INTO [dbo].[MsFollow] ([FirmId], [IsActive], [SectorTypeId], [FollowTypeId], [ItemTypeId], [ItemCode], [ParentItemCode], [ItemCaption]) VALUES (@firmId, 1, 201, 2011, 1, '20', '', 'Tahsilatlar' )
+
+INSERT INTO [dbo].[MsFollow] ([FirmId], [IsActive], [SectorTypeId], [FollowTypeId], [ItemTypeId], [ItemCode], [ParentItemCode], [ItemCaption]) VALUES (@firmId, 1, 201, 2011, 1, '30', '', 'Ödemeler' )
+
+INSERT INTO [dbo].[MsFollow] ([FirmId], [IsActive], [SectorTypeId], [FollowTypeId], [ItemTypeId], [ItemCode], [ParentItemCode], [ItemCaption]) VALUES (@firmId, 1, 201, 2011, 1, '40', '', 'Personel' )
+
+INSERT INTO [dbo].[MsFollow] ([FirmId], [IsActive], [SectorTypeId], [FollowTypeId], [ItemTypeId], [ItemCode], [ParentItemCode], [ItemCaption]) VALUES (@firmId, 1, 201, 2011, 1, '50', '', 'Bakiyeler' )
+
+--INSERT INTO [dbo].[MsFollow] ([FirmId], [IsActive], [SectorTypeId], [FollowTypeId], [ItemTypeId], [ItemCode], [ParentItemCode], [ItemCaption]) VALUES (@firmId, 1, 201, 2011, 1, '', '', '' )
+
+--INSERT INTO [dbo].[MsFollow] ([FirmId], [IsActive], [SectorTypeId], [FollowTypeId], [ItemTypeId], [ItemCode], [ParentItemCode], [ItemCaption]) VALUES (@firmId, 1, 201, 2011, 1, '', '', '' )
+
+
+
+-- Groups
+--
+INSERT INTO [dbo].[MsFollow] ([FirmId], [IsActive], [SectorTypeId], [FollowTypeId], [ItemTypeId], [ItemCode], [ParentItemCode], [ItemId], [ItemCaption]) VALUES (@firmId, 1, 201, 2011, 2, '20.10', '20', 201, 'Vadesi geçmiş sertifika ücretleri' )
+INSERT INTO [dbo].[MsFollow] ([FirmId], [IsActive], [SectorTypeId], [FollowTypeId], [ItemTypeId], [ItemCode], [ParentItemCode], [ItemId], [ItemCaption]) VALUES (@firmId, 1, 201, 2011, 2, '20.20', '20', 202, 'Bu ayki sertifika ücretleri' )
+INSERT INTO [dbo].[MsFollow] ([FirmId], [IsActive], [SectorTypeId], [FollowTypeId], [ItemTypeId], [ItemCode], [ParentItemCode], [ItemId], [ItemCaption]) VALUES (@firmId, 1, 201, 2011, 2, '20.30', '20', 203, 'Gelecek aylardaki sertifika ücretleri' )
+INSERT INTO [dbo].[MsFollow] ([FirmId], [IsActive], [SectorTypeId], [FollowTypeId], [ItemTypeId], [ItemCode], [ParentItemCode], [ItemId], [ItemCaption]) VALUES (@firmId, 1, 201, 2011, 2, '20.40', '20', 211, 'Teorik sınav ücretleri' )
+INSERT INTO [dbo].[MsFollow] ([FirmId], [IsActive], [SectorTypeId], [FollowTypeId], [ItemTypeId], [ItemCode], [ParentItemCode], [ItemId], [ItemCaption]) VALUES (@firmId, 1, 201, 2011, 2, '20.50', '20', 212, 'Uygulama sınav ücretleri' )
+INSERT INTO [dbo].[MsFollow] ([FirmId], [IsActive], [SectorTypeId], [FollowTypeId], [ItemTypeId], [ItemCode], [ParentItemCode], [ItemId], [ItemCaption]) VALUES (@firmId, 1, 201, 2011, 2, '20.60', '20', 213, 'Özel teorik ders ücretleri' )
+INSERT INTO [dbo].[MsFollow] ([FirmId], [IsActive], [SectorTypeId], [FollowTypeId], [ItemTypeId], [ItemCode], [ParentItemCode], [ItemId], [ItemCaption]) VALUES (@firmId, 1, 201, 2011, 2, '20.60', '20', 214, 'Özel uygulama ders ücretleri' )
+--INSERT INTO [dbo].[MsFollow] ([FirmId], [IsActive], [SectorTypeId], [FollowTypeId], [ItemTypeId], [ItemCode], [ParentItemCode], [ItemId], [ItemCaption]) VALUES (@firmId, 1, 201, 2011, 2, '20.80', '20', 222, '' )
+--INSERT INTO [dbo].[MsFollow] ([FirmId], [IsActive], [SectorTypeId], [FollowTypeId], [ItemTypeId], [ItemCode], [ParentItemCode], [ItemId], [ItemCaption]) VALUES (@firmId, 1, 201, 2011, 2, '20.90', '20', 223, '' )
+
+INSERT INTO [dbo].[MsFollow] ([FirmId], [IsActive], [SectorTypeId], [FollowTypeId], [ItemTypeId], [ItemCode], [ParentItemCode], [ItemId], [ItemCaption]) VALUES (@firmId, 1, 201, 2011, 2, '30.10', '30', 301, 'Vadesi geçmiş ödemeler' )
+INSERT INTO [dbo].[MsFollow] ([FirmId], [IsActive], [SectorTypeId], [FollowTypeId], [ItemTypeId], [ItemCode], [ParentItemCode], [ItemId], [ItemCaption]) VALUES (@firmId, 1, 201, 2011, 2, '30.20', '30', 302, '7 gün içindeki ödemeler' )
+INSERT INTO [dbo].[MsFollow] ([FirmId], [IsActive], [SectorTypeId], [FollowTypeId], [ItemTypeId], [ItemCode], [ParentItemCode], [ItemId], [ItemCaption]) VALUES (@firmId, 1, 201, 2011, 2, '30.30', '30', 303, 'Ay sonuna kadar ödemeler' )
+INSERT INTO [dbo].[MsFollow] ([FirmId], [IsActive], [SectorTypeId], [FollowTypeId], [ItemTypeId], [ItemCode], [ParentItemCode], [ItemId], [ItemCaption]) VALUES (@firmId, 1, 201, 2011, 2, '30.40', '30', 304, 'Gelecek ayki ödemeler' )
+INSERT INTO [dbo].[MsFollow] ([FirmId], [IsActive], [SectorTypeId], [FollowTypeId], [ItemTypeId], [ItemCode], [ParentItemCode], [ItemId], [ItemCaption]) VALUES (@firmId, 1, 201, 2011, 2, '30.50', '30', 305, 'Tüm bekleyen ödemeler' )
+--INSERT INTO [dbo].[MsFollow] ([FirmId], [IsActive], [SectorTypeId], [FollowTypeId], [ItemTypeId], [ItemCode], [ParentItemCode], [ItemId], [ItemCaption]) VALUES (@firmId, 1, 201, 2011, 2, '30.', '30', 306, '' )
+--INSERT INTO [dbo].[MsFollow] ([FirmId], [IsActive], [SectorTypeId], [FollowTypeId], [ItemTypeId], [ItemCode], [ParentItemCode], [ItemId], [ItemCaption]) VALUES (@firmId, 1, 201, 2011, 2, '30.', '30', 307, '' )
+
+
+/*CreateDataEnd*/
+
+--INSERT INTO [dbo].[MsFollow] ([FirmId], [IsActive], [SectorTypeId], [FollowTypeId], [ItemTypeId], [ItemCode], [ParentItemCode], [ItemId], [ItemCaption]) VALUES (@firmId, 1, 201, 2011, 2, '20.70', '20', 221, 'Banka hesabına geçecek POS tahsilatları' )

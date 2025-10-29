@@ -1,0 +1,37 @@
+
+/* 
+   BU TABLODA BÝR NESNEYE VEYA TABLOYA AÝT 
+
+   PROPERTÝES SATIRLARI OLUÞTURULUYOR 
+
+*/
+
+begin transaction
+
+ create table MS_PROPERTIES
+ (
+	REF_ID			Int IDENTITY(1,1) 	NOT NULL,
+        TABLENAME               VarChar(50)             NULL,
+        FIELDNAME		VarChar(50)             NULL,
+
+        ROW_TYPE                SmallInt                NULL, /* 1 = CategoryRow, 2 = EditorRow */
+        ROW_CATEGORY_NO         SmallInt                NULL,
+        ROW_LINE_NO             SmallInt                NULL,
+        ROW_CAPTION             VarChar(40)             NULL,
+        ROW_FIELDNAME           VarChar(40)             NULL,
+        ROW_FIELDTYPE           SmallInt                NULL,
+        ROW_COLUMN_TYPE  	VarChar(30) 		NULL,
+        LIST_TYPES_NAME         VarChar(50) 		NULL, 
+
+	Constraint PK_MS_PROPERTIES primary key (REF_ID)
+
+ )
+
+ create index X_MS_PROPERTIES_1 on MS_PROPERTIES 
+     (TABLENAME, FIELDNAME, ROW_CATEGORY_NO, ROW_LINE_NO)
+
+ grant select, insert, update, delete on MS_PROPERTIES to public
+
+commit transaction
+
+

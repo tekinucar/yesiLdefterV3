@@ -1,0 +1,61 @@
+﻿USE [u7093888_Ustad01]
+GO
+
+/****** Object:  StoredProcedure [dbo].[prc_CihazKaydiSet]    Script Date: 07.10.2020 15:49:27 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+--CREATE PROCEDURE [dbo].[prc_CihazKaydiSet] (@FirmId int, @CihazId int, @CariId int, @TarihSaat datetime )  
+CREATE PROCEDURE [dbo].[prc_CihazKaydiSet] (@FirmId int, @CihazId int, @CariId int, @TarihSaat datetime )  
+AS BEGIN 
+
+declare @YeniKayitArasiFark int 
+set @YeniKayitArasiFark = 10 * (-1)
+
+--declare @FirmId int
+--declare @CihazId int
+--declare @CariId int
+--declare @TarihSaat datetime 
+
+--set @FirmId = 9
+--set @CihazId = 5
+--set @CariId = 101
+set @TarihSaat = convert(datetime, @TarihSaat, 101)
+
+if ( Select count(Id) Adet
+     From  [dbo].[CihazKaydi]
+     Where [FirmId] = @FirmId
+     and   [CihazId] = @CihazId
+     and   [CariId] = @CariId 
+	 and   convert(datetime,[TarihSaat],104) > convert(datetime, dateadd(minute, @YeniKayitArasiFark, @TarihSaat), 104)
+	 ) = 0 
+begin
+  --print 'insert'
+  INSERT INTO [dbo].[CihazKaydi]
+           ([FirmId]
+           ,[IsActive]
+           ,[CihazId]
+           ,[CariId]
+           ,[TarihSaat])
+     VALUES
+           (@FirmId
+           ,1
+           ,@CihazId
+           ,@CariId
+           ,@TarihSaat)
+end-- else
+--begin
+--  print 'update'
+--end
+
+END
+
+
+GO
+
+

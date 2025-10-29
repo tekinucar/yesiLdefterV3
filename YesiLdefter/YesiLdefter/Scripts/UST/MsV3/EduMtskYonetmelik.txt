@@ -1,0 +1,146 @@
+﻿
+begin transaction
+
+ create table EduMtskYonetmelik
+ (
+    Id                   Int IDENTITY(1,1) not null,
+    ParentId             Int               null,
+	KonuTipiId           SmallInt          null,
+    IsActive             Bit               null,
+    SiraNo               SmallInt          null,
+    Konu                 nVarChar(250)     null,
+    AltBaslik            nVarChar(250)     null,
+    ContentHTML          nVarChar(max)     null,
+
+    ImageName1           VarChar(100)      null,
+    ImageAbout1          nVarChar(250)     null,
+    ImageWidth1          SmallInt          null,
+    ImageHeight1         SmallInt          null,
+    ImageName2           VarChar(100)      null,
+    ImageAbout2          nVarChar(250)     null,
+    ImageWidth2          SmallInt          null,
+    ImageHeight2         SmallInt          null,
+    ImageName3           VarChar(100)      null,
+    ImageAbout3          nVarChar(250)     null,
+    ImageWidth3          SmallInt          null,
+    ImageHeight3         SmallInt          null,
+    ImageName4           VarChar(100)      null,
+    ImageAbout4          nVarChar(250)     null,
+    ImageWidth4          SmallInt          null,
+    ImageHeight4         SmallInt          null,
+
+   Constraint pk_EduMtskYonetmelik primary key (Id)
+ )
+
+ create index X_EduMtskYonetmelik_01 on EduMtskYonetmelik (KonuTipiId)
+
+ grant select, insert, update, delete on EduMtskYonetmelik to public
+
+commit transaction
+
+
+
+/*CreateLkpTable*/
+
+begin transaction
+
+-- ------------------------------------------------------- 
+-- KonuTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'EduMtskYonetmelikKonuTipi')
+drop table [Lkp].[EduMtskYonetmelikKonuTipi]
+
+create table Lkp.EduMtskYonetmelikKonuTipi
+(
+   Id         Int Unique Not Null,
+   KonuTipi   nVarchar(20)   null
+   
+   constraint  pk_EduMtskYonetmelikKonuTipi primary key (Id)
+)
+
+INSERT INTO Lkp.EduMtskYonetmelikKonuTipi (Id, KonuTipi)
+ VALUES 
+  ( 0, N'Tanımsız'),
+  ( 1, N'Aday'),
+  ( 2, N'Dersler'),
+  ( 3, N'Sınavlar'),
+  ( 4, N'Mtsk Kurum İşlemleri'),
+  ( 5, N'Tanımlar')
+
+commit transaction
+
+/*CreateLkpTableEnd*/
+
+
+
+USE [MainManagerV3]
+GO
+/****** Object:  Trigger [dbo].[trg_EduMtskYonetmelik]    Script Date: 6.08.2023 18:36:06 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+create trigger [dbo].[trg_EduMtskYonetmelik] on [dbo].[EduMtskYonetmelik]
+after insert, update
+as begin
+
+    declare cursor_EduMtskYonetmelik cursor for select Id from Inserted
+    declare @curId bigint
+
+    OPEN cursor_EduMtskYonetmelik
+
+    FETCH NEXT FROM cursor_EduMtskYonetmelik INTO @curId
+
+    declare @contentHtml nVarchar(max)
+	declare @newContentHtml nVarchar(max)
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        set @contentHtml = '';
+		Select 
+           @contentHtml = ins.ContentHTML
+    	From EduMtskYonetmelik ins
+    	Where ins.Id = @curId
+		and ins.ContentHTML like '%<td style="border:1px solid #000000;text-align:center;">%'
+
+        if ( @contentHtml != '') 
+		begin
+		    set @newContentHtml = REPLACE(@contentHtml,'<td style="border:1px solid #000000;text-align:center;">','<td>');  
+            Update EduMtskYonetmelik set 
+            ContentHTML = @newContentHtml
+            where Id = @curId 
+		end;
+
+    	FETCH NEXT FROM cursor_EduMtskYonetmelik INTO @curId
+    end -- While
+
+
+    CLOSE cursor_EduMtskYonetmelik
+    DEALLOCATE cursor_EduMtskYonetmelik
+	
+end -- trigger
+
+
+
+/*
+alter table EduMtskYonetmelik add ImageName1           VarChar(100)      null
+alter table EduMtskYonetmelik add ImageAbout1          nVarChar(250)     null
+alter table EduMtskYonetmelik add ImageWidth1          SmallInt          null
+alter table EduMtskYonetmelik add ImageHeight1         SmallInt          null
+
+alter table EduMtskYonetmelik add ImageName2           VarChar(100)      null
+alter table EduMtskYonetmelik add ImageAbout2          nVarChar(250)     null
+alter table EduMtskYonetmelik add ImageWidth2          SmallInt          null
+alter table EduMtskYonetmelik add ImageHeight2         SmallInt          null
+
+alter table EduMtskYonetmelik add ImageName3           VarChar(100)      null
+alter table EduMtskYonetmelik add ImageAbout3          nVarChar(250)     null
+alter table EduMtskYonetmelik add ImageWidth3          SmallInt          null
+alter table EduMtskYonetmelik add ImageHeight3         SmallInt          null
+
+alter table EduMtskYonetmelik add ImageName4           VarChar(100)      null
+alter table EduMtskYonetmelik add ImageAbout4          nVarChar(250)     null
+alter table EduMtskYonetmelik add ImageWidth4          SmallInt          null
+alter table EduMtskYonetmelik add ImageHeight4         SmallInt          null
+
+*/

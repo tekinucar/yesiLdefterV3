@@ -1,0 +1,46 @@
+﻿begin transaction
+ create table MsWebNodes
+ (
+    Id              Int IDENTITY(1,1) not null,
+	NodeId          int               not null,
+	ParentId        int               not null,
+	PageCode        varchar(50)       null,
+    IsActive        Bit               not null,
+    EventsType      smallInt          null, /* 1. pageLoad */
+	LineNumber      int               not null,
+
+	About           nVarChar(100)    null,     
+	TagName         VarChar(20)      null,     
+	AttId           VarChar(50)      null,
+	AttName         VarChar(30)      null,
+    AttClass        VarChar(100)     null, 	
+	AttType         VarChar(20)      null,
+	AttRole         VarChar(10)      null,
+	AttHRef         VarChar(1000)    null,
+	AttSrc          VarChar(200)     null, 	
+	XPath           VarChar(400)     null, 
+    
+    InnerHtml       varChar(8000)    null, 	
+	InnerText       varChar(8000)    null, 	
+	OuterHtml       varChar(8000)    null, 	
+	OuterText       varChar(200)     null, 	
+	
+	InjectType      smallInt         null, /* 1.get&set, 2.get, 3.set,  4.? */
+	InvokeMember    smallInt         null,
+	DontSave        Bit              null,
+	GetSave         Bit              null, /* get işleminin bitiminde otomatik database kayıt etmesi için */
+	DisplayNone     Bit              null,
+	PageRefresh     Bit              null,
+	TestValue       varChar(200)     null, 
+	KrtOperandType  varChar(5)       null,
+	CheckValue      varChar(200)     null, 
+	CheckNodeId     int              null, 
+	
+   Constraint pk_MsWebNodes primary key (Id)
+ )
+
+ create index X_MsWebNodes_01 on MsWebNodes (pageCode)
+ 
+ grant select, insert, update, delete on MsWebNodes to public
+
+commit transaction

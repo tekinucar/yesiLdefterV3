@@ -1,0 +1,18 @@
+﻿begin transaction
+
+ create table MsProjectFunctions
+ (
+    Id              Int IDENTITY(1,1) not null,
+    IsActive        Bit               not null,
+	SectorTypeId    SmallInt          not null,
+	FunctionName    nVarChar(100)     not null,     
+	SqlScript       varchar(MAX)      null,
+
+   Constraint pk_MsProjectFunctions primary key (Id)
+ )
+
+ create index X_MsProjectFunctions_01 on MsProjectFunctions (SectorTypeId, FunctionName)
+
+ grant select, insert, update, delete on MsProjectFunctions to public
+
+commit transaction

@@ -1,0 +1,52 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_OnmBelgeDekontTbmGelirHesaplari] 
+AS BEGIN
+
+  declare @KasaId int = 0
+  Select top 1 @KasaId = Id from dbo.OnmHesapFinans 
+  Where UstGrupTipiId = 10 
+  and   AnaGrupTipiId = 100
+  and   AltGrupTipiId = 100
+  and   ParaTipiId = 'TRY'
+  and   IsActive = 1
+
+
+  -- CariAlt tablosundan gelenleri düzenler
+
+  Update [dbo].[OnmBelgeDekont] set
+      BorcluId = x.BorcluId
+    , AlacakliId = x.AlacakliId
+  from [dbo].[OnmBelgeDekont] as d,
+  (
+  Select 
+       dk.Id
+     ,(case when dk.BHesapTipiId = 100 then @KasaId 
+            when dk.BHesapTipiId = 2110 then dk.BorcluId 
+            when dk.BHesapTipiId = 2111 then dk.BorcluId 
+            when dk.BHesapTipiId = 2112 then dk.BorcluId 
+            when dk.BHesapTipiId = 2114 then dk.BorcluId 
+            when dk.BHesapTipiId = 1024 then bb.BankaHesapId      
+            end) as [BorcluId]
+     , dk.[BHesapTipiId]
+     ,(case when dk.AHesapTipiId = 100 then @KasaId 
+            when dk.AHesapTipiId = 2110 then dk.AlacakliId 
+            when dk.AHesapTipiId = 2111 then dk.AlacakliId 
+            when dk.AHesapTipiId = 2112 then dk.AlacakliId 
+            when dk.AHesapTipiId = 2114 then dk.AlacakliId 
+            when dk.AHesapTipiId = 1024 then ba.BankaHesapId      
+            end) as [AlacakliId]
+     , dk.[AHesapTipiId]
+     , dk.[EkMaliyetId]
+      
+  From [dbo].[OnmBelgeDekont] as dk
+     left outer join dbo.TempTabimBankalar as bb on ( dk.BHesapTipiId = 1024 and dk.EkMaliyetId = ( -1 * bb.ULAS ) )
+	 left outer join dbo.TempTabimBankalar as ba on ( dk.AHesapTipiId = 1024 and dk.EkMaliyetId = ( -1 * ba.ULAS ) )
+  Where BelgeSeri = 'TbmGl'
+  ) as x
+  Where d.Id = x.Id
+
+
+END -- procedure
+
+/*CreateProcedureEnd*/

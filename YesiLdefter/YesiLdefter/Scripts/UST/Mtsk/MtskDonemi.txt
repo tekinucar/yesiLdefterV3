@@ -1,0 +1,114 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table MtskDonemi
+ (
+   Id                   Int IDENTITY(1,1) not null, 
+   ParentId             Int       not null, /* default 0 */
+   FirmId               Int       not null,
+   IsActive             Bit       not null, /* default : 1 = active, 0 = not active */  
+
+   DonemTipiId          Int           null,
+   GrupTipiId           SmallInt      null,
+   GrupBaslamaTarihi    Date          null,
+   GrupSubeSayisi       SmallInt      null, /* kaç şube açıldığı bilgisi , fakat ekranda hiç kullanılmadı */
+   DonemAdaySayisi      SmallInt      null,
+   GrupAdaySayisi       SmallInt      null,
+   TeorikDersSayisi     SmallInt      null,
+   UygulamaDersSayisi   SmallInt      null,
+   KurumOnayTipiId      SmallInt      null, /* 0. Onay bekliyor, 1-Onaylandı  tablo = [Lkp].[MtskKurumOnayTipi]   */		
+      
+   constraint		pk_MtskDonemi primary key (Id)
+ )
+  
+ grant select, insert, update, delete on MtskDonemi to public
+
+commit transaction
+
+
+/*CreateTableEnd*/
+
+/*CreateTrigger*/
+
+CREATE TRIGGER [dbo].[trg_MtskDonemi] on [dbo].[MtskDonemi]
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    DECLARE cursorMtskDonemi cursor local for select Id from Inserted
+    DECLARE @curId bigint
+
+    OPEN cursorMtskDonemi
+
+    FETCH NEXT FROM cursorMtskDonemi INTO @curId
+
+    declare @FirmId Int = 0
+    declare @DonemTipiId int = 0
+    declare @GrupTipiId int = 0
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+       Select @FirmId = ins.FirmId
+         , @DonemTipiId = DonemTipiId
+         , @GrupTipiId  = GrupTipiId
+       From inserted as ins
+       Where Id = @curId
+
+       if ( Select count(Id) ADET from dbo.MtskGrupSubesi 
+            where FirmId = @FirmId
+            and DonemTipiId = @DonemTipiId 
+			and GrupTipiId = @GrupTipiId ) = 0 
+       begin
+           insert into dbo.MtskGrupSubesi 
+		   (ParentId, FirmId, IsActive, DonemTipiId, GrupTipiId, SubeTipiId, KurumOnayTipiId) values (0, @FirmId, 1, @DonemTipiId, @GrupTipiId, 0, 0 )  
+       end
+
+      FETCH NEXT FROM cursorMtskDonemi INTO @curId
+    END -- While
+
+    CLOSE cursorMtskDonemi
+    DEALLOCATE cursorMtskDonemi   
+
+END -- create trigger
+
+/*CreateTriggerEnd*/
+
+
+/*CreateTrigger*/
+
+CREATE TRIGGER [dbo].[trg_MtskDonemiDeleteIsLock] on [dbo].[MtskDonemi]
+INSTEAD of DELETE
+AS BEGIN
+
+    declare isLockCursorDlt cursor local for select Id from deleted
+    declare @curId bigint
+
+    OPEN isLockCursorDlt
+
+    FETCH NEXT FROM isLockCursorDlt INTO @curId
+	   
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        if ( Select COUNT(t.Id) as Adet from deleted as d
+             left join dbo.MtskAdayTalep as t on ( d.DonemTipiId = t.DonemTipiId and d.GrupTipiId = t.GrupTipiId ) ) > 0 
+        begin
+            PRINT 'Bu kayıt silinemez!'
+            RETURN
+        end
+	    IF EXISTS (SELECT 1 FROM deleted WHERE isnull(GrupTipiId,0) = 1 and Id = @curId)
+        BEGIN
+            PRINT 'Bu kayıt silinemez!'
+            RETURN
+        END
+
+        Delete from dbo.MtskDonemi  Where Id = @curId and isnull(GrupTipiId,0) <> 1
+
+      FETCH NEXT FROM isLockCursorDlt INTO @curId
+    END
+
+    CLOSE isLockCursorDlt
+    DEALLOCATE isLockCursorDlt
+
+END
+
+ /*CreateTriggerEnd*/

@@ -1,0 +1,67 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[sp_GenerateLookupScript]
+(
+    @TableName VARCHAR(100),
+    @FieldName VARCHAR(100)
+)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+	DECLARE @Enter varchar(4) = CHAR(13) + CHAR(10)
+    DECLARE @FieldName2 VARCHAR(100)    
+	DECLARE @Script NVARCHAR(MAX);
+
+	SET @FieldName2 = REPLACE(@FieldName, 'Id', '')
+
+    print '  ' + @Enter 
+    print '  -- ------------------------------------------------------- ' + @Enter
+    print '  -- ' + @FieldName + @Enter 
+    print '  -- ------------------------------------------------------- '
+    print '  IF EXISTS (SELECT * FROM sys.objects WHERE name = ''' + @TableName + @FieldName2 + ''') '
+    print '  DROP TABLE [Lkp].[' + @TableName + @FieldName2 + '] ' + @Enter 
+    print '  '
+    print '  CREATE TABLE [Lkp].[' + @TableName + @FieldName2 + '] ' + @Enter
+    print '  ( ' + @Enter
+    print '   Id               INT UNIQUE NOT NULL, ' + @Enter 
+    print '   ' + @FieldName2 + '   NVARCHAR(50)   NULL, ' + @Enter 
+    print '   ' + @Enter
+    print '   CONSTRAINT pk_' + @TableName + @FieldName2 + ' PRIMARY KEY (Id) ' + @Enter 
+    print '  ) ' + @Enter 
+    print '  ' + @Enter 
+    print '  DELETE FROM [Lkp].[' + @TableName + @FieldName2 + '] ' + @Enter
+    print '  INSERT INTO [Lkp].[' + @TableName + @FieldName2 + '] (Id, ' + @FieldName2 + ') ' + @Enter
+    print '  VALUES ' + @Enter 
+    print '    (0, N''Tanımsız''), ' + @Enter 
+    print '  ' + @Enter 
+    print '  ' + @Enter 
+
+    set @Script = '  ' + @Enter 
+    set @Script = @Script + '  -- ------------------------------------------------------- ' + @Enter
+    set @Script = @Script + '  -- ' + @FieldName + @Enter 
+    set @Script = @Script + '  -- ------------------------------------------------------- '
+    set @Script = @Script + '  IF EXISTS (SELECT * FROM sys.objects WHERE name = ''' + @TableName + @FieldName2 + ''') '
+    set @Script = @Script + '  DROP TABLE [Lkp].[' + @TableName + @FieldName2 + '] ' + @Enter 
+    set @Script = @Script + '  '
+    set @Script = @Script + '  CREATE TABLE [Lkp].[' + @TableName + @FieldName2 + '] ' + @Enter
+    set @Script = @Script + '  ( ' + @Enter
+    set @Script = @Script + '   Id               INT UNIQUE NOT NULL, ' + @Enter 
+    set @Script = @Script + '   ' + @FieldName2 + '   NVARCHAR(50)   NULL, ' + @Enter 
+    set @Script = @Script + '   ' + @Enter
+    set @Script = @Script + '   CONSTRAINT pk_' + @TableName + @FieldName2 + ' PRIMARY KEY (Id) ' + @Enter 
+    set @Script = @Script + '  ) ' + @Enter 
+    set @Script = @Script + '  ' + @Enter 
+    set @Script = @Script + '  DELETE FROM [Lkp].[' + @TableName + @FieldName2 + '] ' + @Enter
+    set @Script = @Script + '  INSERT INTO [Lkp].[' + @TableName + @FieldName2 + '] (Id, ' + @FieldName2 + ') ' + @Enter
+    set @Script = @Script + '  VALUES ' + @Enter 
+    set @Script = @Script + '    (0, N''Tanımsız''), ' + @Enter 
+    set @Script = @Script + '  ' + @Enter 
+    set @Script = @Script + '  ' + @Enter 
+
+    -- Script'i geri döndür
+    SELECT @Script AS GeneratedScript;
+
+END
+
+/*CreateProcedureEnd*/

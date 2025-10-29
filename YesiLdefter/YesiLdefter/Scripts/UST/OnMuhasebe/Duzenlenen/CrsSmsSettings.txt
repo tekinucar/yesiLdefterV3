@@ -1,0 +1,57 @@
+﻿
+/*CreateTable*/
+
+begin transaction
+
+ create table CrsSmsSettings
+ (
+
+   Id                  Int IDENTITY(1,1) NOT NULL, 
+   FirmId              Int         not null,
+   IsActive            Bit         not null, /* default : 1 = active, 0 = not active */  
+   ServisTypeId        SmallInt        null,
+   KullaniciAdi        nVarchar(50)    null,
+   Sifre               nVarchar(50)    null,
+   BayiiKodu           nVarchar(50)    null,
+   Origin              nVarchar(50)    null,
+
+  constraint pk_CrsSmsSettings primary key (Id)
+ )
+
+ create index X_CrsSmsSettings01 on CrsSmsSettings (FirmId)
+
+ grant select, insert, update, delete on CrsSmsSettings to public
+
+commit transaction
+
+/*CreateTableEnd*/
+
+
+/*CreateLkpTable*/
+
+begin transaction
+
+-- ------------------------------------------------------- 
+-- ServisTypeId  servis sağlayıcı firma ıd 
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'CrsSmsSettingsServisType')
+drop table [Lkp].[CrsSmsSettingsServisType]
+
+create table [Lkp].[CrsSmsSettingsServisType]
+(
+   Id               Int Unique Not    null,
+   ServisType       nVarchar(50)      null,
+
+   constraint  pk_CrsSmsSettingsServisType primary key (Id)
+)
+
+Delete from [Lkp].[CrsSmsSettingsServisType]
+INSERT INTO [Lkp].[CrsSmsSettingsServisType] (Id, ServisType)
+ VALUES 
+  ( -1, N''),
+  (  0, N'Tanımsız'),
+  (  1, N'3g Bilişim')
+
+commit transaction
+
+/*CreateLkpTableEnd*/

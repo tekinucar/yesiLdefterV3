@@ -1,0 +1,79 @@
+﻿USE [u7093888_Ustad01]
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+**** bunu yeni triger yazarken kullan *****
+
+
+CREATE TRIGGER [dbo].[trg_MtskAdayAdres] on [dbo].[MtskAdayAdres]
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    DECLARE adresCursor cursor for select Id from Inserted
+    DECLARE @curId bigint
+
+    OPEN adresCursor
+
+    FETCH NEXT FROM adresCursor INTO @curId
+
+    declare @yAdayId int 
+    declare @yFirmId int
+
+    declare @eSozluAdresBeyani nVarchar(250) = null
+    declare @ySozluAdresBeyani nVarchar(250) = null
+    declare @eAdresKodu varchar(20) = null
+    declare @yAdresKodu varchar(20) = null
+    
+    declare @durum bit
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+
+        select 
+           @eSozluAdresBeyani = isnull(dlt.SozluAdresBeyani, '')
+         , @eAdresKodu = isnull(dlt.AdresKodu, '') 
+    	from deleted dlt
+    	where dlt.Id = @curId
+			   
+        select 
+           @yAdayId = ins.AdayId
+         , @yFirmId = ins.FirmId
+         , @ySozluAdresBeyani = isnull(ins.SozluAdresBeyani, '')
+         , @yAdresKodu = isnull(ins.AdresKodu, '')
+		from inserted ins
+    	where ins.Id = @curId
+     	   	
+        if (@eSozluAdresBeyani <> @ySozluAdresBeyani) 
+        begin
+          if (@ySozluAdresBeyani) <> '') set @durum = 1
+          if (@ySozluAdresBeyani) = '') set @durum = 0
+
+          update dbo.MtskAday set
+            AdresAlindi = @durum
+          Where Id = @yAdayId
+          and FirmId = @yFirmId
+        end
+
+        if (@eAdresKodu <> @yAdresKodu) 
+        begin
+          if (@yAdresKodu) <> '') set @durum = 1
+          if (@yAdresKodu) = '') set @durum = 0
+
+          update dbo.MtskAdayBelgeler set
+            AdresKodlandi = @durum
+          Where AdayId = @yAdayId
+          and FirmId = @yFirmId
+        end
+
+      FETCH NEXT FROM adresCursor INTO @curId
+    END -- While
+
+    CLOSE adresCursor
+    DEALLOCATE adresCursor   
+
+END -- create trigger

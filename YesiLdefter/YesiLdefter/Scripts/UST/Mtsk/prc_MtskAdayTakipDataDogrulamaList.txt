@@ -1,0 +1,111 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_MtskAdayTakipDataDogrulamaList] (@FirmId int, @KonuId int)  
+AS BEGIN
+
+  -- Variables
+  --declare @FirmId int = 11
+  --declare @KonuId int = 1120
+
+  declare @sql nvarchar(max)
+  declare @sql1 nvarchar(max)
+  declare @sqlWhere nvarchar(500)
+
+  Set @sql1 = '
+  declare @FirmId int 
+  Set @FirmId = ' + Convert(varchar(10),@FirmId) + '
+  ';  
+
+  Set @sql1 += ' 
+ Select [MtskAdayTakip].Id
+ , [MtskAdayTakip].FirmId
+ , [MtskAdayTakip].TalepId
+ , [MtskAdayTakip].AdayId
+ , [MtskAdayTakip].KayitTipiId
+ , [MtskAdayTakip].TeorikDersTipiId
+ , [MtskAdayTakip].eSinavDurumTipiId
+ , [MtskAdayTakip].eSinavSonrasiTipiId
+ , [MtskAdayTakip].UygulamaliDersTipiId
+ , [MtskAdayTakip].TelafiDersTipiId
+ , [MtskAdayTakip].BasarisizDersTipiId
+ , [MtskAdayTakip].Arti4DersTipiId
+ , [MtskAdayTakip].uSinavDurumTipiId
+ , [MtskAdayTakip].uSinavSonrasiTipiId
+
+ -- Join Tables standart fields 
+ , [aday].TcNo  as Lkp_AdayTcNo
+ , [aday].TamAdiSoyadi as Lkp_AdayTamAdiSoyadi
+ , [aday].CepTelefonu as Lkp_CepTelefonu
+ , [MevcutSertifika].KSertifikaTipi as Lkp_MevcutSertifikaTipi
+ , [IstenenSertifika].KSertifikaTipi as Lkp_IstenenSertifikaTipi
+ , [talep].IsOtomatik as Lkp_IsOtomatik
+ , [talep].IsEngelli as Lkp_IsEngelli
+ , [talep].Is125ccAlti as Lkp_Is125ccAlti
+
+ -- LookUp Fields
+ , FNo7.DonemTipi as Lkp_DonemTipi
+ , FNo8.GrupTipi as Lkp_GrupTipi
+ , FNo9.SubeTipi as Lkp_SubeTipi
+ , FNo12.KayitTipi as Lkp_KayitTipi
+ -- Özel field : Donem + Grup + Sube 
+ , FNo7.DonemTipi + '' , '' + FNo9.SubeTipi as Lkp_DonemSube
+
+ from MtskAdayTakip as [MtskAdayTakip] with (nolock) 
+   -- Join Tables 
+   left outer join MtskAdayTalep as [talep] with (nolock) on ( [MtskAdayTakip].TalepId = [talep].Id  ) 
+   left outer join MtskAday as [aday] with (nolock) on ( [MtskAdayTakip].AdayId = [aday].Id  ) 
+   left outer join Lkp.MtskSertifikaTipi as [MevcutSertifika] with (nolock) on ( [talep].MevcutSertifikaTipiId = [MevcutSertifika].Id  ) 
+   left outer join Lkp.MtskSertifikaTipi as [IstenenSertifika] with (nolock) on ( [talep].IstenenSertifikaTipiId = [IstenenSertifika].Id  ) 
+   -- LookUp Tables
+   left outer join Lkp.MtskDonemTipi as FNo7 with (nolock) on ( MtskAdayTakip.DonemTipiId = FNo7.Id ) 
+   left outer join Lkp.MtskGrupTipi as FNo8 with (nolock) on ( MtskAdayTakip.GrupTipiId = FNo8.Id ) 
+   left outer join Lkp.MtskSubeTipi as FNo9 with (nolock) on ( MtskAdayTakip.SubeTipiId = FNo9.Id ) 
+   left outer join Lkp.MtskAdayTakipKayitTipi as FNo12 with (nolock) on ( MtskAdayTakip.KayitTipiId = FNo12.Id ) 
+
+ where [MtskAdayTakip].FirmId = @FirmId
+ /*[MtskAdayTakip].DEFAULT_VALUE*/
+'
+
+  if (@KonuId >= 1120 and @KonuId <= 1128)
+      set @sqlWhere = ' and [MtskAdayTakip].KayitTipiId = ' + convert(varchar(10), @KonuId - 1120)
+
+  if (@KonuId >= 2100 and @KonuId <= 2117)
+      set @sqlWhere = ' and [MtskAdayTakip].TeorikDersTipiId = ' + convert(varchar(10), @KonuId - 2100)
+
+  if (@KonuId >= 2120 and @KonuId <= 2126)
+      set @sqlWhere = ' and [MtskAdayTakip].eSinavDurumTipiId = ' + convert(varchar(10), @KonuId - 2120)
+
+  if (@KonuId >= 2140 and @KonuId <= 2143)
+      set @sqlWhere = ' and [MtskAdayTakip].eSinavSonrasiTipiId = ' + convert(varchar(10), @KonuId - 2140)
+
+  if (@KonuId >= 3100 and @KonuId <= 3106)
+      set @sqlWhere = ' and [MtskAdayTakip].UygulamaliDersTipiId = ' + convert(varchar(10), @KonuId - 3100)
+
+  if (@KonuId >= 3110 and @KonuId <= 3115)
+      set @sqlWhere = ' and [MtskAdayTakip].TelafiDersTipiId = ' + convert(varchar(10), @KonuId - 3110)
+
+  if (@KonuId >= 3120 and @KonuId <= 3126)
+      set @sqlWhere = ' and [MtskAdayTakip].BasarisizDersTipiId = ' + convert(varchar(10), @KonuId - 3120)
+
+  if (@KonuId >= 3130 and @KonuId <= 3136)
+      set @sqlWhere = ' and [MtskAdayTakip].Arti4DersTipiId = ' + convert(varchar(10), @KonuId - 3130)
+
+  if (@KonuId >= 5140 and @KonuId <= 5148)
+      set @sqlWhere = ' and [MtskAdayTakip].uSinavDurumTipiId = ' + convert(varchar(10), @KonuId - 5140)
+
+  if (@KonuId >= 5170 and @KonuId <= 5175)
+      set @sqlWhere = ' and [MtskAdayTakip].uSinavSonrasiTipiId = ' + convert(varchar(10), @KonuId - 5170)
+
+
+  if (@KonuId >= 2100 and @KonuId <= 5175)
+      set @sqlWhere += ' and ( MtskAdayTakip.KayitTipiId = 2 or MtskAdayTakip.KayitTipiId = 3 ) ' 
+
+
+  Set @sql = @sql1 + @sqlWhere
+  
+  -- print @sql
+  EXEC sp_executesql @sql
+   
+END -- procedure
+
+/*CreateProcedureEnd*/

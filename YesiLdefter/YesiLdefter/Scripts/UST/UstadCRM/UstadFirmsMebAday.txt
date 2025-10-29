@@ -1,0 +1,90 @@
+﻿begin transaction
+ create table UstadFirmsMebAday
+ (
+    Id              Int IDENTITY(1,1) not null,
+    FirmId          Int               null,
+	FirmGUID        uniqueidentifier  null,
+	DonemTipiId     int               null, 
+    Adet            int               null, 	
+
+   Constraint pk_UstadFirmsMebAday primary key (Id)
+ )
+
+ create index X_UstadFirmsMebAday_01 on UstadFirmsMebAday (FirmId)
+ create index X_UstadFirmsMebAday_02 on UstadFirmsMebAday (FirmGUID)
+
+ grant select, insert, update, delete on UstadFirmsMebAday to public
+
+commit transaction
+
+
+begin transaction
+ create table UstadFirmsMebAdaySertifika
+ (
+    Id                     Int IDENTITY(1,1) not null,
+    FirmId                 Int               null,
+	FirmGUID               uniqueidentifier  null,
+	DonemTipiId            int               null, 
+    MevcutSertifikaTipiId  smallint          null,
+    IstenenSertifikaTipiId smallint          null,
+    Adet                   int               null, 	
+
+   Constraint pk_UstadFirmsMebAdaySertifika primary key (Id)
+ )
+
+ create index X_UstadFirmsMebAdaySertifika_01 on UstadFirmsMebAdaySertifika (FirmId)
+ create index X_UstadFirmsMebAdaySertifika_02 on UstadFirmsMebAdaySertifika (FirmGUID)
+
+ grant select, insert, update, delete on UstadFirmsMebAdaySertifika to public
+
+commit transaction
+
+
+
+begin transaction
+ create table UstadFirmsMebAdayOranlari
+ (
+    Id                     Int IDENTITY(1,1) not null,
+	YilId                  int               null, 
+    SertifikaUcreti        Numeric(22,5)     null,
+
+    Aday_Default_Orani     Numeric(22,8)     null,
+    Aday_00_10_Orani       Numeric(22,8)     null,
+    Aday_11_20_Orani       Numeric(22,8)     null,
+    Aday_21_30_Orani       Numeric(22,8)     null,
+    Aday_31_40_Orani       Numeric(22,8)     null,
+    Aday_41_50_Orani       Numeric(22,8)     null,
+    Aday_51_60_Orani       Numeric(22,8)     null,
+    Aday_61_70_Orani       Numeric(22,8)     null,
+    Aday_71_80_Orani       Numeric(22,8)     null,
+    Aday_81_90_Orani       Numeric(22,8)     null,
+    Aday_91_100_Orani      Numeric(22,8)     null,
+    Aday_101_110_Orani     Numeric(22,8)     null,
+    Aday_111_120_Orani     Numeric(22,8)     null,
+    Aday_121_130_Orani     Numeric(22,8)     null,
+    Aday_131_999_Orani     Numeric(22,8)     null,
+
+    Aday_Default_Tutari    Numeric(22,5)     null,
+    Aday_00_10_Tutari      Numeric(22,5)     null,
+    Aday_11_20_Tutari      Numeric(22,5)     null,
+    Aday_21_30_Tutari      Numeric(22,5)     null,
+    Aday_31_40_Tutari      Numeric(22,5)     null,
+    Aday_41_50_Tutari      Numeric(22,5)     null,
+    Aday_51_60_Tutari      Numeric(22,5)     null,
+    Aday_61_70_Tutari      Numeric(22,5)     null,
+    Aday_71_80_Tutari      Numeric(22,5)     null,
+    Aday_81_90_Tutari      Numeric(22,5)     null,
+    Aday_91_100_Tutari     Numeric(22,5)     null,
+    Aday_101_110_Tutari    Numeric(22,5)     null,
+    Aday_111_120_Tutari    Numeric(22,5)     null,
+    Aday_121_130_Tutari    Numeric(22,5)     null,
+    Aday_131_999_Tutari    Numeric(22,5)     null,
+
+   Constraint pk_UstadFirmsMebAdayOranlari primary key (Id)
+ )
+
+ create index X_UstadFirmsMebAdayOranlari_01 on UstadFirmsMebAdayOranlari (YilId)
+
+ grant select, insert, update, delete on UstadFirmsMebAdayOranlari to public
+
+commit transaction

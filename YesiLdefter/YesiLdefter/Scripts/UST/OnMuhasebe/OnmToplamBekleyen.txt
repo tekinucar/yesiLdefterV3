@@ -1,0 +1,242 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table OnmToplamBekleyen
+ (
+    Id              Int IDENTITY(1,1) not null,
+    FirmId          Int                   null,
+
+	ItemCode        Varchar(30)           null,
+	ParentItemCode  Varchar(30)           null,    
+
+    UstGrupTipiId   SmallInt              null,
+    AnaGrupTipiId   SmallInt              null,
+    AltGrupTipiId   SmallInt              null, 
+    AltCesitTipiId  SmallInt              null,
+    TableTypeId     SmallInt              null,
+    ItemId          Int                   null,
+    
+    ToplamVadesiGecen     Numeric(22,5)   null,
+    ToplamBugun           Numeric(22,5)   null,    
+    Toplam7Gun            Numeric(22,5)   null,
+    Toplam2Hafta          Numeric(22,5)   null,    
+    ToplamAySonu          Numeric(22,5)   null,
+    Toplam1Ay             Numeric(22,5)   null,
+    Toplam2Ay             Numeric(22,5)   null,
+    Toplam3Ay             Numeric(22,5)   null,
+    Toplam1Yil            Numeric(22,5)   null,
+    ToplamTamami          Numeric(22,5)   null,
+
+   Constraint pk_OnmToplamBekleyen primary key (Id)
+ )
+
+ create index X_OnmToplamBekleyen_01 on OnmToplamBekleyen (UstGrupTipiId, AnaGrupTipiId, AltGrupTipiId, AltCesitTipiId, ItemId)
+
+ grant select, insert, update, delete on OnmToplamBekleyen to public
+
+commit transaction
+
+/*CreateTableEnd*/
+
+
+
+/*CreateLkpTable*/
+
+begin transaction
+
+-- ------------------------------------------------------- 
+-- AnaGrupTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmToplamBekleyenAnaGrupTipi')
+drop table [Lkp].[OnmToplamBekleyenAnaGrupTipi]
+
+create table [Lkp].[OnmToplamBekleyenAnaGrupTipi]
+(
+   Id                Int Unique not null, 
+   AnaGrupTipi       nVarchar(30)   null
+   
+   constraint  pk_OnmToplamBekleyenAnaGrupTipi primary key (Id)
+)
+
+Delete from [Lkp].[OnmToplamBekleyenAnaGrupTipi]
+INSERT INTO [Lkp].[OnmToplamBekleyenAnaGrupTipi] (Id, AnaGrupTipi)
+ VALUES 
+  ( 0,  N'' ),
+  ( 1,  N'Ödemeler' ),
+  ( 2,  N'Tahsilatlar' )
+
+
+-- ------------------------------------------------------- 
+-- AltGrupTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmToplamBekleyenAltGrupTipi')
+drop table [Lkp].[OnmToplamBekleyenAltGrupTipi]
+
+create table [Lkp].[OnmToplamBekleyenAltGrupTipi]
+(
+   Id                Int Unique not null, 
+   AltGrupTipi       nVarchar(100)  null,
+   HesapKodu         nVarchar(50)   null,
+    
+   constraint  pk_OnmToplamBekleyenAltGrupTipi primary key (Id)
+)
+
+Delete from [Lkp].[OnmToplamBekleyenAltGrupTipi]
+INSERT INTO [Lkp].[OnmToplamBekleyenAltGrupTipi] (Id, AltGrupTipi, HesapKodu)
+ VALUES 
+  ( 0,    N'', '' ),
+  ( 100,  N'Ödemeler', '' ),
+  ( 101,  N'Alış faturaları', '' ),
+  ( 102,  N'Alınan hizmetler', '' ),
+
+  
+  ( 111,  N'Kayıtlı gider/masraf belgeleri',            '81.16' ), 
+  ( 112,  N'Dışarıdan sağlanan fayda ve hizmetler',     '81.11' ), 
+  ( 113,  N'Kredi kartı ekstreleri',                    '81.13' ),
+  ( 114,  N'Henüz işlenmemiş, beklenen aylık ödemeler', ''  ),
+  ( 115,  N'Kiralar',                                   '81.14' ),
+  ( 116,  N'Personel ücretleri',                        '81.17' ),
+
+  ( 121,  N'Vergiler',                                  '81.21' ),
+  ( 122,  N'SGK',                                       '81.22' ),
+  ( 123,  N'Bağkur',                                    '81.23' ),
+  ( 124,  N'Belediye',                                  '81.24' ),
+  
+  ( 131,  N'Banka kredileri', '' ),
+
+  (  200,    N'Gelirler', '' ),
+  (  201,    N'Kesilen faturalar', '' ),
+  (  202,    N'Verilen hizmetler', '' ),
+  (  211,    N'Ödeme planına bağlanmış ücretler', '' ),
+  ( 2110,    N'Mtsk Sertifika Ücreti', '' ),  
+  ( 2111,    N'Mtsk Teorik Sınav Ücreti', '' ),
+  ( 2112,    N'Mtsk Uygulama Sınav Ücreti', '' ),
+  ( 2113,    N'Mtsk Özel Teorik Ders Ücreti', '' ),
+  ( 2114,    N'Mtsk Özel Uygulama Ders Ücreti', '' )
+
+  
+  --( 201,  N'', '' ),
+
+
+-- ------------------------------------------------------- 
+-- AltCesitTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmToplamBekleyenAltCesitTipi')
+drop table [Lkp].[OnmToplamBekleyenAltCesitTipi]
+
+create table [Lkp].[OnmToplamBekleyenAltCesitTipi]
+(
+   Id           Int Unique Not Null,
+   AltCesitTipi nVarchar(50) Null,
+   GrupTipiId   SmallInt Null,
+
+   constraint  pk_OnmToplamBekleyenAltCesitTipi primary key (Id)
+)
+
+Delete from [Lkp].[OnmToplamBekleyenAltCesitTipi]
+INSERT INTO [Lkp].[OnmToplamBekleyenAltCesitTipi] (Id, AltCesitTipi)
+ VALUES 
+  ( 0,       N'')
+
+
+
+
+-- ------------------------------------------------------- 
+-- TableTypeId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmToplamBekleyenTableType')
+drop table [Lkp].[OnmToplamBekleyenTableType]
+
+create table [Lkp].[OnmToplamBekleyenTableType]
+(
+   Id                Int Unique not null, 
+   TableType         nVarchar(30)   null
+   
+   constraint  pk_OnmToplamBekleyenTableType primary key (Id)
+)
+
+Delete from [Lkp].[OnmToplamBekleyenTableType]
+INSERT INTO [Lkp].[OnmToplamBekleyenTableType] (Id, TableType)
+ VALUES 
+  ( 0,  N'' ),
+  ( 101,  N'OnmBelgeMaliyet' ),
+  ( 102,  N'OnmBelgeDekont' ),
+  ( 103,  N'OnmBelgeStokB' ),
+  ( 104,  N'OnmOdemePlani' )
+  --( 105,  N'' )
+  --( 106,  N'' )
+
+  
+
+commit transaction
+
+/*CreateLkpTableEnd*/
+
+
+/*CreateData*/
+
+declare @FirmId int
+declare @AnaGrupTipiId smallInt
+declare @AltGrupTipiId smallInt
+set @FirmId = :FIRM_ID
+
+Delete [dbo].[OnmToplamBekleyen]
+
+-- UstGrupTipiId
+INSERT INTO [dbo].[OnmToplamBekleyen]
+           ([FirmId], [ItemCode], [ParentItemCode], [UstGrupTipiId], [AnaGrupTipiId], [AltGrupTipiId], [AltCesitTipiId], [TableTypeId] )
+   VALUES  ( @FirmId,  ''        , ''              , 1              , 0              , 0              , 0               , 0 )
+
+
+-- AnaGrupTipiId
+set @AnaGrupTipiId = 1
+INSERT INTO [dbo].[OnmToplamBekleyen]
+           ([FirmId], [ItemCode], [ParentItemCode], [UstGrupTipiId], [AnaGrupTipiId], [AltGrupTipiId], [AltCesitTipiId], [TableTypeId] )
+   VALUES  ( @FirmId,  ''        , ''              , 1             , @AnaGrupTipiId ,  0             ,  0              ,  0 )
+
+set @AnaGrupTipiId = 2
+INSERT INTO [dbo].[OnmToplamBekleyen]
+           ([FirmId], [ItemCode], [ParentItemCode], [UstGrupTipiId], [AnaGrupTipiId], [AltGrupTipiId], [AltCesitTipiId], [TableTypeId] )
+   VALUES  ( @FirmId,  ''        , ''              , 1             , @AnaGrupTipiId ,  0             ,  0              ,  0 )
+
+
+
+
+
+-- AltGrupTipiId, AnaGrupTipiId = 1 
+set @AnaGrupTipiId = 1
+INSERT INTO [dbo].[OnmToplamBekleyen]
+           ([FirmId], [ItemCode], [ParentItemCode], [UstGrupTipiId], [AnaGrupTipiId], [AltGrupTipiId], [AltCesitTipiId], [TableTypeId] )
+   VALUES  ( @FirmId,  ''        , ''              , 1              ,@AnaGrupTipiId ,  101           ,  0              ,  103 ) 
+          ,( @FirmId,  ''        , ''              , 1              ,@AnaGrupTipiId ,  102           ,  0              ,  103 ) 
+          ,( @FirmId,  ''        , ''              , 1              ,@AnaGrupTipiId ,  111           ,  0              ,  101 ) 
+          ,( @FirmId,  ''        , ''              , 1              ,@AnaGrupTipiId ,  112           ,  0              ,  101 ) 
+          ,( @FirmId,  ''        , ''              , 1              ,@AnaGrupTipiId ,  113           ,  0              ,  101 ) 
+          ,( @FirmId,  ''        , ''              , 1              ,@AnaGrupTipiId ,  114           ,  0              ,  101 ) 
+          ,( @FirmId,  ''        , ''              , 1              ,@AnaGrupTipiId ,  115           ,  0              ,  101 ) 
+          ,( @FirmId,  ''        , ''              , 1              ,@AnaGrupTipiId ,  116           ,  0              ,  101 ) 
+          ,( @FirmId,  ''        , ''              , 1              ,@AnaGrupTipiId ,  121           ,  0              ,  101 ) 
+          ,( @FirmId,  ''        , ''              , 1              ,@AnaGrupTipiId ,  122           ,  0              ,  101 ) 
+          ,( @FirmId,  ''        , ''              , 1              ,@AnaGrupTipiId ,  123           ,  0              ,  101 ) 
+          ,( @FirmId,  ''        , ''              , 1              ,@AnaGrupTipiId ,  124           ,  0              ,  101 ) 
+          ,( @FirmId,  ''        , ''              , 1              ,@AnaGrupTipiId ,  131           ,  0              ,  0 ) 
+        --,( @FirmId,  ''        , ''              , 1              ,@AnaGrupTipiId ,    0           ,  0              ,  0 ) 
+
+
+-- AltGrupTipiId, AnaGrupTipiId = 2
+set @AnaGrupTipiId = 2
+INSERT INTO [dbo].[OnmToplamBekleyen]
+           ([FirmId], [ItemCode], [ParentItemCode], [UstGrupTipiId], [AnaGrupTipiId], [AltGrupTipiId], [AltCesitTipiId], [TableTypeId] )
+   VALUES  ( @FirmId,  ''        , ''              , 1              ,@AnaGrupTipiId ,  201           ,  0              ,  103 ) 
+          ,( @FirmId,  ''        , ''              , 1              ,@AnaGrupTipiId ,  202           ,  0              ,  103 ) 
+          ,( @FirmId,  ''        , ''              , 1              ,@AnaGrupTipiId ,  211           ,  0              ,  104 )
+          ,( @FirmId,  ''        , ''              , 1              ,@AnaGrupTipiId ,  2110          ,  0              ,  104 )
+          ,( @FirmId,  ''        , ''              , 1              ,@AnaGrupTipiId ,  2111          ,  0              ,  104 )
+          ,( @FirmId,  ''        , ''              , 1              ,@AnaGrupTipiId ,  2112          ,  0              ,  104 )
+          ,( @FirmId,  ''        , ''              , 1              ,@AnaGrupTipiId ,  2113          ,  0              ,  104 )
+          ,( @FirmId,  ''        , ''              , 1              ,@AnaGrupTipiId ,  2114          ,  0              ,  104 )
+
+/*CreateDataEnd*/
+
+

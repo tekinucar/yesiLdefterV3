@@ -1,0 +1,145 @@
+﻿-- ---------------------------------------------------------------
+-- EduMtskSoruKitabi 
+-- ---------------------------------------------------------------
+
+
+begin transaction
+
+ create table EduMtskSoruKitabi
+ (
+    Id                   Int IDENTITY(1,1) not null,
+    IsActive             Bit               null,
+    KitapNo              SmallInt          not null,
+    KitapAciklama        nVarchar(100)     null,
+    SertifikaGrupTipiId  SmallInt          null,
+    SoruSayisi           SmallInt          null,
+    
+   Constraint pk_EduMtskSoruKitabi primary key (Id)
+ )
+
+ create index X_EduMtskSoruKitabi_01 on EduMtskSoruKitabi (KitapNo)
+
+ grant select, insert, update, delete on EduMtskSoruKitabi to public
+
+commit transaction
+
+-- ------------------------------------------------------- 
+-- SertifikaGrupTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'EduMtskSoruKitabiSertifikaGrupTipi')
+drop table [Lkp].[EduMtskSoruKitabiSertifikaGrupTipi]
+
+create table Lkp.EduMtskSoruKitabiSertifikaGrupTipi
+(
+   Id          Int Unique Not Null,
+   SertifikaGrupTipi  nVarchar(50)   null
+   
+   constraint  pk_EduMtskSoruKitabiSertifikaGrupTipi primary key (Id)
+)
+
+INSERT INTO Lkp.EduMtskSoruKitabiSertifikaGrupTipi (Id, SertifikaGrupTipi)
+ VALUES 
+  ( 0, N'Tanımsız'),
+  ( 1, N'A,A1,A2,M'),
+  ( 2, N'B,C,D,E'),
+  ( 3, N'F,G')
+
+
+-- delete from dbo.EduMtskSoruKitabi
+
+INSERT INTO [dbo].[EduMtskSoruKitabi] ([IsActive],[KitapNo],[KitapAciklama],[SertifikaGrupTipiId]) 
+VALUES 
+(1, 101, '101 nolu Kitap', 1),
+(1, 102, '102 nolu Kitap', 1),
+(1, 103, '103 nolu Kitap', 1),
+(1, 104, '104 nolu Kitap', 1),
+(1, 105, '105 nolu Kitap', 1),
+(1, 106, '106 nolu Kitap', 1),
+(1, 107, '107 nolu Kitap', 1),
+(1, 108, '108 nolu Kitap', 1),
+(1, 109, '109 nolu Kitap', 1),
+(1, 110, '110 nolu Kitap', 1),
+(1, 111, '111 nolu Kitap', 1),
+(1, 112, '112 nolu Kitap', 1),
+(1, 113, '113 nolu Kitap', 1),
+(1, 114, '114 nolu Kitap', 1),
+(1, 115, '115 nolu Kitap', 1),
+(1, 116, '116 nolu Kitap', 1),
+(1, 117, '117 nolu Kitap', 1),
+(1, 118, '118 nolu Kitap', 1),
+(1, 119, '119 nolu Kitap', 1),
+(1, 120, '120 nolu Kitap', 1),
+
+
+(1, 201, '201 nolu Kitap', 2),
+(1, 202, '202 nolu Kitap', 2),
+(1, 203, '203 nolu Kitap', 2),
+(1, 204, '204 nolu Kitap', 2),
+(1, 205, '205 nolu Kitap', 2),
+(1, 206, '206 nolu Kitap', 2),
+(1, 207, '207 nolu Kitap', 2),
+(1, 208, '208 nolu Kitap', 2),
+(1, 209, '209 nolu Kitap', 2),
+(1, 210, '210 nolu Kitap', 2),
+(1, 211, '211 nolu Kitap', 2),
+(1, 212, '212 nolu Kitap', 2),
+(1, 213, '213 nolu Kitap', 2),
+(1, 214, '214 nolu Kitap', 2),
+(1, 215, '215 nolu Kitap', 2),
+(1, 216, '216 nolu Kitap', 2),
+(1, 217, '217 nolu Kitap', 2),
+(1, 218, '218 nolu Kitap', 2),
+(1, 219, '219 nolu Kitap', 2),
+(1, 220, '220 nolu Kitap', 2),
+(1, 221, '221 nolu Kitap', 2),
+(1, 222, '222 nolu Kitap', 2),
+(1, 223, '223 nolu Kitap', 2),
+(1, 224, '224 nolu Kitap', 2),
+(1, 225, '225 nolu Kitap', 2),
+(1, 226, '226 nolu Kitap', 2),
+(1, 227, '227 nolu Kitap', 2),
+(1, 228, '228 nolu Kitap', 2),
+(1, 229, '229 nolu Kitap', 2),
+(1, 230, '230 nolu Kitap', 2),
+(1, 231, '231 nolu Kitap', 2),
+(1, 232, '232 nolu Kitap', 2),
+(1, 233, '233 nolu Kitap', 2),
+(1, 234, '234 nolu Kitap', 2),
+(1, 235, '235 nolu Kitap', 2),
+(1, 236, '236 nolu Kitap', 2),
+(1, 237, '237 nolu Kitap', 2),
+(1, 238, '238 nolu Kitap', 2),
+(1, 239, '239 nolu Kitap', 2),
+(1, 240, '240 nolu Kitap', 2),
+(1, 241, '241 nolu Kitap', 2),
+(1, 242, '242 nolu Kitap', 2),
+(1, 243, '243 nolu Kitap', 2),
+(1, 244, '244 nolu Kitap', 2),
+(1, 245, '245 nolu Kitap', 2),
+(1, 246, '246 nolu Kitap', 2),
+(1, 247, '247 nolu Kitap', 2),
+(1, 248, '248 nolu Kitap', 2),
+(1, 249, '249 nolu Kitap', 2),
+(1, 250, '250 nolu Kitap', 2),
+
+
+(1, 301, '301 nolu Kitap', 3),
+(1, 302, '302 nolu Kitap', 3),
+(1, 303, '303 nolu Kitap', 3),
+(1, 304, '304 nolu Kitap', 3),
+(1, 305, '305 nolu Kitap', 3),
+(1, 306, '306 nolu Kitap', 3),
+(1, 307, '307 nolu Kitap', 3),
+(1, 308, '308 nolu Kitap', 3),
+(1, 309, '309 nolu Kitap', 3),
+(1, 310, '310 nolu Kitap', 3),
+(1, 311, '311 nolu Kitap', 3),
+(1, 312, '312 nolu Kitap', 3),
+(1, 313, '313 nolu Kitap', 3),
+(1, 314, '314 nolu Kitap', 3),
+(1, 315, '315 nolu Kitap', 3),
+(1, 316, '316 nolu Kitap', 3),
+(1, 317, '317 nolu Kitap', 3),
+(1, 318, '318 nolu Kitap', 3),
+(1, 319, '319 nolu Kitap', 3),
+(1, 320, '320 nolu Kitap', 3) 

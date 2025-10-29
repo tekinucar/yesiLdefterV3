@@ -1,0 +1,67 @@
+﻿begin transaction
+
+ create table EduMtskUserSertifikasi
+ (
+   Id                      Int IDENTITY(1,1) not null,
+   UserGUID                nvarchar(40)  null,
+   FirmId                  Int           null,
+   MtskAdayId              Int           null,
+   MevcutSertifikaTipiId   SmallInt      null,
+   IstenenSertifikaTipiId  SmallInt      null,
+   SertifikaGrupTipiId     SmallInt      null,
+   
+   Constraint pk_EduMtskUserSertifikasi primary key (Id)
+ )
+
+ create index X_EduMtskUserSertifikasi_01 on EduMtskUserSertifikasi (UserGUID)
+ create index X_EduMtskUserSertifikasi_02 on EduMtskUserSertifikasi (FirmId, MtskAdayId)
+
+
+ grant select, insert, update, delete on EduMtskUserSertifikasi to public
+
+commit transaction
+
+
+
+CREATE TRIGGER [dbo].[trg_EduMtskUserSertifikasi] on [dbo].[EduMtskUserSertifikasi]
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    DECLARE emusCursor cursor for select Id from Inserted
+    DECLARE @curId bigint
+
+    OPEN emusCursor
+
+    FETCH NEXT FROM emusCursor INTO @curId
+
+    declare @IstenenSertifikaTipiId smallint
+    declare @SertifikaGrupTipiId smallint
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+
+        select 
+          @IstenenSertifikaTipiId = isnull(ins.IstenenSertifikaTipiId, 0)
+		from inserted ins
+    	where ins.Id = @curId
+     	
+        if (@IstenenSertifikaTipiId in ( 2514, 2502, 2503 )) set @SertifikaGrupTipiId = 1
+        if (@IstenenSertifikaTipiId in ( 2504, 2518, 2515, 2505, 2520, 2516, 2519, 2506, 2522, 2517, 2521, 2507 )) set @SertifikaGrupTipiId = 2
+        if (@IstenenSertifikaTipiId in ( 2508, 2509, 2510, 2511, 2513, 2512 )) set @SertifikaGrupTipiId = 3
+
+        if (@IstenenSertifikaTipiId in ( 9000, 9001, 9002, 9003, 9004 )) set @SertifikaGrupTipiId = 1
+        if (@IstenenSertifikaTipiId in ( 9005, 9006, 9007, 9008, 9009, 9010, 9011, 9012 )) set @SertifikaGrupTipiId = 2
+        if (@IstenenSertifikaTipiId in ( 9100, 9101, 9102 )) set @SertifikaGrupTipiId = 3
+
+        update dbo.EduMtskUserSertifikasi set
+           SertifikaGrupTipiId = @SertifikaGrupTipiId
+        Where Id = @curId
+
+      FETCH NEXT FROM emusCursor INTO @curId
+    END -- While
+
+    CLOSE emusCursor
+    DEALLOCATE emusCursor   
+
+END -- create trigger
+

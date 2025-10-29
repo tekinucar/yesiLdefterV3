@@ -1,0 +1,248 @@
+﻿
+begin transaction
+
+ create table MsReports
+ (
+    Id              Int IDENTITY(1,1) not null,
+	IsActive        Bit               not null,
+    LineNumber      int               not null,
+
+    -- 10
+	ReportCode      nvarChar(50)      null,     
+	ParentCode      nvarChar(50)      null,     
+	ReportCaption   nvarChar(100)     null,     
+    About           nvarChar(100)     null,     
+    ReportName      nvarChar(100)     null,     
+
+    -- 20
+    DesignerTypeId  SmallInt          null,
+    RecordTypeId    SmallInt          null,  
+    ReportTypeId    SmallInt          null, 
+    PrivateTypeId   SmallInt          null, /* 0, 1. Genel, 2. Üst Yönetim, 3. Sadece Ortaklar */  
+
+    -- 30
+    ReportHeader    nVarchar(100)     null,
+    PageHeader      nVarchar(100)     null,     
+    ReportSummary   nVarchar(100)     null,
+    PageSummary     nVarchar(100)     null,     
+
+    -- 40 
+    IlKodu          varChar(3)        null,
+    IlceKodu        varChar(5)        null,
+    FirmaDbName     varChar(50)       null, 
+
+    -- 90
+	SoftwareCode    varchar(20)       null,
+    ProjectCode     varchar(20)       null,
+    ModulCode       varchar(20)       null,
+
+    -- 100
+    ReportTemp      VarBinary(max)    null,
+
+   Constraint pk_MsReports primary key (Id)
+ )
+
+ create index X_MsReports_01 on MsReports (SoftWareCode, ProjectCode, ModulCode)
+ 
+ grant select, insert, update, delete on MsReports to public
+
+commit transaction
+
+
+
+
+-- ------------------------------------------------------- 
+-- DesignerTypeId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MsReportsDesignerType')
+drop table [Lkp].[MsRepotsRecordType]
+
+create table [Lkp].[MsReportsDesignerType]
+(
+   Id               Int Unique not null, 
+   DesignerType     nVarchar(50)   null,
+   
+   constraint  pk_MsReportsDesignerType primary key (Id)
+)
+
+Delete from [Lkp].[MsReportsDesignerType]
+INSERT INTO [Lkp].[MsReportsDesignerType] (Id, DesignerType)
+ VALUES 
+  ( 0,    N'Seçiniz'),
+  ( 1,    N'FastReport'),
+  ( 2,    N'DevExpress')
+
+
+
+-- ------------------------------------------------------- 
+-- RecordTypeId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MsReportsRecordType')
+drop table [Lkp].[MsRepotsRecordType]
+
+create table [Lkp].[MsReportsRecordType]
+(
+   Id               Int Unique not null, 
+   RecordType       nVarchar(50)   null,
+   
+   constraint  pk_MsReportsRecordType primary key (Id)
+)
+
+Delete from [Lkp].[MsReportsRecordType]
+INSERT INTO [Lkp].[MsReportsRecordType] (Id, RecordType)
+ VALUES 
+  ( 0,    N'Seçiniz'),
+  ( 1,    N'Group name'),
+  ( 2,    N'Report name'),
+  ( 3,    N'İl bazlı rapor'),
+  ( 4,    N'İlçe bazlı rapor'),
+  ( 5,    N'Firma bazlı rapor')
+
+  
+
+-- ------------------------------------------------------- 
+-- ReportTypeId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MsReportsReportType')
+drop table [Lkp].[MsRepotsReportType]
+
+create table [Lkp].[MsReportsReportType]
+(
+   Id               Int Unique not null, 
+   ReportType       nVarchar(50)   null,
+   
+   constraint  pk_MsReportsReportType primary key (Id)
+)
+
+Delete from [Lkp].[MsReportsReportType]
+INSERT INTO [Lkp].[MsReportsReportType] (Id, ReportType)
+ VALUES 
+  ( 0,    N'Seçiniz'),
+  ( 1,    N'List type report'),
+  ( 2,    N'Single record report'),
+  ( 3,    N'Form desing report')
+
+
+
+
+/*
+
+Menu başlık kayıt satırındaki PropViews içindeki ALLMENU altında
+
+
+Report TableIPCode : ?
+
+Menülerde Rapor butonu kullanılarak, bulunduğu formu ilgilendiren raporlara ulaşılacak
+Bu TableIPCode ler sayesinde bir ekranın/formun çağırabileceği raporların listesi gelecek
+
+Report FormCode : ? 
+
+Açılan Raporlar formu içindeki raporların kullanacağı tüm Dataların bulunduğu Layout MasterCode saklar.
+
+
+
+
+
+ReportTypeId
+    List 
+    Single
+    Form
+
+LocalTypeId
+    Ulke
+    Il
+    Ilce
+    Firm
+
+RecordType
+    ReportGroupName
+    ReportName
+
+
+Master-Detail ?????
+
+*/
+
+
+
+USE [MainManagerV3]
+GO
+
+delete from [dbo].[MsReports] Where RecordTypeId = 1
+INSERT INTO [dbo].[MsReports]
+           ([IsActive],[LineNumber],[ReportCode],[ParentCode],[ReportCaption]                    ,[About], [ReportName],[RecordTypeId],[ReportTypeId],[PrivateTypeId],[SoftwareCode],[ProjectCode],[ModulCode],[ReportTemp])
+     VALUES
+           ( 1        , 0         , 'KRM'       , ''         , 'Kurum işlemleri'                 , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'MLI'       , ''         , 'Mali işlemler'                   , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM'       , ''         , 'Dönem işlemler'                  , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'IDA'       , ''         , 'İdari işlemler'                  , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'RPR'       , ''         , 'Rapor işlemleri'                 , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+
+           ( 1        , 0         , 'KRM.PERS'  , 'KRM'      , 'Personel raporları'              , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'KRM.ARAC'  , 'KRM'      , 'Taşıt raporları'                 , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+
+           ( 1        , 0         , 'DNM.TAKP'  , 'DNM'      , 'Takip raporları'                 , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.ADAY'  , 'DNM'      , 'Aday raporları'                  , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.TALP'  , 'DNM'      , 'Talep raporları'                 , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.DONM'  , 'DNM'      , 'Dönem ve grup raporları'         , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.TEOD'  , 'DNM'      , 'Teorik ders planı raporları'     , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.TEOS'  , 'DNM'      , 'e-Sınav raporları'               , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.UYGD'  , 'DNM'      , 'Uygulama ders planı raporları'   , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.UYGS'  , 'DNM'      , 'Uygulama sınav raporları'        , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.SERT'  , 'DNM'      , 'Sertifika raporları'             , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.ISTA'  , 'DNM'      , 'İstatistik raporları'            , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+
+         --( 1        , 0         , 'DNM.TALP'      , 'DNM'      , 'Talep raporları'             , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.TALP.TLP'  , 'DNM.TALP' , 'Talep '                      , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.TALP.EVR'  , 'DNM.TALP' , 'Evraklar'                    , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.TALP.DER'  , 'DNM.TALP' , 'Dersler'                     , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.TALP.UCR'  , 'DNM.TALP' , 'Ücretler'                    , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.TALP.BIL'  , 'DNM.TALP' , 'Bildirimler'                 , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.TALP.TKP'  , 'DNM.TALP' , 'Takip durumu'                , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.TALP.FRM'  , 'DNM.TALP' , 'Formlar'                     , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+
+
+
+         --( 1        , 0         , 'DNM.TEOD'         , 'DNM'          , 'Teorik ders planı raporları' , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.TEOD.001'     , 'DNM.TEOD'     , 'Plan raporları'              , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.TEOD.002'     , 'DNM.TEOD'     , 'Derslik raporları'           , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.TEOD.003'     , 'DNM.TEOD'     , 'Personel raporları'          , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.TEOD.004'     , 'DNM.TEOD'     , 'Personel raporları'          , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.TEOD.005'     , 'DNM.TEOD'     , 'Günlük planları'             , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.TEOD.006'     , 'DNM.TEOD'     , 'Dönem planları'              , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.TEOD.007'     , 'DNM.TEOD'     , 'Yıllık planları'             , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.TEOD.008'     , 'DNM.TEOD'     , 'Yoklama defterleri'          , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+
+
+
+        -- ( 1        , 0         , 'DNM.TEOD.005'     , 'DNM.TEOD'     , 'Günlük planları'             , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.TEOD.005.01'  , 'DNM.TEOD.005' , 'Trafik ve Çevre Bilgisi'     , null  , ''          , 2            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.TEOD.005.02'  , 'DNM.TEOD.005' , 'İlkyardım Dersi'             , null  , ''          , 2            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.TEOD.005.03'  , 'DNM.TEOD.005' , 'Araç Tekniği Dersi'          , null  , ''          , 2            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.TEOD.005.05'  , 'DNM.TEOD.005' , 'Trafik Adabı Dersi'          , null  , ''          , 2            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+
+        -- ( 1        , 0         , 'DNM.TEOD.006'     , 'DNM.TEOD'     , 'Dönem planları'              , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.TEOD.006.01'  , 'DNM.TEOD.006' , 'Trafik ve Çevre Bilgisi'     , null  , ''          , 2            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.TEOD.006.02'  , 'DNM.TEOD.006' , 'İlkyardım Dersi'             , null  , ''          , 2            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.TEOD.006.03'  , 'DNM.TEOD.006' , 'Araç Tekniği Dersi'          , null  , ''          , 2            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.TEOD.006.05'  , 'DNM.TEOD.006' , 'Trafik Adabı Dersi'          , null  , ''          , 2            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+
+        -- ( 1        , 0         , 'DNM.TEOD.007'     , 'DNM.TEOD'     , 'Yıllık planları'             , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.TEOD.007.01'  , 'DNM.TEOD.007' , 'Trafik ve Çevre Bilgisi'     , null  , ''          , 2            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.TEOD.007.02'  , 'DNM.TEOD.007' , 'İlkyardım Dersi'             , null  , ''          , 2            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.TEOD.007.03'  , 'DNM.TEOD.007' , 'Araç Tekniği Dersi'          , null  , ''          , 2            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.TEOD.007.05'  , 'DNM.TEOD.007' , 'Trafik Adabı Dersi'          , null  , ''          , 2            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+
+        -- ( 1        , 0         , 'DNM.TEOD.008'     , 'DNM.TEOD'     , 'Yoklama defterleri'          , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.TEOD.008.01'  , 'DNM.TEOD.008' , 'Trafik ve Çevre Bilgisi'     , null  , ''          , 2            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.TEOD.008.02'  , 'DNM.TEOD.008' , 'İlkyardım Dersi'             , null  , ''          , 2            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.TEOD.008.03'  , 'DNM.TEOD.008' , 'Araç Tekniği Dersi'          , null  , ''          , 2            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'DNM.TEOD.008.05'  , 'DNM.TEOD.008' , 'Trafik Adabı Dersi'          , null  , ''          , 2            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+
+         
+         
+           ( 1        , 0         , 'RPR.RBAS'      , 'RPR'      , 'Rapor başlığı'               , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'RPR.SBAS'      , 'RPR'      , 'Sayfa başlığı'               , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'RPR.RTOP'      , 'RPR'      , 'Rapor toplamı'               , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
+           ( 1        , 0         , 'RPR.STOP'      , 'RPR'      , 'Sayfa toplamı'               , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       )
+

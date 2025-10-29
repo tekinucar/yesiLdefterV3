@@ -1,0 +1,21 @@
+﻿/*CreateFunction*/
+
+CREATE FUNCTION [dbo].[fnc_getSettingsInt]( @FirmId int, @settingGroupNo smallint, @settingNo smallint )
+RETURNS Int
+AS   
+BEGIN 
+  /* Bu functionda dbo.Setting tablosundaki Int olan öndeğeler sorgulanıyor, cevaplanıyor */
+  declare @retValue Int
+
+  Select @retValue = DefaultNumeric
+  From [dbo].[Settings] as s
+  Where FirmId = @FirmId
+  and   SettingGroupNo = @settingGroupNo
+  and   SettingNo = @settingNo
+
+  -- Int value dönüyor
+  RETURN @retValue;
+END; -- function
+
+/*CreateFunctionEnd*/
+

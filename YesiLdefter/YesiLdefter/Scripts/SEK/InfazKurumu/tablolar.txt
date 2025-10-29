@@ -1,0 +1,610 @@
+﻿
+begin transaction
+
+
+
+
+
+
+
+
+
+
+ -- Görevlendirme yerleri
+ -- Hastane listesi
+ create table LokalHesap
+ (
+
+   Id                Int IDENTITY(1,1) NOT NULL, 
+   ParentId          Int       not null, /* default 0 */
+   FirmId            Int       not null,
+   IsActive          Bit       not null, /* default : 1 = active, 0 = not active */ 
+   LokalTipiId       SmallInt      null, /* Görevlendirme, Hastane */
+   SiraNo            Int           null,             
+   LokalAdi          nVarchar(100) null,
+   
+   constraint		pk_LokalHesap primary key (Id)
+ )
+
+ create index X_LokalHesap01 on LokalHesap (FirmId)
+ create index X_LokalHesap02 on LokalHesap (FirmId,LokalTipiId)
+
+ grant select, insert, update, delete on LokalHesap to public
+
+-- ------------------------------------------------------- 
+-- LokalTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[LokalHesapLokalTipi]
+(
+   Id           Int Unique Not Null,
+   LokalTipi    nVarchar(50),
+   GrupTipiId   SmallInt Null,
+ 
+   constraint  pk_LokalHesapLokalTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[LokalHesapLokalTipi] (Id, LokalTipi, GrupTipiId)
+ VALUES 
+  (  0, N'Tanımsız',       0 ),
+  
+  (120, N'İzin Çeşitleri', 1 ),
+  (130, N'Hastane',        1 ),
+  (150, N'Görev Yeri',     1 ),
+
+  (210, N'Blok',       2 ),
+  (220, N'Kat',        2 ),
+  (230, N'Daire',      2 ),
+  
+  (310, N'Departman',  3 ),
+  (320, N'Bölüm',      3 ),
+  (330, N'Görev',      3 )
+
+
+
+
+ -- Görevlendirme, hastane, izin, görüş, sayıma katılamayanların listelerini oluşturan tablo
+ -- Sayıma katılanlar şöyle işaretlenecek
+ -- CihazKaydi.SayimIcmaliId = SayimIcmali.Id 
+
+ create table EylemPlani
+ (
+
+   Id                Int IDENTITY(1,1) NOT NULL, 
+   FirmId            Int       not null,
+   Tarih             Date      not null,  
+   IsActive          Bit       not null, /* default : 1 = active, 0 = not active */ 
+   IsCancel          Bit           null, /* default : 0 = normal kayıt, 1 : iptal edilmiş kayıt */
+   
+   /* Planlama burada yapılır */
+   EylemTipiId       SmallInt      null, /* İzin, Hastane, Görev, Görüş, Sayıma Katılamayan */
+   LokalId           Int           null, /* HastaneId, GörevYeriId */
+   CariId            Int       not null,
+   BaslamaTarihSaat  SmallDatetime null, /* planlanan başlangıç */
+   BaslamaSaati      Time          null,
+   BitisTarihSaat    SmallDatetime null, /* planlanan bitiş */
+   BitisSaati        Time          null,
+   VadeGun           SmallInt      null, /* kullanıcı manuel x gün girsin diye */
+   Aciklama          nVarchar(50)  null,
+   
+   /* giriş-çıkış hareketi buradan takip edilecek */
+   GirisTarihi       SmallDatetime null,
+   CikisTarihi       SmallDatetime null,
+   GirisCihazKaydiId Int           null,
+   CikisCihazKaydiId Int           null,
+   
+   Gun               Int           null, /* kaç gün */ 
+   Sure              Time          null, /* kaç saat sürdü sorusunun cevabı */     
+   
+   constraint	pk_EylemPlani primary key (Id)
+ )
+
+ create index X_EylemPlani01 on EylemPlani (FirmId,Tarih,EylemTipiId,LokalId)
+ create index X_EylemPlani02 on EylemPlani (FirmId,BaslamaTarihSaat,BitisTarihSaat,CariId)
+  
+ grant select, insert, update, delete on EylemPlani to public
+
+ 
+-- ------------------------------------------------------- 
+-- EylemTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[EylemPlaniEylemTipi]
+(
+   Id           Int Unique Not Null,
+   EylemTipi    nVarchar(50),
+   GrupTipiId   SmallInt Null,
+
+   constraint  pk_EylemPlaniEylemTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[EylemPlaniEylemTipi] (Id, EylemTipi, GrupTipiId)
+ VALUES 
+  (  0, N'Tanımsız',          0 ),
+  (100, N'Sayıma Katılmayan', 1 ), /* sayıma katılanlar CK.EylemPlanId = null, CK.SayimId = SayimIcmali.Id */
+  (102, N'Plansız Eylem',     1 ),
+  (120, N'İzin',              1 ),
+  (130, N'Hastane',           1 ),
+  (140, N'Görüş',             1 ),
+  (150, N'Görevli',           1 ),
+  (160, N'Yeni Giriş',        1 ),
+  (170, N'Tahliye',           1 ),
+  (172, N'Sevk/Nakil',        1 ),
+  
+  (210, N'İş Giriş-Çıkışı',   2 ),
+  (212, N'Mola',              2 ),
+  (214, N'Yemek',             2 ),
+  (220, N'İzin',              2 ),
+  (230, N'Hastane',           2 ),
+  (250, N'Görevli',           2 )
+  
+
+  
+
+ create table EylemIcmali
+ (
+
+   Id                Int IDENTITY(1,1) NOT NULL, 
+   FirmId            Int       not null,
+   Tarih             Date      not null,  
+   IsActive          Bit       not null, /* default : 1 = active, 0 = not active */ 
+ 
+   EylemTipiId       SmallInt      null, /* Eylem planından ayrı */ 
+   Planlanan         Int           null,    
+   Cikmayan          Int           null,
+   Cikan             Int           null,
+   Giren             Int           null,
+   Girmeyen          Int           null,
+   Mevcut            Int           null,
+   
+   constraint	pk_EylemIcmali primary key (Id)
+ )
+
+ create index X_EylemIcmali01 on EylemIcmali (FirmId,Tarih,EylemTipiId)
+  
+ grant select, insert, update, delete on EylemIcmali to public
+
+
+-- ------------------------------------------------------- 
+-- EylemIcmali nin EylemTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[EylemIcmaliEylemTipi]
+(
+   Id           Int Unique Not Null,
+   EylemTipi    nVarchar(50),
+   GrupTipiId   SmallInt Null,
+
+   constraint  pk_EylemIcmaliEylemTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[EylemIcmaliEylemTipi] (Id, EylemTipi, GrupTipiId)
+ VALUES 
+  (  0, N'Tanımsız',       0 ),
+  (110, N'Toplam',         1 ),
+  (120, N'İzinli Bugün',   1 ),
+  (122, N'İzinli Tamamı',  1 ),
+  (130, N'Hastane Bugün',  1 ),
+  (132, N'Hastane Tamamı', 1 ),
+  (140, N'Görüş',          1 ),
+  (150, N'Görevde',        1 ),
+  (160, N'Yeni Gelen',     1 ),
+  (170, N'Tahliye',        1 ),
+  (172, N'Sevk/Nakil',     1 ),
+  (190, N'Mevcut',         1 )
+
+
+
+ create table AyarSayimSuresi
+ (
+
+   Id                Int IDENTITY(1,1) NOT NULL, 
+   FirmId            Int       not null,
+
+   /* buraya girilen bilgilerle AyarSayimPlani tablosu dolduruluyor */
+   SayimBasDakika    SmallInt      null, /* 0 - 59 */
+   SayimSuresi       SmallInt      null, /* 0 - 59 */
+   SayimDisiSure     SmallInt      null, /* 0 - 59 */
+
+   /* buraya girilen bilgiyle ani sayımı başlatabilir */
+   AniSayimBasSaati  Time          null, /* 08:00  */
+   AniSayimSuresi    SmallInt      null, /* 0 - 59 */
+   GorusSuresi       SmallInt      null,
+
+   constraint	pk_AyarSayimSuresi primary key (Id)
+ )
+
+ create index X_AyarSayimSuresi01 on AyarSayimSuresi (FirmId)
+  
+ grant select, insert, update, delete on AyarSayimSuresi to public
+
+
+ create table AyarSayimPlani
+ (
+
+   Id                Int IDENTITY(1,1) NOT NULL, 
+   FirmId            Int       not null,
+   IsActive          Bit       not null, /* default : 1 = active, 0 = not active */ 
+   SayimNo           SmallInt  not null, 
+   MSayimBasSaat     SmallInt      null, /* 0 - 23 */
+   MSayimSuresi      SmallInt      null, /* 0 - 59 */
+   MSayimDisiSure    SmallInt      null, /* 0 - 59 */
+   SayimOncesiSaat   Time          null, /* 07:45 */
+   SayimBasSaat      Time          null, /* 08:00 */
+   SayimBitSaat      Time          null, /* 08:30 */
+   SayimSonrasiSaat  Time          null, /* 08:45 */
+
+   constraint	pk_AyarSayimPlani primary key (Id)
+ )
+
+ create index X_AyarSayimPlani01 on AyarSayimPlani (FirmId,SayimNo)
+  
+ grant select, insert, update, delete on AyarSayimPlani to public
+
+
+
+
+
+ create table SayimIcmali
+ (
+
+   Id                Int IDENTITY(1,1) NOT NULL, 
+   FirmId            Int       not null,
+   IsActive          Bit       not null, /* default : 1 = active, 0 = not active */ 
+   Tarih             Date      not null,    
+   SayimNo           SmallInt  not null, /* 0 - 23 */ 
+   SayimTipiId       SmallInt  not null, /* 0, 1 : Normal Sayim, 2 : Ani Sayım  */
+
+   /* sayım başladığında bu bilgiler insert edilecek */
+   
+   SayimOncesiSaat   nVarchar(5)   null, /* 07:45 */
+   SayimBasSaat      nVarchar(5)   null, /* 08:00 */
+   SayimBitSaat      nVarchar(5)   null, /* 08:30 */
+   SayimSonrasiSaat  nVarchar(5)   null, /* 08:45 */
+   
+   SayimHedefi       Int       not null, /* SayimBitSaat sırasındaki EylemIcmal.Mevcut alınacak */
+   SayimaKatilan     Int       not null, /* SayimSaatinde okutanalar */
+   SayimDisi         Int           null, /* Sayımdan önce veya sonra okutanlar */
+   SayimaKatilmayan  Int           null, /* Bu sayıma katılmayanlar, EylemPlani tablosunda GirisCihazKayitId ve CikisCihazKayitId ler null kayıt oluşturulur */
+   
+   constraint	pk_SayimIcmali primary key (Id)
+ )
+
+ create index X_SayimIcmali01 on SayimIcmali (FirmId,SayimNo)
+  
+ grant select, insert, update, delete on SayimIcmali to public
+
+
+-- ------------------------------------------------------- 
+-- SayimTipiId
+-- ------------------------------------------------------- 
+create table [Lkp].[SayimIcmaliSayimTipi]
+(
+   Id           Int Unique Not Null,
+   SayimTipi    nVarchar(50),
+   GrupTipiId   SmallInt Null,
+
+   constraint  pk_SayimIcmaliSayimTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[SayimIcmaliSayimTipi] (Id, SayimTipi, GrupTipiId)
+ VALUES 
+  (0, N'Tanımsız', 0 ),
+  (1, N'Normal',   1 ),
+  (2, N'Ani',      1 )
+
+
+commit transaction
+
+
+
+/*  çalışma şekli 
+
+
+ -- CihazHesap tablosu (CH)
+ -- CihazKaydi tablosu (CK)
+ -- EylemPlani tablosu (EP)
+ -- EylemIcmali tablosu (EI)
+ -- SayimIcmali tablosu (SI)
+ -- AyarSayimPlani tablosu (ASP)
+
+prc : ler
+
+CK_prc1 : 
+
+1. CK bilgilerine bakarak ( CK.CihazId = CH.CalismaTipiId != Sayim ) EP ve CK yı işleyecek (sayım harici işler)
+2. CK bilgilerine bakarak ( CK.CihazId = CH.CalismaTipiId = Sayim ) SI SayimIcmal tablosundan uygun kaydı bulup CK.SayimIcmalId ye işleyecek 
+3. SayimaKatilmayanlar tespit edilip EP ye işlenecek 
+
+CK_prc2 :
+
+1. EylemIcmali için Insert Select sum() çalışacak
+2. SayimIcmali için Insert Select sum() çalışacak
+
+
+CK_prc1 : detayı
+
+ -- CK tablonun trigeri storedProcedure çalıştıracak ve şu işlemleri yapacak
+ 
+ ASP oku : SayimNo, BasSaat, BitSaat from ASP where BasSaat <= Now & BitSaat >= Now
+
+ CK  oku : Id as CihazKayitId, CihazId, CalismaTipiId, CariId, TarihSaat  yi oku
+ 
+ 
+  if CK.CalismaTipiId = Sayım 
+  {
+     Uygun olan SI satırı tespit edilecek
+     SI satırı yoksa SI.Insert oluşturulacak
+
+     update CK
+     CK.SayimIcmaliId = SI.Id
+     CK.ZamanlamaTipiId = 1,2,3
+     where Id = CK.Id
+
+     Sayıma katılanlar için EP tablsounda herhangi bir işlem yapılmayacak
+     Sayıma katılmayanlar için EP de EylemTipiId = SayimaKalilmayan şeklinde insert oluşturulacak
+  }
+  
+
+
+  if CK.CalismaTipiId = Giris-Çıkış 
+  {
+ -- EP oku : Id as EylemPlanId, EylemTipiId, BaslamaTarihSaat, BitisTarihSaat 
+    EP where  EP.CariId = CK.CariId
+
+ -- CalismaTipiId != Sayım : 
+ --    EP insert ise : CK.CariId, EylemTipiId ye karar verilecek, EP.EylemPlanId, EP.BasCihazKaydiId = CK.Id
+ --    EP edit   ise : EK.BitCihazKayitId = CK.Id, Bas ve Bit arasındaki EP.Sure hesaplanacak
+ 
+ -- CK update olacak :  
+       CK.EylemPlanId = EP.Id
+
+  }
+
+
+
+
+EylemIcmali Tablonun yapısı
+
+-----------------------------------------------------------------------------
+                |   1    |     2     | 3     |    4     |   5   |    6      |  
+-----------------------------------------------------------------------------
+                | Mevcut | Planlanan | Çıkan | Çıkmayan | Giren | Girmeyen  |  
+-----------------------------------------------------------------------------
+A. Toplam       |  250                                                      | 
+                -------------------------------------------------------------
+                |Girmeyen|           |       |          |       |Çıkan-Giren|
+B. İzinli B     |    6          10        6         4        0         6    | Bugun
+   İzinli T     |   11          15       11         4        3        11    | Bugun + Oncekiler
+C. Hastanede B  |    4           5        5         0        1         4    | Bugun
+   Hastanede T  |    7           8        8         0        1         7    | Bugun + Oncekiler
+D. Görevde      |   15         100       95         5       80        15    | 1. örnek : Bugun
+                |   75         100       75        25        0        75    | 2. örnek : Bugun
+                |   10         100       85        15       75        10    | 3. örnek : Bugun
+E. Görüş        |    8          30       30         0       22         8    | Bugun
+                -------------------------------------------------------------
+F. Yeni Gelen   |   5            5                           3              | 
+G. Tahliye Olan |   2           10        8         2                       |
+H. Sevk/Nakil   |   3            5        2         3                       |
+K. Mevcut       |  ???    | (250+5) - (6+4+15)                              | Toplam - ( İzin.T + Hastane.T + Görev + Tahliye + Sevk )
+                -------------------------------------------------------------
+İzin Dönüşü B   |   1            3        0         0        2          1   |
+Hastanae Dö B   |   2            5        0         0        3          2   |
+                -------------------------------------------------------------
+
+
+   SayimHedefi       Int       not null, /* SayimBitSaat sırasındaki EylemIcmal.Mevcut alınacak */
+   SayimaKatilan     Int       not null, /* SayimSaatinde okutanalar */
+   SayimDisi         Int           null, /* Sayımdan önce veya sonra okutanlar */
+   SayimaKatilmayan  Int           null, /* Bu sayıma katılmayanlar, EylemPlani tablosunda GirisCihazKayitId ve CikisCihazKayitId ler null kayıt oluşturulur */
+   
+
+                SayimHedefi       SayimaKatilan        SayimDisi        SayimaKatilmayan 
+				Mevcut            ASP uyanlar          ASP Uymayanlar   Hiç okutmayanlar EP ye işlenecek
+				------------------------------------------------------------------------------
+08:00 - 08:30     220   
+12:00 - 12:30
+16:00 - 16:30     150
+				------------------------------------------------------------------------------
+
+				Görevli+İzinli+Hastane giriş yaparken SayımSaatine denk gelirse auto Sayım için EA oluştur
+				Sayım dışında okutanların tespiti tanomlı bir tablodan okunacak : 
+				Örnek : 15 dak önce veya 15 dak sonra okutanlar bu sınıfa girecek
+
+				Tamamen bunların dışında kalanlar Hiç okutmayanlarda olacak 
+
+
+AyarSayimSuresi
+
+SayimBasDakika
+SayimSuresi
+SayimDisiSuresi
+
+AniSayimBasSaati
+AniSayimBitSaati
+
+
+-1  True  -1   0   30  15
+
+AyarSayimPlani tablosu 
+               Farklı         Farkli           Farkli           Planlan -----------------------------------
+Saat  IsActive SayimBasSaati  SayimSayimSuresi SayimDisiSuresi  SOncesiSaati  SayimBas   SayimBit   SSonrasiSaat 
+0
+1
+2
+8       true                                                    07:45          08:00       08:30     08:45 
+9
+10
+12
+13
+22
+23
+
+
+
+
+
+Tablolar
+C1 = CariHesap  
+C2 = CariHesapIO : Carinin kuruma Giriş veya Çıkış işareti ve Tarihi
+
+CK = CihazKaydi
+EP = EylemPlani
+EI = EylemIcmali
+ET = Lkp.EylemPlaniEylemTipi
+
+  
+--Toplam
+A.1. = C1.IsActive = True & C2.IOTipiId = Giris & C2.Tarih <= Bugun 
+
+--Izin Bugün
+B.1. mevcut    = EI.Girmeyen  
+  2. planlanan = from EP     where EP.IsActive = True & EP.EylemTipiId = ET.İzin & EP.BasTarihSaat = Bugun 
+  3. çıkan     = from EP, CK where EP.IsActive = True & EP.EylemTipiId = ET.İzin & join(EP.BasCihazKayitId = CK.Id & CK.Tarih = Bugun )   
+  4. çıkmayan  = EI.Planlanan - EI.Cikan
+  5. giren     = from EA, CK where EA.EylemTipiId = ET.İzin & join(EA.BitCihazKayitId = CK.Id & CK.Tarih = Bugun ) DİKKAT : Giriş yapılınca EA.IsActive = false olacak
+  6. girmeyen  = EI.Cikan - EI.Giren
+
+--Izin Tamamı
+B.1. mevcut    = EI.Girmeyen  
+  2. planlanan = from EA     where EA.IsActive = True & EA.EylemTipiId = ET.İzin & EA.BasTarihSaat <= Bugun 
+  3. çıkan     = from EA, CK where EA.IsActive = True & EA.EylemTipiId = ET.İzin & join(EA.BasCihazKayitId = CK.Id & CK.Tarih <= Bugun )   
+  4. çıkmayan  = EI.Planlanan - EI.Cikan
+  5. giren     = from EA, CK where EA.EylemTipiId = ET.İzin & join(EA.BitCihazKayitId = CK.Id & CK.Tarih = Bugun ) : DİKKAT : Sadece Bugün Girenler
+  6. girmeyen  = EI.Cikan - EI.Giren
+
+C.1. Hastane iznin aynısı
+D.1. Görevlendirme iznin aynısı sadece bugün mevcut
+E.1. Görüş iznin aynısı sadece bugün mevcut
+
+--YeniGiris
+F.1. mevcut    = EI.Planlanan or EI.Giren
+  2. planlanan = C1.IsActive = True & C2.IOTipiId = Giris & C2.Tarih = Bugun, (Bu kayıt yapılırken EA tablosuna 210 insert edilir)
+  5. giren     = from EA, CK where EA.BasTarihSaat = Bugun & EA.EylemTipiId = ET.YeniGiris & join(EA.BasCihazKayitId = CK.Id & CK.Tarih = Bugun )
+
+--Tahliye
+G.1. mevcut    = EI.Cikan
+  2. planlanan = C1.IsActive = False & C2.IOTipiId = Çıkış & C2.Tarih = Bugun, (Bu kayıt yapılırken EA tablosuna 220 insert edilir)
+  3. çıkan     = from EA, CK where EA.BasTarihSaat = Bugun & ED.EylemTipiId = ET.Tahliye   & join(EA.BitCihazKayitId = CK.Id & CK.Tarih = Bugun )
+  4. çıkmayan  = EI.Planlanan - EI.Cikan
+
+--Sevk (Tahliyenin aynısı)
+H.1.  
+
+--Mevcut Satırı
+K.1. = Toplam - ( İzin.T + Hastane.T + Görev + Tahliye + Sevk )
+
+
+--Sayım işlemi
+
+L.1. mevcut = from CK where CK.EylemTipiId = ET.Sayim & CK.TarihSaat = SayımTarihSaat
+M.1. mevcut = 
+N.1. mevcut =
+
+
+
+NOT : 
+
+1. Süreli İzin ve Hastane eylemleri talepsiz olmaz, muhakkak BaşMemurluğa başvuracak
+2. Yeni Gelen, Tahliye vaya Sevk Olan muhakkak EA (EylemAtama) işlemleri yapılacak
+3. Görevlendirme ve Görüş
+	3.1. EA ile önceden hazırlanabilir
+	3.2. EA hazırlanmamıştır fakat Nizamiye cihazlarında kaydı varsa PLANSIZ GÖREV süreci çalışır.
+
+PLANSIZ GÖREV : Nedir ?
+
+EA : EylemAtama işlemi yapılmamış kişi Nizamiye ve Görüş cihazlarında giriş ve çıkış yapabilir.
+
+Cihazın  CihazHesapCalismaTipi belirlenir.
+
+-- 
+CihazHesapCalismaTipi = Çıkış  ise
+
+çıkış için EA satırı 
+
+nizamiye cihazı ise
+-EylemTipiId = Görev
+görüş cihazı ise
+-EylemTipiId = Görüş
+
+-CariId = x
+-BasTarihSaat = Now
+-BasCihazKayitId = CK.Id
+
+--
+CihazHesapCalismaTipi = Giriş  ise
+
+giriş için EA satırı 
+
+nizamiye cihazı ise
+-EylemTipiId = Görev
+görüş cihazı ise
+-EylemTipiId = Görüş
+
+-CariId = x
+-BitTarihSaat = Now
+-BitCihazKayitId = CK.Id
+
+--
+CihazHesapCalismaTipi = Giriş-Çıkış ise    
+
+CariId & Bugun & EA.IsActive = True & EylemTipiId = Görev olan EA satırı sorgula 
+
+EA satırı Insert ise çıkış kabul ederiz, IsActive = true olur  
+          Edit   ise giriş kabul ederiz, IsActive = false çevrilir ve EylemAtama satırı kapanır.
+
+soru 1 : LokalId nasıl belirlenecek
+
+soru 2 : Insert sırasında gerçekte kişi çıkış değilde giriş yapıyorsa ne olacak ?
+
+--
+Bu Plansız Görev için Nizamiye cihazlarında bu kişinin ID si gerekiyor.
+
+
+
+
+NİZAMİYE CİHAZLARI : 
+
+Nizamiyedeki cihazlarda kimlerin ID leri bulunur.
+
+1. EA ile atama yapılan EA.IsActive = true olanlar cihaza eklenir ( ne zaman )
+2. EA da EA.IsActive = false döndüğü an cihazdan silinir. ( ne zaman lama )
+3. Plansız çıkış listesinde olanlar Nizamiye cihazlarına yüklenecek ( kısıtlama, sürü sınırlaması nasıl olur ?)
+4. Plansız çıkış listesinden silinenler Nizamiye cihazlarından silinir.
+5. Yeni Giriş kaydı yapılanlar nizamiye ve sayım cihazlarına yüklenir.
+6. Yeni kişi içeriye giriş için okuttuğunda nizamiyeden silinir. (gerekte olmaya bilir.)
+7. Tahliye ve sevk için çıkış okutunca nizamiyeden ve tüm cihazlardan silinir.
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+
+
+
+
+
+
+
+
+210 Toplam Kişi Sayısı
+220 Bugün Çıkış Yapacakların Sayısı
+230 Çıkış Yapanların Sayısı
+240 Henüz Çıkış Yapmayanların Sayısı
+250 Dönüş Yapanların Sayısı
+260 Henüz Dönmeyenlerin Sayısı
+270 Süreli İzinde Olanların Sayısı
+280 Sayıma Katılması Gerekenlerin Sayısı
+290 Son Sayıma Katılanların Sayısı
+300 Sayıma Katılmayanların Sayısı
+310 Sayım Saati Dışında Okutanlar
+320 Yeni Gelen Hükümlü Sayısı
+330 Tahliye, Sevk ve Pasife Alınanların Sayısı
+
+*/

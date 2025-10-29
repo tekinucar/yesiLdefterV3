@@ -1,0 +1,93 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_OnmToplamBekleyenOdemeler] (@firmId int)  
+AS BEGIN
+
+  --declare @firmId int
+  --set @firmId = 21
+  
+  UPDATE [dbo].[OnmToplamBekleyen]
+   SET 
+      -- [FirmId] = 
+      --,[ItemCode] = <ItemCode, varchar(30),>
+      --,[ParentItemCode] = <ParentItemCode, varchar(30),>
+      --,[UstGrupTipiId] = <UstGrupTipiId, smallint,>
+      --,[AnaGrupTipiId] = <AnaGrupTipiId, smallint,>
+      --,[AltGrupTipiId] = 
+      --,[AltCesitTipiId] = <AltCesitTipiId, smallint,>
+      --,[TableTypeId] = <TableTypeId, smallint,>
+      --,[ItemId] = <ItemId, int,>
+       [ToplamVadesiGecen] = y.VadesiGecen
+      ,[ToplamBugun] = y.Bugun
+      ,[Toplam7Gun] = y.Hafta1
+      ,[Toplam2Hafta] = y.Hafta2
+      ,[ToplamAySonu] = y.AySonu
+      ,[Toplam1Ay] = y.AySonu1
+      ,[Toplam2Ay] = y.AySonu2
+      ,[Toplam3Ay] = y.AySonu3
+      ,[Toplam1Yil] = y.YilSonu
+      ,[ToplamTamami] = y.Tamami
+	  
+ From [dbo].[OnmToplamBekleyen] as a
+  inner join (
+    Select 
+      x.FirmId 
+	, x.AltGrupTipiId
+    , sum(x.VadesiGecen) as VadesiGecen
+    , sum(x.Bugun) as Bugun
+    , sum(x.Hafta1) as Hafta1
+    , sum(x.Hafta2) as Hafta2
+    , sum(x.AySonu) as AySonu
+    , sum(x.AySonu1) as AySonu1
+    , sum(x.AySonu2) as AySonu2
+    , sum(x.AySonu3) as AySonu3
+    , sum(x.YilSonu1) as YilSonu
+	, sum(x.Tamami) as Tamami
+    from (
+       Select 
+           belge.FirmId
+         , hesap.HesapKisaAdi
+         , hesap.HesapKodu
+         , hesap.UstHesapKodu
+         , altGrup.Id as AltGrupTipiId
+         , altGrup.AltGrupTipi
+         , belge.SonOdemeTarihi
+         , belge.BelgeTutari 
+         , case when belge.SonOdemeTarihi <  tarih.Bugun  then belge.BelgeTutari else 0 end as VadesiGecen
+         , case when belge.SonOdemeTarihi =  tarih.Bugun  then belge.BelgeTutari else 0 end as Bugun
+         , case when belge.SonOdemeTarihi >= tarih.Bugun   and belge.SonOdemeTarihi < tarih.Hafta1  then belge.BelgeTutari else 0 end as Hafta1
+         , case when belge.SonOdemeTarihi >= tarih.Hafta1  and belge.SonOdemeTarihi < tarih.Hafta2  then belge.BelgeTutari else 0 end as Hafta2
+         , case when belge.SonOdemeTarihi < tarih.AySonu0 then belge.BelgeTutari else 0 end as AySonu
+         , case when belge.SonOdemeTarihi >= tarih.AySonu0 and belge.SonOdemeTarihi < tarih.AySonu1 then belge.BelgeTutari else 0 end as AySonu1
+         , case when belge.SonOdemeTarihi >= tarih.AySonu1 and belge.SonOdemeTarihi < tarih.AySonu2 then belge.BelgeTutari else 0 end as AySonu2
+         , case when belge.SonOdemeTarihi >= tarih.AySonu2 and belge.SonOdemeTarihi < tarih.AySonu3 then belge.BelgeTutari else 0 end as AySonu3
+		 , case when belge.SonOdemeTarihi < tarih.YilSonu1 then belge.BelgeTutari else 0 end as YilSonu1
+         , belge.BelgeTutari as Tamami
+         --  tarih.*
+         --, hesap.*       
+         --, belge.* 
+       From OnmBelgeMaliyet as belge
+          left outer join OnmHesapFinans as hesap on ( belge.MaliyetId = hesap.Id )
+	      left outer join Lkp.OnmToplamBekleyenAltGrupTipi as altGrup on ( hesap.UstHesapKodu = altGrup.HesapKodu ) 
+	   , ( Select 
+               convert(date, GETDATE(), 103) as Bugun
+             , convert(date, DATEADD(dd,  7, GETDATE())) as Hafta1 -- 7 gün sonrası
+             , convert(date, DATEADD(dd, 14, GETDATE())) as Hafta2 -- 2 hafta sonrası
+             , DATEADD(dd, - (DAY(DATEADD(mm, 1, GETDATE()))-1), DATEADD(mm, 1, convert(date, GETDATE(), 103)))  as AySonu0 -- gelecek ay başı
+             , DATEADD(dd, - (DAY(DATEADD(mm, 1, GETDATE()))-1), DATEADD(mm, 2, convert(date, GETDATE(), 103)))  as AySonu1 -- 1. ay
+             , DATEADD(dd, - (DAY(DATEADD(mm, 1, GETDATE()))-1), DATEADD(mm, 3, convert(date, GETDATE(), 103)))  as AySonu2 -- 2. ay
+             , DATEADD(dd, - (DAY(DATEADD(mm, 1, GETDATE()))-1), DATEADD(mm, 4, convert(date, GETDATE(), 103)))  as AySonu3 -- 3. ay
+             , DATEADD(dd, - (DAY(DATEADD(mm, 1, GETDATE()))-1), DATEADD(mm,13, convert(date, GETDATE(), 103))) as YilSonu1 -- 1 yil sonu
+	     ) as tarih 
+       Where belge.FirmId = @firmId
+       and   belge.IsActive = 1
+     --and   belge.IsPaid = 0
+       ) as x
+       group by x.FirmId, x.AltGrupTipiId
+  ) as y on ( a.AltGrupTipiId = y.AltGrupTipiId )
+  Where a.FirmId = y.FirmId
+
+
+END -- procedure
+
+/*CreateProcedureEnd*/

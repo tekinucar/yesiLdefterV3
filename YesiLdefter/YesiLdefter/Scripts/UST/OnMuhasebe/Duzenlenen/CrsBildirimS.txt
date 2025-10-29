@@ -1,0 +1,311 @@
+﻿
+/*CreateTable*/
+
+begin transaction
+
+ create table CrsBildirimS
+ (
+
+   Id                  Int IDENTITY(1,1) NOT NULL, 
+   CrsBildirimBId      Int               null,
+   IsLock              Bit               null,  
+   MesajKodu           Varchar(50)       null,
+   StateTypeId         SmallInt          null, /*  */
+   AliciAdiSoyadi      nVarchar(100)     null, 
+   TalepId             Int               null,
+   CariId              Int               null,
+   TelefonNo           nVarchar(15)      null,
+   Eposta              Varchar(98)       null,
+   Mesaj               nVarChar(1000)    null,
+   KarekterSayisi      SmallInt          null, /* mesajın kaç karakter olduğunu gösteriyor */
+   MesajSayisi         SmallInt          null, /* SMS max 160 karekter. Bu nedenle 160 dan fazla olunca birden fazla SMS önderiliyor */  
+   ServisinCevabi      Varchar(50)       null, /* SMS servisinden dönen cevap */
+   RaporTypeId         SmallInt          null, 
+   RaporTarihi         Varchar(15)       null,
+
+   SourceTypeId        SmallInt          null, /* mesajın kaynak konusu :  ilgili table detay aşağıda   */
+   SourceId            Int               null, /* mesaja sebep olan kaynak tablonun Id si  : ilgili table ref Id */
+
+   Dinamik1Value       nVarchar(100)     null,
+   Dinamik2Value       nVarchar(100)     null,
+   Dinamik3Value       nVarchar(100)     null,
+
+  constraint pk_CrsBildirimS primary key (Id)
+ )
+
+ create index X_CrsBildirimS01 on CrsBildirimS (CrsBildirimBId)
+
+ grant select, insert, update, delete on CrsBildirimS to public
+
+commit transaction
+
+/*CreateTableEnd*/
+
+
+/*CreateTrigger*/
+
+CREATE TRIGGER [dbo].[trg_CrsBildirimS] on [dbo].[CrsBildirimS]
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    DECLARE cursorCrsBildirimS cursor local for select Id from Inserted
+    DECLARE @curId bigint
+
+    OPEN cursorCrsBildirimS
+
+    FETCH NEXT FROM cursorCrsBildirimS INTO @curId
+
+    declare @CrsBildirimBId  Int
+    declare @IsLock Bit
+    declare @MesajKodu Varchar(50)
+    declare @StateTypeId SmallInt        
+    declare @AliciAdiSoyadi nVarchar(100)
+    declare @TalepId Int
+    declare @CariId Int
+    declare @TelefonNo nVarchar(10)
+    declare @Eposta Varchar(98)
+    declare @Mesaj nVarChar(1000)
+    --declare @MesajSayisi SmallInt 
+
+	declare @BildirimMetni nVarChar(1000)
+	declare @search nvarchar(200)
+	declare @value nvarchar(200)
+	
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        Select  
+            @CrsBildirimBId = ins.[CrsBildirimBId]
+           ,@IsLock = ins.[IsLock] 
+           ,@MesajKodu = ins.[MesajKodu]
+           ,@StateTypeId = isnull(ins.[StateTypeId],0)
+           ,@AliciAdiSoyadi = ins.[AliciAdiSoyadi]
+           ,@TalepId = ins.[TalepId]
+           ,@CariId = ins.[CariId]
+           ,@TelefonNo = ins.[TelefonNo]
+           ,@Eposta = ins.[Eposta]
+           ,@Mesaj = ins.[Mesaj]
+           --,[MesajSayisi]
+        From inserted as ins
+        Where ins.Id = @curId
+
+		if ((@IsLock = 0) and (@StateTypeId = 0))
+        begin
+		    Select @BildirimMetni = b.BildirimMetni 
+            From CrsBildirimB as b
+			Where Id = @CrsBildirimBId
+
+			set @search = '<ADAY.AdiSoyadi>';
+			if (charindex(@search, @BildirimMetni) > 0) 
+            begin
+                Select @value = TamAdiSoyadi
+                From dbo.MtskAday 
+                Where Id = @CariId
+				Set @BildirimMetni = REPLACE(@BildirimMetni, @search, @value)
+            end
+
+			set @search = '<TALEP.EksikBelge>';
+			if (charindex(@search, @BildirimMetni) > 0) 
+            begin
+                declare @KimlikGeldi bit
+                declare @BiyometrikGeldi bit
+                declare @BasvuruFotoCekildi bit 
+                declare @OgrenimGeldi bit
+                declare @SaglikGeldi bit
+                declare @AdliSicilGeldi bit
+                declare @ImzaAlindi bit
+                declare @SozlesmeYapildi bit
+                declare @AdresAlindi bit
+
+                Select @KimlikGeldi = t.[KimlikGeldi]
+                      ,@BiyometrikGeldi = t.[BiyometrikGeldi]
+                      ,@BasvuruFotoCekildi = t.[BasvuruFotoCekildi]
+                      ,@OgrenimGeldi = t.[OgrenimGeldi]
+                      ,@SaglikGeldi = t.[SaglikGeldi]
+                      ,@AdliSicilGeldi = t.[AdliSicilGeldi]
+                      ,@ImzaAlindi = t.[ImzaAlindi]
+                      ,@SozlesmeYapildi = t.[SozlesmeYapildi]
+                      ,@AdresAlindi = t.[AdresAlindi]
+                From dbo.MtskAdayTalep as t
+                Where Id = @TalepId
+
+			    Set @value = '';
+                if (@KimlikGeldi = 0)     set @value = @value + ', ' + 'Kimlik fotokobisi'
+                if (@BiyometrikGeldi = 0) set @value = @value + ', ' + 'Biyometrik resim'
+                if (@OgrenimGeldi = 0)    set @value = @value + ', ' + 'Öğrenim belgesi'
+                if (@SaglikGeldi = 0)     set @value = @value + ', ' + 'Sağlık belgesi'
+                if (@AdliSicilGeldi = 0)  set @value = @value + ', ' + 'Adli sicil belgesi'
+                if (@ImzaAlindi = 0)      set @value = @value + ', ' + 'İmza örneğini'
+                --if (@SozlesmeYapildi = 0) set @value = @value + ', ' + 'Sözleşme'
+				if (@AdresAlindi = 0)     set @value = @value + ', ' + 'Adres beyanı'
+                if (@value <> '') set @value = Substring(@value, 2, 200)
+
+				Set @BildirimMetni = REPLACE(@BildirimMetni, @search, @value)
+            end
+
+			set @search = '<ESINAV.Ucreti>';
+			if (charindex(@search, @BildirimMetni) > 0) 
+            begin
+                Select @value = Convert(varchar(50), Sum(TaksitTutari)) 
+                From dbo.OnmOdemePlani
+                Where TalepId = @TalepId
+                and   CariId = @CariId
+                and   UcretTipiId = 21111
+                and   IsPaid = 0
+
+				Set @BildirimMetni = REPLACE(@BildirimMetni, @search, @value)
+            end
+
+			set @search = '<USINAV.Ucreti>';
+			if (charindex(@search, @BildirimMetni) > 0) 
+            begin
+                Select @value = Convert(varchar(50), Sum(TaksitTutari)) 
+                From dbo.OnmOdemePlani
+                Where TalepId = @TalepId
+                and   CariId = @CariId
+                and   UcretTipiId = 21112
+                and   IsPaid = 0
+
+				Set @BildirimMetni = REPLACE(@BildirimMetni, @search, @value)
+            end
+
+            Update CrsBildirimS Set Mesaj = @BildirimMetni
+            , KarekterSayisi = LEN(@BildirimMetni)
+            , MesajSayisi = (LEN(@BildirimMetni) / 160) + 1 
+			, StateTypeId = 1 -- Hazır ( mesaj hazırlandı )
+            Where Id = @curId
+
+        end -- @IsLock
+		
+		if (@IsLock = 1)
+        begin
+            Update dbo.CrsBildirimB Set IsLock = 1
+            Where Id = @CrsBildirimBId
+            and   IsLock = 0
+        end
+
+        FETCH NEXT FROM cursorCrsBildirimS INTO @curId
+    END -- While
+
+    CLOSE cursorCrsBildirimS
+    DEALLOCATE cursorCrsBildirimS   
+
+END -- create trigger
+
+/*CreateTriggerEnd*/
+
+
+
+/*CreateLkpTable*/
+
+begin transaction
+
+-- ------------------------------------------------------- 
+-- StateTypeId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'CrsBildirimSStateType')
+drop table [Lkp].[CrsBildirimSStateType]
+
+create table [Lkp].[CrsBildirimSStateType]
+(
+   Id               Int Unique Not    null,
+   StateType        nVarchar(50)      null,
+
+   constraint  pk_CrsBildirimSStateType primary key (Id)
+)
+
+Delete from [Lkp].[CrsBildirimSStateType]
+INSERT INTO [Lkp].[CrsBildirimSStateType] (Id, StateType)
+ VALUES 
+  ( -1, N''),
+  (  0, N'Tanımsız'),
+  (  1, N'Hazır'),
+  (  2, N'Gönderildi')
+
+
+-- ------------------------------------------------------- 
+-- RaporTypeId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'CrsBildirimSRaporType')
+drop table [Lkp].[CrsBildirimSRaporType]
+
+create table [Lkp].[CrsBildirimSRaporType]
+(
+   Id               Int Unique Not    null,
+   RaporType        nVarchar(100)      null,
+
+   constraint  pk_CrsBildirimSRaporType primary key (Id)
+)
+
+Delete from [Lkp].[CrsBildirimSRaporType]
+INSERT INTO [Lkp].[CrsBildirimSRaporType] (Id, RaporType)
+ VALUES 
+  ( -1, N''),
+  (  0, N'Tanımsız'),
+  (  1, N'Bekleyen Numaralar'),
+  (  2, N'İletilen Numaralar (Başarılı)'),
+  (  3, N'Sistem Hatası(bu numara kullanımda değil yada servis dışı)'),
+  (  4, N'İletilememesinden dolayı zaman aşımı'),
+  ( 100, N'Hatalı Kullanıcı Adı yada şifresi '),
+  ( 101, N'Hatalı Kullanıcı Adı yada şifresi '),
+  ( 120, N'Özet Raporda; verilen dönem için atış bulunamadı'),
+  ( 121, N'Detay Raporda; rapor bulunamadı yada  rapor henüz hazır değil')
+
+
+
+-- ------------------------------------------------------- 
+-- SourceTypeId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'CrsBildirimSSourceType')
+drop table [Lkp].[CrsBildirimSSourceType]
+
+create table [Lkp].[CrsBildirimSSourceType]
+(
+   Id                Int Unique not null, 
+   SourceType        nVarchar(50)   null,
+   
+   constraint  pk_CrsBildirimSSourceType primary key (Id)
+)
+
+Delete from [Lkp].[CrsBildirimSSourceType]
+INSERT INTO [Lkp].[CrsBildirimSSourceType] (Id, SourceType)
+ VALUES 
+  ( 0,        N''),
+  ( 21101,    N'Kursiyer belgeleri'),
+  ( 21110,    N'------------------'),
+  ( 21111,    N'Teorik dersler'),
+  ( 21112,    N'e-Sınav bildirimi'),
+  ( 21113,    N'Uygulamalı dersler'),
+  ( 21114,    N'+4 hak uyg. dersleri'),
+  ( 21115,    N'Telafi eğitim dersleri'),
+  ( 21116,    N'Başarısız aday eğitim dersleri'),
+  ( 21117,    N'Uygulamalı sınav bildirimi'),
+
+  ( 21120,    N'------------------'),
+  ( 21121,    N'Sertifika ücreti'),
+  ( 21122,    N'e-Sınav ücreti'),
+  ( 21123,    N'Uygulama sınav ücreti'),
+  ( 21125,    N'Telafi eğitim ücreti'),
+  ( 21126,    N'Başarısız eğitim ücreti'),
+  
+  ( 21130,    N'------------------'),
+  ( 21131,    N'e-Sınav sonucu'),
+  ( 21132,    N'Uygulamalı sınav sonucu'),
+
+  ( 21140,    N'------------------'),
+  ( 21141,    N'Doğum günü'),
+  ( 21142,    N'Özel gün kutlaması')
+
+
+
+commit transaction
+
+/*CreateLkpTableEnd*/
+
+
+/*
+
+  alter table CrsBildirimS add Dinamik1Value       nVarchar(100)     null
+  alter table CrsBildirimS add Dinamik2Value       nVarchar(100)     null
+  alter table CrsBildirimS add Dinamik3Value       nVarchar(100)     null
+
+*/

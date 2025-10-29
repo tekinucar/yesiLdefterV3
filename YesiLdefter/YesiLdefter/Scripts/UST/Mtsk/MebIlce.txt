@@ -1,0 +1,24 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table MebIlce
+ (
+   Id                              Int IDENTITY(1,1) not null, 
+   FirmId                          Int               not null,
+   KursunKurucuAdiSoyadi           nVarchar(50)      null,
+   MebMuduruUnvani                 nVarchar(30)      null, 
+   MebMuduruAdi                    nVarchar(100)     null, 
+   MebMuduruVekiliAdiSoyadi        nVarchar(100)     null,
+   MebMemurAdi                     nVarchar(100)     null,
+   UygulamaSinavGuzergahi1         nVarchar(150)     null,
+   UygulamaSinavGuzergahi2         nVarchar(150)     null,
+      
+   constraint		pk_MebIlce primary key (Id)
+ )
+  
+grant select, insert, update, delete on MebIlce to public
+
+commit transaction
+
+/*CreateTableEnd*/

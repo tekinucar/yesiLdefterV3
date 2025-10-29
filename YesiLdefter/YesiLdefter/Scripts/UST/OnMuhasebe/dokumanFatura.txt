@@ -1,0 +1,192 @@
+İşlem Amacına Bağlı Olarak:
+Satış Faturası
+Bir işletmenin sattığı ürün veya hizmeti belgelemek için müşterilerine kestiği faturalardır. Her satışın belgelenerek yasallaşması gerekir. Bir satış faturasında satılan malın cinsi, ismi, miktarı, birim satış fiyatı, ve toplam bedeli gibi bilgiler beyan edilir.
+
+Faturada mutlaka bulunması gereken bilgiler:
+
+Faturanın düzenlenme tarihi, seri ve sıra numarası
+Faturayı düzenleyenin adı, varsa ticaret unvanı, iş adresi, bağlı olduğu vergi dairesi ve hesap numarası
+Müşterinin adı, ticaret unvanı, adresi, varsa vergi dairesi ve hesap numarası
+Malın veya işin nevi, miktarı fiyatı ve tutarı
+Satılan malların teslim tarihi ve irsaliye numarası
+İrsaliyeli Fatura
+Hem sevk irsaliyesi hem de satış faturası değeri taşıyan belgeye İrsaliyeli Fatura denir.
+
+İrsaliyeli faturada bulunması gereken bilgiler:
+
+“İrsaliyeli Fatura” ibaresi
+Maliye Bakanlığı klişesi veya noter tasdiki
+İrsaliyeli fatura düzenleyenin adı, ticari unvanı, iş adresi, bağlı olduğu vergi dairesi ve hesap numarası
+Malın ve hizmetin cinsi, miktarı, fiyatı ve tutarı
+Malın nereye ve kime gönderildiği; müşterinin adı, ticari unvanı, adresi, vergi dairesi ve hesap numarası
+İrsaliyeli faturanın seri ve müteselsil sıra numarası
+İrsaliyeli faturanın düzenlenme tarihi ve saati
+İrsaliyeli faturayı düzenleyenin imzası
+Proforma Fatura
+Proforma fatura bir teklif faturasıdır ve hiç bir mali yükümlülüğe neden olmaz. Satıcı hizmet veya malı ne kadar ücret karşılığında satmak istediğini satış gerçekleştiriyormuş gibi alıcıya gönderir. Proforma fatura karşılığı ne mal sevkiyatı ne de ödeme yapılır.
+
+Ticaret ve Vergi Hukukunda "Proforma Fatura" ile ilgili herhangi bir düzenleme bulunmuyor. Her firma Proforma faturayı kendi ihtiyaçlarına uygun şekilde düzenleyebilir. Ancak Proforma göndermek amacıyla asla resmi fatura kullanılmamalıdır ve fatura üstüne kesinlikle “Proforma Fatura” ibaresi eklenmelidir.
+
+Proforma faturada bulunması gereken ve bulunabilecek bilgiler:
+
+“Proforma Fatura” ibaresi
+Faturanın tarihi
+Mal / hizmet cinsi
+-Satıcının ve alıcının isim/unvan, adresleri
+-Ödeme şekli
+-Malların menşei
+Teslim şekli
+Mal veya hizmetin birim fiyatı/miktarı/tutarı
+Malların ağırlığı, ebatları, miktarı
+Sevkiyatın şekli
+Mallara ilişkin ambalaj özellikleri, numara vb. detay açıklamalar
+Navlun ve sigorta prim tutarları
+Düzenleyenin imzası
+Proforma fatura hazırlamak için Proforma fatura nedir? Proforma fatura nasıl düzenlenir? yazımıza göz atabilirsiniz.
+
+İade Faturası
+İade faturası, müşteri tarafından alınan bir malın satıcıya geri verilmesi durumunda düzenlenen bir faturadır. İade faturası ile müşteri tarafından alınan bir malın tamamının satıcıya iadesi olabileceği gibi bir kısmının da iadesi olanaklıdır.
+
+İade faturası düzenlenirken dikkat etmeniz gerekenler:
+
+Faturanın görünür bir yerine 'iade faturasıdır' ibaresi yazılır
+Fatura kesmek için satış faturası koçanı kullanılır, iade faturası için ayrı bir fatura koçanı yoktur
+Satıcıdan gelen faturadaki seri no. ve tarihi bu faturada mutlaka bulunmalıdır
+İade faturası ile iade edilen malın birim bedeli, satıcı tarafından kesilen ilk faturadaki bedelden fazla olamaz. Müşteri iade faturası keserek kar edemez
+İade faturasının açık veya kapalı kesilebilir
+Vergilendirmeye Bağlı Olarak:
+Tevkifatlı Fatura
+Tevkifatlı fatura; KDV’nin belirli bir oranının, satışı yapana ödenmesi yerine, alım yapan tarafından devlete ödenmesidir.
+
+Tevkifat uygulayacak kuruluşlar:
+
+Genel bütçeye dahil daireler, katma bütçeli idareler, il özel idareleri, belediyeler ve bunların teşkil ettikleri birlikler
+Döner sermayeli kuruluşlar
+Kanunla kurulan kamu kurum ve kuruluşları
+Kamu kurumu niteliğindeki meslek kuruluşları
+Üniversiteler (vakıf üniversiteleri hariç)
+Kanunla kurulan veya tüzel kişiliği haiz emekli ve yardım sandıkları
+Bankalar ve özel finans kurumları
+Kamu iktisadi teşebbüsleri (Kamu İktisadi Kuruluşları, İktisadi Devlet Teşekkülleri)
+Özelleştirme kapsamındaki kuruluşlar
+Organize sanayi bölgeleri ile menkul kıymetler, vadeli işlemler borsaları dahil bütün borsalar
+Yarıdan fazla hissesi doğrudan yukarıda sayılan kurum ve kuruluşlara ait olan (tek başına ya da birlikte) kurum, kuruluş ve işletmeler
+
+Tevkifat Uygulanacak İşlemler
+
+Yapım işleri ile bu işlere ilişkin mühendislik-mimarlık ve etüt-proje hizmetleri
+Temizlik, bahçe ve çevre bakım hizmetleri
+Özel güvenlik hizmetleri
+Makine, teçhizat, demirbaş ve taşıtlara ait tadil, bakım ve onarım hizmetleri
+Her türlü yemek servisi
+Danışmanlık ve denetim hizmetleri
+ÖİV’li Fatura
+Özel İletişim Vergisi Türkiye’de tüm mobil iletişim hizmetlerine uygulanır. Bayındırlık hizmetlerine fon sağlamak amacıyla toplanmaktadır. Vergi GSM aboneleri tarafından ödenir ve GSM operatörleri tarafından toplanır. GSM operatörlerinin kestikleri faturalara ÖİV olarak yansır.
+
+ÖTV’li Fatura
+Özel tüketim vergisi, belirli mal ve ürünler üzerinden alınan bir tüketim vergisidir. Malın ithal edilmesi veya üretilen malın ilk alıcısına teslimi nedeniyle ÖTV doğar. Vergi ithalatçılar ve ilk satıcılar tarafından ödenir.
+
+Hangi ürünlerde ÖTV var?
+İthalatta Özel Tüketim Vergisi (ÖTV), tütün mamulleri, alkollü ve kolalı içkiler, akaryakıtlar, doğal gaz, LPG, madeni yağlar ve solventler, motorlu araçlar, havyar, kozmetik ürünleri, beyaz eşyalar (buzdolabı, çamaşır makinesi, bulaşık makinesi, termosifon v.b su ısıtıcıları,) kurşun kristalden el imali sofra ve mutfak eşyaları, postlar, kürkler, kıymetli taşlar, traş makinesı, elektrikli ev aletleri, tv, video kamera, cep telefonu v.b. elektronik aletler…
+
+Stopajlı Fatura
+Kaynakta kesilen gelir vergisine stopaj vergisi adı verilir. Serbest Meslek kazancı ve kira getirisi gibi gelirler stopaja tabidir. Serbest Meslek Makbuzu ve Gider Pusulası gibi faturaya yerine geçen evraklarda stopaj bulunur.
+
+Ödeme Zamanına Bağlı Olarak:
+Açık Fatura
+Vadeli bir satış yapıldığında faturanın üst kısmına kaşe vurulup imzalanır. Bu tip faturalara “Açık Fatura” denir.
+
+Kapalı Fatura
+Peşin ödemeli satış yapıldığında ise fatura bedelinin peşin olarak alındığını göstermek için faturanın alt kısmı kaşelenip imzalanır. Bu da “Kapalı Fatura” olarak ifade edilir.
+
+Ancak ticari hayatta uygulaması olan açık ya da kapalı ayrımı vergi kanunlarında yoktur. Vergi kanunlarına göre kaşenin faturada nereye vurulduğunun bir önemi ya da hukuki olarak tahsilata ilişkin ispat gücü de yoktur.
+
+Gönderim Yöntemine Bağlı Olarak:
+Basılı Fatura
+Yetkili matbaalarda şekil şartlarına uygun olarak basılmış faturadır.
+
+Dijital Fatura
+Dijital ortamda oluşturulup, saklanan faturalardır. Basılı fatura ile aynı değere sahiptir.
+
+e-Fatura
+İki e-Fatura mükellefi arasında alınıp gönderilen faturalardır.
+
+e-Arşiv
+Taraflardan birinin e-Fatura mükellefi olmadığı durumlarda gönderilen dijital faturalardır.
+
+Fatura türleri hakkında bilgi aldınız, peki fatura takibinizi nasıl daha düzenli hale getireceksiniz? Tabii ki Paraşüt ile! Kolay ön muhasebe programı Paraşüt ile faturalarınızı istediğiniz yerden görüntüleyebilir, paylaşabilir ve hatta yazdırabilirsiniz.
+
+
+
+
+
+Bu yazımızı okuduğunuzda faturalama süreciyle ilgili aklınıza takılan soruların cevabını bulabileceksiniz. Üstelik yazımızın içerisinde size bir hediyemiz var!
+
+1. Fatura Nerede ve Nasıl Bastırılır?
+Faturalar kıymetli ve resmi evraklardır. Her yerde herkes basamaz. Fatura basma yetkisi Maliye Bakanlığı tarafından belirli koşulları sağlayan matbaalara verilir. Bu matbaalar şekil şartlarına uygun olarak basım yaparlar. Dolayısıyla, öncelikle faturalarınızı basmak için yetkisi olan bir matbaa ile iletişime geçmelisiniz.
+
+Matbaanızdan fiyat teklifi alırken, basılmasını istediğiniz faturanın özelliklerini vermeniz gerekir. Fatura formatınızın A4 boyutunda olması uygulama açısından size kolaylık sağlar. Bu sayede piyasadaki birçok standart yazıcıdan çıktı alabilirsiniz.
+
+En az 3 nüshalı fatura baskısı isteyin. İlk nüshayı müşteriye vereceksiniz. Genelde ikinci nüsha muhasebe fişinin altına takılır. Üçüncü nüsha da faturalarınızın bulunduğu dosyada arşivlenir. Bu dosyada sadece sizin kestiğiniz faturaların üçüncü nüshası olur ve istediğiniz faturayı bu dosyada kolayca bulabilirsiniz. Üç nüshanın renginin farklı olması, kopyaların karışmaması açısından iyi olur. Özel bir renk tercihiniz varsa, matbaanıza belirtmeyi unutmayın. Faturanızı kendiniz elle yazacaksınız otokopili fatura da kullanabilirsiniz.
+
+Genelde matbaa, faturada bulunması gereken asgari bilgileri sizden ister. Bunların yanında basılacak faturanın tasarımını pdf olarak pantone renkleri ile birlikte matbaaya iletmenizde fayda var. Müşterinin ödeme yapacağı banka hesap numaralarını da iletirseniz, tahsilatlarınızı hızlandırmanıza destek olacaktır. Adet yükseldikçe, elbette ki maliyet düşecektir. Ancak, herhangi bir logo, isim ya da adres değişikliğinde fatura iptal süreçleri ile uğraşmamak için bir yıl içinde kullanacağınız kadar basım yaptırmanız daha doğru olacaktır.
+
+Matbaa, faturanızı basabilmek için sizden vergi levhası, yoklama tutanağı ya da KDV beyannamesinin tahakkuk fişi, imza sirküleri ve ticaret sicil gazetesini isteyecektir.
+
+2. Faturanın Üzerinde Bulunması Gereken Bilgiler Neler?
+Faturalarınız resmi evraktır. Düzenlerken ve saklarken dikkat etmek gerekir. Üzerinde birçok bilgi yer alır: Firmanızın bilgisi- logo, ünvan, adres, vergi dairesi, vergi no, Mersis no, iletişim bilgileri, banka hesap bilgileri, sermaye vb- ; müşterinizin bilgileri -ünvan, adres, vergi dairesi, vergi no- ; Maliye Bakanlığı mührü, fatura tarihi, fatura seri no, satılan malın ya da hizmetin türü, tutarı, varsa KDV tutarı...
+
+Fatura Nasıl Saklanmalı?
+Fatura kesildikten sonra üzerine kaşe basılır ve şirket yetkilisi tarafından imzalanır. Faturalar sıra takip eder, sıra ile kesilir, sıra atlanmaz. Faturalarınız kaybolur ise vergi dairesine bildirimde bulunmanız gerekir. Kesim esnasında yanlışlık yapılırsa yanlışlık yapılan faturalar çöpe atılmaz, tüm nüshaların üzerine “iptal” yazılır ve fatura dosyasında saklanır. Faturanız herhangi bir sebepten dolayı yırtılır ya da parçalanırsa, parçalar bant ile birleştirilir ve tüm nüshaları ile beraber yine aynı dosyada saklanır. Faturalarınızı da diğer belgeler gibi vergi kanunları açısından 5 yıl saklamanız gerekir. Yurtiçinden şirketinize kesilen faturalarda yukarıda bahsedilen bilgilerin, mühür ve imzaların bulunması gerekir. Eksiklik var ise bu faturalar kabul edilmez, iade edilir. Yurtdışından gelen faturalar için şekil şartı yoktur, geldikleri şekilde muhasebeleştirilirler.
+
+
+3. Faturanın Kaç Gün İçinde Kesilmesi Gerekir?
+Malın teslimi yapıldıktan ya da hizmet verildikten sonra 7 gün içinde fatura kesilmelidir. Eğer bu 7 günlük süre ile bir sonraki aya geçiş var ise faturanın kesimi için 7 günlük süre beklenmeden o ay içinde düzenlenmelidir. Çünkü faturanın ilgili ayın KDV beyannamesinde yer alması gerekir. Size kesilen faturanın da aynı süreler içinde size ulaşması gerekir. Eğer size kesilen faturada yanlışlık varsa itirazınızı belirli süre içinde yapmalısınız. Size kesilen faturaları için, elinize ulaştıktan sonraki 7 gün içinde itirazınızı belirten bir mektubu iadeli taahhütlü ya da noter kanalı ile göndermeniz gerekir. Yıl içinde kesilen faturalar muhasebe kayıtlarına problemsiz alınır. Eğer yıl atlaması var ise yani bir önceki yılın faturası size yeni ulaştı ise, fatura muhasebeleştirilir fakat faturanın bedeli gider yazılamaz. Aynı şekilde KDV’si de KKEG (kanunen kabul edilmeyen gider) olur. Hak kaybına uğramamak adına bu konuları mali müşaviriniz ile görüşmenizde fayda var.
+
+4. e-Fatura Nedir, Normal Faturadan Farklı mıdır?
+Mali açıdan e-faturanın normal faturadan bir farkı yoktur. e-Faturada da normal faturada olduğu gibi şekil şartları vardır. Şu an için bazı sektörlerde e-Faturanın kullanımı mecburi diğerlerinde ise isteğe bağlıdır. Ancak, gelecekte tüm firmalara e-faturayı kullanma zorunluluğu gelecek.
+
+e-Faturayı kullanabilmek için;
+
+e-Faturayı kullanmak için GİB’e başvuru yapılmalıdır.
+Tübitak’a başvuru yapılarak Mali Mühür alınmalı.
+e-Fatura entegrasyonu ya da portal için başvuru yapılması gerekmektedir.
+e-Faturanın entegrasyonu 3 ayrı şekilde olabilir:
+
+Maliye ile direkt entegre olarak kendi sisteminiz üzerinden fatura kesilmesi
+Maliye’den izin almış bir entegratör firma arayüzünü ya da bu entegratörler ile entegre olmuş faturalama uygulamalarını kullanarak e-fatura kesilmesi
+Maliyenin portal altyapısını kullanarak e-fatura kesilmesi
+Girişimciler ve KOBİ’ler için en uygun yöntem ikinci yöntem olacaktır. Portali olan bir entegratör firma ya da Paraşüt gibi bu entegratörler ile entegre çalışacak faturalama uygulamalarını kullanmak hem en maliyetsiz hem de en kullanışlı yöntemdir. Bu yöntemde, yazılım geliştirme gibi teknik çalışmalara gerek yoktur. Web üzerinden kullanıcı adı ve şifresi ile hemen e-Faturalarını alıp, göndermeye başlanabilir.
+
+e-Fatura sistemine kayıtlı firmalar kendi aralarında basılı fatura kullanamazlar. e-Fatura sistemine kayıtlı firma, sisteme kayıtlı olmayan firmaya kağıt ortamında fatura keser. e-Faturalar kağıda basılıp arşivlenmez, elektronik ortamda saklanır. Şirketinin e-Fatura kullanma mecburiyetinde olup olmadığını ya da isteğe bağlı olarak kullanılıp kullanılmaması gerektiğini mali müşaviriniz ile değerlendirmenizde fayda var.
+
+5. Fatura Seri ve Sıra no’nun Nereden Başladığı önemli mi?
+Hayır. Fatura basmaya yetkili matbaalar, belirli seri sıra no aralığındaki faturaları basma yetkisini alırlar. Müşterilerinden talep geldikçe, bu aralıkta yer alan belirli bir bloğu müşterilerine atarlar.
+
+6. Faturaları Türkçe ve TL Düzenlemem mi Gerekir?
+Vergi kanunlarına göre mahsup, mizan, resmi defterler vb tüm muhasebe işlemleri Türkçe tutulur. Bu sebeple faturalar da Türkçe düzenlenir. Ancak, yurtdışına kesilecek bir faturanız var ise bu faturada açıklama kısmına ilgili dilde açıklamalar yazılabilir. Muhasebe işlemlerinde Türk Lirasının kullanılması gerekir. Herhangi bir sebeple dövizli tutarda fatura kesilecek ise de fatura açıklamasına kullanılan kur bilgisi, faturada hesaplanan KDV’nin TL karşılığı yazılır. Fatura bilgilerini yasal faturaya yazdırmadan önce mali müşaviriniz, fatura yer alacak bilgileri kontrol etmeli ve onay verdikten sonra siz yazıcıdan yazdırmalısınız.
+
+
+7. Faturanın Fotokopisi Geçerli midir?
+Faturanın orjinal olması önemlidir. Faturaların fotokopileri ve proforma faturalar mali açıdan geçersizdir. Faturanın aslı yani ilk nüshası kaybolmuş ise ikinci ya da üçüncü nüshadan fotokopi alınır ve aslı gibidir kaşesi basılarak yetkili kişiler tarafından imzalanır. Yurtdışında gelen faturalarda orjinallik aranmaz.
+
+8. Fatura Yerine Başka Belgeler Kullanılır mı?
+Vergi kanunlarında sadece fatura tarif edilmemiştir. İşin niteliğine göre serbest meslek makbuzu, gider pusulası gibi başka belgeler de kullanılabilir. Bu belgeleri detaylandıracak olursak:
+
+Perakende satış fişi: Taksi fişi vb. 800 TL’den daha yüksek bedeller için fatura düzenlemek zorunludur. PSF kesilemez.
+Yazarkasa fişi: 800 TL’den daha yüksek bedeller için yine aynı zorunluluk geçerlidir. Yazarkasa fişi düzenlenemez.
+Yolcu taşıma biletleri: Uçak bileti vb. fatura yerine geçer.
+Gider pusulası: Vergi mükellefiyeti olmayan şahıslardan alınan hizmet için gider pusulası kesilir.
+Serbest meslek makbuzu: Avukat, doktor ya da mali müşavirler gibi bilgiye dayalı hizmet veren meslek sahipleri serbest meslek makbuzu keserler.
+
+Paraşüt ile serbest meslek makbuzu kesme adımlarını okumak isterseniz ilgili yazımıza göz atabilirsiniz.
+
+9. Açık Fatura ya da Kapalı Fatura Nedir?
+Vadeli bir satış yapıldığında faturanın üst kısmına kaşe vurulup imzalanır. Bu tip faturalara “Açık Fatura” denir. Peşin ödemeli satış yapıldığında ise fatura bedelinin peşin olarak alındığını göstermek için faturanın alt kısmı kaşelenip imzalanır. Bu da “Kapalı Fatura” olarak ifade edilir. Ticari hayatta uygulaması olan açık ya da kapalı ayrımı vergi kanunlarında yoktur. Vergi kanunlarına göre kaşenin faturada nereye vurulduğunun bir önemi ya da hukuki olarak tahsilata ilişkin ispat gücü de yoktur.
+
+10. Naylon Fatura Nedir, Normal Faturadan Farklı mıdır?
+Sahte veya muhteviyatı itibariyle yanıltıcı belge de denir. Faturaya konu mal ya da hizmet satışı yoktur. Şeklen normal bir faturadan farkı bulunmamaktadır. Bu türde faturayı kesen firmalar, var olmayan stoklarını eritmek ister ya da çok düşük görünen hasılatlarını arttırırlar. Ayrıca faturayı kestiği firmadan faturada hesaplanan KDV’yi ya da gelir sebebi ile oluşacak Kurumlar Vergisini talep eder. Faturayı alan firma da giderleri daha yüksek göstererek az vergi ödemeyi amaçlar. Bu fatura karşılığında da faturayı kesen firmaya bir miktar ödeme yapar. Naylon faturayı kesmenin ya da alıp kullanmanın cezası büyüktür. Bu tip belgeleri kullananlar için 3 yıldan 5 yıla kadar hapis cezası vardır. Zarara uğratılan verginin 3 katı kadar da vergi ziyaı cezası vardır. Eğer bir belgenin naylon fatura olduğunu düşünürseniz hemen mali müşaviriniz ile irtibata geçmenizi, kayıtlarınıza almamanızı, eğer kayıtlara geçmiş bir belge ise de pişmanlık hükümlerinden yararlanarak kayıtlarınızdan çıkarmanızı ve hatanın düzeltilmesini sağlamanızı öneririz.
+
+Faturalarınızı istediğiniz yerden verimli şekilde göndermek ve takip etmek isterseniz,
+
+

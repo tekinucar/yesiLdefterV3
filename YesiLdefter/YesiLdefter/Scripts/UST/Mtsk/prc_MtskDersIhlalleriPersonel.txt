@@ -1,0 +1,390 @@
+﻿
+/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_MtskDersIhlalleriPersonel] (@curId bigint, @FirmId int, @DonemTipiId int, @PersonelId varchar(30))  
+AS BEGIN
+
+--declare @curId int = 576--test 710
+--declare @FirmId int
+--declare @DonemTipiId int = 0
+--declare @PersonelId varchar(30)
+  declare @DersTarihi date
+  declare @DersTarihiBasla date
+  declare @DersTarihiBitis date
+
+  Select @DersTarihi  = td.DersTarihi
+  --   , @FirmId = td.FirmId
+  --   , @DonemTipiId = td.DonemTipiId
+  --   , @PersonelId = td.PersonelId
+  From dbo.MtskTeorikDers as td
+  Where td.Id = @curId
+
+  -- select @FirmId, @DonemTipiId, @PersonelId, @DersTarihi, @DersTarihiBasla, @DersTarihiBitis
+
+  -- Kontrole 1 hafta öncesinden başla
+  -- 15 gün sonrasına kadar kontrol et
+  Set @DersTarihiBasla = DATEADD(dd, -7, @DersTarihi)
+  Set @DersTarihiBitis = DATEADD(dd, 15, @DersTarihi)
+
+  Delete dbo.MtskKIhlalTeorikD
+  Where  FirmId = @FirmId
+  and    DonemTipiId = @DonemTipiId
+  and    PersonelId = @PersonelId
+  and    IhlalTipiId > 30
+  and    IhlalTipiId < 40   
+  
+  --Select @DersTarihi, @DersTarihiBasla, @DersTarihiBitis
+
+  -- ---------------------------------------------------------------------
+  -- Personelin haftalık ders sayılarının tespiti : 31 idli ihlaller
+  -- 31 :  Personelin haftalık ders saati aştı
+  -- ---------------------------------------------------------------------
+
+     -- Tespit et ve yaz  
+     INSERT INTO [dbo].[MtskKIhlalTeorikD]
+       ( FirmId
+       , DonemTipiId
+       , IhlalTipiId
+       , DersSaatSayisi
+       , PersonelId
+       , DersHaftasiId
+       , DersHaftasi
+       , Tarih )
+     Select   
+         toplam.FirmId
+       , @DonemTipiId 
+       , 31 as IhlalTipiId
+       , sum(toplam.DersSaatSayisi) as DersSaatSayisi
+       , toplam.PersonelId
+	   , toplam.DersHaftasiId
+       , [dbo].[fnc_getHaftaBasiSonu](toplam.DersYili, toplam.DersHaftasiId) 
+       , GETDATE()
+     from (
+         -- Teorik dersler
+         Select 
+             td.FirmId
+           , td.PersonelId
+           , DatePart(ww, td.DersTarihi) as DersHaftasiId
+		   , Year(td.DersTarihi) as DersYili
+           , count(td.Id) as DersSaatSayisi
+         From dbo.MtskTeorikDers as td 
+         Where 0 = 0
+         and   td.DersTarihi >= @DersTarihiBasla
+         and   td.DersTarihi <= @DersTarihiBitis
+         and   td.PersonelId = @PersonelId 
+         group by
+             td.FirmId
+           , td.PersonelId
+           , DatePart(ww, td.DersTarihi)
+		   , Year(td.DersTarihi)
+
+         union all
+
+		 -- Uygulamalı dersler
+         Select 
+             ud.FirmId
+           , ud.PersonelId
+           , DatePart(ww, ud.DersTarihi) as DersHaftasiId
+		   , Year(ud.DersTarihi) as DersYili
+           , count(ud.Id) as DersSaatSayisi
+         From dbo.MtskUygulamaliDers as ud 
+         Where 0 = 0
+         and   ud.DersTarihi >= @DersTarihiBasla
+         and   ud.DersTarihi <= @DersTarihiBitis
+         and   ud.PersonelId = @PersonelId
+         group by
+             ud.FirmId
+           , ud.PersonelId
+           , DatePart(ww, ud.DersTarihi)
+           , Year(ud.DersTarihi)
+      ) as toplam
+	       left outer join dbo.MtskPersoneli as personel on (
+              toplam.PersonelId = personel.TcNoCalismaIzniNo or 
+              toplam.PersonelId = personel.TcNo_CalismaIzniNo )
+
+	  Group by 
+         toplam.FirmId
+       , toplam.PersonelId
+       , toplam.DersHaftasiId
+       , toplam.DersYili
+	   , personel.HaftalikDersSayisi
+      Having sum(toplam.DersSaatSayisi) > personel.HaftalikDersSayisi 
+
+
+  -- ---------------------------------------------------------------------
+  -- Personel izin gününe uygun değil    : 32 idli ihlali
+  -- Personel çalışma saatlerine uymuyor : 33 idli ihlali
+  -- ---------------------------------------------------------------------
+
+     -- Tespit et ve yaz  
+      INSERT INTO dbo.MtskKIhlalTeorikD
+       ( FirmId
+       , DonemTipiId
+       --, GrupTipiId
+       --, SubeTipiId
+       , IhlalTipiId
+       , DerslikTipiId
+       , DersTarihi
+       , DersSaatiTipiId 
+       , PersonelId
+	   , InsertedId
+       , Tarih )
+
+      Select 
+	       dersler.FirmId
+         , @DonemTipiId
+         --, dersler.DonemTipiId
+         --, dersler.GrupTipiId
+         --, dersler.SubeTipiId
+	     , ( case when (dersler.DersSaatiTipiId = 100 and gun.IsActive = 0) then 32
+	              when (dersler.DersSaatiTipiId < 100 and gun.IsActive = 0) then 33 
+				  end ) as IhlalTipiId
+         , dersler.DerslikTipiId
+	     , dersler.DersTarihi
+		 , dersler.DersSaatiTipiId 
+         , dersler.PersonelId
+         , dersler.InsertedId
+         , GETDATE()
+      From (
+         -- Teorik dersler
+         Select 
+             distinct td.DersTarihi 
+           , td.FirmId
+           , 0 as DonemTipiId
+           , 0 as GrupTipiId
+           , 0 as SubeTipiId
+           , td.PersonelId
+           , 0   as DerslikTipiId -- Teorik dersler işareti
+           , 100 as DersSaatiTipiId 
+           , 0   as InsertedId
+           , DatePart(WEEKDAY, td.DersTarihi) as GunNo
+         From dbo.MtskTeorikDers as td
+         Where 0 = 0
+         and   td.DersTarihi >= @DersTarihiBasla
+         and   td.DersTarihi <= @DersTarihiBitis
+         and   td.PersonelId = @PersonelId	 
+
+         union all  
+
+         -- Teorik dersler
+         Select 
+             td.DersTarihi 
+           , td.FirmId
+           , td.DonemTipiId
+           , td.GrupTipiId
+           , td.SubeTipiId
+           , td.PersonelId
+           , td.DerslikTipiId
+           , td.DersSaatiTipiId 
+           , td.Id as InsertedId
+           , DatePart(WEEKDAY, td.DersTarihi) as GunNo
+
+		 From dbo.MtskTeorikDers as td
+         Where 0 = 0
+         and   td.DersTarihi >= @DersTarihiBasla
+         and   td.DersTarihi <= @DersTarihiBitis
+         and   td.PersonelId = @PersonelId
+
+         union all  
+
+         -- Uygulamali dersler
+         Select 
+             distinct ud.DersTarihi 
+           , ud.FirmId
+           , 0 as DonemTipiId
+           , 0 as GrupTipiId
+           , 0 as SubeTipiId
+           , ud.PersonelId
+           , 10  as DerslikTipiId -- Uygulamalı dersler işareti
+           , 100 as DersSaatiTipiId 
+           , 0   as InsertedId
+           , DatePart(WEEKDAY, ud.DersTarihi) as GunNo
+         From dbo.MtskUygulamaliDers as ud
+         Where 0 = 0
+         and   ud.DersTarihi >= @DersTarihiBasla
+         and   ud.DersTarihi <= @DersTarihiBitis
+         and   ud.PersonelId = @PersonelId	 
+
+         union all  
+
+         -- Uygulamalı dersler
+         Select 
+             ud.DersTarihi 
+           , ud.FirmId
+           , ud.DonemTipiId
+           , ud.GrupTipiId
+           , ud.SubeTipiId
+           , ud.PersonelId
+           , ud.EgitimYeriTipiId + 10 as DerslikTipiId 
+           , ud.DersSaatiTipiId 
+           , ud.Id as InsertedId
+           , DatePart(WEEKDAY, ud.DersTarihi) as GunNo
+         From dbo.MtskUygulamaliDers as ud
+         Where 0 = 0
+         and   ud.DersTarihi >= @DersTarihiBasla
+         and   ud.DersTarihi <= @DersTarihiBitis
+         and   ud.PersonelId = @PersonelId
+      ) as dersler
+	       left outer join dbo.OnmCalismaSaatleri as gun on (
+                      substring(dersler.PersonelId,1,11) = gun.TcVkNo 
+		          and dersler.GunNo = gun.GunTipiId 
+				  and dersler.DersSaatiTipiId = gun.SaatTipiId 
+		   ) 
+      Where 0 = 0       
+      Group by 
+	       dersler.FirmId
+         , dersler.DonemTipiId
+         , dersler.GrupTipiId
+         , dersler.SubeTipiId
+		 , dersler.DersSaatiTipiId 
+	     , dersler.DersTarihi
+         , dersler.PersonelId
+         , dersler.DerslikTipiId
+         , dersler.InsertedId
+		 , dersler.GunNo
+		 , gun.IsActive
+
+	  Having (dersler.DersSaatiTipiId = 100 and gun.IsActive = 0)
+	      or (dersler.DersSaatiTipiId < 100 and gun.IsActive = 0) 
+	  order by dersler.PersonelId, dersler.DersTarihi, dersler.DersSaatiTipiId
+	  
+  -- ---------------------------------------------------------------------
+  -- Personelin çalışma izin tarihi henüz başlamadı : 34 idli ihlali
+  -- Personelin çalışma izin tarihi bitmiş          : 35 idli ihlali
+  -- ---------------------------------------------------------------------
+
+     -- Tespit et ve yaz  
+      INSERT INTO dbo.MtskKIhlalTeorikD
+       ( FirmId
+       , DonemTipiId
+       , GrupTipiId
+       , SubeTipiId
+       , IhlalTipiId
+       , DerslikTipiId
+       , DersTarihi
+       , DersSaatiTipiId 
+       , PersonelId
+	   , InsertedId
+       , Tarih )
+
+      Select 
+	       dersler.FirmId
+         , dersler.DonemTipiId
+         , dersler.GrupTipiId
+         , dersler.SubeTipiId
+	     , ( case when (dersler.DersTarihi < personel.CalismaIzniBaslamaTarihi ) then 34
+	              when (dersler.DersTarihi >  DATEADD(DAY,-1,personel.CalismaIzniBitisTarihi) ) then 35 
+				  end ) as IhlalTipiId
+         , dersler.DerslikTipiId
+	     , dersler.DersTarihi
+		 , dersler.DersSaatiTipiId 
+         , dersler.PersonelId
+         , dersler.InsertedId
+         , GETDATE()
+      From (
+         -- Teorik dersler
+         Select 
+             td.FirmId
+           , td.DonemTipiId
+           , td.GrupTipiId
+           , td.SubeTipiId
+           , td.PersonelId
+           , td.DerslikTipiId
+           , td.DersTarihi 
+           , td.DersSaatiTipiId 
+           , td.Id as InsertedId
+
+		 From dbo.MtskTeorikDers as td
+         Where 0 = 0
+         and   td.DersTarihi >= @DersTarihiBasla
+         and   td.DersTarihi <= @DersTarihiBitis
+         and   td.PersonelId = @PersonelId
+
+         union all  
+
+         -- Uygulamalı dersler
+         Select 
+             ud.FirmId
+           , ud.DonemTipiId
+           , ud.GrupTipiId
+           , ud.SubeTipiId
+           , ud.PersonelId
+           , ud.EgitimYeriTipiId + 10 as DerslikTipiId 
+           , ud.DersTarihi 
+           , ud.DersSaatiTipiId 
+           , ud.Id as InsertedId
+
+         From dbo.MtskUygulamaliDers as ud
+         Where 0 = 0
+         and   ud.DersTarihi >= @DersTarihiBasla
+         and   ud.DersTarihi <= @DersTarihiBitis
+         and   ud.PersonelId = @PersonelId
+      ) as dersler
+	       left outer join dbo.MtskPersoneli as personel on (
+              dersler.PersonelId = personel.TcNoCalismaIzniNo or 
+              dersler.PersonelId = personel.TcNo_CalismaIzniNo )
+      Where 0 = 0
+	  and dersler.DersTarihi < personel.CalismaIzniBaslamaTarihi 
+	  or  dersler.DersTarihi > DATEADD(DAY,-1,personel.CalismaIzniBitisTarihi) 
+
+
+  -- ---------------------------------------------------------------------
+  -- Personelin uygulama dersi mevcut : 36 idli ihlal
+  -- ---------------------------------------------------------------------
+
+  Delete dbo.MtskKIhlalTeorikD
+  Where  FirmId = @FirmId
+  and    IhlalTipiId = 36
+  and    DonemTipiId = @DonemTipiId
+  and    PersonelId = @PersonelId
+
+      -- Tespit et ve yaz  
+      INSERT INTO dbo.MtskKIhlalTeorikD
+       ( FirmId
+       , DonemTipiId
+       --, GrupTipiId
+       --, SubeTipiId
+       , IhlalTipiId
+       , DerslikTipiId
+       , DersTarihi
+       , DersSaatiTipiId 
+       , PersonelId
+	   , InsertedId
+       , MevcutId
+       , Tarih )
+         -- Teorik dersler
+         Select 
+             td.FirmId
+           , @DonemTipiId
+           --, td.DonemTipiId
+           --, td.GrupTipiId
+           --, td.SubeTipiId
+		   , 36 as IhlalTipiId
+           , td.DerslikTipiId
+           , td.DersTarihi 
+           , td.DersSaatiTipiId 
+           , td.PersonelId
+           , td.Id as InsertedId
+		   , ud.Id as MevcutId
+		   , GETDATE()
+		 From dbo.MtskTeorikDers as td 
+		     left outer join dbo.MtskUygulamaliDers as ud on ( 
+                    ud.FirmId = @FirmId
+                and td.DersTarihi = ud.DersTarihi 
+                and td.DersSaatiTipiId = ud.DersSaatiTipiId
+                and td.PersonelId = ud.PersonelId
+                and td.PersonelId = @PersonelId
+             )
+         Where 0 = 0
+         and   td.FirmId = @FirmId 
+         and   td.DersTarihi >= @DersTarihiBasla
+         and   td.DersTarihi <= @DersTarihiBitis
+         and   td.PersonelId = @PersonelId
+         and   ud.Id is not null
+
+END -- procedure
+/*CreateProcedureEnd*/
+
+
+
+

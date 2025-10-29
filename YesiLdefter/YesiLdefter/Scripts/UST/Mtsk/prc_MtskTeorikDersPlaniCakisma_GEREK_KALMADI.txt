@@ -1,0 +1,33 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_MtskTeorikDersPlaniCakisma] (@SablonTeorikFId int)  
+AS BEGIN
+
+  /* Yeni planla çakışan varsa getirecek */ 
+  --declare @SablonTeorikFId int = 3
+      
+  Select td.* From 
+    [dbo].[MtskTeorikDers] as pl -- planlanan
+  , [dbo].[MtskTeorikDers] as td -- mevcut dersler 
+  Where 0 = 0  
+  and pl.SablonTeorikFId = @SablonTeorikFId
+  and td.DersSaatiTipiId = pl.DersSaatiTipiId
+  and td.DersTarihi = pl.DersTarihi
+  
+  and ( td.DerslikAdiTipiId = pl.DerslikAdiTipiId 
+  or  td.PersonelId = pl.PersonelId )
+  
+  and (td.DonemTipiId <> pl.DonemTipiId
+  or   td.GrupTipiId <> pl.GrupTipiId
+  or   td.SubeTipiId <> pl.SubeTipiId
+  or   td.DerslikTipiId <> pl.DerslikTipiId
+  or   td.DerslikAdiTipiId <> pl.DerslikAdiTipiId -- personelin başka sınıfta dersi varsa
+  or   td.PersonelId <> pl.PersonelId -- derslikte başka hoca varsa
+  )
+  
+  order by td.DersTarihi, td.DersSaatiTipiId
+  
+END -- procedure
+
+/*CreateProcedureEnd*/
+

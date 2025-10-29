@@ -1,0 +1,50 @@
+
+
+begin transaction
+
+ create table MS_DC_LINE
+ (
+    REF_ID               Int IDENTITY(1,1) NOT NULL,
+    DC_CODE              VarChar(30)       NOT NULL,        
+    LINE_NO              SmallInt          NULL,
+    DC_SOURCE_TYPE       SmallInt          NULL, 
+    TARGET_TABLEIPCODE   VarChar(50)       NULL,
+    TARGET_FIELDNAME     VarChar(30)       NULL,
+    SOURCE_TABLEIPCODE   VarChar(50)       NULL,
+    SOURCE_FIELDNAME     VarChar(30)       NULL,
+    INPUTBOX_MESSAGE     VarChar(100)      NULL,
+    INPUTBOX_TYPE        SmallInt          NULL,
+    INPUTBOX_DEFAULT1    VarChar(50)       NULL,
+    INPUTBOX_DEFAULT2    VarChar(50)       NULL,
+    CHECK_FIELD          Bit               NULL,
+
+	Constraint PK_MS_DC_LINE primary key (REF_ID)
+   , foreign key ( DC_CODE ) references MS_DC ( DC_CODE )
+
+ )
+
+ create index X_MS_DC_LINE_1 on MS_DC_LINE (DC_CODE, LINE_NO)
+
+ grant select, insert, update, delete on MS_DC_LINE to public
+
+commit transaction
+
+
+
+
+
+
+
+/*
+
+DC_SOURCE_TYPE = 1.SOURCE_TABLEIPCODE Read, 2. DEFAULT_VALUE SET, 3. INPUT_BOX 
+
+
+Target TableIPCode ( Hedef, insert edilecek IP )
+Source TableIPCode ( Kaynak okunacak IP )
+Target TableIPCode ( Default value set ) 
+Target TableIPCode ( Gerektiðinde InputBox çaðýr )
+
+
+*/
+

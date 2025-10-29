@@ -1,0 +1,54 @@
+﻿  
+  /*CreateTable*/ 
+  
+  begin transaction 
+  
+  create table dbo.OnmMaasEkGelirler 
+  ( 
+    Id                 Int IDENTITY(1,1) not null, 
+    FirmId             Int               not null, 
+    IsActive           Bit               null, 
+
+    SiraNo             SmallInt          null, /* Sıra No */
+    EkGelirTipiAdi     nVarChar(50)      null, /* Ek Gelir Tipi Adı */
+    GelirTipiId        SmallInt          null, /* Ek Gelir Tipi Id si : 0. Kullanıcı verecek, 1. Her ay verilecek, 2. Çalışma günü kadar verilecek */
+    GelirTutari        Numeric(22,5)     null, /* Ek Gelir Tutarı : 1. de GelirTutarin tamamı, 2. Çalışma Günü x GelirTutari */
+    IsLock             Bit               null, /* Bu Gelir hesabı OnmMaasHesaplari satırlarında kullanıldıysa kilitle */
+    
+    Constraint pk_OnmMaasEkGelirler primary key (Id) 
+  ) 
+  
+  create index X_OnmMaasEkGelirler_01 on dbo.OnmMaasEkGelirler (FirmId, SiraNo) 
+  
+  grant select, insert, update, delete on dbo.OnmMaasEkGelirler to public 
+  
+  commit transaction 
+  
+  /*CreateTableEnd*/ 
+  
+
+  /*CreateLkpTable*/ 
+
+  -- ------------------------------------------------------- 
+  -- GelirTipiId
+  -- ------------------------------------------------------- 
+  IF EXISTS (SELECT * FROM sys.objects WHERE name = 'OnmMaasEkGelirlerGelirTipi') 
+  DROP TABLE [Lkp].[OnmMaasEkGelirlerGelirTipi] 
+  
+  CREATE TABLE [Lkp].[OnmMaasEkGelirlerGelirTipi] 
+  ( 
+   Id               INT UNIQUE NOT NULL, 
+   GelirTipi   NVARCHAR(50)   NULL, 
+   
+   CONSTRAINT pk_OnmMaasEkGelirlerGelirTipi PRIMARY KEY (Id) 
+  ) 
+  
+  DELETE FROM [Lkp].[OnmMaasEkGelirlerGelirTipi] 
+  INSERT INTO [Lkp].[OnmMaasEkGelirlerGelirTipi] (Id, GelirTipi) 
+  VALUES 
+    (0, N'Tanımsız'), 
+    (1, N'Kullanıcı verecek'), 
+    (2, N'Her ay verilecek')--, 
+    --(3, N'Çalışma günü kadar verilecek')
+
+  /*CreateLkpTableEnd*/ 

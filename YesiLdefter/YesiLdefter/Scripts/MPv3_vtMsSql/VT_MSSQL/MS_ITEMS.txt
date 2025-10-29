@@ -1,0 +1,64 @@
+
+/* for MENU */
+
+begin transaction
+
+ create table MS_ITEMS
+ (
+    REF_ID                  Int IDENTITY(1,1)  NOT NULL,
+    MODUL_CODE              VarChar(100)    NULL,
+    MASTER_ITEM_TYPE        SmallInt        NULL,
+    MASTER_CODE             VarChar(50)     NULL,
+    ITEM_TYPE               SmallInt        NULL,
+    ITEM_CODE               VarChar(50)     NULL,
+    PARENT_ITEM_CODE        VarChar(50)     NULL, /* TREE VÝEW ÝÇÝN GEREKÝYOR */
+    CAPTION                 VarChar(100)    NULL,
+    ABOUT                   VarChar(100)    NULL,
+    ITEM_NAME               VarChar(100)    NULL,
+ /* ITEM_NAME VARSA MEVCUT MENU CONTROL ÜZERÝNDE OLAN BÝR NESNEYÝ ÝÞARET EDÝYOR, ONUN ÜZERÝNDE ÝÞLEM YAPILACAK */ 
+    SHORTCUT_KEYS           VarChar(20)     NULL,
+ 
+    PROP_VIEWS              VarChar(8000)   NULL,   
+    PROP_NAVIGATOR          VarChar(8000)   NULL,   
+    CLICK_EVENTS            SmallInt        NULL,
+
+    LINE_NO                 SmallInt        NULL,
+    DOCK_TYPE	            SmallInt        NULL,
+    CMP_WIDTH               SmallInt        NULL,
+    CMP_HEIGHT              SmallInt        NULL,
+    CMP_TOP                 SmallInt        NULL,
+    CMP_LEFT                SmallInt        NULL,
+    CMP_READONLY            Bit             NULL,
+    CMP_ENABLED             Bit             NULL,
+    CMP_VISIBLE             Bit             NULL,
+    CMP_FONT_NAME           VarChar(30)     NULL,
+    CMP_FONT_SIZE           Numeric(6,3)    NULL,
+    CMP_FONT_STYLE          SmallInt        NULL,
+    CMP_FONT_COLOR          varchar(6)      NULL,
+    CMP_BACK_COLOR          varchar(6)      NULL, 
+	CMP_NAME                varchar(50)     NULL,
+
+    GYLPH_16                VarChar(100)    NULL,
+    GYLPH_32                VarChar(100)    NULL,         
+
+	SOFTWARE_CODE           nvarchar(20)    NULL,
+	PROJECT_CODE            nvarchar(20)    NULL,
+	MENU_CODE               nvarchar(20)    NULL,
+
+	Constraint PK_MS_ITEMS primary key (REF_ID)
+ )
+
+ create index X_MS_ITEMS1 on MS_ITEMS (MODUL_CODE, LINE_NO)
+
+ grant select, insert, update, delete on MS_ITEMS to public
+
+commit transaction
+
+
+/*
+MASTER ITEM TYPES
+-----------------------
+1. FORM
+2. USER_CONTROL
+3. MENU
+*/

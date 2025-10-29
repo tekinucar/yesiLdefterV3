@@ -1,0 +1,37 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_MtskSertifikaUcreti] (@FirmId int, @Yil int, 
+    @MevcutSertifikaTipiId smallint, @IstenenSertifikaTipiId smallint)  
+AS BEGIN
+   
+   declare @MevcutSertifikaliUcret numeric(22,8)
+   declare @IstenenSertifikaUcreti numeric(22,8)
+   
+   set @MevcutSertifikaliUcret = 0
+   
+   Select @MevcutSertifikaliUcret = isnull(SertifikaUcreti,0)
+   From [dbo].[MtskSertifikaUcreti] 
+   Where FirmId = @FirmId
+   and Yil = @Yil
+   and MevcutSertifikaTipiId = @MevcutSertifikaTipiId
+   and IstenenSertifikaTipiId = @IstenenSertifikaTipiId
+
+   Select @IstenenSertifikaUcreti = isnull(SertifikaUcreti,0)
+   From [dbo].[MtskSertifikaUcreti] 
+   Where FirmId = @FirmId
+   and Yil = @Yil
+   and MevcutSertifikaTipiId = 0
+   and IstenenSertifikaTipiId = @IstenenSertifikaTipiId
+
+   --print @MevcutSertifikaliUcret
+   --print @IstenenSertifikaUcreti
+
+   if (@MevcutSertifikaliUcret = 0) 
+       set @MevcutSertifikaliUcret = @IstenenSertifikaUcreti
+
+   Select isnull(@MevcutSertifikaliUcret,0) as SertifikaUcreti
+   	 
+
+END -- procedure
+
+/*CreateProcedureEnd*/

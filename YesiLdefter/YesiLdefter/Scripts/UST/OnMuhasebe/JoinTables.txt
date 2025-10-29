@@ -1,0 +1,40 @@
+﻿-- ------------------------------------------------------- 
+-- JoinTableId
+-- ------------------------------------------------------- 
+create table [Lkp].[JoinTables]
+(
+   Id               Int IDENTITY(1,1) NOT NULL,
+   TableAbout       nVarchar(50)   null,
+   TableName        nVarchar(50)   null,
+   IdField          nVarchar(50)   null,
+   CaptionField     nVarchar(50)   null,
+   JoinWhere        nVarchar(50)   null, 
+   JoinOrderBy      nVarchar(50)   null, 
+   JoinIntValue     Int            null,
+   JoinStrValue     nVarchar(50)   null,
+   
+   constraint  pk_JoinTables primary key (Id)
+)
+
+delete from [Lkp].[JoinTables]
+
+INSERT INTO [Lkp].[JoinTables] (TableAbout, TableName)
+ VALUES 
+  (N'Tanımsız', ''),
+  (N'Cari Hesabı',    'HesapCari'),
+  (N'Finans Hesabı',  'HesapFinans'),
+  (N'Maliyet Hesabı', 'HesapFinans'),
+  (N'Varlık Hesabı',  'HesapFinans'),
+  (N'Stok Hesabı',    'HesapStok'),
+  (N'Hizmet Hesabı',  'HesapHizmet'),
+  (N'Vezne Hesabı',   'HesapVezne'),
+  (N'Makbuz Belgesi', 'BelgeMakbuz'),
+  (N'Maliyet Belgesi','BelgeMaliyet'),
+  (N'Çek-Senet',      'BelgeCekSenet')/*,
+  
+  (0,    N'', ''),
+  (0,    N'', ''),
+  (0,    N'', ''),
+  (0,    N'', ''),
+  (0,    N'', ''),*/
+

@@ -1,0 +1,335 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table MtskTeorikDers
+ (
+   Id                   Int IDENTITY(1,1) not null, 
+   FirmId               Int       not null,
+   IsActive             Bit       not null, /* default : 1 = active, 0 = not active */  
+
+   DonemTipiId          Int           null,
+   GrupTipiId           SmallInt      null,
+   SubeTipiId           SmallInt      null,
+   
+   DerslikTipiId        SmallInt      null, /* 1. Trafik ve Çevre Bilgisi, İlk Yardım, Araç Tekniği */
+   DerslikAdiTipiId     SmallInt      null, /* Derslik-1, -2 ... -10 */
+   DersTarihi           Date          null,
+   DersSaatiTipiId      SmallInt      null,
+   PersonelId           Varchar(20)   null,
+   EgitimTipiId         SmallInt      null, /* 1. Normal, 2. Telafi */
+
+   BaslamaSaati         Datetime      null, /* Calender and Scheduling için gerekli */
+   BitisSaati           Datetime      null, /* Calender and Scheduling için gerekli */
+   TDersIsUploaded      Bit           null,
+   SablonTeorikBId      Int           null, /* SablonTeorikBId ve DonemTipiId ile beraber bakıldığında hangi taslak formundan (MtskTaslakTeorikF) bilgi alındığı bulunur  */
+   SablonTeorikFId      Int           null,
+   OzelGunlerId         Int           null, /* OnmOzelGunler.Id */
+   DersHaftasiId        SmallInt      null, /* yılın hangi haftasına denk geldi, bu sayede o haftadaki tüm dersler listeleniyor */  
+
+   constraint		pk_MtskTeorikDers primary key (Id)
+ )
+  
+ grant select, insert, update, delete on MtskTeorikDers to public
+
+commit transaction
+
+/*CreateTableEnd*/
+
+/*CreateTrigger*/
+
+CREATE TRIGGER [dbo].[trg_MtskTeorikDers] on [dbo].[MtskTeorikDers] 
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    DECLARE myCursor cursor local for select Id from Inserted
+    DECLARE @curId bigint
+
+    OPEN myCursor
+    FETCH NEXT FROM myCursor INTO @curId
+
+    declare @eFirmId int = 0
+    declare @eDonemTipiId int = 0
+    declare @eGrupTipiId smallInt = 0
+    declare @eSubeTipiId smallInt = 0
+    declare @eDersTarihi date = null
+    declare @eDersSaatiTipiId smallInt = -1
+    declare @ePersonelId varchar(20) = ''
+    declare @eSaat varchar(20) = null
+    declare @TcNoCalismaIzniNo varchar(20) = null
+    declare @TDersIsUploaded bit = 0
+    declare @SablonTeorikFId int = 0
+
+	declare @insId int = 0
+    declare @mvcId int = 0
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+    	
+      Select
+	   @eFirmId = ins.FirmId
+      ,@eDonemTipiId = ins.DonemTipiId
+      ,@eGrupTipiId = ins.GrupTipiId
+      ,@eSubeTipiId = ins.SubeTipiId
+      ,@eDersTarihi = ins.DersTarihi
+      ,@eDersSaatiTipiId = ins.DersSaatiTipiId
+      ,@ePersonelId = isnull(ins.PersonelId,'')
+      ,@TDersIsUploaded = isnull(ins.TDersIsUploaded,0)
+      ,@SablonTeorikFId = isnull(ins.SablonTeorikFId,0)
+      ,@eSaat = isnull(saat.DersSaatiTipi,'00:00 - 00:00')
+      From inserted ins
+	    left outer join Lkp.MtskTeorikDersDersSaatiTipi saat on (ins.DersSaatiTipiId = saat.Id)
+      Where ins.Id = @curId
+      
+      -- personelId kontrolu
+      Select @TcNoCalismaIzniNo = isnull(TcNoCalismaIzniNo,'')
+      From dbo.MtskPersoneli
+      Where TamAdiSoyadi like @ePersonelId+'%'
+      
+      -- Mebbisten okuma yapınca alınan ismi alınıyor
+      -- alınan bu ismi TcNoIzinNo ya çeviriyor
+      if (@TcNoCalismaIzniNo <> '')
+      begin
+        update dbo.MtskTeorikDers set 
+        PersonelId = @TcNoCalismaIzniNo
+        Where Id = @curId
+      end
+	  
+	  if (@eDersSaatiTipiId > -1 and @eDersSaatiTipiId < 20)
+	  begin
+	      -- BaslangicSaat ve BitisSaat 
+	      update dbo.MtskTeorikDers set 
+              BaslamaSaati = CONVERT(smalldatetime, CONVERT(varchar(10), @eDersTarihi) + ' ' + SUBSTRING(@eSaat,1,5))
+            , BitisSaati   = CONVERT(smalldatetime, CONVERT(varchar(10), @eDersTarihi) + ' ' + SUBSTRING(@eSaat,9,5))
+            , DersHaftasiId = DatePart(ww, @eDersTarihi)
+          Where Id = @curId
+	  end --
+
+      if (@TDersIsUploaded = 1 and @SablonTeorikFId > 0)
+      begin 
+          Update dbo.MtskSablonTeorikF set IsLock = 1
+          Where Id = @SablonTeorikFId
+          and   isnull(IsLock,0) = 0
+      end
+
+	  Execute [dbo].[prc_MtskTeorikDersIhlalleriSaatler] @eFirmId, @eDonemTipiId
+      Execute [dbo].[prc_MtskTeorikDersIhlalleriCakismalar] @eFirmId, @eDonemTipiId
+	  Execute [dbo].[prc_MtskDersIhlalleriPersonel] @curId, @eFirmId, @eDonemTipiId, @ePersonelId
+
+      FETCH NEXT FROM myCursor INTO @curId
+    END
+
+    Execute [dbo].[prc_MtskGrupSubesiTeorikDersToplami] @eFirmId, @eDonemTipiId, @eGrupTipiId, @eSubeTipiId
+    Execute [dbo].[prc_MtskGrupSubesiTakipSet] @eFirmId, @eDonemTipiId, @eGrupTipiId, @eSubeTipiId
+
+    CLOSE myCursor
+    DEALLOCATE myCursor   
+
+END -- create trigger
+
+/*CreateTriggerEnd*/
+
+
+/*CreateTrigger*/
+
+CREATE TRIGGER [dbo].[trg_MtskTeorikDersDelete] on [dbo].[MtskTeorikDers]
+AFTER DELETE
+AS BEGIN
+
+    declare teoCursorDlt cursor local for select Id from deleted
+	declare @curId bigint
+
+	OPEN teoCursorDlt
+    FETCH NEXT FROM teoCursorDlt INTO @curId
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+
+	    Delete From dbo.MtskKIhlalTeorikD 
+		Where InsertedId = @curId 
+		or    MevcutId   = @curId
+
+      FETCH NEXT FROM teoCursorDlt INTO @curId
+    END
+
+    CLOSE teoCursorDlt
+    DEALLOCATE teoCursorDlt
+
+END
+
+ /*CreateTriggerEnd*/
+
+
+/*CreateTrigger*/
+
+CREATE TRIGGER [dbo].[trg_MtskTeorikDersDeleteIsLock] on [dbo].[MtskTeorikDers]
+INSTEAD of DELETE
+AS BEGIN
+
+    declare isLockCursorDlt cursor local for select Id from deleted
+    declare @curId bigint
+
+	declare @FirmId int
+	declare @DonemTipiId int
+	declare @GrupTipiId int
+	declare @SubeTipiId int
+	declare @PersonelId varchar(30)
+
+    OPEN isLockCursorDlt
+
+    FETCH NEXT FROM isLockCursorDlt INTO @curId
+	   
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+	    IF EXISTS (SELECT 1 FROM deleted WHERE isnull(TDersIsUploaded,0) = 1 and Id = @curId)
+        BEGIN
+            PRINT 'Bu kayıt silinemez!'
+            RETURN
+        END
+
+        Select @FirmId = FirmId
+		, @DonemTipiId = DonemTipiId 
+		, @GrupTipiId = GrupTipiId 
+		, @SubeTipiId = SubeTipiId 
+        , @PersonelId = PersonelId
+		from dbo.MtskTeorikDers Where Id = @curId
+
+        Delete from dbo.MtskTeorikDers  Where Id = @curId and isnull(TDersIsUploaded,0) = 0
+
+	    Execute [dbo].[prc_MtskTeorikDersIhlalleriSaatler] @FirmId, @DonemTipiId
+        Execute [dbo].[prc_MtskTeorikDersIhlalleriCakismalar] @FirmId, @DonemTipiId
+		Execute [dbo].[prc_MtskDersIhlalleriPersonel] @curId, @FirmId, @DonemTipiId, @PersonelId
+
+      FETCH NEXT FROM isLockCursorDlt INTO @curId
+    END
+
+    Execute [dbo].[prc_MtskGrupSubesiTeorikDersToplami] @FirmId, @DonemTipiId, @GrupTipiId, @SubeTipiId
+    Execute [dbo].[prc_MtskGrupSubesiTakipSet] @FirmId, @DonemTipiId, @GrupTipiId, @SubeTipiId
+
+    CLOSE isLockCursorDlt
+    DEALLOCATE isLockCursorDlt
+
+END
+
+ /*CreateTriggerEnd*/
+
+
+/*CreateLkpTable*/
+
+begin transaction
+
+-- ------------------------------------------------------- 
+-- DerslikTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskTeorikDersDerslikTipi')
+drop table [Lkp].[MtskTeorikDersDerslikTipi]
+
+create table Lkp.MtskTeorikDersDerslikTipi
+(
+   Id          Int Unique Not Null,
+   DerslikTipi nVarchar(50)   null
+   
+   constraint  pk_MtskTeorikDersDerslikTipi primary key (Id)
+)
+
+INSERT INTO Lkp.MtskTeorikDersDerslikTipi (Id, DerslikTipi)
+ VALUES 
+  (-1, N'--Seçiniz--'),
+  ( 0, N'Tanımsız'),
+  ( 1, N'Trafik ve Çevre Dersi'),
+  ( 2, N'İlkyardım Dersi'),
+  ( 3, N'Araç Tekniği Dersi'),
+  ( 5, N'Trafik Adabı Dersi')
+
+-- ------------------------------------------------------- 
+-- DerslikAdiTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskTeorikDersDerslikAdiTipi')
+drop table [Lkp].[MtskTeorikDersDerslikAdiTipi]
+
+create table Lkp.MtskTeorikDersDerslikAdiTipi
+(
+   Id             Int Unique Not Null,
+   DerslikAdiTipi nVarchar(50)   null
+   
+   constraint  pk_MtskTeorikDersDerslikAdiTipi primary key (Id)
+)
+
+INSERT INTO Lkp.MtskTeorikDersDerslikAdiTipi (Id, DerslikAdiTipi)
+ VALUES 
+  ( 0, N'Tanımsız'),
+  ( 1, N'DERSLİK-1'),
+  ( 2, N'DERSLİK-2'),
+  ( 3, N'DERSLİK-3'),
+  ( 4, N'DERSLİK-4'),
+  ( 5, N'DERSLİK-5'),
+  ( 6, N'DERSLİK-6'),
+  ( 7, N'DERSLİK-7'),
+  ( 8, N'DERSLİK-8'),
+  ( 9, N'DERSLİK-9'),
+  (10, N'DERSLİK-10')
+ 
+
+-- ------------------------------------------------------- 
+-- DersSaatiTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskTeorikDersDersSaatiTipi')
+drop table [Lkp].[MtskTeorikDersDersSaatiTipi]
+
+create table Lkp.MtskTeorikDersDersSaatiTipi
+(
+   Id              Int Unique Not Null,
+   DersSaatiTipi   nVarchar(50)   null
+
+   constraint  pk_MtskTeorikDersDersSaatiTipi primary key (Id)
+)
+
+Delete From Lkp.MtskTeorikDersDersSaatiTipi
+INSERT INTO Lkp.MtskTeorikDersDersSaatiTipi (Id, DersSaatiTipi)
+ VALUES 
+  (-1, N' Seçiniz'),
+  ( 0, N'07:00 - 07:50'),
+  ( 1, N'08:00 - 08:50'),
+  ( 2, N'09:00 - 09:50'),
+  ( 3, N'10:00 - 10:50'),
+  ( 4, N'11:00 - 11:50'),
+  ( 5, N'12:00 - 12:50'),
+  ( 6, N'13:00 - 13:50'),
+  ( 7, N'14:00 - 14:50'),
+  ( 8, N'15:00 - 15:50'),
+  ( 9, N'16:00 - 16:50'),
+  (10, N'17:00 - 17:50'),
+  (11, N'18:00 - 18:50'),
+  (12, N'19:00 - 19:50'),
+  (13, N'20:00 - 20:50'),
+  (14, N'21:00 - 21:50'),
+  (15, N'22:00 - 22:50'),
+  (100,N'00:00 - 23:59'),
+  (113,N'13:00 - 23:59')
+
+
+-- ------------------------------------------------------- 
+-- EgitimTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskTeorikDersEgitimTipi')
+drop table [Lkp].[MtskTeorikDersEgitimTipi]
+
+create table Lkp.MtskTeorikDersEgitimTipi
+(
+   Id           Int Unique Not Null,
+   EgitimTipi   nVarchar(20)   null
+
+   constraint  pk_MtskTeorikDersEgitimTipi primary key (Id)
+)
+
+INSERT INTO Lkp.MtskTeorikDersEgitimTipi (Id, EgitimTipi)
+ VALUES 
+  ( 0, N'Tanımsız'),
+  ( 1, N'Normal Eğitim'),
+  ( 2, N'Telafi Eğitim')
+
+commit transaction
+ 
+/*CreateLkpTableEnd*/
+
+

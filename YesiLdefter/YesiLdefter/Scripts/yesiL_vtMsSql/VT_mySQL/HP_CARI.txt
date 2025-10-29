@@ -1,0 +1,171 @@
+﻿
+begin transaction
+
+ create table HP_CARI
+ (
+
+   ID                Int IDENTITY(1,1) NOT NULL, /* ID  DİĞER TABLOLARDA CARI_ID OLUYOR  */
+   PARENT_ID  	     Int               NULL,
+   FIRM_ID           Int               NULL,
+   SHOP_ID           Int               NULL,
+   REC_DATE          SmallDatetime     NULL,
+   REC_USER          Int               NULL,
+   ARSIV_TD          SmallInt          NULL,    /* 0. AKTİF, 1. ARŞİV, 2. ÇIKIŞ, 3. ADAY, 4.DEMO,   9. SİL VB.... */ 
+   CARI_TIPI         SmallInt          NULL,    /* 511.Bireysel, 521.Özel Kurum, 531.Devlet Kurumu, 541.Bayi, 551.Tedarikci, 561.571.Hizmet Aldığımız Özel-Resmi, 591.Personel  */
+   ISLETME_TIPI      Int               NULL,    /* İşletme Tipleri */
+   RESIM             VarBinary(MAX)    NULL,
+
+   HESAP_KODU        VarChar(50)       NULL,
+   TAMADI            VarChar(200)      NULL,    /* KURUM ADI */
+   ADI               VarChar(100)      NULL,
+   SOYADI            VarChar(100)      NULL,
+   ISYERI_UNVANI1    VarChar(100)      NULL,
+   ISYERI_UNVANI2    VarChar(100)      NULL,
+   ILCE_KODU         VarChar(10)       NULL,
+   IL_KODU           VarChar(10)       NULL,
+   ILCE              VarChar(50)       NULL,
+   IL                VarChar(50)       NULL,
+   REFERANS          VarChar(100)      NULL,  
+   HAKKINDA          VarChar(MAX)      NULL,
+
+   /* ÖZEL KURUM NUMARALARI */  
+   TC_NO               VarChar(20)       NULL,
+   BABA_ADI            VarChar(50)       NULL,	 
+   ANA_ADI             VarChar(50)       NULL,	 
+   ONCEKI_SOYADI       VarChar(50)       NULL,	 
+   DOGUM_TRH           Datetime          NULL,
+   DOGUM_YERI          VarChar(50)       NULL,	 
+   CINSIYET_TD         SmallInt          NULL, 
+   MEDENIYET_TD        SmallInt          NULL, 
+
+   VERGI_NO            VarChar(30)       NULL,
+   VERGI_DAIRESI       VarChar(50)       NULL,	
+   TICARET_SICIL_NO    VarChar(30)       NULL,
+   TICARET_SICIL_YER   VarChar(50)       NULL,	
+   SGK_SICIL_NO        VarChar(30)       NULL,  
+   HARCTAN_MUAF        VarChar(1)        NULL, 
+   KURULUS_TRH         Datetime          NULL,
+   KURUM_KODU          VarChar(30)       NULL,
+
+   /* PARA */
+   PARA_ID           SmallInt          NULL,    /* 1. TL, 2. ENG ... */ 
+   B_DOVIZ_YERI_ID   Int               NULL,    /* B_DOVIZ_YERI_ID ,   DEBT_EXCHANGE_PLACE_ID     */
+   A_DOVIZ_YERI_ID   Int               NULL,    /* A_DOVIZ_YERI_ID ,   CLAIMS_EXCHANGE_PLACE_ID   */
+
+   /* meslek */
+   OGRENIM_ID        SmallInt          NULL,
+   UNVAN_ID          SmallInt          NULL,
+   MESLEK_ID         SmallInt          NULL,
+   
+   /* KİŞİLERİN CİHAZLAR ÜZERİNDEKİ IDLERİ */
+   FACE_ID           Int               NULL,
+   FINGER_ID         Int               NULL,
+   KIMLIK_KART_NO    VarChar(30)       NULL,
+   SEND_SMS          SmallInt          NULL,
+   SEND_EMAIL        SmallInt          NULL,
+   OLD_CARI_ID       Int               NULL,
+   
+   constraint		PK_HP_CARI primary key (ID)
+ )
+
+ create index X_HP_CARI1 on HP_CARI (FIRM_ID, SHOP_ID, ID)
+ create index X_HP_CARI2 on HP_CARI (CARI_TIPI)
+ create index X_HP_CARI3 on HP_CARI (TAMADI)
+ create index X_HP_CARI4 on HP_CARI (TC_NO)
+
+ grant select, insert, update, delete on HP_CARI to public
+
+commit transaction
+
+
+   /* CARININ BANKA BİLGİLERİ */
+   BANKA_ADI         VarChar(30)       NULL,
+   SUBE_ADI          VarChar(30)       NULL, 
+   BANKA_HESAP_NO    VarChar(50)       NULL,    
+   BANKA_IBAN        VarChar(50)       NULL,
+   KREDI_KARTI_NO    VarChar(20)       NULL,
+   BANKA_EKBILGI     VarChar(50)       NULL,
+
+
+DİĞER EKLENECEK BİLGİLER
+   MUSTERI_TEMSILCISI  Int               NULL,
+
+
+
+begin transaction
+
+ create table HP_ILETISIM
+ (
+
+   /* İLETİŞİM BİLGİLERİ */
+   ID                         Int IDENTITY(1,1) NOT NULL, 
+   CARI_ID  	              Int               NULL, /* 1. HP_CARI   */      
+   FINANS_ID                  Int               NULL, /* 2. HP_FINANS */
+   AKTIF                      Bit               NULL, /* Triger Veya Kullanıcı Aktifleştirsin Böylece Sorguları Kolay olsun */      
+   KAYIT_TARIHI               SmallDateTime     NULL,
+   BILGININ_ALINDIGI_KAYNAK   VarChar(20)       NULL,
+   GSM_TELEFON1_KISI          VarChar(30)       NULL,
+   GSM_TELEFON1               VarChar(20)       NULL,
+   GSM_TELEFON2_KISI          VarChar(30)       NULL,
+   GSM_TELEFON2               VarChar(20)       NULL,
+   GSM_TELEFON3_KISI          VarChar(30)       NULL,
+   GSM_TELEFON3               VarChar(20)       NULL,
+   TELEFON1_KISI              VarChar(30)       NULL,
+   TELEFON1                   VarChar(20)       NULL,
+   TELEFON2_KISI              VarChar(30)       NULL,
+   TELEFON2                   VarChar(20)       NULL,
+   TELEFON3_KISI              VarChar(30)       NULL,
+   TELEFON3                   VarChar(20)       NULL,
+   EMAIL1_KISI                VarChar(30)       NULL,
+   EMAIL1                     VarChar(50)       NULL,
+   EMAIL2_KISI                VarChar(30)       NULL,
+   EMAIL2                     VarChar(50)       NULL,
+   FAX                        VarChar(20)       NULL,
+
+   --constraint		PK_HP_ILETISIM primary key (ID)
+ )
+
+ create index X_HP_ILETISIM1 on HP_ILETISIM (CARI_ID)
+
+ grant select, insert, update, delete on HP_ILETISIM to public
+
+commit transaction
+
+
+
+
+begin transaction
+
+ create table HP_ADRES
+ (
+   /* ADRES BİLGİLERİ */
+   ID                         Int IDENTITY(1,1) NOT NULL, 
+   CARI_ID  	              Int               NULL,       
+   AKTIF                      Bit               NULL, /* Triger Veya Kullanıcı Aktifleştirsin Böylece Sorguları Kolay olsun */      
+   KAYIT_TARIHI               SmallDateTime     NULL,
+   BILGININ_ALINDIGI_KAYNAK   VarChar(20)       NULL,
+   ADRES_HAKKINDA             VarChar(50)       NULL,
+   ADRES_TIPI                 SmallInt          NULL, 
+   IL                         VarChar(50)       NULL,
+   ILCE                       VarChar(50)       NULL,
+   MAHKOY                     VarChar(50)       NULL,
+   CADSOK                     VarChar(50)       NULL,
+   DISKAPINO                  VarChar(30)       NULL,
+   ICKAPINO                   VarChar(30)       NULL,
+   IL_KODU                    VarChar(10)       NULL,
+   ILCE_KODU                  VarChar(10)       NULL,
+   MAHKOY_KODU                VarChar(10)       NULL,
+   CADSOK_KODU                VarChar(10)       NULL,
+   DISKAPINO_KODU             VarChar(10)       NULL,
+   ICKAPINO_KODU              VarChar(10)       NULL,
+   TAM_ADRES                  VarChar(300)      NULL,
+
+   --constraint		PK_HP_ADRES primary key (ID)
+ )
+
+ create index X_HP_ADRES1 on HP_ADRES (CARI_ID)
+
+ grant select, insert, update, delete on HP_ADRES to public
+
+commit transaction
+

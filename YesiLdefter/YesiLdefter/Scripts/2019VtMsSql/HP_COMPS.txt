@@ -1,0 +1,25 @@
+
+begin transaction
+
+ create table HP_COMPS
+ (
+    ID                         Int IDENTITY(1,1) NOT NULL, 
+    SYS_ID                     Int               NULL,  
+	ISACTIVE                   SmallInt          NULL,  -- PASSIVE, ACTIVE, DONT_ACTIVE
+	COMP_FIRM_GUID             VarChar(50)       NULL,
+	SYSTEM_NAME                VarChar(50)       NULL,
+	NETWORK_MACADDRESS         VarChar(30)       NULL UNIQUE,  
+	PROCESSOR_ID               VarChar(50)       NULL,
+	REC_DATE                   Date              NULL,
+	
+   constraint		PK_HP_COMPS primary key (ID)
+ )
+ -- mysql_add
+ 
+ create index X_HP_COMPS01 on HP_COMPS (SYS_ID);
+ create index X_HP_COMPS02 on HP_COMPS (NETWORK_MACADDRESS);
+ create index X_HP_COMPS03 on HP_COMPS (COMP_FIRM_GUID);
+ 
+ grant select, insert, update, delete on HP_COMPS to public
+
+commit transaction

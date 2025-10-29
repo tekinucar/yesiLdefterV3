@@ -1,0 +1,54 @@
+declare @Kolonlar varchar(MAX) 
+select @Kolonlar =
+       COALESCE( @Kolonlar + ', '+ 
+            QUOTENAME(PLAKA_ULAS,'''') + ' [' + Plaka + ']', 
+            QUOTENAME(PLAKA_ULAS,'''') + ' [' + Plaka + ']' ) 
+
+
+--select @Kolonlar = coalesce ( @Kolonlar,  ' - ')  +  x.Plaka + ' .. '  
+--select @Kolonlar = coalesce ( @Kolonlar,  ' - ')  +  QUOTENAME( x.Plaka ) + '   ' 
+
+from (
+select DISTINCT prg.PLAKA_ULAS PLAKA_ULAS, plk.Plaka  
+from DERSPRG_PLAN prg
+   LEFT OUTER JOIN Plaka plk on (prg.PLAKA_ULAS = plk.plkorder )
+where prg.KURSIYER_ULAS > 6118
+and prg.TARIH >= '01.01.2014'
+and prg.TARIH <= '12.31.2015' 
+) x
+
+select @Kolonlar
+
+
+
+
+-----
+
+
+declare @Kolonlar varchar(MAX) 
+select @Kolonlar =
+       COALESCE( @Kolonlar + ', '+ 
+            QUOTENAME(Plaka,'''') + QUOTENAME(PLAKA_ULAS), 
+            QUOTENAME(Plaka,'''') + QUOTENAME(PLAKA_ULAS) ) 
+
+
+--select @Kolonlar = coalesce ( @Kolonlar,  ' - ')  +  x.Plaka + ' .. '  
+--select @Kolonlar = coalesce ( @Kolonlar,  ' - ')  +  QUOTENAME( x.Plaka ) + '   ' 
+
+from (
+  select DISTINCT prg.PLAKA_ULAS PLAKA_ULAS, plk.Plaka  
+  from DERSPRG_PLAN prg
+    LEFT OUTER JOIN Plaka plk on (prg.PLAKA_ULAS = plk.plkorder )
+  where prg.KURSIYER_ULAS > 6000
+  and prg.TARIH >= '01.01.2014'
+  and prg.TARIH <= '12.31.2015' 
+) x
+
+select @Kolonlar
+
+declare @SORGU VARCHAR(MAX) 
+     SET @SORGU = ' select '  + @Kolonlar  
+     select @SORGU
+
+select '58 DT 373'[6], '58 DP 393'[4], '58 FS 343'[2], '58 NE 945'[5], '58 DE 303'[1], '58 TC 453'[3]
+

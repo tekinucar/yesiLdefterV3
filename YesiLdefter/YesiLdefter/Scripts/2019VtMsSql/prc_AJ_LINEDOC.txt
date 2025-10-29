@@ -1,0 +1,177 @@
+
+--  Bu viewde AJ_LINEDOC un benzeri oluþturuluyor
+--  Select * FROM AJ_LINEDOC WHERE ID = 1
+--  
+
+
+-- MSSQL 
+
+CREATE PROCEDURE prc_AJ_LINEDOC(@firmId int, @listType smallint)  
+AS BEGIN 
+
+  --declare @listType smallint 
+  --set @listType = 101
+  
+  declare @cumle    varchar(MAX)
+  declare @whereAdd varchar(500)
+  
+  -- 101 Vadesi geçmiþ ödemeler
+  -- 102 Bugünki ödemeler
+  -- 103 Yarýnki ödemeler
+  -- 104 Bu haftaki ödemeler
+  -- 105 Gelecek haftaki ödemeler
+  -- 106 Ay sonuna kadar olan ödemeler
+  
+  if (@listType = 101)
+      set @whereAdd = 
+	  ' and AJLNDOC.SON_ODEME_TARIH < convert(date,GETDATE(),103)  '
+  
+  if (@listType = 102)
+      set @whereAdd = 
+	  ' and ( AJLNDOC.ODEME_BAS_TARIH = convert(date,GETDATE(),103) 
+	    or    AJLNDOC.SON_ODEME_TARIH = convert(date,GETDATE(),103) ) '
+  
+  if (@listType = 103)
+      set @whereAdd = 
+	  ' and ( AJLNDOC.ODEME_BAS_TARIH = convert(date,GETDATE()+1,103) 
+	    or    AJLNDOC.SON_ODEME_TARIH = convert(date,GETDATE()+1,103) ) '
+  
+  if (@listType = 104)
+     set @whereAdd = 
+	 ' and ( datepart(wk,AJLNDOC.ODEME_BAS_TARIH) = datepart(wk,GETDATE())
+       or    datepart(wk,AJLNDOC.SON_ODEME_TARIH) = datepart(wk,GETDATE()) ) 
+       and   AJLNDOC.SON_ODEME_TARIH >= convert(date,GETDATE(),103) '
+  
+  if (@listType = 105)
+     set @whereAdd = 
+	 ' and ( datepart(wk,AJLNDOC.ODEME_BAS_TARIH) = datepart(wk,GETDATE()) + 1
+       or    datepart(wk,AJLNDOC.SON_ODEME_TARIH) = datepart(wk,GETDATE()) + 1 ) 
+       and   AJLNDOC.SON_ODEME_TARIH >= convert(date,GETDATE(),103) '
+
+  if (@listType = 106)
+     set @whereAdd = 
+	 ' and ( datepart(mm,AJLNDOC.ODEME_BAS_TARIH) = datepart(mm,GETDATE())
+       or    datepart(mm,AJLNDOC.SON_ODEME_TARIH) = datepart(mm,GETDATE()) ) 
+       and   AJLNDOC.SON_ODEME_TARIH >= convert(date,GETDATE(),103) '
+  
+  
+  set @cumle = '
+   Select x.* from ( 
+   Select 
+        AJLNDOC.ID
+      , AJLNDOC.FIRM_ID
+      , AJLNDOC.REC_DATE
+      , AJLNDOC.REC_USER_ID
+      , AJLNDOC.ARSIV_TD
+      , AJLNDOC.GELGIT_TARIH
+      , AJLNDOC.GELGIT_SAAT
+      , AJLNDOC.LINE_TD
+      , AJLNDOC.EVRAK_TD
+      , AJLNDOC.HESAP_ID
+      , AJLNDOC.BELGE_TARIHI
+      , AJLNDOC.BELGE_NO
+      , AJLNDOC.MASRAF_YERI_TD
+      , AJLNDOC.EVRAK_ILETISIM_TD
+      , AJLNDOC.ACIKLAMA
+      , AJLNDOC.TARAF_FIRMA
+      , AJLNDOC.TARAF_KISI
+      , AJLNDOC.TARAF_ILETISIM
+      , AJLNDOC.TARAF_ADRES
+      , AJLNDOC.ODEME_BAS_TARIH
+      , AJLNDOC.SON_ODEME_TARIH
+      , AJLNDOC.MIN_ODEME_TUTARI
+      , AJLNDOC.MAX_ODEME_TUTARI
+      , AJLNDOC.SONUC_TD
+      , AJLNDOC.PARENT_TD
+      , AJLNDOC.PARENT_ID
+      , ( case AJLNDOC.EVRAK_TD 
+          when  72 then HPFNS_GDR.HP_TAMADI 
+	      when 601 then HCR_AF.TAMADI 
+	      when 602 then HCR_IR.TAMADI 
+	      when  23 then HPFNS_KK.HP_TAMADI 
+	      when  91 then HPFNS_MUH.HP_TAMADI  
+	      else  '''' end ) LKP_KAYNAK_ADI  
+      , ( case AJLNDOC.EVRAK_TD 
+          when  72 then HPFNS_GDR.KDV_ORANI 
+	      else  CONVERT(smallint, 0) end ) LKP_KDV_ORANI  
+
+	  
+   from AJ_LINEDOC AJLNDOC
+        left outer join HP_FINANS HPFNS_GDR on ( AJLNDOC.HESAP_ID = HPFNS_GDR.ID  ) 
+        left outer join HP_CARI HCR_AF on ( AJLNDOC.HESAP_ID = HCR_AF.ID  ) 
+        left outer join HP_CARI HCR_IR on ( AJLNDOC.HESAP_ID = HCR_IR.ID  ) 
+        left outer join HP_FINANS HPFNS_KK on ( AJLNDOC.HESAP_ID = HPFNS_KK.ID  ) 
+        left outer join HP_FINANS HPFNS_MUH on ( AJLNDOC.HESAP_ID = HPFNS_MUH.ID  ) 
+
+   where SONUC_TD = 0 ' + @whereAdd + '
+  
+   union all  
+  
+   -- periyodik belgesiz giderler
+   -- MASRAF_YERI_TD in ( 3 , 6 ) -- faliyet içi ve dýþý belgesiz
+   -- HPFNS.MASRAF_PERIYODU_TD = 3 -- aylýk
+
+   Select * from (
+     Select 
+       (HPFNS.ID * -1) ID 
+     , HPFNS.FIRM_ID
+     , CONVERT(smalldatetime, GETDATE(), 111) REC_DATE
+     , -1  REC_USER_ID
+     , CONVERT(smallInt, 0)  ARSIV_TD
+     , CONVERT(date, GETDATE(), 103) GELGIT_TARIH
+     , CONVERT(varchar(5),CONVERT(TIME, GETDATE(), 103)) GELGIT_SAAT
+     , CONVERT(smallInt, 1)  LINE_TD
+     , CONVERT(smallInt, 72) EVRAK_TD
+     , HPFNS.ID  HESAP_ID
+     , CONVERT(date, NULL)  BELGE_TARIHI
+     , CONVERT(varchar(20), '''')  BELGE_NO
+     , HPFNS.MASRAF_YERI_TD
+     , CONVERT(smallInt, 9) EVRAK_ILETISIM_TD
+     , HPFNS.HP_TAMADI  ACIKLAMA
+     , '''' TARAF_FIRMA
+     , '''' TARAF_KISI
+     , '''' TARAF_ILETISIM
+     , '''' TARAF_ADRES
+     , convert(date,
+         convert(varchar(2),ISNULL(HPFNS.ODEME_KAC_GUN_SONRA ,1)) + ''.'' + 
+         convert(varchar(2),datepart(MONTH, GETDATE())) + ''.'' + 
+         convert(varchar(4),datepart(YEAR, GETDATE()))
+     , 103) ODEME_BAS_TARIH
+     , convert(date,
+         convert(varchar(2),ISNULL(HPFNS.SON_ODEME_GUNU ,28)) + ''.'' + 
+         convert(varchar(2),datepart(MONTH, GETDATE())) + ''.'' + 
+         convert(varchar(4),datepart(YEAR, GETDATE()))
+     , 103) SON_ODEME_TARIH
+
+     -- extra tabloya baðlanana kadar
+     , CONVERT(numeric(22,5), HPFNS.B_DOVIZ_YERI_ID)  MIN_ODEME_TUTARI
+     , CONVERT(numeric(22,5), HPFNS.B_DOVIZ_YERI_ID)  MAX_ODEME_TUTARI
+  
+     , CONVERT(smallInt, 0) SONUC_TD
+     , CONVERT(smallInt, 0) PARENT_TD
+     , 0 PARENT_ID
+     , HPFNS.HP_TAMADI  LKP_KAYNAK_ADI
+     , HPFNS.KDV_ORANI  LKP_KDV_ORANI
+
+     from HP_FINANS HPFNS 
+     where HPFNS.FNS_TIPI = 72 
+     and   HPFNS.MASRAF_YERI_TD in ( 3 , 6 ) -- faliyet içi ve dýþý 
+     and   HPFNS.MASRAF_PERIYODU_TD = 3 -- aylýk
+   ) AJLNDOC 
+   where 0 = 0
+   ' + @whereAdd + '
+   ) x 
+   order by x.SON_ODEME_TARIH, x.ODEME_BAS_TARIH  
+   ' ; 
+
+  
+  execute ( @cumle )
+  
+  
+END;
+
+
+
+
+
+

@@ -1,0 +1,27 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table MsFileUpdates
+ (
+    Id           Int IDENTITY(1,1)  NOT NULL,
+    IsActive     bit           NULL,
+    RecordDate   Datetime      NULL,
+
+    FileName     varchar(50)   NULL,
+    Extension    varchar(20)   NULL,
+    VersionNo    varchar(20)   NULL,
+    PacketName   varchar(50)   NULL,
+    PathName     varchar(100)  NULL,
+    About        varchar(100)  NULL,
+
+	Constraint pk_MsFileUpdates primary key (Id)
+ )
+
+ grant select, insert, update, delete on MsFileUpdates to public
+
+commit transaction
+
+/*CreateTableEnd*/
+
+

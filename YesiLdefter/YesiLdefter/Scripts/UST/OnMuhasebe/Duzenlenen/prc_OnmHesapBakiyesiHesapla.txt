@@ -1,0 +1,200 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_OnmHesapBakiyesiHesapla]  (@FirmId int, @Yil int)  
+AS BEGIN
+
+  --declare @FirmdId int = 11
+  --declare @Yil int = 2025
+  INSERT INTO [dbo].[OnmHesapBakiyesi]
+           ([FirmId]
+           ,[Yil]
+           ,[HesapTipiId]
+           ,[HesapFinansId]
+           ,[HesapCariId]
+           ,[AcilisTutari]
+           ,[BorcIslemSayisi]
+           ,[BorcToplami]
+           ,[AlacakIslemSayisi]
+           ,[AlacakToplami]
+           ,[BorcBakiyesi]
+           ,[AlacakBakiyesi]
+           ,[BakiyeTipi]
+           ,[Bakiye]
+           ,[VGBorcBakiyesi]
+           ,[VGAlacakBakiyesi]
+           ,[BorcIptalSayisi]
+           ,[BorcIptalToplami]
+           ,[AlacakIptalSayisi]
+           ,[AlacakIptalToplami]
+           ,[KapanisTutari])
+  Select 
+    @FirmId
+  , @Yil
+  , 1
+  , hf.Id
+  , 0 -- CariId
+  , 0, 0, 0, 0, 0, 0, 0, ''
+  , 0, 0, 0, 0, 0, 0, 0, 0 
+  From dbo.OnmHesapFinans as hf
+      left outer join dbo.OnmHesapBakiyesi as hb on ( hb.HesapFinansId = hf.Id and hb.Yil = @Yil )
+  Where hf.IsActive = 1
+  and   hf.FirmId = @FirmId
+  and   hf.AltGrupTipiId in (100, 1022, 1023, 1024, 1025)
+  and   hb.Id is null		  
+
+
+  ;With FinansBakiyeleri as (
+  Select
+       @FirmId as FirmId
+	 , @Yil as Yil
+     , x2.HesapFinansId
+     , x2.BorcToplami
+     , x2.AlacakToplami
+     , (case when x2.BorcBakiyesi >= 0 then x2.BorcBakiyesi else 0 end) as BorcBakiyesi
+     , (case when x2.AlacakBakiyesi >= 0 then x2.AlacakBakiyesi else 0 end) as AlacakBakiyesi
+     , (case 
+        when x2.BorcBakiyesi > 0 then 'B'
+        when x2.AlacakBakiyesi > 0 then 'A'
+        else '=' end) as BakiyeTipi 
+     , (case 
+        when x2.BorcBakiyesi > 0 then x2.BorcBakiyesi 
+        when x2.AlacakBakiyesi > 0 then x2.AlacakBakiyesi * -1 /* Finans hesapları alacklı ise durum eksi bakiye demektir  */
+        else 0 end) as Bakiye 
+     , x2.BorcIslemSayisi
+	 , x2.AlacakIslemSayisi
+
+     , x2.BorcIptalSayisi
+     , x2.BorcIptalToplami
+     , x2.AlacakIptalSayisi
+     , x2.AlacakIptalToplami
+
+  From (
+      Select
+          x1.HesapFinansId
+        , SUM(x1.BorcToplami) as BorcToplami
+        , SUM(x1.AlacakToplami) as AlacakToplami
+        , SUM(x1.BorcToplami) - SUM(x1.AlacakToplami) as BorcBakiyesi
+        , SUM(x1.AlacakToplami) - SUM(x1.BorcToplami) as AlacakBakiyesi
+        , SUM(x1.BorcIslemSayisi) as BorcIslemSayisi
+        , SUM(x1.AlacakIslemSayisi) as AlacakIslemSayisi
+		-- iptaller
+        , SUM(x1.BorcIptalSayisi) as BorcIptalSayisi
+        , SUM(x1.BorcIptalToplami) as BorcIptalToplami
+        , SUM(x1.AlacakIptalSayisi) as AlacakIptalSayisi
+        , SUM(x1.AlacakIptalToplami) as AlacakIptalToplami
+      From (
+          Select 
+              BorcluId as HesapFinansId
+            , SUM(BelgeTutari) as BorcToplami
+            , 0 as AlacakToplami
+			, COUNT(Id) as BorcIslemSayisi
+			, 0 as AlacakIslemSayisi
+
+            , 0 as BorcIptalSayisi     
+            , 0 as BorcIptalToplami    
+            , 0 as AlacakIptalSayisi   
+            , 0 as AlacakIptalToplami  
+
+          From dbo.OnmBelgeDekont 
+          Where IsActive = 1
+          and   FirmId = @FirmId
+          and   YEAR(BelgeTarihi) = @Yil
+          and   BHesapTipiId in (100, 1022, 1023, 1024, 1025)
+          group by BorcluId
+
+          union all 
+
+          Select 
+              BorcluId as HesapFinansId
+            , 0 as BorcToplami
+            , 0 as AlacakToplami
+			, 0 as BorcIslemSayisi
+			, 0 as AlacakIslemSayisi
+
+            , count(Id) as BorcIptalSayisi     
+            , SUM(BelgeTutari) as BorcIptalToplami    
+    
+            , 0 as AlacakIptalSayisi   
+            , 0 as AlacakIptalToplami  
+
+          From dbo.OnmBelgeDekont 
+          Where IsActive = 0
+          and   FirmId = @FirmId
+          and   YEAR(BelgeTarihi) = @Yil
+          and   BHesapTipiId in (100, 1022, 1023, 1024, 1025)
+          group by BorcluId
+
+          union all 
+
+          Select 
+              AlacakliId as HesapFinansId
+            , 0 as BorcToplami
+            , SUM(BelgeTutari) as AlacakToplami
+			, 0 as BorcIslemSayisi
+			, COUNT(Id) as AlacakIslemSayisi
+
+            , 0 as BorcIptalSayisi     
+            , 0 as BorcIptalToplami    
+            , 0 as AlacakIptalSayisi   
+            , 0 as AlacakIptalToplami  
+
+          From dbo.OnmBelgeDekont 
+          Where IsActive = 1
+          and   FirmId = @FirmId
+          and   YEAR(BelgeTarihi) = @Yil
+          and   AHesapTipiId in (100, 1022, 1023, 1024, 1025)
+          group by AlacakliId
+
+          union all 
+
+          Select 
+              AlacakliId as HesapFinansId
+            , 0 as BorcToplami
+            , 0 as AlacakToplami
+			, 0 as BorcIslemSayisi
+			, 0 as AlacakIslemSayisi
+
+            , 0 as BorcIptalSayisi     
+            , 0 as BorcIptalToplami    
+            , COUNT(Id) as AlacakIptalSayisi   
+            , SUM(BelgeTutari) as AlacakIptalToplami  
+
+          From dbo.OnmBelgeDekont 
+          Where IsActive = 0
+          and   FirmId = @FirmId
+          and   YEAR(BelgeTarihi) = @Yil
+          and   AHesapTipiId in (100, 1022, 1023, 1024, 1025)
+          group by AlacakliId
+
+          ) as x1
+      Group by x1.HesapFinansId
+  ) as x2
+  ) -- with
+  --Select * From FinansBakiyeleri
+  Update a set 
+       --[AcilisTutari] = AcilisTutari
+       [BorcIslemSayisi] = x.BorcIslemSayisi
+      ,[BorcToplami] = x.BorcToplami
+      ,[AlacakIslemSayisi] = x.AlacakIslemSayisi
+      ,[AlacakToplami] = x.AlacakToplami
+      ,[BorcBakiyesi] = x.BorcBakiyesi
+      ,[AlacakBakiyesi] = x.AlacakBakiyesi
+      ,[BakiyeTipi] = x.BakiyeTipi
+      ,[Bakiye] = x.Bakiye
+      ,[VGBorcBakiyesi] = 0
+      ,[VGAlacakBakiyesi] = 0
+      ,[BorcIptalSayisi] = x.BorcIptalSayisi
+      ,[BorcIptalToplami] = x.BorcIptalToplami
+      ,[AlacakIptalSayisi] = x.AlacakIptalSayisi
+      ,[AlacakIptalToplami] = x.AlacakIptalToplami
+      --,[KapanisTutari] = <KapanisTutari
+  FROM dbo.OnmHesapBakiyesi as a
+  JOIN FinansBakiyeleri x ON ( a.FirmId = x.FirmId )
+  Where a.HesapTipiId = 1 -- Finans hesaplari
+  and   a.Yil = x.Yil
+  and   a.HesapFinansId = x.HesapFinansId
+
+END -- procedure
+
+/*CreateProcedureEnd*/  
+

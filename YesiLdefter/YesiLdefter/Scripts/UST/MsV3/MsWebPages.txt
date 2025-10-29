@@ -1,0 +1,31 @@
+﻿begin transaction
+ create table MsWebPages
+ (
+    Id              Int IDENTITY(1,1) not null,
+	ParentId        int               not null,
+	IsActive        Bit               not null,
+    LineNumber      int               not null,
+
+	About           nvarChar(100)     null,     
+	PageCode        varchar(50)       null,
+	PageUrl         nvarChar(200)     null,     
+	BeforePageUrl   nvarChar(200)     null,
+    LoginPage       bit               null,
+	PageLeft        SmallInt          null,
+	PageTop         SmallInt          null, 
+    ErrorPageUrl    nvarChar(200)     null,
+
+	ModulCode       varChar(100)      null,
+    SoftwareCode    varchar(20)       null,
+    ProjectCode     varchar(20)       null,
+    SchemasCode     varchar(5)        null,
+
+
+   Constraint pk_MsWebPages primary key (Id)
+ )
+
+ create index X_MsWebPages_01 on MsWebPages (ModulCode, PageCode)
+ 
+ grant select, insert, update, delete on MsWebPages to public
+
+commit transaction

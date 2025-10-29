@@ -1,0 +1,174 @@
+
+5. gelen evrak, 
+6. giden evrak, 
+7. gelen kargo, 
+8. giden kargo 
+
+
+
+
+
+SOSYAL MEDYA TAKÝBÝ
+
+/*
+
+
+
+
+----------------------------------------------
+ISLEM_TD
+        NEOLDU_TD                      ARSIV_TD
+----------------------------------------------
+11.ARIYOR		
+	111.AKTARILDI        	        1.BÝTTÝ / Kapalý
+	112.GERÝ DÖNÜÞ BEKLÝYOR	        0.Açýk
+	1131.KENDÝSÝ ARAYACAK	        0.Açýk
+
+12.ARADI, MESAJ BIRAKTI		
+	121.MESAJ VAR	                1.BÝTTÝ
+
+21.GELEN ZÝYARETCÝ		
+	211.GÖRÜÞME SAÐLANDI	        1.BÝTTÝ
+	212.GÖRÜÞME OLMADI	        1.BÝTTÝ
+		
+
+
+15.BÝZ ARADIK		
+	151.ARANDI                      1.BÝTTÝ
+	152.ULAÞILAMADI	                1.BÝTTÝ
+	153.MESAJ BIRAKILDI             1.BÝTTÝ
+	102.TEKRAR ARANACAK             0.Açýk 
+
+16.ARA-ÝLET		
+	101.YENÝ                        0.Açýk
+	161.ÝLETÝLDÝ	                1.BÝTTÝ
+	162.MESAJ ÝLETÝLEMEDÝ	        1.BÝTTÝ
+	163.BAÞKASINA MESAJ BIRAKILDI	1.BÝTTÝ
+	102.TEKRAR ARANACAK             0.Açýk
+
+17.TELEFON BAÐLA		
+	101.YENÝ                        0.Açýk	
+	171.BAÐLANDI	                1.BÝTTÝ
+	172.GÖRÜÞME SAÐLANAMADI	        1.BÝTTÝ
+	173.MESAJ BIRAKILDI             1.BÝTTÝ
+	102.TEKRAR ARANACAK             0.Açýk
+
+		
+22.ZÝYARETE GÝDÝLDÝ		
+	221.GERÇEKLEÞTÝ	                1.BÝTTÝ
+	222.GERÇEKLEÞMEDÝ               1.BÝTTÝ
+
+*/
+
+begin transaction
+ create table AJ_LINETALK
+ (
+        ID                  Int IDENTITY(1,1) NOT NULL,
+        FIRM_ID             Int               NULL,
+        SHOP_ID             Int               NULL,
+        REC_DATE            SmallDatetime     NULL, 
+        REC_USER_ID         Int               NULL,
+        ARSIV_TD            SmallInt          NULL, /* 0. Açýk, 1. Kapandý,  99. ÝPTAL */ 
+        MUDUR_TD            SmallInt          NULL, /* 0. Yeni, 1. Gördü, 2. Ýþi Yapýlmasýný Onayladý, 3. Ýþin Yapýlamsýna Onay YOK, 4. Sonuç Incelendi   */
+        AMIR_TD             SmallInt          NULL, /* 0. Yeni, 1. Gördü, 2. Ýþi Yapýlmasýný Onayladý, 3. Ýþin Yapýlamsýna Onay YOK, 4. Sonuç Incelendi   */
+        
+        /* gorüþme aný */
+        CARI_TD             SmallInt          NULL, /* GEREKSÝZ */ 
+        CARI_ID             Int               NULL,
+        ARAYAN_FIRMA        VarChar(100)      NULL,
+        ARAYAN_KISI         VarChar(100)      NULL,
+        ARAYAN_ILETISIM     VarChar(100)      NULL,
+        ARAYAN_ADRES        VarChar(200)      NULL,
+        
+        ISLEM_TD            SmallInt          NULL, /* 1. arayan, 2. aranan, 3. geldi, 4. gidildi, 5. gelen evrak, 6. gön. evrak, 7. gelen kargo, 8. giden kargo */
+        NEOLDU_TD           SmallInt          NULL, /* Islem_TD nin sonucunda ne oldu */
+        TALEP_TD            Int               NULL, /* Talepler aþaðýda  */
+        KONU_TD             Int               NULL, /* Görüþme Konusu Maddeler Halinde, Kullanýcý Firma Bazlý */ 
+        KONU_ACIKLAMA       VarChar(200)      NULL, /* ... */ 
+        BOLUM_ID            Int               NULL,
+        PERSONEL_ID         Int               NULL, 
+        IS_GOREN_TD         SmallInt          NULL, /* 0. Yeni, 1. Gördü, 2. Ýþ Baþladý, Devam Ediyor, 3. Tamamlandý, 4. Beklemeye alýndý, 5. Sonuç Sýkýntýlý, 6. Olumsuz Kapatýldý ..... */                
+        TALEP_HIZI_TD       SmallInt          NULL, /* 0. Normal, 1. Acil,   2. Çok Acil, 3. Kriz,   4. Gizli,  ... */  
+        ARAYAN_RUH_HALI_TD  SmallInt          NULL, /* 0. Normal, 1. Kýzgýn, 2. Telaþlý,  3. Üzgün,  4. Titiz .... */   
+        ARAYAN_DERKI        VarChar(1000)     NULL,
+        ARAYANA_SOYLENEN    VarChar(1000)     NULL,
+        AMIR_DERKI          VarChar(200)      NULL,
+        SONUC_TD            SmallInt          NULL, 
+        REMINDER_DATE       SmallDatetime     NULL,
+
+   Constraint PK_AJ_LINETALK primary key (ID)
+ )
+
+ create index X_AJ_LINETALK1 on AJ_LINETALK (FIRM_ID, SHOP_ID, REC_DATE)
+ 
+ grant select, insert, update, delete on AJ_LINETALK to public
+
+commit transaction
+
+
+
+
+ALTER TABLE AJ_LINETALK ADD 		REMINDER_DATE       SmallDatetime     NULL
+
+
+
+        EVRAK_TD          SmallInt          NULL, /* Evrak cinsi */
+        HP_GIDER_ID       Int               NULL, /* Gider HP baðlantýsý */             
+
+        HESAP_KESIM_TRH   Date              NULL,
+        SON_ODEME_TRH     Date              NULL,
+        HESAP_TUTARI      Numeric(22,5)     NULL,
+        MIN_ODEME_TUTARI  Numeric(22,5)     NULL,
+        
+        KURUM_ADI         VarChar(100)      NULL,
+        TEBLIG_TRH        Date              NULL,  
+        RESMI_TRH         Date              NULL,
+        RESMI_NO          VarChar(50)       NULL,    
+        KONU              VarChar(100)      NULL,
+
+        EVRAK_TESLIMI_TD  SmallInt          NULL, /* 0. none, 1.Evrak Sekreteryada, 2.Evrak Teslim Edildi */ 
+        EVRAK_TESLIM_KISI VarChar(50)       NULL, /* evraðý teslim alan kiþi, kargo, kurum */
+        EVRAK_TESLIM_CARI_ID Int            NULL, /* cari Id si */
+
+		ILGILI_BOLUM_ID     Int             NULL,
+		ILGILI_PERSONEL_ID  Int             NULL,           
+
+
+
+   Constraint PK_AJ_LINELCI primary key (ID)
+ )
+
+ create index X_AJ_LINELCI1 on AJ_LINELCI (FIRM_ID, SHOP_ID, REC_DATE)
+ 
+ grant select, insert, update, delete on AJ_LINELCI to public
+
+commit transaction
+
+/*
+ 
+ISLEM_TD
+
+1. arayan, 
+2. aranan, 
+3. geldi, 
+4. gidildi, 
+S
+
+
+
+
+Talepler 
+
+-Destek istiyor > birim + personel
+-Servis istiyor > birim
+
+-Bilgi istiyor > birim
+-Teklif istiyor > birim
+-Görüþmek istiyor > birim
+-Randevu istiyor > personel
+
+-Teklifleri var > ilgili birim
+-Özel Görüþme > personel
+
+*/
+

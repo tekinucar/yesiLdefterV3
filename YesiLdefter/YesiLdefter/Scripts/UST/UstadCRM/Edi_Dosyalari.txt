@@ -1,0 +1,252 @@
+﻿
+EdiBolumler
+--EdiKategoriler
+----EdiKonular
+------EdiCozumler
+
+EdiDuyurular
+
+EdiTalepFormu
+
+
+
+
+
+begin transaction
+ create table EdiBolumler
+ (
+    Id           Int IDENTITY(1,1) not null,
+    IsActive     bit null,
+	SectorTypeId smallint not null,
+    BolumAdi     nvarchar(50) null,
+
+	--RecordDate  SmallDatetime null,
+
+   Constraint pk_EdiBolumler primary key (Id)
+ )
+
+ create index X_EdiBolumler_01 on EdiBolumler (SectorTypeId)
+
+ grant select, insert, update, delete on EdiBolumler to public
+
+commit transaction
+
+
+
+begin transaction
+ create table EdiKategoriler
+ (
+    Id           Int IDENTITY(1,1) not null,
+	ParentId     Int not null,
+    BolumId      Int not null,
+	SectorTypeId smallint not null,
+    IsActive     bit null,
+    SiraNo       smallint null,
+    KategoriAdi  nvarchar(50) null,
+
+	--RecordDate  SmallDatetime null,
+
+   Constraint pk_EdiKategoriler primary key (Id)
+ )
+
+  create index X_EdiKategoriler_01 on EdiKategoriler (BolumId)
+
+  grant select, insert, update, delete on EdiKategoriler to public
+
+commit transaction
+
+
+
+
+begin transaction
+ create table EdiKonular
+ (
+    Id           Int IDENTITY(1,1) not null,
+    KategoriId   Int not null,
+	SectorTypeId smallint not null,
+    IsActive     bit null,
+    IsTopical    bit null,
+
+    KonuBasligi     nvarchar(100)  null,
+    KonuDetayi      nvarchar(500)  null,
+    KonuResim       varBinary(max) null,
+    KonuResimSmall  varBinary(max) null,
+
+	--RecordDate      SmallDatetime null,
+
+   Constraint pk_EdiKonular primary key (Id)
+ )
+
+ create index X_EdiKonular_01 on EdiKonular (KategoriId)
+
+ grant select, insert, update, delete on EdiKonular to public
+
+commit transaction
+
+
+begin transaction
+ create table EdiDuyurular
+ (
+    Id           Int IDENTITY(1,1) not null,
+    BolumId      Int not null,
+	SectorTypeId smallint not null,
+    IsActive     bit null,
+    IsTopical    bit null,
+
+    DuyuruBasligi     nvarchar(200)  null,
+    DuyuruDetayi      nvarchar(4000) null,    
+
+    DuyuruResim       varBinary(max) null,
+    DuyuruResimSmall  varBinary(max) null,
+
+
+	RecordDate        SmallDatetime null,
+
+   Constraint pk_EdiDuyurular primary key (Id)
+ )
+
+  create index X_EdiDuyurular_01 on EdiDuyurular (BolumId)
+
+  grant select, insert, update, delete on EdiDuyurular to public
+
+commit transaction
+
+
+begin transaction
+ create table EdiCozumler
+ (
+    Id           Int IDENTITY(1,1) not null,
+    KonuId       Int not null,
+	SectorTypeId smallint not null,
+    IsActive     bit null,
+
+	RecordDate        SmallDatetime null,
+
+   Constraint pk_EdiCozumler primary key (Id)
+ )
+
+ create index X_EdiCozumler_01 on EdiCozumler (KonuId)
+
+ grant select, insert, update, delete on EdiCozumler to public
+
+commit transaction
+
+
+
+
+begin transaction
+ create table EdiTalepFormu
+ (
+    Id           Int IDENTITY(1,1) not null,
+    IsActive     bit null,
+	SectorTypeId smallint not null,
+    
+    FirmId       Int           null,
+    FirmGUID     varchar(50)   null,
+    FirmaKodu    varchar(20)   null,
+    FirmaAdi     nvarchar(50)  null,
+    
+    AdiSoyadi    nvarchar(50)  null,
+    CepTelefonu  nvarchar(15)  null,
+    
+    KategoriId   Int null,
+    KonuId       Int null,
+    Aciklama     nvarchar(1000) null,
+
+	TalepKayitTarihi   SmallDatetime null,
+    TalepDuzeltTarihi  SmallDatetime null,
+
+    -- Talep eden kişi
+    IsKabulTipiId    smallInt null,        
+    IsKabulTarihi    smallDatetime null,
+
+    BolumPersonelId  Int null, /* son işlem yapan, kapatan personelId */
+    CagriPersonelId  Int null,
+
+   Constraint pk_EdiTalepFormu primary key (Id)
+ )
+
+ create index X_EdiTalepFormu_01 on EdiTalepFormu (SectorTypeId)
+ create index X_EdiTalepFormu_02 on EdiTalepFormu (FirmGUID)
+ create index X_EdiTalepFormu_03 on EdiTalepFormu (KategoriId)
+ create index X_EdiTalepFormu_04 on EdiTalepFormu (KonuId)
+
+ grant select, insert, update, delete on EdiTalepFormu to public
+
+commit transaction
+
+
+
+
+begin transaction
+
+ create table EdiIslemFormu
+ (
+    Id           Int IDENTITY(1,1) not null,
+	SectorTypeId smallint not null,
+    
+    FirmGUID     varchar(50)   null,
+    TalepFormuId Int null,
+
+    BolumPersonelId  Int null,
+    IslemBasTarihi   SmallDatetime null,
+    IslemBitTarihi   SmallDatetime null,
+    IslemSuresi      smallInt null, -- sonuç dakika olacak
+    IslemDurumTipiId smallInt null,
+
+    CozumId          Int null,
+    YapilanIslemler  nvarchar(1000) null,
+
+
+   Constraint pk_EdiIslemFormu primary key (Id)
+ )
+
+ create index X_EdiIslemFormu_01 on EdiIslemFormu (SectorTypeId)
+ create index X_EdiIslemFormu_02 on EdiIslemFormu (TalepFormuId)
+ create index X_EdiIslemFormu_03 on EdiIslemFormu (FirmGUID)
+ create index X_EdiIslemFormu_04 on EdiIslemFormu (IslemDurumTipiId)
+
+ grant select, insert, update, delete on EdiIslemFormu to public
+
+commit transaction
+
+
+CREATE TRIGGER [dbo].[trg_EdiTalepFormu] on [dbo].[EdiTalepFormu] 
+AFTER INSERT, UPDATE
+AS BEGIN
+  declare @yId  int
+  declare @eId  int
+
+
+  DECLARE formCursor cursor for select Id from Inserted
+  DECLARE @curId bigint
+
+  OPEN formCursor
+  FETCH NEXT FROM formCursor INTO @curId
+
+   WHILE @@FETCH_STATUS = 0
+   BEGIN 
+      set @eId = 0
+
+      SELECT 
+       @eId = isnull(Id,0)
+      from deleted
+      where Id = @curId
+	    
+	  if (@eId = 0)
+	  begin
+        Update [dbo].[EdiTalepFormu] set TalepKayitTarihi = GETDATE()
+        where Id = @curId 
+      end else
+	  begin
+        Update [dbo].[EdiTalepFormu] set TalepDuzeltTarihi = GETDATE()
+        where Id = @curId 
+	  end
+
+      FETCH NEXT FROM formCursor INTO @curId
+   END
+
+   CLOSE formCursor
+   DEALLOCATE formCursor   
+   
+END -- trigger

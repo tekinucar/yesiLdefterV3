@@ -1,0 +1,36 @@
+﻿
+USE [GREEN]
+GO
+
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TRIGGER [dbo].[trg_STK_FIYAT] on [dbo].[STK_FIYAT] 
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    
+    DECLARE InsertCursor_STK_FIYAT cursor for select ID from Inserted
+    DECLARE @curId bigint
+
+    OPEN InsertCursor_STK_FIYAT
+
+    FETCH NEXT FROM InsertCursor_STK_FIYAT INTO @curId
+    
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+	    
+	    -- EXEC dbo.prc_STK_FIYAT_CALC @curId 
+				
+    	FETCH NEXT FROM InsertCursor_STK_FIYAT INTO @curId
+    END
+
+    CLOSE InsertCursor_STK_FIYAT
+    DEALLOCATE InsertCursor_STK_FIYAT   
+
+END
+
+GO

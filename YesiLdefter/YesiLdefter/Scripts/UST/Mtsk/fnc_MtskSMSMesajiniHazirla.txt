@@ -1,0 +1,68 @@
+﻿
+/*CreateFunction*/
+
+CREATE FUNCTION [dbo].[fnc_MtskSMSMesajiniHazirla](
+   @KaynakTipiId SmallInt
+  ,@KaynakRefId Int
+  ,@MesajTipiId SmallInt
+)  
+RETURNS varchar(max)
+AS   
+BEGIN 
+  --declare @KaynakTipiId SmallInt = 1
+  --declare @KaynakRefId Int = 1115 -- 1115, 1116
+  --declare @MesajTipiId SmallInt = 2
+  
+  declare @Mesaj nVarchar(300) = ''
+
+  Select @Mesaj = Mesaj from [dbo].[MtskSablonSMS]
+  Where MesajTipiId = @MesajTipiId
+
+  -- MtskAday
+  if (@KaynakTipiId = 1)
+  begin
+      declare @Belgeler nvarchar(200) = ''
+      declare @TamAdiSoyadi nvarchar(100)
+      declare @CepTelefonu varchar(15) 
+      declare @KimlikGeldi bit
+      declare @BiyometrikGeldi bit
+      declare @OgrenimGeldi bit
+      declare @SaglikGeldi bit
+      declare @AdliSicilGeldi bit
+      declare @ImzaAlindi bit
+      declare @SozlesmeYapildi bit
+
+      Select 
+        @TamAdiSoyadi = aday.TamAdiSoyadi
+      , @CepTelefonu = aday.CepTelefonu  
+      , @KimlikGeldi = isnull(aday.KimlikGeldi,0)
+      , @BiyometrikGeldi = aday.BiyometrikGeldi
+      , @OgrenimGeldi = aday.OgrenimGeldi
+      , @SaglikGeldi = aday.SaglikGeldi
+      , @AdliSicilGeldi = aday.AdliSicilGeldi
+      , @ImzaAlindi = aday.ImzaAlindi
+      , @SozlesmeYapildi = aday.SozlesmeYapildi
+      From dbo.MtskAday as aday
+      Where aday.Id = @KaynakRefId
+
+      Set @Mesaj = REPLACE(@Mesaj, '<MtskAday.TamAdiSoyadi>', @TamAdiSoyadi)
+
+      if (@KimlikGeldi = 0)     set @Belgeler = @Belgeler + ', ' + 'Kimlik'
+      if (@BiyometrikGeldi = 0) set @Belgeler = @Belgeler + ', ' + 'Biyometrik Foto'
+      if (@OgrenimGeldi = 0)    set @Belgeler = @Belgeler + ', ' + 'Öğrenim Bel.'
+      if (@SaglikGeldi = 0)     set @Belgeler = @Belgeler + ', ' + 'Sağlık Bel.'
+      if (@AdliSicilGeldi = 0)  set @Belgeler = @Belgeler + ', ' + 'Adli Sicil'
+      if (@ImzaAlindi = 0)      set @Belgeler = @Belgeler + ', ' + 'İmza Örneği'
+      --if (@SozlesmeYapildi = 0) set @Belgeler = @Belgeler + ', ' + 'Sözleşme'
+
+      if (@Belgeler <> '') set @Belgeler = Substring(@Belgeler, 2, 200)
+
+      Set @Mesaj = @Mesaj + @Belgeler
+
+  end -- @KaynakTipiId = 1
+
+
+  RETURN @Mesaj;  
+END;
+
+/*CreateFunctionEnd*/

@@ -1,0 +1,95 @@
+﻿
+CREATE PROCEDURE [dbo].[prc_DatabaseCreateList] ( 
+    @NEWFIRM_DBNAME varchar(50) 
+   ,@MANAGER_DBNAME varchar(50) 
+   ,@SectorTypeId SmallInt
+   ,@ElementTypeId SmallInt
+  )  
+AS BEGIN
+
+  /*  
+  MsSectorType] (Id, SectorType)
+  (  1,    N'UstadManagerV3'),
+  (  2,    N'UstadManagerV4'),
+  ( 11,    N'UstadCrmV1'),
+  ( 21,    N'UstadEdiV1'),
+  ( 101,   N'Ön Muhasebe'),
+  ( 111,   N'Mali Müşavir'),
+  ( 112,   N'Resmi Muhasebe'),
+  ( 113,   N'Bordro'),
+  ( 201,   N'Mtsk'),
+  ( 202,   N'İşmak'),
+  ( 203,   N'SRC')
+  */
+  /*
+  ElementTypeId
+  1. Tables
+  2. Procedures
+  3. Functions
+  */
+  declare @cumle varchar(4000)
+
+  -- Tables
+  if (@ElementTypeId = 1)
+  begin
+    set @cumle = 
+    ' Select 
+    ''{db_Name}'' as Lkp_DatabaseName
+    , mTables.SchemaName
+    , mTables.TableName
+    , mTables.ParentTable
+    , mTables.SqlScript
+    , convert(bit, (case when (isnull(sTables.name,'''') = '''') then 0 else 1 end)) as Lkp_IsThere
+   
+    From [:MANAGER_DBNAME].dbo.MsProjectTables as mTables  
+       Left outer join [{db_Name}].sys.tables as sTables on ( mTables.TableName = sTables.name )
+    
+	Where mTables.SectorTypeId = {SectorTypeId}
+    
+	Order by mTables.TableName '
+  end
+  -- Procedures
+  if (@ElementTypeId = 2)
+  begin
+    set @cumle = 
+    ' Select 
+    ''{db_Name}'' as Lkp_DatabaseName
+    , mProcedures.SchemaName
+    , mProcedures.ProcedureName
+    , mProcedures.SqlScript
+    , convert(bit, (case when (isnull(sProcedures.name,'''') = '''') then 0 else 1 end)) as Lkp_IsThere
+   
+    From [:MANAGER_DBNAME].dbo.MsProjectProcedures as mProcedures  
+       Left outer join [{db_Name}].sys.procedures as sProcedures on ( mProcedures.ProcedureName = sProcedures.name )
+
+    Where mProcedures.SectorTypeId = {SectorTypeId}
+    
+    Order by mProcedures.ProcedureName '
+  end
+  -- Functions
+  if (@ElementTypeId = 3)
+  begin
+    set @cumle = 
+    ' Select 
+    ''{db_Name}'' as Lkp_DatabaseName
+    , mFunctions.FunctionName
+    , mFunctions.SqlScript
+    , convert(bit, (case when (isnull(obj.name,'''') = '''') then 0 else 1 end)) as Lkp_IsThere
+
+    From [:MANAGER_DBNAME].dbo.MsProjectFunctions as mFunctions
+       Left outer join [{db_Name}].sys.objects as obj on ( obj.name = mFunctions.FunctionName )
+
+    Where mFunctions.SectorTypeId = {SectorTypeId}    
+
+    Order by mFunctions.FunctionName '
+  end
+
+  set @cumle = REPLACE(@cumle, '{db_Name}', @NEWFIRM_DBNAME) 
+  set @cumle = REPLACE(@cumle, ':MANAGER_DBNAME', @MANAGER_DBNAME) 
+  set @cumle = REPLACE(@cumle, '{SectorTypeId}', Convert(varchar(10),(@SectorTypeId))) 
+
+  execute(@cumle) 
+
+  --print @cumle
+
+END -- procedure

@@ -1,0 +1,30 @@
+
+begin transaction
+ create table MS_TEMP_PROCESS
+ (
+        REF_ID              Int IDENTITY(1,1) NOT NULL,
+        WFILE_CODE          VarChar(30)    NULL,   -- MS_TEMP_FILE = MS_WORK_CODE (Master-Detail)
+        LINE_CODE           VarChar(30)    NULL,   -- MS_TEMP_LINES = MS_WORK_LINES (Master-Detail)
+
+        PROCESS_SORT_NO     SmallInt       NULL,   -- Ýþin sýra numarasý
+        PROCESS_CODE        VarChar(30)    NULL,   -- iþin kodu  
+        PROCESS_NAME        VarChar(100)   NULL,   -- iþin adý
+        APPROVAL_ESTATE     SmallInt       NULL,   -- (Onay gerektirmiyor/Onay ister)
+        APPROVAL_TYPE       SmallInt       NULL,   -- (None, Sýralý Onay, Eþ Zamanlý Onay)
+        APPROVAL1_PART      Int            NULL,   -- Onay istenecek 1. Bölüm
+        APPROVAL2_PART      Int            NULL,   -- Onay istenecek 2. Bölüm
+        APPROVAL3_PART      Int            NULL,   -- Onay istenecek 3. Bölüm
+        TABLE_IPCODE        VarChar(50)    NULL,   --  <<<< ASLINDA IP DANDA MS_TEMP_PROCESS ÇAÐRILABÝLÝR
+
+    Constraint PK_MS_TEMP_PROCESS primary key (REF_ID)
+ )
+
+ create index X_MS_TEMP_PROCESS1 on MS_TEMP_PROCESS ( WFILE_CODE, LINE_CODE, PROCESS_CODE )
+ 
+ grant select, insert, update, delete on MS_TEMP_PROCESS to public
+
+commit transaction
+
+
+
+

@@ -1,0 +1,90 @@
+﻿ /*CreateProcedure*/
+
+CREATE PROCEDURE dbo.prc_OnmMaasHesaplariKayit  
+(  
+  @FirmId int, 
+  @CariId int, 
+  @HazirlamaTarihi datetime,
+  @DonemTipiId int,
+  @IslemTarihi datetime,
+  @IslemTipiId smallInt,
+  @EkGelirId int,
+  @EkKesintiId int,
+  @DekontId int, 
+  @IslemAciklamasi nvarchar(100),
+  @BorcTutari numeric(22,5),
+  @AlacakTutari numeric(22,5),
+  @IsError bit
+)
+AS BEGIN
+  
+  begin transaction 
+
+  if ( Select count(Id) ADET from dbo.OnmMaasHesaplari
+	   where 0 = 0 
+       and FirmId      = @FirmId
+       and CariId      = @CariId
+       and DonemTipiId = @DonemTipiId
+       and IslemTipiId = @IslemTipiId
+       and EkGelirId   = @EkGelirId
+       and EkKesintiId = @EkKesintiId
+       and DekontId    = @DekontId
+  ) = 0 
+  begin 
+    Insert into dbo.OnmMaasHesaplari ( 
+      FirmId, 
+      CariId, 
+      HazirlamaTarihi, 
+      DonemTipiId, 
+      IslemTarihi, 
+      IslemTipiId, 
+      EkGelirId, 
+      EkKesintiId, 
+      DekontId, 
+      IslemAciklamasi, 
+      BorcTutari, 
+      AlacakTutari, 
+      IsError,
+      KayitTarihSaat ) values 
+      ( 
+       @FirmId, 
+       @CariId, 
+       convert(datetime, @HazirlamaTarihi, 103),
+       @DonemTipiId,
+       convert(datetime, @IslemTarihi, 103),
+       @IslemTipiId,
+       @EkGelirId,
+       @EkKesintiId,
+       @DekontId, 
+       @IslemAciklamasi,
+       @BorcTutari,
+       @AlacakTutari,
+       @IsError,
+	   GETDATE()
+	   ) 
+      --select MAX(Id) as Id, 'dsInsert' as dsState from dbo.OnmMaasHesaplari 
+  end else 
+  begin 
+    Update dbo.OnmMaasHesaplari set 
+      IslemTarihi = convert(datetime, @IslemTarihi, 103),
+      IslemAciklamasi = @IslemAciklamasi, 
+      BorcTutari = @BorcTutari, 
+      AlacakTutari = @AlacakTutari, 
+      IsError = @IsError
+    where 0 = 0 
+    and FirmId = @FirmId
+    and CariId = @CariId
+    and DonemTipiId = @DonemTipiId 
+    and IslemTipiId = @IslemTipiId 
+    and EkGelirId = @EkGelirId 
+    and EkKesintiId = @EkKesintiId
+    and DekontId = @DekontId
+  end -- if 	
+
+  commit transaction 
+
+END -- procedure
+
+ /*CreateProcedureEnd*/
+
+

@@ -1,0 +1,38 @@
+﻿
+CREATE TRIGGER [dbo].[trg_users] on [dbo].[users] 
+AFTER INSERT, UPDATE
+AS BEGIN
+  declare @yUserFullName   varchar(100)
+  declare @yUserFirstName  varchar(50)
+  declare @yUserLastName   varchar(50)
+
+  DECLARE usersCursor cursor for select Ulas from Inserted
+  DECLARE @curId bigint
+
+  OPEN usersCursor
+  FETCH NEXT FROM usersCursor INTO @curId
+
+   WHILE @@FETCH_STATUS = 0
+   BEGIN 
+      SELECT 
+       @yUserFirstName = isnull([UserFirstName],'')
+      ,@yUserLastName = isnull([UserLastName],'')
+      from inserted 
+      where Ulas = @curId
+
+	  set @yUserFullName = @yUserFirstName + ' ' + @yUserLastName
+
+      Update [dbo].[users] set
+        UserFullName = substring(@yUserFullName, 1, 100)
+      where Ulas = @curId 
+
+      FETCH NEXT FROM usersCursor INTO @curId
+   END
+
+   CLOSE usersCursor
+   DEALLOCATE usersCursor   
+   
+END -- trigger
+
+
+

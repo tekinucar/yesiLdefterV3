@@ -1,0 +1,90 @@
+﻿/*CreateProcedure*/
+
+
+CREATE PROCEDURE [dbo].[prc_OnmOdemePlaniTahsilatiIptalEt] (@dekontId int)  
+AS BEGIN 
+
+    -- iki türlü taksit satırı mevcut
+    -- 1. esas TaksitTutari : kullanıcının oluşturduğu
+    -- 2. eksik tahsilatlardan dolayı sonradan türetilmiş ve PatchBelgeDekontId ile kaynağı belirtilmiş eksik TaksitTutari
+    -- yani 
+    -- BelgeDekontId      : taksidi kapatan tahsilat dekontun Id si 
+    -- PatchBelgeDekontId : taksidin tamamı kapatılmadıysa kalan tutarın yeni taksit oluşmasına sebep olan tahsilat dekont Id (bu sadece borçlandırıyor)
+
+    -- EsasTaksitTutari  : EsTT
+    -- EksikTaksitTutari : EkTT
+
+    -- işlem1 : EsTT tamamı tahsil edildi
+    -- işlem2 : EsTT eksik tahsil edildi, EkTT üretildi
+    -- işlem3 : EkTT tamamı tahsil edildi
+    -- işlem4 : EkTT tahsil edilmedi 
+    -- işlem5 : EkTT tamamı tahsil edildi 
+    -- işlem6 : EkTT eksik tahsil edildi, yeni EkTT2 üretildi
+    -- işlem7 : EkTT2 üretildikten sonra EkTT gibi tekrarlamakta
+
+    -- esas taksidin tahsilatını iptal et
+    -- işlem1
+    Update dbo.OnmOdemePlani set
+        IsPaid = 0
+      , BelgeDekontId = 0
+      , TahsilTarihi = null
+    Where BelgeDekontId = @dekontId
+    and   isnull(YedekTaksitTutari,0) = 0
+    and   isnull(PatchBelgeDekontId,0) = 0
+    and   IsPaid = 1
+
+    -- esas taksit tutarı eksik tahsil edilmiş 
+    -- işlem2
+    Update dbo.OnmOdemePlani set
+        TaksitTutari = YedekTaksitTutari
+      , YedekTaksitTutari = null
+      , IsPaid = 0
+      , BelgeDekontId = 0
+      , TahsilTarihi = null
+    Where BelgeDekontId = @dekontId
+    and   isnull(YedekTaksitTutari,0) > 0
+    and   isnull(PatchBelgeDekontId,0) = 0
+    and   IsPaid = 1
+
+    -- eksik taksit üretilmiş ve oda başka bir tahsilat makbuzu ile tahsil edilmiş ise
+    -- işlem3
+    Update dbo.OnmOdemePlani set
+        PatchBelgeDekontId = null
+    Where PatchBelgeDekontId = @dekontId
+    and   BelgeDekontId > 0
+    and   IsPaid = 1
+
+    -- eksik taksit üretilmiş ve tahsil edilmemiş ise
+    -- işlem4 ve işlem6 için
+    Delete from dbo.OnmOdemePlani 
+    Where PatchBelgeDekontId = @dekontId
+    and   IsPaid = 0
+
+    -- eksik taksidin tamamını tahsilmiş ise
+    -- işlem5
+    Update dbo.OnmOdemePlani set
+        IsPaid = 0
+      , BelgeDekontId = 0
+      , TahsilTarihi = null
+    Where BelgeDekontId = @dekontId
+    and   isnull(YedekTaksitTutari,0) = 0
+    and   isnull(PatchBelgeDekontId,0) > 0
+    and   IsPaid = 1
+
+    -- kendisi eksik taksit zaten, ve yine eksik tahsil edilmiş ise
+    -- işlem6
+    Update dbo.OnmOdemePlani set
+        TaksitTutari = YedekTaksitTutari
+      , YedekTaksitTutari = null
+      , IsPaid = 0
+      , BelgeDekontId = 0
+      , TahsilTarihi = null
+    Where BelgeDekontId = @dekontId
+    and   isnull(YedekTaksitTutari,0) > 0
+    and   isnull(PatchBelgeDekontId,0) > 0
+    and   IsPaid = 1
+
+END -- prc_
+
+
+/*CreateProcedureEnd*/

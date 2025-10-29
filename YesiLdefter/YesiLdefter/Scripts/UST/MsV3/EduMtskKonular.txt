@@ -1,0 +1,45 @@
+﻿
+begin transaction
+
+ create table EduMtskKonular
+ (
+    Id                   Int IDENTITY(1,1) not null,
+    IsActive             Bit               not null,
+	SertifikaGrupTipiId  SmallInt          not null,
+	DersTipiId           SmallInt          null,       /* 1. Trafik ve Çevre Bilgisi, İlk Yardım, Araç Tekniği */
+    SiraNo               SmallInt          null,
+    Konu                 nVarChar(100)     null,
+    SinavSoruSayisi      SmallInt          null,
+    ToplamSoruSayisi     SmallInt          null,
+
+   Constraint pk_EduMtskKonular primary key (Id)
+ )
+
+ create index X_EduMtskKonular_01 on EduMtskKonular (SertifikaGrupTipiId,DersTipiId)
+
+ grant select, insert, update, delete on EduMtskKonular to public
+
+commit transaction
+
+
+-- ------------------------------------------------------- 
+-- DersTipiTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'EduMtskKonularDersTipi')
+drop table [Lkp].[EduMtskKonularDersTipi]
+
+create table Lkp.EduMtskKonularDersTipi
+(
+   Id          Int Unique Not Null,
+   DersTipi    nVarchar(50)   null
+   
+   constraint  pk_EduMtskKonularDersTipi primary key (Id)
+)
+
+INSERT INTO Lkp.EduMtskKonularDersTipi (Id, DersTipi)
+ VALUES 
+  ( 0, N'Tanımsız'),
+  ( 1, N'Trafik ve Çevre Dersi'),
+  ( 2, N'İlkyardım Dersi'),
+  ( 3, N'Araç Tekniği Dersi'),
+  ( 5, N'Trafik Adabı Dersi')

@@ -1,0 +1,221 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_OnmBelgeDekontTbmGiderHesaplari] 
+AS BEGIN
+
+declare @KasaId int = 0
+Select top 1 @KasaId = Id from dbo.OnmHesapFinans 
+Where UstGrupTipiId = 10 
+and   AnaGrupTipiId = 100
+and   AltGrupTipiId = 100
+and   ParaTipiId = 'TRY'
+and   IsActive = 1
+
+Update [dbo].[OnmBelgeDekont] set 
+
+   BHesapTipiId = ( case isnull([BDekont].BHesapTipiId,-1) when -1 then x.BAHesapTipiId else [BDekont].BHesapTipiId end )
+ , BorcluId     = ( case ISNULL([BDekont].BorcluId,-1)     when -1 then x.MaliyetId     when -2 then @KasaId else [BDekont].BorcluId end )
+ , AHesapTipiId = ( case isnull([BDekont].AHesapTipiId,-1) when -1 then x.BAHesapTipiId else [BDekont].AHesapTipiId end ) 
+ , AlacakliId   = ( case ISNULL([BDekont].AlacakliId,-1)   when -1 then x.MaliyetId     when -2 then @KasaId else [BDekont].AlacakliId end ) 
+ , VarlikId     = x.VarlikId
+ , AboneId      = x.AboneId 
+ , CariId       = x.PersonelId 
+
+from [dbo].[OnmBelgeDekont] as [BDekont],
+(
+ -- Maliyet hesapları : kasanın karşısında gider hesapları var ise
+ -- direk gider hesabı
+ Select 
+   [BDekont].Id as MakbuzId
+ , isnull(tbm.VarlikId, 0) as VarlikId
+ , isnull(tbm.AboneId, 0)  as AboneId
+ , isnull(tbm.PersonelId, 0)  as PersonelId
+ , hm.BAHesapTipiId
+ , hf.Id as MaliyetId
+
+ From [dbo].[OnmBelgeDekont] as [BDekont]
+	left outer join TempTabimHesaplar as tbm on ( [BDekont].BelgeNo = tbm.HESAP_KODU )
+	left outer join Lkp.OnmHesapMaster as hm on ( tbm.MaliyetHesapKodu = hm.HesapKodu )
+	left outer join OnmHesapFinans as hf on ( tbm.MaliyetHesapKodu = hf.HesapKodu )
+
+ Where 0 = 0 
+ and [BDekont].BelgeSeri = 'TbmGd'
+ and isnull(tbm.KasaId,0) = 0 
+ and isnull(tbm.BankaHesapId,0) = 0
+ and isnull(tbm.KrediKartiId,0) = 0
+ and isnull(tbm.PosId,0) = 0
+ and isnull(tbm.PersonelId,0) = 0 
+
+ union all 
+ -- Kasa hesabı : karşı hesap başka bir kasa, kasalar arası virman var ise
+ -- gider hesap kodunu kasa niyetinde kullanmış olabilirler
+ Select 
+   [BDekont].Id as MakbuzId
+ , isnull(tbm.VarlikId, 0) as VarlikId
+ , isnull(tbm.AboneId, 0)  as AboneId
+ , isnull(tbm.PersonelId, 0)  as PersonelId
+ , 100 as BAHesapTipiId
+ , tbm.KasaId as MaliyetId
+
+ From [dbo].[OnmBelgeDekont] as [BDekont]
+	left outer join TempTabimHesaplar as tbm on ( [BDekont].BelgeNo = tbm.HESAP_KODU )
+
+ Where 0 = 0 
+ and [BDekont].BelgeSeri = 'TbmGd'
+ and isnull(tbm.KasaId,0) > 0 
+ and isnull(tbm.BankaHesapId,0) = 0
+ and isnull(tbm.KrediKartiId,0) = 0
+ and isnull(tbm.PosId,0) = 0  
+ and isnull(tbm.PersonelId,0) = 0 
+
+ union all 
+ -- Banka hesabı : karşı hesap banka hesapları ise 
+ -- gider hesap kodunu banka niyetinde kullanmış olabilirler
+ Select 
+   [BDekont].Id as MakbuzId
+ , isnull(tbm.VarlikId, 0) as VarlikId
+ , isnull(tbm.AboneId, 0)  as AboneId
+ , isnull(tbm.PersonelId, 0)  as PersonelId
+ , 1022 as BAHesapTipiId
+ , tbm.BankaHesapId as MaliyetId
+
+ From [dbo].[OnmBelgeDekont] as [BDekont]
+	left outer join TempTabimHesaplar as tbm on ( [BDekont].BelgeNo = tbm.HESAP_KODU )
+
+ Where 0 = 0 
+ and [BDekont].BelgeSeri = 'TbmGd'
+ and isnull(tbm.KasaId,0) = 0 
+ and isnull(tbm.BankaHesapId,0) > 0
+ and isnull(tbm.KrediKartiId,0) = 0
+ and isnull(tbm.PosId,0) = 0  
+ and isnull(tbm.PersonelId,0) = 0 
+
+ union all 
+ -- Kredi kartı hesabı : karşı hesap kredi kartı hesapları ise 
+ -- gider hesap kodunu kredi kartı niyetinde kullanmış olabilirler
+ Select 
+   [BDekont].Id as MakbuzId
+ , isnull(tbm.VarlikId, 0) as VarlikId
+ , isnull(tbm.AboneId, 0)  as AboneId
+ , isnull(tbm.PersonelId, 0)  as PersonelId
+ , 1023 as BAHesapTipiId
+ , tbm.KrediKartiId as MaliyetId
+
+ From [dbo].[OnmBelgeDekont] as [BDekont]
+	left outer join TempTabimHesaplar as tbm on ( [BDekont].BelgeNo = tbm.HESAP_KODU )
+
+ Where 0 = 0 
+ and [BDekont].BelgeSeri = 'TbmGd'
+ and isnull(tbm.KasaId,0) = 0 
+ and isnull(tbm.BankaHesapId,0) = 0
+ and isnull(tbm.KrediKartiId,0) > 0
+ and isnull(tbm.PosId,0) = 0  
+ and isnull(tbm.PersonelId,0) = 0 
+ 
+ union all 
+ -- Pos cihazı hesabı : karşı hesap pos cihazı hesapları ise 
+ -- gider hesap kodunu pos cihazı hesabı niyetinde kullanmış olabilirler
+ Select 
+   [BDekont].Id as MakbuzId
+ , isnull(tbm.VarlikId, 0) as VarlikId
+ , isnull(tbm.AboneId, 0)  as AboneId
+ , isnull(tbm.PersonelId, 0)  as PersonelId
+ , 1024 as BAHesapTipiId
+ , tbm.PosId as MaliyetId
+
+ From [dbo].[OnmBelgeDekont] as [BDekont]
+	left outer join TempTabimHesaplar as tbm on ( [BDekont].BelgeNo = tbm.HESAP_KODU )
+
+ Where 0 = 0 
+ and [BDekont].BelgeSeri = 'TbmGd'
+ and isnull(tbm.KasaId,0) = 0 
+ and isnull(tbm.BankaHesapId,0) = 0
+ and isnull(tbm.KrediKartiId,0) = 0
+ and isnull(tbm.PosId,0) > 0  
+ and isnull(tbm.PersonelId,0) = 0 
+
+ union all 
+ -- Personel hesabı : karşı hesap personel hesapları ise 
+ -- gider hesap kodunu personel hesabı niyetinde kullanmış olabilirler
+ Select 
+   [BDekont].Id as MakbuzId
+ , isnull(tbm.VarlikId, 0) as VarlikId
+ , isnull(tbm.AboneId, 0)  as AboneId
+ , isnull(tbm.PersonelId, 0)  as PersonelId
+ , hm.BAHesapTipiId
+ , hf.Id as MaliyetId
+
+ From [dbo].[OnmBelgeDekont] as [BDekont]
+	left outer join TempTabimHesaplar as tbm on ( [BDekont].BelgeNo = tbm.HESAP_KODU )
+	left outer join Lkp.OnmHesapMaster as hm on ( tbm.MaliyetHesapKodu = hm.HesapKodu )
+	left outer join OnmHesapFinans as hf on ( tbm.MaliyetHesapKodu = hf.HesapKodu )
+
+ Where 0 = 0 
+ and [BDekont].BelgeSeri = 'TbmGd'
+ and isnull(tbm.KasaId,0) = 0 
+ and isnull(tbm.BankaHesapId,0) = 0
+ and isnull(tbm.KrediKartiId,0) = 0
+ and isnull(tbm.PosId,0) = 0  
+ and isnull(tbm.PersonelId,0) > 0 
+
+ ) as x
+
+Where [BDekont].Id = x.MakbuzId
+
+
+/*
+
+declare @KasaId int = 0
+Select top 1 @KasaId = Id from dbo.OnmHesapFinans 
+Where UstGrupTipiId = 10 
+and   AnaGrupTipiId = 100
+and   AltGrupTipiId = 100
+and   ParaTipiId = 'TRY'
+and   IsActive = 1
+
+-- print @KasaId
+
+Select 
+   [BDekont].[IslemTipiId]
+ , [BDekont].[BHesapTipiId]
+ , [BDekont].[AHesapTipiId]
+ , [BDekont].[VarlikId]
+ , [BDekont].[AboneId]
+ , ( case isnull([BDekont].BHesapTipiId,-1) when -1 then x.BAHesapTipiId else [BDekont].BHesapTipiId end ) as BH
+ , ( case ISNULL([BDekont].BorcluId,-1)     when -1 then x.MaliyetId     when -2 then @KasaId else [BDekont].BorcluId end ) as BID  
+ , ( case isnull([BDekont].AHesapTipiId,-1) when -1 then x.BAHesapTipiId else [BDekont].AHesapTipiId end ) as AH
+ , ( case ISNULL([BDekont].AlacakliId,-1)   when -1 then x.MaliyetId     when -2 then @KasaId else [BDekont].AlacakliId end ) as AID  
+ 
+ , x.*
+from [dbo].[OnmBelgeDekont] as [BDekont],
+(
+ Select 
+   [BDekont].Id as MakbuzId
+ , tbm.VarlikId
+ , tbm.AboneId
+ , hm.BAHesapTipiId
+ , hf.Id as MaliyetId
+ , hf.HesapAdi
+
+ From [dbo].[OnmBelgeDekont] as [BDekont]
+	left outer join TempTabimHesaplar as tbm on ( [BDekont].BelgeNo = tbm.HESAP_KODU )
+	left outer join Lkp.OnmHesapMaster as hm on ( tbm.MaliyetHesapKodu = hm.HesapKodu )
+	left outer join OnmHesapFinans as hf on ( tbm.MaliyetHesapKodu = hf.HesapKodu )
+
+ Where 0 = 0 
+ and [BDekont].BelgeSeri = 'TbmGd'
+ and isnull(tbm.KasaId,0) = 0 
+ and isnull(tbm.BankaHesapId,0) = 0
+ and isnull(tbm.KrediKartiId,0) = 0
+ and isnull(tbm.PosId,0) = 0 
+
+ ) as x
+
+Where [BDekont].Id = x.MakbuzId
+
+*/
+
+
+END -- procedure
+
+/*CreateProcedureEnd*/

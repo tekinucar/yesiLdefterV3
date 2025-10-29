@@ -1,0 +1,30 @@
+﻿/*CreateFunction*/
+
+CREATE FUNCTION [dbo].[fnc_getDonemTipiId] (
+    @DonemAdi VARCHAR(30),
+    @ReferansTarih DATETIME = NULL
+)
+RETURNS INT
+AS
+BEGIN
+    DECLARE @Bugun SMALLDATETIME = ISNULL(@ReferansTarih, GETDATE());
+    DECLARE @GelecekAy SMALLDATETIME = DATEADD(MONTH, 1, @Bugun);
+
+    DECLARE @BugunDonemTipiId INT = YEAR(@Bugun) * 100 + MONTH(@Bugun);
+    DECLARE @GelecekDonemTipiId INT = YEAR(@GelecekAy) * 100 + MONTH(@GelecekAy);
+
+    if @ReferansTarih is not null RETURN @BugunDonemTipiId; 
+    if (@DonemAdi = 'BUGUN' OR @DonemAdi = 'BUGÜN') RETURN @BugunDonemTipiId;
+	if (@DonemAdi = 'GELECEK') Return @GelecekDonemTipiId
+
+	if TRY_CONVERT(date, @DonemAdi) IS NOT NULL
+    begin
+	    set @Bugun = TRY_CONVERT(date, @DonemAdi); 
+        set @BugunDonemTipiId = YEAR(@Bugun) * 100 + MONTH(@Bugun);
+        Return @BugunDonemTipiId
+	end
+
+	Return @BugunDonemTipiId
+END
+
+/*CreateFunctionEnd*/

@@ -1,0 +1,87 @@
+﻿begin transaction
+
+ create table UstTablesIP
+ (
+        Id                   Int IDENTITY(1,1) not null,
+        TableId              Int               not null, /* UstTables tablosundaki Id */ 
+
+        ProjectCode          nVarChar(3)       null,  
+        ModuleCode           nVarChar(3)       null,
+        ClassCode            nVarChar(3)       null, 
+        TableCode            nVarChar(50)      null, /* TableAlias */ 
+        FullTableCode        nVarChar(70)      null, /* ProjectCode + '-' + ModuleCode + '-' + TableCode/TableAlias  */ 
+
+        IPCode               nVarChar(50)      null,
+        TableIPCode          nVarChar(150)     null, /* FullTableCode + '.' + IPCode */ 
+        ExternalIPCode       nVarChar(150)     null, /* Çalışırken kendisini bağlayacağı esas DataSet */ 
+
+        IPCaption            nVarChar(100)     null,   
+        WorkTypeId           SmallInt          null, 
+        IPSelectSql          VarChar(Max)      null,
+        IPWhereSql           VarChar(2000)     null,
+        IPOrderBySql         VarChar(400)      null,
+        ParentFieldName      VarChar(50)       null, /* -- TreeView için gerekli */
+        LockFieldName        VarChar(50)       null, /* ana tablodaki LockFieldName ile aynı olmaz ise burayı kullan */ 
+
+        UITypeId             SmallInt          null, /* 1. WinForm, 2. WebForm, 3. Mobil */ 
+        ViewComponentTypeId  SmallInt          null,
+        PropNavigator        VarChar(2000)     null, /* liste halindeki Navigator propNavigator döndü */ 
+        DataFindTypeId       SmallInt          null,
+        IsAutoInsert         Bit               null,
+        IsUseNewRefId        Bit               null, /* Yeni RefId kullanılsın mı? */
+        
+        PropNavigatorWorks   VarChar(Max)      null, /* PropNavigator ise PropNavigatorWorks oldu */ 
+        PropJoinTables       VarChar(Max)      null,
+        PropSubView          VarChar(Max)      null,
+        PropViews            VarChar(Max)      null,
+        PropRunTime          VarChar(Max)      null,
+        
+
+	Constraint pk_UstTablesIP primary key (Id)
+ )
+
+ create index X_UstTablesIP01 on UstTablesIP (FullTableCode)
+
+ grant select, insert, update, delete on UstTablesIP to public
+
+
+commit transaction
+
+
+begin transaction
+
+-- WorkTypeId
+-- UITypeId
+-- ViewComponentTypeId
+-- DataFindTypeId
+-- 
+
+-- ------------------------------------------------------- 
+-- WorkTypeId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'UstTablesIPWorkType')
+drop table [Lkp].[UstTablesIPWorkType]
+
+create table [Lkp].[UstTablesIPWorkType]
+(
+   Id               Int Unique not null, 
+   WorkType         nVarchar(20)   null
+
+   constraint  pk_UstTablesIPWorkType primary key (Id)
+)
+
+Delete from [Lkp].[UstTablesIPWorkType]
+INSERT INTO [Lkp].[UstTablesIPWorkType] (Id, WorkType)
+ VALUES 
+  ( 0,    N'Seçiniz'),
+  ( 1,    N'Table'),
+  ( 2,    N'View'),
+  ( 3,    N'Stored Procedure'),
+  ( 4,    N'Function'),
+  ( 5,    N'Trigger'),
+  ( 6,    N'Select')
+
+
+
+
+commit transaction

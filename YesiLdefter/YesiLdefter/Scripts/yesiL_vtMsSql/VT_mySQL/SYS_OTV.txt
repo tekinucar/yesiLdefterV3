@@ -1,0 +1,58 @@
+﻿/*
+ÖZEL TÜKETİM VERGİ ORAN ve TUTARLARI TABLOSU
+
+
+ID
+LISTE_NO
+YURURLUK_TARIHI
+G.T.İ.P. NO
+Mal İsmi
+Vergi Oranı (%)
+Asgari Maktu Vergi Tutarı 
+Maktu Vergi Tutarı 
+*/
+
+begin transaction
+
+ create table SYS_OTV
+ (
+   ID                         Int IDENTITY(1,1) NOT NULL, 
+   TARIH                      Date              NOT NULL,
+   LISTE_NO                   SmallInt          NULL, /* G.İ.B. in verdiği liste no 1,2,3 ve 4 nolu */    
+   GTIP_TAMNO                 VarChar(30)       NULL, /* GTIP_NO + "_" + ALT_NO  */
+   GTIP_NO                    VarChar(20)       NULL, /* GİB in tanımladığı kod */
+   ALT_NO                     VarChar(10)       NULL, /* ??? = aşağıda */
+   MAL_ISMI                   VarChar(4000)     NULL,
+   VERGI_ORANI                Numeric(22,8)     NULL,
+   ASGARI_MAKTU_VERGI_TUTARI  Numeric(22,8)     NULL, /* asgari = en aşağı, en düşük, en az, en azından*/
+   MAKTU_VERGI_TUTARI         Numeric(22,8)     NULL, /* maktu  = kesin olarak belirlenmiş olan (değer) */
+   BIRIMI                     VarChar(20)       NULL,
+
+   constraint		PK_SYS_OTV primary key (ID)
+ )
+
+ create index X_SYS_OTV01 on SYS_OTV (GTIP_TAMNO, TARIH)
+ create index X_SYS_OTV02 on SYS_OTV (TARIH, LISTE_NO, GTIP_TAMNO)
+ create index X_SYS_OTV03 on SYS_OTV (LISTE_NO, TARIH)
+
+ grant select, insert, update, delete on SYS_OTV to public
+
+commit transaction
+
+/* ALT_NO
+aslında böyle bir no yok, 
+fakat bazılarında GTIP no içinde birden fazla ürün bulunmakta 
+bu nedenle biz bir seri no ureterek biribirinden ayırt edebiliriz
+
+gtıp_no = 2710.20.90.00.00 içinde iki ürünü barındırmakta
+
+alt_no = 1 = 2,4985 kilogram
+alt_no = 2 = 1,5007 kilogram
+
+gtip_tamno = gtip_no + "_" + alt_no
+
+ 
+*/ 
+
+
+

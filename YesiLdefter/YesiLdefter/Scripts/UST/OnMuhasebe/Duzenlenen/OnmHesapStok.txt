@@ -1,0 +1,175 @@
+﻿
+/*CreateTable*/
+
+begin transaction
+
+ create table OnmHesapStok
+ (
+
+   Id                  Int IDENTITY(1,1) NOT NULL, /* Id  DİĞER TABLOLARDA Stok_ID OLUYOR  */
+   ParentId            Int       not null, /* default 0 */
+   FirmId              Int       not null,
+   IsActive            Bit       not null, /* default : 1 = active, 0 = not active */  
+   StokTipiId          SmallInt      null, /* 150,151,153,600(verilen Hizmetler),740 */
+   --CalismaTipiId       SmallInt      null, /* ? */
+
+   KategoriKodu        nVarchar(50)  null,
+   StokKodu            nVarChar(50)  null,
+   StokAdi             nVarChar(100) null,
+  
+   BirimTipiId1        nVarChar(3)   null,
+   BirimTipiId2        nVarChar(3)   null,
+   Birim2Carpani       Numeric(12,4) null,
+   AlimBirimTipiId     nVarChar(3)   null,
+   SatisBirimTipiId    nVarChar(3)   null,
+   AlimKdvOrani        Numeric(4,2)  null,
+   SatisKdvOrani       Numeric(4,2)  null,
+
+
+   AlimMesaji           nVarChar(100) null,
+   SatisMesaji          nVarChar(100) null,
+   SatisiDurumuTipiId   SmallInt      null, /* 0- Normal, 1-Satışı Yok 2- Geçiçi Süreyle Yok */
+   AlimMiktariniSorma   Bit           null, /* 1 ise alım  işlemleri sırasında miktar sorma */
+   SatisMiktariniSorma  Bit           null, /* 1 ise satış işlemleri sırasında miktar sorma */
+
+   --
+   ParaTipiId          nVarChar(3)   null,
+   BorcDovizYeriId     SmallInt      null,
+   AlacakDovizYeriId   SmallInt      null,
+   --
+   GIPKodu             Varchar(8)    null, /* (Gelir İdaresi Paket Kodu), mal ve hizmetlerin vergisel sınıflandırılması için kullanılan 8 haneli bir koddur. */
+   GTIPKodu            Varchar(12)   null, /* (Gümrük Tarife İstatistik Pozisyonu) */
+
+   IhracatKategoriKodu nVarchar(20)  null, /* sistem bilmiyorum */
+   IsTevkifat          Bit           null,
+   TevkifatKodu        nVarchar(6)   null,
+   TevkifatPayi        Numeric(3)    null, /* 2, 1 - 9, %90,  */
+   TevkifatPaydasi     Numeric(3)    null, /* 3, 10,    100   */
+   TevkifatOrani       nVarChar(4)   null, /* 2/3 , 2/10 ... 9/10 veya %90 gibi açıklamalar taşır  */
+
+   constraint  pk_OnmHesapStok primary key (Id)
+ )
+
+ create index X_OnmHesapStok01 on OnmHesapStok (FirmId)
+ create index X_OnmHesapStok02 on OnmHesapStok (StokTipiId)
+ 
+ grant select, insert, update, delete on OnmHesapStok to public
+
+ commit transaction
+
+/*CreateTableEnd*/
+
+
+
+/*CreateLkpTable*/
+
+begin transaction
+-- ------------------------------------------------------- 
+-- StokTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmHesapStokStokTipi')
+drop table [Lkp].[OnmHesapStokStokTipi]
+
+create table [Lkp].[OnmHesapStokStokTipi]
+(
+   Id          Int Unique Not Null,
+   StokTipi    nVarchar(50)   null,
+   GrupTipiId  SmallInt       null,
+   
+   constraint  pk_OnmHesapStokStokTipi primary key (Id)
+)
+
+DELETE [Lkp].[OnmHesapStokStokTipi]
+INSERT INTO [Lkp].[OnmHesapStokStokTipi] (Id, StokTipi, GrupTipiId)
+ VALUES 
+  (0,    N'Tanımsız',    0),
+  (150,  N'150 İlk Madde Malzeme',  1),
+  (151,  N'151 Yarı Mamuller', 1),
+  (153,  N'153 Ticari Mal',    1),
+  (25,   N' 25 Maddi Duran Varlık', 1),
+  (600,  N'600 Yurtiçi Satışlar', 1),
+  (601,  N'601 Yurtdışı Satışlar', 1),
+  (602,  N'602 Hizmet Gelirleri', 1),
+  (622,  N'622 Satılan Hizmet Hesabı', 1),
+  --(750,  N'750 ArGe Malzemesi', 1), -- 750. Araştırma Ve Geliştirme
+  (770,  N'770 Tüketim Malzemesi', 1) -- 770. Genel Yönetim Giderleri
+
+
+commit transaction
+
+/*CreateLkpTableEnd*/
+
+
+/*CreateTrigger*/
+
+CREATE TRIGGER [dbo].[trg_OnmHesapStok] on [dbo].[OnmHesapStok]
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    DECLARE curStok cursor local for select Id from Inserted
+    DECLARE @curId bigint
+
+    OPEN curStok
+
+    FETCH NEXT FROM curStok INTO @curId
+
+	declare @FirmId int
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+	    
+        select 
+		  @FirmId = ins.FirmId
+        from inserted ins
+    	where ins.Id = @curId
+		
+        if ( Select count(*) ADET from dbo.OnmHesapStokImg
+             where StokId = @curId 
+        ) = 0 
+        begin  
+            Insert into [dbo].[OnmHesapStokImg] (FirmId, StokId) VALUES (@FirmId, @curId ) 
+        end
+				
+        FETCH NEXT FROM curStok INTO @curId
+    END -- While
+
+    CLOSE curStok
+    DEALLOCATE curStok
+END -- create trigger
+
+/*CreateTriggerEnd*/
+
+
+
+
+ create table IStokFaturaEkVergi
+ (
+
+   Id                Int IDENTITY(1,1) NOT NULL, 
+   FirmId            Int       not null,
+   IsActive          Bit       not null, /* default : 1 = active, 0 = not active */  
+   StokId            Int           null,
+   SiraNo            SmallInt      null,
+   FaturaEkVergiKodu nVarchar(10)  null,
+   VergiOrani        Numeric(12,8) null, /* tanımlı tablodan okunacak */
+   VergiTutari       Numeric(22,8) null, /*  ""  */
+   
+   constraint		pk_IStokFaturaEkVergi primary key (Id)
+ )
+
+ create index X_IStokFaturaEkVergi01 on IStokFaturaEkVergi (FirmId,StokId)
+ 
+ grant select, insert, update, delete on IStokFaturaEkVergi to public
+
+
+ /*
+
+GIP vs GTIP Farkı
+Özellik             GIP Kodu                          GTIP Kodu
+Kullanım Amacı	    e-Fatura, e-Arşiv Fatura          Gümrük beyanları, ithalat/ihracat
+Uzunluk	            8 haneli                          8-12 haneli (GTIP+Ek Kodlar)
+Yetkili Kurum	    Gelir İdaresi Başkanlığı (GIB)    Gümrük ve Ticaret Bakanlığı
+
+ */
+
+

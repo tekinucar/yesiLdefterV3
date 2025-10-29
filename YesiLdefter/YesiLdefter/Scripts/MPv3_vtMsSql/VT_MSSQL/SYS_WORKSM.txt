@@ -1,0 +1,23 @@
+
+
+
+begin transaction
+ create table SYS_WORKSM
+ (
+        ID                Int IDENTITY(1,1) NOT NULL,
+        LINE_NO           Int                   NULL,
+        WR_CODE           VarChar(50)   NULL,
+        PARENT_CODE       VarChar(50)   NULL,
+        WR_NAME           VarChar(100)  NULL,
+        WR_ABOUT          VarChar(200)  NULL,
+        WR_TYPE           SmallInt      NULL, /* 0.Tanımsız, 1.Veri Girişi, 2. Veri Listeleme, 3. Veri Üretme  */
+        
+   Constraint PK_SYS_WORKSM primary key (ID)
+ )
+
+ create index X_SYS_WORKSM1 on SYS_WORKSM (WR_CODE)
+ create index X_SYS_WORKSM2 on SYS_WORKSM (WR_NAME)
+ 
+ grant select, insert, update, delete on SYS_WORKSM to public
+
+commit transaction

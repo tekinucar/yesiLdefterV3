@@ -1,0 +1,66 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table OnmVezneKullanici
+ (
+
+   Id                Int IDENTITY(1,1) NOT NULL, 
+   ParentId          Int       not null, /* default 0 */
+   FirmId            Int       not null,
+   IsActive          Bit       not null, /* default : 1 = active, 0 = not active */  
+   UserId            Int           null,
+   VezneId           Int           null,
+   SiraNo            SmallInt      null,
+
+   constraint		pk_OnmVezneKullanici primary key (Id)
+ )
+
+ create index X_OnmVezneKullanici01 on OnmVezneKullanici (FirmId,UserId)
+ 
+ grant select, insert, update, delete on OnmVezneKullanici to public
+ 
+commit transaction
+
+/*CreateTableEnd*/
+
+
+/* gerek kalmadı */
+
+CREATE TRIGGER [dbo].[trg_OnmVezneKullanici] on [dbo].[OnmVezneKullanici_GEREK_KALMADI]
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    DECLARE ovkCursor cursor for select Id from Inserted
+    DECLARE @curId bigint
+
+    OPEN ovkCursor
+
+    FETCH NEXT FROM ovkCursor INTO @curId
+
+    declare @UserId int 
+    declare @UserId_ int
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+    /* gerek kalmadı
+        Select
+         @UserId = isnull(ins.[UserId],0)
+        ,@UserId_ = isnull(ins.[UserId_],0)
+        From inserted ins
+		where ins.Id = @curId
+
+		if ((@UserId = 0) and (@UserId_ > 0))
+        begin
+          update dbo.OnmVezneKullanici set
+            UserId = @UserId_
+          Where Id = @curId
+        end
+	  */		   		 
+      FETCH NEXT FROM ovkCursor INTO @curId
+    END -- While
+
+    CLOSE ovkCursor
+    DEALLOCATE ovkCursor   
+
+END -- create trigger

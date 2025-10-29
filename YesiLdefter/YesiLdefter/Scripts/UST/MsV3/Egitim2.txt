@@ -1,0 +1,68 @@
+﻿
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[Egitim2](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[parentId] [int] NULL,
+	[kaynakId] [int] NULL,
+	[kaynakKolon] [nvarchar](5) NULL,
+	[konu] [nvarchar](255) NULL,
+	[siraNo] [smallint] NULL,
+	[contentHTML] [varchar](max) NULL,
+ CONSTRAINT [pk_Egitim2] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+
+
+
+
+/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_Egitim2DetailList] (@_XID int)  
+AS BEGIN
+
+--declare @_XID int
+--set @_XID = 11
+
+;WITH CTE
+     AS  (
+         Select e2.Id, e2.Id U_Id
+         From Egitim2 as e2
+         Where e2.ParentId = @_XID
+
+         Union all
+
+         Select e2.Id, e2.Id U_Id
+         From Egitim2 as e2
+         Where e2.Id = @_XID
+
+		 Union all
+
+		 Select c.U_Id, e2.Id 
+         From CTE as c
+            Join Egitim2 as e2 ON C.U_Id = e2.ParentId
+     )
+  Select distinct e2.Id 
+      ,e2.[parentId]
+      ,e2.[kaynakId]
+      ,e2.[kaynakKolon]
+      ,e2.[konu]
+      ,e2.[siraNo]
+      ,e2.[contentHTML]
+
+  from CTE as c
+    left outer join Egitim2 as e2 on ( c.U_Id = e2.Id )
+
+
+END -- procedure
+
+/*CreateProcedureEnd*/
+
+

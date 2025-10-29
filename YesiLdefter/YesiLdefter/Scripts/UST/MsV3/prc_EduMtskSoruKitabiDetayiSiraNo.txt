@@ -1,0 +1,23 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_EduMtskSoruKitabiDetayiSiraNo] (@KitapNo int)  
+AS BEGIN
+
+--declare @KitapNo int
+--set @KitapNo = 201
+
+  Update [dbo].[EduMtskSoruKitabiDetayi] set
+  SiraNo = x.Lkp_SoruNo
+  from [dbo].[EduMtskSoruKitabiDetayi] as a, 
+  (
+    Select detay.Id
+    , ROW_NUMBER() OVER(ORDER BY detay.DersTipiId, detay.EduMtskKonularId, detay.EduMtskSorularId ASC) AS Lkp_SoruNo
+    from [dbo].[EduMtskSoruKitabiDetayi] as detay
+    Where detay.KitapNo = @KitapNo 
+  ) as x
+  Where a.Id = x.Id
+
+END -- procedure
+
+/*CreateProcedureEnd*/
+GO

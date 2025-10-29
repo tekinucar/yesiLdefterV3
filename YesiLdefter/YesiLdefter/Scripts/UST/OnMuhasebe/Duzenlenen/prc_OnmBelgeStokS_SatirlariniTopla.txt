@@ -1,0 +1,104 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_OnmBelgeStokS_SatirlariniTopla]
+    @BelgeStokBId INT
+AS
+BEGIN
+
+  SET NOCOUNT ON;
+
+  ;With SatirlarinToplami as (
+    Select 
+        BelgeStokBId
+      --  ToplamTutar 
+      , sum(ToplamOTVliTutari) as ToplamOTVliTutari -- FsIOVergisizToplamTutar
+      --, ToplamOTVKdvliTutar 
+      --, OvtTutari 
+      --, KdvTutari 
+      , sum(IskontoTutariToplam) as IskontoTutariToplam -- FsIskontoTutariToplam
+      
+	  --, ISBirimFiyati 
+      --, ISBirimFiyatiOtvli
+      --, ISBirimFiyatiOtvKdvli 
+      , sum(ISVergisizToplamTutar) as ISVergisizToplamTutar -- FsISVergisizToplamTutar  
+      , sum(ISEkVergiTutari) as ISEkVergiTutari -- FsEkVergiTutari
+      , sum(ISOtvTutari) as ISOtvTutari -- FsOtvTutari 
+      --, ISKdvMatrahi 
+      , sum(ISKdvTutari) as ISKdvTutari -- FsKdvToplami 
+      , sum(ISToplamTutarNormalKdvli) as ISToplamTutarNormalKdvli -- FsToplamTutarNormalKdvli 
+      , sum(ISStopajTutari) as ISStopajTutari -- FsStopajTutari  
+      , sum(ISToplamTutarNormalKdvliNet) as ISToplamTutarNormalKdvliNet -- FsToplamTutarNormalKdvliNet 
+      , sum(ISTevkifatTutariAliciyaAit) as ISTevkifatTutariAliciyaAit -- FsTevkifatTutariAliciyaAit
+      , sum(ISHesaplananKdvSaticiyaAit) as ISHesaplananKdvSaticiyaAit -- FsHesaplananKdvSaticiyaAit 
+      , sum(ISToplamTutarTevkifatKdvli) as ISToplamTutarTevkifatKdvli -- FsToplamTutarTevkifatKdvli 
+      --, dISVergilerDahilToplamTutar 
+      , sum(ISVergilerDahilToplamTutar) as ISVergilerDahilToplamTutar -- FsVergilerDahilToplamTutar 
+    From   dbo.OnmBelgeStokS 
+    Where  BelgeStokBId  = @BelgeStokBId
+	Group by BelgeStokBId
+  ) -- with
+  --Select * from SatirlarinToplami
+  Update b Set
+      FsIOVergisizToplamTutar = s.ToplamOTVliTutari 
+    , FsIskontoTutariToplam = s.IskontoTutariToplam
+	, FsISVergisizToplamTutar = s.ISVergisizToplamTutar
+
+	, FsEkVergiTutari = s.ISEkVergiTutari
+	, FsOtvTutari = s.ISOtvTutari
+	, FsKdvToplami = s.ISKdvTutari
+	, FsToplamTutarNormalKdvli = s.ISToplamTutarNormalKdvli
+	, FsStopajTutari = s.ISStopajTutari
+	, FsToplamTutarNormalKdvliNet = s.ISToplamTutarNormalKdvliNet
+
+	, FsTevkifatTutariAliciyaAit = s.ISTevkifatTutariAliciyaAit
+	, FsHesaplananKdvSaticiyaAit = s.ISHesaplananKdvSaticiyaAit
+	, FsToplamTutarTevkifatKdvli = s.ISToplamTutarTevkifatKdvli
+
+	, FsVergilerDahilToplamTutar = s.ISVergilerDahilToplamTutar
+  From dbo.OnmBelgeStokB as b
+  JOIN SatirlarinToplami as s ON ( b.Id = s.BelgeStokBId )
+
+
+  ;With SatirlarinKdvToplami as (
+    Select 
+        BelgeStokBId
+	  , (case KdvOrani when 20 then sum(ISKdvMatrahi) end ) as FsKdv1Matrahi
+      , (case KdvOrani when 20 then KdvOrani end) as FsKdv1Orani
+      , (case KdvOrani when 20 then sum(ISKdvTutari) end) as FsKdv1Tutari
+
+	  , (case KdvOrani when 10 then sum(ISKdvMatrahi) end ) as FsKdv2Matrahi
+      , (case KdvOrani when 10 then KdvOrani end) as FsKdv2Orani
+      , (case KdvOrani when 10 then sum(ISKdvTutari) end) as FsKdv2Tutari
+
+	  , (case KdvOrani when 1 then sum(ISKdvMatrahi) end ) as FsKdv3Matrahi
+      , (case KdvOrani when 1 then KdvOrani end) as FsKdv3Orani
+      , (case KdvOrani when 1 then sum(ISKdvTutari) end) as FsKdv3Tutari
+
+      , sum(ISKdvTutari) as FsKdvToplami
+
+    From   dbo.OnmBelgeStokS 
+    Where  BelgeStokBId  = @BelgeStokBId
+	Group by BelgeStokBId, KdvOrani
+  ) -- with
+  --Select * from SatirlarinKdvToplami
+  Update b Set
+      FsKdv1Matrahi = s.FsKdv1Matrahi
+    , FsKdv1Orani = s.FsKdv1Orani
+	, FsKdv1Tutari = s.FsKdv1Tutari
+
+    , FsKdv2Matrahi = s.FsKdv2Matrahi
+    , FsKdv2Orani = s.FsKdv2Orani
+	, FsKdv2Tutari = s.FsKdv2Tutari
+
+    , FsKdv3Matrahi = s.FsKdv3Matrahi
+    , FsKdv3Orani = s.FsKdv3Orani
+	, FsKdv3Tutari = s.FsKdv3Tutari
+
+  From dbo.OnmBelgeStokB as b
+  JOIN SatirlarinKdvToplami as s ON ( b.Id = s.BelgeStokBId )
+
+
+END --
+
+
+/*CreateProcedureEnd*/

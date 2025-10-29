@@ -1,0 +1,152 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table MtskDerslik
+ (
+   Id                   Int IDENTITY(1,1) not null, 
+   ParentId             Int       not null, /* default 0 */
+   FirmId               Int       not null,
+   IsActive             Bit       not null, /* default : 1 = active, 0 = not active */  
+
+   DerslikTipiId        SmallInt  not null, /* 1. Trafik ve Çevre Bilgisi, İlk Yardım, Araç Tekniği */
+   DerslikAdiTipiId     SmallInt  not null, /* Derslik-1, -2 ... -10 */
+   OdaKontenjani        SmallInt      null,
+   OdaninDurumTipiId    SmallInt      null, /* 0. belirsiz, 1. Açık, 2. Kapalı */
+   OdaAcilmaTarihi      Date          null,
+   OdaKapanmaTarihi     Date          null,
+   KurumOnayTipiId      SmallInt      null, /* BAŞLANGIÇ --Seçiniz--, 1-Onay Bekliyor, 2-Onaylandı */		
+
+   constraint		pk_MtskDerslik primary key (Id)
+ )
+  
+ grant select, insert, update, delete on MtskDerslik to public
+
+commit transaction
+
+/*CreateTableEnd*/
+
+/*CreateLkpTable*/
+
+begin transaction
+
+-- ------------------------------------------------------- 
+-- DerslikTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskDerslikDerslikTipi')
+drop table [Lkp].[MtskDerslikDerslikTipi]
+
+create table Lkp.MtskDerslikDerslikTipi
+(
+   Id          Int Unique Not Null,
+   DerslikTipi nVarchar(30)   null,
+   
+   constraint  pk_MtskDerslikDerslikTipi primary key (Id)
+)
+
+INSERT INTO Lkp.MtskDerslikDerslikTipi (Id, DerslikTipi)
+ VALUES 
+  (0, N''),
+  (1, N'Trafik ve Çevre Bilgisi'),
+  (2, N'İlk Yardım'),
+  (3, N'Araç Tekniği')
+  --,(5, N'Trafik Adabı')
+
+-- ------------------------------------------------------- 
+-- DerslikAdiTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskDerslikDerslikAdiTipi')
+drop table [Lkp].[MtskDerslikDerslikAdiTipi]
+
+create table Lkp.MtskDerslikDerslikAdiTipi
+(
+   Id             Int Unique Not Null,
+   IsActive       Bit            null, 
+   DerslikAdiTipi nVarchar(10)   null,
+
+   constraint  pk_MtskDerslikDerslikAdiTipi primary key (Id)
+)
+
+INSERT INTO Lkp.MtskDerslikDerslikAdiTipi (Id, IsActive, DerslikAdiTipi)
+ VALUES 
+  ( 0, 0, N''),
+  ( 1, 0, N'Derslik-1'),
+  ( 2, 0, N'Derslik-2'),
+  ( 3, 0, N'Derslik-3'),
+  ( 4, 0, N'Derslik-4'),
+  ( 5, 0, N'Derslik-5'),
+  ( 6, 0, N'Derslik-6'),
+  ( 7, 0, N'Derslik-7'),
+  ( 8, 0, N'Derslik-8'),
+  ( 9, 0, N'Derslik-9'),
+  (10, 0, N'Derslik-10')
+
+
+-- ------------------------------------------------------- 
+-- OdaninDurumTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskDerslikOdaninDurumTipi')
+drop table [Lkp].[MtskDerslikOdaninDurumTipi]
+
+create table Lkp.MtskDerslikOdaninDurumTipi
+(
+   Id              Int Unique Not Null,
+   OdaninDurumTipi nVarchar(10)   null
+   
+   constraint  pk_MtskDerslikOdaninDurumTipi primary key (Id)
+)
+
+INSERT INTO Lkp.MtskDerslikOdaninDurumTipi (Id, OdaninDurumTipi)
+ VALUES 
+  (0, N''),
+  (1, N'Açık'),
+  (2, N'Kapalı')
+
+commit transaction
+
+/*CreateLkpTableEnd*/
+
+
+/*CreateTrigger*/
+
+CREATE TRIGGER [dbo].[trg_MtskDerslik] on [dbo].[MtskDerslik]
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    DECLARE curDerslik cursor local for select Id from Inserted
+    DECLARE @curId bigint
+
+    OPEN curDerslik
+    FETCH NEXT FROM curDerslik INTO @curId
+    
+    declare @IsActive bit = 0
+	declare @DerslikAdiTipiId SmallInt = 0
+    declare @OdaninDurumTipiId SmallInt = 0
+	declare @newActive bit = 0
+	
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        select 
+		  @IsActive = ins.IsActive
+        , @DerslikAdiTipiId = ins.DerslikAdiTipiId
+        , @OdaninDurumTipiId = isnull(ins.OdaninDurumTipiId,0)
+        from inserted ins
+    	where ins.Id = @curId
+
+		if (@IsActive = 0 or @OdaninDurumTipiId = 0 or @OdaninDurumTipiId = 2) 
+		    set @newActive = 0 
+        else set @newActive = 1 
+
+		update Lkp.MtskDerslikDerslikAdiTipi set IsActive = @newActive
+		Where Id = @DerslikAdiTipiId
+		
+        FETCH NEXT FROM curDerslik INTO @curId
+    END -- While
+
+    CLOSE curDerslik
+    DEALLOCATE curDerslik
+END -- create trigger
+
+/*CreateTriggerEnd*/
+
+

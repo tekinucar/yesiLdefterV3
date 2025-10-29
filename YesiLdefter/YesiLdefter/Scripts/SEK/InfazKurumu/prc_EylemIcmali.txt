@@ -1,0 +1,636 @@
+﻿USE [u7093888_Ustad01]
+GO
+
+/****** Object:  StoredProcedure [dbo].[prc_EylemIcmali]    Script Date: 07.10.2020 15:51:16 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[prc_EylemIcmali] (@yFirmId int, @yTarihSaat Date)  
+--CREATE PROCEDURE [dbo].[prc_EylemIcmali] (@yFirmId int, @yTarihSaat Date)  
+AS BEGIN 
+   
+  --print 'EylemIcmali hazırlanıyor'
+  declare @eylemIcmaliId int = -1
+  
+  Select @eylemIcmaliId = [Id]
+  From [dbo].[EylemIcmali]
+  Where [FirmId] = @yFirmId
+  and   [EylemTipiId] = 110
+  and   convert(date,[Tarih]) = convert(date, @yTarihSaat)
+  
+  if (@eylemIcmaliId = -1)
+  begin
+      --print 'eylem icmal insert'  
+	  
+	  --[Lkp].[EylemIcmaliEylemTipi]
+      --  0, 'Tanımsız'
+      --110, 'Toplam'
+      --120, 'İzinli Bugün'
+      --122, 'İzinli Tamamı'
+      --130, 'Hastane Bugün'
+      --132, 'Hastane Tamamı'
+      --140, 'Görüş'
+      --150, 'Görevde'
+      --160, 'Yeni Gelen'
+      --170, 'Tahliye'
+      --172, 'Sevk/Nakil'
+      --190, 'Mevcut'
+      
+	  INSERT INTO [dbo].[EylemIcmali] ([FirmId],[Tarih],[IsActive],[EylemTipiId]) VALUES (@yFirmId, @yTarihSaat, 1, 110 )
+	  INSERT INTO [dbo].[EylemIcmali] ([FirmId],[Tarih],[IsActive],[EylemTipiId]) VALUES (@yFirmId, @yTarihSaat, 1, 112 )
+	  INSERT INTO [dbo].[EylemIcmali] ([FirmId],[Tarih],[IsActive],[EylemTipiId]) VALUES (@yFirmId, @yTarihSaat, 1, 120 )
+	  INSERT INTO [dbo].[EylemIcmali] ([FirmId],[Tarih],[IsActive],[EylemTipiId]) VALUES (@yFirmId, @yTarihSaat, 1, 122 )
+	  INSERT INTO [dbo].[EylemIcmali] ([FirmId],[Tarih],[IsActive],[EylemTipiId]) VALUES (@yFirmId, @yTarihSaat, 1, 130 )
+	  INSERT INTO [dbo].[EylemIcmali] ([FirmId],[Tarih],[IsActive],[EylemTipiId]) VALUES (@yFirmId, @yTarihSaat, 1, 132 )
+	  INSERT INTO [dbo].[EylemIcmali] ([FirmId],[Tarih],[IsActive],[EylemTipiId]) VALUES (@yFirmId, @yTarihSaat, 1, 140 )
+	  INSERT INTO [dbo].[EylemIcmali] ([FirmId],[Tarih],[IsActive],[EylemTipiId]) VALUES (@yFirmId, @yTarihSaat, 1, 150 )
+	  INSERT INTO [dbo].[EylemIcmali] ([FirmId],[Tarih],[IsActive],[EylemTipiId]) VALUES (@yFirmId, @yTarihSaat, 1, 160 )
+	  INSERT INTO [dbo].[EylemIcmali] ([FirmId],[Tarih],[IsActive],[EylemTipiId]) VALUES (@yFirmId, @yTarihSaat, 1, 170 )
+	  INSERT INTO [dbo].[EylemIcmali] ([FirmId],[Tarih],[IsActive],[EylemTipiId]) VALUES (@yFirmId, @yTarihSaat, 1, 172 )
+	  INSERT INTO [dbo].[EylemIcmali] ([FirmId],[Tarih],[IsActive],[EylemTipiId]) VALUES (@yFirmId, @yTarihSaat, 1, 190 )
+	  Select @@IDENTITY
+
+  end
+  
+  -- tüm eylem hareketleri - bugün
+
+  UPDATE [dbo].[EylemIcmali]
+  SET [Planlanan] = sonuc.Planlanan
+     ,[Cikan] = sonuc.Cikan
+     ,[Cikmayan] = sonuc.Cikmayan
+     ,[Giren] = sonuc.Giren
+     ,[Girmeyen] = sonuc.Girmeyen
+     ,[Mevcut] = sonuc.Girmeyen
+  FROM [dbo].[EylemIcmali] EI,
+  (
+    Select FirmId, Tarih, EylemTipiId
+    , sum(Planlanan) as Planlanan
+    , sum(Cikan)     as Cikan
+    , sum(Cikmayan)  as Cikmayan
+    , sum(Giren)     as Giren
+    , sum(Girmeyen)  as Girmeyen from (
+
+  	-- Boş kayıtlar 
+    Select @yFirmId as FirmId, convert(date, @yTarihSaat) Tarih
+	, 112 as EylemTipiId, 0 as Planlanan, 0 as Cikan, 0 as Cikmayan, 0 as Giren, 0 as Girmeyen
+	union all 
+    Select @yFirmId as FirmId, convert(date, @yTarihSaat) Tarih
+	, 120 as EylemTipiId, 0 as Planlanan, 0 as Cikan, 0 as Cikmayan, 0 as Giren, 0 as Girmeyen
+	union all 
+    Select @yFirmId as FirmId, convert(date, @yTarihSaat) Tarih
+	, 130 as EylemTipiId, 0 as Planlanan, 0 as Cikan, 0 as Cikmayan, 0 as Giren, 0 as Girmeyen
+	union all 
+	Select @yFirmId as FirmId, convert(date, @yTarihSaat) Tarih
+	, 140 as EylemTipiId, 0 as Planlanan, 0 as Cikan, 0 as Cikmayan, 0 as Giren, 0 as Girmeyen
+	union all 
+	Select @yFirmId as FirmId, convert(date, @yTarihSaat) Tarih
+	, 150 as EylemTipiId, 0 as Planlanan, 0 as Cikan, 0 as Cikmayan, 0 as Giren, 0 as Girmeyen
+	union all 
+	
+	Select FirmId, convert(date,BaslamaTarihSaat) Tarih, EylemTipiId
+    , count(Id) as Planlanan
+    , 0 as Cikan
+    , 0 as Cikmayan
+    , 0 as Giren
+    , 0 as Girmeyen
+    From [dbo].[EylemPlani]
+    Where IsCancel = 0
+    and FirmId = @yFirmId
+	and convert(date,BaslamaTarihSaat) = convert(date, @yTarihSaat)
+    Group by FirmId, convert(date,BaslamaTarihSaat), EylemTipiId
+    
+	union all 
+    
+	Select FirmId, convert(date,BaslamaTarihSaat) Tarih, EylemTipiId
+    , 0 as Planlanan
+    , count(Id) as Cikan
+    , 0 as Cikmayan
+    , 0 as Giren
+    , 0 as Girmeyen
+    From [dbo].[EylemPlani]
+    Where IsCancel = 0
+    and FirmId = @yFirmId
+	and convert(date,BaslamaTarihSaat) = convert(date, @yTarihSaat)
+    and isnull(CikisCihazKaydiId,0) <> 0
+    --and isnull(GirisCihazKaydiId,0) = 0
+    Group by FirmId, convert(date,BaslamaTarihSaat), EylemTipiId
+    
+	union all 
+    
+	Select FirmId, convert(date,BaslamaTarihSaat) Tarih, EylemTipiId
+    , 0 as Planlanan
+    , 0 as Cikan
+    , count(Id) as Cikmayan
+    , 0 as Giren
+    , 0 as Girmeyen
+    From [dbo].[EylemPlani]
+    Where IsCancel = 0
+    and FirmId = @yFirmId
+	and convert(date,BaslamaTarihSaat) = convert(date, @yTarihSaat)
+    and isnull(CikisCihazKaydiId,0) = 0
+    and isnull(GirisCihazKaydiId,0) = 0
+    Group by FirmId, convert(date,BaslamaTarihSaat), EylemTipiId
+    
+	union all   
+    
+	-- Bugün çıkıp, bugün geri dönen
+	Select FirmId, convert(date,BitisTarihSaat) Tarih, EylemTipiId
+    , 0 as Planlanan
+    , 0 as Cikan
+    , 0 as Cikmayan
+    , count(Id) as Giren
+    , 0 as Girmeyen
+    From [dbo].[EylemPlani]
+    Where IsCancel = 0
+    and FirmId = @yFirmId
+	and IsActive = 0
+    and convert(date,BaslamaTarihSaat) = convert(date, @yTarihSaat)
+    and convert(date,BitisTarihSaat) = convert(date, @yTarihSaat)
+    and isnull(CikisCihazKaydiId,0) <> 0
+    and isnull(GirisCihazKaydiId,0) <> 0
+    Group by FirmId, convert(date,BitisTarihSaat), EylemTipiId
+    
+	union all 
+
+    --Bugün çıkıp bugün dönmesi gerektiği halde dönmeyen
+	Select FirmId, convert(date,BitisTarihSaat) Tarih, EylemTipiId
+    , 0 as Planlanan
+    , 0 as Cikan
+    , 0 as Cikmayan
+    , 0 as Giren
+    , count(Id) as Girmeyen
+    From [dbo].[EylemPlani]
+    Where IsCancel = 0
+    and FirmId = @yFirmId
+	and convert(date,BaslamaTarihSaat) = convert(date, @yTarihSaat)
+    and convert(date,BitisTarihSaat) = convert(date, @yTarihSaat)
+    and isnull(CikisCihazKaydiId,0) <> 0
+    and isnull(GirisCihazKaydiId,0) = 0
+    Group by FirmId, convert(date,BitisTarihSaat), EylemTipiId
+    
+	) toplam
+
+    group by toplam.FirmId, toplam.Tarih, toplam.EylemTipiId
+  ) sonuc
+
+  Where 0 = 0 
+  and EI.FirmId = sonuc.FirmId
+  and EI.Tarih = sonuc.Tarih
+  and EI.EylemTipiId = sonuc.EylemTipiId
+  
+  -- 122 ve 132 eylem hareketleri - öncekiler ve bugün
+  
+  --planlanan : 0 //baslamagunu = bugun, iscancel = false
+  --çıkan     : baslamagunu <= bugun, giriş yok,isactive true -tümü
+  --çıkmayan  : 0 //bugun ( bugun öncekileri isactive false yap )
+  --giren     : bitisgunu <= bugun, hareket gunu bugun
+  --girmeyen  : bitisgunu <= bugun, giriş yok, isactive = true
+  
+  UPDATE [dbo].[EylemIcmali]
+  SET [Planlanan] = sonuc.Planlanan
+     ,[Cikan] = sonuc.Cikan
+     ,[Cikmayan] = sonuc.Cikmayan
+     ,[Giren] = sonuc.Giren
+     ,[Girmeyen] = sonuc.Girmeyen
+     ,[Mevcut] = sonuc.Girmeyen
+  FROM [dbo].[EylemIcmali] EI,
+  (
+    Select FirmId, Tarih, EylemTipiId
+    , sum(Planlanan) as Planlanan
+    , sum(Cikan)     as Cikan
+    , sum(Cikmayan)  as Cikmayan
+    , sum(Giren)     as Giren
+    , sum(Girmeyen)  as Girmeyen from (
+	
+    -- Boş kayıtlar 
+    Select @yFirmId as FirmId, convert(date, @yTarihSaat) Tarih
+	, 122 as EylemTipiId, 0 as Planlanan, 0 as Cikan, 0 as Cikmayan, 0 as Giren, 0 as Girmeyen
+	union all 
+	Select @yFirmId as FirmId, convert(date, @yTarihSaat) Tarih
+	, 132 as EylemTipiId, 0 as Planlanan, 0 as Cikan, 0 as Cikmayan, 0 as Giren, 0 as Girmeyen
+	union all 
+
+	--planlanan : 0 //baslamagunu = bugun, iscancel = false
+    Select FirmId, convert(date, @yTarihSaat) Tarih
+	, (EylemTipiId + 2) as EylemTipiId
+    , 0 as Planlanan
+    , 0 as Cikan
+    , 0 as Cikmayan
+    , 0 as Giren
+    , 0 as Girmeyen
+    From [dbo].[EylemPlani]
+    Where IsCancel = 0
+	--and IsActive = 1
+    and FirmId = @yFirmId
+	and ( EylemTipiId = 120 or EylemTipiId = 130 )
+	and convert(date,BaslamaTarihSaat) = convert(date, @yTarihSaat)
+	Group by FirmId, EylemTipiId
+    
+	union all 
+    
+	--çıkan     : baslamagunu <= bugun, giriş yok,isactive true -tümü
+	Select FirmId, convert(date,max(BaslamaTarihSaat)) Tarih
+	, (EylemTipiId + 2) as EylemTipiIde
+    , 0 as Planlanan
+    , count(Id) as Cikan
+    , 0 as Cikmayan
+    , 0 as Giren
+    , 0 as Girmeyen
+    From [dbo].[EylemPlani]
+    Where IsCancel = 0
+	--and IsActive = 1
+    and FirmId = @yFirmId
+	--and convert(date,BaslamaTarihSaat) = convert(date, @yTarihSaat)
+    --and isnull(CikisCihazKaydiId,0) <> 0
+    --and isnull(GirisCihazKaydiId,0) = 0
+    and ( EylemTipiId = 120 or EylemTipiId = 130 ) 
+    and convert(date,isnull(CikisTarihi,convert(date,'1900.01.01'))) = convert(date, @yTarihSaat)
+	Group by FirmId, EylemTipiId
+    
+	union all 
+    
+	--çıkmayan  : 0 //bugun ( bugun öncekileri isactive false yap )
+    Select FirmId, convert(date, @yTarihSaat) Tarih
+	, (EylemTipiId + 2) as EylemTipiId
+    , 0 as Planlanan
+    , 0 as Cikan
+    , 0 as Cikmayan
+    , 0 as Giren
+    , 0 as Girmeyen
+    From [dbo].[EylemPlani]
+    Where IsCancel = 0
+	--and IsActive = 1
+    and FirmId = @yFirmId
+	--and convert(date,BaslamaTarihSaat) <= convert(date, @yTarihSaat)
+    --and isnull(CikisCihazKaydiId,0) = 0
+    --and isnull(GirisCihazKaydiId,0) = 0
+    and ( EylemTipiId = 120 or EylemTipiId = 130 ) 
+	and (
+	     convert(date,isnull(CikisTarihi,convert(date,'1900.01.01'))) > convert(date, @yTarihSaat) or
+	     convert(date,isnull(CikisTarihi,convert(date,'1900.01.01'))) = convert(date,'1900.01.01')
+		)
+	Group by FirmId, EylemTipiId
+    
+	union all   
+    
+	--giren     : bitisgunu <= bugun, hareket gunu bugun
+    Select ep.FirmId, convert(date, @yTarihSaat) Tarih
+	, (ep.EylemTipiId + 2) as EylemTipiId
+    , 0 as Planlanan
+    , 0 as Cikan
+    , 0 as Cikmayan
+    , count(ep.Id) as Giren
+    , 0 as Girmeyen
+    From [dbo].[EylemPlani] as ep--, [dbo].[CihazKaydi] as ck
+    Where ep.IsCancel = 0
+    and ep.FirmId = @yFirmId
+	--and ep.IsActive = 0
+    --and isnull(ep.CikisCihazKaydiId,0) <> 0
+    --and isnull(ep.GirisCihazKaydiId,0) <> 0
+    and convert(date,GirisTarihi) = convert(date, @yTarihSaat)
+	and ( EylemTipiId = 120 or EylemTipiId = 130 ) 
+	and convert(date,isnull(GirisTarihi,convert(date,'1900.01.01'))) = convert(date, @yTarihSaat)
+    --and ep.GirisCihazKaydiId = ck.Id
+	--and convert(date, ck.TarihSaat) = convert(date, @yTarihSaat) 
+	Group by ep.FirmId, ep.EylemTipiId
+    
+	union all 
+    
+	--  eksi100 önceden izne çıkmış kişilerin çıkış kayıtları için 
+	-- işaret Id si
+
+	--girmeyen  : bitisgunu <= bugun, giriş yok, isactive = true
+    -- izin
+    Select ep.FirmId, convert(date, @yTarihSaat) Tarih
+	, (ep.EylemTipiId + 2) as EylemTipiId
+    , 0 as Planlanan
+    , 0 as Cikan
+    , 0 as Cikmayan
+    , 0 as Giren
+    , count(ep.Id) as Girmeyen
+    From [dbo].[EylemPlani] as ep
+    Where ep.IsCancel = 0
+	--and ep.IsActive = 1
+    and ep.FirmId = @yFirmId
+	and isnull(ep.CikisCihazKaydiId,0) <> 0
+    --and isnull(ep.GirisCihazKaydiId,0) = 0
+    and ( ep.EylemTipiId = 120 or EylemTipiId = 130 )
+	and (
+	     convert(date,isnull(GirisTarihi,convert(date,'1900.01.01'))) > convert(date, @yTarihSaat) or
+	     convert(date,isnull(GirisTarihi,convert(date,'1900.01.01'))) = convert(date,'1900.01.01')
+		)
+	     
+    Group by ep.FirmId, ep.EylemTipiId
+           	 
+	) toplam
+
+    Group by toplam.FirmId, toplam.Tarih, toplam.EylemTipiId
+  ) sonuc
+
+  Where 0 = 0 
+  and EI.FirmId = sonuc.FirmId
+  and EI.Tarih = sonuc.Tarih
+  and EI.EylemTipiId = sonuc.EylemTipiId
+
+  -- 110, 160, 170, 172 : Toplam, Yeni Giriş, Tahliye, Sevk/Nakil
+  
+  UPDATE [dbo].[EylemIcmali]
+  SET [Planlanan] = sonuc.Planlanan
+     ,[Cikan] = sonuc.Cikan
+     ,[Cikmayan] = sonuc.Cikmayan
+     ,[Giren] = sonuc.Giren
+     ,[Girmeyen] = sonuc.Girmeyen
+     ,[Mevcut] = sonuc.Mevcut
+  FROM [dbo].[EylemIcmali] EI,
+  (
+    Select FirmId, Tarih, EylemTipiId
+    , sum(Planlanan) as Planlanan
+    , sum(Cikan)     as Cikan
+    , sum(Cikmayan)  as Cikmayan
+    , sum(Giren)     as Giren
+    , sum(Girmeyen)  as Girmeyen 
+	, sum(Mevcut)    as Mevcut from (
+
+	-- Boş kayıtlar 
+    Select @yFirmId as FirmId, convert(date, @yTarihSaat) Tarih
+	, 110 as EylemTipiId, 0 as Planlanan, 0 as Cikan, 0 as Cikmayan, 0 as Giren, 0 as Girmeyen, 0 as Mevcut
+	union all 
+    Select @yFirmId as FirmId, convert(date, @yTarihSaat) Tarih
+	, 160 as EylemTipiId, 0 as Planlanan, 0 as Cikan, 0 as Cikmayan, 0 as Giren, 0 as Girmeyen, 0 as Mevcut
+	union all 
+    Select @yFirmId as FirmId, convert(date, @yTarihSaat) Tarih
+	, 170 as EylemTipiId, 0 as Planlanan, 0 as Cikan, 0 as Cikmayan, 0 as Giren, 0 as Girmeyen, 0 as Mevcut
+	union all 
+    Select @yFirmId as FirmId, convert(date, @yTarihSaat) Tarih
+	, 172 as EylemTipiId, 0 as Planlanan , 0 as Cikan, 0 as Cikmayan, 0 as Giren, 0 as Girmeyen, 0 as Mevcut
+	union all 
+
+	-- Toplam Kişi
+    Select cio.FirmId, convert(date, @yTarihSaat) Tarih
+	, 110 as EylemTipiId 
+    , count(cio.Id) as Planlanan -- Mevcuda da aynısı işlenecek
+    , 0 as Cikan
+    , 0 as Cikmayan
+	, 0 as Giren
+	, 0 as Girmeyen
+	, count(cio.Id) as Mevcut
+    From [dbo].[CariIO]    as cio 
+        ,[dbo].[HesapCari] as ch
+    Where cio.IsActive = 1
+    and   cio.FirmId = @yFirmId
+	and   cio.CariId = ch.Id
+    and   isnull(cio.CikisCihazKaydiId,0) = 0
+    and   convert(date, cio.GirisTarihi) <= convert(date, @yTarihSaat)
+	Group by cio.FirmId
+
+	union all
+
+	-- Yeni Giriş
+    Select cio.FirmId, convert(date, @yTarihSaat) Tarih
+	, 160 as EylemTipiId 
+    , count(cio.Id) as Planlanan -- Mevcuda da aynısı işlenecek
+    , 0 as Cikan
+    , 0 as Cikmayan
+	, 0 as Giren
+	, 0 as Girmeyen
+	, count(cio.Id) as Mevcut
+    From [dbo].[CariIO]    as cio 
+	    ,[dbo].[HesapCari] as ch
+    Where 0 = 0 --IsActive = 1
+    and   cio.FirmId = @yFirmId
+	and   cio.CariId = ch.Id
+    and   convert(date, cio.GirisTarihi) = convert(date, @yTarihSaat)
+	Group by cio.FirmId
+
+    union all 
+
+	-- Yeni Giriş yapan cihazdan okutarak girdiyse
+    Select cio.FirmId, convert(date, @yTarihSaat) Tarih
+	, 160 as EylemTipiId
+    , 0 as Planlanan
+    , 0 as Cikan
+    , 0 as Cikmayan
+	, count(cio.Id) as Giren
+    , 0 as Girmeyen
+	, 0 as Mevcut
+    From [dbo].[CariIO]    as cio 
+	    ,[dbo].[HesapCari] as ch
+    Where 0 = 0 -- cio.IsActive = 1
+    and   cio.FirmId = @yFirmId
+	and   cio.CariId = ch.Id
+    and   convert(date, cio.GirisTarihi) = convert(date, @yTarihSaat)
+	and   cio.GirisCihazKaydiId > 0 
+	Group by cio.FirmId
+
+	union all
+
+	-- Yeni Giriş fakat cihazdan okutmamıs
+    Select cio.FirmId, convert(date, @yTarihSaat) Tarih
+	, 160 as EylemTipiId
+    , 0 as Planlanan
+    , 0 as Cikan
+    , 0 as Cikmayan
+	, 0 as Giren
+    , count(cio.Id) as Girmeyen
+	, 0 as Mevcut
+    From [dbo].[CariIO]    as cio 
+	    ,[dbo].[HesapCari] as ch
+    Where 0 = 0 -- cio.IsActive = 1
+    and   cio.FirmId = @yFirmId
+    and   convert(date, cio.GirisTarihi) = convert(date, @yTarihSaat)
+	and   isnull(cio.GirisCihazKaydiId,0) = 0 
+	and   isnull(cio.CikisCihazKaydiId,0) = 0 
+	and   cio.CariId = ch.Id
+	Group by cio.FirmId
+
+	union all
+	
+    -- Tahliye 
+    Select cio.FirmId, convert(date, @yTarihSaat) Tarih
+	, 170 as EylemTipiId
+    , count(cio.Id) as Planlanan -- Mevcuda da aynısı işlenecek
+    , 0 as Cikan
+    , 0 as Cikmayan
+	, 0 as Giren
+	, 0 as Girmeyen
+	, 0 as Mevcut
+    From [dbo].[CariIO]    as cio   
+	    ,[dbo].[HesapCari] as ch
+    Where 0 = 0 -- IsActive = 0
+    and   cio.FirmId = @yFirmId 
+    and   cio.CikisTipiId = 1 
+    and   convert(date, cio.CikisTarihi) = convert(date, @yTarihSaat)
+	and   cio.CariId = ch.Id
+    Group by cio.FirmId, cio.CikisTipiId
+
+	union all
+
+	-- Tahliye Çıkış yapan cihazdan okutarak çıkınca
+    Select cio.FirmId, convert(date, @yTarihSaat) Tarih
+	, 170 as EylemTipiId
+    , 0 as Planlanan
+    , count(cio.Id) as Cikan
+    , 0 as Cikmayan
+	, 0 as Giren
+    , 0 as Girmeyen
+	, count(cio.Id) as Mevcut
+    From [dbo].[CariIO]    as cio 
+	    ,[dbo].[HesapCari] as ch
+    Where 0 = 0 -- cio.IsActive = 1
+    and   cio.FirmId = @yFirmId
+    and   cio.CariId = ch.Id
+	and   convert(date, cio.CikisTarihi) = convert(date, @yTarihSaat)
+	and   isnull(cio.CikisCihazKaydiId,0) > 0 
+	and   cio.CikisTipiId = 1 
+    Group by cio.FirmId
+
+	union all
+
+	-- Tahliye Çıkmayan 
+    Select cio.FirmId, convert(date, @yTarihSaat) Tarih
+	, 170 as EylemTipiId
+    , 0 as Planlanan
+    , 0 as Cikan
+    , count(cio.Id) as Cikmayan
+	, 0 as Giren
+    , 0 as Girmeyen
+	, 0 as Mevcut
+    From [dbo].[CariIO]    as cio 
+	    ,[dbo].[HesapCari] as ch
+    Where 0 = 0 -- cio.IsActive = 1
+    and   cio.FirmId = @yFirmId
+    and   cio.CariId = ch.Id
+	and   convert(date, cio.CikisTarihi) = convert(date, @yTarihSaat)
+	and   isnull(cio.CikisCihazKaydiId,0) = 0 
+	and   cio.CikisTipiId = 1 
+    Group by cio.FirmId
+
+	union all
+	
+	-- Sevk/Nakil
+    Select cio.FirmId, convert(date, @yTarihSaat) Tarih
+	, 172 as EylemTipiId
+    , count(cio.Id) as Planlanan -- Mevcuda da aynısı işlenecek
+    , 0 as Cikan
+    , 0 as Cikmayan
+	, 0 as Giren
+	, 0 as Girmeyen
+	, 0 as Mevcut
+    From [dbo].[CariIO]    as cio
+	    ,[dbo].[HesapCari] as ch 
+    Where 0 = 0 -- IsActive = 0
+    and   cio.FirmId = @yFirmId 
+    and   cio.CariId = ch.Id
+    and   cio.CikisTipiId = 2 
+    and   convert(date, cio.CikisTarihi) = convert(date, @yTarihSaat)
+    Group by cio.FirmId, cio.CikisTipiId
+
+    union all 
+
+	-- Sevl Çıkış yapan cihazdan okutarak çıkınca
+    Select cio.FirmId, convert(date, @yTarihSaat) Tarih
+	, 172 as EylemTipiId
+    , 0 as Planlanan
+    , count(cio.Id) as Cikan
+    , 0 as Cikmayan
+	, 0 as Giren
+    , 0 as Girmeyen
+	, count(cio.Id) as Mevcut
+    From [dbo].[CariIO]    as cio 
+	    ,[dbo].[HesapCari] as ch
+    Where 0 = 0 -- cio.IsActive = 1
+    and   cio.FirmId = @yFirmId
+    and   cio.CariId = ch.Id
+	and   convert(date, cio.CikisTarihi) = convert(date, @yTarihSaat)
+	and   isnull(cio.CikisCihazKaydiId,0) > 0 
+	and   cio.CikisTipiId = 2 
+    Group by cio.FirmId
+	
+    union all 
+
+	-- Sevk Çıkmayan 
+    Select cio.FirmId, convert(date, @yTarihSaat) Tarih
+	, 172 as EylemTipiId
+    , 0 as Planlanan
+    , 0 as Cikan
+    , count(cio.Id) as Cikmayan
+	, 0 as Giren
+    , 0 as Girmeyen
+	, 0 as Mevcut
+    From [dbo].[CariIO]    as cio 
+	    ,[dbo].[HesapCari] as ch
+    Where 0 = 0 -- cio.IsActive = 1
+    and   cio.FirmId = @yFirmId
+    and   cio.CariId = ch.Id
+	and   convert(date, cio.CikisTarihi) = convert(date, @yTarihSaat)
+	and   isnull(cio.CikisCihazKaydiId,0) = 0 
+	and   cio.CikisTipiId = 2 
+    Group by cio.FirmId
+    
+  ) toplam
+
+    Group by toplam.FirmId, toplam.Tarih, toplam.EylemTipiId
+  ) sonuc
+
+  Where 0 = 0 
+  and EI.FirmId = sonuc.FirmId
+  and EI.Tarih = sonuc.Tarih
+  and EI.EylemTipiId = sonuc.EylemTipiId
+  
+  -- 190 Mevcut 
+  UPDATE [dbo].[EylemIcmali]
+  SET [Planlanan] = sonuc.Planlanan
+     ,[Cikan] = sonuc.Cikan
+     ,[Cikmayan] = sonuc.Cikmayan
+     ,[Giren] = sonuc.Giren
+     ,[Girmeyen] = sonuc.Girmeyen
+     ,[Mevcut] = sonuc.Mevcut
+  FROM [dbo].[EylemIcmali] EI,
+  (
+    Select FirmId, Tarih, EylemTipiId
+    , 0 as Planlanan
+    , 0 as Cikan
+    , 0 as Cikmayan
+    , 0 as Giren
+    , 0 as Girmeyen 
+    , sum(Toplam) - sum(Sayilmaz) as Mevcut from (
+  
+    Select FirmId, convert(date, @yTarihSaat) Tarih
+	, 190 as EylemTipiId
+    , sum(isnull(Mevcut,0)) as Toplam 
+    , 0 as Sayilmaz
+    From [dbo].EylemIcmali
+    Where IsActive = 1 
+    and Tarih = convert(date, @yTarihSaat)
+    and EylemTipiId = 110
+	Group by FirmId
+    
+	union all
+
+    Select FirmId, convert(date, @yTarihSaat) Tarih
+	, 190 as EylemTipiId
+    , 0 as Toplam
+    , sum(isnull(Mevcut,0)) as Sayilmaz 
+    From [dbo].EylemIcmali
+    Where IsActive = 1 
+    and Tarih = convert(date, @yTarihSaat)
+    and EylemTipiId in (112,122,132,140,150)
+    Group by FirmId
+
+	) toplam
+
+    Group by toplam.FirmId, toplam.Tarih, toplam.EylemTipiId
+  ) sonuc
+
+  Where 0 = 0 
+  and EI.FirmId = sonuc.FirmId
+  and EI.Tarih = sonuc.Tarih
+  and EI.EylemTipiId = sonuc.EylemTipiId
+
+END
+GO
+
+

@@ -1,0 +1,37 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table MtskSablonSMS
+ (
+   Id                      Int IDENTITY(1,1) not null, 
+   IsActive                Bit           not null, /* default : 1 = active, 0 = not active */  
+   MesajTipiId             SmallInt          null,
+   Mesaj                   nVarChar(300)     null,
+   --MesajSQL                VarChar(4000)     null,
+
+   constraint		pk_MtskSablonSMS primary key (Id)
+ )
+  
+ create index X_MtskSavlonSMS01 on MtskSablonSMS (MesajTipiId)
+ 
+ grant select, insert, update, delete on MtskSablonSMS to public
+
+
+commit transaction
+
+begin transaction
+
+INSERT INTO [dbo].[MtskSablonSMS]
+           ([IsActive]
+           ,[MesajTipiId]
+           ,[Mesaj])
+     VALUES
+           (1
+           ,2
+           ,'Sn aday, eksik belgeleri tamamlamanızı rica ederiz.')
+           --,'Sayın <MtskAday.TamAdiSoyadi> dönem kaydınızı gerçekleştirebilmek için en kısa zamanda eksik olan belgeleri tamamlamanızı önemle rica ederiz.')
+
+commit transaction
+
+/*CreateTableEnd*/

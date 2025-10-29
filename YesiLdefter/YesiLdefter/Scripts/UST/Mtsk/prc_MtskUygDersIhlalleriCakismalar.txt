@@ -1,0 +1,132 @@
+﻿
+/*CreateProcedure*/
+
+
+CREATE PROCEDURE [dbo].[prc_MtskUygDersIhlalleriCakismalar] (@curId bigint)  
+AS BEGIN
+
+  --declare @FirmId int
+  --declare @TalepId int
+  
+  Delete dbo.MtskKIhlalUygulamaD
+  Where  FirmId  = @FirmId
+  and    TalepId = @TalepId
+  and    IhlalTipiId > 20
+  and    IhlalTipiId < 30   
+
+  -- ---------------------------------------------------------------------
+  -- Çakışmaların tespiti : 21, 22, 23, 24, 25, 29  idli ihlaller
+  -- ---------------------------------------------------------------------
+
+      INSERT INTO [dbo].[MtskKIhlalUygulamaD]
+         ( FirmId
+         , DersDonemTipiId
+         , IhlalTipiId
+
+         , EgitimYeriTipiId
+         , EgitimAraciId
+         , PersonelId  
+		 , TalepId
+
+         , DersTarihi
+         , DersSaatiTipiId
+
+         , EgitimTipiId 
+         , InsertedId
+         , MevcutId
+         , Tarih )
+
+      Select  
+          tespit.FirmId  
+        , tespit.DersDonemTipiId
+        , tespit.IhlalTipiId 
+
+        , tespit.EgitimYeriTipiId
+        , tespit.EgitimAraciId
+        , tespit.PersonelId
+		, tespit.TalepId
+
+        , tespit.DersTarihi
+        , tespit.DersSaatiTipiId
+        , tespit.EgitimTipiId 
+
+        , tespit.InsertedId
+        , tespit.MevcutId
+        , GetDate()
+      From (
+
+        Select 
+          td.FirmId  
+        , td.DersDonemTipiId
+        , ( case 
+            when  td.EgitimAraciId =  mvc.EgitimAraciId and td.PersonelId =  mvc.PersonelId then 23 -- Hem araç hemde personel çakışması var
+            when  td.EgitimAraciId =  mvc.EgitimAraciId and td.PersonelId <> mvc.PersonelId then 21 -- Araç çakışması var
+            when  td.EgitimAraciId <> mvc.EgitimAraciId and td.PersonelId =  mvc.PersonelId then 22 -- Personel çakışması var 
+            when  ((td.EgitimAraciId <> mvc.EgitimAraciId or td.PersonelId <> mvc.PersonelId) and (td.TalepId = mvc.TalepId)) then 27 -- Kursiyerin başka dersi var 
+         -- when ... then 24 -- Farklı bir dersle çakışması var
+         -- when  td.EgitimAraciId =  mvc.EgitimAraciId then 25 -- Çift kayıt çakışması var  
+            else 29 end) as IhlalTipiId
+
+        , td.EgitimYeriTipiId
+        , td.EgitimAraciId
+        , td.PersonelId 
+		, td.TalepId
+
+        , td.DersTarihi 
+        , td.DersSaatiTipiId
+        , td.EgitimTipiId
+
+        , td.Id as InsertedId
+        , isnull(mvc.Id,0) as MevcutId
+        
+        From dbo.MtskUygulamaliDers as td 
+            left outer join dbo.MtskUygulamaliDers as mvc on (
+                td.FirmId = mvc.FirmId 
+            and td.DersTarihi = mvc.DersTarihi
+            and td.BaslamaSaati = mvc.BaslamaSaati
+            and ( td.EgitimAraciId = mvc.EgitimAraciId -- aynı aracın başka kaydı varsa
+            or    td.PersonelId = mvc.PersonelId -- aynı personelin başka kaydı varsa
+            or    td.TalepId = mvc.TalepId -- aynı kuriyerin başka kaydı varsa
+			)     
+            and td.Id != mvc.Id
+            )
+        Where 0 = 0
+        and   td.FirmId = mvc.FirmId
+        and   td.TalepId = @TalepId
+        and   mvc.Id > 0
+
+        ) as tespit     
+
+           left join dbo.MtskKIhlalUygulamaD as ihl on (
+                 tespit.FirmId = ihl.FirmId 
+           and   tespit.TalepId = ihl.TalepId
+           and   tespit.IhlalTipiId = ihl.IhlalTipiId
+           and   tespit.DersTarihi  = ihl.DersTarihi
+           and   tespit.DersSaatiTipiId = ihl.DersSaatiTipiId
+      )
+      Where ihl.Id is null
+
+  /*
+  -- Çift oluşan kayıtlardan birini sil 
+  Delete From dbo.MtskKIhlalUygulamaD 
+  Where Id in (
+     Select top 1 ihl1.Id --, ihl2.Id
+     From dbo.MtskKIhlalUygulamaD as ihl1
+        left outer join dbo.MtskKIhlalUygulamaD as ihl2 on (
+	          ihl1.InsertedId = ihl2.MevcutId
+		  and ihl1.MevcutId   = ihl2.InsertedId
+        )
+     Where ihl1.InsertedId > 0
+     and   ihl2.MevcutId > 0
+     and   ihl1.FirmId = ihl2.FirmId
+     and   ihl1.DersDonemTipiId = ihl2.DersDonemTipiId
+     and   ihl1.IhlalTipiId = ihl2.IhlalTipiId
+     and   ihl1.DersTarihi = ihl2.DersTarihi
+     and   ihl1.DersSaatiTipiId = ihl2.DersSaatiTipiId
+  )
+  */
+
+END -- procedure
+
+
+/*CreateProcedureEnd*/

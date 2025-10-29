@@ -1,0 +1,420 @@
+/*CreateTable*/
+
+begin transaction
+
+ create table MtskEgitimAraci
+ (
+   Id                     Int IDENTITY(1,1) not null, 
+   ParentId               Int       not null, /* default 0 */
+   FirmId                 Int       not null,
+   IsActive               Bit       not null, /* default : 1 = active, 0 = not active */  
+   
+   PlakaIlKoduTipiId      SmallInt      null, /* BASLANGIC --- SONRA 01-81 ARASI SECIM */
+   PlakaNumarasi          nVarchar(10)  null,
+   SertifikaTipiId        SmallInt      null, 
+
+   AracinMarkasi          nVarchar(50)  null,
+   AracinModeli           nVarchar(50)  null,
+   ModelYiliTipiId        SmallInt      null,
+   
+   AracinTescilTarihi      Date          null,
+   HizmetBaslamaTarihi     Date          null,
+   HizmettenCikisTarihi    Date          null,
+
+   SahiplikTipiId          SmallInt      null, /* BA�LANGI� --Se�iniz--, 1-Kuruma Ait, 2-Kiral�k*/
+   HizmetDurumuTipiId      SmallInt      null, /* BA�LANGI� --Se�iniz--, 1-Hizmette, 2-Hizmet D���*/
+
+   MuayeneGecerlilikTarihi Date          null,
+
+   KiraBaslamaTarihi       Date          null,
+   KiraBitisTarihi         Date          null,
+   
+   AracSaseNumarasi        nVarchar(20)  null,
+   AracMotorNumarasi       nVarchar(20)  null,
+   SanzimanTipiId          SmallInt      null, /* BA�LANGI� --Se�iniz--, 1-Manuel, 2-Otomatik*/
+
+   TrafikSigortaBasTarihi  Date          null,
+   TrafikSigortaBelgeNo    nVarchar(20)  null,
+   
+   KurumOnayTipiId         SmallInt      null, /* BA�LANGI� --Se�iniz--, 1-Onay Bekliyor, 2-Onayland� */		
+
+   constraint		pk_MtskEgitimAraci primary key (Id)
+ )
+
+ create index X_MtskEgitimAraci01 on MtskEgitimAraci (PlakaNumarasi)
+ 
+ grant select, insert, update, delete on MtskEgitimAraci to public
+
+ commit transaction
+
+/*CreateTableEnd*/
+
+/*CreateLkpTable*/
+
+ begin transaction
+
+-- ------------------------------------------------------- 
+-- PlakaIlKoduTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskEgitimAraciPlakaIlKoduTipi')
+drop table [Lkp].[MtskEgitimAraciPlakaIlKoduTipi]
+
+create table [Lkp].[MtskEgitimAraciPlakaIlKoduTipi]
+(
+   Id               Int Unique Not null,
+   PlakaIlKoduTipi  nVarchar(50)   null,
+   GrupTipiId       SmallInt       null,
+
+   constraint  pk_MtskEgitimPlakaIlKoduTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[MtskEgitimAraciPlakaIlKoduTipi] (Id, PlakaIlKoduTipi, GrupTipiId)
+ VALUES 
+  ( 0,  N'', 1),
+  ( 1,  N'01', 1),
+  ( 2,  N'02', 1),
+  ( 3,  N'03', 1),
+  ( 4,  N'04', 1),
+  ( 5,  N'05', 1),
+  ( 6,  N'06', 1),
+  ( 7,  N'07', 1),
+  ( 8,  N'08', 1),
+  ( 9,  N'09', 1),
+  (10,  N'10', 1),
+  (11,  N'11', 1),
+  (12,  N'12', 1),
+  (13,  N'13', 1),
+  (14,  N'14', 1),
+  (15,  N'15', 1),
+  (16,  N'16', 1),
+  (17,  N'17', 1),
+  (18,  N'18', 1),
+  (19,  N'19', 1),
+  (20,  N'20', 1),
+  (21,  N'21', 1),
+  (22,  N'22', 1),
+  (23,  N'23', 1),
+  (24,  N'24', 1),
+  (25,  N'25', 1),
+  (26,  N'26', 1),
+  (27,  N'27', 1),
+  (28,  N'28', 1),
+  (29,  N'29', 1),
+  (30,  N'30', 1),
+  (31,  N'31', 1),
+  (32,  N'32', 1),
+  (33,  N'33', 1),
+  (34,  N'34', 1),
+  (35,  N'35', 1),
+  (36,  N'36', 1),
+  (37,  N'37', 1),
+  (38,  N'38', 1),
+  (39,  N'39', 1),
+  (40,  N'40', 1),
+  (41,  N'41', 1),
+  (42,  N'42', 1),
+  (43,  N'43', 1),
+  (44,  N'44', 1),
+  (45,  N'45', 1),
+  (46,  N'46', 1),
+  (47,  N'47', 1),
+  (48,  N'48', 1),
+  (49,  N'49', 1),
+  (50,  N'50', 1),
+  (51,  N'51', 1),
+  (52,  N'52', 1),
+  (53,  N'53', 1),
+  (54,  N'54', 1),
+  (55,  N'55', 1),
+  (56,  N'56', 1),
+  (57,  N'57', 1),
+  (58,  N'58', 1),
+  (59,  N'59', 1),
+  (60,  N'60', 1),
+  (61,  N'61', 1),
+  (62,  N'62', 1),
+  (63,  N'63', 1),
+  (64,  N'64', 1),
+  (65,  N'65', 1),
+  (66,  N'66', 1),
+  (67,  N'67', 1),
+  (68,  N'68', 1),
+  (69,  N'69', 1),
+  (70,  N'70', 1),
+  (71,  N'71', 1),
+  (72,  N'72', 1),
+  (73,  N'73', 1),
+  (74,  N'74', 1),
+  (75,  N'75', 1),
+  (76,  N'76', 1),
+  (77,  N'77', 1),
+  (78,  N'78', 1),
+  (79,  N'79', 1),
+  (80,  N'80', 1),
+  (81,  N'81', 1)
+
+-- ------------------------------------------------------- 
+-- ModelYiliTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskEgitimAraciModelYiliTipi')
+drop table [Lkp].[MtskEgitimAraciModelYiliTipi]
+
+create table [Lkp].[MtskEgitimAraciModelYiliTipi]
+(
+   Id               Int Unique Not null,
+   ModelYiliTipi    nVarchar(50)   null,
+   GrupTipiId       SmallInt       null,
+
+   constraint  pk_MtskEgitimAraciModelYiliTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[MtskEgitimAraciModelYiliTipi] (Id, ModelYiliTipi, GrupTipiId)
+ VALUES 
+  ( 0,     N'', 1),
+  ( 2030,  N'2030', 1),
+  ( 2029,  N'2029', 1),
+  ( 2028,  N'2028', 1),
+  ( 2027,  N'2027', 1),
+  ( 2026,  N'2026', 1),
+  ( 2025,  N'2025', 1),
+  ( 2024,  N'2024', 1),
+  ( 2023,  N'2023', 1),
+  ( 2022,  N'2022', 1),
+  ( 2021,  N'2021', 1),
+  ( 2020,  N'2020', 1),
+  ( 2019,  N'2019', 1),
+  ( 2018,  N'2018', 1),
+  ( 2017,  N'2017', 1),
+  ( 2016,  N'2016', 1),
+  ( 2015,  N'2015', 1),
+  ( 2014,  N'2014', 1),
+  ( 2013,  N'2013', 1),
+  ( 2012,  N'2012', 1),
+  ( 2011,  N'2011', 1),
+  ( 2010,  N'2010', 1),
+  ( 2009,  N'2009', 1),
+  ( 2008,  N'2008', 1),
+  ( 2007,  N'2007', 1),
+  ( 2006,  N'2006', 1),
+  ( 2005,  N'2005', 1),
+  ( 2004,  N'2004', 1),
+  ( 2003,  N'2003', 1),
+  ( 2002,  N'2002', 1),
+  ( 2001,  N'2001', 1),
+  ( 2000,  N'2000', 1),
+  ( 1999,  N'1999', 1),
+  ( 1998,  N'1998', 1),
+  ( 1997,  N'1997', 1),
+  ( 1996,  N'1996', 1),
+  ( 1995,  N'1995', 1),
+  ( 1994,  N'1994', 1),
+  ( 1993,  N'1993', 1),
+  ( 1992,  N'1992', 1),
+  ( 1991,  N'1991', 1),
+  ( 1990,  N'1990', 1)
+
+
+-- ------------------------------------------------------- 
+-- SahiplikTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskEgitimAraciSahiplikTipi')
+drop table [Lkp].[MtskEgitimAraciSahiplikTipi]
+
+create table [Lkp].[MtskEgitimAraciSahiplikTipi]
+(
+   Id               Int Unique Not null,
+   SahiplikTipi     nVarchar(50)   null,
+   GrupTipiId       SmallInt       null,
+
+   constraint  pk_MtskEgitimAraciSahiplikTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[MtskEgitimAraciSahiplikTipi] (Id, SahiplikTipi, GrupTipiId)
+ VALUES 
+  ( 0,     N'', 1),
+  ( 1,     N'Kuruma Ait', 1),
+  ( 2,     N'Kiralık', 1)
+
+-- ------------------------------------------------------- 
+-- HizmetDurumuTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskEgitimAraciHizmetDurumuTipi')
+drop table [Lkp].[MtskEgitimAraciHizmetDurumuTipi]
+
+create table [Lkp].[MtskEgitimAraciHizmetDurumuTipi]
+(
+   Id               Int Unique Not null,
+   HizmetDurumuTipi nVarchar(50)   null,
+   GrupTipiId       SmallInt       null,
+
+   constraint  pk_MtskEgitimAraciHizmetDurumuTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[MtskEgitimAraciHizmetDurumuTipi] (Id, HizmetDurumuTipi, GrupTipiId)
+ VALUES 
+  ( 0,     N'', 1),
+  ( 1,     N'Hizmette', 1),
+  ( 2,     N'Hizmet Dışı', 1),
+  ( 3,     N'Trafik Sigortası Süresi Doldu', 1),
+  ( 4,     N'Muayene Tarihi Doldu', 1)
+
+
+-- ------------------------------------------------------- 
+-- SanzimanTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'MtskEgitimAraciSanzimanTipi')
+drop table [Lkp].[MtskEgitimAraciSanzimanTipi]
+
+create table [Lkp].[MtskEgitimAraciSanzimanTipi]
+(
+   Id               Int Unique Not null,
+   SanzimanTipi     nVarchar(50)   null,
+   GrupTipiId       SmallInt       null,
+
+   constraint  pk_MtskEgitimAraciSanzimanTipi primary key (Id)
+)
+
+INSERT INTO [Lkp].[MtskEgitimAraciSanzimanTipi] (Id, SanzimanTipi, GrupTipiId)
+ VALUES 
+  ( 0,     N'', 1),
+  ( 1,     N'Manuel', 1),
+  ( 2,     N'Otomatik', 1)
+
+commit transaction
+
+/*CreateLkpTableEnd*/
+
+
+
+/*CreateTrigger*/
+
+CREATE TRIGGER [dbo].[trg_MtskEgitimAraci] on [dbo].[MtskEgitimAraci]
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    DECLARE cursorMtskEgitimAraci cursor for select Id from Inserted
+    DECLARE @curId bigint
+
+    OPEN cursorMtskEgitimAraci
+
+    FETCH NEXT FROM cursorMtskEgitimAraci INTO @curId
+    
+    declare @yFirmId Int = 0
+	declare @yPlakaNumarasi nvarchar(20) = null
+    declare @yAracinMarkasi nvarchar(50) = null
+	declare @yHizmetDurumuTipiId SmallInt = 0
+    declare @OnmHesapFinansId Int = 0
+    declare @HesapAdi nvarchar(150) = null
+	
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        set @yPlakaNumarasi = ''
+        set @yAracinMarkasi = ''
+        set @HesapAdi = ''
+
+        -- OnmHesapFinans
+        select 
+          @OnmHesapFinansId = isnull(Id, 0)
+        , @HesapAdi = isnull(HesapAdi,'')
+        From [dbo].[OnmHesapFinans]
+        Where 0 = 0
+        and   UstGrupTipiId = 83
+        and   AnaGrupTipiId = 254
+        and   HesapTipiId = 12
+        and   UstHesapKodu = '254'
+        and   JoinTableTypeId = 2102
+    	and   JoinId = @curId
+
+        -- MtskEgitimAraci			   
+        select 
+          @yFirmId = ins.FirmId
+        , @yPlakaNumarasi = isnull(ins.PlakaNumarasi,'')
+        , @yAracinMarkasi = isnull(ins.AracinMarkasi,'')
+		, @yHizmetDurumuTipiId  = ins.HizmetDurumuTipiId 
+        from inserted ins
+    	where ins.Id = @curId
+
+        -- Maliyetlerin takibi için Finans hesabı yok ise
+		-- @yHizmetDurumuTipiId = 2 Hizmet dışı değilse
+        if (@OnmHesapFinansId = 0) and (@yHizmetDurumuTipiId <> 2)
+        begin
+          INSERT INTO [dbo].[OnmHesapFinans]
+           ([ParentId]
+           ,[FirmId]
+           ,[IsActive]
+           ,[UstGrupTipiId]
+           ,[AnaGrupTipiId]
+           ,[AltGrupTipiId]
+           ,[AltCesitTipiId]
+           ,[HesapTipiId]
+           ,[HesapKodu]
+           ,[UstHesapKodu]
+           ,[HesapKisaAdi]
+           ,[HesapAdi]
+
+           ,[IsBilancoHesap]
+           ,[IsGelirGiderHesap]
+           ,[IsMaliyetAHesap]
+           ,[IsMaliyetBHesap]
+           ,[IsNazimHesap]
+
+           ,[BAHesapTipiId]
+           ,[UruneYuklenmesiTipiId]
+           ,[UretimHacmiTipiId]
+           ,[IsletmeFonksiyonuTipiId]
+           ,[PeriyodTipiId]
+           ,[BelgeTipiId]
+           ,[KaynakTipiId]
+           ,[IsKkeg]
+           ,[JoinTableTypeId]
+           ,[JoinId])
+          VALUES
+           (0        --ParentId
+           ,@yFirmId --FirmId
+           ,1        --IsActive
+           ,83       --UstGrupTipiId
+           ,254      --AnaGrupTipiId
+           ,0        --AltGrupTipiId
+           ,0        --AltCesitTipiId
+           ,12       --HesapTipiId
+           ,''       --HesapKodu
+           ,254      --UstHesapKodu
+           ,substring(@yPlakaNumarasi + ' - ' + @yAracinMarkasi,1,100) --HesapKisaAdi, nvarchar(100)
+           ,substring(@yPlakaNumarasi + ' - ' + @yAracinMarkasi,1,150) --HesapAdi, nvarchar(150)
+
+           ,0 -- IsBilancoHesap
+           ,0 -- IsGelirGiderHesap
+           ,0 -- IsMaliyetAHesap
+           ,0 -- IsMaliyetBHesap
+           ,0 -- IsNazimHesap
+
+           ,0 -- BAHesapTipiId, smallint,>
+           ,0 -- UruneYuklenmesiTipiId, smallint,>
+           ,0 -- UretimHacmiTipiId, smallint,>
+           ,0 -- IsletmeFonksiyonuTipiId, smallint,>
+           ,0 -- PeriyodTipiId, smallint,>
+           ,0 -- BelgeTipiId, smallint,>
+           ,0 -- KaynakTipiId, smallint,>
+           ,0 -- IsKkeg, bit,>
+           ,2102 --JoinTableTypeId
+           ,@curId --JoinId 
+           )
+        end -- if (@eHesapAdi = '')
+         
+        if ((@OnmHesapFinansId > 0) and 
+            (substring(@yPlakaNumarasi + ' - ' + @yAracinMarkasi,1,150) <> @HesapAdi))
+        begin            
+          Update [dbo].[OnmHesapFinans] set
+            [HesapKisaAdi] = substring(@yPlakaNumarasi + ' - ' + @yAracinMarkasi,1,100)
+           ,[HesapAdi] = substring(@yPlakaNumarasi + ' - ' + @yAracinMarkasi,1,150)
+          Where Id = @OnmHesapFinansId
+        end
+
+      FETCH NEXT FROM cursorMtskEgitimAraci INTO @curId
+    END -- While
+
+    CLOSE cursorMtskEgitimAraci
+    DEALLOCATE cursorMtskEgitimAraci
+END -- create trigger
+
+/*CreateTriggerEnd*/

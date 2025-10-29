@@ -1,0 +1,135 @@
+﻿
+/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_MtskTeorikDersIhlalleriCakismalar] (@FirmId int, @DonemTipiId int)  
+AS BEGIN
+
+  --declare @curId int = 576--test 710
+  --declare @FirmId int
+  --declare @DonemTipiId int = 0
+
+  --Select 
+  --     @FirmId      = ins.FirmId  
+  --    ,@DonemTipiId = ins.DonemTipiId
+  --From dbo.MtskTeorikDers as ins
+  --Where ins.Id = @curId
+  
+  Delete dbo.MtskKIhlalTeorikD
+  Where  FirmId = @FirmId
+  and    DonemTipiId = @DonemTipiId
+  and    IhlalTipiId > 20
+  and    IhlalTipiId < 30   
+ 
+
+  -- ---------------------------------------------------------------------
+  -- Çakışmaların tespiti : 21, 22, 23, 24, 25, 29  idli ihlaller
+  -- ---------------------------------------------------------------------
+
+      INSERT INTO [dbo].[MtskKIhlalTeorikD]
+         ( FirmId
+         , DonemTipiId
+         , GrupTipiId
+         , SubeTipiId
+         , IhlalTipiId
+         , DerslikTipiId
+         , DerslikAdiTipiId
+         , PersonelId  
+         , DersTarihi
+         , DersSaatiTipiId
+         , InsertedId
+         , MevcutId
+         , Tarih )
+
+      Select  
+          tespit.FirmId  
+        , tespit.DonemTipiId
+        , tespit.GrupTipiId
+        , tespit.SubeTipiId
+        , tespit.IhlalTipiId 
+		, tespit.DerslikTipiId
+		, tespit.DerslikAdiTipiId
+        , tespit.PersonelId
+        , tespit.DersTarihi
+        , tespit.DersSaatiTipiId
+        , tespit.InsertedId
+        , tespit.MevcutId
+        , GetDate()
+      From (
+
+        Select 
+          td.FirmId  
+        , td.DonemTipiId
+        , td.GrupTipiId
+        , td.SubeTipiId
+        , ( case 
+            when  td.DerslikTipiId =  mvc.DerslikTipiId and td.PersonelId =  mvc.PersonelId then 23 -- Hem derslik hemde personel çakışması var
+            when  td.DerslikTipiId =  mvc.DerslikTipiId and td.PersonelId <> mvc.PersonelId then 21 -- Derslik çakışması var
+            when  td.DerslikTipiId <> mvc.DerslikTipiId and td.PersonelId =  mvc.PersonelId then 22 -- Personel çakışması var 
+            when ( td.DonemTipiId     =  mvc.DonemTipiId 
+               and td.GrupTipiId      =  mvc.GrupTipiId 
+               and td.SubeTipiId      =  mvc.SubeTipiId 
+               and td.DerslikTipiId   <> mvc.DerslikTipiId ) then 24 -- Farklı bir dersle çakışması var
+            when  td.DerslikTipiId    =  mvc.DerslikTipiId then 25 -- Çift kayıt çakışması var            else 0 end) as IhlalTipiId 
+            else 29 end) as IhlalTipiId
+        , td.DerslikTipiId
+        , td.DerslikAdiTipiId
+        , td.PersonelId 
+        , td.DersTarihi 
+        , td.DersSaatiTipiId
+        , td.Id as InsertedId
+        , isnull(mvc.Id,0) as MevcutId
+
+        From dbo.MtskTeorikDers as td 
+            left outer join [dbo].[MtskTeorikDers] as mvc on (
+                mvc.FirmId = @FirmId 
+            and td.DersTarihi = mvc.DersTarihi
+            and td.BaslamaSaati = mvc.BaslamaSaati
+            and ( td.DerslikTipiId = mvc.DerslikTipiId 
+            or    td.PersonelId = mvc.PersonelId 
+			or  ( td.DonemTipiId = mvc.DonemTipiId 
+			  and td.GrupTipiId = mvc.GrupTipiId
+			  and td.SubeTipiId = mvc.SubeTipiId )
+			)
+            and td.Id != mvc.Id
+            )
+        Where 0 = 0
+        and   td.FirmId = @FirmId
+        and   td.DonemTipiId = @DonemTipiId
+        and   mvc.Id > 0
+
+        ) as tespit     
+
+           left join MtskKIhlalTeorikD as ihl on (
+                 tespit.FirmId      = ihl.FirmId 
+           and   tespit.DonemTipiId = ihl.DonemTipiId 
+           and   tespit.GrupTipiId  = ihl.GrupTipiId 
+           and   tespit.SubeTipiId  = ihl.SubeTipiId
+           and   tespit.IhlalTipiId = ihl.IhlalTipiId
+           and   tespit.DersTarihi  = ihl.DersTarihi
+           and   tespit.DersSaatiTipiId = ihl.DersSaatiTipiId
+      )
+      Where ihl.Id is null
+
+  -- Çift oluşan kayıtlardan birini sil 
+  Delete From dbo.MtskKIhlalTeorikD 
+  Where Id in (
+     Select top 1 ihl1.Id --, ihl2.Id
+     From dbo.MtskKIhlalTeorikD as ihl1
+        left outer join dbo.MtskKIhlalTeorikD as ihl2 on (
+	          ihl1.InsertedId = ihl2.MevcutId
+		  and ihl1.MevcutId   = ihl2.InsertedId
+        )
+     Where ihl1.InsertedId > 0
+     and   ihl2.MevcutId > 0
+     and   ihl1.FirmId = ihl2.FirmId
+     and   ihl1.DonemTipiId = ihl2.DonemTipiId
+     and   ihl1.GrupTipiId = ihl2.GrupTipiId
+     and   ihl1.SubeTipiId = ihl2.SubeTipiId
+     and   ihl1.IhlalTipiId = ihl2.IhlalTipiId
+     and   ihl1.DersTarihi = ihl2.DersTarihi
+     and   ihl1.DersSaatiTipiId = ihl2.DersSaatiTipiId
+  )
+
+END -- procedure
+
+/*CreateProcedureEnd*/

@@ -1,0 +1,111 @@
+﻿Tablo taslağı
+
+
+
+
+documentHeader belgeBasligi
+ducumentLines  belgeSatirlari
+
+wageHeader     yevmiyeBasligi
+wageLines      yevmiyeSatirlari
+
+bookHeader     isletmeDefteriBasligi
+bookLines      isletmeDefteriSatirlari
+
+
+
+
+
+belgeBasligi
+--bbBilgisi
+Id
+bsLineCount 
+bbState = 0 : Normal, 1 : Kilitli, 9 : Silindi 
+
+--bbMaliyetYerleri
+bbSubeId
+bbDepartmanId
+bbMasrafYeriId
+
+--bbHakkinda
+blgTypeA = 1 = Fatura, 2 = Makbuz, 3 = PerakendeFiş, 4 = Z Raporu, 5 = Banka Extresi, 6 = POS Z Raporu, 7 = Çek, 8 = Senet  vb
+blgTypeb = 1 = SatFat, 2 = AlFat vb..
+blgDate
+blgHour
+blgSeri
+blgNo
+blgFinansTypeId
+blgFinansHesapId
+blgCariId
+blgSahibininAdi : Firma/Kurum/Adi
+blgToplamTutariTL
+blgToplamTutariExc
+blgKurTutari
+blgExchangeType
+blgAciklamasi 
+
+--bbKaynagi
+bbKaynakTypeId = 1 : Manuel giriş, 9 : Devir,  11..100 = Entegrasyon modul kaynakları, 101..200 : Dış Entegrason kaynakları   
+bbKaynakIntId 
+bbKaynakStrId
+
+
+--bbLog
+--bbUser
+--bbRecDatetime
+--bbComputerId
+
+
+
+
+
+belgeSatirlari
+
+
+bsHesapKodu
+--muhasebe hesap kodu
+bsAciklamasi
+--
+bsTutarlar
+--toplam Tl, döviz tutarlar 
+--BATipi 
+bsCariId
+--cari bağlantısı
+bsStokId
+--stok bağlantısı
+bsFinansId
+--finans hesapları
+fsEDefter
+--e-defter bilgileri 
+
+
+
+--------------------------------
+fisBasligi
+--------------------------------
+fbBilgisi
+--tarih, numaralar, tipler,  
+fbAciklamasi
+--
+fbTutarlar
+--toplam Tl, döviz tutarlar 
+fbKontrolBilgisi
+--kilit vb
+fbEntegreBilgisi
+--entegrasyon kaynaklari
+fbLogs
+
+
+--------------------------------
+fisSatirlari : fs = fisSatir 
+--------------------------------
+fsBilgisi
+--tarih, numaralar, tipler,  
+
+fsKontrolBilgisi
+--kilit vb
+fsEntegreBilgisi
+--entegrasyon kaynaklari
+
+--------------------------------
+

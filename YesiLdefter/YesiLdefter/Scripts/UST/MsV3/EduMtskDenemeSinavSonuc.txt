@@ -1,0 +1,23 @@
+﻿
+begin transaction
+
+ create table EduMtskDenemeSinavSonuc
+ (
+    Id                   Int IDENTITY(1,1) not null,
+    KitapNo              SmallInt          not null,
+    UserGUID             nvarchar(40)      null,
+    DogruCevapSayisi     SmallInt          null,
+    YanlisCevapSayisi    SmallInt          null,
+    SinavPuani           SmallInt          null,
+    IsSuccessful         Bit               null,
+
+   Constraint pk_EduMtskDenemeSinavSonuc primary key (Id)
+ )
+
+ create index X_EduMtskDenemeSinavSonuc_01 on EduMtskDenemeSinavSonuc (UserGUID, KitapNo)
+
+ grant select, insert, update, delete on EduMtskDenemeSinavSonuc to public
+
+commit transaction
+
+

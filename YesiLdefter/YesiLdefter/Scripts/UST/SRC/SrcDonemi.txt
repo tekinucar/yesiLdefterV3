@@ -1,0 +1,134 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table SrcDonemi
+ (
+   Id                   Int IDENTITY(1,1) not null, 
+   ParentId             Int       not null, /* default 0 */
+   FirmId               Int       not null,
+   IsActive             Bit       not null, /* default : 1 = active, 0 = not active */  
+
+   DonemTipiId          Int           null,
+   GrupTipiId           SmallInt      null,
+   SertifikaTipiId      SmallInt      null, /* detayı [Lkp].[SrcSertifikaTipi] tablosunda */
+   GrupBaslamaTarihi    Date          null,
+   GrupSubeSayisi       SmallInt      null, /* kaç şube açıldığı bilgisi , fakat ekranda hiç kullanılmadı */
+   DonemAdaySayisi      SmallInt      null,
+   GrupAdaySayisi       SmallInt      null,
+   TeorikDersSayisi     SmallInt      null,
+   UygulamaDersSayisi   SmallInt      null,
+   KurumOnayTipiId      SmallInt      null, /* 0. Onay bekliyor, 1-Onaylandı  tablo = [Lkp].[MtskKurumOnayTipi]   */		
+      
+   constraint		pk_SrcDonemi primary key (Id)
+ )
+  
+ grant select, insert, update, delete on SrcDonemi to public
+
+commit transaction
+
+
+/*CreateTableEnd*/
+
+
+
+/*CreateTrigger*/
+
+CREATE TRIGGER [dbo].[trg_SrcDonemi] on [dbo].[SrcDonemi]
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    DECLARE cursorSrcDonemi cursor local for select Id from Inserted
+    DECLARE @curId bigint
+
+    OPEN cursorSrcDonemi
+
+    FETCH NEXT FROM cursorSrcDonemi INTO @curId
+
+    declare @FirmId Int = 0
+    declare @DonemTipiId int = 0
+    declare @GrupTipiId int = 0
+    declare @SertifikaTipiId smallint = 0
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+       Select @FirmId = ins.FirmId
+         , @DonemTipiId = DonemTipiId
+         , @GrupTipiId  = GrupTipiId
+         , @SertifikaTipiId = SertifikaTipiId
+       From inserted as ins
+       Where Id = @curId
+
+       if ( Select count(Id) ADET from dbo.SrcGrupSubesi 
+            where FirmId = @FirmId
+            and DonemTipiId = @DonemTipiId 
+			and GrupTipiId = @GrupTipiId ) = 0 
+       begin
+           insert into dbo.SrcGrupSubesi 
+		   (ParentId, FirmId, IsActive, DonemTipiId, GrupTipiId, SubeTipiId, SertifikaTipiId, KurumOnayTipiId) 
+           values (0, @FirmId, 1, @DonemTipiId, @GrupTipiId, 0, @SertifikaTipiId, 0 )  
+       end
+
+       ;With Subeler as (
+         Select Id, FirmId, DonemTipiId, GrupTipiId, SertifikaTipiId 
+         From dbo.SrcDonemi
+         Where FirmId = @FirmId
+         and DonemTipiId = @DonemTipiId 
+         and GrupTipiId = @GrupTipiId
+       )
+       --Select * from Subeler
+       Update a set 
+         a.SertifikaTipiId = x.SertifikaTipiId
+       FROM dbo.SrcGrupSubesi as a
+       JOIN Subeler x ON ( a.FirmId = x.FirmId and a.DonemTipiId = x.DonemTipiId and a.GrupTipiId = x.GrupTipiId )
+       Where isnull(a.SertifikaTipiId,0) = 0
+
+       FETCH NEXT FROM cursorSrcDonemi INTO @curId
+    END -- While
+
+    CLOSE cursorSrcDonemi
+    DEALLOCATE cursorSrcDonemi   
+
+END -- create trigger
+
+/*CreateTriggerEnd*/
+
+
+/*CreateTrigger*/
+
+CREATE TRIGGER [dbo].[trg_SrcDonemiDeleteIsLock] on [dbo].[SrcDonemi]
+INSTEAD of DELETE
+AS BEGIN
+
+    declare isLockCursorDlt cursor local for select Id from deleted
+    declare @curId bigint
+
+    OPEN isLockCursorDlt
+
+    FETCH NEXT FROM isLockCursorDlt INTO @curId
+	   
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        if ( Select COUNT(t.Id) as Adet from deleted as d
+             left join dbo.SrcAdayTalep as t on ( d.DonemTipiId = t.DonemTipiId and d.GrupTipiId = t.GrupTipiId ) ) > 0 
+        begin
+            PRINT 'Bu kayıt silinemez!'
+            RETURN
+        end
+	    IF EXISTS (SELECT 1 FROM deleted WHERE isnull(GrupTipiId,0) = 1 and Id = @curId)
+        BEGIN
+            PRINT 'Bu kayıt silinemez!'
+            RETURN
+        END
+
+        Delete from dbo.SrcDonemi  Where Id = @curId and isnull(GrupTipiId,0) <> 1
+
+      FETCH NEXT FROM isLockCursorDlt INTO @curId
+    END
+
+    CLOSE isLockCursorDlt
+    DEALLOCATE isLockCursorDlt
+
+END
+
+ /*CreateTriggerEnd*/

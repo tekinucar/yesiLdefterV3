@@ -1,0 +1,103 @@
+﻿/*
+  Bu tablodaki kayıt bir varlığın kira kontratıdır. 
+  Bu kontrota bakılarak her ay veya her yıl için bir OnmBelgeMaliyet satırı otomatik olarak oluşturulur.
+  Önce kira kontratı kaydediliyor, bu kontrata bakarak MaliyetBelgesi otomatik oluşturuluyor
+
+*/
+
+/*CreateTable*/
+
+begin transaction
+
+ create table OnmKira
+ (
+
+   Id                Int IDENTITY(1,1) NOT NULL, 
+   FirmId            Int       not null,
+   VarlikTipiId      smallInt  not null, /* 250, 251, 252, 253, 254, 255, 256 */
+   VarlikId          Int       not null, /* OnmHesapFinans.Id  : Kira yapılan nesnenin id si */
+   IsActive          Bit       not null, /* default : 1 = active, 0 = not active */  
+
+   KiraTipiId           smallInt  not null, /* 1. Kiraya veriyoruz, 2. Kiralıyoruz */
+   KirayaVerenAdi       nVarchar(100) null, 
+   KirayaVerenTcVkNo    nVarchar(11)  null, 
+   KirayaVerenTelefon   nVarchar(30)  null, 
+
+   KiraciAdi            nVarchar(100) null, 
+   KiraciTcVkNo         nVarchar(11)  null, 
+   KiraciTelefon        nVarchar(30)  null, 
+   KiraciCalistigiYer   nVarchar(100) null, 
+
+   KefilAdi             nVarchar(100) null, 
+   KefilTcVkNo          nVarchar(11)  null, 
+   KefilTelefon         nVarchar(30)  null, 
+   KefilCalistigiYer    nVarchar(100) null, 
+   
+   KiraBedeliTutari     Numeric(22,5) null,
+   ParaTipiId           nVarchar(3)   null, 
+   KiraSuresi           nVarchar(30)  null,    /* sözleşmedeki yazıyla yazılan kısım */
+   DepozitoTutari       Numeric(22,5) null,
+   DepozitoParaTipiId   nVarchar(3)   null, 
+   DemirbasDurumu       nVarchar(500) null, 
+
+   EmlakciAdi           nVarchar(100) null, 
+   EmlakciTelefon       nVarchar(30)  null, 
+   EmlakciAdresi        nVarchar(200) null, 
+
+   KiraBaslamaTarihi    Date          null,
+   KiraBitisTarihi      Date          null,
+
+   CariId               Int           null, 
+   IsFatura                Bit       null, /* fatura : 0. kesilmiyor, 1. kesiliyor */
+   KdvOrani                SmallInt  null,
+   OtoOdemeBankaHesapId    Int       null,
+   KiralikGun              SmallInt  null,
+   KiralikAy               SmallInt  null,
+
+   KayitTarihi           DateTime      null, 
+
+   constraint		pk_OnmKira primary key (Id)
+ )
+
+ create index X_OnmKira01 on OnmKira (FirmId)
+ create index X_OnmKira02 on OnmKira (VarlikId)
+ create index X_OnmKira03 on OnmKira (KiraBitisTarihi)
+ 
+ grant select, insert, update, delete on OnmKira to public
+
+commit transaction
+
+/*CreateTableEnd*/
+
+/*CreateData*/
+
+-- ------------------------------------------------------- 
+-- VarlikTipiId   
+-- ------------------------------------------------------- 
+
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmKiraVarlikTipi')
+drop table [Lkp].[OnmKiraVarlikTipi]
+
+create table [Lkp].[OnmKiraVarlikTipi]
+(
+   Id             Int Unique Not Null,
+   VarlikTipi     nVarchar(50),
+
+   constraint  pk_OnmKiraVarlikTipi primary key (Id)
+)
+
+delete from [Lkp].[OnmKiraVarlikTipi]
+INSERT INTO [Lkp].[OnmKiraVarlikTipi] (Id, VarlikTipi)
+ VALUES 
+  ( 0,    N"Tanımsız"),
+  ( 250,  N"Arazi ve Arsalar"),
+  ( 251,  N"Yer Altı ve Yer Üstü Düzenleri"),
+  ( 252,  N"Binalar"),
+  ( 253,  N"Tesis, Makine Ve Cihazlar"),
+  ( 254,  N"Taşıtlar"),
+  ( 255,  N"Demirbaşlar"),
+  ( 256,  N"Diğer Maddi Duran Varlıklar")
+
+
+/*CreateDataEnd*/
+

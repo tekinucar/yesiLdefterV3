@@ -1,0 +1,145 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_MtskUygulamaDersPlaniElemanaOzel] (
+   @DersDonemTipiId int
+  ,@EgitimAraciId varchar(30)
+  ,@PersonelId varchar(30)
+  ,@TalepId Int 
+  ,@ElemanGrubu varchar(30))  
+AS BEGIN
+
+/* 
+ declare @DersDonemTipiId Int 
+ declare @TalepId Int 
+ declare @EgitimAraciId varchar(30)
+ declare @PersonelId varchar(30)
+ declare @ElemanGrubu varchar(30)
+ 
+ set @DersDonemTipiId = 202412
+ */
+ /*
+ if (@DonemTipiId <= 0)
+ begin
+   if (MONTH(getdate()) < 10)
+        set @DonemTipiId = convert(int, convert(varchar(5), YEAR(getdate())) + '0' + convert(varchar(3), MONTH(getdate())))
+   else set @DonemTipiId = convert(int, convert(varchar(5), YEAR(getdate())) + convert(varchar(3), MONTH(getdate())))
+ end
+
+ declare @EgitimBaslangicTarihi date
+ declare @EgitimBitisTarihi date
+  
+ set @EgitimBaslangicTarihi = dbo.fnc_MtskDonemDersBasBitTarihiniBul(@DonemTipiId, 0, 1, 1, 0)
+ set @EgitimBitisTarihi = dbo.fnc_MtskDonemDersBasBitTarihiniBul(@DonemTipiId, 0, 1, 0, 1)
+ 
+ print @EgitimBaslangicTarihi
+ print @EgitimBitisTarihi
+ */
+
+ declare @sql nvarchar(max)
+ declare @sqlWhere nvarchar(500)
+ declare @sqlOrderBy nvarchar(100)
+
+ set @sql = '
+ Select [ders].* 
+ , [aday].TamAdiSoyadi  as  Lkp_AdayTamAdiSoyadi
+ , [aday].TcNo  as  Lkp_AdayTcNo
+ , [pers].TamAdiSoyadi as  Lkp_PersonelTamAdiSoyadi
+ , [pers].TcVkNo  as  Lkp_PersonelTcNo
+
+ , FNo9.EgitimYeriTipi  as  Lkp_EgitimYeriTipi
+ , FNo12.DersSaatiTipi  as  Lkp_DersSaatiTipi
+ , FNo14.EgitimTipi  as  Lkp_EgitimTipi
+
+ , FNo5.DonemTipi  as  Lkp_DonemTipi
+ , FNo6.GrupTipi   as  Lkp_GrupTipi
+ , FNo7.SubeTipi   as  Lkp_SubeTipi
+
+ , FNo9.EgitimYeriTipi + '' : '' + [ders].EgitimAraciId as Lkp_AracVeEgitimYeri
+ , FNo5.DonemTipi + '' : '' + FNo6.GrupTipi + '' : '' + FNo7.SubeTipi as Lkp_DonemTipiGrupTipiSubeTipi
+ , [arac].PlakaNumarasi + '' : '' + [pers].TamAdiSoyadi as Lkp_AracVePersonel
+ 
+ , ( case
+     when ders.EgitimAraciId = [arac].PlakaNumarasi  and ders.PersonelId = [pers].TcNoCalismaIzniNo and ders.TalepId = [talep].Id and ders.EgitimYeriTipiId = 1 then 1  
+     when ders.EgitimAraciId = [arac].PlakaNumarasi  and ders.PersonelId = [pers].TcNoCalismaIzniNo and ders.TalepId = [talep].Id and ders.EgitimYeriTipiId = 2 then 2  
+     when ders.EgitimAraciId = [simu].SicilNumarasi  and ders.PersonelId = [pers].TcNoCalismaIzniNo and ders.TalepId = [talep].Id then 3  
+
+     when ders.EgitimAraciId = [arac].PlakaNumarasi  and ders.PersonelId = [pers].TcNoCalismaIzniNo and ders.TalepId <> [talep].Id and ders.EgitimYeriTipiId = 1 then 4  
+     when ders.EgitimAraciId = [arac].PlakaNumarasi  and ders.PersonelId = [pers].TcNoCalismaIzniNo and ders.TalepId <> [talep].Id and ders.EgitimYeriTipiId = 2 then 5  
+     when ders.EgitimAraciId = [simu].SicilNumarasi  and ders.PersonelId = [pers].TcNoCalismaIzniNo and ders.TalepId <> [talep].Id then 6  
+
+     when ders.EgitimAraciId = [arac].PlakaNumarasi  and ders.PersonelId <> [pers].TcNoCalismaIzniNo and ders.TalepId <> [talep].Id and ders.EgitimYeriTipiId = 1 then 7  
+     when ders.EgitimAraciId = [arac].PlakaNumarasi  and ders.PersonelId <> [pers].TcNoCalismaIzniNo and ders.TalepId <> [talep].Id and ders.EgitimYeriTipiId = 2 then 8  
+     when ders.EgitimAraciId = [simu].SicilNumarasi  and ders.PersonelId <> [pers].TcNoCalismaIzniNo and ders.TalepId <> [talep].Id then 9  
+
+     when ders.EgitimAraciId <> [arac].PlakaNumarasi  and ders.PersonelId = [pers].TcNoCalismaIzniNo and ders.TalepId <> [talep].Id and ders.EgitimYeriTipiId = 1 then 10
+     when ders.EgitimAraciId <> [arac].PlakaNumarasi  and ders.PersonelId = [pers].TcNoCalismaIzniNo and ders.TalepId <> [talep].Id and ders.EgitimYeriTipiId = 2 then 1  
+     when ders.EgitimAraciId <> [simu].SicilNumarasi  and ders.PersonelId = [pers].TcNoCalismaIzniNo and ders.TalepId <> [talep].Id then 2  
+
+	 else 0 end ) as Lkp_LabelTipiId 
+
+ from MtskUygulamaliDers as [ders]
+   left outer join MtskAday [aday] on ( [ders].AdayId = [aday].Id  ) 
+   left outer join MtskAdayTalep [talep] on ( [ders].TalepId = [talep].Id  ) 
+   left outer join MtskPersoneli [pers] on ( [ders].PersonelId = [pers].TcNoCalismaIzniNo  ) 
+   left outer join MtskEgitimAraci [arac] on ( [ders].EgitimAraciId = [arac].PlakaNumarasi ) 
+   left outer join MtskSimulator [simu] on ( [ders].EgitimAraciId = [simu].SicilNumarasi ) 
+ 
+   left outer join Lkp.MtskUygulamaliDersEgitimYeriTipi as FNo9 on ( [ders].EgitimYeriTipiId = FNo9.Id ) 
+   left outer join Lkp.MtskUygulamaliDersDersSaatiTipi as FNo12 on ( [ders].DersSaatiTipiId = FNo12.Id ) 
+   left outer join Lkp.MtskUygulamaliDersEgitimTipi as FNo14 on ( [ders].EgitimTipiId = FNo14.Id ) 
+
+   left outer join Lkp.MtskDonemTipi as FNo5 on ( [ders].DonemTipiId = FNo5.Id ) 
+   left outer join Lkp.MtskGrupTipi  as FNo6 on ( [ders].GrupTipiId = FNo6.Id ) 
+   left outer join Lkp.MtskSubeTipi  as FNo7 on ( [ders].SubeTipiId = FNo7.Id ) 
+
+ Where 0 = 0
+ '
+ set @sqlOrderBy = ' Order by DersTarihi, DersSaatiTipiId '
+ 
+ set @sqlWhere = ''
+
+ --set @EgitimAraciId = ''--'0149207'
+ --set @PersonelId = ''--'205013645624899268'
+ --set @TalepId = 1454
+ 
+ --set @ElemanGrubu = 'Eğitim Aracı'
+ --set @ElemanGrubu = 'Usta Eğitici'
+ --set @ElemanGrubu = 'Aday'
+ 
+ if (@ElemanGrubu = 'Dönem')
+   set @sqlWhere = @sqlWhere +
+   '  and [ders].DersDonemTipiId = ' + Convert(varchar(20), @DersDonemTipiId)
+
+ if ((@TalepId > 0) and (@ElemanGrubu = 'Aday'))
+   set @sqlWhere = @sqlWhere +
+   '  and [ders].DersDonemTipiId >= ' + Convert(varchar(20), @DersDonemTipiId) +
+   '  and [ders].TalepId = ' + Convert(varchar(30), @TalepId)
+
+ if (@ElemanGrubu = 'Eğitim Aracı')
+   set @sqlWhere = @sqlWhere +
+   '  and [ders].DersDonemTipiId = ' + Convert(varchar(20), @DersDonemTipiId) +
+   '  and [ders].EgitimYeriTipiId = 2 ' + 
+   '  and [ders].EgitimAraciId = ''' + @EgitimAraciId + ''''
+
+ if (@ElemanGrubu = 'Simülatör')
+   set @sqlWhere = @sqlWhere +
+   '  and [ders].DersDonemTipiId = ' + Convert(varchar(20), @DersDonemTipiId) +
+   '  and [ders].EgitimYeriTipiId = 3 ' + 
+   '  and [ders].EgitimAraciId = ''' + @EgitimAraciId + ''''
+
+
+ if ((@PersonelId <> '') and (@ElemanGrubu = 'Usta Eğitici')) 
+   set @sqlWhere = @sqlWhere +
+   '  and [ders].DersDonemTipiId = ' + Convert(varchar(20), @DersDonemTipiId) +
+   '  and [ders].PersonelId = ''' + @PersonelId + ''''
+
+ set @sql = @sql + @sqlWhere + @sqlOrderBy
+
+ --print @sql
+ EXEC sp_executesql @sql
+
+  
+END -- procedure
+  
+
+/*CreateProcedureEnd*/

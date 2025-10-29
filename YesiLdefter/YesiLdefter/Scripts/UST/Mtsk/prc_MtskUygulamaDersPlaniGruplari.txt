@@ -1,0 +1,88 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_MtskUygulamaDersPlaniGruplari] (@DonemTipiId int)  
+AS BEGIN
+
+-- DonemTipiId   : Dönem
+-- EgitimAraciId : Eğitim Aracı
+-- PersonelId    : Usta Öğretici
+-- TalepId       : Aday Talebi
+
+-- declare @DonemTipiId Int 
+-- set @DonemTipiId = 202411
+
+   Select  
+     @DonemTipiId as DonemTipiId
+   , '' as EgitimAraciId 
+   , '' as PersonelId
+   , 0  TalepId 
+   , 'Dönem' as Lkp_ElemanGrubu
+   , donem.DonemTipi as Lkp_ElemanAdi
+   , '' as Lkp_SertifikaTipi
+   from Lkp.MtskDonemTipi as donem
+   Where donem.Id = @DonemTipiId
+
+   union all
+
+   Select 
+     @DonemTipiId as DonemTipiId
+   , x.EgitimAraciId 
+   , '' as PersonelId 
+   , 0  as TalepId
+   , (case x.EgitimYeriTipiId
+	  when 3 then 'Simülatör'
+	  else 'Eğitim Aracı' end) as Lkp_ElemanGrubu
+   , x.EgitimAraciId as Lkp_ElemanAdi
+   , '' as Lkp_SertifikaTipi
+   from (
+     Select distinct [uygDers].EgitimAraciId
+	 , ( case [uygDers].EgitimYeriTipiId 
+	     when 1 then 1
+		 when 2 then 1
+		 when 3 then 3 end ) as EgitimYeriTipiId
+     from MtskUygulamaliDers as [uygDers]
+     Where [uygDers].DersDonemTipiId = @DonemTipiId
+   ) as x
+   --order by  EgitimYeriTipiId, EgitimAraciId
+
+   union all
+
+   Select 
+     @DonemTipiId as DonemTipiId
+   , '' as EgitimAraciId 
+   , x.PersonelId
+   , 0  TalepId 
+   , 'Usta Eğitici' as Lkp_ElemanGrubu
+   , x.TamAdiSoyadi as Lkp_ElemanAdi
+   , '' as SertifikaTipi
+   from (
+     Select distinct [uygDers].PersonelId, per.TamAdiSoyadi
+     from MtskUygulamaliDers as [uygDers]
+	   left outer join MtskPersoneli as [per] on (uygDers.PersonelId = per.TcNoCalismaIzniNo)
+     Where [uygDers].DersDonemTipiId = @DonemTipiId
+   ) x
+
+   union all
+
+   Select 
+     @DonemTipiId as DonemTipiId
+   , '' as EgitimAraciId 
+   , '' PersonelId
+   , x.TalepId 
+   , 'Aday' as Lkp_ElemanGrubu
+   , x.TamAdiSoyadi as Lkp_ElemanAdi
+   , x.SertifikaTipi as Lkp_SertifikaTipi
+   from (
+     Select distinct [uygDers].TalepId, aday.TamAdiSoyadi, ser.SertifikaTipi
+     from MtskUygulamaliDers as [uygDers]
+	   left outer join MtskAdayTalep as [talep] on (uygDers.TalepId = Talep.Id)
+	   left outer join MtskAday as [aday] on (uygDers.AdayId = aday.Id)
+	   left outer join Lkp.MtskSertifikaTipi [ser] on (talep.IstenenSertifikaTipiId = ser.Id)
+     Where [uygDers].DersDonemTipiId = @DonemTipiId
+
+   ) x
+ 
+END -- procedure
+
+/*CreateProcedureEnd*/
+

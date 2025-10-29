@@ -1,0 +1,96 @@
+/*CreateTable*/
+
+begin transaction
+
+ create table MsTables
+ (
+    Id                      Int IDENTITY(1,1)     not null,
+        
+    SoftWareCode            varchar(20)           null,
+    ProjectCode             varchar(20)           null,
+    SchemasCode             varchar(5)            null,
+    ModulCode               varchar(20)           null,
+        
+    DbTypeId                SmallInt              not null,
+    TableTypeId             SmallInt              null,
+    TableCode               VarChar(50)           not null,
+    TableName               VarChar(50)           not null,
+    KeyFieldName	        VarChar(30)           null,
+    TableCaption            nVarchar(100)         null,
+
+    SelectSql               varchar(8000)         null,
+    WhereSql                varchar(250)          null,  
+    OrderBySql              varchar(250)          null,  
+    PropJoinTable           varchar(8000)         null,
+
+	Constraint PK_MsTables primary key (Id)
+ )
+
+ create index X_MsTables1 on MsTables (SoftWareCode,ProjectCode,ModulCode)
+
+ grant select, insert, update, delete on MsTables to public
+
+
+commit transaction
+
+/*CreateTableEnd*/
+
+/*CreateLkpTable*/
+
+begin transaction
+
+-- ------------------------------------------------------- 
+-- DbTypeId
+-- ------------------------------------------------------- 
+
+IF EXISTS (Select * From sys.objects WHERE name = 'MsTablesDbType')
+drop table [Lkp].[MsTablesDbType]
+
+create table [Lkp].[MsTablesDbType]
+(
+   Id          Int Unique not null, 
+   DbType      Varchar(20)    null
+   
+   constraint  pk_MsTablesDbType primary key (Id)
+)
+
+Delete from [Lkp].[MsTablesDbType]
+INSERT INTO [Lkp].[MsTablesDbType] (Id, DbType)
+ VALUES 
+  ( 0,     N'none'),
+  ( 1,     N'master'),
+  ( 2,     N'ManagerServer'),
+  ( 3,     N'UstadCRM'),
+  ( 4,     N'Project'),
+  ( 7,     N'PublishManager')
+
+
+-- ------------------------------------------------------- 
+-- TableTypeId
+-- ------------------------------------------------------- 
+
+IF EXISTS (Select * From sys.objects WHERE name = 'MsTablesTableType')
+drop table [Lkp].[MsTablesTableType]
+
+create table [Lkp].[MsTablesTableType]
+(
+   Id          Int Unique not null, 
+   TableType   nVarchar(50)   null
+   
+   constraint  pk_MsTablesTableType primary key (Id)
+)
+
+Delete from [Lkp].[MsTablesTableType]
+INSERT INTO [Lkp].[MsTablesTableType] (Id, TableType)
+ VALUES 
+  ( 0,     N''),
+  ( 1,     N'Table'),
+  ( 2,     N'View'),
+  ( 3,     N'Stored Procedure'),
+  ( 4,     N'Function'),
+  ( 5,     N'Trigger'),
+  ( 6,     N'Select')
+
+commit transaction
+  
+/*CreateLkpTableEnd*/

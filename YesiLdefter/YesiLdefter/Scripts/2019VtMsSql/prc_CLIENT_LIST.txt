@@ -1,0 +1,124 @@
+
+CREATE PROCEDURE prc_CLIENT_LIST(@firmId int, @clientType int)  
+AS BEGIN 
+ 
+  -- clientType
+  -- 1 Grup Firma
+  -- 2 Firma Merkezi
+  -- 3 Þube
+  -- 4 Bölüm
+  -- 5 Departman
+  -- 6 Personel
+  -- 7 Bilgisayar
+  
+  if ((@clientType = 1) or -- grup firma
+      (@clientType = 2) or -- firma merkezi
+      (@clientType = 3))   -- þube
+  begin
+    /* Firm List */
+    Select 
+      f.LOCAL_ID   CLIENT_ID
+    , f.HP_NAME    CLIENT_NAME 
+    , f.LOCAL_TD   CLIENT_TYPE  
+    , f.PARENT_ID  PARENT_ID
+    , u.HP_NAME    PARENT_NAME   
+    FROM HP_FIRMS f 
+	  left outer join HP_FIRMS u on ( f.PARENT_ID = u.LOCAL_ID )
+    WHERE f.LOCAL_TD = @clientType
+    and   f.LOCAL_ID = @firmId
+  end
+  
+  /* henüz hazýrlanmadý 
+  
+  if (@clientType = 4)
+  begin
+    /* Bölüm List */
+  end
+  
+  if (@clientType = 5)
+  begin
+    /* Departman List */
+  end
+  
+  */
+  
+  if (@clientType = 6)
+  begin
+    /* kullanýcý  */  
+    
+	;WITH CTE AS (
+            
+    Select u.ID _USER_ID, f.LOCAL_ID _FIRM_ID from HP_USERS u
+      left outer join HP_FIRMS f on  u.USER_FIRM_GUID = f.FIRM_GUID 
+    where u.ISACTIVE = 1
+   
+    union all
+		
+    Select c._USER_ID, M.LOCAL_ID 
+    from CTE C
+      join HP_FIRMS M ON C._FIRM_ID = M.PARENT_ID 
+    )
+ 
+    Select 
+      HPUSER.SYS_ID         CLIENT_ID
+    , HPUSER.USER_FULLNAME  CLIENT_NAME 
+    , 6                     CLIENT_TYPE  
+    , 0                     PARENT_ID 
+    , f.FIRM_NAME           PARENT_NAME   
+    
+	From CTE c
+      left outer join HP_FIRMS f on ( c._FIRM_ID = f.LOCAL_ID )
+      left outer join HP_USERS HPUSER on ( c._USER_ID = HPUSER.ID )
+    Where f.LOCAL_ID = @firmId
+     
+    order by  HPUSER.USER_FULLNAME 
+	
+  end
+
+  /* bilgisayar */
+    
+  if (@clientType = 7)
+  begin
+    Select  
+      c.SYS_ID         CLIENT_ID
+    , c.SYSTEM_NAME    CLIENT_NAME 
+    , 7                CLIENT_TYPE  
+    , f.LOCAL_ID       PARENT_ID 
+    , f.FIRM_NAME      PARENT_NAME   
+
+    from HP_FIRMS f
+       left outer join HP_COMPS c on ( f.FIRM_GUID = c.COMP_FIRM_GUID )
+    where f.LOCAL_ID = @firmId
+  
+  end
+  
+END;
+
+
+
+
+/* MySQL  **** */
+
+
+  -- clientType
+  -- 1 Grup Firma
+  -- 2 Firma Merkezi
+  -- 3 Þube
+  -- 4 Bölüm
+  -- 5 Departman
+  -- 6 Personel
+  -- 7 Bilgisayar
+
+DELIMITER $$
+
+DROP PROCEDURE IF EXISTS `prc_CLIENT_LIST` $$
+CREATE PROCEDURE `prc_CLIENT_LIST` (in firmID int, in clientType int)
+BEGIN
+  
+  
+  
+END $$
+DELIMITER ;
+
+
+

@@ -1,0 +1,46 @@
+﻿
+USE [GREEN]
+GO
+
+
+CREATE TRIGGER [dbo].[trg_AJ_LINEDOC] on [dbo].[AJ_LINEDOC] 
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    declare @i_EVRAK_TD            SmallInt = 0
+	declare @i_MIN_ODEME_TUTARI    Numeric(22,5) = 0  
+	
+    DECLARE InsertCursor_AJ_LINEDOC cursor for select ID from Inserted
+    DECLARE @curId bigint
+
+    OPEN InsertCursor_AJ_LINEDOC
+
+    FETCH NEXT FROM InsertCursor_AJ_LINEDOC INTO @curId
+    
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+	    set @i_EVRAK_TD = 0
+        set @i_MIN_ODEME_TUTARI = 0
+		
+		select 
+    	   @i_EVRAK_TD  = ins.EVRAK_TD
+		 , @i_MIN_ODEME_TUTARI = ins.MIN_ODEME_TUTARI
+    	from Inserted ins
+    	where ins.ID = @curId
+    
+	    if (@i_EVRAK_TD <> 23) -- kredi kartı extresi deilse
+    	begin
+    	  update AJ_LINEDOC set 
+          MAX_ODEME_TUTARI = @i_MIN_ODEME_TUTARI
+          where ID = @curId 
+    	end 
+        
+    	FETCH NEXT FROM InsertCursor_AJ_LINEDOC INTO @curId
+    END
+
+    CLOSE InsertCursor_AJ_LINEDOC
+    DEALLOCATE InsertCursor_AJ_LINEDOC
+
+END
+
+GO

@@ -1,0 +1,188 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table MtskAdayBelgeler
+ (
+   Id                    Int IDENTITY(1,1) not null, 
+   FirmId                Int       not null,
+   TalepId               Int       not null, 
+   AdayId                Int       not null, 
+   TcNo                  Varchar(11)   null,
+   DonemTipiId           Int           null,
+   -- 20
+   BiyometrikTarandi     Bit   null,
+   BasvuruFotoTarandi    Bit   null,
+   OgrenimTarandi        Bit   null,
+   SaglikTarandi         Bit   null,
+   AdliSicilTarandi      Bit   null,
+   ImzaTarandi           Bit   null,
+   Sozlesme1Tarandi      Bit   null,
+   Sozlesme2Tarandi      Bit   null,
+   AdresKodlandi         Bit   null,  
+   BelgelerTarandi       Bit   null,
+
+   -- 40
+   AdayKaydiYapildi      Bit   null, /* mebbise aday kaydı yapıldı işareti */
+   BiyometrikYuklendi    Bit   null,
+   BasvuruFotoYuklendi   Bit   null,
+   OgrenimYuklendi       Bit   null,
+   SaglikYuklendi        Bit   null,
+   AdliSicilYuklendi     Bit   null,
+   ImzaYuklendi          Bit   null,
+   Sozlesme1Yuklendi     Bit   null,
+   Sozlesme2Yuklendi     Bit   null,
+   AdresYuklendi         Bit   null,
+   BelgelerYuklendi      Bit   null,
+
+   -- 60
+   IsSertifikaUcreti     Bit   null, -- ücret planlandı mı
+   SertifikaUcretiIsPaid Bit   null, -- ücretin tamamı tahsil edildi mi
+   IsUcretsiz            Bit   null, -- ücretsiz mi
+   IsFatura              Bit   null, -- ücretin tamamına fatura kesildi mi
+
+   constraint		pk_MtskAdayBelgeler primary key (Id)
+ )
+  
+  grant select, insert, update, delete on MtskAdayBelgeler to public
+
+  create index X_MtskAdayBelgeler01 on MtskAdayBelgeler (TalepId)
+  create index X_MtskAdayBelgeler02 on MtskAdayBelgeler (AdayId)
+  create index X_MtskAdayBelgeler03 on MtskAdayBelgeler (TcNo)
+  create index X_MtskAdayBelgeler04 on MtskAdayBelgeler (DonemTipiId)
+
+commit transaction
+
+/*CreateTableEnd*/
+
+
+/*CreateTrigger*/
+
+CREATE TRIGGER [dbo].[trg_MtskAdayBelgeler] on [dbo].[MtskAdayBelgeler]
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    DECLARE belgeCursor cursor local for select Id from Inserted
+    DECLARE @belgeId bigint
+
+    OPEN belgeCursor
+    FETCH NEXT FROM belgeCursor INTO @belgeId
+
+    -- Veri Transferi başladımı
+    declare @DbUpdatesIsActive Bit = 0
+    set @DbUpdatesIsActive = [dbo].[fnc_getIsDbUpdate] (13)
+
+    declare @TalepId int
+    declare @AdayId int
+    declare @BiyometrikTarandi Bit = 0
+    declare @BasvuruFotoTarandi Bit = 0
+    declare @OgrenimTarandi Bit = 0
+    declare @SaglikTarandi Bit = 0
+    declare @AdliSicilTarandi Bit = 0
+    declare @ImzaTarandi Bit = 0
+    declare @Sozlesme1Tarandi Bit = 0
+    declare @Sozlesme2Tarandi Bit = 0
+    declare @AdresKodlandi Bit = 0
+    declare @BelgelerTarandi Bit = 0
+   
+     -- Mebbise yüklendimi
+    declare @AdayKaydiYapildi Bit = 0
+    declare @BiyometrikYuklendi Bit = 0
+    declare @BasvuruFotoYuklendi Bit = 0
+    declare @OgrenimYuklendi Bit = 0
+    declare @SaglikYuklendi Bit = 0
+    declare @AdliSicilYuklendi Bit = 0
+    declare @ImzaYuklendi Bit = 0
+    declare @Sozlesme1Yuklendi Bit = 0
+    declare @Sozlesme2Yuklendi Bit = 0
+    declare @AdresYuklendi Bit = 0
+    declare @BelgelerYuklendi Bit = 0
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+
+        select 
+          @TalepId = isnull(ins.TalepId,0)
+        , @AdayId = isnull(ins.AdayId,0)
+        , @BiyometrikTarandi = isnull(ins.BiyometrikTarandi,0)
+        , @BasvuruFotoTarandi = isnull(ins.BasvuruFotoTarandi,0)
+        , @OgrenimTarandi = isnull(ins.OgrenimTarandi,0)
+        , @SaglikTarandi = isnull(ins.SaglikTarandi,0)
+        , @AdliSicilTarandi = isnull(ins.AdliSicilTarandi,0)
+        , @ImzaTarandi = isnull(ins.ImzaTarandi,0)
+        , @Sozlesme1Tarandi = isnull(ins.Sozlesme1Tarandi,0)
+        , @Sozlesme2Tarandi = isnull(ins.Sozlesme2Tarandi,0)
+        , @AdresKodlandi = isnull(ins.AdresKodlandi,0)
+
+        , @AdayKaydiYapildi = isnull(ins.AdayKaydiYapildi,0)
+        , @BiyometrikYuklendi = isnull(ins.BiyometrikYuklendi,0)
+        , @BasvuruFotoYuklendi = isnull(ins.BasvuruFotoYuklendi,0)
+        , @OgrenimYuklendi = isnull(ins.OgrenimYuklendi,0)
+        , @SaglikYuklendi = isnull(ins.SaglikYuklendi,0)
+        , @AdliSicilYuklendi = isnull(ins.AdliSicilYuklendi,0)
+        , @ImzaYuklendi = isnull(ins.ImzaYuklendi,0)
+        , @Sozlesme1Yuklendi = isnull(ins.Sozlesme1Yuklendi,0)
+        , @Sozlesme2Yuklendi = isnull(ins.Sozlesme2Yuklendi,0)
+        , @AdresYuklendi = isnull(ins.AdresYuklendi,0)
+        from inserted ins
+    	where ins.Id = @belgeId
+
+        Set @BelgelerTarandi = 0
+        Set @BelgelerYuklendi = 0
+
+        if ((@BiyometrikTarandi = 1) and 
+            (@OgrenimTarandi = 1) and
+            --(@BasvuruFotoTarandi = 1) and
+            (@SaglikTarandi = 1) and
+            (@AdliSicilTarandi = 1) and
+            (@ImzaTarandi = 1) and
+            (@Sozlesme1Tarandi = 1) and
+            (@Sozlesme2Tarandi = 1) --and
+            --(@AdresKodlandi = 1)
+            ) set @BelgelerTarandi = 1
+
+        if ((@AdayKaydiYapildi = 1) and
+            (@BiyometrikYuklendi = 1) and
+            --(@BasvuruFotoYuklendi = 1) and            
+            (@OgrenimYuklendi = 1) and 
+            (@SaglikYuklendi = 1) and 
+            (@AdliSicilYuklendi = 1) and 
+            (@ImzaYuklendi = 1) and 
+            (@Sozlesme1Yuklendi = 1) and 
+            (@Sozlesme2Yuklendi = 1) and
+            (@AdresYuklendi = 1)
+            ) set @BelgelerYuklendi = 1
+     
+        Update MtskAdayBelgeler set
+          BelgelerTarandi = @BelgelerTarandi
+        , BelgelerYuklendi = @BelgelerYuklendi
+        Where Id = @belgeId
+  
+        if (@DbUpdatesIsActive = 0)
+        begin 
+            if (@AdayId = 0)
+            begin
+                Select @AdayId = AdayId from dbo.MtskAdayTalep
+                Where Id = @TalepId
+            
+                Update dbo.MtskAdayBelgeler set AdayId = @AdayId
+                Where Id = @belgeId	
+            end
+
+            Update MtskAdayTakip set
+                BelgelerTarandi = @BelgelerTarandi
+              , BelgelerYuklendi = @BelgelerYuklendi
+            Where Id = @TalepId
+        end
+
+        FETCH NEXT FROM belgeCursor INTO @belgeId
+    END -- While
+
+    CLOSE belgeCursor
+    DEALLOCATE belgeCursor   
+    
+
+END -- create trigger
+
+
+/*CreateTriggerEnd*/

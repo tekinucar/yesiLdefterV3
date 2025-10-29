@@ -1,0 +1,360 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_OnmOdemePlaniOlustur] (@firmId int, @ucretTipiId smallInt, @cariId int)  
+AS BEGIN
+
+  --declare @TalepId int = 200 
+
+  declare @IslemSonucu nvarchar(100) = ''
+  declare @TahsilatAdedi int = 0
+    
+  Select @TahsilatAdedi = count(Id)
+  From [dbo].[OnmOdemePlani]
+  Where TalepId = @TalepId
+  and UcretTipiId >= 21101
+  and UcretTipiId <= 21105
+  and   (IsPaid = 1      -- ödendi
+    or BelgeDekontId > 0 -- tahsilat dekontu var ise
+	or BelgeStokBId > 0) -- fatura kesilmişse
+
+  if (@TahsilatAdedi > 0) 
+  begin
+     set @IslemSonucu = 'DİKKAT : Tahsilat işlemi veya fatura kesildiği için işlem yapılamıyor...'
+     return @IslemSonucu
+  end
+
+  declare @FirmId                  Int
+  declare @TalepTipiId             Int
+  declare @AdayId                  Int
+  declare @DonemTipiId             Int
+
+  declare @SertifikaUcreti         Numeric(22,5) /* il bazlı sertifika ücreti - readOnly */
+  declare @BirSaatOzelDersUcreti   Numeric(22,5) /* Özel ders için */
+  declare @AlacagiOzelDersSayisi   SmallInt      /* Özel ders için */
+  declare @KontejanTipiId          SmallInt      /* şehit, gazi vb...  */
+  declare @KontejanIndirimOrani    Numeric(12,8) /* %25 indirim dersek : %75 aday öder, %25 kurs indirim yapmış olur */
+  declare @KontejanIndirimTutari   Numeric(22,5) 
+  declare @KontejanSonrasiUcret    Numeric(22,5) 
+   
+  declare @AnlasilanUcret          Numeric(22,5) 
+  declare @IskontoOrani            Numeric(12,8) 
+  declare @PesinatTutari           Numeric(22,5)  
+  declare @TaksitSayisiTipiId      SmallInt      /* 0.Peşin, 1 Ay, 2 Ay, 3 Ay .... */
+  declare @TaksitTipiId            SmallInt      /* 1.Peşinat, 2.Taksit, 3.Tek Ödeme, 4.İade nedeniyle oluşan borç,5.Borcun tamamı */ 
+  declare @TaksitlendirilecekUcret Numeric(22,5) /* AnlasilanUcret - PesinatTutari */
+
+  declare @ESinavUcretTipiId       SmallInt 
+  declare @ESinavUcreti            Numeric(22,5) 
+  declare @USinavUcretTipiId       SmallInt
+  declare @UygulamaSinavUcreti     Numeric(22,5) 
+  declare @SertifikaVeSinavUcreti  Numeric(22,5) /* AnlasilanUcret + ESinavUcreti + UygulamaSinavUcreti */
+  declare @IsSinavUcretiTaksitli   Bit           /* Taksitlendirirken sinav ücretlerini birleştir */
+
+  declare @OdemeTipiId             SmallInt 
+  declare @OdemeBaslamaTarihi      Date
+  declare @TalepKayitTarihi        Date
+
+  declare @parcalancakUcret        Numeric(22,5)
+  declare @aylikUcret              Numeric(22,5)
+  declare @sayac                   Int = 1
+  declare @UcretTipiId             Int = 0
+
+  Select
+       @FirmId = u.[FirmId]  
+      ,@TalepTipiId = u.[TalepTipiId]
+      ---,@TalepId = u.[TalepId] > input value
+      ,@AdayId = u.[AdayId]
+      ,@DonemTipiId = u.[DonemTipiId]
+
+      ,@SertifikaUcreti = u.[SertifikaUcreti]
+      ,@BirSaatOzelDersUcreti = u.[BirSaatOzelDersUcreti]
+      ,@AlacagiOzelDersSayisi = u.[AlacagiOzelDersSayisi]
+      ,@KontejanTipiId = u.[KontejanTipiId]
+      ,@KontejanIndirimOrani = u.[KontejanIndirimOrani]
+      ,@KontejanIndirimTutari = u.[KontejanIndirimTutari]
+      ,@KontejanSonrasiUcret = u.[KontejanSonrasiUcret]
+
+      ,@AnlasilanUcret = u.[AnlasilanUcret]
+      ,@IskontoOrani = u.[IskontoOrani]
+      ,@PesinatTutari = u.[PesinatTutari]
+      ,@TaksitSayisiTipiId = u.[TaksitSayisiTipiId]
+      ,@TaksitlendirilecekUcret = u.[TaksitlendirilecekUcret]
+
+      ,@ESinavUcretTipiId = u.[ESinavUcretTipiId]
+      ,@ESinavUcreti = u.[ESinavUcreti]
+      ,@USinavUcretTipiId = u.[USinavUcretTipiId]
+      ,@UygulamaSinavUcreti = u.[UygulamaSinavUcreti]
+      ,@SertifikaVeSinavUcreti = u.[SertifikaVeSinavUcreti]
+      ,@IsSinavUcretiTaksitli = u.[IsSinavUcretiTaksitli]
+      ,@OdemeTipiId = u.[OdemeTipiId] 
+      ,@OdemeBaslamaTarihi = isnull(u.[OdemeBaslamaTarihi], DATEADD(MM, 1, t.[TalepKayitTarihi]))
+	  ,@TalepKayitTarihi = t.[TalepKayitTarihi]
+
+  From MtskAdayUcret as u, MtskAdayTalep as t
+  Where u.TalepId = t.Id
+  and   u.TalepId = @TalepId
+
+  -- Eğer peşin seçilmişse
+  if (@TaksitSayisiTipiId = 100) 
+  begin 
+      set @PesinatTutari = @AnlasilanUcret
+	  set @TaksitlendirilecekUcret = 0
+	  set @TaksitTipiId = 3 -- Tek ödeme
+  end
+
+  if (@PesinatTutari > 0 and @PesinatTutari < @AnlasilanUcret)
+      set @TaksitTipiId = 1 -- Peşinat
+
+  -- ucret tipleri belirleniyor
+  if (@TalepTipiId = 1) set @UcretTipiId = 21101
+  if (@TalepTipiId = 2) set @UcretTipiId = 21102
+  if (@TalepTipiId = 3) set @UcretTipiId = 21103
+  if (@TalepTipiId = 4) set @UcretTipiId = 21104
+  if (@TalepTipiId = 5) set @UcretTipiId = 21105
+  if (@TalepTipiId = 6) set @UcretTipiId = 21106
+
+  -- Mevcut Odeme Planını sil
+  --
+  Delete
+  From [dbo].[OnmOdemePlani]
+  Where TalepId = @TalepId
+  and UcretTipiId >= 21101
+  and UcretTipiId <= 21105
+
+  -- Peşinat veya peşin ödeme ise
+  if (@PesinatTutari > 0 or @TaksitSayisiTipiId = 100)
+  begin
+    INSERT INTO [dbo].[OnmOdemePlani]
+           ([FirmId]
+           ,[IsActive]
+           ,[DonemTipiId]
+           ,[TalepId]
+           ,[TalepTipiId]
+           ,[UcretTipiId]
+           ,[CariId]
+           ,[TaksitTipiId]
+           ,[TaksitNo]
+           ,[VadeTarihi]
+           ,[TaksitTutari]
+           ,[OdemeTipiId]
+           ,[IsPaid]
+           ,[TahsilTarihi]
+           ,[YedekTaksitTutari]
+           ,[BelgeDekontId]
+           ,[PatchBelgeDekontId]
+           ,[BelgeStokBId]
+           ,[SourceTypeId]
+           ,[SourceId])
+     VALUES
+           (@FirmId
+           ,1
+           ,@DonemTipiId
+           ,@TalepId
+           ,@TalepTipiId
+           ,@UcretTipiId   
+           ,@AdayId
+           ,@TaksitTipiId --TaksitTipiId
+           ,0
+           ,@TalepKayitTarihi -- VadeTarihi
+           ,@PesinatTutari 
+           ,@OdemeTipiId
+           ,0
+           ,null
+           ,0
+           ,0
+           ,0
+           ,0
+           ,0
+           ,0)
+  end -- @PesinatTutari > 0
+
+  if (@TaksitSayisiTipiId = 100) set @TaksitSayisiTipiId = 0
+
+  set @parcalancakUcret = @TaksitlendirilecekUcret
+
+  if (@IsSinavUcretiTaksitli = 1)
+      set @parcalancakUcret = @TaksitlendirilecekUcret + @ESinavUcreti + @UygulamaSinavUcreti
+	 
+  -- Aylık ücret hesaplanıyor
+  -- 
+  if (@TaksitSayisiTipiId > 0 and
+      @TaksitSayisiTipiId < 100 and
+	  @parcalancakUcret > 0)
+      set @aylikUcret = @parcalancakUcret / @TaksitSayisiTipiId
+
+  -- Yeni Ödeme Planını oluştur
+  --
+  while (@sayac <= @TaksitSayisiTipiId and @aylikUcret > 0)
+  begin
+    INSERT INTO [dbo].[OnmOdemePlani]
+           ([FirmId]
+           ,[IsActive]
+           ,[DonemTipiId]
+           ,[TalepId]
+           ,[TalepTipiId]
+           ,[UcretTipiId]   
+           ,[CariId]
+           ,[TaksitTipiId]
+           ,[TaksitNo]
+           ,[VadeTarihi]
+           ,[TaksitTutari]
+           ,[OdemeTipiId]
+           ,[IsPaid]
+           ,[TahsilTarihi]
+           ,[YedekTaksitTutari]
+           ,[BelgeDekontId]
+           ,[PatchBelgeDekontId]
+           ,[BelgeStokBId]
+           ,[SourceTypeId]
+           ,[SourceId])
+     VALUES
+           (@FirmId
+           ,1
+           ,@DonemTipiId
+           ,@TalepId
+           ,@TalepTipiId
+           ,@UcretTipiId   
+           ,@AdayId
+           ,2 --TaksitTipiId
+           ,@sayac
+           ,@OdemeBaslamaTarihi -- VadeTarihi
+           ,@aylikUcret 
+           ,@OdemeTipiId
+           ,0
+           ,null
+           ,0
+           ,0
+           ,0
+           ,0
+           ,0
+           ,0)
+
+    set @OdemeBaslamaTarihi = DATEADD(MONTH, 1, @OdemeBaslamaTarihi)
+    set @sayac = @sayac + 1
+  end -- while
+
+  if (@ESinavUcretTipiId = 1) and -- Biz yatıracağız
+     (@ESinavUcreti > 0)
+  begin
+
+      if ( Select count(*) ADET from [dbo].[OnmOdemePlani] where 0 = 0 
+      and [FirmId] = @FirmId 
+      and [TalepId] = @TalepId 
+      and [TalepTipiId] = @TalepTipiId 
+      and [TaksitNo] = 1 -- eğer ücretini kayıt sırasında alacaksa sadece birinci sınav ücreti otomatik oluşsun
+      and [UcretTipiId] = 21111 -- e-sinav ücreti
+      and [VadeTarihi] =  @TalepKayitTarihi  
+      ) = 0 
+      begin 
+          INSERT INTO [dbo].[OnmOdemePlani]
+           ([FirmId]
+           ,[IsActive]
+           ,[DonemTipiId]
+           ,[TalepId]
+           ,[TalepTipiId]
+           ,[UcretTipiId]
+           ,[CariId]
+           ,[TaksitTipiId]
+           ,[TaksitNo]
+           ,[VadeTarihi]
+           ,[TaksitTutari]
+           ,[OdemeTipiId]
+           ,[IsPaid]
+           ,[TahsilTarihi]
+           ,[YedekTaksitTutari]
+           ,[BelgeDekontId]
+           ,[PatchBelgeDekontId]
+           ,[BelgeStokBId]
+           ,[SourceTypeId]
+           ,[SourceId])
+          VALUES
+           (@FirmId
+           ,1
+           ,@DonemTipiId
+           ,@TalepId
+           ,@TalepTipiId
+           ,21111 -- @UcretTipiId   e-sinav ücreti
+           ,@AdayId
+           ,3 --TaksitTipiId
+           ,1
+           ,@TalepKayitTarihi -- VadeTarihi
+           ,@ESinavUcreti 
+           ,@OdemeTipiId
+           ,0
+           ,null
+           ,0
+           ,0
+           ,0
+           ,0
+           ,0
+           ,0)
+      end -- if ( Select count(*) ADET 
+  end -- @ESinavUcreti > 0
+
+  if (@USinavUcretTipiId = 1) and -- Biz yatıracağız
+     (@UygulamaSinavUcreti > 0)
+  begin
+      if ( Select count(*) ADET from [dbo].[OnmOdemePlani] where 0 = 0 
+      and [FirmId] = @FirmId 
+      and [TalepId] = @TalepId 
+      and [TalepTipiId] = @TalepTipiId 
+      and [TaksitNo] = 1 -- eğer ücretini kayıt sırasında alacaksa sadece birinci sınav ücreti otomatik oluşsun
+      and [UcretTipiId] = 21112 -- uygulama sinav ücreti
+      and [VadeTarihi] =  @TalepKayitTarihi  
+      ) = 0 
+      begin 
+          INSERT INTO [dbo].[OnmOdemePlani]
+           ([FirmId]
+           ,[IsActive]
+           ,[DonemTipiId]
+           ,[TalepId]
+           ,[TalepTipiId]
+           ,[UcretTipiId]
+           ,[CariId]
+           ,[TaksitTipiId]
+           ,[TaksitNo]
+           ,[VadeTarihi]
+           ,[TaksitTutari]
+           ,[OdemeTipiId]
+           ,[IsPaid]
+           ,[TahsilTarihi]
+           ,[YedekTaksitTutari]
+           ,[BelgeDekontId]
+           ,[PatchBelgeDekontId]
+           ,[BelgeStokBId]
+           ,[SourceTypeId]
+           ,[SourceId])
+          VALUES
+           (@FirmId
+           ,1
+           ,@DonemTipiId
+           ,@TalepId
+           ,@TalepTipiId
+           ,21112 -- @UcretTipiId   uygulama sinav ücreti
+           ,@AdayId
+           ,3 --TaksitTipiId
+           ,1
+           ,@TalepKayitTarihi -- VadeTarihi
+           ,@UygulamaSinavUcreti 
+           ,@OdemeTipiId
+           ,0
+           ,null
+           ,0
+           ,0
+           ,0
+           ,0
+           ,0
+           ,0)
+      end -- if ( Select count(*) ADET 
+
+  end -- @UygulamaSinavUcreti > 0
+
+  Execute dbo.prc_MtskAdayBorcunuHesapla @FirmId, @TalepId
+
+  -- Bunu kapatma veya silme. 
+  -- Bu sonuca kodun içinde kontrol ediliyor
+  Select @IslemSonucu as IslemSonucu
+
+END -- procedure
+
+/*CreateProcedureEnd*/

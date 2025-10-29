@@ -1,0 +1,102 @@
+﻿
+CREATE PROCEDURE [dbo].[prc_EduMtskSoruResimleri] (@SoruId int)  
+AS BEGIN
+-- declare @SoruId int  set @SoruId = 1
+
+  declare @Soru nvarchar(200)
+
+  Select  @Soru = Soru From EduMtskSorular
+  Where Id = @SoruId
+
+
+  Select Id, 
+  @Soru as LkpSoru,
+  'SoruResim' as LkpImageType, 
+  'Soru Resmi' as LkpBelgeAdi, 
+  'EduMtskSorular' as LkpTableName, 
+  'SoruResim' as LkpFieldName,
+  '' as LkpSmallFieldName,
+  'Id' as LkpIdFieldName, 
+  SoruResim as LkpImage, 
+  512 as LkpWidth,
+  512 as LkpHeight,
+  96 as LkpDpi
+
+  From EduMtskSorular
+  Where Id = @SoruId
+
+  Union All
+
+  Select Id, 
+  @Soru as LkpSoru,
+  'CevapResim' as LkpImageType, 
+  'Cevap A Resmi' as LkpBelgeAdi, 
+  'EduMtskSorular' as LkpTableName, 
+  'CevapAResim' as LkpFieldName,
+  '' as LkpSmallFieldName,
+  'Id' as LkpIdFieldName, 
+  CevapAResim as LkpImage, 
+  512 as LkpWidth,
+  512 as LkpHeight,
+  96 as LkpDpi
+
+  From EduMtskSorular
+  Where Id = @SoruId
+
+  Union All
+
+  Select Id, 
+  @Soru as LkpSoru,
+  'CevapResim' as LkpImageType, 
+  'Cevap B Resmi' as LkpBelgeAdi, 
+  'EduMtskSorular' as LkpTableName, 
+  'CevapBResim' as LkpFieldName,
+  '' as LkpSmallFieldName,
+  'Id' as LkpIdFieldName, 
+  CevapBResim as LkpImage, 
+  512 as LkpWidth,
+  512 as LkpHeight,
+  96 as LkpDpi
+
+  From EduMtskSorular
+  Where Id = @SoruId
+
+  Union All
+
+  Select Id, 
+  @Soru as LkpSoru,
+  'CevapResim' as LkpImageType, 
+  'Cevap C Resmi' as LkpBelgeAdi, 
+  'EduMtskSorular' as LkpTableName, 
+  'CevapCResim' as LkpFieldName,
+  '' as LkpSmallFieldName,
+  'Id' as LkpIdFieldName, 
+  CevapCResim as LkpImage, 
+  512 as LkpWidth,
+  512 as LkpHeight,
+  96 as LkpDpi
+
+  From EduMtskSorular
+  Where Id = @SoruId
+
+  Union All
+
+  Select Id, 
+  @Soru as LkpSoru,
+  'CevapResim' as LkpImageType, 
+  'Cevap D Resmi' as LkpBelgeAdi, 
+  'EduMtskSorular' as LkpTableName, 
+  'CevapDResim' as LkpFieldName,
+  '' as LkpSmallFieldName,
+  'Id' as LkpIdFieldName, 
+  CevapDResim as LkpImage, 
+  512 as LkpWidth,
+  512 as LkpHeight,
+  96 as LkpDpi
+
+  From EduMtskSorular
+  Where Id = @SoruId
+
+END -- procedure
+  
+

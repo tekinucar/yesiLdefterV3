@@ -1,0 +1,179 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_MtskDonemAdaySayilariSet] (@FirmId int)  
+AS BEGIN
+
+  declare @SinifKontejani int
+  declare @GruplarKontejani int
+  declare @DonemAdaySayisi int
+  declare @oran0 numeric(22,8)
+  declare @YILAY1 varchar(6)
+  declare @BugunDonemTipiId int = 0
+
+  -- Bugün hangi dönem ?  tespit ediliyor
+  if (MONTH(getdate()) < 10)
+       set @BugunDonemTipiId = convert(int, convert(varchar(5), YEAR(getdate())) + '0' + convert(varchar(3), MONTH(getdate())))
+  else set @BugunDonemTipiId = convert(int, convert(varchar(5), YEAR(getdate())) + convert(varchar(3), MONTH(getdate())))
+
+  Set @YILAY1 = Convert(varchar(6), @BugunDonemTipiId)
+
+  -- SınıfKontajini 
+  Select @SinifKontejani = (sum(OdaKontenjani) / Count(Id))
+  From MtskDerslik
+  Where OdaninDurumTipiId = 1
+  Group by DerslikAdiTipiId
+
+  -- GruplarKontejani = SınıfKontajini x Grup Sayısı
+  Set @GruplarKontejani = @SinifKontejani * 3
+
+  -- ---------------------------------------------------
+  -- Donem Aday Sayısı Tespiti
+  -- ---------------------------------------------------
+  Update MtskDonemi set
+  DonemAdaySayisi = x.Adet
+  From MtskDonemi as a,
+  (
+     Select DonemTipiId, Count(Id) Adet 
+     From MtskAdayTalep
+	 Where FirmId = @FirmId
+     Group by DonemTipiId
+  ) x
+  Where a.DonemTipiId = x.DonemTipiId
+  and   a.FirmId = @FirmId
+  and   isnull(a.DonemAdaySayisi,0) <> x.Adet
+
+  -- ---------------------------------------------------
+  -- Grup Aday Sayısı
+  -- ---------------------------------------------------
+  Update MtskDonemi set
+  GrupAdaySayisi = Adet
+  From MtskDonemi as a,
+  (
+     Select DonemTipiId, GrupTipiId, Count(Id) Adet 
+     From MtskAdayTalep
+	 Where FirmId = @FirmId
+     Group by DonemTipiId, GrupTipiId
+  ) x
+  Where a.DonemTipiId = x.DonemTipiId
+  and   a.GrupTipiId = x.GrupTipiId
+  and   a.FirmId = @FirmId
+  and   isnull(a.GrupAdaySayisi,0) <> Adet
+
+  -- ---------------------------------------------------
+  -- Sube Aday Sayısı
+  -- ---------------------------------------------------
+  Update MtskGrupSubesi set
+  SubeAdaySayisi = x.Adet
+  From MtskGrupSubesi as a,
+  (
+     Select DonemTipiId, GrupTipiId, SubeTipiId, Count(Id) Adet 
+     From MtskAdayTalep
+	 Where FirmId = @FirmId
+     Group by DonemTipiId, GrupTipiId, SubeTipiId 
+  ) x
+  Where a.DonemTipiId = x.DonemTipiId
+  and   a.GrupTipiId = x.GrupTipiId
+  and   a.SubeTipiId = x.SubeTipiId
+  and   a.FirmId = @FirmId
+  and   isnull(a.SubeAdaySayisi,0) <> x.Adet
+
+
+
+  -- ---------------------------------------------------
+  -- Yeni Grup Açma için hesaplar
+  -- Grup2 ve Grup3 açmak için yapılan hesaplar
+  -- ---------------------------------------------------
+  /*
+  Select @DonemAdaySayisi = DonemAdaySayisi From MtskDonemi
+  Where DonemTipiId = @YILAY1
+  and   FirmId = @FirmId
+
+  --Select @Grup1AdaySayisi = GrupAdaySayisi From MtskDonemi
+  --Where DonemTipiId = @YILAY1
+  --and   GrupTipiId = 1
+
+  set @oran0 = ( @DonemAdaySayisi  / (cast(@GruplarKontejani as decimal(22,8)) )) * 100
+  --set @oran1 = ( @Grup1AdaySayisi  / (cast(@SinifKontejani as decimal(22,8)) )) * 100
+
+  
+  -- MtskDonem
+  if ( @oran0 > 22 ) and -- yüzde 22 yi geçtiyse
+     ( Select count(Id) ADET from [MtskDonemi] 
+       where [DonemTipiId] = @YILAY1 
+       and GrupTipiId = 2 
+       and FirmId = @FirmId
+	   ) = 0 
+  begin 
+    insert into [MtskDonemi] ( ParentId, FirmId, IsActive, DonemTipiId, GrupTipiId, KurumOnayTipiId ) values ( 0, @FirmId, 1, @YILAY1, 2, 0 ) 
+  end
+
+  if ( @oran0 > 55 ) and -- yüzde 55 i geçtiyse
+     ( Select count(Id) ADET from [MtskDonemi] 
+       where [DonemTipiId] = @YILAY1 
+       and GrupTipiId = 3 
+       and FirmId = @FirmId
+       ) = 0 
+  begin 
+    insert into [MtskDonemi] ( ParentId, FirmId, IsActive, DonemTipiId, GrupTipiId, KurumOnayTipiId ) values ( 0, @FirmId, 1, @YILAY1, 3, 0 ) 
+  end
+
+  -- MtskGrupSubesi
+  if ( @oran0 > 22 ) and -- yüzde 22 yi geçtiyse
+     ( Select count(Id) ADET from [MtskGrupSubesi] 
+       where [DonemTipiId] = @YILAY1 
+       and GrupTipiId = 2 
+       and FirmId = @FirmId
+	   ) = 0 
+  begin 
+    insert into [MtskGrupSubesi] (ParentId, FirmId, IsActive, DonemTipiId, GrupTipiId, SubeTipiId, KurumOnayTipiId) values (0, @FirmId, 1, @YILAY1, 2, 0, 0 )  
+  end
+
+  if ( @oran0 > 55 ) and -- yüzde 55 i geçtiyse
+     ( Select count(Id) ADET from [MtskGrupSubesi] 
+       where [DonemTipiId] = @YILAY1 
+       and GrupTipiId = 3 
+       and FirmId = @FirmId
+	   ) = 0 
+  begin 
+    insert into [MtskGrupSubesi] (ParentId, FirmId, IsActive, DonemTipiId, GrupTipiId, SubeTipiId, KurumOnayTipiId) values (0, @FirmId, 1, @YILAY1, 3, 0, 0 )  
+  end
+  */
+  -- -------------------------------------------------------
+  -- Kapasite Tipi hesaplaması
+  -- -------------------------------------------------------
+
+  declare @OdaKontenjani smallInt = 0
+
+  Select Top 1 @OdaKontenjani = OdaKontenjani  
+  From dbo.MtskDerslik
+  Where FirmId = @FirmId
+  and   IsActive = 1
+
+  Update MtskGrupSubesi set
+      KapasiteTipiId = x.KapasiteTipiId
+  From MtskGrupSubesi as a,
+  (
+     Select sube.DonemTipiId, sube.GrupTipiId, sube.SubeTipiId
+	      , sube.SubeAdaySayisi
+          --, sube.SubeAdaySayisi - @OdaKontenjani 
+          ,( case 
+             when sube.SubeAdaySayisi - @OdaKontenjani = 0 then 0
+             when sube.SubeAdaySayisi - @OdaKontenjani < 0 and sube.SubeAdaySayisi - @OdaKontenjani > -6 then (sube.SubeAdaySayisi - @OdaKontenjani)
+	         when sube.SubeAdaySayisi - @OdaKontenjani < -5 then -6
+	         when sube.SubeAdaySayisi - @OdaKontenjani > 0  then 1
+	         end ) as KapasiteTipiId
+     From dbo.MtskGrupSubesi as sube  
+     Where sube.FirmId = @FirmId
+  ) x
+  Where a.DonemTipiId = x.DonemTipiId
+  and   a.GrupTipiId = x.GrupTipiId
+  and   a.SubeTipiId = x.SubeTipiId
+  and   a.FirmId = @FirmId
+  and   isnull(a.KapasiteTipiId,-9) <> x.KapasiteTipiId
+
+
+
+END -- procedure
+
+
+/*CreateProcedureEnd*/
