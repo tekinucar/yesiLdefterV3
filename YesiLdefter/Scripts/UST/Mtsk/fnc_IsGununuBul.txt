@@ -94,7 +94,7 @@ BEGIN
 
           -- @gunTipiId : 0 tatil gün şekli belirtilmemiş ise
           -- @gunNo     : 1 = Pazar değilse
-          if (@gunTipiId = 0) and (@gunNo <> 1) 
+          if (@gunTipiId = 0) --and (@gunNo <> 1) -- kullanıcı pazar günü vermek istiyor onun için bu kontrolü açma 
               set @isGunu = @isGunu + 1 -- pazar değilse isGunu +1 olsun 
 
           if (@istenenIsGunu = @isGunu - 1) 

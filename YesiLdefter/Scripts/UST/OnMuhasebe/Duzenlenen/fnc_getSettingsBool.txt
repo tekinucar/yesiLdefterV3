@@ -10,7 +10,7 @@ BEGIN
   Select @retValue = DefaultBool
   From [dbo].[Settings] as s
   Where FirmId = @FirmId
-  and   SettingGroupNo = @settingGroupNo
+  and   GroupNoTypeId = @settingGroupNo
   and   SettingNo = @settingNo
 
   -- True yada False dönüyor

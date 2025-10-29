@@ -4063,8 +4063,12 @@ INSERT INTO [dbo].[SYS_UPDATES]
 
                                             find = Where_Lines.IndexOf("/*setEnd*/");
                                             Where_Lines = Where_Lines.Insert(find,
-                                                "/*prm*/ set " + t.Set_FieldName_Value_(field_type, "@" + fname, "first", "@", toperand_type.ToString()) +
+                                                "/*prm*/ set " + t.Set_FieldName_Value_(field_type, fname, "first", "@", toperand_type.ToString()) +
                                                 "   -- :D.SD." + RefId.ToString() + ": --" + v.ENTER);
+
+                                            //Where_Lines = Where_Lines.Insert(find,
+                                            //    "/*prm*/ set " + t.Set_FieldName_Value_(field_type, "@" + fname, "first", "@", toperand_type.ToString()) +
+                                            //    "   -- :D.SD." + RefId.ToString() + ": --" + v.ENTER);
 
                                             find = Where_Lines.IndexOf("/*paramEnd*/");
                                             Where_Lines = Where_Lines.Insert(find, virgul + " @" + fname + v.ENTER);

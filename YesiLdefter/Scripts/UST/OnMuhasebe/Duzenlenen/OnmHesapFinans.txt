@@ -83,6 +83,9 @@ begin transaction
    KiralikGun              SmallInt      null,
    KiralikAy               SmallInt      null,
    IsSatildi               Bit           null,
+   KiraTutari              Numeric(22,5) null,
+
+   -- 111
    MaliyetinKapsamTipiId   SmallInt      null,
 
    --197, 198,199
@@ -570,7 +573,6 @@ commit transaction
 CREATE TRIGGER [dbo].[trg_OnmHesapFinans] on [dbo].[OnmHesapFinans] 
 AFTER INSERT, UPDATE
 AS BEGIN
-
 --   UstGrupTipiId       SmallInt      null, /* 102   banka        */
 --   AnaGrupTipiId       SmallInt      null, /* 1022  banka hesabı */
 --   AltGrupTipiId       Int           null, /* 10221 vadesiz      */
@@ -592,7 +594,8 @@ AS BEGIN
     declare @eHesapKodu varchar(50) = null
     declare @eUstHesapKodu varchar(50) = null
     declare @eNumarasi varchar(50) = null
-	declare @ePeriyodTipiId smallint = 0
+    declare @eIlgiliIsim varchar(50) = null
+    declare @ePeriyodTipiId smallint = 0
 	declare @yPeriyodTipiId smallint = 0
 	declare @IsKiralik bit 
 
@@ -610,6 +613,12 @@ AS BEGIN
 	declare @kontrolId Int = 0
 
     OPEN cursorOnmHesapFinans
+
+    -- HesapTipiId
+    -- 0  Tanımsız
+    -- 11 Maliyet grubu
+    -- 12 Varlık hesabı
+    -- 13 Abone hesabı
 
     FETCH NEXT FROM cursorOnmHesapFinans INTO @curId
 
@@ -631,6 +640,7 @@ AS BEGIN
         ,@eHesapKodu = isnull(ins.HesapKodu,'NULL')
         ,@eUstHesapKodu = isnull(ins.UstHesapKodu,'NULL')
         ,@eNumarasi = isnull(ins.Numarasi,'')
+        ,@eIlgiliIsim = isnull(ins.IlgiliIsim,'')
 		,@ePeriyodTipiId = isnull(ins.PeriyodTipiId, 0)
         ,@IsKiralik = isnull(ins.IsKiralik, 0) 
         ,@eParentHesapAdi1 = isnull(fh1.HesapAdi, '')
@@ -701,6 +711,7 @@ AS BEGIN
         -- banka şubesi
         if (@eAltGrupTipiId = 1021)
             set @yHesapKisaAdi = @yHesapKisaAdi + '.' + @eHesapAdi
+
         -- banka hesabi
         if (@eAltGrupTipiId = 1022)
         begin
@@ -717,14 +728,16 @@ AS BEGIN
             --                   BankaAdi       +  .  + SubeAdi           +  .  + SubeKod                          +   
             set @yHesapKisaAdi = @yHesapKisaAdi + '.' + @eParentHesapAdi1 + '.' + RTRIM(LTRIM(@eParentHesapKodu1)) + '.' + @yHesapAdi + '***' + RIGHT(@eNumarasi, 4)
         end 
+
         -- banka kartı
-        if (@eAltGrupTipiId = 1023)
+        if (@eAltGrupTipiId = 1023 and (@eHesapTipiId = 12 or @yHesapTipiId = 12)) -- (12 = varlık : kart ise)
         begin
             set @yHesapKisaAdi = @yHesapKisaAdi + '.' + @eHesapAdi + '.****' + RIGHT(@eNumarasi,4)
             set @UstGrupTipiId_ = 85
             -- Kredi kartı hesap ekstresi
             Execute dbo.[prc_OnmHesapFinansMaliyetGrubuKontrolu] @eFirmId, @UstGrupTipiId_, @eAnaGrupTipiId, @eAltGrupTipiId, '81.13.30'       
         end	   
+
 	    -- pos cihazı
         if (@eAltGrupTipiId = 1024) and (@eHesapAdi <> 'pos') and (@eHesapAdi <> 'NULL') and (@eHesapAdi <> 'PosCihazı')
             set @yHesapKisaAdi = @yHesapKisaAdi + '.pos.' + @eHesapAdi + '.' + @eNumarasi
@@ -739,6 +752,22 @@ AS BEGIN
                 where Id = @curId
             end			
         end 	  
+
+	    -- sanal pos
+        if (@eAltGrupTipiId = 1025) and (@eHesapAdi <> 'pos') and (@eHesapAdi <> 'Spos') and (@eHesapAdi <> 'NULL') and (@eHesapAdi <> 'SanalPos')
+            set @yHesapKisaAdi = @yHesapKisaAdi + '.Spos.' + @eHesapAdi + '.' + @eNumarasi
+        if (@eAltGrupTipiId = 1025) and ((@eHesapAdi = 'pos') or (@eHesapAdi = 'Spos') or (@eHesapAdi = 'NULL') or (@eHesapAdi = 'SanalPos'))
+        begin 
+            set @yHesapKisaAdi = @yHesapKisaAdi + '.Spos.' + @eNumarasi
+            if ((@eHesapAdi = 'Spos') or (@eHesapAdi = 'NULL') or (@eHesapAdi = 'SanalPos'))
+            begin
+			    set @yHesapAdi = 'SanalPos'
+                update OnmHesapFinans set 
+                HesapAdi = @yHesapAdi
+                where Id = @curId
+            end			
+        end 	  
+
         if (@yHesapKisaAdi <> @eHesapKisaAdi)
         begin
           update OnmHesapFinans set 
@@ -746,7 +775,6 @@ AS BEGIN
           where Id = @curId
           set @eHesapAdi = '' -- aşağıdaki çalısmasın ( update OnmHesapFinans set HesapKisaAdi = ...) 
         end 
-  
       end -- if
 
       -- Varlık 25 > 83
@@ -933,7 +961,7 @@ AS BEGIN
             where Id = @curId
         end
       end -- 83, 84
-      /*
+
       if ((@eUstHesapKodu = '81.21') or
           (@eUstHesapKodu = '81.22') or
           (@eUstHesapKodu = '81.23') or
@@ -1001,7 +1029,7 @@ AS BEGIN
            (0, @eFirmId, 1, 84, Convert(int, @eUstHesapKodu), 0, 0, null, @eUstHesapKodu, @yHesapKisaAdi, @yHesapKisaAdi)
         end
       end -- if 81..
-	  */
+	  
       -- Abone kaydı ise
       if (@eUstGrupTipiId = 84)
       begin
@@ -1017,6 +1045,8 @@ AS BEGIN
         end 
 
         set @yHesapKisaAdi = @eHesapAdi + '.' + @eNumarasi
+
+        if (@eIlgiliIsim <> '') set @yHesapKisaAdi = @yHesapKisaAdi + '.' + @eIlgiliIsim
 
         update OnmHesapFinans set 
           HesapKisaAdi = substring(@yHesapKisaAdi,1,100)
@@ -1046,7 +1076,6 @@ AS BEGIN
 
     CLOSE cursorOnmHesapFinans
     DEALLOCATE cursorOnmHesapFinans
-
 
 END
 

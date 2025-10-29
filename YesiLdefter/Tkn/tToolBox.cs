@@ -6292,7 +6292,7 @@ namespace Tkn_ToolBox
                 if (Field_Name == "FirmId" && fvalue == "first") fvalue = ":FIRM_ID";
                 if (Field_Name == "UserId" && fvalue == "first") fvalue = ":USER_ID";
 
-                if (fvalue == "first") fvalue = "-99";
+                if (fvalue == "first") fvalue = "-1";// "-99";
 
                 // rakam türü , ile ayrılmış ise , yerine . işareti değiştiriliyor 
                 if (fvalue.IndexOf(",") > -1)
@@ -6421,8 +6421,18 @@ namespace Tkn_ToolBox
                     (fvalue == "") /// yeni eklendi
                     )
                 {
-                    //MyStr = string.Empty;
-                    MyStr = "Convert(Date, isnull(" + Field_Name + ",getdate()), 103) " + " <> " + " Convert(Date, '01.01.1900', 103)";
+                    if (SetType != "@")
+                    {
+                        //MyStr = string.Empty;
+                        MyStr = "Convert(Date, isnull(" + Field_Name + ",getdate()), 103) " + " <> " + " Convert(Date, '01.01.1900', 103)";
+                    }
+                    else
+                    {
+                        // /*prm*/ set @FirmId = 0   -- :D.SD.64295: --
+                        // /*prm*/ set @BaslangicTarihi = Convert(Date, '01.09.2025', 103)-- :D.SD.64297: --
+
+                        MyStr = "@" + Field_Name + " = " + " Convert(Date, '01.01.1900', 103)  -- :D.SD.";
+                    }
                 }
                 else
                 {
@@ -8345,7 +8355,7 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
       ,[PcName]
       ,[NetworkMacAddress]
       ,[UserId]
-      ,[SettingGroupNo]
+      ,[GroupNoTypeId]
       ,[SettingNo]
       ,[About]
       ,[DefaultTypeId]
@@ -9055,7 +9065,23 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
                 SQL_Read_Execute(v.dBaseNo.Project, v.ds_IlceList, ref Sql, "ILCEList", "");
         }
 
+        public void CrsTakvimiAyarla()
+        {
+            vTable vt = new vTable();
+            vt.DBaseNo = v.dBaseNo.Project;
+            vt.SchemasCode = "dbo";
+            vt.TableName = "CrsTakvim";
+            vt.ParentTable = "";
+            vt.SqlScript = "";
 
+            DataSet ds = new DataSet();
+
+            string Sql = " Execute [dbo].[prc_CrsTakvimiAyarla] @FirmId = 0 ";
+
+            Sql_ExecuteNon(ds, ref Sql, vt);
+
+            ds.Dispose();
+        }
 
         // LKP_ olan fieldler ve onlara ait listeler
         public void SYS_Types_List(DataSet ds, string List_Name)

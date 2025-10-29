@@ -50,8 +50,8 @@ AS BEGIN
     set @WhereAnd = ''
     if (@DekontTipiId = 2)
        set @WhereAnd = ' and   hFinans.AltGrupTipiId <> 1023 ' -- banka kartları olmasın yani tahsilat araçları listelensin
-    if (@DekontTipiId = 3)
-       set @WhereAnd = ' and   hFinans.AltGrupTipiId not in ( 1024, 1025, 1026 ) ' -- pos cih. olmasın yani ödeme araçları listelensin
+    --if (@DekontTipiId = 3)
+    --   set @WhereAnd = ' and   hFinans.AltGrupTipiId not in ( 1024, 1025, 1026 ) ' -- pos cih. olmasın yani ödeme araçları listelensin
     if (@UserId > 0) 
        set @WhereAnd += ' and   kullanici.UserId = ' + convert(varchar(20), @UserId)  
 

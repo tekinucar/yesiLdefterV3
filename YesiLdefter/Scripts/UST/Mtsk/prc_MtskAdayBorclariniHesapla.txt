@@ -12,9 +12,9 @@ AS BEGIN
    -- 21111   e-Sınav ücreti
    -- 21112   Uygulama sınav ücreti
    -- 21113   Başarısız eğitim ücreti
-   -- 21114   Telafi eğitim ücreti
-   -- 21115   Diğer ücretler 
-   -- 21116   Uyg+Başarısız ücreti
+   -- 21114   Uyg+Başarısız ücreti
+   -- 21115   Telafi eğitim ücreti
+   -- 21116   Diğer ücretler 
 
 UPDATE [dbo].[MtskAdayUcret]
 
@@ -99,9 +99,9 @@ UPDATE [dbo].[MtskAdayUcret]
          ,(case when UcretTipiId = 21111 then sum(TaksitTutari) else 0	end	 )  as AlacakESinavUcreti
          ,(case when UcretTipiId = 21112 then sum(TaksitTutari) else 0	end	 )  as AlacakUgulamaSinavUcreti
          ,(case when UcretTipiId = 21113 then sum(TaksitTutari) else 0	end	 )  as AlacakBasarisizEgitimUcreti
-         ,(case when UcretTipiId = 21114 then sum(TaksitTutari) else 0	end	 )  as AlacakTelafiEgitimUcreti
-         ,(case when UcretTipiId = 21115 then sum(TaksitTutari) else 0	end	 )  as AlacakDigerUcretler
-         ,(case when UcretTipiId = 21116 then sum(TaksitTutari) else 0	end	 )  as AlacakUygBasarisizUcreti
+         ,(case when UcretTipiId = 21114 then sum(TaksitTutari) else 0	end	 )  as AlacakUygBasarisizUcreti
+         ,(case when UcretTipiId = 21115 then sum(TaksitTutari) else 0	end	 )  as AlacakTelafiEgitimUcreti
+         ,(case when UcretTipiId = 21116 then sum(TaksitTutari) else 0	end	 )  as AlacakDigerUcretler
          ,sum(TaksitTutari) as AlacakToplamTutar  
 
          ,0 as BorcSertifikaUcreti
@@ -157,9 +157,9 @@ UPDATE [dbo].[MtskAdayUcret]
          ,(case when UcretTipiId = 21111 then sum(TaksitTutari) else 0	end	 )  as BorcESinavUcreti
          ,(case when UcretTipiId = 21112 then sum(TaksitTutari) else 0	end	 )  as BorcUgulamaSinavUcreti
          ,(case when UcretTipiId = 21113 then sum(TaksitTutari) else 0	end	 )  as BorcBasarisizEgitimUcreti
-         ,(case when UcretTipiId = 21114 then sum(TaksitTutari) else 0	end	 )  as BorcTelafiEgitimUcreti
-         ,(case when UcretTipiId = 21115 then sum(TaksitTutari) else 0	end	 )  as BorcDigerUcretler
-         ,(case when UcretTipiId = 21116 then sum(TaksitTutari) else 0	end	 )  as BorcUygBasarisizUcreti
+         ,(case when UcretTipiId = 21114 then sum(TaksitTutari) else 0	end	 )  as BorcUygBasarisizUcreti
+         ,(case when UcretTipiId = 21115 then sum(TaksitTutari) else 0	end	 )  as BorcTelafiEgitimUcreti
+         ,(case when UcretTipiId = 21116 then sum(TaksitTutari) else 0	end	 )  as BorcDigerUcretler
          ,sum(TaksitTutari) as BorcToplamTutar  
 
          ,0 as VGSertifikaUcreti
@@ -215,9 +215,9 @@ UPDATE [dbo].[MtskAdayUcret]
          ,(case when UcretTipiId = 21111 then sum(TaksitTutari) else 0	end	 )  as VGESinavUcreti
          ,(case when UcretTipiId = 21112 then sum(TaksitTutari) else 0	end	 )  as VGUgulamaSinavUcreti
          ,(case when UcretTipiId = 21113 then sum(TaksitTutari) else 0	end	 )  as VGBasarisizEgitimUcreti
-         ,(case when UcretTipiId = 21114 then sum(TaksitTutari) else 0	end	 )  as VGTelafiEgitimUcreti
-         ,(case when UcretTipiId = 21115 then sum(TaksitTutari) else 0	end	 )  as VGDigerUcretler
-         ,(case when UcretTipiId = 21116 then sum(TaksitTutari) else 0	end	 )  as VGUygBasarisizUcreti
+         ,(case when UcretTipiId = 21114 then sum(TaksitTutari) else 0	end	 )  as VGUygBasarisizUcreti
+         ,(case when UcretTipiId = 21115 then sum(TaksitTutari) else 0	end	 )  as VGTelafiEgitimUcreti
+         ,(case when UcretTipiId = 21116 then sum(TaksitTutari) else 0	end	 )  as VGDigerUcretler
          ,sum(TaksitTutari) as VGToplamTutar   
 
          ,0 as TahsilEdilenUcretler

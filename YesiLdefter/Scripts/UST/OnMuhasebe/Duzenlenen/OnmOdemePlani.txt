@@ -110,17 +110,19 @@ INSERT INTO [Lkp].[OnmOdemePlaniUcretTipi] (Id, UcretTipi)
   ( 21111,    N'e-Sınav ücreti'),
   ( 21112,    N'Uygulama sınav ücreti'),
   ( 21113,    N'Başarısız eğitim ücreti'),
-  ( 21114,    N'Telafi eğitim ücreti'),
-  ( 21115,    N'Diğer ücretler'),
-  ( 21116,    N'Uyg+Başarısız ücretler'),
+  ( 21114,    N'Uyg+Başarısız ücretler'),
+  ( 21115,    N'Telafi eğitim ücreti'),
+  ( 21116,    N'Diğer ücretler (Ek direksiyon)'),
 
   -- Src
-  ( 23101,    N'Src Sertifika'),
+  ( 23101,    N'Src 1234 Sertifika'),
   ( 23102,    N'Src5 Sertifika'),
+  ( 23103,    N'Src6 Sertifika'),
+  ( 23104,    N'Ody 1234 Sertifika'),
+  ( 23105,    N'Üdy 1234 Sertifika'),
   ( 23111,    N'e-Sınav ücreti'),
-  ( 23112,    N'Uygulama sınav ücreti')
-
-
+  ( 23112,    N'Uygulama sınav ücreti'),
+  ( 23113,    N'Diğer ücretler')
 
   
 -- ------------------------------------------------------- 
@@ -312,7 +314,7 @@ AS BEGIN
             Update dbo.MtskAdayTakip Set uSinavUcretTipiId = 1
             From dbo.OnmOdemePlani as odeme
                 left outer join dbo.MtskAdayTakip as takip on ( odeme.TalepId = takip.TalepId )
-            where odeme.UcretTipiId in (21112, 21113) -- uyg sinav ücreti veya başarısız aday eğitimi ise
+            where odeme.UcretTipiId in (21112, 21113, 21114) -- uyg sinav ücreti veya başarısız aday eğitimi veya uyg+başarısız ise
             and   isnull(takip.uSinavUcretTipiId,0) = 0
             --and   odeme.Id = @curId
 

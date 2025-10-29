@@ -3,6 +3,9 @@
 CREATE PROCEDURE [dbo].[prc_OnmOdemePlaniOlustur] (@FirmId int, @TalepId int)  
 AS BEGIN
 
+  --declare @TalepId Int = 200 
+  --declare @FirmId  Int = 11
+
   declare @SP_Message nvarchar(100) = ''
   declare @TahsilatAdedi int = 0
   declare @SectorTypeId smallint = 0 -- 201. Mtsk, 202. İşmak, 203. Src
@@ -15,7 +18,7 @@ AS BEGIN
       From [dbo].[OnmOdemePlani]
       Where TalepId = @TalepId
       and UcretTipiId >= 21101
-      and UcretTipiId <= 21199
+      and UcretTipiId <= 21105 --21199
       and   (IsPaid = 1      -- ödendi
       or BelgeDekontId > 0 -- tahsilat dekontu var ise
 	  or BelgeStokBId > 0) -- fatura kesilmişse
@@ -27,7 +30,7 @@ AS BEGIN
       From [dbo].[OnmOdemePlani]
       Where TalepId = @TalepId
       and UcretTipiId >= 22101
-      and UcretTipiId <= 22199
+      and UcretTipiId <= 22105 --22199
       and   (IsPaid = 1      -- ödendi
       or BelgeDekontId > 0 -- tahsilat dekontu var ise
 	  or BelgeStokBId > 0) -- fatura kesilmişse
@@ -39,7 +42,7 @@ AS BEGIN
       From [dbo].[OnmOdemePlani]
       Where TalepId = @TalepId
       and UcretTipiId >= 23101
-      and UcretTipiId <= 23199
+      and UcretTipiId <= 23105 --23199
       and   (IsPaid = 1      -- ödendi
       or BelgeDekontId > 0 -- tahsilat dekontu var ise
 	  or BelgeStokBId > 0) -- fatura kesilmişse
@@ -196,9 +199,9 @@ AS BEGIN
   ( 21111,    N'e-Sınav ücreti'),
   ( 21112,    N'Uygulama sınav ücreti'),
   ( 21113,    N'Başarısız eğitim ücreti'),
-  ( 21114,    N'Telafi eğitim ücreti'),
-  ( 21115,    N'Diğer ücretler'),
-  ( 21116,    N'Uyg+Başarısız ücretler'),
+  ( 21114,    N'Uyg+Başarısız eğitim ücreti'),
+  ( 21115,    N'Telafi eğitim ücreti'),
+  ( 21116,    N'Diğer ücretler'),
   -- Src
   ( 23101,    N'Src Sertifika'),
   ( 23102,    N'Src5 Sertifika'),
@@ -255,6 +258,13 @@ AS BEGIN
   and UcretTipiId >= @BasUcretTipiId
   and UcretTipiId <= @BitUcretTipiId
   and isnull(IsPaid,0) = 0
+
+  if (@TaksitlendirilecekUcret <= 0) 
+  begin
+     set @SP_Message = 'DİKKAT : Taksitlendirilecek ücret sıfır olduğu için işlem yapılamıyor...'
+     Select @SP_Message as SP_Message
+     return; 
+  end
 
   -- Peşinat veya peşin ödeme ise
   if (@PesinatTutari > 0 or @TaksitSayisiTipiId = 100)
@@ -371,6 +381,7 @@ AS BEGIN
   if (@ESinavUcretTipiId = 1) and -- Biz yatıracağız
      (@ESinavUcreti > 0)
   begin
+
       if ( Select count(*) ADET from [dbo].[OnmOdemePlani] where 0 = 0 
       and [FirmId] = @FirmId 
       and [TalepId] = @TalepId 

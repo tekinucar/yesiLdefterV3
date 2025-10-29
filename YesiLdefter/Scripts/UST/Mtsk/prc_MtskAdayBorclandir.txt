@@ -21,11 +21,8 @@ AS BEGIN
   declare @IsYeniBorc bit = 0
   declare @BorclandirmaUcreti numeric(22,5)
   
+  set @BugunDonemTipiId = dbo.fnc_getDonemTipiId('BUGUN',null);
 
-  if (MONTH(getdate()) < 10)
-       set @BugunDonemTipiId = convert(int, convert(varchar(5), YEAR(getdate())) + '0' + convert(varchar(3), MONTH(getdate())))
-  else set @BugunDonemTipiId = convert(int, convert(varchar(5), YEAR(getdate())) + convert(varchar(3), MONTH(getdate())))
-  
   Select 
       @FirmId = FirmId
      ,@AdayId = AdayId
@@ -64,7 +61,9 @@ AS BEGIN
   -- 21111, 'e-Sınav ücreti
   -- 21112, 'Uygulama sınav ücreti
   -- 21113, 'Başarısız eğitim ücreti
-  -- 21114, 'Telafi eğitim ücreti
+  -- 21114, 'Uyg+Başarısız ücretler'),
+  -- 21115, 'Telafi eğitim ücreti'),
+  -- 21116, 'Diğer ücretler
 
   -- En sonuncu e-Sınavı oku
   if (@UcretTipiId = 21111)

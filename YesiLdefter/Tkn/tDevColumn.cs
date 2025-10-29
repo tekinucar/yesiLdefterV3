@@ -1221,7 +1221,8 @@ namespace Tkn_DevColumn
                     tEdit.Properties.DisplayFormat.FormatString = tdisplayformat;
                     tEdit.Properties.EditFormat.FormatString = teditformat;
 
-                    tEdit.Properties.Mask.MaskType = DevExpress.XtraEditors.Mask.MaskType.DateTime;
+                    //tEdit.Properties.Mask.MaskType = DevExpress.XtraEditors.Mask.MaskType.DateTime;
+                    tEdit.Properties.Mask.MaskType = DevExpress.XtraEditors.Mask.MaskType.DateTimeAdvancingCaret;
                 }
 
                 if (tcmp_format_type == 3)
@@ -3390,8 +3391,20 @@ namespace Tkn_DevColumn
                 //if (t.IsNotNull(tdisplayformat))
                 if (tcmp_format_type > 0)
                 {
-                    XtraEditorsTextEdit_DisplayFormat(tEdit, tdisplayformat, teditformat, tcmp_format_type);
+                    //XtraEditorsTextEdit_DisplayFormat(tEdit, tdisplayformat, teditformat, tcmp_format_type);
+
                 }
+
+                tEdit.Properties.DisplayFormat.FormatType = DevExpress.Utils.FormatType.DateTime;
+                tEdit.Properties.EditFormat.FormatType = DevExpress.Utils.FormatType.DateTime;
+
+                tEdit.Properties.DisplayFormat.FormatString = "dd.MM.yyyy";
+                tEdit.Properties.EditFormat.FormatString = "dd.MM.yyyy";
+
+                //tEdit.Properties.Mask.MaskType = DevExpress.XtraEditors.Mask.MaskType.DateTime;
+                tEdit.Properties.Mask.MaskType = DevExpress.XtraEditors.Mask.MaskType.DateTimeAdvancingCaret;
+
+
                 #endregion displayformat
 
                 #region tExpressionType
@@ -3401,10 +3414,10 @@ namespace Tkn_DevColumn
                 }
                 #endregion 
 
-                if (tcmp_format_type > 0)
-                {
-                    XtraEditorsTextEdit_DisplayFormat(tEdit, tdisplayformat, teditformat, tcmp_format_type);
-                }
+                //if (tcmp_format_type > 0)
+                //{
+                //    XtraEditorsTextEdit_DisplayFormat(tEdit, tdisplayformat, teditformat, tcmp_format_type);
+                //}
 
                 tXtraEditors_Properties(row_Fields, tEdit, tcolumn_type, tview_type);
 

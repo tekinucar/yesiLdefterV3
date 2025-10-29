@@ -13,7 +13,7 @@ begin transaction
 
    -- 20
    TcNo                  Varchar(11)      null, 
-   KimlikSeriNo          Varchar(10)      null, 
+   KimlikSeriNo          Varchar(20)      null, 
    TamAdiSoyadi          nVarchar(100)    null, 
    Adi                   nVarchar(50)     null,
    Soyadi                nVarchar(50)     null,
@@ -225,7 +225,6 @@ AS BEGIN
 
     CLOSE adayCursor
     DEALLOCATE adayCursor   
-
 
 END -- create trigger
 

@@ -1,14 +1,4 @@
-﻿/*
-SrcUcretSinav
-SrcUcretUygulama
-SrcUcretTeorik
-
-SrcSaatTeorik
-SrcSaatUygulama
-
-*/
-
-/*CreateTable*/
+﻿/*CreateTable*/
 
 begin transaction
 
@@ -23,12 +13,15 @@ begin transaction
    GecerlilikTarihiId     Int        not null,
 
    -- 11
-   MevcutSertifikaTipiId  Int            null,
-   IstenenSertifikaTipiId Int            null,
+   MevcutSertifikaTipiId   Int           null,
+   IstenenSertifikaTipiId  Int           null,
+   IstenenSinifTipiId      SmallInt      null, /* İstenen SRC5'in detay sertifika tipi Id si */
+   IstemeNedeniTipiId      SmallInt      null, /* 1. sertifika ilk defa alıyor, 2. yenileme */
 
    -- 21
    /* Sertifika Ücretleri */  
    SertifikaUcreti                      Numeric(22,5) null,  
+   SertifikaUcretiReel                  Numeric(22,5) null, 
 
    /* Uygulama Saat Ücretleri */  
    -- 31

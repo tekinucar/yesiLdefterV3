@@ -1,0 +1,166 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_SrcTeorikDersPlaniElemanaOzel] (
+   @DonemTipiId int
+  ,@GrupTipiId int 
+  ,@SubeTipiId int
+  ,@DerslikAdiTipiId int 
+  ,@PersonelId varchar(30)
+  ,@ElemanGrubu varchar(30))  
+AS BEGIN
+
+-- DonemTipiId             : Dönem
+-- GrupTipiId, SubeTipiId  : Gruplar
+-- DerslikAdiTipiId        : Derslik
+-- PersonelId              : Usta Öğretici
+
+/* 
+ --testlerin başı 
+ declare @DonemTipiId Int 
+ declare @GrupTipiId Int 
+ declare @SubeTipiId Int 
+ declare @DerslikAdiTipiId Int 
+ declare @PersonelId varchar(30)
+ declare @ElemanGrubu varchar(30)
+ 
+ set @ElemanGrubu = 'Dönem'
+ set @DonemTipiId = 202410
+
+ set @ElemanGrubu = 'Gruplar'
+ set @GrupTipiId = 1
+ set @SubeTipiId = 1
+ -- set @ElemanGrubu = 'Derslikler'
+ -- testlerin sonu
+*/
+ 
+ if (@DonemTipiId <= 0)
+ begin
+     set @DonemTipiId = dbo.fnc_getDonemTipiId ('BUGÜN', null)
+ end
+
+ declare @EgitimBaslangicTarihi date
+ declare @EgitimBaslangicTarihi_ varchar(100)
+ declare @EgitimBitisTarihi date
+  
+ 
+ Select @EgitimBaslangicTarihi = isnull(min(GrupBaslamaTarihi), getdate())
+ From SrcDonemi
+ Where DonemTipiId = @DonemTipiId
+
+ set @EgitimBaslangicTarihi_ = 'Convert(datetime, ''' + CONVERT(varchar(10), @EgitimBaslangicTarihi, 103) + ''', 103) '
+
+ print @EgitimBaslangicTarihi_
+
+ --print @EgitimBaslangicTarihi
+ --print @EgitimBitisTarihi
+
+ declare @sql nvarchar(max)
+ declare @sqlWhere nvarchar(500)
+ declare @sqlOrderBy nvarchar(500)
+
+ set @sql = '
+   Select 
+   td.[Id]
+ , td.[FirmId]
+ , td.[IsActive]
+ , td.[DonemTipiId]
+ , td.[GrupTipiId]
+ , td.[SubeTipiId]
+ , td.[DersTipiId]
+ , td.[DerslikAdiTipiId]
+ , td.[DersTarihi]
+ , td.[DersSaatiTipiId]
+ , td.[PersonelId]
+ , td.[EgitimTipiId]
+ , td.[BaslamaSaati]
+ , td.[BitisSaati]
+ , td.[TDersIsUploaded]
+ , td.[SablonTeorikBId]
+ , td.[SablonTeorikFId]
+ , td.[OzelGunlerId]
+
+ , [personel].TamAdiSoyadi as Lkp_PersonelTamAdiSoyadi
+ , [personel].TcVkNo as Lkp_PersonelTcNo
+ , [personel].TamAdiSoyadi + '' . '' + FNo9.DerslikAdiTipi as Lkp_DerslikVePersonel
+ , [personel].TamAdiSoyadi + '', '' + FNo9.DerslikAdiTipi + '', '' + FNo5.DonemTipi + '', '' + FNo6.GrupTipi + '', '' + FNo7.SubeTipi as Lkp_DerslikPersDonemGrupSube
+
+ , FNo5.DonemTipi as Lkp_DonemTipi
+ , FNo6.GrupTipi as Lkp_GrupTipi
+ , FNo7.SubeTipi as Lkp_SubeTipi
+
+ , FNo9.DerslikAdiTipi as Lkp_DerslikAdiTipi
+ , FNo11.DersSaatiTipi as Lkp_DersSaatiTipi
+ --, FNo13.EgitimTipi as Lkp_EgitimTipi
+ , FNo5.DonemTipi + '', '' + FNo6.GrupTipi + '', '' + FNo7.SubeTipi as Lkp_DonemGrupSube
+
+ , ( case 
+     when isnull(OzelGunlerId,0) = 0 then FNo8.DersTipi -- Lkp_DersTipi
+     when OzelGunlerId > 0 then ozelGunler.GunAdi -- Lkp_DerslikTipi
+     end ) as Lkp_DersTipi  
+
+ , ( case 
+     when isnull(OzelGunlerId,0) = 0 then td.DersTipiId -- Lkp_LabelId
+     when OzelGunlerId > 0 then ozelGunler.OzelGunTipiId + 7 -- Lkp_LabelId
+     end ) as Lkp_LabelId  
+
+ from SrcTeorikDers as td with (nolock) 
+   -- Join Tables 
+   left outer join SrcPersoneli as [personel] with (nolock)   on ( td.PersonelId = [personel].TcNoCalismaIzniNo  ) 
+   left outer join OnmOzelGunler as [ozelGunler] with (nolock) on ( td.OzelGunlerId = [ozelGunler].Id  ) 
+   -- LookUp Tables
+   left outer join Lkp.SrcDonemTipi as FNo5 with (nolock) on ( td.DonemTipiId = FNo5.Id ) 
+   left outer join Lkp.SrcGrupTipi as FNo6 with (nolock) on ( td.GrupTipiId = FNo6.Id ) 
+   left outer join Lkp.SrcSubeTipi as FNo7 with (nolock) on ( td.SubeTipiId = FNo7.Id ) 
+   left outer join Lkp.SrcTeorikDersDersTipi as FNo8 with (nolock) on ( td.DersTipiId = FNo8.Id ) 
+   left outer join Lkp.SrcTeorikDersDerslikAdiTipi as FNo9 with (nolock) on ( td.DerslikAdiTipiId = FNo9.Id ) 
+   left outer join Lkp.SrcTeorikDersDersSaatiTipi as FNo11 with (nolock) on ( td.DersSaatiTipiId = FNo11.Id ) 
+   --left outer join Lkp.SrcTeorikDersEgitimTipi as FNo13 with (nolock) on ( td.EgitimTipiId = FNo13.Id ) 
+
+ Where 0 = 0
+ '
+ set @sqlOrderBy = '
+   or (    td.OzelGunlerId > 0 
+       and td.BaslamaSaati > DATEADD( mm, -1, ' + @EgitimBaslangicTarihi_ + ') 
+       and td.BitisSaati   < DATEADD( mm,  3, ' + @EgitimBaslangicTarihi_ + ') 
+      )
+   Order by td.BaslamaSaati, td.DersSaatiTipiId '
+
+ -- Dönem ve grupla bilgisi isteniyorsa DonemTipiId koşulu olsun
+ --if (@ElemanGrubu = 'Dönem' or @ElemanGrubu = 'Gruplar') -- bunu açınca ilk okumada boş data geliyor ve dataset formun üzerine işlenmiyor
+ set @sqlWhere = '  and td.DonemTipiId = ' + Convert(varchar(30), @DonemTipiId) + ' '
+
+ -- Elemenanlar ver derslikler onlunca grubun başlangıç tarihinden sonra olan tüm diğer gruplardaki derslikleride getirsin
+ if (@ElemanGrubu = 'Derslikler' or @ElemanGrubu = 'Usta Eğitici')
+     set @sqlWhere = '  and Convert(date, td.DersTarihi, 103 ) >= Convert(date, ''' + Convert(varchar(30), Format(@EgitimBaslangicTarihi, 'dd.MM.yyyy')) + ''', 103) '
+
+ --set @ElemanGrubu = 'Dönem'
+ --set @ElemanGrubu = 'Gruplar'
+ --set @ElemanGrubu = 'Derslikler'
+ --set @ElemanGrubu = 'Usta Eğitici'
+
+ --set @GrupTipiId = 1
+ --set @SubeTipiId = 1
+ --set @DerslikAdiTipiId = 1
+ --set @PersonelId = '205013645624899268'
+ 
+ if ((@GrupTipiId > 0) and (@SubeTipiId > 0) and  (@ElemanGrubu = 'Gruplar'))
+   set @sqlWhere = @sqlWhere +
+     '  and td.GrupTipiId = ' + Convert(varchar(20), @GrupTipiId) 
+   + '  and td.SubeTipiId = ' + Convert(varchar(20), @SubeTipiId) + ' '
+
+ if ((@DerslikAdiTipiId > 0) and (@ElemanGrubu = 'Derslikler'))
+   set @sqlWhere = @sqlWhere +
+   '  and td.DerslikAdiTipiId = ' + Convert(varchar(20), @DerslikAdiTipiId) + ' '
+
+ if ((@PersonelId <> '') and (@ElemanGrubu = 'Usta Eğitici')) 
+   set @sqlWhere = @sqlWhere +
+   '  and td.PersonelId = ''' + @PersonelId + ''''
+
+ set @sql = @sql + @sqlWhere + @sqlOrderBy
+
+ --print @sql
+ EXEC sp_executesql @sql
+  
+END -- procedure
+
+/*CreateProcedureEnd*/

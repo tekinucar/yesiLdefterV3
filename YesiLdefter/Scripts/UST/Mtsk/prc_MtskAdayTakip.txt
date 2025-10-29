@@ -8,13 +8,14 @@ CREATE PROCEDURE [dbo].[prc_MtskAdayTakip]
 AS
 BEGIN
 
+
   SET NOCOUNT ON;
-
-  --declare @FirmId int = 11 
-  --declare @TalepId int = 3390
-  --declare @DonemTipiId int = 0--202507
-  --declare @Kim varchar(100) = N''
-
+/*
+  declare @FirmId int = 35
+  declare @TalepId int = 0 --3390
+  declare @DonemTipiId int = 0--202507
+  declare @Kim varchar(100) = N'MtskAdayTakipESinav'
+*/
   print 'prc_MtskAdayTakip start'
   print ''
   print 'Kim başlattı = ' + @Kim
@@ -70,7 +71,8 @@ BEGIN
     N' declare @BugunDonemTipiId int = 0 ' + @Enter 
   + N' declare @GelecekDonemTipiId int = 0 ' + @Enter 
   + N' set @BugunDonemTipiId = dbo.fnc_getDonemTipiId(''BUGUN'', null) ' + @Enter 
-  + N' set @GelecekDonemTipiId = dbo.fnc_getDonemTipiId(''GELECEK'', null) ' + @Enter;
+  + N' set @GelecekDonemTipiId = dbo.fnc_getDonemTipiId(''GELECEK'', null) ' + @Enter
+
 
   --declare @bugun smalldatetime = getdate()
   set @SqlBugun = ' declare @bugun smalldatetime = getdate() ' + @Enter;
@@ -79,7 +81,11 @@ BEGIN
   --set @settingsAdayHazirMi = dbo.fnc_getSettingsBool(@FirmId, 1130, 101)
   Set @SqlSettings = 
     N' declare @settingsAdayHazirMi bit ' + @Enter 
+  + N' declare @eSinavBorclandirYapma bit ' + @Enter 
+  + N' declare @uSinavBorclandirYapma bit ' + @Enter 
   + N' set @settingsAdayHazirMi = dbo.fnc_getSettingsBool(@FirmId, 1130, 101) ' + @Enter
+  + N' set @eSinavBorclandirYapma = dbo.fnc_getSettingsBool(@FirmId, 2010, 113) ' + @Enter
+  + N' set @uSinavBorclandirYapma = dbo.fnc_getSettingsBool(@FirmId, 2010, 116) ' + @Enter
 
   -- -----------------------------------------------------------------
   -- Kayıt - Adayın durumu hakkında bilgi toplama aşaması
@@ -118,6 +124,7 @@ BEGIN
             and  t.AdresAlindi = 1 then 1 else 0 end) <> t.BelgelerGeldi 
 	or t.BelgelerGeldi is null
     )
+    and t.KayitTipiId < 8
   ) -- with
   Update a set 
     a.BelgelerGeldi = x.yeniBelgelerGeldi
@@ -174,6 +181,7 @@ BEGIN
     where 0 = 0
     and @FirmId = t.FirmId 
     --and @TalepId = t.Id 
+    and t.KayitTipiId < 8
 	and (( Case
             When t.IsOtomatik = 1 and t.IsEngelli = 0 then 1
             When t.IsOtomatik = 0 and t.IsEngelli = 1 then 2
@@ -254,6 +262,7 @@ BEGIN
 	and t.Id = p.TalepId
     and @FirmId = t.FirmId
     --and @TalepId = t.Id
+    and t.KayitTipiId < 8
 	and (( Case 
             When t.DonemTipiId = @BugunDonemTipiId then 2
             When t.DonemTipiId = @GelecekDonemTipiId and ISNULL(t.KayitTipiId, 0) < 4 then 3
@@ -312,6 +321,7 @@ BEGIN
     WHERE 0 = 0
     and @FirmId = t.FirmId
     --and @TalepId = t.Id
+    and t.KayitTipiId < 8
     and ( t.BiyometrikGeldi <> (case when a.BiyometrikResim IS NOT NULL then 1 else 0 end) 
     or    t.BiyometrikGeldi is null )
   )
@@ -362,6 +372,7 @@ BEGIN
     and @FirmId = t.FirmId
     --and @TalepId = t.Id
     --and @AdayId = a.Id
+    and t.KayitTipiId < 8
 	and t.Id = b.TalepId
 	and ( b.BiyometrikTarandi <> (case when a.BiyometrikResim IS NOT NULL then 1 else 0 end) 
 	or    b.BiyometrikTarandi is null )
@@ -430,6 +441,7 @@ BEGIN
 	WHERE 0 = 0
 	and @FirmId = t.FirmId
 	--and @TalepId = t.Id    
+    and t.KayitTipiId < 8
     and ( (case when og.OgrenimBelgesiResimSmall IS NOT NULL then 1 else 0 end) <> t.OgrenimGeldi
 	or    (case when sg.SaglikRaporuResimSmall IS NOT NULL then 1 
 	            when sg.IsRaporReferansNo = 1 then 1 else 0 end) <> t.SaglikGeldi
@@ -500,7 +512,8 @@ BEGIN
     , (case when im.ImzaResimSmall IS NOT NULL then 1 else 0 end) as yeniImzaTarandi
 	, b.ImzaTarandi
 
-    FROM dbo.MtskAdayBelgeler b
+    FROM dbo.MtskAdayTalep as t, 
+         dbo.MtskAdayBelgeler as b
     INNER JOIN dbo.MtskAdayOgrenim   as og ON ( b.FirmId = og.FirmId and b.TalepId = og.TalepId )
     INNER JOIN dbo.MtskAdaySaglik    as sg ON ( b.FirmId = sg.FirmId and b.TalepId = sg.TalepId )
     INNER JOIN dbo.MtskAdayAdliSicil as ad ON ( b.FirmId = ad.FirmId and b.TalepId = ad.TalepId )
@@ -509,8 +522,10 @@ BEGIN
     INNER JOIN dbo.MtskAdayImza      as im ON ( b.FirmId = im.FirmId and b.TalepId = im.TalepId )
     
 	WHERE 0 = 0
+    and t.Id = b.TalepId
 	and @FirmId = b.FirmId
 	--and @TalepId = b.TalepId    
+    and t.KayitTipiId < 8
     and ( (case when og.OgrenimBelgesiResimSmall IS NOT NULL then 1 else 0 end) <> b.OgrenimTarandi 
 	or    (case when sg.SaglikRaporuResimSmall IS NOT NULL then 1 
 	            when sg.IsRaporReferansNo = 1 then 1 else 0 end) <> b.SaglikTarandi
@@ -608,6 +623,7 @@ BEGIN
     and t.Id = p.TalepId      
     and @FirmId = t.FirmId
     --and @TalepId = t.Id 
+    and t.KayitTipiId < 8
 	and ( ( case 
             When t.BiyometrikGeldi = 1
             and  t.OgrenimGeldi = 1
@@ -711,6 +727,7 @@ BEGIN
     --and @DonemTipiId = t.DonemTipiId
     and  t.DonemTipiId = gs.DonemTipiId	
     and  t.GrupTipiId  = gs.GrupTipiId	
+    and  t.KayitTipiId < 8
   ) -- With
   UPDATE takip
   SET 
@@ -746,6 +763,7 @@ BEGIN
   -- -------------------------------------------------------------------
   -- e - Sınav başvuru ve sonuç aşaması
   -- -------------------------------------------------------------------
+  -- İPTAL 
   -- MtskAdayTakip.eSinavDurumTipiId
   -- 0,    'Tanımsız'
   -- 1,    'Hazır değil'
@@ -754,6 +772,18 @@ BEGIN
   -- 4,    'Belgesi teslim edilecek'
   -- 5,    'Sınava girecek'
   -- 6,    'Muaf'  
+  -- İPTAL end
+  
+  -- MtskAdayTakip.eSinavDurumTipiId
+  -- 0,    'Tanımsız'
+  -- 1,    'Hazır değil'
+  -- 2,    'Sınav işlemlerini başlat'
+  -- 3,    'Mebbise başvurulacak'  
+  -- 4,    'Belgesi hazırlanacak'
+  -- 5,    'Belgesi teslim edilecek'
+  -- 6,    'Muaf'  
+  -- 7,    'Sınava girecek'
+
   -- MtskAdayTakip.eSinavSonrasiTipiId
   -- 1,  Tekrar sınava girecek
   -- 2,  Uygulama aşamasına geçti
@@ -776,26 +806,47 @@ BEGIN
 
   , ( case when t.eSinavDurumTipiId = 1 then 1 -- e-Sınav için hazır değil
            when t.eSinavDurumTipiId = 6 then 6 -- muaf 
+          
+           when @eSinavBorclandirYapma = 1   -- birinci sınav için borçlandrma yapma
+               and dbo.fnc_getEUSinavNo(t.TalepId, ''YeniESinavNo'') = 1 -- 1. sınav ise 
+               and isnull(t.eSinavDurumTipiId,0) != 1 
+               and isnull(t.eSinavDurumTipiId,0) != 6 
+               and isnull(basvu.Id,0) = 0 
+               and isnull(sonuc.Id,0) = 0 
+               and isnull(t.TeorikDersTipiId,0) = 17 -- 17 : Teork dersler tamamlandıysa
+               then 3 -- Mebbise başvur      
+          
+		   when dbo.fnc_getEUSinavNo(t.TalepId, ''YeniESinavNo'') > 0 
+               and isnull(t.eSinavDurumTipiId,0) != 1 
+               and isnull(t.eSinavDurumTipiId,0) != 6 
+               and isnull(basvu.Id,0) = 0 
+               --and isnull(sonuc.Id,0) = 0 açma
+               and isnull(t.TeorikDersTipiId,0) = 17 -- 17 : Teork dersler tamamlandı
+               and odeme.IsPaid = 1 -- sınav ücreti ödenmişse
+               then 3 -- Mebbise başvur
 
 		   when dbo.fnc_getEUSinavNo(t.TalepId, ''YeniESinavNo'') > 0 
                and isnull(t.eSinavDurumTipiId,0) != 1 
                and isnull(t.eSinavDurumTipiId,0) != 6 
                and isnull(basvu.Id,0) = 0 
                and isnull(sonuc.Id,0) = 0 
-               and isnull(t.TeorikDersTipiId,0) = 17 then 2 -- e-Sınav başvurusu yapılacak   17 : Teork dersler tamamlandı
+               and isnull(t.TeorikDersTipiId,0) = 17 -- 17 : Teork dersler tamamlandı
+               and odeme.IsPaid = 0 -- sınav ücreti ödenme mişse
+               then 2 -- Sınav işlemlerini başlat 
 
 		   when dbo.fnc_getEUSinavNo(t.TalepId, ''YeniESinavNo'') > 0 
                and isnull(t.eSinavDurumTipiId,0) != 1 
                and isnull(t.eSinavDurumTipiId,0) != 6 
                and isnull(basvu.Id,0) = 0 
                and isnull(sonuc.Id,0) = 0 
-               and isnull(t.TeorikDersTipiId,0) < 17 then 0 -- 0 tanımsız   17 : Teork dersler tamamlandı
+               and isnull(t.TeorikDersTipiId,0) < 17 -- 17 : Teork dersler tamamlandı
+               then 0 -- 0 tanımsız   
 
            when isnull(sonuc.Id,0) > 0 and isnull(sonuc.DurumuTipiId,0) = 1 then 0 -- tanımsız
-           when isnull(basvu.Id,0) > 0 and isnull(basvu.IsGBelgesiHazir,0) = 0 and isnull(basvu.IsGBelgesiTeslimEdildi,0) = 0  then 3 -- e-Sınav belgesi hazırlanacak
-           when isnull(basvu.Id,0) > 0 and isnull(basvu.IsGBelgesiHazir,0) = 1 and isnull(basvu.IsGBelgesiTeslimEdildi,0) = 0  then 4 -- e-Sınav belgesi teslim edilecek
-           when isnull(basvu.Id,0) > 0 and isnull(basvu.IsGBelgesiHazir,0) = 1 and isnull(basvu.IsGBelgesiTeslimEdildi,0) = 1  then 5 -- e-Sınava girecek
-           when isnull(sonuc.Id,0) > 0 and isnull(sonuc.DurumuTipiId,0) > 1 and (isnull(sonuc.SinavNo,0) < 4 ) then 2 -- e-Sınav başvurusu yapılacak
+           when isnull(basvu.Id,0) > 0 and isnull(basvu.IsGBelgesiHazir,0) = 0 and isnull(basvu.IsGBelgesiTeslimEdildi,0) = 0  then 4 -- 3 idi : e-Sınav belgesi hazırlanacak
+           when isnull(basvu.Id,0) > 0 and isnull(basvu.IsGBelgesiHazir,0) = 1 and isnull(basvu.IsGBelgesiTeslimEdildi,0) = 0  then 5 -- 4 idi : e-Sınav belgesi teslim edilecek
+           when isnull(basvu.Id,0) > 0 and isnull(basvu.IsGBelgesiHazir,0) = 1 and isnull(basvu.IsGBelgesiTeslimEdildi,0) = 1  then 7 -- 5 idi : e-Sınava girecek
+           when isnull(sonuc.Id,0) > 0 and isnull(sonuc.DurumuTipiId,0) > 1 and (isnull(sonuc.SinavNo,0) < 4 ) then 2 -- Sınav işlemlerini başlat
            when isnull(sonuc.Id,0) > 0 and isnull(sonuc.DurumuTipiId,0) > 1 and (isnull(sonuc.SinavNo,0) = 4 ) then 0 -- tanımsız sınav hakkı bitti
            end ) as yenieSinavDurumTipiId
 
@@ -826,14 +877,17 @@ BEGIN
   , ( case when isnull(sonuc.Id,0) > 0 then sonuc.Id end ) as yenieSinavDetayId
   , ( case when isnull(sonuc.Id,0) > 0 then sonuc.SinavTarihi end ) as yenieSinavBasariTarihi
 
-    FROM dbo.MtskAdayTakip as t
-    left outer join MtskSinavETeorik as sonuc on ( t.TalepId = sonuc.TalepId and sonuc.LineTypeId = 2 and sonuc.SinavNo = dbo.fnc_getEUSinavNo(t.TalepId, ''GirdigiESinavNo'') )
-    left outer join MtskSinavETeorik as basvu on ( t.TalepId = basvu.TalepId and basvu.LineTypeId = 1 and basvu.SinavNo = dbo.fnc_getEUSinavNo(t.TalepId, ''YeniESinavNo'') )
+    FROM dbo.MtskAdayTakip as t with (nolock)
+    left outer join dbo.MtskSinavETeorik as sonuc with (nolock) on ( t.TalepId = sonuc.TalepId and sonuc.LineTypeId = 2 and sonuc.SinavNo = dbo.fnc_getEUSinavNo(t.TalepId, ''GirdigiESinavNo'') )
+    left outer join dbo.MtskSinavETeorik as basvu with (nolock) on ( t.TalepId = basvu.TalepId and basvu.LineTypeId = 1 and basvu.SinavNo = dbo.fnc_getEUSinavNo(t.TalepId, ''YeniESinavNo'') )
+    left outer join dbo.OnmOdemePlani    as odeme with (nolock) on ( t.TalepId = odeme.TalepId and dbo.fnc_getEUSinavNo(t.TalepId, ''YeniESinavNo'') = odeme.TaksitNo and odeme.UcretTipiId = 21111 ) -- e-sınav ücreti
 
     WHERE 0 = 0
 	and @FirmId = t.FirmId
     --and @TalepId = t.TalepId
+    and t.KayitTipiId < 8
   ) -- With
+
   Update takip
   Set eSinavNo = x.yeniGirecegiSinavNo
     , eSinavDurumTipiId = isnull(x.yenieSinavDurumTipiId,0)    
@@ -865,8 +919,8 @@ BEGIN
   )
   ';
 
-  Set @Sql = REPLACE(@Sql, '--@Header', @SqlHeader)
-
+  Set @Sql = REPLACE(@Sql, '--@Header', @SqlHeader + @SqlSettings)
+ 
   if (@TalepId > 0) 
       Set @Sql = REPLACE(@Sql, '--and @TalepId', 'and @TalepId')
 
@@ -1684,7 +1738,7 @@ BEGIN
 		 --and @TalepId = takip.TalepId
          --and ( takip.KayitTipiId = 2 or takip.KayitTipiId = 3 ) 
          and   takip.KayitTipiId < 4 
-         and takip.TalepTipiId = 1
+         and   takip.TalepTipiId = 1
   ) -- With
   Update takip
   Set UygulamaliDersTipiId = x.UygulamaliDersTipiId
@@ -2305,7 +2359,6 @@ BEGIN
   -- -----------------------------------------------------------------
   -- MtskAdayTakip.KayitTipiId
   -- -----------------------------------------------------------------
-  -- when t.KayitTipiId < 4 and (@BugunDonemTipiId - t.DonemTipiId) > 200 and t.DonemTipiId > 0 then 9 -- 24 ayda kapanmamış dosya
 
   Set @Sql = '
 --@Header
@@ -2317,13 +2370,14 @@ BEGIN
          when t.KayitTipiId > 3 then t.KayitTipiId -- aşamasını bulmui, kayıt tipini değiştirme
          when t.KayitTipiId < 4 
          and  t.DonemTipiId > 0 
-         and  convert(int,SUBSTRING(CONVERT(char(6),@BugunDonemTipiId),1,4)) - 
-              convert(int,SUBSTRING(CONVERT(char(6),t.DonemTipiId),1,4)) > 2 then 9 -- 2 yıl : 24 ayda kapanmamış dosya
+         and  DATEDIFF(MONTH, DATEFROMPARTS(t.DonemTipiId / 100, t.DonemTipiId % 100, 1), DATEFROMPARTS(@BugunDonemTipiId / 100, @BugunDonemTipiId % 100, 1)) > 24
+         then 9 -- 24 ayda kapanmamış dosya
+
          when t.KayitTipiId = 8 then 8 -- Manuel dosya kapanmışsa hiç elleme 
 	     when t.uSinavSonrasiTipiId = 4 then 7 -- 2.+4 hakkı bitti
 	     when t.uSinavSonrasiTipiId = 3 then 6 -- uyg  hakkı bitti
 	     when t.eSinavSonrasiTipiId = 3 then 5 -- e-sınav hakkı bitti
-		 when ( t.uSinavSonrasiTipiId = 2 or isnull(s.SertifikaAlmayiHakKazandi,0) = 1 ) then 4 -- sertifika hakkı
+		 when ( t.uSinavSonrasiTipiId = 2 or isnull(s.SertifikaAlmayiHakKazandi,0) = 1 )   then 4 -- sertifika hakkı
 		 when ( t.uSinavDurumTipiId > 1 
 		 or     t.UygulamaliDersTipiId > 0 
 		 or     t.eSinavSonrasiTipiId > 1

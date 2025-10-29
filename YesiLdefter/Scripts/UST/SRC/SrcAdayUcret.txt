@@ -53,26 +53,41 @@ begin transaction
    MebbisUygDersSaati         SmallInt       null, 
    Mebbis1SaatUygDersUcreti   Numeric(22,5) null, 
       
+   -- 70 Tüm alacaklar
+   AlacakSertifikaUcreti        Numeric(22,5) null,
+   AlacakESinavUcreti           Numeric(22,5) null,
+   AlacakUygulamaSinavUcreti    Numeric(22,5) null,
+   AlacakTelafiEgitimUcreti     Numeric(22,5) null,
+   AlacakBasarisizEgitimUcreti  Numeric(22,5) null,
+   AlacakUygBasarisizUcreti     Numeric(22,5) null,
+   AlacakDigerUcretler          Numeric(22,5) null,
+   AlacakUcretlerToplami        Numeric(22,5) null,
 
-   -- 70 Mevcut borçlar
+   -- 80 Mevcut borçlar
    BorcSertifikaUcreti        Numeric(22,5) null,
    BorcESinavUcreti           Numeric(22,5) null,
    BorcUygulamaSinavUcreti    Numeric(22,5) null,
    BorcTelafiEgitimUcreti     Numeric(22,5) null,
    BorcBasarisizEgitimUcreti  Numeric(22,5) null,
+   BorcUygBasarisizUcreti     Numeric(22,5) null,
    BorcDigerUcretler          Numeric(22,5) null,
    BorcUcretlerToplami        Numeric(22,5) null,
 
-   -- 80 Vadesi geçmiş olan borçlar
+   -- 90 Vadesi geçmiş olan borçlar
    VGSertifikaUcreti          Numeric(22,5) null,
    VGESinavUcreti             Numeric(22,5) null,
    VGUygulamaSinavUcreti      Numeric(22,5) null,
    VGTelafiEgitimUcreti       Numeric(22,5) null,
    VGBasarisizEgitimUcreti    Numeric(22,5) null,
+   VGUygBasarisizUcreti       Numeric(22,5) null,
    VGDigerUcretler            Numeric(22,5) null,
    VGUcretlerToplami          Numeric(22,5) null,
 
-   -- 90
+   -- 100
+   TahsilEdilenUcretler      Numeric(22,5) null,
+   IadeEdilenUcretler        Numeric(22,5) null,
+
+   -- 110
    PersonelId              Int           null,
    TeklifTarihi            Datetime      null,
    VeriKaynakId            Int           null, /* Veri transferi edildiği tablodaki Id . Sorun olduğunda bilginin nereden geldiğine referans olsun */
@@ -221,6 +236,19 @@ AS BEGIN
                 Where Id = @curId 
             end
 
+            if (@AnlasilanUcret > 0)
+            begin  
+                Update dbo.SrcAdayUcret set IsUcretli = 1, IsUcretsiz = 0
+                From dbo.SrcAdayUcret as a
+                Where a.Id = @curId
+            end 
+            if (@AnlasilanUcret <= 0)
+            begin  
+                Update dbo.SrcAdayUcret set IsUcretli = 0, IsUcretsiz = 1
+                From dbo.SrcAdayUcret as a
+                Where a.Id = @curId
+            end
+
         end	-- if (@DbUpdatesIsActive = 0)	
 
         -- Data transferi oldu fakat daha önce bu talep için boş kayıt oluşturulmuş ise onu sil
@@ -268,11 +296,11 @@ Delete from [Lkp].[SrcAdayUcretTalepTipi]
 INSERT INTO [Lkp].[SrcAdayUcretTalepTipi] (Id, TalepTipi, IsActive)
  VALUES 
   ( 0,    N'Seçiniz', 1),
-  ( 1,    N'SRC Sertifikası',  1),
+  ( 1,    N'SRC 1234 Sertifikası',  1),
   ( 2,    N'SRC5 Sertifikası', 1),
   ( 3,    N'SRC6 Sertifikası', 1),
-  ( 4,    N'ODY Sertifikası',  1),
-  ( 5,    N'ÜDY Sertifikası',  1)
+  ( 4,    N'ODY 1234 Sertifikası',  1),
+  ( 5,    N'ÜDY 1234 Sertifikası',  1)
 
 
 -- ------------------------------------------------------- 

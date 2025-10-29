@@ -1191,6 +1191,7 @@ namespace Tkn_Search
                 string uT_FNAME = string.Empty;
                 string uR_FNAME = string.Empty;
 
+                string targetTableIPCode_ = string.Empty;
                 string targetFName = string.Empty;
                 string sourceFName = string.Empty;
                 string MSETVALUE = string.Empty;
@@ -1237,11 +1238,20 @@ namespace Tkn_Search
                         if (checked_ == false)
                             continue;
 
+                        targetTableIPCode_ = item.TABLEIPCODE.ToString(); // set data için belirtilen hedef tablo
                         targetFName = item.KEYFNAME.ToString();
                         sourceFName = item.RKEYFNAME.ToString();
                         MSETVALUE = item.MSETVALUE.ToString();
                         WORKTYPE = item.WORKTYPE.ToString();
 
+                        /// set data için belirtilen hedef tablo ile yukarıda hazır gelen tablo aynı değilse 
+                        if (t.IsNotNull(targetTableIPCode_) && TargetTableIPCode != targetTableIPCode_)
+                        {
+                            dsTarget = null;
+                            dNTarget = null;
+                            t.Find_DataSet(tForm, ref dsTarget, ref dNTarget, targetTableIPCode_);
+                        }
+                                                
                         /// Arama moturu çalıştı ve kullanıcı istediği kaydı buldu
                         /// bulduğu kaydın tamamını 
 

@@ -12,6 +12,8 @@ begin transaction
 
    ESinavUcreti                     Numeric(22,5) null,  
    UygulamaSinavUcreti              Numeric(22,5) null,  
+   ReelESinavUcreti                 Numeric(22,5) null,  
+   ReelUygulamaSinavUcreti          Numeric(22,5) null,  
 
   constraint pk_MtskUcretSinav primary key (Id)
  )

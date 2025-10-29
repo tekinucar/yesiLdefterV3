@@ -7255,8 +7255,6 @@ namespace Tkn_Events
                         cntrl = t.Find_Control(tForm, t.AntiStr_Dot(FormCode), "", controls);
                     if (cntrl == null)
                         cntrl = t.Find_BackstageViewTabItem(tForm, TabControlName, "tTabPage_" + t.AntiStr_Dot(FormCode) + ReadValue);
-
-
                 }
 
                 if (t.IsNotNull(tabPageCode))
@@ -8780,8 +8778,14 @@ namespace Tkn_Events
                         {
                             str_end = "   -- :D.SD.";// + read_RefId + ": --";
                             i_end = Sql.IndexOf(str_end, i_bgn);
-                        }
 
+                            if (i_end == -1)
+                            {
+                                str_end = "-- :D.SD.";// + read_RefId + ": --";
+                                i_end = Sql.IndexOf(str_end, i_bgn);
+                            }
+                        }
+                        
                         if (mst_Row != null)
                         {
                             try

@@ -1,0 +1,70 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_CrsTakvimiAyarla] (@FirmId int)  
+AS BEGIN
+
+    declare @BaslangicTarihi DATE
+    declare @GunSayisi int = 0
+    declare @HaftaSonuFiltresi int
+
+    Set NOCOUNT ON;
+    Set LANGUAGE Turkish;
+
+    if (@BaslangicTarihi is null) Set @BaslangicTarihi = getdate()
+    if (CONVERT(varchar(20), convert(date,@BaslangicTarihi,103)) = '01.01.1900') Set @BaslangicTarihi = getdate()
+    if (@GunSayisi <= 0) Set @GunSayisi = 60
+    if (@HaftaSonuFiltresi <= 0) Set @HaftaSonuFiltresi = 0
+
+    if ( Select COUNT(Id) as Adet From dbo.CrsTakvim ) = 0
+    begin
+        Set @BaslangicTarihi = convert(date, '01.01.' + convert(varchar(10), YEAR(getdate())),103)    
+        Set @GunSayisi = DATEPART(DAYOFYEAR, GETDATE()) + 60 
+    end
+
+    ;WITH DateList AS (
+        SELECT 
+              @BaslangicTarihi AS DateValue
+            , 1 AS DayIndex
+            , (DATEPART(WEEKDAY, @BaslangicTarihi)) as HaftaGunNo
+        UNION ALL
+        SELECT 
+             DATEADD(DAY, 1, DateValue)
+            ,DayIndex + 1
+            ,DATEPART(WEEKDAY, DATEADD(DAY, 1, DateValue)) as HaftaGunNo
+        FROM DateList
+        WHERE DayIndex < @GunSayisi
+    )
+    INSERT INTO [dbo].[CrsTakvim]
+           ([FirmId]
+           ,[IsActive]
+           ,[Tarih]
+           ,[TarihGun]
+           ,[OzelGunId]) 
+    SELECT 
+        0 as FirmId -- FirmId
+      , ( case 
+          when HaftaGunNo = 6 then convert(bit,0)
+          when HaftaGunNo = 7 then convert(bit,0)
+          else convert(bit,1) end ) as IsActive
+      , DateValue as Tarih
+      , FORMAT(DateValue, 'dd.MM.yyyy dddd') AS TarihGun
+      , 0 as OzelGunId
+
+    FROM DateList as dl
+       left outer join dbo.CrsTakvim as tkvm on ( dl.DateValue = tkvm.Tarih )
+    Where tkvm.Id is null
+    OPTION (MAXRECURSION 1000);
+/*
+      , DayIndex as GunNo
+      , HaftaGunNo
+      , CAST(DayIndex AS VARCHAR) + '. gün' AS GunEtiketi
+      , CAST(ROW_NUMBER() OVER(ORDER BY DateValue) AS varchar) + '. iş günü'  AS IsGunuEtiketi
+      , DateValue
+      , FORMAT(DateValue, 'dd.MM.yyyy dddd') AS SiraliTarih
+      , tkvm.*
+*/
+
+END -- 
+
+/*CreateProcedureEnd*/
+

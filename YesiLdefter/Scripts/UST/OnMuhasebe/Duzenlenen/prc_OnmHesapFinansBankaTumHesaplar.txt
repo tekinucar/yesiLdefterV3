@@ -78,7 +78,7 @@ AS BEGIN
  Where 0 = 0 
  and HBanka.UstGrupTipiId = 10
  and HBanka.AltGrupTipiId = 1022
- 
+ /* **********
  union all 
 
  -- Kredi kartları
@@ -135,7 +135,7 @@ AS BEGIN
  Where 0 = 0 
  and HBanka.UstGrupTipiId = 10
  and HBanka.AltGrupTipiId = 1024
-
+ ****** */
 END -- procedure
 
 /*CreateProcedureEnd*/

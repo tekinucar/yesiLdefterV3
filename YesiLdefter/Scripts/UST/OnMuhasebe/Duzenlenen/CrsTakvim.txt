@@ -1,0 +1,24 @@
+﻿
+/*CreateTable*/
+
+begin transaction
+
+ create table dbo.CrsTakvim
+ (
+   Id                     Int IDENTITY(1,1) not null,  
+   FirmId                 Int        not null,
+   IsActive               Bit        not null, 
+   Tarih                  Date           null,
+   TarihGun               VarChar(20)    null,
+   OzelGunId              Int            null,
+
+    constraint pk_CrsTakvim primary key (Id)
+ )
+
+ create index X_CrsTakvim01 on dbo.CrsTakvim (Tarih)
+ 
+ grant select, insert, update, delete on dbo.CrsTakvim to public
+
+commit transaction
+
+/*CreateTableEnd*/

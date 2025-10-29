@@ -27,7 +27,7 @@ begin transaction
         LOCK_FIELD_NAME         VarChar(30)           NULL, 
 
         PROP_SUBVIEW            VarChar(4000)         NULL,
-        PROP_JOINTABLE          VarChar(8000)         NULL,
+        PROP_JOINTABLE          NVARCHAR(MAX) NULL
         PROP_FOREING            VarChar(4000)         NULL,
 
         SOFTWARE_CODE           nvarchar(20)          NULL,

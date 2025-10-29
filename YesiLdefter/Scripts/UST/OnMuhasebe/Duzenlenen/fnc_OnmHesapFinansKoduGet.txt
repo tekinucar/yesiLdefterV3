@@ -34,7 +34,8 @@ END
 /*CreateFunctionEnd*/
 
 
-/*CreateFunction*/
+/*
+/********* CreateFunction*/
 
 CREATE FUNCTION [dbo].[fnc_OnmHesapFinansGetId](
  @FirmId int 
@@ -100,5 +101,6 @@ BEGIN
     RETURN @ret;  
 END
 
-/*CreateFunctionEnd*/
+/*CreateFunctionEnd ************* */
 
+*/

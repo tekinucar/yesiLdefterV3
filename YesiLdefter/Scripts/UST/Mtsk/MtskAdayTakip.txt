@@ -57,7 +57,9 @@ begin transaction
    eSinavPlanTarihi       Date         null, /* Kullanıcının planladığı tarih */
    eSinavMuracatTarihi    Date         null, /* Müracat Tarihi */
    eSinavUcretTipiId      SmallInt     null, /* kendisi yatıracak, biz yatıracağız */
+   IseSinavaGirebilir     Bit          null, /* e-Sınava girebilir veya giremez */
    IseSinavBTeslimEdildi  Bit          null, /* e-Sınav belgesi kursiyere teslim edildi veya edilmedi */
+
    -- 120
    eSinavNoGirdigi        SmallInt     null,  
    eSinavSonucTipiId      SmallInt     null, /* Başarılı, Başarısız, Girmedi */
@@ -128,7 +130,9 @@ begin transaction
    uSinavPlanTarihi        Date         null, /* Kullanıcının planladığı tarih */
    --uSinavRandevuTarihi     Date         null, /* iptal, yukarıda RandevuTarihi eklendi */
    uSinavUcretTipiId       SmallInt     null, /* kendisi yatıracak, biz yatıracağız */
+   IsuSinavaGirebilir      Bit          null, /* uygulama sınavına girebilir veya giremez */
    IsuSinavBTeslimEdildi   Bit          null, /* uygulama sınav belgesi kursiyere teslim edildi veya edilmedi */
+
    -- 260
    uSinavNoGirdigi         SmallInt     null,  
    uSinavSonucTipiId       SmallInt     null, /* Başarılı, Başarısız, Girmedi */
@@ -159,7 +163,11 @@ begin transaction
  create index X_MtskAdayTakip05 on MtskAdayTakip (eSinavDurumTipiId)
  create index X_MtskAdayTakip06 on MtskAdayTakip (uSinavDurumTipiId)
   
+ create index X_MtskAdayTakip11 on MtskAdayTakip (eSinavBasariTarihi)
+ create index X_MtskAdayTakip12 on MtskAdayTakip (uSinavBasariTarihi)
    
+ create index X_MtskAdayTakip13 on MtskAdayTakip (Asama1TipiId, Asama1DetayTipiId)
+ create index X_MtskAdayTakip14 on MtskAdayTakip (Asama2TipiId, Asama2DetayTipiId)
 
 commit transaction
 
@@ -675,6 +683,7 @@ create table [Lkp].[MtskAdayTakipeSinavDurumTipi]
 Delete from [Lkp].[MtskAdayTakipeSinavDurumTipi]
 INSERT INTO [Lkp].[MtskAdayTakipeSinavDurumTipi] (Id, eSinavDurumTipi, KonuGrupId, KonuId, KonuCaption, ChartCaption, FormCaption)--  , ChartCaption, FormCaption)
  VALUES 
+/*
   ( 0,    N'Tanımsız',                3, 2120, 'Sınav durumu', '', '' ),
   ( 1,    N'Hazır değil',             3, 2121, 'Sınav durumu', 'Hazır değil', '' ),                 -- default
   ( 2,    N'Başvuru yapılacak',       3, 2122, 'Sınav durumu', 'Başvuru yapılacak', 'Mebbis' ),     -- TeorikDersTipiId tetikleyecek
@@ -682,6 +691,16 @@ INSERT INTO [Lkp].[MtskAdayTakipeSinavDurumTipi] (Id, eSinavDurumTipi, KonuGrupI
   ( 4,    N'Belgesi teslim edilecek', 3, 2124, 'Sınav durumu', 'Belgesi teslim edilecek', '' ),     -- sınav günü gelince bu ıd olmalı
   ( 5,    N'Sınava girecek',          3, 2125, 'Sınav durumu', 'Sınava girecek', '' ),              -- kullanıcı okuttuktan sonra
   ( 6,    N'Muaf',                    3, 2126, 'Sınav durumu', 'Muaf', '' )                         -- 
+*/
+  ( 0,    N'Tanımsız',                3, 2120, 'Sınav durumu', '', '' ),
+  ( 1,    N'Hazır değil',             3, 2121, 'Sınav durumu', 'Hazır değil', '' ),                 -- default
+  ( 2,    N'Sınav işlemlerini başlat',3, 2122, 'Sınav durumu', 'Sınav işlemlerini başlat', '' ),    -- TeorikDersTipiId tetikleyecek
+  ( 3,    N'Mebbise başvurulacak',    3, 2123, 'Sınav durumu', 'Mebbise başvurulacak', 'Mebbis' ),  -- TeorikDersTipiId tetikleyecek
+  ( 4,    N'Belgesi hazırlanacak',    3, 2124, 'Sınav durumu', 'Belgesi hazırlanacak', 'Mebbis.' ), -- kullanıcı tetikliyor, başvuru kontrolü ?
+  ( 5,    N'Belgesi teslim edilecek', 3, 2125, 'Sınav durumu', 'Belgesi teslim edilecek', '' ),     -- sınav günü gelince bu ıd olmalı
+  ( 6,    N'Muaf',                    3, 2126, 'Sınav durumu', 'Muaf', '' ),                        -- 
+  ( 7,    N'Sınava girecek',          3, 2127, 'Sınav durumu', 'Sınava girecek', '' )               -- kullanıcı okuttuktan sonra
+
 
 
 -- ------------------------------------------------------- 

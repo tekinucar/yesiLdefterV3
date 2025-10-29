@@ -1,0 +1,87 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_SrcTeorikDersPlaniGruplari] (@DonemTipiId int)  
+AS BEGIN
+
+-- DonemTipiId             : Dönem
+-- GrupTipiId, SubeTipiId  : Gruplar
+-- PersonelId              : Usta Öğretici
+-- DerslikAdiTipiId        : Derslikler
+
+   --declare @DonemTipiId Int 
+   --set @DonemTipiId = 202101
+
+   Select  
+     @DonemTipiId as DonemTipiId
+   , 0  as GrupTipiId
+   , 0  as SubeTipiId
+   , 0  as DerslikAdiTipiId 
+   , '' as PersonelId
+   
+   , 'Dönem' as Lkp_ElemanGrubu
+   , donem.DonemTipi as Lkp_ElemanAdi
+   
+   from Lkp.SrcDonemTipi as donem
+   Where donem.Id = @DonemTipiId
+
+   union all
+
+   Select  
+     @DonemTipiId as DonemTipiId
+   , x.GrupTipiId as GrupTipiId
+   , x.SubeTipiId as SubeTipiId
+   , 0  as DerslikAdiTipiId 
+   , '' as PersonelId
+   
+   , 'Gruplar' as Lkp_ElemanGrubu
+   , x.GrupTipi + ', ' + x.SubeTipi as Lkp_ElemanAdi
+   
+   from (
+     Select distinct [teoDers].GrupTipiId, [teoDers].SubeTipiId, grup.GrupTipi, sube.SubeTipi
+     from SrcTeorikDers as [teoDers]
+	   left outer join Lkp.SrcGrupTipi as grup on ( teoDers.GrupTipiId = grup.Id )
+	   left outer join Lkp.SrcSubeTipi as sube on ( teoDers.SubeTipiId = sube.Id )
+     Where [teoDers].DonemTipiId = @DonemTipiId
+   ) as x
+
+   union all
+
+   Select  
+     @DonemTipiId as DonemTipiId
+   , 0  as GrupTipiId
+   , 0  as SubeTipiId
+   , 0  as DerslikAdiTipiId 
+   , x.PersonelId
+   
+   , 'Usta Eğitici' as Lkp_ElemanGrubu
+   , x.TamAdiSoyadi as Lkp_ElemanAdi
+   
+   from (
+     Select distinct [teoDers].PersonelId, per.TamAdiSoyadi
+     from SrcTeorikDers as [teoDers]
+	   left outer join SrcPersoneli as [per] on (teoDers.PersonelId = per.TcNoCalismaIzniNo)
+     Where [teoDers].DonemTipiId = @DonemTipiId
+   ) x
+
+   union all
+
+   Select  
+     @DonemTipiId as DonemTipiId
+   , 0  as GrupTipiId
+   , 0  as SubeTipiId
+   , x.DerslikAdiTipiId 
+   , '' as PersonelId
+   
+   , 'Derslikler' as Lkp_ElemanGrubu
+   , x.DerslikAdiTipi as Lkp_ElemanAdi
+   
+   from (
+     Select distinct [teoDers].DerslikAdiTipiId, derslik.DerslikAdiTipi
+     from SrcTeorikDers as [teoDers]
+	   left outer join Lkp.SrcTeorikDersDerslikAdiTipi as [derslik] on (teoDers.DerslikAdiTipiId = derslik.Id)
+     Where [teoDers].DonemTipiId = @DonemTipiId
+   ) x
+
+END -- procedure
+
+/*CreateProcedureEnd*/

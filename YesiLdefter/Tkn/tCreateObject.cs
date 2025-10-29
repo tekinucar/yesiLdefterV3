@@ -148,7 +148,7 @@ namespace Tkn_CreateObject
             
                 if (dsData.Tables.Count == 0)
                 {
-                    MessageBox.Show("DİKKAT : Create_Navigator sırasında dsData.Tables.Count == 0 geliyor. Bu nedenle DataSet e ulaşamazsın. Muhakkak tablo oluşturulmalı...");
+                    MessageBox.Show("DİKKAT : " + TableIPCode + v.ENTER + "Create_Navigator sırasında dsData.Tables.Count == 0 geliyor. Bu nedenle DataSet e ulaşamazsın. Muhakkak tablo oluşturulmalı...");
                 }
             }
 
@@ -1220,6 +1220,15 @@ namespace Tkn_CreateObject
             createNavigatorButton(nButton);
 
 
+            nButton.buttonName = "simpleButton_arama";
+            nButton.buttonText = "Arama...";
+            nButton.dock = DockStyle.Left;
+            nButton.tabIndex = 121;
+            nButton.tabStop = false;
+            nButton.imageName = "";// "30_338_Printer_16x16";
+            nButton.width = width90;
+            nButton.events = true;
+            createNavigatorButton(nButton);
 
             #endregion
 

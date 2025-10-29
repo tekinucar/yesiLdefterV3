@@ -10,7 +10,7 @@ BEGIN
   Select @retValue = DefaultNumeric
   From [dbo].[Settings] as s
   Where FirmId = @FirmId
-  and   SettingGroupNo = @settingGroupNo
+  and   GroupNoTypeId = @settingGroupNo
   and   SettingNo = @settingNo
 
   -- Int value dönüyor

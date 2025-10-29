@@ -135,8 +135,11 @@ AS BEGIN
 	declare @ESinavUcretTipiId smallInt 
 	declare @USinavUcretTipiId smallInt 
 	declare @SertifikaUcreti numeric(22,5)
+    declare @KontejanIndirimOrani numeric(12,8)
+    declare @KontejanIndirimTutari numeric(22,5)
 	declare @KontejanSonrasiUcret numeric(22,5)
     declare @AnlasilanUcret numeric(22,5)
+    declare @IskontoOrani numeric(12,8) 
     declare @TaksitlendirilecekUcret numeric (22,5)
 	declare @ESinavUcreti numeric(22,5)
 	declare @UygulamaSinavUcreti numeric(22,5)
@@ -154,6 +157,9 @@ AS BEGIN
 		   ,@ESinavUcretTipiId = isnull(ins.ESinavUcretTipiId,0)
 		   ,@USinavUcretTipiId = isnull(ins.USinavUcretTipiId,0)
            ,@SertifikaUcreti = isnull(ins.SertifikaUcreti,0)
+           ,@IskontoOrani = isnull(ins.IskontoOrani,0)
+           ,@KontejanIndirimOrani = isnull(ins.KontejanIndirimOrani,0)
+           ,@KontejanIndirimTutari = isnull(ins.KontejanIndirimTutari,0)
 	       ,@KontejanSonrasiUcret = isnull(ins.KontejanSonrasiUcret,0)
            ,@AnlasilanUcret = isnull(ins.AnlasilanUcret,0)
            ,@TaksitlendirilecekUcret = isnull(ins.TaksitlendirilecekUcret,0)
@@ -182,7 +188,7 @@ AS BEGIN
 
         if (@DbUpdatesIsActive = 0)
         begin 
-            if (@KontejanTipiId > 0) set @IsKontejan = 1 else set @IsKontejan = 0
+            if (@KontejanIndirimOrani > 0) set @IsKontejan = 1 else set @IsKontejan = 0
 
             if (@ESinavUcreti > 0 and  @ESinavUcretTipiId <> 1)
 			begin
@@ -193,6 +199,7 @@ AS BEGIN
                 Update MtskAdayTakip Set eSinavUcretTipiId = @ESinavUcretTipiId 
                 Where TalepId = @TalepId
             end 
+
             if (@UygulamaSinavUcreti > 0 and  @USinavUcretTipiId <> 1)
 			begin
 			    set @USinavUcretTipiId = 1
@@ -208,14 +215,15 @@ AS BEGIN
             Where TalepId = @TalepId
             and ( IsKontejan <> @IsKontejan )  
 
-            if ((@KontejanSonrasiUcret = 0) or
-			    (@AnlasilanUcret = 0) or
-				(@TaksitlendirilecekUcret = 0))
+            if ((@KontejanIndirimTutari = 0) and
+			    (@AnlasilanUcret = 0) and
+				(@TaksitlendirilecekUcret = 0) and
+                (@IskontoOrani <> 100) )
             begin
                 if (@KontejanSonrasiUcret = 0) Set @KontejanSonrasiUcret = @SertifikaUcreti  
                 if (@AnlasilanUcret = 0) Set @AnlasilanUcret = @KontejanSonrasiUcret
                 if (@TaksitlendirilecekUcret = 0) Set @TaksitlendirilecekUcret = @AnlasilanUcret
-
+                
                 Update dbo.MtskAdayUcret Set
                      KontejanSonrasiUcret = @KontejanSonrasiUcret
                     ,AnlasilanUcret = @AnlasilanUcret
@@ -244,6 +252,7 @@ AS BEGIN
                 From dbo.MtskAdayUcret as a
                 Where a.Id = @curId
             end 
+
             if (@AnlasilanUcret <= 0)
             begin  
                 Update dbo.MtskAdayUcret set IsUcretli = 0, IsUcretsiz = 1

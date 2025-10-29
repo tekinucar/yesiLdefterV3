@@ -1,4 +1,5 @@
 ﻿
+/*    CrossSettings   yerine sadece  Settings  tablosu çalışmaya başladı  */
 
 /*CreateTable*/
 

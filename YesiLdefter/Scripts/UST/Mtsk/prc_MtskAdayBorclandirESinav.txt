@@ -6,6 +6,7 @@ AS BEGIN
   --declare @FirmId Int  = 11
   declare @BugunDonemTipiId int = 0
   declare @BorclandirmaUcreti numeric(22,5)
+  declare @ReelBorclandirmaUcreti numeric(22,5)
   declare @UcretTipiId Int  = 21111
 
    if (MONTH(getdate()) < 10)
@@ -13,13 +14,18 @@ AS BEGIN
   else set @BugunDonemTipiId = convert(int, convert(varchar(5), YEAR(getdate())) + convert(varchar(3), MONTH(getdate())))
   
   -- e-Sınav ücreti
-  Select Top 1  @BorclandirmaUcreti = ucret.[ESinavUcreti]
+  Select Top 1  
+      @BorclandirmaUcreti = isnull(ucret.[ESinavUcreti],0)
+    , @ReelBorclandirmaUcreti = isnull(ucret.[ReelESinavUcreti],0)
   From [dbo].[MtskUcretSinav] as ucret,
        [dbo].[GecerlilikTarihi] as tarih
   Where ucret.FirmId = @FirmId
   and   ucret.IsActive = 1
   and   ucret.GecerlilikTarihiId = dbo.fnc_getGecerlilikTarihiId(@FirmId, 21103, getdate())
   
+  -- Reel ücret varsa onu uygulasın
+  if (@ReelBorclandirmaUcreti > 0)
+      Set @BorclandirmaUcreti = @ReelBorclandirmaUcreti
 
   Insert into [dbo].[OnmOdemePlani]
            ([OdmemePlaniGUID]
@@ -56,8 +62,9 @@ AS BEGIN
            ,3 -- TaksitTipiId : 3 = Tek Ödeme
            ,takip.eSinavNo -- TaksitNo -- Gireceği sınav no
            ,(case 
-		       when isnull(takip.eSinavPlanTarihi,getdate()) > getdate() then takip.eSinavPlanTarihi
-			   else getdate() end )  -- VadeTarihi == Bu kayıt oluşurken sınavın hangi tarihte olacağı bilinmiyor
+		       when isnull(takip.eSinavPlanTarihi,getdate()) > getdate() then takip.eSinavPlanTarihi -- varsa plan tarihi
+               when isnull(takip.eSinavBasariTarihi,getdate()) < getdate() then takip.eSinavBasariTarihi -- son sınav tarihi varsa onu
+			   else getdate() end )  -- VadeTarihi == hiç biri yoksa bugun olsun
            ,@BorclandirmaUcreti -- TaksitTutari
            ,2    -- OdemeTipiId   Nakit
            ,0    -- IsPaid

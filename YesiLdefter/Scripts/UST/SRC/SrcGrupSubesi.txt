@@ -26,10 +26,7 @@ begin transaction
    KapasiteTipiId          SmallInt      null,  /* şubenin doluluk durumu hakkında */ 
 
    TakipTipiId             SmallInt      null,
-   TrafikDersSayisi        SmallInt      null, /* Trafik ve Çevre Dersi */   
-   IlkYardimDersSayisi     SmallInt      null, /* İlkyardım Dersi */   
-   AracTeknigiDersSayisi   SmallInt      null, /* Araç Tekniği Dersi */   
-   AdapDersSayisi          SmallInt      null, /* Trafik Adabı Dersi */   
+   DerslikAdiTipiId        SmallInt      null,
    ToplamDersSayisi        SmallInt      null,   
    TDersIsUploaded         Bit           null, /* Teorik derslerin tamamı Mebbise yüklenince 1 oluyor */
       
@@ -73,23 +70,33 @@ AS BEGIN
     declare @DonemTipiId int
     declare @GrupTipiId smallint
     declare @SubeTipiId smallint
+    declare @SertifikaTipiId smallInt
     declare @GrupBaslamaTarihi date
     declare @KurumOnayTipiId smallint
     declare @LkpSrcDonemiId int
 
 	declare @DonemGrupBaslamaTarihi date
+    declare @eDonemTipiId int
     declare @eGrupTipiId smallint
     declare @eSubeTipiId smallint
+    declare @eSertifikaTipiId smallInt
+    declare @DonemTipiAdi varchar(15)
     declare @GrupAdi varchar(10)
     declare @SubeAdi varchar(10)
     declare @GrupVeSube varchar(20)
+    declare @SertifikaAdi varchar(15)
+    declare @SertifikaMebbisKodu varchar(10)
+    declare @DonemGrupSubeSertifika varchar(50)
+    declare @MebbisDonemKodu varchar(20)
 
     WHILE @@FETCH_STATUS = 0
     BEGIN
 
       Select
-         @eGrupTipiId  = isnull(GrupTipiId,0)
+         @eDonemTipiId  = isnull(DonemTipiId,0)
+        ,@eGrupTipiId  = isnull(GrupTipiId,0)
         ,@eSubeTipiId  = isnull(SubeTipiId,0)
+        ,@eSertifikaTipiId  = isnull(SertifikaTipiId,0)
       From deleted dlt
 	  Where dlt.Id = @curId
 
@@ -98,9 +105,14 @@ AS BEGIN
         ,@DonemTipiId = isnull(DonemTipiId,0)
         ,@GrupTipiId  = isnull(GrupTipiId,0)
         ,@SubeTipiId  = isnull(SubeTipiId,0)
-        ,@GrupVeSube  = GrupVeSube
+        ,@SertifikaTipiId = isnull(SertifikaTipiId,0) 
         ,@GrupBaslamaTarihi = GrupBaslamaTarihi
         ,@KurumOnayTipiId = KurumOnayTipiId
+
+        ,@GrupVeSube = isnull(GrupVeSube,'')
+        ,@DonemGrupSubeSertifika = isnull(DonemGrupSubeSertifika,'')
+        ,@MebbisDonemKodu = isnull(MebbisDonemKodu,'')
+
       From inserted ins
 	  Where ins.Id = @curId
 
@@ -135,15 +147,6 @@ AS BEGIN
           Where Id = @curId
       end
 
-      if (@GrupTipiId <> @eGrupTipiId or @SubeTipiId <> @eSubeTipiId or @GrupVeSube is null)
-      begin
-          Select @GrupAdi = GrupTipi From Lkp.SrcGrupTipi Where Id = @GrupTipiId 
-          Select @SubeAdi = SubeTipi From Lkp.SrcSubeTipi Where Id = @SubeTipiId 
-          Update dbo.SrcGrupSubesi Set
-              GrupVeSube = @GrupAdi + ' ' + @SubeAdi
-          Where Id = @curId
-      end
-
       if (@SrcDonemiId = 0)
       begin
          INSERT INTO [dbo].[SrcDonemi]
@@ -175,9 +178,34 @@ AS BEGIN
            )
       end
 
-	  Execute [dbo].[prc_SrcGrupSubesiTeorikDersToplami] @FirmId, @DonemTipiId, @GrupTipiId, @SubeTipiId
-	  Execute [dbo].[prc_SrcGrupSubesiTakipSet] @FirmId, @DonemTipiId, @GrupTipiId, @SubeTipiId
-	  Execute [dbo].[prc_SrcAdayTakipTeorikDersSet] @FirmId, @DonemTipiId, @GrupTipiId, @SubeTipiId
+
+      if ( @DonemTipiId <> @eDonemTipiId or
+           @GrupTipiId <> @eGrupTipiId or 
+           @SubeTipiId <> @eSubeTipiId or 
+           @SertifikaTipiId <> @eSertifikaTipiId or
+           @GrupVeSube = '' or
+           @DonemGrupSubeSertifika = '' or
+           @MebbisDonemKodu = ''
+           )
+      begin
+          Select @DonemTipiAdi = DonemTipi From Lkp.SrcDonemTipi Where Id = @DonemTipiId
+          Select @GrupAdi = GrupTipi From Lkp.SrcGrupTipi Where Id = @GrupTipiId 
+          Select @SubeAdi = SubeTipi From Lkp.SrcSubeTipi Where Id = @SubeTipiId 
+          Select @SertifikaAdi = SertifikaTipi, @SertifikaMebbisKodu = MebbisKodu From Lkp.SrcSertifikaTipi Where Id = @SertifikaTipiId
+
+          Set @DonemGrupSubeSertifika = @DonemTipiAdi + ' ' + @GrupAdi + ' ' + @SubeAdi + ' ' + @SertifikaAdi
+          Set @MebbisDonemKodu = convert(varchar(6),@DonemTipiId) + '-' + convert(varchar(2),@GrupTipiId) + '-' + convert(varchar(2),@SubeTipiId) + '-' + @SertifikaMebbisKodu
+
+          Update dbo.SrcGrupSubesi Set
+              GrupVeSube = @GrupAdi + ' ' + @SubeAdi
+            , DonemGrupSubeSertifika = @DonemGrupSubeSertifika
+            , MebbisDonemKodu = @MebbisDonemKodu
+          Where Id = @curId
+      end
+    
+      --Execute [dbo].[prc_SrcGrupSubesiTeorikDersToplami] @FirmId, @DonemTipiId, @GrupTipiId, @SubeTipiId
+	  --Execute [dbo].[prc_SrcGrupSubesiTakipSet] @FirmId, @DonemTipiId, @GrupTipiId, @SubeTipiId
+	  --Execute [dbo].[prc_SrcAdayTakipTeorikDersSet] @FirmId, @DonemTipiId, @GrupTipiId, @SubeTipiId
 
       FETCH NEXT FROM mgSubesiCursor INTO @curId
     END
@@ -188,7 +216,6 @@ AS BEGIN
 END
 
 /*CreateTriggerEnd*/
-
 
 /*CreateTrigger*/
 
@@ -292,6 +319,36 @@ INSERT INTO Lkp.SrcGrupSubesiKapasiteTipi (Id, KapasiteTipi)
   ( -1,  N'Son 1 aday'),
   (  0,  N'Kapasite tam dolu'),
   (  1,  N'Sorun : Kapasite fazlası var')
+
+
+-- ------------------------------------------------------- 
+-- DerslikAdiTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'SrcGrupSubesiDerslikAdiTipi')
+drop table [Lkp].[SrcGrupSubesiDerslikAdiTipi]
+
+create table Lkp.SrcGrupSubesiDerslikAdiTipi
+(
+   Id             Int Unique Not Null,
+   IsActive       Bit            null, 
+   DerslikAdiTipi nVarchar(10)   null,
+
+   constraint  pk_SrcGrupSubesiDerslikAdiTipi primary key (Id)
+)
+
+INSERT INTO Lkp.SrcGrupSubesiDerslikAdiTipi (Id, IsActive, DerslikAdiTipi)
+ VALUES 
+  ( 0, 0, N''),
+  ( 1, 0, N'Derslik-1'),
+  ( 2, 0, N'Derslik-2'),
+  ( 3, 0, N'Derslik-3'),
+  ( 4, 0, N'Derslik-4'),
+  ( 5, 0, N'Derslik-5'),
+  ( 6, 0, N'Derslik-6'),
+  ( 7, 0, N'Derslik-7'),
+  ( 8, 0, N'Derslik-8'),
+  ( 9, 0, N'Derslik-9'),
+  (10, 0, N'Derslik-10')
 
 
 

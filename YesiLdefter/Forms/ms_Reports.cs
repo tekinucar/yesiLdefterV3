@@ -268,6 +268,7 @@ namespace YesiLdefter
                 {
                     preparingReportKritersAndData(this, v.dsMsReports, v.dNMsReports);
                     preparingDataSetList();
+                    
                     raporFast.ReportDocumentViewer(this, v.dsMsReports, v.dNMsReports, dataSetList, sourceFormCodeAndName, ref documentViewerFast);
                 }
 

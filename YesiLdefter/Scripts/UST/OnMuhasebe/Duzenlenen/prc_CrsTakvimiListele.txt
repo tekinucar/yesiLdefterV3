@@ -1,0 +1,19 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_CrsTakvimiListele] (@FirmId int, @BaslangicTarihi date)  
+AS BEGIN
+  --declare @BaslangicTarihi date
+  --set @BaslangicTarihi = CONVERT(date,'10.11.2025',103)
+  
+  Select Id
+      ,FirmId
+      ,IsActive
+      ,Tarih
+      ,TarihGun
+      ,OzelGunId
+  From dbo.CrsTakvim
+  Where Convert(date, Tarih, 103) >= Convert(date, @BaslangicTarihi, 103)
+
+END --
+
+/*CreateProcedureEnd*/

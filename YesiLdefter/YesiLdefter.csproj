@@ -435,6 +435,12 @@
     <Compile Include="Forms\ms_Webbrowser.Designer.cs">
       <DependentUpon>ms_Webbrowser.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\ms_XMLRead.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ms_XMLRead.Designer.cs">
+      <DependentUpon>ms_XMLRead.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\SekCevHukumluList.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -1044,6 +1050,7 @@
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmMaasEkGelirler.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmMaasEkKesintiler.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\OnmMaasHesaplari.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_CrsTakvimiListele.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmBelgeDekontOzetler.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmBelgeDekontRaporOzeti.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmBelgeDekontTransferIslemi.txt" />
@@ -1051,6 +1058,7 @@
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmHesapBakiyesiHesapla.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmMaasHesaplari.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmMaasHesaplariKayit.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_CrsTakvimiAyarla.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\Settings.txt" />
     <Content Include="Scripts\UST\Mtsk\TempTabimBankalar.txt" />
     <Content Include="Scripts\UST\Mtsk\TempTabimHesaplar.txt" />
@@ -1112,6 +1120,7 @@
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmOdemePlaniTahsilatiIptalEt.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmOdemePlaniTahsilatiIsle.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmOzelGunlerInsert.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\CrsTakvim.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\FinansIslemi.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\GIB_BirimSeti.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\GIB_FaturaCesitleri.txt" />
@@ -1154,11 +1163,28 @@
     <Content Include="Scripts\UST\OnMuhasebe\trg_Yeni.txt" />
     <Content Include="Scripts\UST\ResmiMuhasebe\HesapPlani.txt" />
     <Content Include="Scripts\UST\SRC\DbUpdates.txt" />
+    <Content Include="Scripts\UST\SRC\fnc_getDonemTipiId.txt" />
+    <Content Include="Scripts\UST\SRC\SrcSablonTeorikB.txt" />
+    <Content Include="Scripts\UST\SRC\SrcSablonTeorikS.txt" />
+    <Content Include="Scripts\UST\SRC\SrcSablonTeorikF.txt" />
+    <Content Include="Scripts\UST\SRC\prc_SiraliTarihListesi.txt" />
+    <Content Include="Scripts\UST\SRC\GecerlilikTarihi.txt" />
     <Content Include="Scripts\UST\SRC\Lkp_SrcGrupTipi.txt" />
     <Content Include="Scripts\UST\SRC\Lkp_MtskSertifikaTipi.txt" />
     <Content Include="Scripts\UST\SRC\Lkp_SrcSubeTipi.txt" />
     <Content Include="Scripts\UST\SRC\Lkp_SrcDonemTipi.txt" />
     <Content Include="Scripts\UST\SRC\Lkp_SrcSertifikaTipi.txt" />
+    <Content Include="Scripts\UST\SRC\MebKurum.txt" />
+    <Content Include="Scripts\UST\SRC\MebKurumEkBilgiler.txt" />
+    <Content Include="Scripts\UST\SRC\prc_SrcTeorikDerslerListesi.txt" />
+    <Content Include="Scripts\UST\SRC\prc_SrcTeorikDersPlaniElemanaOzel.txt" />
+    <Content Include="Scripts\UST\SRC\prc_SrcTeorikDersPlaniGruplari.txt" />
+    <Content Include="Scripts\UST\SRC\SrcKIhlalTeorikD.txt" />
+    <Content Include="Scripts\UST\SRC\SrcTeorikDers.txt" />
+    <Content Include="Scripts\UST\SRC\SrcDersler.txt" />
+    <Content Include="Scripts\UST\SRC\SrcUcretSinav.txt" />
+    <Content Include="Scripts\UST\SRC\SrcUcretTeorik.txt" />
+    <Content Include="Scripts\UST\SRC\SrcAdayAdres.txt" />
     <Content Include="Scripts\UST\SRC\prc_SrcAdayBorclariniHesapla.txt" />
     <Content Include="Scripts\UST\SRC\SrcAdayAdliSicil.txt" />
     <Content Include="Scripts\UST\SRC\SrcAdayOgrenim.txt" />
@@ -1211,6 +1237,7 @@
     <Content Include="Scripts\UST\Ustad\SYS_TYPES_L.txt" />
     <Content Include="Scripts\UST\Ustad\SYS_TYPES_T.txt" />
     <Content Include="Scripts\UST\Ustad\SYS_VARIABLES.txt" />
+    <Content Include="Scripts\UST\Wentec\KURSIYER_KARTI.txt" />
     <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\ADRESLER_20160101_1.Txt" />
     <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\AJ_LINEDOC.txt" />
     <Content Include="Scripts\yesiL_vtMsSql\VT_MSSQL\AJ_LINELCI.txt" />

@@ -5,7 +5,9 @@ AS BEGIN
 
   --declare @FirmId Int  = 11
   --declare @UcretTipiId Int  = 21112  --- u-sınav 
-  --declare @UcretTipiId Int  = 21113  --- u-sınav + başarasız ücreti
+  --declare @UcretTipiId Int  = 21113  --- başarasız ücreti
+  --declare @UcretTipiId Int  = 21114  --- u-sınav + başarasız ücreti
+
   declare @BugunDonemTipiId int = 0
   declare @UygSinavUcreti numeric(22,5)
   declare @Id int = dbo.fnc_getGecerlilikTarihiId(@FirmId, 21104, getdate())
@@ -66,8 +68,8 @@ AS BEGIN
                when @UcretTipiId = 21113 and isnull(uygUcreti.BirSaatBasarisizDersUcretiReel,0) > 0 then (isnull(uygUcreti.BirSaatBasarisizDersUcretiReel,0) * 2)  -- reel ücret x 2 saat
                when @UcretTipiId = 21113 and isnull(uygUcreti.BirSaatBasarisizDersUcretiReel,0) = 0 then (isnull(uygUcreti.BirSaatBasarisizDersUcreti,0) * 2) -- Mebbis ücreti x 2 saat
                -- başarısız aday + sinavÜcreti
-               when @UcretTipiId = 21116 and isnull(uygUcreti.BirSaatBasarisizDersUcretiReel,0) > 0 then (isnull(uygUcreti.BirSaatBasarisizDersUcretiReel,0) * 2) + @UygSinavUcreti  -- reel ücret x 2 saat
-               when @UcretTipiId = 21116 and isnull(uygUcreti.BirSaatBasarisizDersUcretiReel,0) = 0 then (isnull(uygUcreti.BirSaatBasarisizDersUcreti,0) * 2) + @UygSinavUcreti  -- Mebbis ücreti x 2 saat
+               when @UcretTipiId = 21114 and isnull(uygUcreti.BirSaatBasarisizDersUcretiReel,0) > 0 then (isnull(uygUcreti.BirSaatBasarisizDersUcretiReel,0) * 2) + @UygSinavUcreti  -- reel ücret x 2 saat
+               when @UcretTipiId = 21114 and isnull(uygUcreti.BirSaatBasarisizDersUcretiReel,0) = 0 then (isnull(uygUcreti.BirSaatBasarisizDersUcreti,0) * 2) + @UygSinavUcreti  -- Mebbis ücreti x 2 saat
                end )
 
            ,2    -- OdemeTipiId   Nakit

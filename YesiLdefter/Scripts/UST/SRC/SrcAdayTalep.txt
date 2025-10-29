@@ -16,7 +16,7 @@ begin transaction
    -- 20
    /* buradaki kimlik bilgileri sadece ilk data transferinde dolduruluyor */
    TcNo                  Varchar(11)   null, 
-   KimlikSeriNo          Varchar(10)   null, 
+   KimlikSeriNo          Varchar(20)   null, 
    TamAdiSoyadi          nVarchar(100) null, 
    Adi                   nVarchar(50)  null,
    Soyadi                nVarchar(50)  null,
@@ -25,6 +25,7 @@ begin transaction
    AnneAdi               nVarchar(50)  null,
    CinsiyetTipiId        SmallInt      null, /* SİLİNEBİLİR */ 
    CepTelefonu           Varchar(15)   null,
+   CepTelefonu2          Varchar(15)   null,
    Eposta                Varchar(98)   null, 
    /* buradaki kimlik bilgileri sadece ilk data transferinde dolduruluyor SON */
 
@@ -35,15 +36,17 @@ begin transaction
    -- 31
    MevcutSertifikaTipiId          SmallInt        null, /* mevcut SRC sertifika tipi Id si */
    MevcutSinifTipiId              SmallInt        null, /* Mevcut SRC5'in detay sertifika tipi Id si */
-   MevuctSertifikaNumarasi        nVarchar(20)    null,
+   MevcutSertifikaNumarasi        nVarchar(20)    null,
    MevcutSertifikaVerilisTarihi   date            null,
-   MevcutSertSonGecerlilikTarihi  date            null,
    MevcutSertVerildigiKurum       nVarchar(100)   null,
+   MevcutSertVerildigiIl          nVarchar(15)    null,
 
    -- 41
    IstenenSertifikaTipiId  SmallInt      null, /* İstenen SRC sertifika tipi Id si */
    IstenenSinifTipiId      SmallInt      null, /* İstenen SRC5'in detay sertifika tipi Id si */
    IstemeNedeniTipiId      SmallInt      null, /* 1. sertifika ilk defa alıyor, 2. yenileme */
+   SertifikaVerTarih       date          null, /* Verilen sertifikanın veriliş tarihi */
+   SonGecerlilikTarihi     date          null, /* Verilen sertifikanın son geçerlilik tarihi */
    
    /* ODY ve ÜDY ler için hangi yabancı dilleri ve seviye bilgisi olduğu gerekiyor  */ 
 
@@ -84,7 +87,6 @@ begin transaction
    -- 90
    KimlikGeldi             Bit            null,
    BiyometrikGeldi         Bit            null,
-   BasvuruFotoCekildi      Bit            null,  
    EhliyetGeldi            Bit            null, /* 0 = yok, 1 = var */
    OgrenimGeldi            Bit            null,
    SaglikGeldi             Bit            null,
@@ -133,14 +135,12 @@ AS BEGIN
   declare @eDonemTipiId int = 0 
   declare @eGrupTipiId smallInt = 0
   declare @eSubeTipiId smallInt = 0
+  declare @eGrupSubeId int = 0 
   declare @eMebbisDurumTipiId smallInt = 0
 	
   declare @eMevcutSertifikaTipiId smallInt = 0
-  declare @eIsMevcutOtomatik bit = 0
-  declare @eIsMevcut125ccAlti bit = 0
   declare @eIstenenSertifikaTipiId smallInt = 0
-  declare @eIsOtomatik bit = 0
-  declare @eIs125ccAlti bit = 0
+  declare @eIstemeNedeniTipiId smallInt = 0
   declare @eKayitTipiId smallInt = 0  
 
   declare @eBelgelerGeldi bit = 0
@@ -152,12 +152,23 @@ AS BEGIN
   declare @yDonemTipiId int = 0 
   declare @yGrupTipiId smallInt = 0
   declare @ySubeTipiId smallInt = 0
-   
+  declare @yGrupSubeId int = 0 
+    
+  declare @kontrol1DonemTipiId int = 0 
+  declare @kontrol1GrupTipiId smallInt = 0
+  declare @kontrol1SubeTipiId smallInt = 0
+  declare @kontrol1GrupSubeId int = 0 
+  
+  declare @kontrol2DonemTipiId int = 0 
+  declare @kontrol2GrupTipiId smallInt = 0
+  declare @kontrol2SubeTipiId smallInt = 0
+  declare @kontrol2GrupSubeId int = 0 
+  
   declare @yTalepGUID uniqueidentifier
   declare @yFirmId int = 0
   declare @yParentId int = 0
   declare @yTcNo varchar(11) = ''
-  declare @yKimlikSeriNo varchar(10) = ''
+  declare @yKimlikSeriNo varchar(20) = ''
   declare @yTamAdiSoyadi nvarchar(100) = ''
   declare @yAdi nvarchar(50) = ''
   declare @ySoyadi nvarchar(50) = ''
@@ -166,22 +177,19 @@ AS BEGIN
   declare @yAnneAdi nvarchar(50) = ''
   declare @yCinsiyetTipiId smallInt = 0
   declare @yCepTelefonu nvarchar(15) = ''
+  declare @yCepTelefonu2 nvarchar(15) = ''
   declare @yEposta nvarchar(100) = ''
   declare @yTalepKayitTarihi date
 
   declare @yMevcutSertifikaTipiId smallInt = 0
-  declare @yIsMevcutOtomatik bit = 0
-  declare @yIsMevcut125ccAlti bit = 0
   declare @yIstenenSertifikaTipiId smallInt = 0
-  declare @yIsOtomatik bit = 0
-  declare @yIs125ccAlti bit = 0
+  declare @yIstemeNedeniTipiId smallInt = 0
   declare @yMebbisDurumTipiId smallInt = 0
   declare @yKayitTipiId smallInt = 0  
   declare @yVeriKaynakId int = 0
 
   declare @yKimlikGeldi bit = null
   declare @yBiyometrikGeldi bit = null
-  declare @yBasvuruFotoCekildi bit = null  
   declare @yOgrenimGeldi bit = null
   declare @ySaglikGeldi bit = null
   declare @yAdliSicilGeldi bit = null
@@ -207,13 +215,10 @@ AS BEGIN
          ,@eDonemTipiId = isnull(dlt.DonemTipiId,0) 
          ,@eGrupTipiId = isnull(dlt.GrupTipiId,0)
          ,@eSubeTipiId = isnull(dlt.SubeTipiId,0)
+         ,@eGrupSubeId = isnull(dlt.GrupSubeId,0)
 
          ,@eMevcutSertifikaTipiId = isnull(dlt.MevcutSertifikaTipiId,0)
-		 ,@eIsMevcutOtomatik = isnull(dlt.IsMevcutOtomatik,0)
-         ,@eIsMevcut125ccAlti = isnull(dlt.IsMevcut125ccAlti,0)
          ,@eIstenenSertifikaTipiId = isnull(dlt.IstenenSertifikaTipiId,0)
-         ,@eIsOtomatik = isnull(dlt.IsOtomatik,0)
-         ,@eIs125ccAlti = isnull(dlt.Is125ccAlti,0)
 
          ,@eMebbisDurumTipiId = isnull(dlt.MebbisDurumTipiId,0)
          ,@eKayitTipiId = isnull(dlt.KayitTipiId,0)
@@ -229,6 +234,7 @@ AS BEGIN
          ,@yDonemTipiId = isnull(ins.DonemTipiId,0) 
          ,@yGrupTipiId = isnull(ins.GrupTipiId,0)
          ,@ySubeTipiId = isnull(ins.SubeTipiId,0)
+         ,@yGrupSubeId = isnull(ins.GrupSubeId,0) 
       --
          ,@yFirmId = isnull(ins.FirmId,0)
          ,@yParentId = isnull(ins.ParentId,0)
@@ -242,22 +248,18 @@ AS BEGIN
 		 ,@yAnneAdi = isnull(ins.AnneAdi,'')
 		 ,@yCinsiyetTipiId = isnull(ins.CinsiyetTipiId,0)
 		 ,@yCepTelefonu = isnull(ins.CepTelefonu,'')
+         ,@yCepTelefonu2 = isnull(ins.CepTelefonu2,'')
 		 ,@yEposta = isnull(ins.Eposta,'')
 		 ,@yTalepKayitTarihi = ins.TalepKayitTarihi
 
          ,@yMevcutSertifikaTipiId = isnull(ins.MevcutSertifikaTipiId,0)
-		 ,@yIsMevcutOtomatik = isnull(ins.IsMevcutOtomatik,0)
-         ,@yIsMevcut125ccAlti = isnull(ins.IsMevcut125ccAlti,0)
          ,@yIstenenSertifikaTipiId = isnull(ins.IstenenSertifikaTipiId,0)
-         ,@yIsOtomatik = isnull(ins.IsOtomatik,0)
-         ,@yIs125ccAlti = ISNULL(ins.Is125ccAlti,0)
          ,@yMebbisDurumTipiId = isnull(ins.MebbisDurumTipiId,0)
          ,@yKayitTipiId = isnull(ins.KayitTipiId,0)
 		 ,@yVeriKaynakId = isnull(ins.VeriKaynakId,0)
 
          ,@yKimlikGeldi = isnull(ins.KimlikGeldi,0)
          ,@yBiyometrikGeldi = isnull(ins.BiyometrikGeldi,0)
-         ,@yBasvuruFotoCekildi = isnull(ins.BasvuruFotoCekildi,0)
          ,@yOgrenimGeldi = isnull(ins.OgrenimGeldi,0)
          ,@ySaglikGeldi = isnull(ins.SaglikGeldi,0)
          ,@yAdliSicilGeldi = isnull(ins.AdliSicilGeldi,0)
@@ -292,7 +294,7 @@ AS BEGIN
 	  set @newTamAdi = @yAdi + ' ' +  @ySoyadi
 	  
       declare @mevcutAdayId int = 0
-      Select @mevcutAdayId = isnull(Id, 0) from MtskAday 
+      Select @mevcutAdayId = isnull(Id, 0) from SrcAday 
       Where TcNo = @yTcNo
 
 	  if (@mevcutAdayId > 0 and @yAdayId = 0)
@@ -301,14 +303,6 @@ AS BEGIN
 		  
 		  -- Baştan Data transferi yap denince AdayId sıfırlanıyor
 		  Update dbo.SrcAdayTalep Set AdayId = @yAdayId
-		  Where Id = @TalepId
-      end
-
-	  -- Data transferlerinde oluşuyor
-	  if ((@yIstenenSertifikaTipiId >= 9200) and -- 100 Ceza
-	      (@yTalepTipiId <> 4))                  -- Talep 100 Ceza değilse 
-      begin
-		  Update dbo.SrcAdayTalep Set TalepTipiId = 4
 		  Where Id = @TalepId
       end
 
@@ -332,6 +326,7 @@ AS BEGIN
               ,[AnneAdi] = @yAnneAdi
               ,[CinsiyetTipiId] = @yCinsiyetTipiId
               ,[CepTelefonu] = @yCepTelefonu
+              ,[CepTelefonu2] = @yCepTelefonu2
               ,[Eposta] = @yEposta
           WHERE Id = @yAdayId
 		  Print '   * Data transfer update end'
@@ -343,9 +338,9 @@ AS BEGIN
           if (@mevcutAdayId = 0)
           begin
               Print '   * Data transfer insert'
-              INSERT INTO [dbo].[MtskAday] 
-			  (  [AdayGUID],  [FirmId], [IsActive],  [TcNo], [KimlikSeriNo], [TamAdiSoyadi], [Adi], [Soyadi],  [DogumTarihi], [BabaAdi], [AnneAdi], [CinsiyetTipiId], [CepTelefonu], [Eposta], [IlkKayitTarihi] ) VALUES
-              (  NEWID(),    @yFirmId,   1,         @yTcNo, @yKimlikSeriNo,  @newTamAdi,    @yAdi, @ySoyadi,  @yDogumTarihi, @yBabaAdi, @yAnneAdi, @yCinsiyetTipiId, @yCepTelefonu, @yEposta, @yTalepKayitTarihi  )
+              INSERT INTO [dbo].[SrcAday] 
+			  (  [AdayGUID],  [FirmId], [IsActive],  [TcNo], [KimlikSeriNo], [TamAdiSoyadi], [Adi], [Soyadi],  [DogumTarihi], [BabaAdi], [AnneAdi], [CinsiyetTipiId], [CepTelefonu], [CepTelefonu2], [Eposta], [IlkKayitTarihi] ) VALUES
+              (  NEWID(),    @yFirmId,   1,         @yTcNo, @yKimlikSeriNo,  @newTamAdi,    @yAdi, @ySoyadi,  @yDogumTarihi, @yBabaAdi, @yAnneAdi, @yCinsiyetTipiId, @yCepTelefonu, @yCepTelefonu2, @yEposta, @yTalepKayitTarihi  )
               -- Yeni @mevcutAdayId ye kavuştuk
               Select @yAdayId = Id from MtskAday
               Where TcNo = @yTcNo
@@ -355,7 +350,7 @@ AS BEGIN
 
 	  if ((@yAdayId > 0) and (@yTcNo = ''))
 	  begin
-          Select @yTcNo = isnull(TcNo, '') from MtskAday 
+          Select @yTcNo = isnull(TcNo, '') from dbo.SrcAday 
           Where Id = @yAdayId
 
 		  if (@yTcNo <> '')
@@ -365,22 +360,19 @@ AS BEGIN
 		  end
 	  end
 
-      if (@yMevcutSertifikaTipiId < 0) set @yMevcutSertifikaTipiId = 0
-      if (@yMevcutSertifikaTipiId > 9000)
-      begin
-	      if (@yMevcutSertifikaTipiId = 9022) set @yIsMevcut125ccAlti = 1 -- A1 125 cc altı
-		  --if (@yMevcutSertifikaTipiId <> 9200) -- 100 Ceza
-		  set @yIsMevcutOtomatik = [dbo].[fnc_getSertifikaIsOtomatik](@yMevcutSertifikaTipiId)
-	      set @yMevcutSertifikaTipiId = [dbo].[fnc_getSertifikaId](@yMevcutSertifikaTipiId)
-      end
-      if (@yIstenenSertifikaTipiId > 9000)
-      begin
-	      if (@yIstenenSertifikaTipiId = 9022) set @yIs125ccAlti = 1 -- A1 125 cc altı
-		  --if (@yIstenenSertifikaTipiId <> 9200) -- 100 Ceza
-          set @yIsOtomatik = [dbo].[fnc_getSertifikaIsOtomatik](@yIstenenSertifikaTipiId)
-	      set @yIstenenSertifikaTipiId = [dbo].[fnc_getSertifikaId](@yIstenenSertifikaTipiId)
-      end
+	  if ((@yAdayId = 0) and (@yTcNo <> ''))
+	  begin
+          Select @yAdayId = isnull(Id, 0) from dbo.SrcAday 
+          Where TcNo = @yTcNo
 
+		  if (@yAdayId > 0)
+		  begin
+		      Update SrcAdayTalep set AdayId = @yAdayId
+			  Where Id = @TalepId
+		  end
+	  end
+
+/*
       -- Yeni kayıt ise kontrol et
       -- Diğer aşamalara geçmişse dokunma
       if (@yKayitTipiId < 3)
@@ -388,9 +380,8 @@ AS BEGIN
 	  
 	  if (@eMebbisDurumTipiId <> @yMebbisDurumTipiId)
 	      set @yKayitTipiId = [dbo].[fnc_getSertifikaKayitTipi]( @TalepId )
-
+*/
       if ((@yBiyometrikGeldi = 1) and
-          --(@yBasvuruFotoCekildi = 1) and
           (@yOgrenimGeldi = 1) and
           (@yAdliSicilGeldi = 1) and
           (@ySaglikGeldi = 1) and
@@ -399,6 +390,12 @@ AS BEGIN
           (@yAdresAlindi = 1)) 
            set @yBelgelerGeldi = 1
       else set @yBelgelerGeldi = 0
+
+      if ((@yMevcutSertifikaTipiId > 0) and
+          (@yMevcutSertifikaTipiId = @yIstenenSertifikaTipiId) and
+          (@yIstemeNedeniTipiId <> 2))  
+           set @yIstemeNedeniTipiId = 2 -- yenileme
+      else set @yIstemeNedeniTipiId = 1 -- yeni  
 
 	  -- @yAdayId   : ilk mebbisden kayıt alındığında adayId = 0, MtskAday yeni kayıt oluşturuluyor ve adayId belli oluyor
       -- @yIsActive : kayıtTipiId ye göre IsActive değişiyor
@@ -413,12 +410,10 @@ AS BEGIN
           (@eIsActive <> @yIsActive) or
 	      (@eTamAdiSoyadi <> @newTamAdi) or
 		  (@eMevcutSertifikaTipiId <> @yMevcutSertifikaTipiId) or
-		  (@eIsMevcutOtomatik <> @yIsMevcutOtomatik) or
 		  (@eIstenenSertifikaTipiId <> @yIstenenSertifikaTipiId) or
-		  (@eIsOtomatik <> @yIsOtomatik) or
-		  (@eIs125ccAlti <> @yIs125ccAlti) or
 		  (@eBelgelerGeldi <> @yBelgelerGeldi) or
-		  (@eKayitTipiId <> @yKayitTipiId)
+		  (@eKayitTipiId <> @yKayitTipiId) or
+          (@eIstemeNedeniTipiId <> @yIstemeNedeniTipiId)
 		  )
       begin
           Update SrcAdayTalep Set
@@ -426,19 +421,11 @@ AS BEGIN
              ,IsActive = @yIsActive  
 	         ,TamAdiSoyadi = @newTamAdi
 		     ,MevcutSertifikaTipiId = @yMevcutSertifikaTipiId
-		     ,IsMevcutOtomatik = @yIsMevcutOtomatik
 		     ,IstenenSertifikaTipiId = @yIstenenSertifikaTipiId
-		     ,IsOtomatik = @yIsOtomatik
-		     ,Is125ccAlti = @yIs125ccAlti
+             ,IstemeNedeniTipiId = @yIstemeNedeniTipiId
              ,BelgelerGeldi = @yBelgelerGeldi
              ,KayitTipiId = @yKayitTipiId
           Where Id = @TalepId		  
-      end
-	  
-      -- 2. +4 hak için sertifika bilgilerini kopyala 
-      if (@yTalepTipiId = 2) and (@yParentId = 0)
-      begin
-          Execute [dbo].[prc_SrcAdayTalepSertifika24HakKaydi] @TalepId
       end
 	  
       if (@yTalepGUID is null)
@@ -450,12 +437,12 @@ AS BEGIN
       if (@DbUpdatesIsActive = 0)
       begin 
           if ( Select Count(Id) as ADET
-               From [dbo].[MtskDonemi]
+               From [dbo].[SrcDonemi]
                Where DonemTipiId = @yDonemTipiId
                and   GrupTipiId = @yGrupTipiId ) = 0 
                and @yGrupTipiId > 1
           begin
-              INSERT INTO [dbo].[MtskDonemi]
+              INSERT INTO [dbo].[SrcDonemi]
                    ([ParentId]
                    ,[FirmId]
                    ,[IsActive]
@@ -473,14 +460,14 @@ AS BEGIN
           end
 
           if ( Select Count(Id) as ADET
-               From [dbo].[MtskGrupSubesi]
+               From [dbo].[SrcGrupSubesi]
                Where DonemTipiId = @yDonemTipiId
                and   GrupTipiId = @yGrupTipiId 
                and   SubeTipiId = @ySubeTipiId ) = 0 
                and   @yGrupTipiId > 0
                and   @ySubeTipiId > 0
           begin
-              INSERT INTO [dbo].[MtskGrupSubesi]
+              INSERT INTO [dbo].[SrcGrupSubesi]
                   ([ParentId]
                   ,[FirmId]
                   ,[IsActive]
@@ -502,37 +489,101 @@ AS BEGIN
                   )
           end
 
-          Execute [dbo].[prc_MtskAdayTablesInsert] @TalepId  -- Data transferi sırasında oluşturuluyor zaten insert oluyor
-	      Execute [dbo].[prc_SrcAdayTalepYasiniHesapla] @TalepId
+
+          -- Donem, grup veya şube değiştiyse
+          if (@eDonemTipiId <> @yDonemTipiId
+          or  @eGrupTipiId <> @yGrupTipiId
+          or  @eSubeTipiId <> @ySubeTipiId
+          ) and (@eGrupSubeId = @yGrupSubeId)
+          begin
+
+              Select @kontrol1GrupSubeId = isnull(Id,0)
+              From dbo.SrcGrupSubesi
+              Where FirmId = @yFirmId 
+              and   DonemTipiId = @yDonemTipiId
+              and   GrupTipiId = @yGrupTipiId
+              and   SubeTipiId = @ySubeTipiId
+    
+              --Select @kontrol1GrupSubeId
+              Update dbo.SrcAdayTalep Set
+                  GrupSubeId = @kontrol1GrupSubeId
+              Where Id = @TalepId 
+          end
+
+          -- GrupSubeId değiştiyse
+          if (@eDonemTipiId = @yDonemTipiId
+          and @eGrupTipiId = @yGrupTipiId
+          and @eSubeTipiId = @ySubeTipiId
+          ) and (@eGrupSubeId <> @yGrupSubeId)
+          begin
+              Select 
+                  @kontrol2DonemTipiId = isnull(DonemTipiId,0)
+                 ,@kontrol2GrupTipiId = isnull(GrupTipiId,0)
+                 ,@kontrol2SubeTipiId = isnull(SubeTipiId,0)
+              From dbo.SrcGrupSubesi
+              Where FirmId = @yFirmId 
+              and   Id = @yGrupSubeId
+
+              --Select @kontrol2DonemTipiId,@kontrol2GrupTipiId,@kontrol2SubeTipiId,'yy'
+              Update dbo.SrcAdayTalep Set
+                  DonemTipiId = @kontrol2DonemTipiId
+                 ,GrupTipiId = @kontrol2GrupTipiId
+                 ,SubeTipiId = @kontrol2SubeTipiId
+              Where Id = @TalepId 
+          end 
+
+          -- Donem veya Grup veya Şube ve hatta GrupSubeId değiştiyse
+          -- GrupSubeId baz alınıyor
+          if (@eDonemTipiId <> @yDonemTipiId
+          or @eGrupTipiId <> @yGrupTipiId
+          or @eSubeTipiId <> @ySubeTipiId
+          ) and (@eGrupSubeId <> @yGrupSubeId)
+          begin
+              Select 
+                  @kontrol2DonemTipiId = isnull(DonemTipiId,0)
+                 ,@kontrol2GrupTipiId = isnull(GrupTipiId,0)
+                 ,@kontrol2SubeTipiId = isnull(SubeTipiId,0)
+              From dbo.SrcGrupSubesi
+              Where FirmId = @yFirmId 
+              and   Id = @yGrupSubeId
+
+              --Select @kontrol2DonemTipiId,@kontrol2GrupTipiId,@kontrol2SubeTipiId,'xx'
+              Update dbo.SrcAdayTalep Set
+                  DonemTipiId = @kontrol2DonemTipiId
+                 ,GrupTipiId = @kontrol2GrupTipiId
+                 ,SubeTipiId = @kontrol2SubeTipiId
+              Where Id = @TalepId 
+          end 
+
+
+          /*
+          --Execute [dbo].[prc_MtskAdayTablesInsert] @TalepId  -- Data transferi sırasında oluşturuluyor zaten insert oluyor
+	      --Execute [dbo].[prc_SrcAdayTalepYasiniHesapla] @TalepId
 
           -- Veri transferi yapılmıyorsa 
           if (@DbUpdatesIsActive = 0)
           begin
-              Execute [dbo].[prc_MtskAdayTakipTalepKaydiSingleSet] @TalepId
-              EXECUTE [dbo].[prc_MtskAdayTakip] @yFirmId, @TalepId, 0, 'MtskAdayTakipKayit'
+              --Execute [dbo].[prc_MtskAdayTakipTalepKaydiSingleSet] @TalepId
+              --EXECUTE [dbo].[prc_MtskAdayTakip] @yFirmId, @TalepId, 0, 'MtskAdayTakipKayit'
           end
-
-		  -- MtskAdayBelgeler tablosu
-		  Update MtskAdayBelgeler Set DonemTipiId = @yDonemTipiId
+          */
+		  
+          -- SrcAdayBelgeler tablosu
+		  Update SrcAdayBelgeler Set DonemTipiId = @yDonemTipiId
 		  Where TalepId = @TalepId
 		  and isnull(DonemTipiId,0) <> @yDonemTipiId
-
       end 	  
 
-
       --- Execute [dbo].[prc_MtskAdayTakipTalepKaydiMultiSet] @yFirmId 
-
 
       FETCH NEXT FROM talepCursor_ INTO @TalepId
       print '  talep while end'
   END -- While
 
-
   CLOSE talepCursor_
   DEALLOCATE talepCursor_   
 
   print 'talep trigger End'
-
 
 END -- create trigger
 

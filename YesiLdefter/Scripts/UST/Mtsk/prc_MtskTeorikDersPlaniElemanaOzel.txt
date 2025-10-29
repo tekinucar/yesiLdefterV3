@@ -35,9 +35,7 @@ AS BEGIN
  
  if (@DonemTipiId <= 0)
  begin
-   if (MONTH(getdate()) < 10)
-        set @DonemTipiId = convert(int, convert(varchar(5), YEAR(getdate())) + '0' + convert(varchar(3), MONTH(getdate())))
-   else set @DonemTipiId = convert(int, convert(varchar(5), YEAR(getdate())) + convert(varchar(3), MONTH(getdate())))
+     set @DonemTipiId = dbo.fnc_getDonemTipiId ('BUGÜN', null)
  end
 
  declare @EgitimBaslangicTarihi date

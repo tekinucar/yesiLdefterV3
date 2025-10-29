@@ -88,6 +88,7 @@ begin transaction
    IsTransfer         Bit           null, /* default : 0 = normal, 1 = transfer */
    IkizNo             TinyInt       null, /* transfer ise ikiz no : 0 ise transfer değil, 1 ise ikiz kaydın master olanı, 2 ise ikiz kayıt (yani sonradan üretilen kayıt ) */ 
    IkizId             Int           null, /* transfer ise ikiz kaydın Id si */
+   VeriKaynakId       Int           null, /* veri transferlerinde kullanılmak üzere */
 
    constraint		pk_OnmBelgeDekont primary key (Id)
  )
@@ -323,10 +324,10 @@ AS BEGIN
       begin  
           ;With MaliyetKalani as (
            Select 
-               max(dekont.SourceId) as SourceId
-             , max(maliyet.BelgeTutari) as MaliyetTutari
-             , sum(dekont.BelgeTutari) as OdenenTutar
-             , max(maliyet.BelgeTutari) - sum(dekont.BelgeTutari) as KalanTutar
+               isnull(max(dekont.SourceId),0) as SourceId
+             , isnull(max(maliyet.BelgeTutari),0) as MaliyetTutari
+             , isnull(sum(dekont.BelgeTutari),0) as OdenenTutar
+             , isnull(max(maliyet.BelgeTutari),0) - isnull(sum(dekont.BelgeTutari),0) as KalanTutar
              , (case when (max(maliyet.BelgeTutari) - isnull(sum(dekont.BelgeTutari),0)) <= 0 then 1 else 0 end ) as IsPaid
            From dbo.OnmBelgeDekont as dekont
                left outer join dbo.OnmBelgeMaliyet as maliyet on ( dekont.SourceId = maliyet.Id )
@@ -341,6 +342,8 @@ AS BEGIN
            JOIN MaliyetKalani x ON ( m.Id = x.SourceId )
            Where isnull(m.OdenenTutar,0) <> x.OdenenTutar
            or    isnull(m.KalanTutar,0) <> x.KalanTutar 
+           or    isnull(m.IsPaid,0) <> x.IsPaid 
+
 
            ;With MaliyetAciklamasi as (
             Select dekont.Id
@@ -373,8 +376,8 @@ AS BEGIN
       , FinansTipiId = 
         (case 
             -- Para transferi olmayan satırlar ise              
-            when @BHesapTipiId in (100, 1022, 1023, 1024, 1025, 1026) and @AHesapTipiId not in (100, 1022, 1023, 1024, 1025, 1026) then @BHesapTipiId
-            when @AHesapTipiId in (100, 1022, 1023, 1024, 1025, 1026) and @BHesapTipiId not in (100, 1022, 1023, 1024, 1025, 1026) then @AHesapTipiId
+            when @BHesapTipiId in (100, 1022, 1023, 1024, 1025, 1026, 320) and @AHesapTipiId not in (100, 1022, 1023, 1024, 1025, 1026) then @BHesapTipiId
+            when @AHesapTipiId in (100, 1022, 1023, 1024, 1025, 1026, 320) and @BHesapTipiId not in (100, 1022, 1023, 1024, 1025, 1026) then @AHesapTipiId
 
             -- para transfer satırı, 1. inci satır ve Tahsilat fişi ise
             when @BHesapTipiId in (100, 1022, 1023, 1024, 1025, 1026) and isnull(@IkizNo,0) <= 1 and @TipiId = 2 then @BHesapTipiId
@@ -605,10 +608,10 @@ INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, A
  -- Nakit girişleri
  --
  ( '100.100',   'Kasalar arası virman' , 100,  100  ), 
- ( '100.120',   'Cariden nakit tahsilat' , 100,  120  ), 
+ ( '100.120',   '120.Cariden nakit tahsilat' , 100,  120  ), -- << bu hesap çalışma çünkü kursiyer anlamına geliyor, onları 21100 hesaplarla izliyoruz
  ( '100.131',   'Ortaklardan alınan nakit' , 100,  131  ), 
  --( '100.135',   'Personelden alınan nakit' , 100,  135  ), /* 335. Personele Borçlar / 135. Personelden Alacaklar  */
- ( '100.320',   'Cariden nakit tahsilat' , 100,  320  ), 
+ ( '100.320',   '320.Cariden nakit tahsilat' , 100,  320  ), 
  ( '100.600',   'Satışlardan nakit tahsilat' , 100,  600  ), 
  ( '100.602',   'Verilen hizmetlerden nakit tahsilat' , 100,  602  ), 
  ( '100.1022',  'Banka hesabından çekilen nakit' , 100,  1022  ), 
@@ -624,9 +627,9 @@ INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, A
  ( '100.21111',    N'e-Sınav ücreti, nakit tahsilat ' , 100,  21111  ), 
  ( '100.21112',    N'Uygulama sınav ücreti, nakit tahsilat ' , 100,  21112  ), 
  ( '100.21113',    N'Başarısız eğitim ücreti, nakit tahsilat ' , 100,  21113  ), 
- ( '100.21114',    N'Telafi eğitim ücreti, nakit tahsilat ' , 100,  21114  ), 
- ( '100.21115',    N'Diğer ücretler, nakit tahsilat ' , 100,  21115  ), 
- ( '100.21116',    N'Uyg+Başarısız ücretler, nakit tahsilat ' , 100,  21116  ), 
+ ( '100.21114',    N'Uyg+Başarısız ücretler, nakit tahsilat ' , 100,  21114  ), 
+ ( '100.21115',    N'Telafi eğitim ücreti, nakit tahsilat ' , 100,  21115  ), 
+ ( '100.21116',    N'Diğer ücretler, nakit tahsilat ' , 100,  21116  ), 
 
  ( '100.23101',    N'Src 1234 ücreti, nakit tahsilat ' , 100,  23101  ), 
  ( '100.23102',    N'Src 5 ücreti, nakit tahsilat ' , 100,  23102  ), 
@@ -635,20 +638,18 @@ INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, A
  ( '100.23105',    N'ÜDY 1234 ücreti, nakit tahsilat ' , 100,  23105  ), 
  ( '100.23111',    N'e-Sınav ücreti, nakit tahsilat ' , 100,  23111  ), 
  ( '100.23112',    N'Uygulama sınav ücreti, nakit tahsilat ' , 100,  23112  ), 
- ( '100.23113',    N'Başarısız eğitim ücreti, nakit tahsilat ' , 100,  23113  ), 
- ( '100.23114',    N'Telafi eğitim ücreti, nakit tahsilat ' , 100,  23114  ), 
- ( '100.23115',    N'Diğer ücretler, nakit tahsilat ' , 100,  23115  ), 
+ ( '100.23113',    N'Diğer ücretler, nakit tahsilat ' , 100,  23113  ), 
 
 
  -- Banka girişleri
  --
  ( '1022.100',   'Kasadan banka hesabına yatırılan' , 1022,  100  ), 
- ( '1022.120',   'Cariden gelen havale/Eft' , 1022,  120  ), 
+ ( '1022.120',   '120.Cariden gelen havale/Eft' , 1022,  120  ), 
  ( '1022.131',   'Ortaklardan gelen havale/Eft' , 1022,  131  ), 
  --( '1022.135',   'Personelden gelen havale/Eft' , 1022,  135  ),  /* 335. Personele Borçlar / 135. Personelden Alacaklar  */
  ( '1022.300',   'Banka kredisi girişi kv.' , 1022,  300  ), 
  ( '1022.400',   'Banka kredisi girişi uv.' , 1022,  400  ), 
- ( '1022.320',   'Cariden gelen havale/Eft' , 1022,  320  ), 
+ ( '1022.320',   '320.Cariden gelen havale/Eft' , 1022,  320  ), 
  ( '1022.602',   'Verilen hizmet için banka hesabına yatırılan' , 1022,  602  ), 
  ( '1022.1022',  'Banka hesapları arası havale' , 1022,  1022  ), 
  ( '1022.1023',  'Kredi kartından çekilen nakit avans' , 1022,  1023  ), 
@@ -664,10 +665,10 @@ INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, A
  ( '1022.21111',    N'e-Sınav ücreti, banka hesabına yatan' , 1022,  21111  ), 
  ( '1022.21112',    N'Uygulama sınav ücreti, banka hesabına yatan' , 1022,  21112  ), 
  ( '1022.21113',    N'Başarısız eğitim ücreti, banka hesabına yatan' , 1022,  21113  ), 
- ( '1022.21114',    N'Telafi eğitim ücreti, banka hesabına yatan' , 1022,  21114  ), 
- ( '1022.21115',    N'Diğer ücretler, banka hesabına yatan' , 1022,  21115  ), 
- ( '1022.21116',    N'Uyg+Başarısız ücretler, banka hesabına yatan' , 1022,  21116  ), 
-
+ ( '1022.21114',    N'Uyg+Başarısız ücretler, banka hesabına yatan' , 1022,  21114  ), 
+ ( '1022.21115',    N'Telafi eğitim ücreti, banka hesabına yatan' , 1022,  21115  ), 
+ ( '1022.21116',    N'Diğer ücretler, banka hesabına yatan' , 1022,  21116  ), 
+ 
  ( '1022.23101',    N'Src 1234 ücreti, banka hesabına yatan' , 1022,  23101  ), 
  ( '1022.23102',    N'Src 5 ücreti, banka hesabına yatan' , 1022,  23102  ), 
  ( '1022.23103',    N'Src 6 ücreti, banka hesabına yatan' , 1022,  23103  ), 
@@ -675,9 +676,7 @@ INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, A
  ( '1022.23105',    N'ÜDY 1234 ücreti, banka hesabına yatan' , 1022,  23105  ), 
  ( '1022.23111',    N'e-Sınav ücreti, banka hesabına yatan' , 1022,  23111  ), 
  ( '1022.23112',    N'Uygulama sınav ücreti, banka hesabına yatan' , 1022,  21112  ), 
- ( '1022.23113',    N'Başarısız eğitim ücreti, banka hesabına yatan' , 1022,  23113  ), 
- ( '1022.23114',    N'Telafi eğitim ücreti, banka hesabına yatan' , 1022,  23114  ), 
- ( '1022.23115',    N'Diğer ücretler, banka hesabına yatan' , 1022,  23115  ), 
+ ( '1022.23113',    N'Diğer ücretler, banka hesabına yatan' , 1022,  23113  ), 
 
  -- Kredi kartına girişler/yatanlar
  --
@@ -686,10 +685,10 @@ INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, A
 
  -- POS Cihazı ile girişler, tahsilatlar
  --
- ( '1024.120',   'Cariden banka/kredi kartı ile tahsilat' , 1024,  120  ), 
+ ( '1024.120',   '120.Cariden banka/kredi kartı ile tahsilat' , 1024,  120  ), 
  ( '1024.131',   'Ortağın banka/kredi kartından çekilen ' , 1024,  131  ), 
  ( '1024.135',   'Personelin banka/kredi kartından çekilen' , 1024,  135  ), /* 335. Personele Borçlar / 135. Personelden Alacaklar  */
- ( '1024.320',   'Cariden banka/kredi kartı ile tahsilat' , 1024,  320  ), 
+ ( '1024.320',   '320.Cariden banka/kredi kartı ile tahsilat' , 1024,  320  ), 
  ( '1024.600',   'Kesilen fatura için banka/kredi kartı tahsilat' , 1024,  600  ), 
  ( '1024.601',   'Yurtdışı satışlar için çekilen banka/kredi kartı tahsilat' , 1024,  601  ), 
  ( '1024.602',   'Verilen hizmetler için çekilen banka/kredi kartı tahsilat' , 1024,  602  ), 
@@ -704,9 +703,9 @@ INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, A
  ( '1024.21111',    N'e-Sınav ücreti, POS ile tahsilat' , 1024,  21111  ), 
  ( '1024.21112',    N'Uygulama sınav ücreti, POS ile tahsilat' , 1024,  21112  ), 
  ( '1024.21113',    N'Başarısız eğitim ücreti, POS ile tahsilat' , 1024,  21113  ), 
- ( '1024.21114',    N'Telafi eğitim ücreti, POS ile tahsilat' , 1024,  21114  ), 
- ( '1024.21115',    N'Diğer ücretler, POS ile tahsilat' , 1024,  21115  ), 
- ( '1024.21116',    N'UYg+Başarısız ücretler, POS ile tahsilat' , 1024,  21116  ), 
+ ( '1024.21114',    N'UYg+Başarısız ücretler, POS ile tahsilat' , 1024,  21114  ), 
+ ( '1024.21115',    N'Telafi eğitim ücreti, POS ile tahsilat' , 1024,  21115  ), 
+ ( '1024.21116',    N'Diğer ücretler, POS ile tahsilat' , 1024,  21116  ), 
 
  ( '1024.23101',    N'Src 1234 ücreti, POS ile tahsilat' , 1024,  23101  ), 
  ( '1024.23102',    N'Src 5 ücreti, POS ile tahsilat' , 1024,  23102  ), 
@@ -715,9 +714,7 @@ INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, A
  ( '1024.23105',    N'ÜDY 1234 ücreti, POS ile tahsilat' , 1024,  23105  ), 
  ( '1024.23111',    N'e-Sınav ücreti, POS ile tahsilat' , 1024,  23111  ), 
  ( '1024.23112',    N'Uygulama sınav ücreti, POS ile tahsilat' , 1024,  23112  ), 
- ( '1024.23113',    N'Başarısız eğitim ücreti, POS ile tahsilat' , 1024,  23113  ), 
- ( '1024.23114',    N'Telafi eğitim ücreti, POS ile tahsilat' , 1024,  23114  ), 
- ( '1024.23115',    N'Diğer ücretler, POS ile tahsilat' , 1024,  23115  ), 
+ ( '1024.23113',    N'Diğer ücretler, POS ile tahsilat' , 1024,  23113  ), 
 
 
  -- OnmOdemePlani.UcretTipiId SANAL POS ile tahsilatlar
@@ -730,9 +727,9 @@ INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, A
  ( '1025.21111',    N'e-Sınav ücreti, Sanal POS ile tahsilat' , 1025,  21111  ), 
  ( '1025.21112',    N'Uygulama sınav ücreti, Sanal POS ile tahsilat' , 1025,  21112  ), 
  ( '1025.21113',    N'Başarısız eğitim ücreti, Sanal POS ile tahsilat' , 1025,  21113  ), 
- ( '1025.21114',    N'Telafi eğitim ücreti, Sanal POS ile tahsilat' , 1025,  21114  ), 
- ( '1025.21115',    N'Diğer ücretler, Sanal POS ile tahsilat' , 1025,  21115  ), 
- ( '1025.21116',    N'Uyg+Başarısız ücretler, Sanal POS ile tahsilat' , 1025,  21116  ), 
+ ( '1025.21114',    N'Uyg+Başarısız ücretler, Sanal POS ile tahsilat' , 1025,  21114  ), 
+ ( '1025.21115',    N'Telafi eğitim ücreti, Sanal POS ile tahsilat' , 1025,  21115  ), 
+ ( '1025.21116',    N'Diğer ücretler, Sanal POS ile tahsilat' , 1025,  21116  ), 
 
  ( '1025.23101',    N'Src 1234 ücreti, Sanal POS ile tahsilat' , 1025,  23101  ), 
  ( '1025.23102',    N'Src 5 ücreti, Sanal POS ile tahsilat' , 1025,  23102  ), 
@@ -741,9 +738,7 @@ INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, A
  ( '1025.23105',    N'ÜDY 1234 ücreti, Sanal POS ile tahsilat' , 1025,  23105  ), 
  ( '1025.23111',    N'e-Sınav ücreti, Sanal POS ile tahsilat' , 1025,  23111  ), 
  ( '1025.23112',    N'Uygulama sınav ücreti, Sanal POS ile tahsilat' , 1025,  23112  ), 
- ( '1025.23113',    N'Başarısız eğitim ücreti, Sanal POS ile tahsilat' , 1025,  23113  ), 
- ( '1025.23114',    N'Telafi eğitim ücreti, Sanal POS ile tahsilat' , 1025,  23114  ), 
- ( '1025.23115',    N'Diğer ücretler, Sanal POS ile tahsilat' , 1025,  23115  ), 
+ ( '1025.23113',    N'Diğer ücretler, Sanal POS ile tahsilat' , 1025,  23113  ), 
   
  
  -- OnmOdemePlani.UcretTipiId CARİ POS ile tahsilatlar
@@ -756,9 +751,9 @@ INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, A
  ( '1026.21111',    N'e-Sınav ücreti, Cari POS ile tahsilat' , 1025,  21111  ), 
  ( '1026.21112',    N'Uygulama sınav ücreti, Cari POS ile tahsilat' , 1025,  21112  ), 
  ( '1026.21113',    N'Başarısız eğitim ücreti, Cari POS ile tahsilat' , 1025,  21113  ), 
- ( '1026.21114',    N'Telafi eğitim ücreti, Cari POS ile tahsilat' , 1025,  21114  ), 
- ( '1026.21115',    N'Diğer ücretler, Cari POS ile tahsilat' , 1025,  21115  ), 
- ( '1026.21116',    N'Uyg+Başarısız ücretler, Cari POS ile tahsilat' , 1025,  21116  ), 
+ ( '1026.21114',    N'Uyg+Başarısız ücretler, Cari POS ile tahsilat' , 1025,  21114  ), 
+ ( '1026.21115',    N'Telafi eğitim ücreti, Cari POS ile tahsilat' , 1025,  21115  ), 
+ ( '1026.21116',    N'Diğer ücretler, Cari POS ile tahsilat' , 1025,  21116  ), 
 
  ( '1026.23101',    N'Src 1234 ücreti, Cari POS ile tahsilat' , 1025,  23101  ), 
  ( '1026.23102',    N'Src 5 ücreti, Cari POS ile tahsilat' , 1025,  23102  ), 
@@ -767,10 +762,26 @@ INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, A
  ( '1026.23105',    N'ÜDY 1234 ücreti, Cari POS ile tahsilat' , 1025,  23105  ), 
  ( '1026.23111',    N'e-Sınav ücreti, Cari POS ile tahsilat' , 1025,  23111  ), 
  ( '1026.23112',    N'Uygulama sınav ücreti, Cari POS ile tahsilat' , 1025,  23112  ), 
- ( '1026.23113',    N'Başarısız eğitim ücreti, Cari POS ile tahsilat' , 1025,  23113  ), 
- ( '1026.23114',    N'Telafi eğitim ücreti, Cari POS ile tahsilat' , 1025,  23114  ), 
- ( '1026.23115',    N'Diğer ücretler, Cari POS ile tahsilat' , 1025,  23115  ), 
+ ( '1026.23113',    N'Diğer ücretler, Cari POS ile tahsilat' , 1025,  23113  ), 
 
+
+
+ -- OnmOdemePlani.UcretTipiId 320 . CARİ (SATICILAR) ile tahsilatlar
+ --
+ ( '320.21101',    N'Sertifika ücreti, 320.Cari hesaba işlendi (tahsilat)' , 1025,  21101  ), 
+ ( '320.21102',    N'2.+4 hak ücreti, 320.Cari hesaba işlendi (tahsilat)' , 1025,  21102  ), 
+ ( '320.21103',    N'Nakil 2.+4 hak ücreti, 320.Cari hesaba işlendi (tahsilat)' , 1025,  21103  ), 
+ ( '320.21104',    N'100 Ceza ücreti, 320.Cari hesaba işlendi (tahsilat)' , 1025,  21104  ), 
+ ( '320.21105',    N'Özel direksiyon ders ücreti, 320.Cari hesaba işlendi (tahsilat)' , 1025,  21105  ), 
+ ( '320.21111',    N'e-Sınav ücreti, 320.Cari hesaba işlendi (tahsilat)' , 1025,  21111  ), 
+ ( '320.21112',    N'Uygulama sınav ücreti, 320.Cari hesaba işlendi (tahsilat)' , 1025,  21112  ), 
+ ( '320.21113',    N'Başarısız eğitim ücreti, 320.Cari hesaba işlendi (tahsilat)' , 1025,  21113  ), 
+ ( '320.21114',    N'Uyg+Başarısız ücretler, 320.Cari hesaba işlendi (tahsilat)' , 1025,  21114  ), 
+ ( '320.21115',    N'Telafi eğitim ücreti, 320.Cari hesaba işlendi (tahsilat)' , 1025,  21115  ), 
+ ( '320.21116',    N'Diğer ücretler, 320.Cari hesaba işlendi (tahsilat)' , 1025,  21116  ), 
+
+ ( '770.320',      N'Genel yönetim giderleri, 320.Cari hesaba işlendi (tediye)' , 770,  320  ), 
+ ( '793.320',      N'Dışarıdan sağlanan hizmetler, 320.Cari hesaba işlendi (tediye)' , 793,  320  ), 
 
 
  -- --------------------------------------------------
@@ -778,14 +789,14 @@ INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, A
  -- --------------------------------------------------
  
  
- ( '120.100',  'Cari hesaba ödenen nakit' , 120,  100  ), 
+ ( '120.100',  '120.Cari hesaba ödenen nakit' , 120,  100  ), 
  ( '131.100',  'Ortaklara verilen nakit ' , 131,  100  ), 
  --( '135.100',  'Personele verilen nakit' , 135,  100  ), /* 335. Personele Borçlar / 135. Personelden Alacaklar  */
  ( '153.100',  'Stok alımı için ödenen nakit' , 153,  100  ), 
  ( '196.100',  'Personele verilen nakit avans' , 196,  100  ), 
  ( '300.100',  'Banka kredisi için nakit ödeme kv.' , 300,  100  ), 
  ( '400.100',  'Banka kredisi için nakit ödeme uv.' , 400,  100  ), 
- ( '320.100',  'Cari hesaba ödenen nakit' , 320,  100  ), 
+ ( '320.100',  '320.Cari hesaba ödenen nakit' , 320,  100  ), 
  ( '770.100',  'Genel yönetim giderleri için nakit ödeme' , 770,  100  ), 
 
  -- OnmOdemePlani.UcretTipiId
@@ -798,9 +809,9 @@ INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, A
  ( '21111.100',    N'e-Sınav ücreti, nakit iadesi' , 21111,  100  ), 
  ( '21112.100',    N'Uygulama sınav ücreti, nakit iadesi' , 21112,  100  ), 
  ( '21113.100',    N'Başarısız eğitim ücreti, nakit iadesi' , 21113,  100  ), 
- ( '21114.100',    N'Telafi eğitim ücreti, nakit iadesi' , 21114,  100  ), 
- ( '21115.100',    N'Diğer ücretler, nakit iadesi' , 21115,  100  ), 
- ( '21116.100',    N'Uyg+Başarısız ücretler, nakit iadesi' , 21116,  100  ), 
+ ( '21114.100',    N'Uyg+Başarısız ücretler, nakit iadesi' , 21114,  100  ), 
+ ( '21115.100',    N'Telafi eğitim ücreti, nakit iadesi' , 21115,  100  ), 
+ ( '21116.100',    N'Diğer ücretler, nakit iadesi' , 21116,  100  ), 
 
  ( '23101.100',    N'Src 1234 ücreti, nakit iadesi' , 23101,  100  ), 
  ( '23102.100',    N'Src 5 ücreti, nakit iadesi' , 23102,  100  ), 
@@ -809,19 +820,17 @@ INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, A
  ( '23105.100',    N'ÜDY 1234 ücreti, nakit iadesi' , 23105,  100  ), 
  ( '23111.100',    N'e-Sınav ücreti, nakit iadesi' , 23111,  100  ), 
  ( '23112.100',    N'Uygulama sınav ücreti, nakit iadesi' , 23112,  100  ), 
- ( '23113.100',    N'Başarısız eğitim ücreti, nakit iadesi' , 23113,  100  ), 
- ( '23114.100',    N'Telafi eğitim ücreti, nakit iadesi' , 23114,  100  ), 
- ( '23115.100',    N'Diğer ücretler, nakit iadesi' , 23115,  100  ), 
+ ( '23113.100',    N'Diğer ücretler, nakit iadesi' , 23113,  100  ), 
 
 
- ( '120.1022',  'Cari hesaba gönderilen havale/Eft' , 120,  1022  ), 
+ ( '120.1022',  '120.Cari hesaba gönderilen havale/Eft' , 120,  1022  ), 
  ( '131.1022',  'Ortaklara banka hesabından havale/Eft' , 131,  1022  ), 
  --( '135.1022',  'Personele banka hesabından havale/Eft' , 135,  1022  ), /* 335. Personele Borçlar / 135. Personelden Alacaklar  */
  ( '153.1022',  'Stok alımı için banka hesabında havale/Eft' , 153,  1022  ), 
  ( '196.1022',  'Personele banka hesabından havale/Eft avans' , 196,  1022  ),  
  ( '300.1022',  'Banka kredisi için banka hesabından ödeme kv.' , 300,  1022  ), 
  ( '400.1022',  'Banka kredisi için banka hesabından ödeme uv.' , 400,  1022  ), 
- ( '320.1022',  'Cari hesabına havale/Eft' , 320,  1022  ), 
+ ( '320.1022',  '320.Cari hesabına havale/Eft' , 320,  1022  ), 
  ( '770.1022',  'Genel yönetim giderleri için banka hesabından havale/Eft' , 770,  1022  ), 
  ( '780.1022',  'Finansman giderleri için banka hesabından çekilen' , 780,  1022  ), 
 
@@ -835,9 +844,9 @@ INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, A
  ( '21111.1022',    N'e-Sınav ücreti, banka hesabından iade' , 21111,  1022  ), 
  ( '21112.1022',    N'Uygulama sınav ücreti, banka hesabından iade' , 21112,  1022  ), 
  ( '21113.1022',    N'Başarısız eğitim ücreti, banka hesabından iade' , 21113,  1022  ), 
- ( '21114.1022',    N'Telafi eğitim ücreti, banka hesabından iade' , 21114,  1022  ), 
- ( '21115.1022',    N'Diğer ücretler, banka hesabından iade' , 21115,  1022  ), 
- ( '21116.1022',    N'Uyg+Başarısız ücretler, banka hesabından iade' , 21116,  1022  ), 
+ ( '21114.1022',    N'Uyg+Başarısız ücretler, banka hesabından iade' , 21114,  1022  ), 
+ ( '21115.1022',    N'Telafi eğitim ücreti, banka hesabından iade' , 21115,  1022  ), 
+ ( '21116.1022',    N'Diğer ücretler, banka hesabından iade' , 21116,  1022  ), 
 
  
  ( '23101.1022',    N'Src 1234 ücreti, banka hesabından iade' , 23101,  1022  ), 
@@ -847,17 +856,17 @@ INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, A
  ( '23105.1022',    N'ÜDY 1234 ücreti, banka hesabından iade' , 23105,  1022  ), 
  ( '23111.1022',    N'e-Sınav ücreti, banka hesabından iade' , 23111,  1022  ), 
  ( '23112.1022',    N'Uygulama sınav ücreti, banka hesabından iade' , 23112,  1022  ), 
- ( '23113.1022',    N'Başarısız eğitim ücreti, banka hesabından iade' , 23113,  1022  ), 
- ( '23114.1022',    N'Telafi eğitim ücreti, banka hesabından iade' , 23114,  1022  ), 
- ( '23115.1022',    N'Diğer ücretler, banka hesabından iade' , 23115,  1022  ), 
+ ( '23113.1022',    N'Diğer ücretler, banka hesabından iade' , 23113,  1022  ), 
 
 
- ( '120.1023',  'Cari hesaba kredi kartı ile ödeme' , 120,  1023  ), 
+ ( '120.1023',  '120.Cari hesaba kredi kartı ile ödeme' , 120,  1023  ), 
  ( '131.1023',  'Ortakların kredi kartı ile yaptığı harcama' , 131,  1023  ), 
  --( '135.1023',  'Personelin kredi kartı ile yaptığı harcama' , 135,  1023  ), /* 335. Personele Borçlar / 135. Personelden Alacaklar  */
  ( '153.1023',  'Stok alımı için kredi kartıyla ödeme' , 153,  1023  ), 
- ( '320.1023',  'Cari hesaba kredi kartı ile ödeme' , 320,  1023  ), 
+ ( '320.1023',  '320.Cari hesaba kredi kartı ile ödeme' , 320,  1023  ), 
  ( '770.1023',  'Genel yönetim giderleri için kredi kartıyla ödeme' , 770,  1023  ), 
+ ( '770.1024',  'Genel yönetim giderleri için POS ile ödeme' , 770,  1024  ), 
+ ( '780.1024',  'Finansman giderleri için POS ile ödeme' , 780,  1024  ),  /* ÖDEAL da böyle bir uygulama mevcut  */
  ( '791.100',   'İşçi ücret ve giderleri için nakit ödeme' , 791,  100  ), 
  ( '791.1022',  'İşçi ücret ve giderleri için banka hesabından havale/Eft' , 791,  1022  ), 
  ( '793.1023',  'Dışarıdan sağlanan hizmetler için kredi kartıyla ödeme' , 793,  1023  ), 
@@ -875,9 +884,9 @@ INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, A
  ( '21111.1024',    N'e-Sınav ücreti, POS dan iade' , 21111,  1024  ), 
  ( '21112.1024',    N'Uygulama sınav ücreti, POS dan iade' , 21112,  1024  ), 
  ( '21113.1024',    N'Başarısız eğitim ücreti, POS dan iade' , 21113,  1024  ), 
- ( '21114.1024',    N'Telafi eğitim ücreti, POS dan iade' , 21114,  1024  ), 
- ( '21115.1024',    N'Diğer ücretler, POS dan iade' , 21115,  1024  ), 
- ( '21116.1024',    N'Uyg+Başarısız ücretler, POS dan iade' , 21116,  1024  ), 
+ ( '21114.1024',    N'Uyg+Başarısız ücretler, POS dan iade' , 21114,  1024  ), 
+ ( '21115.1024',    N'Telafi eğitim ücreti, POS dan iade' , 21115,  1024  ), 
+ ( '21116.1024',    N'Diğer ücretler, POS dan iade' , 21116,  1024  ), 
 
  
  ( '23101.1024',    N'Src 1234 ücreti, POS dan iade' , 23101,  1024  ), 
@@ -887,9 +896,7 @@ INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, A
  ( '23105.1024',    N'ÜDY 1234 ücreti, POS dan iade' , 23105,  1024  ), 
  ( '23111.1024',    N'e-Sınav ücreti, POS dan iade' , 23111,  1024  ), 
  ( '23112.1024',    N'Uygulama sınav ücreti, POS dan iade' , 23112,  1024  ), 
- ( '23113.1024',    N'Başarısız eğitim ücreti, POS dan iade' , 23113,  1024  ), 
- ( '23114.1024',    N'Telafi eğitim ücreti, POS dan iade' , 23114,  1024  ), 
- ( '23115.1024',    N'Diğer ücretler, POS dan iade' , 23115,  1024  ), 
+ ( '23113.1024',    N'Diğer ücretler, POS dan iade' , 23113,  1024  ), 
 
 
 
@@ -903,9 +910,9 @@ INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, A
  ( '21111.1025',    N'e-Sınav ücreti, Sanal POS dan iade' , 21111,  1025  ), 
  ( '21112.1025',    N'Uygulama sınav ücreti, Sanal POS dan iade' , 21112,  1025  ), 
  ( '21113.1025',    N'Başarısız eğitim ücreti, Sanal POS dan iade' , 21113,  1025  ), 
- ( '21114.1025',    N'Telafi eğitim ücreti, Sanal POS dan iade' , 21114,  1025  ), 
- ( '21115.1025',    N'Diğer ücretler, Sanal POS dan iade' , 21115,  1025  ), 
- ( '21116.1025',    N'Uyg+Başarısız ücretler, Sanal POS dan iade' , 21116,  1025  ), 
+ ( '21114.1025',    N'Uyg+Başarısız ücretler, Sanal POS dan iade' , 21114,  1025  ), 
+ ( '21115.1025',    N'Telafi eğitim ücreti, Sanal POS dan iade' , 21115,  1025  ), 
+ ( '21116.1025',    N'Diğer ücretler, Sanal POS dan iade' , 21116,  1025  ), 
 
  
  ( '23101.1025',    N'Src 1234 ücreti, Sanal POS dan iade' , 23101,  1025  ), 
@@ -915,9 +922,7 @@ INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, A
  ( '23105.1025',    N'ÜDY 1234 ücreti, Sanal POS dan iade' , 23105,  1025  ), 
  ( '23111.1025',    N'e-Sınav ücreti, Sanal POS dan iade' , 23111,  1025  ), 
  ( '23112.1025',    N'Uygulama sınav ücreti, Sanal POS dan iade' , 23112,  1025  ), 
- ( '23113.1025',    N'Başarısız eğitim ücreti, Sanal POS dan iade' , 23113,  1025  ), 
- ( '23114.1025',    N'Telafi eğitim ücreti, Sanal POS dan iade' , 23114,  1025  ), 
- ( '23115.1025',    N'Diğer ücretler, Sanal POS dan iade' , 23115,  1025  ) 
+ ( '23113.1025',    N'Diğer ücretler, Sanal POS dan iade' , 23113,  1025  ) 
 
 
 
@@ -986,9 +991,9 @@ INSERT INTO [Lkp].[OnmBelgeDekontBHesapTipi] (Id, BHesapTipi, GrupTipiId)
   ( 21111,    N'e-Sınav ücreti', 1),
   ( 21112,    N'Uygulama sınav ücreti', 1),
   ( 21113,    N'Başarısız eğitim ücreti', 1),
-  ( 21114,    N'Telafi eğitim ücreti', 1),
-  ( 21115,    N'Diğer ücretler', 1),
-  ( 21116,    N'Uyg+Başarısız ücreti', 1),
+  ( 21114,    N'Uyg+Başarısız ücreti', 1),
+  ( 21115,    N'Telafi eğitim ücreti', 1),
+  ( 21116,    N'Diğer ücretler', 1),
 
   ( 23101,    N'Src 1234', 1),
   ( 23102,    N'Src 5', 1),
@@ -997,9 +1002,7 @@ INSERT INTO [Lkp].[OnmBelgeDekontBHesapTipi] (Id, BHesapTipi, GrupTipiId)
   ( 23105,    N'ÜDY 1234', 1),
   ( 23111,    N'e-Sınav ücreti', 1),
   ( 23112,    N'Uygulama sınav ücreti', 1),
-  ( 23113,    N'Başarısız eğitim ücreti', 1),
-  ( 23114,    N'Telafi eğitim ücreti', 1),
-  ( 23115,    N'Diğer ücretler', 1)
+  ( 23113,    N'Diğer ücretler', 1)
 
 
   
@@ -1066,9 +1069,9 @@ INSERT INTO [Lkp].[OnmBelgeDekontAHesapTipi] (Id, AHesapTipi, GrupTipiId)
   ( 21111,    N'e-Sınav ücreti', 1),
   ( 21112,    N'Uygulama sınav ücreti', 1),
   ( 21113,    N'Başarısız eğitim ücreti', 1),
-  ( 21114,    N'Telafi eğitim ücreti', 1),
-  ( 21115,    N'Diğer ücretler', 1),
-  ( 21116,    N'Uyg+Başarısız ücreti', 1),
+  ( 21114,    N'Uyg+Başarısız ücreti', 1),
+  ( 21115,    N'Telafi eğitim ücreti', 1),
+  ( 21116,    N'Diğer ücretler', 1),
 
   ( 23101,    N'Src 1234', 1),
   ( 23102,    N'Src 5', 1),
@@ -1077,9 +1080,7 @@ INSERT INTO [Lkp].[OnmBelgeDekontAHesapTipi] (Id, AHesapTipi, GrupTipiId)
   ( 23105,    N'ÜDY 1234', 1),
   ( 23111,    N'e-Sınav ücreti', 1),
   ( 23112,    N'Uygulama sınav ücreti', 1),
-  ( 23113,    N'Başarısız eğitim ücreti', 1),
-  ( 23114,    N'Telafi eğitim ücreti', 1),
-  ( 23115,    N'Diğer ücretler', 1)
+  ( 23113,    N'Diğer ücretler', 1)
 
 
 
@@ -1107,7 +1108,8 @@ INSERT INTO [Lkp].[OnmBelgeDekontFinansTipi] (Id, FinansTipi, GrupTipiId)
   ( 1023, N'Banka/Kredi kartı', 1), 
   ( 1024, N'POS', 1),
   ( 1025, N'Sanal POS', 1),
-  ( 1026, N'Cari POS', 1)
+  ( 1026, N'Cari POS', 1),
+  ( 320,  N'320.Cari hesap', 1)
 
 
 -- ------------------------------------------------------- 

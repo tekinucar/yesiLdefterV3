@@ -13,8 +13,9 @@ begin transaction
     NetworkMacAddress varchar(30)   NULL,
     UserId            Int           NULL,
     
-    SettingGroupNo    SmallInt      NULL, 
+    GroupNoTypeId     SmallInt      NULL, /* SettingGroupNo */
     SettingNo         SmallInt      NULL,  
+    SettingId         Int           NULL, /* GroupNoTypeId + SettingNo birleşiminden oluşan tekil ayar ID'si */
     About             varchar(100)  NULL, /* ayar hakkında açıklama  */
 
     DefaultTypeId     SmallInt      NULL,
@@ -86,6 +87,47 @@ INSERT INTO [Lkp].[SettingsDefaultType] (Id, DefaultType)
 
 
 
+
+-- ------------------------------------------------------- 
+-- GroupNoTypeId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'SettingsGroupNoType')
+drop table [Lkp].[SettingsGroupNoType]
+
+create table [Lkp].[SettingsGroupNoType]
+(
+   Id            Int Unique Not Null,
+   GroupNoType   nVarchar(50),
+
+   constraint  pk_SettingsGroupNoType primary key (Id)
+)
+
+delete from [Lkp].[SettingsGroupNoType]
+INSERT INTO [Lkp].[SettingsGroupNoType] (Id, GroupNoType)
+ VALUES 
+  (0,      N'Tanımsız'),
+  (1000,   N'Başlangıç'),
+  (1010,   N'Kayıt'),
+  (1020,   N'Dönemler'),
+  (1030,   N'Teorik dersler'),
+  (1040,   N'e_Sinav basvurusu'),
+  (1050,   N'e_Sinav'),
+  (1060,   N'Tüm uygulamalı dersler'),
+  (1070,   N'Uygulamalı dersler'),
+  (1080,   N'Arti 4 dersler'),
+  (1090,   N'Telafi dersler'),
+  (1110,   N'Başarısız dersler'),
+  (1120,   N'Randevu'),
+  (1130,   N'Uygulamali sınav'),
+  (1140,   N'Sertifika'),
+  (2010,   N'Ön muhasebe'),
+
+  (3010,   N'Sms'),
+  (3020,   N'EMail'),
+  (3030,   N'WhatsApp'),
+  (3040,   N'Mobil')
+
+
 commit transaction
 
 /*CreateLkpTableEnd*/
@@ -94,11 +136,329 @@ commit transaction
 
 /*CreateData*/
 
-/* SettingTypeId : 1. firma bazlı, 2. bilgisayar bazlı, 3. kullanıcı bazlı  */
-/* SettingGroupNo  : henüz nasıl gruplayacağım belli değil */
-/* SettingNo       : her setting row için bizim tarafımızdan belirlenen tekil bir ID  */
+Declare @FirmId Int 
+Set @FirmId = :FIRM_ID
+Declare @SectorTypeId SmallInt
+Set @SectorTypeId = :SectorTypeId 
+declare @grupNo int 
+declare @settingNo int 
 
-/* SettingGroupNo  : 
+
+-- ----------------------------------------
+-- 1000 : Başlangıç işlemleri 
+-- ----------------------------------------
+
+Set @grupNo = 1000 
+Set @settingNo = 100
+
+if ( select COUNT(Id) as adet from Settings
+     Where FirmId = @FirmId
+     and GroupNoTypeId = @grupNo
+     and SettingNo = @settingNo
+     ) = 0
+begin
+     INSERT INTO [dbo].[Settings]
+           ([IsActive], [SettingTypeId], [FirmId], [PcName], [NetworkMacAddress], [UserId], [GroupNoTypeId], [SettingNo], [SettingId], [About], [DefaultTypeId], [DefaultBool], [DefaultNumeric], [DefaultText], [DefaultInt])
+     VALUES
+           (1    --IsActive
+           ,1    --SettingTypeId
+           ,@FirmId
+           ,null -- PcName
+           ,null -- NetworkMacAddress
+           ,null -- UserId
+           ,@grupNo     -- GroupNoTypeId
+           ,@settingNo  -- SettingNo   
+           ,@grupNo + @settingNo  -- SettingId
+           ,'Sektör tipi nedir ?'   -- About
+           ,4    -- DefaultTypeId /* DefaultInt seçildi */ 
+           ,null -- DefaultBool  
+           ,null -- DefaultNumeric
+           ,null -- DefaultText
+           ,@SectorTypeId  -- DefaultInt   : 201 - UstadMtsk, 202 - UstadIsmak, 203 - UstadSrc
+           )
+end -- if
+
+
+Set @grupNo = 1000 
+Set @settingNo = 101
+
+if ( select COUNT(Id) as adet from Settings
+     Where FirmId = @FirmId
+     and GroupNoTypeId = @grupNo
+     and SettingNo = @settingNo
+     ) = 0
+begin
+
+     INSERT INTO [dbo].[Settings]
+           ([IsActive], [SettingTypeId], [FirmId], [PcName], [NetworkMacAddress], [UserId], [GroupNoTypeId], [SettingNo], [SettingId], [About], [DefaultTypeId], [DefaultBool], [DefaultNumeric], [DefaultText], [DefaultInt])
+     VALUES
+           (1    --IsActive
+           ,1    --SettingTypeId
+           ,@FirmId
+           ,null -- PcName
+           ,null -- NetworkMacAddress
+           ,null -- UserId
+           ,@grupNo     -- GroupNoTypeId
+           ,@settingNo  -- SettingNo   
+           ,@grupNo + @settingNo  -- SettingId
+           ,'İşlem paneli menüsü otomatik açılsın'   -- About
+           ,1    -- DefaultTypeId /* DefaultBool seçildi */ 
+           ,1    -- DefaultBool  /*  0 : Gösterme,  1 : Göster  */
+           ,null -- DefaultNumeric
+           ,null -- DefaultText
+           ,null -- DefaultInt   
+           )
+end -- if
+
+
+-- ----------------------------------------
+-- 1130 : UygulamaliSinav
+-- ----------------------------------------
+
+Set @grupNo = 1130 
+Set @settingNo = 101
+
+if ( select COUNT(Id) as adet from Settings
+     Where FirmId = @FirmId
+     and GroupNoTypeId = @grupNo
+     and SettingNo = @settingNo
+     ) = 0
+begin
+
+     INSERT INTO [dbo].[Settings]
+           ([IsActive], [SettingTypeId], [FirmId], [PcName], [NetworkMacAddress], [UserId], [GroupNoTypeId], [SettingNo], [SettingId], [About], [DefaultTypeId], [DefaultBool], [DefaultNumeric], [DefaultText], [DefaultInt])
+     VALUES
+           (1    --IsActive
+           ,1    --SettingTypeId
+           ,@FirmId
+           ,null -- PcName
+           ,null -- NetworkMacAddress
+           ,null -- UserId
+           ,@grupNo     -- GroupNoTypeId
+           ,@settingNo  -- SettingNo   
+           ,@grupNo + @settingNo  -- SettingId
+           ,'Uygulamalı sınav için ( Aday sınav için hazır mı ? ) sorusu devrede mi ?'   -- About
+           ,1    -- DefaultTypeId /* DefaultBool seçildi */ 
+           ,0    -- DefaultBool  /*  0 : Sorma,  1 : Sor  */
+           ,null -- DefaultNumeric
+           ,null -- DefaultText
+           ,null -- DefaultInt   
+           )
+end -- if
+
+
+-- ----------------------------------------
+-- Ön Muhasebe Grubu 
+-- ----------------------------------------
+
+Set @grupNo = 2010 
+Set @settingNo = 111
+
+if ( select COUNT(Id) as adet from Settings
+     Where FirmId = @FirmId
+     and GroupNoTypeId = @grupNo
+     and SettingNo = @settingNo
+     ) = 0
+begin
+
+     INSERT INTO [dbo].[Settings]
+           ([IsActive], [SettingTypeId], [FirmId], [PcName], [NetworkMacAddress], [UserId], [GroupNoTypeId], [SettingNo], [SettingId], [About], [DefaultTypeId], [DefaultBool], [DefaultNumeric], [DefaultText], [DefaultInt])
+     VALUES
+           (1    --IsActive
+           ,1    --SettingTypeId
+           ,@FirmId
+           ,null -- PcName
+           ,null -- NetworkMacAddress
+           ,null -- UserId
+           ,@grupNo     -- GroupNoTypeId  : OnMuhasebe
+           ,@settingNo  -- SettingNo   
+           ,@grupNo + @settingNo  -- SettingId
+           ,'e-sınav borçlandırması için (Planlanan tarih)ini (Vade tarihi) yap.'   -- About
+           ,1    -- DefaultTypeId /* DefaultBool seçildi */ 
+           ,1    -- DefaultBool   /*  0 : hayır,  1 : evet  */
+           ,null -- DefaultNumeric
+           ,null -- DefaultText
+           ,null -- DefaultInt   
+           )
+end -- if
+
+Set @grupNo = 2010 
+Set @settingNo = 112
+
+if ( select COUNT(Id) as adet from Settings
+     Where FirmId = @FirmId
+     and GroupNoTypeId = @grupNo
+     and SettingNo = @settingNo
+     ) = 0
+begin
+
+     INSERT INTO [dbo].[Settings]
+           ([IsActive], [SettingTypeId], [FirmId], [PcName], [NetworkMacAddress], [UserId], [GroupNoTypeId], [SettingNo], [SettingId], [About], [DefaultTypeId], [DefaultBool], [DefaultNumeric], [DefaultText], [DefaultInt])
+     VALUES
+           (1    --IsActive
+           ,1    --SettingTypeId
+           ,@FirmId
+           ,null -- PcName
+           ,null -- NetworkMacAddress
+           ,null -- UserId
+           ,@grupNo    -- GroupNoTypeId  : OnMuhasebe
+           ,@settingNo -- SettingNo   
+           ,@grupNo + @settingNo  -- SettingId
+           ,'e-sınav borçlandırması için başarısız olduğu sınavın tarihini (Vade tarihi) yap.'   -- About
+           ,1    -- DefaultTypeId /* DefaultBool seçildi */ 
+           ,0    -- DefaultBool   /*  0 : hayır,  1 : evet  */
+           ,null -- DefaultNumeric
+           ,null -- DefaultText
+           ,null -- DefaultInt   
+           )
+end -- if
+
+Set @grupNo = 2010 
+Set @settingNo = 113
+
+if ( select COUNT(Id) as adet from Settings
+     Where FirmId = @FirmId
+     and GroupNoTypeId = @grupNo
+     and SettingNo = @settingNo
+     ) = 0
+begin
+
+     INSERT INTO [dbo].[Settings]
+           ([IsActive], [SettingTypeId], [FirmId], [PcName], [NetworkMacAddress], [UserId], [GroupNoTypeId], [SettingNo], [SettingId], [About], [DefaultTypeId], [DefaultBool], [DefaultNumeric], [DefaultText], [DefaultInt])
+     VALUES
+           (1    --IsActive
+           ,1    --SettingTypeId
+           ,@FirmId
+           ,null -- PcName
+           ,null -- NetworkMacAddress
+           ,null -- UserId
+           ,@grupNo    -- GroupNoTypeId  : OnMuhasebe
+           ,@settingNo -- SettingNo   
+           ,@grupNo + @settingNo  -- SettingId
+           ,'1. e-sınav için borçlandırma yapma.'   -- About
+           ,1    -- DefaultTypeId /* DefaultBool seçildi */ 
+           ,0    -- DefaultBool   /*  0 : hayır,  1 : evet  */
+           ,null -- DefaultNumeric
+           ,null -- DefaultText
+           ,null -- DefaultInt   
+           )
+end -- if
+
+
+
+
+Set @grupNo = 2010 
+Set @settingNo = 114
+
+if ( select COUNT(Id) as adet from Settings
+     Where FirmId = @FirmId
+     and GroupNoTypeId = @grupNo
+     and SettingNo = @settingNo
+     ) = 0
+begin
+
+     INSERT INTO [dbo].[Settings]
+           ([IsActive], [SettingTypeId], [FirmId], [PcName], [NetworkMacAddress], [UserId], [GroupNoTypeId], [SettingNo], [SettingId], [About], [DefaultTypeId], [DefaultBool], [DefaultNumeric], [DefaultText], [DefaultInt])
+     VALUES
+           (1    --IsActive
+           ,1    --SettingTypeId
+           ,@FirmId
+           ,null -- PcName
+           ,null -- NetworkMacAddress
+           ,null -- UserId
+           ,@grupNo     -- GroupNoTypeId  : OnMuhasebe
+           ,@settingNo  -- SettingNo   
+           ,@grupNo + @settingNo  -- SettingId
+           ,'Uygulamalı sınav borçlandırması için (Planlanan tarih)ini (Vade tarihi) yap.'   -- About
+           ,1    -- DefaultTypeId /* DefaultBool seçildi */ 
+           ,1    -- DefaultBool   /*  1 : hayır,  0 : evet  */
+           ,null -- DefaultNumeric
+           ,null -- DefaultText
+           ,null -- DefaultInt   
+           )
+end -- if
+
+Set @grupNo = 2010 
+Set @settingNo = 115
+
+if ( select COUNT(Id) as adet from Settings
+     Where FirmId = @FirmId
+     and GroupNoTypeId = @grupNo
+     and SettingNo = @settingNo
+     ) = 0
+begin
+
+     INSERT INTO [dbo].[Settings]
+           ([IsActive], [SettingTypeId], [FirmId], [PcName], [NetworkMacAddress], [UserId], [GroupNoTypeId], [SettingNo], [SettingId], [About], [DefaultTypeId], [DefaultBool], [DefaultNumeric], [DefaultText], [DefaultInt])
+     VALUES
+           (1    --IsActive
+           ,1    --SettingTypeId
+           ,@FirmId
+           ,null -- PcName
+           ,null -- NetworkMacAddress
+           ,null -- UserId
+           ,@grupNo     -- GroupNoTypeId  : OnMuhasebe
+           ,@settingNo  -- SettingNo   
+           ,@grupNo + @settingNo  -- SettingId
+           ,'Uygulamalı sınav borçlandırması için başarısız olduğu sınav tarihini (Vade tarihi) yap.'   -- About
+           ,1    -- DefaultTypeId /* DefaultBool seçildi */ 
+           ,0    -- DefaultBool   /*  0 : hayır,  1 : evet  */
+           ,null -- DefaultNumeric
+           ,null -- DefaultText
+           ,null -- DefaultInt   
+           )
+end -- if
+
+Set @grupNo = 2010 
+Set @settingNo = 116
+
+if ( select COUNT(Id) as adet from Settings
+     Where FirmId = @FirmId
+     and GroupNoTypeId = @grupNo
+     and SettingNo = @settingNo
+     ) = 0
+begin
+
+     INSERT INTO [dbo].[Settings]
+           ([IsActive], [SettingTypeId], [FirmId], [PcName], [NetworkMacAddress], [UserId], [GroupNoTypeId], [SettingNo], [SettingId], [About], [DefaultTypeId], [DefaultBool], [DefaultNumeric], [DefaultText], [DefaultInt])
+     VALUES
+           (1    --IsActive
+           ,1    --SettingTypeId
+           ,@FirmId
+           ,null -- PcName
+           ,null -- NetworkMacAddress
+           ,null -- UserId
+           ,@grupNo    -- GroupNoTypeId  : OnMuhasebe
+           ,@settingNo -- SettingNo   
+           ,@grupNo + @settingNo  -- SettingId
+           ,'1. Uygulamalı sınav için borçlandırma yapma.'   -- About
+           ,1    -- DefaultTypeId /* DefaultBool seçildi */ 
+           ,0    -- DefaultBool   /*  0 : hayır,  1 : evet  */
+           ,null -- DefaultNumeric
+           ,null -- DefaultText
+           ,null -- DefaultInt   
+           )
+end -- if
+
+
+
+  Update s Set GroupNoTypeId = 1000
+  From [dbo].[Settings] as s
+  Where GroupNoTypeId is null
+  and   SettingNo = 101
+
+
+/*CreateDataEnd*/
+
+
+
+/*
+
+/* SettingTypeId : 1. firma bazlı, 2. bilgisayar bazlı, 3. kullanıcı bazlı  */
+/* GroupNoTypeId :  SettingGroupNo */ 
+/* SettingNo     : her setting row için bizim tarafımızdan belirlenen tekil bir ID  */
+
+/* GroupNoTypeId = SettingGroupNo  : 
 1000 Baslangic
 1010 Kayıt
 1020 Donemler
@@ -117,82 +477,13 @@ commit transaction
 
 3010 Sms
 3020 EMail
+3030 WhatsApp
+3040 Mobil
 
 
 */
 
 
-Declare @FirmId Int 
-Set @FirmId = :FIRM_ID
-Declare @SectorTypeId SmallInt
-Set @SectorTypeId = :SectorTypeId 
 
-
-INSERT INTO [dbo].[Settings]
-           ([IsActive], [SettingTypeId], [FirmId], [PcName], [NetworkMacAddress], [UserId], [SettingGroupNo], [SettingNo], [About], [DefaultTypeId], [DefaultBool], [DefaultNumeric], [DefaultText], [DefaultInt])
-     VALUES
-           (1    --IsActive
-           ,1    --SettingTypeId
-           ,@FirmId
-           ,null -- PcName
-           ,null -- NetworkMacAddress
-           ,null -- UserId
-           ,1000 -- SettingGroupNo
-           ,100  -- SettingNo   
-           ,'Sektör tipi nedir ?'   -- About
-           ,4    -- DefaultTypeId /* DefaultInt seçildi */ 
-           ,null -- DefaultBool  
-           ,null -- DefaultNumeric
-           ,null -- DefaultText
-           ,@SectorTypeId  -- DefaultInt   : 201 - UstadMtsk, 202 - UstadIsmak, 203 - UstadSrc
-           )
-
-
-INSERT INTO [dbo].[Settings]
-           ([IsActive], [SettingTypeId], [FirmId], [PcName], [NetworkMacAddress], [UserId], [SettingGroupNo], [SettingNo], [About], [DefaultTypeId], [DefaultBool], [DefaultNumeric], [DefaultText], [DefaultInt])
-     VALUES
-           (1    --IsActive
-           ,1    --SettingTypeId
-           ,@FirmId
-           ,null -- PcName
-           ,null -- NetworkMacAddress
-           ,null -- UserId
-           ,1000 -- SettingGroupNo
-           ,101  -- SettingNo   
-           ,'Başlangıçta yapılması gerekerenler menüsü'   -- About
-           ,1    -- DefaultTypeId /* DefaultBool seçildi */ 
-           ,1    -- DefaultBool  /*  0 : Gösterme,  1 : Göster  */
-           ,null -- DefaultNumeric
-           ,null -- DefaultText
-           ,null -- DefaultInt   
-           )
-
-
-INSERT INTO [dbo].[Settings]
-           ([IsActive], [SettingTypeId], [FirmId], [PcName], [NetworkMacAddress], [UserId], [SettingGroupNo], [SettingNo], [About], [DefaultTypeId], [DefaultBool], [DefaultNumeric], [DefaultText], [DefaultInt])
-     VALUES
-           (1    --IsActive
-           ,1    --SettingTypeId
-           ,@FirmId
-           ,null -- PcName
-           ,null -- NetworkMacAddress
-           ,null -- UserId
-           ,1130 -- SettingGroupNo
-           ,101  -- SettingNo   
-           ,'Uygulamalı sınav için -Aday sınav için hazır mı ?- sorusu devrede mi ?'   -- About
-           ,1    -- DefaultTypeId /* DefaultBool seçildi */ 
-           ,0    -- DefaultBool  /*  0 : Sorma,  1 : Sor  */
-           ,null -- DefaultNumeric
-           ,null -- DefaultText
-           ,null -- DefaultInt   
-           )
-
-
-  Update s Set SettingGroupNo = 1000
-  From [dbo].[Settings] as s
-  Where SettingGroupNo is null
-  and   SettingNo = 101
-
-/*CreateDataEnd*/
-
+*/
 

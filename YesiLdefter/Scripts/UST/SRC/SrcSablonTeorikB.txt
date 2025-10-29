@@ -1,0 +1,75 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table SrcSablonTeorikB
+ (
+   Id                      Int IDENTITY(1,1) not null, 
+   IsActive                Bit           not null, /* default : 1 = active, 0 = not active */  
+
+   SablonKodu              nVarChar(30)  null,     /* şabloları    */
+   SablonAdi               nVarChar(100) null,
+
+   SertifikaTipiId         SmallInt      null, /* detayı [Lkp].[SrcSertifikaTipi] tablosunda */
+   SertifikaSinifTipiId    SmallInt      null, /* İstenen SRC5'in detay sertifika tipi Id si */
+
+   constraint		pk_SrcSablonTeorikB primary key (Id)
+ )
+  
+ grant select, insert, update, delete on SrcSablonTeorikB to public
+
+commit transaction
+
+/*CreateTableEnd*/
+
+
+/*CreateLkpTable*/
+
+begin transaction
+
+-- ------------------------------------------------------- 
+-- GunTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'SrcSablonTeorikBGunTipi')
+drop table [Lkp].[SrcSablonTeorikBGunTipi]
+
+create table Lkp.SrcSablonTeorikBGunTipi
+(
+   Id          Int Unique Not Null,
+   GunTipi     nVarchar(30)   null
+   
+   constraint  pk_SrcSablonTeorikBGunTipi primary key (Id)
+)
+
+INSERT INTO Lkp.SrcSablonTeorikBGunTipi (Id, GunTipi)
+ VALUES 
+  ( 0, N'Tanımsız'),
+  ( 1, N'Manuel, 1 gün'),
+  ( 2, N'6 iş günü, 1 gün izin'),
+  ( 3, N'5 iş günü, 2 gün izin')
+
+
+-- ------------------------------------------------------- 
+-- SaatTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'SrcSablonTeorikBSaatTipi')
+drop table [Lkp].[SrcSablonTeorikBSaatTipi]
+
+create table Lkp.SrcSablonTeorikBSaatTipi
+(
+   Id          Int Unique Not Null,
+   SaatTipi    nVarchar(20)   null
+   
+   constraint  pk_SrcSablonTeorikBSaatTipi primary key (Id)
+)
+
+INSERT INTO Lkp.SrcSablonTeorikBSaatTipi (Id, SaatTipi)
+ VALUES 
+  ( 0, N'Tanımsız'),
+  ( 1, N'Tek saat'),
+  ( 2, N'7-8,.. çift saat'),
+  ( 3, N'8-9,.. çift saat')
+
+commit transaction
+
+/*CreateLkpTableEnd*/

@@ -1,0 +1,71 @@
+﻿
+/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_SrcTeorikDerslerListesi] (@SertifikaTipiId int)  
+AS BEGIN
+
+/*
+15001   SRC 1-2-3-4
+15002   SRC 1-2
+15003   SRC 3-4
+15004   SRC 2-4
+15005   SRC 1
+15006   SRC 2
+15007   SRC 3
+15008   SRC 4
+15021   SRC 5
+15031   SRC 6
+15041   ODY 1-2-3-4
+15042   ODY 1-2
+15043   ODY 3-4
+15044   ODY 1
+15045   ODY 2
+15046   ODY 3
+15047   ODY 4
+15061   ÜDY 1-2-3-4
+15062   ÜDY 1-2
+15063   ÜDY 3-4
+15064   ÜDY 1
+15065   ÜDY 2
+15066   ÜDY 3
+15067   ÜDY 4
+*/
+    -- declare @SertifikaTipiId smallint = 15005
+
+    declare @sql nvarchar(max)
+    declare @sqlAddField nvarchar(500)
+    declare @sqlWhere nvarchar(500)
+
+    Set @sqlAddField = ''
+    Set @sqlWhere = ''
+
+    if (@SertifikaTipiId = 15001) Set @sqlWhere = ' and GrupSaati1234 > 0 ' -- SRC 1-2-3-4
+    if (@SertifikaTipiId = 15002) Set @sqlWhere = ' and GrupSaati12 > 0 ' -- SRC 1-2
+    if (@SertifikaTipiId = 15003) Set @sqlWhere = ' and GrupSaati34 > 0 ' -- SRC 3-4
+    if (@SertifikaTipiId = 15004) Set @sqlWhere = ' and GrupSaati24 > 0 ' -- SRC 2-4
+    if (@SertifikaTipiId = 15005) Set @sqlWhere = ' and DersSaati1 > 0  ' -- SRC 1
+    if (@SertifikaTipiId = 15006) Set @sqlWhere = ' and DersSaati2 > 0  ' -- SRC 2
+    if (@SertifikaTipiId = 15007) Set @sqlWhere = ' and DersSaati3 > 0  ' -- SRC 3
+    if (@SertifikaTipiId = 15008) Set @sqlWhere = ' and DersSaati4 > 0  ' -- SRC 4
+
+    if (@SertifikaTipiId = 15001) Set @sqlAddField = ' , sd.GrupSaati1234 as Lkp_DersSayisi ' -- SRC 1-2-3-4
+    if (@SertifikaTipiId = 15002) Set @sqlAddField = ' , sd.GrupSaati12 as Lkp_DersSayisi ' -- SRC 1-2
+    if (@SertifikaTipiId = 15003) Set @sqlAddField = ' , sd.GrupSaati34 as Lkp_DersSayisi ' -- SRC 3-4
+    if (@SertifikaTipiId = 15004) Set @sqlAddField = ' , sd.GrupSaati24 as Lkp_DersSayisi ' -- SRC 2-4
+    if (@SertifikaTipiId = 15005) Set @sqlAddField = ' , sd.DersSaati1 as Lkp_DersSayisi  ' -- SRC 1
+    if (@SertifikaTipiId = 15006) Set @sqlAddField = ' , sd.DersSaati2 as Lkp_DersSayisi  ' -- SRC 2
+    if (@SertifikaTipiId = 15007) Set @sqlAddField = ' , sd.DersSaati3 as Lkp_DersSayisi  ' -- SRC 3
+    if (@SertifikaTipiId = 15008) Set @sqlAddField = ' , sd.DersSaati4 as Lkp_DersSayisi  ' -- SRC 4
+
+    Set @sql = ' select sd.* '
+      + @sqlAddField
+      + ' from Lkp.SrcDersler as sd Where 0 = 0 '
+      + @sqlWhere
+
+    --print @sql
+    EXEC sp_executesql @sql
+
+
+END -- procedure
+
+/*CreateProcedureEnd*/

@@ -327,6 +327,10 @@ namespace YesiLdefter
                         t.SYS_Ilce_Read();
                         // Frmanın Il ve Ilçe adı atanıyor
                         t.preparing_FirmILAdi_IlceAdi();
+
+                        t.WaitFormOpen(v.mainForm, "Takvim kontrolü yapılıyor...");
+                        t.CrsTakvimiAyarla();
+
                         t.WaitFormOpen(v.mainForm, "......");
                     }
                 }

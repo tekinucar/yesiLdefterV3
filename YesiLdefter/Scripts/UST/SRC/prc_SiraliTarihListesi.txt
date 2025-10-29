@@ -1,0 +1,47 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_SiraliTarihListesi] (@BaslangicTarihi DATE, @GunSayisi int, @HaftaSonuFiltresi int)  
+AS BEGIN 
+
+    SET NOCOUNT ON;
+    SET LANGUAGE Turkish;
+
+    if (@BaslangicTarihi is null) Set @BaslangicTarihi = getdate()
+    if (@GunSayisi = 0) Set @GunSayisi = 14
+
+    ;WITH DateList AS (
+        SELECT 
+              @BaslangicTarihi AS DateValue
+            , 1 AS DayIndex
+            , (DATEPART(WEEKDAY, @BaslangicTarihi)) as HaftaGunNo
+        UNION ALL
+        SELECT 
+             DATEADD(DAY, 1, DateValue)
+            ,DayIndex + 1
+            ,DATEPART(WEEKDAY, DATEADD(DAY, 1, DateValue)) as HaftaGunNo
+        FROM DateList
+        WHERE DayIndex < @GunSayisi
+    )
+    SELECT 
+        DayIndex as GunNo
+      , HaftaGunNo
+      , CAST(DayIndex AS VARCHAR) + '. gün' AS GunEtiketi
+      , CAST(ROW_NUMBER() OVER(ORDER BY DateValue) AS varchar) + '. iş günü'  AS IsGunuEtiketi
+      , FORMAT(DateValue, 'dd.MM.yyyy dddd') AS SiraliTarih
+    FROM DateList
+    Where 
+        (
+            @HaftaSonuFiltresi = 0 -- filtre yoksa
+        )
+    or
+        (
+            @HaftaSonuFiltresi = 1 AND HaftaGunNo < 6 -- Cumartesi, pazar değilse
+        )
+    or
+        (
+            @HaftaSonuFiltresi = 2 AND HaftaGunNo < 7 -- Pazar değilse
+        )
+  
+END; -- procedure
+
+/*CreateProcedureEnd*/

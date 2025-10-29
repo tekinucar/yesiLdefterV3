@@ -6,8 +6,8 @@ begin transaction
  (
 
    ULAS                Int IDENTITY(1,1) not null,  
-   BANKANO             varchar(10)  null,
-   BANKAADI            varchar(20)  null,
+   BANKANO             varchar(30)  null,
+   BANKAADI            varchar(30)  null,
 
    KasaId              Int          null,
    BankaHesapId        Int          null,
@@ -27,3 +27,49 @@ commit transaction
 
 
 
+/*CreateTrigger*/
+
+CREATE TRIGGER [dbo].[trg_TempTabimBankalar] on [dbo].[TempTabimBankalar] 
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    declare cursor_ cursor local for select ULAS from Inserted
+    declare @curId bigint
+        
+    OPEN cursor_
+    FETCH NEXT FROM cursor_ INTO @curId
+
+    declare @yBANKANO varchar(100) = null
+    declare @yBANKAADI varchar(100) = null
+
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+      Select 
+          @yBANKANO = isnull(ins.BANKANO,'?')
+        , @yBANKAADI = isnull(ins.BANKAADI,'?')
+      from Inserted ins
+      where ins.ULAS = @curId
+
+      if (@yBANKANO = '?') or (@yBANKAADI = '?')
+      begin
+         if (@yBANKANO = '?') set @yBANKANO = '' 
+         if (@yBANKAADI = '?') set @yBANKAADI = '' 
+
+         Update dbo.TempTabimBankalar set
+             BANKANO = @yBANKANO
+           , BANKAADI = @yBANKAADI
+         Where ULAS = @curId
+      end
+
+      FETCH NEXT FROM cursor_ INTO @curId
+    END
+
+    CLOSE cursor_
+    DEALLOCATE cursor_
+
+END
+
+ALTER TABLE dbo.TempTabimBankalar ENABLE TRIGGER [trg_TempTabimBankalar]
+
+/*CreateTriggerEnd*/

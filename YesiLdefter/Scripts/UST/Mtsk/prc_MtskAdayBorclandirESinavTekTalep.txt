@@ -4,22 +4,48 @@ CREATE PROCEDURE [dbo].[prc_MtskAdayBorclandirESinavTekTalep] (@FirmId int, @Tal
 AS BEGIN  
 
   --declare @FirmId Int  = 11
+
+  declare @settings1SinavIcinBorclandirma bit = 0
+  set @settings1SinavIcinBorclandirma = dbo.fnc_getSettingsBool(@FirmId, 2010, 113)
+  if (@settings1SinavIcinBorclandirma = 1)
+  begin
+      declare @girecegiSinavNo int = 0
+      Select @girecegiSinavNo = isnull(eSinavNo,0)
+      From dbo.MtskAdayTakip as takip
+      Where takip.FirmId = @FirmId
+      and   takip.TalepId = @TalepId
+
+     -- Birinci sınava giriyorsa atama yapma 
+     if (@girecegiSinavNo <= 1) return;
+  end
+
+  declare @settingsPlanTarihiniKullan bit = 0
+  declare @settingsSonSinavTarihiniKullan bit = 0
+
+  set @settingsPlanTarihiniKullan = dbo.fnc_getSettingsBool(@FirmId, 2010, 111);
+  set @settingsSonSinavTarihiniKullan = dbo.fnc_getSettingsBool(@FirmId, 2010, 112);
+
   declare @BugunDonemTipiId int = 0
   declare @BorclandirmaUcreti numeric(22,5)
+  declare @ReelBorclandirmaUcreti numeric(22,5)
   declare @UcretTipiId Int  = 21111
 
-   if (MONTH(getdate()) < 10)
-       set @BugunDonemTipiId = convert(int, convert(varchar(5), YEAR(getdate())) + '0' + convert(varchar(3), MONTH(getdate())))
-  else set @BugunDonemTipiId = convert(int, convert(varchar(5), YEAR(getdate())) + convert(varchar(3), MONTH(getdate())))
+  set @BugunDonemTipiId = dbo.fnc_getDonemTipiId('BUGUN',null);
   
   -- e-Sınav ücreti
-  Select Top 1  @BorclandirmaUcreti = ucret.[ESinavUcreti]
+  Select Top 1  
+      @BorclandirmaUcreti = isnull(ucret.[ESinavUcreti],0)
+    , @ReelBorclandirmaUcreti = isnull(ucret.[ReelESinavUcreti],0)
   From [dbo].[MtskUcretSinav] as ucret,
        [dbo].[GecerlilikTarihi] as tarih
   Where ucret.FirmId = @FirmId
   and   ucret.IsActive = 1
   and   ucret.GecerlilikTarihiId = dbo.fnc_getGecerlilikTarihiId(@FirmId, 21103, getdate())
   
+  -- Reel ücret varsa onu uygulasın
+  if (@ReelBorclandirmaUcreti > 0)
+      Set @BorclandirmaUcreti = @ReelBorclandirmaUcreti
+
   Insert into [dbo].[OnmOdemePlani]
            ([OdmemePlaniGUID]
            ,[FirmId]
@@ -54,9 +80,14 @@ AS BEGIN
            ,talep.AdayId -- CariId
            ,3 -- TaksitTipiId : 3 = Tek Ödeme
            ,takip.eSinavNo -- TaksitNo -- Gireceği sınav no
-           ,(case 
-		       when isnull(takip.eSinavPlanTarihi,getdate()) > getdate() then takip.eSinavPlanTarihi
-			   else getdate() end )  -- VadeTarihi == Bu kayıt oluşurken sınavın hangi tarihte olacağı bilinmiyor
+
+           ,(case
+               when @settingsSonSinavTarihiniKullan = 1 and takip.eSinavBasariTarihi is not null then takip.eSinavBasariTarihi
+               when @settingsPlanTarihiniKullan = 1 and takip.eSinavPlanTarihi is not null then takip.eSinavPlanTarihi
+               when @settingsSonSinavTarihiniKullan = 0 and -- hiçbiri seçilmemişse
+                    @settingsPlanTarihiniKullan = 0 and takip.eSinavPlanTarihi is not null then takip.eSinavPlanTarihi
+               else GETDATE() end ) -- VadeTarihi
+
            ,@BorclandirmaUcreti -- TaksitTutari
            ,2    -- OdemeTipiId   Nakit
            ,0    -- IsPaid

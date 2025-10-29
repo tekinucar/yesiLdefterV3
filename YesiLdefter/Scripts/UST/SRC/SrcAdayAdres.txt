@@ -1,0 +1,157 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table SrcAdayAdres
+ (
+   Id                    Int IDENTITY(1,1) not null, 
+   FirmId                Int       not null,
+   TalepId               Int       not null, 
+   AdayId                Int       not null, 
+   TcNo                  Varchar(11)   null,
+   DonemTipiId           Int           null,
+   VeriKaynakId          Int           null, /* Veri transferi edildiği tablodaki Id . Sorun olduğunda bilginin nereden geldiğine referans olsun */
+
+   SozluAdresBeyani      nVarchar(250) null,
+   AliciTcNo             Varchar(11)   null,
+   AliciAdi              nVarchar(50)  null,
+   AliciSoyadi           nVarchar(50)  null,
+
+   Il                    nVarchar(15)  null,
+   Ilce                  nVarchar(20)  null,
+   MahalleKoy            nVarchar(50)  null,
+   CaddeSokak            nVarchar(50)  null,
+   DisKapiNo             nVarchar(100) null,
+   IcKapiNo              nVarchar(20)  null,
+   AdresKodu             varchar(20)   null,
+   AcikAdresMERNIS       nVarchar(250) null,
+
+   IlKodu                varchar(3)    null,
+   IlceKodu              varchar(5)    null,
+   MahalleKoyKodu        varchar(10)   null,
+   CaddeSokakKodu        varchar(10)   null,
+   DisKapiNoKodu         varchar(10)   null,
+   IcKapiNoKodu          varchar(25)   null,
+   
+   /* MahalleKoy(50) + CaddeSokak(50) + DisKapi(30) + IcKapi(20) + Ilce(20) + Il(15) + Ulke(30) = 215 > 200  */
+   TamAdres              nVarchar(200) null,   
+   /* MahalleKoy(50) + CaddeSokak(50) + DisKapi(30) + IcKapi(20) = 150 > 120  */
+   YarimAdres            nVarchar(120) null, 
+   AdresIsUploaded       Bit           null,
+
+   constraint		pk_SrckAdayAdres primary key (Id)
+ )
+  
+ grant select, insert, update, delete on SrcAdayAdres to public
+
+  create index X_SrcAdayAdres01 on SrcAdayAdres (TalepId)
+  create index X_SrcAdayAdres02 on SrcAdayAdres (AdayId)
+  create index X_SrcAdayAdres03 on SrcAdayAdres (TcNo)
+  create index X_SrcAdayAdres04 on SrcAdayAdres (DonemTipiId)
+
+commit transaction
+
+/*CreateTableEnd*/
+
+/*CreateTrigger*/
+
+CREATE TRIGGER [dbo].[trg_SrcAdayAdres] on [dbo].[SrcAdayAdres]
+AFTER INSERT, UPDATE
+AS BEGIN
+
+   DECLARE adresCursor cursor local for select Id from Inserted
+    DECLARE @adresId bigint
+
+    OPEN adresCursor
+    FETCH NEXT FROM adresCursor INTO @adresId
+
+    -- Veri Transferi başladımı
+    declare @DbUpdatesIsActive Bit = 0
+    set @DbUpdatesIsActive = [dbo].[fnc_getIsDbUpdate] (13)
+
+    declare @eSozluAdresBeyani nVarchar(250) = null
+    declare @ySozluAdresBeyani nVarchar(250) = null
+    declare @eAdresKodu varchar(20) = null
+    declare @yAdresKodu varchar(20) = null
+    
+    declare @durum bit
+    declare @TalepId int 
+	declare @AdayId int
+	declare @VeriKaynakId int
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+
+        select 
+            @eSozluAdresBeyani = isnull(dlt.SozluAdresBeyani, '')
+           ,@eAdresKodu = isnull(dlt.AdresKodu, '') 
+    	from deleted dlt
+    	where dlt.Id = @adresId
+			   
+        select 
+            @TalepId = ins.TalepId
+           ,@ySozluAdresBeyani = isnull(ins.SozluAdresBeyani, '')
+           ,@yAdresKodu = isnull(ins.AdresKodu, '')
+           ,@AdayId = ins.AdayId
+		   ,@VeriKaynakId = ins.VeriKaynakId
+		from inserted ins
+    	where ins.Id = @adresId
+
+        if (@VeriKaynakId > 0 and (@TalepId = 0 or @AdayId = 0))
+        begin
+            Update dbo.SrcAdayAdres set
+                TalepId = t.Id  
+               ,AdayId  = t.AdayId 
+            From dbo.SrcAdayAdres as a,
+                 dbo.SrcAdayTalep as t
+            Where a.VeriKaynakId = t.VeriKaynakId				 
+            and   a.Id = @adresId
+
+			Select @TalepId = Id, @AdayId = AdayId 
+			From dbo.SrcAdayTalep 
+			Where VeriKaynakId = @VeriKaynakId
+        end
+		     	   	
+        if (@eSozluAdresBeyani <> @ySozluAdresBeyani) 
+        begin
+          if (@ySozluAdresBeyani <> '') set @durum = 1
+          if (@ySozluAdresBeyani = '') set @durum = 0
+
+
+          if (@DbUpdatesIsActive = 0)
+          begin
+              update dbo.SrcAdayTalep set
+                  AdresAlindi = @durum
+              Where Id = @TalepId
+          end
+        end
+
+        if (@eAdresKodu <> @yAdresKodu) 
+        begin
+          if (@yAdresKodu) <> '' set @durum = 1
+          if (@yAdresKodu) = '' set @durum = 0
+
+          update dbo.SrcAdayBelgeler set
+            AdresKodlandi = @durum
+          Where TalepId = @TalepId
+        end
+
+        -- Data transferi oldu fakat daha önce bu talep için boş kayıt oluşturulmuş ise onu sil
+        if (@VeriKaynakId > 0)
+        begin
+		    Delete From dbo.SrcAdayAdres
+            Where TalepId = @TalepId
+            and   isnull(VeriKaynakId,0) = 0
+        end
+
+        FETCH NEXT FROM adresCursor INTO @adresId
+    END -- While
+
+    CLOSE adresCursor
+    DEALLOCATE adresCursor   
+
+END -- create trigger
+
+ALTER TABLE dbo.SrcAdayAdres ENABLE TRIGGER trg_MtskAdayAdres
+
+/*CreateTriggerEnd*/

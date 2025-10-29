@@ -6,7 +6,29 @@ AS BEGIN
 
   --declare @FirmId Int  = 11
   --declare @UcretTipiId Int  = 21112  --- u-sınav 
-  --declare @UcretTipiId Int  = 21113  --- u-sınav + başarasız ücreti
+  --declare @UcretTipiId Int  = 21113  --- başarasız ücreti
+  --declare @UcretTipiId Int  = 21114  --- u-sınav + başarasız ücreti
+
+  declare @settings1SinavIcinBorclandirma bit = 0
+  set @settings1SinavIcinBorclandirma = dbo.fnc_getSettingsBool(@FirmId, 2010, 116)
+  if (@settings1SinavIcinBorclandirma = 1)
+  begin
+      declare @girecegiSinavNo int = 0
+      Select @girecegiSinavNo = isnull(uSinavNo,0)
+      From dbo.MtskAdayTakip as takip
+      Where takip.FirmId = @FirmId
+      and   takip.TalepId = @TalepId
+
+     -- Birinci sınava giriyorsa atama yapma 
+     if (@girecegiSinavNo <= 1) return;
+  end
+
+  declare @settingsPlanTarihiniKullan bit = 0
+  declare @settingsSonSinavTarihiniKullan bit = 0
+
+  set @settingsPlanTarihiniKullan = dbo.fnc_getSettingsBool(@FirmId, 2010, 114);
+  set @settingsSonSinavTarihiniKullan = dbo.fnc_getSettingsBool(@FirmId, 2010, 115);
+
   declare @BugunDonemTipiId int = 0
   declare @UygSinavUcreti numeric(22,5)
   declare @Id int = dbo.fnc_getGecerlilikTarihiId(@FirmId, 21104, getdate())
@@ -20,7 +42,7 @@ AS BEGIN
   Where ucret.FirmId = @FirmId
   and   ucret.IsActive = 1
   and   ucret.GecerlilikTarihiId = dbo.fnc_getGecerlilikTarihiId(@FirmId, 21103, getdate())
-
+  
   Insert into [dbo].[OnmOdemePlani]
            ([OdmemePlaniGUID]
            ,[FirmId]
@@ -44,6 +66,7 @@ AS BEGIN
            ,[SourceTypeId]
            ,[SourceId]
            ,[VeriKaynakId])
+           
   Select 
             NEWID()
            ,@FirmId
@@ -55,11 +78,14 @@ AS BEGIN
            ,talep.AdayId -- CariId
            ,3 -- TaksitTipiId : 3 = Tek Ödeme
            ,takip.uSinavNo -- TaksitNo
-
-           ,(case 
-		       when isnull(takip.uSinavPlanTarihi,getdate()) > getdate() then takip.uSinavPlanTarihi
-			   else getdate() end )  -- VadeTarihi == Bu kayıt oluşurken sınavın hangi tarihte olacağı bilinmiyor
-
+           
+           ,(case
+               when @settingsSonSinavTarihiniKullan = 1 and takip.uSinavBasariTarihi is not null then takip.uSinavBasariTarihi
+               when @settingsPlanTarihiniKullan = 1 and takip.uSinavPlanTarihi is not null then takip.uSinavPlanTarihi
+               when @settingsSonSinavTarihiniKullan = 0 and -- hiçbiri seçilmemişse
+                    @settingsPlanTarihiniKullan = 0 and takip.uSinavPlanTarihi is not null then takip.uSinavPlanTarihi
+               else GETDATE() end ) -- VadeTarihi
+               
            ,(case  
                -- sadece uyg sınav ücreti
                when @UcretTipiId = 21112 then @UygSinavUcreti 
@@ -67,8 +93,8 @@ AS BEGIN
                when @UcretTipiId = 21113 and isnull(uygUcreti.BirSaatBasarisizDersUcretiReel,0) > 0 then (isnull(uygUcreti.BirSaatBasarisizDersUcretiReel,0) * 2)  -- reel ücret x 2 saat
                when @UcretTipiId = 21113 and isnull(uygUcreti.BirSaatBasarisizDersUcretiReel,0) = 0 then (isnull(uygUcreti.BirSaatBasarisizDersUcreti,0) * 2) -- Mebbis ücreti x 2 saat
                -- başarısız aday + sinavÜcreti
-               when @UcretTipiId = 21116 and isnull(uygUcreti.BirSaatBasarisizDersUcretiReel,0) > 0 then (isnull(uygUcreti.BirSaatBasarisizDersUcretiReel,0) * 2) + @UygSinavUcreti  -- reel ücret x 2 saat
-               when @UcretTipiId = 21116 and isnull(uygUcreti.BirSaatBasarisizDersUcretiReel,0) = 0 then (isnull(uygUcreti.BirSaatBasarisizDersUcreti,0) * 2) + @UygSinavUcreti  -- Mebbis ücreti x 2 saat
+               when @UcretTipiId = 21114 and isnull(uygUcreti.BirSaatBasarisizDersUcretiReel,0) > 0 then (isnull(uygUcreti.BirSaatBasarisizDersUcretiReel,0) * 2) + @UygSinavUcreti  -- reel ücret x 2 saat
+               when @UcretTipiId = 21114 and isnull(uygUcreti.BirSaatBasarisizDersUcretiReel,0) = 0 then (isnull(uygUcreti.BirSaatBasarisizDersUcreti,0) * 2) + @UygSinavUcreti  -- Mebbis ücreti x 2 saat
                end )
 
            ,2    -- OdemeTipiId   Nakit
@@ -87,7 +113,7 @@ AS BEGIN
 	      and odeme.TalepId = takip.TalepId
 		  and odeme.TaksitNo = takip.uSinavNo
           --and odeme.UcretTipiId = @UcretTipiId
-          and ( odeme.UcretTipiId = 21112 or odeme.UcretTipiId = 21113 )
+          and ( odeme.UcretTipiId = 21112 or odeme.UcretTipiId = 21113 or odeme.UcretTipiId = 21114 )
 	   )
        left outer join dbo.MtskUcretUygulama as uygUcreti on ( 
               talep.MevcutSertifikaTipiId = uygUcreti.MevcutSertifikaTipiId

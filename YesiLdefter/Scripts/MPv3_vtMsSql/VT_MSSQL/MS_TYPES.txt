@@ -686,6 +686,7 @@ begin transaction
  insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1097, '', 'Ek Button 7');
  insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1101, '', 'Check Button 1'); --checkButton_ek1
  insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1111, '', 'DragDown Button 1'); --dragDownButton_ek1
+ insert into MS_TYPES values ( 1,  0, 'CLICK_EVENTS', 1121, '', 'Arama'); 
 
 
 
@@ -836,6 +837,7 @@ begin transaction
  insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',   97, '', 'Ek Button 7');
  insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',  101, '', 'Check Button 1'); --checkButton_ek1
  insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',  111, '', 'DragDown Button 1'); --dragDownButton_ek1
+ insert into MS_TYPES values ( 1,  0, 'NAVIGATOR',  121, '', 'Arama'); 
  
 
 --DELETE MS_TYPES WHERE TYPES_NAME = 'NAVIGATOR2'

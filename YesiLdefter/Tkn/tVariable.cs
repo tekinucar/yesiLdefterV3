@@ -842,7 +842,7 @@ namespace Tkn_Variable
         public static Color colorNew = System.Drawing.Color.Turquoise; //AppearanceFocusedColor;
         public static Color colorNavigator = System.Drawing.Color.PaleTurquoise; 
         public static Color colorDelete = System.Drawing.Color.LightPink;
-        public static Color colorOrder = System.Drawing.Color.LemonChiffon;
+        public static Color colorOrder = System.Drawing.Color.SkyBlue; //CornflowerBlue;//  LemonChiffon;
         public static Color colorExit = System.Drawing.Color.Gold; //color3
 
         public static Color AppearanceTextColor = Color.DarkGreen;  //MediumSeaGreen;

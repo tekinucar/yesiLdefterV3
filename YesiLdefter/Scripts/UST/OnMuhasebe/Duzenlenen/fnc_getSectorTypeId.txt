@@ -10,7 +10,7 @@ BEGIN
   Select @retValue = DefaultInt
   From [dbo].[Settings] as s
   Where FirmId = @FirmId
-  and   SettingGroupNo = 1000 --@settingGroupNo
+  and   GroupNoTypeId = 1000 --@settingGroupNo
   and   SettingNo = 100 --@settingNo
 
   -- SmallInt value dönüyor
