@@ -1,14 +1,17 @@
-﻿using DevExpress.XtraEditors;
+﻿using DevExpress.Xpo.DB.Helpers;
+using DevExpress.XtraEditors;
 using System;
 using System.Data;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Tkn_Events;
 using Tkn_Registry;
 using Tkn_Save;
 using Tkn_SQLs;
 using Tkn_ToolBox;
-using Tkn_Variable;
 using Tkn_UserFirms;
+using Tkn_UstadAPI;
+using Tkn_Variable;
 
 namespace YesiLdefter
 {
@@ -20,7 +23,8 @@ namespace YesiLdefter
         tSQLs Sqls = new tSQLs();
         tRegistry reg = new tRegistry();
         tUserFirms userFirms = new tUserFirms();
-
+        UstadApiClient apiClient = null; 
+        
         // UL = UserLogin
         DataSet ds_UL = null;
         DataNavigator dN_UL = null;
@@ -43,7 +47,7 @@ namespace YesiLdefter
         Control txt_Pass = null;
         Control btn_BHatirla = null;
         Control btn_SifremiUnuttum = null;
-        
+
         Control uk_user_mail = null;
         Control uk_old_user_pass = null;
         Control uk_new_user_pass = null;
@@ -58,13 +62,14 @@ namespace YesiLdefter
         string tSql = string.Empty;
         string TableIPCode = string.Empty;
 
-        string Login_TableIPCode = "UST/CRM/UstadUsers.Login_F01"; 
+        string Login_TableIPCode = "UST/CRM/UstadUsers.Login_F01";
         string NewPass_TableIPCode = "UST/CRM/UstadUsers.NewPassword_F01";
         string NewUser_TableIPCode = "UST/CRM/UstadUsers.NewUser_F01";
         string FirmList_TableIPCode = "UST/CRM/UstadFirmsUsers.KullanicininFirmaSecimi_L01";
-            //"UST/CRM/UstadFirms.UserFirmList_L01";
-        
+        //"UST/CRM/UstadFirms.UserFirmList_L01";
+
         string regPath = v.registryPath;//"Software\\Üstad\\YesiLdefter";
+        string apiBaseUrl = "http://localhost:5000"; // API base URL - can be configured
         #endregion
 
         public ms_User()
@@ -217,7 +222,7 @@ namespace YesiLdefter
             //
             #region
             cntrl = t.Find_Control(this, "simpleButton_ek1", FirmList_TableIPCode, controls);
-            
+
             if (cntrl != null)
             {
                 ((DevExpress.XtraEditors.SimpleButton)cntrl).Dock = DockStyle.Right;
@@ -230,6 +235,14 @@ namespace YesiLdefter
             // -------------------------------------------------------------------
             //
             GetUserRegistry();
+            try
+            {
+                apiClient = new UstadApiClient(apiBaseUrl);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"API client initialization failed: {ex.Message}");
+            }
 
             v.SP_UserLOGIN = false;
 
@@ -241,7 +254,14 @@ namespace YesiLdefter
 
         void btn_SistemeGiris_Ileri(object sender, EventArgs e)
         {
-            checkedInput();
+            if (apiClient == null)
+            {
+                MessageBox.Show("API bağlantısı kurulamadı. API servisinin çalıştığından emin olun.\n\n" +
+                    "API URL: " + apiBaseUrl, "API Bağlantı Hatası", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            checkedInputApi();
         }
 
         void cmb_EMail_EditValueChanged(object sender, EventArgs e)
@@ -253,10 +273,19 @@ namespace YesiLdefter
         {
             if (e.KeyCode == Keys.Return)
             {
-                checkedInput();
+                if (apiClient != null)
+                {
+                    checkedInputApi();
+                }
+                else
+                {
+                    MessageBox.Show("API bağlantısı kurulamadı. Lütfen API servisinin çalıştığından emin olun.",
+                        "API Bağlantı Hatası", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
 
+        [Obsolete("Use checkedInputApi() instead. This method contains database connection strings.", false)]
         void checkedInput()
         {
             if (t.IsNotNull(ds_UL) && (dN_UL != null))
@@ -272,7 +301,7 @@ namespace YesiLdefter
                     v.tUserRegister.UserLastLoginEMail = u_user_email;
                     v.tUserRegister.UserLastKey = u_user_key;
                     v.tUserRegister.UserRemember = ((DevExpress.XtraEditors.CheckButton)btn_BHatirla).Checked;
-                    
+
                     t.TableRemove(ds_Query);
 
                     // şimdi [ e-mail ile şifre ] databaseden kontrol ediliyor
@@ -298,7 +327,7 @@ namespace YesiLdefter
                         if (ds_Query.Tables[0].Rows.Count == 1)
                         {
                             //e-mail ve şifre girdikte sonra gelen sonucu değerlendir
-                            userFirms.UserSelectFirm(this, ds_Query, dN_Query, u_user_key, 
+                            userFirms.UserSelectFirm(this, ds_Query, dN_Query, u_user_key,
                                 ref dsUserFirmList, ref dNUserFirmList, FirmList_TableIPCode);
                         }
 
@@ -318,12 +347,135 @@ namespace YesiLdefter
             }
         }
 
+        async void checkedInputApi()
+        {
+            if (apiClient == null)
+            {
+                MessageBox.Show("API bağlantısı kurulamadı.",
+                    "Bağlantı Hatası", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if (t.IsNotNull(ds_UL))
+            {
+                if (dN_UL.Position > -1)
+                {
+                    try
+                    {
+                        u_user_email = ((DevExpress.XtraEditors.ComboBoxEdit)cmb_EMail).EditValue?.ToString()?.Trim() ?? "";
+                        u_user_key = ((DevExpress.XtraEditors.TextEdit)txt_Pass).EditValue?.ToString()?.Trim() ?? "";
+
+                        if (string.IsNullOrWhiteSpace(u_user_email))
+                        {
+                            MessageBox.Show("Lütfen e-posta adresinizi girin.", "Eksik Bilgi",
+                                MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            return;
+                        }
+
+                        if (string.IsNullOrWhiteSpace(u_user_key))
+                        {
+                            MessageBox.Show("Lütfen şifrenizi girin.", "Eksik Bilgi",
+                                MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            return;
+                        }
+
+
+                        // Register filling up again with latest info.
+                        v.tUserRegister.UserLastLoginEMail = u_user_email;
+                        v.tUserRegister.UserLastKey = u_user_key;
+                        v.tUserRegister.UserRemember = ((DevExpress.XtraEditors.CheckButton)btn_BHatirla).Checked;
+
+                        var loginResponse = await apiClient.LoginAsync(u_user_email, u_user_key);
+
+                        if (loginResponse != null && !string.IsNullOrEmpty(loginResponse.Token))
+                        {
+                            v.tUser.UserId = loginResponse.OperatorId;
+                            v.tUser.UserGUID = loginResponse.UserGUID;
+                            v.tUser.FullName = loginResponse.FullName;
+                            v.tUser.UserDbTypeId = loginResponse.DbTypeId;
+                            v.tUser.eMail = u_user_email;
+
+                            apiClient.SetAuthToken(loginResponse.Token);
+                            
+                            var userFirmsList = await apiClient.GetUserFirmsAsync(loginResponse.UserGUID);
+
+                            if (userFirmsList != null && userFirmsList.Count > 0)
+                            {
+                                if (userFirmsList.Count == 1)
+                                {
+                                    var firm = userFirmsList[0];
+                                    await SelectFirmFromApiAsync(firm);
+                                }
+                                else
+                                {
+                                    ShowFirmSelectionFromApi(userFirmsList, ref dsUserFirmList, ref dNUserFirmList);
+                                }
+                            }
+                            else
+                            {
+                                MessageBox.Show("Kullanıcıya atanmış firma bulunamadı.", "Firma Bulunamadı",
+                                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                v.SP_UserLOGIN = false;
+                            }
+                        }
+                        else
+                        {
+                            MessageBox.Show("Giriş başarısız. Lütfen bilgilerinizi kontrol edin.", "Giriş Hatası",
+                                MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            v.SP_UserLOGIN = false;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        string errorMsg = ex.Message;
+                        bool isAuthError = false;
+                        int? statusCode = null;
+                        
+                        if (ex.Data.Contains("StatusCode"))
+                        {
+                            statusCode = (int?)ex.Data["StatusCode"];
+                            isAuthError = statusCode == 401;
+                        }
+                        
+                        string apiErrorMsg = "";
+                        if (ex.Data.Contains("ErrorContent"))
+                        {
+                            apiErrorMsg = ex.Data["ErrorContent"]?.ToString() ?? "";
+                        }
+                        
+                        if (isAuthError || 
+                            errorMsg.Contains("401") || 
+                            errorMsg.Contains("Unauthorized") || 
+                            errorMsg.Contains("Şifre hatalı") ||
+                            errorMsg.Contains("Kullanıcı bulunamadı"))
+                        {
+                            checkedUserApi(u_user_email, "FIND");
+                        }
+                        else
+                        {
+                            string displayMsg = errorMsg;
+                            if (errorMsg.Contains("Şifre hatalı"))
+                            {
+                                displayMsg = "Giriş başarısız. Şifreniz hatalı olabilir.\n\n" +
+                                    "Şifrenizi unuttuysanız 'Şifremi Unuttum' butonunu kullanabilirsiniz.";
+                            }
+                            MessageBox.Show(displayMsg, "Giriş Hatası",
+                                MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            v.SP_UserLOGIN = false;
+                        }
+                    }
+                }
+            }
+        }
+
+        [Obsolete("Use API methods instead. This method contains database connection strings.", false)]
         void read_eMail(DataSet ds, string user_EMail)
         {
             tSql = Sqls.preparingUstadUsersSql(user_EMail, "", 0);
             t.SQL_Read_Execute(v.dBaseNo.UstadCrm, ds, ref tSql, "UstadUsers", "FindUser");
         }
 
+        [Obsolete("Use checkedUserApi() instead. This method contains database connection strings.", false)]
         void checkedUser(string user_Email, string work)
         {
             read_eMail(ds_Query, user_Email);
@@ -365,6 +517,194 @@ namespace YesiLdefter
             }
         }
 
+        async void checkedUserApi(string user_Email, string work)
+        {
+            if (apiClient == null)
+            {
+                MessageBox.Show("API bağlantısı kurulamadı. API servisinin çalıştığından emin olun.",
+                    "API Bağlantı Hatası", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            try
+            {
+                var userExists = await apiClient.CheckUserExistsAsync(user_Email);
+
+                if (!userExists.Exists)
+                {
+                    // User not found
+                    if (work == "FIND" || work == "SEND_EMAIL")
+                    {
+                        string soru = user_Email + "  böyle bir hesap bulunamadı. \r\n\r\n Yeni bir kullanıcı oluşturmak ister misiniz  ?";
+                        DialogResult cevap = t.mySoru(soru);
+                        if (DialogResult.Yes == cevap)
+                        {
+                            t.SelectPage(this, "BACKVIEW", "NEWUSER", -1);
+                        }
+                    }
+                    return;
+                }
+
+                if (work == "FIND")
+                {
+                    string message = "Şifrenizde bir sorun olabilir.\r\n\r\n" +
+                        "Yeniden deneyebilir veya yeni bir şifre alabilirsiniz.\r\n\r\n" +
+                        "Not: Eğer şifrenizi yeni değiştirdiyseniz veya sistem yükseltmesinden sonra giriş yapamıyorsanız, " +
+                        "'Şifremi Unuttum' butonunu kullanarak şifrenizi sıfırlayabilirsiniz.";
+                    MessageBox.Show(message, "Şifre Sorunu", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+
+                if (work == "SEND_EMAIL")
+                {
+                    if (userExists.IsActive)
+                    {
+                        try
+                        {
+                            await apiClient.RequestPasswordResetAsync(user_Email);
+                            MessageBox.Show("Şifre sıfırlama talebi gönderildi.\nLütfen e-postanızı kontrol edin.",
+                                "Şifre Sıfırlama", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show("Şifre sıfırlama talebi gönderilemedi:\n" + ex.Message,
+                                "Hata", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("Bu hesap aktif değil.", "Pasif Hesap",
+                            MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Kullanıcı kontrolü sırasında hata oluştu:\n{ex.Message}", "Hata",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        async Task SelectFirmFromApiAsync(UstadApiClient.FirmInfo firm)
+        {
+            try
+            {
+                var firmDetails = await apiClient.GetFirmDetailsAsync(firm.FirmGUID);
+
+                if (firmDetails?.Firm != null)
+                {
+                    bool firmInfoLoaded = userFirms.getFirmAboutWithUserFirmGUID(firm.FirmGUID);
+                    
+                    if (firmInfoLoaded)
+                    {
+                        t.setSelectFirm(v.tMainFirm);
+                        SetUserRegistryFirm(v.tUser.UserId, v.tMainFirm.FirmId);
+                        v.SP_UserLOGIN = true;
+                        this.Close();
+                    }
+                    else
+                    {
+                        MessageBox.Show("Firma bilgileri veritabanından alınamadı. Lütfen sistem yöneticinize başvurun.",
+                            "Firma Bilgisi Hatası", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        v.SP_UserLOGIN = false;
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Firma bilgileri alınamadı.", "Hata",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    v.SP_UserLOGIN = false;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Firma bilgileri alınırken hata oluştu:\n" + ex.Message, "Hata",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                v.SP_UserLOGIN = false;
+            }
+        }
+
+        private void ShowFirmSelectionFromApi(System.Collections.Generic.List<UstadApiClient.FirmInfo> firms, ref DataSet dsUserFirmList, ref DataNavigator dNUserFirmList)
+        {
+            try
+            {
+                t.Find_DataSet(this, ref dsUserFirmList, ref dNUserFirmList, FirmList_TableIPCode);
+
+                int i = 1;
+                foreach (var firm in firms)
+                {
+                    DataRow row = dsUserFirmList.Tables[0].NewRow();
+
+                    //var row = table.NewRow();
+                    row["Id"] = i++;
+                    row["IsActive"] = firm.IsActive ? 1 : 0;
+                    row["FirmId"] = firm.FirmId;
+                    row["FirmGUID"] = firm.FirmGUID ?? "";
+                    row["UserId"] = v.tUser.UserId;
+                    row["UserGUID"] = v.tUser.UserGUID ?? "";
+                    row["Lkp_FirmLongName"] = firm.FirmLongName ?? "";
+                    row["Lkp_UserFullName"] = firm.UserFullName ?? "";
+
+                    row["FirmShortName"] = firm.FirmShortName ?? "";
+                    row["FirmLongName"] = firm.FirmLongName ?? "";
+                    row["MenuCode"] = firm.MenuCode ?? "";
+                    row["SectorTypeId"] = firm.SectorTypeId ?? 0;
+                    row["DatabaseName"] = firm.DatabaseName ?? "";
+                    row["ServerNameIP"] = firm.ServerNameIP ?? "";
+                    row["DbLoginName"] = firm.DbLoginName ?? "";
+                    row["DbPass"] = firm.DbPass ?? "";
+                    row["DbTypeId"] = firm.DbTypeId ?? 0;
+                    row["DistrictTypeId"] = firm.DistrictTypeId ?? 0;
+                    row["CityTypeId"] = firm.CityTypeId ?? 0;
+                    row["MebbisCode"] = firm.MebbisCode ?? "";
+                    row["MebbisPass"] = firm.MebbisPass ?? "";
+
+                    dsUserFirmList.Tables[0].Rows.Add(row);
+                }
+
+                t.SelectPage(this, "BACKVIEW", "FIRMLIST", -1);
+
+                Application.DoEvents();
+
+                if (dsUserFirmList != null && dsUserFirmList.Tables.Count > 0 && dNUserFirmList != null)
+                {
+                    if (dsUserFirmList.Tables[0].Rows.Count > 0)
+                    {
+                        if (v.tUserRegister.UserLastFirmId > 0)
+                        {
+                            int pos = 0;
+                            foreach (System.Data.DataRow row in dsUserFirmList.Tables[0].Rows)
+                            {
+                                if (Convert.ToInt32(row["FirmId"]) == v.tUserRegister.UserLastFirmId)
+                                {
+                                    dNUserFirmList.Position = pos;
+                                    break;
+                                }
+                                pos++;
+                            }
+                        }
+                        else
+                        {
+                            dNUserFirmList.Position = 0;
+                        }
+                        // Nudge bindings
+                        Application.DoEvents();
+                    }
+                }
+
+                Control cntrl = t.Find_Control_View(this, FirmList_TableIPCode);
+                if (cntrl != null)
+                {
+                    t.tFormActiveControl(this, cntrl);
+                }
+                Application.DoEvents();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Firma listesi gösterilirken hata oluştu:\n" + ex.Message, "Hata",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
         void Send_EMail(string myeMail, string myUserFullName, string myKey)
         {
             //
@@ -384,29 +724,91 @@ namespace YesiLdefter
 
         void btn_FirmListSec_Click(object sender, EventArgs e)
         {
-            /// Buraya geldiysen 
-            /// kullanıcı için birden fazla firma seçeneği var demek ki
-            /// kullanıcı bu butona basar ve seçilen değerler alınır lets go ... main form
-            ///
             if (t.IsNotNull(dsUserFirmList))
-            {
+            { 
+                if (dNUserFirmList == null || dNUserFirmList.Position < 0 || dsUserFirmList.Tables.Count == 0 || dsUserFirmList.Tables[0].Rows.Count == 0)
+                {
+                    MessageBox.Show("Firma listesi henüz hazır değil.", "Uyarı",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
                 DataRow row = dsUserFirmList.Tables[0].Rows[dNUserFirmList.Position];
-                userFirms.readUstadFirmAbout(this, row);
+
+                if (apiClient != null && row.Table.Columns.Contains("FirmGUID"))
+                {
+                    // API-based flow
+                    readUstadFirmAboutFromApi(row);
+                }
+                else
+                {
+                    // SQL-based flow
+                    userFirms.readUstadFirmAbout(this, row);
+                }
             }
         }
-        
+
+        async void readUstadFirmAboutFromApi(DataRow row)
+        {
+            try
+            {
+                string firmGUID = row["FirmGUID"]?.ToString();
+                if (string.IsNullOrEmpty(firmGUID))
+                {
+                    MessageBox.Show("Firma bilgisi bulunamadı.", "Hata",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                var firmDetails = await apiClient.GetFirmDetailsAsync(firmGUID);
+
+                if (firmDetails?.Firm != null)
+                {
+                    //v.tMainFirm.FirmId = firmDetails.Firm.FirmId;
+                    //v.tMainFirm.FirmGuid = firmDetails.Firm.FirmGUID;
+                    //v.tMainFirm.FirmLongName = firmDetails.Firm.FirmLongName;
+
+                    userFirms.readUstadFirmAbout(this, row);
+
+                    //SetUserRegistryFirm(v.tUser.UserId, firmDetails.Firm.FirmId);
+
+                    //v.SP_UserLOGIN = true;
+
+                    //this.Close();
+                }
+                else
+                {
+                    MessageBox.Show("Firma bilgileri alınamadı.", "Hata",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Firma seçimi sırasında hata oluştu:\n" + ex.Message, "Hata",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        void SetUserRegistryFirm(int userId, int firmId)
+        {
+            reg.SetUstadRegistry("userFirm" + userId.ToString(), firmId.ToString());
+            reg.SetUstadRegistry("userLastFirm", firmId.ToString());
+            v.tUserRegister.UserLastFirmId = firmId;
+        }
+
         #endregion User giriş yaptı, firma seçti
 
+        [Obsolete("This method contains database connection strings.", false)]
         void SetUserIsActive(int Id)
         {
             tSql = Sqls.preparingUstadUsersSql("", "", Id);
             t.SQL_Read_Execute(v.dBaseNo.UstadCrm, ds_Query2, ref tSql, "UstadUsers", "SetUserIsActive");
         }
-                
+
         void GetUserRegistry()
         {
             userFirms.GetUserRegistry(regPath);
-            
+
             if (cmb_EMail != null)
             {
                 // e-mail listesi combo için okunuyor
@@ -435,28 +837,42 @@ namespace YesiLdefter
                 if (dN_NU.Position > -1)
                 {
                     string user_Email = ds_NU.Tables[0].Rows[0]["UserEMail"].ToString();
-                    read_eMail(ds_Query, user_Email);
 
-                    if (ds_Query.Tables.Count == 1)
+                    if (apiClient != null)
                     {
-                        if (ds_Query.Tables[0].Rows.Count == 1)
-                        {
-                            MessageBox.Show(user_Email + "  hesabı mevcut. .....");
-                            return;
-                        }
-                        else if (ds_Query.Tables[0].Rows.Count == 0)
-                        {
-                            tSave sv = new tSave();
-                            if (sv.tDataSave(this, NewUser_TableIPCode))
-                            {
-                                //t.ButtonEnabledAll(tForm, TableIPCode, true);
-                                MessageBox.Show(user_Email + " hesabınız kaydedilmiştir.\r\n\r\n Şifreniz bu hesaba GÖNDERİLECEK (Unutma bu kısım yazılmadı daha)");
-                                t.SelectPage(this, "BACKVIEW", "USERLOGIN", -1);
-                            }
-                        }
+                        btn_YeniKullanici_KaydetApi(user_Email);
                     }
-
+                    else
+                    {
+                        MessageBox.Show("API bağlantısı kurulamadı. Kullanıcı kaydı yapılamıyor.",
+                            "API Bağlantı Hatası", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
                 }
+            }
+        }
+
+        async void btn_YeniKullanici_KaydetApi(string user_Email)
+        {
+            try
+            {
+                var userExists = await apiClient.CheckUserExistsAsync(user_Email);
+
+                if (userExists.Exists)
+                {
+                    MessageBox.Show(user_Email + "  hesabı mevcut. Lütfen giriş sayfasına dönün.", "Kullanıcı Mevcut",
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+                else
+                {
+                    // Optionally redirect to login
+                    // t.SelectPage(this, "BACKVIEW", "USERLOGIN", -1);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Kullanıcı kontrolü sırasında hata oluştu:\n" + ex.Message, "Hata",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -464,7 +880,14 @@ namespace YesiLdefter
         {
             u_user_email = ((DevExpress.XtraEditors.ComboBoxEdit)cmb_EMail).EditValue.ToString();
 
-            checkedUser(u_user_email, "SEND_EMAIL");
+            if (apiClient == null)
+            {
+                MessageBox.Show("API bağlantısı kurulamadı. API servisinin çalıştığından emin olun.",
+                    "API Bağlantı Hatası", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            checkedUserApi(u_user_email, "SEND_EMAIL");
         }
 
         void btn_Yeni_SifreClick(object sender, EventArgs e)
@@ -478,71 +901,168 @@ namespace YesiLdefter
                     string user_new_pass = ((DevExpress.XtraEditors.TextEdit)uk_new_user_pass).EditValue.ToString();
                     string user_rpt_pass = ((DevExpress.XtraEditors.TextEdit)uk_rpt_user_pass).EditValue.ToString();
 
-                    // şimdi [ e-mail ile şifre ] databaseden kontrol ediliyor
-                    tSql = Sqls.preparingUstadUsersSql(user_email, user_old_pass, 0); 
-                    t.SQL_Read_Execute(v.dBaseNo.UstadCrm, ds_Query, ref tSql, "UstadUser", "UserLogin");
-
-                    if (t.IsNotNull(ds_Query))
+                    // Use secure API method if available, fallback to legacy SQL method
+                    if (apiClient != null)
                     {
-                        int userId = t.myInt32(ds_Query.Tables[0].Rows[0]["UserId"].ToString());
-                        bool IsActive = Convert.ToBoolean(ds_Query.Tables[0].Rows[0]["IsActive"].ToString());
-                        string userFullName = ds_Query.Tables[0].Rows[0]["UserFullName"].ToString();
-                        string db_user_key = ds_Query.Tables[0].Rows[0]["UserKey"].ToString();
+                        btn_Yeni_SifreClickApi(user_email, user_old_pass, user_new_pass, user_rpt_pass);
+                    }
+                    else
+                    {
+                        btn_Yeni_SifreClickLegacy(user_email, user_old_pass, user_new_pass, user_rpt_pass);
+                    }
+                }
+            }
+        }
 
-                        if (IsActive == false)
+        async void btn_Yeni_SifreClickApi(string user_email, string user_old_pass, string user_new_pass, string user_rpt_pass)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(user_email))
+                {
+                    MessageBox.Show("Lütfen e-posta adresinizi giriniz.", "Eksik Bilgi",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(user_old_pass))
+                {
+                    MessageBox.Show("Lütfen mevcut şifrenizi giriniz.", "Eksik Bilgi",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(user_new_pass))
+                {
+                    MessageBox.Show("Lütfen yeni şifrenizi giriniz. Boş geçemezsiniz!", "Eksik Bilgi",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                if (user_new_pass != user_rpt_pass)
+                {
+                    MessageBox.Show("DİKKAT : Yeni şifre ile tekrar yazdığınız şifre aynı değil...", "Şifre Uyumsuz",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                if (user_new_pass == user_old_pass)
+                {
+                    MessageBox.Show("Yeni şifre ile eski şifre aynı olamaz.", "Geçersiz Şifre",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                if (user_new_pass.Length < 4)
+                {
+                    MessageBox.Show("Lütfen en az 4 karakterlik bir şifre giriniz.", "Şifre Kısa",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                bool success = await apiClient.ChangePasswordAsync(user_email, user_old_pass, user_new_pass);
+
+                if (success)
+                {
+                    MessageBox.Show("Şifreniz başarıyla güncellenmiştir...", "Başarılı",
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                string errorMsg = ex.Message;
+                if (errorMsg.Contains("401") || errorMsg.Contains("Unauthorized") || errorMsg.Contains("incorrect"))
+                {
+                    MessageBox.Show("Mevcut şifreniz hatalı. Lütfen kontrol edin.", "Şifre Hatası",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                else if (errorMsg.Contains("not found") || errorMsg.Contains("inactive"))
+                {
+                    checkedUserApi(user_email, "FIND");
+                }
+                else
+                {
+                    MessageBox.Show("Şifre değiştirme sırasında hata oluştu:\n" + errorMsg, "Hata",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        void btn_Yeni_SifreClickLegacy(string user_email, string user_old_pass, string user_new_pass, string user_rpt_pass)
+        {
+            // şimdi [ e-mail ile şifre ] databaseden kontrol ediliyor
+            tSql = Sqls.preparingUstadUsersSql(user_email, user_old_pass, 0);
+            t.SQL_Read_Execute(v.dBaseNo.UstadCrm, ds_Query, ref tSql, "UstadUser", "UserLogin");
+
+            if (t.IsNotNull(ds_Query))
+            {
+                int userId = t.myInt32(ds_Query.Tables[0].Rows[0]["UserId"].ToString());
+                bool IsActive = Convert.ToBoolean(ds_Query.Tables[0].Rows[0]["IsActive"].ToString());
+                string userFullName = ds_Query.Tables[0].Rows[0]["UserFullName"].ToString();
+                string db_user_key = ds_Query.Tables[0].Rows[0]["UserKey"].ToString();
+
+                if (IsActive == false)
+                {
+                    MessageBox.Show("DİKKAT : Bu hesap AKTİF değildir.");
+                    return;
+                }
+
+                if (IsActive)
+                {
+                    if (db_user_key == user_old_pass)
+                    {
+                        if ((user_new_pass == user_rpt_pass) && // yeni şifre = tekrarlanan şifre
+                            (user_new_pass != "") &&            // yeni şifre boş değilse
+                            (user_new_pass != user_old_pass) && // yeni şifre ile eski şifre  aynı değilse
+                            (user_new_pass.Length >= 4)         // en az 4 karekter   
+                            )
                         {
-                            MessageBox.Show("DİKKAT : Bu hesap AKTİF değildir.");
-                            return;
+                            tSql = Sqls.preparingUstadUsersSql("", user_new_pass, userId);
+
+                            string myProp = string.Empty;
+                            t.MyProperties_Set(ref myProp, "DBaseNo", "3");
+                            t.MyProperties_Set(ref myProp, "TableName", "UstadUsers");
+                            t.MyProperties_Set(ref myProp, "SqlFirst", tSql);
+                            t.MyProperties_Set(ref myProp, "SqlSecond", "null");
+                            ds_Query2.Namespace = myProp;
+
+                            bool onay = t.Data_Read_Execute(this, ds_Query2, ref tSql, "NEW_USER_KEY", null);
+
+                            if (onay) MessageBox.Show("Şifreniz başarıyla güncellenmiştir...");
                         }
 
-                        if (IsActive)
-                        {
-                            if (db_user_key == user_old_pass)
-                            {
-                                if ((user_new_pass == user_rpt_pass) && // yeni şifre = tekrarlanan şifre
-                                    (user_new_pass != "") &&            // yeni şifre boş değilse
-                                    (user_new_pass != user_old_pass) && // yeni şifre ile eski şifre  aynı değilse
-                                    (user_new_pass.Length >= 4)         // en az 4 karekter   
-                                    )
-                                {
-                                    tSql = Sqls.preparingUstadUsersSql("", user_new_pass, userId);
+                        if (user_new_pass == "")
+                            MessageBox.Show("Lütfen bir şifre giriniz. Boş geçemezsiniz!");
 
-                                    string myProp = string.Empty;
-                                    t.MyProperties_Set(ref myProp, "DBaseNo", "3");
-                                    t.MyProperties_Set(ref myProp, "TableName", "UstadUsers");
-                                    t.MyProperties_Set(ref myProp, "SqlFirst", tSql);
-                                    t.MyProperties_Set(ref myProp, "SqlSecond", "null");
-                                    ds_Query2.Namespace = myProp;
+                        if (user_new_pass != user_rpt_pass)
+                            MessageBox.Show("DİKKAT : Yeni şifre ile tekrar yazdığınız şifre aynı değil...");
 
-                                    bool onay = t.Data_Read_Execute(this, ds_Query2, ref tSql, "NEW_USER_KEY", null);
-
-                                    if (onay) MessageBox.Show("Şifreniz başarıyla güncellenmiştir...");
-                                }
-
-                                if (user_new_pass == "")
-                                    MessageBox.Show("Lütfen bir şifre giriniz. Boş geçemezsiniz!");
-
-                                if (user_new_pass != user_rpt_pass)
-                                    MessageBox.Show("DİKKAT : Yeni şifre ile tekrar yazdığınız şifre aynı değil...");
-
-                                if (user_new_pass.Length < 4)
-                                    MessageBox.Show("Lütfen en az 4 karekterlik bir şifre giriniz.");
-                            }
-                        }
+                        if (user_new_pass.Length < 4)
+                            MessageBox.Show("Lütfen en az 4 karekterlik bir şifre giriniz.");
                     }
+                }
+            }
 
-                    if (t.IsNotNull(ds_Query) == false)
-                    {
-                        //böyle bir email varmı diye kontrol et
-                        checkedUser(user_email, "FIND");
-                    }
+            if (t.IsNotNull(ds_Query) == false)
+            {
+                //böyle bir email varmı diye kontrol et
+                if (apiClient != null)
+                {
+                    checkedUserApi(user_email, "FIND");
+                }
+                else
+                {
+                    MessageBox.Show("API bağlantısı kurulamadı. Kullanıcı kontrolü yapılamıyor.",
+                        "API Bağlantı Hatası", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
 
         private void ms_User_FormClosed(object sender, FormClosedEventArgs e)
         {
-            //
+            // FORM CLOSE API CLEANUP
+            apiClient?.Dispose();
+            apiClient = null;
         }
 
         private void ms_User_FormClosing(object sender, FormClosingEventArgs e)

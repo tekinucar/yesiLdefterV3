@@ -14,8 +14,6 @@ namespace Ustad.API
     {
         public static void Main(string[] args)
         {
-            myStarter();
-
             CreateHostBuilder(args).Build().Run();
         }
 
@@ -25,12 +23,6 @@ namespace Ustad.API
                 {
                     webBuilder.UseStartup<Startup>();
                 });
-    
-        public static void myStarter()
-        {
-            //string a = "aaaaa";
-        }
-    
     
     }
 }

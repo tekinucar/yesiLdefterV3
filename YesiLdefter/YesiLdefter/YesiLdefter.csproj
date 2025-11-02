@@ -507,6 +507,7 @@
     <Compile Include="Tkn\tTablesRead.cs" />
     <Compile Include="Tkn\tToolBox.cs" />
     <Compile Include="Tkn\tUserFirms.cs" />
+    <Compile Include="Tkn\UstadApiClient.cs" />
     <Compile Include="Tkn\tVariable.cs" />
     <Compile Include="Tkn\tVariableStokHL.cs" />
     <Compile Include="Tkn\tXMLRead.cs" />

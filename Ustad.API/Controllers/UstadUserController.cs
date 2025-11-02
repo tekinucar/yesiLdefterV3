@@ -34,8 +34,6 @@ namespace Ustad.API.Controllers
         public JsonResult Login(string userEMail, string userPass)
         {
             _queryAbout.Clear();
-            //_queryAbout.Configuration = _configuration;
-            //_queryAbout.ConnectionName = v.dbCrm;
             _queryAbout.SqlDataSource = _configuration.GetConnectionString(v.dbCrm);
             _queryAbout.QuerySql = Querys.UstadUserLoginSql(userEMail, userPass);
             /*            
@@ -50,7 +48,7 @@ namespace Ustad.API.Controllers
             _queryAbout.tParams.Add(_param2);
             */
             JsonResult result = t.RunQueryJson(_queryAbout);
-            
+
             return result;
         }
 
@@ -74,7 +72,7 @@ namespace Ustad.API.Controllers
             ";
 
             _queryAbout.Clear();
-            _queryAbout.SqlDataSource = _configuration.GetConnectionString(v.dbProject);
+            _queryAbout.SqlDataSource = _configuration.GetConnectionString(v.dbCrm); // Use working CRM database
             _queryAbout.QuerySql = query;
             JsonResult result = t.RunQueryJson(_queryAbout);
             return result;

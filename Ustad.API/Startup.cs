@@ -10,6 +10,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Serialization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Ustad.API.Classes;
 
 namespace Ustad.API
 {
@@ -26,7 +30,7 @@ namespace Ustad.API
         public void ConfigureServices(IServiceCollection services)
         {
             // Enable CORS
-            services.AddCors(c => 
+            services.AddCors(c =>
             {
                 c.AddPolicy("AllowOrigin", options => options.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
             });
@@ -37,6 +41,39 @@ namespace Ustad.API
                 .AddNewtonsoftJson(options => options.SerializerSettings.ContractResolver = new DefaultContractResolver());
 
             services.AddControllers();
+
+            // Register EmailService as singleton
+            services.AddSingleton<EmailService>();
+
+            // JWT Auth (for SignalR and protected endpoints)
+            var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY") ?? Configuration["Jwt:Key"] ?? "CHANGE_ME_DEV_KEY_32CHARS_MIN";
+            var issuer = Configuration["Jwt:Issuer"] ?? "UstadAuth";
+            var audience = Configuration["Jwt:Audience"] ?? "UstadClients";
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = issuer,
+                        ValidAudience = audience,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+                    };
+                    options.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = context =>
+                        {
+                            var accessToken = context.Request.Query["access_token"];
+                            if (!string.IsNullOrEmpty(accessToken) && context.HttpContext.Request.Path.StartsWithSegments("/messagehub"))
+                                context.Token = accessToken;
+                            return Task.CompletedTask;
+                        }
+                    };
+                });
+            services.AddAuthorization();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -51,7 +88,7 @@ namespace Ustad.API
             }
 
             app.UseRouting();
-
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

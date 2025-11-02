@@ -32,18 +32,18 @@ namespace Ustad.API.Variables
             BUGUN_AY = dt.Month;
             BUGUN_YIL = dt.Year;
 
-        /*
-        string yil = dt.Year.ToString();
-        string ay = dt.Month.ToString();
-        string gun = dt.Day.ToString();
-        string saat = dt.Hour.ToString();
-        string dakk = dt.Minute.ToString();
+            /*
+            string yil = dt.Year.ToString();
+            string ay = dt.Month.ToString();
+            string gun = dt.Day.ToString();
+            string saat = dt.Hour.ToString();
+            string dakk = dt.Minute.ToString();
 
-        if (ay.Length == 1) ay = "0" + ay;
-        if (gun.Length == 1) gun = "0" + gun;
-        if (saat.Length == 1) saat = "0" + saat;
-        if (dakk.Length == 1) dakk = "0" + dakk;
-        */
+            if (ay.Length == 1) ay = "0" + ay;
+            if (gun.Length == 1) gun = "0" + gun;
+            if (saat.Length == 1) saat = "0" + saat;
+            if (dakk.Length == 1) dakk = "0" + dakk;
+            */
 
         }
 
