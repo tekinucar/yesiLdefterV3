@@ -11,6 +11,8 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Security.Claims;
 using System.Text;
+using System.Linq;
+using System.Globalization;
 using System.Threading.Tasks;
 
 namespace Ustad.API.Controllers
@@ -28,22 +30,92 @@ namespace Ustad.API.Controllers
             _emailService = emailService;
         }
 
+        /// <summary>
+        /// Login request payload
+        /// </summary>
         public class LoginRequest
         {
+            /// <summary>
+            /// User email, TC number, or mobile number
+            /// </summary>
             public string UserName { get; set; }
+            /// <summary>
+            /// User password
+            /// </summary>
             public string Password { get; set; }
+            /// <summary>
+            /// Cloudflare Turnstile token for bot protection (optional in dev)
+            /// </summary>
             public string TurnstileToken { get; set; }
         }
 
+        /// <summary>
+        /// Login response containing access and refresh tokens
+        /// </summary>
         public class LoginResponse
         {
+            /// <summary>
+            /// JWT access token (short-lived)
+            /// </summary>
             public string Token { get; set; }
+            /// <summary>
+            /// JWT refresh token (long-lived)
+            /// </summary>
+            public string RefreshToken { get; set; }
+            /// <summary>
+            /// Access token expiration time in seconds
+            /// </summary>
+            public int AccessTokenExpiresInSeconds { get; set; }
+            /// <summary>
+            /// Refresh token expiration time in seconds
+            /// </summary>
+            public int RefreshTokenExpiresInSeconds { get; set; }
+            /// <summary>
+            /// User/Operator ID
+            /// </summary>
             public int OperatorId { get; set; }
+            /// <summary>
+            /// User GUID identifier
+            /// </summary>
             public string UserGUID { get; set; }
+            /// <summary>
+            /// User full name
+            /// </summary>
             public string FullName { get; set; }
+            /// <summary>
+            /// User role (Agent, Admin, etc.)
+            /// </summary>
             public string Role { get; set; }
+            /// <summary>
+            /// Firm ID (legacy, may be 0)
+            /// </summary>
             public int FirmId { get; set; }
+            /// <summary>
+            /// Database type identifier
+            /// </summary>
             public short DbTypeId { get; set; }
+        }
+
+        /// <summary>
+        /// Refresh token request payload
+        /// </summary>
+        public class RefreshTokenRequest
+        {
+            /// <summary>
+            /// Valid refresh token to exchange for new token pair
+            /// </summary>
+            public string RefreshToken { get; set; }
+        }
+
+        /// <summary>
+        /// Logout request payload
+        /// </summary>
+        public class LogoutRequest
+        {
+            /// <summary>
+            /// Refresh token to invalidate
+            /// </summary>
+            public string RefreshToken { get; set; }
         }
 
         public class RegisterRequest
@@ -62,14 +134,14 @@ namespace Ustad.API.Controllers
 
         private string BuildConnectionString()
         {
-            string host = Environment.GetEnvironmentVariable("DB_HOST") ?? _configuration["Db:Host"]; // e.g. 46.101.255.224
+            string host = Environment.GetEnvironmentVariable("DB_HOST") ?? _configuration["Db:Host"]; 
             string port = Environment.GetEnvironmentVariable("DB_PORT") ?? _configuration["Db:Port"] ?? "1433";
             string user = Environment.GetEnvironmentVariable("DB_USER") ?? _configuration["Db:User"];
             string pass = Environment.GetEnvironmentVariable("DB_PASS") ?? _configuration["Db:Pass"];
             string db   = Environment.GetEnvironmentVariable("DB_NAME") ?? _configuration["Db:Name"];
             return !string.IsNullOrWhiteSpace(host) && !string.IsNullOrWhiteSpace(user) && !string.IsNullOrWhiteSpace(db)
                 ? $"Data Source={host},{port}; Initial Catalog={db}; User ID={user}; Password={pass}; TrustServerCertificate=true; Encrypt=false; MultipleActiveResultSets=True"
-                : _configuration.GetConnectionString("BulutCrm"); // Use BulutCrm which has UstadUsers table
+                : _configuration.GetConnectionString("BulutCrm"); 
         }
 
         private async Task<bool> ValidateTurnstileAsync(string token)
@@ -94,21 +166,172 @@ namespace Ustad.API.Controllers
             catch { return false; }
         }
 
+        private string GetJwtKey()
+        {
+            return Environment.GetEnvironmentVariable("JWT_KEY") ?? _configuration["Jwt:Key"] ?? "CHANGE_ME_DEV_KEY_32CHARS_MIN";
+        }
+
+        private string GetJwtIssuer()
+        {
+            return _configuration["Jwt:Issuer"] ?? "UstadAuth";
+        }
+
+        private string GetJwtAudience()
+        {
+            return _configuration["Jwt:Audience"] ?? "UstadClients";
+        }
+
+        // NOTE(@Janberk) 8 hours default
+        private int GetAccessTokenExpiresMinutes()
+        {
+            if (int.TryParse(Environment.GetEnvironmentVariable("JWT_EXPIRES_MINUTES"), out var envValue) && envValue > 0)
+            {
+                return envValue;
+            }
+
+            if (int.TryParse(_configuration["Jwt:ExpiresMinutes"], out var cfgValue) && cfgValue > 0)
+            {
+                return cfgValue;
+            }
+
+            return 480; 
+        }
+
+        // NOTE(@Janberk) 14 days default
+        private int GetRefreshTokenExpiresMinutes()
+        {
+            if (int.TryParse(Environment.GetEnvironmentVariable("JWT_REFRESH_EXPIRES_MINUTES"), out var envValue) && envValue > 0)
+            {
+                return envValue;
+            }
+
+            if (int.TryParse(_configuration["Jwt:RefreshExpiresMinutes"], out var cfgValue) && cfgValue > 0)
+            {
+                return cfgValue;
+            }
+
+            return 60 * 24 * 14; 
+        }
+
+        private TokenValidationParameters GetTokenValidationParameters()
+        {
+            return new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(GetJwtKey())),
+                ValidateIssuer = true,
+                ValidIssuer = GetJwtIssuer(),
+                ValidateAudience = true,
+                ValidAudience = GetJwtAudience(),
+                RequireExpirationTime = true,
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.FromMinutes(1),
+                NameClaimType = ClaimTypes.Name,
+                RoleClaimType = ClaimTypes.Role
+            };
+        }
+
+        private List<Claim> BuildBaseClaims(int userId, string userGuid, string fullName, string role, string firmGuid, string userName, short dbTypeId)
+        {
+            var baseClaims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, userId.ToString(CultureInfo.InvariantCulture)),
+                new Claim("userGUID", userGuid ?? string.Empty),
+                new Claim(ClaimTypes.Name, fullName ?? string.Empty),
+                new Claim(ClaimTypes.Role, string.IsNullOrWhiteSpace(role) ? "Agent" : role),
+                new Claim("firm", firmGuid ?? string.Empty),
+                new Claim("uname", userName ?? string.Empty),
+                new Claim("dbTypeId", dbTypeId.ToString(CultureInfo.InvariantCulture))
+            };
+
+            return baseClaims;
+        }
+
+        private List<Claim> BuildBaseClaimsFromPrincipal(ClaimsPrincipal principal)
+        {
+            var userId = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0";
+            var userGuid = principal.FindFirst("userGUID")?.Value ?? string.Empty;
+            var fullName = principal.FindFirst(ClaimTypes.Name)?.Value ?? string.Empty;
+            var role = principal.FindFirst(ClaimTypes.Role)?.Value ?? "Agent";
+            var firmGuid = principal.FindFirst("firm")?.Value ?? string.Empty;
+            var userName = principal.FindFirst("uname")?.Value ?? string.Empty;
+            var dbTypeIdClaim = principal.FindFirst("dbTypeId")?.Value ?? "0";
+
+            short.TryParse(dbTypeIdClaim, out var dbTypeId);
+            int.TryParse(userId, out var userIdInt);
+
+            return BuildBaseClaims(userIdInt, userGuid, fullName, role, firmGuid, userName, dbTypeId);
+        }
+
+        private (string AccessToken, DateTime AccessExpiresAt, string RefreshToken, DateTime RefreshExpiresAt) GenerateTokenPair(IEnumerable<Claim> baseClaims)
+        {
+            var claimsList = baseClaims.ToList();
+            var handler = new JwtSecurityTokenHandler();
+            var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(GetJwtKey()));
+            var credentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
+            var issuer = GetJwtIssuer();
+            var audience = GetJwtAudience();
+            var accessMinutes = GetAccessTokenExpiresMinutes();
+            var refreshMinutes = GetRefreshTokenExpiresMinutes();
+            var now = DateTime.UtcNow;
+
+            var accessClaims = new List<Claim>(claimsList)
+            {
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim("token_type", "access")
+            };
+
+            var refreshClaims = new List<Claim>(claimsList)
+            {
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim("token_type", "refresh")
+            };
+
+            var accessExpiresAt = now.AddMinutes(accessMinutes);
+            var refreshExpiresAt = now.AddMinutes(refreshMinutes);
+
+            var accessToken = handler.WriteToken(new JwtSecurityToken(
+                issuer: issuer,
+                audience: audience,
+                claims: accessClaims,
+                notBefore: now,
+                expires: accessExpiresAt,
+                signingCredentials: credentials));
+
+            var refreshToken = handler.WriteToken(new JwtSecurityToken(
+                issuer: issuer,
+                audience: audience,
+                claims: refreshClaims,
+                notBefore: now,
+                expires: refreshExpiresAt,
+                signingCredentials: credentials));
+
+            return (accessToken, accessExpiresAt, refreshToken, refreshExpiresAt);
+        }
+
+        /// <summary>
+        /// Authenticates a user and returns access and refresh tokens
+        /// </summary>
+        /// <param name="request">Login credentials including username, password, and optional Turnstile token</param>
+        /// <returns>LoginResponse with access token, refresh token, and user information</returns>
+        /// <response code="200">Login successful, returns tokens and user info</response>
+        /// <response code="400">Invalid request (missing username or password)</response>
+        /// <response code="401">Authentication failed (invalid credentials or Turnstile validation failed)</response>
         [HttpPost("login")]
         [AllowAnonymous]
+        [ProducesResponseType(typeof(LoginResponse), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             if (string.IsNullOrWhiteSpace(request?.UserName) || string.IsNullOrWhiteSpace(request?.Password))
                 return BadRequest("Kullanıcı adı ve şifre zorunludur.");
 
-            // Optional Cloudflare Turnstile verification
             if (!await ValidateTurnstileAsync(request.TurnstileToken))
                 return Unauthorized("Turnstile doğrulaması başarısız.");
 
-            // Get DB connection string from environment variables if provided
             string connStr = BuildConnectionString();
 
-            // Find user in UstadUsers table with secure password extension
             int userId = 0; string fullName = ""; string role = "Agent"; string userKeyPlain = null;
             string firmGuid = ""; string userGuid = ""; bool isActive = false;
             byte[] hash = null; byte[] salt = null; int iterations = 0;
@@ -118,7 +341,6 @@ namespace Ustad.API.Controllers
             {
                 await con.OpenAsync();
                 
-                // Create secure password extension table if it doesn't exist
                 using (var createCmd = con.CreateCommand())
                 {
                     createCmd.CommandText = @"
@@ -137,7 +359,6 @@ END";
                     await createCmd.ExecuteNonQueryAsync();
                 }
 
-                // Query user with optional secure password
                 using (var cmd = con.CreateCommand())
                 {
                     cmd.CommandText = @"
@@ -172,14 +393,12 @@ WHERE (u.UserEMail = @u OR u.UserTcNo = @u OR u.UserMobileNo = @u)
                     isActive = r.GetInt32("IsActive") == 1;
                     if (!r.IsDBNull("DbTypeId"))
                     {
-                        // Column type may be INT (Int32) in DB; read as Int32 and convert safely
                         int dbTypeIdInt = r.GetInt32(r.GetOrdinal("DbTypeId"));
                         if (dbTypeIdInt > short.MaxValue) dbTypeId = short.MaxValue;
                         else if (dbTypeIdInt < short.MinValue) dbTypeId = short.MinValue;
                         else dbTypeId = (short)dbTypeIdInt;
                     }
                     
-                    // Check for secure password
                     if (!r.IsDBNull("PasswordHash"))
                     {
                         hash = (byte[])r["PasswordHash"];
@@ -189,31 +408,26 @@ WHERE (u.UserEMail = @u OR u.UserTcNo = @u OR u.UserMobileNo = @u)
                 }
             }
 
-            // Validate password - prefer secure hash, fallback to plain text if hash fails
             bool verified = false;
             bool usingSecurePassword = false;
             
             if (hash != null && salt != null && iterations > 0)
             {
-                // Use secure PBKDF2 verification
                 verified = Classes.SecurePasswordHasher.Verify(request.Password, hash, salt, iterations);
                 usingSecurePassword = true;
                 
-                // If hash verification fails, try plain text as fallback (for migration scenarios)
                 if (!verified && !string.IsNullOrEmpty(userKeyPlain))
                 {
                     verified = string.Equals(userKeyPlain, request.Password, StringComparison.Ordinal);
                     if (verified)
                     {
-                        // Password matched plain text - upgrade to secure hash
                         await UpgradeUserToSecurePassword(connStr, userId, request.Password);
-                        usingSecurePassword = true; // Will use secure password next time
+                        usingSecurePassword = true;
                     }
                 }
             }
             else if (!string.IsNullOrEmpty(userKeyPlain))
             {
-                // Fallback to legacy plain text verification
                 verified = string.Equals(userKeyPlain, request.Password, StringComparison.Ordinal);
                 usingSecurePassword = false;
             }
@@ -221,45 +435,25 @@ WHERE (u.UserEMail = @u OR u.UserTcNo = @u OR u.UserMobileNo = @u)
             if (!verified)
                 return Unauthorized("Şifre hatalı.");
 
-            // If user logged in with legacy password (and not already upgraded above), upgrade to secure password
             if (!usingSecurePassword && verified && (hash == null || salt == null || iterations == 0))
             {
                 await UpgradeUserToSecurePassword(connStr, userId, request.Password);
             }
 
-            var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY") ?? _configuration["Jwt:Key"] ?? "CHANGE_ME_DEV_KEY_32CHARS_MIN";
-            var issuer = _configuration["Jwt:Issuer"] ?? "UstadAuth";
-            var audience = _configuration["Jwt:Audience"] ?? "UstadClients";
-            var expiresMin = int.TryParse(_configuration["Jwt:ExpiresMinutes"], out var m) ? m : 480;
+            var baseClaims = BuildBaseClaims(userId, userGuid, fullName, role, firmGuid, request.UserName, dbTypeId);
+            var tokens = GenerateTokenPair(baseClaims);
 
-            var claims = new[]
-            {
-                new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
-                new Claim("userGUID", userGuid ?? string.Empty),
-                new Claim(ClaimTypes.Name, fullName ?? string.Empty),
-                new Claim(ClaimTypes.Role, role ?? "Agent"),
-                new Claim("firm", firmGuid ?? string.Empty),
-                new Claim("uname", request.UserName)
-            };
-
-            var creds = new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)), SecurityAlgorithms.HmacSha256);
-            var token = new JwtSecurityToken(
-                issuer: issuer,
-                audience: audience,
-                claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(expiresMin),
-                signingCredentials: creds
-            );
-
-            var jwt = new JwtSecurityTokenHandler().WriteToken(token);
             return Ok(new LoginResponse
             {
-                Token = jwt,
+                Token = tokens.AccessToken,
+                RefreshToken = tokens.RefreshToken,
+                AccessTokenExpiresInSeconds = GetAccessTokenExpiresMinutes() * 60,
+                RefreshTokenExpiresInSeconds = GetRefreshTokenExpiresMinutes() * 60,
                 OperatorId = userId,
                 UserGUID = userGuid,
                 FullName = fullName,
                 Role = role,
-                FirmId = 0, // UstadUsers doesn't have numeric FirmId, using FirmGUID instead
+                FirmId = 0,
                 DbTypeId = dbTypeId
             });
         }
@@ -275,7 +469,6 @@ WHERE (u.UserEMail = @u OR u.UserTcNo = @u OR u.UserMobileNo = @u)
                 if (payload != null && (string.Equals(payload.Role, "Admin", StringComparison.OrdinalIgnoreCase) || 
                                        string.Equals(payload.FullName, "Tekin Uçar", StringComparison.OrdinalIgnoreCase)))
                 {
-                    // Override role to Admin for specific users
                     payload.Role = "Admin";
                     return Ok(payload);
                 }
@@ -287,7 +480,6 @@ WHERE (u.UserEMail = @u OR u.UserTcNo = @u OR u.UserMobileNo = @u)
         [AllowAnonymous]
         public IActionResult Register([FromBody] RegisterRequest req)
         {
-            // Registration is disabled - users must be created via existing UstadUsers management
             return BadRequest("Kayıt işlemi devre dışı. Lütfen yöneticinize başvurun.");
         }
 
@@ -300,7 +492,6 @@ WHERE (u.UserEMail = @u OR u.UserTcNo = @u OR u.UserMobileNo = @u)
             using var con = new SqlConnection(BuildConnectionString());
             await con.OpenAsync();
             
-            // Create reset tokens table if it doesn't exist
             using (var createCmd = con.CreateCommand())
             {
                 createCmd.CommandText = @"
@@ -319,7 +510,6 @@ END";
                 await createCmd.ExecuteNonQueryAsync();
             }
             
-            // Get user info and create token
             string userEmail = null;
             string userName = null;
             string token = null;
@@ -338,7 +528,6 @@ WHERE (UserEMail=@u OR UserTcNo=@u OR UserMobileNo=@u) AND IsActive=1";
                 
                 if (!await r.ReadAsync())
                 {
-                    // Don't reveal if user exists or not (security best practice)
                     return Ok(new { message = "If the user exists, a password reset link has been sent to their email." });
                 }
                 
@@ -346,10 +535,8 @@ WHERE (UserEMail=@u OR UserTcNo=@u OR UserMobileNo=@u) AND IsActive=1";
                 userEmail = r.GetString("UserEMail");
                 userName = r.GetString("UserFullName");
                 
-                // Generate token (similar to SQL NEWID format but uppercase, no dashes)
                 token = System.Guid.NewGuid().ToString("N").ToUpper().Substring(0, 32);
                 
-                // Insert token
                 r.Close();
                 using (var insertCmd = con.CreateCommand())
                 {
@@ -362,10 +549,8 @@ VALUES(@userId, @token, DATEADD(MINUTE,30,SYSUTCDATETIME()))";
                 }
             }
             
-            // Send email if user has email address
             if (!string.IsNullOrWhiteSpace(userEmail) && !string.IsNullOrWhiteSpace(token))
             {
-                // Send email asynchronously (don't wait for it to complete)
                 _ = Task.Run(async () =>
                 {
                     try
@@ -378,7 +563,6 @@ VALUES(@userId, @token, DATEADD(MINUTE,30,SYSUTCDATETIME()))";
                     }
                     catch
                     {
-                        // Log error silently - don't fail the request if email fails
                     }
                 });
             }
@@ -446,44 +630,96 @@ ELSE
             }
         }
 
+        /// <summary>
+        /// Refreshes an access token using a valid refresh token
+        /// </summary>
+        /// <param name="request">Refresh token request containing a valid refresh token</param>
+        /// <returns>New LoginResponse with rotated access and refresh tokens</returns>
+        /// <response code="200">Token refresh successful, returns new token pair</response>
+        /// <response code="400">Invalid request (missing refresh token)</response>
+        /// <response code="401">Invalid or expired refresh token</response>
         [HttpPost("refresh")]
-        [Authorize]
-        public IActionResult Refresh()
+        [AllowAnonymous]
+        [ProducesResponseType(typeof(LoginResponse), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        public IActionResult Refresh([FromBody] RefreshTokenRequest request)
         {
-            // Re-issue token for current user
-            var name = User.Identity?.Name ?? "";
-            var id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0";
-            var userGUID = User.FindFirst("userGUID")?.Value ?? "";
-            var role = User.FindFirst(ClaimTypes.Role)?.Value ?? "Agent";
-            var firm = User.FindFirst("firm")?.Value ?? "0";
-            var uname = User.FindFirst("uname")?.Value ?? "";
-
-            var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY") ?? _configuration["Jwt:Key"] ?? "CHANGE_ME_DEV_KEY_32CHARS_MIN";
-            var issuer = _configuration["Jwt:Issuer"] ?? "UstadAuth";
-            var audience = _configuration["Jwt:Audience"] ?? "UstadClients";
-            var expiresMin = int.TryParse(_configuration["Jwt:ExpiresMinutes"], out var m) ? m : 480;
-
-            var claims = new[]
+            if (request == null || string.IsNullOrWhiteSpace(request.RefreshToken))
             {
-                new Claim(ClaimTypes.NameIdentifier, id),
-                new Claim("userGUID", userGUID),
-                new Claim(ClaimTypes.Name, name),
-                new Claim(ClaimTypes.Role, role),
-                new Claim("firm", firm),
-                new Claim("uname", uname)
-            };
-            var creds = new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)), SecurityAlgorithms.HmacSha256);
-            var token = new JwtSecurityToken(issuer, audience, claims, expires: DateTime.UtcNow.AddMinutes(expiresMin), signingCredentials: creds);
-            var jwt = new JwtSecurityTokenHandler().WriteToken(token);
-            return Ok(new LoginResponse { 
-                Token = jwt, 
-                OperatorId = int.TryParse(id, out var opId) ? opId : 0, 
-                UserGUID = userGUID,
-                FullName = name, 
-                Role = role, 
-                FirmId = int.TryParse(firm, out var firmId) ? firmId : 0,
-                DbTypeId = 0
+                return BadRequest("Refresh token is required.");
+            }
+
+            var handler = new JwtSecurityTokenHandler();
+            ClaimsPrincipal principal;
+            SecurityToken validatedToken;
+
+            try
+            {
+                principal = handler.ValidateToken(request.RefreshToken, GetTokenValidationParameters(), out validatedToken);
+            }
+            catch
+            {
+                return Unauthorized("Invalid refresh token.");
+            }
+
+            if (!(validatedToken is JwtSecurityToken jwtToken &&
+                string.Equals(jwtToken.Header.Alg, SecurityAlgorithms.HmacSha256, StringComparison.OrdinalIgnoreCase)))
+            {
+                return Unauthorized("Invalid refresh token.");
+            }
+
+            var tokenType = principal.FindFirst("token_type")?.Value;
+            if (!string.Equals(tokenType, "refresh", StringComparison.OrdinalIgnoreCase))
+            {
+                return Unauthorized("Invalid token type.");
+            }
+
+            var baseClaims = BuildBaseClaimsFromPrincipal(principal);
+
+            var idClaim = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0";
+            int.TryParse(idClaim, out var operatorId);
+            var userGuid = principal.FindFirst("userGUID")?.Value ?? string.Empty;
+            var fullName = principal.FindFirst(ClaimTypes.Name)?.Value ?? string.Empty;
+            var role = principal.FindFirst(ClaimTypes.Role)?.Value ?? "Agent";
+            var dbTypeIdClaim = principal.FindFirst("dbTypeId")?.Value ?? "0";
+            short.TryParse(dbTypeIdClaim, out var dbTypeId);
+
+            var tokens = GenerateTokenPair(baseClaims);
+
+            return Ok(new LoginResponse
+            {
+                Token = tokens.AccessToken,
+                RefreshToken = tokens.RefreshToken,
+                AccessTokenExpiresInSeconds = GetAccessTokenExpiresMinutes() * 60,
+                RefreshTokenExpiresInSeconds = GetRefreshTokenExpiresMinutes() * 60,
+                OperatorId = operatorId,
+                UserGUID = userGuid,
+                FullName = fullName,
+                Role = role,
+                FirmId = 0,
+                DbTypeId = dbTypeId
             });
+        }
+
+        /// <summary>
+        /// Logs out a user and invalidates the refresh token
+        /// </summary>
+        /// <param name="request">Logout request containing refresh token to invalidate</param>
+        /// <returns>Success response</returns>
+        /// <response code="200">Logout successful</response>
+        /// <response code="401">Unauthorized (invalid or missing JWT)</response>
+        /// <remarks>
+        /// Note: Redis blacklist integration for token invalidation will be added in a subsequent iteration.
+        /// </remarks>
+        [HttpPost("logout")]
+        [Authorize]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(401)]
+        public IActionResult Logout([FromBody] LogoutRequest request)
+        {
+            // Redis blacklist integration will be added in a subsequent iteration.
+            return Ok(new { success = true });
         }
 
         [HttpGet("user/exists")]
