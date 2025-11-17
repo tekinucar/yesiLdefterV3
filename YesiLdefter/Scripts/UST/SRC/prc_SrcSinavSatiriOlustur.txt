@@ -1,0 +1,200 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_SrcSinavSatiriOlustur] (@FirmId int, @TalepId int, @PlanlananTarih DATE)  
+AS BEGIN 
+
+  SET NOCOUNT ON;
+  /* 
+  SrcAdayTakip.GirecegiSinavTipiId
+  1	Teorik + Uygulama
+  2	Sadece Teorik
+  3	Sadece Uygulama
+  */
+
+--declare @FirmId int = 4204
+--declare @TalepId int = 3080 --4827 -- 5223
+--declare @PlanlananTarih date = convert(date, '01.11.2025', 103)
+
+  declare @AdayId int 
+  declare @AdayTcNo varchar(15)
+  declare @AdayTamAdiSoyadi nvarchar(100)
+  declare @AdayDonemTipiId int 
+  declare @GirecegiSinavTipiId smallInt 
+  declare @yeniESinavNo smallInt = null
+  declare @yeniUSinavNo smallInt = null
+
+  Select 
+       @AdayId = tk.AdayId
+     , @AdayTcNo = aday.TcNo
+     , @AdayTamAdiSoyadi = aday.TamAdiSoyadi
+     , @AdayDonemTipiId = tk.DonemTipiId
+     , @GirecegiSinavTipiId = tk.GirecegiSinavTipiId
+     , @yeniESinavNo = tk.eSinavNo -- yeni sinav no
+     , @yeniUSinavNo = tk.uSinavNo -- yeni sinav no
+
+  from dbo.SrcAdayTakip as tk,
+       dbo.SrcAday as aday
+  Where tk.FirmId = @FirmId
+  and   tk.AdayId = aday.Id
+  and   tk.TalepId = @TalepId
+
+  if (@GirecegiSinavTipiId = 1 or  -- Teorik + Uygulama
+      @GirecegiSinavTipiId = 2)    -- Sadece Teorik
+  begin
+      if ( Select COUNT(Id) as Adet from dbo.SrcSinavETeorik
+           Where FirmId = @FirmId
+           and   TalepId = @TalepId
+           and   SinavTarihi = @PlanlananTarih
+      ) = 0 
+      begin
+          INSERT INTO [dbo].[SrcSinavETeorik]
+           ([FirmId]
+           ,[IsActive]
+           ,[TalepId]
+           ,[AdayId]
+           ,[TcNo]
+           ,[TamAdiSoyadi]
+           ,[AdayDonemTipiId]
+           ,[SinavDonemTipiId]
+           ,[SinavNo]
+           ,[SinavTarihSaat]
+           ,[SinavTarihi]
+           ,[SinavSaati]
+           ,[TeorikPuani]
+           ,[DurumuTipiId]
+           ,[MebbisESinavTarihValue]
+           ,[SinavUcreti]
+           ,[TahsilEdildi]
+           ,[DekontId]
+           ,[UcretDurumuTipiId]
+           ,[YatanToplamUcret]
+           ,[UcretSayisi]
+           ,[TestMerkeziBilgisi]
+           ,[IsGBelgesiHazir]
+           ,[IsGBelgesiTeslimEdildi]
+           ,[GBKimeTeslimEdildi]
+           ,[LineTypeId]
+           ,[VeriKaynakTipiId]
+           ,[VeriKaynakId])
+          VALUES
+           (@FirmId
+           ,1 -- IsActive
+           ,@TalepId
+           ,@AdayId
+           ,@AdayTcNo 
+           ,@AdayTamAdiSoyadi
+           ,@AdayDonemTipiId
+           ,0    -- SinavDonemTipiId
+           ,@yeniESinavNo  -- SinavNo 
+           ,null -- SinavTarihSaat
+           ,@PlanlananTarih --SinavTarihi
+           ,null --SinavSaati
+           ,0    -- TeorikPuani
+           ,0    -- DurumuTipiId
+           ,null -- MebbisESinavTarihValue
+           ,null -- SinavUcreti
+           ,null -- TahsilEdildi
+           ,null -- DekontId
+           ,null -- UcretDurumuTipiId
+           ,null -- YatanToplamUcret
+           ,null -- UcretSayisi
+           ,null -- TestMerkeziBilgisi
+           ,null -- IsGBelgesiHazir
+           ,null -- IsGBelgesiTeslimEdildi
+           ,null -- GBKimeTeslimEdildi
+           ,2    -- LineTypeId sınav satırı
+           ,null -- VeriKaynakTipiId
+           ,null -- VeriKaynakId
+           )
+           /*
+           Update dbo.SrcAdayTakip Set 
+               eSinavPlanTarihi = @PlanlananTarih
+           ,   eSinavDurumTipiId = 3 -- Sınav listesine eklendi
+           Where FirmId = @FirmId
+           and   TalepId = @TalepId
+           */
+           EXECUTE [dbo].[prc_SrcAdayTakip] @FirmId, @TalepId, 0, 'SrcAdayTakipESinav'
+           print 'Teorik insert'
+      end -- if Adet
+      else 
+      begin
+          print 'Teorik sınav satırı mevcut'
+      end
+  end -- @GirecegiSinavTipiId
+
+  if (@GirecegiSinavTipiId = 3) -- Sadece Uygulama
+  begin
+      if ( Select COUNT(Id) as Adet from dbo.SrcSinavUygulama
+           Where FirmId = @FirmId
+           and   TalepId = @TalepId
+           and   SinavTarihi = @PlanlananTarih
+      ) = 0 
+      begin
+          INSERT INTO [dbo].[SrcSinavUygulama]
+           ([FirmId]
+           ,[IsActive]
+           ,[TalepId]
+           ,[AdayId]
+           ,[TcNo]
+           ,[TamAdiSoyadi]
+           ,[AdayDonemTipiId]
+           ,[SinavDonemTipiId]
+           ,[SinavNo]
+           ,[SinavTarihi]
+           ,[SiraNo]
+           ,[PuanTipiId]
+           ,[EgitimTipiId]
+           ,[DurumuTipiId]
+           ,[SinavDurumu]
+           ,[SinavSonucYorumu]
+           ,[UcretDurumuTipiId]
+           ,[YatanToplamUcret]
+           ,[UcretSayisi]
+           ,[RandevuId]
+           ,[VeriKaynakTipiId]
+           ,[VeriKaynakId])
+          VALUES
+           (@FirmId
+           ,1 -- IsActive
+           ,@TalepId
+           ,@AdayId
+           ,@AdayTcNo
+           ,@AdayTamAdiSoyadi
+           ,@AdayDonemTipiId
+           ,0    -- SinavDonemTipiId
+           ,@yeniUSinavNo -- SinavNo
+           ,@PlanlananTarih -- SinavTarihi
+           ,null -- SiraNo
+           ,0    -- PuanTipiId
+           ,null -- EgitimTipiId
+           ,0    -- DurumuTipiId
+           ,null -- SinavDurumu
+           ,null -- SinavSonucYorumu
+           ,null -- UcretDurumuTipiId
+           ,null -- YatanToplamUcret
+           ,null -- UcretSayisi
+           ,null -- RandevuId
+           ,null -- VeriKaynakTipiId
+           ,null -- VeriKaynakId
+           )
+           /*
+           Update dbo.SrcAdayTakip Set 
+               eSinavPlanTarihi = @PlanlananTarih
+           ,   eSinavDurumTipiId = 3 -- Sınav listesine eklendi
+           ,   uSinavPlanTarihi = @PlanlananTarih
+           Where FirmId = @FirmId
+           and   TalepId = @TalepId
+           */
+           EXECUTE [dbo].[prc_SrcAdayTakip] @FirmId, @TalepId, 0, 'SrcAdayTakipUygSinav'
+           print 'Uyg insert'
+      end -- Adet
+      else 
+      begin
+          print 'Uyg sınav satırı mevcut'
+      end
+  end -- @GirecegiSinavTipiId
+
+  
+END; -- procedure
+
+/*CreateProcedureEnd*/

@@ -179,4 +179,4 @@ INSERT INTO [Lkp].[OnmHesapStokFiyatYuvarlamaSekliTipi] (Id, YuvarlamaSekliTipi,
 
 commit  transaction
 
-/*CreateLkpTable*/
+/*CreateLkpTableEnd*/

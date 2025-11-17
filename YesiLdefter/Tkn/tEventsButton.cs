@@ -3055,6 +3055,7 @@ namespace Tkn_Events
             
             v.tButtonType buttonType = t.getClickType(Convert.ToInt32(prop_.BUTTONTYPE.ToString()));
             bool onay = true;
+            bool checked_ = false;
 
             if (tBeforeAfter == v.tBeforeAfter.Before)
                 beforeAfter = "BEFORE";
@@ -3082,6 +3083,15 @@ namespace Tkn_Events
                 'WORKTYPE', 'CLEARDATA',  'Clear Data');
 
                 */
+                checked_ = t.tWorkingCheck(tForm, item, null);
+
+                /// kontrolden dolayı onay alamadı fakat yinede true dönmesi gerekiyor
+                if (checked_ == false)
+                {
+                    continue;
+                }
+
+
 
                 workType = item.WORKTYPE.ToString();
 

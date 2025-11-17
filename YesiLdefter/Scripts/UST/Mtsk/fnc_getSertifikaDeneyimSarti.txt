@@ -11,7 +11,7 @@ BEGIN
   -- 3, 'Deneyim şartına uygun değil'
   
   --declare @TalepId int
-  --set @TalepId = 3358
+  --set @TalepId = 7413
 
   declare @FirmId int = 0
   declare @yMevcutSertifikaTipiId smallInt = 0
@@ -21,9 +21,15 @@ BEGIN
   declare @deneyimSartiTipiId smallInt = 0
   declare @deneyimEnAzYilFarki smallInt = 0
 
+  declare @isMevcutOtomatik bit
+  declare @isOtomatik bit
+
   Select 
     @yMevcutSertifikaTipiId = isnull(ins.MevcutSertifikaTipiId,0)
    ,@yIstenenSertifikaTipiId = isnull(ins.IstenenSertifikaTipiId,0)
+   ,@isMevcutOtomatik = ins.IsMevcutOtomatik
+   ,@isOtomatik = ins.IsOtomatik
+
   From  MtskAdayTalep as ins, MtskAday as aday
   Where ins.AdayId = aday.Id
   and ins.Id = @TalepId
@@ -39,10 +45,11 @@ BEGIN
   and   gt.KonuTipiId = 21102 -- Uygulama saatleri
   order by gt.Tarih desc
   
-  -- print '   Mevcut  ehliyet : ' + convert(varchar(5), @yMevcutSertifikaTipiId) 
-  -- print '   İstenen ehliyet : ' + convert(varchar(5), @yIstenenSertifikaTipiId) 
-  -- print '   isEnAz : ' + convert(varchar(3), @isEnAz) + ',  deneyimSertifikaTipiId : ' + convert(varchar(5), @deneyimSertifikaTipiId)
-  
+  --print '   Mevcut  ehliyet : ' + convert(varchar(5), @yMevcutSertifikaTipiId) 
+  --print '   İstenen ehliyet : ' + convert(varchar(5), @yIstenenSertifikaTipiId) 
+  --print '   isEnAz : ' + convert(varchar(3), @isEnAz) + ',  @deneyimSartiTipiId : ' + convert(varchar(5), @deneyimSartiTipiId)
+  --print '   @isMevcutOtomatik : ' + convert(varchar(3), @isMevcutOtomatik) + ',  @isOtomatik : ' + convert(varchar(5), @isOtomatik)
+
   -- Deneyim sertifikası yok ise şart yok
   if (@deneyimSertifikaTipiId = 0)
       set @deneyimSartiTipiId = 1 -- Şart yok
@@ -51,6 +58,8 @@ BEGIN
   if ((@deneyimSertifikaTipiId > 0) and (@yMevcutSertifikaTipiId = 0))
       set @deneyimSartiTipiId = 3 -- uygun değil
 
+  -- print '   isEnAz : ' + convert(varchar(3), @isEnAz) + ',  @deneyimSartiTipiId : ' + convert(varchar(5), @deneyimSartiTipiId)
+
   if ((@deneyimSertifikaTipiId > 0) and (@isEnAz = 0))
   begin
       if (@deneyimSertifikaTipiId = @yMevcutSertifikaTipiId)
@@ -58,8 +67,14 @@ BEGIN
 	  else set @deneyimSartiTipiId = 3 -- uygun değil
   end;
 
-  if (@yMevcutSertifikaTipiId = @yIstenenSertifikaTipiId)
-     set @deneyimSartiTipiId = 3
+  -- print '   isEnAz : ' + convert(varchar(3), @isEnAz) + ',  @deneyimSartiTipiId : ' + convert(varchar(5), @deneyimSartiTipiId)
+
+
+  if ((@yMevcutSertifikaTipiId = @yIstenenSertifikaTipiId) and
+      (@isMevcutOtomatik = @isOtomatik ))
+       set @deneyimSartiTipiId = 3
+
+  -- print '   isEnAz : ' + convert(varchar(3), @isEnAz) + ',  @deneyimSartiTipiId : ' + convert(varchar(5), @deneyimSartiTipiId)
 
   if ((@deneyimSertifikaTipiId > 0) and (@isEnAz = 1) and (@yMevcutSertifikaTipiId > 0)) 
   begin
@@ -133,7 +148,9 @@ BEGIN
   -- 3   Uygun değil
 
   -- print '   Sonuc : ' + convert(varchar(2), @deneyimSartiTipiId);
+
   RETURN @deneyimSartiTipiId;
+
 
 END; -- function
 

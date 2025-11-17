@@ -89,14 +89,19 @@ begin transaction
    BiyometrikGeldi         Bit            null,
    EhliyetGeldi            Bit            null, /* 0 = yok, 1 = var */
    OgrenimGeldi            Bit            null,
-   SaglikGeldi             Bit            null,
-   PsikoteknikGeldi        Bit            null, /* 0 = yok, 1 = var */
    AdliSicilGeldi          Bit            null,
-   ImzaAlindi              Bit            null,
-   SozlesmeYapildi         Bit            null,
+   --SaglikGeldi             Bit            null, /* Sağlık raporu SRC için zorunlu değil İPTAL */
+   --ImzaAlindi              Bit            null,
+   --SozlesmeYapildi         Bit            null,
    AdresAlindi             Bit            null,
    BelgelerGeldi           Bit            null,
-         
+     
+   -- 110
+   IsDosyaKapandi          Bit            null, /* Dosya kapandı ise 1, açık ise 0 */
+   DosyaKapanmaNedeni      nVarchar(50)   null,
+   DosyaKapanmaTarihi      Datetime       null,
+    
+
    constraint		pk_SrcAdayTalep primary key (Id)
  )
   
@@ -120,7 +125,7 @@ AS BEGIN
 
   print 'talep trigger start'
 
-  declare talepCursor_ cursor local for select Id from Inserted
+  declare talepCursor_ cursor local for select Id from Inserted order by Id
   declare @TalepId bigint
 
   OPEN talepCursor_
@@ -190,13 +195,15 @@ AS BEGIN
 
   declare @yKimlikGeldi bit = null
   declare @yBiyometrikGeldi bit = null
+  declare @yEhliyetGeldi bit = null
   declare @yOgrenimGeldi bit = null
-  declare @ySaglikGeldi bit = null
   declare @yAdliSicilGeldi bit = null
-  declare @yImzaAlindi bit = null
-  declare @ySozlesmeYapildi bit = null
+  --declare @ySaglikGeldi bit = null
+  --declare @yImzaAlindi bit = null
+  --declare @ySozlesmeYapildi bit = null
   declare @yAdresAlindi bit = null
   declare @yBelgelerGeldi bit = 0
+  declare @yIsDosyaKapandi bit = 0
 
   -- Veri Transferi başladımı
   declare @DbUpdatesIsActive Bit = 0
@@ -260,13 +267,15 @@ AS BEGIN
 
          ,@yKimlikGeldi = isnull(ins.KimlikGeldi,0)
          ,@yBiyometrikGeldi = isnull(ins.BiyometrikGeldi,0)
+         ,@yEhliyetGeldi = isnull(ins.EhliyetGeldi,0)
          ,@yOgrenimGeldi = isnull(ins.OgrenimGeldi,0)
-         ,@ySaglikGeldi = isnull(ins.SaglikGeldi,0)
          ,@yAdliSicilGeldi = isnull(ins.AdliSicilGeldi,0)
-         ,@yImzaAlindi = isnull(ins.ImzaAlindi,0)
-         ,@ySozlesmeYapildi = isnull(ins.SozlesmeYapildi,0)
+         --,@ySaglikGeldi = isnull(ins.SaglikGeldi,0)
+         --,@yImzaAlindi = isnull(ins.ImzaAlindi,0)
+         --,@ySozlesmeYapildi = isnull(ins.SozlesmeYapildi,0)
          ,@yAdresAlindi = isnull(ins.AdresAlindi,0)
          ,@yBelgelerGeldi = isnull(ins.BelgelerGeldi,0)
+         ,@yIsDosyaKapandi = isnull(ins.IsDosyaKapandi,0)
 
       From inserted as ins
       Where ins.Id = @TalepId
@@ -382,11 +391,12 @@ AS BEGIN
 	      set @yKayitTipiId = [dbo].[fnc_getSertifikaKayitTipi]( @TalepId )
 */
       if ((@yBiyometrikGeldi = 1) and
+          (@yEhliyetGeldi = 1) and
           (@yOgrenimGeldi = 1) and
           (@yAdliSicilGeldi = 1) and
-          (@ySaglikGeldi = 1) and
-          (@yImzaAlindi = 1) and
-          (@ySozlesmeYapildi = 1) and
+          --(@ySaglikGeldi = 1) and
+          --(@yImzaAlindi = 1) and
+          --(@ySozlesmeYapildi = 1) and
           (@yAdresAlindi = 1)) 
            set @yBelgelerGeldi = 1
       else set @yBelgelerGeldi = 0
@@ -554,27 +564,36 @@ AS BEGIN
                  ,SubeTipiId = @kontrol2SubeTipiId
               Where Id = @TalepId 
           end 
+         
+          if (@yIsDosyaKapandi = 1 and @yKayitTipiId <> 8)
+          begin 
+              Update SrcAdayTalep Set KayitTipiId = 8
+                , DosyaKapanmaTarihi = GETDATE()
+              Where Id = @TalepId
+          end
 
+          if (@yIsDosyaKapandi = 0 and @yKayitTipiId = 8)
+          begin 
+              Update SrcAdayTalep Set KayitTipiId = 3
+                , DosyaKapanmaTarihi = GETDATE()
+              Where Id = @TalepId
+          end
 
-          /*
-          --Execute [dbo].[prc_MtskAdayTablesInsert] @TalepId  -- Data transferi sırasında oluşturuluyor zaten insert oluyor
 	      --Execute [dbo].[prc_SrcAdayTalepYasiniHesapla] @TalepId
-
+          
           -- Veri transferi yapılmıyorsa 
           if (@DbUpdatesIsActive = 0)
           begin
-              --Execute [dbo].[prc_MtskAdayTakipTalepKaydiSingleSet] @TalepId
-              --EXECUTE [dbo].[prc_MtskAdayTakip] @yFirmId, @TalepId, 0, 'MtskAdayTakipKayit'
+              Execute [dbo].[prc_SrcAdayTablesInsert] @TalepId  -- Data transferi sırasında oluşturuluyor zaten insert oluyor
+              Execute [dbo].[prc_SrcAdayTakipTalepKaydiSingleSet] @TalepId
+              Execute [dbo].[prc_SrcAdayTakip] @yFirmId, @TalepId, 0, 'SrcAdayTakipKayit'
           end
-          */
 		  
           -- SrcAdayBelgeler tablosu
 		  Update SrcAdayBelgeler Set DonemTipiId = @yDonemTipiId
 		  Where TalepId = @TalepId
 		  and isnull(DonemTipiId,0) <> @yDonemTipiId
       end 	  
-
-      --- Execute [dbo].[prc_MtskAdayTakipTalepKaydiMultiSet] @yFirmId 
 
       FETCH NEXT FROM talepCursor_ INTO @TalepId
       print '  talep while end'
@@ -608,16 +627,12 @@ AS BEGIN
 
     WHILE @@FETCH_STATUS = 0
     BEGIN
-	  Delete from MtskAdayAdliSicil  Where TalepId = @curId
-	  Delete from MtskAdayAdres      Where TalepId = @curId
-	  Delete from MtskAdayBelgeler   Where TalepId = @curId
-	  Delete from MtskAdayImza       Where TalepId = @curId
-	  Delete from MtskAdayOgrenim    Where TalepId = @curId
-	  Delete from MtskAdaySaglik     Where TalepId = @curId
-	  Delete from MtskAdaySertifika  Where TalepId = @curId
-	  Delete from MtskAdaySozlesme   Where TalepId = @curId
-	  Delete from MtskAdayTakip      Where TalepId = @curId
-	  Delete from MtskAdayUcret      Where TalepId = @curId
+	  Delete from SrcAdayAdliSicil  Where TalepId = @curId
+	  Delete from SrcAdayAdres      Where TalepId = @curId
+	  Delete from SrcAdayBelgeler   Where TalepId = @curId
+	  Delete from SrcAdayOgrenim    Where TalepId = @curId
+	  Delete from SrcAdayTakip      Where TalepId = @curId
+	  Delete from SrcAdayUcret      Where TalepId = @curId
 
       FETCH NEXT FROM talepCursorDlt INTO @curId
     END

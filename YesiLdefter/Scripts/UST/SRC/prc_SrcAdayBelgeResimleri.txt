@@ -55,10 +55,102 @@ AS BEGIN
   , 350 as LkpWidth
   , 450 as LkpHeight
   , 96  as LkpDpi 
-  , 'jpg' as LkpFormat
+  , 'png' as LkpFormat
   
   From SrcAdayTalep
   Where Id = @TalepId
+*/
+  Union All
+
+  Select 
+    AdayId as Id
+  , @TamAdiSoyadi as TamAdiSoyadi
+  , @TcNo as TcNo
+  , 'KiloByteKontrollu' as LkpImageType
+  , 'Kimlik 1' as LkpBelgeAdi
+  , 'SrcAdayKimlik' as LkpTableName
+  , 'Kimlik1Resim' as LkpFieldName
+  , 'Kimlik1ResimSmall' as LkpSmallFieldName
+  , 'AdayId' as LkpMasterIdValue
+  , 'AdayId' as LkpIdFieldName
+  , Kimlik1Resim as LkpImage
+  , Kimlik1ResimSmall as LkpSmallImage
+  , 0 as LkpWidth
+  , 0 as LkpHeight
+  , 96  as LkpDpi  
+  , 'jpg' as LkpFormat
+  
+  From SrcAdayKimlik
+  Where AdayId = @AdayId
+
+  Union All
+
+  Select 
+    AdayId as Id
+  , @TamAdiSoyadi as TamAdiSoyadi
+  , @TcNo as TcNo
+  , 'KiloByteKontrollu' as LkpImageType
+  , 'Kimlik 2' as LkpBelgeAdi
+  , 'SrcAdayKimlik' as LkpTableName
+  , 'Kimlik2Resim' as LkpFieldName
+  , 'Kimlik2ResimSmall' as LkpSmallFieldName
+  , 'AdayId' as LkpMasterIdValue
+  , 'AdayId' as LkpIdFieldName
+  , Kimlik2Resim as LkpImage
+  , Kimlik2ResimSmall as LkpSmallImage
+  , 0 as LkpWidth
+  , 0 as LkpHeight
+  , 96  as LkpDpi  
+  , 'jpg' as LkpFormat
+  
+  From SrcAdayKimlik
+  Where AdayId = @AdayId
+
+  Union All
+
+  Select 
+    AdayId as Id
+  , @TamAdiSoyadi as TamAdiSoyadi
+  , @TcNo as TcNo
+  , 'KiloByteKontrollu' as LkpImageType
+  , 'Ehliyet 1' as LkpBelgeAdi
+  , 'SrcAdayEhliyet' as LkpTableName
+  , 'Ehliyet1Resim' as LkpFieldName
+  , 'Ehliyet1ResimSmall' as LkpSmallFieldName
+  , 'AdayId' as LkpMasterIdValue
+  , 'AdayId' as LkpIdFieldName
+  , Ehliyet1Resim as LkpImage
+  , Ehliyet1ResimSmall as LkpSmallImage
+  , 0 as LkpWidth
+  , 0 as LkpHeight
+  , 96  as LkpDpi  
+  , 'jpg' as LkpFormat
+  
+  From SrcAdayEhliyet
+  Where AdayId = @AdayId
+
+  Union All
+
+  Select 
+    AdayId as Id
+  , @TamAdiSoyadi as TamAdiSoyadi
+  , @TcNo as TcNo
+  , 'KiloByteKontrollu' as LkpImageType
+  , 'Ehliyet 2' as LkpBelgeAdi
+  , 'SrcAdayEhliyet' as LkpTableName
+  , 'Ehliyet2Resim' as LkpFieldName
+  , 'Ehliyet2ResimSmall' as LkpSmallFieldName
+  , 'AdayId' as LkpMasterIdValue
+  , 'AdayId' as LkpIdFieldName
+  , Ehliyet2Resim as LkpImage
+  , Ehliyet2ResimSmall as LkpSmallImage
+  , 0 as LkpWidth
+  , 0 as LkpHeight
+  , 96  as LkpDpi  
+  , 'jpg' as LkpFormat
+  
+  From SrcAdayEhliyet
+  Where AdayId = @AdayId
 
   Union All
  
@@ -84,7 +176,7 @@ AS BEGIN
   Where TalepId = @TalepId
   
   Union All
-
+/*
   Select 
     TalepId as Id
   , @TamAdiSoyadi as TamAdiSoyadi
@@ -107,7 +199,7 @@ AS BEGIN
   Where TalepId = @TalepId
 
   Union All
-
+*/
   Select 
     TalepId as Id
   , @TamAdiSoyadi as TamAdiSoyadi
@@ -129,6 +221,8 @@ AS BEGIN
   From SrcAdayAdliSicil
   Where TalepId = @TalepId
 
+
+  /*
   Union All
 
   Select 
@@ -199,6 +293,7 @@ AS BEGIN
   From SrcAdaySozlesme
   Where TalepId = @TalepId
   */
+
 END -- procedure
 
 /*CreateProcedureEnd*/

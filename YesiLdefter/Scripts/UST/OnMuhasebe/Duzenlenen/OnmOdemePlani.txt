@@ -80,7 +80,12 @@ INSERT INTO [Lkp].[OnmOdemePlaniTalepTipi] (Id, TalepTipi)
   ( 5,    N'Özel direksiyon dersi (Aday değil)'),
 
   ( 11,    N'Src Sertifika'),
-  ( 12,    N'Src5 Sertifika')
+  ( 12,    N'Src5 Sertifika'),
+  ( 13,    N'Src6 Sertifika'),
+  ( 14,    N'Ody Sertifika'),
+  ( 15,    N'Üdy Sertifika'),
+  ( 16,    N'Piskoteknik')
+
 
 
 -- ------------------------------------------------------- 
@@ -120,7 +125,9 @@ INSERT INTO [Lkp].[OnmOdemePlaniUcretTipi] (Id, UcretTipi)
   ( 23103,    N'Src6 Sertifika'),
   ( 23104,    N'Ody 1234 Sertifika'),
   ( 23105,    N'Üdy 1234 Sertifika'),
-  ( 23111,    N'e-Sınav ücreti'),
+  ( 23106,    N'Piskoteknik'),
+
+  ( 23111,    N'Teorik sınav ücreti'),
   ( 23112,    N'Uygulama sınav ücreti'),
   ( 23113,    N'Diğer ücretler')
 

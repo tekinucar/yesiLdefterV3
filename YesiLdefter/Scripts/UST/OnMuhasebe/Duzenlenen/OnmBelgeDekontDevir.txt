@@ -1,0 +1,69 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table OnmBelgeDekontDevir
+ (
+    Id                 Int IDENTITY(1,1) NOT NULL, 
+    FirmId             Int               not null,
+    BelgeTarihi        DateTime          null, 
+
+    FinansTipiId      SmallInt           not null, 
+    FinansId          Int                not null, /* OnmHesapFinans Tablosundaki Id */
+
+    DundenDevirBorcToplami    Numeric(22,5) DEFAULT 0,
+    DundenDevirAlacakToplami  Numeric(22,5) DEFAULT 0,
+    BugunBorcToplami          Numeric(22,5) DEFAULT 0,
+    BugunAlacakToplami        Numeric(22,5) DEFAULT 0,
+    DevredenBorcToplami       Numeric(22,5) DEFAULT 0,
+    DevredenAlacakToplami     Numeric(22,5) DEFAULT 0
+
+    constraint		pk_OnmBelgeDekontDevir primary key (Id)
+ )
+
+ create index X_OnmBelgeDekont00 on OnmBelgeDekontDevir (BelgeTarihi)
+ create index X_OnmBelgeDekont01 on OnmBelgeDekontDevir (FirmId)
+ create index X_OnmBelgeDekont02 on OnmBelgeDekontDevir (FinansTipiId)
+ create index X_OnmBelgeDekont03 on OnmBelgeDekontDevir (FinansId)
+
+ grant select, insert, update, delete on OnmBelgeDekontDevir to public
+
+ commit transaction
+
+ /*CreateTableEnd*/
+
+
+ /*CreateLkpTable*/
+
+begin transaction
+
+-- ------------------------------------------------------- 
+-- FinansTipiId   
+-- ------------------------------------------------------- 
+
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmBelgeDekontDevirFinansTipi')
+drop table [Lkp].[OnmBelgeDekontDevirFinansTipi]
+
+create table [Lkp].[OnmBelgeDekontDevirFinansTipi]
+(
+   Id             Int Unique Not Null,
+   FinansTipi     nVarchar(30),
+   
+   constraint  pk_OnmBelgeDekontDevirFinansTipi primary key (Id)
+)
+
+delete from [Lkp].[OnmBelgeDekontDevirFinansTipi]
+INSERT INTO [Lkp].[OnmBelgeDekontDevirFinansTipi] (Id, FinansTipi)
+ VALUES 
+  ( 0,    N'Tanımsız'),
+  ( 100,  N'Kasa'),
+  ( 1022, N'Banka hesabı'), 
+  ( 1023, N'Banka/Kredi kartı'), 
+  ( 1024, N'POS'),
+  ( 1025, N'Sanal POS'),
+  ( 1026, N'Cari POS')
+
+commit transaction
+
+ /*CreateLkpTableEnd*/
+

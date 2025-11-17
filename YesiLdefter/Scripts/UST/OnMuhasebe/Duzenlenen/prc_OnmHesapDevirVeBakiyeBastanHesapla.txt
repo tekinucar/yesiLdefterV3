@@ -1,0 +1,15 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_OnmHesapDevirVeBakiyeBastanHesapla]  (@FirmId int)  
+AS BEGIN
+
+    -- Bu tarihten itibaren hesaplamaya başlasın
+    Declare @MinBelgeTarihi Date = convert(date, '01.01.2010', 103)
+
+    EXECUTE [dbo].[prc_OnmHesapFinansBakiyesiHesapla] @FirmId, @MinBelgeTarihi
+
+    EXECUTE [dbo].[prc_OnmBelgeDekontDevirHesapla] @FirmId, @MinBelgeTarihi
+
+END -- procedure
+
+/*CreateProcedureEnd*/

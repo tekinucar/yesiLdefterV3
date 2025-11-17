@@ -47,7 +47,7 @@ AS BEGIN
 
     -- Veri Transferi başladımı
     declare @DbUpdatesIsActive Bit = 0
-    set @DbUpdatesIsActive =  dbo]. fnc_getIsDbUpdate] (13)
+    set @DbUpdatesIsActive = dbo.fnc_getIsDbUpdate (13)
 
     Declare @TalepId int = 0
 	declare @AdayId int
@@ -123,7 +123,7 @@ AS BEGIN
 
 END -- create trigger
 
-ALTER TABLE dbo.SrcAdayOgrenim ENABLE TRIGGER trg_SrcAdayOgrenim
+
 
 /*CreateTriggerEnd*/
 
@@ -136,9 +136,9 @@ begin transaction
 -- OgrenimBelgesiTipiId
 -- ------------------------------------------------------- 
 IF EXISTS (Select * From sys.objects WHERE name = 'SrcAdayOgrenimOgrenimBelgesiTipi')
-drop table  Lkp]. SrcAdayOgrenimOgrenimBelgesiTipi]
+drop table  [Lkp].[SrcAdayOgrenimOgrenimBelgesiTipi]
 
-create table  Lkp]. SrcAdayOgrenimOgrenimBelgesiTipi]
+create table  [Lkp].[SrcAdayOgrenimOgrenimBelgesiTipi]
 (
    Id               Int Unique Not    null,
    OgrenimBelgesiTipi  nVarchar(60)   null
@@ -146,8 +146,8 @@ create table  Lkp]. SrcAdayOgrenimOgrenimBelgesiTipi]
    constraint  pk_SrcAdayOgrenimOgrenimBelgesiTipi primary key (Id)
 )
 
-Delete from  Lkp]. SrcAdayOgrenimOgrenimBelgesiTipi]
-INSERT INTO  Lkp]. SrcAdayOgrenimOgrenimBelgesiTipi] (Id, OgrenimBelgesiTipi)
+Delete from  [Lkp].[SrcAdayOgrenimOgrenimBelgesiTipi]
+INSERT INTO  [Lkp].[SrcAdayOgrenimOgrenimBelgesiTipi] (Id, OgrenimBelgesiTipi)
  VALUES 
   ( -1, N''),
   (  0, N'Tanımsız'),

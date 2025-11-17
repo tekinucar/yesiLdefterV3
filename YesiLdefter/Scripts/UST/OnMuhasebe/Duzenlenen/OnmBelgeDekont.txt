@@ -158,6 +158,9 @@ AS BEGIN
     declare @IsTransfer bit
     declare @IkizNo smallInt
     declare @IkizId int = -1
+    declare @MinBelgeTarihi date
+
+    Select @MinBelgeTarihi = min(BelgeTarihi) From inserted
 
     OPEN cursor_BDekont
 
@@ -402,7 +405,10 @@ AS BEGIN
     CLOSE cursor_BDekont
     DEALLOCATE cursor_BDekont
 
-    EXECUTE [dbo].[prc_OnmHesapBakiyesiHesapla] @FirmId, @Yil_
+    EXECUTE [dbo].[prc_OnmHesapFinansBakiyesiHesapla] @FirmId, @MinBelgeTarihi
+
+    EXECUTE [dbo].[prc_OnmBelgeDekontDevirHesapla] @FirmId, @MinBelgeTarihi
+
 
 END
 
@@ -435,6 +441,9 @@ AS BEGIN
 	declare @IadeId int
 	declare @Yil_ int
     declare @IkizId int = -1
+    declare @MinBelgeTarihi date
+
+    Select @MinBelgeTarihi = min(BelgeTarihi) From inserted
 
 	OPEN cursor_BDekontDlt
 
@@ -526,7 +535,9 @@ AS BEGIN
     CLOSE cursor_BDekontDlt
     DEALLOCATE cursor_BDekontDlt
 
-    EXECUTE [dbo].[prc_OnmHesapBakiyesiHesapla] @FirmId, @Yil_
+    EXECUTE [dbo].[prc_OnmHesapFinansBakiyesiHesapla] @FirmId, @MinBelgeTarihi
+
+    EXECUTE [dbo].[prc_OnmBelgeDekontDevirHesapla] @FirmId, @MinBelgeTarihi
 
 END
 
@@ -784,6 +795,25 @@ INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, A
  ( '793.320',      N'Dışarıdan sağlanan hizmetler, 320.Cari hesaba işlendi (tediye)' , 793,  320  ), 
 
 
+
+ -- Faliyet dışı gelirler 
+ ( '100.250',  N'Arazi ve arsalar satışı için nakit tahsilat', 100, 250 ),
+ ( '100.251',  N'Yer altı ve yer üstü düzenleri satışı için nakit tahsilat', 100, 251 ),
+ ( '100.252',  N'Binalar satışı için nakit tahsilat', 100, 252 ),
+ ( '100.253',  N'Tesis, makine ve cihazlar satışı için nakit tahsilat', 100, 253 ),
+ ( '100.254',  N'Taşıtlar satışı için nakit tahsilat', 100, 254 ),
+ ( '100.255',  N'Demirbaş satışı için nakit tahsilat', 100, 255 ),
+ ( '100.256',  N'Diğer maddi duran varlıklar satışı için nakit tahsilat', 100, 256 ),
+
+ ( '1022.250',  N'Arazi ve arsalar satışı için gelen banka havalesi', 1022, 250 ),
+ ( '1022.251',  N'Yer altı ve yer üstü düzenleri satışı için gelen banka havalesi', 1022, 251 ),
+ ( '1022.252',  N'Binalar satışı için gelen banka havalesi', 1022, 252 ),
+ ( '1022.253',  N'Tesis, makine ve cihazlar satışı için gelen banka havalesi', 1022, 253 ),
+ ( '1022.254',  N'Taşıtlar satışı için gelen banka havalesi', 1022, 254 ),
+ ( '1022.255',  N'Demirbaş satışı için gelen banka havalesi', 1022, 255 ),
+ ( '1022.256',  N'Diğer maddi duran varlıklar satışı için gelen banka havalesi', 1022, 256 ),
+
+
  -- --------------------------------------------------
  -- Tediye/Ödeme işlemleri
  -- --------------------------------------------------
@@ -866,6 +896,7 @@ INSERT INTO [Lkp].[OnmBelgeDekontIslemTipi] (IslemKodu, IslemAdi, BorcHesapId, A
  ( '320.1023',  '320.Cari hesaba kredi kartı ile ödeme' , 320,  1023  ), 
  ( '770.1023',  'Genel yönetim giderleri için kredi kartıyla ödeme' , 770,  1023  ), 
  ( '770.1024',  'Genel yönetim giderleri için POS ile ödeme' , 770,  1024  ), 
+ ( '770.1026',  'Genel yönetim giderleri için Cari POS ile ödeme' , 770,  1026  ), 
  ( '780.1024',  'Finansman giderleri için POS ile ödeme' , 780,  1024  ),  /* ÖDEAL da böyle bir uygulama mevcut  */
  ( '791.100',   'İşçi ücret ve giderleri için nakit ödeme' , 791,  100  ), 
  ( '791.1022',  'İşçi ücret ve giderleri için banka hesabından havale/Eft' , 791,  1022  ), 
@@ -959,6 +990,13 @@ INSERT INTO [Lkp].[OnmBelgeDekontBHesapTipi] (Id, BHesapTipi, GrupTipiId)
   ( 131,  N'Ortaklar', 1),
   ( 135,  N'Personel', 1),
   ( 196,  N'Personel avansları', 1),
+  ( 250,  N'Arazi ve arsalar', 1),
+  ( 251,  N'Yer altı ve yer üstü düzenleri', 1),
+  ( 252,  N'Binalar', 1),
+  ( 253,  N'Tesis, makine ve cihazlar', 1),
+  ( 254,  N'Taşıtlar', 1),
+  ( 255,  N'Demirbaş', 1),
+  ( 256,  N'Diğer maddi duran varlıklar', 1),
   ( 320,  N'Satıcılar', 1),
 
   ( 300,  N'Banka kredileri (Kısa vadeli)', 1),
@@ -1037,6 +1075,13 @@ INSERT INTO [Lkp].[OnmBelgeDekontAHesapTipi] (Id, AHesapTipi, GrupTipiId)
   ( 131,  N'Ortaklar', 1),
   ( 135,  N'Personel', 1),
   ( 196,  N'Personel avansları', 1),
+  ( 250,  N'Arazi ve arsalar', 1),
+  ( 251,  N'Yer altı ve yer üstü düzenleri', 1),
+  ( 252,  N'Binalar', 1),
+  ( 253,  N'Tesis, makine ve cihazlar', 1),
+  ( 254,  N'Taşıtlar', 1),
+  ( 255,  N'Demirbaş', 1),
+  ( 256,  N'Diğer maddi duran varlıklar', 1),
   ( 320,  N'Satıcılar', 1),
 
   ( 300,  N'Banka kredileri (Kısa vadeli)', 1),
@@ -1135,13 +1180,14 @@ INSERT INTO [Lkp].[OnmBelgeDekontSourceType] (Id, SourceType)
   ( 2,   N'OnmBelgeDekont - Kendisi'), -- kaynak kendisi
   ( 3,   N'OnmBankaKredisiS'),
 
-  ( 201, N'UstadMtsk.OnmOdemePlani'),
-  ( 202, N'UstadIsmak.OnmOdemePlani'),
-  ( 203, N'UstadSrc.OnmOdemePlani'),
+  ( 201, N'OnmOdemePlani (Mtsk)'),
+  ( 202, N'OnmOdemePlani (İsmak)'),
+  ( 203, N'OnmOdemePlani (Src)'), 
+  ( 211, N'Veri transferi')
 
-  ( 2103,  N'Mtsk Veri Transferi - Giderler'),
-  ( 2104,  N'Mtsk Veri Transferi - CariAlt'),
-  ( 2105,  N'Mtsk Veri Transferi - Kurharc')
+--  ( 2103,  N'Mtsk Veri Transferi - Giderler'),
+--  ( 2104,  N'Mtsk Veri Transferi - CariAlt'),
+--  ( 2105,  N'Mtsk Veri Transferi - Kurharc')
 
 
 commit transaction

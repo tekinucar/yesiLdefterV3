@@ -1,0 +1,424 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table SrcSinavUygulama
+ (
+   Id                    Int IDENTITY(1,1) not null, 
+   FirmId                Int       not null,
+   IsActive              Bit       not null, /* default : 1 = active, 0 = not active */  
+   TalepId               Int       not null, 
+   AdayId                Int       not null, /* default 0 */
+   TcNo                  Varchar(11)   null,
+   TamAdiSoyadi          nVarchar(100) null,
+   AdayDonemTipiId       Int           null, /* bu mebbisde e-sınav listelerinde yok, uyg. sınav listelerinde var */ 
+   SinavDonemTipiId      Int           null, /* sınavın yapıldığı dönem */
+
+   --10
+   SinavNo               SmallInt      null,  
+   SinavTarihi           Date          null,
+   SiraNo                SmallInt      null, /* uygulama sınavı için */  
+   PuanTipiId            SmallInt      null, /* 1. Başarısız, 100. Başarılı */
+   EgitimTipiId          SmallInt      null, /* hangi derslerin sınavı olduğunu işaret ediyor : 1 = Normal derslerin sınavı,  3 = 2.Direksiyon Eğitimi (+4) */
+   DurumuTipiId          SmallInt      null, /* mebbiste okunuyor*/
+   SinavDurumu           nVarchar(20)  null, /* aday durum sorgu sayfasında mevcut */
+   SinavSonucYorumu      nVarchar(250) null, /* aday durum sorgu sayfasında mevcut */
+   
+   UcretDurumuTipiId     SmallInt      null, /* mebbisten okunuyor : Sınav Ücreti Yatırılmamış ,  */
+   YatanToplamUcret      Numeric(22,5) null,
+   UcretSayisi           SmallInt      null,
+   RandevuId             Int           null,
+   
+   VeriKaynakTipiId        SmallInt       null, /* 1. Kullanıcı Manuel, 2. Mebbis Dönem Aday Onaylama, 3. Mebbis Uygulama Sınav Listesi, 4. Mebbis Aday Durum Bilgileri, 11. Tabim veritabanı  */
+   VeriKaynakId            Int            null, /* Veri transferi edildiği tablodaki Id . Sorun olduğunda bilginin nereden geldiğine referans olsun */
+
+
+   constraint		pk_SrcSinavUygulama primary key (Id)
+ )
+  
+ grant select, insert, update, delete on SrcSinavUygulama to public
+
+ create index X_SrcSinavUygulama01 on SrcSinavUygulama (TalepId)
+ create index X_SrcSinavUygulama02 on SrcSinavUygulama (AdayId)
+ create index X_SrcSinavUygulama03 on SrcSinavUygulama (TcNo)
+ 
+commit transaction
+
+/*CreateTableEnd*/
+
+
+
+/*CreateTrigger*/
+
+CREATE TRIGGER [dbo].[trg_SrcSinavUygulama] on [dbo].[SrcSinavUygulama] 
+AFTER INSERT, UPDATE
+AS BEGIN
+
+	DECLARE curSinavUyg cursor local for select Id from Inserted 
+    DECLARE @curId bigint
+
+    OPEN curSinavUyg
+    FETCH NEXT FROM curSinavUyg INTO @curId
+ 
+	declare @yFirmId int = 0
+	declare @SinavDonemTipiId int = 0
+    declare @yTalepId int = 0
+	declare @yAdayId int = 0
+	declare @yTcNo varchar(11) = ''
+	declare @yTamAdiSoyadi nvarchar(100) = ''
+	declare @AdayDonemTipiId int = 0
+	declare @ySinavNo smallInt = 0
+	declare @newSinavNo smallInt = 0
+	declare @ySinavTarihi date = null
+	declare @ePuanTipiId smallInt = 0
+	declare @yPuanTipiId smallInt = 0
+	declare @yEgitimTipiId smallInt = 0
+	declare @yDurumuTipiId smallInt = 0
+	declare @ySinavDurumu nvarchar(20) = ''
+	declare @ySinavSonucYorumu nvarchar(250) = ''
+	declare @DosyaYakti bit = 0
+	declare @TalepTipiId smallInt = 0
+
+    -- Veri Transferi başladımı
+    declare @DbUpdatesIsActive Bit = 0
+    set @DbUpdatesIsActive = [dbo].[fnc_getIsDbUpdate] (13)
+	
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+	    set @ySinavNo = 0 
+	    set @newSinavNo = 0 
+	    set @DosyaYakti = 0
+
+        select 
+          @yFirmId = ins.FirmId
+    	, @yTalepId = isnull(ins.TalepId,0)
+    	, @yAdayId = isnull(ins.AdayId,0)
+	    , @yTcNo = isnull(ins.TcNo,'')
+	    , @yTamAdiSoyadi = isnull(ins.TamAdiSoyadi,'') 
+		, @AdayDonemTipiId = isnull(ins.AdayDonemTipiId,0)
+        , @ySinavNo = isnull(ins.SinavNo,0)
+		, @ySinavTarihi = ins.SinavTarihi 
+		, @yPuanTipiId = isnull(ins.PuanTipiId, 0)
+	    , @yDurumuTipiId = isnull(ins.DurumuTipiId,0)
+		, @ySinavDurumu = isnull(ins.SinavDurumu,'')
+        , @ySinavSonucYorumu = isnull(ins.SinavSonucYorumu,'')
+		from inserted ins
+    	where ins.Id = @curId
+
+		-- Sınavın hangi dönemde yapıldığı tespit ediliyor
+        set @SinavDonemTipiId = [dbo].[fnc_getDonemTipiId] ('BUGUN', @ySinavTarihi)
+		
+		if (@yTalepId = 0) and @yAdayId = 0 and (@yTcNo <> '')
+		begin
+		  -- Talepleri kontrol et
+		  Select top 1 @yAdayId = AdayId, @yTalepId = Id From SrcAdayTalep
+          Where TcNo = @yTcNo
+          and   isnull(DonemTipiId,0) <= @SinavDonemTipiId
+          order by DonemTipiId desc, Id desc
+		end
+
+		Select @TalepTipiId = isnull(talep.TalepTipiId,0)
+		From dbo.SrcAdayTalep as talep
+		Where talep.Id = @yTalepId
+
+        if (@TalepTipiId = 0) set @TalepTipiId = 1
+					   
+        -- daha önce kayıtlı ise TcNo sunu bul 			
+		if (@yAdayId > 0) and (@yTcNo = '' or @yTamAdiSoyadi = '' or @AdayDonemTipiId = 0)
+		begin
+            Select @yTcNo = aday.TcNo
+               , @yTamAdiSoyadi = isnull(aday.TamAdiSoyadi,'')
+            From dbo.SrcAday as aday
+            Where aday.FirmId = @yFirmId
+            and   aday.Id = @yAdayId
+
+            Select @AdayDonemTipiId = DonemTipiId 
+            From dbo.SrcAdayTalep
+            Where Id = @yTalepId
+		end	
+
+	    if (isnull(charindex('Başarılı', @ySinavSonucYorumu),0) = 1)  set @yPuanTipiId = 100
+        if (isnull(charindex('Başarısız', @ySinavSonucYorumu),0) = 1) set @yPuanTipiId = 1
+		if (isnull(charindex('Girmedi', @ySinavDurumu),0) = 1) set @yPuanTipiId = -1
+
+		Select @ySinavNo = (count(Id) + 1) From SrcSinavUygulama
+		Where IsActive = 1
+		and FirmId = @yFirmId
+		and AdayId = @yAdayId
+		and SinavTarihi < @ySinavTarihi
+				
+        -- Sertifika istiyor
+		if (@TalepTipiId = 1) and (@ySinavNo <= 4) 
+		begin
+		  set @newSinavNo = @ySinavNo
+		  set @yEgitimTipiId = 1 -- Normal Eğitim sınavı
+		end
+
+		-- SrcSinavUygulama.PuanTipiId
+        -- -1,  'Girmedi'
+        -- 0,   ''
+        -- 1,   'Başarısız'
+        -- 100, 'Başarılı'
+        
+		-- SrcSinavUygulama.DurumuTipiId
+        -- 0,    ''
+        -- 1,    'Uygulama Sınav Aşamasında'
+        -- 2,    '2.Direksiyon Aşamasında'
+        -- 3,    'Sertifika Almaya Hak Kazandı'
+        -- 4,    'Uygulama Sınav Hakkı Doldu'
+        -- 5,    'Sertifikası İptal Edildi'
+
+		if (@yDurumuTipiId <> 5)
+		begin
+		    -- Sınav Sonucu Başarılı ise
+		    if (@yPuanTipiId = 100)  set @yDurumuTipiId = 3  -- Sertifika Almaya Hak Kazandı
+		
+		    -- Normal eğitimlerin başarısız sınav sonuçları
+		    if (@TalepTipiId = 1 and @ySinavNo < 4 and @yEgitimTipiId = 1)
+            begin
+                if ((@yPuanTipiId = 0) or   -- ''
+                    (@yPuanTipiId = 1) or   -- başarısız
+                    (@yPuanTipiId = -1) or  -- girmedi
+                    (@yPuanTipiId = -2))    -- durumu girilmemiş
+                     set @yDurumuTipiId = 1 --  Uygulama Sınav Aşamasında
+            end
+
+		    -- Normal Uygulama derslerinin son sınavı
+		    if (@TalepTipiId = 1 and @ySinavNo = 4 and @yEgitimTipiId = 1)
+            begin
+                if (@yPuanTipiId = 1 or @yPuanTipiId = -1) -- başarısız veya girmediyse
+                   set @yDurumuTipiId = 4         -- Uygulama Sınav Hakkı Doldu
+            end
+
+		    -- 2. Direksiyon (+4) eğitimlerinin başarısız sınav sonuçları
+		    if ((@TalepTipiId = 2 or @TalepTipiId = 3) and @ySinavNo < 4 and @yEgitimTipiId = 3)
+            begin
+                if ((@yPuanTipiId = 1) or  -- başarısız
+		            (@yPuanTipiId = -1)) -- girmedi 
+                     set @yDurumuTipiId = 2         -- 2.Direksiyon Aşamasında
+            end
+
+		    -- 2. Direksiyon (+4) derslerinin son sınavı
+		    if ((@TalepTipiId = 2 or @TalepTipiId = 3) and @ySinavNo = 4 and @yEgitimTipiId = 3)
+            begin
+		        if (@yPuanTipiId = 1 or @yPuanTipiId = -1) -- başarısız veya girmediyse
+                begin     
+			        set @yDurumuTipiId = 4           -- Uygulama Sınav Hakkı Doldu
+  	                set @DosyaYakti = 1
+                end
+            end
+		end -- @yDurumuTipiId <> 5
+				
+		
+		Update dbo.SrcSinavUygulama set
+          TalepId = @yTalepId
+		, AdayId = @yAdayId
+        , TcNo = @yTcNo 
+        , TamAdiSoyadi = @yTamAdiSoyadi
+		, AdayDonemTipiId = @AdayDonemTipiId
+        , SinavDonemTipiId = @SinavDonemTipiId 
+        , SinavNo = @ySinavNo
+		, PuanTipiId = @yPuanTipiId
+        , EgitimTipiId = @yEgitimTipiId 
+		, DurumuTipiId = @yDurumuTipiId
+		Where Id = @curId
+        and (
+          TalepId <> @yTalepId
+		or AdayId <> @yAdayId
+        or TcNo <> @yTcNo 
+        or TamAdiSoyadi <> @yTamAdiSoyadi
+		or AdayDonemTipiId <> @AdayDonemTipiId
+        or SinavDonemTipiId <> @SinavDonemTipiId 
+        or SinavNo <> @ySinavNo
+		or PuanTipiId <> @yPuanTipiId
+        or EgitimTipiId <> @yEgitimTipiId 
+		or DurumuTipiId <> @yDurumuTipiId
+		)
+	
+        -- Veri transferi yapılmıyorsa 
+        if (@DbUpdatesIsActive = 0)
+        begin
+            /* SinavNo ayarlanıyor */
+            Update dbo.SrcSinavUygulama set 
+                SinavNo = x.yeniSinavNo
+            From dbo.SrcSinavUygulama as a,
+            (
+                Select sinav.Id 
+                , ROW_NUMBER() OVER(ORDER BY sinav.SinavTarihi) AS yeniSinavNo 
+                From dbo.SrcSinavUygulama as sinav
+                where sinav.FirmId = @yFirmId
+                and   sinav.IsActive = 1
+                and   sinav.TalepId = @yTalepId
+            ) as x
+            Where a.Id = x.Id
+            and   a.SinavNo <> x.yeniSinavNo
+			   
+            EXECUTE [dbo].[prc_SrcAdayTakip] @yFirmId, @yTalepId, 0, 'SrcAdayTakipUygSinav'
+        end
+
+        FETCH NEXT FROM curSinavUyg INTO @curId
+    END
+	
+    CLOSE curSinavUyg
+    DEALLOCATE curSinavUyg   
+
+END
+
+/*CreateTriggerEnd*/
+
+--ALTER TABLE [dbo].[SrcSinavUygulama] ENABLE TRIGGER [trg_SrcSinavUygulama]
+
+
+
+/*CreateTrigger*/
+
+CREATE TRIGGER [dbo].[trg_SrcSinavUygulamaDelete] on [dbo].[SrcSinavUygulama]
+AFTER DELETE
+AS BEGIN
+
+    declare uygCursorDlt cursor local for select Id from deleted
+	declare @curId bigint
+
+	OPEN uygCursorDlt
+    FETCH NEXT FROM uygCursorDlt INTO @curId
+
+    declare @FirmId int
+    declare @TalepId int
+
+    -- Veri Transferi başladımı
+    declare @DbUpdatesIsActive Bit = 0
+    set @DbUpdatesIsActive = [dbo].[fnc_getIsDbUpdate] (0)
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+	    Select 
+          @FirmId = dlt.FirmId
+        , @TalepId = dlt.TalepId
+	    From deleted dlt
+	    Where dlt.Id = @curId
+	  
+        -- Veri transferi yapılmıyorsa 
+        if (@DbUpdatesIsActive = 0)
+        begin
+            EXECUTE [dbo].[prc_SrcAdayTakip] @FirmId, @TalepId, 0, 'SrcAdayTakipUygSinav'
+        end
+        
+        FETCH NEXT FROM uygCursorDlt INTO @curId
+    END
+
+    CLOSE uygCursorDlt
+    DEALLOCATE uygCursorDlt
+
+END
+
+/*CreateTriggerEnd*/
+
+
+
+
+
+/*CreateLkpTable*/
+
+begin transaction
+
+-- ------------------------------------------------------- 
+-- PuanTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'SrcSinavUygulamaPuanTipi')
+drop table [Lkp].[SrcSinavUygulamaPuanTipi]
+
+create table [Lkp].[SrcSinavUygulamaPuanTipi]
+(
+   Id            Int Unique not null, 
+   PuanTipi      nVarchar(20)   null
+   
+   constraint  pk_SrcSinavUygulamaPuanTipi primary key (Id)
+)
+
+Delete from [Lkp].[SrcSinavUygulamaPuanTipi]
+INSERT INTO [Lkp].[SrcSinavUygulamaPuanTipi] (Id, PuanTipi)
+ VALUES 
+  ( -6,   N'Muaf'),
+  ( -5,   N'Girmeyecek'),
+  --( -4,   N'Kaydı Silindi'),
+  --( -3,   N'Ceza Kaydı Var'),
+  ( -2,   N'Durumu Girilmemiş'),
+  ( -1,   N'Girmedi'),
+  ( 0,    N''),
+  ( 1,    N'Başarısız'),
+  ( 100,  N'Başarılı')
+
+-- ------------------------------------------------------- 
+-- EgitimTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'SrcSinavUygulamaEgitimTipi')
+drop table [Lkp].[SrcSinavUygulamaEgitimTipi]
+
+create table Lkp.SrcSinavUygulamaEgitimTipi
+(
+   Id           Int Unique Not Null,
+   EgitimTipi   nVarchar(50)   null
+
+   constraint  pk_SrcSinavUygulamaEgitimTipi primary key (Id)
+)
+
+INSERT INTO Lkp.SrcSinavUygulamaEgitimTipi (Id, EgitimTipi)
+ VALUES 
+  ( 0, N'Tanımsız'),
+  ( 1, N'Normal Eğitim'),
+  ( 2, N'Telafi Eğitim(Ön Sınav )'),
+  ( 3, N'2.Direksiyon Eğitimi'),
+  ( 4, N'Başarısız Aday Eğitimi')
+
+
+-- ------------------------------------------------------- 
+-- DurumuTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'SrcSinavUygulamaDurumuTipi')
+drop table [Lkp].[SrcSinavUygulamaDurumuTipi]
+
+create table [Lkp].[SrcSinavUygulamaDurumuTipi]
+(
+   Id                 Int Unique not null, 
+   DurumuTipi  nVarchar(50)   null
+   
+   constraint  pk_SrcSinavUygulamaDurumuTipi primary key (Id)
+)
+
+Delete from [Lkp].[SrcSinavUygulamaDurumuTipi]
+INSERT INTO [Lkp].[SrcSinavUygulamaDurumuTipi] (Id, DurumuTipi)
+ VALUES 
+  ( 0,    N''),
+  ( 1,    N'Uygulama Sınav Aşamasında'),
+  --( 2,    N'2.Direksiyon Aşamasında'),
+  ( 3,    N'Sertifika Almaya Hak Kazandı'),
+  ( 4,    N'Uygulama Sınav Hakkı Doldu'),
+  --( 5,    N'Sertifikası İptal Edildi'),
+  ( 6,    N'Durumu Girilmemiş')
+  
+
+-- ------------------------------------------------------- 
+-- UcretDurumuTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'SrcSinavUygulamaUcretDurumuTipi')
+drop table [Lkp].[SrcSinavUygulamaUcretDurumuTipi]
+
+create table [Lkp].[SrcSinavUygulamaUcretDurumuTipi]
+(
+   Id               Int Unique not null, 
+   UcretDurumuTipi  nVarchar(30)   null
+   
+   constraint  pk_SrcSinavUygulamaUcretDurumuTipi primary key (Id)
+)
+
+Delete from [Lkp].[SrcSinavUygulamaUcretDurumuTipi]
+INSERT INTO [Lkp].[SrcSinavUygulamaUcretDurumuTipi] (Id, UcretDurumuTipi)
+ VALUES 
+  ( 0,    N''),
+  ( 1,    N'Yatmışşşşş'),
+  ( 2,    N'Sınav Ücreti Yatırılmamış')
+
+
+commit transaction
+
+/*CreateLkpTableEnd*/

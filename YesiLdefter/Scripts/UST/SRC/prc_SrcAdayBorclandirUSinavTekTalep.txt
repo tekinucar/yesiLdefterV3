@@ -1,0 +1,149 @@
+﻿
+/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_SrcAdayBorclandirUSinavTekTalep] (@FirmId int, @TalepId int)
+AS BEGIN  
+
+  --declare @FirmId Int  = 4204
+  --declare @@TalepId Int  = 2311  
+
+  declare @settings1SinavIcinBorclandirma bit = 0
+  set @settings1SinavIcinBorclandirma = dbo.fnc_getSettingsBool(@FirmId, 2010, 116)
+  if (@settings1SinavIcinBorclandirma = 1)
+  begin
+      declare @girecegiSinavNo int = 0
+      Select @girecegiSinavNo = isnull(uSinavNo,0)
+      From dbo.SrcAdayTakip as takip
+      Where takip.FirmId = @FirmId
+      and   takip.TalepId = @TalepId
+
+     -- Birinci sınava giriyorsa atama yapma 
+     if (@girecegiSinavNo <= 1) return;
+  end
+
+  declare @settingsPlanTarihiniKullan bit = 0
+  declare @settingsSonSinavTarihiniKullan bit = 0
+
+  set @settingsPlanTarihiniKullan = dbo.fnc_getSettingsBool(@FirmId, 2010, 114);
+  set @settingsSonSinavTarihiniKullan = dbo.fnc_getSettingsBool(@FirmId, 2010, 115);
+
+  declare @BugunDonemTipiId int = 0
+  declare @BorclandirmaUcreti numeric(22,5)
+  declare @ReelBorclandirmaUcreti numeric(22,5)
+  declare @UcretTipiId Int = 23112 -- Uygulama sınav ücreti
+  declare @GelecekSinavTarihi date = getdate()
+
+  declare @Id int = dbo.fnc_getGecerlilikTarihiId(@FirmId, 21104, getdate())
+
+  set @BugunDonemTipiId = dbo.fnc_getDonemTipiId('BUGUN',null);
+
+  -- bugünden sonraki en yakın sınav tarihi
+  Select Top 1 
+     @GelecekSinavTarihi = isnull(SinavTarihi,getdate())
+  From [dbo].[SrcSinavTarihi]
+  Where FirmId = @FirmId
+  and   IsActive = 1
+  and   SinavTipiId = 11 -- Src teorik sınav tarihini baz alıyoruz 
+  and   SinavTarihi > getdate()
+  order by SinavTarihi 
+
+  -- Uygulama sınav ücreti
+  Select Top 1  
+      @BorclandirmaUcreti = isnull(ucret.[UygulamaSinavUcreti],0)
+    , @ReelBorclandirmaUcreti = isnull(ucret.[ReelUygulamaSinavUcreti],0)
+  From [dbo].[SrcUcretSinav] as ucret,
+       [dbo].[GecerlilikTarihi] as tarih
+  Where ucret.FirmId = @FirmId
+  and   ucret.IsActive = 1
+  and   ucret.GecerlilikTarihiId = dbo.fnc_getGecerlilikTarihiId(@FirmId, 21103, getdate())
+  
+  -- Reel ücret varsa onu uygulasın
+  if (@ReelBorclandirmaUcreti > 0)
+      Set @BorclandirmaUcreti = @ReelBorclandirmaUcreti
+
+  Insert into [dbo].[OnmOdemePlani]
+           ([OdmemePlaniGUID]
+           ,[FirmId]
+           ,[IsActive]
+           ,[DonemTipiId]
+           ,[TalepId]
+           ,[TalepTipiId]
+           ,[UcretTipiId]
+           ,[CariId]
+           ,[TaksitTipiId]
+           ,[TaksitNo]
+           ,[VadeTarihi]
+           ,[TaksitTutari]
+           ,[OdemeTipiId]
+           ,[IsPaid]
+           ,[TahsilTarihi]
+           ,[YedekTaksitTutari]
+           ,[BelgeDekontId]
+           ,[PatchBelgeDekontId]
+           ,[BelgeStokBId]
+           ,[SourceTypeId]
+           ,[SourceId]
+           ,[VeriKaynakId])
+           
+  Select 
+            NEWID()
+           ,@FirmId
+           ,1 --IsActive
+           ,@BugunDonemTipiId -- DonemTipiId
+           ,takip.TalepId
+           ,talep.TalepTipiId -- TalepTipiId
+           ,@UcretTipiId
+           ,talep.AdayId -- CariId
+           ,3 -- TaksitTipiId : 3 = Tek Ödeme
+           ,takip.uSinavNo -- TaksitNo
+           
+           ,(case
+               when @settingsSonSinavTarihiniKullan = 1 and takip.uSinavBasariTarihi is not null then takip.uSinavBasariTarihi
+               when @settingsPlanTarihiniKullan = 1     and takip.uSinavPlanTarihi is not null then takip.uSinavPlanTarihi
+               when @settingsSonSinavTarihiniKullan = 0 and -- hiçbiri seçilmemişse
+                    @settingsPlanTarihiniKullan = 0     and takip.uSinavPlanTarihi is not null then takip.uSinavPlanTarihi
+               else @GelecekSinavTarihi end ) -- VadeTarihi
+               
+           ,@BorclandirmaUcreti
+           ,2    -- OdemeTipiId   Nakit
+           ,0    -- IsPaid
+           ,null -- TahsilTarihi
+           ,null -- YedekTaksitTutari
+           ,null -- BelgeDekontId
+           ,null -- PatchBelgeDekontId
+           ,null -- BelgeStokBId
+           ,2301 -- SourceTypeId -- Src Modülü - Otomatik, kullanıcı onaylı
+           ,null -- SourceId
+           ,null -- VeriKaynakId
+  From dbo.SrcAdayTakip as takip
+       left outer join dbo.SrcAdayTalep as talep on ( takip.TalepId = talep.Id )
+	   left outer join dbo.OnmOdemePlani as odeme on ( odeme.FirmId = @FirmId
+	      and odeme.TalepId = takip.TalepId
+		  and odeme.TaksitNo = takip.uSinavNo
+          and odeme.UcretTipiId = @UcretTipiId
+	   )
+       left outer join dbo.SrcUcretUygulama as uygUcreti on ( 
+              talep.MevcutSertifikaTipiId = uygUcreti.MevcutSertifikaTipiId
+          and talep.IstenenSertifikaTipiId = uygUcreti.IstenenSertifikaTipiId 
+       )
+  Where talep.FirmId = @FirmId 
+  and   takip.FirmId = @FirmId
+  and   talep.Id = @TalepId
+  and   takip.TalepId = @TalepId
+  --and ( takip.uSinavDurumTipiId = 5 or takip.uSinavDurumTipiId = 6 or takip.uSinavDurumTipiId = 8)
+  and   isnull(takip.uSinavUcretTipiId,0) <> 2 --  aday kendisi yatıracaksa yapmasın
+  and   uygUcreti.GecerlilikTarihiId = dbo.fnc_getGecerlilikTarihiId(@FirmId, 21104, getdate())
+  and   odeme.Id is null
+
+  --- Eğer biz yatıracağı işaretli değilse
+  Update dbo.SrcAdayTakip Set
+    uSinavUcretTipiId = 1
+  From dbo.SrcAdayTakip as takip
+  Where takip.FirmId = @FirmId
+  and   takip.TalepId = @TalepId
+  and   isnull(takip.uSinavUcretTipiId,0) = 0
+
+END -- procedure
+
+/*CreateProcedureEnd*/
+

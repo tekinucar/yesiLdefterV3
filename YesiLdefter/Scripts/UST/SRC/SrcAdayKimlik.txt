@@ -1,0 +1,115 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table SrcAdayKimlik
+ (
+   Id                    Int IDENTITY(1,1) not null, 
+   FirmId                Int       not null,
+   TalepId               Int       not null, /* Kullanılmayacak ileride gerebilir, kimlik resmide AdayBiyometrik resmi gibi tek olacak */
+   AdayId                Int       not null, 
+   TcNo                  Varchar(11)   null,
+   VeriKaynakId          Int           null, /* Veri transferi edildiği tablodaki Id . Sorun olduğunda bilginin nereden geldiğine referans olsun */
+
+   -- 20
+   IsEhliyetli          Bit            null,
+   Kimlik1Resim         VarBinary(max) null,
+   Kimlik2Resim         VarBinary(max) null,
+   Kimlik1ResimSmall    VarBinary(max) null,
+   Kimlik2ResimSmall    VarBinary(max) null,
+
+   constraint		pk_SrcAdayKimlik primary key (Id)
+ )
+  
+ grant select, insert, update, delete on SrcAdayKimlik to public
+
+  create index X_SrcAdayKimlik01 on SrcAdayKimlik (AdayId)
+
+commit transaction
+
+/*CreateTableEnd*/
+
+/*CreateTrigger*/
+
+CREATE TRIGGER dbo.trg_SrcAdayKimlik on dbo.SrcAdayKimlik
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    DECLARE kimlikCursor cursor local for select Id from Inserted
+    DECLARE @KimlikId bigint
+
+    OPEN kimlikCursor
+    FETCH NEXT FROM kimlikCursor INTO @KimlikId
+
+    -- Veri Transferi başladımı
+    declare @DbUpdatesIsActive Bit = 0
+    set @DbUpdatesIsActive = [dbo].[fnc_getIsDbUpdate] (13)
+
+    Declare @TalepId int = 0
+	declare @AdayId int
+	declare @VeriKaynakId int
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+
+        select 
+            --@TalepId = ins.TalepId,
+            @AdayId = ins.AdayId
+		   ,@VeriKaynakId = ins.VeriKaynakId
+		from inserted ins
+    	where ins.Id = @KimlikId
+
+		-- SrcAdayTalep tablosunu işaretle
+        if (@DbUpdatesIsActive = 0)
+        begin
+            Update SrcAdayTalep set
+                KimlikGeldi = x.Sonuc
+            From SrcAdayTalep a, 
+            (
+               Select count(Id) as Sonuc
+               From SrcAdayKimlik
+               Where Kimlik1Resim is not null
+               and AdayId = @AdayId
+            ) as x
+            Where a.AdayId = @AdayId
+        end
+
+		-- SrcAdayBelgeler tablosunu işaretle
+		Update SrcAdayBelgeler set
+        Kimlik1Tarandi = x.Sonuc
+        From SrcAdayBelgeler a, 
+        (
+            Select count(Id) as Sonuc
+            From SrcAdayKimlik
+            Where 0 = 0
+            and Kimlik1Resim is not null
+            and AdayId = @AdayId
+        ) as x
+        Where a.AdayId = @AdayId
+
+        Update SrcAdayBelgeler set
+        Kimlik2Tarandi = x.Sonuc
+        From SrcAdayBelgeler a, 
+        (
+            Select count(Id) as Sonuc
+            From SrcAdayKimlik
+            Where 0 = 0
+            and Kimlik2Resim is not null
+            and AdayId = @AdayId
+        ) as x
+        Where a.AdayId = @AdayId
+
+
+        FETCH NEXT FROM KimlikCursor INTO @KimlikId
+    END -- While
+
+    CLOSE KimlikCursor
+    DEALLOCATE KimlikCursor   
+
+
+END -- create trigger
+
+/*CreateTriggerEnd*/
+
+
+

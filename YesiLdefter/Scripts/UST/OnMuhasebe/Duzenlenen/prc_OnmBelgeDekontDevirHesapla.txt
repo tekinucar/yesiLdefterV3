@@ -1,0 +1,184 @@
+﻿
+/*CreateProcedure*/
+
+CREATE PROCEDURE prc_OnmBelgeDekontDevirHesapla
+      @FirmId Int
+    , @HesaplamaTarihi DATE
+AS
+BEGIN
+
+    --declare @FirmId int = 4239
+    --declare @HesaplamaTarihi DATE = convert(date, '01.01.2010', 103)
+
+    SET NOCOUNT ON;
+    
+    declare @IlkGun Date 
+    Select @IlkGun = MIN(BelgeTarihi) 
+    From dbo.OnmBelgeDekont
+    Where FirmId = @FirmId
+    
+    Select @IlkGun
+
+    if (@HesaplamaTarihi < @IlkGun) 
+        Set @HesaplamaTarihi = @IlkGun
+
+    declare @BaslangicTarihi Date = @HesaplamaTarihi;
+    declare @YilinSonGunu Date = EOMONTH(DATEFROMPARTS(YEAR(@HesaplamaTarihi), 12, 1))
+    declare @SonGun Date = CAST(GETDATE() AS DATE);
+    
+    if (@YilinSonGunu < @SonGun and @HesaplamaTarihi <> @IlkGun)
+        Set @SonGun = @YilinSonGunu
+
+    -- Önceki günün devir bilgilerini al
+    declare @OncekiGunDevirBorc Numeric(22,5) = 0;
+    declare @OncekiGunDevirAlacak Numeric(22,5) = 0;
+    
+    
+    Select * Into #FinansHesaplari from (
+        Select AltGrupTipiId as FinansTipiId, Id as FinansId
+        From dbo.OnmHesapFinans
+        Where FirmId = @FirmId
+        and   IsActive = 1
+        and   AltGrupTipiId in (100,1022,1023,1024,1025,1026)
+    ) as kaynak 
+    --Select * from #FinansHesaplari;
+    
+    -- Finans hesapları için günlük satır insert et
+    WHILE @BaslangicTarihi <= @SonGun
+    BEGIN
+      MERGE dbo.OnmBelgeDekontDevir AS target
+        USING (
+            Select 
+              @BaslangicTarihi AS BelgeTarihi
+            , AltGrupTipiId as FinansTipiId
+            , Id as FinansId
+            From dbo.OnmHesapFinans
+            Where FirmId = @FirmId
+            and   IsActive = 1
+            and   AltGrupTipiId in (100,1022,1023,1024,1025,1026)
+        ) AS source
+        ON target.BelgeTarihi = source.BelgeTarihi 
+        WHEN NOT MATCHED THEN
+        Insert
+           ([FirmId]
+           ,[BelgeTarihi]
+           ,[FinansTipiId]
+           ,[FinansId]
+           ,[DundenDevirBorcToplami]
+           ,[DundenDevirAlacakToplami]
+           ,[BugunBorcToplami]
+           ,[BugunAlacakToplami]
+           ,[DevredenBorcToplami]
+           ,[DevredenAlacakToplami])
+        Values
+           (@FirmId
+           ,@BaslangicTarihi 
+           ,source.FinansTipiId
+           ,source.FinansId
+           ,0
+           ,0
+           ,0
+           ,0
+           ,0
+           ,0);
+
+        set @BaslangicTarihi = DATEADD(DAY, 1, @BaslangicTarihi);
+    END -- while
+    
+    -- Yeniden başlangıç tarihini set etmemiz gerekiyor
+    Set @BaslangicTarihi = @HesaplamaTarihi;
+
+    -- Tarihten itibaren tüm günleri güncelle
+    WHILE @BaslangicTarihi <= @SonGun
+    BEGIN
+        -- Dünden devredenler
+        ;Select * Into #OncekiGunDevirleri from (
+            Select 
+                [FinansTipiId]
+               ,[FinansId]
+               ,[DevredenBorcToplami]  
+               ,[DevredenAlacakToplami]
+            From dbo.OnmBelgeDekontDevir 
+            Where FirmId = @FirmId
+            and   BelgeTarihi = DATEADD(DAY, -1, @BaslangicTarihi)
+        ) as kaynak;
+
+        -- Günlük toplamları hesapla
+        ;Select * Into #BugununToplamlari from (
+             Select 
+                 fh.FinansTipiId
+                ,fh.FinansId
+                ,isnull(bd.GunlukBorcToplami,0) as GunlukBorcToplami
+                ,isnull(bd.GunlukAlacakToplami,0) as GunlukAlacakToplami
+             from #FinansHesaplari as fh
+                 left outer join (    
+                     Select FinansTipiId,
+                         (case 
+                          when FinansTipiId = BHesapTipiId then BorcluId
+                          when FinansTipiId = AHesapTipiId then AlacakliId
+                          else 0
+                          end) as FinansId
+                        ,SUM(case when FinansTipiId = BHesapTipiId then BelgeTutari else 0 end) as GunlukBorcToplami
+                        ,SUM(case when FinansTipiId = AHesapTipiId then BelgeTutari else 0 end) as GunlukAlacakToplami
+                     From dbo.OnmBelgeDekont 
+                     Where FirmId = @FirmId
+                     and   IsActive = 1
+                     and   FinansTipiId > 0
+                     and   BelgeTarihi = @BaslangicTarihi
+                     Group By FinansTipiId,
+                             (case 
+                              when FinansTipiId = BHesapTipiId then BorcluId
+                              when FinansTipiId = AHesapTipiId then AlacakliId
+                              else 0 end)
+                 ) as bd on (fh.FinansTipiId = bd.FinansTipiId and fh.FinansId = bd.FinansId )
+        ) as gunluk;
+
+        MERGE INTO dbo.OnmBelgeDekontDevir AS hedef
+        USING (
+            Select 
+                @BaslangicTarihi AS BelgeTarihi
+               ,b.FinansTipiId
+               ,b.FinansId
+               ,isnull(o.DevredenBorcToplami, 0) AS DundenDevirBorcToplami
+               ,isnull(o.DevredenAlacakToplami, 0) AS DundenDevirAlacakToplami
+               ,b.GunlukBorcToplami
+               ,b.GunlukAlacakToplami
+               ,(case when (isnull(o.DevredenBorcToplami, 0) + b.GunlukBorcToplami) > (isnull(o.DevredenAlacakToplami, 0) + b.GunlukAlacakToplami) then ((isnull(o.DevredenBorcToplami, 0) + b.GunlukBorcToplami) - (isnull(o.DevredenAlacakToplami, 0) + b.GunlukAlacakToplami)) else 0 end)  AS DevredenBorcToplami
+               ,(case when (isnull(o.DevredenBorcToplami, 0) + b.GunlukBorcToplami) < (isnull(o.DevredenAlacakToplami, 0) + b.GunlukAlacakToplami) then ((isnull(o.DevredenAlacakToplami, 0) + b.GunlukAlacakToplami) - (isnull(o.DevredenBorcToplami, 0) + b.GunlukBorcToplami)) else 0 end)  AS DevredenAlacakToplami
+            From #BugununToplamlari b
+                LEFT JOIN #OncekiGunDevirleri o ON ( b.FinansTipiId = o.FinansTipiId AND b.FinansId = o.FinansId )
+        ) AS kaynak
+          ON hedef.FirmId = @FirmId
+         AND hedef.BelgeTarihi = kaynak.BelgeTarihi
+         AND hedef.FinansTipiId = kaynak.FinansTipiId
+         AND hedef.FinansId = kaynak.FinansId
+        WHEN MATCHED THEN
+            UPDATE SET
+                DundenDevirBorcToplami   = kaynak.DundenDevirBorcToplami
+               ,DundenDevirAlacakToplami = kaynak.DundenDevirAlacakToplami
+               ,BugunBorcToplami         = kaynak.GunlukBorcToplami
+               ,BugunAlacakToplami       = kaynak.GunlukAlacakToplami
+               ,DevredenBorcToplami      = kaynak.DevredenBorcToplami
+               ,DevredenAlacakToplami    = kaynak.DevredenAlacakToplami;
+    
+        --Select * from #BugununToplamlari;
+
+        drop table #BugununToplamlari
+        drop table #OncekiGunDevirleri;
+
+        set @BaslangicTarihi = DATEADD(DAY, 1, @BaslangicTarihi);
+    END; -- While     
+
+
+    drop table #FinansHesaplari;
+   
+    --  select * from OnmBelgeDekontDevir
+
+    --  select COUNT(Id) as adet from OnmBelgeDekont
+
+    --  delete from OnmBelgeDekontDevir
+
+END -- 
+
+/*CreateProcedureEnd*/
+

@@ -152,6 +152,6 @@ AS BEGIN
 
 END -- create trigger
 
-ALTER TABLE dbo.MtskAdayAdres ENABLE TRIGGER trg_MtskAdayAdres
+-- ALTER TABLE dbo.MtskAdayAdres ENABLE TRIGGER trg_MtskAdayAdres
 
 /*CreateTriggerEnd*/

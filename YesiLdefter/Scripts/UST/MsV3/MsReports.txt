@@ -174,15 +174,16 @@ delete from [dbo].[MsReports] Where RecordTypeId = 1
 INSERT INTO [dbo].[MsReports]
            ([IsActive],[LineNumber],[ReportCode],[ParentCode],[ReportCaption]                    ,[About], [ReportName],[RecordTypeId],[ReportTypeId],[PrivateTypeId],[SoftwareCode],[ProjectCode],[ModulCode],[ReportTemp])
      VALUES
+           -- MTSK
            ( 1        , 0         , 'KRM'       , ''         , 'Kurum işlemleri'                 , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
            ( 1        , 0         , 'OMS'       , ''         , 'Ön muhasebe'                     , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
            ( 1        , 0         , 'DNM'       , ''         , 'Dönem işlemler'                  , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
            ( 1        , 0         , 'IDA'       , ''         , 'İdari işlemler'                  , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
            ( 1        , 0         , 'RPR'       , ''         , 'Rapor işlemleri'                 , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
 
+           -- MTSK
            ( 1        , 0         , 'OMS.DKNT'  , 'OMS'      , 'Tahsilat/Ödeme dekontları'       , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
            ( 1        , 0         , 'OMS.MLYT'  , 'OMS'      , 'Maliyet belgeleri'               , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
-
 
 
            ( 1        , 0         , 'KRM.PERS'  , 'KRM'      , 'Personel raporları'              , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
@@ -251,5 +252,23 @@ INSERT INTO [dbo].[MsReports]
            ( 1        , 0         , 'RPR.RBAS'      , 'RPR'      , 'Rapor başlığı'               , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
            ( 1        , 0         , 'RPR.SBAS'      , 'RPR'      , 'Sayfa başlığı'               , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
            ( 1        , 0         , 'RPR.RTOP'      , 'RPR'      , 'Rapor toplamı'               , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
-           ( 1        , 0         , 'RPR.STOP'      , 'RPR'      , 'Sayfa toplamı'               , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       )
+           ( 1        , 0         , 'RPR.STOP'      , 'RPR'      , 'Sayfa toplamı'               , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'MTS'     , null       ),
 
+
+           -- SRC
+           ( 1        , 0         , 'KRM'       , ''         , 'Kurum işlemleri'                 , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'SRC'     , null       ),
+           ( 1        , 0         , 'OMS'       , ''         , 'Ön muhasebe'                     , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'SRC'     , null       ),
+           ( 1        , 0         , 'DNM'       , ''         , 'Dönem işlemler'                  , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'SRC'     , null       ),
+           ( 1        , 0         , 'IDA'       , ''         , 'İdari işlemler'                  , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'SRC'     , null       ),
+           ( 1        , 0         , 'RPR'       , ''         , 'Rapor işlemleri'                 , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'SRC'     , null       ),
+
+           ( 1        , 0         , 'DNM.TALP'  , 'DNM'      , 'Talep raporları'                 , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'SRC'     , null       ),
+
+           --( 1        , 0         , 'DNM.TALP'      , 'DNM'      , 'Talep raporları'             , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'SRC'     , null       ),
+           ( 1        , 0         , 'DNM.TALP.TLP'  , 'DNM.TALP' , 'Talep '                      , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'SRC'     , null       ),
+           ( 1        , 0         , 'DNM.TALP.EVR'  , 'DNM.TALP' , 'Evraklar'                    , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'SRC'     , null       ),
+           ( 1        , 0         , 'DNM.TALP.DER'  , 'DNM.TALP' , 'Dersler'                     , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'SRC'     , null       ),
+           ( 1        , 0         , 'DNM.TALP.UCR'  , 'DNM.TALP' , 'Ücretler'                    , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'SRC'     , null       ),
+           ( 1        , 0         , 'DNM.TALP.BIL'  , 'DNM.TALP' , 'Bildirimler'                 , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'SRC'     , null       ),
+           ( 1        , 0         , 'DNM.TALP.TKP'  , 'DNM.TALP' , 'Takip durumu'                , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'SRC'     , null       ),
+           ( 1        , 0         , 'DNM.TALP.FRM'  , 'DNM.TALP' , 'Formlar'                     , null  , ''          , 1            , 0            , null          , 'UST'        , 'MEB'       , 'SRC'     , null       )

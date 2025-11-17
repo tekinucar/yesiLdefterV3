@@ -1,4 +1,6 @@
-﻿CREATE PROCEDURE [dbo].[prc_KullaniciFinansHesaplariGet] (@FirmId int, @UserId int, @DekontTipiId int)  
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_KullaniciFinansHesaplariGet] (@FirmId int, @UserId int, @DekontTipiId int)  
 AS BEGIN 
 
    --declare @UserId int
@@ -61,3 +63,5 @@ AS BEGIN
     Exec sp_executesql @selectFields
 
 END
+
+/*CreateProcedureEnd*/

@@ -29,13 +29,6 @@ begin transaction
    EpostaGonder            Bit            null,
    WhatsAppGonder          Bit            null,
    
-   -- 50
-   MevcutEhliyetTipiId            SmallInt        null,
-   MevcutEhliyetVerilisTarihi     Date            null, 
-   MevcutEhlSonGecerlilikTarihi   Date            null,
-   MevcutEhliyetNo                nVarchar(30)    null,
-   IsMevcutEhlOtomatik            Bit             null, /* 0 = Manuel vites, 1 = Otomatik vites */
-   IsMevcutEhl2016Oncesi          Bit             null, 
    
    -- 60
    KullaniciUyarilari    nVarchar(200)  null,

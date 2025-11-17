@@ -1,0 +1,78 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table OnmHesapFinansBakiyesi
+ (
+    Id                  Int IDENTITY(1,1) not null,
+    FirmId              Int                   null,
+    Yil                 SmallInt              null,
+
+    FinansTipiId        SmallInt           not null, 
+    FinansId            Int                not null, /* OnmHesapFinans Tablosundaki Id */
+
+    GYDevirBorcToplami    Numeric(22,5) DEFAULT 0,
+    GYDevirAlacakToplami  Numeric(22,5) DEFAULT 0,
+    BorcAcilisTutari      Numeric(22,5)         null, 
+    AlacakAcilisTutari    Numeric(22,5)         null, 
+
+    BorcIslemSayisi       Int                   null, 
+    BorcToplami           Numeric(22,5)         null, 
+    AlacakIslemSayisi     Int                   null, 
+    AlacakToplami         Numeric(22,5)         null, 
+
+    BorcBakiyesi          Numeric(22,5)         null, 
+    AlacakBakiyesi        Numeric(22,5)         null, 
+    BakiyeTipi            Varchar(1)            null, /* B veya A  */ 
+    Bakiye                Numeric(22,5)         null, /* tek kolonda görünen  */ 
+
+    BorcIptalSayisi       Int                   null, 
+    BorcIptalToplami      Numeric(22,5)         null, 
+    
+    AlacakIptalSayisi     Int                   null, 
+    AlacakIptalToplami    Numeric(22,5)         null, 
+
+   Constraint pk_OnmHesapFinansBakiyesi primary key (Id)
+ )
+
+ create index X_OnmHesapFinansBakiyesi_01 on OnmHesapFinansBakiyesi (FirmId, Yil, FinansTipiId, FinansId)
+ 
+ grant select, insert, update, delete on OnmHesapFinansBakiyesi to public
+
+commit transaction
+
+/*CreateTableEnd*/
+
+ /*CreateLkpTable*/
+
+begin transaction
+
+-- ------------------------------------------------------- 
+-- FinansTipiId   
+-- ------------------------------------------------------- 
+
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmHesapFinansBakiyesiFinansTipi')
+drop table [Lkp].[OnmHesapFinansBakiyesiFinansTipi]
+
+create table [Lkp].[OnmHesapFinansBakiyesiFinansTipi]
+(
+   Id             Int Unique Not Null,
+   FinansTipi     nVarchar(30),
+   
+   constraint  pk_OnmHesapFinansBakiyesiFinansTipi primary key (Id)
+)
+
+delete from [Lkp].[OnmHesapFinansBakiyesiFinansTipi]
+INSERT INTO [Lkp].[OnmHesapFinansBakiyesiFinansTipi] (Id, FinansTipi)
+ VALUES 
+  ( 0,    N'Tanımsız'),
+  ( 100,  N'Kasa'),
+  ( 1022, N'Banka hesabı'), 
+  ( 1023, N'Banka/Kredi kartı'), 
+  ( 1024, N'POS'),
+  ( 1025, N'Sanal POS'),
+  ( 1026, N'Cari POS')
+
+commit transaction
+
+ /*CreateLkpTableEnd*/

@@ -464,7 +464,7 @@ INSERT INTO [Lkp].[OnmBelgeStokBOdemeTipi] (Id, OdemeTipi)
 
 commit transaction
 
-/*CreateLkpTable*/
+/*CreateLkpTableEnd*/
 
 
 /*

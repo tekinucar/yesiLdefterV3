@@ -6,10 +6,13 @@ begin transaction
  (
 
    ULAS                Int IDENTITY(1,1) not null,  
-   HESAP_KODU          varchar(10)  null,
+
+   HESAP_TURU          varchar(30)  null,
+   HESAP_KODU          varchar(30)  null,
    ACIKLAMA            varchar(80)  null,
 
    MaliyetHesapKodu    nvarchar(50) null,
+   MaliyetId           Int          null,
    VarlikId            Int          null,
    AboneId             Int          null,
    KasaId              Int          null,
@@ -17,6 +20,7 @@ begin transaction
    KrediKartiId        Int          null,
    PosId               Int          null,
    PersonelId          Int          null,
+   CariId              Int          null,
    
   constraint pk_TempTabimHesaplar primary key (ULAS)
  )
@@ -28,5 +32,4 @@ begin transaction
 commit transaction
 
 /*CreateTableEnd*/
-
 

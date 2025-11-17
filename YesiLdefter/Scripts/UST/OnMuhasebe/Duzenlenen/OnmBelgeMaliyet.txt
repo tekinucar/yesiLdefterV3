@@ -20,16 +20,14 @@ begin transaction
    IsActive           Bit       not null, /* default : 1 = active, 0 = not active */  
    IsPaid             Bit       not null, /* default : 0 = ödenmedi, 1 = ödendi */  
    IsCommit           Bit       not null, /* default : 0 = muh. işlenmedi, 1 = muh. İşlendi */  
-  
+   
    BelgeTipiId        SmallInt      null, /* fatura, öck, parek.fişi, ...*/
    KaynakTipiId       SmallInt      null, /* 1. kağıt, 2. elektronik belge */
-   
+   IslemTipiId        SmallInt      null, /* 1. Gider, 2. Gelir, 3. Diğer */
+
    -- 10 Belge Hakkında
    BelgeTarihi        Date          null,
    BelgeSaati         VarChar(8)    null,
-   --BelgeYil           Smallint      null, 
-   --BelgeAy            Smallint      null, 
-   --BelgeGun           Smallint      null,
    BelgeSeri          nVarChar(10)  null,
    BelgeNo            nVarChar(50)  null,
    BelgeDonemTipiId   Int           null,
@@ -104,8 +102,9 @@ begin transaction
    -- 140
    KayitTarihi        DateTime      null, 
    BelgeDekontId      Int           null, /* OnmBelgeDekont.Id = Ödeme yapan belge ıd */  
-   CommitTable        Int           null, /* ilgili table */
-   CommitId           Int           null, /* ilgili table ref Id */
+
+   --CommitTable iptal oldu
+   --CommitId 
 
    constraint		pk_OnmBelgeMaliyet primary key (Id)
  )
@@ -311,6 +310,30 @@ INSERT INTO [Lkp].[OnmBelgeMaliyetBelgeTipi] (Id, BelgeTipi, GrupTipiId)
   (22,  N'Hesap Ekstresi', 1),
   (23,  N'Sigorta poliçesi', 1),
   (99,  N'Belgesiz', 1)
+
+
+-- ------------------------------------------------------- 
+-- IslemTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'OnmBelgeMaliyetIslemTipi')
+drop table [Lkp].[OnmBelgeMaliyetIslemTipi]
+
+create table [Lkp].[OnmBelgeMaliyetIslemTipi]
+(
+   Id           Int Unique Not Null,
+   IslemTipi    nVarchar(20),
+
+   constraint  pk_OnmBelgeMaliyetIslemTipi primary key (Id)
+)
+
+delete from [Lkp].[OnmBelgeMaliyetIslemTipi]
+INSERT INTO [Lkp].[OnmBelgeMaliyetIslemTipi] (Id, IslemTipi)
+ VALUES 
+  (0,   N'Tanımsız'),
+  (1,   N'Gider'),
+  (2,   N'Gelir'),
+  (3,   N'Diğer')
+
 
 -- ------------------------------------------------------- 
 -- TuketimTipiId

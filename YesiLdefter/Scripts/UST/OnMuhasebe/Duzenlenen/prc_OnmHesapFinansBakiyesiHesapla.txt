@@ -1,0 +1,251 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_OnmHesapFinansBakiyesiHesapla]  (@FirmId int, @HesaplamaTarihi Date)  
+AS BEGIN
+
+    --declare @FirmId int = 4239
+    --declare @HesaplamaTarihi DATE = convert(date, '01.01.2010', 103)
+
+    SET NOCOUNT ON
+
+    declare @IlkYil int 
+    declare @HesaplanacakYil int = YEAR(@HesaplamaTarihi)
+    declare @BaslangicYil int 
+    declare @SonYil int = YEAR(GETDATE())
+
+    Select @IlkYil = YEAR(MIN(BelgeTarihi)) 
+    From dbo.OnmBelgeDekont
+    Where FirmId = @FirmId
+
+    if (@HesaplanacakYil < @IlkYil) 
+        Set @HesaplanacakYil = @IlkYil
+
+    set @BaslangicYil = @HesaplanacakYil
+
+    --Select @IlkYil, @HesaplanacakYil
+
+    Select * Into #FinansHesaplari from (
+        Select AltGrupTipiId as FinansTipiId, Id as FinansId
+        From dbo.OnmHesapFinans
+        Where FirmId = @FirmId
+        and   IsActive = 1
+        and   AltGrupTipiId in (100,1022,1023,1024,1025,1026)
+    ) as kaynak 
+    --Select * from #FinansHesaplari;
+
+    -- Finans hesapları için yıllık satır insert et
+    WHILE @BaslangicYil <= @SonYil
+    BEGIN
+      MERGE dbo.OnmHesapFinansBakiyesi AS target
+        USING (
+            Select 
+              @BaslangicYil AS BelgeYili
+            , AltGrupTipiId as FinansTipiId
+            , Id as FinansId
+            From dbo.OnmHesapFinans
+            Where FirmId = @FirmId
+            and   IsActive = 1
+            and   AltGrupTipiId in (100,1022,1023,1024,1025,1026)
+        ) AS source
+        ON target.Yil = source.BelgeYili 
+        WHEN NOT MATCHED THEN
+        Insert
+           ([FirmId]
+           ,[Yil]
+           ,[FinansTipiId]
+           ,[FinansId]
+           ,[GYDevirBorcToplami]
+           ,[GYDevirAlacakToplami]
+           ,[BorcAcilisTutari]
+           ,[AlacakAcilisTutari]
+           ,[BorcIslemSayisi]
+           ,[BorcToplami]
+           ,[AlacakIslemSayisi]
+           ,[AlacakToplami]
+           ,[BorcBakiyesi]
+           ,[AlacakBakiyesi]
+           ,[BakiyeTipi]
+           ,[Bakiye]
+           ,[BorcIptalSayisi]
+           ,[BorcIptalToplami]
+           ,[AlacakIptalSayisi]
+           ,[AlacakIptalToplami]
+           )
+        Values
+           (@FirmId
+           ,@BaslangicYil
+           ,source.FinansTipiId
+           ,source.FinansId
+           ,0 
+           ,0
+           ,0 
+           ,0
+           ,0
+           ,0
+           ,0
+           ,0
+           ,0 
+           ,0
+           ,'' -- BakiyeTipi
+           ,0
+           ,0
+           ,0
+           ,0
+           ,0
+           );
+
+        set @BaslangicYil = @BaslangicYil + 1
+    END -- while
+
+    -- select * from OnmHesapFinansBakiyesi
+    -- delete from OnmHesapFinansBakiyesi
+
+    -- Yeniden başlangıç tarihini set etmemiz gerekiyor
+    Set @BaslangicYil = @HesaplanacakYil;
+
+    -- Tarihten itibaren tüm günleri güncelle
+    WHILE @BaslangicYil <= @SonYil
+    BEGIN
+        -- Geçen yıldan devredenler
+        ;Select * Into #OncekiYilinDevirleri from (
+            Select 
+                [FinansTipiId]
+               ,[FinansId]
+               ,[BorcBakiyesi] as DevirBorcToplami 
+               ,[AlacakBakiyesi] as DevirAlacakToplami 
+            From dbo.OnmHesapFinansBakiyesi 
+            Where FirmId = @FirmId
+            and   Yil = @BaslangicYil - 1
+        ) as kaynak;
+
+        -- Bu yılki toplamları hesapla
+        ;Select * Into #BuYilinToplamlari from (
+             Select 
+                 fh.FinansTipiId
+                ,fh.FinansId
+                ,isnull(bd.YillikBorcToplami,0) as BuYilBorcToplami
+                ,isnull(bd.YillikAlacakToplami,0) as BuYilAlacakToplami
+                ,isnull(bd.BorcBelgeSayisi,0) as YillikBorcBelgeSayisi
+                ,isnull(bd.AlacakBelgeSayisi,0) as YillikAlacakBelgeSayisi
+                -- İptaller
+                ,isnull(bd.YillikBorcIptalToplami,0) as BuYilBorcIptalToplami
+                ,isnull(bd.YillikAlacakIptalToplami,0) as BuYilAlacakIptalToplami
+                ,isnull(bd.BorcIptalBelgeSayisi,0) as YillikBorcIptalBelgeSayisi
+                ,isnull(bd.AlacakIptalBelgeSayisi,0) as YillikAlacakIptalBelgeSayisi
+
+             from #FinansHesaplari as fh
+                 left outer join (    
+                     Select FinansTipiId,
+                         (case 
+                          when FinansTipiId = BHesapTipiId then BorcluId
+                          when FinansTipiId = AHesapTipiId then AlacakliId
+                          else 0
+                          end) as FinansId
+                        -- Geçerli olan belgeler 
+                        ,SUM(case when IsActive = 1 and FinansTipiId = BHesapTipiId then BelgeTutari else 0 end) as YillikBorcToplami
+                        ,SUM(case when IsActive = 1 and FinansTipiId = AHesapTipiId then BelgeTutari else 0 end) as YillikAlacakToplami
+                        ,SUM(case when IsActive = 1 and FinansTipiId = BHesapTipiId then 1 else 0 end) as BorcBelgeSayisi
+                        ,SUM(case when IsActive = 1 and FinansTipiId = AHesapTipiId then 1 else 0 end) as AlacakBelgeSayisi
+                        -- İptal edilen belgeler
+                        ,SUM(case when IsActive = 0 and FinansTipiId = BHesapTipiId then BelgeTutari else 0 end) as YillikBorcIptalToplami
+                        ,SUM(case when IsActive = 0 and FinansTipiId = AHesapTipiId then BelgeTutari else 0 end) as YillikAlacakIptalToplami
+                        ,SUM(case when IsActive = 0 and FinansTipiId = BHesapTipiId then 1 else 0 end) as BorcIptalBelgeSayisi
+                        ,SUM(case when IsActive = 0 and FinansTipiId = AHesapTipiId then 1 else 0 end) as AlacakIptalBelgeSayisi
+
+                     From dbo.OnmBelgeDekont 
+                     Where FirmId = @FirmId
+                     --and   IsActive = 1
+                     and   FinansTipiId > 0
+                     and   YEAR(BelgeTarihi) = @BaslangicYil
+                     Group By FinansTipiId,
+                             (case 
+                              when FinansTipiId = BHesapTipiId then BorcluId
+                              when FinansTipiId = AHesapTipiId then AlacakliId
+                              else 0 end)
+                 ) as bd on (fh.FinansTipiId = bd.FinansTipiId and fh.FinansId = bd.FinansId )
+        ) as buYil;
+
+        MERGE INTO dbo.OnmHesapFinansBakiyesi AS hedef
+        USING (
+          Select 
+              c.BelgeYili
+             ,c.FinansTipiId
+             ,c.FinansId
+             ,c.DevirBorcToplami
+             ,c.DevirAlacakToplami
+             ,c.BuYilBorcToplami
+             ,c.BuYilAlacakToplami
+             ,c.DevredenBorcToplami
+             ,c.DevredenAlacakToplami
+             ,c.YillikBorcBelgeSayisi
+             ,c.YillikAlacakBelgeSayisi
+
+             ,(case  
+               when c.DevredenBorcToplami > c.DevredenAlacakToplami then 'B'
+               when c.DevredenBorcToplami < c.DevredenAlacakToplami then 'A'
+               else '' end) as BakiyeTipi
+             ,(case  
+               when c.DevredenBorcToplami > c.DevredenAlacakToplami then c.DevredenBorcToplami
+               when c.DevredenBorcToplami < c.DevredenAlacakToplami then c.DevredenAlacakToplami * -1  -- Finans hesaplarda alacak eksi bakiye demektir
+               else 0 end) as Bakiye
+
+             ,c.BuYilBorcIptalToplami
+             ,c.BuYilAlacakIptalToplami
+             ,c.YillikBorcIptalBelgeSayisi
+             ,c.YillikAlacakIptalBelgeSayisi
+
+          From ( 
+            Select 
+                @BaslangicYil AS BelgeYili
+               ,b.FinansTipiId
+               ,b.FinansId
+               ,isnull(o.DevirBorcToplami, 0) AS DevirBorcToplami
+               ,isnull(o.DevirAlacakToplami, 0) AS DevirAlacakToplami
+               ,b.BuYilBorcToplami
+               ,b.BuYilAlacakToplami
+               ,(case when (isnull(o.DevirBorcToplami, 0) + b.BuYilBorcToplami) > (isnull(o.DevirAlacakToplami, 0) + b.BuYilAlacakToplami) then ((isnull(o.DevirBorcToplami, 0) + b.BuYilBorcToplami) - (isnull(o.DevirAlacakToplami, 0) + b.BuYilAlacakToplami)) else 0 end)  AS DevredenBorcToplami
+               ,(case when (isnull(o.DevirBorcToplami, 0) + b.BuYilBorcToplami) < (isnull(o.DevirAlacakToplami, 0) + b.BuYilAlacakToplami) then ((isnull(o.DevirAlacakToplami, 0) + b.BuYilAlacakToplami) - (isnull(o.DevirBorcToplami, 0) + b.BuYilBorcToplami)) else 0 end)  AS DevredenAlacakToplami
+               ,b.YillikBorcBelgeSayisi
+               ,b.YillikAlacakBelgeSayisi
+                -- İptaller
+               ,isnull(b.BuYilBorcIptalToplami,0) as BuYilBorcIptalToplami
+               ,isnull(b.BuYilAlacakIptalToplami,0) as BuYilAlacakIptalToplami
+               ,isnull(b.YillikBorcIptalBelgeSayisi,0) as YillikBorcIptalBelgeSayisi
+               ,isnull(b.YillikAlacakIptalBelgeSayisi,0) as YillikAlacakIptalBelgeSayisi
+            From #BuYilinToplamlari b
+                LEFT JOIN #OncekiYilinDevirleri o ON ( b.FinansTipiId = o.FinansTipiId AND b.FinansId = o.FinansId )
+          ) as c  
+
+        ) AS kaynak
+          ON hedef.FirmId = @FirmId
+         AND hedef.Yil = kaynak.BelgeYili
+         AND hedef.FinansTipiId = kaynak.FinansTipiId
+         AND hedef.FinansId = kaynak.FinansId
+        WHEN MATCHED THEN
+            UPDATE SET
+                GYDevirBorcToplami   = kaynak.DevirBorcToplami
+               ,GYDevirAlacakToplami = kaynak.DevirAlacakToplami
+               ,BorcToplami          = kaynak.BuYilBorcToplami
+               ,AlacakToplami        = kaynak.BuYilAlacakToplami
+               ,BorcBakiyesi         = kaynak.DevredenBorcToplami
+               ,AlacakBakiyesi       = kaynak.DevredenAlacakToplami
+               ,BorcIslemSayisi      = kaynak.YillikBorcBelgeSayisi
+               ,AlacakIslemSayisi    = kaynak.YillikAlacakBelgeSayisi
+               ,BakiyeTipi           = kaynak.BakiyeTipi
+               ,Bakiye               = kaynak.Bakiye
+               ,BorcIptalSayisi      = kaynak.YillikBorcIptalBelgeSayisi
+               ,BorcIptalToplami     = kaynak.BuYilBorcIptalToplami
+               ,AlacakIptalSayisi    = kaynak.YillikAlacakIptalBelgeSayisi
+               ,AlacakIptalToplami   = kaynak.BuYilAlacakIptalToplami;
+
+        drop table #BuYilinToplamlari;
+        drop table #OncekiYilinDevirleri;
+
+        set @BaslangicYil = @BaslangicYil + 1;
+    END; -- While     
+
+    drop table #FinansHesaplari;
+
+END -- procedure
+
+/*CreateProcedureEnd*/  

@@ -961,7 +961,7 @@ AS BEGIN
             where Id = @curId
         end
       end -- 83, 84
-
+      /*
       if ((@eUstHesapKodu = '81.21') or
           (@eUstHesapKodu = '81.22') or
           (@eUstHesapKodu = '81.23') or
@@ -1029,7 +1029,8 @@ AS BEGIN
            (0, @eFirmId, 1, 84, Convert(int, @eUstHesapKodu), 0, 0, null, @eUstHesapKodu, @yHesapKisaAdi, @yHesapKisaAdi)
         end
       end -- if 81..
-	  
+	  */
+
       -- Abone kaydı ise
       if (@eUstGrupTipiId = 84)
       begin

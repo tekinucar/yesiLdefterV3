@@ -1,6 +1,9 @@
-﻿/*CreateProcedure*/
+﻿USE [MainManagerV3]
+GO
 
-CREATE PROCEDURE [dbo].[prc_MsReportsList] (@ReportCode varchar(50))  
+/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_MsReportsList] (@ReportCode varchar(50), @IlCode varchar(5),  @IlceCode varchar(5), @FirmDbName varchar(50), @SectorTypeId int)  
 AS BEGIN
 
    /*
@@ -15,6 +18,14 @@ AS BEGIN
    set @FirmDbName = 'TbmMtsk00000030'
    */
 
+   declare @ModulCode varchar(5)
+   
+   Set @ModulCode = 'MTS'
+
+   if (@SectorTypeId = 201) Set @ModulCode = 'MTS'
+   if (@SectorTypeId = 202) Set @ModulCode = 'ISM'
+   if (@SectorTypeId = 203) Set @ModulCode = 'SRC'
+   
    if (@ReportCode = 'null') 
        set @ReportCode = ''
    if (@FirmDbName = 'null')
@@ -26,18 +37,25 @@ AS BEGIN
     Select mr.ReportCode, mr.ReportCode as Cte_Code
     from MsReports as mr
     Where mr.ParentCode = @ReportCode
- 
+    and   mr.ModulCode = @ModulCode
+    --and   mr.IsActive = 1
+
     union all
 
     Select mr.ReportCode, mr.ReportCode as Cte_Code
     from MsReports as mr
     Where mr.ReportCode = @ReportCode
+    and   mr.ModulCode = @ModulCode
+    --and   mr.IsActive = 1
 
     union all
 
     Select c.Cte_Code , mr.ReportCode
     from CTE as c
         Join MsReports as mr ON ( c.Cte_Code = mr.ParentCode )
+    Where mr.ModulCode = @ModulCode
+    --and   mr.IsActive = 1
+
   ) 
 Select distinct
   tr.[Id]
@@ -86,6 +104,17 @@ Select distinct
 		when il.IlKodu <> '' then il.[PageSummary]
 		else tr.[PageSummary] end ) as [PageSummary]
 
+, (case when firma.FirmaDbName <> '' and isnull(firma.[TableIPCode],'') <> ''  then firma.[TableIPCode]
+        when ilce.IlceKodu <> '' and isnull(ilce.[TableIPCode],'') <> '' then ilce.[TableIPCode]
+		when il.IlKodu <> '' and isnull(il.[TableIPCode],'') <> '' then il.[TableIPCode]
+		else tr.[TableIPCode] end ) as [TableIPCode]
+
+, (case when firma.FirmaDbName <> '' and isnull(firma.[TableIPCode2],'') <> ''  then firma.[TableIPCode2]
+        when ilce.IlceKodu <> '' and isnull(ilce.[TableIPCode2],'') <> '' then ilce.[TableIPCode2]
+		when il.IlKodu <> '' and isnull(il.[TableIPCode2],'') <> '' then il.[TableIPCode2]
+		else tr.[TableIPCode2] end ) as [TableIPCode2]
+
+
 , tr.[SoftwareCode]
 , tr.[ProjectCode]
 , tr.[ModulCode]
@@ -117,14 +146,15 @@ Select distinct
 , firma.PageSummary   as Lkp_FirmaPageSummary 
 
 From CTE as c
-   left outer join MsReports as tr    on ( c.Cte_Code = tr.ReportCode )
-   left outer join MsReports as il    on ( tr.ReportCode = il.ParentCode    and  il.RecordTypeId = 3    and  il.IlKodu = @IlCode )
-   left outer join MsReports as ilce  on ( tr.ReportCode = ilce.ParentCode  and  ilce.RecordTypeId = 4  and  ilce.IlceKodu = @IlceCode )
-   left outer join MsReports as firma on ( tr.ReportCode = firma.ParentCode and  firma.RecordTypeId = 5 and  firma.FirmaDbName = @FirmDbName )
+   left outer join MsReports as tr    on ( c.Cte_Code = tr.ReportCode and tr.IsActive = 1 )
+   left outer join MsReports as il    on ( tr.ReportCode = il.ParentCode    and  il.RecordTypeId = 3    and  il.IlKodu = @IlCode and il.ModulCode = @ModulCode and il.IsActive = 1)
+   left outer join MsReports as ilce  on ( tr.ReportCode = ilce.ParentCode  and  ilce.RecordTypeId = 4  and  ilce.IlceKodu = @IlceCode and ilce.ModulCode = @ModulCode and ilce.IsActive = 1)
+   left outer join MsReports as firma on ( tr.ReportCode = firma.ParentCode and  firma.RecordTypeId = 5 and  firma.FirmaDbName = @FirmDbName and firma.ModulCode = @ModulCode and firma.IsActive = 1)
 
 where tr.ReportCode <> @ReportCode
 and   tr.RecordTypeId < 3
 and   tr.IsActive = 1
+and   tr.ModulCode = @ModulCode
 
 order by tr.[ReportCode]
 

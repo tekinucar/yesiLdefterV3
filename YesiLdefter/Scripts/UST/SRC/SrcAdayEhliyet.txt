@@ -1,0 +1,144 @@
+﻿/*CreateTable*/
+
+begin transaction
+
+ create table SrcAdayEhliyet
+ (
+   Id                    Int IDENTITY(1,1) not null, 
+   FirmId                Int       not null,
+   TalepId               Int       not null, /* Kullanılmayacak ileride gerebilir, ehliyet AdayBiyometrik resmi gibi tek olacak */
+   AdayId                Int       not null, 
+   TcNo                  Varchar(11)   null,
+   VeriKaynakId          Int           null, /* Veri transferi edildiği tablodaki Id . Sorun olduğunda bilginin nereden geldiğine referans olsun */
+
+   -- 10
+   MevcutEhliyetTipiId            SmallInt        null,
+   MevcutEhliyetVerilisTarihi     Date            null, 
+   MevcutEhlSonGecerlilikTarihi   Date            null,
+   MevcutEhliyetNo                nVarchar(30)    null,
+   MevcutEhliyetVerildigiIl       nVarchar(15)    null,
+   IsMevcutEhlOtomatik            Bit             null, /* 0 = Manuel vites, 1 = Otomatik vites */
+   IsMevcutEhl2016Oncesi          Bit             null, 
+   -- 20
+   Ehliyet1Resim         VarBinary(max) null,
+   Ehliyet2Resim         VarBinary(max) null,
+   Ehliyet1ResimSmall    VarBinary(max) null,
+   Ehliyet2ResimSmall    VarBinary(max) null,
+
+   constraint		pk_SrcAdayEhliyet primary key (Id)
+ )
+  
+ grant select, insert, update, delete on SrcAdayEhliyet to public
+
+  create index X_SrcAdayEhliyet01 on SrcAdayEhliyet (AdayId)
+
+commit transaction
+
+/*CreateTableEnd*/
+
+/*CreateTrigger*/
+
+CREATE TRIGGER dbo.trg_SrcAdayEhliyet on dbo.SrcAdayEhliyet
+AFTER INSERT, UPDATE
+AS BEGIN
+
+    DECLARE ehliyetCursor cursor local for select Id from Inserted
+    DECLARE @EhliyetId bigint
+
+    OPEN ehliyetCursor
+    FETCH NEXT FROM ehliyetCursor INTO @EhliyetId
+
+    -- Veri Transferi başladımı
+    declare @DbUpdatesIsActive Bit = 0
+    set @DbUpdatesIsActive = [dbo].[fnc_getIsDbUpdate] (13)
+
+    Declare @TalepId int = 0
+	declare @AdayId int
+	declare @VeriKaynakId int
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+
+        select 
+            --@TalepId = ins.TalepId,
+            @AdayId = ins.AdayId
+		   ,@VeriKaynakId = ins.VeriKaynakId
+		from inserted ins
+    	where ins.Id = @EhliyetId
+
+        /* TalepId lmadığı için kapatıldı
+        if (@VeriKaynakId > 0 and (@TalepId = 0 or @AdayId = 0))
+        begin
+            Update dbo.SrcAdayEhliyet set
+                TalepId = t.Id  
+               ,AdayId  = t.AdayId 
+            From dbo.SrcAdayEhliyet as a,
+                 dbo.SrcAdayTalep as t
+            Where a.VeriKaynakId = t.VeriKaynakId				 
+            and   a.Id = @EhliyetId
+
+			Select @TalepId = Id, @AdayId = AdayId 
+			From dbo.SrcAdayTalep 
+			Where VeriKaynakId = @VeriKaynakId
+        end
+        */
+		-- SrcAdayTalep tablosunu işaretle
+        if (@DbUpdatesIsActive = 0)
+        begin
+            Update SrcAdayTalep set
+                EhliyetGeldi = x.Sonuc
+            From SrcAdayTalep a, 
+            (
+               Select count(Id) as Sonuc
+               From SrcAdayEhliyet
+               Where Ehliyet1Resim is not null
+               --and TalepId = @TalepId
+               and AdayId = @AdayId
+            ) as x
+            --Where a.Id = @TalepId
+            Where a.AdayId = @AdayId
+        end
+
+		-- SrcAdayBelgeler tablosunu işaretle
+		Update SrcAdayBelgeler set
+        Ehliyet1Tarandi = x.Sonuc
+        From SrcAdayBelgeler a, 
+        (
+            Select count(Id) as Sonuc
+            From SrcAdayEhliyet
+            Where 0 = 0
+            and Ehliyet1Resim is not null
+            --and TalepId = @TalepId
+            and AdayId = @AdayId
+        ) as x
+        --Where a.TalepId = @TalepId
+        Where a.AdayId = @AdayId
+
+        Update SrcAdayBelgeler set
+        Ehliyet2Tarandi = x.Sonuc
+        From SrcAdayBelgeler a, 
+        (
+            Select count(Id) as Sonuc
+            From SrcAdayEhliyet
+            Where 0 = 0
+            and Ehliyet2Resim is not null
+            --and TalepId = @TalepId
+            and AdayId = @AdayId
+        ) as x
+        --Where a.TalepId = @TalepId
+        Where a.AdayId = @AdayId
+
+
+        FETCH NEXT FROM ehliyetCursor INTO @EhliyetId
+    END -- While
+
+    CLOSE ehliyetCursor
+    DEALLOCATE ehliyetCursor   
+
+
+END -- create trigger
+
+/*CreateTriggerEnd*/
+
+
+

@@ -13,6 +13,10 @@ begin transaction
    -- 20
    BiyometrikTarandi     Bit   null,
    BasvuruFotoTarandi    Bit   null,
+   Kimlik1Tarandi        Bit   null,
+   Kimlik2Tarandi        Bit   null,
+   Ehliyet1Tarandi       Bit   null,
+   Ehliyet2Tarandi       Bit   null,
    OgrenimTarandi        Bit   null,
    SaglikTarandi         Bit   null,
    AdliSicilTarandi      Bit   null,
@@ -76,12 +80,16 @@ AS BEGIN
     declare @AdayId int
     declare @BiyometrikTarandi Bit = 0
     declare @BasvuruFotoTarandi Bit = 0
+    declare @Kimlik1Tarandi Bit = 0
+    declare @Kimlik2Tarandi Bit = 0
+    declare @Ehliyet1Tarandi Bit = 0
+    declare @Ehliyet2Tarandi Bit = 0
     declare @OgrenimTarandi Bit = 0
-    declare @SaglikTarandi Bit = 0
+    --declare @SaglikTarandi Bit = 0
     declare @AdliSicilTarandi Bit = 0
-    declare @ImzaTarandi Bit = 0
-    declare @Sozlesme1Tarandi Bit = 0
-    declare @Sozlesme2Tarandi Bit = 0
+    --declare @ImzaTarandi Bit = 0
+    --declare @Sozlesme1Tarandi Bit = 0
+    --declare @Sozlesme2Tarandi Bit = 0
     declare @AdresKodlandi Bit = 0
     declare @BelgelerTarandi Bit = 0
    
@@ -90,11 +98,11 @@ AS BEGIN
     declare @BiyometrikYuklendi Bit = 0
     declare @BasvuruFotoYuklendi Bit = 0
     declare @OgrenimYuklendi Bit = 0
-    declare @SaglikYuklendi Bit = 0
+    --declare @SaglikYuklendi Bit = 0
     declare @AdliSicilYuklendi Bit = 0
-    declare @ImzaYuklendi Bit = 0
-    declare @Sozlesme1Yuklendi Bit = 0
-    declare @Sozlesme2Yuklendi Bit = 0
+    --declare @ImzaYuklendi Bit = 0
+    --declare @Sozlesme1Yuklendi Bit = 0
+    --declare @Sozlesme2Yuklendi Bit = 0
     declare @AdresYuklendi Bit = 0
     declare @BelgelerYuklendi Bit = 0
 
@@ -106,23 +114,27 @@ AS BEGIN
         , @AdayId = isnull(ins.AdayId,0)
         , @BiyometrikTarandi = isnull(ins.BiyometrikTarandi,0)
         , @BasvuruFotoTarandi = isnull(ins.BasvuruFotoTarandi,0)
+        , @Kimlik1Tarandi = isnull(Kimlik1Tarandi,0)
+        , @Kimlik2Tarandi = isnull(Kimlik2Tarandi,0)
+        , @Ehliyet1Tarandi = isnull(Ehliyet1Tarandi,0)
+        , @Ehliyet2Tarandi = isnull(Ehliyet2Tarandi,0)
         , @OgrenimTarandi = isnull(ins.OgrenimTarandi,0)
-        , @SaglikTarandi = isnull(ins.SaglikTarandi,0)
+        --, @SaglikTarandi = isnull(ins.SaglikTarandi,0)
         , @AdliSicilTarandi = isnull(ins.AdliSicilTarandi,0)
-        , @ImzaTarandi = isnull(ins.ImzaTarandi,0)
-        , @Sozlesme1Tarandi = isnull(ins.Sozlesme1Tarandi,0)
-        , @Sozlesme2Tarandi = isnull(ins.Sozlesme2Tarandi,0)
+        --, @ImzaTarandi = isnull(ins.ImzaTarandi,0)
+        --, @Sozlesme1Tarandi = isnull(ins.Sozlesme1Tarandi,0)
+        --, @Sozlesme2Tarandi = isnull(ins.Sozlesme2Tarandi,0)
         , @AdresKodlandi = isnull(ins.AdresKodlandi,0)
 
         , @AdayKaydiYapildi = isnull(ins.AdayKaydiYapildi,0)
         , @BiyometrikYuklendi = isnull(ins.BiyometrikYuklendi,0)
         , @BasvuruFotoYuklendi = isnull(ins.BasvuruFotoYuklendi,0)
         , @OgrenimYuklendi = isnull(ins.OgrenimYuklendi,0)
-        , @SaglikYuklendi = isnull(ins.SaglikYuklendi,0)
+        --, @SaglikYuklendi = isnull(ins.SaglikYuklendi,0)
         , @AdliSicilYuklendi = isnull(ins.AdliSicilYuklendi,0)
-        , @ImzaYuklendi = isnull(ins.ImzaYuklendi,0)
-        , @Sozlesme1Yuklendi = isnull(ins.Sozlesme1Yuklendi,0)
-        , @Sozlesme2Yuklendi = isnull(ins.Sozlesme2Yuklendi,0)
+        --, @ImzaYuklendi = isnull(ins.ImzaYuklendi,0)
+        --, @Sozlesme1Yuklendi = isnull(ins.Sozlesme1Yuklendi,0)
+        --, @Sozlesme2Yuklendi = isnull(ins.Sozlesme2Yuklendi,0)
         , @AdresYuklendi = isnull(ins.AdresYuklendi,0)
         from inserted ins
     	where ins.Id = @belgeId
@@ -132,12 +144,16 @@ AS BEGIN
 
         if ((@BiyometrikTarandi = 1) and 
             (@OgrenimTarandi = 1) and
+            (@Kimlik1Tarandi = 1) and
+            (@Kimlik2Tarandi = 1) and
+            (@Ehliyet1Tarandi = 1) and
+            (@Ehliyet2Tarandi = 1) and
             --(@BasvuruFotoTarandi = 1) and
-            (@SaglikTarandi = 1) and
-            (@AdliSicilTarandi = 1) and
-            (@ImzaTarandi = 1) and
-            (@Sozlesme1Tarandi = 1) and
-            (@Sozlesme2Tarandi = 1) --and
+            --(@SaglikTarandi = 1) and
+            (@AdliSicilTarandi = 1) --and
+            --(@ImzaTarandi = 1) and
+            --(@Sozlesme1Tarandi = 1) and
+            --(@Sozlesme2Tarandi = 1) And
             --(@AdresKodlandi = 1)
             ) set @BelgelerTarandi = 1
 
@@ -145,11 +161,11 @@ AS BEGIN
             (@BiyometrikYuklendi = 1) and
             --(@BasvuruFotoYuklendi = 1) and            
             (@OgrenimYuklendi = 1) and 
-            (@SaglikYuklendi = 1) and 
+            --(@SaglikYuklendi = 1) and 
             (@AdliSicilYuklendi = 1) and 
-            (@ImzaYuklendi = 1) and 
-            (@Sozlesme1Yuklendi = 1) and 
-            (@Sozlesme2Yuklendi = 1) and
+            --(@ImzaYuklendi = 1) and 
+            --(@Sozlesme1Yuklendi = 1) and 
+            --(@Sozlesme2Yuklendi = 1) and
             (@AdresYuklendi = 1)
             ) set @BelgelerYuklendi = 1
      
