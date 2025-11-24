@@ -9,7 +9,7 @@ begin transaction
    OdmemePlaniGUID     uniqueidentifier  null,
    FirmId              Int       not null,
    IsActive            Bit       not null, /* default : 1 = active, 0 = not active */ 
-   DonemTipiId         Int           null, /* borcun oluştuğu YılAy ? neden kullanıldım, gereksizse sil */
+   DonemTipiId         Int           null, /* adayın DonemTipiId  */
    TalepId             Int           null, /* = MtskAdayTalep.Id */
    TalepTipiId         SmallInt      null, /* = MtskAdayTalep.TalepTipi */
    UcretTipiId         Int           null, /* = Ücret tipleri */
@@ -33,6 +33,7 @@ begin transaction
    SourceId            Int           null, /* Tabim CariAlt.Ulas */
    VeriKaynakId        Int           null, /* Veri transferi edildiği tablodaki KURSIYER.Ulas. Sorun olduğunda bilginin nereden geldiğine referans olsun */
    MultiSourceId       varchar(100)  null,
+   VadeDonemTipiId     Int           null, /* borcun oluştuğu YılAy */
    
    constraint		pk_OnmOdemePlani primary key (Id)
  )
@@ -45,7 +46,7 @@ begin transaction
   create index X_OnmOdemePlani04 on OnmOdemePlani (CariId)
   create index X_OnmOdemePlani05 on OnmOdemePlani (VadeTarihi)
   create index X_OnmOdemePlani06 on OnmOdemePlani (TahsilTarihi)
-  create index X_OnmOdemePlani07 on OnmOdemePlani (DonemTipiId)
+  create index X_OnmOdemePlani07 on OnmOdemePlani (VadeDonemTipiId)
  
 commit transaction
 
@@ -240,7 +241,7 @@ AS BEGIN
     declare @UcretTipiId smallInt
 	declare @VeriKaynakId int
 	declare @SourceTypeId smallint
-
+    declare @VadeTarihi date
 
     -- Veri Transferi başladımı
     declare @DbUpdatesIsActive Bit = 0
@@ -255,6 +256,7 @@ AS BEGIN
            ,@UcretTipiId = isnull(ins.UcretTipiId,0)
 		   ,@VeriKaynakId = ins.VeriKaynakId
            ,@SourceTypeId = ins.SourceTypeId
+           ,@VadeTarihi = ins.VadeTarihi
         From inserted ins
         Where ins.Id = @curId
      	
@@ -290,8 +292,6 @@ AS BEGIN
                 From dbo.SrcAdayTalep 
                 Where VeriKaynakId = @VeriKaynakId
             end
-
-
         end		
 
 		-- Tahsil edilmiş bir taksit var ise MtskAdayUcret tablosunu kilitle
@@ -321,7 +321,7 @@ AS BEGIN
             Update dbo.MtskAdayTakip Set uSinavUcretTipiId = 1
             From dbo.OnmOdemePlani as odeme
                 left outer join dbo.MtskAdayTakip as takip on ( odeme.TalepId = takip.TalepId )
-            where odeme.UcretTipiId in (21112, 21113, 21114) -- uyg sinav ücreti veya başarısız aday eğitimi veya uyg+başarısız ise
+            where odeme.UcretTipiId in (21112, 21113) -- uyg sinav ücreti veya başarısız aday eğitimi ise
             and   isnull(takip.uSinavUcretTipiId,0) = 0
             --and   odeme.Id = @curId
 
@@ -348,10 +348,25 @@ AS BEGIN
 	        if (@DbUpdatesIsActive = 0)
             begin  
                 Execute [dbo].[prc_SrcAdayBorcunuHesapla] @FirmId, @TalepId
+
+                if (@UcretTipiId = 23111 or  -- teorik sınav ücreti
+                    @UcretTipiId = 23112 )   -- Uygulama sınav ücreti
+                begin
+                    Execute dbo.prc_SrcAdayTakip @FirmId, @TalepId, 0, 'SrcAdayTakipESinav' 
+                end -- if
             end
         end -- Mtsk
 
-
+        if (@VadeTarihi is not null)
+        begin
+            Update dbo.OnmOdemePlani set VadeDonemTipiId = dbo.fnc_getDonemTipiId('BUGUN',  @VadeTarihi)
+            Where  Id = @curId
+        end
+        if (@VadeTarihi is null)
+        begin
+            Update dbo.OnmOdemePlani set VadeDonemTipiId = null
+            Where  Id = @curId
+        end
 
       FETCH NEXT FROM odmPlaniCursor_ INTO @curId
     END -- While
@@ -402,7 +417,13 @@ AS BEGIN
         if (@UcretTipiId > 23100 and @UcretTipiId < 23200)
         begin
 		    Execute [dbo].[prc_SrcAdayBorcunuHesapla] @FirmId, @TalepId
-        end
+
+            if (@UcretTipiId = 23111 or  -- teorik sınav ücreti
+                @UcretTipiId = 23112 )   -- Uygulama sınav ücreti
+            begin
+                Execute dbo.prc_SrcAdayTakip @FirmId, @TalepId, 0, 'SrcAdayTakipESinav' 
+            end -- if
+        end -- if
 
       FETCH NEXT FROM odmPlaniCursor_ INTO @curId
     END

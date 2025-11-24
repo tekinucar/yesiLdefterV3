@@ -11,6 +11,7 @@ begin transaction
    IsActive              Bit       not null, 
    TalepKayitTarihi      Date          null, 
    ParentId              Int           null, /* şimdilik boş */
+   ArtiBelgeTipiId       SmallInt      null, /* 0. yok, 1. (1. talep/belge) , 2. (Artı talep/belge) */
    AdayNo                Int           null,
 
    -- 20
@@ -33,7 +34,7 @@ begin transaction
    /* Talep bilgileri */
    TalepTipiId                    SmallInt        null, /* şimdilk kullanılmayacak, silme kalsın */
 
-   -- 31
+   -- 30
    MevcutSertifikaTipiId          SmallInt        null, /* mevcut SRC sertifika tipi Id si */
    MevcutSinifTipiId              SmallInt        null, /* Mevcut SRC5'in detay sertifika tipi Id si */
    MevcutSertifikaNumarasi        nVarchar(20)    null,
@@ -54,7 +55,6 @@ begin transaction
    -- Ders veya yaş için muafiyeti var
    IsMuafiyetiVar          Bit           null, /* 0 = yok, 1 = var */  
    MuafiyetAciklmasi       nVarchar(50)  null, 
-
 
    -- 60
    /* Dönem bilgileri */
@@ -659,6 +659,29 @@ begin transaction
 -- MevcutSertifikaTipiId ve
 -- IsteneSertifikaTipiId için
 -- [Lkp].[SrcSertifikaTipi]  tablosuna bak
+
+
+-- ------------------------------------------------------- 
+-- ArtiBelgeTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'SrcAdayTalepArtiBelgeTipi')
+drop table [Lkp].[SrcAdayTalepArtiBelgeTipi]
+
+create table [Lkp].[SrcAdayTalepArtiBelgeTipi]
+(
+   Id               Int Unique not null, 
+   ArtiBelgeTipi    nVarchar(50)   null
+   
+   constraint  pk_SrcAdayTalepArtiBelgeTipi primary key (Id)
+)
+
+Delete from [Lkp].[SrcAdayTalepArtiBelgeTipi]
+INSERT INTO [Lkp].[SrcAdayTalepArtiBelgeTipi] (Id, ArtiBelgeTipi)
+ VALUES 
+  ( 0,    N'Yok'),
+  ( 1,    N'1. belge'),
+  ( 2,    N'2. belge')
+
 
 -- ------------------------------------------------------- 
 -- TalepTipiId

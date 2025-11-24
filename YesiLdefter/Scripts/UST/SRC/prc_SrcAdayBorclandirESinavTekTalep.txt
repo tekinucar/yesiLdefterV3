@@ -3,7 +3,8 @@
 CREATE PROCEDURE [dbo].[prc_SrcAdayBorclandirESinavTekTalep] (@FirmId int, @TalepId int)
 AS BEGIN  
 
-  --declare @FirmId Int  = 4202
+  --declare @FirmId Int  = 4204
+  --declare @TalepId int = 3078
 
   declare @settings1SinavIcinBorclandirma bit = 0
   set @settings1SinavIcinBorclandirma = dbo.fnc_getSettingsBool(@FirmId, 2010, 113)
@@ -121,7 +122,6 @@ AS BEGIN
   and   takip.FirmId = @FirmId
   and   talep.Id = @TalepId
   and   takip.TalepId = @TalepId
-  and ( takip.eSinavDurumTipiId >= 2 or takip.eSinavDurumTipiId <= 5 )
   and   isnull(takip.eSinavUcretTipiId,0) <> 2 -- kendisi yatıracaksa yapmasın
   and   odeme.Id is null
 
@@ -132,6 +132,8 @@ AS BEGIN
   Where takip.FirmId = @FirmId
   and   takip.TalepId = @TalepId
   and   isnull(takip.eSinavUcretTipiId,0) = 0
+
+  Execute dbo.prc_SrcAdayTakip @FirmId, @TalepId, 0, 'SrcAdayTakipESinav'
 
 END -- procedure
 

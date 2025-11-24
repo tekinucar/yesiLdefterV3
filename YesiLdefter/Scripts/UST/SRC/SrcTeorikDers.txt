@@ -12,12 +12,13 @@ begin transaction
    GrupTipiId           SmallInt      null,
    SubeTipiId           SmallInt      null,
    
+   Grubu                Varchar(1)    null, /* A, B, C veya D : Mebbisden doğrudan ders programı okunduğunda gerekiyor */  
    DersTipiId           Int           null, /* Detayı : Lkp.SrcDersler tablosunda */
    DerslikAdiTipiId     SmallInt      null, /* Derslik-1, -2 ... -10 */
    DersTarihi           Date          null,
    DersSaatiTipiId      SmallInt      null,
    PersonelId           Varchar(20)   null,
-   EgitimTipiId         SmallInt      null, /* 1. Normal, 2. Telafi */
+   EgitimTipiId         SmallInt      null, /* 1. Normal, 2. Telafi, 9. Şablon kayıt  */
 
    BaslamaSaati         Datetime      null, /* Calender and Scheduling için gerekli */
    BitisSaati           Datetime      null, /* Calender and Scheduling için gerekli */

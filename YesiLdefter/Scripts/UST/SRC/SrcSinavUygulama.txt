@@ -163,10 +163,10 @@ AS BEGIN
 		-- SrcSinavUygulama.DurumuTipiId
         -- 0,    ''
         -- 1,    'Uygulama Sınav Aşamasında'
-        -- 2,    '2.Direksiyon Aşamasında'
         -- 3,    'Sertifika Almaya Hak Kazandı'
         -- 4,    'Uygulama Sınav Hakkı Doldu'
-        -- 5,    'Sertifikası İptal Edildi'
+        -- --- 5,    'Sertifikası İptal Edildi'
+        -- 6,    'Durumu Girilmemiş'
 
 		if (@yDurumuTipiId <> 5)
 		begin
@@ -188,24 +188,6 @@ AS BEGIN
             begin
                 if (@yPuanTipiId = 1 or @yPuanTipiId = -1) -- başarısız veya girmediyse
                    set @yDurumuTipiId = 4         -- Uygulama Sınav Hakkı Doldu
-            end
-
-		    -- 2. Direksiyon (+4) eğitimlerinin başarısız sınav sonuçları
-		    if ((@TalepTipiId = 2 or @TalepTipiId = 3) and @ySinavNo < 4 and @yEgitimTipiId = 3)
-            begin
-                if ((@yPuanTipiId = 1) or  -- başarısız
-		            (@yPuanTipiId = -1)) -- girmedi 
-                     set @yDurumuTipiId = 2         -- 2.Direksiyon Aşamasında
-            end
-
-		    -- 2. Direksiyon (+4) derslerinin son sınavı
-		    if ((@TalepTipiId = 2 or @TalepTipiId = 3) and @ySinavNo = 4 and @yEgitimTipiId = 3)
-            begin
-		        if (@yPuanTipiId = 1 or @yPuanTipiId = -1) -- başarısız veya girmediyse
-                begin     
-			        set @yDurumuTipiId = 4           -- Uygulama Sınav Hakkı Doldu
-  	                set @DosyaYakti = 1
-                end
             end
 		end -- @yDurumuTipiId <> 5
 				
@@ -254,6 +236,18 @@ AS BEGIN
             and   a.SinavNo <> x.yeniSinavNo
 			   
             EXECUTE [dbo].[prc_SrcAdayTakip] @yFirmId, @yTalepId, 0, 'SrcAdayTakipUygSinav'
+
+            -- Kullanıcı manel sınav tarih girince, eğer o tarih dbo.SrcSinavTarihi tablosunda yoksa otomatik eklesin
+            ;With SinavTarihleri as (
+                  Select @ySinavTarihi as SinavTarihi 
+            ) -- with      
+            MERGE dbo.SrcSinavTarihi AS target
+            USING ( Select * From SinavTarihleri ) AS source
+            ON target.SinavTarihi = source.SinavTarihi and target.SinavTipiId = 11
+            WHEN NOT MATCHED THEN
+                Insert ( [FirmId],[IsActive],[SinavTipiId],[SinavDonemTipiId],[SinavTarihSaat],[SinavTarihi],[SinavSaati],[MebbisESinavTarihValue],[MebbisUSinavTarihValue],[AdaySayisi],[BasariliAdaySayisi],[BasarisizAdaySayisi],[VeriKaynakId] )
+                Values (@yFirmId ,1         ,11           ,0                 ,null            ,source.SinavTarihi ,null  ,null                    ,null                    ,0           ,0                   ,0                    ,0            );
+
         end
 
         FETCH NEXT FROM curSinavUyg INTO @curId
@@ -266,7 +260,6 @@ END
 
 /*CreateTriggerEnd*/
 
---ALTER TABLE [dbo].[SrcSinavUygulama] ENABLE TRIGGER [trg_SrcSinavUygulama]
 
 
 

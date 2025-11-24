@@ -133,6 +133,7 @@ AS BEGIN
     declare @BelgeTarihi datetime
     declare @BHesapTipiId smallInt
     declare @AHesapTipiId smallInt
+    declare @FinansTipiId smallInt
     declare @kontrolBelgeTutari numeric(22,5)
     declare @eBelgeTutari numeric(22,5)
 
@@ -153,12 +154,11 @@ AS BEGIN
     declare @OnmOdemePlaniId int
     declare @OnmOdemePlaniTaksitTutari numeric(22,8)
     declare @makbuzCount int
-	declare @Yil_ int
 
     declare @IsTransfer bit
     declare @IkizNo smallInt
     declare @IkizId int = -1
-    declare @MinBelgeTarihi date
+    declare @MinBelgeTarihi date = getdate()
 
     Select @MinBelgeTarihi = min(BelgeTarihi) From inserted
 
@@ -192,7 +192,10 @@ AS BEGIN
         , @BelgeTarihi = ins.BelgeTarihi
 		, @BHesapTipiId = isnull(ins.BHesapTipiId,0)
 		, @AHesapTipiId = isnull(ins.AHesapTipiId,0)
+        , @FinansTipiId = isnull(ins.FinansTipiId,0)
 	    , @BelgeTutari  = round(isnull(ins.BelgeTutari,0),2)
+	    , @BorcTutari  = round(isnull(ins.BorcTutari,0),2)
+	    , @AlacakTutari  = round(isnull(ins.AlacakTutari,0),2)
 		, @MasrafTutari = round(isnull(ins.MasrafTutari,0),2)
 		, @CariId = ins.CariId
 		, @SourceTypeId = ins.SourceTypeId
@@ -200,11 +203,9 @@ AS BEGIN
         , @IsTransfer = isnull(ins.IsTransfer,0)
         , @IkizNo = isnull(ins.IkizNo,0)
         , @IkizId = isnull(ins.IkizId,0)
-
       from Inserted ins
       where ins.Id = @curId
 	  
-	  set @Yil_ = YEAR(@BelgeTarihi)
 
       -- Tahsilat ise
       if (@TipiId = 2 and @IsActive = 1)
@@ -347,7 +348,6 @@ AS BEGIN
            or    isnull(m.KalanTutar,0) <> x.KalanTutar 
            or    isnull(m.IsPaid,0) <> x.IsPaid 
 
-
            ;With MaliyetAciklamasi as (
             Select dekont.Id
                   ,dekont.Aciklama  as DekontAciklamasi
@@ -378,6 +378,9 @@ AS BEGIN
       , IptalTutari = @IptalTutari
       , FinansTipiId = 
         (case 
+            -- Açılı fişi ise
+            when @BHesapTipiId = @AHesapTipiId and @TipiId = 1 then @FinansTipiId
+
             -- Para transferi olmayan satırlar ise              
             when @BHesapTipiId in (100, 1022, 1023, 1024, 1025, 1026, 320) and @AHesapTipiId not in (100, 1022, 1023, 1024, 1025, 1026) then @BHesapTipiId
             when @AHesapTipiId in (100, 1022, 1023, 1024, 1025, 1026, 320) and @BHesapTipiId not in (100, 1022, 1023, 1024, 1025, 1026) then @AHesapTipiId
@@ -396,7 +399,8 @@ AS BEGIN
       Where Id = @curId 
 
       if (@BHesapTipiId in (100, 1022, 1023, 1024, 1025, 1026) and 
-          @AHesapTipiId in (100, 1022, 1023, 1024, 1025, 1026))
+          @AHesapTipiId in (100, 1022, 1023, 1024, 1025, 1026)) and
+          (@TipiId = 2 or @TipiId = 3) -- Tahsilat veya Tediye ise
           Execute dbo.prc_OnmBelgeDekontTransferIslemi @curId 
 
 	  FETCH NEXT FROM cursor_BDekont INTO @curId
@@ -406,9 +410,8 @@ AS BEGIN
     DEALLOCATE cursor_BDekont
 
     EXECUTE [dbo].[prc_OnmHesapFinansBakiyesiHesapla] @FirmId, @MinBelgeTarihi
-
+   
     EXECUTE [dbo].[prc_OnmBelgeDekontDevirHesapla] @FirmId, @MinBelgeTarihi
-
 
 END
 
@@ -441,9 +444,9 @@ AS BEGIN
 	declare @IadeId int
 	declare @Yil_ int
     declare @IkizId int = -1
-    declare @MinBelgeTarihi date
+    declare @MinBelgeTarihi date = getdate()
 
-    Select @MinBelgeTarihi = min(BelgeTarihi) From inserted
+    Select @MinBelgeTarihi = min(BelgeTarihi) From deleted
 
 	OPEN cursor_BDekontDlt
 
@@ -482,15 +485,6 @@ AS BEGIN
           and   IsPaid = 0 
       end
 
-	  -- Banka kredisi ödemesi silince
-	  if (@SourceTypeId = 3)
-      begin  
-          -- sadace FirmId update olsun böyleye ödenen, kalan tutarlar hesaplansı
-          Update dbo.OnmBankaKredisiS set
-              FirmId = @FirmId      
-          Where Id = @SourceId
-      end
-
 	  if (@TipiId = 3) and -- Tediye    
 	     (@SourceTypeId = 1) -- OnmBelgeMaliyet tablosu
       begin
@@ -513,8 +507,17 @@ AS BEGIN
            From dbo.OnmBelgeMaliyet as m
            JOIN MaliyetKalani x ON ( m.Id = x.SourceId )
            Where isnull(m.OdenenTutar,0) <> x.OdenenTutar
-           or    isnull(m.KalanTutar,0) <> x.KalanTutar  
+           or    isnull(m.KalanTutar,0) <> x.KalanTutar 
 	  end
+
+	  -- Banka kredisi ödemesi silince
+	  if (@SourceTypeId = 3)
+      begin  
+          -- sadace FirmId update olsun böyleye ödenen, kalan tutarlar hesaplansı
+          Update dbo.OnmBankaKredisiS set
+              FirmId = @FirmId      
+          Where Id = @SourceId
+      end
 
       -- Para Transferi için oluşturulmuş ikiz kaydı varsa onuda sil 
       if (@IkizId > 0)
@@ -536,7 +539,7 @@ AS BEGIN
     DEALLOCATE cursor_BDekontDlt
 
     EXECUTE [dbo].[prc_OnmHesapFinansBakiyesiHesapla] @FirmId, @MinBelgeTarihi
-
+   
     EXECUTE [dbo].[prc_OnmBelgeDekontDevirHesapla] @FirmId, @MinBelgeTarihi
 
 END

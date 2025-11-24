@@ -1,0 +1,57 @@
+﻿/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_OnmOdemePlaniBakiyesiDetayi] (@FirmId int, @DonemTipiId int)  
+AS BEGIN
+
+    --declare @FirmId int = 35
+    --declare @DonemTipiId int = 202312
+
+  declare @SectorTypeId smallint = 0 -- 201. Mtsk, 202. İşmak, 203. Src
+
+  Set @SectorTypeId = dbo.fnc_getSectorTypeId(@FirmId)
+
+  if (@SectorTypeId = 201)
+  begin
+      Select op.* 
+      , aday.TcNo as Lkp_TcNo
+      , aday.TamAdiSoyadi as Lkp_TamAdiSoyadi
+      , aday.CepTelefonu as Lkp_CepTelefonu
+      , uc.UcretTipi as Lkp_UcretTipi
+      from dbo.OnmOdemePlani as op
+          left outer join dbo.MtskAdayTalep as talep on (op.TalepId = talep.Id)
+          left outer join dbo.MtskAday as aday on (op.CariId = aday.Id)
+          left outer join Lkp.OnmOdemePlaniUcretTipi as uc on (op.UcretTipiId = uc.Id) 
+
+      Where op.FirmId = @FirmId
+      and   op.IsActive = 1
+      and   op.IsPaid = 0
+      and   op.VadeDonemTipiId = @DonemTipiId
+
+      order by aday.TamAdiSoyadi
+
+  end -- 201
+
+  if (@SectorTypeId = 203)
+  begin
+      Select op.* 
+      , aday.TcNo as Lkp_TcNo
+      , aday.TamAdiSoyadi as Lkp_TamAdiSoyadi
+      , aday.CepTelefonu as Lkp_CepTelefonu
+      , uc.UcretTipi as Lkp_UcretTipi
+      from dbo.OnmOdemePlani as op
+          left outer join dbo.SrcAdayTalep as talep on (op.TalepId = talep.Id)
+          left outer join dbo.SrcAday as aday on (op.CariId = aday.Id)
+          left outer join Lkp.OnmOdemePlaniUcretTipi as uc on (op.UcretTipiId = uc.Id) 
+
+      Where op.FirmId = @FirmId
+      and   op.IsActive = 1
+      and   op.IsPaid = 0
+      and   op.VadeDonemTipiId = @DonemTipiId
+
+      order by aday.TamAdiSoyadi
+
+  end -- 203
+
+END --
+
+/*CreateProcedureEnd*/

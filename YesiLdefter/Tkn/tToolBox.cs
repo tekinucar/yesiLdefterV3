@@ -8259,8 +8259,8 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             if (SQL_Read_Execute(v.dBaseNo.publishManager, ds, ref ySql, "", "MSSQL Server Tarihi"))
             {
                 v.BUGUN_TARIH = Convert.ToDateTime(ds.Tables[0].Rows[0]["TARIH"].ToString());
-                v.DONEM_BASI_TARIH = v.BUGUN_TARIH.AddDays(-367);
-                v.DONEM_BITIS_TARIH = v.BUGUN_TARIH.AddDays(365);
+                v.DONEM_BASI_TARIH = new DateTime(v.BUGUN_TARIH.Year, 1, 1);  
+                v.DONEM_BITIS_TARIH = new DateTime(v.BUGUN_TARIH.Year, 12, 31);
                 v.BU_HAFTA_BASI_TARIH = v.BUGUN_TARIH; //???
                 v.BU_HAFTA_SONU_TARIH = v.BUGUN_TARIH; //???
                 v.BIR_HAFTA_ONCEKI_TARIH = DateTime.Now.AddDays(-7);
@@ -8386,8 +8386,9 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
                 SQL_Read_Execute(v.dBaseNo.Project, v.ds_Settings, ref Sql, "Settings", "");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                MessageBox.Show("Settings tablosu okunamadı. \n" + ex.Message, "Settings Read Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 v.ds_Settings = null;
                 //throw;
             }

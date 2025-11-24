@@ -63,7 +63,7 @@ CREATE TRIGGER [dbo].[trg_SrcSinavETeorik] on [dbo].[SrcSinavETeorik]
 AFTER INSERT, UPDATE
 AS BEGIN
 
-    DECLARE eSinavCursor cursor local for select Id from Inserted
+    DECLARE eSinavCursor cursor local for select Id from Inserted order by Id
     DECLARE @curId bigint
 
     OPEN eSinavCursor
@@ -129,7 +129,7 @@ AS BEGIN
 		-- Kullnıcı @ySinavTarihi ve @ySinavSaati manuel girmişse @ySinavTarihSaat ona göre ayarlanıyor
 
         -- LEN(@xSinavSaati) > 5 olması bu bilginin mebbisden girildiğini işaret ediyor
-		if (@ySinavTarihSaat <> '0' and LEN(@xSinavSaati) > 5) 
+		if (ISDATE(@ySinavTarihSaat) = 1 and LEN(@xSinavSaati) > 5) 
 		begin
 		  set @xSinavTarihSaat = replace(@ySinavTarihSaat, '/E-Sınav', '') 
 		  set @ySinavTarihi = convert(date, @xSinavTarihSaat, 103)
@@ -151,16 +151,7 @@ AS BEGIN
 				   'dd.MM.yyyy HH:mm', 'tr-TR')
 				   
 		-- Sınavın hangi dönemde yapıldığı tespit ediliyor
-        if (@ySinavTarihSaat <> '0')
-        begin
-            if (MONTH(@ySinavTarihSaat) < 10)
-                 set @SinavDonemTipiId = convert(int, convert(varchar(5), YEAR(@ySinavTarihSaat)) + '0' + convert(varchar(3), MONTH(@ySinavTarihSaat)))
-            else set @SinavDonemTipiId = convert(int, convert(varchar(5), YEAR(@ySinavTarihSaat)) + convert(varchar(3), MONTH(@ySinavTarihSaat)))
-        end
-
-        if (@SinavDonemTipiId = 0)
-            set @SinavDonemTipiId = [dbo].[fnc_getDonemTipiId] ('BUGUN', @ySinavTarihi)
-
+        set @SinavDonemTipiId = [dbo].[fnc_getDonemTipiId] ('BUGUN', @ySinavTarihi)
 
 		if (@yTalepId = 0 and @yAdayId = 0 and @yTcNo <> '')
 		begin
@@ -168,7 +159,7 @@ AS BEGIN
             Select top 1 @yAdayId = AdayId, @yTalepId = Id, @yAdayDonemTipiId = DonemTipiId 
             From dbo.SrcAdayTalep
             Where TcNo = @yTcNo
-            and   isnull(DonemTipiId,0) <= @SinavDonemTipiId
+            and   isnull(DonemTipiId,0) < @SinavDonemTipiId
             order by DonemTipiId desc, Id desc
 		end
 		
@@ -270,6 +261,18 @@ AS BEGIN
                     and   isnull(PuanTipiId,0) = 0  
                 end
             end
+        
+            -- Kullanıcı manel sınav tarih girince, eğer o tarih dbo.SrcSinavTarihi tablosunda yoksa otomatik eklesin
+            ;With SinavTarihleri as (
+                  Select @ySinavTarihi as SinavTarihi 
+            ) -- with      
+            MERGE dbo.SrcSinavTarihi AS target
+            USING ( Select * From SinavTarihleri ) AS source
+            ON target.SinavTarihi = source.SinavTarihi and target.SinavTipiId = 11
+            WHEN NOT MATCHED THEN
+                Insert ( [FirmId],[IsActive],[SinavTipiId],[SinavDonemTipiId],[SinavTarihSaat],[SinavTarihi],[SinavSaati],[MebbisESinavTarihValue],[MebbisUSinavTarihValue],[AdaySayisi],[BasariliAdaySayisi],[BasarisizAdaySayisi],[VeriKaynakId] )
+                Values (@yFirmId ,1         ,11           ,0                 ,null            ,source.SinavTarihi ,null  ,null                    ,null                    ,0           ,0                   ,0                    ,0            );
+       
         end
 
         FETCH NEXT FROM eSinavCursor INTO @curId
@@ -277,6 +280,7 @@ AS BEGIN
 
     CLOSE eSinavCursor
     DEALLOCATE eSinavCursor   
+
 
 END -- trigger
 

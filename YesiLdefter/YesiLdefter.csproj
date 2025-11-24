@@ -1064,6 +1064,9 @@
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmMaasHesaplari.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmMaasHesaplariKayit.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_CrsTakvimiAyarla.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmOdemePlaniBakiyesi.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmOdemePlaniBakiyesiDetayi.txt" />
+    <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\prc_OnmOdemePlaniBakiyesiOzeti.txt" />
     <Content Include="Scripts\UST\OnMuhasebe\Duzenlenen\Settings.txt" />
     <Content Include="Scripts\UST\Mtsk\TempTabimBankalar.txt" />
     <Content Include="Scripts\UST\Mtsk\TempTabimHesaplar.txt" />
@@ -1174,6 +1177,7 @@
     <Content Include="Scripts\UST\SRC\prc_SrcAdayBorclandirESinavTekTalep.txt" />
     <Content Include="Scripts\UST\SRC\prc_SrcAdayBorclandirUSinavTekTalep.txt" />
     <Content Include="Scripts\UST\SRC\prc_SrcAdayTakipTalepKaydiSingleSet.txt" />
+    <Content Include="Scripts\UST\SRC\prc_SrcArtiTalepOlustur.txt" />
     <Content Include="Scripts\UST\SRC\prc_SrcDonemKontrolu.txt" />
     <Content Include="Scripts\UST\SRC\prc_SrcSinavSatiriOlustur.txt" />
     <Content Include="Scripts\UST\SRC\SrcAdayKimlik.txt" />

@@ -481,19 +481,21 @@ namespace YesiLdefter
             string reportCaption = dsMsReports.Tables[0].Rows[dNMsReports.Position]["ReportCaption"].ToString();
             string tableIPCode = dsMsReports.Tables[0].Rows[dNMsReports.Position]["TableIPCode"].ToString();
             string tableIPCode2 = dsMsReports.Tables[0].Rows[dNMsReports.Position]["TableIPCode2"].ToString();
+            string tableIPCode3 = dsMsReports.Tables[0].Rows[dNMsReports.Position]["TableIPCode3"].ToString();
 
             if (t.IsNotNull(tableIPCode))
             {
-                crateReportKriters(tForm, tableIPCode, tableIPCode2);
+                crateReportKriters(tForm, tableIPCode, tableIPCode2, tableIPCode3);
                 /// Form üzerindeki DataSet ler tespit ediliyor
                 preparingDataSetList();
             }
         }
     
-        private void crateReportKriters(Form tForm, string tableIPCode, string tableIPCode2)
+        private void crateReportKriters(Form tForm, string tableIPCode, string tableIPCode2, string tableIPCode3)
         {
             tableIPCode = tableIPCode.Trim();
             tableIPCode2 = tableIPCode2.Trim();
+            tableIPCode3 = tableIPCode3.Trim();
 
             string TabControlName = "";
             string ReadValue = "";
@@ -503,6 +505,7 @@ namespace YesiLdefter
 
             Control cntrl = null;
             Control cntrl2 = null;
+            Control cntrl3 = null;
             string[] controls = new string[] {
                     "DevExpress.XtraTab.XtraTabPage",
                     "DevExpress.XtraBars.Navigation.NavigationPage",
@@ -538,6 +541,17 @@ namespace YesiLdefter
                 cntrl2 = t.Find_Control(this, "tTabPage_" + t.AntiStr_Dot(tableIPCode2 + ReadValue), "", controls);
 
                 ip.Create_InputPanel(tForm, cntrl2, tableIPCode2, v.IPdataType_DataView, false);
+            }
+            /// üçüncü tableIPCode varsa
+            if (t.IsNotNull(tableIPCode3))
+            {
+                TabControlName = "tabControl_SUBVIEW2";
+                ReadValue = "Data";
+
+                ev.CreateOrSelect_Page(this, TabControlName, "", tableIPCode3, ReadValue, "", true);
+                cntrl3 = t.Find_Control(this, "tTabPage_" + t.AntiStr_Dot(tableIPCode3 + ReadValue), "", controls);
+
+                ip.Create_InputPanel(tForm, cntrl3, tableIPCode3, v.IPdataType_DataView, false);
             }
 
 

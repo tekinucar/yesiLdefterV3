@@ -49,11 +49,7 @@ BEGIN
 
       select top 1 @GirdigiESinavNo =
       ( case when isnull(s.Id,0) = 0 then 0 -- girmedi
-             when isnull(s.DurumuTipiId,0) > 1 and isnull(s.SinavNo,0) < 4  then s.SinavNo
-             when isnull(s.DurumuTipiId,0) = 0 and isnull(s.SinavNo,0) = 1  then 0
-             when isnull(s.DurumuTipiId,0) > 1 and isnull(s.SinavNo,0) = 4  then 4
-             when isnull(s.DurumuTipiId,0) = 1 then s.SinavNo 
-             end ) 
+             else s.SinavNo end )
       from dbo.SrcAdayTalep as t
 	  left join dbo.SrcSinavETeorik as s on ( t.Id = s.TalepId and s.LineTypeId = 2 )
       where t.Id = @TalepId
@@ -69,10 +65,7 @@ BEGIN
 
       select top 1 @GirdigiUSinavNo =
       ( case when  isnull(s.Id,0) = 0 then 0 -- girmedi
-             when (isnull(s.PuanTipiId,0) = 1 or isnull(s.PuanTipiId,0) = -1) and isnull(s.SinavNo,0) < 4 then s.SinavNo
-             when (isnull(s.PuanTipiId,0) = 1 or isnull(s.PuanTipiId,0) = -1) and isnull(s.SinavNo,0) = 4 then 4
-             when (isnull(s.PuanTipiId,0) = 0 or isnull(s.PuanTipiId,0) = -2) then s.SinavNo - 1 -- sınav sonucu girilmemiş
-             when  isnull(s.PuanTipiId,0) = 100 then s.SinavNo end ) 
+             else  s.SinavNo end )
       from dbo.SrcAdayTalep as t
 	  left join dbo.SrcSinavUygulama as s on ( t.Id = s.TalepId )
       where t.Id = @TalepId
