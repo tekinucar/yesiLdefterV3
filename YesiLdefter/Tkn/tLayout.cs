@@ -63,6 +63,14 @@ namespace Tkn_Layout
         }
 
 
+        // 1. NOTE(@Janberk): Create_Layout() is the main orchestrator for building form layouts
+        // It reads layout definitions from ds_Layout
+        // (populated by tTablesRead.MS_Layout_Read from MS_LAYOUT table).
+        // The method dispatches to specific preparers 
+        // (lMenu_Preparing, lPanelControl_Preparing, etc.) based on LAYOUT_TYPE.
+        // /////////////////////////////////////////////////////////////////
+        // EXAMPLE: when LayoutType == v.lyt_menu => 
+        // it calls lMenu_Preparing which then calls tMenu.Create_Menu_IN_Control.
         private void Create_Layout(Form tForm, Control subView, DataSet ds_Layout)
         {
             Cursor.Current = Cursors.Hand;
@@ -84,6 +92,8 @@ namespace Tkn_Layout
 
             bool dockPanel = false;
 
+            System.Diagnostics.Debug.WriteLine($"tLayout.Create_Layout: Starting layout creation for form={tForm?.Name}, itemCount={itemCount}");
+
             // Form için tanımlanmış
             foreach (DataRow row in ds_Layout.Tables[0].Rows)
             {
@@ -91,7 +101,7 @@ namespace Tkn_Layout
                 MasterLayoutType = t.myInt16(row["MASTER_LAYOUT_TYPE"].ToString());
                 LayoutType = row["LAYOUT_TYPE"].ToString();
                 visible = t.Set(row["CMP_VISIBLE"].ToString(), "", "");
-
+                System.Diagnostics.Debug.WriteLine($"tLayout.Create_Layout: Processing row {pos}/{itemCount}, LayoutType={LayoutType}, visible={visible}, TABLEIPCODE={row["TABLEIPCODE"]?.ToString() ?? "null"}");
                 if ((MasterLayoutType == 1) && (LayoutType == ""))
                 {
                     // sf : SetFocus
@@ -107,7 +117,10 @@ namespace Tkn_Layout
                 {
                     // subView varsa menü oluşturma yoksa oluştur
                     if (LayoutType == v.lyt_menu) //&& (subView == null))
+                    {
+                        System.Diagnostics.Debug.WriteLine($"tLayout.Create_Layout: Dispatching to lMenu_Preparing (TABLEIPCODE={row["TABLEIPCODE"]?.ToString() ?? "null"})");
                         lMenu_Preparing(tForm, subView, ds_Layout, row, pos);
+                    }
 
                     if ((LayoutType == v.lyt_dockPanel) && (dockPanel == false))
                     {
@@ -261,6 +274,10 @@ namespace Tkn_Layout
             tForm.Text = caption;
         }
 
+        // 2. NOTE(@Janberk): lMenu_Preparing() handles menu creation within a layout.
+        // It extracts TABLEIPCODE from the layout row, which points to a menu definition in MS_ITEMS.
+        // This TABLEIPCODE is passed to tMenu.Create_Menu_IN_Control(),
+        // which reads menu items and builds DevExpress controls (TileNavPane, Ribbon, NavBar, etc.).
         private void lMenu_Preparing(Form tForm, Control subView, DataSet ds_Layout, DataRow row, int pos)
         {
             tMenu mn = new tMenu();
@@ -279,6 +296,8 @@ namespace Tkn_Layout
             // 1. TileNavPane için FIRM menüsü için kullanıulacak IPCode geliyor
             //
             string TABLEIPCODE2 = row["TABLEIPCODE2"].ToString();
+
+            System.Diagnostics.Debug.WriteLine($"tLayout.lMenu_Preparing: TABLEIPCODE={TABLEIPCODE}, fieldName={fieldName}, TABLEIPCODE2={TABLEIPCODE2}");
 
             // FIRM işareti ve kullanılacak TableIPCode paketleniyor
             if (fieldName == "FIRMF")
@@ -320,6 +339,7 @@ namespace Tkn_Layout
                     if (c != null)
                     {
                         v.con_Menu_Prop_Value = Prop_View;
+                        System.Diagnostics.Debug.WriteLine($"tLayout.lMenu_Preparing: Calling Create_Menu_IN_Control with parent control={c.Name}, TABLEIPCODE={TABLEIPCODE}");
                         mn.Create_Menu_IN_Control(c, TABLEIPCODE, fieldName);
                         v.con_Menu_Prop_Value = string.Empty;
                     }
@@ -328,11 +348,13 @@ namespace Tkn_Layout
                 else if (subView != null)
                 {
                     v.con_Menu_Prop_Value = Prop_View;
+                    System.Diagnostics.Debug.WriteLine($"tLayout.lMenu_Preparing: Calling Create_Menu_IN_Control with subView={subView.Name}, TABLEIPCODE={TABLEIPCODE}");
                     mn.Create_Menu_IN_Control(subView, TABLEIPCODE, fieldName);
                     v.con_Menu_Prop_Value = string.Empty;
                 }
                 else
                 {
+                    System.Diagnostics.Debug.WriteLine($"tLayout.lMenu_Preparing: Calling Create_Menu_IN_Control with form={tForm?.Name}, TABLEIPCODE={TABLEIPCODE}");
                     mn.Create_Menu_IN_Control(tForm, TABLEIPCODE, fieldName);
                 }
 
