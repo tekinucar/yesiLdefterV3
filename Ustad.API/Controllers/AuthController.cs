@@ -364,15 +364,23 @@ namespace Ustad.API.Controllers
 
             string connStr = BuildConnectionString();
 
-            int userId = 0; string fullName = ""; string role = "Agent"; string? userKeyPlain = null;
-            string firmGuid = ""; string userGuid = ""; bool isActive = false;
-            byte[]? hash = null; byte[]? salt = null; int iterations = 0;
-            short dbTypeId = 0;
+            // ============================================
+            // PHASE 1: Minimal Password Verification Query
+            // ============================================
+            // Only query what's needed for password verification
+            // This minimizes SQL connection time for invalid login attempts
+            int userId = 0;
+            string? userKeyPlain = null;
+            byte[]? hash = null;
+            byte[]? salt = null;
+            int iterations = 0;
+            bool isActive = false;
 
             using (var con = new SqlConnection(connStr))
             {
                 await con.OpenAsync();
                 
+                // Ensure secure passwords table exists
                 using (var createCmd = con.CreateCommand())
                 {
                     createCmd.CommandText = @"
@@ -391,17 +399,14 @@ END";
                     await createCmd.ExecuteNonQueryAsync();
                 }
 
+                // Phase 1: Query ONLY password verification data
                 using (var cmd = con.CreateCommand())
                 {
                     cmd.CommandText = @"
 SELECT 
-    u.UserId, 
-    COALESCE(u.UserFullName, '') AS FullName,
+    u.UserId,
     COALESCE(u.UserKey, '') AS UserKey,
-    COALESCE(u.FirmGUID, '') AS FirmGUID,
-    COALESCE(u.UserGUID, '') AS UserGUID,
     CASE WHEN u.IsActive = 1 THEN 1 ELSE 0 END AS IsActive,
-    COALESCE(u.DbTypeId, 0) AS DbTypeId,
     sp.PasswordHash,
     sp.Salt,
     sp.Iterations
@@ -418,18 +423,8 @@ WHERE (u.UserEMail = @u OR u.UserTcNo = @u OR u.UserMobileNo = @u)
                     }
 
                     userId = r.GetInt32("UserId");
-                    fullName = r.GetString("FullName");
                     userKeyPlain = r.GetString("UserKey");
-                    firmGuid = r.GetString("FirmGUID");
-                    userGuid = r.GetString("UserGUID");
                     isActive = r.GetInt32("IsActive") == 1;
-                    if (!r.IsDBNull("DbTypeId"))
-                    {
-                        int dbTypeIdInt = r.GetInt32(r.GetOrdinal("DbTypeId"));
-                        if (dbTypeIdInt > short.MaxValue) dbTypeId = short.MaxValue;
-                        else if (dbTypeIdInt < short.MinValue) dbTypeId = short.MinValue;
-                        else dbTypeId = (short)dbTypeIdInt;
-                    }
                     
                     if (!r.IsDBNull("PasswordHash"))
                     {
@@ -438,8 +433,12 @@ WHERE (u.UserEMail = @u OR u.UserTcNo = @u OR u.UserMobileNo = @u)
                         iterations = r.GetInt32("Iterations");
                     }
                 }
-            }
+            } // Close connection immediately after Phase 1
 
+            // ============================================
+            // PHASE 2: Password Verification (NO SQL CONNECTION)
+            // ============================================
+            // Verify password BEFORE fetching full user data
             bool verified = false;
             bool usingSecurePassword = false;
             
@@ -453,7 +452,7 @@ WHERE (u.UserEMail = @u OR u.UserTcNo = @u OR u.UserMobileNo = @u)
                     verified = string.Equals(userKeyPlain, request.Password, StringComparison.Ordinal);
                     if (verified)
                     {
-                        await UpgradeUserToSecurePassword(connStr, userId, request.Password);
+                        // Upgrade password on next connection
                         usingSecurePassword = true;
                     }
                 }
@@ -467,10 +466,60 @@ WHERE (u.UserEMail = @u OR u.UserTcNo = @u OR u.UserMobileNo = @u)
             if (!verified)
                 return Unauthorized("Şifre hatalı.");
 
-            if (!usingSecurePassword && verified && (hash == null || salt == null || iterations == 0))
+            // ============================================
+            // PHASE 3: Full User Data + Password Upgrade (After Successful Auth)
+            // ============================================
+            // Only now that password is verified, fetch full user data
+            string fullName = "";
+            string role = "Agent";
+            string firmGuid = "";
+            string userGuid = "";
+            short dbTypeId = 0;
+
+            using (var con = new SqlConnection(connStr))
             {
-                await UpgradeUserToSecurePassword(connStr, userId, request.Password);
-            }
+                await con.OpenAsync();
+
+                // Phase 3: Query full user data for token generation
+                using (var cmd = con.CreateCommand())
+                {
+                    cmd.CommandText = @"
+SELECT 
+    COALESCE(u.UserFullName, '') AS FullName,
+    COALESCE(u.FirmGUID, '') AS FirmGUID,
+    COALESCE(u.UserGUID, '') AS UserGUID,
+    COALESCE(u.DbTypeId, 0) AS DbTypeId
+FROM UstadUsers u
+WHERE u.UserId = @userId";
+                    
+                    cmd.Parameters.AddWithValue("@userId", userId);
+                    using var r = await cmd.ExecuteReaderAsync(CommandBehavior.SingleRow);
+                    if (await r.ReadAsync())
+                    {
+                        fullName = r.GetString("FullName");
+                        firmGuid = r.GetString("FirmGUID");
+                        userGuid = r.GetString("UserGUID");
+                        if (!r.IsDBNull("DbTypeId"))
+                        {
+                            int dbTypeIdInt = r.GetInt32(r.GetOrdinal("DbTypeId"));
+                            if (dbTypeIdInt > short.MaxValue) dbTypeId = short.MaxValue;
+                            else if (dbTypeIdInt < short.MinValue) dbTypeId = short.MinValue;
+                            else dbTypeId = (short)dbTypeIdInt;
+                        }
+                    }
+                }
+
+                // Password upgrade happens INSIDE Phase 3 connection (optimized)
+                if (!usingSecurePassword && verified && (hash == null || salt == null || iterations == 0))
+                {
+                    await UpgradeUserToSecurePassword(connStr, userId, request.Password);
+                }
+                else if (verified && !usingSecurePassword && !string.IsNullOrEmpty(userKeyPlain))
+                {
+                    // Upgrade from plain text to secure password
+                    await UpgradeUserToSecurePassword(connStr, userId, request.Password);
+                }
+            } // Close connection after Phase 3
 
             var baseClaims = BuildBaseClaims(userId, userGuid, fullName, role, firmGuid, request.UserName, dbTypeId);
             var tokens = GenerateTokenPair(baseClaims);
@@ -488,6 +537,86 @@ WHERE (u.UserEMail = @u OR u.UserTcNo = @u OR u.UserMobileNo = @u)
                 FirmId = 0,
                 DbTypeId = dbTypeId
             });
+        }
+
+        /// <summary>
+        /// QR Login endpoint for mobile shell authentication
+        /// Uses stored procedure prc_GetMtskKursiyerSorgulamaJson
+        /// </summary>
+        [HttpPost("qr-login")]
+        [AllowAnonymous]
+        public async Task<IActionResult> QRLogin([FromBody] QRLoginRequest request)
+        {
+            if (request == null || string.IsNullOrWhiteSpace(request.FirmGUID) || 
+                string.IsNullOrWhiteSpace(request.UserGUID) || 
+                string.IsNullOrWhiteSpace(request.TcNoTelefonNo) ||
+                string.IsNullOrWhiteSpace(request.DbName))
+            {
+                return BadRequest("FirmGUID, UserGUID, TcNoTelefonNo, and DbName are required.");
+            }
+
+            try
+            {
+                // Build connection string for specific database
+                string connStr = BuildConnectionStringForDb(request.DbName);
+
+                using (var con = new SqlConnection(connStr))
+                {
+                    await con.OpenAsync();
+                    using (var cmd = con.CreateCommand())
+                    {
+                        cmd.CommandType = System.Data.CommandType.StoredProcedure;
+                        cmd.CommandText = "[dbo].[prc_GetMtskKursiyerSorgulamaJson]";
+                        cmd.Parameters.AddWithValue("@FirmGUID", request.FirmGUID);
+                        cmd.Parameters.AddWithValue("@UserGUID", request.UserGUID);
+                        cmd.Parameters.AddWithValue("@TcNoTelefonNo", request.TcNoTelefonNo);
+
+                        using var r = await cmd.ExecuteReaderAsync();
+                        if (await r.ReadAsync())
+                        {
+                            // Read JSON result from stored procedure
+                            string jsonResult = r.IsDBNull(0) ? "{}" : r.GetString(0);
+                            
+                            return Ok(new QRLoginResponse
+                            {
+                                User = System.Text.Json.JsonSerializer.Deserialize<object>(jsonResult),
+                                Token = null // QR login doesn't return JWT token
+                            });
+                        }
+                        else
+                        {
+                            return Unauthorized("User not found or invalid credentials.");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"QR login failed: {ex.Message}");
+            }
+        }
+
+        public class QRLoginRequest
+        {
+            public string FirmGUID { get; set; } = string.Empty;
+            public string UserGUID { get; set; } = string.Empty;
+            public string TcNoTelefonNo { get; set; } = string.Empty;
+            public string DbName { get; set; } = string.Empty;
+        }
+
+        public class QRLoginResponse
+        {
+            public object? User { get; set; }
+            public string? Token { get; set; }
+        }
+
+        private string BuildConnectionStringForDb(string dbName)
+        {
+            string baseConnStr = BuildConnectionString();
+            // Replace the database name in the connection string
+            var builder = new Microsoft.Data.SqlClient.SqlConnectionStringBuilder(baseConnStr);
+            builder.InitialCatalog = dbName;
+            return builder.ConnectionString;
         }
 
         [HttpPost("login-admin")]
