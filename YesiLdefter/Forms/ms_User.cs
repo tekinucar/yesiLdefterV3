@@ -1060,13 +1060,6 @@ namespace YesiLdefter
                     return;
                 }
 
-                if (user.active == false)
-                {
-                    MessageBox.Show("Kullanıcı aktif değil. Lütfen kontrol edin.", "Kullanıcı Aktif Değil",
-                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-
                 bool success = await apiClient.ChangePasswordAsync(user_email, user_old_pass, user_new_pass);
 
                 if (success)
