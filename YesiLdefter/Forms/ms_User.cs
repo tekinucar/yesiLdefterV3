@@ -23,6 +23,7 @@ namespace YesiLdefter
         tSQLs Sqls = new tSQLs();
         tRegistry reg = new tRegistry();
         tUserFirms userFirms = new tUserFirms();
+        // API client for Ustad API
         UstadApiClient apiClient = null; 
         
         // UL = UserLogin
@@ -69,9 +70,10 @@ namespace YesiLdefter
         //"UST/CRM/UstadFirms.UserFirmList_L01";
 
         string regPath = v.registryPath;//"Software\\Üstad\\YesiLdefter";
-        string apiBaseUrl = "http://localhost:5000"; // API base URL - can be configured
+        string apiBaseUrl = "http://localhost:5000"; 
+        // TODO(@Janberk): API base URL should be configured in app.config or environment variables.
         
-        // TODO(@Janberk): Login refactoring tasks for tomorrow:
+        // TODO(@Janberk): Login refactoring tasks for backlog:
         // 1. Extract API base URL to app.config or registry for runtime configuration
         // 2. Create IAuthenticationService interface and move UstadApiClient behind it for testability
         // 3. Extract password reset flow into a separate PasswordResetService class
@@ -243,9 +245,7 @@ namespace YesiLdefter
             }
             #endregion
 
-            //
-            // -------------------------------------------------------------------
-            //rock
+            #region API Client Initialization
             GetUserRegistry();
             try
             {
@@ -255,7 +255,7 @@ namespace YesiLdefter
             {
                 System.Diagnostics.Debug.WriteLine($"API client initialization failed: {ex.Message}");
             }
-
+            #endregion
             v.SP_UserLOGIN = false;
 
             if (cmb_EMail != null)
@@ -285,15 +285,13 @@ namespace YesiLdefter
         {
             if (e.KeyCode == Keys.Return)
             {
-                if (apiClient != null)
-                {
-                    checkedInputApi();
-                }
-                else
+                if (apiClient == null)
                 {
                     MessageBox.Show("API bağlantısı kurulamadı. Lütfen API servisinin çalıştığından emin olun.",
                         "API Bağlantı Hatası", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
                 }
+                checkedInputApi();
             }
         }
 
@@ -359,7 +357,7 @@ namespace YesiLdefter
             }
         }
 
-        // NOTE(@Janberk): checkedInputApi() is the modern API-based authentication method.
+        // 1. NOTE(@Janberk): checkedInputApi() is the API-based authentication method.
         // It replaces the legacy checkedInput() which used direct SQL connections.
         // This method handles: login → token storage → firm selection → main form access.
         // TODO(@Janberk): Extract this into AuthenticationService.LoginAsync() for better separation of concerns.
@@ -395,8 +393,6 @@ namespace YesiLdefter
                             return;
                         }
 
-
-                        // Register filling up again with latest info.
                         v.tUserRegister.UserLastLoginEMail = u_user_email;
                         v.tUserRegister.UserLastKey = u_user_key;
                         v.tUserRegister.UserRemember = ((DevExpress.XtraEditors.CheckButton)btn_BHatirla).Checked;
@@ -533,6 +529,10 @@ namespace YesiLdefter
             }
         }
 
+        // 2. NOTE(@Janberk): checkedUserApi() is the API-based user check method.
+        // It replaces the legacy checkedUser() which used direct SQL connections.
+        // This method handles: user check → password reset → user creation.
+        // TODO(@Janberk): Extract this into UserService.CheckUserExistsAsync() for better separation of concerns.
         async void checkedUserApi(string user_Email, string work)
         {
             if (apiClient == null)
@@ -556,7 +556,6 @@ namespace YesiLdefter
 
                 if (!userExists.Exists)
                 {
-                    // User not found
                     if (work == "FIND" || work == "SEND_EMAIL")
                     {
                         string soru = user_Email + "  böyle bir hesap bulunamadı. \r\n\r\n Yeni bir kullanıcı oluşturmak ister misiniz  ?";
@@ -647,6 +646,10 @@ namespace YesiLdefter
             }
         }
 
+        // 3. NOTE(@Janberk): ShowFirmSelectionFromApi() is the API-based firm selection method.
+        // It replaces the legacy ShowFirmSelection() which used direct SQL connections.
+        // This method handles: firm list display → firm selection → firm details retrieval.
+        // TODO(@Janberk): Extract this into FirmService.GetFirmListAsync() for better separation of concerns.
         private void ShowFirmSelectionFromApi(System.Collections.Generic.List<UstadApiClient.FirmInfo> firms, ref DataSet dsUserFirmList, ref DataNavigator dNUserFirmList)
         {
             try
@@ -748,6 +751,10 @@ namespace YesiLdefter
 
         void btn_FirmListSec_Click(object sender, EventArgs e)
         {
+            /// Buraya geldiysen firma seçimi yapılacak .
+            /// kullanıcı için birden fazla firma seçeneği var demek ki
+            /// kullanıcı bu butona basar ve seçilen değerler alınır lets go ... main form
+            ///
             if (t.IsNotNull(dsUserFirmList))
             { 
                 if (dNUserFirmList == null || dNUserFirmList.Position < 0 || dsUserFirmList.Tables.Count == 0 || dsUserFirmList.Tables[0].Rows.Count == 0)
@@ -763,15 +770,17 @@ namespace YesiLdefter
                 {
                     // API-based flow
                     readUstadFirmAboutFromApi(row);
+                    return;
                 }
-                else
-                {
-                    // SQL-based flow
-                    userFirms.readUstadFirmAbout(this, row);
-                }
+                // else: SQL-based flow
+                userFirms.readUstadFirmAbout(this, row);
             }
         }
 
+        // 4. NOTE(@Janberk): readUstadFirmAboutFromApi() is the API-based firm details retrieval method.
+        // It replaces the legacy readUstadFirmAbout() which used direct SQL connections.
+        // This method handles: firm details retrieval from API.
+        // TODO(@Janberk): Extract this into FirmService.GetFirmDetailsAsync() for better separation of concerns.
         async void readUstadFirmAboutFromApi(DataRow row)
         {
             try
@@ -788,17 +797,77 @@ namespace YesiLdefter
 
                 if (firmDetails?.Firm != null)
                 {
-                    //v.tMainFirm.FirmId = firmDetails.Firm.FirmId;
-                    //v.tMainFirm.FirmGuid = firmDetails.Firm.FirmGUID;
-                    //v.tMainFirm.FirmLongName = firmDetails.Firm.FirmLongName;
-
                     userFirms.readUstadFirmAbout(this, row);
+                    // TODO(@Janberk): Remove the readUstadFirmAbout method and use the
+                    // API-based flow instead. The original method given below:
+                    /**
+                            public void readUstadFirmAbout(Form tForm, DataRow row)
+                            {
+                                /// UstadCrm den gelen Firmaya ait bilgileri v.tMainFirm üzerine oku
+                                /// 
+                                t.getFirmAbout(row, ref v.tMainFirm);
+                                ///
+                                /// kullınıcının çalışma yapabileceği firması
+                                ///
+                                t.setSelectFirm(v.tMainFirm);
+                                ///
+                                /// User giriş yaptığı firmayı registere yaz
+                                ///
+                                SetUserRegistryFirm(v.tUser.UserId, v.tMainFirm.FirmId);
+                                ///
+                                /// Login onayı
+                                ///
+                                v.SP_UserLOGIN = true;
+                                ///
+                                /// form close
+                                ///
+                                tForm.Close();
+                            }
+                            
+                    */
+                    
+                    // For the line => t.getFirmAbout(row, ref v.tMainFirm);
 
-                    //SetUserRegistryFirm(v.tUser.UserId, firmDetails.Firm.FirmId);
+                    // TODO(@Janberk): Remove the getFirmAbout method and use the
+                    // API-based flow instead.
+                    // The original method given below:
+                    /**
+                    /**
+                    public void getFirmAbout(DataRow row, ref tUstadFirm tFirm)
+                            {
+                                //
+                                tFirm.FirmId = myInt32(row["FirmId"].ToString());
+                                tFirm.FirmLongName = row["FirmLongName"].ToString();
+                                tFirm.FirmShortName = row["FirmShortName"].ToString();
+                                tFirm.FirmGuid = row["FirmGUID"].ToString();
+                                tFirm.IlKodu = row["CityTypeId"].ToString();
+                                tFirm.IlceKodu = row["DistrictTypeId"].ToString();
 
+                                tFirm.MenuCode = row["MenuCode"].ToString();
+                                tFirm.SectorTypeId = myInt16(row["SectorTypeId"].ToString());
+                                tFirm.DatabaseType = "1"; // MSSQL 
+                                tFirm.DatabaseName = row["DatabaseName"].ToString();
+                                tFirm.ServerNameIP = row["ServerNameIP"].ToString();
+                                //tFirm.DbAuthentication = dbAuthentication;
+                                tFirm.DbLoginName = row["DbLoginName"].ToString();
+                                tFirm.DbPassword = row["DbPass"].ToString();
+                                tFirm.DbTypeId = myInt16(row["DbTypeId"].ToString()); // 2 = Abone database (Ustad yazılım müşterileri)
+                                tFirm.FirmMebbisCode = row["MebbisCode"].ToString();
+                                tFirm.FirmMebbisPass = row["MebbisPass"].ToString();
+
+                                /// şimdilik manuel çözüm yaptım
+                                /// Tabim localdb ve Tabim yeni projesi ayrışımını çözemedim şu an için
+                                /// aynı müşteri hem local hemde yeni projeye geçiş yapmış olabilir
+                                ///
+                                menuCodeChecked();
+                            }
+                    */
+
+                    //t.setSelectFirm(v.tMainFirm);
+                    //SetUserRegistryFirm(v.tUser.UserId, v.tMainFirm.FirmId);
                     //v.SP_UserLOGIN = true;
-
                     //this.Close();
+
                 }
                 else
                 {
@@ -924,7 +993,14 @@ namespace YesiLdefter
                     string user_old_pass = ((DevExpress.XtraEditors.TextEdit)uk_old_user_pass).EditValue.ToString();
                     string user_new_pass = ((DevExpress.XtraEditors.TextEdit)uk_new_user_pass).EditValue.ToString();
                     string user_rpt_pass = ((DevExpress.XtraEditors.TextEdit)uk_rpt_user_pass).EditValue.ToString();
-
+                    bool user_active = Convert.ToBoolean(ds_UK.Tables[0].Rows[dN_UK.Position]["IsActive"].ToString());
+                    if (user_active == false)
+                    {
+                        MessageBox.Show("Kullanıcı aktif değil. Lütfen kontrol edin.", "Kullanıcı Aktif Değil",
+                            MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return;
+                    }
+                    
                     // Use secure API method if available, fallback to legacy SQL method
                     if (apiClient != null)
                     {
@@ -980,6 +1056,13 @@ namespace YesiLdefter
                 if (user_new_pass.Length < 4)
                 {
                     MessageBox.Show("Lütfen en az 4 karakterlik bir şifre giriniz.", "Şifre Kısa",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                if (user.active == false)
+                {
+                    MessageBox.Show("Kullanıcı aktif değil. Lütfen kontrol edin.", "Kullanıcı Aktif Değil",
                         MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
@@ -1084,7 +1167,6 @@ namespace YesiLdefter
 
         private void ms_User_FormClosed(object sender, FormClosedEventArgs e)
         {
-            // FORM CLOSE API CLEANUP
             apiClient?.Dispose();
             apiClient = null;
         }

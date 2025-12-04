@@ -64,7 +64,16 @@ namespace Ustad.API
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 if (File.Exists(xmlPath))
                 {
-                    c.IncludeXmlComments(xmlPath);
+                    c.IncludeXmlComments(xmlPath, includeControllerXmlComments: true);
+                }
+                else
+                {
+                    // Try alternative paths for development
+                    var altXmlPath = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "bin", "Debug", "net8.0", xmlFile);
+                    if (File.Exists(altXmlPath))
+                    {
+                        c.IncludeXmlComments(altXmlPath, includeControllerXmlComments: true);
+                    }
                 }
 
                 // Add JWT Bearer authentication definition

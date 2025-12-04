@@ -92,7 +92,6 @@ namespace Tkn_Layout
 
             bool dockPanel = false;
 
-            System.Diagnostics.Debug.WriteLine($"tLayout.Create_Layout: Starting layout creation for form={tForm?.Name}, itemCount={itemCount}");
 
             // Form için tanımlanmış
             foreach (DataRow row in ds_Layout.Tables[0].Rows)
@@ -101,7 +100,6 @@ namespace Tkn_Layout
                 MasterLayoutType = t.myInt16(row["MASTER_LAYOUT_TYPE"].ToString());
                 LayoutType = row["LAYOUT_TYPE"].ToString();
                 visible = t.Set(row["CMP_VISIBLE"].ToString(), "", "");
-                System.Diagnostics.Debug.WriteLine($"tLayout.Create_Layout: Processing row {pos}/{itemCount}, LayoutType={LayoutType}, visible={visible}, TABLEIPCODE={row["TABLEIPCODE"]?.ToString() ?? "null"}");
                 if ((MasterLayoutType == 1) && (LayoutType == ""))
                 {
                     // sf : SetFocus
@@ -118,7 +116,6 @@ namespace Tkn_Layout
                     // subView varsa menü oluşturma yoksa oluştur
                     if (LayoutType == v.lyt_menu) //&& (subView == null))
                     {
-                        System.Diagnostics.Debug.WriteLine($"tLayout.Create_Layout: Dispatching to lMenu_Preparing (TABLEIPCODE={row["TABLEIPCODE"]?.ToString() ?? "null"})");
                         lMenu_Preparing(tForm, subView, ds_Layout, row, pos);
                     }
 
@@ -281,8 +278,6 @@ namespace Tkn_Layout
         private void lMenu_Preparing(Form tForm, Control subView, DataSet ds_Layout, DataRow row, int pos)
         {
             tMenu mn = new tMenu();
-
-
             
             string TABLEIPCODE = row["TABLEIPCODE"].ToString();
 
@@ -296,8 +291,6 @@ namespace Tkn_Layout
             // 1. TileNavPane için FIRM menüsü için kullanıulacak IPCode geliyor
             //
             string TABLEIPCODE2 = row["TABLEIPCODE2"].ToString();
-
-            System.Diagnostics.Debug.WriteLine($"tLayout.lMenu_Preparing: TABLEIPCODE={TABLEIPCODE}, fieldName={fieldName}, TABLEIPCODE2={TABLEIPCODE2}");
 
             // FIRM işareti ve kullanılacak TableIPCode paketleniyor
             if (fieldName == "FIRMF")
@@ -339,7 +332,6 @@ namespace Tkn_Layout
                     if (c != null)
                     {
                         v.con_Menu_Prop_Value = Prop_View;
-                        System.Diagnostics.Debug.WriteLine($"tLayout.lMenu_Preparing: Calling Create_Menu_IN_Control with parent control={c.Name}, TABLEIPCODE={TABLEIPCODE}");
                         mn.Create_Menu_IN_Control(c, TABLEIPCODE, fieldName);
                         v.con_Menu_Prop_Value = string.Empty;
                     }
@@ -348,13 +340,11 @@ namespace Tkn_Layout
                 else if (subView != null)
                 {
                     v.con_Menu_Prop_Value = Prop_View;
-                    System.Diagnostics.Debug.WriteLine($"tLayout.lMenu_Preparing: Calling Create_Menu_IN_Control with subView={subView.Name}, TABLEIPCODE={TABLEIPCODE}");
                     mn.Create_Menu_IN_Control(subView, TABLEIPCODE, fieldName);
                     v.con_Menu_Prop_Value = string.Empty;
                 }
                 else
                 {
-                    System.Diagnostics.Debug.WriteLine($"tLayout.lMenu_Preparing: Calling Create_Menu_IN_Control with form={tForm?.Name}, TABLEIPCODE={TABLEIPCODE}");
                     mn.Create_Menu_IN_Control(tForm, TABLEIPCODE, fieldName);
                 }
 

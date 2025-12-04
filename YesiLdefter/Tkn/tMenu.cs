@@ -91,12 +91,9 @@ namespace Tkn_Menu
 
             // 1. NOTE(@Janberk): ItemType 106 = TileNavPane
             // this is the most common menu type for dashboard tiles.
-            // Create_TileNavPane() builds the colored tile groups you see on the start screen (Dönem İşlemleri, e-Sınav İşlemleri, etc.).
-            if (ItemType == 106)
-            {
-                System.Diagnostics.Debug.WriteLine($"tMenu.Create_Menu_IN_Control: Dispatching to Create_TileNavPane (ItemType=106)");
-                Create_TileNavPane((DevExpress.XtraBars.Navigation.TileNavPane)menuControl, ds_Items, fieldName, dontReport, dontEDI, dontExit, reportTableIPCode);
-            }
+            // Create_TileNavPane() builds the colored tile groups seen on the start screen
+            // (Dönem İşlemleri, e-Sınav İşlemleri, etc.).
+            if (ItemType == 106) Create_TileNavPane((DevExpress.XtraBars.Navigation.TileNavPane)menuControl, ds_Items, fieldName, dontReport, dontEDI, dontExit, reportTableIPCode);
             if (ItemType == 107) Create_NavigationPane((DevExpress.XtraBars.Navigation.NavigationPane)menuControl, ds_Items);
             if (ItemType == 108) Create_AccordionControl((DevExpress.XtraBars.Navigation.AccordionControl)menuControl, ds_Items);
             if (ItemType == 109) Create_ToolBoxControl((DevExpress.XtraToolbox.ToolboxControl)menuControl, ds_Items);
@@ -134,7 +131,6 @@ namespace Tkn_Menu
             DataSet ds_Items = new DataSet();
 
             //tr.MS_LayoutOrItems_Read(ds_Items, MenuCode, 3);
-            System.Diagnostics.Debug.WriteLine($"tMenu.Create_Menu_IN_Control: Loading menu metadata for MenuCode={MenuCode}");
             tr.MS_Menu_Read(ds_Items, MenuCode);
 
             if (t.IsNotNull(ds_Items) == false)
@@ -1606,7 +1602,6 @@ namespace Tkn_Menu
             tEventsMenu evm = new tEventsMenu();
 
             int itemCount = ds_Items.Tables[0].Rows.Count;
-            System.Diagnostics.Debug.WriteLine($"tMenu.Create_TileNavPane: Starting tile creation, itemCount={itemCount}");
             int itemType = 0;
 
             string lineNo = string.Empty;
@@ -1672,7 +1667,6 @@ namespace Tkn_Menu
                 DockType = t.myInt16(ds_Items.Tables[0].Rows[i]["DOCK_TYPE"].ToString());
                 CmpName = t.Set(ds_Items.Tables[0].Rows[i]["CMP_NAME"].ToString(), "", "");
 
-                System.Diagnostics.Debug.WriteLine($"tMenu.Create_TileNavPane: Processing item {i}/{itemCount}, itemType={itemType}, caption={itemCaption}, refid={refid}");
                 UstHesapRow = null;
                 ustHesapRefId = string.Empty;
                 ustHesapItemName = string.Empty;
@@ -1736,13 +1730,11 @@ namespace Tkn_Menu
                         //mControl.Categories.Add(pGroup);
                         if (itemType == 201)
                         {
-                            // TEST(@Janberk): Hardcoded colors here 
+                            // 4. NOTE(@Janberk): Hardcoded colors here 
                             // (Red, Green, Coral, Purple) are test/example values.
                             // In production, colors should come from metadata (CMP_BACKCOLOR, MENU_COLOR columns)
                             string backColorStr = t.Set(ds_Items.Tables[0].Rows[i]["CMP_BACKCOLOR"]?.ToString(), "", "");
                             string menuColorStr = t.Set(ds_Items.Tables[0].Rows[i]["MENU_COLOR"]?.ToString(), "", "");
-                            
-                            System.Diagnostics.Debug.WriteLine($"tMenu.Create_TileNavPane: Creating Category (itemType=201), caption={itemCaption}, CMP_BACKCOLOR={backColorStr}, MENU_COLOR={menuColorStr}");
                             
                             pGroup.Tile.AppearanceItem.Normal.BackColor = Color.Red;
                             pGroup.Tile.AppearanceItem.Hovered.BackColor = Color.Green;
@@ -1913,7 +1905,7 @@ namespace Tkn_Menu
                                 if (t.IsNotNull(Prop_Navigator))
                                     tItem.Tag = Prop_Navigator + "|Prop_Navigator|";
 
-                                // 4. NOTE(@Janberk): Colors are applied here from global variables 
+                                // 5. NOTE(@Janberk): Colors are applied here from global variables 
                                 // (v.colorNew, v.colorFocus).
                                 // These come from tVariable.cs.
                                 string tileBackColor = t.Set(ds_Items.Tables[0].Rows[i]["CMP_BACKCOLOR"]?.ToString(), "", "");
@@ -2439,9 +2431,8 @@ namespace Tkn_Menu
             */
             #endregion örnek
             
-            // NOTE(@Janberk): Tile creation complete. All categories, tiles, and buttons have been added to mControl.
+            // 6. NOTE(@Janberk): Tile creation complete. All categories, tiles, and buttons have been added to mControl.
             // The dashboard is now ready for user interaction. Click handlers are wired via tEventsMenu.
-            System.Diagnostics.Debug.WriteLine($"tMenu.Create_TileNavPane: Completed tile creation, total categories={mControl.Categories.Count}, total buttons={mControl.Buttons.Count}");
         }
 
         #endregion Create_TileNavPane

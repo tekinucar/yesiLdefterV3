@@ -23,6 +23,27 @@ namespace Ustad.API.Models
         public string DbPassword { get; set; } = string.Empty;
         public string MebbisCode { get; set; } = string.Empty;
         public string MebbisPass { get; set; } = string.Empty;
+
+        /// <summary>
+        /// District Type ID - Foreign key to UstadFirmsDistrictType.Id
+        /// </summary>
+        public int? DistrictTypeId { get; set; }
+
+        /// <summary>
+        /// City Type ID - Foreign key to ILTipi.Id
+        /// </summary>
+        public int? CityTypeId { get; set; }
+
+        /// <summary>
+        /// District name (populated from UstadFirmsDistrictType)
+        /// </summary>
+        public string? DistrictName { get; set; }
+
+        /// <summary>
+        /// Province name (populated from ILTipi)
+        /// </summary>
+        public string? ProvinceName { get; set; }
+
         public void Clear()
         {
             FirmId = 0;
@@ -34,6 +55,10 @@ namespace Ustad.API.Models
             SectorTypeId = 0;
             MebbisCode = "";
             MebbisPass = "";
+            DistrictTypeId = null;
+            CityTypeId = null;
+            DistrictName = null;
+            ProvinceName = null;
         }
     }
 }
