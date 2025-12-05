@@ -1891,7 +1891,7 @@ namespace Tkn_ToolBox
                         preparing_TableIPCodeFieldsList(vt.TableIPCode);
                         if (IsNotNull(vt.TableIPCode))
                         {
-                            if (v.active_DB.mainManagerDbUses)
+                            if (v.active_DB.mainManagerDbUses || vt.DBaseNo == v.dBaseNo.UstadCrm)
                             {
                                 DataTable dt = v.ds_TableIPCodeFields.Tables[vt.TableIPCode];
                                 if (dt != null)
@@ -7298,6 +7298,18 @@ namespace Tkn_ToolBox
             }
         }
 
+        public void FindName_Control_List(Form tForm, List<string> list, string controlName)
+        {
+            list.Clear();
+
+            foreach (Control c in tForm.Controls)
+            {
+                FindName_Control_List_(c, list, controlName);
+            }
+
+            list.Sort();
+        }
+
         public void Find_Control_List(Form tForm, List<string> list, string[] ControlType, string tabPageName)
         {
             if (tForm == null) return;
@@ -7322,17 +7334,33 @@ namespace Tkn_ToolBox
             list.Sort();
         }
 
-        public void FindName_Control_List(Form tForm, List<string> list, string controlName)
+        public void Find_Controls_List(Form tForm, string controlName, ref List<Control> list)
         {
             list.Clear();
 
             foreach (Control c in tForm.Controls)
             {
-                FindName_Control_List_(c, list, controlName);
+                Find_Controls_List_(c, controlName, list);
             }
-
-            list.Sort();
         }
+        private void Find_Controls_List_(Control cntrl, string controlName, List<Control> list)
+        {
+            string cName = cntrl?.Name;
+            cName = cntrl?.GetType().ToString();
+
+            if (cName?.IndexOf(controlName) > -1)
+                list.Add(cntrl);
+
+            if (cntrl.Controls.Count > 0)
+            {
+                foreach (Control item in cntrl.Controls)
+                {
+                    Find_Controls_List_(item, controlName, list);
+                }
+            }
+        }
+
+
 
         private void FindName_Control_List_(Control cntrl, List<string> list, string controlName)
         {
@@ -8259,8 +8287,8 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
             if (SQL_Read_Execute(v.dBaseNo.publishManager, ds, ref ySql, "", "MSSQL Server Tarihi"))
             {
                 v.BUGUN_TARIH = Convert.ToDateTime(ds.Tables[0].Rows[0]["TARIH"].ToString());
-                v.DONEM_BASI_TARIH = v.BUGUN_TARIH.AddDays(-367);
-                v.DONEM_BITIS_TARIH = v.BUGUN_TARIH.AddDays(365);
+                v.DONEM_BASI_TARIH = new DateTime(v.BUGUN_TARIH.Year, 1, 1);  
+                v.DONEM_BITIS_TARIH = new DateTime(v.BUGUN_TARIH.Year, 12, 31);
                 v.BU_HAFTA_BASI_TARIH = v.BUGUN_TARIH; //???
                 v.BU_HAFTA_SONU_TARIH = v.BUGUN_TARIH; //???
                 v.BIR_HAFTA_ONCEKI_TARIH = DateTime.Now.AddDays(-7);
@@ -8386,8 +8414,9 @@ SELECT 'Yılın Son Günü',                DATEADD(dd,-1,DATEADD(yy,0,DATEADD(y
 
                 SQL_Read_Execute(v.dBaseNo.Project, v.ds_Settings, ref Sql, "Settings", "");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                MessageBox.Show("Settings tablosu okunamadı. \n" + ex.Message, "Settings Read Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 v.ds_Settings = null;
                 //throw;
             }

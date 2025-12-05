@@ -11,6 +11,7 @@ begin transaction
    IsActive              Bit       not null, 
    TalepKayitTarihi      Date          null, 
    ParentId              Int           null, /* şimdilik boş */
+   ArtiBelgeTipiId       SmallInt      null, /* 0. yok, 1. (1. talep/belge) , 2. (Artı talep/belge) */
    AdayNo                Int           null,
 
    -- 20
@@ -33,7 +34,7 @@ begin transaction
    /* Talep bilgileri */
    TalepTipiId                    SmallInt        null, /* şimdilk kullanılmayacak, silme kalsın */
 
-   -- 31
+   -- 30
    MevcutSertifikaTipiId          SmallInt        null, /* mevcut SRC sertifika tipi Id si */
    MevcutSinifTipiId              SmallInt        null, /* Mevcut SRC5'in detay sertifika tipi Id si */
    MevcutSertifikaNumarasi        nVarchar(20)    null,
@@ -53,8 +54,7 @@ begin transaction
    -- 50
    -- Ders veya yaş için muafiyeti var
    IsMuafiyetiVar          Bit           null, /* 0 = yok, 1 = var */  
-   MuafiyetAciklmasi       nVarchar(50)  null, 
-
+   MuafiyetAciklamasi      nVarchar(50)  null, 
 
    -- 60
    /* Dönem bilgileri */
@@ -172,6 +172,7 @@ AS BEGIN
   declare @yTalepGUID uniqueidentifier
   declare @yFirmId int = 0
   declare @yParentId int = 0
+  declare @yArtiBelgeTipiId smallint = 0
   declare @yTcNo varchar(11) = ''
   declare @yKimlikSeriNo varchar(20) = ''
   declare @yTamAdiSoyadi nvarchar(100) = ''
@@ -245,6 +246,7 @@ AS BEGIN
       --
          ,@yFirmId = isnull(ins.FirmId,0)
          ,@yParentId = isnull(ins.ParentId,0)
+         ,@yArtiBelgeTipiId = isnull(ins.ArtiBelgeTipiId,0)
          ,@yTcNo = isnull(ins.TcNo,'')
          ,@yKimlikSeriNo = isnull(ins.KimlikSeriNo, '')
          ,@yTamAdiSoyadi = isnull(ins.TamAdiSoyadi,'')
@@ -516,8 +518,14 @@ AS BEGIN
     
               --Select @kontrol1GrupSubeId
               Update dbo.SrcAdayTalep Set
-                  GrupSubeId = @kontrol1GrupSubeId
+                  DonemTipiId = @yDonemTipiId
+                 ,GrupTipiId = @yGrupTipiId
+                 ,SubeTipiId = @ySubeTipiId
+                 ,GrupSubeId = @kontrol1GrupSubeId
               Where Id = @TalepId 
+
+              Set @eGrupSubeId = @kontrol1GrupSubeId
+              Set @yGrupSubeId = @kontrol1GrupSubeId
           end
 
           -- GrupSubeId değiştiyse
@@ -564,6 +572,23 @@ AS BEGIN
                  ,SubeTipiId = @kontrol2SubeTipiId
               Where Id = @TalepId 
           end 
+
+          -- Eğer bu belge (Artı/2. Belge) ise
+          if (@yArtiBelgeTipiId = 2)
+          begin
+              -- 1. belge sertifika almadığı müddetce dönem belirlenemez
+              if ( Select KayitTipiId From dbo.SrcAdayTakip --Talep
+                   Where TalepId = @yParentId ) < 4 
+              and ( @yDonemTipiId <> 0 or @yGrupTipiId <> 0 or @ySubeTipiId <> 0)
+              begin
+                  Update dbo.SrcAdayTalep Set
+                      DonemTipiId = 0
+                    , GrupTipiId = 1
+                    , SubeTipiId = 0
+                    , GrupSubeId = 0
+                  Where Id = @TalepId
+              end
+          end -- if 
          
           if (@yIsDosyaKapandi = 1 and @yKayitTipiId <> 8)
           begin 
@@ -659,6 +684,29 @@ begin transaction
 -- MevcutSertifikaTipiId ve
 -- IsteneSertifikaTipiId için
 -- [Lkp].[SrcSertifikaTipi]  tablosuna bak
+
+
+-- ------------------------------------------------------- 
+-- ArtiBelgeTipiId
+-- ------------------------------------------------------- 
+IF EXISTS (Select * From sys.objects WHERE name = 'SrcAdayTalepArtiBelgeTipi')
+drop table [Lkp].[SrcAdayTalepArtiBelgeTipi]
+
+create table [Lkp].[SrcAdayTalepArtiBelgeTipi]
+(
+   Id               Int Unique not null, 
+   ArtiBelgeTipi    nVarchar(50)   null
+   
+   constraint  pk_SrcAdayTalepArtiBelgeTipi primary key (Id)
+)
+
+Delete from [Lkp].[SrcAdayTalepArtiBelgeTipi]
+INSERT INTO [Lkp].[SrcAdayTalepArtiBelgeTipi] (Id, ArtiBelgeTipi)
+ VALUES 
+  ( 0,    N''),
+  ( 1,    N'1. belge'),
+  ( 2,    N'2. belge')
+
 
 -- ------------------------------------------------------- 
 -- TalepTipiId

@@ -17,7 +17,7 @@ BEGIN
     From dbo.OnmBelgeDekont
     Where FirmId = @FirmId
     
-    Select @IlkGun
+    --Select @IlkGun
 
     if (@HesaplamaTarihi < @IlkGun) 
         Set @HesaplamaTarihi = @IlkGun
@@ -88,6 +88,10 @@ BEGIN
     -- Yeniden başlangıç tarihini set etmemiz gerekiyor
     Set @BaslangicTarihi = @HesaplamaTarihi;
 
+
+
+
+
     -- Tarihten itibaren tüm günleri güncelle
     WHILE @BaslangicTarihi <= @SonGun
     BEGIN
@@ -102,6 +106,21 @@ BEGIN
             Where FirmId = @FirmId
             and   BelgeTarihi = DATEADD(DAY, -1, @BaslangicTarihi)
         ) as kaynak;
+
+       ;Select * Into #AcilisTutarlari from (
+            Select 
+                FinansTipiId
+               ,BorcluId as FinansId
+               ,sum(BorcTutari) as AcilisBorcToplami 
+               ,sum(AlacakTutari) as AcilisAlacakToplami 
+            From dbo.OnmBelgeDekont
+            Where FirmId = @FirmId
+            and   IsActive = 1
+            and   TipiId = 1 -- Açılış fişi
+            and   convert(date,BelgeTarihi,103) = convert(date, @BaslangicTarihi,103)
+            Group by FinansTipiId, BorcluId
+        ) as kaynak;
+
 
         -- Günlük toplamları hesapla
         ;Select * Into #BugununToplamlari from (
@@ -124,7 +143,7 @@ BEGIN
                      Where FirmId = @FirmId
                      and   IsActive = 1
                      and   FinansTipiId > 0
-                     and   BelgeTarihi = @BaslangicTarihi
+                     and   convert(date,BelgeTarihi,103) = convert(date,@BaslangicTarihi,103)
                      Group By FinansTipiId,
                              (case 
                               when FinansTipiId = BHesapTipiId then BorcluId
@@ -141,12 +160,18 @@ BEGIN
                ,b.FinansId
                ,isnull(o.DevredenBorcToplami, 0) AS DundenDevirBorcToplami
                ,isnull(o.DevredenAlacakToplami, 0) AS DundenDevirAlacakToplami
-               ,b.GunlukBorcToplami
-               ,b.GunlukAlacakToplami
-               ,(case when (isnull(o.DevredenBorcToplami, 0) + b.GunlukBorcToplami) > (isnull(o.DevredenAlacakToplami, 0) + b.GunlukAlacakToplami) then ((isnull(o.DevredenBorcToplami, 0) + b.GunlukBorcToplami) - (isnull(o.DevredenAlacakToplami, 0) + b.GunlukAlacakToplami)) else 0 end)  AS DevredenBorcToplami
-               ,(case when (isnull(o.DevredenBorcToplami, 0) + b.GunlukBorcToplami) < (isnull(o.DevredenAlacakToplami, 0) + b.GunlukAlacakToplami) then ((isnull(o.DevredenAlacakToplami, 0) + b.GunlukAlacakToplami) - (isnull(o.DevredenBorcToplami, 0) + b.GunlukBorcToplami)) else 0 end)  AS DevredenAlacakToplami
+               ,isnull(a.AcilisBorcToplami, 0) + b.GunlukBorcToplami as GunlukBorcToplami
+               ,isnull(a.AcilisAlacakToplami, 0) + b.GunlukAlacakToplami as GunlukAlacakToplami
+
+               ,(case when (isnull(o.DevredenBorcToplami, 0) + isnull(a.AcilisBorcToplami, 0) + b.GunlukBorcToplami) > (isnull(o.DevredenAlacakToplami, 0) + isnull(a.AcilisAlacakToplami, 0) + b.GunlukAlacakToplami) 
+                     then ((isnull(o.DevredenBorcToplami, 0) + isnull(a.AcilisBorcToplami, 0) + b.GunlukBorcToplami) - (isnull(o.DevredenAlacakToplami, 0) + isnull(a.AcilisAlacakToplami, 0) + b.GunlukAlacakToplami)) else 0 end)  AS DevredenBorcToplami
+
+               ,(case when (isnull(o.DevredenBorcToplami, 0) + isnull(a.AcilisBorcToplami, 0) + b.GunlukBorcToplami) < (isnull(o.DevredenAlacakToplami, 0) + isnull(a.AcilisAlacakToplami, 0) + b.GunlukAlacakToplami) 
+                     then ((isnull(o.DevredenAlacakToplami, 0) + isnull(a.AcilisAlacakToplami, 0) + b.GunlukAlacakToplami) - (isnull(o.DevredenBorcToplami, 0) + isnull(a.AcilisBorcToplami, 0) + b.GunlukBorcToplami)) else 0 end)  AS DevredenAlacakToplami
+
             From #BugununToplamlari b
-                LEFT JOIN #OncekiGunDevirleri o ON ( b.FinansTipiId = o.FinansTipiId AND b.FinansId = o.FinansId )
+                LEFT JOIN #OncekiGunDevirleri AS o ON ( b.FinansTipiId = o.FinansTipiId AND b.FinansId = o.FinansId )
+                LEFT JOIN #AcilisTutarlari    AS a ON ( b.FinansTipiId = a.FinansTipiId AND b.FinansId = a.FinansId )
         ) AS kaynak
           ON hedef.FirmId = @FirmId
          AND hedef.BelgeTarihi = kaynak.BelgeTarihi
@@ -161,22 +186,14 @@ BEGIN
                ,DevredenBorcToplami      = kaynak.DevredenBorcToplami
                ,DevredenAlacakToplami    = kaynak.DevredenAlacakToplami;
     
-        --Select * from #BugununToplamlari;
-
-        drop table #BugununToplamlari
         drop table #OncekiGunDevirleri;
+        drop table #AcilisTutarlari;
+        drop table #BugununToplamlari
 
         set @BaslangicTarihi = DATEADD(DAY, 1, @BaslangicTarihi);
     END; -- While     
 
-
     drop table #FinansHesaplari;
-   
-    --  select * from OnmBelgeDekontDevir
-
-    --  select COUNT(Id) as adet from OnmBelgeDekont
-
-    --  delete from OnmBelgeDekontDevir
 
 END -- 
 

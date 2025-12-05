@@ -47,6 +47,38 @@ BEGIN
 
       select top 1 @GirdigiESinavNo =
       ( case when isnull(s.Id,0) = 0 then 0 -- girmedi
+             else s.SinavNo end )
+      from dbo.SrcAdayTalep as t
+	  left join dbo.SrcSinavETeorik as s on ( t.Id = s.TalepId and s.LineTypeId = 2 )
+      where t.Id = @TalepId
+      and   s.DurumuTipiId > 0 -- sonuçlanmış sınavlar
+      order by s.SinavNo desc
+
+	  return @GirdigiESinavNo;
+  end
+
+  if (@SinavNoTipi = 'GirdigiUSinavNo')   
+  begin
+      declare @GirdigiUSinavNo int
+
+      select top 1 @GirdigiUSinavNo =
+      ( case when  isnull(s.Id,0) = 0 then 0 -- girmedi
+             else  s.SinavNo end )
+      from dbo.SrcAdayTalep as t
+	  left join dbo.SrcSinavUygulama as s on ( t.Id = s.TalepId )
+      where t.Id = @TalepId
+      order by s.SinavNo desc
+
+	  return @GirdigiUSinavNo;
+  end
+
+  /*
+  if (@SinavNoTipi = 'GirdigiESinavNo')   
+  begin
+      declare @GirdigiESinavNo int
+
+      select top 1 @GirdigiESinavNo =
+      ( case when isnull(s.Id,0) = 0 then 0 -- girmedi
              when isnull(s.DurumuTipiId,0) > 1 and isnull(s.SinavNo,0) < 4  then s.SinavNo
              when isnull(s.DurumuTipiId,0) > 1 and isnull(s.SinavNo,0) = 4  then 4
              when isnull(s.DurumuTipiId,0) = 1 then s.SinavNo end ) 
@@ -75,7 +107,7 @@ BEGIN
 
 	  return @GirdigiUSinavNo;
   end
-
+  */
   return -1;
 END -- 
 

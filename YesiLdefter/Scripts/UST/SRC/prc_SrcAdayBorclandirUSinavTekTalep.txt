@@ -130,7 +130,6 @@ AS BEGIN
   and   takip.FirmId = @FirmId
   and   talep.Id = @TalepId
   and   takip.TalepId = @TalepId
-  --and ( takip.uSinavDurumTipiId = 5 or takip.uSinavDurumTipiId = 6 or takip.uSinavDurumTipiId = 8)
   and   isnull(takip.uSinavUcretTipiId,0) <> 2 --  aday kendisi yatıracaksa yapmasın
   and   uygUcreti.GecerlilikTarihiId = dbo.fnc_getGecerlilikTarihiId(@FirmId, 21104, getdate())
   and   odeme.Id is null
@@ -142,6 +141,8 @@ AS BEGIN
   Where takip.FirmId = @FirmId
   and   takip.TalepId = @TalepId
   and   isnull(takip.uSinavUcretTipiId,0) = 0
+
+  Execute dbo.prc_SrcAdayTakip @FirmId, @TalepId, 0, 'SrcAdayTakipESinav'
 
 END -- procedure
 

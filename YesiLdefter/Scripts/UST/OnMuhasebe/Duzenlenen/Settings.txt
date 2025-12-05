@@ -273,7 +273,7 @@ begin
            ,@grupNo     -- GroupNoTypeId  : OnMuhasebe
            ,@settingNo  -- SettingNo   
            ,@grupNo + @settingNo  -- SettingId
-           ,'e-sınav borçlandırması için (Planlanan tarih)ini (Vade tarihi) yap.'   -- About
+           ,'e-sınav borçlandırması için gireceği yeni sınav tarihini (Vade tarihi) yap.'   -- About
            ,1    -- DefaultTypeId /* DefaultBool seçildi */ 
            ,1    -- DefaultBool   /*  0 : hayır,  1 : evet  */
            ,null -- DefaultNumeric
@@ -369,7 +369,7 @@ begin
            ,@grupNo     -- GroupNoTypeId  : OnMuhasebe
            ,@settingNo  -- SettingNo   
            ,@grupNo + @settingNo  -- SettingId
-           ,'Uygulamalı sınav borçlandırması için (Planlanan tarih)ini (Vade tarihi) yap.'   -- About
+           ,'Uygulamalı sınav borçlandırması için yeni gireceği sınav tarihini (Vade tarihi) yap.'   -- About
            ,1    -- DefaultTypeId /* DefaultBool seçildi */ 
            ,1    -- DefaultBool   /*  1 : hayır,  0 : evet  */
            ,null -- DefaultNumeric

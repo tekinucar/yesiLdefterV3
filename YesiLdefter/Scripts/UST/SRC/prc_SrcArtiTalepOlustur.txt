@@ -1,0 +1,194 @@
+﻿
+/*CreateProcedure*/
+
+CREATE PROCEDURE [dbo].[prc_SrcArtiTalepOlustur] (@FirmId int, @AdayId int)  
+AS BEGIN
+
+    --declare @FirmId int = 4204
+    --declare @AdayId int = 10169
+
+    declare @masterTalepId int 
+    declare @masterSertifikaTipiId int
+    declare @masterSinifTipiId smallint
+    declare @masterReferansId int
+    declare @LastId int
+
+    declare @TcNo varchar(11)
+    declare @TalepTipiId smallint
+    declare @KimlikGeldi bit
+    declare @BiyometrikGeldi bit
+    declare @EhliyetGeldi bit
+    declare @OgrenimGeldi bit
+    declare @AdliSicilGeldi bit
+    declare @AdresAlindi bit
+    declare @BelgelerGeldi bit
+
+
+    Select TOP 1 @masterTalepId = Id 
+    , @masterSertifikaTipiId = IstenenSertifikaTipiId
+    , @masterSinifTipiId = IstenenSinifTipiId
+    , @masterReferansId = ReferansId
+    , @TalepTipiId = TalepTipiId
+    , @KimlikGeldi = KimlikGeldi
+    , @BiyometrikGeldi = BiyometrikGeldi
+    , @EhliyetGeldi = EhliyetGeldi
+    , @OgrenimGeldi = OgrenimGeldi
+    , @AdliSicilGeldi = AdliSicilGeldi
+    , @AdresAlindi = AdresAlindi
+    , @BelgelerGeldi = BelgelerGeldi
+    From dbo.SrcAdayTalep
+    Where FirmId = @FirmId
+    and   AdayId = @AdayId
+    and   IsActive = 1
+    and   isnull(ParentId,0) = 0
+    order by TalepKayitTarihi desc
+
+    -- Src5 veya Src6 veya Piskotekik ise geri dön, işlem yapma
+    if (@masterSertifikaTipiId = 2 or @masterSertifikaTipiId = 3 or @masterSertifikaTipiId = 6) return;
+
+    if (
+    Select COUNT(Id) as Adet from dbo.SrcAdayTalep
+    Where FirmId = @FirmId
+    and   AdayId = @AdayId
+    and   IsActive = 1
+    and   isnull(ParentId,0) = @masterTalepId
+    ) = 0
+    begin
+        Select @TcNo = TcNo From dbo.SrcAday
+        Where FirmId = @FirmId
+        and   Id = @AdayId
+
+        INSERT INTO [dbo].[SrcAdayTalep]
+           ([TalepGUID]
+           ,[FirmId]
+           ,[AdayId]
+           ,[IsActive]
+           ,[TalepKayitTarihi]
+           ,[ParentId]
+           ,[ArtiBelgeTipiId]
+           ,[AdayNo]
+           ,[TcNo]
+           ,[KimlikSeriNo]
+           ,[TamAdiSoyadi]
+           ,[Adi]
+           ,[Soyadi]
+           ,[DogumTarihi]
+           ,[BabaAdi]
+           ,[AnneAdi]
+           ,[CinsiyetTipiId]
+           ,[CepTelefonu]
+           ,[CepTelefonu2]
+           ,[Eposta]
+           ,[TalepTipiId]
+           ,[MevcutSertifikaTipiId]
+           ,[MevcutSinifTipiId]
+           ,[MevcutSertifikaNumarasi]
+           ,[MevcutSertifikaVerilisTarihi]
+           ,[MevcutSertVerildigiKurum]
+           ,[MevcutSertVerildigiIl]
+           ,[IstenenSertifikaTipiId]
+           ,[IstenenSinifTipiId]
+           ,[IstemeNedeniTipiId]
+           ,[SertifikaVerTarih]
+           ,[SonGecerlilikTarihi]
+           ,[IsMuafiyetiVar]
+           ,[MuafiyetAciklamasi]
+           ,[DonemTipiId]
+           ,[GrupTipiId]
+           ,[SubeTipiId]
+           ,[GrupSubeId]
+           ,[MebbisKurumOnayi]
+           ,[MebbisDurumTipiId]
+           ,[MebbisDurumOkundu]
+           ,[KayitTipiId]
+           ,[KullaniciUyarilari]
+           ,[SistemUyarilari]
+           ,[EtiketTipiId]
+           ,[ReferansId]
+           ,[VeriKaynakTipiId]
+           ,[VeriKaynakId]
+           ,[KimlikGeldi]
+           ,[BiyometrikGeldi]
+           ,[EhliyetGeldi]
+           ,[OgrenimGeldi]
+           ,[AdliSicilGeldi]
+           ,[AdresAlindi]
+           ,[BelgelerGeldi]
+           ,[IsDosyaKapandi]
+           ,[DosyaKapanmaNedeni]
+           ,[DosyaKapanmaTarihi]
+           )
+        VALUES
+           ( NEWID() -- TalepGUID
+           , @FirmId
+           , @AdayId
+           , 1 --IsActive
+           , getdate() --TalepKayitTarihi
+           , @masterTalepId -- ParentId   << kendisine master olan 1. belgenin Id si
+           , 2 -- ArtiBelgeTipiId 
+           , null -- AdayNo
+           , @TcNo 
+           , null -- KimlikSeriNo
+           , null -- TamAdiSoyadi
+           , null -- Adi
+           , null -- Soyadi
+           , null -- DogumTarihi
+           , null -- BabaAdi
+           , null -- AnneAdi
+           , null -- CinsiyetTipiId
+           , null -- CepTelefonu
+           , null -- CepTelefonu2
+           , null -- Eposta
+           , @TalepTipiId -- TalepTipiId
+           , @masterSertifikaTipiId -- MevcutSertifikaTipiId
+           , @masterSinifTipiId -- MevcutSinifTipiId
+           , null -- MevcutSertifikaNumarasi
+           , null -- MevcutSertifikaVerilisTarihi
+           , null -- MevcutSertVerildigiKurum
+           , null -- MevcutSertVerildigiIl
+           , 0 -- IstenenSertifikaTipiId
+           , 0 -- IstenenSinifTipiId
+           , 0 -- IstemeNedeniTipiId
+           , null -- SertifikaVerTarih
+           , null -- SonGecerlilikTarihi
+           , 0 -- IsMuafiyetiVar
+           , null -- MuafiyetAciklamasi
+           , 0 -- DonemTipiId
+           , 0 -- GrupTipiId
+           , 0 -- SubeTipiId
+           , 0 -- GrupSubeId
+           , 0 -- MebbisKurumOnayi
+           , 0 -- MebbisDurumTipiId
+           , 0 -- MebbisDurumOkundu
+           , 1 -- KayitTipiId
+           , null -- KullaniciUyarilari
+           , null -- SistemUyarilari
+           , null -- EtiketTipiId
+           , @masterReferansId -- ReferansId
+           , 0 -- VeriKaynakTipiId
+           , 0 -- VeriKaynakId
+           , @KimlikGeldi
+           , @BiyometrikGeldi
+           , @EhliyetGeldi
+           , @OgrenimGeldi
+           , @AdliSicilGeldi
+           , @AdresAlindi
+           , @BelgelerGeldi
+           , 0 -- IsDosyaKapandi
+           , null --DosyaKapanmaNedeni
+           , null --DosyaKapanmaTarihi  
+           )
+
+           Select @LastId = SCOPE_IDENTITY()
+
+           -- master olan ilk talebe de işaret koyalım
+           Update dbo.SrcAdayTalep Set ParentId = @LastId
+           , ArtiBelgeTipiId = 1
+           Where Id = @masterTalepId
+
+    end -- if
+
+END -- procedure
+
+/*CreateProcedureEnd*/
+

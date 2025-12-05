@@ -225,14 +225,34 @@ AS BEGIN
 
 	  update OnmBelgeMaliyet set BelgeDonemTipiId = convert(int, (@Yil + @Ay))
 	  where Id = @curId
-	  
+	  and isnull(BelgeDonemTipiId,0) <> convert(int, (@Yil + @Ay))
+
+      ;With MaliyetKalani as (
+      Select 
+          max(maliyet.Id) as MaliyetId
+        , isnull(max(maliyet.BelgeTutari),0) as MaliyetTutari
+        , isnull(sum(dekont.BelgeTutari),0) as OdenenTutar
+        , isnull(max(maliyet.BelgeTutari),0) - isnull(sum(dekont.BelgeTutari),0) as KalanTutar
+        , (case when (max(maliyet.BelgeTutari) - isnull(sum(dekont.BelgeTutari),0)) <= 0 then 1 else 0 end ) as IsPaid
+      From dbo.OnmBelgeMaliyet as maliyet
+          left outer join dbo.OnmBelgeDekont as dekont   on ( dekont.SourceId = maliyet.Id 
+      and dekont.SourceTypeId = 1 )
+      Where maliyet.Id = @curId
+      ) -- with
+      Update m set 
+        OdenenTutar = x.OdenenTutar
+      , KalanTutar = x.KalanTutar
+	  , IsPaid = x.IsPaid
+      FROM dbo.OnmBelgeMaliyet as m
+      JOIN MaliyetKalani x ON ( m.Id = x.MaliyetId )
+      Where isnull(m.OdenenTutar,0) <> x.OdenenTutar
+      or    isnull(m.KalanTutar,0) <> x.KalanTutar 
+
       FETCH NEXT FROM cursor_BMaliyet INTO @curId
     END
 
     CLOSE cursor_BMaliyet
     DEALLOCATE cursor_BMaliyet
-
-	--EXECUTE [dbo].[prc_OnmToplamBekleyenOdemeler] @FirmId
 	   
 END
 
