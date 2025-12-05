@@ -106,19 +106,24 @@ namespace Ustad.API
             services.AddSingleton<EmailService>();
 
             // JWT Auth (for SignalR and protected endpoints)
-            var jwtKeyRaw = Environment.GetEnvironmentVariable("JWT_KEY") ?? Configuration["Jwt:Key"] ?? "UstadSecretKeyForJWTTokenGeneration2025SecureKey32Chars";
+            var jwtKeyRaw = Environment.GetEnvironmentVariable("JWT_KEY") ?? Configuration["Jwt:Key"];
+            
+            if (string.IsNullOrWhiteSpace(jwtKeyRaw))
+            {
+                throw new InvalidOperationException(
+                    "JWT_KEY environment variable or Jwt:Key configuration is required. " +
+                    "Do not use hardcoded fallback values for security.");
+            }
             
             // Ensure key is at least 32 characters (256 bits) for HS256
-            var jwtKey = jwtKeyRaw;
-            if (jwtKey.Length < 32)
+            if (jwtKeyRaw.Length < 32)
             {
-                // Pad or repeat the key to meet minimum length requirement
-                while (jwtKey.Length < 32)
-                {
-                    jwtKey += jwtKey;
-                }
-                jwtKey = jwtKey.Substring(0, 32);
+                throw new InvalidOperationException(
+                    $"JWT key must be at least 32 characters long. Current length: {jwtKeyRaw.Length}. " +
+                    "Please set JWT_KEY environment variable or Jwt:Key configuration with a secure key.");
             }
+            
+            var jwtKey = jwtKeyRaw;
             
             var issuer = Configuration["Jwt:Issuer"] ?? "UstadAuth";
             var audience = Configuration["Jwt:Audience"] ?? "UstadClients";

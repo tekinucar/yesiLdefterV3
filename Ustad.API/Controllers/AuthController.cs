@@ -231,16 +231,33 @@ WHEN NOT MATCHED THEN
     INSERT (UserId, PasswordHash, Salt, Iterations, CreatedAt)
     VALUES (@userId, @hash, @salt, @iterations, SYSUTCDATETIME());";
 
+        /// <summary>
+        /// Builds database connection string from environment variables or configuration
+        /// </summary>
+        /// <returns>Connection string</returns>
+        /// <exception cref="InvalidOperationException">Thrown if required configuration is missing</exception>
         private string BuildConnectionString()
         {
-            string host = Environment.GetEnvironmentVariable("DB_HOST") ?? _configuration["Db:Host"] ?? string.Empty; 
-            string port = Environment.GetEnvironmentVariable("DB_PORT") ?? _configuration["Db:Port"] ?? "1433";
-            string user = Environment.GetEnvironmentVariable("DB_USER") ?? _configuration["Db:User"] ?? string.Empty;
-            string pass = Environment.GetEnvironmentVariable("DB_PASS") ?? _configuration["Db:Pass"] ?? string.Empty;
-            string db   = Environment.GetEnvironmentVariable("DB_NAME") ?? _configuration["Db:Name"] ?? string.Empty;
-            return !string.IsNullOrWhiteSpace(host) && !string.IsNullOrWhiteSpace(user) && !string.IsNullOrWhiteSpace(db)
-                ? $"Data Source={host},{port}; Initial Catalog={db}; User ID={user}; Password={pass}; TrustServerCertificate=true; Encrypt=false; MultipleActiveResultSets=True"
-                : _configuration.GetConnectionString("BulutCrm") ?? string.Empty; 
+            string host = Environment.GetEnvironmentVariable("DB_HOST") ?? _configuration["Db:Host"];
+            string port = Environment.GetEnvironmentVariable("DB_PORT") ?? _configuration["Db:Port"];
+            string user = Environment.GetEnvironmentVariable("DB_USER") ?? _configuration["Db:User"];
+            string pass = Environment.GetEnvironmentVariable("DB_PASS") ?? _configuration["Db:Pass"];
+            string db   = Environment.GetEnvironmentVariable("DB_NAME") ?? _configuration["Db:Name"];
+
+            // Validate required configuration - fail securely if missing
+            if (string.IsNullOrWhiteSpace(host))
+                throw new InvalidOperationException("DB_HOST environment variable or Db:Host configuration is required");
+            if (string.IsNullOrWhiteSpace(port))
+                throw new InvalidOperationException("DB_PORT environment variable or Db:Port configuration is required");
+            if (string.IsNullOrWhiteSpace(user))
+                throw new InvalidOperationException("DB_USER environment variable or Db:User configuration is required");
+            if (string.IsNullOrWhiteSpace(db))
+                throw new InvalidOperationException("DB_NAME environment variable or Db:Name configuration is required");
+            if (string.IsNullOrWhiteSpace(pass))
+                throw new InvalidOperationException("DB_PASS environment variable or Db:Pass configuration is required");
+
+            // Build connection string - all values validated above
+            return $"Data Source={host},{port}; Initial Catalog={db}; User ID={user}; Password={pass}; TrustServerCertificate=true; Encrypt=false; MultipleActiveResultSets=True";
         }
         /// <summary>
         /// Validates the Cloudflare Turnstile token
@@ -285,19 +302,26 @@ WHEN NOT MATCHED THEN
         /// Gets the JWT key from the configuration
         /// </summary>
         /// <returns>Stored JWT key</returns>
+        /// <exception cref="InvalidOperationException">Thrown if JWT key is not configured</exception>
         private string GetJwtKey()
         {
-            var key = Environment.GetEnvironmentVariable("JWT_KEY") ?? _configuration["Jwt:Key"] ?? "UstadSecretKeyForJWTTokenGeneration2024SecureKey32Chars";
+            var key = Environment.GetEnvironmentVariable("JWT_KEY") ?? _configuration["Jwt:Key"];
+            
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                throw new InvalidOperationException(
+                    "JWT_KEY environment variable or Jwt:Key configuration is required. " +
+                    "Do not use hardcoded fallback values for security.");
+            }
+            
             // Ensure key is at least 32 characters (256 bits) for HS256
             if (key.Length < 32)
             {
-                // Pad or repeat the key to meet minimum length requirement
-                while (key.Length < 32)
-                {
-                    key += key;
-                }
-                key = key.Substring(0, 32);
+                throw new InvalidOperationException(
+                    $"JWT key must be at least 32 characters long. Current length: {key.Length}. " +
+                    "Please set JWT_KEY environment variable or Jwt:Key configuration with a secure key.");
             }
+            
             return key;
         }
         /// <summary>
@@ -1285,16 +1309,29 @@ ELSE
         {
             try
             {
-                // Get connection info from environment variables (secure, not hardcoded)
-                string host = Environment.GetEnvironmentVariable("DB_HOST") ?? _configuration["Db:Host"] ?? "46.101.255.224";
-                string port = Environment.GetEnvironmentVariable("DB_PORT") ?? _configuration["Db:Port"] ?? "1433";
-                string user = Environment.GetEnvironmentVariable("DB_USER") ?? _configuration["Db:User"] ?? "sa";
-                string dbName = Environment.GetEnvironmentVariable("DB_NAME") ?? _configuration["Db:Name"] ?? "UstadCrmV1";
+                // Get connection info from environment variables or configuration (NO hardcoded fallbacks)
+                string host = Environment.GetEnvironmentVariable("DB_HOST") ?? _configuration["Db:Host"];
+                string port = Environment.GetEnvironmentVariable("DB_PORT") ?? _configuration["Db:Port"];
+                string user = Environment.GetEnvironmentVariable("DB_USER") ?? _configuration["Db:User"];
+                string dbName = Environment.GetEnvironmentVariable("DB_NAME") ?? _configuration["Db:Name"];
+                string password = Environment.GetEnvironmentVariable("DB_PASS") ?? _configuration["Db:Pass"];
+
+                // Validate required configuration - fail securely if missing
+                if (string.IsNullOrWhiteSpace(host))
+                    throw new InvalidOperationException("DB_HOST environment variable or Db:Host configuration is required");
+                if (string.IsNullOrWhiteSpace(port))
+                    throw new InvalidOperationException("DB_PORT environment variable or Db:Port configuration is required");
+                if (string.IsNullOrWhiteSpace(user))
+                    throw new InvalidOperationException("DB_USER environment variable or Db:User configuration is required");
+                if (string.IsNullOrWhiteSpace(dbName))
+                    throw new InvalidOperationException("DB_NAME environment variable or Db:Name configuration is required");
+                if (string.IsNullOrWhiteSpace(password))
+                    throw new InvalidOperationException("DB_PASS environment variable or Db:Pass configuration is required");
 
                 // Get manager DB info from configuration
                 var managerConnStr = _configuration.GetConnectionString("BulutManager");
                 string managerServer = host;
-                string managerDb = "MainManagerV3"; // Default, can be overridden from config
+                string managerDb = null;
                 string managerUser = user;
 
                 // Parse manager connection string if available
@@ -1309,12 +1346,17 @@ ELSE
                     }
                     catch
                     {
-                        // Use defaults if parsing fails
+                        // Connection string parsing failed, will try configuration fallback below
                     }
                 }
 
-                // Get password from environment (secure, not hardcoded)
-                string password = Environment.GetEnvironmentVariable("DB_PASS") ?? _configuration["Db:Pass"] ?? "ustad84352Yazilim";
+                // If manager database name not obtained from connection string, get from configuration
+                if (string.IsNullOrWhiteSpace(managerDb))
+                {
+                    managerDb = _configuration["Db:ManagerName"];
+                    if (string.IsNullOrWhiteSpace(managerDb))
+                        throw new InvalidOperationException("Manager database name must be configured via BulutManager connection string or Db:ManagerName");
+                }
                 
                 // Build connection strings (password included but will be encrypted)
                 string ustadCrmConnStr = $"Data Source={host},{port};Initial Catalog={dbName};User ID={user};Password={password};MultipleActiveResultSets=True;TrustServerCertificate=true;Encrypt=false";
