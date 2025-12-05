@@ -76,7 +76,8 @@ namespace Tkn_Layout
             short MasterLayoutType = 0;
             string LayoutType = string.Empty;
             string visible = string.Empty;
-            
+            string layoutCode = string.Empty;
+
             string setfocus_TableIPCode = string.Empty;
             string setfocus_FieldName = string.Empty;
             string setfocus_CmpName = string.Empty;
@@ -91,6 +92,7 @@ namespace Tkn_Layout
                 MasterLayoutType = t.myInt16(row["MASTER_LAYOUT_TYPE"].ToString());
                 LayoutType = row["LAYOUT_TYPE"].ToString();
                 visible = t.Set(row["CMP_VISIBLE"].ToString(), "", "");
+                layoutCode = row["LAYOUT_CODE"].ToString();
 
                 if ((MasterLayoutType == 1) && (LayoutType == ""))
                 {
