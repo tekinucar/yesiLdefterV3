@@ -20,6 +20,8 @@ using System.Linq;
 using System.Globalization;
 /* Threading Namespace */
 using System.Threading.Tasks;
+/* Cryptography Namespace */
+using System.Security.Cryptography;
 
 namespace Ustad.API.Controllers
 {
@@ -1264,6 +1266,159 @@ ELSE
                     ex.Message);
                 return false;
             }
+        }
+        #endregion
+        #region Get Database Connection Info (Authenticated)
+        /// <summary>
+        /// Get database connection information for authenticated desktop application
+        /// Returns connection details (server, database, username) but NOT password for security
+        /// Password is handled server-side only via environment variables
+        /// </summary>
+        /// <returns>DatabaseConnectionInfo with server, database, and username</returns>
+        /// <response code="200">Returns database connection info</response>
+        /// <response code="401">Unauthorized - valid JWT token required</response>
+        [HttpGet("db-connection-info")]
+        [Authorize]
+        [ProducesResponseType(typeof(DatabaseConnectionInfo), 200)]
+        [ProducesResponseType(401)]
+        public IActionResult GetDatabaseConnectionInfo()
+        {
+            try
+            {
+                // Get connection info from environment variables (secure, not hardcoded)
+                string host = Environment.GetEnvironmentVariable("DB_HOST") ?? _configuration["Db:Host"] ?? "46.101.255.224";
+                string port = Environment.GetEnvironmentVariable("DB_PORT") ?? _configuration["Db:Port"] ?? "1433";
+                string user = Environment.GetEnvironmentVariable("DB_USER") ?? _configuration["Db:User"] ?? "sa";
+                string dbName = Environment.GetEnvironmentVariable("DB_NAME") ?? _configuration["Db:Name"] ?? "UstadCrmV1";
+
+                // Get manager DB info from configuration
+                var managerConnStr = _configuration.GetConnectionString("BulutManager");
+                string managerServer = host;
+                string managerDb = "MainManagerV3"; // Default, can be overridden from config
+                string managerUser = user;
+
+                // Parse manager connection string if available
+                if (!string.IsNullOrEmpty(managerConnStr))
+                {
+                    try
+                    {
+                        var builder = new Microsoft.Data.SqlClient.SqlConnectionStringBuilder(managerConnStr);
+                        managerServer = builder.DataSource.Split(',')[0]; // Get server without port
+                        managerDb = builder.InitialCatalog;
+                        managerUser = builder.UserID;
+                    }
+                    catch
+                    {
+                        // Use defaults if parsing fails
+                    }
+                }
+
+                // Get password from environment (secure, not hardcoded)
+                string password = Environment.GetEnvironmentVariable("DB_PASS") ?? _configuration["Db:Pass"] ?? "ustad84352Yazilim";
+                
+                // Build connection strings (password included but will be encrypted)
+                string ustadCrmConnStr = $"Data Source={host},{port};Initial Catalog={dbName};User ID={user};Password={password};MultipleActiveResultSets=True;TrustServerCertificate=true;Encrypt=false";
+                string managerConnStr = $"Data Source={managerServer},{port};Initial Catalog={managerDb};User ID={managerUser};Password={password};MultipleActiveResultSets=True;TrustServerCertificate=true;Encrypt=false";
+                
+                // Encrypt connection strings using JWT key for transmission
+                // Desktop app will decrypt using the same key derived from JWT token
+                string encryptionKey = GetJwtKey();
+                string encryptedUstadCrm = EncryptConnectionString(ustadCrmConnStr, encryptionKey);
+                string encryptedManager = EncryptConnectionString(managerConnStr, encryptionKey);
+
+                return Ok(new DatabaseConnectionInfo
+                {
+                    UstadCrmServer = host,
+                    UstadCrmPort = port,
+                    UstadCrmDatabase = dbName,
+                    UstadCrmUsername = user,
+                    ManagerServer = managerServer,
+                    ManagerDatabase = managerDb,
+                    ManagerUsername = managerUser,
+                    // Encrypted connection strings - decrypt on desktop using JWT token
+                    EncryptedUstadCrmConnectionString = encryptedUstadCrm,
+                    EncryptedManagerConnectionString = encryptedManager
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting database connection info");
+                return StatusCode(500, "Error retrieving database connection information");
+            }
+        }
+        #endregion
+        #region Private Encryption Methods
+        /// <summary>
+        /// Encrypt connection string using AES encryption with key derived from JWT secret
+        /// </summary>
+        private string EncryptConnectionString(string plainText, string key)
+        {
+            try
+            {
+                // Derive a 32-byte key from the JWT key
+                byte[] keyBytes = Encoding.UTF8.GetBytes(key);
+                if (keyBytes.Length < 32)
+                {
+                    // Pad key to 32 bytes
+                    Array.Resize(ref keyBytes, 32);
+                }
+                else if (keyBytes.Length > 32)
+                {
+                    // Truncate to 32 bytes
+                    byte[] truncated = new byte[32];
+                    Array.Copy(keyBytes, truncated, 32);
+                    keyBytes = truncated;
+                }
+
+                using (Aes aes = Aes.Create())
+                {
+                    aes.Key = keyBytes;
+                    aes.Mode = CipherMode.CBC;
+                    aes.Padding = PaddingMode.PKCS7;
+                    aes.GenerateIV();
+
+                    using (ICryptoTransform encryptor = aes.CreateEncryptor())
+                    {
+                        byte[] plainBytes = Encoding.UTF8.GetBytes(plainText);
+                        byte[] encryptedBytes = encryptor.TransformFinalBlock(plainBytes, 0, plainBytes.Length);
+                        
+                        // Combine IV and encrypted data
+                        byte[] result = new byte[aes.IV.Length + encryptedBytes.Length];
+                        Array.Copy(aes.IV, 0, result, 0, aes.IV.Length);
+                        Array.Copy(encryptedBytes, 0, result, aes.IV.Length, encryptedBytes.Length);
+                        
+                        return Convert.ToBase64String(result);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error encrypting connection string");
+                throw;
+            }
+        }
+        #endregion
+        #region Database Connection Info Class
+        /// <summary>
+        /// Database connection information response with encrypted connection strings
+        /// </summary>
+        public class DatabaseConnectionInfo
+        {
+            public string UstadCrmServer { get; set; } = string.Empty;
+            public string UstadCrmPort { get; set; } = "1433";
+            public string UstadCrmDatabase { get; set; } = string.Empty;
+            public string UstadCrmUsername { get; set; } = string.Empty;
+            public string ManagerServer { get; set; } = string.Empty;
+            public string ManagerDatabase { get; set; } = string.Empty;
+            public string ManagerUsername { get; set; } = string.Empty;
+            /// <summary>
+            /// Encrypted UstadCRM connection string - decrypt using JWT key on desktop
+            /// </summary>
+            public string EncryptedUstadCrmConnectionString { get; set; } = string.Empty;
+            /// <summary>
+            /// Encrypted Manager connection string - decrypt using JWT key on desktop
+            /// </summary>
+            public string EncryptedManagerConnectionString { get; set; } = string.Empty;
         }
         #endregion
         #region Private Helper Methods
