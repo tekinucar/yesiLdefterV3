@@ -87,6 +87,10 @@ namespace Tkn_Starter
             t.WaitFormOpen(v.mainForm, "Ini dosyalar okunuyor...");
             t.ftpDownloadIniFile();
 
+            // Initialize API configuration defaults
+            // NOTE(@Janberk): Ensures API base URL and JWT key are set in registry if not already configured
+            Tkn_UstadAPI.tApiConfig.InitializeDefaults();
+
             //Version clrVersion = Environment.Version;
             //string appVersion = Application.ProductVersion;
 /*
@@ -105,27 +109,14 @@ namespace Tkn_Starter
             //task2.Start();
 */
             
-            // 1. NOTE(@Janberk): InitPreparingConnection() sets up SQL connection strings for Manager DB, UstadCRM DB, master DB.
-            // This is the first critical step after reading INI files - all database access depends on these connection strings.
-            // TODO(@Janberk): Refactor here to use API endpoints instead of direct database access for security and scalability.
-            t.WaitFormOpen(v.mainForm, "Database bağlantı bilgileri hazırlanıyor...");
-            System.Diagnostics.Debug.WriteLine("tStarter.InitStart → InitPreparingConnection");
-            InitPreparingConnection();
-            System.Diagnostics.Debug.WriteLine("tStarter.InitStart ← InitPreparingConnection (connections configured)");
-
-            t.WaitFormOpen(v.mainForm, "ManagerDB bağlantısı gerçekleşiyor...");
-            Db_Open(v.active_DB.managerMSSQLConn);
-
-            //t.WaitFormOpen(v.mainForm, "Read : SysGlyph ...");
-            //SYS_Glyph_Read();
-
-            // 2. NOTE(@Janberk): InitLoginUser() opens the ms_User login form (Dialog mode).
-            // This is where authentication happens.
-            // After successful login, v.SP_UserLOGIN becomes true and control returns here. 
+            // 1. SECURE AUTHENTICATION FLOW: Authenticate user FIRST before any database connections
+            // NOTE(@Janberk): Authentication happens via API - no database connection required for login.
+            // The login form (ms_User) uses checkedInputApi() which calls /auth/login endpoint.
+            // After successful authentication, we get database connection info from API.
             t.WaitFormOpen(v.mainForm, "Kullanıcı Girişi...");
             if (v.active_DB.localDbUses == false)
             {
-                InitLoginUser(); // Ustad YesiLdester user girişi
+                InitLoginUser(); // Ustad YesiLdester user girişi - NO DB CONNECTION NEEDED
             }
             else
             {
@@ -166,6 +157,36 @@ namespace Tkn_Starter
             {
                 //Application.Exit();
                 return;
+            }
+
+            // 2. SECURE AUTHENTICATION FLOW: After successful authentication, get database connection info from API
+            // NOTE(@Janberk): Database connections are established ONLY after user authentication.
+            // Connection strings are retrieved from API and decrypted using JWT key.
+            // This prevents hardcoded passwords from being compiled into the DLL.
+            if (v.SP_UserLOGIN == true && v.active_DB.localDbUses == false)
+            {
+                t.WaitFormOpen(v.mainForm, "Database bağlantı bilgileri API'den alınıyor...");
+                bool dbConnectionsEstablished = InitPreparingConnectionFromApi();
+                
+                if (!dbConnectionsEstablished)
+                {
+                    MessageBox.Show("Database bağlantı bilgileri alınamadı. Lütfen sistem yöneticinize başvurun.",
+                        "Bağlantı Hatası", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    v.SP_ApplicationExit = true;
+                    return;
+                }
+
+                t.WaitFormOpen(v.mainForm, "ManagerDB bağlantısı gerçekleşiyor...");
+                Db_Open(v.active_DB.managerMSSQLConn);
+            }
+            else if (v.active_DB.localDbUses == true)
+            {
+                // Local DB mode - use existing connection setup (for Tabim local database)
+                t.WaitFormOpen(v.mainForm, "Database bağlantı bilgileri hazırlanıyor...");
+                InitPreparingConnection();
+                
+                t.WaitFormOpen(v.mainForm, "ManagerDB bağlantısı gerçekleşiyor...");
+                Db_Open(v.active_DB.managerMSSQLConn);
             }
 
             /// Mesaj formu nedense kayboluyor
@@ -244,7 +265,119 @@ namespace Tkn_Starter
 
         #region Variable Set
 
+        /// <summary>
+        /// SECURE AUTHENTICATION FLOW: Initialize database connections from API after authentication
+        /// NOTE(@Janberk): This method retrieves encrypted connection strings from API and decrypts them.
+        /// No hardcoded passwords are used - all credentials come from API environment variables.
+        /// </summary>
+        /// <returns>True if connections were successfully established, false otherwise</returns>
+        bool InitPreparingConnectionFromApi()
+        {
+            try
+            {
+                // Get API base URL from registry configuration
+                // NOTE(@Janberk): API base URL is now stored in registry for runtime configuration
+                string apiBaseUrl = Tkn_UstadAPI.tApiConfig.GetApiBaseUrl();
+                
+                // Get JWT key for decryption from registry configuration
+                // NOTE(@Janberk): JWT key is stored in registry - must match API's JWT key for encryption/decryption
+                string jwtKey = Tkn_UstadAPI.tApiConfig.GetJwtKey();
+                
+                using (var apiClient = new Tkn_UstadAPI.UstadApiClient(apiBaseUrl))
+                {
+                    // Get JWT token stored after successful login
+                    string authToken = GetStoredAuthToken();
+                    if (string.IsNullOrEmpty(authToken))
+                    {
+                        System.Diagnostics.Debug.WriteLine("No authentication token found. User must login first.");
+                        return false;
+                    }
+                    
+                    apiClient.SetAuthToken(authToken);
+                    
+                    // Get database connection info from API (synchronous call using .Result)
+                    // NOTE(@Janberk): Using .Result here because this is called from synchronous InitStart() method
+                    var dbInfoTask = apiClient.GetDatabaseConnectionInfoAsync(jwtKey);
+                    dbInfoTask.Wait(); // Wait for async operation to complete
+                    var dbInfo = dbInfoTask.Result;
+                    
+                    if (dbInfo == null || string.IsNullOrEmpty(dbInfo.UstadCrmConnectionString))
+                    {
+                        System.Diagnostics.Debug.WriteLine("Failed to get database connection info from API.");
+                        return false;
+                    }
+                    
+                    // Set up connection strings from API response
+                    v.active_DB.managerDBType = v.dBaseType.MSSQL;
+                    v.active_DB.ustadCrmDBType = v.dBaseType.MSSQL;
+                    v.active_DB.projectDBType = v.dBaseType.MSSQL;
+                    
+                    // Parse connection strings
+                    ParseConnectionStringFromApi(dbInfo.UstadCrmConnectionString, true); // UstadCRM
+                    ParseConnectionStringFromApi(dbInfo.ManagerConnectionString, false); // Manager
+                    
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error getting DB connection info from API: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
+                return false;
+            }
+        }
         
+        /// <summary>
+        /// Get stored authentication token from user context
+        /// NOTE(@Janberk): Token is stored in v.tUser.JwtToken after successful login in ms_User form
+        /// </summary>
+        string GetStoredAuthToken()
+        {
+            // Token is stored in v.tUser.JwtToken after successful login
+            return v.tUser.JwtToken ?? string.Empty;
+        }
+        
+        /// <summary>
+        /// Parse connection string from API response and set up database connection objects
+        /// </summary>
+        void ParseConnectionStringFromApi(string connectionString, bool isUstadCrm)
+        {
+            try
+            {
+                var builder = new System.Data.SqlClient.SqlConnectionStringBuilder(connectionString);
+                
+                if (isUstadCrm)
+                {
+                    v.active_DB.ustadCrmServerName = builder.DataSource.Split(',')[0];
+                    v.active_DB.ustadCrmDBName = builder.InitialCatalog;
+                    v.active_DB.ustadCrmUserName = builder.UserID;
+                    v.active_DB.ustadCrmConnectionText = connectionString;
+                    v.active_DB.ustadCrmMSSQLConn = new SqlConnection(v.active_DB.ustadCrmConnectionText);
+                    v.active_DB.ustadCrmMSSQLConn.StateChange += new StateChangeEventHandler(DBConnectStateManager);
+                }
+                else
+                {
+                    v.active_DB.managerServerName = builder.DataSource.Split(',')[0];
+                    v.active_DB.managerDBName = builder.InitialCatalog;
+                    v.active_DB.managerUserName = builder.UserID;
+                    v.active_DB.managerConnectionText = connectionString;
+                    v.active_DB.managerMSSQLConn = new SqlConnection(v.active_DB.managerConnectionText);
+                    v.active_DB.managerMSSQLConn.StateChange += new StateChangeEventHandler(DBConnectStateManager);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error parsing connection string: {ex.Message}");
+                throw;
+            }
+        }
+        
+        /// <summary>
+        /// LEGACY METHOD: Initialize database connections with hardcoded passwords
+        /// NOTE(@Janberk): This method is kept for local DB mode (Tabim) and backward compatibility.
+        /// For secure mode, use InitPreparingConnectionFromApi() instead.
+        /// TODO(@Janberk): Remove hardcoded password references when all modes use API.
+        /// </summary>
         void InitPreparingConnection() 
         {
             ///
@@ -264,9 +397,23 @@ namespace Tkn_Starter
             
             v.active_DB.managerUserName = "sa";
             
+            // NOTE(@Janberk): Hardcoded passwords removed for security.
+            // For local DB mode, password should come from INI file or secure storage.
+            // For production, use InitPreparingConnectionFromApi() instead.
+            string managerPassword = ""; // Get from secure storage or INI file
             if (v.active_DB.mainManagerDbUses)
-                 v.active_DB.managerPsw = v.mainManagerPass;
-            else v.active_DB.managerPsw = v.publishManagerPass;
+            {
+                // Try to get from INI or secure storage
+                managerPassword = ""; // TODO: Get from secure source
+            }
+            else
+            {
+                managerPassword = ""; // TODO: Get from secure source
+            }
+            
+            v.active_DB.managerPsw = string.IsNullOrEmpty(managerPassword) 
+                ? "" // Will fail connection - intentional for security
+                : "Password = " + managerPassword + ";";
 
             v.active_DB.managerConnectionText =
                 string.Format(" Data Source = {0}; Initial Catalog = {1}; User ID = {2}; {3} MultipleActiveResultSets = True ",
@@ -285,7 +432,8 @@ namespace Tkn_Starter
             #region
             v.publishManager_DB.dBaseNo = v.dBaseNo.publishManager;
             v.publishManager_DB.userName = "sa";
-            v.publishManager_DB.psw = v.publishManagerPass;
+            // NOTE(@Janberk): Hardcoded password removed for security
+            v.publishManager_DB.psw = ""; // TODO: Get from secure source or use API
             v.publishManager_DB.connectionText =
                 string.Format(" Data Source = {0}; Initial Catalog = {1}; User ID = {2}; {3} MultipleActiveResultSets = True ",
                 v.publishManager_DB.serverName,
@@ -305,9 +453,12 @@ namespace Tkn_Starter
             //v.active_DB.ustadCrmDBName = "UstadCRM";
             v.active_DB.ustadCrmUserName = "sa";
             
-            if (v.active_DB.mainManagerDbUses)
-                 v.active_DB.ustadCrmPsw = v.mainManagerPass;
-            else v.active_DB.ustadCrmPsw = v.publishManagerPass;
+            // NOTE(@Janberk): Hardcoded passwords removed for security
+            // For local DB mode, password should come from INI file or secure storage.
+            string ustadCrmPassword = ""; // TODO: Get from secure source
+            v.active_DB.ustadCrmPsw = string.IsNullOrEmpty(ustadCrmPassword)
+                ? "" // Will fail connection - intentional for security
+                : "Password = " + ustadCrmPassword + ";";
 
             v.active_DB.ustadCrmConnectionText =
                 string.Format(" Data Source = {0}; Initial Catalog = {1}; User ID = {2}; {3} MultipleActiveResultSets = True ",

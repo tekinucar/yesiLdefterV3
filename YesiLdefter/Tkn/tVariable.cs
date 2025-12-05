@@ -145,8 +145,11 @@ namespace Tkn_Variable
 
         public static DBTypes active_DB = new DBTypes();
 
-        public static string mainManagerPass = "Password = ustad84352Yazilim;";
-        public static string publishManagerPass = "Password = ustad84352Yazilim;";
+        // NOTE(@Janberk): Hardcoded passwords REMOVED for security.
+        // Database passwords are now retrieved from API after authentication.
+        // For local DB mode, passwords should be stored in encrypted INI files or secure storage.
+        // DO NOT add hardcoded passwords here - they will be compiled into the DLL and can be reverse-engineered.
+        
         public static string destekServiceToolCode = "875421";
         public static string destekTesterServiceToolCode = "784512";
 
@@ -1712,6 +1715,11 @@ namespace Tkn_Variable
         public string MebbisPass { get; set; }
         public string UserTcNo { get; set; }
         public string Username_ { get; set; } /* Tabim users dan gelen bilgi */
+        /// <summary>
+        /// JWT authentication token from API login
+        /// NOTE(@Janberk): Stored after successful API authentication for use in subsequent API calls
+        /// </summary>
+        public string JwtToken { get; set; }
 
         public void Clear()
         {
@@ -1734,6 +1742,7 @@ namespace Tkn_Variable
             MebbisPass = "";
             UserTcNo = "";
             Username_ = "";
+            JwtToken = "";
         }
 
     }

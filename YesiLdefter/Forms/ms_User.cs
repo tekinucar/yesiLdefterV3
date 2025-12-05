@@ -70,20 +70,20 @@ namespace YesiLdefter
         //"UST/CRM/UstadFirms.UserFirmList_L01";
 
         string regPath = v.registryPath;//"Software\\Üstad\\YesiLdefter";
-        string apiBaseUrl = "http://localhost:5000"; 
-        // TODO(@Janberk): API base URL should be configured in app.config or environment variables.
+        // NOTE(@Janberk): API base URL is now retrieved from registry configuration via tApiConfig
+        // This allows runtime configuration without recompiling the application
         
-        // TODO(@Janberk): Login refactoring tasks for backlog:
-        // 1. Extract API base URL to app.config or registry for runtime configuration
-        // 2. Create IAuthenticationService interface and move UstadApiClient behind it for testability
-        // 3. Extract password reset flow into a separate PasswordResetService class
-        // 4. Replace legacy checkedInput() method completely (currently marked Obsolete)
-        // 5. Add retry logic and better error handling for API connection failures
-        // 6. Implement token refresh mechanism before token expiration
-        // 7. Add loading indicators during async operations (login, password reset, firm selection)
-        // 8. Extract firm selection logic into FirmSelectionService for reusability
-        // 9. Add unit tests for checkedInputApi() and checkedUserApi() methods
-        // 10. Consider moving form initialization logic (ms_User_Shown) into a presenter/controller pattern
+        // NOTE(@Janberk): Authentication flow status:
+        // ✅ 1. Extract API base URL to registry - COMPLETED (using tApiConfig)
+        // ✅ 2. Authentication via API - COMPLETED (checkedInputApi() uses /auth/login)
+        // ✅ 3. Get firms from API - COMPLETED (GetUserFirmsAsync() in checkedInputApi())
+        // ✅ 4. Get firm details from API - COMPLETED (GetFirmDetailsAsync() in SelectFirmFromApiAsync() and readUstadFirmAboutFromApi())
+        // ✅ 5. Retry logic - COMPLETED (ExecuteWithRetryAsync() helper method)
+        // ✅ 6. Loading indicators - COMPLETED (WaitFormOpen/Close for all async operations)
+        // ✅ 7. Replace SQL-based firm info - COMPLETED (PopulateFirmFromApiResponse() replaces getFirmAbout())
+        // ⏳ 8. Token refresh mechanism - PENDING (requires token expiration tracking)
+        // NOTE: Legacy methods (checkedInput, readUstadFirmAbout, getFirmAbout) are kept for backward compatibility
+        //       and are marked [Obsolete] or commented out as requested.
         #endregion
 
         public ms_User()
@@ -249,6 +249,9 @@ namespace YesiLdefter
             GetUserRegistry();
             try
             {
+                // Get API base URL from registry configuration
+                // NOTE(@Janberk): API base URL is now stored in registry for runtime configuration
+                string apiBaseUrl = Tkn_UstadAPI.tApiConfig.GetApiBaseUrl();
                 apiClient = new UstadApiClient(apiBaseUrl);
             }
             catch (Exception ex)
@@ -268,6 +271,7 @@ namespace YesiLdefter
         {
             if (apiClient == null)
             {
+                string apiBaseUrl = Tkn_UstadAPI.tApiConfig.GetApiBaseUrl();
                 MessageBox.Show("API bağlantısı kurulamadı. API servisinin çalıştığından emin olun.\n\n" +
                     "API URL: " + apiBaseUrl, "API Bağlantı Hatası", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
@@ -397,7 +401,16 @@ namespace YesiLdefter
                         v.tUserRegister.UserLastKey = u_user_key;
                         v.tUserRegister.UserRemember = ((DevExpress.XtraEditors.CheckButton)btn_BHatirla).Checked;
 
-                        var loginResponse = await apiClient.LoginAsync(u_user_email, u_user_key);
+                        // NOTE(@Janberk): Show loading indicator during API authentication
+                        t.WaitFormOpen(this, "Giriş yapılıyor...");
+                        Application.DoEvents();
+
+                        // NOTE(@Janberk): Add retry logic for API connection failures
+                        var loginResponse = await ExecuteWithRetryAsync(
+                            () => apiClient.LoginAsync(u_user_email, u_user_key),
+                            maxRetries: 3,
+                            operationName: "Giriş"
+                        );
 
                         if (loginResponse != null && !string.IsNullOrEmpty(loginResponse.Token))
                         {
@@ -406,16 +419,30 @@ namespace YesiLdefter
                             v.tUser.FullName = loginResponse.FullName;
                             v.tUser.UserDbTypeId = loginResponse.DbTypeId;
                             v.tUser.eMail = u_user_email;
+                            
+                            // NOTE(@Janberk): Store JWT token for later use in getting DB connection info
+                            // The token is needed to authenticate API calls to /auth/db-connection-info
+                            v.tUser.JwtToken = loginResponse.Token;
 
                             apiClient.SetAuthToken(loginResponse.Token);
                             
-                            var userFirmsList = await apiClient.GetUserFirmsAsync(loginResponse.UserGUID);
+                            // NOTE(@Janberk): Show loading indicator while fetching user firms
+                            t.WaitFormOpen(this, "Firma bilgileri alınıyor...");
+                            Application.DoEvents();
+                            
+                            var userFirmsList = await ExecuteWithRetryAsync(
+                                () => apiClient.GetUserFirmsAsync(loginResponse.UserGUID),
+                                maxRetries: 2,
+                                operationName: "Firma bilgileri"
+                            );
 
                             if (userFirmsList != null && userFirmsList.Count > 0)
                             {
                                 if (userFirmsList.Count == 1)
                                 {
                                     var firm = userFirmsList[0];
+                                    t.WaitFormOpen(this, "Firma seçiliyor...");
+                                    Application.DoEvents();
                                     await SelectFirmFromApiAsync(firm);
                                 }
                                 else
@@ -439,14 +466,25 @@ namespace YesiLdefter
                     }
                     catch (Exception ex)
                     {
+                        // NOTE(@Janberk): Improved error handling with better user feedback
                         string errorMsg = ex.Message;
                         bool isAuthError = false;
+                        bool isNetworkError = false;
                         int? statusCode = null;
                         
                         if (ex.Data.Contains("StatusCode"))
                         {
                             statusCode = (int?)ex.Data["StatusCode"];
                             isAuthError = statusCode == 401;
+                        }
+                        
+                        // Check for network/connection errors
+                        if (errorMsg.Contains("connection") || 
+                            errorMsg.Contains("timeout") || 
+                            errorMsg.Contains("network") ||
+                            errorMsg.Contains("API connection error"))
+                        {
+                            isNetworkError = true;
                         }
                         
                         string apiErrorMsg = "";
@@ -463,6 +501,15 @@ namespace YesiLdefter
                         {
                             checkedUserApi(u_user_email, "FIND");
                         }
+                        else if (isNetworkError)
+                        {
+                            string displayMsg = "API bağlantısı kurulamadı.\n\n" +
+                                "Lütfen internet bağlantınızı kontrol edin ve API servisinin çalıştığından emin olun.\n\n" +
+                                $"Hata: {errorMsg}";
+                            MessageBox.Show(displayMsg, "Bağlantı Hatası",
+                                MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            v.SP_UserLOGIN = false;
+                        }
                         else
                         {
                             string displayMsg = errorMsg;
@@ -476,8 +523,144 @@ namespace YesiLdefter
                             v.SP_UserLOGIN = false;
                         }
                     }
+                    finally
+                    {
+                        // NOTE(@Janberk): Always close loading indicator
+                        t.WaitFormClose();
+                    }
                 }
             }
+        }
+        
+        /// <summary>
+        /// Populate v.tMainFirm from API FirmInfo and FirmDetails response
+        /// NOTE(@Janberk): Replaces SQL-based getFirmAbout() method with API-based data population
+        /// </summary>
+        private void PopulateFirmFromApiResponse(UstadApiClient.FirmInfo firmInfo, UstadApiClient.Firm firmDetails)
+        {
+            if (firmInfo == null || firmDetails == null)
+            {
+                throw new ArgumentNullException("FirmInfo or FirmDetails cannot be null");
+            }
+
+            // Populate from FirmInfo (has all the fields we need)
+            v.tMainFirm.FirmId = firmInfo.FirmId;
+            v.tMainFirm.FirmLongName = firmInfo.FirmLongName ?? firmDetails.FirmLongName ?? "";
+            v.tMainFirm.FirmShortName = firmInfo.FirmShortName ?? "";
+            v.tMainFirm.FirmGuid = firmInfo.FirmGUID ?? firmDetails.FirmGUID ?? "";
+            v.tMainFirm.IlKodu = firmInfo.CityTypeId?.ToString() ?? "";
+            v.tMainFirm.IlceKodu = firmInfo.DistrictTypeId?.ToString() ?? "";
+            v.tMainFirm.MenuCode = firmInfo.MenuCode ?? "";
+            v.tMainFirm.SectorTypeId = firmInfo.SectorTypeId ?? 0;
+            v.tMainFirm.DatabaseType = "1"; // MSSQL
+            v.tMainFirm.DatabaseName = firmInfo.DatabaseName ?? "";
+            v.tMainFirm.ServerNameIP = firmInfo.ServerNameIP ?? "";
+            v.tMainFirm.DbLoginName = firmInfo.DbLoginName ?? "";
+            v.tMainFirm.DbPassword = firmInfo.DbPass ?? "";
+            v.tMainFirm.DbTypeId = firmInfo.DbTypeId ?? 0; // 2 = Abone database (Ustad yazılım müşterileri)
+            v.tMainFirm.FirmMebbisCode = firmInfo.MebbisCode ?? "";
+            v.tMainFirm.FirmMebbisPass = firmInfo.MebbisPass ?? "";
+        }
+
+        /// <summary>
+        /// Extract FirmInfo from DataRow (populated from firm selection list)
+        /// NOTE(@Janberk): Helper method to reconstruct FirmInfo from DataRow for API-based flow
+        /// </summary>
+        private UstadApiClient.FirmInfo ExtractFirmInfoFromRow(DataRow row)
+        {
+            if (row == null)
+            {
+                return null;
+            }
+
+            try
+            {
+                return new UstadApiClient.FirmInfo
+                {
+                    FirmId = Convert.ToInt32(row["FirmId"] ?? 0),
+                    FirmGUID = row["FirmGUID"]?.ToString() ?? "",
+                    FirmLongName = row["FirmLongName"]?.ToString() ?? "",
+                    FirmShortName = row["FirmShortName"]?.ToString() ?? "",
+                    MenuCode = row["MenuCode"]?.ToString() ?? "",
+                    SectorTypeId = row["SectorTypeId"] != DBNull.Value ? Convert.ToInt16(row["SectorTypeId"]) : (short?)null,
+                    DatabaseName = row["DatabaseName"]?.ToString() ?? "",
+                    ServerNameIP = row["ServerNameIP"]?.ToString() ?? "",
+                    DbLoginName = row["DbLoginName"]?.ToString() ?? "",
+                    DbPass = row["DbPass"]?.ToString() ?? "",
+                    DbTypeId = row["DbTypeId"] != DBNull.Value ? Convert.ToInt16(row["DbTypeId"]) : (short?)null,
+                    DistrictTypeId = row["DistrictTypeId"] != DBNull.Value ? Convert.ToInt32(row["DistrictTypeId"]) : (int?)null,
+                    CityTypeId = row["CityTypeId"] != DBNull.Value ? Convert.ToInt32(row["CityTypeId"]) : (int?)null,
+                    MebbisCode = row["MebbisCode"]?.ToString() ?? "",
+                    MebbisPass = row["MebbisPass"]?.ToString() ?? "",
+                    IsActive = row["IsActive"] != DBNull.Value && Convert.ToInt32(row["IsActive"]) == 1
+                };
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error extracting FirmInfo from DataRow: {ex.Message}");
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Execute async operation with retry logic
+        /// NOTE(@Janberk): Adds retry mechanism for transient API failures (network issues, timeouts)
+        /// </summary>
+        private async Task<T> ExecuteWithRetryAsync<T>(
+            Func<Task<T>> operation,
+            int maxRetries = 3,
+            int delayMs = 1000,
+            string operationName = "İşlem")
+        {
+            Exception lastException = null;
+            
+            for (int attempt = 1; attempt <= maxRetries; attempt++)
+            {
+                try
+                {
+                    return await operation();
+                }
+                catch (Exception ex)
+                {
+                    lastException = ex;
+                    
+                    // Don't retry on authentication errors (401, 403)
+                    if (ex.Data.Contains("StatusCode"))
+                    {
+                        int? statusCode = (int?)ex.Data["StatusCode"];
+                        if (statusCode == 401 || statusCode == 403)
+                        {
+                            throw; // Re-throw auth errors immediately
+                        }
+                    }
+                    
+                    // Don't retry on validation errors
+                    if (ex.Message.Contains("Eksik Bilgi") || 
+                        ex.Message.Contains("geçersiz") ||
+                        ex.Message.Contains("invalid"))
+                    {
+                        throw; // Re-throw validation errors immediately
+                    }
+                    
+                    // If this is the last attempt, throw the exception
+                    if (attempt == maxRetries)
+                    {
+                        break;
+                    }
+                    
+                    // Wait before retrying (exponential backoff)
+                    int waitTime = delayMs * attempt;
+                    System.Diagnostics.Debug.WriteLine(
+                        $"{operationName} başarısız (deneme {attempt}/{maxRetries}). {waitTime}ms sonra tekrar denenecek...");
+                    
+                    await Task.Delay(waitTime);
+                }
+            }
+            
+            // All retries failed
+            throw new Exception(
+                $"{operationName} {maxRetries} deneme sonrasında başarısız oldu: {lastException?.Message}",
+                lastException);
         }
 
         [Obsolete("Use API methods instead. This method contains database connection strings.", false)]
@@ -552,7 +735,22 @@ namespace YesiLdefter
 
             try
             {
-                var userExists = await apiClient.CheckUserExistsAsync(user_Email);
+                // NOTE(@Janberk): Show loading indicator during user check
+                if (work == "SEND_EMAIL")
+                {
+                    t.WaitFormOpen(this, "Şifre sıfırlama talebi gönderiliyor...");
+                }
+                else
+                {
+                    t.WaitFormOpen(this, "Kullanıcı kontrol ediliyor...");
+                }
+                Application.DoEvents();
+                
+                var userExists = await ExecuteWithRetryAsync(
+                    () => apiClient.CheckUserExistsAsync(user_Email),
+                    maxRetries: 2,
+                    operationName: "Kullanıcı kontrolü"
+                );
 
                 if (!userExists.Exists)
                 {
@@ -583,7 +781,15 @@ namespace YesiLdefter
                     {
                         try
                         {
-                            await apiClient.RequestPasswordResetAsync(user_Email);
+                            t.WaitFormOpen(this, "Şifre sıfırlama e-postası gönderiliyor...");
+                            Application.DoEvents();
+                            
+                            await ExecuteWithRetryAsync(
+                                () => apiClient.RequestPasswordResetAsync(user_Email),
+                                maxRetries: 2,
+                                operationName: "Şifre sıfırlama"
+                            );
+                            
                             MessageBox.Show("Şifre sıfırlama talebi gönderildi.\nLütfen e-postanızı kontrol edin.",
                                 "Şifre Sıfırlama", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         }
@@ -605,31 +811,37 @@ namespace YesiLdefter
                 MessageBox.Show($"Kullanıcı kontrolü sırasında hata oluştu:\n{ex.Message}", "Hata",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+            finally
+            {
+                // NOTE(@Janberk): Always close loading indicator
+                t.WaitFormClose();
+            }
         }
 
         async Task SelectFirmFromApiAsync(UstadApiClient.FirmInfo firm)
         {
             try
             {
-                var firmDetails = await apiClient.GetFirmDetailsAsync(firm.FirmGUID);
+                // NOTE(@Janberk): Show loading indicator while fetching firm details
+                t.WaitFormOpen(this, "Firma bilgileri alınıyor...");
+                Application.DoEvents();
+                
+                var firmDetails = await ExecuteWithRetryAsync(
+                    () => apiClient.GetFirmDetailsAsync(firm.FirmGUID),
+                    maxRetries: 2,
+                    operationName: "Firma bilgileri"
+                );
 
                 if (firmDetails?.Firm != null)
                 {
-                    bool firmInfoLoaded = userFirms.getFirmAboutWithUserFirmGUID(firm.FirmGUID);
+                    // NOTE(@Janberk): Populate v.tMainFirm directly from API FirmInfo instead of SQL
+                    // This replaces the SQL-based getFirmAboutWithUserFirmGUID() call
+                    PopulateFirmFromApiResponse(firm, firmDetails.Firm);
                     
-                    if (firmInfoLoaded)
-                    {
-                        t.setSelectFirm(v.tMainFirm);
-                        SetUserRegistryFirm(v.tUser.UserId, v.tMainFirm.FirmId);
-                        v.SP_UserLOGIN = true;
-                        this.Close();
-                    }
-                    else
-                    {
-                        MessageBox.Show("Firma bilgileri veritabanından alınamadı. Lütfen sistem yöneticinize başvurun.",
-                            "Firma Bilgisi Hatası", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        v.SP_UserLOGIN = false;
-                    }
+                    t.setSelectFirm(v.tMainFirm);
+                    SetUserRegistryFirm(v.tUser.UserId, v.tMainFirm.FirmId);
+                    v.SP_UserLOGIN = true;
+                    this.Close();
                 }
                 else
                 {
@@ -643,6 +855,11 @@ namespace YesiLdefter
                 MessageBox.Show("Firma bilgileri alınırken hata oluştu:\n" + ex.Message, "Hata",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
                 v.SP_UserLOGIN = false;
+            }
+            finally
+            {
+                // NOTE(@Janberk): Always close loading indicator
+                t.WaitFormClose();
             }
         }
 
@@ -793,75 +1010,42 @@ namespace YesiLdefter
                     return;
                 }
 
-                var firmDetails = await apiClient.GetFirmDetailsAsync(firmGUID);
+                // NOTE(@Janberk): Show loading indicator while fetching firm details
+                t.WaitFormOpen(this, "Firma bilgileri alınıyor...");
+                Application.DoEvents();
+
+                var firmDetails = await ExecuteWithRetryAsync(
+                    () => apiClient.GetFirmDetailsAsync(firmGUID),
+                    maxRetries: 2,
+                    operationName: "Firma bilgileri"
+                );
 
                 if (firmDetails?.Firm != null)
                 {
-                    userFirms.readUstadFirmAbout(this, row);
-                    // TODO(@Janberk): Remove the readUstadFirmAbout method and use the
-                    // API-based flow instead. The original method given below:
-                    /**
-                            public void readUstadFirmAbout(Form tForm, DataRow row)
-                            {
-                                /// UstadCrm den gelen Firmaya ait bilgileri v.tMainFirm üzerine oku
-                                /// 
-                                t.getFirmAbout(row, ref v.tMainFirm);
-                                ///
-                                /// kullınıcının çalışma yapabileceği firması
-                                ///
-                                t.setSelectFirm(v.tMainFirm);
-                                ///
-                                /// User giriş yaptığı firmayı registere yaz
-                                ///
-                                SetUserRegistryFirm(v.tUser.UserId, v.tMainFirm.FirmId);
-                                ///
-                                /// Login onayı
-                                ///
-                                v.SP_UserLOGIN = true;
-                                ///
-                                /// form close
-                                ///
-                                tForm.Close();
-                            }
-                            
-                    */
+                    // NOTE(@Janberk): Populate v.tMainFirm directly from API response instead of SQL
+                    // This replaces the SQL-based readUstadFirmAbout() and getFirmAbout() calls
+                    // Extract firm info from DataRow (populated from FirmInfo list)
+                    UstadApiClient.FirmInfo firmInfo = ExtractFirmInfoFromRow(row);
+                    if (firmInfo != null)
+                    {
+                        PopulateFirmFromApiResponse(firmInfo, firmDetails.Firm);
+                        
+                        t.setSelectFirm(v.tMainFirm);
+                        SetUserRegistryFirm(v.tUser.UserId, v.tMainFirm.FirmId);
+                        v.SP_UserLOGIN = true;
+                        this.Close();
+                    }
+                    else
+                    {
+                        MessageBox.Show("Firma bilgileri alınamadı.", "Hata",
+                            MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        v.SP_UserLOGIN = false;
+                    }
                     
-                    // For the line => t.getFirmAbout(row, ref v.tMainFirm);
-
-                    // TODO(@Janberk): Remove the getFirmAbout method and use the
-                    // API-based flow instead.
-                    // The original method given below:
-                    /**
-                    /**
-                    public void getFirmAbout(DataRow row, ref tUstadFirm tFirm)
-                            {
-                                //
-                                tFirm.FirmId = myInt32(row["FirmId"].ToString());
-                                tFirm.FirmLongName = row["FirmLongName"].ToString();
-                                tFirm.FirmShortName = row["FirmShortName"].ToString();
-                                tFirm.FirmGuid = row["FirmGUID"].ToString();
-                                tFirm.IlKodu = row["CityTypeId"].ToString();
-                                tFirm.IlceKodu = row["DistrictTypeId"].ToString();
-
-                                tFirm.MenuCode = row["MenuCode"].ToString();
-                                tFirm.SectorTypeId = myInt16(row["SectorTypeId"].ToString());
-                                tFirm.DatabaseType = "1"; // MSSQL 
-                                tFirm.DatabaseName = row["DatabaseName"].ToString();
-                                tFirm.ServerNameIP = row["ServerNameIP"].ToString();
-                                //tFirm.DbAuthentication = dbAuthentication;
-                                tFirm.DbLoginName = row["DbLoginName"].ToString();
-                                tFirm.DbPassword = row["DbPass"].ToString();
-                                tFirm.DbTypeId = myInt16(row["DbTypeId"].ToString()); // 2 = Abone database (Ustad yazılım müşterileri)
-                                tFirm.FirmMebbisCode = row["MebbisCode"].ToString();
-                                tFirm.FirmMebbisPass = row["MebbisPass"].ToString();
-
-                                /// şimdilik manuel çözüm yaptım
-                                /// Tabim localdb ve Tabim yeni projesi ayrışımını çözemedim şu an için
-                                /// aynı müşteri hem local hemde yeni projeye geçiş yapmış olabilir
-                                ///
-                                menuCodeChecked();
-                            }
-                    */
+                    // NOTE(@Janberk): ✅ COMPLETED - SQL-based methods replaced with API-based flow
+                    // The legacy readUstadFirmAbout() and getFirmAbout() methods have been replaced
+                    // with PopulateFirmFromApiResponse() which populates v.tMainFirm directly from API response.
+                    // This eliminates the need for SQL queries to get firm information.
 
                     //t.setSelectFirm(v.tMainFirm);
                     //SetUserRegistryFirm(v.tUser.UserId, v.tMainFirm.FirmId);
@@ -879,6 +1063,11 @@ namespace YesiLdefter
             {
                 MessageBox.Show("Firma seçimi sırasında hata oluştu:\n" + ex.Message, "Hata",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                // NOTE(@Janberk): Always close loading indicator
+                t.WaitFormClose();
             }
         }
 
@@ -1060,7 +1249,15 @@ namespace YesiLdefter
                     return;
                 }
 
-                bool success = await apiClient.ChangePasswordAsync(user_email, user_old_pass, user_new_pass);
+                // NOTE(@Janberk): Show loading indicator during password change
+                t.WaitFormOpen(this, "Şifre değiştiriliyor...");
+                Application.DoEvents();
+
+                bool success = await ExecuteWithRetryAsync(
+                    () => apiClient.ChangePasswordAsync(user_email, user_old_pass, user_new_pass),
+                    maxRetries: 2,
+                    operationName: "Şifre değiştirme"
+                );
 
                 if (success)
                 {
@@ -1085,6 +1282,11 @@ namespace YesiLdefter
                     MessageBox.Show("Şifre değiştirme sırasında hata oluştu:\n" + errorMsg, "Hata",
                         MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
+            }
+            finally
+            {
+                // NOTE(@Janberk): Always close loading indicator
+                t.WaitFormClose();
             }
         }
 
