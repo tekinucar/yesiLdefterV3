@@ -48,8 +48,18 @@ Delete from [Lkp].[MtskDataTransferSourceFirmType]
 INSERT INTO [Lkp].[MtskDataTransferSourceFirmType] (Id, SourceFirmType)
  VALUES 
   ( 0,    N'Firma belli değil'),
-  ( 12,   N'Tabim')
-
+  ( 12,   N'Mtsk.Tabim'),
+  ( 13,   N'Mtsk.Akınsoft'),
+  ( 14,   N'Mtsk.GoldenNet'),
+  ( 15,   N'Mtsk.WennTec'),
+  ( 16,   N'Mtsk.Ths'),
+  ( 17,   N'Mtsk.Çizgisoft'),
+  ( 22,   N'Src.Tabim'),
+  ( 23,   N'Src.Akınsoft'),
+  ( 24,   N'Src.GoldenNet'),
+  ( 25,   N'Src.WennTec'),
+  ( 26,   N'Src.Ths'),
+  ( 27,   N'Src.Çizgisoft')
 
 /* firmanın aktarılacak datası nereden alındı */
 -- ------------------------------------------------------- 

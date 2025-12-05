@@ -76,7 +76,7 @@ BEGIN
         where ins.Id = @curId
 		
         -- E Sınav
-        if (@ySinavTarihSaat <> '0' and @ySinavTipiId = 1)
+        if (ISDATE(@ySinavTarihSaat) = 1 and @ySinavTipiId = 1)
         begin
             set @ySinavTarihSaat = replace(@ySinavTarihSaat, '/E-Sınav', '') 
             set @ySinavTarihi = convert(date, @ySinavTarihSaat, 103)
@@ -100,25 +100,12 @@ BEGIN
           , SinavSaati = @ySinavSaati 
           , SinavDonemTipiId = @SinavDonemTipiId 
 		Where Id = @curId
-        --and ( SinavTarihi <> @ySinavTarihi
-        --or    SinavSaati <> @ySinavSaati         
-        --or    SinavDonemTipiId = @SinavDonemTipiId )   
-/*
-        if (@ySinavTipiId > 10 and 
-            convert(date, isnull(@eSinavTarihi, getdate()), 103) <>  
-            convert(date, isnull(@ySinavTarihi, getdate()), 103) )
-        begin
-            Update dbo.SrcSinavListesi set SinavTarihi = @ySinavTarihi 
-            Where SinavTipiId = @ySinavTipiId
-            and SinavTarihi = @eSinavTarihi
-        end -- if
-*/			   
+
         FETCH NEXT FROM myCursor INTO @curId
     END
 
     CLOSE myCursor
     DEALLOCATE myCursor  
-
 
 END
 
@@ -180,6 +167,52 @@ END
 
 /*CreateTriggerEnd*/
 
+
+/*CreateTrigger*/
+
+CREATE TRIGGER [dbo].[trg_SrcSinavTarihiDeleteIsLock] on [dbo].[SrcSinavTarihi]
+INSTEAD of DELETE
+AS BEGIN
+
+    declare isLockCursorDlt cursor local for select Id from deleted
+    declare @curId bigint
+
+    OPEN isLockCursorDlt
+
+    FETCH NEXT FROM isLockCursorDlt INTO @curId
+    declare @SinavTarihi date
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        Select @SinavTarihi = SinavTarihi 
+        From deleted
+        Where Id = @curId
+
+        if ( Select COUNT(Id) as Adet From dbo.SrcSinavETeorik
+             Where convert(date,SinavTarihi,103) = convert(date,@SinavTarihi,103) ) > 0
+        begin
+            PRINT 'Bu kayıt silinemez!. Bu tarihte teorik sınav kayıtları mevcut...'
+            RETURN
+        end
+
+        if ( Select COUNT(Id) as Adet From dbo.SrcSinavUygulama
+             Where convert(date,SinavTarihi,103) = convert(date,@SinavTarihi,103) ) > 0
+        begin
+            PRINT 'Bu kayıt silinemez!. Bu tarihte uygulamalı sınav kayıtları mevcut...'
+            RETURN
+        end
+
+        Delete from dbo.SrcSinavTarihi Where Id = @curId
+
+      FETCH NEXT FROM isLockCursorDlt INTO @curId
+    END
+
+    CLOSE isLockCursorDlt
+    DEALLOCATE isLockCursorDlt
+
+END
+
+/*CreateTriggerEnd*/
 
 
 
