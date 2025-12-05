@@ -361,3 +361,8 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# User-specific configuration files (may contain passwords)
+*.ini
+!*.ini.example
+!*.ini.template

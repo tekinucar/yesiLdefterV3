@@ -105,8 +105,13 @@ namespace Tkn_Starter
             //task2.Start();
 */
             
+            // 1. NOTE(@Janberk): InitPreparingConnection() sets up SQL connection strings for Manager DB, UstadCRM DB, master DB.
+            // This is the first critical step after reading INI files - all database access depends on these connection strings.
+            // TODO(@Janberk): Refactor here to use API endpoints instead of direct database access for security and scalability.
             t.WaitFormOpen(v.mainForm, "Database bağlantı bilgileri hazırlanıyor...");
+            System.Diagnostics.Debug.WriteLine("tStarter.InitStart → InitPreparingConnection");
             InitPreparingConnection();
+            System.Diagnostics.Debug.WriteLine("tStarter.InitStart ← InitPreparingConnection (connections configured)");
 
             t.WaitFormOpen(v.mainForm, "ManagerDB bağlantısı gerçekleşiyor...");
             Db_Open(v.active_DB.managerMSSQLConn);
@@ -114,9 +119,14 @@ namespace Tkn_Starter
             //t.WaitFormOpen(v.mainForm, "Read : SysGlyph ...");
             //SYS_Glyph_Read();
 
-            t.WaitFormOpen(v.mainForm, "Kullunacı girişi...");
+            // 2. NOTE(@Janberk): InitLoginUser() opens the ms_User login form (Dialog mode).
+            // This is where authentication happens.
+            // After successful login, v.SP_UserLOGIN becomes true and control returns here. 
+            t.WaitFormOpen(v.mainForm, "Kullanıcı Girişi...");
             if (v.active_DB.localDbUses == false)
+            {
                 InitLoginUser(); // Ustad YesiLdester user girişi
+            }
             else
             {
                 /// exe ilk çalıştığında [] args ile userId / ExternalUserId ile çalıştırılabilir
@@ -199,6 +209,20 @@ namespace Tkn_Starter
 
             //t.TestRead();
 
+            // 3. NOTE(@Janberk): if v.SP_UserIN = true, then initialization is complete.
+            // The main form will call tLayout.Create_Layout(), which triggers the dashboard rendering pipeline.
+            // TODO(@Janberk): Extract initialization stages into Ustad.API and the endpoints called here:
+            // - InitPreparingConnection()
+            // - InitLoginUser()
+            // - InitLoginComputer()
+            // - Screen_Sizes_Get()
+            // - read_MsFileUpdates()
+            // - dataUpdates()
+            // - read_MsExeUpdates()
+            // - MSSQL_Server_Tarihi()
+            // - read_Settings()
+            // - SYS_Glyph_Read()
+            // - TestRead()
             v.SP_UserIN = true;
         }
 
@@ -479,6 +503,9 @@ namespace Tkn_Starter
         #endregion InitRegisterComputer
 
         #region InitLoginUser, InitTabimLoginUser
+        // 3. NOTE(@Janberk): InitLoginUser() opens the login form (ms_User) as a modal dialog.
+        // FormCode "UST/CRM/ABO/UstadUserLogin" is used by tLayout.Create_Layout() to load the form's layout metadata
+        // from MS_LAYOUT table. If user authenticates, the form closes and v.SP_UserLOGIN is set to true.
         void InitLoginUser()
         {
             string FormName = "ms_User";
